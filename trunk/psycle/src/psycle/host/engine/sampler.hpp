@@ -100,7 +100,7 @@ namespace psycle
 			virtual void Work(int numSamples);
 			virtual void Stop();
 			virtual void Tick(int channel, PatternEntry* pData);
-			virtual char* GetName(void) { return _psName; };
+			virtual std::string GetName() const { return _psName; }
 			virtual bool Load(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
@@ -137,7 +137,7 @@ namespace psycle
 					}
 				}
 				return TRUE;
-			};
+			}
 
 			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
 			{
@@ -159,14 +159,14 @@ namespace psycle
 						break;
 				}
 				pFile->Write(temp); // quality
-			};
+			}
 
-			void Update(void);
+			void Update();
 
 		protected:
 			friend CGearTracker;
 
-			static char* _psName;
+			static std::string _psName;
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
 			dsp::Cubic _resampler;

@@ -104,21 +104,8 @@ namespace psycle
 							Machine & machine_;
 					};
 				}
-				//////////////////////
-				/// ***** TODO ****
-				/// ***** TODO ****
-				/// ***** TODO ****
-				/// ***** TODO ****
-				/// ***** TODO ****
-				/// ***** TODO ****
-				/// ***** TODO ****
-				/// ***** TODO ****
-				//////////////////////
-				///\todo VERY IMPORTANT: exception handling has been semi-disabled for now (see //__WITH_FUNCTOR) in the definition below)
-				///\todo VERY IMPORTANT: the reason is there's a circular dependency between proxy and plugin classes.
-				///\todo VERY IMPORTANT: we need to put back the inlined implementation after the class definition like it was before.
 				#define PSYCLE__HOST__CATCH_ALL(machine) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW//__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor f(machine); f)
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor f(machine); f)
 				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
 			}
 		}
@@ -457,9 +444,13 @@ namespace psycle
 			///\name name
 			///\{
 				public:
-					virtual const char * const GetDllName() const throw() { return "built-in"; };
-					virtual char * GetName() = 0;
-					virtual char * GetEditName() { return _editName; }
+					virtual std::string GetDllName() const { return "built-in"; };
+					virtual std::string GetName() const = 0;
+
+				public:
+					virtual std::string const & GetEditName() { return _editName; }
+				PSYCLE__PRIVATE:
+					std::string  _editName;
 			///\}
 
 			///\name parameters
@@ -506,10 +497,6 @@ namespace psycle
 			int _panning;
 			int _x;
 			int _y;
-			///\todo hardcoded limits and wastes
-			///\todo that's a fixed char[] cause it makes it "easier" to load/save with the currently hardcoded-to-32-char fileformat or what?
-			/// it's null terminated. or at least, seems so.
-			char _editName[32];
 			int _numPars;
 			int _nCols;
 
@@ -629,12 +616,12 @@ namespace psycle
 		public:
 			Dummy(id_type index);
 			virtual void Work(int numSamples);
-			virtual char* GetName(void) { return _psName; };
+			virtual std::string GetName() const { return _psName; };
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
 			bool wasVST;
 		protected:
-			static char * _psName;
+			static std::string _psName;
 		};
 
 		/// note duplicator machine.
@@ -646,7 +633,7 @@ namespace psycle
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
-			virtual char* GetName(void) { return _psName; };
+			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -658,7 +645,7 @@ namespace psycle
 		protected:
 			short macOutput[8];
 			short noteOffset[8];
-			static char* _psName;
+			static std::string _psName;
 			bool bisTicking;
 		};
 
@@ -674,7 +661,7 @@ namespace psycle
 			Master(id_type index);
 			virtual void Init(void);
 			virtual void Work(int numSamples);
-			virtual char* GetName(void) { return _psName; };
+			virtual std::string GetName() const { return _psName; };
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
@@ -691,7 +678,7 @@ namespace psycle
 			float _rMax;
 			bool vuupdated;
 		protected:
-			static char* _psName;
+			static std::string _psName;
 		};
 
 		/// mixer machine.
@@ -739,7 +726,7 @@ namespace psycle
 			virtual void Work(int numSamples);
 			void FxSend(int numSamples);
 			void Mix(int numSamples);
-			virtual char* GetName(void) { return _psName; };
+			virtual std::string GetName() const { return _psName; };
 			virtual int GetNumCols();
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
@@ -790,7 +777,7 @@ namespace psycle
 				std::vector<send> sends;
 			#endif
 
-			static char* _psName;
+			static std::string _psName;
 		};
 
 
@@ -803,7 +790,7 @@ namespace psycle
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
-			virtual char* GetName(void) { return _psName; };
+			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -867,7 +854,7 @@ namespace psycle
 			int centerVal[NUM_CHANS];			//where knob should be at lfo==0
 
 
-			static char* _psName;
+			static std::string _psName;
 			bool bisTicking;
 
 		};

@@ -268,7 +268,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (_pMixer->_inputCon[i])
 			{
 				std::string chantxt = _pMixer->GetAudioInputName(InPort::id_type(i+Mixer::chan1));
-				InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,chantxt.c_str(),Global::_pSong->_pMachine[_pMixer->_inputMachines[i]]->GetEditName());
+				InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,chantxt.c_str(),Global::_pSong->_pMachine[_pMixer->_inputMachines[i]]->GetEditName().c_str());
 
 				yoffset+=InfoLabel::height;
 				for (int j=0; j<numSends; j++)

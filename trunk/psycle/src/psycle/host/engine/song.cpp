@@ -15,6 +15,8 @@
 #include <psycle/host/gui/MainFrm.hpp> // Is this needed?
 #include <psycle/host/gui/ChildView.hpp> // Is this needed?
 #include <psycle/host/gui/ProgressDialog.hpp> // Is this needed?
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <cstdint>
 #include <cassert>
 #include <sstream>
@@ -1776,14 +1778,13 @@ namespace psycle
 			// save our file
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 
-			CString filepath = Global::pConfig->GetSongDir().c_str();
-			filepath += "\\psycle.tmp";
-			::DeleteFile(filepath);
+			boost::filesystem::path path(Global::pConfig->GetSongDir(), boost::filesystem::native);
+			path /= "psycle.tmp";
+
+			boost::filesystem::remove(path);
+
 			RiffFile file;
-			if (!file.Create(filepath.GetBuffer(1), true))
-			{
-				return false;
-			}
+			if(!file.Create(path.string(), true)) return false;
 
 			file.Write("MACD",4);
 			std::uint32_t version = CURRENT_FILE_VERSION_MACD;
@@ -1805,11 +1806,12 @@ namespace psycle
 
 			// now load it
 
-			if (!file.Open(filepath.GetBuffer(1)))
+			if(!file.Open(path.string()))
 			{
-				DeleteFile(filepath);
+				boost::filesystem::remove(path);
 				return false;
 			}
+
 			char Header[5];
 			file.Read(&Header, 4);
 			Header[4] = 0;
@@ -1821,7 +1823,7 @@ namespace psycle
 				{
 					// there is an error, this file is newer than this build of psycle
 					file.Close();
-					DeleteFile(filepath);
+					boost::filesystem::remove(path);
 					return false;
 				}
 				else
@@ -1838,7 +1840,7 @@ namespace psycle
 					else
 					{
 						file.Close();
-						DeleteFile(filepath);
+						boost::filesystem::remove(path);
 						return false;
 					}
 				}
@@ -1846,13 +1848,13 @@ namespace psycle
 			else
 			{
 				file.Close();
-				DeleteFile(filepath);
+				boost::filesystem::remove(path);
 				return false;
 			}
 			file.Close();
-			DeleteFile(filepath);
+			boost::filesystem::remove(path);
 
-			// oh and randomize the dst's position
+			// randomize the dst's position
 
 			int xs,ys,x,y;
 			if (src >= MAX_BUSES)
@@ -1893,7 +1895,7 @@ namespace psycle
 			_pMachine[dst]->_x = x;
 			_pMachine[dst]->_y = y;
 
-			// oh and delete all connections
+			// delete all connections
 
 			_pMachine[dst]->_connectedInputs = 0;
 			_pMachine[dst]->_connectedOutputs = 0;
@@ -1913,43 +1915,51 @@ namespace psycle
 				}
 			}
 
-			int number = 1;
-			char buf[sizeof(_pMachine[dst]->_editName)+4];
-			strcpy (buf,_pMachine[dst]->_editName);
-			char* ps = strrchr(buf,' ');
-			if (ps)
+			#if 1
 			{
-				number = atoi(ps);
-				if (number < 1)
-				{
-					number =1;
-				}
-				else
-				{
-					ps[0] = 0;
-					ps = strchr(_pMachine[dst]->_editName,' ');
-					ps[0] = 0;
-				}
+				std::stringstream s;
+				s << _pMachine[dst]->_editName << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
+				s >> _pMachine[dst]->_editName;
 			}
-
-			for (int i = 0; i < MAX_MACHINES-1; i++)
-			{
-				if (i!=dst)
+			#else ///\todo rewrite this for std::string
+				int number = 1;
+				char buf[sizeof(_pMachine[dst]->_editName)+4];
+				strcpy (buf,_pMachine[dst]->_editName);
+				char* ps = strrchr(buf,' ');
+				if (ps)
 				{
-					if (_pMachine[i])
+					number = atoi(ps);
+					if (number < 1)
 					{
-						if (strcmp(_pMachine[i]->_editName,buf)==0)
+						number =1;
+					}
+					else
+					{
+						ps[0] = 0;
+						ps = strchr(_pMachine[dst]->_editName,' ');
+						ps[0] = 0;
+					}
+				}
+
+				for (int i = 0; i < MAX_MACHINES-1; i++)
+				{
+					if (i!=dst)
+					{
+						if (_pMachine[i])
 						{
-							number++;
-							sprintf(buf,"%s %d",_pMachine[dst]->_editName,number);
-							i = -1;
+							if (strcmp(_pMachine[i]->_editName,buf)==0)
+							{
+								number++;
+								sprintf(buf,"%s %d",_pMachine[dst]->_editName.c_str(),number);
+								i = -1;
+							}
 						}
 					}
 				}
-			}
 
-			buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
-			strcpy(_pMachine[dst]->_editName,buf);
+				buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
+				strcpy(_pMachine[dst]->_editName,buf);
+			#endif
 
 			return true;
 		}

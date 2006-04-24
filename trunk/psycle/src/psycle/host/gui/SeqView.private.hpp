@@ -110,7 +110,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//				devc->FillSolidRect(&rect,Global::pConfig->pvc_rowbeat);
 						devc->SetBkColor(Global::pConfig->pvc_rowbeat);
 						devc->SetTextColor(Global::pConfig->pvc_font);
-						sprintf(cbuffer,"%.02X:%s",i,tmac->_editName);
+						sprintf(cbuffer,"%.02X:%s",i,tmac->_editName.c_str());
 						TXT(devc,cbuffer,0,curYoffset,SEQ_XOFFSET-1,SEQ_ROWHEIGHT-1);
 
 					/////////////////////////////////////////// Add Draw patterns.(NEED TO REDO WITH MULTISEQUENCE!)

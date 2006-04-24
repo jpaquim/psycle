@@ -243,17 +243,9 @@ namespace psycle
 						_sProductName=temp.substr(0,temp.rfind('.'));
 					}
 				}
-				{
-					if(overwriteName) strncpy(_editName, _sProductName.c_str(), 32);
-					_editName[31]='\0';
-				}
-				// Compatibility hacks
-				{
-					if(_sProductName == "sc-101")
-					{
-						requiresRepl = true;
-					}
-				}
+				if(overwriteName) _editName = _sProductName;
+				// Compatibility hack
+				if(_sProductName == "sc-101") requiresRepl = true;
 				{
 					char temp[64];
 					if(proxy().getVendorString(temp) && temp[0]) _sVendorName = temp;
@@ -458,23 +450,24 @@ namespace psycle
 				}
 			}
 
-			bool plugin::LoadDll(std::string const & psFileName)
+			bool plugin::LoadDll(std::string const & file_name)
 			{
-				std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
-				std::string sPath;
-				if(CNewMachine::lookupDllName(psFileName, sPath))
+				std::string file_name_lower_case;
+				std::transform(file_name.begin(), file_name.end(), file_name_lower_case.begin(), std::tolower);
+				std::string path;
+				if(CNewMachine::lookupDllName(file_name_lower_case, path))
 				{
-					if(!CNewMachine::TestFilename(sPath)) return false;
+					if(!CNewMachine::TestFilename(path)) return false;
 					try
 					{
-						Instance(sPath.c_str(), false);
+						Instance(path, false);
 					}
 					catch(const std::exception & e)
 					{
 						std::ostringstream s; s
-							<< "Exception while instanciating plugin: " << sPath << std::endl
+							<< "Exception while instanciating plugin: " << path << std::endl
 							<< "Replacing with dummy." << std::endl
-							<< typeid(e).name() << std::endl
+							<< universalis::compiler::typenameof(e) << std::endl
 							<< e.what();
 						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
 						return false;
@@ -482,9 +475,9 @@ namespace psycle
 					catch(...)
 					{
 						std::ostringstream s; s
-							<< "Exception while instanciating plugin: " << sPath << std::endl
+							<< "Exception while instanciating plugin: " << path << std::endl
 							<< "Replacing with dummy." << std::endl
-							<< "Unkown type of exception";
+							<< "Unkown type of exception: " << universalis::compiler::exceptions::ellipsis();
 						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
@@ -492,7 +485,7 @@ namespace psycle
 				else
 				{
 					std::ostringstream s; s
-						<< "Missing plugin: " << psFileName << std::endl
+						<< "Missing plugin: " << file_name << std::endl
 						<< "Replacing with dummy.";
 					MessageBox(0, s.str().c_str(), "Plugin Loading Error", MB_OK | MB_ICONWARNING);
 					return false;
@@ -833,21 +826,17 @@ namespace psycle
 			long int plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
 				#if !defined NDEBUG
-					switch(opcode)
+					if(opcode!=audioMasterGetTime)
 					{
-						default:
-							if(opcode!=audioMasterGetTime)
-							{
-								std::ostringstream s;
-								s
-									<< "VST: plugin call to host dispatcher: plugin address: " << effect
-									<< " Opcode = " << audioMaster_opcode_to_string(opcode)
-									<< " Index = " << index
-									<< " Value = " << value
-									<< " Ptr = " << ptr
-									<< " Opt = " << opt;
-									host::loggers::trace(s.str());
-							}
+						std::ostringstream s;
+						s
+							<< "VST: plugin call to host dispatcher: plugin address: " << effect
+							<< " Opcode = " << audioMaster_opcode_to_string(opcode)
+							<< " Index = " << index
+							<< " Value = " << value
+							<< " Ptr = " << ptr
+							<< " Opt = " << opt;
+							host::loggers::trace(s.str());
 					}
 				#endif
 				
@@ -1112,7 +1101,7 @@ namespace psycle
 			:
 				plugin(MACH_VST, MACHMODE_GENERATOR, id)
 			{
-				std::sprintf(_editName, "Vst2 Instr.");
+				_editName = "Vst2 Instr.";
 				_program = 0;
 			}
 
@@ -1442,7 +1431,7 @@ namespace psycle
 				plugin(MACH_VSTFX, MACHMODE_FX, id)
 			{
 				for(Wire::id_type i(0) ; i < MAX_CONNECTIONS; ++i) _inputConVol[i] = 1.f / 32767; // VST plugins use the range -1.0 .. +1.0
-				std::sprintf(_editName, "Vst2 Fx");
+				_editName = "Vst2 Fx";
 				_pOutSamplesL = new float[MAX_BUFFER_LENGTH];
 				_pOutSamplesR = new float[MAX_BUFFER_LENGTH];
 				dsp::Clear(_pOutSamplesL, MAX_BUFFER_LENGTH);
@@ -1762,6 +1751,25 @@ namespace psycle
 				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 				work_cpu_cost(work_cpu_cost() + cost);
 				_worked = true;
+			}
+
+			void proxy::operator()(AEffect * plugin) throw(host::exceptions::function_error)
+			{
+				if(this->plugin_) close();
+				// [magnus] we shouldn't delete plugin_ because the AEffect is allocated
+				// by the plugin's DLL by some unknown means. Dispatching effClose will
+				// automatically free up the AEffect structure.
+				this->plugin_ = plugin;
+				if(plugin)
+				{
+					try
+					{
+						// AEffect's resvd2 data member is right after the resvd1 data member in memory,
+						// so, we can use those two 32-bit data members together as a single, potentially 64-bit, address
+						*reinterpret_cast<vst::plugin**>(&plugin->resvd1) = &host();
+					}
+					PSYCLE__HOST__CATCH_ALL(host())
+				}
 			}
 		}
 	}

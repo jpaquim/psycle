@@ -11,6 +11,9 @@ namespace psycle
 {
 	namespace host
 	{
+		/// \todo CPresetsDlg code sux big time concerning interface separation :-(
+		class CPresetDlg;
+
 		/// calls that the plugin side can make to the host side
 		///\todo PLEASE EXTEND THIS!!!
 		class PluginFxCallback : public plugin_interface::CFxCallback
@@ -47,66 +50,40 @@ namespace psycle
 			///\name reference to the plugin side
 			///\{
 				private:
-					plugin_interface::CMachineInterface const inline & plugin() const throw() { return *plugin_; }
-					plugin_interface::CMachineInterface       inline & plugin()       throw() { return *plugin_; }
+					plugin_interface::CMachineInterface const inline & plugin() const throw() { assert(plugin_); return *plugin_; }
+					plugin_interface::CMachineInterface       inline & plugin()       throw() { assert(plugin_); return *plugin_; }
 				private:
 					plugin_interface::CMachineInterface              * plugin_;
 				public:
 					inline bool operator()() const throw() { return plugin_; }
-					inline void operator()(plugin_interface::CMachineInterface * plugin) throw(exceptions::function_error)
-					{
-						delete this->plugin_; ///\todo call the plugin's exported deletion function instead
-						this->plugin_ = plugin;
-						if(plugin)
-						{
-							callback();
-							//Init(); // can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
-						}
-					}
+					void operator()(plugin_interface::CMachineInterface * plugin) throw(exceptions::function_error);
 			///\}
 
 			///\name protected calls from the host side to the plugin side
 			///\{
 				public:
-					#if defined DIVERSALIS__COMPILER__MICROSOFT
-						#pragma warning(push)
-						#pragma warning(disable:4702) // unreachable code
-					#endif
+					void inline callback()                                                                     throw(exceptions::function_error);
+					void inline Init()                                                                         throw(exceptions::function_error);
+					void inline SequencerTick()                                                                throw(exceptions::function_error);
+					void inline ParameterTweak(int par, int val)                                               throw(exceptions::function_error);
+					void inline Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(exceptions::function_error);
+					void inline Stop()                                                                         throw(exceptions::function_error);
+					void inline PutData(void * pData)                                                          throw(exceptions::function_error);
+					void inline GetData(void * pData)                                                          throw(exceptions::function_error);
+					int  inline GetDataSize()                                                                  throw(exceptions::function_error);
+					void inline Command()                                                                      throw(exceptions::function_error);
+					void inline MuteTrack(const int i)                                                         throw(exceptions::function_error);
+					bool inline IsTrackMuted(const int i)                                                      throw(exceptions::function_error);
+					void inline MidiNote(const int channel, const int value, const int velocity)               throw(exceptions::function_error);
+					void inline Event(std::uint32_t const data)                                                throw(exceptions::function_error);
+					bool inline DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error);
+					bool inline PlayWave(const int wave, const int note, const float volume)                   throw(exceptions::function_error);
+					void inline SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error);
+					void inline StopWave()                                                                     throw(exceptions::function_error);
+					int  inline Val(int parameter)                                                             throw(exceptions::function_error);
 
-					//////////////////////
-					/// ***** TODO ****
-					/// ***** TODO ****
-					/// ***** TODO ****
-					/// ***** TODO ****
-					/// ***** TODO ****
-					/// ***** TODO ****
-					/// ***** TODO ****
-					/// ***** TODO ****
-					/// put back the inline implementation after the class definition like it was before
-					//////////////////////
-					void inline Init()                                                                         throw(exceptions::function_error) { assert((*this)()); try { plugin().Init();                                                        } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline SequencerTick()                                                                throw(exceptions::function_error) { assert((*this)()); try { plugin().SequencerTick();                                               } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline ParameterTweak(int par, int val)                                               throw(exceptions::function_error) { assert((*this)()); try { plugin().ParameterTweak(par, val);                                      } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(exceptions::function_error) { assert((*this)()); try { plugin().Work(psamplesleft, psamplesright, numsamples, tracks);         } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline Stop()                                                                         throw(exceptions::function_error) { assert((*this)()); try { plugin().Stop();                                                        } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline PutData(void * pData)                                                          throw(exceptions::function_error) { assert((*this)()); try { plugin().PutData(pData);                                                } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline GetData(void * pData)                                                          throw(exceptions::function_error) { assert((*this)()); try { plugin().GetData(pData);                                                } PSYCLE__HOST__CATCH_ALL(host()) }
-					int  inline GetDataSize()                                                                  throw(exceptions::function_error) { assert((*this)()); try { return plugin().GetDataSize();                                          } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-					void inline Command()                                                                      throw(exceptions::function_error) { assert((*this)()); try { plugin().Command();                                                     } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline MuteTrack(const int i)                                                         throw(exceptions::function_error) { assert((*this)()); try { plugin().MuteTrack(i);                                                  } PSYCLE__HOST__CATCH_ALL(host()) }
-					bool inline IsTrackMuted(const int i)                                                      throw(exceptions::function_error) { assert((*this)()); try { return const_cast<const CMachineInterface &>(plugin()).IsTrackMuted(i); } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
-					void inline MidiNote(const int channel, const int value, const int velocity)               throw(exceptions::function_error) { assert((*this)()); try { plugin().MidiNote(channel, value, velocity);                            } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline Event(std::uint32_t const data)                                                throw(exceptions::function_error) { assert((*this)()); try { plugin().Event(data);                                                   } PSYCLE__HOST__CATCH_ALL(host()) }
-					bool inline DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error) { assert((*this)()); try { return plugin().DescribeValue(txt, param, value);                       } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
-					bool inline PlayWave(const int wave, const int note, const float volume)                   throw(exceptions::function_error) { assert((*this)()); try { plugin().PlayWave(wave, note, volume);                                  } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
-					void inline SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error) { assert((*this)()); try { plugin().SeqTick(channel, note, ins, cmd, val);                         } PSYCLE__HOST__CATCH_ALL(host()) }
-					void inline StopWave()                                                                     throw(exceptions::function_error) { assert((*this)()); try { plugin().StopWave();                                                    } PSYCLE__HOST__CATCH_ALL(host()) }
-					int  inline * Vals()                                                                       throw(exceptions::function_error) { assert((*this)()); try { return plugin().Vals;                                                   } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-					void inline callback()                                                                     throw(exceptions::function_error) { assert((*this)()); try { plugin().pCB = host().GetCallback();                                    } PSYCLE__HOST__CATCH_ALL(host()) }
-
-					#if defined DIVERSALIS__COMPILER__MICROSOFT
-						#pragma warning(pop)
-					#endif
+					/// \todo CPresetsDlg code sux big time concerning interface separation :-(
+					friend class CPresetDlg; int const /* at least it's const! */ * Vals() { return plugin().Vals; }
 			///\}
 		};
 
@@ -140,24 +117,20 @@ namespace psycle
 
 			///\name general info
 			///\{
-				public:  std::string const inline & GetDllName  () const throw() { return _psDllName; }
-				private: std::string _psDllName;
+				public:  std::string virtual inline GetDllName() const { return _psDllName; }
+				private: std::string                _psDllName;
 				
-				public:  std::string const inline & GetName     () const throw() { return _psName; };
-				private: std::string _psName;
+				public:  std::string virtual inline GetName() const { return _psName; };
+				private: std::string                _psName;
 
 				public:  std::string const inline & GetShortName() const throw() { return _psShortName; }
-				private: char _psShortName[16];
+				private: std::string                _psShortName;
 
-				public:  std::string const inline & GetAuthor   () const throw() { return _psAuthor; }
+				public:  std::string const inline & GetAuthor() const throw() { return _psAuthor; }
 				private: std::string _psAuthor;
 
-				public:  bool        const inline & IsSynth     () const throw() { return _isSynth; }
-				private: bool                      _isSynth;
-
-				PSYCLE__PRIVATE:
-					PSYCLE__DEPRECATED("use the std::string const & overload") virtual char*GetName(){return/*static*/reinterpret_cast<char*>_psName.c_str();}
-					PSYCLE__DEPRECATED("use the std::string const & overload") virtual char*GetDllName(){return _psDllName.c_str();}
+				public:  bool const inline & IsSynth() const throw() { return _isSynth; }
+				private: bool               _isSynth;
 			///\}
 
 			///\name calls to the plugin side go thru the proxy
@@ -197,9 +170,10 @@ namespace psycle
 					virtual int  GetParamValue(int numparam);
 					virtual void GetParamValue(int numparam, char* parval);
 					virtual bool SetParameter (int numparam, int value);
-					virtual plugin_interface::CMachineGuiParameter* GetParam(int num); // dw00t
+				public:
+					virtual /*plugin_interface::*/CMachineGuiParameter* GetParam(int num); // dw00t
 				private:
-					CMachineGuiParameter ** _pParams; //dw00t
+					/*plugin_interface::*/CMachineGuiParameter ** _pParams; //dw00t
 			///\}
 
 			///\name (de)serialization
@@ -215,7 +189,46 @@ namespace psycle
 				PSYCLE__DEPRECATED("use member functions")
 				plugin_interface::CMachineInfo inline * GetInfo() throw() { return _pInfo; };
 			private:
-				plugin_interface::CMachineInfo        * _pInfo;
+				///\todo move this to the proxy class
+				plugin_interface::CMachineInfo        *  _pInfo;
 		};
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// inline implementations. we need to define body of inlined function after the class definition because of dependencies
+
+namespace psycle
+{
+	namespace host
+	{
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma warning(push)
+			#pragma warning(disable:4702) // unreachable code
+		#endif
+
+		void inline proxy:: Init()                                                                         throw(exceptions::function_error) { try { plugin().Init();                                                        } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: SequencerTick()                                                                throw(exceptions::function_error) { try { plugin().SequencerTick();                                               } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: ParameterTweak(int par, int val)                                               throw(exceptions::function_error) { try { plugin().ParameterTweak(par, val);                                      } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(exceptions::function_error) { try { plugin().Work(psamplesleft, psamplesright, numsamples, tracks);         } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: Stop()                                                                         throw(exceptions::function_error) { try { plugin().Stop();                                                        } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: PutData(void * pData)                                                          throw(exceptions::function_error) { try { plugin().PutData(pData);                                                } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: GetData(void * pData)                                                          throw(exceptions::function_error) { try { plugin().GetData(pData);                                                } PSYCLE__HOST__CATCH_ALL(host()) }
+		int  inline proxy:: GetDataSize()                                                                  throw(exceptions::function_error) { try { return plugin().GetDataSize();                                          } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+		void inline proxy:: Command()                                                                      throw(exceptions::function_error) { try { plugin().Command();                                                     } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: MuteTrack(const int i)                                                         throw(exceptions::function_error) { try { plugin().MuteTrack(i);                                                  } PSYCLE__HOST__CATCH_ALL(host()) }
+		bool inline proxy:: IsTrackMuted(const int i)                                                      throw(exceptions::function_error) { try { return const_cast<const CMachineInterface &>(plugin()).IsTrackMuted(i); } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
+		void inline proxy:: MidiNote(const int channel, const int value, const int velocity)               throw(exceptions::function_error) { try { plugin().MidiNote(channel, value, velocity);                            } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: Event(std::uint32_t const data)                                                throw(exceptions::function_error) { try { plugin().Event(data);                                                   } PSYCLE__HOST__CATCH_ALL(host()) }
+		bool inline proxy:: DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error) { try { return plugin().DescribeValue(txt, param, value);                       } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
+		bool inline proxy:: PlayWave(const int wave, const int note, const float volume)                   throw(exceptions::function_error) { try { plugin().PlayWave(wave, note, volume);                                  } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
+		void inline proxy:: SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error) { try { plugin().SeqTick(channel, note, ins, cmd, val);                         } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: StopWave()                                                                     throw(exceptions::function_error) { try { plugin().StopWave();                                                    } PSYCLE__HOST__CATCH_ALL(host()) }
+		int  inline proxy::Val(int parameter)                                                              throw(exceptions::function_error) { try { return plugin().Vals[parameter];                                        } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+		void inline proxy:: callback()                                                                     throw(exceptions::function_error) { try { plugin().pCB = host().GetCallback();                                    } PSYCLE__HOST__CATCH_ALL(host()) }
+
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma warning(pop)
+		#endif
 	}
 }

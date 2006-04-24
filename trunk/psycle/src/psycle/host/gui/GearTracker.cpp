@@ -43,7 +43,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
 
-			SetWindowText(_pMachine->_editName);
+			SetWindowText(_pMachine->_editName.c_str());
 
 			m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 			m_polyslider.SetPos(_pMachine->_numVoices);

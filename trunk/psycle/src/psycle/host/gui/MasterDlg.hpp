@@ -23,7 +23,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				CBitmap m_numbers;
 				CFont namesFont;
 				Master* _pMachine;
-				char macname[MAX_CONNECTIONS][32];
+				std::string macname[MAX_CONNECTIONS];
 				afx_msg void OnCancel();
 				enum { IDD = IDD_MASTERDLG };
 				CStatic	m_masterpeak;

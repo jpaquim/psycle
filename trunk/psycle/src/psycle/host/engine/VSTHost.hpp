@@ -49,84 +49,27 @@ namespace psycle
 						AEffect              * plugin_;
 					public:
 						inline bool operator()() const throw() { return plugin_; }
-						void inline operator()(AEffect * const plugin) throw(host::exceptions::function_error);
-						{
-							if(this->plugin_) close();
-							// [magnus] we shouldn't delete plugin_ because the AEffect is allocated
-							// by the plugin's DLL by some unknown means. Dispatching effClose will
-							// automatically free up the AEffect structure.
-							this->plugin_ = plugin;
-							if(plugin)
-							{
-								try
-								{
-									// AEffect's resvd2 data member is right after the resvd1 data member in memory,
-									// so, we can use those two 32-bit data members together as a single, potentially 64-bit, address
-									*reinterpret_cast<vst::plugin**>(&plugin->resvd1) = &host();
-								}
-								PSYCLE__HOST__CATCH_ALL(*this)
-							}
-						}
+						void operator()(AEffect * plugin) throw(host::exceptions::function_error);
 				///\}
 
 				///\name protected calls from the host side to the plugin side
 				///\{
 					public:
-						#if defined DIVERSALIS__COMPILER__MICROSOFT
-							#pragma warning(push)
-							#pragma warning(disable:4702) // unreachable code
-						#endif
-
-						//////////////////////
-						/// ***** TODO ****
-						/// ***** TODO ****
-						/// ***** TODO ****
-						/// ***** TODO ****
-						/// ***** TODO ****
-						/// ***** TODO ****
-						/// ***** TODO ****
-						/// ***** TODO ****
-						/// put back the inline implementation after the class definition like it was before
-						//////////////////////
-						long int inline magic()                                                                      throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().magic;                                               } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						void inline     process(float * * inputs, float * * outputs, long int sampleframes)          throw(host::exceptions::function_error) { assert((*this)()); try { plugin().process(&plugin(), inputs, outputs, sampleframes);          } PSYCLE__HOST__CATCH_ALL(host()) }
-						void inline     processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error) { assert((*this)()); try { plugin().processReplacing(&plugin(), inputs, outputs, sampleframes); } PSYCLE__HOST__CATCH_ALL(host()) }
-						void inline     setParameter(long int index, float parameter)                                throw(host::exceptions::function_error) { assert((*this)()); try { plugin().setParameter(&plugin(), index, parameter);                  } PSYCLE__HOST__CATCH_ALL(host()) }
-						float inline    getParameter(long int index)                                                 throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().getParameter(&plugin(), index);                      } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline numPrograms()                                                                throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().numPrograms;                                         } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline numParams()                                                                  throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().numParams;                                           } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline numInputs()                                                                  throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().numInputs;                                           } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline numOutputs()                                                                 throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().numOutputs;                                          } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+						long int inline magic()                                                                      throw(host::exceptions::function_error);
+						void inline     process(float * * inputs, float * * outputs, long int sampleframes)          throw(host::exceptions::function_error);
+						void inline     processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
+						void inline     setParameter(long int index, float parameter)                                throw(host::exceptions::function_error);
+						float inline    getParameter(long int index)                                                 throw(host::exceptions::function_error);
+						long int inline numPrograms()                                                                throw(host::exceptions::function_error);
+						long int inline numParams()                                                                  throw(host::exceptions::function_error);
+						long int inline numInputs()                                                                  throw(host::exceptions::function_error);
+						long int inline numOutputs()                                                                 throw(host::exceptions::function_error);
 						//\todo: maybe exchange "flags()" with functions for each flag.
-						long int inline flags()                                                                      throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().flags;                                               } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline uniqueId()                                                                   throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().uniqueID;                                            } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline version()                                                                    throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().version;                                             } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline initialDelay()                                                               throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().initialDelay;                                        } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
-						long int inline dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
-						{
-							#ifndef NDEBUG
-								switch(operation)
-								{
-									case effEditIdle: break; // floods
-									default:
-										{
-											std::ostringstream s;
-											s
-												<< "VST: host call to plugin dispatcher: plugin address: " << &plugin()
-												<< ", opcode: " << exceptions::dispatch_errors::operation_description(operation)
-												<< ", index: " << index
-												<< ", value = " << value
-												<< ", ptr = " << ptr
-												<< ", opt = " << opt;
-											host::loggers::trace(s.str());
-										}
-								}
-							#endif
-							assert((*this)()); try { return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt); } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */
-						}
-						#if defined DIVERSALIS__COMPILER__MICROSOFT
-							#pragma warning(pop)
-						#endif
+						long int inline flags()                                                                      throw(host::exceptions::function_error);
+						long int inline uniqueId()                                                                   throw(host::exceptions::function_error);
+						long int inline version()                                                                    throw(host::exceptions::function_error);
+						long int inline initialDelay()                                                               throw(host::exceptions::function_error);
+						long int inline dispatcher(long int operation, long int index = 0, long int value = 0, void * ptr = 0, float opt = 0) throw(host::exceptions::function_error);
 				///\}
 
 				//////////////////////////////////////////////////////////////////////////
@@ -168,7 +111,7 @@ namespace psycle
 						long int inline getProgram() { return dispatcher(effGetProgram); }
 						long int inline setProgram(int program) { assert(program >= 0); assert(program < numPrograms() || numPrograms() == 0); return dispatcher(effSetProgram, 0, program); }
 						/// Tells the VST plugin the desired samplerate.
-						long int inline setSampleRate(float sr) assert(sr > 0); return dispatcher(effSetSampleRate,0,0,0,sr); }
+						long int inline setSampleRate(float sr) { assert(sr > 0); return dispatcher(effSetSampleRate,0,0,0,sr); }
 						/// Tells the VST plugin the MAX block size of data that it will request. (default value for VST's is 1024)
 						long int inline setBlockSize(int bs) { assert(bs>0); return dispatcher(effSetBlockSize,0,bs); }
 						long int inline mainsChanged(bool on) { return dispatcher(effMainsChanged, 0, on ? 1 : 0); }
@@ -219,17 +162,17 @@ namespace psycle
 
 				///\name general info
 				///\{
-					public: virtual inline char const * const GetDllName() const throw() { return _sDllName.c_str(); }
-					private: std::string                       _sDllName;
+					public:  virtual inline std::string GetDllName() const { return _sDllName; }
+					private: std::string                 _sDllName;
 
-					public: virtual inline char * GetName()             throw() { return reinterpret_cast<char*>(_sProductName.c_str()); }
-					private: std::string    _sProductName;
+					public:  virtual inline std::string GetName() const { return _sProductName; }
+					private: std::string _sProductName;
 
-					public:  long int const inline & GetVersion()    const throw() { return _version; }
+					public:  long int const inline & GetVersion() const throw() { return _version; }
 					private: long int                  _version;
 
-					public: char const inline * const GetVendorName() const throw() { return _sVendorName.c_str(); }
-					private: std::string               _sVendorName;
+					public: std::string const inline & GetVendorName() const throw() { return _sVendorName; }
+					private: std::string                _sVendorName;
 
 					public:  bool const inline &  IsSynth() const throw() { return _isSynth; }
 					private: bool                _isSynth;
@@ -339,39 +282,33 @@ namespace psycle
 					public:
 						//void SetCurrentProgram(int prg);
 						//int GetCurrentProgram();
-						virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; };
-						virtual int GetNumParams() { try { return proxy().numParams(); } catch(const std::exception &) { /* \todo we really should do something */ /* throw; */ return 0; } }
-						virtual void GetParamValue(int numparam, char * parval);
-						virtual void GetParamName(int numparam, char * name)
-						bool DescribeValue(int parameter, char * psTxt);
-						bool SetParameter(int parameter, float value);
-						bool SetParameter(int parameter, int value);
+						virtual int  GetNumParams() { try { return proxy().numParams(); } catch(const std::exception &) { /* \todo we really should do something */ /* throw; */ return 0; } }
+						virtual void GetParamName(int parameter, char * name)
 						{
 							try
 							{
-								if(numparam < proxy().numParams())
-									proxy().dispatcher(effGetParamName, numparam, 0, name);
+								if(parameter < proxy().numParams())
+									proxy().dispatcher(effGetParamName, parameter, 0, name);
 								else std::strcpy(name,"Out of Range");
 							}
 							catch(const std::exception &)
 							{
-								// [bohan]
-								// exception blocked here for now,
-								// but we really should do something...
-								//throw;
-								std::strcpy(name, "fucked up"); /// \todo [bohan] ???
+								std::strcpy(name, "crashed");
 							}
 						}
+						virtual void GetParamRange(int numparam, int & minval, int & maxval) { minval = 0; maxval = quantization; }
+						bool DescribeValue(int parameter, char * psTxt);
+						virtual void GetParamValue(int parameter, char * parval);
 						#if defined DIVERSALIS__COMPILER__MICROSOFT
 							#pragma warning(push)
 							#pragma warning(disable:4702) // unreachable code
 						#endif
-						virtual int GetParamValue(int numparam)
+						virtual int  GetParamValue(int parameter)
 						{
 							try
 							{
-								if(numparam < proxy().numParams())
-									return f2i(proxy().getParameter(numparam) * quantization);
+								if(parameter < proxy().numParams())
+									return f2i(proxy().getParameter(parameter) * quantization);
 								else
 									return 0; /// \todo [bohan] ???
 							}
@@ -387,6 +324,8 @@ namespace psycle
 						#if defined DIVERSALIS__COMPILER__MICROSOFT
 							#pragma warning(pop)
 						#endif
+						bool SetParameter(int parameter, float value);
+						bool SetParameter(int parameter, int   value);
 				///\}
 
 				///\name (de)serialization
@@ -494,14 +433,8 @@ namespace psycle
 	}
 }
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Inline Implementations.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// inline implementations. we need to define body of inlined function after the class definition because of dependencies
 
 namespace psycle
 {
@@ -509,6 +442,50 @@ namespace psycle
 	{
 		namespace vst
 		{
+			#if defined DIVERSALIS__COMPILER__MICROSOFT
+				#pragma warning(push)
+				#pragma warning(disable:4702) // unreachable code
+			#endif
+
+			long int inline proxy::magic()                                                                      throw(host::exceptions::function_error) { try { return plugin().magic;                                               } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			void inline     proxy::process(float * * inputs, float * * outputs, long int sampleframes)          throw(host::exceptions::function_error) { try { plugin().process(&plugin(), inputs, outputs, sampleframes);          } PSYCLE__HOST__CATCH_ALL(host()) }
+			void inline     proxy::processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error) { try { plugin().processReplacing(&plugin(), inputs, outputs, sampleframes); } PSYCLE__HOST__CATCH_ALL(host()) }
+			void inline     proxy::setParameter(long int index, float parameter)                                throw(host::exceptions::function_error) { try { plugin().setParameter(&plugin(), index, parameter);                  } PSYCLE__HOST__CATCH_ALL(host()) }
+			float inline    proxy::getParameter(long int index)                                                 throw(host::exceptions::function_error) { try { return plugin().getParameter(&plugin(), index);                      } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::numPrograms()                                                                throw(host::exceptions::function_error) { try { return plugin().numPrograms;                                         } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::numParams()                                                                  throw(host::exceptions::function_error) { try { return plugin().numParams;                                           } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::numInputs()                                                                  throw(host::exceptions::function_error) { try { return plugin().numInputs;                                           } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::numOutputs()                                                                 throw(host::exceptions::function_error) { try { return plugin().numOutputs;                                          } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			//\todo: maybe exchange "flags()" with functions for each flag.
+			long int inline proxy::flags()                                                                      throw(host::exceptions::function_error) { try { return plugin().flags;                                               } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::uniqueId()                                                                   throw(host::exceptions::function_error) { try { return plugin().uniqueID;                                            } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::version()                                                                    throw(host::exceptions::function_error) { try { return plugin().version;                                             } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::initialDelay()                                                               throw(host::exceptions::function_error) { try { return plugin().initialDelay;                                        } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+			long int inline proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
+			{
+				#ifndef NDEBUG
+					switch(operation)
+					{
+						case effEditIdle: break; // floods
+						default:
+							{
+								std::ostringstream s;
+								s
+									<< "VST: host call to plugin dispatcher: plugin address: " << &plugin()
+									<< ", opcode: " << exceptions::dispatch_errors::operation_description(operation)
+									<< ", index: " << index
+									<< ", value = " << value
+									<< ", ptr = " << ptr
+									<< ", opt = " << opt;
+								host::loggers::trace(s.str());
+							}
+					}
+				#endif
+				try { return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt); } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */
+			}
+			#if defined DIVERSALIS__COMPILER__MICROSOFT
+				#pragma warning(pop)
+			#endif
 		}
 	}
 }

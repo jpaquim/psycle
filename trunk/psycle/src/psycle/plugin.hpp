@@ -44,7 +44,11 @@ namespace psycle
 						///\return the Parameter at the index parameter.
 						Parameter const inline & parameter(int const & parameter) const throw() { return *parameters[parameter]; }
 						/// description of the plugin.
-						char const * const description;
+						char const *
+							#if defined NDEBUG
+								const
+							#endif
+							description;
 						/// name of the plugin.
 						char const * const name;
 						/// author of the plugin.
@@ -76,6 +80,13 @@ namespace psycle
 							columns(columns)
 						{
 							for(int i(0) ; i < parameter_count ; ++i) this->parameters[i] = &parameters[i];
+							#if !defined NDEBUG
+							{
+								std::string & s(*new std::string(this->description));
+								s += " (debug build)";
+								this->description = s.c_str();
+							}
+							#endif
 						}
 					public:
 						/// information describing a parameter

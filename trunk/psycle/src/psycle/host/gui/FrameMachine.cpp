@@ -702,7 +702,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					int min_v=1;
 					int max_v=1;
 					char name[64];
-					memset(name,0,64);
+					std::memset(name,0,64);
 					CNewVal dlg;
 
 					_pMachine->GetParamName(tweakpar,name);

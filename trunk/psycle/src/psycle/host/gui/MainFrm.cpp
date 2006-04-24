@@ -455,9 +455,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnDestroy();
 		}
 
-		void CMainFrame::StatusBarText(std::string txt)
+		void CMainFrame::StatusBarText(CString const & txt)
 		{
-			m_wndStatusBar.SetWindowText(txt.c_str());
+			m_wndStatusBar.SetWindowText(txt);
 		}
 
 		void CMainFrame::PsybarsUpdate()
@@ -812,12 +812,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			bool found=false;
 			int selected = -1;
 			int line = -1;
-			char buffer[64];
-			
-			if (_pSong == NULL) 
-			{
-				return; // why should this happen?
-			}
+			if(!_pSong) return; // why should this happen?
+
 			CComboBox *cb=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 			CComboBox *cb2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 			
@@ -833,8 +829,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if (updatelist)
 					{	
-						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
-						cb->AddString(buffer);
+						{
+							std::ostringstream s;
+							s << std::hex << b << ": " << _pSong->_pMachine[b]->_editName;
+							cb->AddString(s.str().c_str());
+						}
 						cb->SetItemData(cb->GetCount()-1,b);
 					}
 					if (!found) 
@@ -864,9 +863,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if(_pSong->_pMachine[b])
 				{
 					if (updatelist)
-					{	
-						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
-						cb->AddString(buffer);
+					{
+						{
+							std::ostringstream s;
+							s << std::hex << b << ": " << _pSong->_pMachine[b]->_editName;
+							cb->AddString(s.str().c_str());
+						}
 						cb->SetItemData(cb->GetCount()-1,b);
 					}
 					if (!found) 
@@ -1377,15 +1379,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView);
 							m_wndView.MasterMachineDialog->_pMachine = (Master*)ma;
 							for (int i=0;i<MAX_CONNECTIONS; i++)
-							{
 								if ( ma->_inputCon[i])
-								{
 									if (_pSong->_pMachine[ma->_inputMachines[i]])
-									{
-										strcpy(m_wndView.MasterMachineDialog->macname[i],_pSong->_pMachine[ma->_inputMachines[i]]->_editName);
-									}
-								}
-							}
+										m_wndView.MasterMachineDialog->macname[i] = _pSong->_pMachine[ma->_inputMachines[i]]->_editName;
 							m_wndView.MasterMachineDialog->Create();
 							CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
 							m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
@@ -1421,7 +1417,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								m_wndView.XMSamplerMachineDialog->DestroyWindow();
 							}
 						}
-						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->_editName,&m_wndView);
+						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->_editName.c_str(),&m_wndView);
 						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
 						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
 						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
