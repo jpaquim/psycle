@@ -104,4 +104,13 @@ NCustomButton * NTabBar::tab( NPanel * page )
   return 0;
 }
 
+void NTabBar::setActiveTab( unsigned int index )
+{
+  if (index < visualComponents().size() && index >= 0) {
+     NVisualComponent* tab = visualComponents().at(index);
+     setDown((NCustomButton*)tab);
+     repaint();
+  }
+}
+
 
