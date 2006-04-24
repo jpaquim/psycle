@@ -83,8 +83,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::RedrawList() 
 		{
-			char buffer[64];
-			
 			m_list.ResetContent();
 
 			int selected=0;
