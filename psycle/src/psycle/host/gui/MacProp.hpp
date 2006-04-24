@@ -5,6 +5,7 @@
 #include <psycle/host/gui/ChildView.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+
 		class Song;
 
 		/// machine properties window.
@@ -16,26 +17,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Machine *pMachine;
 			Song* pSong;
 			int thisMac;
-			char txt[32];
+			CString txt;
 			bool deleted;
-		// Dialog Data
-			//{{AFX_DATA(CMacProp)
 			enum { IDD = IDD_MACPROP };
 			CButton	m_soloCheck;
 			CButton	m_bypassCheck;
 			CButton	m_muteCheck;
 			CEdit	m_macname;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CMacProp)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CMacProp)
+			virtual void DoDataExchange(CDataExchange* pDX);
 			virtual BOOL OnInitDialog();
 			afx_msg void OnChangeEdit1();
 			afx_msg void OnButton1();
@@ -43,11 +33,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnBypass();
 			afx_msg void OnSolo();
 			afx_msg void OnClone();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
+		DECLARE_MESSAGE_MAP()
 		};
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

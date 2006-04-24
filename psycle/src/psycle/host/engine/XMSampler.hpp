@@ -953,7 +953,7 @@ XMSampler::Channel::PerformFX().
 	virtual void Work(int numSamples);
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
-	virtual TCHAR* GetName(void) { return _psName; };
+	virtual std::string GetName() const { return _psName; };
 	virtual void SetSampleRate(int sr);
 
 	virtual bool Load(RiffFile& riffFile);
@@ -1063,7 +1063,7 @@ XMSampler::Channel::PerformFX().
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 protected:
 
-	static TCHAR* _psName;
+	static std::string _psName;
 	int _numVoices;
 
 	Voice m_Voices[MAX_POLYPHONY];

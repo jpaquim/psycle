@@ -48,21 +48,22 @@ namespace psycle
 						Machine & machine = *pointer_to_machine;
 						machine_converted_from[&machine] = new int(type);
 						machine.Init();
-						assert(sizeof(int) == 4);
-						riff.Read(machine._editName, 16); /* sizeof machine._editName); */ machine._editName[16] = 0;
-						riff.Read(machine._inputMachines, sizeof machine._inputMachines);
-						riff.Read(machine._outputMachines, sizeof machine._outputMachines);
-						riff.Read(machine._inputConVol, sizeof machine._inputConVol);
-						riff.Read(machine._connection, sizeof machine._connection);
-						riff.Read(machine._inputCon, sizeof machine._inputCon);
-						#if defined (_WINAMP_PLUGIN_)
-							riff.Skip(96) ; // sizeof(CPoint) == 8
-						#else
-							riff.Read(machine._connectionPoint, sizeof machine._connectionPoint);
-						#endif
-						riff.Read(&machine._connectedInputs, sizeof machine._connectedInputs);
-						riff.Read(&machine._connectedOutputs, sizeof machine._connectedOutputs);
-						riff.Read(&machine._panning, sizeof machine._panning);
+						BOOST_STATIC_ASSERT(sizeof(int) == 4);
+						{
+							char c[16];
+							riff.Read(c, 16);
+							c[15] = 0;
+							machine._editName = c;
+						}
+						riff.Read(machine._inputMachines);
+						riff.Read(machine._outputMachines);
+						riff.Read(machine._inputConVol);
+						riff.Read(machine._connection);
+						riff.Read(machine._inputCon);
+						riff.Read(machine._connectionPoint);
+						riff.Read(machine._connectedInputs);
+						riff.Read(machine._connectedOutputs);
+						riff.Read(machine._panning);
 						machine.SetPan(machine._panning);
 						riff.Skip(40); // skips shiatz
 						switch(type)

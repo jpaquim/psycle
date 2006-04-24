@@ -108,13 +108,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if(Global::_pSong->_pMachine[b])
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
-						m_list.AddString(buffer);
+						std::ostringstream s;
+						s << std::hex << b << ": " << Global::_pSong->_pMachine[b]->_editName;
+						m_list.AddString(s.str().c_str());
 					}
 					else
 					{
-						sprintf(buffer,"%.2X: empty",b);
-						m_list.AddString(buffer);
+						std::ostringstream s;
+						s << std::hex << b << ": empty";
+						m_list.AddString(s.str().c_str());
 					}
 				}
 				break;
@@ -138,13 +140,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if(Global::_pSong->_pMachine[b])
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
-						m_list.AddString(buffer);
+						std::ostringstream s;
+						s << std::hex << b << ": " << Global::_pSong->_pMachine[b]->_editName;
+						m_list.AddString(s.str().c_str());
 					}
 					else
 					{
-						sprintf(buffer,"%.2X: empty",b);
-						m_list.AddString(buffer);
+						std::ostringstream s;
+						s << std::hex << b << ": empty";
+						m_list.AddString(s.str().c_str());
 					}
 				}
 				break;
@@ -158,8 +162,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				char buffer[64];
 				for (int b=0;b<PREV_WAV_INS;b++)
 				{
-					sprintf(buffer, "%.2X: %s", b, Global::_pSong->_pInstrument[b]->_sName);
-					m_list.AddString(buffer);
+					std::ostringstream s;
+					s << std::hex << b << ": " << Global::_pSong->_pInstrument[b]->_sName;
+					m_list.AddString(s.str().c_str());
 				}
 				CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 				if (cc->GetCurSel() == AUX_WAVES)

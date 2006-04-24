@@ -58,7 +58,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void ShowMidiMonitorDlg();
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
-			void StatusBarText(std::string txt);
+			void StatusBarText(CString const & txt);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);
 			void PsybarsUpdate();

@@ -357,8 +357,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						// machine
 						Machine * pMachine = Global::_pSong->_pMachine[ genFxIdx ];
-						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->_editName );
-						m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+						{
+							std::ostringstream s;
+							s << genFxIdx << ": " << pMachine->_editName;
+							m_channelMap.SetItem( ch, 1, LVIF_TEXT, s.str().c_str(), 0, 0, 0, 0);
+						}
 
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
@@ -366,8 +369,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						// required? (instruments only apply for samplers)
 						if( pMachine->_type == MACH_SAMPLER )
 						{
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+							std::ostringstream s;
+							s << instrument << ": " << Global::_pSong->_pInstrument[ instrument ]->_sName;
+							m_channelMap.SetItem( ch, 2, LVIF_TEXT, s.str().c_str(), 0, 0, 0, 0);
 						}
 						else
 						{

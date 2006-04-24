@@ -40,7 +40,7 @@ namespace psycle
 				_psName("")
 			{
 				_audiorange=32768.0f;
-				std::sprintf(_editName, "native plugin");
+				_editName = "native plugin";
 			}
 
 		#if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -172,10 +172,8 @@ namespace psycle
 				DefineStereoInput(1);
 				DefineStereoOutput(1);
 			}
-			strncpy(_psShortName,_pInfo->ShortName,15);
-			_psShortName[15]='\0';
-			strncpy(_editName, _pInfo->ShortName,31);
-			_editName[31]='\0';
+			_psShortName = _pInfo->ShortName;
+			_editName = _pInfo->ShortName;
 			_psAuthor = _pInfo->Author;
 			_psName = _pInfo->Name;
 			_psDllName = file_name;
@@ -241,8 +239,8 @@ namespace psycle
 
 		bool Plugin::LoadDll(std::string const & base_name_)
 		{
-			std::string base_name;
-			std::transform(base_name_.begin(), base_name_.end(), base_name.begin(), std::tolower);
+			std::string base_name(base_name_);
+			std::transform(base_name.begin(), base_name.end(), base_name.begin(), std::tolower);
 			std::string path;
 			if(!CNewMachine::lookupDllName(base_name,path)) 
 			{
@@ -303,13 +301,9 @@ namespace psycle
 
 		void Plugin::SaveDllName(RiffFile * pFile) 
 		{
-			boost::filesystem::path path(this->GetDllName(); boost::filesystem::native);
+			boost::filesystem::path path(this->GetDllName(), boost::filesystem::native);
 			path = path.leaf();
-			std::string s = path.string();
-			///\todo hardcoded limits and wastes
-			char c[/* limit */ 256];
-			std::strcpy(c,s);
-			pFile->Write(&c, /* waste */ s.length() + 1);
+			pFile->Write(path.string().c_str(), path.string().length() + 1);
 		}
 
 		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -681,7 +675,7 @@ namespace psycle
 			{
 				try
 				{
-					return proxy().Vals()[numparam];
+					return proxy().Val(numparam);
 				}
 				catch(const std::exception &)
 				{
@@ -834,6 +828,17 @@ namespace psycle
 					}
 				}
 				Global::pPlayer->Tweaker = true;
+			}
+		}
+
+		void proxy::operator()(plugin_interface::CMachineInterface * plugin) throw(exceptions::function_error)
+		{
+			delete this->plugin_; ///\todo call the plugin's exported deletion function instead
+			this->plugin_ = plugin;
+			if(plugin)
+			{
+				callback();
+				//Init(); // can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
 			}
 		}
 	}

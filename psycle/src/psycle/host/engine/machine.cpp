@@ -27,12 +27,6 @@ namespace psycle
 	{
 		extern CPsycleApp theApp;
 
-		char* Master::_psName = "Master";
-		char* Dummy::_psName = "DummyPlug";
-		char* DuplicatorMac::_psName = "Dupe it!";
-		char* Mixer::_psName = "Mixer";
-		char* LFO::_psName = "LFO";
-
 		void Machine::crashed(std::exception const & e) throw()
 		{
 			bool minor_problem(false);
@@ -68,8 +62,7 @@ namespace psycle
 				_mute = true;
 			}
 			std::ostringstream s;
-			s << "Machine: " << _editName;
-			if(GetDllName()) s << ": " << GetDllName();
+			s << "Machine: " << _editName << ": " << GetDllName();
 			s << std::endl << e.what() << std::endl;
 			if(minor_problem)
 			{
@@ -686,31 +679,30 @@ namespace psycle
 			}
 			pMachine->Init();
 			pMachine->_type = type;
-			pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
-			pFile->Read(&pMachine->_mute,sizeof(pMachine->_mute));
-			pFile->Read(&pMachine->_panning,sizeof(pMachine->_panning));
-			pFile->Read(&pMachine->_x,sizeof(pMachine->_x));
-			pFile->Read(&pMachine->_y,sizeof(pMachine->_y));
-			pFile->Read(&pMachine->_connectedInputs,sizeof(pMachine->_connectedInputs));							// number of Incoming connections
-			pFile->Read(&pMachine->_connectedOutputs,sizeof(pMachine->_connectedOutputs));						// number of Outgoing connections
+			pFile->Read(pMachine->_bypass);
+			pFile->Read(pMachine->_mute);
+			pFile->Read(pMachine->_panning);
+			pFile->Read(pMachine->_x);
+			pFile->Read(pMachine->_y);
+			pFile->Read(pMachine->_connectedInputs);
+			pFile->Read(pMachine->_connectedOutputs);
 			for(int i = 0; i < MAX_CONNECTIONS; i++)
 			{
-				pFile->Read(&pMachine->_inputMachines[i],sizeof(pMachine->_inputMachines[i]));	// Incoming connections Machine number
-				pFile->Read(&pMachine->_outputMachines[i],sizeof(pMachine->_outputMachines[i]));	// Outgoing connections Machine number
-				pFile->Read(&pMachine->_inputConVol[i],sizeof(pMachine->_inputConVol[i]));	// Incoming connections Machine vol
-				pFile->Read(&pMachine->_wireMultiplier[i],sizeof(pMachine->_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-				pFile->Read(&pMachine->_connection[i],sizeof(pMachine->_connection[i]));      // Outgoing connections activated
-				pFile->Read(&pMachine->_inputCon[i],sizeof(pMachine->_inputCon[i]));		// Incoming connections activated
+				pFile->Read(pMachine->_inputMachines[i]);
+				pFile->Read(pMachine->_outputMachines[i]);
+				pFile->Read(pMachine->_inputConVol[i]);
+				pFile->Read(pMachine->_wireMultiplier[i]);
+				pFile->Read(pMachine->_connection[i]);
+				pFile->Read(pMachine->_inputCon[i]);
 			}
-			///\todo hardcoded limits and wastes
-			pFile->ReadString(pMachine->_editName,32); // whoa, it's null-terminated but we always save 32 chars?
-			if(bDeleted)
 			{
-				char buf[2 + sizeof pMachine->_editName]; // it's because of the "X " below, but then we possibly truncate the machine name
-				sprintf(buf,"X %s",pMachine->_editName);
-				buf[sizeof pMachine->_editName - 1]=0; // great, see above
-				strcpy(pMachine->_editName,buf);
+				///\todo hardcoded limits and wastes
+				char c[32];
+				pFile->ReadString(c, 32); // whoa, it's null-terminated but we always save 32 chars?
+				c[31] = 0;
+				pMachine->_editName = c;
 			}
+			if(bDeleted) pMachine->_editName += " (replaced)";
 			if(!fullopen) return pMachine;
 			if(!pMachine->LoadSpecificChunk(pFile,version))
 			{
@@ -739,11 +731,10 @@ namespace psycle
 					p->_connection[i]=pMachine->_connection[i];
 					p->_inputCon[i]=pMachine->_inputCon[i];
 				}
-				// dummy name goes here
-				sprintf(p->_editName,"X %s",pMachine->_editName);
-				p->_numPars=0;
+				pMachine->_editName += " (replaced)";
+				p->_numPars = 0;
 				delete pMachine;
-				pMachine=p;
+				pMachine = p;
 			}
 			if(index < MAX_BUSES)
 			{
@@ -776,46 +767,51 @@ namespace psycle
 
 		void Machine::SaveFileChunk(RiffFile* pFile)
 		{
-			pFile->Write(&_type,sizeof(_type));
+			pFile->Write(_type);
 			SaveDllName(pFile);
-			pFile->Write(&_bypass,sizeof(_bypass));
-			pFile->Write(&_mute,sizeof(_mute));
-			pFile->Write(&_panning,sizeof(_panning));
-			pFile->Write(&_x,sizeof(_x));
-			pFile->Write(&_y,sizeof(_y));
-			pFile->Write(&_connectedInputs,sizeof(_connectedInputs));							// number of Incoming connections
-			pFile->Write(&_connectedOutputs,sizeof(_connectedOutputs));						// number of Outgoing connections
+			pFile->Write(_bypass);
+			pFile->Write(_mute);
+			pFile->Write(_panning);
+			pFile->Write(_x);
+			pFile->Write(_y);
+			pFile->Write(_connectedInputs);
+			pFile->Write(_connectedOutputs);
 			for(int i = 0; i < MAX_CONNECTIONS; i++)
 			{
-				pFile->Write(&_inputMachines[i],sizeof(_inputMachines[i]));	// Incoming connections Machine number
-				pFile->Write(&_outputMachines[i],sizeof(_outputMachines[i]));	// Outgoing connections Machine number
-				pFile->Write(&_inputConVol[i],sizeof(_inputConVol[i]));	// Incoming connections Machine vol
-				pFile->Write(&_wireMultiplier[i],sizeof(_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-				pFile->Write(&_connection[i],sizeof(_connection[i]));      // Outgoing connections activated
-				pFile->Write(&_inputCon[i],sizeof(_inputCon[i]));		// Incoming connections activated
+				pFile->Write(_inputMachines[i]);
+				pFile->Write(_outputMachines[i]);
+				pFile->Write(_inputConVol[i]);
+				pFile->Write(_wireMultiplier[i]);
+				pFile->Write(_connection[i]);
+				pFile->Write(_inputCon[i]);
 			}
-			pFile->Write(_editName,strlen(_editName)+1);
+			{
+				///\todo hardcoded limits and wastes
+				char c[32];
+				std::strncpy(c, _editName.c_str(), 32); c[31] = 0;// happily truncates!
+				pFile->Write(c, 32); // whoa, it's null-terminated but we always save 32 chars?
+			}
 			SaveSpecificChunk(pFile);
 		}
 
 		void Machine::SaveSpecificChunk(RiffFile* pFile) 
 		{
-			UINT count = GetNumParams();
-			UINT size = sizeof(count)+(count*sizeof(int));
-			pFile->Write(&size,sizeof(size));
-			pFile->Write(&count,sizeof(count));
-			for(UINT i = 0; i < count; i++)
+			std::uint32_t count = GetNumParams();
+			std::uint32_t const size(sizeof count  + count * sizeof(std::uint32_t));
+			pFile->Write(size);
+			pFile->Write(count);
+			for(unsigned int i = 0; i < count; i++)
 			{
-				int temp = GetParamValue(i);
-				pFile->Write(&temp,sizeof(temp));
+				std::uint32_t temp = GetParamValue(i);
+				pFile->Write(temp);
 			}
-		};
+		}
 
 		void Machine::SaveDllName(RiffFile* pFile)
 		{
 			char temp=0;
-			pFile->Write(&temp,1);
-		};
+			pFile->Write(temp);
+		}
 
 
 
@@ -826,13 +822,15 @@ namespace psycle
 
 
 
+		std::string Dummy::_psName = "DummyPlug";
+
 		Dummy::Dummy(Machine::id_type id)
 		:
 			Machine(MACH_DUMMY, MACHMODE_FX, id)
 		{
 			DefineStereoInput(1);
 			DefineStereoOutput(1);
-			sprintf(_editName, "Dummy");
+			_editName = "Dummy";
 		}
 
 		void Dummy::Work(int numSamples)
@@ -857,8 +855,8 @@ namespace psycle
 
 		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
-			pFile->Read(&size, sizeof size); // size of this part params to load
+			std::uint32_t size;
+			pFile->Read(size);
 			pFile->Skip(size);
 			return true;
 		};
@@ -872,6 +870,8 @@ namespace psycle
 
 
 
+		std::string DuplicatorMac::_psName = "Dupe it!";
+
 		DuplicatorMac::DuplicatorMac(Machine::id_type id)
 		:
 			Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id)
@@ -879,7 +879,7 @@ namespace psycle
 			_numPars = 16;
 			_nCols = 2;
 			bisTicking = false;
-			strcpy(_editName, "Dupe it!");
+			_editName = "Dupe it!";
 			for (int i=0;i<8;i++)
 			{
 				macOutput[i]=-1;
@@ -950,8 +950,9 @@ namespace psycle
 			{
 				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName);
-				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
+					sprintf(parVal,"%X -%s", macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName.c_str());
+				}
+				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
 			} else if (numparam >=8 && numparam <16) {
@@ -981,19 +982,19 @@ namespace psycle
 
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
-			pFile->Read(&size, sizeof size); // size of this part params to load
-			pFile->Read(&macOutput,sizeof macOutput);
-			pFile->Read(&noteOffset,sizeof noteOffset);
+			std::uint32_t size;
+			pFile->Read(size);
+			pFile->Read(macOutput);
+			pFile->Read(noteOffset);
 			return true;
 		}
 
 		void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile)
 		{
-			UINT size = sizeof macOutput+ sizeof noteOffset;
-			pFile->Write(&size, sizeof size); // size of this part params to save
-			pFile->Write(&macOutput,sizeof macOutput);
-			pFile->Write(&noteOffset,sizeof noteOffset);
+			std::uint32_t const size(sizeof macOutput + sizeof noteOffset);
+			pFile->Write(size);
+			pFile->Write(macOutput);
+			pFile->Write(noteOffset);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1001,7 +1002,7 @@ namespace psycle
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Master
 
-
+		std::string Master::_psName = "Master";
 
 		float * Master::_pMasterSamples = 0;
 
@@ -1014,7 +1015,7 @@ namespace psycle
 		{
 			_audiorange=32768.0f;
 			DefineStereoInput(1);
-			sprintf(_editName, "Master");
+			_editName = "Master";
 		}
 
 		void Master::Init()
@@ -1145,25 +1146,27 @@ namespace psycle
 
 		bool Master::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
-			pFile->Read(&size, sizeof size ); // size of this part params to load
-			pFile->Read(&_outDry,sizeof _outDry);
-			pFile->Read(&decreaseOnClip, sizeof decreaseOnClip);
+			std::uint32_t size;
+			pFile->Read(size);
+			pFile->Read(_outDry);
+			pFile->Read(decreaseOnClip);
 			return true;
 		};
 
 		void Master::SaveSpecificChunk(RiffFile* pFile)
 		{
-			UINT size = sizeof _outDry + sizeof decreaseOnClip;
-			pFile->Write(&size, sizeof size); // size of this part params to save
-			pFile->Write(&_outDry,sizeof _outDry);
-			pFile->Write(&decreaseOnClip, sizeof decreaseOnClip); 
+			std::uint32_t const size(sizeof _outDry + sizeof decreaseOnClip);
+			pFile->Write(size);
+			pFile->Write(_outDry);
+			pFile->Write(decreaseOnClip);
 		};
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer
+
+		std::string Mixer::_psName = "Mixer";
 
 		Mixer::Mixer(Machine::id_type id)
 		:
@@ -1172,7 +1175,7 @@ namespace psycle
 			_numPars = 255;
 			DefineStereoInput(24);
 			DefineStereoOutput(1);
-			sprintf(_editName, "Mixer");
+			_editName = "Mixer";
 		}
 
 		void Mixer::Init()
@@ -1485,23 +1488,23 @@ namespace psycle
 		{
 			std::uint32_t size;
 			pFile->Read(size);
-			pFile->Read(&_sendGrid,sizeof(_sendGrid));
-			pFile->Read(&_send,sizeof(_send));
-			pFile->Read(&_sendVol,sizeof(_sendVol));
-			pFile->Read(&_sendVolMulti,sizeof(_sendVolMulti));
-			pFile->Read(&_sendValid,sizeof(_sendValid));
+			pFile->Read(_sendGrid);
+			pFile->Read(_send);
+			pFile->Read(_sendVol);
+			pFile->Read(_sendVolMulti);
+			pFile->Read(_sendValid);
 			return true;
 		}
 
 		void Mixer::SaveSpecificChunk(RiffFile* pFile)
 		{
-			std::uint32_t size = sizeof(_sendGrid) + sizeof(_send) + sizeof(_sendVol) + sizeof(_sendVolMulti) + sizeof(_sendValid);
+			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _sendVol + sizeof _sendVolMulti + sizeof _sendValid);
 			pFile->Write(size);
-			pFile->Write(&_sendGrid,sizeof(_sendGrid));
-			pFile->Write(&_send,sizeof(_send));
-			pFile->Write(&_sendVol,sizeof(_sendVol));
-			pFile->Write(&_sendVolMulti,sizeof(_sendVolMulti));
-			pFile->Write(&_sendValid,sizeof(_sendValid));
+			pFile->Write(_sendGrid);
+			pFile->Write(_send);
+			pFile->Write(_sendVol);
+			pFile->Write(_sendVolMulti);
+			pFile->Write(_sendValid);
 		}
 
 		float Mixer::VuChan(Wire::id_type idx)
@@ -1541,6 +1544,16 @@ namespace psycle
 		//  - vst support??
 
 
+		std::string LFO::_psName = "LFO";
+
+		#if 0 // don't worry, msvc is the weird
+			int const LFO::LFO_SIZE;
+			int const LFO::MAX_PHASE;
+			int const LFO::MAX_SPEED;
+			int const LFO::MAX_DEPTH;
+			int const LFO::NUM_CHANS;
+		#endif
+
 		LFO::LFO(Machine::id_type id)
 		:
 			Machine(MACH_LFO, MACHMODE_GENERATOR, id)
@@ -1548,7 +1561,7 @@ namespace psycle
 			_numPars = prms::num_params;
 			_nCols = 3;
 			bisTicking = false;
-			strcpy(_editName, "LFO");
+			_editName = "LFO";
 			for (int i=0;i<NUM_CHANS;i++)
 			{
 				macOutput[i]=-1;
@@ -1679,7 +1692,7 @@ namespace psycle
 			else if(numparam<prms::prm0)
 			{
 				if ((macOutput[numparam-prms::mac0] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]] != NULL))
-					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]]->_editName);
+					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]]->_editName.c_str());
 				else if (macOutput[numparam-prms::mac0] != -1)
 					sprintf(parVal,"%X (none)",macOutput[numparam-prms::mac0]);
 				else 
@@ -1839,31 +1852,29 @@ namespace psycle
 
 		bool LFO::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
-			pFile->Read(&size,			sizeof size); // size of this part params to load
-			pFile->Read(&waveform,		sizeof waveform);
-			pFile->Read(&lSpeed,		sizeof lSpeed);
-			pFile->Read(&pWidth,		sizeof pWidth);
-			pFile->Read(&macOutput,		sizeof macOutput);
-			pFile->Read(&paramOutput,	sizeof paramOutput);
-			pFile->Read(&level,			sizeof level);
-			pFile->Read(&phase,			sizeof phase);
+			std::uint32_t size;
+			pFile->Read(size);
+			pFile->Read(waveform);
+			pFile->Read(lSpeed);
+			pFile->Read(pWidth);
+			pFile->Read(macOutput);
+			pFile->Read(paramOutput);
+			pFile->Read(level);
+			pFile->Read(phase);
 			return true;
 		}
 
 		void LFO::SaveSpecificChunk(RiffFile* pFile)
 		{
-			UINT size	= sizeof waveform	+ sizeof lSpeed +	sizeof pWidth 
-						+ sizeof macOutput	+ sizeof paramOutput
-						+ sizeof level		+ sizeof phase;
-			pFile->Write(&size, sizeof size); // size of this part params to save
-			pFile->Write(&waveform,		sizeof waveform);
-			pFile->Write(&lSpeed,		sizeof lSpeed);
-			pFile->Write(&pWidth,		sizeof pWidth);
-			pFile->Write(&macOutput,	sizeof macOutput);
-			pFile->Write(&paramOutput,	sizeof paramOutput);
-			pFile->Write(&level,		sizeof level);
-			pFile->Write(&phase,		sizeof phase);
+			std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof pWidth + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
+			pFile->Write(size);
+			pFile->Write(waveform);
+			pFile->Write(lSpeed);
+			pFile->Write(pWidth);
+			pFile->Write(macOutput);
+			pFile->Write(paramOutput);
+			pFile->Write(level);
+			pFile->Write(phase);
 		}
 
 		void LFO::FillTable()
@@ -1970,12 +1981,5 @@ namespace psycle
 					Global::_pSong->_pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}
-
-		int const static LFO_SIZE;
-		int const static MAX_PHASE;
-		int const static MAX_SPEED;
-		int const static MAX_DEPTH;
-		int const static NUM_CHANS;
-
 	}
 }

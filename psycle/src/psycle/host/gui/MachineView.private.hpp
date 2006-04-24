@@ -988,21 +988,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-							//code to visually mark a machine as being selected
-							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
-							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
-				//			}
-
-
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
+							// visually mark the machine as being selected
+							std::ostringstream s;
+							s << std::hex << mac->id() << ":" << mac->_editName;
+							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName.c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1072,20 +1065,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-							//code to visually mark a machine as being selected
-							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
-							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
-				//			}
-
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
+							// visually mark the machine as being selected
+							std::ostringstream s;
+							s << std::hex << mac->id() << ":" << mac->_editName;
+							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName.c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1160,23 +1147,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-
-							//code to visually mark a machine as being selected
-							// no longer needed
-							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
-							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
-				//			}
-
-
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
+							// visually mark the machine as being selected
+							std::ostringstream s;
+							s << std::hex << mac->id() << ":" << mac->_editName;
+							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName.c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1233,21 +1211,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-							//code to visually mark a machine as being selected
-							//no longer needed as a box is drawn around the machine
-							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
-							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
-				//			}
-
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
+							// visually mark the machine as being selected
+							std::ostringstream s;
+							s << std::hex << mac->id() << ":" << mac->_editName;
+							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName.c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);

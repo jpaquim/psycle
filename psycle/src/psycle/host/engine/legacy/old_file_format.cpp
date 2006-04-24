@@ -276,7 +276,7 @@ namespace psycle
 									Machine* pOldMachine = pMac[i];
 									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 									// dummy name goes here
-									sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+									pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
 									pMac[i]->_type = MACH_DUMMY;
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
@@ -304,7 +304,7 @@ namespace psycle
 										pOldMachine->_pSamplesL = NULL;
 										pOldMachine->_pSamplesR = NULL;
 										// dummy name goes here
-										sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+										pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
 										zapObject(pOldMachine);
 										pMac[i]->_type = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
@@ -326,7 +326,7 @@ namespace psycle
 											pOldMachine->_pSamplesL = NULL;
 											pOldMachine->_pSamplesR = NULL;
 											// dummy name goes here
-											sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+											pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
 											zapObject(pOldMachine);
 											pMac[i]->_type = MACH_DUMMY;
 											((Dummy*)pMac[i])->wasVST = true;
@@ -344,7 +344,7 @@ namespace psycle
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
 									// dummy name goes here
-									sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+									pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
 									zapObject(pOldMachine);
 									pMac[i]->_type = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
@@ -357,7 +357,7 @@ namespace psycle
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
 								// dummy name goes here
-								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+								pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
 								zapObject(pOldMachine);
 								pMac[i]->_type = MACH_DUMMY;
 								((Dummy*)pMac[i])->wasVST = true;

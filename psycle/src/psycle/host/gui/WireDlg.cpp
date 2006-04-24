@@ -79,14 +79,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int t = (int)sqrtf(val*16384*4*4);
 			m_volslider.SetPos(256*4-t);
 
-			char buf[128];
-			sprintf(buf,"[%d] %s -> %s", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
-			SetWindowText(buf);
+			{
+				std::ostringstream s;
+				s << "[" << wireIndex << "]" << _pSrcMachine->_editName << " -> " << _pDstMachine->_editName;
+				SetWindowText(s.str().c_str());
+			}
 
 			hold = FALSE;
 
-			memset(pSamplesL,0,sizeof(pSamplesL));
-			memset(pSamplesR,0,sizeof(pSamplesR));
+			std::memset(pSamplesL,0,sizeof(pSamplesL));
+			std::memset(pSamplesR,0,sizeof(pSamplesR));
 
 			CClientDC dc(this);
 			rc.top = 4;

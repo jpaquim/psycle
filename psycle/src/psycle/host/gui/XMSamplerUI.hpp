@@ -6,45 +6,38 @@
 #include <psycle/host/engine/constants.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
-/////////////////////////////////////////////////////////////////////////////
-// XMSamplerUI dialog
-class XMSampler;
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
-class XMSamplerUI : public CPropertySheet
-	{
-	DECLARE_DYNAMIC(XMSamplerUI)
-	public:
-		XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+		class XMSampler;
 
-		// Datos del cuadro de diálogo
-		enum { IDD = IDD_XM_SAMPLER };
+		class XMSamplerUI : public CPropertySheet
+		{
+			DECLARE_DYNAMIC(XMSamplerUI)
 
-		// Attributes
-	private:
-		XMSampler* _pMachine;
-		XMSamplerUIGeneral m_General;
-		XMSamplerUIInst m_Instrument;
-		XMSamplerUISample m_Sample;
-		XMSamplerMixerPage m_Mixer;
-		bool init;
-		// Operations
-	public:
-		void Init(XMSampler* pMachine);
-		void UpdateUI(void);
-		XMSampler* GetMachine(){ return _pMachine; }
+			public:
+				XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+				XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 
-		// Implementation
-		// Generated message map functions
-	protected:
-		//{{AFX_MSG(XMSamplerUI)
-		afx_msg void OnDestroy();
-		//}}AFX_MSG
-		DECLARE_MESSAGE_MAP()
-	};
+				enum { IDD = IDD_XM_SAMPLER };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-UNIVERSALIS__COMPILER__NAMESPACE__END
+			private:
+				XMSampler* _pMachine;
+				XMSamplerUIGeneral m_General;
+				XMSamplerUIInst m_Instrument;
+				XMSamplerUISample m_Sample;
+				XMSamplerMixerPage m_Mixer;
+				bool init;
+
+			public:
+				void Init(XMSampler* pMachine);
+				void UpdateUI(void);
+				XMSampler* GetMachine(){ return _pMachine; }
+
+			protected:
+				afx_msg void OnDestroy();
+
+			DECLARE_MESSAGE_MAP()
+		};
+
+	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

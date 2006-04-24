@@ -639,16 +639,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								_pSong->_pMachine[smac]->SetPan(newpan);
 								newpan= _pSong->_pMachine[smac]->_panning;
 								
-								char buf[128];
-								if (newpan != 64)
 								{
-									sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", _pSong->_pMachine[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+									std::ostringstream s;
+									s << _pSong->_pMachine[smac]->_editName << " Pan: ";
+									if(newpan != 64)
+										s << 100.0f - ((float)newpan*0.78125f) << "% Left / " << (float)newpan*0.78125f << "% Right";
+									else
+										s << "center";
+									pParentMain->StatusBarText(s.str().c_str());
 								}
-								else
-								{
-									sprintf(buf, "%s Pan: Center", _pSong->_pMachine[smac]->_editName);
-								}
-								pParentMain->StatusBarText(buf);
 								updatePar = smac;
 								Repaint(DMMacRefresh);
 							}

@@ -10,18 +10,15 @@
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
-		CMasterDlg::CMasterDlg(CChildView* pParent) : CDialog(CMasterDlg::IDD, pParent)
-		{
-			m_pParent = pParent;
-			//{{AFX_DATA_INIT(CMasterDlg)
-			//}}AFX_DATA_INIT
-			memset(macname,0,32*MAX_CONNECTIONS);
-		}
+		CMasterDlg::CMasterDlg(CChildView* pParent)
+		:
+			CDialog(CMasterDlg::IDD, pParent),
+			m_pParent(pParent)
+		{}
 
 		void CMasterDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CMasterDlg)
 			DDX_Control(pDX, IDC_MASTERPEAK, m_masterpeak);
 			DDX_Control(pDX, IDC_SLIDERMASTER, m_slidermaster);
 			#define sad_tools(_, count, __) DDX_Control(pDX, BOOST_PP_CAT(IDC_SLIDERM, BOOST_PP_INC(count)), m_sliderm[count]);
@@ -29,7 +26,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			#undef sad_tools
 			DDX_Control(pDX, IDC_MIXERVIEW, m_mixerview);
 			DDX_Control(pDX, IDC_AUTODEC, m_autodec);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
@@ -142,14 +138,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CDC *dc = m_mixerview.GetDC();
 			CDC memDC;
-//			CBitmap* oldbmp;
-//			memDC.CreateCompatibleDC(dc);
-//			oldbmp = memDC.SelectObject(&m_numbers);
+			//CBitmap* oldbmp;
+			//memDC.CreateCompatibleDC(dc);
+			//oldbmp = memDC.SelectObject(&m_numbers);
 			
 			PaintNumbersDC(dc,&memDC,val,x,y);
 
-//			memDC.SelectObject(oldbmp);
-//			memDC.DeleteDC();
+			//memDC.SelectObject(oldbmp);
+			//memDC.DeleteDC();
 		}
 
 		void CMasterDlg::PaintNumbersDC(CDC *dc, CDC *memDC, float val, int x, int y)
@@ -220,7 +216,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				int x(xo);
 				for(int column(0); column < columns && i < MAX_CONNECTIONS; ++column, ++i)
 				{
-					dcm->TextOut(x, y, macname[i]);
+					dcm->TextOut(x, y, macname[i].c_str());
 					x += dx;
 				}
 				y += dy;
@@ -236,16 +232,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				CDC *dcm = m_mixerview.GetDC();
 				CDC memDC;
-//				CBitmap* oldbmp;
-//				memDC.CreateCompatibleDC(dcm);
-//				oldbmp = memDC.SelectObject(&m_numbers);
+				//CBitmap* oldbmp;
+				//memDC.CreateCompatibleDC(dcm);
+				//oldbmp = memDC.SelectObject(&m_numbers);
 				
 				PaintNumbersDC(dcm,&memDC,((208-m_slidermaster.GetPos())/4.0f)-40.0f,32,142);
 				for(int i(0); i < MAX_CONNECTIONS; ++i)
 					PaintNumbersDC(dcm,&memDC,((208-m_sliderm[i].GetPos())/4.0f)-40.0f,92,142);
 		
-//				memDC.SelectObject(oldbmp);
-//				memDC.DeleteDC();
+				//memDC.SelectObject(oldbmp);
+				//memDC.DeleteDC();
 			}
 			if ( dc.m_ps.rcPaint.bottom >=25 && dc.m_ps.rcPaint.top<=155 && dc.m_ps.rcPaint.right >=350)
 			{

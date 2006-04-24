@@ -1355,18 +1355,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::NewMachine(int x, int y, Machine::id_type mac) 
 		{
 			CNewMachine dlg;
-			if(mac >= 0)
-			{
-				if (mac < MAX_BUSES)
-				{
-					dlg.LastType1 = 0;
-				}
-				else
-				{
-					dlg.LastType1 = 1;
-				}
-			}
-			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
+			if(mac >= 0) dlg.LastType1 = mac < MAX_BUSES ? 0 : 1;
+			if(dlg.DoModal() == IDOK && dlg.Outputmachine >= 0)
 			{
 				Machine::id_type fb;
 				int xs,ys;
@@ -1387,7 +1377,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if ((mac >= MAX_BUSES) && !(dlg.OutBus))
+					if (mac >= MAX_BUSES && !dlg.OutBus)
 					{
 						fb = mac;
 						xs = MachineCoords.sEffect.width;
@@ -1401,7 +1391,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							Global::_pSong->DestroyMachine(fb);
 						}
 					}
-					else if ((mac < MAX_BUSES) && (dlg.OutBus))
+					else if (mac < MAX_BUSES && dlg.OutBus)
 					{
 						fb = mac;
 						xs = MachineCoords.sGenerator.width;
@@ -1425,12 +1415,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// random position
 				if ((x < 0) || (y < 0))
 				{
-					bool bCovered = TRUE;
+					bool bCovered = true;
 					while (bCovered)
 					{
 						x = (rand())%(CW-xs);
 						y = (rand())%(CH-ys);
-						bCovered = FALSE;
+						bCovered = false;
 						for (int i=0; i < MAX_MACHINES; i++)
 						{
 							if (Global::_pSong->_pMachine[i])
@@ -1438,7 +1428,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								if ((abs(Global::_pSong->_pMachine[i]->_x - x) < 32) &&
 									(abs(Global::_pSong->_pMachine[i]->_y - y) < 32))
 								{
-									bCovered = TRUE;
+									bCovered = true;
 									i = MAX_MACHINES;
 								}
 							}
@@ -1461,35 +1451,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if ( dlg.OutBus)
-					{
-						Global::_pSong->seqBus = fb;
-					}
+					if(dlg.OutBus) Global::_pSong->seqBus = fb;
 
 					// make sure that no 2 machines have the same name, because that is irritating
-
-					int number = 1;
-					char buf[sizeof(_pSong->_pMachine[fb]->_editName)+4];
-					strcpy (buf,_pSong->_pMachine[fb]->_editName);
-
-					for (int i = 0; i < MAX_MACHINES-1; i++)
 					{
-						if (i!=fb)
-						{
-							if (_pSong->_pMachine[i])
-							{
-								if (strcmp(_pSong->_pMachine[i]->_editName,buf)==0)
-								{
-									number++;
-									sprintf(buf,"%s %d",_pSong->_pMachine[fb]->_editName,number);
-									i = -1;
-								}
-							}
-						}
+						std::stringstream ss;
+						ss << _pSong->_pMachine[fb]->_editName << " " << std::hex << fb;
+						ss >> _pSong->_pMachine[fb]->_editName;
 					}
-
-					buf[sizeof(_pSong->_pMachine[fb]->_editName)-1] = 0;
-					strcpy(_pSong->_pMachine[fb]->_editName,buf);
 
 					pParentMain->UpdateComboGen();
 					Repaint(DMAll);
@@ -3465,7 +3434,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
-				sprintf(dlg.pMachine->_editName, dlg.txt);
+				dlg.pMachine->_editName = dlg.txt;
 				pParentMain->StatusBarText(dlg.txt);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();

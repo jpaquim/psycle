@@ -151,33 +151,43 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				Machine *tmac = _pSong->_pMachine[c];
 				if(tmac)
 				{
-					char buffer[128];
-					
 					// Name [Machine view editor custom name]
-					sprintf(buffer,"%.3d: %s",n+1,tmac->_editName);
-					m_machlist.InsertItem(n,buffer);
+					{
+						std::ostringstream s;
+						s << n + 1 << ": " << tmac->_editName;
+						m_machlist.InsertItem(n,s.str().c_str());
+					}
 					
 					// Gear [Gear type]
-					strcpy(buffer, tmac->GetName());
-					m_machlist.SetItem(n,1,LVIF_TEXT,buffer,0,0,0,NULL);
+					m_machlist.SetItem(n,1,LVIF_TEXT,tmac->GetName().c_str(),0,0,0,0);
 					
 					// Type [Set is generator/effect/master]
-					switch(tmac->_mode)
 					{
-					case MACHMODE_GENERATOR: strcpy(buffer,"Generator");break;
-					case MACHMODE_FX: strcpy(buffer,"Effect");break;
-					case MACHMODE_MASTER: strcpy(buffer,"Master");break;
+						std::string s;
+						switch(tmac->_mode)
+						{
+							case MACHMODE_GENERATOR: s = "Generator"; break;
+							case MACHMODE_FX: s = "Effect"; break;
+							case MACHMODE_MASTER: s = "Master"; break;
+						}
+						m_machlist.SetItem(n,2,LVIF_TEXT,s.c_str(),0,0,0,0);
 					}
-					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
-					
+
 					// Input numbers
-					sprintf(buffer,"%d",tmac->_connectedInputs);
-					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
-					
+					{
+						std::ostringstream s;
+						s << tmac->_connectedInputs;
+						m_machlist.SetItem(n,3,LVIF_TEXT,s.str().c_str(),0,0,0,0);
+					}
+
 					// OutPut numbers
-					sprintf(buffer,"%d",tmac->_connectedOutputs);
-					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
-					n++;
+					{
+						std::ostringstream s;
+						s << tmac->_connectedOutputs;
+						m_machlist.SetItem(n,4,LVIF_TEXT,s.str().c_str(),0,0,0,0);
+					}
+
+					++n;
 				}
 			}
 			itemcount = n;

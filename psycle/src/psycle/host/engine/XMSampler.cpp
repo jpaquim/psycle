@@ -27,7 +27,7 @@ namespace psycle
 		static CXResampler *pResampler = NULL;
 */
 
-		TCHAR* XMSampler::_psName = _T("Sampulse");
+		std::string XMSampler::_psName = "Sampulse";
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
@@ -2016,7 +2016,7 @@ namespace psycle
 			DefineStereoOutput(1);
 			_audiorange=32768.0f;
 			_numPars=0;
-			_stprintf(_editName, _T(_psName));
+			_editName = _psName;
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 

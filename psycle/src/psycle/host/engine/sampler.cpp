@@ -11,7 +11,7 @@ namespace psycle
 {
 	namespace host
 	{
-		char* Sampler::_psName = "Sampler";
+		std::string Sampler::_psName = "Sampler";
 
 		Sampler::Sampler(Machine::id_type id)
 		:
@@ -20,7 +20,7 @@ namespace psycle
 			_audiorange= 32768.0f;
 			_numPars=0;
 			DefineStereoOutput(1);
-			sprintf(_editName, "Sampler");
+			_editName = "Sampler";
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
