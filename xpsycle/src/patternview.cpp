@@ -72,6 +72,8 @@ PatternView::PatternView()
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
 
   setTransparent(false);
+
+  patternStep_ = 1;
 }
 
 
@@ -819,7 +821,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           int startLine  = dy_ / pView->rowHeight();
           int lineCount  = clientHeight() / pView->rowHeight();
           int oldLine = pView->cursor().y();
-          pView->moveCursor(0,1,0);
+          pView->moveCursor(0,pView->patternStep(),0);
           int newLine = pView->cursor().y();
           if (newLine > startLine + lineCount-1) {
             pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
@@ -835,7 +837,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           doSel(selCursor);
         } else {
           int oldLine = pView->cursor().y();
-          pView->moveCursor(0,-1,0);
+          pView->moveCursor(0,-pView->patternStep(),0);
           int startLine  = dy_ / pView->rowHeight();
           int newLine = pView->cursor().y();
           if (newLine < startLine) {
@@ -1644,6 +1646,15 @@ void PatternView::PatternDraw::deleteBlock( )
 void PatternView::deleteBlock( )
 {
   drawArea->deleteBlock();
+}
+
+void PatternView::setPatternStep( int step )
+{
+  patternStep_ = step;
+}
+
+int PatternView::patternStep() const {
+  return patternStep_;
 }
 
 

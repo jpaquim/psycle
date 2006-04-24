@@ -279,8 +279,9 @@ void MainWindow::initMenu( )
    fileMenu_->itemByName("New")->click.connect(this,&MainWindow::onFileNew);
    fileMenu_->itemByName("Open")->click.connect(this,&MainWindow::onFileOpen);
    fileMenu_->itemByName("Save as")->click.connect(this,&MainWindow::onFileSaveAs);
-//   recentFileMenu_ = new NMenu();
-//   fileMenu_->itemByName("recent Files")->add(recentFileMenu_);
+
+   recentFileMenu_ = new NMenu("recent Files");
+   fileMenu_->itemByName("recent Files")->add(recentFileMenu_);
 
    editMenu_ = new NMenu("Edit",'e',
        "Undo,Redo,Pattern Cut,Pattern Copy,Pattern Paste,Pattern Mix Paster,Pattern Delete,|,Block Cut,Block Copy,Block Paste,Block Mix Paste,Block Delete,|,Sequence Cut,Sequence Copy,Sequence Delete");
@@ -371,25 +372,33 @@ void MainWindow::initToolBar( )
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->newfile()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "new.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onFileNew);;
+    NButton* newBtn = new NButton(img);
+     newBtn->setHint("New song");
+    toolBar1_->add(newBtn)->clicked.connect(this,&MainWindow::onFileNew);;
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->open()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "open.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onFileOpen);;
+    NButton* fileOpenBtn = new NButton(img);
+      fileOpenBtn->setHint("Song load");
+    toolBar1_->add(fileOpenBtn)->clicked.connect(this,&MainWindow::onFileOpen);;
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "save.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onFileSaveAs);;
+    NButton* saveBtn = new NButton(img);
+      saveBtn->setHint("Save");
+    toolBar1_->add(saveBtn)->clicked.connect(this,&MainWindow::onFileSaveAs);;
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save_audio()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "saveaudio.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    NButton* saveAsAudioFileBtn = new NButton(img);
+       saveAsAudioFileBtn->setHint("Save as audio file");
+    toolBar1_->add(saveAsAudioFileBtn);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->recordwav()); else
@@ -398,6 +407,7 @@ void MainWindow::initToolBar( )
     NButton* recWav = new NButton(img);
        recWav->setToggle(true);
        recWav->setFlat(false);
+       recWav->setHint("Record to .wav");
        recWav->clicked.connect(this, &MainWindow::onRecordWav);
     toolBar1_->add(recWav);
 
@@ -424,6 +434,7 @@ void MainWindow::initToolBar( )
 
     img->setPreferredSize(25,25);
     NButton* recNotes = new NButton(img);
+       recNotes->setHint("Record Notes Mode");
     toolBar1_->add(recNotes);
 
 
@@ -434,6 +445,7 @@ void MainWindow::initToolBar( )
                                          img->loadFromFile(Global::pConfig()->iconPath+ "playstart.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(barPlayFromStartBtn_ = new NButton(img));
+    barPlayFromStartBtn_->setHint("Play fro start");
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->play()); else
@@ -453,6 +465,7 @@ void MainWindow::initToolBar( )
     img->setPreferredSize(25,25);
     NButton* stopBtn_ = new NButton(img);
        stopBtn_->click.connect(this,&MainWindow::onBarStop);
+       stopBtn_->setHint("Stop");
     toolBar1_->add(stopBtn_);
 
     img = new NImage();
@@ -636,6 +649,10 @@ void MainWindow::initToolBar( )
   psycleToolBar_ = new NToolBar();
      psycleToolBar_->add(new NLabel("Pattern Step"));
      patternCombo_ = new NComboBox();
+     for (int i = 1; i <=16; i++) 
+       patternCombo_->add(new NItem(stringify(i)));
+     patternCombo_->setIndex(0);
+     patternCombo_->itemSelected.connect(this,&MainWindow::onPatternStepChange);
      patternCombo_->setWidth(40);
      patternCombo_->setHeight(20);
      psycleToolBar_->add(patternCombo_);
@@ -1214,6 +1231,13 @@ bool MainWindow::checkUnsavedSong( )
   }
   NApp::addRemovePipe(box);
   return result;
+}
+
+void MainWindow::onPatternStepChange( NItemEvent * ev )
+{
+  if (patternCombo_->selIndex()!=-1) {
+     childView_->patternView()->setPatternStep(patternCombo_->selIndex()+1);
+  }
 }
 
 

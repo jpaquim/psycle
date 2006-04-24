@@ -130,6 +130,7 @@ private:
 
     void onSongLoadProgress(int chunkCount, int max, const std::string & header);
     void onOctaveChange(NItemEvent* ev);
+    void onPatternStepChange(NItemEvent* ev);
     void onTrackChange(NItemEvent* ev);
     void onNewMachine(NButtonEvent* ev);
 

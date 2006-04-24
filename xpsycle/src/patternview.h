@@ -197,6 +197,9 @@ public:
     int prevEditPosition();
     int playPos();
 
+    void setPatternStep(int step);
+    int patternStep() const;
+
     void updatePlayBar(bool followSong);
 
     void setEditOctave(int octave);
@@ -223,6 +226,7 @@ private:
   int editPosition_, prevEditPosition_;
   int playPos_;
   int editOctave_;
+  int patternStep_;
 
   NPoint3D cursor_;
   PatternDraw* drawArea;
