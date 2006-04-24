@@ -6,7 +6,7 @@
 #pragma once
 #include <universalis/operating_system/exception.hpp>
 #include <universalis/compiler/numeric.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__THREADS__SLEEP
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__OPERATING_SYSTEM__THREADS__SLEEP
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace universalis
 {

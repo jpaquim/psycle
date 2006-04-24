@@ -100,7 +100,7 @@ namespace universalis
 			class rethrow_functor
 			{
 				public:
-					template<typename E> void operator_(compiler::location const & location, E const * const e = 0) const throw(runtime_error) { throw runtime_error(string(*e), location, e); }
+					template<typename E> void operator_(compiler::location const & location, E const * const e = 0) const throw(runtime_error) { throw runtime_error(exceptions::string(*e), location, e); }
 			};
 		}
 
