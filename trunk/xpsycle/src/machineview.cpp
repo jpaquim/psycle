@@ -165,7 +165,7 @@ void MachineView::onNewConnection( MachineGUI * sender )
 
 void MachineView::onLineMousePressed( NButtonEvent * ev )
 {
-  if (ev->button() == 1) {
+  if (ev->button() == 3) {
     bool found = false;
     for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
       MachineGUI* machineGUI = *it;
