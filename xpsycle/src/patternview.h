@@ -138,7 +138,7 @@ class PatternView : public NPanel
     void drawSelBg(NGraphics* g, const NSize & selArea);
 
 
-    std::map<char,int> keyMap_;
+    std::map<int,int> keyMap_;
     void initKeyMap();
     int charToNote(char c);
 

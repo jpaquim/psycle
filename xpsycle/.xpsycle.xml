@@ -1,7 +1,8 @@
 <!-- xpsycle configuration file -->
 <xpsycle>
 <path id='icondir' src='~/xpsycle/icons/'></path>
-<path id='plugindir' src='/home/natti/psycle/trunk/psycle/make/gnu_autotools/++packageneric/build/.libs/'></path>
+<path id='plugindir'
+src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/'></path>
 <vcskin id ='seqbar'>
   <font name = "Suse sans" size = '8' color = '100:100:100'></font>
 </vcskin>	
@@ -9,6 +10,51 @@
 	<bgcolor r='200' g='200' b='200'></bgcolor>
 	<font name = "Suse sans" size = '8' color = '100:100:100'></font>
 </vcskin>
+
+<!-- keyHandler configuration -->
+
+<!-- patternview octave 0  -->
+
+<key id='oct_C_0' ctrl='0' keychar='y'></key>
+<key id='oct_CS0' ctrl='0' keychar='s'></key>
+<key id='oct_D_0' ctrl='0' keychar='x'></key>
+<key id='oct_DS0' ctrl='0' keychar='d'></key>
+<key id='oct_E_0' ctrl='0' keychar='c'></key>
+<key id='oct_F_0' ctrl='0' keychar='v'></key>
+<key id='oct_FS0' ctrl='0' keychar='g'></key>
+<key id='oct_G_0' ctrl='0' keychar='b'></key>
+<key id='oct_GS0' ctrl='0' keychar='h'></key>
+<key id='oct_A_0' ctrl='0' keychar='n'></key>
+<key id='oct_AS0' ctrl='0' keychar='j'></key>
+<key id='oct_B_0' ctrl='0' keychar='m'></key>
+
+<!-- patternview octave 1  -->
+
+<key id='oct_C_1' ctrl='0' keychar='q'></key>
+<key id='oct_CS1' ctrl='0' keychar='2'></key>
+<key id='oct_D_1' ctrl='0' keychar='w'></key>
+<key id='oct_DS1' ctrl='0' keychar='3'></key>
+<key id='oct_E_1' ctrl='0' keychar='e'></key>
+<key id='oct_F_1' ctrl='0' keychar='r'></key>
+<key id='oct_FS1' ctrl='0' keychar='5'></key>
+<key id='oct_G_1' ctrl='0' keychar='t'></key>
+<key id='oct_GS1' ctrl='0' keychar='6'></key>
+<key id='oct_A_1' ctrl='0' keychar='z'></key>
+<key id='oct_AS1' ctrl='0' keychar='7'></key>
+<key id='oct_B_1' ctrl='0' keychar='u'></key>
+
+<!-- patternview octave 2  -->
+
+<key id='oct_C_2' ctrl='0' keychar='i'></key>
+<key id='oct_CS2' ctrl='0' keychar='9'></key>
+<key id='oct_D_2' ctrl='0' keychar='o'></key>
+<key id='oct_DS2' ctrl='0' keychar='0'></key>
+
+<!-- patternview misc key options -->
+
+<key id='key_stop' ctrl='0' keychar='1'></key>
+
+
 </xpsycle>
 
 

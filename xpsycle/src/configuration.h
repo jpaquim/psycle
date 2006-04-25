@@ -23,11 +23,16 @@
 #include "audiodriver.h"
 #include <ncolor.h>
 #include <vector>
+#include <nobject.h>
+#include <inputhandler.h>
 
 /**
 @author Stefan
 */
-class Configuration{
+
+
+
+class Configuration : public NObject {
 public:
     Configuration();
 
@@ -38,6 +43,9 @@ public:
     bool autoStopMachines;
     std::string iconPath;
     std::string pluginPath;
+
+
+    InputHandler inputHandler;
 
     NColor pvc_separator;
     NColor pvc_separator2;
@@ -207,6 +215,7 @@ public:
 private:
     void setSkinDefaults();
 
+    void onConfigTagParse(const std::string & tagName);
 };
 
 #endif

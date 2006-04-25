@@ -1,7 +1,7 @@
 <!-- ngrs configuration file -->
 <ngrs>
 <vcskin id='pane'>
-    <font name='Suse sans' size='12' color='0:0:0'></font>
+    <font name='Suse sans' size='8' color='0:0:0'></font>
     <bgcolor r='200' g='200' b='200'></bgcolor>
 </vcskin>
 <vcskin id='mbar'>
@@ -10,6 +10,12 @@
 </vcskin>	
 <vcskin id='btnflat'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
+</vcskin>
+<vcskin id='btndown'>
+	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<gradient start='200:200:200' mid='210:210:210' end='180:180:180' dir='ver' percent='10' style='2' arcw='5' arch='5'>
+	</gradient>
+	<frmborder style='1' arcw = '5' arch ='5'></frmborder>
 </vcskin>
 <vcskin id='btnup'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
@@ -59,6 +65,17 @@
 	<font name='Suse Sans' size='8' color='230:230:230'></font>
 	<gradient start='100:100:100' mid='50:50:50' end='100:100:100' dir='ver' percent='10' style='1'>
 	</gradient>
+</vcskin>
+<vcskin id='splitbar'>
+<gradient start='200:200:200' mid='220:220:220' end='220:220:220' perc='50'
+style='2' arcw='3' arch='3'>
+</gradient>
+<frmborder style='1'></frmborder>
+</vcskin>
+<vcskin id='toolbar'>
+   <bvlborder outer='lowered' inner='raised'>
+   </bvlborder>
+   <font name='Suse sans' size='8' color='0:0:0'></font>
 </vcskin>
 </ngrs>
 

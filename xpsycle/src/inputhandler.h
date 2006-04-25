@@ -21,6 +21,7 @@
 #define INPUTHANDLER_H
 
 #include <cassert>
+#include <map>
 
 /**
 @author Stefan
@@ -417,12 +418,34 @@
 			}
 		};
 
+class Key {
+public:
+
+   Key() : ctrl(0), scancode(0) {}
+   Key(int c, int k) : ctrl(c), scancode(k) {};
+
+   unsigned int ctrl;
+   unsigned int scancode;
+
+   bool operator<(const Key & key) const {
+      long key1 = ctrl | scancode<<8;
+      long key2 = key.ctrl | key.scancode <<8;
+      return key1 < key2;
+   };
+};
 
 class InputHandler{
 public:
     InputHandler();
 
     ~InputHandler();
+
+    void changeKeyCode(int keyEnumCode, const Key & key);
+    int getEnumCodeByKey(const Key & key);
+
+private:
+
+    std::map<Key,int> keyMap;
 
 };
 
