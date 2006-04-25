@@ -27,6 +27,7 @@
 #include "nbitmap.h"
 #include "nfntstring.h"
 #include "nregion.h"
+#include "npixmap.h"
 
 
 /**
@@ -87,6 +88,7 @@ public:
 
     void putBitmap(int x, int y, NBitmap & bitmap);
     void putBitmap(int destX, int destY, int width, int height, NBitmap & bitmap, int srcX, int srcY );
+    void putPixmap(int destX, int destY, int width, int height, NPixmap & pixmap, int srcX, int srcY );
 
     void setDoubleBuffer(bool on);
 
