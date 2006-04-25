@@ -146,7 +146,8 @@ void NWindow::onMousePress( int x, int y, int button )
       initDrag(obj,x,y);
      }
     selectedBase_ = dragBase_;
-    obj->onMousePress( x - obj->absoluteSpacingLeft(), y - obj->absoluteSpacingTop(), button);
+    obj->onMousePress( x - obj->absoluteSpacingLeft() +
+    obj->scrollDx(), y - obj->absoluteSpacingTop() + obj->scrollDy(), button);
   }
 }
 

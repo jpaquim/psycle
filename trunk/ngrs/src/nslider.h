@@ -58,6 +58,8 @@ public:
     void setPos(double pos);
     double pos();
 
+    NPanel* slider();
+
 private:
 
    bool trackLine_;
