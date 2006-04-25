@@ -843,3 +843,17 @@ void NGraphics::setVisible( bool on )
   }
 }
 
+void NGraphics::putPixmap( int destX, int destY, int width, int height, NPixmap & pixmap, int srcX, int srcY )
+{
+  if (pixmap.X11Pixmap() != 0) {
+
+      if (dblBuffer_)
+            XCopyArea(NApp::system().dpy(),  pixmap.X11Pixmap(), doubleBufferPixmap_,gcp,
+                srcX, srcY, width, height, destX+dx_,destY+dy_);
+      else
+            XCopyArea(NApp::system().dpy(),  pixmap.X11Pixmap(), win ,gc_,
+                srcX, srcY, width, height, destX+dx_,destY+dy_);
+  }
+
+}
+
