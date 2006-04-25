@@ -199,6 +199,8 @@ void SequencerBar::init( )
   resize();
 
   seqList()->itemSelected.connect(this,&SequencerBar::onSelChangeSeqList);
+
+  updateSequencer();
 }
 
 void SequencerBar::setPatternView( PatternView * patternView )

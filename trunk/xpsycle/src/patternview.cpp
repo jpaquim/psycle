@@ -384,8 +384,98 @@ void PatternView::Header::paint( NGraphics * g )
     g->putBitmap(xOff+dg0XCoords.x(),0+dg0XCoords.y(),noCoords.width(),noCoords.height(), bitmap,
                  track0X*noCoords.width(), noCoords.top());
 
+    // blit the mute LED
+    if (Global::pSong()->_trackMuted[i]) {
+       g->putBitmap(xOff+dMuteCoords.x(),0+dMuteCoords.y(),sMuteCoords.width(),sMuteCoords.height(), bitmap,
+                 sMuteCoords.left(), sMuteCoords.top());
+    }
+
+    // blit the solo LED
+    if (Global::pSong()->_trackSoloed == i) {
+       g->putBitmap(xOff+dSoloCoords.x(),0+dSoloCoords.y(),sSoloCoords.width(),sSoloCoords.height(), bitmap,
+                 sSoloCoords.left(), sSoloCoords.top());
+    }
+
+    // blit the record LED
+    if (Global::pSong()->_trackArmed[i]) {
+       g->putBitmap(xOff+dRecCoords.x(),0+dRecCoords.y(),sRecCoords.width(),sRecCoords.height(), bitmap,
+                 sRecCoords.left(), sRecCoords.top());
+    }
+
     if (i!=0) g->drawLine(i*pView->colWidth(),0,i*pView->colWidth(),clientWidth()); // col seperator
   }
+}
+
+void PatternView::Header::onMousePress( int x, int y, int button )
+{
+   // check if left mouse button pressed
+  if (button == 1)
+  {
+     // determine the track column, the mousepress occured on
+     int track = x / pView->colWidth();
+     // find out the start offset of the header bitmap
+     NPoint off(track * pView->colWidth() + (pView->colWidth() - skinColWidth()) / 2,0);
+     // the rect area of the solo led
+     NRect solo(off.x() + dSoloCoords.x(), off.y() + dSoloCoords.y(), sSoloCoords.width(), sSoloCoords.height());
+     // now check point intersection for solo
+     if (solo.intersects(x,y)) {
+         onSoloLedClick(track);
+     } else {
+        // the rect area of the solo led
+        NRect mute(off.x() + dMuteCoords.x(), off.y() + dMuteCoords.y(), sMuteCoords.width(), sMuteCoords.height());
+        // now check point intersection for solo
+        if (mute.intersects(x,y)) {
+           onMuteLedClick(track);
+        } else
+        {
+            // the rect area of the record led
+            NRect record(off.x() + dRecCoords.x(), off.y() + dRecCoords.y(), sRecCoords.width(), sRecCoords.height());
+            // now check point intersection for solo
+            if (record.intersects(x,y)) {
+              onRecLedClick(track);
+            }
+        }
+     }
+  }
+}
+
+void PatternView::Header::onSoloLedClick( int track )
+{
+  if (Global::pSong()->_trackSoloed != track )
+  {
+    for ( int i=0;i<MAX_TRACKS;i++ ) {
+      Global::pSong()->_trackMuted[i] = true;
+    }
+    Global::pSong()->_trackMuted[track] = false;
+    Global::pSong()->_trackSoloed = track;
+  }
+  else
+  {
+    for ( int i=0;i<MAX_TRACKS;i++ )
+    {
+      Global::pSong()->_trackMuted[i] = false;
+    }
+    Global::pSong()->_trackSoloed = -1;
+  }
+  repaint();
+}
+
+void PatternView::Header::onMuteLedClick( int track )
+{
+  Global::pSong()->_trackMuted[track] = !(Global::pSong()->_trackMuted[track]);
+  repaint();
+}
+
+void PatternView::Header::onRecLedClick(int track) {
+  Global::pSong()->_trackArmed[track] = ! Global::pSong()->_trackArmed[track];
+  Global::pSong()->_trackArmedCount = 0;
+  for ( int i=0;i<MAX_TRACKS;i++ ) {
+      if (Global::pSong()->_trackArmed[i])
+      {
+        Global::pSong()->_trackArmedCount++;
+      }
+  }
+  repaint();
 }
 
 int PatternView::Header::preferredWidth( )
@@ -416,7 +506,7 @@ int PatternView::Header::skinColWidth( )
 ///
 /// The Line Number Panel Class
 ///
-  PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : dy_(0), NPanel()
+  PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : NPanel(), dy_(0)
   {
     setBorder(new NFrameBorder(),true);
     pView = pPatternView;
@@ -1671,6 +1761,10 @@ void PatternView::setPatternStep( int step )
 int PatternView::patternStep() const {
   return patternStep_;
 }
+
+
+
+
 
 
 
