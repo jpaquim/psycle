@@ -197,20 +197,22 @@ NewMachine * ChildView::newMachineDlg( )
 
 void ChildView::onMachineViewDblClick( NButtonEvent * ev )
 {
-  if (newMachineDlg()->execute()) {
-    if (newMachineDlg()->outBus()) {
-        // Generator selected
-        int x = 10; int y = 10;
-        int fb = Global::pSong()->GetFreeBus();
-        if (newMachineDlg()->sampler()) {
-          Global::pSong()->CreateMachine(MACH_SAMPLER, x, y, 0, fb);
-          machineView()->addMachine(Global::pSong()->_pMachine[fb]);
-          machineView()->repaint();
-        } else {
-          Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName().c_str(),fb);
-          machineView()->addMachine(Global::pSong()->_pMachine[fb]);
-          machineView()->repaint();
-        }
+  if (ev->button()==1) {
+    if (newMachineDlg()->execute()) {
+      if (newMachineDlg()->outBus()) {
+         // Generator selected
+         int x = 10; int y = 10;
+         int fb = Global::pSong()->GetFreeBus();
+         if (newMachineDlg()->sampler()) {
+            Global::pSong()->CreateMachine(MACH_SAMPLER, x, y, 0, fb);
+            machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+            machineView()->repaint();
+         } else {
+            Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName().c_str(),fb);
+            machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+            machineView()->repaint();
+          }
+      }
     }
    }
 }

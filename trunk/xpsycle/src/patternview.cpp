@@ -811,6 +811,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 void PatternView::PatternDraw::onMousePress( int x, int y, int button )
 {
   if (button == 6) {
+     std::cout << "wheel mouse scroll left" << std::endl;
      // wheel mouse scroll left
      int startTrack  = dx_ / pView->colWidth();
      int newTrack = std::max(0,startTrack-1);
@@ -818,6 +819,7 @@ void PatternView::PatternDraw::onMousePress( int x, int y, int button )
   } else
   if (button == 7) {
     // wheel mouse scrolling right
+     std::cout << "wheel mouse scroll right" << std::endl;
      int startTrack  = dx_ / pView->colWidth();
      int newTrack = std::max(0,std::min(pView->trackNumber(),startTrack+1));
      pView->hScrBar()->setPos( (newTrack) * pView->colWidth());
