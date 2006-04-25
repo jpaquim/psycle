@@ -47,7 +47,7 @@ public:
 
     ~MachineGUI();
 
-    static NBitmap bitmap;
+    static NPixmap pixmap;
 
     Machine* pMac();
     void attachLine(NLine* line, int point);

@@ -68,7 +68,7 @@ ChildView::ChildView()
   enableSound();
   machineView_->createGUIMachines();
 
-  timer.setIntervalTime(100);
+  timer.setIntervalTime(80);
   timer.enableTimer();
 }
 
