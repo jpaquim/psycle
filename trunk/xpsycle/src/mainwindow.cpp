@@ -1131,6 +1131,8 @@ void MainWindow::onTimer( )
   Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
   vuMeter_->repaint();
   ((Master*)Global::pSong()->_pMachine[MASTER_INDEX])->vuupdated = true;
+
+  childView_->machineView()->updateVUs();
 }
 
 void MainWindow::updateBars( )

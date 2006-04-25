@@ -223,6 +223,14 @@ NPanel * MachineView::scrollArea( )
   return scrollArea_;
 }
 
+void MachineView::updateVUs( )
+{
+  for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+    MachineGUI* machineGUI = *it;
+    machineGUI->repaintVUMeter();
+  }
+}
+
 
 
 
