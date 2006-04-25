@@ -117,8 +117,8 @@ void Configuration::loadConfig( )
   NApp::config()->loadXmlConfig(".xpsycle.xml");
   NFile::cd(oldDir);
 
-  iconPath   = NApp::config()->findPath("icondir");
-  pluginPath = NApp::config()->findPath("plugindir");
+  iconPath   = NFile::replaceTilde(NApp::config()->findPath("icondir"));
+  pluginPath = NFile::replaceTilde(NApp::config()->findPath("plugindir"));
 }
 
 void Configuration::onConfigTagParse(const std::string & tagName )
