@@ -21,10 +21,10 @@
 #define CONFIGURATION_H
 
 #include "audiodriver.h"
+#include "inputhandler.h"
 #include <ncolor.h>
 #include <vector>
 #include <nobject.h>
-#include <inputhandler.h>
 
 /**
 @author Stefan
