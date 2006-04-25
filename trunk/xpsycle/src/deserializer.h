@@ -20,12 +20,12 @@
 #ifndef DESERIALIZER_H
 #define DESERIALIZER_H
 
+#include "serializer.h"
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
 #include <inttypes.h>
-#include <serializer.h>
 
 
 /// \todo add real detection of type size
