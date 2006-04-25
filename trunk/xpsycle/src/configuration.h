@@ -47,6 +47,10 @@ public:
 
     InputHandler inputHandler;
 
+    NColor vu1;
+    NColor vu2;
+    NColor vu3;
+
     NColor pvc_separator;
     NColor pvc_separator2;
     NColor pvc_background;

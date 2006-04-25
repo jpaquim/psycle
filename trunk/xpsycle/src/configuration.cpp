@@ -52,6 +52,9 @@ void Configuration::setSkinDefaults( )
   pattern_font_x = 9;
   pattern_font_y = 11;
 
+  vu1.setHCOLORREF(0x0080FF80);
+  vu2.setHCOLORREF(0x00403731);
+  vu3.setHCOLORREF(0x00262bd7);
   pvc_separator.setHCOLORREF(0x00400000);
   pvc_separator2.setHCOLORREF(0x00800000);
   pvc_background.setHCOLORREF(0x0099766C);
@@ -135,6 +138,8 @@ void Configuration::onConfigTagParse(const std::string & tagName )
        inputHandler.changeKeyCode(cdefAddMachine,Key(ctrl,keyCode));
      } else
      if (id == "block_copy") {
+       std::cout << ctrl    << std::endl;
+       std::cout << keyCode << std::endl;
        inputHandler.changeKeyCode(cdefBlockCopy,Key(ctrl,keyCode));
      } else
      if (id == "block_cut") {

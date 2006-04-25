@@ -22,6 +22,7 @@
 
 #include <cassert>
 #include <map>
+#include <napp.h>
 
 /**
 @author Stefan
@@ -422,16 +423,19 @@ class Key {
 public:
 
    Key() : ctrl(0), scancode(0) {}
-   Key(int c, int k) : ctrl(c), scancode(k) {};
-
-   unsigned int ctrl;
-   unsigned int scancode;
+   Key(int c, int k);
 
    bool operator<(const Key & key) const {
       long key1 = ctrl | scancode<<8;
       long key2 = key.ctrl | key.scancode <<8;
       return key1 < key2;
    };
+
+private:
+
+   unsigned int ctrl;
+   unsigned int scancode;
+
 };
 
 class InputHandler{
