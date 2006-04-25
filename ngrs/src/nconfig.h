@@ -26,11 +26,20 @@
 
 #include "nskin.h"
 #include <map>
-
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/sax2/SAX2XMLReader.hpp>
+#include <xercesc/sax2/XMLReaderFactory.hpp>
+#include <xercesc/sax2/DefaultHandler.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <nobject.h>
 
 class NBorder;
 
-class NConfig {
+
+class XERCES_CPP_NAMESPACE_QUALIFIER Attributes;
+
+
+class NConfig : public NObject {
 
 public:
     NConfig();
@@ -47,9 +56,16 @@ public:
     std::string findPath(const std::string & id);
     NSkin* findSkin(const std::string & id);
 
+    std::string getAttribValue(const std::string & name);
+
+    signal1<const std::string &> tagParse;
+
+    const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
+
 private:
 
 
 };
+
 
 #endif

@@ -21,14 +21,9 @@
 #include "nconfig.h"
 #include "nbevelborder.h"
 #include "nframeborder.h"
-#include <xercesc/util/PlatformUtils.hpp>
-#include <xercesc/sax2/SAX2XMLReader.hpp>
-#include <xercesc/sax2/XMLReaderFactory.hpp>
-#include <xercesc/sax2/DefaultHandler.hpp>
-#include <xercesc/util/XMLString.hpp>
-#include <xercesc/sax2/Attributes.hpp>
 #include <nfile.h>
 #include <iostream>
+#include <xercesc/sax2/Attributes.hpp>
 
 
 XERCES_CPP_NAMESPACE_USE;
@@ -91,8 +86,8 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
     //cout << "I saw element: "<< message << endl;
     std::string tagName = std::string(message);
 
-
-  ///todo   NBorder* border;
+    pCfg->tagParse.emit(tagName);
+    pCfg->attrs = &attrs;
 
     if (tagName == "path") {
       std::string id   = getValue("id",attrs);
@@ -350,6 +345,7 @@ const char * vknob_xpm[] = {
 
 NConfig::NConfig()
 {
+  attrs = 0;
   std::string oldDir = NFile::workingDir();
   NFile::cdHome();
   loadXmlConfig(".ngrs.xml");
@@ -582,6 +578,8 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
 
 void NConfig::loadXmlConfig(const std::string & configName )
 {
+  attrs = 0;
+
   try {
     XMLPlatformUtils::Initialize();
   }
@@ -643,4 +641,18 @@ std::string NConfig::findPath( const std::string & id )
   } else {
     return itr->second;
   }
+}
+
+std::string NConfig::getAttribValue( const std::string & name )
+{
+   std::string erg;
+       try {
+       XMLCh* str = XMLString::transcode(name.c_str());
+       const XMLCh* strCh = attrs->getValue(str);
+       char* id = XMLString::transcode(strCh);
+       erg = std::string(id);
+       XMLString::release(&id);
+       XMLString::release(&str);
+       } catch (std::exception e) { return ""; }
+      return erg;
 }
