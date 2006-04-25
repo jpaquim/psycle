@@ -65,7 +65,7 @@ ChildView::ChildView()
     getSaveFileName_->setMode(nSave);
   add(getSaveFileName_);
 
-  enableSound();
+//  enableSound();
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(80);
