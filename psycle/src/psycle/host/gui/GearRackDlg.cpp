@@ -157,7 +157,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(1);
 
-				char buffer[64];
 				for (int b=0;b<PREV_WAV_INS;b++)
 				{
 					std::ostringstream s;
