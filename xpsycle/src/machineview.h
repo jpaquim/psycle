@@ -72,6 +72,7 @@ public:
     void removeMachines();
 
     void update();
+    void updateVUs();
 
     NPanel* scrollArea();
 

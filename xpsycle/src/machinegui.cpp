@@ -131,6 +131,7 @@ MasterGUI::MasterGUI(Machine* mac) : MachineGUI(mac)
   setSkin();
   masterDlg = new MasterDlg(mac);
   setBackground(NColor(0,0,200));
+
 }
 
 MasterGUI::~ MasterGUI( )
@@ -151,6 +152,12 @@ void MasterGUI::paint( NGraphics * g )
   g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
 }
 
+
+
+
+
+
+
 GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 {
   vuSlider_ = new NSlider();
@@ -159,6 +166,11 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
+
+  vuPanel_ = new VUPanel(this);
+    vuPanel_->setPosition(dGeneratorVu.left(),dGeneratorVu.top(),dGeneratorVu.width(),dGeneratorVu.height());
+    vuPanel_->setTransparent(false);
+  add(vuPanel_);
 }
 
 GeneratorGUI::~ GeneratorGUI( )
@@ -188,6 +200,11 @@ void GeneratorGUI::setSkin( )
   soloCoords.setPosition(15,145,15,14);
   dSoloCoords.setPosition(26,5,15,14);
 
+  sGeneratorVu0.setPosition(0,141,7,4);
+  sGeneratorVuPeak.setPosition(128,141,2,4);
+  dGeneratorVu.setPosition(10,35,130,4);
+  sGenerator.setPosition(0,47,148,47);
+
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
 
@@ -195,7 +212,6 @@ void GeneratorGUI::setSkin( )
   vuSlider_->setOrientation(nHorizontal);
   vuSlider_->setRange(0,127);
   vuSlider_->setPos( pMac()->_panning );
-
 }
 
 void GeneratorGUI::onPosChanged(NSlider* sender, double value )
@@ -248,6 +264,76 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
    repaint();
   }
 }
+
+void GeneratorGUI::repaintVUMeter( )
+{
+  vuPanel_->repaint();
+}
+
+void GeneratorGUI::VUPanel::paint( NGraphics * g )
+{
+  int vol = pGui_->pMac()->_volumeDisplay;
+  int max = pGui_->pMac()->_volumeMaxDisplay;
+
+  vol *= pGui_->dGeneratorVu.width();
+  vol /= 96;
+
+  max *= pGui_->dGeneratorVu.width();
+  max /= 96;
+
+  // BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+  if (vol > 0)
+  {
+     if (pGui_->sGeneratorVu0.width())
+     {
+        vol /= pGui_->sGeneratorVu0.width();// restrict to leds
+        vol *= pGui_->sGeneratorVu0.width();
+     }
+  } else {
+    vol = 0;
+  }
+
+  g->putBitmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
+               MachineGUI::bitmap,
+               pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
+               pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
+  );
+
+  if (max > 0) {
+      if (pGui_->sGeneratorVuPeak.width()) {
+          max /= pGui_->sGeneratorVuPeak.width();// restrict to leds
+          max *= pGui_->sGeneratorVuPeak.width();
+          g->putBitmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
+                       MachineGUI::bitmap,
+                       pGui_->sGeneratorVuPeak.left(),
+                       pGui_->sGeneratorVuPeak.top()
+         ); //peak
+       }
+    }
+
+   if (vol > 0) {
+     g->putBitmap(0,0,vol, pGui_->sGeneratorVu0.height(), MachineGUI::bitmap,
+                  pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
+     }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 {
@@ -336,6 +422,11 @@ void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
 {
   ((NVisualComponent*) parent())->resize();
 }
+
+void MachineGUI::repaintVUMeter( )
+{
+}
+
 
 
 

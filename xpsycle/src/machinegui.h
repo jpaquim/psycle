@@ -62,6 +62,8 @@ public:
     virtual void onMoveEnd(const NMoveEvent & moveEvent);
     virtual void resize();
 
+    virtual void repaintVUMeter();
+
 private:
 
 
@@ -100,6 +102,25 @@ private:
 class GeneratorGUI : public MachineGUI
 {
 public:
+
+    class VUPanel : NPanel {
+
+      friend class GeneratorGUI;
+
+      public:
+         VUPanel::VUPanel(GeneratorGUI* pGui) {
+           pGui_ = pGui;
+         };
+
+        virtual void paint(NGraphics* g);
+
+      private:
+
+       GeneratorGUI* pGui_;
+
+    };
+
+
     GeneratorGUI(Machine* mac);
 
     ~GeneratorGUI();
@@ -108,9 +129,12 @@ public:
 
     virtual void onMousePress(int x, int y, int button);
 
+    virtual void repaintVUMeter();
+
 private:
 
    NSlider* vuSlider_;
+   VUPanel* vuPanel_;
 
    NRect bgCoords;
    NRect muteCoords;
@@ -118,6 +142,11 @@ private:
    NRect dSoloCoords;
    NRect dMuteCoords;
    NPoint dNameCoords;
+
+   NRect sGeneratorVuPeak;
+   NRect sGeneratorVu0;
+   NRect dGeneratorVu;
+   NRect sGenerator;
 
    virtual void onMouseDoublePress(int x, int y, int button);
    virtual void paint(NGraphics* g);
