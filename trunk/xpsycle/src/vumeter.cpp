@@ -18,10 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "vumeter.h"
+#include "global.h"
+#include "configuration.h"
+#include "machine.h"
 #include <cmath>
-#include <global.h>
-#include <configuration.h>
-#include <machine.h>
+
 
 VuMeter::VuMeter()
  : NPanel(), l_(1),r_(1)
