@@ -57,13 +57,20 @@ class PatternView : public NPanel
 
      NBitmap bitmap;
 
+     virtual void onMousePress(int x, int y, int button);
      virtual int preferredWidth();
+
      int skinColWidth();
 
    private:
 
      int skinColWidth_;
      PatternView* pView;
+
+     void onSoloLedClick(int track);
+     void onMuteLedClick(int track);
+     void onRecLedClick(int track);
+
    };
 
 

@@ -52,7 +52,7 @@ NewMachine::NewMachine()
   pane()->add(bPnl);
 
   NPanel* properties = new NPanel();
-    properties->setWidth(210);
+    properties->setPreferredSize(210,100);
     properties->setAlign(nAlRight);
     properties->setLayout(new NAlignLayout(),true);
     macProperty = new NGroupBox();
