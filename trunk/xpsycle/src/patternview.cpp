@@ -820,7 +820,7 @@ void PatternView::PatternDraw::onMousePress( int x, int y, int button )
     // wheel mouse scrolling down
      int startLine  = dy_ / pView->rowHeight();
      int lineCount  = clientHeight() / pView->rowHeight();
-     int newLine = std::max(0,std::min(pView->lineNumber()-lineCount,startLine+1));
+     int newLine = std::max(0,std::min(pView->lineNumber(),startLine+1));
      pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
   } else 
   if (button == 2) {
@@ -848,9 +848,11 @@ char inline hex_value(char c) { if(c >= 'A') return 10 + c - 'A'; else return c 
 
 void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 {
-  if (!doSelect_) pView->setCursor(intersectCell(x,y));
-  repaint();
-  endSel();
+  if (button==1) {
+    if (!doSelect_) pView->setCursor(intersectCell(x,y));
+    repaint();
+    endSel();
+  }
 }
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
