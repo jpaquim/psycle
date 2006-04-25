@@ -28,4 +28,18 @@ InputHandler::~InputHandler()
 {
 }
 
+int InputHandler::getEnumCodeByKey( const Key & key )
+{
+  std::map<Key,int>::iterator itr;
+  if ( (itr = keyMap.find(key)) != keyMap.end() )
+     return itr->second;
+    else
+     return -1;
+}
+
+void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
+{
+  keyMap[key] = keyEnumCode;
+}
+
 

@@ -30,6 +30,7 @@
 #include <nitem.h>
 #include <ncheckmenuitem.h>
 #include <nmessagebox.h>
+#include <nbevelborder.h>
 
 
 

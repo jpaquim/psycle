@@ -903,7 +903,9 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
        } else
 
        if (event.buffer()!="") {
-       int note = charToNote(event.scancode());
+
+       int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
+
        if (note == cdefKeyStop && pView->cursor().z()==0) pView->noteOffAny(); else {
        {
          unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (pView->cursor().y() *MULTIPLY) + (pView->cursor().x())*5;
@@ -967,50 +969,50 @@ void PatternView::PatternDraw::initKeyMap( )
 {
   // octave 0
 
-  keyMap_['y'] = 0;
-  keyMap_['s'] = 1;
-  keyMap_['x'] = 2;
-  keyMap_['d'] = 3;
-  keyMap_['c'] = 4;
-  keyMap_['v'] = 5;
-  keyMap_['g'] = 6;
-  keyMap_['b'] = 7;
-  keyMap_['h'] = 8;
-  keyMap_['n'] = 9;
-  keyMap_['j'] = 10;
-  keyMap_['m'] = 11;
+  keyMap_[cdefKeyC_0] = 0;
+  keyMap_[cdefKeyCS0] = 1;
+  keyMap_[cdefKeyD_0] = 2;
+  keyMap_[cdefKeyDS0] = 3;
+  keyMap_[cdefKeyE_0] = 4;
+  keyMap_[cdefKeyF_0] = 5;
+  keyMap_[cdefKeyFS0] = 6;
+  keyMap_[cdefKeyG_0] = 7;
+  keyMap_[cdefKeyGS0] = 8;
+  keyMap_[cdefKeyA_0] = 9;
+  keyMap_[cdefKeyAS0] = 10;
+  keyMap_[cdefKeyB_0] = 11;
 
   // octave 1
 
-  keyMap_['q'] = 0  + 12;
-  keyMap_['2'] = 1  + 12;
-  keyMap_['w'] = 2  + 12;
-  keyMap_['3'] = 3  + 12;
-  keyMap_['e'] = 4  + 12;
-  keyMap_['r'] = 5  + 12;
-  keyMap_['5'] = 6  + 12;
-  keyMap_['t'] = 7  + 12;
-  keyMap_['6'] = 8  + 12;
-  keyMap_['z'] = 9  + 12;
-  keyMap_['7'] = 10 + 12;
-  keyMap_['u'] = 11 + 12;
+  keyMap_[cdefKeyC_1] = 0  + 12;
+  keyMap_[cdefKeyCS1] = 1  + 12;
+  keyMap_[cdefKeyD_1] = 2  + 12;
+  keyMap_[cdefKeyDS1] = 3  + 12;
+  keyMap_[cdefKeyE_1] = 4  + 12;
+  keyMap_[cdefKeyF_1] = 5  + 12;
+  keyMap_[cdefKeyFS1] = 6  + 12;
+  keyMap_[cdefKeyG_1] = 7  + 12;
+  keyMap_[cdefKeyGS1] = 8  + 12;
+  keyMap_[cdefKeyA_1] = 9  + 12;
+  keyMap_[cdefKeyAS1] = 10 + 12;
+  keyMap_[cdefKeyB_1] = 11 + 12;
 
   // octave 2
 
-  keyMap_['i'] = 0 + 24;
-  keyMap_['9'] = 1 + 24;
-  keyMap_['o'] = 2 + 24;
-  keyMap_['0'] = 3 + 24;
-  keyMap_['p'] = 4 + 24;
+  keyMap_[cdefKeyC_2] = 0 + 24;
+  keyMap_[cdefKeyCS2] = 1 + 24;
+  keyMap_[cdefKeyD_2] = 2 + 24;
+  keyMap_[cdefKeyDS2] = 3 + 24;
+  keyMap_[cdefKeyE_2] = 4 + 24;
 
   // special
 
-  keyMap_['1'] = cdefKeyStop;
+  keyMap_[cdefKeyCS0] = cdefKeyStop;
 }
 
 int PatternView::PatternDraw::charToNote( char c )
 {
-  std::map<char,int>::iterator itr = keyMap_.begin();
+  std::map<int,int>::iterator itr = keyMap_.begin();
   if ( (itr = keyMap_.find(c)) == keyMap_.end() )
        {
           // no mapped Key found
