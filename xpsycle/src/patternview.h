@@ -158,6 +158,7 @@ class PatternView : public NPanel
     void onPopupBlockCut(NButtonEvent* ev);
     void onPopupBlockPaste(NButtonEvent* ev);
     void onPopupBlockDelete(NButtonEvent* ev);
+    void onPopupBlockMixPaste(NButtonEvent* ev);
     void onPopupTranspose1(NButtonEvent* ev);
     void onPopupTranspose12(NButtonEvent* ev);
     void onPopupTranspose_1(NButtonEvent* ev);

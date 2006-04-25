@@ -39,6 +39,8 @@ public:
 private:
 
     float l_, r_;
+    int vuprevL;
+    int vuprevR;
 
     NColor vu1;
     NColor vu2;

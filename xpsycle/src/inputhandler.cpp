@@ -42,4 +42,10 @@ void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
   keyMap[key] = keyEnumCode;
 }
 
+Key::Key( int c, int k )
+{
+  scancode = k;
+  if (c ) ctrl = ControlMask; else ctrl = 0;
+}
+
 

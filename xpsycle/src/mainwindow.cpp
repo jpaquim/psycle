@@ -643,14 +643,14 @@ void MainWindow::initToolBar( )
 
     psycleControlBar_->add(new NLabel("VU"));
     NPanel* vuPanel = new NPanel();
-    vuPanel->setPosition(0,0,100,22);
+    vuPanel->setPosition(0,0,225,10);
        vuMeter_ = new VuMeter();
        vuPanel->add(vuMeter_);
-       vuMeter_->setPosition(0,0,100,10);
+       vuMeter_->setPosition(0,0,225,10);
 
        masterSlider_ = new NSlider();
        masterSlider_->setOrientation(nHorizontal);
-       masterSlider_->setPosition(0,10,100,10);
+       masterSlider_->setPosition(0,10,225,10);
        vuPanel->add(masterSlider_);
     psycleControlBar_->add(vuPanel);
 
@@ -1125,11 +1125,12 @@ void MainWindow::onTimer( )
        sequencerBar_->updatePlayOrder(true);
        sequencerBar_->updateSequencer();
     }
-
-    vuMeter_->setPegel(Global::pSong()->_pMachine[MASTER_INDEX]->_lMax,
-    Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
-    vuMeter_->repaint();
   }
+
+  vuMeter_->setPegel(Global::pSong()->_pMachine[MASTER_INDEX]->_lMax,
+  Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
+  vuMeter_->repaint();
+  ((Master*)Global::pSong()->_pMachine[MASTER_INDEX])->vuupdated = true;
 }
 
 void MainWindow::updateBars( )

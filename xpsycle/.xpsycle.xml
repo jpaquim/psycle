@@ -1,58 +1,78 @@
 <!-- xpsycle configuration file -->
 <xpsycle>
-<path id='icondir' src='~/xpsycle/icons/'></path>
+<path id='icondir' src='~/xpsycle/icons/' />
 <path id='plugindir'
-src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/'></path>
+src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 <vcskin id ='seqbar'>
-  <font name = "Suse sans" size = '8' color = '100:100:100'></font>
+  <font name = "Suse sans" size = '8' color = '100:100:100'/>
 </vcskin>	
 <vcskin id ='playbar'>
-	<bgcolor r='200' g='200' b='200'></bgcolor>
-	<font name = "Suse sans" size = '8' color = '100:100:100'></font>
+	<bgcolor r='200' g='200' b='200' />
+	<font name = "Suse sans" size = '8' color = '100:100:100' />
 </vcskin>
 
 <!-- keyHandler configuration -->
 
 <!-- patternview octave 0  -->
 
-<key id='oct_C_0' ctrl='0' keychar='y'></key>
-<key id='oct_CS0' ctrl='0' keychar='s'></key>
-<key id='oct_D_0' ctrl='0' keychar='x'></key>
-<key id='oct_DS0' ctrl='0' keychar='d'></key>
-<key id='oct_E_0' ctrl='0' keychar='c'></key>
-<key id='oct_F_0' ctrl='0' keychar='v'></key>
-<key id='oct_FS0' ctrl='0' keychar='g'></key>
-<key id='oct_G_0' ctrl='0' keychar='b'></key>
-<key id='oct_GS0' ctrl='0' keychar='h'></key>
-<key id='oct_A_0' ctrl='0' keychar='n'></key>
-<key id='oct_AS0' ctrl='0' keychar='j'></key>
-<key id='oct_B_0' ctrl='0' keychar='m'></key>
+<key id='oct_C_0' keychar='y'/>
+<key id='oct_CS0' keychar='s'/>
+<key id='oct_D_0' keychar='x'/>
+<key id='oct_DS0' keychar='d'/>
+<key id='oct_E_0' keychar='c'/>
+<key id='oct_F_0' keychar='v'/>
+<key id='oct_FS0' keychar='g'/>
+<key id='oct_G_0' keychar='b'/>
+<key id='oct_GS0' keychar='h'/>
+<key id='oct_A_0' keychar='n'/>
+<key id='oct_AS0' keychar='j'/>
+<key id='oct_B_0' keychar='m'/>
 
 <!-- patternview octave 1  -->
 
-<key id='oct_C_1' ctrl='0' keychar='q'></key>
-<key id='oct_CS1' ctrl='0' keychar='2'></key>
-<key id='oct_D_1' ctrl='0' keychar='w'></key>
-<key id='oct_DS1' ctrl='0' keychar='3'></key>
-<key id='oct_E_1' ctrl='0' keychar='e'></key>
-<key id='oct_F_1' ctrl='0' keychar='r'></key>
-<key id='oct_FS1' ctrl='0' keychar='5'></key>
-<key id='oct_G_1' ctrl='0' keychar='t'></key>
-<key id='oct_GS1' ctrl='0' keychar='6'></key>
-<key id='oct_A_1' ctrl='0' keychar='z'></key>
-<key id='oct_AS1' ctrl='0' keychar='7'></key>
-<key id='oct_B_1' ctrl='0' keychar='u'></key>
+<key id='oct_C_1' keychar='q'/>
+<key id='oct_CS1' keychar='2'/>
+<key id='oct_D_1' keychar='w'/>
+<key id='oct_DS1' keychar='3'/>
+<key id='oct_E_1' keychar='e'/>
+<key id='oct_F_1' keychar='r'/>
+<key id='oct_FS1' keychar='5'/>
+<key id='oct_G_1' keychar='t'/>
+<key id='oct_GS1' keychar='6'/>
+<key id='oct_A_1' keychar='z'/>
+<key id='oct_AS1' keychar='7'/>
+<key id='oct_B_1' keychar='u'/>
 
 <!-- patternview octave 2  -->
 
-<key id='oct_C_2' ctrl='0' keychar='i'></key>
-<key id='oct_CS2' ctrl='0' keychar='9'></key>
-<key id='oct_D_2' ctrl='0' keychar='o'></key>
-<key id='oct_DS2' ctrl='0' keychar='0'></key>
+<key id='oct_C_2' keychar='i' />
+<key id='oct_CS2' keychar='9' />
+<key id='oct_D_2' keychar='o' />
+<key id='oct_DS2' keychar='0' />
 
 <!-- patternview misc key options -->
 
-<key id='key_stop' ctrl='0' keychar='1'></key>
+<key id='key_stop' keychar='1' />
+
+<!-- patternview block key options -->
+
+<key id='block_copy' ctrl='1' keychar='c' />
+<key id='block_cut' ctrl='1' keychar='x' />
+<key id='block_delete' ctrl='1' keychar='y' />
+<key id='block_double' ctrl='1' keychar='d' />
+<key id='block_halve' ctrl='1' keychar='h' />
+<key id='block_interpolate' ctrl='1' keychar='i' />
+<key id='block_mix' ctrl='1' keychar='m' />
+<key id='block_paste' ctrl='1' keychar='v' />
+<key id='block_select_all' ctrl='1' keychar='a' />
+<key id='block_select_bar' ctrl='1' keychar='e' />
+<key id='block_select_column' ctrl='1' keychar='r' />
+<key id='block_set_instrument' ctrl='1' keychar='t' />
+<key id='block_set_machine' ctrl='1' keychar='g' />
+<key id='block_start' ctrl='1' keychar='b' />
+<key id='block_start' ctrl='1' keychar='k' />
+<key id='block_unmark' ctrl='1' keychar='u' />
+
 
 
 </xpsycle>
