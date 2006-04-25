@@ -132,7 +132,7 @@ int NComboBox::itemCount( )
 
 int NComboBox::selIndex( ) const
 {
-  lbox->selIndex();
+  return lbox->selIndex();
 }
 
 
