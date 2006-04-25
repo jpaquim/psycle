@@ -165,24 +165,26 @@ void MachineView::onNewConnection( MachineGUI * sender )
 
 void MachineView::onLineMousePressed( NButtonEvent * ev )
 {
-  bool found = false;
-  for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
-    MachineGUI* machineGUI = *it;
-    if (machineGUI->clipBox().intersects(line->left()+ev->x(),line->top()+ev->y())) {
-      Global::pSong()->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
-      startGUI->attachLine(line,0);
-      machineGUI->attachLine(line,1);
-      line->setMoveable(NMoveable());
-      line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
-      line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-      found = true;
-      repaint();
-      break;
+  if (ev->button() == 1) {
+    bool found = false;
+    for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+      MachineGUI* machineGUI = *it;
+      if (machineGUI->clipBox().intersects(line->left()+ev->x(),line->top()+ev->y())) {
+        Global::pSong()->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
+        startGUI->attachLine(line,0);
+        machineGUI->attachLine(line,1);
+        line->setMoveable(NMoveable());
+        line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
+        line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
+        found = true;
+        repaint();
+        break;
+      }
     }
-  }
-  if (!found) {
-    scrollArea_->removeChild(line);
-    repaint();
+    if (!found) {
+      scrollArea_->removeChild(line);
+      repaint();
+    }
   }
 }
 
