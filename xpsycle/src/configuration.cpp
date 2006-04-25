@@ -123,7 +123,8 @@ void Configuration::onConfigTagParse(const std::string & tagName )
   if (tagName == "key") {
      std::string id         = NApp::config()->getAttribValue("id");
      std::string ctrlStr    = NApp::config()->getAttribValue("ctrl");
-     int ctrl = str<int>(ctrlStr);
+     int ctrl = 0;
+     if (ctrlStr!="")  ctrl = str<int>(ctrlStr);
      int keyCode = 0;
      std::string keyCodeStr = NApp::config()->getAttribValue("keycode");
      if (keyCodeStr!="") keyCode = str<int>(keyCodeStr);
@@ -131,94 +132,94 @@ void Configuration::onConfigTagParse(const std::string & tagName )
      if (keyCharStr!="")
        keyCode = keyCharStr[0];
      if (id == "add_new_machine") {
-
+       inputHandler.changeKeyCode(cdefAddMachine,Key(ctrl,keyCode));
      } else
      if (id == "block_copy") {
-       
+       inputHandler.changeKeyCode(cdefBlockCopy,Key(ctrl,keyCode));
      } else
      if (id == "block_cut") {
-       
+       inputHandler.changeKeyCode(cdefBlockCut,Key(ctrl,keyCode));
      } else
      if (id == "block_delete") {
-       
+       inputHandler.changeKeyCode(cdefBlockDelete,Key(ctrl,keyCode));
      } else
      if (id == "block_double") {
-       
+       inputHandler.changeKeyCode(cdefBlockDouble,Key(ctrl,keyCode));
      } else
      if (id == "block_end") {
-       
+       inputHandler.changeKeyCode(cdefBlockEnd,Key(ctrl,keyCode));
      } else
      if (id == "block_halve") {
-       
+       inputHandler.changeKeyCode(cdefBlockHalve,Key(ctrl,keyCode));
      } else
      if (id == "block_interpolate") {
-       
+       inputHandler.changeKeyCode(cdefBlockInterpolate,Key(ctrl,keyCode));
      } else
      if (id == "block_mix") {
-       
+       inputHandler.changeKeyCode(cdefBlockMix,Key(ctrl,keyCode));
      } else
      if (id == "block_paste") {
-       
+       inputHandler.changeKeyCode(cdefBlockPaste,Key(ctrl,keyCode));
      } else
      if (id == "block_select_all") {
-       
+       inputHandler.changeKeyCode(cdefSelectAll,Key(ctrl,keyCode));
      } else
      if (id == "block_select_bar") {
-       
+       inputHandler.changeKeyCode(cdefSelectBar,Key(ctrl,keyCode));
      } else
      if (id == "block_select_column") {
-       
+       inputHandler.changeKeyCode(cdefSelectCol,Key(ctrl,keyCode));
      } else
      if (id == "block_set_instrument") {
-       
+       inputHandler.changeKeyCode(cdefBlockSetInstr,Key(ctrl,keyCode));
      } else
      if (id == "block_set_machine") {
-       
+       inputHandler.changeKeyCode(cdefBlockSetMachine,Key(ctrl,keyCode));
      } else
      if (id == "block_start") {
-       
+       inputHandler.changeKeyCode(cdefBlockStart,Key(ctrl,keyCode));
      } else
      if (id == "block_unmark") {
-       
+       inputHandler.changeKeyCode(cdefBlockUnMark,Key(ctrl,keyCode));
      } else
      if (id == "clear_row") {
-       
+       inputHandler.changeKeyCode(cdefRowClear,Key(ctrl,keyCode));
      } else
      if (id == "current_instrument+1") {
-       
+       inputHandler.changeKeyCode(cdefInstrInc,Key(ctrl,keyCode));
      } else
      if (id == "current_instrument-1") {
-       
+       inputHandler.changeKeyCode(cdefInstrDec,Key(ctrl,keyCode));
      } else
      if (id == "current_machine+1") {
-       
+       inputHandler.changeKeyCode(cdefMachineInc,Key(ctrl,keyCode));
      } else
      if (id == "current_machine-1") {
-       
+       inputHandler.changeKeyCode(cdefMachineDec,Key(ctrl,keyCode));
      } else
      if (id == "current_octave+1") {
-
+       inputHandler.changeKeyCode(cdefOctaveUp,Key(ctrl,keyCode));
      } else
      if (id == "current_octave-1") {
-       
+       inputHandler.changeKeyCode(cdefOctaveDn,Key(ctrl,keyCode));
      } else
      if (id == "current_pattern+1") {
-       
+       inputHandler.changeKeyCode(cdefPatternInc,Key(ctrl,keyCode));
      } else
      if (id == "current_pattern-1") {
-       
+       inputHandler.changeKeyCode(cdefPatternDec,Key(ctrl,keyCode));
      } else
      if (id == "delete_row") {
-       
+       inputHandler.changeKeyCode(cdefRowDelete,Key(ctrl,keyCode));
      } else
      if (id == "edit_instrument") {
-       
+       inputHandler.changeKeyCode(cdefEditInstr,Key(ctrl,keyCode));
      } else
      if (id == "edit_redo") {
-       
+       inputHandler.changeKeyCode(cdefRedo,Key(ctrl,keyCode));
      } else
      if (id == "edit_undo") {
-       
+       inputHandler.changeKeyCode(cdefUndo,Key(ctrl,keyCode));
      } else
      if (id.find("oct")!=std::string::npos) {
         if (id == "oct_C_0") {
@@ -328,156 +329,153 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         inputHandler.changeKeyCode(cdefKeyStop,Key(ctrl,keyCode));
      } else
      if (id == "key_stop_current") {
-
+        inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode)); // not sure or key_stop ?
      }if (id == "machine_info") {
-       
+        inputHandler.changeKeyCode(cdefInfoMachine,Key(ctrl,keyCode));
      } else
      if (id == "maximise_pattern_view") {
-       
+        inputHandler.changeKeyCode(cdefMaxPattern,Key(ctrl,keyCode));
      } else
      if (id == "mcm_midi_cc") {
-       
+        inputHandler.changeKeyCode(cdefMIDICC,Key(ctrl,keyCode));
      } else
      if (id == "nav_bottom") {
-       
+        inputHandler.changeKeyCode(cdefNavBottom,Key(ctrl,keyCode));
      } else
      if (id == "nav_down") {
-       
+        inputHandler.changeKeyCode(cdefNavDn,Key(ctrl,keyCode));
      } else
      if (id == "nav_down_16") {
-       
+        inputHandler.changeKeyCode(cdefNavPageDn,Key(ctrl,keyCode));
      } else
      if (id == "nav_left") {
-       
+        inputHandler.changeKeyCode(cdefNavLeft,Key(ctrl,keyCode));
      } else
      if (id == "nav_right") {
-       
+        inputHandler.changeKeyCode(cdefNavRight,Key(ctrl,keyCode));
      } else
      if (id == "nav_top") {
-       
+        inputHandler.changeKeyCode(cdefNavTop,Key(ctrl,keyCode));
      } else
      if (id == "nav_up") {
-       
+        inputHandler.changeKeyCode(cdefNavUp,Key(ctrl,keyCode));
      } else
      if (id == "nav_up_16") {
-       
+        inputHandler.changeKeyCode(cdefNavPageUp,Key(ctrl,keyCode));
      } else
      if (id == "next_column") {
-       
+        inputHandler.changeKeyCode(cdefColumnNext,Key(ctrl,keyCode));
      } else
      if (id == "pattern_copy") {
-       
+        inputHandler.changeKeyCode(cdefPatternCopy,Key(ctrl,keyCode));
      } else
-     if (id == "pattern_copy") {
-       
+     if (id == "pattern_cut") {
+        inputHandler.changeKeyCode(cdefPatternCut,Key(ctrl,keyCode));
      } else
      if (id == "pattern_delete") {
-       
+        inputHandler.changeKeyCode(cdefPatternDelete,Key(ctrl,keyCode));
      } else
      if (id == "pattern_info") {
-       
+        inputHandler.changeKeyCode(cdefInfoPattern,Key(ctrl,keyCode));
      } else
      if (id == "pattern_mix_paste") {
-       
+        inputHandler.changeKeyCode(cdefPatternMixPaste,Key(ctrl,keyCode));
      } else
      if (id == "pattern_paste") {
-       
+        inputHandler.changeKeyCode(cdefPatternPaste,Key(ctrl,keyCode));
      } else
      if (id == "pattern_track_mute") {
-       
+        inputHandler.changeKeyCode(cdefPatternTrackMute,Key(ctrl,keyCode));
      } else
      if (id == "pattern_track_record") {
-       
+        inputHandler.changeKeyCode(cdefPatternTrackRecord,Key(ctrl,keyCode));
      } else
      if (id == "pattern_track_solo") {
-       
+        inputHandler.changeKeyCode(cdefPatternTrackSolo,Key(ctrl,keyCode));
      } else
      if (id == "play_current_note") {
-       
+        inputHandler.changeKeyCode(cdefPlayFromPos,Key(ctrl,keyCode));
      } else
      if (id == "play_current_row") {
-       
+        inputHandler.changeKeyCode(cdefPlayRowTrack,Key(ctrl,keyCode));
      } else
      if (id == "play_sel_pattern_looped") {
-       
+        inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "play_song_current") {
-       
+        inputHandler.changeKeyCode(cdefPlayFromPos,Key(ctrl,keyCode));
      } else
      if (id == "play_song_start") {
-       
+        inputHandler.changeKeyCode(cdefPlayStart,Key(ctrl,keyCode));
      } else
      if (id == "play_song_normal") {
-       
+        inputHandler.changeKeyCode(cdefPlaySong,Key(ctrl,keyCode));
      } else
      if (id == "position+1") {
-       
+        inputHandler.changeKeyCode(cdefSongPosInc,Key(ctrl,keyCode));
      } else
      if (id == "position-1") {
-       
+        inputHandler.changeKeyCode(cdefSongPosDec,Key(ctrl,keyCode));
      } else
      if (id == "prev_column") {
-       
+        inputHandler.changeKeyCode(cdefColumnPrev,Key(ctrl,keyCode));
      } else
      if (id == "row_skip+1") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "row_skip-1") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "screen_machines") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "screen_patterns") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "select_mac_in_cursor") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "show_error_log") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "stop_playback") {
-       
+        inputHandler.changeKeyCode(cdefPlayStop,Key(ctrl,keyCode));
      } else
      if (id == "toggle_edit_mode") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "toggle_follow_song") {
-       
+        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
      } else
      if (id == "transpose_block+1") {
-       
+        inputHandler.changeKeyCode(cdefTransposeBlockInc,Key(ctrl,keyCode));
      } else
      if (id == "transpose_block+12") {
-       
+        inputHandler.changeKeyCode(cdefTransposeBlockInc12,Key(ctrl,keyCode));
      } else
      if (id == "transpose_block-1") {
-       
-     } else
-     if (id == "transpose_block-1") {
-       
+        inputHandler.changeKeyCode(cdefTransposeBlockDec,Key(ctrl,keyCode));
      } else
      if (id == "transpose_block-12") {
-       
+        inputHandler.changeKeyCode(cdefTransposeBlockDec12,Key(ctrl,keyCode));
      } else
      if (id == "transpose_channel+1") {
-       
+        inputHandler.changeKeyCode(cdefTransposeChannelInc,Key(ctrl,keyCode));
      } else
      if (id == "transpose_channel+12") {
-       
+        inputHandler.changeKeyCode(cdefTransposeChannelInc12,Key(ctrl,keyCode));
      } else
      if (id == "transpose_channel-1") {
-       
+        inputHandler.changeKeyCode(cdefTransposeChannelDec,Key(ctrl,keyCode));
      } else
      if (id == "transpose_channel-12") {
-       
+        inputHandler.changeKeyCode(cdefTransposeChannelDec12,Key(ctrl,keyCode));
      } else
      if (id == "tweak_parameter") {
-       
+        inputHandler.changeKeyCode(cdefTweakM,Key(ctrl,keyCode));
      } else
      if (id == "tweak_smooth_paramater") {
-       
+        inputHandler.changeKeyCode(cdefTweakS,Key(ctrl,keyCode));
      }
   }
 }
