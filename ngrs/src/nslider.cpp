@@ -120,6 +120,11 @@ double NSlider::pos( )
   return pos_;
 }
 
+NPanel * NSlider::slider( )
+{
+  return slider_;
+}
+
 
 
 
