@@ -38,6 +38,8 @@ namespace psycle
 					void        handoff(::GstBuffer &, ::GstPad &);
 					boost::condition condition_;
 					boost::mutex mutex_;
+					void * buffer_;
+					unsigned int current_read_buffer_, current_write_buffer_;
 			};
 		}
 	}
