@@ -37,11 +37,11 @@ dir='ver' percent='10' style='1' />
 	<font name='Suse Sans' size='8' color='0:0:0'></font>	
 </vcskin>
 <vcskin id='mitemover'>
-	<font name='Suse Sans' size='8' color='0:0:0'></font>
 	<gradient start='210:210:210' mid='180:180:180' end='200:200:200' dir='ver' percent='10' style='2' arcw='5' arch='5'>
 	</gradient>
 	<frmborder style='1' arcw = '5' arch ='5'></frmborder>	
 </vcskin>
+<vcskin id='mitemnone' />
 <vcskin id='mbtnover'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
 	<gradient start='200:200:200' mid='210:210:210' end='180:180:180' dir='ver' percent='10' style='2' arcw='5' arch='5'>

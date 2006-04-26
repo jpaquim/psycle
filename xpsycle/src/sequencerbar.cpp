@@ -160,13 +160,12 @@ void SequencerBar::init( )
                                          img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
     lenPanel->add( declen_     = new NButton( img,40,10));
     declen_->clicked.connect(this,&SequencerBar::onDecLen);
-    char buffer[30];
 
     lenSeg1 = new N7SegDisplay(2);
-      lenSeg1->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
+      lenSeg1->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
       lenSeg1->setNumber((int)(Global::pSong()->playLength / 60));
     lenSeg2 = new N7SegDisplay(2);
-      lenSeg2->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
+      lenSeg2->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
     lenSeg2->setNumber((int)(Global::pSong()->playLength % 60));
 
     lenPanel->add( lenSeg1);

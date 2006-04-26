@@ -365,7 +365,7 @@ void MainWindow::initToolBar( )
     psycleControlBar_->add(bpmDecBtnOne)->clicked.connect(this,&MainWindow::onBpmDecOne);
 
     bpmDisplay_ = new N7SegDisplay(3);
-      bpmDisplay_->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
+      bpmDisplay_->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
       bpmDisplay_->setNumber(125);
     psycleControlBar_->add(bpmDisplay_);
 
@@ -404,7 +404,7 @@ void MainWindow::initToolBar( )
     psycleControlBar_->add(lessTpbButton);
 
     tpbDisplay_ = new N7SegDisplay(2);
-      tpbDisplay_->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
+      tpbDisplay_->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
       tpbDisplay_->setNumber(4);
     psycleControlBar_->add(tpbDisplay_);
 
@@ -455,6 +455,7 @@ void MainWindow::initToolBar( )
        genCombo_->setWidth(158);
        genCombo_->setHeight(20);
        updateComboGen();
+       genCombo_->setIndex(0);
      psycleToolBar_->add(genCombo_);
 
      img = new NImage();
@@ -472,8 +473,10 @@ void MainWindow::initToolBar( )
      psycleToolBar_->add(new NButton("Gear Rack"));
      psycleToolBar_->add(new NToolBarSeparator());
      auxSelectCombo_ = new NComboBox();
-     auxSelectCombo_->setWidth(46);
+     auxSelectCombo_->setWidth(70);
      auxSelectCombo_->setHeight(20);
+     auxSelectCombo_->add(new NItem("Wave"));
+     auxSelectCombo_->setIndex(0);
      psycleToolBar_->add(auxSelectCombo_);
      insCombo_ = new NComboBox();
      insCombo_->setWidth(158);
@@ -669,8 +672,8 @@ void MainWindow::updateComboGen() {
 
      if (!found) selected++;
      if (Global::pSong()->seqBus == b) found = true;
-    }
-   filled = true;
+     filled = true;
+   }
   }
 
   genCombo_->add(new NItem("----------------------------------------------------"));
@@ -686,10 +689,10 @@ void MainWindow::updateComboGen() {
        sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName);
        genCombo_->add(new NItem(buffer));
         //cb->SetItemData(cb->GetCount()-1,b);
-     }
      if (!found) selected++;
      if (Global::pSong()->seqBus == b) found = true;
      filled = true;
+    }
   }
 
   if (!filled) {
