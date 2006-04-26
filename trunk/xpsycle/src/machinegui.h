@@ -129,11 +129,15 @@ public:
 
     virtual void onMousePress(int x, int y, int button);
 
-    virtual void repaintVUMeter();
+    void repaintVUMeter();
+
+    virtual void onMouseDoublePress(int x, int y, int button);
+
+    virtual void paint(NGraphics* g);
 
 private:
 
-   NSlider* vuSlider_;
+   NSlider* panSlider_;
    VUPanel* vuPanel_;
 
    NRect bgCoords;
@@ -148,8 +152,9 @@ private:
    NRect dGeneratorVu;
    NRect sGenerator;
 
-   virtual void onMouseDoublePress(int x, int y, int button);
-   virtual void paint(NGraphics* g);
+   NRect sGenPan;
+
+   void customSliderPaint(NSlider* sl, NGraphics* g);
 
    void setSkin();
    void onPosChanged(NSlider* sender, double value);
@@ -165,14 +170,18 @@ public:
 
     FrameMachine* frameMachine;
 
+    virtual void paint(NGraphics* g);
+
 private:
 
    NRect bgCoords;
+   NRect sEffectPan;
    NPoint dNameCoords;
    NSlider* panSlider_;
 
    virtual void onMouseDoublePress(int x, int y, int button);
-   virtual void paint(NGraphics* g);
+
+   void customSliderPaint(NSlider* sl, NGraphics* g);
 
    void setSkin();
    void onPosChanged(NSlider* sender, double value);

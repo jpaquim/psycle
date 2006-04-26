@@ -3,6 +3,7 @@
 <path id='icondir' src='~/xpsycle/icons/' />
 <path id='plugindir'
 src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
+<path id='prsdir' src='~/.xpsycle/prs/'></path>
 <vcskin id ='seqbar'>
   <font name = "Suse sans" size = '8' color = '100:100:100'/>
 </vcskin>	

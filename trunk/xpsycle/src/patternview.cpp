@@ -1240,6 +1240,7 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
 void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
 {
   deleteBlock();
+  repaint();
 }
 
 void PatternView::PatternDraw::onPopupBlockMixPaste( NButtonEvent * ev )
