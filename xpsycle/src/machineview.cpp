@@ -193,12 +193,15 @@ void MachineView::onWireDelete( WireDlg * dlg )
   Machine* _pSrcMachine = dlg->pSrcMachine();
   Machine* _pDstMachine = dlg->pDstMachine();
 
-  _pSrcMachine->_connection[dlg->pDstMachine()->_macIndex] = false;
-  _pSrcMachine->_outputMachines[dlg->pDstMachine()->_macIndex] = -1;
+  int wireIndex    = dlg->pSrcMachine()->_macIndex;
+  int dstWireIndex = dlg->pDstMachine()->_macIndex;
+
+  _pSrcMachine->_connection[wireIndex] = false;
+  _pSrcMachine->_outputMachines[wireIndex] = -1;
   _pSrcMachine->_numOutputs--;
 
-  _pDstMachine->_inputCon[dlg->pSrcMachine()->_macIndex] = false;
-  _pDstMachine->_inputMachines[dlg->pSrcMachine()->_macIndex]=-1;
+  _pDstMachine->_inputCon[dstWireIndex] = false;
+  _pDstMachine->_inputMachines[dstWireIndex]=-1;
   _pDstMachine->_numInputs--;
 
   MachineGUI* from = this->findByMachine(dlg->pSrcMachine());
