@@ -223,8 +223,8 @@ void GeneratorGUI::onPosChanged(NSlider* sender, double value )
 
 void GeneratorGUI::onMousePress( int x, int y, int button )
 {
+  MachineGUI::onMousePress(x,y,button);
   if (button==1) {
-    MachineGUI::onMousePress(x,y,button);
       if (dMuteCoords.intersects(x,y)) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
