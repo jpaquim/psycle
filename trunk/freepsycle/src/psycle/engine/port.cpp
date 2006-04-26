@@ -79,7 +79,7 @@ namespace psycle
 	
 		void port::buffer(typenames::buffer * const buffer)
 		{
-			if(loggers::trace()())
+			if(false && loggers::trace()())
 			{
 				std::ostringstream s;
 				s << "assigning buffer " << buffer << " to port " << qualified_name();
@@ -87,7 +87,7 @@ namespace psycle
 			}
 			if(this->buffer_ == buffer)
 			{
-				if(loggers::trace()())
+				if(false && loggers::trace()())
 				{
 					std::ostringstream s;
 					s << "already assigned the same buffer";

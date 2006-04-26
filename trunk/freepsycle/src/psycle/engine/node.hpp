@@ -161,7 +161,7 @@ namespace psycle
 	{
 		void node::process_first() throw(std::exception)
 		{
-			if(loggers::trace()())
+			if(false && loggers::trace()())
 			{
 				std::ostringstream s;
 				s << qualified_name() << " processing node first input";
@@ -172,7 +172,7 @@ namespace psycle
 
 		void node::process() throw(std::exception)
 		{
-			if(loggers::trace()())
+			if(false && loggers::trace()())
 			{
 				std::ostringstream s;
 				s << qualified_name() << " processing node";
@@ -183,7 +183,7 @@ namespace psycle
 
 		void node::reset()
 		{
-			if(loggers::trace()())
+			if(false && loggers::trace()())
 			{
 				std::ostringstream s;
 				s << qualified_name() << " resetting node";

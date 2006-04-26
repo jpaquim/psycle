@@ -315,7 +315,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 						allocate();
 						while(!stop_requested())
 						{
-							loggers::trace()("process loop", UNIVERSALIS__COMPILER__LOCATION);
+							//loggers::trace()("process loop", UNIVERSALIS__COMPILER__LOCATION);
 							boost::mutex::scoped_lock lock(graph().underlying().mutex());
 							for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i)
 							{
@@ -342,10 +342,10 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 				{
 					if(node.processed()) return;
 					node.mark_as_processed();
-					if(loggers::trace()())
+					if(false && loggers::trace()())
 					{
 						std::ostringstream s;
-						s << "scheduling " << node.underlying().qualified_name() << " ###################";
+						s << "scheduling " << node.underlying().qualified_name();
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					{
@@ -377,7 +377,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 									node.multiple_input_port()->output_ports().size() == 1 // We have a single input, so, this is the identity transform, i.e., the buffer will not be modified.
 								)
 								{
-									if(loggers::trace()())
+									if(false && loggers::trace()())
 									{
 										std::ostringstream s;
 										s << node.underlying().qualified_name() << ": copying pointer of input buffer to pointer of output buffer";
@@ -391,7 +391,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 									// get buffer for output port
 									set_buffer_for_output_port(output_port, buffer_pool_instance()());
 									// copy content of input buffer to output buffer
-									if(loggers::trace()())
+									if(false && loggers::trace()())
 									{
 										std::ostringstream s;
 										s << node.underlying().qualified_name() << ": copying content of input buffer to output buffer";
@@ -429,10 +429,10 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 						ports::output & output_port(**i);
 						check_whether_to_recycle_buffer_in_the_pool(output_port);
 					}
-					if(loggers::trace()())
+					if(false && loggers::trace()())
 					{
 						std::ostringstream s;
-						s << "scheduling of " << node.underlying().qualified_name() << " done ###################";
+						s << "scheduling of " << node.underlying().qualified_name() << " done";
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 				}
@@ -442,10 +442,10 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 				{
 					process(output_port.parent());
 					assert(&output_port.buffer());
-					if(loggers::trace()())
+					if(false && loggers::trace()())
 					{
 						std::ostringstream s;
-						s << "back to scheduling of input port " << input_port.underlying().qualified_name() << " ###################";
+						s << "back to scheduling of input port " << input_port.underlying().qualified_name();
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					input_port.underlying().buffer(&output_port.underlying().buffer());
@@ -483,7 +483,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 				/// if not recycle it in the pool.
 				void inline scheduler::check_whether_to_recycle_buffer_in_the_pool(ports::output & output_port)
 				{
-					if(loggers::trace()())
+					if(false && loggers::trace()())
 					{
 						std::ostringstream s;
 						s

@@ -57,14 +57,14 @@ namespace psycle
 					::IDirectSoundBuffer mutable * buffer_;
 					::IDirectSoundBuffer inline & buffer() throw() { assert(buffer_); return *buffer_; }
 					::IDirectSoundBuffer inline & buffer() const throw() { assert(buffer_); return *buffer_; }
-					int bits_per_sample_;
+					unsigned char bits_per_sample_;
 					bool allocate_buffer() throw(universalis::operating_system::exception);
 					bool write_primary_;
-					int samples_per_buffer_;
-					int buffers_;
-					unsigned long int total_buffering_size_;
-					unsigned long int bytes_per_buffer_;
-					int current_buffer_;
+					unsigned int samples_per_buffer_;
+					unsigned int buffers_;
+					unsigned int total_buffering_size_;
+					unsigned int bytes_per_buffer_;
+					unsigned int current_buffer_;
 					universalis::compiler::numeric<16>::signed_int last_sample_;
 			};
 		}

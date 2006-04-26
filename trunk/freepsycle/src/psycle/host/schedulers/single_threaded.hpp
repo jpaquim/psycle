@@ -203,7 +203,7 @@ namespace psycle
 								/// gets a buffer from the pool.
 								buffer inline & operator()()
 								{
-									if(loggers::trace()())
+									if(false && loggers::trace()())
 									{
 										std::ostringstream s;
 										s << "buffer requested, pool size before: " << size();
@@ -228,7 +228,7 @@ namespace psycle
 									assert("reference count is zero: " && !buffer);
 									assert(buffer.size() >= this->channels_);
 									assert(buffer.events() >= this->events_);
-									if(loggers::trace()())
+									if(false && loggers::trace()())
 									{
 										std::ostringstream s;
 										s << "buffer " << &buffer << " given back, pool size before: " << size();

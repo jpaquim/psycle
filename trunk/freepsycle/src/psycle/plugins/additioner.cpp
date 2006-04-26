@@ -18,8 +18,8 @@ namespace psycle
 			bipolar_filter::do_process();
 			engine::buffer & in = multiple_input_port()->buffer();
 			engine::buffer & out = output_ports()[0]->buffer();
-			for(int channel(0) ; channel < in.size() ; ++channel)
-				for(int event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event)
+			for(unsigned int channel(0) ; channel < in.size() ; ++channel)
+				for(unsigned int event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event)
 					out[channel][event].sample() += in[channel][event].sample();
 		}
 	}

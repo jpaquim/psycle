@@ -24,9 +24,10 @@ namespace psycle
 				unsigned char const channels(1);
 				unsigned char const bits_per_sample(16);
 				bool const samples_signed(true);
-				typedef std::int16_t numeric_type;
-				std::size_t const buffer_size(16384);
-				unsigned int const buffer_count(3);
+				typedef std::int16_t output_sample_type;
+				std::size_t const bytes_per_buffer(16384);
+				unsigned int const samples_per_buffer(bytes_per_buffer / sizeof(output_sample_type));
+				unsigned int const buffers(3);
 			}
 
 			PSYCLE__PLUGINS__NODE_INSTANCIATOR(gstreamer)
@@ -38,7 +39,9 @@ namespace psycle
 				source_(),
 				sink_(),
 				caps_(),
-				caps_set_()
+				caps_set_(),
+				buffer_(),
+				current_read_buffer_(), current_write_buffer_()
 			{
 				engine::ports::inputs::single::create(*this, "in");
 				engine::ports::inputs::single::create(*this, "amplification", boost::cref(1));
@@ -221,8 +224,8 @@ namespace psycle
 						(
 							G_OBJECT(source_),
 							"data", /*FAKE_SRC_DATA_SUBBUFFER*/ 2, // data allocation method
-							"parentsize", buffer_size * buffer_count,
-							"sizemax", buffer_size,
+							"parentsize", bytes_per_buffer * buffers,
+							"sizemax", bytes_per_buffer,
 							"sizetype", /*FAKE_SRC_SIZETYPE_FIXED*/ 2, // fixed to sizemax
 							//"filltype", /*FAKE_SRC_FILLTYPE_RANDOM*/ 3,
 							"filltype", /*FAKE_SRC_FILLTYPE_NOTHING*/ 1,
@@ -231,6 +234,8 @@ namespace psycle
 							"signal-handoffs", true,
 							0
 						);
+
+						buffer_ = new std::int8_t[bytes_per_buffer * buffers];
 
 						// register our callback to the handoff signal of the fakesrc element
 						if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw engine::exceptions::runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
@@ -348,15 +353,17 @@ namespace psycle
 					catch(...)
 					{
 						::gst_caps_unref(caps_); caps_ = 0;
+						delete buffer_; buffer_ = 0;
 						throw;
 					}
+					::gst_element_set_state(pipeline_, ::GST_STATE_READY);
+					wait_for_state(*pipeline_, ::GST_STATE_READY);
 				}
 				catch(...)
 				{
 					::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
 					throw;
 				}
-				//wait_for_state(*pipeline_, ::GST_STATE_READY);
 			}
 
 			bool gstreamer::opened() const
@@ -367,8 +374,9 @@ namespace psycle
 			void gstreamer::do_start() throw(engine::exception)
 			{
 				resource::do_start();
+				current_read_buffer_ = current_write_buffer_;
 				::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING);
-//				wait_for_state(*pipeline_, ::GST_STATE_PLAYING);
+				wait_for_state(*pipeline_, ::GST_STATE_PLAYING);
 			}
 		
 			bool gstreamer::started() const
@@ -389,40 +397,75 @@ namespace psycle
 					::gst_buffer_set_caps(&buffer, caps_);
 					caps_set_ = true;
 				}
-				std::size_t const size(GST_BUFFER_SIZE(&buffer));
-				if(false && loggers::trace())
+				if(loggers::trace())
 				{
-					std::ostringstream s; s << "buffer size: " << size;
+					std::ostringstream s; s << "handoff " << current_read_buffer_;
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
-				numeric_type * data(reinterpret_cast<numeric_type*>(GST_BUFFER_DATA(&buffer)));
-
-				boost::mutex::scoped_lock lock(mutex_);
-				loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
-				condition_.wait(lock);
-
-				for(std::size_t i(0) ; i < size / sizeof *data ; ++i)
 				{
-					static double t(0);
-					static double a(1);
-					*data++ = static_cast<numeric_type>(std::numeric_limits<numeric_type>::min() * a * std::sin(t));
-					static double s(0.04);
-					t += s;
-					s *= 1.000005;
-					a /= 1.0002;
-					if(a < 0.1) a = 1;
+					unsigned int current_write_buffer;
+					{
+						boost::mutex::scoped_lock lock(mutex_);
+						current_write_buffer = current_write_buffer_;
+					}
+					if(current_read_buffer_ == current_write_buffer)
+					{
+						loggers::warning()("underrun");
+						//loggers::trace()("notifying condition", UNIVERSALIS__COMPILER__LOCATION);
+						condition_.notify_one();
+						return;
+					}
 				}
-
+				{
+					output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
+					if(loggers::trace())
+					{
+						std::size_t const size(GST_BUFFER_SIZE(&buffer));
+						std::ostringstream s; s << "buffer size: " << size << ", data address: " << out;
+						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+					{
+						output_sample_type * in(reinterpret_cast<output_sample_type*>(buffer_) + current_read_buffer_ * samples_per_buffer);
+						for(unsigned int event(0) ; event < samples_per_buffer ; ++event)
+						{
+							*out++ = *in++; // just use std::memcpy
+						}
+					}
+				}
+				{
+					boost::mutex::scoped_lock lock(mutex_);
+					++current_read_buffer_ %= buffers;
+				}
+				//loggers::trace()("notifying condition", UNIVERSALIS__COMPILER__LOCATION);
 				condition_.notify_one();
 			}
 
 			void gstreamer::do_process() throw(engine::exception)
 			{
-				condition_.notify_one();
-
-				boost::mutex::scoped_lock lock(mutex_);
-				loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
-				::sleep(1);//condition_.wait(lock);
+				if(loggers::trace())
+				{
+					std::ostringstream s; s << "process " << current_write_buffer_;
+					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				}
+				{
+					engine::buffer::channel & in(single_input_ports()[0]->buffer()[0]);
+					assert(samples_per_buffer == in.size());
+					output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_buffer_ * samples_per_buffer);
+					for(unsigned int event(0) ; event < in.size(); ++event)
+					{
+						out[event] = static_cast<output_sample_type>(std::numeric_limits<output_sample_type>::min() * in[event].sample());
+					}
+				}
+				{
+					unsigned int const next_write_buffer((current_write_buffer_ + 1) % buffers);
+					boost::mutex::scoped_lock lock(mutex_);
+					if(current_read_buffer_ == next_write_buffer)
+					{
+						//loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
+						condition_.wait(lock);
+					}
+					current_write_buffer_ = next_write_buffer;
+				}
 			}
 			
 			void gstreamer::do_stop() throw(engine::exception)
@@ -450,6 +493,7 @@ namespace psycle
 						::gst_deinit();
 					}
 				}
+				delete buffer_; buffer_ = 0;
 				resource::do_close();
 			}
 			
