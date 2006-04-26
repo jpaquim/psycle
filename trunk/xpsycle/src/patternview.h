@@ -144,11 +144,6 @@ class PatternView : public NPanel
     void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
     void drawSelBg(NGraphics* g, const NSize & selArea);
 
-
-    std::map<int,int> keyMap_;
-    void initKeyMap();
-    int charToNote(char c);
-
     NPoint3D intersectCell(int x, int y);
     void clearOldSelection();
 
@@ -221,6 +216,8 @@ public:
     NScrollBar* hScrBar();
 
     void PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine);
+    void StopNote(int note,bool bTranspose=true,Machine*pMachine=NULL);
+
     void noteOffAny();
     void clearCursorPos();
 

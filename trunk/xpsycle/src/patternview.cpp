@@ -630,7 +630,7 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : dx_(0),dy_
     NMenuItem* blockPatPropItem_ = new NMenuItem("Pattern properties");
       blockPatPropItem_->click.connect(this,&PatternView::PatternDraw::onPopupPattern);
     editPopup_->add(blockPatPropItem_);
-    initKeyMap();
+
     patDlg = new PatDlg();
 }
 
@@ -1022,8 +1022,11 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                  if (pView->cursor().z()==0) {
                    note += pView->editOctave()*12;
                    *patOffset = note;
-                   Machine* tmac = Global::pSong()->_pMachine[0];
-                   //pView->PlayNote(24,127,false,tmac);
+
+                   Machine *tmac = Global::pSong()->_pMachine[Global::pSong()->seqBus];
+                   if (tmac) {
+                      pView->PlayNote(note,127,false,tmac); 
+                   }
 
                    int startLine  = dy_ / pView->rowHeight();
                    int lineCount  = clientHeight() / pView->rowHeight();
@@ -1074,63 +1077,6 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
      }}}
      break;
   }
-}
-
-void PatternView::PatternDraw::initKeyMap( )
-{
-  // octave 0
-
-  keyMap_[cdefKeyC_0] = 0;
-  keyMap_[cdefKeyCS0] = 1;
-  keyMap_[cdefKeyD_0] = 2;
-  keyMap_[cdefKeyDS0] = 3;
-  keyMap_[cdefKeyE_0] = 4;
-  keyMap_[cdefKeyF_0] = 5;
-  keyMap_[cdefKeyFS0] = 6;
-  keyMap_[cdefKeyG_0] = 7;
-  keyMap_[cdefKeyGS0] = 8;
-  keyMap_[cdefKeyA_0] = 9;
-  keyMap_[cdefKeyAS0] = 10;
-  keyMap_[cdefKeyB_0] = 11;
-
-  // octave 1
-
-  keyMap_[cdefKeyC_1] = 0  + 12;
-  keyMap_[cdefKeyCS1] = 1  + 12;
-  keyMap_[cdefKeyD_1] = 2  + 12;
-  keyMap_[cdefKeyDS1] = 3  + 12;
-  keyMap_[cdefKeyE_1] = 4  + 12;
-  keyMap_[cdefKeyF_1] = 5  + 12;
-  keyMap_[cdefKeyFS1] = 6  + 12;
-  keyMap_[cdefKeyG_1] = 7  + 12;
-  keyMap_[cdefKeyGS1] = 8  + 12;
-  keyMap_[cdefKeyA_1] = 9  + 12;
-  keyMap_[cdefKeyAS1] = 10 + 12;
-  keyMap_[cdefKeyB_1] = 11 + 12;
-
-  // octave 2
-
-  keyMap_[cdefKeyC_2] = 0 + 24;
-  keyMap_[cdefKeyCS2] = 1 + 24;
-  keyMap_[cdefKeyD_2] = 2 + 24;
-  keyMap_[cdefKeyDS2] = 3 + 24;
-  keyMap_[cdefKeyE_2] = 4 + 24;
-
-  // special
-
-  keyMap_[cdefKeyCS0] = cdefKeyStop;
-}
-
-int PatternView::PatternDraw::charToNote( char c )
-{
-  std::map<int,int>::iterator itr = keyMap_.begin();
-  if ( (itr = keyMap_.find(c)) == keyMap_.end() )
-       {
-          // no mapped Key found
-       } else {
-          return itr->second;
-       }
-  return 255;
 }
 
 
@@ -1732,6 +1678,11 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
 
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
   if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) endSel();
+
+  if (pView->cursor().z()==0) {
+    int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
+    pView->StopNote(outnote);
+  }
 }
 
 void PatternView::copyBlock( bool cutit )
@@ -1775,6 +1726,44 @@ void PatternView::setPatternStep( int step )
 
 int PatternView::patternStep() const {
   return patternStep_;
+}
+
+void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
+{
+  if (!(note>=0 && note < 128)) return;
+
+  // octave offset
+  if(note<120) {
+     if(bTranspose) note+=Global::pSong()->currentOctave*12;
+     if (note > 119) note = 119;
+  }
+
+  if(pMachine==NULL) {
+      int mgn = Global::pSong()->seqBus;
+
+      if (mgn < MAX_MACHINES) {
+         pMachine = Global::pSong()->_pMachine[mgn];
+      }
+  }
+
+  for(int i=0;i<Global::pSong()->SONGTRACKS;i++) {
+     if(notetrack[i]==note) {
+       notetrack[i]=120;
+       // build entry
+       PatternEntry entry;
+       entry._note = 120;
+       entry._inst = Global::pSong()->auxcolSelected;
+       entry._mach = Global::pSong()->seqBus;
+       entry._cmd = 0;
+       entry._parameter = 0;
+
+       // play it
+
+       if (pMachine) {
+          pMachine->Tick(i,&entry);
+       }
+     }
+   }
 }
 
 
