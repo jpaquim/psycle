@@ -338,9 +338,9 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
 
 EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 {
-  vuSlider_ = new NSlider();
-    vuSlider_->posChanged.connect(this,&EffektGUI::onPosChanged);
-  add(vuSlider_);
+  panSlider_ = new NSlider();
+    panSlider_->posChanged.connect(this,&EffektGUI::onPosChanged);
+  add(panSlider_);
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
@@ -364,10 +364,10 @@ void EffektGUI::setSkin( )
   setWidth(bgCoords.width());
   setTransparent(true);
 
-  vuSlider_->setPosition(45,23,96,10);
-  vuSlider_->setOrientation(nHorizontal);
-  vuSlider_->setRange(0,127);
-  vuSlider_->setPos( pMac()->_panning );
+  panSlider_->setPosition(45,23,96,10);
+  panSlider_->setOrientation(nHorizontal);
+  panSlider_->setRange(0,127);
+  panSlider_->setPos( pMac()->_panning );
 
 }
 
@@ -375,8 +375,7 @@ void EffektGUI::setSkin( )
 void EffektGUI::onPosChanged(NSlider* sender, double value )
 {
   if (pMac()) {
-    std::cout << vuSlider_->pos() << std::endl;
-    pMac()->SetPan( (int) vuSlider_->pos());
+    pMac()->SetPan( (int) panSlider_->pos());
   }
 }
 

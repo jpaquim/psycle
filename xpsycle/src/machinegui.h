@@ -169,7 +169,7 @@ private:
 
    NRect bgCoords;
    NPoint dNameCoords;
-   NSlider* vuSlider_;
+   NSlider* panSlider_;
 
    virtual void onMouseDoublePress(int x, int y, int button);
    virtual void paint(NGraphics* g);
