@@ -56,6 +56,11 @@ NSlider::Slider::~ Slider( )
 {
 }
 
+void NSlider::Slider::paint( NGraphics * g )
+{
+  sl_->customSliderPaint.emit(sl_,g);
+}
+
 void NSlider::Slider::onMove( const NMoveEvent & moveEvent )
 {
   sl_->onSliderMove();
@@ -124,6 +129,8 @@ NPanel * NSlider::slider( )
 {
   return slider_;
 }
+
+
 
 
 

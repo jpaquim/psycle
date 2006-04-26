@@ -34,6 +34,7 @@ class NSlider : public NPanel
       ~Slider();
 
       virtual void onMove(const NMoveEvent & moveEvent);
+      virtual void paint(NGraphics* g);
 
   private:
 
@@ -46,6 +47,7 @@ public:
     ~NSlider();
 
     sigslot::signal2<NSlider*,double> posChanged;
+    sigslot::signal2<NSlider*, NGraphics*> customSliderPaint;
 
     void resize();
     void setOrientation(int orientation);
