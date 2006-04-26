@@ -30,6 +30,7 @@
 #include <napp.h>
 #include <iostream>
 #include <cstdlib>
+#include <nfile.h>
 
 using namespace std;
 
@@ -45,6 +46,7 @@ int f2i(double q) { return ((int)q)&2047; }
 
 int main(int argc, char *argv[])
 {
+
 
     NApp app;
     Global gl;
