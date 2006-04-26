@@ -142,8 +142,10 @@ void NWindow::onMousePress( int x, int y, int button )
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
   if (obj!=NULL) {
     if (obj!=pane_ && (mapped())) {
-      dragBase_ = obj;
-      initDrag(obj,x,y);
+      if (button==1) {
+        dragBase_ = obj;
+        initDrag(obj,x,y);
+      }
      }
     selectedBase_ = dragBase_;
     obj->onMousePress( x - obj->absoluteSpacingLeft() +
@@ -154,7 +156,7 @@ void NWindow::onMousePress( int x, int y, int button )
 void NWindow::onMousePressed( int x, int y, int button )
 {
   if (dragBase_!=0) dragBase_->onMousePressed( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop(), button);
-  endDrag(dragBase_,x,y);
+  if (button==1) endDrag(dragBase_,x,y);
   dragBase_ = 0;
   if (selectedBase_!=0) selectedBase_->onFocus();
 }
