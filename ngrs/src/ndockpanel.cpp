@@ -29,15 +29,12 @@
 
 /* XPM */
 const char * winundock_xpm[] = {
-"16 13 2 1",
+"16 10 2 1",
 " 	c None",
 ".	c #003063",
 "................",
 ".              .",
-".              .",
 "................",
-".              .",
-".              .",
 ".              .",
 ".          ... .",
 ".           .. .",
@@ -48,15 +45,12 @@ const char * winundock_xpm[] = {
 
 
 const char * windock_xpm[] = {
-"16 13 2 1",
+"16 10 2 1",
 " 	c None",
 ".	c #003063",
 "................",
 ".              .",
-".              .",
 "................",
-".              .",
-".              .",
 ".              .",
 ".            . .",
 ".         . .  .",
@@ -92,7 +86,7 @@ void NDockPanel::init( )
     undockBmp.createFromXpmData(winundock_xpm);
     dockImg = new NImage();
       dockImg->setSharedBitmap(&undockBmp);
-      dockImg->setPreferredSize(20,17);
+      dockImg->setPreferredSize(20,10);
     NButton* unCoupleBtn = new NButton(dockImg);
       unCoupleBtn->clicked.connect(this,&NDockPanel::onUndockWindow);
     dockBar_->add(unCoupleBtn);
