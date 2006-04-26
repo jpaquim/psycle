@@ -363,7 +363,7 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
   if (identifier == "") return; else
   if ( (xmlSkin = findSkin(identifier)) && (xmlSkin!=0)) {
     skin->font = xmlSkin->font;
-    skin->useParentFont = false;
+    skin->useParentFont = xmlSkin->useParentFont;
     skin->bgColor = xmlSkin->bgColor;
     skin->useParentBgColor = xmlSkin->useParentBgColor;
     skin->gradStartColor  = xmlSkin->gradStartColor;

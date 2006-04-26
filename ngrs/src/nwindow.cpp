@@ -388,7 +388,7 @@ void NWindow::pack( )
 {
   if (pane()->layout()!=NULL) {
     pane()->layout()->align(pane());
-    int pW = std::max( pane()->layout()->preferredWidth(pane()) + 
+    int pW = std::max( pane()->layout()->preferredWidth(pane()) +
                        pane()->spacing().left() + pane()->spacing().right() ,10);
     int pH = std::max( pane()->layout()->preferredHeight(pane()) +
                        pane()->spacing().top() + pane()->spacing().bottom()
