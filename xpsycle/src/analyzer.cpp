@@ -38,7 +38,7 @@ Analyzer::Analyzer()
   setBackground(NColor(0,0,0));
 
   timer.setIntervalTime(100);
-  timer.enableTimer();
+//  timer.enableTimer();
   timer.timerEvent.connect(this,&Analyzer::onTimer);
 }
 

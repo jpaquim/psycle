@@ -96,6 +96,8 @@ NewMachine::NewMachine()
     tabBook_->addPage(internalPage_,"Internal");
   pane()->add(tabBook_);
 
+
+  tabBook_->setActivePage(1);
 }
 
 

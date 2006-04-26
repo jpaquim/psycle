@@ -223,45 +223,46 @@ void GeneratorGUI::onPosChanged(NSlider* sender, double value )
 
 void GeneratorGUI::onMousePress( int x, int y, int button )
 {
-  MachineGUI::onMousePress(x,y,button);
-
-  if (dMuteCoords.intersects(x,y)) { // mute or unmute
-     pMac()->_mute = !pMac()->_mute;
-     if (pMac()->_mute) {
-       pMac()->_volumeCounter=0.0f;
-       pMac()->_volumeDisplay=0;
-       if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-          Global::pSong()->machineSoloed = -1;
+  if (button==1) {
+    MachineGUI::onMousePress(x,y,button);
+      if (dMuteCoords.intersects(x,y)) { // mute or unmute
+        pMac()->_mute = !pMac()->_mute;
+        if (pMac()->_mute) {
+         pMac()->_volumeCounter=0.0f;
+         pMac()->_volumeDisplay=0;
+          if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
+            Global::pSong()->machineSoloed = -1;
+         }
        }
-     }
-    repaint();
-  } else
-  if (dSoloCoords.intersects(x,y)) { // solo or unsolo
-    if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-      Global::pSong()->machineSoloed = -1;
-      for ( int i=0;i<MAX_MACHINES;i++ ) {
-        if ( Global::pSong()->_pMachine[i] ) {
-          if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-             Global::pSong()->_pMachine[i]->_mute = false;
-          }
-        }
-      }
-   } else {
-      for ( int i=0;i<MAX_MACHINES;i++ ) {
-       if ( Global::pSong()->_pMachine[i] )
-       {
-        if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
-        {
-          Global::pSong()->_pMachine[i]->_mute = true;
-          Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
-          Global::pSong()->_pMachine[i]->_volumeDisplay=0;
-        }
+       repaint();
+     } else
+      if (dSoloCoords.intersects(x,y)) { // solo or unsolo
+        if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
+         Global::pSong()->machineSoloed = -1;
+         for ( int i=0;i<MAX_MACHINES;i++ ) {
+           if ( Global::pSong()->_pMachine[i] ) {
+             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+               Global::pSong()->_pMachine[i]->_mute = false;
+             }
+           }
+         }
+       } else {
+          for ( int i=0;i<MAX_MACHINES;i++ ) {
+          if ( Global::pSong()->_pMachine[i] )
+          {
+            if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
+            {
+               Global::pSong()->_pMachine[i]->_mute = true;
+               Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
+               Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+             }
+           }
+         }
+         pMac()->_mute = false;
+         Global::pSong()->machineSoloed = pMac()->_macIndex;
        }
-   }
-   pMac()->_mute = false;
-   Global::pSong()->machineSoloed = pMac()->_macIndex;
-   }
-   repaint();
+      repaint();
+    }
   }
 }
 
@@ -405,17 +406,23 @@ void MachineGUI::onMouseDoublePress( int x, int y, int button )
 
 void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
 {
-  frameMachine->setVisible(true);
+  if (button==1) {
+     frameMachine->setVisible(true);
+  }
 }
 
 void MasterGUI::onMouseDoublePress( int x, int y, int button )
 {
-  masterDlg->setVisible(true);
+  if (button==1) {
+    masterDlg->setVisible(true);
+  }
 }
 
 void EffektGUI::onMouseDoublePress( int x, int y, int button )
 {
-  frameMachine->setVisible(true);
+  if (button==1) {
+    frameMachine->setVisible(true); 
+  }
 }
 
 void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
