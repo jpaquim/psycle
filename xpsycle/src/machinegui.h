@@ -87,13 +87,19 @@ public:
     ~MasterGUI();
 
 
+    virtual void onMousePress(int x, int y, int button);
+    virtual void onMouseDoublePress(int x, int y, int button);
+
+    virtual void paint(NGraphics* g);
+
 private:
 
    MasterDlg* masterDlg;
    NRect bgCoords;
-
-   virtual void onMouseDoublePress(int x, int y, int button);
-   virtual void paint(NGraphics* g);
+   NRect muteCoords;
+   NRect soloCoords;
+   NRect dSoloCoords;
+   NRect dMuteCoords;
 
    void setSkin();
 };
@@ -103,7 +109,7 @@ class GeneratorGUI : public MachineGUI
 {
 public:
 
-    class VUPanel : NPanel {
+    class VUPanel : public NPanel {
 
       friend class GeneratorGUI;
 
@@ -129,7 +135,7 @@ public:
 
     virtual void onMousePress(int x, int y, int button);
 
-    void repaintVUMeter();
+    virtual void repaintVUMeter();
 
     virtual void onMouseDoublePress(int x, int y, int button);
 
@@ -164,13 +170,37 @@ private:
 class EffektGUI : public MachineGUI
 {
 public:
+
+   class VUPanel : public NPanel {
+
+      friend class EffectGUI;
+
+      public:
+         VUPanel::VUPanel(EffektGUI* pGui) {
+           pGui_ = pGui;
+         };
+
+        virtual void paint(NGraphics* g);
+
+      private:
+
+       EffektGUI* pGui_;
+
+    };
+
+
     EffektGUI(Machine* mac);
 
     ~EffektGUI();
 
     FrameMachine* frameMachine;
 
+    virtual void onMousePress(int x, int y, int button);
+    virtual void onMouseDoublePress(int x, int y, int button);
+
     virtual void paint(NGraphics* g);
+
+    virtual void repaintVUMeter();
 
 private:
 
@@ -179,7 +209,18 @@ private:
    NPoint dNameCoords;
    NSlider* panSlider_;
 
-   virtual void onMouseDoublePress(int x, int y, int button);
+   NRect muteCoords;
+   NRect soloCoords;
+   NRect dSoloCoords;
+   NRect dMuteCoords;
+
+   NRect sGeneratorVuPeak;
+   NRect sGeneratorVu0;
+   NRect dGeneratorVu;
+   NRect sGenerator;
+
+
+   VUPanel* vuPanel_;
 
    void customSliderPaint(NSlider* sl, NGraphics* g);
 

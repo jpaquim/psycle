@@ -145,14 +145,68 @@ void MasterGUI::setSkin( )
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
   setBackground(NColor(0,0,200));
+
+  muteCoords.setPosition(0,145,15,14);
+  dMuteCoords.setPosition(11,5,15,14);
+  soloCoords.setPosition(15,145,15,14);
+  dSoloCoords.setPosition(26,5,15,14);
 }
 
 void MasterGUI::paint( NGraphics * g )
 {
   g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), pixmap, bgCoords.left(), bgCoords.top());
+
+  if (pMac()->_mute)
+    g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), pixmap, muteCoords.left(), muteCoords.top());
+
+  if (Global::pSong()->machineSoloed == pMac()->_macIndex)
+    g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), pixmap, soloCoords.left(), soloCoords.top());
 }
 
-
+void MasterGUI::onMousePress( int x, int y, int button )
+{
+  MachineGUI::onMousePress(x,y,button);
+  if (button==1) {
+      if (dMuteCoords.intersects(x,y)) { // mute or unmute
+        pMac()->_mute = !pMac()->_mute;
+        if (pMac()->_mute) {
+         pMac()->_volumeCounter=0.0f;
+         pMac()->_volumeDisplay=0;
+          if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
+            Global::pSong()->machineSoloed = -1;
+         }
+       }
+       repaint();
+     } else
+      if (dSoloCoords.intersects(x,y)) { // solo or unsolo
+        if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
+         Global::pSong()->machineSoloed = -1;
+         for ( int i=0;i<MAX_MACHINES;i++ ) {
+           if ( Global::pSong()->_pMachine[i] ) {
+             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+               Global::pSong()->_pMachine[i]->_mute = false;
+             }
+           }
+         }
+       } else {
+          for ( int i=0;i<MAX_MACHINES;i++ ) {
+          if ( Global::pSong()->_pMachine[i] )
+          {
+            if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
+            {
+               Global::pSong()->_pMachine[i]->_mute = true;
+               Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
+               Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+             }
+           }
+         }
+         pMac()->_mute = false;
+         Global::pSong()->machineSoloed = pMac()->_macIndex;
+       }
+      repaint();
+    }
+  }
+}
 
 
 
@@ -357,6 +411,11 @@ EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
+
+  vuPanel_ = new VUPanel(this);
+    vuPanel_->setPosition(dGeneratorVu.left(),dGeneratorVu.top(),dGeneratorVu.width(),dGeneratorVu.height());
+    vuPanel_->setTransparent(false);
+  add(vuPanel_);
 }
 
 EffektGUI::~ EffektGUI( )
@@ -367,6 +426,12 @@ void EffektGUI::paint( NGraphics * g )
 {
   g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), pixmap, bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), pMac()->_editName);
+
+  if (pMac()->_mute)
+    g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), pixmap, muteCoords.left(), muteCoords.top());
+
+  if (Global::pSong()->machineSoloed == pMac()->_macIndex)
+    g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), pixmap, soloCoords.left(), soloCoords.top());
 }
 
 void EffektGUI::setSkin( )
@@ -374,6 +439,11 @@ void EffektGUI::setSkin( )
   bgCoords.setPosition(0,94,148,47);
   dNameCoords.setXY(49,7);
   sEffectPan.setPosition(45,145,16,5);
+
+  muteCoords.setPosition(0,145,15,14);
+  dMuteCoords.setPosition(11,5,15,14);
+  soloCoords.setPosition(15,145,15,14);
+  dSoloCoords.setPosition(26,5,15,14);
 
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
@@ -387,6 +457,11 @@ void EffektGUI::setSkin( )
   panSlider_->customSliderPaint.connect(this,&EffektGUI::customSliderPaint);
   panSlider_->slider()->setWidth(sEffectPan.width());
   panSlider_->slider()->setHeight(sEffectPan.height());
+
+  sGeneratorVu0.setPosition(0,141,7,4);
+  sGeneratorVuPeak.setPosition(128,141,2,4);
+  dGeneratorVu.setPosition(10,35,130,4);
+  sGenerator.setPosition(0,47,148,47);
 }
 
 
@@ -402,6 +477,103 @@ void EffektGUI::customSliderPaint( NSlider * sl, NGraphics * g )
   g->putPixmap(0,0,sEffectPan.width(),sEffectPan.height(),MachineGUI::pixmap,sEffectPan.left(),sEffectPan.top());
 }
 
+void EffektGUI::onMousePress( int x, int y, int button )
+{
+  MachineGUI::onMousePress(x,y,button);
+  if (button==1) {
+      if (dMuteCoords.intersects(x,y)) { // mute or unmute
+        pMac()->_mute = !pMac()->_mute;
+        if (pMac()->_mute) {
+         pMac()->_volumeCounter=0.0f;
+         pMac()->_volumeDisplay=0;
+          if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
+            Global::pSong()->machineSoloed = -1;
+         }
+       }
+       repaint();
+     } else
+      if (dSoloCoords.intersects(x,y)) { // solo or unsolo
+        if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
+         Global::pSong()->machineSoloed = -1;
+         for ( int i=0;i<MAX_MACHINES;i++ ) {
+           if ( Global::pSong()->_pMachine[i] ) {
+             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+               Global::pSong()->_pMachine[i]->_mute = false;
+             }
+           }
+         }
+       } else {
+          for ( int i=0;i<MAX_MACHINES;i++ ) {
+          if ( Global::pSong()->_pMachine[i] )
+          {
+            if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
+            {
+               Global::pSong()->_pMachine[i]->_mute = true;
+               Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
+               Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+             }
+           }
+         }
+         pMac()->_mute = false;
+         Global::pSong()->machineSoloed = pMac()->_macIndex;
+       }
+      repaint();
+    }
+  }
+}
+
+void EffektGUI::repaintVUMeter( )
+{
+  vuPanel_->repaint();
+}
+
+void EffektGUI::VUPanel::paint( NGraphics * g )
+{
+  int vol = pGui_->pMac()->_volumeDisplay;
+  int max = pGui_->pMac()->_volumeMaxDisplay;
+
+  vol *= pGui_->dGeneratorVu.width();
+  vol /= 96;
+
+  max *= pGui_->dGeneratorVu.width();
+  max /= 96;
+
+  // BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+  if (vol > 0)
+  {
+     if (pGui_->sGeneratorVu0.width())
+     {
+        vol /= pGui_->sGeneratorVu0.width();// restrict to leds
+        vol *= pGui_->sGeneratorVu0.width();
+     }
+  } else {
+    vol = 0;
+  }
+
+  g->putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
+               MachineGUI::pixmap,
+               pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
+               pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
+  );
+
+  if (max > 0) {
+      if (pGui_->sGeneratorVuPeak.width()) {
+          max /= pGui_->sGeneratorVuPeak.width();// restrict to leds
+          max *= pGui_->sGeneratorVuPeak.width();
+          g->putPixmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
+                       MachineGUI::pixmap,
+                       pGui_->sGeneratorVuPeak.left(),
+                       pGui_->sGeneratorVuPeak.top()
+         ); //peak
+       }
+    }
+
+   if (vol > 0) {
+     g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), MachineGUI::pixmap,
+                  pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
+     }
+
+}
 
 void MachineGUI::onMousePress( int x, int y, int button )
 {
@@ -455,6 +627,12 @@ void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
 void MachineGUI::repaintVUMeter( )
 {
 }
+
+
+
+
+
+
 
 
 
