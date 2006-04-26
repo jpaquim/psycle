@@ -104,6 +104,7 @@ void Configuration::setSkinDefaults( )
 
   iconPath   = "";
   pluginPath = "~/xpsycle/plugins/";
+  prsPath    = "~/.xpsycle/prs/";
 
   mv_wirewidth = 1;
   mv_triangle_size = 22;
@@ -119,6 +120,8 @@ void Configuration::loadConfig( )
 
   iconPath   = NFile::replaceTilde(NApp::config()->findPath("icondir"));
   pluginPath = NFile::replaceTilde(NApp::config()->findPath("plugindir"));
+  prsPath    = NFile::replaceTilde(NApp::config()->findPath("prsdir"));
+
 }
 
 void Configuration::onConfigTagParse(const std::string & tagName )

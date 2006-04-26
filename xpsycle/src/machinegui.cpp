@@ -160,9 +160,9 @@ void MasterGUI::paint( NGraphics * g )
 
 GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 {
-  vuSlider_ = new NSlider();
-    vuSlider_->posChanged.connect(this,&GeneratorGUI::onPosChanged);
-  add(vuSlider_);
+  panSlider_ = new NSlider();
+    panSlider_->posChanged.connect(this,&GeneratorGUI::onPosChanged);
+  add(panSlider_);
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
@@ -208,16 +208,26 @@ void GeneratorGUI::setSkin( )
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
 
-  vuSlider_->setPosition(45,23,96,10);
-  vuSlider_->setOrientation(nHorizontal);
-  vuSlider_->setRange(0,127);
-  vuSlider_->setPos( pMac()->_panning );
+  sGenPan.setPosition(45,145,16,5);
+
+  setHeight(bgCoords.height());
+  setWidth(bgCoords.width());
+  setTransparent(true);
+
+  panSlider_->setPosition(45 ,26,91,sGenPan.height());
+  panSlider_->setOrientation(nHorizontal);
+  panSlider_->setTrackLine(false);
+  panSlider_->setRange(0,127);
+  panSlider_->setPos( pMac()->_panning );
+  panSlider_->customSliderPaint.connect(this,&GeneratorGUI::customSliderPaint);
+  panSlider_->slider()->setWidth(sGenPan.width());
+  panSlider_->slider()->setHeight(sGenPan.height());
 }
 
 void GeneratorGUI::onPosChanged(NSlider* sender, double value )
 {
   if (pMac()) {
-    pMac()->SetPan( (int) vuSlider_->pos());
+    pMac()->SetPan( (int) panSlider_->pos());
   }
 }
 
@@ -320,7 +330,10 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
 }
 
 
-
+void GeneratorGUI::customSliderPaint( NSlider * sl, NGraphics * g )
+{
+  g->putPixmap(0,0,sGenPan.width(),sGenPan.height(),MachineGUI::pixmap,sGenPan.left(),sGenPan.top());
+}
 
 
 
@@ -360,15 +373,20 @@ void EffektGUI::setSkin( )
 {
   bgCoords.setPosition(0,94,148,47);
   dNameCoords.setXY(49,7);
+  sEffectPan.setPosition(45,145,16,5);
+
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
   setTransparent(true);
 
-  panSlider_->setPosition(45,23,96,10);
+  panSlider_->setPosition(46 ,26,91,sEffectPan.height());
   panSlider_->setOrientation(nHorizontal);
+  panSlider_->setTrackLine(false);
   panSlider_->setRange(0,127);
   panSlider_->setPos( pMac()->_panning );
-
+  panSlider_->customSliderPaint.connect(this,&EffektGUI::customSliderPaint);
+  panSlider_->slider()->setWidth(sEffectPan.width());
+  panSlider_->slider()->setHeight(sEffectPan.height());
 }
 
 
@@ -377,6 +395,11 @@ void EffektGUI::onPosChanged(NSlider* sender, double value )
   if (pMac()) {
     pMac()->SetPan( (int) panSlider_->pos());
   }
+}
+
+void EffektGUI::customSliderPaint( NSlider * sl, NGraphics * g )
+{
+  g->putPixmap(0,0,sEffectPan.width(),sEffectPan.height(),MachineGUI::pixmap,sEffectPan.left(),sEffectPan.top());
 }
 
 
@@ -432,6 +455,9 @@ void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
 void MachineGUI::repaintVUMeter( )
 {
 }
+
+
+
 
 
 

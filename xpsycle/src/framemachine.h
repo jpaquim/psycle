@@ -34,6 +34,8 @@ const int W_ROWWIDTH = 150;
 
 
 class Machine;
+class NTogglePanel;
+class NButton;
 
 /**
 @author Stefan
@@ -100,6 +102,7 @@ private:
 
    NLabel* label;
    NLabel* vLabel;
+
 };
 
 
@@ -138,6 +141,9 @@ private:
 
    Machine* pMachine_;
    NPanel* knobPanel;
+   NTogglePanel* prsPanel;
+   NButton* defaultPrsBtn;
+
    NGridLayout* gridLayout;
 
    void onItemClicked(NEvent* menuEv, NButtonEvent* itemEv);

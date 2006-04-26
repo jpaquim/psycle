@@ -43,6 +43,7 @@ public:
     bool autoStopMachines;
     std::string iconPath;
     std::string pluginPath;
+    std::string prsPath;
 
 
     InputHandler inputHandler;

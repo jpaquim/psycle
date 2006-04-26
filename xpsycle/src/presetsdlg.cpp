@@ -142,7 +142,8 @@ void PresetsDlg::loadPresets( )
   }
 
   try {
-     DeSerializer f(Global::pConfig()->pluginPath+filename);
+     std::cout << Global::pConfig()->prsPath+filename << std::endl;
+     DeSerializer f(Global::pConfig()->prsPath+filename);
 
      int numpresets = f.getInt();
      int filenumpars = f.getInt();

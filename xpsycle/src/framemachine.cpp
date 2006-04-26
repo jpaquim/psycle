@@ -25,6 +25,8 @@
 #include "presetsdlg.h"
 #include <napp.h>
 #include <nmenubar.h>
+#include <ntogglepanel.h>
+#include <nbutton.h>
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
@@ -53,18 +55,25 @@ int FrameMachine::onClose( )
 void FrameMachine::init( )
 {
   NMenuBar* bar = new NMenuBar();
-  pane()->add(bar);
+    pane()->add(bar);
   NMenu* aboutMenu = new NMenu("About",'a',"Help,|,About this machine");
-  aboutMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
+    aboutMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
   bar->add(aboutMenu);
   NMenu* parameterMenu = new NMenu("Parameters",'p',"Reset,Random,Presets");
-  parameterMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
+    parameterMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
   bar->add(parameterMenu);
 
   NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
     font.setTextColor(Global::pConfig()->machineGUITopColor);
   pane()->setFont(font);
   setTitle(stringify(pMachine_->_macIndex)+std::string(" : ")+pMachine_->GetName());
+
+  prsPanel = new NTogglePanel();
+    prsPanel->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+    defaultPrsBtn = new NButton("User");
+    defaultPrsBtn->setFlat(false);
+    prsPanel->add(defaultPrsBtn);
+  pane()->add(prsPanel, nAlBottom);
 
 }
 
