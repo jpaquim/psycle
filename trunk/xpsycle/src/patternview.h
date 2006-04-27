@@ -119,6 +119,8 @@ class PatternView : public NPanel
      void pasteBlock(int tx,int lx,bool mix,bool save = true);
      void blockTranspose(int trp);
      void deleteBlock();
+     void doubleLength();
+
 
    private:
 
@@ -225,6 +227,7 @@ public:
     void pasteBlock(int tx,int lx,bool mix,bool save = true);
     void blockTranspose(int trp);
     void deleteBlock();
+    void doubleLength();
 
 private:
 
