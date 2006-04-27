@@ -1745,7 +1745,7 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
       if (mgn < MAX_MACHINES) {
          pMachine = Global::pSong()->_pMachine[mgn];
       }
-  }
+  
 
   for(int i=0;i<Global::pSong()->SONGTRACKS;i++) {
      if(notetrack[i]==note) {
@@ -1765,16 +1765,103 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
        }
      }
    }
+
+  }
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// undo/redo code
-////////////////////////////////////////////////////////////////////////////////////////////////////////
+// next todo
+
+/*
 
 
+void CChildView::DoubleLength()
+		{
+			// UNDO CODE DOUBLE LENGTH
+			unsigned char *toffset;
+			PatternEntry blank;
+			int st, et, sl, el,nl;
 
+			int ps = _ps();
+			if ( blockSelected )
+			{
+		///////////////////////////////////////////////////////// Add ROW
+				st=blockSel.start.track;		
+				et=blockSel.end.track+1;
+				sl=blockSel.start.line;			
+				nl=((blockSel.end.line-sl)/2)+1;
+				el=blockSel.end.line;
+				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2,editcur.track,editcur.line,editcur.col,editPosition);
+			}
+			else 
+			{
+				st=0;		
+				et=_pSong->SONGTRACKS;		
+				sl=0;
+				nl= _pSong->patternLines[ps]/2;	
+				el=_pSong->patternLines[ps]-1;
+				AddUndo(ps,0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
+			}
 
+			for (int t=st;t<et;t++)
+			{
+				toffset=_ptrack(ps,t);
+				memcpy(toffset+el*MULTIPLY,&blank,EVENT_SIZE);
+				for (int l=nl-1;l>0;l--)
+				{
+					memcpy(toffset+(sl+l*2)*MULTIPLY,toffset+(sl+l)*MULTIPLY,EVENT_SIZE);
+					memcpy(toffset+(sl+(l*2)-1)*MULTIPLY,&blank,EVENT_SIZE);
+				}
+			}
 
+			NewPatternDraw(st,et,sl,el);
+			Repaint(DMData);
+		}
 
+		void CChildView::HalveLength()
+		{
+			// UNDO CODE HALF LENGTH
+			unsigned char *toffset;
+			int st, et, sl, el,nl;
+			int ps = _ps();
+			PatternEntry blank;
 
+			if ( blockSelected )
+			{
+		///////////////////////////////////////////////////////// Add ROW
+				st=blockSel.start.track;	
+				et=blockSel.end.track+1;
+				sl=blockSel.start.line;		
+				nl=blockSel.end.line-sl+1;
+				el=nl/2;
+				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl,editcur.track,editcur.line,editcur.col,editPosition);
+			}
+			else 
+			{
+				st=0;	
+				et=_pSong->SONGTRACKS;		
+				sl=0;
+				nl=_pSong->patternLines[ps];	
+				el=_pSong->patternLines[ps]/2;
+				AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+			}
+			
+			for (int t=st;t<et;t++)
+			{
+				toffset=_ptrack(ps,t);
+				int l;
+				for (l=1;l<el;l++)
+				{
+					memcpy(toffset+(l+sl)*MULTIPLY,toffset+((l*2)+sl)*MULTIPLY,EVENT_SIZE);
+				}
+				while (l < nl)
+				{
+					memcpy(toffset+((l+sl)*MULTIPLY),&blank,EVENT_SIZE);
+					l++;
+				}
+			}
+
+			NewPatternDraw(st,et,sl,nl+sl);
+			Repaint(DMData);
+		}
+*/
