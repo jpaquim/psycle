@@ -1752,7 +1752,7 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
        notetrack[i]=120;
        // build entry
        PatternEntry entry;
-       entry._note = 120;
+       entry._note = 120+0;
        entry._inst = Global::pSong()->auxcolSelected;
        entry._mach = Global::pSong()->seqBus;
        entry._cmd = 0;
@@ -1843,7 +1843,7 @@ void CChildView::DoubleLength()
 				sl=0;
 				nl=_pSong->patternLines[ps];	
 				el=_pSong->patternLines[ps]/2;
-				AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition) ;
 			}
 			
 			for (int t=st;t<et;t++)
