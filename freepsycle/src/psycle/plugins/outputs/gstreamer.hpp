@@ -22,24 +22,34 @@ namespace psycle
 					gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 					virtual ~gstreamer() throw();
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_name(std::string const &);
-					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened() const;
+					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened()  const;
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
 				protected:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open() throw(engine::exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start() throw(engine::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open()    throw(engine::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start()   throw(engine::exception);
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop() throw(engine::exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close() throw(engine::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop()    throw(engine::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close()   throw(engine::exception);
 				private:
 					::GstElement * pipeline_, * source_, * sink_;
+
+					unsigned int  samples_per_second_;
+					unsigned char channels_;
+					unsigned char significant_bits_per_channel_sample_;
+
 					::GstCaps * caps_;
 					bool caps_set_;
+
 					void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 					void        handoff(::GstBuffer &, ::GstPad &);
+
 					boost::condition condition_;
 					boost::mutex mutex_;
+					bool waiting_for_state_to_become_playing_;
+
 					void * buffer_;
-					unsigned int current_read_buffer_, current_write_buffer_;
+					unsigned int buffers_, buffer_size_, total_buffer_size_, current_read_position_, current_write_position_;
+					unsigned int samples_per_buffer_;
 			};
 		}
 	}

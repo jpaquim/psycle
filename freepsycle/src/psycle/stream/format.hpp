@@ -16,20 +16,34 @@ namespace psycle
 		{
 			public:
 				typedef universalis::compiler::numeric<>::floating_point real;
+
+			public:
 				virtual ~format() throw() {}
+
 			protected:
-				int  virtual channels(           ) const = 0;
-				void virtual channels(int const &)       = 0;
 
-				int  virtual samples_per_second(           ) const = 0;
-				void virtual samples_per_second(int const &) = 0;
+				void         virtual samples_per_second(unsigned int)       = 0;
+				unsigned int virtual samples_per_second(            ) const = 0;
 
-				int  virtual bits_per_channel_sample(           ) const = 0;
-				void virtual bits_per_channel_sample(int const &)       = 0;
+				void          virtual channels(unsigned char)       = 0;
+				unsigned char virtual channels(             ) const = 0;
+
+				void          virtual significant_bits_per_channel_sample(unsigned char)       = 0;
+				unsigned char virtual significant_bits_per_channel_sample(             ) const = 0;
+
+				void          virtual bits_per_channel_sample(unsigned char)       = 0;
+				unsigned char virtual bits_per_channel_sample(             ) const = 0;
 
 				real virtual bytes_per_channel_sample() const = 0;
+				real virtual bytes_per_sample        () const = 0;
 
-				real virtual bytes_per_sample() const = 0;
+				void virtual sample_signed(bool)       = 0;
+				bool virtual sample_signed(    ) const = 0;
+
+			#if 0 // should go in a subclass
+				void                                     virtual sample_endianness(universalis::processor::endianness::type)       = 0;
+				universalis::processor::endianness::type virtual sample_endianness(                                        ) const = 0;
+			#endif
 		};
 	}
 }

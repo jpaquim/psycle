@@ -5,29 +5,26 @@
 ///\implementation psycle::plugins::outputs::gstreamer
 #include <psycle/detail/project.private.hpp>
 #include "gstreamer.hpp"
+#include <psycle/stream/formats/riff_wave/format.hpp>
 #include <gst/gst.h>
+#include <universalis/compiler/numeric.hpp>
 #include <universalis/exception.hpp>
+#include <universalis/operating_system/threads/sleep.hpp>
 #include <cstddef>
 #include <limits>
 #include <cmath>
-#include <cstdint>
 namespace psycle
 {
 	namespace plugins
 	{
 		namespace outputs
 		{
-			///\todo hardcoded for now
+			using stream::formats::riff_wave::format;
+
 			namespace
 			{
-				unsigned int const samples_per_second(44100);
-				unsigned char const channels(1);
-				unsigned char const bits_per_sample(16);
-				bool const samples_signed(true);
+				///\todo parametrable
 				typedef std::int16_t output_sample_type;
-				std::size_t const bytes_per_buffer(16384);
-				unsigned int const samples_per_buffer(bytes_per_buffer / sizeof(output_sample_type));
-				unsigned int const buffers(3);
 			}
 
 			PSYCLE__PLUGINS__NODE_INSTANCIATOR(gstreamer)
@@ -41,7 +38,7 @@ namespace psycle
 				caps_(),
 				caps_set_(),
 				buffer_(),
-				current_read_buffer_(), current_write_buffer_()
+				current_read_position_(), current_write_position_()
 			{
 				engine::ports::inputs::single::create(*this, "in");
 				engine::ports::inputs::single::create(*this, "amplification", boost::cref(1));
@@ -189,181 +186,190 @@ namespace psycle
 					}
 				}
 
-				// create a pipeline
-				if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw engine::exceptions::runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
-				try
+				// audio format
+				format format(single_input_ports()[0]->channels(), single_input_ports()[0]->events_per_second(), /*significant_bits_per_channel_sample*/ 16); /// \todo parametrable
+				if(loggers::information()())
 				{
-					// pad capabilities, audio format
+					std::ostringstream s;
+					s << "format: " << format.description();
+					loggers::information()(s.str());
+				}
+				samples_per_buffer_ = 8192; /// \todo parametrable
+				buffers_ = 4; /// \todo parametrable
+				total_buffer_size_ = buffers_ * samples_per_buffer_ * static_cast<unsigned long int>(format.bytes_per_sample());
+				if(loggers::information()())
+				{
+					std::ostringstream s;
+					s << "total buffer size: " << total_buffer_size_ << " bytes";
+					loggers::information()(s.str());
+				}
+				buffer_size_ = static_cast<unsigned long int>(samples_per_buffer_ * format.bytes_per_sample());
+				if(loggers::information()())
+				{
+					std::ostringstream s;
+					s << "buffer size: " << buffer_size_ << " bytes";
+					loggers::information()(s.str());
+				}
+				{
+					real const latency(static_cast<real>(samples_per_buffer_) / format.samples_per_second());
+					if(loggers::information()())
+					{
+						std::ostringstream s;
+						s << "latency: between " << latency << " and " << latency * buffers_ << " seconds ";
+						loggers::information()(s.str());
+					}
+				}
+
+				// audio format ... pad capabilities 
+				{
+					::gint     const samples_per_second                 (format.samples_per_second());
+					::gint     const channels                           (format.channels());
+					::gint     const significant_bits_per_channel_sample(format.significant_bits_per_channel_sample());
+					::gint     const             bits_per_channel_sample(format.bits_per_channel_sample());
+					::gboolean const sample_signed                      (/*format.sample_signed()*/ std::numeric_limits<output_sample_type>::min() < 0);
+					::gint     const sample_endianness                  (/*format.sample_endianness()*/ G_BYTE_ORDER);
+
 					caps_ = ::gst_caps_new_simple
 					(
 						"audio/x-raw-int",
 						"rate"      , G_TYPE_INT    , samples_per_second,
 						"channels"  , G_TYPE_INT    , channels,
-						"width"     , G_TYPE_INT    , bits_per_sample,
-						"depth"     , G_TYPE_INT    , bits_per_sample,
-						"signed"    , G_TYPE_BOOLEAN, samples_signed,
-						"endianness", G_TYPE_INT    , G_BYTE_ORDER,
+						"width"     , G_TYPE_INT    , significant_bits_per_channel_sample, ///\todo [bohan] check the doc again, i don't remember which is depth and width
+						"depth"     , G_TYPE_INT    ,             bits_per_channel_sample, ///\todo [bohan] check the doc again, i don't remember which is depth and width
+						"signed"    , G_TYPE_BOOLEAN, sample_signed,
+						"endianness", G_TYPE_INT    , sample_endianness,
 						0
 					);
+				}
+
+				// create a pipeline
+				if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw engine::exceptions::runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
+
+				// create a fakesrc
+				source_ = &instanciate("fakesrc", name() + "-src");
+				if(!::gst_bin_add(GST_BIN(pipeline_), source_)) throw engine::exceptions::runtime_error("could not add source element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
+
+				// set properties of the fakesrc element
+				::g_object_set
+				(
+					G_OBJECT(source_),
+					"data"           , /*FAKE_SRC_DATA_SUBBUFFER*/ 2, // data allocation method
+					"parentsize"     , buffer_size_ * buffers_,
+					"sizemax"        , buffer_size_,
+					"sizetype"       , /*FAKE_SRC_SIZETYPE_FIXED*/ 2, // fixed to sizemax
+					"filltype"       , /*FAKE_SRC_FILLTYPE_NOTHING*/ 1,
+					"signal-handoffs", true,
+					0
+				);
+
+				buffer_ = new std::int8_t[buffer_size_ * buffers_];
+
+				// register our callback to the handoff signal of the fakesrc element
+				if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw engine::exceptions::runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
+
+				// get the source element's src pad
+				::GstPad * source_pad(::gst_element_get_pad(source_, "src" ));
+				if(!source_pad) throw engine::exceptions::runtime_error("no src pad found on source element", UNIVERSALIS__COMPILER__LOCATION);
+				try
+				{
+					// set the caps of the source element's src pad
+					if(!::gst_pad_set_caps(source_pad, caps_)) throw engine::exceptions::runtime_error("could not set capabilities on source element's src pad", UNIVERSALIS__COMPILER__LOCATION);
+					::gst_pad_use_fixed_caps(source_pad);
+
+					// create an audio sink
 					try
 					{
-						// create a fakesrc
-						source_ = &instanciate("fakesrc", name() + "-src");
+						sink_ = &instanciate("gconfaudiosink", name() + "-sink");
+					}
+					catch(std::exception const & e)
+					{
+						// maybe the user didn't configure his default audio-sink, falling back to several possibilities
+						#if 0 // jacksink needs to be put in a jackbin, because it's pulling audio data.
+						if(loggers:information())
+						{
+							std::ostringstream s;
+							s
+								<< "exception: caught while trying to instanciate audio sink: " <<
+							loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
 						try
 						{
-							if(!::gst_bin_add(GST_BIN(pipeline_), source_)) throw engine::exceptions::runtime_error("could not add source element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
+							sink_ = &instanciate("jacksink", name() + "-sink");
 						}
 						catch(...)
+						#endif
 						{
-							::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
-							throw;
-						}
-
-						// set properties of the fakesrc element
-						::g_object_set
-						(
-							G_OBJECT(source_),
-							"data", /*FAKE_SRC_DATA_SUBBUFFER*/ 2, // data allocation method
-							"parentsize", bytes_per_buffer * buffers,
-							"sizemax", bytes_per_buffer,
-							"sizetype", /*FAKE_SRC_SIZETYPE_FIXED*/ 2, // fixed to sizemax
-							//"filltype", /*FAKE_SRC_FILLTYPE_RANDOM*/ 3,
-							"filltype", /*FAKE_SRC_FILLTYPE_NOTHING*/ 1,
-							//"num-buffers", 0,
-							//"datarate", 0,
-							"signal-handoffs", true,
-							0
-						);
-
-						buffer_ = new std::int8_t[bytes_per_buffer * buffers];
-
-						// register our callback to the handoff signal of the fakesrc element
-						if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw engine::exceptions::runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
-
-						// get the source element's src pad
-						::GstPad * source_pad(::gst_element_get_pad(source_, "src" ));
-						if(!source_pad) throw engine::exceptions::runtime_error("no src pad found on source element", UNIVERSALIS__COMPILER__LOCATION);
-						try
-						{
-							// set the caps of the source element's src pad
-							if(!::gst_pad_set_caps(source_pad, caps_)) throw engine::exceptions::runtime_error("could not set capabilities on source element's src pad", UNIVERSALIS__COMPILER__LOCATION);
-							::gst_pad_use_fixed_caps(source_pad);
-
-							// create an audio sink
+							loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
 							try
 							{
-								sink_ = &instanciate("gconfaudiosink", name() + "-sink");
+								sink_ = &instanciate("alsasink", name() + "-sink");
 							}
-							catch(std::exception const & e)
+							catch(...)
 							{
-								// maybe the user didn't configure his default audio-sink, falling back to several possibilities
-								#if 0 // jacksink needs to be put in a jackbin, because it's pulling audio data.
-								if(loggers:information())
-								{
-									std::ostringstream s;
-									s
-										<< "exception: caught while trying to instanciate audio sink: " <<
-									loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
+								loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
 								try
 								{
-									sink_ = &instanciate("jacksink", name() + "-sink");
+									sink_ = &instanciate("esdsink", name() + "-sink");
 								}
 								catch(...)
-								#endif
 								{
 									loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
 									try
 									{
-										sink_ = &instanciate("alsasink", name() + "-sink");
+										sink_ = &instanciate("osssink", name() + "-sink");
 									}
 									catch(...)
 									{
 										loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
 										try
 										{
-											sink_ = &instanciate("esdsink", name() + "-sink");
+											sink_ = &instanciate("artssink", name() + "-sink");
 										}
 										catch(...)
 										{
-											loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-											try
-											{
-												sink_ = &instanciate("osssink", name() + "-sink");
-											}
-											catch(...)
-											{
-												loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-												try
-												{
-													sink_ = &instanciate("artssink", name() + "-sink");
-												}
-												catch(...)
-												{
-													loggers::information()("exception: caught while trying to instanciate audio sink ; no more type to try ; bailing out.", UNIVERSALIS__COMPILER__LOCATION);
-													throw;
-												}
-											}
+											loggers::information()("exception: caught while trying to instanciate audio sink ; no more type to try ; bailing out.", UNIVERSALIS__COMPILER__LOCATION);
+											throw;
 										}
 									}
 								}
 							}
-							try
-							{
-								if(!::gst_bin_add(GST_BIN(pipeline_), sink_)) throw engine::exceptions::runtime_error("could not add sink element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
-							}
-							catch(...)
-							{
-								::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
-								throw;
-							}
-
-							// get the sink element's sink pad
-							::GstPad * sink_pad(::gst_element_get_pad(sink_, "sink"));
-							if(!sink_pad) throw engine::exceptions::runtime_error("no sink pad found on sink element", UNIVERSALIS__COMPILER__LOCATION);
-							try
-							{
-								// set the caps of the sink element's sink pad
-								if(!::gst_pad_set_caps(sink_pad, caps_)) throw engine::exceptions::runtime_error("could not set capabilities on sink element's sink pad", UNIVERSALIS__COMPILER__LOCATION);
-
-								// connect the source element's src pad to the sink element's sink pad
-								{
-									//::GstPadLinkReturn const result(::gst_pad_link_filtered(source_pad, sink_pad, caps_));
-									::GstPadLinkReturn const result(::gst_pad_link(source_pad, sink_pad));
-									if(GST_PAD_LINK_FAILED(result))
-									{
-										std::ostringstream s; s << "could not link source and sink: code: " << result;
-										throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-									}
-								}
-							}
-							catch(...)
-							{
-								::gst_object_unref(GST_OBJECT(sink_pad));
-								throw;
-							}
-							::gst_object_unref(GST_OBJECT(sink_pad));
 						}
-						catch(...)
+					}
+					if(!::gst_bin_add(GST_BIN(pipeline_), sink_)) throw engine::exceptions::runtime_error("could not add sink element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
+
+					// get the sink element's sink pad
+					::GstPad * sink_pad(::gst_element_get_pad(sink_, "sink"));
+					if(!sink_pad) throw engine::exceptions::runtime_error("no sink pad found on sink element", UNIVERSALIS__COMPILER__LOCATION);
+					try
+					{
+						// set the caps of the sink element's sink pad
+						if(!::gst_pad_set_caps(sink_pad, caps_)) throw engine::exceptions::runtime_error("could not set capabilities on sink element's sink pad", UNIVERSALIS__COMPILER__LOCATION);
+
+						// connect the source element's src pad to the sink element's sink pad
 						{
-							::gst_object_unref(GST_OBJECT(source_pad));
-							throw;
+							::GstPadLinkReturn const result(::gst_pad_link(source_pad, sink_pad));
+							if(GST_PAD_LINK_FAILED(result))
+							{
+								std::ostringstream s; s << "could not link source and sink: code: " << result;
+								throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+							}
 						}
-						::gst_object_unref(GST_OBJECT(source_pad));
 					}
 					catch(...)
 					{
-						::gst_caps_unref(caps_); caps_ = 0;
-						delete buffer_; buffer_ = 0;
+						::gst_object_unref(GST_OBJECT(sink_pad));
 						throw;
 					}
-					::gst_element_set_state(pipeline_, ::GST_STATE_READY);
-					wait_for_state(*pipeline_, ::GST_STATE_READY);
+					::gst_object_unref(GST_OBJECT(sink_pad));
 				}
 				catch(...)
 				{
-					::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
+					::gst_object_unref(GST_OBJECT(source_pad));
 					throw;
 				}
+				::gst_object_unref(GST_OBJECT(source_pad));
+
+				::gst_element_set_state(pipeline_, ::GST_STATE_READY);
+				wait_for_state(*pipeline_, ::GST_STATE_READY);
 			}
 
 			bool gstreamer::opened() const
@@ -374,8 +380,9 @@ namespace psycle
 			void gstreamer::do_start() throw(engine::exception)
 			{
 				resource::do_start();
-				current_read_buffer_ = current_write_buffer_;
+				current_read_position_ = current_write_position_;
 				::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING);
+				waiting_for_state_to_become_playing_ = true;
 				wait_for_state(*pipeline_, ::GST_STATE_PLAYING);
 			}
 		
@@ -399,22 +406,23 @@ namespace psycle
 				}
 				if(loggers::trace())
 				{
-					std::ostringstream s; s << "handoff " << current_read_buffer_;
+					std::ostringstream s; s << "handoff " << current_read_position_;
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 				{
-					unsigned int current_write_buffer;
+					boost::mutex::scoped_lock lock(mutex_);
+					if(current_read_position_ == current_write_buffer)
 					{
-						boost::mutex::scoped_lock lock(mutex_);
-						current_write_buffer = current_write_buffer_;
-					}
-					if(current_read_buffer_ == current_write_buffer)
-					{
+						if(waiting_for_state_to_become_playing_) return;
 						loggers::warning()("underrun");
-						//loggers::trace()("notifying condition", UNIVERSALIS__COMPILER__LOCATION);
-						condition_.notify_one();
-						return;
+						//loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
+						condition_.wait(lock);
 					}
+				}
+				if(!loggers::trace()())
+				{
+					static const char c [] = { '-', '\\', '|', '/' };
+					std::cout << ' ' << c[current_read_position_ % sizeof c] << '\r' << std::flush;
 				}
 				{
 					output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
@@ -425,16 +433,13 @@ namespace psycle
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					{
-						output_sample_type * in(reinterpret_cast<output_sample_type*>(buffer_) + current_read_buffer_ * samples_per_buffer);
-						for(unsigned int event(0) ; event < samples_per_buffer ; ++event)
-						{
-							*out++ = *in++; // just use std::memcpy
-						}
+						output_sample_type * in(reinterpret_cast<output_sample_type*>(buffer_) + current_read_position_ * samples_per_buffer_);
+						std::memcpy(out, in, buffer_size_);
 					}
 				}
 				{
 					boost::mutex::scoped_lock lock(mutex_);
-					++current_read_buffer_ %= buffers;
+					++current_read_position_ %= buffers_;
 				}
 				//loggers::trace()("notifying condition", UNIVERSALIS__COMPILER__LOCATION);
 				condition_.notify_one();
@@ -444,44 +449,73 @@ namespace psycle
 			{
 				if(loggers::trace())
 				{
-					std::ostringstream s; s << "process " << current_write_buffer_;
+					std::ostringstream s; s << "process " << current_write_position_;
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				}
+				if(waiting_for_state_to_become_playing_)
+				{
+					boost::mutex::scoped_lock lock(mutex_);
+					waiting_for_state_to_become_playing_ = false;
 				}
 				{
 					engine::buffer::channel & in(single_input_ports()[0]->buffer()[0]);
-					assert(samples_per_buffer == in.size());
-					output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_buffer_ * samples_per_buffer);
+					assert(samples_per_buffer_ == in.size());
+					output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer_);
 					for(unsigned int event(0) ; event < in.size(); ++event)
 					{
-						out[event] = static_cast<output_sample_type>(std::numeric_limits<output_sample_type>::min() * in[event].sample());
+						real sample(in[event].sample());
+						sample *= std::numeric_limits<output_sample_type>::max();
+						if     (sample < std::numeric_limits<output_sample_type>::min()) sample = std::numeric_limits<output_sample_type>::min();
+						else if(sample > std::numeric_limits<output_sample_type>::max()) sample = std::numeric_limits<output_sample_type>::max();
+						assert(std::numeric_limits<output_sample_type>::min() <= sample && sample <= std::numeric_limits<output_sample_type>::max());
+						out[event] = static_cast<output_sample_type>(sample);
 					}
 				}
+				//loggers::trace()("notifying condition", UNIVERSALIS__COMPILER__LOCATION);
+				condition_.notify_one();
 				{
-					unsigned int const next_write_buffer((current_write_buffer_ + 1) % buffers);
+					unsigned int const next_write_buffer((current_write_position_ + 1) % buffers_);
 					boost::mutex::scoped_lock lock(mutex_);
-					if(current_read_buffer_ == next_write_buffer)
+					if(current_read_position_ == next_write_buffer)
 					{
 						//loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
 						condition_.wait(lock);
 					}
-					current_write_buffer_ = next_write_buffer;
+					current_write_position_ = next_write_buffer;
 				}
 			}
 			
 			void gstreamer::do_stop() throw(engine::exception)
 			{
-				::gst_element_set_state(pipeline_, ::GST_STATE_READY);
-				wait_for_state(*pipeline_, ::GST_STATE_READY);
-				::gst_caps_unref(caps_); caps_ = 0;
+				if(pipeline_)
+				{
+					::gst_element_set_state(pipeline_, ::GST_STATE_READY);
+					wait_for_state(*pipeline_, ::GST_STATE_READY);
+				}
 				caps_set_ = false;
 				resource::do_stop();
 			}
 		
 			void gstreamer::do_close() throw(engine::exception)
 			{
-				::gst_element_set_state(pipeline_, ::GST_STATE_NULL);
-				wait_for_state(*pipeline_, ::GST_STATE_NULL);
-				::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
+				if(sink_)
+				{
+					::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
+				}
+				if(source_)
+				{
+					::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
+				}
+				if(pipeline_)
+				{
+					::gst_element_set_state(pipeline_, ::GST_STATE_NULL);
+					wait_for_state(*pipeline_, ::GST_STATE_NULL);
+					::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
+				}
+				if(caps_)
+				{
+					::gst_caps_unref(caps_); caps_ = 0;
+				}
 				// deinitialize gstreamer
 				{
 					static bool once = false;

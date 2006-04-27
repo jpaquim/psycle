@@ -8,6 +8,8 @@
 #include "../../format.hpp"
 #include <string>
 #include <exception>
+#include <cstdint>
+#include <cstddef>
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -32,97 +34,143 @@ namespace psycle
 			{
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK format : public stream::format
 				{
-				public:
-					format(const int & channels = 2, const int & samples_per_second = 44100, const int & bits_per_channel_sample = 16) throw(std::bad_alloc);
-					format(const format &) throw(std::bad_alloc);
-					//bool user_choose_dialog(const HWnd window_handle, const format * const source_format = 0, const format * const proposed_format = 0; const std::string & title = "");
-					//format(riff &) throw(exception)
-					virtual ~format() throw();
-
-					class tags
-					{
+					///\name riff wave fmt chunk
+					///\{
 						public:
-							enum tag // from microsoft's <mmreg.h> ... not meant to be exhaustive
+
+							#if 0
+								format(riff &) throw(exception)
+								/// fmt chunk only
+								void write(riff &);
+								/// fmt & fact chunks
+								void write(riff &, std::size_t);
+							#endif
+
+							#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+								bool user_choose_dialog(HWnd const window_handle, format const * const source_format = 0, format const * const proposed_format = 0; std::string const & caption = "");
+							#endif
+
+						private:
+							class UNIVERSALIS__COMPILER__ALIGNED(1) chunk_type
 							{
-								unknown         = 0x0000,
-								pcm             = 0x0001,
-								ieee_float      = 0x0003,
-								gsm610          = 0x0031,
-								iso_mpeg_layer3 = 0x0055,
-								vorbis          = unknown // i do not know what would be the identifier ... actually, i only saw vorbis in a ogg container, never in a riff one
+								friend class format;
+
+								public:
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+										inline operator ::WAVEFORMATEX & () { return reinterpret_cast< ::WAVEFORMATEX& >(chunk()); }
+									#endif
+
+								public:
+									void                tag(std::uint16_t);
+									std::uint16_t inline tag() const throw() { return tag_; }
+								private:
+									std::uint16_t     tag_; // Tag enumerated type, but forced to be 16-bit long
+
+								public:
+									void                 channels(std::uint16_t);
+									std::uint16_t inline channels() const throw() { return channels_; }
+								private:
+									std::uint16_t channels_;
+
+								public:
+									void                 samples_per_second(std::uint32_t);
+									std::uint32_t inline samples_per_second() const throw() { return samples_per_second_; }
+								private:
+									std::uint32_t samples_per_second_;
+
+								private:
+									std::uint32_t average_bytes_per_second_;
+
+								public:
+									real inline   bytes_per_channel_sample() const { return bytes_per_sample() / channels(); }
+									real          bytes_per_sample        () const;
+								private:
+									std::uint16_t bytes_per_sample_;
+									unsigned int  bytes_to_samples(unsigned int) const;
+
+								public:
+									void                 bits_per_channel_sample(std::uint16_t);
+									std::uint16_t inline bits_per_channel_sample() const throw() { return bits_per_channel_sample_; }
+								private:
+									std::uint16_t        bits_per_channel_sample_;
+
+								public:
+									void set(std::uint16_t channels = 2, std::uint32_t samples_per_second = 44100, std::uint16_t bits_per_channel_sample = 16);
+
+								void recompute_if_pcm(bool full = true);
+
+								public:
+									std::size_t inline size() const { return sizeof *this + extra_information_size(); }
+								private:
+									/// the count in bytes of the size of extra information, after the size itself
+									std::uint16_t inline extra_information_size() const throw() { return extra_information_size_; }
+									std::uint16_t        extra_information_size_;
+									// variable size ... \todo make a custom allocator by overloading operator new(const size_t &)
+									//std::int8_t extra[];
 							};
-					};
-					using tags::tag;
-					typedef tag Tag; // msvc (at least version 6) has problems with type name resolution
-					
-					//void write(riff &); // fmt chunk only
-					//void write(riff &, const int & bytes); // fmt & fact chunks
 
-					inline tag tag() const { return chunk().tag(); }
-					inline void tag(const Tag & tag) { chunk().tag(tag); }
-					std::string tag_description() const;
-					std::string description() const;
+							chunk_type        * chunk_;
+							chunk_type inline & chunk() const { return *chunk_; }
 
-					inline virtual int channels() const { return chunk().channels(); }
-					inline virtual void channels(const int & channels) { chunk().channels(channels); }
-					inline virtual int samples_per_second() const { return chunk().samples_per_second(); }
-					inline virtual void samples_per_second(const int & samples_per_second) { chunk().samples_per_second(samples_per_second); }
-					inline virtual int bits_per_channel_sample() const { return chunk().bits_per_channel_sample(); }
-					inline virtual void bits_per_channel_sample(const int & bits_per_channel_sample) { chunk().bits_per_channel_sample(bits_per_channel_sample); }
-					inline virtual real bytes_per_channel_sample() const { return chunk().bytes_per_sample(); }
-					inline virtual real bytes_per_sample() const { return chunk().bytes_per_sample(); }
-					
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-						inline ::WAVEFORMATEX & wave_format_ex() { return reinterpret_cast< ::WAVEFORMATEX& >(chunk()); }
-					#endif
+							void allocate_chunk(std::size_t extra_information_size) throw(std::bad_alloc);
 
-				private:
-					class chunk;
-					typedef chunk Chunk; // msvc has problems with type name resolution
-					chunk * chunk_;
-					inline chunk & chunk() const { return *chunk_; }
-					void allocate_chunk(const int & extra_information_size) throw(std::bad_alloc);
-					#if defined DIVERSALIS__COMPILER__MICROSOFT
-						#pragma pack(push, 1)
-					#endif
-					class UNIVERSALIS__COMPILER__ATTRIBUTE(packed) chunk
-					{
-						friend class format;
+						public:
+							struct tags
+							{
+								enum type // not meant to be exhaustive
+								{
+									unknown          = 0x0000,
+									pcm              = 0x0001,
+									ieee_float       = 0x0003,
+									iso_gsm_610      = 0x0031,
+									iso_mpeg_layer_3 = 0x0055,
+									vorbis           = unknown // i do not know what would be the identifier ... actually, i only saw vorbis in a ogg container, never in a riff one
+								};
+							};
 
-						universalis::compiler::numeric<16>::unsigned_int tag_; // Tag enumerated type, but forced to be 16-bit long
-						inline Tag tag() const { return static_cast<Tag>(tag_); }
-						void tag(const Tag &);
+							void       inline tag(tags::type tag)       throw() { chunk().tag(tag); }
+							tags::type inline tag(              ) const throw() { return static_cast<tags::type>(chunk().tag()); }
 
-						universalis::compiler::numeric<16>::unsigned_int channels_;
-						inline int channels() const { return channels_; }
-						void channels(const int &);
+						private:
+							std::string tag_description() const;
+					///\}
 
-						universalis::compiler::numeric<32>::unsigned_int samples_per_second_;
-						inline int samples_per_second() const { return samples_per_second_; }
-						void samples_per_second(const int &);
+					public:
+						format(unsigned char channels = 2, real samples_per_second = 44100, unsigned char bits_per_channel_sample = 16, unsigned char significant_bits_per_channel_sample = 16);
+						format(format const &);
+						virtual ~format() throw();
 
-						universalis::compiler::numeric<32>::unsigned_int average_bytes_per_second_;
+						void          inline virtual samples_per_second(unsigned int value)       {        chunk().samples_per_second(value); }
+						unsigned int  inline virtual samples_per_second(                  ) const { return chunk().samples_per_second(     ); }
 
-						universalis::compiler::numeric<16>::unsigned_int bytes_per_sample_;
-						inline double bytes_per_channel_sample() const { return bytes_per_sample() / channels(); }
-						double bytes_per_sample() const;
-						int bytes_to_samples(const int &) const;
+						void          inline virtual channels(unsigned char value)       {        chunk().channels(value); }
+						unsigned char inline virtual channels(                   ) const { return chunk().channels(     ); }
 
-						universalis::compiler::numeric<16>::unsigned_int bits_per_channel_sample_;
-						inline int bits_per_channel_sample() const { return bits_per_channel_sample_; }
-						void bits_per_channel_sample(const int &);
+						void          inline virtual significant_bits_per_channel_sample(unsigned char value)       {        bits_per_channel_sample(value); }
+						unsigned char inline virtual significant_bits_per_channel_sample(                   ) const { return bits_per_channel_sample(     ); }
 
-						void set(const int & channels = 2, const int & samples_per_second = 44100, const int & bits_per_channel_sample = 16);
-						void recompute_if_pcm(const bool & full = true);
+						void          inline virtual bits_per_channel_sample(unsigned char value)                         {        chunk().bits_per_channel_sample(value); }
+						unsigned char inline virtual bits_per_channel_sample(                                     ) const { return chunk().bits_per_channel_sample(     ); }
 
-						universalis::compiler::numeric<16>::unsigned_int extra_information_size_; // the count in bytes of the size of extra information, after the size itself
-						inline int size() const { return sizeof *this + extra_information_size(); }
-						inline int extra_information_size() const { return extra_information_size_; }
-						// variable size ... \todo make a custom allocator by overloading operator new(const size_t &)
-					};
-					#if defined DIVERSALIS__COMPILER__MICROSOFT
-						#pragma pack(pop)
-					#endif
+						real          inline virtual bytes_per_channel_sample() const { return chunk().bytes_per_sample(); }
+						real          inline virtual bytes_per_sample        () const { return chunk().bytes_per_sample(); }
+						
+						///\todo
+						void inline virtual sample_signed(bool)       {              }
+						///\todo
+						bool inline virtual sample_signed(    ) const { return true; }
+
+						#if 0 // it's handled by riff's root chunk header id: either "RIFF" or "RIFX"
+							void                                     virtual sample_endianness(universalis::processor::endianness::type)       {                                                 }
+							universalis::processor::endianness::type virtual sample_endianness(                                        ) const { return universalis::processor::endianness::big; }
+						#endif
+
+						std::string description() const;
+
+						#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+							inline operator ::WAVEFORMATEX & () { return chunk(); }
+							::WAVEFORMATEX & inline wave_format_ex() { return *this; }
+						#endif
 				};
 			}
 		}
