@@ -404,14 +404,14 @@ namespace psycle
 					::gst_buffer_set_caps(&buffer, caps_);
 					caps_set_ = true;
 				}
-				if(loggers::trace())
+				if(false && loggers::trace())
 				{
 					std::ostringstream s; s << "handoff " << current_read_position_;
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 				{
 					boost::mutex::scoped_lock lock(mutex_);
-					if(current_read_position_ == current_write_buffer)
+					if(current_read_position_ == current_write_position_)
 					{
 						if(waiting_for_state_to_become_playing_) return;
 						loggers::warning()("underrun");
@@ -426,7 +426,7 @@ namespace psycle
 				}
 				{
 					output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
-					if(loggers::trace())
+					if(false && loggers::trace())
 					{
 						std::size_t const size(GST_BUFFER_SIZE(&buffer));
 						std::ostringstream s; s << "buffer size: " << size << ", data address: " << out;
@@ -447,7 +447,7 @@ namespace psycle
 
 			void gstreamer::do_process() throw(engine::exception)
 			{
-				if(loggers::trace())
+				if(false && loggers::trace())
 				{
 					std::ostringstream s; s << "process " << current_write_position_;
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);

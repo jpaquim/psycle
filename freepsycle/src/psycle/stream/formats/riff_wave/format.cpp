@@ -59,8 +59,8 @@ namespace psycle
 					{
 						std::ostringstream s; s
 							<< tag_description() << ", "
-							<< channels() << " channels of "
-							<< bits_per_channel_sample() << "-bit samples at "
+							<< static_cast<unsigned int>(channels()) << " channels of "
+							<< static_cast<unsigned int>(bits_per_channel_sample()) << "-bit samples at "
 							<< samples_per_second()  << " hertz";
 						return s.str();
 					}
