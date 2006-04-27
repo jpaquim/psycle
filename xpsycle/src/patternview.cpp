@@ -1010,6 +1010,10 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
             case cdefTransposeBlockDec12:
                blockTranspose(-12);
             break;
+            case cdefBlockDouble:
+               doubleLength();
+               repaint();
+            break;
 
           default: {
              if (event.buffer()!="") {
@@ -1745,7 +1749,6 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
       if (mgn < MAX_MACHINES) {
          pMachine = Global::pSong()->_pMachine[mgn];
       }
-  
 
   for(int i=0;i<Global::pSong()->SONGTRACKS;i++) {
      if(notetrack[i]==note) {
@@ -1769,13 +1772,74 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
   }
 }
 
+/*const int ps = Global::pSong()->playOrder[editPosition()];
+  unsigned char * offset = Global::pSong()->_ptrack(ps,cursor_.x());
+  unsigned char * toffset = Global::pSong()->_ptrackline(ps,cursor_.x(),cursor_.y());
+
+  if ( cursor_.z() == 0 ) {
+     memset(offset+(cursor_.y()*MULTIPLY),255,3*sizeof(char));
+     memset(offset+(cursor_.y()*MULTIPLY)+3,0,2*sizeof(char));
+  }
+  else if (cursor_.z() < 5 ) { 
+    *(toffset+(cursor().z()+1)/2)= 255;
+  } else
+  {
+    *(toffset+(cursor().z()+1)/2)= 0; 
+  }
+
+int ps=Global::pSong()->playOrder[pView->editPosition()];
+
+  for (int t=selection_.left(); t < selection_.right();t++)
+    for (int l=selection_.top(); l< selection_.bottom();l++)
+            memcpy(Global::pSong()->_ptrackline(ps,t,l),&blank,EVENT_SIZE);
+
+*/
+
+void PatternView::PatternDraw::doubleLength( )
+{
+  unsigned char *toffset;
+  PatternEntry blank;
+  int st, et, sl, el,nl;
+
+  st = selection_.left();
+  et = selection_.right();
+  sl = selection_.left();
+  el = selection_.bottom();
+  nl=((selection_.bottom()-selection_.top())/2);
+
+  if (st==et && sl==el) {
+    st=0;		
+    et= pView->trackNumber()-1;
+    sl=0;
+    nl= (pView->lineNumber()-1)/2;
+    el= pView->lineNumber()-1;
+  }
+
+  int ps = Global::pSong()->playOrder[pView->editPosition()];
+
+  for (int t= st ; t <= et ;t++) {
+    toffset= Global::pSong()->_ptrack(ps,t);
+    memcpy(toffset+el*MULTIPLY,&blank,EVENT_SIZE);
+    for (int l=nl;l>=0;l--) {
+      memcpy(toffset+(sl*2)*MULTIPLY,toffset+(sl)*MULTIPLY,EVENT_SIZE);
+      memcpy(toffset+(sl+(l*2))*MULTIPLY,&blank,EVENT_SIZE);
+    }
+  }
+}
+
+
+void PatternView::doubleLength( )
+{
+  drawArea->doubleLength();
+}
+
 
 // next todo
 
 /*
 
 
-void CChildView::DoubleLength()
+void CChildView::
 		{
 			// UNDO CODE DOUBLE LENGTH
 			unsigned char *toffset;

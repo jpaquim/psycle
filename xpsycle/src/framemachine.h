@@ -20,11 +20,13 @@
 #ifndef FRAMEMACHINE_H
 #define FRAMEMACHINE_H
 
+#include "presetsdlg.h"
 #include <nwindow.h>
 #include <nlabel.h>
 #include <nframeborder.h>
 #include <ngridlayout.h>
 #include <nbitmap.h>
+#include <ndialog.h>
 
 const int K_XSIZE = 28;
 const int K_YSIZE = 28;
@@ -40,6 +42,12 @@ class NButton;
 /**
 @author Stefan
 */
+
+class NewNameDlg : public NDialog {
+public:
+  NewNameDlg();
+  ~NewNameDlg();
+};
 
 class Cell : public NPanel {
 public:
@@ -82,6 +90,7 @@ public:
 
    virtual int preferredWidth() const;
    virtual int preferredHeight() const;
+
 
 private:
 
@@ -139,6 +148,8 @@ public:
 
 private:
 
+   std::map<NButton*,Preset> presetMap;
+
    Machine* pMachine_;
    NPanel* knobPanel;
    NTogglePanel* prsPanel;
@@ -146,11 +157,23 @@ private:
 
    NGridLayout* gridLayout;
 
+   Preset knobsPreset();
+
    void onItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
    void init();
    void initParameterGUI();
 
+   void onPrsClick(NButtonEvent* ev);
+
    void onKnobValueChange(Knob* sender, int value, int param);
+
+   void onLeftBtn(NButtonEvent* ev);
+   void onRightBtn(NButtonEvent* ev);
+
+   void loadPresets();
+   void onAddPrs(NButtonEvent* ev);
+   void onLoadPrs(NButtonEvent* ev);
+
 
 };
 

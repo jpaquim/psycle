@@ -27,10 +27,34 @@
 #include <nmenubar.h>
 #include <ntogglepanel.h>
 #include <nbutton.h>
+#include <nedit.h>
+#include <nfiledialog.h>
+
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
 
+
+NewNameDlg::NewNameDlg( )
+{
+
+  NPanel* btnPnl = new NPanel();
+    btnPnl->setLayout(new NFlowLayout(nAlRight,5,5),true);
+    btnPnl->add(new NButton("add"));
+    btnPnl->add(new NButton("cancel"));
+  pane()->add(btnPnl,nAlBottom);
+
+  NEdit* name = new NEdit();
+  name->setText("userprs");
+  pane()->add(name,nAlClient);
+
+
+  setPosition(100,100,300,60);
+}
+
+NewNameDlg::~ NewNameDlg( )
+{
+}
 
 FrameMachine::FrameMachine(Machine* pMachine)
  : NWindow()
@@ -39,6 +63,7 @@ FrameMachine::FrameMachine(Machine* pMachine)
 
   init();
   initParameterGUI();
+  loadPresets();
 }
 
 
@@ -63,18 +88,38 @@ void FrameMachine::init( )
     parameterMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
   bar->add(parameterMenu);
 
-  NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
-    font.setTextColor(Global::pConfig()->machineGUITopColor);
-  pane()->setFont(font);
   setTitle(stringify(pMachine_->_macIndex)+std::string(" : ")+pMachine_->GetName());
 
-  prsPanel = new NTogglePanel();
-    prsPanel->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+  NPanel* prs = new NPanel();
+    prs->setLayout(new NAlignLayout(),true);
+    NButton* savePrsBtn = new NButton("save");
+       savePrsBtn->setFlat(false);
+    prs->add(savePrsBtn,nAlLeft);
+    NButton* loadPrsBtn = new NButton("load");
+       loadPrsBtn->setFlat(false);
+       loadPrsBtn->clicked.connect(this,&FrameMachine::onLoadPrs);
+    prs->add(loadPrsBtn,nAlLeft);
+    NButton* addPrsBtn = new NButton("add");
+       addPrsBtn->setFlat(false);
+       addPrsBtn->clicked.connect(this,&FrameMachine::onAddPrs);
+    prs->add(addPrsBtn,nAlLeft);
     defaultPrsBtn = new NButton("User");
-    defaultPrsBtn->setFlat(false);
-    prsPanel->add(defaultPrsBtn);
-  pane()->add(prsPanel, nAlBottom);
-
+       defaultPrsBtn->setFlat(false);
+    prs->add(defaultPrsBtn,nAlLeft);
+    NButton* rightPrsBtn = new NButton(">");
+       rightPrsBtn->setFlat(false);
+       rightPrsBtn->clicked.connect(this,&FrameMachine::onRightBtn);
+    prs->add(rightPrsBtn,nAlRight);
+    NButton* leftPrsBtn = new NButton("<");
+       leftPrsBtn->setFlat(false);
+       leftPrsBtn->clicked.connect(this,&FrameMachine::onLeftBtn);
+    prs->add(leftPrsBtn,nAlRight);
+    prsPanel = new NTogglePanel();
+      NFlowLayout* fl = new NFlowLayout(nAlLeft,5,5);
+        fl->setLineBreak(false);
+      prsPanel->setLayout(fl,true);
+    prs->add(prsPanel, nAlClient);
+  pane()->add(prs, nAlBottom);
 }
 
 
@@ -89,6 +134,9 @@ void FrameMachine::initParameterGUI( )
     knobPanel->setLayout(gridLayout,true);
   pane()->add(knobPanel,nAlClient);
 
+  NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
+    font.setTextColor(Global::pConfig()->machineGUITopColor);
+  knobPanel->setFont(font);
 
   int numParameters = pMachine_->GetNumParams();
   int cols = pMachine_->GetNumCols();
@@ -313,7 +361,129 @@ Machine * FrameMachine::pMac( )
 
 void FrameMachine::updateValues( )
 {
-  knobPanel->removeChilds();
-  initParameterGUI();
+  int numParameters = pMachine_->GetNumParams();
+  int cols = pMachine_->GetNumCols();
+  int rows = numParameters/cols;
+
+
+  for (int c=0; c<numParameters; c++) {
+     int min_v,max_v,val_v;
+     int newC = format(c,cols,rows);
+     pMachine_->GetParamRange(newC,min_v,max_v);
+     bool bDrawKnob = (min_v==max_v)?false:true;
+     if (!bDrawKnob) {
+     } else {
+        Knob* cell = (Knob*) knobPanel->visualComponents().at(c);
+        char buffer[128];
+        pMachine_->GetParamValue(format(c,cols,rows),buffer);
+        int val_v = pMachine_->GetParamValue(format(c,cols,rows));
+        cell->setValue(val_v);
+        int min_v; int max_v;
+        pMachine_->GetParamRange(format(c,cols,rows),min_v,max_v);
+        cell->setRange(min_v,max_v);
+        cell->setValueAsText(buffer);
+     }
+  }
+
   knobPanel->repaint();
 }
+
+
+
+void FrameMachine::loadPresets() {
+  std::string filename(pMac()->GetDllName());
+
+  std::string::size_type pos = filename.find('.')  ;
+  if ( pos == std::string::npos ) {
+    filename  = filename + '.' + "prs";
+  } else {
+    filename = filename.substr(0,pos)+".prs";
+  }
+
+  try {
+     DeSerializer f(Global::pConfig()->prsPath+filename);
+
+     int numpresets = f.getInt();
+     int filenumpars = f.getInt();
+
+     if (numpresets >= 0) {
+       // old file format .. do not support so far ..
+     } else {
+       // new file format
+       if (filenumpars == 1) {
+         int filepresetsize;
+         // new preset format version 1
+         // new preset format version 1
+
+         int numParameters = ((Plugin*) pMac())->GetInfo()->numParameters;
+         int sizeDataStruct = ((Plugin *) pMac())->proxy().GetDataSize();
+
+         numpresets = f.getInt();
+         filenumpars = f.getInt();
+         filepresetsize = f.getInt();
+
+         if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) return;
+
+         while (!f.eof() ) {
+           Preset newPreset(numParameters, sizeDataStruct);
+           newPreset.loadFromFile(&f);
+           NButton* prsBtn = new NButton(newPreset.name());
+             prsBtn->setFlat(false);
+             prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
+           prsPanel->add(prsBtn);
+           presetMap[prsBtn] = newPreset;
+         }
+       }
+     }
+  } catch (const char * e) {
+     // couldn`t open presets
+  }
+}
+
+void FrameMachine::onLeftBtn( NButtonEvent * ev )
+{
+  prsPanel->setScrollDx(std::max(0,prsPanel->scrollDx()-100));
+  prsPanel->repaint();
+}
+
+void FrameMachine::onRightBtn( NButtonEvent * ev )
+{
+  prsPanel->setScrollDx(std::min(prsPanel->preferredWidth() - prsPanel->clientWidth(),prsPanel->scrollDx()+100));
+  prsPanel->repaint();
+}
+
+void FrameMachine::onPrsClick( NButtonEvent * ev )
+{
+  std::map<NButton*,Preset>::iterator itr;
+  if ( (itr = presetMap.find((NButton*)ev->sender())) != presetMap.end() ) {
+        itr->second.tweakMachine(pMac() );
+    }
+  updateValues();
+}
+
+void FrameMachine::onAddPrs( NButtonEvent * ev )
+{
+  NewNameDlg* dlg = new NewNameDlg();
+  add(dlg);
+  dlg->execute();
+  NApp::addRemovePipe(dlg);
+}
+
+void FrameMachine::onLoadPrs( NButtonEvent * ev )
+{
+  NFileDialog* dlg = new NFileDialog();
+  add(dlg);
+  dlg->setPosition(10,10,500,500);
+  dlg->execute();
+  NApp::addRemovePipe(dlg);
+}
+
+Preset FrameMachine::knobsPreset( )
+{
+  Preset prs;
+
+  return prs;
+}
+
+
+
