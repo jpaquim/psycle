@@ -1754,7 +1754,7 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
        PatternEntry entry;
        entry._note = 120+0;
        entry._inst = Global::pSong()->auxcolSelected;
-       entry._mach = Global::pSong()->seqBus;
+       entry._mach = Global::pSong()->seqBus;;
        entry._cmd = 0;
        entry._parameter = 0;
 
