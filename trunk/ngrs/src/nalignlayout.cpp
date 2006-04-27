@@ -53,7 +53,9 @@ void NAlignLayout::align( NVisualComponent * parent )
            case nAlRight: {
                   int topOff     = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() +vgap_  ;
                   int bottomOff  = (lastBottom == 0) ? vgap_ : parent->clientHeight() - lastBottom->top() - vgap_;
-                  visualChild->setLeft(parent->clientWidth()-visualChild->preferredWidth()+hgap_);
+                  int rightOff = (lastRight  == 0) ? parent->clientWidth() - hgap_ : lastRight->left() - hgap_;
+
+                  visualChild->setLeft(rightOff-visualChild->preferredWidth());
                   visualChild->setTop ( topOff );
                   visualChild->setWidth(visualChild->preferredWidth());
                   visualChild->setHeight(parent->clientHeight() - topOff - bottomOff );
@@ -119,7 +121,8 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
   for (;itr < parent()->visualComponents().end(); itr++) {
      NVisualComponent* visualChild = *itr;
      switch (visualChild->align()) {
-       case nAlTop    : topMax = std::max(visualChild->preferredWidth(),topMax);
+       case nAlTop    : 
+           topMax = std::max(visualChild->preferredWidth(),topMax);
        break;
        case nAlLeft   : xp = xp + visualChild->preferredWidth();
        break;
@@ -140,15 +143,45 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
   int yp = 0;
   int topMax = 0;
 
+  NVisualComponent* lastLeft    = 0;
+  NVisualComponent* lastRight  = 0;
+  NVisualComponent* lastTop     = 0;
+  NVisualComponent* lastBottom  = 0;
+
   std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
 
   for (;itr < parent()->visualComponents().end(); itr++) {
      NVisualComponent* visualChild = *itr;
      switch (visualChild->align()) {
-       case nAlLeft   : yp = std::max(topMax,visualChild->preferredHeight());  break;
-       case nAlTop    : yp = yp + visualChild->preferredHeight();  break;
-       case nAlBottom : yp = yp + visualChild->preferredHeight();  break;
-       case nAlClient : yp = yp + visualChild->preferredHeight();  break;
+       case nAlLeft   :
+           lastLeft = visualChild;
+           yp = visualChild->preferredHeight();
+       break;
+        case nAlRight   :
+           lastRight = visualChild;
+           yp = visualChild->preferredHeight();
+       break;
+       case nAlTop    : {
+           lastTop = visualChild;
+           int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
+           int bottomOff  = (lastBottom == 0) ? vgap_ : parent()->clientHeight() - lastBottom->top() + vgap_ ;
+           yp = topOff + bottomOff;
+          }
+       break;
+       case nAlBottom : {
+           lastBottom = visualChild;
+           lastTop = visualChild;
+           int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
+           int bottomOff  = (lastBottom == 0) ? vgap_ : parent()->clientHeight() - lastBottom->top() + vgap_ ;
+           yp = topOff + bottomOff;
+         }
+       break;
+       case nAlClient : {
+           int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
+           int bottomOff  = (lastBottom == 0) ? vgap_ : parent()->clientHeight() - lastBottom->top() + vgap_ ;
+           yp = visualChild->preferredHeight() + topOff + bottomOff;
+       }
+       break;
       }
   }
 
