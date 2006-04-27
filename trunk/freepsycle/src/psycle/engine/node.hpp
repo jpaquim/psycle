@@ -74,7 +74,7 @@ namespace psycle
 			///\{
 				public:
 					/// called by schedulers
-					void inline     open() throw(std::exception) { if(!opened()) do_open(); }
+					void inline     open() throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
 					bool virtual    opened() const;
 				protected:
 					void virtual do_open() throw(std::exception);
@@ -84,7 +84,7 @@ namespace psycle
 			///\{
 				public:
 					/// called by schedulers
-					void virtual    start() throw(std::exception) { open(); if(!started()) do_start(); }
+					void virtual    start() throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
 					bool virtual    started() const;
 				protected:
 					void virtual do_start() throw(std::exception);
@@ -109,7 +109,7 @@ namespace psycle
 					void virtual do_process() throw(std::exception) = 0;
 		
 				public:
-					/// called by schedulers, reset the state of this node so that it prepares for the next call to visit_and_process()
+					/// called by schedulers, reset the state of this node so that it prepares for the next call to process()
 					void inline     reset();
 				protected:
 					void virtual do_reset() {}

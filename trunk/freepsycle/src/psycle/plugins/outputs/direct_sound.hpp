@@ -43,29 +43,30 @@ namespace psycle
 			{
 				public:
 					direct_sound(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(universalis::operating_system::exception);
-					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened() const;
+					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened()  const;
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
 				protected:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open() throw(universalis::operating_system::exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start() throw(universalis::operating_system::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open()    throw(universalis::operating_system::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start()   throw(universalis::operating_system::exception);
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(universalis::operating_system::exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop() throw(universalis::operating_system::exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close() throw(universalis::operating_system::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop()    throw(universalis::operating_system::exception);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close()   throw(universalis::operating_system::exception);
 				private:
-					::IDirectSound * direct_sound_;
-					::IDirectSound inline & direct_sound_instance() throw() { assert(direct_sound_); return *direct_sound_; }
+					::IDirectSound        * direct_sound_;
+					::IDirectSound inline & direct_sound() throw() { assert(direct_sound_); return *direct_sound_; }
+
+					typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
+					output_sample_type last_sample_;
+
 					::IDirectSoundBuffer mutable * buffer_;
-					::IDirectSoundBuffer inline & buffer() throw() { assert(buffer_); return *buffer_; }
-					::IDirectSoundBuffer inline & buffer() const throw() { assert(buffer_); return *buffer_; }
-					unsigned char bits_per_sample_;
-					bool allocate_buffer() throw(universalis::operating_system::exception);
+					::IDirectSoundBuffer inline  & buffer()       throw() { assert(buffer_); return *buffer_; }
+					::IDirectSoundBuffer inline  & buffer() const throw() { assert(buffer_); return *buffer_; }
+
 					bool write_primary_;
+					unsigned int buffers_, buffer_size_, total_buffer_size_;
+					/// position in byte offset
+					unsigned int current_position_;
 					unsigned int samples_per_buffer_;
-					unsigned int buffers_;
-					unsigned int total_buffering_size_;
-					unsigned int bytes_per_buffer_;
-					unsigned int current_buffer_;
-					universalis::compiler::numeric<16>::signed_int last_sample_;
 			};
 		}
 	}
