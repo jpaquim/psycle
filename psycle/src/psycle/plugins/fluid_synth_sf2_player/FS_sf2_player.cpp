@@ -797,7 +797,7 @@ void mi::BuildPresets()
                                 cur_bank = (*(preset)->get_banknum)(preset);
                                 max_bank_index++;
                                 banks[max_bank_index] = cur_bank;
-                                progs[max_bank_index] = (*(preset)->get_num)(preset);
+                                progs[cur_bank] = (*(preset)->get_num)(preset);
                         }
                 }
         }
