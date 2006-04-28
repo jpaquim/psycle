@@ -4,7 +4,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <fluidsynth/fluidsynth.h>
-#include <memory.h>
+//#include <memory.h>
 
 #define NUMPARAMETERS   24
 #define FILEVERSION             1
@@ -47,7 +47,7 @@ struct SYNPAR
 
 CMachineParameter const paraChannel = 
 {
-        "Channel", "Channel", 0, MAXMIDICHAN, MPF_STATE, 0
+        "Channel", "Channel", 0, MAXMIDICHAN-1, MPF_STATE, 1
 };
 
 CMachineParameter const paraBank = 
@@ -67,7 +67,7 @@ CMachineParameter const paraPitchBend =
 
 CMachineParameter const paraWheelSens = 
 {
-        "Wheel sens", "Wheel", -127, 127, MPF_STATE, 0
+        "Wheel sens", "Wheel", 0, 127, MPF_STATE, 0
 };
 
 
@@ -280,7 +280,7 @@ mi::~mi()
         delete Vals;
         
         if (synth) delete_fluid_synth(synth);
-    if (settings) delete_fluid_settings(settings);
+		if (settings) delete_fluid_settings(settings);
 
 }
 
@@ -343,9 +343,9 @@ void mi::Init()
         fluid_settings_setstr(settings, "synth.verbose", "yes");
 #endif
         fluid_settings_setint(settings, "synth.sample-rate", pCB->GetSamplingRate());
-    fluid_settings_setint(settings, "synth.polyphony", globalpar.polyphony);
+		fluid_settings_setint(settings, "synth.polyphony", globalpar.polyphony);
         fluid_settings_setint(settings, "synth.interpolation", globalpar.interpolation);
-    fluid_settings_setint(settings, "synth.midi-channels", globalpar.midi_channels);
+		fluid_settings_setint(settings, "synth.midi-channels", globalpar.midi_channels);
         
         synth = new_fluid_synth(settings);
         SetParams();
@@ -359,20 +359,20 @@ void mi::SetParams()
  //   fluid_settings_setint(settings, "synth.midi-channels", globalpar.midi_channels);
 
         fluid_synth_set_interp_method(synth, -1, globalpar.interpolation);
-    fluid_synth_set_polyphony(synth, globalpar.polyphony);
+		fluid_synth_set_polyphony(synth, globalpar.polyphony);
 
         fluid_synth_set_reverb_on(synth, globalpar.reverb_on);
         if(globalpar.reverb_on)
         {
                 fluid_synth_set_reverb(synth, roomsize, damping, width, r_level);
         }
-    fluid_synth_set_chorus_on(synth, globalpar.chorus_on);
+		fluid_synth_set_chorus_on(synth, globalpar.chorus_on);
         if(globalpar.chorus_on)
         {
                 fluid_synth_set_chorus(synth, nr, c_level, speed, depth_ms, type);
         }
 
-    fluid_synth_system_reset( synth );
+		fluid_synth_system_reset( synth );
     
         for (int i=0;i<MAX_TRACKS;i++) lastnote[i]=255;
 }
@@ -392,14 +392,14 @@ void mi::PutData(void* pData)
                 Vals[e_paraBank]                =       globalpar.curBank;
                 Vals[e_paraProgram]             =       globalpar.curProgram;
 
-                Vals[e_paraPitchBend]   =       globalpar.Pitch;
-                Vals[e_paraWheelSens]   =       globalpar.WheelSens;
+                Vals[e_paraPitchBend]			=       globalpar.Pitch;
+                Vals[e_paraWheelSens]			=       globalpar.WheelSens;
 
                 Vals[e_paraReverb]              =       globalpar.reverb_on;
-                Vals[e_paraReverbRoom]  =       globalpar.roomsize;
-                Vals[e_paraReverbDamp]  =       globalpar.damping;
-                Vals[e_paraReverbWidth] =       globalpar.width;
-                Vals[e_paraReverbLevel] =       globalpar.r_level;
+                Vals[e_paraReverbRoom]			=       globalpar.roomsize;
+                Vals[e_paraReverbDamp]			=       globalpar.damping;
+                Vals[e_paraReverbWidth]			=       globalpar.width;
+                Vals[e_paraReverbLevel]			=       globalpar.r_level;
                 
                 roomsize         =      (double)globalpar.roomsize * .01;
                 damping          =      (double)globalpar.damping * .01;
@@ -407,17 +407,17 @@ void mi::PutData(void* pData)
                 r_level          =      (double)globalpar.r_level * .001;
 
                 Vals[e_paraChorus]              =       globalpar.chorus_on;
-                Vals[e_paraChorusNr]    =       nr = globalpar.nr;
-                Vals[e_paraChorusLevel] =       globalpar.c_level;
-                Vals[e_paraChorusSpeed] =       globalpar.speed;
-                Vals[e_paraChorusDepth] =       globalpar.depth_ms;
-                Vals[e_paraChorusType]  =       type = globalpar.type;
+                Vals[e_paraChorusNr]			=       nr = globalpar.nr;
+                Vals[e_paraChorusLevel]			=       globalpar.c_level;
+                Vals[e_paraChorusSpeed]			=       globalpar.speed;
+                Vals[e_paraChorusDepth]			=       globalpar.depth_ms;
+                Vals[e_paraChorusType]			=       type = globalpar.type;
 
                 c_level         =       (double)globalpar.c_level * .001;
                 speed           =       (double)globalpar.speed * .1;
                 depth_ms        =       (double)globalpar.depth_ms;
 
-                Vals[e_paraPolyphony]   =       globalpar.polyphony;
+                Vals[e_paraPolyphony]			=       globalpar.polyphony;
                 Vals[e_paraInter]               =       globalpar.interpolation;
 
                 SetParams();
@@ -438,7 +438,11 @@ void mi::GetData(void* pData)
 
 void mi::Stop()
 {
-        fluid_synth_system_reset(synth);
+	//fluid_synth_system_reset(synth);
+	for(int chan=0;chan<MAXMIDICHAN;chan++)
+	{
+		fluid_synth_all_sounds_off(synth,chan);
+	}
 }
 
 void mi::SequencerTick()
@@ -456,17 +460,14 @@ void mi::ParameterTweak(int par, int val)
         {
                 case e_paraChannel:
                         globalpar.curChannel = val;
-                        if(synth)
-                        {
-                                preset = fluid_synth_get_channel_preset(synth, globalpar.curChannel);
-                                if(preset!=NULL)
-                                {
-                                        globalpar.curBank = (*(preset)->get_banknum)(preset);
-                                        Vals[e_paraBank] = globalpar.curBank;
-                                        globalpar.curProgram = (*(preset)->get_num)(preset);
-                                        Vals[e_paraProgram] = globalpar.curProgram;
-                                }
-                        }
+						preset = fluid_synth_get_channel_preset(synth, globalpar.curChannel);
+						if(preset!=NULL)
+						{
+							globalpar.curBank = (*(preset)->get_banknum)(preset);
+							Vals[e_paraBank] = globalpar.curBank;
+							globalpar.curProgram = (*(preset)->get_num)(preset);
+							Vals[e_paraProgram] = globalpar.curProgram;
+						}
                         break;
                 case e_paraBank:
                         if (Vals[par]>max_bank_index && max_bank_index!=-1)
@@ -577,11 +578,11 @@ void mi::ParameterTweak(int par, int val)
                         }
                         break;
                 case e_paraPolyphony:
-            globalpar.polyphony = val;
+						globalpar.polyphony = val;
                         fluid_synth_set_polyphony(synth, globalpar.polyphony);
                         break;
                 case e_paraInter:
-            globalpar.interpolation = val;
+						globalpar.interpolation = val;
                         fluid_synth_set_interp_method(synth, -1, globalpar.interpolation);
                         break;
                 default:
@@ -702,9 +703,14 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
         if (note<120)
         {
-        if (lastnote[channel]!=255) fluid_synth_noteoff(synth, globalpar.curChannel, lastnote[channel]);
-        lastnote[channel] = note;
-        fluid_synth_noteon(synth, globalpar.curChannel, note, 127);
+			if (lastnote[channel]!=255) fluid_synth_noteoff(synth, globalpar.curChannel, lastnote[channel]);
+			lastnote[channel] = note;
+			if (cmd==0xC)
+			{
+				fluid_synth_noteon(synth, globalpar.curChannel, note, int(val/2));
+			} else {
+				fluid_synth_noteon(synth, globalpar.curChannel, note, 127);
+			}
         }
         if (note==120)
         {
@@ -739,38 +745,33 @@ void mi::Command()
 bool mi::LoadSF(const char *sf_file)
 {
         if(fluid_is_soundfont(sf_file))
-                {
-                        if(sf_id)
-                        {
-                                fluid_synth_sfunload(synth,sf_id,1);
-                                fluid_synth_system_reset(synth);
-                        }
-                        sf_id = fluid_synth_sfload(synth, sf_file, 1);
-                        if(sf_id==-1)
-                        {
-                                pCB->MessBox("Error loading!","SF2 Loader",0);
-                                sf_id = 0;
-                                return false;
-                        }
+		{
+			if(sf_id)
+			{
+					fluid_synth_sfunload(synth,sf_id,1);
+					fluid_synth_system_reset(synth);
+			}
+			sf_id = fluid_synth_sfload(synth, sf_file, 1);
+			if(sf_id==-1)
+			{
+					pCB->MessBox("Error loading!","SF2 Loader",0);
+					sf_id = 0;
+					return false;
+			}
+			fluid_synth_system_reset(synth);
 
-                        BuildPresets();
+			BuildPresets();
 
-                        //for (int i=0;i<globalpar.midi_channels;i++)
-                        //{
-                        //      //fluid_synth_sfont_select(synth, i, sf_id);
-                        //      fluid_synth_bank_select(synth, i, 0);
-                        //}
+			std::sprintf(globalpar.SFPathName, sf_file);
 
-                        
-                        
-                        std::sprintf(globalpar.SFPathName, sf_file);
+			return true;
 
-                        return true;
-
-                } else {
-                        pCB->MessBox("It's not a SoundFont file or file not found!","SF2 Loader",0);
-                        return false;
-                }
+		} else {
+			char txt[1024];
+			std::sprintf(txt,"It's not a SoundFont file or file %s not found!",sf_file);
+			pCB->MessBox(txt,"SF2 Loader",0);
+			return false;
+		}
 }
 
 void mi::BuildPresets()
@@ -809,5 +810,7 @@ void mi::BuildPresets()
                                 fluid_synth_bank_select(synth, i, banks[0]);
                                 fluid_synth_program_change(synth, i, progs[banks[0]]);
                         }
+						Vals[e_paraBank] = globalpar.curBank = banks[0];
+                        globalpar.curProgram = Vals[e_paraProgram] = progs[banks[0]];
         }
 }
