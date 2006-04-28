@@ -88,8 +88,8 @@ extern "C" {
 #include <fluidsynth/audio.h>
 #include <fluidsynth/event.h>
 #include <fluidsynth/midi.h>
-#include <fluidsynth/seq.h>
-#include <fluidsynth/seqbind.h>
+//#include <fluidsynth/seq.h>
+//#include <fluidsynth/seqbind.h>
 #include <fluidsynth/log.h>
 #include <fluidsynth/misc.h>
 #include <fluidsynth/mod.h>

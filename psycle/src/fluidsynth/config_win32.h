@@ -24,7 +24,7 @@
 #define WIN32  1
 #endif
 
-#define WITH_PROFILING 1
+#define WITH_PROFILING 0
 
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4101)

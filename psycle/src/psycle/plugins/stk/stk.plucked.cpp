@@ -11,10 +11,10 @@
 #include <stk/stk.h>
 #include <stk/Plucked.h>
 #include <stk/ADSR.h>
-#include <stdlib.h>
-#include <vector>
 
 #define NUMPARAMETERS 5
+
+StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
 
 CMachineParameter const paraVolume = 
 {
@@ -115,6 +115,7 @@ private:
 	Plucked track[MAX_TRACKS];
 	ADSR	adsr[MAX_TRACKS];
 	float	vol_ctrl[MAX_TRACKS];
+	StkFloat n2f[NOTE_MAX];
 	std::vector<int> w_tracks;
 };
 
@@ -123,6 +124,11 @@ PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 mi::mi()
 {
 	Vals=new int[NUMPARAMETERS];
+
+	for (int note=0;note<NOTE_MAX;note++)
+	{
+		n2f[note]= std::pow(2., (note - offset) / 12);
+	}
 }
 
 mi::~mi()
@@ -155,7 +161,8 @@ void mi::Stop()
 {
 	for(int c=0;c<MAX_TRACKS;c++)
 	{
-		track[c].noteOff(0.0);
+		adsr[c].keyOff();
+		//track[c].noteOff(0.0);
 		track[c].clear();
 	}
 }
@@ -267,14 +274,14 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 		// Note on
 		{
 			adsr[channel].keyOn();
-			StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
-			StkFloat const frequency = std::pow(2., (note - offset) / 12);
-			track[channel].noteOff(0.0);
-			track[channel].noteOn(frequency,1.0);
+			//StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
+			//StkFloat const frequency = std::pow(2., (note - offset) / 12);
+			//track[channel].noteOff(0.0);
+			track[channel].noteOn(n2f[note],1.0);
 		}
-		track[channel].tick();
+		//track[channel].tick();
 	}
-	adsr[channel].tick();
+	//adsr[channel].tick();
 	
 	if( cmd == 0x0C) vol_ctrl[channel] = val * .003921568627450980392156862745098f; // 1/255
 }
