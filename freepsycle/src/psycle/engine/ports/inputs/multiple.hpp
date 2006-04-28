@@ -6,20 +6,8 @@
 #pragma once
 #include "../input.hpp"
 #include <vector>
-#if defined PSYCLE__EXPERIMENTAL
-	#include <psycle/generic/generic.hpp>
-#endif
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE__PORTS__INPUTS__MULTIPLE
 #include <universalis/compiler/dynamic_link/begin.hpp>
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#if defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
 namespace psycle
 {
 	namespace engine
@@ -28,9 +16,8 @@ namespace psycle
 		{
 			namespace inputs
 			{
-				typedef generic::ports::inputs::multiple<typenames::typenames> multiple_base;
 				/// handles an input stream of signal coming to a node.
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
 				{
 					friend class node;
 	
@@ -55,68 +42,4 @@ namespace psycle
 		}
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#else // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
-namespace psycle
-{
-	namespace engine
-	{
-		namespace ports
-		{
-			namespace inputs
-			{
-				/// handles an input stream of signal coming to a node.
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public input
-				{
-					friend class node;
-	
-					public:
-						multiple(engine::node &, name_type const &, bool const & single_connection_is_identity_transform, int const & channels = 0);
-						virtual ~multiple() throw();
-		
-					public:	
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES disconnect_all();
-	
-					protected:
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES    connect_internal_side(output &);
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES disconnect_internal_side(output &);
-	
-					protected:
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_channels() throw(exception);
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_seconds_per_event();
-		
-					public:
-						typedef std::vector<ports::output*> output_ports_type;
-						output_ports_type inline const & output_ports() const throw() { return output_ports_; }
-					private:
-						output_ports_type                output_ports_;
-						
-					public:
-						bool inline const & single_connection_is_identity_transform() const throw() { return single_connection_is_identity_transform_; }
-					private:
-						bool                single_connection_is_identity_transform_;
-		
-					public:
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES dump(std::ostream &, int const & tabulations = 0) const;
-				};
-			}
-		}
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#endif // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
 #include <universalis/compiler/dynamic_link/end.hpp>

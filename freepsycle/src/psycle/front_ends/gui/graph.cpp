@@ -17,11 +17,11 @@ namespace psycle
 	{
 		namespace gui
 		{
-			graph::graph(std::string const & name, host::plugin_resolver & resolver)
+			graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 			:
+				graph_type(underlying),
 				resolver_(resolver),
-				graph_(name),
-				scheduler_(graph_instance()),
+				scheduler_(*this),
 				start_("play"),
 				canvas_(*this),
 				adjustment_(1.00, 0.05, 5.00, 0.001, 0.1, 0.1),
@@ -267,36 +267,46 @@ namespace psycle
 				return false;
 			}
 
-			node::node(graph & graph, engine::node & node, real const & x, real const & y)
+			node::node(node::parent_type & parent, node::underlying_type & underlying, real const & x, real const & y)
 			:
-				Gnome::Canvas::Group(graph, x, y),
-				graph_(graph),
-				contraption_(*this, 0, 0, 0x60606000, node.name() + "\n" + node.plugin_library_reference_instance().name()),
-				node_(node)
+				node_type(parent, underlying),
+				Gnome::Canvas::Group(parent, x, y),
+				contraption_(*this, 0, 0, 0x60606000, underlying.name() + "\n" + underlying.plugin_library_reference_instance().name())
 			{
-				int const ports(node.single_input_ports().size() + node.output_ports().size() + (node.multiple_input_port() ? 1 : 0));
+			}
+
+			void node::init()
+			{
+				node_type::init();
+				int const ports(single_input_ports().size() + output_ports().size() + (multiple_input_port() ? 1 : 0));
 				real const angle_step(engine::math::pi * 2 / ports);
 				real const radius(60);
 				real angle(0);
-				for(engine::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i)
+				for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i)
 				{
-					engine::ports::output & output_port(**i);
+					typenames::ports::output & output_port(**i);
+					Gtk::manage(&output_port);
 					real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
-					output_ports_.push_back(Gtk::manage(new ports::output(*this, output_port, x, y)));
+					output_port.contraption_instance().property_parent().get_value()->move(x, y);
+					output_port.contraption_instance().signal_move()(output_port.contraption_instance());
 					angle += angle_step;
 				}
-				if(node.multiple_input_port())
+				if(multiple_input_port())
 				{
-					engine::ports::inputs::multiple & multiple_input_port(*node.multiple_input_port());
+					typenames::ports::inputs::multiple & multiple_input_port(*this->multiple_input_port());
+					Gtk::manage(&multiple_input_port);
 					real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
-					multiple_input_port_ = Gtk::manage(new ports::inputs::multiple(*this, multiple_input_port, x, y));
+					multiple_input_port.contraption_instance().property_parent().get_value()->move(x, y);
+					multiple_input_port.contraption_instance().signal_move()(multiple_input_port.contraption_instance());
 					angle += angle_step;
 				}
-				for(engine::node::single_input_ports_type::const_iterator i(node.single_input_ports().begin()) ; i != node.single_input_ports().end() ; ++i)
+				for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i)
 				{
-					engine::ports::inputs::single & single_input_port(**i);
+					typenames::ports::inputs::single & single_input_port(**i);
+					Gtk::manage(&single_input_port);
 					real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
-					input_ports_.push_back(Gtk::manage(new ports::inputs::single(*this, single_input_port, x, y)));
+					single_input_port.contraption_instance().property_parent().get_value()->move(x, y);
+					single_input_port.contraption_instance().signal_move()(single_input_port.contraption_instance());
 					angle += angle_step;
 				}
 				contraption_instance().raise_to_top();
@@ -346,11 +356,10 @@ namespace psycle
 				return false;
 			}
 
-			port::port(node & node, port::underlying_type & underlying, real const & x, real const & y, color const & color)
+			port::port(port::parent_type & parent, port::underlying_type & underlying, real const & x, real const & y, color const & color)
 			:
-				underlying_wrapper_type(underlying),
-				Gnome::Canvas::Group(node, x, y),
-				node_(node),
+				port_type(parent, underlying),
+				Gnome::Canvas::Group(parent, x, y),
 				contraption_(*this, 0, 0, color, underlying.name()),
 				line_(contraption_instance())
 			{
@@ -365,15 +374,15 @@ namespace psycle
 
 			void port::on_select(contraption & contraption)
 			{
-				if(!node_instance().graph_instance().canvas_instance().selected_port())
-					node_instance().graph_instance().canvas_instance().selected_port(*this);
+				if(!parent().parent().canvas_instance().selected_port())
+					parent().parent().canvas_instance().selected_port(*this);
 			}
 			
 			void port::on_move(contraption & contraption)
 			{
 				Gnome::Canvas::Points points(2);
 				points[0] = Gnome::Art::Point(0, 0);
-				real node_x(node_instance().property_x()), node_y(node_instance().property_y());
+				real node_x(parent().property_x()), node_y(parent().property_y());
 				w2i(node_x, node_y);
 				points[1] = Gnome::Art::Point(node_x, node_y);
 				line().property_points() = points;
@@ -426,29 +435,29 @@ namespace psycle
 
 			namespace ports
 			{
-				output::output(node & node, output::underlying_type & underlying, real const & x, real const & y)
+				output::output(output::parent_type & parent, output::underlying_type & underlying, real const & x, real const & y)
 				:
-					underlying_wrapper_type(node, underlying, x, y, 0xa0600000)
+					output_type(parent, underlying, x, y, boost::cref(color(0xa0600000)))
 				{
 				}
 
-				input::input(node & node, input::underlying_type & underlying, real const & x, real const & y, color const & color)
+				input::input(input::parent_type & parent, input::underlying_type & underlying, real const & x, real const & y, color const & color)
 				:
-					underlying_wrapper_type(node, underlying, x, y, color)
+					input_type(parent, underlying, x, y, color)
 				{
 				}
 				
 				namespace inputs
 				{
-					single::single(node & node, single::underlying_type & underlying, real const & x, real const & y)
+					single::single(single::parent_type & parent, single::underlying_type & underlying, real const & x, real const & y)
 					:
-						underlying_wrapper_type(node, underlying, x, y, 0x00a00000)
+						single_type(parent, underlying, x, y, boost::cref(color(0x00a00000)))
 					{
 					}
 
-					multiple::multiple(node & node, multiple::underlying_type & underlying, real const & x, real const & y)
+					multiple::multiple(multiple::parent_type & parent, multiple::underlying_type & underlying, real const & x, real const & y)
 					:
-						underlying_wrapper_type(node, underlying, x, y, 0x0060a000)
+						multiple_type(parent, underlying, x, y, boost::cref(color(0x0060a000)))
 					{
 					}
 				}
@@ -505,7 +514,7 @@ namespace psycle
 							case 2:
 							{
 								window_to_world(x, y, x, y);
-								node & node_instance(*Gtk::manage(new node(graph_instance(), graph_instance().resolver()("sine", graph_instance(), "node"), x, y)));
+								node & node_instance(*Gtk::manage(&node::create(graph_instance(), graph_instance().resolver()("sine", graph_instance(), "node"), x, y)));
 								//return true;
 							}
 							break;

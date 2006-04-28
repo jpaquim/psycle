@@ -6,8 +6,8 @@
 #pragma once
 #include "forward_declarations.hpp"
 #include "color.hpp"
-#include <psycle/engine/engine.hpp>
-#include <psycle/host/host.hpp>
+#include <psycle/engine.hpp>
+#include <psycle/host.hpp>
 #include <universalis/compiler/cast.hpp>
 #include <boost/signal.hpp>
 #include <gtkmm/adjustment.h>
@@ -67,11 +67,38 @@ namespace psycle
 					Gnome::Canvas::Line line_;
 			};
 			
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public Gtk::VBox
+			namespace underlying = engine;
+
+			class graph;
+			class node;
+			class port;
+			namespace ports
+			{
+				class output;
+				namespace inputs
+				{
+					class single;
+					class multiple;
+				}
+			}
+
+			namespace typenames
+			{
+				using namespace gui;
+				class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
+			}
+
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
+			:
+				public typenames::typenames::bases::graph,
+				public Gtk::VBox
 			{
 				public:
 					typedef Gtk::VBox base;
-					graph(std::string const & name, host::plugin_resolver & resolver);
+
+				protected:
+					graph(underlying_type &, host::plugin_resolver & resolver); friend class generic_access;
+				public:
 					virtual ~graph() throw();
 
 				public:
@@ -79,12 +106,6 @@ namespace psycle
 				private:
 					host::plugin_resolver & resolver_;
 
-				public:
-					engine::graph inline & graph_instance() { return graph_; }
-					inline operator engine::graph & () { return graph_instance(); }
-				private:
-					engine::graph graph_;
-					
 				protected:
 					host::schedulers::single_threaded::scheduler inline & scheduler() throw() { return scheduler_; }
 				private:
@@ -174,77 +195,18 @@ namespace psycle
 				///\}
 			};
 
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public Gnome::Canvas::Group
-			{
-				public:
-					node(graph &, engine::node &, real const & x, real const & y);
-					
-				public:
-					graph inline & graph_instance() throw() { return graph_; }
-				private:
-					graph & graph_;
-				
-				protected:
-					contraption inline & contraption_instance() throw() { return contraption_; }
-				private:
-					contraption contraption_;
-				
-				public:
-					engine::node inline & node_instance() throw() { return node_; }
-					inline operator engine::node & () throw() { return node_instance(); }
-				private:
-					engine::node & node_;
-					
-				protected:
-					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
-					
-				friend class port;
-		
-				public:
-					typedef std::vector<ports::output*> output_ports_type;
-					/// the output ports owned by this node
-					output_ports_type inline const & output_ports() const { return output_ports_; }
-					/// finds an output port by its name
-					ports::output * const output_port(std::string const & name) const;
-				private:
-					friend class ports::output;
-					output_ports_type output_ports_;
-		
-				friend class ports::input;
-	
-				public:
-					typedef std::vector<ports::inputs::single*> input_ports_type;
-					/// the input ports owned by this node
-					input_ports_type inline const & input_ports() const { return input_ports_; }
-					/// finds an input port by its name
-					ports::input * const input_port(std::string const & name) const;
-				private:
-					friend class ports::inputs::single;
-					input_ports_type input_ports_;
-					
-				public:
-					ports::inputs::multiple inline * const multiple_input_port() const throw() { return multiple_input_port_; }
-				protected:
-					void inline multiple_input_port(ports::inputs::multiple & multiple_input_port) throw() { assert(!this->multiple_input_port()); this->multiple_input_port_ = &multiple_input_port; }
-				private:
-					friend class ports::inputs::multiple;
-					ports::inputs::multiple * multiple_input_port_;
-			};
-
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
 			:
-				public universalis::compiler::cast::underlying_wrapper<engine::port>,
+				public typenames::typenames::bases::port,
 				public Gnome::Canvas::Group
 			{
 				protected:
-					port(node &, underlying_type &, real const & x, real const & y, color const &);
+					port(parent_type &, underlying_type &, real const & x, real const & y, color const &);
 				
 				public:
-					node inline & node_instance() throw() { return node_; }
-				private:
-					node & node_;
+					~port() throw() {}
 
-				protected:
+				protected: friend class node;
 					contraption inline & contraption_instance() throw() { return contraption_; }
 				private:
 					contraption contraption_;
@@ -262,47 +224,55 @@ namespace psycle
 
 			namespace ports
 			{
-				namespace cast
-				{
-					template<typename Derived_Underlying, typename Base_Wrapper>
-					class underlying_wrapper
-					:
-						public Base_Wrapper,
-						public universalis::compiler::cast::underlying_wrapper<Derived_Underlying, Base_Wrapper>
-					{
-						UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__DISAMBIGUATES(Derived_Underlying, underlying_wrapper)
-						protected:
-							inline  underlying_wrapper(node & node, Derived_Underlying & underlying, real const & x, real const & y, color const & color) : Base_Wrapper(node, underlying, x, y, color) {}
-					};
-				}
-
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public cast::underlying_wrapper<engine::ports::output, port>
-				{
-					public:
-						output(node &, underlying_type &, real const & x, real const & y);
-				};
-
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public cast::underlying_wrapper<engine::ports::input, port>
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output
 				{
 					protected:
-						input(node &, underlying_type &, real const & x, real const & y, color const &);
+						output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
+				};
+
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input
+				{
+					protected:
+						input(parent_type &, underlying_type &, real const & x, real const & y, color const &); friend class generic_access;
 				};
 				
 				namespace inputs
 				{
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public cast::underlying_wrapper<engine::ports::inputs::single, input>
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single
 					{
-						public:
-							single(node &, underlying_type &, real const & x, real const & y);
+						protected:
+							single(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
 					};
 
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public cast::underlying_wrapper<engine::ports::inputs::multiple, input>
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
 					{
-						public:
-							multiple(node &, underlying_type &, real const & x, real const & y);
+						protected:
+							multiple(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
 					};
 				}
 			}
+
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
+			:
+				public typenames::typenames::bases::node,
+				public Gnome::Canvas::Group
+			{
+				protected:
+					node(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init();
+					
+				public:
+					~node() throw() {}
+
+				protected:
+					contraption inline & contraption_instance() throw() { return contraption_; }
+				private:
+					contraption contraption_;
+				
+				protected:
+					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+			};
+
 		}
 	}
 }

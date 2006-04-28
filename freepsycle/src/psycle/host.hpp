@@ -3,6 +3,6 @@
 // copyright 2004-2006 psycledelics http://psycle.pastnotecut.org
 
 ///\file
-///\brief meta header: all the psycle::engine interface in one header file inclusion.
+///\brief meta header: all the psycle::host interface in one header file inclusion.
 #pragma once
-#include "engine/engine.hpp"
+#include "host/host.hpp"

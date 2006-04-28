@@ -10,15 +10,6 @@
 #include "../output.hpp"
 #include "../../buffer.hpp"
 #include "../../node.hpp"
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#if defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
 namespace psycle
 {
 	namespace engine
@@ -29,7 +20,7 @@ namespace psycle
 			{
 				multiple::multiple(multiple::parent_type & parent, name_type const & name, bool const & single_connection_is_identity_transform, int const & channels)
 				:
-					multiple_base(parent, name, channels),
+					multiple_type(parent, name, channels),
 					single_connection_is_identity_transform_(single_connection_is_identity_transform)	
 				{
 					if(loggers::trace()())
@@ -73,127 +64,3 @@ namespace psycle
 		}
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#else // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
-namespace psycle
-{
-	namespace engine
-	{
-		namespace ports
-		{
-			namespace inputs
-			{
-				multiple::multiple(engine::node & node, std::string const & name, bool const & single_connection_is_identity_transform, int const & channels)
-				:
-					input(node, name, channels),
-					single_connection_is_identity_transform_(single_connection_is_identity_transform)	
-				{
-					if(loggers::trace()())
-					{
-						std::ostringstream s;
-						s << qualified_name() << " new port input multiple";
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					assert(!this->node().multiple_input_port());
-					this->node().multiple_input_port(*this);
-				}
-			
-				multiple::~multiple() throw()
-				{
-					if(loggers::trace()())
-					{
-						std::ostringstream s;
-						s << qualified_name() << " delete port input multiple";
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					disconnect_all();
-				}
-			
-				void multiple::disconnect_all()
-				{
-					while(!output_ports_.empty())
-						disconnect(*output_ports_.back());
-				}
-			
-				void multiple::connect_internal_side(output & output_port)
-				{
-					if(loggers::trace()())
-					{
-						std::ostringstream s;
-						s << "connecting multiple input port internal side to output port";
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
-					if(i != output_ports_.end())
-					{
-						if(loggers::warning()())
-						{
-							std::ostringstream s;
-							s << "already connected";
-							loggers::warning()(s.str());
-						}
-						return;
-					}
-					output_ports_.push_back(&output_port);
-				}
-			
-				void multiple::disconnect_internal_side(output & output_port)
-				{
-					if(loggers::trace()())
-					{
-						std::ostringstream s;
-						s << "disconnecting multiple input port internal side from output port";
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
-					if(i == output_ports_.end())
-					{
-						if(loggers::warning()())
-						{
-							std::ostringstream s;
-							s << "was not connected";
-							loggers::warning()(s.str());
-						}
-						return;
-					}
-					output_ports_.erase(i);
-				}
-			
-				void multiple::do_propagate_channels() throw(exception)
-				{
-					for(output_ports_type::iterator i(output_ports_.begin()); i != output_ports_.end() ; ++i)
-						(**i).propagate_channels_to_node(this->channels());
-				}
-			
-				void multiple::do_propagate_seconds_per_event()
-				{
-					for(output_ports_type::iterator i(output_ports_.begin()); i != output_ports_.end() ; ++i)
-						(**i).propagate_seconds_per_event_to_node(this->seconds_per_event());
-				}
-
-				void multiple::dump(std::ostream & out, const int & tabulations) const
-				{
-					port::dump(out, /*"in",*/ tabulations);
-					for(std::vector<output*>::const_iterator o = output_ports_.begin() ; o != output_ports_.end() ; ++o)
-						out << ' ' << (**o).semi_qualified_name();
-					out << std::endl;
-				}
-			}
-		}
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#endif // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////

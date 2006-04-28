@@ -13,6 +13,42 @@ namespace psycle
 {
 	namespace generic
 	{
+		namespace basic
+		{
+			template<typename> class graph;
+			template<typename> class node;
+			template<typename> class port;
+			namespace ports
+			{
+				template<typename> class output;
+				template<typename> class  input;
+				namespace inputs
+				{
+					template<typename> class   single;
+					template<typename> class multiple;
+				}
+			}
+		}
+
+		using namespace basic;
+
+		namespace wrappers
+		{
+			template<typename> class graph;
+			template<typename> class node;
+			template<typename> class port;
+			namespace ports
+			{
+				template<typename> class output;
+				template<typename> class  input;
+				namespace inputs
+				{
+					template<typename> class   single;
+					template<typename> class multiple;
+				}
+			}
+		}
+
 		template
 		<
 			typename               Graph,
@@ -28,6 +64,25 @@ namespace psycle
 		{
 			public:
 				typedef Underlying_Typenames underlying;
+				class bases
+				{
+					public:
+						typedef wrappers::graph<typenames> graph;
+						typedef wrappers::node <typenames> node;
+						typedef wrappers::port <typenames> port;
+						class ports
+						{
+							public:
+								typedef wrappers::ports::output<typenames> output;
+								typedef wrappers::ports::input <typenames>  input;
+								class inputs
+								{
+									public:
+										typedef wrappers::ports::inputs::single  <typenames>    single;
+										typedef wrappers::ports::inputs::multiple<typenames>  multiple;
+								};
+						};
+				};
 		};
 
 		template
@@ -44,8 +99,8 @@ namespace psycle
 		{
 			public:
 				typedef Graph graph;
-				typedef Node node;
-				typedef Port port;
+				typedef Node  node;
+				typedef Port  port;
 				class ports
 				{
 					public:
@@ -58,13 +113,33 @@ namespace psycle
 								typedef Multiple_Input_Port multiple;
 						};
 				};
+				public:
+					class bases
+					{
+						public:
+							typedef basic::graph<typenames> graph;
+							typedef basic::node <typenames> node;
+							typedef basic::port <typenames> port;
+							class ports
+							{
+								public:
+									typedef basic::ports::output<typenames> output;
+									typedef basic::ports::input <typenames>  input;
+									class inputs
+									{
+										public:
+											typedef basic::ports::inputs::single  <typenames>    single;
+											typedef basic::ports::inputs::multiple<typenames>  multiple;
+									};
+							};
+					};
 			#if 0 // checks disabled here because types are incomplete at the time this template class is instanciated.
 				private:
 					BOOST_STATIC_ASSERT((boost::is_base_and_derived<child_of<graph>, node                   >::value));
 					BOOST_STATIC_ASSERT((boost::is_base_and_derived<child_of< node>, port                   >::value));
 					BOOST_STATIC_ASSERT((boost::is_base_and_derived<port           , ports::output          >::value));
-					BOOST_STATIC_ASSERT((boost::is_base_and_derived<port           , ports::input           >::value));
-					BOOST_STATIC_ASSERT((boost::is_base_and_derived<ports::input   , ports::inputs::single  >::value));
+					BOOST_STATIC_ASSERT((boost::is_base_and_derived<port           , ports:: input          >::value));
+					BOOST_STATIC_ASSERT((boost::is_base_and_derived<ports::input   , ports::inputs::  single>::value));
 					BOOST_STATIC_ASSERT((boost::is_base_and_derived<ports::input   , ports::inputs::multiple>::value));
 			#endif
 		};

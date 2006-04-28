@@ -5,23 +5,12 @@
 ///\interface psycle::host::schedulers::single_threaded
 #pragma once
 #include "../scheduler.hpp"
+#include <psycle/generic/wrappers.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <list>
-#if defined PSYCLE__EXPERIMENTAL
-	#include <psycle/generic/wrappers.hpp>
-#endif
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PACKAGENERIC__MODULE__SOURCE__PSYCLE__HOST__SCHEDULERS__SINGLE_THREADED
 #include <universalis/compiler/dynamic_link/begin.hpp>
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#if defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
 namespace psycle
 {
 	namespace host
@@ -260,124 +249,4 @@ namespace psycle
 		}
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#else // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
-namespace psycle
-{
-	namespace host
-	{
-		namespace schedulers
-		{
-			/// a scheduler using only one thread
-			namespace single_threaded
-			{
-				/// a scheduler using only one thread
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler
-				{
-					public:
-						scheduler(engine::graph &) throw(std::exception);
-						virtual ~scheduler() throw();
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES start() throw(engine::exception);
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES stop();
-						void operator()();
-					private:
-						/// engine::buffer with a reference counter.
-						class buffer : public engine::buffer
-						{
-							public:
-								/// creates a buffer with an initial reference count set to 0.
-								buffer(int const & channels, const int & events) throw(std::exception);
-								/// deletes the buffer
-								///\pre the reference count must be 0.
-								virtual ~buffer() throw();
-								/// convertible to int
-								///\returns the reference count.
-								inline operator int const & () const throw() { return reference_count_; }
-								/// increments the reference count.
-								inline buffer & operator+=(int const & more) throw() { reference_count_ += more; return *this; }
-								/// decrements the reference count by 1.
-								inline buffer & operator--() throw() { --reference_count_; assert(*this >= 0); return *this; }
-							private:
-								int reference_count_;
-						};
-						/// a pool of buffers that can be used for input and output ports of the nodes of the graph.
-						class buffer_pool : protected std::list<buffer*>
-						{
-							public:
-								buffer_pool(int const & channels, int const & events) throw(std::exception);
-								virtual ~buffer_pool() throw();
-								/// gets a buffer from the pool.
-								buffer inline & operator()()
-								{
-									if(loggers::trace()())
-									{
-										std::ostringstream s;
-										s << "buffer requested, pool size before: " << size();
-										loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-									}
-									if(empty())
-									{
-										return *new buffer(channels_, events_);
-									}
-									else
-									{
-										buffer & result(*back());
-										assert("reference count is zero: " && !result);
-										pop_back();
-										return result;
-									}
-								}
-								/// recycles a buffer in the pool.
-								void inline operator()(buffer & buffer)
-								{
-									assert(&buffer);
-									assert("reference count is zero: " && !buffer);
-									if(loggers::trace()())
-									{
-										std::ostringstream s;
-										s << "buffer " << &buffer << " given back, pool size before: " << size();
-										loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-									}
-									push_back(&buffer);
-								}
-							private:
-								int channels_, events_;
-						} * buffer_pool_instance_;
-						buffer_pool inline & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
-						boost::thread * thread_;
-						boost::mutex mutable mutex_;
-						bool stop_requested_;
-						bool stop_requested();
-						void process_loop();
-						void process(engine::node &);
-						void process_node_of_output_port_and_set_buffer_for_input_port(engine::ports::output &, engine::ports::input &);
-						void set_buffer_for_output_port(engine::ports::output &, engine::buffer &);
-						void set_buffers_for_all_output_ports_of_node_from_the_buffer_pool(engine::node &);
-						void mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(engine::ports::output &, engine::ports::input &);
-						void check_whether_to_recycle_buffer_in_the_pool(engine::ports::output &);
-						typedef std::list<engine::node*> terminal_nodes_type;
-						terminal_nodes_type terminal_nodes_;
-						void allocate() throw(std::exception);
-						void free() throw();
-				};
-			}
-		}
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#endif // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
 #include <universalis/compiler/dynamic_link/end.hpp>
