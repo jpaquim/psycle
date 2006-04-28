@@ -16,10 +16,10 @@ namespace psycle
 			class lock
 			{
 				public:
-					void static init();
-					bool static inline const & initialized() { return initialized_; }
+					void       static          init();
+					bool const static inline & initialized() { return initialized_; }
 				private:
-					bool static initialized_;
+					bool       static          initialized_;
 
 				public:
 					inline lock()
