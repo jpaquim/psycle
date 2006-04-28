@@ -36,57 +36,12 @@
 		Anyone is free to edit the content of these pages, please contribute!
 	</part>
 	<part caption='Psycle based on Microsoft&apos;s Windows&#174;&#8482; MFC&#174;&#8482;' anchor='mfc'>
-		Warning:
-		<div class='indented'>
-			"<i>Windows</i>" and "<i>MFC</i>" are registred&#174; trademarks&#8482; of Microsoft Corporation.
-			<br/>
-			Windows&#174;&#8482; and MFC&#174;&#8482; source code and binaries are Copyright &#169; Microsoft Corporation,
-			and under non Free Software licences.
-		</div>
 		This codebase of psycle represents years of development and is quite mature.
 		The use of Psycle's sources and binaries are currently not restricted by any licence.
 		If the psycledelics community ever decides to use a licence, it will surely be some Free/Libre Software License, like for example the GNU Public Licence, which would strengthen its freedom.
 		<part caption='Binary raw packages'>
-			The builds are distributed as raw archives (no installer) containing the "doc" dir, and directories containing the binaries themselves,
+			The builds here are distributed as raw archives (no installer) containing the "doc" dir, and directories containing the binaries themselves,
 			of the psycle host application, and all the open source native plugins.
-			<br/>
-			<!--
-			All binaries come currently in two versions, one for each CPU type. Both are included in the pack:
-			<ul>
-				<li>
-					<b>"recent" AMD and Intel CPUs:</b>
-					<br/>
-					G7: AMD Athlon and early Duron.
-					<br/>
-					G7-SSE:
-					<ul>
-						<li>
-							AMD: Athlon XP, late Duron, Athlon 64, Athlon FX
-						</li>
-						<li>
-							Intel: Pentium 4, Celeron Pentium 4, Pentium M Centrino
-						</li>
-					</ul>
-				</li>
-				<li>
-					<b>"old" Intel CPUs:</b>
-					<br/>
-					G6: Intel Pentium Pro, Pentium II, and early Celeron.
-					<br/>
-					G6-SSE: Intel Pentium III and Celeron Pentium III.
-				</li>
-				<li>
-					Currently, we don't distribute builds optimized for older CPUs, G5: Intel Pentium I, AMD K6 I, K6 II, K6 III, 5x86, 6x86, etc.
-					<br/>
-					If you request us to add it, we'll add it.
-				</li>
-				<li>
-					At the time of this writing, Intel IA-64 are not yet widely used,
-					and we don't have tools to make builds for these CPUs.
-				</li>
-			</ul>
-			-->
-			Here are the available raw "packages":
 			<part caption='Latest Unstable Alpha' anchor='mfc-unstable'>
 				<a href='./packages/microsoft/psycle.mfc.bin.zip'/>
 				(
@@ -97,7 +52,9 @@
 				<br/>
 				The very latest build. This might be unstable ; use at your own risk ; you may very well trash your tune! ( It already happened to several people, so sure it will happen again. )
 				<br/>
-				<b>Note:</b> This is compiled for x86 CPUs which support SSE2.
+				This is built from the <code>trunk</code> directory of the suberversion repository.
+				<br/>
+				<b>Note:</b> This might be compiled with SSE2 instructions of the x86 CPUs ; only recent CPUs have SSE2 support.
 			</part>
 			<!--part caption='Candidate Release' anchor='mfc-release-candidate'>
 				(
@@ -106,7 +63,7 @@
 					</i>
 				)
 				<br/>
-				This is built from the revisions in the cvs tagged <code>release_candidate</code>.
+				This is built from the <code>tags/psycle-1.10.0-release-candidate</code> directory of the suberversion repository.
 				It is an official candidate release, which means it's nearly stable.
 			</part-->
 			<part caption='Stable Release 1.8 with bugfixes' anchor='mfc-stable'>
@@ -117,59 +74,37 @@
 					</i>
 				)
 				<br/>
-				This is built from the revisions in the cvs tagged <code>release_1_8_stable</code>, in the branch <code>release_1_8_bugfixes</code>.
+				This is built from the <code>tags/psycle-1.8.2-stable</code> directory in the subversion repository, tagged from the branch directory <code>branches/psycle-1.8-bugfixes</code>.
 			</part>
 			<part caption='Old Stable Release 1.7.6.2' anchor='mfc-stable-old-1.7.6.2'>
 				<a href='http://download.sourceforge.net/sourceforge/psycle/psycle.bin.release-1.7.6.2.simpler-g7-only-package.rar'/>
 				<br/>
-				This is built from the revisions in the cvs tagged <code>release_1_7_6_2</code>.
+				This is built from the directory <code>tags/psycle-1.7.6.2</code> directry of the subversion repository.
 			</part>
 		</part>
 		<part caption='Sources'>
-			To get the <code>HEAD</code> revision set of the cvs (the lastest revision of each file in the trunk (main branch)), issue the following command:
+			To checkout the head of <code>trunk</code> (main branch) of the subversion repository, issue the following command:
 			<div class='indented'>
 				<code>
-					cvs -d :pserver:anonymous@cvs.sourceforge.net:/cvsroot/psycle -z9 checkout -R -P -r HEAD portable_psycle
+					svn checkout https://svn.sourceforge.net:/svnroot/psycle/trunk
 				</code>
 			</div>
 			Later, to update your local copy, you can just do:
 			<div class='indented'>
 				<code>
-					cd portable_psycle
+					cd trunk
 					<br/>
-					cvs update -R -d -P
+					svn update
 				</code>
 			</div>
 			Tip:
 			<div class='indented'>
-				You can retrieve a particular revision set by changing <code>-r HEAD</code> in the command above
-				to, for example, <code>-r release_1_8_stable</code> to get the source code of psycle stable version 1.8.
+				You can retrieve a particular revision by checking out the url:
+				<code>https://svn.sourceforge.net:/svnroot/psycle/tags/psycle-x.y.z-stable</code>
 				<br/>
-				Remember that if you do so, <code>cvs update</code> will likely not give you any more changes, apart maybe bugfixes,
+				Remember that if you do so, <code>svn update</code> will likely not give you any more changes, apart maybe bugfixes,
 				since stable versions are mostly frozen.
 			</div>
-			<!--part caption='Automated tarballs checked out from the CVS'>
-				<a href='./psycle.cvs.sticky-tag.HEAD.tar.bz2'/>
-				(
-					<i>
-						updated on [!__ date cvs __] UTC 2006 February 12 Sunday 16:26:50
-					</i>
-				)
-				<br/>
-				[!__
-				<br/>
-				(<a href='./psycle.cvs.sticky-tag.HEAD.tar.bz2.sha1sum'/>)
-				__]
-				Source code automatically updated every sunday at half past noon UTC-8
-				from both cvs hosted at sourceforge.net, and sourceforge.jp (japanese version of sourceforge, used by <a href='./blogs/satoshi/all.html'>Satoshi Fujiwara</a>).
-				This is the cvs <code>HEAD</code> revision set,
-				that is, the lastest revision of each file in the trunk (main branch).
-				<b>
-					Concerning cvs.sourceforge.net, the module
-					containing the current codebase of psycle
-					is, as explained in the README file, the one called portable_psycle.
-				</b>
-			</part-->
 		</part>
 		<!--part caption='Documentation of the source code'>
 			<a href='./doxygen.mfc/html/'/>
@@ -183,45 +118,46 @@
 		</part-->
 	</part>
 	<part caption='Psycle based on Free Software (work in progress)' anchor='free'>
-		<b>
-			Note:
-			<div class='indented'>
-				If you are looking for a usable version of psycle,
-				get Psycle based on Microsoft's Windows&#174;&#8482; MFC&#174;&#8482;,
-				which is the mature version of psycle.
-				<br/>
-				This Psycle based on Free Software is not usable at all currently.
-			</div>
-		</b>
-		It's also called freepsycle as coined by the <a href='./irc.html'>#psycle</a> folks, and it has its wiki page there: <a href='./wiki/freepsycle'/>
-		<br/>
 		The sources are distributed under the <a href='http://fsf.org/licenses/gpl.html'>GNU General Public Licence</a>.
-		You can see development progress in the <a href='./packages/changelogs/psycle.gz'>psycle source package change log</a> and in the in <a href='./gnu-arch.archzoom'>psycle GNU-Arch change log</a>.
+		You can see development progress in the <a href='./packages/changelogs/'>package change logs</a>.
 		<br/>
-		Screenshots: <a href='./images/psycle-on-debian.png'/>, <a href='./images/psycle-on-microsoft.png'/>.
+		<part caption='xpsycle'>
+			still secret ...
+		</part>
+		<part caption='freepsycle'>
+			<b>
+				Note:
+				<div class='indented'>
+					If you are looking for a usable version of psycle,
+					get Psycle based on Microsoft's Windows&#174;&#8482; MFC&#174;&#8482;,
+					which is the mature version of psycle.
+					<br/>
+					This Psycle based on Free Software is not usable at all currently.
+				</div>
+			</b>
+			Screenshots: <a href='./images/psycle-on-debian.png'/>, <a href='./images/psycle-on-microsoft.png'/>.
+		</part>
 		<part caption='Binary packages'>
-			<part caption='Debian archive'>
+			<part caption='Debian &amp; Ubuntu archive'>
 				There is a Debian archive in the <a href='./debian/'/> directory,
 				which lists both
 				<a href='./debian/dists/unstable/unstable/main/binary-i386/Packages.gz'>binary-i386 packages</a>, and
 				<a href='./debian/dists/source/unstable/main/source/Sources.gz'>source packages</a>.
 				<br/>
-				To let APT find the archive and look into it for binary packages,
-				add the following lines to your <code>/etc/apt/sources.list</code>:
+				You can choose either <code>unstable</code>, <code>testing</code> or <code>stable</code> <b>for the version of psycle</b>,
+				Note that this is independent from the main debian distribution you use:
+				All packages are built on debian <code>unstable</code>, debian <code>testing</code>, debian <code>stable</code>, ubuntu <code>dapper</code>, ubuntu <code>breezy</code>, etc ...
+				<br/>
+				In the following <b>example</b>, <code>etch/unstable</code> means psycle's <code>unstable</code> version for the debian <code>etch</code> distibution.
+				<br/>
+				To let APT find the archive and look into it for psycle <code>unstable</code> binary packages compiled for the <code>etch</code> debian distribution,
+				add <b>for example (see notes above)</b> following lines to your <code>/etc/apt/sources.list</code>:
 				<div class='indented'>
 					<code>
 						# psycle binary packages
 						<br/>
-						deb http://psycle.sourceforge.net/debian unstable/unstable main
+						deb http://psycle.sourceforge.net/debian etch/unstable main
 					</code>
-					<br/>
-					<div class='indented'>
-						You can choose either <code>unstable</code>, <code>testing</code> or <code>stable</code>,
-						but this setting is independant of the main debian distribution you use:
-						all packages are built on debian testing,
-						and should also work on debian unstable appart in rare occasions caused by unstable packages having trouble entering testing.
-						On a near future, i (bohan) plan on adding builds for debian unstable and debian stable.
-					</div>
 				</div>
 				Then, update you local list of packages:
 				<div class='indented'>
@@ -253,18 +189,31 @@
 				<div class='indented'>
 					Currently, the archive contains binaries only for the <code>i386</code> architecture.
 					You can easily build the source packages to produce binary packages for your architecture.
+					<br/>
+					For each source package, there are three versions: <code>unstable</code>, <code>testing</code>, <code>stable</code>
+					<br/>
+					To let APT find the source archive and look into it for <code>unstable</code> source packages,
+					add <b>for example (see notes above)</b> following lines to your <code>/etc/apt/sources.list</code>:
+					<div class='indented'>
+						<code>
+							# psycle source packages
+							<br/>
+							deb-src http://psycle.sourceforge.net/debian source/unstable main
+						</code>
+						<br/>
+					</div>
+					Please see the paragraph about how to build psycle below for the next steps.
 				</div>
 			</part>
-			<part caption='Linux Standard Base packages'>
-				<a href='./packages/linux-standard-base/'/>
-			</part>
-			<part caption='Slackware packages'>
-				<a href='./packages/slackware/'/>
-			</part>
-			<part caption='RPM packages'>
-				<a href='./packages/rpm/'/>
-			</part>
-			<part caption='Other package-archiving systems'>
+			<part caption='Cross-packages'>
+				Note that these are untested. Please instead debootsrap a Debian or Ubuntu system in a chroot.
+				<br/>
+				Linux Standard Base packages: <a href='./packages/linux-standard-base/'/>
+				<br/>
+				Slackware packages: <a href='./packages/slackware/'/>
+				<br/>
+				RPM packages: <a href='./packages/rpm/'/>
+				<br/>
 				Any volunteer for yum and gentoo?
 			</part>
 			<part caption='Microsoft&apos;s Windows&#174;&#8482;'>
@@ -299,34 +248,32 @@
 		<part caption='Source package'>
 			<part caption='Downloading the standard source tarball package'>
 				<part caption='Using HTTP directly'>
-					For the latest unstable standard source tarball, download <a href='./packages/standard-source-tarball/psycle.tar.gz'/>
+					For the latest unstable standard source tarball, download one of the unversionned <code>.tar.gz</code> file from the <a href='./packages/standard-source-tarball/'/> directory.
 					(
 						<i>
 							updated on <!-- date source --> UTC 2006 January 03 Tuesday 23:48:51
 						</i>
 					)
 					<br/>
-					or for a particular version, download one of the <code>psycle_*.*.*.tar.gz</code> file from the <a href='./packages/standard-source-tarball/'/> directory.
+					or for a particular version, download one of the versionned <code>.tar.gz</code> file from the <a href='./packages/standard-source-tarball/'/> directory.
 				</part>
-				<part caption='Using the Debian archive and APT'>
+				<part caption='Using the Debian/Ubuntu archive and APT'>
 					There is a Debian archive in the <a href='./debian/'/> directory,
 					which lists both
 					<a href='./debian/dists/unstable/unstable/main/binary-i386/Packages.gz'>binary-i386 packages</a>, and
 					<a href='./debian/dists/source/unstable/main/source/Sources.gz'>source packages</a>.
 					<br/>
-					To let APT find the archive and look into it for source packages,
-					add the following lines to your <code>/etc/apt/sources.list</code>:
+					For each source package, there are three versions: <code>unstable</code>, <code>testing</code>, <code>stable</code>
+					<br/>
+					To let APT find the source archive and look into it for <code>unstable</code> source packages,
+					add <b>for example (see notes above)</b> following lines to your <code>/etc/apt/sources.list</code>:
 					<div class='indented'>
 						<code>
 							# psycle source packages
 							<br/>
-							deb-src http://psycle.sourceforge.net/debian unstable main
+							deb-src http://psycle.sourceforge.net/debian source/unstable main
 						</code>
-						<div class='indented'>
-							You can choose either <code>unstable</code>, <code>testing</code> or <code>stable</code>,
-							This setting is independant of the main debian distribution you use:
-							all source packages build fine on any debian distribution, stable, testing or unstable.
-						</div>
+						<br/>
 					</div>
 					Then, update you local list of packages:
 					<div class='indented'>
@@ -358,9 +305,11 @@
 					</div>
 				</part>
 				<part caption='Other package-archiving systems'>
-					Any volunteer for yum and gentoo?
+					Any volunteer?
 				</part>
 				<part caption='GNU-Arch archive' anchor='GNU-Arch'>
+					erm.. please google.
+					<!--
 					There is a GNU-Arch archive in the <a href='./gnu-arch/'/> directory (browse it via <a href='./gnu-arch.archzoom'/>).
 					<br/>
 					(<a href='./gnu-arch.xml'>getting started with GNU-Arch</a>)
@@ -373,16 +322,20 @@
 							<br/>
 							cd /tmp
 							<br/>
-							tla get psycle@sourceforge.net/psycle--mainline
+							tla get psycle@sourceforge.net/psycle__mainline
 							<br/>
-							cd psycle--mainline--*
+							cd psycle__mainline__*
 							<br/>
 							./packageneric/generic/bin/autotools.bootstrap
 						</code>
 					</div>
-					The last command, <code>./packageneric/generic/bin/autotools.bootstrap</code> will
+					The last command, <code>./autotools.bootstrap</code> will
 					generate the configure script (amongst other files),
 					which is not included in the archive since it is an autogenerated file.
+					-->
+				</part>
+				<part caption='Subversion repository' anchor='subversion'>
+					erm.. please google.
 				</part>
 			</part>
 			<part caption='Building the source package'>
@@ -441,13 +394,19 @@
 					<part caption='From Microsoft&apos;s Windows&#174;&#8482;' anchor='dev-pack'>
 						To build the source package from and for Microsoft's Windows&#174;&#8482;,
 						<br/>
+						INSTRUCTIONS CURRENTLY REMOVED ...
+						noone is interested in this operating system at the moment,
+						and it's better not putting outdated/broken/untested intructions.
+						(hint, read the source of the page, it's just commented out)
+						<br/>
+						<!--
+						<br/>
 						download and unpack <a href='./packages/microsoft/dev-pack/'/>
 						<br/>
 						( release notes: <a href='./packages/microsoft/dev-pack/release-notes/'/> )
 						<br/>
 						This pack contains everything you need, namely,
-						<!--a href='http://cygwin.com/setup.exe'>Cygwin</a> or-->
-						<a href='http://mingw.org/msys.shtml'>MSys+MSysDTK+MinGW</a>,
+						<a href='http://mingw.org/msys.shtml'>MSys+MSysDTK+MinGW</a> (better alternative is cygwin),
 						the <a href='http://www.pcpm.ucl.ac.be/~gustin/win32_ports/gtkmm.html'>GTKMM library</a>,
 						the <a href='http://ftp.gnome.org/Public/gnome/sources/libgnomecanvas'>GNOME Canvas library</a>,						
 						the <a href='http://boost.org'>Boost libraries</a>, and
@@ -455,38 +414,18 @@
 						There is nothing to install, the pack is self contained and work as is.
 						With this pack, you now have a GNU system, so, if you wish, you can go to the section:
 						<a href='#build'>Building from a GNU system for the same GNU system</a>.
-						<br/>
-						<br/>
-						<!--a href='./images/eclipse.png'/>
-						<br/>
-						<br/-->
-						<!--object
-							classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
-							codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"
-							width="844"
-							height="275"
-							id="eclipse-completion"
-							viewastext='true'
-						>
-							<param name='movie' value='./images/eclipse-completion.swf'/>
-							<param name='quality' value='high'/>
-							<param name='bgcolor' value='#ddddbb'/>
-							<embeed
-								src="./images/eclipse-completion.swf"
-								quality='high'
-								bgcolor='#ddddbb'
-								width="844"
-								height="275"
-								name="eclipse-completion"
-								align=""
-								type="application/x-shockwave-flash"
-								pluginpage="http://www.macromedia.com/go/getflashplayer"
-							/>
-						</object-->
+						-->
 					</part>
 					<part caption='Cross-compiling from another GNU system'>
 						From GNU systems (even cygwin, uwin, sfu), you can use the mingw32 tool-chain package to cross-compile
 						and produce binaries relying on msvc's C runtime lib (msvc<b>r</b>71.dll).
+						<br/>
+						INSTRUCTIONS CURRENTLY REMOVED ...
+						noone is interested in this operating system at the moment,
+						and it's better not putting outdated/broken/untested intructions.
+						(hint, read the source of the page, it's just commented out)
+						<br/>
+						<!--
 						Note that the c++ runtime needs to be distributed (either statically compiled or as a shared lib)
 						with the compiled binaries, as mingw doesn't use msvc's c++ runtime lib (msvc<b>p</b>*.dll).
 						<br/>
@@ -497,7 +436,7 @@
 								<br/>
 								mkdir build &amp;&amp; cd build
 								<br/>
-								../configure --host=<em>i586-mingw32msvc</em> --prefix=/mnt/smbfs/psycle-mswindows-install-dir
+								../configure __host=<em>i586-mingw32msvc</em> __prefix=/mnt/smbfs/psycle-mswindows-install-dir
 							</code>
 							<br/>
 						</div>
@@ -515,19 +454,25 @@
 								ssh mswindows ./psycle-mswindows-install-dir/bin/psycle
 							</code>
 						</div>
+						-->
 					</part>
 				</part>
 			</part>
 		</part>
 		<part caption='Documentation of the source code'>
+			CURRENTLY REMOVED (well just the link) ...
+			doxygen has its bugs, and makes things not clearer than looking at the sources.
+			<br/>
+			<!--
 			<a href='./doxygen/html/'/>
 			(
 				<i>
-					updated on <!-- date doxygen --> UTC 2005 June 25 Saturday 02:01:19
+					updated on <!__ date doxygen __> UTC 2005 June 25 Saturday 02:01:19
 				</i>
 			)
 			<br/>
 			Auto-generated documentation of and from the source code.
+			-->
 		</part>
 	</part>
 	<part caption='Satoshi Fujiwara&apos;s tracker (SFTracker) (work in progress)' anchor='sftracker'>
@@ -536,9 +481,7 @@
 		jaz has taken the FT2 sampler source that Satoshi did, put it in the mainline version of psycle (MFC), and did many improvements on it,
 		so Satoshi's original work on the FT2 sampler isn't a lost abandonned effort.
 		<part caption='Changelog (blog)'>
-				<a href='./blogs/satoshi/sftracker.html'>Satoshi's blog about his developments on <b>SFTracker</b>.</a> This project is <b>active</b>.
-				<br/>
-				<a href='./blogs/satoshi/psycle.html'>Satoshi's blog about his developments on <b>psycle (WTL, FT2 sampler, win32-generics)</b>.</a> This project is <b>stopped</b>.
+				<a href='./blogs/satoshi/sftracker.html'>Satoshi's blog about his developments on <b>SFTracker</b></a>
 		</part>
 		<part caption='Sources'>
 			To get the <code>HEAD</code> revision set of the cvs (the lastest revision of each file in the trunk (main branch)), issue the following command:
@@ -555,23 +498,6 @@
 					cvs update -R -d -P
 				</code>
 			</div>
-			<!--part caption='Automated tarballs checked out from the CVS'>
-				<a href='./psycle.cvs.sticky-tag.HEAD.tar.bz2'/>
-				(
-					<i>
-						updated on [!__ date cvs __] UTC 2006 February 12 Sunday 16:26:50
-					</i>
-				)
-				<br/>
-				[!__
-				<br/>
-				(<a href='./psycle.cvs.sticky-tag.HEAD.tar.bz2.sha1sum'/>)
-				__]
-				Source code automatically updated every sunday at half past noon UTC-8
-				from both cvs hosted at sourceforge.net and sourceforge.jp (japanese version of sourceforge, used by <a href='./blogs/satoshi/all.html'>Satoshi Fujiwara</a>).
-				This is the cvs <code>HEAD</code> revision set,
-				that is, the lastest revision of each file in the trunk (main branch).
-			</part-->
 		</part>
 	</part>
 	<part caption='Sourceforge&apos;s interface and tools'>
