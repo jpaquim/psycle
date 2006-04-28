@@ -129,17 +129,17 @@ int fluid_synth_sfont_select(fluid_synth_t* synth, int chan, unsigned int sfont_
   */
 FLUIDSYNTH_API 
 int fluid_synth_program_select(fluid_synth_t* synth, int chan, 
-			      unsigned int sfont_id, 
-			      unsigned int bank_num, 
-			      unsigned int preset_num);
+                              unsigned int sfont_id, 
+                              unsigned int bank_num, 
+                              unsigned int preset_num);
 
   /** Returns the program, bank, and SoundFont number of the preset on
       a given channel. Returns 0 if no error occurred, -1 otherwise. */
 FLUIDSYNTH_API 
 int fluid_synth_get_program(fluid_synth_t* synth, int chan, 
-			   unsigned int* sfont_id, 
-			   unsigned int* bank_num, 
-			   unsigned int* preset_num);
+                           unsigned int* sfont_id, 
+                           unsigned int* bank_num, 
+                           unsigned int* preset_num);
 
   /** Send a bank select and a program change to every channel to
    *  reinitialize the preset of the channel. This function is useful
@@ -151,6 +151,9 @@ FLUIDSYNTH_API int fluid_synth_program_reset(fluid_synth_t* synth);
       controller values. */
 FLUIDSYNTH_API int fluid_synth_system_reset(fluid_synth_t* synth);
 
+FLUIDSYNTH_API int fluid_synth_all_notes_off(fluid_synth_t* synth, int chan);
+FLUIDSYNTH_API int fluid_synth_all_sounds_off(fluid_synth_t* synth, int chan);
+
 
   /*
    * 
@@ -161,8 +164,8 @@ FLUIDSYNTH_API int fluid_synth_system_reset(fluid_synth_t* synth);
   /** Create and start voices using a preset. The id passed as
    * argument will be used as the voice group id.  */
 FLUIDSYNTH_API int fluid_synth_start(fluid_synth_t* synth, unsigned int id, 
-				     fluid_preset_t* preset, int audio_chan, 
-				     int midi_chan, int key, int vel);
+                                     fluid_preset_t* preset, int audio_chan, 
+                                     int midi_chan, int key, int vel);
 
   /** Stop the voices in the voice group defined by id. */
 FLUIDSYNTH_API int fluid_synth_stop(fluid_synth_t* synth, unsigned int id);
@@ -170,8 +173,8 @@ FLUIDSYNTH_API int fluid_synth_stop(fluid_synth_t* synth, unsigned int id);
   /** Change the value of a generator of the voices in the voice group
    * defined by id. */
 /* FLUIDSYNTH_API int fluid_synth_ctrl(fluid_synth_t* synth, int id,  */
-/* 				    int gen, float value,  */
-/* 				    int absolute, int normalized); */
+/*                                  int gen, float value,  */
+/*                                  int absolute, int normalized); */
 
 
   /*
@@ -275,7 +278,7 @@ FLUIDSYNTH_API int fluid_synth_get_bank_offset(fluid_synth_t* synth, int sfont_i
 
   /** Set the parameters for the built-in reverb unit */
 FLUIDSYNTH_API void fluid_synth_set_reverb(fluid_synth_t* synth, double roomsize, 
-					 double damping, double width, double level);
+                                         double damping, double width, double level);
 
   /** Turn on (1) / off (0) the built-in reverb unit */
 FLUIDSYNTH_API void fluid_synth_set_reverb_on(fluid_synth_t* synth, int on);
@@ -311,7 +314,7 @@ enum fluid_chorus_mod {
    * Keep in mind, that the needed CPU time is proportional to 'nr'.
    */
 FLUIDSYNTH_API void fluid_synth_set_chorus(fluid_synth_t* synth, int nr, double level, 
-					 double speed, double depth_ms, int type);
+                                         double speed, double depth_ms, int type);
 
   /** Turn on (1) / off (0) the built-in chorus unit */
 FLUIDSYNTH_API void fluid_synth_set_chorus_on(fluid_synth_t* synth, int on);
@@ -462,7 +465,7 @@ FLUIDSYNTH_API float fluid_synth_get_gen(fluid_synth_t* synth, int chan, int par
   */
 FLUIDSYNTH_API 
 int fluid_synth_create_key_tuning(fluid_synth_t* synth, int tuning_bank, int tuning_prog,
-				 char* name, double* pitch);
+                                 char* name, double* pitch);
 
   /** Create a new octave-based tuning with given name, number, and
       pitches.  The array 'pitches' should have length 12 and contains
@@ -478,7 +481,7 @@ int fluid_synth_create_key_tuning(fluid_synth_t* synth, int tuning_bank, int tun
   */
 FLUIDSYNTH_API 
 int fluid_synth_create_octave_tuning(fluid_synth_t* synth, int tuning_bank, int tuning_prog,
-				    char* name, double* pitch);
+                                    char* name, double* pitch);
 
   /** Request a note tuning changes. Both they 'keys' and 'pitches'
       arrays should be of length 'num_pitches'. If 'apply' is non-zero,
@@ -496,7 +499,7 @@ int fluid_synth_create_octave_tuning(fluid_synth_t* synth, int tuning_bank, int 
   */
 FLUIDSYNTH_API 
 int fluid_synth_tune_notes(fluid_synth_t* synth, int tuning_bank, int tuning_prog,
-			  int len, int *keys, double* pitch, int apply);
+                          int len, int *keys, double* pitch, int apply);
 
   /** Select a tuning for a channel. 
 
@@ -547,7 +550,7 @@ int fluid_synth_tuning_iteration_next(fluid_synth_t* synth, int* bank, int* prog
       \param pitch Pointer to buffer to store the pitch values
   */
 FLUIDSYNTH_API int fluid_synth_tuning_dump(fluid_synth_t* synth, int bank, int prog, 
-					 char* name, int len, double* pitch);
+                                         char* name, int len, double* pitch);
 
 
 
@@ -596,8 +599,8 @@ FLUIDSYNTH_API char* fluid_synth_error(fluid_synth_t* synth);
    */
 
 FLUIDSYNTH_API int fluid_synth_write_s16(fluid_synth_t* synth, int len, 
-				       void* lout, int loff, int lincr, 
-				       void* rout, int roff, int rincr);
+                                       void* lout, int loff, int lincr, 
+                                       void* rout, int roff, int rincr);
 
 
   /** Generate a number of samples. This function expects two floating
@@ -616,12 +619,12 @@ FLUIDSYNTH_API int fluid_synth_write_s16(fluid_synth_t* synth, int len,
    */
 
 FLUIDSYNTH_API int fluid_synth_write_float(fluid_synth_t* synth, int len, 
-					 void* lout, int loff, int lincr, 
-					 void* rout, int roff, int rincr);
+                                         void* lout, int loff, int lincr, 
+                                         void* rout, int roff, int rincr);
 
 FLUIDSYNTH_API int fluid_synth_nwrite_float(fluid_synth_t* synth, int len, 
-					  float** left, float** right, 
-					  float** fx_left, float** fx_right);
+                                          float** left, float** right, 
+                                          float** fx_left, float** fx_right);
 
   /** Generate a number of samples. This function implements the
    *  default interface defined in fluidsynth/audio.h. This function
@@ -638,15 +641,15 @@ FLUIDSYNTH_API int fluid_synth_nwrite_float(fluid_synth_t* synth, int len,
    */
 
 FLUIDSYNTH_API int fluid_synth_process(fluid_synth_t* synth, int len,
-				     int nin, float** in, 
-				     int nout, float** out);
+                                     int nin, float** in, 
+                                     int nout, float** out);
 
 
 
   /* Type definition of the synthesizer's audio callback function. */
 typedef int (*fluid_audio_callback_t)(fluid_synth_t* synth, int len, 
-				     void* out1, int loff, int lincr, 
-				     void* out2, int roff, int rincr);
+                                     void* out1, int loff, int lincr, 
+                                     void* out2, int roff, int rincr);
 
 
 
@@ -669,7 +672,7 @@ FLUIDSYNTH_API void fluid_synth_add_sfloader(fluid_synth_t* synth, fluid_sfloade
       Note: A single noteon event may create any number of voices, when the preset is layered. 
       Typically 1 (mono) or 2 (stereo).*/
 FLUIDSYNTH_API fluid_voice_t* fluid_synth_alloc_voice(fluid_synth_t* synth, fluid_sample_t* sample, 
-						   int channum, int key, int vel);
+                                                   int channum, int key, int vel);
 
   /** Start a synthesis voice. This function is called by a
       soundfont's preset in response to a noteon event after the voice
@@ -682,7 +685,7 @@ FLUIDSYNTH_API void fluid_synth_start_voice(fluid_synth_t* synth, fluid_voice_t*
   /** Write a list of all voices matching ID into buf, but not more than bufsize voices.
    * If ID <0, return all voices. */
 FLUIDSYNTH_API void fluid_synth_get_voicelist(fluid_synth_t* synth, 
-					    fluid_voice_t* buf[], int bufsize, int ID);
+                                            fluid_voice_t* buf[], int bufsize, int ID);
 
 
   /** Callback function for the MIDI router. Any event goes through this. */
@@ -691,7 +694,7 @@ FLUIDSYNTH_API int fluid_synth_handle_midi_event(void* data, fluid_midi_event_t*
 
   /** This is a hack to get command handlers working */
 FLUIDSYNTH_API void fluid_synth_set_midi_router(fluid_synth_t* synth, 
-					      fluid_midi_router_t* router);
+                                              fluid_midi_router_t* router);
 
 #ifdef __cplusplus
 }
