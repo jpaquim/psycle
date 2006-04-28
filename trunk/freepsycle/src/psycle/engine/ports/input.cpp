@@ -10,15 +10,6 @@
 #include "output.hpp"
 #include "../buffer.hpp"
 #include "../node.hpp"
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#if defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
 namespace psycle
 {
 	namespace engine
@@ -27,7 +18,7 @@ namespace psycle
 		{
 			input::input(input::parent_type & parent, name_type const & name, int const & channels)
 			:
-				input_base(parent, name, channels)
+				input_type(parent, name, channels)
 			{
 				if(loggers::trace()())
 				{
@@ -56,7 +47,7 @@ namespace psycle
 					s << "connecting output port " << output_port.qualified_name() << " to input port " << this->qualified_name();
 					loggers::information()(s.str());
 				}
-				input_base::connect(output_port);
+				input_type::connect(output_port);
 			}
 		
 			void input::disconnect(typenames::ports::output & output_port)
@@ -67,83 +58,8 @@ namespace psycle
 					s << "disconnecting output port " << output_port.qualified_name() << " from input port " << this->qualified_name();
 					loggers::information()(s.str());
 				}
-				input_base::disconnect(output_port);
+				input_type::disconnect(output_port);
 			}
 		}
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#else // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
-namespace psycle
-{
-	namespace engine
-	{
-		namespace ports
-		{
-			input::input(engine::node & node, const std::string & name, const int & channels)
-			:
-				port(node, name, channels)
-			{
-				if(loggers::trace()())
-				{
-					std::ostringstream s;
-					s << qualified_name() << ": new port input";
-					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				}
-			}
-		
-			input::~input() throw()
-			{
-				if(loggers::trace()())
-				{
-					std::ostringstream s;
-					s << qualified_name() << ": delete port input";
-					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				}
-				//disconnect_all();
-			}
-		
-			void input::connect(output & output_port) throw(exception)
-			{
-				if(loggers::information()())
-				{
-					std::ostringstream s;
-					s << "connecting output port " << output_port.qualified_name() << " to input port " << this->qualified_name();
-					loggers::information()(s.str());
-				}
-				assert("ports must belong to different nodes:" && &output_port.node() != &this->node());
-				assert("nodes of both ports must belong to the same graph:" && &output_port.node().graph_instance() == &this->node().graph_instance());
-				output_port.connect_internal_side(*this);
-				this->connect_internal_side(output_port);
-				port::connect(output_port);
-			}
-		
-			void input::disconnect(output & output_port)
-			{
-				if(loggers::information()())
-				{
-					std::ostringstream s;
-					s << "disconnecting output port " << output_port.qualified_name() << " from input port " << this->qualified_name();
-					loggers::information()(s.str());
-				}
-				this->disconnect_internal_side(output_port);
-				output_port.disconnect_internal_side(*this);
-			}
-		}
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-#endif // !defined PSYCLE__EXPERIMENTAL
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////

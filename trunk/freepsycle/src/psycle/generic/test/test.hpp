@@ -5,7 +5,7 @@
 ///\interface psycle::engine::generic::test
 #pragma once
 
-#if defined PSYCLE__EXPERIMENTAL__TEST
+#if defined PSYCLE__TEST
 
 #include "../generic.hpp" // test::layer0
 #include "../wrappers.hpp" // test::layer1
@@ -36,33 +36,19 @@ namespace psycle
 				}
 
 				class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple> {};
-
-				typedef generic::graph<typenames> graph_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base { protected: graph(); friend class generic_access; };
-				
-				typedef generic::port<typenames> port_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base { protected: port(parent_type & parent); };
-				
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::bases::graph { protected: graph(); friend class generic_access; };
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK port  : public typenames::bases::port  { protected: port(parent_type & parent); };
 				namespace ports
 				{
-					typedef generic::ports::output<typenames> output_base;
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base { protected: output(parent_type & parent); friend class generic_access; };
-					
-					typedef generic::ports::input<typenames> input_base;
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base { protected: input(parent_type & parent); friend class generic_access; };
-					
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::bases::ports::output { protected: output(parent_type & parent); friend class generic_access; };
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK input  : public typenames::bases::ports:: input { protected: input(parent_type & parent); friend class generic_access; };
 					namespace inputs
 					{
-						typedef generic::ports::inputs::single<typenames> single_base;
-						class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base { protected: single(parent_type & parent); friend class generic_access; };
-						
-						typedef generic::ports::inputs::multiple<typenames> multiple_base;
-						class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base { protected: multiple(parent_type & parent); friend class generic_access; };
+						class UNIVERSALIS__COMPILER__DYNAMIC_LINK   single : public typenames::bases::ports::inputs::  single { protected: single(parent_type & parent); friend class generic_access; };
+						class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::bases::ports::inputs::multiple { protected: multiple(parent_type & parent); friend class generic_access; };
 					}
 				}
-
-				typedef generic::node<typenames> node_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base { protected: node(parent_type & parent); friend class generic_access; };
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node { protected: node(parent_type & parent); friend class generic_access; };
 			}
 		}
 	}
@@ -93,33 +79,20 @@ namespace psycle
 				}
 
 				class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames> {};
-
-				typedef generic::wrappers::graph<typenames> graph_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base { protected: graph(underlying_type &); friend class generic_access; };
-
-				typedef generic::wrappers::port<typenames> port_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base { protected: port(parent_type &, underlying_type &); };
-				
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::bases::graph { protected: graph(underlying_type &); friend class generic_access; };
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK port  : public typenames::bases::port  { protected: port(parent_type &, underlying_type &); };
 				namespace ports
 				{
-					typedef generic::wrappers::ports::output<typenames> output_base;
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base { protected: output(parent_type &, underlying_type &); friend class generic_access; };
-
-					typedef generic::wrappers::ports::input<typenames> input_base;
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base { protected: input(parent_type &, underlying_type &); friend class generic_access; };
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::bases::ports::output { protected: output(parent_type &, underlying_type &); friend class generic_access; };
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK  input : public typenames::bases::ports:: input { protected:  input(parent_type &, underlying_type &); friend class generic_access; };
 
 					namespace inputs
 					{
-						typedef generic::wrappers::ports::inputs::single<typenames> single_base;
-						class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base { protected: single(parent_type &, underlying_type &); friend class generic_access; };
-
-						typedef generic::wrappers::ports::inputs::multiple<typenames> multiple_base;
-						class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base { protected: multiple(parent_type &, underlying_type &); friend class generic_access; };
+						class UNIVERSALIS__COMPILER__DYNAMIC_LINK   single : public typenames::bases::ports::inputs::  single { protected:   single(parent_type &, underlying_type &); friend class generic_access; };
+						class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::bases::ports::inputs::multiple { protected: multiple(parent_type &, underlying_type &); friend class generic_access; };
 					}
 				}
-
-				typedef generic::wrappers::node<typenames> node_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base { protected: node(parent_type &, underlying_type &); friend class generic_access; };
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node { protected: node(parent_type &, underlying_type &); friend class generic_access; };
 			}
 		}
 	}
@@ -152,8 +125,7 @@ namespace psycle
 				
 				class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames> {};
 
-				typedef generic::wrappers::graph<typenames> graph_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base, public named
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::bases::graph, public named
 				{
 					protected:
 						graph(underlying_type &, name_type const & = "unnamed"); friend class generic_access;
@@ -165,8 +137,7 @@ namespace psycle
 					///\}
 				};
 
-				typedef generic::wrappers::port<typenames> port_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base, public named
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::bases::port, public named
 				{
 					protected:
 						port(parent_type &, underlying_type &, name_type const & = "unnamed");
@@ -174,15 +145,13 @@ namespace psycle
 
 				namespace ports
 				{
-					typedef generic::wrappers::ports::output<typenames> output_base;
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::bases::ports::output
 					{
 						protected:
 							output(parent_type &, underlying_type &, name_type const & = "unnamed"); friend class generic_access;
 					};
 
-					typedef generic::wrappers::ports::input<typenames> input_base;
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base
+					class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::bases::ports::input
 					{
 						protected:
 							input(parent_type &, underlying_type &, name_type const & = "unnamed"); friend class generic_access;
@@ -190,15 +159,13 @@ namespace psycle
 
 					namespace inputs
 					{
-						typedef generic::wrappers::ports::inputs::single<typenames> single_base;
-						class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base
+						class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::bases::ports::inputs::single
 						{
 							protected:
 								single(parent_type &, underlying_type &, name_type const & = "unnamed"); friend class generic_access;
 						};
 
-						typedef generic::wrappers::ports::inputs::multiple<typenames> multiple_base;
-						class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base
+						class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::bases::ports::inputs::multiple
 						{
 							protected:
 								multiple(parent_type &, underlying_type &, name_type const & = "unnamed"); friend class generic_access;
@@ -206,8 +173,7 @@ namespace psycle
 					}
 				}
 
-				typedef generic::wrappers::node<typenames> node_base;
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base, public named
+				class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, public named
 				{
 					protected:
 						node(parent_type &, underlying_type &, name_type const & = "unnamed"); friend class generic_access;
@@ -225,4 +191,5 @@ namespace psycle
 	}
 }
 #include <universalis/compiler/dynamic_link/end.hpp>
-#endif // defined PSYCLE__EXPERIMENTAL__TEST
+
+#endif // defined PSYCLE__TEST

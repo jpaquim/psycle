@@ -34,6 +34,8 @@ namespace psycle
 				public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::graph>
 			{
 				protected:
+					typedef graph graph_type;
+
 					graph(typename graph::underlying_type & underlying) : graph::underlying_wrapper_type(underlying)
 					{
 						on_new_node_signal_connection          = underlying.         new_node_signal().connect(boost::bind(&graph::on_new_node         , this, _1    ));
@@ -78,7 +80,7 @@ namespace psycle
 						boost::signals::connection on_new_node_signal_connection;
 						void on_new_node(typename Typenames::underlying::node & underlying_node)
 						{
-							Typenames::node::create(*this, underlying_node);
+							Typenames::node::create(static_cast<typename Typenames::graph &>(*this), underlying_node);
 						}
 
 						//boost::signals::connection on_delete_node_signal_connection;
@@ -130,6 +132,8 @@ namespace psycle
 				public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::node>
 			{
 				protected:
+					typedef node node_type;
+
 					node(typename node::parent_type & parent, typename node::underlying_type & underlying)
 					:
 						generic::node<Typenames>(parent),
@@ -220,6 +224,8 @@ namespace psycle
 				public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::port>
 			{
 				protected:
+					typedef port port_type;
+
 					port(typename port::parent_type & parent, typename port::underlying_type & underlying)
 					:
 						generic::port<Typenames>(parent),
@@ -233,6 +239,8 @@ namespace psycle
 				class output : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::output, generic::ports::output<Typenames> >
 				{
 					protected:
+						typedef output output_type;
+
 						#define constructor(_, count, __) \
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							output(typename output::parent_type & parent, typename output::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
@@ -245,6 +253,8 @@ namespace psycle
 				class input : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::input, generic::ports::input<Typenames> >
 				{
 					protected:
+						typedef input input_type;
+
 						#define constructor(_, count, __) \
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							input(typename input::parent_type & parent, typename input::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
@@ -259,6 +269,8 @@ namespace psycle
 					class single : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::inputs::single, generic::ports::inputs::single<Typenames> >
 					{
 						protected:
+							typedef single single_type;
+
 							#define constructor(_, count, __) \
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								single(typename single::parent_type & parent, typename single::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
@@ -271,6 +283,8 @@ namespace psycle
 					class multiple : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::inputs::multiple, generic::ports::inputs::multiple<Typenames> >
 					{
 						protected:
+							typedef multiple multiple_type;
+
 							#define constructor(_, count, __) \
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								multiple(typename multiple::parent_type & parent, typename multiple::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \

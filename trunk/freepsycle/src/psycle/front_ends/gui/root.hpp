@@ -17,38 +17,38 @@ namespace psycle
 			class root : public Gtk::Window
 			{
 				public:
-					root(engine::hello &);
+					root(underlying::graph &, underlying::hello &);
 					virtual ~root() throw();
 				
 				protected:
-					engine::hello inline & hello() throw() { return hello_; }
-					engine::hello inline const & hello() const throw() { return hello_; }
+					underlying::hello const inline & hello() const throw() { return hello_; }
+					underlying::hello       inline & hello()       throw() { return hello_; }
 				private:
-					engine::hello & hello_;
+					underlying::hello              & hello_;
 				
-				private:
-					host::plugin_resolver resolver_;
 				protected:
 					host::plugin_resolver inline & resolver() throw() { return resolver_; }
+				private:
+					host::plugin_resolver          resolver_;
 
 				protected:
 					void virtual on_button_clicked();
-					Gtk::Button inline & button() throw() { return button_; }
-					Gtk::Button inline const & button() const throw() { return button_; }
+					Gtk::Button const inline & button() const throw() { return button_; }
+					Gtk::Button       inline & button()       throw() { return button_; }
 				private:
-					Gtk::Button button_;
+					Gtk::Button                button_;
 				
 				protected:
-					Gtk::Label inline & label() throw() { return label_; }
-					Gtk::Label inline const & label() const throw() { return label_; }
+					Gtk::Label const inline & label() const throw() { return label_; }
+					Gtk::Label       inline & label()       throw() { return label_; }
 				private:
-					Gtk::Label label_;
+					Gtk::Label                label_;
 				
 				protected:
-					graph inline & graph_instance() throw() { return graph_; }
-					graph inline const & graph_instance() const throw() { return graph_; }
+					graph const inline & graph_instance() const throw() { return graph_; }
+					graph       inline & graph_instance()       throw() { return graph_; }
 				private:
-					graph graph_;
+					graph              & graph_;
 					
 				private:
 					Gtk::Frame hello_frame_, graph_frame_;

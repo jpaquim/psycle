@@ -44,12 +44,14 @@ namespace psycle
 						lock::init();
 						Gnome::Canvas::init();
 						Gtk::Main main(argument_count, arguments);
-						psycle::engine::hello hello;
-						root window(hello);
+						engine::hello hello;
+						engine::graph & graph(engine::graph::create("graph"));
+						root window(graph, hello);
 						{
 							lock lock;
 							main.run(window);
 						}
+						delete &graph;
 					}
 					catch(Glib::Exception const & e)
 					{

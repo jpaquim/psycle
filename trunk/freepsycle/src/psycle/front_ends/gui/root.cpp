@@ -15,14 +15,14 @@ namespace psycle
 	{
 		namespace gui
 		{
-			root::root(engine::hello & hello)
+			root::root(underlying::graph & graph, underlying::hello & hello)
 			:
 				hello_(hello),
 				button_("get a hello message from psycle's engine"),
 				label_(/*"message from psycle's engine"*/),
-				graph_("graph", resolver()),
+				graph_(graph::create(graph, resolver())),
 				hello_frame_("hello"),
-				graph_frame_(graph_instance().graph_instance().name())
+				graph_frame_(graph.name())
 			{
 				set_size_request(1000, 700);
 				set_title(paths::package::name() + " " + paths::package::version::string());
