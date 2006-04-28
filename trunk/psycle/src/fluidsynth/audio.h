@@ -35,18 +35,18 @@ extern "C" {
 
   /** The function should return non-zero if an error occured. */
 typedef int (*fluid_audio_func_t)(void* data, int len, 
-				 int nin, float** in, 
-				 int nout, float** out);
-
+                                 int nin, float** in, 
+                                 int nout, float** out);
+/*
 FLUIDSYNTH_API fluid_audio_driver_t* new_fluid_audio_driver(fluid_settings_t* settings, 
-							 fluid_synth_t* synth);
+                                                         fluid_synth_t* synth);
 
 FLUIDSYNTH_API fluid_audio_driver_t* new_fluid_audio_driver2(fluid_settings_t* settings, 
-							  fluid_audio_func_t func,
-							  void* data);
+                                                          fluid_audio_func_t func,
+                                                          void* data);
 
 FLUIDSYNTH_API void delete_fluid_audio_driver(fluid_audio_driver_t* driver);
-
+*/
 
 
 #ifdef __cplusplus
