@@ -21,7 +21,7 @@
 #ifndef GSTOUT_H
 #define GSTOUT_H
 
-#include "audiodriver.h"
+#include <xpsycle/audiodriver.h>
 #include <psycle/plugins/output/gstreamer.hpp> // we're wrapping freepsycle's gstreamer output
 
 namespace psycle
