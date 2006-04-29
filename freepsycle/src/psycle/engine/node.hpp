@@ -63,8 +63,9 @@ namespace psycle
 			///\{
 				public:
 					/// called by schedulers
-					void inline     open() throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
-					bool virtual    opened() const;
+					void inline     open  (          ) throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
+					void inline     opened(bool value) throw(std::exception) { if(value) open(); else close(); }
+					bool virtual    opened(          ) const;
 				protected:
 					void virtual do_open() throw(std::exception);
 			///\}
@@ -73,8 +74,9 @@ namespace psycle
 			///\{
 				public:
 					/// called by schedulers
-					void virtual    start() throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
-					bool virtual    started() const;
+					void inline     start  (          ) throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
+					void inline     started(bool value) throw(std::exception) { if(value) start(); else stop(); }
+					bool virtual    started(          ) const;
 				protected:
 					void virtual do_start() throw(std::exception);
 			///\}
