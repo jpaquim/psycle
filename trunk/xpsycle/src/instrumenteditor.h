@@ -59,7 +59,7 @@ private:
     NCheckBox* rndVCFCutCbx;
     NCheckBox* rndVCFResoCbx;
     NCheckBox* playSampleFitCbx;
-    NLabel*    patRowLbl;
+    NEdit*    patRowEdt;
     NSlider*   volumeSlider;
     NLabel*    volumeLbl;
     NSlider*   fineTuneSlider;
@@ -81,6 +81,7 @@ private:
     void onComboSelected(NItemEvent* ev);
     void onSliderMove(NSlider* sender, double pos);
 
+    void onPatRowEdit(const NKeyEvent & event);
 };
 
 #endif
