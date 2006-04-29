@@ -20,6 +20,7 @@
 #include "instrumenteditor.h"
 #include "global.h"
 #include "song.h"
+#include "envdialog.h"
 #include <nalignlayout.h>
 #include <nflowlayout.h>
 #include <nlabel.h>
@@ -219,12 +220,16 @@ void InstrumentEditor::init( )
         waveLayerGrpBox->add(loopAtPnl,nAlTop);
         NButton* amplitudeBtn = new NButton("Amplitudes/Filter Envelopes");
           amplitudeBtn->setFlat(false);
+          amplitudeBtn->clicked.connect(this,&InstrumentEditor::onShowEnvelopeEditor);
         waveLayerGrpBox->add(amplitudeBtn,nAlTop);
      properties->add(waveLayerGrpBox,nAlClient);
 
   pane()->add(properties,nAlClient);
 
   setPosition(0,0,400,600);
+
+  envelopeEditor = new EnvDialog();
+  add(envelopeEditor);
 }
 
 int InstrumentEditor::onClose( )
@@ -393,4 +398,9 @@ void InstrumentEditor::onSliderMove( NSlider * sender, double pos )
 void InstrumentEditor::onPatRowEdit( const NKeyEvent & event )
 {
   Global::pSong()->_pInstrument[instrumentIndex()]->_lines = str<int>(patRowEdt->text());
+}
+
+void InstrumentEditor::onShowEnvelopeEditor( NButtonEvent * ev )
+{
+  envelopeEditor->setVisible(true);
 }
