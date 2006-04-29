@@ -158,7 +158,7 @@ int PatternView::rowHeight( )
 
 int PatternView::headerHeight( )
 {
-  return header->height();
+  return header->height()-1;
 }
 
 int PatternView::colWidth( )
@@ -536,8 +536,13 @@ int PatternView::Header::skinColWidth( )
     g->drawLine(0,0,0,clientHeight());
     g->drawLine(clientWidth()-1,0,clientWidth()-1,clientHeight());
 
-      for (int i = offT; i < count; i++)
+      for (int i = offT; i < count; i++) {
+        if (i+startLine == pView->cursor().y()) {
+          g->setForeground(Global::pConfig()->pvc_cursor);
+          g->fillRect(0,i*pView->rowHeight()+pView->headerHeight(),clientWidth()-1,pView->rowHeight());
+        }
         g->drawText(clientWidth()-g->textWidth(stringify(i+startLine))-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,stringify(i+startLine));
+      }
 
     g->drawText(1,pView->headerHeight()-1,"Line");
   }
@@ -704,6 +709,15 @@ void PatternView::PatternDraw::paint( NGraphics * g )
   }
 
   drawPattern(g,startLine,endLine,startTrack,endTrack);
+
+  g->setForeground(NColor(0,0,80));
+  int endTop     = pView->lineNumber() * pView->rowHeight() - dy();
+  int endHeight  = std::max(0, clientHeight() - endTop);
+  g->fillRect(0,endTop,clientWidth(),endHeight);
+
+  int endLeft     = pView->trackNumber() * pView->colWidth() - dx();
+  int endWidth    = std::max(0, clientWidth() - endLeft);
+  g->fillRect(endLeft,0,endWidth,clientHeight());
 }
 
 void PatternView::PatternDraw::setDy( int dy )
@@ -863,7 +877,7 @@ void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 {
   if (button==1) {
     if (!doSelect_) pView->setCursor(intersectCell(x,y));
-    repaint();
+    pView->repaint();
     endSel();
   }
 }
@@ -933,7 +947,9 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           if (newLine > startLine + lineCount-1) {
             pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
           }
-          window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+            window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+            window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
+
         }
      }
      break;
@@ -951,6 +967,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
             pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
           }
           window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
+          window()->repaint(pView,pView->repaintLineNumberArea(newLine,oldLine));
         }
      }
      break;
@@ -965,6 +982,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
            pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
         }
         window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
+        window()->repaint(pView,pView->repaintLineNumberArea(newLine,oldLine));
      }
      break;
      case XK_Page_Down:{
@@ -979,6 +997,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
            pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
         }
         window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+        window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
      }
      break;
      default: {
@@ -1041,6 +1060,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                    pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
                  }
                  window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+                 window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
                 } else  {
                   int off = (pView->cursor().z()+1) / 2;
                   patOffset +=off;
@@ -1075,6 +1095,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                       pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
                    }
                    window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+                   window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
                 }
             }
          }
@@ -1092,6 +1113,14 @@ NRect PatternView::PatternDraw::repaintTrackArea( int startLine, int endLine, in
   int right  = (endTrack+1) * pView->colWidth()   + absoluteLeft() - dx_;
 
   return NRect(left,top,right - left,bottom - top);
+}
+
+NRect PatternView::repaintLineNumberArea(int startLine, int endLine)
+{
+  int top    = startLine    * rowHeight()  + drawArea->absoluteTop()  - drawArea->dy();
+  int bottom = (endLine+1)  * rowHeight()  + drawArea->absoluteTop()  - drawArea->dy();
+
+  return NRect(lineNumber_->absoluteLeft(),top,lineNumber_->clientWidth(),bottom - top);
 }
 
 NPoint PatternView::PatternDraw::linesFromRepaint( const NRegion & repaintArea )

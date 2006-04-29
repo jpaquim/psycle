@@ -119,10 +119,12 @@ void InstrumentEditor::init( )
         tempoGrpBox->setHeaderText("Tempo Looping Tool");
         playSampleFitCbx = new NCheckBox("Play sample to fit");
         tempoGrpBox->add(playSampleFitCbx);
-        patRowLbl = new NLabel("   ");
-           patRowLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
-           patRowLbl->border()->setSpacing(NSize(2,2,2,2));
-        tempoGrpBox->add(patRowLbl,nAlLeft);
+        patRowEdt = new NEdit();
+           patRowEdt->setWidth(50);
+           patRowEdt->setBorder(new NBevelBorder(nNone,nLowered),true);
+           patRowEdt->border()->setSpacing(NSize(2,2,2,2));
+           patRowEdt->keyPress.connect(this,&InstrumentEditor::onPatRowEdit);
+        tempoGrpBox->add(patRowEdt,nAlLeft);
         tempoGrpBox->add(new NLabel("Pattern rows"),nAlLeft);
      properties->add(tempoGrpBox,nAlTop);
 
@@ -259,7 +261,7 @@ void InstrumentEditor::setInstrument( int index )
   bool const ils = Global::pSong()->_pInstrument[index]->_loop;
 
   playSampleFitCbx->setCheck(ils);
-  patRowLbl->setText(stringify(Global::pSong()->_pInstrument[index]->_lines));
+  patRowEdt->setText(stringify(Global::pSong()->_pInstrument[index]->_lines));
 
   // Set looptype
   if(Global::pSong()->_pInstrument[index]->waveLoopType)
@@ -386,4 +388,9 @@ void InstrumentEditor::onSliderMove( NSlider * sender, double pos )
     fineTuneLbl->setText(stringify(Global::pSong()->_pInstrument[instrumentIndex()]->waveFinetune));
     fineTuneLbl->repaint();
   }
+}
+
+void InstrumentEditor::onPatRowEdit( const NKeyEvent & event )
+{
+  Global::pSong()->_pInstrument[instrumentIndex()]->_lines = str<int>(patRowEdt->text());
 }

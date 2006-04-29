@@ -111,7 +111,7 @@ class PatternView : public NPanel
      virtual void onKeyPress(const NKeyEvent & event);
      virtual void onKeyRelease(const NKeyEvent & event);
 
-     NRect repaintTrackArea    (int startLine,int endLine,int startTrack, int endTrack);
+     NRect repaintTrackArea         (int startLine,int endLine,int startTrack, int endTrack);
      NPoint linesFromRepaint(const NRegion & repaintArea);
      NPoint tracksFromRepaint(const NRegion & repaintArea);
 
@@ -228,6 +228,8 @@ public:
     void blockTranspose(int trp);
     void deleteBlock();
     void doubleLength();
+
+    NRect repaintLineNumberArea    (int startLine,int endLine);
 
 private:
 
