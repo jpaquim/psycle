@@ -190,7 +190,7 @@ void SequencerBar::init( )
     checkPanel->add( follow_                = new NCheckBox("Follow song"));
     checkPanel->add( multichannel_audition_ = new NCheckBox("Multichannel\nAudition"));
     checkPanel->add( record_noteoff_        = new NCheckBox("Record NoteOffs"));
-    checkPanel->add( record_tweaks_         = new NCheckBox("Record Tewaks"));
+    checkPanel->add( record_tweaks_         = new NCheckBox("Record Tweaks"));
     checkPanel->add( notestoeffects_        = new NCheckBox("Allow Notes\nto Effects"));
     checkPanel->add( movecirsorpaste_       = new NCheckBox("Move Cursor\nWhen Paste"));
   add(checkPanel);

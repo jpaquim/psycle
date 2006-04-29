@@ -17,75 +17,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef INSTRUMENTEDITOR_H
-#define INSTRUMENTEDITOR_H
+#ifndef ENVDIALOG_H
+#define ENVDIALOG_H
 
 #include <nwindow.h>
-
-class NLabel;
-class NButton;
-class NEdit;
-class NComboBox;
-class NSlider;
-class NCheckBox;
-class NItemEvent;
-class EnvDialog;
 
 /**
 @author Stefan Nattkemper
 */
-class InstrumentEditor : public NWindow
+class EnvDialog : public NWindow
 {
 public:
-    InstrumentEditor();
+    EnvDialog();
 
-    ~InstrumentEditor();
-
-    void setInstrument(int index);
-    int instrumentIndex();
+    ~EnvDialog();
 
     virtual int onClose();
 
-private:
 
-    NLabel*    instNumberLbl;
-    NButton*   incInstBtn;
-    NButton*   decInstBtn;
-    NEdit*     instNameEd;
-    NButton*   killBtn;
-    NComboBox* newNoteActionCb;
-    NSlider*   panningSlider;
-    NLabel*    panningLbl;
-    NCheckBox* rndPanningCbx;
-    NCheckBox* rndVCFCutCbx;
-    NCheckBox* rndVCFResoCbx;
-    NCheckBox* playSampleFitCbx;
-    NEdit*    patRowEdt;
-    NSlider*   volumeSlider;
-    NLabel*    volumeLbl;
-    NSlider*   fineTuneSlider;
-    NLabel*    fineTuneLbl;
-    NButton*   octDecBtn;
-    NButton*   noteDecBtn;
-    NButton*   noteIncBtn;
-    NButton*   octIncBtn;
-    NLabel*    octLbl;
-    NLabel*    loopLbl;
-    NLabel*    loopAtFromLbl;
-    NLabel*    loopAtToLbl;
-    NLabel*    lenLbl;
 
-    EnvDialog*    envelopeEditor;
-
-    void init();
-    std::string noteToString( int value );
-
-    void onBtnPress(NButtonEvent* ev);
-    void onComboSelected(NItemEvent* ev);
-    void onSliderMove(NSlider* sender, double pos);
-    void onShowEnvelopeEditor(NButtonEvent* ev);
-
-    void onPatRowEdit(const NKeyEvent & event);
 };
 
 #endif
