@@ -114,7 +114,7 @@ public:
       friend class GeneratorGUI;
 
       public:
-         VUPanel::VUPanel(GeneratorGUI* pGui) {
+         VUPanel(GeneratorGUI* pGui) {
            pGui_ = pGui;
          };
 
@@ -176,7 +176,7 @@ public:
       friend class EffectGUI;
 
       public:
-         VUPanel::VUPanel(EffektGUI* pGui) {
+         VUPanel(EffektGUI* pGui) {
            pGui_ = pGui;
          };
 

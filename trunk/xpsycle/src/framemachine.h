@@ -53,7 +53,7 @@ public:
 
 class Cell : public NPanel {
 public:
-   Cell::Cell() {
+   Cell() {
      setBorder(new NFrameBorder(),true);
    }
 
