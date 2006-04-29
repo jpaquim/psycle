@@ -239,7 +239,9 @@ void MainWindow::initToolBar( )
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->play()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "play.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onBarPlay);
+    NButton* playBtn = new NButton(img);
+      playBtn->setHint("Play from edit position");
+    toolBar1_->add(playBtn)->clicked.connect(this,&MainWindow::onBarPlay);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playselpattern()); else
