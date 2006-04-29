@@ -33,7 +33,7 @@ namespace psycle
 			ASIOSampleType asioSample;
 			AudioDriver::WorkFunction _pASIOCallback;
 			void* _pASIOcallbackContext;
-			int _ASIObufferSize;
+			int _ASIObufferSize__STATIC_SHIATZ;
 			bool asiopostOutput;
 
 			void Error(const char msg[])
@@ -213,8 +213,8 @@ namespace psycle
 			info[1].channelNum = outputindex[_driverID] + 1;
 			info[1].buffers[0] = info->buffers[1] = 0;
 			// create and activate buffers
-			if(_ASIObufferSize < minSamples[driverindex[_driverID]]) _ASIObufferSize = prefSamples[driverindex[_driverID]];
-			else if(_ASIObufferSize > maxSamples[driverindex[_driverID]]) _ASIObufferSize = prefSamples[driverindex[_driverID]];
+			if(_ASIObufferSize < minSamples[driverindex[_driverID]]) _ASIObufferSize = _ASIObufferSize__STATIC_SHIATZ = prefSamples[driverindex[_driverID]];
+			else if(_ASIObufferSize > maxSamples[driverindex[_driverID]]) _ASIObufferSize = _ASIObufferSize__STATIC_SHIATZ = prefSamples[driverindex[_driverID]];
 			if(ASIOCreateBuffers(info,2,_ASIObufferSize,&asioCallbacks) != ASE_OK)
 			{
 				//ASIOExit();
@@ -271,7 +271,7 @@ namespace psycle
 			bool saveatend(false);
 			_samplesPerSec=44100;
 			_driverID=0;
-			_ASIObufferSize = 1024;
+			_ASIObufferSize = _ASIObufferSize__STATIC_SHIATZ = 1024;
 			_channelmode = 3; // always stereo
 			_bitDepth = 16; // asio doesn't care about bit depth
 			Registry reg;
@@ -339,7 +339,7 @@ namespace psycle
 			int oldvid = _driverID;
 			int oldsps = _samplesPerSec;
 			if(_initialized) Stop();
-			_ASIObufferSize = dlg.m_bufferSize;
+			_ASIObufferSize = _ASIObufferSize__STATIC_SHIATZ = dlg.m_bufferSize;
 			_driverID = dlg.m_driverIndex;
 			_samplesPerSec = dlg.m_sampleRate;
 			_configured = true;
@@ -348,7 +348,7 @@ namespace psycle
 				if (Start()) WriteConfig();
 				else
 				{
-					_ASIObufferSize = oldbs;
+					_ASIObufferSize = _ASIObufferSize__STATIC_SHIATZ = oldbs;
 					_driverID = oldvid;
 					_samplesPerSec = oldsps;
 
@@ -377,11 +377,6 @@ namespace psycle
 			int playPos = 0;//int(Pa_StreamTime(stream));
 			return playPos;
 		}
-
-		int ASIOInterface::GetBufferSize()
-		{ 
-			return _ASIObufferSize; 
-		};
 
 		void ASIOInterface::ControlPanel(int driverID)
 		{
@@ -447,7 +442,7 @@ namespace psycle
 					structured_exception_translator_set = true;
 				}
 
-				float *pBuf = _pASIOCallback(_pASIOcallbackContext, _ASIObufferSize);
+				float *pBuf = _pASIOCallback(_pASIOcallbackContext, _ASIObufferSize__STATIC_SHIATZ);
 				int i;
 				switch (asioSample)
 				{
@@ -461,7 +456,7 @@ namespace psycle
 						WORD* outr;
 						outl = (WORD*)ASIObuffers[0][index];
 						outr = (WORD*)ASIObuffers[1][index];
-						for(i = 0; i < _ASIObufferSize; i++)
+						for(i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = f2iclip16(*pBuf++);
 							*outr++ = f2iclip16(*pBuf++);
@@ -476,7 +471,7 @@ namespace psycle
 						outr = (char*)ASIObuffers[1][index];
 						int t;
 						char* pt = (char*)&t;
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							t = f2iclip24((*pBuf++)*256.0f);
 							*outl++ = pt[0];
@@ -497,7 +492,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = f2iclip32((*pBuf++)*65536.0f);
 							*outr++ = f2iclip32((*pBuf++)*65536.0f);
@@ -510,7 +505,7 @@ namespace psycle
 						float* outr;
 						outl = (float*)ASIObuffers[0][index];
 						outr = (float*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = ((*pBuf++)/32768.0f);
 							*outr++ = ((*pBuf++)/32768.0f);
@@ -523,7 +518,7 @@ namespace psycle
 						double* outr;
 						outl = (double*)ASIObuffers[0][index];
 						outr = (double*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = ((*pBuf++)/32768.0);
 							*outr++ = ((*pBuf++)/32768.0);
@@ -538,7 +533,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = f2iclip16(*pBuf++);
 							*outr++ = f2iclip16(*pBuf++);
@@ -551,7 +546,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = f2iclip18((*pBuf++)*4.0f);
 							*outr++ = f2iclip18((*pBuf++)*4.0f);
@@ -564,7 +559,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = f2iclip20((*pBuf++)*16.0f);
 							*outr++ = f2iclip20((*pBuf++)*16.0f);
@@ -577,7 +572,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = f2iclip24((*pBuf++)*256.0f);
 							*outr++ = f2iclip24((*pBuf++)*256.0f);
@@ -590,7 +585,7 @@ namespace psycle
 						WORD* outr;
 						outl = (WORD*)ASIObuffers[0][index];
 						outr = (WORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = SwapShort(f2iclip16(*pBuf++));
 							*outr++ = SwapShort(f2iclip16(*pBuf++));
@@ -605,7 +600,7 @@ namespace psycle
 						outr = (char*)ASIObuffers[1][index];
 						int t;
 						char* pt = (char*)&t;
-						for(i = 0; i < _ASIObufferSize; i++)
+						for(i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							t = f2iclip24((*pBuf++)*256.0f);
 							*outl++ = pt[2];
@@ -625,7 +620,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for(i = 0; i < _ASIObufferSize; i++)
+						for(i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = SwapLong(f2iclip32((*pBuf++)*65536.0f));
 							*outr++ = SwapLong(f2iclip32((*pBuf++)*65536.0f));
@@ -638,7 +633,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = SwapLong(f2iclip16(*pBuf++));
 							*outr++ = SwapLong(f2iclip16(*pBuf++));
@@ -651,7 +646,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for(i = 0; i < _ASIObufferSize; i++)
+						for(i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = SwapLong(f2iclip18((*pBuf++)*4.0f));
 							*outr++ = SwapLong(f2iclip18((*pBuf++)*4.0f));
@@ -664,7 +659,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = SwapLong(f2iclip20((*pBuf++)*16.0f));
 							*outr++ = SwapLong(f2iclip20((*pBuf++)*16.0f));
@@ -677,7 +672,7 @@ namespace psycle
 						DWORD* outr;
 						outl = (DWORD*)ASIObuffers[0][index];
 						outr = (DWORD*)ASIObuffers[1][index];
-						for(i = 0; i < _ASIObufferSize; i++)
+						for(i = 0; i < _ASIObufferSize__STATIC_SHIATZ; i++)
 						{
 							*outl++ = SwapLong(f2iclip24((*pBuf++)*256.0f));
 							*outr++ = SwapLong(f2iclip24((*pBuf++)*256.0f));
@@ -686,13 +681,13 @@ namespace psycle
 					break;
 				case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
 					///\todo not yet implemented
-					memset (ASIObuffers[0][index], 0, _ASIObufferSize * 4);
-					memset (ASIObuffers[1][index], 0, _ASIObufferSize * 4);
+					memset (ASIObuffers[0][index], 0, _ASIObufferSize__STATIC_SHIATZ * 4);
+					memset (ASIObuffers[1][index], 0, _ASIObufferSize__STATIC_SHIATZ * 4);
 					break;
 				case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
 					///\todo not yet implemented
-					memset (ASIObuffers[0][index], 0, _ASIObufferSize * 8);
-					memset (ASIObuffers[1][index], 0, _ASIObufferSize * 8);
+					memset (ASIObuffers[0][index], 0, _ASIObufferSize__STATIC_SHIATZ * 8);
+					memset (ASIObuffers[1][index], 0, _ASIObufferSize__STATIC_SHIATZ * 8);
 					break;
 				}
 				// finally if the driver supports the ASIOOutputReady() optimization, do it here, all data are in place

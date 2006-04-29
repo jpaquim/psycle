@@ -34,11 +34,12 @@ namespace psycle
 		public:
 			DirectSound();
 			virtual ~DirectSound() throw();
-			virtual void Initialize(HWND hwnd, WorkFunction pCallback, void * context);
+			virtual void Initialize(HWND, WorkFunction, void*);
 			virtual void Reset();
-			virtual bool Enable(bool e);
+			virtual bool Enable(bool);
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
+			int virtual GetMaxLatencyInSamples() { return GetSampleSize() * _dsBufferSize; }
 			virtual void Configure();
 			virtual bool Initialized() { return _initialized; };
 			virtual bool Configured() { return _configured; };

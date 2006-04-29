@@ -42,7 +42,7 @@ namespace psycle
 			{
 				_numOutputDrivers = 4;
 				_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
-				_ppOutputDrivers[0] = new AudioDriver;
+				_ppOutputDrivers[0] = new NullOutput;
 				_ppOutputDrivers[1] = new WaveOut;
 				_ppOutputDrivers[2] = new DirectSound;
 				_ppOutputDrivers[3] = new ASIOInterface;

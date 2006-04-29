@@ -1220,11 +1220,8 @@ namespace psycle
 				// resync interrupt
 				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();
 				
-				int blockSamples = Global::pConfig->_pOutputDriver->GetBufferSize() / Global::pConfig->_pOutputDriver->GetSampleSize();
-				int blocks = Global::pConfig->_pOutputDriver->GetNumBuffers();
-
 				// calculate our final adjuster
-				int syncAdjuster = m_adjustedPlayPos - ( writePos - (blockSamples*blocks) );
+				int syncAdjuster = m_adjustedPlayPos - ( writePos - Global::pConfig->_pOutputDriver->GetMaxLatencyInSamples() );
 				m_stats.syncAdjuster = syncAdjuster;
 
 		#ifdef _DEBUGGING

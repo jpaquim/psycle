@@ -37,31 +37,43 @@ namespace psycle
 				typedef float * (*WorkFunction) (void * context, int & numSamples);
 
 			public:
+				AudioDriverInfo* GetInfo() { return &_info; }
 				AudioDriver();
-				virtual ~AudioDriver() {};
-				virtual void Initialize(HWND hwnd, WorkFunction pCallback, void* context) {};
-				virtual void Reset(void) {};
-				virtual bool Enable(bool e) { return false; };	
-				virtual int GetWritePos() { return 0; };
-				virtual int GetPlayPos() { return 0; };
-				virtual int GetNumBuffers() { return _numBlocks; };
-				virtual int GetBufferSize() { return _blockSize; };
-				virtual int GetBufferSamples() { return _blockSize/GetSampleSize(); };
-				virtual int GetSampleSize() { return (_channelmode==3)?(_bitDepth/4):(_bitDepth/8); };
-				virtual void Configure(void) {};
-				virtual bool Initialized(void) { return true; };
-				virtual bool Configured(void) { return true; };
-				virtual AudioDriverInfo* GetInfo() { return &_info; };
+				virtual ~AudioDriver() throw() {}
+				virtual void Initialize(HWND, WorkFunction, void*)= 0;
+				virtual void Reset() = 0;
+				virtual bool Enable(bool) = 0;
+				virtual int GetWritePos() = 0;
+				virtual int GetPlayPos() = 0;
+				int virtual GetMaxLatencyInSamples() = 0;
+				virtual void Configure() = 0;
+				virtual bool Initialized() = 0;
+				virtual bool Configured() = 0;
 				static void QuantizeWithDither(float *pin, int *piout, int c);
 				static void Quantize(float *pin, int *piout, int c);
-			public:
-				int _numBlocks;
+				int GetSampleSize() { return _channelmode == 3 ? _bitDepth / 4 : _bitDepth / 8; }
+			PSYCLE__PRIVATE:
 				int _blockSize;
 				int _samplesPerSec;
-				int _channelmode;
 				int _bitDepth;
-			protected:
-				static AudioDriverInfo _info;
+				int _channelmode;
+			protected: // whuo!?
+				/**/static/**/ AudioDriverInfo _info;
+		};
+
+		class NullOutput : public AudioDriver
+		{
+			public:
+				~NullOutput() throw() {}
+				virtual void Initialize(HWND hwnd, WorkFunction, void*) {}
+				virtual void Reset() {}
+				virtual bool Enable(bool) { return true; }
+				virtual int GetWritePos() { return 0; }
+				virtual int GetPlayPos() { return 0; }
+				int virtual GetMaxLatencyInSamples() { return 0; }
+				virtual void Configure() {}
+				virtual bool Initialized() { return true; }
+				virtual bool Configured() { return true; }
 		};
 	}
 }
