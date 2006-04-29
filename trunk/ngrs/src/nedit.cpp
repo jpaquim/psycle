@@ -280,6 +280,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
       }
  }
  //emitActions();
+  keyPress.emit(keyEvent);
 }
 
 void NEdit::onFocus( )
