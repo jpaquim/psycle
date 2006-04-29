@@ -146,7 +146,7 @@
 				<br/>
 				<b>For the version of psycle</b>, you can choose either <code>unstable</code>, <code>testing</code> or <code>stable</code>.
 				<br/>
-				Note that this is independent from the main debian distribution you use:
+				<b>Note that this is independent from the main debian distribution you use:</b>
 				All packages are built on debian <code>unstable</code>, debian <code>testing</code>, debian <code>stable</code>, ubuntu <code>dapper</code>, ubuntu <code>breezy</code>, etc ...
 				<br/>
 				In the following <b>example</b>, <code>etch/unstable</code> means psycle's <code>unstable</code> version for the debian <code>etch</code> distibution.
