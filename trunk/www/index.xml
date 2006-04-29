@@ -144,7 +144,8 @@
 				<a href='./debian/dists/unstable/unstable/main/binary-i386/Packages.gz'>binary-i386 packages</a>, and
 				<a href='./debian/dists/source/unstable/main/source/Sources.gz'>source packages</a>.
 				<br/>
-				You can choose either <code>unstable</code>, <code>testing</code> or <code>stable</code> <b>for the version of psycle</b>,
+				<b>For the version of psycle</b>, you can choose either <code>unstable</code>, <code>testing</code> or <code>stable</code>.
+				<br/>
 				Note that this is independent from the main debian distribution you use:
 				All packages are built on debian <code>unstable</code>, debian <code>testing</code>, debian <code>stable</code>, ubuntu <code>dapper</code>, ubuntu <code>breezy</code>, etc ...
 				<br/>
