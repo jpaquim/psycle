@@ -34,7 +34,6 @@ namespace psycle
 			: _samplesPerSec(44100)
 			, _bitDepth(16)
 			, _channelmode(3)
-			, _numBlocks(0)
 			, _blockSize(0)
 		{}
 

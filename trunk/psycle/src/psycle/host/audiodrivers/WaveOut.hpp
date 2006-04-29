@@ -30,51 +30,59 @@ namespace psycle
 		public:
 			WaveOut();
 			virtual ~WaveOut() throw();
-			virtual void Initialize(HWND hwnd, WorkFunction pCallback, void * context);
+			virtual void Initialize(HWND, WorkFunction, void*);
 			virtual void Reset();
-			virtual bool Enable(bool e);	
+			virtual bool Enable(bool);
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
+			int virtual GetMaxLatencyInSamples() { return GetSampleSize() * _blockSize * _numBlocks; }
 			virtual void Configure();
 			virtual bool Initialized() { return _initialized; };
 			virtual bool Configured() { return _configured; };
-			virtual AudioDriverInfo* GetInfo() { return &_info; };
 		private:
-			class CBlock
-			{
-			public:
-				HANDLE Handle;
-				unsigned char *pData;
-				WAVEHDR *pHeader;
-				HANDLE HeaderHandle;
-				bool Prepared;
-			};
-			bool _initialized;
-			bool _configured;
 			static AudioDriverInfo _info;
+
+			int _deviceID;
+			HWAVEOUT _handle;
+
+			bool _initialized;
+
+			void ReadConfig();
+			bool _configured;
+			void WriteConfig();
+
+			bool Start();
+			bool _running;
+			bool Stop();
+
+			WorkFunction _pCallback;
+			void* _callbackContext;
+			static void PollerThread(void *pWaveOut);
+			int _pollSleep;
+			bool _stopPolling;
 			static AudioDriverEvent _event;
 			static CCriticalSection _lock;
 
-			HWAVEOUT _handle;
-			int _deviceID;
-			int _currentBlock;
-			int _writePos;
-			int _pollSleep;
-			int _dither;
-			bool _running;
-			bool _stopPolling;
 			int const static MAX_WAVEOUT_BLOCKS = 8;
+			int _numBlocks;
+			int _currentBlock;
+			class CBlock
+			{
+				public:
+					HANDLE Handle;
+					unsigned char *pData;
+					WAVEHDR *pHeader;
+					HANDLE HeaderHandle;
+					bool Prepared;
+			};
 			CBlock _blocks[MAX_WAVEOUT_BLOCKS];
-			void* _callbackContext;
-			WorkFunction _pCallback;
 
-			static void PollerThread(void *pWaveOut);
-			void ReadConfig();
-			void WriteConfig();
-			void Error(const char msg[]);
 			void DoBlocks();
-			bool Start();
-			bool Stop();
+			int _writePos;
+
+			int _dither;
+
+			void Error(const char msg[]);
 		};
 	}
 }

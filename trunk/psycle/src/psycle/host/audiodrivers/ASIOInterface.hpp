@@ -28,16 +28,15 @@ namespace psycle
 		public:
 			ASIOInterface();
 			virtual ~ASIOInterface() throw();
-			virtual void Initialize(HWND hwnd, WorkFunction pCallback, void* context);
+			virtual void Initialize(HWND, WorkFunction, void*);
 			virtual void Configure();
 			inline virtual bool Initialized() { return _initialized; };
 			inline virtual bool Configured() { return _configured; };
-			virtual int GetBufferSize();
-			inline virtual AudioDriverInfo* GetInfo() { return &_info; };
 			virtual void Reset();
-			virtual bool Enable(bool e);
+			virtual bool Enable(bool);
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
+			int virtual GetMaxLatencyInSamples() { return GetSampleSize() * _ASIObufferSize; }
 			void ControlPanel(int driverID);
 
 			int drivercount;
@@ -65,6 +64,7 @@ namespace psycle
 			int _driverID;
 			char szNameBuf[MAX_ASIO_DRIVERS][64];
 			asio::AsioDrivers asioDrivers;
+			int _ASIObufferSize;
 		};
 	}
 }
