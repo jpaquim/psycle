@@ -181,7 +181,7 @@ string NSystem::getFontPattern( const NFont & font )
   else {
     string pattern = fontPattern(font);
     int count = 0;
-    char** myFonts = getFontList(dpy(), pattern, &count);    
+    char** myFonts = getFontList(dpy(), pattern, &count);
     if (count!=0) {
       xfntname = getFontPatternWithSizeStyle(dpy(),0,myFonts[0],font.size()*10);
     }

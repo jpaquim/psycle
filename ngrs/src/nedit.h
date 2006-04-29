@@ -53,6 +53,8 @@ public:
 
     unsigned int pos() const;
 
+    sigslot::signal1<const NKeyEvent &> keyPress;
+
 private:
 
     int valign_, halign_;

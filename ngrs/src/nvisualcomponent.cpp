@@ -88,7 +88,6 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
 
     if (clip_) g->setClipping(region);    //  setClipping
     g->setRegion(region);
-
     int gTx = g->xTranslation();          // store old graphics translation
     int gTy = g->yTranslation();
 

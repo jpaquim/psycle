@@ -68,4 +68,9 @@ void NTogglePanel::setDown( NCustomButton * btn )
   repaint();
 }
 
+void NTogglePanel::add( NVisualComponent * component, int align )
+{
+   NPanel::add(component,align);
+}
+
 
