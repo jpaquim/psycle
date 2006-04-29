@@ -214,7 +214,7 @@ class Master : public Machine
 
     //virtual bool Load(RiffFile * pFile);
     virtual bool LoadSpecificChunk(DeSerializer * pFile, int version);
-    virtual void Master::SaveSpecificChunk(Serializer* pFile);
+    virtual void SaveSpecificChunk(Serializer* pFile);
 
     /// this is for the VstHost
     double sampleCount;

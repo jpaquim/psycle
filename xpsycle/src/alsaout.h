@@ -100,7 +100,7 @@ private:
    int xrun_recovery(snd_pcm_t *handle, int err);
    int write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
 
-   static int AlsaOut::audioOutThread(void * ptr);
+   static int audioOutThread(void * ptr);
    void setValues();
 
 };
