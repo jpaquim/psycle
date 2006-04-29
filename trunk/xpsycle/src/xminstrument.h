@@ -20,10 +20,13 @@
 #ifndef XMINSTRUMENT_H
 #define XMINSTRUMENT_H
 
+#include "deserializer.h"
+#include "serializer.h"
 #include <utility>
 #include <string>
 #include <inttypes.h>
 #include <cassert>
+
 
 template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
 {
@@ -135,8 +138,8 @@ public:
           m_WaveLength  = iLen;
        }
 
-       // void Load(RiffFile* riffFile);
-       // void Save(RiffFile* riffFile);
+        void Load(DeSerializer* file);  // here is a change to main psycle
+        void Save(Serializer* file);
 
        /// Wave Data Copy Operator
        void operator= (const WaveData& source)

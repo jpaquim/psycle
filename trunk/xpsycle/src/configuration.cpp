@@ -43,6 +43,7 @@ void Configuration::setSkinDefaults( )
 {
   autoStopMachines = false;
   _centerCursor = false;
+  enableSound = 0;
 
   _linenumbers       = true;
   _linenumbersHex    = false;
@@ -126,6 +127,13 @@ void Configuration::loadConfig( )
 
 void Configuration::onConfigTagParse(const std::string & tagName )
 {
+  if (tagName == "audio") {
+     std::string enableStr = NApp::config()->getAttribValue("enable");
+     int enable = 0;
+     if (enableStr != "") enable = str<int>(enableStr);
+     enableSound = enable;
+  }
+
   if (tagName == "key") {
      std::string id         = NApp::config()->getAttribValue("id");
      std::string ctrlStr    = NApp::config()->getAttribValue("ctrl");

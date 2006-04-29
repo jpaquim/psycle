@@ -29,6 +29,7 @@
 #include <nbutton.h>
 #include <nedit.h>
 #include <nfiledialog.h>
+#include <nslider.h>
 
 
 NBitmap Knob::kbitmap;
@@ -47,7 +48,6 @@ NewNameDlg::NewNameDlg( )
   NEdit* name = new NEdit();
   name->setText("userprs");
   pane()->add(name,nAlClient);
-
 
   setPosition(100,100,300,60);
 }

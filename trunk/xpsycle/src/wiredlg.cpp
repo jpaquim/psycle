@@ -52,6 +52,8 @@ WireDlg::WireDlg()
     analyzer = new Analyzer();
     pane()->add(analyzer,nAlClient);
   pane()->add(btnPnl,nAlBottom);
+
+  setPosition(10,10,300,300);
 }
 
 

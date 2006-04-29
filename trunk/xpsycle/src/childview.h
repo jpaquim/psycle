@@ -58,6 +58,7 @@ public:
     PatternView* patternView();
     MachineView* machineView();
 
+    void play();
     void playFromStart();
     void enableSound();
 

@@ -233,13 +233,13 @@ void MainWindow::initToolBar( )
                                          img->loadFromFile(Global::pConfig()->iconPath+ "playstart.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(barPlayFromStartBtn_ = new NButton(img));
-    barPlayFromStartBtn_->setHint("Play fro start");
+    barPlayFromStartBtn_->setHint("Play from start");
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->play()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "play.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onBarPlay);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playselpattern()); else
@@ -513,6 +513,12 @@ void MainWindow::initSignals( )
   viewMenu_->itemClicked.connect(this, &MainWindow::onViewMenuItemClicked);
   childView_->newSongLoaded.connect(sequencerBar_,&SequencerBar::updateSequencer);
   barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
+}
+
+
+void MainWindow::onBarPlay( NButtonEvent * ev )
+{
+  childView_->play();
 }
 
 void MainWindow::onBarPlayFromStart( NButtonEvent * ev )
@@ -1047,6 +1053,8 @@ void MainWindow::onSequencerView( NButtonEvent * ev )
   box->execute();
   NApp::addRemovePipe(box);
 }
+
+
 
 
 

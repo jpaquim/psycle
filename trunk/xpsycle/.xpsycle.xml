@@ -1,5 +1,15 @@
 <!-- xpsycle configuration file -->
 <xpsycle>
+
+
+
+<!-- audio configuration -->
+
+<audio enable='1' />
+
+
+<!-- gui configuration -->
+
 <path id='icondir' src='~/xpsycle/icons/' />
 <path id='plugindir'
 src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
