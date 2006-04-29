@@ -65,7 +65,7 @@ ChildView::ChildView()
     getSaveFileName_->setMode(nSave);
   add(getSaveFileName_);
 
- // enableSound();
+  if (Global::pConfig()->enableSound) enableSound();
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(80);
@@ -155,6 +155,14 @@ PatternView * ChildView::patternView( )
   return patternView_;
 }
 
+
+void ChildView::play( )
+{
+  patternView_->setPrevEditPosition(patternView_->editPosition());
+  Global::pPlayer()->Start(0,0);
+}
+
+
 void ChildView::playFromStart()
 {
   if (Global::pConfig()->_followSong)
@@ -162,7 +170,7 @@ void ChildView::playFromStart()
     //bScrollDetatch=false;
   }
   patternView_->setPrevEditPosition(patternView_->editPosition());
-  Global::pPlayer()->Start(0,0);
+  Global::pPlayer()->Start(patternView_->editPosition(),0);
   //pParentMain->StatusBarIdle();
 }
 
@@ -216,6 +224,8 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
     }
    }
 }
+
+
 
 
 

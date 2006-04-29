@@ -113,6 +113,8 @@ public:
     int _numOutputDrivers;
     int _outputDriverIndex;
 
+    bool enableSound;
+
     inline int GetSamplesPerSec() const throw()
     {
       return _pOutputDriver->_samplesPerSec;

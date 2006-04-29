@@ -1029,7 +1029,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 
                    Machine *tmac = Global::pSong()->_pMachine[Global::pSong()->seqBus];
                    if (tmac) {
-                      pView->PlayNote(note,127,false,tmac); 
+                      //pView->PlayNote(note,127,false,tmac); 
                    }
 
                    int startLine  = dy_ / pView->rowHeight();
@@ -1686,7 +1686,7 @@ void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
 
   if (pView->cursor().z()==0) {
     int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
-    pView->StopNote(outnote);
+    //pView->StopNote(outnote);
   }
 }
 

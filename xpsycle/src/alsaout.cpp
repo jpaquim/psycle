@@ -60,6 +60,7 @@ bool AlsaOut::Start( )
 bool AlsaOut::Stop( )
 {
   _timerActive = false;
+  enablePlayer = 0;
 }
 
 

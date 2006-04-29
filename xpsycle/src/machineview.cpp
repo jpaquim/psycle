@@ -194,7 +194,7 @@ void MachineView::onWireDelete( WireDlg * dlg )
   Machine* _pDstMachine = dlg->pDstMachine();
 
   int wireIndex    = dlg->pSrcMachine()->_macIndex;
-  int dstWireIndex = dlg->pDstMachine()->_macIndex;
+  int dstWireIndex = _pDstMachine->FindInputWire(_pSrcMachine->_macIndex);
 
   _pSrcMachine->_connection[wireIndex] = false;
   _pSrcMachine->_outputMachines[wireIndex] = -1;

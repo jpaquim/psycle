@@ -109,6 +109,7 @@ private:
 
     void showSongpDlg(NObject* sender);
 
+    void onBarPlay(NButtonEvent* ev);
     void onBarPlayFromStart(NButtonEvent* ev);
     void onBarStop(NButtonEvent* ev);
 

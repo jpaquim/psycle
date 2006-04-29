@@ -358,6 +358,7 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
     vol = 0;
   }
 
+  if (max >0 || vol >0)
   g->putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
                MachineGUI::pixmap,
                pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,

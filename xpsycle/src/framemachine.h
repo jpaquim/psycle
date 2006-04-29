@@ -38,6 +38,8 @@ const int W_ROWWIDTH = 150;
 class Machine;
 class NTogglePanel;
 class NButton;
+class NSlider;
+
 
 /**
 @author Stefan
@@ -154,6 +156,7 @@ private:
    NPanel* knobPanel;
    NTogglePanel* prsPanel;
    NButton* defaultPrsBtn;
+   NSlider* prsBtnSlider;
 
    NGridLayout* gridLayout;
 
@@ -173,6 +176,7 @@ private:
    void loadPresets();
    void onAddPrs(NButtonEvent* ev);
    void onLoadPrs(NButtonEvent* ev);
+
 
 
 };
