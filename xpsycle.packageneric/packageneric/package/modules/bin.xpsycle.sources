@@ -1,2 +1,2 @@
 #! /bin/sh
-find xpsycle/ \( -type d -name todo -prune \) -or \( -name \*.cpp -print \)
+find xpsycle/ \( -type d \( -name todo -or -name output_plugins \) -prune \) -or \( -name \*.cpp -print \)
