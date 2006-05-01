@@ -423,8 +423,3 @@ void NFileDialog::onHiddenCheckBoxClicked( NButtonEvent * ev )
 }
 
 
-
-
-
-
-

@@ -18,12 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nmenu.h"
+#include "ncustommenuitem.h"
 #include "napp.h"
 #include "nconfig.h"
-#include "nmenuitem.h"
-#include "ncheckmenuitem.h"
-#include "nmenuseperator.h"
-#include "nbevelborder.h"
+#include "npopupmenu.h"
 
 NMenu::NMenu()
  : NCustomButton()
@@ -31,37 +29,17 @@ NMenu::NMenu()
   init();
 }
 
-NMenu::NMenu( std::string text )
+NMenu::NMenu( const std::string & text ) : NCustomButton(text)
 {
   init();
-  setText(text);
-}
-
-NMenu::NMenu( std::string text, char mnemonic )
-{
-  init();
-  setText(text);
-  setMnemonic(mnemonic);
-}
-
-NMenu::NMenu( std::string text, char mnemonic, std::string create )
-{
-  init();
-  setText(text);
-  setMnemonic(mnemonic);
-  add(create);
 }
 
 void NMenu::init( )
 {
   popupMenu_ = new NPopupMenu();
-  add(popupMenu_);
-  popupMenu_->hideRequest.connect(this,&NMenu::onHideRequest);
-  popupMenu_->leftPress.connect(this,&NMenu::onLeftPress);
-  popupMenu_->rightPress.connect(this,&NMenu::onRightPress);
-  setTransparent(true);
-  selectedItem_ = 0;
-  del = ',';
+  NCustomButton::add(popupMenu_);
+
+  popupMenu_->addMessageListener(this);
 
   NApp::config()->setSkin(&btnOver_,"mbtnover");
   NApp::config()->setSkin(&btnNone_,"mbtnnone");
@@ -69,113 +47,75 @@ void NMenu::init( )
   setSkin(btnNone_);
 }
 
-
 NMenu::~NMenu()
 {
-  delete border_;
 }
 
-NPopupMenu * NMenu::popupMenu( )
+NCustomMenuItem* NMenu::add( NCustomMenuItem * item )
 {
-  return popupMenu_;
-}
-
-void NMenu::addSeperator( )
-{
-  popupMenu_->addSeperator();
-}
-
-void NMenu::add( NCustomMenuItem * item )
-{
-  item->click.connect(this,&NMenu::onItemSelected);
   popupMenu_->add(item);
-}
-
-void NMenu::add( NRuntime * component )
-{
-  NCustomButton::add(component);
-}
-
-void NMenu::onKeyAcceleratorNotify(NKeyAccelerator accelerator) {
-   NButtonEvent ev(this,0,0,0); // fake a button press on this menu
-   click.emit(&ev);
-}
-
-void NMenu::onHideRequest( NObject * sender )
-{
-  menuHideRequest.emit(this);
-}
-
-void NMenu::onLeftPress( NObject * sender )
-{
-  leftPress.emit(this);
-}
-
-void NMenu::onRightPress( NObject * sender )
-{
-  rightPress.emit(this);
+  item->addMessageListener(popupMenu_);
+  return item;
 }
 
 void NMenu::onMouseEnter( )
 {
   setSkin(btnOver_);
   repaint();
-  menuEntered.emit(this);
+
+  NEvent ev(this, "ngrs_menu_enter");
+  sendMessage(&ev);
 }
 
 void NMenu::onMouseExit( )
 {
-  if (!popupMenu()->mapped()) {
-    NCustomButton::onMouseExit();
-    setSkin(btnNone_);
-    repaint();
+  setSkin(btnNone_);
+  repaint();
+}
+
+void NMenu::onMousePress( int x, int y, int button )
+{
+  if ( button == 1 ) {
+    NEvent ev(this, "ngrs_menu_press");
+    sendMessage(&ev);
   }
 }
 
-void NMenu::onItemSelected( NButtonEvent * ev )
+void NMenu::onMessage( NEvent * ev )
 {
-  selectedItem_ = ev->sender();
-  NEvent ev_menu(this,text());
-  itemClicked.emit(&ev_menu,ev);
-  sendMessage(&ev_menu);
+  if (ev->text() == "ngrs_menu_expose" && ev->sender() == this) {
+    int winLeft = window()->left();
+    int winTop  = window()->top();
+    popupMenu_->setPosition(winLeft + absoluteLeft(), winTop + absoluteTop() + height() ,100,100);
+    popupMenu_->setVisible(true);
+  } else
+  if (ev->text() == "ngrs_menu_expose" && !(ev->sender() == this)) {
+    popupMenu_->setVisible(false);
+  } else
+  if (ev->text() == "ngrs_menu_hide") {
+     popupMenu_->setVisible(false);
+  } else 
+    if (ev->text() == "ngrs_menu_item_click") {
+     NEvent ev(this, "ngrs_menu_press");
+     sendMessage(&ev);
+  }
 }
 
-NObject * NMenu::selectedItem( )
+void NMenu::onKeyPress( const NKeyEvent & event )
 {
-  return selectedItem_;
-}
-
-void NMenu::add( std::string create )
-{
-  unsigned int i = 0;
-  int start = 0;
-  std::string substr;
-  do {
-    i = create.find(del, i);
-    if (i != std::string::npos) {
-       substr = create.substr(start,i-start);
-       i+=1;
-       start = i;
-    } else substr = create.substr(start);
-    if (substr=="|") {
-      add(new NMenuSeperator());
-    } else {
-      if (substr.substr(0,2)=="&&") {
-        substr.erase(0,2);
-        NCheckMenuItem *item = new NCheckMenuItem(substr);
-        add(item);
-        item->setName(substr);
-      } else {
-        NMenuItem *item = new NMenuItem(substr);
-        add(item);
-        item->setName(substr);
-      }
+  switch (event.scancode()) {
+    case XK_Left : {
+      NEvent ev(this, "ngrs_menu_key_left");
+      sendMessage(&ev);
     }
-  } while (i != std::string::npos);
+    break;
+    case XK_Right : {
+      NEvent ev(this, "ngrs_menu_key_right");
+      sendMessage(&ev);
+    }
+    break;
+  }
 }
 
-NCustomMenuItem * NMenu::itemByName( const std::string & name )
-{
-  return popupMenu_->itemByName(name);
-}
+
 

@@ -33,29 +33,22 @@ public:
 
     ~NCustomMenuItem();
 
-    signal1<NObject*> subMenuMapped;
-
-    virtual void setIconSize(int size);
-    virtual void setCaptionSize(int size);
-    virtual void setShortCutSize(int size);
-    virtual void setHintSize(int size);
-
-    virtual int maxIconSize();
-    virtual int maxCaptionSize();
-    virtual int maxShortCutSize();
-    virtual int maxHintSize();
+    signal1<NButtonEvent*> click;
 
     virtual void add(class NMenu* menu);
     virtual void add(NRuntime* comp);
+    virtual void add(NVisualComponent* comp, int align);
 
-    signal1<NButtonEvent*> click;
+    virtual void onMouseEnter();
+    virtual void onMouseExit();
 
-    char mnemonic();
-    virtual void setMnemonic(char c);
+    virtual void onMousePress(int x, int y, int button);
 
 private:
 
-    int iconSize_, captionSize_, shortCutSize_, hintSize_, mnemonic_;
+    NSkin itemNone;
+    NSkin itemOver;
+
 
 };
 

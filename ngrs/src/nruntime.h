@@ -64,7 +64,7 @@ public:
    NRuntime* parent() const;
 
    virtual bool visit(NVisitor* v);
-   virtual void onCustomMessage( NEvent * event );
+   virtual void onMessage( NEvent * event );
 
    static std::string stringify(double x);
    static std::string stringify(int x);

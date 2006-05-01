@@ -21,63 +21,43 @@
 #define NMENU_H
 
 #include <ncustombutton.h>
-#include <npopupmenu.h>
-#include "nmenuseperator.h"
+
+
+class NPopupMenu;
+class NCustomMenuItem;
 
 /**
 @author Stefan
 */
+
 class NMenu : public NCustomButton
 {
 public:
-    NMenu();
-    NMenu(std::string text);
-    NMenu(std::string text, char mnemonic);
-    NMenu(std::string text, char mnemonic, std::string create);
+   NMenu();
+   NMenu(const std::string & text);
 
-    ~NMenu();
+   ~NMenu();
 
-   virtual void add(std::string create);
-   virtual void add(NRuntime* component);
-   virtual void add(NCustomMenuItem* item);
+   virtual NCustomMenuItem* add(NCustomMenuItem* item);
 
-   void addSeperator();
-
-   signal2<NEvent*,NButtonEvent*> itemClicked;
-
-
-   signal1<NObject*> menuEntered;
-   signal1<NObject*> menuHideRequest;
-   signal1<NObject*> leftPress;
-   signal1<NObject*> rightPress;
-
-
-   NPopupMenu* popupMenu();
-
-   virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
    virtual void onMouseEnter();
    virtual void onMouseExit();
+   virtual void onMousePress( int x, int y, int button );
 
-   NObject* selectedItem();
+   virtual void onKeyPress(const NKeyEvent & event);
 
-   NCustomMenuItem* itemByName(const std::string & name);
+   virtual void onMessage(NEvent* ev);
+
+
 
 private:
 
     NSkin btnOver_;
-    NSkin btnNone_; 
+    NSkin btnNone_;
 
-    char del;
-    NObject* selectedItem_;
     NPopupMenu* popupMenu_;
-    NBorder* border_;
 
     void init();
-    void onHideRequest(NObject* sender);
-    void onLeftPress (NObject* sender);
-    void onRightPress(NObject* sender);
-
-    void onItemSelected(NButtonEvent* ev);
 
 };
 

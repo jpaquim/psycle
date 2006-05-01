@@ -22,7 +22,6 @@
 NMenuSeperator::NMenuSeperator()
  : NCustomMenuItem()
 {
-  setAlign(nAlClient);
 }
 
 

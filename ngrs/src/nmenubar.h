@@ -21,8 +21,9 @@
 #define NMENUBAR_H
 
 #include <npanel.h>
-#include <nflowlayout.h>
-#include <nmenu.h>
+
+class NMenu;
+
 
 /**
 @author Stefan
@@ -35,23 +36,14 @@ public:
     ~NMenuBar();
 
     virtual void add(NMenu* menu);
+    virtual void onMessage(NEvent* ev);
 
 private:
 
-    void setSkin();
+    bool isMenuMapped_;
 
-    NMenu* lastMenu_;
-    NMenu* lastUnmapMenu_;
-    bool aMenuMapped_;
+    std::vector<NObject*> menus;
 
-    void onMenuEnter(NObject* sender);
-    void onMenuClick(NButtonEvent * ev);
-
-    void mapLeft  (NObject* actual);
-    void mapRight (NObject* actual);
-
-    void mapMenu(NObject* menu);
-    void unmapMenu(NObject* menu);
 };
 
 #endif
