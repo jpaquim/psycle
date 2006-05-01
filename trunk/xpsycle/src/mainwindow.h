@@ -123,6 +123,14 @@ private:
     void onFileSave(NButtonEvent* ev);
     void onFileSaveAs(NButtonEvent* ev);
 
+    void onViewMenuToolbar(NButtonEvent* ev);
+    void onViewMenuMachinebar(NButtonEvent* ev);
+    void onViewMenuSequencerbar(NButtonEvent* ev);
+    void onViewMenuStatusbar(NButtonEvent* ev);
+
+    void onHelpMenuAbout(NButtonEvent* ev);
+    void onHelpMenuGreeting(NButtonEvent* ev);
+
     void onLoadWave(NButtonEvent* ev);
     void onEditInstrument(NButtonEvent* ev);
 

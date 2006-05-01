@@ -29,6 +29,7 @@
 #include <napp.h>
 #include <nitem.h>
 #include <ncheckmenuitem.h>
+#include <nmenuseperator.h>
 #include <nmessagebox.h>
 #include <nbevelborder.h>
 
@@ -37,7 +38,6 @@ MainWindow::MainWindow()
  : NWindow()
 {
   setPosition(0,0,1024,768);
-  pane()->setName("pane");
 
   initMenu();
   initDialogs();
@@ -47,15 +47,6 @@ MainWindow::MainWindow()
   initSignals();
 
   childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
-
-  greetDlg =  new GreetDlg();
-    add(greetDlg);
-  aboutDlg =  new AboutDlg();
-    add(aboutDlg);
-  wavRecFileDlg = new NFileDialog();
-    wavRecFileDlg->setMode(nSave);
-  add(wavRecFileDlg);
-
 }
 
 
@@ -68,43 +59,95 @@ void MainWindow::initMenu( )
    menuBar_ = new NMenuBar();
    pane()->add(menuBar_);
 
-
-   fileMenu_ = new NMenu("File",'i'
-      ,"New,Open,Import Module,Save,Save as,Render as Wav,|,Song properties,|,revert to Saved,recent Files,Exit");
+   // Creates the file menu
+   fileMenu_ = new NMenu("File");
+     fileMenu_->add(new NMenuItem("New"))->click.connect(this,&MainWindow::onFileNew);
+     fileMenu_->add(new NMenuItem("Open"))->click.connect(this,&MainWindow::onFileOpen);
+     fileMenu_->add(new NMenuItem("Import Module"));
+     fileMenu_->add(new NMenuItem("Save"));
+     fileMenu_->add(new NMenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
+     fileMenu_->add(new NMenuItem("Render as Wav"));
+     fileMenu_->add(new NMenuSeperator());
+     fileMenu_->add(new NMenuItem("Song properties"));
+     fileMenu_->add(new NMenuSeperator());
+     fileMenu_->add(new NMenuItem("Song properties"));
+     fileMenu_->add(new NMenuItem("revert to saved"));
+     fileMenu_->add(new NMenuItem("recent files"));
+     fileMenu_->add(new NMenuItem("exit"));
    menuBar_->add(fileMenu_);
 
-   fileMenu_->itemByName("New")->click.connect(this,&MainWindow::onFileNew);
-   fileMenu_->itemByName("Open")->click.connect(this,&MainWindow::onFileOpen);
-   fileMenu_->itemByName("Save as")->click.connect(this,&MainWindow::onFileSaveAs);
-
-   recentFileMenu_ = new NMenu("recent Files");
-   fileMenu_->itemByName("recent Files")->add(recentFileMenu_);
-
-   editMenu_ = new NMenu("Edit",'e',
-       "Undo,Redo,Pattern Cut,Pattern Copy,Pattern Paste,Pattern Mix Paster,Pattern Delete,|,Block Cut,Block Copy,Block Paste,Block Mix Paste,Block Delete,|,Sequence Cut,Sequence Copy,Sequence Delete");
-       editMenu_->itemClicked.connect(this, &MainWindow::onEditMenuItemClicked);
+   // Creates the edit menu
+   editMenu_ = new NMenu("Edit");
+      editMenu_->add(new NMenuItem("Undo"));
+      editMenu_->add(new NMenuItem("Redo"));
+      editMenu_->add(new NMenuItem("Pattern Cut"));
+      editMenu_->add(new NMenuItem("Pattern Copy"));
+      editMenu_->add(new NMenuItem("Pattern Paste"));
+      editMenu_->add(new NMenuItem("Pattern Mix"));
+      editMenu_->add(new NMenuItem("Pattern Mix Paste"));
+      editMenu_->add(new NMenuItem("Pattern Delete"));
+      editMenu_->add(new NMenuItem("Block Cut"));
+      editMenu_->add(new NMenuItem("Block Copy"));
+      editMenu_->add(new NMenuItem("Block Paste"));
+      editMenu_->add(new NMenuItem("Block Mix Paste"));
+      editMenu_->add(new NMenuItem("Block Mix Delete"));
+      editMenu_->add(new NMenuSeperator());
+      editMenu_->add(new NMenuItem("Sequence Cut"));
+      editMenu_->add(new NMenuItem("Sequence Copy"));
+      editMenu_->add(new NMenuItem("Sequence Delete"));
    menuBar_->add(editMenu_);
 
-   viewMenu_ = new NMenu("View",'v',
-       "&&Toolbar,&&MachineBar,&&SequencerBar,&&StatusBar,|,MachineView,PatternEditor,PatternSequencer,|,Add machine,Instrument Editor");
+   // Creates the view menu
+   viewMenu_ = new NMenu("View");
+     viewMenu_->add(new NCheckMenuItem("Toolbar"))->click.connect(this,&MainWindow::onViewMenuToolbar);
+     viewMenu_->add(new NCheckMenuItem("Machinebar"))->click.connect(this,&MainWindow::onViewMenuMachinebar);
+     viewMenu_->add(new NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
+     viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);;
+     viewMenu_->add(new NMenuSeperator());
+     viewMenu_->add(new NCheckMenuItem("PatternEditor"));
+     viewMenu_->add(new NCheckMenuItem("PatternSequencer"));
+     viewMenu_->add(new NCheckMenuItem("Add machine"));
+     viewMenu_->add(new NMenuSeperator());
+     viewMenu_->add(new NCheckMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
    menuBar_->add(viewMenu_);
 
-   configurationMenu_ = new NMenu("Configuration",'c',
-       "Free Audio,AutoStop,|,Loop Playback,|,Settings");
+   // Creates the configuration menu
+   configurationMenu_ = new NMenu("Configuration");
+      configurationMenu_->add(new NMenuItem("Free Audio"));
+      configurationMenu_->add(new NMenuItem("Autostop"));
+      configurationMenu_->add(new NMenuSeperator());
+      configurationMenu_->add(new NMenuItem("Loop Playback"));
+      configurationMenu_->add(new NMenuSeperator());
+      configurationMenu_->add(new NMenuItem("Settings"));
    menuBar_->add(configurationMenu_);
 
-   performanceMenu_ = new NMenu("Performance",'p',"CPU Monitor ...,Midi Monitor ...");
+   // Creates the performance menu
+   performanceMenu_ = new NMenu("Performance");
+      performanceMenu_->add(new NMenuItem("CPU Monitor"));
+      performanceMenu_->add(new NMenuItem("MDI Monitor"));
    menuBar_->add(performanceMenu_);
 
-   helpMenu_ = new NMenu("Help",'h',
-       "Help,|,./doc/readme.txt,./doc/tweaking.txt,./doc/keys.txt,./doc/tweaking.txt,./doc/whatsnew.txt,|,About,Greetings");
+   // Creates the help menu
+   helpMenu_ = new NMenu("Help");
+      helpMenu_->add(new NMenuItem("About"))->click.connect(this,&MainWindow::onHelpMenuAbout);
+      helpMenu_->add(new NMenuItem("Greetings"))->click.connect(this,&MainWindow::onHelpMenuGreeting);
    menuBar_->add(helpMenu_);
 }
 
 void MainWindow::initDialogs( )
 {
+  // creates the song dialog for editing song name, author, and comment
   add( songpDlg_ = new SongpDlg() );
+  // creates the instrument editor for editing samples
   add( instrumentEditor = new InstrumentEditor() );
+  // creates the greeting dialog, that greets people who help psycle development
+  add( greetDlg =  new GreetDlg() );
+  // creates the version and licence copyright dialog
+  add( aboutDlg =  new AboutDlg() );
+  // creates the save dialog, that ask where to store wave files, recorded from playing a psy song
+  wavRecFileDlg = new NFileDialog();
+    wavRecFileDlg->setMode(nSave);
+  add(wavRecFileDlg);
 }
 
 // events from menuItems
@@ -233,6 +276,7 @@ void MainWindow::initToolBar( )
                                          img->loadFromFile(Global::pConfig()->iconPath+ "playstart.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(barPlayFromStartBtn_ = new NButton(img));
+    barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
     barPlayFromStartBtn_->setHint("Play from start");
 
     img = new NImage();
@@ -510,11 +554,11 @@ void MainWindow::initToolBar( )
 
 void MainWindow::initSignals( )
 {
-  fileMenu_->itemClicked.connect(this, &MainWindow::onFileMenuItemClicked);
+/*  fileMenu_->itemClicked.connect(this, &MainWindow::onFileMenuItemClicked);
   helpMenu_->itemClicked.connect(this, &MainWindow::onHelpMenuItemClicked);
   viewMenu_->itemClicked.connect(this, &MainWindow::onViewMenuItemClicked);
   childView_->newSongLoaded.connect(sequencerBar_,&SequencerBar::updateSequencer);
-  barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
+  barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);*/
 }
 
 
@@ -569,24 +613,13 @@ void MainWindow::onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv)
 void MainWindow::onViewMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
   if (itemEv->text()=="Toolbar") {
-     toolBar1_->setVisible(!toolBar1_->visible());
-     pane()->resize();
-     pane()->repaint();
   } else
   if (itemEv->text()=="MachineBar") {
-     psycleToolBar_->setVisible(!psycleToolBar_->visible());
-     pane()->resize();
-     pane()->repaint();
   } else
   if (itemEv->text()=="SequencerBar") {
-     sequencerBar_->setVisible(!sequencerBar_->visible());
-     pane()->resize();
-     pane()->repaint();
+     
   } else
   if (itemEv->text()=="StatusBar") {
-     statusBar_->setVisible(!statusBar_->visible());
-     pane()->resize();
-     pane()->repaint();
   } else
   if (itemEv->text()=="Add machine") {
      if (childView_->newMachineDlg()->execute()) {
@@ -758,16 +791,6 @@ void MainWindow::appNew( )
 
 }
 
-
-void MainWindow::onHelpMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
-{
-  if (itemEv->text()=="Greetings") {
-    greetDlg->setVisible(true);
-  } else 
-  if (itemEv->text()=="About") {
-    aboutDlg->setVisible(true);
-  }
-}
 
 void MainWindow::onEditMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
@@ -1047,6 +1070,8 @@ void MainWindow::onPatternStepChange( NItemEvent * ev )
   }
 }
 
+// Sequencer menu events
+
 void MainWindow::onSequencerView( NButtonEvent * ev )
 {
   NMessageBox* box = new NMessageBox("This feature is unimplemented in this release. Use the left side sequence now");
@@ -1054,6 +1079,46 @@ void MainWindow::onSequencerView( NButtonEvent * ev )
   box->setButtons(nMsgOkBtn);
   box->execute();
   NApp::addRemovePipe(box);
+}
+
+void MainWindow::onViewMenuToolbar( NButtonEvent * ev )
+{
+  toolBar1_->setVisible(!toolBar1_->visible());
+  pane()->resize();
+  pane()->repaint();
+}
+
+void MainWindow::onViewMenuMachinebar( NButtonEvent * ev )
+{
+  psycleToolBar_->setVisible(!psycleToolBar_->visible());
+  pane()->resize();
+  pane()->repaint();
+}
+
+void MainWindow::onViewMenuSequencerbar( NButtonEvent * ev )
+{
+  sequencerBar_->setVisible(!sequencerBar_->visible());
+  pane()->resize();
+  pane()->repaint();
+}
+
+void MainWindow::onViewMenuStatusbar( NButtonEvent * ev )
+{
+  statusBar_->setVisible(!statusBar_->visible());
+  pane()->resize();
+  pane()->repaint();
+}
+
+// Help menu events
+
+void MainWindow::onHelpMenuAbout( NButtonEvent * ev )
+{
+  aboutDlg->setVisible(true);
+}
+
+void MainWindow::onHelpMenuGreeting( NButtonEvent * ev )
+{
+  greetDlg->setVisible(true);
 }
 
 
