@@ -42,6 +42,7 @@
 #include "ntreenode.h"
 #include "nlabel.h"
 #include "nmessagebox.h"
+#include "nmenu.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -72,19 +73,19 @@ NTestWindow::NTestWindow()
 
   view->setPosition(10,50,200,200);*/
 
-  NLabel* lb = new NLabel("Hallo");
+  /*NLabel* lb = new NLabel("Hallo");
     lb->setPosition(10,120,100,120);
-  pane()->add(lb);
+  pane()->add(lb);*/
 
 /*  NButton* btn = new NButton("hallo");
     btn->setPosition(100,100,100,20);
     btn->setFlat(false);
     btn->setHint("Button zum drücken");
   pane()->add(btn);*/
-  //testMenu();
+  testMenu();
   //testSegDisplay();
 
-  testEdit();
+  //testEdit();
 }
 
 
@@ -176,8 +177,24 @@ void NTestWindow::testMenu( )
   NMenuBar* menuBar_ = new NMenuBar();
   menuBar_->setName("menuBar_");
   pane()->add(menuBar_);
-  NMenu* menu1 = new NMenu("Bearbeiten",'b');
+  NMenu* menu1 = new NMenu("Bearbeiten");//,'b');
   menuBar_->add(menu1);
+  NMenu* menu2 = new NMenu("File");//,'b');
+  menuBar_->add(menu2);
+  NMenu* menu3 = new NMenu("Debug");//,'b');
+  menuBar_->add(menu3);
+
+  NMenuItem* item = new NMenuItem("Open");
+  menu1->add(item);
+
+  NMenuItem* item1 = new NMenuItem("close");
+  menu1->add(item1);
+
+  NMenuItem* item2 = new NMenuItem("crass");
+  menu1->add(item2);
+
+    NMenuItem* item3 = new NMenuItem("jo");
+  menu1->add(item3);
 
   /*NPanel* test = test = new NPanel();
     test->skin_.gradientStyle=1;
@@ -189,14 +206,14 @@ void NTestWindow::testMenu( )
 
 
 
-  NMenuItem* item = new NMenuItem("open");
+  //NMenuItem* item = new NMenuItem("open");
     //NMenu* menu = new NMenu();
     //item->add(menu);
-  menu1->add(item);
-  item->click.connect(this,&NTestWindow::onOpen);
+//  menu1->add(item);
+//  item->click.connect(this,&NTestWindow::onOpen);
 
-  NCheckMenuItem* item1 = new NCheckMenuItem("test");
-  menu1->add(item1);
+  NCheckMenuItem* item5 = new NCheckMenuItem("test");
+  menu1->add(item5);
 }
 
 void NTestWindow::testSpinButton( )

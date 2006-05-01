@@ -47,7 +47,7 @@ public:
     void addMessageListener(NObject* obj);
 
     virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
-    virtual void onCustomMessage(NEvent* event);
+    virtual void onMessage(NEvent* event);
 
 private:
 

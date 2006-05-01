@@ -142,11 +142,11 @@ void NRuntime::erase( NRuntime * child )
   components.erase(itr);
 }
 
-void NRuntime::onCustomMessage( NEvent * event )
+void NRuntime::onMessage( NEvent * event )
 {
   for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
    NRuntime* child = *it;
-   child->onCustomMessage(event);
+   child->onMessage(event);
   }
 }
 

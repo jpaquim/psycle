@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "ncheckbox.h"
 #include "nlabel.h"
+#include "nalignlayout.h"
 
 NCheckBox::NCheckBox()
  : NPanel()

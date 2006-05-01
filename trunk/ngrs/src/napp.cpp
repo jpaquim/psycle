@@ -279,10 +279,7 @@ int NApp::processEvent( NWindow * win, XEvent * event )
               XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
-                    NObject* acellNotify = findAcceleratorNotifier(NKeyAccelerator(NApp::system().keyState(),mykeysym));
-                    if (acellNotify!=0) {
-                        acellNotify->onKeyAcceleratorNotify(NKeyAccelerator(NApp::system().keyState(),mykeysym));
-                    }
+
                   }
                   win->onKeyRelease(NKeyEvent(buffer,mykeysym));
               } else win->onKeyRelease(NKeyEvent(buffer,mykeysym));

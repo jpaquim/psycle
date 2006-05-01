@@ -35,127 +35,25 @@ NCheckMenuItem::NCheckMenuItem()
 NCheckMenuItem::NCheckMenuItem( const std::string & text )
 {
   init();
-  caption_->setText(text);
+  captionLbl_->setText(text);
+}
+
+void NCheckMenuItem::init( )
+{
+  setLayout(new NAlignLayout(), true);
+
+  checkBox_ = new NCheckBox();
+  checkBox_->setPreferredSize(20,20);
+  NCustomMenuItem::add(checkBox_, nAlLeft);
+
+  captionLbl_ = new NLabel();
+  NCustomMenuItem::add(captionLbl_, nAlClient);
 }
 
 
 NCheckMenuItem::~NCheckMenuItem()
 {
-
 }
-
-void NCheckMenuItem::init( )
-{
-  checkBox_ = new NCheckBox();
-  checkBox_->setCheck(true);
-  checkBox_->clicked.connect(this,&NCheckMenuItem::onCheckBoxClicked);
-  checkBox_->mouseEnter.connect(this,&NCheckMenuItem::onCheckBoxMouseEnter);
-  checkBox_->mouseExit.connect(this,&NCheckMenuItem::onCheckBoxMouseExit);
-  add(checkBox_);
-
-  caption_ = new NLabel();
-  add(caption_);
-
-  NApp::config()->setSkin(&itemNone,"mitemnone");
-  NApp::config()->setSkin(&itemOver,"mitemover");
-
-  setSkin(itemNone);
-}
-
-
-int NCheckMenuItem::maxIconSize( )
-{
-  return 20;
-}
-
-int NCheckMenuItem::maxCaptionSize( )
-{
-  return caption_->preferredWidth();
-}
-
-int NCheckMenuItem::maxShortCutSize( )
-{
-  return 20;
-}
-
-int NCheckMenuItem::maxHintSize( )
-{
-  return 20;
-}
-
-int NCheckMenuItem::preferredWidth( ) const
-{
-  return checkBox_->preferredWidth() + caption_->preferredWidth() +15+ 20+20+20;
-}
-
-int NCheckMenuItem::preferredHeight( ) const
-{
-  return checkBox_->preferredHeight();
-}
-
-void NCheckMenuItem::onCheckBoxClicked( NButtonEvent * ev )
-{
-  NApp::unmapPopupWindows();
-  NButtonEvent ev1(this,0,0,0,caption_->text());
-  click.emit(&ev1);
-}
-
-void NCheckMenuItem::onCheckBoxMouseEnter( NEvent * ev )
-{
-  setSkin(itemOver);
-  repaint();
-}
-
-void NCheckMenuItem::onCheckBoxMouseExit( NEvent * ev )
-{
-  setSkin(itemNone);
-  repaint();
-}
-
-void NCheckMenuItem::setIconSize( int size )
-{
-  checkBox_->setLeft(0);
-  checkBox_->setWidth(size);
-}
-
-void NCheckMenuItem::setCaptionSize( int size )
-{
-  caption_->setWidth(size);
-  caption_->setLeft(checkBox_->width() + 10);
-}
-
-void NCheckMenuItem::setShortCutSize( int size )
-{
-   caption_->setWidth(caption_->width()+size);
-}
-
-void NCheckMenuItem::setHintSize( int size )
-{
-  caption_->setWidth(caption_->width()+size);
-}
-
-void NCheckMenuItem::onMouseEnter( )
-{
-  NCustomMenuItem::onMouseEnter();
-  setSkin(itemOver);
-  repaint();
-}
-
-
-void NCheckMenuItem::onMouseExit( )
-{
-  NCustomMenuItem::onMouseExit();
-  setSkin(itemNone);
-  repaint();
-}
-
-void NCheckMenuItem::setHeight( int height )
-{
-  caption_->setHeight(height);
-  checkBox_->setHeight(height);
-}
-
-
 
 
 

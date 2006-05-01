@@ -20,28 +20,19 @@
 #include "nmenubar.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nflowlayout.h"
+#include <nmenu.h>
+
 
 NMenuBar::NMenuBar()
- : NPanel()
+ : NPanel(), isMenuMapped_(0)
 {
-  NFlowLayout* flow = new NFlowLayout(nAlLeft);
-  flow->setVgap(2);
-  setLayout(flow,true);
+  setLayout(new NFlowLayout(nAlLeft,5,5),true);
   setAlign(nAlTop);
-  aMenuMapped_ = false;
-  NFont fnt = font();
-  fnt.setSize(10);
-  setFont(fnt);
-  lastMenu_ = 0;
-  lastUnmapMenu_ = 0;
 
   NApp::config()->setSkin(&skin_,"mbar");
 }
 
-void NMenuBar::setSkin( )
-{
-
-}
 
 NMenuBar::~NMenuBar()
 {
@@ -50,76 +41,54 @@ NMenuBar::~NMenuBar()
 void NMenuBar::add( NMenu * menu )
 {
   NVisualComponent::add(menu);
-  menu->menuEntered.connect(this,&NMenuBar::onMenuEnter);
-  menu->click.connect(this,&NMenuBar::onMenuClick);
-  menu->menuHideRequest.connect(this,&NMenuBar::unmapMenu);
-  menu->leftPress.connect(this,&NMenuBar::mapLeft);
-  menu->rightPress.connect(this,&NMenuBar::mapRight);
-  NApp::addKeyAccelerator(NKeyAccelerator(Mod1Mask,menu->mnemonic()),menu);
+  menu->addMessageListener(this);
+  menus.push_back(menu);
 }
 
-void NMenuBar::onMenuEnter( NObject * sender )
+void NMenuBar::onMessage( NEvent * ev )
 {
-  if (aMenuMapped_) mapMenu(sender);
-}
-
-void NMenuBar::onMenuClick( NButtonEvent * ev )
-{
-   if (!NApp::popupUnmapped_) {
-     aMenuMapped_ = !aMenuMapped_;
-     if (aMenuMapped_) {
-        mapMenu(ev->sender());
-     } else unmapMenu(ev->sender());
-   }
-   lastUnmapMenu_ = 0;
-}
-
-void NMenuBar::mapRight( NObject * actual )
-{
-  std::vector<NRuntime*>::iterator it = std::find(components.begin(),components.end(),actual);
-  if (it!=components.end()) {
-     it++;
-     if (it == components.end()) it = components.begin();
-  } else it = components.begin();
-
-  mapMenu(*it);
-}
-
-void NMenuBar::mapLeft( NObject * actual )
-{
-  std::vector<NRuntime*>::iterator it = std::find(components.begin(),components.end(),actual);
-  if (it!=components.begin()) it--;
-  else {
-    it = components.end();
-    it--;
+  if (ev->text() == "ngrs_menu_enter") {
+    if (isMenuMapped_) {
+      NEvent ev(ev->sender(),"ngrs_menu_expose");
+      NPanel::onMessage(&ev);
+    }
+  } else
+  if (ev->text() == "ngrs_menu_press") {
+    isMenuMapped_ = !isMenuMapped_;
+    if (isMenuMapped_) {
+      NEvent ev(ev->sender(),"ngrs_menu_expose");
+      NPanel::onMessage(&ev);
+    } else {
+      NEvent ev(ev->sender(),"ngrs_menu_hide");
+      NPanel::onMessage(&ev);
+    }
+  } else
+  if (ev->text() == "ngrs_menu_key_right") {
+    std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
+    NEvent ev(ev->sender(),"ngrs_menu_hide");
+    NPanel::onMessage(&ev);
+    if (it < menus.end()) {
+      it++;
+      if (it != menus.end()) {
+        NEvent ev(*it,"ngrs_menu_expose");
+        NPanel::onMessage(&ev);
+      } else {
+        if (menus.size() > 0) {
+          NEvent ev(*menus.begin(),"ngrs_menu_expose");
+          NPanel::onMessage(&ev);
+        }
+      }
+    }
+  } else 
+  if (ev->text() == "ngrs_menu_key_left") {
+     std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
+     NEvent ev(ev->sender(),"ngrs_menu_hide");
+     NPanel::onMessage(&ev);
+     if (it > menus.begin()) {
+        it--;
+        NEvent ev(*it,"ngrs_menu_expose");
+        NPanel::onMessage(&ev);
+     }
   }
-  mapMenu(*it);
 }
-
-void NMenuBar::mapMenu(NObject* sender)
-{
-  if (lastMenu_ == sender) return;
-  NMenu* menu = (NMenu*) sender;
-  if (lastMenu_ != 0) unmapMenu(lastMenu_);
-  NWindow* win = window();
-  menu->popupMenu()->setPosition(win->left()+menu->absoluteLeft(), win->top()+menu->absoluteTop()+menu->height(),menu->popupMenu()->width(),menu->popupMenu()->height());
-  menu->popupMenu()->setVisible(true);
-  lastMenu_ = menu;
-  aMenuMapped_ = true;
-}
-
-void NMenuBar::unmapMenu( NObject * sender )
-{
-  NMenu* menu = (NMenu*) sender;
-  lastUnmapMenu_ = menu;
-  menu->popupMenu()->setVisible(false);
-  menu->onMouseExit();
-  aMenuMapped_ = false;
-  lastMenu_=0;
-}
-
-
-
-
-
 

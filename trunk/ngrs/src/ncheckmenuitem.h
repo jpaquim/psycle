@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2004,2005,2006 by Stefan Nattkemper, nattisoft   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,13 +25,12 @@
 
 class NCheckBox;
 class NLabel;
-class NMenu;
-class NButton;
-
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
+
+
 class NCheckMenuItem : public NCustomMenuItem
 {
 public:
@@ -40,38 +39,12 @@ public:
 
     ~NCheckMenuItem();
 
-    virtual int maxIconSize();
-    virtual int maxCaptionSize();
-    virtual int maxShortCutSize();
-    virtual int maxHintSize();
-
-    virtual void setIconSize(int size);
-    virtual void setCaptionSize(int size);
-    virtual void setShortCutSize(int size);
-    virtual void setHintSize(int size);
-
-    virtual int preferredWidth() const;
-    virtual int preferredHeight() const;
-
-    virtual void setHeight( int height );
-
-    virtual void onMouseEnter();
-    virtual void onMouseExit();
-
 private:
 
+    NLabel* captionLbl_;
     NCheckBox* checkBox_;
-    NLabel*    caption_;
-
-    NSkin itemNone;
-    NSkin itemOver;
 
     void init();
-    void onCheckBoxClicked(NButtonEvent* ev);
-
-    void onCheckBoxMouseEnter(NEvent* ev);
-    void onCheckBoxMouseExit(NEvent* ev);
-
 };
 
 #endif

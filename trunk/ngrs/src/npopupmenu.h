@@ -35,32 +35,15 @@ public:
 
     ~NPopupMenu();
 
-    signal1<NObject*> hideRequest;
-    signal1<NObject*> leftPress;
-    signal1<NObject*> rightPress;
 
     virtual void add(NCustomMenuItem* item);
-
     virtual void setVisible(bool on);
-    void addSeperator();
 
-    void setSelItem(int index);
-
-    virtual void updateAlign();
-    virtual void onKeyPress(const NKeyEvent & keyEvent);
-
-    void onSubMenuMapped(NObject* sender);
-
-    NCustomMenuItem* itemByName(const std::string & name);
+    virtual void onMessage(NEvent* ev);
 
 private:
 
-   NCustomMenuItem* subMenuItem_;
-   int selItemIndex_;
 
-   void onItemEnter(NEvent * ev);
-
-   std::vector<NCustomMenuItem*> items;
 };
 
 #endif

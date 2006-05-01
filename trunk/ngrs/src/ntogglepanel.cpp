@@ -46,7 +46,7 @@ void NTogglePanel::onClick( NButtonEvent * ev )
     NRuntime* msgClient = *it;
     if (msgClient != ev->sender()) {
       NEvent toggleEvent(ev->sender(),"toggle:'up'");
-      msgClient->onCustomMessage(&toggleEvent);
+      msgClient->onMessage(&toggleEvent);
     }
   }
   resize();
@@ -59,7 +59,7 @@ void NTogglePanel::setDown( NCustomButton * btn )
     NRuntime* msgClient = *it;
     if (msgClient != btn) {
       NEvent toggleEvent(btn,"toggle:'up'");
-      msgClient->onCustomMessage(&toggleEvent);
+      msgClient->onMessage(&toggleEvent);
     } else {
        btn->setDown(true);
     }

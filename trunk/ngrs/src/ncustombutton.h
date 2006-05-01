@@ -61,7 +61,7 @@ public:
    bool down() const;
 
    virtual void setDown(bool on);
-   virtual void onCustomMessage(NEvent* ev);
+   virtual void onMessage(NEvent* ev);
 
 private:
 

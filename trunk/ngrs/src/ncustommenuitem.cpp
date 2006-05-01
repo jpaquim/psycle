@@ -18,12 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ncustommenuitem.h"
+#include "napp.h"
+#include "nconfig.h"
+
+
 
 NCustomMenuItem::NCustomMenuItem()
  : NCustomItem()
 {
-  iconSize_ = captionSize_ = shortCutSize_ = hintSize_ =0;
-  mnemonic_ = '\0';
+  NApp::config()->setSkin(&itemNone,"mitemnone");
+  NApp::config()->setSkin(&itemOver,"mitemover");
+
+  setSkin(itemNone);
 }
 
 
@@ -31,63 +37,36 @@ NCustomMenuItem::~NCustomMenuItem()
 {
 }
 
-void NCustomMenuItem::setIconSize( int size )
-{
-  iconSize_ = size;
-}
-
-void NCustomMenuItem::setCaptionSize( int size )
-{
-  captionSize_ = size;
-}
-
-void NCustomMenuItem::setShortCutSize( int size )
-{
-  shortCutSize_ = size;
-}
-
-void NCustomMenuItem::setHintSize( int size )
-{
-  hintSize_ = size;
-}
-
-int NCustomMenuItem::maxIconSize( )
-{
-  return iconSize_;
-}
-
-int NCustomMenuItem::maxCaptionSize( )
-{
-  return captionSize_;
-}
-
-int NCustomMenuItem::maxShortCutSize( )
-{
-  return shortCutSize_;
-}
-
-int NCustomMenuItem::maxHintSize( )
-{
-  return hintSize_;
-}
-
-char NCustomMenuItem::mnemonic()
-{
-  return mnemonic_;
-}
-
-void NCustomMenuItem::setMnemonic(char c)
-{
-  mnemonic_ = c;
-}
-
-void NCustomMenuItem::add( NMenu * menu )
+void NCustomMenuItem::add( class NMenu * menu )
 {
 }
 
 void NCustomMenuItem::add( NRuntime * comp )
 {
-  NVisualComponent::add(comp);
+  NCustomItem::add(comp);
 }
 
+void NCustomMenuItem::add( NVisualComponent * comp, int align )
+{
+  NCustomItem::add(comp, align);
+}
 
+void NCustomMenuItem::onMouseEnter( )
+{
+  setSkin(itemOver);
+  repaint();
+}
+
+void NCustomMenuItem::onMouseExit( )
+{
+  setSkin(itemNone);
+  repaint();
+}
+
+void NCustomMenuItem::onMousePress( int x, int y, int button )
+{
+  NButtonEvent ev(this,x,y,button,"ngrs_menu_item_click");
+  sendMessage(&ev);
+
+  click.emit(&ev);
+}

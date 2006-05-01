@@ -24,6 +24,7 @@
 
 class NLabel;
 class NMenu;
+class NImage;
 
 
 /**
@@ -35,55 +36,17 @@ class NMenuItem : public NCustomMenuItem
 {
 public:
     NMenuItem();
-    NMenuItem(std::string text);
-    NMenuItem(std::string text, int keyMask, char c, std::string description );
+    NMenuItem(const std::string & text);
 
     ~NMenuItem();
 
-    void setText(std::string text);
-    std::string text();
-    void setShortCut(int keyMask, char c, std::string description );
-
-
-    virtual void onMouseEnter();
-    virtual void onMouseExit();
-
-    virtual void add(NMenu* menu);
-
-    virtual int preferredWidth() const;
-    virtual int preferredHeight() const;
-
-    virtual int maxIconSize();
-    virtual int maxCaptionSize();
-    virtual int maxShortCutSize();
-    virtual int maxHintSize();
-
-    virtual void setIconSize(int size);
-    virtual void setCaptionSize(int size);
-    virtual void setShortCutSize(int size);
-    virtual void setMnemonic(char c);
-    virtual void setHintSize(int size);
-
-    virtual void setHeight(int height);
-    virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
-
-    void setGap(int gap);
-
-    virtual void onMousePress(int x, int y, int button);
-
-
 private:
 
-    int gap_;
-
-    NPanel* iconField_;
-    NLabel* caption_;
-    NLabel* shortCut_;
-    NLabel* subMenuHint_;
     NMenu* menu_;
 
-    NSkin itemNone;
-    NSkin itemOver;
+    NLabel* captionLbl_;
+    NImage* iconImg_;
+    NImage* subMenuImg_;
 
     void init();
 

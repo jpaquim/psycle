@@ -43,7 +43,7 @@ const std::string & NObject::name( ) const
   return name_;
 }
 
-void NObject::onCustomMessage( NEvent * event )
+void NObject::onMessage( NEvent * event )
 {
 }
 
@@ -57,7 +57,7 @@ void NObject::sendMessage( NEvent * ev )
 {
   for (std::vector<NObject*>::iterator it = msgListener.begin(); it < msgListener.end(); it++) {
      NObject* obj = *it;
-     obj->onCustomMessage(ev);
+     obj->onMessage(ev);
   }
 }
 
