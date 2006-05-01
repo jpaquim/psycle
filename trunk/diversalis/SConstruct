@@ -10,10 +10,15 @@ prefix = os.path.join(output, 'install')
 includedir = os.path.join(prefix, 'include')
 pkgincludedir = os.path.join(includedir, package)
 
-package = 'diversalis'
-BuildDir('++packagneric/build/scons', 'src', duplicate=0)
-env = Environment()
+BuildDir(os.path.join(output, 'build', 'scons'), 'src', duplicate=0)
 
-print 'headers: '
+env = Environment()
+dictionary = env.Dictionary()
+keys = dictionary.keys()
+keys.sort()
+for key in keys:
+	print '%s = %s' % (key, dictionary[key])
+	
+print 'c++ headers: '
 for file in packageneric.GlobDirectoryWalker('src', '*.hpp'):
 	print file
