@@ -49,8 +49,8 @@ void NMenuBar::onMessage( NEvent * ev )
 {
   if (ev->text() == "ngrs_menu_enter") {
     if (isMenuMapped_) {
-      NEvent ev(ev->sender(),"ngrs_menu_expose");
-      NPanel::onMessage(&ev);
+      NEvent ev1(ev->sender(),"ngrs_menu_expose");
+      NPanel::onMessage(&ev1);
     }
   } else
   if (ev->text() == "ngrs_menu_press") {
