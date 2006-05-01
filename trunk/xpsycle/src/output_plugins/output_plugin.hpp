@@ -20,12 +20,16 @@
 
 #pragma once
 #include "interface.hpp"
+#include <boost/bind.hpp>
 
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__OUTPUT_PLUGIN
+#include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
 	class output_plugin : public output_plugins::interface
 	{
 		public:
-			void output_plugin(AUDIODRIVERWORKFN callback, void *);
+			void output_plugin(callback_type);
 	};
 }
+#include <universalis/compiler/dynamic_link/end.hpp>
