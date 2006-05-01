@@ -1,0 +1,17 @@
+#! /usr/bin/env scons
+
+import os.path
+import glob
+
+output = '++packageneric'
+prefix = os.path.join(output, 'install')
+includedir = os.path.join(prefix, 'include')
+pkgincludedir = os.path.join(includedir, package)
+
+package = 'diversalis'
+BuildDir('++packagneric/build/scons', 'src', duplicate=0)
+env = Environment()
+
+headers = glob.glob('src/*.hpp')
+
+print headers
