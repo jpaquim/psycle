@@ -123,6 +123,8 @@ void Configuration::loadConfig( )
   pluginPath = NFile::replaceTilde(NApp::config()->findPath("plugindir"));
   prsPath    = NFile::replaceTilde(NApp::config()->findPath("prsdir"));
 
+  std::cout << Global::pConfig()->iconPath << std::endl;
+
 }
 
 void Configuration::onConfigTagParse(const std::string & tagName )
