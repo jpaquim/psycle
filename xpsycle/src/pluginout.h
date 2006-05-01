@@ -92,8 +92,6 @@ class PluginOut : public AudioDriver
 		output_plugins::interface::   new_function_type    new_interface_;
 		output_plugins::interface::delete_function_type delete_interface_;
 		output_plugins::interface *                            interface_;
-
-	private:
 		class callback : public output_plugins::interface::callback_type
 		{
 			public:
@@ -114,8 +112,7 @@ class PluginOut : public AudioDriver
 
 				///\todo hardcoded
 				float samples_per_seconds { return 44100; }
-		};
-		callback * callback_;
+		} * callback_;
 };
 
 #endif

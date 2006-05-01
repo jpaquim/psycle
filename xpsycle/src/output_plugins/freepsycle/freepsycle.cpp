@@ -18,35 +18,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "gstreamer.hpp"
-#include <boost/thread/thread.hpp>
+#include "freepsycle.hpp"
 
 namespace psycle
 {
 	namespace output_plugins
 	{
-		extern "C"
-		{
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT AudioDriver & UNIVERSALIS__COMPILER__CALLING_CONVENTION_C new_()
-			{
-				return new gstreamer_wrapper;
-			}
-
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void          UNIVERSALIS__COMPILER__CALLING_CONVENTION_C delete_(AudioDriver & instance)
-			{
-				delete &instance;
-			}
-		}
+		PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR(freepsycle)
 
 		namespace
 		{
-			/// source node from where the audio data from psycle come from
+			/// freepsycle source node fed with the audio data from psycle
 			class source : public engine::node
 			{
 				protected: friend class generic_access;
-					source(parent_type &, std::string const & name)
+					source(parent_type & parent, name_type const & name)
+					:
+						node_type(parent, name)
 					{
-						engine::ports::output::create(*this, "out");
+						engine::ports::output::create(*this, "out", 2);
 					}
 
 				public:
@@ -56,7 +46,7 @@ namespace psycle
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception)
 					{
 						engine::buffer & out(output_ports()[0]);
-						float const * in(callback_(callback_argument_, out.size());
+						float const * in(callback().process(out.size()));
 						unsigned int const samples(out.samples_per_channel_buffer());
 						for(unsigned int event(0); event < samples; ++event)
 							for(unsigned int channel(0); channel < out.channels(); ++channel)
@@ -67,26 +57,26 @@ namespace psycle
 					}
 
 				private:
-					typedef float const * (*callback_type)(void*);
-					callback_type callback_;
+					interface::callback_type callback_;
 					void * callback_argument_;
 			};
 		}
 
-		freepsycle_sink::freepsycle_sink()
+		freepsycle::freepsycle(std::string const & sink_plugin, std::string const & sink_input_port)
 		:
-			graph_(engine::graph::create("psycle -> gstreamer")),
+			graph_(engine::graph::create("psycle -> freepsycle")),
 			source_(engine::node::create<source>(graph_, "psycle")
-			sink_(engine::node::create<plugins::output::grstreamer>(graph_, "gstreamer")),
+			sink_(resolver(sink_plugin, graph_, "freepsycle")),
 			scheduler_(host::schedulers::single_threaded::create(graph_)
 		{
+			source_.output_port("out").connect(sink_.input_port(sink_input_port));
 		}
 
-		void freepsycle_sink::opened(bool value)
+		void freepsycle::opened(bool value)
 		{
 		}
 
-		void freepsycle_sink::started(bool value)
+		void freepsycle::started(bool value)
 		{
 			scheduler_.started(value);
 		}
