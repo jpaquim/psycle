@@ -44,8 +44,10 @@ MachineGUI::MachineGUI(Machine* mac)
   if (c==0) {
     if (Global::pConfig()->iconPath=="") ;
        //pixmap = Global::pBitmaps()->machine_skin(); 
-    else
+    else {
+       std::cout << Global::pConfig()->iconPath+ "machine_skin.xpm" << std::endl;
        pixmap.loadFromFile(Global::pConfig()->iconPath+ "machine_skin.xpm");
+    }
   }
   c++;
   setFont(NFont("Suse sans",6, nMedium | nStraight | nAntiAlias));
