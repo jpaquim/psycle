@@ -1,7 +1,6 @@
 #! /usr/bin/env scons
 
-import os.path
-import glob
+import os, fnmatch
 
 package = 'diversalis'
 
@@ -14,9 +13,6 @@ pkgincludedir = os.path.join(includedir, package)
 package = 'diversalis'
 BuildDir('++packagneric/build/scons', 'src', duplicate=0)
 env = Environment()
-
-import os
-import fnmatch
 
 class GlobDirectoryWalker:
 	# a forward iterator that traverses a directory tree
