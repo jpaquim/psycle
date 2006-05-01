@@ -20,7 +20,9 @@
 
 namespace psycle
 {
-	output_plugin::output_plugin(AUDIODRIVERWORKFN callback, void *)
+	output_plugin::output_plugin(output_plugin::callback_type callback)
+	:
+		output_plugins::interface(callback)
 	{
 	}
 }
