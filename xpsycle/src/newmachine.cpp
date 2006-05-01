@@ -80,7 +80,7 @@ NewMachine::NewMachine()
     NPanel* generatorPage = new NPanel();
        generatorPage->setLayout(new NAlignLayout(),true);
          generatorfBox_ = new NFileListBox();
-           generatorfBox_->addFilter(".so","!S*.so");
+           generatorfBox_->addFilter(".so","!S*.so!S*");
            generatorfBox_->setMode(nFiles);
            generatorfBox_->setAlign(nAlClient);
            generatorfBox_->setDirectory(Global::pConfig()->pluginPath);
