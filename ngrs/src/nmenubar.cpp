@@ -56,42 +56,42 @@ void NMenuBar::onMessage( NEvent * ev )
   if (ev->text() == "ngrs_menu_press") {
     isMenuMapped_ = !isMenuMapped_;
     if (isMenuMapped_) {
-      NEvent ev(ev->sender(),"ngrs_menu_expose");
-      NPanel::onMessage(&ev);
+      NEvent ev1(ev->sender(),"ngrs_menu_expose");
+      NPanel::onMessage(&ev1);
     } else {
-      NEvent ev(ev->sender(),"ngrs_menu_hide");
-      NPanel::onMessage(&ev);
+      NEvent ev1(ev->sender(),"ngrs_menu_hide");
+      NPanel::onMessage(&ev1);
     }
   } else
   if (ev->text() == "ngrs_menu_key_right") {
     std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
-    NEvent ev(ev->sender(),"ngrs_menu_hide");
-    NPanel::onMessage(&ev);
+    NEvent ev1(ev->sender(),"ngrs_menu_hide");
+    NPanel::onMessage(&ev1);
     if (it < menus.end()) {
       it++;
       if (it != menus.end()) {
-        NEvent ev(*it,"ngrs_menu_expose");
-        NPanel::onMessage(&ev);
+        NEvent ev1(*it,"ngrs_menu_expose");
+        NPanel::onMessage(&ev1);
       } else {
         if (menus.size() > 0) {
-          NEvent ev(*menus.begin(),"ngrs_menu_expose");
-          NPanel::onMessage(&ev);
+          NEvent ev1(*menus.begin(),"ngrs_menu_expose");
+          NPanel::onMessage(&ev1);
         }
       }
     }
   } else
   if (ev->text() == "ngrs_menu_key_left") {
      std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
-     NEvent ev(ev->sender(),"ngrs_menu_hide");
-     NPanel::onMessage(&ev);
+     NEvent ev1(ev->sender(),"ngrs_menu_hide");
+     NPanel::onMessage(&ev1);
      if (it > menus.begin()) {
         it--;
         NEvent ev(*it,"ngrs_menu_expose");
-        NPanel::onMessage(&ev);
+        NPanel::onMessage(&ev1);
      } else {
        if (menus.size() > 0) {
-         NEvent ev(menus.back(),"ngrs_menu_expose");
-         NPanel::onMessage(&ev);
+         NEvent ev1(menus.back(),"ngrs_menu_expose");
+         NPanel::onMessage(&ev1);
        }
      }
   }
