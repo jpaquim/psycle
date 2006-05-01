@@ -1,6 +1,6 @@
 #! /usr/bin/env scons
 
-import os, fnmatch
+import os, fnmatch, packageneric
 
 package = 'diversalis'
 
