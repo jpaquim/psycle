@@ -1,5 +1,13 @@
 #! /usr/bin/autoconf
 
 PACKAGENERIC__INCLUDE(packageneric/generic/autotools/autoconf/pool/modules/alsa.ac)
-PACKAGENERIC__MODULE__EXTERNAL(NGRS, ngrs >= 0.0.3)
+PACKAGENERIC__MODULE__EXTERNAL(NGRS, ngrs >= 0)
+
 PACKAGENERIC__MODULE__INTERNAL(bin, xpsycle, 0:0:0, NGRS ALSA, xpsycle - psycle for X window)
+
+PACKAGENERIC__CONFIGURATION__OPTION__WITH__DEFINE(xpsycle-output_plugin-freepsycle, psycle output plugin via freepsycle, xpsycle__output_plugin__freepsycle, XPSYCLE__OUTPUT_PLUGIN__FREEPSYCLE, no)
+if PACKAGENERIC__CONFIGURATION__OPTION__WITH(xpsycle__output_plugin__freepsycle)
+then
+	PACKAGENERIC__MODULE__EXTERNAL(FREEPSYCLE__HOST, psycle.host >= 0)
+	PACKAGENERIC__MODULE__INTERNAL(lib, xpsycle.output_plugin.freepsycle, 0:0:0, FREEPSYCLE__HOST, xpsycle output plugin via freepsycle)
+fi
