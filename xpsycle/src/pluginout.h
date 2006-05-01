@@ -24,7 +24,7 @@
 #include "output_plugins/interface.hpp"
 #include <string>
 
-class PlugingOut : public AudioDriver
+class PluginOut : public AudioDriver
 {
 	/// [bohan] sorry for the crap here
 	/// [bohan] it comes from the original AudioDriver class of psyclemfc
@@ -34,7 +34,7 @@ class PlugingOut : public AudioDriver
 		public:
 			/// step 1, no that's not enough.
 			/// this ctor does NOTHING, don't forget to call the Initialize function
-			PlugingOut(std::string const & library_file_name)
+			PluginOut(std::string const & library_file_name)
 			:
 				initialized_(false),
 				configured_(false),
@@ -43,7 +43,12 @@ class PlugingOut : public AudioDriver
 
 		public:
 			/// step 2, don't forget to call this function
-			void Initialize(AUDIODRIVERWORKFN, void *) { do_initialize(); initialized_ = true; }
+			void Initialize(AUDIODRIVERWORKFN callback_function, void * callback_function_argument)
+			{
+				callback_ = new callback(callback_function, callback_function_argument);
+				do_initialize();
+				initialized_ = true;
+			}
 		public:
 			/// do-we-really-have-an-instance?-style runtime check
 			bool Initialized() { return initialized_; }
@@ -83,9 +88,34 @@ class PlugingOut : public AudioDriver
 
 	private:
 		std::string library_file_name_;
-	private:
-		output_plugins::interface * interface_;
+		void * library_;
+		output_plugins::interface::   new_function_type    new_interface_;
+		output_plugins::interface::delete_function_type delete_interface_;
+		output_plugins::interface *                            interface_;
 
+	private:
+		class callback : public output_plugins::interface::callback_type
+		{
+			public:
+				callback(AUDIODRIVERWORKFN callback_function, void * callback_function_argument)
+				:
+					callback_function_(callback_function),
+					callback_function_argument_(callback_function_argument)
+				{}
+			private:
+				AUDIODRIVERWORKFN callback_function_
+				void * callback_function_argument_;
+
+			protected:
+				float const * process(unsigned int samples) { return callback_function_(callback_function_argument_, samples); }
+
+				///\todo hardcoded
+				unsigned int channels() { return 2; }
+
+				///\todo hardcoded
+				float samples_per_seconds { return 44100; }
+		};
+		callback * callback_;
 };
 
 #endif

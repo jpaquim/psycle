@@ -21,22 +21,26 @@
 #include "pluginout.h"
 #include <dlfcn.h>
 
-PlugingOut::do_initialize()
+PluginOut::do_initialize()
 {
 	void * library(::dlopen(library_file_name_.c_str()));
 	if(!library) throw; ///\todo better
 
-	new_ = ::dlsym(library, interface::new_symbol);
+	#define stringized(tokens) stringized__no_expansion(tokens)
+	#define stringized__no_expansion(tokens) #tokens
+
+	new_interface_ = ::dlsym(library, stringized(PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR__SYMBOL(new)));
 	if(!new_) throw; ///\todo better
 
-	delete_ = ::dlsym(library, interface::new_symbol);
+	delete_interface_ = ::dlsym(library, stringized(PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR__SYMBOL(delete)));
 	if(!delete_) throw; ///\todo better
 
-	interface_ = &new_(callback);
+	assert(callback_);
+	interface_ = &new_interface_(*callback_);
 	if(!interface_) throw; ///\todo better
 }
 
-PlugingOut::~PlugingOut()
+PluginOut::~PluginOut()
 {
-	if(interface_) delete_(*interface_);
+	if(delete_interface_ && interface_) delete_(*interface_);
 }
