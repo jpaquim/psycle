@@ -81,12 +81,12 @@ void FrameMachine::init( )
 {
   NMenuBar* bar = new NMenuBar();
     pane()->add(bar);
-  NMenu* aboutMenu = new NMenu("About",'a',"Help,|,About this machine");
+/*  NMenu* aboutMenu = new NMenu("About",'a',"Help,|,About this machine");
     aboutMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
   bar->add(aboutMenu);
   NMenu* parameterMenu = new NMenu("Parameters",'p',"Reset,Random,Presets");
     parameterMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
-  bar->add(parameterMenu);
+  bar->add(parameterMenu);*/
 
   setTitle(stringify(pMachine_->_macIndex)+std::string(" : ")+pMachine_->GetName());
 
