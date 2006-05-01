@@ -537,4 +537,9 @@ NDockPanel * NWindow::dock( )
   return dock_;
 }
 
+void NWindow::setFocus( )
+{
+
+}
+
 

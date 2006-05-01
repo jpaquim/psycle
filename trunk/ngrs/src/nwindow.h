@@ -62,6 +62,7 @@ public:
     virtual void add(NWindow* window);
     virtual void add( NRuntime * component );
 
+    virtual void setFocus();
     void setGrabEvents(bool on);
 
     Window win() const;

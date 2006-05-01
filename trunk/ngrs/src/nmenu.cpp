@@ -90,32 +90,26 @@ void NMenu::onMessage( NEvent * ev )
     popupMenu_->setVisible(true);
   } else
   if (ev->text() == "ngrs_menu_expose" && !(ev->sender() == this)) {
-    popupMenu_->setVisible(false);
+    if (popupMenu_->mapped()) popupMenu_->setVisible(false);
   } else
   if (ev->text() == "ngrs_menu_hide") {
-     popupMenu_->setVisible(false);
+     if (popupMenu_->mapped()) popupMenu_->setVisible(false);
   } else 
     if (ev->text() == "ngrs_menu_item_click") {
      NEvent ev(this, "ngrs_menu_press");
      sendMessage(&ev);
+  } else 
+  if (ev->text() == "ngrs_menu_key_left") {
+     NEvent ev(this, "ngrs_menu_key_left");
+     sendMessage(&ev);
+  } else 
+  if (ev->text() == "ngrs_menu_key_right") {
+    NEvent ev(this, "ngrs_menu_key_right");
+    sendMessage(&ev);
   }
 }
 
-void NMenu::onKeyPress( const NKeyEvent & event )
-{
-  switch (event.scancode()) {
-    case XK_Left : {
-      NEvent ev(this, "ngrs_menu_key_left");
-      sendMessage(&ev);
-    }
-    break;
-    case XK_Right : {
-      NEvent ev(this, "ngrs_menu_key_right");
-      sendMessage(&ev);
-    }
-    break;
-  }
-}
+
 
 
 
