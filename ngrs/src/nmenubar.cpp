@@ -79,7 +79,7 @@ void NMenuBar::onMessage( NEvent * ev )
         }
       }
     }
-  } else 
+  } else
   if (ev->text() == "ngrs_menu_key_left") {
      std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
      NEvent ev(ev->sender(),"ngrs_menu_hide");
@@ -88,6 +88,11 @@ void NMenuBar::onMessage( NEvent * ev )
         it--;
         NEvent ev(*it,"ngrs_menu_expose");
         NPanel::onMessage(&ev);
+     } else {
+       if (menus.size() > 0) {
+         NEvent ev(menus.back(),"ngrs_menu_expose");
+         NPanel::onMessage(&ev);
+       }
      }
   }
 }

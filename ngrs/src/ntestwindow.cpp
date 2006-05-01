@@ -60,6 +60,8 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
+  std::cout << win() << std::endl;
+
   /*NCustomTreeView* view = new NCustomTreeView();
     NLabel* lb = new NLabel("Test");
     view->rootNode()->pane()->add(lb,nAlClient);
@@ -178,10 +180,13 @@ void NTestWindow::testMenu( )
   menuBar_->setName("menuBar_");
   pane()->add(menuBar_);
   NMenu* menu1 = new NMenu("Bearbeiten");//,'b');
+     menu1->setName("m1");
   menuBar_->add(menu1);
   NMenu* menu2 = new NMenu("File");//,'b');
+     menu2->setName("m2");
   menuBar_->add(menu2);
   NMenu* menu3 = new NMenu("Debug");//,'b');
+     menu3->setName("m3");
   menuBar_->add(menu3);
 
   NMenuItem* item = new NMenuItem("Open");

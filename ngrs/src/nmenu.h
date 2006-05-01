@@ -44,8 +44,6 @@ public:
    virtual void onMouseExit();
    virtual void onMousePress( int x, int y, int button );
 
-   virtual void onKeyPress(const NKeyEvent & event);
-
    virtual void onMessage(NEvent* ev);
 
 

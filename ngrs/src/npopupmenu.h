@@ -41,6 +41,8 @@ public:
 
     virtual void onMessage(NEvent* ev);
 
+    virtual void onKeyPress(const NKeyEvent & event);
+
 private:
 
 

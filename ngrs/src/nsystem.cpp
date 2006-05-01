@@ -405,13 +405,14 @@ void NSystem::setWindowGrab( Window win, bool on )
 {
   if (win!=0) {
     if (on) {
-     XGrabPointer(dpy(), win, true,
+   /*  XGrabPointer(dpy(), win, true,
                      ButtonPressMask | ButtonReleaseMask,
                      GrabModeAsync, GrabModeAsync,
-                     None, None , CurrentTime);
+                     None, None , CurrentTime);*/
      XGrabKeyboard(dpy(), win, false, GrabModeAsync, GrabModeAsync, CurrentTime);
+
    } else {
-      XUngrabPointer( dpy(), CurrentTime);
+      //XUngrabPointer( dpy(), CurrentTime);
       XUngrabKeyboard(dpy(), CurrentTime);
       XFlush(dpy());
    }

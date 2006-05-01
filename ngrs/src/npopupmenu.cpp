@@ -21,6 +21,7 @@
 #include "napp.h"
 #include "nconfig.h"
 #include "nframeborder.h"
+#include <iostream>
 
 NPopupMenu::NPopupMenu()
  : NWindow()
@@ -38,11 +39,16 @@ NPopupMenu::~NPopupMenu()
 
 void NPopupMenu::setVisible( bool on )
 {
-  if (on) {
-     pack();
-  }
+  if (on) pack();
 
   NWindow::setVisible(on);
+
+  if (on) {
+     setGrabEvents(true);
+  } else {
+     setGrabEvents(false);
+  }
+
 }
 
 void NPopupMenu::add( NCustomMenuItem * item )
@@ -55,6 +61,22 @@ void NPopupMenu::onMessage( NEvent * ev )
   if (ev->text() == "ngrs_menu_item_click") {
      NEvent ev(this,"ngrs_menu_item_click");
      sendMessage(&ev);
+  }
+}
+
+void NPopupMenu::onKeyPress( const NKeyEvent & event )
+{
+    switch (event.scancode()) {
+    case XK_Left : {
+      NEvent ev(this, "ngrs_menu_key_left");
+      sendMessage(&ev);
+    }
+    break;
+    case XK_Right : {
+      NEvent ev(this, "ngrs_menu_key_right");
+      sendMessage(&ev);
+    }
+    break;
   }
 }
 
