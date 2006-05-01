@@ -1,7 +1,7 @@
 #! /usr/bin/env scons
 
-import os, fnmatch, packageneric
-import src
+import os, packageneric
+
 package = 'diversalis'
 
 output = '++packageneric'
@@ -14,33 +14,6 @@ package = 'diversalis'
 BuildDir('++packagneric/build/scons', 'src', duplicate=0)
 env = Environment()
 
-class GlobDirectoryWalker:
-	# a forward iterator that traverses a directory tree
-	
-	def __init__(self, directory, pattern="*"):
-		self.stack = [directory]
-		self.pattern = pattern
-		self.files = []
-		self.index = 0
-	
-	def __getitem__(self, index):
-		while 1:
-			try:
-				file = self.files[self.index]
-				self.index = self.index + 1
-			except IndexError:
-				# pop next directory from stack
-				self.directory = self.stack.pop()
-				self.files = os.listdir(self.directory)
-				self.index = 0
-			else:
-				# got a filename
-				fullname = os.path.join(self.directory, file)
-				if os.path.isdir(fullname): # and not os.path.islink(fullname):
-					self.stack.append(fullname)
-				if fnmatch.fnmatch(file, self.pattern):
-					return fullname
-
 print 'headers: '
-for file in GlobDirectoryWalker('src', '*.hpp'):
+for file in packageneric.GlobDirectoryWalker('src', '*.hpp'):
 	print file
