@@ -22,26 +22,36 @@
 #include "../interface.hpp"
 #include <psycle/host/scheduler/single_threaded.hpp>
 
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__OUTPUT_PLUGINS__FREEPSYCLE__FREEPSYCLE
+#include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
 	namespace output_plugins
 	{
 		/// connect psycle's master machine to an input port of a freepsycle node
-		class freepsycle_sink : public output_plugin
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK freepsycle : public output_plugin
 		{
 			public:
 				///\param sink_plugin the freepsycle node plugin to instanciate
 				///\param sink_input_port the input port to connect to
-				freepsycle_sink(std::string const & sink_plugin = "output.default", std::string const & sink_input_port = "in");
+				freepsycle(std::string const & sink_plugin = "output.default", std::string const & sink_input_port = "in");
+
 			private:
 				/// freepsycle graph connecting psycle with gstreamer
 				engine::graph & graph_;
+
 				/// freepsycle source node fed with the audio data from psycle
 				engine::node & source_;
+
+				///
+				host::plugin_resolver resolver_;
+
 				/// freepsycle sink node where the audio data from psycle's master machine is forwarded to
 				engine::node & sink_;
+
 				/// scheduler for processing the graph
 				host::schedulers::single_threaded scheduler_;
 		};
 	}
 }
+#include <universalis/compiler/dynamic_link/end.hpp>
