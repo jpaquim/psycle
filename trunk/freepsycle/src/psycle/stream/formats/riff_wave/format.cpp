@@ -10,6 +10,7 @@
 #include <universalis/operating_system/exceptions/code_description.hpp>
 #include <cstring>
 #include <sstream>
+#include <climits>
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	//#include <msacm.h>
 #endif
@@ -93,10 +94,17 @@ namespace psycle
 			
 				namespace
 				{
+					///\todo the is general purpose, should go in universalis
 					unsigned int inline bits_to_bytes(unsigned int bits)
 					{
-						unsigned int const bytes(bits >> 3);
-						return bits & 7 ? bytes + 1 : bytes;
+						#if !defined CHAR_BITS
+							#error missing #include <climits>
+						#elif CHAR_BITS == 8
+							unsigned int const bytes(bits >> 3);
+							return bits & 7 ? bytes + 1 : bytes;
+						#else
+							return (bits + CHAR_BITS - 1) / CHAR_BITS;
+						#endif
 					}
 				}
 			
