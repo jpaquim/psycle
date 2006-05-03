@@ -7,9 +7,10 @@
 //#include <memory.h>
 
 #define NUMPARAMETERS   24
-#define FILEVERSION             1
-#define MAXPATH                 (MAX_PATH < (1 << 12) ? (1 << 12) : MAX_PATH)
-#define MAXMIDICHAN             MAX_TRACKS
+#define FILEVERSION     1
+#define MAXPATH         (MAX_PATH < (1 << 12) ? (1 << 12) : MAX_PATH)
+#define MAXMIDICHAN     MAX_TRACKS
+#define MAXINSTR		MAXMIDICHAN
 
 struct SYNPAR
 {
@@ -47,7 +48,7 @@ struct SYNPAR
 
 CMachineParameter const paraChannel = 
 {
-        "Channel", "Channel", 0, MAXMIDICHAN-1, MPF_STATE, 1
+        "Midi channel / Instrument", "Channel", 0, MAXMIDICHAN-1, MPF_STATE, 1
 };
 
 CMachineParameter const paraBank = 
@@ -258,7 +259,7 @@ private:
         int banks[129],progs[129];
         int max_bank_index;
         int midi_channel[MAXMIDICHAN];
-        int lastnote[MAXMIDICHAN];
+        int lastnote[MAXINSTR][MAXMIDICHAN];
 
         //reverb
         double roomsize, damping, width, r_level;
@@ -289,12 +290,6 @@ void mi::Init()
 // Initialize your stuff here
         
         max_bank_index = -1;
-        //for (int i = 0; i<129; i++)
-        //{
-        //      banks[i] = -1;
-        //      progs[i] = -1;
-        //}
-        
         sf_id = 0;
 
         globalpar.version               = FILEVERSION;
@@ -374,7 +369,9 @@ void mi::SetParams()
 
 		fluid_synth_system_reset( synth );
     
-        for (int i=0;i<MAX_TRACKS;i++) lastnote[i]=255;
+        for (int i=0;i<MAXINSTR;i++)
+			for (int y=0;y<MAXMIDICHAN;y++)
+				lastnote[i][y]=255;
 }
 
 void mi::PutData(void* pData)
@@ -442,6 +439,8 @@ void mi::Stop()
 	for(int chan=0;chan<MAXMIDICHAN;chan++)
 	{
 		fluid_synth_all_sounds_off(synth,chan);
+		for (int i=0;i<MAXINSTR;i++)
+				lastnote[i][chan]=255;
 	}
 }
 
@@ -703,19 +702,19 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
         if (note<120)
         {
-			if (lastnote[channel]!=255) fluid_synth_noteoff(synth, globalpar.curChannel, lastnote[channel]);
-			lastnote[channel] = note;
+			if (lastnote[ins][channel]!=255) fluid_synth_noteoff(synth, /*globalpar.curChannel*/ins, lastnote[ins][channel]);
+			lastnote[ins][channel] = note;
 			if (cmd==0xC)
 			{
-				fluid_synth_noteon(synth, globalpar.curChannel, note, int(val/2));
+				fluid_synth_noteon(synth, /*globalpar.curChannel*/ins, note, int(val/2));
 			} else {
-				fluid_synth_noteon(synth, globalpar.curChannel, note, 127);
+				fluid_synth_noteon(synth, /*globalpar.curChannel*/ins, note, 127);
 			}
         }
         if (note==120)
         {
-                fluid_synth_noteoff(synth, globalpar.curChannel, lastnote[channel]);
-                lastnote[channel] = 255;
+                fluid_synth_noteoff(synth, /*globalpar.curChannel*/ins, lastnote[ins][channel]);
+                lastnote[ins][channel] = 255;
         }
 
 
