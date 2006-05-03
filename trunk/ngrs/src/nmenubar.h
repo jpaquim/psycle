@@ -31,6 +31,7 @@ class NMenu;
 class NMenuBar : public NPanel
 {
 public:
+
     NMenuBar();
 
     ~NMenuBar();
@@ -41,6 +42,7 @@ public:
 private:
 
     bool isMenuMapped_;
+    NMenu* lastMenuOver;
 
     std::vector<NObject*> menus;
 

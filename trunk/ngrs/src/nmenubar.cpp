@@ -25,7 +25,7 @@
 
 
 NMenuBar::NMenuBar()
- : NPanel(), isMenuMapped_(0)
+ : NPanel(), isMenuMapped_(0), lastMenuOver(0)
 {
   setLayout(new NFlowLayout(nAlLeft,5,5),true);
   setAlign(nAlTop);
@@ -51,6 +51,25 @@ void NMenuBar::onMessage( NEvent * ev )
     if (isMenuMapped_) {
       NEvent ev1(ev->sender(),"ngrs_menu_expose");
       NPanel::onMessage(&ev1);
+
+      if (lastMenuOver!=0 && lastMenuOver != ev->sender()) {
+        lastMenuOver->setSkin(lastMenuOver->btnNone_);
+        lastMenuOver->repaint();
+      }
+    }
+    std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
+      if (it != menus.end()) {
+        lastMenuOver = reinterpret_cast<NMenu*> (*it);
+      }
+  } else
+  if (ev->text() == "ngrs_menu_exit") {
+    if (!isMenuMapped_) {
+      std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
+      if (it != menus.end()) {
+        NMenu* menu = reinterpret_cast<NMenu*> (*it);
+        menu->setSkin(menu->btnNone_);
+        menu->repaint();
+      }
     }
   } else
   if (ev->text() == "ngrs_menu_press") {
@@ -62,20 +81,31 @@ void NMenuBar::onMessage( NEvent * ev )
       NEvent ev1(ev->sender(),"ngrs_menu_hide");
       NPanel::onMessage(&ev1);
     }
+    std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
+      if (it != menus.end()) {
+        lastMenuOver = reinterpret_cast<NMenu*> (*it);
+      }
   } else
   if (ev->text() == "ngrs_menu_key_right") {
     std::vector<NObject*>::iterator it = find(menus.begin(),menus.end(),ev->sender());
     NEvent ev1(ev->sender(),"ngrs_menu_hide");
     NPanel::onMessage(&ev1);
+
     if (it < menus.end()) {
+      if (lastMenuOver!=0) {
+        lastMenuOver->setSkin(lastMenuOver->btnNone_);
+        lastMenuOver->repaint();
+      }
       it++;
       if (it != menus.end()) {
         NEvent ev1(*it,"ngrs_menu_expose");
         NPanel::onMessage(&ev1);
+        lastMenuOver = reinterpret_cast<NMenu*> (*it);
       } else {
         if (menus.size() > 0) {
           NEvent ev1(*menus.begin(),"ngrs_menu_expose");
           NPanel::onMessage(&ev1);
+          lastMenuOver = reinterpret_cast<NMenu*> (*menus.begin());
         }
       }
     }

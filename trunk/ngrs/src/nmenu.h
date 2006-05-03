@@ -50,6 +50,8 @@ public:
 
 private:
 
+    friend class NMenuBar;
+
     NSkin btnOver_;
     NSkin btnNone_;
 
