@@ -69,8 +69,8 @@ void NMenu::onMouseEnter( )
 
 void NMenu::onMouseExit( )
 {
-  setSkin(btnNone_);
-  repaint();
+  NEvent ev(this, "ngrs_menu_exit");
+  sendMessage(&ev);
 }
 
 void NMenu::onMousePress( int x, int y, int button )
@@ -84,6 +84,8 @@ void NMenu::onMousePress( int x, int y, int button )
 void NMenu::onMessage( NEvent * ev )
 {
   if (ev->text() == "ngrs_menu_expose" && ev->sender() == this) {
+    setSkin(btnOver_);
+    repaint();
     int winLeft = window()->left();
     int winTop  = window()->top();
     popupMenu_->setPosition(winLeft + absoluteLeft(), winTop + absoluteTop() + height() ,100,100);
