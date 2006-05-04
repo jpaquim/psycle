@@ -1,10 +1,10 @@
 #! /usr/bin/env scons
 
-import os, packageneric
+import os, packagerrycan
 
-package = 'diversalis'
+package = packageneric.debian.changelog.package_name()
 
-output = '++packageneric'
+output = packageneric.output
 
 prefix = os.path.join(output, 'install')
 includedir = os.path.join(prefix, 'include')
@@ -12,13 +12,7 @@ pkgincludedir = os.path.join(includedir, package)
 
 BuildDir(os.path.join(output, 'build', 'scons'), 'src', duplicate=0)
 
-env = Environment()
-dictionary = env.Dictionary()
-keys = dictionary.keys()
-keys.sort()
-for key in keys:
-	print '%s = %s' % (key, dictionary[key])
-	
-print 'c++ headers: '
-for file in packageneric.GlobDirectoryWalker('src', '*.hpp'):
-	print file
+module = packageneric.Module()
+
+for file in packageneric.find('src', '*.hpp'):
+	module.headers.add(file)
