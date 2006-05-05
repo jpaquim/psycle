@@ -34,7 +34,7 @@ namespace psycle
 			public:
 				///\param sink_plugin the freepsycle node plugin to instanciate
 				///\param sink_input_port the input port to connect to
-				freepsycle(std::string const & sink_plugin = "output.default", std::string const & sink_input_port = "in");
+				freepsycle(callback_type &, std::string const & sink_plugin = "output.default", std::string const & sink_input_port = "in");
 
 			private:
 				/// freepsycle graph connecting psycle with gstreamer
