@@ -369,6 +369,7 @@ private:
 	Voice::Default_Data track_def_data;
 	TB303_Voice::Data track_data;
 	Chorus	chorus;
+	int samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -387,6 +388,7 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
+	samplerate = pCB->GetSamplingRate();
 	track_def_data.relative_pan=0;
 	track_def_data.LFO_speed=0;
 	track_def_data.LFO_depth=0;
@@ -424,11 +426,11 @@ void mi::Init()
 		track[i].set_default_data(&track_def_data);
 		track[i].set_data(&track_data);
 
-		track[i].set_mix_frequency(pCB->GetSamplingRate());
+		track[i].set_mix_frequency(samplerate);
 		track[i].set_note_off(0);
 		track[i].set_sustain(false);
 	}
-	chorus.set_mixfreq(pCB->GetSamplingRate());
+	chorus.set_mixfreq(samplerate);
 }
 
 void mi::Stop()
@@ -442,6 +444,14 @@ void mi::Stop()
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	if(samplerate!=pCB->GetSamplingRate())
+	{
+		samplerate=pCB->GetSamplingRate();
+		chorus.set_mixfreq(samplerate);
+		for(int i=0;i<MAX_TRACKS;i++)
+			track[i].set_mix_frequency(samplerate);
+	}
+
 }
 
 void mi::ParameterTweak(int par, int val)

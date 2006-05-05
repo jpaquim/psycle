@@ -122,6 +122,7 @@ public:
 private:
 
 	EffectCompressor sl,sr;
+	int samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -140,13 +141,15 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-	sl.setSampleRate(pCB->GetSamplingRate());
-	sr.setSampleRate(pCB->GetSamplingRate());
+	samplerate = pCB->GetSamplingRate();
+	sl.setSampleRate(samplerate);
+	sr.setSampleRate(samplerate);
 }
 
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	if(samplerate!=pCB->GetSamplingRate()) Init();
 }
 
 void mi::Command()

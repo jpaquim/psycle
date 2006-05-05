@@ -122,6 +122,7 @@ private:
 	Shakers track[MAX_TRACKS];
 	bool noteonoff[MAX_TRACKS];
 	float	vol_ctrl[MAX_TRACKS];
+	StkFloat samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -141,7 +142,8 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-	Stk::setSampleRate((StkFloat)pCB->GetSamplingRate());
+	samplerate = (StkFloat)pCB->GetSamplingRate();
+	Stk::setSampleRate(samplerate);
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
 		noteonoff[i]=false;
@@ -163,6 +165,11 @@ void mi::Stop()
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	if(samplerate!=(StkFloat)pCB->GetSamplingRate())
+	{
+		samplerate = (StkFloat)pCB->GetSamplingRate();
+		Stk::setSampleRate(samplerate);
+	}
 }
 
 void mi::ParameterTweak(int par, int val)
