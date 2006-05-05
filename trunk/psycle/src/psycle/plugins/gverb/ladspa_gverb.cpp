@@ -21,6 +21,10 @@ Comments and suggestions should be mailed to Juhana Sadeharju
 
 #define NUMPARAMETERS 8
 
+
+#define DB_CO(g) ((g) > -90.0f ? powf(10.0f, (g) * 0.05f) : 0.0f)
+#define CO_DB(v) (20.0f * log10f(v))
+
 CMachineParameter const paraRoomSize = 
 { 
 	"Room size",
@@ -151,6 +155,7 @@ public:
 private:
 
 	ty_gverb *gv_l,*gv_r;
+	int samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -171,16 +176,35 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
+	samplerate = pCB->GetSamplingRate();
 
-	gv_l = gverb_new(pCB->GetSamplingRate(), 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+	gv_l = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
 
-	gv_r = gverb_new(pCB->GetSamplingRate(), 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+	gv_r = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
 
 }
 
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	if(samplerate != pCB->GetSamplingRate())
+	{
+		samplerate = pCB->GetSamplingRate();
+
+		gverb_free(gv_l);
+		gverb_free(gv_r);
+		
+		gv_l = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+		gv_r = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+
+		gverb_set_roomsize(gv_l,(float)Vals[0]); gverb_set_roomsize(gv_r,(float)Vals[0]);
+		gverb_set_revtime(gv_l,(float)Vals[1]*.01f); gverb_set_revtime(gv_r,(float)Vals[1]*.01f);
+		gverb_set_damping(gv_l,(float)Vals[2] * .001f); gverb_set_damping(gv_r,(float)Vals[2] * .001f);
+		gverb_set_inputbandwidth(gv_l,(float)Vals[3] * .001f); gverb_set_inputbandwidth(gv_r,(float)Vals[3] * .001f);
+		gverb_set_earlylevel(gv_l,DB_CO((float)Vals[5]*.001f)); gverb_set_earlylevel(gv_r,DB_CO((float)Vals[5]*.001f));
+		gverb_set_taillevel(gv_l,DB_CO((float)Vals[6]*.001f)); gverb_set_taillevel(gv_r,DB_CO((float)Vals[6]*.001f));
+
+	}
 }
 
 void mi::Command()
@@ -190,10 +214,6 @@ void mi::Command()
 // or an about button
 pCB->MessBox("LADSPA GVerb","GVerb",0);
 }
-
-
-#define DB_CO(g) ((g) > -90.0f ? powf(10.0f, (g) * 0.05f) : 0.0f)
-#define CO_DB(v) (20.0f * log10f(v))
 
 void mi::ParameterTweak(int par, int val)
 {

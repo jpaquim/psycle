@@ -117,6 +117,7 @@ private:
 	float	vol_ctrl[MAX_TRACKS];
 	StkFloat n2f[NOTE_MAX];
 	std::vector<int> w_tracks;
+	StkFloat samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -143,8 +144,8 @@ void mi::Init()
 	
 	w_tracks.push_back( 0 ); // 
 	
-
-	Stk::setSampleRate((StkFloat)pCB->GetSamplingRate());
+	samplerate = (StkFloat)pCB->GetSamplingRate();
+	Stk::setSampleRate(samplerate);
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
 		track[i].clear();
@@ -170,6 +171,19 @@ void mi::Stop()
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	if(samplerate!=(StkFloat)pCB->GetSamplingRate())
+	{
+		samplerate = (StkFloat)pCB->GetSamplingRate();
+		Stk::setSampleRate(samplerate);
+		for(int c=0;c<MAX_TRACKS;c++)
+		{
+			adsr[c].setAllTimes(StkFloat(Vals[1]*0.000030517578125),
+									StkFloat(Vals[2]*0.000030517578125),
+									StkFloat(Vals[3]*0.000030517578125),
+									StkFloat(Vals[4]*0.000030517578125));
+		}
+	}
+
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -190,14 +204,8 @@ void mi::Command()
 // Called when user presses editor button
 // Probably you want to show your custom window here
 // or an about button
-char buffer[2048];
 
-sprintf(
-		buffer,"%s",
-		"Simple Plucked\n"
-		);
-
-pCB->MessBox(buffer,"stk Plucked",0);
+pCB->MessBox("Simple Plucked","stk Plucked",0);
 
 }
 

@@ -148,6 +148,7 @@ private:
 	float *DM_l,*DM_r;
 	unsigned int buf_count;
 	float min_sweep,max_sweep,sweep,step,outval[2];
+	int samplerate;
 
 };
 
@@ -176,9 +177,10 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
+	samplerate = pCB->GetSamplingRate();
 	buf_count=0;
-	min_sweep = Vals[4] * .001 * pCB->GetSamplingRate();
-    max_sweep = Vals[5] * .001 * pCB->GetSamplingRate();
+	min_sweep = Vals[4] * .001 * samplerate;
+    max_sweep = Vals[5] * .001 * samplerate;
     step = Vals[6]*.001;
     sweep = min_sweep;
 	outval[0] = outval[1] = 0;
@@ -191,6 +193,13 @@ void mi::Init()
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	if(samplerate!=pCB->GetSamplingRate())
+	{
+		samplerate = pCB->GetSamplingRate();
+	
+		min_sweep = Vals[4] * .001 * samplerate;
+		max_sweep = Vals[5] * .001 * samplerate;
+	}
 }
 
 void mi::Command()
@@ -205,8 +214,8 @@ void mi::ParameterTweak(int par, int val)
 {
 	Vals[par]=val;
 
-	min_sweep = Vals[4] * .001 * pCB->GetSamplingRate();
-    max_sweep = Vals[5] * .001 * pCB->GetSamplingRate();
+	min_sweep = Vals[4] * .001 * samplerate;
+    max_sweep = Vals[5] * .001 * samplerate;
     step = Vals[6]*.001;
 	if (step == 0)
 	{

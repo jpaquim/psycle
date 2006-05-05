@@ -65,6 +65,7 @@ private:
         NRev    nrev[2];
         PRCRev  pcrrev[2];
         Effect  *rev_l,*rev_r;
+		StkFloat samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -87,15 +88,26 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-        Stk::setSampleRate((StkFloat)pCB->GetSamplingRate());
-
+	samplerate=(StkFloat)pCB->GetSamplingRate();
+    Stk::setSampleRate(samplerate);
 }
 
 
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
-	Stk::setSampleRate((StkFloat)pCB->GetSamplingRate());
+	if(samplerate!=(StkFloat)pCB->GetSamplingRate())
+	{
+		samplerate = (StkFloat)pCB->GetSamplingRate();
+		Stk::setSampleRate(samplerate);
+		StkFloat const t60 = StkFloat(Vals[1])*0.03125;
+        for(short i=0;i<2;i++)
+        {
+                jcrev[i].setT60(t60);
+                nrev[i].setT60(t60);
+                pcrrev[i].setT60(t60);
+        }
+	}
 }
 
 void mi::ParameterTweak(int par, int val)

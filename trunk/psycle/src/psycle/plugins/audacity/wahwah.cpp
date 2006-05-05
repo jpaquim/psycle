@@ -187,6 +187,7 @@ void mi::Init()
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate();
 }
 
 void mi::Command()
