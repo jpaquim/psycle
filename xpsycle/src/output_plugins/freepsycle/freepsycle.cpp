@@ -24,17 +24,16 @@ namespace psycle
 {
 	namespace output_plugins
 	{
-		PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR(freepsycle)
-
 		namespace
 		{
 			/// freepsycle source node fed with the audio data from psycle
 			class source : public engine::node
 			{
 				protected: friend class generic_access;
-					source(parent_type & parent, name_type const & name)
+					source(parent_type & parent, name_type const & name, output_plugin::callback_type & callback)
 					:
-						node_type(parent, name)
+						node_type(parent, name),
+						callback_(callback)
 					{
 						engine::ports::output::create(*this, "out", 2);
 					}
@@ -58,14 +57,14 @@ namespace psycle
 
 				private:
 					interface::callback_type callback_;
-					void * callback_argument_;
 			};
 		}
 
-		freepsycle::freepsycle(std::string const & sink_plugin, std::string const & sink_input_port)
+		freepsycle::freepsycle(callback_type & callback, std::string const & sink_plugin, std::string const & sink_input_port)
 		:
+			output_plugin(callback),
 			graph_(engine::graph::create("psycle -> freepsycle")),
-			source_(engine::node::create<source>(graph_, "psycle")
+			source_(engine::node::create<source>(graph_, "psycle", callback())
 			sink_(resolver(sink_plugin, graph_, "freepsycle")),
 			scheduler_(host::schedulers::single_threaded::create(graph_)
 		{
@@ -74,6 +73,7 @@ namespace psycle
 
 		void freepsycle::opened(bool value)
 		{
+			scheduler_.opened(value);
 		}
 
 		void freepsycle::started(bool value)
