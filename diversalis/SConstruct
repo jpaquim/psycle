@@ -1,18 +1,36 @@
 #! /usr/bin/env scons
 
-import os, packagerrycan
+import os, packageneric as jerrycan
 
-package = packageneric.debian.changelog.package_name()
+if False:
+	package = packageneric.debian.changelog.package_name()
 
-output = packageneric.output
+	output = packageneric.output
 
-prefix = os.path.join(output, 'install')
-includedir = os.path.join(prefix, 'include')
-pkgincludedir = os.path.join(includedir, package)
+	prefix = os.path.join(output, 'install')
+	includedir = os.path.join(prefix, 'include')
+	pkgincludedir = os.path.join(includedir, package)
 
-BuildDir(os.path.join(output, 'build', 'scons'), 'src', duplicate=0)
+	BuildDir(os.path.join(output, 'build', 'scons'), 'src', duplicate=0)
 
-module = packageneric.Module()
+module_package = jerrycan.ModulePackage()
+module_package.name = 'diversalis'
+module_package.version = [0, 0, 0]
 
-for file in packageneric.find('src', '*.hpp'):
-	module.headers.add(file)
+module = jerrycan.Module()
+module_package.modules.append(module)
+module.name = 'diversalis'
+module.version = [0, 0, 0]
+module.compiler_flags.append('-O0')
+module.compiler_flags.append('-ggdb3')
+
+for file in jerrycan.Find('src', 'diversalis', '*.hpp'):
+	module.sources.append(file)
+
+for x in module.sources: print x
+
+m = jerrycan.Module()
+m.compiler_flags.append('test')
+module.public_requires.append(m)
+
+print module_package.merged_compiler_flags()
