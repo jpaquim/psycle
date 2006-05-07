@@ -13,24 +13,21 @@ if False:
 
 	BuildDir(os.path.join(output, 'build', 'scons'), 'src', duplicate=0)
 
-module_package = jerrycan.ModulePackage()
-module_package.name = 'diversalis'
-module_package.version = [0, 0, 0]
+	env = Environment()
+	
+	diversalis = jerrycan.InternalModule(env)
+	diversalis.set_name('diversalis')
+	diversalis.set_version([0, 0, 0])
+	diversalis.compiler_flags.append('-O0')
+	diversalis.compiler_flags.append('-ggdb3')
+	diversalis.get_headers().add(jerrycan.Find('src', 'diversalis', '*.hpp'))
 
-module = jerrycan.Module()
-module_package.modules.append(module)
-module.name = 'diversalis'
-module.version = [0, 0, 0]
-module.compiler_flags.append('-O0')
-module.compiler_flags.append('-ggdb3')
+	diversalis_package = jerrycan.InternalModulePackage(env)
+	diversalis_package.set_name('diversalis')
+	diversalis_package.set_version([0, 0, 0])
+	diversalis_package.get_modules().append(diversalis)
 
-for file in jerrycan.Find('src', 'diversalis', '*.hpp'):
-	module.sources.append(file)
-
-for x in module.sources: print x
-
-m = jerrycan.Module()
-m.compiler_flags.append('test')
-module.public_requires.append(m)
-
-print module_package.merged_compiler_flags()
+	
+	env.Install(pkgincludedir, diversalis.get_headers())
+	env.Install(install.include, universalis)
+	env.Alias('install', prefix)
