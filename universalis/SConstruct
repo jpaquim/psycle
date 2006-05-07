@@ -1,1 +1,31 @@
 #! /usr/bin/env scons
+
+import os, packageneric as jerrycan
+
+BuildDir(os.path.join('++packageneric', 'build', 'scons'), 'src', duplicate=0)
+env = Environment()
+
+diversalis = jerrycan.ExternalModulePackage(env, 'diversalis')
+diversalis.show()
+
+glibmm = jerrycan.ExternalModulePackage(env, 'glibmm-2.4')
+glibmm.show()
+
+universalis = jerrycan.InternalModule(env, 'lib-universalis')
+universalis.add_public_requires(diversalis)
+universalis.add_public_requires(glibmm)
+universalis.add_sources(jerrycan.Find('.', 'src/universalis', '*.cpp'))
+universalis.add_headers(jerrycan.Find('.', 'src/universalis', '*.hpp'))
+universalis.show()
+
+if False:
+	import SCons as cobaye
+	install = jerrycan.InstallPrefix(cobaye)
+	env.Install(install.lib, universalis.scons())
+	env.Install(install.include, universalis.get_headers())
+	env.Alias('install', install.prefix)
+
+print universalis.get_sources()
+print universalis.get_headers()
+#universalis.scons()
+	
