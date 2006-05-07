@@ -26,9 +26,10 @@
 #include <niswindow.h>
 #include <nregion.h>
 
-#define nDestroyWindow 1
-#define nHideWindow    2
-#define nDockWindow    3
+const int nDestroyWindow  = 1;
+const int nHideWindow     = 2;
+const int nDockWindow     = 3;
+
 
 class NDockPanel;
 
@@ -44,6 +45,7 @@ public:
     ~NWindow();
 
     virtual void setPosition(int x, int y, int width, int height);
+    void setPositionToScreenMaximize();
     void setPositionToScreenCenter( );
     virtual void setLeft(int left);
     virtual void setTop(int top);

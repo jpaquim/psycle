@@ -70,6 +70,7 @@ public:
     unsigned long getXColorValue(int r, int g, int b);
 
     bool isTrueColor();
+    bool propertysActive();
 
 
 private:

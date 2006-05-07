@@ -25,8 +25,9 @@
 #include <string>
 #include <vector>
 
-class NEvent;
 
+class NEvent;
+class NProperty;
 
 using namespace sigslot;
 
@@ -49,10 +50,16 @@ public:
     virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
     virtual void onMessage(NEvent* event);
 
+    NProperty* propertys();
+
 private:
 
    std::string name_;
    std::vector<NObject*> msgListener;
+
+   NProperty* propertys_;
+   void getNameProperty(std::string  & name);
+
 };
 
 #endif
