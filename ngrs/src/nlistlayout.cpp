@@ -34,14 +34,11 @@ NListLayout::~NListLayout()
 void NListLayout::align( NVisualComponent * parent )
 {
   maxX_ = maxY_ = 0;
-  std::vector<NRuntime*>::iterator itr = parent->components.begin();
+  std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
   int yp = 0;
-  for (;itr < parent->components.end(); itr++) {
-    NRuntime* child = *itr;
-    //if (child->visit(NVisualComponent::isVisualComponent)) {
-       // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
-       NVisualComponent* visualChild = static_cast<NVisualComponent*> (child);
-       if (visualChild->visible()) {
+  for (;itr < parent->visualComponents().end(); itr++) {
+   NVisualComponent* visualChild = *itr;
+   if (visualChild->visible()) {
         int prefWidth = visualChild->preferredWidth();
         int minWidth = visualChild->minimumWidth();
         int width = (prefWidth < minWidth) ? minWidth : prefWidth; 
@@ -51,8 +48,7 @@ void NListLayout::align( NVisualComponent * parent )
            maxX_ = width;
         }
         yp+= visualChild->preferredHeight();
-       }
-    //}
+   }
   }
   maxY_ = yp;
 }

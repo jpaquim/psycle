@@ -542,4 +542,10 @@ void NWindow::setFocus( )
 
 }
 
+void NWindow::setPositionToScreenMaximize( )
+{
+  setPosition(0,0,NApp::system().screenWidth(),NApp::system().screenHeight());
+}
+
+
 

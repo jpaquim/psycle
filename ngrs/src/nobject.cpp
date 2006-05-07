@@ -19,9 +19,21 @@
  ***************************************************************************/
 #include "nobject.h"
 #include "nevent.h"
+#include "napp.h"
+#include "nsystem.h"
+#include "nproperty.h"
 
 NObject::NObject()
 {
+  if (NApp::system().propertysActive()) propertys_ = new NProperty(); else propertys_ = 0;
+
+  if (propertys_) {
+     SetGet<const std::string &, std::string &>* setGet = new SetGet<const std::string &, std::string &>;
+     setGet->set.connect(this,&NObject::setName);
+     setGet->get.connect(this,&NObject::getNameProperty);
+     propertys_->registrate("name",setGet);
+
+  }
 }
 
 
@@ -60,5 +72,17 @@ void NObject::sendMessage( NEvent * ev )
      obj->onMessage(ev);
   }
 }
+
+NProperty * NObject::propertys( )
+{
+  return propertys_;
+}
+
+void NObject::getNameProperty( std::string & name )
+{
+  name = name_;
+}
+
+
 
 

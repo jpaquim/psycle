@@ -235,10 +235,14 @@ int NApp::processEvent( NWindow * win, XEvent * event )
     }
     break;
     case ButtonPress: {
+        NEvent ev(win,"ngrs_menu_hide_all");
+        std::cout << "here" << std::endl;
+        win->sendMessage(&ev);
         vector<NWindow*>::iterator itr;
         for (itr = popups_.begin(); itr < popups_.end(); itr++) {
            NWindow* popup = *itr;
-           if (popup->visible() && win!=popup) {
+           if (popup->visible()) {
+               
                popupUnmapped_ = true;
                popup->setVisible(false);
            }

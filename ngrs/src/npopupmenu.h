@@ -43,6 +43,7 @@ public:
 
     virtual void onKeyPress(const NKeyEvent & event);
 
+
 private:
 
 
