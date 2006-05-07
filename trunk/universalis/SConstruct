@@ -2,21 +2,36 @@
 
 import os, packageneric as jerrycan
 
-BuildDir(os.path.join('++packageneric', 'build', 'scons'), 'src', duplicate=0)
 env = Environment()
+env.BuildDir(os.path.join('++packageneric', 'build', 'scons'), 'src', duplicate=0)
 
-diversalis = jerrycan.ExternalModulePackage(env, 'diversalis')
-diversalis.show()
+if True:
+	# Configuration:
+	conf = Configure(env,
+		custom_tests = {
+			'CheckPkg' : jerrycan.pkg_config_check
+		})
+	bool  = conf.CheckPkg('pkg-config >= 0.18')
+	bool &= conf.CheckPkg('glibmm-2.4 >= 2.4')
+	bool &= conf.CheckPkg('diversalis >= 0')
+	if not bool:
+		print '*** some of the checks above failed ***'
+	env = conf.Finish()
 
-glibmm = jerrycan.ExternalModulePackage(env, 'glibmm-2.4')
-glibmm.show()
+if True:
+	diversalis = jerrycan.ExternalModulePackage(env, 'diversalis')
+	diversalis.show()
 
-universalis = jerrycan.InternalModule(env, 'lib-universalis')
-universalis.add_public_requires(diversalis)
-universalis.add_public_requires(glibmm)
-universalis.add_sources(jerrycan.Find('.', 'src/universalis', '*.cpp'))
-universalis.add_headers(jerrycan.Find('.', 'src/universalis', '*.hpp'))
-universalis.show()
+	glibmm = jerrycan.ExternalModulePackage(env, 'glibmm-2.4')
+	glibmm.show()
+
+if True:
+	universalis = jerrycan.InternalModule(env, 'lib-universalis')
+	universalis.add_public_requires(diversalis)
+	universalis.add_public_requires(glibmm)
+	universalis.add_sources(jerrycan.Find('.', 'src/universalis', '*.cpp'))
+	universalis.add_headers(jerrycan.Find('.', 'src/universalis', '*.hpp'))
+	universalis.show()
 
 if False:
 	import SCons as cobaye
@@ -25,7 +40,7 @@ if False:
 	env.Install(install.include, universalis.get_headers())
 	env.Alias('install', install.prefix)
 
-print universalis.get_sources()
-print universalis.get_headers()
-#universalis.scons()
-	
+if False:
+	print universalis.get_sources()
+	print universalis.get_headers()
+	universalis.scons()
