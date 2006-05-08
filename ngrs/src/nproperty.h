@@ -43,10 +43,11 @@ namespace detail
 				Class const & instance() const { return *instance_; }
 			private:
 				Class       * instance_;
-
-			public:
-				std::type_info const & type() const { return typeid(instance()); }
 		///\}
+
+		public:
+			/// runtime type information
+			std::type_info const & type() const { return typeid(Value); }
 
 		///\name member function pointers
 		///\{
