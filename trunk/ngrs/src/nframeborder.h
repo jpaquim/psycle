@@ -47,6 +47,8 @@ public:
 
    virtual void paint(NGraphics* g, const NShape & geometry);
 
+   virtual NFrameBorder* clone()  const;   // Uses the copy constructor
+
 private:
 
    int lcount_;  // number of frame lines

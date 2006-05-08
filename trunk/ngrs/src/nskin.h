@@ -36,19 +36,12 @@ const int nHorizontal = 32;
 class NSkin {
 public:
 
-   NSkin() {
-     transparent = true;
-     useParentBgColor = true;
-     useParentFgColor = true;
-     useParentFont    = true;
-     bitmapBgStyle = 0;
-     translucent = 100;
-     gradientStyle = 0;
-     gradientOrientation = nHorizontal;
-     gradientPercent = 50;
-     border = 0;
-     arcWidth = arcHeight = 10;
-   }
+   NSkin();
+   ~NSkin();
+
+   NSkin(const NSkin & src);
+   const NSkin & operator= (const NSkin & rhs);
+
 
    NBorder* border;
    NColor bgColor;

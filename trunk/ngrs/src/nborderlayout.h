@@ -37,6 +37,7 @@ public:
     virtual int preferredWidth(const NVisualComponent* target) const;
     virtual int preferredHeight(const NVisualComponent* target) const;
 
+
 private:
 
     int maxX_;

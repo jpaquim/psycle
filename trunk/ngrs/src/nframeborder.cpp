@@ -93,4 +93,11 @@ int NFrameBorder::dHeight( ) const
   return dy_;
 }
 
+// usage of Covariant Return Types, a feature that was not originally part of c++. If your //compiler complains at the declaration of NFrameBorder* clone() const, you have an old compiler and you'll have to change the return type to NBorder*.
+
+NFrameBorder * NFrameBorder::clone( ) const
+{
+  return new NFrameBorder(*this);
+}
+
 

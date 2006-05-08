@@ -37,6 +37,19 @@ NGroupBox::~NGroupBox()
 
 /// GBorder Class
 
+NBorder* NGroupBox::GBorder::clone( ) const
+{
+  return new GBorder(*this);
+}
+
+NGroupBox::GBorder::GBorder( )
+{
+  pBox = 0;
+  NFontMetrics metrics;
+  metrics.setFont(pBox->font());
+  setSpacing(NSize(5,metrics.textHeight(),5,5));
+}
+
 NGroupBox::GBorder::GBorder(NGroupBox* groupBox )
 {
   pBox = groupBox;
@@ -66,6 +79,3 @@ void NGroupBox::GBorder::setHeaderText( std::string text )
 {
   headerText_ = text;
 }
-
-
-

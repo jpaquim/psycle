@@ -31,12 +31,15 @@ class NGroupBox : public NPanel
 
   class GBorder : public NBorder {
   public:
+     GBorder();
      GBorder(NGroupBox* groupBox);
      ~GBorder();
 
      void setHeaderText(std::string text);
 
      virtual void paint(NGraphics* g, const NShape & geometry);
+
+     virtual NBorder* clone() const;
 
   private:
 

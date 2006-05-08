@@ -159,3 +159,10 @@ void NBevelBorder::setStyle( int outerStyle, int innerStyle, int size )
   mapStyle();
 //  size_ = size;
 }
+
+// usage of Covariant Return Types, a feature that was not originally part of c++. If your //compiler complains at the declaration of NBevelBorder* clone() const, you have an old compiler and you'll have to change the return type to NBorder*.
+
+NBevelBorder * NBevelBorder::clone( ) const
+{
+  return new NBevelBorder(*this);
+}

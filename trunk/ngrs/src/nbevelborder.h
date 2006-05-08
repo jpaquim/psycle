@@ -47,6 +47,8 @@ public:
     int innerStyle();
     int outerStyle();
 
+    virtual NBevelBorder* clone()  const;   // Uses the copy constructor
+
 private:
 
     int style_;
