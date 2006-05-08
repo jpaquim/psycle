@@ -24,24 +24,18 @@
 #include "nproperty.h"
 
 NObject::NObject()
+:
+	properties_(NApp::system().propertysActive() ? new NPropertyMap() : 0)
 {
-  if (NApp::system().propertysActive()) propertys_ = new NProperty(); else propertys_ = 0;
-
-  if (propertys_) {
-     SetGet<const std::string &, std::string &> setGet;
-     setGet.set.connect(this,&NObject::setName);
-     setGet.get.connect(this,&NObject::getNameProperty);
-     propertys_->registrate("name",setGet);
-
-  }
+	if (properties_) properties_->registrate<std::string>("name", *this, &NObject::name, &NObject::setName);
 }
-
 
 NObject::~NObject()
 {
+	if (properties_) delete properties_;
 }
 
-void NObject::onKeyAcceleratorNotify(NKeyAccelerator acell )
+void NObject::onKeyAcceleratorNotify( NKeyAccelerator acell )
 {
 }
 
@@ -59,7 +53,6 @@ void NObject::onMessage( NEvent * event )
 {
 }
 
-
 void NObject::addMessageListener( NObject * obj )
 {
   msgListener.push_back(obj);
@@ -72,17 +65,3 @@ void NObject::sendMessage( NEvent * ev )
      obj->onMessage(ev);
   }
 }
-
-NProperty * NObject::propertys( )
-{
-  return propertys_;
-}
-
-void NObject::getNameProperty( std::string & name )
-{
-  name = name_;
-}
-
-
-
-

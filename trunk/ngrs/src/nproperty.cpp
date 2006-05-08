@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
+ *   Copyright (C) 2006 by Stefan Nattkemper <natti@linux>                 *
+ *   Copyright (C) 2006 by Johan Boule <bohan@jabber.org>                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,43 +19,4 @@
  ***************************************************************************/
 #include "nproperty.h"
 
-NProperty::NProperty()
-{
-}
-
-
-NProperty::~NProperty()
-{
-  std::map<const std::string , void*>::iterator itr;
-  for (; itr!= setGetMap.end(); itr++) {
-    SetGet<const void*,const void*>* setGet = (SetGet<const void*,const void*>*) itr->second;
-    delete setGet;
-  }
-}
-
-void NProperty::write( const std::string & name, const void * value )
-{
-  std::map<const std::string , void*>::iterator itr;
-  if ( (itr = setGetMap.find(name)) == setGetMap.end() )
-  {
-     // not found
-  } else {
-     SetGet<const void*,const void*>* setGet = (SetGet<const void*,const void*>*) itr->second;
-     setGet->set.emit(value);
-  }
-}
-
-void NProperty::read( const std::string & name, const void * value )
-{
-  std::map<const std::string , void*>::iterator itr;
-  if ( (itr = setGetMap.find(name)) == setGetMap.end() )
-  {
-     // not found
-  } else {
-     SetGet<const void*,const void*>* setGet = (SetGet<const void*,const void*>*) itr->second;
-     setGet->get.emit(value);
-  }
-}
-
-
-
+// everything is template code in the header file
