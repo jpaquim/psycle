@@ -37,6 +37,10 @@ class SetGet {
     sigslot::signal1<SetType>  set;
     sigslot::signal1<GetType>  get;
     std::string methodName;
+
+    SetGet<SetType,GetType>* clone() const {
+      return new SetGet<SetType,GetType>(*this);
+    }
 };
 
 class NProperty{
@@ -45,8 +49,8 @@ public:
 
     ~NProperty();
 
-    template<class SetType, class GetType> inline void registrate(const std::string &  methodName, SetGet<SetType, GetType>* setGet) {
-        setGetMap[methodName] = (void*) setGet;
+    template<class SetType, class GetType> inline void registrate(const std::string &  methodName, const SetGet<SetType, GetType> & setGet) {
+        setGetMap[methodName] = (void*) setGet.clone();
     }
 
     void write(const std::string & name, const void* value);

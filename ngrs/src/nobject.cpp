@@ -28,9 +28,9 @@ NObject::NObject()
   if (NApp::system().propertysActive()) propertys_ = new NProperty(); else propertys_ = 0;
 
   if (propertys_) {
-     SetGet<const std::string &, std::string &>* setGet = new SetGet<const std::string &, std::string &>;
-     setGet->set.connect(this,&NObject::setName);
-     setGet->get.connect(this,&NObject::getNameProperty);
+     SetGet<const std::string &, std::string &> setGet;
+     setGet.set.connect(this,&NObject::setName);
+     setGet.get.connect(this,&NObject::getNameProperty);
      propertys_->registrate("name",setGet);
 
   }

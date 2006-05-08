@@ -42,6 +42,8 @@ public:
     void setColor(const NColor & color);
     const NColor & color();
 
+    virtual NBorder* clone()  const = 0;   // Uses the copy constructor
+
 private:
 
    NColor color_;

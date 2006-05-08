@@ -26,6 +26,11 @@ NProperty::NProperty()
 
 NProperty::~NProperty()
 {
+  std::map<const std::string , void*>::iterator itr;
+  for (; itr!= setGetMap.end(); itr++) {
+    SetGet<const void*,const void*>* setGet = (SetGet<const void*,const void*>*) itr->second;
+    delete setGet;
+  }
 }
 
 void NProperty::write( const std::string & name, const void * value )
