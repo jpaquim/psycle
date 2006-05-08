@@ -45,7 +45,7 @@ namespace detail
 				Class       * instance_;
 
 			public:
-				std::type_info type() const { return typeid(instance()); }
+				std::type_info const & type() const { return typeid(instance()); }
 		///\}
 
 		///\name member function pointers
