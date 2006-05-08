@@ -22,6 +22,7 @@
 
 #include <map>
 #include <string>
+#include <typeinfo>
 #include <stdexcept>
 
 ///\internal
@@ -42,6 +43,9 @@ namespace detail
 				Class const & instance() const { return *instance_; }
 			private:
 				Class       * instance_;
+
+			public:
+				std::type_info type() const { return typeid(instance()); }
 		///\}
 
 		///\name member function pointers
