@@ -27,7 +27,7 @@
 
 
 class NEvent;
-class NProperty;
+class NPropertyMap;
 
 using namespace sigslot;
 
@@ -50,15 +50,15 @@ public:
     virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
     virtual void onMessage(NEvent* event);
 
-    NProperty* propertys();
+	NPropertyMap* properties() { return properties_; }
 
 private:
 
    std::string name_;
    std::vector<NObject*> msgListener;
 
-   NProperty* propertys_;
-   void getNameProperty(std::string  & name);
+   NPropertyMap* properties_;
+   void getNameProperty(std::string const & name);
 
 };
 
