@@ -182,7 +182,7 @@ class NPropertyMap
 				return find<AnyClass, Value>(key).get();
 			}
 
-			template<typename Value>
+			template<class Value>
 			void set(Key const & key, Value const & value) throw(std::exception)
 			{
 				find<AnyClass, Value>(key).set(value);

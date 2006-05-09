@@ -23,16 +23,14 @@
 #include "nsystem.h"
 #include "nproperty.h"
 
-NObject::NObject()
-:
-	properties_(NApp::system().propertysActive() ? new NPropertyMap() : 0)
+NObject::NObject() : properties_(NApp::system().propertysActive() ? new NPropertyMap() : 0)
 {
-	if (properties_) properties_->registrate<std::string>("name", *this, &NObject::name, &NObject::setName);
+  if (properties_) properties_->registrate<std::string>("name", *this, &NObject::name, &NObject::setName);
 }
 
 NObject::~NObject()
 {
-	if (properties_) delete properties_;
+  if (properties_) delete properties_;
 }
 
 void NObject::onKeyAcceleratorNotify( NKeyAccelerator acell )
@@ -64,4 +62,9 @@ void NObject::sendMessage( NEvent * ev )
      NObject* obj = *it;
      obj->onMessage(ev);
   }
+}
+
+NPropertyMap * NObject::properties( ) const
+{
+  return properties_;
 }

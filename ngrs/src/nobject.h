@@ -50,7 +50,7 @@ public:
     virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
     virtual void onMessage(NEvent* event);
 
-	NPropertyMap* properties() { return properties_; }
+    NPropertyMap* properties() const;
 
 private:
 
