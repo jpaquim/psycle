@@ -63,6 +63,12 @@ dir='ver' percent='10' style='1' />
 	<gradient start='200:200:200' mid='210:210:210' end='180:180:180' dir='ver' percent='10' style='1'>
 	</gradient>
 </vcskin>
+<vcskin id='sbar_vsl'>
+   <bgcolor r='230' g='230' b='230' />
+</vcskin>
+<vcskin id='sbar_hsl'>
+   <bgcolor r='230' g='230' b='230' />
+</vcskin>
 
 <vcskin id='splitbar'>
 <gradient start='200:200:200' mid='220:220:220' end='220:220:220' perc='50'

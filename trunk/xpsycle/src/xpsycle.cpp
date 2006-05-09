@@ -31,6 +31,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <nfile.h>
+#include <nproperty.h>
 
 using namespace std;
 
@@ -46,15 +47,6 @@ int f2i(double q) { return ((int)q)&2047; }
 
 int main(int argc, char *argv[])
 {
-
-  NObject* obj = new NObject();
-
-  obj->properties()->set("name",std::string("hallo"));
-
-  std::cout << obj->name() << std::endl;
-
-  exit(0);
-
 
     NApp app;
     Global gl;
