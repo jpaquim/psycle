@@ -37,6 +37,7 @@ ChildView::ChildView()
   Global::pSong()->seqBus=0;
   // end of strange main psycle code
 
+
   newMachineDlg_ = new NewMachine();
   add(newMachineDlg_);
 
@@ -70,6 +71,7 @@ ChildView::ChildView()
 
   timer.setIntervalTime(80);
   timer.enableTimer();
+
 }
 
 

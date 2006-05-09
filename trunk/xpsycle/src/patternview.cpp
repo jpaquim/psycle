@@ -508,7 +508,7 @@ int PatternView::Header::skinColWidth( )
 ///
   PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : NPanel(), dy_(0)
   {
-    setBorder(new NFrameBorder(),true);
+    setBorder(NFrameBorder());
     pView = pPatternView;
     setWidth(40);
   }

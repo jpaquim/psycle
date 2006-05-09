@@ -67,6 +67,7 @@ private:
    NListBox* seqList_;
    N7SegDisplay* lenSeg1;
    N7SegDisplay* lenSeg2;
+   N7SegDisplay* sampCountSeg;
 
    NButton* incshort_;
    NButton* decshort_;

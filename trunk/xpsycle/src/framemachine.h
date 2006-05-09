@@ -54,7 +54,7 @@ public:
 class Cell : public NPanel {
 public:
    Cell() {
-     setBorder(new NFrameBorder(),true);
+     setBorder(NFrameBorder());
    }
 
    virtual void paint(NGraphics* g);

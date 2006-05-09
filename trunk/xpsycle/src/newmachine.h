@@ -35,7 +35,7 @@ public:
      add( infoLb = new NLabel(info) );
      add( textLb = new NLabel() );
      textLb->setWordbreak(true);
-     textLb->setBorder(new NBevelBorder(nNone,nLowered),true);
+     textLb->setBorder(NBevelBorder(nNone,nLowered));
    }
 
    ~InfoLine() {

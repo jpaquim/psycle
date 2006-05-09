@@ -55,7 +55,7 @@ void InstrumentEditor::init( )
     header->setLayout(new NFlowLayout(nAlLeft,5,5),true);
     header->add(new NLabel("Instrument"), nAlLeft);
     instNumberLbl = new NLabel("   ");
-       instNumberLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+       instNumberLbl->setBorder(NBevelBorder(nNone,nLowered));
        instNumberLbl->border()->setSpacing(NSize(2,2,2,2));
     header->add(instNumberLbl,nAlLeft);
     decInstBtn = new NButton("<");
@@ -101,7 +101,7 @@ void InstrumentEditor::init( )
           panningSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         panningPnl->add(panningSlider,nAlLeft);
         panningLbl = new NLabel("   ");
-           panningLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+           panningLbl->setBorder(NBevelBorder(nNone,nLowered));
            panningLbl->border()->setSpacing(NSize(2,2,2,2));
         panningPnl->add(panningLbl,nAlLeft);
      properties->add(panningPnl,nAlTop);
@@ -122,7 +122,7 @@ void InstrumentEditor::init( )
         tempoGrpBox->add(playSampleFitCbx);
         patRowEdt = new NEdit();
            patRowEdt->setWidth(50);
-           patRowEdt->setBorder(new NBevelBorder(nNone,nLowered),true);
+           patRowEdt->setBorder(NBevelBorder(nNone,nLowered));
            patRowEdt->border()->setSpacing(NSize(2,2,2,2));
            patRowEdt->keyPress.connect(this,&InstrumentEditor::onPatRowEdit);
         tempoGrpBox->add(patRowEdt,nAlLeft);
@@ -143,7 +143,7 @@ void InstrumentEditor::init( )
           volumeSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         volumePnl->add(volumeSlider,nAlLeft);
         volumeLbl = new NLabel("   ");
-           volumeLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+           volumeLbl->setBorder(NBevelBorder(nNone,nLowered));
            volumeLbl->border()->setSpacing(NSize(2,2,2,2));
         volumePnl->add(volumeLbl,nAlLeft);
         waveLayerGrpBox->add(volumePnl,nAlTop);
@@ -158,7 +158,7 @@ void InstrumentEditor::init( )
           fineTuneSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         fineTunePnl->add(fineTuneSlider,nAlLeft);
         fineTuneLbl = new NLabel("   ");
-           fineTuneLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+           fineTuneLbl->setBorder(NBevelBorder(nNone,nLowered));
            fineTuneLbl->border()->setSpacing(NSize(2,2,2,2));
         fineTunePnl->add(fineTuneLbl,nAlLeft);
         waveLayerGrpBox->add(fineTunePnl,nAlTop);
@@ -182,7 +182,7 @@ void InstrumentEditor::init( )
              octIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
            tunePnl->add(octIncBtn);
            octLbl   = new NLabel("  ");
-             octLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             octLbl->setBorder(NBevelBorder(nNone,nLowered));
              octLbl->border()->setSpacing(NSize(2,2,2,2));
            tunePnl->add(octLbl);
         waveLayerGrpBox->add(tunePnl,nAlTop);
@@ -196,7 +196,7 @@ void InstrumentEditor::init( )
              forwardBtn->setFlat(false);
            loopPnl->add(forwardBtn);
            loopLbl   = new NLabel("  ");
-             loopLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             loopLbl->setBorder(NBevelBorder(nNone,nLowered));
              loopLbl->border()->setSpacing(NSize(2,2,2,2));
            loopPnl->add(loopLbl);
         waveLayerGrpBox->add(loopPnl,nAlTop);
@@ -204,17 +204,17 @@ void InstrumentEditor::init( )
            loopAtPnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
            loopAtPnl->add(new NLabel("Loop At"),nAlLeft);
            loopAtFromLbl = new NLabel("  ");
-             loopAtFromLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             loopAtFromLbl->setBorder(NBevelBorder(nNone,nLowered));
              loopAtFromLbl->border()->setSpacing(NSize(2,2,2,2));
            loopAtPnl->add(loopAtFromLbl,nAlLeft);
            loopAtPnl->add(new NLabel("to"),nAlLeft);
            loopAtToLbl   = new NLabel("  ");
-             loopAtToLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             loopAtToLbl->setBorder(NBevelBorder(nNone,nLowered));
              loopAtToLbl->border()->setSpacing(NSize(2,2,2,2));
            loopAtPnl->add(loopAtToLbl,nAlLeft);
            loopAtPnl->add(new NLabel("Length"),nAlLeft);
            lenLbl   = new NLabel("  ");
-             lenLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             lenLbl->setBorder(NBevelBorder(nNone,nLowered));
              lenLbl->border()->setSpacing(NSize(2,2,2,2));
            loopAtPnl->add(lenLbl,nAlLeft);
         waveLayerGrpBox->add(loopAtPnl,nAlTop);
