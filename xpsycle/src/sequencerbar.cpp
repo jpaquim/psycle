@@ -49,12 +49,12 @@ SequencerBar::~SequencerBar()
 
 void SequencerBar::init( )
 {
-  NApp::config()->setSkin(&skin_,"seqbar");
+  skin_ = NApp::config()->skin("seqbar");
 
-  frBorder = new NFrameBorder();
-    frBorder->setOval();
-    frBorder->setLineCount(2,4,4);
-  setBorder(frBorder,true);
+  NFrameBorder frBorder;
+    frBorder.setOval();
+    frBorder.setLineCount(2,4,4);
+  setBorder(frBorder);
 
   setLayout(new NListLayout(),true);
   setWidth(90);
@@ -149,7 +149,18 @@ void SequencerBar::init( )
   btnBar->setLeft(seqList_->left()+seqList_->width()+2);
     seqPanel_->setWidth(btnBar->left()+btnBar->width()+2);
   seqPanel_->add(seqList_);
-  
+
+  NPanel* lengthPanel = new NPanel();
+    lengthPanel->setLayout(new NFlowLayout(nAlLeft,5,0),true);
+    lengthPanel->add(new NLabel("Len"));
+    NPanel* spacer = new NPanel();
+       spacer->setPreferredSize(16,10);
+    lengthPanel->add(spacer);
+    N7SegDisplay* sampCountSeg = new N7SegDisplay(3);
+      sampCountSeg->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
+      sampCountSeg->setNumber((int)(Global::pSong()->_sampCount));
+    lengthPanel->add(sampCountSeg);
+  add(lengthPanel);
 
   NPanel* lenPanel = new NPanel();
    lenPanel->setLayout(new NFlowLayout(nAlLeft,5,0),true);
@@ -178,12 +189,6 @@ void SequencerBar::init( )
     inclen_->clicked.connect(this,&SequencerBar::onIncLen);
    lenPanel->resize();
   add(lenPanel);
-
-  NPanel* lengthPanel = new NPanel();
-    lengthPanel->setLayout(new NFlowLayout(nAlLeft,5,0),true);
-    lengthPanel->add(new NLabel("Length"));
-    lengthPanel->add(new NLabel("00:07"));
-  add(lengthPanel);
 
   NPanel* checkPanel = new NPanel();
     checkPanel->setLayout(new NListLayout(),true);

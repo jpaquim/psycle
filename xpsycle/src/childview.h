@@ -68,6 +68,7 @@ public:
 
     void onMachineViewDblClick(NButtonEvent* ev);
 
+
 private:
 
     Song* _pSong;
