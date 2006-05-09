@@ -30,7 +30,7 @@ NMenuBar::NMenuBar()
   setLayout(new NFlowLayout(nAlLeft,5,5),true);
   setAlign(nAlTop);
 
-  NApp::config()->setSkin(&skin_,"mbar");
+  skin_ = NApp::config()->skin("mbar");
 }
 
 

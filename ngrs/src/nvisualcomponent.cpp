@@ -29,31 +29,18 @@ NIsVisualComponent* NVisualComponent::isVisualComponent = new NIsVisualComponent
 NVisualComponent::NVisualComponent()
  : NVisual()
 {
-  skin_.transparent = true;
-  skin_.useParentBgColor = true;
-  skin_.useParentFgColor = true;
-  skin_.useParentFont    = true;
-  skin_.bitmapBgStyle = 0;
-  skin_.translucent = 100;
-  skin_.gradientStyle = 0;
-  skin_.gradientOrientation = nHorizontal;
-  skin_.gradientPercent = 50;
-  skin_.border = 0;
-
   scrollDx_ = scrollDy_ = 0;
-  skin_.border  = 0;
   layout_  = 0;
   win_ = 0;
   align_ = 0;
   clipping_ = events_ = true;
-
   clSzPolicy = 0;
 
   ownerSizeSet_ = false;
   ownerPreferredWidth_  = 0;
   ownerPreferredHeight_ = 0;
 
-  layoutDeleteFlag_ = borderDeleteFlag_ = false;
+  layoutDeleteFlag_ = false;
 }
 
 
@@ -61,7 +48,6 @@ NVisualComponent::~NVisualComponent()
 {
   if (layout_!=0) layout_->setParent(0);
   if (layoutDeleteFlag_ && layout_!=0) delete layout_;
-  if (borderDeleteFlag_ && layout_!=0) delete layout_;
 }
 
 
@@ -82,9 +68,9 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
 
     g->setRepaintArea(repaintArea);  // set repaintArea to graphics
 
-    bool clip_ = !(transparent() && (translucent()==100) && skin_.gradientStyle == 0 );
+    bool clip_ = !(transparent() && (translucent()==100) && skin_.gradientStyle() == 0 );
 
-    if (skin_.bitmapBgStyle!=0) clip_ = true;
+    if (skin_.bitmapBgStyle()!=0) clip_ = true;
 
     if (clip_) g->setClipping(region);    //  setClipping
     g->setRegion(region);
@@ -97,34 +83,34 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
       //std::cout << "j:" << name() << std::endl;
     }
     if (transparent() && (translucent()<100))
-         g->fillTranslucent(left(),top(),width(),height(),skin_.transColor, translucent());
+         g->fillTranslucent(left(),top(),width(),height(),skin_.transColor(), translucent());
 
-    if (skin_.gradientStyle == 1 && NWindow::paintFlag) {
+    if (skin_.gradientStyle() == 1 && NWindow::paintFlag) {
          g->fillGradient(left(),top(),spacingWidth(),spacingHeight(),
-            skin_.gradStartColor,skin_.gradMidColor,skin_.gradEndColor,
-            skin_.gradientOrientation,skin_.gradientOrientation);
+            skin_.gradientStartColor(),skin_.gradientMidColor(),skin_.gradientEndColor(),
+            skin_.gradientOrientation(),skin_.gradientPercent());
     } else
-    if (skin_.gradientStyle == 2 && NWindow::paintFlag) {
+    if (skin_.gradientStyle() == 2 && NWindow::paintFlag) {
          g->fillRoundGradient(left(),top(),spacingWidth(),spacingHeight(),
-            skin_.gradStartColor,skin_.gradMidColor,skin_.gradEndColor,
-            skin_.gradientOrientation,skin_.gradientOrientation,skin_.arcWidth,skin_.arcHeight);
+            skin_.gradientStartColor(),skin_.gradientMidColor(),skin_.gradientEndColor(),
+            skin_.gradientOrientation(),skin_.gradientStyle(),skin_.gradientArcWidth(),skin_.gradientArcHeight() );
     }
 
-    if (skin_.bitmapBgStyle == 1 && NWindow::paintFlag) {
-      int w = skin_.bitmap.width();
-      int h = skin_.bitmap.height();
+    if (skin_.bitmapBgStyle() == 1 && NWindow::paintFlag) {
+      int w = skin_.bitmap().width();
+      int h = skin_.bitmap().height();
       for (int yp = 0; yp < spacingHeight(); yp+=h) {
         for (int xp = 0; xp < spacingWidth(); xp+=w) {
-          g->putBitmap(left()+xp,top()+yp,w,h,skin_.bitmap,0,0);
+          g->putBitmap( left()+xp,top()+yp,w,h,skin_.bitmap(),0,0);
        }
       }
     } else
 
-    if (skin_.bitmapBgStyle == 2 && NWindow::paintFlag) {
+    if (skin_.bitmapBgStyle() == 2 && NWindow::paintFlag) {
 
-      int xp =(int)  d2i((spacingWidth()  - skin_.bitmap.width())  / 2.0f);
-      int yp = (int) d2i((spacingHeight() - skin_.bitmap.height()) / 2.0f);
-      g->putBitmap(left()+xp,top()+yp,skin_.bitmap);
+      int xp =(int)  d2i((spacingWidth()  - skin_.bitmap().width())  / 2.0f);
+      int yp = (int) d2i((spacingHeight() - skin_.bitmap().height()) / 2.0f);
+      g->putBitmap(left()+xp,top()+yp,skin_.bitmap());
     }
 
     if (moveable().style() & nMvRectPicker) geometry()->drawRectPicker(g);
@@ -161,9 +147,9 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     drawChildren(g,repaintArea,sender);   // the container children will be drawn
 
     g->setTranslation(gTx,gTy);           // set back to old translation
-    if ((skin_.border!=0)) {
+    if ((skin_.border()!=0)) {
         g->setClipping(region);
-        skin_.border->paint(g,*geometry());
+        skin_.border()->paint(g,*geometry());
     }
     g->setRegion(oldRegion);              // restore old region
 
@@ -193,26 +179,26 @@ bool NVisualComponent::visit( NVisitor * v )
 
 bool NVisualComponent::transparent( ) const
 {
-  return skin_.transparent;
+  return skin_.transparent();
 }
 
 void NVisualComponent::setTransparent( bool on )
 {
-  skin_.transparent = on;
+  skin_.setTransparent(on);
 }
 
 void NVisualComponent::setBackground( const NColor & background )
 {
-   skin_.bgColor = background;
-   skin_.useParentBgColor = false;
+   skin_.setBackground(background);
+   skin_.useParentBackground(false);
 }
 
 const NColor & NVisualComponent::background( )
 {
-  if (skin_.useParentBgColor && parent()->visit(NVisualComponent::isVisualComponent)) {
+  if (skin_.parentBackground() && parent()->visit(NVisualComponent::isVisualComponent)) {
      return (static_cast<NVisualComponent*> (parent()))->background();
   }
-  return skin_.bgColor;
+  return skin_.background();
 }
 
 void NVisualComponent::setScrollDx( int dx )
@@ -227,7 +213,7 @@ void NVisualComponent::setScrollDy( int dy )
 
 void NVisualComponent::setSpacing( int left, int top, int right, int bottom )
 {
-  skin_.spacing.setSize(left,top,right,bottom);
+  skin_.setSpacing(NSize(left,top,right,bottom));
 }
 
 void NVisualComponent::paint( NGraphics * g )
@@ -237,10 +223,10 @@ void NVisualComponent::paint( NGraphics * g )
 
 const NFont & NVisualComponent::font( ) const
 {
-  if (skin_.useParentFont && parent()!=0 && parent()->visit(NVisualComponent::isVisualComponent)) {
+  if (skin_.parentFont() && parent()!=0 && parent()->visit(NVisualComponent::isVisualComponent)) {
      return ((NVisualComponent*) parent())->font();
   }
-  return skin_.font;
+  return skin_.font();
 }
 
 NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long absY )
@@ -279,32 +265,32 @@ NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long a
 
 int NVisualComponent::spacingWidth( ) const
 {
-  return (skin_.border==0) ? geometry()->width() - ( spacing().left()+spacing().right()) : geometry()->width() - ( spacing().left()+spacing().right() + skin_.border->spacing().left() + skin_.border->spacing().right());
+  return (skin_.border()==0) ? geometry()->width() - ( spacing().left()+spacing().right()) : geometry()->width() - ( spacing().left()+spacing().right() + skin_.border()->spacing().left() + skin_.border()->spacing().right());
 }
 
 int NVisualComponent::spacingHeight( ) const
 {
-  return (skin_.border==0) ?  geometry()->height() - ( spacing().top()+spacing().bottom()) : geometry()->height() - ( spacing().top()+spacing().bottom() + skin_.border->spacing().top() + skin_.border->spacing().bottom());
+  return (skin_.border()==0) ?  geometry()->height() - ( spacing().top()+spacing().bottom()) : geometry()->height() - ( spacing().top()+spacing().bottom() + skin_.border()->spacing().top() + skin_.border()->spacing().bottom());
 }
 
-void NVisualComponent::setBorder( NBorder * border , bool deleteFlag)
+void NVisualComponent::setBorder( const NBorder & border)
 {
-  skin_.border = border;
-  borderDeleteFlag_ = deleteFlag;
+  skin_.setBorder(border);
+  //borderDeleteFlag_ = deleteFlag;
 }
 
 void NVisualComponent::setForeground( const NColor & foreground )
 {
-  skin_.fgColor = foreground;
-  skin_.useParentFgColor = false;
+  skin_.setForeground(foreground);
+  skin_.useParentForeground(false);
 }
 
 const NColor & NVisualComponent::foreground( )
 {
-  if (skin_.useParentFgColor && parent()->visit(NVisualComponent::isVisualComponent)) {
+  if (skin_.parentForeground() && parent()->visit(NVisualComponent::isVisualComponent)) {
      return ((NVisualComponent*) parent())->foreground();
   }
-  return skin_.fgColor;
+  return skin_.foreground();
 }
 
 void NVisualComponent::setLayout(NLayout* layout, bool deleteFlag) {
@@ -332,27 +318,27 @@ int NVisualComponent::clientHeight( ) const
 
 int NVisualComponent::borderRight( ) const
 {
-  return (skin_.border==0) ? 0 :  skin_.border->spacing().right();
+  return (skin_.border()==0) ? 0 :  skin_.border()->spacing().right();
 }
 
 int NVisualComponent::borderTop( ) const
 {
-  return (skin_.border==0) ? 0 :  skin_.border->spacing().top();
+  return (skin_.border()==0) ? 0 :  skin_.border()->spacing().top();
 }
 
 int NVisualComponent::borderBottom( ) const
 {
-  return (skin_.border==0) ? 0 :  skin_.border->spacing().bottom();
+  return (skin_.border()==0) ? 0 :  skin_.border()->spacing().bottom();
 }
 
 int NVisualComponent::borderLeft( ) const
 {
-  return (skin_.border==0) ? 0 :  skin_.border->spacing().left();
+  return (skin_.border()==0) ? 0 :  skin_.border()->spacing().left();
 }
 
 const NSize & NVisualComponent::spacing( ) const
 {
-  return skin_.spacing;
+  return skin_.spacing();
 }
 
 int NVisualComponent::absoluteLeft( ) const
@@ -370,14 +356,14 @@ int NVisualComponent::absoluteTop( ) const
 int NVisualComponent::absoluteSpacingLeft( ) const
 {
   int borderSizeLeft = 0;
-  if (skin_.border!=NULL) borderSizeLeft = skin_.border->spacing().left();
+  if (skin_.border()!=NULL) borderSizeLeft = skin_.border()->spacing().left();
   return absoluteLeft() + borderSizeLeft + spacing().left();
 }
 
 int NVisualComponent::absoluteSpacingTop( ) const
 {
   int borderSizeTop = 0;
-  if (skin_.border!=NULL) borderSizeTop = skin_.border->spacing().top();
+  if (skin_.border()!=NULL) borderSizeTop = skin_.border()->spacing().top();
   return absoluteTop() + borderSizeTop + spacing().top();
 }
 
@@ -518,13 +504,12 @@ bool NVisualComponent::events( ) const
 
 void NVisualComponent::setTranslucent( NColor color, int percent )
 {
-  skin_.translucent = percent;
-  skin_.transColor  = color;
+  skin_.setTranslucent(color,percent);
 }
 
 void NVisualComponent::setParentBackground( bool on )
 {
-  skin_.useParentBgColor = on;
+  skin_.useParentBackground(on);
 }
 
 NLayout * NVisualComponent::layout( )
@@ -535,8 +520,8 @@ NLayout * NVisualComponent::layout( )
 
 void NVisualComponent::setFont( const NFont & font )
 {
-  skin_.font = font;
-  skin_.useParentFont = false;
+  skin_.setFont(font);
+  skin_.useParentFont(false);
 }
 
 int NVisualComponent::zOrder( )
@@ -583,17 +568,17 @@ void NVisualComponent::setClientSizePolicy( int clPolicy )
 
 NBorder * NVisualComponent::border( )
 {
-  return skin_.border;
+  return skin_.border();
 }
 
 int NVisualComponent::translucent( ) const
 {
-  return skin_.translucent;
+  return skin_.translucent();
 }
 
 const NColor & NVisualComponent::translucentColor( )
 {
-  return skin_.transColor;
+  return skin_.transColor();
 }
 
 void NVisualComponent::add( NRuntime * component )
@@ -724,12 +709,12 @@ void NVisualComponent::setSpacing( const NSize & spacing )
 
 void NVisualComponent::setParentForeground( bool on )
 {
-  skin_.useParentFgColor = on;
+  skin_.useParentForeground(on);
 }
 
 void NVisualComponent::setParentFont( bool on )
 {
-  skin_.useParentFont = on;
+  skin_.useParentFont(on);
 }
 
 NLayout * NVisualComponent::layout( ) const
@@ -744,12 +729,12 @@ void NVisualComponent::setSkin( NSkin skin )
 
 void NVisualComponent::setGradientStyle( int style )
 {
-  skin_.gradientStyle = style;
+  skin_.setGradientStyle(style);
 }
 
 void NVisualComponent::setGradientOrientation( int orientation )
 {
-  skin_.gradientOrientation = orientation;
+  skin_.setGradientOrientation(orientation);
 }
 
 void NVisualComponent::onMoveStart( const NMoveEvent & moveEvent )

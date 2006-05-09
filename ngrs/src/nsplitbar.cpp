@@ -43,8 +43,7 @@ void NSplitBar::init( )
 {
   setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
   setWidth(5);
-  NApp::config()->setSkin(&skin_,"splitbar");
-  
+  skin_ = NApp::config()->skin("splitbar");
 }
 
 void NSplitBar::onMove( const NMoveEvent & moveEvent )

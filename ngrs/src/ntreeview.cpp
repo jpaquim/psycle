@@ -26,7 +26,7 @@ NTreeView::NTreeView()
  : NPanel()
 {
   setLayout(new NAlignLayout(),true);
-  setBorder(new NFrameBorder(),true);
+  setBorder(NFrameBorder());
   add( rootNode_ = new NTreeNode(), nAlTop );
 }
 

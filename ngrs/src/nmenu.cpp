@@ -41,8 +41,8 @@ void NMenu::init( )
 
   popupMenu_->addMessageListener(this);
 
-  NApp::config()->setSkin(&btnOver_,"mbtnover");
-  NApp::config()->setSkin(&btnNone_,"mbtnnone");
+  btnOver_ = NApp::config()->skin("mbtnover");
+  btnNone_ = NApp::config()->skin("mbtnnone");
 
   setSkin(btnNone_);
 }

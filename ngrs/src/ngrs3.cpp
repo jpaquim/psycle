@@ -41,16 +41,6 @@ int main(int argc, char *argv[])
 {
   NApp app;
 
-  NObject* obj = new NObject();
-  string name = "hallo";
-  obj->propertys()->write("name",&name);
-
-  string result;
-  obj->propertys()->read("name",&result);
-  std::cout << "j" << result  << std::endl;
-
-  exit(0);
-
   NWindow* myMainWindow = new NTestWindow();
   app.setMainWindow(myMainWindow);
   app.run();

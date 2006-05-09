@@ -23,9 +23,9 @@
 NGroupBox::NGroupBox()
  : NPanel()
 {
-  gBorder = new GBorder(this);
-  gBorder->setHeaderText("GroupBox");
-  setBorder(gBorder,true);
+//  gBorder = new GBorder(this);
+//  gBorder->setHeaderText("GroupBox");
+//  setBorder(gBorder,true);
 }
 
 
@@ -72,10 +72,10 @@ void NGroupBox::GBorder::paint( NGraphics * g, const NShape & geometry )
 
 void NGroupBox::setHeaderText( std::string text )
 {
-  gBorder->setHeaderText(text);
+ // gBorder->setHeaderText(text);
 }
 
 void NGroupBox::GBorder::setHeaderText( std::string text )
 {
-  headerText_ = text;
+  //headerText_ = text;
 }

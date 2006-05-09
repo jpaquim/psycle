@@ -46,7 +46,7 @@ public:
 
     ~NConfig();
 
-    void setSkin(NSkin * skin, const std::string & identifier);
+    NSkin skin(const std::string & identifier);
 
     void loadXmlConfig(const std::string & configName);
 

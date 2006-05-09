@@ -323,7 +323,7 @@ int NGraphics::textDescent( )
 }
 
 
-void NGraphics::putBitmap( int x, int y, NBitmap & bitmap )
+void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
 {
   if (bitmap.X11data() != 0) {
 
@@ -355,7 +355,7 @@ void NGraphics::putBitmap( int x, int y, NBitmap & bitmap )
 }
 
 
-void NGraphics::putBitmap( int destX, int destY, int width, int height, NBitmap & bitmap, int srcX, int srcY )
+void NGraphics::putBitmap( int destX, int destY, int width, int height, const NBitmap & bitmap, int srcX, int srcY )
 {
    if (bitmap.X11data() != 0) {
 

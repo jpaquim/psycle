@@ -25,7 +25,7 @@ NSplashScreen::NSplashScreen()
  : NWindow()
 {
    setDecoration(false);
-   pane()->setBorder(new NFrameBorder(),true);
+   pane()->setBorder(NFrameBorder());
    setPositionToScreenCenter();
 }
 

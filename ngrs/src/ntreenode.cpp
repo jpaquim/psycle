@@ -56,7 +56,7 @@ NTreeNode::NTreeNode()
  : NFlipBox()
 {
   setLayout(new NAlignLayout(),true);
-  setBorder(new NFrameBorder(),true);
+  setBorder(NFrameBorder());
 
   panel_ = new NodePanel(this);
 

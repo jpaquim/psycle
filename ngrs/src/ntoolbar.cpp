@@ -34,7 +34,7 @@ NToolBar::NToolBar()
   spacer_->setTransparent(true);
   add(spacer_);
 
-  NApp::config()->setSkin(&skin_,"toolbar");
+  skin_ = NApp::config()->skin("toolbar");
 }
 
 

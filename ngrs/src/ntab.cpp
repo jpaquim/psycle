@@ -37,8 +37,8 @@ void NTab::init( )
 {
   setToggle(true);
 
-  NApp::config()->setSkin(&downSk,"tabup");
-  NApp::config()->setSkin(&noneSk,"tabnone");
+  downSk = NApp::config()->skin("tabup");
+  noneSk = NApp::config()->skin("tabnone");
 
   setSkin(noneSk);
 }

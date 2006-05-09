@@ -37,8 +37,8 @@ NListBox::NListBox()
 
   setHScrollBarPolicy(nNoneVisible);
 
-  NApp::config()->setSkin(&itemBg,"lbitemsel");
-  NApp::config()->setSkin(&itemFg,"lbitemnone");
+  itemBg = NApp::config()->skin("lbitemsel");
+  itemFg = NApp::config()->skin("lbitemnone");
 }
 
 

@@ -39,7 +39,7 @@ NEdit::~NEdit()
 void NEdit::init( )
 {
   metrics.setFont(font());
-  NApp::config()->setSkin(&skin_,"edit");
+  skin_ = NApp::config()->skin("edit");
 
   valign_ = nAlCenter;
   halign_ = nAlLeft;

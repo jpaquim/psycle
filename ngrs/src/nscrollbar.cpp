@@ -131,11 +131,11 @@ void NScrollBar::init( )
   add(decBtn);
 
   sliderArea_ = new NPanel();
-    NApp::config()->setSkin(&sliderArea_->skin_,"sbar_pane");
+    sliderArea_->skin_ = NApp::config()->skin("sbar_pane");
   add(sliderArea_);
 
-  NApp::config()->setSkin(&vSlSkin,"sbar_vsl");
-  NApp::config()->setSkin(&hSlSkin,"sbar_hsl");
+ vSlSkin = NApp::config()->skin("sbar_vsl");
+ hSlSkin = NApp::config()->skin("sbar_hsl");
 
   slider_ = new Slider(this);
      slider_->setSkin(vSlSkin);

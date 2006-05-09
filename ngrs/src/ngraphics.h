@@ -86,8 +86,8 @@ public:
 
     void fillTranslucent(int x, int y, int width, int height, NColor color, int percent);
 
-    void putBitmap(int x, int y, NBitmap & bitmap);
-    void putBitmap(int destX, int destY, int width, int height, NBitmap & bitmap, int srcX, int srcY );
+    void putBitmap(int x, int y, const NBitmap & bitmap);
+    void putBitmap(int destX, int destY, int width, int height, const NBitmap & bitmap, int srcX, int srcY );
     void putPixmap(int destX, int destY, int width, int height, NPixmap & pixmap, int srcX, int srcY );
 
     void setDoubleBuffer(bool on);

@@ -168,7 +168,7 @@ NFileDialog::NFileDialog()
   setModal(true);
 
   NSkin paneSkin;
-  NApp::config()->setSkin(&paneSkin,"filedlgpane");
+  paneSkin = NApp::config()->skin("filedlgpane");
   pane()->setSkin(paneSkin);
 
 
@@ -199,13 +199,14 @@ NFileDialog::NFileDialog()
 
   NPanel* dirPanel = new NPanel();
     dirPanel->setLayout(new NAlignLayout(),true);
-    dirPanel->setBorder(dirPanelBorder = new NFrameBorder(),true);
-      dirPanelBorder->setOval(true,5,5);
-      dirPanelBorder->setColor(NColor(220,220,220));
+    NFrameBorder dirPanelBorder;
+    dirPanelBorder.setOval(true,5,5);
+    dirPanelBorder.setColor(NColor(220,220,220));
+    dirPanel->setBorder(dirPanelBorder);
       dirPanel->setPreferredSize(180,100);
       dirPanel->add(new NLabel("Parentdir"),nAlTop);
       pdBox_ = new NFileListBox();
-        pdBox_->setBorder(new NFrameBorder(),true);
+        pdBox_->setBorder(NFrameBorder());
         pdBox_->setMode(nDirs);
         pdBox_->setHeight(100);
         pdBox_->setDirectory(NFile::parentWorkingDir());
@@ -216,7 +217,7 @@ NFileDialog::NFileDialog()
       dirPanel->add(splitBar,nAlTop);
       dirPanel->add(new NLabel("Workingdir"),nAlTop);
       dBox_ = new NFileListBox();
-        dBox_->setBorder(new NFrameBorder(),true);
+        dBox_->setBorder(NFrameBorder());
         dBox_->setMode(nDirs);
         dBox_->setDirectory(NFile::workingDir());
         dBox_->itemSelected.connect(this,&NFileDialog::onDirItemSelected);
