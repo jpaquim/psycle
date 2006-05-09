@@ -36,7 +36,8 @@ NWindow::NWindow()
   NApp::addWindow(win_, this);
   pane_ = new NPanel();
     pane_->setLayout(new NAlignLayout(),true);
-    NApp::config()->setSkin(&pane_->skin_,"pane");
+    pane_->skin_ = NApp::config()->skin("pane");
+    pane_->setName("window_pane");
   add(pane_);
   graphics_ = new NGraphics(win_);
   dragBase_ = 0;
@@ -103,7 +104,7 @@ void NWindow::repaint( NVisualComponent * sender, const NRegion & repaintArea, b
     if (sender->transparent()) {
      // find last non transparent
 
-     while (sender->transparent() && sender->skin_.gradientStyle==0 && sender !=pane() && sender->parent() != 0) {
+     while (sender->transparent() && sender->skin_.gradientStyle()==0 && sender !=pane() && sender->parent() != 0) {
        sender = static_cast<NVisualComponent*> (sender->parent());
       }
     }

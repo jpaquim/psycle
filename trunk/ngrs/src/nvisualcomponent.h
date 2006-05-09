@@ -104,7 +104,7 @@ public:
     const NFont & font() const;
 
     NVisualComponent* overObject(NGraphics* g, long absX, long absY);
-    void setBorder(NBorder* border, bool deleteFlag = false);
+    void setBorder(const NBorder & border);
     NBorder* border();
     void setLayout(NLayout* layout, bool deleteFlag = false);
     NLayout* layout();
@@ -212,7 +212,6 @@ private:
    int ownerPreferredHeight_;
 
    bool layoutDeleteFlag_;
-   bool borderDeleteFlag_;
 };
 
 #endif

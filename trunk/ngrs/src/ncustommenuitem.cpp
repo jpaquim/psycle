@@ -26,8 +26,8 @@
 NCustomMenuItem::NCustomMenuItem()
  : NCustomItem()
 {
-  NApp::config()->setSkin(&itemNone,"mitemnone");
-  NApp::config()->setSkin(&itemOver,"mitemover");
+  itemNone = NApp::config()->skin("mitemnone");
+  itemOver = NApp::config()->skin("mitemover");
 
   setSkin(itemNone);
 }

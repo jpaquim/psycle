@@ -109,8 +109,8 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          std::stringstream str; str << styleStr;
          int style  = 0;
          str >> style;
-         skin->bitmap.loadFromFile(src);
-         skin->bitmapBgStyle = style;
+         NBitmap bmp(src);
+         skin->setBitmap(bmp,style);
       }
     } else
     if (tagName == "font") {
@@ -118,26 +118,25 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
       if (skin != 0) {
          std::string name = getValue("name",attrs);
          std::string size = getValue("size",attrs);
-         std::stringstream str; str << size; int sz = 0; str >> sz;
-         skin->font.setName(name);
-         skin->font.setSize(sz);
          std::string color = getValue("color",attrs);
-         skin->font.setTextColor(NColor(color));
+         std::stringstream str; str << size; int sz = 0; str >> sz;
+         NFont font(name,sz,nMedium | nAntiAlias);
+         font.setTextColor(NColor(color));
+         skin->setFont(font);
       }
     } else
     if (tagName == "frmborder") {
      NSkin* skin = pCfg->findSkin(lastId);
       if (skin != 0) {
-         NFrameBorder* fr = new NFrameBorder();
-         fr->setSpacing(NSize(0,0,0,0));
-         skin->border = fr;
+         NFrameBorder fr;
+         fr.setSpacing(NSize(0,0,0,0));
 
          std::string styleStr = getValue("style",attrs);
          if (styleStr != "") {
            std::stringstream str; str << styleStr;
            int style  = 0;
            str >> style;
-           fr->setOval(style);
+           fr.setOval(style);
          }
 
 
@@ -154,23 +153,24 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
              std::string dheight  = getValue("linedistw",attrs);
             int dh = 0;
             if (dheight!="") dh = str<int>(dheight);
-            fr->setOval(lines,dw,dh);
+            fr.setOval(lines,dw,dh);
          }
 
          int arcH = 0;
          if (arch!="") arcH = str<int>(arch);
          int arcW = 0; arcW = str<int>(arcw);
          if (arcw!="" || arch!="") {
-           fr->setOval(fr->oval(),arcH,arcW);
+           fr.setOval(fr.oval(),arcH,arcW);
          }
+
+         skin->setBorder(fr);
       }
     } else
     if (tagName == "bvlborder") {
      NSkin* skin = pCfg->findSkin(lastId);
       if (skin != 0) {
-         NBevelBorder* br = new NBevelBorder();
-         br->setSpacing(NSize(0,0,0,0));
-         skin->border = br;
+         NBevelBorder br;
+         br.setSpacing(NSize(0,0,0,0));
 
          int outerStyle = nNone;
 
@@ -188,22 +188,23 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
            if (styleStr == "lowered") innerStyle = nLowered;
          }
 
-         br->setStyle(outerStyle,innerStyle,2);
+         br.setStyle(outerStyle,innerStyle,2);
+         skin->setBorder(br);
        }
     } else
     if (tagName == "bgcolor") {
       NSkin* skin = pCfg->findSkin(lastId);
       if (skin != 0) {
-         skin->bgColor = attrsToColor(attrs);
-         skin->useParentBgColor = false;
-         skin->transparent = false;
+         skin->setBackground(attrsToColor(attrs));
+         skin->useParentBackground(false);
+         skin->setTransparent(false);
       }
     } else
     if (tagName == "fgcolor") {
       NSkin* skin = pCfg->findSkin(lastId);
       if (skin != 0) {
-         skin->fgColor = attrsToColor(attrs);
-         skin->useParentFgColor = false;
+         skin->setForeground(attrsToColor(attrs));
+         skin->useParentForeground(false);
       }
     } else
     if (tagName == "translucent") {
@@ -214,8 +215,7 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          std::stringstream str; str << percentStr;
          int percent  = 0;
          str >> percent;
-         skin->translucent = percent;
-         skin->transColor = NColor(color);
+         skin->setTranslucent(NColor(color),percent);
       }
     } else
     if (tagName == "gradient") {
@@ -236,31 +236,22 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          str1 << percentStr;
          int percent = 50;
          str1 >> percent;
-         skin->gradStartColor = NColor(start);
-         skin->gradMidColor   = NColor(mid);
-         skin->gradEndColor   = NColor(end);
-         skin->gradientStyle   = style;
-         skin->gradientPercent = percent;
 
-         if (direction == "hor") skin->gradientOrientation = nHorizontal;
-                             else skin->gradientOrientation = nVertical;
-
+         int arcWidth = 0;
          if (arcw!="") {
-           int arc  = 0;
            std::stringstream str3;
            str3 << arcw;
-           str3 >> arc;
-           skin->arcWidth  = arc;
+           str3 >> arcWidth;
          }
 
+         int arcHeight = 0;
          if (arch!="") {
-           int arc  = 0;
            std::stringstream str3;
            str3 << arch;
-           str3 >> arc;
-           skin->arcHeight  = arc;
+           str3 >> arcHeight;
          }
 
+         skin->setGradient(NColor(start),NColor(mid),NColor(end),style,(direction=="hor") ? nHorizontal : nVertical,percent,arcWidth,arcHeight);
       }
     } else
     if (tagName == "spacing") {
@@ -275,7 +266,7 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          std::stringstream str2; str2 << r; int right  = 0; str1 >> right;
          std::stringstream str3; str3 << b; int bottom  = 0; str1 >> bottom;
 
-         skin->spacing.setSize(left,top,right,bottom);
+         skin->setSpacing(NSize(left,top,right,bottom));
       }
     }
     /*if (tagName!="ngrs") {
@@ -357,223 +348,57 @@ NConfig::~NConfig()
 {
 }
 
-void NConfig::setSkin( NSkin * skin, const std::string & identifier )
+NSkin NConfig::skin( const std::string & identifier )
 {
-  NSkin* xmlSkin;
-  if (identifier == "") return; else
+  NSkin skin;
+  NSkin* xmlSkin = 0;
+  if (identifier == "") return NSkin(); else
   if ( (xmlSkin = findSkin(identifier)) && (xmlSkin!=0)) {
-    skin->font = xmlSkin->font;
-    skin->useParentFont = xmlSkin->useParentFont;
-    skin->bgColor = xmlSkin->bgColor;
-    skin->useParentBgColor = xmlSkin->useParentBgColor;
-    skin->gradStartColor  = xmlSkin->gradStartColor;
-    skin->gradMidColor    = xmlSkin->gradMidColor;
-    skin->gradEndColor    = xmlSkin->gradEndColor;
-    skin->gradientStyle   = xmlSkin->gradientStyle;
-    skin->gradientOrientation = xmlSkin->gradientOrientation;
-    skin->arcWidth = xmlSkin->arcWidth;
-    skin->arcHeight = xmlSkin->arcHeight;
-    skin->gradientPercent = xmlSkin->gradientPercent;
-    skin->translucent = xmlSkin->translucent;
-    skin->transColor  = xmlSkin->transColor;
-    skin->transparent = xmlSkin->transparent;
-    skin->spacing = xmlSkin->spacing;
-    skin->bitmap = xmlSkin->bitmap;
-    skin->border = xmlSkin->border;
-    skin->bitmapBgStyle = xmlSkin->bitmapBgStyle;
-  } else
+    skin = *xmlSkin;
+  } else // default skins if xml not found
   if (identifier == "edit") {
-    skin->gradStartColor.setRGB(230,230,230);
-    skin->gradMidColor.setRGB(50,50,50);
-    skin->gradEndColor.setRGB(100,100,100);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->gradientOrientation = nVertical;
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(230,230,230));
-
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = false;
   } else
   if (identifier == "filedlgpane") {
-    skin->bgColor = NColor(200,200,200);
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = false;
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
   } else
-
   if (identifier == "pane") {
-    skin->bgColor = NColor(200,200,200);
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = false;
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
   } else
   if (identifier == "lbitemsel") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(0,0,0));
-    skin->gradStartColor.setRGB(130,130,130);
-    skin->gradMidColor.setRGB(150,150,150);
-    skin->gradEndColor.setRGB(140,140,140);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->useParentFont    = false;
-
   } else
   if (identifier == "lbitemnone") {
-
   } else
   if (identifier == "mitemover") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(0,0,0));
-
-    skin->gradStartColor.setRGB(130,130,130);
-    skin->gradMidColor.setRGB(150,150,150);
-    skin->gradEndColor.setRGB(140,140,140);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->useParentFont    = false;
-
   } else
   if (identifier == "mitemnone") {
-    skin->fgColor = NColor(50,50,150);
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = true;
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(150,150,180));
-    skin->translucent = 100;
-    skin->border = 0;
   } else
   if (identifier == "popmnubg") {
-    skin->fgColor = NColor(230,230,230);
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(0,0,0));
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = false;
-    skin->bgColor.setRGB(230,230,230);
   } else
   if (identifier == "sbar_pane") {
-      skin->gradientStyle = 1;
-      skin->gradStartColor.setRGB(240,240,240);
-      skin->gradMidColor.setRGB(220,220,220);
-      skin->gradEndColor.setRGB(230,230,230);
-      skin->gradientPercent=0;
   } else
   if (identifier == "mbtnover") {
-    skin->gradStartColor.setRGB(130,130,130);
-    skin->gradMidColor.setRGB(150,150,150);
-    skin->gradEndColor.setRGB(140,140,140);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->useParentFont    = false;
   } else
   if (identifier == "mbtnnone") {
   } else
   if (identifier == "mbar") {
-    skin->gradStartColor.setRGB(230,230,230);
-    skin->gradMidColor.setRGB(250,250,250);
-    skin->gradEndColor.setRGB(240,240,240);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->gradientOrientation = nVertical;
   } else
   if (identifier == "clbox") {
-    skin->bitmapBgStyle = 0;
-    skin->bgColor = NColor(230,230,230);
-    skin->fgColor = NColor(0,0,0);
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = false;
   } else
   if (identifier == "btnup") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-
-    skin->gradStartColor.setRGB(230,230,230);
-    skin->gradMidColor.setRGB(240,240,240);
-    skin->gradEndColor.setRGB(180,180,180);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->gradientOrientation = nVertical;
-    skin->useParentFont    = false;
-
   } else 
   if (identifier == "btnover") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-
-    skin->gradStartColor.setRGB(240,240,240);
-    skin->gradMidColor.setRGB(250,250,250);
-    skin->gradEndColor.setRGB(180,180,180);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->gradientOrientation = nVertical;
-    skin->useParentFont    = false;
   } else 
   if (identifier == "btndown") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->gradStartColor.setRGB(200,200,200);
-    skin->gradMidColor.setRGB(210,210,210);
-    skin->gradEndColor.setRGB(180,180,180);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->gradientOrientation = nVertical;
-    skin->useParentFont    = false;
   } else
   if (identifier == "btnflat") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->transparent = true;
   } else
   if (identifier == "tabup") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(0,0,0));
-
-    skin->gradStartColor.setRGB(230,230,230);
-    skin->gradMidColor.setRGB(240,240,240);
-    skin->gradEndColor.setRGB(200,200,200);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->gradientOrientation = nVertical;
-    skin->useParentFont    = false;
   } else
   if (identifier == "tabnone") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(0,0,0));
-
-    skin->gradStartColor.setRGB(200,200,200);
-    skin->gradMidColor.setRGB(210,210,210);
-    skin->gradEndColor.setRGB(180,180,180);
-    skin->gradientStyle   = 1;
-    skin->gradientPercent = 10;
-    skin->gradientOrientation = nVertical;
-    skin->useParentFont    = false;
   } else
   if (identifier == "sbar_vsl") {
-     NFrameBorder* fr = new NFrameBorder();
-     fr->setSpacing(NSize(0,0,0,0));
-     fr->setOval(true,4,4);
-     skin->border = fr;
-     skin->bitmap.createFromXpmData(vknob_xpm);
-     skin->bitmapBgStyle = 2;
-
   } else
   if (identifier == "sbar_hsl") {
-     NFrameBorder* fr = new NFrameBorder();
-     fr->setSpacing(NSize(0,0,0,0));
-     fr->setOval(true,4,4);
-     skin->border = fr;
-     skin->bitmap.createFromXpmData(hbar_xpm);
-     skin->bitmapBgStyle = 2;
   }
+  return skin;
 }
 
 void NConfig::loadXmlConfig(const std::string & configName )

@@ -48,7 +48,7 @@ void NSlider::resize( )
 NSlider::Slider::Slider( NSlider* sl)
 {
   setTransparent(false);
-  setBorder(new NFrameBorder(),true);
+  setBorder(NFrameBorder());
   sl_ = sl;
 }
 

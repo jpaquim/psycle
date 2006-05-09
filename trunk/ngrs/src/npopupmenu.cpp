@@ -29,8 +29,6 @@ NPopupMenu::NPopupMenu()
   setDecoration(false);
   pane()->setLayout(new NListLayout(),true);
 
-  NApp::config()->setSkin(&pane()->skin_,"popmnubg");
-
   NApp::addPopupWindow(this);
 }
 

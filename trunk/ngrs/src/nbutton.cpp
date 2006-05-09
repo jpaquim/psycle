@@ -130,10 +130,10 @@ void NButton::init( )
 {
   flat_ = true;
 
-  NApp::config()->setSkin(&btnUp_,  "btnup");
-  NApp::config()->setSkin(&btnOver_,"btnover");
-  NApp::config()->setSkin(&btnDown_,"btndown");
-  NApp::config()->setSkin(&btnFlat_,"btnflat");
+  btnUp_ = NApp::config()->skin("btnup");
+  btnOver_ = NApp::config()->skin("btnover");
+  btnDown_ = NApp::config()->skin("btndown");
+  btnFlat_ = NApp::config()->skin("btnflat");
 
   setSkin(btnFlat_);
 
@@ -160,7 +160,7 @@ void NButton::setHint( const std::string & text )
      hint = new NWindow();
        hintLbl = new NLabel();
          hint->pane()->setBackground(NColor(0xFF,0xFF,0xD0));
-         hint->pane()->setBorder(new NFrameBorder(),true);
+         hint->pane()->setBorder(NFrameBorder());
          hint->pane()->setSpacing(NSize(2,2,2,2));
          hint->setDecoration(false);
        hint->pane()->add(hintLbl, nAlClient);

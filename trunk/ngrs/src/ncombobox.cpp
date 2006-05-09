@@ -73,7 +73,7 @@ void NComboBox::init( )
 
   lbox = new NListBox();
     lbox->setAlign(nAlClient);
-    NApp::config()->setSkin(&lbox->skin_,"clbox");
+    lbox->skin_ = NApp::config()->skin("clbox");
   popup->pane()->add(lbox);
 }
 

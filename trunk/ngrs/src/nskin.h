@@ -42,32 +42,80 @@ public:
    NSkin(const NSkin & src);
    const NSkin & operator= (const NSkin & rhs);
 
+   void setBorder(const NBorder & border);
+   NBorder* border() const;
+   void setBackground(const NColor & bgColor);
+   const NColor & background() const;
+   void setForeground(const NColor & fgColor);
+   const NColor & foreground() const;
+   void setTranslucent(const NColor & transColor, int percent);
+   const NColor & transColor() const;
+   void setFont(const NFont & font);
+   const NFont & font() const;
+   void setSpacing(const NSize & size);
+   const NSize & spacing() const;
+   void setBitmap(const NBitmap & bitmap, int bitmapBgStyle);
+   const NBitmap & bitmap() const;
+   int bitmapBgStyle() const;
 
-   NBorder* border;
-   NColor bgColor;
-   NColor fgColor;
-   NColor transColor;
-   NFont  font;
-   NSize  spacing;
-   NBitmap bitmap;
+   void useParentBackground(bool on);
+   bool parentBackground() const;
+   void useParentForeground(bool on);
+   bool parentForeground() const;
+   void useParentFont(bool on);
+   bool parentFont() const;
+   void setTransparent(bool on);
+   bool transparent() const;
+   int translucent() const;
 
-   bool useParentBgColor;
-   bool useParentFgColor;
-   bool useParentFont;
-   bool transparent;
-   int translucent;
+   void setGradient(const NColor & start, const NColor & mid, const NColor & end, int gradientStyle, int gradientOrientation, int percent, int arcWidth, int arcHeight);
+   const NColor & gradientStartColor() const;
+   const NColor & gradientMidColor() const;
+   const NColor & gradientEndColor() const;
+   int gradientPercent() const;
+   int gradientStyle() const;
+   int gradientOrientation() const;
+   int gradientArcWidth() const;
+   int gradientArcHeight() const;
 
-   NColor gradStartColor;
-   NColor gradMidColor;
-   NColor gradEndColor;
+   void setGradientStyle(int style);
+   void setGradientPercent(int percent);
+   void setGradientOrientation(int orientation);
 
-   int gradientPercent;
-   int gradientStyle;
-   int gradientOrientation;
+   private:
 
-   int bitmapBgStyle;
-   int arcWidth;
-   int arcHeight;
+      // gradient style information
+      NColor gradStartColor_;
+      NColor gradMidColor_;
+      NColor gradEndColor_;
+      int gradientPercent_, gradientStyle_, gradientOrientation_;
+      int arcWidth_;
+      int arcHeight_;
+
+      // fore- and bgcolor style
+      NColor bgColor_;
+      NColor fgColor_;
+      bool transparent_;
+      bool useParentBgColor_;
+      bool useParentFgColor_;
+
+      // translucent Background style
+      NColor transColor_;  // the transparent color mix
+      int translucent_;    // the percent of translucent visibility
+
+      // the Bitmap background style
+      NBitmap bitmap_;
+      int bitmapBgStyle_;
+
+      // the Font style
+      NFont  font_;
+      bool useParentFont_;
+
+      // the border style
+      NBorder* border_;
+
+      // the spacing indent
+      NSize  spacing_;
 };
 
 #endif

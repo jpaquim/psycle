@@ -150,9 +150,9 @@ void NTestWindow::testFrameBorder( )
 {
   NPanel* pnl = new NPanel();
     pnl->setPosition(10,10,200,200);
-    NFrameBorder* fr = new NFrameBorder();
-    fr->setOval();
-    pnl->setBorder(fr,true);
+    NFrameBorder fr;
+    fr.setOval();
+    pnl->setBorder(fr);
   pane()->add(pnl);
 }
 
