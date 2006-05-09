@@ -102,10 +102,11 @@ namespace detail
 
 class NPropertyMap
 {
-	private:
+	public:
 		/// the type of key used for the mapping
 		typedef std::string Key;
 
+	private:
 		/// associative container that maps a Key to a NProperty
 		template<typename Class, typename Value> class Map : public std::map< Key, detail::NProperty<Class, Value> > {};
 
@@ -151,24 +152,24 @@ class NPropertyMap
 	///\{
 		public:
 			template<typename Value>
-			void get(std::string const & name, Value & result) const throw(std::exception)
+			void get(Key const & key, Value & result) const throw(std::exception)
 			{
-				result = get<Value>(name);
+				result = get<Value>(key);
 			}
 
 			template<typename Value>
-			Value const & get(std::string const & name) const throw(std::exception)
+			Value const & get(Key const & key) const throw(std::exception)
 			{
-				typename AnyMap::const_iterator i(anyMap.find(name));
-				if(i == anyMap.end()) throw std::runtime_error(name + " was not found in the property map");
+				typename AnyMap::const_iterator i(anyMap.find(key));
+				if(i == anyMap.end()) throw std::runtime_error(key + " was not found in the property map");
 				return reinterpret_cast<Value const &>(i->second.get());
 			}
 
 			template<typename Value>
-			void set(std::string const & name, Value const & value) throw(std::exception)
+			void set(Key const & key, Value const & value) throw(std::exception)
 			{
-				typename AnyMap::const_iterator i(anyMap.find(name));
-				if(i == anyMap.end()) throw std::runtime_error(name + " was not found in the property map");
+				typename AnyMap::const_iterator i(anyMap.find(key));
+				if(i == anyMap.end()) throw std::runtime_error(key + " was not found in the property map");
 				i->second.set(reinterpret_cast<AnyValue const &>(value));
 			}
 	///\}
