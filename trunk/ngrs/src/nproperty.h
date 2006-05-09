@@ -162,7 +162,7 @@ class NPropertyMap
 			{
 				typename AnyMap::const_iterator i(anyMap.find(key));
 				if(i == anyMap.end()) throw std::runtime_error(key + " was not found in the property map");
-				return reinterpret_cast<Value const &>(i->second.get());
+				return dynamic_cast<Value const &>(i->second.get());
 			}
 
 			template<typename Value>
@@ -170,7 +170,7 @@ class NPropertyMap
 			{
 				typename AnyMap::const_iterator i(anyMap.find(key));
 				if(i == anyMap.end()) throw std::runtime_error(key + " was not found in the property map");
-				i->second.set(reinterpret_cast<AnyValue const &>(value));
+				i->second.set(dynamic_cast<AnyValue const &>(value));
 			}
 	///\}
 };
