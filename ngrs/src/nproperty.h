@@ -24,6 +24,7 @@
 #include <string>
 #include <typeinfo>
 #include <stdexcept>
+#include "sigslot.h"
 
 ///\internal
 /// the user doesn't have to use the NProperty class directly,
@@ -44,10 +45,6 @@ namespace detail
 			private:
 				Class       * instance_;
 		///\}
-
-		public:
-			/// runtime type information
-			std::type_info const & type() const { return typeid(Value); }
 
 		///\name member function pointers
 		///\{
@@ -81,6 +78,9 @@ namespace detail
 				setterMemberFunction(setterMemberFunction)
 			{}
 
+			/// runtime type information
+			std::type_info const & type() const { return typeid(Value); }
+
 			/// calls the getter member function on the instance
 			Value const & get() const throw(std::exception)
 			{
@@ -95,7 +95,17 @@ namespace detail
 				(this->instance().*setterMemberFunction)(value);
 			}
 
-		public: // friend class std::map<xxx,xxx>
+		///\name signal emited automatically when the set(Value const &) function is called
+		///\{
+			public:
+				typedef sigslot::signal1<NProperty<Class, Value>&> OnChangeSignal;
+				OnChangeSignal const & onChangeSignal() const { return onChangeSignal_; }
+				OnChangeSignal       & onChangeSignal()       { return onChangeSignal_; }
+			private:
+				OnChangeSignal         onChangeSignal_;
+		///\}
+
+		public: // friend class NPropertyMap::Map<AnyClass, AnyValue>
 			NProperty() {}
 	};
 }
@@ -116,6 +126,12 @@ class NPropertyMap
 			typedef void const * AnyValue;
 			typedef Map<AnyClass, AnyValue> AnyMap;
 			AnyMap anyMap;
+
+			template<typename Class, typename Value>
+			Map<Class, Value> & map()
+			{
+				return reinterpret_cast<Map<Class, Value>&>(anyMap);
+			}
 		///\}
 
 	///\name property registration functions
@@ -125,32 +141,35 @@ class NPropertyMap
 			template<typename Value, typename Class>
 			void registrate
 			(
-				std::string const & name,
+				Key const & key,
 				Class & instance,
 				typename detail::NProperty<Class, Value>::GetterMemberFunction getterMemberFunction,
 				typename detail::NProperty<Class, Value>::SetterMemberFunction setterMemberFunction = 0
 			)
 			{
-				(reinterpret_cast<Map<Class, Value>&>(anyMap))[name] =
-					detail::NProperty<Class, Value>(instance, getterMemberFunction, setterMemberFunction);
+				map<Class, Value>()[key] = detail::NProperty<Class, Value>(instance, getterMemberFunction, setterMemberFunction);
 			}
 
 			template<typename Value, typename Class>
 			void registrate
 			(
-				std::string const & name,
+				Key const & key,
 				Class & instance,
 				typename detail::NProperty<Class, Value>::SetterMemberFunction setterMemberFunction
 			)
 			{
-				(reinterpret_cast<Map<Class, Value>&>(anyMap))[name] =
-					detail::NProperty<Class, Value>(instance, 0, setterMemberFunction);
+				map<Class, Value>()[key] = detail::NProperty<Class, Value>(instance, 0, setterMemberFunction);
 			}
 	///\}
 
 	///\name getter and setter functions
 	///\{
 		public:
+			std::type_info const & type(Key const & key) const throw(std::exception)
+			{
+				return find<AnyClass, AnyValue>(key).type();
+			}
+
 			template<typename Value>
 			void get(Key const & key, Value & result) const throw(std::exception)
 			{
@@ -160,17 +179,41 @@ class NPropertyMap
 			template<typename Value>
 			Value const & get(Key const & key) const throw(std::exception)
 			{
-				typename AnyMap::const_iterator i(anyMap.find(key));
-				if(i == anyMap.end()) throw std::runtime_error(key + " was not found in the property map");
-				return reinterpret_cast<Value const &>(i->second.get());
+				return find<AnyClass, Value>(key).get();
 			}
 
 			template<typename Value>
 			void set(Key const & key, Value const & value) throw(std::exception)
 			{
-				typename AnyMap::const_iterator i(anyMap.find(key));
-				if(i == anyMap.end()) throw std::runtime_error(key + " was not found in the property map");
-				i->second.set(reinterpret_cast<AnyValue const &>(value));
+				find<AnyClass, Value>(key).set(value);
+			}
+
+			template<typename Class, typename Value>
+			typename detail::NProperty<Class, Value>::OnChangeSignal const & onChangeSignal(Key const & key) const throw(std::exception)
+			{
+				return find<Class, Value>(key).onChangeSignal();
+			}
+
+			template<typename Class, typename Value>
+			typename detail::NProperty<Class, Value>::OnChangeSignal & onChangeSignal(Key const & key) throw(std::exception)
+			{
+				return find<Class, Value>(key).onChangeSignal();
+			}
+		private:
+			template<typename Class, typename Value>
+			detail::NProperty<Class, Value> const & find(Key const & key) const throw(std::exception)
+			{
+				return const_cast<NPropertyMap&>(*this).find<Class, Value>(key);
+			}
+
+			template<typename Class, typename Value>
+			detail::NProperty<Class, Value> & find(Key const & key) throw(std::exception)
+			{
+				typedef Map<Class, Value> Map;
+				Map & map(this->map<Class, Value>());
+				typename Map::iterator i(map.find(key));
+				if(i == map.end()) throw std::runtime_error(key + " was not found in the property map");
+				return i->second;
 			}
 	///\}
 };
