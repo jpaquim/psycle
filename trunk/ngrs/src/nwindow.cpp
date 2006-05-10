@@ -375,12 +375,12 @@ bool NWindow::mapped( )
   return NApp::system().isWindowMapped(win_);
 }
 
-long NWindow::top( ) const
+int NWindow::top( ) const
 {
   return NApp::system().windowTop(win_);
 }
 
-long NWindow::left( ) const
+int NWindow::left( ) const
 {
   return NApp::system().windowLeft(win_);
 }

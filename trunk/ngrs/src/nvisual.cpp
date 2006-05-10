@@ -18,10 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nvisual.h"
+#include "nproperty.h"
 
 NVisual::NVisual()
  : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10)
 {
+    //if (properties()) properties()->registrate<int>("left", *this, &NVisual::left, &NVisual::setLeft);
+
 }
 
 
@@ -80,12 +83,12 @@ void NVisual::setGeometry( NShape * geometry )
   geometry_ = geometry;
 }
 
-long NVisual::top( ) const
+int NVisual::top( ) const
 {
   return geometry_->rectArea().top();
 }
 
-long NVisual::left( ) const
+int NVisual::left( ) const
 {
   return geometry_->rectArea().left();
 }
@@ -232,12 +235,3 @@ void NVisual::onKeyRelease( const NKeyEvent & event )
 void NVisual::setSize( int width, int height )
 {
 }
-
-
-
-
-
-
-
-
-

@@ -90,8 +90,8 @@ public:
 
     bool mapped();
 
-    virtual long top()  const;
-    virtual long left() const;
+    virtual int top()  const;
+    virtual int left() const;
 
     void pack();
 

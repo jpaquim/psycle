@@ -21,7 +21,7 @@
 #include "nlabel.h"
 #include "nbevelborder.h"
 #include <ngradient.h>
-
+#include "nproperty.h"
 
 NCustomButton::NCustomButton()
  : NPanel()
@@ -59,6 +59,9 @@ void NCustomButton::init( )
   add(label_);
 
   resize();
+
+    // runtime
+  if (properties()) properties()->registrate<std::string>("text", *this, &NCustomButton::text, &NCustomButton::setText);
 }
 
 NCustomButton::~NCustomButton()
@@ -67,7 +70,7 @@ NCustomButton::~NCustomButton()
 }
 
 
-void NCustomButton::setText( std::string text )
+void NCustomButton::setText( const std::string & text )
 {
   label_->setText(text);
 }
@@ -111,7 +114,7 @@ void NCustomButton::onMousePressed( int x, int y, int button )
 }
 
 
-std::string NCustomButton::text( ) const
+const std::string & NCustomButton::text( ) const
 {
   return label_->text();
 }

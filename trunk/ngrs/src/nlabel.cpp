@@ -19,6 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nlabel.h"
+#include "nproperty.h"
 
 using namespace std;
 
@@ -45,6 +46,9 @@ void NLabel::init( )
   orientation_ = nHorizontal;
   setEvents(false);
   wbreak_ = false;
+
+  // runtime
+  if (properties()) properties()->registrate<std::string>("text", *this, &NLabel::text, &NLabel::setText);
 }
 
 
@@ -180,16 +184,14 @@ int NLabel::preferredWidth( ) const
   return xmax + spacing().left()+spacing().right()+borderLeft()+borderRight();
 }
 
-
 void NLabel::setMnemonic( char c )
 {
   mnemonic_ = c;
 }
 
-char NLabel::mnemonic() {
+char NLabel::mnemonic() const {
   return mnemonic_;
 }
-
 
 void NLabel::setVAlign( int align )
 {

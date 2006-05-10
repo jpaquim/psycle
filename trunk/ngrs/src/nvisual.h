@@ -50,8 +50,8 @@ public:
     virtual void setMinimumWidth (int minWidth);
     virtual void setMinimumHeight(int minHeight);
 
-    virtual long top()  const;
-    virtual long left() const;
+    virtual int top()  const;
+    virtual int left() const;
 
     // events ..
 
