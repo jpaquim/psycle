@@ -41,7 +41,7 @@ public:
    const std::string & text() const;
 
    void setMnemonic(char c);
-   char mnemonic();
+   char mnemonic() const;
 
    virtual int preferredWidth() const;
    virtual int preferredHeight() const;

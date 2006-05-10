@@ -37,8 +37,8 @@ public:
 
    ~NCustomButton();
 
-   void setText(std::string text);
-   std::string text() const;
+   void setText(const std::string & text);
+   const std::string & text() const;
 
    void setTextHAlign(int align);
    void setTextVAlign(int align);

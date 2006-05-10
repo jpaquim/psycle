@@ -23,6 +23,8 @@
 #include "nwindow.h"
 #include "nlabel.h"
 #include "nframeborder.h"
+#include "nbutton.h"
+#include "nproperty.h"
 
 using namespace std;
 
@@ -139,6 +141,7 @@ void NButton::init( )
 
   hint = 0;
   hintLbl = 0;
+
 }
 
 void NButton::setDown( bool on )

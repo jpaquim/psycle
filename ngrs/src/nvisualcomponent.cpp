@@ -21,6 +21,7 @@
 #include "nwindow.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nproperty.h"
 
 using namespace std;
 
@@ -41,6 +42,7 @@ NVisualComponent::NVisualComponent()
   ownerPreferredHeight_ = 0;
 
   layoutDeleteFlag_ = false;
+
 }
 
 

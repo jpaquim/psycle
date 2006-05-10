@@ -155,7 +155,7 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
      switch (visualChild->align()) {
        case nAlLeft   :
            lastLeft = visualChild;
-           yp = visualChild->preferredHeight();
+           yp = visualChild->preferredHeight() + 2*vgap_;
        break;
         case nAlRight   :
            lastRight = visualChild;
