@@ -82,7 +82,7 @@ namespace detail
 				SetterMemberFunction setterMemberFunction
 			)
 			:
-				type_(&typeid(instance)),
+				type_(&typeid(Value)),
 				instance_(&instance),
 				getterMemberFunction(getterMemberFunction),
 				setterMemberFunction(setterMemberFunction)
