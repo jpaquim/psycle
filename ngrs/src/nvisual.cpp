@@ -229,6 +229,10 @@ void NVisual::onKeyRelease( const NKeyEvent & event )
 {
 }
 
+void NVisual::setSize( int width, int height )
+{
+}
+
 
 
 

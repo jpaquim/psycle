@@ -47,11 +47,13 @@ public:
     virtual void setPosition(int x, int y, int width, int height);
     void setPositionToScreenMaximize();
     void setPositionToScreenCenter( );
+    void setPositionToScreenTop(int height );
+
     virtual void setLeft(int left);
     virtual void setTop(int top);
     virtual void setWidth(int width);
     virtual void setHeight(int height);
-
+    virtual void setSize(int width, int height);
 
     virtual void setVisible(bool on);
     virtual void onMouseExit();

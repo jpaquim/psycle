@@ -548,5 +548,15 @@ void NWindow::setPositionToScreenMaximize( )
   setPosition(0,0,NApp::system().screenWidth(),NApp::system().screenHeight());
 }
 
+void NWindow::setPositionToScreenTop(int height)
+{
+  setPosition(0,0,NApp::system().screenWidth(),height);
+}
+
+void NWindow::setSize( int width, int height )
+{
+  setPosition(left(),top(),width,height);
+}
+
 
 
