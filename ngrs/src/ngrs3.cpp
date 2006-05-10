@@ -34,6 +34,7 @@
 #include "nregexp.h"
 #include "nruntime.h"
 #include "nproperty.h"
+#include "nlabel.h"
 
 using namespace std;
 
@@ -44,6 +45,11 @@ int main(int argc, char *argv[])
   NObject* obj = new NObject();
 
   obj->properties()->set("name",std::string("hallo"));
+
+  NLabel* label = new NLabel();
+  label->properties()->set("left",10);
+
+  std::cout << label->left() << std::endl;
 
   std::cout << obj->name() << std::endl;
 
