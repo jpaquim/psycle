@@ -37,6 +37,14 @@ namespace detail
 	template<typename Class, typename Value>
 	class NProperty
 	{
+		///\name runtime type information
+		///\{
+			public:
+				std::type_info const & type() const { return *type_; }
+			private:
+				std::type_info const * type_;
+		///\}
+
 		///\name instance
 		/// the instance we call the getter and/or setter member functions with
 		///\{
@@ -74,14 +82,13 @@ namespace detail
 				SetterMemberFunction setterMemberFunction
 			)
 			:
+				type_(&typeid(instance)),
 				instance_(&instance),
 				getterMemberFunction(getterMemberFunction),
 				setterMemberFunction(setterMemberFunction)
 			{}
 
-			/// runtime type information
-			std::type_info const & type() const { return typeid(Value); }
-
+		public:
 			/// calls the getter member function on the instance
 			Value const & get() const throw(std::exception)
 			{
@@ -201,11 +208,12 @@ class NPropertyMap
 				return find<Class, Value>(key).onChangeSignal();
 			}
                         
-                        std::vector<Key> methodNames() const  {
-                           std::vector<Key> listing;
-			   for (AnyMap::const_iterator i(anyMap.begin()) ; i != anyMap.end() ; ++i) listing.push_back(i->first);
-                           return listing;
-                        }
+			std::vector<Key> methodNames() const
+			{
+				std::vector<Key> listing;
+				for (AnyMap::const_iterator i(anyMap.begin()) ; i != anyMap.end() ; ++i) listing.push_back(i->first);
+				return listing;
+			}
  
 		private:
 			template<typename Class, typename Value>
