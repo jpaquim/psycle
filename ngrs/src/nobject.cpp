@@ -25,7 +25,7 @@
 
 NObject::NObject() : properties_(NApp::system().propertysActive() ? new NPropertyMap() : 0)
 {
-	if (properties_) properties_->registrate<std::string const &, std::string const &>("name", *this, &NObject::name, &NObject::setName);
+	if (properties_) properties_->registrate("name", *this, &NObject::name, &NObject::setName);
 }
 
 NObject::~NObject()

@@ -152,30 +152,29 @@ class NPropertyMap
 	///\name property registration functions
 	///\{
 		public: // it's declared public but will actually probably only used by the object that owns the property map
-
 			/// read and optionally write with different types for getter and setter
-			template<typename GetValue, typename SetValue, typename Class>
+			template<typename Class, typename GetValue, typename SetValue>
 			void registrate
 			(
 				Key const & key,
 				Class & instance,
-				typename detail::NProperty<Class, GetValue, SetValue>::GetterMemberFunction getterMemberFunction,
-				typename detail::NProperty<Class, GetValue, SetValue>::SetterMemberFunction setterMemberFunction = 0
+				GetValue (Class::*getterMemberFunction) () const,
+				void (Class::*setterMemberFunction) (SetValue) = 0
 			)
 			{
 				map<Class, GetValue, SetValue>()[key] = detail::NProperty<Class, GetValue, SetValue>(instance, getterMemberFunction, setterMemberFunction);
 			}
 
 			/// write-only with different types for getter and setter
-			template<typename GetValue, typename SetValue, typename Class>
+			template<typename Class, typename Value>
 			void registrate
 			(
 				Key const & key,
 				Class & instance,
-				typename detail::NProperty<Class, GetValue, SetValue>::SetterMemberFunction setterMemberFunction
+				void (Class::*setterMemberFunction) (Value)
 			)
 			{
-				map<Class, GetValue, SetValue>()[key] = detail::NProperty<Class, GetValue, SetValue>(instance, 0, setterMemberFunction);
+				map<Class, Value, Value>()[key] = detail::NProperty<Class, Value, Value>(instance, 0, setterMemberFunction);
 			}
 	///\}
 
