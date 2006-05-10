@@ -69,14 +69,14 @@ namespace detail
 		///\name runtime type information of Value
 		///\{
 			public:
-				std::type_info const & get_type() const { return *get_type_; }
+				std::type_info const & getType() const { return *getType_; }
 			private:
-				std::type_info const * get_type_;
+				std::type_info const * getType_;
 
 			public:
-				std::type_info const & set_type() const { return *set_type_; }
+				std::type_info const & setType() const { return *setType_; }
 			private:
-				std::type_info const * set_type_;
+				std::type_info const * setType_;
 		///\}
 
 		public:
@@ -90,8 +90,8 @@ namespace detail
 				instance_(&instance),
 				getterMemberFunction(getterMemberFunction),
 				setterMemberFunction(setterMemberFunction),
-				get_type_(&typeid(GetValue)),
-				set_type_(&typeid(SetValue))
+				getType_(&typeid(GetValue)),
+				setType_(&typeid(SetValue))
 			{}
 
 		public:
@@ -209,12 +209,12 @@ class NPropertyMap
 		public:
 			std::type_info const & get_type(Key const & key) const throw(std::exception)
 			{
-				return find<AnyClass, AnyValue, AnyValue>(key).get_type();
+				return find<AnyClass, AnyValue, AnyValue>(key).getType();
 			}
 
 			std::type_info const & set_type(Key const & key) const throw(std::exception)
 			{
-				return find<AnyClass, AnyValue, AnyValue>(key).set_type();
+				return find<AnyClass, AnyValue, AnyValue>(key).setType();
 			}
 
 			template<typename Value>
