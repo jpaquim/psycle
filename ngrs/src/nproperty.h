@@ -154,7 +154,7 @@ class NPropertyMap
 		public: // it's declared public but will actually probably only used by the object that owns the property map
 			/// read and optionally write with different types for getter and setter
 			template<typename Class, typename GetValue, typename SetValue>
-			void registrate
+			void bind
 			(
 				Key const & key,
 				Class & instance,
@@ -167,7 +167,7 @@ class NPropertyMap
 
 			/// write-only with different types for getter and setter
 			template<typename Class, typename Value>
-			void registrate
+			void bind
 			(
 				Key const & key,
 				Class & instance,
