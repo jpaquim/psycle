@@ -177,31 +177,6 @@ class NPropertyMap
 			{
 				map<Class, GetValue, SetValue>()[key] = detail::NProperty<Class, GetValue, SetValue>(instance, 0, setterMemberFunction);
 			}
-
-			/// read and optionally write with same type for getter and setter (Value const &)
-			template<typename Value, typename Class>
-			void registrate
-			(
-				Key const & key,
-				Class & instance,
-				typename detail::NProperty<Class, Value const &>::GetterMemberFunction getterMemberFunction,
-				typename detail::NProperty<Class, Value const &>::SetterMemberFunction setterMemberFunction = 0
-			)
-			{
-				registrate<Value const &, Value const &>(key, instance, getterMemberFunction, setterMemberFunction);
-			}
-
-			/// write-only with same type for getter and setter (Value const &)
-			template<typename Value, typename Class>
-			void registrate
-			(
-				Key const & key,
-				Class & instance,
-				typename detail::NProperty<Class, Value const &>::SetterMemberFunction setterMemberFunction
-			)
-			{
-				registrate<Value const &>(key, instance, 0, setterMemberFunction);
-			}
 	///\}
 
 	///\name getter and setter functions
