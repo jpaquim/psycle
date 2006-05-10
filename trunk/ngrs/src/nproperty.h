@@ -34,7 +34,7 @@ namespace detail
 {
 	/// One property is composed of
 	/// a reference to an object and pointers to getter and setter member functions
-	template<typename Class, typename Value>
+	template<typename Class, typename GetValue, typename SetValue = GetValue>
 	class NProperty
 	{
 		///\name instance
@@ -53,11 +53,11 @@ namespace detail
 				/// the signature for the getter member function that Class should have.
 				/// It takes no argument and returns a const reference to a Value.
 				/// This is a const function of Class
-				typedef Value const & (Class::*GetterMemberFunction) () const;
+				typedef GetValue (Class::*GetterMemberFunction) () const;
 				/// the signature for the setter member function that Class should have.
 				/// It takes one const reference to a Value as argument and returns nothing.
 				/// This is a non-const function of Class
-				typedef void (Class::*SetterMemberFunction) (Value const &);
+				typedef void (Class::*SetterMemberFunction) (SetValue);
 
 			private:
 				/// pointer to the getter member function in Class
@@ -69,9 +69,14 @@ namespace detail
 		///\name runtime type information of Value
 		///\{
 			public:
-				std::type_info const & type() const { return *type_; }
+				std::type_info const & get_type() const { return *get_type_; }
 			private:
-				std::type_info const * type_;
+				std::type_info const * get_type_;
+
+			public:
+				std::type_info const & set_type() const { return *set_type_; }
+			private:
+				std::type_info const * set_type_;
 		///\}
 
 		public:
@@ -85,19 +90,20 @@ namespace detail
 				instance_(&instance),
 				getterMemberFunction(getterMemberFunction),
 				setterMemberFunction(setterMemberFunction),
-				type_(&typeid(Value))
+				get_type_(&typeid(GetValue)),
+				set_type_(&typeid(SetValue))
 			{}
 
 		public:
 			/// calls the getter member function on the instance
-			Value const & get() const throw(std::exception)
+			GetValue get() const throw(std::exception)
 			{
 				if(!getterMemberFunction) throw("not a readable property");
 				return (this->instance().*getterMemberFunction)();
 			}
 
 			/// calls the setter member function on the instance
-			void set(Value const & value) throw(std::exception)
+			void set(SetValue value) throw(std::exception)
 			{
 				if(!setterMemberFunction) throw("not a writable property");
 				(this->instance().*setterMemberFunction)(value);
@@ -106,14 +112,15 @@ namespace detail
 		///\name signal emited automatically when the set(Value const &) function is called
 		///\{
 			public:
-				typedef sigslot::signal1<NProperty<Class, Value>&> OnChangeSignal;
+				///\todo [bohan] not sure NProperty<Class, GetValue, SetValue> is what's needed in the signal
+				typedef sigslot::signal1<NProperty<Class, GetValue, SetValue>&> OnChangeSignal;
 				OnChangeSignal const & onChangeSignal() const { return onChangeSignal_; }
 				OnChangeSignal       & onChangeSignal()       { return onChangeSignal_; }
 			private:
 				OnChangeSignal         onChangeSignal_;
 		///\}
 
-		public: // friend class NPropertyMap::Map<AnyClass, AnyValue>
+		public: // friend class NPropertyMap::Map<AnyClass, AnyValue, AnyValue>
 			NProperty() {}
 	};
 }
@@ -126,19 +133,19 @@ class NPropertyMap
 
 	private:
 		/// associative container that maps a Key to a NProperty
-		template<typename Class, typename Value> class Map : public std::map< Key, detail::NProperty<Class, Value> > {};
+		template<typename Class, typename GetValue, typename SetValue> class Map : public std::map< Key, detail::NProperty<Class, GetValue, SetValue> > {};
 
 		///\name the ugly work around for the lack of covariance on template classes in C++
 		///\{
 			class AnyClass {};
 			typedef void const * AnyValue;
-			typedef Map<AnyClass, AnyValue> AnyMap;
+			typedef Map<AnyClass, AnyValue, AnyValue> AnyMap;
 			AnyMap anyMap;
 
-			template<typename Class, typename Value>
-			Map<Class, Value> & map()
+			template<typename Class, typename GetValue, typename SetValue>
+			Map<Class, GetValue, SetValue> & map()
 			{
-				return reinterpret_cast<Map<Class, Value>&>(anyMap);
+				return reinterpret_cast<Map<Class, GetValue, SetValue>&>(anyMap);
 			}
 		///\}
 
@@ -146,36 +153,68 @@ class NPropertyMap
 	///\{
 		public: // it's declared public but will actually probably only used by the object that owns the property map
 
-			template<typename Value, typename Class>
+			/// read and optionally write with different types for getter and setter
+			template<typename GetValue, typename SetValue, typename Class>
 			void registrate
 			(
 				Key const & key,
 				Class & instance,
-				typename detail::NProperty<Class, Value>::GetterMemberFunction getterMemberFunction,
-				typename detail::NProperty<Class, Value>::SetterMemberFunction setterMemberFunction = 0
+				typename detail::NProperty<Class, GetValue, SetValue>::GetterMemberFunction getterMemberFunction,
+				typename detail::NProperty<Class, GetValue, SetValue>::SetterMemberFunction setterMemberFunction = 0
 			)
 			{
-				map<Class, Value>()[key] = detail::NProperty<Class, Value>(instance, getterMemberFunction, setterMemberFunction);
+				map<Class, GetValue, SetValue>()[key] = detail::NProperty<Class, GetValue, SetValue>(instance, getterMemberFunction, setterMemberFunction);
 			}
 
+			/// write-only with different types for getter and setter
+			template<typename GetValue, typename SetValue, typename Class>
+			void registrate
+			(
+				Key const & key,
+				Class & instance,
+				typename detail::NProperty<Class, GetValue, SetValue>::SetterMemberFunction setterMemberFunction
+			)
+			{
+				map<Class, GetValue, SetValue>()[key] = detail::NProperty<Class, GetValue, SetValue>(instance, 0, setterMemberFunction);
+			}
+
+			/// read and optionally write with same type for getter and setter (Value const &)
 			template<typename Value, typename Class>
 			void registrate
 			(
 				Key const & key,
 				Class & instance,
-				typename detail::NProperty<Class, Value>::SetterMemberFunction setterMemberFunction
+				typename detail::NProperty<Class, Value const &>::GetterMemberFunction getterMemberFunction,
+				typename detail::NProperty<Class, Value const &>::SetterMemberFunction setterMemberFunction = 0
 			)
 			{
-				map<Class, Value>()[key] = detail::NProperty<Class, Value>(instance, 0, setterMemberFunction);
+				registrate<Value const &, Value const &>(key, instance, getterMemberFunction, setterMemberFunction);
+			}
+
+			/// write-only with same type for getter and setter (Value const &)
+			template<typename Value, typename Class>
+			void registrate
+			(
+				Key const & key,
+				Class & instance,
+				typename detail::NProperty<Class, Value const &>::SetterMemberFunction setterMemberFunction
+			)
+			{
+				registrate<Value const &>(key, instance, 0, setterMemberFunction);
 			}
 	///\}
 
 	///\name getter and setter functions
 	///\{
 		public:
-			std::type_info const & type(Key const & key) const throw(std::exception)
+			std::type_info const & get_type(Key const & key) const throw(std::exception)
 			{
-				return find<AnyClass, AnyValue>(key).type();
+				return find<AnyClass, AnyValue, AnyValue>(key).get_type();
+			}
+
+			std::type_info const & set_type(Key const & key) const throw(std::exception)
+			{
+				return find<AnyClass, AnyValue, AnyValue>(key).set_type();
 			}
 
 			template<typename Value>
@@ -187,25 +226,25 @@ class NPropertyMap
 			template<typename Value>
 			Value const & get(Key const & key) const throw(std::exception)
 			{
-				return find<AnyClass, Value>(key).get();
+				return find<AnyClass, Value, AnyValue>(key).get();
 			}
 
 			template<typename Value>
 			void set(Key const & key, Value const & value) throw(std::exception)
 			{
-				find<AnyClass, Value>(key).set(value);
+				find<AnyClass, AnyValue, Value>(key).set(value);
 			}
 
-			template<typename Class, typename Value>
-			typename detail::NProperty<Class, Value>::OnChangeSignal const & onChangeSignal(Key const & key) const throw(std::exception)
+			template<typename Class, typename GetValue, typename SetValue>
+			typename detail::NProperty<Class, GetValue, SetValue>::OnChangeSignal const & onChangeSignal(Key const & key) const throw(std::exception)
 			{
-				return find<Class, Value>(key).onChangeSignal();
+				return find<Class, GetValue, SetValue>(key).onChangeSignal();
 			}
 
-			template<typename Class, typename Value>
-			typename detail::NProperty<Class, Value>::OnChangeSignal & onChangeSignal(Key const & key) throw(std::exception)
+			template<typename Class, typename GetValue, typename SetValue>
+			typename detail::NProperty<Class, GetValue, SetValue>::OnChangeSignal & onChangeSignal(Key const & key) throw(std::exception)
 			{
-				return find<Class, Value>(key).onChangeSignal();
+				return find<Class, GetValue, SetValue>(key).onChangeSignal();
 			}
                         
 			std::vector<Key> methodNames() const
@@ -216,17 +255,17 @@ class NPropertyMap
 			}
  
 		private:
-			template<typename Class, typename Value>
-			detail::NProperty<Class, Value> const & find(Key const & key) const throw(std::exception)
+			template<typename Class, typename GetValue, typename SetValue>
+			detail::NProperty<Class, GetValue, SetValue> const & find(Key const & key) const throw(std::exception)
 			{
-				return const_cast<NPropertyMap&>(*this).find<Class, Value>(key);
+				return const_cast<NPropertyMap&>(*this).find<Class, GetValue, SetValue>(key);
 			}
 
-			template<typename Class, typename Value>
-			detail::NProperty<Class, Value> & find(Key const & key) throw(std::exception)
+			template<typename Class, typename GetValue, typename SetValue>
+			detail::NProperty<Class, GetValue, SetValue> & find(Key const & key) throw(std::exception)
 			{
-				typedef Map<Class, Value> Map;
-				Map & map(this->map<Class, Value>());
+				typedef Map<Class, GetValue, SetValue> Map;
+				Map & map(this->map<Class, GetValue, SetValue>());
 				typename Map::iterator i(map.find(key));
 				if(i == map.end()) throw std::runtime_error(key + " was not found in the property map");
 				return i->second;
