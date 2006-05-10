@@ -61,7 +61,7 @@ void NCustomButton::init( )
   resize();
 
     // runtime
-  if (properties()) properties()->registrate<std::string>("text", *this, &NCustomButton::text, &NCustomButton::setText);
+//  if (properties()) properties()->registrate<std::string>("text", *this, &NCustomButton::text, &NCustomButton::setText);
 }
 
 NCustomButton::~NCustomButton()

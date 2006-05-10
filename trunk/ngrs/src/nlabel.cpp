@@ -48,7 +48,7 @@ void NLabel::init( )
   wbreak_ = false;
 
   // runtime
-  if (properties()) properties()->registrate<std::string>("text", *this, &NLabel::text, &NLabel::setText);
+  //if (properties()) properties()->registrate<std::string>("text", *this, &NLabel::text, &NLabel::setText);
 }
 
 
