@@ -207,12 +207,12 @@ class NPropertyMap
 	///\name getter and setter functions
 	///\{
 		public:
-			std::type_info const & get_type(Key const & key) const throw(std::exception)
+			std::type_info const & getType(Key const & key) const throw(std::exception)
 			{
 				return find<AnyClass, AnyValue, AnyValue>(key).getType();
 			}
 
-			std::type_info const & set_type(Key const & key) const throw(std::exception)
+			std::type_info const & setType(Key const & key) const throw(std::exception)
 			{
 				return find<AnyClass, AnyValue, AnyValue>(key).setType();
 			}
@@ -224,13 +224,13 @@ class NPropertyMap
 			}
 
 			template<typename Value>
-			Value const & get(Key const & key) const throw(std::exception)
+			Value get(Key const & key) const throw(std::exception)
 			{
 				return find<AnyClass, Value, AnyValue>(key).get();
 			}
 
 			template<typename Value>
-			void set(Key const & key, Value const & value) throw(std::exception)
+			void set(Key const & key, Value value) throw(std::exception)
 			{
 				find<AnyClass, AnyValue, Value>(key).set(value);
 			}
