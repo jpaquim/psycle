@@ -37,14 +37,6 @@ namespace detail
 	template<typename Class, typename Value>
 	class NProperty
 	{
-		///\name runtime type information
-		///\{
-			public:
-				std::type_info const & type() const { return *type_; }
-			private:
-				std::type_info const * type_;
-		///\}
-
 		///\name instance
 		/// the instance we call the getter and/or setter member functions with
 		///\{
@@ -74,6 +66,14 @@ namespace detail
 				SetterMemberFunction setterMemberFunction;
 		///\}
 
+		///\name runtime type information of Value
+		///\{
+			public:
+				std::type_info const & type() const { return *type_; }
+			private:
+				std::type_info const * type_;
+		///\}
+
 		public:
 			NProperty
 			(
@@ -82,10 +82,10 @@ namespace detail
 				SetterMemberFunction setterMemberFunction
 			)
 			:
-				type_(&typeid(Value)),
 				instance_(&instance),
 				getterMemberFunction(getterMemberFunction),
-				setterMemberFunction(setterMemberFunction)
+				setterMemberFunction(setterMemberFunction),
+				type_(&typeid(Value))
 			{}
 
 		public:
