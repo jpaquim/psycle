@@ -45,6 +45,7 @@ public:
     virtual void setTop(int top);
     virtual void setWidth(int width);
     virtual void setHeight(int height);
+    virtual void setSize(int width, int height);
 
     virtual void setMinimumWidth (int minWidth);
     virtual void setMinimumHeight(int minHeight);

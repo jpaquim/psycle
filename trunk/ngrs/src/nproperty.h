@@ -22,6 +22,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <typeinfo>
 #include <stdexcept>
 #include "sigslot.h"
@@ -199,6 +200,13 @@ class NPropertyMap
 			{
 				return find<Class, Value>(key).onChangeSignal();
 			}
+                        
+                        std::vector<Key> methodNames() const  {
+                           std::vector<Key> listing;
+			   for (AnyMap::const_iterator i(anyMap.begin()) ; i != anyMap.end() ; ++i) listing.push_back(i->first);
+                           return listing;
+                        }
+ 
 		private:
 			template<typename Class, typename Value>
 			detail::NProperty<Class, Value> const & find(Key const & key) const throw(std::exception)

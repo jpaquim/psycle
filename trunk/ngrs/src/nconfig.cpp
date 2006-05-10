@@ -39,6 +39,7 @@ public:
         const   XMLCh* const    qname,
         const   Attributes&     attrs
     );
+
     void fatalError(const SAXParseException&);
 
     void setCfg(NConfig* cfg) { pCfg = cfg;};
@@ -46,13 +47,15 @@ public:
     std::string getValue(const std::string & name, const Attributes& attrs) {
        std::string erg;
        try {
-       XMLCh* str = XMLString::transcode(name.c_str());
-       const XMLCh* strCh = attrs.getValue(str);
-       char* id = XMLString::transcode(strCh);
-       erg = std::string(id);
-       XMLString::release(&id);
-       XMLString::release(&str);
-       } catch (std::exception e) { return ""; }
+         XMLCh* str = XMLString::transcode(name.c_str());
+         const XMLCh* strCh = attrs.getValue(str);
+         char* id = XMLString::transcode(strCh);
+         erg = std::string(id);
+         XMLString::release(&id);
+         XMLString::release(&str);
+       } catch (std::exception e) {
+           return "";
+        }
       return erg;
     }
 
