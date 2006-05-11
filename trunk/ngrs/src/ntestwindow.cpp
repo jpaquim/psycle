@@ -62,6 +62,10 @@ NTestWindow::NTestWindow()
 
   std::cout << win() << std::endl;
 
+  NComboBox* box = new NComboBox();
+    box->setPosition(10,40,100,20);
+  pane()->add(box);
+
   /*NCustomTreeView* view = new NCustomTreeView();
     NLabel* lb = new NLabel("Test");
     view->rootNode()->pane()->add(lb,nAlClient);

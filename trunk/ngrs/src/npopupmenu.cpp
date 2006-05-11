@@ -24,13 +24,10 @@
 #include <iostream>
 
 NPopupMenu::NPopupMenu()
- : NWindow()
+ : NPopupWindow()
 {
   setName("name");
-  setDecoration(false);
   pane()->setLayout(new NListLayout(),true);
-
-  NApp::addPopupWindow(this);
 }
 
 
@@ -62,10 +59,12 @@ void NPopupMenu::onMessage( NEvent * ev )
   if (ev->text() == "ngrs_menu_item_click") {
      NEvent ev1(this,"ngrs_menu_item_click");
      sendMessage(&ev1);
+     setVisible(false);
   } else
   if (ev->text() == "ngrs_global_hide") {
      NEvent ev1(this,"ngrs_menu_item_click");
      sendMessage(&ev1);
+     setVisible(false);
   }
 }
 
