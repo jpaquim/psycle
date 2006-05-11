@@ -56,7 +56,6 @@ NMenu::~NMenu()
 NCustomMenuItem* NMenu::add( NCustomMenuItem * item )
 {
   popupMenu_->add(item);
-  item->addMessageListener(popupMenu_);
   return item;
 }
 
