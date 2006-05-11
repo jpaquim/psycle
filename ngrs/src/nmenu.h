@@ -56,6 +56,7 @@ private:
     NSkin btnNone_;
 
     NPopupMenu* popupMenu_;
+    bool hide_;
 
     void init();
 

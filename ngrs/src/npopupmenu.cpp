@@ -26,6 +26,7 @@
 NPopupMenu::NPopupMenu()
  : NWindow()
 {
+  setName("name");
   setDecoration(false);
   pane()->setLayout(new NListLayout(),true);
 
@@ -59,8 +60,12 @@ void NPopupMenu::add( NCustomMenuItem * item )
 void NPopupMenu::onMessage( NEvent * ev )
 {
   if (ev->text() == "ngrs_menu_item_click") {
-     NEvent ev(this,"ngrs_menu_item_click");
-     sendMessage(&ev);
+     NEvent ev1(this,"ngrs_menu_item_click");
+     sendMessage(&ev1);
+  } else
+  if (ev->text() == "ngrs_global_hide") {
+     NEvent ev1(this,"ngrs_menu_item_click");
+     sendMessage(&ev1);
   }
 }
 
@@ -79,6 +84,8 @@ void NPopupMenu::onKeyPress( const NKeyEvent & event )
     break;
   }
 }
+
+
 
 
 
