@@ -45,6 +45,8 @@ void NMenu::init( )
   btnNone_ = NApp::config()->skin("mbtnnone");
 
   setSkin(btnNone_);
+
+  hide_ = false;
 }
 
 NMenu::~NMenu()
@@ -75,9 +77,13 @@ void NMenu::onMouseExit( )
 
 void NMenu::onMousePress( int x, int y, int button )
 {
-  if ( button == 1 ) {
+  if ( button == 1 && !(NApp::popupUnmapped_ && hide_) ) {
     NEvent ev(this, "ngrs_menu_press");
     sendMessage(&ev);
+  } else {
+     hide_ = false;
+     setSkin(btnOver_);
+     repaint();
   }
 }
 
@@ -95,19 +101,24 @@ void NMenu::onMessage( NEvent * ev )
     if (popupMenu_->mapped()) popupMenu_->setVisible(false);
   } else
   if (ev->text() == "ngrs_menu_hide") {
-     if (popupMenu_->mapped()) popupMenu_->setVisible(false);
+     if (popupMenu_->mapped()) {
+       popupMenu_->setVisible(false);
+       setSkin(btnNone_);
+       repaint();
+       hide_ = true;
+     }
   } else 
     if (ev->text() == "ngrs_menu_item_click") {
-     NEvent ev(this, "ngrs_menu_press");
-     sendMessage(&ev);
+     NEvent ev1(this, "ngrs_menu_press");
+     sendMessage(&ev1);
   } else 
   if (ev->text() == "ngrs_menu_key_left") {
-     NEvent ev(this, "ngrs_menu_key_left");
-     sendMessage(&ev);
+     NEvent ev1(this, "ngrs_menu_key_left");
+     sendMessage(&ev1);
   } else 
   if (ev->text() == "ngrs_menu_key_right") {
-    NEvent ev(this, "ngrs_menu_key_right");
-    sendMessage(&ev);
+    NEvent ev1(this, "ngrs_menu_key_right");
+    sendMessage(&ev1);
   }
 }
 

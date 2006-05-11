@@ -235,14 +235,13 @@ int NApp::processEvent( NWindow * win, XEvent * event )
     }
     break;
     case ButtonPress: {
-        NEvent ev(win,"ngrs_menu_hide_all");
-        win->sendMessage(&ev);
         vector<NWindow*>::iterator itr;
         for (itr = popups_.begin(); itr < popups_.end(); itr++) {
            NWindow* popup = *itr;
            if (popup->visible() && (popup != win || ((popup == win && !mouseOverWindow()))) ) {
-               popupUnmapped_ = true;
-               popup->setVisible(false);
+              popupUnmapped_ = true;
+              NEvent ev(win,"ngrs_global_hide");
+              popup->onMessage(&ev);
            }
         }
         Time time = event->xbutton.time;

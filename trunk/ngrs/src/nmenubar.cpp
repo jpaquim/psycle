@@ -47,6 +47,9 @@ void NMenuBar::add( NMenu * menu )
 
 void NMenuBar::onMessage( NEvent * ev )
 {
+  if (ev->text() == "ngrs_menu_hide_all") {
+      std::cout << "here" << std::endl;
+  } else
   if (ev->text() == "ngrs_menu_enter") {
     if (isMenuMapped_) {
       NEvent ev1(ev->sender(),"ngrs_menu_expose");

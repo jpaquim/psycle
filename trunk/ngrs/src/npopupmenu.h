@@ -40,7 +40,6 @@ public:
     virtual void setVisible(bool on);
 
     virtual void onMessage(NEvent* ev);
-
     virtual void onKeyPress(const NKeyEvent & event);
 
 
