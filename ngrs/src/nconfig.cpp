@@ -376,6 +376,9 @@ NSkin NConfig::skin( const std::string & identifier )
   if (identifier == "popmnubg") {
   } else
   if (identifier == "sbar_pane") {
+    skin.setBackground(NColor(230,230,230));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
   } else
   if (identifier == "mbtnover") {
   } else
@@ -398,8 +401,22 @@ NSkin NConfig::skin( const std::string & identifier )
   if (identifier == "tabnone") {
   } else
   if (identifier == "sbar_vsl") {
+    NBitmap bmp;
+    bmp.createFromXpmData(vknob_xpm);
+    skin.setBitmap(bmp,2);
+    skin.setBorder(NFrameBorder());
+    skin.setBackground(NColor(230,230,230));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
   } else
   if (identifier == "sbar_hsl") {
+    NBitmap bmp;
+    bmp.createFromXpmData(hbar_xpm);
+    skin.setBitmap(bmp,2);
+    skin.setBorder(NFrameBorder());
+    skin.setBackground(NColor(230,230,230));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
   }
   return skin;
 }
