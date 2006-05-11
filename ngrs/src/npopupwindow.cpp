@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,35 +17,26 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NPOPUPMENU_H
-#define NPOPUPMENU_H
-
 #include "npopupwindow.h"
-#include "nlistlayout.h"
-#include "nmenuseperator.h"
+#include "napp.h"
 
-
-/**
-@author Stefan
-*/
-class NPopupMenu : public NPopupWindow
+NPopupWindow::NPopupWindow()
+ : NWindow()
 {
-public:
-    NPopupMenu();
-
-    ~NPopupMenu();
-
-
-    virtual void add(NCustomMenuItem* item);
-    virtual void setVisible(bool on);
-
-    virtual void onMessage(NEvent* ev);
-    virtual void onKeyPress(const NKeyEvent & event);
+  setDecoration(false);
+  NApp::addPopupWindow(this);
+}
 
 
-private:
+NPopupWindow::~NPopupWindow()
+{
+}
+
+void NPopupWindow::onMessage( NEvent * ev )
+{
+  if (ev->text() == "ngrs_global_hide") {
+     setVisible(false);
+  }
+}
 
 
-};
-
-#endif

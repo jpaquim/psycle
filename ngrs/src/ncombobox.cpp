@@ -28,6 +28,7 @@
 #include "ncustomitem.h"
 #include "nconfig.h"
 #include "nframeborder.h"
+#include "npopupwindow.h"
 
 const char * arrow_down1_xpm[] = {
 "12 6 2 1",
@@ -66,9 +67,7 @@ void NComboBox::init( )
     downBtn_->click.connect(this,&NComboBox::onDownBtnClicked);
   NPanel::add(downBtn_);
 
-  popup = new NWindow();
-    popup->setDecoration(false);
-    NApp::addPopupWindow(popup);
+  popup = new NPopupWindow();
   NPanel::add(popup);
 
   lbox = new NListBox();

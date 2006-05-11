@@ -27,6 +27,7 @@ class NButton;
 class NEdit;
 class NListBox;
 class NItemEvent;
+class NPopupWindow;
 
 /**
 @author Stefan
@@ -59,7 +60,7 @@ private:
    NButton* downBtn_;
 
    NListBox* lbox;
-   NWindow*  popup;
+   NPopupWindow*  popup;
 
    void init();
 
