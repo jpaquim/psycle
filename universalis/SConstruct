@@ -22,7 +22,7 @@ if True:
 	glibmm.show()
 
 	boost = jerrycan.ExternalPackage(env, 'libboost-dev', '>= 1.33')
-	boost.check_header('boost/version.hpp')
+	#boost.check_header('boost/version.hpp')
 	boost.show()
 
 	if not bool:
