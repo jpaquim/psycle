@@ -77,4 +77,18 @@ void NNoteBook::setActivePage( unsigned int index )
   }
 }
 
+int NNoteBook::preferredWidth( ) const
+{
+  if (visiblePage_) {
+        return std::max(1,visiblePage_->preferredWidth());
+  } else return 10;
+}
+
+int NNoteBook::preferredHeight( ) const
+{
+  if (visiblePage_) {
+        return std::max(1,visiblePage_->preferredHeight());
+  } else return 10;
+}
+
 

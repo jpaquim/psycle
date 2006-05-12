@@ -47,6 +47,7 @@ void NTabBar::addTab( NTab * tab, NPanel* page )
 
   tab->click.connect(this,&NTabBar::onTabClick);
   pageMap_[tab] = page;
+
 }
 
 void NTabBar::setNoteBook( NNoteBook * noteBook )

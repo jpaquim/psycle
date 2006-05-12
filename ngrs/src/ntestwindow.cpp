@@ -43,6 +43,7 @@
 #include "nlabel.h"
 #include "nmessagebox.h"
 #include "nmenu.h"
+#include "npackageinfo.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -58,13 +59,27 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
+  NPackageInfo info;
+
+  std::vector<std::string> cats = info.categories();
+
+  for (std::vector<std::string>::iterator it = cats.begin(); it < cats.end(); it++){
+     std::cout << *it << std::endl;
+     //book->addPage(new NPanel(), *it);
+  }
+
   setPosition(0,0,1000,700);
 
-  std::cout << win() << std::endl;
 
-  NComboBox* box = new NComboBox();
+  NTabBook* book = new NTabBook();
+    book->addPage(new NPanel(),"Standard2");
+  pane()->add(book,nAlTop);
+
+  //std::cout << book->preferredHeight() << std::endl;
+
+  /*NComboBox* box = new NComboBox();
     box->setPosition(10,40,100,20);
-  pane()->add(box);
+  pane()->add(box);*/
 
   /*NCustomTreeView* view = new NCustomTreeView();
     NLabel* lb = new NLabel("Test");
@@ -88,7 +103,7 @@ NTestWindow::NTestWindow()
     btn->setFlat(false);
     btn->setHint("Button zum drücken");
   pane()->add(btn);*/
-  testMenu();
+  //testMenu();
   //testSegDisplay();
 
   //testEdit();

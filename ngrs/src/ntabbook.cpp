@@ -20,6 +20,7 @@
 #include "ntabbook.h"
 #include "ntabbar.h"
 #include "nalignlayout.h"
+#include "nbutton.h"
 
 NTabBook::NTabBook()
  : NPanel()
@@ -27,12 +28,16 @@ NTabBook::NTabBook()
    setLayout(NAlignLayout());
 
    tabBar_ = new NTabBar();
-   tabBar_->setAlign(nAlTop);
-   add(tabBar_);
+   add(tabBar_, nAlTop);
+
+   std::cout << "h" << preferredHeight() << std::endl;
 
    book_ = new NNoteBook();
-   add(book_);
-   book_->setAlign(nAlClient);
+   //add(book_, nAlClient);
+
+   add(book_,nAlClient);
+
+   std::cout << "b" << preferredHeight() << std::endl;
 
    tabBar_->setNoteBook(book_);
 }

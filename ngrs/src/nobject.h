@@ -62,4 +62,8 @@ private:
 
 };
 
+// the types of the class factories
+typedef NObject* create_t();
+typedef void destroy_t(NObject*);
+
 #endif
