@@ -167,14 +167,14 @@ void MainWindow::initViews( )
 void MainWindow::initBars( )
 {
   toolBarPanel_ = new NPanel();
-    toolBarPanel_->setLayout(new NFlowLayout(nAlLeft,0,2), true);
+    toolBarPanel_->setLayout(NFlowLayout(nAlLeft,0,2));
     toolBarPanel_->setWidth(500);
   pane()->add(toolBarPanel_, nAlTop);
 
   initToolBar();
 
   statusBar_ = new NPanel();
-    statusBar_->setLayout(new NFlowLayout(nAlLeft),true);
+    statusBar_->setLayout(NFlowLayout(nAlLeft));
       progressBar_ = new NProgressBar();
         progressBar_->setValue(0);
         progressBar_->setWidth(200);

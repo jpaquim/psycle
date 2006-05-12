@@ -56,7 +56,7 @@ void SequencerBar::init( )
     frBorder.setLineCount(2,4,4);
   setBorder(frBorder);
 
-  setLayout(new NListLayout(),true);
+  setLayout(NListLayout());
   setWidth(90);
 
   patternView_ = 0;
@@ -67,10 +67,9 @@ void SequencerBar::init( )
   add(seqPanel_);
 
   NPanel* btnBar = new NPanel();
-    gridLayout = new NGridLayout();
-    gridLayout->setVgap(5);
-    gridLayout->setHgap(5);
-    btnBar->setLayout(gridLayout,true);
+    gridLayout.setVgap(5);
+    gridLayout.setHgap(5);
+    btnBar->setLayout(gridLayout);
 
     NImage* img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus()); else
@@ -151,7 +150,7 @@ void SequencerBar::init( )
   seqPanel_->add(seqList_);
 
   NPanel* lengthPanel = new NPanel();
-    lengthPanel->setLayout(new NFlowLayout(nAlLeft,5,0),true);
+    lengthPanel->setLayout(NFlowLayout(nAlLeft,5,0));
     lengthPanel->add(new NLabel("Len"));
     NPanel* spacer = new NPanel();
        spacer->setPreferredSize(16,10);
@@ -163,7 +162,7 @@ void SequencerBar::init( )
   add(lengthPanel);
 
   NPanel* lenPanel = new NPanel();
-   lenPanel->setLayout(new NFlowLayout(nAlLeft,5,0),true);
+   lenPanel->setLayout(NFlowLayout(nAlLeft,5,0));
    lenPanel->add( new NLabel("Len"));
 
     img = new NImage();
@@ -191,7 +190,7 @@ void SequencerBar::init( )
   add(lenPanel);
 
   NPanel* checkPanel = new NPanel();
-    checkPanel->setLayout(new NListLayout(),true);
+    checkPanel->setLayout(NListLayout());
     checkPanel->add( follow_                = new NCheckBox("Follow song"));
     checkPanel->add( multichannel_audition_ = new NCheckBox("Multichannel\nAudition"));
     checkPanel->add( record_noteoff_        = new NCheckBox("Record NoteOffs"));

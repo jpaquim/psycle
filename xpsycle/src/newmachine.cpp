@@ -20,6 +20,7 @@
 #include "newmachine.h"
 #include "plugin.h"
 #include <nborderlayout.h>
+#include <nalignlayout.h>
 #include <nlabel.h>
 #include <nlistbox.h>
 #include <nitem.h>
@@ -33,14 +34,14 @@ NewMachine::NewMachine()
   NFont fnt("Suse sans",8,nStraight | nMedium | nAntiAlias);
   pane()->setFont(fnt);
 
-  pane()->setLayout(new NBorderLayout(),true);
+  pane()->setLayout(NBorderLayout());
 
   setModal(true);
   do_Execute = false;
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
-    bPnl->setLayout(new NFlowLayout(nAlRight),true);
+    bPnl->setLayout(NFlowLayout(nAlRight));
     NButton* okBtn = new NButton("Open");
       okBtn->clicked.connect(this,&NewMachine::onOkBtn);
       okBtn->setFlat(false);
@@ -54,13 +55,13 @@ NewMachine::NewMachine()
   NPanel* properties = new NPanel();
     properties->setPreferredSize(210,100);
     properties->setAlign(nAlRight);
-    properties->setLayout(new NAlignLayout(),true);
+    properties->setLayout(NAlignLayout());
     macProperty = new NGroupBox();
       macProperty->setAlign(nAlTop);
       macProperty->setHeaderText("Machine Properties");
       macProperty->setWidth(200);
       macProperty->setHeight(300);
-      macProperty->setLayout(new NListLayout(),true);
+      macProperty->setLayout(NListLayout());
       name = new InfoLine("Name");
       macProperty->add(name);
       description = new InfoLine("Description");
@@ -78,7 +79,7 @@ NewMachine::NewMachine()
   tabBook_ = new NTabBook();
     tabBook_->setAlign(nAlClient);
     NPanel* generatorPage = new NPanel();
-       generatorPage->setLayout(new NAlignLayout(),true);
+       generatorPage->setLayout(NAlignLayout());
          generatorfBox_ = new NFileListBox();
            generatorfBox_->addFilter(".so","!S*.so!S*");
            generatorfBox_->setMode(nFiles);

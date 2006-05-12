@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "wiredlg.h"
 #include <nlistlayout.h>
+#include <nalignlayout.h>
 
 WireDlg::WireDlg()
  : NWindow()
@@ -27,12 +28,12 @@ WireDlg::WireDlg()
   _pSrcMachine = _pDstMachine = 0;
 
   NPanel* btnPnl = new NPanel();
-    btnPnl->setLayout(new NListLayout(),true);
+    btnPnl->setLayout(NListLayout());
     modeBtn = new NButton("Scope Mode");
       modeBtn->setFlat(false);
     btnPnl->add(modeBtn);
     NPanel* sliderPnl = new NPanel();
-      sliderPnl->setLayout(new NAlignLayout(),true);
+      sliderPnl->setLayout(NAlignLayout());
       holdBtn = new NButton("Hold");
         holdBtn->setFlat(false);
       sliderPnl->add(holdBtn,nAlRight);

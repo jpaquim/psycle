@@ -111,7 +111,7 @@ private:
    std::vector<int> seqCopyBuffer;
 
    NFrameBorder* frBorder;
-   NGridLayout* gridLayout;
+   NGridLayout gridLayout;
 };
 
 #endif

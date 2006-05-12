@@ -38,7 +38,7 @@
 PatternView::PatternView()
  : NPanel()
 {
-  setLayout(new NAlignLayout(),true);
+  setLayout(NAlignLayout());
 
   // create scrollBars
   hBar = new NScrollBar();

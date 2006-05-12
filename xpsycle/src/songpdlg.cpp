@@ -20,7 +20,7 @@
 #include "songpdlg.h"
 #include "global.h"
 #include "song.h"
-
+#include <nlistlayout.h>
 
 SongpDlg::SongpDlg()
  : NWindow()
@@ -37,7 +37,7 @@ void SongpDlg::init( )
 {
   setTitle("Song properties");
 
-  pane()->setLayout(new NListLayout(),true);
+  pane()->setLayout(NListLayout());
 
   NLabel* songTitleLb_ = new NLabel("Song Title");
   pane()->add(songTitleLb_);
