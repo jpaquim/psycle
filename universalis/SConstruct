@@ -1,83 +1,118 @@
 #! /usr/bin/env scons
 
-import os, packageneric as jerrycan
+import os, packageneric
 
-env = Environment()
-env.BuildDir(os.path.join('++packageneric', 'build', 'scons'), 'src', duplicate=0)
+# init
+packageneric = packageneric.Packageneric(Environment, Configure)
 
+# source package
+
+source_package = packageneric.SourcePackage(
+	name = 'universalis',
+	version = [0, 0, 0],
+	description = '''blah blah'''
+)
+
+# configure
 if True:
-	# Configuration:
-	conf = Configure(env,
-		custom_tests = {
-			'PkgConfig' : jerrycan.pkg_config
-		})
-	bool  = conf.PkgConfig('pkg-config >= 0.18', 'exists')
-	bool &= conf.PkgConfig('glibmm-2.4 >= 2.4', 'exists')
-	bool &= conf.PkgConfig('diversalis >= 0', 'exists')
+	bool  = packageneric.pkg_config('pkg-config >= 0.18', 'exists')
+	bool &= packageneric.pkg_config('glibmm-2.4 >= 2.4', 'exists')
+	bool &= packageneric.pkg_config('diversalis >= 0', 'exists')
 
-	diversalis = jerrycan.ExternalPackage(env, 'lib-diversalis-0-dev', '>= 0', 'diversalis')
+	diversalis = packageneric.ExternalPackage(
+		packageneric,
+		debian = 'lib-diversalis-0-dev',
+		debian_version_compare = '>= 0',
+		pkg_config = 'diversalis'
+	)
 	diversalis.show()
 
-	glibmm = jerrycan.ExternalPackage(env, 'libglibmm-dev', '>= 2.4', 'glibmm-2.4')
+	glibmm = packageneric.ExternalPackage(
+		packageneric,
+		debian = 'libglibmm-dev',
+		debian_version_compare = '>= 2.4',
+		pkg_config = 'glibmm-2.4'
+	)
 	glibmm.show()
 
-	boost = jerrycan.ExternalPackage(env, 'libboost-dev', '>= 1.33')
-	#boost.check_header('boost/version.hpp')
-	boost.show()
+	boost = packageneric.ExternalPackage(
+		packageneric,
+		debian = 'libboost-dev',
+		debian_version_compare = '>= 1.33'
+	)
+	packageneric.configure().CheckHeader('boost/version.hpp')
+	packageneric.configure().CheckLib('boost_thread') # adds to env LIBS automatically
 
 	if not bool:
 		print '*** some of the checks above failed ***'
-	env = conf.Finish()
-	
+	env = packageneric.configure().Finish()
+
+# modules	
 if True:
-	universalis = jerrycan.Module(env, 'lib-universalis')
-	universalis.add_public_requires(diversalis)
-	universalis.add_public_requires(glibmm)
-	universalis.add_public_requires(boost)
-	universalis.add_sources(jerrycan.Find('.', 'src/universalis', '*.cpp'))
-	universalis.add_headers(jerrycan.Find('.', 'src/universalis', '*.hpp'))
+	universalis = packageneric.Module(
+		packageneric,
+		name = 'lib-universalis',
+		version = source_package.version,
+		description = source_package.description,
+		public_requires = [diversalis, glibmm, boost]
+	)
+	universalis.add_sources(packageneric.Find('.', 'src/universalis', '*.cpp'))
+	universalis.add_headers(packageneric.Find('.', 'src/universalis', '*.hpp'))
 	universalis.show()
 
+# install
 if False:
 	import SCons as cobaye
-	install = jerrycan.InstallPrefix(cobaye)
-	env.Install(install.lib, universalis.scons())
-	env.Install(install.include, universalis.get_headers())
-	env.Alias('install', install.prefix)
+	install = packageneric.InstallPrefix(cobaye)
+	packageneric.environment().Install(install.lib, universalis.scons())
+	packageneric.environment().Install(install.include, universalis.get_headers())
+	packageneric.environment().Alias('install', install.prefix)
 
+# stuff ...
 if False:
 	print universalis.get_sources()
 	print universalis.get_headers()
 	universalis.scons()
 
-if False:
-	universalis_package = jerrycan.Package('universalis')
-	universalis_package.modules.append(universalis)
-	universalis_package.version = universalis.version
-	universalis_package.description = universalis.description
+# package
+if True:
+	universalis_package = packageneric.Package(
+		name = 'universalis',
+		version = universalis.version,
+		description = universalis.description,
+		modules = [universalis]
+	)
+
+# debian package
+if True:	
+	universalis_runtime = packageneric.DebianPackage(
+		name = 'lib-universalis-0',
+		section = 'libs',
+		long_description = universalis_package.description + '\n .\n This package contains the runtime library.'
+	)
+	universalis_runtime.depends = universalis.public_requires
+	#universalis_runtime.files.append(universalis_package.get_binaries())
 	
-	universalis_runtime = jerrycan.DebianPackage('lib-universalis-0')
-	universalis_runtime.section = 'libs'
-	universalis_runtime.long_description = universalis_package.description
-	universalis_runtime.long_description += '\n .\n This package contains the runtime library.'
-	universalis_runtime.files.append(universalis_package.get_binaries())
+	universalis_dev = packageneric.DebianPackage(
+		name = 'lib-universalis-0-dev',
+		section = 'libdevel',
+		long_description = universalis_package.description + '\n .\n This package contains the development files.',
+	)
+	universalis_dev.depends = universalis.public_requires
+	#universalis_dev.files.append(universalis_package.get_headers())
+	#universalis_dev.files.append(universalis_package.get_libs())
+	#universalis_dev.files.append(universalis_package.get_pkg_configs())
 	
-	universalis_dev = jerrycan.DebianPackage('lib-universalis-0-dev')
-	universalis_dev.section = 'libdevel'
-	universalis_dev.long_description = universalis_package.description
-	universalis_dev.long_description += '\n .\n This package contains the development files.'
-	universalis_dev.files.append(universalis_package.get_headers())
-	universalis_dev.files.append(universalis_package.get_libs())
-	universalis_dev.files.append(universalis_package.get_pkg_configs())
+	universalis_doc = packageneric.DebianPackage(
+		name = 'lib-universalis-0-doc',
+		section = 'doc',
+		architecture = 'all',
+		long_description = universalis_package.description + '\n .\n This package contains the documentation.'
+	)
 	
-	universalis_doc = jerrycan.DebianPackage('lib-universalis-0-doc')
-	universalis_doc.section = 'doc'
-	universalis_doc.long_description = universalis_package.description
-	universalis_doc.long_description += '\n .\n This package contains the documentation.'
-	universalis_doc.architecture = 'all'
+	debian = packageneric.Debian(
+		source_package = source_package,
+		binary_packages = [universalis_runtime, universalis_dev, universalis_doc]
+	)
+	debian.control(None)
 	
-	debian = jerrycan.Debian()
-	debian.source_package = source_package
-	debian.binary_packages.append(universalis_runtime)
-	debian.binary_packages.append(universalis_dev)
-	debian.binary_packages.append(universalis_doc)
