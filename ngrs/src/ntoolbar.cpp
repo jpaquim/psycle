@@ -19,15 +19,17 @@
  ***************************************************************************/
 #include "ntoolbar.h"
 #include "nbevelborder.h"
+#include "nflowlayout.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nbutton.h"
 
 NToolBar::NToolBar()
  : NTogglePanel()
 {
-
-  setLayout( fl = new NFlowLayout(nAlLeft,3,2),true);
-  fl->setLineBreak(false);
+  NFlowLayout fl(nAlLeft,3,2);
+   fl.setLineBreak(false);
+  setLayout(fl);
 
   spacer_ = new NPanel();
   spacer_->setWidth(5);

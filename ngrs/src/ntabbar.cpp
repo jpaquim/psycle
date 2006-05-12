@@ -25,9 +25,9 @@
 NTabBar::NTabBar()
  : NTogglePanel()
 {
-  fl = new NFlowLayout(nAlLeft);
-  fl->setBaseLine(nAlBottom);
-  setLayout(fl,true);
+  fl.setAlign(nAlLeft);
+  fl.setBaseLine(nAlBottom);
+  setLayout(fl);
   noteBook_ = 0;
   setTransparent(true);
   orientation_ = nAlTop;
@@ -73,12 +73,16 @@ void NTabBar::setOrientation( int orientation )
   orientation_ = orientation;
   switch (orientation) {
     case nAlTop:
-      fl->setBaseLine(nAlBottom);
+      fl.setBaseLine(nAlBottom);
+      setLayout(fl);
     break;
     case nAlBottom:
-      fl->setBaseLine(nAlTop);
+      fl.setBaseLine(nAlTop);
+      setLayout(fl);
     break;
-    default : fl->setBaseLine(nAlBottom);
+    default : 
+      fl.setBaseLine(nAlBottom);
+      setLayout(fl);
   }
 }
 

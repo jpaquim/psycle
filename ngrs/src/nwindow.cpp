@@ -21,6 +21,7 @@
 #include "napp.h"
 #include "nconfig.h"
 #include "ndockpanel.h"
+#include "nalignlayout.h"
 
 //#include <X11/extensions/Xinerama.h>
 
@@ -35,7 +36,7 @@ NWindow::NWindow()
   win_ = NApp::system().registerWindow(NApp::system().rootWindow());
   NApp::addWindow(win_, this);
   pane_ = new NPanel();
-    pane_->setLayout(new NAlignLayout(),true);
+    pane_->setLayout(NAlignLayout());
     pane_->skin_ = NApp::config()->skin("pane");
     pane_->setName("window_pane");
   add(pane_);
@@ -436,7 +437,7 @@ NWindow::NWindow( const NWindow & topWindow )
   pane_->setTransparent(false);
   add(pane_);
   pane_->setBackground(NColor(255,255,255));
-  pane_->setLayout(new NAlignLayout(),true);
+  pane_->setLayout(NAlignLayout());
   graphics_ = new NGraphics(win_);
   dragBase_ = 0;
   dragRectPoint = 0;

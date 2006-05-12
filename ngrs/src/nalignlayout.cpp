@@ -34,6 +34,11 @@ NAlignLayout::NAlignLayout( int hgap, int vgap )
   vgap_ = vgap;
 }
 
+NAlignLayout * NAlignLayout::clone( ) const
+{
+  return new NAlignLayout(*this);
+}
+
 NAlignLayout::~NAlignLayout()
 {
 }
@@ -197,6 +202,8 @@ void NAlignLayout::setVgap( int vgap )
 {
   vgap_ = vgap;
 }
+
+
 
 
 

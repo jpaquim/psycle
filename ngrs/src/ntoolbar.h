@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,13 +20,14 @@
 #ifndef NTOOLBAR_H
 #define NTOOLBAR_H
 
-#include <ntogglepanel.h>
-#include <nflowlayout.h>
-#include <nbutton.h>
+#include "ntogglepanel.h"
+
+class NButton;
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
+
 class NToolBar : public NTogglePanel
 {
 public:
@@ -44,9 +45,6 @@ private:
 
     NButton* btn;
     NPanel* spacer_;
-    NBorder* bv;
-
-    NFlowLayout* fl;
 };
 
 #endif

@@ -48,11 +48,6 @@ private:
     NPanel* dockBar_;
     NPanel* area_;
 
-    NLayout* alignLayout;
-    NLayout* alignLayoutArea;
-    NLayout* flowLayout;
-    NLayout* oldAreaLayout_;
-
     NWindow* undockedWindow;
 
     void init();

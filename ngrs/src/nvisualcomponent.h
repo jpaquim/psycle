@@ -106,7 +106,7 @@ public:
     NVisualComponent* overObject(NGraphics* g, long absX, long absY);
     void setBorder(const NBorder & border);
     NBorder* border();
-    void setLayout(NLayout* layout, bool deleteFlag = false);
+    void setLayout(const NLayout & layout);
     NLayout* layout();
     NLayout* layout() const;
 
@@ -210,8 +210,6 @@ private:
    bool ownerSizeSet_;
    int ownerPreferredWidth_;
    int ownerPreferredHeight_;
-
-   bool layoutDeleteFlag_;
 };
 
 #endif

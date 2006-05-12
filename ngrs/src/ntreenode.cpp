@@ -24,14 +24,14 @@
 
 NTreeNode::NodePanel::NodePanel( NTreeNode * node ) : node_(node)
 {
-  setLayout(new NAlignLayout(),true);
+  setLayout(NAlignLayout());
 
   pane_ = new NPanel();
-     pane_->setLayout(new NAlignLayout(),true);
+     pane_->setLayout(NAlignLayout());
   add( pane_, nAlTop);
 
   childNodePane_ = new NPanel();
-    childNodePane_->setLayout(new NAlignLayout(),true);
+    childNodePane_->setLayout(NAlignLayout());
   add( childNodePane_, nAlTop);
 }
 
@@ -55,7 +55,7 @@ int NTreeNode::NodePanel::minimumHeight( ) const
 NTreeNode::NTreeNode()
  : NFlipBox()
 {
-  setLayout(new NAlignLayout(),true);
+  setLayout(NAlignLayout());
   setBorder(NFrameBorder());
 
   panel_ = new NodePanel(this);

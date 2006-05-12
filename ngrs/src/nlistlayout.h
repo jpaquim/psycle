@@ -30,6 +30,8 @@ class NListLayout : public NLayout
 {
 public:
     NListLayout();
+    virtual NListLayout* clone()  const;   // Uses the copy constructor
+
 
     ~NListLayout();
 

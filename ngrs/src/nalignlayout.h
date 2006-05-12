@@ -32,6 +32,7 @@ class NAlignLayout : public NLayout
 public:
     NAlignLayout();
     NAlignLayout(int hgap, int vgap);
+    virtual NAlignLayout* clone()  const;   // Uses the copy constructor
 
     ~NAlignLayout();
 
@@ -41,6 +42,7 @@ public:
 
     void setHgap(int hgap);
     void setVgap(int vgap);
+
 
 
 private:

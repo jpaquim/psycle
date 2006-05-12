@@ -25,6 +25,10 @@ NAutoScrollLayout::NAutoScrollLayout()
   maxY_ = maxY_ = 0;
 }
 
+NLayout * NAutoScrollLayout::clone( ) const
+{
+  return new NAutoScrollLayout(*this);
+}
 
 NAutoScrollLayout::~NAutoScrollLayout()
 {
@@ -59,5 +63,7 @@ int NAutoScrollLayout::preferredHeight( const NVisualComponent * target ) const
 {
   return maxY_;
 }
+
+
 
 

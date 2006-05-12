@@ -25,7 +25,7 @@
 NCustomTreeView::NCustomTreeView()
  : NPanel()
 {
-  setLayout(new NAlignLayout(),true);
+  setLayout(NAlignLayout());
   setBorder(NFrameBorder());
   add( rootNode_ = new NTreeNode(), nAlTop );
 }

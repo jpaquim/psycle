@@ -38,8 +38,9 @@ const short nAlCenter = 6;
 class NLayout{
 public:
     NLayout();
+    virtual NLayout* clone()  const = 0;   // Uses the copy constructor
 
-    virtual ~NLayout() = 0; //{};
+    virtual ~NLayout() = 0;
 
     virtual void align(class NVisualComponent* parent);
     virtual int preferredWidth(const class NVisualComponent* target) const = 0;
@@ -53,6 +54,7 @@ public:
 private:
 
    class NVisualComponent* parent_;
+
 
 };
 

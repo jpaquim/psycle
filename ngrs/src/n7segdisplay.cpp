@@ -64,7 +64,7 @@ void N7SegDisplay::setNumber( int number )
 
 void N7SegDisplay::initSegDisplay( )
 {
- setLayout(new NFlowLayout(nAlLeft,0,0),true);
+ setLayout(NFlowLayout(nAlLeft,0,0));
 
  for (int i=0; i<segCount; i++) {
    N7Segment* seg = new N7Segment();

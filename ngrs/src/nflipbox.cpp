@@ -24,7 +24,7 @@
 NFlipBox::NFlipBox()
  : NPanel()
 {
-  setLayout(new NAlignLayout(), true);
+  setLayout(NAlignLayout());
 
   pane_ = 0;
 

@@ -27,7 +27,7 @@
 NMenuBar::NMenuBar()
  : NPanel(), isMenuMapped_(0), lastMenuOver(0)
 {
-  setLayout(new NFlowLayout(nAlLeft,5,2),true);
+  setLayout(NFlowLayout(nAlLeft,5,2));
   setAlign(nAlTop);
 
   skin_ = NApp::config()->skin("mbar");

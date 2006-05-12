@@ -40,14 +40,14 @@ NCheckMenuItem::NCheckMenuItem( const std::string & text )
 
 void NCheckMenuItem::init( )
 {
-  setLayout(new NAlignLayout(), true);
+  setLayout(NAlignLayout());
 
   checkBox_ = new NCheckBox();
-  checkBox_->setPreferredSize(20,20);
-  NCustomMenuItem::add(checkBox_, nAlLeft);
+     checkBox_->setPreferredSize(20,20);
+  add(checkBox_, nAlLeft);
 
   captionLbl_ = new NLabel();
-  NCustomMenuItem::add(captionLbl_, nAlClient);
+  add(captionLbl_, nAlClient);
 }
 
 

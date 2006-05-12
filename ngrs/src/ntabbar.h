@@ -21,10 +21,10 @@
 #define NTABBAR_H
 
 #include <npanel.h>
-#include "nflowlayout.h"
 #include "ntab.h"
 #include "nnotebook.h"
 #include "ntogglepanel.h"
+#include "nflowlayout.h"
 
 class NNotebook;
 class NFlowLayout;
@@ -50,9 +50,10 @@ public:
 
 private:
 
+   NFlowLayout fl;
+
    int orientation_;
 
-   NFlowLayout* fl;
    std::map<NObject*,NPanel*> pageMap_;
    NNoteBook* noteBook_;
 
