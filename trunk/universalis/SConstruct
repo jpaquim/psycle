@@ -10,7 +10,7 @@ packageneric = packageneric.Packageneric(Environment, Configure)
 source_package = packageneric.SourcePackage(
 	name = 'universalis',
 	version = [0, 0, 0],
-	description = '''blah blah'''
+	description = '''universalis is ...'''
 )
 
 # configure
