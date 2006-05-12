@@ -39,7 +39,7 @@ PatDlg::PatDlg()
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
-    bPnl->setLayout(new NFlowLayout(nAlRight),true);
+    bPnl->setLayout(NFlowLayout(nAlRight));
     NButton* okBtn = new NButton("Change");
       okBtn->clicked.connect(this,&PatDlg::onOkBtn);
       okBtn->setFlat(false);

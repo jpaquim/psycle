@@ -52,7 +52,7 @@ void InstrumentEditor::init( )
 
   NPanel* header = new NPanel();
     header->setHeight(20);
-    header->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+    header->setLayout(NFlowLayout(nAlLeft,5,5));
     header->add(new NLabel("Instrument"), nAlLeft);
     instNumberLbl = new NLabel("   ");
        instNumberLbl->setBorder(NBevelBorder(nNone,nLowered));
@@ -77,10 +77,10 @@ void InstrumentEditor::init( )
   pane()->add(header, nAlTop);
 
   NGroupBox* properties = new NGroupBox();
-     properties->setLayout(new NAlignLayout(5,5),true);
+     properties->setLayout(NAlignLayout(5,5));
      properties->setHeaderText("Instrument Properties");
      NPanel* noteActionPnl = new NPanel();
-        noteActionPnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+        noteActionPnl->setLayout(NFlowLayout(nAlLeft,5,5));
         noteActionPnl->add(new NLabel("New Note Action"));
           newNoteActionCb = new NComboBox();
           newNoteActionCb->setWidth(100);
@@ -92,7 +92,7 @@ void InstrumentEditor::init( )
         noteActionPnl->add(newNoteActionCb,nAlTop);
      properties->add(noteActionPnl,nAlTop);
      NPanel* panningPnl = new NPanel();
-        panningPnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+        panningPnl->setLayout(NFlowLayout(nAlLeft,5,5));
         panningSlider = new NSlider();
           panningSlider->setOrientation(nHorizontal);
           panningSlider->setWidth(150);
@@ -116,7 +116,7 @@ void InstrumentEditor::init( )
      properties->add(rndVCFResoCbx,nAlTop);
 
      NGroupBox* tempoGrpBox = new NGroupBox();
-        tempoGrpBox->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+        tempoGrpBox->setLayout(NFlowLayout(nAlLeft,5,5));
         tempoGrpBox->setHeaderText("Tempo Looping Tool");
         playSampleFitCbx = new NCheckBox("Play sample to fit");
         tempoGrpBox->add(playSampleFitCbx);
@@ -130,10 +130,10 @@ void InstrumentEditor::init( )
      properties->add(tempoGrpBox,nAlTop);
 
      NGroupBox* waveLayerGrpBox = new NGroupBox();
-        waveLayerGrpBox->setLayout(new NAlignLayout(5,5),true);
+        waveLayerGrpBox->setLayout(NAlignLayout(5,5));
         waveLayerGrpBox->setHeaderText("Instrument Wave Layer");
         NPanel* volumePnl = new NPanel();
-        volumePnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+        volumePnl->setLayout(NFlowLayout(nAlLeft,5,5));
         volumePnl->add(new NLabel("Volume"),nAlLeft);
         volumeSlider = new NSlider();
           volumeSlider->setOrientation(nHorizontal);
@@ -148,7 +148,7 @@ void InstrumentEditor::init( )
         volumePnl->add(volumeLbl,nAlLeft);
         waveLayerGrpBox->add(volumePnl,nAlTop);
         NPanel* fineTunePnl = new NPanel();
-        fineTunePnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+        fineTunePnl->setLayout(NFlowLayout(nAlLeft,5,5));
         fineTunePnl->add(new NLabel("Finetune"),nAlLeft);
         fineTuneSlider = new NSlider();
           fineTuneSlider->setOrientation(nHorizontal);
@@ -163,7 +163,7 @@ void InstrumentEditor::init( )
         fineTunePnl->add(fineTuneLbl,nAlLeft);
         waveLayerGrpBox->add(fineTunePnl,nAlTop);
         NPanel* tunePnl = new NPanel();
-           tunePnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+           tunePnl->setLayout(NFlowLayout(nAlLeft,5,5));
            tunePnl->add(new NLabel("Tune"));
            octDecBtn = new NButton("Oct-");
              octDecBtn->setFlat(false);
@@ -187,7 +187,7 @@ void InstrumentEditor::init( )
            tunePnl->add(octLbl);
         waveLayerGrpBox->add(tunePnl,nAlTop);
         NPanel* loopPnl = new NPanel();
-           loopPnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+           loopPnl->setLayout(NFlowLayout(nAlLeft,5,5));
            loopPnl->add(new NLabel("Loop"));
            NButton* offBtn = new NButton("Off");
              offBtn->setFlat(false);
@@ -201,7 +201,7 @@ void InstrumentEditor::init( )
            loopPnl->add(loopLbl);
         waveLayerGrpBox->add(loopPnl,nAlTop);
         NPanel* loopAtPnl = new NPanel();
-           loopAtPnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
+           loopAtPnl->setLayout(NFlowLayout(nAlLeft,5,5));
            loopAtPnl->add(new NLabel("Loop At"),nAlLeft);
            loopAtFromLbl = new NLabel("  ");
              loopAtFromLbl->setBorder(NBevelBorder(nNone,nLowered));

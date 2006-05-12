@@ -24,7 +24,6 @@
 #include "wiredlg.h"
 #include <npage.h>
 #include <nscrollbox.h>
-#include <nautoscrolllayout.h>
 #include <nlabel.h>
 
 

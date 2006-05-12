@@ -23,6 +23,8 @@
 #include "machinegui.h"
 #include "global.h"
 #include "plugin.h"
+#include <nautoscrolllayout.h>
+#include <nalignlayout.h>
 #include <napp.h>
 
 
@@ -30,11 +32,11 @@
 MachineView::MachineView()
  : NPanel()
 {
-  setLayout(new NAlignLayout(),true);
+  setLayout(NAlignLayout());
 
   scrollBox_ = new NScrollBox();
     scrollArea_ = new NPanel();
-      scrollArea_->setLayout(new NAutoScrollLayout(),true);
+      scrollArea_->setLayout(NAutoScrollLayout());
       scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
     scrollBox_->setScrollPane(scrollArea_);
   add(scrollBox_, nAlClient);

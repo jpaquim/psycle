@@ -23,7 +23,6 @@
 #include <nwindow.h>
 #include <nlabel.h>
 #include <nedit.h>
-#include <nlistlayout.h>
 #include <nbutton.h>
 
 /**

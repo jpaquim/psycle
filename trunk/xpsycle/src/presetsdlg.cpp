@@ -100,11 +100,11 @@ PresetsDlg::PresetsDlg(FrameMachine* mac)
   pane()->setSpacing(5,5,5,5);
 
   NPanel* btnBar = new NPanel();
-    NGridLayout* grid = new NGridLayout();
-    grid->setVgap(5);
-    grid->setHgap(5);
+    NGridLayout grid;
+      grid.setVgap(5);
+      grid.setHgap(5);
+    btnBar->setLayout(grid);
     NButton* btn;
-    btnBar->setLayout(grid,true);
     btnBar->add(new NButton("Save",false));
     btnBar->add(new NButton("Delete",false));
     btnBar->add(new NButton("Import",false));

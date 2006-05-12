@@ -30,6 +30,7 @@
 #include <nedit.h>
 #include <nfiledialog.h>
 #include <nslider.h>
+#include <nalignlayout.h>
 
 
 NBitmap Knob::kbitmap;
@@ -40,7 +41,7 @@ NewNameDlg::NewNameDlg( )
 {
 
   NPanel* btnPnl = new NPanel();
-    btnPnl->setLayout(new NFlowLayout(nAlRight,5,5),true);
+    btnPnl->setLayout(NFlowLayout(nAlRight,5,5));
     btnPnl->add(new NButton("add"));
     btnPnl->add(new NButton("cancel"));
   pane()->add(btnPnl,nAlBottom);
@@ -91,7 +92,7 @@ void FrameMachine::init( )
   setTitle(stringify(pMachine_->_macIndex)+std::string(" : ")+pMachine_->GetName());
 
   NPanel* prs = new NPanel();
-    prs->setLayout(new NAlignLayout(),true);
+    prs->setLayout(NAlignLayout());
     NButton* savePrsBtn = new NButton("save");
        savePrsBtn->setFlat(false);
     prs->add(savePrsBtn,nAlLeft);
@@ -115,9 +116,9 @@ void FrameMachine::init( )
        leftPrsBtn->clicked.connect(this,&FrameMachine::onLeftBtn);
     prs->add(leftPrsBtn,nAlRight);
     prsPanel = new NTogglePanel();
-      NFlowLayout* fl = new NFlowLayout(nAlLeft,5,5);
-        fl->setLineBreak(false);
-      prsPanel->setLayout(fl,true);
+      NFlowLayout fl(nAlLeft,5,5);
+        fl.setLineBreak(false);
+      prsPanel->setLayout(fl);
     prs->add(prsPanel, nAlClient);
   pane()->add(prs, nAlBottom);
 }
@@ -130,8 +131,7 @@ inline int format(int c, int maxcols, int maxrows) {
 void FrameMachine::initParameterGUI( )
 {
   knobPanel = new NPanel();
-    gridLayout = new NGridLayout();
-    knobPanel->setLayout(gridLayout,true);
+    knobPanel->setLayout(NGridLayout());
   pane()->add(knobPanel,nAlClient);
 
   NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
