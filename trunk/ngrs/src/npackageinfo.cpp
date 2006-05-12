@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,35 +17,54 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NNOTEBOOK_H
-#define NNOTEBOOK_H
+#include "npackageinfo.h"
+#include <iostream>
 
-#include "npanel.h"
-
-/**
-@author Stefan
-*/
-class NNoteBook : public NPanel
+NPackageInfo::NPackageInfo()
 {
-public:
-    NNoteBook();
-
-    ~NNoteBook();
-
-    void add(NPanel* page);
-    void setActivePage(NPanel* page);
-    void setActivePage(unsigned int index);
-
-    virtual void resize();
-
-    virtual int preferredWidth() const;
-    virtual int preferredHeight() const;
+  std::vector<std::string> standards;
+    standards.push_back("Label");
+  packageMap[std::string("Standard")] = standards;
+  std::cout << "hier" << std::endl;
+  packageName = "ngrs_pkg";
+}
 
 
-private:
+NPackageInfo::~NPackageInfo()
+{
+}
 
-    NPanel* visiblePage_;
+extern "C" NPackageInfo* createPackageInfo() {
+    std::cout << "create" << std::endl;
+    return new NPackageInfo();
+}
 
-};
+extern "C" void destroyNPackageInfo(NPackageInfo* p) {
+    delete p;
+}
 
-#endif
+std::vector< std::string > NPackageInfo::categories( ) const
+{
+
+  std::vector<std::string> stringList;
+
+  for (std::map<std::string , std::vector<std::string> >::const_iterator i(packageMap.begin()) ; i != packageMap.end() ; ++i) stringList.push_back(i->first);
+
+  return stringList;
+}
+
+std::vector< std::string > NPackageInfo::factoryNamesByCategory( const std::string & categoryName ) const
+{
+  std::map<std::string , std::vector<std::string> >::const_iterator itr = packageMap.begin();
+
+  if ( (itr = packageMap.find(categoryName)) == packageMap.end() )
+    return std::vector<std::string>(); // empty list
+  else
+    return itr->second;
+}
+
+std::string NPackageInfo::name( ) const
+{
+  return packageName;
+}
+

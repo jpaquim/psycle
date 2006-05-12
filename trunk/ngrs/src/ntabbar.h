@@ -48,6 +48,7 @@ public:
    void setActiveTab(NPanel* page);
    void setActiveTab(unsigned int index);
 
+
 private:
 
    NFlowLayout fl;

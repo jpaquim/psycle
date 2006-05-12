@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,35 +17,37 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NNOTEBOOK_H
-#define NNOTEBOOK_H
+#ifndef NPACKAGEINFO_H
+#define NPACKAGEINFO_H
 
-#include "npanel.h"
+#include <map>
+#include <string>
+#include <vector>
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
-class NNoteBook : public NPanel
-{
+class NPackageInfo{
 public:
-    NNoteBook();
+    NPackageInfo();
 
-    ~NNoteBook();
+    ~NPackageInfo();
 
-    void add(NPanel* page);
-    void setActivePage(NPanel* page);
-    void setActivePage(unsigned int index);
+    std::string name() const;
 
-    virtual void resize();
-
-    virtual int preferredWidth() const;
-    virtual int preferredHeight() const;
-
+    std::vector<std::string> categories() const;
+    std::vector<std::string> factoryNamesByCategory(const std::string & categoryName) const;
 
 private:
 
-    NPanel* visiblePage_;
+    std::map<std::string, std::vector<std::string> > packageMap;
 
+    std::string packageName;
 };
+
+// the types of the class factories
+typedef NPackageInfo* create_p();
+typedef void destroy_p(NPackageInfo*);
+
 
 #endif

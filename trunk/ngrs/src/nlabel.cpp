@@ -52,6 +52,16 @@ void NLabel::init( )
 }
 
 
+// the class factories
+
+extern "C" NObject* createLabel() {
+    return new NLabel();
+}
+
+extern "C" void destroyLabel(NObject* p) {
+    delete p;
+}
+
 NLabel::~NLabel()
 {
 }
@@ -277,3 +287,4 @@ bool NLabel::wordBreak( ) const
 {
   return wbreak_;
 }
+
