@@ -38,7 +38,7 @@ NMenuItem::NMenuItem( const std::string & text )
 
 void NMenuItem::init( )
 {
-  setLayout(new NAlignLayout(), true);
+  setLayout(NAlignLayout());
 
   iconImg_ = new NImage();
   iconImg_->setPreferredSize(20,20);

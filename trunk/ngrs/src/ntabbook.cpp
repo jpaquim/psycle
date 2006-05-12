@@ -24,7 +24,7 @@
 NTabBook::NTabBook()
  : NPanel()
 {
-   setLayout(new NAlignLayout(),true);
+   setLayout(NAlignLayout());
 
    tabBar_ = new NTabBar();
    tabBar_->setAlign(nAlTop);

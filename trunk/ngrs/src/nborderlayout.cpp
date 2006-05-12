@@ -30,6 +30,11 @@ NBorderLayout::~NBorderLayout()
 {
 }
 
+NBorderLayout * NBorderLayout::clone( ) const
+{
+  return new NBorderLayout(*this);
+}
+
 void NBorderLayout::align( NVisualComponent * parent )
 {
   NVisualComponent* lastTop    = 0;
@@ -148,5 +153,7 @@ int NBorderLayout::preferredHeight( const NVisualComponent * target ) const
 
  return tOff + bOff + cOff;
 }
+
+
 
 

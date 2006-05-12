@@ -30,6 +30,7 @@ class NGridLayout : public NLayout
 public:
     NGridLayout();
     NGridLayout(int cols, int rows);
+    virtual NGridLayout* clone()  const;   // Uses the copy constructor
 
     ~NGridLayout();
 

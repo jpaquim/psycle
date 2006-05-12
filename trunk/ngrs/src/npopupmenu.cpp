@@ -21,13 +21,15 @@
 #include "napp.h"
 #include "nconfig.h"
 #include "nframeborder.h"
+#include "nlistlayout.h"
 #include <iostream>
 
 NPopupMenu::NPopupMenu()
  : NPopupWindow()
 {
   setName("name");
-  pane()->setLayout(new NListLayout(),true);
+  pane()->setLayout(NListLayout());
+  pane()->skin_ = NApp::config()->skin("popup_menu_bg");
 }
 
 
@@ -38,15 +40,8 @@ NPopupMenu::~NPopupMenu()
 void NPopupMenu::setVisible( bool on )
 {
   if (on) pack();
-
   NWindow::setVisible(on);
-
-  if (on) {
-     setGrabEvents(true);
-  } else {
-     setGrabEvents(false);
-  }
-
+  setGrabEvents(on);
 }
 
 void NPopupMenu::add( NCustomMenuItem * item )

@@ -30,7 +30,7 @@ NListBox::NListBox()
   listBoxPane_->setTransparent(false);
   setScrollPane(listBoxPane_);
 
-  listBoxPane_->setLayout(new NListLayout(),true);
+  listBoxPane_->setLayout(NListLayout());
   listBoxPane_->setClientSizePolicy(nVertical + nHorizontal);
 
   multiSelect_ = false;

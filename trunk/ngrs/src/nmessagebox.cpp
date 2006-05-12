@@ -38,7 +38,7 @@ NMessageBox::NMessageBox( const std::string & msgText )
 void NMessageBox::init( )
 {
   NPanel* btnPnl = new NPanel();
-    btnPnl->setLayout(new NFlowLayout(nAlRight,5,5),true);
+    btnPnl->setLayout(NFlowLayout(nAlRight,5,5));
     okBtn = new NButton("ok");
       okBtn->setFlat(false);
       okBtn->clicked.connect(this,&NMessageBox::onBtnPress);

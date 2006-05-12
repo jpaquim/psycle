@@ -22,7 +22,6 @@
 
 #include <nsystem.h>
 #include <npanel.h>
-#include <nalignlayout.h>
 #include <niswindow.h>
 #include <nregion.h>
 

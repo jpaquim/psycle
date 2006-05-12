@@ -21,7 +21,6 @@
 #define NPOPUPMENU_H
 
 #include "npopupwindow.h"
-#include "nlistlayout.h"
 #include "nmenuseperator.h"
 
 

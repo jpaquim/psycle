@@ -129,7 +129,7 @@ void NTestWindow::onOpen( NButtonEvent * ev )
 
 void NTestWindow::testBorderLayout( )
 {
-  pane()->setLayout(new NBorderLayout(),true);
+  pane()->setLayout(NBorderLayout());
 
   NButton* button = new NButton("Button 1 (PAGE_START)");
   pane()->add(button, nAlTop);

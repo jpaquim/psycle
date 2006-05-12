@@ -27,6 +27,12 @@ NListLayout::NListLayout()
 }
 
 
+NListLayout * NListLayout::clone( ) const
+{
+  return new NListLayout(*this);
+}
+
+
 NListLayout::~NListLayout()
 {
 }

@@ -75,12 +75,12 @@ NDockPanel::NDockPanel( NVisualComponent * clientComponent )
 void NDockPanel::init( )
 {
   // an alignLayout for top : dochBar and client the pane
-  setLayout( new NAlignLayout() , true );
+  setLayout(NAlignLayout());
 
   // create header with the button to dock and undock the pane
 
   dockBar_ = new NPanel();
-    dockBar_->setLayout( flowLayout = new NFlowLayout(nAlRight,0,0), true);
+    dockBar_->setLayout( NFlowLayout(nAlRight,0,0));
     // create the dockBar icon bitmaps
     dockBmp.createFromXpmData(windock_xpm);
     undockBmp.createFromXpmData(winundock_xpm);
@@ -98,7 +98,7 @@ void NDockPanel::init( )
 
   area_ = new NPanel();
     // set as area btw pane default NAlignLayout
-    area_->setLayout( new NAlignLayout() , true);
+    area_->setLayout( NAlignLayout());
   add(area_,nAlClient);
 
   // start state = docked

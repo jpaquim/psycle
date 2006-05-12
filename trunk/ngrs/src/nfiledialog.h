@@ -31,7 +31,6 @@ const int nLoad = 2;
 class NCheckBox;
 class NLabel;
 class NEdit;
-class NFlowLayout;
 class NComboBox;
 class NFrameBorder;
 
@@ -76,7 +75,6 @@ private:
    NCheckBox* hBox;
 
    NButton* okBtn_;
-   NFlowLayout* navLayout;
    NFrameBorder* dirPanelBorder;
 
    void onItemSelected(NItemEvent* ev);

@@ -29,6 +29,7 @@ class NBorderLayout : public NLayout
 {
 public:
     NBorderLayout();
+    virtual NBorderLayout* clone()  const;   // Uses the copy constructor
 
     ~NBorderLayout();
 

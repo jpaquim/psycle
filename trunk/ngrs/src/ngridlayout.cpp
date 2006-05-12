@@ -24,13 +24,15 @@ NGridLayout::NGridLayout( ) : cols_(1),rows_(1), hgap_(0), vgap_(0)
 {
 }
 
-
-
 NGridLayout::NGridLayout(int cols, int rows)
  : NLayout(), cols_(cols),rows_(rows), hgap_(0), vgap_(0)
 {
 }
 
+NGridLayout * NGridLayout::clone( ) const
+{
+  return new NGridLayout(*this);
+}
 
 NGridLayout::~NGridLayout()
 {
@@ -119,6 +121,8 @@ void NGridLayout::setVgap( int vgap )
 {
   vgap_ = vgap;
 }
+
+
 
 
 

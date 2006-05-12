@@ -373,7 +373,11 @@ NSkin NConfig::skin( const std::string & identifier )
   } else
   if (identifier == "mitemnone") {
   } else
-  if (identifier == "popmnubg") {
+  if (identifier == "popup_menu_bg") {
+    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+    skin.setBackground(NColor(240,240,240));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
   } else
   if (identifier == "sbar_pane") {
     skin.setBackground(NColor(230,230,230));
