@@ -143,6 +143,6 @@ if True:
 		maintainer = bohan,
 		binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
 	)
-	#print '==== debian/control ===='
+	#print '======== debian/control'
 	#print debian.control()
 	
