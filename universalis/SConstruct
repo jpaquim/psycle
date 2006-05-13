@@ -52,6 +52,7 @@ if True:
 		debian_version_compare = '>= 2.9',
 	)
 	glibmm.show()
+	#if glibmm.failed():
 
 	glibmm = packageneric.ExternalPackage(
 		packageneric,
@@ -61,14 +62,53 @@ if True:
 		debian_version_compare = '>= 2.4',
 	)
 	glibmm.show()
-	
+
+	# boost base	
 	boost = packageneric.ExternalPackage(
 		packageneric,
 		debian = 'libboost-dev',
 		debian_version_compare = '>= 1.33'
 	)
-	packageneric.configure().CheckHeader('boost/version.hpp')
-	packageneric.configure().CheckLib('boost_thread') # adds to env LIBS automatically
+	boost.show()
+	if False:
+		result = []
+		if not packageneric.build_and_execute(
+			source =
+				'''
+					#include <boost/version.hpp>
+					#include <iostream>
+					int main()
+					{
+						std::cout << BOOST_VERSION << std::endl;
+					}
+				''',
+			requires = [],
+			result = result
+		):
+			if not packageneric.check_header(boost, 'boost/version.hpp'):
+				packageneric.error('boost headers required')
+			else:
+				packageneric.error('something odd happened')
+			packageneric.abort()
+		else:
+			if not packageneric.version_match(result[1], '>= 1.33'):
+				packageneric.error('boost headers found but version missmatch')
+				packageneric.abort()
+			
+	packageneric.check_header(boost, 'boost/version.hpp')
+
+	# boost	thread
+	boost_thread = packageneric.ExternalPackage(
+		packageneric,
+		debian = 'libboost-thread-dev',
+		debian_version_compare = boost.debian_version_compare
+	)
+	boost_thread.show()
+	packageneric.check_header_and_library(boost_thread, 'boost/thread/thread.hpp', 'boost_thread')
+
+	for x in (diversalis, glibmm, boost, boost_thread):
+		if x.failed:
+			packageneric.abort()
 
 	packageneric.finish_configure()
 
@@ -96,9 +136,8 @@ if True:
 
 # install
 if False:
-	import SCons as cobaye
-	install = packageneric.InstallPrefix(cobaye)
-	packageneric.environment().Install(install.lib, universalis.scons())
+	install = packageneric.InstallPrefix(packageneric)
+	packageneric.environment().Install(install.lib, universalis.get_libs())
 	packageneric.environment().Install(install.include, universalis.get_headers())
 	packageneric.environment().Alias('install', install.prefix)
 
