@@ -39,10 +39,15 @@ public:
 
     void setDown(NCustomButton* btn);
 
+    NVisualComponent* selectedComponent();
+
+    signal1<NButtonEvent*> click;
+
 private:
 
    void onClick(NButtonEvent* ev);
 
+   NVisualComponent* selectedComp_;
 };
 
 #endif

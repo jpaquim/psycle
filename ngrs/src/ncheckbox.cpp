@@ -50,6 +50,17 @@ NCheckBox::~NCheckBox()
 {
 }
 
+// class factories
+
+extern "C" NObject* createCheckBox() {
+    return new NCheckBox();
+}
+
+extern "C" void destroyCheckBox(NObject* p) {
+    delete p;
+}
+
+
 void NCheckBox::paint( NGraphics * g )
 {
   dx = 5;

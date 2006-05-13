@@ -46,6 +46,17 @@ NListBox::~NListBox()
 {
 }
 
+// the class factories
+
+extern "C" NObject* createListBox() {
+    return new NListBox();
+}
+
+extern "C" void destroyListBox(NObject* p) {
+    delete p;
+}
+
+
 void NListBox::add( NCustomItem * component , bool align)
 {
   listBoxPane_->add(component);

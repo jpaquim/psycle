@@ -149,7 +149,7 @@ public:
 
     void setClipping(bool on);
 
-    int align();
+    int align() const;
     void setAlign(int align);
 
     virtual int preferredWidth() const;

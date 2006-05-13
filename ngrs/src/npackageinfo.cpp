@@ -24,8 +24,25 @@ NPackageInfo::NPackageInfo()
 {
   std::vector<std::string> standards;
     standards.push_back("Label");
+    standards.push_back("Edit");
+    standards.push_back("Button");
+    standards.push_back("ScrollBar");
+    standards.push_back("CheckBox");
+    standards.push_back("GroupBox");
+    standards.push_back("ComboBox");
+    standards.push_back("ListBox");
+    standards.push_back("TogglePanel");
+    standards.push_back("Panel");
   packageMap[std::string("Standard")] = standards;
-  std::cout << "hier" << std::endl;
+
+  std::vector<std::string> additional;
+    additional.push_back("Image");
+  packageMap[std::string("Additional")] = additional;
+
+  std::vector<std::string> dialogs;
+    dialogs.push_back("FileDialog");
+  packageMap[std::string("Dialogs")] = dialogs;
+
   packageName = "ngrs_pkg";
 }
 
@@ -35,7 +52,6 @@ NPackageInfo::~NPackageInfo()
 }
 
 extern "C" NPackageInfo* createPackageInfo() {
-    std::cout << "create" << std::endl;
     return new NPackageInfo();
 }
 

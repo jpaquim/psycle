@@ -36,6 +36,17 @@ NEdit::~NEdit()
 {
 }
 
+// the class factories
+
+extern "C" NObject* createEdit() {
+    return new NEdit();
+}
+
+extern "C" void destroyEdit(NObject* p) {
+    delete p;
+}
+
+
 void NEdit::init( )
 {
   metrics.setFont(font());
