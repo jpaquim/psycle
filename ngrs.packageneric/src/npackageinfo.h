@@ -1,0 +1,1 @@
+../../ngrs/src/npackageinfo.h
