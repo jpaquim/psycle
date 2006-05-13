@@ -40,6 +40,8 @@ NVisualComponent::NVisualComponent()
   ownerSizeSet_ = false;
   ownerPreferredWidth_  = 0;
   ownerPreferredHeight_ = 0;
+
+  if (properties()) properties()->bind("align", *this, &NVisualComponent::align, &NVisualComponent::setAlign);
 }
 
 NVisualComponent::~NVisualComponent()
@@ -464,7 +466,7 @@ void NVisualComponent::setClipping( bool on )
   clipping_ = on;
 }
 
-int NVisualComponent::align( )
+int NVisualComponent::align( ) const
 {
   return align_;
 }

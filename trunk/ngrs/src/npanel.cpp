@@ -35,6 +35,15 @@ NPanel::~NPanel()
 {
 }
 
+// the class factories
+
+extern "C" NObject* createPanel() {
+    return new NPanel();
+}
+
+extern "C" void destroyPanel(NObject* p) {
+    delete p;
+}
 
 
 

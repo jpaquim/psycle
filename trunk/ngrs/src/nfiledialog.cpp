@@ -292,6 +292,17 @@ NFileDialog::NFileDialog()
   setPosition(0,0,550,400);
 }
 
+// the class factories
+
+extern "C" NObject* createFileDialog() {
+    return new NFileDialog();
+}
+
+extern "C" void destroyFileDialog(NObject* p) {
+    delete p;
+}
+
+
 
 NFileDialog::~NFileDialog()
 {

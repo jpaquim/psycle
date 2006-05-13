@@ -144,6 +144,17 @@ void NScrollBar::init( )
   slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit));
 }
 
+// class factories
+
+extern "C" NObject* createScrollBar() {
+    return new NScrollBar();
+}
+
+extern "C" void destroyScrollBar(NObject* p) {
+    delete p;
+}
+
+
 void NScrollBar::resize( )
 {
   switch (orientation_) {

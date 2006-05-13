@@ -76,6 +76,17 @@ void NComboBox::init( )
   popup->pane()->add(lbox);
 }
 
+// the class factories
+
+extern "C" NObject* createComboBox() {
+    return new NComboBox();
+}
+
+extern "C" void destroyComboBox(NObject* p) {
+    delete p;
+}
+
+
 void NComboBox::resize( )
 {
   downBtn_->setPosition(clientWidth()-downBtn_->width(),0,downBtn_->width(),clientHeight());

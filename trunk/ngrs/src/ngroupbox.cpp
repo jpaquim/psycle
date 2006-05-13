@@ -35,6 +35,17 @@ NGroupBox::~NGroupBox()
 }
 
 
+// the class factories
+
+extern "C" NObject* createGroupBox() {
+    return new NGroupBox();
+}
+
+extern "C" void destroyGroupBox(NObject* p) {
+    delete p;
+}
+
+
 /// GBorder Class
 
 NBorder* NGroupBox::GBorder::clone( ) const

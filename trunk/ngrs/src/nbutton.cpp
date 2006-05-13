@@ -42,6 +42,7 @@ NButton::~ NButton( )
 {
 }
 
+
 NButton::NButton( const std::string & text, int minWidth, int minHeight ) : NCustomButton(text), flat_(1), icon_(0)
 {
   setMinimumWidth(minWidth);
@@ -74,6 +75,16 @@ NButton::NButton( NImage * icon , int minWidth, int minHeight) : NCustomButton()
   setMinimumWidth(minWidth);
   add(icon);
   init();
+}
+
+// class factories
+
+extern "C" NObject* createButton() {
+    return new NButton();
+}
+
+extern "C" void destroyButton(NObject* p) {
+    delete p;
 }
 
 void NButton::resize( )

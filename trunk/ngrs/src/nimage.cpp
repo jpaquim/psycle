@@ -39,6 +39,15 @@ NImage::NImage( std::string fileName ) : NPanel()
   pBitmap_ = 0;
 }
 
+// the class factories
+
+extern "C" NObject* createImage() {
+    return new NImage();
+}
+
+extern "C" void destroyImage(NImage* p) {
+    delete p;
+}
 
 
 NImage::~NImage()
