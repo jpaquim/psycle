@@ -51,6 +51,10 @@ public:
 
     virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRegion & repaintArea, NVisualComponent* sender);
 
+    virtual void add(class NVisualComponent* comp);
+    virtual void remove(class NVisualComponent* comp);
+    virtual void removeAll();
+
 private:
 
    class NVisualComponent* parent_;
