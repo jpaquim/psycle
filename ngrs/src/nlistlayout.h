@@ -50,6 +50,8 @@ private:
     int findVerticalStart( long comparator , NVisualComponent* owner);
     int maxX_, maxY_;
 
+    std::vector<NVisualComponent*> comps;
+
 };
 
 #endif

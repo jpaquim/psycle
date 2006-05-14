@@ -33,7 +33,6 @@ NVisualComponent::NVisualComponent()
   scrollDx_ = scrollDy_ = 0;
   layout_  = 0;
   win_ = 0;
-  align_ = 0;
   clipping_ = events_ = true;
   clSzPolicy = 0;
 
@@ -468,12 +467,12 @@ void NVisualComponent::setClipping( bool on )
 
 int NVisualComponent::align( ) const
 {
-  return align_;
+  return alignConstraint_.align();
 }
 
 void NVisualComponent::setAlign( int align )
 {
-  align_ = align;
+  alignConstraint_.setAlign(align);
 }
 
 int NVisualComponent::preferredWidth( ) const
@@ -590,7 +589,10 @@ void NVisualComponent::add( NVisualComponent * component )
   if (component == this) return;
 
   visualComponents_.push_back(component);
-  if (layout_!=0) layout_->align(this);
+  if (layout_!=0) {
+      layout_->add(component);
+      layout_->align(this);
+  }
 }
 
 NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area)
@@ -672,6 +674,10 @@ void NVisualComponent::removeChilds( )
   if (window()!=0) window()->checkForRemove(0);
   components.clear();
   visualComponents_.clear();
+  if (layout_!=0) {
+      layout_->removeAll();
+      layout_->align(this);
+  }
 }
 
 void NVisualComponent::removeChild( NVisualComponent * child )
@@ -683,6 +689,10 @@ void NVisualComponent::removeChild( NVisualComponent * child )
   visualComponents_.erase(vItr);
   NApp::addRemovePipe(child);
   if (window()!=0) window()->checkForRemove(0);
+  if (layout_!=0) {
+      layout_->remove(child);
+      layout_->align(this);
+  }
 }
 
 void NVisualComponent::erase( NVisualComponent * child )
@@ -693,6 +703,10 @@ void NVisualComponent::erase( NVisualComponent * child )
   std::vector<NVisualComponent*>::iterator vItr = find(visualComponents_.begin(),visualComponents_.end(),child);
   visualComponents_.erase(vItr);
   if (window()!=0) window()->checkForRemove(0);
+  if (layout_!=0) {
+      layout_->remove(child);
+      layout_->align(this);
+  }
 }
 
 const std::vector< NVisualComponent * > & NVisualComponent::visualComponents( )
@@ -802,6 +816,16 @@ int NVisualComponent::ownerWidth( ) const
 int NVisualComponent::ownerHeight( ) const
 {
   return ownerPreferredHeight_;
+}
+
+void NVisualComponent::setAlignConstraint( const NAlignConstraint & constraint )
+{
+  alignConstraint_ = constraint;
+}
+
+NAlignConstraint NVisualComponent::alignConstraint( ) const
+{
+  return alignConstraint_;
 }
 
 

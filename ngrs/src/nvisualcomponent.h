@@ -32,6 +32,7 @@
 #include "nmoveable.h"
 #include "nmoveevent.h"
 #include "nskin.h"
+#include "nalignconstraint.h"
 
 class NWindow;
 
@@ -149,8 +150,10 @@ public:
 
     void setClipping(bool on);
 
-    int align() const;
     void setAlign(int align);
+    int align() const;
+    void setAlignConstraint(const NAlignConstraint & constraint);
+    NAlignConstraint alignConstraint() const;
 
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
@@ -202,7 +205,6 @@ private:
    NMoveable moveable_;
    class NWindow* win_;
 
-   int align_;
    std::string alignStr_;
 
    int clSzPolicy;
@@ -210,6 +212,8 @@ private:
    bool ownerSizeSet_;
    int ownerPreferredWidth_;
    int ownerPreferredHeight_;
+
+   NAlignConstraint alignConstraint_;
 };
 
 #endif

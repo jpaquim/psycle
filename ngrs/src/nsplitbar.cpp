@@ -42,7 +42,7 @@ NSplitBar::~NSplitBar()
 void NSplitBar::init( )
 {
   setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
-  setWidth(5);
+  setPreferredSize(3,3);
   skin_ = NApp::config()->skin("splitbar");
 }
 
@@ -93,12 +93,11 @@ void NSplitBar::setOrientation( int orientation )
 {
   setGradientOrientation(!orientation);
   orientation_ = orientation;
+  setPreferredSize(3,3);
   if (orientation == nVertical) {
-     setWidth(5);
      setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
   } else
   if (orientation == nHorizontal) {
-     setHeight(5);
      setMoveable(NMoveable(nMvVertical | nMvNoneRepaint | nMvParentLimit));
   }
 }
