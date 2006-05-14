@@ -21,23 +21,53 @@
 #define NTABLELAYOUT_H
 
 #include <nlayout.h>
+#include <map>
 
 /**
 @author Stefan Nattkemper
 */
 class NTableLayout : public NLayout
 {
+  class Col {
+     public :
+       Col();
+       Col(int row, class NVisualComponent* comp);
+       ~Col();
+
+       int colWidth() const;
+
+     private:
+
+       std::map<int, class NVisualComponent*> colMap;
+       int colWidth_;
+  };
+
+
 public:
     NTableLayout();
 
     ~NTableLayout();
 
+    void setRows(int number);
+    void setColumns(int number);
+
     virtual NTableLayout* clone()  const;   // Uses the copy constructor
+
+    virtual void align(class NVisualComponent* parent);
 
     virtual int preferredWidth(const class NVisualComponent* target) const;
     virtual int preferredHeight(const class NVisualComponent* target) const;
 
+    virtual void add(class NVisualComponent* comp);
+    virtual void remove(class NVisualComponent* comp);
+    virtual void removeAll();
 
+private:
+
+    int cols_;
+    int rows_;
+
+    std::map<int,Col> columns;
 };
 
 #endif
