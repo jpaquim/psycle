@@ -21,7 +21,7 @@
 #include "nvisualcomponent.h"
 
 NTableLayout::NTableLayout()
- : NLayout()
+ : NLayout(), cols_(1), rows_(1)
 {
 }
 
@@ -35,14 +35,67 @@ NTableLayout * NTableLayout::clone( ) const
   return new NTableLayout(*this);
 }
 
-
+void NTableLayout::align( NVisualComponent * parent )
+{
+}
 
 int NTableLayout::preferredWidth( const NVisualComponent * target ) const
 {
+  return 10;
 }
 
 int NTableLayout::preferredHeight( const NVisualComponent * target ) const
 {
+  return 10;
 }
+
+void NTableLayout::add( NVisualComponent * comp )
+{
+  if (comp) {
+    int col = comp->alignConstraint().col();
+    int row = comp->alignConstraint().row();
+
+    columns[col] = Col(row,comp);
+  }
+}
+
+void NTableLayout::remove( NVisualComponent * comp )
+{
+}
+
+void NTableLayout::removeAll( )
+{
+}
+
+void NTableLayout::setRows( int number )
+{
+  cols_ = number;
+}
+
+void NTableLayout::setColumns( int number )
+{
+  rows_ = number;
+}
+
+NTableLayout::Col::Col( )
+{
+  colWidth_ = 100; // test value
+}
+
+NTableLayout::Col::~ Col( )
+{
+}
+
+NTableLayout::Col::Col( int row, NVisualComponent * comp )
+{
+  colMap[row] = comp;
+}
+
+int NTableLayout::Col::colWidth( ) const
+{
+   return colWidth_;
+}
+
+
 
 
