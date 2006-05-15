@@ -21,21 +21,21 @@
 #define NTESTWINDOW_H
 
 #include <nwindow.h>
-#include "nmenubar.h"
-#include "nmenuitem.h"
-#include "nscrollbox.h"
-#include "nedit.h"
-#include "nfile.h"
-#include "nprogressbar.h"
-#include "nslider.h"
-#include "nimage.h"
-#include "nslider.h"
-#include "nnotebook.h"
-#include "npage.h"
-#include "ntabbook.h"
-#include "ncheckbox.h"
-#include "nfilelistbox.h"
-#include "nfiledialog.h"
+#include <nmenubar.h>
+#include <nmenuitem.h>
+#include <nscrollbox.h>
+#include <nedit.h>
+#include <nfile.h>
+#include <nprogressbar.h>
+#include <nslider.h>
+#include <nimage.h>
+#include <nslider.h>
+#include <nnotebook.h>
+#include <npage.h>
+#include <ntabbook.h>
+#include <ncheckbox.h>
+#include <nfilelistbox.h>
+#include <nfiledialog.h>
 
 /**
 @author Stefan

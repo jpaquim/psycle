@@ -27,12 +27,12 @@
 #include <sstream>
 #include <string>
 #include <cstdlib>
-#include "napp.h"
-#include "ntestwindow.h"
-#include "nwindow.h"
-#include "nnfa.h"
-#include "nstate.h"
-#include "nsplashscreen.h"
+#include <napp.h>
+#include <ntestwindow.h>
+#include <nwindow.h>
+#include <nnfa.h>
+#include <nstate.h>
+#include <nsplashscreen.h>
 
 using namespace std;
 
