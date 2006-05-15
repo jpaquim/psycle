@@ -23,7 +23,7 @@
 #include <string>
 #include "nfont.h"
 #include "nfontstructure.h"
-#include "ngrs/color_converter.hpp"
+#include "color_converter.hpp"
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
