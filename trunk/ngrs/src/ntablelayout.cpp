@@ -37,6 +37,22 @@ NTableLayout * NTableLayout::clone( ) const
 
 void NTableLayout::align( NVisualComponent * parent )
 {
+   int xp = 0;
+   int yp = 0;
+
+   std::map<int,Row>::iterator rowIt = rows.begin();
+   for ( ; rowIt != rows.end(); rowIt++ ) {
+      Row row = rowIt->second;
+      std::map<int,NVisualComponent*>::iterator colIt = row.colMap.begin();
+      int rowHeight = defaultRowHeight();
+      xp=0;
+      for ( ; colIt != row.colMap.end(); colIt++) {
+         NVisualComponent* visual = colIt->second;
+         visual->setPosition(xp,yp,defaultColWidth(),defaultRowHeight());
+         xp+=defaultColWidth();
+      }
+      yp+=defaultRowHeight();
+   }
 }
 
 int NTableLayout::preferredWidth( const NVisualComponent * target ) const
@@ -55,7 +71,12 @@ void NTableLayout::add( NVisualComponent * comp )
     int col = comp->alignConstraint().col();
     int row = comp->alignConstraint().row();
 
-    columns[col] = Col(row,comp);
+    std::map<int,Row>::iterator itr;
+    if ( (itr = rows.find( row )) == rows.end() ) {
+       rows[row] = Row(col,comp);
+    } else {
+       itr->second.add(col,comp);
+    }
   }
 }
 
@@ -77,24 +98,52 @@ void NTableLayout::setColumns( int number )
   rows_ = number;
 }
 
-NTableLayout::Col::Col( )
-{
-  colWidth_ = 100; // test value
-}
-
-NTableLayout::Col::~ Col( )
+NTableLayout::Row::Row( )
 {
 }
 
-NTableLayout::Col::Col( int row, NVisualComponent * comp )
+NTableLayout::Row::~ Row( )
 {
-  colMap[row] = comp;
 }
 
-int NTableLayout::Col::colWidth( ) const
+NTableLayout::Row::Row( int col, NVisualComponent * comp )
 {
-   return colWidth_;
+  colMap[col] = comp;
 }
+
+int NTableLayout::Row::rowHeight( ) const
+{
+   //return colWidth_;
+}
+
+void NTableLayout::Row::add( int col, NVisualComponent * comp )
+{
+  colMap[col] = comp;
+}
+
+NVisualComponent * NTableLayout::Row::colAt( int index )
+{
+  std::map<int,NVisualComponent*>::iterator itr;
+  if ( (itr = colMap.find( index )) == colMap.end() ) {
+    return 0;
+  } else {
+    return itr->second;
+  }
+}
+
+int NTableLayout::defaultColWidth( ) const
+{
+  return 100;
+}
+
+int NTableLayout::defaultRowHeight( ) const
+{
+  return 20;
+}
+
+
+
+
 
 
 
