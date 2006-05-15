@@ -28,18 +28,21 @@
 */
 class NTableLayout : public NLayout
 {
-  class Col {
+  class Row {
      public :
-       Col();
-       Col(int row, class NVisualComponent* comp);
-       ~Col();
+       Row();
+       Row(int col, class NVisualComponent* comp);
+       ~Row();
 
-       int colWidth() const;
+       int rowHeight() const;
+       NVisualComponent* colAt(int index);
+
+       void add(int col, class NVisualComponent* comp);
+
+       std::map<int, class NVisualComponent*> colMap;
 
      private:
 
-       std::map<int, class NVisualComponent*> colMap;
-       int colWidth_;
   };
 
 
@@ -50,6 +53,9 @@ public:
 
     void setRows(int number);
     void setColumns(int number);
+
+    int defaultColWidth() const;
+    int defaultRowHeight() const;
 
     virtual NTableLayout* clone()  const;   // Uses the copy constructor
 
@@ -67,7 +73,7 @@ private:
     int cols_;
     int rows_;
 
-    std::map<int,Col> columns;
+    std::map<int,Row> rows;
 };
 
 #endif

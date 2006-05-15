@@ -26,6 +26,7 @@
 class NAlignConstraint{
 public:
     NAlignConstraint();
+    NAlignConstraint(int align, int col, int row);
 
     ~NAlignConstraint();
 

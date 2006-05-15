@@ -23,6 +23,9 @@ NAlignConstraint::NAlignConstraint() : align_(0), col_(0), row_(0)
 {
 }
 
+NAlignConstraint::NAlignConstraint( int align, int col, int row ) : align_(align), col_(col), row_(row)
+{
+}
 
 NAlignConstraint::~NAlignConstraint()
 {
@@ -53,5 +56,7 @@ int NAlignConstraint::row( ) const
 {
   return row_;
 }
+
+
 
 
