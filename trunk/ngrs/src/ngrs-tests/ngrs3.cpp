@@ -29,12 +29,12 @@
 #include <string>
 #include <cstdlib>
 
-#include "napp.h"
-#include "ntestwindow.h"
-#include "nregexp.h"
-#include "nruntime.h"
-#include "nproperty.h"
-#include "nlabel.h"
+#include <napp.h>
+#include <ntestwindow.h>
+#include <nregexp.h>
+#include <nruntime.h>
+#include <nproperty.h>
+#include <nlabel.h>
 
 using namespace std;
 
