@@ -20,7 +20,7 @@
 #ifndef NPANEL_H
 #define NPANEL_H
 
-#include "ngrs/nvisualcomponent.h"
+#include "nvisualcomponent.h"
 
 
 /**

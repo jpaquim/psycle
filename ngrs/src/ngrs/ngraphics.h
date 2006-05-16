@@ -20,14 +20,14 @@
 #ifndef NGRAPHICS_H
 #define NGRAPHICS_H
 
-#include "ngrs/nsystem.h"
-#include "ngrs/nrect.h"
-#include "ngrs/ncolor.h"
+#include "nsystem.h"
+#include "nrect.h"
+#include "ncolor.h"
 #include <stack>
-#include "ngrs/nbitmap.h"
-#include "ngrs/nfntstring.h"
-#include "ngrs/nregion.h"
-#include "ngrs/npixmap.h"
+#include "nbitmap.h"
+#include "nfntstring.h"
+#include "nregion.h"
+#include "npixmap.h"
 
 
 /**

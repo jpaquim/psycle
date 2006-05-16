@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/npoint3d.h"
+#include "npoint3d.h"
 
 NPoint3D::NPoint3D() : x_(0), y_(0) , z_(0) {}
 

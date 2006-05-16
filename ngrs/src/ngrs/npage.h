@@ -22,7 +22,7 @@
 
  // this class is obsolete
 
-#include "ngrs/npanel.h"
+#include "npanel.h"
 
 /**
 @author Stefan

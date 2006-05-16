@@ -17,12 +17,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ntoolbar.h"
-#include "ngrs/nbevelborder.h"
-#include "ngrs/nflowlayout.h"
-#include "ngrs/napp.h"
-#include "ngrs/nconfig.h"
-#include "ngrs/nbutton.h"
+#include "ntoolbar.h"
+#include "nbevelborder.h"
+#include "nflowlayout.h"
+#include "napp.h"
+#include "nconfig.h"
+#include "nbutton.h"
 
 NToolBar::NToolBar()
  : NTogglePanel()

@@ -20,8 +20,8 @@
 #ifndef NPIXMAP_H
 #define NPIXMAP_H
 
-#include "ngrs/nobject.h"
-#include "ngrs/nsystem.h"
+#include "nobject.h"
+#include "nsystem.h"
 
 class NWindow;
 

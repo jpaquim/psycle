@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ntreenode.h"
-#include "ngrs/nalignlayout.h"
-#include "ngrs/nframeborder.h"
+#include "ntreenode.h"
+#include "nalignlayout.h"
+#include "nframeborder.h"
 
 
 NTreeNode::NodePanel::NodePanel( NTreeNode * node ) : node_(node)

@@ -21,7 +21,7 @@
 #define NCUSTOMMENUITEM_H
 
 #include <ngrs/ncustomitem.h>
-#include "ngrs/nalignlayout.h"
+#include "nalignlayout.h"
 
 /**
 @author Stefan

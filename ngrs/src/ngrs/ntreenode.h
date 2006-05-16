@@ -20,7 +20,7 @@
 #ifndef NTREENODE_H
 #define NTREENODE_H
 
-#include "ngrs/nflipbox.h"
+#include "nflipbox.h"
 
 /**
 @author Stefan Nattkemper

@@ -17,13 +17,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/napp.h"
-#include "ngrs/nimage.h"
-#include "ngrs/nsplashscreen.h"
-#include "ngrs/nconfig.h"
-#include "ngrs/nwindow.h"
-#include "ngrs/ntimer.h"
-#include "ngrs/ndockpanel.h"
+#include "napp.h"
+#include "nimage.h"
+#include "nsplashscreen.h"
+#include "nconfig.h"
+#include "nwindow.h"
+#include "ntimer.h"
+#include "ndockpanel.h"
 
 
 NSystem* NApp::system_ = 0;

@@ -21,8 +21,8 @@
 #define NXPMFILTER_H
 
 #include <X11/xpm.h>
-#include "ngrs/nimgfilter.h"
-#include "ngrs/nsystem.h"
+#include "nimgfilter.h"
+#include "nsystem.h"
 
 /**
 @author Stefan

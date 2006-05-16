@@ -24,11 +24,11 @@
 @author Stefan
 */
 
-#include "ngrs/ncolor.h"
-#include "ngrs/nfont.h"
-#include "ngrs/nsize.h"
-#include "ngrs/nborder.h"
-#include "ngrs/nbitmap.h"
+#include "ncolor.h"
+#include "nfont.h"
+#include "nsize.h"
+#include "nborder.h"
+#include "nbitmap.h"
 
 const int nVertical   = 16;
 const int nHorizontal = 32;

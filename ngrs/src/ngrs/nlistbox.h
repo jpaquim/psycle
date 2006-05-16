@@ -20,10 +20,10 @@
 #ifndef NLISTBOX_H
 #define NLISTBOX_H
 
-#include "ngrs/nscrollbox.h"
-#include "ngrs/nlistlayout.h"
-#include "ngrs/ncustomitem.h"
-#include "ngrs/nitemevent.h"
+#include "nscrollbox.h"
+#include "nlistlayout.h"
+#include "ncustomitem.h"
+#include "nitemevent.h"
 
 /**
 @author Stefan

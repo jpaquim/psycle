@@ -21,7 +21,7 @@
 #define NAUTOSCROLLLAYOUT_H
 
 #include <ngrs/nlayout.h>
-#include "ngrs/nvisualcomponent.h"
+#include "nvisualcomponent.h"
 
 /**
 @author Stefan

@@ -20,8 +20,8 @@
 #ifndef NPOPUPMENU_H
 #define NPOPUPMENU_H
 
-#include "ngrs/npopupwindow.h"
-#include "ngrs/nmenuseperator.h"
+#include "npopupwindow.h"
+#include "nmenuseperator.h"
 
 
 /**

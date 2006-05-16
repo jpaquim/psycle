@@ -17,15 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ndockpanel.h"
-#include "ngrs/nalignlayout.h"
-#include "ngrs/nflowlayout.h"
-#include "ngrs/nimage.h"
-#include "ngrs/nbutton.h"
-#include "ngrs/nwindow.h"
-#include "ngrs/napp.h"
-#include "ngrs/nconfig.h"
-#include "ngrs/npoint.h"
+#include "ndockpanel.h"
+#include "nalignlayout.h"
+#include "nflowlayout.h"
+#include "nimage.h"
+#include "nbutton.h"
+#include "nwindow.h"
+#include "napp.h"
+#include "nconfig.h"
+#include "npoint.h"
 
 /* XPM */
 const char * winundock_xpm[] = {

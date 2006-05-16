@@ -20,10 +20,10 @@
 #ifndef NVISUAL_H
 #define NVISUAL_H
 
-#include "ngrs/nruntime.h"
-#include "ngrs/nshape.h"
-#include "ngrs/nkeyevent.h"
-#include "ngrs/nbuttonevent.h"
+#include "nruntime.h"
+#include "nshape.h"
+#include "nkeyevent.h"
+#include "nbuttonevent.h"
 
 /**
 @author Stefan

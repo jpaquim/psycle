@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "ngrs/nconfig.h"
-#include "ngrs/nbevelborder.h"
-#include "ngrs/nframeborder.h"
+#include "nconfig.h"
+#include "nbevelborder.h"
+#include "nframeborder.h"
 #include <ngrs/nfile.h>
 #include <iostream>
 #include <xercesc/sax2/Attributes.hpp>

@@ -17,11 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nobject.h"
-#include "ngrs/nevent.h"
-#include "ngrs/napp.h"
-#include "ngrs/nsystem.h"
-#include "ngrs/nproperty.h"
+#include "nobject.h"
+#include "nevent.h"
+#include "napp.h"
+#include "nsystem.h"
+#include "nproperty.h"
 
 NObject::NObject() : properties_(NApp::system().propertysActive() ? new NPropertyMap() : 0)
 {

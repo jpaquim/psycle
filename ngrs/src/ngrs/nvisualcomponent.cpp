@@ -17,11 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nvisualcomponent.h"
-#include "ngrs/nwindow.h"
-#include "ngrs/napp.h"
-#include "ngrs/nconfig.h"
-#include "ngrs/nproperty.h"
+#include "nvisualcomponent.h"
+#include "nwindow.h"
+#include "napp.h"
+#include "nconfig.h"
+#include "nproperty.h"
 
 using namespace std;
 

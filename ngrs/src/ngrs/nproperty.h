@@ -25,7 +25,7 @@
 #include <vector>
 #include <typeinfo>
 #include <stdexcept>
-#include "ngrs/sigslot.h"
+#include "sigslot.h"
 
 ///\internal
 /// the user doesn't have to use the NProperty class directly,

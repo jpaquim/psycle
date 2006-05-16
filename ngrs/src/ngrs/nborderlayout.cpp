@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nborderlayout.h"
-#include "ngrs/nvisualcomponent.h"
+#include "nborderlayout.h"
+#include "nvisualcomponent.h"
 
 NBorderLayout::NBorderLayout()
  : NLayout()

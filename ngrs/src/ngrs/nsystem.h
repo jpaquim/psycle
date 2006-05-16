@@ -21,8 +21,8 @@
 #define NSYSTEM_H
 
 #include <string>
-#include "ngrs/nfont.h"
-#include "ngrs/nfontstructure.h"
+#include "nfont.h"
+#include "nfontstructure.h"
 #include "ngrs/color_converter.hpp"
 
 #include <X11/Xlib.h>
