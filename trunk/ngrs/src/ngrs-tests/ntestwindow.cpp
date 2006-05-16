@@ -47,6 +47,8 @@
 #include <ngrs/nmenu.h>
 #include <ngrs/npackageinfo.h>
 #include <ngrs/ntablelayout.h>
+#include <ngrs/ntable.h>
+#include <ngrs/nedit.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -64,36 +66,20 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1024,768);
 
-  NScrollBox* box = new NScrollBox();
-  pane()->add(box,nAlClient);
+  NTable* table = new NTable();
+  pane()->add(table,nAlClient);
 
-  NPanel* panel = new NPanel();
-    panel->setLayout(NTableLayout(12,12));
-    for (int y = 0; y < 256; y++) {
-      for (int x = 0; x < 64; x++) {
-         NLabel* btn = new NLabel(stringify(x)+","+stringify(y));
-           //btn->setFlat(false);
-           if (x == 0 && y == 0) {
-             btn->setPreferredSize(200,50);
-           }
-
-           if (x == 5 && y == 5) {
-             btn->setPreferredSize(130,130);
-           }
-
-           if (y == 2 || y == 3 || x == 2) {
-           } else
-         panel->add(btn,NAlignConstraint(nAlLeft,x,y),false);
+  for (int y = 0; y < 100; y++) {
+    for (int x = 0; x < 10; x++) {
+         NEdit* edt = new NEdit(stringify(x)+","+stringify(y));
+         table->add(edt,x,y, false);
       }
     }
 
-  panel->setClientSizePolicy(nHorizontal | nVertical);
-  box->setScrollPane(panel);
-
+  table->scrollPane()->resize();
 
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
   //panel->setBackground(NColor(250,250,250));
-  panel->setTransparent(false);
   //std::cout << book->preferredHeight() << std::endl;
 
   /*NComboBox* box = new NComboBox();
