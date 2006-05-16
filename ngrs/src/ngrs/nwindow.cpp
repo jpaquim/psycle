@@ -544,6 +544,17 @@ void NWindow::setFocus( )
 
 }
 
+void NWindow::setFocus( NVisualComponent * comp )
+{
+  if (comp) {
+    checkForRemove(0);
+    graphics_->setRegion(NRect(0,0,width(),height()));
+
+    selectedBase_ = comp;
+    selectedBase_->onFocus();
+  }
+}
+
 void NWindow::setPositionToScreenMaximize( )
 {
   setPosition(0,0,NApp::system().screenWidth(),NApp::system().screenHeight());
@@ -558,6 +569,8 @@ void NWindow::setSize( int width, int height )
 {
   setPosition(left(),top(),width,height);
 }
+
+
 
 
 

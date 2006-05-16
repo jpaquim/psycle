@@ -36,6 +36,8 @@ public:
 
     virtual std::string text() const;
 
+    virtual void loadFromFile(const std::string & fileName);
+
 private:
 
     NPanel* scrollPane_;

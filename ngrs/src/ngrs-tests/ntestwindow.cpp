@@ -337,6 +337,11 @@ void NTestWindow::testMemo( )
 {
   NMemo* memo = new NMemo();
      memo->setPosition(10,10,400,400);
+     try {
+     memo->loadFromFile("hkj/home/natti/.xchat2/xchatlogs/EFnet-#psycle.log");
+     } catch (const char* e) {
+
+     }
   pane()->add(memo);
 }
 

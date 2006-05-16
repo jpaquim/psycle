@@ -22,6 +22,8 @@
 #include "nlistlayout.h"
 #include "nscrollbox.h"
 #include "nedit.h"
+#include "nwindow.h"
+#include <fstream>
 
 NMemo::NMemo()
  : NTextBase()
@@ -58,12 +60,36 @@ void NMemo::clear( )
 void NMemo::onKeyPress( const NKeyEvent & event )
 {
   if (event.scancode() == XK_Return) {
+   int index = window()->selectedBase()->zOrder();
    NEdit* edt = new NEdit();
     edt->setAutoSize(true);
     edt->keyPress.connect(this, &NMemo::onKeyPress);
-   scrollPane_->add(edt);
+   scrollPane_->insert(edt,index+1);
+   edt->setFocus();
+   scrollPane_->resize();
    scrollPane_->repaint();
   }
+}
+
+void NMemo::loadFromFile( const std::string & fileName )
+{
+  std::fstream file(fileName.c_str());
+  if (!file.is_open ()) throw "couldn't open file";
+
+  scrollPane_->removeChilds();
+  std::string line;
+
+  while(!file.eof())
+  {
+    getline(file, line, '\n');
+    //append data
+    NEdit* edt = new NEdit(line);
+      edt->setAutoSize(true);
+      edt->keyPress.connect(this, &NMemo::onKeyPress);
+     scrollPane_->add(edt,nAlNone,false);
+  }
+  scrollPane_->resize();
+  scrollPane_->repaint();
 }
 
 

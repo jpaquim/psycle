@@ -849,6 +849,14 @@ NAlignConstraint NVisualComponent::alignConstraint( ) const
 }
 
 
+void NVisualComponent::setFocus( )
+{
+  NWindow* win = window();
+  if (win) {
+    win->setFocus(this);
+  }
+}
+
 
 
 
