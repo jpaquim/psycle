@@ -20,11 +20,11 @@
 
 #include "ntestwindow.h"
 
-#include <napp.h>
-#include <nwindow.h>
-#include <nnfa.h>
-#include <nstate.h>
-#include <nsplashscreen.h>
+#include <ngrs/napp.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nnfa.h>
+#include <ngrs/nstate.h>
+#include <ngrs/nsplashscreen.h>
 
 #include <iostream>
 #include <sstream>
