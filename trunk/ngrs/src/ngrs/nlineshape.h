@@ -20,7 +20,7 @@
 #ifndef NLINESHAPE_H
 #define NLINESHAPE_H
 
-#include <ngrs/nshape.h>
+#include "nshape.h"
 
 /**
 @author Stefan

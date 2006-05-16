@@ -20,7 +20,7 @@
 #ifndef NFILEDIALOG_H
 #define NFILEDIALOG_H
 
-#include <ngrs/nwindow.h>
+#include "nwindow.h"
 #include "nfilelistbox.h"
 #include "nflowlayout.h"
 #include "nregexp.h"

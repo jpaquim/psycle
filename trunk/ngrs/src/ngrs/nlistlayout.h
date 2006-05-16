@@ -20,7 +20,7 @@
 #ifndef NLISTLAYOUT_H
 #define NLISTLAYOUT_H
 
-#include <ngrs/nlayout.h>
+#include "nlayout.h"
 #include "nvisualcomponent.h"
 
 /**

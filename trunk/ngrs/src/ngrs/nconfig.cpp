@@ -21,7 +21,7 @@
 #include "nconfig.h"
 #include "nbevelborder.h"
 #include "nframeborder.h"
-#include <ngrs/nfile.h>
+#include "nfile.h"
 #include <iostream>
 #include <xercesc/sax2/Attributes.hpp>
 

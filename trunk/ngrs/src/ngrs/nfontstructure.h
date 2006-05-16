@@ -22,7 +22,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
-#include <ngrs/ncolor.h>
+#include "ncolor.h"
 
 
 /**

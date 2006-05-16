@@ -20,7 +20,7 @@
 #ifndef NFLIPBAR_H
 #define NFLIPBAR_H
 
-#include <ngrs/npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper

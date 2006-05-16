@@ -20,7 +20,7 @@
 #ifndef NFLIPBOX_H
 #define NFLIPBOX_H
 
-#include <ngrs/npanel.h>
+#include "npanel.h"
 
 class NFlipBar;
 

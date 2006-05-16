@@ -20,7 +20,7 @@
 #ifndef NALIGNLAYOUT_H
 #define NALIGNLAYOUT_H
 
-#include <ngrs/nlayout.h>
+#include "nlayout.h"
 
 
 

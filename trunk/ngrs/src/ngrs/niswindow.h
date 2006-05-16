@@ -20,7 +20,7 @@
 #ifndef NISWINDOW_H
 #define NISWINDOW_H
 
-#include <ngrs/nvisitor.h>
+#include "nvisitor.h"
 
 /**
 @author Stefan

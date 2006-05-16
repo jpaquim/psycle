@@ -20,8 +20,8 @@
 #ifndef NLINE_H
 #define NLINE_H
 
-#include <ngrs/nvisualcomponent.h>
-#include <ngrs/nlineshape.h>
+#include "nvisualcomponent.h"
+#include "nlineshape.h"
 
 /**
 @author Stefan

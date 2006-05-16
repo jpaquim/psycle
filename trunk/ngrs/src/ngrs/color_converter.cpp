@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "ngrs/color_converter.hpp"
+#include "color_converter.hpp"
 
 
 namespace ngrs

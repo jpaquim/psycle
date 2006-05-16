@@ -20,7 +20,7 @@
 #ifndef NCUSTOMMENUITEM_H
 #define NCUSTOMMENUITEM_H
 
-#include <ngrs/ncustomitem.h>
+#include "ncustomitem.h"
 #include "nalignlayout.h"
 
 /**
