@@ -20,11 +20,11 @@
 
 #include "ntestwindow.h"
 
-#include <napp.h>
-#include <nregexp.h>
-#include <nruntime.h>
-#include <nproperty.h>
-#include <nlabel.h>
+#include <ngrs/napp.h>
+#include <ngrs/nregexp.h>
+#include <ngrs/nruntime.h>
+#include <ngrs/nproperty.h>
+#include <ngrs/nlabel.h>
 
 #include <iostream>
 #include <sstream>
