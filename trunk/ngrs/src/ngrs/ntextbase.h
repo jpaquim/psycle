@@ -20,7 +20,7 @@
 #ifndef NTEXTBASE_H
 #define NTEXTBASE_H
 
-#include <npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper
