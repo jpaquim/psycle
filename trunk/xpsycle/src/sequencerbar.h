@@ -20,16 +20,16 @@
 #ifndef SEQUENCERBAR_H
 #define SEQUENCERBAR_H
 
-#include <npanel.h>
-#include <ncheckbox.h>
-#include <nlistlayout.h>
-#include <nlistbox.h>
-#include <nalignlayout.h>
-#include <nflowlayout.h>
-#include <nframeborder.h>
-#include <ngridlayout.h>
-#include <nimage.h>
-#include <ngroupbox.h>
+#include <ngrs/npanel.h>
+#include <ngrs/ncheckbox.h>
+#include <ngrs/nlistlayout.h>
+#include <ngrs/nlistbox.h>
+#include <ngrs/nalignlayout.h>
+#include <ngrs/nflowlayout.h>
+#include <ngrs/nframeborder.h>
+#include <ngrs/ngridlayout.h>
+#include <ngrs/nimage.h>
+#include <ngrs/ngroupbox.h>
 
 class N7SegDisplay;
 

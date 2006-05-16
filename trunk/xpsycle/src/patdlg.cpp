@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include "patdlg.h"
 #include "constants.h"
-#include <nspinedit.h>
-#include <nbutton.h>
-#include <npanel.h>
-#include <nflowlayout.h>
+#include <ngrs/nspinedit.h>
+#include <ngrs/nbutton.h>
+#include <ngrs/npanel.h>
+#include <ngrs/nflowlayout.h>
 
 PatDlg::PatDlg()
  : NWindow()

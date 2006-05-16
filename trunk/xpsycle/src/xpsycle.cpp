@@ -26,12 +26,12 @@
 #include "mainwindow.h"
 #include "song.h"
 #include "plugin.h"
-#include <nsplashscreen.h>
-#include <napp.h>
+#include <ngrs/nsplashscreen.h>
+#include <ngrs/napp.h>
 #include <iostream>
 #include <cstdlib>
-#include <nfile.h>
-#include <nproperty.h>
+#include <ngrs/nfile.h>
+#include <ngrs/nproperty.h>
 
 using namespace std;
 

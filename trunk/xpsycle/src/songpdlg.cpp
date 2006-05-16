@@ -20,7 +20,7 @@
 #include "songpdlg.h"
 #include "global.h"
 #include "song.h"
-#include <nlistlayout.h>
+#include <ngrs/nlistlayout.h>
 
 SongpDlg::SongpDlg()
  : NWindow()

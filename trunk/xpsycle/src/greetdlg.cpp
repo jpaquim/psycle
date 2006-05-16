@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "greetdlg.h"
-#include <nlabel.h>
-#include <nlistbox.h>
-#include <nitem.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nlistbox.h>
+#include <ngrs/nitem.h>
 
 
 GreetDlg::GreetDlg()

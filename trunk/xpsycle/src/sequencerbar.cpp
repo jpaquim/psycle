@@ -24,11 +24,11 @@
 #include "patternview.h"
 #include "defaultbitmaps.h"
 #include "player.h"
-#include <nlabel.h>
-#include <nitem.h>
-#include <napp.h>
-#include <nconfig.h>
-#include <n7segdisplay.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nitem.h>
+#include <ngrs/napp.h>
+#include <ngrs/nconfig.h>
+#include <ngrs/n7segdisplay.h>
 
 
 SequencerBar::SequencerBar()

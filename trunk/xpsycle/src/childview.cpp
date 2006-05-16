@@ -21,9 +21,9 @@
 #include "configuration.h"
 #include "player.h"
 #include "newmachine.h"
-#include <napp.h>
+#include <ngrs/napp.h>
 #include <inttypes.h>
-#include <ndockpanel.h>
+#include <ngrs/ndockpanel.h>
 
 const std::string PSYCLE__VERSION="X";
 

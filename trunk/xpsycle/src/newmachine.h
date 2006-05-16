@@ -20,12 +20,12 @@
 #ifndef NEWMACHINE_H
 #define NEWMACHINE_H
 
-#include <nwindow.h>
-#include <ntabbook.h>
-#include <nfilelistbox.h>
-#include <ngroupbox.h>
-#include <nlabel.h>
-#include <nbevelborder.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/ntabbook.h>
+#include <ngrs/nfilelistbox.h>
+#include <ngrs/ngroupbox.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nbevelborder.h>
 
 
 class InfoLine : public NPanel {

@@ -20,10 +20,10 @@
 #ifndef SONGPDLG_H
 #define SONGPDLG_H
 
-#include <nwindow.h>
-#include <nlabel.h>
-#include <nedit.h>
-#include <nbutton.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nedit.h>
+#include <ngrs/nbutton.h>
 
 /**
 @author Stefan

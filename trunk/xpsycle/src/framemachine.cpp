@@ -23,14 +23,14 @@
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include "presetsdlg.h"
-#include <napp.h>
-#include <nmenubar.h>
-#include <ntogglepanel.h>
-#include <nbutton.h>
-#include <nedit.h>
-#include <nfiledialog.h>
-#include <nslider.h>
-#include <nalignlayout.h>
+#include <ngrs/napp.h>
+#include <ngrs/nmenubar.h>
+#include <ngrs/ntogglepanel.h>
+#include <ngrs/nbutton.h>
+#include <ngrs/nedit.h>
+#include <ngrs/nfiledialog.h>
+#include <ngrs/nslider.h>
+#include <ngrs/nalignlayout.h>
 
 
 NBitmap Knob::kbitmap;

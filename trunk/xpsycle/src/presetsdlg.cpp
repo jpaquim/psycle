@@ -23,12 +23,12 @@
 #include "plugin.h"
 #include "global.h"
 #include "framemachine.h"
-#include <nbutton.h>
-#include <ncheckbox.h>
-#include <ngridlayout.h>
-#include <nlistbox.h>
-#include <nborderlayout.h>
-#include <nitem.h>
+#include <ngrs/nbutton.h>
+#include <ngrs/ncheckbox.h>
+#include <ngrs/ngridlayout.h>
+#include <ngrs/nlistbox.h>
+#include <ngrs/nborderlayout.h>
+#include <ngrs/nitem.h>
 
 
 

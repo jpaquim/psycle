@@ -20,7 +20,7 @@
 #ifndef ABOUTDLG_H
 #define ABOUTDLG_H
 
-#include <nwindow.h>
+#include <ngrs/nwindow.h>
 
 /**
 @author Stefan Nattkemper

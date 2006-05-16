@@ -26,12 +26,12 @@
 #include "aboutdlg.h"
 #include "vumeter.h"
 #include "instrumenteditor.h"
-#include <napp.h>
-#include <nitem.h>
-#include <ncheckmenuitem.h>
-#include <nmenuseperator.h>
-#include <nmessagebox.h>
-#include <nbevelborder.h>
+#include <ngrs/napp.h>
+#include <ngrs/nitem.h>
+#include <ngrs/ncheckmenuitem.h>
+#include <ngrs/nmenuseperator.h>
+#include <ngrs/nmessagebox.h>
+#include <ngrs/nbevelborder.h>
 
 
 MainWindow::MainWindow()
