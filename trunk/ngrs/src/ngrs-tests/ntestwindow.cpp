@@ -338,8 +338,9 @@ void NTestWindow::testMemo( )
   NMemo* memo = new NMemo();
      memo->setPosition(10,10,400,400);
      try {
-     memo->loadFromFile("hkj/home/natti/.xchat2/xchatlogs/EFnet-#psycle.log");
+       memo->loadFromFile("afilename");
      } catch (const char* e) {
+       memo->setText("ngrs version alpha, Copyright (C) 2004,2005,2006 Nattisoft,\nngrs comes with ABSOLUTELY NO WARRANTY;\nfor details see COPYING. \nThis is free software, and you are welcome to redistribute it under certain conditions");
 
      }
   pane()->add(memo);

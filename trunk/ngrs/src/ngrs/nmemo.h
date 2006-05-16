@@ -35,8 +35,10 @@ public:
     ~NMemo();
 
     virtual std::string text() const;
+    void setText(const std::string & text);
 
-    virtual void loadFromFile(const std::string & fileName);
+    void loadFromFile(const std::string & fileName);
+    void setReadOnly(bool on);
 
 private:
 
@@ -44,6 +46,9 @@ private:
     void clear();
 
     void onKeyPress(const NKeyEvent & event);
+
+    std::vector<class NEdit*> edits;
+
 };
 
 #endif

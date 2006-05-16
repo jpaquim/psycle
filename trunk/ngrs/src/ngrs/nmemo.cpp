@@ -24,6 +24,7 @@
 #include "nedit.h"
 #include "nwindow.h"
 #include <fstream>
+#include <sstream>
 
 NMemo::NMemo()
  : NTextBase()
@@ -55,6 +56,7 @@ void NMemo::clear( )
     edt->setAutoSize(true);
     edt->keyPress.connect(this, &NMemo::onKeyPress);
   scrollPane_->add(edt);
+  edits.push_back(edt);
 }
 
 void NMemo::onKeyPress( const NKeyEvent & event )
@@ -65,6 +67,7 @@ void NMemo::onKeyPress( const NKeyEvent & event )
     edt->setAutoSize(true);
     edt->keyPress.connect(this, &NMemo::onKeyPress);
    scrollPane_->insert(edt,index+1);
+   edits.insert(edits.begin()+index+1,edt);
    edt->setFocus();
    scrollPane_->resize();
    scrollPane_->repaint();
@@ -76,7 +79,9 @@ void NMemo::loadFromFile( const std::string & fileName )
   std::fstream file(fileName.c_str());
   if (!file.is_open ()) throw "couldn't open file";
 
+  edits.clear();
   scrollPane_->removeChilds();
+
   std::string line;
 
   while(!file.eof())
@@ -87,9 +92,49 @@ void NMemo::loadFromFile( const std::string & fileName )
       edt->setAutoSize(true);
       edt->keyPress.connect(this, &NMemo::onKeyPress);
      scrollPane_->add(edt,nAlNone,false);
+     edits.push_back(edt);
   }
   scrollPane_->resize();
   scrollPane_->repaint();
 }
+
+void NMemo::setText( const std::string & text )
+{
+  edits.clear();
+  scrollPane_->removeChilds();
+
+  std::string delimiters = "\n";
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = text.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = text.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos)
+  {
+     // Found a token, add it to the vector.
+     NEdit* edt = new NEdit(text.substr(lastPos, pos - lastPos));
+      edt->setAutoSize(true);
+      edt->keyPress.connect(this, &NMemo::onKeyPress);
+     scrollPane_->add(edt,nAlNone,false);
+     edits.push_back(edt);
+     // Skip delimiters.  Note the "not_of"
+     lastPos = text.find_first_not_of(delimiters, pos);
+     // Find next "non-delimiter"
+     pos = text.find_first_of(delimiters, lastPos);
+  }
+  scrollPane_->resize();
+  scrollPane_->repaint();
+}
+
+void NMemo::setReadOnly( bool on )
+{
+  std::vector<NEdit*>::iterator it = edits.begin();
+  for (;it < edits.end(); it++) {
+    NEdit* edt = *it;
+    edt->setReadOnly(on);
+  }
+}
+
+
 
 
