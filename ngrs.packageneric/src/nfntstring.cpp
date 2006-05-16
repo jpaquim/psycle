@@ -1,1 +1,0 @@
-../../ngrs/src/nfntstring.cpp
