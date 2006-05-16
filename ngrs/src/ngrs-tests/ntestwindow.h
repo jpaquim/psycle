@@ -80,6 +80,8 @@ private:
     void testEdit();
     void testSpinEdit();
     void testSegDisplay();
+    void testTable();
+    void testMemo();
 
     void onOpen(NButtonEvent* ev);
     void onSliderPosChanged(double v);

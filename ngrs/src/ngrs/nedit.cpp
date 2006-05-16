@@ -26,12 +26,12 @@ using namespace std;
 
 
 NEdit::NEdit()
- : NPanel(), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
+ : NPanel(), autoSize_(0),valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
 {
   init();
 }
 
-NEdit::NEdit( const std::string & text ) : NPanel(), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0), text_(text)
+NEdit::NEdit( const std::string & text ) : NPanel(), autoSize_(0), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0), text_(text)
 {
   init();
 }
@@ -96,6 +96,8 @@ void NEdit::drawCursor(NGraphics* g, const std::string & text )
 
 int NEdit::computeDx( NGraphics* g, const std::string & text )
 {
+  if (autoSize_) return 0;
+
   int dx = 0;
 
   NPoint screenPos = getScreenPos(g, text );
@@ -135,7 +137,7 @@ int NEdit::preferredWidth( ) const
 { 
   NFontMetrics metrics;
   metrics.setFont(font());
-  return width();
+  return metrics.textWidth(text_);
 }
 
 
@@ -246,7 +248,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                         text_.erase(pos_,1);
                         //doAutoTextWidth();
                         //textChanged.emit(this);
-                        repaint();
+                        doAutoSize();
                       //}
                     }
                  }
@@ -282,7 +284,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                     text_.erase(pos_,count);
                     //doAutoTextWidth();
                     //textChanged.emit(this);
-                    repaint();
+                    doAutoSize();
                    }
                 }
                 break;
@@ -290,8 +292,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
       if (keyEvent.buffer()!="") {
         text_.insert(pos_,keyEvent.buffer());
         pos_++;
-        //doAutoTextWidth();
-        repaint();
+        doAutoSize();
       }
  }
  //emitActions();
@@ -300,6 +301,22 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
 
 void NEdit::onFocus( )
 {
+  repaint();
+}
+
+void NEdit::setAutoSize( bool on )
+{
+  autoSize_ = on;
+}
+
+void NEdit::doAutoSize( )
+{
+  if (autoSize_) {
+     if (parent() && parent()->visit(NVisualComponent::isVisualComponent)) {
+       ((NVisualComponent*) parent())->resize();
+       ((NVisualComponent*) parent())->repaint();
+     }
+  } else
   repaint();
 }
 
