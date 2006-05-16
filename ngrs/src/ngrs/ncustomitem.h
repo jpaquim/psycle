@@ -20,7 +20,7 @@
 #ifndef NCUSTOMITEM_H
 #define NCUSTOMITEM_H
 
-#include <ngrs/npanel.h>
+#include "npanel.h"
 #include <string>
 
 /**

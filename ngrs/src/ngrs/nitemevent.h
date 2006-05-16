@@ -20,7 +20,7 @@
 #ifndef NITEMEVENT_H
 #define NITEMEVENT_H
 
-#include <ngrs/nevent.h>
+#include "nevent.h"
 
 class NCustomItem;
 

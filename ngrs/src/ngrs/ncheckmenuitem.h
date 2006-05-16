@@ -20,7 +20,7 @@
 #ifndef NCHECKMENUITEM_H
 #define NCHECKMENUITEM_H
 
-#include <ngrs/ncustommenuitem.h>
+#include "ncustommenuitem.h"
 
 
 class NCheckBox;

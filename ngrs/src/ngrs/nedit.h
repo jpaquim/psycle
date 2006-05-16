@@ -20,9 +20,9 @@
 #ifndef NEDIT_H
 #define NEDIT_H
 
-#include <ngrs/npanel.h>
+#include "npanel.h"
 #include <string>
-#include <ngrs/nfontmetrics.h>
+#include "nfontmetrics.h"
 
 /**
 @author Stefan

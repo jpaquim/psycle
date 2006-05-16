@@ -20,7 +20,7 @@
 #ifndef NDOCKPANEL_H
 #define NDOCKPANEL_H
 
-#include <ngrs/npanel.h>
+#include "npanel.h"
 
 class NImage;
 

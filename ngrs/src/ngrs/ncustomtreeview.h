@@ -20,7 +20,7 @@
 #ifndef NCUSTOMTREEVIEW_H
 #define NCUSTOMTREEVIEW_H
 
-#include <ngrs/npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper

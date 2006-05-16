@@ -31,7 +31,7 @@
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 #include <xercesc/sax2/DefaultHandler.hpp>
 #include <xercesc/util/XMLString.hpp>
-#include <ngrs/nobject.h>
+#include "nobject.h"
 
 class NBorder;
 

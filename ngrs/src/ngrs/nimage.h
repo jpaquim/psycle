@@ -20,9 +20,9 @@
 #ifndef NIMAGE_H
 #define NIMAGE_H
 
-#include <ngrs/npanel.h>
-#include <ngrs/nbitmap.h>
-#include <ngrs/nimgfilter.h>
+#include "npanel.h"
+#include "nbitmap.h"
+#include "nimgfilter.h"
 
 /**
 @author Stefan

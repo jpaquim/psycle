@@ -20,8 +20,8 @@
 #ifndef NBITMAP_H
 #define NBITMAP_H
 
-#include <ngrs/nobject.h>
-#include <ngrs/nsystem.h>
+#include "nobject.h"
+#include "nsystem.h"
 
 /**
 @author Stefan
