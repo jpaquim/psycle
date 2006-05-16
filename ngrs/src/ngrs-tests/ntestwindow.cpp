@@ -63,13 +63,16 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
   setPosition(0,0,1024,768);
+
+  NScrollBox* box = new NScrollBox();
+  pane()->add(box,nAlClient);
+
   NPanel* panel = new NPanel();
-    panel->setLayout(NTableLayout(10,10));
-    for (int y = 0; y < 10; y++) {
+    panel->setLayout(NTableLayout(12,12));
+    for (int y = 0; y < 100; y++) {
       for (int x = 0; x < 10; x++) {
          NButton* btn = new NButton(stringify(x)+","+stringify(y));
            btn->setFlat(false);
-           btn->setAlignConstraint(NAlignConstraint(nAlLeft,x,y));
            if (x == 0 && y == 0) {
              btn->setPreferredSize(200,50);
            }
@@ -80,13 +83,16 @@ NTestWindow::NTestWindow()
 
            if (y == 2 || y == 3 || x == 2) {
            } else
-         panel->add(btn);
+         panel->add(btn,NAlignConstraint(nAlLeft,x,y),false);
       }
     }
 
-  pane()->add(panel);
-  panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
-  panel->setBackground(NColor(250,250,250));
+  panel->setClientSizePolicy(nHorizontal | nVertical);
+  box->setScrollPane(panel);
+
+
+  //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
+  //panel->setBackground(NColor(250,250,250));
   panel->setTransparent(false);
   //std::cout << book->preferredHeight() << std::endl;
 

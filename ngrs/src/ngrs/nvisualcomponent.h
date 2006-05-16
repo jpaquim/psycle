@@ -170,6 +170,9 @@ public:
     void add(NRuntime* component);
     void add(NVisualComponent* component);
     void add(NVisualComponent* component, int align);
+    void add(NVisualComponent* component, int align, bool update);
+    void add(NVisualComponent* component, const NAlignConstraint & align, bool update);
+
     void insert(NVisualComponent* component, unsigned int index);
 
     NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area);
