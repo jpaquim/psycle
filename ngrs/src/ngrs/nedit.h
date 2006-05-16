@@ -36,6 +36,7 @@ public:
     ~NEdit();
 
     void setAutoSize(bool on);
+    void setReadOnly(bool on);
 
     void setText(const std::string & text);
     const std::string & text() const;
@@ -60,7 +61,7 @@ public:
 
 private:
 
-    bool autoSize_;
+    bool autoSize_, readOnly_;
     int valign_, halign_;
     int dx;
     unsigned int pos_;

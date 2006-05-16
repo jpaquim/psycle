@@ -26,12 +26,12 @@ using namespace std;
 
 
 NEdit::NEdit()
- : NPanel(), autoSize_(0),valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
+ : NPanel(), autoSize_(0),readOnly_(0),valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
 {
   init();
 }
 
-NEdit::NEdit( const std::string & text ) : NPanel(), autoSize_(0), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0), text_(text)
+NEdit::NEdit( const std::string & text ) : NPanel(), autoSize_(0), readOnly_(0), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0), text_(text)
 {
   init();
 }
@@ -80,7 +80,7 @@ void NEdit::paint( NGraphics * g )
 
   g->drawText( screenPos.x() , screenPos.y() ,text_);
 
-  if (focus()) drawCursor(g,text_);
+  if (focus() && !readOnly_) drawCursor(g,text_);
 }
 
 void NEdit::drawCursor(NGraphics* g, const std::string & text )
@@ -194,6 +194,7 @@ unsigned int NEdit::pos( ) const
 
 void NEdit::onKeyPress( const NKeyEvent & keyEvent )
 {
+ if (!readOnly_) {
  int keyCode = keyEvent.scancode();
  switch (keyCode) {
     case XK_Left:
@@ -300,6 +301,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
  }
  //emitActions();
   keyPress.emit(keyEvent);
+ }
 }
 
 void NEdit::onFocus( )
@@ -321,6 +323,11 @@ void NEdit::doAutoSize( )
      }
   } else
   repaint();
+}
+
+void NEdit::setReadOnly( bool on )
+{
+  readOnly_ = on;
 }
 
 
