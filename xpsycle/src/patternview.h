@@ -22,11 +22,11 @@
 
 #include "patdlg.h"
 #include "song.h"
-#include <npage.h>
-#include <nbitmap.h>
-#include <npoint3d.h>
-#include <npopupmenu.h>
-#include <nscrollbar.h>
+#include <ngrs/npage.h>
+#include <ngrs/nbitmap.h>
+#include <ngrs/npoint3d.h>
+#include <ngrs/npopupmenu.h>
+#include <ngrs/nscrollbar.h>
 #include <map>
 
 /**

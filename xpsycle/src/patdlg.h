@@ -20,7 +20,7 @@
 #ifndef PATDLG_H
 #define PATDLG_H
 
-#include <nwindow.h>
+#include <ngrs/nwindow.h>
 
 class NButton;
 class NSpinEdit;

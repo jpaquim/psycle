@@ -20,7 +20,7 @@
 #ifndef ENVDIALOG_H
 #define ENVDIALOG_H
 
-#include <nwindow.h>
+#include <ngrs/nwindow.h>
 
 /**
 @author Stefan Nattkemper

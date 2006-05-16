@@ -20,7 +20,7 @@
 #ifndef MACPROP_H
 #define MACPROP_H
 
-#include <nwindow.h>
+#include <ngrs/nwindow.h>
 
 /**
 @author Stefan

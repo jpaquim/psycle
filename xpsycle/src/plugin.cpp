@@ -21,7 +21,7 @@
 #include "inputhandler.h"
 #include "serializer.h"
 #include "deserializer.h"
-#include <nfile.h>
+#include <ngrs/nfile.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <fstream>

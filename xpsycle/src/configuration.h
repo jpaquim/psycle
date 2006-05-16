@@ -22,9 +22,9 @@
 
 #include "audiodriver.h"
 #include "inputhandler.h"
-#include <ncolor.h>
+#include <ngrs/ncolor.h>
 #include <vector>
-#include <nobject.h>
+#include <ngrs/nobject.h>
 
 /**
 @author Stefan

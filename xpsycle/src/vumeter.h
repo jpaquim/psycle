@@ -20,7 +20,7 @@
 #ifndef VUMETER_H
 #define VUMETER_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 /**
 @author Stefan Nattkemper

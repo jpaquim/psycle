@@ -21,7 +21,7 @@
 #define PRESETSDLG_H
 
 #include "plugin.h"
-#include <ndialog.h>
+#include <ngrs/ndialog.h>
 
 class NListBox;
 class Machine;

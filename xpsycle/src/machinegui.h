@@ -20,7 +20,7 @@
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 class NLine;
 class Machine;

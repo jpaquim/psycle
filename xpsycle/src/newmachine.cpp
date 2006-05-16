@@ -19,11 +19,11 @@
  ***************************************************************************/
 #include "newmachine.h"
 #include "plugin.h"
-#include <nborderlayout.h>
-#include <nalignlayout.h>
-#include <nlabel.h>
-#include <nlistbox.h>
-#include <nitem.h>
+#include <ngrs/nborderlayout.h>
+#include <ngrs/nalignlayout.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nlistbox.h>
+#include <ngrs/nitem.h>
 
 NewMachine::NewMachine()
  : NWindow()

@@ -20,7 +20,7 @@
 #ifndef DEFAULTBITMAPS_H
 #define DEFAULTBITMAPS_H
 
-#include <nbitmap.h>
+#include <ngrs/nbitmap.h>
 
 /**
 @author Stefan Nattkemper

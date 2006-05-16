@@ -20,8 +20,8 @@
 #ifndef MASTERDLG_H
 #define MASTERDLG_H
 
-#include <nwindow.h>
-#include <nslider.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nslider.h>
 
 
 

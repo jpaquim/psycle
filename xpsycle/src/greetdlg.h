@@ -20,7 +20,7 @@
 #ifndef GREETDLG_H
 #define GREETDLG_H
 
-#include <nwindow.h>
+#include <ngrs/nwindow.h>
 
 class NListBox;
 

@@ -23,8 +23,8 @@
 #include "constants.h"
 #include "instrument.h"
 #include "songstructs.h"
-#include <nobject.h>
-#include <npoint.h>
+#include <ngrs/nobject.h>
+#include <ngrs/npoint.h>
 #include <string>
 #include <cstdlib>
 #include <iostream>

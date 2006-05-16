@@ -25,13 +25,13 @@
 #include "player.h"
 #include "machine.h"
 #include "defaultbitmaps.h"
-#include <napp.h>
-#include <nalignlayout.h>
-#include <nwindow.h>
-#include <nmenuitem.h>
-#include <nmenuseperator.h>
-#include <nframeborder.h>
-#include <nfontmetrics.h>
+#include <ngrs/napp.h>
+#include <ngrs/nalignlayout.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nmenuitem.h>
+#include <ngrs/nmenuseperator.h>
+#include <ngrs/nframeborder.h>
+#include <ngrs/nfontmetrics.h>
 
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw

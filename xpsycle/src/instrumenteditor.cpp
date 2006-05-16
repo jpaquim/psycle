@@ -21,19 +21,19 @@
 #include "global.h"
 #include "song.h"
 #include "envdialog.h"
-#include <nalignlayout.h>
-#include <nflowlayout.h>
-#include <nlabel.h>
-#include <nbevelborder.h>
-#include <nframeborder.h>
-#include <nbutton.h>
-#include <nedit.h>
-#include <ngroupbox.h>
-#include <ncombobox.h>
-#include <nitem.h>
-#include <nslider.h>
-#include <ncheckbox.h>
-#include <nitemevent.h>
+#include <ngrs/nalignlayout.h>
+#include <ngrs/nflowlayout.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nbevelborder.h>
+#include <ngrs/nframeborder.h>
+#include <ngrs/nbutton.h>
+#include <ngrs/nedit.h>
+#include <ngrs/ngroupbox.h>
+#include <ngrs/ncombobox.h>
+#include <ngrs/nitem.h>
+#include <ngrs/nslider.h>
+#include <ngrs/ncheckbox.h>
+#include <ngrs/nitemevent.h>
 
 InstrumentEditor::InstrumentEditor()
  : NWindow()

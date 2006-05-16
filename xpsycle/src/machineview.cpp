@@ -23,9 +23,9 @@
 #include "machinegui.h"
 #include "global.h"
 #include "plugin.h"
-#include <nautoscrolllayout.h>
-#include <nalignlayout.h>
-#include <napp.h>
+#include <ngrs/nautoscrolllayout.h>
+#include <ngrs/nalignlayout.h>
+#include <ngrs/napp.h>
 
 
 

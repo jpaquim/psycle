@@ -20,7 +20,7 @@
 #ifndef INSTRUMENTEDITOR_H
 #define INSTRUMENTEDITOR_H
 
-#include <nwindow.h>
+#include <ngrs/nwindow.h>
 
 class NLabel;
 class NButton;

@@ -24,11 +24,11 @@
 #include "global.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
-#include <nframeborder.h>
-#include <nlabel.h>
-#include <nline.h>
-#include <nwindow.h>
-#include <nslider.h>
+#include <ngrs/nframeborder.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nline.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nslider.h>
 
 NPixmap MachineGUI::pixmap;
 int MachineGUI::c = 0;

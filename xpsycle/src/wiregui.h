@@ -20,7 +20,7 @@
 #ifndef WIREGUI_H
 #define WIREGUI_H
 
-#include <nline.h>
+#include <ngrs/nline.h>
 
 /**
 @author Stefan

@@ -21,12 +21,12 @@
 #define FRAMEMACHINE_H
 
 #include "presetsdlg.h"
-#include <nwindow.h>
-#include <nlabel.h>
-#include <nframeborder.h>
-#include <ngridlayout.h>
-#include <nbitmap.h>
-#include <ndialog.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nframeborder.h>
+#include <ngrs/ngridlayout.h>
+#include <ngrs/nbitmap.h>
+#include <ngrs/ndialog.h>
 
 const int K_XSIZE = 28;
 const int K_YSIZE = 28;

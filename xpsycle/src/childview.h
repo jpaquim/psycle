@@ -24,9 +24,9 @@
 #include "patternview.h"
 #include "song.h"
 #include "global.h"
-#include <ntabbook.h>
-#include <nfiledialog.h>
-#include <ntimer.h>
+#include <ngrs/ntabbook.h>
+#include <ngrs/nfiledialog.h>
+#include <ngrs/ntimer.h>
 
 class NewMachine;
 

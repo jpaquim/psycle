@@ -22,9 +22,9 @@
 
 #include "wiregui.h"
 #include "wiredlg.h"
-#include <npage.h>
-#include <nscrollbox.h>
-#include <nlabel.h>
+#include <ngrs/npage.h>
+#include <ngrs/nscrollbox.h>
+#include <ngrs/nlabel.h>
 
 
 class Machine;

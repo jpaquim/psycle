@@ -21,8 +21,8 @@
 #define ANALYZER_H
 
 #include "machine.h"
-#include <npanel.h>
-#include <ntimer.h>
+#include <ngrs/npanel.h>
+#include <ngrs/ntimer.h>
 
 
 /**

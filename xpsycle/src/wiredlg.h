@@ -21,10 +21,10 @@
 #define WIREDLG_H
 
 #include "analyzer.h"
-#include <nwindow.h>
-#include <nbutton.h>
-#include <nslider.h>
-#include <nline.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nbutton.h>
+#include <ngrs/nslider.h>
+#include <ngrs/nline.h>
 
 /**
 @author Stefan

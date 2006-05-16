@@ -22,7 +22,7 @@
 
 #include <cassert>
 #include <map>
-#include <napp.h>
+#include <ngrs/napp.h>
 
 /**
 @author Stefan
