@@ -18,15 +18,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ntable.h"
+#include "ntablelayout.h"
 
 NTable::NTable()
  : NScrollBox()
 {
+  tablePane = new NPanel();
+    tablePane->setLayout(NTableLayout(10,10));
+    tablePane->setClientSizePolicy(nVertical | nHorizontal);
+  setScrollPane(tablePane);
 }
 
 
 NTable::~NTable()
 {
+}
+
+void NTable::add( NVisualComponent * comp, int col, int row,  bool update )
+{
+  tablePane->add(comp,NAlignConstraint(nAlLeft,col,row),update);
 }
 
 

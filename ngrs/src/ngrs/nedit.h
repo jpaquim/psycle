@@ -31,6 +31,7 @@ class NEdit : public NPanel
 {
 public:
     NEdit();
+    NEdit(const std::string & text);
 
     ~NEdit();
 

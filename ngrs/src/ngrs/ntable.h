@@ -32,6 +32,12 @@ public:
 
     ~NTable();
 
+    virtual void add(NVisualComponent* comp, int col, int row, bool update=true);
+
+private:
+
+   NPanel* tablePane;
+
 };
 
 #endif

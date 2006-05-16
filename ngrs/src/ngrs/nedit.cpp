@@ -31,6 +31,10 @@ NEdit::NEdit()
   init();
 }
 
+NEdit::NEdit( const std::string & text ) : NPanel(), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0), text_(text)
+{
+  init();
+}
 
 NEdit::~NEdit()
 {
@@ -298,3 +302,5 @@ void NEdit::onFocus( )
 {
   repaint();
 }
+
+
