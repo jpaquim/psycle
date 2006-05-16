@@ -191,6 +191,7 @@ public:
     int  ownerWidth() const;
     int  ownerHeight() const;
 
+    virtual void setFocus();
     virtual bool focus() const;
 
 private:

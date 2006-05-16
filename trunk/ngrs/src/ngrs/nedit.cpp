@@ -270,6 +270,9 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                    repaint();
                 }
                 break;
+    case XK_Return:
+
+    break;
     case XK_Delete:
                 if (pos_<text_.length()) {
                    //bool flag = true;

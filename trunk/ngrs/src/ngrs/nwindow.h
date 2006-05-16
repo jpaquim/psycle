@@ -66,6 +66,7 @@ public:
     virtual void add( NRuntime * component );
 
     virtual void setFocus();
+    virtual void setFocus(class NVisualComponent* comp);
     void setGrabEvents(bool on);
 
     Window win() const;
