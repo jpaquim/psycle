@@ -20,7 +20,7 @@
 #ifndef NMEMO_H
 #define NMEMO_H
 
-#include <ntextbase.h>
+#include "ntextbase.h"
 
 /**
 @author Stefan Nattkemper

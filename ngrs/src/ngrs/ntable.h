@@ -20,7 +20,7 @@
 #ifndef NTABLE_H
 #define NTABLE_H
 
-#include <nscrollbox.h>
+#include "nscrollbox.h"
 
 /**
 @author Stefan Nattkemper
