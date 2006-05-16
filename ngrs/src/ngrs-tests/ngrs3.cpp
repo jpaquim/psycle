@@ -18,23 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ntestwindow.h"
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
+#include <napp.h>
+#include <nregexp.h>
+#include <nruntime.h>
+#include <nproperty.h>
+#include <nlabel.h>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <cstdlib>
-
-#include <napp.h>
-#include <ntestwindow.h>
-#include <nregexp.h>
-#include <nruntime.h>
-#include <nproperty.h>
-#include <nlabel.h>
 
 using namespace std;
 
