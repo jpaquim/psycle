@@ -19,9 +19,9 @@
  ***************************************************************************/
 #include "npixmap.h"
 #include "napp.h"
+#include "nfile.h"
+#include "nwindow.h"
 #include <X11/xpm.h>
-#include <nfile.h>
-#include <nwindow.h>
 
 NPixmap::NPixmap( )
 {
