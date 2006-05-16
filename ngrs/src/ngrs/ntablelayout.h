@@ -34,7 +34,9 @@ class NTableLayout : public NLayout
        Row(int col, class NVisualComponent* comp);
        ~Row();
 
-       int rowHeight() const;
+       int rowMaxHeight() const;
+       int defaultRowHeight() const;
+
        NVisualComponent* colAt(int index);
 
        void add(int col, class NVisualComponent* comp);
@@ -48,6 +50,7 @@ class NTableLayout : public NLayout
 
 public:
     NTableLayout();
+    NTableLayout(int cols, int rows);
 
     ~NTableLayout();
 
@@ -73,7 +76,11 @@ private:
     int cols_;
     int rows_;
 
+    int colMaxWidth(int col) const;
+    int colWidthBetween(int colStart, int colEnd) const;
+
     std::map<int,Row> rows;
+    mutable std::map<int,int> colMaxWidthCache;
 };
 
 #endif
