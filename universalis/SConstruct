@@ -7,7 +7,7 @@
 # init
 
 import packageneric
-packageneric = packageneric.Packageneric(Environment, Configure, Options)
+packageneric = packageneric.Packageneric(Help, Configure)
 
 # source package
 
