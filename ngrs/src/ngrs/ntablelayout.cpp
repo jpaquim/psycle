@@ -216,6 +216,10 @@ int NTableLayout::colWidthBetween( int colStart, int colEnd ) const
 }
 
 
+int NTableLayout::findVerticalStart( long comparator , NVisualComponent* owner)
+{
+
+}
 
 
 
