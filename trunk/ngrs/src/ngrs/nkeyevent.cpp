@@ -18,11 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nkeyevent.h"
+#include "nobject.h"
 
-NKeyEvent::NKeyEvent( std::string buffer, int scancode )
+NKeyEvent::NKeyEvent(NObject* sender, std::string buffer, int scancode )
 {
   buffer_   = buffer;
   scancode_ = scancode;
+  sender_ = sender;
 }
 
 
@@ -38,6 +40,11 @@ std::string NKeyEvent::buffer( ) const
 int NKeyEvent::scancode( ) const
 {
   return scancode_;
+}
+
+NObject * NKeyEvent::sender( ) const
+{
+  return sender_;
 }
 
 

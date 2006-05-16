@@ -271,8 +271,8 @@ int NApp::processEvent( NWindow * win, XEvent * event )
                         acellNotify->onKeyAcceleratorNotify(NKeyAccelerator(NApp::system().keyState(),mykeysym));
                     }
                   }
-                  win->onKeyPress(NKeyEvent(buffer,mykeysym));
-              } else win->onKeyPress(NKeyEvent(buffer,mykeysym));
+                  win->onKeyPress(NKeyEvent(0,buffer,mykeysym));
+              } else win->onKeyPress(NKeyEvent(0,buffer,mykeysym));
             }
           break;
         case KeyRelease:
@@ -282,8 +282,8 @@ int NApp::processEvent( NWindow * win, XEvent * event )
                   if (mykeysym<0xF000) {
 
                   }
-                  win->onKeyRelease(NKeyEvent(buffer,mykeysym));
-              } else win->onKeyRelease(NKeyEvent(buffer,mykeysym));
+                  win->onKeyRelease(NKeyEvent(0,buffer,mykeysym));
+              } else win->onKeyRelease(NKeyEvent(0,buffer,mykeysym));
             }
           break;
 

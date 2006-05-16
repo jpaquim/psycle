@@ -186,6 +186,11 @@ int NEdit::hAlign( ) const
   return halign_;
 }
 
+void NEdit::setPos( unsigned int pos )
+{
+  if (pos >= 0 && pos < text_.length() ) pos_ = pos;
+}
+
 unsigned int NEdit::pos( ) const
 {
   return pos_;
@@ -329,5 +334,7 @@ void NEdit::setReadOnly( bool on )
 {
   readOnly_ = on;
 }
+
+
 
 

@@ -27,17 +27,19 @@
 */
 class NKeyEvent{
 public:
-    NKeyEvent(std::string buffer, int scancode);
+    NKeyEvent(class NObject* sender, std::string buffer, int scancode);
 
     ~NKeyEvent();
 
     std::string buffer() const;
     int scancode() const;
+    NObject* sender() const;
 
 private:
 
    std::string buffer_;
    int scancode_;
+   NObject* sender_;
 
 };
 

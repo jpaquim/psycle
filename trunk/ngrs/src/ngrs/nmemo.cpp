@@ -29,6 +29,8 @@
 NMemo::NMemo()
  : NTextBase()
 {
+  oldPos_ = 0;
+
   setLayout(NAlignLayout());
   NScrollBox* box = new NScrollBox();
     scrollPane_ = new NPanel();
@@ -61,6 +63,10 @@ void NMemo::clear( )
 
 void NMemo::onKeyPress( const NKeyEvent & event )
 {
+  std::vector<NEdit*>::iterator it = find(edits.begin(),edits.end(),event.sender());
+  NEdit* current = 0;
+  if (it != edits.end()) current = *it;
+
   if (event.scancode() == XK_Return) {
    int index = window()->selectedBase()->zOrder();
    NEdit* edt = new NEdit();
@@ -71,7 +77,28 @@ void NMemo::onKeyPress( const NKeyEvent & event )
    edt->setFocus();
    scrollPane_->resize();
    scrollPane_->repaint();
+  } else
+  if (event.scancode() == XK_Left && current && oldPos_ == 0) {
+     if (it > edits.begin()) {
+        it--;
+        current = *it;
+        current->setFocus();
+        current->setPos(current->text().length()-1);
+        scrollPane_->repaint();
+     }
+  } else
+  if (event.scancode() == XK_Right && current && oldPos_ == current->text().length()-1) {
+     if (it < edits.end()) {
+        it++;
+        if (it < edits.end()) {
+          current = *it;
+          current->setPos(0);
+          current->setFocus();
+          scrollPane_->repaint();
+        }
+     }
   }
+  if (current) oldPos_ = current->pos();
 }
 
 void NMemo::loadFromFile( const std::string & fileName )
