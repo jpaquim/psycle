@@ -69,10 +69,10 @@ NTestWindow::NTestWindow()
 
   NPanel* panel = new NPanel();
     panel->setLayout(NTableLayout(12,12));
-    for (int y = 0; y < 100; y++) {
-      for (int x = 0; x < 10; x++) {
-         NButton* btn = new NButton(stringify(x)+","+stringify(y));
-           btn->setFlat(false);
+    for (int y = 0; y < 256; y++) {
+      for (int x = 0; x < 64; x++) {
+         NLabel* btn = new NLabel(stringify(x)+","+stringify(y));
+           //btn->setFlat(false);
            if (x == 0 && y == 0) {
              btn->setPreferredSize(200,50);
            }

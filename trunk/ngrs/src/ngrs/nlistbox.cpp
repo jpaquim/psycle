@@ -21,6 +21,7 @@
 #include "nbuttonevent.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "ntablelayout.h"
 
 NListBox::NListBox()
  : NScrollBox()
@@ -172,6 +173,13 @@ NCustomItem * NListBox::itemAt( unsigned int index )
     return (NCustomItem*) listBoxPane_->visualComponents().at(index);
   else
     return 0;
+}
+
+void NListBox::setOrientation( int orientation )
+{
+  if (orientation == nHorizontal) {
+    setHScrollBarPolicy(nAlwaysVisible);
+  }
 }
 
 

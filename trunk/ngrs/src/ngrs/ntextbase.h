@@ -17,72 +17,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTABLELAYOUT_H
-#define NTABLELAYOUT_H
+#ifndef NTEXTBASE_H
+#define NTEXTBASE_H
 
-#include "nlayout.h"
-#include <map>
+#include <npanel.h>
 
 /**
 @author Stefan Nattkemper
 */
-class NTableLayout : public NLayout
+class NTextBase : public NPanel
 {
-  class Row {
-     public :
-       Row();
-       Row(int col, class NVisualComponent* comp);
-       ~Row();
-
-       int rowMaxHeight() const;
-       int defaultRowHeight() const;
-
-       NVisualComponent* colAt(int index);
-
-       void add(int col, class NVisualComponent* comp);
-
-       std::map<int, class NVisualComponent*> colMap;
-
-     private:
-
-  };
-
-
 public:
-    NTableLayout();
-    NTableLayout(int cols, int rows);
+    NTextBase();
 
-    ~NTableLayout();
+    ~NTextBase();
 
-    void setRows(int number);
-    void setColumns(int number);
-
-    int defaultColWidth() const;
-    int defaultRowHeight() const;
-
-    virtual NTableLayout* clone()  const;   // Uses the copy constructor
-
-    virtual void align(class NVisualComponent* parent);
-
-    virtual int preferredWidth(const class NVisualComponent* target) const;
-    virtual int preferredHeight(const class NVisualComponent* target) const;
-
-    virtual void add(class NVisualComponent* comp);
-    virtual void remove(class NVisualComponent* comp);
-    virtual void removeAll();
-
-private:
-
-    int cols_;
-    int rows_;
-
-    int colMaxWidth(int col) const;
-    int colWidthBetween(int colStart, int colEnd) const;
-
-    std::map<int,Row> rows;
-    mutable std::map<int,int> colMaxWidthCache;
-
-    int findVerticalStart( long comparator , class NVisualComponent* owner);
 };
 
 #endif

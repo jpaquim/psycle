@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,57 +17,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NLISTBOX_H
-#define NLISTBOX_H
+#include "ntable.h"
 
-#include "nscrollbox.h"
-#include "nlistlayout.h"
-#include "ncustomitem.h"
-#include "nitemevent.h"
-
-/**
-@author Stefan
-*/
-class NListBox : public NScrollBox
+NTable::NTable()
+ : NScrollBox()
 {
-public:
-    NListBox();
-
-    ~NListBox();
-
-    signal1<NItemEvent*> itemSelected;
-
-    void add(NCustomItem* item);
-    void add(NCustomItem* item, bool align);
-    void insert(NCustomItem* item, int index, bool align = true);
-
-    virtual void onItemSelected(NCustomItem * item);
-    virtual void removeChilds();
-
-    int itemCount();
-    void setIndex(unsigned int i);
-    int selIndex() const;
-    std::vector<int> selIndexList();
-    void selClear();
-
-    void setMultiSelect(bool on);
-    NCustomItem* itemAt(unsigned int index);
-
-    void setOrientation(int orientation);
-
-private:
-
-    NPanel* listBoxPane_;
-    bool multiSelect_;
-    std::vector<NCustomItem*> selItems_;
-
-    NSkin itemBg;
-    NSkin itemFg;
-
-    void onItemPress(NButtonEvent * ev);
-    void deSelectItems();
+}
 
 
-};
+NTable::~NTable()
+{
+}
 
-#endif
+

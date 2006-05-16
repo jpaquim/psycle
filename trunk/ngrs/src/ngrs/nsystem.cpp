@@ -511,5 +511,5 @@ bool NSystem::isTrueColor()
 
 bool NSystem::propertysActive( )
 {
-  return true;
+  return false;
 }
