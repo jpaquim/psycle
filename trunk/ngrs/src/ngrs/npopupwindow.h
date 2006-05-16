@@ -20,7 +20,7 @@
 #ifndef NPOPUPWINDOW_H
 #define NPOPUPWINDOW_H
 
-#include <nwindow.h>
+#include "ngrs/nwindow.h"
 
 /**
 @author Stefan Nattkemper

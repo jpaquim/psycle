@@ -17,10 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nlistbox.h"
-#include "nbuttonevent.h"
-#include "napp.h"
-#include "nconfig.h"
+#include "ngrs/nlistbox.h"
+#include "ngrs/nbuttonevent.h"
+#include "ngrs/napp.h"
+#include "ngrs/nconfig.h"
 
 NListBox::NListBox()
  : NScrollBox()

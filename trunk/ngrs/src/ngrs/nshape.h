@@ -20,11 +20,11 @@
 #ifndef NSHAPE_H
 #define NSHAPE_H
 
-#include "nrect.h"
-#include "ngraphics.h"
-#include "nsize.h"
-#include "npoint.h"
-#include "nregion.h"
+#include "ngrs/nrect.h"
+#include "ngrs/ngraphics.h"
+#include "ngrs/nsize.h"
+#include "ngrs/npoint.h"
+#include "ngrs/nregion.h"
 
 /**
 @author Stefan

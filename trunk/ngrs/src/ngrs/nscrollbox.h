@@ -20,8 +20,8 @@
 #ifndef NSCROLLBOX_H
 #define NSCROLLBOX_H
 
-#include <npanel.h>
-#include <nscrollbar.h>
+#include "ngrs/npanel.h"
+#include "ngrs/nscrollbar.h"
 
 const int nAlwaysVisible = 1;
 const int nNoneVisible   = 2;

@@ -20,7 +20,7 @@
 #ifndef NRECTSHAPE_H
 #define NRECTSHAPE_H
 
-#include <nshape.h>
+#include <ngrs/nshape.h>
 
 /**
 @author Stefan

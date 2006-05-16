@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nbitmap.h"
-#include "napp.h"
-#include "nfile.h"
+#include "ngrs/nbitmap.h"
+#include "ngrs/napp.h"
+#include "ngrs/nfile.h"
 
 NBitmap::NBitmap()
  : NObject(), depth_(24),width_(0),height_(0), data_(0), xi(0), clp(0)

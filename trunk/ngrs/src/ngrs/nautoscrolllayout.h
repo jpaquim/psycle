@@ -20,8 +20,8 @@
 #ifndef NAUTOSCROLLLAYOUT_H
 #define NAUTOSCROLLLAYOUT_H
 
-#include <nlayout.h>
-#include "nvisualcomponent.h"
+#include <ngrs/nlayout.h>
+#include "ngrs/nvisualcomponent.h"
 
 /**
 @author Stefan

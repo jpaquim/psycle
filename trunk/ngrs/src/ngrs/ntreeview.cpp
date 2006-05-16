@@ -17,10 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ntreeview.h"
-#include "ntreenode.h"
-#include "nalignlayout.h"
-#include "nframeborder.h"
+#include "ngrs/ntreeview.h"
+#include "ngrs/ntreenode.h"
+#include "ngrs/nalignlayout.h"
+#include "ngrs/nframeborder.h"
 
 NTreeView::NTreeView()
  : NPanel()

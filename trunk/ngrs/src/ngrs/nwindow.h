@@ -20,10 +20,10 @@
 #ifndef NWINDOW_H
 #define NWINDOW_H
 
-#include <nsystem.h>
-#include <npanel.h>
-#include <niswindow.h>
-#include <nregion.h>
+#include "ngrs/nsystem.h"
+#include "ngrs/npanel.h"
+#include "ngrs/niswindow.h"
+#include "ngrs/nregion.h"
 
 const int nDestroyWindow  = 1;
 const int nHideWindow     = 2;

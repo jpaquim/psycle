@@ -20,7 +20,7 @@
 #ifndef NBORDERLAYOUT_H
 #define NBORDERLAYOUT_H
 
-#include <nlayout.h>
+#include <ngrs/nlayout.h>
 
 /**
 @author Stefan

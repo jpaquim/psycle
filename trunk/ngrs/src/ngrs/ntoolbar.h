@@ -20,7 +20,7 @@
 #ifndef NTOOLBAR_H
 #define NTOOLBAR_H
 
-#include "ntogglepanel.h"
+#include "ngrs/ntogglepanel.h"
 
 class NButton;
 

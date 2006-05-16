@@ -20,10 +20,10 @@
 #ifndef NBORDER_H
 #define NBORDER_H
 
-#include "nsize.h"
-#include "ngraphics.h"
-#include "nshape.h"
-#include "ncolor.h"
+#include "ngrs/nsize.h"
+#include "ngrs/ngraphics.h"
+#include "ngrs/nshape.h"
+#include "ngrs/ncolor.h"
 
 /**
 @author Stefan

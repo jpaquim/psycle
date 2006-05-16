@@ -20,7 +20,7 @@
 #ifndef NRUNTIME_H
 #define NRUNTIME_H
 
-#include "nobject.h"
+#include "ngrs/nobject.h"
 #include <vector>
 #include <iostream>
 #include <sstream>

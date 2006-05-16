@@ -20,7 +20,7 @@
 #ifndef NBUTTONEVENT_H
 #define NBUTTONEVENT_H
 
-#include <nevent.h>
+#include <ngrs/nevent.h>
 
 /**
 @author Stefan

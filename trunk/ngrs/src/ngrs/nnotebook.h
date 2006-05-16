@@ -20,7 +20,7 @@
 #ifndef NNOTEBOOK_H
 #define NNOTEBOOK_H
 
-#include "npanel.h"
+#include "ngrs/npanel.h"
 
 /**
 @author Stefan

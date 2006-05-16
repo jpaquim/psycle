@@ -20,7 +20,7 @@
 #ifndef NMENUSEPERATOR_H
 #define NMENUSEPERATOR_H
 
-#include <ncustommenuitem.h>
+#include "ngrs/ncustommenuitem.h"
 
 /**
 @author Stefan

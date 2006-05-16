@@ -20,7 +20,7 @@
 #ifndef NTIMER_H
 #define NTIMER_H
 
-#include <nobject.h>
+#include "ngrs/nobject.h"
 #include <vector>
 
 /**

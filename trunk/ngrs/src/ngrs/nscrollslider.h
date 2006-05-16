@@ -20,7 +20,7 @@
 #ifndef NSCROLLSLIDER_H
 #define NSCROLLSLIDER_H
 
-#include <nbutton.h>
+#include "ngrs/nbutton.h"
 
 
 /**

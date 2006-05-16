@@ -20,7 +20,7 @@
 #ifndef N7SEGDISPLAY_H
 #define N7SEGDISPLAY_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 class N7Segment;
 

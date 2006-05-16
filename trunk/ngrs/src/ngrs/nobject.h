@@ -20,8 +20,8 @@
 #ifndef NOBJECT_H
 #define NOBJECT_H
 
-#include "sigslot.h"
-#include "nkeyaccelerator.h"
+#include "ngrs/sigslot.h"
+#include "ngrs/nkeyaccelerator.h"
 #include <string>
 #include <vector>
 

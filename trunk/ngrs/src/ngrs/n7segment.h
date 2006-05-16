@@ -20,7 +20,7 @@
 #ifndef N7SEGMENT_H
 #define N7SEGMENT_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 /**
 @author Stefan Nattkemper

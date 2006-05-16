@@ -20,7 +20,7 @@
 #ifndef NCUSTOMBUTTON_H
 #define NCUSTOMBUTTON_H
 
-#include "npanel.h"
+#include "ngrs/npanel.h"
 
 class NLabel;
 class NBevelBorder;

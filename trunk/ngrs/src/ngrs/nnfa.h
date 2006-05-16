@@ -20,7 +20,7 @@
 #ifndef NNFA_H
 #define NNFA_H
 
-#include "nstate.h"
+#include "ngrs/nstate.h"
 #include <vector>
 
 

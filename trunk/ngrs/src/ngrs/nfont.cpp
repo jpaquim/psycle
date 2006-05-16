@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nfont.h"
-#include "napp.h"
+#include "ngrs/nfont.h"
+#include "ngrs/napp.h"
 
 using namespace std;
 

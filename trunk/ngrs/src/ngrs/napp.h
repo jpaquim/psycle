@@ -21,8 +21,8 @@
 #define NAPP_H
 
 #include <map>
-#include "nkeyaccelerator.h"
-#include "nxpmfilter.h"
+#include "ngrs/nkeyaccelerator.h"
+#include "ngrs/nxpmfilter.h"
 #include <sys/time.h>
 #include <sys/select.h>
 

@@ -20,7 +20,7 @@
 #ifndef NDIALOG_H
 #define NDIALOG_H
 
-#include <nwindow.h>
+#include <ngrs/nwindow.h>
 
 /**
 @author Stefan

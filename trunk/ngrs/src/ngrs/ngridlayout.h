@@ -20,7 +20,7 @@
 #ifndef NGRIDLAYOUT_H
 #define NGRIDLAYOUT_H
 
-#include <nlayout.h>
+#include <ngrs/nlayout.h>
 
 /**
 @author Stefan

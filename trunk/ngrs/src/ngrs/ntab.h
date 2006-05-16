@@ -20,7 +20,7 @@
 #ifndef NTAB_H
 #define NTAB_H
 
-#include <ncustombutton.h>
+#include "ngrs/ncustombutton.h"
 
 /**
 @author Stefan

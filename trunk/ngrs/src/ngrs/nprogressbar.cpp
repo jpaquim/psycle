@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nprogressbar.h"
-#include "nframeborder.h"
-#include "nlabel.h"
+#include "ngrs/nprogressbar.h"
+#include "ngrs/nframeborder.h"
+#include "ngrs/nlabel.h"
 
 
 NProgressBar::NProgressBar()

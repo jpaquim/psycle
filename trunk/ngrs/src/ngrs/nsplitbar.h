@@ -20,7 +20,7 @@
 #ifndef NSPLITBAR_H
 #define NSPLITBAR_H
 
-#include <npanel.h>
+#include "ngrs/npanel.h"
 
 /**
 @author Stefan Nattkemper

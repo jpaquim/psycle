@@ -20,9 +20,9 @@
 #ifndef NFLOWLAYOUT_H
 #define NFLOWLAYOUT_H
 
-#include <nlayout.h>
-#include "nvisualcomponent.h"
-#include "nvisualcomponent.h"
+#include "ngrs/nlayout.h"
+#include "ngrs/nvisualcomponent.h"
+#include "ngrs/nvisualcomponent.h"
 
 const int nAlHeight = 10;
 

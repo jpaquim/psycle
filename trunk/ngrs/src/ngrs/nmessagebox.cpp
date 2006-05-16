@@ -17,10 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nmessagebox.h"
-#include "nbutton.h"
-#include "nflowlayout.h"
-#include "nlabel.h"
+#include "ngrs/nmessagebox.h"
+#include "ngrs/nbutton.h"
+#include "ngrs/nflowlayout.h"
+#include "ngrs/nlabel.h"
 
 NMessageBox::NMessageBox()
  : NDialog()

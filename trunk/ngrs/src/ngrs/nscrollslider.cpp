@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nscrollslider.h"
-#include "nscrollbar.h"
+#include "ngrs/nscrollslider.h"
+#include "ngrs/nscrollbar.h"
 
 NScrollSlider::NScrollSlider()
  : NButton()
