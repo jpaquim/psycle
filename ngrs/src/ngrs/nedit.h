@@ -55,6 +55,7 @@ public:
     int vAlign() const;
     int hAlign() const;
 
+    void setPos(unsigned int pos);
     unsigned int pos() const;
 
     sigslot::signal1<const NKeyEvent &> keyPress;

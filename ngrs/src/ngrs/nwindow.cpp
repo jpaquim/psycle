@@ -321,12 +321,12 @@ void NWindow::dragRectPicker( NVisualComponent * dragBase, int x, int y, int var
 
 void NWindow::onKeyPress( const NKeyEvent & keyEvent )
 {
-  if (selectedBase_ != NULL) selectedBase_->onKeyPress(keyEvent);
+  if (selectedBase_ != NULL) selectedBase_->onKeyPress(NKeyEvent(selectedBase_,keyEvent.buffer(),keyEvent.scancode()));
 }
 
 void NWindow::onKeyRelease( const NKeyEvent & keyEvent )
 {
-  if (selectedBase_ != NULL) selectedBase_->onKeyRelease(keyEvent);
+  if (selectedBase_ != NULL) selectedBase_->onKeyRelease(NKeyEvent(selectedBase_,keyEvent.buffer(),keyEvent.scancode()));
 }
 
 

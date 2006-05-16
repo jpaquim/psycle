@@ -42,6 +42,8 @@ public:
 
 private:
 
+    int oldPos_;
+
     NPanel* scrollPane_;
     void clear();
 
