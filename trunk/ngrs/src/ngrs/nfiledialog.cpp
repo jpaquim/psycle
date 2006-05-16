@@ -17,19 +17,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nfiledialog.h"
-#include "ngrs/ntoolbarseparator.h"
-#include "ngrs/ngroupbox.h"
-#include "ngrs/napp.h"
-#include "ngrs/nconfig.h"
-#include "ngrs/nitem.h"
-#include "ngrs/ncheckbox.h"
-#include "ngrs/nlabel.h"
-#include "ngrs/nedit.h"
-#include "ngrs/ncombobox.h"
-#include "ngrs/nframeborder.h"
-#include "ngrs/nsplitbar.h"
-#include "ngrs/nalignlayout.h"
+#include "nfiledialog.h"
+#include "ntoolbarseparator.h"
+#include "ngroupbox.h"
+#include "napp.h"
+#include "nconfig.h"
+#include "nitem.h"
+#include "ncheckbox.h"
+#include "nlabel.h"
+#include "nedit.h"
+#include "ncombobox.h"
+#include "nframeborder.h"
+#include "nsplitbar.h"
+#include "nalignlayout.h"
 
 /* XPM */
 const char * left_nav[] = {

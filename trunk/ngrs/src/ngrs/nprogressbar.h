@@ -20,8 +20,8 @@
 #ifndef NPROGRESSBAR_H
 #define NPROGRESSBAR_H
 
-#include "ngrs/npanel.h"
-#include "ngrs/ngradient.h"
+#include "npanel.h"
+#include "ngradient.h"
 
 class NLabel;
 

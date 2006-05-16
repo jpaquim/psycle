@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ngraphics.h"
-#include "ngrs/napp.h"
-#include "ngrs/nvisualcomponent.h"
+#include "ngraphics.h"
+#include "napp.h"
+#include "nvisualcomponent.h"
 
 NGraphics::NGraphics(Window winID)
 {

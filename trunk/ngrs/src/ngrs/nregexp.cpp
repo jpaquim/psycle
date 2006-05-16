@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nregexp.h"
-#include "ngrs/nnfa.h"
-#include "ngrs/nstate.h"
+#include "nregexp.h"
+#include "nnfa.h"
+#include "nstate.h"
 
 using namespace std;
 

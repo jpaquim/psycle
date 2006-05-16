@@ -24,7 +24,7 @@
 @author Stefan
 */
 
-#include "ngrs/nskin.h"
+#include "nskin.h"
 #include <map>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>

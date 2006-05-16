@@ -23,8 +23,8 @@
 /**
 @author Stefan
 */
-#include "ngrs/nfont.h"
-#include "ngrs/nfontstructure.h"
+#include "nfont.h"
+#include "nfontstructure.h"
 #include <string>
 
 /**

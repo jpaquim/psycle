@@ -20,7 +20,7 @@
 #ifndef NTOGGLEPANEL_H
 #define NTOGGLEPANEL_H
 
-#include "ngrs/npanel.h"
+#include "npanel.h"
 
 class NCustomButton;
 

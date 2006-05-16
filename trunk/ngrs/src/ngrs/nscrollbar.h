@@ -20,8 +20,8 @@
 #ifndef NSCROLLBAR_H
 #define NSCROLLBAR_H
 
-#include "ngrs/nbutton.h"
-#include "ngrs/nbevelborder.h"
+#include "nbutton.h"
+#include "nbevelborder.h"
 
 enum NScrollPolicyType{ nDx = 1, nDy = 2 };
 

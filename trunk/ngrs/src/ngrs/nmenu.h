@@ -20,7 +20,7 @@
 #ifndef NMENU_H
 #define NMENU_H
 
-#include "ngrs/ncustombutton.h"
+#include "ncustombutton.h"
 
 
 class NPopupMenu;

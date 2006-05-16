@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nvisual.h"
-#include "ngrs/nproperty.h"
+#include "nvisual.h"
+#include "nproperty.h"
 
 NVisual::NVisual()
  : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10)

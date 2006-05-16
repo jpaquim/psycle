@@ -20,9 +20,9 @@
 #ifndef NBUTTON_H
 #define NBUTTON_H
 
-#include "ngrs/ncustombutton.h"
-#include "ngrs/nimage.h"
-#include "ngrs/nbevelborder.h"
+#include "ncustombutton.h"
+#include "nimage.h"
+#include "nbevelborder.h"
 
 class NWindow;
 class NLabel;

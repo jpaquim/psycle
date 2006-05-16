@@ -20,8 +20,8 @@
 #ifndef NSLIDER_H
 #define NSLIDER_H
 
-#include "ngrs/npanel.h"
-#include "ngrs/nbutton.h"
+#include "npanel.h"
+#include "nbutton.h"
 
 /**
 @author Stefan

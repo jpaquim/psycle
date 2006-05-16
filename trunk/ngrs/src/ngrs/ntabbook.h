@@ -20,9 +20,9 @@
 #ifndef NTABBOOK_H
 #define NTABBOOK_H
 
-#include "ngrs/npanel.h"
-#include "ngrs/nnotebook.h"
-#include "ngrs/ntabbar.h"
+#include "npanel.h"
+#include "nnotebook.h"
+#include "ntabbar.h"
 
 
 

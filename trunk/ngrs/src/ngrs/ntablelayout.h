@@ -20,7 +20,7 @@
 #ifndef NTABLELAYOUT_H
 #define NTABLELAYOUT_H
 
-#include "ngrs/nlayout.h"
+#include "nlayout.h"
 #include <map>
 
 /**

@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/n7segdisplay.h"
-#include "ngrs/nflowlayout.h"
-#include "ngrs/n7segment.h"
+#include "n7segdisplay.h"
+#include "nflowlayout.h"
+#include "n7segment.h"
 
 N7SegDisplay::N7SegDisplay( )
 {

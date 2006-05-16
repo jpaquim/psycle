@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ntablelayout.h"
-#include "ngrs/nvisualcomponent.h"
+#include "ntablelayout.h"
+#include "nvisualcomponent.h"
 
 NTableLayout::NTableLayout()
  : NLayout(), cols_(1), rows_(1)

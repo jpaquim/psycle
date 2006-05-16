@@ -20,7 +20,7 @@
 #ifndef NTOOLBARSEPARATOR_H
 #define NTOOLBARSEPARATOR_H
 
-#include "ngrs/npanel.h"
+#include "npanel.h"
 
 /**
 @author Stefan

@@ -49,10 +49,10 @@ const char * group_xpm[] = {
 "                "};
 
 
-#include "ngrs/nfilelistbox.h"
-#include "ngrs/nlabel.h"
-#include "ngrs/nflowlayout.h"
-#include "ngrs/nitem.h"
+#include "nfilelistbox.h"
+#include "nlabel.h"
+#include "nflowlayout.h"
+#include "nitem.h"
 
 NFileListBox::NFileListBox()
  :  NListBox()

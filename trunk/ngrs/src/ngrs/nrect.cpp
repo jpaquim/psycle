@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nrect.h"
+#include "nrect.h"
 #include <algorithm>
 
 NRect::NRect() : left_(0), top_(0), width_(0), height_(0)

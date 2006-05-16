@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nflipbox.h"
-#include "ngrs/nflipbar.h"
-#include "ngrs/nalignlayout.h"
+#include "nflipbox.h"
+#include "nflipbar.h"
+#include "nalignlayout.h"
 
 NFlipBox::NFlipBox()
  : NPanel()

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nitemevent.h"
-#include "ngrs/ncustomitem.h"
+#include "nitemevent.h"
+#include "ncustomitem.h"
 
 NItemEvent::NItemEvent(NCustomItem* sender, const std::string & text)
  : NEvent(sender,text)

@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ncheckbox.h"
-#include "ngrs/nlabel.h"
-#include "ngrs/nalignlayout.h"
+#include "ncheckbox.h"
+#include "nlabel.h"
+#include "nalignlayout.h"
 
 NCheckBox::NCheckBox()
  : NPanel()

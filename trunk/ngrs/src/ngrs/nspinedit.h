@@ -20,9 +20,9 @@
 #ifndef NSPINEDIT_H
 #define NSPINEDIT_H
 
-#include "ngrs/npanel.h"
-#include "ngrs/nspinbutton.h"
-#include "ngrs/nedit.h"
+#include "npanel.h"
+#include "nspinbutton.h"
+#include "nedit.h"
 
 /**
 @author Stefan Nattkemper

@@ -17,10 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ntabbook.h"
-#include "ngrs/ntabbar.h"
-#include "ngrs/nalignlayout.h"
-#include "ngrs/nbutton.h"
+#include "ntabbook.h"
+#include "ntabbar.h"
+#include "nalignlayout.h"
+#include "nbutton.h"
 
 NTabBook::NTabBook()
  : NPanel()

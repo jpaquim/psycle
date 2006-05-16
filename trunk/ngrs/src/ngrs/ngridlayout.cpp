@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/ngridlayout.h"
-#include "ngrs/nvisualcomponent.h"
+#include "ngridlayout.h"
+#include "nvisualcomponent.h"
 
 NGridLayout::NGridLayout( ) : cols_(1),rows_(1), hgap_(0), vgap_(0)
 {

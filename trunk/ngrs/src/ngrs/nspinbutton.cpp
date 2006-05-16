@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nspinbutton.h"
-#include "ngrs/nbutton.h"
+#include "nspinbutton.h"
+#include "nbutton.h"
 
 /* XPM */
 const char * arrow_inc_xpm[] = {

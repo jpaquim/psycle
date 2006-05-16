@@ -17,11 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ngrs/nmenu.h"
-#include "ngrs/ncustommenuitem.h"
-#include "ngrs/napp.h"
-#include "ngrs/nconfig.h"
-#include "ngrs/npopupmenu.h"
+#include "nmenu.h"
+#include "ncustommenuitem.h"
+#include "napp.h"
+#include "nconfig.h"
+#include "npopupmenu.h"
 
 NMenu::NMenu()
  : NCustomButton()

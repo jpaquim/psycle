@@ -20,19 +20,19 @@
 #ifndef NVISUALCOMPONENT_H
 #define NVISUALCOMPONENT_H
 
-#include "ngrs/nvisual.h"
-#include "ngrs/ngraphics.h"
-#include "ngrs/nrect.h"
-#include "ngrs/nisvisualcomponent.h"
-#include "ngrs/ncolor.h"
+#include "nvisual.h"
+#include "ngraphics.h"
+#include "nrect.h"
+#include "nisvisualcomponent.h"
+#include "ncolor.h"
 #include <vector>
-#include "ngrs/nsize.h"
-#include "ngrs/nborder.h"
-#include "ngrs/nlayout.h"
-#include "ngrs/nmoveable.h"
-#include "ngrs/nmoveevent.h"
-#include "ngrs/nskin.h"
-#include "ngrs/nalignconstraint.h"
+#include "nsize.h"
+#include "nborder.h"
+#include "nlayout.h"
+#include "nmoveable.h"
+#include "nmoveevent.h"
+#include "nskin.h"
+#include "nalignconstraint.h"
 
 class NWindow;
 

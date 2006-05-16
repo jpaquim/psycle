@@ -20,8 +20,8 @@
 #ifndef NLAYOUT_H
 #define NLAYOUT_H
 
-#include "ngrs/ngraphics.h"
-#include "ngrs/nregion.h"
+#include "ngraphics.h"
+#include "nregion.h"
 
 const short nAlNone   = 0;
 const short nAlLeft   = 1;

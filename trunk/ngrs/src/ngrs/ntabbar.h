@@ -20,11 +20,11 @@
 #ifndef NTABBAR_H
 #define NTABBAR_H
 
-#include "ngrs/npanel.h"
-#include "ngrs/ntab.h"
-#include "ngrs/nnotebook.h"
-#include "ngrs/ntogglepanel.h"
-#include "ngrs/nflowlayout.h"
+#include "npanel.h"
+#include "ntab.h"
+#include "nnotebook.h"
+#include "ntogglepanel.h"
+#include "nflowlayout.h"
 
 class NNotebook;
 class NFlowLayout;
