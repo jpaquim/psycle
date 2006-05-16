@@ -80,16 +80,19 @@ int NTableLayout::preferredHeight( const NVisualComponent * target ) const
   int yp = 0;
   std::map<int,Row>::const_iterator rowIt = rows.begin();
   int lastRowIndex = 0;
-   for ( ; rowIt != rows.end(); rowIt++ ) {
-      Row row = rowIt->second;
-      int rowHeight = row.rowMaxHeight();
-      int newRowIndex = rowIt->first;
-      if ((newRowIndex-lastRowIndex) > 0) {
-         yp += defaultRowHeight() * (newRowIndex-lastRowIndex);
-      }
-      lastRowIndex = newRowIndex + 1;
-      yp+=rowHeight;
-   }
+  for ( ; rowIt != rows.end(); rowIt++ ) {
+    Row row = rowIt->second;
+    int rowHeight = row.rowMaxHeight();
+    int newRowIndex = rowIt->first;
+    if ((newRowIndex-lastRowIndex) > 0) {
+      yp += defaultRowHeight() * (newRowIndex-lastRowIndex);
+    }
+    lastRowIndex = newRowIndex + 1;
+    yp+=rowHeight;
+  }
+  if (lastRowIndex < rows_-1) {
+    yp += defaultRowHeight() * (rows_-lastRowIndex);
+  }
   return yp;
 }
 

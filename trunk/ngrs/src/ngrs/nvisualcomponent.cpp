@@ -28,18 +28,8 @@ using namespace std;
 NIsVisualComponent* NVisualComponent::isVisualComponent = new NIsVisualComponent();
 
 NVisualComponent::NVisualComponent()
- : NVisual()
+ : NVisual(), clipping_(1), events_(1), scrollDx_(0), scrollDy_(0), layout_(0), win_(0), clSzPolicy(0), ownerSizeSet_(0), ownerPreferredWidth_(0), ownerPreferredHeight_(0)
 {
-  scrollDx_ = scrollDy_ = 0;
-  layout_  = 0;
-  win_ = 0;
-  clipping_ = events_ = true;
-  clSzPolicy = 0;
-
-  ownerSizeSet_ = false;
-  ownerPreferredWidth_  = 0;
-  ownerPreferredHeight_ = 0;
-
   if (properties()) properties()->bind("align", *this, &NVisualComponent::align, &NVisualComponent::setAlign);
 }
 
@@ -595,6 +585,36 @@ void NVisualComponent::add( NVisualComponent * component )
   }
 }
 
+void NVisualComponent::add( NVisualComponent * component, int align, bool update )
+{
+  if (component == this) return;
+  component->setAlign(align);
+
+  NVisual::add(component);
+  if (component == this) return;
+
+  visualComponents_.push_back(component);
+  if (layout_!=0) {
+      layout_->add(component);
+      if (update) layout_->align(this);
+  }
+}
+
+void NVisualComponent::add( NVisualComponent * component, const NAlignConstraint & align, bool update )
+{
+  if (component == this) return;
+  component->setAlignConstraint(align);
+
+  NVisual::add(component);
+  if (component == this) return;
+
+  visualComponents_.push_back(component);
+  if (layout_!=0) {
+      layout_->add(component);
+      if (update) layout_->align(this);
+  }
+}
+
 NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area)
 {
    NVisualComponent* comp = this;
@@ -827,6 +847,10 @@ NAlignConstraint NVisualComponent::alignConstraint( ) const
 {
   return alignConstraint_;
 }
+
+
+
+
 
 
 
