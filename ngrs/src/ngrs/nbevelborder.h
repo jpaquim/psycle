@@ -20,7 +20,7 @@
 #ifndef NBEVELBORDER_H
 #define NBEVELBORDER_H
 
-#include <nborder.h>
+#include <ngrs/nborder.h>
 
 const int nRaised  = 0;
 const int nLowered   = 1;

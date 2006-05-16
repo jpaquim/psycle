@@ -20,7 +20,7 @@
 #ifndef NMENUITEM_H
 #define NMENUITEM_H
 
-#include <ncustommenuitem.h>
+#include "ngrs/ncustommenuitem.h"
 
 class NLabel;
 class NMenu;

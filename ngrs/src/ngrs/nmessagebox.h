@@ -20,7 +20,7 @@
 #ifndef NMESSAGEBOX_H
 #define NMESSAGEBOX_H
 
-#include <ndialog.h>
+#include "ngrs/ndialog.h"
 
 class NButton;
 class NLabel;

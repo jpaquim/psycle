@@ -20,8 +20,8 @@
 #ifndef NCHECKBOX_H
 #define NCHECKBOX_H
 
-#include <npanel.h>
-#include <nfontmetrics.h>
+#include <ngrs/npanel.h>
+#include <ngrs/nfontmetrics.h>
 
 class NLabel;
 

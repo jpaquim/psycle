@@ -17,14 +17,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nbutton.h"
-#include "napp.h"
-#include "nconfig.h"
-#include "nwindow.h"
-#include "nlabel.h"
-#include "nframeborder.h"
-#include "nbutton.h"
-#include "nproperty.h"
+#include "ngrs/nbutton.h"
+#include "ngrs/napp.h"
+#include "ngrs/nconfig.h"
+#include "ngrs/nwindow.h"
+#include "ngrs/nlabel.h"
+#include "ngrs/nframeborder.h"
+#include "ngrs/nbutton.h"
+#include "ngrs/nproperty.h"
 
 using namespace std;
 

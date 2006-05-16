@@ -20,7 +20,7 @@
 #ifndef NRECT_H
 #define NRECT_H
 
-#include "npoint.h"
+#include "ngrs/npoint.h"
 
 /**
 @author Stefan

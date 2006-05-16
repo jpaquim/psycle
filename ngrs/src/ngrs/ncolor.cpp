@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ncolor.h"
-#include "napp.h"
+#include "ngrs/ncolor.h"
+#include "ngrs/napp.h"
 
 using namespace std;
 

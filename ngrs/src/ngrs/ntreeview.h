@@ -20,7 +20,7 @@
 #ifndef NTREEVIEW_H
 #define NTREEVIEW_H
 
-#include <npanel.h>
+#include "ngrs/npanel.h"
 
 class NTreeNode;
 

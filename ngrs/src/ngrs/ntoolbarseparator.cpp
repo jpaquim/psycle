@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ntoolbarseparator.h"
-#include "nflowlayout.h"
+#include "ngrs/ntoolbarseparator.h"
+#include "ngrs/nflowlayout.h"
 
 NToolBarSeparator::NToolBarSeparator()
  : NPanel()

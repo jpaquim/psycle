@@ -17,33 +17,33 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <ntestwindow.h>
-#include <napp.h>
-#include <nautoscrolllayout.h>
-#include <nline.h>
-#include <ntoolbar.h>
-#include <ntoolbarseparator.h>
-#include <ncombobox.h>
-#include <ngridlayout.h>
-#include <ncheckbox.h>
-#include <ncheckmenuitem.h>
-#include <nitem.h>
-#include <ngroupbox.h>
-#include <nframeborder.h>
-#include <nborderlayout.h>
-#include <nspinbutton.h>
-#include <nspinedit.h>
-#include <n7segment.h>
-#include <n7segdisplay.h>
-#include <ndockpanel.h>
-#include <nsplitbar.h>
-#include <nflipbox.h>
-#include <ncustomtreeview.h>
-#include <ntreenode.h>
-#include <nlabel.h>
-#include <nmessagebox.h>
-#include <nmenu.h>
-#include <npackageinfo.h>
+#include <ngrs-tests/ntestwindow.h>
+#include <ngrs/napp.h>
+#include <ngrs/nautoscrolllayout.h>
+#include <ngrs/nline.h>
+#include <ngrs/ntoolbar.h>
+#include <ngrs/ntoolbarseparator.h>
+#include <ngrs/ncombobox.h>
+#include <ngrs/ngridlayout.h>
+#include <ngrs/ncheckbox.h>
+#include <ngrs/ncheckmenuitem.h>
+#include <ngrs/nitem.h>
+#include <ngrs/ngroupbox.h>
+#include <ngrs/nframeborder.h>
+#include <ngrs/nborderlayout.h>
+#include <ngrs/nspinbutton.h>
+#include <ngrs/nspinedit.h>
+#include <ngrs/n7segment.h>
+#include <ngrs/n7segdisplay.h>
+#include <ngrs/ndockpanel.h>
+#include <ngrs/nsplitbar.h>
+#include <ngrs/nflipbox.h>
+#include <ngrs/ncustomtreeview.h>
+#include <ngrs/ntreenode.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nmessagebox.h>
+#include <ngrs/nmenu.h>
+#include <ngrs/npackageinfo.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",

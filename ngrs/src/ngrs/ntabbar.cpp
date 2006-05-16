@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ntabbar.h"
-#include "nnotebook.h"
-#include "nflowlayout.h"
+#include "ngrs/ntabbar.h"
+#include "ngrs/nnotebook.h"
+#include "ngrs/nflowlayout.h"
 
 
 NTabBar::NTabBar()

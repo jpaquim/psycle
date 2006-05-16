@@ -20,10 +20,10 @@
 #ifndef NFILEDIALOG_H
 #define NFILEDIALOG_H
 
-#include <nwindow.h>
-#include "nfilelistbox.h"
-#include "nflowlayout.h"
-#include "nregexp.h"
+#include <ngrs/nwindow.h>
+#include "ngrs/nfilelistbox.h"
+#include "ngrs/nflowlayout.h"
+#include "ngrs/nregexp.h"
 
 const int nSave = 1;
 const int nLoad = 2;

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nnfa.h"
-#include "nstate.h"
+#include "ngrs/nnfa.h"
+#include "ngrs/nstate.h"
 #include <iostream>
 
 

@@ -20,7 +20,7 @@
 #ifndef NGRADIENT_H
 #define NGRADIENT_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 /**
 @author Stefan

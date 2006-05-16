@@ -17,11 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ncustombutton.h"
-#include "nlabel.h"
-#include "nbevelborder.h"
-#include <ngradient.h>
-#include "nproperty.h"
+#include "ngrs/ncustombutton.h"
+#include "ngrs/nlabel.h"
+#include "ngrs/nbevelborder.h"
+#include "ngrs/ngradient.h"
+#include "ngrs/nproperty.h"
 
 NCustomButton::NCustomButton()
  : NPanel()

@@ -20,8 +20,8 @@
 #ifndef NIMGFILTER_H
 #define NIMGFILTER_H
 
-#include <nobject.h>
-#include <nbitmap.h>
+#include <ngrs/nobject.h>
+#include <ngrs/nbitmap.h>
 
 /**
 @author Stefan

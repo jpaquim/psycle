@@ -20,7 +20,7 @@
 #ifndef NCOMBOBOX_H
 #define NCOMBOBOX_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 class NCustomItem;
 class NButton;

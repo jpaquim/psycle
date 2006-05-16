@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nbuttonevent.h"
+#include "ngrs/nbuttonevent.h"
 
 
 NButtonEvent::NButtonEvent( NObject * sender, int x, int y, int button, const std::string & text ) : NEvent(sender,text), x_(x),y_(y),button_(button)

@@ -20,10 +20,10 @@
 #ifndef NLABEL_H
 #define NLABEL_H
 
-#include <nvisualcomponent.h>
-#include <nrectshape.h>
+#include <ngrs/nvisualcomponent.h>
+#include <ngrs/nrectshape.h>
 #include <string>
-#include <nfontmetrics.h>
+#include <ngrs/nfontmetrics.h>
 
 /**
 @author Stefan

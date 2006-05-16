@@ -20,7 +20,7 @@
 #ifndef NMENUBAR_H
 #define NMENUBAR_H
 
-#include <npanel.h>
+#include "ngrs/npanel.h"
 
 class NMenu;
 

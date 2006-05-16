@@ -24,14 +24,14 @@
 @author Stefan
 */
 
-#include "nskin.h"
+#include "ngrs/nskin.h"
 #include <map>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 #include <xercesc/sax2/DefaultHandler.hpp>
 #include <xercesc/util/XMLString.hpp>
-#include <nobject.h>
+#include <ngrs/nobject.h>
 
 class NBorder;
 

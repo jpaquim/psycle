@@ -20,7 +20,7 @@
 #ifndef NGROUPBOX_H
 #define NGROUPBOX_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 
 /**

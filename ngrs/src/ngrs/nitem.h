@@ -20,8 +20,8 @@
 #ifndef NITEM_H
 #define NITEM_H
 
-#include "ncustomitem.h"
-#include "nimage.h"
+#include "ngrs/ncustomitem.h"
+#include "ngrs/nimage.h"
 
 class NLabel;
 

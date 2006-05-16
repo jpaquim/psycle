@@ -20,9 +20,9 @@
 #ifndef NFILELISTBOX_H
 #define NFILELISTBOX_H
 
-#include <nlistbox.h>
-#include <nfile.h>
-#include <nregexp.h>
+#include <ngrs/nlistbox.h>
+#include <ngrs/nfile.h>
+#include <ngrs/nregexp.h>
 
 const int nFiles = 1;
 const int nDirs  = 2;

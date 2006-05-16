@@ -20,8 +20,8 @@
 #ifndef NFRAMEBORDER_H
 #define NFRAMEBORDER_H
 
-#include <nborder.h>
-#include <ncolor.h>
+#include <ngrs/nborder.h>
+#include <ngrs/ncolor.h>
 
 /**
 @author Stefan

@@ -20,7 +20,7 @@
 #ifndef NSPLASHSCREEN_H
 #define NSPLASHSCREEN_H
 
-#include <nwindow.h>
+#include "ngrs/nwindow.h"
 
 /**
 @author Stefan

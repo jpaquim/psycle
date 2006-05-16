@@ -21,9 +21,9 @@
 #define NFONT_H
 
 #include <string>
-#include <ncolor.h>
-#include <nruntime.h>
-#include <nfontstructure.h>
+#include <ngrs/ncolor.h>
+#include <ngrs/nruntime.h>
+#include <ngrs/nfontstructure.h>
 
 
 /**

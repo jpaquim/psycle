@@ -20,8 +20,8 @@
 #ifndef NREGION_H
 #define NREGION_H
 
-#include "nsystem.h"
-#include "nrect.h"
+#include "ngrs/nsystem.h"
+#include "ngrs/nrect.h"
 
 /**
 @author Stefan Nattkemper

@@ -20,9 +20,9 @@
 #ifndef NSIZE_H
 #define NSIZE_H
 
-#include "ncolor.h"
-#include "nfont.h"
-#include "nsize.h"
+#include "ngrs/ncolor.h"
+#include "ngrs/nfont.h"
+#include "ngrs/nsize.h"
 
 
 /**

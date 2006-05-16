@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nslider.h"
-#include "nframeborder.h"
+#include "ngrs/nslider.h"
+#include "ngrs/nframeborder.h"
 
 NSlider::NSlider()
  : NPanel(), trackLine_(true), pos_(0) , min_(0), max_(100), orientation_(nVertical)

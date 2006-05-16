@@ -20,9 +20,9 @@
 #ifndef NXPMFILTER_H
 #define NXPMFILTER_H
 
-#include <nimgfilter.h>
 #include <X11/xpm.h>
-#include <nsystem.h>
+#include "ngrs/nimgfilter.h"
+#include "ngrs/nsystem.h"
 
 /**
 @author Stefan

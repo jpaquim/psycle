@@ -17,11 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nmenubar.h"
-#include "napp.h"
-#include "nconfig.h"
-#include "nflowlayout.h"
-#include <nmenu.h>
+#include "ngrs/nmenubar.h"
+#include "ngrs/napp.h"
+#include "ngrs/nconfig.h"
+#include "ngrs/nflowlayout.h"
+#include "ngrs/nmenu.h"
 
 
 NMenuBar::NMenuBar()

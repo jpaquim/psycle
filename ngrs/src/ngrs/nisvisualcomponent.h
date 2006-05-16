@@ -20,7 +20,7 @@
 #ifndef NISVISUALCOMPONENT_H
 #define NISVISUALCOMPONENT_H
 
-#include <nvisitor.h>
+#include <ngrs/nvisitor.h>
 
 /**
 @author Stefan

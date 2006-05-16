@@ -17,18 +17,18 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ncombobox.h"
-#include "nimage.h"
-#include "napp.h"
-#include "nlabel.h"
-#include "nedit.h"
-#include "nbutton.h"
-#include "nlistbox.h"
-#include "nwindow.h"
-#include "ncustomitem.h"
-#include "nconfig.h"
-#include "nframeborder.h"
-#include "npopupwindow.h"
+#include "ngrs/ncombobox.h"
+#include "ngrs/nimage.h"
+#include "ngrs/napp.h"
+#include "ngrs/nlabel.h"
+#include "ngrs/nedit.h"
+#include "ngrs/nbutton.h"
+#include "ngrs/nlistbox.h"
+#include "ngrs/nwindow.h"
+#include "ngrs/ncustomitem.h"
+#include "ngrs/nconfig.h"
+#include "ngrs/nframeborder.h"
+#include "ngrs/npopupwindow.h"
 
 const char * arrow_down1_xpm[] = {
 "12 6 2 1",

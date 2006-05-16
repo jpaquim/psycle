@@ -20,7 +20,9 @@
 #ifndef NPAGE_H
 #define NPAGE_H
 
-#include <npanel.h>
+ // this class is obsolete
+
+#include "ngrs/npanel.h"
 
 /**
 @author Stefan

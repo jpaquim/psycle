@@ -20,7 +20,7 @@
 #ifndef NSPINBUTTON_H
 #define NSPINBUTTON_H
 
-#include <npanel.h>
+#include "ngrs/npanel.h"
 
 class NButton;
 class NImage;
