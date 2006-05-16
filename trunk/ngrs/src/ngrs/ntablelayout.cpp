@@ -25,6 +25,9 @@ NTableLayout::NTableLayout()
 {
 }
 
+NTableLayout::NTableLayout( int cols, int rows ) : NLayout(), cols_(cols), rows_(rows)
+{
+}
 
 NTableLayout::~NTableLayout()
 {
@@ -37,32 +40,57 @@ NTableLayout * NTableLayout::clone( ) const
 
 void NTableLayout::align( NVisualComponent * parent )
 {
-   int xp = 0;
+   colMaxWidthCache.clear();
+
    int yp = 0;
 
    std::map<int,Row>::iterator rowIt = rows.begin();
+   int lastRowIndex = 0;
    for ( ; rowIt != rows.end(); rowIt++ ) {
       Row row = rowIt->second;
+      int newRowIndex = rowIt->first;
+      if ((newRowIndex-lastRowIndex) > 0) {
+         yp += defaultRowHeight() * (newRowIndex-lastRowIndex);
+      }
+      lastRowIndex = newRowIndex + 1;
       std::map<int,NVisualComponent*>::iterator colIt = row.colMap.begin();
-      int rowHeight = defaultRowHeight();
-      xp=0;
+      int rowHeight = row.rowMaxHeight();
+      int xp = 0;
+      int lastIndex = 0;
       for ( ; colIt != row.colMap.end(); colIt++) {
          NVisualComponent* visual = colIt->second;
-         visual->setPosition(xp,yp,defaultColWidth(),defaultRowHeight());
-         xp+=defaultColWidth();
+         int newIndex = visual->alignConstraint().col();
+         xp+= colWidthBetween(lastIndex,newIndex);
+         int colWidth = colMaxWidth(newIndex);
+         visual->setPosition(xp,yp,colWidth,rowHeight);
+         xp+=colWidth;
+         lastIndex = newIndex+1;
       }
-      yp+=defaultRowHeight();
+      yp+=rowHeight;
    }
 }
 
 int NTableLayout::preferredWidth( const NVisualComponent * target ) const
 {
-  return 10;
+  return colWidthBetween(0,cols_);
 }
 
 int NTableLayout::preferredHeight( const NVisualComponent * target ) const
 {
-  return 10;
+  int yp = 0;
+  std::map<int,Row>::const_iterator rowIt = rows.begin();
+  int lastRowIndex = 0;
+   for ( ; rowIt != rows.end(); rowIt++ ) {
+      Row row = rowIt->second;
+      int rowHeight = row.rowMaxHeight();
+      int newRowIndex = rowIt->first;
+      if ((newRowIndex-lastRowIndex) > 0) {
+         yp += defaultRowHeight() * (newRowIndex-lastRowIndex);
+      }
+      lastRowIndex = newRowIndex + 1;
+      yp+=rowHeight;
+   }
+  return yp;
 }
 
 void NTableLayout::add( NVisualComponent * comp )
@@ -111,10 +139,25 @@ NTableLayout::Row::Row( int col, NVisualComponent * comp )
   colMap[col] = comp;
 }
 
-int NTableLayout::Row::rowHeight( ) const
+
+int NTableLayout::Row::rowMaxHeight( ) const
 {
-   //return colWidth_;
+  int maxHeight = defaultRowHeight();
+
+  std::map<int, NVisualComponent*>::const_iterator colIt = colMap.begin();
+  for ( ; colIt != colMap.end(); colIt++ ) {
+      NVisualComponent* comp = colIt->second;
+      maxHeight = std::max(maxHeight, comp->preferredHeight());
+   }
+
+  return maxHeight;
 }
+
+int NTableLayout::Row::defaultRowHeight( ) const
+{
+  return 20;
+}
+
 
 void NTableLayout::Row::add( int col, NVisualComponent * comp )
 {
@@ -123,7 +166,7 @@ void NTableLayout::Row::add( int col, NVisualComponent * comp )
 
 NVisualComponent * NTableLayout::Row::colAt( int index )
 {
-  std::map<int,NVisualComponent*>::iterator itr;
+  std::map<int,class NVisualComponent*>::iterator itr;
   if ( (itr = colMap.find( index )) == colMap.end() ) {
     return 0;
   } else {
@@ -140,6 +183,38 @@ int NTableLayout::defaultRowHeight( ) const
 {
   return 20;
 }
+
+int NTableLayout::colMaxWidth( int col ) const
+{
+   int maxWidth = defaultColWidth();
+   std::map<int,int>::iterator itr;
+   if ( (itr = colMaxWidthCache.find( col )) == colMaxWidthCache.end() ) {
+     std::map<int,Row>::const_iterator rowIt = rows.begin();
+     for ( ; rowIt != rows.end(); rowIt++ ) {
+       Row row = rowIt->second;
+       NVisualComponent* comp = row.colAt(col);
+       if (comp) maxWidth = std::max(maxWidth,comp->preferredWidth());
+     }
+     colMaxWidthCache[col] = maxWidth;
+   } else {
+     maxWidth = itr->second;
+   }
+
+   return maxWidth;
+}
+
+int NTableLayout::colWidthBetween( int colStart, int colEnd ) const
+{
+   int width = 0;
+   for (int i = colStart; i < colEnd; i++) {
+      width += colMaxWidth(i);
+   }
+   return width;
+}
+
+
+
+
 
 
 

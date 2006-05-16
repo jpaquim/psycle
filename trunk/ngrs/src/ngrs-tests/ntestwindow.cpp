@@ -46,6 +46,7 @@
 #include <ngrs/nmessagebox.h>
 #include <ngrs/nmenu.h>
 #include <ngrs/npackageinfo.h>
+#include <ngrs/ntablelayout.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -61,22 +62,32 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-  NPackageInfo info;
+  setPosition(0,0,1024,768);
+  NPanel* panel = new NPanel();
+    panel->setLayout(NTableLayout(10,10));
+    for (int y = 0; y < 10; y++) {
+      for (int x = 0; x < 10; x++) {
+         NButton* btn = new NButton(stringify(x)+","+stringify(y));
+           btn->setFlat(false);
+           btn->setAlignConstraint(NAlignConstraint(nAlLeft,x,y));
+           if (x == 0 && y == 0) {
+             btn->setPreferredSize(200,50);
+           }
 
-  std::vector<std::string> cats = info.categories();
+           if (x == 5 && y == 5) {
+             btn->setPreferredSize(130,130);
+           }
 
-  for (std::vector<std::string>::iterator it = cats.begin(); it < cats.end(); it++){
-     std::cout << *it << std::endl;
-     //book->addPage(new NPanel(), *it);
-  }
+           if (y == 2 || y == 3 || x == 2) {
+           } else
+         panel->add(btn);
+      }
+    }
 
-  setPosition(0,0,1000,700);
-
-
-  NTabBook* book = new NTabBook();
-    book->addPage(new NPanel(),"Standard2");
-  pane()->add(book,nAlTop);
-
+  pane()->add(panel);
+  panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
+  panel->setBackground(NColor(250,250,250));
+  panel->setTransparent(false);
   //std::cout << book->preferredHeight() << std::endl;
 
   /*NComboBox* box = new NComboBox();
