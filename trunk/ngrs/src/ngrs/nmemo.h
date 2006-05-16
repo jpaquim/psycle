@@ -25,6 +25,8 @@
 /**
 @author Stefan Nattkemper
 */
+
+
 class NMemo : public NTextBase
 {
 public:
@@ -32,6 +34,14 @@ public:
 
     ~NMemo();
 
+    virtual std::string text() const;
+
+private:
+
+    NPanel* scrollPane_;
+    void clear();
+
+    void onKeyPress(const NKeyEvent & event);
 };
 
 #endif

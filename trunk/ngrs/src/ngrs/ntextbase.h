@@ -32,6 +32,8 @@ public:
 
     ~NTextBase();
 
+    virtual std::string text() const = 0;
+
 };
 
 #endif

@@ -35,6 +35,8 @@ public:
 
     ~NEdit();
 
+    void setAutoSize(bool on);
+
     void setText(const std::string & text);
     const std::string & text() const;
 
@@ -58,6 +60,7 @@ public:
 
 private:
 
+    bool autoSize_;
     int valign_, halign_;
     int dx;
     unsigned int pos_;
@@ -69,10 +72,10 @@ private:
 
     NPoint getScreenPos(NGraphics* g, const std::string & text );
     int computeDx( NGraphics* g, const std::string & text );
-
     void drawCursor(NGraphics* g, const std::string & text );
 
     void init();
+    void doAutoSize();
 
 };
 

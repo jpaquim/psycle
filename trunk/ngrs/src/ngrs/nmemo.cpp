@@ -18,15 +18,52 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nmemo.h"
+#include "nalignlayout.h"
+#include "nlistlayout.h"
+#include "nscrollbox.h"
+#include "nedit.h"
 
 NMemo::NMemo()
  : NTextBase()
 {
+  setLayout(NAlignLayout());
+  NScrollBox* box = new NScrollBox();
+    scrollPane_ = new NPanel();
+       scrollPane_->setClientSizePolicy(nVertical | nHorizontal);
+       scrollPane_->setLayout(NListLayout());
+    box->setScrollPane(scrollPane_);
+  add(box, nAlClient);
+
+  clear();
 }
 
 
 NMemo::~NMemo()
 {
+}
+
+std::string NMemo::text( ) const
+{
+  return "";
+}
+
+void NMemo::clear( )
+{
+  NEdit* edt = new NEdit();
+    edt->setAutoSize(true);
+    edt->keyPress.connect(this, &NMemo::onKeyPress);
+  scrollPane_->add(edt);
+}
+
+void NMemo::onKeyPress( const NKeyEvent & event )
+{
+  if (event.scancode() == XK_Return) {
+   NEdit* edt = new NEdit();
+    edt->setAutoSize(true);
+    edt->keyPress.connect(this, &NMemo::onKeyPress);
+   scrollPane_->add(edt);
+   scrollPane_->repaint();
+  }
 }
 
 

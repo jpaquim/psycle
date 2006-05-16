@@ -49,6 +49,7 @@
 #include <ngrs/ntablelayout.h>
 #include <ngrs/ntable.h>
 #include <ngrs/nedit.h>
+#include <ngrs/nmemo.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -66,18 +67,7 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1024,768);
 
-  NTable* table = new NTable();
-  pane()->add(table,nAlClient);
-
-  for (int y = 0; y < 100; y++) {
-    for (int x = 0; x < 10; x++) {
-         NEdit* edt = new NEdit(stringify(x)+","+stringify(y));
-         table->add(edt,x,y, false);
-      }
-    }
-
-  table->scrollPane()->resize();
-
+  testMemo();
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
   //panel->setBackground(NColor(250,250,250));
   //std::cout << book->preferredHeight() << std::endl;
@@ -326,6 +316,28 @@ void NTestWindow::testSegDisplay( )
   N7SegDisplay* disp = new N7SegDisplay();
    pane()->setPosition(0,0,200,200);
   pane()->add(disp);
+}
+
+void NTestWindow::testTable( )
+{
+  NTable* table = new NTable();
+  pane()->add(table,nAlClient);
+
+  for (int y = 0; y < 100; y++) {
+    for (int x = 0; x < 10; x++) {
+         NEdit* edt = new NEdit(stringify(x)+","+stringify(y));
+         table->add(edt,x,y, false);
+      }
+    }
+
+  table->scrollPane()->resize();
+}
+
+void NTestWindow::testMemo( )
+{
+  NMemo* memo = new NMemo();
+     memo->setPosition(10,10,400,400);
+  pane()->add(memo);
 }
 
 
