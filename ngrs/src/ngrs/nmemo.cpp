@@ -391,6 +391,25 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
   }
 }
 
+void NMemo::TextArea::onMousePress( int x, int y, int button )
+{
+  if (button == 1) {
+    int start = findVerticalStart();
+    std::vector<Line>::iterator it = lines.begin() + start;
+    for ( ; it < lines.end(); it++) {
+      Line & line = *it;
+      if (y>= line.top()  && y < line.top() + line.height()) {
+         // line found
+         line.setPosToScreenPos(x,y);
+         lineIndexItr = it;
+         repaint();
+         break;
+      }
+      if ( line.top() + line.height() - scrollDy()  > spacingHeight() ) break;
+    }
+  }
+}
+
 int NMemo::TextArea::preferredWidth( ) const
 {
   int maxWidth = 0;
@@ -539,6 +558,32 @@ NPoint NMemo::TextArea::Line::screenPos( ) const
   return position;
 }
 
+void NMemo::TextArea::Line::setPosToScreenPos( int x, int y )
+{
+  if ( pArea->wordWrap() ) {
+    NFontMetrics metrics(pArea->font());
+    int yp = top();
+    int pos = 0;
+
+    for (std::vector<int>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+      int lineEnd = *it;
+      if (y >= yp && y < yp + metrics.textAscent()) {
+        // right line
+        pos_ = findWidthMax(x,text_.substr(pos,lineEnd-pos),false);
+        if (pos_ > text_.length()) pos_ = text_.length();
+        return;
+      }
+      yp+=metrics.textHeight();
+      pos = lineEnd;
+    }
+    pos_ = findWidthMax(x,text_.substr(pos),false);
+    if (pos_ > text_.length()) pos_ = text_.length();
+  } else {
+    pos_ = findWidthMax(x,text_,false);
+    if (pos_ > text_.length()) pos_ = text_.length();
+  }
+}
+
 int NMemo::TextArea::Line::width( ) const
 {
   NFontMetrics metrics(pArea->font());
@@ -659,6 +704,10 @@ std::string NMemo::TextArea::Line::deleteToPos( )
   text_.erase(0,pos_);
   return tmp;
 }
+
+
+
+
 
 
 
