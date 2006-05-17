@@ -339,9 +339,9 @@ void NTestWindow::testMemo( )
      memo->setPosition(10,10,400,400);
   pane()->add(memo);
      try {
-     memo->loadFromFile("/home/natti/.xchat2/xchatlogs/EFnet-#psycle.log");
+     memo->loadFromFile("11/home/natti/.xchat2/xchatlogs/EFnet-#psycle.log");
      } catch (const char* e) {
-       memo->setText("sajdslka dsalkj ");
+       memo->setText("sajdslka dsalkj \n dshkjhdsa ");
      }
 
 }
