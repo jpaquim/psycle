@@ -92,9 +92,11 @@ class NMemo : public NTextBase
        virtual void paint(NGraphics* g);
        virtual void onKeyPress(const NKeyEvent & keyEvent);
 
-       void setWordBreak(bool on);
-       bool wordBreak() const;
+       void setWordWrap(bool on);
+       bool wordWrap() const;
 
+       void setReadOnly(bool on);
+       bool readOnly() const;
 
        void appendLine(const std::string & text);
        void clear();
@@ -110,7 +112,9 @@ class NMemo : public NTextBase
      private:
 
       NMemo* pMemo;
-      bool wordBreak_;
+      bool wordWrap_;
+      bool readOnly_;
+
       std::vector<Line>::iterator lineIndexItr;
       std::vector<Line> lines;
 
@@ -137,8 +141,11 @@ public:
     void loadFromFile(const std::string & fileName);
     void saveToFile(const std::string & fileName);
 
-    void setWordBreak(bool on);
-    bool wordBreak() const;
+    void setWordWrap(bool on);
+    bool wordWrap() const;
+
+    void setReadOnly(bool on);
+    bool readOnly() const;
 
     void clear();
 
