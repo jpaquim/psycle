@@ -252,9 +252,8 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                       //if (flag) {
                         pos_--;
                         text_.erase(pos_,1);
-                        //doAutoTextWidth();
                         //textChanged.emit(this);
-                        doAutoSize();
+                        repaint();
                       //}
                     }
                  }
@@ -291,9 +290,8 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                        selStartIdx_ =selEndIdx_ = 0;
                     //}
                     text_.erase(pos_,count);
-                    //doAutoTextWidth();
                     //textChanged.emit(this);
-                    doAutoSize();
+                    repaint();
                    }
                 }
                 break;
@@ -301,7 +299,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
       if (keyEvent.buffer()!="") {
         text_.insert(pos_,keyEvent.buffer());
         pos_++;
-        doAutoSize();
+        repaint();
       }
  }
  //emitActions();
@@ -317,17 +315,6 @@ void NEdit::onFocus( )
 void NEdit::setAutoSize( bool on )
 {
   autoSize_ = on;
-}
-
-void NEdit::doAutoSize( )
-{
-  if (autoSize_) {
-     if (parent() && parent()->visit(NVisualComponent::isVisualComponent)) {
-       ((NVisualComponent*) parent())->resize();
-       ((NVisualComponent*) parent())->repaint();
-     }
-  } else
-  repaint();
 }
 
 void NEdit::setReadOnly( bool on )

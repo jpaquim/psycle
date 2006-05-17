@@ -93,6 +93,11 @@ NScrollBar::NScrollBar()
   init();
 }
 
+NScrollBar::NScrollBar( int orientation )
+{
+  init();
+  setOrientation(orientation);
+}
 
 NScrollBar::~NScrollBar()
 {
@@ -197,7 +202,7 @@ void NScrollBar::setOrientation( int orientation )
   resize();
 }
 
-int NScrollBar::orientation( )
+int NScrollBar::orientation( ) const
 {
   return orientation_;
 }
@@ -402,6 +407,8 @@ int NScrollBar::pos( ) const
 {
   return pos_;
 }
+
+
 
 
 

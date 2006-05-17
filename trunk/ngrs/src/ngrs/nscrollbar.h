@@ -50,6 +50,7 @@ class NScrollBar : public NPanel
 
 public:
     NScrollBar();
+    NScrollBar(int orientation);
 
     ~NScrollBar();
 
@@ -58,7 +59,7 @@ public:
    virtual void resize();
 
    void setOrientation(int orientation);
-   int orientation();
+   int orientation() const;
 
    void setStep(int step);
    int step() const;
