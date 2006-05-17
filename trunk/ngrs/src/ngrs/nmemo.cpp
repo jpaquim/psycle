@@ -364,10 +364,13 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
 void NMemo::TextArea::resize( )
 {
   if ( wordBreak() ) {
+     Line* oldLine = 0;
      std::vector<Line>::iterator it = lines.begin();
      for (; it < lines.end(); it++) {
         Line & line = *it;
         line.computeBreakPoints();
+        if (oldLine) line.setTop(oldLine->top() + oldLine->height());
+        oldLine = &line;
      }
   }
 }
@@ -607,7 +610,6 @@ std::string NMemo::TextArea::Line::deleteToPos( )
   return tmp;
 }
 
-
 int NMemo::TextArea::preferredWidth( ) const
 {
   int maxWidth = 0;
@@ -626,12 +628,3 @@ int NMemo::TextArea::preferredHeight( ) const
   Line line = lines.back();
   return line.top() + line.height();
 }
-
-
-
-
-
-
-
-
-

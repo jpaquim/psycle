@@ -337,11 +337,11 @@ void NTestWindow::testMemo( )
 {
   NMemo* memo = new NMemo();
      memo->setPosition(10,10,400,400);
-  pane()->add(memo);
+  pane()->add(memo, nAlClient);
   memo->setWordBreak(true);
 
      try {
-     memo->loadFromFile("/home/natti/.xchat2/xchatlogs/EFnet-#psycle.log");
+     memo->loadFromFile("/home/natti/ngrs3/src/ngrs/nmemo.cpp");
      } catch (const char* e) {
        memo->setText("sajdslka dsalkj \n dshkjhdsa ");
      }
