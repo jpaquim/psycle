@@ -76,16 +76,16 @@ void NMemo::saveToFile( const std::string & fileName )
 
 // The ability for the text to continue on the next line when the caret encounters the right border of the memo is controlled whose default value is set to true. If you do not want text to wrap to the subsequent line, set the  WordWrap property to false.
 
-void NMemo::setWordBreak( bool on )
+void NMemo::setWordWrap( bool on )
 {
-  textArea->setWordBreak(on);
+  textArea->setWordWrap(on);
   hBar->setVisible(!on);
   resize();
 }
 
-bool NMemo::wordBreak( ) const
+bool NMemo::wordWrap( ) const
 {
-  return textArea->wordBreak();
+  return textArea->wordWrap();
 }
 
 // clears the text content
@@ -93,6 +93,18 @@ bool NMemo::wordBreak( ) const
 void NMemo::clear( )
 {
   textArea->clear();
+}
+
+// setting readOnly means to have a view
+
+void NMemo::setReadOnly( bool on )
+{
+  textArea->setReadOnly(on);
+}
+
+bool NMemo::readOnly( ) const
+{
+  return textArea->readOnly();
 }
 
 
@@ -115,6 +127,10 @@ void NMemo::TextArea::init( )
   setBackground(NColor(255,255,255));
   setTransparent(false);
 
+  wordWrap_ = false;
+  readOnly_ = false;
+  pMemo = 0;
+
   clear();
 }
 
@@ -122,14 +138,24 @@ NMemo::TextArea::~ TextArea( )
 {
 }
 
-void NMemo::TextArea::setWordBreak( bool on )
+void NMemo::TextArea::setWordWrap( bool on )
 {
-  wordBreak_ = on;
+  wordWrap_ = on;
 }
 
-bool NMemo::TextArea::wordBreak( ) const
+bool NMemo::TextArea::wordWrap( ) const
 {
-  return wordBreak_;
+  return wordWrap_;
+}
+
+void NMemo::TextArea::setReadOnly( bool on )
+{
+  readOnly_ = on;
+}
+
+bool NMemo::TextArea::readOnly( ) const
+{
+  return readOnly_;
 }
 
 void NMemo::TextArea::setText( const std::string & text )
@@ -242,9 +268,11 @@ void NMemo::TextArea::paint( NGraphics * g )
      if ( line.top() + line.height() - scrollDy()  > spacingHeight() ) break;
   }
   // the cursor
-  Line & actualLine = *lineIndexItr;
-  NPoint p = actualLine.screenPos();
-  drawCursor(g, p.x() , p.y() );
+  if (!readOnly()) {
+    Line & actualLine = *lineIndexItr;
+    NPoint p = actualLine.screenPos();
+    drawCursor(g, p.x() , p.y() );
+  }
 }
 
 void NMemo::TextArea::drawCursor( NGraphics* g, int x, int y )
@@ -282,6 +310,7 @@ int NMemo::TextArea::findVerticalStart() const
 
 void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
 {
+  if ( !readOnly() ) {
   // dereference to the actual selected Line
   Line & line = *lineIndexItr;
 
@@ -359,11 +388,32 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
           repaint();
        }
   }
+  }
 }
+
+int NMemo::TextArea::preferredWidth( ) const
+{
+  int maxWidth = 0;
+  int start = findVerticalStart();
+  std::vector<Line>::const_iterator it = lines.begin() + start;
+  for ( ; it < lines.end(); it++) {
+    const Line & line = *it;
+    maxWidth = std::max(maxWidth, line.width());
+    if ( line.top() + line.height() - scrollDy()  > spacingHeight() ) break;
+  }
+  return maxWidth;
+}
+
+int NMemo::TextArea::preferredHeight( ) const
+{
+  Line line = lines.back();
+  return line.top() + line.height();
+}
+
 
 void NMemo::TextArea::resize( )
 {
-  if ( wordBreak() ) {
+  if ( wordWrap() ) {
      Line* oldLine = 0;
      std::vector<Line>::iterator it = lines.begin();
      for (; it < lines.end(); it++) {
@@ -422,7 +472,7 @@ int NMemo::TextArea::Line::top( ) const
 
 int NMemo::TextArea::Line::height( ) const
 {
-  if (!pArea->wordBreak()) {
+  if (!pArea->wordWrap()) {
     NFontMetrics metrics(pArea->font());
     return metrics.textHeight();
   } else {
@@ -466,7 +516,7 @@ NPoint NMemo::TextArea::Line::screenPos( ) const
 {
   NPoint position;
   NFontMetrics metrics(pArea->font());
-  if ( !pArea->wordBreak() ) {
+  if ( !pArea->wordWrap() ) {
     position.setX( metrics.textWidth(text_.substr(0,pos_)) );
     position.setY( top() + metrics.textAscent() );
   } else {
@@ -550,7 +600,7 @@ int NMemo::TextArea::Line::findWidthMax(long width, const std::string & data, bo
 
 void NMemo::TextArea::Line::drawText( NGraphics * g )
 {
-  if (!pArea->wordBreak()) {
+  if (!pArea->wordWrap()) {
      g->drawText( 0 , top() + g->textAscent() , text_);
   } else
   {
@@ -570,7 +620,7 @@ void NMemo::TextArea::Line::drawText( NGraphics * g )
 void NMemo::TextArea::Line::insert( unsigned int pos , const std::string & text )
 {
   text_.insert(pos_,text);
-  if (pArea->wordBreak()) {
+  if (pArea->wordWrap()) {
     computeBreakPoints();
   }
 }
@@ -578,7 +628,7 @@ void NMemo::TextArea::Line::insert( unsigned int pos , const std::string & text 
 void NMemo::TextArea::Line::erase( unsigned int count )
 {
   text_.erase(pos_,count);
-  if (pArea->wordBreak()) {
+  if (pArea->wordWrap()) {
     computeBreakPoints();
   }
 }
@@ -592,7 +642,7 @@ std::string NMemo::TextArea::Line::deleteFromPos( )
 {
   std::string tmp = text_.substr(pos_);
   text_.erase(pos_, text_.length() - pos_ );
-  if (pArea->wordBreak()) {
+  if (pArea->wordWrap()) {
     computeBreakPoints();
   }
   return tmp;
@@ -610,21 +660,7 @@ std::string NMemo::TextArea::Line::deleteToPos( )
   return tmp;
 }
 
-int NMemo::TextArea::preferredWidth( ) const
-{
-  int maxWidth = 0;
-  int start = findVerticalStart();
-  std::vector<Line>::const_iterator it = lines.begin() + start;
-  for ( ; it < lines.end(); it++) {
-    const Line & line = *it;
-    maxWidth = std::max(maxWidth, line.width());
-    if ( line.top() + line.height() - scrollDy()  > spacingHeight() ) break;
-  }
-  return maxWidth;
-}
 
-int NMemo::TextArea::preferredHeight( ) const
-{
-  Line line = lines.back();
-  return line.top() + line.height();
-}
+
+
+
