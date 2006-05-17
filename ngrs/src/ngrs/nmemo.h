@@ -21,7 +21,7 @@
 #define NMEMO_H
 
 #include "ntextbase.h"
-#include "npoint.h"
+#include "npoint3d.h"
 /**
 @author Stefan Nattkemper
 */
@@ -55,8 +55,11 @@ class NMemo : public NTextBase
 
           unsigned int pos() const;
 
-          NPoint screenPos() const;
+          NPoint3D screenPos() const;
           void setPosToScreenPos(int x, int y);
+          bool setPosLineUp(int x);
+          bool setPosLineDown(int x);
+
           int width() const;
 
           std::string strFromPos() const;
@@ -117,6 +120,7 @@ class NMemo : public NTextBase
       NMemo* pMemo;
       bool wordWrap_;
       bool readOnly_;
+      int xupdownpos;
 
       std::vector<Line>::iterator lineIndexItr;
       std::vector<Line> lines;

@@ -112,13 +112,14 @@ bool NMemo::readOnly( ) const
 
 NMemo::TextArea::TextArea( )
 {
+  pMemo = 0;
   init();
 }
 
 NMemo::TextArea::TextArea( NMemo * memo )
 {
+  pMemo = memo;
   init();
-  pMemo = pMemo;
 }
 
 void NMemo::TextArea::init( )
@@ -129,7 +130,6 @@ void NMemo::TextArea::init( )
 
   wordWrap_ = false;
   readOnly_ = false;
-  pMemo = 0;
 
   clear();
 }
@@ -216,6 +216,9 @@ void NMemo::TextArea::clear( )
   lines.push_back(Line(this));
   // set the lineindex Iterator to begin
   lineIndexItr = lines.begin();
+  // this is the x pos saver for up and down key, 
+  //that always keeps the xpos , although if one line was smaller
+  xupdownpos = 0;
 }
 
 void NMemo::TextArea::insertLine( const std::string & text )
@@ -270,7 +273,7 @@ void NMemo::TextArea::paint( NGraphics * g )
   // the cursor
   if (!readOnly()) {
     Line & actualLine = *lineIndexItr;
-    NPoint p = actualLine.screenPos();
+    NPoint3D p = actualLine.screenPos();
     drawCursor(g, p.x() , p.y() );
   }
 }
@@ -315,16 +318,37 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
   Line & line = *lineIndexItr;
 
   switch ( keyEvent.scancode() ) {
+    case XK_Up:
+       if (!line.setPosLineUp(xupdownpos) && lineIndexItr != lines.begin() ) {
+          Line & oldLine = *lineIndexItr;
+          lineIndexItr--;
+          Line & line = *lineIndexItr;
+          line.setPosToScreenPos(xupdownpos, oldLine.top() - 1 );
+          repaint();
+       } else
+       repaint();
+    break;
+    case XK_Down:
+        if (!line.setPosLineDown(xupdownpos) && lineIndexItr != lines.end() -1) {
+          Line & oldLine = *lineIndexItr;
+          lineIndexItr++;
+          Line & line = *lineIndexItr;
+          line.setPosToScreenPos(xupdownpos, line.top());
+          repaint();
+       } else repaint();
+    break;
     case XK_Left:
       if (line.pos() == 0) {
          if (lineIndexItr > lines.begin()) {
             lineIndexItr--;
             Line & line = *lineIndexItr;
             line.setPosEnd();
+            xupdownpos = line.screenPos().x();
             repaint();
          }
       } else {
         line.decPos();
+        xupdownpos = line.screenPos().x();
         repaint();
       }
     break;
@@ -334,20 +358,24 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
         if (lineIndexItr != lines.end()) {
           Line & line = *lineIndexItr;
           line.setPosStart();
+          xupdownpos = line.screenPos().x();
           repaint();
         } else
         lineIndexItr--;
       } else {
         line.incPos();
+        xupdownpos = line.screenPos().x();
         repaint();
       }
     break;
     case XK_Home:
        line.setPosStart();
+       xupdownpos = line.screenPos().x();
        repaint();
     break;
     case XK_End:
        line.setPosEnd();
+       xupdownpos = line.screenPos().x();
        repaint();
     break;
     case XK_BackSpace:
@@ -357,6 +385,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
           deleteLine();
           Line & line = *lineIndexItr;
           line.setPosEnd();
+          xupdownpos = line.screenPos().x();
           line.insert(line.pos(),tmp);
           repaint();
         }
@@ -368,11 +397,13 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
          int diff = line.height() - oldHeight;
          moveLines(lineIndexItr + 1, lines.end(), diff);
        }
+       xupdownpos = line.screenPos().x();
        repaint();
       }
     break;
     case XK_Return: {
        insertLine(line.deleteFromPos());
+       xupdownpos = line.screenPos().x();
        repaint();
     }
     break;
@@ -385,6 +416,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
              int diff = line.height() - oldHeight;
              moveLines(lineIndexItr + 1, lines.end(), diff);
           }
+          xupdownpos = line.screenPos().x();
           repaint();
        }
   }
@@ -402,6 +434,7 @@ void NMemo::TextArea::onMousePress( int x, int y, int button )
          // line found
          line.setPosToScreenPos(x,y);
          lineIndexItr = it;
+         xupdownpos = line.screenPos().x();
          repaint();
          break;
       }
@@ -531,28 +564,33 @@ unsigned int NMemo::TextArea::Line::pos( ) const
   return pos_;
 }
 
-NPoint NMemo::TextArea::Line::screenPos( ) const
+NPoint3D NMemo::TextArea::Line::screenPos( ) const
 {
-  NPoint position;
+  NPoint3D position;
   NFontMetrics metrics(pArea->font());
   if ( !pArea->wordWrap() ) {
     position.setX( metrics.textWidth(text_.substr(0,pos_)) );
     position.setY( top() + metrics.textAscent() );
+    position.setZ( 0 );
   } else {
     int yp = top() + metrics.textAscent();
     int pos = 0;
+    int z = 0;
     for (std::vector<int>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
       int lineEnd = *it;
       if (pos_ < lineEnd) {
          position.setX( metrics.textWidth( text_.substr(pos, pos_-pos)) );
          position.setY(yp);
+         position.setZ(z);
          return position;
       }
       yp+= metrics.textHeight();
+      z++;
       pos = lineEnd;
     }
     position.setX( metrics.textWidth( text_.substr(pos,pos_-pos)) );
     position.setY(yp);
+    position.setZ(z);
     return position;
   }
   return position;
@@ -567,21 +605,47 @@ void NMemo::TextArea::Line::setPosToScreenPos( int x, int y )
 
     for (std::vector<int>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
       int lineEnd = *it;
-      if (y >= yp && y < yp + metrics.textAscent()) {
+      if (y >= yp && y < yp + metrics.textHeight()) {
         // right line
-        pos_ = findWidthMax(x,text_.substr(pos,lineEnd-pos),false);
+        pos_ = pos + findWidthMax(x,text_.substr(pos,lineEnd-pos),false);
         if (pos_ > text_.length()) pos_ = text_.length();
         return;
       }
       yp+=metrics.textHeight();
       pos = lineEnd;
     }
-    pos_ = findWidthMax(x,text_.substr(pos),false);
+    pos_ = pos + findWidthMax(x,text_.substr(pos),false);
     if (pos_ > text_.length()) pos_ = text_.length();
   } else {
     pos_ = findWidthMax(x,text_,false);
     if (pos_ > text_.length()) pos_ = text_.length();
   }
+}
+
+bool NMemo::TextArea::Line::setPosLineUp(int x)
+{
+  if ( pArea->wordWrap() ) {
+      NPoint3D p = screenPos();
+      if (p.z() == 0) return false;
+      NFontMetrics metrics(pArea->font());
+      p.setY(p.y() - metrics.textHeight());
+      setPosToScreenPos(x , p.y() );
+      return true;
+  }
+  return false;
+}
+
+bool NMemo::TextArea::Line::setPosLineDown(int x)
+{
+  if ( pArea->wordWrap() ) {
+      NPoint3D p = screenPos();
+      NFontMetrics metrics(pArea->font());
+      if (p.y() + metrics.textHeight() > top() + height() ) return false;
+      p.setY(p.y() + metrics.textHeight());
+      setPosToScreenPos(x , p.y() );
+      return true;
+  }
+  return false;
 }
 
 int NMemo::TextArea::Line::width( ) const
@@ -704,12 +768,6 @@ std::string NMemo::TextArea::Line::deleteToPos( )
   text_.erase(0,pos_);
   return tmp;
 }
-
-
-
-
-
-
 
 
 
