@@ -104,11 +104,7 @@ if True:
 		debian_version_compare = boost.debian_version_compare
 	)
 	boost_thread.show()
-	packageneric.check_header_and_library(boost_thread, 'boost/thread/thread.hpp', 'boost_thread')
-
-	for x in (diversalis, glibmm, boost, boost_thread):
-		if x.failed:
-			packageneric.abort()
+	packageneric.check_header_and_library(boost_thread, 'boost/thread/thread.hpp', 'boost_thready')
 
 	packageneric.finish_configure()
 
