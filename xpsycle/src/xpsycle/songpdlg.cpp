@@ -21,6 +21,7 @@
 #include "global.h"
 #include "song.h"
 #include <ngrs/nlistlayout.h>
+#include <ngrs/nmemo.h>
 
 SongpDlg::SongpDlg()
  : NWindow()
@@ -51,8 +52,9 @@ void SongpDlg::init( )
   pane()->add(songCredits_);
   NLabel* songCommentsLb_ = new NLabel("Song comments");
   pane()->add(songCommentsLb_);
-  songComments_ = new NEdit();
-  songComments_->setWidth(200);
+  songComments_ = new NMemo();
+    songComments_->setPreferredSize(200,200);
+    songComments_->setWordWrap(true);
   pane()->add(songComments_);
   okBtn_ = new NButton("OK");
   pane()->add(okBtn_);
