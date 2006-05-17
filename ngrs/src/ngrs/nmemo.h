@@ -78,6 +78,9 @@ class NMemo : public NTextBase
 
        ~TextArea();
 
+       void setText(const std::string & text);
+       std::string text() const;
+
        virtual void paint(NGraphics* g);
        virtual void onKeyPress(const NKeyEvent & keyEvent);
 

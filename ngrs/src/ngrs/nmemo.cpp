@@ -54,11 +54,12 @@ NMemo::~NMemo()
 
 std::string NMemo::text( ) const
 {
-  return "";
+  textArea->text();
 }
 
 void NMemo::setText( const std::string & text )
 {
+  textArea->setText(text);
 }
 
 // the load save function
@@ -126,6 +127,36 @@ void NMemo::TextArea::setWordBreak( bool on )
 bool NMemo::TextArea::wordBreak( ) const
 {
   return wordBreak_;
+}
+
+void NMemo::TextArea::setText( const std::string & text )
+{
+  lines.clear();
+
+  std::string delimiters = "\n";
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = text.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = text.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos)
+  {
+     // Found a token, add it to the vector.
+     appendLine(text.substr(lastPos, pos - lastPos));
+     // Skip delimiters.  Note the "not_of"
+     lastPos = text.find_first_not_of(delimiters, pos);
+     // Find next "non-delimiter"
+     pos = text.find_first_of(delimiters, lastPos);
+  }
+
+  if (lines.size() == 0) clear();
+
+  lineIndexItr = lines.begin();
+}
+
+std::string NMemo::TextArea::text( ) const
+{
+  return "";
 }
 
 void NMemo::TextArea::loadFromFile(const std::string & fileName) {
@@ -463,4 +494,8 @@ int NMemo::TextArea::preferredHeight( ) const
   Line line = lines.back();
   return line.top() + line.height();
 }
+
+
+
+
 
