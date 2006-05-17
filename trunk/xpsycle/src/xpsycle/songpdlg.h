@@ -25,6 +25,8 @@
 #include <ngrs/nedit.h>
 #include <ngrs/nbutton.h>
 
+class NMemo;
+
 /**
 @author Stefan
 */
@@ -43,7 +45,7 @@ private:
 
    NEdit* songTitle_;
    NEdit* songCredits_;
-   NEdit* songComments_;
+   NMemo* songComments_;
 
    NButton* okBtn_;
 

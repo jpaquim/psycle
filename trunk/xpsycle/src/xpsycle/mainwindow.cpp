@@ -26,6 +26,7 @@
 #include "aboutdlg.h"
 #include "vumeter.h"
 #include "instrumenteditor.h"
+#include "infodlg.h"
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
 #include <ngrs/ncheckmenuitem.h>
@@ -68,7 +69,7 @@ void MainWindow::initMenu( )
      fileMenu_->add(new NMenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
      fileMenu_->add(new NMenuItem("Render as Wav"));
      fileMenu_->add(new NMenuSeperator());
-     fileMenu_->add(new NMenuItem("Song properties"));
+     fileMenu_->add(new NMenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
      fileMenu_->add(new NMenuSeperator());
      fileMenu_->add(new NMenuItem("Song properties"));
      fileMenu_->add(new NMenuItem("revert to saved"));
@@ -102,7 +103,7 @@ void MainWindow::initMenu( )
      viewMenu_->add(new NCheckMenuItem("Toolbar"))->click.connect(this,&MainWindow::onViewMenuToolbar);
      viewMenu_->add(new NCheckMenuItem("Machinebar"))->click.connect(this,&MainWindow::onViewMenuMachinebar);
      viewMenu_->add(new NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
-     viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);;
+     viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
      viewMenu_->add(new NMenuSeperator());
      viewMenu_->add(new NCheckMenuItem("PatternEditor"));
      viewMenu_->add(new NCheckMenuItem("PatternSequencer"));
@@ -131,6 +132,11 @@ void MainWindow::initMenu( )
    helpMenu_ = new NMenu("Help");
       helpMenu_->add(new NMenuItem("About"))->click.connect(this,&MainWindow::onHelpMenuAbout);
       helpMenu_->add(new NMenuItem("Greetings"))->click.connect(this,&MainWindow::onHelpMenuGreeting);
+      helpMenu_->add(new NMenuSeperator());
+      helpMenu_->add(new NMenuItem("readme"))->click.connect(this,&MainWindow::onHelpMenuReadme);
+      helpMenu_->add(new NMenuItem("keys"))->click.connect(this,&MainWindow::onHelpMenuKeys);
+      helpMenu_->add(new NMenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
+      helpMenu_->add(new NMenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
    menuBar_->add(helpMenu_);
 }
 
@@ -148,11 +154,13 @@ void MainWindow::initDialogs( )
   wavRecFileDlg = new NFileDialog();
     wavRecFileDlg->setMode(nSave);
   add(wavRecFileDlg);
+  // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
+  add( infoDlg =  new InfoDlg() );
 }
 
 // events from menuItems
 
-void MainWindow::showSongpDlg( NObject * sender )
+void MainWindow::showSongpDlg( NButtonEvent* ev )
 {
   songpDlg_->setVisible(true);
 }
@@ -1121,13 +1129,27 @@ void MainWindow::onHelpMenuGreeting( NButtonEvent * ev )
   greetDlg->setVisible(true);
 }
 
+void MainWindow::onHelpMenuReadme( NButtonEvent * ev )
+{
+  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"readme.txt");
+  infoDlg->setVisible(true);
 
+}
 
+void MainWindow::onHelpMenuWhatsNew( NButtonEvent * ev )
+{
+  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"keys.txt");
+  infoDlg->setVisible(true);
+}
 
+void MainWindow::onHelpMenuTweaking( NButtonEvent * ev )
+{
+  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"tweaking.txt");
+  infoDlg->setVisible(true);
+}
 
-
-
-
-
-
-
+void MainWindow::onHelpMenuKeys( NButtonEvent * ev )
+{
+  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"whatsnew.txt");
+  infoDlg->setVisible(true);
+}

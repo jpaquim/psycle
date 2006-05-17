@@ -44,7 +44,7 @@ class GreetDlg;
 class AboutDlg;
 class VuMeter;
 class InstrumentEditor;
-
+class InfoDlg;
 
 /**
 @author Stefan
@@ -91,6 +91,7 @@ private:
 
     GreetDlg* greetDlg;
     AboutDlg* aboutDlg;
+    InfoDlg*  infoDlg;
     NFileDialog* wavRecFileDlg;
 
     VuMeter* vuMeter_;
@@ -107,7 +108,7 @@ private:
 
     void updateBars();
 
-    void showSongpDlg(NObject* sender);
+    void showSongpDlg(NButtonEvent* ev);
 
     void onBarPlay(NButtonEvent* ev);
     void onBarPlayFromStart(NButtonEvent* ev);
@@ -130,6 +131,10 @@ private:
 
     void onHelpMenuAbout(NButtonEvent* ev);
     void onHelpMenuGreeting(NButtonEvent* ev);
+    void onHelpMenuReadme(NButtonEvent* ev);
+    void onHelpMenuKeys(NButtonEvent* ev);
+    void onHelpMenuTweaking(NButtonEvent* ev);
+    void onHelpMenuWhatsNew(NButtonEvent* ev);
 
     void onLoadWave(NButtonEvent* ev);
     void onEditInstrument(NButtonEvent* ev);
