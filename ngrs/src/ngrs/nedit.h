@@ -77,7 +77,6 @@ private:
     void drawCursor(NGraphics* g, const std::string & text );
 
     void init();
-    void doAutoSize();
 
 };
 

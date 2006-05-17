@@ -29,6 +29,91 @@
 
 class NMemo : public NTextBase
 {
+   class TextArea : public NPanel {
+     class Line {
+       public :
+
+          Line();
+          Line(TextArea* area);
+          ~Line();
+
+          void setText( const std::string & text );
+          const std::string & text() const;
+          void insert(unsigned int pos, const std::string & text);
+          void erase(unsigned int count);
+
+          void setTop( int top );
+          void move(int dy);
+          int top() const;
+          int height() const;
+
+          void incPos();
+          void decPos();
+          void setPos( unsigned int pos );
+          void setPosEnd();
+          void setPosStart();
+          unsigned int pos() const;
+
+          int screenXPos() const;
+          int width() const;
+
+          std::string strFromPos() const;
+          std::string deleteFromPos();
+          std::string strToPos() const;
+          std::string deleteToPos();
+
+
+       private:
+
+          TextArea* pArea;
+          std::string text_;
+          int top_;
+          unsigned int pos_;
+
+     };
+
+     public:
+       TextArea();
+       TextArea(NMemo* memo);
+
+       ~TextArea();
+
+       virtual void paint(NGraphics* g);
+       virtual void onKeyPress(const NKeyEvent & keyEvent);
+
+       void setWordBreak(bool on);
+       bool wordBreak() const;
+
+
+       void appendLine(const std::string & text);
+       void clear();
+
+       void loadFromFile(const std::string & fileName);
+
+
+       virtual int preferredWidth() const;
+       virtual int preferredHeight() const;
+
+
+     private:
+
+      NMemo* pMemo;
+      bool wordBreak_;
+      std::vector<Line>::iterator lineIndexItr;
+      std::vector<Line> lines;
+
+      void init();
+      void drawCursor( NGraphics* g , int x, int y );
+      int findVerticalStart() const;
+
+      void insertLine(const std::string & text);
+      void deleteLine();
+
+      void moveLines(std::vector<Line>::iterator from, std::vector<Line>::iterator to, int dy);
+
+
+   };
+
 public:
     NMemo();
 
@@ -38,18 +123,18 @@ public:
     void setText(const std::string & text);
 
     void loadFromFile(const std::string & fileName);
-    void setReadOnly(bool on);
+    void saveToFile(const std::string & fileName);
+
+    void setWordBreak(bool on);
+    bool wordBreak() const;
+
+    void clear();
 
 private:
 
-    int oldPos_;
-
-    NPanel* scrollPane_;
-    void clear();
-
-    void onKeyPress(const NKeyEvent & event);
-
-    std::vector<class NEdit*> edits;
+    TextArea* textArea;
+    class NScrollBar* vBar;
+    class NScrollBar* hBar;
 
 };
 
