@@ -21,7 +21,7 @@
 #define NMEMO_H
 
 #include "ntextbase.h"
-
+#include "npoint.h"
 /**
 @author Stefan Nattkemper
 */
@@ -54,7 +54,7 @@ class NMemo : public NTextBase
           void setPosStart();
           unsigned int pos() const;
 
-          int screenXPos() const;
+          NPoint screenPos() const;
           int width() const;
 
           std::string strFromPos() const;
@@ -62,6 +62,9 @@ class NMemo : public NTextBase
           std::string strToPos() const;
           std::string deleteToPos();
 
+          void computeBreakPoints();
+
+          void drawText(NGraphics *g);
 
        private:
 
@@ -69,6 +72,11 @@ class NMemo : public NTextBase
           std::string text_;
           int top_;
           unsigned int pos_;
+          int height_;
+
+          int findWidthMax(long width, const std::string & data, bool wbreak);
+
+          std::vector<int> breakPoints;
 
      };
 
@@ -97,6 +105,7 @@ class NMemo : public NTextBase
        virtual int preferredWidth() const;
        virtual int preferredHeight() const;
 
+       virtual void resize();
 
      private:
 
