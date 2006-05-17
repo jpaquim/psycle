@@ -1,4 +1,0 @@
-# !/usr/bin/automake
-
-include $(top_srcdir)/packageneric/package/modules/bin.xpsycle.am
-#include $(top_srcdir)/packageneric/package/modules/lib.xpsycle.output_plugin.freepsycle.am
