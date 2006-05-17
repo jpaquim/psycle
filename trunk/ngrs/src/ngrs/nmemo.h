@@ -52,9 +52,11 @@ class NMemo : public NTextBase
           void setPos( unsigned int pos );
           void setPosEnd();
           void setPosStart();
+
           unsigned int pos() const;
 
           NPoint screenPos() const;
+          void setPosToScreenPos(int x, int y);
           int width() const;
 
           std::string strFromPos() const;
@@ -91,6 +93,7 @@ class NMemo : public NTextBase
 
        virtual void paint(NGraphics* g);
        virtual void onKeyPress(const NKeyEvent & keyEvent);
+       virtual void onMousePress(int x, int y, int button);
 
        void setWordWrap(bool on);
        bool wordWrap() const;

@@ -338,8 +338,8 @@ void NTestWindow::testMemo( )
   NMemo* memo = new NMemo();
      memo->setPosition(10,10,400,400);
   pane()->add(memo, nAlClient);
-  memo->setWordWrap(true);
-  memo->setReadOnly(true);
+  //memo->setWordWrap(true);
+//  memo->setReadOnly(true);
 
      try {
      memo->loadFromFile("/home/natti/ngrs3/src/ngrs/nmemo.cpp");
