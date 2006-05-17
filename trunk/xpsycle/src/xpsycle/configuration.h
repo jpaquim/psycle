@@ -44,6 +44,7 @@ public:
     std::string iconPath;
     std::string pluginPath;
     std::string prsPath;
+    std::string hlpPath;
 
 
     InputHandler inputHandler;
