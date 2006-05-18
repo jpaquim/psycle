@@ -39,6 +39,7 @@ namespace psycle
 			virtual void Configure();
 			virtual bool Initialized() { return _initialized; };
 			virtual bool Configured() { return _configured; };
+			virtual AudioDriverInfo* GetInfo() { return &_info; };
 		private:
 			static AudioDriverInfo _info;
 

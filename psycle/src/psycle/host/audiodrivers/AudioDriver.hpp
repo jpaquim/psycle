@@ -37,7 +37,7 @@ namespace psycle
 				typedef float * (*WorkFunction) (void * context, int & numSamples);
 
 			public:
-				AudioDriverInfo* GetInfo() { return &_info; }
+				virtual AudioDriverInfo* GetInfo() { return &_info; }
 				AudioDriver();
 				virtual ~AudioDriver() throw() {}
 				virtual void Initialize(HWND, WorkFunction, void*)= 0;

@@ -37,6 +37,7 @@ namespace psycle
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
 			int virtual GetMaxLatencyInSamples() { return GetSampleSize() * _ASIObufferSize; }
+			virtual AudioDriverInfo* GetInfo() { return &_info; };
 			void ControlPanel(int driverID);
 
 			int drivercount;
