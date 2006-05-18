@@ -285,7 +285,7 @@ void MySAX2Handler::fatalError(const SAXParseException& exception)
     cout << "xml error: " << message
          << " at line: " << exception.getLineNumber()
          << endl;
-    cout << "using instead defaults" << endl;
+    cout << "using defaults instead" << endl;
 }
 
 
@@ -461,17 +461,19 @@ void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )
   }
         catch (const XMLException& toCatch) {
             char* message = XMLString::transcode(toCatch.getMessage());
-            cout << "Exception message is: \n"
+            cout << "ngrs: configuration: error: Exception message is: \n"
                  << message << "\n";
             XMLString::release(&message);
-            //return -1;
+            if(throw_allowed) throw;
+            //else return -1;
         }
         catch (const SAXParseException& toCatch) {
             char* message = XMLString::transcode(toCatch.getMessage());
-            cout << "Exception message is: \n"
+            cout << "ngrs: configuration: error: Exception message is: \n"
                  << message << "\n";
             XMLString::release(&message);
-            //return -1;
+            if(throw_allowed) throw;
+            //else return -1;
         }
    catch (...) {
        if(throw_allowed)
@@ -481,7 +483,7 @@ void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )
            XMLPlatformUtils::Terminate();
            throw;
        }
-       else std::cerr << "Unexpected Exception" << std::endl;
+       else std::cerr << "ngrs: error: Unexpected Exception" << std::endl;
    }
 
   delete parser;
@@ -494,6 +496,9 @@ NSkin* NConfig::findSkin( const std::string & id )
   std::map<std::string, NSkin>::iterator itr;
   if ( (itr = skinMap.find(id)) == skinMap.end() )
   {
+      #if !defined NDEBUG
+      	std::cerr << "ngrs: configuration: error: skin id not found: " << id << std::endl;
+      #endif
       return 0;
   } else {
     return &itr->second;
@@ -505,6 +510,9 @@ std::string NConfig::findPath( const std::string & id )
   std::map<std::string, std::string>::iterator itr;
   if ( (itr = pathMap.find(id)) == pathMap.end() )
   {
+      #if !defined NDEBUG
+      	std::cerr << "ngrs: configuration: error: path id not found: " << id << std::endl;
+      #endif
       return "";
   } else {
     return itr->second;
@@ -521,6 +529,12 @@ std::string NConfig::getAttribValue( const std::string & name )
        erg = std::string(id);
        XMLString::release(&id);
        XMLString::release(&str);
-       } catch (std::exception e) { return ""; }
+       } catch (std::exception e)
+       {
+           #if !defined NDEBUG
+           	std::cerr << "ngrs: configuration: error: exception on attribute value: " << e.what() << std::endl;
+           #endif
+           return ""; 
+       }
       return erg;
 }
