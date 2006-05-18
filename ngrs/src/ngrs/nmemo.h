@@ -70,6 +70,8 @@ class NMemo : public NTextBase
           void computeBreakPoints();
 
           void drawText(NGraphics *g);
+          void repaint();
+          NRect repaintLineArea() const;
 
        private:
 

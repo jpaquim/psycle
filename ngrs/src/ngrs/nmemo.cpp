@@ -21,6 +21,7 @@
 #include "nalignlayout.h"
 #include "nscrollbar.h"
 #include "nfontmetrics.h"
+#include "nwindow.h"
 #include <fstream>
 #include <sstream>
 
@@ -324,9 +325,10 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
           lineIndexItr--;
           Line & line = *lineIndexItr;
           line.setPosToScreenPos(xupdownpos, oldLine.top() - 1 );
-          repaint();
-       } else
-       repaint();
+          window()->repaint(this,NRegion(oldLine.repaintLineArea()) | NRegion(line.repaintLineArea()),true);
+       } else {
+         line.repaint();
+       }
     break;
     case XK_Down:
         if (!line.setPosLineDown(xupdownpos) && lineIndexItr != lines.end() -1) {
@@ -334,8 +336,8 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
           lineIndexItr++;
           Line & line = *lineIndexItr;
           line.setPosToScreenPos(xupdownpos, line.top());
-          repaint();
-       } else repaint();
+          window()->repaint(this,NRegion(oldLine.repaintLineArea()) | NRegion(line.repaintLineArea()),true);
+       } else line.repaint();
     break;
     case XK_Left:
       if (line.pos() == 0) {
@@ -349,7 +351,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
       } else {
         line.decPos();
         xupdownpos = line.screenPos().x();
-        repaint();
+        line.repaint();
       }
     break;
     case XK_Right:
@@ -365,7 +367,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
       } else {
         line.incPos();
         xupdownpos = line.screenPos().x();
-        repaint();
+        line.repaint();
       }
     break;
     case XK_Home:
@@ -396,9 +398,10 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
        if (oldHeight!=line.height()) {
          int diff = line.height() - oldHeight;
          moveLines(lineIndexItr + 1, lines.end(), diff);
-       }
+         repaint();
+       } else line.repaint();
+
        xupdownpos = line.screenPos().x();
-       repaint();
       }
     break;
     case XK_Return: {
@@ -415,9 +418,10 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
           if (oldHeight!=line.height()) {
              int diff = line.height() - oldHeight;
              moveLines(lineIndexItr + 1, lines.end(), diff);
-          }
+             repaint();
+          } else line.repaint();
+
           xupdownpos = line.screenPos().x();
-          repaint();
        }
   }
   }
@@ -425,7 +429,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
 
 void NMemo::TextArea::onMousePress( int x, int y, int button )
 {
-  if (button == 1) {
+  if ( button == 1 && !readOnly() ) {
     int start = findVerticalStart();
     std::vector<Line>::iterator it = lines.begin() + start;
     for ( ; it < lines.end(); it++) {
@@ -769,5 +773,19 @@ std::string NMemo::TextArea::Line::deleteToPos( )
   return tmp;
 }
 
+void NMemo::TextArea::Line::repaint( )
+{
+  pArea->window()->repaint(pArea,NRegion(repaintLineArea()),true);
+}
+
+NRect NMemo::TextArea::Line::repaintLineArea( ) const
+{
+  int top_    = pArea->absoluteTop() + top() - pArea->scrollDy();
+  int bottom_ = top_  + height();
+  int left_   = pArea->absoluteLeft() - pArea->scrollDx();
+  int right_  = left_ + pArea->spacingWidth();
+
+  return NRect(left_,top_,right_ - left_,bottom_ - top_);
+}
 
 
