@@ -360,17 +360,37 @@ NSkin NConfig::skin( const std::string & identifier )
     skin = *xmlSkin;
   } else // default skins if xml not found
   if (identifier == "edit") {
+    skin.setGradient(NColor(230,230,230),NColor(250,250,250),NColor(240,240,240),1,nVertical,10,4,4);
+    skin.setTransparent(false);
+  } else
+  if (identifier == "toolbar") {
+      NBevelBorder border(nLowered,nRaised);
+      skin.setBorder(border);
+      skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "filedlgpane") {
+    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+    skin.setBackground(NColor(200,200,200));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
   } else
   if (identifier == "pane") {
-  } else
+    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+    skin.setBackground(NColor(200,200,200));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
+  }
   if (identifier == "lbitemsel") {
     skin.setBackground(NColor(68,123,205));
     skin.useParentBackground(false);
     skin.setTransparent(false);
   } else
-  if (identifier == "lbitemnone") {
+  if (identifier == "splitbar") {
+     NFrameBorder fr(true,3,3);
+     fr.setSpacing(NSize(0,0,0,0));
+     skin.setBorder(fr);
+     skin.setGradient(NColor(200,200,200),NColor(220,220,220),NColor(220,220,220),2,nVertical,50,3,3);
+
   } else
   if (identifier == "mitemiconbg") {
     skin.setBackground(NColor(220,220,220));
@@ -383,7 +403,7 @@ NSkin NConfig::skin( const std::string & identifier )
      fr.setSpacing(NSize(0,0,0,0));
      skin.setBorder(fr);
      skin.setGradient(NColor(89,153,235),NColor(68,123,205),NColor(88,143,225),2,nVertical,10,4,4);
-    skin.setTransparent(false);
+     skin.setTransparent(false);
   } else
   if (identifier == "mitemnone") {
     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
@@ -400,24 +420,54 @@ NSkin NConfig::skin( const std::string & identifier )
     skin.setTransparent(false);
   } else
   if (identifier == "mbtnover") {
+     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+     skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),2,nVertical,10,5,5);
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+     skin.setBorder(fr);
   } else
   if (identifier == "mbtnnone") {
+    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "mbar") {
+     skin.setGradient(NColor(230,230,230),NColor(250,250,250),NColor(240,240,240),2,nVertical,10,4,4);
+     skin.setTransparent(false);
   } else
   if (identifier == "clbox") {
   } else
   if (identifier == "btnup") {
+     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+     skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(180,180,180),2,nVertical,10,5,5);
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+     skin.setBorder(fr);
   } else 
   if (identifier == "btnover") {
+     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+     skin.setGradient(NColor(250,250,250),NColor(255,255,255),NColor(210,210,210),2,nVertical,10,5,5);
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+     skin.setBorder(fr);
   } else 
   if (identifier == "btndown") {
+     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+     skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),2,nVertical,10,5,5);
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+     skin.setBorder(fr);
   } else
   if (identifier == "btnflat") {
+     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "tabup") {
+     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+     skin.setGradient(NColor(230,230,230),NColor(240,240,240),NColor(200,200,200),1,nVertical,10,5,5);
   } else
   if (identifier == "tabnone") {
+     NFont fnt("Suse Sans",8,nMedium | nAntiAlias);
+     fnt.setTextColor(NColor(100,100,100));
+     skin.setFont(fnt);
+     skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),1,nVertical,10,5,5);
   } else
   if (identifier == "sbar_vsl") {
   /*  NBitmap bmp;
