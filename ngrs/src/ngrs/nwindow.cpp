@@ -480,7 +480,7 @@ void NWindow::setExitLoop( int flag )
 void NWindow::setPositionToScreenCenter( )
 {
   // todo xinerama display width / height for a screen
-  setPosition( (NApp::system().screenWidth() / 2 - width()) / 2,  (NApp::system().screenHeight() - height()) / 2, width(), height());
+  setPosition( (NApp::system().screenWidth() - width()) / 2,  (NApp::system().screenHeight() - height()) / 2, width(), height());
 }
 
 void NWindow::checkForRemove( NVisualComponent * obj )

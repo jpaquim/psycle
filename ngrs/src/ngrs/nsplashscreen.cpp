@@ -40,10 +40,10 @@ void NSplashScreen::loadImageFromFile( const std::string & fileName )
 {
   NImage* img = new NImage();
   img->loadFromFile(fileName);
+  setPosition(0, 0, img->width(), img->height());
+  setPositionToScreenCenter();
   img->setAlign(nAlClient);
   pane()->add(img);
-  setPosition(img->left(), img->top(), img->width(), img->height());
-  setPositionToScreenCenter();
 }
 
 

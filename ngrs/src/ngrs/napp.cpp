@@ -74,7 +74,7 @@ NApp::~NApp()
 
 void NApp::run( )
 {
-  if (splashScreen_!=0) system().unmapWindow(splashScreen_->win());
+  if (splashScreen_!=0) splashScreen_->setVisible(false);
   eventLoop();
 }
 
@@ -372,6 +372,7 @@ void NApp::setSplashScreen(NSplashScreen * splashScreen )
 {
   splashScreen_ = splashScreen;
   if (splashScreen_!=0) {
+     splashScreen_->setVisible(true);
      NApp::system().mapWindow(splashScreen_->win());
      splashScreen_->graphics()->resize(splashScreen_->width(),splashScreen_->height());
      splashScreen_->repaint(splashScreen->pane(),NRect(0,0,splashScreen_->width(),splashScreen_->height()));
