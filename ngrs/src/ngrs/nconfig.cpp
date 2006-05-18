@@ -438,16 +438,16 @@ NSkin NConfig::skin( const std::string & identifier )
   return skin;
 }
 
-void NConfig::loadXmlConfig(const std::string & configName )
+void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )
 {
   attrs = 0;
 
   try {
     XMLPlatformUtils::Initialize();
   }
-  catch (const XMLException& toCatch) {
-    // Do your failure processing here
-//    return 1;
+  catch (const XMLException&) {
+    if(throw_allowed) throw;
+    else return; // ahem...
   }
 
   SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
@@ -474,8 +474,14 @@ void NConfig::loadXmlConfig(const std::string & configName )
             //return -1;
         }
    catch (...) {
-       cout << "Unexpected Exception \n" ;
-            //return -1;
+       if(throw_allowed)
+       {
+           delete parser;
+           delete defaultHandler;
+           XMLPlatformUtils::Terminate();
+           throw;
+       }
+       else std::cerr << "Unexpected Exception" << std::endl;
    }
 
   delete parser;

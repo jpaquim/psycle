@@ -48,7 +48,7 @@ public:
 
     NSkin skin(const std::string & identifier);
 
-    void loadXmlConfig(const std::string & configName);
+    void loadXmlConfig(const std::string & configName, bool throw_allowed = false);
 
     std::map<std::string, NSkin> skinMap;
     std::map<std::string, std::string> pathMap;
