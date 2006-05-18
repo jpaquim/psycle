@@ -107,10 +107,12 @@ void Configuration::setSkinDefaults( )
 
   #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/install_paths.defines.hpp>
+	hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
 	iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
-	pluginPath = ""; ///\todo [bohan] gotta check the plugin loading code to rely on LD_LIBRARY_PATH
+	pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
 	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
   #else
+  	//hlpPath = ...
 	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
 	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
 	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
