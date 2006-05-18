@@ -31,6 +31,7 @@
 #include <ngrs/nfiledialog.h>
 #include <ngrs/nslider.h>
 #include <ngrs/nalignlayout.h>
+#include <ngrs/ngridlayout.h>
 
 
 NBitmap Knob::kbitmap;
@@ -64,7 +65,7 @@ FrameMachine::FrameMachine(Machine* pMachine)
 
   init();
   initParameterGUI();
-  loadPresets();
+//  loadPresets();*/
 }
 
 
@@ -130,22 +131,22 @@ inline int format(int c, int maxcols, int maxrows) {
 
 void FrameMachine::initParameterGUI( )
 {
+  int numParameters = pMachine_->GetNumParams();
+  int cols = pMachine_->GetNumCols();
+  int rows = numParameters/cols;
+
   knobPanel = new NPanel();
-    knobPanel->setLayout(NGridLayout());
+    NGridLayout gridLayout;
+      gridLayout.setRows(rows);
+      gridLayout.setColumns(cols);
+    knobPanel->setLayout(gridLayout);
   pane()->add(knobPanel,nAlClient);
 
   NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
     font.setTextColor(Global::pConfig()->machineGUITopColor);
   knobPanel->setFont(font);
 
-  int numParameters = pMachine_->GetNumParams();
-  int cols = pMachine_->GetNumCols();
-  int rows = numParameters/cols;
-
-  gridLayout->setRows(rows);
-  gridLayout->setColumns(cols);
-
-   for (int c=0; c<numParameters; c++) {
+  for (int c=0; c<numParameters; c++) {
      int min_v,max_v,val_v;
      int newC = format(c,cols,rows);
      pMachine_->GetParamRange(newC,min_v,max_v);

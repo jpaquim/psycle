@@ -24,7 +24,6 @@
 #include <ngrs/nwindow.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nframeborder.h>
-#include <ngrs/ngridlayout.h>
 #include <ngrs/nbitmap.h>
 #include <ngrs/ndialog.h>
 
@@ -157,8 +156,6 @@ private:
    NTogglePanel* prsPanel;
    NButton* defaultPrsBtn;
    NSlider* prsBtnSlider;
-
-   NGridLayout* gridLayout;
 
    Preset knobsPreset();
 
