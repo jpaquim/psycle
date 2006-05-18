@@ -282,10 +282,10 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
 void MySAX2Handler::fatalError(const SAXParseException& exception)
 {
     char* message = XMLString::transcode(exception.getMessage());
-    cout << "xml error: " << message
+    cout << "ngrs: configuration: xml error: " << message
          << " at line: " << exception.getLineNumber()
          << endl;
-    cout << "using defaults instead" << endl;
+    cout << "ngrs: configuration: using defaults instead" << endl;
 }
 
 
