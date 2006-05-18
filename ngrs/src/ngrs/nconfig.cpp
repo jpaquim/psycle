@@ -533,7 +533,7 @@ void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )
            XMLPlatformUtils::Terminate();
            throw;
        }
-       else std::cerr << "ngrs: error: Unexpected Exception" << std::endl;
+       else std::cerr << "ngrs: configuration: error: Unexpected Exception" << std::endl;
    }
 
   delete parser;
