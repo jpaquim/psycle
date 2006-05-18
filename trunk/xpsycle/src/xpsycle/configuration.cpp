@@ -104,9 +104,16 @@ void Configuration::setSkinDefaults( )
   _outputDriverIndex = 0;
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
-  iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
-  pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
-  prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
+  #if defined XPSYCLE__CONFIGURATION
+	#include <xpsycle/install_paths.defines.hpp>
+	iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/"
+	pluginPath = ""; ///\todo [bohan] gotta check the plugin loading code to rely on LD_LIBRARY_PATH
+	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/"
+  #else
+	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
+	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
+	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
+  #endif
 
   mv_wirewidth = 1;
   mv_triangle_size = 22;
@@ -117,7 +124,37 @@ void Configuration::loadConfig( )
   NApp::config()->tagParse.connect(this,&Configuration::onConfigTagParse);
   std::string oldDir = NFile::workingDir();
   NFile::cdHome();
-  NApp::config()->loadXmlConfig(".xpsycle.xml");
+  try
+  {
+  	NApp::config()->loadXmlConfig(".xpsycle.xml", /* throw_allowed */ true);
+  }
+  catch(...)
+  {
+	#if !defined XPSYCLE__CONFIGURATION
+		std::cerr << "xpsycle: error: could not load any configuration file" << std::endl;
+	#else
+		try
+		{
+		        // there's a xpsycle.xml file installed as an example in <datadir>/doc/<package>/examples
+		        // <datadir> is configured via autoconf.
+		        // the xpsycle.xml file is configured via autoconf from xpsycle.xml.in
+		        // (note: the dot was removed so the the files in the example dir aren't hidden)
+	        	// we can copy it to the user's home dir.
+	        	{
+				#include <xpsycle/install_paths.defines.hpp>
+	        		std::string file_content(NFile::readFile(XPSYCLE__INSTALL_PATHS__DOC "/examples/xpsycle.xml");
+		        	std::ofstream ostream(".xpsycle.xml");
+		        	file_content >> ostream;
+		        }
+			NApp::config()->loadXmlConfig(".xpsycle.xml", /* throw_allowed */ true);
+		}
+		catch(...)
+		{
+			// oh well
+			std::cerr << "xpsycle: error: could not load any configuration file" << std::endl;
+		}
+	#endif
+  }
   NFile::cd(oldDir);
 
   iconPath   = NFile::replaceTilde(NApp::config()->findPath("icondir"));
