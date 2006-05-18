@@ -168,10 +168,14 @@ void Configuration::loadConfig( )
   }
   NFile::cd(oldDir);
 
-  iconPath   = NFile::replaceTilde(NApp::config()->findPath("icondir"));
-  pluginPath = NFile::replaceTilde(NApp::config()->findPath("plugindir"));
-  prsPath    = NFile::replaceTilde(NApp::config()->findPath("prsdir"));
-  hlpPath    = NFile::replaceTilde(NApp::config()->findPath("hlpdir"));
+  std::string iconXmlPath   = NFile::replaceTilde(NApp::config()->findPath("icondir"));
+  if (iconXmlPath!="") iconPath = iconXmlPath;
+  std::string pluginXmlPath = NFile::replaceTilde(NApp::config()->findPath("plugindir"));
+  if (pluginXmlPath!="") pluginPath = pluginXmlPath;
+  std::string prsXmlPath  = NFile::replaceTilde(NApp::config()->findPath("prsdir"));
+  if (prsXmlPath!="") prsPath = prsXmlPath;
+  std::string hlpXmlPath    = NFile::replaceTilde(NApp::config()->findPath("hlpdir"));
+  if (hlpXmlPath!="") hlpPath = hlpXmlPath;
 
   #if !defined NDEBUG
 	std::cout
