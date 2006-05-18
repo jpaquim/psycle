@@ -196,9 +196,9 @@ namespace psycle
 			tracks_= MAX_TRACKS;
 			_machineLock = false;
 			Invalided = false;
-			PW_Phase = 0;
-			PW_Stage = 0;
-			PW_Length = 0;
+//			PW_Phase = 0;
+//			PW_Stage = 0;
+//			PW_Length = 0;
 			// setting the preview wave volume to 25%
 			preview_vol = 0.25f;
 			
@@ -1698,7 +1698,20 @@ namespace psycle
 			return true;
 		}
 
-		void Song::PW_Play()
+		void Song::DoPreviews(int amount)
+		{
+			//todo do better.. use a vector<InstPreview*> or something instead
+			if(wavprev.IsEnabled())
+			{
+				wavprev.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+			}
+			if(waved.IsEnabled())
+			{
+				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+			}
+		}
+
+/*		void Song::PW_Play()
 		{
 			if (PW_Stage==0)
 			{
@@ -1744,7 +1757,7 @@ namespace psycle
 				
 			} while(--numSamples);
 		}
-
+*/
 		///\todo mfc+winapi->std
 		bool Song::CloneMac(Machine::id_type src, Machine::id_type dst)
 		{

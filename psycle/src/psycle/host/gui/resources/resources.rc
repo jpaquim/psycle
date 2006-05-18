@@ -70,11 +70,12 @@ BEGIN
     POPUP "Process"
     BEGIN
         MENUITEM "Amplify selection...\tCTRL+M", ID_SELECTION_AMPLIFY
-        MENUITEM "Reverse\tCTRL+R",             ID_SELECTION_REVERSE
         MENUITEM "Fade In\tCTRL+I",             ID_SELECTION_FADEIN
         MENUITEM "Fade Out\tCTRL+O",            ID_SELECTION_FADEOUT
+        MENUITEM "Insert Silence...\tCTRL+S",   ID_SELECTION_INSERTSILENCE
         MENUITEM "Normalize\tCTRL+N",           ID_SELECTION_NORMALIZE
         MENUITEM "Remove DC\tCTRL+D",           ID_SELECTION_REMOVEDC
+        MENUITEM "Reverse\tCTRL+R",             ID_SELECTION_REVERSE
     END
     POPUP "Edit"
     BEGIN
@@ -83,8 +84,16 @@ BEGIN
         MENUITEM "Cut\tCTRL+X",                 ID_EDIT_CUT
         MENUITEM "Crop\tCTRL+P",                ID_EDIT_CROP
         MENUITEM "Copy\tCTRL+C",                ID_EDIT_COPY
-        MENUITEM "Paste\tCTRL+V",               ID_EDIT_PASTE
+        POPUP "Paste"
+        BEGIN
+            MENUITEM "Insert\tCTRL+V",              ID_EDIT_PASTE
+            MENUITEM "Overwrite",                   ID_PASTE_OVERWRITE
+            MENUITEM "Mix...",                      ID_PASTE_MIX
+            MENUITEM "Crossfade...",                ID_PASTE_CROSSFADE
+        END
         MENUITEM "Delete\tDel",                 ID_EDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Snap to Zero",                ID_EDIT_SNAPTOZERO
     END
     POPUP "View"
     BEGIN
@@ -249,6 +258,25 @@ BEGIN
     END
 END
 
+IDR_WAVED_POPUP MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Zoom to Selection",           ID_POPUP_ZOOMSEL
+        MENUITEM "Zoom In",                     ID_POPUP_ZOOMIN
+        MENUITEM "Zoom Out",                    ID_POPUP_ZOOMOUT
+        MENUITEM SEPARATOR
+        MENUITEM "Cut\tCTRL+X",                 ID_POPUP_CUT
+        MENUITEM "Copy\tCTRL+C",                ID_POPUP_COPY
+        MENUITEM "Paste\tCTRL+V",               ID_POPUP_PASTE
+        MENUITEM "Delete\tDel",                 ID_POPUP_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Set Loop Start",              ID_POPUP_SETLOOPSTART
+        MENUITEM "Set Loop End",                ID_POPUP_SETLOOPEND
+        MENUITEM "Set Loop to Selection",       ID_POPUP_SELECTIONTOLOOP
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -306,6 +334,7 @@ IDB_SLIDERKNOBV         BITMAP                  "Slider\\sliderB-gray.bmp"
 IDB_SLIDERBACKV         BITMAP                  "Slider\\sliderP-gray.bmp"
 IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
 IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
+IDR_WAVEDFRAME          BITMAP                  "./toolbar1.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -348,6 +377,7 @@ BEGIN
     "D",            ID_SELECTION_REMOVEDC,  VIRTKEY, CONTROL, NOINVERT
     "R",            ID_SELECTION_REVERSE,   VIRTKEY, CONTROL, NOINVERT
     "A",            ID_SELECTION_SHOWALL,   VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_SELECTION_INSERTSILENCE, VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -2250,6 +2280,93 @@ BEGIN
     EDITTEXT        IDC_POS,41,232,75,12,ES_AUTOHSCROLL
 END
 
+IDD_WAVED_ZOOMBAR DIALOGEX 0, 0, 343, 12
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "-",IDC_ZOOMOUT,269,0,10,12,NOT WS_TABSTOP
+    PUSHBUTTON      "+",IDC_ZOOMIN,320,0,9,12,NOT WS_TABSTOP
+    CONTROL         "",IDC_ZOOMSLIDE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,281,0,36,12,WS_EX_DLGMODALFRAME
+    SCROLLBAR       IDC_HSCROLL,48,1,209,10
+    CONTROL         "",IDC_VOLSLIDE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,7,0,40,12
+END
+
+IDD_WAVED_MIX DIALOGEX 0, 0, 246, 158
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Mix"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,187,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,187,24,50,14
+    GROUPBOX        "Clipboard",IDC_SRCGROUP,16,24,59,117
+    GROUPBOX        "Wave",IDC_DESTGROUP,91,24,60,117
+    CONTROL         "",IDC_SRCVOL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,33,41,17,68
+    CONTROL         "",IDC_DESTVOL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,108,41,18,68
+    CONTROL         "Fade Out",IDC_FADEOUTCHECK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,159,92,8,9
+    EDITTEXT        IDC_FADEINTIME,179,65,50,12,ES_AUTOHSCROLL | WS_DISABLED,
+                    WS_EX_RIGHT
+    EDITTEXT        IDC_FADEOUTTIME,179,89,50,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED,WS_EX_RIGHT
+    LTEXT           "Fade In to Mix",IDC_STATIC,171,57,47,8
+    LTEXT           "Fade Out of Mix",IDC_STATIC,169,81,52,8
+    CONTROL         "Fade In",IDC_FADEINCHECK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,159,68,11,10
+    CTEXT           "100%",IDC_SRCVOL_TEXT,25,109,31,24
+    CTEXT           "100%",IDC_DESTVOL_TEXT,100,109,35,24
+END
+
+IDD_WAVED_INSERTSILENCE DIALOGEX 0, 0, 205, 78
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Insert Silence"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,148,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,148,24,50,14
+    EDITTEXT        IDC_EDIT1,19,32,56,13,ES_AUTOHSCROLL
+    CONTROL         "At start",IDC_RADIO_ATSTART,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,88,22,47,10
+    CONTROL         "At end",IDC_RADIO_ATEND,"Button",BS_AUTORADIOBUTTON,88,
+                    33,48,11
+    CONTROL         "At cursor",IDC_RADIO_ATCURSOR,"Button",
+                    BS_AUTORADIOBUTTON,88,45,47,11
+    LTEXT           "Insert (in secs):",IDC_STATIC,21,23,53,8
+END
+
+IDD_WAVED_CROSSFADE DIALOGEX 0, 0, 287, 161
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Crossfade"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,228,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,228,23,50,14
+    GROUPBOX        "Clipboard",IDC_SRCGROUP,16,17,90,125
+    GROUPBOX        "Wave",IDC_DESTGROUP,120,17,90,125
+    CONTROL         "",IDC_SRCSTARTVOL,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,33,47,17,69
+    CONTROL         "",IDC_DESTSTARTVOL,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,137,47,18,69
+    CTEXT           "100%",IDC_SRCENDVOL_TEXT,63,116,31,23
+    CTEXT           "100%",IDC_DESTSTARTVOL_TEXT,129,116,35,23
+    CONTROL         "",IDC_SRCENDVOL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,70,47,19,69
+    CONTROL         "",IDC_DESTENDVOL,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,176,47,18,69
+    CTEXT           "100%",IDC_DESTENDVOL_TEXT,169,116,31,23
+    CTEXT           "100%",IDC_SRCSTARTVOL_TEXT,26,116,31,23
+    LTEXT           "Start",IDC_STATIC_SRCSTARTLABEL,33,37,18,8
+    LTEXT           "Start",IDC_STATIC_DESTSTARTLABEL,137,37,18,8
+    LTEXT           "End",IDC_STATIC_SRCENDLABEL,74,37,14,10
+    LTEXT           "End",IDC_STATIC_DESTENDLABEL,178,37,14,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2575,6 +2692,38 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 267
     END
+
+    IDD_WAVED_ZOOMBAR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 336
+    END
+
+    IDD_WAVED_MIX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 237
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 152
+        HORZGUIDE, 109
+    END
+
+    IDD_WAVED_INSERTSILENCE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 198
+        VERTGUIDE, 88
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 71
+    END
+
+    IDD_WAVED_CROSSFADE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 278
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 155
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2765,6 +2914,17 @@ BEGIN
     BUTTON      ID_PSYHELP
 END
 
+IDR_WAVEDFRAME TOOLBAR  17, 17
+BEGIN
+    BUTTON      ID_WAVED_PLAYFROMSTART
+    BUTTON      ID_WAVED_PLAY
+    BUTTON      ID_WAVED_RELEASE
+    BUTTON      ID_WAVED_STOP
+    SEPARATOR
+    BUTTON      ID_WAVED_REWIND
+    BUTTON      ID_WAVED_FASTFORWARD
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -2953,9 +3113,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_EDIT_COPY            "Pattern Copy to clipboard\nPattern Copy"
-    ID_EDIT_CUT             "Cut Pattern to clipboard\nCut Pattern"
-    ID_EDIT_PASTE           "Pattern Paste from clipboard\nPattern Paste"
+    ID_EDIT_COPY            "Copy Selection to Clipboard\nCopy Selection"
+    ID_EDIT_CUT             "Cut Selection to clipboard\nCut Selection"
+    ID_EDIT_PASTE           "Insert Clipboard Data at Cursor\nInsert Data"
     ID_EDIT_SELECT_ALL      "Select whole wave"
     ID_EDIT_UNDO            "Undo last action\nUndo"
     ID_EDIT_REDO            "Redo last Undo\nRedo"
@@ -3004,6 +3164,40 @@ STRINGTABLE
 BEGIN
     ID_SELECCION_ZOOMIN     "Zoom In"
     ID_SELECTION_ZOOMSEL    "Zoom to Selection"
+    ID_PASTE_MIX            "Mix with Clipboard Data"
+    ID_PASTE_OVERWRITE      "Overwrite with Clipboard Data"
+    ID_PASTE_CROSSFADE      "Crossfade with Clipboard Data"
+    ID_EDIT_SNAPTOZERO      "Set/Unset Snap to Zero"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WAVED_PLAY           "Play Wave from Cursor"
+    ID_WAVED_PLAYFROMSTART  "Play Wave from Start"
+    ID_WAVED_STOP           "Stop Playback"
+    ID_WAVED_RELEASE        "Release from Loop"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_POPUP_ZOOMOUT        "Zoom Out"
+    ID_FASTFORWARD          "Move Cursor to Wave End"
+    ID_REWIND               "Move Cursor to Wave Start"
+    ID_WAVED_REWIND         "Move Cursor to Wave Start"
+    ID_WAVED_FASTFORWARD    "Move Cursor to Wave End"
+    ID_POPUP_SELECTIONTOLOOP "Set Current Selection as Loop Points"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_POPUP_ZOOMSEL        "Set Viewable Area to Selection"
+    ID_POPUP_CUT            "Cut Selected Data into Clipboard"
+    ID_POPUP_COPY           "Copy Selected Data to Clipboard"
+    ID_POPUP_PASTE          "Paste (Insert) Clipboard Data into Wave"
+    ID_POPUP_DELETE         "Delete Selection"
+    ID_POPUP_SETLOOPSTART   "Set Point as Loop Start"
+    ID_POPUP_SETLOOPEND     "Set Point as Loop End"
+    ID_POPUP_ZOOMIN         "Zoom In"
 END
 
 #endif    // Neutral (Default) resources

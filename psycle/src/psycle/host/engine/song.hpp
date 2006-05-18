@@ -3,6 +3,7 @@
 #pragma once
 #include "SongStructs.hpp"
 #include "instrument.hpp"
+#include "InstPreview.hpp"
 #include "machine.hpp"
 #include "constants.hpp" // for the bloat-sized arrays and many other stuffs that should actually be moved in this file
 #include <psycle/host/global.hpp>
@@ -220,7 +221,7 @@ namespace psycle
 			///\todo shouldn't belong to the song class.
 			///\{
 				public:
-					/// wave file previewing: work... \todo doc
+/*					/// wave file previewing: work... \todo doc
 					void PW_Work(float *psamplesL, float *pSamplesR, int numSamples);
 					/// wave file previewing: starts the playback.
 					void PW_Play();
@@ -230,6 +231,11 @@ namespace psycle
 					int PW_Stage;
 					/// wave file previewing: length of the wave (in samples?) \todo doc
 					int PW_Length;
+*/
+					//todo these ought to be dynamically allocated
+					InstPreview wavprev;
+					InstPreview waved;
+					void DoPreviews(int amount);
 			///\}
 
 			///\name (de)serialization

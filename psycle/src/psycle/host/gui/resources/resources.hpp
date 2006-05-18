@@ -16,6 +16,7 @@
 #define IDR_MAINFRAME                   101
 #define IDD_PSYBAR                      102
 #define IDB_LESS                        103
+#define IDD_WAVED_ZOOMBAR               103
 #define IDB_LESSLESS                    104
 #define IDB_MORE                        105
 #define IDB_MOREMORE                    106
@@ -114,6 +115,11 @@
 #define IDB_SLIDERBACKV                 250
 #define IDB_SLIDERKNOBH                 251
 #define IDB_SLIDERBACKH                 252
+#define IDD_WAVED_MIX                   255
+#define IDD_WAVED_INSERTSILENCE         257
+#define IDD_WAVED_CROSSFADE             258
+#define IDR_WAVEDFRAME                  258
+#define IDR_WAVED_POPUP                 260
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -229,6 +235,7 @@
 #define IDC_BUTTON2                     1092
 #define IDC_HOLD                        1092
 #define IDC_SCOPE_HOLD                  1092
+#define IDC_ZOOMIN                      1092
 #define IDC_BUTTON3                     1093
 #define IDC_BUTTON4                     1094
 #define IDC_INS_DECOCTAVE               1094
@@ -959,6 +966,35 @@
 #define IDC_VIEW_SCOPE                  1736
 #define IDC_SCOPE_PARAM_1               1739
 #define IDC_SCOPE_PARAM_2               1740
+#define IDC_HSCROLL                     1741
+#define IDC_ZOOMSLIDE                   1742
+#define IDC_ZOOMOUT                     1743
+#define IDC_DESTGROUP                   1744
+#define IDC_SRCGROUP                    1745
+#define IDC_SRCVOL                      1746
+#define IDC_DESTVOL                     1747
+#define IDC_FADEINTIME                  1748
+#define IDC_FADEOUTTIME                 1749
+#define IDC_FADEINCHECK                 1750
+#define IDC_FADEOUTCHECK                1751
+#define IDC_DESTVOL_TEXT                1753
+#define IDC_SRCVOL_TEXT                 1754
+#define IDC_RADIO_ATSTART               1755
+#define IDC_RADIO_ATEND                 1756
+#define IDC_DESTENDVOL_TEXT             1756
+#define IDC_RADIO_ATCURSOR              1757
+#define IDC_SRCSTARTVOL                 1758
+#define IDC_SRCENDVOL                   1759
+#define IDC_DESTSTARTVOL                1760
+#define IDC_DESTENDVOL                  1761
+#define IDC_SRCENDVOL_TEXT              1762
+#define IDC_SRCSTARTVOL_TEXT            1763
+#define IDC_DESTSTARTVOL_TEXT           1764
+#define IDC_STATIC_SRCSTARTLABEL        1765
+#define IDC_STATIC_DESTSTARTLABEL       1766
+#define IDC_STATIC_DESTENDLABEL         1767
+#define IDC_STATIC_SRCENDLABEL          1768
+#define IDC_VOLSLIDE                    1771
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1093,6 +1129,30 @@
 #define ID_POP_INTERPOLATE_CURVE        32999
 #define ID_SELECCION_ZOOMIN             33000
 #define ID_SELECTION_ZOOMSEL            33002
+#define ID_EDIT_PASTE33003              33003
+#define ID_PASTE_MIX                    33004
+#define ID_PASTE_OVERWRITE              33005
+#define ID_PASTE_CROSSFADE              33006
+#define ID_EDIT_SNAPTOZERO              33007
+#define ID_SELECTION_INSERTSILENCE      33009
+#define ID_WAVED_PLAY                   33012
+#define ID_WAVED_PLAYFROMSTART          33013
+#define ID_WAVED_STOP                   33014
+#define ID_WAVED_RELEASE                33017
+#define ID_POPUP_ZOOMSEL                33028
+#define ID_POPUP_CUT                    33029
+#define ID_POPUP_COPY                   33030
+#define ID_POPUP_PASTE                  33031
+#define ID_POPUP_DELETE                 33032
+#define ID_POPUP_SETLOOPSTART           33035
+#define ID_POPUP_SETLOOPEND             33036
+#define ID_POPUP_ZOOMIN                 33039
+#define ID_POPUP_ZOOMOUT                33040
+#define ID_FASTFORWARD                  33041
+#define ID_REWIND                       33043
+#define ID_WAVED_REWIND                 33044
+#define ID_WAVED_FASTFORWARD            33045
+#define ID_POPUP_SELECTIONTOLOOP        33047
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1101,9 +1161,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         33003
-#define _APS_NEXT_CONTROL_VALUE         1741
+#define _APS_NEXT_RESOURCE_VALUE        261
+#define _APS_NEXT_COMMAND_VALUE         33048
+#define _APS_NEXT_CONTROL_VALUE         1772
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

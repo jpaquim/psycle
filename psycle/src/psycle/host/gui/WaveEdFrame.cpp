@@ -18,7 +18,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_WM_SHOWWINDOW()
 			ON_UPDATE_COMMAND_UI ( ID_INDICATOR_MODE, OnUpdateStatusBar )
 			ON_UPDATE_COMMAND_UI ( ID_INDICATOR_SEL,  OnUpdateSelection )
+			ON_UPDATE_COMMAND_UI ( ID_WAVED_PLAYFROMSTART, OnUpdatePlayButtons )
+			ON_UPDATE_COMMAND_UI ( ID_WAVED_PLAY,	OnUpdatePlayButtons		)
+			ON_UPDATE_COMMAND_UI ( ID_WAVED_STOP,	OnUpdateStopButton		)
+			ON_UPDATE_COMMAND_UI ( ID_WAVED_RELEASE,OnUpdateReleaseButton		)
+			ON_UPDATE_COMMAND_UI ( ID_WAVED_FASTFORWARD, OnUpdateFFandRWButtons )
+			ON_UPDATE_COMMAND_UI ( ID_WAVED_REWIND, OnUpdateFFandRWButtons )
+			ON_COMMAND ( ID_WAVED_PLAY, OnPlay )
+			ON_COMMAND ( ID_WAVED_PLAYFROMSTART, OnPlayFromStart )
+			ON_COMMAND ( ID_WAVED_STOP, OnStop )
+			ON_COMMAND ( ID_WAVED_RELEASE, OnRelease)
+			ON_COMMAND ( ID_WAVED_FASTFORWARD, OnFastForward )
+			ON_COMMAND ( ID_WAVED_REWIND, OnRewind )
 			//}}AFX_MSG_MAP
+			ON_WM_DESTROY()
 		END_MESSAGE_MAP()
 
 		static UINT indicators[] =
@@ -32,7 +45,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CWaveEdFrame::CWaveEdFrame()
 		{
 		}
-		CWaveEdFrame::CWaveEdFrame(Song* _sng,CMainFrame* pframe)
+		CWaveEdFrame::CWaveEdFrame(Song* _sng, CMainFrame* pframe)
 		{
 			this->_pSong=_sng;
 			wavview.SetSong(this->_pSong);
@@ -47,6 +60,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWaveEdFrame::OnClose() 
 		{
 			ShowWindow(SW_HIDE);
+			OnStop();
 		}
 
 		int CWaveEdFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -66,13 +80,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			statusbar.SetPaneInfo(1, ID_INDICATOR_SEL, SBPS_NORMAL, 180);
 			statusbar.SetPaneInfo(2, ID_INDICATOR_SIZE, SBPS_NORMAL, 180);
 			statusbar.SetPaneInfo(3, ID_INDICATOR_MODE, SBPS_NORMAL, 70);
+
+			if( !(ToolBar.Create(this, WS_CHILD|WS_VISIBLE|CBRS_TOP|CBRS_FLYBY)) || !ToolBar.LoadToolBar(IDR_WAVEDFRAME))
+				this->MessageBox("Error creating toolbar!", "whoops!", MB_OK);
+
 			
 			wavview.Create(NULL, "Psycle wave editor", AFX_WS_DEFAULT_VIEW,
 			CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
 
 			/*	toolbar.EnableDocking(CBRS_ALIGN_ANY);
 			EnableDocking(CBRS_ALIGN_ANY); */
-			
+			bPlaying=false;
 			SetWindowText("Psycle wave editor");
 			return 0;
 		}
@@ -89,6 +107,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			return TRUE;	
 		}
+
+		void CWaveEdFrame::OnDestroy()
+		{
+			CFrameWnd::OnDestroy();
+
+			OnStop();
+		}
+
 
 		void CWaveEdFrame::GenerateView() 
 		{	
@@ -108,6 +134,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWaveEdFrame::OnUpdateStatusBar(CCmdUI *pCmdUI)  
 		{     
 			pCmdUI->Enable ();  
+		}
+
+		void CWaveEdFrame::OnUpdatePlayButtons(CCmdUI *pCmdUI)
+		{
+			pCmdUI->Enable(!_pSong->waved.IsEnabled());
+		}
+
+		void CWaveEdFrame::OnUpdateStopButton(CCmdUI *pCmdUI)
+		{
+			pCmdUI->Enable(_pSong->waved.IsEnabled());
+		}
+
+		void CWaveEdFrame::OnUpdateReleaseButton(CCmdUI *pCmdUI)
+		{
+			pCmdUI->Enable(_pSong->waved.IsEnabled() && _pSong->waved.IsLooping());
 		}
 
 		void CWaveEdFrame::OnUpdateSelection(CCmdUI *pCmdUI)
@@ -155,6 +196,45 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			wavview.SetViewData(_pSong->instSelected);
 			AdjustStatusBar(_pSong->instSelected);
+			wsInstrument = _pSong->instSelected;
 		}
+
+		void CWaveEdFrame::OnPlay() {PlayFrom(wavview.GetCursorPos());}
+		void CWaveEdFrame::OnPlayFromStart() {PlayFrom(0);}
+		void CWaveEdFrame::OnRelease()
+		{
+			_pSong->waved.Release();
+		}
+		void CWaveEdFrame::OnStop()
+		{
+			_pSong->waved.Stop();
+		}
+
+		void CWaveEdFrame::PlayFrom(unsigned long startPos)
+		{
+			if( startPos<0 || startPos >= _pSong->_pInstrument[wsInstrument]->waveLength )
+				return;
+
+			OnStop();
+
+			_pSong->waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
+			_pSong->waved.Play(startPos);
+		}
+		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(true);
+		}
+
+		void CWaveEdFrame::OnFastForward()
+		{
+			unsigned long wl = _pSong->_pInstrument[wsInstrument]->waveLength;
+			wavview.SetCursorPos( wl-1 );
+		}
+		void CWaveEdFrame::OnRewind()
+		{
+			wavview.SetCursorPos( 0 );
+		}
+
+
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END
