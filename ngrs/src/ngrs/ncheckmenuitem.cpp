@@ -46,6 +46,7 @@ void NCheckMenuItem::init( )
      checkBox_->setPreferredSize(25,25);
      checkBox_->setCheck(true);
      checkBox_->setSkin(NApp::config()->skin("mitemiconbg"));
+     checkBox_->setEvents(false);
   add(checkBox_, nAlLeft);
 
   captionLbl_ = new NLabel();
