@@ -546,9 +546,6 @@ NSkin* NConfig::findSkin( const std::string & id )
   std::map<std::string, NSkin>::iterator itr;
   if ( (itr = skinMap.find(id)) == skinMap.end() )
   {
-      #if !defined NDEBUG
-      	std::cerr << "ngrs: configuration: error: skin id not found: " << id << std::endl;
-      #endif
       return 0;
   } else {
     return &itr->second;
@@ -560,9 +557,6 @@ std::string NConfig::findPath( const std::string & id )
   std::map<std::string, std::string>::iterator itr;
   if ( (itr = pathMap.find(id)) == pathMap.end() )
   {
-      #if !defined NDEBUG
-      	std::cerr << "ngrs: configuration: error: path id not found: " << id << std::endl;
-      #endif
       return "";
   } else {
     return itr->second;
@@ -581,10 +575,7 @@ std::string NConfig::getAttribValue( const std::string & name )
        XMLString::release(&str);
        } catch (std::exception e)
        {
-           #if !defined NDEBUG
-           	std::cerr << "ngrs: configuration: error: exception on attribute value: " << e.what() << std::endl;
-           #endif
-           return ""; 
+           return "";
        }
       return erg;
 }
