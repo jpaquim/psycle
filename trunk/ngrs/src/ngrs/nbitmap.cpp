@@ -141,10 +141,11 @@ const NBitmap & NBitmap::operator =( const NBitmap & rhs )
   return *this;
 }
 
-void NBitmap::loadFromFile( std::string filename )
+void NBitmap::loadFromFile( const std::string & filename )
 {
   NBitmap bmp1 = NApp::filter.at(0)->loadFromFile(NFile::replaceTilde(filename));
-  xi = bmp1.X11data();
+  xi  = bmp1.X11data();
+  clp = bmp1.X11ClpData();
 }
 
 

@@ -54,7 +54,7 @@ public:
 
     void setX11Data(XImage* ximage, XImage* clp_);
 
-    void loadFromFile(std::string filename);
+    void loadFromFile(const std::string & filename);
     void createFromXpmData(const char** data);
 
 

@@ -147,6 +147,7 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
 {
   int yp = 0;
   int topMax = 0;
+  int leftTopMax = 0;
 
   NVisualComponent* lastLeft    = 0;
   NVisualComponent* lastRight  = 0;
@@ -160,7 +161,8 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
      switch (visualChild->align()) {
        case nAlLeft   :
            lastLeft = visualChild;
-           yp = visualChild->preferredHeight() + 2*vgap_;
+           leftTopMax = std::max(visualChild->preferredHeight() + 2*vgap_ , leftTopMax);
+           yp = leftTopMax;
        break;
         case nAlRight   :
            lastRight = visualChild;
@@ -184,7 +186,8 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
        case nAlClient : {
            int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
            int bottomOff  = (lastBottom == 0) ? vgap_ : parent()->clientHeight() - lastBottom->top() + vgap_ ;
-           yp = visualChild->preferredHeight() + topOff + bottomOff;
+
+           yp = std::max(leftTopMax, visualChild->preferredHeight() + topOff + bottomOff);
        }
        break;
       }

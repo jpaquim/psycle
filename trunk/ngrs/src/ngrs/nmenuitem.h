@@ -37,6 +37,7 @@ class NMenuItem : public NCustomMenuItem
 public:
     NMenuItem();
     NMenuItem(const std::string & text);
+    NMenuItem(const std::string & text, const NBitmap & icon);
 
     ~NMenuItem();
 
