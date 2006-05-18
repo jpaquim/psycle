@@ -40,6 +40,8 @@ public:
 
     void loadConfig();
 
+    NBitmap newfile();
+
     bool autoStopMachines;
     std::string iconPath;
     std::string pluginPath;

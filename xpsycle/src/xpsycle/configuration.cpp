@@ -22,6 +22,7 @@
 #include "song.h"
 #include "global.h"
 #include "alsaout.h"
+#include "defaultbitmaps.h"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
 #include <ngrs/nfile.h>
@@ -497,4 +498,11 @@ void Configuration::onConfigTagParse(const std::string & tagName )
   }
 }
 
+NBitmap Configuration::newfile( )
+{
+  if (iconPath=="")
+     return Global::pBitmaps()->newfile();
+  else
+     return NBitmap(iconPath+ "new.xpm");
 
+}
