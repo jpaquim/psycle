@@ -65,7 +65,7 @@ FrameMachine::FrameMachine(Machine* pMachine)
 
   init();
   initParameterGUI();
-//  loadPresets();*/
+  loadPresets();
 }
 
 

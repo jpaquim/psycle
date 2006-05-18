@@ -105,11 +105,11 @@ void MainWindow::initMenu( )
      viewMenu_->add(new NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
      viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
      viewMenu_->add(new NMenuSeperator());
-     viewMenu_->add(new NCheckMenuItem("PatternEditor"));
-     viewMenu_->add(new NCheckMenuItem("PatternSequencer"));
-     viewMenu_->add(new NCheckMenuItem("Add machine"));
+     viewMenu_->add(new NMenuItem("PatternEditor"));
+     viewMenu_->add(new NMenuItem("PatternSequencer"));
+     viewMenu_->add(new NMenuItem("Add machine"));
      viewMenu_->add(new NMenuSeperator());
-     viewMenu_->add(new NCheckMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
+     viewMenu_->add(new NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
    menuBar_->add(viewMenu_);
 
    // Creates the configuration menu
