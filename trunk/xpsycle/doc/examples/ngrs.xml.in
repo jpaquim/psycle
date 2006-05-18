@@ -7,7 +7,7 @@ dir='ver' percent='10' style='1' />
 </vcskin>
 
 <vcskin id='pane'>
-    <font name='Suse sans' size='8' color='0:0:0'></font>
+    <font name='Helvetica' size='8' color='0:0:0'></font>
     <bgcolor r='200' g='200' b='200'></bgcolor>
 </vcskin>
 <vcskin id='mbar'>
@@ -15,10 +15,10 @@ dir='ver' percent='10' style='1' />
     </gradient>
 </vcskin>	
 <vcskin id='btnflat'>
-	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<font name='Helvetica' size='8' color='0:0:0'></font>
 </vcskin>
 <vcskin id='btndown'>
-	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<font name='Helvetica' size='8' color='0:0:0'></font>
 	<gradient start='200:200:200' mid='210:210:210' end='180:180:180' dir='ver' percent='10' style='2' arcw='5' arch='5'>
 	</gradient>
 	<frmborder style='1' arcw = '5' arch ='5'></frmborder>
@@ -34,27 +34,27 @@ dir='ver' percent='10' style='1' />
 	<frmborder style='1' arcw = '5' arch ='5'></frmborder>
 </vcskin>
 <vcskin id='mbtnnone'>
-	<font name='Suse Sans' size='8' color='0:0:0'></font>	
+	<font name='Helvetica' size='8' color='0:0:0'></font>	
 </vcskin>
 <vcskin id='mitemnone' />
 <vcskin id='mbtnover'>
-	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<font name='Helvetica' size='8' color='0:0:0'></font>
 	<gradient start='200:200:200' mid='210:210:210' end='180:180:180' dir='ver' percent='10' style='2' arcw='5' arch='5'>
 	</gradient>
 	<frmborder style='1' arcw = '5' arch ='5'></frmborder>
 </vcskin>
 <vcskin id="filedlgpane">
      <bgcolor r='200' g='200' b='200'></bgcolor>
-     <font name='Suse sans' size='8' color='0:0:0'></font>
+     <font name='Helvetica' size='8' color='0:0:0'></font>
 </vcskin>	
 
 <vcskin id='tabup'>
-	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<font name='Helvetica' size='8' color='0:0:0'></font>
 	<gradient start='230:230:230' mid='240:240:240' end='200:200:200' dir='ver' percent='10' style='1'>
 	</gradient>
 </vcskin>
 <vcskin id='tabnone'>
-	<font name='Suse Sans' size='8' color='100:100:100'></font>
+	<font name='Helvetica' size='8' color='100:100:100'></font>
 	<gradient start='200:200:200' mid='210:210:210' end='180:180:180' dir='ver' percent='10' style='1'>
 	</gradient>
 </vcskin>
@@ -68,7 +68,7 @@ style='2' arcw='3' arch='3'>
 <vcskin id='toolbar'>
    <bvlborder outer='lowered' inner='raised'>
    </bvlborder>
-   <font name='Suse sans' size='8' color='0:0:0'></font>
+   <font name='Helvetica' size='8' color='0:0:0'></font>
 </vcskin>
 </ngrs>
 
