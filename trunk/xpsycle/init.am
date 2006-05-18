@@ -5,6 +5,9 @@ CLEANFILES =
 AM_CPPFLAGS = -I$(top_builddir)/src -I$(top_srcdir)/src
 bin_PROGRAMS =
 lib_LTLIBRARIES =
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA =
 
+pkgversiondocdir = $(datadir)/doc/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
+nobase_pkgversiondoc_DATA =
