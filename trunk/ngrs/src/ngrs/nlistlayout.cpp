@@ -49,7 +49,9 @@ void NListLayout::align( NVisualComponent * parent )
         int minWidth = visualChild->minimumWidth();
         int width = (prefWidth < minWidth) ? minWidth : prefWidth; 
         visualChild->setPosition(0,yp,width,visualChild->preferredHeight());
-        if (visualChild->align() == nAlClient) visualChild->setWidth(parent->clientWidth());
+        if (visualChild->align() == nAlCenter) {
+           visualChild->setWidth(parent->spacingWidth());
+        }
         if (width > maxX_) {
            maxX_ = width;
         }

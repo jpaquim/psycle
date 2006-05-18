@@ -67,7 +67,10 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1024,768);
 
-  testMemo();
+  testMenu();
+
+  //testListBox();
+
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
   //panel->setBackground(NColor(250,250,250));
   //std::cout << book->preferredHeight() << std::endl;
@@ -305,10 +308,11 @@ void NTestWindow::testListBox( )
   NListBox* lbox = new NListBox();
      lbox->setMultiSelect(true);
      lbox->setPosition(10,10,200,200);
-     for (int i = 0; i < 100; i++) {
+     for (int i = 0; i < 10; i++) {
         lbox->add(new NItem(stringify(i)));
      }
   pane()->add(lbox);
+  lbox->resize();
 }
 
 void NTestWindow::testSegDisplay( )

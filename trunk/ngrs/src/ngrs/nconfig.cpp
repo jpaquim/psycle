@@ -366,12 +366,22 @@ NSkin NConfig::skin( const std::string & identifier )
   if (identifier == "pane") {
   } else
   if (identifier == "lbitemsel") {
+    skin.setBackground(NColor(68,123,205));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
   } else
   if (identifier == "lbitemnone") {
   } else
   if (identifier == "mitemover") {
+     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+     NFrameBorder fr(true,4,4);
+     fr.setSpacing(NSize(0,0,0,0));
+     skin.setBorder(fr);
+     skin.setGradient(NColor(89,153,235),NColor(68,123,205),NColor(88,143,225),2,nVertical,10,4,4);
+    skin.setTransparent(false);
   } else
   if (identifier == "mitemnone") {
+    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "popup_menu_bg") {
     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
