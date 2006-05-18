@@ -22,12 +22,13 @@
 #include "mainwindow.h"
 #include "song.h"
 #include "plugin.h"
+#include "install_paths.hpp"
 #include <ngrs/nsplashscreen.h>
 #include <ngrs/napp.h>
-#include <iostream>
-#include <cstdlib>
 #include <ngrs/nfile.h>
 #include <ngrs/nproperty.h>
+#include <iostream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -43,24 +44,25 @@ int f2i(double q) { return ((int)q)&2047; }
 
 int main(int argc, char *argv[])
 {
-
-    NApp app;
-    Global gl;
-    Global::pConfig()->loadConfig();
-    NWindow* mainWin = new MainWindow();
-    app.setMainWindow(mainWin);
-    app.run();
-    return EXIT_SUCCESS;
-
-
- /* NSplashScreen* splash = new NSplashScreen();
-    splash->loadImageFromFile("/home/natti/xpsycle/icons/splash.xpm");
-  app.setSplashScreen(splash);*/
-
-  
-  /*Song song;
-
-  song.load("/home/natti/lastfuture.picknick.psy");*/
-
-
+	NApp app;
+	#if !defined XPSYCLE__CONFIGURATION
+		std::cout << "xpsycle: warning: built without configuration" << std::end;
+	#else
+		NSplashScreen* splash = new NSplashScreen();
+		#if !defined NDEBUG
+			std::cout << xpsycle::paths::pixmaps() << "/splash.xpm" << std::endl;
+		#endif
+		splash->loadImageFromFile(xpsycle::paths::pixmaps() + "/splash.xpm");
+		app.setSplashScreen(splash);
+	#endif
+	Global gl;
+	Global::pConfig()->loadConfig();
+	NWindow* mainWin = new MainWindow();
+	app.setMainWindow(mainWin);
+	app.run();
+	return EXIT_SUCCESS;
+	#if 0
+		Song song;
+		song.load("/home/natti/lastfuture.picknick.psy");
+	#endif
 }

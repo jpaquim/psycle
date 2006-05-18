@@ -17,14 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 #include "configuration.h"
 #include "song.h"
 #include "global.h"
 #include "alsaout.h"
+#include "install_paths.hpp"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
 #include <ngrs/nfile.h>
-
 
 Configuration::Configuration()
 {
@@ -103,9 +104,9 @@ void Configuration::setSkinDefaults( )
   _outputDriverIndex = 0;
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
-  iconPath   = "";
+  iconPath = xpsycle::paths::pixmaps() + "/";
   pluginPath = "~/xpsycle/plugins/";
-  prsPath    = "~/.xpsycle/prs/";
+  prsPath = xpsycle::paths::presets() + "/";
 
   mv_wirewidth = 1;
   mv_triangle_size = 22;
