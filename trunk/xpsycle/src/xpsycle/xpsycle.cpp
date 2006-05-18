@@ -48,12 +48,15 @@ int main(int argc, char *argv[])
 	#if !defined XPSYCLE__CONFIGURATION
 		std::cout << "xpsycle: warning: built without configuration" << std::end;
 	#else
+		// bohan.. broken. how to get path to installed pixmaps? is the splash part of the user-configured skin?
+		#if 0
 		NSplashScreen* splash = new NSplashScreen();
 		#if !defined NDEBUG
 			std::cout << xpsycle::paths::pixmaps() << "/splash.xpm" << std::endl;
 		#endif
 		splash->loadImageFromFile(xpsycle::paths::pixmaps() + "/splash.xpm");
 		app.setSplashScreen(splash);
+		#endif
 	#endif
 	Global gl;
 	Global::pConfig()->loadConfig();
