@@ -342,9 +342,9 @@ void NTestWindow::testMemo( )
 //  memo->setReadOnly(true);
 
      try {
-       memo->loadFromFile("/home/natti/ngrs3/src/ngrs/nmemo.cpp");
+       //memo->loadFromFile("/home/natti/ngrs3/src/ngrs/nmemo.cpp");
      } catch (const char* e) {
-       memo->setText("sajdslka dsalkj \n dshkjhdsa ");
+       //memo->setText("sajdslka dsalkj \n dshkjhdsa ");
      }
 
 }

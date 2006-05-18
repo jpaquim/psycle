@@ -29,7 +29,8 @@
 class NFrameBorder : public NBorder
 {
 public:
-    NFrameBorder();
+   NFrameBorder();
+   NFrameBorder(bool oval, int arcWidth, int arcHeight);
 
     ~NFrameBorder();
 

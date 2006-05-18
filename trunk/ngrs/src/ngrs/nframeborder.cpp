@@ -31,6 +31,15 @@ NFrameBorder::NFrameBorder()
   oval_ = false;
 }
 
+NFrameBorder::NFrameBorder( bool oval, int arcWidth, int arcHeight )
+{
+  setSpacing(NSize(1,1,1,1));
+  lcount_ = 1;
+  dx_ = 2; dy_ = 2;
+  arcWidth_  = arcWidth;
+  arcHeight_ = arcHeight;
+  oval_ = oval;
+}
 
 NFrameBorder::~NFrameBorder()
 {
@@ -99,5 +108,7 @@ NFrameBorder * NFrameBorder::clone( ) const
 {
   return new NFrameBorder(*this);
 }
+
+
 
 

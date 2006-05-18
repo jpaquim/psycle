@@ -111,6 +111,7 @@ class NMemo : public NTextBase
 
        void loadFromFile(const std::string & fileName);
 
+       NRect selection() const;
 
        virtual int preferredWidth() const;
        virtual int preferredHeight() const;
@@ -123,6 +124,7 @@ class NMemo : public NTextBase
       bool wordWrap_;
       bool readOnly_;
       int xupdownpos;
+      NRect selection_;
 
       std::vector<Line>::iterator lineIndexItr;
       std::vector<Line> lines;

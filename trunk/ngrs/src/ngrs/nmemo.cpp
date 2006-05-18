@@ -209,6 +209,10 @@ void NMemo::TextArea::loadFromFile(const std::string & fileName) {
 
 }
 
+NRect NMemo::TextArea::selection( ) const
+{
+  return selection_;
+}
 
 void NMemo::TextArea::clear( )
 {
@@ -406,7 +410,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
     break;
     case XK_Return: {
        insertLine(line.deleteFromPos());
-       xupdownpos = line.screenPos().x();
+       xupdownpos = 0;
        repaint();
     }
     break;
@@ -787,5 +791,3 @@ NRect NMemo::TextArea::Line::repaintLineArea( ) const
 
   return NRect(left_,top_,right_ - left_,bottom_ - top_);
 }
-
-
