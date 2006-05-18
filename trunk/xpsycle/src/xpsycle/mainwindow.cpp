@@ -57,28 +57,28 @@ MainWindow::~MainWindow()
 
 void MainWindow::initMenu( )
 {
-   menuBar_ = new NMenuBar();
-   pane()->add(menuBar_);
+  menuBar_ = new NMenuBar();
+  pane()->add(menuBar_);
 
-   // Creates the file menu
-   fileMenu_ = new NMenu("File");
-     fileMenu_->add(new NMenuItem("New"))->click.connect(this,&MainWindow::onFileNew);
-     fileMenu_->add(new NMenuItem("Open"))->click.connect(this,&MainWindow::onFileOpen);
-     fileMenu_->add(new NMenuItem("Import Module"));
-     fileMenu_->add(new NMenuItem("Save"));
-     fileMenu_->add(new NMenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
-     fileMenu_->add(new NMenuItem("Render as Wav"));
-     fileMenu_->add(new NMenuSeperator());
-     fileMenu_->add(new NMenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
-     fileMenu_->add(new NMenuSeperator());
-     fileMenu_->add(new NMenuItem("Song properties"));
-     fileMenu_->add(new NMenuItem("revert to saved"));
-     fileMenu_->add(new NMenuItem("recent files"));
-     fileMenu_->add(new NMenuItem("exit"));
-   menuBar_->add(fileMenu_);
+  // Creates the file menu
+  fileMenu_ = new NMenu("File");
+    fileMenu_->add(new NMenuItem("New",Global::pConfig()->newfile()))->click.connect(this,&MainWindow::onFileNew);
+    fileMenu_->add(new NMenuItem("Open"))->click.connect(this,&MainWindow::onFileOpen);
+    fileMenu_->add(new NMenuItem("Import Module"));
+    fileMenu_->add(new NMenuItem("Save"));
+    fileMenu_->add(new NMenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
+    fileMenu_->add(new NMenuItem("Render as Wav"));
+    fileMenu_->add(new NMenuSeperator());
+    fileMenu_->add(new NMenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
+    fileMenu_->add(new NMenuSeperator());
+    fileMenu_->add(new NMenuItem("Song properties"));
+    fileMenu_->add(new NMenuItem("revert to saved"));
+    fileMenu_->add(new NMenuItem("recent files"));
+    fileMenu_->add(new NMenuItem("exit"));
+  menuBar_->add(fileMenu_);
 
-   // Creates the edit menu
-   editMenu_ = new NMenu("Edit");
+  // Creates the edit menu
+  editMenu_ = new NMenu("Edit");
       editMenu_->add(new NMenuItem("Undo"));
       editMenu_->add(new NMenuItem("Redo"));
       editMenu_->add(new NMenuItem("Pattern Cut"));
@@ -204,16 +204,16 @@ void MainWindow::initBars( )
 void MainWindow::initToolBar( )
 {
   toolBar1_ = new NToolBar();
-
   toolBarPanel_->add(toolBar1_);
-    NImage* img;
-    img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->newfile()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "new.xpm");
-    img->setPreferredSize(25,25);
-    NButton* newBtn = new NButton(img);
+
+  NImage* img;
+
+  // creates the newfile button
+  img = new NImage(Global::pConfig()->newfile());
+  img->setPreferredSize(25,25);
+  NButton* newBtn = new NButton(img);
      newBtn->setHint("New song");
-    toolBar1_->add(newBtn)->clicked.connect(this,&MainWindow::onFileNew);;
+  toolBar1_->add(newBtn)->clicked.connect(this,&MainWindow::onFileNew);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->open()); else
