@@ -11,19 +11,19 @@
 
 <!-- plugin configuration -->
 
-<path id='plugindir' src='' /> <!-- todo [bohan] gotta check the plugin loading code to rely on LD_LIBRARY_PATH -->
+<path id='plugindir' src='@XPSYCLE__INSTALL_PATHS__PLUGINS@/' />
 <path id='prsdir' src='@XPSYCLE__INSTALL_PATHS__PRESETS@/' />
 
 <!-- gui configuration -->
 
 <path id='icondir' src='@XPSYCLE__INSTALL_PATHS__PIXMAPS@/' />
 <vcskin id = 'seqbar'>
-  <font name = 'Suse sans' size = '8' color = '100:100:100' />
+  <font name = 'Helvetica' size = '8' color = '100:100:100' />
 </vcskin>
 
 <vcskin id ='playbar' >
 	<bgcolor r='200' g='200' b='200' />
-	<font name = 'Suse sans' size = '8' color = '100:100:100' />
+	<font name = 'Helvetica' size = '8' color = '100:100:100' />
 </vcskin>
 
 <!-- keyHandler configuration -->
