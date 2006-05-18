@@ -310,9 +310,9 @@ const char * hbar_xpm[] = {
 /* XPM */
 const char * vknob_xpm[] = {
 "11 20 5 1",
-".	c None",
-"+	c #CECECE",
-"@	c #CECECD",
+"@	c None",
+".	c #CECECE",
+"+	c #CECECD",
 "#	c #DEDEDE",
 "$	c #CACACA",
 ".+@+.+@+.+@",
@@ -405,21 +405,19 @@ NSkin NConfig::skin( const std::string & identifier )
   if (identifier == "tabnone") {
   } else
   if (identifier == "sbar_vsl") {
-    NBitmap bmp;
+  /*  NBitmap bmp;
     bmp.createFromXpmData(vknob_xpm);
-    skin.setBitmap(bmp,2);
-    skin.setBorder(NFrameBorder());
-    skin.setBackground(NColor(230,230,230));
-    skin.useParentBackground(false);
+    skin.setBitmap(bmp,2);*/
+    skin.setBorder(NFrameBorder(true,4,4));
+    skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(220,220,220),2,nHorizontal,90,4,4);
     skin.setTransparent(false);
   } else
   if (identifier == "sbar_hsl") {
-    NBitmap bmp;
+    /*NBitmap bmp;
     bmp.createFromXpmData(hbar_xpm);
-    skin.setBitmap(bmp,2);
-    skin.setBorder(NFrameBorder());
-    skin.setBackground(NColor(230,230,230));
-    skin.useParentBackground(false);
+    skin.setBitmap(bmp,2);*/
+    skin.setBorder(NFrameBorder(true,4,4));
+    skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(220,220,220),2,nVertical,90,4,4);
     skin.setTransparent(false);
   }
   return skin;
