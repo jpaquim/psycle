@@ -41,7 +41,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			{
 				std::ostringstream s;
-				s << std::hex << Global::_pSong->FindBusFromIndex(thisMac) << ": " << pMachine->_editName << "  Properties";
+				s	<< std::hex << std::setfill('0') << std::setw(2)
+					<< Global::_pSong->FindBusFromIndex(thisMac) << ": " << pMachine->_editName << "  Properties";
 				SetWindowText(s.str().c_str());
 			}
 

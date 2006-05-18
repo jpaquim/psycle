@@ -108,8 +108,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				);
 			
 			// center master machine
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->SetPosX((pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2);
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->SetPosY((pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2);
 			
 			pFrame->UpdateWindow();
 			

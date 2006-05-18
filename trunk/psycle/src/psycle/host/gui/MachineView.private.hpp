@@ -121,17 +121,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						switch (tmac->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							oriX = tmac->_x+(MachineCoords.sGenerator.width/2);
-							oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
+							oriX = tmac->GetPosX()+(MachineCoords.sGenerator.width/2);
+							oriY = tmac->GetPosY()+(MachineCoords.sGenerator.height/2);
 							break;
 						case MACHMODE_FX:
-							oriX = tmac->_x+(MachineCoords.sEffect.width/2);
-							oriY = tmac->_y+(MachineCoords.sEffect.height/2);
+							oriX = tmac->GetPosX()+(MachineCoords.sEffect.width/2);
+							oriY = tmac->GetPosY()+(MachineCoords.sEffect.height/2);
 							break;
 
 						case MACHMODE_MASTER:
-							oriX = tmac->_x+(MachineCoords.sMaster.width/2);
-							oriY = tmac->_y+(MachineCoords.sMaster.height/2);
+							oriX = tmac->GetPosX()+(MachineCoords.sMaster.width/2);
+							oriY = tmac->GetPosY()+(MachineCoords.sMaster.height/2);
 							break;
 						}
 
@@ -147,17 +147,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									switch (pout->_mode)
 									{
 									case MACHMODE_GENERATOR:
-										desX = pout->_x+(MachineCoords.sGenerator.width/2);
-										desY = pout->_y+(MachineCoords.sGenerator.height/2);
+										desX = pout->GetPosX()+(MachineCoords.sGenerator.width/2);
+										desY = pout->GetPosY()+(MachineCoords.sGenerator.height/2);
 										break;
 									case MACHMODE_FX:
-										desX = pout->_x+(MachineCoords.sEffect.width/2);
-										desY = pout->_y+(MachineCoords.sEffect.height/2);
+										desX = pout->GetPosX()+(MachineCoords.sEffect.width/2);
+										desY = pout->GetPosY()+(MachineCoords.sEffect.height/2);
 										break;
 
 									case MACHMODE_MASTER:
-										desX = pout->_x+(MachineCoords.sMaster.width/2);
-										desY = pout->_y+(MachineCoords.sMaster.height/2);
+										desX = pout->GetPosX()+(MachineCoords.sMaster.width/2);
+										desY = pout->GetPosY()+(MachineCoords.sMaster.height/2);
 										break;
 									}
 								}
@@ -311,17 +311,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						switch (tmac->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							oriX = tmac->_x+(MachineCoords.sGenerator.width/2);
-							oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
+							oriX = tmac->GetPosX()+(MachineCoords.sGenerator.width/2);
+							oriY = tmac->GetPosY()+(MachineCoords.sGenerator.height/2);
 							break;
 						case MACHMODE_FX:
-							oriX = tmac->_x+(MachineCoords.sEffect.width/2);
-							oriY = tmac->_y+(MachineCoords.sEffect.height/2);
+							oriX = tmac->GetPosX()+(MachineCoords.sEffect.width/2);
+							oriY = tmac->GetPosY()+(MachineCoords.sEffect.height/2);
 							break;
 
 						case MACHMODE_MASTER:
-							oriX = tmac->_x+(MachineCoords.sMaster.width/2);
-							oriY = tmac->_y+(MachineCoords.sMaster.height/2);
+							oriX = tmac->GetPosX()+(MachineCoords.sMaster.width/2);
+							oriY = tmac->GetPosY()+(MachineCoords.sMaster.height/2);
 							break;
 						}
 
@@ -337,17 +337,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									switch (pout->_mode)
 									{
 									case MACHMODE_GENERATOR:
-										desX = pout->_x+(MachineCoords.sGenerator.width/2);
-										desY = pout->_y+(MachineCoords.sGenerator.height/2);
+										desX = pout->GetPosX()+(MachineCoords.sGenerator.width/2);
+										desY = pout->GetPosY()+(MachineCoords.sGenerator.height/2);
 										break;
 									case MACHMODE_FX:
-										desX = pout->_x+(MachineCoords.sEffect.width/2);
-										desY = pout->_y+(MachineCoords.sEffect.height/2);
+										desX = pout->GetPosX()+(MachineCoords.sEffect.width/2);
+										desY = pout->GetPosY()+(MachineCoords.sEffect.height/2);
 										break;
 
 									case MACHMODE_MASTER:
-										desX = pout->_x+(MachineCoords.sMaster.width/2);
-										desY = pout->_y+(MachineCoords.sMaster.height/2);
+										desX = pout->GetPosX()+(MachineCoords.sMaster.width/2);
+										desY = pout->GetPosY()+(MachineCoords.sMaster.height/2);
 										break;
 									}
 								}
@@ -532,8 +532,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 
 						RECT r;
-						r.left = pMac->_x+vol+MachineCoords.dGeneratorVu.x;
-						r.top = pMac->_y+MachineCoords.dGeneratorVu.y;
+						r.left = pMac->GetPosX()+vol+MachineCoords.dGeneratorVu.x;
+						r.top = pMac->GetPosY()+MachineCoords.dGeneratorVu.y;
 						r.right = r.left + MachineCoords.dGeneratorVu.width-vol;
 						r.bottom = r.top + MachineCoords.sGeneratorVu0.height;
 						devc->FillSolidRect(&r,Global::pConfig->mv_colour);
@@ -555,8 +555,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
 								max *= MachineCoords.sGeneratorVuPeak.width;
 								TransparentBlt(devc,
-											pMac->_x+max+MachineCoords.dGeneratorVu.x, 
-											pMac->_y+MachineCoords.dGeneratorVu.y, 
+											pMac->GetPosX()+max+MachineCoords.dGeneratorVu.x, 
+											pMac->GetPosY()+MachineCoords.dGeneratorVu.y, 
 											MachineCoords.sGeneratorVuPeak.width, 
 											MachineCoords.sGeneratorVuPeak.height, 
 											&memDC, 
@@ -569,8 +569,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if (vol > 0)
 						{
 							TransparentBlt(devc,
-										pMac->_x+MachineCoords.dGeneratorVu.x, 
-										pMac->_y+MachineCoords.dGeneratorVu.y, 
+										pMac->GetPosX()+MachineCoords.dGeneratorVu.x, 
+										pMac->GetPosY()+MachineCoords.dGeneratorVu.y, 
 										vol, 
 										MachineCoords.sGeneratorVu0.height, 
 										&memDC, 
@@ -595,8 +595,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							vol = 0;
 						}
 
-						devc->BitBlt(pMac->_x+vol+MachineCoords.dGeneratorVu.x, 
-										pMac->_y+MachineCoords.dGeneratorVu.y, 
+						devc->BitBlt(pMac->GetPosX()+vol+MachineCoords.dGeneratorVu.x, 
+										pMac->GetPosY()+MachineCoords.dGeneratorVu.y, 
 										MachineCoords.dGeneratorVu.width-vol, 
 										MachineCoords.sGeneratorVu0.height, 
 										&memDC, 
@@ -610,8 +610,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							{
 								max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
 								max *= MachineCoords.sGeneratorVuPeak.width;
-								devc->BitBlt(pMac->_x+max+MachineCoords.dGeneratorVu.x, 
-											pMac->_y+MachineCoords.dGeneratorVu.y, 
+								devc->BitBlt(pMac->GetPosX()+max+MachineCoords.dGeneratorVu.x, 
+											pMac->GetPosY()+MachineCoords.dGeneratorVu.y, 
 											MachineCoords.sGeneratorVuPeak.width, 
 											MachineCoords.sGeneratorVuPeak.height, 
 											&memDC, 
@@ -623,8 +623,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 						if (vol > 0)
 						{
-							devc->BitBlt(pMac->_x+MachineCoords.dGeneratorVu.x, 
-										pMac->_y+MachineCoords.dGeneratorVu.y, 
+							devc->BitBlt(pMac->GetPosX()+MachineCoords.dGeneratorVu.x, 
+										pMac->GetPosY()+MachineCoords.dGeneratorVu.y, 
 										vol, 
 										MachineCoords.sGeneratorVu0.height, 
 										&memDC, 
@@ -660,8 +660,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 
 						RECT r;
-						r.left = pMac->_x+vol+MachineCoords.dEffectVu.x;
-						r.top = pMac->_y+MachineCoords.dEffectVu.y;
+						r.left = pMac->GetPosX()+vol+MachineCoords.dEffectVu.x;
+						r.top = pMac->GetPosY()+MachineCoords.dEffectVu.y;
 						r.right = r.left + MachineCoords.dEffectVu.width-vol;
 						r.bottom = r.top + MachineCoords.sEffectVu0.height;
 						devc->FillSolidRect(&r,Global::pConfig->mv_colour);
@@ -683,8 +683,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
 								max *= MachineCoords.sEffectVuPeak.width;
 								TransparentBlt(devc,
-											pMac->_x+max+MachineCoords.dEffectVu.x, 
-											pMac->_y+MachineCoords.dEffectVu.y, 
+											pMac->GetPosX()+max+MachineCoords.dEffectVu.x, 
+											pMac->GetPosY()+MachineCoords.dEffectVu.y, 
 											MachineCoords.sEffectVuPeak.width, 
 											MachineCoords.sEffectVuPeak.height, 
 											&memDC, 
@@ -697,8 +697,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if (vol > 0)
 						{
 							TransparentBlt(devc,
-										pMac->_x+MachineCoords.dEffectVu.x, 
-										pMac->_y+MachineCoords.dEffectVu.y, 
+										pMac->GetPosX()+MachineCoords.dEffectVu.x, 
+										pMac->GetPosY()+MachineCoords.dEffectVu.y, 
 										vol, 
 										MachineCoords.sEffectVu0.height, 
 										&memDC, 
@@ -723,8 +723,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							vol = 0;
 						}
 
-						devc->BitBlt(pMac->_x+vol+MachineCoords.dEffectVu.x, 
-										pMac->_y+MachineCoords.dEffectVu.y, 
+						devc->BitBlt(pMac->GetPosX()+vol+MachineCoords.dEffectVu.x, 
+										pMac->GetPosY()+MachineCoords.dEffectVu.y, 
 										MachineCoords.dEffectVu.width-vol, 
 										MachineCoords.sEffectVu0.height, 
 										&memDC, 
@@ -738,8 +738,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							{
 								max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
 								max *= MachineCoords.sEffectVuPeak.width;
-								devc->BitBlt(pMac->_x+max+MachineCoords.dEffectVu.x, 
-											pMac->_y+MachineCoords.dEffectVu.y, 
+								devc->BitBlt(pMac->GetPosX()+max+MachineCoords.dEffectVu.x, 
+											pMac->GetPosY()+MachineCoords.dEffectVu.y, 
 											MachineCoords.sEffectVuPeak.width, 
 											MachineCoords.sEffectVuPeak.height, 
 											&memDC, 
@@ -751,8 +751,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 						if (vol > 0)
 						{
-							devc->BitBlt(pMac->_x+MachineCoords.dEffectVu.x, 
-										pMac->_y+MachineCoords.dEffectVu.y, 
+							devc->BitBlt(pMac->GetPosX()+MachineCoords.dEffectVu.x, 
+										pMac->GetPosY()+MachineCoords.dEffectVu.y, 
 										vol, 
 										MachineCoords.sEffectVu0.height, 
 										&memDC, 
@@ -785,15 +785,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				switch (mac->_mode)
 				{
 				case MACHMODE_GENERATOR:
-					r.left = mac->_x;
-					r.top = mac->_y;
+					r.left = mac->GetPosX();
+					r.top = mac->GetPosY();
 					r.right = r.left + MachineCoords.sGenerator.width;
 					r.bottom = r.top + MachineCoords.sGenerator.height;
 					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
 					break;
 				case MACHMODE_FX:
-					r.left = mac->_x;
-					r.top = mac->_y;
+					r.left = mac->GetPosX();
+					r.top = mac->GetPosY();
 					r.right = r.left + MachineCoords.sEffect.width;
 					r.bottom = r.top + MachineCoords.sEffect.height;
 					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
@@ -910,8 +910,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return;
 			}
 
-			int x=mac->_x;
-			int y=mac->_y;
+			int x=mac->GetPosX();
+			int y=mac->GetPosY();
 
 			CDC memDC;
 			memDC.CreateCompatibleDC(devc);
@@ -990,7 +990,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
 							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, s.str().c_str());
 						}
 						else
@@ -1067,7 +1067,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, s.str().c_str());
 						}
 						else
@@ -1149,7 +1149,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
 							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, s.str().c_str());
 						}
 						else
@@ -1213,7 +1213,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, s.str().c_str());
 						}
 						else
@@ -1267,23 +1267,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				Machine* pMac = Global::_pSong->_pMachine[c];
 				if (pMac)
 				{
-					int x1 = pMac->_x;
-					int y1 = pMac->_y;
+					int x1 = pMac->GetPosX();
+					int y1 = pMac->GetPosY();
 					int x2=0,y2=0;
 					switch (pMac->_mode)
 					{
 					case MACHMODE_GENERATOR:
-						x2 = pMac->_x+MachineCoords.sGenerator.width;
-						y2 = pMac->_y+MachineCoords.sGenerator.height;
+						x2 = pMac->GetPosX()+MachineCoords.sGenerator.width;
+						y2 = pMac->GetPosY()+MachineCoords.sGenerator.height;
 						break;
 					case MACHMODE_FX:
-						x2 = pMac->_x+MachineCoords.sEffect.width;
-						y2 = pMac->_y+MachineCoords.sEffect.height;
+						x2 = pMac->GetPosX()+MachineCoords.sEffect.width;
+						y2 = pMac->GetPosY()+MachineCoords.sEffect.height;
 						break;
 
 					case MACHMODE_MASTER:
-						x2 = pMac->_x+MachineCoords.sMaster.width;
-						y2 = pMac->_y+MachineCoords.sMaster.height;
+						x2 = pMac->GetPosX()+MachineCoords.sMaster.width;
+						y2 = pMac->GetPosY()+MachineCoords.sMaster.height;
 						break;
 					}
 					

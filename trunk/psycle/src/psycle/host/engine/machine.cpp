@@ -678,12 +678,15 @@ namespace psycle
 				break;
 			}
 			pMachine->Init();
+			int temp;
 			pMachine->_type = type;
 			pFile->Read(pMachine->_bypass);
 			pFile->Read(pMachine->_mute);
 			pFile->Read(pMachine->_panning);
-			pFile->Read(pMachine->_x);
-			pFile->Read(pMachine->_y);
+			pFile->Read(temp);
+			pMachine->SetPosX(temp);
+			pFile->Read(temp);
+			pMachine->SetPosY(temp);
 			pFile->Read(pMachine->_connectedInputs);
 			pFile->Read(pMachine->_connectedOutputs);
 			for(int i = 0; i < MAX_CONNECTIONS; i++)
@@ -718,8 +721,8 @@ namespace psycle
 				p->_bypass=pMachine->_bypass;
 				p->_mute=pMachine->_mute;
 				p->_panning=pMachine->_panning;
-				p->_x=pMachine->_x;
-				p->_y=pMachine->_y;
+				p->SetPosX(pMachine->GetPosX());
+				p->SetPosY(pMachine->GetPosY());
 				p->_connectedInputs=pMachine->_connectedInputs;							// number of Incoming connections
 				p->_connectedOutputs=pMachine->_connectedOutputs;						// number of Outgoing connections
 				for(int i = 0; i < MAX_CONNECTIONS; i++)
@@ -739,26 +742,26 @@ namespace psycle
 			if(index < MAX_BUSES)
 			{
 				pMachine->_mode = MACHMODE_GENERATOR;
-				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+				if(pMachine->GetPosX() > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
+					pMachine->SetPosX(Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width);
+				if(pMachine->GetPosY() > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
+					pMachine->SetPosY(Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height);
 			}
 			else if (index < MAX_BUSES*2)
 			{
 				pMachine->_mode = MACHMODE_FX;
-				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+				if(pMachine->GetPosX() > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
+					pMachine->SetPosX(Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width);
+				if(pMachine->GetPosY() > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
+					pMachine->SetPosY(Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height);
 			}
 			else
 			{
 				pMachine->_mode = MACHMODE_MASTER;
-				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+				if(pMachine->GetPosX() > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
+					pMachine->SetPosX(Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width);
+				if(pMachine->GetPosY() > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
+					pMachine->SetPosY(Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height);
 			}
 			pMachine->SetPan(pMachine->_panning);
 			return pMachine;
@@ -950,7 +953,7 @@ namespace psycle
 			{
 				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s", macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName.c_str());
+					sprintf(parVal,"%X -%s", macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->GetEditName().c_str());
 				}
 				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
@@ -1692,7 +1695,7 @@ namespace psycle
 			else if(numparam<prms::prm0)
 			{
 				if ((macOutput[numparam-prms::mac0] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]] != NULL))
-					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]]->_editName.c_str());
+					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]]->GetEditName().c_str());
 				else if (macOutput[numparam-prms::mac0] != -1)
 					sprintf(parVal,"%X (none)",macOutput[numparam-prms::mac0]);
 				else 

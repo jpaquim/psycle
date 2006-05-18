@@ -972,8 +972,8 @@ namespace psycle
 					if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
 					{
 						CPoint point;
-						point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
-						point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
+						point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->GetPosX();
+						point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->GetPosY();
 						pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);//, Global::_pSong->seqBus);
 					}
 				}

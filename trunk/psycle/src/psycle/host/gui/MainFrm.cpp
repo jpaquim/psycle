@@ -831,7 +831,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{	
 						{
 							std::ostringstream s;
-							s << std::hex << b << ": " << _pSong->_pMachine[b]->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << b << ": " << _pSong->_pMachine[b]->_editName;
 							cb->AddString(s.str().c_str());
 						}
 						cb->SetItemData(cb->GetCount()-1,b);
@@ -1440,10 +1440,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								this);
 							((CFrameMachine*)m_pWndMac[tmac])->Generate();
 							((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
-							char winname[32];
-							sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
-								,ma->_editName);
-							((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
+							std::ostringstream winname;
+							winname<<std::setfill('0') << std::setw(2) << std::hex;
+							winname << ((CFrameMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->GetEditName();
+							((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
 							isguiopen[tmac] = true;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
@@ -1461,10 +1461,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								this);
 							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate();
 							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
-							char winname[32];
-							sprintf(winname,"%.2X : %s",((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex
-													,ma->_editName);
-							((CFrameMixerMachine*)m_pWndMac[tmac])->SetWindowText(winname);
+							std::ostringstream winname;
+							winname<<std::setfill('0') << std::setw(2) << std::hex;
+							winname << ((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->GetEditName();
+							((CFrameMixerMachine*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
 							isguiopen[tmac] = true;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
@@ -1482,10 +1482,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								this);
 							((CFrameLFOMachine*)m_pWndMac[tmac])->Generate();
 							((CFrameLFOMachine*)m_pWndMac[tmac])->SelectMachine(ma);
-							char winname[32];
-							sprintf(winname,"%.2X : %s",((CFrameLFOMachine*)m_pWndMac[tmac])->MachineIndex
-													,ma->_editName);
-							((CFrameLFOMachine*)m_pWndMac[tmac])->SetWindowText(winname);
+							std::ostringstream winname;
+							winname<<std::setfill('0') << std::setw(2) << std::hex;
+							winname << ((CFrameLFOMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->GetEditName();
+							((CFrameLFOMachine*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
 							isguiopen[tmac] = true;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}

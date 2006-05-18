@@ -405,8 +405,8 @@ namespace psycle
 							break;
 						}
 
-						pMac[i]->_x = x;
-						pMac[i]->_y = y;
+						pMac[i]->SetPosX(x);
+						pMac[i]->SetPosY(y);
 					}
 				}
 

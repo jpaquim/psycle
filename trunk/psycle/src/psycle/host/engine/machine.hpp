@@ -464,6 +464,16 @@ namespace psycle
 					virtual int GetParamValue(int numparam) { return 0; };
 					virtual bool SetParameter(int numparam, int value) { return false;}; 
 			///\}
+
+			///\name more misplaced gui stuff
+			///\{
+				public:
+					virtual int  GetPosX() { return _x; };
+					virtual void SetPosX(int x) {_x = x;};
+					virtual int  GetPosY() { return _y; };
+					virtual void SetPosY(int y) {_y = y;};
+
+			///\}
 		protected:
 			void SetVolumeCounter(int numSamples);
 			//void SetVolumeCounterAccurate(int numSamples);

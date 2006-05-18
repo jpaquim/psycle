@@ -168,8 +168,8 @@ namespace psycle
 				else machine->Init();
 			}
 
-			machine->_x = x;
-			machine->_y = y;
+			machine->SetPosX(x);
+			machine->SetPosY(y);
 
 			// Finally, activate the machine
 			_pMachine[index] = machine;
@@ -1880,8 +1880,8 @@ namespace psycle
 				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
 				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
 			}
-			x=_pMachine[dst]->_x+32;
-			y=_pMachine[dst]->_y+ys+8;
+			x=_pMachine[dst]->GetPosX()+32;
+			y=_pMachine[dst]->GetPosY()+ys+8;
 
 			bool bCovered = TRUE;
 			while (bCovered)
@@ -1893,8 +1893,8 @@ namespace psycle
 					{
 						if (_pMachine[i])
 						{
-							if ((abs(_pMachine[i]->_x - x) < 32) &&
-								(abs(_pMachine[i]->_y - y) < 32))
+							if ((abs(_pMachine[i]->GetPosX() - x) < 32) &&
+								(abs(_pMachine[i]->GetPosY() - y) < 32))
 							{
 								bCovered = TRUE;
 								i = MAX_MACHINES;
@@ -1905,8 +1905,8 @@ namespace psycle
 					}
 				}
 			}
-			_pMachine[dst]->_x = x;
-			_pMachine[dst]->_y = y;
+			_pMachine[dst]->SetPosX(x);
+			_pMachine[dst]->SetPosY(y);
 
 			// delete all connections
 
