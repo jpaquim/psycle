@@ -22,7 +22,6 @@
 #include "mainwindow.h"
 #include "song.h"
 #include "plugin.h"
-#include "install_paths.hpp"
 #include <ngrs/nsplashscreen.h>
 #include <ngrs/napp.h>
 #include <ngrs/nfile.h>
