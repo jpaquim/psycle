@@ -36,19 +36,29 @@ NMenuItem::NMenuItem( const std::string & text )
   captionLbl_->setText(text);
 }
 
+NMenuItem::NMenuItem( const std::string & text, const NBitmap & icon )
+{
+  init();
+  captionLbl_->setText(text);
+  iconImg_->setBitmap(icon);
+}
+
 void NMenuItem::init( )
 {
   setLayout(NAlignLayout());
 
   iconImg_ = new NImage();
-  iconImg_->setPreferredSize(20,20);
+    iconImg_->setPreferredSize(25,25);
+    iconImg_->setVAlign(nAlCenter);
+    iconImg_->setHAlign(nAlCenter);
   NCustomMenuItem::add(iconImg_, nAlLeft);
 
   subMenuImg_ = new NImage();
-  subMenuImg_->setPreferredSize(20,20);
+    subMenuImg_->setPreferredSize(25,25);
   NCustomMenuItem::add(subMenuImg_, nAlRight);
 
   captionLbl_ = new NLabel();
+    captionLbl_->setVAlign(nAlCenter);
   NCustomMenuItem::add(captionLbl_, nAlClient);
 
 }
@@ -56,6 +66,8 @@ void NMenuItem::init( )
 NMenuItem::~NMenuItem()
 {
 }
+
+
 
 
 

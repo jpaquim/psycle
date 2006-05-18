@@ -43,13 +43,14 @@ void NCheckMenuItem::init( )
   setLayout(NAlignLayout());
 
   checkBox_ = new NCheckBox();
-     checkBox_->setPreferredSize(20,20);
+     checkBox_->setPreferredSize(25,25);
      checkBox_->setCheck(true);
   add(checkBox_, nAlLeft);
 
   captionLbl_ = new NLabel();
   add(captionLbl_, nAlClient);
 }
+
 
 
 NCheckMenuItem::~NCheckMenuItem()

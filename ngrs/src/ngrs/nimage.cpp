@@ -27,12 +27,22 @@ NImage::NImage()
 {
   setEvents(false);
   halign_ = nAlLeft;
+  valign_ = nAlLeft;
   pBitmap_ = 0;
 }
 
-NImage::NImage( std::string fileName ) : NPanel()
+NImage::NImage( const std::string & fileName ) : NPanel()
 {
   bitmap24bpp_ = NApp::filter.at(0)->loadFromFile(fileName);
+  setEvents(false);
+  halign_ = nAlLeft;
+  valign_ = nAlLeft;
+  pBitmap_ = 0;
+}
+
+NImage::NImage( const NBitmap & bitmap )
+{
+  bitmap24bpp_ = bitmap;
   setEvents(false);
   halign_ = nAlLeft;
   valign_ = nAlLeft;
@@ -138,6 +148,8 @@ void NImage::setSharedBitmap( NBitmap * bitmap )
 {
   pBitmap_ = bitmap;
 }
+
+
 
 
 

@@ -31,7 +31,8 @@ class NImage : public NPanel
 {
 public:
     NImage();
-    NImage(std::string fileName);
+    NImage(const std::string & fileName);
+    NImage(const NBitmap & bitmap);
 
     ~NImage();
 
