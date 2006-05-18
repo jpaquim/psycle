@@ -97,15 +97,15 @@ void Configuration::setSkinDefaults( )
   machineGUITitleColor.setHCOLORREF(0x00000000);
   machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
 
-  _numOutputDrivers = 4;
+  _numOutputDrivers = 1;
   _ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
   _ppOutputDrivers[0] = new AlsaOut();
   _outputDriverIndex = 0;
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
-  iconPath = "pixmaps/";
-  pluginPath = "~/xpsycle/plugins/";
-  prsPath =  "prs/";
+  iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
+  pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
+  prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
 
   mv_wirewidth = 1;
   mv_triangle_size = 22;
@@ -123,6 +123,7 @@ void Configuration::loadConfig( )
   pluginPath = NFile::replaceTilde(NApp::config()->findPath("plugindir"));
   prsPath    = NFile::replaceTilde(NApp::config()->findPath("prsdir"));
   hlpPath    = NFile::replaceTilde(NApp::config()->findPath("hlpdir"));
+
 }
 
 void Configuration::onConfigTagParse(const std::string & tagName )
