@@ -1221,15 +1221,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					Global::pConfig->SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 				}
 			}
+
 			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
 			{
 				// Stopping wavepreview if not stopped.
-				if(_pSong->PW_Stage)
+				_pSong->wavprev.Stop();
+	/*			if(_pSong->PW_Stage)
 				{
 					_pSong->PW_Stage=0;
 					_pSong->IsInvalided(true);
 					Sleep(LOCK_LATENCY);
 				}
+	*/
 
 				//Delete it.
 				_pSong->DeleteLayer(PREV_WAV_INS);

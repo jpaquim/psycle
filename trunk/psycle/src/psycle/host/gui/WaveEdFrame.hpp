@@ -11,7 +11,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			CWaveEdFrame();
-			CWaveEdFrame(Song* _sng,CMainFrame* pframe);
+			CWaveEdFrame(Song* _sng, CMainFrame* pframe);
 			virtual ~CWaveEdFrame() throw();
 		protected: 
 			DECLARE_DYNAMIC(CWaveEdFrame)
@@ -32,8 +32,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//}}AFX_VIRTUAL	
 		private:
 			void AdjustStatusBar(int ins);
+			void PlayFrom(unsigned long startpos);
 			CStatusBar statusbar;
+			CToolBar ToolBar;
+
 			CWaveEdChildView wavview;
+
+			int wsInstrument;
+			bool bPlaying;
 		// Implementation
 		protected:
 			// Generated message map functions
@@ -41,9 +47,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnClose();
 			afx_msg void OnUpdateStatusBar(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateSelection(CCmdUI *pCmdUI);
+			afx_msg void OnUpdatePlayButtons(CCmdUI *pCmdUI);
+			afx_msg void OnUpdateStopButton(CCmdUI *pCmdUI);
+			afx_msg void OnUpdateReleaseButton(CCmdUI *pCmdUI);
+			afx_msg void OnUpdateFFandRWButtons(CCmdUI* pCmdUI);
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+			afx_msg void OnDestroy();
 			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 			afx_msg void OnEditCut();
+			afx_msg void OnPlay();
+			afx_msg void OnRelease();
+			afx_msg void OnPlayFromStart();
+			afx_msg void OnStop();
+			afx_msg void OnFastForward();
+			afx_msg void OnRewind();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};

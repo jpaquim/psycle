@@ -472,11 +472,14 @@ namespace psycle
 					{
 						if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);
 					}
-					if(song().PW_Stage == 1)
+
+/*					if(song().PW_Stage == 1)
 					{
 						// Mixing preview WAV
 						song().PW_Work(song()._pMachine[MASTER_INDEX]->_pSamplesL,song()._pMachine[MASTER_INDEX]->_pSamplesR, amount);
 					}
+*/					song().DoPreviews( amount );
+
 					// Inject Midi input data
 					if(!CMidiInput::Instance()->InjectMIDI( amount ))
 					{
