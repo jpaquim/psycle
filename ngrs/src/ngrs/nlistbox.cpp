@@ -60,7 +60,7 @@ extern "C" void destroyListBox(NObject* p) {
 
 void NListBox::add( NCustomItem * component , bool align)
 {
-  listBoxPane_->add(component);
+  listBoxPane_->add(component,nAlCenter);
   component->mousePress.connect(this,&NListBox::onItemPress);
   component->setTransparent(true);
   if (align) listBoxPane_->resize();

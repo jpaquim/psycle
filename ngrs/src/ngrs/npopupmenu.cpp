@@ -46,7 +46,7 @@ void NPopupMenu::setVisible( bool on )
 
 void NPopupMenu::add( NCustomMenuItem * item )
 {
-  pane()->add(item, nAlClient);
+  pane()->add(item, nAlCenter);
   item->addMessageListener(this);
 }
 
