@@ -1385,8 +1385,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						// delete machine if it already exists
 						if (Global::_pSong->_pMachine[fb])
 						{
-							x = Global::_pSong->_pMachine[fb]->_x;
-							y = Global::_pSong->_pMachine[fb]->_y;
+							x = Global::_pSong->_pMachine[fb]->GetPosX();
+							y = Global::_pSong->_pMachine[fb]->GetPosY();
 							pParentMain->CloseMacGui(fb);
 							Global::_pSong->DestroyMachine(fb);
 						}
@@ -1399,8 +1399,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						// delete machine if it already exists
 						if (Global::_pSong->_pMachine[fb])
 						{
-							x = Global::_pSong->_pMachine[fb]->_x;
-							y = Global::_pSong->_pMachine[fb]->_y;
+							x = Global::_pSong->_pMachine[fb]->GetPosX();
+							y = Global::_pSong->_pMachine[fb]->GetPosY();
 							pParentMain->CloseMacGui(fb);
 							Global::_pSong->DestroyMachine(fb);
 						}
@@ -1425,8 +1425,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							if (Global::_pSong->_pMachine[i])
 							{
-								if ((abs(Global::_pSong->_pMachine[i]->_x - x) < 32) &&
-									(abs(Global::_pSong->_pMachine[i]->_y - y) < 32))
+								if ((abs(Global::_pSong->_pMachine[i]->GetPosX() - x) < 32) &&
+									(abs(Global::_pSong->_pMachine[i]->GetPosY() - y) < 32))
 								{
 									bCovered = true;
 									i = MAX_MACHINES;

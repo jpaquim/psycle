@@ -36,15 +36,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								break;
 								*/								
 								case MACHMODE_FX:
-									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
-									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+									wireDX = _pSong->_pMachine[wiredest]->GetPosX()+(MachineCoords.sEffect.width/2);
+									wireDY = _pSong->_pMachine[wiredest]->GetPosY()+(MachineCoords.sEffect.height/2);
 									wireSX = point.x;
 									wireSY = point.y;
 									break;
 
 								case MACHMODE_MASTER:
-									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
-									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+									wireDX = _pSong->_pMachine[wiredest]->GetPosX()+(MachineCoords.sMaster.width/2);
+									wireDY = _pSong->_pMachine[wiredest]->GetPosY()+(MachineCoords.sMaster.height/2);
 									wireSX = point.x;
 									wireSY = point.y;
 									break;
@@ -66,14 +66,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						switch (_pSong->_pMachine[wiresource]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->GetPosY()+(MachineCoords.sGenerator.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->GetPosX()+(MachineCoords.sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->GetPosX()+(MachineCoords.sEffect.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->GetPosY()+(MachineCoords.sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
@@ -217,8 +217,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 						case MACHMODE_GENERATOR:
 						case MACHMODE_FX:
-							mcd_x = point.x - _pSong->_pMachine[smac]->_x;
-							mcd_y = point.y - _pSong->_pMachine[smac]->_y;
+							mcd_x = point.x - _pSong->_pMachine[smac]->GetPosX();
+							mcd_y = point.y - _pSong->_pMachine[smac]->GetPosY();
 							_pSong->seqBus = _pSong->FindBusFromIndex(smac);
 							pParentMain->UpdateComboGen();
 							Repaint();	
@@ -241,15 +241,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								break;
 */								
 							case MACHMODE_FX:
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+								wireDX = _pSong->_pMachine[wiredest]->GetPosX()+(MachineCoords.sEffect.width/2);
+								wireDY = _pSong->_pMachine[wiredest]->GetPosY()+(MachineCoords.sEffect.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
 
 							case MACHMODE_MASTER:
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+								wireDX = _pSong->_pMachine[wiredest]->GetPosX()+(MachineCoords.sMaster.width/2);
+								wireDY = _pSong->_pMachine[wiredest]->GetPosY()+(MachineCoords.sMaster.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
@@ -271,14 +271,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						switch (_pSong->_pMachine[wiresource]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->GetPosX()+(MachineCoords.sGenerator.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->GetPosY()+(MachineCoords.sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->GetPosX()+(MachineCoords.sEffect.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->GetPosY()+(MachineCoords.sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
@@ -300,8 +300,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						int panning;
 						Machine* tmac=Global::_pSong->_pMachine[smac];
-						mcd_x = point.x - tmac->_x;
-						mcd_y = point.y - tmac->_y;
+						mcd_x = point.x - tmac->GetPosX();
+						mcd_y = point.y - tmac->GetPosY();
 
 						SSkinDest tmpsrc;
 						switch (tmac->_mode)
@@ -527,16 +527,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							default:
 								assert(false);ssrc=SSkinSource();break;
 						}
-						if (point.x-mcd_x < 0 ) _pSong->_pMachine[smac]->_x = 0;
+						if (point.x-mcd_x < 0 ) _pSong->_pMachine[smac]->SetPosX(0);
 						else if	(point.x-mcd_x+ssrc.width > CW) 
 						{ 
-							_pSong->_pMachine[smac]->_x = CW-ssrc.width; 
+							_pSong->_pMachine[smac]->SetPosX(CW-ssrc.width);
 						}
 
-						if (point.y-mcd_y < 0 ) _pSong->_pMachine[smac]->_y = 0; 
+						if (point.y-mcd_y < 0 ) _pSong->_pMachine[smac]->SetPosY(0); 
 						else if (point.y-mcd_y+ssrc.height > CH) 
 						{ 
-						_pSong->_pMachine[smac]->_y = CH-ssrc.height; 
+						_pSong->_pMachine[smac]->SetPosY(CH-ssrc.height); 
 						}
 						Repaint(); 
 					}
@@ -603,12 +603,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						if (smacmode == 0)
 						{
-							_pSong->_pMachine[smac]->_x = point.x-mcd_x;
-							_pSong->_pMachine[smac]->_y = point.y-mcd_y;
+							_pSong->_pMachine[smac]->SetPosX(point.x-mcd_x);
+							_pSong->_pMachine[smac]->SetPosY(point.y-mcd_y);
 
-							char buf[128];
-							sprintf(buf, "%s (%d,%d)", _pSong->_pMachine[smac]->_editName, _pSong->_pMachine[smac]->_x, _pSong->_pMachine[smac]->_y);
-							pParentMain->StatusBarText(buf);
+							std::ostringstream buf;
+							buf	<<_pSong->_pMachine[smac]->GetEditName() 
+								<< " (" 
+								<< _pSong->_pMachine[smac]->GetPosX() 
+								<< "," 
+								<< _pSong->_pMachine[smac]->GetPosY()
+								<< ")";
+							pParentMain->StatusBarText(buf.str().c_str());
 							Repaint();
 						}
 						else if ((smacmode == 1) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
@@ -617,14 +622,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							switch(_pSong->_pMachine[smac]->_mode)
 							{
 							case MACHMODE_GENERATOR:
-								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords.dGeneratorPan.x - (MachineCoords.sGeneratorPan.width/2))*128;
+								newpan = (point.x - _pSong->_pMachine[smac]->GetPosX() - MachineCoords.dGeneratorPan.x - (MachineCoords.sGeneratorPan.width/2))*128;
 								if (MachineCoords.dGeneratorPan.width)
 								{
 									newpan /= MachineCoords.dGeneratorPan.width;
 								}
 								break;
 							case MACHMODE_FX:
-								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords.dEffectPan.x - (MachineCoords.sEffectPan.width/2))*128;
+								newpan = (point.x - _pSong->_pMachine[smac]->GetPosX() - MachineCoords.dEffectPan.x - (MachineCoords.sEffectPan.width/2))*128;
 								if (MachineCoords.dEffectPan.width)
 								{
 									newpan /= MachineCoords.dEffectPan.width;

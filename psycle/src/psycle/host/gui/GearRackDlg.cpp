@@ -225,8 +225,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					Machine * mac = Global::_pSong->_pMachine[tmac];
 					if (mac)
 					{
-						int x = mac->_x;
-						int y = mac->_y;
+						int x = mac->GetPosX();
+						int y = mac->GetPosY();
 
 						// buffer all the connection info
 
@@ -526,13 +526,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				
 				// exchange positions
 				
-				int temp = tmp1->_x;
-				tmp1->_x = tmp2->_x;
-				tmp2->_x = temp;
+				int temp = tmp1->GetPosX();
+				tmp1->SetPosX(tmp2->GetPosX());
+				tmp2->SetPosX(temp);
 				
-				temp = tmp1->_y;
-				tmp1->_y = tmp2->_y;
-				tmp2->_y = temp;
+				temp = tmp1->GetPosY();
+				tmp1->SetPosY(tmp2->GetPosY());
+				tmp2->SetPosY(temp);
 				
 				// exchange all connections
 				
