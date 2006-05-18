@@ -47,8 +47,9 @@ void InfoDlg::loadFromFile( const std::string & fileName )
 {
   try {
     memo->loadFromFile(fileName);
+    setTitle(fileName);
   }
   catch (const char* e) {
-
+    setTitle("Help path wrong");
   }
 }

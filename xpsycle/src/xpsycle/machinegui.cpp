@@ -631,24 +631,3 @@ void MachineGUI::repaintVUMeter( )
 {
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
