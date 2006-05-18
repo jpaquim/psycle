@@ -44,6 +44,7 @@ void NCheckMenuItem::init( )
 
   checkBox_ = new NCheckBox();
      checkBox_->setPreferredSize(20,20);
+     checkBox_->setCheck(true);
   add(checkBox_, nAlLeft);
 
   captionLbl_ = new NLabel();
@@ -53,6 +54,12 @@ void NCheckMenuItem::init( )
 
 NCheckMenuItem::~NCheckMenuItem()
 {
+}
+
+void NCheckMenuItem::onMousePress( int x, int y, int button )
+{
+  NCustomMenuItem::onMousePress(x,y,button);
+  checkBox_->setCheck(!checkBox_->checked());
 }
 
 
