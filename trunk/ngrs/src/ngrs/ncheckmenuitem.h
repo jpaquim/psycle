@@ -39,6 +39,8 @@ public:
 
     ~NCheckMenuItem();
 
+   virtual void onMousePress(int x, int y, int button);
+
 private:
 
     NLabel* captionLbl_;
