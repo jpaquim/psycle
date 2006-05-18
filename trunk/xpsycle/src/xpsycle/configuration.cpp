@@ -106,15 +106,23 @@ void Configuration::setSkinDefaults( )
 
   #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/install_paths.defines.hpp>
-	iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/"
+	iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
 	pluginPath = ""; ///\todo [bohan] gotta check the plugin loading code to rely on LD_LIBRARY_PATH
-	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/"
+	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
   #else
 	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
 	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
 	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
   #endif
 
+  #if !defined NDEBUG
+	std::cout
+		<< "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
+		<< "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
+		<< "xpsycle: configuration: preset dir: " << prsPath << "\n"
+		<< "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
+  #endif
+  
   mv_wirewidth = 1;
   mv_triangle_size = 22;
 }
@@ -131,7 +139,7 @@ void Configuration::loadConfig( )
   catch(...)
   {
 	#if !defined XPSYCLE__CONFIGURATION
-		std::cerr << "xpsycle: error: could not load any configuration file" << std::endl;
+		std::cerr << "xpsycle: configuration: error: could not load any configuration file" << std::endl;
 	#else
 		try
 		{
@@ -141,17 +149,20 @@ void Configuration::loadConfig( )
 		        // (note: the dot was removed so the the files in the example dir aren't hidden)
 	        	// we can copy it to the user's home dir.
 	        	{
+	        		#if !defined NDEBUG
+	        			std::cout << "xpsycle: configuration: copying default configuration file to ~/.xpsycle.xml\n";
+	        		#endif
 				#include <xpsycle/install_paths.defines.hpp>
-	        		std::string file_content(NFile::readFile(XPSYCLE__INSTALL_PATHS__DOC "/examples/xpsycle.xml");
+	        		std::string file_content(NFile::readFile(XPSYCLE__INSTALL_PATHS__DOC "/examples/xpsycle.xml"));
 		        	std::ofstream ostream(".xpsycle.xml");
-		        	file_content >> ostream;
+		        	ostream << file_content;
 		        }
 			NApp::config()->loadXmlConfig(".xpsycle.xml", /* throw_allowed */ true);
 		}
 		catch(...)
 		{
 			// oh well
-			std::cerr << "xpsycle: error: could not load any configuration file" << std::endl;
+			std::cerr << "xpsycle: configuration: error: could not load any configuration file" << std::endl;
 		}
 	#endif
   }
@@ -162,6 +173,13 @@ void Configuration::loadConfig( )
   prsPath    = NFile::replaceTilde(NApp::config()->findPath("prsdir"));
   hlpPath    = NFile::replaceTilde(NApp::config()->findPath("hlpdir"));
 
+  #if !defined NDEBUG
+	std::cout
+		<< "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
+		<< "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
+		<< "xpsycle: configuration: preset dir: " << prsPath << "\n"
+		<< "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
+  #endif
 }
 
 void Configuration::onConfigTagParse(const std::string & tagName )
