@@ -3,7 +3,7 @@
 main()
 {
 	cd $(dirname $0) &&
-	stanza=$(basename $0 .sh) &&
+	stanza=$(basename $0 .glob-files) &&
 	out=$stanza.ac &&
 	{
 		cat > $out <<-eof
