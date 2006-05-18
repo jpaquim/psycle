@@ -22,7 +22,6 @@
 #include "song.h"
 #include "global.h"
 #include "alsaout.h"
-#include "install_paths.hpp"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
 #include <ngrs/nfile.h>
@@ -104,9 +103,9 @@ void Configuration::setSkinDefaults( )
   _outputDriverIndex = 0;
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
-  iconPath = xpsycle::paths::pixmaps() + "/";
+  iconPath = "pixmaps/";
   pluginPath = "~/xpsycle/plugins/";
-  prsPath = xpsycle::paths::presets() + "/";
+  prsPath =  "prs/";
 
   mv_wirewidth = 1;
   mv_triangle_size = 22;
