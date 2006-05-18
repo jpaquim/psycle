@@ -396,14 +396,22 @@ int NScrollBar::step( ) const
 
 void NScrollBar::onDecBtnClicked( NButtonEvent * ev )
 {
-  slider_->setTop( std::max(0, slider_->top() - 10) );
+  if ( orientation() == nVertical ) {
+    slider_->setTop( std::max(0, slider_->top() - 10) );
+  } else {
+    slider_->setLeft( std::max(0, slider_->left() - 10) );
+  }
   sliderArea_->repaint();
   onSliderMove();
 }
 
 void NScrollBar::onIncBtnClicked( NButtonEvent * ev )
 {
-  slider_->setTop( std::min(sliderArea_->height() - slider_->height(), slider_->top() + 10) );
+  if ( orientation() == nVertical ) {
+    slider_->setTop( std::min(sliderArea_->height() - slider_->height(), slider_->top() + 10) );
+  } else {
+    slider_->setLeft( std::min(sliderArea_->width() - slider_->width(), slider_->left() + 10) );
+  }
   sliderArea_->repaint();
   onSliderMove();
 }
@@ -417,7 +425,13 @@ void NScrollBar::onScrollAreaClick( NButtonEvent * ev )
 {
   if (ev->button() == 1) {
     if ( orientation() == nHorizontal ) {
-
+     if (ev->x() > slider_->left() + slider_->width() ) {
+       // mouse was pressed right to slider so increment position
+       slider_->setLeft( std::min(sliderArea_->width() - slider_->width(), slider_->left() + 10) );
+      } else {
+       // mouse was pressed left to slider so decrement position
+       slider_->setLeft( std::max(0, slider_->left() - 10) );
+      }
     } else
     {
       if (ev->y() > slider_->top() + slider_->height() ) {
@@ -427,9 +441,9 @@ void NScrollBar::onScrollAreaClick( NButtonEvent * ev )
        // mouse was pressed above slider so decrement position
        slider_->setTop( std::max(0, slider_->top() - 10) );
       }
-      sliderArea_->repaint();
-      onSliderMove();
     }
+    sliderArea_->repaint();
+    onSliderMove();
   }
 }
 
