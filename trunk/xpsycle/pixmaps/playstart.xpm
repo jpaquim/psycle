@@ -1,8 +1,8 @@
 /* XPM */
 static char * playstart_xpm[] = {
 "21 21 111 2",
-"  	c None",
-". 	c #D4D0C8",
+"  	c #D4D0C8",
+". 	c None",
 "+ 	c #C9C6BE",
 "@ 	c #A9A6A2",
 "# 	c #91908D",
