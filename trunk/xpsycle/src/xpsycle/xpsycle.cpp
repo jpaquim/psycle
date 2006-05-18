@@ -43,28 +43,22 @@ int f2i(double q) { return ((int)q)&2047; }
 
 int main(int argc, char *argv[])
 {
-	NApp app;
-	#if !defined XPSYCLE__CONFIGURATION
-		std::cout << "xpsycle: warning: built without configuration" << std::end;
-	#else
-		// bohan.. broken. how to get path to installed pixmaps? is the splash part of the user-configured skin?
-		#if 0
-		NSplashScreen* splash = new NSplashScreen();
-		#if !defined NDEBUG
-			std::cout << xpsycle::paths::pixmaps() << "/splash.xpm" << std::endl;
-		#endif
-		splash->loadImageFromFile(xpsycle::paths::pixmaps() + "/splash.xpm");
-		app.setSplashScreen(splash);
-		#endif
-	#endif
-	Global gl;
-	Global::pConfig()->loadConfig();
-	NWindow* mainWin = new MainWindow();
-	app.setMainWindow(mainWin);
-	app.run();
-	return EXIT_SUCCESS;
-	#if 0
-		Song song;
-		song.load("/home/natti/lastfuture.picknick.psy");
-	#endif
+    NApp app;
+
+    Global gl;
+    Global::pConfig()->loadConfig();
+
+    #if !defined XPSYCLE__CONFIGURATION
+        std::cout << "xpsycle: warning: built without configuration" << std::endl;
+    #endif
+
+    NSplashScreen* splash = new NSplashScreen();
+    splash->loadImageFromFile(Global::pConfig()->iconPath + "/splash.xpm");
+    app.setSplashScreen(splash);
+
+    NWindow* mainWin = new MainWindow();
+    app.setMainWindow(mainWin);
+    app.run();
+
+    return EXIT_SUCCESS;
 }
