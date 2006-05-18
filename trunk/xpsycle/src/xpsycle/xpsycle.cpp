@@ -48,10 +48,6 @@ int main(int argc, char *argv[])
     Global gl;
     Global::pConfig()->loadConfig();
 
-    #if !defined XPSYCLE__CONFIGURATION
-        std::cout << "xpsycle: warning: built without configuration" << std::endl;
-    #endif
-
     NSplashScreen* splash = new NSplashScreen();
     splash->loadImageFromFile(Global::pConfig()->iconPath + "/splash.xpm");
     app.setSplashScreen(splash);
