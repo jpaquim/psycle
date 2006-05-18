@@ -113,11 +113,14 @@ const std::string &  NCheckBox::text( ) const
 
 int NCheckBox::preferredWidth( ) const
 {
+  if (ownerSize()) return NVisualComponent::preferredWidth();
   return 20 + label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
 }
 
 int NCheckBox::preferredHeight( ) const
 {
+  if (ownerSize()) return NVisualComponent::preferredHeight();
+
   return label_->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
 }
 

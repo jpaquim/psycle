@@ -41,6 +41,9 @@ public:
 
    virtual void onMousePress(int x, int y, int button);
 
+   virtual void onMouseEnter();
+   virtual void onMouseExit();
+
 private:
 
     NLabel* captionLbl_;

@@ -372,6 +372,11 @@ NSkin NConfig::skin( const std::string & identifier )
   } else
   if (identifier == "lbitemnone") {
   } else
+  if (identifier == "mitemiconbg") {
+    skin.setBackground(NColor(220,220,220));
+    skin.useParentBackground(false);
+    skin.setTransparent(false);
+  } else
   if (identifier == "mitemover") {
      skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
      NFrameBorder fr(true,4,4);
