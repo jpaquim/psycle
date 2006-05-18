@@ -106,6 +106,8 @@ private:
    void onDecBtnClicked(NButtonEvent* ev);
    void onIncBtnClicked(NButtonEvent* ev);
 
+   void onScrollAreaClick(NButtonEvent* ev);
+
 };
 
 #endif

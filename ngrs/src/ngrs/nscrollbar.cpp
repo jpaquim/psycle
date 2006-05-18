@@ -137,6 +137,7 @@ void NScrollBar::init( )
 
   sliderArea_ = new NPanel();
     sliderArea_->skin_ = NApp::config()->skin("sbar_pane");
+    sliderArea_->mousePress.connect(this,&NScrollBar::onScrollAreaClick);
   add(sliderArea_);
 
  vSlSkin = NApp::config()->skin("sbar_vsl");
@@ -395,17 +396,41 @@ int NScrollBar::step( ) const
 
 void NScrollBar::onDecBtnClicked( NButtonEvent * ev )
 {
-  setPos(pos()-step());
+  slider_->setTop( std::max(0, slider_->top() - 10) );
+  sliderArea_->repaint();
+  onSliderMove();
 }
 
 void NScrollBar::onIncBtnClicked( NButtonEvent * ev )
 {
-  setPos(pos()+step());
+  slider_->setTop( std::min(sliderArea_->height() - slider_->height(), slider_->top() + 10) );
+  sliderArea_->repaint();
+  onSliderMove();
 }
 
 int NScrollBar::pos( ) const
 {
   return pos_;
+}
+
+void NScrollBar::onScrollAreaClick( NButtonEvent * ev )
+{
+  if (ev->button() == 1) {
+    if ( orientation() == nHorizontal ) {
+
+    } else
+    {
+      if (ev->y() > slider_->top() + slider_->height() ) {
+       // mouse was pressed under slider so increment position
+       slider_->setTop( std::min(sliderArea_->height() - slider_->height(), slider_->top() + 10) );
+      } else {
+       // mouse was pressed above slider so decrement position
+       slider_->setTop( std::max(0, slider_->top() - 10) );
+      }
+      sliderArea_->repaint();
+      onSliderMove();
+    }
+  }
 }
 
 
