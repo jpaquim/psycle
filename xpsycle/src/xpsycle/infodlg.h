@@ -20,8 +20,8 @@
 #ifndef INFODLG_H
 #define INFODLG_H
 
-#include <nwindow.h>
-#include <nmemo.h>
+#include <ngrs/nwindow.h>
+#include <ngrs/nmemo.h>
 
 /**
 @author Stefan Nattkemper
