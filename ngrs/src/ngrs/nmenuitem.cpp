@@ -23,6 +23,8 @@
 #include "nlabel.h"
 #include "nalignlayout.h"
 #include "nimage.h"
+#include "napp.h"
+#include "nconfig.h"
 
 NMenuItem::NMenuItem()
  : NCustomMenuItem()
@@ -51,6 +53,7 @@ void NMenuItem::init( )
     iconImg_->setPreferredSize(25,25);
     iconImg_->setVAlign(nAlCenter);
     iconImg_->setHAlign(nAlCenter);
+    iconImg_->setSkin(NApp::config()->skin("mitemiconbg"));
   NCustomMenuItem::add(iconImg_, nAlLeft);
 
   subMenuImg_ = new NImage();
@@ -58,6 +61,7 @@ void NMenuItem::init( )
   NCustomMenuItem::add(subMenuImg_, nAlRight);
 
   captionLbl_ = new NLabel();
+    captionLbl_->setSpacing(4,0,0,0);
     captionLbl_->setVAlign(nAlCenter);
   NCustomMenuItem::add(captionLbl_, nAlClient);
 
@@ -66,6 +70,19 @@ void NMenuItem::init( )
 NMenuItem::~NMenuItem()
 {
 }
+
+void NMenuItem::onMouseEnter( )
+{
+  iconImg_->setTransparent(true);
+  NCustomMenuItem::onMouseEnter();
+}
+
+void NMenuItem::onMouseExit( )
+{
+  iconImg_->setTransparent(false);
+  NCustomMenuItem::onMouseExit();
+}
+
 
 
 

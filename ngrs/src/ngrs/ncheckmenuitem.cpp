@@ -45,9 +45,12 @@ void NCheckMenuItem::init( )
   checkBox_ = new NCheckBox();
      checkBox_->setPreferredSize(25,25);
      checkBox_->setCheck(true);
+     checkBox_->setSkin(NApp::config()->skin("mitemiconbg"));
   add(checkBox_, nAlLeft);
 
   captionLbl_ = new NLabel();
+     captionLbl_->setSpacing(4,0,0,0);
+    captionLbl_->setVAlign(nAlCenter);
   add(captionLbl_, nAlClient);
 }
 
@@ -61,6 +64,18 @@ void NCheckMenuItem::onMousePress( int x, int y, int button )
 {
   NCustomMenuItem::onMousePress(x,y,button);
   checkBox_->setCheck(!checkBox_->checked());
+}
+
+void NCheckMenuItem::onMouseEnter( )
+{
+  checkBox_->setTransparent(true);
+  NCustomMenuItem::onMouseEnter();
+}
+
+void NCheckMenuItem::onMouseExit( )
+{
+  checkBox_->setTransparent(false);
+  NCustomMenuItem::onMouseExit();
 }
 
 
