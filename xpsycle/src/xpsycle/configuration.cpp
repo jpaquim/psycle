@@ -29,10 +29,11 @@
 
 Configuration::Configuration()
 {
-  setSkinDefaults();
-
-  defaultPatLines = 64;
-
+	#if !defined XPSYCLE__CONFIGURATION
+		std::cout << "xpsycle: warning: built without configuration" << std::endl;
+	#endif
+	setSkinDefaults();
+	defaultPatLines = 64;
 }
 
 
