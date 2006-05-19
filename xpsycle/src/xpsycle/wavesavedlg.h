@@ -22,6 +22,13 @@
 
 #include <ngrs/ndialog.h>
 
+class NFileDialog;
+class NEdit;
+class NCheckBox;
+class NRadioButton;
+class NComboBox;
+class NProgressBar;
+
 /**
 @author Stefan Nattkemper
 */
@@ -31,6 +38,28 @@ public:
     WaveSaveDlg();
 
     ~WaveSaveDlg();
+
+private:
+
+    NFileDialog* fileDlg;
+    NEdit* pathEdt;
+    NCheckBox* wireChkBox;
+    NCheckBox* trackChkBox;
+    NCheckBox* generatorChkBox;
+    NRadioButton* entireRBtn;
+    NRadioButton* numberRBtn;
+    NEdit* numberEdt;
+    NRadioButton* seqRBtn;
+    NEdit* fromEdt;
+    NEdit* toEdt;
+    NComboBox* sampleRateCbx;
+    NComboBox* bitDepthCbx;
+    NComboBox* channelsCbx;
+    NProgressBar* progressBar;
+
+    void onBrowseBtn(NButtonEvent* ev);
+    void onCloseBtn(NButtonEvent* ev);
+    void onSaveBtn(NButtonEvent* ev);
 
 };
 

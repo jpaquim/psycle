@@ -32,12 +32,16 @@
 #include <ngrs/ncombobox.h>
 #include <ngrs/nitem.h>
 #include <ngrs/nprogressbar.h>
+#include <ngrs/nfiledialog.h>
 
 WaveSaveDlg::WaveSaveDlg()
  : NDialog()
 {
   setTitle("Render as Wav File");
   setSize(800,400);
+
+  fileDlg = new NFileDialog();
+  add(fileDlg);
 
   pane()->setLayout(NAlignLayout(5,5));
 
@@ -46,42 +50,43 @@ WaveSaveDlg::WaveSaveDlg()
     pathPanel->add(new NLabel("Output Path"), nAlLeft);
     NButton* browseBtn = new NButton("Browse");
       browseBtn->setFlat(false);
+      browseBtn->clicked.connect(this,&WaveSaveDlg::onBrowseBtn);
     pathPanel->add(browseBtn,nAlRight);
-    NEdit* pathEdt = new NEdit();
+    pathEdt = new NEdit();
   pathPanel->add(pathEdt,nAlClient);
 
   pane()->add( pathPanel, nAlTop );
 
-  NCheckBox* wireChkBox = new NCheckBox();
+  wireChkBox = new NCheckBox();
     wireChkBox->setText("Save each unmuted input to master as a separated wav (wire number will be appended to filename)");
   pane()->add(wireChkBox, nAlTop);
 
-  NCheckBox* trackChkBox = new NCheckBox();
+  trackChkBox = new NCheckBox();
     trackChkBox->setText("Save each unmuted track as a separated wav (track number will be appended to filename)** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem");
   pane()->add(trackChkBox, nAlTop);
 
-  NCheckBox* generatorChkBox = new NCheckBox();
+  generatorChkBox = new NCheckBox();
     generatorChkBox->setText("Save each unmuted generator as a separated wav (generator number will be appended to filename)** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem");
   pane()->add(generatorChkBox, nAlTop);
 
   NTogglePanel* gBox = new NTogglePanel();
     gBox->setLayout(NTableLayout(4,3));
-    NRadioButton* entireRBtn = new NRadioButton();
+    entireRBtn = new NRadioButton();
      entireRBtn->setText("Record the entire song");
     gBox->add(entireRBtn,NAlignConstraint(nAlLeft,0,0));
-    NRadioButton* numberRBtn = new NRadioButton();
+    numberRBtn = new NRadioButton();
      numberRBtn->setText("Record pattern number");
     gBox->add(numberRBtn,NAlignConstraint(nAlLeft,0,1));
-    NEdit* numberEdt = new NEdit();
+    numberEdt = new NEdit();
     gBox->add(numberEdt,NAlignConstraint(nAlLeft,1,1));
     gBox->add(new NLabel("in HEX value"),NAlignConstraint(nAlLeft,2,1));
-    NRadioButton* seqRBtn = new NRadioButton();
+    seqRBtn = new NRadioButton();
      seqRBtn->setText("Sequence positions from");
     gBox->add(seqRBtn,NAlignConstraint(nAlLeft,0,2));
-    NEdit* fromEdt = new NEdit();
+    fromEdt = new NEdit();
     gBox->add(fromEdt,NAlignConstraint(nAlLeft,1,2));
     gBox->add(new NLabel("to"),NAlignConstraint(nAlLeft,2,2));
-    NEdit* toEdt = new NEdit();
+    toEdt = new NEdit();
     gBox->add(toEdt,NAlignConstraint(nAlLeft,3,2));
     gBox->add(new NLabel("in HEX value"),NAlignConstraint(nAlLeft,4,2));
   pane()->add(gBox, nAlTop);
@@ -91,7 +96,7 @@ WaveSaveDlg::WaveSaveDlg()
     NPanel* cboxPanel = new NPanel();
        cboxPanel->setLayout(NAlignLayout());
        cboxPanel->add(new NLabel("sampling rate"),nAlTop);
-       NComboBox* sampleRateCbx = new NComboBox();
+       sampleRateCbx = new NComboBox();
           sampleRateCbx->add(new NItem("8192 hz"));
           sampleRateCbx->add(new NItem("11025 hz"));
           sampleRateCbx->add(new NItem("22050 hz"));
@@ -101,7 +106,7 @@ WaveSaveDlg::WaveSaveDlg()
           sampleRateCbx->setIndex(3);
        cboxPanel->add(sampleRateCbx,nAlTop);
        cboxPanel->add(new NLabel("bit rate"),nAlTop);
-       NComboBox* bitDepthCbx = new NComboBox();
+       bitDepthCbx = new NComboBox();
           bitDepthCbx->add(new NItem("8"));
           bitDepthCbx->add(new NItem("16"));
           bitDepthCbx->add(new NItem("24"));
@@ -109,7 +114,7 @@ WaveSaveDlg::WaveSaveDlg()
           bitDepthCbx->setIndex(1);
        cboxPanel->add(bitDepthCbx,nAlTop);
        cboxPanel->add(new NLabel("channels"),nAlTop); 
-       NComboBox* channelsCbx = new NComboBox();
+       channelsCbx = new NComboBox();
           channelsCbx->add(new NItem("Mono [mix]"));
           channelsCbx->add(new NItem("Mono [left]"));
           channelsCbx->add(new NItem("Mono [right]"));
@@ -118,22 +123,39 @@ WaveSaveDlg::WaveSaveDlg()
        cboxPanel->add(channelsCbx,nAlTop);
     audioPanel->add(cboxPanel, nAlClient);
   pane()->add(audioPanel,nAlTop);
-  NProgressBar* progressBar = new NProgressBar();
+  progressBar = new NProgressBar();
      progressBar->setValue(0);
   pane()->add(progressBar,nAlTop);
   NPanel* btnPanel = new NPanel();
     btnPanel->setLayout(NFlowLayout(nAlRight,5,5));
     NButton* closeBtn = new NButton("Close");
       closeBtn->setFlat(false);
+      closeBtn->clicked.connect(this,&WaveSaveDlg::onCloseBtn);
     btnPanel->add(closeBtn);
     NButton* saveBtn  = new NButton("Save as Wav");
       saveBtn->setFlat(false);
+      saveBtn->clicked.connect(this,&WaveSaveDlg::onSaveBtn);
     btnPanel->add(saveBtn);
   pane()->add(btnPanel,nAlTop);
 }
 
 
 WaveSaveDlg::~WaveSaveDlg()
+{
+}
+
+void WaveSaveDlg::onBrowseBtn( NButtonEvent * ev )
+{
+  if (fileDlg->execute()) {
+
+  }
+}
+
+void WaveSaveDlg::onCloseBtn( NButtonEvent * ev )
+{
+}
+
+void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
 {
 }
 

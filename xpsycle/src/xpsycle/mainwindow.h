@@ -127,6 +127,24 @@ private:
     void onFileSaveAs(NButtonEvent* ev);
     void onRenderAsWave(NButtonEvent* ev);
 
+    void onEditUndo(NButtonEvent* ev);
+    void onEditRedo(NButtonEvent* ev);
+    void onEditPatternCut(NButtonEvent* ev);
+    void onEditPatternCopy(NButtonEvent* ev);
+    void onEditPatternPaste(NButtonEvent* ev);
+    void onEditPatternMix(NButtonEvent* ev);
+    void onEditPatternMixPaste(NButtonEvent* ev);
+    void onEditPatternDelete(NButtonEvent* ev);
+    void onEditBlockCut(NButtonEvent* ev);
+    void onEditBlockCopy(NButtonEvent* ev);
+    void onEditBlockPaste(NButtonEvent* ev);
+    void onEditBlockMix(NButtonEvent* ev);
+    void onEditBlockMixPaste(NButtonEvent* ev);
+    void onEditBlockDelete(NButtonEvent* ev);
+    void onEditSeqCut(NButtonEvent* ev);
+    void onEditSeqCopy(NButtonEvent* ev);
+    void onEditSeqDelete(NButtonEvent* ev);
+
     void onViewMenuToolbar(NButtonEvent* ev);
     void onViewMenuMachinebar(NButtonEvent* ev);
     void onViewMenuSequencerbar(NButtonEvent* ev);

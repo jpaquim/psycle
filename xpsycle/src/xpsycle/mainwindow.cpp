@@ -79,23 +79,23 @@ void MainWindow::initMenu( )
 
   // Creates the edit menu
   editMenu_ = new NMenu("Edit");
-      editMenu_->add(new NMenuItem("Undo"));
-      editMenu_->add(new NMenuItem("Redo"));
-      editMenu_->add(new NMenuItem("Pattern Cut"));
-      editMenu_->add(new NMenuItem("Pattern Copy"));
-      editMenu_->add(new NMenuItem("Pattern Paste"));
-      editMenu_->add(new NMenuItem("Pattern Mix"));
-      editMenu_->add(new NMenuItem("Pattern Mix Paste"));
-      editMenu_->add(new NMenuItem("Pattern Delete"));
-      editMenu_->add(new NMenuItem("Block Cut"));
-      editMenu_->add(new NMenuItem("Block Copy"));
-      editMenu_->add(new NMenuItem("Block Paste"));
-      editMenu_->add(new NMenuItem("Block Mix Paste"));
-      editMenu_->add(new NMenuItem("Block Mix Delete"));
+      editMenu_->add(new NMenuItem("Undo"))->click.connect(this,&MainWindow::onEditUndo);
+      editMenu_->add(new NMenuItem("Redo"))->click.connect(this,&MainWindow::onEditRedo);
+      editMenu_->add(new NMenuItem("Pattern Cut"))->click.connect(this,&MainWindow::onEditPatternCut);
+      editMenu_->add(new NMenuItem("Pattern Copy"))->click.connect(this,&MainWindow::onEditPatternCopy);
+      editMenu_->add(new NMenuItem("Pattern Paste"))->click.connect(this,&MainWindow::onEditPatternPaste);
+      editMenu_->add(new NMenuItem("Pattern Mix"))->click.connect(this,&MainWindow::onEditPatternMix);
+      editMenu_->add(new NMenuItem("Pattern Mix Paste"))->click.connect(this,&MainWindow::onEditPatternMixPaste);
+      editMenu_->add(new NMenuItem("Pattern Delete"))->click.connect(this,&MainWindow::onEditPatternDelete);
+      editMenu_->add(new NMenuItem("Block Cut"))->click.connect(this,&MainWindow::onEditBlockCut);
+      editMenu_->add(new NMenuItem("Block Copy"))->click.connect(this,&MainWindow::onEditBlockCopy);
+      editMenu_->add(new NMenuItem("Block Paste"))->click.connect(this,&MainWindow::onEditBlockPaste);
+      editMenu_->add(new NMenuItem("Block Mix Paste"))->click.connect(this,&MainWindow::onEditBlockMixPaste);
+      editMenu_->add(new NMenuItem("Block Delete"))->click.connect(this,&MainWindow::onEditBlockDelete);
       editMenu_->add(new NMenuSeperator());
-      editMenu_->add(new NMenuItem("Sequence Cut"));
-      editMenu_->add(new NMenuItem("Sequence Copy"));
-      editMenu_->add(new NMenuItem("Sequence Delete"));
+      editMenu_->add(new NMenuItem("Sequence Cut"))->click.connect(this,&MainWindow::onEditSeqCut);
+      editMenu_->add(new NMenuItem("Sequence Copy"))->click.connect(this,&MainWindow::onEditSeqCopy);
+      editMenu_->add(new NMenuItem("Sequence Delete"))->click.connect(this,&MainWindow::onEditSeqDelete);
    menuBar_->add(editMenu_);
 
    // Creates the view menu
@@ -1168,3 +1168,72 @@ void MainWindow::onRenderAsWave( NButtonEvent * ev )
 
   }
 }
+
+void MainWindow::onEditUndo( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditRedo( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditPatternCut( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditPatternCopy( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditPatternPaste( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditPatternMix( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditPatternMixPaste( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditPatternDelete( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditBlockMixPaste( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditBlockDelete( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditBlockMix( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditBlockPaste( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditBlockCopy( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditBlockCut( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditSeqDelete( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditSeqCopy( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onEditSeqCut( NButtonEvent * ev )
+{
+}
+
