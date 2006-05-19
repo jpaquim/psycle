@@ -34,7 +34,7 @@ public:
    InfoLine(const std::string & info) {
      add( infoLb = new NLabel(info) );
      add( textLb = new NLabel() );
-     textLb->setWordbreak(true);
+     textLb->setWordWrap(true);
      textLb->setBorder(NBevelBorder(nNone,nLowered));
    }
 

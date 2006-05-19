@@ -30,7 +30,7 @@ GreetDlg::GreetDlg()
 
   NLabel* greetings = new NLabel();
     greetings->setText("Psyceledics Community, wants to thank the following people for their contributions in the developement of Psycle");
-    greetings->setWordbreak(true);
+    greetings->setWordWrap(true);
   pane()->add(greetings,nAlTop);
 
   pane()->add(lBox, nAlClient);
