@@ -38,7 +38,7 @@ WaveSaveDlg::WaveSaveDlg()
  : NDialog()
 {
   setTitle("Render as Wav File");
-  setSize(800,400);
+  setSize(400,600);
 
   fileDlg = new NFileDialog();
   add(fileDlg);
@@ -59,14 +59,17 @@ WaveSaveDlg::WaveSaveDlg()
 
   wireChkBox = new NCheckBox();
     wireChkBox->setText("Save each unmuted input to master as a separated wav (wire number will be appended to filename)");
+    wireChkBox->setWordWrap(true);
   pane()->add(wireChkBox, nAlTop);
 
   trackChkBox = new NCheckBox();
     trackChkBox->setText("Save each unmuted track as a separated wav (track number will be appended to filename)** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem");
+    trackChkBox->setWordWrap(true);
   pane()->add(trackChkBox, nAlTop);
 
   generatorChkBox = new NCheckBox();
     generatorChkBox->setText("Save each unmuted generator as a separated wav (generator number will be appended to filename)** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem");
+    generatorChkBox->setWordWrap(true);
   pane()->add(generatorChkBox, nAlTop);
 
   NTogglePanel* gBox = new NTogglePanel();
