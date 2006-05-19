@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "nfile.h"
 
+
 using namespace std;
 
 NFile::NFile()
@@ -171,6 +172,13 @@ std::string NFile::replaceTilde( std::string  path )
     path.replace(pos,1,std::string(home));
   }  
   return path;
+}
+
+bool NFile::fileExits( const std::string & file )
+{
+   std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
+   if (!_stream.is_open ()) return false;
+   return true;
 }
 
 
