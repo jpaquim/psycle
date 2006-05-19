@@ -45,6 +45,7 @@ public:
     static std::vector<std::string> dirList(const std::string path);
     static std::vector<std::string> parentDirList(const std::string path);
     static std::string workingDir();
+    static bool fileExits(const std::string & file);
     static std::string parentWorkingDir();
     static void cd( const std::string & path );
     static void cdHome();
