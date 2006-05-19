@@ -101,7 +101,7 @@ namespace psycle
 				{
 					#if defined PSYCLE__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT // make use of windows registry database
 						result const error(::RegSetValueEx(current, name.c_str(), 0, type , reinterpret_cast<unsigned char const *>(&data), sizeof data));
-						if(error != ERROR_SUCCESS) loggers::warning("could not write " + name + "to registry.");
+						if(error != ERROR_SUCCESS) loggers::warning("could not write " + name + " to registry.");
 						return error;
 					#else
 						#error todo
