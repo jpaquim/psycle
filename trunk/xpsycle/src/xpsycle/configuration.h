@@ -23,8 +23,10 @@
 #include "audiodriver.h"
 #include "inputhandler.h"
 #include <ngrs/ncolor.h>
-#include <vector>
 #include <ngrs/nobject.h>
+#include <vector>
+#include <string>
+#include <exception>
 
 /**
 @author Stefan
@@ -38,8 +40,12 @@ public:
 
     ~Configuration();
 
+public:
     void loadConfig();
+private:
+    void loadConfig(std::string const & path) throw(std::exception);
 
+public:
     NBitmap newfile();
 
     bool autoStopMachines;
