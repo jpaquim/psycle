@@ -70,7 +70,10 @@ WaveSaveDlg::WaveSaveDlg()
   pane()->add(generatorChkBox, nAlTop);
 
   NTogglePanel* gBox = new NTogglePanel();
-    gBox->setLayout(NTableLayout(4,3));
+    NTableLayout tableLayout(4,3);
+      //tableLayout.setVGap(5);
+      //tableLayout.setHGap(5);
+    gBox->setLayout(tableLayout);
     entireRBtn = new NRadioButton();
      entireRBtn->setText("Record the entire song");
     gBox->add(entireRBtn,NAlignConstraint(nAlLeft,0,0));

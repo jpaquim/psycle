@@ -81,12 +81,14 @@ void MainWindow::initMenu( )
   editMenu_ = new NMenu("Edit");
       editMenu_->add(new NMenuItem("Undo"))->click.connect(this,&MainWindow::onEditUndo);
       editMenu_->add(new NMenuItem("Redo"))->click.connect(this,&MainWindow::onEditRedo);
+      editMenu_->add(new NMenuSeperator());
       editMenu_->add(new NMenuItem("Pattern Cut"))->click.connect(this,&MainWindow::onEditPatternCut);
       editMenu_->add(new NMenuItem("Pattern Copy"))->click.connect(this,&MainWindow::onEditPatternCopy);
       editMenu_->add(new NMenuItem("Pattern Paste"))->click.connect(this,&MainWindow::onEditPatternPaste);
       editMenu_->add(new NMenuItem("Pattern Mix"))->click.connect(this,&MainWindow::onEditPatternMix);
       editMenu_->add(new NMenuItem("Pattern Mix Paste"))->click.connect(this,&MainWindow::onEditPatternMixPaste);
       editMenu_->add(new NMenuItem("Pattern Delete"))->click.connect(this,&MainWindow::onEditPatternDelete);
+      editMenu_->add(new NMenuSeperator());
       editMenu_->add(new NMenuItem("Block Cut"))->click.connect(this,&MainWindow::onEditBlockCut);
       editMenu_->add(new NMenuItem("Block Copy"))->click.connect(this,&MainWindow::onEditBlockCopy);
       editMenu_->add(new NMenuItem("Block Paste"))->click.connect(this,&MainWindow::onEditBlockPaste);
@@ -1179,6 +1181,7 @@ void MainWindow::onEditRedo( NButtonEvent * ev )
 
 void MainWindow::onEditPatternCut( NButtonEvent * ev )
 {
+  
 }
 
 void MainWindow::onEditPatternCopy( NButtonEvent * ev )
@@ -1203,26 +1206,32 @@ void MainWindow::onEditPatternDelete( NButtonEvent * ev )
 
 void MainWindow::onEditBlockMixPaste( NButtonEvent * ev )
 {
+  childView_->patternView()->pasteBlock(childView_->patternView()->cursor().x(), childView_->patternView()->cursor().y(), true);
 }
 
 void MainWindow::onEditBlockDelete( NButtonEvent * ev )
 {
+  childView_->patternView()->deleteBlock();
 }
 
 void MainWindow::onEditBlockMix( NButtonEvent * ev )
 {
+  
 }
 
 void MainWindow::onEditBlockPaste( NButtonEvent * ev )
 {
+  childView_->patternView()->pasteBlock(childView_->patternView()->cursor().x(), childView_->patternView()->cursor().y(), false);
 }
 
 void MainWindow::onEditBlockCopy( NButtonEvent * ev )
 {
+  childView_->patternView()->copyBlock(false);
 }
 
 void MainWindow::onEditBlockCut( NButtonEvent * ev )
 {
+  childView_->patternView()->copyBlock(true);
 }
 
 void MainWindow::onEditSeqDelete( NButtonEvent * ev )
