@@ -196,20 +196,12 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
 		std::cout << "xpsycle: configuration: attempting to load file: " << path << std::endl;
 	#endif
 	
-	// check whether the file exists
+	// check whether the file is readable
+	if(!NFile::fileIsReadable(path))
 	{
-		bool file_exists;
-		{
-			struct stat s;
-			int const result(stat(path.c_str(), &s));
-			file_exists = !result;
-		}
-		if(!file_exists)
-		{
-			std::ostringstream s;
-			s << "file does not exist: " << path;
-			throw std::runtime_error(s.str());
-		}
+		std::ostringstream s;
+		s << "cannot read file: " << path;
+		throw std::runtime_error(s.str());
 	}
 	
 	// parse the file
