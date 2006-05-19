@@ -17,7 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 #include "nfile.h"
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+#include <iostream>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 
 using namespace std;
@@ -43,7 +51,7 @@ std::string NFile::readFile( const std::string & filename )
   return buf.str();
 }
 
-std::vector< std::string > NFile::fileList( const std::string path )
+std::vector< std::string > NFile::fileList( const std::string & path )
 {
   std::vector<std::string> destination;
   DIR *dhandle;
@@ -115,7 +123,7 @@ std::string NFile::parentWorkingDir( )
 }
 
 
-std::vector< std::string > NFile::parentDirList( const std::string path ) {
+std::vector< std::string > NFile::parentDirList( const std::string & path ) {
    std::string oldDir = workingDir();
    cd("..");
    string parentDir = workingDir();
@@ -125,7 +133,7 @@ std::vector< std::string > NFile::parentDirList( const std::string path ) {
 
 
 
-std::vector< std::string > NFile::dirList( const std::string path )
+std::vector< std::string > NFile::dirList( const std::string & path )
 {
    std::vector<std::string> destination;
   DIR *dhandle;
@@ -163,22 +171,17 @@ std::vector< std::string > NFile::dirList( const std::string path )
  return destination;
 }
 
-std::string NFile::replaceTilde( std::string  path )
+std::string NFile::replaceTilde( std::string const & path )
 {
- unsigned int pos = path.find("~");
-  if (pos!=std::string::npos) {
-    char home[8000]; 
-    strncpy(home,getenv("HOME"),7999);
-    path.replace(pos,1,std::string(home));
-  }  
-  return path;
+  std::string nvr(path);
+  if(!path.length() || path[0] != '~') return nvr;
+  nvr.replace(0, 1, std::getenv("HOME"));
+  return nvr;
 }
 
-bool NFile::fileExits( const std::string & file )
+bool NFile::fileIsReadable( const std::string & file )
 {
    std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
    if (!_stream.is_open ()) return false;
    return true;
 }
-
-
