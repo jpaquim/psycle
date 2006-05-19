@@ -215,6 +215,7 @@ namespace psycle
 			// create and activate buffers
 			if(_ASIObufferSize < minSamples[driverindex[_driverID]]) _ASIObufferSize = _ASIObufferSize__STATIC_SHIATZ = prefSamples[driverindex[_driverID]];
 			else if(_ASIObufferSize > maxSamples[driverindex[_driverID]]) _ASIObufferSize = _ASIObufferSize__STATIC_SHIATZ = prefSamples[driverindex[_driverID]];
+			else	_ASIObufferSize__STATIC_SHIATZ = _ASIObufferSize;
 			if(ASIOCreateBuffers(info,2,_ASIObufferSize,&asioCallbacks) != ASE_OK)
 			{
 				//ASIOExit();
