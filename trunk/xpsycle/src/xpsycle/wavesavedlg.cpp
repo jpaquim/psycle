@@ -21,17 +21,25 @@
 #include "napp.h"
 #include <ngrs/nlabel.h>
 #include <ngrs/nalignlayout.h>
+#include <ngrs/ntablelayout.h>
+#include <ngrs/nflowlayout.h>
+#include <ngrs/nalignconstraint.h>
 #include <ngrs/nbutton.h>
 #include <ngrs/nedit.h>
 #include <ngrs/ncheckbox.h>
 #include <ngrs/nradiobutton.h>
 #include <ngrs/ntogglepanel.h>
+#include <ngrs/ncombobox.h>
+#include <ngrs/nitem.h>
+#include <ngrs/nprogressbar.h>
 
 WaveSaveDlg::WaveSaveDlg()
  : NDialog()
 {
   setTitle("Render as Wav File");
-  setSize(500,500);
+  setSize(800,400);
+
+  pane()->setLayout(NAlignLayout(5,5));
 
   NPanel* pathPanel = new NPanel();
     pathPanel->setLayout(NAlignLayout(5,5));
@@ -57,17 +65,71 @@ WaveSaveDlg::WaveSaveDlg()
   pane()->add(generatorChkBox, nAlTop);
 
   NTogglePanel* gBox = new NTogglePanel();
-    gBox->setLayout(NAlignLayout());
+    gBox->setLayout(NTableLayout(4,3));
     NRadioButton* entireRBtn = new NRadioButton();
      entireRBtn->setText("Record the entire song");
-    gBox->add(entireRBtn,nAlTop);
+    gBox->add(entireRBtn,NAlignConstraint(nAlLeft,0,0));
     NRadioButton* numberRBtn = new NRadioButton();
-     numberRBtn->setText("Record the entire song");
-    gBox->add(numberRBtn,nAlTop);
+     numberRBtn->setText("Record pattern number");
+    gBox->add(numberRBtn,NAlignConstraint(nAlLeft,0,1));
+    NEdit* numberEdt = new NEdit();
+    gBox->add(numberEdt,NAlignConstraint(nAlLeft,1,1));
+    gBox->add(new NLabel("in HEX value"),NAlignConstraint(nAlLeft,2,1));
     NRadioButton* seqRBtn = new NRadioButton();
-     seqRBtn->setText("Record the entire song");
-    gBox->add(seqRBtn,nAlTop);
+     seqRBtn->setText("Sequence positions from");
+    gBox->add(seqRBtn,NAlignConstraint(nAlLeft,0,2));
+    NEdit* fromEdt = new NEdit();
+    gBox->add(fromEdt,NAlignConstraint(nAlLeft,1,2));
+    gBox->add(new NLabel("to"),NAlignConstraint(nAlLeft,2,2));
+    NEdit* toEdt = new NEdit();
+    gBox->add(toEdt,NAlignConstraint(nAlLeft,3,2));
+    gBox->add(new NLabel("in HEX value"),NAlignConstraint(nAlLeft,4,2));
   pane()->add(gBox, nAlTop);
+  NPanel * audioPanel = new NPanel();
+    audioPanel->setLayout(NAlignLayout());
+  audioPanel->add(new NLabel("Note many filters\nscrew up when rendereing\nat slow sample rates"),nAlLeft);
+    NPanel* cboxPanel = new NPanel();
+       cboxPanel->setLayout(NAlignLayout());
+       cboxPanel->add(new NLabel("sampling rate"),nAlTop);
+       NComboBox* sampleRateCbx = new NComboBox();
+          sampleRateCbx->add(new NItem("8192 hz"));
+          sampleRateCbx->add(new NItem("11025 hz"));
+          sampleRateCbx->add(new NItem("22050 hz"));
+          sampleRateCbx->add(new NItem("44100 hz"));
+          sampleRateCbx->add(new NItem("48000 hz"));
+          sampleRateCbx->add(new NItem("96000 hz"));
+          sampleRateCbx->setIndex(3);
+       cboxPanel->add(sampleRateCbx,nAlTop);
+       cboxPanel->add(new NLabel("bit rate"),nAlTop);
+       NComboBox* bitDepthCbx = new NComboBox();
+          bitDepthCbx->add(new NItem("8"));
+          bitDepthCbx->add(new NItem("16"));
+          bitDepthCbx->add(new NItem("24"));
+          bitDepthCbx->add(new NItem("32"));
+          bitDepthCbx->setIndex(1);
+       cboxPanel->add(bitDepthCbx,nAlTop);
+       cboxPanel->add(new NLabel("channels"),nAlTop); 
+       NComboBox* channelsCbx = new NComboBox();
+          channelsCbx->add(new NItem("Mono [mix]"));
+          channelsCbx->add(new NItem("Mono [left]"));
+          channelsCbx->add(new NItem("Mono [right]"));
+          channelsCbx->add(new NItem("Stereo"));
+          channelsCbx->setIndex(3);
+       cboxPanel->add(channelsCbx,nAlTop);
+    audioPanel->add(cboxPanel, nAlClient);
+  pane()->add(audioPanel,nAlTop);
+  NProgressBar* progressBar = new NProgressBar();
+     progressBar->setValue(0);
+  pane()->add(progressBar,nAlTop);
+  NPanel* btnPanel = new NPanel();
+    btnPanel->setLayout(NFlowLayout(nAlRight,5,5));
+    NButton* closeBtn = new NButton("Close");
+      closeBtn->setFlat(false);
+    btnPanel->add(closeBtn);
+    NButton* saveBtn  = new NButton("Save as Wav");
+      saveBtn->setFlat(false);
+    btnPanel->add(saveBtn);
+  pane()->add(btnPanel,nAlTop);
 }
 
 
