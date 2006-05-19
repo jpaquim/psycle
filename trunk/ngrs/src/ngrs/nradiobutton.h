@@ -20,7 +20,7 @@
 #ifndef NRADIOBUTTON_H
 #define NRADIOBUTTON_H
 
-#include <ncustombutton.h>
+#include "ncustombutton.h"
 
 /**
 @author Stefan Nattkemper
