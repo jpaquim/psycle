@@ -22,14 +22,6 @@
 
 #include <string>
 #include <vector>
-#include <fstream>
-#include <sstream>
-#include <cstdlib>
-#include <iostream>
-
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
 
 /**
 @author Stefan
@@ -41,16 +33,15 @@ public:
     ~NFile();
 
     static std::string readFile(const std::string & filename);
-    static std::vector<std::string> fileList(const std::string path);
-    static std::vector<std::string> dirList(const std::string path);
-    static std::vector<std::string> parentDirList(const std::string path);
+    static std::vector<std::string> fileList(const std::string & path);
+    static std::vector<std::string> dirList(const std::string & path);
+    static std::vector<std::string> parentDirList(const std::string & path);
     static std::string workingDir();
-    static bool fileExits(const std::string & file);
+    static bool fileIsReadable(const std::string & file);
     static std::string parentWorkingDir();
     static void cd( const std::string & path );
     static void cdHome();
-    static std::string replaceTilde(std::string path);
-
+    static std::string replaceTilde(const std::string & path);
 };
 
 #endif
