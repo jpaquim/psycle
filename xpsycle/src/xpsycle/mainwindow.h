@@ -45,6 +45,7 @@ class AboutDlg;
 class VuMeter;
 class InstrumentEditor;
 class InfoDlg;
+class WaveSaveDlg;
 
 /**
 @author Stefan
@@ -93,6 +94,7 @@ private:
     AboutDlg* aboutDlg;
     InfoDlg*  infoDlg;
     NFileDialog* wavRecFileDlg;
+    WaveSaveDlg* wavSaveDlg;
 
     VuMeter* vuMeter_;
 
@@ -123,6 +125,7 @@ private:
     void onFileOpen(NButtonEvent* ev);
     void onFileSave(NButtonEvent* ev);
     void onFileSaveAs(NButtonEvent* ev);
+    void onRenderAsWave(NButtonEvent* ev);
 
     void onViewMenuToolbar(NButtonEvent* ev);
     void onViewMenuMachinebar(NButtonEvent* ev);
