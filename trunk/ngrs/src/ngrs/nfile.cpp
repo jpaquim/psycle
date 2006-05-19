@@ -189,6 +189,6 @@ bool NFile::fileIsReadable( const std::string & file )
 std::string NFile::getEnv( const std::string & envName )
 {
   char env[8000];
-  strncpy(env,getenv("HOME"),7999);
+  strncpy(env,getenv(envName.c_str()),7999);
   return std::string(env);
 }
