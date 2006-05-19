@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,66 +17,56 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCUSTOMBUTTON_H
-#define NCUSTOMBUTTON_H
+#include "nradiobutton.h"
+#include "nlabel.h"
 
-#include "npanel.h"
-
-class NLabel;
-class NBevelBorder;
-class NGradient;
-
-/**
-@author Stefan
-*/
-class NCustomButton : public NPanel
+NRadioButton::NRadioButton()
+ : NCustomButton()
 {
-public:
-   NCustomButton();
-   NCustomButton(const std::string & text);
+  label()->setHAlign(nAlLeft);
+  label()->setVAlign(nAlTop);
 
-   ~NCustomButton();
+  setToggle(true);
+}
 
-   void setText(const std::string & text);
-   const std::string & text() const;
 
-   void setTextHAlign(int align);
-   void setTextVAlign(int align);
+NRadioButton::~NRadioButton()
+{
+}
 
-   virtual void setMnemonic(char c);
-   char mnemonic();
+void NRadioButton::paint( NGraphics * g )
+{
+  g->setForeground(NColor(255,255,255));
+  g->fillArc(2,2,10,10,0,64*360);
+  g->setForeground(NColor(0,0,0));
+  g->drawArc(2,2,10,10,0,64*360);
+  if ( down() ) {
+    g->fillArc(4,4,6,6,0,64*360);
+  }
+}
 
-   virtual void resize();
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
+void NRadioButton::resize( )
+{
+  label()->setPosition(20,0,spacingWidth()-20,spacingHeight());
+}
 
-   virtual void onMousePress (int x, int y, int button);
-   virtual void onMousePressed (int x, int y, int button);
+int NRadioButton::preferredWidth( ) const
+{
+  if (ownerSize()) return NVisualComponent::preferredWidth();
+  return 20 + label()->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
+}
 
-   signal1<NButtonEvent*> click;
-   signal1<NButtonEvent*> clicked;
+int NRadioButton::preferredHeight( ) const
+{
+  if (ownerSize()) return NVisualComponent::preferredHeight();
 
-   void setToggle(bool on);
-   bool toggle() const;
-   bool down() const;
+  return label()->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+}
 
-   virtual void setDown(bool on);
-   virtual void onMessage(NEvent* ev);
+void NRadioButton::setDown( bool on )
+{
+  NCustomButton::setDown(on);
+  repaint();
+}
 
-protected:
 
-   NLabel* label();
-   NLabel* label() const;
-
-private:
-
-   NLabel* label_;
-
-   void init();
-
-   bool down_;
-   bool toggle_;
-
-};
-
-#endif

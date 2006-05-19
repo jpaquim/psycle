@@ -50,6 +50,7 @@
 #include <ngrs/ntable.h>
 #include <ngrs/nedit.h>
 #include <ngrs/nmemo.h>
+#include <ngrs/nradiobutton.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -67,8 +68,13 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1024,768);
 
-  testMenu();
+  NRadioButton* rBtn = new NRadioButton();
+    rBtn->setPosition(10,10,200,30);
+    rBtn->setText("Hallo");
+  pane()->add(rBtn);
 
+  //testMenu();
+  //testMemo();
   //testListBox();
 
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
@@ -346,7 +352,7 @@ void NTestWindow::testMemo( )
 //  memo->setReadOnly(true);
 
      try {
-       //memo->loadFromFile("/home/natti/ngrs3/src/ngrs/nmemo.cpp");
+       memo->loadFromFile("/home/natti/ngrs3/src/ngrs/nmemo.cpp");
      } catch (const char* e) {
        //memo->setText("sajdslka dsalkj \n dshkjhdsa ");
      }
