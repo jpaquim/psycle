@@ -57,6 +57,11 @@ public:
     void setRows(int number);
     void setColumns(int number);
 
+    void setHGap(int hgap);
+    int hGap() const;
+    void setVGap(int vgap);
+    int vGap() const;
+
     int defaultColWidth() const;
     int defaultRowHeight() const;
 
@@ -75,6 +80,9 @@ private:
 
     int cols_;
     int rows_;
+
+    int hgap_;
+    int vgap_;
 
     int colMaxWidth(int col) const;
     int colWidthBetween(int colStart, int colEnd) const;

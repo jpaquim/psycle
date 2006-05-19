@@ -135,6 +135,16 @@ void NCheckBox::onMousePressed( int x, int y, int button )
   clicked.emit(&ev);
 }
 
+void NCheckBox::setWordWrap( bool on )
+{
+  label_->setWordWrap(on);
+}
+
+bool NCheckBox::wordWrap( ) const
+{
+  return label_->wordWrap();
+}
+
 
 
 

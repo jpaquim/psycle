@@ -21,11 +21,11 @@
 #include "nvisualcomponent.h"
 
 NTableLayout::NTableLayout()
- : NLayout(), cols_(1), rows_(1)
+ : NLayout(), cols_(1), rows_(1),hgap_(0),vgap_(0)
 {
 }
 
-NTableLayout::NTableLayout( int cols, int rows ) : NLayout(), cols_(cols), rows_(rows)
+NTableLayout::NTableLayout( int cols, int rows ) : NLayout(), cols_(cols), rows_(rows),hgap_(0),vgap_(0)
 {
 }
 
@@ -42,7 +42,7 @@ void NTableLayout::align( NVisualComponent * parent )
 {
    colMaxWidthCache.clear();
 
-   int yp = 0;
+   int yp = vgap_;
 
    std::map<int,Row>::iterator rowIt = rows.begin();
    int lastRowIndex = 0;
@@ -50,12 +50,12 @@ void NTableLayout::align( NVisualComponent * parent )
       Row row = rowIt->second;
       int newRowIndex = rowIt->first;
       if ((newRowIndex-lastRowIndex) > 0) {
-         yp += defaultRowHeight() * (newRowIndex-lastRowIndex);
+         yp += (defaultRowHeight()+vgap_) * (newRowIndex-lastRowIndex);
       }
       lastRowIndex = newRowIndex + 1;
       std::map<int,NVisualComponent*>::iterator colIt = row.colMap.begin();
       int rowHeight = row.rowMaxHeight();
-      int xp = 0;
+      int xp = hgap_;
       int lastIndex = 0;
       for ( ; colIt != row.colMap.end(); colIt++) {
          NVisualComponent* visual = colIt->second;
@@ -63,7 +63,7 @@ void NTableLayout::align( NVisualComponent * parent )
          xp+= colWidthBetween(lastIndex,newIndex);
          int colWidth = colMaxWidth(newIndex);
          visual->setPosition(xp,yp,colWidth,rowHeight);
-         xp+=colWidth;
+         xp+=colWidth+hgap_;
          lastIndex = newIndex+1;
       }
       yp+=rowHeight;
@@ -210,7 +210,7 @@ int NTableLayout::colWidthBetween( int colStart, int colEnd ) const
 {
    int width = 0;
    for (int i = colStart; i < colEnd; i++) {
-      width += colMaxWidth(i);
+      width += colMaxWidth(i) + hgap_;
    }
    return width;
 }
@@ -220,6 +220,28 @@ int NTableLayout::findVerticalStart( long comparator , NVisualComponent* owner)
 {
 
 }
+
+void NTableLayout::setHGap( int hgap )
+{
+  hgap_ = hgap;
+}
+
+int NTableLayout::hGap( ) const
+{
+  return hgap_;
+}
+
+
+void NTableLayout::setVGap( int vgap )
+{
+  vgap_ = vgap;
+}
+
+int NTableLayout::vGap( ) const
+{
+  return vgap_;
+}
+
 
 
 

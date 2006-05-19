@@ -278,12 +278,12 @@ void NLabel::resize( )
   if (wbreak_) computeBreakPoints();
 }
 
-void NLabel::setWordbreak( bool on )
+void NLabel::setWordWrap( bool on )
 {
   wbreak_ = on;
 }
 
-bool NLabel::wordBreak( ) const
+bool NLabel::wordWrap( ) const
 {
   return wbreak_;
 }
