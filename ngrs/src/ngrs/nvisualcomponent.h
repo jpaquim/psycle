@@ -167,11 +167,11 @@ public:
 
     void setClientSizePolicy(int clPolicy);
 
-    void add(NRuntime* component);
-    void add(NVisualComponent* component);
-    void add(NVisualComponent* component, int align);
-    void add(NVisualComponent* component, int align, bool update);
-    void add(NVisualComponent* component, const NAlignConstraint & align, bool update);
+    virtual void add(NRuntime* component);
+    virtual void add(NVisualComponent* component);
+    virtual void add(NVisualComponent* component, int align);
+    virtual void add(NVisualComponent* component, int align, bool update);
+    virtual void add(NVisualComponent* component, const NAlignConstraint & align, bool update);
 
     void insert(NVisualComponent* component, unsigned int index);
 

@@ -68,6 +68,17 @@ void NTogglePanel::add( NCustomButton * component, int align )
   add(component);
 }
 
+void NTogglePanel::add( NCustomButton * component, const NAlignConstraint & align )
+{
+  component->setAlignConstraint(align);
+  add(component);
+}
+
+void NTogglePanel::add( NVisualComponent * component, const NAlignConstraint & align )
+{
+  NPanel::add(component,align,true);
+}
+
 void NTogglePanel::onClick( NButtonEvent * ev )
 {
   for (std::vector<NVisualComponent*>::const_iterator it=visualComponents().begin(); it<visualComponents().end(); it++) {
@@ -104,7 +115,3 @@ NVisualComponent * NTogglePanel::selectedComponent( )
 {
   return selectedComp_;
 }
-
-
-
-

@@ -37,6 +37,8 @@ public:
     virtual void add(NVisualComponent* component, int align);
     virtual void add(NCustomButton* component, int align);
     virtual void add(NCustomButton* toogleComponent);
+    virtual void add(NCustomButton* component, const NAlignConstraint & align );
+    virtual void add(NVisualComponent* component, const NAlignConstraint & align );
 
     void setDown(NCustomButton* btn);
 
