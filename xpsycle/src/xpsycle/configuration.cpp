@@ -26,6 +26,10 @@
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
 #include <ngrs/nfile.h>
+#include <sys/stat.h>
+#include <cstdlib>
+#include <stdexcept>
+#include <sstream>
 
 Configuration::Configuration()
 {
@@ -112,7 +116,9 @@ void Configuration::setSkinDefaults( )
 	pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
 	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
   #else
-  	//hlpPath = ...
+	// we don't have any information about the installation paths,
+	// so, we can only assume everything is at a fixed place, like under the user home dir
+	hlpPath = NFile::replaceTilde("~/xpsycle/doc/");
 	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
 	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
 	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
@@ -120,6 +126,7 @@ void Configuration::setSkinDefaults( )
 
   #if !defined NDEBUG
 	std::cout
+		<< "xpsycle: configuration: initial defaults:\n"
 		<< "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
 		<< "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
 		<< "xpsycle: configuration: preset dir: " << prsPath << "\n"
@@ -130,65 +137,135 @@ void Configuration::setSkinDefaults( )
   mv_triangle_size = 22;
 }
 
-void Configuration::loadConfig( )
+void Configuration::loadConfig()
 {
-  NApp::config()->tagParse.connect(this,&Configuration::onConfigTagParse);
-  std::string oldDir = NFile::workingDir();
-  NFile::cdHome();
-  try
-  {
-  	NApp::config()->loadXmlConfig(".xpsycle.xml", /* throw_allowed */ true);
-  }
-  catch(...)
-  {
-	#if !defined XPSYCLE__CONFIGURATION
-		std::cerr << "xpsycle: configuration: error: could not load any configuration file" << std::endl;
-	#else
+	NApp::config()->tagParse.connect(this,&Configuration::onConfigTagParse);
+	
+	// system-wide
+	{
+		#if !defined XPSYCLE__CONFIGURATION
+			// we don't have any information about the installation paths
+		#else
+			#include <xpsycle/install_paths.defines.hpp>
+			try
+			{
+				loadConfig(XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml");
+			}
+			catch(std::exception const & e)
+			{
+				std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
+			}
+		#endif
+	}
+	
+	// user home
+	{
 		try
 		{
-		        // there's a xpsycle.xml file installed as an example in <datadir>/doc/<package>/examples
-		        // <datadir> is configured via autoconf.
-		        // the xpsycle.xml file is configured via autoconf from xpsycle.xml.in
-		        // (note: the dot was removed so the the files in the example dir aren't hidden)
-	        	// we can copy it to the user's home dir.
-	        	{
-	        		#if !defined NDEBUG
-	        			std::cout << "xpsycle: configuration: copying default configuration file to ~/.xpsycle.xml\n";
-	        		#endif
-				#include <xpsycle/install_paths.defines.hpp>
-	        		std::string file_content(NFile::readFile(XPSYCLE__INSTALL_PATHS__DOC "/examples/xpsycle.xml"));
-		        	std::ofstream ostream(".xpsycle.xml");
-		        	ostream << file_content;
-		        }
-			NApp::config()->loadXmlConfig(".xpsycle.xml", /* throw_allowed */ true);
+			loadConfig(NFile::replaceTilde("~/.xpsycle.xml"));
 		}
-		catch(...)
+		catch(std::exception const & e)
 		{
-			// oh well
-			std::cerr << "xpsycle: configuration: error: could not load any configuration file" << std::endl;
+			std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 		}
-	#endif
-  }
-  NFile::cd(oldDir);
-
-  std::string iconXmlPath   = NFile::replaceTilde(NApp::config()->findPath("icondir"));
-  if (iconXmlPath!="") iconPath = iconXmlPath;
-  std::string pluginXmlPath = NFile::replaceTilde(NApp::config()->findPath("plugindir"));
-  if (pluginXmlPath!="") pluginPath = pluginXmlPath;
-  std::string prsXmlPath  = NFile::replaceTilde(NApp::config()->findPath("prsdir"));
-  if (prsXmlPath!="") prsPath = prsXmlPath;
-  std::string hlpXmlPath    = NFile::replaceTilde(NApp::config()->findPath("hlpdir"));
-  if (hlpXmlPath!="") hlpPath = hlpXmlPath;
-
-  #if !defined NDEBUG
-	std::cout
-		<< "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
-		<< "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
-		<< "xpsycle: configuration: preset dir: " << prsPath << "\n"
-		<< "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
-  #endif
+	}
+	
+	// environment
+	{
+		// this is most useful for developpers.
+		// you can test xpsycle directly from within the build dir,
+		// pointing various paths to the source or build dir.
+		char const * const path(std::getenv("XPSYCLE__CONFIGURATION"));
+		if(path)
+		{
+			try
+			{
+				loadConfig(path);
+			}
+			catch(std::exception const & e)
+			{
+				std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
+			}
+		}
+	}
 }
 
+void Configuration::loadConfig(std::string const & path) throw(std::exception)
+{
+	#if !defined NDEBUG
+		std::cout << "xpsycle: configuration: attempting to load file: " << path << std::endl;
+	#endif
+	
+	// check whether the file exists
+	{
+		bool file_exists;
+		{
+			struct stat s;
+			int const result(stat(path.c_str(), &s));
+			file_exists = !result;
+		}
+		if(!file_exists)
+		{
+			std::ostringstream s;
+			s << "file does not exist: " << path;
+			throw std::runtime_error(s.str());
+		}
+	}
+	
+	// parse the file
+	try
+	{
+		NApp::config()->loadXmlConfig(path, /* throw_allowed */ true);
+	}
+	catch(std::exception const & e)
+	{
+		std::ostringstream s;
+		s <<
+			"an error occured while parsing xml configuration file " << path << " ; "
+			"the settings might have been only partially loaded ; "
+			"message: " << e.what();
+		throw std::runtime_error(s.str());
+	}
+	catch(...)
+	{
+		std::ostringstream s;
+		s <<
+			"an unidentified error occured while parsing xml configuration file " << path << " ; "
+			"the settings might have been only partially loaded";
+		throw std::runtime_error(s.str());
+	}
+	
+	// the parser defaults to empty strings on missing values
+	// so we make sure not to override previous settings with empty strings
+	{
+		{
+			std::string const s(NFile::replaceTilde(NApp::config()->findPath("icondir")));
+			if(s.length()) iconPath = s;
+		}
+		{
+			std::string const s(NFile::replaceTilde(NApp::config()->findPath("plugindir")));
+			if(s.length()) pluginPath = s;
+		}
+		{
+			std::string const s(NFile::replaceTilde(NApp::config()->findPath("prsdir")));
+			if(s.length()) prsPath = s;
+		}
+		{
+			std::string const s(NFile::replaceTilde(NApp::config()->findPath("hlpdir")));
+			if(s.length()) hlpPath = s;
+		}
+	}
+
+	#if !defined NDEBUG
+		std::cout
+			<< "xpsycle: configuration: after loading file: " << path << "\n"
+			<< "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
+			<< "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
+			<< "xpsycle: configuration: preset dir: " << prsPath << "\n"
+			<< "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
+	#endif
+}
+	
 void Configuration::onConfigTagParse(const std::string & tagName )
 {
   if (tagName == "audio") {
