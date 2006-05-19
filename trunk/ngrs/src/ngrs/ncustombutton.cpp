@@ -41,16 +41,6 @@ void NCustomButton::init( )
 
   setTransparent(false);
 
-  gradient_ = new NGradient();
-     gradient_->setColor_1(NColor(200,200,205));
-     gradient_->setColor_2(NColor(230,230,255));
-     gradient_->setColor_3(NColor(200,200,205));
-     gradient_->setPercent(30);
-     gradient_->setActive(false);
-     gradient_->setHorizontal(false);
-     gradient_->setEvents(false);
-  add(gradient_);
-
   label_ = new NLabel();
     label_->setSpacing(4,2,4,2);
     label_->setHAlign(nAlCenter);
@@ -78,7 +68,6 @@ void NCustomButton::setText( const std::string & text )
 
 void NCustomButton::resize( )
 {
-  gradient_->setPosition(0,0,spacingWidth(),spacingHeight());
   label_->setPosition(0,0,spacingWidth(),spacingHeight());
 }
 
@@ -165,6 +154,16 @@ void NCustomButton::setTextHAlign( int align )
 void NCustomButton::setTextVAlign( int align )
 {
   label_->setVAlign(align);
+}
+
+NLabel * NCustomButton::label( )
+{
+  return label_;
+}
+
+NLabel * NCustomButton::label( ) const
+{
+  return label_;
 }
 
 

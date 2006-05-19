@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,65 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCUSTOMBUTTON_H
-#define NCUSTOMBUTTON_H
+#ifndef NRADIOBUTTON_H
+#define NRADIOBUTTON_H
 
-#include "npanel.h"
-
-class NLabel;
-class NBevelBorder;
-class NGradient;
+#include <ncustombutton.h>
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
-class NCustomButton : public NPanel
+class NRadioButton : public NCustomButton
 {
 public:
-   NCustomButton();
-   NCustomButton(const std::string & text);
+    NRadioButton();
 
-   ~NCustomButton();
+    ~NRadioButton();
 
-   void setText(const std::string & text);
-   const std::string & text() const;
+    virtual void paint( NGraphics* g );
 
-   void setTextHAlign(int align);
-   void setTextVAlign(int align);
+    virtual void resize();
 
-   virtual void setMnemonic(char c);
-   char mnemonic();
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
-   virtual void resize();
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
-
-   virtual void onMousePress (int x, int y, int button);
-   virtual void onMousePressed (int x, int y, int button);
-
-   signal1<NButtonEvent*> click;
-   signal1<NButtonEvent*> clicked;
-
-   void setToggle(bool on);
-   bool toggle() const;
-   bool down() const;
-
-   virtual void setDown(bool on);
-   virtual void onMessage(NEvent* ev);
-
-protected:
-
-   NLabel* label();
-   NLabel* label() const;
-
-private:
-
-   NLabel* label_;
-
-   void init();
-
-   bool down_;
-   bool toggle_;
+    virtual void setDown(bool on);
 
 };
 

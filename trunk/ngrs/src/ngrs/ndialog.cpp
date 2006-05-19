@@ -33,6 +33,7 @@ NDialog::~NDialog()
 
 bool NDialog::execute( )
 {
+  setPositionToScreenCenter();
   setVisible(true);
   return do_execute;
 }

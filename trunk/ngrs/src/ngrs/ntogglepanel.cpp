@@ -57,6 +57,17 @@ void NTogglePanel::add( NCustomButton * toggleComponent )
   NPanel::add(toggleComponent);
 }
 
+void NTogglePanel::add( NVisualComponent * component, int align )
+{
+   NPanel::add(component,align);
+}
+
+void NTogglePanel::add( NCustomButton * component, int align )
+{
+  component->setAlign(align);
+  add(component);
+}
+
 void NTogglePanel::onClick( NButtonEvent * ev )
 {
   for (std::vector<NVisualComponent*>::const_iterator it=visualComponents().begin(); it<visualComponents().end(); it++) {
@@ -88,14 +99,12 @@ void NTogglePanel::setDown( NCustomButton * btn )
   repaint();
 }
 
-void NTogglePanel::add( NVisualComponent * component, int align )
-{
-   NPanel::add(component,align);
-}
 
 NVisualComponent * NTogglePanel::selectedComponent( )
 {
   return selectedComp_;
 }
+
+
 
 

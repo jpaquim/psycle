@@ -323,6 +323,7 @@ void NSystem::setWindowPosition(Window win, int left, int top, int width, int he
     unsigned int value = CWX | CWY;
     XConfigureWindow(dpy(),win,value,&wc);
   }
+  XSync(dpy(),false);
 }
 
 void NSystem::destroyWindow( Window win )

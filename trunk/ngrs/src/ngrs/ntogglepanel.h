@@ -34,8 +34,9 @@ public:
 
     ~NTogglePanel();
 
-    void add(NVisualComponent* component, int align);
-    void add(NCustomButton* toogleComponent);
+    virtual void add(NVisualComponent* component, int align);
+    virtual void add(NCustomButton* component, int align);
+    virtual void add(NCustomButton* toogleComponent);
 
     void setDown(NCustomButton* btn);
 
