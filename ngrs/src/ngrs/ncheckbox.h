@@ -47,6 +47,10 @@ public:
    void setCheck(bool on);
    bool checked() const;
 
+   void setWordWrap(bool on);
+   bool wordWrap() const;
+
+
    virtual int preferredWidth() const;
    virtual int preferredHeight() const;
 

@@ -56,8 +56,8 @@ public:
 
    void resize();
 
-   void setWordbreak(bool on);
-   bool wordBreak() const;
+   void setWordWrap(bool on);
+   bool wordWrap() const;
 
 private:
 

@@ -55,7 +55,7 @@ void NMessageBox::init( )
 
   textLbl = new NLabel();
   pane()->add(textLbl,nAlClient);
-  textLbl->setWordbreak(true);
+  textLbl->setWordWrap(true);
 
   setPosition(10,10,300,150);
   setTitle("Message");
