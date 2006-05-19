@@ -27,6 +27,7 @@
 #include "vumeter.h"
 #include "instrumenteditor.h"
 #include "infodlg.h"
+#include "wavesavedlg.h"
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
 #include <ngrs/ncheckmenuitem.h>
@@ -67,11 +68,10 @@ void MainWindow::initMenu( )
     fileMenu_->add(new NMenuItem("Import Module"));
     fileMenu_->add(new NMenuItem("Save"));
     fileMenu_->add(new NMenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
-    fileMenu_->add(new NMenuItem("Render as Wav"));
+    fileMenu_->add(new NMenuItem("Render as Wav"))->click.connect(this,&MainWindow::onRenderAsWave);
     fileMenu_->add(new NMenuSeperator());
     fileMenu_->add(new NMenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
     fileMenu_->add(new NMenuSeperator());
-    fileMenu_->add(new NMenuItem("Song properties"));
     fileMenu_->add(new NMenuItem("revert to saved"));
     fileMenu_->add(new NMenuItem("recent files"));
     fileMenu_->add(new NMenuItem("exit"));
@@ -105,9 +105,11 @@ void MainWindow::initMenu( )
      viewMenu_->add(new NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
      viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
      viewMenu_->add(new NMenuSeperator());
-     viewMenu_->add(new NMenuItem("PatternEditor"));
-     viewMenu_->add(new NMenuItem("PatternSequencer"));
-     viewMenu_->add(new NMenuItem("Add machine"));
+     viewMenu_->add(new NMenuItem("PatternEditor"))->click.connect(this,&MainWindow::onPatternView);
+     viewMenu_->add(new NMenuItem("MachineView"))->click.connect(this,&MainWindow::onMachineView);
+     viewMenu_->add(new NMenuItem("PatternSequencer"))->click.connect(this,&MainWindow::onSequencerView);
+     viewMenu_->add(new NMenuSeperator());
+     viewMenu_->add(new NMenuItem("Add machine"))->click.connect(this,&MainWindow::onNewMachine);
      viewMenu_->add(new NMenuSeperator());
      viewMenu_->add(new NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
    menuBar_->add(viewMenu_);
@@ -156,6 +158,7 @@ void MainWindow::initDialogs( )
   add(wavRecFileDlg);
   // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
   add( infoDlg =  new InfoDlg() );
+  add( wavSaveDlg = new WaveSaveDlg() );
 }
 
 // events from menuItems
@@ -1152,4 +1155,16 @@ void MainWindow::onHelpMenuKeys( NButtonEvent * ev )
 {
   infoDlg->loadFromFile(Global::pConfig()->hlpPath+"whatsnew.txt");
   infoDlg->setVisible(true);
+}
+
+void MainWindow::onNewMachine( NButtonEvent * ev )
+{
+  childView_->onMachineViewDblClick(ev);
+}
+
+void MainWindow::onRenderAsWave( NButtonEvent * ev )
+{
+  if (wavSaveDlg->execute()) {
+
+  }
 }
