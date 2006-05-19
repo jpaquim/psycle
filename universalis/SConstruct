@@ -138,9 +138,10 @@ if False:
 	packageneric.environment().Alias('install', install.prefix)
 
 # stuff ...
+if True:
+	packageneric.trace(str(universalis.get_sources()))
+	packageneric.trace(str(universalis.get_headers()))
 if False:
-	print universalis.get_sources()
-	print universalis.get_headers()
 	universalis.scons()
 
 # debian packages
