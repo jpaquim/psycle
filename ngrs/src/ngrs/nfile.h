@@ -42,6 +42,7 @@ public:
     static void cd( const std::string & path );
     static void cdHome();
     static std::string replaceTilde(const std::string & path);
+    static std::string getEnv(const std::string & envName);
 };
 
 #endif

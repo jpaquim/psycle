@@ -185,3 +185,10 @@ bool NFile::fileIsReadable( const std::string & file )
    if (!_stream.is_open ()) return false;
    return true;
 }
+
+std::string NFile::getEnv( const std::string & envName )
+{
+  char env[8000];
+  strncpy(env,getenv("HOME"),7999);
+  return std::string(env);
+}
