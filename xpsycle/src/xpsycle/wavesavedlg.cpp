@@ -45,6 +45,8 @@ WaveSaveDlg::WaveSaveDlg()
 {
   autostop = playblock = loopsong = saving = 0;
   rate = -1;
+  m_recmode = 0;
+  channelmode = -1;
 
   for (int i; i < MAX_SONG_POSITIONS; i++) sel[i] = 0;
 
@@ -148,13 +150,13 @@ WaveSaveDlg::WaveSaveDlg()
   pane()->add(progressBar,nAlTop);
   NPanel* btnPanel = new NPanel();
     btnPanel->setLayout(NFlowLayout(nAlRight,5,5));
-    NButton* closeBtn = new NButton("Close");
+    closeBtn = new NButton("Close");
       closeBtn->setFlat(false);
       closeBtn->clicked.connect(this,&WaveSaveDlg::onCloseBtn);
     btnPanel->add(closeBtn);
     NButton* saveBtn  = new NButton("Save as Wav");
       saveBtn->setFlat(false);
-      //saveBtn->clicked.connect(this,&WaveSaveDlg::onSaveBtn);
+      saveBtn->clicked.connect(this,&WaveSaveDlg::onSaveBtn);
     btnPanel->add(saveBtn);
   pane()->add(btnPanel,nAlTop);
 
@@ -180,7 +182,6 @@ void WaveSaveDlg::initVars( )
   Song* pSong = Global::pSong();
 
   name+= Global::pSong()->fileName;
-  std::cout << "j" << name << std::endl;
   name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
   name+=".wav";
   pathEdt->setText(name);
@@ -194,24 +195,24 @@ void WaveSaveDlg::initVars( )
   sprintf(num,"%02x",pSong->playLength-1);
   toEdt->setText(num);
 
-/*  if ( (rate < 0) || (rate >5) )
+  if ( (rate < 0) || (rate >5) )
   {
-     if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8192)
+     if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 8192)
      {
        rate = 0;
      }
-     else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 11025)
+     else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 11025)
      {
        rate = 1;
-     } else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
+     } else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 22050)
      {
        rate = 2;
      }
-     else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
+     else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 44100)
      {
        rate = 3;
      }
-     else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
+     else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 48000)
      {
        rate = 4;
      }
@@ -219,7 +220,32 @@ void WaveSaveDlg::initVars( )
      {
        rate = 5;
      }
-  }*/
+  }
+
+  if ((channelmode < 0) || (channelmode > 3))
+  {
+    channelmode = Global::pConfig()->_pOutputDriver->_channelmode;
+  }
+
+  if ((bits < 0) || (bits > 3))
+  {
+    if (Global::pConfig()->_pOutputDriver->_bitDepth <= 8)
+    {
+      bits = 0;
+    }
+    else if (Global::pConfig()->_pOutputDriver->_bitDepth <= 16)
+    {
+      bits = 1;
+    }
+    else if (Global::pConfig()->_pOutputDriver->_bitDepth <= 24)
+    {
+      bits = 2;
+    }
+    else if (Global::pConfig()->_pOutputDriver->_bitDepth <= 32)
+    {
+      bits = 3;
+    }
+  }
 }
 
 void WaveSaveDlg::onBrowseBtn( NButtonEvent * ev )
@@ -238,6 +264,12 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
   Song *pSong     = Global::pSong();
   Player *pPlayer = Global::pPlayer();
 
+  closeBtn->setText("Stop");
+  pane()->resize();
+  pane()->repaint();
+
+  autostop = Global::pConfig()->autoStopMachines;
+
   if ( Global::pConfig()->autoStopMachines )
   {
     Global::pConfig()->autoStopMachines = false;
@@ -254,6 +286,11 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
   loopsong = pPlayer->_loopSong;
   memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
   memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
+
+  std::string name = pathEdt->text();
+
+  rootname = name;
+  rootname=rootname.substr(0,std::max(std::string::size_type(0),rootname.length()-4));
 
   const int real_rate[]={8192,11025,22050,44100,48000,96000};
   const int real_bits[]={8,16,24,32};
@@ -377,7 +414,7 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
     current = 256;
     saveEnd();
   } else {
-    //saveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
+     saveWav(name,real_bits[bits],real_rate[rate],channelmode);
   }
 }
 
@@ -404,14 +441,13 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
 
   int tmp;
   int cont;
-  //CString name;
+
+  std::string name;
 
   int pstart;
-//  kill_thread = 0;
+  kill_thread = 0;
   int tickcont=0;
   int lastlinetick=0;
-  int lastpostick=0;
-  int m_patnumber=0;
   int i,j;
 
   int m_recmode = 0;
@@ -475,6 +511,128 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
 
 void WaveSaveDlg::saveEnd( )
 {
+  saving=false;
+  kill_thread=1;
+  if ( autostop )
+  {
+    Global::pConfig()->autoStopMachines=true;
+  }
+  Global::pPlayer()->_playBlock = playblock;
+  Global::pPlayer()->_loopSong  = loopsong;
+  memcpy(Global::pSong()->playOrderSel,sel,MAX_SONG_POSITIONS);
+  Global::pConfig()->_pOutputDriver->Enable(true);
+  //Global::pConfig->_pMidiInput->Open();
+
+  if ( trackChkBox->checked() )
+  {
+    Song *pSong = Global::pSong();
+
+    const int real_rate[]={8192,11025,22050,44100,48000,96000};
+    const int real_bits[]={8,16,24,32};
+
+    for (int i = current+1; i < pSong->SONGTRACKS; i++)
+    {
+      if (!_Muted[i])
+      {
+        current = i;
+        for (int j = 0; j < pSong->SONGTRACKS; j++)
+        {
+          if (j != i)
+          {
+            pSong->_trackMuted[j] = true;
+          } else {
+            pSong->_trackMuted[j] = false;
+          }
+        }
+        // now save the song
+        char filename[8000];
+        sprintf(filename,"%s-track %.2u.wav",rootname,i);
+        saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+        return;
+      }
+    }
+    memcpy(pSong->_trackMuted,_Muted,sizeof(pSong->_trackMuted));
+  }
+  else if ( wireChkBox->checked() ) {
+    Song *pSong = Global::pSong();
+
+    const int real_rate[]={8192,11025,22050,44100,48000,96000};
+    const int real_bits[]={8,16,24,32};
+
+    for (int i = current+1; i < MAX_CONNECTIONS; i++)
+    {
+       if (!_Muted[i])
+       {
+          current = i;
+          for (int j = 0; j < MAX_CONNECTIONS; j++)
+          {
+             if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j]) {
+               if (j != i)
+               {
+                 pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
+               } else {
+                 pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
+               }
+             }
+           }
+           // now save the song
+           char filename[8000];
+           sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+           saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+           return;
+        }
+      }
+
+      for (int i = 0; i < MAX_CONNECTIONS; i++)
+      {
+        if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
+        {
+          pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute = _Muted[i];
+        }
+      }
+    } else if ( generatorChkBox->checked() ) {
+       Song *pSong = Global::pSong();
+
+       const int real_rate[]={8192,11025,22050,44100,48000,96000};
+       const int real_bits[]={8,16,24,32};
+
+       for (int i = current+1; i < MAX_BUSES; i++)
+       {
+         if (!_Muted[i])
+         {
+           current = i;
+           for (int j = 0; j < MAX_BUSES; j++)
+           {
+             if (pSong->_pMachine[j])
+             {
+               if (j != i)
+               {
+                 pSong->_pMachine[j]->_mute = true;
+               } else
+               {
+                 pSong->_pMachine[j]->_mute = false;
+               }
+             }
+           }
+        // now save the song
+        char filename[8000];
+        sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
+        saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+        return;
+      }
+    }
+
+    for (int i = 0; i < MAX_BUSES; i++)
+    {
+      if (pSong->_pMachine[i]) {
+        pSong->_pMachine[i]->_mute = _Muted[i];
+      }
+    }
+  }
+
+  closeBtn->setText("Close");
+  pane()->resize();
+  pane()->repaint();
 }
 
 int WaveSaveDlg::audioOutThread( void * ptr )
@@ -492,7 +650,7 @@ int WaveSaveDlg::audioOutThread( void * ptr )
       pWaveSaveDlg->saveEnd();
       pWaveSaveDlg->threadopen--;
       //ExitThread(0);
-      //return 0;
+      return 0;
     }
     pPlayer->Work(pPlayer,stream_size);
     pWaveSaveDlg->saveTick();
@@ -503,7 +661,7 @@ int WaveSaveDlg::audioOutThread( void * ptr )
   pWaveSaveDlg->saveEnd();
   pWaveSaveDlg->threadopen--;
   //ExitThread(0);
-  //return 0;
+  return 0;
 }
 
 void WaveSaveDlg::saveTick( )

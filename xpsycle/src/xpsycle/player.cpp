@@ -526,7 +526,7 @@ void Player::AdvancePosition( )
   {
      // Don't loop the recording
      if(_recording) {
-        //StopRecording();
+        StopRecording(true);
      }
      if( _loopSong ) {
         _playPosition = 0;

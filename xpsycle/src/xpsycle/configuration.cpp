@@ -103,10 +103,12 @@ void Configuration::setSkinDefaults( )
   machineGUITitleColor.setHCOLORREF(0x00000000);
   machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
 
-  _numOutputDrivers = 1;
+  // audio driver configuration
+  _numOutputDrivers = 2;
   _ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
-  _ppOutputDrivers[0] = new AlsaOut();
-  _outputDriverIndex = 0;
+  _ppOutputDrivers[0] = new AudioDriver;
+  _ppOutputDrivers[1] = new AlsaOut();
+  _outputDriverIndex = 1;
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
   #if defined XPSYCLE__CONFIGURATION
@@ -256,6 +258,10 @@ void Configuration::onConfigTagParse(const std::string & tagName )
      int enable = 0;
      if (enableStr != "") enable = str<int>(enableStr);
      enableSound = enable;
+     if (enable == 0) {
+        _outputDriverIndex = 0;
+       _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
+     }
   }
 
   if (tagName == "key") {

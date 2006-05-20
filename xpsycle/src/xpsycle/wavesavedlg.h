@@ -29,6 +29,7 @@ class NCheckBox;
 class NRadioButton;
 class NComboBox;
 class NProgressBar;
+class NButton;
 
 /**
 @author Stefan Nattkemper
@@ -67,6 +68,7 @@ private:
     NComboBox* bitDepthCbx;
     NComboBox* channelsCbx;
     NProgressBar* progressBar;
+    NButton* closeBtn;
 
     // psycle sound engine variables
     int rate;
@@ -85,6 +87,7 @@ private:
     bool saving;
     int current;
     std::string rootname;
+    int m_recmode;
 
     void saveWav(std::string file, int bits, int rate, int channelmode);
 
