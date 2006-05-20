@@ -2,7 +2,7 @@
 
 import sys
 
-def do_one_file(path):
+def do_one_file(path, tabs_to_spaces):
 	f = file(path, 'r')
 	lines = f.readlines()
 	f.close()
@@ -14,7 +14,7 @@ def do_one_file(path):
 			if indentation:
 				if char == '\t':
 					tab_found = True
-					chars.append(' ' * 2)
+					chars.append(' ' * tabs_to_spaces)
 					continue
 				elif char != ' ':
 					indentation = False
@@ -28,4 +28,4 @@ def do_one_file(path):
 
 if __name__ == '__main__':
 	for path in sys.argv[1:]:
-		do_one_file(path)
+		do_one_file(path, 2)

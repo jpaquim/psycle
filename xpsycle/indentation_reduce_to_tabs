@@ -1,0 +1,41 @@
+#! /usr/bin/env python
+
+import sys
+
+def do_one_file(path, spaces_to_tab):
+	f = file(path, 'r')
+	lines = f.readlines()
+	f.close()
+	chars = []
+	space_found = False
+	line_number = 0
+	for line in lines:
+		line_number += 1
+		indentation = True
+		spaces = 0
+		for char in line:
+			if indentation:
+				if char == ' ':
+					space_found = True
+					spaces += 1
+					if spaces == spaces_to_tab:
+						chars.append('\t')
+						spaces = 0
+					continue
+				elif char != ' ':
+					indentation = False
+					if spaces != 0: # sometimes indentation with spaces is inconsistent, using varying lengths
+						print sys.argv[0] + ':', 'inconsistent space indentation found in file:', path, '; line:', line_number
+						return # manual fix
+						chars.append('\t')
+			chars.append(char)
+	if space_found:
+		print sys.argv[0] + ':', 'found indentation space in file:', path, '; replacing ...'
+		f = file(path, 'w')
+		for char in chars:
+			f.write(char)
+		f.close()
+
+if __name__ == '__main__':
+	for path in sys.argv[1:]:
+		do_one_file(path, 2)
