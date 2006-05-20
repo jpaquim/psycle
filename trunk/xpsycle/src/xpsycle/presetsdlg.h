@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef PRESETSDLG_H
 #define PRESETSDLG_H
 
@@ -35,15 +35,15 @@ class FrameMachine;
 class Preset {
   public:
 
-     Preset();
+      Preset();
 
-     Preset(int numpars, int dataSize);
+      Preset(int numpars, int dataSize);
 
-     void loadFromFile(DeSerializer* f);
+      void loadFromFile(DeSerializer* f);
 
-     const std::string & name() const;
+      const std::string & name() const;
 
-     void tweakMachine(Machine* mac);
+      void tweakMachine(Machine* mac);
 
   private:
 
@@ -67,15 +67,15 @@ public:
 
 private:
 
-   NListBox* lBox;
-   FrameMachine* fMac;
+    NListBox* lBox;
+    FrameMachine* fMac;
 
-   void loadPresets();
-   void addPreset(const std::string & name);
+    void loadPresets();
+    void addPreset(const std::string & name);
 
-   std::map<std::string,Preset> presetMap;
+    std::map<std::string,Preset> presetMap;
 
-   void onUseClicked(NButtonEvent* ev);
+    void onUseClicked(NButtonEvent* ev);
 
 };
 

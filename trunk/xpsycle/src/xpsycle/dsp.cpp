@@ -39,5 +39,5 @@ namespace dsp
       _dTable[i] = float( 0.5*x*x*x - 0.5*x*x);
       _lTable[i] = x;
     }
-   }
+    }
 }

@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef DESERIALIZER_H
 #define DESERIALIZER_H
 
@@ -43,8 +43,8 @@ public:
     DeSerializer (std::string const & nameFile) throw (const char *)
         : _stream (nameFile.c_str (), std::ios_base::in | std::ios_base::binary)
     {
-       std::cout << nameFile.c_str() << std::endl;
-       if (!_stream.is_open ()) throw "couldn't open file";
+        std::cout << nameFile.c_str() << std::endl;
+        if (!_stream.is_open ()) throw "couldn't open file";
         _stream.seekg (0, std::ios::beg);
     }
 
@@ -57,35 +57,35 @@ public:
     }
 
     std::size_t getPos() {
-     return  _stream.tellg();
+      return  _stream.tellg();
     }
 
     bool readString(char* pData, long maxBytes)
     {
       if(maxBytes > 0) {
-         memset(pData,0,maxBytes);
-         char c;
-         for(long index = 0; index < maxBytes; index++)
-         {
-           if ( (c=_stream.get())!=EOF)
-           {
+          memset(pData,0,maxBytes);
+          char c;
+          for(long index = 0; index < maxBytes; index++)
+          {
+            if ( (c=_stream.get())!=EOF)
+            {
               pData[index] = c;
               if(c == '\0') return true;
-           }
-         }
-         if (c==EOF) return true; else false;
-       }
+            }
+          }
+          if (c==EOF) return true; else false;
+        }
       return false;
     }
 
     bool checkVersion(int currentVer) {
-       int version = getVersion();
-       int size    = getSize();
-       if (version > currentVer) {
-         skip(size);
-         return false;
-       }
-       return true;
+        int version = getVersion();
+        int size    = getSize();
+        if (version > currentVer) {
+          skip(size);
+          return false;
+        }
+        return true;
     }
 
     void read(byte * buf, int bytes) {
@@ -150,19 +150,19 @@ public:
     }
 
     int getVersion() {
-       return getInt();
+        return getInt();
     }
 
     int getSize() {
-       return getInt();
+        return getInt();
     }
 
     bool eof() {
-       return _stream.eof();
+        return _stream.eof();
     }
 
     void skip(int offset) {
-       _stream.seekg(offset, std::ios::cur);
+        _stream.seekg(offset, std::ios::cur);
     }
 
     std::string getHeader4()
@@ -229,7 +229,7 @@ public:
       while(wave_format.header.ckID != FourCC("fmt "))
       {
         //Skip (wave_format.header.ckSize);// read each block until we find the correct one
-                                           // we didn't find our header, so move back and try again
+                                            // we didn't find our header, so move back and try again
         skip(1 - sizeof wave_format.header);
         read ((char*) &wave_format.header, sizeof(wave_format.header) );
       }
@@ -238,8 +238,8 @@ public:
 
       if(!wave_format.VerifyValidity())
       {
-           // This isn't standard PCM, so we don't know what it is!
-           throw "DDC_FILE_ERROR";
+            // This isn't standard PCM, so we don't know what it is!
+            throw "DDC_FILE_ERROR";
       }
       pcm_data_offset = getPos();
       read ((char*) &pcm_data, sizeof(pcm_data) );
@@ -256,7 +256,7 @@ public:
       num_samples /= NumChannels();
       num_samples /= (BitsPerSample() / 8);
     } catch (const char* e) {
-       throw "RFM_UNKNOWN";
+        throw "RFM_UNKNOWN";
     }
   }
 

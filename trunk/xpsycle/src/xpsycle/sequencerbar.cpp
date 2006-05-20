@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "sequencerbar.h"
 #include "global.h"
 #include "song.h"
@@ -32,7 +32,7 @@
 
 
 SequencerBar::SequencerBar()
- : NPanel()
+  : NPanel()
 {
   init();
 }
@@ -73,23 +73,23 @@ void SequencerBar::init( )
 
     NImage* img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "plus.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "plus.xpm");
     btnBar->add( incshort_     = new NButton(img));
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->minus()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "minus.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "minus.xpm");
     btnBar->add( decshort_     = new NButton( img));
 
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus1()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "plus1.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "plus1.xpm");
     btnBar->add( inclong_     = new NButton( img));
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->minus1()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "minus1.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "minus1.xpm");
     btnBar->add( declong_     = new NButton( img));
 
     btnBar->add( seqnew_       = new NButton("New"));
@@ -153,7 +153,7 @@ void SequencerBar::init( )
     lengthPanel->setLayout(NFlowLayout(nAlLeft,5,0));
     lengthPanel->add(new NLabel("Len"));
     NPanel* spacer = new NPanel();
-       spacer->setPreferredSize(16,10);
+        spacer->setPreferredSize(16,10);
     lengthPanel->add(spacer);
     N7SegDisplay* sampCountSeg = new N7SegDisplay(3);
       sampCountSeg->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
@@ -162,12 +162,12 @@ void SequencerBar::init( )
   add(lengthPanel);
 
   NPanel* lenPanel = new NPanel();
-   lenPanel->setLayout(NFlowLayout(nAlLeft,5,0));
-   lenPanel->add( new NLabel("Len"));
+    lenPanel->setLayout(NFlowLayout(nAlLeft,5,0));
+    lenPanel->add( new NLabel("Len"));
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
     lenPanel->add( declen_     = new NButton( img,40,10));
     declen_->clicked.connect(this,&SequencerBar::onDecLen);
 
@@ -183,10 +183,10 @@ void SequencerBar::init( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
     lenPanel->add( inclen_     = new NButton( img,40,10));
     inclen_->clicked.connect(this,&SequencerBar::onIncLen);
-   lenPanel->resize();
+    lenPanel->resize();
   add(lenPanel);
 
   NPanel* checkPanel = new NPanel();
@@ -322,16 +322,16 @@ void SequencerBar::onSeqNew( NButtonEvent * ev )
   }
 
   if(Global::pSong()->playLength<(MAX_SONG_POSITIONS-1)) {
-     //m_wndView.AddUndoSequence(pSong()->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-       ++Global::pSong()->playLength;
+      //m_wndView.AddUndoSequence(pSong()->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+        ++Global::pSong()->playLength;
 
-       int const pop = editPosition;
-       for(int c=(Global::pSong()->playLength-1);c >= pop;c--) {
-         Global::pSong()->playOrder[c]=Global::pSong()->playOrder[c-1];
-       }
-       Global::pSong()->playOrder[editPosition]=Global::pSong()->GetBlankPatternUnused();
+        int const pop = editPosition;
+        for(int c=(Global::pSong()->playLength-1);c >= pop;c--) {
+          Global::pSong()->playOrder[c]=Global::pSong()->playOrder[c-1];
+        }
+        Global::pSong()->playOrder[editPosition]=Global::pSong()->GetBlankPatternUnused();
 
-       if ( Global::pSong()->playOrder[editPosition]>= MAX_PATTERNS ) {
+        if ( Global::pSong()->playOrder[editPosition]>= MAX_PATTERNS ) {
         Global::pSong()->playOrder[editPosition]=MAX_PATTERNS-1;
       }
 
@@ -341,7 +341,7 @@ void SequencerBar::onSeqNew( NButtonEvent * ev )
       updateSequencer();
       seqList_->repaint();
       patternView_->repaint();
-   }
+    }
 //   m_wndView.SetFocus();
 }
 
@@ -375,12 +375,12 @@ void SequencerBar::updatePlayOrder(bool mode)
 
       for (int l = 0; l < Global::pSong()->patternLines[pattern]*MULTIPLY; l+=MULTIPLY) {
         for (int t = 0; t < Global::pSong()->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE) {
-           PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
-           switch (pEntry->_cmd) {
+            PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
+            switch (pEntry->_cmd) {
               case 0xFF:
                 if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
                 {
-                   bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+                    bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
                 }
               break;
 
@@ -390,10 +390,10 @@ void SequencerBar::updatePlayOrder(bool mode)
                     tpb=pEntry->_parameter;
                 }
               break;
-           }
+            }
         }
         songLength += (60.0f/(bpm * tpb));
-     }
+      }
   }
 
   lenSeg1->setNumber((int)(songLength / 60));
@@ -448,9 +448,9 @@ void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
 
   if((ep!=patternView_->editPosition())) {
       if ((Global::pPlayer()->_playing) && (Global::pConfig()->_followSong)) {
-         bool b = Global::pPlayer()->_playBlock;
-         Global::pPlayer()->Start(ep,0);
-         Global::pPlayer()->_playBlock = b;
+          bool b = Global::pPlayer()->_playBlock;
+          Global::pPlayer()->Start(ep,0);
+          Global::pPlayer()->_playBlock = b;
       }
       patternView_->setEditPosition(ep);
       patternView_->setPrevEditPosition(ep);
@@ -470,32 +470,32 @@ void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
 void SequencerBar::onSeqIns( NButtonEvent * ev )
 {
   if(Global::pSong()->playLength<(MAX_SONG_POSITIONS-1)) {
-     //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-     ++Global::pSong()->playLength;
+      //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+      ++Global::pSong()->playLength;
 
-     patternView_->setEditPosition(patternView_->editPosition()+1);
-     int const pop=patternView_->editPosition();
-     for(int c=(Global::pSong()->playLength-1);c>=pop;c--) {
+      patternView_->setEditPosition(patternView_->editPosition()+1);
+      int const pop=patternView_->editPosition();
+      for(int c=(Global::pSong()->playLength-1);c>=pop;c--) {
         Global::pSong()->playOrder[c]=Global::pSong()->playOrder[c-1];
-     }
+      }
 
-     updatePlayOrder(true);
-     updateSequencer();
-     seqList_->repaint();
+      updatePlayOrder(true);
+      updateSequencer();
+      seqList_->repaint();
 
-     patternView_->repaint();
+      patternView_->repaint();
   }
   //m_wndView.SetFocus();
 }
 
 void SequencerBar::onSeqCopy( NButtonEvent * ev )
 {
-   seqCopyBuffer = seqList_->selIndexList();
+    seqCopyBuffer = seqList_->selIndexList();
 
-   std::sort( seqCopyBuffer.begin(), seqCopyBuffer.end());
+    std::sort( seqCopyBuffer.begin(), seqCopyBuffer.end());
 
-   for (std::vector<int>::iterator it = seqCopyBuffer.begin(); it < seqCopyBuffer.end(); it++)
-     *it = Global::pSong()->playOrder[*it];
+    for (std::vector<int>::iterator it = seqCopyBuffer.begin(); it < seqCopyBuffer.end(); it++)
+      *it = Global::pSong()->playOrder[*it];
 
 }
 
@@ -522,7 +522,7 @@ void SequencerBar::onSeqPaste( NButtonEvent * ev )
     updatePlayOrder(true);
     for(int i(patternView_->editPosition() + 1 - pastedcount) ; i < patternView_->editPosition() ; ++i)
     {
-       Global::pSong()->playOrderSel[i] = true;
+        Global::pSong()->playOrderSel[i] = true;
     }
     updateSequencer();
     seqList_->repaint();
@@ -532,15 +532,15 @@ void SequencerBar::onSeqPaste( NButtonEvent * ev )
 
 void SequencerBar::onSeqSort( NButtonEvent * ev )
 {
-   //m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-   unsigned char oldtonew[MAX_PATTERNS];
-   unsigned char newtoold[MAX_PATTERNS];
-   memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
-   memset(newtoold,255,MAX_PATTERNS*sizeof(char));
+    //m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+    unsigned char oldtonew[MAX_PATTERNS];
+    unsigned char newtoold[MAX_PATTERNS];
+    memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
+    memset(newtoold,255,MAX_PATTERNS*sizeof(char));
 
-   // Part one, Read patterns from sequence and assign them a new ordered number.
-   unsigned char freep=0;
-   for ( int i=0 ; i<Global::pSong()->playLength ; i++ ) {
+    // Part one, Read patterns from sequence and assign them a new ordered number.
+    unsigned char freep=0;
+    for ( int i=0 ; i<Global::pSong()->playLength ; i++ ) {
       const char cp= Global::pSong()->playOrder[i];
       if ( oldtonew[cp] == 255 ) // else, we have processed it already
       {
@@ -548,30 +548,30 @@ void SequencerBar::onSeqSort( NButtonEvent * ev )
         newtoold[freep]=cp;
         freep++;
       }
-   }
-   // Part one and a half. End filling the order numbers.
-   for(int i(0) ; i < MAX_PATTERNS ; ++i)
-   {
-       if ( oldtonew[i] == 255 )
-       {
-         oldtonew[i] = freep;
-         newtoold[freep] = i;
-         freep++;
-       }
-   }
-   // Part two. Sort Patterns. Take first "invalid" out, and start putting patterns in their place.
-   // When we have to put the first read one back, do it and find next candidate.
+    }
+    // Part one and a half. End filling the order numbers.
+    for(int i(0) ; i < MAX_PATTERNS ; ++i)
+    {
+        if ( oldtonew[i] == 255 )
+        {
+          oldtonew[i] = freep;
+          newtoold[freep] = i;
+          freep++;
+        }
+    }
+    // Part two. Sort Patterns. Take first "invalid" out, and start putting patterns in their place.
+    // When we have to put the first read one back, do it and find next candidate.
 
-   int patl; // first one is initial one, next one is temp one
-   char patn[32]; // ""
-   unsigned char * pData; // ""
+    int patl; // first one is initial one, next one is temp one
+    char patn[32]; // ""
+    unsigned char * pData; // ""
 
-   int idx=0;
-   int idx2=0;
+    int idx=0;
+    int idx2=0;
 
-   for(int i(0) ; i < MAX_PATTERNS ; ++i) {
-     if ( newtoold[i] != i ) // check if this place belongs to another pattern
-     {
+    for(int i(0) ; i < MAX_PATTERNS ; ++i) {
+      if ( newtoold[i] != i ) // check if this place belongs to another pattern
+      {
         pData = Global::pSong()->ppPatternData[i];
         memcpy(&patl,&Global::pSong()->patternLines[i],sizeof(int));
         memcpy(patn,&Global::pSong()->patternName[i],sizeof(char)*32);
@@ -579,14 +579,14 @@ void SequencerBar::onSeqSort( NButtonEvent * ev )
         idx = i;
         while ( newtoold[idx] != i ) // Start moving patterns while it is not the stored one.
         {
-           idx2 = newtoold[idx]; // get pattern that goes here and move.
+            idx2 = newtoold[idx]; // get pattern that goes here and move.
 
-           Global::pSong()->ppPatternData[idx] = Global::pSong()->ppPatternData[idx2];
-           memcpy(&Global::pSong()->patternLines[idx],&Global::pSong()->patternLines[idx2],sizeof(int));
-           memcpy(&Global::pSong()->patternName[idx],&Global::pSong()->patternName[idx2],sizeof(char)*32);
+            Global::pSong()->ppPatternData[idx] = Global::pSong()->ppPatternData[idx2];
+            memcpy(&Global::pSong()->patternLines[idx],&Global::pSong()->patternLines[idx2],sizeof(int));
+            memcpy(&Global::pSong()->patternName[idx],&Global::pSong()->patternName[idx2],sizeof(char)*32);
 
-           newtoold[idx]=idx; // and indicate that this pattern has been corrected.
-           idx = idx2;
+            newtoold[idx]=idx; // and indicate that this pattern has been corrected.
+            idx = idx2;
         }
 
         // Put pattern back.
@@ -602,15 +602,15 @@ void SequencerBar::onSeqSort( NButtonEvent * ev )
 
     for(int i(0) ; i < Global::pSong()->playLength ; ++i)
     {
-       Global::pSong()->playOrder[i]=oldtonew[Global::pSong()->playOrder[i]];
+        Global::pSong()->playOrder[i]=oldtonew[Global::pSong()->playOrder[i]];
     }
 
     // Part four. All the needed things.
 
-     seqCopyBuffer.clear();
-     updateSequencer();
-     seqList_->repaint();
-     patternView_->repaint();
+      seqCopyBuffer.clear();
+      updateSequencer();
+      seqList_->repaint();
+      patternView_->repaint();
     //m_wndView.SetFocus();
 }
 
@@ -682,7 +682,7 @@ void SequencerBar::onSeqClone( NButtonEvent * ev )
         Global::pSong()->playOrder[sel.back()+i+1]=newpat;
         counter++;
       } else {
-       Global::pSong()->playOrder[sel.back()+i+1]=0;
+        Global::pSong()->playOrder[sel.back()+i+1]=0;
       }
     }
     if(counter > 0)
@@ -697,39 +697,39 @@ void SequencerBar::onSeqClone( NButtonEvent * ev )
 
 void SequencerBar::onSeqClear( NButtonEvent * ev )
 {
-   // if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
+    // if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
   {
-     //m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+      //m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
   // clear sequence
-   for(int c=0;c<MAX_SONG_POSITIONS;c++) {
-     Global::pSong()->playOrder[c]=0;
-   }
-   // clear pattern data
-   Global::pSong()->DeleteAllPatterns();
-   // init a pattern for #0
-   Global::pSong()->_ppattern(0);
+    for(int c=0;c<MAX_SONG_POSITIONS;c++) {
+      Global::pSong()->playOrder[c]=0;
+    }
+    // clear pattern data
+    Global::pSong()->DeleteAllPatterns();
+    // init a pattern for #0
+    Global::pSong()->_ppattern(0);
 
-   Global::pSong()->playLength=1;
+    Global::pSong()->playLength=1;
 
-   patternView_->setEditPosition(0);
-   updatePlayOrder(true);
-   updateSequencer();
+    patternView_->setEditPosition(0);
+    updatePlayOrder(true);
+    updateSequencer();
 
-   seqList_->repaint();
-   patternView_->repaint();
-   //m_wndView.SetFocus();
- }
+    seqList_->repaint();
+    patternView_->repaint();
+    //m_wndView.SetFocus();
+  }
 }
 
 void SequencerBar::onDecLen( NButtonEvent * ev )
 {
   //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
   if(Global::pSong()->playLength>1) {
-     --Global::pSong()->playLength;
-     Global::pSong()->playOrder[Global::pSong()->playLength]=0;
-     updatePlayOrder(false);
-     updateSequencer();
-     seqList_->repaint();
+      --Global::pSong()->playLength;
+      Global::pSong()->playOrder[Global::pSong()->playLength]=0;
+      updatePlayOrder(false);
+      updateSequencer();
+      seqList_->repaint();
   }
   //m_wndView.SetFocus();
 }
@@ -738,10 +738,10 @@ void SequencerBar::onIncLen( NButtonEvent * ev )
 {
   //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
   if(Global::pSong()->playLength<(MAX_SONG_POSITIONS-1)) {
-     ++Global::pSong()->playLength;
-     updatePlayOrder(false);
-     updateSequencer();
-     seqList_->repaint();
+      ++Global::pSong()->playLength;
+      updatePlayOrder(false);
+      updateSequencer();
+      seqList_->repaint();
   }
   //m_wndView.SetFocus();
 }

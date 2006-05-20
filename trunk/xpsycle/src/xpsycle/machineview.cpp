@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "machineview.h"
 #include "song.h"
 #include "machine.h"
@@ -30,7 +30,7 @@
 
 
 MachineView::MachineView()
- : NPanel()
+  : NPanel()
 {
   setLayout(NAlignLayout());
 
@@ -60,27 +60,27 @@ void MachineView::onCreateMachine( Machine * mac )
 {
   switch (mac->_mode)
   {
-     case MACHMODE_GENERATOR: {
+      case MACHMODE_GENERATOR: {
         MachineGUI* macGui = new GeneratorGUI(mac);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
         }
-     break;
-     case MACHMODE_FX: {
+      break;
+      case MACHMODE_FX: {
         MachineGUI* macGui = new EffektGUI(mac);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
       }
-     break;
-     case MACHMODE_MASTER: {
+      break;
+      case MACHMODE_MASTER: {
         MachineGUI* macGui = new MasterGUI(mac);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           scrollArea_->add(macGui);
-         machineGUIs.push_back(macGui);
+          machineGUIs.push_back(macGui);
       }
-     break;
+      break;
   }
 }
 
@@ -107,26 +107,26 @@ void MachineView::createGUIMachines( )
   // add Wires
   for(int c=0;c<MAX_MACHINES;c++)
   {
-     Machine* tmac = Global::pSong()->_pMachine[c];
-     if (tmac) for (int w=0; w<MAX_CONNECTIONS; w++)
-     {
+      Machine* tmac = Global::pSong()->_pMachine[c];
+      if (tmac) for (int w=0; w<MAX_CONNECTIONS; w++)
+      {
         if (tmac->_connection[w]) {
-             MachineGUI* from = findByMachine(tmac);
-             if (from!=0) {
-               Machine* pout = Global::pSong()->_pMachine[tmac->_outputMachines[w]];
-               MachineGUI* to = findByMachine(pout);
-               if (to != 0) {
-                 Wire* line = new Wire();
-                 line->setPoints(NPoint(10,10),NPoint(100,100));
-                 scrollArea_->insert(line,0);
-                 from->attachLine(line,0);
-                 to->attachLine(line,1);
-                 line->dialog()->setMachines(tmac,pout);
-                 line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-               }
-             }
+              MachineGUI* from = findByMachine(tmac);
+              if (from!=0) {
+                Machine* pout = Global::pSong()->_pMachine[tmac->_outputMachines[w]];
+                MachineGUI* to = findByMachine(pout);
+                if (to != 0) {
+                  Wire* line = new Wire();
+                  line->setPoints(NPoint(10,10),NPoint(100,100));
+                  scrollArea_->insert(line,0);
+                  from->attachLine(line,0);
+                  to->attachLine(line,1);
+                  line->dialog()->setMachines(tmac,pout);
+                  line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
+                }
+              }
         }
-     }
+      }
   }
 }
 

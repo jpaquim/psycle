@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef SONG_H
 #define SONG_H
 
@@ -150,7 +150,7 @@ class Song : public NObject {
     int GetFreeFxBus();
     /// Returns the Bus index out of a pMachine index.
     int FindBusFromIndex(int smac);
-     /// Returns the first unused pattern in the pPatternData[] Array.
+      /// Returns the first unused pattern in the pPatternData[] Array.
     int GetBlankPatternUnused(int rval = 0);
     /// creates a new pattern.
     bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
@@ -175,7 +175,7 @@ class Song : public NObject {
 //    bool Load(RiffFile* pFile, bool fullopen=true);
     /// saves this song to a file.
 //    bool Save(RiffFile* pFile,bool autosave=false);
-     bool save(const std::string & fileName);
+      bool save(const std::string & fileName);
     /// Used to detect if an especific pattern index contains any data.
     bool IsPatternUsed(int i);
     ///\name previews waving
@@ -227,9 +227,9 @@ class Song : public NObject {
   const int LinesPerBeat(){return m_LinesPerBeat;};
   void LinesPerBeat(const int value)
   {
-     if ( value < 1 )m_LinesPerBeat = 1;
-     else if ( value > 31 ) m_LinesPerBeat = 31;
-     else m_LinesPerBeat = value;
+      if ( value < 1 )m_LinesPerBeat = 1;
+      else if ( value > 31 ) m_LinesPerBeat = 31;
+      else m_LinesPerBeat = value;
   };
   const bool IsInvalided(){return Invalided;};
   void IsInvalided(const bool value){Invalided = value;};

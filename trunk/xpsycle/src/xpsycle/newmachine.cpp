@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "newmachine.h"
 #include "plugin.h"
 #include <ngrs/nborderlayout.h>
@@ -26,7 +26,7 @@
 #include <ngrs/nitem.h>
 
 NewMachine::NewMachine()
- : NWindow()
+  : NWindow()
 {
   sampler_ = false;
 
@@ -79,21 +79,21 @@ NewMachine::NewMachine()
   tabBook_ = new NTabBook();
     tabBook_->setAlign(nAlClient);
     NPanel* generatorPage = new NPanel();
-       generatorPage->setLayout(NAlignLayout());
-         generatorfBox_ = new NFileListBox();
-           generatorfBox_->addFilter(".so","!S*.so!S*");
-           generatorfBox_->setMode(nFiles);
-           generatorfBox_->setAlign(nAlClient);
-           generatorfBox_->setDirectory(Global::pConfig()->pluginPath);
-           generatorfBox_->setActiveFilter(".so");
-           generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
-       generatorPage->add(generatorfBox_);
+        generatorPage->setLayout(NAlignLayout());
+          generatorfBox_ = new NFileListBox();
+            generatorfBox_->addFilter(".so","!S*.so!S*");
+            generatorfBox_->setMode(nFiles);
+            generatorfBox_->setAlign(nAlClient);
+            generatorfBox_->setDirectory(Global::pConfig()->pluginPath);
+            generatorfBox_->setActiveFilter(".so");
+            generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
+        generatorPage->add(generatorfBox_);
     NPanel* effectPage = new NPanel();
     tabBook_->addPage(effectPage,"Effects");
     tabBook_->addPage(generatorPage,"Generators");
     NListBox* internalPage_ = new NListBox();
-       internalPage_->add(new NItem("Sampler"));
-       internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
+        internalPage_->add(new NItem("Sampler"));
+        internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
   pane()->add(tabBook_);
 

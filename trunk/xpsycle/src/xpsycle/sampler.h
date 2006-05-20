@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef SAMPLER_H
 #define SAMPLER_H
 
@@ -84,7 +84,7 @@ typedef enum {
 
 
 class WaveData {
-   public:
+    public:
       short* _pL;
       short* _pR;
       bool _stereo;
@@ -153,38 +153,38 @@ public:
     virtual bool Load(DeSerializer* pFile);
 
     inline virtual bool LoadSpecificChunk(DeSerializer* pFile, int version)
-   {
-     int size =  pFile->getInt();
-     if (size)
-     {
+    {
+      int size =  pFile->getInt();
+      if (size)
+      {
         if (version > CURRENT_FILE_VERSION_MACD)
         {
-           // data is from a newer format of psycle, it might be unsafe to load.
-           pFile->skip(size);
-           return false;
+            // data is from a newer format of psycle, it might be unsafe to load.
+            pFile->skip(size);
+            return false;
         }
         else {
-           int temp;
-           temp = pFile->getInt();
-           _numVoices=temp;
-           temp = pFile->getInt();
+            int temp;
+            temp = pFile->getInt();
+            _numVoices=temp;
+            temp = pFile->getInt();
 
-           switch (temp)
-           {
-             case 2:
-               _resampler.SetQuality(dsp::R_SPLINE);
-             break;
-             case 0:
-               _resampler.SetQuality(dsp::R_NONE);
-             break;
-             default:
-             case 1:
+            switch (temp)
+            {
+              case 2:
+                _resampler.SetQuality(dsp::R_SPLINE);
+              break;
+              case 0:
+                _resampler.SetQuality(dsp::R_NONE);
+              break;
+              default:
+              case 1:
                 _resampler.SetQuality(dsp::R_LINEAR);
-             break;
-           }
-         }
-       }
-       return true;
+              break;
+            }
+          }
+        }
+        return true;
 };
 
 
@@ -207,7 +207,7 @@ protected:
     unsigned char lastInstrument[MAX_TRACKS];
     static inline int alteRand(int x)
     {
-       return (x*rand())/32768;
+        return (x*rand())/32768;
     };
 
 };

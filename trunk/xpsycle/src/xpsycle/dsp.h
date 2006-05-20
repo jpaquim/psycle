@@ -80,9 +80,9 @@ static inline void Clear(float *pDstSamples, int numSamples)
 /// converts a double to an int.
 static inline int F2I(double d)
 {
-   const double magic(6755399441055744.0); /// 2^51 + 2^52
+    const double magic(6755399441055744.0); /// 2^51 + 2^52
   /*const*/ double tmp((d-0.5) + magic);
-   return *reinterpret_cast<int*>(&tmp);
+    return *reinterpret_cast<int*>(&tmp);
 };
 
 /// finds the maximum amplitude in a signal buffer.
@@ -113,9 +113,9 @@ static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples
   }
 
   while(ns--) {
-     RMSAccumulatedLeft +=  *(++pL)**(pL);
-     RMSAccumulatedRight +=  *(++pR)**(pR);
-     countRMSSamples++;
+      RMSAccumulatedLeft +=  *(++pL)**(pL);
+      RMSAccumulatedRight +=  *(++pR)**(pR);
+      countRMSSamples++;
   };
   return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
 
@@ -173,12 +173,12 @@ static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int
 
   if (volL > vol)
   {
-   vol = volL;
+    vol = volL;
   }
 
   if (volR > vol)
   {
-   vol = volR;
+    vol = volR;
   }
   }
 
@@ -203,9 +203,9 @@ static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const
   {
     sample = *inArrayOfFloats;
     exponent = sample & 0x7F800000;
-   // exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
-   // exponent > 0 is 0 if denormalized, otherwise 1
-   *inArrayOfFloats++ = sample * ((exponent < 0x7F800000) & (exponent > 0));
+    // exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
+    // exponent > 0 is 0 if denormalized, otherwise 1
+    *inArrayOfFloats++ = sample * ((exponent < 0x7F800000) & (exponent > 0));
   }
 }
 
@@ -291,11 +291,11 @@ class Resampler
 class Cubic : public Resampler
 {
   public:
-     /// constructor.
-     Cubic();
-     /// refefinition.
-     virtual void SetQuality(ResamplerQuality quality)
-     {
+      /// constructor.
+      Cubic();
+      /// refefinition.
+      virtual void SetQuality(ResamplerQuality quality)
+      {
         _quality = quality;
         switch (quality)
         {
@@ -309,23 +309,23 @@ class Cubic : public Resampler
             _pWorkFn = Spline;
           break;
         }
-     }
+      }
 
-     virtual ResamplerQuality GetQuality(void) { return _quality; }
+      virtual ResamplerQuality GetQuality(void) { return _quality; }
 
-     protected:
+      protected:
 
-     /// interpolation work function which does linear interpolation.
-     static float Linear(const short *pData, uint64 offset, uint32 res, uint64 length)
-     {
-       float y0,y1;
-       y0 = *pData;
-       y1 =(offset+1 == length)?0:*(pData+1);
-       return (y0+(y1-y0)*_lTable[res>>21]);
-     }
-     /// interpolation work function which does spline interpolation.
-     static float Spline(const short *pData, uint64 offset, uint32 res, uint64 length)
-     {
+      /// interpolation work function which does linear interpolation.
+      static float Linear(const short *pData, uint64 offset, uint32 res, uint64 length)
+      {
+        float y0,y1;
+        y0 = *pData;
+        y1 =(offset+1 == length)?0:*(pData+1);
+        return (y0+(y1-y0)*_lTable[res>>21]);
+      }
+      /// interpolation work function which does spline interpolation.
+      static float Spline(const short *pData, uint64 offset, uint32 res, uint64 length)
+      {
         float yo, y0,y1, y2;
         res = res >> 21;
 
@@ -334,7 +334,7 @@ class Cubic : public Resampler
         y1=(offset+1 == length)?0:*(pData+1);
         y2=(offset+2 == length)?0:*(pData+2);
         return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
-     }
+      }
       
       // yo = y[-1] [sample at x-1]
       // y0 = y[0]  [sample at x (input)]

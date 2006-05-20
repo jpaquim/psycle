@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
+  ***************************************************************************/
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
@@ -91,7 +91,7 @@ class Plugin : public Machine{
 private:
   static PluginFxCallback _callback;
   public:
-     inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
+      inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
 public:
     Plugin(int index);
 
@@ -124,14 +124,14 @@ public:
     inline CMachineInfo * GetInfo() throw() { return _pInfo; };
 
 private:
-   void* _dll;
-   char _psShortName[16];
-   std::string _psAuthor;
-   std::string _psDllName;
-   std::string _psName;
-   bool _isSynth;
-   CMachineInfo * _pInfo;
-   Proxy proxy_;
+    void* _dll;
+    char _psShortName[16];
+    std::string _psAuthor;
+    std::string _psDllName;
+    std::string _psName;
+    bool _isSynth;
+    CMachineInfo * _pInfo;
+    Proxy proxy_;
 };
 
 
@@ -151,11 +151,11 @@ inline const bool Proxy::operator()() const throw() { return plugin_; }
 inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
 {
   zapObject(this->plugin_,plugin);
-   //if((*this)())
-   if(plugin) {
-       callback();
-       //Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
-   }
+    //if((*this)())
+    if(plugin) {
+        callback();
+        //Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
+    }
 }
 
 inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw()

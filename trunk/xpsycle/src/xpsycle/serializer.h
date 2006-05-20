@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef SERIALIZER_H
 #define SERIALIZER_H
 
@@ -38,7 +38,7 @@ typedef unsigned long dword;
 
 class WaveFormat_ChunkData
 {
-   public:
+    public:
       /// Format category (PCM=1)
       uint16_t         wFormatTag;
       /// Number of channels (mono=1, stereo=2)
@@ -55,11 +55,11 @@ class WaveFormat_ChunkData
         uint16_t NewNumChannels = 2
       )
       {
-         nSamplesPerSec = NewSamplingRate;
-         nChannels = NewNumChannels;
-         nBitsPerSample = NewBitsPerSample;
-         nAvgBytesPerSec = nChannels * nSamplesPerSec * nBitsPerSample / 8;
-         nBlockAlign = nChannels * nBitsPerSample / 8;
+          nSamplesPerSec = NewSamplingRate;
+          nChannels = NewNumChannels;
+          nBitsPerSample = NewBitsPerSample;
+          nAvgBytesPerSec = nChannels * nSamplesPerSec * nBitsPerSample / 8;
+          nBlockAlign = nChannels * nBitsPerSample / 8;
       }
       WaveFormat_ChunkData()
       {
@@ -80,21 +80,21 @@ class ExtRiffChunkHeader
 class WaveFormat_Chunk
 {
   public:
-     ExtRiffChunkHeader header;
-     WaveFormat_ChunkData data;
-     WaveFormat_Chunk()
-     {
-       header.ckID = FourCC("fmt");
-       header.ckSize = sizeof(WaveFormat_ChunkData);
-     }
-     bool VerifyValidity()
-     {
-       return
+      ExtRiffChunkHeader header;
+      WaveFormat_ChunkData data;
+      WaveFormat_Chunk()
+      {
+        header.ckID = FourCC("fmt");
+        header.ckSize = sizeof(WaveFormat_ChunkData);
+      }
+      bool VerifyValidity()
+      {
+        return
           header.ckID == FourCC("fmt") &&
           (data.nChannels == 1 || data.nChannels == 2) &&
-           data.nAvgBytesPerSec == data.nChannels * data.nSamplesPerSec * data.nBitsPerSample / 8 &&
-           data.nBlockAlign == data.nChannels * data.nBitsPerSample / 8;
-     }
+            data.nAvgBytesPerSec == data.nChannels * data.nSamplesPerSec * data.nBitsPerSample / 8 &&
+            data.nBlockAlign == data.nChannels * data.nBitsPerSample / 8;
+      }
     unsigned long FourCC( const char *ChunkName)
     {
       long retbuf = 0x20202020;   // four spaces (padding)
@@ -133,7 +133,7 @@ public:
         PutPChar( (char*) &ExtRiff_header, sizeof(ExtRiff_header));
 
         if ((BitsPerSample != 8 && BitsPerSample != 16 && BitsPerSample != 24 && BitsPerSample != 32) || NumChannels < 1 || NumChannels > 2)
-           throw "invalid call";
+            throw "invalid call";
 
         data.Config(SamplingRate, BitsPerSample, NumChannels);
 
@@ -250,46 +250,46 @@ public:
     }
 
     void WriteStereoSample( float LeftSample, float RightSample ) {
-       int l, r;
-       if(LeftSample > 32767.0f) LeftSample = 32767.0f;
-       else if (LeftSample < -32768.0f) LeftSample = -32768.0f;
-       if(RightSample > 32767.0f) RightSample = 32767.0f;
-       else if(RightSample < -32768.0f) RightSample = -32768.0f;
-       switch( data.nBitsPerSample)
-       {
-         case 8:
-           l = int(LeftSample/256.0f);
-           r = int(RightSample/256.0f);
-           l+= 128;
-           r+= 128;
-           PutPChar ( (char*) &l, 1 );
-           PutPChar ( (char*) &r, 1);
-           pcm_data.ckSize += 2;
-         break;
-         case 16:
-           l = int(LeftSample);
-           r = int(RightSample);
-           PutPChar( (char*) &l, 2 );
-           PutPChar( (char*) &r, 2); 
-           pcm_data.ckSize += 4;
-         break;
-         case 24:
-           l = int(LeftSample*256.0f);
-           r = int(RightSample*256.0f);
-           PutPChar((char*)&l, 3);
-           PutPChar((char*)&r, 3);
-           pcm_data.ckSize += 6;
-         break;
-         case 32:
-           l = int(LeftSample*65536.0f);
-           r = int(RightSample*65536.0f);
-           PutPChar( (char*) &l, 4);
-           PutPChar( (char*) &r, 4 );
-           pcm_data.ckSize += 8;
-         break;
-         default:;
+        int l, r;
+        if(LeftSample > 32767.0f) LeftSample = 32767.0f;
+        else if (LeftSample < -32768.0f) LeftSample = -32768.0f;
+        if(RightSample > 32767.0f) RightSample = 32767.0f;
+        else if(RightSample < -32768.0f) RightSample = -32768.0f;
+        switch( data.nBitsPerSample)
+        {
+          case 8:
+            l = int(LeftSample/256.0f);
+            r = int(RightSample/256.0f);
+            l+= 128;
+            r+= 128;
+            PutPChar ( (char*) &l, 1 );
+            PutPChar ( (char*) &r, 1);
+            pcm_data.ckSize += 2;
+          break;
+          case 16:
+            l = int(LeftSample);
+            r = int(RightSample);
+            PutPChar( (char*) &l, 2 );
+            PutPChar( (char*) &r, 2); 
+            pcm_data.ckSize += 4;
+          break;
+          case 24:
+            l = int(LeftSample*256.0f);
+            r = int(RightSample*256.0f);
+            PutPChar((char*)&l, 3);
+            PutPChar((char*)&r, 3);
+            pcm_data.ckSize += 6;
+          break;
+          case 32:
+            l = int(LeftSample*65536.0f);
+            r = int(RightSample*65536.0f);
+            PutPChar( (char*) &l, 4);
+            PutPChar( (char*) &r, 4 );
+            pcm_data.ckSize += 8;
+          break;
+          default:;
 
-         }
+          }
 
     }
 

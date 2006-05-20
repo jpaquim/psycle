@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef MACHINE_H
 #define MACHINE_H
 
@@ -36,8 +36,8 @@ class Serializer;
 
 class CPoint {
 public:
-   int x;
-   int y;
+    int x;
+    int y;
 };
 
 #define CPUCOST_INIT(cost) long long cost = 0;
@@ -161,7 +161,7 @@ public:
     CPoint _connectionPoint[MAX_CONNECTIONS];
 
     protected:
-       void SetVolumeCounter(int numSamples);
+        void SetVolumeCounter(int numSamples);
 };
 
 class DuplicatorMac : public Machine
@@ -200,7 +200,7 @@ class Dummy : public Machine
     /// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
     bool wasVST;
     protected:
-       static char * _psName;
+        static char * _psName;
 };
 
 class Master : public Machine
@@ -225,46 +225,46 @@ class Master : public Machine
     float currentpeak;
     bool vuupdated;
     protected:
-       static char* _psName;
+        static char* _psName;
     };
 
 class Mixer : public Machine
 {
-   public:
-   enum
-   {
-     mix=0,
-     send0,
-     sendmax=send0+MAX_CONNECTIONS
-   };
-   Mixer();
-   Mixer(int index);
-   virtual void Init(void);
-   virtual void Work(int numSamples);
-   void FxSend(int numSamples);
-   void Mix(int numSamples);
-   virtual char* GetName(void) { return _psName; };
-   virtual int GetNumCols();
-   virtual void GetParamName(int numparam,char *name);
-   virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
-   virtual void GetParamValue(int numparam,char *parVal);
-   virtual int GetParamValue(int numparam);
-   virtual bool SetParameter(int numparam,int value);
-   virtual bool LoadSpecificChunk(DeSerializer* pFile, int version);
-   virtual void SaveSpecificChunk(Serializer* pFile);
+    public:
+    enum
+    {
+      mix=0,
+      send0,
+      sendmax=send0+MAX_CONNECTIONS
+    };
+    Mixer();
+    Mixer(int index);
+    virtual void Init(void);
+    virtual void Work(int numSamples);
+    void FxSend(int numSamples);
+    void Mix(int numSamples);
+    virtual char* GetName(void) { return _psName; };
+    virtual int GetNumCols();
+    virtual void GetParamName(int numparam,char *name);
+    virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
+    virtual void GetParamValue(int numparam,char *parVal);
+    virtual int GetParamValue(int numparam);
+    virtual bool SetParameter(int numparam,int value);
+    virtual bool LoadSpecificChunk(DeSerializer* pFile, int version);
+    virtual void SaveSpecificChunk(Serializer* pFile);
 
-   protected:
-     float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
-     /// Incoming send, Machine number
-     int _send[MAX_CONNECTIONS];	
-     /// Incoming send, connection volume
-     float _sendVol[MAX_CONNECTIONS];	
-     /// Value to multiply _sendVol[] to have a 0.0..1.0 range
-     float _sendVolMulti[MAX_CONNECTIONS];
-     /// Incoming connections activated
-     bool _sendValid[MAX_CONNECTIONS];		
+    protected:
+      float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
+      /// Incoming send, Machine number
+      int _send[MAX_CONNECTIONS];	
+      /// Incoming send, connection volume
+      float _sendVol[MAX_CONNECTIONS];	
+      /// Value to multiply _sendVol[] to have a 0.0..1.0 range
+      float _sendVolMulti[MAX_CONNECTIONS];
+      /// Incoming connections activated
+      bool _sendValid[MAX_CONNECTIONS];		
 
-     static char* _psName;
+      static char* _psName;
 };
 
 inline void Machine::SetVolumeCounter(int numSamples)

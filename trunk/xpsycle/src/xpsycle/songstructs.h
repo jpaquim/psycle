@@ -5,11 +5,11 @@ class PatternEntry
 {
   public:
     inline PatternEntry()
-     : _note(255), _inst(255)/* _volume(255)*/, _mach(255), _cmd(0), _parameter(0)
+      : _note(255), _inst(255)/* _volume(255)*/, _mach(255), _cmd(0), _parameter(0)
     {}
     uint8 _note;
     uint8 _inst;
-   // uint8 _volume;
+    // uint8 _volume;
     uint8 _mach;
     uint8 _cmd;
     uint8 _parameter;
@@ -19,7 +19,7 @@ class PatternEntry
     // Patterns are organized in rows.
     // i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEntry) bytes
     // belong to the first line.
-     // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+      // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
     class Pattern
     {
       public:

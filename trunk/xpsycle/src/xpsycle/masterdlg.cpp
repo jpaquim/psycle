@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "masterdlg.h"
 #include "global.h"
 #include "defaultbitmaps.h"
@@ -25,18 +25,18 @@
 #include "dsp.h"
 
 MasterDlg::MasterDlg(Machine* master)
- : NWindow()
+  : NWindow()
 {
   pMaster = master;
 
 /*  if (Global::pConfig()->iconPath=="") 
-       pane()->skin_.setBitmap(Global::pBitmaps()->masterbk());
+        pane()->skin_.setBitmap(Global::pBitmaps()->masterbk());
     else;
-       //pane()->skin_.bitmap.loadFromFile(Global::pConfig()->iconPath+ "masterbk.xpm");*/
+        //pane()->skin_.bitmap.loadFromFile(Global::pConfig()->iconPath+ "masterbk.xpm");*/
 
   //pane()->skin_.bitmapBgStyle = 1;
 
- // if (pane()->skin_.bitmap.X11data()!=0) setPosition(0,0,pane()->skin_.bitmap.width(),pane()->skin_.bitmap.height());
+  // if (pane()->skin_.bitmap.X11data()!=0) setPosition(0,0,pane()->skin_.bitmap.width(),pane()->skin_.bitmap.height());
 
   init();
 }
@@ -116,22 +116,22 @@ void MasterDlg::onSliderPosChanged( NSlider * sender, double pos )
 {
   std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
   if (it != sliders.end()) {
-     Slider* slider = *it;
-     if (slider->led()) {
+      Slider* slider = *it;
+      if (slider->led()) {
         if (slider->index() > 0) {
           float db = ((208-pos)/4.0f)-40.0f;
           pMaster->SetWireVolume(slider->index()-1,dsp::dB2Amp(db));
           slider->led()->setNumber(db);
           slider->led()->repaint();
-       } else {
-         // slidermaster
+        } else {
+          // slidermaster
 
-           float db = ((208-pos)/4.0f)-40.0f;
-           pMaster->_outDry = int(dsp::dB2Amp(db)*256.0f);
-           slider->led()->setNumber(db);
-           slider->led()->repaint();
-       }
-     }
+            float db = ((208-pos)/4.0f)-40.0f;
+            pMaster->_outDry = int(dsp::dB2Amp(db)*256.0f);
+            slider->led()->setNumber(db);
+            slider->led()->repaint();
+        }
+      }
   }
 }
 

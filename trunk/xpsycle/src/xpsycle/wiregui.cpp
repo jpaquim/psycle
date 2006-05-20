@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "wiregui.h"
 #include "global.h"
 #include "configuration.h"
@@ -25,17 +25,17 @@
 
 template<typename X, typename Y>
 inline double min (X x,Y y) {
-   return std::min((double)(x),(double)(y));
+    return std::min((double)(x),(double)(y));
 }
 
 template<typename X, typename Y>
 inline double max (X x,Y y) { 
-   return std::max((double)(x),(double)(y));
+    return std::max((double)(x),(double)(y));
 }
 
 
 WireGUI::WireGUI()
- : NLine()
+  : NLine()
 {
   deltaColR = (Global::pConfig()->mv_polycolour.red() / 510.0) + .45;
   deltaColG = (Global::pConfig()->mv_polycolour.green() / 510.0) + .45;
@@ -92,14 +92,14 @@ void WireGUI::drawArrow( NGraphics * g )
 
 
   NColor rtBrush(max(0, min(255, rtcol * deltaColR)),
-                 max(0, min(255, rtcol * deltaColG)),
-                 max(0, min(255, rtcol * deltaColB)));
+                  max(0, min(255, rtcol * deltaColG)),
+                  max(0, min(255, rtcol * deltaColB)));
   NColor ltBrush(max(0, min(255, ltcol * deltaColR)),
-                 max(0, min(255, ltcol * deltaColG)),
-                 max(0, min(255, ltcol * deltaColB)));
+                  max(0, min(255, ltcol * deltaColG)),
+                  max(0, min(255, ltcol * deltaColB)));
   NColor btBrush(max(0, min(255, btcol * deltaColR)),
-                 max(0, min(255, btcol * deltaColG)),
-                 max(0, min(255, btcol * deltaColB)));
+                  max(0, min(255, btcol * deltaColG)),
+                  max(0, min(255, btcol * deltaColB)));
 
 
   XPoint pol[5];
