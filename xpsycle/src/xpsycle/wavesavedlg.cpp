@@ -18,6 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "wavesavedlg.h"
+#include "global.h"
+#include "player.h"
+#include "configuration.h"
+#include "machine.h"
+#include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nalignlayout.h>
@@ -38,6 +43,13 @@
 WaveSaveDlg::WaveSaveDlg()
  : NDialog()
 {
+  // init variables
+
+  autostop = playblock = loopsong = saving = 0;
+  for (int i; i < MAX_SONG_POSITIONS; i++) sel[i] = 0;
+
+  // init gui
+
   setTitle("Render as Wav File");
   setSize(400,600);
 
@@ -100,7 +112,7 @@ WaveSaveDlg::WaveSaveDlg()
   pane()->add(gBox, nAlTop);
   NPanel * audioPanel = new NPanel();
     audioPanel->setLayout(NAlignLayout());
-  audioPanel->add(new NLabel("Note many filters\nscrew up when rendereing\nat slow sample rates"),nAlLeft);
+  audioPanel->add(new NLabel("Note many filters\nscrew up when rendering\nat slow sample rates"),nAlLeft);
     NPanel* cboxPanel = new NPanel();
        cboxPanel->setLayout(NAlignLayout());
        cboxPanel->add(new NLabel("Sampling rate"),nAlTop);
@@ -142,7 +154,7 @@ WaveSaveDlg::WaveSaveDlg()
     btnPanel->add(closeBtn);
     NButton* saveBtn  = new NButton("Save as Wav");
       saveBtn->setFlat(false);
-      saveBtn->clicked.connect(this,&WaveSaveDlg::onSaveBtn);
+      //saveBtn->clicked.connect(this,&WaveSaveDlg::onSaveBtn);
     btnPanel->add(saveBtn);
   pane()->add(btnPanel,nAlTop);
 }
@@ -164,6 +176,245 @@ void WaveSaveDlg::onCloseBtn( NButtonEvent * ev )
 }
 
 void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
+{
+  Song *pSong     = Global::pSong();
+  Player *pPlayer = Global::pPlayer();
+
+  if ( Global::pConfig()->autoStopMachines )
+  {
+    Global::pConfig()->autoStopMachines = false;
+    for (int c=0; c<MAX_MACHINES; c++)
+    {
+      if (pSong->_pMachine[c])
+      {
+        pSong->_pMachine[c]->_stopped=false;
+      }
+    }
+  }
+
+  playblock = pPlayer->_playBlock;
+  loopsong = pPlayer->_loopSong;
+  memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
+  memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
+
+  const int real_rate[]={8192,11025,22050,44100,48000,96000};
+  const int real_bits[]={8,16,24,32};
+
+  if (trackChkBox->checked())
+  {
+    memcpy(_Muted,pSong->_trackMuted,sizeof(pSong->_trackMuted));
+
+    int count = 0;
+
+    for (int i = 0; i < pSong->SONGTRACKS; i++)
+    {
+      if (!_Muted[i])
+      {
+        count++;
+        current = i;
+        for (int j = 0; j < pSong->SONGTRACKS; j++)
+        {
+          if (j != i) {
+            pSong->_trackMuted[j] = true;
+          } else {
+               pSong->_trackMuted[j] = false;
+          }
+        }
+        // now save the song
+        std::ostringstream filename;
+        filename << rootname;
+
+        filename << "-track " << std::setprecision(2) << (unsigned)i;
+        saveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode);
+        return;
+      }
+     }
+     current = 256;
+     saveEnd();
+  } else
+  if (wireChkBox->checked())
+  {
+    // this is tricky - sort of
+    // back up our connections first
+    for (int i = 0; i < MAX_CONNECTIONS; i++)
+    {
+       if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
+       {
+          _Muted[i] = pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute;
+       } else {
+          _Muted[i] = true;
+       }
+    }
+
+    for (int i = 0; i < MAX_CONNECTIONS; i++) {
+      if (!_Muted[i])
+      {
+        current = i;
+        for (int j = 0; j < MAX_CONNECTIONS; j++)
+        {
+          if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j])
+          {
+            if (j != i)
+            {
+              pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
+            } else
+            {
+              pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
+            }
+          }
+        }
+        // now save the song
+        char filename[8000];
+        sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+        saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+        return;
+      }
+    }
+    current = 256;
+    saveEnd();
+  } else 
+  if ( generatorChkBox->checked() )
+  {
+    // this is tricky - sort of
+    // back up our connections first
+
+    for (int i = 0; i < MAX_BUSES; i++)
+    {
+      if (pSong->_pMachine[i])
+      {
+        _Muted[i] = pSong->_pMachine[i]->_mute;
+      }
+      else
+      {
+        _Muted[i] = true;
+      }
+    }
+
+    for (int i = 0; i < MAX_BUSES; i++)
+    {
+      if (!_Muted[i])
+      {
+        current = i;
+        for (int j = 0; j < MAX_BUSES; j++)
+        {
+          if (pSong->_pMachine[j])
+          {
+            if (j != i)
+            {
+              pSong->_pMachine[j]->_mute = true;
+            }
+            else
+            {
+              pSong->_pMachine[j]->_mute = false;
+            }
+          }
+        }
+        // now save the song
+        char filename[8000];
+        sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
+        saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+        return;
+      }
+    }
+    current = 256;
+    saveEnd();
+  } else {
+    //saveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
+  }
+}
+
+void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode )
+{
+  saving=true;
+  Player *pPlayer = Global::pPlayer();
+  Song *pSong = Global::pSong();
+  pPlayer->StopRecording();
+  Global::pConfig()->_pOutputDriver->Enable(false);
+//  Global::pConfig()->_pMidiInput->Close();
+
+  std::string::size_type pos = file.rfind('\\');
+  if (pos == std::string::npos)
+  {
+    //m_text.SetWindowText(file.c_str());
+  }
+  else
+  {
+    //m_text.SetWindowText(file.substr(pos+1).c_str());
+  }
+
+  pPlayer->StartRecording(file,bits,rate,channelmode);
+
+  int tmp;
+  int cont;
+  //CString name;
+
+  int pstart;
+//  kill_thread = 0;
+  int tickcont=0;
+  int lastlinetick=0;
+  int lastpostick=0;
+  int m_patnumber=0;
+  int i,j;
+
+  int m_recmode = 0;
+
+  switch (m_recmode)
+  {
+    case 0:
+      j=0; // Calculate progress bar range.
+      for (i=0;i<pSong->playLength;i++)
+      {
+        j+=pSong->patternLines[pSong->playOrder[i]];
+      }
+      //m_progress.SetRange(0,j);
+
+      pPlayer->_playBlock=false;
+      lastpostick=0;
+      pPlayer->Start(0,0);
+    break;
+    case 1:
+//        m_patnumber.GetWindowText(name);
+//        hexstring_to_integer(name.GetBuffer(2), pstart);
+        progressBar->setRange(0,pSong->patternLines[pstart]);
+        for (cont=0;cont<pSong->playLength;cont++)
+        {
+          if ( (int)pSong->playOrder[cont] == pstart)
+          {
+            pstart= cont;
+            break;
+          }
+        }
+        lastpostick=pstart;
+        pSong->playOrderSel[cont]=true;
+        pPlayer->Start(pstart,0);
+        pPlayer->_playBlock=true;
+        pPlayer->_loopSong=false;
+    break;
+    case 2:
+//        m_rangestart.GetWindowText(name);
+//        hexstring_to_integer(name.GetBuffer(2), pstart);
+//        m_rangeend.GetWindowText(name);
+//        hexstring_to_integer(name.GetBuffer(2), tmp);
+        j=0;
+        for (cont=pstart;cont<=tmp;cont++)
+        {
+          pSong->playOrderSel[cont]=true;
+          j+=pSong->patternLines[pSong->playOrder[cont]];
+        }
+        progressBar->setRange(0,j);
+
+        lastpostick=pstart;
+        pPlayer->Start(pstart,0);
+        pPlayer->_playBlock=true;
+        pPlayer->_loopSong=false;
+    break;
+    default:
+      saveEnd();
+      return;
+  }
+}
+
+void WaveSaveDlg::saveEnd( )
 {
 }
 
