@@ -110,29 +110,29 @@ void Configuration::setSkinDefaults( )
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
   #if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/install_paths.defines.hpp>
-	hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
-	iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
-	pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
-	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
+  #include <xpsycle/install_paths.defines.hpp>
+  hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
+  iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
+  pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
+  prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
   #else
-	// we don't have any information about the installation paths,
-	// so, we can only assume everything is at a fixed place, like under the user home dir
-	hlpPath = NFile::replaceTilde("~/xpsycle/doc/");
-	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
-	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
-	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
+  // we don't have any information about the installation paths,
+  // so, we can only assume everything is at a fixed place, like under the user home dir
+  hlpPath = NFile::replaceTilde("~/xpsycle/doc/");
+  iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
+  pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
+  prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
   #endif
 
   #if !defined NDEBUG
-	std::cout
-		<< "xpsycle: configuration: initial defaults:\n"
-		<< "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
-		<< "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
-		<< "xpsycle: configuration: preset dir: " << prsPath << "\n"
-		<< "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
+  std::cout
+    << "xpsycle: configuration: initial defaults:\n"
+    << "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
+    << "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
+    << "xpsycle: configuration: preset dir: " << prsPath << "\n"
+    << "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
   #endif
-  
+
   mv_wirewidth = 1;
   mv_triangle_size = 22;
 }
