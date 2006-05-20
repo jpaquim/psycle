@@ -43,9 +43,9 @@
 WaveSaveDlg::WaveSaveDlg()
  : NDialog()
 {
-  // init variables
-
   autostop = playblock = loopsong = saving = 0;
+  rate = -1;
+
   for (int i; i < MAX_SONG_POSITIONS; i++) sel[i] = 0;
 
   // init gui
@@ -157,11 +157,69 @@ WaveSaveDlg::WaveSaveDlg()
       //saveBtn->clicked.connect(this,&WaveSaveDlg::onSaveBtn);
     btnPanel->add(saveBtn);
   pane()->add(btnPanel,nAlTop);
+
+  initVars();
 }
 
 
 WaveSaveDlg::~WaveSaveDlg()
 {
+}
+
+void WaveSaveDlg::initVars( )
+{
+  // init variables
+
+  threadopen = 0;
+  kill_thread = 1;
+  lastpostick = 0;
+  lastlinetick = 0;
+
+  std::string name;// = Global::pConfig->GetCurrentSongDir();
+  //name+='\\';
+  Song* pSong = Global::pSong();
+
+  name+= Global::pSong()->fileName;
+  std::cout << "j" << name << std::endl;
+  name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
+  name+=".wav";
+  pathEdt->setText(name);
+  setTitle(name);
+
+  char num[3];
+  sprintf(num,"%02x",pSong->playOrder[0]);
+  numberEdt->setText(num);
+  sprintf(num,"%02x",0);
+  fromEdt->setText(num);
+  sprintf(num,"%02x",pSong->playLength-1);
+  toEdt->setText(num);
+
+/*  if ( (rate < 0) || (rate >5) )
+  {
+     if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8192)
+     {
+       rate = 0;
+     }
+     else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 11025)
+     {
+       rate = 1;
+     } else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
+     {
+       rate = 2;
+     }
+     else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
+     {
+       rate = 3;
+     }
+     else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
+     {
+       rate = 4;
+     }
+     else
+     {
+       rate = 5;
+     }
+  }*/
 }
 
 void WaveSaveDlg::onBrowseBtn( NButtonEvent * ev )
@@ -471,5 +529,15 @@ void WaveSaveDlg::saveTick( )
 //     progressBar->setPos(tickcont);
   }
 }
+
+void WaveSaveDlg::setVisible( bool on )
+{
+  if (on) {
+     initVars();
+  }
+  NDialog::setVisible(on);
+}
+
+
 
 
