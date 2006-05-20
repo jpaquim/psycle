@@ -23,24 +23,24 @@
 
 PluginOut::do_initialize()
 {
-	void * library(::dlopen(library_file_name_.c_str()));
-	if(!library) throw; ///\todo better
+  void * library(::dlopen(library_file_name_.c_str()));
+  if(!library) throw; ///\todo better
 
-	#define stringized(tokens) stringized__no_expansion(tokens)
-	#define stringized__no_expansion(tokens) #tokens
+  #define stringized(tokens) stringized__no_expansion(tokens)
+  #define stringized__no_expansion(tokens) #tokens
 
-	new_interface_ = ::dlsym(library, stringized(PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR__SYMBOL(new)));
-	if(!new_) throw; ///\todo better
+  new_interface_ = ::dlsym(library, stringized(PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR__SYMBOL(new)));
+  if(!new_) throw; ///\todo better
 
-	delete_interface_ = ::dlsym(library, stringized(PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR__SYMBOL(delete)));
-	if(!delete_) throw; ///\todo better
+  delete_interface_ = ::dlsym(library, stringized(PSYCLE__OUTPUT_PLUGIN__INSTANCIATOR__SYMBOL(delete)));
+  if(!delete_) throw; ///\todo better
 
-	assert(callback_);
-	interface_ = &new_interface_(*callback_);
-	if(!interface_) throw; ///\todo better
+  assert(callback_);
+  interface_ = &new_interface_(*callback_);
+  if(!interface_) throw; ///\todo better
 }
 
 PluginOut::~PluginOut()
 {
-	if(delete_interface_ && interface_) delete_(*interface_);
+  if(delete_interface_ && interface_) delete_(*interface_);
 }

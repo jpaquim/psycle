@@ -307,72 +307,72 @@ void Player::NotifyNewLine( void )
 
 
 void Player::ExecuteNotes(void)
-		{
-			Song* pSong = Global::pSong();
-			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
+    {
+      Song* pSong = Global::pSong();
+      unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
 
-			for(int track=0; track<pSong->SONGTRACKS; track++)
-			{
-				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?
-				{
-					int mac = pEntry->_mach;
-					if(mac != 255) prevMachines[track] = mac;
-					else mac = prevMachines[track];
+      for(int track=0; track<pSong->SONGTRACKS; track++)
+      {
+        PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
+        if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?
+        {
+          int mac = pEntry->_mach;
+          if(mac != 255) prevMachines[track] = mac;
+          else mac = prevMachines[track];
 //					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
-					if( mac != 255 ) // is there a machine number and it is either a note or a command?
-					{
-						if(mac < MAX_MACHINES) //looks like a valid machine index?
-						{
-							Machine *pMachine = pSong->_pMachine[mac];
-							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
-							{
-								if(pEntry->_cmd == PatternCmd::NOTE_DELAY)
-								{
-									// delay
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*SamplesPerRow())/256;
-								}
-								else if(pEntry->_cmd == PatternCmd::RETRIGGER)
-								{
-									// retrigger
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
-									pMachine->TriggerDelayCounter[track] = 0;
-								}
-								else if(pEntry->_cmd == PatternCmd::RETR_CONT)
-								{
-									// retrigger continue
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									if(pEntry->_parameter&0xf0) pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
-								}
-								else if (pEntry->_cmd == PatternCmd::ARPEGGIO)
-								{
-									// arpeggio
-									//\todo : Add Memory.
-									//\todo : This won't work... What about sampler's NNA's?
-									if (pEntry->_parameter)
-									{
-										memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-										pMachine->ArpeggioCount[track] = 1;
-									}
-									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
-								}
-								else
-								{
-									pMachine->TriggerDelay[track]._cmd = 0;
-									pMachine->Tick(track, pEntry);
-									pMachine->TriggerDelayCounter[track] = 0;
-									pMachine->ArpeggioCount[track] = 0;
-								}
-							}
-						}
-					}
-				}
-			}
-			_samplesRemaining = SamplesPerRow();
-		}
+          if( mac != 255 ) // is there a machine number and it is either a note or a command?
+          {
+            if(mac < MAX_MACHINES) //looks like a valid machine index?
+            {
+              Machine *pMachine = pSong->_pMachine[mac];
+              if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
+              {
+                if(pEntry->_cmd == PatternCmd::NOTE_DELAY)
+                {
+                  // delay
+                  memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+                  pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*SamplesPerRow())/256;
+                }
+                else if(pEntry->_cmd == PatternCmd::RETRIGGER)
+                {
+                  // retrigger
+                  memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+                  pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
+                  pMachine->TriggerDelayCounter[track] = 0;
+                }
+                else if(pEntry->_cmd == PatternCmd::RETR_CONT)
+                {
+                  // retrigger continue
+                  memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+                  if(pEntry->_parameter&0xf0) pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
+                }
+                else if (pEntry->_cmd == PatternCmd::ARPEGGIO)
+                {
+                  // arpeggio
+                  //\todo : Add Memory.
+                  //\todo : This won't work... What about sampler's NNA's?
+                  if (pEntry->_parameter)
+                  {
+                    memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+                    pMachine->ArpeggioCount[track] = 1;
+                  }
+                  pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
+                }
+                else
+                {
+                  pMachine->TriggerDelay[track]._cmd = 0;
+                  pMachine->Tick(track, pEntry);
+                  pMachine->TriggerDelayCounter[track] = 0;
+                  pMachine->ArpeggioCount[track] = 0;
+                }
+              }
+            }
+          }
+        }
+      }
+      _samplesRemaining = SamplesPerRow();
+    }
 
 float * Player::Work( void * context, int & numSamples )
 {

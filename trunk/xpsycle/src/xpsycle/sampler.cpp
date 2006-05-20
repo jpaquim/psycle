@@ -408,436 +408,436 @@ void Sampler::NoteOffFast(int voice)
 
 void Sampler::Tick( int channel, PatternEntry * pData )
 {
-	if ( pData->_note > 120 ) // don't process twk , twf of Mcm Commands
-			{
-				if ( pData->_cmd == 0 || pData->_note != 255) return; // Return in everything but commands!
-			}
-			if ( _mute ) return; // Avoid new note entering when muted.
+  if ( pData->_note > 120 ) // don't process twk , twf of Mcm Commands
+      {
+        if ( pData->_cmd == 0 || pData->_note != 255) return; // Return in everything but commands!
+      }
+      if ( _mute ) return; // Avoid new note entering when muted.
 
-			int voice;
-			int useVoice = -1;
+      int voice;
+      int useVoice = -1;
 
-			PatternEntry data = *pData;
+      PatternEntry data = *pData;
 
-			if (data._inst >= 255)
-			{
-				data._inst = lastInstrument[channel];
-				if (data._inst >= 255)
-				{
-					return;  // no previous sample
-				}
-			}
-			else
-			{
-				data._inst = lastInstrument[channel] = pData->_inst;
-			}
+      if (data._inst >= 255)
+      {
+        data._inst = lastInstrument[channel];
+        if (data._inst >= 255)
+        {
+          return;  // no previous sample
+        }
+      }
+      else
+      {
+        data._inst = lastInstrument[channel] = pData->_inst;
+      }
 
 
-			if ( data._note < 120 )	// Handle Note On.
-			{
-				if ( Global::pSong()->_pInstrument[data._inst]->waveLength == 0 ) return; // if no wave, return.
+      if ( data._note < 120 )	// Handle Note On.
+      {
+        if ( Global::pSong()->_pInstrument[data._inst]->waveLength == 0 ) return; // if no wave, return.
 
-				for (voice=0; voice<_numVoices; voice++)	// Find a voice to apply the new note
-				{
-					switch(_voices[voice]._envelope._stage)
-					{
-						case ENV_OFF: 
-							if ( _voices[voice]._triggerNoteDelay == 0 ) 
-							{ 
-								useVoice=voice; 
-								voice=_numVoices; // Ok, we can go out from the loop already.
-							}
-							break;
-						case ENV_FASTRELEASE: 
-							useVoice = voice;
-							break;
-						case ENV_RELEASE:
-							if ( useVoice == -1 ) 
-								useVoice= voice;
-							break;
-						default:break;
-					}
-				}
-				for ( voice=0; voice<_numVoices; voice++)
-				{
-					if ( _voices[voice]._channel == channel ) // NoteOff previous Notes in this channel.
-					{
-						switch (Global::pSong()->_pInstrument[_voices[voice]._instrument]->_NNA)
-						{
-						case 0:
-							NoteOffFast(voice);
-							break;
-						case 1:
-							NoteOff(voice);
-							break;
-						}
-						if ( useVoice == -1 ) { useVoice = voice; }
-					}
-				}
-				if ( useVoice == -1 )	// No free voices. Assign first one.
-				{						// This algorithm should be replace by a LRU lookup
-					useVoice=0;
-				}
-				_voices[useVoice]._channel=channel;
-			}
-			else {
-				for (voice=0;voice<_numVoices; voice++)  // Find the...
-				{
-					if (( _voices[voice]._channel == channel ) && // ...playing voice on current channel.
-						(_voices[voice]._envelope._stage != ENV_OFF ) &&
-		//				(_voices[voice]._envelope._stage != ENV_RELEASE ) && // Effects can STILL apply in this case.
-																			// Think on a slow fadeout and changing panning
-						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
-					{
-						if ( data._note == 120 ) NoteOff(voice);//  Handle Note Off
-						useVoice=voice;
-					}
-				}
-				if ( useVoice == -1 ) return;   // No playing note on this channel. Just go out.
-												// Change it if you have channel commands.
-			}
-			// If you want to make a command that controls more than one voice (the entire channel, for
-			// example) you'll need to change this. Otherwise, add it to VoiceTick().
+        for (voice=0; voice<_numVoices; voice++)	// Find a voice to apply the new note
+        {
+          switch(_voices[voice]._envelope._stage)
+          {
+            case ENV_OFF: 
+              if ( _voices[voice]._triggerNoteDelay == 0 ) 
+              { 
+                useVoice=voice; 
+                voice=_numVoices; // Ok, we can go out from the loop already.
+              }
+              break;
+            case ENV_FASTRELEASE: 
+              useVoice = voice;
+              break;
+            case ENV_RELEASE:
+              if ( useVoice == -1 ) 
+                useVoice= voice;
+              break;
+            default:break;
+          }
+        }
+        for ( voice=0; voice<_numVoices; voice++)
+        {
+          if ( _voices[voice]._channel == channel ) // NoteOff previous Notes in this channel.
+          {
+            switch (Global::pSong()->_pInstrument[_voices[voice]._instrument]->_NNA)
+            {
+            case 0:
+              NoteOffFast(voice);
+              break;
+            case 1:
+              NoteOff(voice);
+              break;
+            }
+            if ( useVoice == -1 ) { useVoice = voice; }
+          }
+        }
+        if ( useVoice == -1 )	// No free voices. Assign first one.
+        {						// This algorithm should be replace by a LRU lookup
+          useVoice=0;
+        }
+        _voices[useVoice]._channel=channel;
+      }
+      else {
+        for (voice=0;voice<_numVoices; voice++)  // Find the...
+        {
+          if (( _voices[voice]._channel == channel ) && // ...playing voice on current channel.
+            (_voices[voice]._envelope._stage != ENV_OFF ) &&
+    //				(_voices[voice]._envelope._stage != ENV_RELEASE ) && // Effects can STILL apply in this case.
+                                      // Think on a slow fadeout and changing panning
+            (_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
+          {
+            if ( data._note == 120 ) NoteOff(voice);//  Handle Note Off
+            useVoice=voice;
+          }
+        }
+        if ( useVoice == -1 ) return;   // No playing note on this channel. Just go out.
+                        // Change it if you have channel commands.
+      }
+      // If you want to make a command that controls more than one voice (the entire channel, for
+      // example) you'll need to change this. Otherwise, add it to VoiceTick().
 
-			VoiceTick(useVoice,&data); 
+      VoiceTick(useVoice,&data); 
 }
 
 
 void Sampler::TickFilterEnvelope(
-			int voice)
-		{
-			Voice* pVoice = &_voices[voice];
-			switch (pVoice->_filterEnv._stage)
-			{
-			case ENV_ATTACK:
-				pVoice->_filterEnv._value += pVoice->_filterEnv._step;
+      int voice)
+    {
+      Voice* pVoice = &_voices[voice];
+      switch (pVoice->_filterEnv._stage)
+      {
+      case ENV_ATTACK:
+        pVoice->_filterEnv._value += pVoice->_filterEnv._step;
 
-				if (pVoice->_filterEnv._value > 1.0f)
-				{
-					pVoice->_filterEnv._stage = ENV_DECAY;
-					pVoice->_filterEnv._value = 1.0f;
-					pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pPlayer()->SampleRate());
-				}
-				break;
-			case ENV_DECAY:
-				pVoice->_filterEnv._value -= pVoice->_filterEnv._step;
+        if (pVoice->_filterEnv._value > 1.0f)
+        {
+          pVoice->_filterEnv._stage = ENV_DECAY;
+          pVoice->_filterEnv._value = 1.0f;
+          pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pPlayer()->SampleRate());
+        }
+        break;
+      case ENV_DECAY:
+        pVoice->_filterEnv._value -= pVoice->_filterEnv._step;
 
-				if (pVoice->_filterEnv._value < pVoice->_filterEnv._sustain)
-				{
-					pVoice->_filterEnv._value = pVoice->_filterEnv._sustain;
-					pVoice->_filterEnv._stage = ENV_SUSTAIN;
-				}
-				break;
-			case ENV_RELEASE:
-				pVoice->_filterEnv._value -= pVoice->_filterEnv._step;
+        if (pVoice->_filterEnv._value < pVoice->_filterEnv._sustain)
+        {
+          pVoice->_filterEnv._value = pVoice->_filterEnv._sustain;
+          pVoice->_filterEnv._stage = ENV_SUSTAIN;
+        }
+        break;
+      case ENV_RELEASE:
+        pVoice->_filterEnv._value -= pVoice->_filterEnv._step;
 
-				if (pVoice->_filterEnv._value < 0)
-				{
-					pVoice->_filterEnv._value = 0;
-					pVoice->_filterEnv._stage = ENV_OFF;
-				}
-				break;
-			}
-		}
+        if (pVoice->_filterEnv._value < 0)
+        {
+          pVoice->_filterEnv._value = 0;
+          pVoice->_filterEnv._stage = ENV_OFF;
+        }
+        break;
+      }
+    }
 
-		void Sampler::TickEnvelope(
-			int voice)
-		{
-			Voice* pVoice = &_voices[voice];
-			switch (pVoice->_envelope._stage)
-			{
-			case ENV_ATTACK:
-				pVoice->_envelope._value += pVoice->_envelope._step;
-				if (pVoice->_envelope._value > 1.0f)
-				{
-					pVoice->_envelope._value = 1.0f;
-					pVoice->_envelope._stage = ENV_DECAY;
-					pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pPlayer()->SampleRate());
-				}
-				break;
-			case ENV_DECAY:
-				pVoice->_envelope._value -= pVoice->_envelope._step;
-				if (pVoice->_envelope._value < pVoice->_envelope._sustain)
-				{
-					pVoice->_envelope._value = pVoice->_envelope._sustain;
-					pVoice->_envelope._stage = ENV_SUSTAIN;
-				}
-				break;
-			case ENV_RELEASE:
-			case ENV_FASTRELEASE:
-				pVoice->_envelope._value -= pVoice->_envelope._step;
-				if (pVoice->_envelope._value <= 0)
-				{
-					pVoice->_envelope._value = 0;
-					pVoice->_envelope._stage = ENV_OFF;
-				}
-				break;
-			default:break;
-			}
-		}
+    void Sampler::TickEnvelope(
+      int voice)
+    {
+      Voice* pVoice = &_voices[voice];
+      switch (pVoice->_envelope._stage)
+      {
+      case ENV_ATTACK:
+        pVoice->_envelope._value += pVoice->_envelope._step;
+        if (pVoice->_envelope._value > 1.0f)
+        {
+          pVoice->_envelope._value = 1.0f;
+          pVoice->_envelope._stage = ENV_DECAY;
+          pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pPlayer()->SampleRate());
+        }
+        break;
+      case ENV_DECAY:
+        pVoice->_envelope._value -= pVoice->_envelope._step;
+        if (pVoice->_envelope._value < pVoice->_envelope._sustain)
+        {
+          pVoice->_envelope._value = pVoice->_envelope._sustain;
+          pVoice->_envelope._stage = ENV_SUSTAIN;
+        }
+        break;
+      case ENV_RELEASE:
+      case ENV_FASTRELEASE:
+        pVoice->_envelope._value -= pVoice->_envelope._step;
+        if (pVoice->_envelope._value <= 0)
+        {
+          pVoice->_envelope._value = 0;
+          pVoice->_envelope._stage = ENV_OFF;
+        }
+        break;
+      default:break;
+      }
+    }
 
 
 int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
-		{		
+    {		
 
-			Voice* pVoice = &_voices[voice];
-			int triggered = 0;
-			__uint64 w_offset = 0; /// todo not sure about type!
+      Voice* pVoice = &_voices[voice];
+      int triggered = 0;
+      __uint64 w_offset = 0; /// todo not sure about type!
 
-			if (Global::pSong()->Invalided) return 0;
+      if (Global::pSong()->Invalided) return 0;
 
-			pVoice->_sampleCounter=0;
-			pVoice->effCmd=pEntry->_cmd;
+      pVoice->_sampleCounter=0;
+      pVoice->effCmd=pEntry->_cmd;
 
-			switch(pEntry->_cmd) // DO NOT ADD here those commands that REQUIRE a note.
-			{
-				case SAMPLER_CMD_EXTENDED:
-					if ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
-					{
-						pVoice->_triggerNoteOff = (Global::pPlayer()->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
-					}
-					else if (((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry->_parameter & 0x0f) == 0 ))
-					{
-						pEntry->_cmd=0; pEntry->_parameter=0;
-					}
-					break;
-				case SAMPLER_CMD_PORTAUP:
-					pVoice->effVal=pEntry->_parameter;
-					break;
-				case SAMPLER_CMD_PORTADOWN:
-					pVoice->effVal=pEntry->_parameter;
-					break;
-			}
-			
+      switch(pEntry->_cmd) // DO NOT ADD here those commands that REQUIRE a note.
+      {
+        case SAMPLER_CMD_EXTENDED:
+          if ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
+          {
+            pVoice->_triggerNoteOff = (Global::pPlayer()->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
+          }
+          else if (((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry->_parameter & 0x0f) == 0 ))
+          {
+            pEntry->_cmd=0; pEntry->_parameter=0;
+          }
+          break;
+        case SAMPLER_CMD_PORTAUP:
+          pVoice->effVal=pEntry->_parameter;
+          break;
+        case SAMPLER_CMD_PORTADOWN:
+          pVoice->effVal=pEntry->_parameter;
+          break;
+      }
+      
 
-		//  All this mess should be really changed with classes using the "operator=" to "copy" values.
+    //  All this mess should be really changed with classes using the "operator=" to "copy" values.
 
-			int twlength = Global::pSong()->_pInstrument[pEntry->_inst]->waveLength;
-			
-			if (pEntry->_note < 120 && twlength > 0)
-			{
-				pVoice->_triggerNoteOff=0;
-				pVoice->_instrument = pEntry->_inst;
-				
-				// Init filter synthesizer
-				//
-				pVoice->_filter.Init();
+      int twlength = Global::pSong()->_pInstrument[pEntry->_inst]->waveLength;
+      
+      if (pEntry->_note < 120 && twlength > 0)
+      {
+        pVoice->_triggerNoteOff=0;
+        pVoice->_instrument = pEntry->_inst;
+        
+        // Init filter synthesizer
+        //
+        pVoice->_filter.Init();
 
-				if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RCUT)
-				{
-					pVoice->_cutoff = alteRand(Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_CO);
-				}
-				else
-				{
-					pVoice->_cutoff = Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_CO;
-				}
-				
-				if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RRES)
-				{
-					pVoice->_filter._q = alteRand(Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_RQ);
-				}
-				else
-				{
-					pVoice->_filter._q = Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_RQ;
-				}
+        if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RCUT)
+        {
+          pVoice->_cutoff = alteRand(Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_CO);
+        }
+        else
+        {
+          pVoice->_cutoff = Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_CO;
+        }
+        
+        if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RRES)
+        {
+          pVoice->_filter._q = alteRand(Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_RQ);
+        }
+        else
+        {
+          pVoice->_filter._q = Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_RQ;
+        }
 
-				pVoice->_filter._type = (FilterType)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_TP;
-				pVoice->_coModify = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_EA;
-				pVoice->_filterEnv._sustain = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
+        pVoice->_filter._type = (FilterType)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_TP;
+        pVoice->_coModify = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_EA;
+        pVoice->_filterEnv._sustain = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
 
-				if (( pEntry->_cmd != SAMPLER_CMD_EXTENDED) || ((pEntry->_parameter & 0xf0) != SAMPLER_CMD_EXT_NOTEDELAY))
-				{
-					pVoice->_filterEnv._stage = ENV_ATTACK;
-				}
-				pVoice->_filterEnv._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer()->SampleRate());
-				pVoice->_filterEnv._value = 0;
-				
-				// Init Wave
-				//
-				pVoice->_wave._pL = Global::pSong()->_pInstrument[pVoice->_instrument]->waveDataL;
-				pVoice->_wave._pR = Global::pSong()->_pInstrument[pVoice->_instrument]->waveDataR;
-				pVoice->_wave._stereo = Global::pSong()->_pInstrument[pVoice->_instrument]->waveStereo;
-				pVoice->_wave._length = twlength;
-				
-				// Init loop
-				if (Global::pSong()->_pInstrument[pVoice->_instrument]->waveLoopType)
-				{
-					pVoice->_wave._loop = true;
-					pVoice->_wave._loopStart = Global::pSong()->_pInstrument[pVoice->_instrument]->waveLoopStart;
-					pVoice->_wave._loopEnd = Global::pSong()->_pInstrument[pVoice->_instrument]->waveLoopEnd;
-				}
-				else
-				{
-					pVoice->_wave._loop = false;
-				}
-				
-				// Init Resampler
-				//
-				if (Global::pSong()->_pInstrument[pVoice->_instrument]->_loop)
-				{
-					double const totalsamples = double(Global::pPlayer()->SamplesPerRow()*Global::pSong()->_pInstrument[pVoice->_instrument]->_lines);
-					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
-				}	
-				else
-				{
-					float const finetune = CValueMapper::Map_255_1(Global::pSong()->_pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::pSong()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer()->SampleRate()));
-				}
-				
+        if (( pEntry->_cmd != SAMPLER_CMD_EXTENDED) || ((pEntry->_parameter & 0xf0) != SAMPLER_CMD_EXT_NOTEDELAY))
+        {
+          pVoice->_filterEnv._stage = ENV_ATTACK;
+        }
+        pVoice->_filterEnv._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer()->SampleRate());
+        pVoice->_filterEnv._value = 0;
+        
+        // Init Wave
+        //
+        pVoice->_wave._pL = Global::pSong()->_pInstrument[pVoice->_instrument]->waveDataL;
+        pVoice->_wave._pR = Global::pSong()->_pInstrument[pVoice->_instrument]->waveDataR;
+        pVoice->_wave._stereo = Global::pSong()->_pInstrument[pVoice->_instrument]->waveStereo;
+        pVoice->_wave._length = twlength;
+        
+        // Init loop
+        if (Global::pSong()->_pInstrument[pVoice->_instrument]->waveLoopType)
+        {
+          pVoice->_wave._loop = true;
+          pVoice->_wave._loopStart = Global::pSong()->_pInstrument[pVoice->_instrument]->waveLoopStart;
+          pVoice->_wave._loopEnd = Global::pSong()->_pInstrument[pVoice->_instrument]->waveLoopEnd;
+        }
+        else
+        {
+          pVoice->_wave._loop = false;
+        }
+        
+        // Init Resampler
+        //
+        if (Global::pSong()->_pInstrument[pVoice->_instrument]->_loop)
+        {
+          double const totalsamples = double(Global::pPlayer()->SamplesPerRow()*Global::pSong()->_pInstrument[pVoice->_instrument]->_lines);
+          pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
+        }	
+        else
+        {
+          float const finetune = CValueMapper::Map_255_1(Global::pSong()->_pInstrument[pVoice->_instrument]->waveFinetune);
+          pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::pSong()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer()->SampleRate()));
+        }
+        
 
-				// Handle wave_start_offset cmd
-				//
-				if (pEntry->_cmd == SAMPLER_CMD_OFFSET)
-				{
-					w_offset = pEntry->_parameter*pVoice->_wave._length;
-					pVoice->_wave._pos.QuadPart = (w_offset << 24);
-				}
-				else
-				{
-					pVoice->_wave._pos.QuadPart = 0;
-				}
+        // Handle wave_start_offset cmd
+        //
+        if (pEntry->_cmd == SAMPLER_CMD_OFFSET)
+        {
+          w_offset = pEntry->_parameter*pVoice->_wave._length;
+          pVoice->_wave._pos.QuadPart = (w_offset << 24);
+        }
+        else
+        {
+          pVoice->_wave._pos.QuadPart = 0;
+        }
 
-				// Calculating volume coef ---------------------------------------
-				//
-				pVoice->_wave._vol = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
+        // Calculating volume coef ---------------------------------------
+        //
+        pVoice->_wave._vol = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-				if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
-				{
-					pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
-				}
-				
-				// Panning calculation -------------------------------------------
-				//
-				float panFactor;
-				
-				if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RPAN)
-				{
-					panFactor = (float)rand()*0.000030517578125f;
-				}
-				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
-				{
-					panFactor = CValueMapper::Map_255_1(pEntry->_parameter);
-				}
-				else {
-					panFactor = CValueMapper::Map_255_1(Global::pSong()->_pInstrument[pVoice->_instrument]->_pan);
-				}
+        if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
+        {
+          pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
+        }
+        
+        // Panning calculation -------------------------------------------
+        //
+        float panFactor;
+        
+        if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RPAN)
+        {
+          panFactor = (float)rand()*0.000030517578125f;
+        }
+        else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
+        {
+          panFactor = CValueMapper::Map_255_1(pEntry->_parameter);
+        }
+        else {
+          panFactor = CValueMapper::Map_255_1(Global::pSong()->_pInstrument[pVoice->_instrument]->_pan);
+        }
 
-				pVoice->_wave._rVolDest = panFactor;
-				pVoice->_wave._lVolDest = 1-panFactor;
+        pVoice->_wave._rVolDest = panFactor;
+        pVoice->_wave._lVolDest = 1-panFactor;
 
-				if (pVoice->_wave._rVolDest > 0.5f)
-				{
-					pVoice->_wave._rVolDest = 0.5f;
-				}
-				if (pVoice->_wave._lVolDest > 0.5f)
-				{
-					pVoice->_wave._lVolDest = 0.5f;
-				}
+        if (pVoice->_wave._rVolDest > 0.5f)
+        {
+          pVoice->_wave._rVolDest = 0.5f;
+        }
+        if (pVoice->_wave._lVolDest > 0.5f)
+        {
+          pVoice->_wave._lVolDest = 0.5f;
+        }
 
-				pVoice->_wave._lVolCurr = (pVoice->_wave._lVolDest *= pVoice->_wave._vol);
-				pVoice->_wave._rVolCurr = (pVoice->_wave._rVolDest *= pVoice->_wave._vol);
+        pVoice->_wave._lVolCurr = (pVoice->_wave._lVolDest *= pVoice->_wave._vol);
+        pVoice->_wave._rVolCurr = (pVoice->_wave._rVolDest *= pVoice->_wave._vol);
 
-				// Init Amplitude Envelope
-				//
-				pVoice->_envelope._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer()->SampleRate());
-				pVoice->_envelope._value = 0.0f;
-				pVoice->_envelope._sustain = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
-				if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
-				{
-					pVoice->_triggerNoteDelay = (Global::pPlayer()->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
-					pVoice->_envelope._stage = ENV_OFF;
-				}
-				else
-				{
-					if (pEntry->_cmd == SAMPLER_CMD_RETRIG && (pEntry->_parameter&0x0f) > 0)
-					{
-						pVoice->effretTicks=(pEntry->_parameter&0x0f); // number of Ticks.
-						pVoice->effVal= (Global::pPlayer()->SamplesPerRow()/(pVoice->effretTicks+1));
-						
-						int volmod = (pEntry->_parameter&0xf0)>>4; // Volume modifier.
-						switch (volmod) 
-						{
-							case 0:
-							case 8:	pVoice->effretVol = 0; pVoice->effretMode=0; break;
-							case 1:
-							case 2:
-							case 3:
-							case 4:
-							case 5: pVoice->effretVol = (float)(std::pow(2.,volmod-1)/64); pVoice->effretMode=1; break;
-							case 6: pVoice->effretVol = 0.66666666f;	 pVoice->effretMode=2; break;
-							case 7: pVoice->effretVol = 0.5f;			 pVoice->effretMode=2; break;
-							case 9:
-							case 10:
-							case 11:
-							case 12:
-							case 13: pVoice->effretVol = (float)(std::pow(2.,volmod-9)*(-1))/64; pVoice->effretMode=1; break;
-							case 14: pVoice->effretVol = 1.5f;					pVoice->effretMode=2; break;
-							case 15: pVoice->effretVol = 2.0f;					pVoice->effretMode=2; break;
-						}
-						pVoice->_triggerNoteDelay = pVoice->effVal;
-					}
-					else
-					{
-						pVoice->_triggerNoteDelay=0;
-					}
-					pVoice->_envelope._stage = ENV_ATTACK;
-				}
-				
-				triggered = 1;
-			}
+        // Init Amplitude Envelope
+        //
+        pVoice->_envelope._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer()->SampleRate());
+        pVoice->_envelope._value = 0.0f;
+        pVoice->_envelope._sustain = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
+        if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
+        {
+          pVoice->_triggerNoteDelay = (Global::pPlayer()->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
+          pVoice->_envelope._stage = ENV_OFF;
+        }
+        else
+        {
+          if (pEntry->_cmd == SAMPLER_CMD_RETRIG && (pEntry->_parameter&0x0f) > 0)
+          {
+            pVoice->effretTicks=(pEntry->_parameter&0x0f); // number of Ticks.
+            pVoice->effVal= (Global::pPlayer()->SamplesPerRow()/(pVoice->effretTicks+1));
+            
+            int volmod = (pEntry->_parameter&0xf0)>>4; // Volume modifier.
+            switch (volmod) 
+            {
+              case 0:
+              case 8:	pVoice->effretVol = 0; pVoice->effretMode=0; break;
+              case 1:
+              case 2:
+              case 3:
+              case 4:
+              case 5: pVoice->effretVol = (float)(std::pow(2.,volmod-1)/64); pVoice->effretMode=1; break;
+              case 6: pVoice->effretVol = 0.66666666f;	 pVoice->effretMode=2; break;
+              case 7: pVoice->effretVol = 0.5f;			 pVoice->effretMode=2; break;
+              case 9:
+              case 10:
+              case 11:
+              case 12:
+              case 13: pVoice->effretVol = (float)(std::pow(2.,volmod-9)*(-1))/64; pVoice->effretMode=1; break;
+              case 14: pVoice->effretVol = 1.5f;					pVoice->effretMode=2; break;
+              case 15: pVoice->effretVol = 2.0f;					pVoice->effretMode=2; break;
+            }
+            pVoice->_triggerNoteDelay = pVoice->effVal;
+          }
+          else
+          {
+            pVoice->_triggerNoteDelay=0;
+          }
+          pVoice->_envelope._stage = ENV_ATTACK;
+        }
+        
+        triggered = 1;
+      }
 
-			else if ((pEntry->_cmd == SAMPLER_CMD_VOLUME) || ( pEntry->_cmd == SAMPLER_CMD_PANNING ) )
-			{
-				// Calculating volume coef ---------------------------------------
-				//
-				pVoice->_wave._vol = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
+      else if ((pEntry->_cmd == SAMPLER_CMD_VOLUME) || ( pEntry->_cmd == SAMPLER_CMD_PANNING ) )
+      {
+        // Calculating volume coef ---------------------------------------
+        //
+        pVoice->_wave._vol = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-				if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
-				
-				// Panning calculation -------------------------------------------
-				//
-				float panFactor;
-				
-				if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RPAN)
-				{
-					panFactor = (float)rand()*0.000030517578125f;
-				}
-				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
-				{
-					panFactor = CValueMapper::Map_255_1(pEntry->_parameter);
-				}
-				else
-				{
-					panFactor = CValueMapper::Map_255_1(Global::pSong()->_pInstrument[pVoice->_instrument]->_pan);
-				}
+        if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
+        
+        // Panning calculation -------------------------------------------
+        //
+        float panFactor;
+        
+        if (Global::pSong()->_pInstrument[pVoice->_instrument]->_RPAN)
+        {
+          panFactor = (float)rand()*0.000030517578125f;
+        }
+        else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
+        {
+          panFactor = CValueMapper::Map_255_1(pEntry->_parameter);
+        }
+        else
+        {
+          panFactor = CValueMapper::Map_255_1(Global::pSong()->_pInstrument[pVoice->_instrument]->_pan);
+        }
 
-				pVoice->_wave._rVolDest = panFactor;
-				pVoice->_wave._lVolDest = 1-panFactor;
+        pVoice->_wave._rVolDest = panFactor;
+        pVoice->_wave._lVolDest = 1-panFactor;
 
-				if (pVoice->_wave._rVolDest > 0.5f)
-				{
-					pVoice->_wave._rVolDest = 0.5f;
-				}
-				if (pVoice->_wave._lVolDest > 0.5f)
-				{
-					pVoice->_wave._lVolDest = 0.5f;
-				}
+        if (pVoice->_wave._rVolDest > 0.5f)
+        {
+          pVoice->_wave._rVolDest = 0.5f;
+        }
+        if (pVoice->_wave._lVolDest > 0.5f)
+        {
+          pVoice->_wave._lVolDest = 0.5f;
+        }
 
-				pVoice->_wave._lVolDest *= pVoice->_wave._vol;
-				pVoice->_wave._rVolDest *= pVoice->_wave._vol;
-			}
+        pVoice->_wave._lVolDest *= pVoice->_wave._vol;
+        pVoice->_wave._rVolDest *= pVoice->_wave._vol;
+      }
 
-			return triggered;
+      return triggered;
 
-		}
+    }
 
 void Sampler::Stop(void)
-		{
-			for (int i=0; i<_numVoices; i++)
-			{
-				NoteOffFast(i);
-			}
-		}
+    {
+      for (int i=0; i<_numVoices; i++)
+      {
+        NoteOffFast(i);
+      }
+    }
 
 bool Sampler::Load(DeSerializer* pFile)
 {

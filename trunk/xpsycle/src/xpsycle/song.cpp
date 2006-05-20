@@ -36,10 +36,10 @@
 
 
 template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
-		{
-			if(pointer) delete [] pointer;
-			return pointer = new_value;
-		}
+    {
+      if(pointer) delete [] pointer;
+      return pointer = new_value;
+    }
 
 
 
@@ -271,16 +271,16 @@ void Song::New( )
   m_LinesPerBeat=4;
 //			LineCounter=0;
 //			LineChanged=false;
-			//MessageBox(0, "Machines", 0, 0);
-			// Clean up allocated machines.
+      //MessageBox(0, "Machines", 0, 0);
+      // Clean up allocated machines.
   DestroyAllMachines(true);
-			//MessageBox(0, "Insts", 0, 0);
-			// Cleaning instruments
+      //MessageBox(0, "Insts", 0, 0);
+      // Cleaning instruments
    DeleteInstruments();
-			//MessageBox(0, "Pats", 0, 0);
-			// Clear patterns
+      //MessageBox(0, "Pats", 0, 0);
+      // Clear patterns
   DeleteAllPatterns();
-			// Clear sequence
+      // Clear sequence
   Reset();
   instSelected = 0;
   midiSelected = 0;
@@ -288,20 +288,20 @@ void Song::New( )
   _saved=false;
   fileName ="Untitled.psy";
 /*  if((CMainFrame *)theApp.m_pMainWnd)
-			{*/
+      {*/
    //CreateMachine
    //(
      //MACH_MASTER,
      // (viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
-	//					(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
-	//					0,
-	//					MASTER_INDEX
-	//				);
-	//		}
-	//		else
-	//		{
-				CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
-	//		}*/
+  //					(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
+  //					0,
+  //					MASTER_INDEX
+  //				);
+  //		}
+  //		else
+  //		{
+        CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
+  //		}*/
 }
 
 bool Song::load( const std::string & fName )
@@ -622,170 +622,170 @@ int Song::GetBlankPatternUnused(int rval)
 
 
 bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
-		{
-			PatternEntry blank;
-			unsigned char *toffset;
-			if(adaptsize)
-			{
-				float step;
-				if( patternLines[pattern] > lines ) 
-				{
-					step= (float)patternLines[pattern]/lines;
-					for(int t=0;t<SONGTRACKS;t++)
-					{
-						toffset=_ptrack(pattern,t);
-						int l;
-						for(l = 1 ; l < lines; ++l)
-						{
-							std::memcpy(toffset + l * MULTIPLY, toffset + f2i(l * step) * MULTIPLY,EVENT_SIZE);
-						}
-						while(l < patternLines[pattern])
-						{
-							// This wouldn't be necessary if we really allocate a new pattern.
-							std::memcpy(toffset + (l * MULTIPLY), &blank, EVENT_SIZE);
-							++l;
-						}
-					}
-					patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
-				}
-				else if(patternLines[pattern] < lines)
-				{
-					step= (float)lines/patternLines[pattern];
-					int nl= patternLines[pattern];
-					for(int t=0;t<SONGTRACKS;t++)
-					{
-						toffset=_ptrack(pattern,t);
-						for(int l=nl-1;l>0;l--)
-						{
-							std::memcpy(toffset + f2i(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
-							int tz(f2i(l * step) - 1);
-							while (tz > (l - 1) * step)
-							{
-								std::memcpy(toffset + tz * MULTIPLY, &blank, EVENT_SIZE);
-								--tz;
-							}
-						}
-					}
-					patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
-				}
-			}
-			else
-			{
-				int l(patternLines[pattern]);
-				while(l < lines)
-				{
-					// This wouldn't be necessary if we really allocate a new pattern.
-					for(int t(0) ; t < SONGTRACKS ; ++t)
-					{
-						toffset=_ptrackline(pattern,t,l);
-						memcpy(toffset,&blank,EVENT_SIZE);
-					}
-					++l;
-				}
-				patternLines[pattern] = lines;
-			}
-			std::sprintf(patternName[pattern], name);
-			return true;
-		}
+    {
+      PatternEntry blank;
+      unsigned char *toffset;
+      if(adaptsize)
+      {
+        float step;
+        if( patternLines[pattern] > lines ) 
+        {
+          step= (float)patternLines[pattern]/lines;
+          for(int t=0;t<SONGTRACKS;t++)
+          {
+            toffset=_ptrack(pattern,t);
+            int l;
+            for(l = 1 ; l < lines; ++l)
+            {
+              std::memcpy(toffset + l * MULTIPLY, toffset + f2i(l * step) * MULTIPLY,EVENT_SIZE);
+            }
+            while(l < patternLines[pattern])
+            {
+              // This wouldn't be necessary if we really allocate a new pattern.
+              std::memcpy(toffset + (l * MULTIPLY), &blank, EVENT_SIZE);
+              ++l;
+            }
+          }
+          patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
+        }
+        else if(patternLines[pattern] < lines)
+        {
+          step= (float)lines/patternLines[pattern];
+          int nl= patternLines[pattern];
+          for(int t=0;t<SONGTRACKS;t++)
+          {
+            toffset=_ptrack(pattern,t);
+            for(int l=nl-1;l>0;l--)
+            {
+              std::memcpy(toffset + f2i(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
+              int tz(f2i(l * step) - 1);
+              while (tz > (l - 1) * step)
+              {
+                std::memcpy(toffset + tz * MULTIPLY, &blank, EVENT_SIZE);
+                --tz;
+              }
+            }
+          }
+          patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
+        }
+      }
+      else
+      {
+        int l(patternLines[pattern]);
+        while(l < lines)
+        {
+          // This wouldn't be necessary if we really allocate a new pattern.
+          for(int t(0) ; t < SONGTRACKS ; ++t)
+          {
+            toffset=_ptrackline(pattern,t,l);
+            memcpy(toffset,&blank,EVENT_SIZE);
+          }
+          ++l;
+        }
+        patternLines[pattern] = lines;
+      }
+      std::sprintf(patternName[pattern], name);
+      return true;
+    }
 
 
 bool Song::IsPatternUsed(int i)
-		{
-			bool bUsed = false;
-			if (ppPatternData[i])
-			{
-				// we could also check to see if pattern is unused AND blank.
-				for (int j = 0; j < playLength; j++)
-				{
-					if (playOrder[j] == i)
-					{
-						bUsed = true;
-						break;
-					}
-				}
+    {
+      bool bUsed = false;
+      if (ppPatternData[i])
+      {
+        // we could also check to see if pattern is unused AND blank.
+        for (int j = 0; j < playLength; j++)
+        {
+          if (playOrder[j] == i)
+          {
+            bUsed = true;
+            break;
+          }
+        }
 
-				if (!bUsed)
-				{
-					// check to see if it is empty
-					PatternEntry blank;
-					unsigned char * pData = ppPatternData[i];
-					for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
-					{
-						if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
-						{
-							bUsed = true;
-							j = MULTIPLY2;
-							break;
-						}
-					}
-				}
-			}
-			return bUsed;
-		}
+        if (!bUsed)
+        {
+          // check to see if it is empty
+          PatternEntry blank;
+          unsigned char * pData = ppPatternData[i];
+          for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
+          {
+            if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
+            {
+              bUsed = true;
+              j = MULTIPLY2;
+              break;
+            }
+          }
+        }
+      }
+      return bUsed;
+    }
 
 
 int Song::GetFreeBus()
-		{
-			for(int c(0) ; c < MAX_BUSES ; ++c) if(!_pMachine[c]) return c;
-			return -1; 
-		}
+    {
+      for(int c(0) ; c < MAX_BUSES ; ++c) if(!_pMachine[c]) return c;
+      return -1; 
+    }
 
-		int Song::GetFreeFxBus()
-		{
-			for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
-			return -1; 
-		}
+    int Song::GetFreeFxBus()
+    {
+      for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
+      return -1; 
+    }
 
 bool Song::InsertConnection(int src, int dst, float value)
-		{
-			int freebus=-1;
-			int dfreebus=-1;
-			bool error=false;
-			Machine *srcMac = _pMachine[src];
-			Machine *dstMac = _pMachine[dst];
-			if(!srcMac || !dstMac) return false;
-			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
-			// Get a free output slot on the source machine
-			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
-			{
-				if(!srcMac->_connection[c]) freebus = c;
-				// Checking that there's not an slot to the dest. machine already
-				else if(srcMac->_outputMachines[c] == dst) error = true;
-			}
-			if(freebus == -1 || error) return false;
-			// Get a free input slot on the destination machine
-			error=false;
-			for(int c=MAX_CONNECTIONS-1; c>=0; c--)
-			{
-				if(!dstMac->_inputCon[c]) dfreebus = c;
-				// Checking if the destination machine is connected with the source machine to avoid a loop.
-				else if(dstMac->_outputMachines[c] == src) error = true;
-			}
-			if(dfreebus == -1 || error) return false;
-			// Calibrating in/out properties
-			srcMac->_outputMachines[freebus] = dst;
-			srcMac->_connection[freebus] = true;
-			srcMac->_numOutputs++;
-			dstMac->_inputMachines[dfreebus] = src;
-			dstMac->_inputCon[dfreebus] = true;
-			dstMac->_numInputs++;
-			dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
-			return true;
-		}
+    {
+      int freebus=-1;
+      int dfreebus=-1;
+      bool error=false;
+      Machine *srcMac = _pMachine[src];
+      Machine *dstMac = _pMachine[dst];
+      if(!srcMac || !dstMac) return false;
+      if(dstMac->_mode == MACHMODE_GENERATOR) return false;
+      // Get a free output slot on the source machine
+      for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+      {
+        if(!srcMac->_connection[c]) freebus = c;
+        // Checking that there's not an slot to the dest. machine already
+        else if(srcMac->_outputMachines[c] == dst) error = true;
+      }
+      if(freebus == -1 || error) return false;
+      // Get a free input slot on the destination machine
+      error=false;
+      for(int c=MAX_CONNECTIONS-1; c>=0; c--)
+      {
+        if(!dstMac->_inputCon[c]) dfreebus = c;
+        // Checking if the destination machine is connected with the source machine to avoid a loop.
+        else if(dstMac->_outputMachines[c] == src) error = true;
+      }
+      if(dfreebus == -1 || error) return false;
+      // Calibrating in/out properties
+      srcMac->_outputMachines[freebus] = dst;
+      srcMac->_connection[freebus] = true;
+      srcMac->_numOutputs++;
+      dstMac->_inputMachines[dfreebus] = src;
+      dstMac->_inputCon[dfreebus] = true;
+      dstMac->_numInputs++;
+      dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
+      return true;
+    }
 
 void Song::DeleteInstruments()
-		{
-			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) DeleteInstrument(i);
-		}
+    {
+      for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) DeleteInstrument(i);
+    }
 
 
 
-		void Song::DeleteInstrument(int i)
-		{
-			Invalided=true;
-			_pInstrument[i]->Delete();
-			Invalided=false;
-		}
+    void Song::DeleteInstrument(int i)
+    {
+      Invalided=true;
+      _pInstrument[i]->Delete();
+      Invalided=false;
+    }
 
 
 
@@ -1035,24 +1035,24 @@ bool Song::save(const std::string & fileName)
 }
 
 int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
-		{
-			///\todo what is ASSERT? some msicrosoft thingie?
-			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
-			DeleteLayer(iInstr);
-			_pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
-			if(bStereo)
-			{	_pInstrument[iInstr]->waveDataR = new signed short[iSamplesPerChan];
-				_pInstrument[iInstr]->waveStereo = true;
-			} else {
-				_pInstrument[iInstr]->waveStereo = false;
-			}
-			_pInstrument[iInstr]->waveLength = iSamplesPerChan;
-			std::strncpy(_pInstrument[iInstr]->waveName, sName, 31);
-			_pInstrument[iInstr]->waveName[31] = '\0';
-			std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
-			_pInstrument[iInstr]->_sName[31]='\0';
-			return true;
-		}
+    {
+      ///\todo what is ASSERT? some msicrosoft thingie?
+      assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
+      DeleteLayer(iInstr);
+      _pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
+      if(bStereo)
+      {	_pInstrument[iInstr]->waveDataR = new signed short[iSamplesPerChan];
+        _pInstrument[iInstr]->waveStereo = true;
+      } else {
+        _pInstrument[iInstr]->waveStereo = false;
+      }
+      _pInstrument[iInstr]->waveLength = iSamplesPerChan;
+      std::strncpy(_pInstrument[iInstr]->waveName, sName, 31);
+      _pInstrument[iInstr]->waveName[31] = '\0';
+      std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
+      _pInstrument[iInstr]->_sName[31]='\0';
+      return true;
+    }
 
 unsigned long Song::FourCC( const char *ChunkName)
 {
@@ -1193,6 +1193,6 @@ int Song::WavAlloc(int instrument,const char * Wavfile)
 }
 
 void Song::DeleteLayer(int i)
-		{
-			_pInstrument[i]->DeleteLayer();
-		}
+    {
+      _pInstrument[i]->DeleteLayer();
+    }

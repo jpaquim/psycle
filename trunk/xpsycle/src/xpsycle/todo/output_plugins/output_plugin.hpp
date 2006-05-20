@@ -26,10 +26,10 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
-	class output_plugin : public output_plugins::interface
-	{
-		public:
-			void output_plugin(callback_type);
-	};
+  class output_plugin : public output_plugins::interface
+  {
+    public:
+      void output_plugin(callback_type);
+  };
 }
 #include <universalis/compiler/dynamic_link/end.hpp>

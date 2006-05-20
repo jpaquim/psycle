@@ -346,97 +346,97 @@ void Plugin::Tick( int channel, PatternEntry * pData )
      if(pData->_inst < _pInfo->numParameters)
      {
         int nv = (pData->_cmd<<8)+pData->_parameter;
-					int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-					int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
-					nv += min;
-					if(nv > max) nv = max;
-					try
-					{
-						proxy().ParameterTweak(pData->_inst, nv);
-					}
-					catch(const std::exception &)
-					{
-					}
-					Global::pPlayer()->Tweaker = true;
-				}
-			}
-			else if(pData->_note == cdefTweakS)
-			{
-				if(pData->_inst < _pInfo->numParameters)
-				{
-					int i;
-					if(TWSActive)
-					{
-						// see if a tweak slide for this parameter is already happening
-						for(i = 0; i < MAX_TWS; i++)
-						{
-							if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
-							{
-								// yes
-								break;
-							}
-						}
-						if(i == MAX_TWS)
-						{
-							// nope, find an empty slot
-							for (i = 0; i < MAX_TWS; i++)
-							{
-								if (TWSDelta[i] == 0)
-								{
-									break;
-								}
-							}
-						}
-					}
-					else
-					{
-						// wipe our array for safety
-						for (i = MAX_TWS-1; i > 0; i--)
-						{
-							TWSDelta[i] = 0;
-						}
-					}
-					if (i < MAX_TWS)
-					{
-						TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
-						float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
-						float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
-						TWSDestination[i] += min;
-						if (TWSDestination[i] > max)
-						{
-							TWSDestination[i] = max;
-						}
-						TWSInst[i] = pData->_inst;
-						try
-						{
-							TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
-						}
-						catch(const std::exception &)
-						{
-						}
-						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer()->SamplesPerRow();
-						TWSSamples = 0;
-						TWSActive = true;
-					}
-					else
-					{
-						// we have used all our slots, just send a twk
-						int nv = (pData->_cmd<<8)+pData->_parameter;
-						int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-						int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
-						nv += min;
-						if (nv > max) nv = max;
-						try
-						{
-							proxy().ParameterTweak(pData->_inst, nv);
-						}
-						catch(const std::exception &)
-						{
-						}
-					}
-				}
-				Global::pPlayer()->Tweaker = true;
-			}
+          int const min = _pInfo->Parameters[pData->_inst]->MinValue;
+          int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+          nv += min;
+          if(nv > max) nv = max;
+          try
+          {
+            proxy().ParameterTweak(pData->_inst, nv);
+          }
+          catch(const std::exception &)
+          {
+          }
+          Global::pPlayer()->Tweaker = true;
+        }
+      }
+      else if(pData->_note == cdefTweakS)
+      {
+        if(pData->_inst < _pInfo->numParameters)
+        {
+          int i;
+          if(TWSActive)
+          {
+            // see if a tweak slide for this parameter is already happening
+            for(i = 0; i < MAX_TWS; i++)
+            {
+              if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+              {
+                // yes
+                break;
+              }
+            }
+            if(i == MAX_TWS)
+            {
+              // nope, find an empty slot
+              for (i = 0; i < MAX_TWS; i++)
+              {
+                if (TWSDelta[i] == 0)
+                {
+                  break;
+                }
+              }
+            }
+          }
+          else
+          {
+            // wipe our array for safety
+            for (i = MAX_TWS-1; i > 0; i--)
+            {
+              TWSDelta[i] = 0;
+            }
+          }
+          if (i < MAX_TWS)
+          {
+            TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
+            float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
+            float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
+            TWSDestination[i] += min;
+            if (TWSDestination[i] > max)
+            {
+              TWSDestination[i] = max;
+            }
+            TWSInst[i] = pData->_inst;
+            try
+            {
+              TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
+            }
+            catch(const std::exception &)
+            {
+            }
+            TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer()->SamplesPerRow();
+            TWSSamples = 0;
+            TWSActive = true;
+          }
+          else
+          {
+            // we have used all our slots, just send a twk
+            int nv = (pData->_cmd<<8)+pData->_parameter;
+            int const min = _pInfo->Parameters[pData->_inst]->MinValue;
+            int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+            nv += min;
+            if (nv > max) nv = max;
+            try
+            {
+              proxy().ParameterTweak(pData->_inst, nv);
+            }
+            catch(const std::exception &)
+            {
+            }
+          }
+        }
+        Global::pPlayer()->Tweaker = true;
+      }
 }
 
 void Plugin::Stop( )
@@ -489,71 +489,71 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
 
 
 void Plugin::GetParamName(int numparam, char * name)
-		{
-			if( numparam < _pInfo->numParameters ) std::strcpy(name,_pInfo->Parameters[numparam]->Name);
-			else std::strcpy(name, "Out of Range");
+    {
+      if( numparam < _pInfo->numParameters ) std::strcpy(name,_pInfo->Parameters[numparam]->Name);
+      else std::strcpy(name, "Out of Range");
 
-		}
-		void Plugin::GetParamRange(int numparam,int &minval,int &maxval)
-		{
-			if(GetInfo()->Parameters[numparam]->Flags & MPF_STATE)
-			{
-				minval = GetInfo()->Parameters[numparam]->MinValue;
-				maxval = GetInfo()->Parameters[numparam]->MaxValue;
-			}
-			else
-			{
-				minval = maxval = 0;
-			}
-		}
-		int Plugin::GetParamValue(int numparam)
-		{
-			if(numparam < _pInfo->numParameters)
-			{
-				try
-				{
-					return proxy().Vals()[numparam];
-				}
-				catch(const std::exception &)
-				{
-					return -1; // hmm
-				}
-			}
-			else return -1; // hmm
-		}
+    }
+    void Plugin::GetParamRange(int numparam,int &minval,int &maxval)
+    {
+      if(GetInfo()->Parameters[numparam]->Flags & MPF_STATE)
+      {
+        minval = GetInfo()->Parameters[numparam]->MinValue;
+        maxval = GetInfo()->Parameters[numparam]->MaxValue;
+      }
+      else
+      {
+        minval = maxval = 0;
+      }
+    }
+    int Plugin::GetParamValue(int numparam)
+    {
+      if(numparam < _pInfo->numParameters)
+      {
+        try
+        {
+          return proxy().Vals()[numparam];
+        }
+        catch(const std::exception &)
+        {
+          return -1; // hmm
+        }
+      }
+      else return -1; // hmm
+    }
 
-		void Plugin::GetParamValue(int numparam, char * parval)
-		{
-			if(numparam < _pInfo->numParameters)
-			{
-				try
-				{
-					if(!proxy().DescribeValue(parval, numparam, proxy().Vals()[numparam]))
-						std::sprintf(parval, "%i", proxy().Vals()[numparam]);
-				}
-				catch(const std::exception &)
-				{
-				}
-			}
-			else std::strcpy(parval,"Out of Range");
-		}
+    void Plugin::GetParamValue(int numparam, char * parval)
+    {
+      if(numparam < _pInfo->numParameters)
+      {
+        try
+        {
+          if(!proxy().DescribeValue(parval, numparam, proxy().Vals()[numparam]))
+            std::sprintf(parval, "%i", proxy().Vals()[numparam]);
+        }
+        catch(const std::exception &)
+        {
+        }
+      }
+      else std::strcpy(parval,"Out of Range");
+    }
 
 bool Plugin::SetParameter(int numparam,int value)
-		{
-			if(numparam < _pInfo->numParameters)
-			{
-				try
-				{
-					proxy().ParameterTweak(numparam,value);
-				}
-				catch(const std::exception &)
-				{
-					return false;
-				}
-				return true;
-			}
-			else return false;
-		}
+    {
+      if(numparam < _pInfo->numParameters)
+      {
+        try
+        {
+          proxy().ParameterTweak(numparam,value);
+        }
+        catch(const std::exception &)
+        {
+          return false;
+        }
+        return true;
+      }
+      else return false;
+    }
 
 void Plugin::SaveDllName( Serializer * pFile )
 {
