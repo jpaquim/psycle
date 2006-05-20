@@ -41,13 +41,14 @@ public:
     std::string text();
 
     void setMin(int min);
-    int min();
+    int min() const;
     void setMax(int max);
-    int max();
+    int max() const;
     void setStep(int step);
-    int step();
+    int step() const;
     void setValue(int value);
-    int value();
+    int value() const;
+    void setRange(int min, int max);
 
     void setOrientation(int orientation);
 
