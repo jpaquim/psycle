@@ -629,8 +629,7 @@ void Configuration::onConfigTagParse(const std::string & tagName )
 NBitmap Configuration::newfile( )
 {
   if (iconPath=="")
-     return Global::pBitmaps()->newfile();
+    return Global::pBitmaps()->newfile();
   else
-     return NBitmap(iconPath+ "new.xpm");
-
+    return NBitmap(iconPath+ "new.xpm");
 }

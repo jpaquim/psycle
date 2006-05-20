@@ -796,7 +796,7 @@ void MainWindow::appNew( )
 //  pParentMain->RedrawGearRackList();
 //  pParentMain->UpdateSequencer();
 //  pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
-				//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
+        //pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
   childView_->patternView()->repaint();
   childView_->machineView()->repaint();
   sequencerBar_->repaint();

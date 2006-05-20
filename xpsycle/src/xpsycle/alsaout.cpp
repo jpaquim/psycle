@@ -154,7 +154,7 @@ int AlsaOut::audioStart(  )
   }
 
   if (0 == pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this)) return EXIT_SUCCESS;
-	return 1;
+  return 1;
 }
 
 void AlsaOut::FillBuffer(const snd_pcm_channel_area_t * areas, snd_pcm_uframes_t offset, int count )
@@ -345,28 +345,28 @@ int AlsaOut::write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channe
   while (enablePlayer > 0) {
     FillBuffer(areas, 0, period_size);
     ptr = samples;
-		cptr = period_size;
-		while (cptr > 0) {
-			err = snd_pcm_writei(handle, ptr, cptr);
-			if (err == -EAGAIN)
-				continue;
-			if (err < 0) {
-				if (xrun_recovery(handle, err) < 0) {
-					printf("Write error: %s\n", snd_strerror(err));
-					exit(EXIT_FAILURE);
-				}
-				break;  /* skip one period */
-			}
-			ptr += err * channels;
-			cptr -= err;
-		}
-	}
+    cptr = period_size;
+    while (cptr > 0) {
+      err = snd_pcm_writei(handle, ptr, cptr);
+      if (err == -EAGAIN)
+        continue;
+      if (err < 0) {
+        if (xrun_recovery(handle, err) < 0) {
+          printf("Write error: %s\n", snd_strerror(err));
+          exit(EXIT_FAILURE);
+        }
+        break;  /* skip one period */
+      }
+      ptr += err * channels;
+      cptr -= err;
+    }
+  }
 }
 
 struct transfer_method {
-	const char *name;
-	snd_pcm_access_t access;
-	int (*transfer_loop)(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
+  const char *name;
+  snd_pcm_access_t access;
+  int (*transfer_loop)(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
 };
 
 int AlsaOut::AlsaOut::audioOutThread( void * ptr )

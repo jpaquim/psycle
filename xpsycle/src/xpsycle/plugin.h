@@ -145,7 +145,7 @@ inline Plugin & Proxy::host() throw() { return host_; }
 inline const Plugin & Proxy::host() const throw() { return host_; }
 
 inline void Proxy::callback() throw()
-		{ assert((*this)()); plugin().pCB = host().GetCallback(); }
+    { assert((*this)()); plugin().pCB = host().GetCallback(); }
 
 inline const bool Proxy::operator()() const throw() { return plugin_; }
 inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)

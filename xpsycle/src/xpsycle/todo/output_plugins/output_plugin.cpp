@@ -20,9 +20,9 @@
 
 namespace psycle
 {
-	output_plugin::output_plugin(output_plugin::callback_type callback)
-	:
-		output_plugins::interface(callback)
-	{
-	}
+  output_plugin::output_plugin(output_plugin::callback_type callback)
+  :
+    output_plugins::interface(callback)
+  {
+  }
 }

@@ -214,8 +214,8 @@ static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const
 static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 {
 /*			float id(float(1.0E-18));
-			for(int s(0) ; s < numsamples ; ++s)
-			{
+      for(int s(0) ; s < numsamples ; ++s)
+      {
 //			Old denormal code. Now we use a 1bit sinus.
 //				if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
 //				if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
@@ -223,10 +223,10 @@ static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsampl
 //				const float is2=pSamplesR[s];
 //				pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
 //				pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
-				pSamplesL[s] += id;
-				pSamplesR[s] += id;
-				id = - id;
-			}
+        pSamplesL[s] += id;
+        pSamplesR[s] += id;
+        id = - id;
+      }
 */
 erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
 erase_All_NaNs_Infinities_And_Denormals(pSamplesR,numsamples);
@@ -335,21 +335,21 @@ class Cubic : public Resampler
         y2=(offset+2 == length)?0:*(pData+2);
         return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
      }
-			
-			// yo = y[-1] [sample at x-1]
-			// y0 = y[0]  [sample at x (input)]
-			// y1 = y[1]  [sample at x+1]
-			// y2 = y[2]  [sample at x+2]
-			
-			// res= distance between two neighboughing sample points [y0 and y1] 
-			//		,so [0...1.0]. You have to multiply this distance * RESOLUTION used
-			//		on the spline conversion table. [2048 by default]
-			// If you are using 2048 is asumed you are using 12 bit decimal
-			// fixed point offsets for resampling.
-			
-			// offset = sample offset [info to avoid go out of bounds on sample reading ]
-			// length = sample length [info to avoid go out of bounds on sample reading ]
-			
+      
+      // yo = y[-1] [sample at x-1]
+      // y0 = y[0]  [sample at x (input)]
+      // y1 = y[1]  [sample at x+1]
+      // y2 = y[2]  [sample at x+2]
+      
+      // res= distance between two neighboughing sample points [y0 and y1] 
+      //		,so [0...1.0]. You have to multiply this distance * RESOLUTION used
+      //		on the spline conversion table. [2048 by default]
+      // If you are using 2048 is asumed you are using 12 bit decimal
+      // fixed point offsets for resampling.
+      
+      // offset = sample offset [info to avoid go out of bounds on sample reading ]
+      // length = sample length [info to avoid go out of bounds on sample reading ]
+      
     private:
 
     /// Currently is 2048
