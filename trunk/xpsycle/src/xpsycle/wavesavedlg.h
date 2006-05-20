@@ -20,6 +20,7 @@
 #ifndef WAVESAVEDLG_H
 #define WAVESAVEDLG_H
 
+#include "song.h"
 #include <ngrs/ndialog.h>
 
 class NFileDialog;
@@ -41,6 +42,7 @@ public:
 
 private:
 
+    // gui elements
     NFileDialog* fileDlg;
     NEdit* pathEdt;
     NCheckBox* wireChkBox;
@@ -57,6 +59,24 @@ private:
     NComboBox* channelsCbx;
     NProgressBar* progressBar;
 
+    // psycle sound engine variables
+    int rate;
+    int bits;
+    int channelmode;
+
+    bool _Muted[MAX_BUSES];
+    bool autostop;
+    bool playblock;
+    bool loopsong;
+    bool sel[MAX_SONG_POSITIONS];
+    bool saving;
+    int current;
+    std::string rootname;
+
+    void saveWav(std::string file, int bits, int rate, int channelmode);
+    void saveEnd();
+
+    // button event methods
     void onBrowseBtn(NButtonEvent* ev);
     void onCloseBtn(NButtonEvent* ev);
     void onSaveBtn(NButtonEvent* ev);
