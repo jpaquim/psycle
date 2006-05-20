@@ -808,7 +808,7 @@ namespace psycle
 						}
 						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer->SamplesPerRow();
 						TWSSamples = 0;
-						TWSActive = TRUE;
+						TWSActive = true;
 					}
 					else
 					{

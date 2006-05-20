@@ -425,7 +425,7 @@ namespace psycle
 				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 					boost::read_write_mutex::scoped_read_write_lock lock(song().read_write_mutex(),boost::read_write_lock_state::read_locked);
 				#else // original implementation
-					CSingleLock crit(&song().door, TRUE);
+					CSingleLock crit(&song().door, true);
 				#endif
 			#endif
 			do

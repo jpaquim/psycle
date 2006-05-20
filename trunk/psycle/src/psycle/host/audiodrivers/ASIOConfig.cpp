@@ -84,7 +84,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// recalc the buffers combo
 			FillBufferBox();
 
-			return TRUE;
+			return true;
 		}
 
 		void CASIOConfig::OnOK() 

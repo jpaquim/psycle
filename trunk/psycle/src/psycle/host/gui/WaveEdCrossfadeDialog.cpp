@@ -50,7 +50,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_destStartVol.SetPos(1000);
 			m_srcEndVol.SetPos(1000);
 			m_destEndVol.SetPos(2000);
-			return TRUE;
+			return true;
 		}
 
 		void CWaveEdCrossfadeDialog::OnOK() 

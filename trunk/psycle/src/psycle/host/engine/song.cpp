@@ -286,7 +286,7 @@ namespace psycle
 				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
 				#else // original implementation
-					CSingleLock lock(&door,TRUE);
+					CSingleLock lock(&door,true);
 				#endif
 			#endif
 
@@ -418,11 +418,11 @@ namespace psycle
 					{
 						// delete the old wire
 						int wire = smac->FindOutputWire(wiredest);
-						smac->_connection[wire] = FALSE;
+						smac->_connection[wire] = false;
 						smac->_outputMachines[wire] = 255;
 						smac->_connectedOutputs--;
 
-						_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
+						_pMachine[wiredest]->_inputCon[wireindex] = false;
 						_pMachine[wiredest]->_inputMachines[wireindex] = 255;
 						_pMachine[wiredest]->_connectedInputs--;
 					}
@@ -445,7 +445,7 @@ namespace psycle
 				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
 				#else // original implementation
-					CSingleLock lock(&door, TRUE);
+					CSingleLock lock(&door, true);
 				#endif
 			#endif
 			Machine *iMac = _pMachine[mac];
@@ -1883,10 +1883,10 @@ namespace psycle
 			x=_pMachine[dst]->GetPosX()+32;
 			y=_pMachine[dst]->GetPosY()+ys+8;
 
-			bool bCovered = TRUE;
+			bool bCovered = true;
 			while (bCovered)
 			{
-				bCovered = FALSE;
+				bCovered = false;
 				for (int i=0; i < MAX_MACHINES; i++)
 				{
 					if (i != dst)
@@ -1896,7 +1896,7 @@ namespace psycle
 							if ((abs(_pMachine[i]->GetPosX() - x) < 32) &&
 								(abs(_pMachine[i]->GetPosY() - y) < 32))
 							{
-								bCovered = TRUE;
+								bCovered = true;
 								i = MAX_MACHINES;
 								x = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-xs);
 								y = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CH-ys);

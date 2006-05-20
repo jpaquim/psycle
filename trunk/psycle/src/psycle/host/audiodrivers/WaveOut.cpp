@@ -52,7 +52,7 @@ namespace psycle
 
 		bool WaveOut::Start()
 		{
-			CSingleLock lock(&_lock, TRUE);
+			CSingleLock lock(&_lock, true);
 			if(_running) return true;
 			if(!_pCallback) return false;
 
@@ -121,10 +121,10 @@ namespace psycle
 
 		bool WaveOut::Stop()
 		{
-			CSingleLock lock(&_lock, TRUE);
+			CSingleLock lock(&_lock, true);
 			if(!_running) return true;
 			_stopPolling = true;
-			CSingleLock event(&_event, TRUE);
+			CSingleLock event(&_event, true);
 			// Once we get here, the PollerThread should have stopped
 			if(::waveOutReset(_handle) != MMSYSERR_NOERROR)
 			{

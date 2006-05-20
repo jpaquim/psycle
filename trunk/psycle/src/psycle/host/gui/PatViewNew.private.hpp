@@ -280,22 +280,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				InvalidateRect(rect,false);
 				if ( snt > VISTRACKS )
 				{	
-					ShowScrollBar(SB_HORZ,TRUE);
+					ShowScrollBar(SB_HORZ,true);
 					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
 				}
 				else
 				{	
-					ShowScrollBar(SB_HORZ,FALSE); 
+					ShowScrollBar(SB_HORZ,false); 
 				}
 
 				if ( plines > VISLINES )
 				{	
-					ShowScrollBar(SB_VERT,TRUE);
+					ShowScrollBar(SB_VERT,true);
 					SetScrollRange(SB_VERT,0,plines-VISLINES);
 				}
 				else
 				{	
-					ShowScrollBar(SB_VERT,FALSE); 
+					ShowScrollBar(SB_VERT,false); 
 				}
 				break;
 			case DMPattern: 
@@ -308,22 +308,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				InvalidateRect(rect,false);
 				if ( snt > VISTRACKS )
 				{	
-					ShowScrollBar(SB_HORZ,TRUE);
+					ShowScrollBar(SB_HORZ,true);
 					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
 				}
 				else
 				{	
-					ShowScrollBar(SB_HORZ,FALSE); 
+					ShowScrollBar(SB_HORZ,false); 
 				}
 
 				if ( plines > VISLINES )
 				{	
-					ShowScrollBar(SB_VERT,TRUE);
+					ShowScrollBar(SB_VERT,true);
 					SetScrollRange(SB_VERT,0,plines-VISLINES);
 				}
 				else
 				{	
-					ShowScrollBar(SB_VERT,FALSE); 
+					ShowScrollBar(SB_VERT,false); 
 				}
 				break;
 			case DMPlayback: 
@@ -391,22 +391,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				InvalidateRect(rect,false);
 				if ( snt > VISTRACKS )
 				{	
-					ShowScrollBar(SB_HORZ,TRUE);
+					ShowScrollBar(SB_HORZ,true);
 					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
 				}
 				else
 				{	
-					ShowScrollBar(SB_HORZ,FALSE); 
+					ShowScrollBar(SB_HORZ,false); 
 				}
 
 				if ( plines > VISLINES )
 				{	
-					ShowScrollBar(SB_VERT,TRUE);
+					ShowScrollBar(SB_VERT,true);
 					SetScrollRange(SB_VERT,0,plines-VISLINES);
 				}
 				else
 				{	
-					ShowScrollBar(SB_VERT,FALSE); 
+					ShowScrollBar(SB_VERT,false); 
 				}
 				break;
 			case DMSelection: 

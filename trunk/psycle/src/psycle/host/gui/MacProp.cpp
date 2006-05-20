@@ -55,7 +55,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_bypassCheck.ShowWindow(SW_HIDE);
 			else 
 				m_soloCheck.ShowWindow(SW_HIDE);
-			return TRUE;
+			return true;
 		}
 
 		void CMacProp::OnChangeEdit1() 

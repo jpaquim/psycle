@@ -89,7 +89,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_greetz.AddString("TAo-AAS");
 			m_greetz.AddString("TimEr [Site Graphics and more]");
 			m_greetz.AddString("Vir|us");
-			return TRUE;
+			return true;
 		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

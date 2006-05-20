@@ -91,7 +91,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_midiMachineViewSeqMode.SetCheck(Global::pConfig->_midiMachineViewSeqMode);
 
-			return TRUE;
+			return true;
 		}
 
 		void COutputDlg::OnOK() 

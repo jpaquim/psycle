@@ -36,7 +36,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			m_atStart.SetCheck(BST_CHECKED);
 			m_time.SetWindowText("0.000");
-			return TRUE;
+			return true;
 		}
 
 		void CWaveEdInsertSilenceDialog::OnOK() 

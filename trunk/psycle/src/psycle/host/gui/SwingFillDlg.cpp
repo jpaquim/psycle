@@ -35,7 +35,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		BOOL CSwingFillDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			bGo = FALSE;
+			bGo = false;
 			
 			char buf[32];
 			sprintf(buf,"%d",tempo);
@@ -56,7 +56,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_Offset.SetCheck(offset?1:0);
 
-			return FALSE;
+			return false;
 		}
 
 		void CSwingFillDlg::OnOK() 
@@ -79,7 +79,7 @@ This procedure does not mess with BPM nor with LPB so it shouldn't cause any pro
 The beat is always at the same place if not using the LFO with special values
  */
 
-			bGo = TRUE;
+			bGo = true;
 			char buf[32];
 			m_Tempo.GetWindowText(buf,32);
 			tempo=atoi(buf);

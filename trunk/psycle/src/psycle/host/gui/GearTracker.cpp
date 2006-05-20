@@ -48,7 +48,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 			m_polyslider.SetPos(_pMachine->_numVoices);
 
-			return TRUE;
+			return true;
 		}
 
 		void CGearTracker::OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult) 

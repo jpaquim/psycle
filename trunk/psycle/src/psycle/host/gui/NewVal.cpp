@@ -38,7 +38,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			sprintf(buf,"%d",m_Value);
 			m_value.SetWindowText(buf);
 			m_value.SetSel(-1,-1,false);
-			return TRUE;
+			return true;
 		}
 
 		void CNewVal::OnOK() 

@@ -61,7 +61,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			SetSliderValues();
 			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 			else m_autodec.SetCheck(0);
-			return TRUE;
+			return true;
 		}
 
 		void CMasterDlg::SetSliderValues()

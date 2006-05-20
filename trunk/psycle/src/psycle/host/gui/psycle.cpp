@@ -126,7 +126,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			LoadRecent(pFrame); // Import recent files from registry.
 
-			return TRUE;
+			return true;
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -262,9 +262,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
 			m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER);
 
-			// return TRUE unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return FALSE
-			return TRUE;
+			// return true unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return false
+			return true;
 		}
 
 		void CAboutDlg::OnShowatstartup() 
@@ -346,7 +346,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						hNewItemInfo.wID = ids[iCount];
 						hNewItemInfo.cch = std::strlen(nameBuff);
 						hNewItemInfo.dwTypeData = nameBuff;
-						::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
+						::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, true, &hNewItemInfo);
 						cntSize = sizeof cntBuff;
 						nameSize = sizeof nameBuff;
 						++iCount;

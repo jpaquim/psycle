@@ -10,9 +10,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CPatDlg)
-			m_adaptsize = FALSE;
+			m_adaptsize = false;
 			//}}AFX_DATA_INIT
-			bInit = FALSE;
+			bInit = false;
 		}
 
 		void CPatDlg::DoDataExchange(CDataExchange* pDX)
@@ -51,9 +51,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// Pass the focus to the texbox
 			m_patname.SetFocus();
 			m_patname.SetSel(0,-1);
-			bInit = TRUE;
+			bInit = true;
 			OnUpdateNumLines();
-			return FALSE;
+			return false;
 		}
 
 		void CPatDlg::OnOK() 
