@@ -19,21 +19,22 @@
  ***************************************************************************/
 #include "greetdlg.h"
 #include <ngrs/nlabel.h>
-#include <ngrs/nlistbox.h>
+#include <ngrs/nmemo.h>
 #include <ngrs/nitem.h>
 
 
 GreetDlg::GreetDlg()
  : NWindow()
 {
-  lBox = new NListBox();
+  memo = new NMemo();
+  memo->setReadOnly(true);
 
   NLabel* greetings = new NLabel();
     greetings->setText("Psyceledics Community, wants to thank the following people for their contributions in the developement of Psycle");
     greetings->setWordWrap(true);
   pane()->add(greetings,nAlTop);
 
-  pane()->add(lBox, nAlClient);
+  pane()->add(memo, nAlClient);
 
   setGreetz();
 
@@ -53,37 +54,7 @@ int GreetDlg::onClose( )
 
 void GreetDlg::setGreetz( )
 {
-  lBox->add(new NItem("_sue_ [Extreme testing]"));
-  lBox->add(new NItem("[JAZ] Our project father!]"));
-  lBox->add(new NItem("[SAS] SOLARiS [project-ps WebMaster]"));
-  lBox->add(new NItem("Alk [Extreme testing + coding]"));
-  lBox->add(new NItem("All at #psycle[Efnet]"));
-  lBox->add(new NItem("All the people from the Forums"));
-  lBox->add(new NItem("bohan"));
-  lBox->add(new NItem("Byte"));
-  lBox->add(new NItem("CyanPhase for porting [VibraSynth]"));
-  lBox->add(new NItem("dazld"));
-  lBox->add(new NItem("DJMirage"));
-  lBox->add(new NItem("Drax_D[for asking to be here:D]"));
-  lBox->add(new NItem("Druttis [Machines]"));
-  lBox->add(new NItem("Frodix"));
-  lBox->add(new NItem("Felix Kaplan / Spirit of India"));
-  lBox->add(new NItem("Felix Petrescu 'WakaX'"));
-  lBox->add(new NItem("Gerwin / Freeh2o"));
-  lBox->add(new NItem("Imagineer"));
-  lBox->add(new NItem("Koopeer"));
-  lBox->add(new NItem("krokpitr"));
-  lBox->add(new NItem("Krzysztof Foltman / fsm [coding help]"));
-  lBox->add(new NItem("ksn [Psyceledics WebMaster]"));
-  lBox->add(new NItem("lastfuture"));
-  lBox->add(new NItem("LegoStar [iso]"));
-  lBox->add(new NItem("Loby [for being away])"));
-  lBox->add(new NItem("Pikari"));
-  lBox->add(new NItem("pooplog[Machines+Config]"));
-  lBox->add(new NItem("sampler"));
-  lBox->add(new NItem("TAo-AAS"));
-  lBox->add(new NItem("TimEr[Site Graphics and more]"));
-  lBox->add(new NItem("Vir|us"));
+  memo->setText("_sue_ [Extreme testing],[JAZ] Our project father!]\n[SAS] SOLARiS [project-ps WebMaster]\nAlk [Extreme testing + coding]\nAll at #psycle[Efnet]\nAll the people from the Forums\nbohan\nByte\nCyanPhase for porting [VibraSynth]\ndazld\nDJMirage\nDrax_D[for asking to be here:D]\nDruttis [Machines]\nFrodix\nFelix Kaplan / Spirit of India\nFelix Petrescu 'WakaX'\nGerwin / Freeh2o\nImagineer\nKoopeer\nkrokpitr\nKrzysztof Foltman / fsm [coding help]\nksn [Psyceledics WebMaster]\nlastfuture\nLegoStar [iso]\nLoby [for being away])\nPikari\npooplog[Machines+Config]\nsampler\nTAo-AAS\nTimEr[Site Graphics and more\nVir|us\n");
 }
 
 

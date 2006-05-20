@@ -33,6 +33,7 @@
 #include <ngrs/nitem.h>
 #include <ngrs/nprogressbar.h>
 #include <ngrs/nfiledialog.h>
+#include <ngrs/nbevelborder.h>
 
 WaveSaveDlg::WaveSaveDlg()
  : NDialog()
@@ -46,7 +47,7 @@ WaveSaveDlg::WaveSaveDlg()
   pane()->setLayout(NAlignLayout(5,5));
 
   NPanel* pathPanel = new NPanel();
-    pathPanel->setLayout(NAlignLayout(5,5));
+    pathPanel->setLayout(NAlignLayout(5,10));
     pathPanel->add(new NLabel("Output Path"), nAlLeft);
     NButton* browseBtn = new NButton("Browse");
       browseBtn->setFlat(false);
@@ -73,9 +74,10 @@ WaveSaveDlg::WaveSaveDlg()
   pane()->add(generatorChkBox, nAlTop);
 
   NTogglePanel* gBox = new NTogglePanel();
+    gBox->setBorder(NBevelBorder(nNone,nLowered));
     NTableLayout tableLayout(4,3);
-      //tableLayout.setVGap(5);
-      //tableLayout.setHGap(5);
+      tableLayout.setVGap(5);
+      tableLayout.setHGap(5);
     gBox->setLayout(tableLayout);
     entireRBtn = new NRadioButton();
      entireRBtn->setText("Record the entire song");
@@ -101,7 +103,7 @@ WaveSaveDlg::WaveSaveDlg()
   audioPanel->add(new NLabel("Note many filters\nscrew up when rendereing\nat slow sample rates"),nAlLeft);
     NPanel* cboxPanel = new NPanel();
        cboxPanel->setLayout(NAlignLayout());
-       cboxPanel->add(new NLabel("sampling rate"),nAlTop);
+       cboxPanel->add(new NLabel("Sampling rate"),nAlTop);
        sampleRateCbx = new NComboBox();
           sampleRateCbx->add(new NItem("8192 hz"));
           sampleRateCbx->add(new NItem("11025 hz"));
@@ -111,7 +113,7 @@ WaveSaveDlg::WaveSaveDlg()
           sampleRateCbx->add(new NItem("96000 hz"));
           sampleRateCbx->setIndex(3);
        cboxPanel->add(sampleRateCbx,nAlTop);
-       cboxPanel->add(new NLabel("bit rate"),nAlTop);
+       cboxPanel->add(new NLabel("Bit rate"),nAlTop);
        bitDepthCbx = new NComboBox();
           bitDepthCbx->add(new NItem("8"));
           bitDepthCbx->add(new NItem("16"));
@@ -119,7 +121,7 @@ WaveSaveDlg::WaveSaveDlg()
           bitDepthCbx->add(new NItem("32"));
           bitDepthCbx->setIndex(1);
        cboxPanel->add(bitDepthCbx,nAlTop);
-       cboxPanel->add(new NLabel("channels"),nAlTop); 
+       cboxPanel->add(new NLabel("Channels"),nAlTop); 
        channelsCbx = new NComboBox();
           channelsCbx->add(new NItem("Mono [mix]"));
           channelsCbx->add(new NItem("Mono [left]"));
