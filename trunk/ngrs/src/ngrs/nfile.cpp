@@ -188,7 +188,21 @@ bool NFile::fileIsReadable( const std::string & file )
 
 std::string NFile::env( const std::string & envName )
 {
-  char env[8000];
-  strncpy(env,getenv(envName.c_str()),7999);
-  return std::string(env);
+  #if 1
+    char env[8000];
+    strncpy(env,getenv(envName.c_str()),7999);
+    return std::string(env);
+  #else // no length limit
+    char const * const value(std::getenv(envName.c_str()));
+    if(!value)
+    {
+    	std::string nvr;
+    	return nvr;
+    }
+    else
+    {
+    	std::string nvr(value);
+    	return nvr;
+    }
+  #endif
 }
