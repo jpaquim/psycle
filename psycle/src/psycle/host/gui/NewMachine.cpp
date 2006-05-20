@@ -225,7 +225,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			itemheight = m_browser.GetItemHeight ();
 			
-			return TRUE;
+			return true;
 
 		}
 
@@ -602,8 +602,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (i >= IS_FOLDER)
 			{
 				name = ""; desc = ""; dll = ""; version = "";
-				m_Allow.SetCheck(FALSE);
-				m_Allow.EnableWindow(FALSE);
+				m_Allow.SetCheck(false);
+				m_Allow.EnableWindow(false);
 			}
 			else if ((i >= IS_INTERNAL_MACHINE) && (i <= (IS_INTERNAL_MACHINE + NUM_INTERNAL_MACHINES - 1)))
 			{
@@ -615,8 +615,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					OutBus = _pInternalMachines[i - IS_INTERNAL_MACHINE]->OutBus;
 					LastType0 = _pInternalMachines[i - IS_INTERNAL_MACHINE]->LastType0;
 					LastType1 = _pInternalMachines[i - IS_INTERNAL_MACHINE]->LastType1;
-					m_Allow.SetCheck(FALSE);
-					m_Allow.EnableWindow(FALSE);
+					m_Allow.SetCheck(false);
+					m_Allow.EnableWindow(false);
 
 			}
 			else
@@ -661,7 +661,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				psOutputDll = _pPlugsInfo[i]->dllname;
 				m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
-				m_Allow.EnableWindow(TRUE);
+				m_Allow.EnableWindow(true);
 			}
 			m_nameLabel.SetWindowText(name);
 			m_descLabel.SetWindowText(desc);
@@ -1511,7 +1511,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (tHand == hPlug[i])
 				{
 					_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
-					bAllowChanged = TRUE;
+					bAllowChanged = true;
 				}
 			}
 		}
@@ -1632,7 +1632,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if ((piml = m_browser.CreateDragImage(lpnmtv->itemNew.hItem)) == NULL) return;
 				
 				/* get the bounding rectangle of the item being dragged (rel to top-left of control) */
-				if (m_browser.GetItemRect(lpnmtv->itemNew.hItem, &rcItem, TRUE))
+				if (m_browser.GetItemRect(lpnmtv->itemNew.hItem, &rcItem, true))
 				{
 					CPoint ptDragBegin;
 					int nX, nY;
@@ -1672,7 +1672,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				SetFocus();
 				
 				// redraw item being dragged, otherwise it remains (looking) selected
-				InvalidateRect(&rcItem, TRUE);
+				InvalidateRect(&rcItem, true);
 				UpdateWindow();
 				
 				// Hide the mouse cursor, and direct mouse input to this window
@@ -1773,7 +1773,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
     				ClientToScreen(&pt);
 
     				CImageList::DragMove(pt);
-    				CImageList::DragShowNolock(FALSE);			
+    				CImageList::DragShowNolock(false);			
 			    
 				if (CWnd::WindowFromPoint(pt) == &m_browser)
 				{
@@ -1785,7 +1785,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
       				m_browser.SelectDropTarget(tvhti.hItem);
     				}
 
-    				CImageList::DragShowNolock(TRUE);
+    				CImageList::DragShowNolock(true);
   			}
 
 			CPoint curpoint = point;
@@ -1881,7 +1881,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 			}
 
-  			FinishDragging(TRUE);
+  			FinishDragging(true);
 			
   			RedrawWindow();
 		}
@@ -1896,7 +1896,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
       				CImageList::EndDrag();
     				}
     				ReleaseCapture();
-    				ShowCursor(TRUE);
+    				ShowCursor(true);
     				m_hItemDrag = NULL;
     				m_browser.SelectDropTarget(NULL);
   			}

@@ -99,13 +99,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if( !CFrameWnd::PreCreateWindow(cs) )
 			{
-				return FALSE;
+				return false;
 			}
 
 		//	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 		//	cs.lpszClass = AfxRegisterWndClass(0,0,0, AfxGetApp()->LoadIcon(IDR_WAVEFRAME));
 			
-			return TRUE;	
+			return true;	
 		}
 
 		void CWaveEdFrame::OnDestroy()
@@ -126,7 +126,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 			{
 				this->AdjustStatusBar(_pSong->instSelected);
-				return TRUE;	
+				return true;	
 			}
 			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 		}
@@ -164,7 +164,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				float slInSecs = sl / float(Global::configuration().GetSamplesPerSec());
 				sprintf(buff, "Selection: %u (%0.3f secs.)", sl, slInSecs);
 			}
-			statusbar.SetPaneText(1, buff, TRUE);
+			statusbar.SetPaneText(1, buff, true);
 		}
 
 		void CWaveEdFrame::AdjustStatusBar(int ins)
@@ -173,14 +173,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int	wl=_pSong->_pInstrument[ins]->waveLength;
 			float wlInSecs = wl / float(Global::configuration().GetSamplesPerSec());
 			sprintf(buff, "Size: %u (%0.3f secs.)", wl, wlInSecs);
-			statusbar.SetPaneText(2, buff, TRUE);
+			statusbar.SetPaneText(2, buff, true);
 
 			if (wl)
 			{
-				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", TRUE);
-				else statusbar.SetPaneText(3, "Mode: Mono", TRUE);
+				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", true);
+				else statusbar.SetPaneText(3, "Mode: Mono", true);
 			}
-			else statusbar.SetPaneText(3, "Mode: Empty", TRUE);
+			else statusbar.SetPaneText(3, "Mode: Empty", true);
 		}
 
 		void CWaveEdFrame::OnShowWindow(BOOL bShow, UINT nStatus) 

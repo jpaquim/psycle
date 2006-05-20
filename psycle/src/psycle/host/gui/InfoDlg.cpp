@@ -56,7 +56,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			InitTimer();
 			
-			return TRUE;
+			return true;
 		}
 
 		void CInfoDlg::InitTimer()

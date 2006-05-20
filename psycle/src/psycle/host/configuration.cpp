@@ -24,7 +24,7 @@ namespace psycle
 			_RecordNoteoff = false;
 			_RecordTweaks = false;
 			_notesToEffects = false;
-			_RecordMouseTweaksSmooth = FALSE;
+			_RecordMouseTweaksSmooth = false;
 			_RecordUnarmed = true;
 			_NavigationIgnoresStep = false;
 			_midiMachineViewSeqMode = false;
@@ -563,9 +563,9 @@ namespace psycle
 			pattern_font_point = 80;
 			pattern_font_x = 9;
 			pattern_font_y = 11;
-			pattern_draw_empty_data = FALSE;
-			draw_mac_index = TRUE;
-			draw_vus = TRUE;
+			pattern_draw_empty_data = false;
+			draw_mac_index = true;
+			draw_vus = true;
 			generator_fontface = "Tahoma";
 			generator_font_point = 80;
 			effect_fontface = "Tahoma";

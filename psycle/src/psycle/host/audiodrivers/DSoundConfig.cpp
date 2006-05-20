@@ -69,7 +69,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									enclosing.m_deviceComboBox.FindString(0, description),
 									reinterpret_cast<DWORD_PTR>(device_guid ? new GUID(*device_guid) : new GUID(GUID())) // DSDEVID_DefaultPlayback <-- unresolved external symbol
 								);
-							return TRUE;
+							return true;
 						}
 				};
 				/*directsound*/::DirectSoundEnumerate(callback::DirectSoundEnumerateCallback, this);
@@ -118,9 +118,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					m_bufferSizeSpin.SetAccel(1, &accel);
 				}
 			}
-			return TRUE;
-			// return TRUE unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return FALSE
+			return true;
+			// return true unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return false
 		}
 
 		void CDSoundConfig::OnOK() 

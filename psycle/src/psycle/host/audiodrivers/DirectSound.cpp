@@ -57,7 +57,7 @@ namespace psycle
 
 		bool DirectSound::Start()
 		{
-			CSingleLock lock(&_lock, TRUE);
+			CSingleLock lock(&_lock, true);
 			if(_running) return true;
 			if(!_pCallback) return false;
 			if(FAILED(::DirectSoundCreate(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
@@ -172,11 +172,11 @@ namespace psycle
 
 		bool DirectSound::Stop()
 		{
-			CSingleLock lock(&_lock, TRUE);
+			CSingleLock lock(&_lock, true);
 			if(!_running) return true;
 			_running = false;
 			_timerActive = false;
-			CSingleLock event(&_event, TRUE);
+			CSingleLock event(&_event, true);
 			// Once we get here, the PollerThread should have stopped
 			if(_playing)
 			{

@@ -451,7 +451,7 @@ namespace psycle {
 				if (uMsg == BFFM_INITIALIZED)
 				{
 					if (lpData && *((LPCSTR)lpData))
-						::SendMessage(hwnd, BFFM_SETSELECTION, TRUE, lpData);
+						::SendMessage(hwnd, BFFM_SETSELECTION, true, lpData);
 				}
 				return 0;
 			}

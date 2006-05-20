@@ -258,7 +258,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
 		{
 			if (!CWnd::PreCreateWindow(cs))
-				return FALSE;
+				return false;
 			
 			cs.dwExStyle |= WS_EX_CLIENTEDGE;
 			cs.style &= ~WS_BORDER;
@@ -270,7 +270,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					0,
 					0
 				);
-			return TRUE;
+			return true;
 		}
 
 		/// This function gives to the pParentMain the pointer to a CMainFrm
@@ -318,7 +318,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						// It is causing skips on sound when there is a pattern change because
 						// it is not allowing the player to work. Do the same in the one inside
 						// Player::Work()
-						CSingleLock lock(&_pSong->door,TRUE);
+						CSingleLock lock(&_pSong->door,true);
 					#endif
 				#endif
 				if (Global::_pSong->_pMachine[MASTER_INDEX])
@@ -640,7 +640,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				MessageBox("Sorry, saving is not functional in this experimental build.");
 				return false;
 			#endif
-			BOOL bResult = TRUE;
+			BOOL bResult = true;
 			if ( Global::_pSong->_saved )
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
@@ -653,12 +653,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if (!file.Create((char*)filepath.c_str(), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
+						return false;
 					}
 					if (!_pSong->Save(&file))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
+						bResult = false;
 					}
 					else 
 					{
@@ -678,7 +678,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else 
 				{
-					return FALSE;
+					return false;
 				}
 			}
 			else 
@@ -728,10 +728,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = TRUE;
+			BOOL bResult = true;
 			
 			// Display the Open dialog box. 
-			if (GetSaveFileName(&ofn) == TRUE)
+			if (GetSaveFileName(&ofn) == true)
 			{
 				CString str = ofn.lpstrFile;
 
@@ -751,7 +751,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					catch(...)
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
+						return false;
 					}
 				}
 				else if ( ofn.nFilterIndex == 3 ) 
@@ -785,12 +785,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if (!file.Create(str.GetBuffer(1), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
+						return false;
 					}
 					if (!_pSong->Save(&file))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
+						bResult = false;
 					}
 					else 
 					{
@@ -813,7 +813,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				return FALSE;
+				return false;
 			}
 			return bResult;
 		}
@@ -843,7 +843,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			
 			// Display the Open dialog box. 
-			if(::GetOpenFileName(&ofn)==TRUE)
+			if(::GetOpenFileName(&ofn)==true)
 			{
 				OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
 			}
@@ -954,23 +954,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//  <JosepMa> is this still the case? or what does "machine changes" mean?
 		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
 		{
-			BOOL bChecked = TRUE;
+			BOOL bChecked = true;
 			if (pUndoList)
 			{
 				if (UndoSaved != pUndoList->counter)
 				{
-					bChecked = FALSE;
+					bChecked = false;
 				}
 			}
 			else if (UndoMacSaved != UndoMacCounter)
 			{
-				bChecked = FALSE;
+				bChecked = false;
 			}
 			else
 			{
 				if (UndoSaved != 0)
 				{
-					bChecked = FALSE;
+					bChecked = false;
 				}
 			}
 			if (!bChecked)
@@ -993,22 +993,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							std::ostringstream szText;
 							szText << "Error writing to \"" << filepath << "\"!!!";
 							MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
-							return FALSE;
+							return false;
 						}
 						_pSong->Save(&file);
 						//file.Close(); <- save handles this
-						return TRUE;
+						return true;
 						break;
 					case IDNO:
-						return TRUE;
+						return true;
 						break;
 					case IDCANCEL:
-						return FALSE;
+						return false;
 						break;
 					}
 				}
 			}
-			return TRUE;
+			return true;
 		}
 
 		void CChildView::OnFileRevert()
@@ -1032,7 +1032,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (viewMode != VMMachine)
 			{
 				viewMode = VMMachine;
-				ShowScrollBar(SB_BOTH,FALSE);
+				ShowScrollBar(SB_BOTH,false);
 
 				// set midi input mode to real-time or Step
 				if(Global::pConfig->_midiMachineViewSeqMode)
@@ -1061,7 +1061,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				RecalcMetrics();
 
 				viewMode = VMPattern;
-				//ShowScrollBar(SB_BOTH,FALSE);
+				//ShowScrollBar(SB_BOTH,false);
 				
 				// set midi input mode to step insert
 				CMidiInput::Instance()->m_midiMode = MODE_STEP;
@@ -1098,7 +1098,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (viewMode != VMSequence)
 			{
 				viewMode = VMSequence;
-				ShowScrollBar(SB_BOTH,FALSE);
+				ShowScrollBar(SB_BOTH,false);
 				
 				// set midi input mode to step insert
 				CMidiInput::Instance()->m_midiMode = MODE_STEP;
@@ -1158,12 +1158,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (Global::pConfig->_followSong && bEditMode)
 			{
-				bEditMode = FALSE;
+				bEditMode = false;
 			}
 			else
 			{
-				Global::pConfig->_followSong = TRUE;
-				bEditMode = TRUE;
+				Global::pConfig->_followSong = true;
+				bEditMode = true;
 				CButton*cb=(CButton*)pParentMain->m_wndSeq.GetDlgItem(IDC_FOLLOW);
 				cb->SetCheck(1);
 			}
@@ -1200,8 +1200,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 		{
-			if ( Global::pPlayer->_playBlock == true ) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			if ( Global::pPlayer->_playBlock == true ) pCmdUI->SetCheck(true);
+			else pCmdUI->SetCheck(false);
 		}
 
 		void CChildView::OnBarstop()
@@ -1281,8 +1281,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateAutostop(CCmdUI* pCmdUI) 
 		{
-			if (Global::pConfig->autoStopMachines == true ) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			if (Global::pConfig->autoStopMachines == true ) pCmdUI->SetCheck(true);
+			else pCmdUI->SetCheck(false);
 		}
 
 		void CChildView::OnFileSongproperties() 
@@ -1610,8 +1610,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 		{
-			if (blockSelected && (viewMode == VMPattern)) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
+			if (blockSelected && (viewMode == VMPattern)) pCmdUI->Enable(true);
+			else pCmdUI->Enable(false);
 		}
 
 		void CChildView::OnPopCopy() { CopyBlock(false); }
@@ -1619,8 +1619,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnPopPaste() { PasteBlock(editcur.track,editcur.line,false); }
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
-			if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(TRUE);
-			else  pCmdUI->Enable(FALSE);
+			if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(true);
+			else  pCmdUI->Enable(false);
 		}
 
 		void CChildView::OnPopMixpaste() { PasteBlock(editcur.track,editcur.line,true); }
@@ -1632,8 +1632,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
 		{
-			if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(TRUE);
-			else  pCmdUI->Enable(FALSE);
+			if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(true);
+			else  pCmdUI->Enable(false);
 		}
 		void CChildView::OnPopDelete() { DeleteBlock(); }
 
@@ -1659,13 +1659,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		/// fill block
 		void CChildView::OnPopBlockSwingfill()
 		{
-			ShowSwingFillDlg(FALSE);
+			ShowSwingFillDlg(false);
 		}
 
 		/// fill track
 		void CChildView::OnPopTrackSwingfill()
 		{
-			ShowSwingFillDlg(TRUE);
+			ShowSwingFillDlg(true);
 		}
 
 		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
@@ -1675,18 +1675,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				switch (pUndoList->type)
 				{
 				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
+					pCmdUI->Enable(true);
 					pCmdUI->SetText("Undo");
 					break;
 				default:
 					if(viewMode == VMPattern)// && bEditMode)
 					{
-						pCmdUI->Enable(TRUE);
+						pCmdUI->Enable(true);
 						pCmdUI->SetText("Undo");
 					}
 					else
 					{
-						pCmdUI->Enable(FALSE);
+						pCmdUI->Enable(false);
 						pCmdUI->SetText("Undo in Pattern View");
 					}
 					break;
@@ -1695,7 +1695,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else
 			{
 				pCmdUI->SetText("Undo");
-				pCmdUI->Enable(FALSE);
+				pCmdUI->Enable(false);
 			}
 		}
 
@@ -1706,18 +1706,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				switch (pRedoList->type)
 				{
 				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
+					pCmdUI->Enable(true);
 					pCmdUI->SetText("Redo");
 					break;
 				default:
 					if(viewMode == VMPattern)// && bEditMode)
 					{
-						pCmdUI->Enable(TRUE);
+						pCmdUI->Enable(true);
 						pCmdUI->SetText("Redo");
 					}
 					else
 					{
-						pCmdUI->Enable(FALSE);
+						pCmdUI->Enable(false);
 						pCmdUI->SetText("Redo in Pattern View");
 					}
 					break;
@@ -1725,21 +1725,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				pCmdUI->Enable(FALSE);
+				pCmdUI->Enable(false);
 				pCmdUI->SetText("Redo");
 			}
 		}
 
 		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
 		{
-			if(viewMode == VMPattern) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
+			if(viewMode == VMPattern) pCmdUI->Enable(true);
+			else pCmdUI->Enable(false);
 		}
 
 		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
 		{
-			if(patBufferCopy&&(viewMode == VMPattern)) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
+			if(patBufferCopy&&(viewMode == VMPattern)) pCmdUI->Enable(true);
+			else pCmdUI->Enable(false);
 		}
 
 		void CChildView::OnFileImportModulefile() 
@@ -1768,7 +1768,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==TRUE)
+			if (GetOpenFileName(&ofn)==true)
 			{
 				KillUndo();
 				KillRedo();
@@ -1949,7 +1949,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			hNewItemInfo.wID		= ids[0];
 			hNewItemInfo.cch		= static_cast<UINT>(fName.length()); ///\todo recheck this on a 64-bit platform
 			hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
-			InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
+			InsertMenuItem(hRecentMenu, 0, true, &hNewItemInfo);
 			// Update identifiers.
 			for(iCount = 1;iCount < GetMenuItemCount(hRecentMenu);iCount++)
 			{
@@ -2145,7 +2145,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				szOld = Global::pConfig->machine_skin;
 				if (szOld != PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
 				{
-					BOOL result = FALSE;
+					BOOL result = false;
 					FindMachineSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
 					if(result)
 					{
@@ -2240,7 +2240,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					MachineCoords.dEffectBypass.y = 15;
 					MachineCoords.dEffectName.x = 10;
 					MachineCoords.dEffectName.y = 12;
-					MachineCoords.bHasTransparency = FALSE;
+					MachineCoords.bHasTransparency = false;
 				#else
 					MachineCoords.sMaster.x = 0;
 					MachineCoords.sMaster.y = 0;
@@ -2326,7 +2326,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					MachineCoords.dEffectBypass.y = 5;//15;
 					MachineCoords.dEffectName.x = 49;//10;
 					MachineCoords.dEffectName.y = 7;//12;
-					MachineCoords.bHasTransparency = FALSE;
+					MachineCoords.bHasTransparency = false;
 				#endif
 				machineskin.DeleteObject();
 				DeleteObject(hbmMachineSkin);
@@ -2345,7 +2345,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (finder.IsDirectory() && !finder.IsDots())
 				{
 					FindMachineSkin(finder.GetFilePath(),findName,result);
-					if ( *result == TRUE) return;
+					if ( *result == true) return;
 				}
 			}
 			finder.Close();
@@ -2859,7 +2859,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									if (q)
 									{
 										hexstring_to_integer(q+1, MachineCoords.cTransparency);
-										MachineCoords.bHasTransparency = TRUE;
+										MachineCoords.bHasTransparency = true;
 									}
 								}
 							}
@@ -2868,7 +2868,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PrepareMask(&machineskin,&machineskinmask,MachineCoords.cTransparency);
 							}
 							fclose(hfile);
-							*result = TRUE;
+							*result = true;
 							break;
 						}
 					}
@@ -2886,7 +2886,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// ok so...
 				if (szOld != std::string(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN))
 				{
-					BOOL result = FALSE;
+					BOOL result = false;
 					FindPatternHeaderSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->pattern_header_skin.c_str(), &result);
 					if (result)
 					{
@@ -2927,7 +2927,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					PatHeaderCoords.dMuteOn.y = 5;
 					PatHeaderCoords.dSoloOn.x = 96;
 					PatHeaderCoords.dSoloOn.y = 5;
-					PatHeaderCoords.bHasTransparency = FALSE;
+					PatHeaderCoords.bHasTransparency = false;
 				#else
 					PatHeaderCoords.sBackground.x=0;
 					PatHeaderCoords.sBackground.y=0;
@@ -2959,7 +2959,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					PatHeaderCoords.dMuteOn.y = 3;//5;
 					PatHeaderCoords.dSoloOn.x = 97;//96;
 					PatHeaderCoords.dSoloOn.y = 3;//5;
-					PatHeaderCoords.bHasTransparency = FALSE;
+					PatHeaderCoords.bHasTransparency = false;
 				#endif
 				patternheader.DeleteObject();
 				DeleteObject(hbmPatHeader);
@@ -3201,7 +3201,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									if (q)
 									{
 										hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
-										PatHeaderCoords.bHasTransparency = TRUE;
+										PatHeaderCoords.bHasTransparency = true;
 									}
 								}
 							}
@@ -3210,7 +3210,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PrepareMask(&patternheader,&patternheadermask,PatHeaderCoords.cTransparency);
 							}
 							fclose(hfile);
-							*result = TRUE;
+							*result = true;
 							break;
 						}
 					}
@@ -3390,7 +3390,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = FALSE;
+						_pSong->_trackMuted[i] = false;
 					}
 					_pSong->_trackSoloed = -1;
 				}
@@ -3398,9 +3398,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = TRUE;
+						_pSong->_trackMuted[i] = true;
 					}
-					_pSong->_trackMuted[editcur.track] = FALSE;
+					_pSong->_trackMuted[editcur.track] = false;
 					_pSong->_trackSoloed = editcur.track;
 				}
 				Repaint(DMTrackHeader);
@@ -3475,7 +3475,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if ( hbmMachineDial) DeleteObject(hbmMachineDial);
 			if (Global::pConfig->bBmpDial)
 			{
-				Global::pConfig->bBmpDial=FALSE;
+				Global::pConfig->bBmpDial=false;
 				hbmMachineDial = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpDialFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 				if (hbmMachineDial)
 				{
@@ -3486,7 +3486,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 						if ((bm.bmWidth == 1792) && (bm.bmHeight == 28))
 						{
-							Global::pConfig->bBmpDial=TRUE;
+							Global::pConfig->bBmpDial=true;
 						}
 						else
 							machinedial.LoadBitmap(IDB_KNOB);
@@ -3504,7 +3504,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
 			if (Global::pConfig->bBmpBkg)
 			{
-				Global::pConfig->bBmpBkg=FALSE;
+				Global::pConfig->bBmpBkg=false;
 				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 				if (hbmMachineBkg)
 				{
@@ -3518,7 +3518,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 						if ((bkgx > 0) && (bkgy > 0))
 						{
-							Global::pConfig->bBmpBkg=TRUE;
+							Global::pConfig->bBmpBkg=true;
 						}
 					}
 				}

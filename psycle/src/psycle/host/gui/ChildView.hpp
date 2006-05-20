@@ -244,13 +244,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void IncPosition(bool bRepeat=false);
 			void DecPosition();
 
-			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
 
 			void AddMacViewUndo(); // place holder

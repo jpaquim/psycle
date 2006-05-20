@@ -425,7 +425,7 @@ namespace psycle
 					}
 					else if (!pMac[i])
 					{
-						_machineActive[i] = FALSE;
+						_machineActive[i] = false;
 					}
 					else 
 					{
@@ -597,7 +597,7 @@ namespace psycle
 							if (pMac[busMachine[i]]->_mode == MACHMODE_GENERATOR)
 							{
 								_pMachine[i] = pMac[busMachine[i]];
-								_machineActive[busMachine[i]] = FALSE; // don't update this twice;
+								_machineActive[busMachine[i]] = false; // don't update this twice;
 
 								for (int c=0; c<MAX_CONNECTIONS; c++)
 								{
@@ -652,7 +652,7 @@ namespace psycle
 							if (pMac[busEffect[i]]->_mode == MACHMODE_FX)
 							{
 								_pMachine[i+MAX_BUSES] = pMac[busEffect[i]];
-								_machineActive[busEffect[i]] = FALSE; // don't do this again
+								_machineActive[busEffect[i]] = false; // don't do this again
 
 								for (int c=0; c<MAX_CONNECTIONS; c++)
 								{

@@ -43,7 +43,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_songcomments.SetWindowText(_pSong->Comment);
 			m_songtitle.SetFocus();
 			m_songtitle.SetSel(0,-1);
-			return FALSE;
+			return false;
 		}
 
 		void CSongpDlg::OnChangeTitle() 

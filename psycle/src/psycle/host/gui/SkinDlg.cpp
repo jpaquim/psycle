@@ -231,9 +231,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			m_triangle_size.SetCurSel(_triangle_size-8);
 
-			return TRUE;
-			// return TRUE unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return FALSE
+			return true;
+			// return true unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return false
 		}
 
 		void CSkinDlg::FindSkinsInDir(CString findDir)
@@ -913,7 +913,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								p[0]=0;
 								szBmpBkgFilename = q;
 								// check for no \ in which case search for it?
-								bBmpBkg = TRUE;
+								bBmpBkg = true;
 							}
 						}
 					}
@@ -929,7 +929,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								p[0]=0;
 								szBmpDialFilename = q;
 								// check for no \ in which case search for it?
-								bBmpDial = TRUE;
+								bBmpDial = true;
 							}
 						}
 					}
@@ -1861,10 +1861,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				ofn.lpstrInitialDir = szPath;
 				ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 				// Display the Open dialog box. 
-				if(GetOpenFileName(&ofn)==TRUE)
+				if(GetOpenFileName(&ofn)==true)
 				{
 					szBmpDialFilename = szFile;
-					bBmpDial = TRUE;
+					bBmpDial = true;
 					CString str1(szBmpDialFilename.c_str());
 					int i = str1.ReverseFind('\\')+1;
 					CString str2 = str1.Mid(i);
@@ -1872,7 +1872,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					bBmpDial = FALSE;
+					bBmpDial = false;
 					m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
 				}
 		}
@@ -1903,10 +1903,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.lpstrInitialDir = szPath;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
-			if(GetOpenFileName(&ofn)==TRUE)
+			if(GetOpenFileName(&ofn)==true)
 			{
 				szBmpBkgFilename = szFile;
-				bBmpBkg = TRUE;
+				bBmpBkg = true;
 				CString str1(szBmpBkgFilename.c_str());
 				int i = str1.ReverseFind('\\')+1;
 				CString str2 = str1.Mid(i);
@@ -1914,7 +1914,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				bBmpBkg = FALSE;
+				bBmpBkg = false;
 				m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 			}
 		}

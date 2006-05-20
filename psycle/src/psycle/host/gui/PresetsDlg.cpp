@@ -260,7 +260,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			file_name = path.string();
 			ReadPresets();
 			UpdateList();
-			return TRUE;
+			return true;
 		}
 
 		void CPresetsDlg::OnSave() 
@@ -341,7 +341,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
-			if(GetOpenFileName(&ofn) == TRUE)
+			if(GetOpenFileName(&ofn) == true)
 			{
 				if(ofn.nFilterIndex == 1)
 				{
@@ -613,7 +613,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			// Display the Open dialog box. 
 			
-			if (GetSaveFileName(&ofn)==TRUE)
+			if (GetSaveFileName(&ofn)==true)
 			{
 				int selpreset=m_preslist.GetCurSel();
 				int filepresets;

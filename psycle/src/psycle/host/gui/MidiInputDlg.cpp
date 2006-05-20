@@ -101,7 +101,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				write_to_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
 			}
 
-			return TRUE;
+			return true;
 		}
 
 		namespace

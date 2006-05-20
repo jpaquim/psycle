@@ -78,7 +78,7 @@ namespace psycle
 								driverindex[drivercount]=i;
 								outputindex[drivercount]=j;
 								ASIOChannelInfo channelInfo;
-								channelInfo.isInput = FALSE;
+								channelInfo.isInput = false;
 								channelInfo.channel = j;
 								ASIOGetChannelInfo(&channelInfo);
 								std::sprintf(szFullName[drivercount],"%s : %s",szNameBuf[i],channelInfo.name);
@@ -161,7 +161,7 @@ namespace psycle
 
 		bool ASIOInterface::Start()
 		{
-			CSingleLock lock(&_lock, TRUE);
+			CSingleLock lock(&_lock, true);
 			structured_exception_translator_set = false;
 			if(_running) return true;
 			if(_pASIOCallback == 0)
@@ -229,7 +229,7 @@ namespace psycle
 			ASIObuffers[1][0] = info[1].buffers[0];
 			ASIObuffers[1][1] = info[1].buffers[1];
 			ASIOChannelInfo channelInfo;
-			channelInfo.isInput = FALSE;
+			channelInfo.isInput = false;
 			channelInfo.channel = outputindex[_driverID];
 			if(ASIOGetChannelInfo(&channelInfo) != ASE_OK)
 			{
@@ -255,7 +255,7 @@ namespace psycle
 
 		bool ASIOInterface::Stop()
 		{
-			CSingleLock lock(&_lock, TRUE);
+			CSingleLock lock(&_lock, true);
 			structured_exception_translator_set = false;
 			if(!_running) return true;
 			_running = false;

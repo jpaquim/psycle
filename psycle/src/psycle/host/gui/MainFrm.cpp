@@ -358,7 +358,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			UpdatePlayOrder(true);
 			
-			DragAcceptFiles(TRUE);
+			DragAcceptFiles(true);
 
 			Global::pConfig->CreateFonts();
 
@@ -378,13 +378,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 		{
 			if( !CFrameWnd::PreCreateWindow(cs) )
-				return FALSE;
+				return false;
 			// TODO: Modify the Window class or styles here by modifying
 			//  the CREATESTRUCT cs
 			
 			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 			cs.lpszClass = AfxRegisterWndClass(0);
-			return TRUE;
+			return true;
 		}
 
 		#if !defined NDEBUG
@@ -411,7 +411,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			// let the view have first crack at the command
 			if (m_wndView.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
-				return TRUE;
+				return true;
 			
 			// otherwise, do default handling
 			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
@@ -420,7 +420,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized) 
 		{
 			CFrameWnd::OnActivate(nState, pWndOther, bMinimized);
-			if (((nState == WA_ACTIVE) || (nState == WA_CLICKACTIVE)) && (bMinimized == FALSE))
+			if (((nState == WA_ACTIVE) || (nState == WA_CLICKACTIVE)) && (bMinimized == false))
 			{
 			}
 		}
@@ -1250,7 +1250,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			if (_pSong->_pInstrument[_pSong->instSelected]->waveLength)
 			{
-				CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+				CFileDialog dlg(false, "wav", _pSong->_pInstrument[_pSong->instSelected]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 				if (dlg.DoModal() == IDOK)
 				{
 					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
@@ -1862,7 +1862,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					_pSong->playOrder[edpos]=MAX_PATTERNS-1;
 				}
 
-				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",Global::pConfig->defaultPatLines,FALSE);
+				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",Global::pConfig->defaultPatLines,false);
 
 				UpdatePlayOrder(true);
 				UpdateSequencer(m_wndView.editPosition);
@@ -1925,7 +1925,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// now we copy the data
 				// we don't really need to be able to undo this, since it's a new pattern anyway.
 		//		m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-				_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
+				_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],false);
 
 				memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
 
@@ -2440,7 +2440,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				pCmdUI->Enable(FALSE);
+				pCmdUI->Enable(false);
 			}
 		}
 
@@ -2452,7 +2452,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				pCmdUI->Enable(FALSE);
+				pCmdUI->Enable(false);
 			}
 		}
 
@@ -2464,7 +2464,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				pCmdUI->Enable(FALSE);
+				pCmdUI->Enable(false);
 			}
 		}
 
@@ -2476,7 +2476,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				pCmdUI->Enable(FALSE);
+				pCmdUI->Enable(false);
 			}
 		}
 
@@ -2560,9 +2560,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 
 				szStatusIdle=oss.str();
-				return TRUE;
+				return true;
 			}
-			return FALSE;
+			return false;
 		}
 
 		void CMainFrame::OnDropFiles(HDROP hDropInfo)
@@ -2608,47 +2608,47 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (m_wndControl.IsWindowVisible())
 			{
-				ShowControlBar(&m_wndControl,FALSE,FALSE);
+				ShowControlBar(&m_wndControl,false,false);
 			}
-			else {	ShowControlBar(&m_wndControl,TRUE,FALSE);	}
+			else {	ShowControlBar(&m_wndControl,true,false);	}
 		}
 
 		void CMainFrame::OnViewMachinebar() 
 		{
 			if (m_wndControl2.IsWindowVisible())
 			{
-				ShowControlBar(&m_wndControl2,FALSE,FALSE);
+				ShowControlBar(&m_wndControl2,false,false);
 			}
-			else {	ShowControlBar(&m_wndControl2,TRUE,FALSE);	}
+			else {	ShowControlBar(&m_wndControl2,true,false);	}
 		}
 
 		void CMainFrame::OnViewSequencerbar() 
 		{
 			if (m_wndSeq.IsWindowVisible())
 			{
-				ShowControlBar(&m_wndSeq,FALSE,FALSE);
+				ShowControlBar(&m_wndSeq,false,false);
 			}
-			else {	ShowControlBar(&m_wndSeq,TRUE,FALSE);	}	
+			else {	ShowControlBar(&m_wndSeq,true,false);	}	
 		}
 
 		void CMainFrame::OnUpdateViewSongbar(CCmdUI* pCmdUI) 
 		{
-			if ( m_wndControl.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			if ( m_wndControl.IsWindowVisible()) pCmdUI->SetCheck(true);
+			else pCmdUI->SetCheck(false);
 			
 		}
 
 		void CMainFrame::OnUpdateViewMachinebar(CCmdUI* pCmdUI) 
 		{
-			if ( m_wndControl2.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			if ( m_wndControl2.IsWindowVisible()) pCmdUI->SetCheck(true);
+			else pCmdUI->SetCheck(false);
 			
 		}
 
 		void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI) 
 		{
-			if ( m_wndSeq.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			if ( m_wndSeq.IsWindowVisible()) pCmdUI->SetCheck(true);
+			else pCmdUI->SetCheck(false);
 		}
 
 

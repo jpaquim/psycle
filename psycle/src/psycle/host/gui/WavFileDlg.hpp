@@ -13,7 +13,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Song *_pSong;
 			CString _lastFile;
 			CWavFileDlg(
-				BOOL bOpenFileDialog, // TRUE for FileOpen, FALSE for FileSaveAs
+				BOOL bOpenFileDialog, // true for FileOpen, false for FileSaveAs
 				LPCTSTR lpszDefExt = NULL,
 				LPCTSTR lpszFileName = NULL,
 				DWORD dwFlags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,

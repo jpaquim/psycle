@@ -27,7 +27,7 @@ namespace psycle
 		class AudioDriverEvent : public CEvent
 		{
 			public:
-				AudioDriverEvent() : CEvent(FALSE, TRUE) {}
+				AudioDriverEvent() : CEvent(false, true) {}
 		};
 
 		/// output device interface.

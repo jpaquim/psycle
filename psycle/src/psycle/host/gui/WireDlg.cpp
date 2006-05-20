@@ -85,7 +85,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				SetWindowText(s.str().c_str());
 			}
 
-			hold = FALSE;
+			hold = false;
 
 			std::memset(pSamplesL,0,sizeof(pSamplesL));
 			std::memset(pSamplesR,0,sizeof(pSamplesR));
@@ -156,7 +156,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 
 
-			return TRUE;
+			return true;
 		}
 
 		BOOL CWireDlg::Create()
@@ -251,12 +251,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			f=64-f;
 			if (f < 1) 
 			{
-				clip = TRUE;
+				clip = true;
 				return 1;
 			}
 			else if (f > 126) 
 			{
-				clip = TRUE;
+				clip = true;
 				return 126;
 			}
 			return int(f);
@@ -465,7 +465,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							rect.bottom = rect.top+4;
 							bufDC.FillSolidRect(&rect,0x00101080);
 
-							clip = FALSE;
+							clip = false;
 						}
 
 						CPen *oldpen = bufDC.SelectObject(&linepenL);
@@ -769,7 +769,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							}
 							if (awl > 32768.0f || awr > 32768.0f)
 							{
-								clip = TRUE;
+								clip = true;
 							}
 						} 
 
@@ -1248,7 +1248,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						v = 0;
 					}
 					m_volslider.SetPos(v);
-					return TRUE;
+					return true;
 				}
 				else if (pMsg->wParam == VK_DOWN)
 				{
@@ -1259,7 +1259,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						v = 256*4;
 					}
 					m_volslider.SetPos(v);
-					return TRUE;
+					return true;
 				}
 				else
 				{

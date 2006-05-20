@@ -58,7 +58,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_fadeInTime.SetWindowText(temp.str().c_str());
 			m_fadeOutTime.SetWindowText(temp.str().c_str());
 			srcVol=destVol=fadeInTime=fadeOutTime=0;
-			return TRUE;
+			return true;
 		}
 
 		void CWaveEdMixDialog::OnOK() 

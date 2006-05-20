@@ -88,7 +88,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			WaveUpdate();
 			cando=true;
-			return TRUE;
+			return true;
 		}
 
 		//////////////////////////////////////////////////////////////////////

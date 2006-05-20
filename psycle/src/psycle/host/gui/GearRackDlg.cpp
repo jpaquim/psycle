@@ -60,9 +60,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			// fill our list box and select the currently selected machine
 			RedrawList();
-			return TRUE;
-			// return TRUE unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return FALSE
+			return true;
+			// return true unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return false
 		}
 
 		void CGearRackDlg::OnCancel()

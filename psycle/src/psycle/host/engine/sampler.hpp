@@ -112,7 +112,7 @@ namespace psycle
 					{
 						// data is from a newer format of psycle, it might be unsafe to load.
 						pFile->Skip(size);
-						return FALSE;
+						return false;
 					}
 					else
 					{
@@ -136,7 +136,7 @@ namespace psycle
 						}
 					}
 				}
-				return TRUE;
+				return true;
 			}
 
 			inline virtual void SaveSpecificChunk(RiffFile* pFile) 

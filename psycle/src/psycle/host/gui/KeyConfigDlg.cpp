@@ -16,7 +16,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_prvIdx = 0;
 			//{{AFX_DATA_INIT(CKeyConfigDlg)
 			//}}AFX_DATA_INIT
-			bInit = FALSE;
+			bInit = false;
 		}
 
 		void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
@@ -148,13 +148,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			acc.nInc = 16;
 			m_spinlines.SetAccel(1, &acc);
 			
-			bInit = TRUE;
+			bInit = true;
 			OnUpdateNumLines();
 
 			FillCmdList();
 			
-			return TRUE;  // return TRUE unless you set the focus to a control
-						// EXCEPTION: OCX Property Pages should return FALSE
+			return true;  // return true unless you set the focus to a control
+						// EXCEPTION: OCX Property Pages should return false
 		}
 
 		/// update key on show
@@ -330,7 +330,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 			// Display the Open dialog box. 
 			
-			if (GetOpenFileName(&ofn)==TRUE)
+			if (GetOpenFileName(&ofn)==true)
 			{
 				FILE* hfile;
 				if ((hfile=fopen(szFile,"r")) == NULL )
@@ -400,7 +400,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 
-			if (GetSaveFileName(&ofn)==TRUE)
+			if (GetSaveFileName(&ofn)==true)
 			{
 				FILE* hfile;
 

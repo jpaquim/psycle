@@ -2650,7 +2650,7 @@ namespace psycle
 				m_Instruments[idx].IsEnabled(true);
 			}
 
-			return TRUE;
+			return true;
 		}
 	}
 }

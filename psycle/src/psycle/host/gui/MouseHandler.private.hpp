@@ -474,7 +474,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						CopyBlock(false);
 						editcur = oldm;
 					}
-					else blockStart = TRUE;
+					else blockStart = true;
 					if (nFlags & MK_SHIFT)
 					{
 						editcur = oldm;
@@ -763,7 +763,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						if (blockStart) 
 						{
-							blockStart = FALSE;
+							blockStart = false;
 							blockSelected=false;
 							blockSel.end.line=0;
 							blockSel.end.track=0;
@@ -1059,7 +1059,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 						StartBlock(ttm,0,0);
 						EndBlock(ttm,nl-1,8);
-						blockStart = FALSE;
+						blockStart = false;
 					}
 
 					break;

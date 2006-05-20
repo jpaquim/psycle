@@ -17,7 +17,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_BufNum = 0;
 			m_BufSize = 0;
 			m_Device = -1;
-			m_Dither = FALSE;
+			m_Dither = false;
 			//}}AFX_DATA_INIT
 		}
 
@@ -101,9 +101,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_BufSizeSpin.SetAccel(1, &acc);
 			}
 			RecalcLatency();
-			return TRUE;
-			// return TRUE unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return FALSE
+			return true;
+			// return true unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return false
 		}
 
 		void CWaveOutDialog::OnOK() 

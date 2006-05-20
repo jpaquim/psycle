@@ -120,7 +120,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// start the dialog timer
 			InitTimer();
 
-			return TRUE;
+			return true;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////

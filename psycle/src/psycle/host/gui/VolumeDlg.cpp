@@ -46,7 +46,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_db.SetSel(0,32);
 			}
 			go = true;
-			return FALSE;
+			return false;
 		}
 
 		void CVolumeDlg::DrawDb() 

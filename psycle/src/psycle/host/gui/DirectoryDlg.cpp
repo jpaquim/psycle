@@ -151,8 +151,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			initializingDlg=false;
 			
-			return TRUE;  // return TRUE unless you set the focus to a control
-						// EXCEPTION: OCX Property Pages should return FALSE
+			return true;  // return true unless you set the focus to a control
+						// EXCEPTION: OCX Property Pages should return false
 		}
 
 		void CDirectoryDlg::OnChangeSongedit() 

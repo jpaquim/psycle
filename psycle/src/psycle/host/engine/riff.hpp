@@ -34,8 +34,8 @@ namespace psycle
 			DDC_INVALID_FILE       // File format does not match
 		};
 
-		#define  TRUE     1
-		#define  FALSE    0
+		#define  true     1
+		#define  false    0
 
 		typedef int dBOOLEAN;
 

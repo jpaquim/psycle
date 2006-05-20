@@ -1425,7 +1425,7 @@ void XMSamplerUIInst::CSampleAssignEditor::Initialize(XMSampler * const pSampler
 	info.nMin = 0;
 	info.nMax  = 8;
 	info.nPos = m_Octave;
-	m_scBar.SetScrollInfo(&info, FALSE);
+	m_scBar.SetScrollInfo(&info, false);
 	Invalidate();
 }
 

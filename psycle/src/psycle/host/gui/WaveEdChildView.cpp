@@ -318,14 +318,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		BOOL CWaveEdChildView::PreCreateWindow(CREATESTRUCT& cs) 
 		{
-			if (!CWnd::PreCreateWindow(cs)) return FALSE;
+			if (!CWnd::PreCreateWindow(cs)) return false;
 
 			cs.dwExStyle |= WS_EX_CLIENTEDGE;
 			cs.style &= ~WS_BORDER;
 			cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
 			::LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), NULL);
 
-			return TRUE;
+			return true;
 			
 		//	return CWnd::PreCreateWindow(cs);
 		}

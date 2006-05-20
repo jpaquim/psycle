@@ -1000,16 +1000,16 @@ namespace psycle
 				if (pChildView->maxView == true) 
 				{
 					pChildView->maxView = false;
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,TRUE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,TRUE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,TRUE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,true,false);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,true,false);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,true,false);
 				} 
 				else
 				{			
 					pChildView->maxView = true;
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,FALSE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,FALSE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,FALSE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,false,false);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,false,false);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,false,false);
 				}
 				break;
 

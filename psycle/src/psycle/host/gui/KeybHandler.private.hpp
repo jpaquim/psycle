@@ -2205,7 +2205,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					else 
 					{
-						_pSong->AllocNewPattern(patternum,"",Global::pConfig->defaultPatLines,FALSE);
+						_pSong->AllocNewPattern(patternum,"",Global::pConfig->defaultPatLines,false);
 					}
 
 					++_pSong->playLength;
@@ -2705,7 +2705,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				case UNDO_PATTERN:
 					if(viewMode == VMPattern)// && bEditMode)
 					{
-						AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,FALSE,pRedoList->counter);
+						AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do redo
 						unsigned char* pData = pRedoList->pData;
 
@@ -2747,7 +2747,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				case UNDO_LENGTH:
 					if(viewMode == VMPattern)// && bEditMode)
 					{
-						AddUndoLength(pRedoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,FALSE,pRedoList->counter);
+						AddUndoLength(pRedoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do undo
 						_pSong->patternLines[pRedoList->pattern]=pRedoList->lines;
 						// set up cursor
@@ -2770,7 +2770,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						break;
 					}
 				case UNDO_SEQUENCE:
-					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,FALSE,pRedoList->counter);
+					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
 					// do undo
 					memcpy(_pSong->playOrder, pRedoList->pData, MAX_SONG_POSITIONS*sizeof(char));
 					_pSong->playLength = pRedoList->lines;
@@ -2793,7 +2793,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					break;
 				case UNDO_SONG:
-					AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,FALSE,pRedoList->counter);
+					AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
 					// do undo
 					unsigned char * pData = pRedoList->pData;
 					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));

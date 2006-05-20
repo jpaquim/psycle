@@ -34,7 +34,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			m_slider.SetRange(0, 14400); 	// Don't use (-,+) range. It fucks up with the "0"
 			m_slider.SetPos(9600);
-			return TRUE;
+			return true;
 		}
 
 		void CWaveEdAmplifyDialog::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult) 

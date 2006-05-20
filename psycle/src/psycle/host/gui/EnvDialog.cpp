@@ -107,7 +107,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_q_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_RQ);
 			m_envelope_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_EA+128);
 			
-			return TRUE;
+			return true;
 		}
 
 		void CEnvDialog::OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult) 
