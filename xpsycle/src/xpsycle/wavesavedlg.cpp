@@ -412,10 +412,64 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
       saveEnd();
       return;
   }
+  pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
 }
 
 void WaveSaveDlg::saveEnd( )
 {
+}
+
+int WaveSaveDlg::audioOutThread( void * ptr )
+{
+  WaveSaveDlg* pWaveSaveDlg = (WaveSaveDlg*) ptr;
+  pWaveSaveDlg->threadopen++;
+  Player* pPlayer = Global::pPlayer();
+  int stream_size = 8192; // Player has just a single buffer of 65535 samples to allocate both channels
+  //int stream_buffer[65535];
+  while(!(pWaveSaveDlg->kill_thread))
+  {
+    if (!pPlayer->_recording) // the player automatically closes the wav recording when looping.
+    {
+      pPlayer->Stop();
+      pWaveSaveDlg->saveEnd();
+      pWaveSaveDlg->threadopen--;
+      //ExitThread(0);
+      //return 0;
+    }
+    pPlayer->Work(pPlayer,stream_size);
+    pWaveSaveDlg->saveTick();
+  }
+
+  pPlayer->Stop();
+  pPlayer->StopRecording();
+  pWaveSaveDlg->saveEnd();
+  pWaveSaveDlg->threadopen--;
+  //ExitThread(0);
+  //return 0;
+}
+
+void WaveSaveDlg::saveTick( )
+{
+  Song* pSong = Global::pSong();
+  Player* pPlayer = Global::pPlayer();
+
+  for (int i=lastpostick+1;i<pPlayer->_playPosition;i++)
+  {
+    tickcont+=pSong->patternLines[pSong->playOrder[i]];
+  }
+  if (lastpostick!= pPlayer->_playPosition ) 
+  {
+    tickcont+=pSong->patternLines[pSong->playOrder[lastpostick]]-(lastlinetick+1)+pPlayer->_lineCounter;
+  }
+  else tickcont+=pPlayer->_lineCounter-lastlinetick;
+
+  lastlinetick = pPlayer->_lineCounter;
+  lastpostick = pPlayer->_playPosition;
+
+  if (!kill_thread )
+  {
+//     progressBar->setPos(tickcont);
+  }
 }
 
 

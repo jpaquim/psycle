@@ -40,6 +40,13 @@ public:
 
     ~WaveSaveDlg();
 
+    // psycle engine code
+    int kill_thread;
+    int threadopen;
+
+    void saveTick();
+    void saveEnd();
+
 private:
 
     // gui elements
@@ -64,6 +71,10 @@ private:
     int bits;
     int channelmode;
 
+    int lastpostick;
+    int lastlinetick;
+    int tickcont;
+
     bool _Muted[MAX_BUSES];
     bool autostop;
     bool playblock;
@@ -74,7 +85,11 @@ private:
     std::string rootname;
 
     void saveWav(std::string file, int bits, int rate, int channelmode);
-    void saveEnd();
+
+    static int audioOutThread(void * ptr);
+    int iret1;
+    pthread_t threadid;
+
 
     // button event methods
     void onBrowseBtn(NButtonEvent* ev);
