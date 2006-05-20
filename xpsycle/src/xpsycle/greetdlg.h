@@ -22,7 +22,7 @@
 
 #include <ngrs/nwindow.h>
 
-class NListBox;
+class NMemo;
 
 /**
 @author Stefan Nattkemper
@@ -39,7 +39,7 @@ public:
 
 private:
 
-   NListBox* lBox;
+   NMemo* memo;
 
    void setGreetz();
 };
