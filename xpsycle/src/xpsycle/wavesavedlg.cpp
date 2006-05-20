@@ -637,6 +637,7 @@ void WaveSaveDlg::saveEnd( )
     }
   }
 
+
   closeBtn->setText("Close");
   pane()->resize();
   pane()->repaint();
@@ -656,8 +657,7 @@ int WaveSaveDlg::audioOutThread( void * ptr )
       pPlayer->Stop();
       pWaveSaveDlg->saveEnd();
       pWaveSaveDlg->threadopen--;
-      //ExitThread(0);
-      return 0;
+      pthread_exit(0);
     }
     pPlayer->Work(pPlayer,stream_size);
     pWaveSaveDlg->saveTick();
@@ -667,8 +667,7 @@ int WaveSaveDlg::audioOutThread( void * ptr )
   pPlayer->StopRecording();
   pWaveSaveDlg->saveEnd();
   pWaveSaveDlg->threadopen--;
-  //ExitThread(0);
-  return 0;
+  pthread_exit(0);
 }
 
 void WaveSaveDlg::saveTick( )
