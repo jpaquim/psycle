@@ -45,6 +45,7 @@ WaveSaveDlg::WaveSaveDlg()
 {
   autostop = playblock = loopsong = saving = 0;
   rate = -1;
+  bits = -1;
   m_recmode = 0;
   channelmode = -1;
 
@@ -246,6 +247,8 @@ void WaveSaveDlg::initVars( )
       bits = 3;
     }
   }
+
+  std::cout << bits << std::endl;
 }
 
 void WaveSaveDlg::onBrowseBtn( NButtonEvent * ev )
@@ -420,6 +423,10 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
 
 void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode )
 {
+  std::cout << bits << std::endl;
+  std::cout << rate << std::endl;
+  std::cout << channelmode << std::endl;
+
   saving=true;
   Player *pPlayer = Global::pPlayer();
   Song *pSong = Global::pSong();
