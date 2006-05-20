@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "alsaout.h"
 #include "global.h"
 #include "player.h"
@@ -24,10 +24,10 @@
 
 
 AlsaOut::AlsaOut( ) :
-   AudioDriver(),
-   _running(false),
-   _initialized(false),
-   _timerActive(false)
+    AudioDriver(),
+    _running(false),
+    _initialized(false),
+    _timerActive(false)
 {
 }
 
@@ -38,10 +38,10 @@ AlsaOut::~AlsaOut()
 
 void AlsaOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
 {
- _pCallback = pCallback;
- _callbackContext = context;
- _initialized = true;
- _running = false;
+  _pCallback = pCallback;
+  _callbackContext = context;
+  _initialized = true;
+  _running = false;
 }
 
 bool AlsaOut::Enable( bool e )
@@ -76,24 +76,24 @@ void AlsaOut::configure( )
 
 void AlsaOut::setDefault( )
 {
-   device = "plughw:0";    // playback device
-   rate = 44100; // stream rate
-   format = SND_PCM_FORMAT_S16; // sample format
-   channels = 2; // count of channels
-   buffer_time = 50000; // ring buffer length in us
-   period_time = 10000; // period time in us
+    device = "plughw:0";    // playback device
+    rate = 44100; // stream rate
+    format = SND_PCM_FORMAT_S16; // sample format
+    channels = 2; // count of channels
+    buffer_time = 50000; // ring buffer length in us
+    period_time = 10000; // period time in us
 
-   buffer_size;
-   period_size;
-   output = NULL;
-   enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
+    buffer_size;
+    period_size;
+    output = NULL;
+    enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
 }
 
 int AlsaOut::audioStop( )
 {
   enablePlayer = 0;
   while (enablePlayer != -2) {
-     sleep(1);
+      sleep(1);
   }
   free(areas);
   free(samples);
@@ -112,8 +112,8 @@ int AlsaOut::audioStart(  )
 
   err = snd_output_stdio_attach(&output, stdout, 0);
   if (err < 0) {
-     printf("Output failed: %s\n", snd_strerror(err));
-     return 0;
+      printf("Output failed: %s\n", snd_strerror(err));
+      return 0;
   }
 
   printf("Playback device is %s\n", device);
@@ -137,20 +137,20 @@ int AlsaOut::audioStart(  )
 
   samples = (short int*) malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
   if (samples == NULL) {
-     printf("No enough memory\n");
-     exit(EXIT_FAILURE);
+      printf("No enough memory\n");
+      exit(EXIT_FAILURE);
   }
 
   areas = (snd_pcm_channel_area_t*) calloc(channels, sizeof(snd_pcm_channel_area_t));
   if (areas == NULL) {
-     printf("No enough memory\n");
-     exit(EXIT_FAILURE);
+      printf("No enough memory\n");
+      exit(EXIT_FAILURE);
   }
 
   for (chn = 0; chn < channels; chn++) {
-   areas[chn].addr = samples;
-   areas[chn].first = chn * 16;
-   areas[chn].step = channels * 16;
+    areas[chn].addr = samples;
+    areas[chn].first = chn * 16;
+    areas[chn].step = channels * 16;
   }
 
   if (0 == pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this)) return EXIT_SUCCESS;
@@ -178,14 +178,14 @@ void AlsaOut::FillBuffer(const snd_pcm_channel_area_t * areas, snd_pcm_uframes_t
   }
   // fill the channel areas
 
- float const * input(_pCallback(_callbackContext, count));
- tick.emit();
+  float const * input(_pCallback(_callbackContext, count));
+  tick.emit();
   while (count-- > 0) {
   //   (*audioPlayer).getSample(audioPlayer);
-     *samples[0] = *input++;
-     samples[0] += steps[0];
-     *samples[1] = *input++;
-     samples[1] += steps[1];
+      *samples[0] = *input++;
+      samples[0] += steps[0];
+      *samples[1] = *input++;
+      samples[1] += steps[1];
   }
 
 }
@@ -194,11 +194,11 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
                         snd_pcm_hw_params_t *params,
                         snd_pcm_access_t access)
 {
-   unsigned int rrate;
-   snd_pcm_uframes_t size;
-   int err, dir;
+    unsigned int rrate;
+    snd_pcm_uframes_t size;
+    int err, dir;
 
-   // choose all parameters
+    // choose all parameters
     err = snd_pcm_hw_params_any(handle, params);
     if (err < 0) {
                 printf("Broken configuration for playback: no configurations available: %s\n", snd_strerror(err));
@@ -207,7 +207,7 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
     /* set hardware resampling
     err = snd_pcm_hw_params_set_rate_resample(handle, params, resample);
     if (err < 0) {
-         printf("Resampling setup failed for playback: %s\n", snd_strerror(err));
+          printf("Resampling setup failed for playback: %s\n", snd_strerror(err));
                 return err;
         }
     */
@@ -227,8 +227,8 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
     // set the count of channels
     err = snd_pcm_hw_params_set_channels(handle, params, channels);
     if (err < 0) {
-         printf("Channels count (%i) not available for playbacks: %s\n", channels, snd_strerror(err));
-         return err;
+          printf("Channels count (%i) not available for playbacks: %s\n", channels, snd_strerror(err));
+          return err;
     }
     // set the stream rate
     rrate = rate;
@@ -238,8 +238,8 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
         return err;
     }
     if (rrate != rate) {
-         printf("Rate doesn't match (requested %iHz, get %iHz)\n", rate, err);
-         return -EINVAL;
+          printf("Rate doesn't match (requested %iHz, get %iHz)\n", rate, err);
+          return -EINVAL;
     }
     // set the buffer time
     err = snd_pcm_hw_params_set_buffer_time_near(handle, params, &buffer_time, &dir);
@@ -249,15 +249,15 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
     }
     err = snd_pcm_hw_params_get_buffer_size(params, &size);
     if (err < 0) {
-         printf("Unable to get buffer size for playback: %s\n", snd_strerror(err));
-         return err;
+          printf("Unable to get buffer size for playback: %s\n", snd_strerror(err));
+          return err;
     }
     buffer_size = size;
     // set the period time
     err = snd_pcm_hw_params_set_period_time_near(handle, params, &period_time, &dir);
     if (err < 0) {
-         printf("Unable to set period time %i for playback: %s\n", period_time, snd_strerror(err));
-         return err;
+          printf("Unable to set period time %i for playback: %s\n", period_time, snd_strerror(err));
+          return err;
     }
     err = snd_pcm_hw_params_get_period_size(params, &size, &dir);
     if (err < 0) {
@@ -327,12 +327,12 @@ int AlsaOut::xrun_recovery(snd_pcm_t *handle, int err)
     return 0;
   } else if (err == -ESTRPIPE) {
     while ((err = snd_pcm_resume(handle)) == -EAGAIN)
-       sleep(1);       /* wait until the suspend flag is released */
-       if (err < 0) {
-         err = snd_pcm_prepare(handle);
-         if (err < 0) printf("Can't recovery from suspend, prepare failed: %s\n", snd_strerror(err));
-       }
-       return 0;
+        sleep(1);       /* wait until the suspend flag is released */
+        if (err < 0) {
+          err = snd_pcm_prepare(handle);
+          if (err < 0) printf("Can't recovery from suspend, prepare failed: %s\n", snd_strerror(err));
+        }
+        return 0;
   }
   return err;
 }

@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "framemachine.h"
 #include "machine.h"
 #include "global.h"
@@ -59,7 +59,7 @@ NewNameDlg::~ NewNameDlg( )
 }
 
 FrameMachine::FrameMachine(Machine* pMachine)
- : NWindow()
+  : NWindow()
 {
   pMachine_ = pMachine;
 
@@ -95,26 +95,26 @@ void FrameMachine::init( )
   NPanel* prs = new NPanel();
     prs->setLayout(NAlignLayout());
     NButton* savePrsBtn = new NButton("save");
-       savePrsBtn->setFlat(false);
+        savePrsBtn->setFlat(false);
     prs->add(savePrsBtn,nAlLeft);
     NButton* loadPrsBtn = new NButton("load");
-       loadPrsBtn->setFlat(false);
-       loadPrsBtn->clicked.connect(this,&FrameMachine::onLoadPrs);
+        loadPrsBtn->setFlat(false);
+        loadPrsBtn->clicked.connect(this,&FrameMachine::onLoadPrs);
     prs->add(loadPrsBtn,nAlLeft);
     NButton* addPrsBtn = new NButton("add");
-       addPrsBtn->setFlat(false);
-       addPrsBtn->clicked.connect(this,&FrameMachine::onAddPrs);
+        addPrsBtn->setFlat(false);
+        addPrsBtn->clicked.connect(this,&FrameMachine::onAddPrs);
     prs->add(addPrsBtn,nAlLeft);
     defaultPrsBtn = new NButton("User");
-       defaultPrsBtn->setFlat(false);
+        defaultPrsBtn->setFlat(false);
     prs->add(defaultPrsBtn,nAlLeft);
     NButton* rightPrsBtn = new NButton(">");
-       rightPrsBtn->setFlat(false);
-       rightPrsBtn->clicked.connect(this,&FrameMachine::onRightBtn);
+        rightPrsBtn->setFlat(false);
+        rightPrsBtn->clicked.connect(this,&FrameMachine::onRightBtn);
     prs->add(rightPrsBtn,nAlRight);
     NButton* leftPrsBtn = new NButton("<");
-       leftPrsBtn->setFlat(false);
-       leftPrsBtn->clicked.connect(this,&FrameMachine::onLeftBtn);
+        leftPrsBtn->setFlat(false);
+        leftPrsBtn->clicked.connect(this,&FrameMachine::onLeftBtn);
     prs->add(leftPrsBtn,nAlRight);
     prsPanel = new NTogglePanel();
       NFlowLayout fl(nAlLeft,5,5);
@@ -126,7 +126,7 @@ void FrameMachine::init( )
 
 
 inline int format(int c, int maxcols, int maxrows) {
-   return (c / maxcols) + ( (c%maxcols)*maxrows);
+    return (c / maxcols) + ( (c%maxcols)*maxrows);
 }
 
 void FrameMachine::initParameterGUI( )
@@ -147,17 +147,17 @@ void FrameMachine::initParameterGUI( )
   knobPanel->setFont(font);
 
   for (int c=0; c<numParameters; c++) {
-     int min_v,max_v,val_v;
-     int newC = format(c,cols,rows);
-     pMachine_->GetParamRange(newC,min_v,max_v);
-     bool bDrawKnob = (min_v==max_v)?false:true;
-     if (!bDrawKnob) {
+      int min_v,max_v,val_v;
+      int newC = format(c,cols,rows);
+      pMachine_->GetParamRange(newC,min_v,max_v);
+      bool bDrawKnob = (min_v==max_v)?false:true;
+      if (!bDrawKnob) {
         Header* cell = new Header();
         char parName[64];
         pMachine_->GetParamName(format(c,cols,rows),parName);
         cell->setText(parName);
         knobPanel->add(cell);
-     } else {
+      } else {
         Knob* cell = new Knob(format(c,cols,rows));
         cell->valueChanged.connect(this,&FrameMachine::onKnobValueChange);
         char parName[64];
@@ -172,7 +172,7 @@ void FrameMachine::initParameterGUI( )
         cell->setRange(min_v,max_v);
         cell->setValueAsText(buffer);
         knobPanel->add(cell);
-     }
+      }
   }
   pack();
 }
@@ -184,9 +184,9 @@ Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), f
 
   if (c==0) {
     if (Global::pConfig()->iconPath=="") 
-       kbitmap = Global::pBitmaps()->tbmainknob(); 
+        kbitmap = Global::pBitmaps()->tbmainknob(); 
     else
-       kbitmap.loadFromFile(Global::pConfig()->iconPath+ "TbMainKnob.xpm");
+        kbitmap.loadFromFile(Global::pConfig()->iconPath+ "TbMainKnob.xpm");
   }
   c++;
   add( label = new NLabel());
@@ -292,18 +292,18 @@ void Knob::onMousePress( int x, int y, int button )
 void Knob::onMouseOver( int x, int y )
 {
   if (istweak) {
-     if (( ultrafinetweak && !(NApp::system().keyState() & ShiftMask )) || //shift-key has been left.
-         ( !ultrafinetweak && (NApp::system().keyState() & ShiftMask))) //shift-key has just been pressed
-     {
+      if (( ultrafinetweak && !(NApp::system().keyState() & ShiftMask )) || //shift-key has been left.
+          ( !ultrafinetweak && (NApp::system().keyState() & ShiftMask))) //shift-key has just been pressed
+      {
         sourcepoint=y;
         ultrafinetweak=!ultrafinetweak;
-     }
-     else if (( finetweak && !(NApp::system().keyState() & ControlMask )) || //control-key has been left.
-     ( !finetweak && (NApp::system().keyState() & ControlMask))) //control-key has just been pressed
-     {
+      }
+      else if (( finetweak && !(NApp::system().keyState() & ControlMask )) || //control-key has been left.
+      ( !finetweak && (NApp::system().keyState() & ControlMask))) //control-key has just been pressed
+      {
         sourcepoint = y;
         finetweak=!finetweak;
-     }
+      }
 
 
     int maxval = max_range;
@@ -348,10 +348,10 @@ void FrameMachine::onKnobValueChange( Knob* sender,int value , int param )
 void FrameMachine::onItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
   if (itemEv->text() == "Presets") {
-     PresetsDlg* dlg = new PresetsDlg(this);
-     add(dlg);
-     dlg->execute();
-     NApp::addRemovePipe(dlg);
+      PresetsDlg* dlg = new PresetsDlg(this);
+      add(dlg);
+      dlg->execute();
+      NApp::addRemovePipe(dlg);
   }
 }
 
@@ -368,12 +368,12 @@ void FrameMachine::updateValues( )
 
 
   for (int c=0; c<numParameters; c++) {
-     int min_v,max_v,val_v;
-     int newC = format(c,cols,rows);
-     pMachine_->GetParamRange(newC,min_v,max_v);
-     bool bDrawKnob = (min_v==max_v)?false:true;
-     if (!bDrawKnob) {
-     } else {
+      int min_v,max_v,val_v;
+      int newC = format(c,cols,rows);
+      pMachine_->GetParamRange(newC,min_v,max_v);
+      bool bDrawKnob = (min_v==max_v)?false:true;
+      if (!bDrawKnob) {
+      } else {
         Knob* cell = (Knob*) knobPanel->visualComponents().at(c);
         char buffer[128];
         pMachine_->GetParamValue(format(c,cols,rows),buffer);
@@ -383,7 +383,7 @@ void FrameMachine::updateValues( )
         pMachine_->GetParamRange(format(c,cols,rows),min_v,max_v);
         cell->setRange(min_v,max_v);
         cell->setValueAsText(buffer);
-     }
+      }
   }
 
   knobPanel->repaint();
@@ -402,42 +402,42 @@ void FrameMachine::loadPresets() {
   }
 
   try {
-     DeSerializer f(Global::pConfig()->prsPath+filename);
+      DeSerializer f(Global::pConfig()->prsPath+filename);
 
-     int numpresets = f.getInt();
-     int filenumpars = f.getInt();
+      int numpresets = f.getInt();
+      int filenumpars = f.getInt();
 
-     if (numpresets >= 0) {
-       // old file format .. do not support so far ..
-     } else {
-       // new file format
-       if (filenumpars == 1) {
-         int filepresetsize;
-         // new preset format version 1
-         // new preset format version 1
+      if (numpresets >= 0) {
+        // old file format .. do not support so far ..
+      } else {
+        // new file format
+        if (filenumpars == 1) {
+          int filepresetsize;
+          // new preset format version 1
+          // new preset format version 1
 
-         int numParameters = ((Plugin*) pMac())->GetInfo()->numParameters;
-         int sizeDataStruct = ((Plugin *) pMac())->proxy().GetDataSize();
+          int numParameters = ((Plugin*) pMac())->GetInfo()->numParameters;
+          int sizeDataStruct = ((Plugin *) pMac())->proxy().GetDataSize();
 
-         numpresets = f.getInt();
-         filenumpars = f.getInt();
-         filepresetsize = f.getInt();
+          numpresets = f.getInt();
+          filenumpars = f.getInt();
+          filepresetsize = f.getInt();
 
-         if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) return;
+          if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) return;
 
-         while (!f.eof() ) {
-           Preset newPreset(numParameters, sizeDataStruct);
-           newPreset.loadFromFile(&f);
-           NButton* prsBtn = new NButton(newPreset.name());
-             prsBtn->setFlat(false);
-             prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
-           prsPanel->add(prsBtn);
-           presetMap[prsBtn] = newPreset;
-         }
-       }
-     }
+          while (!f.eof() ) {
+            Preset newPreset(numParameters, sizeDataStruct);
+            newPreset.loadFromFile(&f);
+            NButton* prsBtn = new NButton(newPreset.name());
+              prsBtn->setFlat(false);
+              prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
+            prsPanel->add(prsBtn);
+            presetMap[prsBtn] = newPreset;
+          }
+        }
+      }
   } catch (const char * e) {
-     // couldn`t open presets
+      // couldn`t open presets
   }
 }
 

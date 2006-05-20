@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "wavesavedlg.h"
 #include "global.h"
 #include "player.h"
@@ -41,7 +41,7 @@
 #include <ngrs/nbevelborder.h>
 
 WaveSaveDlg::WaveSaveDlg()
- : NDialog()
+  : NDialog()
 {
   autostop = playblock = loopsong = saving = 0;
   rate = -1;
@@ -95,16 +95,16 @@ WaveSaveDlg::WaveSaveDlg()
       tableLayout.setHGap(5);
     gBox->setLayout(tableLayout);
     entireRBtn = new NRadioButton();
-     entireRBtn->setText("Record the entire song");
+      entireRBtn->setText("Record the entire song");
     gBox->add(entireRBtn,NAlignConstraint(nAlLeft,0,0));
     numberRBtn = new NRadioButton();
-     numberRBtn->setText("Record pattern number");
+      numberRBtn->setText("Record pattern number");
     gBox->add(numberRBtn,NAlignConstraint(nAlLeft,0,1));
     numberEdt = new NEdit();
     gBox->add(numberEdt,NAlignConstraint(nAlLeft,1,1));
     gBox->add(new NLabel("in HEX value"),NAlignConstraint(nAlLeft,2,1));
     seqRBtn = new NRadioButton();
-     seqRBtn->setText("Sequence positions from");
+      seqRBtn->setText("Sequence positions from");
     gBox->add(seqRBtn,NAlignConstraint(nAlLeft,0,2));
     fromEdt = new NEdit();
     gBox->add(fromEdt,NAlignConstraint(nAlLeft,1,2));
@@ -117,9 +117,9 @@ WaveSaveDlg::WaveSaveDlg()
     audioPanel->setLayout(NAlignLayout());
   audioPanel->add(new NLabel("Note many filters\nscrew up when rendering\nat slow sample rates"),nAlLeft);
     NPanel* cboxPanel = new NPanel();
-       cboxPanel->setLayout(NAlignLayout());
-       cboxPanel->add(new NLabel("Sampling rate"),nAlTop);
-       sampleRateCbx = new NComboBox();
+        cboxPanel->setLayout(NAlignLayout());
+        cboxPanel->add(new NLabel("Sampling rate"),nAlTop);
+        sampleRateCbx = new NComboBox();
           sampleRateCbx->add(new NItem("8192 hz"));
           sampleRateCbx->add(new NItem("11025 hz"));
           sampleRateCbx->add(new NItem("22050 hz"));
@@ -127,27 +127,27 @@ WaveSaveDlg::WaveSaveDlg()
           sampleRateCbx->add(new NItem("48000 hz"));
           sampleRateCbx->add(new NItem("96000 hz"));
           sampleRateCbx->setIndex(3);
-       cboxPanel->add(sampleRateCbx,nAlTop);
-       cboxPanel->add(new NLabel("Bit rate"),nAlTop);
-       bitDepthCbx = new NComboBox();
+        cboxPanel->add(sampleRateCbx,nAlTop);
+        cboxPanel->add(new NLabel("Bit rate"),nAlTop);
+        bitDepthCbx = new NComboBox();
           bitDepthCbx->add(new NItem("8"));
           bitDepthCbx->add(new NItem("16"));
           bitDepthCbx->add(new NItem("24"));
           bitDepthCbx->add(new NItem("32"));
           bitDepthCbx->setIndex(1);
-       cboxPanel->add(bitDepthCbx,nAlTop);
-       cboxPanel->add(new NLabel("Channels"),nAlTop); 
-       channelsCbx = new NComboBox();
+        cboxPanel->add(bitDepthCbx,nAlTop);
+        cboxPanel->add(new NLabel("Channels"),nAlTop); 
+        channelsCbx = new NComboBox();
           channelsCbx->add(new NItem("Mono [mix]"));
           channelsCbx->add(new NItem("Mono [left]"));
           channelsCbx->add(new NItem("Mono [right]"));
           channelsCbx->add(new NItem("Stereo"));
           channelsCbx->setIndex(3);
-       cboxPanel->add(channelsCbx,nAlTop);
+        cboxPanel->add(channelsCbx,nAlTop);
     audioPanel->add(cboxPanel, nAlClient);
   pane()->add(audioPanel,nAlTop);
   progressBar = new NProgressBar();
-     progressBar->setValue(0);
+      progressBar->setValue(0);
   pane()->add(progressBar,nAlTop);
   NPanel* btnPanel = new NPanel();
     btnPanel->setLayout(NFlowLayout(nAlRight,5,5));
@@ -198,29 +198,29 @@ void WaveSaveDlg::initVars( )
 
   if ( (rate < 0) || (rate >5) )
   {
-     if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 8192)
-     {
-       rate = 0;
-     }
-     else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 11025)
-     {
-       rate = 1;
-     } else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 22050)
-     {
-       rate = 2;
-     }
-     else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 44100)
-     {
-       rate = 3;
-     }
-     else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 48000)
-     {
-       rate = 4;
-     }
-     else
-     {
-       rate = 5;
-     }
+      if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 8192)
+      {
+        rate = 0;
+      }
+      else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 11025)
+      {
+        rate = 1;
+      } else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 22050)
+      {
+        rate = 2;
+      }
+      else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 44100)
+      {
+        rate = 3;
+      }
+      else if (Global::pConfig()->_pOutputDriver->_samplesPerSec <= 48000)
+      {
+        rate = 4;
+      }
+      else
+      {
+        rate = 5;
+      }
   }
 
   if ((channelmode < 0) || (channelmode > 3))
@@ -315,7 +315,7 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
           if (j != i) {
             pSong->_trackMuted[j] = true;
           } else {
-               pSong->_trackMuted[j] = false;
+                pSong->_trackMuted[j] = false;
           }
         }
         // now save the song
@@ -326,9 +326,9 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
         saveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode);
         return;
       }
-     }
-     current = 256;
-     saveEnd();
+      }
+      current = 256;
+      saveEnd();
   } else
   if (wireChkBox->checked())
   {
@@ -336,12 +336,12 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
     // back up our connections first
     for (int i = 0; i < MAX_CONNECTIONS; i++)
     {
-       if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
-       {
+        if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
+        {
           _Muted[i] = pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute;
-       } else {
+        } else {
           _Muted[i] = true;
-       }
+        }
     }
 
     for (int i = 0; i < MAX_CONNECTIONS; i++) {
@@ -417,7 +417,7 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
     current = 256;
     saveEnd();
   } else {
-     saveWav(name,real_bits[bits],real_rate[rate],channelmode);
+      saveWav(name,real_bits[bits],real_rate[rate],channelmode);
   }
 }
 
@@ -568,25 +568,25 @@ void WaveSaveDlg::saveEnd( )
 
     for (int i = current+1; i < MAX_CONNECTIONS; i++)
     {
-       if (!_Muted[i])
-       {
+        if (!_Muted[i])
+        {
           current = i;
           for (int j = 0; j < MAX_CONNECTIONS; j++)
           {
-             if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j]) {
-               if (j != i)
-               {
-                 pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
-               } else {
-                 pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
-               }
-             }
-           }
-           // now save the song
-           char filename[8000];
-           sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
-           saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
-           return;
+              if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j]) {
+                if (j != i)
+                {
+                  pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
+                } else {
+                  pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
+                }
+              }
+            }
+            // now save the song
+            char filename[8000];
+            sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+            saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+            return;
         }
       }
 
@@ -598,29 +598,29 @@ void WaveSaveDlg::saveEnd( )
         }
       }
     } else if ( generatorChkBox->checked() ) {
-       Song *pSong = Global::pSong();
+        Song *pSong = Global::pSong();
 
-       const int real_rate[]={8192,11025,22050,44100,48000,96000};
-       const int real_bits[]={8,16,24,32};
+        const int real_rate[]={8192,11025,22050,44100,48000,96000};
+        const int real_bits[]={8,16,24,32};
 
-       for (int i = current+1; i < MAX_BUSES; i++)
-       {
-         if (!_Muted[i])
-         {
-           current = i;
-           for (int j = 0; j < MAX_BUSES; j++)
-           {
-             if (pSong->_pMachine[j])
-             {
-               if (j != i)
-               {
-                 pSong->_pMachine[j]->_mute = true;
-               } else
-               {
-                 pSong->_pMachine[j]->_mute = false;
-               }
-             }
-           }
+        for (int i = current+1; i < MAX_BUSES; i++)
+        {
+          if (!_Muted[i])
+          {
+            current = i;
+            for (int j = 0; j < MAX_BUSES; j++)
+            {
+              if (pSong->_pMachine[j])
+              {
+                if (j != i)
+                {
+                  pSong->_pMachine[j]->_mute = true;
+                } else
+                {
+                  pSong->_pMachine[j]->_mute = false;
+                }
+              }
+            }
         // now save the song
         char filename[8000];
         sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
@@ -698,7 +698,7 @@ void WaveSaveDlg::saveTick( )
 void WaveSaveDlg::setVisible( bool on )
 {
   if (on) {
-     initVars();
+      initVars();
   }
   NDialog::setVisible(on);
 }

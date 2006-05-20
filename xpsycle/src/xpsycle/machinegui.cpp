@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "machinegui.h"
 #include "machine.h"
 #include "framemachine.h"
@@ -34,7 +34,7 @@ NPixmap MachineGUI::pixmap;
 int MachineGUI::c = 0;
 
 MachineGUI::MachineGUI(Machine* mac)
- : NPanel()
+  : NPanel()
 {
   line = 0;
   mac_ = mac;
@@ -43,10 +43,10 @@ MachineGUI::MachineGUI(Machine* mac)
 
   if (c==0) {
     if (Global::pConfig()->iconPath=="") ;
-       //pixmap = Global::pBitmaps()->machine_skin(); 
+        //pixmap = Global::pBitmaps()->machine_skin(); 
     else {
-       std::cout << Global::pConfig()->iconPath+ "machine_skin.xpm" << std::endl;
-       pixmap.loadFromFile(Global::pConfig()->iconPath+ "machine_skin.xpm");
+        std::cout << Global::pConfig()->iconPath+ "machine_skin.xpm" << std::endl;
+        pixmap.loadFromFile(Global::pConfig()->iconPath+ "machine_skin.xpm");
     }
   }
   c++;
@@ -69,7 +69,7 @@ void MachineGUI::attachLine( NLine * line, int point )
   attachedLines.push_back(LineAttachment(line,point));
   int midW = clientWidth()  / 2;
   int midH = clientHeight() / 2;
-   if (point == 1) {
+    if (point == 1) {
         line->setPoints(NPoint(left()+midW,top()+midH),line->p2());
     } else {
         line->setPoints(line->p1(),NPoint(left()+midW,top()+midH));
@@ -172,39 +172,39 @@ void MasterGUI::onMousePress( int x, int y, int button )
       if (dMuteCoords.intersects(x,y)) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
-         pMac()->_volumeCounter=0.0f;
-         pMac()->_volumeDisplay=0;
+          pMac()->_volumeCounter=0.0f;
+          pMac()->_volumeDisplay=0;
           if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
             Global::pSong()->machineSoloed = -1;
-         }
-       }
-       repaint();
-     } else
+          }
+        }
+        repaint();
+      } else
       if (dSoloCoords.intersects(x,y)) { // solo or unsolo
         if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-         Global::pSong()->machineSoloed = -1;
-         for ( int i=0;i<MAX_MACHINES;i++ ) {
-           if ( Global::pSong()->_pMachine[i] ) {
-             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-               Global::pSong()->_pMachine[i]->_mute = false;
-             }
-           }
-         }
-       } else {
+          Global::pSong()->machineSoloed = -1;
+          for ( int i=0;i<MAX_MACHINES;i++ ) {
+            if ( Global::pSong()->_pMachine[i] ) {
+              if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+                Global::pSong()->_pMachine[i]->_mute = false;
+              }
+            }
+          }
+        } else {
           for ( int i=0;i<MAX_MACHINES;i++ ) {
           if ( Global::pSong()->_pMachine[i] )
           {
             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
             {
-               Global::pSong()->_pMachine[i]->_mute = true;
-               Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
-               Global::pSong()->_pMachine[i]->_volumeDisplay=0;
-             }
-           }
-         }
-         pMac()->_mute = false;
-         Global::pSong()->machineSoloed = pMac()->_macIndex;
-       }
+                Global::pSong()->_pMachine[i]->_mute = true;
+                Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
+                Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+              }
+            }
+          }
+          pMac()->_mute = false;
+          Global::pSong()->machineSoloed = pMac()->_macIndex;
+        }
       repaint();
     }
   }
@@ -294,39 +294,39 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
       if (dMuteCoords.intersects(x,y)) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
-         pMac()->_volumeCounter=0.0f;
-         pMac()->_volumeDisplay=0;
+          pMac()->_volumeCounter=0.0f;
+          pMac()->_volumeDisplay=0;
           if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
             Global::pSong()->machineSoloed = -1;
-         }
-       }
-       repaint();
-     } else
+          }
+        }
+        repaint();
+      } else
       if (dSoloCoords.intersects(x,y)) { // solo or unsolo
         if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-         Global::pSong()->machineSoloed = -1;
-         for ( int i=0;i<MAX_MACHINES;i++ ) {
-           if ( Global::pSong()->_pMachine[i] ) {
-             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-               Global::pSong()->_pMachine[i]->_mute = false;
-             }
-           }
-         }
-       } else {
+          Global::pSong()->machineSoloed = -1;
+          for ( int i=0;i<MAX_MACHINES;i++ ) {
+            if ( Global::pSong()->_pMachine[i] ) {
+              if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+                Global::pSong()->_pMachine[i]->_mute = false;
+              }
+            }
+          }
+        } else {
           for ( int i=0;i<MAX_MACHINES;i++ ) {
           if ( Global::pSong()->_pMachine[i] )
           {
             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
             {
-               Global::pSong()->_pMachine[i]->_mute = true;
-               Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
-               Global::pSong()->_pMachine[i]->_volumeDisplay=0;
-             }
-           }
-         }
-         pMac()->_mute = false;
-         Global::pSong()->machineSoloed = pMac()->_macIndex;
-       }
+                Global::pSong()->_pMachine[i]->_mute = true;
+                Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
+                Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+              }
+            }
+          }
+          pMac()->_mute = false;
+          Global::pSong()->machineSoloed = pMac()->_macIndex;
+        }
       repaint();
     }
   }
@@ -351,20 +351,20 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
   // BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
   if (vol > 0)
   {
-     if (pGui_->sGeneratorVu0.width())
-     {
+      if (pGui_->sGeneratorVu0.width())
+      {
         vol /= pGui_->sGeneratorVu0.width();// restrict to leds
         vol *= pGui_->sGeneratorVu0.width();
-     }
+      }
   } else {
     vol = 0;
   }
 
   if (max >0 || vol >0)
   g->putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
-               MachineGUI::pixmap,
-               pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
-               pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
+                MachineGUI::pixmap,
+                pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
+                pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
   );
 
   if (max > 0) {
@@ -372,17 +372,17 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
           max /= pGui_->sGeneratorVuPeak.width();// restrict to leds
           max *= pGui_->sGeneratorVuPeak.width();
           g->putPixmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
-                       MachineGUI::pixmap,
-                       pGui_->sGeneratorVuPeak.left(),
-                       pGui_->sGeneratorVuPeak.top()
-         ); //peak
-       }
+                        MachineGUI::pixmap,
+                        pGui_->sGeneratorVuPeak.left(),
+                        pGui_->sGeneratorVuPeak.top()
+          ); //peak
+        }
     }
 
-   if (vol > 0) {
-     g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), MachineGUI::pixmap,
+    if (vol > 0) {
+      g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), MachineGUI::pixmap,
                   pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
-     }
+      }
 
 }
 
@@ -487,39 +487,39 @@ void EffektGUI::onMousePress( int x, int y, int button )
       if (dMuteCoords.intersects(x,y)) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
-         pMac()->_volumeCounter=0.0f;
-         pMac()->_volumeDisplay=0;
+          pMac()->_volumeCounter=0.0f;
+          pMac()->_volumeDisplay=0;
           if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
             Global::pSong()->machineSoloed = -1;
-         }
-       }
-       repaint();
-     } else
+          }
+        }
+        repaint();
+      } else
       if (dSoloCoords.intersects(x,y)) { // solo or unsolo
         if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-         Global::pSong()->machineSoloed = -1;
-         for ( int i=0;i<MAX_MACHINES;i++ ) {
-           if ( Global::pSong()->_pMachine[i] ) {
-             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-               Global::pSong()->_pMachine[i]->_mute = false;
-             }
-           }
-         }
-       } else {
+          Global::pSong()->machineSoloed = -1;
+          for ( int i=0;i<MAX_MACHINES;i++ ) {
+            if ( Global::pSong()->_pMachine[i] ) {
+              if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+                Global::pSong()->_pMachine[i]->_mute = false;
+              }
+            }
+          }
+        } else {
           for ( int i=0;i<MAX_MACHINES;i++ ) {
           if ( Global::pSong()->_pMachine[i] )
           {
             if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
             {
-               Global::pSong()->_pMachine[i]->_mute = true;
-               Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
-               Global::pSong()->_pMachine[i]->_volumeDisplay=0;
-             }
-           }
-         }
-         pMac()->_mute = false;
-         Global::pSong()->machineSoloed = pMac()->_macIndex;
-       }
+                Global::pSong()->_pMachine[i]->_mute = true;
+                Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
+                Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+              }
+            }
+          }
+          pMac()->_mute = false;
+          Global::pSong()->machineSoloed = pMac()->_macIndex;
+        }
       repaint();
     }
   }
@@ -544,19 +544,19 @@ void EffektGUI::VUPanel::paint( NGraphics * g )
   // BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
   if (vol > 0)
   {
-     if (pGui_->sGeneratorVu0.width())
-     {
+      if (pGui_->sGeneratorVu0.width())
+      {
         vol /= pGui_->sGeneratorVu0.width();// restrict to leds
         vol *= pGui_->sGeneratorVu0.width();
-     }
+      }
   } else {
     vol = 0;
   }
 
   g->putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
-               MachineGUI::pixmap,
-               pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
-               pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
+                MachineGUI::pixmap,
+                pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
+                pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
   );
 
   if (max > 0) {
@@ -564,17 +564,17 @@ void EffektGUI::VUPanel::paint( NGraphics * g )
           max /= pGui_->sGeneratorVuPeak.width();// restrict to leds
           max *= pGui_->sGeneratorVuPeak.width();
           g->putPixmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
-                       MachineGUI::pixmap,
-                       pGui_->sGeneratorVuPeak.left(),
-                       pGui_->sGeneratorVuPeak.top()
-         ); //peak
-       }
+                        MachineGUI::pixmap,
+                        pGui_->sGeneratorVuPeak.left(),
+                        pGui_->sGeneratorVuPeak.top()
+          ); //peak
+        }
     }
 
-   if (vol > 0) {
-     g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), MachineGUI::pixmap,
+    if (vol > 0) {
+      g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), MachineGUI::pixmap,
                   pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
-     }
+      }
 
 }
 
@@ -589,10 +589,10 @@ void MachineGUI::detachLine( NLine * line )
   for (;it <  attachedLines.end(); it++) {
     LineAttachment lineAttachment = *it;
 
-     if (lineAttachment.line == line) {
-       attachedLines.erase(it); 
-       break;
-     }
+      if (lineAttachment.line == line) {
+        attachedLines.erase(it); 
+        break;
+      }
   }
 }
 
@@ -604,7 +604,7 @@ void MachineGUI::onMouseDoublePress( int x, int y, int button )
 void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
 {
   if (button==1) {
-     frameMachine->setVisible(true);
+      frameMachine->setVisible(true);
   }
 }
 

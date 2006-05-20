@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "machine.h"
 #include "global.h"
 #include "dsp.h"
@@ -40,7 +40,7 @@ char* Mixer::_psName = "Mixer";
 using namespace dsp;
 
 Machine::Machine() :/* crashed_(),
-       fpu_exception_mask_(),*/
+        fpu_exception_mask_(),*/
   _macIndex(0)
   , _type(MACH_UNDEFINED)
   , _mode(MACHMODE_UNDEFINED)
@@ -82,27 +82,27 @@ Machine::Machine() :/* crashed_(),
     }
     for (int c = 0; c<MAX_TRACKS; c++)
     {
-       TriggerDelay[c]._cmd = 0;
-       TriggerDelayCounter[c]=0;
-       RetriggerRate[c]=256;
-       ArpeggioCount[c]=0;
+        TriggerDelay[c]._cmd = 0;
+        TriggerDelayCounter[c]=0;
+        RetriggerRate[c]=256;
+        ArpeggioCount[c]=0;
     }
     for (int c = 0; c<MAX_TWS; c++)
     {
-       TWSInst[c] = 0;
-       TWSDelta[c] = 0;
-       TWSCurrent[c] = 0;
-       TWSDestination[c] = 0;
+        TWSInst[c] = 0;
+        TWSDelta[c] = 0;
+        TWSCurrent[c] = 0;
+        TWSDestination[c] = 0;
     }
 
     for (int i = 0; i<MAX_CONNECTIONS; i++)
     {
-       _inputMachines[i]=-1;
-       _outputMachines[i]=-1;
-       _inputConVol[i]=0.0f;
-       _wireMultiplier[i]=0.0f;
-       _connection[i]=false;
-       _inputCon[i]=false;
+        _inputMachines[i]=-1;
+        _outputMachines[i]=-1;
+        _inputConVol[i]=0.0f;
+        _wireMultiplier[i]=0.0f;
+        _connection[i]=false;
+        _inputCon[i]=false;
     }
 }
 
@@ -113,25 +113,25 @@ Machine::~Machine()
 
 void Machine::Init( )
 {
- // Standard gear initalization
- _cpuCost = 0;
- _wireCost = 0;
- _mute = false;
- _stopped = false;
- _bypass = false;
- _waitingForSound = false;
- // Centering volume and panning
- SetPan(64);
- // Clearing connections
- for(int i=0; i<MAX_CONNECTIONS; i++)
- {
-   _inputConVol[i] = 1.0f;
-   _wireMultiplier[i] = 1.0f;
-   _connection[i] = false;
-   _inputCon[i] = false;
- }
- _numInputs = 0;
- _numOutputs = 0;
+  // Standard gear initalization
+  _cpuCost = 0;
+  _wireCost = 0;
+  _mute = false;
+  _stopped = false;
+  _bypass = false;
+  _waitingForSound = false;
+  // Centering volume and panning
+  SetPan(64);
+  // Clearing connections
+  for(int i=0; i<MAX_CONNECTIONS; i++)
+  {
+    _inputConVol[i] = 1.0f;
+    _wireMultiplier[i] = 1.0f;
+    _connection[i] = false;
+    _inputCon[i] = false;
+  }
+  _numInputs = 0;
+  _numOutputs = 0;
 }
 
 void Machine::SetPan( int newPan )
@@ -164,18 +164,18 @@ void Machine::PreWork( int numSamples )
   //CPUCOST_INIT(cost);
   if (_pScopeBufferL && _pScopeBufferR)
   {
-     float *pSamplesL = _pSamplesL;
-     float *pSamplesR = _pSamplesR;
-     int i = _scopePrevNumSamples;
-     while (i > 0) {
+      float *pSamplesL = _pSamplesL;
+      float *pSamplesR = _pSamplesR;
+      int i = _scopePrevNumSamples;
+      while (i > 0) {
         if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)
         {
-           memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-           memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-           pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-           pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-           i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-           _scopeBufferIndex = 0;
+            memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+            memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+            pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+            pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+            i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+            _scopeBufferIndex = 0;
         } else {
           memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));   
           memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));   
@@ -238,8 +238,8 @@ bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,float value)
     int c;
     if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
     {
-       _pDstMachine->SetWireVolume(c,value);
-       return true;
+        _pDstMachine->SetWireVolume(c,value);
+        return true;
     }
   }
   return false;
@@ -256,10 +256,10 @@ bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,float &value)
     int c;
     if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
     {
-       //float val;
-       _pDstMachine->GetWireVolume(c,value);
-       //value = f2i(val*256.0f);
-       return true;
+        //float val;
+        _pDstMachine->GetWireVolume(c,value);
+        //value = f2i(val*256.0f);
+        return true;
     }
   }
   return false;
@@ -305,8 +305,8 @@ bool Machine::LoadSpecificChunk(DeSerializer* pFile, int version)
   UINT count;
   count = pFile->getInt();
   for (UINT i = 0; i < count; i++) {
-   int temp = pFile->getInt();
-   SetParameter(i,temp);
+    int temp = pFile->getInt();
+    SetParameter(i,temp);
   }
   pFile->skip(size-sizeof(count)-(count*sizeof(int)));
   return true;
@@ -353,25 +353,25 @@ bool Dummy::LoadSpecificChunk(DeSerializer* pFile, int version)
 
 void Machine::Work( int numSamples )
 {
- _waitingForSound=true;
- for (int i=0; i<MAX_CONNECTIONS; i++)
- {
-   if (_inputCon[i])
-   {
-     Machine* pInMachine = Global::pSong()->_pMachine[_inputMachines[i]];
-     if (pInMachine)
-     {
+  _waitingForSound=true;
+  for (int i=0; i<MAX_CONNECTIONS; i++)
+  {
+    if (_inputCon[i])
+    {
+      Machine* pInMachine = Global::pSong()->_pMachine[_inputMachines[i]];
+      if (pInMachine)
+      {
         /*
-         * Change the sound routing to understand what a feedback loop is,
-         * creating a special type of wire that will have a buffer which will give as output,
-         * and which will be (internally) connected to master, 
-         * to fill again the buffer once all the other machines have done its job.
+          * Change the sound routing to understand what a feedback loop is,
+          * creating a special type of wire that will have a buffer which will give as output,
+          * and which will be (internally) connected to master, 
+          * to fill again the buffer once all the other machines have done its job.
         */
         if (!pInMachine->_worked && !pInMachine->_waitingForSound)
         {
           {
             #if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
-             processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); 
+              processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); 
             // (un)masks fpu exceptions in the current scope
             #endif
             pInMachine->Work(numSamples);
@@ -414,13 +414,13 @@ float * Master::_pMasterSamples = 0;
 
 Master::Master(int index)
 {
-   _macIndex = index;
-   sampleCount = 0;
-   _outDry = 256;
-   decreaseOnClip=false;
-   _type = MACH_MASTER;
-   _mode = MACHMODE_MASTER;
-   sprintf(_editName, "Master");
+    _macIndex = index;
+    sampleCount = 0;
+    _outDry = 256;
+    decreaseOnClip=false;
+    _type = MACH_MASTER;
+    _mode = MACHMODE_MASTER;
+    sprintf(_editName, "Master");
 }
 
 void Master::Init(void)
@@ -456,8 +456,8 @@ void Master::Work(int numSamples)
 
   if(vuupdated) 
   {
-     _lMax *= 0.5;
-     _rMax *= 0.5;
+      _lMax *= 0.5;
+      _rMax *= 0.5;
   }
   int i = numSamples;
   if(decreaseOnClip)
@@ -465,51 +465,51 @@ void Master::Work(int numSamples)
     do
     {
       // Left channel
-       if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
-       {
+        if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
+        {
           _lMax = fabsf(*pSamplesL);
-       }
-       if(*pSamples > 32767.0f)
-       {
-         _outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-         mv = CValueMapper::Map_255_1(_outDry);
-         *pSamples = *pSamplesL = 32767.0f; 
-       }
-       else if (*pSamples < -32767.0f)
-       {
-         _outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-         mv = CValueMapper::Map_255_1(_outDry);
-         *pSamples = *pSamplesL = -32767.0f; 
-       }
-       pSamples++;
-       pSamplesL++;
-       // Right channel
-       if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
-       {
-         _rMax = fabsf(*pSamplesR);
-       }
-       if(*pSamples > 32767.0f)
-       {
-         _outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-         mv = CValueMapper::Map_255_1(_outDry);
-         *pSamples = *pSamplesR = 32767.0f; 
-       }
-       else if (*pSamples < -32767.0f)
-       {
-         _outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-         mv = CValueMapper::Map_255_1(_outDry);
-         *pSamples = *pSamplesR = -32767.0f; 
-       }
-       pSamples++;
-       pSamplesR++;
-     }
-     while (--i);
+        }
+        if(*pSamples > 32767.0f)
+        {
+          _outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+          mv = CValueMapper::Map_255_1(_outDry);
+          *pSamples = *pSamplesL = 32767.0f; 
+        }
+        else if (*pSamples < -32767.0f)
+        {
+          _outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+          mv = CValueMapper::Map_255_1(_outDry);
+          *pSamples = *pSamplesL = -32767.0f; 
+        }
+        pSamples++;
+        pSamplesL++;
+        // Right channel
+        if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
+        {
+          _rMax = fabsf(*pSamplesR);
+        }
+        if(*pSamples > 32767.0f)
+        {
+          _outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+          mv = CValueMapper::Map_255_1(_outDry);
+          *pSamples = *pSamplesR = 32767.0f; 
+        }
+        else if (*pSamples < -32767.0f)
+        {
+          _outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+          mv = CValueMapper::Map_255_1(_outDry);
+          *pSamples = *pSamplesR = -32767.0f; 
+        }
+        pSamples++;
+        pSamplesR++;
+      }
+      while (--i);
     }
     else
     {
-       do
-       {
-         // Left channel
+        do
+        {
+          // Left channel
             if(std::fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
             {
               _lMax = fabsf(*pSamplesL);
@@ -548,11 +548,11 @@ void Master::Work(int numSamples)
     }
 
 bool Master::LoadSpecificChunk(DeSerializer* pFile, int version) {
-   UINT size;
-   size    = pFile->getInt(); // size of this part params to load
-   _outDry = pFile->getInt();
-   decreaseOnClip = pFile->getByte();
-   return true;
+    UINT size;
+    size    = pFile->getInt(); // size of this part params to load
+    _outDry = pFile->getInt();
+    decreaseOnClip = pFile->getByte();
+    return true;
 };
 /*
     void Master::SaveSpecificChunk(RiffFile* pFile)
@@ -808,7 +808,7 @@ bool Master::LoadSpecificChunk(DeSerializer* pFile, int version) {
       }
     }
     void Mixer::Mix(int
- numSamples)
+  numSamples)
     {
       for (int i=0; i<MAX_CONNECTIONS; i++)
       {
@@ -965,51 +965,51 @@ void Machine::WorkNoMix(int numSamples)
   _waitingForSound=true;
   for (int i=0; i<MAX_CONNECTIONS; i++)
   {
-     if (_inputCon[i])
-     {
-       Machine* pInMachine = Global::pSong()->_pMachine[_inputMachines[i]];
-       if (pInMachine)
-       {
-         if (!pInMachine->_worked && !pInMachine->_waitingForSound)
-         {
-             {
-               pInMachine->Work(numSamples);
-             }
-             pInMachine->_waitingForSound = false;
-         }
-         if(!pInMachine->_stopped) _stopped = false;
+      if (_inputCon[i])
+      {
+        Machine* pInMachine = Global::pSong()->_pMachine[_inputMachines[i]];
+        if (pInMachine)
+        {
+          if (!pInMachine->_worked && !pInMachine->_waitingForSound)
+          {
+              {
+                pInMachine->Work(numSamples);
+              }
+              pInMachine->_waitingForSound = false;
+          }
+          if(!pInMachine->_stopped) _stopped = false;
         }
       }
-   }
+    }
 }
 
 Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, bool fullopen )
 {
-   // assume version 0 for now
-   bool bDeleted(false);
-   Machine* pMachine;
-   MachineType type;//,oldtype;
-   char dllName[256];
-   pFile->read(reinterpret_cast<char*>(&type),sizeof(type));
-   std::cout << type << std::endl;
-   pFile->readString(dllName,256);
+    // assume version 0 for now
+    bool bDeleted(false);
+    Machine* pMachine;
+    MachineType type;//,oldtype;
+    char dllName[256];
+    pFile->read(reinterpret_cast<char*>(&type),sizeof(type));
+    std::cout << type << std::endl;
+    pFile->readString(dllName,256);
 
-   switch (type)
-   {
-     case MACH_MASTER:
+    switch (type)
+    {
+      case MACH_MASTER:
         if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new Master(index);
-     break;
-     case MACH_SAMPLER:
-         if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new Sampler(index);
-     break;
-     case MACH_XMSAMPLER:
+      break;
+      case MACH_SAMPLER:
+          if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new Sampler(index);
+      break;
+      case MACH_XMSAMPLER:
         pMachine = new Dummy(index);
         //if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new XMSampler(index);
-     break;
-     case MACH_DUPLICATOR:
+      break;
+      case MACH_DUPLICATOR:
         if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new DuplicatorMac(index);
-     break;
-     case MACH_PLUGIN: {
+      break;
+      case MACH_PLUGIN: {
         if(!fullopen) pMachine = new Dummy(index); else
         {
           Plugin * p;
@@ -1017,53 +1017,53 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
           if(!p->LoadDll(dllName)) {
               std::cout << "creating Dummy" << std::endl; fflush(stdout);
               //char sError[MAX_PATH + 100];
-             // sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
-             // MessageBox(NULL,sError, "Loading Error", MB_OK);
+              // sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
+              // MessageBox(NULL,sError, "Loading Error", MB_OK);
               pMachine = new Dummy(index);
               type = MACH_DUMMY;
               delete p;
               bDeleted = true;
           }
         }
-     }
-     break;
+      }
+      break;
     case MACH_VST: {
         if(!fullopen) pMachine = new Dummy(index); else
         {
           pMachine = new Dummy(index);
           type = MACH_DUMMY;
-           /*vst::instrument * p;
-           pMachine = p = new vst::instrument(index);
-           if(!p->LoadDll(dllName)) {
-             char sError[MAX_PATH + 100];
-             sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
-             MessageBox(NULL,sError, "Loading Error", MB_OK);
-             pMachine = new Dummy(index);
-             type = MACH_DUMMY;
-             delete p;
-             bDeleted = true;
-           }*/
+            /*vst::instrument * p;
+            pMachine = p = new vst::instrument(index);
+            if(!p->LoadDll(dllName)) {
+              char sError[MAX_PATH + 100];
+              sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
+              MessageBox(NULL,sError, "Loading Error", MB_OK);
+              pMachine = new Dummy(index);
+              type = MACH_DUMMY;
+              delete p;
+              bDeleted = true;
+            }*/
         }
     }
     break;
     case MACH_VSTFX: {
-       if(!fullopen) pMachine = new Dummy(index); else {
+        if(!fullopen) pMachine = new Dummy(index); else {
         pMachine = new Dummy(index);
         type = MACH_DUMMY;
         /* vst::fx * p;
-         pMachine = p = new vst::fx(index);
-         if(!p->LoadDll(dllName)) {
-             char sError[MAX_PATH + 100];
-             sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
-             MessageBox(NULL,sError, "Loading Error", MB_OK);
-             pMachine = new Dummy(index);
-             type = MACH_DUMMY;
-             delete p;
-             bDeleted = true;
-         }*/
-       }
-     }
-     break;
+          pMachine = p = new vst::fx(index);
+          if(!p->LoadDll(dllName)) {
+              char sError[MAX_PATH + 100];
+              sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
+              MessageBox(NULL,sError, "Loading Error", MB_OK);
+              pMachine = new Dummy(index);
+              type = MACH_DUMMY;
+              delete p;
+              bDeleted = true;
+          }*/
+        }
+      }
+      break;
     default:
       /*if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);*/
       pMachine = new Dummy(index);
@@ -1095,10 +1095,10 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
     }
     pFile->readString(pMachine->_editName,32);
     if(bDeleted) {
-       char buf[34];
-       sprintf(buf,"X %s",pMachine->_editName);
-       buf[31]=0;
-       strcpy(pMachine->_editName,buf);
+        char buf[34];
+        sprintf(buf,"X %s",pMachine->_editName);
+        buf[31]=0;
+        strcpy(pMachine->_editName,buf);
     }
     if(!fullopen) return pMachine;
       if(!pMachine->LoadSpecificChunk(pFile,version)) {
@@ -1140,24 +1140,24 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
         if(pMachine->_y > Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
         pMachine->_y = Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;*/
     } else if (index < MAX_BUSES*2) {
-       pMachine->_mode = MACHMODE_FX;
-       /*if(pMachine->_x > Global::pSong()->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
-       pMachine->_x = Global::pSong()->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-       if(pMachine->_y > Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
-       pMachine->_y = Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;*/
+        pMachine->_mode = MACHMODE_FX;
+        /*if(pMachine->_x > Global::pSong()->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
+        pMachine->_x = Global::pSong()->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+        if(pMachine->_y > Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
+        pMachine->_y = Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;*/
     } else {
         pMachine->_mode = MACHMODE_MASTER;
         /*if(pMachine->_x > Global::pSong()->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
         pMachine->_x = Global::pSong()->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
         if(pMachine->_y > Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
         pMachine->_y = Global::pSong()->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;*/
-     }
-   pMachine->SetPan(pMachine->_panning);
-   return pMachine;
+      }
+    pMachine->SetPan(pMachine->_panning);
+    return pMachine;
 }
 
- bool Mixer::LoadSpecificChunk(DeSerializer* pFile, int version)
- {
+  bool Mixer::LoadSpecificChunk(DeSerializer* pFile, int version)
+  {
     UINT size;
     size = pFile->getInt();
     pFile->read((char*)&_sendGrid,sizeof(_sendGrid));
@@ -1166,7 +1166,7 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
     pFile->read((char*)&_sendVolMulti,sizeof(_sendVolMulti));
     pFile->read((char*)&_sendValid,sizeof(_sendValid));
     return true;
- };
+  };
 
 
 void Machine::SaveFileChunk(Serializer * pFile) {
@@ -1183,12 +1183,12 @@ void Machine::SaveFileChunk(Serializer * pFile) {
 
   for(int i = 0; i < MAX_CONNECTIONS; i++)
   {
-     pFile->PutInt(_inputMachines[i]);   // Incoming connections Machine number
-     pFile->PutInt(_outputMachines[i]); // Outgoing connections Machine number
-     pFile->PutFloat(_inputConVol[i]);    // Incoming connections Machine vol
-     pFile->PutFloat(_wireMultiplier[i]); // Value to multiply _inputConVol[] to have a 0.0...1.0 range
-     pFile->PutBool(_connection[i]);       // Outgoing connections activated
-     pFile->PutBool(_inputCon[i]);         // Incoming connections activated
+      pFile->PutInt(_inputMachines[i]);   // Incoming connections Machine number
+      pFile->PutInt(_outputMachines[i]); // Outgoing connections Machine number
+      pFile->PutFloat(_inputConVol[i]);    // Incoming connections Machine vol
+      pFile->PutFloat(_wireMultiplier[i]); // Value to multiply _inputConVol[] to have a 0.0...1.0 range
+      pFile->PutBool(_connection[i]);       // Outgoing connections activated
+      pFile->PutBool(_inputCon[i]);         // Incoming connections activated
   }
   pFile->PutString(_editName);
   SaveSpecificChunk(pFile);

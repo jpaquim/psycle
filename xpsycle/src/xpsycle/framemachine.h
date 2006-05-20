@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef FRAMEMACHINE_H
 #define FRAMEMACHINE_H
 
@@ -52,83 +52,83 @@ public:
 
 class Cell : public NPanel {
 public:
-   Cell() {
-     setBorder(NFrameBorder());
-   }
+    Cell() {
+      setBorder(NFrameBorder());
+    }
 
-   virtual void paint(NGraphics* g);
+    virtual void paint(NGraphics* g);
 
-   virtual ~Cell() {}
+    virtual ~Cell() {}
 
-   virtual int preferredWidth() const {
+    virtual int preferredWidth() const {
       return 100;
-   }
+    }
 
-   virtual int preferredHeight() const {
+    virtual int preferredHeight() const {
       return K_YSIZE;
-   }
+    }
 };
 
 class Knob: public Cell {
 public:
 
-   Knob(int param);
+    Knob(int param);
 
-   signal3<Knob*,int,int> valueChanged;
+    signal3<Knob*,int,int> valueChanged;
 
-   void setValue(int value);
-   void setValueAsText(const std::string & text);
+    void setValue(int value);
+    void setValueAsText(const std::string & text);
 
-   void setRange(int min, int max);
-   void setText(const std::string & text);
+    void setRange(int min, int max);
+    void setText(const std::string & text);
 
-   virtual void onMousePress(int x, int y, int button);
-   virtual void onMouseOver(int x, int y);
-   virtual void onMousePressed(int x, int y, int button);
+    virtual void onMousePress(int x, int y, int button);
+    virtual void onMouseOver(int x, int y);
+    virtual void onMousePressed(int x, int y, int button);
 
-   virtual void paint(NGraphics* g);
-   virtual void resize();
+    virtual void paint(NGraphics* g);
+    virtual void resize();
 
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
 
 private:
 
-   int param_;
-   int max_range;
-   int min_range;
-   int value_;
-   std::string tvalue;
+    int param_;
+    int max_range;
+    int min_range;
+    int value_;
+    std::string tvalue;
 
-   bool istweak;
-   bool finetweak;
-   bool ultrafinetweak;
+    bool istweak;
+    bool finetweak;
+    bool ultrafinetweak;
 
-   int sourcepoint;
+    int sourcepoint;
 
-   static int c;
-   static NBitmap kbitmap;
+    static int c;
+    static NBitmap kbitmap;
 
-   NLabel* label;
-   NLabel* vLabel;
+    NLabel* label;
+    NLabel* vLabel;
 
 };
 
 
 class Header: public Cell {
 public:
-     Header();
+      Header();
 
-     void setText(const std::string & text) {
-       label->setText(text);
-     }
+      void setText(const std::string & text) {
+        label->setText(text);
+      }
 
-     virtual void resize() {
-       int ch = clientHeight();
-       int lh = label->preferredHeight();
-       label->setPosition(0,(ch - lh) / 2,clientWidth(),lh);
-     }
+      virtual void resize() {
+        int ch = clientHeight();
+        int lh = label->preferredHeight();
+        label->setPosition(0,(ch - lh) / 2,clientWidth(),lh);
+      }
 
 private:
 
@@ -149,30 +149,30 @@ public:
 
 private:
 
-   std::map<NButton*,Preset> presetMap;
+    std::map<NButton*,Preset> presetMap;
 
-   Machine* pMachine_;
-   NPanel* knobPanel;
-   NTogglePanel* prsPanel;
-   NButton* defaultPrsBtn;
-   NSlider* prsBtnSlider;
+    Machine* pMachine_;
+    NPanel* knobPanel;
+    NTogglePanel* prsPanel;
+    NButton* defaultPrsBtn;
+    NSlider* prsBtnSlider;
 
-   Preset knobsPreset();
+    Preset knobsPreset();
 
-   void onItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
-   void init();
-   void initParameterGUI();
+    void onItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
+    void init();
+    void initParameterGUI();
 
-   void onPrsClick(NButtonEvent* ev);
+    void onPrsClick(NButtonEvent* ev);
 
-   void onKnobValueChange(Knob* sender, int value, int param);
+    void onKnobValueChange(Knob* sender, int value, int param);
 
-   void onLeftBtn(NButtonEvent* ev);
-   void onRightBtn(NButtonEvent* ev);
+    void onLeftBtn(NButtonEvent* ev);
+    void onRightBtn(NButtonEvent* ev);
 
-   void loadPresets();
-   void onAddPrs(NButtonEvent* ev);
-   void onLoadPrs(NButtonEvent* ev);
+    void loadPresets();
+    void onAddPrs(NButtonEvent* ev);
+    void onLoadPrs(NButtonEvent* ev);
 
 
 

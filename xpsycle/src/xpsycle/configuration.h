@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
@@ -137,11 +137,11 @@ public:
           for(std::size_t i(0) ; i < groups().size() ; ++i) group(i).message() = group(i).command() = i + 1;
         }
 
-     public:
-       class group_with_message;
-       class group_type
-       {
-         public:
+      public:
+        class group_with_message;
+        class group_type
+        {
+          public:
             group_type(int const & command = 0) : record_(), type_(), command_(command), from_(), to_(0xff) {}
 
             public:
@@ -173,7 +173,7 @@ public:
               int const inline & to() const throw() { return to_; }
               int       inline & to()       throw() { return to_; }
             private:
-               int                to_;
+                int                to_;
 
             public:
             typedef group_with_message with_message;
@@ -188,24 +188,24 @@ public:
               int       inline & message()       throw() { return message_; }
             private:
               int                message_;
-         };
+          };
 
-         public:
+          public:
             typedef std::vector<group_type::with_message> groups_type;
             groups_type              const inline & groups()                  const throw() { return groups_        ; }
             groups_type                    inline & groups()                  throw() { return groups_        ; }
             groups_type::value_type  const inline & group (std::size_t const & index) const throw() { return groups()[index]; }
             groups_type::value_type        inline & group (std::size_t const & index)       throw() { return groups()[index]; }
-         private:
-             groups_type groups_;
+          private:
+              groups_type groups_;
 
-         public:
+          public:
             group_type const inline & velocity() const throw() { return velocity_; }
             group_type       inline & velocity()       throw() { return velocity_; }
-         private:
+          private:
             group_type                velocity_;
 
-         public:
+          public:
             group_type const inline & pitch() const throw() { return pitch_; }
             group_type       inline & pitch()       throw() { return pitch_; }
         private:
@@ -221,12 +221,12 @@ public:
 
 
 public:
-   midi_type const inline & midi() const throw() { return midi_; }
-   midi_type       inline & midi()       throw() { return midi_; }
+    midi_type const inline & midi() const throw() { return midi_; }
+    midi_type       inline & midi()       throw() { return midi_; }
 
-   private:
+    private:
 
-   midi_type                midi_;
+    midi_type                midi_;
 
 private:
     void setSkinDefaults();

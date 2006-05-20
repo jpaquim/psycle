@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef PATTERNVIEW_H
 #define PATTERNVIEW_H
 
@@ -35,94 +35,94 @@
 
 class PatternView : public NPanel
 {
-   class Header: public NPanel {
-   public:
-     Header(PatternView* pPatternView);
-     ~Header();
+    class Header: public NPanel {
+    public:
+      Header(PatternView* pPatternView);
+      ~Header();
 
-     virtual void paint(NGraphics* g);
+      virtual void paint(NGraphics* g);
 
-     void setSkin();
+      void setSkin();
 
-     NRect bgCoords;
-     NRect noCoords;
-     NRect sRecCoords;
-     NPoint dRecCoords;
-     NRect sMuteCoords;
-     NPoint dMuteCoords;
-     NRect sSoloCoords;
-     NPoint dSoloCoords;
-     NPoint dgX0Coords;
-     NPoint dg0XCoords;
+      NRect bgCoords;
+      NRect noCoords;
+      NRect sRecCoords;
+      NPoint dRecCoords;
+      NRect sMuteCoords;
+      NPoint dMuteCoords;
+      NRect sSoloCoords;
+      NPoint dSoloCoords;
+      NPoint dgX0Coords;
+      NPoint dg0XCoords;
 
-     NBitmap bitmap;
+      NBitmap bitmap;
 
-     virtual void onMousePress(int x, int y, int button);
-     virtual int preferredWidth();
+      virtual void onMousePress(int x, int y, int button);
+      virtual int preferredWidth();
 
-     int skinColWidth();
+      int skinColWidth();
 
-   private:
+    private:
 
-     int skinColWidth_;
-     PatternView* pView;
+      int skinColWidth_;
+      PatternView* pView;
 
-     void onSoloLedClick(int track);
-     void onMuteLedClick(int track);
-     void onRecLedClick(int track);
+      void onSoloLedClick(int track);
+      void onMuteLedClick(int track);
+      void onRecLedClick(int track);
 
-   };
-
-
+    };
 
 
-   class LineNumber : public NPanel {
-   public:
-     LineNumber(PatternView* pPatternView);
-     ~LineNumber();
 
-     virtual void paint(NGraphics* g);
 
-     void setDy(int dy);
-     int dy();
+    class LineNumber : public NPanel {
+    public:
+      LineNumber(PatternView* pPatternView);
+      ~LineNumber();
 
-   private:
+      virtual void paint(NGraphics* g);
+
+      void setDy(int dy);
+      int dy();
+
+    private:
       PatternView* pView;
       int dy_;
-   };
+    };
 
-   class PatternDraw : public NPanel {
-   public:
-     PatternDraw(PatternView* pPatternView);
-     ~PatternDraw();
-
-
-     virtual void paint(NGraphics* g);
-
-     void setDy(int dy);
-     void setDx(int dx);
-
-     int dy();
-     int dx();
-
-     virtual void onMousePress(int x, int y, int button);
-     virtual void onMousePressed(int x, int y, int button);
-     virtual void onMouseOver(int x, int y);
-     virtual void onKeyPress(const NKeyEvent & event);
-     virtual void onKeyRelease(const NKeyEvent & event);
-
-     NRect repaintTrackArea         (int startLine,int endLine,int startTrack, int endTrack);
-     NPoint linesFromRepaint(const NRegion & repaintArea);
-     NPoint tracksFromRepaint(const NRegion & repaintArea);
-
-     void copyBlock(bool cutit);
-     void pasteBlock(int tx,int lx,bool mix,bool save = true);
-     void blockTranspose(int trp);
-     void deleteBlock();
-     void doubleLength();
+    class PatternDraw : public NPanel {
+    public:
+      PatternDraw(PatternView* pPatternView);
+      ~PatternDraw();
 
 
-   private:
+      virtual void paint(NGraphics* g);
+
+      void setDy(int dy);
+      void setDx(int dx);
+
+      int dy();
+      int dx();
+
+      virtual void onMousePress(int x, int y, int button);
+      virtual void onMousePressed(int x, int y, int button);
+      virtual void onMouseOver(int x, int y);
+      virtual void onKeyPress(const NKeyEvent & event);
+      virtual void onKeyRelease(const NKeyEvent & event);
+
+      NRect repaintTrackArea         (int startLine,int endLine,int startTrack, int endTrack);
+      NPoint linesFromRepaint(const NRegion & repaintArea);
+      NPoint tracksFromRepaint(const NRegion & repaintArea);
+
+      void copyBlock(bool cutit);
+      void pasteBlock(int tx,int lx,bool mix,bool save = true);
+      void blockTranspose(int trp);
+      void deleteBlock();
+      void doubleLength();
+
+
+    private:
 
     NPopupMenu* editPopup_;
     PatDlg* patDlg;
@@ -157,7 +157,7 @@ class PatternView : public NPanel
     void startSel(const NPoint3D & p);
     void doSel(const NPoint3D & p);
     void endSel();
- 
+  
     void onPopupBlockCopy(NButtonEvent* ev);
     void onPopupBlockCut(NButtonEvent* ev);
     void onPopupBlockPaste(NButtonEvent* ev);

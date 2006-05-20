@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "plugin.h"
 #include "inputhandler.h"
 #include "serializer.h"
@@ -53,22 +53,22 @@ Plugin::~ Plugin( )
 bool Plugin::Instance(const std::string & file_name)
 {
   _dll = dlopen(file_name.c_str(), RTLD_LAZY);
-   if (!_dll) {
+    if (!_dll) {
         std::cerr << "Cannot load library: " << dlerror() << '\n';
         return false;
-   } else {
-     GETINFO GetInfo  = (GETINFO) dlsym(_dll, "GetInfo");
-     if (!GetInfo) {
+    } else {
+      GETINFO GetInfo  = (GETINFO) dlsym(_dll, "GetInfo");
+      if (!GetInfo) {
         std::cerr << "Cannot load symbols: " << dlerror() << '\n';
         return false;
-     } else {
-       _pInfo = GetInfo();
-       std::cout << _pInfo->Author << std::endl;
+      } else {
+        _pInfo = GetInfo();
+        std::cout << _pInfo->Author << std::endl;
 
-       if(_pInfo->Version < MI_VERSION) std::cerr << "plugin format is too old" << _pInfo->Version << file_name <<std::endl;
-       fflush(stdout);
-       _isSynth = _pInfo->Flags == 3;
-       if(_isSynth) _mode = MACHMODE_GENERATOR;
+        if(_pInfo->Version < MI_VERSION) std::cerr << "plugin format is too old" << _pInfo->Version << file_name <<std::endl;
+        fflush(stdout);
+        _isSynth = _pInfo->Flags == 3;
+        if(_isSynth) _mode = MACHMODE_GENERATOR;
       strncpy(_psShortName,_pInfo->ShortName,15);
       _psShortName[15]='\0';
       strncpy(_editName, _pInfo->ShortName,31);
@@ -77,13 +77,13 @@ bool Plugin::Instance(const std::string & file_name)
       _psName = _pInfo->Name;
       CREATEMACHINE GetInterface = (CREATEMACHINE) dlsym(_dll, "CreateMachine");
       if(!GetInterface) {
-         std::cerr << "Cannot load symbol: " << dlerror() << "\n";
-         return false;
+          std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+          return false;
       } else {
           proxy()(GetInterface());
       }
     }
-   }
+    }
   return true;
 }
 
@@ -108,8 +108,8 @@ void Plugin::Work( int numSamples )
     if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
       int ns = numSamples;
       int us = 0;
-         while (ns)
-         {
+          while (ns)
+          {
             int nextevent = (TWSActive)?TWSSamples:ns+1;
             for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
             {
@@ -122,60 +122,60 @@ void Plugin::Work( int numSamples )
             }
             if (nextevent > ns)
             {
-               if (TWSActive)
-               {
-                 TWSSamples -= ns;
-               }
-               for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
-               {
+                if (TWSActive)
+                {
+                  TWSSamples -= ns;
+                }
+                for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+                {
                   // come back to this
                   if (TriggerDelay[i]._cmd)
                   {
                     TriggerDelayCounter[i] -= ns;
                   }
-               }
-               try
-               {
+                }
+                try
+                {
                   proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::pSong()->SONGTRACKS);
-               }
-               catch(const std::exception &)
-               {
-               }
-               ns = 0;
-           } else {
+                }
+                catch(const std::exception &)
+                {
+                }
+                ns = 0;
+            } else {
                     if(nextevent) {
-                       ns -= nextevent;
-                       try
-                       {
+                        ns -= nextevent;
+                        try
+                        {
                           proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::pSong()->SONGTRACKS);
-                       }
-                       catch(const std::exception &)
-                       {
-                       }
-                       us += nextevent;
+                        }
+                        catch(const std::exception &)
+                        {
+                        }
+                        us += nextevent;
                     }
                     if (TWSActive)
                     {
                       if (TWSSamples == nextevent)
                       {
-                         int activecount = 0;
-                         TWSSamples = TWEAK_SLIDE_SAMPLES;
-                         for (int i = 0; i < MAX_TWS; i++)
-                         {
-                           if (TWSDelta[i] != 0)
-                           {
+                          int activecount = 0;
+                          TWSSamples = TWEAK_SLIDE_SAMPLES;
+                          for (int i = 0; i < MAX_TWS; i++)
+                          {
+                            if (TWSDelta[i] != 0)
+                            {
                               TWSCurrent[i] += TWSDelta[i];
                               if (((TWSDelta[i] > 0) && (TWSCurrent[i] >= TWSDestination[i])) || ((TWSDelta[i] < 0) && (TWSCurrent[i] <= TWSDestination[i])))
                               {
-                                 TWSCurrent[i] = TWSDestination[i];
-                                 TWSDelta[i] = 0;
+                                  TWSCurrent[i] = TWSDestination[i];
+                                  TWSDelta[i] = 0;
                               } else
                               {
                                 activecount++;
                               }
                               try
                               {
-                                 proxy().ParameterTweak(TWSInst[i], int(TWSCurrent[i]));
+                                  proxy().ParameterTweak(TWSInst[i], int(TWSCurrent[i]));
                               }
                               catch(const std::exception &)
                               {
@@ -187,17 +187,17 @@ void Plugin::Work( int numSamples )
                     }
                     for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
                     {
-                       // come back to this
-                       if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
-                       {
+                        // come back to this
+                        if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+                        {
                           if (TriggerDelayCounter[i] == nextevent)
                           {
-                             // do event
-                             try
-                             {
-                               proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-                             }
-                             catch(const std::exception &)
+                              // do event
+                              try
+                              {
+                                proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+                              }
+                              catch(const std::exception &)
                             {
                             }
                             TriggerDelay[i]._cmd = 0;
@@ -209,26 +209,26 @@ void Plugin::Work( int numSamples )
                       }
                       else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
                       {
-                         if (TriggerDelayCounter[i] == nextevent)
-                         {
-                           // do event
-                           try
-                           {
-                             proxy().SeqTick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-                           }
-                           catch(const std::exception &)
-                           {
-                           }
-                           TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer()->SamplesPerRow())/256;
-                         } else
-                         {
-                           TriggerDelayCounter[i] -= nextevent;
-                         }
+                          if (TriggerDelayCounter[i] == nextevent)
+                          {
+                            // do event
+                            try
+                            {
+                              proxy().SeqTick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+                            }
+                            catch(const std::exception &)
+                            {
+                            }
+                            TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer()->SamplesPerRow())/256;
+                          } else
+                          {
+                            TriggerDelayCounter[i] -= nextevent;
+                          }
                       }
                       else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
                       {
-                         if (TriggerDelayCounter[i] == nextevent)
-                         {
+                          if (TriggerDelayCounter[i] == nextevent)
+                          {
                             // do event
                             try
                             {
@@ -241,13 +241,13 @@ void Plugin::Work( int numSamples )
                             int parameter = TriggerDelay[i]._parameter&0x0f;
                             if (parameter < 9)
                             {
-                               RetriggerRate[i]+= 4*parameter;
+                                RetriggerRate[i]+= 4*parameter;
                             } else
                             {
                               RetriggerRate[i]-= 2*(16-parameter);
                               if (RetriggerRate[i] < 16)
                               {
-                                 RetriggerRate[i] = 16;
+                                  RetriggerRate[i] = 16;
                               }
                             }
                           }
@@ -259,54 +259,54 @@ void Plugin::Work( int numSamples )
                         {
                           if (TriggerDelayCounter[i] == nextevent)
                           {
-                             PatternEntry entry =TriggerDelay[i];
-                             switch(ArpeggioCount[i])
-                             {
-                               case 0:
-                               try
-                               {
+                              PatternEntry entry =TriggerDelay[i];
+                              switch(ArpeggioCount[i])
+                              {
+                                case 0:
+                                try
+                                {
                                   proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-                               }
-                               catch(const std::exception &)
-                               {
-                               }
-                               ArpeggioCount[i]++;
-                               break;
-                               case 1:
-                                 entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
-                                 try
-                                 {
+                                }
+                                catch(const std::exception &)
+                                {
+                                }
+                                ArpeggioCount[i]++;
+                                break;
+                                case 1:
+                                  entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
+                                  try
+                                  {
                                     proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
-                                 }
-                                 catch(const std::exception &)
-                                 {
-                                 }
-                                 ArpeggioCount[i]++;
-                               break;
-                               case 2:
-                                 entry._note+=(TriggerDelay[i]._parameter&0x0F);
-                                 try
-                                   {
-                                     proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
-                                   }
-                                   catch(const std::exception &)
-                                   {
-                                   }
-                                   ArpeggioCount[i]=0;
-                                   break;
+                                  }
+                                  catch(const std::exception &)
+                                  {
+                                  }
+                                  ArpeggioCount[i]++;
+                                break;
+                                case 2:
+                                  entry._note+=(TriggerDelay[i]._parameter&0x0F);
+                                  try
+                                    {
+                                      proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
+                                    }
+                                    catch(const std::exception &)
+                                    {
+                                    }
+                                    ArpeggioCount[i]=0;
+                                    break;
                                 }
                                 TriggerDelayCounter[i] = Global::pPlayer()->SamplesPerRow()*Global::pPlayer()->tpb/24;
-                               } else {
-                                   TriggerDelayCounter[i] -= nextevent;
-                               }
-                             }
+                                } else {
+                                    TriggerDelayCounter[i] -= nextevent;
+                                }
+                              }
                           }
-                       }
+                        }
 
-           }
-           Machine::SetVolumeCounter(numSamples);
-           if ( Global::pConfig()->autoStopMachines )
-           {
+            }
+            Machine::SetVolumeCounter(numSamples);
+            if ( Global::pConfig()->autoStopMachines )
+            {
               if (_volumeCounter < 8.0f)
               {
                 _volumeCounter = 0.0f;
@@ -314,18 +314,18 @@ void Plugin::Work( int numSamples )
                 _stopped = true;
               }
               else _stopped = false;
-           }
+            }
         }
-     }
-     //CPUCOST_CALC(cost, numSamples);
-     //_cpuCost += cost;
-     _worked = true;
+      }
+      //CPUCOST_CALC(cost, numSamples);
+      //_cpuCost += cost;
+      _worked = true;
 }
 
 void Plugin::Tick()
 {
   try {
-     proxy().SequencerTick();
+      proxy().SequencerTick();
   }
   catch(const std::exception &) {
   }
@@ -339,12 +339,12 @@ void Plugin::Tick( int channel, PatternEntry * pData )
   }
   catch(const std::exception &)
   {
-     return;
+      return;
   }
   if(pData->_note == cdefTweakM || pData->_note == cdefTweakE)
   {
-     if(pData->_inst < _pInfo->numParameters)
-     {
+      if(pData->_inst < _pInfo->numParameters)
+      {
         int nv = (pData->_cmd<<8)+pData->_parameter;
           int const min = _pInfo->Parameters[pData->_inst]->MinValue;
           int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
@@ -442,7 +442,7 @@ void Plugin::Tick( int channel, PatternEntry * pData )
 void Plugin::Stop( )
 {
   try {
-     proxy().Stop();
+      proxy().Stop();
   }
   catch(const std::exception &)
   {
@@ -450,9 +450,9 @@ void Plugin::Stop( )
 }
 
 struct ToLower
-   {
-     char operator() (char c) const  { return std::tolower(c); }
-   };
+    {
+      char operator() (char c) const  { return std::tolower(c); }
+    };
 
 bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cause we modify it
 {
@@ -469,16 +469,16 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
   } else {
       int i = psFileName.find("lib-xpsycle.plugin.");
       if (i!=std::string::npos) {
-         int j = psFileName.find(".so");
-         if (j!=0) {
+          int j = psFileName.find(".so");
+          if (j!=0) {
             _psDllName = psFileName.substr(0,j);
             _psDllName.erase(0,std::string("lib-xpsycle.plugin.").length());
             _psDllName = _psDllName + ".dll";
-         } else {
+          } else {
             _psDllName = psFileName;
             _psDllName.erase(0,std::string("lib-xpsycle.plugin.").length());
             _psDllName = _psDllName + ".dll";
-         }
+          }
       } else _psDllName = psFileName;
 
       psFileName = Global::pConfig()->pluginPath + psFileName;
@@ -570,36 +570,36 @@ bool Plugin::LoadSpecificChunk( DeSerializer * pFile, int version )
   if(size) {
       if(version > CURRENT_FILE_VERSION_MACD)  {
           pFile->skip(size);
-         std::ostringstream s; 
-         s << version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
-         << "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-         //MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+          std::ostringstream s; 
+          s << version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
+          << "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
+          //MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
           return false;
       } else
       {
-         uint32_t count = pFile->getInt(); // size of vars
-         for(unsigned int i(0) ; i < count ; ++i)
-         {
+          uint32_t count = pFile->getInt(); // size of vars
+          for(unsigned int i(0) ; i < count ; ++i)
+          {
             uint32_t temp = pFile->getInt();
             SetParameter(i, temp);
-         }
-         size -= sizeof(count) + sizeof(uint32_t) * count;
-         if(size) {
-           char * pData = new char[size];
-           pFile->read(pData, size); // Number of parameters
-           try
-           {
+          }
+          size -= sizeof(count) + sizeof(uint32_t) * count;
+          if(size) {
+            char * pData = new char[size];
+            pFile->read(pData, size); // Number of parameters
+            try
+            {
               proxy().PutData(pData); // Internal load
-           }
-           catch(std::exception const &)
-           {
+            }
+            catch(std::exception const &)
+            {
               return false;
-           }
-           return true;
+            }
+            return true;
         }
       }
-   }
-   return true;
+    }
+    return true;
 }
 
 
@@ -609,7 +609,7 @@ void Plugin::SaveSpecificChunk(Serializer* pFile)
   int size2(0);
   try
   {
-     size2 = proxy().GetDataSize();
+      size2 = proxy().GetDataSize();
   }
   catch(const std::exception &)
   {
@@ -629,12 +629,12 @@ void Plugin::SaveSpecificChunk(Serializer* pFile)
     byte * pData = new byte[size2];
     try
     {
-       proxy().GetData(pData); // Internal save
+        proxy().GetData(pData); // Internal save
     }
     catch(const std::exception &)
     {
         // this sucks because we already wrote the size,
-       // so now we have to write the data, even if they are corrupted.
+        // so now we have to write the data, even if they are corrupted.
     }
     pFile->PutPChar((char*)pData, size2); // Number of parameters
     delete pData; pData = 0;

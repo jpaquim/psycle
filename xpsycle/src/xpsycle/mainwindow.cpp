@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "mainwindow.h"
 #include "configuration.h"
 #include "song.h"
@@ -37,7 +37,7 @@
 
 
 MainWindow::MainWindow()
- : NWindow()
+  : NWindow()
 {
   setPosition(0,0,1024,768);
 
@@ -98,42 +98,42 @@ void MainWindow::initMenu( )
       editMenu_->add(new NMenuItem("Sequence Cut"))->click.connect(this,&MainWindow::onEditSeqCut);
       editMenu_->add(new NMenuItem("Sequence Copy"))->click.connect(this,&MainWindow::onEditSeqCopy);
       editMenu_->add(new NMenuItem("Sequence Delete"))->click.connect(this,&MainWindow::onEditSeqDelete);
-   menuBar_->add(editMenu_);
+    menuBar_->add(editMenu_);
 
-   // Creates the view menu
-   viewMenu_ = new NMenu("View");
-     viewMenu_->add(new NCheckMenuItem("Toolbar"))->click.connect(this,&MainWindow::onViewMenuToolbar);
-     viewMenu_->add(new NCheckMenuItem("Machinebar"))->click.connect(this,&MainWindow::onViewMenuMachinebar);
-     viewMenu_->add(new NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
-     viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
-     viewMenu_->add(new NMenuSeperator());
-     viewMenu_->add(new NMenuItem("PatternEditor"))->click.connect(this,&MainWindow::onPatternView);
-     viewMenu_->add(new NMenuItem("MachineView"))->click.connect(this,&MainWindow::onMachineView);
-     viewMenu_->add(new NMenuItem("PatternSequencer"))->click.connect(this,&MainWindow::onSequencerView);
-     viewMenu_->add(new NMenuSeperator());
-     viewMenu_->add(new NMenuItem("Add machine"))->click.connect(this,&MainWindow::onNewMachine);
-     viewMenu_->add(new NMenuSeperator());
-     viewMenu_->add(new NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
-   menuBar_->add(viewMenu_);
+    // Creates the view menu
+    viewMenu_ = new NMenu("View");
+      viewMenu_->add(new NCheckMenuItem("Toolbar"))->click.connect(this,&MainWindow::onViewMenuToolbar);
+      viewMenu_->add(new NCheckMenuItem("Machinebar"))->click.connect(this,&MainWindow::onViewMenuMachinebar);
+      viewMenu_->add(new NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
+      viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
+      viewMenu_->add(new NMenuSeperator());
+      viewMenu_->add(new NMenuItem("PatternEditor"))->click.connect(this,&MainWindow::onPatternView);
+      viewMenu_->add(new NMenuItem("MachineView"))->click.connect(this,&MainWindow::onMachineView);
+      viewMenu_->add(new NMenuItem("PatternSequencer"))->click.connect(this,&MainWindow::onSequencerView);
+      viewMenu_->add(new NMenuSeperator());
+      viewMenu_->add(new NMenuItem("Add machine"))->click.connect(this,&MainWindow::onNewMachine);
+      viewMenu_->add(new NMenuSeperator());
+      viewMenu_->add(new NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
+    menuBar_->add(viewMenu_);
 
-   // Creates the configuration menu
-   configurationMenu_ = new NMenu("Configuration");
+    // Creates the configuration menu
+    configurationMenu_ = new NMenu("Configuration");
       configurationMenu_->add(new NMenuItem("Free Audio"));
       configurationMenu_->add(new NMenuItem("Autostop"));
       configurationMenu_->add(new NMenuSeperator());
       configurationMenu_->add(new NMenuItem("Loop Playback"));
       configurationMenu_->add(new NMenuSeperator());
       configurationMenu_->add(new NMenuItem("Settings"));
-   menuBar_->add(configurationMenu_);
+    menuBar_->add(configurationMenu_);
 
-   // Creates the performance menu
-   performanceMenu_ = new NMenu("Performance");
+    // Creates the performance menu
+    performanceMenu_ = new NMenu("Performance");
       performanceMenu_->add(new NMenuItem("CPU Monitor"));
       performanceMenu_->add(new NMenuItem("MDI Monitor"));
-   menuBar_->add(performanceMenu_);
+    menuBar_->add(performanceMenu_);
 
-   // Creates the help menu
-   helpMenu_ = new NMenu("Help");
+    // Creates the help menu
+    helpMenu_ = new NMenu("Help");
       helpMenu_->add(new NMenuItem("About"))->click.connect(this,&MainWindow::onHelpMenuAbout);
       helpMenu_->add(new NMenuItem("Greetings"))->click.connect(this,&MainWindow::onHelpMenuGreeting);
       helpMenu_->add(new NMenuSeperator());
@@ -141,7 +141,7 @@ void MainWindow::initMenu( )
       helpMenu_->add(new NMenuItem("keys"))->click.connect(this,&MainWindow::onHelpMenuKeys);
       helpMenu_->add(new NMenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
       helpMenu_->add(new NMenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
-   menuBar_->add(helpMenu_);
+    menuBar_->add(helpMenu_);
 }
 
 void MainWindow::initDialogs( )
@@ -217,12 +217,12 @@ void MainWindow::initToolBar( )
   img = new NImage(Global::pConfig()->newfile());
   img->setPreferredSize(25,25);
   NButton* newBtn = new NButton(img);
-     newBtn->setHint("New song");
+      newBtn->setHint("New song");
   toolBar1_->add(newBtn)->clicked.connect(this,&MainWindow::onFileNew);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->open()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "open.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "open.xpm");
     img->setPreferredSize(25,25);
     NButton* fileOpenBtn = new NButton(img);
       fileOpenBtn->setHint("Song load");
@@ -230,7 +230,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "save.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "save.xpm");
     img->setPreferredSize(25,25);
     NButton* saveBtn = new NButton(img);
       saveBtn->setHint("Save");
@@ -238,21 +238,21 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save_audio()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "saveaudio.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "saveaudio.xpm");
     img->setPreferredSize(25,25);
     NButton* saveAsAudioFileBtn = new NButton(img);
-       saveAsAudioFileBtn->setHint("Save as audio file");
+        saveAsAudioFileBtn->setHint("Save as audio file");
     toolBar1_->add(saveAsAudioFileBtn);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->recordwav()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "recordwav.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "recordwav.xpm");
     img->setPreferredSize(25,25);
     NButton* recWav = new NButton(img);
-       recWav->setToggle(true);
-       recWav->setFlat(false);
-       recWav->setHint("Record to .wav");
-       recWav->clicked.connect(this, &MainWindow::onRecordWav);
+        recWav->setToggle(true);
+        recWav->setFlat(false);
+        recWav->setHint("Record to .wav");
+        recWav->clicked.connect(this, &MainWindow::onRecordWav);
     toolBar1_->add(recWav);
 
 
@@ -260,13 +260,13 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->undo()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "undo.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "undo.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(new NButton(img));
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->redo()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "redo.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "redo.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(new NButton(img));
 
@@ -274,11 +274,11 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->recordnotes()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "recordnotes.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "recordnotes.xpm");
 
     img->setPreferredSize(25,25);
     NButton* recNotes = new NButton(img);
-       recNotes->setHint("Record Notes Mode");
+        recNotes->setHint("Record Notes Mode");
     toolBar1_->add(recNotes);
 
 
@@ -286,7 +286,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playstart()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "playstart.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "playstart.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(barPlayFromStartBtn_ = new NButton(img));
     barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
@@ -294,7 +294,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->play()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "play.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "play.xpm");
     img->setPreferredSize(25,25);
     NButton* playBtn = new NButton(img);
       playBtn->setHint("Play from edit position");
@@ -302,22 +302,22 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playselpattern()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "playselpattern.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "playselpattern.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(new NButton(img));
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->stop()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "stop.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "stop.xpm");
     img->setPreferredSize(25,25);
     NButton* stopBtn_ = new NButton(img);
-       stopBtn_->click.connect(this,&MainWindow::onBarStop);
-       stopBtn_->setHint("Stop");
+        stopBtn_->click.connect(this,&MainWindow::onBarStop);
+        stopBtn_->setHint("Stop");
     toolBar1_->add(stopBtn_);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->autoStop()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "autostop.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "autostop.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(new NButton(img));
 
@@ -326,7 +326,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->machines()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "machines.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "machines.xpm");
     img->setPreferredSize(25,25);
     NButton* macBtn_ = new NButton(img);
       macBtn_->setFlat(false);
@@ -337,21 +337,21 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->patterns()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "patterns.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "patterns.xpm");
     img->setPreferredSize(25,25);
     NButton* patBtn_ = new NButton(img);
-       patBtn_->clicked.connect(this,&MainWindow::onPatternView);
-       patBtn_->setFlat(false);
-       patBtn_->setToggle(true);
-       patBtn_->setHint("Patterns");
+        patBtn_->clicked.connect(this,&MainWindow::onPatternView);
+        patBtn_->setFlat(false);
+        patBtn_->setToggle(true);
+        patBtn_->setHint("Patterns");
     toolBar1_->add(patBtn_);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->sequencer()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "sequencer.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "sequencer.xpm");
     img->setPreferredSize(25,25);
     NButton* seqBtn = new NButton(img);
-       seqBtn->setHint("Sequencer");
+        seqBtn->setHint("Sequencer");
     toolBar1_->add(seqBtn)->clicked.connect(this,&MainWindow::onSequencerView);
 
     toolBar1_->add(new NToolBarSeparator());
@@ -359,7 +359,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->newmachine()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "newmachine.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "newmachine.xpm");
     img->setPreferredSize(25,25);
     NButton* newMacBtn = new NButton(img);
       newMacBtn->setHint("New Machine");
@@ -367,7 +367,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->openeditor()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "openeditor.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "openeditor.xpm");
     img->setPreferredSize(25,25);
     NButton* editInsBtn = new NButton(img);
       editInsBtn->setHint("Edit Instrument");
@@ -377,7 +377,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->p()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "p.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "p.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(new NButton(img));
 
@@ -385,7 +385,7 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->help()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "help.xpm");
+                                          img->loadFromFile(Global::pConfig()->iconPath+ "help.xpm");
     img->setPreferredSize(25,25);
     toolBar1_->add(new NButton(img));
 
@@ -399,7 +399,7 @@ void MainWindow::initToolBar( )
       trackCombo_->itemSelected.connect(this,&MainWindow::onTrackChange);
     psycleControlBar_->add(trackCombo_);
       for(int i=4;i<=MAX_TRACKS;i++) {
-       trackCombo_->add(new NItem(stringify(i)));
+        trackCombo_->add(new NItem(stringify(i)));
       }
     psycleControlBar_->add(new NLabel("Tempo"));
 
@@ -415,9 +415,9 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") 
-       img->setSharedBitmap(&Global::pBitmaps()->less()); 
+        img->setSharedBitmap(&Global::pBitmaps()->less()); 
     else
-       img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
+        img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
     img->setPreferredSize(25,25);
     NButton* bpmDecBtnOne = new NButton(img);
     bpmDecBtnOne->setFlat(false);
@@ -430,9 +430,9 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") 
-       img->setSharedBitmap(&Global::pBitmaps()->more()); 
+        img->setSharedBitmap(&Global::pBitmaps()->more()); 
     else
-       img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+        img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
     img->setPreferredSize(25,25);
 
     NButton* bpmIncBtnOne = new NButton(img);
@@ -440,26 +440,26 @@ void MainWindow::initToolBar( )
     psycleControlBar_->add(bpmIncBtnOne)->clicked.connect(this,&MainWindow::onBpmIncOne);
 
 
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->moremore()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "moremore.xpm");
-     img->setPreferredSize(25,25);
-     NButton* moremoreBmp = new NButton(img);
-       moremoreBmp->setFlat(false);
-       moremoreBmp->clicked.connect(this,&MainWindow::onBpmAddTen);
-     psycleControlBar_->add(moremoreBmp);
+      img = new NImage();
+      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->moremore()); else
+                                            img->loadFromFile(Global::pConfig()->iconPath+ "moremore.xpm");
+      img->setPreferredSize(25,25);
+      NButton* moremoreBmp = new NButton(img);
+        moremoreBmp->setFlat(false);
+        moremoreBmp->clicked.connect(this,&MainWindow::onBpmAddTen);
+      psycleControlBar_->add(moremoreBmp);
 
 
     psycleControlBar_->add(new NLabel("Lines per beat"));
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); 
-       else
+        else
     img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
     img->setPreferredSize(25,25);
     NButton* lessTpbButton = new NButton(img);
-       lessTpbButton->setFlat(false);
-       lessTpbButton->clicked.connect(this,&MainWindow::onTpbDecOne);
+        lessTpbButton->setFlat(false);
+        lessTpbButton->clicked.connect(this,&MainWindow::onTpbDecOne);
     psycleControlBar_->add(lessTpbButton);
 
     tpbDisplay_ = new N7SegDisplay(2);
@@ -467,13 +467,13 @@ void MainWindow::initToolBar( )
       tpbDisplay_->setNumber(4);
     psycleControlBar_->add(tpbDisplay_);
 
-   img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+    img = new NImage();
+      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
+                                            img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
     img->setPreferredSize(25,25);
     NButton* moreTpbButton = new NButton(img);
-       moreTpbButton->setFlat(false);
-       moreTpbButton->clicked.connect(this,&MainWindow::onTpbIncOne);
+        moreTpbButton->setFlat(false);
+        moreTpbButton->clicked.connect(this,&MainWindow::onTpbIncOne);
     psycleControlBar_->add(moreTpbButton);
 
     psycleControlBar_->add(new NLabel("Octave"));
@@ -487,78 +487,78 @@ void MainWindow::initToolBar( )
     psycleControlBar_->add(new NLabel("VU"));
     NPanel* vuPanel = new NPanel();
     vuPanel->setPosition(0,0,225,10);
-       vuMeter_ = new VuMeter();
-       vuPanel->add(vuMeter_);
-       vuMeter_->setPosition(0,0,225,10);
+        vuMeter_ = new VuMeter();
+        vuPanel->add(vuMeter_);
+        vuMeter_->setPosition(0,0,225,10);
 
-       masterSlider_ = new NSlider();
-       masterSlider_->setOrientation(nHorizontal);
-       masterSlider_->setPosition(0,10,225,10);
-       vuPanel->add(masterSlider_);
+        masterSlider_ = new NSlider();
+        masterSlider_->setOrientation(nHorizontal);
+        masterSlider_->setPosition(0,10,225,10);
+        vuPanel->add(masterSlider_);
     psycleControlBar_->add(vuPanel);
 
   toolBarPanel_->add(psycleControlBar_);
 
   psycleToolBar_ = new NToolBar();
-     psycleToolBar_->add(new NLabel("Pattern Step"));
-     patternCombo_ = new NComboBox();
-     for (int i = 1; i <=16; i++) 
-       patternCombo_->add(new NItem(stringify(i)));
-     patternCombo_->setIndex(0);
-     patternCombo_->itemSelected.connect(this,&MainWindow::onPatternStepChange);
-     patternCombo_->setWidth(40);
-     patternCombo_->setHeight(20);
-     psycleToolBar_->add(patternCombo_);
-     psycleToolBar_->add(new NToolBarSeparator());
-     genCombo_ = new NComboBox();
-       genCombo_->setWidth(158);
-       genCombo_->setHeight(20);
-       updateComboGen();
-       genCombo_->setIndex(0);
-     psycleToolBar_->add(genCombo_);
+      psycleToolBar_->add(new NLabel("Pattern Step"));
+      patternCombo_ = new NComboBox();
+      for (int i = 1; i <=16; i++) 
+        patternCombo_->add(new NItem(stringify(i)));
+      patternCombo_->setIndex(0);
+      patternCombo_->itemSelected.connect(this,&MainWindow::onPatternStepChange);
+      patternCombo_->setWidth(40);
+      patternCombo_->setHeight(20);
+      psycleToolBar_->add(patternCombo_);
+      psycleToolBar_->add(new NToolBarSeparator());
+      genCombo_ = new NComboBox();
+        genCombo_->setWidth(158);
+        genCombo_->setHeight(20);
+        updateComboGen();
+        genCombo_->setIndex(0);
+      psycleToolBar_->add(genCombo_);
 
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleleft()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleleft.xpm");
-     img->setPreferredSize(25,25);
-     psycleToolBar_->add(new NButton(img));
+      img = new NImage();
+      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleleft()); else
+                                            img->loadFromFile(Global::pConfig()->iconPath+ "littleleft.xpm");
+      img->setPreferredSize(25,25);
+      psycleToolBar_->add(new NButton(img));
 
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleright()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleright.xpm");
-     img->setPreferredSize(25,25);
-     psycleToolBar_->add(new NButton(img));
+      img = new NImage();
+      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleright()); else
+                                            img->loadFromFile(Global::pConfig()->iconPath+ "littleright.xpm");
+      img->setPreferredSize(25,25);
+      psycleToolBar_->add(new NButton(img));
 
-     psycleToolBar_->add(new NButton("Gear Rack"));
-     psycleToolBar_->add(new NToolBarSeparator());
-     auxSelectCombo_ = new NComboBox();
-     auxSelectCombo_->setWidth(70);
-     auxSelectCombo_->setHeight(20);
-     auxSelectCombo_->add(new NItem("Wave"));
-     auxSelectCombo_->setIndex(0);
-     psycleToolBar_->add(auxSelectCombo_);
-     insCombo_ = new NComboBox();
-     insCombo_->setWidth(158);
-     insCombo_->setHeight(20);
-     psycleToolBar_->add(insCombo_);
+      psycleToolBar_->add(new NButton("Gear Rack"));
+      psycleToolBar_->add(new NToolBarSeparator());
+      auxSelectCombo_ = new NComboBox();
+      auxSelectCombo_->setWidth(70);
+      auxSelectCombo_->setHeight(20);
+      auxSelectCombo_->add(new NItem("Wave"));
+      auxSelectCombo_->setIndex(0);
+      psycleToolBar_->add(auxSelectCombo_);
+      insCombo_ = new NComboBox();
+      insCombo_->setWidth(158);
+      insCombo_->setHeight(20);
+      psycleToolBar_->add(insCombo_);
 
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleleft()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleleft.xpm");
-     img->setPreferredSize(25,25);
-     psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onDecInsBtn);
+      img = new NImage();
+      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleleft()); else
+                                            img->loadFromFile(Global::pConfig()->iconPath+ "littleleft.xpm");
+      img->setPreferredSize(25,25);
+      psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onDecInsBtn);
 
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleright()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleright.xpm");
-     img->setPreferredSize(25,25);
-     psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onIncInsBtn);
+      img = new NImage();
+      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleright()); else
+                                            img->loadFromFile(Global::pConfig()->iconPath+ "littleright.xpm");
+      img->setPreferredSize(25,25);
+      psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onIncInsBtn);
 
-     psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
-     psycleToolBar_->add(new NButton("Save"));
-     psycleToolBar_->add(new NButton("Edit"))->clicked.connect(this,&MainWindow::onEditInstrument);
-     psycleToolBar_->add(new NButton("Wave Ed"));
-     psycleToolBar_->resize();
+      psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
+      psycleToolBar_->add(new NButton("Save"));
+      psycleToolBar_->add(new NButton("Edit"))->clicked.connect(this,&MainWindow::onEditInstrument);
+      psycleToolBar_->add(new NButton("Wave Ed"));
+      psycleToolBar_->resize();
 
   toolBarPanel_->add(psycleToolBar_);
 
@@ -616,10 +616,10 @@ void MainWindow::onFileSaveAs( NButtonEvent * ev )
 void MainWindow::onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv)
 {
   if (itemEv->text()=="Song properties") {
-     songpDlg_->setVisible(true);
+      songpDlg_->setVisible(true);
   } else
   if (itemEv->text()=="Exit") {
-     closePsycle();
+      closePsycle();
   }
 }
 
@@ -630,21 +630,21 @@ void MainWindow::onViewMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
   if (itemEv->text()=="MachineBar") {
   } else
   if (itemEv->text()=="SequencerBar") {
-     
+      
   } else
   if (itemEv->text()=="StatusBar") {
   } else
   if (itemEv->text()=="Add machine") {
-     if (childView_->newMachineDlg()->execute()) {
-         if (childView_->newMachineDlg()->outBus()) {
-           // Generator selected
-           int x = 10; int y = 10;
-           int fb = Global::pSong()->GetFreeBus();
-           Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, childView_->newMachineDlg()->getDllName().c_str(),fb);
-           childView_->machineView()->addMachine(Global::pSong()->_pMachine[fb]);
-           childView_->machineView()->repaint();
-         }
-     }
+      if (childView_->newMachineDlg()->execute()) {
+          if (childView_->newMachineDlg()->outBus()) {
+            // Generator selected
+            int x = 10; int y = 10;
+            int fb = Global::pSong()->GetFreeBus();
+            Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, childView_->newMachineDlg()->getDllName().c_str(),fb);
+            childView_->machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+            childView_->machineView()->repaint();
+          }
+      }
   }
 }
 
@@ -694,9 +694,9 @@ void MainWindow::onBarStop(NButtonEvent* ev)
         //pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
         //Repaint(DMPattern);
     } else {
-       memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-       Global::pSong()->playOrderSel[childView_->patternView()->editPosition()] = true;
-       //Repaint(DMCursor); 
+        memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+        Global::pSong()->playOrderSel[childView_->patternView()->editPosition()] = true;
+        //Repaint(DMCursor); 
     }
   }
 }
@@ -719,15 +719,15 @@ void MainWindow::updateComboGen() {
 
   for (int b=0; b<MAX_BUSES; b++) // Check Generators
   {
-   if( Global::pSong()->_pMachine[b]) {
-     sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName);
-     genCombo_->add(new NItem(buffer));
-       //cb->SetItemData(cb->GetCount()-1,b);
+    if( Global::pSong()->_pMachine[b]) {
+      sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName);
+      genCombo_->add(new NItem(buffer));
+        //cb->SetItemData(cb->GetCount()-1,b);
 
-     if (!found) selected++;
-     if (Global::pSong()->seqBus == b) found = true;
-     filled = true;
-   }
+      if (!found) selected++;
+      if (Global::pSong()->seqBus == b) found = true;
+      filled = true;
+    }
   }
 
   genCombo_->add(new NItem("----------------------------------------------------"));
@@ -740,19 +740,19 @@ void MainWindow::updateComboGen() {
   for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
   {
     if(Global::pSong()->_pMachine[b]) {
-       sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName);
-       genCombo_->add(new NItem(buffer));
+        sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName);
+        genCombo_->add(new NItem(buffer));
         //cb->SetItemData(cb->GetCount()-1,b);
-     if (!found) selected++;
-     if (Global::pSong()->seqBus == b) found = true;
-     filled = true;
+      if (!found) selected++;
+      if (Global::pSong()->seqBus == b) found = true;
+      filled = true;
     }
   }
 
   if (!filled) {
-     genCombo_->removeChilds();
-     genCombo_->add(new NItem("No Machines Loaded"));
-     selected = 0;
+      genCombo_->removeChilds();
+      genCombo_->add(new NItem("No Machines Loaded"));
+      selected = 0;
   } else if (!found)  {
     selected=line;
   }
@@ -881,19 +881,19 @@ void MainWindow::onBpmDecTen(NButtonEvent* ev)
 
 void MainWindow::setAppSongBpm(int x)
 {
-   int bpm = 0;
-   if ( x != 0 ) {
-     if (Global::pPlayer()->_playing )  {
+    int bpm = 0;
+    if ( x != 0 ) {
+      if (Global::pPlayer()->_playing )  {
         Global::pSong()->BeatsPerMin(Global::pPlayer()->bpm+x);
-     } else Global::pSong()->BeatsPerMin(Global::pSong()->BeatsPerMin()+x);
-     Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(),Global::pSong()->LinesPerBeat());
-     bpm = Global::pSong()->BeatsPerMin();
-   }
-   else bpm = Global::pPlayer()->bpm;
+      } else Global::pSong()->BeatsPerMin(Global::pSong()->BeatsPerMin()+x);
+      Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(),Global::pSong()->LinesPerBeat());
+      bpm = Global::pSong()->BeatsPerMin();
+    }
+    else bpm = Global::pPlayer()->bpm;
 
-   bpmDisplay_->setNumber(Global::pPlayer()->bpm);
+    bpmDisplay_->setNumber(Global::pPlayer()->bpm);
 
-   bpmDisplay_->repaint();
+    bpmDisplay_->repaint();
 }
 
 void MainWindow::setAppSongTpb(int x)
@@ -902,12 +902,12 @@ void MainWindow::setAppSongTpb(int x)
 
   if ( x != 0)
   {
-     if (Global::pPlayer()->_playing )
-       Global::pSong()->LinesPerBeat(Global::pPlayer()->tpb+x);
-     else 
-       Global::pSong()->LinesPerBeat(Global::pSong()->LinesPerBeat()+x);
-       Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(), Global::pSong()->LinesPerBeat());
-       tpb = Global::pSong()->LinesPerBeat();
+      if (Global::pPlayer()->_playing )
+        Global::pSong()->LinesPerBeat(Global::pPlayer()->tpb+x);
+      else 
+        Global::pSong()->LinesPerBeat(Global::pSong()->LinesPerBeat()+x);
+        Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(), Global::pSong()->LinesPerBeat());
+        tpb = Global::pSong()->LinesPerBeat();
   } else tpb = Global::pPlayer()->tpb;
 
   tpbDisplay_->setNumber(tpb);
@@ -932,7 +932,7 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
 {
   if (!Global::pPlayer()->_recording)
   {
-     if (wavRecFileDlg->execute()) {
+      if (wavRecFileDlg->execute()) {
         Global::pPlayer()->StartRecording(wavRecFileDlg->fileName());
       }
       if ( Global::pConfig()->autoStopMachines )
@@ -942,7 +942,7 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
   }
   else
   {
-     Global::pPlayer()->StopRecording();
+      Global::pPlayer()->StopRecording();
   }
 }
 
@@ -953,8 +953,8 @@ void MainWindow::onTimer( )
     childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
 
     if (sequencerBar_->followSong() && oldPos != Global::pPlayer()->_playPosition) {
-       sequencerBar_->updatePlayOrder(true);
-       sequencerBar_->updateSequencer();
+        sequencerBar_->updatePlayOrder(true);
+        sequencerBar_->updateSequencer();
     }
   }
 
@@ -968,8 +968,8 @@ void MainWindow::onTimer( )
 
 void MainWindow::updateBars( )
 {
- int p[] = {1, 2, 3, 4, 5};
- std::vector<int> a(p, p+5);
+  int p[] = {1, 2, 3, 4, 5};
+  std::vector<int> a(p, p+5);
 }
 
 int MainWindow::close( )
@@ -999,15 +999,15 @@ void MainWindow::onLoadWave( NButtonEvent * ev )
     //added by sampler
     if ( Global::pSong()->_pInstrument[si]->waveLength != 0)
     {
-       //if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
+        //if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
     }
 
     if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
     {
       updateComboIns(true);
-     //m_wndStatusBar.SetWindowText("New wave loaded");
-     //WaveEditorBackUpdate();
-     //m_wndInst.WaveUpdate();
+      //m_wndStatusBar.SetWindowText("New wave loaded");
+      //WaveEditorBackUpdate();
+      //m_wndInst.WaveUpdate();
     }
   }
 
@@ -1070,7 +1070,7 @@ bool MainWindow::checkUnsavedSong( )
   add(box);
   bool result = box->execute();
   if (result == true) {
-     childView_->onFileSaveSong(0);
+      childView_->onFileSaveSong(0);
   }
   NApp::addRemovePipe(box);
   return result;
@@ -1079,7 +1079,7 @@ bool MainWindow::checkUnsavedSong( )
 void MainWindow::onPatternStepChange( NItemEvent * ev )
 {
   if (patternCombo_->selIndex()!=-1) {
-     childView_->patternView()->setPatternStep(patternCombo_->selIndex()+1);
+      childView_->patternView()->setPatternStep(patternCombo_->selIndex()+1);
   }
 }
 

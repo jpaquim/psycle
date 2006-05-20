@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "song.h"
 #include "global.h"
 #include "configuration.h"
@@ -58,36 +58,36 @@ bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll
   switch (type)
   {
     case MACH_MASTER:
-       if(_pMachine[MASTER_INDEX]) return false;
-       pMachine = pMaster = new Master(index);
-       index = MASTER_INDEX;
+        if(_pMachine[MASTER_INDEX]) return false;
+        pMachine = pMaster = new Master(index);
+        index = MASTER_INDEX;
     break;
     case MACH_SAMPLER:
-         pMachine = pSampler = new Sampler(index);
+          pMachine = pSampler = new Sampler(index);
     break;
     case MACH_XMSAMPLER:
 //       pMachine = pXMSampler = new XMSampler(index);
     break;
     case MACH_DUPLICATOR:
-       pMachine = pDuplicator = new DuplicatorMac(index);
+        pMachine = pDuplicator = new DuplicatorMac(index);
     break;
     case MACH_MIXER:
-       pMachine = pMixer = new Mixer(index);
+        pMachine = pMixer = new Mixer(index);
     break;
     case MACH_PLUGIN:
     {
         pMachine = pPlugin = new Plugin(index);
 //       if(!CNewMachine::TestFilename(psPluginDll))
- //      {
- //        zapObject(pMachine);
- //        return false;
- //      }
-   //    try
-   //    {
-           pPlugin->LoadDll(psPluginDll);
-   //    }
+  //      {
+  //        zapObject(pMachine);
+  //        return false;
+  //      }
+    //    try
+    //    {
+            pPlugin->LoadDll(psPluginDll);
+    //    }
   //     catch(std::exception const & e)
-       //{
+        //{
 //         loggers::exception(e.what());
 //         zapObject(pMachine);
 //         return false;
@@ -97,62 +97,62 @@ bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll
 //         zapObject(pMachine); 
 //         return false;
 //       }
-       break;
-     }
-     case MACH_VST:
-     {
+        break;
+      }
+      case MACH_VST:
+      {
   /*     pMachine = pVstPlugin = new vst::instrument(index);
-       if(!CNewMachine::TestFilename(psPluginDll)) 
-       {
-         zapObject(pMachine);
-         return false;
-       }
-       try
-       {
-         pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
-       }
-       catch(std::exception const & e)
-       {
-         loggers::exception(e.what());
-         zapObject(pMachine);
-         return false;
-       }
-       catch(...)
-       {
-         zapObject(pMachine);
-         return false;
-       }
-       break;*/
-     }
-     case MACH_VSTFX:
-     {
-       /*pMachine = pVstPlugin = new vst::fx(index);
-       if(!CNewMachine::TestFilename(psPluginDll)) 
-       {
-         zapObject(pMachine);
-         return false;
-       }
-       try
-       {
-         pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
-       }
-       catch(std::exception const & e)
-       {
-         loggers::exception(e.what());
-         zapObject(pMachine); 
-         return false;
-       }
-       catch(...)
-       {
-         zapObject(pMachine);
-         return false;
-       }*/
-       break;
-     }
-     case MACH_DUMMY:
+        if(!CNewMachine::TestFilename(psPluginDll)) 
+        {
+          zapObject(pMachine);
+          return false;
+        }
+        try
+        {
+          pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
+        }
+        catch(std::exception const & e)
+        {
+          loggers::exception(e.what());
+          zapObject(pMachine);
+          return false;
+        }
+        catch(...)
+        {
+          zapObject(pMachine);
+          return false;
+        }
+        break;*/
+      }
+      case MACH_VSTFX:
+      {
+        /*pMachine = pVstPlugin = new vst::fx(index);
+        if(!CNewMachine::TestFilename(psPluginDll)) 
+        {
+          zapObject(pMachine);
+          return false;
+        }
+        try
+        {
+          pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
+        }
+        catch(std::exception const & e)
+        {
+          loggers::exception(e.what());
+          zapObject(pMachine); 
+          return false;
+        }
+        catch(...)
+        {
+          zapObject(pMachine);
+          return false;
+        }*/
+        break;
+      }
+      case MACH_DUMMY:
         pMachine = new Dummy(index);
-     break;
-     default:
+      break;
+      default:
         return false; ///< hmm?
     }
     if(index < 0)
@@ -204,7 +204,7 @@ void Song::Reset( )
 
   cpuIdle=0;
   _sampCount=0;
- //  Cleaning pattern allocation info
+  //  Cleaning pattern allocation info
 //  for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
   for(int i(0) ; i < MAX_MACHINES ; ++i)
   {
@@ -276,7 +276,7 @@ void Song::New( )
   DestroyAllMachines(true);
       //MessageBox(0, "Insts", 0, 0);
       // Cleaning instruments
-   DeleteInstruments();
+    DeleteInstruments();
       //MessageBox(0, "Pats", 0, 0);
       // Clear patterns
   DeleteAllPatterns();
@@ -289,10 +289,10 @@ void Song::New( )
   fileName ="Untitled.psy";
 /*  if((CMainFrame *)theApp.m_pMainWnd)
       {*/
-   //CreateMachine
-   //(
-     //MACH_MASTER,
-     // (viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
+    //CreateMachine
+    //(
+      //MACH_MASTER,
+      // (viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
   //					(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
   //					0,
   //					MASTER_INDEX
@@ -312,30 +312,30 @@ bool Song::load( const std::string & fName )
   int fcounter = 0;
 
   if (f.getHeader8()=="PSY3SONG") {
-     if (f.getVersion() > CURRENT_FILE_VERSION) { }
-     unsigned int size    = f.getInt();
-     int chunkcount = 0;
-     if (size == 4) chunkcount = f.getInt();
-     if (size > 4 ) f.skip(size - 4);
+      if (f.getVersion() > CURRENT_FILE_VERSION) { }
+      unsigned int size    = f.getInt();
+      int chunkcount = 0;
+      if (size == 4) chunkcount = f.getInt();
+      if (size > 4 ) f.skip(size - 4);
 
-     int solo = 0;
-     try {
-       while (!f.eof()) {
+      int solo = 0;
+      try {
+        while (!f.eof()) {
           fcounter++;
           string header = f.getHeader4();
           if (fcounter % 100 == 0) loadProgress.emit(f.getPos(),fileSize,header);
           if (header == "INFO") {
-             --chunkcount;
-             if (f.checkVersion(CURRENT_FILE_VERSION_INFO))
-             {
-               f.readString(Name,sizeof(Name));
-               f.readString(Author,sizeof(Author));
-               f.readString(Comment,sizeof(Comment));
-             }
+              --chunkcount;
+              if (f.checkVersion(CURRENT_FILE_VERSION_INFO))
+              {
+                f.readString(Name,sizeof(Name));
+                f.readString(Author,sizeof(Author));
+                f.readString(Comment,sizeof(Comment));
+              }
           } else
           if (header == "SNGI") {
-             --chunkcount;
-             if (f.checkVersion(CURRENT_FILE_VERSION_SNGI)) {
+              --chunkcount;
+              if (f.checkVersion(CURRENT_FILE_VERSION_SNGI)) {
                 SONGTRACKS       = f.getInt();
                 m_BeatsPerMin    = f.getInt();
                 m_LinesPerBeat   = f.getInt();
@@ -356,24 +356,24 @@ bool Song::load( const std::string & fName )
               }
             } else
           if (header == "SEQD") {
-             --chunkcount;
-             if (f.checkVersion(CURRENT_FILE_VERSION_SEQD)) {
-               unsigned int index = f.getInt();
-               if (index < MAX_SEQUENCES) {
-                 // play length for this sequence
-                 playLength = f.getInt();
-                 // name, for multipattern, for now unused
-                 char pTemp[256];
-                 f.readString(pTemp,sizeof(pTemp));
-                 for (int i(0) ; i < playLength; ++i) {
-                   playOrder[i] = f.getInt();
-                 }
-               }
-             }
+              --chunkcount;
+              if (f.checkVersion(CURRENT_FILE_VERSION_SEQD)) {
+                unsigned int index = f.getInt();
+                if (index < MAX_SEQUENCES) {
+                  // play length for this sequence
+                  playLength = f.getInt();
+                  // name, for multipattern, for now unused
+                  char pTemp[256];
+                  f.readString(pTemp,sizeof(pTemp));
+                  for (int i(0) ; i < playLength; ++i) {
+                    playOrder[i] = f.getInt();
+                  }
+                }
+              }
           }
           if (header == "PATD") {
-             --chunkcount;
-             if (f.checkVersion(CURRENT_FILE_VERSION_PATD)) {
+              --chunkcount;
+              if (f.checkVersion(CURRENT_FILE_VERSION_PATD)) {
                 unsigned int index = f.getInt();
                 if(index < MAX_PATTERNS) {
                   // num lines
@@ -399,16 +399,16 @@ bool Song::load( const std::string & fName )
                   }
                   zapArray(pDest);
                 }
-             }
+              }
           } else
           if (header == "MACD") {
-               chunkcount--;
+                chunkcount--;
 //               if(!fullopen) {
-               //   curpos = pFile->GetPos();
+                //   curpos = pFile->GetPos();
   //             }
-               if (f.checkVersion(CURRENT_FILE_VERSION_MACD)) {
+                if (f.checkVersion(CURRENT_FILE_VERSION_MACD)) {
 
-               }
+                }
                   unsigned int index = f.getInt();
                   if(index < MAX_MACHINES) {
                       // we had better load it
@@ -417,25 +417,25 @@ bool Song::load( const std::string & fName )
                       // skips specific chunk.
     //                    if(!fullopen) pFile->seek(curpos + size);
                   } else {
-           //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+            //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
 //                      pFile->Skip(size - sizeof index);
                   }
           } else 
           if (header== "INSD") {
             if (f.checkVersion(CURRENT_FILE_VERSION_INSD)) {
-               int index = f.getInt();
-               if(index < MAX_INSTRUMENTS) {
-                 _pInstrument[index]->LoadFileChunk(&f, CURRENT_FILE_VERSION_INSD, true);
-               } else
-               {
-                 //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-                 //pFile->skip(size - sizeof index);
-               }
+                int index = f.getInt();
+                if(index < MAX_INSTRUMENTS) {
+                  _pInstrument[index]->LoadFileChunk(&f, CURRENT_FILE_VERSION_INSD, true);
+                } else
+                {
+                  //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+                  //pFile->skip(size - sizeof index);
+                }
             }
           }
 
         }
-     }  catch (int e) {};
+      }  catch (int e) {};
   }
 
   f.close();
@@ -456,11 +456,11 @@ void Song::DestroyMachine(int mac, bool write_locked)
       // Checking In-Wires
       if(iMac->_inputCon[w])
       {
-         if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
-         {
-           iMac2 = _pMachine[iMac->_inputMachines[w]];
-           if(iMac2)
-           {
+          if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
+          {
+            iMac2 = _pMachine[iMac->_inputMachines[w]];
+            if(iMac2)
+            {
               for(int x=0; x<MAX_CONNECTIONS; x++)
               {
                 if( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
@@ -470,34 +470,34 @@ void Song::DestroyMachine(int mac, bool write_locked)
                   break;
                 }
               }
-           }
-         }
-       }
-       // Checking Out-Wires
-       if(iMac->_connection[w])
-       {
-         if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
-         {
+            }
+          }
+        }
+        // Checking Out-Wires
+        if(iMac->_connection[w])
+        {
+          if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
+          {
             iMac2 = _pMachine[iMac->_outputMachines[w]];
             if(iMac2)
             {
-               for(int x=0; x<MAX_CONNECTIONS; x++)
-               {
-                 if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
-                 {
-                   iMac2->_inputCon[x] = false;
-                   iMac2->_numInputs--;
-                   break;
-                 }
-               }
-             }
-           }
-         }
-       }
-     }
-     if(mac == machineSoloed) machineSoloed = -1;
-     // If it's a (Vst)Plugin, the destructor calls to release the underlying library
-     zapObject(_pMachine[mac]);
+                for(int x=0; x<MAX_CONNECTIONS; x++)
+                {
+                  if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
+                  {
+                    iMac2->_inputCon[x] = false;
+                    iMac2->_numInputs--;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if(mac == machineSoloed) machineSoloed = -1;
+      // If it's a (Vst)Plugin, the destructor calls to release the underlying library
+      zapObject(_pMachine[mac]);
 }
 
 
@@ -506,8 +506,8 @@ int Song::GetFreeMachine()
   int tmac = 0;
   for(;;)
   {
-     if(!_pMachine[tmac]) return tmac;
-     if(tmac++ >= MAX_MACHINES) return -1;
+      if(!_pMachine[tmac]) return tmac;
+      if(tmac++ >= MAX_MACHINES) return -1;
   }
 }
 
@@ -525,8 +525,8 @@ void Song::DestroyAllMachines(bool write_locked)
   {
     if(_pMachine[c])
     {
-       for(int j(c + 1) ; j < MAX_MACHINES; ++j)
-       {
+        for(int j(c + 1) ; j < MAX_MACHINES; ++j)
+        {
           if(_pMachine[c] == _pMachine[j])
           {
             ///\todo wtf? duplicate machine? could happen if loader messes up?
@@ -535,8 +535,8 @@ void Song::DestroyAllMachines(bool write_locked)
 //            MessageBox(0, buf, "Duplicate Machine", 0);
             _pMachine[j] = 0;
           }
-       }
-       DestroyMachine(c, write_locked);
+        }
+        DestroyMachine(c, write_locked);
     }
     _pMachine[c] = 0;
   }
@@ -565,9 +565,9 @@ void Song::PW_Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
   do {
     ld=(*(wl+PW_Phase))*preview_vol;
     if(stereo)
-       rd=(*(wr+PW_Phase))*preview_vol; 
+        rd=(*(wr+PW_Phase))*preview_vol; 
     else 
-       rd=ld;
+        rd=ld;
 
     *++pSamplesL+=ld;
     *++pSamplesR+=rd;
@@ -604,7 +604,7 @@ int Song::GetBlankPatternUnused(int rval)
             bTryAgain = true;
             t = MULTIPLY2;
           }
-       }
+        }
     }
   }
   if(rval > MAX_PATTERNS - 1) {
@@ -925,54 +925,54 @@ bool Song::save(const std::string & fileName)
 
   for(uint32_t index(0) ; index < MAX_PATTERNS; ++index)
   {
-     // check every pattern for validity
-     if (IsPatternUsed(index))
-     {
-       // ok save it
-       unsigned char * pSource = new unsigned char[SONGTRACKS*patternLines[index]*EVENT_SIZE];
+      // check every pattern for validity
+      if (IsPatternUsed(index))
+      {
+        // ok save it
+        unsigned char * pSource = new unsigned char[SONGTRACKS*patternLines[index]*EVENT_SIZE];
 
-       unsigned char * pCopy = pSource;
+        unsigned char * pCopy = pSource;
 
-       for (int y = 0; y < patternLines[index]; y++)
-       {
-         unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
-         std::memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
-         pCopy+=EVENT_SIZE*SONGTRACKS;
-       }
+        for (int y = 0; y < patternLines[index]; y++)
+        {
+          unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
+          std::memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
+          pCopy+=EVENT_SIZE*SONGTRACKS;
+        }
 
-       uint32_t sizez77 = DataCompression::BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[index]*EVENT_SIZE);
-       zapArray(pSource);
+        uint32_t sizez77 = DataCompression::BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[index]*EVENT_SIZE);
+        zapArray(pSource);
 
-       // chunk header
-       f.PutPChar("PATD",4);
-       version = CURRENT_FILE_VERSION_PATD;
-       f.PutInt(version);
-       size = sizez77 + 4 * sizeof temp + strlen(patternName[index]) + 1;
-       f.PutInt(size);
+        // chunk header
+        f.PutPChar("PATD",4);
+        version = CURRENT_FILE_VERSION_PATD;
+        f.PutInt(version);
+        size = sizez77 + 4 * sizeof temp + strlen(patternName[index]) + 1;
+        f.PutInt(size);
 
-       // chunk data
+        // chunk data
 
-       f.PutInt(index);
-       f.PutInt(patternLines[index]);
-       f.PutInt(SONGTRACKS); // eventually this may be variable per pattern
-       f.PutString(patternName[index]);
+        f.PutInt(index);
+        f.PutInt(patternLines[index]);
+        f.PutInt(SONGTRACKS); // eventually this may be variable per pattern
+        f.PutString(patternName[index]);
 
-       f.PutInt(sizez77);
-       f.PutPChar((char*)pCopy,sizez77);
+        f.PutInt(sizez77);
+        f.PutPChar((char*)pCopy,sizez77);
 
-       zapArray(pCopy);
-     }
-   }
+        zapArray(pCopy);
+      }
+    }
 
-   //
-   // ===================
-   // MACHINE DATA
-   // ===================
-   // id = "MACD";
-   // machine and instruments handle their save and load in their respective classes
+    //
+    // ===================
+    // MACHINE DATA
+    // ===================
+    // id = "MACD";
+    // machine and instruments handle their save and load in their respective classes
 
-   for(uint32_t index(0) ; index < MAX_MACHINES; ++index)
-   {
+    for(uint32_t index(0) ; index < MAX_MACHINES; ++index)
+    {
       if (_pMachine[index])
       {
         std::size_t pos;
@@ -994,44 +994,44 @@ bool Song::save(const std::string & fileName)
           f.Seek(pos2);
       }
 
-   }
+    }
 
-   //
-   // ===================
-   // Instrument DATA
-   // ===================
-   // id = "INSD"; 
-   //
-   for(uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
-   {
-     if (!_pInstrument[index]->Empty())
-     {
-       std::size_t pos;
-       // chunk header
-       f.PutPChar("INSD",4);
-       version = CURRENT_FILE_VERSION_INSD;
-       f.PutInt(version);
+    //
+    // ===================
+    // Instrument DATA
+    // ===================
+    // id = "INSD"; 
+    //
+    for(uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
+    {
+      if (!_pInstrument[index]->Empty())
+      {
+        std::size_t pos;
+        // chunk header
+        f.PutPChar("INSD",4);
+        version = CURRENT_FILE_VERSION_INSD;
+        f.PutInt(version);
 
-       pos = f.GetPos();
-       size = 0;
-       f.PutInt(size);
+        pos = f.GetPos();
+        size = 0;
+        f.PutInt(size);
 
-       // chunk data
+        // chunk data
 
-       f.PutInt(index);
-       //_pInstrument[index]->SaveFileChunk(f);
+        f.PutInt(index);
+        //_pInstrument[index]->SaveFileChunk(f);
 
-       // chunk size in header
+        // chunk size in header
 
-       std::size_t const pos2(f.GetPos());
-       size = pos2 - pos - sizeof size;
-       f.Seek(pos);
-       f.PutInt(size);
-       f.Seek(pos2);
-     }
-   }
+        std::size_t const pos2(f.GetPos());
+        size = pos2 - pos - sizeof size;
+        f.Seek(pos);
+        f.PutInt(size);
+        f.Seek(pos2);
+      }
+    }
 
-   f.close();
+    f.close();
 }
 
 int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
@@ -1056,12 +1056,12 @@ int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * 
 
 unsigned long Song::FourCC( const char *ChunkName)
 {
-   long retbuf = 0x20202020;   // four spaces (padding)
-   char *p = ((char *)&retbuf);
-   // Remember, this is Intel format!
-   // The first character goes in the LSB
-   for( int i(0) ; i < 4 && ChunkName[i]; ++i) *p++ = ChunkName[i];
-   return retbuf;
+    long retbuf = 0x20202020;   // four spaces (padding)
+    char *p = ((char *)&retbuf);
+    // Remember, this is Intel format!
+    // The first character goes in the LSB
+    for( int i(0) ; i < 4 && ChunkName[i]; ++i) *p++ = ChunkName[i];
+    return retbuf;
 }
 
 
@@ -1091,45 +1091,45 @@ int Song::WavAlloc(int instrument,const char * Wavfile)
 
     long io;
 
-   // mono
-   if(st_type == 1) {
-     uint8_t smp8;
-     switch(bits) {
+    // mono
+    if(st_type == 1) {
+      uint8_t smp8;
+      switch(bits) {
         case 8:
-           for(io = 0 ; io < Datalen ; ++io) {
-             file.ReadData(&smp8, 1);
-             *sampL = (smp8 << 8) - 32768;
-             ++sampL;
-           }
+            for(io = 0 ; io < Datalen ; ++io) {
+              file.ReadData(&smp8, 1);
+              *sampL = (smp8 << 8) - 32768;
+              ++sampL;
+            }
         break;
         case 16:
-           file.ReadData(sampL, Datalen);
+            file.ReadData(sampL, Datalen);
         break;
         case 24:
-           for(io = 0 ; io < Datalen ; ++io) {
-             file.ReadData(&smp8, 1);
-             file.ReadData(sampL, 1);
-             ++sampL;
-           }
+            for(io = 0 ; io < Datalen ; ++io) {
+              file.ReadData(&smp8, 1);
+              file.ReadData(sampL, 1);
+              ++sampL;
+            }
         break;
         default:
         break;
-     }
-   }
-   // stereo
-   else {
-     short *sampR(_pInstrument[instrument]->waveDataR);
-     uint8_t smp8;
-     switch(bits) {
+      }
+    }
+    // stereo
+    else {
+      short *sampR(_pInstrument[instrument]->waveDataR);
+      uint8_t smp8;
+      switch(bits) {
         case 8:
-           for(io = 0 ; io < Datalen ; ++io) {
-             file.ReadData(&smp8, 1);
-             *sampL = (smp8 << 8) - 32768;
-             ++sampL;
-             file.ReadData(&smp8, 1);
-             *sampR = (smp8 << 8) - 32768;
-             ++sampR;
-           }
+            for(io = 0 ; io < Datalen ; ++io) {
+              file.ReadData(&smp8, 1);
+              *sampL = (smp8 << 8) - 32768;
+              ++sampL;
+              file.ReadData(&smp8, 1);
+              *sampR = (smp8 << 8) - 32768;
+              ++sampR;
+            }
         break;
         case 16:
           for(io = 0 ; io < Datalen ; ++io) {
@@ -1150,32 +1150,32 @@ int Song::WavAlloc(int instrument,const char * Wavfile)
           }
         break;
         default:
-           throw "something wrong";
+            throw "something wrong";
         break;
       }
     }
     while (!file.eof()) {
       file.read((char*)(&hd), 8);
       if(hd.ckID == FourCC("smpl")) {
-         char pl(0);
-         file.skip(28);
-         file.read(&pl, 1);
-         if(pl == 1) {
-           file.skip(15);
-           unsigned int ls(0);
-           unsigned int le(0);
-           file.read((char*)&ls, 4);
-           file.read((char*)&le, 4);
-           _pInstrument[instrument]->waveLoopStart = ls;
-           _pInstrument[instrument]->waveLoopEnd = le;
-           // only for my bad sample collection
-           //if(!((ls <= 0) && (le >= Datalen - 1)))
-           {
-             _pInstrument[instrument]->waveLoopType = true;
-           }
-         }
-         file.skip(9);
-       } else if(hd.ckSize > 0)
+          char pl(0);
+          file.skip(28);
+          file.read(&pl, 1);
+          if(pl == 1) {
+            file.skip(15);
+            unsigned int ls(0);
+            unsigned int le(0);
+            file.read((char*)&ls, 4);
+            file.read((char*)&le, 4);
+            _pInstrument[instrument]->waveLoopStart = ls;
+            _pInstrument[instrument]->waveLoopEnd = le;
+            // only for my bad sample collection
+            //if(!((ls <= 0) && (le >= Datalen - 1)))
+            {
+              _pInstrument[instrument]->waveLoopType = true;
+            }
+          }
+          file.skip(9);
+        } else if(hd.ckSize > 0)
                 file.skip(hd.ckSize);
               else
                 file.skip(1);

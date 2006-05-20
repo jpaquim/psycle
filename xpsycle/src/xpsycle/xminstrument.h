@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #ifndef XMINSTRUMENT_H
 #define XMINSTRUMENT_H
 
@@ -70,30 +70,30 @@ public:
 
     class WaveData {
     public:
-     /** Wave Loop Type */
-       enum LoopType {
+      /** Wave Loop Type */
+        enum LoopType {
           DO_NOT = 0x0,///< Do Nothing
           NORMAL = 0x1,///< normal Start --> End ,Start --> End ...
           BIDI = 0x2	 ///< bidirectional Start --> End, End --> Start ...
-       };
+        };
 
-       enum WaveForms {
+        enum WaveForms {
           SINUS = 0x0,
           SQUARE = 0x1,
           SAWUP = 0x2,
           SAWDOWN = 0x3,
           RANDOM = 0x4
-       };
+        };
 
-       /// Constructor
-       WaveData()
-       {
-         m_pWaveDataL = m_pWaveDataR = NULL;
-         Init();
-       };
+        /// Constructor
+        WaveData()
+        {
+          m_pWaveDataL = m_pWaveDataR = NULL;
+          Init();
+        };
 
-       /// Initialize
-       void Init(){
+        /// Initialize
+        void Init(){
           DeleteWaveData();
           m_WaveLength = 0;
           m_WaveGlobVolume = 1.0f; // Global volume ( global multiplier )
@@ -116,34 +116,34 @@ public:
           m_VibratoSpeed = 0;
           m_VibratoDepth = 0;
           m_VibratoType = 0;
-       }
+        }
 
-       /// Destructor
-       ~WaveData(){
-           DeleteWaveData();
-       };
+        /// Destructor
+        ~WaveData(){
+            DeleteWaveData();
+        };
 
-       //  Object Functions
-       void DeleteWaveData(){
-         zapArray(m_pWaveDataL);
-         zapArray(m_pWaveDataR);
-       }
+        //  Object Functions
+        void DeleteWaveData(){
+          zapArray(m_pWaveDataL);
+          zapArray(m_pWaveDataR);
+        }
 
-       void AllocWaveData(const int iLen,const bool bStereo)
-       {
+        void AllocWaveData(const int iLen,const bool bStereo)
+        {
           DeleteWaveData();
           m_pWaveDataL = new signed short[iLen];
           m_pWaveDataR = bStereo?new signed short[iLen]:NULL;
           m_WaveStereo = bStereo;
           m_WaveLength  = iLen;
-       }
+        }
 
         void Load(DeSerializer* file);  // here is a change to main psycle
         void Save(Serializer* file);
 
-       /// Wave Data Copy Operator
-       void operator= (const WaveData& source)
-       {
+        /// Wave Data Copy Operator
+        void operator= (const WaveData& source)
+        {
           Init();
           m_WaveName = source.m_WaveName;
           m_WaveLength = source.m_WaveLength;
@@ -169,7 +169,7 @@ public:
           if(source.m_WaveStereo){
               memcpy(m_pWaveDataR,source.m_pWaveDataR,source.m_WaveLength * sizeof(short));
           }
-       }
+        }
 
 
       // Properties

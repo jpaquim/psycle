@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "instrumenteditor.h"
 #include "global.h"
 #include "song.h"
@@ -36,7 +36,7 @@
 #include <ngrs/nitemevent.h>
 
 InstrumentEditor::InstrumentEditor()
- : NWindow()
+  : NWindow()
 {
   init();
 }
@@ -55,8 +55,8 @@ void InstrumentEditor::init( )
     header->setLayout(NFlowLayout(nAlLeft,5,5));
     header->add(new NLabel("Instrument"), nAlLeft);
     instNumberLbl = new NLabel("   ");
-       instNumberLbl->setBorder(NBevelBorder(nNone,nLowered));
-       instNumberLbl->border()->setSpacing(NSize(2,2,2,2));
+        instNumberLbl->setBorder(NBevelBorder(nNone,nLowered));
+        instNumberLbl->border()->setSpacing(NSize(2,2,2,2));
     header->add(instNumberLbl,nAlLeft);
     decInstBtn = new NButton("<");
       decInstBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
@@ -77,9 +77,9 @@ void InstrumentEditor::init( )
   pane()->add(header, nAlTop);
 
   NGroupBox* properties = new NGroupBox();
-     properties->setLayout(NAlignLayout(5,5));
-     properties->setHeaderText("Instrument Properties");
-     NPanel* noteActionPnl = new NPanel();
+      properties->setLayout(NAlignLayout(5,5));
+      properties->setHeaderText("Instrument Properties");
+      NPanel* noteActionPnl = new NPanel();
         noteActionPnl->setLayout(NFlowLayout(nAlLeft,5,5));
         noteActionPnl->add(new NLabel("New Note Action"));
           newNoteActionCb = new NComboBox();
@@ -90,8 +90,8 @@ void InstrumentEditor::init( )
           newNoteActionCb->add(new NItem("None"));
           newNoteActionCb->itemSelected.connect(this,&InstrumentEditor::onComboSelected);
         noteActionPnl->add(newNoteActionCb,nAlTop);
-     properties->add(noteActionPnl,nAlTop);
-     NPanel* panningPnl = new NPanel();
+      properties->add(noteActionPnl,nAlTop);
+      NPanel* panningPnl = new NPanel();
         panningPnl->setLayout(NFlowLayout(nAlLeft,5,5));
         panningSlider = new NSlider();
           panningSlider->setOrientation(nHorizontal);
@@ -101,35 +101,35 @@ void InstrumentEditor::init( )
           panningSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         panningPnl->add(panningSlider,nAlLeft);
         panningLbl = new NLabel("   ");
-           panningLbl->setBorder(NBevelBorder(nNone,nLowered));
-           panningLbl->border()->setSpacing(NSize(2,2,2,2));
+            panningLbl->setBorder(NBevelBorder(nNone,nLowered));
+            panningLbl->border()->setSpacing(NSize(2,2,2,2));
         panningPnl->add(panningLbl,nAlLeft);
-     properties->add(panningPnl,nAlTop);
-     rndPanningCbx = new NCheckBox("Random panning");
+      properties->add(panningPnl,nAlTop);
+      rndPanningCbx = new NCheckBox("Random panning");
         rndPanningCbx->clicked.connect(this,&InstrumentEditor::onBtnPress);
-     properties->add(rndPanningCbx,nAlTop);
-     rndVCFCutCbx  = new NCheckBox("Random VCF Cutoff");
+      properties->add(rndPanningCbx,nAlTop);
+      rndVCFCutCbx  = new NCheckBox("Random VCF Cutoff");
         rndVCFCutCbx->clicked.connect(this,&InstrumentEditor::onBtnPress);
-     properties->add(rndVCFCutCbx,nAlTop);
-     rndVCFResoCbx = new NCheckBox("Random VCF Reso/Bw.");
+      properties->add(rndVCFCutCbx,nAlTop);
+      rndVCFResoCbx = new NCheckBox("Random VCF Reso/Bw.");
         rndVCFResoCbx->clicked.connect(this,&InstrumentEditor::onBtnPress);
-     properties->add(rndVCFResoCbx,nAlTop);
+      properties->add(rndVCFResoCbx,nAlTop);
 
-     NGroupBox* tempoGrpBox = new NGroupBox();
+      NGroupBox* tempoGrpBox = new NGroupBox();
         tempoGrpBox->setLayout(NFlowLayout(nAlLeft,5,5));
         tempoGrpBox->setHeaderText("Tempo Looping Tool");
         playSampleFitCbx = new NCheckBox("Play sample to fit");
         tempoGrpBox->add(playSampleFitCbx);
         patRowEdt = new NEdit();
-           patRowEdt->setWidth(50);
-           patRowEdt->setBorder(NBevelBorder(nNone,nLowered));
-           patRowEdt->border()->setSpacing(NSize(2,2,2,2));
-           patRowEdt->keyPress.connect(this,&InstrumentEditor::onPatRowEdit);
+            patRowEdt->setWidth(50);
+            patRowEdt->setBorder(NBevelBorder(nNone,nLowered));
+            patRowEdt->border()->setSpacing(NSize(2,2,2,2));
+            patRowEdt->keyPress.connect(this,&InstrumentEditor::onPatRowEdit);
         tempoGrpBox->add(patRowEdt,nAlLeft);
         tempoGrpBox->add(new NLabel("Pattern rows"),nAlLeft);
-     properties->add(tempoGrpBox,nAlTop);
+      properties->add(tempoGrpBox,nAlTop);
 
-     NGroupBox* waveLayerGrpBox = new NGroupBox();
+      NGroupBox* waveLayerGrpBox = new NGroupBox();
         waveLayerGrpBox->setLayout(NAlignLayout(5,5));
         waveLayerGrpBox->setHeaderText("Instrument Wave Layer");
         NPanel* volumePnl = new NPanel();
@@ -143,8 +143,8 @@ void InstrumentEditor::init( )
           volumeSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         volumePnl->add(volumeSlider,nAlLeft);
         volumeLbl = new NLabel("   ");
-           volumeLbl->setBorder(NBevelBorder(nNone,nLowered));
-           volumeLbl->border()->setSpacing(NSize(2,2,2,2));
+            volumeLbl->setBorder(NBevelBorder(nNone,nLowered));
+            volumeLbl->border()->setSpacing(NSize(2,2,2,2));
         volumePnl->add(volumeLbl,nAlLeft);
         waveLayerGrpBox->add(volumePnl,nAlTop);
         NPanel* fineTunePnl = new NPanel();
@@ -158,71 +158,71 @@ void InstrumentEditor::init( )
           fineTuneSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         fineTunePnl->add(fineTuneSlider,nAlLeft);
         fineTuneLbl = new NLabel("   ");
-           fineTuneLbl->setBorder(NBevelBorder(nNone,nLowered));
-           fineTuneLbl->border()->setSpacing(NSize(2,2,2,2));
+            fineTuneLbl->setBorder(NBevelBorder(nNone,nLowered));
+            fineTuneLbl->border()->setSpacing(NSize(2,2,2,2));
         fineTunePnl->add(fineTuneLbl,nAlLeft);
         waveLayerGrpBox->add(fineTunePnl,nAlTop);
         NPanel* tunePnl = new NPanel();
-           tunePnl->setLayout(NFlowLayout(nAlLeft,5,5));
-           tunePnl->add(new NLabel("Tune"));
-           octDecBtn = new NButton("Oct-");
-             octDecBtn->setFlat(false);
-             octDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
-           tunePnl->add(octDecBtn);
-           noteDecBtn = new NButton("Note-");
-             noteDecBtn->setFlat(false);
-             noteDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
-           tunePnl->add(noteDecBtn);
-           noteIncBtn = new NButton("Note+");
-             noteIncBtn->setFlat(false);
-             noteIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
-           tunePnl->add(noteIncBtn);
-           octIncBtn  = new NButton("Oct+");
-             octIncBtn->setFlat(false);
-             octIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
-           tunePnl->add(octIncBtn);
-           octLbl   = new NLabel("  ");
-             octLbl->setBorder(NBevelBorder(nNone,nLowered));
-             octLbl->border()->setSpacing(NSize(2,2,2,2));
-           tunePnl->add(octLbl);
+            tunePnl->setLayout(NFlowLayout(nAlLeft,5,5));
+            tunePnl->add(new NLabel("Tune"));
+            octDecBtn = new NButton("Oct-");
+              octDecBtn->setFlat(false);
+              octDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
+            tunePnl->add(octDecBtn);
+            noteDecBtn = new NButton("Note-");
+              noteDecBtn->setFlat(false);
+              noteDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
+            tunePnl->add(noteDecBtn);
+            noteIncBtn = new NButton("Note+");
+              noteIncBtn->setFlat(false);
+              noteIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
+            tunePnl->add(noteIncBtn);
+            octIncBtn  = new NButton("Oct+");
+              octIncBtn->setFlat(false);
+              octIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
+            tunePnl->add(octIncBtn);
+            octLbl   = new NLabel("  ");
+              octLbl->setBorder(NBevelBorder(nNone,nLowered));
+              octLbl->border()->setSpacing(NSize(2,2,2,2));
+            tunePnl->add(octLbl);
         waveLayerGrpBox->add(tunePnl,nAlTop);
         NPanel* loopPnl = new NPanel();
-           loopPnl->setLayout(NFlowLayout(nAlLeft,5,5));
-           loopPnl->add(new NLabel("Loop"));
-           NButton* offBtn = new NButton("Off");
-             offBtn->setFlat(false);
-           loopPnl->add(offBtn);
-           NButton* forwardBtn = new NButton("Forward");
-             forwardBtn->setFlat(false);
-           loopPnl->add(forwardBtn);
-           loopLbl   = new NLabel("  ");
-             loopLbl->setBorder(NBevelBorder(nNone,nLowered));
-             loopLbl->border()->setSpacing(NSize(2,2,2,2));
-           loopPnl->add(loopLbl);
+            loopPnl->setLayout(NFlowLayout(nAlLeft,5,5));
+            loopPnl->add(new NLabel("Loop"));
+            NButton* offBtn = new NButton("Off");
+              offBtn->setFlat(false);
+            loopPnl->add(offBtn);
+            NButton* forwardBtn = new NButton("Forward");
+              forwardBtn->setFlat(false);
+            loopPnl->add(forwardBtn);
+            loopLbl   = new NLabel("  ");
+              loopLbl->setBorder(NBevelBorder(nNone,nLowered));
+              loopLbl->border()->setSpacing(NSize(2,2,2,2));
+            loopPnl->add(loopLbl);
         waveLayerGrpBox->add(loopPnl,nAlTop);
         NPanel* loopAtPnl = new NPanel();
-           loopAtPnl->setLayout(NFlowLayout(nAlLeft,5,5));
-           loopAtPnl->add(new NLabel("Loop At"),nAlLeft);
-           loopAtFromLbl = new NLabel("  ");
-             loopAtFromLbl->setBorder(NBevelBorder(nNone,nLowered));
-             loopAtFromLbl->border()->setSpacing(NSize(2,2,2,2));
-           loopAtPnl->add(loopAtFromLbl,nAlLeft);
-           loopAtPnl->add(new NLabel("to"),nAlLeft);
-           loopAtToLbl   = new NLabel("  ");
-             loopAtToLbl->setBorder(NBevelBorder(nNone,nLowered));
-             loopAtToLbl->border()->setSpacing(NSize(2,2,2,2));
-           loopAtPnl->add(loopAtToLbl,nAlLeft);
-           loopAtPnl->add(new NLabel("Length"),nAlLeft);
-           lenLbl   = new NLabel("  ");
-             lenLbl->setBorder(NBevelBorder(nNone,nLowered));
-             lenLbl->border()->setSpacing(NSize(2,2,2,2));
-           loopAtPnl->add(lenLbl,nAlLeft);
+            loopAtPnl->setLayout(NFlowLayout(nAlLeft,5,5));
+            loopAtPnl->add(new NLabel("Loop At"),nAlLeft);
+            loopAtFromLbl = new NLabel("  ");
+              loopAtFromLbl->setBorder(NBevelBorder(nNone,nLowered));
+              loopAtFromLbl->border()->setSpacing(NSize(2,2,2,2));
+            loopAtPnl->add(loopAtFromLbl,nAlLeft);
+            loopAtPnl->add(new NLabel("to"),nAlLeft);
+            loopAtToLbl   = new NLabel("  ");
+              loopAtToLbl->setBorder(NBevelBorder(nNone,nLowered));
+              loopAtToLbl->border()->setSpacing(NSize(2,2,2,2));
+            loopAtPnl->add(loopAtToLbl,nAlLeft);
+            loopAtPnl->add(new NLabel("Length"),nAlLeft);
+            lenLbl   = new NLabel("  ");
+              lenLbl->setBorder(NBevelBorder(nNone,nLowered));
+              lenLbl->border()->setSpacing(NSize(2,2,2,2));
+            loopAtPnl->add(lenLbl,nAlLeft);
         waveLayerGrpBox->add(loopAtPnl,nAlTop);
         NButton* amplitudeBtn = new NButton("Amplitudes/Filter Envelopes");
           amplitudeBtn->setFlat(false);
           amplitudeBtn->clicked.connect(this,&InstrumentEditor::onShowEnvelopeEditor);
         waveLayerGrpBox->add(amplitudeBtn,nAlTop);
-     properties->add(waveLayerGrpBox,nAlClient);
+      properties->add(waveLayerGrpBox,nAlClient);
 
   pane()->add(properties,nAlClient);
 
@@ -270,9 +270,9 @@ void InstrumentEditor::setInstrument( int index )
 
   // Set looptype
   if(Global::pSong()->_pInstrument[index]->waveLoopType)
-     loopLbl->setText("Forward");
+      loopLbl->setText("Forward");
   else
-     loopLbl->setText("Off");
+      loopLbl->setText("Off");
 
   // Display Loop Points & Wave Length	
 
@@ -292,18 +292,18 @@ std::string InstrumentEditor::noteToString( int value )
   int octave = value / 12;
 
   switch (value % 12) {
-     case 0:   return "C-" + stringify(octave); break;
-     case 1:   return "C#" + stringify(octave); break;
-     case 2:   return "D-" + stringify(octave); break;
-     case 3:   return "D#" + stringify(octave); break;
-     case 4:   return "E-" + stringify(octave); break;
-     case 5:   return "F-" + stringify(octave); break;
-     case 6:   return "F#" + stringify(octave); break;
-     case 7:   return "G-" + stringify(octave); break;
-     case 8:   return "G#" + stringify(octave); break;
-     case 9:   return "A-" + stringify(octave); break;
-     case 10:  return "A#" + stringify(octave); break;
-     case 11:  return "B-" + stringify(octave); break;
+      case 0:   return "C-" + stringify(octave); break;
+      case 1:   return "C#" + stringify(octave); break;
+      case 2:   return "D-" + stringify(octave); break;
+      case 3:   return "D#" + stringify(octave); break;
+      case 4:   return "E-" + stringify(octave); break;
+      case 5:   return "F-" + stringify(octave); break;
+      case 6:   return "F#" + stringify(octave); break;
+      case 7:   return "G-" + stringify(octave); break;
+      case 8:   return "G#" + stringify(octave); break;
+      case 9:   return "A-" + stringify(octave); break;
+      case 10:  return "A#" + stringify(octave); break;
+      case 11:  return "B-" + stringify(octave); break;
   }
   return "err";
 }
@@ -311,13 +311,13 @@ std::string InstrumentEditor::noteToString( int value )
 void InstrumentEditor::onBtnPress( NButtonEvent * ev )
 {
   if (ev->sender() == decInstBtn && instrumentIndex() > 0) {
-     setInstrument(instrumentIndex()-1);
-     pane()->repaint();
+      setInstrument(instrumentIndex()-1);
+      pane()->repaint();
   } else
   if (ev->sender() == incInstBtn) {
-     setInstrument(instrumentIndex()+1);
-     pane()->resize();
-     pane()->repaint();
+      setInstrument(instrumentIndex()+1);
+      pane()->resize();
+      pane()->repaint();
   } else
   if (ev->sender() == killBtn) {
     Global::pSong()->DeleteInstrument(instrumentIndex());
@@ -335,30 +335,30 @@ void InstrumentEditor::onBtnPress( NButtonEvent * ev )
     Global::pSong()->_pInstrument[instrumentIndex()]->_RRES = rndVCFResoCbx->checked();
   } else
   if (ev->sender() == octDecBtn) {
-     if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-37)
-       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune-=12;
-     else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
-     octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
-     octLbl->repaint();
+      if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-37)
+        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune-=12;
+      else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
+      octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+      octLbl->repaint();
   } else
   if (ev->sender() == octIncBtn) {
-     if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune < 60)
-       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=12;
-     else 
-       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=71;
-     octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
-     octLbl->repaint();
+      if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune < 60)
+        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=12;
+      else 
+        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=71;
+      octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+      octLbl->repaint();
   } else
   if (ev->sender() == noteDecBtn) {
-     if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-47)
+      if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-47)
         Global::pSong()->_pInstrument[instrumentIndex()]->waveTune-=1;
-     else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
-     octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
-     octLbl->repaint();
+      else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
+      octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+      octLbl->repaint();
   } else
   if (ev->sender() == noteIncBtn) {
     if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune < 71)
-       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=1;
+        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=1;
     else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=71;
     octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
     octLbl->repaint();
@@ -367,7 +367,7 @@ void InstrumentEditor::onBtnPress( NButtonEvent * ev )
 
 int InstrumentEditor::instrumentIndex( )
 {
-   return Global::pSong()->instSelected;
+    return Global::pSong()->instSelected;
 }
 
 void InstrumentEditor::onComboSelected( NItemEvent * ev )

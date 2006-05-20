@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "vumeter.h"
 #include "global.h"
 #include "configuration.h"
@@ -25,7 +25,7 @@
 
 
 VuMeter::VuMeter()
- : NPanel(), l_(1),r_(1)
+  : NPanel(), l_(1),r_(1)
 {
   setTransparent(false);
 
@@ -64,28 +64,28 @@ void VuMeter::paint( NGraphics * g )
 
 
   if (log_r || vuprevR) {
-     g->setForeground(vu1);
-     g->fillRect(0,5,log_r,4);
+      g->setForeground(vu1);
+      g->fillRect(0,5,log_r,4);
 
-     if (vuprevR > log_r ) {
+      if (vuprevR > log_r ) {
         g->setForeground(vu3);
         g->fillRect(log_r,5,vuprevR-log_r,4);
         g->setForeground(vu2);
         g->fillRect(vuprevR,5,225-vuprevR,4);
         vuprevR-=2;
-     } else
-     {
+      } else
+      {
         g->setForeground(vu2);
         g->fillRect(log_r,5,225-log_r,4);
         vuprevR = log_r;
-     }
-   }
-   else {
-     g->setForeground(vu2);
-     g->fillRect(0,5,225,4);
-   }
+      }
+    }
+    else {
+      g->setForeground(vu2);
+      g->fillRect(0,5,225,4);
+    }
 
-   if (log_l || vuprevL) {
+    if (log_l || vuprevL) {
     g->setForeground(vu1);
     g->fillRect(0,0,log_l, 4);
     if (vuprevL > log_l ) {
@@ -95,9 +95,9 @@ void VuMeter::paint( NGraphics * g )
       g->fillRect(vuprevL,0,225-vuprevL,4);
       vuprevL-=2;
     } else {
-       g->setForeground(vu2);
-       g->fillRect(log_l,0,225-log_l,4);
-       vuprevL = log_l;
+        g->setForeground(vu2);
+        g->fillRect(log_l,0,225-log_l,4);
+        vuprevL = log_l;
     }
   }
   else {

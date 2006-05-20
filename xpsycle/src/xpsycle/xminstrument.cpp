@@ -1,33 +1,33 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "xminstrument.h"
 
 void XMInstrument::WaveData::Load(DeSerializer* file)
 { /// todo port
-   uint32_t size1,size2;
+    uint32_t size1,size2;
 
-   //\todo: add version
-   //riffFile->Read(version);
+    //\todo: add version
+    //riffFile->Read(version);
 
-   // CT2A _wave_name(""); ???
-   /*riffFile->ReadStringA2T(_wave_name,32);
+    // CT2A _wave_name(""); ???
+    /*riffFile->ReadStringA2T(_wave_name,32);
       m_WaveName=_wave_name;
 
       riffFile->Read(m_WaveLength);
@@ -69,7 +69,7 @@ void XMInstrument::WaveData::Load(DeSerializer* file)
         SoundDesquash(pData,&m_pWaveDataR);
       }
       delete pData;
- */
+  */
 }
 
 void XMInstrument::WaveData::Save(Serializer* file)

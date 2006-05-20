@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
 #include "sampler.h"
 #include "global.h"
 #include "player.h"
@@ -68,8 +68,8 @@ void Sampler::Tick( )
 {
   for (int voice=0;voice<_numVoices;voice++) {
     if ( _voices[voice].effCmd != SAMPLER_CMD_EXTENDED ) {
-       _voices[voice].effOld=_voices[voice].effCmd;
-       _voices[voice].effCmd=SAMPLER_CMD_NONE;
+        _voices[voice].effOld=_voices[voice].effCmd;
+        _voices[voice].effCmd=SAMPLER_CMD_NONE;
     }
   }
 }
@@ -108,111 +108,111 @@ void Sampler::Work( int numSamples )
         {
           if (TriggerDelay[i]._cmd)
           {
-             if (TriggerDelayCounter[i] < nextevent)
-             {
+              if (TriggerDelayCounter[i] < nextevent)
+              {
                 nextevent = TriggerDelayCounter[i];
-             }
+              }
           }
         }
         if (nextevent > ns)
         {
-           for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
-           {
+            for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+            {
               // come back to this
               if (TriggerDelay[i]._cmd)
               {
                 TriggerDelayCounter[i] -= ns;
               }
-           }
-           for (int voice=0; voice<_numVoices; voice++)
-           {
+            }
+            for (int voice=0; voice<_numVoices; voice++)
+            {
               VoiceWork(ns, voice);
-           }
-           ns = 0;
+            }
+            ns = 0;
         }
         else
         {
-           if (nextevent)
-           {
-             ns -= nextevent;
-             for (int voice=0; voice<_numVoices; voice++)
-             {
+            if (nextevent)
+            {
+              ns -= nextevent;
+              for (int voice=0; voice<_numVoices; voice++)
+              {
                 VoiceWork(nextevent, voice);
-             }
-           }
-           for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
-           {
-             // come back to this
-             if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
-             {
+              }
+            }
+            for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+            {
+              // come back to this
+              if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+              {
                 if (TriggerDelayCounter[i] == nextevent)
                 {
-                   // do event
-                   Tick(i,&TriggerDelay[i]);
-                   TriggerDelay[i]._cmd = 0;
+                    // do event
+                    Tick(i,&TriggerDelay[i]);
+                    TriggerDelay[i]._cmd = 0;
                 }
                 else
                 {
-                   TriggerDelayCounter[i] -= nextevent;
+                    TriggerDelayCounter[i] -= nextevent;
                 }
-             }
-             else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
-             {
-                 if (TriggerDelayCounter[i] == nextevent)
-                 {
+              }
+              else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
+              {
+                  if (TriggerDelayCounter[i] == nextevent)
+                  {
                     // do event
                     Tick(i,&TriggerDelay[i]);
                     TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer()->SamplesPerRow())/256;
-                 }
-                 else
-                 {
+                  }
+                  else
+                  {
                     TriggerDelayCounter[i] -= nextevent;
-                 }
-             }
-             else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
-             {
+                  }
+              }
+              else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
+              {
                 if (TriggerDelayCounter[i] == nextevent)
                 {
-                   // do event
-                   Tick(i,&TriggerDelay[i]);
-                   TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer()->SamplesPerRow())/256;
-                   int parameter = TriggerDelay[i]._parameter&0x0f;
-                   if (parameter < 9)
-                   {
+                    // do event
+                    Tick(i,&TriggerDelay[i]);
+                    TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer()->SamplesPerRow())/256;
+                    int parameter = TriggerDelay[i]._parameter&0x0f;
+                    if (parameter < 9)
+                    {
                       RetriggerRate[i]+= 4*parameter;
-                   }
-                   else
-                   {
+                    }
+                    else
+                    {
                       RetriggerRate[i]-= 2*(16-parameter);
                       if (RetriggerRate[i] < 16)
                       {
                         RetriggerRate[i] = 16;
                       }
-                   }
-                 }
-                 else
-                 {
+                    }
+                  }
+                  else
+                  {
                     TriggerDelayCounter[i] -= nextevent;
-                 }
+                  }
               }
-           }
+            }
         }
-     }
-     Machine::SetVolumeCounter(numSamples);
-     if ( Global::pConfig()->autoStopMachines )
-     {
+      }
+      Machine::SetVolumeCounter(numSamples);
+      if ( Global::pConfig()->autoStopMachines )
+      {
         if (_volumeCounter < 8.0f) {
           _volumeCounter = 0.0f;
           _volumeDisplay = 0;
           _stopped = true;
         }
         else _stopped=false;
-     }
-   }
+      }
+    }
 
-   //CPUCOST_CALC(cost, numSamples);
+    //CPUCOST_CALC(cost, numSamples);
 //   _cpuCost += cost;
-   _worked = true;
+    _worked = true;
 }
 
 void Sampler::PerformFx( int voice )
@@ -220,21 +220,21 @@ void Sampler::PerformFx( int voice )
   __int64 shift;
   switch(_voices[voice].effCmd)
   {
-     // 0x01 : Pitch Up
-     case 0x01:
-       shift=_voices[voice].effVal*4294967;
-       _voices[voice]._wave._speed+=shift;
-     break;
+      // 0x01 : Pitch Up
+      case 0x01:
+        shift=_voices[voice].effVal*4294967;
+        _voices[voice]._wave._speed+=shift;
+      break;
 
-     // 0x02 : Pitch Down
-     case 0x02:
-       shift=_voices[voice].effVal*4294967;
-       _voices[voice]._wave._speed-=shift;
-       if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
-     break;
+      // 0x02 : Pitch Down
+      case 0x02:
+        shift=_voices[voice].effVal*4294967;
+        _voices[voice]._wave._speed-=shift;
+        if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
+      break;
 
-     default:
-     break;
+      default:
+      break;
   }
 }
 
@@ -258,37 +258,37 @@ void Sampler::VoiceWork( int numsamples, int voice )
   {
     if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
     {
-       pVoice->_triggerNoteDelay = pVoice->_sampleCounter+ pVoice->effVal;
-       pVoice->_envelope._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer()->SampleRate());
-       pVoice->_filterEnv._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer()->SampleRate());
-       pVoice->effretTicks--;
-       pVoice->_wave._pos.QuadPart = 0;
-       if ( pVoice->effretMode == 1 )
-       {
+        pVoice->_triggerNoteDelay = pVoice->_sampleCounter+ pVoice->effVal;
+        pVoice->_envelope._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer()->SampleRate());
+        pVoice->_filterEnv._step = (1.0f/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer()->SampleRate());
+        pVoice->effretTicks--;
+        pVoice->_wave._pos.QuadPart = 0;
+        if ( pVoice->effretMode == 1 )
+        {
           pVoice->_wave._lVolDest += pVoice->effretVol;
           pVoice->_wave._rVolDest += pVoice->effretVol;
-       }
-       else if (pVoice->effretMode == 2 )
-       {
+        }
+        else if (pVoice->effretMode == 2 )
+        {
           pVoice->_wave._lVolDest *= pVoice->effretVol;
           pVoice->_wave._rVolDest *= pVoice->effretVol;
-       }
-     } else
-     {
-         pVoice->_triggerNoteDelay=0;
-     }
-     pVoice->_envelope._stage = ENV_ATTACK;
+        }
+      } else
+      {
+          pVoice->_triggerNoteDelay=0;
+      }
+      pVoice->_envelope._stage = ENV_ATTACK;
     }
     else if (pVoice->_envelope._stage == ENV_OFF)
     {
-       pVoice->_wave._lVolCurr = 0;
-       pVoice->_wave._rVolCurr = 0;
-       return;
+        pVoice->_wave._lVolCurr = 0;
+        pVoice->_wave._rVolCurr = 0;
+        return;
     }
     else if ((pVoice->_triggerNoteOff) && (pVoice->_sampleCounter >= pVoice->_triggerNoteOff))
     {
-       pVoice->_triggerNoteOff = 0;
-       NoteOff(voice);
+        pVoice->_triggerNoteOff = 0;
+        NoteOff(voice);
     }
 
     pResamplerWork = _resampler._pWorkFn;
@@ -298,99 +298,99 @@ void Sampler::VoiceWork( int numsamples, int voice )
 
       if (pVoice->_envelope._stage != ENV_OFF)
       {
-         left_output = pResamplerWork(
+          left_output = pResamplerWork(
           pVoice->_wave._pL + pVoice->_wave._pos.HighPart,
           pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
           if (pVoice->_wave._stereo)
           {
-             right_output = pResamplerWork(
-               pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
-               pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+              right_output = pResamplerWork(
+                pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
+                pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
           }
 
           // Filter section
           //
           if (pVoice->_filter._type < F_NONE)
           {
-             TickFilterEnvelope(voice);
-             pVoice->_filter._cutoff = pVoice->_cutoff + dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
-             if (pVoice->_filter._cutoff < 0)
-             {
+              TickFilterEnvelope(voice);
+              pVoice->_filter._cutoff = pVoice->_cutoff + dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
+              if (pVoice->_filter._cutoff < 0)
+              {
                 pVoice->_filter._cutoff = 0;
-             }
-             if (pVoice->_filter._cutoff > 127)
-             {
+              }
+              if (pVoice->_filter._cutoff > 127)
+              {
                 pVoice->_filter._cutoff = 127;
-             }
+              }
 
-             pVoice->_filter.Update();
-             if (pVoice->_wave._stereo)
-             {
+              pVoice->_filter.Update();
+              if (pVoice->_wave._stereo)
+              {
                 pVoice->_filter.WorkStereo(left_output, right_output);
-             }
-             else
-             {
+              }
+              else
+              {
                 left_output = pVoice->_filter.Work(left_output);
-             }
-           }
+              }
+            }
 
-           TickEnvelope(voice);
+            TickEnvelope(voice);
 
-           // calculate volume
+            // calculate volume
 
-           if(pVoice->_wave._lVolCurr<0)
-           pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
-           if(pVoice->_wave._rVolCurr<0)
-           pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
+            if(pVoice->_wave._lVolCurr<0)
+            pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
+            if(pVoice->_wave._rVolCurr<0)
+            pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
 
-           if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
-           pVoice->_wave._lVolCurr-=0.005f;
-           if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
-           pVoice->_wave._lVolCurr+=0.005f;
-           if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
-           pVoice->_wave._rVolCurr-=0.005f;
-           if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
-           pVoice->_wave._rVolCurr+=0.005f;
+            if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
+            pVoice->_wave._lVolCurr-=0.005f;
+            if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
+            pVoice->_wave._lVolCurr+=0.005f;
+            if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
+            pVoice->_wave._rVolCurr-=0.005f;
+            if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
+            pVoice->_wave._rVolCurr+=0.005f;
 
-           if(!pVoice->_wave._stereo)
-           right_output=left_output;
-           right_output *= pVoice->_wave._rVolCurr*pVoice->_envelope._value;
-           left_output *= pVoice->_wave._lVolCurr*pVoice->_envelope._value;
+            if(!pVoice->_wave._stereo)
+            right_output=left_output;
+            right_output *= pVoice->_wave._rVolCurr*pVoice->_envelope._value;
+            left_output *= pVoice->_wave._lVolCurr*pVoice->_envelope._value;
 
 
 
-           pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
+            pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
 
-           // Loop handler
-           //
-           if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
-           {
-             pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart;
-           }
-           if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
-           {
-             pVoice->_envelope._stage = ENV_OFF;
-           }
-         }
+            // Loop handler
+            //
+            if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
+            {
+              pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart;
+            }
+            if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
+            {
+              pVoice->_envelope._stage = ENV_OFF;
+            }
+          }
 
-         *pSamplesL++ = *pSamplesL+left_output;
-         *pSamplesR++ = *pSamplesR+right_output;
-         numsamples--;
-       }
+          *pSamplesL++ = *pSamplesL+left_output;
+          *pSamplesR++ = *pSamplesR+right_output;
+          numsamples--;
+        }
 }
 
 
 
 void Sampler::NoteOff(int voice)
 {
-   Voice* pVoice = &_voices[voice];
-   if (pVoice->_envelope._stage != ENV_OFF)
-   {
-     pVoice->_envelope._stage = ENV_RELEASE;
-     pVoice->_filterEnv._stage = ENV_RELEASE;
-     pVoice->_envelope._step = (pVoice->_envelope._value/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pPlayer()->SampleRate());
-     pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pPlayer()->SampleRate());
-   }
+    Voice* pVoice = &_voices[voice];
+    if (pVoice->_envelope._stage != ENV_OFF)
+    {
+      pVoice->_envelope._stage = ENV_RELEASE;
+      pVoice->_filterEnv._stage = ENV_RELEASE;
+      pVoice->_envelope._step = (pVoice->_envelope._value/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pPlayer()->SampleRate());
+      pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pPlayer()->SampleRate());
+    }
 }
 
 void Sampler::NoteOffFast(int voice)
@@ -841,73 +841,73 @@ void Sampler::Stop(void)
 
 bool Sampler::Load(DeSerializer* pFile)
 {
-   int i;
-   char junk[256];
-   memset(&junk, 0, sizeof(junk));
+    int i;
+    char junk[256];
+    memset(&junk, 0, sizeof(junk));
 
-   pFile->readString(_editName,16);
-   _editName[15] = 0;
+    pFile->readString(_editName,16);
+    _editName[15] = 0;
 
-   pFile->read(&_inputMachines[0], sizeof(_inputMachines));
-   pFile->read(&_outputMachines[0], sizeof(_outputMachines));
-   pFile->read(&_inputConVol[0], sizeof(_inputConVol));
-   pFile->read(&_connection[0], sizeof(_connection));
-   pFile->read(&_inputCon[0], sizeof(_inputCon));
-   pFile->read((char*)&_connectionPoint[0], sizeof(_connectionPoint));
-   pFile->read(&_numInputs, sizeof(_numInputs));
-   pFile->read(&_numOutputs, sizeof(_numOutputs));
+    pFile->read(&_inputMachines[0], sizeof(_inputMachines));
+    pFile->read(&_outputMachines[0], sizeof(_outputMachines));
+    pFile->read(&_inputConVol[0], sizeof(_inputConVol));
+    pFile->read(&_connection[0], sizeof(_connection));
+    pFile->read(&_inputCon[0], sizeof(_inputCon));
+    pFile->read((char*)&_connectionPoint[0], sizeof(_connectionPoint));
+    pFile->read(&_numInputs, sizeof(_numInputs));
+    pFile->read(&_numOutputs, sizeof(_numOutputs));
 
-   pFile->read(&_panning, sizeof(_panning));
-   Machine::SetPan(_panning);
-   pFile->read(&junk[0], 8*sizeof(int)); // SubTrack[]
-   pFile->read(&_numVoices, sizeof(_numVoices)); // numSubtracks
+    pFile->read(&_panning, sizeof(_panning));
+    Machine::SetPan(_panning);
+    pFile->read(&junk[0], 8*sizeof(int)); // SubTrack[]
+    pFile->read(&_numVoices, sizeof(_numVoices)); // numSubtracks
 
-   if (_numVoices < 4)
-   {
-     // Psycle versions < 1.1b2 had polyphony per channel,not per machine.
-     _numVoices = 8;
-   }
+    if (_numVoices < 4)
+    {
+      // Psycle versions < 1.1b2 had polyphony per channel,not per machine.
+      _numVoices = 8;
+    }
 
-   pFile->read(&i, sizeof(int)); // interpol
-   switch (i)
-   {
-     case 2:
-       _resampler.SetQuality(dsp::R_SPLINE);
-     break;
-     case 0:
-       _resampler.SetQuality(dsp::R_NONE);
-     break;
-     default:
-     case 1:
-       _resampler.SetQuality(dsp::R_LINEAR);
-     break;
-   }
+    pFile->read(&i, sizeof(int)); // interpol
+    switch (i)
+    {
+      case 2:
+        _resampler.SetQuality(dsp::R_SPLINE);
+      break;
+      case 0:
+        _resampler.SetQuality(dsp::R_NONE);
+      break;
+      default:
+      case 1:
+        _resampler.SetQuality(dsp::R_LINEAR);
+      break;
+    }
 
-   pFile->read(&junk[0], sizeof(int)); // outwet
-   pFile->read(&junk[0], sizeof(int)); // outdry
+    pFile->read(&junk[0], sizeof(int)); // outwet
+    pFile->read(&junk[0], sizeof(int)); // outdry
 
-   pFile->read(&junk[0], sizeof(int)); // distPosThreshold
-   pFile->read(&junk[0], sizeof(int)); // distPosClamp
-   pFile->read(&junk[0], sizeof(int)); // distNegThreshold
-   pFile->read(&junk[0], sizeof(int)); // distNegClamp
+    pFile->read(&junk[0], sizeof(int)); // distPosThreshold
+    pFile->read(&junk[0], sizeof(int)); // distPosClamp
+    pFile->read(&junk[0], sizeof(int)); // distNegThreshold
+    pFile->read(&junk[0], sizeof(int)); // distNegClamp
 
-   pFile->read(&junk[0], sizeof(char)); // sinespeed
-   pFile->read(&junk[0], sizeof(char)); // sineglide
-   pFile->read(&junk[0], sizeof(char)); // sinevolume
-   pFile->read(&junk[0], sizeof(char)); // sinelfospeed
-   pFile->read(&junk[0], sizeof(char)); // sinelfoamp
+    pFile->read(&junk[0], sizeof(char)); // sinespeed
+    pFile->read(&junk[0], sizeof(char)); // sineglide
+    pFile->read(&junk[0], sizeof(char)); // sinevolume
+    pFile->read(&junk[0], sizeof(char)); // sinelfospeed
+    pFile->read(&junk[0], sizeof(char)); // sinelfoamp
 
-   pFile->read(&junk[0], sizeof(int)); // delayTimeL
-   pFile->read(&junk[0], sizeof(int)); // delayTimeR
-   pFile->read(&junk[0], sizeof(int)); // delayFeedbackL
-   pFile->read(&junk[0], sizeof(int)); // delayFeedbackR
+    pFile->read(&junk[0], sizeof(int)); // delayTimeL
+    pFile->read(&junk[0], sizeof(int)); // delayTimeR
+    pFile->read(&junk[0], sizeof(int)); // delayFeedbackL
+    pFile->read(&junk[0], sizeof(int)); // delayFeedbackR
 
-   pFile->read(&junk[0], sizeof(int)); // filterCutoff
-   pFile->read(&junk[0], sizeof(int)); // filterResonance
-   pFile->read(&junk[0], sizeof(int)); // filterLfospeed
-   pFile->read(&junk[0], sizeof(int)); // filterLfoamp
-   pFile->read(&junk[0], sizeof(int)); // filterLfophase
-   pFile->read(&junk[0], sizeof(int)); // filterMode
+    pFile->read(&junk[0], sizeof(int)); // filterCutoff
+    pFile->read(&junk[0], sizeof(int)); // filterResonance
+    pFile->read(&junk[0], sizeof(int)); // filterLfospeed
+    pFile->read(&junk[0], sizeof(int)); // filterLfoamp
+    pFile->read(&junk[0], sizeof(int)); // filterLfophase
+    pFile->read(&junk[0], sizeof(int)); // filterMode
 
-   return true;
+    return true;
 }
