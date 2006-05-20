@@ -66,8 +66,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						switch (_pSong->_pMachine[wiresource]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong->_pMachine[wiresource]->GetPosY()+(MachineCoords.sGenerator.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->GetPosX()+(MachineCoords.sGenerator.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->GetPosX()+(MachineCoords.sGenerator.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->GetPosY()+(MachineCoords.sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
