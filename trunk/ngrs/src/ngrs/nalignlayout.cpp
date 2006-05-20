@@ -103,7 +103,7 @@ void NAlignLayout::align( NVisualComponent * parent )
                  int leftOff = (lastLeft == 0) ? hgap_ : lastLeft->left() + lastLeft->width() + hgap_ ;
                  int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
                  int bottomOff  = (lastBottom == 0) ? vgap_ : parent->clientHeight() - lastBottom->top() + vgap_ ;
-                 int rightOff  = (lastRight == 0) ? hgap_ : parent->clientWidth() - lastRight->left() - hgap_;
+                 int rightOff  = (lastRight == 0) ? hgap_ : parent->clientWidth() - (lastRight->left() - hgap_);
                  maxX_ = visualChild->preferredWidth()  + leftOff;
                  maxY_ = visualChild->preferredHeight() + topOff + bottomOff;
                  visualChild->setPosition(leftOff,topOff,parent->clientWidth() - leftOff-rightOff,parent->clientHeight() - topOff - bottomOff);
