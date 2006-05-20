@@ -21,11 +21,12 @@
 #include "nvisualcomponent.h"
 
 NTableLayout::NTableLayout()
- : NLayout(), cols_(1), rows_(1),hgap_(0),vgap_(0)
+ : NLayout(), cols_(1), rows_(1),hgap_(0),vgap_(0),minCellWidth_(20),minCellHeight_(20)
+
 {
 }
 
-NTableLayout::NTableLayout( int cols, int rows ) : NLayout(), cols_(cols), rows_(rows),hgap_(0),vgap_(0)
+NTableLayout::NTableLayout( int cols, int rows ) : NLayout(), cols_(cols), rows_(rows),hgap_(0),vgap_(0),minCellWidth_(20),minCellHeight_(20)
 {
 }
 
@@ -66,18 +67,18 @@ void NTableLayout::align( NVisualComponent * parent )
          xp+=colWidth+hgap_;
          lastIndex = newIndex+1;
       }
-      yp+=rowHeight;
+      yp+=rowHeight+vgap_;
    }
 }
 
 int NTableLayout::preferredWidth( const NVisualComponent * target ) const
 {
-  return colWidthBetween(0,cols_);
+  return hgap_ + colWidthBetween(0,cols_);
 }
 
 int NTableLayout::preferredHeight( const NVisualComponent * target ) const
 {
-  int yp = 0;
+  int yp = vgap_;
   std::map<int,Row>::const_iterator rowIt = rows.begin();
   int lastRowIndex = 0;
   for ( ; rowIt != rows.end(); rowIt++ ) {
@@ -85,13 +86,13 @@ int NTableLayout::preferredHeight( const NVisualComponent * target ) const
     int rowHeight = row.rowMaxHeight();
     int newRowIndex = rowIt->first;
     if ((newRowIndex-lastRowIndex) > 0) {
-      yp += defaultRowHeight() * (newRowIndex-lastRowIndex);
+      yp += (defaultRowHeight()+vgap_) * (newRowIndex-lastRowIndex);
     }
     lastRowIndex = newRowIndex + 1;
-    yp+=rowHeight;
+    yp+=rowHeight+vgap_;
   }
   if (lastRowIndex < rows_-1) {
-    yp += defaultRowHeight() * (rows_-lastRowIndex);
+    yp += (defaultRowHeight()+vgap_) * (rows_-lastRowIndex);
   }
   return yp;
 }
@@ -179,12 +180,12 @@ NVisualComponent * NTableLayout::Row::colAt( int index )
 
 int NTableLayout::defaultColWidth( ) const
 {
-  return 100;
+  return minCellWidth_;
 }
 
 int NTableLayout::defaultRowHeight( ) const
 {
-  return 20;
+  return minCellHeight_;
 }
 
 int NTableLayout::colMaxWidth( int col ) const
@@ -240,6 +241,12 @@ void NTableLayout::setVGap( int vgap )
 int NTableLayout::vGap( ) const
 {
   return vgap_;
+}
+
+void NTableLayout::setMinimumCellSize( int width, int height )
+{
+  minCellWidth_ = width;
+  minCellHeight_ = height;
 }
 
 
