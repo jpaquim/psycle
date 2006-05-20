@@ -74,7 +74,7 @@ void NProgressBar::setMin( int min )
   min_ = min;
 }
 
-int NProgressBar::min( )
+int NProgressBar::min( ) const
 {
   return min_;
 }
@@ -84,19 +84,19 @@ void NProgressBar::setMax( int max )
   max_ = max;
 }
 
+int NProgressBar::max( ) const
+{
+  return max_;
+}
+
 void NProgressBar::setStep( int step )
 {
   step_ = step;
 }
 
-int NProgressBar::step( )
+int NProgressBar::step( ) const
 {
   return step_;
-}
-
-int NProgressBar::max( )
-{
-  return max_;
 }
 
 void NProgressBar::setValue( int value )
@@ -105,7 +105,7 @@ void NProgressBar::setValue( int value )
   resize();
 }
 
-int NProgressBar::value( )
+int NProgressBar::value( ) const
 {
   return (int) ((progress_ * (max_-min_)) / 100.0f);
 }
@@ -113,6 +113,12 @@ int NProgressBar::value( )
 void NProgressBar::setOrientation( int orientation )
 {
   orientation_ = orientation;
+}
+
+void NProgressBar::setRange( int min, int max )
+{
+  min_ = min;
+  max_ = max;
 }
 
 
