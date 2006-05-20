@@ -200,6 +200,8 @@ Song::~ Song( ) throw()
 
 void Song::Reset( )
 {
+  fileName = "untitled.psy";
+
   cpuIdle=0;
   _sampCount=0;
  //  Cleaning pattern allocation info

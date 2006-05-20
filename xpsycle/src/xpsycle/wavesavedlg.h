@@ -47,6 +47,8 @@ public:
     void saveTick();
     void saveEnd();
 
+    virtual void setVisible(bool on);
+
 private:
 
     // gui elements
@@ -90,6 +92,7 @@ private:
     int iret1;
     pthread_t threadid;
 
+    void initVars();
 
     // button event methods
     void onBrowseBtn(NButtonEvent* ev);
