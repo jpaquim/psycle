@@ -551,7 +551,7 @@ void WaveSaveDlg::saveEnd( )
         }
         // now save the song
         char filename[8000];
-        sprintf(filename,"%s-track %.2u.wav",rootname,i);
+        sprintf(filename,"%s-track %.2u.wav",rootname.c_str(),i);
         saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
         return;
       }
