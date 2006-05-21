@@ -288,3 +288,13 @@ void NSkin::setGradientOrientation(int orientation) {
 int NSkin::translucent() const {
   return translucent_;
 }
+
+void NSkin::setDisabledTextColor( const NColor & color )
+{
+  disabledTextColor_ = color;
+}
+
+const NColor & NSkin::disabledTextColor( ) const
+{
+  return disabledTextColor_;
+}

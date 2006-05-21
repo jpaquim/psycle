@@ -82,14 +82,18 @@ void NListBox::add( NCustomItem * component )
 
 void NListBox::onItemPress( NButtonEvent * ev)
 {
-  NVisualComponent* item = static_cast<NVisualComponent*>(ev->sender());
+  if (ev->button() == 1) {
+    NVisualComponent* item = static_cast<NVisualComponent*>(ev->sender());
 
-  if (!multiSelect_ || !(NApp::system().keyState() & ControlMask)) deSelectItems();
+    if (!multiSelect_ || !(NApp::system().keyState() & ControlMask)) deSelectItems();
 
-  item->setSkin(itemBg);
-  item->repaint();
+    item->setSkin(itemBg);
+    item->repaint();
 
-  onItemSelected((NCustomItem*) (ev->sender()));
+    onItemSelected((NCustomItem*) (ev->sender()));
+  } else {
+      // todo at mousewheel code
+  }
 }
 
 void NListBox::onItemSelected( NCustomItem * item )

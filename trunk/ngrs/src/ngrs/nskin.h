@@ -49,6 +49,9 @@ public:
    void setForeground(const NColor & fgColor);
    const NColor & foreground() const;
    void setTranslucent(const NColor & transColor, int percent);
+   void setDisabledTextColor(const NColor & color);
+   const NColor & disabledTextColor() const;
+
    const NColor & transColor() const;
    void setFont(const NFont & font);
    const NFont & font() const;
@@ -116,6 +119,9 @@ public:
 
       // the spacing indent
       NSize  spacing_;
+
+      // color that will be used as foreground, when a component is disabled
+      NColor disabledTextColor_;
 };
 
 #endif
