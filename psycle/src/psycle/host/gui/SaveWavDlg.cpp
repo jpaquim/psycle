@@ -607,7 +607,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-track %.2u.wav",rootname,i);
+						sprintf(filename,"%s-track %.2u.wav",rootname.c_str(),i);
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
