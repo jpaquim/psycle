@@ -204,9 +204,9 @@ namespace psycle
 			_pScopeBufferL(0),
 			_pScopeBufferR(0),
 			_scopeBufferIndex(0),
-			_scopePrevNumSamples(0)
+			_scopePrevNumSamples(0),
+			_editName("")
 		{
-			_editName[0] = '\0';
 			_pSamplesL = new float[MAX_BUFFER_LENGTH];
 			_pSamplesR = new float[MAX_BUFFER_LENGTH];
 			// Clear machine buffer samples
@@ -699,11 +699,11 @@ namespace psycle
 				pFile->Read(pMachine->_inputCon[i]);
 			}
 			{
-				///\todo hardcoded limits and wastes
-				char c[32];
-				pFile->ReadString(c, 32); // whoa, it's null-terminated but we always save 32 chars?
-				c[31] = 0;
-				pMachine->_editName = c;
+				//see? no char arrays! god bless the stl
+				//it's still necessary to limit editname length, but i'm inclined to think 128 is plenty..
+				std::vector<char> nametemp(128);
+				pFile->ReadString(&nametemp[0], nametemp.size());
+				pMachine->_editName.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
 			}
 			if(bDeleted) pMachine->_editName += " (replaced)";
 			if(!fullopen) return pMachine;
@@ -788,12 +788,8 @@ namespace psycle
 				pFile->Write(_connection[i]);
 				pFile->Write(_inputCon[i]);
 			}
-			{
-				///\todo hardcoded limits and wastes
-				char c[32];
-				std::strncpy(c, _editName.c_str(), 32); c[31] = 0;// happily truncates!
-				pFile->Write(c, 32); // whoa, it's null-terminated but we always save 32 chars?
-			}
+			pFile->Write(GetEditName().c_str(), GetEditName().length()+1);	//a max of 128 chars will be read on song load, but there's no real
+																			//reason to limit what gets saved here.. (is there?)
 			SaveSpecificChunk(pFile);
 		}
 

@@ -302,8 +302,8 @@ namespace psycle
 		void Plugin::SaveDllName(RiffFile * pFile) 
 		{
 			boost::filesystem::path path(this->GetDllName(), boost::filesystem::native);
-			path = path.leaf();
-			pFile->Write(path.string().c_str(), path.string().length() + 1);
+			std::string pathstr = path.leaf();
+			pFile->Write(pathstr.c_str(), pathstr.length() + 1);
 		}
 
 		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
