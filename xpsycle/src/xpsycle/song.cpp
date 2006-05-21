@@ -306,140 +306,151 @@ void Song::New( )
 
 bool Song::load( const std::string & fName )
 {
-  DeSerializer f(fName.c_str());
+	try
+	{
+	  DeSerializer f(fName.c_str());
 
-  int fileSize = f.fileSize();
-  int fcounter = 0;
+	  int fileSize = f.fileSize();
+	  int fcounter = 0;
 
-  if (f.getHeader8()=="PSY3SONG") {
-      if (f.getVersion() > CURRENT_FILE_VERSION) { }
-      unsigned int size    = f.getInt();
-      int chunkcount = 0;
-      if (size == 4) chunkcount = f.getInt();
-      if (size > 4 ) f.skip(size - 4);
+	  if (f.getHeader8()=="PSY3SONG") {
+	      if (f.getVersion() > CURRENT_FILE_VERSION) { }
+	      unsigned int size    = f.getInt();
+	      int chunkcount = 0;
+	      if (size == 4) chunkcount = f.getInt();
+	      if (size > 4 ) f.skip(size - 4);
 
-      int solo = 0;
-      try {
-        while (!f.eof()) {
-          fcounter++;
-          string header = f.getHeader4();
-          if (fcounter % 100 == 0) loadProgress.emit(f.getPos(),fileSize,header);
-          if (header == "INFO") {
-              --chunkcount;
-              if (f.checkVersion(CURRENT_FILE_VERSION_INFO))
-              {
-                f.readString(Name,sizeof(Name));
-                f.readString(Author,sizeof(Author));
-                f.readString(Comment,sizeof(Comment));
-              }
-          } else
-          if (header == "SNGI") {
-              --chunkcount;
-              if (f.checkVersion(CURRENT_FILE_VERSION_SNGI)) {
-                SONGTRACKS       = f.getInt();
-                m_BeatsPerMin    = f.getInt();
-                m_LinesPerBeat   = f.getInt();
-                currentOctave    = f.getInt();
-                solo             = f.getInt();
-                _trackSoloed     = f.getInt();
-                seqBus           = f.getInt();
-                midiSelected     = f.getInt();
-                auxcolSelected   = f.getInt();
-                instSelected     = f.getInt();
-                _trackArmedCount = 0; f.getInt();
-                for(int i(0) ; i < SONGTRACKS; ++i) {
-                  f.read(&_trackMuted[i],sizeof(_trackMuted[i]));
-                  // remember to count them
-                  f.read(&_trackArmed[i],sizeof(_trackArmed[i]));
-                  if(_trackArmed[i]) ++_trackArmedCount;
-                }
-              }
-            } else
-          if (header == "SEQD") {
-              --chunkcount;
-              if (f.checkVersion(CURRENT_FILE_VERSION_SEQD)) {
-                unsigned int index = f.getInt();
-                if (index < MAX_SEQUENCES) {
-                  // play length for this sequence
-                  playLength = f.getInt();
-                  // name, for multipattern, for now unused
-                  char pTemp[256];
-                  f.readString(pTemp,sizeof(pTemp));
-                  for (int i(0) ; i < playLength; ++i) {
-                    playOrder[i] = f.getInt();
-                  }
-                }
-              }
-          }
-          if (header == "PATD") {
-              --chunkcount;
-              if (f.checkVersion(CURRENT_FILE_VERSION_PATD)) {
-                unsigned int index = f.getInt();
-                if(index < MAX_PATTERNS) {
-                  // num lines
-                  int num = f.getInt();
-                  // clear it out if it already exists
-                  RemovePattern(index);
-                  patternLines[index] = num;
-                  // num tracks per pattern
-                  // eventually this may be variable per pattern,
-                  // like when we get multipattern
-                  f.getInt();
-                  f.readString(patternName[index], sizeof(*patternName));
-                  unsigned int size = f.getInt();
-                  byte* pSource = new byte[size];
-                  f.read(pSource, size);
-                  byte* pDest;
-                  DataCompression::BEERZ77Decomp2(pSource, &pDest);
-                  zapArray(pSource,pDest);
-                  for(int y(0) ; y < patternLines[index] ; ++y) {
-                    unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
-                    std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
-                    pSource += SONGTRACKS * EVENT_SIZE;
-                  }
-                  zapArray(pDest);
-                }
-              }
-          } else
-          if (header == "MACD") {
-                chunkcount--;
-//               if(!fullopen) {
-                //   curpos = pFile->GetPos();
-  //             }
-                if (f.checkVersion(CURRENT_FILE_VERSION_MACD)) {
+	      int solo = 0;
+	      try {
+	        while (!f.eof()) {
+	          fcounter++;
+	          string header = f.getHeader4();
+	          if (fcounter % 100 == 0) loadProgress.emit(f.getPos(),fileSize,header);
+	          if (header == "INFO") {
+	              --chunkcount;
+	              if (f.checkVersion(CURRENT_FILE_VERSION_INFO))
+	              {
+	                f.readString(Name,sizeof(Name));
+	                f.readString(Author,sizeof(Author));
+	                f.readString(Comment,sizeof(Comment));
+	              }
+	          } else
+	          if (header == "SNGI") {
+	              --chunkcount;
+	              if (f.checkVersion(CURRENT_FILE_VERSION_SNGI)) {
+	                SONGTRACKS       = f.getInt();
+	                m_BeatsPerMin    = f.getInt();
+	                m_LinesPerBeat   = f.getInt();
+	                currentOctave    = f.getInt();
+	                solo             = f.getInt();
+	                _trackSoloed     = f.getInt();
+	                seqBus           = f.getInt();
+	                midiSelected     = f.getInt();
+	                auxcolSelected   = f.getInt();
+	                instSelected     = f.getInt();
+	                _trackArmedCount = 0; f.getInt();
+	                for(int i(0) ; i < SONGTRACKS; ++i) {
+	                  f.read(&_trackMuted[i],sizeof(_trackMuted[i]));
+	                  // remember to count them
+	                  f.read(&_trackArmed[i],sizeof(_trackArmed[i]));
+	                  if(_trackArmed[i]) ++_trackArmedCount;
+	                }
+	              }
+	            } else
+	          if (header == "SEQD") {
+	              --chunkcount;
+	              if (f.checkVersion(CURRENT_FILE_VERSION_SEQD)) {
+	                unsigned int index = f.getInt();
+	                if (index < MAX_SEQUENCES) {
+	                  // play length for this sequence
+	                  playLength = f.getInt();
+	                  // name, for multipattern, for now unused
+	                  char pTemp[256];
+	                  f.readString(pTemp,sizeof(pTemp));
+	                  for (int i(0) ; i < playLength; ++i) {
+	                    playOrder[i] = f.getInt();
+	                  }
+	                }
+	              }
+	          }
+	          if (header == "PATD") {
+	              --chunkcount;
+	              if (f.checkVersion(CURRENT_FILE_VERSION_PATD)) {
+	                unsigned int index = f.getInt();
+	                if(index < MAX_PATTERNS) {
+	                  // num lines
+	                  int num = f.getInt();
+	                  // clear it out if it already exists
+	                  RemovePattern(index);
+	                  patternLines[index] = num;
+	                  // num tracks per pattern
+	                  // eventually this may be variable per pattern,
+	                  // like when we get multipattern
+	                  f.getInt();
+	                  f.readString(patternName[index], sizeof(*patternName));
+	                  unsigned int size = f.getInt();
+	                  byte* pSource = new byte[size];
+	                  f.read(pSource, size);
+	                  byte* pDest;
+	                  DataCompression::BEERZ77Decomp2(pSource, &pDest);
+	                  zapArray(pSource,pDest);
+	                  for(int y(0) ; y < patternLines[index] ; ++y) {
+	                    unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
+	                    std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
+	                    pSource += SONGTRACKS * EVENT_SIZE;
+	                  }
+	                  zapArray(pDest);
+	                }
+	              }
+	          } else
+	          if (header == "MACD") {
+	                chunkcount--;
+	//               if(!fullopen) {
+	                //   curpos = pFile->GetPos();
+	  //             }
+	                if (f.checkVersion(CURRENT_FILE_VERSION_MACD)) {
 
-                }
-                  unsigned int index = f.getInt();
-                  if(index < MAX_MACHINES) {
-                      // we had better load it
-                        DestroyMachine(index); bool fullopen = true;
-                        _pMachine[index] = Machine::LoadFileChunk(&f, index, CURRENT_FILE_VERSION_MACD, fullopen);
-                      // skips specific chunk.
-    //                    if(!fullopen) pFile->seek(curpos + size);
-                  } else {
-            //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-//                      pFile->Skip(size - sizeof index);
-                  }
-          } else 
-          if (header== "INSD") {
-            if (f.checkVersion(CURRENT_FILE_VERSION_INSD)) {
-                int index = f.getInt();
-                if(index < MAX_INSTRUMENTS) {
-                  _pInstrument[index]->LoadFileChunk(&f, CURRENT_FILE_VERSION_INSD, true);
-                } else
-                {
-                  //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-                  //pFile->skip(size - sizeof index);
-                }
-            }
-          }
+	                }
+	                  unsigned int index = f.getInt();
+	                  if(index < MAX_MACHINES) {
+	                      // we had better load it
+	                        DestroyMachine(index); bool fullopen = true;
+	                        _pMachine[index] = Machine::LoadFileChunk(&f, index, CURRENT_FILE_VERSION_MACD, fullopen);
+	                      // skips specific chunk.
+	    //                    if(!fullopen) pFile->seek(curpos + size);
+	                  } else {
+	            //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+	//                      pFile->Skip(size - sizeof index);
+	                  }
+	          } else 
+	          if (header== "INSD") {
+	            if (f.checkVersion(CURRENT_FILE_VERSION_INSD)) {
+	                int index = f.getInt();
+	                if(index < MAX_INSTRUMENTS) {
+	                  _pInstrument[index]->LoadFileChunk(&f, CURRENT_FILE_VERSION_INSD, true);
+	                } else
+	                {
+	                  //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+	                  //pFile->skip(size - sizeof index);
+	                }
+	            }
+	          }
 
-        }
-      }  catch (int e) {};
-  }
+	        }
+	      }  catch (int e) {};
+	  }
 
-  f.close();
-  fileName = fName;
+	  f.close();
+	  fileName = fName;
+	}
+	catch (const char* e)
+	{
+		std::cerr << e << std::endl;
+	}
+	catch (const std::exception & e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 }
 
 
