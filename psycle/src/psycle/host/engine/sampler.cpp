@@ -203,8 +203,11 @@ namespace psycle
 			char junk[256];
 			memset(&junk, 0, sizeof(junk));
 
-			pFile->Read(&_editName,16);
-			_editName[15] = 0;
+			{
+				std::vector<char> nametemp(128);
+				pFile->Read(&nametemp[0], nametemp.size());
+				_editName.assign(nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
+			}
 
 			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 			pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
