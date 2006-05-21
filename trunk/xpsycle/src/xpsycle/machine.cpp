@@ -60,16 +60,16 @@ Machine::Machine() :/* crashed_(),
   , _nCols(1)
   , _numInputs(0)
   , _numOutputs(0)
-  , TWSSamples(0)
   , TWSActive(false)
+  , TWSSamples(0)
   , _volumeCounter(0.0f)
   , _volumeDisplay(0)
   , _volumeMaxDisplay(0)
   , _volumeMaxCounterLife(0)
+  , _scopePrevNumSamples(0)
+  , _scopeBufferIndex(0)
   , _pScopeBufferL(0)
   , _pScopeBufferR(0)
-  , _scopeBufferIndex(0)
-  , _scopePrevNumSamples(0)
   {
     _editName[0] = '\0';
     _pSamplesL = new float[STREAM_SIZE];
