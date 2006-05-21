@@ -150,17 +150,19 @@ void NWindow::onMousePress( int x, int y, int button )
       }
      }
     selectedBase_ = dragBase_;
-    obj->onMousePress( x - obj->absoluteSpacingLeft() +
-    obj->scrollDx(), y - obj->absoluteSpacingTop() + obj->scrollDy(), button);
+    if ( selectedBase_->enabled() ) {
+      obj->onMousePress( x - obj->absoluteSpacingLeft() +
+      obj->scrollDx(), y - obj->absoluteSpacingTop() + obj->scrollDy(), button);
+    }
   }
 }
 
 void NWindow::onMousePressed( int x, int y, int button )
 {
-  if (dragBase_!=0) dragBase_->onMousePressed( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop(), button);
+  if (dragBase_!=0 && dragBase_->enabled()) dragBase_->onMousePressed( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop(), button);
   if (button==1) endDrag(dragBase_,x,y);
   dragBase_ = 0;
-  if (selectedBase_!=0) selectedBase_->onFocus();
+  if ( selectedBase_!=0 && selectedBase_->enabled() ) selectedBase_->onFocus();
 }
 
 void NWindow::onMouseOver( int x, int y )
@@ -172,9 +174,9 @@ void NWindow::onMouseOver( int x, int y )
     dragBase_->onMouseOver( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop());
   } else {
     NVisualComponent* over = pane_->overObject(graphics_,x,y);
-    if (lastOver_!=0 && over!=lastOver_) lastOver_->onMouseExit();
-    if (over!=0) {
-       if (over!=lastOver_ || lastOver_==0) over->onMouseEnter();
+    if (lastOver_!=0 && over!=lastOver_ && lastOver_->enabled()) lastOver_->onMouseExit();
+    if (over!=0 && over->enabled()) {
+       if (over!=lastOver_ || lastOver_==0 && selectedBase_->enabled()) over->onMouseEnter();
        over->onMouseOver( x - over->absoluteSpacingLeft(), y - over->absoluteSpacingTop());
     }
     lastOver_ = over;
@@ -321,12 +323,12 @@ void NWindow::dragRectPicker( NVisualComponent * dragBase, int x, int y, int var
 
 void NWindow::onKeyPress( const NKeyEvent & keyEvent )
 {
-  if (selectedBase_ != NULL) selectedBase_->onKeyPress(NKeyEvent(selectedBase_,keyEvent.buffer(),keyEvent.scancode()));
+  if ( selectedBase_ != NULL && selectedBase_->enabled() ) selectedBase_->onKeyPress(NKeyEvent(selectedBase_,keyEvent.buffer(),keyEvent.scancode()));
 }
 
 void NWindow::onKeyRelease( const NKeyEvent & keyEvent )
 {
-  if (selectedBase_ != NULL) selectedBase_->onKeyRelease(NKeyEvent(selectedBase_,keyEvent.buffer(),keyEvent.scancode()));
+  if (selectedBase_ != NULL && selectedBase_->enabled() ) selectedBase_->onKeyRelease(NKeyEvent(selectedBase_,keyEvent.buffer(),keyEvent.scancode()));
 }
 
 

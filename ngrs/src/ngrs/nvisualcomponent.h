@@ -161,6 +161,9 @@ public:
     void setEvents(bool on);
     bool events() const;
 
+    virtual void setEnable(bool on);
+    bool enabled() const;
+
     int zOrder();
     int componentZOrderSize();
     NVisualComponent* componentByZOrder(int zOrder);
@@ -218,6 +221,8 @@ private:
    int ownerPreferredHeight_;
 
    NAlignConstraint alignConstraint_;
+
+   bool enabled_;
 };
 
 #endif
