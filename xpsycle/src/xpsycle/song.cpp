@@ -320,9 +320,15 @@ bool Song::load( const std::string & fName )
         if (size == 4) chunkcount = f.getInt();
         if (size > 4 ) f.skip(size - 4);
 
+       DestroyAllMachines();
+       _machineLock = true;
+      DeleteInstruments();
+      DeleteAllPatterns();
+                                                                                                       
+                                                                                                        
         int solo = 0;
         try {
-          while (!f.eof()) {
+          while (!f.eof()) { //this will ever emit a eof
             fcounter++;
             string header = f.getHeader4();
             if (fcounter % 100 == 0) loadProgress.emit(f.getPos(),fileSize,header);

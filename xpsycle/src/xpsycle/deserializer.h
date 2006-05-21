@@ -90,62 +90,59 @@ public:
 
     void read(byte * buf, int bytes) {
       if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (byte)";
       _stream.read(reinterpret_cast<char*>(buf) ,bytes);
       if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (byte)";
     }
 
     void read(int * buf, int bytes) {
       if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (int)";
       _stream.read(reinterpret_cast<char*>(buf) ,bytes);
       if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (int)";
     }
 
     void read(short * buf, int bytes) {
       if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (short)";
       _stream.read(reinterpret_cast<char*>(buf) ,bytes);
       if (_stream.bad())
-            throw "file read failed";
-    }
-
-
-    void read(float * buf, int bytes) {
-      if (_stream.eof())
-            throw "unexpected end of file";
-      _stream.read(reinterpret_cast<char*>(buf) ,bytes);
-      if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (short)";
     }
 
     void read(bool * buf, int bytes) {
       if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (bool)";
       _stream.read(reinterpret_cast<char*>(buf),bytes);
       if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (bool)";
     }
 
-
+    void read(float * buf, int bytes) {
+      if (_stream.eof())
+            throw "unexpected end of file (float)";
+      _stream.read(reinterpret_cast<char*>(buf) ,bytes);
+      if (_stream.bad())
+            throw "file read failed (float)";
+    }
 
     void read(char * buf, int bytes) {
       if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (char)";
       _stream.read(buf,bytes);
       if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (char)";
     }
 
     byte getByte() {
       char buf[1];
       if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (getByte)";
       _stream.read(buf,1);
       if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (getByte)";
       return buf[0];
     }
 
@@ -168,33 +165,33 @@ public:
     std::string getHeader4()
     {
         if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (getHeader4)";
         char data4[4];
         _stream.read(data4, sizeof (data4));
         if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (getHeader4)";
         return std::string(data4,4);
     }
 
     std::string getHeader8()
     {
         if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (getHeader8)";
         char data8[8];
         _stream.read (data8, sizeof (data8));
         if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (getHeader8)";
         return std::string(data8,8);
     }
 
     int getInt ()
     {
         if (_stream.eof())
-            throw "unexpected end of file";
+            throw "unexpected end of file (getInt)";
         int i;
         _stream.read (reinterpret_cast<char *> (&i), sizeof (int));
         if (_stream.bad())
-            throw "file read failed";
+            throw "file read failed (getInt)";
         return i;
     }
 
