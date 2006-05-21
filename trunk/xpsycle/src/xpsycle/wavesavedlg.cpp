@@ -49,8 +49,6 @@ WaveSaveDlg::WaveSaveDlg()
   m_recmode = 0;
   channelmode = -1;
 
-  for (int i; i < MAX_SONG_POSITIONS; i++) sel[i] = 0;
-
   // init gui
 
   setTitle("Render as Wav File");
