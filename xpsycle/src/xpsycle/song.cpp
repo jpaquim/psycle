@@ -443,7 +443,15 @@ bool Song::load( const std::string & fName )
             }
 
           }
-        }  catch (int e) {};
+        }
+        catch (const char* e)
+        {
+          std::cerr << e << std::endl;
+        }
+          catch (const std::exception & e)
+        {
+          std::cerr << e.what() << std::endl;
+        }
     }
 
     f.close();

@@ -226,7 +226,7 @@ void MainWindow::initToolBar( )
     img->setPreferredSize(25,25);
     NButton* fileOpenBtn = new NButton(img);
       fileOpenBtn->setHint("Song load");
-    toolBar1_->add(fileOpenBtn)->clicked.connect(this,&MainWindow::onFileOpen);;
+    toolBar1_->add(fileOpenBtn)->clicked.connect(this,&MainWindow::onFileOpen);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save()); else
