@@ -34,7 +34,7 @@ public:
 
     ~NXPMFilter();
 
-    NBitmap loadFromFile(std::string filename);
+    NBitmap loadFromFile(const std::string & filename);
 
 };
 

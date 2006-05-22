@@ -143,9 +143,15 @@ const NBitmap & NBitmap::operator =( const NBitmap & rhs )
 
 void NBitmap::loadFromFile( const std::string & filename )
 {
-  NBitmap bmp1 = NApp::filter.at(0)->loadFromFile(NFile::replaceTilde(filename));
-  xi  = bmp1.X11data();
-  clp = bmp1.X11ClpData();
+  try {
+    NBitmap bmp1 = NApp::filter.at(0)->loadFromFile(NFile::replaceTilde(filename));
+    xi  = bmp1.X11data();
+    clp = bmp1.X11ClpData();
+  } catch (const char* e) {
+     xi = 0;
+     clp = 0;
+     throw "couldn`t open file";
+  }
 }
 
 
