@@ -35,6 +35,7 @@ Those abstractions of platforms specificities can be categorized into:
 
 # configure
 if True:
+	#diversalis = packageneric.check().ExternalPackage(
 	diversalis = packageneric.ExternalPackage(
 		packageneric,
 		pkg_config = 'diversalis',
@@ -70,32 +71,22 @@ if True:
 		debian_version_compare = '>= 1.33'
 	)
 	boost.show()
-	if False:
-		result = []
-		if not packageneric.build_and_execute(
-			source =
-				'''
-					#include <boost/version.hpp>
-					#include <iostream>
-					int main()
-					{
-						std::cout << BOOST_VERSION << std::endl;
-					}
-				''',
-			requires = [],
-			result = result
-		):
-			if not packageneric.check_header(boost, 'boost/version.hpp'):
-				packageneric.error('boost headers required')
-			else:
-				packageneric.error('something odd happened')
-			packageneric.abort()
-		else:
-			if not packageneric.version_match(result[1], '>= 1.33'):
-				packageneric.error('boost headers found but version missmatch')
-				packageneric.abort()
-			
-	packageneric.check_header(boost, 'boost/version.hpp')
+	if True:
+		packageneric.check_header(boost, 'boost/version.hpp')
+		boost_result, boost_version = packageneric.try_run(
+			'boost version',
+			'''
+				#include <boost/version.hpp>
+				#include <iostream>
+				int main()
+				{
+					std::cout << BOOST_VERSION;
+				}
+			'''
+		)
+		print 'boost version', boost_version, boost_version >= 103300
+		if boost_version < str(103300):
+			print 'please install', boost.debian, boost.debian_version_compare
 
 	# boost	thread
 	boost_thread = packageneric.ExternalPackage(
@@ -181,4 +172,3 @@ if True:
 	)
 	#print '======== debian/control'
 	#print debian.control()
-	
