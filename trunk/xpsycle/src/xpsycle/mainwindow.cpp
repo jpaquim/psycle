@@ -508,8 +508,9 @@ void MainWindow::initToolBar( )
       auxSelectCombo_->setIndex(0);
       psycleToolBar_->add(auxSelectCombo_);
       insCombo_ = new NComboBox();
-      insCombo_->setWidth(158);
-      insCombo_->setHeight(20);
+        insCombo_->setWidth(158);
+        insCombo_->setHeight(20);
+        insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
       psycleToolBar_->add(insCombo_);
 
       img = new NImage();
@@ -1213,4 +1214,12 @@ void MainWindow::onEditSeqCopy( NButtonEvent * ev )
 
 void MainWindow::onEditSeqCut( NButtonEvent * ev )
 {
+}
+
+void MainWindow::onInstrumentCbx( NItemEvent * ev )
+{
+  int index = insCombo_->selIndex();
+  Global::pSong()->instSelected=   index;
+  Global::pSong()->auxcolSelected= index;
+  insCombo_->setIndex(index);
 }

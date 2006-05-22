@@ -159,6 +159,7 @@ private:
 
     void onLoadWave(NButtonEvent* ev);
     void onEditInstrument(NButtonEvent* ev);
+    void onInstrumentCbx(NItemEvent* ev);
 
     void onMachineView(NButtonEvent* ev);
     void onPatternView(NButtonEvent* ev);
