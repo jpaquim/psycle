@@ -183,10 +183,7 @@ Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), f
   param_ = param;
 
   if (c==0) {
-    if (Global::pConfig()->iconPath=="") 
-        kbitmap = Global::pBitmaps()->tbmainknob(); 
-    else
-        kbitmap.loadFromFile(Global::pConfig()->iconPath+ "TbMainKnob.xpm");
+    kbitmap = Global::pConfig()->icons().tbmainknob();
   }
   c++;
   add( label = new NLabel());

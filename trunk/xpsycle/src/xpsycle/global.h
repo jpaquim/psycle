@@ -27,8 +27,6 @@
     class Song;
     class Player;
     class Configuration;
-    class DefaultBitmaps;
-
 
     class Global{
     public:
@@ -39,7 +37,6 @@
         static Song* pSong();
         static Player* pPlayer();
         static Configuration* pConfig();
-        static DefaultBitmaps* pBitmaps();
     };
 
 template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)

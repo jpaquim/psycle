@@ -18,6 +18,7 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "defaultbitmaps.h"
+#include "configuration.h"
 
 //////// The bitmaps
 
@@ -11628,6 +11629,225 @@ DefaultBitmaps::DefaultBitmaps()
 
 }
 
+DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
+{
+  try {
+    autoStop_.loadFromFile(pCfg->iconPath+ "autostop.xpm");
+  } catch (const char* e) {
+    autoStop_.createFromXpmData(autostop_xpm);
+  }
+
+  try {
+    help_.loadFromFile(pCfg->iconPath+ "help.xpm");
+  } catch (const char* e) {
+    help_.createFromXpmData(help_xpm);
+  }
+
+  try {
+    less_.loadFromFile(pCfg->iconPath+ "less.xpm");
+  } catch (const char* e) {
+    less_.createFromXpmData(less_xpm);
+  }
+
+  try {
+    lessless_.loadFromFile(pCfg->iconPath+ "lessless.xpm");
+  } catch (const char* e) {
+    lessless_.createFromXpmData(lessless_xpm);
+  }
+
+  try {
+    littleleft_.loadFromFile(pCfg->iconPath+ "littleleft.xpm");
+  } catch (const char* e) {
+    littleleft_.createFromXpmData(littleleft_xpm);
+  }
+
+  try {
+    littleright_.loadFromFile(pCfg->iconPath+ "littleright.xpm");
+  } catch (const char* e) {
+    littleright_.createFromXpmData(littleright_xpm);
+  }
+
+  try {
+    machines_.loadFromFile(pCfg->iconPath+ "machines.xpm");
+  } catch (const char* e) {
+    machines_.createFromXpmData(machines_xpm);
+  }
+
+  try {
+    masterbk_.loadFromFile(pCfg->iconPath+ "masterbk.xpm");
+  } catch (const char* e) {
+    masterbk_.createFromXpmData(masterbk_xpm);
+  }
+
+  try {
+    minus1_.loadFromFile(pCfg->iconPath+ "minus1.xpm");
+  } catch (const char* e) {
+    minus1_.createFromXpmData(minus1_xpm);
+  }
+
+  try {
+    minus_.loadFromFile(pCfg->iconPath+ "minus.xpm");
+  } catch (const char* e) {
+    minus_.createFromXpmData(minus_xpm);
+  }
+
+  try {
+    moremore_.loadFromFile(pCfg->iconPath+ "moremore.xpm");
+  } catch (const char* e) {
+    moremore_.createFromXpmData(moremore_xpm);
+  }
+
+  try {
+    more_.loadFromFile(pCfg->iconPath+ "more.xpm");
+  } catch (const char* e) {
+    more_.createFromXpmData(more_xpm);
+  }
+
+  try {
+    newmachine_.loadFromFile(pCfg->iconPath+ "newmachine.xpm");
+  } catch (const char* e) {
+    newmachine_.createFromXpmData(newmachine_xpm);
+  }
+
+  try {
+    newfile_.loadFromFile(pCfg->iconPath+ "new.xpm");
+  } catch (const char* e) {
+    newfile_.createFromXpmData(new_xpm);
+  }
+
+  try {
+    numbers_.loadFromFile(pCfg->iconPath+ "numbers.xpm");
+  } catch (const char* e) {
+    numbers_.createFromXpmData(numbers_xpm);
+  }
+
+  try {
+    openeditor_.loadFromFile(pCfg->iconPath+ "openeditor.xpm");
+  } catch (const char* e) {
+    openeditor_.createFromXpmData(openeditor_xpm);
+  }
+
+  try {
+    open_.loadFromFile(pCfg->iconPath+ "open.xpm");
+  } catch (const char* e) {
+    open_.createFromXpmData(open_xpm);
+  }
+
+  try {
+    pattern_header_skin_.loadFromFile(pCfg->iconPath+ "pattern_header_skin.xpm");
+  } catch (const char* e) {
+    pattern_header_skin_.createFromXpmData(pattern_header_skin_xpm);
+  }
+
+  try {
+    patterns_.loadFromFile(pCfg->iconPath+ "patterns.xpm");
+  } catch (const char* e) {
+    patterns_.createFromXpmData(patterns_xpm);
+  }
+
+  try {
+    playselpattern_.loadFromFile(pCfg->iconPath+ "playselpattern.xpm");
+  } catch (const char* e) {
+    playselpattern_.createFromXpmData(playselpattern_xpm);
+  }
+
+  try {
+    playstart_.loadFromFile(pCfg->iconPath+ "playstart.xpm");
+  } catch (const char* e) {
+    playstart_.createFromXpmData(playstart_xpm);
+  }
+
+  try {
+    play_.loadFromFile(pCfg->iconPath+ "play.xpm");
+  } catch (const char* e) {
+    play_.createFromXpmData(play_xpm);
+  }
+
+  try {
+    plus1_.loadFromFile(pCfg->iconPath+ "plus1.xpm");
+  } catch (const char* e) {
+    plus1_.createFromXpmData(plus1_xpm);
+  }
+
+  try {
+    plus_.loadFromFile(pCfg->iconPath+ "plus.xpm");
+  } catch (const char* e) {
+    plus_.createFromXpmData(plus_xpm);
+  }
+
+  try {
+    p_.loadFromFile(pCfg->iconPath+ "p.xpm");
+  } catch (const char* e) {
+    p_.createFromXpmData(p_xpm);
+  }
+
+  try {
+    recordnotes_.loadFromFile(pCfg->iconPath+ "recordnotes.xpm");
+  } catch (const char* e) {
+    recordnotes_.createFromXpmData(recordnotes_xpm);
+  }
+
+  try {
+    recordwav_.loadFromFile(pCfg->iconPath+ "recordwav.xpm");
+  } catch (const char* e) {
+    recordwav_.createFromXpmData(recordwav_xpm);
+  }
+
+  try {
+    redo_.loadFromFile(pCfg->iconPath+ "redo.xpm");
+  } catch (const char* e) {
+    redo_.createFromXpmData(redo_xpm);
+  }
+
+  try {
+    save_audio_.loadFromFile(pCfg->iconPath+ "save_audio.xpm");
+  } catch (const char* e) {
+    save_audio_.createFromXpmData(saveaudio_xpm);
+  }
+
+  try {
+    save_.loadFromFile(pCfg->iconPath+ "save.xpm");
+  } catch (const char* e) {
+    save_.createFromXpmData(save_xpm);
+  }
+
+  try {
+    sequencer_.loadFromFile(pCfg->iconPath+ "sequencer.xpm");
+  } catch (const char* e) {
+    sequencer_.createFromXpmData(sequencer_xpm);
+  }
+
+  try {
+    splash_.loadFromFile(pCfg->iconPath+ "splash.xpm");
+  } catch (const char* e) {
+    splash_.createFromXpmData(splash_xpm);
+  }
+
+  try {
+    stop_.loadFromFile(pCfg->iconPath+ "stop.xpm");
+  } catch (const char* e) {
+    stop_.createFromXpmData(stop_xpm);
+  }
+
+  try {
+    tbmainknob_.loadFromFile(pCfg->iconPath+ "TbMainKnob.xpm");
+  } catch (const char* e) {
+    tbmainknob_.createFromXpmData(tbmainknob_xpm);
+  }
+
+  try {
+    undo_.loadFromFile(pCfg->iconPath+ "undo.xpm");
+  } catch (const char* e) {
+    undo_.createFromXpmData(undo_xpm);
+  }
+
+  try {
+    machine_skin_.loadFromFile(pCfg->iconPath+ "machine_skin.xpm");
+  } catch (const char* e) {
+    machine_skin_.createFromXpmData(machine_skin_xpm);
+  }
+}
+
 
 DefaultBitmaps::~DefaultBitmaps()
 {
@@ -11638,6 +11858,7 @@ DefaultBitmaps::~DefaultBitmaps()
 
 NBitmap & DefaultBitmaps::autoStop( )
 {
+  return autoStop_;
 }
 
 NBitmap & DefaultBitmaps::help( )
@@ -11813,3 +12034,5 @@ NBitmap & DefaultBitmaps::undo( )
 NBitmap & DefaultBitmaps::machine_skin() {
   return machine_skin_;
 }
+
+

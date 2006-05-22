@@ -337,11 +337,7 @@ int PatternView::editOctave( )
 /// The Header Panel Class
 PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , NPanel()
 {
-  if (Global::pConfig()->iconPath=="") 
-    bitmap = Global::pBitmaps()->pattern_header_skin();
-  else
-    bitmap.loadFromFile(Global::pConfig()->iconPath+ "pattern_header_skin.xpm");
-
+  bitmap = Global::pConfig()->icons().pattern_header_skin();
   setSkin();
   setHeight(bgCoords.height());
   skinColWidth_ = bgCoords.width();

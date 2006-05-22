@@ -22,6 +22,7 @@
 
 #include "audiodriver.h"
 #include "inputhandler.h"
+#include "defaultbitmaps.h"
 #include <ngrs/ncolor.h>
 #include <ngrs/nobject.h>
 #include <vector>
@@ -46,7 +47,8 @@ private:
     void loadConfig(std::string const & path) throw(std::exception);
 
 public:
-    NBitmap newfile();
+
+    DefaultBitmaps & icons();
 
     bool autoStopMachines;
     std::string iconPath;
@@ -229,8 +231,10 @@ public:
     midi_type                midi_;
 
 private:
-    void setSkinDefaults();
 
+    DefaultBitmaps* bitmaps_;
+
+    void setSkinDefaults();
     void onConfigTagParse(const std::string & tagName);
 };
 

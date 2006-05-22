@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
     NApp app;
 
     Global gl;
-    Global::pConfig()->loadConfig();
 
     NSplashScreen* splash = new NSplashScreen();
     splash->loadImageFromFile(Global::pConfig()->iconPath + "/splash.xpm");

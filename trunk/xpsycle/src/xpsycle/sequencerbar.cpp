@@ -51,6 +51,8 @@ void SequencerBar::init( )
 {
   skin_ = NApp::config()->skin("seqbar");
 
+  DefaultBitmaps & icons = Global::pConfig()->icons();
+
   NFrameBorder frBorder;
     frBorder.setOval();
     frBorder.setLineCount(2,4,4);
@@ -72,24 +74,19 @@ void SequencerBar::init( )
     btnBar->setLayout(gridLayout);
 
     NImage* img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus()); else
-                                          img->loadFromFile(Global::pConfig()->iconPath+ "plus.xpm");
+      img->setSharedBitmap(&icons.plus());
     btnBar->add( incshort_     = new NButton(img));
 
     img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->minus()); else
-                                          img->loadFromFile(Global::pConfig()->iconPath+ "minus.xpm");
+       img->setSharedBitmap(&icons.minus());
     btnBar->add( decshort_     = new NButton( img));
 
-
     img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus1()); else
-                                          img->loadFromFile(Global::pConfig()->iconPath+ "plus1.xpm");
+       img->setSharedBitmap(&icons.plus1());
     btnBar->add( inclong_     = new NButton( img));
 
     img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->minus1()); else
-                                          img->loadFromFile(Global::pConfig()->iconPath+ "minus1.xpm");
+       img->setSharedBitmap(&icons.minus1());
     btnBar->add( declong_     = new NButton( img));
 
     btnBar->add( seqnew_       = new NButton("New"));
@@ -166,8 +163,7 @@ void SequencerBar::init( )
     lenPanel->add( new NLabel("Len"));
 
     img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
-                                          img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
+       img->setSharedBitmap(&icons.less()); 
     lenPanel->add( declen_     = new NButton( img,40,10));
     declen_->clicked.connect(this,&SequencerBar::onDecLen);
 
@@ -182,8 +178,7 @@ void SequencerBar::init( )
     lenPanel->add( lenSeg2);
 
     img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
-                                          img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+      img->setSharedBitmap(&icons.more());
     lenPanel->add( inclen_     = new NButton( img,40,10));
     inclen_->clicked.connect(this,&SequencerBar::onIncLen);
     lenPanel->resize();
@@ -750,7 +745,3 @@ bool SequencerBar::followSong( )
 {
   return follow_->checked();
 }
-
-
-
-
