@@ -33,7 +33,7 @@ public:
 
     virtual ~NImgFilter();
 
-    virtual NBitmap loadFromFile(std::string filename) = 0;
+    virtual NBitmap loadFromFile(const std::string & filename) = 0;
 
 };
 
