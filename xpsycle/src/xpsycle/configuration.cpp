@@ -38,11 +38,14 @@ Configuration::Configuration()
   #endif
   setSkinDefaults();
   defaultPatLines = 64;
+  loadConfig();
+  bitmaps_ = new DefaultBitmaps();
 }
 
 
 Configuration::~Configuration()
 {
+  delete bitmaps_;
 }
 
 void Configuration::setSkinDefaults( )
@@ -626,10 +629,7 @@ void Configuration::onConfigTagParse(const std::string & tagName )
   }
 }
 
-NBitmap Configuration::newfile( )
+DefaultBitmaps & Configuration::icons( )
 {
-  if (iconPath=="")
-    return Global::pBitmaps()->newfile();
-  else
-    return NBitmap(iconPath+ "new.xpm");
+  return *bitmaps_;
 }

@@ -39,11 +39,6 @@ Player * Global::pPlayer() {
   return p;
 }
 
-DefaultBitmaps * Global::pBitmaps() {
-  static DefaultBitmaps* p = new DefaultBitmaps();
-  return p;
-}
-
 
 Global::Global()
 {

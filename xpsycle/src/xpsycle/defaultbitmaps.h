@@ -28,6 +28,7 @@
 class DefaultBitmaps{
 public:
     DefaultBitmaps();
+    DefaultBitmaps( class Configuration* pCfg);
 
     ~DefaultBitmaps();
 
