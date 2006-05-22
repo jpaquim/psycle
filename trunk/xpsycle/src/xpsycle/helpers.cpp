@@ -18,6 +18,7 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "helpers.h"
+#include <vector>
 
 float CValueMapper::fMap_255_1[257] = 
       {0, 0.00390625, 0.0078125, 0.01171875, 0.015625, 0.01953125, 0.0234375, 0.02734375, 0.03125, 0.03515625, 0.0390625, 
@@ -69,5 +70,46 @@ float CValueMapper::fMap_255_1[257] =
       94.53125, 94.921875, 95.3125, 95.703125, 96.09375, 96.484375, 96.875, 97.265625, 97.65625, 98.046875, 98.4375, 98.828125, 
       99.21875, 99.609375, 100};
 
+void hexstring_to_vector(std::string const & string, std::vector<unsigned char> & vector)
+			{
+				vector.reserve(string.length());
+				for(std::size_t i(0) ; i < string.length() ; ++i)
+				{
+					char c(string[i]);
+					unsigned char v;
+					if(std::isdigit(c)) v = c - '0';
+					else
+					{
+						c = std::tolower(c);
+						if('a' <= c && c <= 'f') v = 10 + c - 'a';
+						else continue;
+					}
+					vector.push_back(v);
+				}
+			}
 
+
+		template<typename x>
+		void hexstring_to_integer(std::string const & string, x & result)
+		{
+			std::vector<unsigned char> v;
+			hexstring_to_vector(string, v);
+			result = x();
+			int r(1);
+			for(std::vector<unsigned char>::reverse_iterator i(v.rbegin()) ; i != v.rend() ; ++i)
+			{
+				result += *i * r;
+				r *= 0x10;
+			}
+		}
+		template void hexstring_to_integer<  signed          char>(std::string const &,   signed          char &);
+		template void hexstring_to_integer<unsigned          char>(std::string const &, unsigned          char &);
+		template void hexstring_to_integer<  signed short     int>(std::string const &,   signed short     int &);
+		template void hexstring_to_integer<unsigned short     int>(std::string const &, unsigned short     int &);
+		template void hexstring_to_integer<  signed           int>(std::string const &,   signed           int &);
+		template void hexstring_to_integer<unsigned           int>(std::string const &, unsigned           int &);
+		template void hexstring_to_integer<  signed long      int>(std::string const &,   signed long      int &);
+		template void hexstring_to_integer<unsigned long      int>(std::string const &, unsigned long      int &);
+		template void hexstring_to_integer<  signed long long int>(std::string const &,   signed long long int &);
+		template void hexstring_to_integer<unsigned long long int>(std::string const &, unsigned long long int &);
 

@@ -22,6 +22,7 @@
 #include "player.h"
 #include "configuration.h"
 #include "machine.h"
+#include "helpers.h"
 #include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nlabel.h>
@@ -98,15 +99,18 @@ WaveSaveDlg::WaveSaveDlg()
     gBox->setLayout(tableLayout);
     entireRBtn = new NRadioButton();
       entireRBtn->setText("Record the entire song");
+      entireRBtn->click.connect(this,&WaveSaveDlg::onEntireRBtn);
     gBox->add(entireRBtn,NAlignConstraint(nAlLeft,0,0));
     numberRBtn = new NRadioButton();
       numberRBtn->setText("Record pattern number");
+      numberRBtn->click.connect(this,&WaveSaveDlg::onNumberRBtn);
     gBox->add(numberRBtn,NAlignConstraint(nAlLeft,0,1));
     numberEdt = new NEdit();
     gBox->add(numberEdt,NAlignConstraint(nAlLeft,1,1));
     gBox->add(new NLabel("in HEX value"),NAlignConstraint(nAlLeft,2,1));
     seqRBtn = new NRadioButton();
       seqRBtn->setText("Sequence positions from");
+      seqRBtn->click.connect(this,&WaveSaveDlg::onSequencerRBtn);
     gBox->add(seqRBtn,NAlignConstraint(nAlLeft,0,2));
     fromEdt = new NEdit();
     gBox->add(fromEdt,NAlignConstraint(nAlLeft,1,2));
@@ -253,7 +257,6 @@ void WaveSaveDlg::initVars( )
     }
   }
 
-  std::cout << bits << std::endl;
 }
 
 void WaveSaveDlg::onBrowseBtn( NButtonEvent * ev )
@@ -265,6 +268,18 @@ void WaveSaveDlg::onBrowseBtn( NButtonEvent * ev )
 
 void WaveSaveDlg::onCloseBtn( NButtonEvent * ev )
 {
+  if (saving || (threadopen > 0))
+  {
+     //while(threadopen > 0)
+     {
+       current = 256;
+       kill_thread=1;
+       usleep(100);
+     }
+  }
+  else if (threadopen <= 0) {
+     doClose(true);
+  }
 }
 
 void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
@@ -479,8 +494,8 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
       pPlayer->Start(0,0);
     break;
     case 1:
-//        m_patnumber.GetWindowText(name);
-//        hexstring_to_integer(name.GetBuffer(2), pstart);
+        name = this->numberEdt->text();
+        hexstring_to_integer(name, pstart);
         progressBar->setRange(0,pSong->patternLines[pstart]);
         for (cont=0;cont<pSong->playLength;cont++)
         {
@@ -497,10 +512,10 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
         pPlayer->_loopSong=false;
     break;
     case 2:
-//        m_rangestart.GetWindowText(name);
-//        hexstring_to_integer(name.GetBuffer(2), pstart);
-//        m_rangeend.GetWindowText(name);
-//        hexstring_to_integer(name.GetBuffer(2), tmp);
+        name = fromEdt->text();
+        hexstring_to_integer(name, pstart);
+        name = toEdt->text();
+        hexstring_to_integer(name, tmp);
         j=0;
         for (cont=pstart;cont<=tmp;cont++)
         {
@@ -757,5 +772,40 @@ void WaveSaveDlg::onGeneratorChkBox( NButtonEvent * ev )
     wireChkBox->repaint();
     trackChkBox->repaint();
   }
+}
+
+// Radiobutton events
+
+void WaveSaveDlg::onEntireRBtn( NButtonEvent * ev )
+{
+  fromEdt->setEnable(false);
+  toEdt->setEnable(false);
+  numberEdt->setEnable(false);
+  fromEdt->repaint();
+  toEdt->repaint();
+  numberEdt->repaint();
+  m_recmode = 0;
+}
+
+void WaveSaveDlg::onNumberRBtn( NButtonEvent * ev )
+{
+  fromEdt->setEnable(false);
+  toEdt->setEnable(false);
+  numberEdt->setEnable(true);
+  fromEdt->repaint();
+  toEdt->repaint();
+  numberEdt->repaint();
+  m_recmode = 1;
+}
+
+void WaveSaveDlg::onSequencerRBtn( NButtonEvent * ev )
+{
+  fromEdt->setEnable(true);
+  toEdt->setEnable(true);
+  numberEdt->setEnable(false);
+  fromEdt->repaint();
+  toEdt->repaint();
+  numberEdt->repaint();
+  m_recmode = 2;
 }
 
