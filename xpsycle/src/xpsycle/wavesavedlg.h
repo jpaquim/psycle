@@ -30,6 +30,7 @@ class NRadioButton;
 class NComboBox;
 class NProgressBar;
 class NButton;
+class NItemEvent;
 
 /**
 @author Stefan Nattkemper
@@ -102,6 +103,15 @@ private:
     void onCloseBtn(NButtonEvent* ev);
     void onSaveBtn(NButtonEvent* ev);
 
+    // combobox events
+    void onSampleRateCbx(NItemEvent* ev);
+    void onBitSelCbx(NItemEvent* ev);
+    void onChannelSelCbx(NItemEvent* ev);
+
+    // checkbox events
+    void onWireChkBox(NButtonEvent* ev);
+    void onTrackChkBox(NButtonEvent* ev);
+    void onGeneratorChkBox(NButtonEvent* ev);
 };
 
 #endif
