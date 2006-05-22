@@ -67,9 +67,9 @@ void MainWindow::initMenu( )
   // Creates the file menu
   fileMenu_ = new NMenu("File");
     fileMenu_->add(new NMenuItem("New",icons.newfile() ))->click.connect(this,&MainWindow::onFileNew);
-    fileMenu_->add(new NMenuItem("Open"))->click.connect(this,&MainWindow::onFileOpen);
+    fileMenu_->add(new NMenuItem("Open",icons.open()))->click.connect(this,&MainWindow::onFileOpen);
     fileMenu_->add(new NMenuItem("Import Module"));
-    fileMenu_->add(new NMenuItem("Save"));
+    fileMenu_->add(new NMenuItem("Save",icons.save()));
     fileMenu_->add(new NMenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
     fileMenu_->add(new NMenuItem("Render as Wav"))->click.connect(this,&MainWindow::onRenderAsWave);
     fileMenu_->add(new NMenuSeperator());
@@ -82,8 +82,8 @@ void MainWindow::initMenu( )
 
   // Creates the edit menu
   editMenu_ = new NMenu("Edit");
-      editMenu_->add(new NMenuItem("Undo"))->click.connect(this,&MainWindow::onEditUndo);
-      editMenu_->add(new NMenuItem("Redo"))->click.connect(this,&MainWindow::onEditRedo);
+      editMenu_->add(new NMenuItem("Undo",icons.undo()))->click.connect(this,&MainWindow::onEditUndo);
+      editMenu_->add(new NMenuItem("Redo",icons.redo()))->click.connect(this,&MainWindow::onEditRedo);
       editMenu_->add(new NMenuSeperator());
       editMenu_->add(new NMenuItem("Pattern Cut"))->click.connect(this,&MainWindow::onEditPatternCut);
       editMenu_->add(new NMenuItem("Pattern Copy"))->click.connect(this,&MainWindow::onEditPatternCopy);
@@ -110,11 +110,11 @@ void MainWindow::initMenu( )
       viewMenu_->add(new NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
       viewMenu_->add(new NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
       viewMenu_->add(new NMenuSeperator());
-      viewMenu_->add(new NMenuItem("PatternEditor"))->click.connect(this,&MainWindow::onPatternView);
-      viewMenu_->add(new NMenuItem("MachineView"))->click.connect(this,&MainWindow::onMachineView);
-      viewMenu_->add(new NMenuItem("PatternSequencer"))->click.connect(this,&MainWindow::onSequencerView);
+      viewMenu_->add(new NMenuItem("PatternEditor",icons.patterns()))->click.connect(this,&MainWindow::onPatternView);
+      viewMenu_->add(new NMenuItem("MachineView",icons.machines()))->click.connect(this,&MainWindow::onMachineView);
+      viewMenu_->add(new NMenuItem("PatternSequencer",icons.sequencer()))->click.connect(this,&MainWindow::onSequencerView);
       viewMenu_->add(new NMenuSeperator());
-      viewMenu_->add(new NMenuItem("Add machine"))->click.connect(this,&MainWindow::onNewMachine);
+      viewMenu_->add(new NMenuItem("Add machine",icons.newmachine()))->click.connect(this,&MainWindow::onNewMachine);
       viewMenu_->add(new NMenuSeperator());
       viewMenu_->add(new NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
     menuBar_->add(viewMenu_);
