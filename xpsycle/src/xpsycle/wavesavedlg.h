@@ -112,6 +112,12 @@ private:
     void onWireChkBox(NButtonEvent* ev);
     void onTrackChkBox(NButtonEvent* ev);
     void onGeneratorChkBox(NButtonEvent* ev);
+
+    // radiobutton events
+
+    void onEntireRBtn(NButtonEvent* ev);
+    void onNumberRBtn(NButtonEvent* ev);
+    void onSequencerRBtn(NButtonEvent* ev);
 };
 
 #endif
