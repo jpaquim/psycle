@@ -597,6 +597,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   childView_->onFileLoadSong(0);
   progressBar_->setVisible(false);
   updateComboGen();
+  sequencerBar_->updateSequencer();
   pane()->repaint();
 }
 
