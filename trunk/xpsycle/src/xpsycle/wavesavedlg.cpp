@@ -39,6 +39,7 @@
 #include <ngrs/nprogressbar.h>
 #include <ngrs/nfiledialog.h>
 #include <ngrs/nbevelborder.h>
+#include <ngrs/nitemevent.h>
 
 WaveSaveDlg::WaveSaveDlg()
   : NDialog()
@@ -74,16 +75,19 @@ WaveSaveDlg::WaveSaveDlg()
   wireChkBox = new NCheckBox();
     wireChkBox->setText("Save each unmuted input to master as a separated wav (wire number will be appended to filename)");
     wireChkBox->setWordWrap(true);
+    wireChkBox->clicked.connect(this,&WaveSaveDlg::onWireChkBox);
   pane()->add(wireChkBox, nAlTop);
 
   trackChkBox = new NCheckBox();
     trackChkBox->setText("Save each unmuted track as a separated wav (track number will be appended to filename)** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem");
     trackChkBox->setWordWrap(true);
+    trackChkBox->clicked.connect(this,&WaveSaveDlg::onTrackChkBox);
   pane()->add(trackChkBox, nAlTop);
 
   generatorChkBox = new NCheckBox();
     generatorChkBox->setText("Save each unmuted generator as a separated wav (generator number will be appended to filename)** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem");
     generatorChkBox->setWordWrap(true);
+    generatorChkBox->clicked.connect(this,&WaveSaveDlg::onGeneratorChkBox);
   pane()->add(generatorChkBox, nAlTop);
 
   NTogglePanel* gBox = new NTogglePanel();
@@ -125,6 +129,7 @@ WaveSaveDlg::WaveSaveDlg()
           sampleRateCbx->add(new NItem("48000 hz"));
           sampleRateCbx->add(new NItem("96000 hz"));
           sampleRateCbx->setIndex(3);
+          sampleRateCbx->itemSelected.connect(this,&WaveSaveDlg::onSampleRateCbx);
         cboxPanel->add(sampleRateCbx,nAlTop);
         cboxPanel->add(new NLabel("Bit rate"),nAlTop);
         bitDepthCbx = new NComboBox();
@@ -133,6 +138,7 @@ WaveSaveDlg::WaveSaveDlg()
           bitDepthCbx->add(new NItem("24"));
           bitDepthCbx->add(new NItem("32"));
           bitDepthCbx->setIndex(1);
+          bitDepthCbx->itemSelected.connect(this,&WaveSaveDlg::onBitSelCbx);
         cboxPanel->add(bitDepthCbx,nAlTop);
         cboxPanel->add(new NLabel("Channels"),nAlTop); 
         channelsCbx = new NComboBox();
@@ -141,6 +147,7 @@ WaveSaveDlg::WaveSaveDlg()
           channelsCbx->add(new NItem("Mono [right]"));
           channelsCbx->add(new NItem("Stereo"));
           channelsCbx->setIndex(3);
+          channelsCbx->itemSelected.connect(this,&WaveSaveDlg::onChannelSelCbx);
         cboxPanel->add(channelsCbx,nAlTop);
     audioPanel->add(cboxPanel, nAlClient);
   pane()->add(audioPanel,nAlTop);
@@ -700,6 +707,55 @@ void WaveSaveDlg::setVisible( bool on )
   NDialog::setVisible(on);
 }
 
+// comboBox events
 
+void WaveSaveDlg::onSampleRateCbx( NItemEvent * ev )
+{
+  rate = sampleRateCbx->selIndex();
+}
 
+void WaveSaveDlg::onBitSelCbx( NItemEvent * ev )
+{
+  bits = bitDepthCbx->selIndex();
+}
+
+void WaveSaveDlg::onChannelSelCbx( NItemEvent * ev )
+{
+  channelmode = channelsCbx->selIndex();
+}
+
+// checkBoxEvents
+
+void WaveSaveDlg::onWireChkBox( NButtonEvent * ev )
+{
+  if ( wireChkBox->checked() )
+  {
+    trackChkBox->setCheck(false);
+    generatorChkBox->setCheck(false);
+    trackChkBox->repaint();
+    generatorChkBox->repaint();
+  }
+}
+
+void WaveSaveDlg::onTrackChkBox( NButtonEvent * ev )
+{
+  if ( trackChkBox->checked() )
+  {
+    wireChkBox->setCheck(false);
+    generatorChkBox->setCheck(false);
+    wireChkBox->repaint();
+    generatorChkBox->repaint();
+  }
+}
+
+void WaveSaveDlg::onGeneratorChkBox( NButtonEvent * ev )
+{
+  if ( generatorChkBox->checked() )
+  {
+    wireChkBox->setCheck(false);
+    trackChkBox->setCheck(false);
+    wireChkBox->repaint();
+    trackChkBox->repaint();
+  }
+}
 
