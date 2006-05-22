@@ -150,7 +150,7 @@ void NWindow::onMousePress( int x, int y, int button )
       }
      }
     selectedBase_ = dragBase_;
-    if ( selectedBase_->enabled() ) {
+    if ( obj->enabled() ) {
       obj->onMousePress( x - obj->absoluteSpacingLeft() +
       obj->scrollDx(), y - obj->absoluteSpacingTop() + obj->scrollDy(), button);
     }
