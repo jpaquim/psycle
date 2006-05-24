@@ -172,3 +172,30 @@ if True:
 	)
 	#print '======== debian/control'
 	#print debian.control()
+
+env = packageneric.environment().Copy()
+env.ParseConfig('pkg-config --cflags --libs diversalis')
+env.ParseConfig('pkg-config --cflags --libs glibmm-2.4')
+env.Append(CPPPATH = ['src', 'tmp'])
+env.Append(
+	CPPDEFINES = {
+		'PACKAGENERIC': '\\"/dev/null\\"',
+		'PACKAGENERIC__PACKAGE__NAME': '\\"test\\"',
+		'PACKAGENERIC__PACKAGE__VERSION': '\\"0\\"',
+		'PACKAGENERIC__PACKAGE__VERSION__MAJOR': '0',
+		'PACKAGENERIC__PACKAGE__VERSION__MINOR': '0',
+		'PACKAGENERIC__PACKAGE__VERSION__PATCH': '0',
+		'PACKAGENERIC__MODULE__NAME': '\\"test\\"',
+		'PACKAGENERIC__MODULE__VERSION': '\\"0\\"',
+		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_LIB': '\\"../lib\\"',
+		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE': '\\"../share\\"',
+		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR': '\\"../var\\"',
+		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC': '\\"../../etc\\"',
+		'PACKAGENERIC__CONFIGURATION__COMPILER__HOST': '\\"test\\"'
+	}
+)
+sources = []
+import os.path
+for x in universalis.get_sources():
+	sources.append(os.path.join('src', x))
+env.SharedLibrary('scons', sources)
