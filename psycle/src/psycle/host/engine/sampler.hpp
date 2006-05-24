@@ -126,6 +126,9 @@ namespace psycle
 						case 2:
 							_resampler.SetQuality(dsp::R_SPLINE);
 							break;
+						case 3:
+							_resampler.SetQuality(dsp::R_BANDLIM);
+							break;
 						case 0:
 							_resampler.SetQuality(dsp::R_NONE);
 							break;
@@ -156,6 +159,9 @@ namespace psycle
 						break;
 					case dsp::R_SPLINE:
 						temp = 2;
+						break;
+					case dsp::R_BANDLIM:
+						temp = 3;
 						break;
 				}
 				pFile->Write(temp); // quality

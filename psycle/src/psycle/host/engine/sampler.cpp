@@ -238,6 +238,8 @@ namespace psycle
 			case 0:
 				_resampler.SetQuality(dsp::R_NONE);
 				break;
+			case 3:
+				_resampler.SetQuality(dsp::R_BANDLIM);
 			default:
 			case 1:
 				_resampler.SetQuality(dsp::R_LINEAR);
