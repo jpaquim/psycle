@@ -38,7 +38,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CChildView::CChildView()
 		:
 			smac(-1),
-			smacmode(0 /* \todo wtf is zero? */),
+			smacmode(smacmodes::move),
 			wiresource(-1),
 			wiredest(-1),
 			wiremove(-1),
