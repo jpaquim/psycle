@@ -1702,9 +1702,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				
 				if(cpid!=_pSong->playOrder[ep])
 				{
-					m_wndView.Repaint(DMPattern);
+					m_wndView.Repaint(draw_modes::DMPattern);
 					if (Global::pPlayer->_playing) {
-						m_wndView.Repaint(DMPlayback);
+						m_wndView.Repaint(draw_modes::DMPlayback);
 					}
 				}		
 			}
@@ -1764,7 +1764,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::DMPattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1786,7 +1786,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::DMPattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1812,7 +1812,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::DMPattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1838,7 +1838,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::DMPattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1867,7 +1867,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				UpdatePlayOrder(true);
 				UpdateSequencer(m_wndView.editPosition);
 
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::DMPattern);
 			}
 			m_wndView.SetFocus();
 		}
@@ -1889,7 +1889,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				UpdatePlayOrder(true);
 				UpdateSequencer(m_wndView.editPosition);
 
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::DMPattern);
 			}
 			m_wndView.SetFocus();
 		}
@@ -1946,7 +1946,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				UpdatePlayOrder(true);
 				UpdateSequencer(m_wndView.editPosition);
 
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::DMPattern);
 			}
 			zapArray(litems);
 			m_wndView.SetFocus();
@@ -2007,7 +2007,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			UpdatePlayOrder(true);
 			UpdateSequencer(m_wndView.editPosition);
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::DMPattern);
 			m_wndView.SetFocus();
 		}
 
@@ -2071,7 +2071,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							_pSong->playOrderSel[i] = true;
 						}
 						UpdateSequencer(m_wndView.editPosition);
-						m_wndView.Repaint(DMPattern);
+						m_wndView.Repaint(draw_modes::DMPattern);
 
 					}
 				}
@@ -2099,7 +2099,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				_pSong->playLength=1;
 				UpdatePlayOrder(true);
 				UpdateSequencer();
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::DMPattern);
 			}
 			m_wndView.SetFocus();
 			
@@ -2184,7 +2184,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			seqcopybufferlength = 0;
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::DMPattern);
 			m_wndView.SetFocus();
 		}
 
@@ -2266,7 +2266,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
 				{
 					m_wndView.editPosition=Global::pPlayer->_playPosition;
-					m_wndView.Repaint(DMPattern);
+					m_wndView.Repaint(draw_modes::DMPattern);
 				}
 			}
 			else if ( !Global::pPlayer->_playing )
@@ -2528,7 +2528,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				oss << _pSong->Name
 					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
 
-				if ((m_wndView.viewMode==VMPattern)	&& (!Global::pPlayer->_playing))
+				if ((m_wndView.viewMode==view_modes::VMPattern)	&& (!Global::pPlayer->_playing))
 				{
 					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
 					int machine = toffset[2];

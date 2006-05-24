@@ -9,7 +9,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
-				if(viewMode == VMPattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
+				if(viewMode == view_modes::VMPattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
 				{ 
 					EnterNote(outnote,0,true);	// note end
 				}
@@ -42,7 +42,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// undo code not required, enter not and msbput handle it
 			BOOL bRepeat = nFlags&0x4000;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{
 				if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
 				{
@@ -57,7 +57,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
-			else if (viewMode == VMSequence && bEditMode)
+			else if (viewMode == view_modes::VMSequence && bEditMode)
 			{
 				bool success;
 				// add data
@@ -79,12 +79,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if(cmd.IsValid())
 			{
-				if((cmd.GetType() == CT_Immediate) ||
-				(cmd.GetType() == CT_Editor && viewMode == VMPattern) ) 
+				if((cmd.GetType() == CT_Immediate) || (cmd.GetType() == CT_Editor && viewMode == view_modes::VMPattern) ) 
 				{			
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 				}
-				else if (cmd.GetType() == CT_Note && viewMode != VMSequence)
+				else if (cmd.GetType() == CT_Note && viewMode != view_modes::VMSequence)
 				{
 					if(!bRepeat) 
 					{	
@@ -123,7 +122,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												// and outnote CAN NOT be negative since it's taken from
 												//	(dwParam1 & 0xFF00) >>8;
 			*/
-				if(viewMode == VMPattern && bEditMode)
+				if(viewMode == view_modes::VMPattern && bEditMode)
 				{ 
 					// add note
 					if(velocity > 0 && outnote != 120)
@@ -167,7 +166,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._inst = command;
 			entry._note = cdefTweakM;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -218,7 +217,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::DMData);
 					}
 				}
 			}
@@ -249,7 +248,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._inst = command;
 			entry._note = cdefTweakS;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -299,7 +298,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::DMData);
 					}
 				}
 			}
@@ -329,7 +328,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._parameter = value;
 			entry._note = 255;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -375,7 +374,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pentry->_inst = entry._inst;
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-					Repaint(DMData);
+					Repaint(draw_modes::DMData);
 				}
 			}
 		//	else
@@ -404,7 +403,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._inst = command;
 			entry._note = cdefMIDICC;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -454,7 +453,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::DMData);
 					}
 				}
 			}
@@ -484,7 +483,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._parameter = 255;
 			entry._note = 255;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -526,7 +525,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pentry->_inst = entry._inst;
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-					Repaint(DMData);
+					Repaint(draw_modes::DMData);
 				}
 			}
 		//	else
@@ -547,7 +546,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -585,7 +584,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						entry->_note = cdefTweakM;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::DMData);
 					}
 				}
 			}
@@ -596,7 +595,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// UNDO CODE MIDI PATTERN TWEAK
 			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::VMPattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -634,7 +633,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						entry->_note = cdefTweakS;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::DMData);
 					}
 				}
 			}
@@ -863,12 +862,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			bScrollDetatch=false;
 			Global::pInputHandler->bDoingSelection = false;
-			Repaint(DMData);
+			Repaint(draw_modes::DMData);
 		}
 
 		void CChildView::EnterNoteoffAny()
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::VMPattern)
 			{
 				// UNDO CODE ENTER NOTE
 				const int ps = _ps();
@@ -900,7 +899,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				bScrollDetatch=false;
 				Global::pInputHandler->bDoingSelection = false;
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -965,7 +964,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			bScrollDetatch=false;
 			Global::pInputHandler->bDoingSelection = false;
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-			Repaint(DMData);
+			Repaint(draw_modes::DMData);
 			return true;
 		}
 
@@ -993,7 +992,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			Repaint(DMData);
+			Repaint(draw_modes::DMData);
 		}
 
 		void CChildView::DeleteCurr()
@@ -1025,7 +1024,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			Repaint(DMData);
+			Repaint(draw_modes::DMData);
 		}
 
 		void CChildView::InsertCurr()
@@ -1049,7 +1048,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			Repaint(DMData);
+			Repaint(draw_modes::DMData);
 		}
 
 
@@ -1127,7 +1126,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			if (updateDisplay) 
 			{
-				Repaint(DMCursor);
+				Repaint(draw_modes::DMCursor);
 			}
 		}
 
@@ -1152,7 +1151,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			if (updateDisplay) 
 			{
-				Repaint(DMCursor);
+				Repaint(draw_modes::DMCursor);
 			}
 		}
 
@@ -1177,7 +1176,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 			}
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::DMCursor);
 		}
 
 		void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
@@ -1213,7 +1212,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::DMCursor);
 		}
 
 		void CChildView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
@@ -1231,7 +1230,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::DMCursor);
 		}
 
 		void CChildView::PrevTrack(int x,bool wrap,bool updateDisplay)
@@ -1249,7 +1248,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::DMCursor);
 		}
 
 
@@ -1258,7 +1257,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::patCut()
 		{
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::VMPattern)
 			{
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
@@ -1279,13 +1278,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				patBufferCopy = true;
 
 				NewPatternDraw(0,_pSong->tracks(),0,patBufferLines-1);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
 		void CChildView::patCopy()
 		{
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::VMPattern)
 			{
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
@@ -1302,7 +1301,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::patPaste()
 		{
 			// UNDO CODE PATT PASTE
-			if(patBufferCopy && viewMode == VMPattern)
+			if(patBufferCopy && viewMode == view_modes::VMPattern)
 			{
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
@@ -1315,14 +1314,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
 
-				Repaint(DMPattern);
+				Repaint(draw_modes::DMPattern);
 			}
 		}
 
 		void CChildView::patMixPaste()
 		{
 			// UNDO CODE PATT PASTE
-			if(patBufferCopy && viewMode == VMPattern)
+			if(patBufferCopy && viewMode == view_modes::VMPattern)
 			{
 				const int ps = _ps();
 				unsigned char* offset_target = _ppattern(ps);
@@ -1346,13 +1345,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					offset_source+= EVENT_SIZE;
 				}
 				
-				Repaint(DMPattern);
+				Repaint(draw_modes::DMPattern);
 			}
 		}
 
 		void CChildView::patDelete()
 		{
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::VMPattern)
 			{
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
@@ -1371,7 +1370,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 
 				NewPatternDraw(0,_pSong->tracks(),0,patBufferLines-1);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -1381,7 +1380,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			const int ps = _ps();
 			unsigned char *soffset = _ppattern(ps);
 
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::VMPattern)
 			{
 				int pLines=_pSong->patternLines[ps];
 				int length=pLines*EVENT_SIZE*MAX_TRACKS;
@@ -1401,7 +1400,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				NewPatternDraw(0,_pSong->tracks(),editcur.line,pLines-1);
 
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -1430,7 +1429,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			blockSelected=true;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::DMSelection);
 		}
 		void CChildView::ChangeBlock(int track,int line, int col)
 		{
@@ -1467,7 +1466,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			blockSelected=true;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::DMSelection);
 		}
 
 		void CChildView::EndBlock(int track,int line, int col)
@@ -1504,7 +1503,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			blockSelected=true;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::DMSelection);
 		}
 
 		void CChildView::BlockUnmark()
@@ -1514,7 +1513,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//reinitialise the select bar state
 			CChildView::blockSelectBarState = 1;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::DMSelection);
 		}
 
 		void CChildView::CopyBlock(bool cutit)
@@ -1558,7 +1557,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 
-					Repaint(DMData);
+					Repaint(draw_modes::DMData);
 				}
 			}
 		}
@@ -1581,7 +1580,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -1639,7 +1638,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				bScrollDetatch=false;
 				NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -1793,7 +1792,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				PasteBlock(tx, lx, false,false);
 				
 				NewPatternDraw(0,_pSong->tracks()-1,0,nl-1);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -1862,7 +1861,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						memcpy(offset_target,&blank,EVENT_SIZE);
 					}
 				}
-				Repaint(DMPattern);
+				Repaint(draw_modes::DMPattern);
 			}
 		}
 
@@ -1906,7 +1905,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			NewPatternDraw(st,et,sl,el);
-			Repaint(DMData);
+			Repaint(draw_modes::DMData);
 		}
 
 		void CChildView::HalveLength()
@@ -1953,7 +1952,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			NewPatternDraw(st,et,sl,nl+sl);
-			Repaint(DMData);
+			Repaint(draw_modes::DMData);
 		}
 
 
@@ -1983,7 +1982,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -2014,7 +2013,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -2045,7 +2044,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -2100,7 +2099,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::DMData);
 			}
 		}
 
@@ -2112,7 +2111,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				++_pSong->playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::DMPattern);
 			}
 		}
 
@@ -2124,7 +2123,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				--_pSong->playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::DMPattern);
 			}
 		}
 
@@ -2162,9 +2161,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				_pSong->playOrderSel[editPosition]=true;
 
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::DMPattern);
 				if (Global::pPlayer->_playing) {
-					Repaint(DMPlayback);
+					Repaint(draw_modes::DMPlayback);
 				}
 			}
 		}
@@ -2219,9 +2218,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				_pSong->playOrderSel[editPosition]=true;
 
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::DMPattern);
 				if (Global::pPlayer->_playing) {
-					Repaint(DMPlayback);
+					Repaint(draw_modes::DMPlayback);
 				}
 			}
 		}
@@ -2564,7 +2563,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				switch (pUndoList->type)
 				{
 				case UNDO_PATTERN:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::VMPattern)// && bEditMode)
 					{
 						AddRedo(pUndoList->pattern,pUndoList->x,pUndoList->y,pUndoList->tracks,pUndoList->lines,editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
 						// do undo
@@ -2588,13 +2587,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// display changes
 							NewPatternDraw(pUndoList->x,pUndoList->x+pUndoList->tracks,pUndoList->y,pUndoList->y+pUndoList->lines);
-							Repaint(DMData);
+							Repaint(draw_modes::DMData);
 						}
 						else
 						{
 							editPosition = pUndoList->seqpos;
 							pParentMain->UpdatePlayOrder(true);
-							Repaint(DMPattern);
+							Repaint(draw_modes::DMPattern);
 							
 						}
 						// delete undo from list
@@ -2605,7 +2604,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					break;
 				case UNDO_LENGTH:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::VMPattern)// && bEditMode)
 					{
 						AddRedoLength(pUndoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
 						// do undo
@@ -2620,7 +2619,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							pParentMain->UpdatePlayOrder(true);
 						}
 						// display changes
-						Repaint(DMPattern);
+						Repaint(draw_modes::DMPattern);
 						
 						// delete undo from list
 						SPatternUndo* pTemp = pUndoList->pPrev;
@@ -2642,7 +2641,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::DMPattern);
 					
 					// delete undo from list
 					{
@@ -2678,7 +2677,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::DMPattern);
 					
 					// delete undo from list
 					{
@@ -2703,7 +2702,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				switch (pRedoList->type)
 				{
 				case UNDO_PATTERN:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::VMPattern)// && bEditMode)
 					{
 						AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do redo
@@ -2728,13 +2727,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// display changes
 							NewPatternDraw(pRedoList->x,pRedoList->x+pRedoList->tracks,pRedoList->y,pRedoList->y+pRedoList->lines);
-							Repaint(DMData);
+							Repaint(draw_modes::DMData);
 						}
 						else
 						{
 							editPosition = pRedoList->seqpos;
 							pParentMain->UpdatePlayOrder(true);
-							Repaint(DMPattern);
+							Repaint(draw_modes::DMPattern);
 							
 						}
 						// delete redo from list
@@ -2745,7 +2744,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					break;
 				case UNDO_LENGTH:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::VMPattern)// && bEditMode)
 					{
 						AddUndoLength(pRedoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do undo
@@ -2760,7 +2759,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							pParentMain->UpdatePlayOrder(true);
 						}
 						// display changes
-						Repaint(DMPattern);
+						Repaint(draw_modes::DMPattern);
 						
 						// delete redo from list
 						SPatternUndo* pTemp = pRedoList->pPrev;
@@ -2782,7 +2781,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::DMPattern);
 					
 					{
 						// delete redo from list
@@ -2818,7 +2817,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::DMPattern);
 					
 					{
 						// delete redo from list

@@ -15,48 +15,54 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		#define MAX_WIRE_DIALOGS 16
 
-		enum 
+		struct draw_modes
 		{
-			DMAll = 0,		// Repaints everything (means, slow). Used when switching views, or when a
-							// whole update is needed (For example, when changing pattern Properties, or TPB)
-			DMAllMacsRefresh, //Used to refresh all the machines, without refreshing the background/wires
-			DMMacRefresh,	// Used to refresh the image of one machine (mac num in "updatePar")
+			enum draw_mode
+			{
+				DMAll = 0,		// Repaints everything (means, slow). Used when switching views, or when a
+								// whole update is needed (For example, when changing pattern Properties, or TPB)
+				DMAllMacsRefresh, //Used to refresh all the machines, without refreshing the background/wires
+				DMMacRefresh,	// Used to refresh the image of one machine (mac num in "updatePar")
 
-			DMPattern,		// Use this when switching Patterns (changing from one to another)
-			DMData,			// Data has Changed. Which data to update is indicated with DrawLineStart/End
-							// and DrawTrackStart/End
-							// Use it when editing and copy/pasting
-			DMHScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
-							// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
-			DMVScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
-							// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
-		//	DMResize,		// Indicates the Refresh is called from the "OnSize()" event.
-			DMPlayback,		// Indicates it needs a refresh caused by Playback (update playback cursor)
-			DMPlaybackChange,// Indicates that while playing, a pattern switch is needed.
-			DMCursor,		// Indicates a movement of the cursor. update the values to "editcur" directly
-							// and call this function.
-							// this is arbitrary message as cursor is checked
-			DMSelection,	// The selection has changed. use "blockSel" to indicate the values.
-			DMTrackHeader,  // Track header refresh (mute/solo, Record updating)
-		//	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
-			DMNone			// Do not use this one directly. It is used to detect refresh calls from the OS.
+				DMPattern,		// Use this when switching Patterns (changing from one to another)
+				DMData,			// Data has Changed. Which data to update is indicated with DrawLineStart/End
+								// and DrawTrackStart/End
+								// Use it when editing and copy/pasting
+				DMHScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
+								// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+				DMVScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
+								// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+			//	DMResize,		// Indicates the Refresh is called from the "OnSize()" event.
+				DMPlayback,		// Indicates it needs a refresh caused by Playback (update playback cursor)
+				DMPlaybackChange,// Indicates that while playing, a pattern switch is needed.
+				DMCursor,		// Indicates a movement of the cursor. update the values to "editcur" directly
+								// and call this function.
+								// this is arbitrary message as cursor is checked
+				DMSelection,	// The selection has changed. use "blockSel" to indicate the values.
+				DMTrackHeader,  // Track header refresh (mute/solo, Record updating)
+			//	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
+				DMNone			// Do not use this one directly. It is used to detect refresh calls from the OS.
 
-			// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
-			// "DrawPatternEditor()".
-			// Note: Modes are sorted by priority. (although it is not really used)
+				// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
+				// "DrawPatternEditor()".
+				// Note: Modes are sorted by priority. (although it is not really used)
 
-			// !!!BIG ADVISE!!! : The execution of Repaint(mode) does not imply an instant refresh of
-			//						the Screen, and what's worse, you might end calling Repaint(anothermode)
-			//						previous of the first refresh. In PreparePatternRefresh() there's code
-			//						to avoid problems when two modes do completely different things. On
-			//						other cases, it still ends to wrong content being shown.
+				// !!!BIG ADVISE!!! : The execution of Repaint(mode) does not imply an instant refresh of
+				//						the Screen, and what's worse, you might end calling Repaint(anothermode)
+				//						previous of the first refresh. In PreparePatternRefresh() there's code
+				//						to avoid problems when two modes do completely different things. On
+				//						other cases, it still ends to wrong content being shown.
+			};
 		};
 
-		enum
+		struct view_modes
 		{
-			VMMachine,
-			VMPattern,
-			VMSequence
+			enum view_mode
+			{
+				VMMachine,
+				VMPattern,
+				VMSequence
+			};
 		};
 
 		class CCursor
@@ -185,7 +191,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void InitTimer();
 			void ValidateParent();
 			void EnableSound();
-			void Repaint(int drawMode=DMAll);
+			void Repaint(draw_modes::draw_mode drawMode = draw_modes::DMAll);
 
 			void ShowPatternDlg(void);
 			void BlockInsChange(int x);

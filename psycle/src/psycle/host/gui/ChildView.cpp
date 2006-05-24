@@ -49,7 +49,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			maxView(false),
 			textLeftEdge(2),
 			bmpDC(0),
-			viewMode(VMMachine),
+			viewMode(view_modes::VMMachine),
 			MasterMachineDialog(0),
 			SamplerMachineDialog(0),
 			XMSamplerMachineDialog(0),
@@ -338,7 +338,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI();
 					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 				}
-				if (viewMode == VMMachine)
+				if (viewMode == view_modes::VMMachine)
 				{
 					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
 /*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
@@ -394,16 +394,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 								pSeqList->SetSel(Global::pPlayer->_playPosition,true);
 								editPosition=Global::pPlayer->_playPosition;
-								if ( viewMode == VMPattern ) 
+								if ( viewMode == view_modes::VMPattern ) 
 								{ 
-									Repaint(DMPattern);//DMPlaybackChange);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
-									Repaint(DMPlayback);
+									Repaint(draw_modes::DMPattern);//DMPlaybackChange);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
+									Repaint(draw_modes::DMPlayback);
 								}
 							}
-							else if( viewMode == VMPattern ) Repaint(DMPlayback);
+							else if( viewMode == view_modes::VMPattern ) Repaint(draw_modes::DMPlayback);
 						}
-						else if ( viewMode == VMPattern ) Repaint(DMPlayback);
-						if ( viewMode == VMSequence ) Repaint(DMPlayback);
+						else if ( viewMode == view_modes::VMPattern ) Repaint(draw_modes::DMPlayback);
+						if ( viewMode == view_modes::VMSequence ) Repaint(draw_modes::DMPlayback);
 					}
 				}
 			}
@@ -509,20 +509,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				bufDC.CreateCompatibleDC(&dc);
 				CBitmap* oldbmp;
 				oldbmp = bufDC.SelectObject(bmpDC);
-				if (viewMode==VMMachine)	// Machine view paint handler
+				if (viewMode==view_modes::VMMachine)	// Machine view paint handler
 				{
 					switch (updateMode)
 					{
-					case DMAll:
+					case draw_modes::DMAll:
 						DrawMachineEditor(&bufDC);
 						break;
-					case DMMacRefresh:
+					case draw_modes::DMMacRefresh:
 						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
 						DrawMachine(updatePar, &bufDC);
 						DrawMachineVumeters(updatePar, &bufDC);
-						updateMode=DMAll;
+						updateMode=draw_modes::DMAll;
 						break;
-					case DMAllMacsRefresh:
+					case draw_modes::DMAllMacsRefresh:
 						for (int i=0;i<MAX_MACHINES;i++)
 						{
 							if (_pSong->_pMachine[i])
@@ -534,11 +534,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						break;
 					}
 				}
-				else if (viewMode == VMPattern)	// Pattern view paint handler
+				else if (viewMode == view_modes::VMPattern)	// Pattern view paint handler
 				{
 					DrawPatEditor(&bufDC);
 				}
-				else if ( viewMode == VMSequence)
+				else if ( viewMode == view_modes::VMSequence)
 				{
 					DrawSeqEditor(&bufDC);
 				}
@@ -551,20 +551,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				if (viewMode==VMMachine) // Machine view paint handler
+				if (viewMode==view_modes::VMMachine) // Machine view paint handler
 				{
 					switch (updateMode)
 					{
-					case DMAll:
+					case draw_modes::DMAll:
 						DrawMachineEditor(&dc);
 						break;
-					case DMMacRefresh:
+					case draw_modes::DMMacRefresh:
 						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
 						DrawMachine(updatePar, &dc);
 						DrawMachineVumeters(updatePar, &dc);
-						updateMode=DMAll;
+						updateMode=draw_modes::DMAll;
 						break;
-					case DMAllMacsRefresh:
+					case draw_modes::DMAllMacsRefresh:
 						for (int i=0;i<MAX_MACHINES;i++)
 						{
 							if (_pSong->_pMachine[i]) 
@@ -573,39 +573,39 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							}
 						}
 						DrawAllMachineVumeters(&dc);
-						updateMode=DMAll;
+						updateMode=draw_modes::DMAll;
 						break;
 					}
 				}
-				else if (viewMode == VMPattern)	// Pattern view paint handler
+				else if (viewMode == view_modes::VMPattern)	// Pattern view paint handler
 				{
 					DrawPatEditor(&dc);
 				}
-				else if ( viewMode == VMSequence)
+				else if ( viewMode == view_modes::VMSequence)
 				{
 					DrawSeqEditor(&dc);
 				}
 			}
 		}
 
-		void CChildView::Repaint(int drawMode)
+		void CChildView::Repaint(draw_modes::draw_mode drawMode)
 		{
-			if ( viewMode == VMMachine )
+			if ( viewMode == view_modes::VMMachine )
 			{
-				if ( drawMode <= DMMacRefresh )
+				if ( drawMode <= draw_modes::DMMacRefresh )
 				{
 					updateMode = drawMode;
 					Invalidate(false);
 				}
 			}
-			else if ( viewMode == VMPattern )
+			else if ( viewMode == view_modes::VMPattern )
 			{
-				if (drawMode >= DMPattern || drawMode == DMAll )	
+				if (drawMode >= draw_modes::DMPattern || drawMode == draw_modes::DMAll )	
 				{
 					PreparePatternRefresh(drawMode);
 				}
 			}
-			if ( viewMode == VMSequence )
+			if ( viewMode == view_modes::VMSequence )
 			{
 				Invalidate(false);
 			}
@@ -626,7 +626,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				bmpDC->DeleteObject();
 				zapObject(bmpDC);
 			}
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::VMPattern)
 			{
 				RecalcMetrics();
 			}
@@ -1029,9 +1029,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		/// Tool bar buttons and View Commands
 		void CChildView::OnMachineview() 
 		{
-			if (viewMode != VMMachine)
+			if (viewMode != view_modes::VMMachine)
 			{
-				viewMode = VMMachine;
+				viewMode = view_modes::VMMachine;
 				ShowScrollBar(SB_BOTH,false);
 
 				// set midi input mode to real-time or Step
@@ -1048,7 +1048,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) 
 		{
-			if (viewMode==VMMachine)
+			if (viewMode==view_modes::VMMachine)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1056,11 +1056,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPatternView() 
 		{
-			if (viewMode != VMPattern)
+			if (viewMode != view_modes::VMPattern)
 			{
 				RecalcMetrics();
 
-				viewMode = VMPattern;
+				viewMode = view_modes::VMPattern;
 				//ShowScrollBar(SB_BOTH,false);
 				
 				// set midi input mode to step insert
@@ -1085,7 +1085,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI) 
 		{
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::VMPattern)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1113,7 +1113,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePatternSeq(CCmdUI* pCmdUI) 
 		{
-			if (viewMode==VMSequence)
+			if (viewMode==view_modes::VMSequence)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);	
@@ -1195,7 +1195,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
 
 			pParentMain->StatusBarIdle();
-			if ( viewMode == VMPattern ) Repaint(DMPattern);
+			if ( viewMode == view_modes::VMPattern ) Repaint(draw_modes::DMPattern);
 		}
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
@@ -1218,13 +1218,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					editPosition=prevEditPosition;
 					pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
-					Repaint(DMPattern);
+					Repaint(draw_modes::DMPattern);
 				}
 				else
 				{
 					memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 					Global::_pSong->playOrderSel[editPosition] = true;
-					Repaint(DMCursor); 
+					Repaint(draw_modes::DMCursor); 
 				}
 			}
 		}
@@ -1461,8 +1461,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 
 					pParentMain->UpdateComboGen();
-					Repaint(DMAll);
-					//Repaint(DMMacRefresh); // Seems that this doesn't always work (multiple calls to Repaint?)
+					Repaint(draw_modes::DMAll);
+					//Repaint(draw_modes::DMMacRefresh); // Seems that this doesn't always work (multiple calls to Repaint?)
 				}
 				
 				/*
@@ -1600,7 +1600,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						index+=step;
 					}
 					NewPatternDraw(x,x,y,y+ny);	
-					Repaint(DMData);
+					Repaint(draw_modes::DMData);
 				}
 			}
 		}
@@ -1610,7 +1610,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 		{
-			if (blockSelected && (viewMode == VMPattern)) pCmdUI->Enable(true);
+			if (blockSelected && (viewMode == view_modes::VMPattern)) pCmdUI->Enable(true);
 			else pCmdUI->Enable(false);
 		}
 
@@ -1619,7 +1619,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnPopPaste() { PasteBlock(editcur.track,editcur.line,false); }
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
-			if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(true);
+			if (isBlockCopied && (viewMode == view_modes::VMPattern)) pCmdUI->Enable(true);
 			else  pCmdUI->Enable(false);
 		}
 
@@ -1632,7 +1632,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
 		{
-			if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(true);
+			if (isBlockCopied && (viewMode == view_modes::VMPattern)) pCmdUI->Enable(true);
 			else  pCmdUI->Enable(false);
 		}
 		void CChildView::OnPopDelete() { DeleteBlock(); }
@@ -1679,7 +1679,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pCmdUI->SetText("Undo");
 					break;
 				default:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::VMPattern)// && bEditMode)
 					{
 						pCmdUI->Enable(true);
 						pCmdUI->SetText("Undo");
@@ -1710,7 +1710,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					pCmdUI->SetText("Redo");
 					break;
 				default:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::VMPattern)// && bEditMode)
 					{
 						pCmdUI->Enable(true);
 						pCmdUI->SetText("Redo");
@@ -1732,13 +1732,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
 		{
-			if(viewMode == VMPattern) pCmdUI->Enable(true);
+			if(viewMode == view_modes::VMPattern) pCmdUI->Enable(true);
 			else pCmdUI->Enable(false);
 		}
 
 		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
 		{
-			if(patBufferCopy&&(viewMode == VMPattern)) pCmdUI->Enable(true);
+			if(patBufferCopy&&(viewMode == view_modes::VMPattern)) pCmdUI->Enable(true);
 			else pCmdUI->Enable(false);
 		}
 
@@ -3375,16 +3375,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::patTrackMute()
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::VMPattern)
 			{
 				_pSong->_trackMuted[editcur.track] = !_pSong->_trackMuted[editcur.track];
-				Repaint(DMTrackHeader);
+				Repaint(draw_modes::DMTrackHeader);
 			}
 		}
 
 		void CChildView::patTrackSolo()
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::VMPattern)
 			{
 				if (_pSong->_trackSoloed == editcur.track)
 				{
@@ -3403,13 +3403,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					_pSong->_trackMuted[editcur.track] = false;
 					_pSong->_trackSoloed = editcur.track;
 				}
-				Repaint(DMTrackHeader);
+				Repaint(draw_modes::DMTrackHeader);
 			}
 		}
 
 		void CChildView::patTrackRecord()
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::VMPattern)
 			{
 				_pSong->_trackArmed[editcur.track] = !_pSong->_trackArmed[editcur.track];
 				_pSong->_trackArmedCount = 0;
@@ -3420,7 +3420,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						_pSong->_trackArmedCount++;
 					}
 				}
-				Repaint(DMTrackHeader);
+				Repaint(draw_modes::DMTrackHeader);
 			}
 		}
 

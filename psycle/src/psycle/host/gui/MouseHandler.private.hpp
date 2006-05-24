@@ -8,7 +8,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			SetCapture();
 			
-			if(viewMode == VMMachine) // User is in machine view mode
+			if(viewMode == view_modes::VMMachine) // User is in machine view mode
 			{
 				if (_pSong->_machineLock) return;
 				
@@ -97,7 +97,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			ReleaseCapture();
 
-			if (viewMode == VMMachine)
+			if (viewMode == view_modes::VMMachine)
 			{
 				Machine::id_type propMac = GetMachine(point);
 
@@ -180,7 +180,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::VMPattern)
 			{
 				CMenu menu;
 				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
@@ -199,7 +199,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			SetCapture();
 
-			if(viewMode == VMMachine)
+			if(viewMode == view_modes::VMMachine)
 			{
 				if (_pSong->_machineLock) return;
 
@@ -385,7 +385,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									tmac->_volumeCounter=0.0f;	tmac->_volumeDisplay=0;
 								}
 								updatePar = smac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::DMMacRefresh);
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectMute)) //Solo 
 							{
@@ -395,7 +395,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									tmac->_volumeCounter=0.0f;	tmac->_volumeDisplay=0;
 								}
 								updatePar = smac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::DMMacRefresh);
 							}
 							break;
 
@@ -406,7 +406,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}// No Shift
 			}	
 
-			else if ( viewMode==VMPattern)
+			else if ( viewMode==view_modes::VMPattern)
 			{			
 				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
 				if ( ttm >= _pSong->tracks() ) ttm = _pSong->tracks()-1;
@@ -453,7 +453,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 					}
 					oldm.track = -1;
-					Repaint(DMTrackHeader);
+					Repaint(draw_modes::DMTrackHeader);
 				}
 				else if ( point.y >= YOFFSET )
 				{
@@ -478,7 +478,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if (nFlags & MK_SHIFT)
 					{
 						editcur = oldm;
-						Repaint(DMCursor);
+						Repaint(draw_modes::DMCursor);
 					}
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE if statement
@@ -489,7 +489,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			ReleaseCapture();
 			
-			if (viewMode == VMMachine )
+			if (viewMode == view_modes::VMMachine )
 			{
 				Machine::id_type propMac(GetMachine(point));
 				if ( propMac != -1)
@@ -548,7 +548,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				Repaint();
 
 			}
-			else if (viewMode == VMPattern)
+			else if (viewMode == view_modes::VMPattern)
 			{
 				if ( (blockStart) &&
 					( point.y > YOFFSET && point.y < YOFFSET+(maxl*ROWHEIGHT)) &&
@@ -564,7 +564,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//			else if ( editcur.line < 0 ) editcur.line = 0;
 
 					editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
-					Repaint(DMCursor);
+					Repaint(draw_modes::DMCursor);
 					pParentMain->StatusBarIdle();
 					if (!(nFlags & MK_SHIFT))
 					{
@@ -573,7 +573,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						blockSel.end.track=0;
 						ChordModeOffs = 0;
 						bScrollDetatch=false;
-						Repaint(DMSelection);
+						Repaint(draw_modes::DMSelection);
 					}
 				}
 				else if (blockswitch)
@@ -586,7 +586,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					blockSel.end.track=0;
 					SwitchBlock(blockLastOrigin.start.track+(tmpcur.track-editcur.track),blockLastOrigin.start.line+(tmpcur.line-editcur.line));
 					blockswitch=false;
-					Repaint(DMSelection);
+					Repaint(draw_modes::DMSelection);
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnLButtonUp(nFlags,point);
@@ -595,7 +595,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		{
-			if (viewMode == VMMachine)
+			if (viewMode == view_modes::VMMachine)
 			{
 				if (smac > -1 && (nFlags & MK_LBUTTON))
 				{
@@ -654,7 +654,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									pParentMain->StatusBarText(s.str().c_str());
 								}
 								updatePar = smac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::DMMacRefresh);
 							}
 						}
 					}
@@ -673,13 +673,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 			}
 
-			else if (viewMode == VMPattern)
+			else if (viewMode == view_modes::VMPattern)
 			{
 				if ((nFlags & MK_LBUTTON) && oldm.track != -1)
 				{
 					ntOff = tOff;
 					nlOff = lOff;
-					int paintmode = 0;
+					draw_modes::draw_mode paintmode = draw_modes::draw_mode(); // kinda undefined
 
 					int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
 					if ( point.x < XOFFSET ) ttm--; // 1/2 = 0 , -1/2 = 0 too!
@@ -690,7 +690,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if ( ttm < 0 ) { ttm = 0; } // Out of Range
 						// and Scroll
 						ntOff = ttm;
-						if (ntOff != tOff) paintmode=DMHScroll;
+						if (ntOff != tOff) paintmode=draw_modes::DMHScroll;
 					}
 					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 					{
@@ -701,14 +701,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							if ( tOff != ttm-VISTRACKS ) 
 							{ 
 								ntOff = ttm-VISTRACKS+1; 
-								paintmode=DMHScroll; 
+								paintmode=draw_modes::DMHScroll; 
 							}
 						}
 						else	//scroll
 						{	
 							ntOff = ttm-VISTRACKS+1;
 							if ( ntOff != tOff ) 
-								paintmode=DMHScroll;
+								paintmode=draw_modes::DMHScroll;
 						}
 					}
 					else // Not exceeded
@@ -728,14 +728,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							if ( lOff != 0 ) 
 							{ 
 								nlOff = 0; 
-								paintmode=DMVScroll; 
+								paintmode=draw_modes::DMVScroll; 
 							}
 						}
 						else	//scroll
 						{	
 							nlOff = llm;
 							if ( nlOff != lOff ) 
-								paintmode=DMVScroll;
+								paintmode=draw_modes::DMVScroll;
 						}
 					}
 					else if ( llm - lOff >= VISLINES ) // Exceeded from bottom
@@ -746,14 +746,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							if ( lOff != llm-VISLINES) 
 							{ 
 								nlOff = llm-VISLINES+1; 
-								paintmode=DMVScroll; 
+								paintmode=draw_modes::DMVScroll; 
 							}
 						}
 						else	//scroll
 						{	
 							nlOff = llm-VISLINES+1;
 							if ( nlOff != lOff ) 
-								paintmode=DMVScroll;
+								paintmode=draw_modes::DMVScroll;
 						}
 					}
 					
@@ -783,7 +783,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						oldm.track=ttm;
 						oldm.line=llm;
 						oldm.col=ccm;
-						paintmode=DMSelection;
+						paintmode=draw_modes::DMSelection;
 					}
 
 					bScrollDetatch=true;
@@ -795,7 +795,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						editcur = detatchpoint;
 						if (!paintmode)
 						{
-							paintmode=DMCursor;
+							paintmode=draw_modes::DMCursor;
 						}
 					}
 
@@ -823,7 +823,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::DMVScroll);
 						}
 						else if (nPos < lOff )
 						{
@@ -836,7 +836,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::DMVScroll);
 						}
 						MBStart.y += delta*ROWHEIGHT;
 					}
@@ -856,7 +856,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::DMHScroll);
 						}
 						else if (nPos < tOff)
 						{
@@ -869,7 +869,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::DMHScroll);
 						}
 						MBStart.x += delta*ROWWIDTH;
 					}
@@ -886,7 +886,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			switch (viewMode)
 			{
-				case VMMachine: // User is in machine view mode
+				case view_modes::VMMachine: // User is in machine view mode
 				
 					tmac = GetMachine(point);
 
@@ -918,7 +918,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									}
 								}
 								updatePar = tmac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::DMMacRefresh);
 								return;
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorSolo,MachineCoords.sGeneratorSolo)) //Solo 
@@ -955,7 +955,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									_pSong->machineSoloed = tmac;
 								}
 								updatePar = tmac;
-								Repaint(DMAllMacsRefresh);
+								Repaint(draw_modes::DMAllMacsRefresh);
 								return;
 							}
 							break;
@@ -977,7 +977,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									pMac->_volumeDisplay=0;
 								}
 								updatePar = tmac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::DMMacRefresh);
 								return;
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectBypass)) //Bypass
@@ -989,7 +989,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									pMac->_volumeDisplay=0;
 								}
 								updatePar = tmac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::DMMacRefresh);
 								return;
 							}
 							break;
@@ -1051,7 +1051,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 					////////////////////////////////////////////////////////////////
 
-				case VMPattern: // User is in pattern view mode
+				case view_modes::VMPattern: // User is in pattern view mode
 					if (( point.y >= YOFFSET ) && (point.x >= XOFFSET))
 					{
 						const int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
@@ -1073,7 +1073,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
 		{
-			if ( viewMode == VMPattern )
+			if ( viewMode == view_modes::VMPattern )
 			{
 				int nlines = _pSong->patternLines[_ps()];
 				int nPos = lOff - (zDelta/30);
@@ -1088,7 +1088,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					bScrollDetatch=true;
 					detatchpoint.track = ntOff+1;
 					detatchpoint.line = nlOff+1;
-					Repaint(DMVScroll);
+					Repaint(draw_modes::DMVScroll);
 				}
 				else if (nPos < lOff )
 				{
@@ -1101,7 +1101,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					bScrollDetatch=true;
 					detatchpoint.track = ntOff+1;
 					detatchpoint.line = nlOff+1;
-					Repaint(DMVScroll);
+					Repaint(draw_modes::DMVScroll);
 				}
 			}
 			return CWnd ::OnMouseWheel(nFlags, zDelta, pt);
@@ -1116,7 +1116,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
-			if ( viewMode == VMPattern )
+			if ( viewMode == view_modes::VMPattern )
 			{
 				switch(nSBCode)
 				{
@@ -1127,7 +1127,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::DMVScroll);
 						}
 						break;
 					case SB_LINEUP:
@@ -1137,7 +1137,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::DMVScroll);
 						}
 						break;
 					case SB_PAGEDOWN:
@@ -1152,7 +1152,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::DMVScroll);
 						}
 						break;
 					case SB_PAGEUP:
@@ -1166,7 +1166,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::DMVScroll);
 						}
 						break;
 					case SB_THUMBPOSITION:
@@ -1186,7 +1186,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::DMVScroll);
 						}
 						break;
 					default: 
@@ -1199,7 +1199,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
-			if ( viewMode == VMPattern )
+			if ( viewMode == view_modes::VMPattern )
 			{
 				switch(nSBCode)
 				{
@@ -1214,7 +1214,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::DMHScroll);
 						}
 						break;
 					case SB_LINELEFT:
@@ -1228,7 +1228,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::DMHScroll);
 						}
 						else PrevTrack(1,false);
 						break;
@@ -1252,7 +1252,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::DMHScroll);
 						}
 						break;
 					default: 
