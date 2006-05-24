@@ -41,7 +41,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (bScrollDetatch)
 				{
-					if ( drawMode == draw_modes::DMHScroll )
+					if ( drawMode == draw_modes::horizontal_scroll )
 					{
 						rntOff = ntOff;
 						if ( rntOff >= snt-VISTRACKS ) 
@@ -77,7 +77,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else if (Global::pConfig->_centerCursor)
 				{
-					if ( drawMode == draw_modes::DMHScroll ) 
+					if ( drawMode == draw_modes::horizontal_scroll ) 
 						rntOff = ntOff;
 					else 
 						rntOff = editcur.track - (VISTRACKS/2);
@@ -98,7 +98,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if ( drawMode == draw_modes::DMHScroll )
+					if ( drawMode == draw_modes::horizontal_scroll )
 					{
 						rntOff = ntOff;
 						if ( rntOff >= snt-VISTRACKS ) 
@@ -143,7 +143,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (bScrollDetatch)
 				{
-					if ( drawMode == draw_modes::DMVScroll )
+					if ( drawMode == draw_modes::vertical_scroll )
 					{
 						rnlOff = nlOff;
 						if ( rnlOff >= plines-VISLINES ) 
@@ -183,7 +183,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else if (Global::pConfig->_centerCursor)
 				{
-					if ( drawMode == draw_modes::DMVScroll ) 
+					if ( drawMode == draw_modes::vertical_scroll ) 
 						rnlOff = nlOff;
 					else 
 						rnlOff = editcur.line - (VISLINES/2);
@@ -204,7 +204,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if ( drawMode == draw_modes::DMVScroll )
+					if ( drawMode == draw_modes::vertical_scroll )
 					{
 						rnlOff = nlOff;
 						if ( rnlOff >= plines-VISLINES ) 
@@ -246,7 +246,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			////////////////////////////////////////////////////////////////////
 			// Determines if background Scroll is needed or not.
 
-			if (drawMode != draw_modes::DMAll && drawMode != draw_modes::DMPattern)
+			if (drawMode != draw_modes::all && drawMode != draw_modes::pattern)
 			{
 				if ( rnlOff != lOff )
 				{
@@ -270,7 +270,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			switch (drawMode)
 			{
-			case draw_modes::DMAll: 
+			case draw_modes::all: 
 				// header
 				rect.top=0; 
 				rect.left=0;
@@ -298,7 +298,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					ShowScrollBar(SB_VERT,false); 
 				}
 				break;
-			case draw_modes::DMPattern: 
+			case draw_modes::pattern: 
 				// all data
 				rect.top=YOFFSET;		
 				rect.left=0;
@@ -326,7 +326,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					ShowScrollBar(SB_VERT,false); 
 				}
 				break;
-			case draw_modes::DMPlayback: 
+			case draw_modes::playback: 
 				{
 					int pos = Global::pPlayer->_lineCounter;
 					if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
@@ -373,7 +373,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				break;
-			case draw_modes::DMPlaybackChange: 
+			case draw_modes::playback_change: 
 				if (_pSong->playOrder[editPosition] == _pSong->playOrder[Global::pPlayer->_playPosition])
 				{
 					newplaypos= Global::pPlayer->_lineCounter;
@@ -409,7 +409,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					ShowScrollBar(SB_VERT,false); 
 				}
 				break;
-			case draw_modes::DMSelection: 
+			case draw_modes::selection: 
 				// could optimize to only draw the changes
 				if (blockSelected)
 				{
@@ -798,7 +798,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					InvalidateRect(rect,false);
 				}
 				break;
-			case draw_modes::DMData: 
+			case draw_modes::data: 
 				{
 					SPatternDraw* pPD = &pPatternDraw[numPatternDraw-1];
 					
@@ -810,7 +810,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					InvalidateRect(rect,false);
 				}
 				break;
-			case draw_modes::DMTrackHeader: 
+			case draw_modes::track_header: 
 				// header
 				rect.top=0; 
 				rect.left=XOFFSET;
@@ -819,9 +819,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				updatePar |= DRAW_TRHEADER;
 				InvalidateRect(rect,false);
 				break;
-		//	case draw_modes::DMCursor: 
+		//	case draw_modes::cursor: 
 		//		break;
-			case draw_modes::DMNone: 
+			case draw_modes::none: 
 				break;
 			}
 
@@ -2269,7 +2269,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			devc->SelectObject(oldFont);
 
-			updateMode = draw_modes::DMNone;
+			updateMode = draw_modes::none;
 			updatePar = 0;
 		}
 
@@ -2559,7 +2559,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd)
 		{
-			if (viewMode == view_modes::VMPattern)
+			if (viewMode == view_modes::pattern)
 			{
 				if (!(updatePar & DRAW_FULL_DATA))
 				{
@@ -2586,7 +2586,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						// this should never have to happen with a 32 message buffer, but just incase....
 						numPatternDraw++;
-						PreparePatternRefresh(draw_modes::DMAll);
+						PreparePatternRefresh(draw_modes::all);
 					}
 				}
 			}

@@ -6,42 +6,56 @@
 #include <psycle/host/gui/InputHandler.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
-		#define MAX_DRAW_MESSAGES 32
 
 		class CMasterDlg;
 		class CWireDlg;
 		class CGearTracker;
 		class XMSamplerUI;
 
-		#define MAX_WIRE_DIALOGS 16
+		int const MAX_WIRE_DIALOGS = 16;
+
+		int const MAX_DRAW_MESSAGES = 32;
 
 		struct draw_modes
 		{
 			enum draw_mode
 			{
-				DMAll = 0,		// Repaints everything (means, slow). Used when switching views, or when a
-								// whole update is needed (For example, when changing pattern Properties, or TPB)
-				DMAllMacsRefresh, //Used to refresh all the machines, without refreshing the background/wires
-				DMMacRefresh,	// Used to refresh the image of one machine (mac num in "updatePar")
+				all, ///< Repaints everything (means, slow). Used when switching views, or when a
+				     ///< whole update is needed (For example, when changing pattern Properties, or TPB)
 
-				DMPattern,		// Use this when switching Patterns (changing from one to another)
-				DMData,			// Data has Changed. Which data to update is indicated with DrawLineStart/End
-								// and DrawTrackStart/End
-								// Use it when editing and copy/pasting
-				DMHScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
-								// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
-				DMVScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
-								// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
-			//	DMResize,		// Indicates the Refresh is called from the "OnSize()" event.
-				DMPlayback,		// Indicates it needs a refresh caused by Playback (update playback cursor)
-				DMPlaybackChange,// Indicates that while playing, a pattern switch is needed.
-				DMCursor,		// Indicates a movement of the cursor. update the values to "editcur" directly
-								// and call this function.
-								// this is arbitrary message as cursor is checked
-				DMSelection,	// The selection has changed. use "blockSel" to indicate the values.
-				DMTrackHeader,  // Track header refresh (mute/solo, Record updating)
-			//	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
-				DMNone			// Do not use this one directly. It is used to detect refresh calls from the OS.
+				all_machines, ///< Used to refresh all the machines, without refreshing the background/wires
+
+				machine, ///< Used to refresh the image of one machine (mac num in "updatePar")
+
+				pattern, ///< Use this when switching Patterns (changing from one to another)
+
+				data, ///< Data has Changed. Which data to update is indicated with DrawLineStart/End
+				      ///< and DrawTrackStart/End
+				      ///< Use it when editing and copy/pasting
+
+				horizontal_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
+				                   ///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+
+				vertical_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
+				                 ///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+
+				//resize, ///< Indicates the Refresh is called from the "OnSize()" event.
+
+				playback, ///< Indicates it needs a refresh caused by Playback (update playback cursor)
+
+				playback_change, ///< Indicates that while playing, a pattern switch is needed.
+
+				cursor, ///< Indicates a movement of the cursor. update the values to "editcur" directly
+				        ///< and call this function.
+				        ///< this is arbitrary message as cursor is checked
+
+				selection, ///< The selection has changed. use "blockSel" to indicate the values.
+
+				track_header, ///< Track header refresh (mute/solo, Record updating)
+
+				//pattern_header, ///< Octave, Pattern name, Edit Mode on/off
+
+				none ///< Do not use this one directly. It is used to detect refresh calls from the OS.
 
 				// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
 				// "DrawPatternEditor()".
@@ -59,9 +73,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			enum view_mode
 			{
-				VMMachine,
-				VMPattern,
-				VMSequence
+				machine,
+				pattern,
+				sequence
 			};
 		};
 
@@ -191,7 +205,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void InitTimer();
 			void ValidateParent();
 			void EnableSound();
-			void Repaint(draw_modes::draw_mode drawMode = draw_modes::DMAll);
+			void Repaint(draw_modes::draw_mode drawMode = draw_modes::all);
 
 			void ShowPatternDlg(void);
 			void BlockInsChange(int x);
@@ -317,7 +331,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int ChordModeLine;
 			int ChordModeTrack;
 			int updateMode;
-			int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
+			int updatePar;			// pattern: Display update mode. machine: Machine number to update.
 			int viewMode;
 			int XOFFSET;
 			int YOFFSET;
