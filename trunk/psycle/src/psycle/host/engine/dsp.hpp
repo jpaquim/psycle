@@ -227,7 +227,8 @@ namespace psycle
 			{
 				R_NONE  = 0,
 				R_LINEAR,
-				R_SPLINE
+				R_SPLINE,
+				R_BANDLIM
 			};
 
 		/// interpolator work function.
@@ -280,6 +281,9 @@ namespace psycle
 				case R_SPLINE:
 					_pWorkFn = Spline;
 					break;
+				case R_BANDLIM:
+					_pWorkFn = Bandlimit;
+					break;
 				}
 			}
 			virtual ResamplerQuality GetQuality(void) { return _quality; }
@@ -318,8 +322,48 @@ namespace psycle
 			
 			// offset = sample offset [info to avoid go out of bounds on sample reading ]
 			// length = sample length [info to avoid go out of bounds on sample reading ]
+
+
+			//either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
+			//make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
+			#define SINC_RESOLUTION 512	//sinc table values per zero crossing -- keep it a power of 2!!
+			#define SINC_ZEROS 11	//sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
+			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
+
+			/// interpolation work function which does band-limited interpolation.
+			static float Bandlimit(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			{
+				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
+				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
+				if(offset<SINC_ZEROS) leftExtent=offset;
+				if(length-offset<SINC_ZEROS) rightExtent=length-offset;
+				
+				const int sincInc(SINC_RESOLUTION);
+				float newval(0.0);
+
+				newval += sincTable[res] * *(pData);
+				float sincIndex(sincInc+res);
+				float weight(sincIndex - floor(sincIndex));
+				for(	int i(1);
+						i < leftExtent;
+						++i, sincIndex+=sincInc
+						)
+					newval+= (sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData-i);
+
+				sincIndex = sincInc-res;
+				weight = sincIndex - floor(sincIndex);
+				for(	int i(1);
+						i < rightExtent;
+						++i, sincIndex+=sincInc
+						)
+					newval += ( sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData+i);
+
+				return newval;
+			}
+
 			
 		private:
+
 			/// Currently is 2048
 			static int _resolution;
 			/// 
@@ -329,6 +373,15 @@ namespace psycle
 			static float _cTable[CUBIC_RESOLUTION];
 			static float _dTable[CUBIC_RESOLUTION];
 			static float _lTable[CUBIC_RESOLUTION];
+
+			//sinc function table
+			static float sincTable[SINC_TABLESIZE];
+			//table of deltas between sincTable indices.. sincDelta[i] = sincTable[i+1] - sincTable[i]
+			//used to speed up linear interpolation of sinc table-- this idea stolen from libresampler
+			static float sincDelta[SINC_TABLESIZE];
+			//note: even with this optimization, interpolating the sinc table roughly doubles the cpu usage on my machine.
+			// since we're working in realtime here, it may be best to just make SINC_RESOLUTION a whole lot bigger, and drop
+			// the table interpolation altogether..
 		};
 		}
 	}
