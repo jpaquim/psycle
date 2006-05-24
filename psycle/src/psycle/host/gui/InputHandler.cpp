@@ -691,7 +691,7 @@ namespace psycle
 				}
 				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
-				pChildView->Repaint(draw_modes::DMCursor);
+				pChildView->Repaint(draw_modes::cursor);
 				break;
 			
 			case cdefNavBottom:
@@ -721,7 +721,7 @@ namespace psycle
 				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
 
-				pChildView->Repaint(draw_modes::DMCursor);
+				pChildView->Repaint(draw_modes::cursor);
 				break;
 			
 			case cdefRowInsert:
@@ -932,7 +932,7 @@ namespace psycle
 				
 				if(bCtrlPlay) Stop();
 				
-		//		pChildView->Repaint(DMPatternHeader);
+		//		pChildView->Repaint(pattern_header);
 				break;
 
 			case cdefPlayStop:
@@ -959,7 +959,7 @@ namespace psycle
 				break;
 
 			case cdefInfoPattern:
-				if ( pChildView->viewMode == view_modes::VMPattern )
+				if ( pChildView->viewMode == view_modes::pattern )
 				{
 					pChildView->OnPopPattenproperties();
 				}

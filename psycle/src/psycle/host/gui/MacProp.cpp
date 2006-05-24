@@ -83,7 +83,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				m_view->AddMacViewUndo();
 				m_view->updatePar=thisMac;
-				m_view->Repaint(draw_modes::DMMacRefresh);
+				m_view->Repaint(draw_modes::machine);
 			}
 		}
 		void CMacProp::OnBypass() 
@@ -93,7 +93,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				m_view->AddMacViewUndo();
 				m_view->updatePar=thisMac;
-				m_view->Repaint(draw_modes::DMMacRefresh);
+				m_view->Repaint(draw_modes::machine);
 			}
 		}
 
@@ -132,7 +132,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			if ( m_view != NULL )
 			{
-				m_view->Repaint(draw_modes::DMAllMacsRefresh);
+				m_view->Repaint(draw_modes::all_machines);
 			}
 		}
 
@@ -173,7 +173,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if(m_view)
 				{
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
-					if (m_view->viewMode==view_modes::VMMachine)
+					if (m_view->viewMode==view_modes::machine)
 					{
 						m_view->Repaint();
 					}
