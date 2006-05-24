@@ -452,8 +452,8 @@ namespace psycle
 
 			bool plugin::LoadDll(std::string const & file_name)
 			{
-				std::string file_name_lower_case;
-				std::transform(file_name.begin(), file_name.end(), file_name_lower_case.begin(), std::tolower);
+				std::string file_name_lower_case(file_name);
+				std::transform(file_name_lower_case.begin(), file_name_lower_case.end(), file_name_lower_case.begin(), std::tolower);
 				std::string path;
 				if(CNewMachine::lookupDllName(file_name_lower_case, path))
 				{
