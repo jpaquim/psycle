@@ -433,8 +433,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int numPatternDraw;
 
 			// Enviroment variables
+
 			Machine::id_type smac;
-			/* Machine::mode_type ? */ int smacmode;
+
+			struct smacmodes
+			{
+				enum smacmode
+				{
+					move, //< moving a machine
+					panning //< panning on a machine
+				};
+			};
+			smacmodes::smacmode smacmode;
+
 			Machine::id_type wiresource;
 			Machine::id_type wiredest;
 			Wire::id_type wiremove;

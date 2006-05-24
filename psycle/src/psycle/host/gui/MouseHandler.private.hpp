@@ -13,7 +13,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (_pSong->_machineLock) return;
 				
 				smac = Machine::id_type(-1);
-				smacmode = Machine::mode_type(0 /* \todo wtf is zero? */);
+				smacmode = smacmodes::move;
 				wiresource = -1; wiredest = -1;
 				wiremove = -1;
 				if (nFlags & MK_CONTROL) // Control+Rightclick. Action: Move the wire origin.
@@ -204,7 +204,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (_pSong->_machineLock) return;
 
 				smac = Machine::id_type(-1);
-				smacmode = Machine::mode_type(0 /* \todo wtf is zero? */);
+				smacmode = smacmodes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 
@@ -317,7 +317,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							tmpsrc.x=MachineCoords.dGeneratorPan.x; tmpsrc.y=MachineCoords.dGeneratorPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan,panning)) //changing panning
 							{
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorMute,MachineCoords.sGeneratorMute)) //Mute 
 							{
@@ -374,7 +374,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							tmpsrc.x=MachineCoords.dEffectPan.x; tmpsrc.y=MachineCoords.dEffectPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan,panning)) //changing panning
 							{
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 								OnMouseMove(nFlags,point);
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectMute,MachineCoords.sEffectMute)) //Mute 
@@ -511,7 +511,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}
 					}
-					else if ( smacmode == 0 && smac != -1 ) // Are we moving a machine?
+					else if ( smacmode == smacmodes::move && smac != -1 ) // Are we moving a machine?
 					{
 						SSkinSource ssrc;
 						AddMacViewUndo();
@@ -542,7 +542,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 	
-				smac = -1;		smacmode = 0;
+				smac = -1;		smacmode = smacmodes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 				Repaint();
@@ -601,7 +601,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if (_pSong->_pMachine[smac])
 					{
-						if (smacmode == 0)
+						if (smacmode == smacmodes::move)
 						{
 							_pSong->_pMachine[smac]->SetPosX(point.x-mcd_x);
 							_pSong->_pMachine[smac]->SetPosY(point.y-mcd_y);
@@ -616,7 +616,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							pParentMain->StatusBarText(buf.str().c_str());
 							Repaint();
 						}
-						else if ((smacmode == 1) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
+						else if ((smacmode == smacmodes::panning) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
 						{
 							int newpan = 64;
 							switch(_pSong->_pMachine[smac]->_mode)
@@ -901,7 +901,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan)) //changing panning
 							{
 								smac=tmac;
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}
@@ -964,7 +964,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan)) //changing panning
 							{
 								smac=tmac;
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}
