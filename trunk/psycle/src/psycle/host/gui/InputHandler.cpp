@@ -691,7 +691,7 @@ namespace psycle
 				}
 				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
-				pChildView->Repaint(DMCursor);
+				pChildView->Repaint(draw_modes::DMCursor);
 				break;
 			
 			case cdefNavBottom:
@@ -721,7 +721,7 @@ namespace psycle
 				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
 
-				pChildView->Repaint(DMCursor);
+				pChildView->Repaint(draw_modes::DMCursor);
 				break;
 			
 			case cdefRowInsert:
@@ -959,7 +959,7 @@ namespace psycle
 				break;
 
 			case cdefInfoPattern:
-				if ( pChildView->viewMode == VMPattern )
+				if ( pChildView->viewMode == view_modes::VMPattern )
 				{
 					pChildView->OnPopPattenproperties();
 				}
