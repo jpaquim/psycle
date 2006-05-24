@@ -688,171 +688,276 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	/* 16bit, 2 bytes per sample, so divide by two the length of
 	 * the buffer (length is in bytes)
 	 */
-	for(index = 0; index < numsamples; index++)
+
+	if(extra)
 	{
-			out_l = out_r = 0;
+			for(index = 0; index < numsamples; index++)
+			{
+					out_l = out_r = 0;
+					
+					/* For each band */
+					for(band = 0; band < bnds; band++)
+					{
+						// left ch
+
+						/* Store Xi(n) */
+						data_history[band][0].x[g_eqi] = *psamplesleft;
+						/* Calculate and store Yi(n) */
 			
-			/* For each band */
-			for(band = 0; band < bnds; band++)
+						data_history[band][0].y[g_eqi] =
+               				(
+               			/* 		= alpha * [x(n)-x(n-2)] */
+								iir_cf[band].alpha * ( data_history[band][0].x[g_eqi]
+               					-  data_history[band][0].x[g_eqk])
+               			/* 		+ gamma * y(n-1) */
+               					+ iir_cf[band].gamma * data_history[band][0].y[g_eqj]
+               			/* 		- beta * y(n-2) */
+               					- iir_cf[band].beta * data_history[band][0].y[g_eqk]
+								);
+
+						// NaN and Den remover :
+						corrected_sample = *((unsigned int*)&data_history[band][0].y[g_eqi]);
+						exponent = corrected_sample & 0x7F800000;
+						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+						data_history[band][0].y[g_eqi] = *((float*)&corrected_sample);
+
+
+						/* 
+						* The multiplication by 2.0 was 'moved' into the coefficients to save
+						* CPU cycles here */
+						/* Apply the gain  */
+						out_l +=  data_history[band][0].y[g_eqi] * gains[band]; // * 2.0;
+						//denormal = -denormal;
+
+
+						// right ch
+
+						/* Store Xi(n) */
+						data_history[band][1].x[g_eqi] = *psamplesright;
+						/* Calculate and store Yi(n) */
+			
+						data_history[band][1].y[g_eqi] =
+               				(
+               			/* 		= alpha * [x(n)-x(n-2)] */
+								iir_cf[band].alpha * ( data_history[band][1].x[g_eqi]
+               					-  data_history[band][1].x[g_eqk])
+               			/* 		+ gamma * y(n-1) */
+               					+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
+               			/* 		- beta * y(n-2) */
+               					- iir_cf[band].beta * data_history[band][1].y[g_eqk]
+								);//+ denormal;
+
+						// NaN and Den remover :
+						corrected_sample = *((unsigned int*)&data_history[band][1].y[g_eqi]);
+						exponent = corrected_sample & 0x7F800000;
+						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+						data_history[band][1].y[g_eqi] = *((float*)&corrected_sample);
+
+						/* 
+						* The multiplication by 2.0 was 'moved' into the coefficients to save
+						* CPU cycles here */
+						/* Apply the gain  */
+						out_r +=  data_history[band][1].y[g_eqi] * gains[band]; // * 2.0;
+						//denormal = -denormal;
+
+					} /* For each band */
+
+
+					/* Filter the sample again */
+					for(band = 0; band < bnds; band++)
+					{
+						// left ch
+						/* Store Xi(n) */
+						data_history2[band][0].x[g_eqi] = out_l;
+						/* Calculate and store Yi(n) */
+						data_history2[band][0].y[g_eqi] = 
+            	   			(
+	               		/* y(n) = alpha * [x(n)-x(n-2)] */
+								iir_cf[band].alpha * (data_history2[band][0].x[g_eqi]
+            	   				-  data_history2[band][0].x[g_eqk])
+               			/* 	    + gamma * y(n-1) */
+	               				+ iir_cf[band].gamma * data_history2[band][0].y[g_eqj]
+    	           		/* 		- beta * y(n-2) */
+        	       				- iir_cf[band].beta * data_history2[band][0].y[g_eqk]
+								); // + denormal;
+
+						corrected_sample = *((unsigned int*)&data_history2[band][0].y[g_eqi]);
+						exponent = corrected_sample & 0x7F800000;
+						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+						data_history2[band][0].y[g_eqi] = *((float*)&corrected_sample);
+
+						/* Apply the gain */
+						out_l +=  data_history2[band][0].y[g_eqi]*gains[band];
+
+						// right ch
+
+						/* Store Xi(n) */
+
+						data_history2[band][1].x[g_eqi] = out_r;
+
+						/* Calculate and store Yi(n) */
+						data_history2[band][1].y[g_eqi] = 
+            	   			(
+	               		/* y(n) = alpha * [x(n)-x(n-2)] */
+								iir_cf[band].alpha * (data_history2[band][1].x[g_eqi]
+            	   				-  data_history2[band][1].x[g_eqk])
+               			/* 	    + gamma * y(n-1) */
+	               				+ iir_cf[band].gamma * data_history2[band][1].y[g_eqj]
+    	           		/* 		- beta * y(n-2) */
+        	       				- iir_cf[band].beta * data_history2[band][1].y[g_eqk]
+								); // + denormal;
+						corrected_sample = *((unsigned int*)&data_history2[band][1].y[g_eqi]);
+						exponent = corrected_sample & 0x7F800000;
+						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+						data_history2[band][1].y[g_eqi] = *((float*)&corrected_sample);
+
+						/* Apply the gain */
+						out_r +=  data_history2[band][1].y[g_eqi]*gains[band];
+
+					} /* For each band */
+					/* Volume stuff
+					Scale down original PCM sample and add it to the filters 
+					output. This substitutes the multiplication by 0.25
+					*/
+
+					out_l += *psamplesleft*.25f; 
+					out_r += *psamplesright*.25f;
+
+					/* Limit the output */
+					if(out_l < -32768.f)
+						out_l = -32768.f;
+					else if(out_l > 32767.f)
+						out_l = 32767.f;
+
+					/* Limit the output */
+					if(out_r < -32768.f)
+						out_r = -32768.f;
+					else if(out_r > 32767.f)
+						out_r = 32767.f;
+
+					*psamplesleft = out_l;
+					*psamplesright = out_r;
+
+
+				g_eqi++; g_eqj++; g_eqk++;
+				
+				/* Wrap around the indexes */
+				if(g_eqi == 3) g_eqi = 0;
+				else if(g_eqj == 3) g_eqj = 0;
+				else if(g_eqk == 3) g_eqk = 0;
+
+				++psamplesleft;
+				++psamplesright;
+				
+			}/* For each pair of samples */
+	} else {
+			for(index = 0; index < numsamples; index++)
 			{
-				// left ch
+					out_l = out_r = 0;
+					
+					/* For each band */
+					for(band = 0; band < bnds; band++)
+					{
+						// left ch
 
-				/* Store Xi(n) */
-				data_history[band][0].x[g_eqi] = *psamplesleft;
-				/* Calculate and store Yi(n) */
- 
-				data_history[band][0].y[g_eqi] =
-               		   (
-               	/* 		= alpha * [x(n)-x(n-2)] */
-						iir_cf[band].alpha * ( data_history[band][0].x[g_eqi]
-               			-  data_history[band][0].x[g_eqk])
-               	/* 		+ gamma * y(n-1) */
-               			+ iir_cf[band].gamma * data_history[band][0].y[g_eqj]
-               	/* 		- beta * y(n-2) */
-               			- iir_cf[band].beta * data_history[band][0].y[g_eqk]
-						);
+						/* Store Xi(n) */
+						data_history[band][0].x[g_eqi] = *psamplesleft;
+						/* Calculate and store Yi(n) */
+		 
+						data_history[band][0].y[g_eqi] =
+               				(
+               			/* 		= alpha * [x(n)-x(n-2)] */
+								iir_cf[band].alpha * ( data_history[band][0].x[g_eqi]
+               					-  data_history[band][0].x[g_eqk])
+               			/* 		+ gamma * y(n-1) */
+               					+ iir_cf[band].gamma * data_history[band][0].y[g_eqj]
+               			/* 		- beta * y(n-2) */
+               					- iir_cf[band].beta * data_history[band][0].y[g_eqk]
+								);
 
-				// NaN and Den remover :
-				corrected_sample = *((unsigned int*)&data_history[band][0].y[g_eqi]);
-				exponent = corrected_sample & 0x7F800000;
-				corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-				data_history[band][0].y[g_eqi] = *((float*)&corrected_sample);
-
-
-				/* 
-				 * The multiplication by 2.0 was 'moved' into the coefficients to save
-				 * CPU cycles here */
-				 /* Apply the gain  */
-				out_l +=  data_history[band][0].y[g_eqi] * gains[band]; // * 2.0;
-				//denormal = -denormal;
+						// NaN and Den remover :
+						corrected_sample = *((unsigned int*)&data_history[band][0].y[g_eqi]);
+						exponent = corrected_sample & 0x7F800000;
+						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+						data_history[band][0].y[g_eqi] = *((float*)&corrected_sample);
 
 
-				// right ch
-
-				/* Store Xi(n) */
-				data_history[band][1].x[g_eqi] = *psamplesright;
-				/* Calculate and store Yi(n) */
- 
-				data_history[band][1].y[g_eqi] =
-               		   (
-               	/* 		= alpha * [x(n)-x(n-2)] */
-						iir_cf[band].alpha * ( data_history[band][1].x[g_eqi]
-               			-  data_history[band][1].x[g_eqk])
-               	/* 		+ gamma * y(n-1) */
-               			+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
-               	/* 		- beta * y(n-2) */
-               			- iir_cf[band].beta * data_history[band][1].y[g_eqk]
-						);//+ denormal;
-
-				// NaN and Den remover :
-				corrected_sample = *((unsigned int*)&data_history[band][1].y[g_eqi]);
-				exponent = corrected_sample & 0x7F800000;
-				corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-				data_history[band][1].y[g_eqi] = *((float*)&corrected_sample);
-
-				/* 
-				 * The multiplication by 2.0 was 'moved' into the coefficients to save
-				 * CPU cycles here */
-				 /* Apply the gain  */
-				out_r +=  data_history[band][1].y[g_eqi] * gains[band]; // * 2.0;
-				//denormal = -denormal;
-
-			} /* For each band */
+						/* 
+						* The multiplication by 2.0 was 'moved' into the coefficients to save
+						* CPU cycles here */
+						/* Apply the gain  */
+						out_l +=  data_history[band][0].y[g_eqi] * gains[band]; // * 2.0;
+						//denormal = -denormal;
 
 
-			if(extra)
-			{
-				/* Filter the sample again */
-				for(band = 0; band < bnds; band++)
-				{
+						// right ch
 
-					// left ch
-					/* Store Xi(n) */
+						/* Store Xi(n) */
+						data_history[band][1].x[g_eqi] = *psamplesright;
+						/* Calculate and store Yi(n) */
+		 
+						data_history[band][1].y[g_eqi] =
+               				(
+               			/* 		= alpha * [x(n)-x(n-2)] */
+								iir_cf[band].alpha * ( data_history[band][1].x[g_eqi]
+               					-  data_history[band][1].x[g_eqk])
+               			/* 		+ gamma * y(n-1) */
+               					+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
+               			/* 		- beta * y(n-2) */
+               					- iir_cf[band].beta * data_history[band][1].y[g_eqk]
+								);//+ denormal;
 
-					data_history2[band][0].x[g_eqi] = out_l;
+						// NaN and Den remover :
+						corrected_sample = *((unsigned int*)&data_history[band][1].y[g_eqi]);
+						exponent = corrected_sample & 0x7F800000;
+						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+						data_history[band][1].y[g_eqi] = *((float*)&corrected_sample);
 
-					/* Calculate and store Yi(n) */
-					data_history2[band][0].y[g_eqi] = 
-            	   		   (
-	               	/* y(n) = alpha * [x(n)-x(n-2)] */
-							iir_cf[band].alpha * (data_history2[band][0].x[g_eqi]
-            	   			-  data_history2[band][0].x[g_eqk])
-               		/* 	    + gamma * y(n-1) */
-	               			+ iir_cf[band].gamma * data_history2[band][0].y[g_eqj]
-    	           	/* 		- beta * y(n-2) */
-        	       			- iir_cf[band].beta * data_history2[band][0].y[g_eqk]
-							); // + denormal;
+						/* 
+						* The multiplication by 2.0 was 'moved' into the coefficients to save
+						* CPU cycles here */
+						/* Apply the gain  */
+						out_r +=  data_history[band][1].y[g_eqi] * gains[band]; // * 2.0;
+						//denormal = -denormal;
 
-					corrected_sample = *((unsigned int*)&data_history2[band][0].y[g_eqi]);
-					exponent = corrected_sample & 0x7F800000;
-					corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-					data_history2[band][0].y[g_eqi] = *((float*)&corrected_sample);
+					} /* For each band */
 
-					/* Apply the gain */
-					out_l +=  data_history2[band][0].y[g_eqi]*gains[band];
+					/* Volume stuff
+					Scale down original PCM sample and add it to the filters 
+					output. This substitutes the multiplication by 0.25
+					*/
 
-					// right ch
+					out_l += *psamplesleft*.25f; 
+					out_r += *psamplesright*.25f;
 
-					/* Store Xi(n) */
+					/* Limit the output */
+					if(out_l < -32768.f)
+						out_l = -32768.f;
+					else if(out_l > 32767.f)
+						out_l = 32767.f;
 
-					data_history2[band][1].x[g_eqi] = out_r;
+					/* Limit the output */
+					if(out_r < -32768.f)
+						out_r = -32768.f;
+					else if(out_r > 32767.f)
+						out_r = 32767.f;
 
-					/* Calculate and store Yi(n) */
-					data_history2[band][1].y[g_eqi] = 
-            	   		   (
-	               	/* y(n) = alpha * [x(n)-x(n-2)] */
-							iir_cf[band].alpha * (data_history2[band][1].x[g_eqi]
-            	   			-  data_history2[band][1].x[g_eqk])
-               		/* 	    + gamma * y(n-1) */
-	               			+ iir_cf[band].gamma * data_history2[band][1].y[g_eqj]
-    	           	/* 		- beta * y(n-2) */
-        	       			- iir_cf[band].beta * data_history2[band][1].y[g_eqk]
-							); // + denormal;
-					corrected_sample = *((unsigned int*)&data_history2[band][1].y[g_eqi]);
-					exponent = corrected_sample & 0x7F800000;
-					corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-					data_history2[band][1].y[g_eqi] = *((float*)&corrected_sample);
-
-					/* Apply the gain */
-					out_r +=  data_history2[band][1].y[g_eqi]*gains[band];
-
-				} /* For each band */
-			}
-			/* Volume stuff
-			   Scale down original PCM sample and add it to the filters 
-			   output. This substitutes the multiplication by 0.25
-			 */
-
-			out_l += *psamplesleft; //*.25f; 
-			out_r += *psamplesright; //*.25f;
-
-			/* Limit the output */
-			if(out_l < -32768.f)
-				out_l = -32768.f;
-			else if(out_l > 32767.f)
-				out_l = 32767.f;
-
-			/* Limit the output */
-			if(out_r < -32768.f)
-				out_r = -32768.f;
-			else if(out_r > 32767.f)
-				out_r = 32767.f;
-
-			*psamplesleft = out_l;
-			*psamplesright = out_r;
+					*psamplesleft = out_l;
+					*psamplesright = out_r;
 
 
-		g_eqi++; g_eqj++; g_eqk++;
-		
-		/* Wrap around the indexes */
-		if(g_eqi == 3) g_eqi = 0;
-		else if(g_eqj == 3) g_eqj = 0;
-		else g_eqk = 0;
+				g_eqi++; g_eqj++; g_eqk++;
+				
+				/* Wrap around the indexes */
+				if(g_eqi == 3) g_eqi = 0;
+				else if(g_eqj == 3) g_eqj = 0;
+				else if(g_eqk == 3) g_eqk = 0;
 
-		++psamplesleft;
-		++psamplesright;
-		
-	}/* For each pair of samples */
+				++psamplesleft;
+				++psamplesright;
+				
+			}/* For each pair of samples */
+	}
 
 
 }
