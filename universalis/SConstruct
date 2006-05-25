@@ -35,9 +35,7 @@ Those abstractions of platforms specificities can be categorized into:
 
 # configure
 if True:
-	#diversalis = packageneric.check().ExternalPackage(
-	diversalis = packageneric.ExternalPackage(
-		packageneric,
+	diversalis = packageneric.external_package(
 		pkg_config = 'diversalis',
 		pkg_config_version_compare = '>= 0',
 		debian = 'lib-diversalis-0-dev',
@@ -45,8 +43,7 @@ if True:
 	)
 	diversalis.show()
 
-	glibmm = packageneric.ExternalPackage(
-		packageneric,
+	glibmm = packageneric.external_package(
 		pkg_config = 'glibmm-2.4',
 		pkg_config_version_compare = '>= 2.9',
 		debian = 'libglibmm-2.4-dev',
@@ -55,8 +52,7 @@ if True:
 	glibmm.show()
 	#if glibmm.failed():
 
-	glibmm = packageneric.ExternalPackage(
-		packageneric,
+	glibmm = packageneric.external_package(
 		pkg_config = 'glibmm-2.4',
 		pkg_config_version_compare = '>= 2.4',
 		debian = 'libglibmm-2.4-dev',
@@ -65,8 +61,7 @@ if True:
 	glibmm.show()
 
 	# boost base	
-	boost = packageneric.ExternalPackage(
-		packageneric,
+	boost = packageneric.external_package(
 		debian = 'libboost-dev',
 		debian_version_compare = '>= 1.33'
 	)
@@ -89,8 +84,7 @@ if True:
 			print 'please install', boost.debian, boost.debian_version_compare
 
 	# boost	thread
-	boost_thread = packageneric.ExternalPackage(
-		packageneric,
+	boost_thread = packageneric.external_package(
 		debian = 'libboost-thread-dev',
 		debian_version_compare = boost.debian_version_compare
 	)
