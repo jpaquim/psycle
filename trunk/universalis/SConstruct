@@ -113,19 +113,14 @@ if True:
 	universalis.add_include_path('src')
 	universalis.add_include_path('tmp')
 	universalis.show()
-if False:
-	packageneric.trace(str(universalis.get_sources()))
-	print
-	packageneric.trace(str(universalis.get_headers()))
-if True:
 	universalis.scons()
 
 # pkg-config packages
 if True:
 	universalis_package = packageneric.PkgConfigPackage(
 		name = 'universalis-' + str(Version.major),
-		version = universalis.version,
-		description = universalis.description,
+		version = universalis.version(),
+		description = universalis.description(),
 		modules = [universalis]
 	)
 
@@ -141,28 +136,28 @@ if True:
 	universalis_runtime = packageneric.DebianPackage(
 		name = 'lib-universalis-' + str(Version.major),
 		section = 'libs',
-		description = universalis_package.description,
+		description = universalis_package.description(),
 		long_description = 'This package contains the runtime library.'
 	)
-	universalis_runtime.depends = universalis.public_requires
-	#universalis_runtime.files.append(universalis_package.get_binaries())
+	universalis_runtime.depends = universalis.public_requires()
+	#universalis_runtime.files.append(universalis_package.binaries())
 	
 	universalis_dev = packageneric.DebianPackage(
-		name = universalis_runtime.name + '-dev',
+		name = universalis_runtime.name() + '-dev',
 		section = 'libdevel',
-		description = universalis_package.description,
+		description = universalis_package.description(),
 		long_description = 'This package contains the development files.',
 	)
-	universalis_dev.depends = universalis.public_requires
-	#universalis_dev.files.append(universalis_package.get_headers())
-	#universalis_dev.files.append(universalis_package.get_libs())
-	#universalis_dev.files.append(universalis_package.get_pkg_configs())
+	universalis_dev.depends = universalis.public_requires()
+	#universalis_dev.files.append(universalis_package.headers())
+	#universalis_dev.files.append(universalis_package.libraries())
+	#universalis_dev.files.append(universalis_package.pkg_configs())
 	
 	universalis_doc = packageneric.DebianPackage(
-		name = universalis_runtime.name + '-doc',
+		name = universalis_runtime.name() + '-doc',
 		section = 'doc',
 		architecture = 'all',
-		description = universalis_package.description,
+		description = universalis_package.description(),
 		long_description = 'This package contains the documentation.'
 	)
 	
