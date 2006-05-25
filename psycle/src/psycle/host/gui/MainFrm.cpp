@@ -1506,7 +1506,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								this);
 						((vst::plugin*)ma)->editorWnd = m_pWndMac[tmac];
 						std::ostringstream winname;
-						winname << std::hex << std::setw(2)
+						winname << std::setfill('0') << std::hex << std::setw(2)
 							<< ((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex
 							<< " : " << ma->_editName;
 						((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());

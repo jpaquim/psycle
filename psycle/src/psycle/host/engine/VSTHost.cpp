@@ -393,8 +393,7 @@ namespace psycle
 			void plugin::SaveDllName(RiffFile * pFile) 
 			{
 				boost::filesystem::path path(GetDllName(), boost::filesystem::native);
-				path = path.leaf();
-				std::string const s(path.string());
+				std::string const s(path.leaf());
 				pFile->Write(s.c_str(), s.length() + 1);
 			}
 
