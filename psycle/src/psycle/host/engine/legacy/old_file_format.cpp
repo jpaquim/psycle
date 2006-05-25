@@ -49,10 +49,10 @@ namespace psycle
 					m_LinesPerBeat= 4; sampR = 4315;
 				}
 				else m_LinesPerBeat = 44100 * 15 * 4 / (sampR * m_BeatsPerMin);
-				Global::pPlayer->bpm = m_BeatsPerMin;
-				Global::pPlayer->tpb = m_LinesPerBeat;
+				Global::player().bpm = m_BeatsPerMin;
+				Global::player().tpb = m_LinesPerBeat;
 				// The old format assumes we output at 44100 samples/sec, so...
-				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
+				Global::player().SamplesPerRow(sampR * Global::configuration()._pOutputDriver->_samplesPerSec / 44100);
 				pFile->Read(currentOctave);
 				pFile->Read(busMachine);
 				pFile->Read(playOrder);

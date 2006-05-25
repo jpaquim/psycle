@@ -347,12 +347,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.nMaxFileTitle = 0;
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
-				std::string tmpstr = Global::pConfig->GetPluginDir();
+				std::string tmpstr = Global::configuration().GetPluginDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
 			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
-				std::string tmpstr = Global::pConfig->GetVstDir();
+				std::string tmpstr = Global::configuration().GetVstDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
@@ -617,12 +617,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.nMaxFileTitle = 0;
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
-				std::string tmpstr = Global::pConfig->GetPluginDir();
+				std::string tmpstr = Global::configuration().GetPluginDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				std::string tmpstr = Global::pConfig->GetVstDir();
+				std::string tmpstr = Global::configuration().GetVstDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	

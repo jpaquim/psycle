@@ -112,13 +112,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_cmdFT2Del.SetCheck(Global::pInputHandler->bFT2DelBehaviour?1:0);
 			m_cmdShiftArrows.SetCheck(Global::pInputHandler->bShiftArrowsDoSelect?1:0);
 
-			m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
-			m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
-			m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
-			//m_move_cursor_paste.SetCheck(Global::pConfig->_MoveCursorPaste?1:0);
-			m_navigation_ignores_step.SetCheck(Global::pConfig->_NavigationIgnoresStep?1:0);
-			m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
-			m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
+			m_save_reminders.SetCheck(Global::configuration().bFileSaveReminders?1:0);
+			m_tweak_smooth.SetCheck(Global::configuration()._RecordMouseTweaksSmooth?1:0);
+			m_record_unarmed.SetCheck(Global::configuration()._RecordUnarmed?1:0);
+			//m_move_cursor_paste.SetCheck(Global::configuration()._MoveCursorPaste?1:0);
+			m_navigation_ignores_step.SetCheck(Global::configuration()._NavigationIgnoresStep?1:0);
+			m_show_info.SetCheck(Global::configuration().bShowSongInfoOnLoad?1:0);
+			m_autosave.SetCheck(Global::configuration().autosaveSong?1:0);
 			
 			// prevent ALT in hotkey	
 
@@ -129,19 +129,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_hotkey0.SetRules(rules,subst);
 
-			m_wrap.SetCheck(Global::pConfig->_wrapAround?1:0);
-			m_centercursor.SetCheck(Global::pConfig->_centerCursor?1:0);
-			m_cursordown.SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
+			m_wrap.SetCheck(Global::configuration()._wrapAround?1:0);
+			m_centercursor.SetCheck(Global::configuration()._centerCursor?1:0);
+			m_cursordown.SetCheck(Global::configuration()._cursorAlwaysDown?1:0);
 
 			m_spinlines.SetRange(1,MAX_LINES);
 			m_autosave_spin.SetRange(1,60);
 			
 			char buffer[16];
-			itoa(Global::pConfig->defaultPatLines,buffer,10);
+			itoa(Global::configuration().defaultPatLines,buffer,10);
 			m_numlines.SetWindowText(buffer);
-			itoa(Global::pConfig->autosaveSongTime,buffer,10);
+			itoa(Global::configuration().autosaveSongTime,buffer,10);
 			m_autosave_mins.SetWindowText(buffer);
-			m_timesig.SetCurSel(Global::pConfig->pv_timesig-1);
+			m_timesig.SetCurSel(Global::configuration().pv_timesig-1);
 			
 			UDACCEL acc;
 			acc.nSec = 4;
@@ -270,19 +270,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// save settings
 			Global::pInputHandler->ConfigSave();
 			
-			Global::pConfig->_wrapAround = m_wrap.GetCheck()?true:false;
-			Global::pConfig->_centerCursor = m_centercursor.GetCheck()?true:false;
-			Global::pConfig->_cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
+			Global::configuration()._wrapAround = m_wrap.GetCheck()?true:false;
+			Global::configuration()._centerCursor = m_centercursor.GetCheck()?true:false;
+			Global::configuration()._cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
 
-			Global::pConfig->bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
-			Global::pConfig->_RecordMouseTweaksSmooth = m_tweak_smooth.GetCheck()?true:false;
-			Global::pConfig->_RecordUnarmed = m_record_unarmed.GetCheck()?true:false;
-			//Global::pConfig->_MoveCursorPaste = m_move_cursor_paste.GetCheck()?true:false;
-			Global::pConfig->_NavigationIgnoresStep = m_navigation_ignores_step.GetCheck()?true:false;
+			Global::configuration().bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
+			Global::configuration()._RecordMouseTweaksSmooth = m_tweak_smooth.GetCheck()?true:false;
+			Global::configuration()._RecordUnarmed = m_record_unarmed.GetCheck()?true:false;
+			//Global::configuration()._MoveCursorPaste = m_move_cursor_paste.GetCheck()?true:false;
+			Global::configuration()._NavigationIgnoresStep = m_navigation_ignores_step.GetCheck()?true:false;
 			
-			Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
-			Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;
-			Global::pConfig->pv_timesig = m_timesig.GetCurSel()+1;
+			Global::configuration().bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
+			Global::configuration().autosaveSong = m_autosave.GetCheck()?true:false;
+			Global::configuration().pv_timesig = m_timesig.GetCurSel()+1;
 			
 			char buffer[32];
 			m_numlines.GetWindowText(buffer,16);
@@ -294,7 +294,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else if (nlines > MAX_LINES)
 				{ nlines = MAX_LINES; }
 
-			Global::pConfig->defaultPatLines=nlines;
+			Global::configuration().defaultPatLines=nlines;
 
 			m_autosave_mins.GetWindowText(buffer,16);
 			nlines = atoi(buffer);
@@ -302,7 +302,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ nlines = 1; }
 			else if (nlines > 60)
 			{ nlines = 60; }
-			Global::pConfig->autosaveSongTime = nlines;
+			Global::configuration().autosaveSongTime = nlines;
 			
 			CDialog::OnOK();
 		}

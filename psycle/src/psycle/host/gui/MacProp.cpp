@@ -42,7 +42,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				std::ostringstream s;
 				s	<< std::hex << std::setfill('0') << std::setw(2)
-					<< Global::_pSong->FindBusFromIndex(thisMac) << ": " << pMachine->_editName << "  Properties";
+					<< Global::song().FindBusFromIndex(thisMac) << ": " << pMachine->_editName << "  Properties";
 				SetWindowText(s.str().c_str());
 			}
 
@@ -146,7 +146,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// we need to find an empty slot
 				for (Machine::id_type i(0); i < MAX_BUSES; i++)
 				{
-					if (!Global::_pSong->_pMachine[i])
+					if (!Global::song()._pMachine[i])
 					{
 						dst = i;
 						break;
@@ -157,7 +157,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				for (Machine::id_type i(MAX_BUSES); i < MAX_BUSES*2; i++)
 				{
-					if (!Global::_pSong->_pMachine[i])
+					if (!Global::song()._pMachine[i])
 					{
 						dst = i;
 						break;
@@ -166,7 +166,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			if (dst >= 0)
 			{
-				if (!Global::_pSong->CloneMac(src,dst))
+				if (!Global::song().CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}

@@ -92,7 +92,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			CWnd::OnRButtonDown(nFlags,point);
 		}
-		
+
 		void CChildView::OnRButtonUp( UINT nFlags, CPoint point )
 		{
 			ReleaseCapture();
@@ -299,7 +299,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if ( smac != -1 ) // found a machine, let's do something on it.
 					{
 						int panning;
-						Machine* tmac=Global::_pSong->_pMachine[smac];
+						Machine* tmac=Global::song()._pMachine[smac];
 						mcd_x = point.x - tmac->GetPosX();
 						mcd_y = point.y - tmac->GetPosY();
 
@@ -434,7 +434,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sSoloOn))
 					{
-						if (Global::_pSong->_trackSoloed != ttm )
+						if (Global::song()._trackSoloed != ttm )
 						{
 							for ( int i=0;i<MAX_TRACKS;i++ )
 							{
@@ -506,7 +506,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
 						AddMacViewUndo();
-						if (!Global::_pSong->InsertConnection(wiresource, propMac))
+						if (!Global::song().InsertConnection(wiresource, propMac))
 						{
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}

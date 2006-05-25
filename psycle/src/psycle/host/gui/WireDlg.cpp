@@ -474,7 +474,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						// buffered and working backwards - it does it this way to minimize chances of drawing 
 						// erroneous data across the buffering point
 
-						float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
+						float add = (float(Global::configuration()._pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
 						float n = float(_pSrcMachine->_scopeBufferIndex-pos);
 						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
@@ -913,7 +913,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				scope_osc_freq = m_slider.GetPos();
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_slider2.SetRange(1,1+int(Global::configuration()._pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
 				}
 				break;
 			case 2:
@@ -1010,7 +1010,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			case 1:
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_slider2.SetRange(1,1+int(Global::configuration()._pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
 					m_slider2.SetPos(1);
 				}
 				else

@@ -89,7 +89,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			acc.nInc = 50;
 			m_midiHeadroomSpin.SetAccel(1, &acc);
 
-			m_midiMachineViewSeqMode.SetCheck(Global::pConfig->_midiMachineViewSeqMode);
+			m_midiMachineViewSeqMode.SetCheck(Global::configuration()._midiMachineViewSeqMode);
 
 			return true;
 		}
@@ -115,7 +115,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = m_midiHeadroom;
 
-			Global::pConfig->_midiMachineViewSeqMode = m_midiMachineViewSeqMode.GetCheck();
+			Global::configuration()._midiMachineViewSeqMode = m_midiMachineViewSeqMode.GetCheck();
 			CDialog::OnOK();
 		}
 
@@ -123,7 +123,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			m_driverIndex = m_oldDriverIndex;
 			m_midiDriverIndex = m_oldMidiDriverIndex;
-			m_midiMachineViewSeqMode.SetCheck(Global::pConfig->_midiMachineViewSeqMode);
+			m_midiMachineViewSeqMode.SetCheck(Global::configuration()._midiMachineViewSeqMode);
 			CDialog::OnCancel();
 		}
 
@@ -132,7 +132,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			int index = m_driverComboBox.GetCurSel();
 			m_ppDrivers[index]->Configure();
-			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+			Global::player().SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

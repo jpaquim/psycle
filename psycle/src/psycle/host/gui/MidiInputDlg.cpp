@@ -76,20 +76,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CPropertyPage::OnInitDialog();
 
-			raw.SetCheck(Global::pConfig->midi().raw());
+			raw.SetCheck(Global::configuration().midi().raw());
 
 			velocity.type.AddString("cmd");
 			velocity.type.AddString("ins");
-			write_to_gui(velocity, Global::pConfig->midi().velocity());
+			write_to_gui(velocity, Global::configuration().midi().velocity());
 
 			pitch.type.AddString("cmd");
 			pitch.type.AddString("twk");
 			pitch.type.AddString("tws");
 			pitch.type.AddString("ins");
 			pitch.type.AddString("mcm");
-			write_to_gui(pitch, Global::pConfig->midi().pitch());
+			write_to_gui(pitch, Global::configuration().midi().pitch());
 
-			assert(groups.size() == Global::pConfig->midi().groups().size());
+			assert(groups.size() == Global::configuration().midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
 				groups[i]->type.AddString("cmd");
@@ -97,8 +97,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				groups[i]->type.AddString("tws");
 				groups[i]->type.AddString("ins");
 				groups[i]->type.AddString("mcm");
-				write_to_gui(*groups[i], Global::pConfig->midi().group(i));
-				write_to_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
+				write_to_gui(*groups[i], Global::configuration().midi().group(i));
+				write_to_gui_text(groups[i]->message, Global::configuration().midi().group(i).message());
 			}
 
 			return true;
@@ -126,14 +126,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMidiInputDlg::OnOK() 
 		{
-			Global::pConfig->midi().raw() = raw.GetCheck();
-			read_from_gui(velocity, Global::pConfig->midi().velocity());
-			read_from_gui(pitch, Global::pConfig->midi().pitch());
-			assert(groups.size() == Global::pConfig->midi().groups().size());
+			Global::configuration().midi().raw() = raw.GetCheck();
+			read_from_gui(velocity, Global::configuration().midi().velocity());
+			read_from_gui(pitch, Global::configuration().midi().pitch());
+			assert(groups.size() == Global::configuration().midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
-				read_from_gui(*groups[i], Global::pConfig->midi().group(i));
-				read_from_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
+				read_from_gui(*groups[i], Global::configuration().midi().group(i));
+				read_from_gui_text(groups[i]->message, Global::configuration().midi().group(i).message());
 			}
 			CPropertyPage::OnOK();
 		}

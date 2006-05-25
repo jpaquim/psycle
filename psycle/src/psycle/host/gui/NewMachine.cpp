@@ -774,8 +774,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					std::string s(c);
 					host::loggers::info("Scanning plugins ... Current Directory: " + s);
 				}
-				host::loggers::info("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
-				host::loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
+				host::loggers::info("Scanning plugins ... Directory for Natives: " + Global::configuration().GetPluginDir());
+				host::loggers::info("Scanning plugins ... Directory for VSTs: " + Global::configuration().GetVstDir());
 				host::loggers::info("Scanning plugins ... Listing ...");
 				if(progressOpen)
 				{
@@ -784,8 +784,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					Progress.ShowWindow(SW_SHOW);
 				}
 
-				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
-				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
+				populate_plugin_list(nativePlugs,Global::configuration().GetPluginDir());
+				populate_plugin_list(vstPlugs,Global::configuration().GetVstDir());
 
 				std::size_t plugin_count = nativePlugs.size() + vstPlugs.size();
 

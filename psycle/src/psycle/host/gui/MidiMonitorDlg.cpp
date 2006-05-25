@@ -342,8 +342,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return;
 			}
 
-			char txtBuffer[ 128 ];
-
 			// for all MIDI channels
 			for( int ch = 0; ch<MAX_MIDI_CHANNELS; ch++ )
 			{
@@ -353,10 +351,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// machine mapped & active?
 				if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES )
 				{
-					if( Global::_pSong->_pMachine[ genFxIdx ] )
+					if( Global::song()._pMachine[ genFxIdx ] )
 					{
 						// machine
-						Machine * pMachine = Global::_pSong->_pMachine[ genFxIdx ];
+						Machine * pMachine = Global::song()._pMachine[ genFxIdx ];
 						{
 							std::ostringstream s;
 							s << genFxIdx << ": " << pMachine->_editName;
@@ -370,7 +368,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if( pMachine->_type == MACH_SAMPLER )
 						{
 							std::ostringstream s;
-							s << instrument << ": " << Global::_pSong->_pInstrument[ instrument ]->_sName;
+							s << instrument << ": " << Global::song()._pInstrument[ instrument ]->_sName;
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, s.str().c_str(), 0, 0, 0, 0);
 						}
 						else

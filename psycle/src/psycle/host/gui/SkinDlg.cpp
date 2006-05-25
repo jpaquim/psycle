@@ -184,7 +184,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_machine_skin.AddString(PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
 			
 			// ok now browse our folder for skins
-			FindSkinsInDir(Global::pConfig->GetSkinDir().c_str());
+			FindSkinsInDir(Global::configuration().GetSkinDir().c_str());
 
 			int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin.c_str());
 			if (sel==CB_ERR)

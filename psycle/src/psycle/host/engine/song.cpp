@@ -256,7 +256,7 @@ namespace psycle
 			for(int i(0) ; i < MAX_PATTERNS; ++i)
 			{
 				// All pattern reset
-				if(Global::pConfig) patternLines[i]=Global::pConfig->defaultPatLines;
+				if(Global::pConfig) patternLines[i]=Global::configuration().defaultPatLines;
 				else patternLines[i]=64;
 				std::sprintf(patternName[i], "Untitled"); 
 			}
@@ -1071,7 +1071,7 @@ namespace psycle
 								pFile->Read(_trackArmed[i]);
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
-							Global::pPlayer->SetBPM(m_BeatsPerMin,m_LinesPerBeat);
+							Global::player().SetBPM(m_BeatsPerMin,m_LinesPerBeat);
 						}
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
@@ -1744,7 +1744,7 @@ namespace psycle
 			// save our file
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 
-			boost::filesystem::path path(Global::pConfig->GetSongDir(), boost::filesystem::native);
+			boost::filesystem::path path(Global::configuration().GetSongDir(), boost::filesystem::native);
 			path /= "psycle.tmp";
 
 			boost::filesystem::remove(path);
@@ -1934,17 +1934,17 @@ namespace psycle
 		bool Song::CloneIns(Instrument::id_type src, Instrument::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
-			if (!Global::_pSong->_pInstrument[src]->Empty() && !Global::_pSong->_pInstrument[dst]->Empty())
+			if (!Global::song()._pInstrument[src]->Empty() && !Global::song()._pInstrument[dst]->Empty())
 			{
 				return false;
 			}
-			if (!Global::_pSong->_pInstrument[dst]->Empty())
+			if (!Global::song()._pInstrument[dst]->Empty())
 			{
 				int temp = src;
 				src = dst;
 				dst = temp;
 			}
-			if (Global::_pSong->_pInstrument[src]->Empty())
+			if (Global::song()._pInstrument[src]->Empty())
 			{
 				return false;
 			}
@@ -1954,7 +1954,7 @@ namespace psycle
 
 			// save our file
 
-			CString filepath = Global::pConfig->GetSongDir().c_str();
+			CString filepath = Global::configuration().GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			RiffFile file;

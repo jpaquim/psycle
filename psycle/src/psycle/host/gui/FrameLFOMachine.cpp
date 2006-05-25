@@ -32,10 +32,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			d_showLabel=top;
 			d_showValue=bottom;
-			d_valBkColor = Global::pConfig->machineGUIBottomColor;
-			d_lblBkColor = Global::pConfig->machineGUIBottomColor;
-			d_valTextColor = Global::pConfig->machineGUIFontBottomColor;
-			d_lblTextColor = Global::pConfig->machineGUIFontBottomColor;
+			d_valBkColor = Global::configuration().machineGUIBottomColor;
+			d_lblBkColor = Global::configuration().machineGUIBottomColor;
+			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
+			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
 			strcpy(d_lblString, label);
 		}
 
@@ -158,9 +158,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			d_showLabel=top;
 			d_showValue=bottom;
-			d_lblBkColor = Global::pConfig->machineGUIBottomColor;
-			d_valTextColor = Global::pConfig->machineGUIFontBottomColor;
-			d_lblTextColor = Global::pConfig->machineGUIFontBottomColor;
+			d_lblBkColor = Global::configuration().machineGUIBottomColor;
+			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
+			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
 			strcpy(d_lblString, label);
 		}
 
@@ -404,7 +404,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		ComboBox::s_ComboBoxDC.CreateCompatibleDC(&bufferDC);
 		CBitmap *oldbmp2=ComboBox::s_ComboBoxDC.SelectObject(&m_combobox);
 
-		bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,Global::pConfig->machineGUIBottomColor);
+		bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,Global::configuration().machineGUIBottomColor);
 		char temp[128];
 		for(int i(0);i<num_params;++i)
 		{
@@ -434,15 +434,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		for(int i(0);i<MAX_MACHINES-1; ++i)
 		{
-			if(Global::_pSong->_pMachine[i])
+			if(Global::song()._pMachine[i])
 			{
-				d_machNames.push_back(Global::_pSong->_pMachine[i]->GetEditName());
+				d_machNames.push_back(Global::song()._pMachine[i]->GetEditName());
 				std::vector<std::string> tempnames;
 				char tempname[128];
-				numParams = Global::_pSong->_pMachine[i]->GetNumParams();
+				numParams = Global::song()._pMachine[i]->GetNumParams();
 				for(int j(0);j<numParams; ++j)
 				{
-					Global::_pSong->_pMachine[i]->GetParamName(j, tempname);
+					Global::song()._pMachine[i]->GetParamName(j, tempname);
 					tempnames.push_back(tempname);
 				}
 				d_paramNames[i]=tempnames;

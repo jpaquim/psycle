@@ -62,15 +62,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				host::loggers::info(s.str());
 			}
 
-			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
+			if(!Global::configuration().Read()) // problem reading registry info. missing or damaged
 			{
-				Global::pConfig->_initialized = false;
+				Global::configuration()._initialized = false;
 				CConfigDlg dlg("Psycle Settings");
 				dlg.Init(Global::pConfig);
 				if (dlg.DoModal() == IDOK)
 				{
 					pFrame->m_wndView._outputActive = true;
-					Global::pConfig->_initialized = true;
+					Global::configuration()._initialized = true;
 				}
 			}
 			else
@@ -118,7 +118,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			#if defined NDEBUG // boring when developping
 				// Show splash screen
 				// If has been commented out for non-stable builds..
-				//if (Global::pConfig->_showAboutAtStart)
+				//if (Global::configuration()._showAboutAtStart)
 					OnAppAbout();
 			#endif
 			
@@ -256,7 +256,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
 						"Haralabos Michael\t\t\tInstaller and Debugging help"
 					);
-			m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
+			m_showabout.SetCheck(Global::configuration()._showAboutAtStart);
 
 			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
@@ -269,8 +269,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CAboutDlg::OnShowatstartup() 
 		{
-			if ( m_showabout.GetCheck() )  Global::pConfig->_showAboutAtStart = true;
-			else Global::pConfig->_showAboutAtStart=false;
+			if ( m_showabout.GetCheck() )  Global::configuration()._showAboutAtStart = true;
+			else Global::configuration()._showAboutAtStart=false;
 		}
 
 		void CPsycleApp::ProcessCmdLine(CMainFrame* pFrame)

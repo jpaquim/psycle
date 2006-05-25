@@ -289,13 +289,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						//dc.SetTextColor(0x00CCDDEE + nc);
 						if ((tweakpar == c) && (istweak))
 						{
-							dc.SetBkColor(Global::pConfig->machineGUIHTopColor);
-							dc.SetTextColor(Global::pConfig->machineGUIHFontTopColor);
+							dc.SetBkColor(Global::configuration().machineGUIHTopColor);
+							dc.SetTextColor(Global::configuration().machineGUIHFontTopColor);
 						}
 						else
 						{
-							dc.SetBkColor(Global::pConfig->machineGUITopColor);
-							dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
+							dc.SetBkColor(Global::configuration().machineGUITopColor);
+							dc.SetTextColor(Global::configuration().machineGUIFontTopColor);
 						}
 						dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
 						
@@ -303,47 +303,45 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						//dc.SetTextColor(0x0044EEFF + nc);
 						if ((tweakpar == c) && (istweak))
 						{
-							dc.SetBkColor(Global::pConfig->machineGUIHBottomColor);
-							dc.SetTextColor(Global::pConfig->machineGUIHFontBottomColor);
+							dc.SetBkColor(Global::configuration().machineGUIHBottomColor);
+							dc.SetTextColor(Global::configuration().machineGUIHFontBottomColor);
 						}
 						else
 						{
-							dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
-							dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+							dc.SetBkColor(Global::configuration().machineGUIBottomColor);
+							dc.SetTextColor(Global::configuration().machineGUIFontBottomColor);
 						}
 						dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
-					
 					}
 					else
 					{
 						if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
 						{
 							//dc.SetBkColor(0x00788D93);
-							dc.SetBkColor(Global::pConfig->machineGUITopColor);
+							dc.SetBkColor(Global::configuration().machineGUITopColor);
 							dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
 							
-
 							//dc.SetBkColor(0x00687D83);
-							dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
+							dc.SetBkColor(Global::configuration().machineGUIBottomColor);
 							dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 						}
 						else
 						{
 							//dc.SetBkColor(0x00788D93);
-							dc.SetBkColor(Global::pConfig->machineGUITopColor);
+							dc.SetBkColor(Global::configuration().machineGUITopColor);
 							dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + K_YSIZE / 4), "", 0);
 						
 							//dc.SetBkColor(0x0088a8b4);
 							//dc.SetTextColor(0x00FFFFFF);
-							dc.SetBkColor(Global::pConfig->machineGUITitleColor);
-							dc.SetTextColor(Global::pConfig->machineGUITitleFontColor);
+							dc.SetBkColor(Global::configuration().machineGUITitleColor);
+							dc.SetTextColor(Global::configuration().machineGUITitleFontColor);
 
 							dc.SelectObject(&font_bold);
 							dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
 							dc.SelectObject(&font);
 
 							//dc.SetBkColor(0x00687D83);
-							dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
+							dc.SetBkColor(Global::configuration().machineGUIBottomColor);
 							dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE), "", 0);
 						}
 					}
@@ -366,14 +364,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						//dc.SetBkColor(0x00788D93);
 						//dc.SetTextColor(0x00CCDDEE);
-						dc.SetBkColor(Global::pConfig->machineGUITopColor);
-						dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
+						dc.SetBkColor(Global::configuration().machineGUITopColor);
+						dc.SetTextColor(Global::configuration().machineGUIFontTopColor);
 						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
 
 						//dc.SetBkColor(0x00687D83);
 						//dc.SetTextColor(0x0044EEFF);
-						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
-						dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+						dc.SetBkColor(Global::configuration().machineGUIBottomColor);
+						dc.SetTextColor(Global::configuration().machineGUIFontBottomColor);
 						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 
 						y_knob += K_YSIZE;
@@ -398,11 +396,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				for(int c=numParameters-1;c>=0;c--)
 				{
-
 					_pMachine->GetParamValue(c,paramValue);
 					((Plugin*)_pMachine)->GetParam(c)->Paint(&memdc,paramValue);
 				}
-
 				dc.BitBlt(0, 0, clientRect.right-clientRect.left, clientRect.bottom-clientRect.top, &memdc, 0, 0, SRCCOPY);
 
 				memdc.SelectObject(oldbmp);
@@ -452,9 +448,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							wndView->AddMacViewUndo();
 							_pMachine->SetParameter(tweakpar,newval);
-							if (Global::pConfig->_RecordTweaks)
+							if (Global::configuration()._RecordTweaks)
 							{
-								if (Global::pConfig->_RecordMouseTweaksSmooth)
+								if (Global::configuration()._RecordMouseTweaksSmooth)
 								{
 									wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
 								}
@@ -510,9 +506,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							{
 								wndView->AddMacViewUndo();
 								_pMachine->SetParameter(tweakpar,newval);
-								if (Global::pConfig->_RecordTweaks)
+								if (Global::configuration()._RecordTweaks)
 								{
-									if (Global::pConfig->_RecordMouseTweaksSmooth)
+									if (Global::configuration()._RecordMouseTweaksSmooth)
 									{
 										wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
 									}
@@ -590,9 +586,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					_pMachine->SetParameter(tweakpar,(int) nv);
 					prevval=(int)nv;
 
-					if (Global::pConfig->_RecordTweaks)
+					if (Global::configuration()._RecordTweaks)
 					{
-						if (Global::pConfig->_RecordMouseTweaksSmooth)
+						if (Global::configuration()._RecordMouseTweaksSmooth)
 						{
 							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
 						}
@@ -615,10 +611,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							&& setvals[i] <= ((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MaxValue)
 						{
 							_pMachine->SetParameter(setparams[i],setvals[i]);
-							if (Global::pConfig->_RecordTweaks)	//todo: while i haven't tested it, i can't imagine recording tweaks on something like an
+							if (Global::configuration()._RecordTweaks)	//todo: while i haven't tested it, i can't imagine recording tweaks on something like an
 							{									//xymod grid coming out too well.. to do it properly, we'd need to implement a means
 																//of splitting the recording into separate tracks for each parameter.
-								if (Global::pConfig->_RecordMouseTweaksSmooth)
+								if (Global::configuration()._RecordMouseTweaksSmooth)
 								{
 									wndView->MousePatternTweakSlide(MachineIndex, setparams[i], setvals[i]-((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MinValue);
 								}
@@ -650,9 +646,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if( ((Plugin*)_pMachine)->GetParam(tweakpar)->LButtonUp(point.x, point.y, newval))
 						{
 							_pMachine->SetParameter(tweakpar, newval);
-							if (Global::pConfig->_RecordTweaks)
+							if (Global::configuration()._RecordTweaks)
 							{
-								if (Global::pConfig->_RecordMouseTweaksSmooth)
+								if (Global::configuration()._RecordMouseTweaksSmooth)
 								{
 									wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
 								}
@@ -690,11 +686,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (nFlags & MK_CONTROL)
 				{
-					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
+					Global::song().seqBus = MachineIndex;//Global::song().FindBusFromIndex(MachineIndex);
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(false);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
-					Global::_pSong->auxcolSelected=tweakpar;
+					Global::song().auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 				}
 				else 
@@ -753,7 +749,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				case CT_Note:
 					{
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::configuration()._notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
@@ -777,7 +773,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::configuration()._notesToEffects)
 				{
 					Global::pInputHandler->StopNote(outnote,true,_pMachine);
 				}

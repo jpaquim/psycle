@@ -55,11 +55,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		const int half = height/2;
 		dc->Draw3dRect(x,y-1,width,height+1,RGB(20,20,20),RGB(20,20,20));
-//		dc->FillSolidRect(x, y, width-1, half,Global::pConfig->machineGUITopColor);
-//		dc->FillSolidRect(x, y+half, width-1, half-1,Global::pConfig->machineGUIBottomColor);
+//		dc->FillSolidRect(x, y, width-1, half,Global::configuration().machineGUITopColor);
+//		dc->FillSolidRect(x, y+half, width-1, half-1,Global::configuration().machineGUIBottomColor);
 
-		dc->SetBkColor(Global::pConfig->machineGUITopColor);
-		dc->SetTextColor(Global::pConfig->machineGUIFontTopColor);
+		dc->SetBkColor(Global::configuration().machineGUITopColor);
+		dc->SetTextColor(Global::configuration().machineGUIFontTopColor);
 		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName), 0);
 	
 		DrawValue(dc,x,y,parValue);
@@ -67,8 +67,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	void CFrameMixerMachine::InfoLabel::DrawValue(CDC* dc, int x, int y,const char *parValue)
 	{
 		const int half = height/2;
-		dc->SetBkColor(Global::pConfig->machineGUIBottomColor);
-		dc->SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
+		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
 		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue), 0);
 	}
 
@@ -78,11 +78,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
-//		dc->FillSolidRect(x, y, mywidth, half,Global::pConfig->machineGUITitleColor);
-//		dc->FillSolidRect(x, y+half, mywidth, half,Global::pConfig->machineGUIBottomColor);
+//		dc->FillSolidRect(x, y, mywidth, half,Global::configuration().machineGUITitleColor);
+//		dc->FillSolidRect(x, y+half, mywidth, half,Global::configuration().machineGUIBottomColor);
 
-		dc->SetBkColor(Global::pConfig->machineGUITitleColor);
-		dc->SetTextColor(Global::pConfig->machineGUITitleFontColor);
+		dc->SetBkColor(Global::configuration().machineGUITitleColor);
+		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
 		CFont *oldfont =dc->SelectObject(font_bold);
 		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
 		dc->SelectObject(oldfont);
@@ -94,8 +94,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
-		dc->SetBkColor(Global::pConfig->machineGUIBottomColor);
-		dc->SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
+		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
 		dc->ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue), 0);
 	}
 	
@@ -106,11 +106,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		const int half = height/2;
 		const int quarter = height/4;
 		const int mywidth = width + Knob::width;
-		dc->FillSolidRect(x, y, mywidth, half,Global::pConfig->machineGUITopColor);
-		dc->FillSolidRect(x, y+half, mywidth, half,Global::pConfig->machineGUIBottomColor);
+		dc->FillSolidRect(x, y, mywidth, half,Global::configuration().machineGUITopColor);
+		dc->FillSolidRect(x, y+half, mywidth, half,Global::configuration().machineGUIBottomColor);
 
-		dc->SetBkColor(Global::pConfig->machineGUITitleColor);
-		dc->SetTextColor(Global::pConfig->machineGUITitleFontColor);
+		dc->SetBkColor(Global::configuration().machineGUITitleColor);
+		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
 
 		dc->SelectObject(&font_bold);
 		dc->ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName), 0);
@@ -124,7 +124,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	void CFrameMixerMachine::GraphSlider::Draw(CDC *dc,int x, int y,float value)
 	{
 		dc->BitBlt(x,y,width,height,&backDC,0,0,SRCCOPY);
-//		dc->FillSolidRect(x+width, y, InfoLabel::width, height-InfoLabel::height,Global::pConfig->machineGUITopColor);
+//		dc->FillSolidRect(x+width, y, InfoLabel::width, height-InfoLabel::height,Global::configuration().machineGUITopColor);
 		dc->Draw3dRect(x-1,y-1,width+1,height+1,RGB(20,20,20),RGB(20,20,20));
 		DrawKnob(dc,x,y,value);
 	}
@@ -204,7 +204,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		for (int i=0; i<MAX_CONNECTIONS; i++)
 		{
 			if (_pMixer->SendValid(i)) {
-				sendNames[sends]=Global::_pSong->_pMachine[_pMixer->GetSend(i)]->GetEditName();
+				sendNames[sends]=Global::song()._pMachine[_pMixer->GetSend(i)]->GetEditName();
 				sends++;
 			}
 		}
@@ -268,7 +268,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (_pMixer->_inputCon[i])
 			{
 				std::string chantxt = _pMixer->GetAudioInputName(InPort::id_type(i+Mixer::chan1));
-				InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,chantxt.c_str(),Global::_pSong->_pMachine[_pMixer->_inputMachines[i]]->GetEditName().c_str());
+				InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->GetEditName().c_str());
 
 				yoffset+=InfoLabel::height;
 				for (int j=0; j<numSends; j++)
@@ -357,7 +357,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		if (updateBuffer) 
 		{
-			bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,Global::pConfig->machineGUIBottomColor);
+			bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,Global::configuration().machineGUIBottomColor);
 			Generate(bufferDC);
 			updateBuffer=false;
 		}

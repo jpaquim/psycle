@@ -41,14 +41,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 		CFont* oldFont;
 			
-			oldFont= devc->SelectObject(&Global::pConfig->seqFont);
+			oldFont= devc->SelectObject(&Global::configuration().seqFont);
 			
 		/////////////////////////// Draw Background
 			rect.top=0;
 			rect.left=0;
 			rect.bottom=CH;
 			rect.right=CW;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_background);
+			devc->FillSolidRect(&rect,Global::configuration().pvc_background);
 
 		/////////////////////////// Draw (Columns') Header
 
@@ -56,10 +56,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			rect.bottom=SEQ_YOFFSET;
 			rect.left=0;
 			rect.right=CW;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+			devc->FillSolidRect(&rect,Global::configuration().pvc_separator);
 
-			devc->SetBkColor(Global::pConfig->pvc_background);
-			devc->SetTextColor(Global::pConfig->pvc_font);
+			devc->SetBkColor(Global::configuration().pvc_background);
+			devc->SetTextColor(Global::configuration().pvc_font);
 			
 			if ( seqTracksHoriz ) 
 			{
@@ -71,9 +71,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					//rect.left= curXoffset;
 					//rect.right= curXoffset+SEQ_ROWWIDTH;
-					//devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+					//devc->FillSolidRect(&rect,Global::configuration().pvc_separator);
 					
-					devc->SetBkColor(Global::pConfig->pvc_rowbeat);	// This affects TXT background
+					devc->SetBkColor(Global::configuration().pvc_rowbeat);	// This affects TXT background
 					sprintf(cbuffer,"%d",curcol+1);
 					TXT(devc,cbuffer,curXoffset,0,SEQ_ROWWIDTH-1,SEQ_ROWHEIGHT-1);
 					
@@ -104,12 +104,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						rect.left=0;
 						rect.bottom=curYoffset+SEQ_ROWHEIGHT;
 						rect.right=CW;
-						devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+						devc->FillSolidRect(&rect,Global::configuration().pvc_separator);
 						
 		//				rect.right= SEQ_XOFFSET;
-		//				devc->FillSolidRect(&rect,Global::pConfig->pvc_rowbeat);
-						devc->SetBkColor(Global::pConfig->pvc_rowbeat);
-						devc->SetTextColor(Global::pConfig->pvc_font);
+		//				devc->FillSolidRect(&rect,Global::configuration().pvc_rowbeat);
+						devc->SetBkColor(Global::configuration().pvc_rowbeat);
+						devc->SetTextColor(Global::configuration().pvc_font);
 						sprintf(cbuffer,"%.02X:%s",i,tmac->_editName.c_str());
 						TXT(devc,cbuffer,0,curYoffset,SEQ_XOFFSET-1,SEQ_ROWHEIGHT-1);
 
@@ -129,8 +129,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								int psize=(_pSong->patternLines[_pSong->playOrder[j]]*SEQ_ROWWIDTH)/(_pSong->LinesPerBeat()*seqSteps);
 								rect.left=curXoffset;
 								//rect.right=curXoffset+psize;
-								//devc->FillSolidRect(rect,Global::pConfig->pvc_row4beat);
-								devc->SetBkColor(Global::pConfig->pvc_row4beat);
+								//devc->FillSolidRect(rect,Global::configuration().pvc_row4beat);
+								devc->SetBkColor(Global::configuration().pvc_row4beat);
 								sprintf(cbuffer,"%.2d:%s",_pSong->playOrder[j],_pSong->patternName[_pSong->playOrder[j]]);
 								TXT(devc,cbuffer,curXoffset,curYoffset,psize-1,SEQ_ROWHEIGHT-1);
 								curXoffset+=psize;
@@ -144,7 +144,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									curcolf=(int)curcolf;
 									rect.left=curXoffset;
 									rect.right=	SEQ_XOFFSET+((curcolf+1)*SEQ_ROWWIDTH)-1;
-									devc->FillSolidRect(rect,Global::pConfig->pvc_row);
+									devc->FillSolidRect(rect,Global::configuration().pvc_row);
 									curXoffset=rect.right+1;
 									curcolf+=1;
 								}
@@ -152,7 +152,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								{
 									rect.left=curXoffset;
 									rect.right=curXoffset+SEQ_ROWWIDTH-1;
-									devc->FillSolidRect(rect,Global::pConfig->pvc_row);
+									devc->FillSolidRect(rect,Global::configuration().pvc_row);
 									curXoffset+=SEQ_ROWWIDTH;
 									curcolf+=1;
 								}
@@ -164,7 +164,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							{
 								rect.left=curXoffset;
 								rect.right=curXoffset+SEQ_ROWWIDTH-1;
-								devc->FillSolidRect(rect,Global::pConfig->pvc_row);
+								devc->FillSolidRect(rect,Global::configuration().pvc_row);
 								curXoffset+=SEQ_ROWWIDTH;
 							}
 						}
@@ -208,14 +208,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				strcpy(cbuffer,"...");
 			}
-			devc->SetBkColor(Global::pConfig->pvc_cursor);
-			devc->SetTextColor(Global::pConfig->pvc_fontCur);
+			devc->SetBkColor(Global::configuration().pvc_cursor);
+			devc->SetTextColor(Global::configuration().pvc_fontCur);
 			
-		//	devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+		//	devc->FillSolidRect(&rect,Global::configuration().pvc_separator);
 			TXTFLAT(devc,cbuffer,rect.left,rect.top,SEQ_ROWWIDTH-1,SEQ_ROWHEIGHT-1);
 			
 			
-		//	brush1.CreateSolidBrush(Global::pConfig->pvc_cursor);
+		//	brush1.CreateSolidBrush(Global::configuration().pvc_cursor);
 		//	oldbrush = (CBrush*)devc->SelectObject(&brush1);
 
 		//	devc->FrameRect(rect,&brush1);
@@ -235,25 +235,25 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			rect.bottom = curYoffset+SEQ_ROWHEIGHT;
 			rect.left=0;
 			rect.right=SEQ_XOFFSET;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+			devc->FillSolidRect(&rect,Global::configuration().pvc_separator);
 		//	rect.top++;
 		//	rect.bottom+= SEQ_ROWHEIGHT-1;
-		//	devc->FillSolidRect(&rect,Global::pConfig->pvc_row);
-			devc->SetBkColor(Global::pConfig->pvc_row4beat);	
-			devc->SetTextColor(Global::pConfig->pvc_font);
+		//	devc->FillSolidRect(&rect,Global::configuration().pvc_row);
+			devc->SetBkColor(Global::configuration().pvc_row4beat);	
+			devc->SetTextColor(Global::configuration().pvc_font);
 			TXT(devc,"Timeline",0,curYoffset,SEQ_XOFFSET-1,SEQ_ROWHEIGHT-1);
 
 		//	rect.top++;
 			rect.left=SEQ_XOFFSET;
 			rect.right=CW;
 			rect.bottom--;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_row4beat);
+			devc->FillSolidRect(&rect,Global::configuration().pvc_row4beat);
 
 			curcol = seqTickOffs - (seqTickOffs%seqSteps);
 			
-			float curtime = (((Master*)(_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::pPlayer->bpm) / (60.0f * Global::pConfig->_pOutputDriver->_samplesPerSec);
+			float curtime = (((Master*)(_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::player().bpm) / (60.0f * Global::configuration()._pOutputDriver->_samplesPerSec);
 
-			if ( (float)(curcol*seqSteps) <= curtime && Global::pPlayer->_playing )
+			if ( (float)(curcol*seqSteps) <= curtime && Global::player()._playing )
 			{
 				if ( (float)(curcol+(seqNumCols*seqSteps)) <= curtime )
 					rect.right=CW;
@@ -262,7 +262,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					(curtime - (float)curcol) *  SEQ_ROWWIDTH /
 					seqSteps
 					);
-				devc->FillSolidRect(&rect,Global::pConfig->pvc_playbar);
+				devc->FillSolidRect(&rect,Global::configuration().pvc_playbar);
 			}
 
 

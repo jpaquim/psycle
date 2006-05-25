@@ -403,7 +403,7 @@ namespace psycle
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = Global::song()._pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -420,7 +420,7 @@ namespace psycle
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = Global::song()._pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -481,7 +481,7 @@ namespace psycle
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						/*
@@ -538,7 +538,7 @@ namespace psycle
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -742,26 +742,26 @@ namespace psycle
 			if(index < MAX_BUSES)
 			{
 				pMachine->_mode = MACHMODE_GENERATOR;
-				if(pMachine->GetPosX() > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
-					pMachine->SetPosX(Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width);
-				if(pMachine->GetPosY() > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
-					pMachine->SetPosY(Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height);
+				if(pMachine->GetPosX() > Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
+					pMachine->SetPosX(Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width);
+				if(pMachine->GetPosY() > Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
+					pMachine->SetPosY(Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height);
 			}
 			else if (index < MAX_BUSES*2)
 			{
 				pMachine->_mode = MACHMODE_FX;
-				if(pMachine->GetPosX() > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
-					pMachine->SetPosX(Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width);
-				if(pMachine->GetPosY() > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
-					pMachine->SetPosY(Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height);
+				if(pMachine->GetPosX() > Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
+					pMachine->SetPosX(Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width);
+				if(pMachine->GetPosY() > Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
+					pMachine->SetPosY(Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height);
 			}
 			else
 			{
 				pMachine->_mode = MACHMODE_MASTER;
-				if(pMachine->GetPosX() > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
-					pMachine->SetPosX(Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width);
-				if(pMachine->GetPosY() > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
-					pMachine->SetPosY(Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height);
+				if(pMachine->GetPosX() > Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
+					pMachine->SetPosX(Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width);
+				if(pMachine->GetPosY() > Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
+					pMachine->SetPosY(Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height);
 			}
 			pMachine->SetPan(pMachine->_panning);
 			return pMachine;
@@ -837,7 +837,7 @@ namespace psycle
 			Machine::Work(numSamples);
 			PSYCLE__CPU_COST__INIT(cost);
 			Machine::SetVolumeCounter(numSamples);
-			if ( Global::pConfig->autoStopMachines )
+			if ( Global::configuration().autoStopMachines )
 			{
 				//Machine::SetVolumeCounterAccurate(numSamples);
 				if (_volumeCounter < 8.0f)	{
@@ -908,8 +908,8 @@ namespace psycle
 					{
 						pTemp._note+=noteOffset[i];
 					}
-					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL 
-						&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
+					if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL 
+						&& Global::song()._pMachine[macOutput[i]] != this) Global::song()._pMachine[macOutput[i]]->Tick(channel,&pTemp);
 				}
 			}
 			bisTicking=false;
@@ -947,9 +947,9 @@ namespace psycle
 		{
 			if (numparam >=0 && numparam <8)
 			{
-				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
+				if ((macOutput[numparam] != -1 ) &&( Global::song()._pMachine[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s", macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->GetEditName().c_str());
+					sprintf(parVal,"%X -%s", macOutput[numparam],Global::song()._pMachine[macOutput[numparam]]->GetEditName().c_str());
 				}
 				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
@@ -1200,7 +1200,7 @@ namespace psycle
 			{
 				int nv = (pData->_cmd<<8)+pData->_parameter;
 				SetParameter(pData->_inst,nv);
-				Global::pPlayer->Tweaker = true;
+				Global::player().Tweaker = true;
 			}
 			else if(pData->_note == cdefTweakS)
 			{
@@ -1220,7 +1220,7 @@ namespace psycle
 				PSYCLE__CPU_COST__INIT(cost);
 					Mix(numSamples);
 					Machine::SetVolumeCounter(numSamples);
-					if ( Global::pConfig->autoStopMachines )
+					if ( Global::configuration().autoStopMachines )
 					{
 						if (_volumeCounter < 8.0f)
 						{
@@ -1250,7 +1250,7 @@ namespace psycle
 			{
 				if (_sendValid[i])
 				{
-					Machine* pSendMachine = Global::_pSong->_pMachine[_send[i]];
+					Machine* pSendMachine = Global::song()._pMachine[_send[i]];
 					if (pSendMachine)
 					{
 						if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
@@ -1262,7 +1262,7 @@ namespace psycle
 									{
 										if (_inputCon[j])
 										{
-											Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[j]];
+											Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 											if (pInMachine)
 											{
 												if(!_mute && !_stopped && _sendGrid[j][send0+i]!= 0.0f)
@@ -1307,7 +1307,7 @@ namespace psycle
 			{
 				if (_sendValid[i])
 				{
-					Machine* pSendMachine = Global::_pSong->_pMachine[_send[i]];
+					Machine* pSendMachine = Global::song()._pMachine[_send[i]];
 					if (pSendMachine)
 					{
 						if(!_mute && !_stopped)
@@ -1322,7 +1322,7 @@ namespace psycle
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						if(!_mute && !_stopped && _sendGrid[i][mix] != 0.0f)
@@ -1510,14 +1510,14 @@ namespace psycle
 		{
 			float vol;
 			GetWireVolume(idx,vol);
-			if ( _inputCon[idx] ) return (Global::_pSong->_pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
+			if ( _inputCon[idx] ) return (Global::song()._pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
 
 		float Mixer::VuSend(Wire::id_type idx)
 		{
 			float vol = _sendVol[idx] * _sendVolMulti[idx];
-			if ( _sendValid[idx] ) return (Global::_pSong->_pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
+			if ( _sendValid[idx] ) return (Global::song()._pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
 
@@ -1635,10 +1635,10 @@ namespace psycle
 			else if (numparam <prms::level0)
 			{
 				minval = -1;
-				if(macOutput[numparam-prms::prm0]==-1 || Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]] == NULL)
+				if(macOutput[numparam-prms::prm0]==-1 || Global::song()._pMachine[macOutput[numparam-prms::prm0]] == NULL)
 					maxval = -1;
 				else
-					maxval =  Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
+					maxval =  Global::song()._pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
 			}
 
 			else if (numparam <prms::phase0){minval = 0; maxval = MAX_DEPTH*2;}
@@ -1690,8 +1690,8 @@ namespace psycle
 			} 
 			else if(numparam<prms::prm0)
 			{
-				if ((macOutput[numparam-prms::mac0] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]] != NULL))
-					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]]->GetEditName().c_str());
+				if ((macOutput[numparam-prms::mac0] != -1 ) &&( Global::song()._pMachine[macOutput[numparam-prms::mac0]] != NULL))
+					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],Global::song()._pMachine[macOutput[numparam-prms::mac0]]->GetEditName().c_str());
 				else if (macOutput[numparam-prms::mac0] != -1)
 					sprintf(parVal,"%X (none)",macOutput[numparam-prms::mac0]);
 				else 
@@ -1700,13 +1700,13 @@ namespace psycle
 			else if(numparam<prms::level0)
 			{
 				if(		(macOutput[numparam-prms::prm0] != -1) 
-					&&	(Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]] != NULL)
+					&&	(Global::song()._pMachine[macOutput[numparam-prms::prm0]] != NULL)
 					&&  (paramOutput[numparam-prms::prm0] >= 0)	)
 				{
-					if		(paramOutput[numparam-prms::prm0] < Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
+					if		(paramOutput[numparam-prms::prm0] < Global::song()._pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
 					{
 						char name[128];
-						Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetParamName(paramOutput[numparam-prms::prm0], name);
+						Global::song()._pMachine[macOutput[numparam-prms::prm0]]->GetParamName(paramOutput[numparam-prms::prm0], name);
 						sprintf(parVal,"%X -%s", paramOutput[numparam-prms::prm0], name);
 					}
 					else
@@ -1753,13 +1753,13 @@ namespace psycle
 					//if we're increasing, increase until we hit an active machine
 					if(value>macOutput[numparam-prms::mac0])
 					{
-						for(newMac=value; newMac<MAX_MACHINES && Global::_pSong->_pMachine[newMac]==NULL; ++newMac)
+						for(newMac=value; newMac<MAX_MACHINES && Global::song()._pMachine[newMac]==NULL; ++newMac)
 							;
 					}
 					//if we're decreasing, or if we're increasing but didn't find anything, decrease until we find an active machine
 					if(value<macOutput[numparam-prms::mac0] || newMac>=MAX_MACHINES)
 					{
-						for(newMac=value;newMac>-1 && Global::_pSong->_pMachine[newMac]==NULL; --newMac)
+						for(newMac=value;newMac>-1 && Global::song()._pMachine[newMac]==NULL; --newMac)
 							;
 					}
 						
@@ -1771,9 +1771,9 @@ namespace psycle
 			}
 			else if(numparam <prms::level0)
 			{
-				if( macOutput[numparam-prms::prm0]>-1 && Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]] )
+				if( macOutput[numparam-prms::prm0]>-1 && Global::song()._pMachine[macOutput[numparam-prms::prm0]] )
 				{
-					if(value<Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
+					if(value<Global::song()._pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
 					{
 						ParamEnd(numparam-prms::prm0);
 						paramOutput[numparam-prms::prm0] = value;
@@ -1782,7 +1782,7 @@ namespace psycle
 					else
 					{
 						ParamEnd(numparam-prms::prm0);
-						paramOutput[numparam-prms::prm0] = Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
+						paramOutput[numparam-prms::prm0] = Global::song()._pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
 						ParamStart(numparam-prms::prm0);
 					}
 				}
@@ -1816,11 +1816,11 @@ namespace psycle
 
 			for(int j(0);j<NUM_CHANS;++j)
 			{
-				if	(	macOutput[j] != -1		&&	Global::_pSong->_pMachine[macOutput[j]] != NULL
-					&&  paramOutput[j] != -1	&&	paramOutput[j] < Global::_pSong->_pMachine[macOutput[j]]->GetNumParams() )
+				if	(	macOutput[j] != -1		&&	Global::song()._pMachine[macOutput[j]] != NULL
+					&&  paramOutput[j] != -1	&&	paramOutput[j] < Global::song()._pMachine[macOutput[j]]->GetNumParams() )
 				{
-					Global::_pSong->_pMachine[macOutput[j]]->GetParamRange(paramOutput[j], minVal, maxVal);
-					curVal = Global::_pSong->_pMachine[macOutput[j]]->GetParamValue(paramOutput[j]);
+					Global::song()._pMachine[macOutput[j]]->GetParamRange(paramOutput[j], minVal, maxVal);
+					curVal = Global::song()._pMachine[macOutput[j]]->GetParamValue(paramOutput[j]);
 					curLFO = waveTable[	int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 					lfoAmt = (level[j]-MAX_DEPTH)/(float)MAX_DEPTH;
 
@@ -1831,17 +1831,17 @@ namespace psycle
 					if(newVal>maxVal) newVal=maxVal;
 					else if(newVal<minVal) newVal=minVal;
 
-					Global::_pSong->_pMachine[macOutput[j]]->SetParameter(paramOutput[j], newVal);	//make it happen!
+					Global::song()._pMachine[macOutput[j]]->SetParameter(paramOutput[j], newVal);	//make it happen!
 					bRedraw=true;
 					prevVal[j] = newVal;
 				}
 			}
 
 			if(bRedraw)
-				Global::pPlayer->Tweaker=true;
+				Global::player().Tweaker=true;
 			bRedraw=false;
 
-			float minms = Global::pConfig->GetSamplesPerSec()/1000.0f * 100.0f;	//100ms in samples
+			float minms = Global::configuration().GetSamplesPerSec()/1000.0f * 100.0f;	//100ms in samples
 			lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
 			if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 
@@ -1926,21 +1926,21 @@ namespace psycle
 			int destMac = macOutput[which];
 			int destParam = paramOutput[which];
 
-			if	(	destMac		!= -1	&&	Global::_pSong->_pMachine[destMac] != NULL
-				&&  destParam	!= -1	&&	destParam < Global::_pSong->_pMachine[destMac]->GetNumParams())
+			if	(	destMac		!= -1	&&	Global::song()._pMachine[destMac] != NULL
+				&&  destParam	!= -1	&&	destParam < Global::song()._pMachine[destMac]->GetNumParams())
 			{
 				int minVal, maxVal;
 				float curLFO, lfoAmt;
 
-				Global::_pSong->_pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
+				Global::song()._pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
 				curLFO = waveTable[	int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 				lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
 
 				//bad! bad!
-				//prevVal[which] = Global::_pSong->_pMachine[macOutput[which]]->GetParamValue(paramOutput[which]);
+				//prevVal[which] = Global::song()._pMachine[macOutput[which]]->GetParamValue(paramOutput[which]);
 				//centerVal[which] = prevVal[which] - (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt);
 
-				centerVal[which] = Global::_pSong->_pMachine[destMac]->GetParamValue(destParam);
+				centerVal[which] = Global::song()._pMachine[destMac]->GetParamValue(destParam);
 				prevVal[which] = centerVal[which];
 				
 				// the way i've set this up, a control will 'jump' if the lfo is at a peak or dip when a control is first selected.
@@ -1966,18 +1966,18 @@ namespace psycle
 			id_type destMac(macOutput[which]);
 			int destParam = paramOutput[which];
 
-			if	(	destMac		!= -1	&&	Global::_pSong->_pMachine[destMac] != NULL
-				&&  destParam	!= -1	&&	destParam < Global::_pSong->_pMachine[destMac]->GetNumParams())
+			if	(	destMac		!= -1	&&	Global::song()._pMachine[destMac] != NULL
+				&&  destParam	!= -1	&&	destParam < Global::song()._pMachine[destMac]->GetNumParams())
 			{
 				int minVal, maxVal;
 				int newVal;
-				Global::_pSong->_pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
+				Global::song()._pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
 				newVal = centerVal[which];
 				if(newVal<minVal) newVal=minVal;
 				else if(newVal>maxVal) newVal=maxVal;
 
 				if(destMac != this->id()) // craziness may ensue without this check.. folks routing the lfo to itself are on their own
-					Global::_pSong->_pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
+					Global::song()._pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}
 	}

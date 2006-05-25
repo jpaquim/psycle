@@ -9,7 +9,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
-				if(viewMode == view_modes::pattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
+				if(viewMode == view_modes::pattern && bEditMode && Global::player()._playing && Global::configuration()._followSong && Global::configuration()._RecordNoteoff)
 				{ 
 					EnterNote(outnote,0,true);	// note end
 				}
@@ -24,7 +24,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				editcur.line = ChordModeLine;
 				editcur.track = ChordModeTrack;
 				ChordModeOffs = 0;
-				AdvanceLine(patStep,Global::pConfig->_wrapAround,true);
+				AdvanceLine(patStep,Global::configuration()._wrapAround,true);
 		//		pParentMain->StatusBarIdle();
 		//		Repaint(cursor);
 			}
@@ -44,7 +44,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{
-				if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
+				if (!(Global::player()._playing && Global::configuration()._followSong && bRepeat))
 				{
 					bool success;
 					// add data
@@ -131,7 +131,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					else
 					{
-						if(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && Global::pConfig->_followSong)
+						if(Global::configuration()._RecordNoteoff && Global::player()._playing && Global::configuration()._followSong)
 						{
 							EnterNote(outnote,0,false);	// note end
 						}
@@ -170,16 +170,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::configuration()._RecordUnarmed)
 					{		
 						// play it
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
@@ -252,16 +252,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::configuration()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -332,16 +332,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::configuration()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -407,16 +407,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::configuration()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -487,16 +487,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::configuration()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -550,15 +550,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::configuration()._RecordUnarmed)
 					{	
 						return;
 					}
@@ -599,15 +599,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::configuration()._RecordUnarmed)
 					{	
 						return;
 					}
@@ -661,7 +661,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			
 			// realtime note entering
-			if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+			if (Global::player()._playing&&Global::configuration()._followSong)
 			{
 				if(_pSong->_trackArmedCount)
 				{
@@ -690,7 +690,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						SelectNextTrack();
 					}
 				}
-				else if (!Global::pConfig->_RecordUnarmed)
+				else if (!Global::configuration()._RecordUnarmed)
 				{
 					// build entry
 					PatternEntry entry;
@@ -699,18 +699,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 					if ( note < 120)
 					{
-						if (Global::pConfig->_RecordTweaks)
+						if (Global::configuration()._RecordTweaks)
 						{
-							if (Global::pConfig->midi().raw())
+							if (Global::configuration().midi().raw())
 							{
 								entry._cmd = 0x0c;
 								entry._parameter = velocity*2;
 							}
-							else if (Global::pConfig->midi().velocity().record())
+							else if (Global::configuration().midi().velocity().record())
 							{
 								// command
-								entry._cmd = Global::pConfig->midi().velocity().command();
-								int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+								entry._cmd = Global::configuration().midi().velocity().command();
+								int par = Global::configuration().midi().velocity().from() + (Global::configuration().midi().velocity().to() - Global::configuration().midi().velocity().from()) * velocity / 127;
 								if (par > 255) 
 								{
 									par = 255;
@@ -749,7 +749,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					Global::pInputHandler->notetrack[editcur.track]=note;
 					return;
 				}
-				line = Global::pPlayer->_lineCounter;
+				line = Global::player()._lineCounter;
 				toffset = _ptrack(ps)+(line*MULTIPLY);
 				ChordModeOffs = 0;
 			}
@@ -774,7 +774,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						editcur.line = ChordModeLine;
 						editcur.track = ChordModeTrack;
 						ChordModeOffs = 0;
-						AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+						AdvanceLine(patStep,Global::configuration()._wrapAround,false);
 					}
 					line = editcur.line;
 					toffset = _ptrackline(ps);
@@ -798,18 +798,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if ( note < 120)
 			{
-				if (Global::pConfig->_RecordTweaks)
+				if (Global::configuration()._RecordTweaks)
 				{
-					if (Global::pConfig->midi().raw())
+					if (Global::configuration().midi().raw())
 					{
 						entry->_cmd = 0x0c;
 						entry->_parameter = velocity * 2;
 					}
-					else if (Global::pConfig->midi().velocity().record())
+					else if (Global::configuration().midi().velocity().record())
 					{
 						// command
-						entry->_cmd = Global::pConfig->midi().velocity().command();
-						int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+						entry->_cmd = Global::configuration().midi().velocity().command();
+						int par = Global::configuration().midi().velocity().from() + (Global::configuration().midi().velocity().to() - Global::configuration().midi().velocity().from()) * velocity / 127;
 						if (par > 255) 
 						{
 							par = 255;
@@ -848,15 +848,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			Global::pInputHandler->notetrack[editcur.track]=note;
 			NewPatternDraw(editcur.track,editcur.track,line,line);
-			if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+			if (!(Global::player()._playing&&Global::configuration()._followSong))
 			{
 				if (ChordModeOffs)
 				{
-					AdvanceLine(-1,Global::pConfig->_wrapAround,false); //Advance track?
+					AdvanceLine(-1,Global::configuration()._wrapAround,false); //Advance track?
 				}
 				else
 				{
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::configuration()._wrapAround,false);
 				}
 			}
 
@@ -874,9 +874,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				unsigned char * toffset;
 				
 				// realtime note entering
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::player()._playing&&Global::configuration()._followSong)
 				{
-					toffset = _ptrack(ps)+(Global::pPlayer->_lineCounter*MULTIPLY);
+					toffset = _ptrack(ps)+(Global::player()._lineCounter*MULTIPLY);
 				}
 				else
 				{
@@ -892,9 +892,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-				if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+				if (!(Global::player()._playing&&Global::configuration()._followSong))
 				{
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::configuration()._wrapAround,false);
 				}
 
 				bScrollDetatch=false;
@@ -933,16 +933,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				break;
 			}
 
-			if (Global::pConfig->_cursorAlwaysDown)
+			if (Global::configuration()._cursorAlwaysDown)
 			{
-				AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+				AdvanceLine(patStep,Global::configuration()._wrapAround,false);
 			}
 			else
 			{
 				switch (editcur.col)
 				{
 				case 0:
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::configuration()._wrapAround,false);
 					break;
 				case 1:
 				case 3:
@@ -957,7 +957,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				case 2:
 				case 4:
 					PrevCol(false,false);
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::configuration()._wrapAround,false);
 					break;
 				}
 			}
@@ -988,7 +988,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+			AdvanceLine(patStep,Global::configuration()._wrapAround,false);
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
@@ -1058,7 +1058,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::PlayCurrentRow(void)
 		{
-			if (Global::pConfig->_followSong)
+			if (Global::configuration()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -1083,7 +1083,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::PlayCurrentNote(void)
 		{
-			if (Global::pConfig->_followSong)
+			if (Global::configuration()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -2130,19 +2130,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::DecPosition()
 		{
 		//	case cdefPlaySkipBack:
-			if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+			if (Global::player()._playing && Global::configuration()._followSong)
 			{
-				if (Global::pPlayer->_playPosition > 0 )
+				if (Global::player()._playPosition > 0 )
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(Global::pPlayer->_playPosition-1,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(Global::player()._playPosition-1,0);
+					Global::player()._playBlock = b;
 				}
 				else
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(_pSong->playLength-1,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(_pSong->playLength-1,0);
+					Global::player()._playBlock = b;
 				}
 			}
 			else
@@ -2162,7 +2162,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
-				if (Global::pPlayer->_playing) {
+				if (Global::player()._playing) {
 					Repaint(draw_modes::playback);
 				}
 			}
@@ -2171,19 +2171,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::IncPosition(bool bRepeat)
 		{
 		//	case cdefPlaySkipAhead:
-			if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+			if (Global::player()._playing && Global::configuration()._followSong)
 			{
-				if (Global::pPlayer->_playPosition < _pSong->playLength-1)
+				if (Global::player()._playPosition < _pSong->playLength-1)
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(Global::pPlayer->_playPosition+1,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(Global::player()._playPosition+1,0);
+					Global::player()._playBlock = b;
 				}
 				else
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(0,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(0,0);
+					Global::player()._playBlock = b;
 				}
 			}
 			else 
@@ -2204,7 +2204,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					else 
 					{
-						_pSong->AllocNewPattern(patternum,"",Global::pConfig->defaultPatLines,false);
+						_pSong->AllocNewPattern(patternum,"",Global::configuration().defaultPatLines,false);
 					}
 
 					++_pSong->playLength;
@@ -2219,7 +2219,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
-				if (Global::pPlayer->_playing) {
+				if (Global::player()._playing) {
 					Repaint(draw_modes::playback);
 				}
 			}

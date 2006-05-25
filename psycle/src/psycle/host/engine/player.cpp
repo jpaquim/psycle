@@ -53,8 +53,8 @@ namespace psycle
 			_playTimem = 0;
 			_loop_count =0;
 			_loop_line = 0;
-			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+			SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
+			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			ExecuteLine();
@@ -67,14 +67,14 @@ namespace psycle
 			_playBlock = false;
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
-				if(Global::song()._pMachine[i])
+				if(song()._pMachine[i])
 				{
-					Global::song()._pMachine[i]->Stop();
-					for(int c = 0; c < MAX_TRACKS; c++) Global::song()._pMachine[i]->TriggerDelay[c]._cmd = 0;
+					song()._pMachine[i]->Stop();
+					for(int c = 0; c < MAX_TRACKS; c++) song()._pMachine[i]->TriggerDelay[c]._cmd = 0;
 				}
 			}
-			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+			SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
+			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 		}
 
 		void Player::SampleRate(const int sampleRate)
@@ -86,7 +86,7 @@ namespace psycle
 				RecalcSPR();
 				for(int i(0) ; i < MAX_MACHINES; ++i)
 				{
-					if(Global::song()._pMachine[i]) Global::song()._pMachine[i]->SetSampleRate(sampleRate);
+					if(song()._pMachine[i]) song()._pMachine[i]->SetSampleRate(sampleRate);
 				}
 			}
 		}
@@ -455,7 +455,7 @@ namespace psycle
 				if(amount > 0)
 				{
 					PSYCLE__CPU_COST__INIT(idletime);
-					if( (int)song()._sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
+					if( (int)song()._sampCount > Global::configuration()._pOutputDriver->_samplesPerSec)
 					{
 						song()._sampCount =0;
 						for(int c=0; c<MAX_MACHINES; c++)
@@ -495,7 +495,7 @@ namespace psycle
 						float* pL(song()._pMachine[MASTER_INDEX]->_pSamplesL);
 						float* pR(song()._pMachine[MASTER_INDEX]->_pSamplesR);
 						int i;
-						switch(Global::pConfig->_pOutputDriver->_channelmode)
+						switch(Global::configuration()._pOutputDriver->_channelmode)
 						{
 						case 0: // mono mix
 							for(i=0; i<amount; i++)
@@ -536,16 +536,16 @@ namespace psycle
 			if(!_recording)
 			{
 				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
-				backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
-				backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
-				backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
-				if(samplerate > 0) { SampleRate(samplerate); Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate; }
-				if(bitdepth > 0) Global::pConfig->_pOutputDriver->_bitDepth = bitdepth;
-				if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
+				backup_rate = Global::configuration()._pOutputDriver->_samplesPerSec;
+				backup_bits = Global::configuration()._pOutputDriver->_bitDepth;
+				backup_channelmode = Global::configuration()._pOutputDriver->_channelmode;
+				if(samplerate > 0) { SampleRate(samplerate); Global::configuration()._pOutputDriver->_samplesPerSec = samplerate; }
+				if(bitdepth > 0) Global::configuration()._pOutputDriver->_bitDepth = bitdepth;
+				if(channelmode >= 0) Global::configuration()._pOutputDriver->_channelmode = channelmode;
 				int channels = 2;
-				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
+				if(Global::configuration()._pOutputDriver->_channelmode != 3) channels = 1;
 				Stop();
-				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::configuration()._pOutputDriver->_samplesPerSec, Global::configuration()._pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
 					_recording = true;
 				else
 				{
@@ -558,10 +558,10 @@ namespace psycle
 		{
 			if(_recording)
 			{
-				Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
+				Global::configuration()._pOutputDriver->_samplesPerSec = backup_rate;
 				SampleRate(backup_rate);
-				Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
-				Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
+				Global::configuration()._pOutputDriver->_bitDepth = backup_bits;
+				Global::configuration()._pOutputDriver->_channelmode = backup_channelmode;
 				_outputWaveFile.Close();
 				_recording = false;
 				if(!bOk)
