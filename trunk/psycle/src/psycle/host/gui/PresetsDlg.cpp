@@ -8,8 +8,10 @@
 #include <psycle/host/engine/VSTHost.hpp>
 #include <psycle/host/gui/FrameMachine.hpp>
 #include <psycle/host/engine/FileIO.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/convenience.hpp>
+#if 0
+	#include <boost/filesystem/path.hpp>
+	#include <boost/filesystem/convenience.hpp>
+#endif
 
 #if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 	#error "sorry, only works on little endian machines"
@@ -255,9 +257,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					++i;
 				}
 			}
-			boost::filesystem::path path(_pMachine->GetDllName(), boost::filesystem::native);
-			boost::filesystem::change_extension(path, ".prs");
-			file_name = path.string();
+
+			// change extension of the plugin's library file name to .prs
+			{
+				#if 0
+					boost::filesystem::path path(_pMachine->GetDllName(), boost::filesystem::native);
+					boost::filesystem::change_extension(path, ".prs");
+					file_name = path.string();
+				#else
+					file_name = _pMachine->GetDllName();
+					std::string::size_type pos = file_name.rfind('.');
+					if(pos != std::string::npos) file_name = file_name.substr(0, pos);
+					file_name += ".prs";
+				#endif
+			}
+
 			ReadPresets();
 			UpdateList();
 			return true;
@@ -893,11 +907,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
 				RiffFile fxb;
+
+				// change extension of the plugin's library file name to .fxb
 				{
-					boost::filesystem::path path(static_cast<vst::plugin*>(_pMachine)->GetDllName(), boost::filesystem::native);
-					boost::filesystem::change_extension(path, ".fxb");
-					if(!fxb.Open(path.string())) return; // here it is read "CcnK" and its "size" (it is 0)
+					#if 0
+						boost::filesystem::path path(_pMachine->GetDllName(), boost::filesystem::native);
+						boost::filesystem::change_extension(path, ".fxb");
+						if(!fxb.Open(path.string())) return; // here it is read "CcnK" and its "size" (it is 0)
+					#else
+						std::string file_name = _pMachine->GetDllName();
+						std::string::size_type pos = file_name.rfind('.');
+						if(pos != std::string::npos) file_name = file_name.substr(0, pos);
+						file_name += ".fxb";
+						if(!fxb.Open(file_name)) return; // here it is read "CcnK" and its "size" (it is 0)
+					#endif
 				}
+
 				if(fxb._header._id != fxb.FourCC("CcnK")) return;
 				RiffChunkHeader tmp;
 				fxb.Read(tmp);
