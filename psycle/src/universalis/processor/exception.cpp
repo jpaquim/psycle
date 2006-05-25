@@ -158,7 +158,9 @@ namespace universalis
 						// There is no default translator function.
 						// [bohan] This requires compilation with the asynchronous exception handling model (/EHa)
 						// [bohan] warning C4535: calling ::_set_se_translator() requires /EHa; the command line options /EHc and /GX are insufficient
-						::_set_se_translator(structured_exception_translator);
+						#if DIVERSALIS__COMPILER__VERSION__MAJOR >= 8 || defined NDEBUG // causes problems with the debugger in msvc7.1
+							::_set_se_translator(structured_exception_translator);
+						#endif
 					#else
 						static bool once(false);
 						if(!once)
