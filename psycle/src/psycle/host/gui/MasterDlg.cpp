@@ -204,10 +204,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CFont* oldfont = dcm->SelectObject(&namesFont);
 			dcm->SetTextColor(0x00FFFFFF); // White
 			dcm->SetBkColor(0x00000000); // Black
-			int const xo(253);
+			int const xo(353);
 			int const dx(75);
 			int const yo(24);
-			int const dy(12);
+			int const dy(22);
 			int const columns(2);
 			int y(yo);
 			int i(0);
