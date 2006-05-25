@@ -1711,53 +1711,6 @@ namespace psycle
 			}
 		}
 
-/*		void Song::PW_Play()
-		{
-			if (PW_Stage==0)
-			{
-				PW_Length=_pInstrument[PREV_WAV_INS]->waveLength;
-				if (PW_Length>0 )
-				{
-					PW_Stage=1;
-					PW_Phase=0;
-				}
-			}
-		}
-
-		void Song::PW_Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
-		{
-			float *pSamplesL = pInSamplesL;
-			float *pSamplesR = pInSamplesR;
-			--pSamplesL;
-			--pSamplesR;
-			
-			std::int16_t *wl=_pInstrument[PREV_WAV_INS]->waveDataL;
-			std::int16_t *wr=_pInstrument[PREV_WAV_INS]->waveDataR;
-			bool const stereo=_pInstrument[PREV_WAV_INS]->waveStereo;
-			float ld=0;
-			float rd=0;
-			
-			do
-			{
-				ld=(*(wl+PW_Phase))*preview_vol;
-				
-				if(stereo)
-					rd=(*(wr+PW_Phase))*preview_vol;
-				else
-					rd=ld;
-					
-				*++pSamplesL+=ld;
-				*++pSamplesR+=rd;
-					
-				if(++PW_Phase>=PW_Length)
-				{
-					PW_Stage=0;
-					return;
-				}
-				
-			} while(--numSamples);
-		}
-*/
 		///\todo mfc+winapi->std
 		bool Song::CloneMac(Machine::id_type src, Machine::id_type dst)
 		{

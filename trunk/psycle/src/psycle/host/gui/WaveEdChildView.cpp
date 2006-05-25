@@ -12,7 +12,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 	
-		float const CWaveEdChildView::zoomBase = 1.06;
+		float const CWaveEdChildView::zoomBase = 1.06f;
 
 		CWaveEdChildView::CWaveEdChildView()
 		{
@@ -979,13 +979,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if(y>nHeadHeight)		//mouse is over body
 				{
 					float diRatio = (float) diLength/nWidth;
-					long newpos =  x * diRatio + diStart;
+					unsigned long newpos =  (x*diRatio+diStart > 0? x*diRatio+diStart: 0);
 					int headX = f2i((diStart+x*diRatio)*nWidth/float(wdLength));
 					if(bDragLoopStart)
 					{
-						if(newpos < 0)				wdLoopS = 0;
-						else if(newpos <= wdLoopE)	wdLoopS = newpos;
-						else						wdLoopS = wdLoopE;
+						if(newpos > wdLoopE)		wdLoopS = wdLoopE;
+						else						wdLoopS = newpos;
 						_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
 						_pSong->IsInvalided(false);
 						pParent->m_wndInst.WaveUpdate();
@@ -1017,18 +1016,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					else
 					{
-						if (newpos >= (long) SelStart)
+						if (newpos >= SelStart)
 						{
 							if (newpos >= wdLength)	{ newpos = wdLength-1; }
-							blStart = (long) (SelStart);
-							blLength = (long)(newpos - blStart);
+							blStart = (SelStart);
+							blLength = newpos - blStart;
 							cursorPos=blStart+blLength;
 						}
 						else
 						{
 							if (newpos < 0) { newpos = 0; }
-							blStart = (long) ( newpos);
-							blLength = (long) (SelStart - blStart);
+							blStart = newpos;
+							blLength = SelStart - blStart;
 							cursorPos=blStart;
 						}
 						//set invalid rects
@@ -1044,18 +1043,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				else					//mouse is over header
 				{
 					float diRatio = (float) wdLength/nWidth;
-					int newpos = x * diRatio;
-					if (newpos >= (long) SelStart)
+					unsigned long newpos = (x * diRatio > 0? x*diRatio: 0);
+					if (newpos >= SelStart)
 					{
 						if (newpos >= wdLength)	{ newpos = wdLength-1;	}
-						blStart = (long) SelStart;
-						blLength = (long)(newpos - blStart);
+						blStart = SelStart;
+						blLength = newpos - blStart;
 					}
 					else
 					{
-						if (newpos < 0) { newpos = 0; }
-						blStart = (long)newpos;
-						blLength = long(SelStart-blStart);
+						blStart = newpos;
+						blLength = SelStart-blStart;
 					}
 					//set invalid rects
 					int bodyX = f2i( (x*wdLength - diStart*nWidth)/diLength );
@@ -1180,7 +1178,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWaveEdChildView::OnSelectionNormalize() // (Fideloop's)
 		{
 			signed short maxL = 0, maxR = 0, absBuf;
-			double ratio = 0, buf;
+			double ratio = 0;
 			unsigned long c = 0;
 			unsigned long startPoint = (blSelection? blStart: 0);
 			unsigned long length = (blSelection? blLength+1: wdLength);
@@ -1307,9 +1305,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnSelectionAmplify()
 		{
-			short buf = 0;
 			double ratio =1;
-			unsigned int c =0;
 			unsigned long startPoint = (blSelection? blStart: 0);
 			unsigned long length = (blSelection? blLength+1: wdLength);
 			int pos = 0;
@@ -1411,7 +1407,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					short *pTmp = new signed short[timeInSamps + wdLength];		//create new buffer
 					memcpy(pTmp, wdLeft, insertPos*2);							//copy pre-insert data
 					memset(pTmp + insertPos, 0, timeInSamps*2);					//insert silence
-					memcpy((BYTE*)pTmp + 2*(insertPos+timeInSamps), wdLeft + insertPos, 2*(wdLength - insertPos));	//copy post-insert data
+					memcpy((unsigned char*)pTmp + 2*(insertPos+timeInSamps), wdLeft + insertPos, 2*(wdLength - insertPos));	//copy post-insert data
 					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
 
 					if(wdStereo)
@@ -1419,7 +1415,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						short *pTmpR= new signed short[timeInSamps + wdLength];
 						memcpy(pTmpR,wdRight,insertPos*2);
 						memset(pTmpR+insertPos, 0, timeInSamps*2);
-						memcpy((BYTE*)pTmpR+ 2*(insertPos+timeInSamps), wdRight + insertPos, 2*(wdLength - insertPos));
+						memcpy((unsigned char*)pTmpR+ 2*(insertPos+timeInSamps), wdRight + insertPos, 2*(wdLength - insertPos));
 						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 					}
 
@@ -1700,14 +1696,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				
 			struct fullheader
 			{
-				DWORD	head;
-				DWORD	size;
-				DWORD	head2;
-				DWORD	fmthead;
-				DWORD	fmtsize;
+				unsigned long	head;
+				unsigned long	size;
+				unsigned long	head2;
+				unsigned long	fmthead;
+				unsigned long	fmtsize;
 				WAVEFORMATEX	fmtcontent;
-				DWORD datahead;
-				DWORD datasize;
+				unsigned long datahead;
+				unsigned long datasize;
 			} wavheader;
 
 			OpenClipboard();
@@ -1780,7 +1776,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pParent->m_wndView.AddMacViewUndo();
 
 			char *pData;
-			DWORD lFmt, lData;
+			unsigned long lFmt, lData;
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
@@ -1790,14 +1786,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(DWORD*)pPasteData != 'FFIR') && (*((DWORD*)pPasteData + 2)!='EVAW')) return;
-			lFmt= *(DWORD*)((char*)pPasteData + 16);
+			if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
+			lFmt= *(unsigned long*)((char*)pPasteData + 16);
 			pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-			lData = *(DWORD*)((char*)pPasteData + 20 + lFmt + 4);
+			lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
-			int lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
+			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 			int bytesPerSamp = (int)(pFmt->nBlockAlign/pFmt->nChannels);
 			_pSong->IsInvalided(true);
 			Sleep(LOCK_LATENCY);
@@ -1893,13 +1889,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnPasteOverwrite()
 		{
-			unsigned long c = 0;
 			unsigned long startPoint;
 
 			pParent->m_wndView.AddMacViewUndo();
 
 			char *pData;
-			DWORD lFmt, lData;
+			unsigned long lFmt, lData;
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
@@ -1909,14 +1904,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(DWORD*)pPasteData != 'FFIR') && (*((DWORD*)pPasteData + 2)!='EVAW')) return;
-			lFmt= *(DWORD*)((char*)pPasteData + 16);
+			if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
+			lFmt= *(unsigned long*)((char*)pPasteData + 16);
 			pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-			lData = *(DWORD*)((char*)pPasteData + 20 + lFmt + 4);
+			lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
-			int lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
+			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 			_pSong->IsInvalided(true);
 			Sleep(LOCK_LATENCY);
@@ -1950,20 +1945,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 
 				//do left channel
-				pTmp = new signed short[(DWORD)wdLength];
+				pTmp = new signed short[wdLength];
 				memcpy(pTmp, wdLeft, startPoint*2);
 				for (c = 0; c < lDataSamps; c++)
 					*(pTmp + startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign);
-				memcpy((BYTE*)pTmp + 2*(startPoint+lDataSamps), wdLeft  + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
+				memcpy((unsigned char*)pTmp + 2*(startPoint+lDataSamps), wdLeft  + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
 				wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
 				
 				if(pFmt->nChannels==2)	//do right channel if stereo
 				{
-					pTmpR= new signed short[(DWORD)wdLength];
+					pTmpR= new signed short[wdLength];
 					memcpy(pTmpR,wdRight,startPoint*2);
 					for (c = 0; c < lDataSamps; c++)
 						*(pTmpR+ startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign + int(pFmt->nBlockAlign*0.5));
-					memcpy((BYTE*)pTmpR+ 2*(startPoint+lDataSamps), wdRight + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
+					memcpy((unsigned char*)pTmpR+ 2*(startPoint+lDataSamps), wdRight + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
 					wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 				}
 			}
@@ -1991,7 +1986,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				char *pData;
-				DWORD lFmt, lData;
+				unsigned long lFmt, lData;
 				
 				WAVEFORMATEX* pFmt;
 				short* pPasteData;
@@ -2001,18 +1996,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				hPasteData = GetClipboardData(CF_WAVE);
 				pPasteData = (short*)GlobalLock(hPasteData);
 
-				if ((*(DWORD*)pPasteData != 'FFIR') && (*((DWORD*)pPasteData + 2)!='EVAW')) return;
-				lFmt= *(DWORD*)((char*)pPasteData + 16);
+				if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
+				lFmt= *(unsigned long*)((char*)pPasteData + 16);
 				pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-				lData = *(DWORD*)((char*)pPasteData + 20 + lFmt + 4);
+				lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
 				pData = (char*)pPasteData + 20 + lFmt + 8;
 
-				int lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
-				int bytesPerSamp = int(pFmt->nBlockAlign/pFmt->nChannels); //preparing for non-16-bit-wave support
+				unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
-				int fadeInSamps(0), fadeOutSamps(0);
-				int destFadeIn(0);	
+				unsigned long fadeInSamps(0), fadeOutSamps(0);
+				unsigned long destFadeIn(0);	
 
 				if(MixDlg.bFadeIn)
 					fadeInSamps = Global::configuration().GetSamplesPerSec() * MixDlg.fadeInTime;
@@ -2041,7 +2035,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					else		//overwrite at cursor
 						startPoint=cursorPos;
 
-					long newLength;
+					unsigned long newLength;
 					if(startPoint+lDataSamps < wdLength)
 						newLength = wdLength;
 					else
@@ -2128,7 +2122,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				char *pData;
-				DWORD lFmt, lData;
+				unsigned long lFmt, lData;
 				
 				WAVEFORMATEX* pFmt;
 				short* pPasteData;
@@ -2138,15 +2132,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				hPasteData = GetClipboardData(CF_WAVE);
 				pPasteData = (short*)GlobalLock(hPasteData);
 
-				if ((*(DWORD*)pPasteData != 'FFIR') && (*((DWORD*)pPasteData + 2)!='EVAW')) return;
-				lFmt= *(DWORD*)((char*)pPasteData + 16);
+				if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
+				lFmt= *(unsigned long*)((char*)pPasteData + 16);
 				pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-				lData = *(DWORD*)((char*)pPasteData + 20 + lFmt + 4);
+				lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
 				pData = (char*)pPasteData + 20 + lFmt + 8;
 
-				int lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
-				int bytesPerSamp = int(pFmt->nBlockAlign/pFmt->nChannels); //preparing for non-16-bit-wave support
+				unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
@@ -2174,7 +2167,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							endPoint = wdLength;				//if not, the end of the existing wave marks the end of the fade
 					}
 
-					long newLength;
+					unsigned long newLength;
 					if(startPoint+lDataSamps < wdLength)
 						newLength = wdLength;				//end wave same size as start wave
 					else
