@@ -8,7 +8,9 @@
 #include <psycle/host/engine/VSTHost.hpp>
 #include <psycle/host/gui/FrameMachine.hpp>
 #include <psycle/host/engine/FileIO.hpp>
-#if 0
+
+#define use_boost 0 // causes an exception with paths that contain spaces
+#if use_boost
 	#include <boost/filesystem/path.hpp>
 	#include <boost/filesystem/convenience.hpp>
 #endif
@@ -260,9 +262,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			// change extension of the plugin's library file name to .prs
 			{
-				#if 0
+				#if use_boost // causes an exception with paths that contain spaces
 					boost::filesystem::path path(_pMachine->GetDllName(), boost::filesystem::native);
-					boost::filesystem::change_extension(path, ".prs");
+					path = boost::filesystem::change_extension(path, ".prs");
 					file_name = path.string();
 				#else
 					file_name = _pMachine->GetDllName();
@@ -910,9 +912,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// change extension of the plugin's library file name to .fxb
 				{
-					#if 0
+					#if use_boost // causes an exception with paths that contain spaces
 						boost::filesystem::path path(_pMachine->GetDllName(), boost::filesystem::native);
-						boost::filesystem::change_extension(path, ".fxb");
+						path = boost::filesystem::change_extension(path, ".fxb");
 						if(!fxb.Open(path.string())) return; // here it is read "CcnK" and its "size" (it is 0)
 					#else
 						std::string file_name = _pMachine->GetDllName();
