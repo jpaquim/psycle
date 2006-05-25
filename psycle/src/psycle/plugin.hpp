@@ -185,8 +185,7 @@ namespace psycle
 				virtual void parameter(int const parameter, int const value) {}
 				/// event called by the host when it wants the plugin to process an audio buffer.
 				virtual void process(Sample stereo_left_channel_samples[], Sample stereo_right_channel_samples[], int samples, int tracks) {}
-				/// event called by the host when it, hmm ... dunno :)
-				///\todo what is this?
+				/// event called by the host when the user presses the stop button. Generally used to note-off everything.
 				virtual void stop() {}
 				/// event called by the host when it wants to serialize the plugin's state.
 				virtual void write_data(unsigned char data[]) const {}

@@ -1198,6 +1198,8 @@ namespace psycle
 					*/
 					try
 					{
+						//\todo : Remove this hack once we run VST's with events, not with "ticks".
+						// It is the origin of VST's "clicking" when pressing stop (that assumes, obviously that it is playing).
 						proxy().process(inputs, inputs, 64);
 					}
 					catch(const std::exception &)

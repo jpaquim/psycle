@@ -16,6 +16,29 @@
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
+		class CAboutDlg : public CDialog
+		{
+		public:
+			CAboutDlg();
+			enum { IDD = IDD_ABOUTBOX };
+			CStatic	m_asio;
+			CEdit	m_sourceforge;
+			CEdit	m_psycledelics;
+			CStatic	m_steincopyright;
+			CStatic	m_headerdlg;
+			CButton	m_showabout;
+			CStatic	m_headercontrib;
+			CStatic	m_aboutbmp;
+			CEdit	m_contrib;
+			CStatic m_versioninfo;
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			afx_msg void OnContributors();
+			virtual BOOL OnInitDialog();
+			afx_msg void OnShowatstartup();
+			DECLARE_MESSAGE_MAP()
+		};
+
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 		END_MESSAGE_MAP()
@@ -145,29 +168,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		/////////////////////////////////////////////////////////////////////////////
 		// CAboutDlg dialog used for App About
-
-		class CAboutDlg : public CDialog
-		{
-			public:
-				CAboutDlg();
-				enum { IDD = IDD_ABOUTBOX };
-				CStatic	m_asio;
-				CEdit	m_sourceforge;
-				CEdit	m_psycledelics;
-				CStatic	m_steincopyright;
-				CStatic	m_headerdlg;
-				CButton	m_showabout;
-				CStatic	m_headercontrib;
-				CStatic	m_aboutbmp;
-				CEdit	m_contrib;
-				CStatic m_versioninfo;
-			protected:
-				virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-				afx_msg void OnContributors();
-				virtual BOOL OnInitDialog();
-				afx_msg void OnShowatstartup();
-			DECLARE_MESSAGE_MAP()
-		};
 
 		CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 		{

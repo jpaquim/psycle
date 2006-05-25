@@ -18,11 +18,14 @@ namespace psycle
 		/// Max number of pattern tracks
 		int const MAX_TRACKS = 64;
 
+		/// The max number of samples (per channel) that the Work function will ask to return.
+		int const MAX_BUFFER_LENGTH = 256;
+
 		///\name note values
 		///\{
-			int const NOTE_MAX = 119;
-			int const NOTE_NO = 120;
-			int const NOTE_OFF = 255;
+		int const NOTE_MAX = 119;	// value of B-9. NOTE: C-0 is note number 0!
+		int const NOTE_NO = 120;	// value of the "off" note.
+		int const NOTE_OFF = 255;	// empty value.
 		///\}
 
 		#if !defined PI
@@ -35,14 +38,15 @@ namespace psycle
 			;
 		#endif
 
-		/// in number of samples (per channel).
-		///\todo more explanations welcome... is it the max value that can be requested in the Work() function?
-		int const MAX_BUFFER_LENGTH = 256;
+
+//////////////////////////////////////////////////////////////////////////
+// Class to define the modificable parameters of the machine.
 
 		///\name CMachineParameter flags.
 		///\{
-			int const MPF_LABEL = 0;
-			int const MPF_STATE = 2;
+		int const MPF_NULL = 0;		// Shows a line with background
+		int const MPF_LABEL = 1;	// Shows a line with the text in a centered label.
+		int const MPF_STATE = 2;	// Shows a tweakable knob and text.
 		///\}
 
 		class CMachineParameter
@@ -63,15 +67,16 @@ namespace psycle
 			int DefValue;
 		};
 
+//////////////////////////////////////////////////////////////////////////
+//	Class defining the machine properties.
+
 		///\name CMachineInfo flags.
 		///\{
 			int const EFFECT = 0;
+			int const SEQUENCER = 1;	//\todo: unused.
 			int const GENERATOR = 3;
 			int const CUSTOM_GUI = 16;
 		///\}
-
-		///\todo ???
-		int const SEQUENCER = 1;
 
 		class CMachineInfo
 		{
@@ -92,6 +97,9 @@ namespace psycle
 			int numCols;
 		};
 
+//////////////////////////////////////////////////////////////////////////
+//	Callback function to let plugins communicate with the host.
+
 		class CFxCallback
 		{
 		public:
@@ -110,6 +118,8 @@ namespace psycle
 			// You get a pointer to a subclass of this one that returns the correct ones.
 		};
 
+//////////////////////////////////////////////////////////////////////////
+//	Base Machine structure class.
 		class CMachineInterface
 		{
 		public:
@@ -198,4 +208,4 @@ using psycle::plugin_interface::uint8;
 using psycle::plugin_interface::uint16;
 using psycle::plugin_interface::uint32;
 
-#include <cstdio> // would be better if plugins that wants it included it themselves.
+#include <cstdio> // would be better if plugins that want it, included it themselves.

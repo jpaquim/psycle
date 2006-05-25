@@ -467,7 +467,7 @@ namespace psycle
 							}
 						}
 					}
-					// Reset all machines
+					// Reset all machine buffers
 					for(int c=0; c<MAX_MACHINES; c++)
 					{
 						if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);

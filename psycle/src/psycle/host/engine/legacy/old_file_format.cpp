@@ -41,7 +41,9 @@ namespace psycle
 				pFile->Read(Name, 32);
 				pFile->Read(Author, 32);
 				pFile->Read(Comment, 128);
-				pFile->Read(m_BeatsPerMin);
+				unsigned int tmp;
+				pFile->Read(tmp);
+				m_BeatsPerMin=tmp;
 				pFile->Read(sampR);
 				if( sampR <= 0)
 				{
@@ -51,7 +53,7 @@ namespace psycle
 				else m_LinesPerBeat = 44100 * 15 * 4 / (sampR * m_BeatsPerMin);
 				Global::player().bpm = m_BeatsPerMin;
 				Global::player().tpb = m_LinesPerBeat;
-				// The old format assumes we output at 44100 samples/sec, so...
+				// The old (1.0..1.6) format assumes we output at 44100 samples/sec, so...
 				Global::player().SamplesPerRow(sampR * Global::configuration()._pOutputDriver->_samplesPerSec / 44100);
 				pFile->Read(currentOctave);
 				pFile->Read(busMachine);
@@ -286,8 +288,37 @@ namespace psycle
 							}
 						case MACH_VST:
 							pMac[i] = pVstPlugin = new vst::instrument(i);
+							goto init_and_load_VST;
 						case MACH_VSTFX:
 							pMac[i] = pVstPlugin = new vst::fx(i);
+							goto init_and_load_VST;
+						case MACH_MASTER:
+							pMac[i] = _pMachine[MASTER_INDEX];
+							goto init_and_load;
+						case MACH_SAMPLER:
+							pMac[i] = pSampler = new Sampler(i);
+							goto init_and_load;
+						case MACH_XMSAMPLER:
+							pMac[i] = pXMSampler = new XMSampler(i);
+							goto init_and_load;
+						case MACH_SCOPE:
+						case MACH_DUMMY:
+							pMac[i] = new Dummy(i);
+							goto init_and_load;
+						default:
+							{
+								std::ostringstream s;
+								s << "unkown machine type: " << type;
+								MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+							}
+							pMac[i] = new Dummy(i);
+
+						init_and_load:
+							pMac[i]->Init();
+							pMac[i]->LoadOldFileFormat(pFile);
+							break;
+
+						init_and_load_VST:
 							if ((pMac[i]->LoadOldFileFormat(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 							{
 								std::string path;
@@ -362,30 +393,7 @@ namespace psycle
 								pMac[i]->_type = MACH_DUMMY;
 								((Dummy*)pMac[i])->wasVST = true;
 							}
-							break;
-						case MACH_MASTER:
-							pMac[i] = _pMachine[MASTER_INDEX];
-							goto init_and_load;
-						case MACH_SAMPLER:
-							pMac[i] = pSampler = new Sampler(i);
-							goto init_and_load;
-						case MACH_XMSAMPLER:
-							pMac[i] = pXMSampler = new XMSampler(i);
-							goto init_and_load;
-						case MACH_SCOPE:
-						case MACH_DUMMY:
-							pMac[i] = new Dummy(i);
-							goto init_and_load;
-						default:
-							{
-								std::ostringstream s;
-								s << "unkown machine type: " << type;
-								MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
-							}
-							pMac[i] = new Dummy(i);
-						init_and_load:
-							pMac[i]->Init();
-							pMac[i]->LoadOldFileFormat(pFile);
+
 						}
 
 						switch (pMac[i]->_mode)
@@ -815,7 +823,7 @@ namespace psycle
 			catch(...)
 			{
 				std::ostringstream s;
-				s << "Error writing to " << pFile->file_name() << " !!!";
+				s << "Error reading from " << pFile->file_name() << " !!!";
 				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
 				return false;
 			}
@@ -824,10 +832,9 @@ namespace psycle
 
 		bool Machine::LoadOldFileFormat(RiffFile* pFile)
 		{
-			char junk[256];
-			std::memset(junk, 0, sizeof junk);
-
-			pFile->Read(&_editName, 16); _editName[15] = 0;
+			char edName[32];
+			pFile->Read(&edName, 16); edName[15] = 0;
+			_editName=edName;
 
 			pFile->Read(_inputMachines);
 			pFile->Read(_outputMachines);
@@ -874,12 +881,11 @@ namespace psycle
 			return true;
 		}
 
-		bool Master::Load(RiffFile* pFile)
+		bool Master::LoadOldFileFormat(RiffFile* pFile)
 		{
-			char junk[256];
-			std::memset(junk, 0, sizeof junk);
-			
-			pFile->Read(&_editName, 16); _editName[15] = 0;
+			char edName[32];
+			pFile->Read(&edName, 16); edName[15] = 0;
+			_editName=edName;
 			
 			pFile->Read(_inputMachines);
 			pFile->Read(_outputMachines);
@@ -929,6 +935,78 @@ namespace psycle
 			return true;
 		}
 
+		bool Sampler::LoadOldFileFormat(RiffFile* pFile)
+		{
+			int i;
+
+			char edName[32];
+			pFile->Read(&edName, 16); edName[15] = 0;
+			_editName=edName;
+
+			pFile->Read(_inputMachines);
+			pFile->Read(_outputMachines);
+			pFile->Read(_inputConVol);
+			pFile->Read(_connection);
+			pFile->Read(_inputCon);
+			pFile->Read(_connectionPoint);
+			pFile->Read(_connectedInputs);
+			pFile->Read(_connectedOutputs);
+
+			pFile->Read(_panning);
+			Machine::SetPan(_panning);
+			pFile->Skip(4*8); // SubTrack[]
+			pFile->Read(&_numVoices, sizeof(_numVoices)); // numSubtracks
+
+			if (_numVoices < 4)
+			{
+				// Psycle versions < 1.1b2 had polyphony per channel,not per machine.
+				_numVoices = 8;
+			}
+
+			pFile->Read(&i, sizeof(int)); // interpol
+			switch (i)
+			{
+			case 2:
+				_resampler.SetQuality(dsp::R_SPLINE);
+				break;
+			case 0:
+				_resampler.SetQuality(dsp::R_NONE);
+				break;
+			default:
+			case 1:
+				_resampler.SetQuality(dsp::R_LINEAR);
+				break;
+			}
+
+			pFile->Skip(4); // outdry
+			pFile->Skip(4); // outwet
+
+			pFile->Skip(4); // distPosThreshold
+			pFile->Skip(4); // distPosClamp
+			pFile->Skip(4); // distNegThreshold
+			pFile->Skip(4); // distNegClamp
+
+			pFile->Skip(1); // sinespeed
+			pFile->Skip(1); // sineglide
+			pFile->Skip(1); // sinevolume
+			pFile->Skip(1); // sinelfospeed
+			pFile->Skip(1); // sinelfoamp
+
+			pFile->Skip(4); // delayTimeL
+			pFile->Skip(4); // delayTimeR
+			pFile->Skip(4); // delayFeedbackL
+			pFile->Skip(4); // delayFeedbackR
+
+			pFile->Skip(4); // filterCutoff
+			pFile->Skip(4); // filterResonance
+			pFile->Skip(4); // filterLfospeed
+			pFile->Skip(4); // filterLfoamp
+			pFile->Skip(4); // filterLfophase
+			pFile->Skip(4); // filterMode
+
+			return true;
+		}
+
 		bool Plugin::LoadOldFileFormat(RiffFile* pFile)
 		{
 			bool result = true;
@@ -940,7 +1018,7 @@ namespace psycle
 
 			pFile->Read(sDllName); // Plugin dll name
 			///\todo would be nicer with std::string and std::transform
-			for(int i(std::strlen(sDllName) - 1) ; i > 0  ; --i) sDllName[i] = std::tolower(sDllName[i]);
+			for(int i(std::strlen(sDllName) - 1) ; i >= 0  ; --i) sDllName[i] = std::tolower(sDllName[i]);
 
 			//Patch: Automatically replace old AS's by AS2F.
 			bool wasAB=false;
@@ -996,7 +1074,9 @@ namespace psycle
 
 			Init();
 
-			pFile->Read(&_editName, 16); _editName[15] = 0;
+			char edName[32];
+			pFile->Read(&edName, 16); edName[15] = 0;
+			_editName=edName;
 
 			pFile->Read(numParameters);
 			if(result)
@@ -1172,11 +1252,13 @@ namespace psycle
 				return true;
 			}
 
-			bool plugin::Load(RiffFile * pFile)
+			bool plugin::LoadOldFileFormat(RiffFile * pFile)
 			{
 				Machine::Init();
 
-				pFile->Read(&_editName, 16); _editName[15] = 0;
+				char edName[32];
+				pFile->Read(&edName, 16); edName[15] = 0;
+				_editName=edName;
 
 				pFile->Read(_inputMachines);
 				pFile->Read(_outputMachines);

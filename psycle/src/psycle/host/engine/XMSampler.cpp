@@ -2569,10 +2569,10 @@ namespace psycle
 			m_DeltaTick = t / (Global::song().BeatsPerMin() * 24);
 		}
 */
-		bool XMSampler::Load(RiffFile& riffFile)
+		bool XMSampler::LoadOldFileFormat(RiffFile& riffFile)
 		{
 			ASSERT(false);
-			//The function "Load()" is used for Songs made with Psycle earlier than 1.7
+			//This function is used for Songs made with Psycle earlier than 1.7
 			// It cannot happen that one of those has this new Sampler.
 			return true;
 		}
