@@ -21,10 +21,10 @@ namespace psycle
 			gear(void);
 			virtual ~gear(void) throw();
 
-			int addconnector(connector &newconnector);
-			void removeconnector(connector &thisconnector);
+			int add_connector(connector &new_connector);
+			void remove_connector(connector &this_connector);
 			//When a connector is modified, it sends a "ConnectorModified" to gear. (signal/slot?)
-			void connectormodified(connector &thisconnector);
+			void connector_modified(connector &this_connector);
 
 			// There should be a function (or variable) indicating that there is no input, so only update internal variables
 			// but don't need to process the input.
@@ -35,17 +35,17 @@ namespace psycle
 
 			//Properties
 			host& hoster() { return m_hoster; }
-			void hoster(host &newhost) { m_hoster = &newhost }
+			void hoster(host &new_host) { m_hoster = &newhost }
 
-			eventlist &geteventlist() { return m_eventlist; }
-			void seteventlist(eventlist &neweventlist) { m_eventlist = &neweventlist; }
+			event_list &ge_tevent_list() { return m_eventlist; }
+			void set_event_list(event_list &new_event_list) { m_event_list = &new_event_list; }
 
 
 
 
 		protected:
 			host* m_hoster;
-			eventlist *m_eventlist;
+			event_list *m_event_list;
 		};
 	}
 }
