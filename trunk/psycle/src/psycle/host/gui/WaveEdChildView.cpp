@@ -1696,14 +1696,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				
 			struct fullheader
 			{
-				unsigned long	head;
-				unsigned long	size;
-				unsigned long	head2;
-				unsigned long	fmthead;
-				unsigned long	fmtsize;
+				std::uint32_t	head;
+				std::uint32_t	size;
+				std::uint32_t	head2;
+				std::uint32_t	fmthead;
+				std::uint32_t	fmtsize;
 				WAVEFORMATEX	fmtcontent;
-				unsigned long datahead;
-				unsigned long datasize;
+				std::uint32_t datahead;
+				std::uint32_t datasize;
 			} wavheader;
 
 			OpenClipboard();
@@ -1776,7 +1776,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pParent->m_wndView.AddMacViewUndo();
 
 			char *pData;
-			unsigned long lFmt, lData;
+			std::uint32_t lFmt, lData;
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
@@ -1786,14 +1786,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
-			lFmt= *(unsigned long*)((char*)pPasteData + 16);
+			if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
 			pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-			lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
+			lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
-			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
+			unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 			int bytesPerSamp = (int)(pFmt->nBlockAlign/pFmt->nChannels);
 			_pSong->IsInvalided(true);
 			Sleep(LOCK_LATENCY);
@@ -1894,7 +1894,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pParent->m_wndView.AddMacViewUndo();
 
 			char *pData;
-			unsigned long lFmt, lData;
+			std::uint32_t lFmt, lData;
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
@@ -1904,11 +1904,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
-			lFmt= *(unsigned long*)((char*)pPasteData + 16);
+			if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
 			pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-			lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
+			lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
 			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
@@ -1986,7 +1986,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				char *pData;
-				unsigned long lFmt, lData;
+				std::uint32_t lFmt, lData;
 				
 				WAVEFORMATEX* pFmt;
 				short* pPasteData;
@@ -1996,14 +1996,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				hPasteData = GetClipboardData(CF_WAVE);
 				pPasteData = (short*)GlobalLock(hPasteData);
 
-				if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
-				lFmt= *(unsigned long*)((char*)pPasteData + 16);
+				if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+				lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
 				pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-				lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
+				lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 				pData = (char*)pPasteData + 20 + lFmt + 8;
 
-				unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
+				unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 				unsigned long fadeInSamps(0), fadeOutSamps(0);
 				unsigned long destFadeIn(0);	
@@ -2122,7 +2122,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				char *pData;
-				unsigned long lFmt, lData;
+				std::uint32_t lFmt, lData;
 				
 				WAVEFORMATEX* pFmt;
 				short* pPasteData;
@@ -2132,14 +2132,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				hPasteData = GetClipboardData(CF_WAVE);
 				pPasteData = (short*)GlobalLock(hPasteData);
 
-				if ((*(unsigned long*)pPasteData != 'FFIR') && (*((unsigned long*)pPasteData + 2)!='EVAW')) return;
-				lFmt= *(unsigned long*)((char*)pPasteData + 16);
+				if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+				lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
 				pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
-				lData = *(unsigned long*)((char*)pPasteData + 20 + lFmt + 4);
+				lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 				pData = (char*)pPasteData + 20 + lFmt + 8;
 
-				unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
+				unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
