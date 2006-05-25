@@ -102,7 +102,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				case CT_Note:
 					{
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::configuration()._notesToEffects)
 						{
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						}
@@ -124,7 +124,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote != -1) {
-				if(_pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+				if(_pMachine->_mode == MACHMODE_GENERATOR || Global::configuration()._notesToEffects)
 					Global::pInputHandler->StopNote(outnote, true, _pMachine);
 				else
 					Global::pInputHandler->StopNote(outnote, true);

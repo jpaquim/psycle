@@ -100,7 +100,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		bool CDirectoryDlg::BrowseForFolder(std::string& rpath) 
 		{
 			bool val=false;
-			
+
 			LPMALLOC pMalloc;
 			// Gets the Shell's default allocator
 			//

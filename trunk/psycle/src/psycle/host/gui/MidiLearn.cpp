@@ -15,7 +15,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// NOTE: the ClassWizard will add member initialization here
 			//}}AFX_DATA_INIT
 			Message = -1;
-			//Global::pConfig->_pMidiInput->fnMidiCallback_Test = (MidiCallback_Test);
+			//Global::configuration()._pMidiInput->fnMidiCallback_Test = (MidiCallback_Test);
 		}
 
 		void CMidiLearn::DoDataExchange(CDataExchange* pDX)

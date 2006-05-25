@@ -4,7 +4,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
-			if (Global::pConfig->draw_vus)
+			if (Global::configuration().draw_vus)
 			{
 				if (_pSong->_machineLock)
 				{
@@ -30,7 +30,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::DrawMachineVumeters(int c, CDC *devc)
 		{
-			if (Global::pConfig->draw_vus)
+			if (Global::configuration().draw_vus)
 			{
 				if (_pSong->_machineLock)
 				{
@@ -59,9 +59,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return;
 			}
 
-			CBrush fillbrush(Global::pConfig->mv_polycolour);
+			CBrush fillbrush(Global::configuration().mv_polycolour);
 			CBrush *oldbrush = devc->SelectObject(&fillbrush);
-			if (Global::pConfig->bBmpBkg) // Draw Background image
+			if (Global::configuration().bBmpBkg) // Draw Background image
 			{
 				CDC memDC;
 				CBitmap* oldbmp;
@@ -91,21 +91,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				CRect rClient;
 				GetClientRect(&rClient);
-				devc->FillSolidRect(&rClient,Global::pConfig->mv_colour);
+				devc->FillSolidRect(&rClient,Global::configuration().mv_colour);
 			}
 
-			if (Global::pConfig->mv_wireaa)
+			if (Global::configuration().mv_wireaa)
 			{
 				
 				// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
 				// polygon color stated in the config.
-				float deltaColR = ((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45;
-				float deltaColG = ((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45;
-				float deltaColB = ((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45;
+				float deltaColR = ((Global::configuration().mv_polycolour     & 0xFF) / 510.0) + .45;
+				float deltaColG = ((Global::configuration().mv_polycolour>>8  & 0xFF) / 510.0) + .45;
+				float deltaColB = ((Global::configuration().mv_polycolour>>16 & 0xFF) / 510.0) + .45;
 			
-				CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa*2), Global::pConfig->mv_wireaacolour);
-				CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa), Global::pConfig->mv_wireaacolour2); 
-				CPen linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+				CPen linepen1( PS_SOLID, Global::configuration().mv_wirewidth+(Global::configuration().mv_wireaa*2), Global::configuration().mv_wireaacolour);
+				CPen linepen2( PS_SOLID, Global::configuration().mv_wirewidth+(Global::configuration().mv_wireaa), Global::configuration().mv_wireaacolour2); 
+				CPen linepen3( PS_SOLID, Global::configuration().mv_wirewidth, Global::configuration().mv_wirecolour); 
 	 			CPen polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB));
 				CPen *oldpen = devc->SelectObject(&linepen1);
 				CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
@@ -287,9 +287,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
 				// polygon color stated in the config.
-				float deltaColR = ((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45;
-				float deltaColG = ((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45;
-				float deltaColB = ((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45;
+				float deltaColR = ((Global::configuration().mv_polycolour     & 0xFF) / 510.0) + .45;
+				float deltaColG = ((Global::configuration().mv_polycolour>>8  & 0xFF) / 510.0) + .45;
+				float deltaColB = ((Global::configuration().mv_polycolour>>16 & 0xFF) / 510.0) + .45;
 				
 
 				// Draw wire [connections]
@@ -300,7 +300,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if(tmac)
 					{
 
-						CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+						CPen linepen( PS_SOLID, Global::configuration().mv_wirewidth, Global::configuration().mv_wirecolour); 
 						CPen polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB));
 						CPen *oldpen = devc->SelectObject(&linepen);				
 						CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
@@ -494,7 +494,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::DrawMachineVol(int c,CDC *devc)
 		{
-			Machine* pMac = Global::_pSong->_pMachine[c];
+			Machine* pMac = Global::song()._pMachine[c];
 			if (pMac)
 			{
 				CDC memDC;
@@ -536,7 +536,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						r.top = pMac->GetPosY()+MachineCoords.dGeneratorVu.y;
 						r.right = r.left + MachineCoords.dGeneratorVu.width-vol;
 						r.bottom = r.top + MachineCoords.sGeneratorVu0.height;
-						devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+						devc->FillSolidRect(&r,Global::configuration().mv_colour);
 
 						TransparentBlt(devc,
 									r.left, 
@@ -664,7 +664,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						r.top = pMac->GetPosY()+MachineCoords.dEffectVu.y;
 						r.right = r.left + MachineCoords.dEffectVu.width-vol;
 						r.bottom = r.top + MachineCoords.sEffectVu0.height;
-						devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+						devc->FillSolidRect(&r,Global::configuration().mv_colour);
 
 						TransparentBlt(devc,
 									r.left, 
@@ -789,14 +789,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					r.top = mac->GetPosY();
 					r.right = r.left + MachineCoords.sGenerator.width;
 					r.bottom = r.top + MachineCoords.sGenerator.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					devc->FillSolidRect(&r,Global::configuration().mv_colour);
 					break;
 				case MACHMODE_FX:
 					r.left = mac->GetPosX();
 					r.top = mac->GetPosY();
 					r.right = r.left + MachineCoords.sEffect.width;
 					r.bottom = r.top + MachineCoords.sEffect.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					devc->FillSolidRect(&r,Global::configuration().mv_colour);
 					break;
 				}
 			}
@@ -807,7 +807,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//the code below draws the highlight around the selected machine (the corners)
 
 			CPoint pol[3];
-			CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+			CPen linepen( PS_SOLID, Global::configuration().mv_wirewidth, Global::configuration().mv_wirecolour); 
 			CPen *oldpen = devc->SelectObject(&linepen);
 
 			int hlength = 9; //the length of the selected machine highlight
@@ -931,7 +931,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					r.top = y;
 					r.right = r.left + MachineCoords.sGenerator.width;
 					r.bottom = r.top + MachineCoords.sGenerator.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					devc->FillSolidRect(&r,Global::configuration().mv_colour);
 					*/
 
 					TransparentBlt(devc,
@@ -983,10 +983,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->generatorFont);
+						CFont* oldFont= devc->SelectObject(&Global::configuration().generatorFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(Global::configuration().mv_generator_fontcolour);
+						if (Global::configuration().draw_mac_index)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
@@ -1008,7 +1008,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					r.top = y;
 					r.right = r.left + MachineCoords.sEffect.width;
 					r.bottom = r.top + MachineCoords.sEffect.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					devc->FillSolidRect(&r,Global::configuration().mv_colour);
 					*/
 
 					TransparentBlt(devc,
@@ -1060,10 +1060,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->effectFont);
+						CFont* oldFont= devc->SelectObject(&Global::configuration().effectFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(Global::configuration().mv_effect_fontcolour);
+						if (Global::configuration().draw_mac_index)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
@@ -1142,10 +1142,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->generatorFont);
+						CFont* oldFont= devc->SelectObject(&Global::configuration().generatorFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(Global::configuration().mv_generator_fontcolour);
+						if (Global::configuration().draw_mac_index)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
@@ -1206,10 +1206,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->effectFont);
+						CFont* oldFont= devc->SelectObject(&Global::configuration().effectFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(Global::configuration().mv_effect_fontcolour);
+						if (Global::configuration().draw_mac_index)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
@@ -1264,7 +1264,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			for (Machine::id_type c(MAX_MACHINES-1); c>=0; c--)
 			{
-				Machine* pMac = Global::_pSong->_pMachine[c];
+				Machine* pMac = Global::song()._pMachine[c];
 				if (pMac)
 				{
 					int x1 = pMac->GetPosX();
@@ -1301,7 +1301,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			for (Machine::id_type c(0); c<MAX_MACHINES; c++)
 			{
-				Machine *tmac = Global::_pSong->_pMachine[c];
+				Machine *tmac = Global::song()._pMachine[c];
 				if (tmac)
 				{
 					for (Wire::id_type w(0); w<MAX_CONNECTIONS; w++)

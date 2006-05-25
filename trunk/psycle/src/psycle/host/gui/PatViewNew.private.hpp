@@ -75,7 +75,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 					}
 				}
-				else if (Global::pConfig->_centerCursor)
+				else if (Global::configuration()._centerCursor)
 				{
 					if ( drawMode == draw_modes::horizontal_scroll ) 
 						rntOff = ntOff;
@@ -181,7 +181,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 					}
 				}
-				else if (Global::pConfig->_centerCursor)
+				else if (Global::configuration()._centerCursor)
 				{
 					if ( drawMode == draw_modes::vertical_scroll ) 
 						rnlOff = nlOff;
@@ -328,9 +328,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				break;
 			case draw_modes::playback: 
 				{
-					int pos = Global::pPlayer->_lineCounter;
+					int pos = Global::player()._lineCounter;
 					if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
-						(_pSong->playOrder[editPosition] == _pSong->playOrder[Global::pPlayer->_playPosition]))
+						(_pSong->playOrder[editPosition] == _pSong->playOrder[Global::player()._playPosition]))
 					{
 						if (pos != playpos)
 						{
@@ -374,9 +374,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case draw_modes::playback_change: 
-				if (_pSong->playOrder[editPosition] == _pSong->playOrder[Global::pPlayer->_playPosition])
+				if (_pSong->playOrder[editPosition] == _pSong->playOrder[Global::player()._playPosition])
 				{
-					newplaypos= Global::pPlayer->_lineCounter;
+					newplaypos= Global::player()._lineCounter;
 				}
 				else 
 				{
@@ -867,7 +867,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			// turn off play line if not playing
-			if (playpos >= 0 && !Global::pPlayer->_playing) 
+			if (playpos >= 0 && !Global::player()._playing) 
 			{
 				newplaypos=-1;
 				rect.top = YOFFSET+ (playpos-rnlOff)*ROWHEIGHT;
@@ -914,7 +914,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			tOff = ntOff = rntOff; 
 			lOff = nlOff = rnlOff;
 
-			oldFont= devc->SelectObject(&Global::pConfig->seqFont);
+			oldFont= devc->SelectObject(&Global::configuration().seqFont);
 
 			// 1 if there is a redraw header, we do that 
 			/////////////////////////////////////////////////////////////
@@ -931,8 +931,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					rect.left++;
 					rect.right = XOFFSET-1;
 					devc->FillSolidRect(&rect,pvc_background[0]);
-					devc->SetBkColor(Global::pConfig->pvc_background);	// This affects TXT background
-					devc->SetTextColor(Global::pConfig->pvc_font);
+					devc->SetBkColor(Global::configuration().pvc_background);	// This affects TXT background
+					devc->SetTextColor(Global::configuration().pvc_font);
 					TXT(devc,"Line",1,1,XOFFSET-2,YOFFSET-2);
 				}
 				CDC memDC;
@@ -984,7 +984,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 							PatHeaderCoords.sNumber0.y);
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::_pSong->_trackMuted[i])
+						if (Global::song()._trackMuted[i])
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 								1+PatHeaderCoords.dMuteOn.y, 
@@ -995,7 +995,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PatHeaderCoords.sMuteOn.x, 
 								PatHeaderCoords.sMuteOn.y);
 
-						if (Global::_pSong->_trackArmed[i])
+						if (Global::song()._trackArmed[i])
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 								1+PatHeaderCoords.dRecordOn.y, 
@@ -1006,7 +1006,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PatHeaderCoords.sRecordOn.x, 
 								PatHeaderCoords.sRecordOn.y);
 
-						if (Global::_pSong->_trackSoloed == i )
+						if (Global::song()._trackSoloed == i )
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 								1+PatHeaderCoords.dSoloOn.y, 
@@ -1063,7 +1063,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							SRCCOPY);
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::_pSong->_trackMuted[i])
+						if (Global::song()._trackMuted[i])
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 								1+PatHeaderCoords.dMuteOn.y, 
@@ -1074,7 +1074,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PatHeaderCoords.sMuteOn.y, 
 								SRCCOPY);
 
-						if (Global::_pSong->_trackArmed[i])
+						if (Global::song()._trackArmed[i])
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 								1+PatHeaderCoords.dRecordOn.y, 
@@ -1085,7 +1085,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PatHeaderCoords.sRecordOn.y, 
 								SRCCOPY);
 
-						if (Global::_pSong->_trackSoloed == i )
+						if (Global::song()._trackSoloed == i )
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 								1+PatHeaderCoords.dSoloOn.y, 
@@ -1174,7 +1174,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					rect.bottom=CH;  
 					rect.right=CW;
 					rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-					devc->FillSolidRect(&rect,Global::pConfig->pvc_separator2);
+					devc->FillSolidRect(&rect,Global::configuration().pvc_separator2);
 				}
 			}
 			else
@@ -1381,7 +1381,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 										PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 										PatHeaderCoords.sNumber0.y);
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
+									if (Global::song()._trackMuted[i])
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 											1+PatHeaderCoords.dMuteOn.y, 
@@ -1392,7 +1392,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sMuteOn.x, 
 											PatHeaderCoords.sMuteOn.y);
 
-									if (Global::_pSong->_trackArmed[i])
+									if (Global::song()._trackArmed[i])
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 											1+PatHeaderCoords.dRecordOn.y, 
@@ -1403,7 +1403,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sRecordOn.x, 
 											PatHeaderCoords.sRecordOn.y);
 
-									if (Global::_pSong->_trackSoloed == i )
+									if (Global::song()._trackSoloed == i )
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 											1+PatHeaderCoords.dSoloOn.y, 
@@ -1453,7 +1453,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 										SRCCOPY);
 
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
+									if (Global::song()._trackMuted[i])
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 											1+PatHeaderCoords.dMuteOn.y, 
@@ -1464,7 +1464,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sMuteOn.y, 
 											SRCCOPY);
 
-									if (Global::_pSong->_trackArmed[i])
+									if (Global::song()._trackArmed[i])
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 											1+PatHeaderCoords.dRecordOn.y, 
@@ -1475,7 +1475,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sRecordOn.y, 
 											SRCCOPY);
 
-									if (Global::_pSong->_trackSoloed == i )
+									if (Global::song()._trackSoloed == i )
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 											1+PatHeaderCoords.dSoloOn.y, 
@@ -1579,7 +1579,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 										PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 										PatHeaderCoords.sNumber0.y);
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
+									if (Global::song()._trackMuted[i])
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 											1+PatHeaderCoords.dMuteOn.y, 
@@ -1590,7 +1590,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sMuteOn.x, 
 											PatHeaderCoords.sMuteOn.y);
 
-									if (Global::_pSong->_trackArmed[i])
+									if (Global::song()._trackArmed[i])
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 											1+PatHeaderCoords.dRecordOn.y, 
@@ -1601,7 +1601,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sRecordOn.x, 
 											PatHeaderCoords.sRecordOn.y);
 
-									if (Global::_pSong->_trackSoloed == i )
+									if (Global::song()._trackSoloed == i )
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 											1+PatHeaderCoords.dSoloOn.y, 
@@ -1651,7 +1651,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 										SRCCOPY);
 
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
+									if (Global::song()._trackMuted[i])
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 											1+PatHeaderCoords.dMuteOn.y, 
@@ -1662,7 +1662,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sMuteOn.y, 
 											SRCCOPY);
 
-									if (Global::_pSong->_trackArmed[i])
+									if (Global::song()._trackArmed[i])
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 											1+PatHeaderCoords.dRecordOn.y, 
@@ -1673,7 +1673,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sRecordOn.y, 
 											SRCCOPY);
 
-									if (Global::_pSong->_trackSoloed == i )
+									if (Global::song()._trackSoloed == i )
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 											1+PatHeaderCoords.dSoloOn.y, 
@@ -1730,7 +1730,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						rect.bottom=CH;  
 						rect.right=CW;
 						rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-						devc->FillSolidRect(&rect,Global::pConfig->pvc_separator2);
+						devc->FillSolidRect(&rect,Global::configuration().pvc_separator2);
 					}
 					*/
 				}
@@ -1857,7 +1857,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 											PatHeaderCoords.sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -1868,7 +1868,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sMuteOn.x, 
 												PatHeaderCoords.sMuteOn.y);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -1879,7 +1879,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sRecordOn.x, 
 												PatHeaderCoords.sRecordOn.y);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 												1+PatHeaderCoords.dSoloOn.y, 
@@ -1929,7 +1929,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -1940,7 +1940,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sMuteOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -1951,7 +1951,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sRecordOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 												1+PatHeaderCoords.dSoloOn.y, 
@@ -2030,7 +2030,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 											PatHeaderCoords.sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -2041,7 +2041,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sMuteOn.x, 
 												PatHeaderCoords.sMuteOn.y);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -2052,7 +2052,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sRecordOn.x, 
 												PatHeaderCoords.sRecordOn.y);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 												1+PatHeaderCoords.dSoloOn.y, 
@@ -2102,7 +2102,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -2113,7 +2113,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sMuteOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -2124,7 +2124,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 												PatHeaderCoords.sRecordOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
 												1+PatHeaderCoords.dSoloOn.y, 
@@ -2167,7 +2167,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							rect.bottom=CH;  
 							rect.right=CW;
 							rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-							devc->FillSolidRect(&rect,Global::pConfig->pvc_separator2);
+							devc->FillSolidRect(&rect,Global::configuration().pvc_separator2);
 						}
 					}
 
@@ -2335,7 +2335,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// break this up into several more general loops for speed
 				if((linecount%_pSong->LinesPerBeat()) == 0)
 				{
-					if ((linecount%(_pSong->LinesPerBeat()*Global::pConfig->pv_timesig)) == 0) 
+					if ((linecount%(_pSong->LinesPerBeat()*Global::configuration().pv_timesig)) == 0) 
 						pBkg = pvc_row4beat;
 					else 
 						pBkg = pvc_rowbeat;
@@ -2347,7 +2347,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				if ((XOFFSET!=1))// && (tstart == 0))
 				{
-					if ((linecount == editcur.line) && (Global::pConfig->_linenumbersCursor))
+					if ((linecount == editcur.line) && (Global::configuration()._linenumbersCursor))
 					{
 						devc->SetBkColor(pvc_cursor[0]);
 						devc->SetTextColor(pvc_fontCur[0]);
@@ -2362,7 +2362,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						devc->SetBkColor(pBkg[0]);
 						devc->SetTextColor(pvc_font[0]);
 					}
-					if (Global::pConfig->_linenumbersHex)
+					if (Global::configuration()._linenumbersHex)
 					{
 						sprintf(tBuf," %.2X",linecount);
 						TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
@@ -2690,20 +2690,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::RecalculateColourGrid()
 		{
-			RecalculateColour(pvc_background, Global::pConfig->pvc_background, Global::pConfig->pvc_background2);
-			RecalculateColour(pvc_separator, Global::pConfig->pvc_separator, Global::pConfig->pvc_separator2);
-			RecalculateColour(pvc_row4beat, Global::pConfig->pvc_row4beat, Global::pConfig->pvc_row4beat2);
-			RecalculateColour(pvc_rowbeat, Global::pConfig->pvc_rowbeat, Global::pConfig->pvc_rowbeat2);
-			RecalculateColour(pvc_row, Global::pConfig->pvc_row, Global::pConfig->pvc_row2);
-			RecalculateColour(pvc_selection, Global::pConfig->pvc_selection, Global::pConfig->pvc_selection2);
-			RecalculateColour(pvc_playbar, Global::pConfig->pvc_playbar, Global::pConfig->pvc_playbar2);
-			RecalculateColour(pvc_cursor, Global::pConfig->pvc_cursor, Global::pConfig->pvc_cursor2);
-			RecalculateColour(pvc_font, Global::pConfig->pvc_font, Global::pConfig->pvc_font2);
-			RecalculateColour(pvc_fontPlay, Global::pConfig->pvc_fontPlay, Global::pConfig->pvc_fontPlay2);
-			RecalculateColour(pvc_fontCur, Global::pConfig->pvc_fontCur, Global::pConfig->pvc_fontCur2);
-			RecalculateColour(pvc_fontSel, Global::pConfig->pvc_fontSel, Global::pConfig->pvc_fontSel2);
-			RecalculateColour(pvc_selectionbeat, ColourDiffAdd(Global::pConfig->pvc_row, Global::pConfig->pvc_rowbeat, Global::pConfig->pvc_selection), ColourDiffAdd(Global::pConfig->pvc_row2, Global::pConfig->pvc_rowbeat2, Global::pConfig->pvc_selection2));
-			RecalculateColour(pvc_selection4beat, ColourDiffAdd(Global::pConfig->pvc_row, Global::pConfig->pvc_row4beat, Global::pConfig->pvc_selection), ColourDiffAdd(Global::pConfig->pvc_row2, Global::pConfig->pvc_row4beat2, Global::pConfig->pvc_selection2));
+			RecalculateColour(pvc_background, Global::configuration().pvc_background, Global::configuration().pvc_background2);
+			RecalculateColour(pvc_separator, Global::configuration().pvc_separator, Global::configuration().pvc_separator2);
+			RecalculateColour(pvc_row4beat, Global::configuration().pvc_row4beat, Global::configuration().pvc_row4beat2);
+			RecalculateColour(pvc_rowbeat, Global::configuration().pvc_rowbeat, Global::configuration().pvc_rowbeat2);
+			RecalculateColour(pvc_row, Global::configuration().pvc_row, Global::configuration().pvc_row2);
+			RecalculateColour(pvc_selection, Global::configuration().pvc_selection, Global::configuration().pvc_selection2);
+			RecalculateColour(pvc_playbar, Global::configuration().pvc_playbar, Global::configuration().pvc_playbar2);
+			RecalculateColour(pvc_cursor, Global::configuration().pvc_cursor, Global::configuration().pvc_cursor2);
+			RecalculateColour(pvc_font, Global::configuration().pvc_font, Global::configuration().pvc_font2);
+			RecalculateColour(pvc_fontPlay, Global::configuration().pvc_fontPlay, Global::configuration().pvc_fontPlay2);
+			RecalculateColour(pvc_fontCur, Global::configuration().pvc_fontCur, Global::configuration().pvc_fontCur2);
+			RecalculateColour(pvc_fontSel, Global::configuration().pvc_fontSel, Global::configuration().pvc_fontSel2);
+			RecalculateColour(pvc_selectionbeat, ColourDiffAdd(Global::configuration().pvc_row, Global::configuration().pvc_rowbeat, Global::configuration().pvc_selection), ColourDiffAdd(Global::configuration().pvc_row2, Global::configuration().pvc_rowbeat2, Global::configuration().pvc_selection2));
+			RecalculateColour(pvc_selection4beat, ColourDiffAdd(Global::configuration().pvc_row, Global::configuration().pvc_row4beat, Global::configuration().pvc_selection), ColourDiffAdd(Global::configuration().pvc_row2, Global::configuration().pvc_row4beat2, Global::configuration().pvc_selection2));
 		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

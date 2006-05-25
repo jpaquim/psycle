@@ -107,7 +107,7 @@ namespace psycle
 				// grows the search path with intermediate dirs between the configured root dir for plugins and the dir of this plugin
 				{
 					// configured root dir for plugins
-					boost::filesystem::path root_path(Global::pConfig->GetPluginDir(), boost::filesystem::native);
+					boost::filesystem::path root_path(Global::configuration().GetPluginDir(), boost::filesystem::native);
 					// grow the search path with each compound of the sub dir until we reached the root dir
 					// first, normalize the path so we don't have
 					// dirs that are not intermediate because of things like foo/../bar
@@ -403,7 +403,7 @@ namespace psycle
 					while (ns)
 					{
 						int nextevent = (TWSActive)?TWSSamples:ns+1;
-						for (int i=0; i < Global::_pSong->tracks(); i++)
+						for (int i=0; i < Global::song().tracks(); i++)
 						{
 							if (TriggerDelay[i]._cmd)
 							{
@@ -419,7 +419,7 @@ namespace psycle
 							{
 								TWSSamples -= ns;
 							}
-							for (int i=0; i < Global::_pSong->tracks(); i++)
+							for (int i=0; i < Global::song().tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd)
@@ -429,7 +429,7 @@ namespace psycle
 							}
 							try
 							{
-								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->tracks());
+								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::song().tracks());
 							}
 							catch(const std::exception &)
 							{
@@ -443,7 +443,7 @@ namespace psycle
 								ns -= nextevent;
 								try
 								{
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->tracks());
+									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::song().tracks());
 								}
 								catch(const std::exception &)
 								{
@@ -484,7 +484,7 @@ namespace psycle
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for (int i=0; i < Global::_pSong->tracks(); i++)
+							for (int i=0; i < Global::song().tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -518,7 +518,7 @@ namespace psycle
 										catch(const std::exception &)
 										{
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 									}
 									else
 									{
@@ -537,7 +537,7 @@ namespace psycle
 										catch(const std::exception &)
 										{
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
 										if (parameter < 9)
 										{
@@ -597,7 +597,7 @@ namespace psycle
 											ArpeggioCount[i]=0;
 											break;
 										}
-										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
+										TriggerDelayCounter[i] = Global::player().SamplesPerRow()*Global::player().tpb/24;
 									}
 									else
 									{
@@ -608,7 +608,7 @@ namespace psycle
 						}
 					}
 					Machine::SetVolumeCounter(numSamples);
-					if ( Global::pConfig->autoStopMachines )
+					if ( Global::configuration().autoStopMachines )
 					{
 						if (_volumeCounter < 8.0f)
 						{
@@ -749,7 +749,7 @@ namespace psycle
 					catch(const std::exception &)
 					{
 					}
-					Global::pPlayer->Tweaker = true;
+					Global::player().Tweaker = true;
 				}
 			}
 			else if(pData->_note == cdefTweakS)
@@ -806,7 +806,7 @@ namespace psycle
 						catch(const std::exception &)
 						{
 						}
-						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer->SamplesPerRow();
+						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::player().SamplesPerRow();
 						TWSSamples = 0;
 						TWSActive = true;
 					}
@@ -827,7 +827,7 @@ namespace psycle
 						}
 					}
 				}
-				Global::pPlayer->Tweaker = true;
+				Global::player().Tweaker = true;
 			}
 		}
 

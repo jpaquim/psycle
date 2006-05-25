@@ -624,7 +624,7 @@ namespace psycle
 							// machine active?
 							if( program < MAX_MACHINES )
 							{  
-								if (Global::_pSong->_pMachine[ program ] )
+								if (Global::song()._pMachine[ program ] )
 								{
 									// ok, map
 									SetGenMap( channel, program );
@@ -702,7 +702,7 @@ namespace psycle
 									m_stats.flags |= FSTAT_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->Stop();
+									Global::player().Stop();
 									return;
 								}
 								break;
@@ -790,7 +790,7 @@ namespace psycle
 									m_stats.flags |= FSTAT_EMULATED_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->Stop();
+									Global::player().Stop();
 									return;
 								}
 								break;
@@ -876,7 +876,7 @@ namespace psycle
 					}
 
 					// invalid machine/channel?
-					if( !Global::_pSong->_pMachine[ busMachine ] && note != 254 )
+					if( !Global::song()._pMachine[ busMachine ] && note != 254 )
 					{
 						return;
 					}
@@ -978,9 +978,9 @@ namespace psycle
 							return;
 					}
 
-					if (Global::pConfig->_RecordTweaks)
+					if (Global::configuration()._RecordTweaks)
 					{
-						if (Global::pConfig->midi().raw())
+						if (Global::configuration().midi().raw())
 						{
 							frame.m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 							return;
@@ -993,19 +993,19 @@ namespace psycle
 								// data 2 contains the info
 								for(int i(0) ; i < 16 ; ++i)
 								{
-									if(Global::pConfig->midi().group(i).record() && (Global::pConfig->midi().group(i).message() == data1 ))
+									if(Global::configuration().midi().group(i).record() && (Global::configuration().midi().group(i).message() == data1 ))
 									{
-										int const value(Global::pConfig->midi().group(i).from() + (Global::pConfig->midi().group(i).to() - Global::pConfig->midi().group(i).from()) * data2 / 127);
-										switch(Global::pConfig->midi().group(i).type())
+										int const value(Global::configuration().midi().group(i).from() + (Global::configuration().midi().group(i).to() - Global::configuration().midi().group(i).from()) * data2 / 127);
+										switch(Global::configuration().midi().group(i).type())
 										{
 											case 0:
-												frame.m_wndView.MidiPatternCommand(Global::pConfig->midi().group(i).command(), value);
+												frame.m_wndView.MidiPatternCommand(Global::configuration().midi().group(i).command(), value);
 												break;
 											case 1:
-												frame.m_wndView.MidiPatternTweak(Global::pConfig->midi().group(i).command(), value);
+												frame.m_wndView.MidiPatternTweak(Global::configuration().midi().group(i).command(), value);
 												break;
 											case 2:
-												frame.m_wndView.MidiPatternTweakSlide(Global::pConfig->midi().group(i).command(), value);
+												frame.m_wndView.MidiPatternTweakSlide(Global::configuration().midi().group(i).command(), value);
 												break;
 											case 3:
 												frame.m_wndView.MidiPatternMidiCommand(status, (data1 << 8) | data2);
@@ -1019,21 +1019,21 @@ namespace psycle
 							case 0x0E:
 								// pitch wheel
 								// data 2 contains the info
-								if (Global::pConfig->_RecordTweaks)
+								if (Global::configuration()._RecordTweaks)
 								{
-									if (Global::pConfig->midi().pitch().record())
+									if (Global::configuration().midi().pitch().record())
 									{
-										int const value(Global::pConfig->midi().pitch().from() + (Global::pConfig->midi().pitch().to() - Global::pConfig->midi().pitch().from()) * data / 0x3fff);
-										switch (Global::pConfig->midi().pitch().type())
+										int const value(Global::configuration().midi().pitch().from() + (Global::configuration().midi().pitch().to() - Global::configuration().midi().pitch().from()) * data / 0x3fff);
+										switch (Global::configuration().midi().pitch().type())
 										{
 										case 0:
-											frame.m_wndView.MidiPatternCommand(Global::pConfig->midi().pitch().command(), value);
+											frame.m_wndView.MidiPatternCommand(Global::configuration().midi().pitch().command(), value);
 											break;
 										case 1:
-											frame.m_wndView.MidiPatternTweak(Global::pConfig->midi().pitch().command(), value);
+											frame.m_wndView.MidiPatternTweak(Global::configuration().midi().pitch().command(), value);
 											break;
 										case 2:
-											frame.m_wndView.MidiPatternTweakSlide(Global::pConfig->midi().pitch().command(), value);
+											frame.m_wndView.MidiPatternTweakSlide(Global::configuration().midi().pitch().command(), value);
 											break;
 										case 3:
 											frame.m_wndView.MidiPatternMidiCommand(status, (data1 << 8) | data2);
@@ -1048,11 +1048,11 @@ namespace psycle
 					}
 
 					// midi controllers pass-through
-					int mgn = Global::_pSong->seqBus;
+					int mgn = Global::song().seqBus;
 
 					if (mgn < MAX_MACHINES)
 					{
-						Machine* pMachine = Global::_pSong->_pMachine[mgn];
+						Machine* pMachine = Global::song()._pMachine[mgn];
 						if (pMachine)
 						{
 							if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
@@ -1079,12 +1079,12 @@ namespace psycle
 
 		void CMidiInput::InternalClock( DWORD dwParam2 )
 		{
-			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::configuration()._pOutputDriver->_samplesPerSec;
 
 			// WARNING! GetPlayPos() has max of 0x7FFFFF
 
 			// get the current play sample position
- 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
+ 			int playPos = Global::configuration()._pOutputDriver->GetPlayPos();
 
 			// calc the latency of the clock midi message
 			int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
@@ -1151,9 +1151,9 @@ namespace psycle
 		void CMidiInput::InternalReSync( DWORD dwParam2 )
 		{
 			// get the current play sample position
-			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
+			int playPos = Global::configuration()._pOutputDriver->GetPlayPos();
 			
-			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::configuration()._pOutputDriver->_samplesPerSec;
 
 			// calculate the latency of the MIDI message in samples (delay in getting to us)
 			// using our own timer, started at the same time (hopefully!) as the MIDI
@@ -1199,7 +1199,7 @@ namespace psycle
 
 			// midi injection NOT enabled?
 			if( !m_midiInHandle[ DRIVER_MIDI ] || 
-				strcmp( Global::pConfig->_pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
+				strcmp( Global::configuration()._pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
 			{
 				m_stats.flags &= ~FSTAT_ACTIVE;
 				return false;
@@ -1207,7 +1207,7 @@ namespace psycle
 
 			m_stats.flags |= FSTAT_ACTIVE;
 
-			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::configuration()._pOutputDriver->_samplesPerSec;
 			m_stats.bufferCount = m_patCount;
 
 			// (waiting until we are sure we will have enough midi data in the buffer
@@ -1218,10 +1218,10 @@ namespace psycle
 
 				// get the write position now and adjust for samples done since the
 				// resync interrupt
-				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();
+				int writePos = Global::configuration()._pOutputDriver->GetWritePos();
 				
 				// calculate our final adjuster
-				int syncAdjuster = m_adjustedPlayPos - ( writePos - Global::pConfig->_pOutputDriver->GetMaxLatencyInSamples() );
+				int syncAdjuster = m_adjustedPlayPos - ( writePos - Global::configuration()._pOutputDriver->GetMaxLatencyInSamples() );
 				m_stats.syncAdjuster = syncAdjuster;
 
 		#ifdef _DEBUGGING
@@ -1296,7 +1296,7 @@ namespace psycle
 				int data2 = m_midiBuffer[ m_patOut ].entry._parameter;
 
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Global::_pSong->_pMachine[ machine ];
+				Plugin * pMachine = (Plugin*) Global::song()._pMachine[ machine ];
 				// make sure machine is still valid
 				if( pMachine || note == 254 )
 				{
@@ -1351,9 +1351,9 @@ namespace psycle
 							// simulate a tracker 'tick' (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
-								if( Global::_pSong->_pMachine[tc])
+								if( Global::song()._pMachine[tc])
 								{
-									Global::_pSong->_pMachine[tc]->Tick();
+									Global::song()._pMachine[tc]->Tick();
 								}
 							}
 
@@ -1381,7 +1381,7 @@ namespace psycle
 
 			// Master machine initiates work
 			//
-			Global::_pSong->_pMachine[MASTER_INDEX]->Work( amount );
+			Global::song()._pMachine[MASTER_INDEX]->Work( amount );
 			return true;
 		}
 	}

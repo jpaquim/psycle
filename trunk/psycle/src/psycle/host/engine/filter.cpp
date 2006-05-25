@@ -16,7 +16,7 @@ namespace psycle
 
 			void FilterCoeff::ComputeCoeffs(int freq, int r, int t)
 			{
-				float omega = float(TPI*Cutoff(freq)/Global::pPlayer->SampleRate());
+				float omega = float(TPI*Cutoff(freq)/Global::player().SampleRate());
 				float sn = (float)sin(omega);
 				float cs = (float)cos(omega);
 				float alpha;

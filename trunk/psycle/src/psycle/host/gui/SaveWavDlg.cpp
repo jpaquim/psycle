@@ -83,7 +83,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			lastlinetick=0;
 			saving=false;
 
-			std::string name = Global::pConfig->GetCurrentSongDir();
+			std::string name = Global::configuration().GetCurrentSongDir();
 			name+='\\';
 			name+=pSong->fileName;
 			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
@@ -107,23 +107,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if ((rate < 0) || (rate >5))
 			{
-				if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8192)
+				if (Global::configuration()._pOutputDriver->_samplesPerSec <= 8192)
 				{
 					rate = 0;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 11025)
+				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 11025)
 				{
 					rate = 1;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
+				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 22050)
 				{
 					rate = 2;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
+				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 44100)
 				{
 					rate = 3;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
+				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 48000)
 				{
 					rate = 4;
 				}
@@ -143,19 +143,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if ((bits < 0) || (bits > 3))
 			{
-				if (Global::pConfig->_pOutputDriver->_bitDepth <= 8)
+				if (Global::configuration()._pOutputDriver->_bitDepth <= 8)
 				{
 					bits = 0;
 				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 16)
+				else if (Global::configuration()._pOutputDriver->_bitDepth <= 16)
 				{
 					bits = 1;
 				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 24)
+				else if (Global::configuration()._pOutputDriver->_bitDepth <= 24)
 				{
 					bits = 2;
 				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 32)
+				else if (Global::configuration()._pOutputDriver->_bitDepth <= 32)
 				{
 					bits = 3;
 				}
@@ -175,7 +175,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if ((channelmode < 0) || (channelmode > 3))
 			{
-				channelmode = Global::pConfig->_pOutputDriver->_channelmode;
+				channelmode = Global::configuration()._pOutputDriver->_channelmode;
 			}
 			m_channelmode.SetCurSel(channelmode);
 
@@ -237,10 +237,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_savewave.EnableWindow(false);
 			m_cancel.SetWindowText("Stop");
 			
-			autostop = Global::pConfig->autoStopMachines;
-			if ( Global::pConfig->autoStopMachines )
+			autostop = Global::configuration().autoStopMachines;
+			if ( Global::configuration().autoStopMachines )
 			{
-				Global::pConfig->autoStopMachines = false;
+				Global::configuration().autoStopMachines = false;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
 					if (pSong->_pMachine[c])
@@ -438,8 +438,8 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			Player *pPlayer = Global::pPlayer;
 			Song *pSong = Global::_pSong;
 			pPlayer->StopRecording();
-			Global::pConfig->_pOutputDriver->Enable(false);
-			Global::pConfig->_pMidiInput->Close();
+			Global::configuration()._pOutputDriver->Enable(false);
+			Global::configuration()._pMidiInput->Close();
 
 			std::string::size_type pos = file.rfind('\\');
 			if (pos == std::string::npos)
@@ -574,13 +574,13 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			kill_thread=1;
 			if ( autostop ) 
 			{
-				Global::pConfig->autoStopMachines=true;
+				Global::configuration().autoStopMachines=true;
 			}
-			Global::pPlayer->_playBlock=playblock;
-			Global::pPlayer->_loopSong=loopsong;
-			memcpy(Global::_pSong->playOrderSel,sel,MAX_SONG_POSITIONS);
-			Global::pConfig->_pOutputDriver->Enable(true);
-			Global::pConfig->_pMidiInput->Open();
+			Global::player()._playBlock=playblock;
+			Global::player()._loopSong=loopsong;
+			memcpy(Global::song().playOrderSel,sel,MAX_SONG_POSITIONS);
+			Global::configuration()._pOutputDriver->Enable(true);
+			Global::configuration()._pMidiInput->Open();
 
 			if (m_savetracks.GetCheck())
 			{

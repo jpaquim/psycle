@@ -388,7 +388,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 
 	CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 	dlg._pSong = _pSong;
-	std::string tmpstr = Global::pConfig->GetCurrentInstrumentDir();
+	std::string tmpstr = Global::configuration().GetCurrentInstrumentDir();
 	dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 	if (dlg.DoModal() == IDOK)
 	{
@@ -431,7 +431,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 		int index = str.ReverseFind('\\');
 		if (index != -1)
 		{
-			Global::pConfig->SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
+			Global::configuration().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 		}
 	}
 	if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)

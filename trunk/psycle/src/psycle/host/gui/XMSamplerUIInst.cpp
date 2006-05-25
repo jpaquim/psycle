@@ -674,10 +674,10 @@ void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
 	{
 //		1024 / getpos() = number of ticks that needs to decrease to 0.
-//		(24.0f * Global::pPlayer->bpm/60.0f) = number of ticks in a second.
-//		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::pPlayer->bpm/60.0f));
+//		(24.0f * Global::player().bpm/60.0f) = number of ticks in a second.
+//		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::player().bpm/60.0f));
 		if (m_SlFadeoutRes.GetPos() == 0) strcpy(tmp,"off");
-		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::pPlayer->bpm *m_SlFadeoutRes.GetPos()) );
+		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::player().bpm *m_SlFadeoutRes.GetPos()) );
 
 		_inst.VolumeFadeSpeed(m_SlFadeoutRes.GetPos()/1024.0f);
 	}
@@ -990,7 +990,7 @@ void XMSamplerUIInst::CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStru
 			const int _points =  m_pEnvelope->NumOfPoints();
 
 			int _mod = 0.0f;
-			float tenthsec = m_Zoom*0.04*Global::pPlayer->bpm;
+			float tenthsec = m_Zoom*0.04*Global::player().bpm;
 			int _sec = 0;
 
 			for(float i = 0; i < m_WindowWidth; i+=tenthsec)

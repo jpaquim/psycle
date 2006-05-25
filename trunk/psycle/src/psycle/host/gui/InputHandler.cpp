@@ -114,7 +114,7 @@ namespace psycle
 			}
 			else
 			{
-				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::player()._playing&&Global::configuration()._followSong))
 				{
 					CmdDef cmdSel;
 					switch (nChar)
@@ -493,13 +493,13 @@ namespace psycle
 			case cdefColumnNext:
 				pChildView->bScrollDetatch=false;
 				pChildView->ChordModeOffs = 0;
-				pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
+				pChildView->AdvanceTrack(1,Global::configuration()._wrapAround);
 				break;
 
 			case cdefColumnPrev:
 				pChildView->bScrollDetatch=false;
 				pChildView->ChordModeOffs = 0;
-				pChildView->PrevTrack(1,Global::pConfig->_wrapAround);
+				pChildView->PrevTrack(1,Global::configuration()._wrapAround);
 				break;
 
 			case cdefNavLeft:
@@ -507,7 +507,7 @@ namespace psycle
 				pChildView->ChordModeOffs = 0;
 				if ( !bDoingSelection )
 				{
-					pChildView->PrevCol(Global::pConfig->_wrapAround);
+					pChildView->PrevCol(Global::configuration()._wrapAround);
 					if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				}
 				else
@@ -516,7 +516,7 @@ namespace psycle
 					{
 						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 					}
-					pChildView->PrevTrack(1,Global::pConfig->_wrapAround);
+					pChildView->PrevTrack(1,Global::configuration()._wrapAround);
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
 
@@ -527,7 +527,7 @@ namespace psycle
 				pChildView->ChordModeOffs = 0;
 				if ( !bDoingSelection )
 				{
-					pChildView->NextCol(Global::pConfig->_wrapAround);
+					pChildView->NextCol(Global::configuration()._wrapAround);
 					if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				}
 				else
@@ -536,7 +536,7 @@ namespace psycle
 					{
 						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 					}
-					pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
+					pChildView->AdvanceTrack(1,Global::configuration()._wrapAround);
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
 
@@ -550,13 +550,13 @@ namespace psycle
 					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
 				if (pChildView->patStep == 0)
-					pChildView->PrevLine(1,Global::pConfig->_wrapAround);
+					pChildView->PrevLine(1,Global::configuration()._wrapAround);
 				else
 					//if added by sampler. New option.
-					if (!Global::pConfig->_NavigationIgnoresStep)
-						pChildView->PrevLine(pChildView->patStep,Global::pConfig->_wrapAround);//before
+					if (!Global::configuration()._NavigationIgnoresStep)
+						pChildView->PrevLine(pChildView->patStep,Global::configuration()._wrapAround);//before
 					else
-						pChildView->PrevLine(1,Global::pConfig->_wrapAround);//new option
+						pChildView->PrevLine(1,Global::configuration()._wrapAround);//new option
 				if ( bDoingSelection )
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -572,13 +572,13 @@ namespace psycle
 					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
 				if (pChildView->patStep == 0)
-					pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
+					pChildView->AdvanceLine(1,Global::configuration()._wrapAround);
 				else
 					//if added by sampler. New option.
-					if (!Global::pConfig->_NavigationIgnoresStep)
-						pChildView->AdvanceLine(pChildView->patStep,Global::pConfig->_wrapAround); //before
+					if (!Global::configuration()._NavigationIgnoresStep)
+						pChildView->AdvanceLine(pChildView->patStep,Global::configuration()._wrapAround); //before
 					else
-						pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);//new option
+						pChildView->AdvanceLine(1,Global::configuration()._wrapAround);//new option
 				if ( bDoingSelection )
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -588,34 +588,34 @@ namespace psycle
 				break;
 			case cdefNavPageUp:
 				//if added by sampler to move backward 16 lines when playing
-				if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+				if (Global::player()._playing && Global::configuration()._followSong)
 				{
-					if (Global::pPlayer->_playBlock )
+					if (Global::player()._playBlock )
 						{
-							if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+							if (Global::player()._lineCounter >= 16) Global::player()._lineCounter -= 16;
 							else
 							{
-								Global::pPlayer->_lineCounter = 0;
-								Global::pPlayer->ExecuteLine();
+								Global::player()._lineCounter = 0;
+								Global::player().ExecuteLine();
 							}
 						}
 					else
 					{
-						if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+						if (Global::player()._lineCounter >= 16) Global::player()._lineCounter -= 16;
 						else
 						{
-							if (Global::pPlayer->_playPosition > 0)
+							if (Global::player()._playPosition > 0)
 							{
-								Global::pPlayer->_playPosition -= 1;
-								Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - 16;												
+								Global::player()._playPosition -= 1;
+								Global::player()._lineCounter = Global::song().patternLines[Global::player()._playPosition] - 16;												
 							}
 							else
 							{
-								if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+								if (Global::player()._lineCounter >= 16) Global::player()._lineCounter -= 16;
 								else
 								{
-									Global::pPlayer->_lineCounter = 0;
-									Global::pPlayer->ExecuteLine();
+									Global::player()._lineCounter = 0;
+									Global::player().ExecuteLine();
 								}
 							}
 						}
@@ -642,9 +642,9 @@ namespace psycle
 
 			case cdefNavPageDn:
 				//if added by sampler
-				if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+				if (Global::player()._playing && Global::configuration()._followSong)
 				{
-					Global::pPlayer->_lineCounter += 16;
+					Global::player()._lineCounter += 16;
 				}
 				//end of if added by sampler
 				else
@@ -703,16 +703,16 @@ namespace psycle
 				}
 				if(bFT2HomeBehaviour)
 				{
-					pChildView->editcur.line=Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]]-1;
+					pChildView->editcur.line=Global::song().patternLines[Global::song().playOrder[pChildView->editPosition]]-1;
 				}
 				else
 				{		
 					if (pChildView->editcur.col != 8) 
 						pChildView->editcur.col = 8;
-					else if ( pChildView->editcur.track != Global::_pSong->tracks()-1 ) 
-						pChildView->editcur.track = Global::_pSong->tracks()-1;
+					else if ( pChildView->editcur.track != Global::song().tracks()-1 ) 
+						pChildView->editcur.track = Global::song().tracks()-1;
 					else 
-						pChildView->editcur.line = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]]-1;
+						pChildView->editcur.line = Global::song().patternLines[Global::song().playOrder[pChildView->editPosition]]-1;
 				}
 				if ( bDoingSelection )
 				{
@@ -756,15 +756,15 @@ namespace psycle
 
 			case cdefSelectAll:
 				{
-					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
+					const int nl = Global::song().patternLines[Global::song().playOrder[pChildView->editPosition]];
 					pChildView->StartBlock(0,0,0);
-					pChildView->EndBlock(Global::_pSong->tracks()-1,nl-1,8);
+					pChildView->EndBlock(Global::song().tracks()-1,nl-1,8);
 				}
 				break;
 				
 			case cdefSelectCol:
 				{
-					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
+					const int nl = Global::song().patternLines[Global::song().playOrder[pChildView->editPosition]];
 					pChildView->StartBlock(pChildView->editcur.track,0,0);
 					pChildView->EndBlock(pChildView->editcur.track,nl-1,8);
 				}
@@ -773,7 +773,7 @@ namespace psycle
 			case cdefSelectBar:
 			//selects 4*tpb lines, 8*tpb lines 16*tpb lines, etc. up to number of lines in pattern
 				{
-					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];			
+					const int nl = Global::song().patternLines[Global::song().playOrder[pChildView->editPosition]];			
 								
 					pChildView->bScrollDetatch=false;
 					pChildView->ChordModeOffs = 0;
@@ -783,7 +783,7 @@ namespace psycle
 						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 					}
 
-					int blockLength = (4 * pChildView->blockSelectBarState * Global::_pSong->LinesPerBeat())-1;
+					int blockLength = (4 * pChildView->blockSelectBarState * Global::song().LinesPerBeat())-1;
 
 					if ((pChildView->editcur.line + blockLength) >= nl-1)
 					{
@@ -885,11 +885,11 @@ namespace psycle
 				break;
 
 			case cdefBlockSetMachine:
-				pChildView->BlockGenChange(Global::_pSong->seqBus);
+				pChildView->BlockGenChange(Global::song().seqBus);
 				break;
 
 			case cdefBlockSetInstr:
-				pChildView->BlockInsChange(Global::_pSong->auxcolSelected);
+				pChildView->BlockInsChange(Global::song().auxcolSelected);
 				break;
 
 			case cdefOctaveUp:
@@ -914,12 +914,12 @@ namespace psycle
 
 			case cdefPlayRowTrack:
 				pChildView->PlayCurrentNote();
-				pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
+				pChildView->AdvanceLine(1,Global::configuration()._wrapAround);
 				break;
 
 			case cdefPlayRowPattern:
 				pChildView->PlayCurrentRow();
-				pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
+				pChildView->AdvanceLine(1,Global::configuration()._wrapAround);
 				break;
 
 			case cdefPlayBlock:
@@ -967,14 +967,14 @@ namespace psycle
 
 			case cdefInfoMachine:
 
-				if (Global::_pSong->seqBus < MAX_MACHINES)
+				if (Global::song().seqBus < MAX_MACHINES)
 				{
-					if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
+					if (Global::song()._pMachine[Global::song().seqBus])
 					{
 						CPoint point;
-						point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->GetPosX();
-						point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->GetPosY();
-						pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);//, Global::_pSong->seqBus);
+						point.x = Global::song()._pMachine[Global::song().seqBus]->GetPosX();
+						point.y = Global::song()._pMachine[Global::song().seqBus]->GetPosY();
+						pMainFrame->ShowMachineGui(Global::song().seqBus, point);//, Global::song().seqBus);
 					}
 				}
 				break;
@@ -1061,7 +1061,7 @@ namespace psycle
 
 		void InputHandler::PlayFromCur() 
 		{
-			Global::pPlayer->Start(pChildView->editPosition,pChildView->editcur.line);
+			Global::player().Start(pChildView->editPosition,pChildView->editcur.line);
 			pMainFrame->StatusBarIdle();
 		}
 
@@ -1102,7 +1102,7 @@ namespace psycle
 			if(note<120)
 			{
 				if(bTranspose)
-					note+=Global::_pSong->currentOctave*12;
+					note+=Global::song().currentOctave*12;
 
 				if (note > 119) 
 					note = 119;
@@ -1110,15 +1110,15 @@ namespace psycle
 
 			if(pMachine==NULL)
 			{
-				int mgn = Global::_pSong->seqBus;
+				int mgn = Global::song().seqBus;
 
 				if (mgn < MAX_MACHINES)
 				{
-					pMachine = Global::_pSong->_pMachine[mgn];
+					pMachine = Global::song()._pMachine[mgn];
 				}
 			}
 
-			for(int i=0;i<Global::_pSong->tracks();i++)
+			for(int i=0;i<Global::song().tracks();i++)
 			{
 				if(notetrack[i]==note)
 				{
@@ -1126,8 +1126,8 @@ namespace psycle
 					// build entry
 					PatternEntry entry;
 					entry._note = 120;
-					entry._inst = Global::_pSong->auxcolSelected;
-					entry._mach = Global::_pSong->seqBus;
+					entry._inst = Global::song().auxcolSelected;
+					entry._mach = Global::song().seqBus;
 					entry._cmd = 0;
 					entry._parameter = 0;	
 
@@ -1154,7 +1154,7 @@ namespace psycle
 			if(note<120)
 			{
 				if(bTranspose)
-					note+=Global::_pSong->currentOctave*12;
+					note+=Global::song().currentOctave*12;
 
 				if (note > 119) 
 					note = 119;
@@ -1163,17 +1163,17 @@ namespace psycle
 			// build entry
 			PatternEntry entry;
 			entry._note = note;
-			entry._inst = Global::_pSong->auxcolSelected;
-			entry._mach = Global::_pSong->seqBus;	// Not really needed.
+			entry._inst = Global::song().auxcolSelected;
+			entry._mach = Global::song().seqBus;	// Not really needed.
 
-			if(velocity != 127 && Global::pConfig->midi().velocity().record())
+			if(velocity != 127 && Global::configuration().midi().velocity().record())
 			{
-				int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+				int par = Global::configuration().midi().velocity().from() + (Global::configuration().midi().velocity().to() - Global::configuration().midi().velocity().from()) * velocity / 127;
 				if (par > 255) par = 255; else if (par < 0) par = 0;
-				switch(Global::pConfig->midi().velocity().type())
+				switch(Global::configuration().midi().velocity().type())
 				{
 					case 0:
-						entry._cmd = Global::pConfig->midi().velocity().command();
+						entry._cmd = Global::configuration().midi().velocity().command();
 						entry._parameter = par;
 						break;
 					case 3:
@@ -1190,11 +1190,11 @@ namespace psycle
 			// play it
 			if(pMachine==NULL)
 			{
-				int mgn = Global::_pSong->seqBus;
+				int mgn = Global::song().seqBus;
 
 				if (mgn < MAX_MACHINES)
 				{
-					pMachine = Global::_pSong->_pMachine[mgn];
+					pMachine = Global::song()._pMachine[mgn];
 				}
 			}	
 
@@ -1204,14 +1204,14 @@ namespace psycle
 				if(bMultiKey)
 				{
 					int i;
-					for (i = outtrack+1; i < Global::_pSong->tracks(); i++)
+					for (i = outtrack+1; i < Global::song().tracks(); i++)
 					{
 						if (notetrack[i] == 120)
 						{
 							break;
 						}
 					}
-					if (i >= Global::_pSong->tracks())
+					if (i >= Global::song().tracks())
 					{
 						for (i = 0; i <= outtrack; i++)
 						{

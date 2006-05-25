@@ -184,7 +184,7 @@ namespace psycle
 					throw host::exceptions::function_errors::bad_returned_value(s.str());
 				}
 				// 2: Host to Plug, setSampleRate ( 44100.000000 )
-				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
+				proxy().setSampleRate((float) Global::configuration().GetSamplesPerSec());
 				// 3: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 4: Host to Plug, open
@@ -204,13 +204,13 @@ namespace psycle
 				}
 
 				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
-				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
+				proxy().setSampleRate((float) Global::configuration().GetSamplesPerSec());
 				// 7: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 8: Host to Plug, setSpeakerArrangement returned: false 
 				proxy().setSpeakerArrangement(&VSTsa,&VSTsa);
 				// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
-				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
+				proxy().setSampleRate((float) Global::configuration().GetSamplesPerSec());
 				// 10: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 11: Host to Plug, getProgram returned: 0 
@@ -846,16 +846,19 @@ namespace psycle
 				switch(opcode)
 				{
 				//  Version 1.0
+				case audioMasterWantMidi:
+					//This is to avoid the warning in the loggers ( "default:" option )
+					break;
 				case audioMasterAutomate:
-					Global::pPlayer->Tweaker = true;
+					Global::player().Tweaker = true;
 					if(effect && host)
 					{
 						if(index<0 || index >= effect->numParams) {
 							host::loggers::info("error audioMasterAutomate: index<0 || index >= effect->numParams");
 						}
-						if(Global::pConfig->_RecordTweaks)
+						if(Global::configuration()._RecordTweaks)
 						{
-							if(Global::pConfig->_RecordMouseTweaksSmooth)
+							if(Global::configuration()._RecordMouseTweaksSmooth)
 								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->id(), index, f2i(opt * vst::quantization));
 							else
 								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->id(), index, f2i(opt * vst::quantization));
@@ -929,15 +932,15 @@ namespace psycle
 					if((Global::pPlayer)->_playing) 
 					{
 						_timeInfo.flags |= kVstTransportPlaying;
-						if(((Master *) (Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount == 0)
+						if(((Master *) (Global::song()._pMachine[MASTER_INDEX]))->sampleCount == 0)
 							_timeInfo.flags |= kVstTransportChanged;
 					}
-					if(Global::_pSong->_pMachine[MASTER_INDEX]) // This happens on song loading with new fileformat.
+					if(Global::song()._pMachine[MASTER_INDEX]) // This happens on song loading with new fileformat.
 					{
-						_timeInfo.samplePos = ((Master *) (Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount;
+						_timeInfo.samplePos = ((Master *) (Global::song()._pMachine[MASTER_INDEX]))->sampleCount;
 					}
 					else _timeInfo.samplePos = 0;
-					_timeInfo.sampleRate = Global::pConfig->GetSamplesPerSec();
+					_timeInfo.sampleRate = Global::configuration().GetSamplesPerSec();
 					
 					if(value & kVstNanosValid)
 					{
@@ -952,22 +955,22 @@ namespace psycle
 						/*
 						if((Global::pPlayer)->_playing) 
 						{
-							const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb * 4)) / Global::pPlayer->tpb;
-							const float linestep = (((float)(Global::_pSong->SamplesPerRow()-Global::pPlayer->_ticksRemaining)) / Global::_pSong->SamplesPerTick) / Global::pPlayer->tpb;
+							const float currentline = (float)(Global::player()._lineCounter%(Global::player().tpb * 4)) / Global::player().tpb;
+							const float linestep = (((float)(Global::song().SamplesPerRow()-Global::player()._ticksRemaining)) / Global::song().SamplesPerTick) / Global::player().tpb;
 							_timeInfo.ppqPos = currentline+linestep;
 						}
 						else
 						{
 						*/
-							//const double ppq = ((((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount/ _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60.0f));
+							//const double ppq = ((((Master*)(Global::song()._pMachine[MASTER_INDEX]))->sampleCount/ _timeInfo.sampleRate ) * (Global::player().bpm / 60.0f));
 							//_timeInfo.ppqPos =  ppq - 4*((int)ppq/4);
-							_timeInfo.ppqPos = (((Master *) (Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::pPlayer->bpm ) / (_timeInfo.sampleRate* 60.0f);
+							_timeInfo.ppqPos = (((Master *) (Global::song()._pMachine[MASTER_INDEX]))->sampleCount * Global::player().bpm ) / (_timeInfo.sampleRate* 60.0f);
 						//}
 					}
 					if(value & kVstTempoValid)
 					{
 						_timeInfo.flags |= kVstTempoValid;
-						_timeInfo.tempo = Global::pPlayer->bpm;
+						_timeInfo.tempo = Global::player().bpm;
 					}
 					if(value & kVstTimeSigValid)
 					{
@@ -992,7 +995,7 @@ namespace psycle
 				case audioMasterTempoAt:
 					// This might be incorrect:
 					// Declaration: virtual long tempoAt (long pos); // returns tempo (in bpm * 10000) at sample frame location <pos>
-					return Global::pPlayer->bpm * 10000;
+					return Global::player().bpm * 10000;
 				case audioMasterGetParameterQuantization:	
 					return vst::quantization;
 				case audioMasterNeedIdle:
@@ -1024,7 +1027,7 @@ namespace psycle
 					return 0;
 				case audioMasterGetSampleRate:
 					{
-						long sampleRate=Global::pConfig->GetSamplesPerSec();
+						long sampleRate=Global::configuration().GetSamplesPerSec();
 						if(effect && host)
 							host->proxy().setSampleRate(sampleRate);
 						return sampleRate;
@@ -1143,7 +1146,7 @@ namespace psycle
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 						SetParameter(pData->_inst, value);
-						Global::pPlayer->Tweaker = true;
+						Global::player().Tweaker = true;
 					}
 					else if(note == cdefTweakS)
 					{
@@ -1166,7 +1169,7 @@ namespace psycle
 							{
 								TWSCurrent[i] = 0;
 							}
-							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::pPlayer->SamplesPerRow();
+							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::player().SamplesPerRow();
 							TWSSamples = 0;
 							TWSActive = true;
 						}
@@ -1176,7 +1179,7 @@ namespace psycle
 							const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 							SetParameter(pData->_inst, value);
 						}
-						Global::pPlayer->Tweaker = true;
+						Global::player().Tweaker = true;
 					}
 				}
 			}
@@ -1233,14 +1236,14 @@ namespace psycle
 					{
 						int nextevent;
 						if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-						for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
+						for(int i(0) ; i < Global::song().tracks() ; ++i)
 						{
 							if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 						}
 						if(nextevent > ns)
 						{
 							if(TWSActive) TWSSamples -= ns;
-							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
+							for(int i(0) ; i < Global::song().tracks() ; ++i)
 							{
 								// come back to this
 								if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
@@ -1310,7 +1313,7 @@ namespace psycle
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
+							for(int i(0) ; i < Global::song().tracks() ; ++i)
 							{
 								// come back to this
 								if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -1329,7 +1332,7 @@ namespace psycle
 									{
 										// do event
 										Tick(i, &TriggerDelay[i]);
-										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 									}
 									else TriggerDelayCounter[i] -= nextevent;
 								}
@@ -1339,7 +1342,7 @@ namespace psycle
 									{
 										// do event
 										Tick(i, &TriggerDelay[i]);
-										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 										int parameter(TriggerDelay[i]._parameter & 0x0f);
 										if(parameter < 9) RetriggerRate[i] += 4  *parameter;
 										else
@@ -1372,7 +1375,7 @@ namespace psycle
 											ArpeggioCount[i]=0;
 											break;
 										}
-										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
+										TriggerDelayCounter[i] = Global::player().SamplesPerRow()*Global::player().tpb/24;
 									}
 									else
 									{
@@ -1399,7 +1402,7 @@ namespace psycle
 						if(temp > 97) temp = 97;
 						if(temp > _volumeDisplay) _volumeDisplay = temp;
 						--_volumeDisplay;
-						if( Global::pConfig->autoStopMachines)
+						if( Global::configuration().autoStopMachines)
 						{
 							if(_volumeCounter < 8.0f)
 							{
@@ -1494,7 +1497,7 @@ namespace psycle
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 						SetParameter(pData->_inst, value);
-						Global::pPlayer->Tweaker = true;
+						Global::player().Tweaker = true;
 					}
 					else if(pData->_note == cdefTweakS)
 					{
@@ -1517,7 +1520,7 @@ namespace psycle
 							{
 								TWSCurrent[i] = 0;
 							}
-							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::pPlayer->SamplesPerRow();
+							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::player().SamplesPerRow();
 							TWSSamples = 0;
 							TWSActive = true;
 						}
@@ -1527,7 +1530,7 @@ namespace psycle
 							const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 							SetParameter(pData->_inst, value);
 						}
-						Global::pPlayer->Tweaker = true;
+						Global::player().Tweaker = true;
 					}
 				}
 			}
@@ -1589,14 +1592,14 @@ namespace psycle
 						{
 							int nextevent;
 							if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
+							for(int i(0) ; i < Global::song().tracks() ; ++i)
 							{
 								if(TriggerDelay[i]._cmd) if(TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 							}
 							if(nextevent > ns)
 							{
 								if(TWSActive) TWSSamples -= ns;
-								for(int i(0) ; i < Global::_pSong->tracks(); ++i)
+								for(int i(0) ; i < Global::song().tracks(); ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
@@ -1661,7 +1664,7 @@ namespace psycle
 										if(activecount == 0) TWSActive = false;
 									}
 								}
-								for(int i(0) ; i < Global::_pSong->tracks(); ++i)
+								for(int i(0) ; i < Global::song().tracks(); ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -1680,7 +1683,7 @@ namespace psycle
 										{
 											// do event
 											Tick(i, &TriggerDelay[i]);
-											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 										}
 										else TriggerDelayCounter[i] -= nextevent;
 									}
@@ -1690,7 +1693,7 @@ namespace psycle
 										{
 											// do event
 											Tick(i, &TriggerDelay[i]);
-											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 											int parameter(TriggerDelay[i]._parameter & 0x0f);
 											if(parameter < 9) RetriggerRate[i] += 4 * parameter;
 											else
@@ -1735,7 +1738,7 @@ namespace psycle
 						if(temp > 97) temp = 97;
 						if(temp > _volumeDisplay) _volumeDisplay = temp;
 						--_volumeDisplay;
-						if(Global::pConfig->autoStopMachines)
+						if(Global::configuration().autoStopMachines)
 						{
 							if(_volumeCounter < 8.0f)
 							{

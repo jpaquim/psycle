@@ -78,7 +78,7 @@ namespace psycle
 				for(int c(0) ; c < MAX_PATTERNS; ++c)
 				{
 					// All pattern reset
-					Global::_pSong->patternLines[c] = defaultPatLines;
+					Global::song().patternLines[c] = defaultPatLines;
 				}
 			}
 			// paths
@@ -200,7 +200,7 @@ namespace psycle
 			for(int c(0) ; c < MAX_PATTERNS; ++c)
 			{
 				// All pattern reset
-				Global::_pSong->patternLines[c] = defaultPatLines;
+				Global::song().patternLines[c] = defaultPatLines;
 			}
 			reg.QueryValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
 			reg.QueryValue("bFileSaveReminders", bFileSaveReminders);
@@ -711,7 +711,7 @@ namespace psycle
 			for(int c(0) ; c < MAX_PATTERNS; ++c)
 			{
 				// All pattern reset
-				Global::_pSong->patternLines[c] = defaultPatLines;
+				Global::song().patternLines[c] = defaultPatLines;
 			}
 			char savedbyte;
 			int savedint;

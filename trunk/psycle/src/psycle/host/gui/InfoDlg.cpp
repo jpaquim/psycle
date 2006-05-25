@@ -88,7 +88,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//				float masterCPU=0;
 		//				machCPU = (float)tmac->work_cpu_cost()*0.1f;
 		//				machCPU = ((float)tmac->work_cpu_cost()/Global::cpu_frequency()) * 100;
-						machCPU = ((float)tmac->work_cpu_cost()/Global::cpu_frequency()) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+						machCPU = ((float)tmac->work_cpu_cost()/Global::cpu_frequency()) * ((float)Global::configuration()._pOutputDriver->_samplesPerSec/tempSampCount)*100;
 		/*				if (!c)
 						{
 							masterCPU = machCPU;
@@ -98,7 +98,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						n++;
 						machsCPU += machCPU;
 		//				wiresCPU += ((float)tmac->wire_cpu_cost()/Global::cpu_frequency())*100;
-						wiresCPU += ((float)tmac->wire_cpu_cost()/Global::cpu_frequency()) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+						wiresCPU += ((float)tmac->wire_cpu_cost()/Global::cpu_frequency()) * ((float)Global::configuration()._pOutputDriver->_samplesPerSec/tempSampCount)*100;
 					}
 				}
 				if (itemcount != n)
@@ -109,7 +109,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//		totalCPU = _pSong->cpuIdle*0.1f+masterCPU;
 		//		totalCPU = ((float)_pSong->cpuIdle/Global::_cpuHz)*100+machsCPU;
 		//		totalCPU = machsCPU + wiresCPU + ((float)_pSong->cpu_idle()/Global::cpu_frequency())*100;
-				totalCPU = machsCPU + wiresCPU + ((float)_pSong->cpu_idle()/Global::cpu_frequency()) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+				totalCPU = machsCPU + wiresCPU + ((float)_pSong->cpu_idle()/Global::cpu_frequency()) * ((float)Global::configuration()._pOutputDriver->_samplesPerSec/tempSampCount)*100;
 				
 				sprintf(buffer,"%.1f%%",totalCPU);
 				m_cpuidlelabel.SetWindowText(buffer);

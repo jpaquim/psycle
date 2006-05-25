@@ -217,10 +217,10 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 				}
 				UpdateText(value);
 				// well, this isn't so hard... just put the twk record here
-				if(Global::pConfig->_RecordTweaks)
+				if(Global::configuration()._RecordTweaks)
 				{
 					assert(mainView);
-					if (Global::pConfig->_RecordMouseTweaksSmooth)
+					if (Global::configuration()._RecordMouseTweaksSmooth)
 						childView->MousePatternTweakSlide(MachineIndex, nPar, val1);
 					else
 						childView->MousePatternTweak(MachineIndex, nPar, val1);
