@@ -672,7 +672,7 @@ namespace psycle
 			virtual void Init(void);
 			virtual void Work(int numSamples);
 			virtual std::string GetName() const { return _psName; };
-			virtual bool Load(RiffFile * pFile);
+			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
