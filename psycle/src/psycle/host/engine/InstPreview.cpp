@@ -19,7 +19,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			std::int16_t *wl = m_pInstrument->waveDataL;
 			std::int16_t *wr = m_pInstrument->waveDataR;
-			bool const stereo = m_pInstrument->waveStereo;
 			float ld = 0;
 			float rd = 0;
 			

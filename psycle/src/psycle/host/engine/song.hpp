@@ -221,20 +221,12 @@ namespace psycle
 			///\todo shouldn't belong to the song class.
 			///\{
 				public:
-/*					/// wave file previewing: work... \todo doc
-					void PW_Work(float *psamplesL, float *pSamplesR, int numSamples);
-					/// wave file previewing: starts the playback.
-					void PW_Play();
-					/// wave file previewing: current playback position, in samples.
-					int PW_Phase;
-					/// wave file previewing: Stage. 0 = Stopped. 1 = Playing. \todo doc
-					int PW_Stage;
-					/// wave file previewing: length of the wave (in samples?) \todo doc
-					int PW_Length;
-*/
 					//todo these ought to be dynamically allocated
+					/// Wave preview.
 					InstPreview wavprev;
+					/// Wave editor playback.
 					InstPreview waved;
+					/// runs the wave previewing.
 					void DoPreviews(int amount);
 			///\}
 
