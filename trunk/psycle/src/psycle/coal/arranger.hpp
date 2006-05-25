@@ -25,7 +25,7 @@ namespace psycle
 			connectors
 			sequence
 			patterns
-			guipatterns
+			gui_patterns
 		};
 	}
 }
