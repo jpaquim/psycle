@@ -6,89 +6,114 @@
 #include <psycle/host/engine/machine.hpp>
 #include <psycle/host/gui/WireDlg.hpp>
 #include <psycle/host/engine/helpers.hpp>
+#include <psycle/host/engine/dsp.hpp>
 //#include <psycle/host/engine/fft.hpp>
 #include <psycle/host/gui/ChildView.hpp>
 #include <psycle/host/gui/InputHandler.hpp>
 #include <psycle/host/gui/VolumeDlg.hpp>
-#include ".\wiredlg.hpp" // Huh?
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
-			//{{AFX_DATA_INIT(CWireDlg)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
+			//todo:
+			//pWire = _pWire;
+			//pWire->SetScopeBuffer(pSamplesL,pSamplesR);
 		}
 
 		void CWireDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CWireDlg)
-			DDX_Control(pDX, IDC_VOLUME_DB, m_volabel_db);
-			DDX_Control(pDX, IDC_VOLUME_PER, m_volabel_per);
-			DDX_Control(pDX, IDC_SLIDER1, m_volslider);
-			DDX_Control(pDX, IDC_SLIDER, m_slider);
-			DDX_Control(pDX, IDC_SLIDER2, m_slider2);
+			DDX_Control(pDX, IDC_SLIDER, m_slspeed);
+			DDX_Control(pDX, IDC_SLIDER2, m_slsize);
+			DDX_Control(pDX, IDC_SCOPE_PARAM_1, m_lblsize);
+			DDX_Control(pDX, IDC_SCOPE_PARAM_2, m_lblspeed);
 			DDX_Control(pDX, IDC_BUTTON, m_mode);
-			DDX_Control(pDX, IDC_SCOPE_PARAM_1, m_param1);
-			DDX_Control(pDX, IDC_SCOPE_PARAM_2, m_param2);
-			//}}AFX_DATA_MAP
+			DDX_Control(pDX, IDC_VOLUME_DB, m_btndb);
+			DDX_Control(pDX, IDC_VOLUME_PER, m_btnper);
+			DDX_Control(pDX, IDC_SLIDER1, m_slvolume);
 		}
 
 		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
-			//{{AFX_MSG_MAP(CWireDlg)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
-			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
 			ON_WM_TIMER()
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
+			ON_WM_PAINT()
+			ON_WM_SIZING()
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlspeed)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlsize)
 			ON_BN_CLICKED(IDC_BUTTON, OnMode)
 			ON_BN_CLICKED(IDC_SCOPE_HOLD, OnHold)
+			ON_BN_CLICKED(IDC_BUTTON1, OnDelete)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlvolume)
 			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
 			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
 			ON_BN_CLICKED(IDC_VIEW_SCOPE, OnBnClickedViewScope)
 			ON_BN_CLICKED(IDC_VIEW_CONNECTIONS, OnBnClickedViewConnections)
-			//}}AFX_MSG_MAP
 			ON_WM_LBUTTONDOWN()
 			ON_WM_RBUTTONDOWN()
-			ON_WM_PAINT()
-			ON_WM_SIZING()
 		END_MESSAGE_MAP()
+
+		BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
+		{
+			/*
+			if (pMsg->message == WM_KEYDOWN)
+			{
+				if (pMsg->wParam == VK_UP)
+				{
+					int v = m_slvolume.GetPos();
+					v--;
+					if (v < 0)
+					{
+						v = 0;
+					}
+					m_slvolume.SetPos(v);
+					return true;
+				}
+				else if (pMsg->wParam == VK_DOWN)
+				{
+					int v = m_slvolume.GetPos();
+					v++;
+					if (v > 256*4)
+					{
+						v = 256*4;
+					}
+					m_slvolume.SetPos(v);
+					return true;
+				}
+				else
+				{
+					m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+				}
+			}
+			else if (pMsg->message == WM_KEYUP)
+			{
+				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+			}
+			*/
+			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
+			{
+				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+			}
+			return CDialog::PreTranslateMessage(pMsg);
+		}
+
 
 		BOOL CWireDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
 
-			scope_mode = 0;
-			scope_peak_rate = 20;
-			scope_osc_freq = 10;
-			scope_osc_rate = 20;
-			scope_spec_bands = 16;
-			scope_spec_rate = 25;
-			scope_phase_rate = 20;
+			std::ostringstream s;
+			s << "[" << wireIndex << "]" << _pSrcMachine->_editName << " -> " << _pDstMachine->_editName;
+			SetWindowText(s.str().c_str());
 
-			Inval = false;
-			m_volslider.SetRange(0,256*4);
-			m_volslider.SetTicFreq(16*4);
-			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
-
+			m_slvolume.SetRange(0,256*4);
+			m_slvolume.SetTicFreq(16*4);
+			
 			float val;
+			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 			_pDstMachine->GetWireVolume(_dstWireIndex,val);
 			invol = val;
 			int t = (int)sqrtf(val*16384*4*4);
-			m_volslider.SetPos(256*4-t);
-
-			{
-				std::ostringstream s;
-				s << "[" << wireIndex << "]" << _pSrcMachine->_editName << " -> " << _pDstMachine->_editName;
-				SetWindowText(s.str().c_str());
-			}
-
-			hold = false;
-
-			std::memset(pSamplesL,0,sizeof(pSamplesL));
-			std::memset(pSamplesR,0,sizeof(pSamplesR));
+			m_slvolume.SetPos(256*4-t);
 
 			CClientDC dc(this);
 			rc.top = 4;
@@ -102,8 +127,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			font.CreatePointFont(70,"Tahoma");
 
-			SetMode();
-			pos = 1;
+			((CButton*)GetDlgItem(IDC_VIEW_SCOPE))->SetCheck(1);
+			//determine graphics parameters for connections view
+			conn_grapharea.left = 4;
+			conn_grapharea.right = conn_grapharea.left + 256;
+			conn_grapharea.top = 32;
+			conn_grapharea.bottom = conn_grapharea.top + 200;
+			
+
+			scope_mode = 0;
+			scope_offset=0;
+			scope_peak_rate = 20;
+			scope_osc_freq = 10;
+			scope_osc_rate = 20;
+			scope_spec_bands = 16;
+			scope_spec_rate = 25;
+			scope_phase_rate = 20;
 
 			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
 			{
@@ -114,16 +153,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				mult = 1.0f;
 			}	
 			//set labels
-			m_param1.SetWindowText ("Refresh:");
-			m_param2.SetWindowText ("");
-			
-			//hide second slider
-			m_slider.ShowWindow (SW_HIDE);
-			//select appropriate push radio button
-			if (bcurrentview)
-				((CButton*)GetDlgItem(IDC_VIEW_CONNECTIONS))->SetCheck(1);
-			else
-				((CButton*)GetDlgItem(IDC_VIEW_SCOPE))->SetCheck(1);
+			m_lblspeed.SetWindowText ("Refresh:");
+			m_lblsize.SetWindowText ("");
+			Inval = false;
+			scope_offset = 1;
+
+
+
+			hold = false;
+			clip = false;
+
+			std::memset(pSamplesL,0,sizeof(pSamplesL));
+			std::memset(pSamplesR,0,sizeof(pSamplesR));
+
+
+			SetMode();
+
 			
 			// get values for connections - NEED TO BE MODIFIED TO WORK WITH "GetNumINputs()" etc
 			numIns = 16; 
@@ -132,30 +177,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//set up inputs - later, this will have to be modified to make it match up stereo pairs (if available) by default.
 			for (int i = 0; i < numIns; i++)
 			{
-				ins_node_used.push_back (0);
+				ins_node_used.push_back(0);
 			}
 			for (int i = 0; i < numOuts; i++)
 			{
-				outs_node_used.push_back (0);
+				outs_node_used.push_back(0);
 			}
-			
-
-			//channel names.
-			
-			//determine graphics parameters for connections view
-			conn_grapharea.left = 4;
-			conn_grapharea.right = conn_grapharea.left + 256;
-			conn_grapharea.top = 32;
-			conn_grapharea.bottom = conn_grapharea.top + 200;
 			
 			conn_ins_spacing = 200 / numIns;
 			conn_outs_spacing = 200 / numOuts;
 			
 			conn_sel_in = -1;  conn_sel_out = -1;  //no points are to be selected.
 			
-			
-
-
 			return true;
 		}
 
@@ -184,12 +217,191 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			delete this;
 		}
 
-		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CWireDlg::OnBnClickedViewScope()
+		{
+			if (((CButton*)GetDlgItem(IDC_VIEW_SCOPE))->GetCheck ())
+			{
+				//button is down
+				m_lblspeed.ShowWindow (SW_SHOW);
+				m_lblsize.ShowWindow (SW_SHOW);
+				m_slspeed.ShowWindow (SW_SHOW);
+				m_slsize.ShowWindow (SW_SHOW);
+				m_mode.ShowWindow (SW_SHOW);
+				((CButton*)GetDlgItem(IDC_SCOPE_HOLD))->ShowWindow (SW_SHOW);
+				Invalidate();
+				SetMode();
+			}
+
+		}
+
+		void CWireDlg::OnBnClickedViewConnections()
+		{
+			if (((CButton*)GetDlgItem(IDC_VIEW_CONNECTIONS))->GetCheck ())
+			{
+				//button is down
+				KillTimer(2304+this_index);
+				//hide dlg items
+				m_lblspeed.ShowWindow (SW_HIDE);
+				m_lblsize.ShowWindow (SW_HIDE);
+				m_slspeed.ShowWindow (SW_HIDE);
+				m_slsize.ShowWindow (SW_HIDE);
+				m_mode.ShowWindow (SW_HIDE);
+				((CButton*)GetDlgItem(IDC_SCOPE_HOLD))->ShowWindow (SW_HIDE);
+				// link to function to draw points for machine connections
+				DrawPoints();
+			}
+		}
+
+
+		void CWireDlg::OnDelete() 
+		{
+			m_pParent->AddMacViewUndo();
+			Inval = true;
+			_pSrcMachine->_connection[wireIndex] = false;
+			_pSrcMachine->_outputMachines[wireIndex]=-1;
+			_pSrcMachine->_connectedOutputs--;
+			
+			_pDstMachine->_inputCon[_dstWireIndex] = false;
+			_pDstMachine->_inputMachines[_dstWireIndex]=-1;
+			_pDstMachine->_connectedInputs--;
+			OnCancel();
+		}
+
+
+		void CWireDlg::OnCustomdrawSlspeed(NMHDR* pNMHDR, LRESULT* pResult) 
+		{
+			switch (scope_mode)
+			{
+			case 0:
+				if (scope_peak_rate != m_slspeed.GetPos())
+				{
+					scope_peak_rate = m_slspeed.GetPos();
+					KillTimer(2304+this_index);
+					SetTimer(2304+this_index,scope_peak_rate,0);
+				}
+				break;
+			case 1:
+				if (hold)
+				{
+					scope_offset = m_slspeed.GetPos()&(SCOPE_BUF_SIZE-1);
+				}
+				else
+				{
+					scope_offset = 1;
+					if (scope_osc_rate != m_slspeed.GetPos())
+					{
+						scope_osc_rate = m_slspeed.GetPos();
+						KillTimer(2304+this_index);
+						SetTimer(2304+this_index,scope_osc_rate,0);
+					}
+				}
+				break;
+			case 2:
+				if (scope_spec_rate != m_slspeed.GetPos())
+				{
+					scope_spec_rate = m_slspeed.GetPos();
+					KillTimer(2304+this_index);
+					SetTimer(2304+this_index,scope_spec_rate,0);
+				}
+				break;
+			case 3:
+				if (scope_phase_rate != m_slspeed.GetPos())
+				{
+					scope_phase_rate = m_slspeed.GetPos();
+					KillTimer(2304+this_index);
+					SetTimer(2304+this_index,scope_phase_rate,0);
+				}
+				break;
+			}
+		//	m_pParent->SetFocus();	
+			*pResult = 0;
+		}
+
+		void CWireDlg::OnCustomdrawSlsize(NMHDR* pNMHDR, LRESULT* pResult) 
+		{
+			switch (scope_mode)
+			{
+			case 1:
+				scope_osc_freq = m_slsize.GetPos();
+				if (hold)
+				{
+					m_slsize.SetRange(1,1+int(Global::configuration()._pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+				}
+				break;
+			case 2:
+				scope_spec_bands = m_slsize.GetPos();
+				break;
+			}
+		//	m_pParent->SetFocus();	
+			*pResult = 0;
+		}
+
+		void CWireDlg::OnMode()
+		{
+			scope_mode++;
+			if (scope_mode > 3)
+			{
+				scope_mode = 0;
+			}
+			//alter sliders/text
+			switch (scope_mode)
+			{
+			case 0:
+                m_lblsize.SetWindowText (""); m_slsize.ShowWindow (SW_HIDE);
+				break;
+			case 1:
+				m_lblsize.SetWindowText ("Frequency:"); m_slsize.ShowWindow (SW_SHOW);
+				break;
+			case 2:
+				m_lblsize.SetWindowText ("Bands:"); m_slsize.ShowWindow (SW_SHOW);
+				break;
+			case 3:
+				m_lblsize.SetWindowText (""); m_slsize.ShowWindow (SW_HIDE);
+				break;
+			}
+
+			SetMode();
+		//	m_pParent->SetFocus();	
+		}
+
+		void CWireDlg::OnHold()
+		{
+			hold = !hold;
+			scope_offset = 1;
+			switch (scope_mode)
+			{
+			case 1:
+				if (hold)
+				{
+					m_slspeed.SetRange(1,1+int(Global::configuration()._pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_slspeed.SetPos(1);
+				}
+				else
+				{
+					scope_offset = 1;
+					m_slspeed.SetRange(10,100);
+					m_slspeed.SetPos(scope_osc_rate);
+				}
+			}
+			if (hold)
+			{
+				_pSrcMachine->_pScopeBufferL = NULL;
+				_pSrcMachine->_pScopeBufferR = NULL;
+			}
+			else
+			{
+				_pSrcMachine->_pScopeBufferL = pSamplesL;
+				_pSrcMachine->_pScopeBufferR = pSamplesR;
+			}
+		//	m_pParent->SetFocus();	
+		}
+
+		void CWireDlg::OnCustomdrawSlvolume(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			char bufper[32];
 			char bufdb[32];
-		//	invol = (128-m_volslider.GetPos())*0.0078125f;
-			invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
+		//	invol = (128-m_slvolume.GetPos())*0.0078125f;
+			invol = ((256*4-m_slvolume.GetPos())*(256*4-m_slvolume.GetPos()))/(16384.0f*4*4);
 
 			if (invol > 1.0f)
 			{	
@@ -212,8 +424,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				sprintf(bufdb,"-Inf. dB"); 
 			}
 
-			m_volabel_per.SetWindowText(bufper);
-			m_volabel_db.SetWindowText(bufdb);
+			m_btnper.SetWindowText(bufper);
+			m_btndb.SetWindowText(bufdb);
 
 			float f;
 			_pDstMachine->GetWireVolume(_dstWireIndex, f);
@@ -227,24 +439,266 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			*pResult = 0;
 		}
 
-		void CWireDlg::OnButton1() 
+		void CWireDlg::OnVolumeDb() 
 		{
-			m_pParent->AddMacViewUndo();
-			Inval = true;
-			_pSrcMachine->_connection[wireIndex] = false;
-			_pSrcMachine->_outputMachines[wireIndex]=-1;
-			_pSrcMachine->_connectedOutputs--;
-			
-			_pDstMachine->_inputCon[_dstWireIndex] = false;
-			_pDstMachine->_inputMachines[_dstWireIndex]=-1;
-			_pDstMachine->_connectedInputs--;
+			CVolumeDlg dlg;
+			dlg.volume = invol;
+			dlg.edit_type = 0;
+			if (dlg.DoModal() == IDOK)
+			{
+				m_pParent->AddMacViewUndo();
 
+				// update from dialog
+				int t = (int)sqrtf(dlg.volume*16384*4*4);
+				m_slvolume.SetPos(256*4-t);
+			}
+		}
 
-			OnCancel();
+		void CWireDlg::OnVolumePer() 
+		{
+			CVolumeDlg dlg;
+			dlg.volume = invol;
+			dlg.edit_type = 1;
+			if (dlg.DoModal() == IDOK)
+			{
+				m_pParent->AddMacViewUndo();
+				// update from dialog
+				int t = (int)sqrtf(dlg.volume*16384*4*4);
+				m_slvolume.SetPos(256*4-t);
+			}
 		}
 
 
 
+
+		void CWireDlg::OnLButtonDown(UINT nFlags, CPoint point)
+		{
+			GraphClicked(0, point);
+			CDialog::OnLButtonDown(nFlags, point);
+		}
+
+		void CWireDlg::OnRButtonDown(UINT nFlags, CPoint point)
+		{
+			GraphClicked(1, point);			
+			CDialog::OnRButtonDown(nFlags, point);
+		}
+
+		void CWireDlg::OnSizing(UINT fwSide, LPRECT pRect)
+		{
+			CDialog::OnSizing(fwSide, pRect);
+
+			//rescope_offsetition controls
+
+
+			//set drawing vars to account for resizing
+		}
+		void CWireDlg::OnPaint()
+		{
+			CPaintDC dc(this); // device context for painting
+			// TODO: Add your message handler code here
+			// Do not call CDialog::OnPaint() for painting messages
+			if (bcurrentview) { DrawPoints(); }
+		}
+		
+		void CWireDlg::SetMode()
+		{
+			CClientDC dc(this);
+
+			CDC bufDC;
+			bufDC.CreateCompatibleDC(&dc);
+			CBitmap* oldbmp;
+			oldbmp = bufDC.SelectObject(clearBM);
+
+			bufDC.FillSolidRect(0,0,rc.right-rc.left,rc.bottom-rc.top,0);
+
+			linepenL.DeleteObject();
+			linepenR.DeleteObject();
+			linepenbL.DeleteObject();
+			linepenbR.DeleteObject();
+
+			char buf[64];
+			switch (scope_mode)
+			{
+			case 0:
+				// vu
+				KillTimer(2304+this_index);
+
+				{
+					CFont* oldFont= bufDC.SelectObject(&font);
+					bufDC.SetBkMode(TRANSPARENT);
+					bufDC.SetTextColor(0x606060);
+
+					RECT rect;
+
+					rect.left = 32+24;
+					rect.right = 256-32-24;
+					rect.top = 32-8;
+					rect.bottom = rect.top+1;
+					bufDC.FillSolidRect(&rect,0x00606060);
+					sprintf(buf,"+6 db");
+					bufDC.TextOut(32-1, 32-8-6, buf);
+					bufDC.TextOut(256-32-22, 32-8-6, buf);
+
+					rect.top = 32+44;
+					rect.bottom = rect.top+1;
+					bufDC.FillSolidRect(&rect,0x00606060);
+
+					sprintf(buf,"-6 db");
+					bufDC.TextOut(32-1+4, 32+44-6, buf);
+					bufDC.TextOut(256-32-22, 32+44-6, buf);
+
+					rect.top = 32+44+16;
+					rect.bottom = rect.top+1;
+					bufDC.FillSolidRect(&rect,0x00606060);
+					sprintf(buf,"-12 db");
+					bufDC.TextOut(32-1-6+4, 32+44+16-6, buf);
+					bufDC.TextOut(256-32-22, 32+44+16-6, buf);
+
+					rect.top = 32+44+16+18;
+					rect.bottom = rect.top+1;
+					bufDC.FillSolidRect(&rect,0x00606060);
+					sprintf(buf,"-24 db");
+					bufDC.TextOut(32-1-6+4, 32+44+16+18-6, buf);
+					bufDC.TextOut(256-32-22, 32+44+16+18-6, buf);
+
+					rect.top = 32+23;
+					rect.bottom = rect.top+1;
+					bufDC.SetTextColor(0x00707070);
+					bufDC.FillSolidRect(&rect,0x00707070);
+					sprintf(buf,"0 db");
+					bufDC.TextOut(32-1+6, 32+23-6, buf);
+					bufDC.TextOut(256-32-22, 32+23-6, buf);
+
+					bufDC.SelectObject(oldFont);
+				}
+
+				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
+				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
+				m_slspeed.SetRange(10,100);
+				m_slspeed.SetPos(scope_peak_rate);
+				sprintf(buf,"Scope Mode");
+				peakL = peakR = peak2L = peak2R = 0.0f;
+				_pSrcMachine->_pScopeBufferL = pSamplesL;
+				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				SetTimer(2304+this_index,scope_peak_rate,0);
+				break;
+			case 1:
+				// oscilloscope
+				KillTimer(2304+this_index);
+
+				{
+					// now draw our scope
+
+					RECT rect;
+
+					rect.left = 0;
+					rect.right = 256;
+					rect.top = 32;
+					rect.bottom = rect.top+2;
+
+					bufDC.FillSolidRect(&rect,0x00202020);
+
+					rect.top = 95;
+					rect.bottom = rect.top+2;
+					bufDC.FillSolidRect(&rect,0x00202020);
+
+					rect.top = 64-4;
+					rect.bottom = rect.top+8;
+					bufDC.FillSolidRect(&rect,0x00202020);
+
+					rect.top = 64-2;
+					rect.bottom = rect.top+4;
+					bufDC.FillSolidRect(&rect,0x00404040);
+				}
+				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
+				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
+
+				m_slsize.SetRange(5, 100);
+				m_slsize.SetPos(scope_osc_freq);
+				scope_offset = 1;
+				m_slspeed.SetRange(10,100);
+				m_slspeed.SetPos(scope_osc_rate);
+				sprintf(buf,"Oscilloscope");
+				_pSrcMachine->_pScopeBufferL = pSamplesL;
+				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				SetTimer(2304+this_index,scope_osc_rate,0);
+				break;
+			case 2:
+				// spectrum analyzer
+				KillTimer(2304+this_index);
+				{
+					for (int i = 0; i < MAX_SCOPE_BANDS; i++)
+					{
+						bar_heightsl[i]=128;
+						bar_heightsr[i]=128;
+					}
+				}
+				m_slsize.SetRange(4, MAX_SCOPE_BANDS);
+				m_slsize.SetPos(scope_spec_bands);
+				m_slspeed.SetRange(10,100);
+				m_slspeed.SetPos(scope_spec_rate);
+				sprintf(buf,"Spectrum Analyzer");
+				_pSrcMachine->_pScopeBufferL = pSamplesL;
+				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				SetTimer(2304+this_index,scope_osc_rate,0);
+				break;
+			case 3:
+				// phase
+				KillTimer(2304+this_index);
+				{
+					CPen linepen(PS_SOLID, 8, 0x00303030);
+
+					CPen *oldpen = bufDC.SelectObject(&linepen);
+
+					// now draw our scope
+
+					bufDC.MoveTo(32,32);
+					bufDC.LineTo(128,128);
+					bufDC.LineTo(128,0);
+					bufDC.MoveTo(128,128);
+					bufDC.LineTo(256-32,32);
+					bufDC.Arc(0,0,256,256,256,128,0,128);
+					bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
+
+					bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
+
+					linepen.DeleteObject();
+					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
+					bufDC.SelectObject(&linepen);
+					bufDC.MoveTo(32,32);
+					bufDC.LineTo(128,128);
+					bufDC.LineTo(128,0);
+					bufDC.MoveTo(128,128);
+					bufDC.LineTo(256-32,32);
+					linepen.DeleteObject();
+
+					bufDC.SelectObject(oldpen);
+				}
+				linepenbL.CreatePen(PS_SOLID, 5, 0x806060);
+				linepenbR.CreatePen(PS_SOLID, 5, 0x608060);
+				linepenL.CreatePen(PS_SOLID, 3, 0xc08080);
+				linepenR.CreatePen(PS_SOLID, 3, 0x80c080);
+
+				_pSrcMachine->_pScopeBufferL = pSamplesL;
+				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				sprintf(buf,"Stereo Phase");
+				o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
+				m_slspeed.SetRange(10,100);
+				m_slspeed.SetPos(scope_phase_rate);
+				SetTimer(2304+this_index,scope_phase_rate,0);
+				break;
+			default:
+				sprintf(buf,"Scope Mode");
+				break;
+			}
+			m_mode.SetWindowText(buf);
+			hold = false;
+			scope_offset = 1;
+
+			bufDC.SelectObject(oldbmp);
+			bufDC.DeleteDC();
+
+		}
 		inline int CWireDlg::GetY(float f)
 		{
 			f*=(64.0f/32768.0f);
@@ -261,7 +715,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			return int(f);
 		}
-
 		void CWireDlg::OnTimer(UINT nIDEvent) 
 		{
 			if ( nIDEvent == 2304+this_index )
@@ -476,7 +929,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 						float add = (float(Global::configuration()._pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
-						float n = float(_pSrcMachine->_scopeBufferIndex-pos);
+						float n = float(_pSrcMachine->_scopeBufferIndex-scope_offset);
 						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
@@ -485,7 +938,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 						bufDC.SelectObject(&linepenR);
 
-						n = float(_pSrcMachine->_scopeBufferIndex-pos);
+						n = float(_pSrcMachine->_scopeBufferIndex-scope_offset);
 						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
@@ -905,444 +1358,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnTimer(nIDEvent);
 		}
 
-		void CWireDlg::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			switch (scope_mode)
-			{
-			case 1:
-				scope_osc_freq = m_slider.GetPos();
-				if (hold)
-				{
-					m_slider2.SetRange(1,1+int(Global::configuration()._pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
-				}
-				break;
-			case 2:
-				scope_spec_bands = m_slider.GetPos();
-				break;
-			}
-		//	m_pParent->SetFocus();	
-			*pResult = 0;
-		}
-
-		void CWireDlg::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			switch (scope_mode)
-			{
-			case 0:
-				if (scope_peak_rate != m_slider2.GetPos())
-				{
-					scope_peak_rate = m_slider2.GetPos();
-					KillTimer(2304+this_index);
-					SetTimer(2304+this_index,scope_peak_rate,0);
-				}
-				break;
-			case 1:
-				if (hold)
-				{
-					pos = m_slider2.GetPos()&(SCOPE_BUF_SIZE-1);
-				}
-				else
-				{
-					pos = 1;
-					if (scope_osc_rate != m_slider2.GetPos())
-					{
-						scope_osc_rate = m_slider2.GetPos();
-						KillTimer(2304+this_index);
-						SetTimer(2304+this_index,scope_osc_rate,0);
-					}
-				}
-				break;
-			case 2:
-				if (scope_spec_rate != m_slider2.GetPos())
-				{
-					scope_spec_rate = m_slider2.GetPos();
-					KillTimer(2304+this_index);
-					SetTimer(2304+this_index,scope_spec_rate,0);
-				}
-				break;
-			case 3:
-				if (scope_phase_rate != m_slider2.GetPos())
-				{
-					scope_phase_rate = m_slider2.GetPos();
-					KillTimer(2304+this_index);
-					SetTimer(2304+this_index,scope_phase_rate,0);
-				}
-				break;
-			}
-		//	m_pParent->SetFocus();	
-			*pResult = 0;
-		}
-
-		void CWireDlg::OnMode()
-		{
-			scope_mode++;
-			if (scope_mode > 3)
-			{
-				scope_mode = 0;
-			}
-			//alter sliders/text
-			switch (scope_mode)
-			{
-			case 0:
-                m_param2.SetWindowText (""); m_slider.ShowWindow (SW_HIDE);
-				break;
-			case 1:
-				m_param2.SetWindowText ("Frequency:"); m_slider.ShowWindow (SW_SHOW);
-				break;
-			case 2:
-				m_param2.SetWindowText ("Bands:"); m_slider.ShowWindow (SW_SHOW);
-				break;
-			case 3:
-				m_param2.SetWindowText (""); m_slider.ShowWindow (SW_HIDE);
-				break;
-			}
-
-			SetMode();
-		//	m_pParent->SetFocus();	
-		}
-
-		void CWireDlg::OnHold()
-		{
-			hold = !hold;
-			pos = 1;
-			switch (scope_mode)
-			{
-			case 1:
-				if (hold)
-				{
-					m_slider2.SetRange(1,1+int(Global::configuration()._pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
-					m_slider2.SetPos(1);
-				}
-				else
-				{
-					pos = 1;
-					m_slider2.SetRange(10,100);
-					m_slider2.SetPos(scope_osc_rate);
-				}
-			}
-			if (hold)
-			{
-				_pSrcMachine->_pScopeBufferL = NULL;
-				_pSrcMachine->_pScopeBufferR = NULL;
-			}
-			else
-			{
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
-			}
-		//	m_pParent->SetFocus();	
-		}
-
-		void CWireDlg::SetMode()
-		{
-			CClientDC dc(this);
-
-			CDC bufDC;
-			bufDC.CreateCompatibleDC(&dc);
-			CBitmap* oldbmp;
-			oldbmp = bufDC.SelectObject(clearBM);
-
-			bufDC.FillSolidRect(0,0,rc.right-rc.left,rc.bottom-rc.top,0);
-
-			linepenL.DeleteObject();
-			linepenR.DeleteObject();
-			linepenbL.DeleteObject();
-			linepenbR.DeleteObject();
-
-			char buf[64];
-			switch (scope_mode)
-			{
-			case 0:
-				// vu
-				KillTimer(2304+this_index);
-
-				{
-					CFont* oldFont= bufDC.SelectObject(&font);
-					bufDC.SetBkMode(TRANSPARENT);
-					bufDC.SetTextColor(0x606060);
-
-					RECT rect;
-
-					rect.left = 32+24;
-					rect.right = 256-32-24;
-					rect.top = 32-8;
-					rect.bottom = rect.top+1;
-					bufDC.FillSolidRect(&rect,0x00606060);
-					sprintf(buf,"+6 db");
-					bufDC.TextOut(32-1, 32-8-6, buf);
-					bufDC.TextOut(256-32-22, 32-8-6, buf);
-
-					rect.top = 32+44;
-					rect.bottom = rect.top+1;
-					bufDC.FillSolidRect(&rect,0x00606060);
-
-					sprintf(buf,"-6 db");
-					bufDC.TextOut(32-1+4, 32+44-6, buf);
-					bufDC.TextOut(256-32-22, 32+44-6, buf);
-
-					rect.top = 32+44+16;
-					rect.bottom = rect.top+1;
-					bufDC.FillSolidRect(&rect,0x00606060);
-					sprintf(buf,"-12 db");
-					bufDC.TextOut(32-1-6+4, 32+44+16-6, buf);
-					bufDC.TextOut(256-32-22, 32+44+16-6, buf);
-
-					rect.top = 32+44+16+18;
-					rect.bottom = rect.top+1;
-					bufDC.FillSolidRect(&rect,0x00606060);
-					sprintf(buf,"-24 db");
-					bufDC.TextOut(32-1-6+4, 32+44+16+18-6, buf);
-					bufDC.TextOut(256-32-22, 32+44+16+18-6, buf);
-
-					rect.top = 32+23;
-					rect.bottom = rect.top+1;
-					bufDC.SetTextColor(0x00707070);
-					bufDC.FillSolidRect(&rect,0x00707070);
-					sprintf(buf,"0 db");
-					bufDC.TextOut(32-1+6, 32+23-6, buf);
-					bufDC.TextOut(256-32-22, 32+23-6, buf);
-
-					bufDC.SelectObject(oldFont);
-				}
-
-				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
-				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_peak_rate);
-				sprintf(buf,"Scope Mode");
-				peakL = peakR = peak2L = peak2R = 0.0f;
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
-				SetTimer(2304+this_index,scope_peak_rate,0);
-				break;
-			case 1:
-				// oscilloscope
-				KillTimer(2304+this_index);
-
-				{
-					// now draw our scope
-
-					RECT rect;
-
-					rect.left = 0;
-					rect.right = 256;
-					rect.top = 32;
-					rect.bottom = rect.top+2;
-
-					bufDC.FillSolidRect(&rect,0x00202020);
-
-					rect.top = 95;
-					rect.bottom = rect.top+2;
-					bufDC.FillSolidRect(&rect,0x00202020);
-
-					rect.top = 64-4;
-					rect.bottom = rect.top+8;
-					bufDC.FillSolidRect(&rect,0x00202020);
-
-					rect.top = 64-2;
-					rect.bottom = rect.top+4;
-					bufDC.FillSolidRect(&rect,0x00404040);
-				}
-				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
-				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
-
-				m_slider.SetRange(5, 100);
-				m_slider.SetPos(scope_osc_freq);
-				pos = 1;
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_osc_rate);
-				sprintf(buf,"Oscilloscope");
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
-				SetTimer(2304+this_index,scope_osc_rate,0);
-				break;
-			case 2:
-				// spectrum analyzer
-				KillTimer(2304+this_index);
-				{
-					for (int i = 0; i < MAX_SCOPE_BANDS; i++)
-					{
-						bar_heightsl[i]=128;
-						bar_heightsr[i]=128;
-					}
-				}
-				m_slider.SetRange(4, MAX_SCOPE_BANDS);
-				m_slider.SetPos(scope_spec_bands);
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_spec_rate);
-				sprintf(buf,"Spectrum Analyzer");
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
-				SetTimer(2304+this_index,scope_osc_rate,0);
-				break;
-			case 3:
-				// phase
-				KillTimer(2304+this_index);
-				{
-					CPen linepen(PS_SOLID, 8, 0x00303030);
-
-					CPen *oldpen = bufDC.SelectObject(&linepen);
-
-					// now draw our scope
-
-					bufDC.MoveTo(32,32);
-					bufDC.LineTo(128,128);
-					bufDC.LineTo(128,0);
-					bufDC.MoveTo(128,128);
-					bufDC.LineTo(256-32,32);
-					bufDC.Arc(0,0,256,256,256,128,0,128);
-					bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
-
-					bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
-
-					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
-					bufDC.SelectObject(&linepen);
-					bufDC.MoveTo(32,32);
-					bufDC.LineTo(128,128);
-					bufDC.LineTo(128,0);
-					bufDC.MoveTo(128,128);
-					bufDC.LineTo(256-32,32);
-					linepen.DeleteObject();
-
-					bufDC.SelectObject(oldpen);
-				}
-				linepenbL.CreatePen(PS_SOLID, 5, 0x806060);
-				linepenbR.CreatePen(PS_SOLID, 5, 0x608060);
-				linepenL.CreatePen(PS_SOLID, 3, 0xc08080);
-				linepenR.CreatePen(PS_SOLID, 3, 0x80c080);
-
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
-				sprintf(buf,"Stereo Phase");
-				o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_phase_rate);
-				SetTimer(2304+this_index,scope_phase_rate,0);
-				break;
-			default:
-				sprintf(buf,"Scope Mode");
-				break;
-			}
-			m_mode.SetWindowText(buf);
-			hold = false;
-			pos = 1;
-
-			bufDC.SelectObject(oldbmp);
-			bufDC.DeleteDC();
-
-		}
 
 
-		BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
-		{
-			/*
-			if (pMsg->message == WM_KEYDOWN)
-			{
-				if (pMsg->wParam == VK_UP)
-				{
-					int v = m_volslider.GetPos();
-					v--;
-					if (v < 0)
-					{
-						v = 0;
-					}
-					m_volslider.SetPos(v);
-					return true;
-				}
-				else if (pMsg->wParam == VK_DOWN)
-				{
-					int v = m_volslider.GetPos();
-					v++;
-					if (v > 256*4)
-					{
-						v = 256*4;
-					}
-					m_volslider.SetPos(v);
-					return true;
-				}
-				else
-				{
-					m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-				}
-			}
-			else if (pMsg->message == WM_KEYUP)
-			{
-				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-			}
-			*/
-			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
-			{
-				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-			}
-			return CDialog::PreTranslateMessage(pMsg);
-		}
 
 
-		void CWireDlg::OnVolumeDb() 
-		{
-			CVolumeDlg dlg;
-			dlg.volume = invol;
-			dlg.edit_type = 0;
-			if (dlg.DoModal() == IDOK)
-			{
-				m_pParent->AddMacViewUndo();
 
-				// update from dialog
-				int t = (int)sqrtf(dlg.volume*16384*4*4);
-				m_volslider.SetPos(256*4-t);
-			}
-		}
-
-		void CWireDlg::OnVolumePer() 
-		{
-			CVolumeDlg dlg;
-			dlg.volume = invol;
-			dlg.edit_type = 1;
-			if (dlg.DoModal() == IDOK)
-			{
-				m_pParent->AddMacViewUndo();
-				// update from dialog
-				int t = (int)sqrtf(dlg.volume*16384*4*4);
-				m_volslider.SetPos(256*4-t);
-			}
-		}
-		void CWireDlg::OnBnClickedViewScope()
-		{
-			if (((CButton*)GetDlgItem(IDC_VIEW_SCOPE))->GetCheck ())
-			{
-				//button is down
-				m_param1.ShowWindow (SW_SHOW);
-				m_param2.ShowWindow (SW_SHOW);
-				m_slider.ShowWindow (SW_SHOW);
-				m_slider2.ShowWindow (SW_SHOW);
-				m_mode.ShowWindow (SW_SHOW);
-				((CButton*)GetDlgItem(IDC_SCOPE_HOLD))->ShowWindow (SW_SHOW);
-				Invalidate();
-				SetMode();
-			}
-
-		}
-
-		void CWireDlg::OnBnClickedViewConnections()
-		{
-			if (((CButton*)GetDlgItem(IDC_VIEW_CONNECTIONS))->GetCheck ())
-			{
-				//button is down
-				KillTimer(2304+this_index);
-				//hide dlg items
-				m_param1.ShowWindow (SW_HIDE);
-				m_param2.ShowWindow (SW_HIDE);
-				m_slider.ShowWindow (SW_HIDE);
-				m_slider2.ShowWindow (SW_HIDE);
-				m_mode.ShowWindow (SW_HIDE);
-				((CButton*)GetDlgItem(IDC_SCOPE_HOLD))->ShowWindow (SW_HIDE);
-				// link to function to draw points for machine connections
-				DrawPoints();
-
-			}
-
-		}
 
 		void CWireDlg::DrawPoints()
 		{
@@ -1422,18 +1442,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			
 
-		}
-
-		void CWireDlg::OnLButtonDown(UINT nFlags, CPoint point)
-		{
-			GraphClicked(0, point);
-			CDialog::OnLButtonDown(nFlags, point);
-		}
-
-		void CWireDlg::OnRButtonDown(UINT nFlags, CPoint point)
-		{
-			GraphClicked(1, point);			
-			CDialog::OnRButtonDown(nFlags, point);
 		}
 
 		void CWireDlg::GraphClicked (bool bSelType, CPoint point)
@@ -1549,8 +1557,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						conn_sel_out = -1;//conn_sel_in = -1;
 					}
 				}
-				bSelectionType = bSelType;
 				bLastSelectionType = bSelectionType;
+				bSelectionType = bSelType;
 				
 			}
 			//bLastSelectionType = bSelectionType;
@@ -1584,22 +1592,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			return rect;
 		}
 
-		void CWireDlg::OnPaint()
-		{
-			CPaintDC dc(this); // device context for painting
-			// TODO: Add your message handler code here
-			// Do not call CDialog::OnPaint() for painting messages
-			if (bcurrentview) { DrawPoints(); }
-		}
-		void CWireDlg::OnSizing(UINT fwSide, LPRECT pRect)
-		{
-			CDialog::OnSizing(fwSide, pRect);
-
-			//reposition controls
-
-
-			//set drawing vars to account for resizing
-		}
 
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END
