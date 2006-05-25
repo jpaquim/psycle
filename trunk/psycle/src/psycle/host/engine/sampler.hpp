@@ -101,7 +101,7 @@ namespace psycle
 			virtual void Stop();
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual std::string GetName() const { return _psName; }
-			virtual bool Load(RiffFile* pFile);
+			virtual bool LoadOldFileFormat(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
 				std::uint32_t size;

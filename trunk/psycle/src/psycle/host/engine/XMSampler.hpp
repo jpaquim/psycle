@@ -956,7 +956,7 @@ XMSampler::Channel::PerformFX().
 	virtual std::string GetName() const { return _psName; };
 	virtual void SetSampleRate(int sr);
 
-	virtual bool Load(RiffFile& riffFile);
+	virtual bool LoadOldFileFormat(RiffFile& riffFile);
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
 	virtual void SaveSpecificChunk(RiffFile* riffFile);
 

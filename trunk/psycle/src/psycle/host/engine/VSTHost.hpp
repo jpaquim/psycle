@@ -331,7 +331,7 @@ namespace psycle
 				///\name (de)serialization
 				///\{
 					public:
-						virtual bool Load(RiffFile * pFile);
+						virtual bool LoadOldFileFormat(RiffFile * pFile);
 						/// Loader for old psycle fileformat.
 						bool LoadChunkOldFileFormat(RiffFile* pFile);
 						virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
