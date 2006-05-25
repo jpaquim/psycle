@@ -86,7 +86,7 @@ if True:
 	# boost	thread
 	boost_thread = packageneric.external_package(
 		debian = 'libboost-thread-dev',
-		debian_version_compare = boost.debian_version_compare
+		debian_version_compare = boost.debian_version_compare()
 	)
 	boost_thread.show()
 	packageneric.check_header_and_library(boost_thread, 'boost/thread/thread.hpp', 'boost_thread')
@@ -97,8 +97,8 @@ if True:
 if True:
 	universalis = packageneric.module(
 		name = 'lib-universalis-' + str(Version.major),
-		version = source_package.version,
-		description = source_package.description,
+		version = source_package.version(),
+		description = source_package.description(),
 		public_requires = [diversalis, glibmm, boost]
 	)
 	import os.path
@@ -121,8 +121,8 @@ if True:
 # install
 if False:
 	install = packageneric.InstallPrefix(packageneric)
-	packageneric.environment().Install(install.lib, universalis.get_libs())
-	packageneric.environment().Install(install.include, universalis.get_headers())
+	packageneric.environment().Install(install.lib(), universalis.libraries())
+	packageneric.environment().Install(install.include(), universalis.headers())
 	packageneric.environment().Alias('install', install.prefix)
 
 # debian packages
