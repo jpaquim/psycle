@@ -7,7 +7,7 @@
 # init
 
 import packageneric
-packageneric = packageneric.Packageneric(Help, Configure)
+packageneric = packageneric.Packageneric(ARGUMENTS, Help, Configure)
 
 # source package
 
@@ -101,16 +101,24 @@ if True:
 
 # modules	
 if True:
-	universalis = packageneric.Module(
-		packageneric,
+	universalis = packageneric.module(
 		name = 'lib-universalis-' + str(Version.major),
 		version = source_package.version,
 		description = source_package.description,
 		public_requires = [diversalis, glibmm, boost]
 	)
-	universalis.add_sources(packageneric.Find('src', 'universalis', '*.cpp'))
+	import os.path
+	universalis.add_sources(packageneric.Find('.', os.path.join('src', 'universalis'), '*.cpp'))
 	universalis.add_headers(packageneric.Find('src', 'universalis', '*.hpp'))
+	universalis.add_include_path('src')
+	universalis.add_include_path('tmp')
 	universalis.show()
+if False:
+	packageneric.trace(str(universalis.get_sources()))
+	print
+	packageneric.trace(str(universalis.get_headers()))
+if True:
+	universalis.scons()
 
 # pkg-config packages
 if True:
@@ -127,13 +135,6 @@ if False:
 	packageneric.environment().Install(install.lib, universalis.get_libs())
 	packageneric.environment().Install(install.include, universalis.get_headers())
 	packageneric.environment().Alias('install', install.prefix)
-
-# stuff ...
-if True:
-	packageneric.trace(str(universalis.get_sources()))
-	packageneric.trace(str(universalis.get_headers()))
-if False:
-	universalis.scons()
 
 # debian packages
 if True:	
@@ -172,30 +173,3 @@ if True:
 	)
 	#print '======== debian/control'
 	#print debian.control()
-
-env = packageneric.environment().Copy()
-env.ParseConfig('pkg-config --cflags --libs diversalis')
-env.ParseConfig('pkg-config --cflags --libs glibmm-2.4')
-env.Append(CPPPATH = ['src', 'tmp'])
-env.Append(
-	CPPDEFINES = {
-		'PACKAGENERIC': '\\"/dev/null\\"',
-		'PACKAGENERIC__PACKAGE__NAME': '\\"test\\"',
-		'PACKAGENERIC__PACKAGE__VERSION': '\\"0\\"',
-		'PACKAGENERIC__PACKAGE__VERSION__MAJOR': '0',
-		'PACKAGENERIC__PACKAGE__VERSION__MINOR': '0',
-		'PACKAGENERIC__PACKAGE__VERSION__PATCH': '0',
-		'PACKAGENERIC__MODULE__NAME': '\\"test\\"',
-		'PACKAGENERIC__MODULE__VERSION': '\\"0\\"',
-		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_LIB': '\\"../lib\\"',
-		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE': '\\"../share\\"',
-		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR': '\\"../var\\"',
-		'PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC': '\\"../../etc\\"',
-		'PACKAGENERIC__CONFIGURATION__COMPILER__HOST': '\\"test\\"'
-	}
-)
-sources = []
-import os.path
-for x in universalis.get_sources():
-	sources.append(os.path.join('src', x))
-env.SharedLibrary('scons', sources)
