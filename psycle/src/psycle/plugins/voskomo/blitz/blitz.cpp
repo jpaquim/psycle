@@ -1500,7 +1500,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			track[c].PerformFx();
 			assert(xnumsamples);
 			do{
-				track[c].GetSample(&slr[0]);
+				track[c].GetSample(slr);
 				*++xpsamplesleft+=slr[0];
 				*++xpsamplesright+=slr[1];
 			}while(--xnumsamples);
