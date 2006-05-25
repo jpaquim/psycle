@@ -1498,6 +1498,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			--xpsamplesleft;
 			--xpsamplesright;
 			track[c].PerformFx();
+			assert(xnumsamples);
 			do{
 				track[c].GetSample(&slr[0]);
 				*++xpsamplesleft+=slr[0];
