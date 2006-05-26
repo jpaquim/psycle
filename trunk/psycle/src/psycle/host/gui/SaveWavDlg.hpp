@@ -24,6 +24,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CButton	m_savewires;
 			CButton	m_savegens;
 			CButton	m_savetracks;
+			CButton m_dither;
 			CEdit	m_rangestart;
 			CEdit	m_rangeend;
 			CProgressCtrl	m_progress;
@@ -34,6 +35,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CComboBox	m_rate;
 			CComboBox	m_bits;
 			CComboBox	m_channelmode;
+			CComboBox	m_pdf;
+			CComboBox	m_noiseshaping;
 			//}}AFX_DATA
 		// Overrides
 			// ClassWizard generated virtual function overrides
@@ -52,6 +55,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			static int rate;
 			static int bits;
 			static int channelmode;
+			static int ditherpdf;
+			static int noiseshape;
+
+			struct pdf
+			{
+				enum pdfs
+				{
+					triangular=0,
+					rectangular,
+					gaussian
+				};
+			};
 
 			int current;
 
@@ -68,6 +83,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			bool loopsong;
 			bool sel[MAX_SONG_POSITIONS];
 			bool saving;
+			bool dither;
 
 			void SaveWav(std::string file, int bits, int rate, int channelmode);
 			
@@ -83,9 +99,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSelchangeComboBits();
 			afx_msg void OnSelchangeComboChannels();
 			afx_msg void OnSelchangeComboRate();
+			afx_msg void OnSelchangeComboPdf();
+			afx_msg void OnSelchangeComboNoiseShaping();
 			afx_msg void OnSavetracksseparated();
 			afx_msg void OnSavewiresseparated();
 			afx_msg void OnSavegensseparated();
+			afx_msg void OnToggleDither();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};

@@ -22,6 +22,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		int CSaveWavDlg::channelmode = -1;
 		int CSaveWavDlg::rate = -1;
 		int CSaveWavDlg::bits = -1;
+		int CSaveWavDlg::noiseshape = 0;
+		int CSaveWavDlg::ditherpdf = (int)pdf::triangular;
 		BOOL CSaveWavDlg::savewires = false;
 		BOOL CSaveWavDlg::savetracks = false;
 		BOOL CSaveWavDlg::savegens = false;
@@ -51,6 +53,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_COMBO_BITS, m_bits);
 			DDX_Control(pDX, IDC_COMBO_CHANNELS, m_channelmode);
 			DDX_Control(pDX, IDC_TEXT, m_text);
+			DDX_Control(pDX, IDC_CHECK_DITHER, m_dither);
+			DDX_Control(pDX, IDC_COMBO_PDF, m_pdf);
+			DDX_Control(pDX, IDC_COMBO_NOISESHAPING, m_noiseshaping);
 			DDX_Radio(pDX, IDC_RECSONG, m_recmode);
 			//}}AFX_DATA_MAP
 		}
@@ -65,9 +70,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_CBN_SELCHANGE(IDC_COMBO_BITS, OnSelchangeComboBits)
 			ON_CBN_SELCHANGE(IDC_COMBO_CHANNELS, OnSelchangeComboChannels)
 			ON_CBN_SELCHANGE(IDC_COMBO_RATE, OnSelchangeComboRate)
+			ON_CBN_SELCHANGE(IDC_COMBO_PDF, OnSelchangeComboPdf)
+			ON_CBN_SELCHANGE(IDC_COMBO_NOISESHAPING, OnSelchangeComboNoiseShaping)
 			ON_BN_CLICKED(IDC_SAVETRACKSSEPARATED, OnSavetracksseparated)
 			ON_BN_CLICKED(IDC_SAVEWIRESSEPARATED, OnSavewiresseparated)
 			ON_BN_CLICKED(IDC_SAVEGENERATORSEPARATED, OnSavegensseparated)
+			ON_BN_CLICKED(IDC_CHECK_DITHER,	OnToggleDither)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
@@ -179,6 +187,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			m_channelmode.SetCurSel(channelmode);
 
+			m_dither.SetCheck(BST_CHECKED);
+
+			m_pdf.AddString("Triangular");
+			m_pdf.AddString("Rectangular");
+			m_pdf.AddString("Gaussian");
+			ditherpdf = (int)pdf::triangular;
+			m_pdf.SetCurSel(ditherpdf);
+
+			m_noiseshaping.AddString("None");
+			m_noiseshaping.AddString("High-Pass Contour");
+			noiseshape=0;
+			m_noiseshaping.SetCurSel(noiseshape);
+
 			m_savetracks.SetCheck(savetracks);
 			m_savegens.SetCheck(savegens);
 			m_savewires.SetCheck(savewires);
@@ -277,6 +298,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_rate.EnableWindow(false);
 			m_bits.EnableWindow(false);
 			m_channelmode.EnableWindow(false);
+			m_pdf.EnableWindow(false);
+			m_noiseshaping.EnableWindow(false);
 
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
@@ -451,7 +474,8 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 				m_text.SetWindowText(file.substr(pos+1).c_str());
 			}
 
-			pPlayer->StartRecording(file,bits,rate,channelmode);
+			pPlayer->StartRecording(file,bits,rate,channelmode,
+									m_dither.GetCheck()==BST_CHECKED, ditherpdf, noiseshape);
 
 			int tmp;
 			int cont;
@@ -716,6 +740,8 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			m_rate.EnableWindow(true);
 			m_bits.EnableWindow(true);
 			m_channelmode.EnableWindow(true);
+			m_pdf.EnableWindow(true);
+			m_noiseshaping.EnableWindow(true);
 
 			switch (m_recmode)
 			{
@@ -779,6 +805,19 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			rate = m_rate.GetCurSel();
 		}
 
+		void CSaveWavDlg::OnSelchangeComboPdf()
+		{
+			ditherpdf = m_pdf.GetCurSel();
+		}
+		void CSaveWavDlg::OnSelchangeComboNoiseShaping()
+		{
+			noiseshape = m_noiseshaping.GetCurSel();
+		}
+		void CSaveWavDlg::OnToggleDither()
+		{
+			m_noiseshaping.EnableWindow(m_dither.GetCheck());
+			m_pdf.EnableWindow(m_dither.GetCheck());
+		}
 		void CSaveWavDlg::OnSavetracksseparated() 
 		{
 			if (savetracks = m_savetracks.GetCheck())
