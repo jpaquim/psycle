@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -545,6 +545,8 @@ BEGIN
     LTEXT           "Static",IDC_SCOPE_PARAM_1,5,120,26,9
     CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS,41,133,97,12
+    CONTROL         "",IDC_MULTISCOPE,"Static",SS_OWNERDRAW | SS_NOTIFY | 
+                    SS_REALSIZEIMAGE | SS_SUNKEN,4,19,171,98
 END
 
 IDD_MACPROP DIALOGEX 0, 0, 190, 73
@@ -3210,7 +3212,7 @@ BEGIN
     ID_POPUP_ZOOMIN         "Zoom In"
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
