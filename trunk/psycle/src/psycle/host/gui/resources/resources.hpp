@@ -998,6 +998,7 @@
 #define IDC_VOLSLIDE                    1771
 #define IDC_COMBO_PDF                   1772
 #define IDC_CHECK_DITHER                1773
+#define IDC_MULTISCOPE                  1774
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1166,7 +1167,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        261
 #define _APS_NEXT_COMMAND_VALUE         33048
-#define _APS_NEXT_CONTROL_VALUE         1774
+#define _APS_NEXT_CONTROL_VALUE         1775
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
