@@ -7,20 +7,15 @@
 # init
 
 import packageneric
-packageneric = packageneric.Packageneric(ARGUMENTS, Help, Configure)
+packageneric = packageneric.packageneric(ARGUMENTS, Environment)
 
 # source package
 
-class Version:
-	major = 0
-	minor = 0
-	patch = 0
+bohan = packageneric.person('Johan Boule', 'bohan.debian.universalis@retropaganda.info')
 
-bohan = packageneric.Person('Johan Boule', 'bohan.debian.universalis@retropaganda.info')
-
-source_package = packageneric.SourcePackage(
+source_package = packageneric.source_package(
 	name = 'universalis',
-	version = [Version.major, Version.minor, Version.patch],
+	version = packageneric.version(0, 0),
 	description = 'universalis platform abstraction layer library',
 	long_description =
 '''\
@@ -36,83 +31,75 @@ Those abstractions of platforms specificities can be categorized into:
 # configure
 if True:
 	diversalis = packageneric.external_package(
-		pkg_config = 'diversalis',
-		pkg_config_version_compare = '>= 0',
-		debian = 'lib-diversalis-0-dev',
-		debian_version_compare = '>= 0'
+		pkg_config = 'diversalis >= 0',
+		debian = 'lib-diversalis-0-dev (>= 0)'
 	)
-	diversalis.show()
 
 	glibmm = packageneric.external_package(
-		pkg_config = 'glibmm-2.4',
-		pkg_config_version_compare = '>= 2.9',
-		debian = 'libglibmm-2.4-dev',
-		debian_version_compare = '>= 2.9',
+		pkg_config = 'glibmm-2.4 >= 2.4',
+		debian = 'libglibmm-2.4-dev (>= 2.4)',
 	)
-	glibmm.show()
-	#if glibmm.failed():
 
-	glibmm = packageneric.external_package(
-		pkg_config = 'glibmm-2.4',
-		pkg_config_version_compare = '>= 2.4',
-		debian = 'libglibmm-2.4-dev',
-		debian_version_compare = '>= 2.4',
-	)
-	glibmm.show()
-
-	# boost base	
+	# boost
+	boost_version_wanted = '1.33'
+	boost_version_wanted_raw = 103300
+	
+	# boost base
 	boost = packageneric.external_package(
-		debian = 'libboost-dev',
-		debian_version_compare = '>= 1.33'
+		debian = 'libboost-dev (>= ' + boost_version_wanted + ')',
+		headers = ['boost/version.hpp']
 	)
-	boost.show()
-	if True:
-		packageneric.check_header(boost, 'boost/version.hpp')
-		boost_result, boost_version = packageneric.try_run(
-			'boost version',
-			'''
-				#include <boost/version.hpp>
-				#include <iostream>
-				int main()
-				{
-					std::cout << BOOST_VERSION;
-				}
-			'''
-		)
-		print 'boost version', boost_version, boost_version >= 103300
-		if boost_version < str(103300):
-			print 'please install', boost.debian, boost.debian_version_compare
+	if not boost.found():
+		packageneric.error('please install ' + boost.debian())
+	run_result, boost_version_raw_found = boost.try_run(
+		'boost version >= ' + boost_version_wanted,
+		'''
+			#include <boost/version.hpp>
+			#include <iostream>
+			int main()
+			{
+				std::cout << BOOST_VERSION;
+				return !(BOOST_VERSION >= %i);
+			}
+		''' % boost_version_wanted_raw
+	)
+	if not run_result:
+		packageneric.error('failed to determine boost version')
+	packageneric.trace('boost version: ' + boost_version_raw_found)
+	if boost_version_raw_found < str(boost_version_wanted_raw):
+		packageneric.error('please install ' + boost.debian())
 
-	# boost	thread
-	boost_thread = packageneric.external_package(
-		debian = 'libboost-thread-dev',
-		debian_version_compare = boost.debian_version_compare()
+	# boost	libraries
+	boost_libraries = packageneric.external_package(
+		debian = 'libboost-thread-dev (>= ' + boost_version_wanted + '), libboost-filesystem-dev (>= ' + boost_version_wanted + ')',
+		headers = ['boost/thread/thread.hpp', 'boost/filesystem.hpp'],
+		libraries = ['boost_thread', 'boost_filesystem']
 	)
-	boost_thread.show()
-	packageneric.check_header_and_library(boost_thread, 'boost/thread/thread.hpp', 'boost_thread')
+	if not boost_libraries.found():
+		packageneric.error('please install ' + boost_libraries.debian())
 
 	packageneric.finish_configure()
 
 # modules	
 if True:
 	universalis = packageneric.module(
-		name = 'lib-universalis-' + str(Version.major),
+		name = 'lib-universalis-' + str(source_package.version().major()),
 		version = source_package.version(),
 		description = source_package.description(),
-		public_requires = [diversalis, glibmm, boost]
+		public_requires = [diversalis, glibmm, boost, boost_libraries]
 	)
 	import os.path
-	universalis.add_sources(packageneric.Find('.', os.path.join('src', 'universalis'), '*.cpp'))
-	universalis.add_headers(packageneric.Find('src', 'universalis', '*.hpp'))
+	universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp'))
+	universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
 	universalis.add_include_path('src')
 	universalis.add_include_path('tmp')
 	universalis.show()
-	universalis.scons()
+	universalis_library = universalis.targets()
 
 # pkg-config packages
 if True:
-	universalis_package = packageneric.PkgConfigPackage(
-		name = 'universalis-' + str(Version.major),
+	universalis_package = packageneric.pkg_config_package(
+		name = 'universalis-' + str(source_package.version().major()),
 		version = universalis.version(),
 		description = universalis.description(),
 		modules = [universalis]
@@ -120,34 +107,35 @@ if True:
 
 # install
 if False:
-	install = packageneric.InstallPrefix(packageneric)
-	packageneric.environment().Install(install.lib(), universalis.libraries())
-	packageneric.environment().Install(install.include(), universalis.headers())
-	packageneric.environment().Alias('install', install.prefix)
+	installation_paths = packageneric.installation_paths()
+	packageneric.environment().install('install', installation_paths.lib(), universalis.libraries())
+	packageneric.environment().install('install', installation_paths.include(), universalis.headers())
+	#packageneric.environment().alias('install', installation_paths.lib())
+	#packageneric.environment().alias('install', installation_paths.include())
 
 # debian packages
 if True:	
-	universalis_runtime = packageneric.DebianPackage(
-		name = 'lib-universalis-' + str(Version.major),
+	universalis_runtime = packageneric.debian_package(
+		name = 'lib-universalis-' + str(source_package.version().major()),
 		section = 'libs',
 		description = universalis_package.description(),
 		long_description = 'This package contains the runtime library.'
 	)
-	universalis_runtime.depends = universalis.public_requires()
+	universalis_runtime.add_depends(universalis.public_requires())
 	#universalis_runtime.files.append(universalis_package.binaries())
 	
-	universalis_dev = packageneric.DebianPackage(
+	universalis_dev = packageneric.debian_package(
 		name = universalis_runtime.name() + '-dev',
 		section = 'libdevel',
 		description = universalis_package.description(),
 		long_description = 'This package contains the development files.',
 	)
-	universalis_dev.depends = universalis.public_requires()
+	universalis_dev.add_depends(universalis.public_requires())
 	#universalis_dev.files.append(universalis_package.headers())
 	#universalis_dev.files.append(universalis_package.libraries())
 	#universalis_dev.files.append(universalis_package.pkg_configs())
 	
-	universalis_doc = packageneric.DebianPackage(
+	universalis_doc = packageneric.debian_package(
 		name = universalis_runtime.name() + '-doc',
 		section = 'doc',
 		architecture = 'all',
@@ -155,10 +143,10 @@ if True:
 		long_description = 'This package contains the documentation.'
 	)
 	
-	debian = packageneric.Debian(
+	debian = packageneric.debian(
 		source_package = source_package,
 		maintainer = bohan,
 		binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
 	)
-	#print '======== debian/control'
-	#print debian.control()
+	packageneric.information('======== debian/control ========')
+	print debian.control()
