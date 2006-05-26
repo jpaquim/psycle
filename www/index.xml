@@ -52,7 +52,7 @@
 				<br/>
 				The very latest build. This might be unstable ; use at your own risk ; you may very well trash your tune! ( It already happened to several people, so sure it will happen again. )
 				<br/>
-				This is built from the <code>trunk</code> directory of the suberversion repository.
+				This is built from the <code>trunk</code> directory of the subversion repository.
 				<br/>
 				<b>Note:</b> This might be compiled with SSE2 instructions of the x86 CPUs ; only recent CPUs have SSE2 support.
 			</part>
@@ -63,7 +63,7 @@
 					</i>
 				)
 				<br/>
-				This is built from the <code>tags/psycle-1.10.0-release-candidate</code> directory of the suberversion repository.
+				This is built from the <code>tags/psycle-1.10.0-release-candidate</code> directory of the subversion repository.
 				It is an official candidate release, which means it's nearly stable.
 			</part-->
 			<part caption='Stable Release 1.8 with bugfixes' anchor='mfc-stable'>
