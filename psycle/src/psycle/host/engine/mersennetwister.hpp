@@ -1,5 +1,5 @@
 ///\file
-///\brief interface for psycle::host::dsp::MarsenneTwister
+///\brief interface for psycle::host::dsp::MersenneTwister
 
 /* 
    A C-program for MT19937, with initialization improved 2002/1/26.
@@ -61,11 +61,11 @@ namespace psycle
 			#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
 			//mt19937 pseudo-random number generator
-			class MarsenneTwister
+			class MersenneTwister
 			{
 			public:
-				MarsenneTwister() {}
-				virtual ~MarsenneTwister() {}
+				MersenneTwister() {}
+				virtual ~MersenneTwister() {}
 
 				/* initializes mt[N] with a seed */
 				void init_genrand(unsigned long s);
