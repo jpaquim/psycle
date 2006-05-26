@@ -300,6 +300,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_channelmode.EnableWindow(false);
 			m_pdf.EnableWindow(false);
 			m_noiseshaping.EnableWindow(false);
+			m_dither.EnableWindow(false);
 
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
@@ -740,8 +741,9 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			m_rate.EnableWindow(true);
 			m_bits.EnableWindow(true);
 			m_channelmode.EnableWindow(true);
-			m_pdf.EnableWindow(true);
-			m_noiseshaping.EnableWindow(true);
+			m_pdf.EnableWindow(m_dither.GetCheck());
+			m_noiseshaping.EnableWindow(m_dither.GetCheck());
+			m_dither.EnableWindow(true);
 
 			switch (m_recmode)
 			{
