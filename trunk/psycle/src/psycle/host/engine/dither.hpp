@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::dsp::Dither
 
-#include <psycle/host/engine/marsennetwister.hpp>
+#include <psycle/host/engine/mersennetwister.hpp>
 
 namespace psycle
 {
@@ -39,7 +39,7 @@ namespace psycle
 				Pdf pdf;
 				NoiseShape noiseshape;
 
-				MarsenneTwister mt;
+				MersenneTwister mt;
 			};
 		}
 	}

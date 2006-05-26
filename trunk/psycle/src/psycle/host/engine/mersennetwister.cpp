@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation for psycle::host::dsp::MarsenneTwister
+///\brief implementation for psycle::host::dsp::MersenneTwister
 
 /* 
    A C-program for MT19937, with initialization improved 2002/1/26.
@@ -49,7 +49,7 @@
 
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "marsennetwister.hpp"
+#include "mersennetwister.hpp"
 
 namespace psycle
 {
@@ -57,11 +57,11 @@ namespace psycle
 	{
 		namespace dsp
 		{
-			unsigned long	MarsenneTwister::mt[N];		 /* the array for the state vector  */
-			int				MarsenneTwister::mti=N+1;	/* mti==N+1 means mt[N] is not initialized */
+			unsigned long	MersenneTwister::mt[N];		 /* the array for the state vector  */
+			int				MersenneTwister::mti=N+1;	/* mti==N+1 means mt[N] is not initialized */
 
 			/* initializes mt[N] with a seed */
-			void MarsenneTwister::init_genrand(unsigned long s)
+			void MersenneTwister::init_genrand(unsigned long s)
 			{
 				mt[0]= s & 0xffffffffUL;
 				for (mti=1; mti<N; mti++) {
@@ -80,7 +80,7 @@ namespace psycle
 			/* init_key is the array for initializing keys */
 			/* key_length is its length */
 			/* slight change for C++, 2004/2/26 */
-			void MarsenneTwister::init_by_array(unsigned long init_key[], int key_length)
+			void MersenneTwister::init_by_array(unsigned long init_key[], int key_length)
 			{
 				int i, j, k;
 				init_genrand(19650218UL);
@@ -106,7 +106,7 @@ namespace psycle
 			}
 
 			/* generates a random number on [0,0xffffffff]-interval */
-			unsigned long MarsenneTwister::genrand_int32(void)
+			unsigned long MersenneTwister::genrand_int32(void)
 			{
 				unsigned long y;
 				static unsigned long mag01[2]={0x0UL, MATRIX_A};
@@ -144,34 +144,34 @@ namespace psycle
 			}
 
 			/* generates a random number on [0,0x7fffffff]-interval */
-			long MarsenneTwister::genrand_int31(void)
+			long MersenneTwister::genrand_int31(void)
 			{
 				return (long)(genrand_int32()>>1);
 			}
 
 			/* generates a random number on [0,1]-real-interval */
-			double MarsenneTwister::genrand_real1(void)
+			double MersenneTwister::genrand_real1(void)
 			{
 				return genrand_int32()*(1.0/4294967295.0); 
 				/* divided by 2^32-1 */ 
 			}
 
 			/* generates a random number on [0,1)-real-interval */
-			double MarsenneTwister::genrand_real2(void)
+			double MersenneTwister::genrand_real2(void)
 			{
 				return genrand_int32()*(1.0/4294967296.0); 
 				/* divided by 2^32 */
 			}
 
 			/* generates a random number on (0,1)-real-interval */
-			double MarsenneTwister::genrand_real3(void)
+			double MersenneTwister::genrand_real3(void)
 			{
 				return (((double)genrand_int32()) + 0.5)*(1.0/4294967296.0); 
 				/* divided by 2^32 */
 			}
 
 			/* generates a random number on [0,1) with 53-bit resolution*/
-			double MarsenneTwister::genrand_res53(void) 
+			double MersenneTwister::genrand_res53(void) 
 			{ 
 				unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6; 
 				return(a*67108864.0+b)*(1.0/9007199254740992.0); 
@@ -179,7 +179,7 @@ namespace psycle
 			/* These real versions are due to Isaku Wada, 2002/01/09 added */
 
 			// gaussian-distribution variation, added by dw
-			void MarsenneTwister::genrand_gaussian(double& out1, double& out2)
+			void MersenneTwister::genrand_gaussian(double& out1, double& out2)
 			{
 				float x1;
 				float x2;
