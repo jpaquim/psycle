@@ -3,6 +3,7 @@
 #pragma once
 #include "song.hpp"
 #include "riff.hpp"
+#include "dither.hpp"
 namespace psycle
 {
 	namespace host
@@ -99,11 +100,13 @@ namespace psycle
 			///\name secondary output device, write to a file
 			///\{
 				/// starts the recording output device.
-				void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
+				void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1, bool dodither=false, int ditherpdf=0, int noiseshape=0);
 				/// stops the recording output device.
 				void StopRecording(bool bOk = true);
 				/// wether the recording device has been started.
 				bool _recording;
+				/// whether to apply dither to recording
+				bool _dodither;
 			///\}
 
 		private:
@@ -119,6 +122,8 @@ namespace psycle
 			float _pBuffer[MAX_DELAY_BUFFER];
 			/// file to which to output signal.
 			WaveFile _outputWaveFile;
+			/// dither handler
+			dsp::Dither dither;
 
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()

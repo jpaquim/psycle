@@ -494,12 +494,18 @@ namespace psycle
 					{
 						float* pL(song()._pMachine[MASTER_INDEX]->_pSamplesL);
 						float* pR(song()._pMachine[MASTER_INDEX]->_pSamplesR);
+						if(_dodither)
+						{
+							dither.Process(pL, amount);
+							dither.Process(pR, amount);
+						}
 						int i;
 						switch(Global::configuration()._pOutputDriver->_channelmode)
 						{
 						case 0: // mono mix
 							for(i=0; i<amount; i++)
 							{
+								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
 								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
@@ -531,7 +537,7 @@ namespace psycle
 			return _pBuffer;
 		}
 
-		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode)
+		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape)
 		{
 			if(!_recording)
 			{
@@ -542,6 +548,13 @@ namespace psycle
 				if(samplerate > 0) { SampleRate(samplerate); Global::configuration()._pOutputDriver->_samplesPerSec = samplerate; }
 				if(bitdepth > 0) Global::configuration()._pOutputDriver->_bitDepth = bitdepth;
 				if(channelmode >= 0) Global::configuration()._pOutputDriver->_channelmode = channelmode;
+				if(_dodither=dodither)	//(not a typo)
+				{
+					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
+					else			dither.SetBitDepth(Global::configuration()._pOutputDriver->_bitDepth);
+					dither.SetPdf((dsp::Dither::Pdf)ditherpdf);
+					dither.SetNoiseShaping((dsp::Dither::NoiseShape)noiseshape);
+				}
 				int channels = 2;
 				if(Global::configuration()._pOutputDriver->_channelmode != 3) channels = 1;
 				Stop();

@@ -1795,7 +1795,7 @@ BEGIN
                     BS_PUSHLIKE,175,257,76,15
 END
 
-IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 252
+IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 303
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Render as Wav File"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
@@ -1814,9 +1814,9 @@ BEGIN
     LTEXT           "to",IDC_STATIC,138,147,8,8
     LTEXT           "(in HEX value)",IDC_STATIC,179,147,47,10
     CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
-                    0x1,5,218,245,9
-    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,154,232,50,14
-    PUSHBUTTON      "Close",IDCANCEL,209,232,41,14
+                    0x1,5,265,245,9
+    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,156,282,50,14
+    PUSHBUTTON      "Close",IDCANCEL,211,282,41,14
     CONTROL         "Record the entire song",IDC_RECSONG,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,13,117,112,10
     CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
@@ -1831,16 +1831,26 @@ BEGIN
                     BS_MULTILINE | WS_TABSTOP,9,47,230,24
     COMBOBOX        IDC_COMBO_RATE,117,170,134,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_BITS,117,185,134,75,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_BITS,117,185,133,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COMBO_CHANNELS,117,200,133,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CTEXT           "Note: many filters screw up when rendering at low sample rates.",
                     IDC_STATIC,12,170,50,45,WS_DISABLED
-    LTEXT           "",IDC_TEXT,6,233,144,12
     CONTROL         "Save each unmuted generator as a separated wav (generator number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
                     IDC_SAVEGENERATORSEPARATED,"Button",BS_AUTOCHECKBOX | 
                     BS_MULTILINE | WS_TABSTOP,9,76,230,24
+    RTEXT           "Prob. Distribution",IDC_STATIC,55,223,54,13,
+                    SS_CENTERIMAGE
+    RTEXT           "Noise-shaping",IDC_STATIC,65,236,44,18,SS_CENTERIMAGE
+    GROUPBOX        "Dither",IDC_STATIC,5,215,245,42
+    LTEXT           "",IDC_TEXT,5,284,144,12
+    CONTROL         "Enable",IDC_CHECK_DITHER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,232,39,9
+    COMBOBOX        IDC_COMBO_PDF,117,223,133,47,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_COMBO_NOISESHAPING,117,239,133,41,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
 END
 
 IDD_NEW_VOLUME DIALOG  0, 0, 114, 63
@@ -2625,10 +2635,10 @@ BEGIN
 
     IDD_SAVEWAVDLG, DIALOG
     BEGIN
-        LEFTMARGIN, 7
+        LEFTMARGIN, 5
         RIGHTMARGIN, 250
         TOPMARGIN, 7
-        BOTTOMMARGIN, 245
+        BOTTOMMARGIN, 296
     END
 
     IDD_NEW_VOLUME, DIALOG

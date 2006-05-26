@@ -781,6 +781,7 @@
 #define IDC_NAVIGATION_IGNORES_STEP     1550
 #define IDC_COMBO2                      1551
 #define IDC_LISTSTYLE                   1551
+#define IDC_COMBO_NOISESHAPING          1551
 #define IDC_COMBO3                      1552
 #define IDC_INS_NNACOMBO                1552
 #define IDC_COMBO4                      1553
@@ -995,6 +996,8 @@
 #define IDC_STATIC_DESTENDLABEL         1767
 #define IDC_STATIC_SRCENDLABEL          1768
 #define IDC_VOLSLIDE                    1771
+#define IDC_COMBO_PDF                   1772
+#define IDC_CHECK_DITHER                1773
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1163,7 +1166,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        261
 #define _APS_NEXT_COMMAND_VALUE         33048
-#define _APS_NEXT_CONTROL_VALUE         1772
+#define _APS_NEXT_CONTROL_VALUE         1774
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
