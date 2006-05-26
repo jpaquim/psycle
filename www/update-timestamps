@@ -39,7 +39,6 @@ function main
 		update-date index.xml bin.mfc.release-candidate packages/microsoft/psycle.mfc.bin.release_1_8_bugfixes.tar.gz
 		update-date index.xml cvs psycle.cvs.sticky-tag.HEAD.tar.bz2
 		update-date index.xml doxygen doxygen/html/index.html
-		update-date index.xml doxygen.mfc doxygen.mfc/html/index.html
 	fi
 } &&
 
