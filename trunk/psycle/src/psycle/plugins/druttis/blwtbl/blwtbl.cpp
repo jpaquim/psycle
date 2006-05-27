@@ -8,7 +8,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #define BLWTBL__SOURCE
 #include "blwtbl.h"
-#include <windows.h>
 //////////////////////////////////////////////////////////////////////
 //
 //	Simple data
@@ -553,23 +552,48 @@ bool UpdateWaveforms(int sr)
 	//
 	return true;
 }
-//////////////////////////////////////////////////////////////////////
-//
-//	DLL - Main
-//
-//////////////////////////////////////////////////////////////////////
-BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
-{
-	switch (fdwReason)
+
+#include <universalis/compiler.hpp>
+// [bohan] Note: i do the test on the operating system, but it might be possible that mingw handle attribute(constructor) and attribute(destructor) ;
+//               i haven't checked ; but in this case, we could use a test on COMPILER__GNU instead.
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#include <windows.h>
+	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/dynamic_link_library_functions.asp
+	::BOOL APIENTRY DllMain(::HMODULE module, ::DWORD reason_for_call, ::LPVOID)
 	{
-	case DLL_PROCESS_ATTACH :
-		InitWaveforms();
-		UpdateWaveforms(44100);
-		return true;
-	case DLL_PROCESS_DETACH :
-		CleanupWaveforms();
-		return true;
-	default :
-		return true;
+		bool result(true);
+		switch(reason_for_call)
+		{
+			case DLL_PROCESS_ATTACH:
+				InitWaveforms();
+				UpdateWaveforms(44100);
+			case DLL_THREAD_ATTACH:
+				break;
+			case DLL_THREAD_DETACH:
+				break;
+			case DLL_PROCESS_DETACH:
+				CleanupWaveforms();
+				break;
+			default:
+				result = false;
+				break;
+		}
+		return result;
 	}
-}
+#elif defined DIVERSALIS__COMPILER__GNU
+	namespace init
+	{
+		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__HIDDEN
+		{
+			InitWaveforms();
+			UpdateWaveforms(44100);
+		}
+		
+		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__HIDDEN
+		{
+			CleanupWaveforms();
+		}
+	}
+#else
+	#error todo...
+#endif

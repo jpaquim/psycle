@@ -12,10 +12,11 @@
 //	DLL - Macros
 //
 //////////////////////////////////////////////////////////////////////
+#include <universalis/compiler.hpp>
 #ifdef BLWTBL__SOURCE
-#define BLWTBL__DYNAMIC_LINK __declspec(dllexport)
+#define BLWTBL__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
 #else
-#define BLWTBL__DYNAMIC_LINK __declspec(dllimport)
+#define BLWTBL__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT
 #endif
 //////////////////////////////////////////////////////////////////////
 //
