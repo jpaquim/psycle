@@ -84,6 +84,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int scope_phase_rate;
 
 			bool clip;
+			float invol;
 			float peakL,peakR;
 			float peak2L,peak2R;
 			int peakLifeL,peakLifeR;
@@ -166,7 +167,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Machine* _pSrcMachine;
 			Machine* _pDstMachine;
 			int _dstWireIndex;
-			float invol;
 
 		protected:
 

@@ -1012,7 +1012,7 @@ namespace psycle
 			_outDry(256),
 			decreaseOnClip(false)
 		{
-			_audiorange=32768.0f;
+			_audiorange = 32768.0f;
 			DefineStereoInput(1);
 			_editName = "Master";
 		}
@@ -1172,6 +1172,7 @@ namespace psycle
 			Machine(MACH_MIXER, MACHMODE_FX, id)
 		{
 			_numPars = 255;
+			_audiorange = 32768.0f;
 			DefineStereoInput(24);
 			DefineStereoOutput(1);
 			_editName = "Mixer";

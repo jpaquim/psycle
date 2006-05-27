@@ -17,8 +17,7 @@ namespace psycle
 		:
 			Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id)
 		{
-			_audiorange= 32768.0f;
-			_numPars=0;
+			_audiorange = 32768.0f;
 			DefineStereoOutput(1);
 			_editName = "Sampler";
 
