@@ -2014,9 +2014,8 @@ namespace psycle
 			Machine(MACH_XMSAMPLER, MACHMODE_GENERATOR, id)
 		{
 			DefineStereoOutput(1);
-			_audiorange=32768.0f;
-			_numPars=0;
 			_editName = _psName;
+			_audiorange = 32768.0f;
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 

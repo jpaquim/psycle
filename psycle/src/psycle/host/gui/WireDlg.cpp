@@ -65,7 +65,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			scope_spec_rate = 25;
 			scope_phase_rate = 20;
 
-			rangecorrection=1.0f/_pDstMachine->GetAudioRange();  // correction for a -1.0f 1.0f range.
+			rangecorrection=1.0f/_pSrcMachine->GetAudioRange();  // correction for a -1.0f 1.0f range.
 			vucorrection = 5329.0f*rangecorrection;
 			scopecorrection = 64.0f*rangecorrection;
 			spectrumcorrection = 9.0f*rangecorrection;
@@ -363,7 +363,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		inline int CMultiScopeCtrl::GetY(float f)
 		{
-			f=64-(f*scopecorrection);
+			f=64-(f*scopecorrection*invol);
 
 			if (f < 1) 
 			{
@@ -393,8 +393,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (awl>curpeakl)	{	curpeakl = awl;	}
 				if (awr>curpeakr)	{	curpeakr = awr;	}
 			}
-			curpeakl=128-f2i(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
-			curpeakr=128-f2i(sqrtf(curpeakr*vucorrection));
+			curpeakl=128-f2i(sqrtf(curpeakl*vucorrection*invol)); //conversion to a cardinal value.
+			curpeakr=128-f2i(sqrtf(curpeakr*vucorrection*invol));
 
 			if (curpeakl<peak2L) //  it is a cardinal value, so smaller means higher peak.
 			{
@@ -638,7 +638,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			for (int i = 0; i < scope_spec_bands; i++)
 			{
 				//							int aml = 128-f2i(powf(1+((float)i/scope_spec_bands),2.0f)*sqrtf(ampl[i])*10);
-				int aml = 128 - (log(1+ampl[i])*heightcompensation[i]);
+				int aml = 128 - (log(1+ampl[i])*heightcompensation[i]*invol);
 				//				int aml = 128-f2i(sqrtf(ampl[i]));
 				if (aml < 0)
 				{
@@ -660,7 +660,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				rect.left+=width;
 
-				int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
+				int amr = 128 - (log(1+ampr[i])*heightcompensation[i]*invol);
 				//				int amr = 128-f2i(sqrtf(ampr[i]));
 				if (amr < 0)
 				{
@@ -730,8 +730,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				index--;
 				index&=(SCOPE_BUF_SIZE-1);
-				float wl=(pSamplesL[index]);///32768; 
-				float wr=(pSamplesR[index]);///32768; 
+				float wl=(pSamplesL[index]*rangecorrection*invol);///32768; 
+				float wr=(pSamplesR[index]*rangecorrection*invol);///32768; 
 				float awl=fabsf(wl);
 				float awr=fabsf(wr);
 				if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
@@ -1114,7 +1114,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			float val;
 			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 			_pDstMachine->GetWireVolume(_dstWireIndex,val);
-			invol = val;
+			m_multiscope.invol = val;
 			int t = (int)sqrtf(val*16384*4*4);
 			m_slvolume.SetPos(256*4-t);
 
@@ -1328,6 +1328,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				m_pParent->AddMacViewUndo();
 				_pDstMachine->SetWireVolume(_dstWireIndex, invol );
+				m_multiscope.invol = invol;
 			}
 
 		//	m_pParent->SetFocus();	
@@ -1337,7 +1338,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWireDlg::OnVolumeDb() 
 		{
 			CVolumeDlg dlg;
-			dlg.volume = invol;
+			dlg.volume = m_multiscope.invol;
 			dlg.edit_type = 0;
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1352,7 +1353,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWireDlg::OnVolumePer() 
 		{
 			CVolumeDlg dlg;
-			dlg.volume = invol;
+			dlg.volume = m_multiscope.invol;
 			dlg.edit_type = 1;
 			if (dlg.DoModal() == IDOK)
 			{

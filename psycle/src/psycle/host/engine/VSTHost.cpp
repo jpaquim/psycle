@@ -112,6 +112,7 @@ namespace psycle
 				queue_size(0), wantidle(false), _sDllName(""), h_dll(0), _program(0), instantiated(false), _instance(0),
 				requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0), editorWnd(0)
 			{
+				_audiorange = 1.0f;
 				proxy_ = new vst::proxy(*this);
 				std::memset(junk, 0, MAX_BUFFER_LENGTH * sizeof(float));
 				for(int i(0) ; i < vst::max_io ; ++i)
