@@ -1323,6 +1323,9 @@ mi::~mi()
 
 void mi::Init()
 {
+	for(int i(0);i<4;++i) globals.oscSymDrift[i]=0;
+	globals.restartfx=0;
+	globals.stereoPos=0;
 	slomo=0;
 	InitLoop[0].setRange(globals.oscSymDriftRange[0]);
 	InitLoop[0].setSpeed(globals.oscSymDriftSpeed[0]);
