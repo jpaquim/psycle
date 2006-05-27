@@ -26,99 +26,102 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CSynthTrack::CSynthTrack()
+CSynthTrack::CSynthTrack() :
+	pwmcount(0)
+	,fxcount(0)
+	,NextGlide(0.0f)
+	,LastGlide(0.0f)
+	,DefGlide(99999999.0f)
+	,DCOglide(0.0f)
+	,semiglide(0.0f)
+	,nextNote(1)
+	,nextSpd(0)
+	,ampEnvStage(0)
+	,satClip(0.0f)
+	,fmData1(0.0f)
+	,fmData2(0.0f)
+	,fmData3(0.0f)
+	,fmData4(0.0f)
+	,nextVol(0.0f)
+	,fastRelease(128.0f)
+	,minFade(0.008f)
+	,rcVol(0.0f)
+	,rcVolCutoff(0.25f)
+	,rcCut(0.0f)
+	,rcCutCutoff(0.25f)
+	,voiceVol(1.0f)
+	,softenHighNotes(0.0f)
+	,fltEnvStage(0)
+	,basenote(0.0f)
+	,rbasenote(0.0f)
+	,dbasenote(64+1.235f)
+	,semitone(0.0f)
+	,rsemitone(0.0f)
+	,arpNotes(0)
+	,arpLen(0)
+	,arpShuffle(0)
+	,arpCount(0)
+	,arpIndex(0)
+	,curArp(0)
+	,volMulti(0.0f)
+	,currentStereoPos(0)
+	,lfocount(0)
+	,updateCount(1)
+	,timetocompute(FILTER_CALC_TIME)
+	,fltResonance(0.0f)
+	,sp_cmd(0)
+	,sp_val(0)
+	,dco1Position(0.0f)
+	,dco1Pitch(0.0f)
+	,rdco1Pitch(0.0f)
+	,dco1Last(0.0f)
+	,dco2Position(0.0f)
+	,dco2Pitch(0.0f)
+	,rdco2Pitch(0.0f)
+	,dco2Last(0.0f)
+	,dco3Position(0.0f)
+	,dco3Pitch(0.0f)
+	,rdco3Pitch(0.0f)
+	,dco3Last(0.0f)
+	,dco4Position(0.0f)
+	,dco4Pitch(0.0f)
+	,rdco4Pitch(0.0f)
+	,dco4Last(0.0f)
+	,bend(0.0f)
+	,modEnvStage(0)
+	,modEnvValue(0.0f)
+	,modEnvCoef(0.0f)
+	,modEnvLast(0.0f)
+	,ampEnvValue(0.0f)
+	,ampEnvCoef(0.0f)
+	,ampEnvSustainLevel(0.0f)
+	,masterVolume(0.0f)
+	,osc1Vol(0.0f)
+	,osc2Vol(0.0f)
+	,osc3Vol(0.0f)
+	,osc4Vol(0.0f)
+	,rm1Vol(0.0f)
+	,rm2Vol(0.0f)
+	,fltEnvValue(0.0f)
+	,fltEnvCoef(0.0f)
+	,fltEnvSustainLevel(0.0f)
+	,fltCutoff(0.0f)
+	,fltAmt(0.0f)
+	,speedup(0.0f)
+	,speedup2(0.0f)
 {
-	satClip=0.0f;
-	cmCtl[0]=0.0f;
-	cmCtl[1]=0.0f;
-	cmCtl[2]=0.0f;
-	cmCtl[3]=0.0f;
-	fbCtl[0]=1.0f;
-	fbCtl[1]=1.0f;
-	fbCtl[2]=1.0f;
-	fbCtl[3]=1.0f;
-	fmCtl[0][0]=1.0f;
-	fmCtl[0][1]=1.0f;
-	fmCtl[0][2]=1.0f;
-	fmCtl[0][3]=1.0f;
-	fmCtl[1][0]=1.0f;
-	fmCtl[1][1]=1.0f;
-	fmCtl[1][2]=1.0f;
-	fmCtl[1][3]=1.0f;
-	fmData1=0.0f;
-	fmData2=0.0f;
-	fmData3=0.0f;
-	fmData4=0.0f;
-	dbasenote=64+1.235f;;
-	updateCount=1;
-	timetocompute=FILTER_CALC_TIME;
-
-	masterVolume=0;
-	osc1Vol=0;
-	osc2Vol=0;
-	osc3Vol=0;
-	osc4Vol=0;
-	DCOglide=0.0f;
-	semiglide=0.0f;
-	DefGlide=99999999.0f;
-	NextGlide=0.0f;
-	LastGlide=0.0f;
-	semitone=0.0f;
-	rsemitone=0.0f;
-
-	sp_cmd=0;
-	sp_val=0;
-
-	dco1Pitch=0.0f;
-	rdco1Pitch=0.0f;
-	dco1Position=0.0f;
-	dco1Last=0.0f;
-
-	dco2Pitch=0.0f;
-	rdco2Pitch=0.0f;
-	dco2Position=0.0f;
-	dco2Last=0.0f;
-
-	dco3Pitch=0.0f;
-	rdco3Pitch=0.0f;
-	dco3Position=0.0f;
-	dco3Last=0.0f;
-
-	dco4Pitch=0.0f;
-	rdco4Pitch=0.0f;
-	dco4Position=0.0f;
-	dco4Last=0.0f;
-
-	modEnvStage=0;
-	modEnvValue=0.0f;
-	ampEnvStage=0;
-	ampEnvValue=0.0f;
-	fltEnvStage=0;
-	fltEnvValue=0.0f;
-	pwmcount=0;
-	fxcount=0;
-	m_filter.init(44100);
-	voiceVol=1.0f;
-	minFade=0.008f;
-	fastRelease=128.0f;
-	rcVolCutoff=0.25f;
-	rcCutCutoff=0.25f;
-	rcVol=0.0f;
-	rcCut=0.0f;
+	for(int i(0);i<4;++i)
+	{
+		cmCtl[i]=0.0f;
+		fbCtl[i]=1.0f;
+		curBuf[i]=0;
+		nextBuf[i]=0;
+		fmCtl[0][i]=1.0f;
+		fmCtl[1][i]=1.0f;
+	}
 
 	arpInput[0]=0;
-
-	nextNote=1;
-	nextSpd=0;
-
-	curBuf[0]=0;
-	curBuf[1]=0;
-	curBuf[2]=0;
-	curBuf[3]=0;
-	nextBuf[0]=0;
-	nextBuf[1]=0;
-	nextBuf[2]=0;
-	nextBuf[3]=0;
+	m_filter.init(44100);
 }
 
 CSynthTrack::~CSynthTrack(){

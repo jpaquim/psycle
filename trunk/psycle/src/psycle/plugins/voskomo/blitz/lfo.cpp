@@ -28,7 +28,15 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-lfo::lfo()
+lfo::lfo() : 
+	pause(0)
+	, phaseHi(0)
+	, phaseLo(0)
+	, offset(0)
+	, count(0)
+	, current(0)
+	, last(0)
+	, delay(0)
 {
 
 }

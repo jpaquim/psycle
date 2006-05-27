@@ -28,7 +28,15 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-pwm::pwm()
+pwm::pwm() :
+	sym(0)
+	,frange(0)
+	,speed(0)
+	,pos(0)
+	,realpos(0)
+	,last(0)
+	,move(0)
+	,direction(0)
 {
 
 }
