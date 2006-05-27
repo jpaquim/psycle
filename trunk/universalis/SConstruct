@@ -20,7 +20,7 @@ source_package = packageneric.source_package(
 	long_description =
 '''\
 universalis is a library which abstracts the few platform specificities
-which are not handled by the boost and and glibmm libraries themselves.
+which are not handled by the boost and glibmm libraries themselves.
 Those abstractions of platforms specificities can be categorized into:
  - tweaks for conformance with the C++ standard library
  - widespread compiler extensions to the C++ standard
@@ -61,10 +61,7 @@ class boost_version:
 				}
 			''' % boost_version_wanted_raw
 		)
-		if not run_result:
-			packageneric.error('failed to determine boost version')
-			return False
-		return version_raw_found >= str(boost_version_wanted_raw)
+		return run_result and version_raw_found >= str(boost_version_wanted_raw)
 boost = packageneric.external_package(
 	debian = 'libboost-dev (>= ' + boost_version_wanted + ')',
 	headers = ['boost/version.hpp'],
@@ -91,17 +88,17 @@ universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'
 universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
 universalis.add_include_path('src')
 universalis.add_include_path('tmp')
-universalis.show()
+#universalis.show(True)
 universalis_library = universalis.targets()
 
 # pkg-config packages
-if True:
-	universalis_package = packageneric.pkg_config_package(
-		name = 'universalis-' + str(source_package.version().major()),
-		version = universalis.version(),
-		description = universalis.description(),
-		modules = [universalis]
-	)
+
+universalis_package = packageneric.pkg_config_package(
+	name = 'universalis-' + str(source_package.version().major()),
+	version = universalis.version(),
+	description = universalis.description(),
+	modules = [universalis]
+)
 
 # install
 if False:
@@ -129,9 +126,9 @@ universalis_dev = packageneric.debian_package(
 )
 universalis_dev.add_depend(universalis_runtime)
 universalis_dev.add_depends(universalis.public_requires())
-#universalis_dev.files.append(universalis_package.headers())
-#universalis_dev.files.append(universalis_package.libraries())
-#universalis_dev.files.append(universalis_package.pkg_configs())
+#universalis_dev.add_files(universalis.headers())
+#universalis_dev.add_files(universalis.libraries())
+#universalis_dev.add_files(universalis_package.pkg_config())
 
 universalis_doc = packageneric.debian_package(
 	name = universalis_runtime.name() + '-doc',
@@ -147,4 +144,5 @@ debian = packageneric.debian(
 	binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
 )
 packageneric.information('======== debian/control ========')
+debian_control = packageneric.environment().Value(debian.control())
 print debian.control()
