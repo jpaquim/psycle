@@ -6,9 +6,9 @@
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
-#include <memory.h>
-#include <psycle/plugin_interface.hpp>
 #include "CTrack.h"
+#include <psycle/plugin_interface.hpp>
+#include <memory>
 //============================================================================
 //	Defines
 //============================================================================

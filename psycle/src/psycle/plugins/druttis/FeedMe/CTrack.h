@@ -12,10 +12,10 @@
 #define WAVEMASK 4095
 //
 //
-#include "..\CDsp.h"
-#include "..\DspMath.h"
-#include "..\CEnvelope.h"
-#include "..\wtfmlib.h"
+#include "../CDsp.h"
+#include "../DspMath.h"
+#include "../CEnvelope.h"
+#include "../wtfmlib.h"
 //============================================================================
 //	Defines
 //============================================================================

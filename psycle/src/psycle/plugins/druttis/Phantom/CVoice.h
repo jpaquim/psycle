@@ -8,12 +8,12 @@
 
 #pragma once
 
-#include <math.h>
-#include "..\CDsp.h"
-#include "..\CEnvelope.h"
-#include "..\DspLib\Phaser.h"
-#include "..\DspLib\Chorus.h"
-#include "..\DspLib\afloat.h"
+#include "../CDsp.h"
+#include "../CEnvelope.h"
+#include "../DspLib/Phaser.h"
+#include "../DspLib/Chorus.h"
+#include "../DspLib/afloat.h"
+#include <cmath>
 
 //============================================================================
 //	Defines

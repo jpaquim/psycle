@@ -6,9 +6,9 @@
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/plugin_interface.hpp>
-#include <memory.h>
 #include "CVoice.h"
+#include <psycle/plugin_interface.hpp>
+#include <memory>
 //============================================================================
 //	Defines
 //============================================================================

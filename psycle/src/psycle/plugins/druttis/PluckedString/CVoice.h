@@ -6,10 +6,10 @@
 //
 //============================================================================
 #pragma once
-#include "..\lib\AMath.h"
-#include "..\lib\BiQuad.h"
-#include "..\lib\DLineN.h"
-#include "..\lib\CEnvelope.h"
+#include "../Lib/AMath.h"
+#include "../Lib/BiQuad.h"
+#include "../Lib/DLineN.h"
+#include "../Lib/CEnvelope.h"
 
 #define EXCITATION_FILTER_LENGTH 3
 
