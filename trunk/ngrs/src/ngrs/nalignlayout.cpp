@@ -126,8 +126,13 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
   for (;itr < parent()->visualComponents().end(); itr++) {
      NVisualComponent* visualChild = *itr;
      switch (visualChild->align()) {
-       case nAlTop    : 
-           topMax = std::max(visualChild->preferredWidth(),topMax);
+       case nAlTop    :
+           topMax = std::max(visualChild->preferredWidth() + 2 * hgap_, topMax);
+           xp = topMax;
+       break;
+       case nAlBottom    :
+           topMax = std::max(visualChild->preferredWidth() + 2 * hgap_, topMax);
+           xp = topMax;
        break;
        case nAlLeft   : xp = xp + visualChild->preferredWidth();
        break;

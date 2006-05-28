@@ -20,6 +20,7 @@
 #include "nmessagebox.h"
 #include "nbutton.h"
 #include "nflowlayout.h"
+#include "nalignlayout.h"
 #include "nlabel.h"
 
 NMessageBox::NMessageBox()
@@ -37,28 +38,27 @@ NMessageBox::NMessageBox( const std::string & msgText )
 
 void NMessageBox::init( )
 {
+  setTitle("Message");
+
   NPanel* btnPnl = new NPanel();
-    btnPnl->setLayout(NFlowLayout(nAlRight,5,5));
+    btnPnl->setLayout(NAlignLayout(5,5));
     okBtn = new NButton("ok");
       okBtn->setFlat(false);
       okBtn->clicked.connect(this,&NMessageBox::onBtnPress);
-    btnPnl->add(okBtn);
+    btnPnl->add(okBtn,nAlRight);
     useBtn = new NButton("use");
       useBtn->setFlat(false);
       useBtn->clicked.connect(this,&NMessageBox::onBtnPress);
-    btnPnl->add(useBtn);
+    btnPnl->add(useBtn,nAlRight);
     cancelBtn = new NButton("cancel");
       cancelBtn->setFlat(false);
       cancelBtn->clicked.connect(this,&NMessageBox::onBtnPress);
-    btnPnl->add(cancelBtn);
+    btnPnl->add(cancelBtn,nAlRight);
   pane()->add(btnPnl,nAlBottom);
 
   textLbl = new NLabel();
-  pane()->add(textLbl,nAlClient);
-  textLbl->setWordWrap(true);
+  pane()->add(textLbl,nAlTop);
 
-  setPosition(10,10,300,150);
-  setTitle("Message");
 }
 
 
@@ -108,6 +108,12 @@ void NMessageBox::onBtnPress( NButtonEvent * ev )
   if (ev->sender()==cancelBtn) {
     doClose(false);
   }
+}
+
+void NMessageBox::setVisible( bool on )
+{
+  pack();
+  NDialog::setVisible(on);
 }
 
 

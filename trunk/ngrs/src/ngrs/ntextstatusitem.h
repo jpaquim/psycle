@@ -17,50 +17,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NMESSAGEBOX_H
-#define NMESSAGEBOX_H
+#ifndef NTEXTSTATUSITEM_H
+#define NTEXTSTATUSITEM_H
 
-#include "ndialog.h"
-
-class NButton;
-class NLabel;
-
+#include <ncustomstatusitem.h>
 
 /**
 @author Stefan Nattkemper
 */
-
-const int nMsgOkBtn = 0;
-const int nMsgCancelBtn = 1;
-const int nMsgUseBtn = 2;
-
-class NMessageBox : public NDialog
+class NTextStatusItem : public NCustomStatusItem
 {
 public:
-    NMessageBox();
-    NMessageBox(const std::string & msgText);
+    NTextStatusItem();
 
-    ~NMessageBox();
+    ~NTextStatusItem();
 
-    void setButtons(int btnMask);
-    void setButtonText(const std::string & ok,const std::string & use, const std::string & cancel);
-    void setText(const std::string & msgText);
-
-    signal1<NObject*> use;
-
-    virtual void setVisible(bool on);
-
-private:
-
-    NButton* okBtn;
-    NButton* cancelBtn;
-    NButton* useBtn;
-
-    NLabel* textLbl;
-
-    void onBtnPress(NButtonEvent* ev);
-
-    void init();
 };
 
 #endif
