@@ -1,33 +1,36 @@
 //-------------------------------------------------------------------------------------------------------
 // VST Plug-Ins SDK
-// Version 1.0
-// © 2003, Steinberg Media Technologies, All Rights Reserved
+// Version 2.4		$Date$
+//
+// Category     : VST 2.x Interfaces
+// Filename     : aeffect.h
+// Created by   : Steinberg Media Technologies
+// Description  : Definition of AEffect structure
+//
+// © 2006, Steinberg Media Technologies, All Rights Reserved
 //-------------------------------------------------------------------------------------------------------
 
-#ifndef __AEffect__
-#define __AEffect__
+#ifndef __aeffect__
+#define __aeffect__
 
-/*	to create an Audio Effect for power pc's, create a
-	code resource
-	file type: 'aPcs'
-	resource type: 'aEff'
-	ppc header: none (raw pef)
-
-	for windows, it's a .dll
-
-	the only symbol searched for is:
-	AEffect *main(float (*audioMaster)(AEffect *effect, long opcode, long index,
-		long value, void *ptr, float opt));
-*/
-
-#if CARBON
-#if PRAGMA_STRUCT_ALIGN || __MWERKS__
-	#pragma options align=mac68k
+// gcc based compiler, or CodeWarrior on Mac OS X
+#if ((defined(__GNUC__) && (defined(__APPLE_CPP__) || defined(__APPLE_CC__))) || (defined (__MWERKS__) && defined (__MACH__)))
+	#ifndef TARGET_API_MAC_CARBON
+		#define TARGET_API_MAC_CARBON 1
+	#endif
+	#if __ppc__
+		#ifndef VST_FORCE_DEPRECATED
+			#define VST_FORCE_DEPRECATED 0
+		#endif
+	#endif
 #endif
-#else
-#if PRAGMA_ALIGN_SUPPORTED || __MWERKS__
-	#pragma options align=mac68k
-#endif
+
+#if TARGET_API_MAC_CARBON
+	#ifdef __LP64__
+		#pragma options align=power
+	#else
+		#pragma options align=mac68k
+	#endif
 #endif
 #if defined __BORLANDC__
 	#pragma -a8
@@ -38,160 +41,306 @@
 #else
 	#define VSTCALLBACK
 #endif
+//-------------------------------------------------------------------------------------------------------
 
+#include <string.h>	// for strncpy
 
-//-------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+// VST Version
+//-------------------------------------------------------------------------------------------------------
+
+/** Define SDK Version (you can generate different versions (from 2.0 to 2.4) of this SDK by setting the unwanted extensions to 0). */
+#define VST_2_1_EXTENSIONS 1 ///< Version 2.1 extensions (08-06-2000)
+#define VST_2_2_EXTENSIONS 1 ///< Version 2.2 extensions (08-06-2001)
+#define VST_2_3_EXTENSIONS 1 ///< Version 2.3 extensions (20-05-2003)
+#define VST_2_4_EXTENSIONS 1 ///< Version 2.4 extensions (01-01-2006)
+
+/** Current VST Version */
+#if VST_2_4_EXTENSIONS
+	#define kVstVersion 2400
+#elif VST_2_3_EXTENSIONS
+	#define kVstVersion 2300
+#elif VST_2_2_EXTENSIONS
+	#define kVstVersion 2200
+#elif VST_2_1_EXTENSIONS
+	#define kVstVersion 2100
+#else
+	#define kVstVersion 2
+#endif
+
+/** Disable for Hosts to serve Plug-ins below VST 2.4 */
+#ifndef VST_FORCE_DEPRECATED
+#define VST_FORCE_DEPRECATED VST_2_4_EXTENSIONS 
+#endif
+
+/** Declares identifier as deprecated. */
+#if VST_FORCE_DEPRECATED
+#define DECLARE_VST_DEPRECATED(identifier) __##identifier##Deprecated
+#else
+#define DECLARE_VST_DEPRECATED(identifier) identifier
+#endif
+
+/** Define for 64 Bit Platform. */
+#ifndef VST_64BIT_PLATFORM
+#define VST_64BIT_PLATFORM _WIN64 || __LP64__
+#endif
+
+//-------------------------------------------------------------------------------------------------------
+// Integral Types
+//-------------------------------------------------------------------------------------------------------
+
+#ifdef WIN32
+typedef short VstInt16;				///< 16 bit integer type
+typedef int VstInt32;				///< 32 bit integer type
+typedef __int64 VstInt64;			///< 64 bit integer type
+#else
+#include <stdint.h>
+typedef int16_t VstInt16;			///< 16 bit integer type
+typedef int32_t VstInt32;			///< 32 bit integer type
+typedef int64_t VstInt64;			///< 64 bit integer type
+#endif
+
+//-------------------------------------------------------------------------------------------------------
+// Generic Types
+//-------------------------------------------------------------------------------------------------------
+
+#if VST_64BIT_PLATFORM
+typedef VstInt64 VstIntPtr;			///< platform-dependent integer type, same size as pointer
+#else
+typedef VstInt32 VstIntPtr;			///< platform-dependent integer type, same size as pointer
+#endif
+
+//-------------------------------------------------------------------------------------------------------
 // Misc. Definition
-//-------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+#undef CCONST
+struct AEffect;
 
-typedef struct AEffect AEffect;
-typedef	long (VSTCALLBACK *audioMasterCallback)(AEffect *effect, long opcode, long index,
-		long value, void *ptr, float opt);
+/// @cond ignore
+typedef	VstIntPtr (VSTCALLBACK *audioMasterCallback) (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
+typedef VstIntPtr (VSTCALLBACK *AEffectDispatcherProc) (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
+typedef void (VSTCALLBACK *AEffectProcessProc) (AEffect* effect, float** inputs, float** outputs, VstInt32 sampleFrames);
+typedef void (VSTCALLBACK *AEffectProcessDoubleProc) (AEffect* effect, double** inputs, double** outputs, VstInt32 sampleFrames);
+typedef void (VSTCALLBACK *AEffectSetParameterProc) (AEffect* effect, VstInt32 index, float parameter);
+typedef float (VSTCALLBACK *AEffectGetParameterProc) (AEffect* effect, VstInt32 index);
+/// @endcond
 
-// prototype for plug-in main
-// AEffect *main(audioMasterCallback audioMaster);
-
-// Four Character Constant
+/** Four Character Constant (for AEffect->uniqueID) */
 #define CCONST(a, b, c, d) \
-	 ((((long)a) << 24) | (((long)b) << 16) | (((long)c) << 8) | (((long)d) << 0))
+	 ((((VstInt32)a) << 24) | (((VstInt32)b) << 16) | (((VstInt32)c) << 8) | (((VstInt32)d) << 0))
 
-// Magic Number
+/** AEffect magic number */
 #define kEffectMagic CCONST ('V', 's', 't', 'P')
 
-
-//-------------------------------------------------
-// AEffect Structure
-//-------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+/** Basic VST Effect "C" Interface. */
+//-------------------------------------------------------------------------------------------------------
 struct AEffect
 {
-	long magic;			// must be kEffectMagic ('VstP')
+//-------------------------------------------------------------------------------------------------------
+	VstInt32 magic;			///< must be #kEffectMagic ('VstP')
 
-	long (VSTCALLBACK *dispatcher)(AEffect *effect, long opCode, long index, long value,
-		void *ptr, float opt);
+	/** Host to Plug-in dispatcher @see AudioEffect::dispatcher */
+	AEffectDispatcherProc dispatcher;
 	
-	void (VSTCALLBACK *process)(AEffect *effect, float **inputs, float **outputs, long sampleframes);
+	/** \deprecated Accumulating process mode is deprecated in VST 2.4! Use AEffect::processReplacing instead! */
+	AEffectProcessProc DECLARE_VST_DEPRECATED (process);
 	
-	void (VSTCALLBACK *setParameter)(AEffect *effect, long index, float parameter);
-	float (VSTCALLBACK *getParameter)(AEffect *effect, long index);
+	/** Set new value of automatable parameter @see AudioEffect::setParameter */
+	AEffectSetParameterProc setParameter;
 
-	long numPrograms;   // number of Programs
-	long numParams;		// all programs are assumed to have numParams parameters
-	long numInputs;		// number of Audio Inputs
-	long numOutputs;	// number of Audio Outputs
+	/** Returns current value of automatable parameter @see AudioEffect::getParameter*/
+	AEffectGetParameterProc getParameter;
 
-	long flags;			// see constants (Flags Bits)
+	VstInt32 numPrograms;   ///< number of programs
+	VstInt32 numParams;		///< all programs are assumed to have numParams parameters
+	VstInt32 numInputs;		///< number of audio inputs
+	VstInt32 numOutputs;	///< number of audio outputs
 
-	long resvd1;		// reserved for Host, must be 0 (Dont use it)
-	long resvd2;		// reserved for Host, must be 0 (Dont use it)
-
-	long initialDelay;	// for algorithms which need input in the first place
-
-	long realQualities;	// number of realtime qualities (0: realtime)
-	long offQualities;	// number of offline qualities (0: realtime only)
-	float ioRatio;		// input samplerate to output samplerate ratio, not used yet
+	VstInt32 flags;			///< @see VstAEffectFlags
 	
-	void *object;		// for class access (see AudioEffect.hpp), MUST be 0 else!
-	void *user;			// user access
+	VstIntPtr resvd1;		///< reserved for Host, must be 0
+	VstIntPtr resvd2;		///< reserved for Host, must be 0
+	
+	VstInt32 initialDelay;	///< for algorithms which need input in the first place (Group delay or latency). This value should be initialized in a resume state.
+	
+	VstInt32 DECLARE_VST_DEPRECATED (realQualities);	///< \deprecated unused member
+	VstInt32 DECLARE_VST_DEPRECATED (offQualities);		///< \deprecated unused member
+	float    DECLARE_VST_DEPRECATED (ioRatio);			///< \deprecated unused member
 
-	long uniqueID;		// pls choose 4 character as unique as possible. (register it at Steinberg Web)
-						// this is used to identify an effect for save+load
-	long version;		// (example 1100 for version 1.1.0.0)
+	void* object;			///< #AudioEffect class pointer
+	void* user;				///< user-defined pointer
 
-	void (VSTCALLBACK *processReplacing)(AEffect *effect, float **inputs, float **outputs, long sampleframes);
+	VstInt32 uniqueID;		///< registered unique identifier (register it at Steinberg 3rd party support Web). This is used to identify a plug-in during save+load of preset and project.
+	VstInt32 version;		///< plug-in version (example 1100 for version 1.1.0.0)
 
-	char future[60];	// pls zero
+	/** Process audio samples in replacing mode @see AudioEffect::processReplacing */
+	AEffectProcessProc processReplacing;
+
+#if VST_2_4_EXTENSIONS
+	/** Process double-precision audio samples in replacing mode @see AudioEffect::processDoubleReplacing */
+	AEffectProcessDoubleProc processDoubleReplacing;
+	
+	char future[56];		///< reserved for future use (please zero)
+#else
+	char future[60];		///< reserved for future use (please zero)
+#endif
+//-------------------------------------------------------------------------------------------------------
 };
 
-//-------------------------------------------------
-// Flags Bits
-//-------------------------------------------------
-
-#define effFlagsHasEditor		1	// if set, is expected to react to editor messages
-#define effFlagsHasClip			2	// return > 1. in getVu() if clipped
-#define effFlagsHasVu			4	// return vu value in getVu(); > 1. means clipped
-#define effFlagsCanMono			8	// if numInputs == 2, makes sense to be used for mono in
-#define effFlagsCanReplacing	16	// supports in place output (processReplacing() exsists)
-#define effFlagsProgramChunks	32	// program data are handled in formatless chunks
-
-//-------------------------------------------------
-// Dispatcher OpCodes
-//-------------------------------------------------
-
-enum
+//-------------------------------------------------------------------------------------------------------
+/** AEffect flags */
+//-------------------------------------------------------------------------------------------------------
+enum VstAEffectFlags
 {
-	effOpen = 0,		// initialise
-	effClose,			// exit, release all memory and other resources!
+//-------------------------------------------------------------------------------------------------------
+	effFlagsHasEditor     = 1 << 0,			///< set if the plug-in provides a custom editor
+	effFlagsCanReplacing  = 1 << 4,			///< supports replacing process mode (which should the default mode in VST 2.4)
+	effFlagsProgramChunks = 1 << 5,			///< program data is handled in formatless chunks
+	effFlagsIsSynth       = 1 << 8,			///< plug-in is a synth (VSTi), Host may assign mixer channels for its outputs
+	effFlagsNoSoundInStop = 1 << 9,			///< plug-in does not produce sound when input is all silence
 
-	effSetProgram,		// program no in <value>
-	effGetProgram,		// return current program no.
-	effSetProgramName,	// user changed program name (max 24 char + 0) to as passed in string 
-	effGetProgramName,	// stuff program name (max 24 char + 0) into string 
+#if VST_2_4_EXTENSIONS
+	effFlagsCanDoubleReplacing = 1 << 12,	///< plug-in supports double precision processing
+#endif
 
-	effGetParamLabel,	// stuff parameter <index> label (max 8 char + 0) into string
-						// (examples: sec, dB, type)
-	effGetParamDisplay,	// stuff parameter <index> textual representation into string
-						// (examples: 0.5, -3, PLATE)
-	effGetParamName,	// stuff parameter <index> label (max 8 char + 0) into string
-						// (examples: Time, Gain, RoomType) 
-	effGetVu,			// called if (flags & (effFlagsHasClip | effFlagsHasVu))
+	DECLARE_VST_DEPRECATED (effFlagsHasClip) = 1 << 1,			///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effFlagsHasVu)   = 1 << 2,			///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effFlagsCanMono) = 1 << 3,			///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effFlagsExtIsAsync)   = 1 << 10,	///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effFlagsExtHasBuffer) = 1 << 11		///< \deprecated deprecated in VST 2.4
+//-------------------------------------------------------------------------------------------------------
+};
 
-	// system
-	effSetSampleRate,	// in opt (float value in Hz; for example 44100.0Hz)
-	effSetBlockSize,	// in value (this is the maximun size of an audio block,
-						// pls check sampleframes in process call)
-	effMainsChanged,	// the user has switched the 'power on' button to
-						// value (0 off, else on). This only switches audio
-						// processing; you should flush delay buffers etc.
+//-------------------------------------------------------------------------------------------------------
+/** Basic dispatcher Opcodes (Host to Plug-in) */
+//-------------------------------------------------------------------------------------------------------
+enum AEffectOpcodes
+{
+	effOpen = 0,		///< no arguments  @see AudioEffect::open
+	effClose,			///< no arguments  @see AudioEffect::close
+
+	effSetProgram,		///< [value]: new program number  @see AudioEffect::setProgram
+	effGetProgram,		///< [return value]: current program number  @see AudioEffect::getProgram
+	effSetProgramName,	///< [ptr]: char* with new program name, limited to #kVstMaxProgNameLen  @see AudioEffect::setProgramName
+	effGetProgramName,	///< [ptr]: char buffer for current program name, limited to #kVstMaxProgNameLen  @see AudioEffect::getProgramName
 	
-	// editor
-	effEditGetRect,		// stuff rect (top, left, bottom, right) into ptr
-	effEditOpen,		// system dependant Window pointer in ptr
-	effEditClose,		// no arguments
-	effEditDraw,		// draw method, ptr points to rect (MAC Only)
-	effEditMouse,		// index: x, value: y (MAC Only)
-	effEditKey,			// system keycode in value
-	effEditIdle,		// no arguments. Be gentle!
-	effEditTop,			// window has topped, no arguments
-	effEditSleep,		// window goes to background
+	effGetParamLabel,	///< [ptr]: char buffer for parameter label, limited to #kVstMaxParamStrLen  @see AudioEffect::getParameterLabel
+	effGetParamDisplay,	///< [ptr]: char buffer for parameter display, limited to #kVstMaxParamStrLen  @see AudioEffect::getParameterDisplay
+	effGetParamName,	///< [ptr]: char buffer for parameter name, limited to #kVstMaxParamStrLen  @see AudioEffect::getParameterName
 	
-	effIdentify,		// returns 'NvEf'
-	effGetChunk,		// host requests pointer to chunk into (void**)ptr, byteSize returned
-	effSetChunk,		// plug-in receives saved chunk, byteSize passed
+	DECLARE_VST_DEPRECATED (effGetVu),	///< \deprecated deprecated in VST 2.4
+
+	effSetSampleRate,	///< [opt]: new sample rate for audio processing  @see AudioEffect::setSampleRate
+	effSetBlockSize,	///< [value]: new maximum block size for audio processing  @see AudioEffect::setBlockSize
+	effMainsChanged,	///< [value]: 0 means "turn off", 1 means "turn on"  @see AudioEffect::suspend @see AudioEffect::resume
+
+	effEditGetRect,		///< [ptr]: #ERect** receiving pointer to editor size  @see ERect @see AEffEditor::getRect
+	effEditOpen,		///< [ptr]: system dependent Window pointer, e.g. HWND on Windows  @see AEffEditor::open
+	effEditClose,		///< no arguments @see AEffEditor::close
+
+	DECLARE_VST_DEPRECATED (effEditDraw),	///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effEditMouse),	///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effEditKey),	///< \deprecated deprecated in VST 2.4
+
+	effEditIdle,		///< no arguments @see AEffEditor::idle
+	
+	DECLARE_VST_DEPRECATED (effEditTop),	///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effEditSleep),	///< \deprecated deprecated in VST 2.4
+	DECLARE_VST_DEPRECATED (effIdentify),	///< \deprecated deprecated in VST 2.4
+	
+	effGetChunk,		///< [ptr]: void** for chunk data address [index]: 0 for bank, 1 for program  @see AudioEffect::getChunk
+	effSetChunk,		///< [ptr]: chunk data [value]: byte size [index]: 0 for bank, 1 for program  @see AudioEffect::setChunk
  
 	effNumOpcodes		
 };
 
-//-------------------------------------------------
-// AudioMaster OpCodes
-//-------------------------------------------------
-
-enum
+//-------------------------------------------------------------------------------------------------------
+/** Basic dispatcher Opcodes (Plug-in to Host) */
+//-------------------------------------------------------------------------------------------------------
+enum AudioMasterOpcodes
 {
-	audioMasterAutomate = 0,		// index, value, returns 0
-	audioMasterVersion,				// VST Version supported (for example 2200 for VST 2.2)
-	audioMasterCurrentId,			// Returns the unique id of a plug that's currently
-									// loading
-	audioMasterIdle,				// Call application idle routine (this will
-									// call effEditIdle for all open editors too) 
-	audioMasterPinConnected			// Inquire if an input or output is beeing connected;
-									// index enumerates input or output counting from zero,
-									// value is 0 for input and != 0 otherwise. note: the
-									// return value is 0 for <true> such that older versions
-									// will always return true.	
+//-------------------------------------------------------------------------------------------------------
+	audioMasterAutomate = 0,	///< [index]: parameter index [opt]: parameter value  @see AudioEffect::setParameterAutomated
+	audioMasterVersion,			///< [return value]: Host VST version (for example 2400 for VST 2.4) @see AudioEffect::getMasterVersion
+	audioMasterCurrentId,		///< [return value]: current unique identifier on shell plug-in  @see AudioEffect::getCurrentUniqueId
+	audioMasterIdle,			///< no arguments  @see AudioEffect::masterIdle
+	audioMasterPinConnected		///< [return value]: 0=true, 1=false [index]: pin index [value]: 0=input, 1=output  @see AudioEffect::isInputConnected @see AudioEffect::isOutputConnected
+//-------------------------------------------------------------------------------------------------------
 };
 
-#if CARBON
-#if PRAGMA_STRUCT_ALIGN || __MWERKS__
-	#pragma options align=reset
-#endif
-#else
-#if PRAGMA_ALIGN_SUPPORTED || __MWERKS__
+//-------------------------------------------------------------------------------------------------------
+/** String length limits (in characters excl. 0 byte) */
+//-------------------------------------------------------------------------------------------------------
+enum VstStringConstants
+{
+//-------------------------------------------------------------------------------------------------------
+	kVstMaxProgNameLen   = 24,	///< used for #effGetProgramName, #effSetProgramName, #effGetProgramNameIndexed
+	kVstMaxParamStrLen   = 8,	///< used for #effGetParamLabel, #effGetParamDisplay, #effGetParamName
+	kVstMaxVendorStrLen  = 64,	///< used for #effGetVendorString, #audioMasterGetVendorString
+	kVstMaxProductStrLen = 64,	///< used for #effGetProductString, #audioMasterGetProductString
+	kVstMaxEffectNameLen = 32	///< used for #effGetEffectName
+//-------------------------------------------------------------------------------------------------------
+};
+
+//-------------------------------------------------------------------------------------------------------
+/** String copy taking care of null terminator. */
+//-------------------------------------------------------------------------------------------------------
+inline char* vst_strncpy (char* dst, const char* src, size_t maxLen)
+{
+	char* result = strncpy (dst, src, maxLen);
+	dst[maxLen] = 0;
+	return result;
+}
+
+//-------------------------------------------------------------------------------------------------------
+/** String concatenation taking care of null terminator. */
+//-------------------------------------------------------------------------------------------------------
+inline char* vst_strncat (char* dst, const char* src, size_t maxLen)
+{
+	char* result = strncat (dst, src, maxLen);
+	dst[maxLen] = 0;
+	return result;
+}
+
+//-------------------------------------------------------------------------------------------------------
+/** Cast #VstIntPtr to pointer. */
+//-------------------------------------------------------------------------------------------------------
+template <class T> inline T* FromVstPtr (VstIntPtr& arg)
+{
+	T** address = (T**)&arg;
+	return *address;
+}
+
+//-------------------------------------------------------------------------------------------------------
+/** Cast pointer to #VstIntPtr. */
+//-------------------------------------------------------------------------------------------------------
+template <class T> inline VstIntPtr ToVstPtr (T* ptr)
+{
+	VstIntPtr* address = (VstIntPtr*)&ptr;
+	return *address;
+}
+
+//-------------------------------------------------------------------------------------------------------
+/** Structure used for #effEditGetRect. */
+//-------------------------------------------------------------------------------------------------------
+struct ERect
+{
+//-------------------------------------------------------------------------------------------------------
+	VstInt16 top;		///< top coordinate
+	VstInt16 left;		///< left coordinate
+	VstInt16 bottom;	///< bottom coordinate
+	VstInt16 right;		///< right coordinate
+//-------------------------------------------------------------------------------------------------------
+};
+
+//-------------------------------------------------------------------------------------------------------
+#if TARGET_API_MAC_CARBON
 	#pragma options align=reset
 #elif defined(WIN32) || defined(__FLAT__)
 	#pragma pack(pop)
 #elif defined __BORLANDC__
 	#pragma -a-
 #endif
-#endif
 
-#endif	// __AEffect__
+#endif	// __aeffect__

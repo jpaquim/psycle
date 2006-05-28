@@ -6,7 +6,7 @@
 #include <psycle/host/engine/machine.hpp>
 #include <psycle/host/engine/sampler.hpp>
 #include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/convert_internal_machines.hpp>
+#include <psycle/host/engine/legacy/convert_internal_machines.hpp>
 #include <psycle/host/engine/plugin.hpp>
 #include <psycle/host/engine/VSTHost.hpp>
 
@@ -335,7 +335,7 @@ namespace psycle
 										pOldMachine->_pSamplesL = NULL;
 										pOldMachine->_pSamplesR = NULL;
 										// dummy name goes here
-										pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
+										pMac[i]->_editName = "X " + pOldMachine->_editName;
 										zapObject(pOldMachine);
 										pMac[i]->_type = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
@@ -357,7 +357,7 @@ namespace psycle
 											pOldMachine->_pSamplesL = NULL;
 											pOldMachine->_pSamplesR = NULL;
 											// dummy name goes here
-											pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
+											pMac[i]->_editName = "X " + pOldMachine->_editName;
 											zapObject(pOldMachine);
 											pMac[i]->_type = MACH_DUMMY;
 											((Dummy*)pMac[i])->wasVST = true;
@@ -375,7 +375,7 @@ namespace psycle
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
 									// dummy name goes here
-									pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
+									pMac[i]->_editName = "X " + pOldMachine->_editName;
 									zapObject(pOldMachine);
 									pMac[i]->_type = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
@@ -388,7 +388,7 @@ namespace psycle
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
 								// dummy name goes here
-								pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
+								pMac[i]->_editName = "X " + pOldMachine->_editName;
 								zapObject(pOldMachine);
 								pMac[i]->_type = MACH_DUMMY;
 								((Dummy*)pMac[i])->wasVST = true;

@@ -6,6 +6,7 @@
 #include <universalis/operating_system/exception.hpp>
 #include <universalis/operating_system/exceptions/code_description.hpp>
 #include <psycle/host/engine/machine.hpp>
+#define VST_FORCE_DEPRECATED 0
 #include <vst/AEffectx.h>
 namespace psycle
 {

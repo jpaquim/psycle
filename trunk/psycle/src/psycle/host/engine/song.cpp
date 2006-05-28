@@ -4,6 +4,7 @@
 #include PACKAGENERIC
 #include "song.hpp"
 #include "machine.hpp"
+#include "internal_machines.hpp"
 #include "sampler.hpp"
 #include "XMSampler.hpp"
 #include "plugin.hpp"

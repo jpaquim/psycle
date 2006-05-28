@@ -2,8 +2,8 @@
 #include <psycle/host/detail/project.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/machine.hpp>
+#include <psycle/host/engine/internal_machines.hpp>
 #include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/gui/InputHandler.hpp> // Is this needed??
 #include <psycle/scale.hpp>
 #include <string>
 #include <exception>
@@ -178,12 +178,12 @@ namespace psycle
 							for(int track(0); track < song.tracks() ; ++track)
 							{
 								PatternEntry & event(events[track]);
-								if(event._note == cdefTweakE)
+								if(event._note == 122) // cdefTweakE
 								{
 									event._mach += 0x40;
-									event._note = cdefTweakM;
+									event._note = 121; // cdefTweakM
 								}
-								if(event._note == cdefTweakM)
+								if(event._note == 121) // cdefTweakM
 								{
 									std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
 									if(i != machine_converted_from.end())

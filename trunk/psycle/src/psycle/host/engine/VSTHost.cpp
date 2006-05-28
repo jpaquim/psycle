@@ -5,6 +5,7 @@
 #include "VSTHost.hpp"
 #include "song.hpp"
 #include "player.hpp"
+#include "internal_machines.hpp"
 #include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/MainFrm.hpp> // Is this needed?
 #include <psycle/host/gui/VSTEditorDlg.hpp> // Is this needed?

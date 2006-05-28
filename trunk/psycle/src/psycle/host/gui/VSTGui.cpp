@@ -7,7 +7,6 @@
 #include <psycle/host/gui/inputhandler.hpp>
 #include <psycle/host/gui/MainFrm.hpp>
 #include <psycle/host/engine/machine.hpp>
-#include <Vst/AEffEditor.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;

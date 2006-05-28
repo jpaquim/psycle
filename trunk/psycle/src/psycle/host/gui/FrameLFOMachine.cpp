@@ -7,6 +7,7 @@
 #include <psycle/host/configuration.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/machine.hpp>
+#include <psycle/host/engine/internal_machines.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

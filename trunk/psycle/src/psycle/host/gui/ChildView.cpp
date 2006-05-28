@@ -17,6 +17,7 @@
 #include <psycle/host/engine/XMSongLoader.hpp>
 #include <psycle/host/engine/ITModule2.hpp>
 #include <psycle/host/gui/MasterDlg.hpp>
+#include <psycle/host/engine/internal_machines.hpp>
 #include <psycle/host/gui/XMSamplerUI.hpp>
 #include <psycle/host/gui/VstEditorDlg.hpp>
 #include <psycle/host/gui/WireDlg.hpp>

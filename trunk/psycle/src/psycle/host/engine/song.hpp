@@ -28,6 +28,9 @@ namespace psycle
 {
 	namespace host
 	{
+		/// Index of MasterMachine
+		Machine::id_type const MASTER_INDEX(128);
+
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
 		class Song

@@ -9,7 +9,6 @@
 #include <psycle/host/gui/PresetsDlg.hpp>
 #include <psycle/host/gui/inputhandler.hpp>
 #include <psycle/host/gui/MainFrm.hpp>
-#include <Vst/AEffEditor.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define VST_PARAMETRIC_WIDTH 228

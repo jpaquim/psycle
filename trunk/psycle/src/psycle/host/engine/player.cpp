@@ -5,6 +5,7 @@
 #include <psycle/host/engine/player.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/machine.hpp>
+#include <psycle/host/engine/internal_machines.hpp>
 #include <psycle/host/configuration.hpp>
 #include <psycle/host/engine/MidiInput.hpp>
 #include <psycle/host/gui/InputHandler.hpp>
