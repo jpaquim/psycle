@@ -92,4 +92,5 @@ void CVoice::NoteOn(int note, int volume)
 	}
 	//
 	filter_phase = 0.0f;
+	filter.buf0 = filter.buf1 = 0.0f;
 }
