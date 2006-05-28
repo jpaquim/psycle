@@ -26,7 +26,6 @@
 #include <ngrs/nlistbox.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nflowlayout.h>
-#include <ngrs/nframeborder.h>
 #include <ngrs/ngridlayout.h>
 #include <ngrs/nimage.h>
 #include <ngrs/ngroupbox.h>
@@ -90,7 +89,7 @@ private:
     NCheckBox* record_noteoff_;
     NCheckBox* record_tweaks_;
     NCheckBox* notestoeffects_;
-    NCheckBox* movecirsorpaste_;
+    NCheckBox* movecursorpaste_;
 
     void onIncShort(NButtonEvent* ev);
     void onDecShort(NButtonEvent* ev);
@@ -107,10 +106,10 @@ private:
     void onSeqClear(NButtonEvent* ev);
     void onDecLen(NButtonEvent* ev);
     void onIncLen(NButtonEvent* ev);
+    void onMoveCursorPaste(NButtonEvent* ev);
 
     std::vector<int> seqCopyBuffer;
 
-    NFrameBorder* frBorder;
     NGridLayout gridLayout;
 };
 
