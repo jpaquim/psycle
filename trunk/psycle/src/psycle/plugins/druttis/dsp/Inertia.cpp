@@ -19,6 +19,8 @@ Inertia::Inertia()
 	m_target = 0.0f;
 	m_ticks = 0;
 	m_decr = 1;
+	m_value = 0.0f;
+	m_coeff = 0.0f;
 	m_valid = false;
 }
 //////////////////////////////////////////////////////////////////////
