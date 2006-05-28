@@ -36,7 +36,7 @@ diversalis = packageneric.external_package(
 )
 
 glibmm = packageneric.external_package(
-	pkg_config = 'glibmm-2.4 >= 2.4',
+	pkg_config = 'glibmm-2.4 >= 2.4 gthread-2.0 >= 2.10',
 	debian = 'libglibmm-2.4-dev (>= 2.4)',
 )
 
@@ -83,8 +83,9 @@ universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'
 universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
 universalis.add_include_path('src')
 universalis.add_include_path('tmp')
-#universalis.show(True)
-universalis_library = universalis.targets()
+if universalis.name() in BUILD_TARGETS:
+	universalis.show()
+	universalis_library = universalis.targets()
 
 # pkg-config packages
 
@@ -137,6 +138,7 @@ debian = packageneric.debian(
 	maintainer = bohan,
 	binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
 )
-packageneric.information('======== debian/control ========')
-debian_control = packageneric.environment().Value(debian.control())
-print debian.control()
+if 'debian/control' in BUILD_TARGETS:
+	packageneric.information('======== debian/control ========')
+	#debian_control = packageneric.environment().Value(debian.control())
+	print debian.control()
