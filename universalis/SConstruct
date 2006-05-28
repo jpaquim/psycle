@@ -7,7 +7,7 @@
 # init
 
 import packageneric
-packageneric = packageneric.packageneric(ARGUMENTS, Environment)
+packageneric = packageneric.packageneric()
 
 # source package
 
@@ -40,39 +40,34 @@ glibmm = packageneric.external_package(
 	debian = 'libglibmm-2.4-dev (>= 2.4)',
 )
 
-# boost
-boost_version_wanted = '1.33'
-boost_version_wanted_raw = 103300
-
 # boost base
 class boost_version:
+	wanted = '1.33'
+	wanted_raw = 103300
 	def __str__(self):
-		return 'boost version >= ' + boost_version_wanted
+		return 'boost version >= ' + boost_version.wanted
 	def __call__(self):
-		run_result, version_raw_found = boost.try_run(
+		return boost.try_run(
 			'boost version',
 			'''
 				#include <boost/version.hpp>
 				#include <iostream>
-				int main()
-				{
-					std::cout << BOOST_VERSION;
-					return 0; //return !(BOOST_VERSION >= %i);
-				}
-			''' % boost_version_wanted_raw
-		)
-		return run_result and version_raw_found >= str(boost_version_wanted_raw)
+				int main() { return !(BOOST_VERSION >= %i); }
+			\n''' % boost_version.wanted_raw
+		)[0]
 boost = packageneric.external_package(
-	debian = 'libboost-dev (>= ' + boost_version_wanted + ')',
-	headers = ['boost/version.hpp'],
+	debian = 'libboost-dev (>= ' + boost_version.wanted + ')',
 	frees = [boost_version()]
 )
 
 # boost	libraries
 boost_libraries = packageneric.external_package(
-	debian = 'libboost-thread-dev (>= ' + boost_version_wanted + '), libboost-filesystem-dev (>= ' + boost_version_wanted + ')',
-	headers = ['boost/thread/thread.hpp', 'boost/filesystem/path.hpp'],
-	libraries = ['boost_thread', 'boost_filesystem']
+	debian = 'libboost-thread-dev (>= ' + boost_version.wanted + '), libboost-filesystem-dev (>= ' + boost_version.wanted + ')',
+	depends = [boost],
+	builds = [
+		['boost_thread', 'boost/thread/thread.hpp', 'boost::thread::thread thread;'],
+		['boost_filesystem', 'boost/filesystem/path.hpp', 'boost::filesystem::path path;']
+	]
 )
 
 # modules
@@ -81,7 +76,7 @@ universalis = packageneric.module(
 	name = 'lib-universalis-' + str(source_package.version().major()),
 	version = source_package.version(),
 	description = source_package.description(),
-	public_requires = [diversalis, glibmm, boost, boost_libraries]
+	public_requires = [diversalis, glibmm, boost_libraries]
 )
 import os.path
 universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp'))
@@ -116,7 +111,7 @@ universalis_runtime = packageneric.debian_package(
 	description = universalis_package.description(),
 	long_description = 'This package contains the runtime library.'
 )
-#universalis_runtime.files.append(universalis_package.binaries())
+#universalis_runtime.add_files(universalis_package.binaries())
 
 universalis_dev = packageneric.debian_package(
 	name = universalis_runtime.name() + '-dev',
@@ -125,9 +120,8 @@ universalis_dev = packageneric.debian_package(
 	long_description = 'This package contains the development files.',
 )
 universalis_dev.add_depend(universalis_runtime)
-universalis_dev.add_depends(universalis.public_requires())
-#universalis_dev.add_files(universalis.headers())
-#universalis_dev.add_files(universalis.libraries())
+universalis_dev.add_build_depends(universalis.public_requires())
+#universalis_dev.add_files(universalis_package.headers())
 #universalis_dev.add_files(universalis_package.pkg_config())
 
 universalis_doc = packageneric.debian_package(
