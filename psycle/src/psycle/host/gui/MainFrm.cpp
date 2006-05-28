@@ -21,6 +21,7 @@
 #include <psycle/host/engine/player.hpp>
 #include <psycle/host/engine/MidiInput.hpp>
 #include <psycle/host/engine/plugin.hpp>
+#include <psycle/host/engine/internal_machines.hpp>
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>

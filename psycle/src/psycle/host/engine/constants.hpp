@@ -31,6 +31,8 @@ namespace psycle
 		int const MAX_PATTERNS = 256;
 		/// harcoded maximal number of lines per pattern
 		int const MAX_LINES = 256;
+
+		int const MAX_VST_EVENTS = 128;
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
 		//PSYCLE__DEPRECATED("This sux.")
 		#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN

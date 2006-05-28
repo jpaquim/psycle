@@ -7,7 +7,7 @@
 #include <psycle/host/gui/MasterDlg.hpp>
 #include <psycle/host/engine/Dsp.hpp>
 #include <boost/preprocessor/arithmetic/inc.hpp>
-
+#include <psycle/host/engine/internal_machines.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CMasterDlg::CMasterDlg(CChildView* pParent)

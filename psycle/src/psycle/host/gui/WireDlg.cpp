@@ -243,9 +243,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					rect.top = 64-2;
 					rect.bottom = rect.top+4;
 					bufDC.FillSolidRect(&rect,0x00404040);
-
-					linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
-					linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
 				}
 				break;
 			case CMultiScopeCtrl::mode_spectrum:
@@ -485,6 +482,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			const int freq = scope_osc_freq*scope_osc_freq;
 
+			const COLORREF colorL = 0xc08080;
+			const COLORREF colorR = 0x80c080;
+
 			// red line if last frame was clipping
 			if (clip)
 			{
@@ -517,24 +517,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// ok this is a little tricky - it chases the wrapping buffer, starting at the last sample 
 			// buffered and working backwards - it does it this way to minimize chances of drawing 
 			// erroneous data across the buffering point
-
-			float add = (float(Global::configuration()._pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
+			float add = (float(Global::configuration()._pOutputDriver->_samplesPerSec)/(float(freq)))/128.0f;
 
 			float n = float(_pSrcMachine->_scopeBufferIndex-scope_offset);
-			bufDC->MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]));
-			for (int x = 256-2; x >= 0; x-=2)
+			for (int x = 256; x > 0; x--)
 			{
+				bufDC->SetPixelV(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]),colorL);
 				n -= add;
-				bufDC->LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]));
 			}
 			bufDC->SelectObject(&linepenR);
 
 			n = float(_pSrcMachine->_scopeBufferIndex-scope_offset);
-			bufDC->MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]));
-			for (int x = 256-2; x >= 0; x-=2)
+			for (int x = 256; x > 0; x--)
 			{
+				bufDC->SetPixelV(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]),colorR);
 				n -= add;
-				bufDC->LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]));
 			}
 
 			bufDC->SelectObject(oldpen);
