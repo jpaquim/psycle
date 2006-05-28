@@ -295,6 +295,11 @@ PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 mi::mi()
 {
 	Vals = new int[NUM_PARAMS];
+
+	inertia_factor=0.0f;
+	globals.filter_freq.current=0.0f;
+	globals.filter_res.current=0.0f;
+
 	for (int ti = 0; ti < MAX_TRACKS; ti++) {
 		for (int vi = 0; vi < MAX_VOICES; vi++)
 			voices[ti][vi].globals = &globals;
