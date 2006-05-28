@@ -68,12 +68,7 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1024,768);
 
-  NRadioButton* rBtn = new NRadioButton();
-    rBtn->setPosition(10,10,200,30);
-    rBtn->setText("Hallo");
-  pane()->add(rBtn);
-
-  //testMenu();
+  testMenu();
   //testMemo();
   //testListBox();
 
@@ -137,9 +132,10 @@ void NTestWindow::onSliderPosChanged( double v )
 
 void NTestWindow::onOpen( NButtonEvent * ev )
 {
-
   NMessageBox* msg = new NMessageBox("Daten gehen verloren!");
   add(msg);
+  msg->pack();
+  std::cout << msg->pane()->preferredHeight() << std::endl;
   msg->execute();
   NApp::addRemovePipe(msg);
   
@@ -213,6 +209,7 @@ void NTestWindow::testMenu( )
   menuBar_->add(menu3);
 
   NMenuItem* item = new NMenuItem("Open");
+     item->click.connect(this,&NTestWindow::onOpen);
   menu1->add(item);
 
   NMenuItem* item1 = new NMenuItem("close");

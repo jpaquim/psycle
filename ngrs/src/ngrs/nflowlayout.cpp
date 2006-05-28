@@ -207,22 +207,30 @@ int NFlowLayout::preferredHeight( const NVisualComponent * target ) const
   int yp = vgap_;
   int ymax = 2*vgap_;
 
-  if (align_ == nAlLeft) {
-    std::vector<NVisualComponent*>::const_iterator itr   = parent()->visualComponents().begin();
-    for (;itr < parent()->visualComponents().end(); itr++) {
-       NVisualComponent* visualChild = *itr;
-       if ((xp + visualChild->preferredWidth() + hgap_ <= parent()->clientWidth()) || (!lineBrk_) ) {
+  std::vector<NVisualComponent*>::const_iterator itr   = parent()->visualComponents().begin();
+  std::vector<NVisualComponent*>::const_iterator start = itr;
+
+
+  for (;itr < parent()->visualComponents().end(); itr++) {
+    NVisualComponent* visualChild = *itr;
+    if (visualChild->visible()) {
+    if ((xp + visualChild->preferredWidth() + hgap_ <= parent()->clientWidth()) || (!lineBrk_) ) {
           xp = xp + visualChild->preferredWidth() + hgap_;
           if (ymax<visualChild->preferredHeight()) ymax = visualChild->preferredHeight();
        }
        else {
+          std::vector<NVisualComponent*>::const_iterator itrH = start;
+          for (;itrH < itr; itrH++) {
+            NVisualComponent* visual = *itrH;
+          }
           yp = yp + ymax + vgap_;
           ymax = visualChild->preferredHeight();
           xp = visualChild->preferredWidth() + 2*hgap_;
+          start = itr;
        }
     }
   }
-  return maxY;
+  return yp + ymax + vgap_;
 }
 
 void NFlowLayout::setAlign( int align )

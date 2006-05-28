@@ -342,7 +342,7 @@ NConfig::NConfig()
   attrs = 0;
   std::string oldDir = NFile::workingDir();
   NFile::cdHome();
-  loadXmlConfig(".ngrs.xml");
+//  loadXmlConfig(".ngrs.xml");
   NFile::cd(oldDir);
 }
 
