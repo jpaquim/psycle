@@ -29,6 +29,7 @@
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
 #include <ngrs/n7segdisplay.h>
+#include <ngrs/nframeborder.h>
 
 
 SequencerBar::SequencerBar()
@@ -191,7 +192,8 @@ void SequencerBar::init( )
     checkPanel->add( record_noteoff_        = new NCheckBox("Record NoteOffs"));
     checkPanel->add( record_tweaks_         = new NCheckBox("Record Tweaks"));
     checkPanel->add( notestoeffects_        = new NCheckBox("Allow Notes\nto Effects"));
-    checkPanel->add( movecirsorpaste_       = new NCheckBox("Move Cursor\nWhen Paste"));
+    checkPanel->add( movecursorpaste_       = new NCheckBox("Move Cursor\nWhen Paste"));
+    
   add(checkPanel);
 
   resize();
@@ -744,4 +746,11 @@ void SequencerBar::onIncLen( NButtonEvent * ev )
 bool SequencerBar::followSong( )
 {
   return follow_->checked();
+}
+
+void SequencerBar::onMoveCursorPaste( NButtonEvent * ev )
+{
+//  if (movecursorpaste_->checked) {
+
+//  }
 }
