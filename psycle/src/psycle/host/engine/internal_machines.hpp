@@ -15,7 +15,7 @@ namespace psycle {
 		{
 		public:
 			Dummy(id_type index);
-			virtual ~Dummy();
+			virtual ~Dummy() throw();
 			virtual void Work(int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
@@ -31,7 +31,7 @@ namespace psycle {
 		public:
 			DuplicatorMac();
 			DuplicatorMac(id_type index);
-			virtual ~DuplicatorMac();
+			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -58,7 +58,7 @@ namespace psycle {
 		public:
 			Master();
 			Master(id_type index);
-			virtual ~Master();
+			virtual ~Master() throw();
 			virtual void Init(void);
 			virtual void Work(int numSamples);
 			virtual std::string GetName() const { return _psName; };
@@ -121,7 +121,7 @@ namespace psycle {
 			};
 			Mixer();
 			Mixer(id_type index);
-			virtual ~Mixer();
+			virtual ~Mixer() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -139,8 +139,8 @@ namespace psycle {
 			virtual std::string GetAudioInputName(InPort::id_type port);
 			virtual std::string GetAutioOutputName(OutPort::id_type port) { std::string rettxt = "Stereo Output"; return rettxt; };
 			virtual bool ConnectTo(Machine & dst, InPort::id_type dstport = InPort::id_type(0), OutPort::id_type outport = OutPort::id_type(0), float volume = 1.0f);
-			virtual int GetSend(int i){ ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
-			virtual bool SendValid(int i) { ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
+			virtual int GetSend(int i){ assert(i<MAX_CONNECTIONS); return _send[i]; }
+			virtual bool SendValid(int i) { assert(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
@@ -188,7 +188,7 @@ namespace psycle {
 		public:
 			LFO();
 			LFO(id_type index);
-			virtual ~LFO();
+			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -215,7 +215,7 @@ namespace psycle {
 			{
 				enum lfo_type
 				{
-					sine=0, tri, sawup, sawdown, square
+					sine, tri, sawup, sawdown, square
 				};
 			};
 
@@ -224,7 +224,7 @@ namespace psycle {
 				/// our parameter indices
 				enum prm
 				{
-					wave=0, pwidth, speed,
+					wave, pwidth, speed,
 					mac0,	mac1,	mac2,	mac3,
 					prm0,	prm1,	prm2,	prm3,
 					level0,	level1,	level2,	level3,

@@ -2570,7 +2570,7 @@ namespace psycle
 */
 		bool XMSampler::LoadOldFileFormat(RiffFile& riffFile)
 		{
-			ASSERT(false);
+			assert(false);
 			//This function is used for Songs made with Psycle earlier than 1.7
 			// It cannot happen that one of those has this new Sampler.
 			return true;

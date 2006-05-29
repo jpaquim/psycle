@@ -675,7 +675,7 @@ namespace psycle
 		Seek(iStart);
 
 		int iInstrSize = ReadInt4();
-//		ASSERT(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
+//		assert(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
 		TCHAR sInstrName[23];
 		ZeroMemory(sInstrName,sizeof(sInstrName) * sizeof(TCHAR));
 		ReadChunk(sInstrName,22); sInstrName[22]= 0;
@@ -781,7 +781,7 @@ namespace psycle
 	
 		// alloc wave memory
 
-		ASSERT(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
+		assert(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 
 		XMInstrument::WaveData& _wave = sampler.SampleData(iSampleIdx);
 		

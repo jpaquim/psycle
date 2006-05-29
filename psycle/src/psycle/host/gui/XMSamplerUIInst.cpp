@@ -1207,7 +1207,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_EditPoint = _edit_point;
 
 	CMenu* pPopup = menu.GetSubMenu(0);
-	ASSERT(pPopup != NULL);
+	assert(pPopup);
 
 	// The ON_UPDATE_COMMAND_UI message handlers only work with CFrameWnd's, and CStatic is a CWnd.
 	// This is documented to be the case, by Microsoft.

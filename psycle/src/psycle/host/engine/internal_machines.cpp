@@ -1,6 +1,10 @@
 #include <packageneric/pre-compiled.private.hpp>
-#ifdef _DEBUG
-#define new DEBUG_NEW
+
+#include <diversalis/compiler.hpp>
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#if defined _DEBUG
+		#define new DEBUG_NEW
+	#endif
 #endif
 
 #include "internal_machines.hpp"
@@ -22,8 +26,7 @@ namespace psycle {
 		std::string Dummy::_psName = "DummyPlug";
 
 		Dummy::Dummy(Machine::id_type id)
-			:
-		Machine(MACH_DUMMY, MACHMODE_FX, id)
+		: Machine(MACH_DUMMY, MACHMODE_FX, id)
 		{
 //			DefineStereoInput(1);
 //			DefineStereoOutput(1);
@@ -31,7 +34,8 @@ namespace psycle {
 			_audiorange = 32768.0f;
 			_editName = "Dummy";
 		}
-		Dummy::~Dummy()
+
+		Dummy::~Dummy() throw()
 		{
 //			DestroyInputs();
 //			DestroyOutputs();
@@ -62,8 +66,7 @@ namespace psycle {
 		std::string DuplicatorMac::_psName = "Dupe it!";
 
 		DuplicatorMac::DuplicatorMac(Machine::id_type id)
-			:
-		Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id)
+		: Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id)
 		{
 			_numPars = 16;
 			_nCols = 2;
@@ -75,9 +78,11 @@ namespace psycle {
 				noteOffset[i]=0;
 			}
 		}
-		DuplicatorMac::~DuplicatorMac()
+
+		DuplicatorMac::~DuplicatorMac() throw()
 		{
 		}
+
 		void DuplicatorMac::Init()
 		{
 			Machine::Init();
@@ -197,8 +202,8 @@ namespace psycle {
 		float * Master::_pMasterSamples = 0;
 
 		Master::Master(Machine::id_type id)
-			:
-		Machine(MACH_MASTER, MACHMODE_MASTER, id),
+		:
+			Machine(MACH_MASTER, MACHMODE_MASTER, id),
 			sampleCount(0),
 			_outDry(256),
 			decreaseOnClip(false)
@@ -207,9 +212,11 @@ namespace psycle {
 			DefineStereoInput(1);
 			_editName = "Master";
 		}
-		Master::~Master()
+
+		Master::~Master() throw()
 		{
 		}
+
 		void Master::Init()
 		{
 			Machine::Init();
@@ -226,9 +233,9 @@ namespace psycle {
 
 		void Master::Work(int numSamples)
 		{
-#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-			universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
+			#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+			#endif
 			Machine::Work(numSamples);
 			cpu::cycles_type cost(cpu::cycles());
 			//if(!_mute)
@@ -360,8 +367,7 @@ namespace psycle {
 		std::string Mixer::_psName = "Mixer";
 
 		Mixer::Mixer(Machine::id_type id)
-			:
-		Machine(MACH_MIXER, MACHMODE_FX, id)
+		: Machine(MACH_MIXER, MACHMODE_FX, id)
 		{
 			_numPars = 255;
 			_audiorange = 32768.0f;
@@ -369,9 +375,11 @@ namespace psycle {
 			DefineStereoOutput(1);
 			_editName = "Mixer";
 		}
-		Mixer::~Mixer()
+
+		Mixer::~Mixer() throw()
 		{
 		}
+
 		void Mixer::Init()
 		{
 			Machine::Init();
@@ -472,9 +480,9 @@ namespace psycle {
 
 							// tell the FX to work, now that the input is ready.
 							{
-#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
+								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
 								pSendMachine->Work(numSamples);
 							}
 
@@ -719,23 +727,22 @@ namespace psycle {
 		// LFO
 
 
-		//		todo:
-		//	- as is, control rate is proportional to MAX_BUFFER_LENGTH.. we update in work, which (at the moment) means once every 256
-		//      samples. at 44k, this means a cr of 142hz.  this is probably good enough for most purposes, but i believe it also
-		//		means that the lfo can and likely will be phased by 5.8ms depending on where it is placed in the machine view..
-		//		if we want to take the idea of modulation machines much further, we should probably put together some kind of
-		//		standard place in the processing chain where these machines will work, preferably -before- any audio
-		//		<JosepMa> About the "before any audio", the player can support this right now in two different ways:
-		//		One is in the "Machine::preWork" function, currently only used for buffer cleanup and generation of the wire visual data.
-		//		The second one is in the "Player::NotifyNewLine" function or in "Player::ExecuteGlobalCommands"
-		//		Also, note that currently, work does NOT mean 256 samples. It means *at much* 256, and quite frequently, it is a smaller
-		//		value (each line). This will change with the event based player.
-		//		processing.  this should also eliminate the need for the lfo to be connected to something to work.
-		//  - respond to pulse width knob.. consider using it as a 'skew' control for sine/tri waves as in dw-tremolo?
-		//  - now that we have a gui, keeping the 'position' display knob as an un-controllable control is just silly
-		//  - prettify gui
-		//  - vst support??
-
+		// todo:
+		// - as is, control rate is proportional to MAX_BUFFER_LENGTH.. we update in work, which (at the moment) means once every 256
+		//   samples. at 44k, this means a cr of 142hz.  this is probably good enough for most purposes, but i believe it also
+		//   means that the lfo can and likely will be phased by 5.8ms depending on where it is placed in the machine view..
+		//   if we want to take the idea of modulation machines much further, we should probably put together some kind of
+		//   standard place in the processing chain where these machines will work, preferably -before- any audio
+		//   <JosepMa> About the "before any audio", the player can support this right now in two different ways:
+		//   One is in the "Machine::preWork" function, currently only used for buffer cleanup and generation of the wire visual data.
+		//   The second one is in the "Player::NotifyNewLine" function or in "Player::ExecuteGlobalCommands"
+		//   Also, note that currently, work does NOT mean 256 samples. It means *at much* 256, and quite frequently, it is a smaller
+		//   value (each line). This will change with the event based player.
+		//   processing.  this should also eliminate the need for the lfo to be connected to something to work.
+		// - respond to pulse width knob.. consider using it as a 'skew' control for sine/tri waves as in dw-tremolo?
+		// - now that we have a gui, keeping the 'position' display knob as an un-controllable control is just silly
+		// - prettify gui
+		// - vst support??
 
 		std::string LFO::_psName = "LFO";
 
@@ -748,8 +755,7 @@ namespace psycle {
 #endif
 
 		LFO::LFO(Machine::id_type id)
-			:
-		Machine(MACH_LFO, MACHMODE_GENERATOR, id)
+		: Machine(MACH_LFO, MACHMODE_GENERATOR, id)
 		{
 			_numPars = prms::num_params;
 			_nCols = 3;
@@ -769,9 +775,11 @@ namespace psycle {
 			pWidth=100;
 			FillTable();
 		}
-		LFO::~LFO()
+
+		LFO::~LFO() throw()
 		{
 		}
+
 		void LFO::Init()
 		{
 			Machine::Init();
@@ -1152,10 +1160,10 @@ namespace psycle {
 		}
 
 
-		//currently, this function resets the value of an output parameter to where it would be at lfo==0.  this behavior deserves
-		// some consideration, because it is conceivable that some people would want turning off an output to leave the parameter where it is
-		// instead of jerking it back to its original position..  on the other hand, without this code, sweeping through a list of parameters
-		// carelessly can wreak havoc on an entire plugin's settings.  i may decide just to let the user choose which s/he prefers..
+		/// currently, this function resets the value of an output parameter to where it would be at lfo==0.  this behavior deserves
+		/// some consideration, because it is conceivable that some people would want turning off an output to leave the parameter where it is
+		/// instead of jerking it back to its original position..  on the other hand, without this code, sweeping through a list of parameters
+		/// carelessly can wreak havoc on an entire plugin's settings.  i may decide just to let the user choose which s/he prefers..
 		void LFO::ParamEnd(int which)
 		{
 			if(which<0 || which>=NUM_CHANS) return;
