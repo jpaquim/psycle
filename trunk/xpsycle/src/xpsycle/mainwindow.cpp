@@ -35,7 +35,7 @@
 #include <ngrs/nmenuseperator.h>
 #include <ngrs/nmessagebox.h>
 #include <ngrs/nbevelborder.h>
-
+#include <ngrs/nstatusbar.h>
 
 MainWindow::MainWindow()
   : NWindow()
@@ -189,7 +189,7 @@ void MainWindow::initBars( )
 
   initToolBar();
 
-  statusBar_ = new NPanel();
+  statusBar_ = new NStatusBar();
     statusBar_->setLayout(NFlowLayout(nAlLeft));
       progressBar_ = new NProgressBar();
         progressBar_->setValue(0);

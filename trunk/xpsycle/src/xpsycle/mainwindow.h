@@ -46,6 +46,7 @@ class VuMeter;
 class InstrumentEditor;
 class InfoDlg;
 class WaveSaveDlg;
+class NStatusBar;
 
 /**
 @author Stefan
@@ -75,7 +76,7 @@ private:
       NComboBox* trackCombo_;
       NComboBox* octaveCombo_;
       NSlider*   masterSlider_;
-    NPanel* statusBar_;
+    NStatusBar* statusBar_;
       NProgressBar* progressBar_;
 
     NMenuBar* menuBar_;
