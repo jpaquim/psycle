@@ -76,7 +76,8 @@ universalis = packageneric.module(
 	name = 'lib-universalis-' + str(source_package.version().major()),
 	version = source_package.version(),
 	description = source_package.description(),
-	public_requires = [diversalis, glibmm, boost_libraries]
+	depends = [glibmm, boost_libraries],
+	build_depends = [diversalis]
 )
 import os.path
 universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp'))
@@ -121,7 +122,7 @@ universalis_dev = packageneric.debian_package(
 	long_description = 'This package contains the development files.',
 )
 universalis_dev.add_depend(universalis_runtime)
-universalis_dev.add_build_depends(universalis.public_requires())
+universalis_dev.add_build_depends(universalis_package.build_depends())
 #universalis_dev.add_files(universalis_package.headers())
 #universalis_dev.add_files(universalis_package.pkg_config())
 
