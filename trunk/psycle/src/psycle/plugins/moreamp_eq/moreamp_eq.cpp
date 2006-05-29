@@ -1115,38 +1115,46 @@ void mi::calc_coeffs()
 	double x0;
 
 	n = 0;
-	for (; bands[n].cfs; n++) {
-		double *freqs = (double *)bands[n].cfs;
-	for (i=0; i<bands[n].band_count; i++)
+	for (; bands[n].cfs; n++)
 	{
-
-		/* Find -3dB frequencies for the center freq */
-		find_f1_and_f2(freqs[i], bands[n].octave, &f1, &f2);
-		/* Find Beta */
-		if ( find_root(
-			BETA2(TETA(freqs[i]), TETA(f1)), 
-			BETA1(TETA(freqs[i]), TETA(f1)), 
-			BETA0(TETA(freqs[i]), TETA(f1)), 
-			&x0) == 0)
+		double *freqs = (double *)bands[n].cfs;
+		for (i=0; i<bands[n].band_count; i++)
 		{
-		/* Got a solution, now calculate the rest of the factors */
-		/* Take the smallest root always (find_root returns the smallest one)
-		*
-		* NOTE: The IIR equation is
-		*	y[n] = 2 * (alpha*(x[n]-x[n-2]) + gamma*y[n-1] - beta*y[n-2])
-		*  Now the 2 factor has been distributed in the coefficients
-		*/
-		/* Now store the coefficients */
-		bands[n].coeffs[i].beta = 2.0 * x0;
-		bands[n].coeffs[i].alpha = 2.0 * ALPHA(x0);
-		bands[n].coeffs[i].gamma = 2.0 * GAMMA(x0, TETA(freqs[i]));
-	} else {
-		/* Shouldn't happen */
-		bands[n].coeffs[i].beta = 0.;
-		bands[n].coeffs[i].alpha = 0.;
-		bands[n].coeffs[i].gamma = 0.;
-	}
-	}// for i
+			if(freqs[i]<=srate/2)
+			{
+
+				/* Find -3dB frequencies for the center freq */
+				find_f1_and_f2(freqs[i], bands[n].octave, &f1, &f2);
+				/* Find Beta */
+				if ( find_root(
+					BETA2(TETA(freqs[i]), TETA(f1)), 
+					BETA1(TETA(freqs[i]), TETA(f1)), 
+					BETA0(TETA(freqs[i]), TETA(f1)), 
+					&x0) == 0)
+				{
+					/* Got a solution, now calculate the rest of the factors */
+					/* Take the smallest root always (find_root returns the smallest one)
+					*
+					* NOTE: The IIR equation is
+					*	y[n] = 2 * (alpha*(x[n]-x[n-2]) + gamma*y[n-1] - beta*y[n-2])
+					*  Now the 2 factor has been distributed in the coefficients
+					*/
+					/* Now store the coefficients */
+					bands[n].coeffs[i].beta = 2.0 * x0;
+					bands[n].coeffs[i].alpha = 2.0 * ALPHA(x0);
+					bands[n].coeffs[i].gamma = 2.0 * GAMMA(x0, TETA(freqs[i]));
+				} else {
+					/* Shouldn't happen */
+					bands[n].coeffs[i].beta = 0.;
+					bands[n].coeffs[i].alpha = 0.;
+					bands[n].coeffs[i].gamma = 0.;
+				}
+			} else {
+				bands[n].coeffs[i].beta = 0.;
+				bands[n].coeffs[i].alpha = 0.;
+				bands[n].coeffs[i].gamma = 0.;
+			}
+		}// for i
 	}//for n
 }
 
