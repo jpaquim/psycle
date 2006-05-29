@@ -2579,18 +2579,18 @@ namespace psycle
 
 		void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 		{
-			int temp;
+			std::int32_t temp;
 			//\todo: save ID and size.
-//		UINT size = 2 * sizeof(temp);
-//		riffFile.Write(&size,sizeof(size));
+			//std::uint32_t const size(2 * sizeof temp);
+			//riffFile.Write(size);
 			riffFile->Write(VERSION);
 			riffFile->Write(_numVoices); // numSubtracks
 			switch (_resampler.GetQuality())
 			{
-			case dsp::R_NONE:	temp = 0;break;
-			case dsp::R_SPLINE:	temp = 2;break;
-			case dsp::R_LINEAR:
-			default:			temp = 1;break;
+				case dsp::R_NONE:   temp = 0; break;
+				case dsp::R_SPLINE: temp = 2; break;
+				case dsp::R_LINEAR:
+				default:            temp = 1; break;
 			}
 			riffFile->Write(temp); // quality
 
@@ -2620,7 +2620,7 @@ namespace psycle
 
 		bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 		{
-			int temp;
+			std::int32_t temp;
 
 			//if ( version ... )
 			riffFile->Read(_numVoices); // numSubtracks
