@@ -17,8 +17,6 @@ namespace psycle
 			extern float previousRMSLeft;
 			extern float previousRMSRight;
 #endif
-		/// Funky denormal check
-		#define IS_DENORMAL(f) (!((*(unsigned int *)&f)&0x7f800000))	
 
 		/// various signal processing utility functions.
 		/// mixes two signals.
@@ -136,42 +134,31 @@ namespace psycle
 		{
 			return GetMaxVol(pSamplesL,pSamplesR,numSamples);
 		}
-		/*
-		static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
-		{
-			return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
-		}
-		static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
-		{
-			--pSamplesL;
-			--pSamplesR;
-			
-			float vol = 0.0f;
-			do
+		#if 0
+			static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
 			{
-				const float volL = fabsf(*++pSamplesL); // not all waves are symmetrical
-				const float volR = fabsf(*++pSamplesR);
-				
-				if (volL > vol)
-				{
-					vol = volL;
-				}
-				
-				if (volR > vol)
-				{
-					vol = volR;
-				}
+				return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
 			}
-			while (--numSamples);
-			
-			return vol;
-		}
-		*/
-		/***********************************************************************
-		Cure for malicious samples
-		Type : Filters Denormals, NaNs, Infinities
-		References : Posted by urs[AT]u-he[DOT]com
-		***********************************************************************/
+			static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
+			{
+				--pSamplesL;
+				--pSamplesR;
+				float vol = 0.0f;
+				do
+				{
+					const float volL = std::fabsf(*++pSamplesL); // not all waves are symmetrical
+					const float volR = std::fabsf(*++pSamplesR);
+					if (volL > vol) vol = volL;
+					if (volR > vol) vol = volR;
+				}
+				while(--numSamples);
+				return vol;
+			}
+		#endif
+
+		/// Cure for malicious samples
+		/// Type : Filters Denormals, NaNs, Infinities
+		/// References : Posted by urs[AT]u-he[DOT]com
 		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const & inNumberOfSamples )
 		{
 			unsigned int* inArrayOfFloats = (unsigned int*) inSamples;
@@ -188,28 +175,21 @@ namespace psycle
 				*inArrayOfFloats++ = sample * ((exponent < 0x7F800000) & (exponent > 0));
 			}
 		}
-		/// undenormalize (renormalize) samples in a signal buffer.
-		///\todo make a template version that accept both float and doubles
+
+		/// Cure for malicious samples
+		/// Type : Filters Denormals, NaNs, Infinities
 		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
-/*			float id(float(1.0E-18));
-			for(int s(0) ; s < numsamples ; ++s)
-			{
-//			Old denormal code. Now we use a 1bit sinus.
-//				if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
-//				if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
-//				const float is1=pSamplesL[s];
-//				const float is2=pSamplesR[s];
-//				pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
-//				pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
+			#if 1
+				erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
+				erase_All_NaNs_Infinities_And_Denormals(pSamplesR,numsamples);
+			#else
+				// a 1-bit "sinus" dither
+				float id(float(1.0E-18));
 				pSamplesL[s] += id;
 				pSamplesR[s] += id;
-				id = - id;
-			}
-*/
-			erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
-			erase_All_NaNs_Infinities_And_Denormals(pSamplesR,numsamples);
-
+				id = -id;
+			#endif
 		}
 
 		static inline float dB(float amplitude) // amplitude normalized to 1.0f.
