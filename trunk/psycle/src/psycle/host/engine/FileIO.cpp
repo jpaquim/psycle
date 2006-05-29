@@ -1,7 +1,8 @@
 ///\implementation psycle::host::RiffFile
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/FileIO.hpp>
+#include "FileIO.hpp"
+#include <stdexcept>
 
 namespace psycle
 {
@@ -117,13 +118,13 @@ namespace psycle
 
 		std::fpos_t RiffFile::Seek(std::fpos_t const & bytes)
 		{
-			if(std::fsetpos(file_, &bytes)) return -1;
+			if(std::fsetpos(file_, &bytes)) throw std::runtime_error("seek failed");
 			return GetPos();
 		}
 
 		std::fpos_t RiffFile::Skip(std::ptrdiff_t const & bytes)
 		{
-			if(std::fseek(file_, bytes, SEEK_CUR)) return -1;
+			if(std::fseek(file_, bytes, SEEK_CUR)) throw std::runtime_error("seek failed");
 			return GetPos();
 		}
 
