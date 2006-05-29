@@ -1245,7 +1245,16 @@ namespace psycle
 							loggers::warning("foreign chunk: size is zero. supressing messages until non zero-sized chunk is found.");
 						}
 						zero_size_foreign_chunk = !size;
-						if(pFile->Skip(size) < 0)
+						bool skip_failed(false);
+						try
+						{
+							pFile->Skip(size);
+						}
+						catch(...)
+						{
+							skip_failed = true;
+						}
+						if(skip_failed)
 						{
 							loggers::exception("foreign chunk is actually random/corrupted data. not reading further data.");
 							//break chunk_loop;
