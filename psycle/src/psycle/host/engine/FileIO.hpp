@@ -64,21 +64,24 @@ namespace psycle
 				std::fpos_t Seek(std::fpos_t    const & bytes);
 				std::fpos_t Skip(std::ptrdiff_t const & bytes);
 
-				bool Write (void const *, std::size_t const &);
-				bool Read  (void       *, std::size_t const &);
+				bool WriteChunk (void const *, std::size_t const &);
+				bool ReadChunk  (void       *, std::size_t const &);
 				bool Expect(void       *, std::size_t const &);
 
 			public://private: \todo to allow endian conversion, the template should be private and only functions with numeric types made public
 				template<typename X>
-				void inline Write(X const & x) { Write(&x, sizeof x); }
+				bool inline Write(X const & x) { return WriteChunk(&x, sizeof x); }
 				template<typename X>
-				void inline  Read(X       & x) {  Read(&x, sizeof x); }
+				bool inline  Read(X       & x) {  return ReadChunk(&x, sizeof x); }
 
 				/// only useful for reading 24-bit numbers
-				void inline Read24(std::int32_t & x) { x = 0; Read(&x, 3); }
+				bool inline Read24(std::int32_t & x) { x = 0; return ReadChunk(&x, 3); }
 
 				bool               ReadString(std::string &);
 				bool               ReadString(char *, std::size_t const & max_length);
+				//\todo : Implement a WriteString() to complement ReadString, and a ReadSizedString() which would do the same as ReadString
+				//		which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
+				//		setting the last char to null.
 
 				/// just a usless reinterpret_cast
 				///\todo disabled because the compiler accepts arguments of different size!

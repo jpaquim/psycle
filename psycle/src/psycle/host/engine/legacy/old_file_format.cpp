@@ -38,9 +38,9 @@ namespace psycle
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
 				New();
-				pFile->Read(Name, 32);
-				pFile->Read(Author, 32);
-				pFile->Read(Comment, 128);
+				pFile->ReadChunk(Name, 32); Name[31]=0;
+				pFile->ReadChunk(Author, 32); Author[31]=0;
+				pFile->ReadChunk(Comment, 128); Comment[31]=0;
 				unsigned int tmp;
 				pFile->Read(tmp);
 				m_BeatsPerMin=tmp;
@@ -66,13 +66,13 @@ namespace psycle
 				for(i =0 ; i < num; ++i)
 				{
 					pFile->Read(patternLines[i]);
-					pFile->Read(&patternName[i][0], sizeof *patternName);
+					pFile->ReadChunk(patternName[i], 32); patternName[i][31]=0;
 					if(patternLines[i] > 0)
 					{
 						unsigned char * pData(CreateNewPattern(i));
 						for(int c(0) ; c < patternLines[i] ; ++c)
 						{
-							pFile->Read(reinterpret_cast<char*>(pData), OLD_MAX_TRACKS * sizeof(PatternEntry));
+							pFile->ReadChunk(pData, OLD_MAX_TRACKS * 5); // OLD_MAX_TRACKS * sizeof(PatternEntry)
 							pData += MAX_TRACKS * sizeof(PatternEntry);
 						}
 					}
@@ -88,7 +88,7 @@ namespace psycle
 				pFile->Read(instSelected);
 				for(i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
-					pFile->Read(_pInstrument[i]->_sName);
+					pFile->ReadChunk(_pInstrument[i]->_sName,32); _pInstrument[i]->_sName[31]=0;
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
@@ -178,7 +178,7 @@ namespace psycle
 							{
 								std::int16_t tmpFineTune;
 								_pInstrument[i]->waveLength=wltemp;
-								pFile->Read(&_pInstrument[i]->waveName, 32);
+								pFile->ReadChunk(_pInstrument[i]->waveName, 32); _pInstrument[i]->waveName[31]=0;
 								pFile->Read(_pInstrument[i]->waveVolume);
 								pFile->Read(tmpFineTune);
 								_pInstrument[i]->waveFinetune=tmpFineTune;
@@ -187,25 +187,25 @@ namespace psycle
 								pFile->Read(_pInstrument[i]->waveLoopType);
 								pFile->Read(_pInstrument[i]->waveStereo);
 								_pInstrument[i]->waveDataL = new std::int16_t[_pInstrument[i]->waveLength];
-								pFile->Read(_pInstrument[i]->waveDataL, _pInstrument[i]->waveLength * sizeof(std::int16_t));
+								pFile->ReadChunk(_pInstrument[i]->waveDataL, _pInstrument[i]->waveLength * sizeof(std::int16_t));
 								if (_pInstrument[i]->waveStereo)
 								{
 									_pInstrument[i]->waveDataR = new std::int16_t[_pInstrument[i]->waveLength];
-									pFile->Read(_pInstrument[i]->waveDataR, _pInstrument[i]->waveLength * sizeof(std::int16_t));
+									pFile->ReadChunk(_pInstrument[i]->waveDataR, _pInstrument[i]->waveLength * sizeof(std::int16_t));
 								}
 							}
 							else 
 							{
 								char *junk =new char[42+sizeof(bool)];
-								pFile->Read(junk,sizeof junk);
+								pFile->ReadChunk(junk,sizeof junk);
 								delete junk;
 								bool stereo;
 								pFile->Read(stereo);
 								std::int16_t *junk2 = new std::int16_t[wltemp];
-								pFile->Read(junk2, sizeof junk2);
+								pFile->ReadChunk(junk2, sizeof junk2);
 								if ( stereo )
 								{
-									pFile->Read(junk2, sizeof junk2);
+									pFile->ReadChunk(junk2, sizeof junk2);
 								}
 								delete junk2;
 							}
@@ -221,17 +221,17 @@ namespace psycle
 				VSTLoader vstL[OLD_MAX_PLUGINS]; 
 				for (i=0; i<OLD_MAX_PLUGINS; i++)
 				{
-					pFile->Read(&vstL[i].valid,sizeof(bool));
+					pFile->Read(vstL[i].valid);
 					if( vstL[i].valid )
 					{
-						pFile->Read(vstL[i].dllName,sizeof(vstL[i].dllName));
+						pFile->ReadChunk(vstL[i].dllName,128); vstL[i].dllName[127]=0;
 						_strlwr(vstL[i].dllName);
-						pFile->Read(&(vstL[i].numpars), sizeof(int));
+						pFile->Read(vstL[i].numpars);
 						vstL[i].pars = new float[vstL[i].numpars];
 
 						for (int c=0; c<vstL[i].numpars; c++)
 						{
-							pFile->Read(&(vstL[i].pars[c]), sizeof(float));
+							pFile->Read(vstL[i].pars[c]);
 						}
 					}
 				}
@@ -483,7 +483,7 @@ namespace psycle
 					pFile->Read(_pInstrument[i]->_lines);
 				}
 
-				if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false ) // Patch 1: BusEffects (twf)
+				if ( pFile->Read(busEffect) == false ) // Patch 1: BusEffects (twf)
 				{
 					int j=0;
 					for ( i=0;i<128;i++ ) 
@@ -531,7 +531,7 @@ namespace psycle
 				}
 
 				bool chunkpresent=false;
-				pFile->Read(&chunkpresent,sizeof(chunkpresent)); // Patch 2: VST's Chunk.
+				pFile->Read(chunkpresent); // Patch 2: VST's Chunk.
 
 				if ( fullopen ) for ( i=0;i<128;i++ ) 
 				{
@@ -832,7 +832,7 @@ namespace psycle
 		bool Machine::LoadOldFileFormat(RiffFile* pFile)
 		{
 			char edName[32];
-			pFile->Read(&edName, 16); edName[15] = 0;
+			pFile->ReadChunk(edName, 16); edName[15] = 0;
 			_editName=edName;
 
 			pFile->Read(_inputMachines);
@@ -883,7 +883,7 @@ namespace psycle
 		bool Master::LoadOldFileFormat(RiffFile* pFile)
 		{
 			char edName[32];
-			pFile->Read(&edName, 16); edName[15] = 0;
+			pFile->ReadChunk(edName, 16); edName[15] = 0;
 			_editName=edName;
 			
 			pFile->Read(_inputMachines);
@@ -939,7 +939,7 @@ namespace psycle
 			int i;
 
 			char edName[32];
-			pFile->Read(&edName, 16); edName[15] = 0;
+			pFile->ReadChunk(edName, 16); edName[15] = 0;
 			_editName=edName;
 
 			pFile->Read(_inputMachines);
@@ -954,7 +954,7 @@ namespace psycle
 			pFile->Read(_panning);
 			Machine::SetPan(_panning);
 			pFile->Skip(4*8); // SubTrack[]
-			pFile->Read(&_numVoices, sizeof(_numVoices)); // numSubtracks
+			pFile->Read(_numVoices); // numSubtracks
 
 			if (_numVoices < 4)
 			{
@@ -962,7 +962,7 @@ namespace psycle
 				_numVoices = 8;
 			}
 
-			pFile->Read(&i, sizeof(int)); // interpol
+			pFile->Read(i); // interpol
 			switch (i)
 			{
 			case 2:
@@ -1074,14 +1074,14 @@ namespace psycle
 			Init();
 
 			char edName[32];
-			pFile->Read(&edName, 16); edName[15] = 0;
+			pFile->ReadChunk(edName, 16); edName[15] = 0;
 			_editName=edName;
 
 			pFile->Read(numParameters);
 			if(result)
 			{
 				std::int32_t * Vals = new std::int32_t[numParameters];
-				pFile->Read(Vals, numParameters * sizeof(std::int32_t));
+				pFile->ReadChunk(Vals, numParameters * sizeof(std::int32_t));
 				try
 				{
 					if ( wasAB ) // Patch to replace Arguru Bass by Arguru Synth 2f
@@ -1116,11 +1116,11 @@ namespace psycle
 				try
 				{
 					int size = proxy().GetDataSize();
-					//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
+					//pFile->Read(size);	// This would have been the right thing to do
 					if(size)
 					{
 						char * pData = new char[size];
-						pFile->Read(pData, size); // Number of parameters
+						pFile->ReadChunk(pData, size); // Number of parameters
 						try
 						{
 							proxy().PutData(pData); // Internal load
@@ -1164,7 +1164,7 @@ namespace psycle
 			{
 				for (int i=0; i<numParameters; i++)
 				{
-					pFile->Read(&junk[0], 4);
+					pFile->ReadChunk(junk, 4);
 				}
 			}
 
@@ -1234,7 +1234,7 @@ namespace psycle
 
 				// read chunk data
 				char * chunk(new char[chunk_size]);
-				pFile->Read(chunk, chunk_size);
+				pFile->ReadChunk(chunk, chunk_size);
 
 				try
 				{
@@ -1256,7 +1256,7 @@ namespace psycle
 				Machine::Init();
 
 				char edName[32];
-				pFile->Read(&edName, 16); edName[15] = 0;
+				pFile->ReadChunk(edName, 16); edName[15] = 0;
 				_editName=edName;
 
 				pFile->Read(_inputMachines);

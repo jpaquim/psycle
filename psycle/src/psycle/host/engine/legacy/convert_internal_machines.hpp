@@ -51,8 +51,7 @@ namespace psycle
 						BOOST_STATIC_ASSERT(sizeof(int) == 4);
 						{
 							char c[16];
-							riff.Read(c, 16);
-							c[15] = 0;
+							riff.ReadChunk(c, 16);	c[15] = 0;
 							machine._editName = c;
 						}
 						riff.Read(machine._inputMachines);
@@ -70,20 +69,20 @@ namespace psycle
 						{
 						case delay:
 							{
-								int parameters [2]; riff.Read(parameters, sizeof parameters);
+								int parameters [2]; riff.ReadChunk(parameters, sizeof parameters);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 5);
 							}
 							break;
 						case flanger:
 							{
-								int parameters [2]; riff.Read(parameters, sizeof parameters);
+								int parameters [2]; riff.ReadChunk(parameters, sizeof parameters);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 7);
 							}
 							break;
 						case gainer:
 							riff.Skip(sizeof(int));
 							{
-								int parameters [1]; riff.Read(parameters, sizeof parameters);
+								int parameters [1]; riff.ReadChunk(parameters, sizeof parameters);
 								if(type == gainer) retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
 							break;
@@ -93,7 +92,7 @@ namespace psycle
 						switch(type)
 						{
 						case distortion:
-							int parameters [4]; riff.Read(parameters, sizeof parameters);
+							int parameters [4]; riff.ReadChunk(parameters, sizeof parameters);
 							retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							break;
 						default:
@@ -104,9 +103,9 @@ namespace psycle
 						case ring_modulator:
 							{
 								unsigned char parameters [4];
-								riff.Read(&parameters[0], 2 * sizeof *parameters);
+								riff.Read(parameters[0]);
 								riff.Skip(sizeof(char));
-								riff.Read(&parameters[2], 2 * sizeof *parameters);
+								riff.Read(parameters[2]);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
 							riff.Skip(40);
@@ -115,10 +114,10 @@ namespace psycle
 							riff.Skip(5);
 							{
 								int parameters [4];
-								riff.Read(&parameters[0], sizeof *parameters);
-								riff.Read(&parameters[2], sizeof *parameters);
-								riff.Read(&parameters[1], sizeof *parameters);
-								riff.Read(&parameters[3], sizeof *parameters);
+								riff.Read(parameters[0]);
+								riff.Read(parameters[2]);
+								riff.Read(parameters[1]);
+								riff.Read(parameters[3]);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
 							riff.Skip(24);
@@ -126,19 +125,19 @@ namespace psycle
 						case flanger:
 							riff.Skip(4);
 							{
-								unsigned char parameters [1]; riff.Read(parameters, sizeof parameters);
+								unsigned char parameters [1]; riff.ReadChunk(parameters, sizeof parameters);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 9);
 							}
 							{
 								int parameters [6];
-								riff.Read(&parameters[0], sizeof *parameters);
+								riff.Read(parameters[0]);
 								riff.Skip(4);
-								riff.Read(&parameters[3], sizeof *parameters);
-								riff.Read(&parameters[5], sizeof *parameters);
+								riff.Read(parameters[3]);
+								riff.Read(parameters[5]);
 								riff.Skip(8);
-								riff.Read(&parameters[2], sizeof *parameters);
-								riff.Read(&parameters[1], sizeof *parameters);
-								riff.Read(&parameters[4], sizeof *parameters);
+								riff.Read(parameters[2]);
+								riff.Read(parameters[1]);
+								riff.Read(parameters[4]);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
 							riff.Skip(4);
@@ -147,8 +146,8 @@ namespace psycle
 							riff.Skip(21);
 							{
 								int parameters [6];
-								riff.Read(&parameters[1], sizeof parameters - sizeof *parameters);
-								riff.Read(&parameters[0], sizeof *parameters);
+								riff.ReadChunk(&parameters[1], sizeof parameters - sizeof *parameters);
+								riff.Read(parameters[0]);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
 							break;

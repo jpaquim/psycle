@@ -528,7 +528,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					if ( fxb._header._id != fxb.FourCC("CcnK") ) return;
 					RiffChunkHeader tmp;
-					fxb.Read(&tmp,8);
+					fxb.Read(tmp);
 					if ( tmp._id == fxb.FourCC("FBCh") ) // Bank Chunk
 					{
 						MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
@@ -541,12 +541,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						fxb.Skip(8); // VST ID + VSTVersion
 
 						endian::big::uint32_t numpresets;
-						fxb.Read(&numpresets,4);
+						fxb.ReadChunk(&numpresets,4);
 						int intpresets = (numpresets.lohi*256) + numpresets.lolo;
 
 						endian::big::uint32_t filenumpars;
 						fxb.Skip(128);
-						fxb.Read(&filenumpars,0);
+						//\todo: Investigate the following line. I assume it to be wrong, and the next fxb.Skip be 28.
+						fxb.ReadChunk(&filenumpars,0);
 
 						int i=0;
 						//int init=m_preslist.GetCount();
@@ -557,7 +558,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						while ( i < intpresets)
 						{
 							fxb.Skip(24);
-							fxb.Read(&filenumpars,4);
+							fxb.ReadChunk(&filenumpars,4);
 
 							if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters)
 							{
@@ -565,8 +566,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								fxb.Close();
 								return;
 							}
-							fxb.Read(cbuf,28);
-							fxb.Read(fbuf,numParameters*sizeof(float));
+							fxb.ReadChunk(cbuf,28); cbuf[27]=0;
+							fxb.ReadChunk(fbuf,numParameters*sizeof(float));
 							for (int y=0;y<numParameters;y++)
 							{
 								float temp=fbuf[y];
@@ -939,13 +940,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					fxb.Skip(8); // VST ID + VSTVersion
 					endian::big::uint32_t numpresets;
-					fxb.Read(&numpresets,4);
+					fxb.ReadChunk(&numpresets,4);
 					int intpresets = (numpresets.lohi*256) + numpresets.lolo;
 					// well, I don't expect any file with more than 65535 presets.
 					fxb.Skip(128);
 
 					endian::big::uint32_t filenumpars;
-					fxb.Read(&filenumpars,0); // Just because it seems that one "Skip" after another cause problems.
+					fxb.ReadChunk(&filenumpars,0); // Just because it seems that one "Skip" after another cause problems.
 
 					char cbuf[29]; cbuf[28]='\0';
 					float* fbuf;
@@ -955,15 +956,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					while( i < intpresets)
 					{
 						fxb.Skip(24); // CcnK header + "size" +  FxCk header + fxbkVersion + VST ID + VSTVersion
-						fxb.Read(&filenumpars,4);
+						fxb.ReadChunk(&filenumpars,4);
 						if(filenumpars.lohi * 256 + filenumpars.lolo != numParameters) // same here...
 						{
 							MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
 							fxb.Close();
 							return;
 						}
-						fxb.Read(cbuf,28); // Read Name
-						fxb.Read(fbuf,numParameters*sizeof(float)); // Read All params.
+						fxb.ReadChunk(cbuf,28); cbuf[27]=0;// Read Name
+						fxb.ReadChunk(fbuf,numParameters*sizeof(float)); // Read All params.
 						for (int y=0;y<numParameters;y++)
 						{
 							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////

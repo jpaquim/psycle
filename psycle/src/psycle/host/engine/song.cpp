@@ -731,8 +731,8 @@ namespace psycle
 			file.Read(hd);
 			if(hd._id == file.FourCC("NAME"))
 			{
-				file.Read(_pInstrument[instrument]->waveName, 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
-				strncpy(_pInstrument[instrument]->_sName,str, 31);
+				file.ReadChunk(_pInstrument[instrument]->waveName, 22); _pInstrument[instrument]->waveName[21]=0;///\todo should be hd._size instead of "22", but it is incorrectly read.
+				std::strncpy(_pInstrument[instrument]->_sName,str, 31);
 				_pInstrument[instrument]->_sName[31]='\0';
 				file.Read(hd);
 			}
@@ -769,7 +769,7 @@ namespace psycle
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-						file.Read(&tmp, 2);
+						file.ReadChunk(&tmp, 2);
 						*csamples = tmp.hilo * 256 + tmp.hihi;
 						++csamples;
 					}
@@ -778,7 +778,7 @@ namespace psycle
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-						file.Read(&tmp, 1);
+						file.ReadChunk(&tmp, 1);
 						*csamples = tmp.hihi * 256 + tmp.hihi;
 						++csamples;
 					}
@@ -814,7 +814,7 @@ namespace psycle
 			WaveFile file;
 			ExtRiffChunkHeader hd;
 			// opens the file and read the format Header.
-			DDCRET retcode(file.OpenForRead(const_cast<char*>(Wavfile)));
+			DDCRET retcode(file.OpenForRead(Wavfile));
 			if(retcode != DDC_SUCCESS) 
 			{
 				Invalided = false;
@@ -856,7 +856,7 @@ namespace psycle
 					case 24:
 						for(io = 0 ; io < Datalen ; ++io)
 						{
-							file.Read(smp8); ///\todo [bohan] is the lsb just discarded?
+							file.Read(smp8); ///\todo [bohan] is the lsb just discarded? [JosepMa]: yes. sampler only knows about 16bit samples
 							file.ReadData(sampL, 1);
 							++sampL;
 						}
@@ -895,10 +895,10 @@ namespace psycle
 					case 24:
 						for(io = 0 ; io < Datalen ; ++io)
 						{
-							file.Read(smp8); ///\todo [bohan] is the lsb just discarded?
+							file.Read(smp8); ///\todo [bohan] is the lsb just discarded? [JosepMa]: yes. sampler only knows about 16bit samples
 							file.ReadData(sampL, 1);
 							++sampL;
-							file.Read(smp8); ///\todo [bohan] is the lsb just discarded?
+							file.Read(smp8); ///\todo [bohan] is the lsb just discarded? [JosepMa]: yes. sampler only knows about 16bit samples
 							file.ReadData(sampR, 1);
 							++sampR;
 						}
@@ -907,7 +907,7 @@ namespace psycle
 						break; ///\todo should throw an exception
 				}
 			}
-			retcode = file.Read(static_cast<void*>(&hd), 8); ///\todo bloergh!
+			retcode = file.Read(hd);
 			while(retcode == DDC_SUCCESS)
 			{
 				if(hd.ckID == FourCC("smpl"))
@@ -923,10 +923,11 @@ namespace psycle
 						_pInstrument[instrument]->waveLoopStart = ls;
 						_pInstrument[instrument]->waveLoopEnd = le;
 						// only for my bad sample collection
-						//if(!((ls <= 0) && (le >= Datalen - 1)))
+						if(!((ls <= 0) && (le >= Datalen - 1)))
 						{
 							_pInstrument[instrument]->waveLoopType = true;
 						}
+						else { ls = 0; le = 0;	}
 					}
 					file.Skip(9);
 				}
@@ -934,7 +935,7 @@ namespace psycle
 					file.Skip(hd.ckSize);
 				else
 					file.Skip(1);
-				retcode = file.Read(static_cast<void*>(&hd), 8); ///\todo bloergh!
+				retcode = file.Read(hd); ///\todo bloergh!
 			}
 			file.Close();
 			Invalided = false;
@@ -944,7 +945,7 @@ namespace psycle
 		bool Song::Load(RiffFile* pFile, bool fullopen)
 		{
 			char Header[9];
-			pFile->Read(&Header, 8);
+			pFile->ReadChunk(&Header, 8);
 			Header[8]=0;
 
 			if (strcmp(Header,"PSY3SONG")==0)
@@ -969,18 +970,22 @@ namespace psycle
 				{
 					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
 				}
-				if (size == 4) // Since "version" is used for File version, we use size as version identifier
+
+				pFile->Read(chunkcount);
+				if ( size > 4)
 				{
-					pFile->Read(chunkcount);
+					/*
+					pFile->Read(fileversion);
+					if (version == x)
+					{}
+					else if (...)
+					{}
+					// This is left here if someday, extra data is added to the file version chunk.
+					// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - bytesread);
+					}
+					*/
+					pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
 				}
-				/*
-				if (size == )
-				{
-				// This is left here if someday, extra data is added to the file version chunk.
-				// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - bytesread);
-				}
-				*/
-				if ( size-4 > 0) pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
 
 				DestroyAllMachines();
 				_machineLock = true;
@@ -989,7 +994,7 @@ namespace psycle
 				Reset(); //added by sampler mainly to reset current pattern showed.
 				bool zero_size_foreign_chunk(false);
 				/* chunk_loop: */
-				while(pFile->Read(&Header, 4))
+				while(pFile->ReadChunk(&Header, 4))
 				{
 					Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
 					::Sleep(1); ///< Allow screen refresh.
@@ -1142,7 +1147,7 @@ namespace psycle
 								pFile->ReadString(patternName[index], sizeof *patternName);
 								pFile->Read(size);
 								unsigned char * pSource = new unsigned char[size];
-								pFile->Read(pSource, size);
+								pFile->ReadChunk(pSource, size);
 								unsigned char * pDest;
 								BEERZ77Decomp2(pSource, &pDest);
 								zapArray(pSource,pDest);
@@ -1390,7 +1395,7 @@ namespace psycle
 
 					// chunk header
 					{
-						pFile->Write("PSY3SONG", 8);
+						pFile->Write("PSY3SONG");
 
 						version = CURRENT_FILE_VERSION;
 						pFile->Write(version);
@@ -1421,7 +1426,7 @@ namespace psycle
 				{
 					// chunk header
 					{
-						pFile->Write("INFO",4);
+						pFile->Write("INFO");
 
 						version = CURRENT_FILE_VERSION_INFO;
 						pFile->Write(version);
@@ -1431,9 +1436,9 @@ namespace psycle
 					}
 					// chunk data
 					{
-						pFile->Write(&Name,strlen(Name)+1);
-						pFile->Write(&Author,strlen(Author)+1);
-						pFile->Write(&Comment,strlen(Comment)+1);
+						pFile->WriteChunk(Name,strlen(Name)+1);
+						pFile->WriteChunk(Author,strlen(Author)+1);
+						pFile->WriteChunk(Comment,strlen(Comment)+1);
 					}
 				}
 
@@ -1452,7 +1457,7 @@ namespace psycle
 				{
 					// chunk header
 					{
-						pFile->Write("SNGI",4);
+						pFile->Write("SNGI");
 
 						version = CURRENT_FILE_VERSION_SNGI;
 						pFile->Write(version);
@@ -1504,7 +1509,7 @@ namespace psycle
 
 					// chunk header
 					{
-						pFile->Write("SEQD",4);
+						pFile->Write("SEQD");
 
 						version = CURRENT_FILE_VERSION_SEQD;
 						pFile->Write(version);
@@ -1517,7 +1522,7 @@ namespace psycle
 						pFile->Write(index); // Sequence Track number
 						temp = playLength; pFile->Write(temp); // Sequence length
 						
-						pFile->Write(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
+						pFile->WriteChunk(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
 
 						for (unsigned int i = 0; i < playLength; i++)
 						{
@@ -1560,7 +1565,7 @@ namespace psycle
 
 						// chunk header
 						{
-							pFile->Write("PATD",4);
+							pFile->Write("PATD");
 
 							version = CURRENT_FILE_VERSION_PATD;
 							pFile->Write(version);
@@ -1574,10 +1579,10 @@ namespace psycle
 							temp = patternLines[index]; pFile->Write(temp);
 							temp = tracks(); pFile->Write(temp); // eventually this may be variable per pattern
 
-							pFile->Write(&patternName[index],strlen(patternName[index])+1);
+							pFile->WriteChunk(&patternName[index],strlen(patternName[index])+1);
 
 							pFile->Write(sizez77);
-							pFile->Write(pCopy,sizez77);
+							pFile->WriteChunk(pCopy,sizez77);
 						}
 
 						delete[] pCopy;
@@ -1605,7 +1610,7 @@ namespace psycle
 
 						// chunk header
 						{
-							pFile->Write("MACD",4);
+							pFile->Write("MACD");
 
 							version = CURRENT_FILE_VERSION_MACD;
 							pFile->Write(version);
@@ -1651,7 +1656,7 @@ namespace psycle
 
 						// chunk header
 						{
-							pFile->Write("INSD",4);
+							pFile->Write("INSD");
 
 							version = CURRENT_FILE_VERSION_INSD;
 							pFile->Write(version);
@@ -1762,7 +1767,7 @@ namespace psycle
 			RiffFile file;
 			if(!file.Create(path.string(), true)) return false;
 
-			file.Write("MACD",4);
+			file.Write("MACD");
 			std::uint32_t version = CURRENT_FILE_VERSION_MACD;
 			file.Write(version);
 			std::fpos_t pos = file.GetPos();
@@ -1789,7 +1794,7 @@ namespace psycle
 			}
 
 			char Header[5];
-			file.Read(&Header, 4);
+			file.ReadChunk(&Header, 4);
 			Header[4] = 0;
 			if (strcmp(Header,"MACD")==0)
 			{
@@ -1973,7 +1978,7 @@ namespace psycle
 				return false;
 			}
 
-			file.Write("INSD",4);
+			file.Write("INSD");
 			std::uint32_t version = CURRENT_FILE_VERSION_INSD;
 			file.Write(version);
 			std::fpos_t pos = file.GetPos();
@@ -2000,7 +2005,7 @@ namespace psycle
 				return false;
 			}
 			char Header[5];
-			file.Read(&Header, 4);
+			file.ReadChunk(&Header, 4);
 			Header[4] = 0;
 
 			if (strcmp(Header,"INSD")==0)

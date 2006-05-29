@@ -1187,7 +1187,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			char Temp[MAX_PATH];
-			file.Read(Temp,8);
+			file.ReadChunk(Temp,8);
 			Temp[8]=0;
 			if (strcmp(Temp,"PSYCACHE")!=0)
 			{
@@ -1197,7 +1197,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			UINT version;
-			file.Read(&version,sizeof(version));
+			file.Read(version);
 			if (version != CURRENT_CACHE_MAP_VERSION)
 			{
 				file.Close();
@@ -1205,27 +1205,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return false;
 			}
 
-			file.Read(&_numPlugins,sizeof(_numPlugins));
+			file.Read(_numPlugins);
 			for (int i = 0; i < _numPlugins; i++)
 			{
 				PluginInfo p;
 				file.ReadString(Temp,sizeof(Temp));
-				file.Read(&p.FileTime,sizeof(_pPlugsInfo[currentPlugsCount]->FileTime));
+				file.ReadChunk(&p.FileTime,sizeof(_pPlugsInfo[currentPlugsCount]->FileTime));
 				{
 					UINT size;
-					file.Read(&size, sizeof size);
+					file.Read(size);
 					if(size)
 					{
 						char *chars(new char[size + 1]);
-						file.Read(chars, size);
+						file.ReadChunk(chars, size);
 						chars[size] = '\0';
 						p.error = (const char*)chars;
 						zapArray(chars);
 					}
 				}
-				file.Read(&p.allow,sizeof(p.allow));
-				file.Read(&p.mode,sizeof(p.mode));
-				file.Read(&p.type,sizeof(p.type));
+				file.Read(p.allow);
+				file.Read(p.mode);
+				file.Read(p.type);
 				file.ReadString(p.name);
 				file.ReadString(p.desc);
 				file.ReadString(p.version);
@@ -1299,7 +1299,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			
 			char Temp[MAX_PATH];
-			file.Read(Temp,13);
+			file.ReadChunk(Temp,13);
 			Temp[13]=0;
 			if (strcmp(Temp,"PSYCATEGORIES")!=0)
 			{
@@ -1309,7 +1309,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			UINT version;
-			file.Read(&version,sizeof(version));
+			file.Read(version);
 			if (version != CURRENT_CACHE_MAP_VERSION)
 			{
 				file.Close();
@@ -1319,11 +1319,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			for (int h=0; h < NUM_INTERNAL_MACHINES;h++)
 			{
-				file.Read (&h, sizeof(h));
+				file.Read (h);
 				file.ReadString (_pInternalMachines[h]->category);
 			}
 
-			file.Read(&NumPlugsInCategories,sizeof(NumPlugsInCategories));
+			file.Read(NumPlugsInCategories);
 			PluginInfo p;
 
 			for (int i = 0; i < NumPlugsInCategories; i++)
@@ -1359,26 +1359,26 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DeleteFile(cache);
 			RiffFile file;
 			if(!file.Create(cache,true)) return false;
-			file.Write("PSYCACHE",8);
+			file.Write("PSYCACHE");
 			std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
 			file.Write(version);
 			file.Write(_numPlugins);
 			for (int i=0; i<_numPlugins; i++ )
 			{
-				file.Write(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
+				file.WriteChunk(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
 				file.Write(_pPlugsInfo[i]->FileTime);
 				{
 					const std::string error(_pPlugsInfo[i]->error);
 					std::uint32_t size(static_cast<int>(error.size()));
 					file.Write(size);
-					if(size) file.Write(error.data(), size);
+					if(size) file.WriteChunk(error.data(), size);
 				}
 				file.Write(_pPlugsInfo[i]->allow);
 				file.Write(_pPlugsInfo[i]->mode);
 				file.Write(_pPlugsInfo[i]->type);
-				file.Write(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
-				file.Write(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
-				file.Write(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
+				file.WriteChunk(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
+				file.WriteChunk(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
+				file.WriteChunk(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
 			}
 			file.Close();
 			return true;
@@ -1396,7 +1396,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				return false;
 			}
-			file.Write("PSYCATEGORIES",13);
+			file.Write("PSYCATEGORIES");
 			std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
 			file.Write(version);
 	
@@ -1404,7 +1404,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			for (std::uint32_t h=0; h < NUM_INTERNAL_MACHINES;h++)
 			{
 				file.Write (h);
-				file.Write (_pInternalMachines[h]->category.c_str (), _pInternalMachines[h]->category.length()+1);
+				file.WriteChunk(_pInternalMachines[h]->category.c_str (), _pInternalMachines[h]->category.length()+1);
 			}
 			
 			file.Write(NumPlugsInCategories);
@@ -1413,8 +1413,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pPlugsInfo[i]->category != "")
 				{
-					file.Write(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
-					file.Write(_pPlugsInfo[i]->category.c_str(),_pPlugsInfo[i]->category.length()+1);
+					file.WriteChunk(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
+					file.WriteChunk(_pPlugsInfo[i]->category.c_str(),_pPlugsInfo[i]->category.length()+1);
 				}
 			}
 			file.Close();

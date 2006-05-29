@@ -119,7 +119,7 @@ namespace psycle
 			{
 				char Header[5];
 
-				pFile->Read(&Header,4);
+				pFile->ReadChunk(&Header,4);
 				Header[4] = 0;
 				std::uint32_t version;
 				std::uint32_t size;
@@ -164,7 +164,7 @@ namespace psycle
 						else
 						{
 							pData = new std::uint8_t[size+4];// +4 to avoid any attempt at buffer overflow by the code <-- ?
-							pFile->Read(pData,size);
+							pFile->ReadChunk(pData,size);
 							///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 							if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
 							{
@@ -191,7 +191,7 @@ namespace psycle
 							else
 							{
 								pData = new std::uint8_t[size+4]; // +4 to avoid any attempt at buffer overflow by the code <-- ?
-								pFile->Read(pData,size);
+								pFile->ReadChunk(pData,size);
 								///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 								if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
 								{
@@ -245,7 +245,7 @@ namespace psycle
 			pFile->Write(_RCUT);
 			pFile->Write(_RRES);
 
-			pFile->Write(_sName, std::strlen(_sName) + 1);
+			pFile->WriteChunk(_sName, std::strlen(_sName) + 1);
 
 			// now we have to write out the waves, but only if valid
 
@@ -264,7 +264,7 @@ namespace psycle
 				}
 
 				std::uint32_t index = 0;
-				pFile->Write("WAVE",4);
+				pFile->Write("WAVE");
 				std::uint32_t version = CURRENT_FILE_VERSION_PATD;
 				std::uint32_t size =
 					sizeof index +
@@ -293,15 +293,15 @@ namespace psycle
 				pFile->Write(waveLoopType);
 				pFile->Write(waveStereo);
 
-				pFile->Write(waveName, std::strlen(waveName) + 1);
+				pFile->WriteChunk(waveName, std::strlen(waveName) + 1);
 
 				pFile->Write(size1);
-				pFile->Write(pData1,size1);
+				pFile->WriteChunk(pData1,size1);
 				delete[] pData1;
 				if (waveStereo)
 				{
 					pFile->Write(size2);
-					pFile->Write(pData2,size2);
+					pFile->WriteChunk(pData2,size2);
 				}
 				delete[] pData2;
 			}

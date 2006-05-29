@@ -22,7 +22,7 @@ namespace psycle
 			for(;;)
 			{
 				char c;
-				if(!Read(&c, sizeof c)) return false;
+				if(!ReadChunk(&c, sizeof c)) return false;
 				if(!c) return true;
 				result += c;
 			}
@@ -36,7 +36,7 @@ namespace psycle
 				for(std::size_t index(0) ; index < max_length ; ++index)
 				{
 					char c;
-					if(!Read(&c, sizeof c)) return false;
+					if(!ReadChunk(&c, sizeof c)) return false;
 					{
 						data[index] = c;
 						if(!c) return true;
@@ -46,7 +46,7 @@ namespace psycle
 					char c;
 					do
 					{
-						if(!Read(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
+						if(!ReadChunk(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
 					} while(c);
 				}
 				return true;
@@ -90,12 +90,12 @@ namespace psycle
 			return !/*std::*/ferror(file_);
 		}
 
-		bool RiffFile::Read(void * data, std::size_t const & bytes)
+		bool RiffFile::ReadChunk(void * data, std::size_t const & bytes)
 		{
 			return std::fread(data, sizeof(char), bytes, file_) == bytes;
 		}
 
-		bool RiffFile::Write(void const * data, std::size_t const & bytes)
+		bool RiffFile::WriteChunk(void const * data, std::size_t const & bytes)
 		{
 			///\todo why flushing?
 			std::fflush(file_);

@@ -303,7 +303,7 @@ namespace psycle
 		{
 			boost::filesystem::path path(this->GetDllName(), boost::filesystem::native);
 			std::string pathstr = path.leaf();
-			pFile->Write(pathstr.c_str(), pathstr.length() + 1);
+			pFile->WriteChunk(pathstr.c_str(), pathstr.length() + 1);
 		}
 
 		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -328,7 +328,7 @@ namespace psycle
 					/*
 					if (count)
 					{
-						pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+						pFile->ReadChunk(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
 					}
 					*/
 					for(unsigned int i(0) ; i < count ; ++i)
@@ -341,7 +341,7 @@ namespace psycle
 					if(size)
 					{
 						char * pData = new char[size];
-						pFile->Read(pData, size); // Number of parameters
+						pFile->ReadChunk(pData, size); // Number of parameters
 						try
 						{
 							proxy().PutData(pData); // Internal load
@@ -385,7 +385,7 @@ namespace psycle
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
 				}
-				pFile->Write(pData, size2); // Number of parameters
+				pFile->WriteChunk(pData, size2); // Number of parameters
 				delete[] pData;
 			}
 		};

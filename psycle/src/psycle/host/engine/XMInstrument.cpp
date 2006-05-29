@@ -35,11 +35,11 @@ namespace psycle
 
 			riffFile->Read(m_WaveLoopStart);
 			riffFile->Read(m_WaveLoopEnd);
-			riffFile->Read(&m_WaveLoopType,sizeof(m_WaveLoopType));
+			riffFile->Read(m_WaveLoopType);
 
 			riffFile->Read(m_WaveSusLoopStart);
 			riffFile->Read(m_WaveSusLoopEnd);
-			riffFile->Read(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
+			riffFile->Read(m_WaveSusLoopType);
 
 			riffFile->Read(m_WaveTune);
 			riffFile->Read(m_WaveFineTune);
@@ -56,7 +56,7 @@ namespace psycle
 			riffFile->Read(size1);
 			byte* pData;
 			pData = new byte[size1];
-			riffFile->Read((void *)pData,size1);
+			riffFile->ReadChunk(pData,size1);
 			SoundDesquash(pData,&m_pWaveDataL);
 			
 			if (m_WaveStereo)
@@ -64,7 +64,7 @@ namespace psycle
 				delete pData;
 				riffFile->Read(size2);
 				pData = new byte[size2];
-				riffFile->Read(pData,size2);
+				riffFile->ReadChunk(pData,size2);
 				SoundDesquash(pData,&m_pWaveDataR);
 			}
 			delete pData;
@@ -95,7 +95,7 @@ namespace psycle
 			riffFile->Write(size);
 			//\todo: add version
 
-			riffFile->Write(_wave_name,strlen(_wave_name) + 1);
+			riffFile->WriteChunk(_wave_name,strlen(_wave_name) + 1);
 
 			riffFile->Write(m_WaveLength);
 			riffFile->Write(m_WaveGlobVolume);
@@ -103,11 +103,11 @@ namespace psycle
 
 			riffFile->Write(m_WaveLoopStart);
 			riffFile->Write(m_WaveLoopEnd);
-			riffFile->Write(&m_WaveLoopType,sizeof(m_WaveLoopType));
+			riffFile->Write(m_WaveLoopType);
 
 			riffFile->Write(m_WaveSusLoopStart);
 			riffFile->Write(m_WaveSusLoopEnd);
-			riffFile->Write(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
+			riffFile->Write(m_WaveSusLoopType);
 
 			riffFile->Write(m_WaveTune);
 			riffFile->Write(m_WaveFineTune);
@@ -122,13 +122,13 @@ namespace psycle
 			riffFile->Write(m_VibratoType);
 
 			riffFile->Write(size1);
-			riffFile->Write((void*)pData1,size1);
+			riffFile->WriteChunk(pData1,size1);
 			delete pData1;
 			
 			if (m_WaveStereo)
 			{
 				riffFile->Write(size2);
-				riffFile->Write((void*)pData2,size2);
+				riffFile->WriteChunk(pData2,size2);
 				delete pData2;
 			}
 		}
@@ -461,25 +461,25 @@ namespace psycle
 			riffFile->Read(m_InitPan);
 			riffFile->Read(m_PanEnabled);
 			riffFile->Read(m_NoteModPanCenter);
-			riffFile->Read(&m_NoteModPanSep,sizeof(universalis::compiler::numeric<8>::signed_int));
+			riffFile->ReadChunk(&m_NoteModPanSep,sizeof(universalis::compiler::numeric<8>::signed_int));
 
 			riffFile->Read(m_FilterCutoff);
 			riffFile->Read(m_FilterResonance);
 			riffFile->Read(m_FilterEnvAmount);
-			riffFile->Read(&m_FilterType,sizeof(m_FilterType));
+			riffFile->Read(m_FilterType);
 
 			riffFile->Read(m_RandomVolume);
 			riffFile->Read(m_RandomPanning);
 			riffFile->Read(m_RandomCutoff);
 			riffFile->Read(m_RandomResonance);
 
-			riffFile->Read(&m_NNA,sizeof(m_NNA));
-			riffFile->Read(&m_DCT,sizeof(m_DCT));
-			riffFile->Read(&m_DCA,sizeof(m_DCA));
+			riffFile->Read(m_NNA);
+			riffFile->Read(m_DCT);
+			riffFile->Read(m_DCA);
 
 			NotePair npair;
 			for(int i = 0;i < NOTE_MAP_SIZE;i++){
-				riffFile->Read(&npair,sizeof(npair));
+				riffFile->Read(npair);
 				NoteToSample(i,npair);
 			}
 
@@ -507,7 +507,7 @@ namespace psycle
 			//\todo : add version.
 
 			CT2A _name(m_Name.c_str());
-			riffFile->Write(_name,strlen(_name) + 1);
+			riffFile->WriteChunk(_name,strlen(_name) + 1);
 
 //			riffFile->Write(m_bEnabled);
 
@@ -524,21 +524,21 @@ namespace psycle
 			riffFile->Write(m_FilterCutoff);
 			riffFile->Write(m_FilterResonance);
 			riffFile->Write(m_FilterEnvAmount);
-			riffFile->Write(&m_FilterType,sizeof(m_FilterType));
+			riffFile->Write(m_FilterType);
 
 			riffFile->Write(m_RandomVolume);
 			riffFile->Write(m_RandomPanning);
 			riffFile->Write(m_RandomCutoff);
 			riffFile->Write(m_RandomResonance);
 
-			riffFile->Write(&m_NNA,sizeof(m_NNA));
-			riffFile->Write(&m_DCT,sizeof(m_DCT));
-			riffFile->Write(&m_DCA,sizeof(m_DCA));
+			riffFile->Write(m_NNA);
+			riffFile->Write(m_DCT);
+			riffFile->Write(m_DCA);
 
 			NotePair npair;
 			for(i = 0;i < NOTE_MAP_SIZE;i++){
 				npair = NoteToSample(i);
-				riffFile->Write(&npair,sizeof(npair));
+				riffFile->Write(npair);
 			}
 
 			int version = 0;
