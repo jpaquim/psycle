@@ -55,7 +55,7 @@
 #else
 #define MSVC_ALIGN
 #endif
-#if defined DIVERSALIS__COMPILER__GNU#
+#if defined DIVERSALIS__COMPILER__GNU
 #define GNU_ALIGN __attribute__((aligned))
 #else
 #define GNU_ALIGN
