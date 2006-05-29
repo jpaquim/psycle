@@ -140,7 +140,7 @@ namespace psycle
 	{
 		// get data
 		Seek(60);
-		Read(&m_Header,sizeof(XMFILEHEADER));
+		Read(m_Header);
 
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
@@ -202,7 +202,7 @@ namespace psycle
 			Seek(start);
 
 		// read data
-		if(Read(pData,size))
+		if(ReadChunk(pData,size))
 			return pData;
 
 		delete[] pData;
@@ -678,8 +678,7 @@ namespace psycle
 //		ASSERT(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
 		TCHAR sInstrName[23];
 		ZeroMemory(sInstrName,sizeof(sInstrName) * sizeof(TCHAR));
-		Read(sInstrName,22);
-		sInstrName[22]= 0;
+		ReadChunk(sInstrName,22); sInstrName[22]= 0;
 
 		Skip(1); //int iInstrType = ReadInt1();
 		int iSampleCount = ReadInt2();
@@ -696,7 +695,7 @@ namespace psycle
         
 		XMSAMPLEHEADER _samph;
 		ZeroMemory(&_samph,sizeof(XMSAMPLEHEADER));
-		Read(&_samph,sizeof(XMSAMPLEHEADER));
+		Read(_samph);
 
 		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
 			XMInstrument::WaveData::WaveForms::SQUARE,
@@ -850,7 +849,7 @@ namespace psycle
 		Seek(iStart);
 		char * smpbuf = new char[smpLen[iSampleIdx]];
 		memset(smpbuf,0,smpLen[iSampleIdx]);
-		Read(smpbuf,smpLen[iSampleIdx]);
+		ReadChunk(smpbuf,smpLen[iSampleIdx]);
 
 		int sampleCnt = smpLen[iSampleIdx];
 
@@ -1032,7 +1031,7 @@ namespace psycle
 		Seek(20);
 		for (int i=0;i<31;i++) LoadSampleHeader(*m_pSampler,i);
 		Seek(950);
-		Read(&m_Header,sizeof(MODHEADER));
+		Read(m_Header);
 		
 		char pID[5];
 		pID[0]=m_Header.pID[0];pID[1]=m_Header.pID[1];pID[2]=m_Header.pID[2];pID[3]=m_Header.pID[3];pID[4]=0;
@@ -1115,7 +1114,7 @@ namespace psycle
 			Seek(start);
 
 		// read data
-		if(Read(pData,size))
+		if(ReadChunk(pData,size))
 			return pData;
 
 		delete[] pData;
@@ -1349,8 +1348,7 @@ namespace psycle
 
 	const void MODSongLoader::LoadSampleHeader(XMSampler & sampler, const int iInstrIdx)
 	{
-		Read(m_Samples[iInstrIdx].sampleName,22);
-		m_Samples[iInstrIdx].sampleName[21]='\0';
+		ReadChunk(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
 
 		smpLen[iInstrIdx] = (ReadUInt1()*0x100+ReadUInt1())*2; 
 		m_Samples[iInstrIdx].sampleLength = smpLen[iInstrIdx];
@@ -1402,7 +1400,7 @@ namespace psycle
 
 		// cache sample data
 		unsigned char * smpbuf = new unsigned char[smpLen[iInstrIdx]];
-		Read(smpbuf,smpLen[iInstrIdx]);
+		ReadChunk(smpbuf,smpLen[iInstrIdx]);
 
 		int sampleCnt = smpLen[iInstrIdx];
 

@@ -3,6 +3,7 @@
 #include <psycle/host/engine/SongStructs.hpp>
 #include <psycle/host/engine/FileIO.hpp>
 #include <psycle/host/engine/XMFile.hpp>
+#include <cstdint>
 class Song;
 class XMSampler;
 class XMInstrument;
@@ -32,23 +33,23 @@ namespace host{
 		// inlines
 		const char ReadInt1(LONG start=-1)
 		{	
-			char i;
+			std::int8_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,1)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const short ReadInt2(LONG start=-1)
 		{
-			short i;
+			std::int16_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,2)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const int ReadInt4(LONG start=-1)
 		{
-			int i;
+			std::int32_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,4)?i:0;
+			return Read(i)?i:0;
 		}
 
 		int m_iInstrCnt;
@@ -107,23 +108,23 @@ namespace host{
 		// inlines
 		const unsigned char ReadUInt1(LONG start=-1)
 		{	
-			unsigned char i;
+			std::uint8_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,1)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const unsigned short ReadUInt2(LONG start=-1)
 		{
-			unsigned short i;
+			std::uint16_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,2)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const unsigned int ReadUInt4(LONG start=-1)
 		{
-			unsigned int i;
+			std::uint32_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,4)?i:0;
+			return Read(i)?i:0;
 		}
 		static const short BIGMODPERIODTABLE[37*8];
 		unsigned short smpLen[32];

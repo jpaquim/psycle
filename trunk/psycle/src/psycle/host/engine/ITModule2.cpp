@@ -39,7 +39,7 @@ namespace psycle
 			pFile->Read(size);
 			pdata = new unsigned char[size];
 			if (!pdata) return false;
-			if (!pFile->Read(pdata,size))
+			if (!pFile->ReadChunk(pdata,size))
 			{
 				delete[] pdata;
 				return false;
@@ -84,7 +84,7 @@ namespace psycle
 		bool ITModule2::LoadITModule(Song *song)
 		{
 			s=song;
-			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
+			if (ReadChunk(&itFileH,sizeof(itHeader))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
 
 			strcpy(s->Name,itFileH.songName);
@@ -190,11 +190,11 @@ Special:  Bit 0: On = song message attached.
 			}
 
 			std::uint32_t *pointersi = new std::uint32_t[itFileH.insNum];
-			Read(pointersi,itFileH.insNum*sizeof(std::uint32_t));
+			ReadChunk(pointersi,itFileH.insNum*sizeof(std::uint32_t));
 			std::uint32_t * pointerss = new std::uint32_t[itFileH.sampNum];
-			Read(pointerss,itFileH.sampNum*sizeof(std::uint32_t));
+			ReadChunk(pointerss,itFileH.sampNum*sizeof(std::uint32_t));
 			std::uint32_t * pointersp = new std::uint32_t[itFileH.patNum];
-			Read(pointersp,itFileH.patNum*sizeof(std::uint32_t));
+			ReadChunk(pointersp,itFileH.patNum*sizeof(std::uint32_t));
 
 			if ( itFileH.special&SpecialFlags::MIDIEMBEDDED)
 			{
@@ -534,7 +534,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadITSample(XMSampler *sampler,int iSampleIdx)
 		{
 			itSampleHeader curH;
-			Read(&curH,sizeof(curH));
+			Read(curH);
 			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 
 /*		      Flg:      Bit 0. On = sample associated with header.
@@ -644,7 +644,7 @@ Special:  Bit 0: On = song message attached.
 
 			if (b16Bit) iLen*=2;
 			unsigned char * smpbuf = new unsigned char[iLen];
-			Read(smpbuf,iLen);
+			ReadChunk(smpbuf,iLen);
 
 			out=0;wNew=0;
 			if (b16Bit) {
@@ -655,7 +655,7 @@ Special:  Bit 0: On = song message attached.
 					out++;
 				}
 				if (bstereo) {
-					Read(smpbuf,iLen);
+					ReadChunk(smpbuf,iLen);
 					out=0;
 					for (j = 0; j < iLen; j+=2) {
 						wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
@@ -670,7 +670,7 @@ Special:  Bit 0: On = song message attached.
 					*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset) ^65535;
 				}
 				if (bstereo) {
-					Read(smpbuf,iLen);
+					ReadChunk(smpbuf,iLen);
 					for (j = 0; j < iLen; j++) {
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
 						*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset) ^65535;
@@ -935,7 +935,7 @@ Special:  Bit 0: On = song message attached.
 					numchans = max(channel,numchans);
 					#undef max
 
-					Read(&newEntry,1);
+					Read(newEntry);
 				}
 			}
 			return true;
@@ -1110,7 +1110,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadS3MModuleX(Song *song)
 		{
 			s=song;
-			if (Read(&s3mFileH,sizeof(s3mFileH))==0 ) return 0;
+			if (ReadChunk(&s3mFileH,sizeof(s3mHeader))==0 ) return 0;
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
 
 			s3mFileH.songName[28]='\0';
@@ -1143,9 +1143,9 @@ Special:  Bit 0: On = song message attached.
 			}
 
 			std::uint16_t *pointersi = new std::uint16_t[s3mFileH.insNum];
-			Read(pointersi,s3mFileH.insNum*sizeof(std::uint16_t));
+			ReadChunk(pointersi,s3mFileH.insNum*sizeof(std::uint16_t));
 			std::uint16_t * pointersp = new std::uint16_t[s3mFileH.patNum];
-			Read(pointersp,s3mFileH.patNum*sizeof(std::uint16_t));
+			ReadChunk(pointersp,s3mFileH.patNum*sizeof(std::uint16_t));
 
 			bool stereo=s3mFileH.mVol&0x80;
 			int numchans=0;
@@ -1176,7 +1176,7 @@ Special:  Bit 0: On = song message attached.
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
 			{
-				Read(chansettings,sizeof(chansettings));
+				Read(chansettings);
 				if (stereo)
 				{
 					for (i=0;i<32;i++)
@@ -1209,7 +1209,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadS3MInstX(XMSampler *sampler,int iInstIdx)
 		{
 			s3mInstHeader curH;
-			Read(&curH,sizeof(curH));
+			Read(curH);
 
 			sampler->rInstrument(iInstIdx).Name(curH.sName);
 
@@ -1344,10 +1344,10 @@ OFFSET              Count TYPE   Description
 				if(b16Bit)
 				{
 					smpbuf = new char[iLen*2];
-					Read(smpbuf,iLen*2);
+					ReadChunk(smpbuf,iLen*2);
 				} else 	{
 					smpbuf = new char[iLen];
-					Read(smpbuf,iLen);
+					ReadChunk(smpbuf,iLen);
 				}
 				std::int16_t wNew;
 				std::int16_t offset;
@@ -1365,7 +1365,7 @@ OFFSET              Count TYPE   Description
 							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 						}
 						out=0;
-						Read(smpbuf,iLen*2);
+						ReadChunk(smpbuf,iLen*2);
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
@@ -1391,7 +1391,7 @@ OFFSET              Count TYPE   Description
 							wNew = (smpbuf[j]<<8)+offset;
 							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
-						Read(smpbuf,iLen);
+						ReadChunk(smpbuf,iLen);
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
@@ -1496,7 +1496,7 @@ OFFSET              Count TYPE   Description
 					*pData = pent;
 					pent=pempty;
 
-					Read(&newEntry,1);
+					Read(newEntry);
 				}
 			}
 			return true;

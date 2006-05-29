@@ -367,7 +367,7 @@ namespace psycle
 						if(proxy().flags() & effFlagsProgramChunks)
 						{
 							char * data(new char[size]);
-							pFile->Read(data, size); // Number of parameters
+							pFile->ReadChunk(data, size); // Number of parameters
 							try 
 							{
 								proxy().dispatcher(effSetChunk, 0, size, data);
@@ -396,7 +396,7 @@ namespace psycle
 			{
 				boost::filesystem::path path(GetDllName(), boost::filesystem::native);
 				std::string const s(path.leaf());
-				pFile->Write(s.c_str(), s.length() + 1);
+				pFile->WriteChunk(s.c_str(), s.length() + 1);
 			}
 
 			void plugin::SaveSpecificChunk(RiffFile * pFile) 
@@ -447,7 +447,7 @@ namespace psycle
 				size -= sizeof _program + sizeof count + sizeof(float) * count;
 				if(size > 0)
 				{
-					pFile->Write(pData, size);
+					pFile->WriteChunk(pData, size);
 				}
 			}
 

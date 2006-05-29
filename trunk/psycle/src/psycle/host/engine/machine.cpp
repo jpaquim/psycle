@@ -573,13 +573,13 @@ namespace psycle
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
-			pFile->Read(&size,sizeof(size)); // size of this part params to load
+			pFile->Read(size); // size of this part params to load
 			UINT count;
-			pFile->Read(&count,sizeof(count)); // num params to load
+			pFile->Read(count); // num params to load
 			for (UINT i = 0; i < count; i++)
 			{
 				int temp;
-				pFile->Read(&temp,sizeof(temp));
+				pFile->Read(temp);
 				SetParameter(i,temp);
 			}
 			pFile->Skip(size-sizeof(count)-(count*sizeof(int)));
@@ -593,7 +593,7 @@ namespace psycle
 			Machine* pMachine;
 			MachineType type;//,oldtype;
 			char dllName[256];
-			pFile->Read(&type,sizeof(type));
+			pFile->Read(type);
 			//oldtype=type;
 			pFile->ReadString(dllName,256);
 			switch (type)
@@ -789,7 +789,7 @@ namespace psycle
 				pFile->Write(_connection[i]);
 				pFile->Write(_inputCon[i]);
 			}
-			pFile->Write(GetEditName().c_str(), GetEditName().length()+1);	//a max of 128 chars will be read on song load, but there's no real
+			pFile->WriteChunk(GetEditName().c_str(), GetEditName().length()+1);	//a max of 128 chars will be read on song load, but there's no real
 																			//reason to limit what gets saved here.. (is there?)
 			SaveSpecificChunk(pFile);
 		}
