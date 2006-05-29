@@ -1,7 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
 #include <psycle/host/engine/machine.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/dsp.hpp>
@@ -244,8 +243,8 @@ namespace psycle
 
 		Machine::~Machine() throw()
 		{
-			zapArray(_pSamplesL);
-			zapArray(_pSamplesR);
+			delete[] _pSamplesL;
+			delete[] _pSamplesR;
 		}
 
 		void Machine::Init()
@@ -572,17 +571,17 @@ namespace psycle
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
-			pFile->Read(size); // size of this part params to load
-			UINT count;
-			pFile->Read(count); // num params to load
-			for (UINT i = 0; i < count; i++)
+			std::uint32_t size;
+			pFile->Read(size);
+			std::uint32_t count;
+			pFile->Read(count);
+			for(std::uint32_t i(0); i < count; ++i)
 			{
-				int temp;
+				std::uint32_t temp;
 				pFile->Read(temp);
 				SetParameter(i,temp);
 			}
-			pFile->Skip(size-sizeof(count)-(count*sizeof(int)));
+			pFile->Skip(size - sizeof count - count * sizeof(std::uint32_t));
 			return true;
 		};
 
@@ -679,7 +678,7 @@ namespace psycle
 				break;
 			}
 			pMachine->Init();
-			int temp;
+			std::uint32_t temp;
 			pMachine->_type = type;
 			pFile->Read(pMachine->_bypass);
 			pFile->Read(pMachine->_mute);
@@ -809,7 +808,7 @@ namespace psycle
 
 		void Machine::SaveDllName(RiffFile* pFile)
 		{
-			char temp=0;
+			std::uint8_t const temp(0);
 			pFile->Write(temp);
 		}
 	}

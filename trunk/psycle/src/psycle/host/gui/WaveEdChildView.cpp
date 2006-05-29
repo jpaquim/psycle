@@ -499,7 +499,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			menu.LoadMenu(IDR_WAVED_POPUP);
 			CMenu *popup;
 			popup=menu.GetSubMenu(0);
-			ASSERT(popup!=NULL);
+			assert(popup);
 
 			//i would very much like to know why this nonsense is necessary.. i've been told that OnUpdateCommandUI messages
 			//don't work for non-CFrameWnd-derived windows, but ChildView.cpp seems to do alright..  if another solution is

@@ -1957,7 +1957,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
 						}
 						CMenu* pPopup = popupmenu.GetSubMenu(0);
-						ASSERT(pPopup);
+						assert(pPopup);
 				
 						pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, CNewMachine::GetActiveWindow());
 				

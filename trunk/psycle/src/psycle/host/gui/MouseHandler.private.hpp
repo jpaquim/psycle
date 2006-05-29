@@ -185,7 +185,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				CMenu menu;
 				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
 				CMenu* pPopup = menu.GetSubMenu(0);
-				ASSERT(pPopup != NULL);
+				assert(pPopup);
 				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 				
 				menu.DestroyMenu();

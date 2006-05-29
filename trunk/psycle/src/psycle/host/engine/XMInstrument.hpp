@@ -202,11 +202,11 @@ namespace psycle
 			const signed short * pWaveDataL(){ return m_pWaveDataL;};
 			const signed short * pWaveDataR(){ return m_pWaveDataR;};
 			
-			signed short WaveDataL(const universalis::compiler::numeric<32>::unsigned_int index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataL + index));};
-			signed short WaveDataR(const universalis::compiler::numeric<32>::unsigned_int index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataR + index));};
+			signed short WaveDataL(std::uint32_t index) const { assert(index<m_WaveLength); return (*(m_pWaveDataL + index));};
+			signed short WaveDataR(std::uint32_t index) const { assert(index<m_WaveLength); return (*(m_pWaveDataR + index));};
 			
-			void WaveDataL(const universalis::compiler::numeric<32>::unsigned_int index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataL + index) = value;};
-			void WaveDataR(const universalis::compiler::numeric<32>::unsigned_int index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataR + index) = value;};
+			void WaveDataL(std::uint32_t index, std::int16_t value){ assert(index<m_WaveLength); *(m_pWaveDataL + index) = value;};
+			void WaveDataR(std::uint32_t index, std::int16_t value){ assert(index<m_WaveLength); *(m_pWaveDataR + index) = value;};
 
 		private:
 
@@ -283,20 +283,20 @@ namespace psycle
 			// Sets a new time for an existing pointIndex point.
 			const int SetTime(const unsigned int pointIndex,const int pointTime)
 			{ 
-				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				assert(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				m_Points[pointIndex].first = pointTime;
 				return SetTimeAndValue(pointIndex,pointTime,m_Points[pointIndex].second);
 			}
 			// Gets the value of the pointIndex point.
 			const ValueType GetValue(const unsigned int pointIndex)
 			{ 
-				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				assert(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				return m_Points[pointIndex].second;
 			}
 			// Sets the value pointVal to pointIndex point.
 			void SetValue(const unsigned int pointIndex,const ValueType pointVal)
 			{
-				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				assert(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				m_Points[pointIndex].second = pointVal;
 			}
 			/// Appends a new point at the end of the array.
@@ -570,13 +570,13 @@ namespace psycle
 		}
 		int SetSample(XMInstrument::WaveData &wave,int pos)
 		{
-			ASSERT(pos<MAX_INSTRUMENTS);
+			assert(pos<MAX_INSTRUMENTS);
 			m_waves[pos]=wave;
 			return pos;
 		}
 		XMInstrument::WaveData &operator[](int pos)
 		{
-			ASSERT(pos<MAX_INSTRUMENTS);
+			assert(pos<MAX_INSTRUMENTS);
 			return m_waves[pos];
 		}
 	private:
@@ -598,12 +598,12 @@ namespace psycle
 		}
 		int SetInst(XMInstrument &inst,int pos)
 		{
-			ASSERT(pos<MAX_INSTRUMENTS);
+			assert(pos<MAX_INSTRUMENTS);
 			m_inst[pos]=inst;
 			return pos;
 		}
 		XMInstrument &operator[](int pos){
-			ASSERT(pos<MAX_INSTRUMENTS);
+			assert(pos<MAX_INSTRUMENTS);
 			return m_inst[pos];
 		}
 	private:
