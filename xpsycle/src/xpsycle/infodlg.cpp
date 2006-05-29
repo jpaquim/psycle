@@ -24,12 +24,13 @@
 InfoDlg::InfoDlg()
   : NWindow()
 {
-    memo = new NMemo();
-      memo->setWordWrap(true);
-      memo->setReadOnly(true);
-    pane()->add(memo,nAlClient);
+  memo = new NMemo();
+    memo->setWordWrap(true);
+    memo->setReadOnly(true);
+  pane()->add(memo,nAlClient);
 
-    setPosition(0,0,500,500);
+  setSize(500,500);
+  setPositionToScreenCenter();
 }
 
 

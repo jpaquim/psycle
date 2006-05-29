@@ -262,6 +262,7 @@ public:
   uint16_t  NumChannels()    const;
   uint32_t  NumSamples()     const;
 
+
   void ReadData  ( uint8_t *data, uint32_t numData ) {
     read(data,numData );
   }
