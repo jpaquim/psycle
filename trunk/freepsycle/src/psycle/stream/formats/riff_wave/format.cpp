@@ -97,13 +97,13 @@ namespace psycle
 					///\todo the is general purpose, should go in universalis
 					unsigned int inline bits_to_bytes(unsigned int bits)
 					{
-						#if !defined CHAR_BITS
+						#if !defined CHAR_BIT
 							#error missing #include <climits>
-						#elif CHAR_BITS == 8
+						#elif CHAR_BIT == 8
 							unsigned int const bytes(bits >> 3);
 							return bits & 7 ? bytes + 1 : bytes;
 						#else
-							return (bits + CHAR_BITS - 1) / CHAR_BITS;
+							return (bits + CHAR_BITS - 1) / CHAR_BIT;
 						#endif
 					}
 				}
