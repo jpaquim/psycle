@@ -287,10 +287,9 @@ namespace psycle
 								break;
 							}
 						case MACH_VST:
-							pMac[i] = pVstPlugin = new vst::instrument(i);
-							goto init_and_load_VST;
 						case MACH_VSTFX:
-							pMac[i] = pVstPlugin = new vst::fx(i);
+							if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+							else if (type == MACH_VSTFX)	pMac[i] = pVstPlugin = new vst::fx(i);
 							goto init_and_load_VST;
 						case MACH_MASTER:
 							pMac[i] = _pMachine[MASTER_INDEX];
