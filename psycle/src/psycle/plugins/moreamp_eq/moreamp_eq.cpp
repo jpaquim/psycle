@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// MoreAmp EQ10 effect plugin for PSYCLE by Sartorius
+// MoreAmp EQ effect plugin for PSYCLE by Sartorius
 //
 //   Original
 
@@ -22,17 +22,39 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
+/*
+ *   PCM time-domain equalizer
+ *
+ *   Copyright (C) 2002-2006  Felipe Rivera <liebremx at users.sourceforge.net>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *   $Id$$
+ */
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cmath>
-//#include <memory.h>
-#include "maEqualizer.h"
 
+#include "maEqualizer.h"
 
 #define NUMPARAMETERS 36
 
-//float denormal = (float)10E-18;
+
+
 
 CMachineParameter const paraB20 = 
 { 
@@ -57,8 +79,8 @@ CMachineParameter const paraB25 =
 
 CMachineParameter const paraB31 = 
 { 
-	"* 31.2 Hz",
-	"* 31.2 Hz",						// description
+	"* 31.5 Hz",
+	"* 31.5 Hz",						// description
 	0,												// MinValue	
 	64,											// MaxValue
 	MPF_STATE,										// Flags
@@ -509,18 +531,24 @@ public:
 private:
 	virtual void maEqualizerReset();
 	virtual void maEqualizerSetLevels();
+	
+	void calc_coeffs();
+	inline void find_f1_and_f2(double f0, double octave_percent, double *f1, double *f2);
+	inline int find_root(double a, double b, double c, double *x0);
+	void clean_history();
 
 	short bnds;
-	//bool extra, lnk;
-	//float gains31[EQBANDS31];
-	//float gains10[EQBANDS10];
+	sIIRCoefficients *iir_cf;
 	float *gains31;
 	float *gains10;
 
 	float *gains;
 
 	char g_eqi, g_eqj, g_eqk;
+	int di;
+	float dither[MAX_BUFFER_LENGTH];
 
+	int srate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -530,9 +558,10 @@ mi::mi()
 	// The constructor zone
 	Vals = new int[NUMPARAMETERS];
 	//iir_cf = new sIIRCoefficients;
-	gains31 = new float[EQBANDS31];
-	gains10 = new float[EQBANDS10];
-	gains = gains10;
+	this->gains31 = new float[EQBANDS31];
+	this->gains10 = new float[EQBANDS10];
+	this->gains = this->gains10;
+	this->iir_cf = NULL;
 }
 
 mi::~mi()
@@ -546,21 +575,29 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-	bnds = EQBANDS10;
 
-	maEqualizerSetLevels();
-	
-	maEqualizerReset();
+	this->srate = pCB->GetSamplingRate();
 
-	//gains = gains10;
+	this->calc_coeffs();
 
-	g_eqi = 0; g_eqj = 2; g_eqk = 1;	
+	this->clean_history();
+
+	this->bnds = EQBANDS10;
+
+	this->maEqualizerSetLevels();
+
+	this->maEqualizerReset();
 
 }
 
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
+	if(this->srate != pCB->GetSamplingRate())
+	{
+		this->calc_coeffs();
+		this->clean_history();
+	}
 }
 
 void mi::Command()
@@ -610,7 +647,7 @@ void mi::ParameterTweak(int par, int val)
 						
 			Vals[B50] = Vals[B62] + delta;		
 			break;
-	
+
 			case B62:
 			case B125:
 			case B250:
@@ -647,17 +684,17 @@ void mi::ParameterTweak(int par, int val)
 			default:
 				break;
 		}
-		maEqualizerSetLevels();
+		this->maEqualizerSetLevels();
 	} else if (par<_DIV)
 	{
-		maEqualizerSetLevels();
+		this->maEqualizerSetLevels();
 	} else 
 	{
 		switch(par)
 		{
 			case _DIV: break;
-			case PRE_AMP: maEqualizerSetLevels(); break; // set preamp
-			case BANDS: bnds = (val==0?EQBANDS10:EQBANDS31); maEqualizerReset(); break;
+			case PRE_AMP: this->maEqualizerSetLevels(); break; // set preamp
+			case BANDS: bnds = (val==0?EQBANDS10:EQBANDS31); this->maEqualizerReset(); break;
 			//case EXTRA: extra = (val==1); break;
 			//case LINK: lnk = val; break;
 			default:
@@ -669,7 +706,6 @@ void mi::ParameterTweak(int par, int val)
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
-	unsigned int corrected_sample,exponent;
 	short index, band;
 	float out_l,out_r;
 
@@ -694,6 +730,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			for(index = 0; index < numsamples; index++)
 			{
 					out_l = out_r = 0;
+					*psamplesleft += dither[di];
+					*psamplesright += dither[di];
 					
 					/* For each band */
 					for(band = 0; band < bnds; band++)
@@ -705,22 +743,15 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						/* Calculate and store Yi(n) */
 			
 						data_history[band][0].y[g_eqi] =
-               				(
-               			/* 		= alpha * [x(n)-x(n-2)] */
+						(
+						/* 		= alpha * [x(n)-x(n-2)] */
 								iir_cf[band].alpha * ( data_history[band][0].x[g_eqi]
-               					-  data_history[band][0].x[g_eqk])
-               			/* 		+ gamma * y(n-1) */
-               					+ iir_cf[band].gamma * data_history[band][0].y[g_eqj]
-               			/* 		- beta * y(n-2) */
-               					- iir_cf[band].beta * data_history[band][0].y[g_eqk]
+						- data_history[band][0].x[g_eqk])
+						/* 		+ gamma * y(n-1) */
+						+ iir_cf[band].gamma * data_history[band][0].y[g_eqj]
+						/* 		- beta * y(n-2) */
+						- iir_cf[band].beta * data_history[band][0].y[g_eqk]
 								);
-
-						// NaN and Den remover :
-						corrected_sample = *((unsigned int*)&data_history[band][0].y[g_eqi]);
-						exponent = corrected_sample & 0x7F800000;
-						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-						data_history[band][0].y[g_eqi] = *((float*)&corrected_sample);
-
 
 						/* 
 						* The multiplication by 2.0 was 'moved' into the coefficients to save
@@ -737,21 +768,15 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						/* Calculate and store Yi(n) */
 			
 						data_history[band][1].y[g_eqi] =
-               				(
-               			/* 		= alpha * [x(n)-x(n-2)] */
+							(
+						/* 		= alpha * [x(n)-x(n-2)] */
 								iir_cf[band].alpha * ( data_history[band][1].x[g_eqi]
-               					-  data_history[band][1].x[g_eqk])
-               			/* 		+ gamma * y(n-1) */
-               					+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
-               			/* 		- beta * y(n-2) */
-               					- iir_cf[band].beta * data_history[band][1].y[g_eqk]
+								-  data_history[band][1].x[g_eqk])
+						/* 		+ gamma * y(n-1) */
+							+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
+						/* 		- beta * y(n-2) */
+							- iir_cf[band].beta * data_history[band][1].y[g_eqk]
 								);//+ denormal;
-
-						// NaN and Den remover :
-						corrected_sample = *((unsigned int*)&data_history[band][1].y[g_eqi]);
-						exponent = corrected_sample & 0x7F800000;
-						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-						data_history[band][1].y[g_eqi] = *((float*)&corrected_sample);
 
 						/* 
 						* The multiplication by 2.0 was 'moved' into the coefficients to save
@@ -771,20 +796,16 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						data_history2[band][0].x[g_eqi] = out_l;
 						/* Calculate and store Yi(n) */
 						data_history2[band][0].y[g_eqi] = 
-            	   			(
-	               		/* y(n) = alpha * [x(n)-x(n-2)] */
+						(
+						/* y(n) = alpha * [x(n)-x(n-2)] */
 								iir_cf[band].alpha * (data_history2[band][0].x[g_eqi]
-            	   				-  data_history2[band][0].x[g_eqk])
-               			/* 	    + gamma * y(n-1) */
-	               				+ iir_cf[band].gamma * data_history2[band][0].y[g_eqj]
-    	           		/* 		- beta * y(n-2) */
-        	       				- iir_cf[band].beta * data_history2[band][0].y[g_eqk]
+							-  data_history2[band][0].x[g_eqk])
+						/*     + gamma * y(n-1) */
+								+ iir_cf[band].gamma * data_history2[band][0].y[g_eqj]
+				 		/* 		- beta * y(n-2) */
+							- iir_cf[band].beta * data_history2[band][0].y[g_eqk]
 								); // + denormal;
 
-						corrected_sample = *((unsigned int*)&data_history2[band][0].y[g_eqi]);
-						exponent = corrected_sample & 0x7F800000;
-						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-						data_history2[band][0].y[g_eqi] = *((float*)&corrected_sample);
 
 						/* Apply the gain */
 						out_l +=  data_history2[band][0].y[g_eqi]*gains[band];
@@ -797,19 +818,15 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 						/* Calculate and store Yi(n) */
 						data_history2[band][1].y[g_eqi] = 
-            	   			(
-	               		/* y(n) = alpha * [x(n)-x(n-2)] */
+						(
+						/* y(n) = alpha * [x(n)-x(n-2)] */
 								iir_cf[band].alpha * (data_history2[band][1].x[g_eqi]
-            	   				-  data_history2[band][1].x[g_eqk])
-               			/* 	    + gamma * y(n-1) */
-	               				+ iir_cf[band].gamma * data_history2[band][1].y[g_eqj]
-    	           		/* 		- beta * y(n-2) */
-        	       				- iir_cf[band].beta * data_history2[band][1].y[g_eqk]
+							-  data_history2[band][1].x[g_eqk])
+						/* 	    + gamma * y(n-1) */
+						+ iir_cf[band].gamma * data_history2[band][1].y[g_eqj]
+						/* 		- beta * y(n-2) */
+								- iir_cf[band].beta * data_history2[band][1].y[g_eqk]
 								); // + denormal;
-						corrected_sample = *((unsigned int*)&data_history2[band][1].y[g_eqi]);
-						exponent = corrected_sample & 0x7F800000;
-						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-						data_history2[band][1].y[g_eqi] = *((float*)&corrected_sample);
 
 						/* Apply the gain */
 						out_r +=  data_history2[band][1].y[g_eqi]*gains[band];
@@ -822,6 +839,9 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 					out_l += *psamplesleft*.25f; 
 					out_r += *psamplesright*.25f;
+
+					out_l -= dither[di]*.25f; 
+					out_r -= dither[di]*.25f;
 
 					/* Limit the output */
 					if(out_l < -32768.f)
@@ -839,12 +859,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 					*psamplesright = out_r;
 
 
-				g_eqi++; g_eqj++; g_eqk++;
-				
-				/* Wrap around the indexes */
-				if(g_eqi == 3) g_eqi = 0;
-				else if(g_eqj == 3) g_eqj = 0;
-				else if(g_eqk == 3) g_eqk = 0;
+				g_eqi = (g_eqi + 1) % 3;
+				g_eqj = (g_eqj + 1) % 3;
+				g_eqk = (g_eqk + 1) % 3;
+
+				di = (di + 1) % MAX_BUFFER_LENGTH;
 
 				++psamplesleft;
 				++psamplesright;
@@ -854,7 +873,10 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			for(index = 0; index < numsamples; index++)
 			{
 					out_l = out_r = 0;
-					
+
+					*psamplesleft += dither[di];
+					*psamplesright += dither[di];
+
 					/* For each band */
 					for(band = 0; band < bnds; band++)
 					{
@@ -865,22 +887,15 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						/* Calculate and store Yi(n) */
 		 
 						data_history[band][0].y[g_eqi] =
-               				(
-               			/* 		= alpha * [x(n)-x(n-2)] */
+						(
+						/* 		= alpha * [x(n)-x(n-2)] */
 								iir_cf[band].alpha * ( data_history[band][0].x[g_eqi]
-               					-  data_history[band][0].x[g_eqk])
-               			/* 		+ gamma * y(n-1) */
-               					+ iir_cf[band].gamma * data_history[band][0].y[g_eqj]
-               			/* 		- beta * y(n-2) */
-               					- iir_cf[band].beta * data_history[band][0].y[g_eqk]
+								-  data_history[band][0].x[g_eqk])
+						/* 		+ gamma * y(n-1) */
+								+ iir_cf[band].gamma * data_history[band][0].y[g_eqj]
+						/* 		- beta * y(n-2) */
+								- iir_cf[band].beta * data_history[band][0].y[g_eqk]
 								);
-
-						// NaN and Den remover :
-						corrected_sample = *((unsigned int*)&data_history[band][0].y[g_eqi]);
-						exponent = corrected_sample & 0x7F800000;
-						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-						data_history[band][0].y[g_eqi] = *((float*)&corrected_sample);
-
 
 						/* 
 						* The multiplication by 2.0 was 'moved' into the coefficients to save
@@ -895,23 +910,17 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						/* Store Xi(n) */
 						data_history[band][1].x[g_eqi] = *psamplesright;
 						/* Calculate and store Yi(n) */
-		 
-						data_history[band][1].y[g_eqi] =
-               				(
-               			/* 		= alpha * [x(n)-x(n-2)] */
-								iir_cf[band].alpha * ( data_history[band][1].x[g_eqi]
-               					-  data_history[band][1].x[g_eqk])
-               			/* 		+ gamma * y(n-1) */
-               					+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
-               			/* 		- beta * y(n-2) */
-               					- iir_cf[band].beta * data_history[band][1].y[g_eqk]
-								);//+ denormal;
 
-						// NaN and Den remover :
-						corrected_sample = *((unsigned int*)&data_history[band][1].y[g_eqi]);
-						exponent = corrected_sample & 0x7F800000;
-						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-						data_history[band][1].y[g_eqi] = *((float*)&corrected_sample);
+						data_history[band][1].y[g_eqi] =
+							(
+						/*		= alpha * [x(n)-x(n-2)] */
+								iir_cf[band].alpha * ( data_history[band][1].x[g_eqi]
+								-  data_history[band][1].x[g_eqk])
+						/* 		+ gamma * y(n-1) */
+								+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
+						/* 		- beta * y(n-2) */
+								- iir_cf[band].beta * data_history[band][1].y[g_eqk]
+								);
 
 						/* 
 						* The multiplication by 2.0 was 'moved' into the coefficients to save
@@ -930,6 +939,9 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 					out_l += *psamplesleft*.25f; 
 					out_r += *psamplesright*.25f;
 
+					out_l -= dither[di]*.25f; 
+					out_r -= dither[di]*.25f;
+
 					/* Limit the output */
 					if(out_l < -32768.f)
 						out_l = -32768.f;
@@ -946,12 +958,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 					*psamplesright = out_r;
 
 
-				g_eqi++; g_eqj++; g_eqk++;
+				g_eqi = (g_eqi + 1) % 3;
+				g_eqj = (g_eqj + 1) % 3;
+				g_eqk = (g_eqk + 1) % 3;
 				
-				/* Wrap around the indexes */
-				if(g_eqi == 3) g_eqi = 0;
-				else if(g_eqj == 3) g_eqj = 0;
-				else if(g_eqk == 3) g_eqk = 0;
+				di = (di + 1) % MAX_BUFFER_LENGTH;
 
 				++psamplesleft;
 				++psamplesright;
@@ -1029,10 +1040,6 @@ void mi::maEqualizerReset()
 		iir_cf = iir_cf10;
 		gains = gains10;
 	}
-
-	/* Zero the history arrays */
-	memset(data_history, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
-	memset(data_history2, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
 }
 
 void mi::maEqualizerSetLevels()
@@ -1048,4 +1055,112 @@ void mi::maEqualizerSetLevels()
 		//this->gains[i] = (factor==1.f)?0.0f:-0.2f + (factor / 5.125903437963185f);
 		gains10[i] = -0.2f + (factor / 5.125903437963185f);
 		}
+}
+
+#define GAIN_F0 1.0
+#define GAIN_F1 GAIN_F0 / M_SQRT2
+
+//#define TETA(f) (2*M_PI*(double)f/bands[n].sfreq)
+#define TETA(f) (2*M_PI*double(f/pCB->GetSamplingRate()))
+#define TWOPOWER(value) (value * value)
+
+#define BETA2(tf0, tf) \
+	(TWOPOWER(GAIN_F1)*TWOPOWER(std::cos(tf0)) \
+	- 2.0 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
+	+ TWOPOWER(GAIN_F1) \
+	- TWOPOWER(GAIN_F0) * TWOPOWER(std::sin(tf)))
+#define BETA1(tf0, tf) \
+	(2.0 * TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf)) \
+	+ TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf0)) \
+	- 2.0 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
+	- TWOPOWER(GAIN_F1) + TWOPOWER(GAIN_F0) * TWOPOWER(sin(tf)))
+#define BETA0(tf0, tf) \
+	(0.25 * TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf0)) \
+	- 0.5 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
+	+ 0.25 * TWOPOWER(GAIN_F1) \
+	- 0.25 * TWOPOWER(GAIN_F0) * TWOPOWER(std::sin(tf)))
+
+#define GAMMA(beta, tf0) ((0.5 + beta) * std::cos(tf0))
+#define ALPHA(beta) ((0.5 - beta)/2.0)
+
+
+/* Get the freqs at both sides of F0. These will be cut at -3dB */
+inline void mi::find_f1_and_f2(double f0, double octave_percent, double *f1, double *f2)
+{
+	double octave_factor = std::pow(2.0, octave_percent/2.0);
+	*f1 = f0/octave_factor;
+	*f2 = f0*octave_factor;
+}
+
+/* Find the quadratic root
+ * Always return the smallest root */
+inline int mi::find_root(double a, double b, double c, double *x0) {
+	double k = c-((b*b)/(4.*a));
+	double h = -(b/(2.*a));
+	double x1 = 0.;
+	if (-(k/a) < 0.)
+		return -1; 
+	*x0 = h - std::sqrt(-(k/a));
+	x1 = h + std::sqrt(-(k/a));
+	if (x1 < *x0)
+		*x0 = x1;
+	return 0;
+}
+
+/* Calculate all the coefficients as specified in the bands[] array */
+void mi::calc_coeffs()
+{
+	int i, n;
+	double f1, f2;
+	double x0;
+
+	n = 0;
+	for (; bands[n].cfs; n++) {
+		double *freqs = (double *)bands[n].cfs;
+	for (i=0; i<bands[n].band_count; i++)
+	{
+
+		/* Find -3dB frequencies for the center freq */
+		find_f1_and_f2(freqs[i], bands[n].octave, &f1, &f2);
+		/* Find Beta */
+		if ( find_root(
+			BETA2(TETA(freqs[i]), TETA(f1)), 
+			BETA1(TETA(freqs[i]), TETA(f1)), 
+			BETA0(TETA(freqs[i]), TETA(f1)), 
+			&x0) == 0)
+		{
+		/* Got a solution, now calculate the rest of the factors */
+		/* Take the smallest root always (find_root returns the smallest one)
+		*
+		* NOTE: The IIR equation is
+		*	y[n] = 2 * (alpha*(x[n]-x[n-2]) + gamma*y[n-1] - beta*y[n-2])
+		*  Now the 2 factor has been distributed in the coefficients
+		*/
+		/* Now store the coefficients */
+		bands[n].coeffs[i].beta = 2.0 * x0;
+		bands[n].coeffs[i].alpha = 2.0 * ALPHA(x0);
+		bands[n].coeffs[i].gamma = 2.0 * GAMMA(x0, TETA(freqs[i]));
+	} else {
+		/* Shouldn't happen */
+		bands[n].coeffs[i].beta = 0.;
+		bands[n].coeffs[i].alpha = 0.;
+		bands[n].coeffs[i].gamma = 0.;
+	}
+	}// for i
+	}//for n
+}
+
+void mi::clean_history()
+{
+	/* Zero the history arrays */
+	memset(data_history, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
+	memset(data_history2, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
+	/* this is only needed if we use fpu code and there's no other place for
+	the moment to init the dither array*/
+	for (int n = 0; n < MAX_BUFFER_LENGTH; n++) {
+		dither[n] = (rand() % 4) - 2;
+	}
+	di = 0;
+	g_eqi = 0; g_eqj = 2; g_eqk = 1;
+	//g_eqi = 2; g_eqj = 1; g_eqk = 0;
 }
