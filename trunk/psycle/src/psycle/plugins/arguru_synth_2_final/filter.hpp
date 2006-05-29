@@ -21,7 +21,7 @@ class CBiquad
 public:
 	float m_a1, m_a2, m_b0, m_b1, m_b2;
 	float m_x1, m_x2, m_y1, m_y2;
-	CBiquad() { m_x1=0.0; m_y1=0.0; m_x2=0.0; m_y2=0.0; }
+	CBiquad() { m_x1=0.0; m_y1=0.0; m_x2=0.0; m_y2=0.0; m_a1=0.0f; m_a2=0.0f; m_b0=0.0f; m_b1=0.0f; m_b2=0.0f;}
 	inline SIG ProcessSample(SIG dSmp) { 
 		SIG dOut=m_b0*dSmp+m_b1*m_x1+m_b2*m_x2-m_a1*m_y1-m_a2*m_y2;
 		if (dOut>=-0.00001 && dOut<=0.00001) dOut=0.0;
