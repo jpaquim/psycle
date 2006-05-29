@@ -27,6 +27,7 @@ namespace psycle {
 		{
 			DefineStereoInput(1);
 			DefineStereoOutput(1);
+			_audiorange = 32768.0f;
 			_editName = "Dummy";
 		}
 		Dummy::~Dummy()
