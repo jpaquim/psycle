@@ -185,6 +185,8 @@ void NWindow::onMouseOver( int x, int y )
 
 void NWindow::initDrag( NVisualComponent * dragBase, int x, int y )
 {
+  oldDrag = dragBase->geometry()->region();
+
   dragBase_->onMoveStart(NMoveEvent());
   dragX = x;
   dragY = y;
@@ -218,7 +220,13 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
 
      if (dragPoint != -1) {
          dragBase_->geometry()->setPicker(dragPoint, x - dragBaseParent->absoluteSpacingLeft() + dragBaseParent->scrollDx(), y - dragBaseParent->absoluteSpacingTop() + dragBaseParent->scrollDy());
-         repaint(pane(),NRect(dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary));
+         NRegion newDrag = dragBase->geometry()->region();
+         NRegion repaintArea = newDrag | oldDrag;
+         repaintArea.move(dragBaseParent->absoluteLeft() - dragBaseParent->scrollDx() ,dragBaseParent->absoluteTop() - dragBaseParent->scrollDy() );
+         repaintArea.shrink(-5,-5); // this is done, cause pickpoints can be outside
+                                    // the component region
+         repaint(pane(),repaintArea);
+         oldDrag = newDrag;
      } else {
 
      if (dragBase->moveable().style() & nMvHorizontal)  {
@@ -243,7 +251,11 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
          } else dragBase_->setTop(newTop);
     } else vary=0;
     if (!(dragBase_->moveable().style() & nMvNoneRepaint)) {
-       repaint(pane(),NRect(dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary));
+       NRegion newDrag = dragBase->geometry()->region();
+       NRegion repaintArea = newDrag | oldDrag;
+       repaintArea.move(dragBaseParent->absoluteLeft() - dragBaseParent->scrollDx(),dragBaseParent->absoluteTop() - dragBaseParent->scrollDy());
+       repaint(pane(),repaintArea);
+       oldDrag = newDrag;
     }
     dragBase->onMove(NMoveEvent());
      }

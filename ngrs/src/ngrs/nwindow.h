@@ -133,6 +133,8 @@ private:
    int dragPoint;
    int exitLoop_;
 
+   NRegion oldDrag;
+
    Window win_;
    NPanel* pane_;
    NGraphics* graphics_;
