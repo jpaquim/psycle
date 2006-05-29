@@ -113,12 +113,12 @@ namespace psycle
 						}
 					}
 					break;
-				{
-					vst::plugin * plugin;
-					case MACH_VST:
-						machine = plugin = new vst::instrument(index);
-					case MACH_VSTFX:
-						machine = plugin = new vst::fx(index);
+				case MACH_VST:
+				case MACH_VSTFX:
+					{
+						vst::plugin * plugin;
+						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
+						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
 						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
 						{
 							delete plugin;
@@ -140,7 +140,7 @@ namespace psycle
 							return false;
 						}
 						break;
-				}
+					}
 				default:
 					loggers::warning("failed to create requested machine type");
 					return false;

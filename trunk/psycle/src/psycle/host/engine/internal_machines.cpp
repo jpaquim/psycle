@@ -25,8 +25,9 @@ namespace psycle {
 			:
 		Machine(MACH_DUMMY, MACHMODE_FX, id)
 		{
-			DefineStereoInput(1);
-			DefineStereoOutput(1);
+//			DefineStereoInput(1);
+//			DefineStereoOutput(1);
+			_audiorange = 32768.0f;
 			_audiorange = 32768.0f;
 			_editName = "Dummy";
 		}
@@ -363,7 +364,7 @@ namespace psycle {
 		Machine(MACH_MIXER, MACHMODE_FX, id)
 		{
 			_numPars = 255;
-			//			_audiorange = 1.0f;
+			_audiorange = 32768.0f;
 			DefineStereoInput(24);
 			DefineStereoOutput(1);
 			_editName = "Mixer";
