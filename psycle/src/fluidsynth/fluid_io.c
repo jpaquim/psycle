@@ -80,7 +80,7 @@ int fluid_istream_gets(fluid_istream_t in, char* buf, int len)
   buf[len - 1] = 0;
   
   while (--len > 0) {
-    n = read(in, &c, 1);
+    n = _read(in, &c, 1);
     if (n == 0) {
       *buf++ = 0;
       return 0;
@@ -117,5 +117,5 @@ int fluid_ostream_printf(fluid_ostream_t out, char* format, ...)
   buf[4095] = 0;
 
 /*   return write(out, buf, len); */
-  return write(out, buf, strlen(buf));
+  return  _write(out, buf, strlen(buf));
 }

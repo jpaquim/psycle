@@ -21,7 +21,17 @@
 
 #ifndef _FLUID_IO_H
 #define _FLUID_IO_H
+/* MSVC 8.0 */
 
+//#ifdef _MS_VER
+//	#if _MS_VER >= 1400
+//		#define FLREAD(a, b, c) _read(a, b, c)
+//		#define FLWRITE(a, b, c) _write(a, b, c)
+//	#else
+//		#define FLREAD(a, b, c) read(a, b, c)
+//		#define FLWRITE(a, b, c) write(a, b, c)
+//	#endif
+//#endif
 
 /** Read a line from the input stream. 
     
