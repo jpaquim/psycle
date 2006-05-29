@@ -44,6 +44,8 @@ public:
 
 private:
 
+   std::vector<class NCustomItem*> items;
+   class NObject* lastOverItem;
 
 };
 

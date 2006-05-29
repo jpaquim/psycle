@@ -25,7 +25,7 @@
 #include <iostream>
 
 NPopupMenu::NPopupMenu()
- : NPopupWindow()
+ : NPopupWindow(), lastOverItem(0)
 {
   setName("name");
   pane()->setLayout(NListLayout());
@@ -47,11 +47,15 @@ void NPopupMenu::setVisible( bool on )
 void NPopupMenu::add( NCustomMenuItem * item )
 {
   pane()->add(item, nAlCenter);
+  items.push_back(item);
   item->addMessageListener(this);
+  addMessageListener(item);
 }
 
 void NPopupMenu::onMessage( NEvent * ev )
 {
+  NPopupWindow::onMessage(ev);
+
   if (ev->text() == "ngrs_menu_item_click") {
      NEvent ev1(this,"ngrs_menu_item_click");
      sendMessage(&ev1);
@@ -61,22 +65,86 @@ void NPopupMenu::onMessage( NEvent * ev )
      NEvent ev1(this,"ngrs_menu_item_click");
      sendMessage(&ev1);
      setVisible(false);
+  } else
+  if (ev->text() == "ngrs_menu_item_enter") {
+    lastOverItem = ev->sender();
+  } else
+  if (ev->text() == "ngrs_menu_item_exit") {
+    lastOverItem = 0;
   }
 }
 
 void NPopupMenu::onKeyPress( const NKeyEvent & event )
 {
     switch (event.scancode()) {
-    case XK_Left : {
-      NEvent ev(this, "ngrs_menu_key_left");
-      sendMessage(&ev);
-    }
-    break;
-    case XK_Right : {
-      NEvent ev(this, "ngrs_menu_key_right");
-      sendMessage(&ev);
-    }
-    break;
+      case XK_Return : {
+        if ( lastOverItem ) {
+          NEvent ev1(this,"ngrs_menu_item_click");
+          sendMessage(&ev1);
+          setVisible(false);
+        }
+      }
+      break;
+      case XK_Left : {
+        NEvent ev(this, "ngrs_menu_key_left");
+        sendMessage(&ev);
+      }
+      break;
+      case XK_Right : {
+        NEvent ev(this, "ngrs_menu_key_right");
+        sendMessage(&ev);
+      }
+      break;
+      case XK_Up : {
+         if ( !lastOverItem && items.size() > 0 ) {
+          lastOverItem = items.back();
+          NEvent ev1(this, "ngrs_menu_item_do_enter");
+          lastOverItem->onMessage(&ev1);
+        } else 
+        if (items.size() > 0) {
+          if (lastOverItem == *items.begin() ) {
+            NEvent ev1(this, "ngrs_menu_item_do_exit");
+            lastOverItem->onMessage(&ev1);
+            lastOverItem = items.back();
+            NEvent ev2(this, "ngrs_menu_item_do_enter");
+            lastOverItem->onMessage(&ev2);
+          } else {
+            std::vector<NCustomItem*>::iterator it = find(items.begin(),items.end(),lastOverItem);
+            it--;
+            NEvent ev1(this, "ngrs_menu_item_do_exit");
+            lastOverItem->onMessage(&ev1);
+            lastOverItem = *it;
+            NEvent ev2(this, "ngrs_menu_item_do_enter");
+            lastOverItem->onMessage(&ev2);
+          }
+        }
+      }
+      break;
+      case XK_Down : {
+         if ( !lastOverItem && items.size() > 0 ) {
+          lastOverItem = *items.begin();
+          NEvent ev1(this, "ngrs_menu_item_do_enter");
+          lastOverItem->onMessage(&ev1);
+        } else 
+        if (items.size() > 0) {
+          if (lastOverItem == items.back() ) {
+            NEvent ev1(this, "ngrs_menu_item_do_exit");
+            lastOverItem->onMessage(&ev1);
+            lastOverItem = *items.begin();
+            NEvent ev2(this, "ngrs_menu_item_do_enter");
+            lastOverItem->onMessage(&ev2);
+          } else {
+            std::vector<NCustomItem*>::iterator it = find(items.begin(),items.end(),lastOverItem);
+            it++;
+            NEvent ev1(this, "ngrs_menu_item_do_exit");
+            lastOverItem->onMessage(&ev1);
+            lastOverItem = *it;
+            NEvent ev2(this, "ngrs_menu_item_do_enter");
+            lastOverItem->onMessage(&ev2);
+          }
+        }
+      }
+      break;
   }
 }
 
