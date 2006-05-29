@@ -61,11 +61,13 @@ NCustomMenuItem* NMenu::add( NCustomMenuItem * item )
 
 void NMenu::onMouseEnter( )
 {
-  setSkin(btnOver_);
-  repaint();
+  if ( !popupMenu_->mapped() ) {
+    setSkin(btnOver_);
+    repaint();
 
-  NEvent ev(this, "ngrs_menu_enter");
-  sendMessage(&ev);
+    NEvent ev(this, "ngrs_menu_enter");
+    sendMessage(&ev);
+  }
 }
 
 void NMenu::onMouseExit( )
@@ -100,13 +102,11 @@ void NMenu::onMessage( NEvent * ev )
     if (popupMenu_->mapped()) popupMenu_->setVisible(false);
   } else
   if (ev->text() == "ngrs_menu_hide") {
-     if (popupMenu_->mapped()) {
-       popupMenu_->setVisible(false);
-       setSkin(btnNone_);
-       repaint();
-       hide_ = true;
-     }
-  } else 
+    popupMenu_->setVisible(false);
+    setSkin(btnNone_);
+    repaint();
+    hide_ = true;
+  } else
     if (ev->text() == "ngrs_menu_item_click") {
      NEvent ev1(this, "ngrs_menu_press");
      sendMessage(&ev1);

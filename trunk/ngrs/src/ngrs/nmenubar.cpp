@@ -119,14 +119,19 @@ void NMenuBar::onMessage( NEvent * ev )
      NPanel::onMessage(&ev1);
      if (it > menus.begin()) {
         it--;
-        NEvent ev(*it,"ngrs_menu_expose");
+        if (lastMenuOver!=0 && lastMenuOver != ev->sender()) {
+          lastMenuOver->setSkin(lastMenuOver->btnNone_);
+          lastMenuOver->repaint();
+        }
+        NEvent ev1(*it,"ngrs_menu_expose");
         NPanel::onMessage(&ev1);
+        lastMenuOver = reinterpret_cast<NMenu*> (*it);
      } else {
-       if (menus.size() > 0) {
+       if ( menus.size() > 0 ) {
          NEvent ev1(menus.back(),"ngrs_menu_expose");
          NPanel::onMessage(&ev1);
+         lastMenuOver = reinterpret_cast<NMenu*> (menus.back());
        }
      }
   }
 }
-

@@ -20,6 +20,7 @@
 #include "ncustommenuitem.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nmenu.h"
 
 
 
@@ -37,8 +38,9 @@ NCustomMenuItem::~NCustomMenuItem()
 {
 }
 
-void NCustomMenuItem::add( class NMenu * menu )
+void NCustomMenuItem::add( NMenu * menu )
 {
+
 }
 
 void NCustomMenuItem::add( NRuntime * comp )
@@ -55,12 +57,18 @@ void NCustomMenuItem::onMouseEnter( )
 {
   setSkin(itemOver);
   repaint();
+
+  NEvent ev(this,"ngrs_menu_item_enter");
+  sendMessage(&ev);
 }
 
 void NCustomMenuItem::onMouseExit( )
 {
   setSkin(itemNone);
   repaint();
+
+  NEvent ev(this,"ngrs_menu_item_exit");
+  sendMessage(&ev);
 }
 
 void NCustomMenuItem::onMousePress( int x, int y, int button )
@@ -69,4 +77,14 @@ void NCustomMenuItem::onMousePress( int x, int y, int button )
   sendMessage(&ev);
 
   click.emit(&ev);
+}
+
+void NCustomMenuItem::onMessage( NEvent * ev )
+{
+  if (ev->text() == "ngrs_menu_item_do_enter") {
+    onMouseEnter();
+  } else
+  if (ev->text() == "ngrs_menu_item_do_exit") {
+    onMouseExit();
+  }
 }

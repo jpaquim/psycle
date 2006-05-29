@@ -44,6 +44,8 @@ public:
 
     virtual void onMousePress(int x, int y, int button);
 
+    virtual void onMessage(NEvent* ev);
+
 private:
 
     NSkin itemNone;
