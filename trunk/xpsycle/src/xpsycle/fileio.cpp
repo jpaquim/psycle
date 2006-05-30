@@ -1,4 +1,6 @@
 ///\implementation psycle::host::RiffFile
+//#include <packageneric/pre-compiled.private.hpp>
+//#include PACKAGENERIC
 #include "fileio.h"
 #include <stdexcept>
 
@@ -46,6 +48,7 @@
 
 		bool RiffFile::Open(std::string const & filename)
 		{
+			write_mode = false;
 			file_name_ = filename;
 			_stream.open(file_name_.c_str(), std::ios_base::in | std::ios_base::binary);
 			if (!_stream.is_open ()) return false;
@@ -55,14 +58,18 @@
 
 		bool RiffFile::Create(std::string const & filename, bool const & overwrite)
 		{
+			write_mode = true;
 			file_name_ = filename;
-			_stream.open(file_name_.c_str (), std::ios_base::in | std::ios_base::binary);
-			if (_stream.is_open ())
+			if(!overwrite)
 			{
-				_stream.close();
-				if(!overwrite) return false;
+				std::fstream filetest(file_name_.c_str (), std::ios_base::in | std::ios_base::binary);
+				if (filetest.is_open ())
+				{
+					filetest.close();
+					return false;
+				}
 			}
-			_stream.open(file_name_.c_str (), std::ios_base::out | std::ios_base::binary);
+			_stream.open(file_name_.c_str (), std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
 			return _stream.is_open ();
 		}
 
@@ -80,9 +87,10 @@
 		bool RiffFile::ReadChunk(void * data, std::size_t const & bytes)
 		{
 			if (_stream.eof()) return false;
-				_stream.read(reinterpret_cast<char*>(data) ,bytes);
-				if (_stream.bad()) return false;
-				return 1;
+			_stream.read(reinterpret_cast<char*>(data) ,bytes);
+			if (_stream.eof()) return false;
+			if (_stream.bad()) return false;
+			return 1;
 		}
 
 		bool RiffFile::WriteChunk(void const * data, std::size_t const & bytes)
@@ -109,14 +117,14 @@
 
 		int RiffFile::Seek(int const & bytes)
 		{
-			_stream.seekg(bytes, std::ios::beg);
+			if (write_mode) _stream.seekp(bytes, std::ios::beg); else _stream.seekg(bytes, std::ios::beg);
 			if (_stream.eof()) throw std::runtime_error("seek failed");
 			return GetPos();
 		}
 
 		int RiffFile::Skip(int const & bytes)
 		{
-			_stream.seekg(bytes, std::ios::cur);
+			if (write_mode) _stream.seekp(bytes, std::ios::cur); else _stream.seekg(bytes, std::ios::cur);
 			if (_stream.eof()) throw std::runtime_error("seek failed");
 			return GetPos();
 		}
@@ -126,7 +134,8 @@
 			return _stream.eof();
 		}
 		
-		std::size_t RiffFile::FileSize() {
+		std::size_t RiffFile::FileSize()
+		{
 			std::size_t curPos = GetPos();
 			_stream.seekg(0, std::ios::end);         // goto end of file
 			std::size_t fileSize = _stream.tellg();  // read the filesize
@@ -134,9 +143,10 @@
 			return fileSize;
 		}
 
-    std::size_t RiffFile::GetPos() {
-      return  _stream.tellg();
-    }
+		std::size_t RiffFile::GetPos()
+		{
+			return  (write_mode) ? _stream.tellp() : _stream.tellg();
+		}
 		
 //	}
 //}
