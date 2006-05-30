@@ -20,7 +20,7 @@
 #ifndef NSTATUSBAR_H
 #define NSTATUSBAR_H
 
-#include <npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper
