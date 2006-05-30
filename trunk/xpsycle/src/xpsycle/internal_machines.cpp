@@ -758,7 +758,7 @@
 				macOutput[i]=-1;
 				paramOutput[i]=-1;
 				level[i]=100;
-				phase[i]=MAX_PHASE/2.0f;
+				phase[i]= (int) MAX_PHASE/2.0f;
 				prevVal[i]=centerVal[i]=0.0;
 			}
 			lfoPos=0.0;
@@ -779,7 +779,7 @@
 				paramOutput[i]=-1;
 				level[i]=100;
 				phase[i]=MAX_PHASE/2.0f;
-				prevVal[i]=centerVal[i]=0.0;
+				prevVal[i] = centerVal[i]= 0;
 			}
 			lfoPos=0.0;
 			lSpeed=MAX_SPEED/6;
@@ -1020,7 +1020,7 @@
 
 					centerVal[j] -= prevVal[j] - curVal;  //compensate for external movement
 
-					newVal = curLFO * ((maxVal-minVal)/2.0f) * lfoAmt + centerVal[j];
+					newVal = (int) (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt + centerVal[j]);
 
 					if(newVal>maxVal) newVal=maxVal;
 					else if(newVal<minVal) newVal=minVal;
