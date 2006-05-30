@@ -238,7 +238,7 @@ namespace psycle
 						"depth"     , G_TYPE_INT    ,             bits_per_channel_sample, ///\todo [bohan] check the doc again, i don't remember which is depth and width
 						"signed"    , G_TYPE_BOOLEAN, sample_signed,
 						"endianness", G_TYPE_INT    , sample_endianness,
-						0
+						(void*)0
 					);
 				}
 
@@ -259,7 +259,7 @@ namespace psycle
 					"sizetype"       , /*FAKE_SRC_SIZETYPE_FIXED*/ 2, // fixed to sizemax
 					"filltype"       , /*FAKE_SRC_FILLTYPE_NOTHING*/ 1,
 					"signal-handoffs", true,
-					0
+					(void*)0
 				);
 
 				buffer_ = new std::int8_t[buffer_size_ * buffers_];
