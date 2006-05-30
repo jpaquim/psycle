@@ -34,19 +34,20 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 
 PluginFxCallback Plugin::_callback;
 
-Plugin::Plugin( int index ): _dll(0)
-  , proxy_(*this)
-  , _psAuthor("")
-  , _psDllName("")
-  , _psName("")
-{
-  _macIndex = index;
-  _type = MACH_PLUGIN;
-  _mode = MACHMODE_FX;
-  std::sprintf(_editName, "native plugin");
-}
+Plugin::Plugin(Machine::id_type id)
+			:
+				Machine(MACH_PLUGIN, MACHMODE_FX, id),
+				_dll(0),
+				proxy_(*this),
+				_psAuthor(""),
+				_psDllName(""),
+				_psName("")
+			{
+				_audiorange=32768.0f;
+				_editName = "native plugin";
+			}
 
-Plugin::~ Plugin( )
+Plugin::~ Plugin( ) throw()
 {
 }
 
@@ -71,8 +72,10 @@ bool Plugin::Instance(const std::string & file_name)
         if(_isSynth) _mode = MACHMODE_GENERATOR;
       strncpy(_psShortName,_pInfo->ShortName,15);
       _psShortName[15]='\0';
-      strncpy(_editName, _pInfo->ShortName,31);
-      _editName[31]='\0';
+      char buf[32];
+      strncpy(buf, _pInfo->ShortName,31);
+      buf[31]='\0';
+      _editName = buf;
       _psAuthor = _pInfo->Author;
       _psName = _pInfo->Name;
       CREATEMACHINE GetInterface = (CREATEMACHINE) dlsym(_dll, "CreateMachine");

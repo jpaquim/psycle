@@ -1,5 +1,5 @@
 // Constants used by psycle
-
+#pragma once
 
 /// number of samples per tweak slide update
 const int TWEAK_SLIDE_SAMPLES = 64;

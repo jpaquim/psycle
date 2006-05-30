@@ -20,6 +20,9 @@
 #include "analyzer.h"
 #include <ngrs/nwindow.h>
 
+//namespace psycle { namespace host {
+
+
 Analyzer::Analyzer()
   : NPanel()
 {
@@ -188,4 +191,5 @@ void Analyzer::onTimer( )
 }
 }
 
+//}}
 

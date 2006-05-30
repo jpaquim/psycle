@@ -1,10 +1,11 @@
 ///\implementation psycle::host::RiffFile
 #include "fileio.h"
+#include <stdexcept>
 
-namespace psycle
-{
-	namespace host
-	{
+//namespace psycle
+//{
+//	namespace host
+//	{
 		std::uint32_t RiffFile::FourCC(char const * null_terminated_string)
 		{
 			std::uint32_t result(0x20202020); // four spaces (padding)
@@ -19,7 +20,7 @@ namespace psycle
 			for(;;)
 			{
 				char c;
-				if(!Read(&c, sizeof c)) return false;
+				if(!ReadChunk(&c, sizeof c)) return false;
 				if(!c) return true;
 				result += c;
 			}
@@ -33,7 +34,7 @@ namespace psycle
 				for(std::size_t index(0) ; index < max_length ; ++index)
 				{
 					char c;
-					if(!Read(&c, sizeof c)) return false;
+					if(!ReadChunk(&c, sizeof c)) return false;
 					{
 						data[index] = c;
 						if(!c) return true;
@@ -43,7 +44,7 @@ namespace psycle
 					char c;
 					do
 					{
-						if(!Read(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
+						if(!ReadChunk(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
 					} while(c);
 				}
 				return true;
@@ -87,12 +88,12 @@ namespace psycle
 			return !/*std::*/ferror(file_);
 		}
 
-		bool RiffFile::Read(void * data, std::size_t const & bytes)
+		bool RiffFile::ReadChunk(void * data, std::size_t const & bytes)
 		{
 			return std::fread(data, sizeof(char), bytes, file_) == bytes;
 		}
 
-		bool RiffFile::Write(void const * data, std::size_t const & bytes)
+		bool RiffFile::WriteChunk(void const * data, std::size_t const & bytes)
 		{
 			///\todo why flushing?
 			std::fflush(file_);
@@ -113,18 +114,16 @@ namespace psycle
 			return true;
 		}
 
-		std::fpos_t RiffFile::Seek(std::fpos_t const & bytes)
+		int RiffFile::Seek(int const & bytes)
 		{
-			// if(std::fsetpos(file_, &bytes)) return  -1;
-                        ///todo  this needs to be checked to run on gcc
-			return GetPos();
+/*			if(std::fsetpos(file_, &bytes)) throw std::runtime_error("seek failed");
+			return GetPos();*/
 		}
 
-		std::fpos_t RiffFile::Skip(std::ptrdiff_t const & bytes)
+		int RiffFile::Skip(std::ptrdiff_t const & bytes)
 		{
-			//if(std::fseek(file_, bytes, SEEK_CUR)) return (long) -1;
-                        ///todo  this needs to be checked to run on gcc
-			return GetPos();
+			/*if(std::fseek(file_, bytes, SEEK_CUR)) throw std::runtime_error("seek failed");
+			return GetPos();*/
 		}
 
 		bool RiffFile::Eof()
@@ -134,18 +133,18 @@ namespace psycle
 
 		std::fpos_t RiffFile::FileSize()
 		{
-			std::fpos_t const save(GetPos());
+/*			std::fpos_t const save(GetPos());
 			std::fseek(file_, 0, SEEK_END);
 			std::fpos_t const  end(GetPos());
 			std::fsetpos(file_, &save);
-			return end;
+			return end;*/
 		}
 
-		std::fpos_t RiffFile::GetPos()
+		int RiffFile::GetPos()
 		{
-			std::fpos_t result;
+/*			std::fpos_t result;
 			std::fgetpos(file_, &result);
-			return result;
+			return result;*/
 		}
-	}
-}
+//	}
+//}

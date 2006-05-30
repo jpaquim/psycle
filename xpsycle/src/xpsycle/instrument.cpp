@@ -21,6 +21,7 @@
 #include "instrument.h"
 #include "filter.h"
 #include "datacompression.h"
+#include "fileio.h"
 #include <cstdio>
 
 
@@ -105,208 +106,228 @@ bool Instrument::Empty()
 
 
 
-void Instrument::LoadFileChunk(DeSerializer* pFile,int version,bool fullopen)
-    {
-      Delete();
-      // assume version 0 for now
-      pFile->read(&_loop,sizeof(_loop));
-      pFile->read(&_lines,sizeof(_lines));
-      pFile->read(&_NNA,sizeof(_NNA));
+void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
+		{
+			Delete();
+			// assume version 0 for now
+			pFile->Read(_loop);
+			pFile->Read(_lines);
+			pFile->Read(_NNA);
 
-      pFile->read(&ENV_AT,sizeof(ENV_AT));
-      pFile->read(&ENV_DT,sizeof(ENV_DT));
-      pFile->read(&ENV_SL,sizeof(ENV_SL));
-      pFile->read(&ENV_RT,sizeof(ENV_RT));
-      
-      pFile->read(&ENV_F_AT,sizeof(ENV_F_AT));
-      pFile->read(&ENV_F_DT,sizeof(ENV_F_DT));
-      pFile->read(&ENV_F_SL,sizeof(ENV_F_SL));
-      pFile->read(&ENV_F_RT,sizeof(ENV_F_RT));
+			pFile->Read(ENV_AT);
+			pFile->Read(ENV_DT);
+			pFile->Read(ENV_SL);
+			pFile->Read(ENV_RT);
+			
+			pFile->Read(ENV_F_AT);
+			pFile->Read(ENV_F_DT);
+			pFile->Read(ENV_F_SL);
+			pFile->Read(ENV_F_RT);
 
-      pFile->read(&ENV_F_CO,sizeof(ENV_F_CO));
-      pFile->read(&ENV_F_RQ,sizeof(ENV_F_RQ));
-      pFile->read(&ENV_F_EA,sizeof(ENV_F_EA));
-      pFile->read(&ENV_F_TP,sizeof(ENV_F_TP));
+			pFile->Read(ENV_F_CO);
+			pFile->Read(ENV_F_RQ);
+			pFile->Read(ENV_F_EA);
+			pFile->Read(ENV_F_TP);
 
-      pFile->read(&_pan,sizeof(_pan));
-      pFile->read(&_RPAN,sizeof(_RPAN));
-      pFile->read(&_RCUT,sizeof(_RCUT));
-      pFile->read(&_RRES,sizeof(_RRES));
+			pFile->Read(_pan);
+			pFile->Read(_RPAN);
+			pFile->Read(_RCUT);
+			pFile->Read(_RRES);
 
-      pFile->readString(_sName,sizeof(_sName));
+			pFile->ReadString(_sName, sizeof _sName);
 
-      // now we have to read waves
+			// now we have to read waves
 
-      int numwaves;
-      pFile->read(&numwaves, sizeof(numwaves));
-      for (int i = 0; i < numwaves; i++)
-      {
-        char Header[5];
+			int numwaves;
+			pFile->Read(numwaves);
+			for (int i = 0; i < numwaves; i++)
+			{
+				char Header[5];
 
-        pFile->read(Header,4);
-        Header[4] = 0;
-        int version;
-        int size;
+				pFile->ReadChunk(&Header,4);
+				Header[4] = 0;
+				std::uint32_t version;
+				std::uint32_t size;
 
-        if (strcmp(Header,"WAVE")==0)
-        {
+				if (strcmp(Header,"WAVE")==0)
+				{
 
-          pFile->read(&version,sizeof(version));
-          pFile->read(&size,sizeof(size));
-          //fileformat supports several waves, but sampler only supports one.
-          if (version > CURRENT_FILE_VERSION_WAVE || i > 0)
-          {
-            // there is an error, this file is newer than this build of psycle
-            //MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
-            pFile->skip(size);
-          }
-          else
-          {
-            int index;
-            pFile->read(&index,sizeof(index));
+					pFile->Read(version);
+					pFile->Read(size);
+					//fileformat supports several waves, but sampler only supports one.
+					if (version > CURRENT_FILE_VERSION_WAVE || i > 0)
+					{
+						// there is an error, this file is newer than this build of psycle
+						//MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
+						pFile->Skip(size);
+					}
+					else
+					{
+						std::uint32_t index;
+						pFile->Read(index);
 
-            pFile->read((char*)&waveLength,sizeof(waveLength));
-            pFile->read((char*)&waveVolume,sizeof(waveVolume));
-            pFile->read((char*)&waveLoopStart,sizeof(waveLoopStart));
-            pFile->read((char*)&waveLoopEnd,sizeof(waveLoopEnd));
-            
-            pFile->read(&waveTune,sizeof(waveTune));
-            pFile->read(&waveFinetune,sizeof(waveFinetune));
-            pFile->read(&waveLoopType,sizeof(waveLoopType));
-            pFile->read(&waveStereo,sizeof(waveStereo));
-            
-            pFile->readString(waveName,sizeof(waveName));
-            
-            pFile->read(&size,sizeof(size));
-            byte* pData;
-            
-            if ( !fullopen )
-            {
-              pFile->skip(size);
-              waveDataL=new signed short[2];
-            }
-            else
-            {
-              pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
-              pFile->read(pData,size);
-              DataCompression::SoundDesquash(pData,&waveDataL);
-              zapArray(pData);
-            }
+						pFile->Read(waveLength);
+						pFile->Read(waveVolume);
+						pFile->Read(waveLoopStart);
+						pFile->Read(waveLoopEnd);
+						
+						pFile->Read(waveTune);
+						pFile->Read(waveFinetune);
+						pFile->Read(waveLoopType);
+						pFile->Read(waveStereo);
+						
+						pFile->ReadString(waveName, sizeof waveName);
+						
+						pFile->Read(size);
+						byte* pData;
+						
+						if ( !fullopen )
+						{
+							pFile->Skip(size);
+							waveDataL=new std::int16_t[2];
+						}
+						else
+						{
+							pData = new std::uint8_t[size+4];// +4 to avoid any attempt at buffer overflow by the code <-- ?
+							pFile->ReadChunk(pData,size);
+							///\todo SoundDesquash should be object-oriented and provide access to this via its interface
+							if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
+							{
+									std::ostringstream s;
+									s << "instrument: " << index << ", name: " << waveName << std::endl;
+									s << "sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
+									s << "You should reload this wave sample and all the samples after this one!";
+//									loggers::warning(s.str());
+//									MessageBox(0, s.str().c_str(), "Loading wave sample data", MB_ICONWARNING | MB_OK);
+							}
+							DataCompression::SoundDesquash(pData,&waveDataL);
+							delete[] pData;
+						}
 
-            if (waveStereo)
-            {
-              pFile->read(&size,sizeof(size));
-              if ( !fullopen )
-              {
-                pFile->skip(size);
-                zapArray(waveDataR,new signed short[2]);
-              }
-              else
-              {
-                pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
-                pFile->read(pData,size);
-                DataCompression::SoundDesquash(pData,&waveDataR);
-                zapArray(pData);
-              }
-            }
-          }
-        }
-        else
-        {
-          pFile->read(&version,sizeof(version));
-          pFile->read(&size,sizeof(size));
-          // there is an error, this file is newer than this build of psycle
-          //MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
-          pFile->skip(size);
-        }
-      }
-    }
+						if (waveStereo)
+						{
+							pFile->Read(size);
+							if ( !fullopen )
+							{
+								pFile->Skip(size);
+								delete[] waveDataR;
+								waveDataR = new std::int16_t[2];
+							}
+							else
+							{
+								pData = new std::uint8_t[size+4]; // +4 to avoid any attempt at buffer overflow by the code <-- ?
+								pFile->ReadChunk(pData,size);
+								///\todo SoundDesquash should be object-oriented and provide access to this via its interface
+								if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
+								{
+										std::ostringstream s;
+										s << "instrument: " << index << ", name: " << waveName << std::endl;
+										s << "stereo wave sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
+										s << "You should reload this wave sample and all the samples after this one!";
+//										loggers::warning(s.str());
+//										MessageBox(0, s.str().c_str(), "Loading stereo wave sample data", MB_ICONWARNING | MB_OK);
+								}
+								DataCompression::SoundDesquash(pData,&waveDataR);
+								delete[] pData;
+							}
+						}
+					}
+				}
+				else
+				{
+					pFile->Read(version);
+					pFile->Read(size);
+					// there is an error, this file is newer than this build of psycle
+					//MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
+				}
+			}
+		}
 
-    /*void Instrument::SaveFileChunk(RiffFile* pFile)
-    {
-      pFile->Write(&_loop,sizeof(_loop));
-      pFile->Write(&_lines,sizeof(_lines));
-      pFile->Write(&_NNA,sizeof(_NNA));
+		void Instrument::SaveFileChunk(RiffFile* pFile)
+		{
+			pFile->Write(_loop);
+			pFile->Write(_lines);
+			pFile->Write(_NNA);
 
-      pFile->Write(&ENV_AT,sizeof(ENV_AT));
-      pFile->Write(&ENV_DT,sizeof(ENV_DT));
-      pFile->Write(&ENV_SL,sizeof(ENV_SL));
-      pFile->Write(&ENV_RT,sizeof(ENV_RT));
-      
-      pFile->Write(&ENV_F_AT,sizeof(ENV_F_AT));
-      pFile->Write(&ENV_F_DT,sizeof(ENV_F_DT));
-      pFile->Write(&ENV_F_SL,sizeof(ENV_F_SL));
-      pFile->Write(&ENV_F_RT,sizeof(ENV_F_RT));
+			pFile->Write(ENV_AT);
+			pFile->Write(ENV_DT);
+			pFile->Write(ENV_SL);
+			pFile->Write(ENV_RT);
+			
+			pFile->Write(ENV_F_AT);
+			pFile->Write(ENV_F_DT);
+			pFile->Write(ENV_F_SL);
+			pFile->Write(ENV_F_RT);
 
-      pFile->Write(&ENV_F_CO,sizeof(ENV_F_CO));
-      pFile->Write(&ENV_F_RQ,sizeof(ENV_F_RQ));
-      pFile->Write(&ENV_F_EA,sizeof(ENV_F_EA));
-      pFile->Write(&ENV_F_TP,sizeof(ENV_F_TP));
+			pFile->Write(ENV_F_CO);
+			pFile->Write(ENV_F_RQ);
+			pFile->Write(ENV_F_EA);
+			pFile->Write(ENV_F_TP);
 
-      pFile->Write(&_pan,sizeof(_pan));
-      pFile->Write(&_RPAN,sizeof(_RPAN));
-      pFile->Write(&_RCUT,sizeof(_RCUT));
-      pFile->Write(&_RRES,sizeof(_RRES));
+			pFile->Write(_pan);
+			pFile->Write(_RPAN);
+			pFile->Write(_RCUT);
+			pFile->Write(_RRES);
 
-      pFile->Write(_sName,strlen(_sName)+1);
+			pFile->WriteChunk(_sName, std::strlen(_sName) + 1);
 
-      // now we have to write out the waves, but only if valid
+			// now we have to write out the waves, but only if valid
 
-      int numwaves = (waveLength > 0)?1:0; // The sampler has never supported more than one sample per instrument, even when the GUI did.
+			int numwaves = (waveLength > 0) ? 1 : 0; // The sampler has never supported more than one sample per instrument, even when the GUI did.
 
-      pFile->Write(&numwaves, sizeof(numwaves));
-      if (waveLength > 0)
-      {
-        byte * pData1(0);
-        byte * pData2(0);
-        UINT size1=0,size2=0;
-        size1 = SoundSquash(waveDataL,&pData1,waveLength);
-        if (waveStereo)
-        {
-          size2 = SoundSquash(waveDataR,&pData2,waveLength);
-        }
+			pFile->Write(numwaves);
+			if (waveLength > 0)
+			{
+				std::uint8_t * pData1(0);
+				std::uint8_t * pData2(0);
+				std::uint32_t size1=0,size2=0;
+				size1 = DataCompression::SoundSquash(waveDataL,&pData1,waveLength);
+				if (waveStereo)
+				{
+					size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
+				}
 
-        UINT index = 0;
-        pFile->Write("WAVE",4);
-        UINT version = CURRENT_FILE_VERSION_PATD;
-        UINT size = sizeof(index)
-              +sizeof(waveLength)
-              +sizeof(waveVolume)
-              +sizeof(waveLoopStart)
-              +sizeof(waveLoopEnd)
-              +sizeof(waveTune)
-              +sizeof(waveFinetune)
-              +sizeof(waveStereo)
-              +strlen(waveName)+1
-              +size1
-              +size2;
+				std::uint32_t index = 0;
+				pFile->Write("WAVE");
+				std::uint32_t version = CURRENT_FILE_VERSION_PATD;
+				std::uint32_t size =
+					sizeof index +
+					sizeof waveLength +
+					sizeof waveVolume +
+					sizeof waveLoopStart +
+					sizeof waveLoopEnd +
+					sizeof waveTune +
+					sizeof waveFinetune +
+					sizeof waveStereo +
+					std::strlen(waveName) + 1 +
+					size1 +
+					size2;
 
-        pFile->Write(&version,sizeof(version));
-        pFile->Write(&size,sizeof(size));
-        pFile->Write(&index,sizeof(index));
+				pFile->Write(version);
+				pFile->Write(size);
+				pFile->Write(index);
 
-        pFile->Write(&waveLength,sizeof(waveLength));
-        pFile->Write(&waveVolume,sizeof(waveVolume));
-        pFile->Write(&waveLoopStart,sizeof(waveLoopStart));
-        pFile->Write(&waveLoopEnd,sizeof(waveLoopEnd));
+				pFile->Write(waveLength);
+				pFile->Write(waveVolume);
+				pFile->Write(waveLoopStart);
+				pFile->Write(waveLoopEnd);
 
-        pFile->Write(&waveTune,sizeof(waveTune));
-        pFile->Write(&waveFinetune,sizeof(waveFinetune));
-        pFile->Write(&waveLoopType,sizeof(waveLoopType));
-        pFile->Write(&waveStereo,sizeof(waveStereo));
+				pFile->Write(waveTune);
+				pFile->Write(waveFinetune);
+				pFile->Write(waveLoopType);
+				pFile->Write(waveStereo);
 
-        pFile->Write(waveName,strlen(waveName)+1);
+				pFile->WriteChunk(waveName, std::strlen(waveName) + 1);
 
-        pFile->Write(&size1,sizeof(size1));
-        pFile->Write(pData1,size1);
-        zapArray(pData1);
-        if (waveStereo)
-        {
-          pFile->Write(&size2,sizeof(size2));
-          pFile->Write(pData2,size2);
-        }
-        zapArray(pData2);
-      }
-    }
-  }
-}*/
+				pFile->Write(size1);
+				pFile->WriteChunk(pData1,size1);
+				delete[] pData1;
+				if (waveStereo)
+				{
+					pFile->Write(size2);
+					pFile->WriteChunk(pData2,size2);
+				}
+				delete[] pData2;
+			}
+		}

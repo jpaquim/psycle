@@ -1,282 +1,623 @@
-/***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
-#ifndef MACHINE_H
-#define MACHINE_H
-
-
+///\file
+///\brief interface file for psycle::host::Machine
+#pragma once
+#include "songstructs.h"
 #include "dsp.h"
-#include "song.h"
+#include "helpers.h"
+#include "constants.h"
+#include "fileio.h"
+#include "global.h"
 #include <stdexcept>
+#include <cstdint>
+#include <vector>
+#include <cassert>
 
+//namespace psycle
+//{
+//	namespace host
+//	{
+		/// we don't really need a macro for just one little expression...
+		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
+		/// we don't really need a macro for just one little expression...
+		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
 
-class DeSerializer;
-class Serializer;
+		class Machine; // forward declaration
 
+		/// Base class for exceptions thrown from plugins.
+		class exception : public std::runtime_error
+		{
+			public:
+				exception(std::string const & what) : std::runtime_error(what) {}
+		};
 
-/**
-@author Stefan
-*/
+		/// Classes derived from exception.
+		namespace exceptions
+		{
+			/// Base class for exceptions caused by errors on library operation.
+			class library_error : public exception
+			{
+				public:
+					library_error(std::string const & what) : exception(what) {}
+			};
 
-class CPoint {
-public:
-    int x;
-    int y;
-};
+			/// Classes derived from library.
+			namespace library_errors
+			{
+				/// Exception caused by library loading failure.
+				class loading_error : public library_error
+				{
+					public:
+						loading_error(std::string const & what) : library_error(what) {}
+				};
 
-#define CPUCOST_INIT(cost) long long cost = 0;
+				/// Exception caused by symbol resolving failure in a library.
+				class symbol_resolving_error : public library_error
+				{
+					public:
+						symbol_resolving_error(std::string const & what) : library_error(what) {}
+				};
+			}
 
-/*
-long long cost; \
-__asm rdtsc \
-__asm mov cost, eax*/
+			/// Base class for exceptions caused by an error in a library function.
+/*			class function_error : public exception
+			{
+				public:
+					function_error(std::string const & what, std::exception const * const exception = 0) : host::exception(what), exception_(exception) {}
+				public:
+					std::exception const inline * const exception() const throw() { return exception_; }
+				private:
+					std::exception const * const        exception_;
+			};
+			
+			///\relates function_error.
+			namespace function_errors
+			{
+				/// Exception caused by a bad returned value from a library function.
+				class bad_returned_value : public function_error
+				{
+					public:
+						bad_returned_value(std::string const & what) : function_error(what) {}
+				};
 
+				///\internal
+				namespace detail
+				{
+					class rethrow_functor
+					{
+						public:
+							rethrow_functor(Machine & machine) : machine_(machine) {}
+							template<typename E> void operator_                (universalis::compiler::location const & location,              E const * const e = 0) const throw(function_error) { rethrow(location, e, 0); }
+							template<          > void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e    ) const throw(function_error) { rethrow(location, e, e); }
+						private:
+							template<typename E> void rethrow                  (universalis::compiler::location const & location,              E const * const e, std::exception const * const standard) const throw(function_error)
+							{
+								std::ostringstream s;
+								s
+									<< "Machine had an exception in function '" << location << "'." << std::endl
+									<< universalis::compiler::typenameof(*e) << std::endl
+									<< universalis::exceptions::string(*e);
+								function_error const function_error(s.str(), standard);
+								machine_.crashed(function_error);
+								throw function_error;
+							}
+							Machine & machine_;
+					};
+				}
+				#define PSYCLE__HOST__CATCH_ALL(machine) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor(machine))
+				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
+			}*/
+		}
 
-class Machine{
-public:
-    Machine();
+                class CPoint {
+                public:
+                   int x;
+                   int y;
+                };
 
-    virtual ~Machine();
+		/// Class for the Internal Machines' Parameters.
+		class CIntMachParam			
+		{
+			public:
+				/// Short name
+				const char * name;		
+				/// >= 0
+				int minValue;
+				/// <= 65535
+				int maxValue;
+		};
 
-    static Machine * LoadFileChunk(DeSerializer* pFile, int index, int version,bool fullopen=true);
-    virtual bool LoadSpecificChunk(DeSerializer* pFile, int version);
+		class AudioPort;
 
-    virtual void SaveFileChunk(Serializer * pFile);
-    virtual void SaveSpecificChunk(Serializer* pFile);
-    virtual void SaveDllName(Serializer* pFile);
+		// A wire is what interconnects two AudioPorts. Appart from being the graphically representable element,
+		// the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
+		class Wire
+		{
+			public:
+				/// legacy
+				typedef int id_type;
 
-    virtual void Init();
-    virtual void PreWork(int numSamples);
-    virtual void WorkNoMix(int numSamples);
-    virtual void Work(int numSamples);
-    virtual void Tick() {};
-    virtual void Tick(int track, PatternEntry * pData) {};
-    //virtual void Tick(int track, PatternEntry * pData) {};
-    virtual void Stop() {};
-    virtual void SetPan(int newpan);
+				Wire()
+					:volume(1.0f),pan(0.0f),multiplier(1.0f),rvol(1.0f),lvol(1.0f)
+					,index(0),senderport(0),receiverport(0){}
+				virtual ~Wire()
+				{
+					if (senderport) Disconnect(senderport);
+					if (receiverport) Disconnect(receiverport);
+				}
+				virtual void Connect(AudioPort *senderp,AudioPort *receiverp);
+				virtual void ChangeSource(AudioPort* newsource);
+				virtual void ChangeDestination(AudioPort* newdest);
+				virtual void CollectData(int numSamples);
+				virtual void SetVolume(float newvol);
+				virtual void SetPan(float newpan);
+				virtual inline int GetIndex() { return index; }
+				virtual inline int SetIndex(int idx) { index = idx; }
+				
+			protected:
+				virtual void Disconnect(AudioPort* port);
+				virtual inline float RVol() { return rvol; }
+				virtual inline float LVol() { return lvol; }
+				float volume;
+				float pan;
+				float multiplier;
+				float rvol;
+				float lvol;
+				int index;
+				AudioPort *senderport;
+				AudioPort *receiverport;
+		};
 
-    virtual char * GetName() = 0;
-    virtual int GetNumParams() { return _numPars; };
-    virtual int GetNumCols() { return _nCols; };
-    virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
-    virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
-    virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
-    virtual int GetParamValue(int numparam) { return 0; };
-    virtual void SetSampleRate(int sr) {};
-    virtual bool SetParameter(int numparam, int value) { return false;};
-    virtual bool Load(DeSerializer * pFile);
+		// Class which allows the setup (as in shape) of the machines' connectors.
+		// An Audio port is synonym of a multiplexed channel. In other words, it is an element that defines
+		// the characteristics of one or more individual inputs that are used in conjunction.
+		// From this definition, we could have one Stereo Audio Port (one channel, two inputs or outputs),
+		// a 5.1 Port, or several Stereo Ports (in the case of a mixer table), between others..
+		// Note that several wires can be connected to the same AudioPort (automatic mixing in the case of an input port?).
+		class AudioPort
+		{
+			public:
+				//\todo: Port creation, assign buffers to it (passed via ctor? they might be shared/pooled). 
+				//\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
+				AudioPort(Machine & parent, int arrangement, std::string const & name) : parent_(parent), name_(name), arrangement_(arrangement) {}
+				virtual ~AudioPort() {}
+				virtual void CollectData(int numSamples) {}
+				virtual void Connected(Wire * wire);
+				virtual void Disconnected(Wire * wire);
+				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires_.size()); return wires_[index]; }
+				virtual inline bool NumberOfWires() { return wires_.size(); }
+				virtual inline int Arrangement() throw() { return arrangement_; }
+				virtual inline Machine * GetMachine() throw() { return &parent_; }
+				//\todo : should change arrangement/name be allowed? (Mutating Port?)
+				virtual inline void ChangeArrangement(int arrangement) { this->arrangement_ = arrangement; }
+				virtual inline std::string const & Name() const throw() { return name_; }
+				virtual inline void ChangeName(std::string const & name) { this->name_ = name; }
+			protected:
+				Machine & parent_;
+				int arrangement_;
+				std::string name_;
+				typedef std::vector<Wire*> wires_type;
+				wires_type wires_;
+		};
 
-    virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
-    virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
-    virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
-    virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
-    virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
-    virtual int FindInputWire(int macIndex);
-    virtual int FindOutputWire(int macIndex);
-    virtual const char * const GetDllName() const throw() { return "built-in"; };
+		class InPort : public AudioPort
+		{
+			public:
+				/// legacy
+				typedef int id_type;
+				InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
+				virtual ~InPort(){};
+				virtual void CollectData(int numSamples);
+		};
 
-    int _macIndex;
-    MachineType _type;
-    MachineMode _mode;
-    bool _bypass;
-    bool _mute;
-    bool _waitingForSound;
-    bool _stopped;
-    bool _worked;
-    float _lMax;
-    float _rMax;
-    /// left data
-    float *_pSamplesL;
-    /// right data
-    float *_pSamplesR;
-    /// left chan volume
-    float _lVol;
-    /// right chan volume
-    float _rVol;
-    int _outDry;
-    /// numerical value of panning.
-    int _panning;
-    int _x;
-    int _y;
-    char _editName[32];
-    int _numPars;
-    int _nCols;
-    /// Incoming connections Machine number
-    int _inputMachines[MAX_CONNECTIONS];	
-    /// Outgoing connections Machine number
-    int _outputMachines[MAX_CONNECTIONS];	
-    /// Incoming connections Machine vol
-    float _inputConVol[MAX_CONNECTIONS];	
-    /// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-    float _wireMultiplier[MAX_CONNECTIONS];
-    /// Outgoing connections activated
-    bool _connection[MAX_CONNECTIONS];
-    /// Incoming connections activated
-    bool _inputCon[MAX_CONNECTIONS];
-    /// number of Incoming connections
-    int _numInputs;
-    /// number of Outgoing connections
-    int _numOutputs;
-    PatternEntry TriggerDelay[MAX_TRACKS];
-    int TriggerDelayCounter[MAX_TRACKS];
-    int RetriggerRate[MAX_TRACKS];
-    int ArpeggioCount[MAX_TRACKS];
-    bool TWSActive;
-    int TWSInst[MAX_TWS];
-    int TWSSamples;
-    float TWSDelta[MAX_TWS];
-    float TWSCurrent[MAX_TWS];
-    float TWSDestination[MAX_TWS];
-    /// output peak level for DSP
-    float _volumeCounter;
-    /// output peak level for display
-    int _volumeDisplay;	
-    /// output peak level for display
-    int _volumeMaxDisplay;
-    /// output peak level for display
-    int _volumeMaxCounterLife;
-    unsigned long int _cpuCost;
-    unsigned long int _wireCost;
-    int _scopePrevNumSamples;
-    int _scopeBufferIndex;
-    float *_pScopeBufferL;
-    float *_pScopeBufferR;
-    /// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
-    CPoint _connectionPoint[MAX_CONNECTIONS];
+		class OutPort : public AudioPort
+		{
+			public:
+				/// legacy
+				typedef int id_type;
+				OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
+				virtual ~OutPort() {}
+				virtual void CollectData(int numSamples);
+		};
 
-    protected:
-        void SetVolumeCounter(int numSamples);
-};
+		enum MachineType
+		{
+			MACH_UNDEFINED = -1, //< :-(
+			MACH_MASTER = 0,
+			MACH_SINE = 1, //< for psycle old fileformat version 2
+			MACH_DIST = 2, //< for psycle old fileformat version 2
+			MACH_SAMPLER = 3,
+			MACH_DELAY = 4, //< for psycle old fileformat version 2
+			MACH_2PFILTER = 5, //< for psycle old fileformat version 2
+			MACH_GAIN = 6, //< for psycle old fileformat version 2
+			MACH_FLANGER = 7, //< for psycle old fileformat version 2
+			MACH_PLUGIN = 8,
+			MACH_VST = 9,
+			MACH_VSTFX = 10,
+			MACH_SCOPE = 11,
+			MACH_XMSAMPLER = 12,
+			MACH_DUPLICATOR = 13,
+			MACH_MIXER = 14,
+			MACH_LFO = 15,
+			MACH_DUMMY = 255
+		};
 
-class DuplicatorMac : public Machine
-{
-  public:
-    DuplicatorMac();
-    DuplicatorMac(int index);
-    virtual void Init(void);
-    virtual void Tick( int channel,PatternEntry* pData);
-    virtual void Work(int numSamples);
-    virtual char* GetName(void) { return _psName; };
-    virtual void GetParamName(int numparam,char *name);
-    virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
-    virtual void GetParamValue(int numparam,char *parVal);
-    virtual int GetParamValue(int numparam);
-    virtual bool SetParameter(int numparam,int value);
-    virtual bool LoadSpecificChunk(DeSerializer* pFile, int version);
-    virtual void SaveSpecificChunk(Serializer* pFile);
+		enum MachineMode
+		{
+			MACHMODE_UNDEFINED = -1, //< :-(
+			MACHMODE_GENERATOR = 0,
+			MACHMODE_FX = 1,
+			MACHMODE_MASTER = 2,
+		};
 
-    protected:
-      short macOutput[8];
-      short noteOffset[8];
-      static char* _psName;
-      bool bisTicking;
-};
+		/// Base class for "Machines", the audio producing elements.
+		class Machine
+		{
 
+			///\name crash handling
+			///\{
+				public:
+					/// This function should be called when an exception was thrown from the machine.
+					/// This will mark the machine as crashed, i.e. crashed() will return true,
+					/// and it will be disabled.
+					///\param e the exception that occured, converted to a std::exception if needed.
+					void crashed(std::exception const & e) throw();
+				public:
+					/// Tells wether this machine has crashed.
+					bool const inline & crashed() const throw() { return crashed_; }
+				private:
+					bool                crashed_;
+			///\}
+			///\name crash handling ... fpu exception mask
+			///\{
+				public:
+/*					universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
+					universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
+				private:
+					universalis::processor::exceptions::fpu::mask::type                fpu_exception_mask_;*/
+			///\}
 
-/// dummy machine.
-class Dummy : public Machine
-{
-  public:
-    Dummy(int index);
-    virtual void Work(int numSamples);
-    virtual char* GetName(void) { return _psName; };
-    virtual bool LoadSpecificChunk(DeSerializer* pFile, int version);
-    /// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
-    bool wasVST;
-    protected:
-        static char * _psName;
-};
+			///\name cpu cost measurement ... for the time spent in the machine's processing function
+			///\{
+				public:
+				/*	void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
+					cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
+				private:
+					cpu::cycles_type        work_cpu_cost_;
+			///\}
+			///\name cpu cost measurement ... for the time spent routing audio
+			///\{
+				public:
+					void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
+					cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
+				private:
+					cpu::cycles_type        wire_cpu_cost_;*/
+			///\}
 
-class Master : public Machine
-{
-  public:
-    Master();
-    Master(int index);
-    virtual void Init(void);
-    virtual void Work(int numSamples);
-    virtual char* GetName(void) { return _psName; };
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			// Draft for a new Machine Specification.
+			// A machine is created via pMachine = new Machine;
+			// Creation does not give a ready to use Machine. "The machine is over the table, but the power is off!"
+			// Use LoadDll(std::string) to load a specific plugin to operate this machine. The function does a loadlibrary, and
+			//	the basic information becomes accessible (name, parameters...). Note that this call will only return "true" 
+			// [ there is another option, which would be a constructor that gets the std::string, and LoadDll() be protected and called from within ]
+			//	for Plugin or vst::plugin, since any other machine do not use an external dll.
+			// Use UnloadDll() to undo the previous action. Else, the destructor will do it for you.
+			// Use SwitchOn() to obtain a ready-to-use machine. This will return false for Plugin and vst::plugin if
+			//	OpenDll() has not been called, or if it has returned false.
+			// Use Reset() to reinitialize the machine status and recall all default values for the parameters.
+			// Use SwitchOff() to stop using this machine. Else, the destructor will do it for you.
+			// Use StandBy(bool) to set or unset the machine to a stopped state. ("suspend" in vst terminology).
+			//	"Process()" will still be called in order for the machine to update state, but will return with no data
+			//	Everything else works as usual.
+			//	This function can be used as an "audio-only" reset. (Panic button)
+			// Bypass(bool) un/sets the Bypass flag, and calls to StandBy() accordingly.
+			// Process() Call it to start the processing of input buffers and generate the output.
+			// AddEvent(timestampedEvent)
+			// MasterChanged(changetype)
+			// SaveState(ofstream)
+			// LoadState(ifstream)
+			// several "Get" for Information (name, params...)
+			// several "Set" for Information (name, params...)
+			// Automation... calling, or being called? ( calling automata.work() or automata calling machine.work())
+			// Use the concept of "Ports" to define inputs/outputs.
+			//
+			// bool IsDllLoaded()
+			// bool IsPowered()
+			// bool IsBypass()
+			// bool IsStandBy()
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
 
-    //virtual bool Load(RiffFile * pFile);
-    virtual bool LoadSpecificChunk(DeSerializer * pFile, int version);
-    virtual void SaveSpecificChunk(Serializer* pFile);
+			///\name each machine has a type attribute so that we can make yummy switch statements
+			///\{
+				public:
+					///\see enum MachineType which defined somewhere outside
+					typedef MachineType type_type;
+					Machine::type_type inline type() const throw() { return _type; }
+				//PSYCLE__PRIVATE:
+					type_type _type;
+			///\}
 
-    /// this is for the VstHost
-    double sampleCount;
-    bool _clip;
-    bool decreaseOnClip;
-    static float* _pMasterSamples;
-    int peaktime;
-    float currentpeak;
-    bool vuupdated;
-    protected:
-        static char* _psName;
-    };
+			///\name each machine has a mode attribute so that we can make yummy switch statements
+			///\{
+				public:
+					///\see enum MachineMode which is defined somewhere outside
+					typedef MachineMode mode_type;
+					mode_type inline mode() const throw() { return _mode; }
+				//PSYCLE__PRIVATE:
+					mode_type _mode;
+			///\}
 
-class Mixer : public Machine
-{
-    public:
-    enum
-    {
-      mix=0,
-      send0,
-      sendmax=send0+MAX_CONNECTIONS
-    };
-    Mixer();
-    Mixer(int index);
-    virtual void Init(void);
-    virtual void Work(int numSamples);
-    void FxSend(int numSamples);
-    void Mix(int numSamples);
-    virtual char* GetName(void) { return _psName; };
-    virtual int GetNumCols();
-    virtual void GetParamName(int numparam,char *name);
-    virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
-    virtual void GetParamValue(int numparam,char *parVal);
-    virtual int GetParamValue(int numparam);
-    virtual bool SetParameter(int numparam,int value);
-    virtual bool LoadSpecificChunk(DeSerializer* pFile, int version);
-    virtual void SaveSpecificChunk(Serializer* pFile);
+			///\name machine's numeric identifier used in the patterns and gui display
+			///\{
+				public:
+					/// legacy
+					///\todo should be unsigned but some functions return negative values to signal errors instead of throwing an exception
+					typedef int id_type;
+					id_type id() const throw() { return _macIndex; }
+//				PSYCLE__PRIVATE:
+					/// it's currently actually used as an array index, but that shouldn't be part of the interface
+					id_type _macIndex;
+			///\}
 
-    protected:
-      float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
-      /// Incoming send, Machine number
-      int _send[MAX_CONNECTIONS];	
-      /// Incoming send, connection volume
-      float _sendVol[MAX_CONNECTIONS];	
-      /// Value to multiply _sendVol[] to have a 0.0..1.0 range
-      float _sendVolMulti[MAX_CONNECTIONS];
-      /// Incoming connections activated
-      bool _sendValid[MAX_CONNECTIONS];		
+			public:
+				Machine(type_type type, mode_type mode, id_type id);
+				virtual ~Machine() throw();
 
-      static char* _psName;
-};
+			//////////////////////////////////////////////////////////////////////////
+			// Actions
 
-inline void Machine::SetVolumeCounter(int numSamples)
-{
-  _volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
-  if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-  int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
-  // prevent downward jerkiness
-  if(temp > 97) temp = 97;
-  if(temp > _volumeDisplay) _volumeDisplay = temp;
-  --_volumeDisplay;
-};
+			///\name the life cycle of a mahine
+			///\{
+				public:
+					virtual void Init();
+					virtual void PreWork(int numSamples);
+					virtual void Work(int numSamples);
+					virtual void WorkNoMix(int numSamples);
+					virtual void Tick() {};
+					virtual void Tick(int track, PatternEntry * pData) {};
+					virtual void Stop() {};
+			///\}
 
+			///\name (de)serialization
+			///\{
+				public:
+					virtual void SaveDllName(RiffFile * pFile);
+					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+					static Machine * LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen=true);
+					virtual void SaveFileChunk(RiffFile * pFile);
+					virtual void SaveSpecificChunk(RiffFile * pFile);
+				protected: friend class Song;
+					/// Loader for psycle fileformat version 2.
+					
+			///\}
 
-#endif
+			///\name connections ... ports
+			///\{
+				public:
+					virtual bool ConnectTo(Machine & dst, InPort::id_type dstport = InPort::id_type(0), OutPort::id_type outport = OutPort::id_type(0), float volume = 1.0f);
+					virtual bool Disconnect(Machine & dst);
+			///\}
+
+			///\name connections ... wires
+			///\{
+				public:
+					virtual void InitWireVolume(type_type, Wire::id_type, float value);
+					virtual Wire::id_type FindInputWire(id_type);
+					virtual Wire::id_type FindOutputWire(id_type);
+			///\}
+
+			///\name multichannel
+			///\{
+				public:
+					void DefineStereoInput(int numins);
+					void DefineStereoOutput(int numouts);
+			///\}
+
+			//////////////////////////////////////////////////////////////////////////
+			// Properties
+
+			public:
+				virtual void SetSampleRate(int hertz) { /* \todo should this be a pure virtual function? */ };
+
+				///\todo 3 dimensional?
+				virtual void SetPan(int newpan);
+
+			///\name ports
+			///\{
+				public:
+					virtual unsigned int GetInPorts() { return numInPorts; };
+					virtual unsigned int GetOutPorts() { return numOutPorts; };
+					virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; };
+					virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; };
+			///\}
+
+			virtual float GetAudioRange() { return _audiorange; }
+
+			///\name amplification of the signal in connections/wires
+			///\{
+				public:
+					virtual void GetWireVolume(Wire::id_type wire, float & result) { result = _inputConVol[wire] * _wireMultiplier[wire]; };
+					virtual void SetWireVolume(Wire::id_type wire, float value) { _inputConVol[wire] = value / _wireMultiplier[wire]; };
+					virtual bool GetDestWireVolume(id_type src, Wire::id_type, float & result);
+					virtual bool SetDestWireVolume(id_type src, Wire::id_type, float value);
+			///\}
+
+			///\name name
+			///\{
+				public:
+					virtual std::string GetDllName() const { return "built-in"; };
+					virtual std::string GetName() const = 0;
+
+				public:
+					virtual std::string const & GetEditName() { return _editName; }
+				//PSYCLE__PRIVATE:
+					std::string  _editName;
+			///\}
+
+			///\name parameters
+			///\{
+				public:
+					virtual int GetNumCols() { return _nCols; };
+					virtual int GetNumParams() { return _numPars; };
+					virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
+					virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
+					virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
+					virtual int GetParamValue(int numparam) { return 0; };
+					virtual bool SetParameter(int numparam, int value) { return false;}; 
+			///\}
+
+			///\name more misplaced gui stuff
+			///\{
+				public:
+					virtual int  GetPosX() { return _x; };
+					virtual void SetPosX(int x) {_x = x;};
+					virtual int  GetPosY() { return _y; };
+					virtual void SetPosY(int y) {_y = y;};
+
+			///\}
+		protected:
+			void SetVolumeCounter(int numSamples);
+			//void SetVolumeCounterAccurate(int numSamples);
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//\todo below are unencapsulated data members
+
+                public:
+//		PSYCLE__PRIVATE:
+
+			InPort *inports;
+			OutPort *outports;
+			int numInPorts;
+			int numOutPorts;
+			bool _bypass;
+			bool _mute;
+			bool _waitingForSound;
+			bool _stopped;
+			bool _worked;
+			float _audiorange;
+			/// left data
+			float *_pSamplesL;
+			/// right data
+			float *_pSamplesR;
+			/// left chan volume
+			float _lVol;
+			/// right chan volume
+			float _rVol;
+			/// numerical value of panning.
+			int _panning;
+			int _x;
+			int _y;
+			int _numPars;
+			int _nCols;
+
+			///\name input ports
+			///\{
+				/// number of Incoming connections
+				int _connectedInputs;
+				/// Incoming connections Machine numbers
+				///\todo hardcoded limits and wastes
+				Machine::id_type _inputMachines[MAX_CONNECTIONS];
+				/// Incoming connections activated
+				///\todo hardcoded limits and wastes
+				bool _inputCon[MAX_CONNECTIONS];
+				/// Incoming connections Machine volumes
+				///\todo hardcoded limits and wastes
+				float _inputConVol[MAX_CONNECTIONS];
+				/// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+				///\todo hardcoded limits and wastes
+				float _wireMultiplier[MAX_CONNECTIONS];
+			///\}
+
+			///\name output ports
+			///\{
+				/// number of Outgoing connections
+				int _connectedOutputs;
+				/// Outgoing connections Machine numbers
+				///\todo hardcoded limits and wastes
+				Machine::id_type _outputMachines[MAX_CONNECTIONS];
+				/// Outgoing connections activated
+				///\todo hardcoded limits and wastes
+				bool _connection[MAX_CONNECTIONS];
+			///\}
+
+			///\name misplaced gui stuff
+			///\{
+				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
+				///\todo hardcoded limits and wastes
+				CPoint _connectionPoint[MAX_CONNECTIONS];
+			///\}
+
+			///\name signal measurements, perhaps can be considered misplaced gui stuff
+			///\{
+				/// output peak level for DSP
+				float _volumeCounter;					
+				/// output peak level for display
+				int _volumeDisplay;	
+				/// output peak level for display
+				int _volumeMaxDisplay;
+				/// output peak level for display
+				int _volumeMaxCounterLife;
+				///\todo doc
+				int _scopePrevNumSamples;
+				///\todo doc
+				int	_scopeBufferIndex;
+				///\todo doc
+				float *_pScopeBufferL;
+				///\todo doc
+				float *_pScopeBufferR;
+			///\}
+
+			///\ various player-related states
+			///\{
+				///\todo hardcoded limits and wastes
+				PatternEntry TriggerDelay[MAX_TRACKS];
+				///\todo hardcoded limits and wastes
+				int TriggerDelayCounter[MAX_TRACKS];
+				///\todo hardcoded limits and wastes
+				int RetriggerRate[MAX_TRACKS];
+				///\todo hardcoded limits and wastes
+				int ArpeggioCount[MAX_TRACKS];
+				///\todo doc
+				bool TWSActive;
+				///\todo hardcoded limits and wastes
+				int TWSInst[MAX_TWS];
+				///\todo doc
+				int TWSSamples;
+				///\todo hardcoded limits and wastes
+				float TWSDelta[MAX_TWS];
+				///\todo hardcoded limits and wastes
+				float TWSCurrent[MAX_TWS];
+				///\todo hardcoded limits and wastes
+				float TWSDestination[MAX_TWS];
+			///\}
+                     float _lMax;
+	             float _rMax;
+		};
+
+		inline void Machine::SetVolumeCounter(int numSamples)
+		{
+			_volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
+			if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
+			int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
+			// prevent downward jerkiness
+			if(temp > 97) temp = 97;
+			else if (temp <0) temp=0;
+			if(temp > _volumeDisplay) _volumeDisplay = temp;
+			--_volumeDisplay;
+		};
+
+		/*
+		inline void Machine::SetVolumeCounterAccurate(int numSamples)
+		{
+			_volumeCounter = Dsp::GetMaxVolAccurate(_pSamplesL, _pSamplesR, numSamples);
+		};
+		*/
+//	}
+//}

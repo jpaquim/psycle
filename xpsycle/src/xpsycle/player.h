@@ -23,7 +23,7 @@
 #include "song.h"
 #include "serializer.h"
 #include <string>
-
+#include "internal_machines.h"
 
 /**
 @author Stefan

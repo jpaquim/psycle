@@ -22,6 +22,8 @@
 
 #include "deserializer.h"
 
+class RiffFile;
+
 /**
 @author Stefan
 */
@@ -33,8 +35,8 @@ public:
 
     void Delete();
     void DeleteLayer(void);
-    void LoadFileChunk(DeSerializer* pFile,int version,bool fullopen=true);
-//   void SaveFileChunk(RiffFile* pFile);
+    void LoadFileChunk(RiffFile* pFile,int version,bool fullopen=true);
+    void SaveFileChunk(RiffFile* pFile);
     bool Empty();
 
     ///\name Loop stuff
