@@ -28,7 +28,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	//////////////////////////////////////////////////////////////////////////
 	// Knob class
 
-	CFrameLFOMachine::Knob::Knob(int x, int y, int minVal, int maxVal, char* label)
+	CFrameLFOMachine::Knob::Knob(int x, int y, int minVal, int maxVal, const std::string& label)
 		: CFrameLFOMachine::LFOControl(x, y, minVal, maxVal)
 		{
 			d_showLabel=top;
@@ -37,11 +37,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			d_lblBkColor = Global::configuration().machineGUIBottomColor;
 			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
 			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
-			strcpy(d_lblString, label);
+			d_lblString=label;
 		}
 
-	void CFrameLFOMachine::Knob::Paint(CDC* dc,int value, char* valString)
+		void CFrameLFOMachine::Knob::Paint(CDC* dc,int value, const std::string& valString)
 	{
+		if(!d_bVisible) return;
 		int range=d_maxValue-d_minValue;
 
 		if(value>d_maxValue) value=d_maxValue;
@@ -52,8 +53,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					SRCCOPY);
 
 		int textX=0, textY=0;
-		CSize valTextSize = dc->GetTextExtent(valString);
-		CSize lblTextSize = dc->GetTextExtent(d_lblString);
+		CSize valTextSize = dc->GetTextExtent(valString.c_str());
+		CSize lblTextSize = dc->GetTextExtent(d_lblString.c_str());
 
 		if(d_showValue!=off)
 		{
@@ -82,7 +83,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		
 			dc->SetBkColor(d_valBkColor);
 			dc->SetTextColor(d_valTextColor);
-			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+valTextSize.cx, textY+valTextSize.cy), valString, 0);
+			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+valTextSize.cx, textY+valTextSize.cy), valString.c_str(), 0);
 		}
 		if(d_showLabel!=off)
 		{
@@ -110,7 +111,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			dc->SetBkColor(d_lblBkColor);
 			dc->SetTextColor(d_lblTextColor);
-			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+lblTextSize.cx, textY+lblTextSize.cy), d_lblString, 0);
+			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+lblTextSize.cx, textY+lblTextSize.cy), d_lblString.c_str(), 0);
 		}
 	}
 	bool CFrameLFOMachine::Knob::LButtonDown(UINT nFlags,int x,int y, int &value)
@@ -147,13 +148,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	bool CFrameLFOMachine::Knob::PointInParam(int x, int y)
 	{
-		return x > d_x && x < d_x+s_width	&&
-			   y > d_y && y < d_y+s_height;
+		return	d_bVisible	&&
+				x > d_x && x < d_x+s_width	&&
+				y > d_y && y < d_y+s_height;
 	}
 
 	/////////////////////////////////////////////////////////////////////////
 	// CFrameLFOMachine::ComboBox class
-	CFrameLFOMachine::ComboBox::ComboBox(int x, int y, int minVal, int maxVal, int length, char* label)
+	CFrameLFOMachine::ComboBox::ComboBox(int x, int y, int minVal, int maxVal, int length, const std::string& label)
 		:CFrameLFOMachine::LFOControl(x, y, minVal, maxVal)
 		,d_length(length)
 		{
@@ -162,11 +164,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			d_lblBkColor = Global::configuration().machineGUIBottomColor;
 			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
 			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
-			strcpy(d_lblString, label);
+			d_lblString = label;
 		}
 
-	void CFrameLFOMachine::ComboBox::Paint(CDC* dc,int value, char* valString)
+		void CFrameLFOMachine::ComboBox::Paint(CDC* dc,int value, const std::string& valString)
 	{
+		if(!d_bVisible) return;
 		dc->BitBlt(	d_x,	d_y, 
 					s_width, s_height, &s_ComboBoxDC,    
 					(value==d_minValue ? s_width*2 : 0), 0, SRCCOPY);
@@ -181,8 +184,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			dc->BitBlt(d_x+i, d_y, 1, s_height, &s_ComboBoxDC, s_width*4+1, 0, SRCCOPY);
 
 
-		CSize valTextSize = dc->GetTextExtent(valString);
-		CSize lblTextSize = dc->GetTextExtent(d_lblString);
+		CSize valTextSize = dc->GetTextExtent(valString.c_str());
+		CSize lblTextSize = dc->GetTextExtent(d_lblString.c_str());
 
 		int textX, textY;
 		if(d_showValue!=off)
@@ -193,7 +196,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			dc->SetBkColor(dc->GetPixel(d_x+s_width+1, d_y+s_height/2));
 			dc->SetTextColor(d_valTextColor);
-			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+valTextSize.cx, textY+valTextSize.cy), valString, 0);
+			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+valTextSize.cx, textY+valTextSize.cy), valString.c_str(), 0);
 
 		}
 
@@ -222,7 +225,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			dc->SetBkColor(d_lblBkColor);
 			dc->SetTextColor(d_lblTextColor);
-			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+lblTextSize.cx, textY+lblTextSize.cy), d_lblString, 0);
+			dc->ExtTextOut(textX, textY, ETO_OPAQUE, CRect(textX, textY, textX+lblTextSize.cx, textY+lblTextSize.cy), d_lblString.c_str(), 0);
 		}
 	}
 	bool CFrameLFOMachine::ComboBox::LButtonDown(UINT nFlags,int x,int y, int &value)
@@ -276,8 +279,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	bool CFrameLFOMachine::ComboBox::PointInParam(int x, int y)
 	{
-		return x > d_x && x < d_x+s_width*2+d_length	&&
-			   y > d_y && y < d_y+s_height;
+		return	d_bVisible	&&
+				x > d_x && x < d_x+s_width*2+d_length	&&
+				y > d_y && y < d_y+s_height;
 	}
 
 
@@ -310,27 +314,29 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		MachineIndex = dum;
 
-		d_pParams[prm_waveform] = new ComboBox(WIN_CX/5-35-ComboBox::s_width,	30, 0, 4, 50, "Waveform");
-		d_pParams[prm_waveform]->d_bDblClkReset=false;
-		d_pParams[prm_pwidth]   = new Knob(2 * WIN_CX/5-Knob::s_width/2,	20, 0, 200, "Pulse Width");
-		d_pParams[prm_pwidth]->d_defValue=100;
-		d_pParams[prm_speed]	= new Knob(3 * WIN_CX/5-Knob::s_width/2,	20, 0, LFO::MAX_SPEED, "LFO Speed");
-		d_pParams[prm_speed]->d_defValue=LFO::MAX_SPEED/6;
-		d_pParams[prm_lfopos]   = new Knob(4 * WIN_CX/5-Knob::s_width/2,	20, 0, LFO::LFO_SIZE, "Position");
+		d_pParams.resize(LFO::prms::num_params);
 
-		char temp[64];
-		for(int i(0);i<4;++i)
+		d_pParams[LFO::prms::wave] = new ComboBox	(55-25-ComboBox::s_width,	35, 0, 4, 50, "Waveform");
+		d_pParams[LFO::prms::wave]->d_bDblClkReset=false;
+		d_pParams[LFO::prms::speed]	= new Knob		(55-   Knob::s_width/2,		100, 0, LFO::MAX_SPEED, "LFO Speed");
+		d_pParams[LFO::prms::speed]->d_defValue=LFO::MAX_SPEED/10;
+
+		for( int i(0); i<LFO::NUM_CHANS; ++i )
 		{
-			sprintf(temp, "LFO Dest. Machine %i", i);
-			d_pParams[prm_macout0+i] = new ComboBox(WIN_CX/2-64-ComboBox::s_width, 80+95*i,  -1, MAX_BUSES*2-1, 128, temp);
-			d_pParams[prm_prmout0+i] = new Knob(    WIN_CX/4-Knob::s_width/2+5, 115+95*i, -1, 128, "Param");
-			d_pParams[prm_level0+i]  = new Knob(2 * WIN_CX/4-Knob::s_width/2+25, 115+95*i,  0, LFO::MAX_DEPTH*2, "Depth");
-			d_pParams[prm_phase0+i]  = new Knob(3 * WIN_CX/4-Knob::s_width/2+25, 115+95*i,  0, LFO::MAX_PHASE, "Phase");
-			d_pParams[prm_macout0+i]->d_bDblClkReset=false;
-			d_pParams[prm_prmout0+i]->d_defValue=-1;
-			d_pParams[prm_level0+i]->d_defValue=LFO::MAX_DEPTH;
-			d_pParams[prm_phase0+i]->d_defValue=LFO::MAX_PHASE/2;
+			std::ostringstream temp;
+			temp<<"LFO Dest. Machine "<<i;
+			d_pParams[LFO::prms::mac0+i] = new ComboBox(2 * WIN_CX/3-64-ComboBox::s_width,	22+115*(i%2), -1, MAX_BUSES*2-1, 128, temp.str());
+			d_pParams[LFO::prms::prm0+i] = new Knob(	2 * WIN_CX/5-Knob::s_width/2+5,	65+115*(i%2), -1, 128, "Param");
+			d_pParams[LFO::prms::level0+i]  = new Knob(	3 * WIN_CX/5-Knob::s_width/2+25,	65+115*(i%2),  0, LFO::MAX_DEPTH*2, "Depth");
+			d_pParams[LFO::prms::phase0+i]  = new Knob(	4 * WIN_CX/5-Knob::s_width/2+25,	65+115*(i%2),  0, LFO::MAX_PHASE, "Phase");
+			d_pParams[LFO::prms::mac0+i]->d_bDblClkReset=false;
+			d_pParams[LFO::prms::prm0+i]->d_defValue=-1;
+			d_pParams[LFO::prms::level0+i]->d_defValue=LFO::MAX_DEPTH;
+			d_pParams[LFO::prms::phase0+i]->d_defValue=LFO::MAX_PHASE/2;
 		}
+
+		d_pView = new ComboBox(55-25-ComboBox::s_width,		180, 0, LFO::NUM_CHANS/2-1, 50, "Switch View");
+		d_pView->d_bDblClkReset=false;
 
 		m_combobox.LoadBitmap(IDB_COMBOBOX);
 	}
@@ -339,11 +345,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	CFrameLFOMachine::~CFrameLFOMachine()
 	{
 		if ( bmpDC ) { bmpDC->DeleteObject(); delete bmpDC; }
-		for(int i(0);i<num_params;++i) delete d_pParams[i];
+		for(int i(0);i<LFO::prms::num_params;++i) delete d_pParams[i];
+		delete d_pView;
 	}
 
 	int CFrameLFOMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 	{
+		d_view = 0;
+		SwitchView();
 		return CFrameMachine::OnCreate(lpCreateStruct);
 	}
 
@@ -356,8 +365,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		d_pLFO=(LFO*)(_pMachine = pMachine);
 		numParameters = d_pLFO->GetNumParams();
-		UpdateNames();
-
+		UpdateParamRanges();
 
 		CRect rect;
 		GetWindowRect(&rect);
@@ -376,7 +384,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		if ( nIDEvent == 2104+MachineIndex )
 		{
-			UpdateNames();
+			UpdateParamRanges();
 			Invalidate(false);
 		}
 		CFrameWnd::OnTimer(nIDEvent);
@@ -405,15 +413,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		ComboBox::s_ComboBoxDC.CreateCompatibleDC(&bufferDC);
 		CBitmap *oldbmp2=ComboBox::s_ComboBoxDC.SelectObject(&m_combobox);
 
+		//draw bg color
 		bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,Global::configuration().machineGUIBottomColor);
+		//draw lfo params
 		char temp[128];
-		for(int i(0);i<num_params;++i)
+		for(int i(0);i<LFO::prms::num_params;++i)
 		{
 			d_pLFO->GetParamValue(i, temp);
 			d_pParams[i]->Paint(&bufferDC, d_pLFO->GetParamValue(i), temp);
 		}
+		//draw view switch control
+		sprintf(temp, "%i and %i", d_view*2, d_view*2+1);
+		d_pView->Paint(&bufferDC, d_view, temp);
+		//blt buffer to screen
 		dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);
 
+		//cleanup
 		Knob::s_knobDC.SelectObject(oldbmp);
 		Knob::s_knobDC.DeleteDC();
 		ComboBox::s_ComboBoxDC.SelectObject(oldbmp2);
@@ -425,47 +440,28 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	}
 
-	void CFrameLFOMachine::UpdateNames()
+	void CFrameLFOMachine::UpdateParamRanges()
 	{
-		d_paramNames.clear();
-		d_machNames.clear();
-
-		int lastMac(0);
-		int numParams(0);
-
-		for(int i(0);i<MAX_MACHINES-1; ++i)
-		{
-			if(Global::song()._pMachine[i])
-			{
-				d_machNames.push_back(Global::song()._pMachine[i]->GetEditName());
-				std::vector<std::string> tempnames;
-				char tempname[128];
-				numParams = Global::song()._pMachine[i]->GetNumParams();
-				for(int j(0);j<numParams; ++j)
-				{
-					Global::song()._pMachine[i]->GetParamName(j, tempname);
-					tempnames.push_back(tempname);
-				}
-				d_paramNames[i]=tempnames;
-				lastMac=i;
-			}
-		}
-
+		int lastMac;
 		int minVal, maxVal;
+
+		for(lastMac=MAX_MACHINES-2; lastMac>-1 && !Global::song()._pMachine[lastMac]; --lastMac)
+			;
+
 		for(int i(0);i<LFO::NUM_CHANS;++i)
 		{
-			d_pLFO->GetParamRange(prm_prmout0+i, minVal, maxVal);
-			d_pParams[prm_prmout0+i]->d_maxValue=maxVal;
-			d_pParams[prm_macout0+i]->d_maxValue=lastMac;
+			d_pLFO->GetParamRange(LFO::prms::prm0+i, minVal, maxVal);
+			d_pParams[LFO::prms::prm0+i]->d_maxValue=maxVal;
+			d_pParams[LFO::prms::mac0+i]->d_maxValue=lastMac;
 		}
 	}
 
 	int CFrameLFOMachine::ConvertXYtoParam(int x, int y)
 	{
 		int i(0);
-		while(i<num_params && !(d_pParams[i]->PointInParam(x, y)))
+		while(i<LFO::prms::num_params && !(d_pParams[i]->PointInParam(x, y)))
 			++i;
-		if(i<num_params)
+		if(i<LFO::prms::num_params)
 			return i;
 		else
 			return -1;
@@ -474,7 +470,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	void CFrameLFOMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 	{
 		tweakpar = ConvertXYtoParam(point.x, point.y);
-		if(tweakpar>-1 && tweakpar<num_params)
+		if(tweakpar>-1 && tweakpar<LFO::prms::num_params)
 		{
 			int value = d_pLFO->GetParamValue(tweakpar);
 			if(d_pParams[tweakpar]->LButtonDown(nFlags, point.x, point.y, value))
@@ -482,6 +478,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			istweak = true;
 			SetCapture();
 		}
+		else if(d_pView->PointInParam(point.x, point.y))
+		{
+			if(d_pView->LButtonDown(nFlags, point.x, point.y, d_view))
+				SwitchView();
+		}
+
+		
 		Invalidate(false);
 	
 		CFrameWnd::OnLButtonDown(nFlags,point);
@@ -491,7 +494,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	void CFrameLFOMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
 	{
 		tweakpar = ConvertXYtoParam(point.x, point.y);
-		if(tweakpar>-1 && tweakpar<num_params)
+		if(tweakpar>-1 && tweakpar<LFO::prms::num_params)
 		{
 			if(d_pParams[tweakpar]->d_bDblClkReset)
 				d_pLFO->SetParameter(tweakpar, d_pParams[tweakpar]->d_defValue);
@@ -504,6 +507,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				SetCapture();
 			}
 		}
+		else if(d_pView->PointInParam(point.x, point.y))
+		{
+			if(d_pView->LButtonDown(nFlags, point.x, point.y, d_view))
+				SwitchView();
+		}
 		Invalidate(false);
 
 		CFrameWnd::OnLButtonDblClk(nFlags,point);
@@ -512,7 +520,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		if(istweak)
 		{
-			if(tweakpar>-1 && tweakpar<num_params)
+			if(tweakpar>-1 && tweakpar<LFO::prms::num_params)
 			{
 				int value=d_pLFO->GetParamValue(tweakpar);
 				if(d_pParams[tweakpar]->MouseMove(nFlags, point.x, point.y, value))
@@ -526,7 +534,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	}
 	void CFrameLFOMachine::OnLButtonUp(UINT nFlags, CPoint point) 
 	{
-		if(tweakpar>-1 && tweakpar<num_params)
+		if(tweakpar>-1 && tweakpar<LFO::prms::num_params)
 		{
 			int value=d_pLFO->GetParamValue(tweakpar);
 			if(d_pParams[tweakpar]->LButtonUp(nFlags, point.x, point.y, value))
@@ -541,6 +549,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	void CFrameLFOMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 	{
 		CFrameMachine::OnRButtonUp(nFlags, point);
+	}
+
+	void CFrameLFOMachine::SwitchView()
+	{
+		for(int i(0);i<LFO::NUM_CHANS;i++)
+		{
+			bool isVis = (i == d_view*2 || i == d_view*2+1);
+			d_pParams[LFO::prms::mac0+i]->Visible(isVis);
+			d_pParams[LFO::prms::prm0+i]->Visible(isVis);
+			d_pParams[LFO::prms::phase0+i]->Visible(isVis);
+			d_pParams[LFO::prms::level0+i]->Visible(isVis);
+		}
+		Invalidate(false);
 	}
 
 	void CFrameLFOMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
