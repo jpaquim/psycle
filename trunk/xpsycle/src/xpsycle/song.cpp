@@ -329,7 +329,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 				std::uint32_t solo(0);
 				std::uint32_t chunkcount=0;
 				Header[4]=0;
-				std::fpos_t filesize = pFile->FileSize();
+				std::size_t filesize = pFile->FileSize();
 				pFile->Read(version);
 				pFile->Read(size);
 				if(version > CURRENT_FILE_VERSION)

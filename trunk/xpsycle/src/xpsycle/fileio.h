@@ -5,6 +5,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 //namespace psycle
 //{
@@ -59,8 +63,8 @@
 				bool Close(void);
 				bool Error();
 				bool Eof();
-				std::fpos_t FileSize();
-				int GetPos();
+				std::size_t FileSize();
+				std::size_t GetPos();
 				int Seek(int    const & bytes);
 				int Skip(std::ptrdiff_t const & bytes);
 
@@ -93,7 +97,7 @@
 				static std::uint32_t          FourCC(char const * null_terminated_string);
 
 			private:
-				std::FILE        * file_;
+				std::fstream _stream;
 		};
 //	}
 //}

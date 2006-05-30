@@ -78,7 +78,8 @@ private:
 
     snd_pcm_t *handle;
 
-    int enablePlayer; // -1: has stopped, 0: stop!, 1: play!, 2: is playing
+    static int enablePlayer; // -1: has stopped, 0: stop!, 1: play!, 2: is playing
+    static bool in;
     int method;       // 0:WRITE 1:WRITE&POLL 2:ASYNC 3:async_direct 4:direct_interleaved
                       // 5:direct_noninterleaved 6:DIRECT_WRITE
     signed short *samples;
