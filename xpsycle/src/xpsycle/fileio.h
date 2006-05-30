@@ -97,8 +97,8 @@
 				static std::uint32_t          FourCC(char const * null_terminated_string);
 
 			private:
+				bool write_mode;
 				std::fstream _stream;
 		};
 //	}
 //}
-
