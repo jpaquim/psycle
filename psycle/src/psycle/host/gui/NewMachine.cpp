@@ -1359,7 +1359,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DeleteFile(cache);
 			RiffFile file;
 			if(!file.Create(cache,true)) return false;
-			file.Write("PSYCACHE");
+			file.WriteChunk("PSYCACHE",8);
 			std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
 			file.Write(version);
 			file.Write(_numPlugins);
@@ -1396,7 +1396,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				return false;
 			}
-			file.Write("PSYCATEGORIES");
+			file.WriteChunk("PSYCATEGORIES",13);
 			std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
 			file.Write(version);
 	

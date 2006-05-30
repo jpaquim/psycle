@@ -1,15 +1,19 @@
 ///\interface psycle::host::RiffFile
 #pragma once
-#include <psycle/host/detail/project.hpp>
+//#include <psycle/host/detail/project.hpp>
 #include <cstdio>
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
-namespace psycle
-{
-	namespace host
-	{
+
+//namespace psycle
+//{
+//	namespace host
+//	{
 		namespace endian
 		{
 			namespace big
@@ -59,10 +63,10 @@ namespace psycle
 				bool Close(void);
 				bool Error();
 				bool Eof();
-				std::fpos_t FileSize();
-				std::fpos_t GetPos();
-				std::fpos_t Seek(std::fpos_t    const & bytes);
-				std::fpos_t Skip(std::ptrdiff_t const & bytes);
+				std::size_t FileSize();
+				std::size_t GetPos();
+				int Seek(int    const & bytes);
+				int Skip(std::ptrdiff_t const & bytes);
 
 				bool WriteChunk (void const *, std::size_t const &);
 				bool ReadChunk  (void       *, std::size_t const &);
@@ -89,11 +93,13 @@ namespace psycle
 
 				/// pad the string with spaces
 				///\todo is it really used with null terminated strings?
-				PSYCLE__DEPRECATED("use the char const [4] overload instead")
+//				PSYCLE__DEPRECATED("use the char const [4] overload instead")
 				static std::uint32_t          FourCC(char const * null_terminated_string);
 
 			private:
-				std::FILE        * file_;
+				bool write_mode;
+				std::fstream _stream;
 		};
-	}
-}
+//	}
+//}
+

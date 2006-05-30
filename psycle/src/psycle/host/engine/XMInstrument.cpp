@@ -91,7 +91,7 @@ namespace psycle
 				+size1
 				+size2;
 
-			riffFile->Write("SMPD");
+			riffFile->WriteChunk("SMPD",4);
 			riffFile->Write(size);
 			//\todo: add version
 
@@ -502,7 +502,7 @@ namespace psycle
 				-sizeof(m_PitchEnvelope)
 				-sizeof(m_FilterEnvelope);
 
-			riffFile->Write("INST");
+			riffFile->WriteChunk("INST",4);
 			riffFile->Write(size);
 			//\todo : add version.
 

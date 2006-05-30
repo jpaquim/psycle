@@ -358,9 +358,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		inline int CMultiScopeCtrl::GetY(float f)
+		inline int CMultiScopeCtrl::GetY(float f,float _invol)
 		{
-			f=64-(f*scopecorrection*invol);
+			f=64-(f*scopecorrection*_invol);
 
 			if (f < 1) 
 			{
@@ -390,8 +390,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (awl>curpeakl)	{	curpeakl = awl;	}
 				if (awr>curpeakr)	{	curpeakr = awr;	}
 			}
-			curpeakl=128-f2i(sqrtf(curpeakl*vucorrection*invol)); //conversion to a cardinal value.
-			curpeakr=128-f2i(sqrtf(curpeakr*vucorrection*invol));
+			curpeakl=128-f2i(sqrtf(curpeakl*vucorrection*involL)); //conversion to a cardinal value.
+			curpeakr=128-f2i(sqrtf(curpeakr*vucorrection*involR));
 
 			if (curpeakl<peak2L) //  it is a cardinal value, so smaller means higher peak.
 			{
@@ -522,7 +522,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			float n = float(_pSrcMachine->_scopeBufferIndex-scope_offset);
 			for (int x = 256; x > 0; x--)
 			{
-				bufDC->SetPixelV(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]),colorL);
+				bufDC->SetPixelV(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)],involL),colorL);
 				n -= add;
 			}
 			bufDC->SelectObject(&linepenR);
@@ -530,7 +530,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			n = float(_pSrcMachine->_scopeBufferIndex-scope_offset);
 			for (int x = 256; x > 0; x--)
 			{
-				bufDC->SetPixelV(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]),colorR);
+				bufDC->SetPixelV(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)],involR),colorR);
 				n -= add;
 			}
 
@@ -598,8 +598,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 			index--;
 			index&=(SCOPE_BUF_SIZE-1);
-			bufl[i]=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol)*0.0000305f;
-			//							bufr[i]=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol)*0.0000305f; 
+			bufl[i]=(pSamplesL[index]*involL*mult*_pSrcMachine->_lVol)*0.0000305f;
+			//							bufr[i]=(pSamplesR[index]*involR*mult*_pSrcMachine->_rVol)*0.0000305f; 
 			} 
 			*/
 			/*
@@ -635,7 +635,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			for (int i = 0; i < scope_spec_bands; i++)
 			{
 				//							int aml = 128-f2i(powf(1+((float)i/scope_spec_bands),2.0f)*sqrtf(ampl[i])*10);
-				int aml = 128 - (log(1+ampl[i])*heightcompensation[i]*invol);
+				int aml = 128 - (log(1+ampl[i])*heightcompensation[i]*involL);
 				//				int aml = 128-f2i(sqrtf(ampl[i]));
 				if (aml < 0)
 				{
@@ -657,7 +657,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				rect.left+=width;
 
-				int amr = 128 - (log(1+ampr[i])*heightcompensation[i]*invol);
+				int amr = 128 - (log(1+ampr[i])*heightcompensation[i]*involR);
 				//				int amr = 128-f2i(sqrtf(ampr[i]));
 				if (amr < 0)
 				{
@@ -727,8 +727,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				index--;
 				index&=(SCOPE_BUF_SIZE-1);
-				float wl=(pSamplesL[index]*rangecorrection*invol);///32768; 
-				float wr=(pSamplesR[index]*rangecorrection*invol);///32768; 
+				float wl=(pSamplesL[index]*rangecorrection*involL);///32768; 
+				float wr=(pSamplesR[index]*rangecorrection*involR);///32768; 
 				float awl=fabsf(wl);
 				float awr=fabsf(wr);
 				if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
@@ -1107,11 +1107,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_slvolume.SetRange(0,256*4);
 			m_slvolume.SetTicFreq(16*4);
-			
+
 			float val;
 			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 			_pDstMachine->GetWireVolume(_dstWireIndex,val);
-			m_multiscope.invol = val;
+			m_multiscope.involL = val*_pSrcMachine->_lVol; 
+			m_multiscope.involR = val*_pSrcMachine->_rVol;
 			int t = (int)sqrtf(val*16384*4*4);
 			m_slvolume.SetPos(256*4-t);
 
@@ -1294,21 +1295,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			char bufper[32];
 			char bufdb[32];
 
-			const float invol = ((256*4-m_slvolume.GetPos())*(256*4-m_slvolume.GetPos()))/(16384.0f*4*4);
-			if (invol >= 1.0f)
+			const float curvol = ((256*4-m_slvolume.GetPos())*(256*4-m_slvolume.GetPos()))/(16384.0f*4*4);
+			if (curvol >= 1.0f)
 			{	
-				sprintf(bufper,"%.2f%%",invol*100); 
-				sprintf(bufdb,"+%.1f dB",20.0f * log10(invol)); 
+				sprintf(bufper,"%.2f%%",curvol*100); 
+				sprintf(bufdb,"+%.1f dB",20.0f * log10(curvol)); 
 			}
-/*			else if (invol == 1.0f)
+/*			else if (curvol == 1.0f)
 			{	
 				sprintf(bufper,"100.00%%"); 
 				sprintf(bufdb,"0.0 dB"); 
 			}*/
-			else if (invol > 0.0f)
+			else if (curvol > 0.0f)
 			{	
-				sprintf(bufper,"%.2f%%",invol*100); 
-				sprintf(bufdb,"%.1f dB",20.0f * log10(invol)); 
+				sprintf(bufper,"%.2f%%",curvol*100); 
+				sprintf(bufdb,"%.1f dB",20.0f * log10(curvol)); 
 			}
 			else 
 			{				
@@ -1321,11 +1322,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			float f;
 			_pDstMachine->GetWireVolume(_dstWireIndex, f);
-			if (f != invol)
+			if (f != curvol)
 			{
 				m_pParent->AddMacViewUndo();
-				_pDstMachine->SetWireVolume(_dstWireIndex, invol );
-				m_multiscope.invol = invol;
+				_pDstMachine->SetWireVolume(_dstWireIndex, curvol );
+				m_multiscope.involL = curvol*_pSrcMachine->_lVol;
+				m_multiscope.involR = curvol*_pSrcMachine->_rVol;;
+				invol = curvol;
 			}
 
 		//	m_pParent->SetFocus();	
@@ -1335,7 +1338,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWireDlg::OnVolumeDb() 
 		{
 			CVolumeDlg dlg;
-			dlg.volume = m_multiscope.invol;
+			dlg.volume = invol;
 			dlg.edit_type = 0;
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1350,7 +1353,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWireDlg::OnVolumePer() 
 		{
 			CVolumeDlg dlg;
-			dlg.volume = m_multiscope.invol;
+			dlg.volume = invol;
 			dlg.edit_type = 1;
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1365,6 +1368,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if ( nIDEvent == 2304+this_index )
 			{
+				float val;
+				_pDstMachine->GetWireVolume(_dstWireIndex,val);
+				m_multiscope.involL = val*_pSrcMachine->_lVol; 
+				m_multiscope.involR = val*_pSrcMachine->_rVol;
 				m_multiscope.Invalidate();
 			}
 //			CDialog::OnTimer(nIDEvent);

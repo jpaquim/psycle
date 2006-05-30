@@ -116,7 +116,7 @@ namespace psycle
 				case MACH_VST:
 				case MACH_VSTFX:
 					{
-						vst::plugin * plugin;
+						vst::plugin * plugin(0);
 						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
 						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
 						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
@@ -1395,7 +1395,7 @@ namespace psycle
 
 					// chunk header
 					{
-						pFile->Write("PSY3SONG");
+						pFile->WriteChunk("PSY3SONG",8);
 
 						version = CURRENT_FILE_VERSION;
 						pFile->Write(version);
@@ -1426,7 +1426,7 @@ namespace psycle
 				{
 					// chunk header
 					{
-						pFile->Write("INFO");
+						pFile->WriteChunk("INFO",4);
 
 						version = CURRENT_FILE_VERSION_INFO;
 						pFile->Write(version);
@@ -1457,7 +1457,7 @@ namespace psycle
 				{
 					// chunk header
 					{
-						pFile->Write("SNGI");
+						pFile->WriteChunk("SNGI",4);
 
 						version = CURRENT_FILE_VERSION_SNGI;
 						pFile->Write(version);
@@ -1509,7 +1509,7 @@ namespace psycle
 
 					// chunk header
 					{
-						pFile->Write("SEQD");
+						pFile->WriteChunk("SEQD",4);
 
 						version = CURRENT_FILE_VERSION_SEQD;
 						pFile->Write(version);
@@ -1565,7 +1565,7 @@ namespace psycle
 
 						// chunk header
 						{
-							pFile->Write("PATD");
+							pFile->WriteChunk("PATD",4);
 
 							version = CURRENT_FILE_VERSION_PATD;
 							pFile->Write(version);
@@ -1610,7 +1610,7 @@ namespace psycle
 
 						// chunk header
 						{
-							pFile->Write("MACD");
+							pFile->WriteChunk("MACD",4);
 
 							version = CURRENT_FILE_VERSION_MACD;
 							pFile->Write(version);
@@ -1656,7 +1656,7 @@ namespace psycle
 
 						// chunk header
 						{
-							pFile->Write("INSD");
+							pFile->WriteChunk("INSD",4);
 
 							version = CURRENT_FILE_VERSION_INSD;
 							pFile->Write(version);
@@ -1767,7 +1767,7 @@ namespace psycle
 			RiffFile file;
 			if(!file.Create(path.string(), true)) return false;
 
-			file.Write("MACD");
+			file.WriteChunk("MACD",4);
 			std::uint32_t version = CURRENT_FILE_VERSION_MACD;
 			file.Write(version);
 			std::fpos_t pos = file.GetPos();
@@ -1978,7 +1978,7 @@ namespace psycle
 				return false;
 			}
 
-			file.Write("INSD");
+			file.WriteChunk("INSD",4);
 			std::uint32_t version = CURRENT_FILE_VERSION_INSD;
 			file.Write(version);
 			std::fpos_t pos = file.GetPos();
