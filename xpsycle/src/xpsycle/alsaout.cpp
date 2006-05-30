@@ -21,6 +21,8 @@
 #include "global.h"
 #include "player.h"
 
+int AlsaOut::enablePlayer = 0;
+bool AlsaOut::in = 0;
 
 
 AlsaOut::AlsaOut( ) :
@@ -42,6 +44,8 @@ void AlsaOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
   _callbackContext = context;
   _initialized = true;
   _running = false;
+  setDefault();
+  audioStart();
 }
 
 bool AlsaOut::Enable( bool e )
@@ -52,15 +56,13 @@ bool AlsaOut::Enable( bool e )
 bool AlsaOut::Start( )
 {
   if(_running) return true;
-  setDefault();
-  audioStart();
-
+  AlsaOut::enablePlayer = _running = 1;
 }
 
 bool AlsaOut::Stop( )
 {
   _timerActive = false;
-  enablePlayer = 0;
+  audioStop();
 }
 
 
@@ -86,18 +88,17 @@ void AlsaOut::setDefault( )
     buffer_size;
     period_size;
     output = NULL;
-    enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
+    AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
 }
 
 int AlsaOut::audioStop( )
 {
-  enablePlayer = 0;
-  while (enablePlayer != -2) {
+  AlsaOut::enablePlayer = 0;
+
+  while (in) {
       sleep(1);
   }
-  free(areas);
-  free(samples);
-  snd_pcm_close(handle);
+
 }
 
 int AlsaOut::audioStart(  )
@@ -342,7 +343,9 @@ int AlsaOut::write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channe
   signed short *ptr;
   int err, cptr;
   if (enablePlayer > 0) enablePlayer = 2;
-  while (enablePlayer > 0) {
+  while (1) {
+    in = true;
+    if (enablePlayer >0) {
     FillBuffer(areas, 0, period_size);
     ptr = samples;
     cptr = period_size;
@@ -360,6 +363,8 @@ int AlsaOut::write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channe
       ptr += err * channels;
       cptr -= err;
     }
+   }
+   in = false;
   }
 }
 
@@ -375,6 +380,7 @@ int AlsaOut::AlsaOut::audioOutThread( void * ptr )
   int err = pDriver->write_loop(pDriver->handle,pDriver->samples,pDriver->areas);
   if (err < 0) printf("Transfer failed: %s\n", snd_strerror(err));
   pDriver->enablePlayer = -2;
+  pthread_exit(0);
   return err;
 }
 
