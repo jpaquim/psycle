@@ -20,7 +20,7 @@
 #ifndef NCUSTOMSTATUSITEM_H
 #define NCUSTOMSTATUSITEM_H
 
-#include <npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper

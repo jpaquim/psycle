@@ -20,7 +20,7 @@
 #ifndef NTEXTSTATUSITEM_H
 #define NTEXTSTATUSITEM_H
 
-#include <ncustomstatusitem.h>
+#include "ngrs/ncustomstatusitem.h"
 
 /**
 @author Stefan Nattkemper
