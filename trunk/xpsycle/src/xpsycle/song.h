@@ -23,12 +23,14 @@
 #include "constants.h"
 #include "instrument.h"
 #include "songstructs.h"
+#include "machine.h"
 #include <ngrs/nobject.h>
 #include <ngrs/npoint.h>
 #include <string>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+
 
 /**
 @author Stefan
@@ -171,11 +173,11 @@ class Song : public NObject {
     void DestroyAllInstruments();
     ///  loads a file into this song object.
     ///\param fullopen  used in context of the winamp/foobar player plugins, where it allows to get the info of the file, without needing to open it completely.
-      bool load(const std::string & fileName);
-//    bool Load(RiffFile* pFile, bool fullopen=true);
+//      bool load(const std::string & fileName); sadly i give up my old one :/
+    bool Load(RiffFile* pFile, bool fullopen=true);
     /// saves this song to a file.
-//    bool Save(RiffFile* pFile,bool autosave=false);
-      bool save(const std::string & fileName);
+    bool Save(RiffFile* pFile,bool autosave=false);
+//      bool save(const std::string & fileName);
     /// Used to detect if an especific pattern index contains any data.
     bool IsPatternUsed(int i);
     ///\name previews waving

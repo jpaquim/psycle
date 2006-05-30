@@ -139,18 +139,18 @@ class Voice
 
 class Sampler : public Machine {
 public:
-    Sampler();
-    Sampler(int index);
 
-    ~Sampler();
+    Sampler(Machine::id_type id);
+
+    ~Sampler() throw();
 
     void Tick();
     virtual void Init(void);
     virtual void Stop(void);
     virtual void Work(int numSamples);
     virtual void Tick(int channel, PatternEntry* pData);
-    virtual char* GetName(void) { return _psName; };
-    virtual bool Load(DeSerializer* pFile);
+    virtual std::string GetName() const { return _psName; };
+//    virtual bool Load(DeSerializer* pFile);
 
     inline virtual bool LoadSpecificChunk(DeSerializer* pFile, int version)
     {

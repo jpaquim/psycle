@@ -21,14 +21,20 @@
 #define WIREDLG_H
 
 #include "analyzer.h"
+#include "machine.h"
 #include <ngrs/nwindow.h>
 #include <ngrs/nbutton.h>
 #include <ngrs/nslider.h>
 #include <ngrs/nline.h>
 
+
 /**
 @author Stefan
 */
+
+//namespace psycle { namespace host {
+
+
 class WireDlg : public NWindow
 {
 public:
@@ -67,4 +73,6 @@ private:
     void onDeleteBtn(NButtonEvent* ev);
 };
 
+
+//}}
 #endif

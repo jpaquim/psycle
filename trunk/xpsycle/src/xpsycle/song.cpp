@@ -25,9 +25,13 @@
 #include "sampler.h"
 #include "xmsampler.h"
 #include "plugin.h"
+#include "internal_machines.h"
 #include "deserializer.h"
 #include "serializer.h"
+#include "fileio.h"
 #include <inttypes.h>
+
+
 
 /// Safer version of delete that clears the pointer automatically. Don't use it for arrays!
 /// \param pointer pointer to single object to be deleted.
@@ -304,225 +308,839 @@ void Song::New( )
   //		}*/
 }
 
-bool Song::load( const std::string & fName )
-{
-  try
-  {
-    DeSerializer f(fName.c_str());
+bool Song::Load(RiffFile* pFile, bool fullopen)
+		{
+			char Header[9];
+			pFile->ReadChunk(&Header, 8);
+			Header[8]=0;
 
-    int fileSize = f.fileSize();
-    int fcounter = 0;
+			if (strcmp(Header,"PSY3SONG")==0)
+			{
+//				loggers::trace("file header: PSY3SONG");
+//				CProgressDialog Progress;
+//				Progress.Create();
+//				Progress.SetWindowText("Loading... psycle song fileformat version 3...");
+//				Progress.ShowWindow(SW_SHOW);
+				std::uint32_t version = 0;
+				std::uint32_t size = 0;
+				std::uint32_t index = 0;
+				std::uint32_t temp;
+				std::uint16_t temp16;
+				std::uint32_t solo(0);
+				std::uint32_t chunkcount=0;
+				Header[4]=0;
+				std::fpos_t filesize = pFile->FileSize();
+				pFile->Read(version);
+				pFile->Read(size);
+				if(version > CURRENT_FILE_VERSION)
+				{
+					//MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
+					std::cerr << "This file is from a newer version of Psycle! This process will try to load it anyway." << std::endl;
+				}
 
-    if (f.getHeader8()=="PSY3SONG") {
-        if (f.getVersion() > CURRENT_FILE_VERSION) { }
-        unsigned int size    = f.getInt();
-        int chunkcount = 0;
-        if (size == 4) chunkcount = f.getInt();
-        if (size > 4 ) f.skip(size - 4);
+				pFile->Read(chunkcount);
+				if ( size > 4)
+				{
+					/*
+					pFile->Read(fileversion);
+					if (version == x)
+					{}
+					else if (...)
+					{}
+					// This is left here if someday, extra data is added to the file version chunk.
+					// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - bytesread);
+					}
+					*/
+					pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
+				}
 
-       DestroyAllMachines();
-       _machineLock = true;
-      DeleteInstruments();
-      DeleteAllPatterns();
-                                                                                                       
-                                                                                                        
-        int solo = 0;
-        try {
-          while (!f.eof()) { //this will ever emit a eof
-            fcounter++;
-            string header = f.getHeader4();
-            if (fcounter % 100 == 0) loadProgress.emit(f.getPos(),fileSize,header);
-            if (header == "INFO") {
-                --chunkcount;
-                if (f.checkVersion(CURRENT_FILE_VERSION_INFO))
-                {
-                  f.readString(Name,sizeof(Name));
-                  f.readString(Author,sizeof(Author));
-                  f.readString(Comment,sizeof(Comment));
-                }
-            } else
-            if (header == "SNGI") {
-                --chunkcount;
-                if (f.checkVersion(CURRENT_FILE_VERSION_SNGI)) {
-                  SONGTRACKS       = f.getInt();
-                  m_BeatsPerMin    = f.getInt();
-                  m_LinesPerBeat   = f.getInt();
-                  currentOctave    = f.getInt();
-                  solo             = f.getInt();
-                  _trackSoloed     = f.getInt();
-                  seqBus           = f.getInt();
-                  midiSelected     = f.getInt();
-                  auxcolSelected   = f.getInt();
-                  instSelected     = f.getInt();
-                  _trackArmedCount = 0; f.getInt();
-                  for(int i(0) ; i < SONGTRACKS; ++i) {
-                    f.read(&_trackMuted[i],sizeof(_trackMuted[i]));
-                    // remember to count them
-                    f.read(&_trackArmed[i],sizeof(_trackArmed[i]));
-                    if(_trackArmed[i]) ++_trackArmedCount;
-                  }
-                }
-              } else
-            if (header == "SEQD") {
-                --chunkcount;
-                if (f.checkVersion(CURRENT_FILE_VERSION_SEQD)) {
-                  unsigned int index = f.getInt();
-                  if (index < MAX_SEQUENCES) {
-                    // play length for this sequence
-                    playLength = f.getInt();
-                    // name, for multipattern, for now unused
-                    char pTemp[256];
-                    f.readString(pTemp,sizeof(pTemp));
-                    for (int i(0) ; i < playLength; ++i) {
-                      playOrder[i] = f.getInt();
-                    }
-                  }
-                }
-            }
-            if (header == "PATD") {
-                --chunkcount;
-                if (f.checkVersion(CURRENT_FILE_VERSION_PATD)) {
-                  unsigned int index = f.getInt();
-                  if(index < MAX_PATTERNS) {
-                    // num lines
-                    int num = f.getInt();
-                    // clear it out if it already exists
-                    RemovePattern(index);
-                    patternLines[index] = num;
-                    // num tracks per pattern
-                    // eventually this may be variable per pattern,
-                    // like when we get multipattern
-                    f.getInt();
-                    f.readString(patternName[index], sizeof(*patternName));
-                    unsigned int size = f.getInt();
-                    byte* pSource = new byte[size];
-                    f.read(pSource, size);
-                    byte* pDest;
-                    DataCompression::BEERZ77Decomp2(pSource, &pDest);
-                    zapArray(pSource,pDest);
-                    for(int y(0) ; y < patternLines[index] ; ++y) {
-                      unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
-                      std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
-                      pSource += SONGTRACKS * EVENT_SIZE;
-                    }
-                    zapArray(pDest);
-                  }
-                }
-            } else
-            if (header == "MACD") {
-                  chunkcount--;
-  //               if(!fullopen) {
-                  //   curpos = pFile->GetPos();
-    //             }
-                  if (f.checkVersion(CURRENT_FILE_VERSION_MACD)) {
+				DestroyAllMachines();
+				_machineLock = true;
+				DeleteInstruments();
+				DeleteAllPatterns();
+				Reset(); //added by sampler mainly to reset current pattern showed.
+				bool zero_size_foreign_chunk(false);
+				/* chunk_loop: */
+				while(pFile->ReadChunk(&Header, 4))
+				{
+//					Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
+//					::Sleep(1); ///< Allow screen refresh.
+					// we should use the size to update the index, but for now we will skip it
+					if(std::strcmp(Header,"INFO") == 0)
+					{
+					//	loggers::trace("chunk: INFO");
+					//	Progress.SetWindowText("Loading... fileformat version information...");
+						--chunkcount;
+						pFile->Read(version);
+						pFile->Read(size);
+						if(version > CURRENT_FILE_VERSION_INFO)
+						{
+							// there is an error, this file is newer than this build of psycle
+							//MessageBox(0, "Info Seqment of File is from a newer version of psycle!", 0, 0);
+							pFile->Skip(size);
+						}
+						else
+						{
+							pFile->ReadString(Name, sizeof Name);
+							pFile->ReadString(Author, sizeof Author);
+							pFile->ReadString(Comment, sizeof Comment);
+						}
+					}
+					else if(std::strcmp(Header,"SNGI")==0)
+					{
+					//	loggers::trace("chunk: SNGI");
+					//	Progress.SetWindowText("Loading... authorship information...");
+						--chunkcount;
+						pFile->Read(version);
+						pFile->Read(size);
+						if(version > CURRENT_FILE_VERSION_SNGI)
+						{
+							// there is an error, this file is newer than this build of psycle
+							std::cerr << "Song Segment of File is from a newer version of psycle!" << std::endl;
+							pFile->Skip(size);
+						}
+						else
+						{
+							// why all these temps?  to make sure if someone changes the defs of
+							// any of these members, the rest of the file reads ok.  assume 
+							// everything is 32-bit, when we write we do the same thing.
 
-                  }
-                    unsigned int index = f.getInt();
-                    if(index < MAX_MACHINES) {
-                        // we had better load it
-                          DestroyMachine(index); bool fullopen = true;
-                          _pMachine[index] = Machine::LoadFileChunk(&f, index, CURRENT_FILE_VERSION_MACD, fullopen);
-                        // skips specific chunk.
-      //                    if(!fullopen) pFile->seek(curpos + size);
-                    } else {
-              //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-  //                      pFile->Skip(size - sizeof index);
-                    }
-            } else 
-            if (header== "INSD") {
-              if (f.checkVersion(CURRENT_FILE_VERSION_INSD)) {
-                  int index = f.getInt();
-                  if(index < MAX_INSTRUMENTS) {
-                    _pInstrument[index]->LoadFileChunk(&f, CURRENT_FILE_VERSION_INSD, true);
-                  } else
-                  {
-                    //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-                    //pFile->skip(size - sizeof index);
-                  }
-              }
-            }
+							// # of tracks for whole song
+							pFile->Read(temp);
+							SONGTRACKS = temp;
+							// bpm
+							pFile->Read(temp16);
+							int BPMCoarse = temp16;
+							pFile->Read(temp16);
+							m_BeatsPerMin = BPMCoarse + temp16/100.0f;
+							// tpb
+							pFile->Read(temp);
+							m_LinesPerBeat = temp;
+							// current octave
+							pFile->Read(temp);
+							currentOctave = temp;
+							// machineSoloed
+							// we need to buffer this because destroy machine will clear it
+							pFile->Read(temp);
+							solo = temp;
+							// trackSoloed
+							pFile->Read(temp);
+							_trackSoloed = temp;
+							pFile->Read(temp);
+							seqBus = temp;
+							pFile->Read(temp);
+							midiSelected = temp;
+							pFile->Read(temp);
+							auxcolSelected = temp;
+							pFile->Read(temp);
+							instSelected = temp;
+							// sequence width, for multipattern
+							pFile->Read(temp);
+							_trackArmedCount = 0;
+							for(int i(0) ; i < SONGTRACKS; ++i)
+							{
+								pFile->Read(_trackMuted[i]);
+								// remember to count them
+								pFile->Read(_trackArmed[i]);
+								if(_trackArmed[i]) ++_trackArmedCount;
+							}
+							Global::player().SetBPM(m_BeatsPerMin,m_LinesPerBeat);
+						}
+					}
+					else if(std::strcmp(Header,"SEQD")==0)
+					{
+						//loggers::trace("chunk: SEQD");
+						//Progress.SetWindowText("Loading... sequence...");
+						--chunkcount;
+						pFile->Read(version);
+						pFile->Read(size);
+						if(version > CURRENT_FILE_VERSION_SEQD)
+						{
+							// there is an error, this file is newer than this build of psycle
+							std::cerr << "Sequence section of File is from a newer version of psycle!" << std::endl;
+							pFile->Skip(size);
+						}
+						else
+						{
+							// index, for multipattern - for now always 0
+							pFile->Read(index);
+							if (index < MAX_SEQUENCES)
+							{
+								char pTemp[256];
+								// play length for this sequence
+								pFile->Read(temp);
+								playLength = temp;
+								// name, for multipattern, for now unused
+								pFile->ReadString(pTemp, sizeof pTemp);
+								for (int i(0) ; i < playLength; ++i)
+								{
+									pFile->Read(temp);
+									playOrder[i] = temp;
+								}
+							}
+							else
+							{
+								//loggers::warning("Sequence section of File is from a newer version of psycle!");
+								pFile->Skip(size - sizeof index);
+							}
+						}
+					}
+					else if(std::strcmp(Header,"PATD") == 0)
+					{
+//						loggers::trace("chunk: PATD");
+//						Progress.SetWindowText("Loading... patterns...");
+						--chunkcount;
+						pFile->Read(version);
+						pFile->Read(size);
+						if(version > CURRENT_FILE_VERSION_PATD)
+						{
+							// there is an error, this file is newer than this build of psycle
+							//loggers::warning("Pattern section of File is from a newer version of psycle!");
+							pFile->Skip(size);
+						}
+						else
+						{
+							// index
+							pFile->Read(index);
+							if(index < MAX_PATTERNS)
+							{
+								// num lines
+								pFile->Read(temp);
+								// clear it out if it already exists
+								RemovePattern(index);
+								patternLines[index] = temp;
+								// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
+								pFile->Read(temp);
+								pFile->ReadString(patternName[index], sizeof *patternName);
+								pFile->Read(size);
+								unsigned char * pSource = new unsigned char[size];
+								pFile->ReadChunk(pSource, size);
+								unsigned char * pDest;
+								DataCompression::BEERZ77Decomp2(pSource, &pDest);
+								zapArray(pSource,pDest);
+								for(int y(0) ; y < patternLines[index] ; ++y)
+								{
+									unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
+									std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
+									pSource += SONGTRACKS * EVENT_SIZE;
+								}
+								zapArray(pDest);
+							}
+							else
+							{
+								//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
+								pFile->Skip(size - sizeof index);
+							}
+						}
+					}
+					else if(std::strcmp(Header,"MACD") == 0)
+					{
+						//loggers::trace("chunk: MACD");
+						//Progress.SetWindowText("Loading... machines...");
+						int curpos;
+						pFile->Read(version);
+						pFile->Read(size);
+						--chunkcount;
+						if(!fullopen)
+						{
+							curpos = pFile->GetPos();
+						}
+						if(version > CURRENT_FILE_VERSION_MACD)
+						{
+							// there is an error, this file is newer than this build of psycle
+						//	loggers::warning("Machine section of File is from a newer version of psycle!");
+							pFile->Skip(size);
+						}
+						else
+						{
+							pFile->Read(index);
+							if(index < MAX_MACHINES)
+							{
+								Machine::id_type const id(index);
+								// we had better load it
+								DestroyMachine(id);
+								_pMachine[index] = Machine::LoadFileChunk(pFile, id, version, fullopen);
+								// skips specific chunk.
+								if(!fullopen) pFile->Seek(curpos + size);
+							}
+							else
+							{
+								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+								pFile->Skip(size - sizeof index);
+							}
+						}
+					}
+					else if(std::strcmp(Header,"INSD") == 0)
+					{
+						//loggers::trace("chunk: INSD");
+						//Progress.SetWindowText("Loading... instruments...");
+						pFile->Read(version);
+						pFile->Read(size);
+						--chunkcount;
+						if(version > CURRENT_FILE_VERSION_INSD)
+						{
+							// there is an error, this file is newer than this build of psycle
+						//	loggers::warning("Instrument section of File is from a newer version of psycle!");
+							pFile->Skip(size);
+						}
+						else
+						{
+							pFile->Read(index);
+							if(index < MAX_INSTRUMENTS)
+							{
+								_pInstrument[index]->LoadFileChunk(pFile, version, fullopen);
+							}
+							else
+							{
+								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+								pFile->Skip(size - sizeof index);
+							}
+						}
+					}
+					else 
+					{
+						if(!zero_size_foreign_chunk)
+						{
+						//	loggers::warning("foreign chunk found. skipping it.");
+						//	Progress.SetWindowText("Loading... foreign chunk found. skipping it...");
+						}
+						pFile->Read(version);
+						pFile->Read(size);
+						if(size)
+						{
+							std::ostringstream s;
+							s << "foreign chunk: version: " << version << ", size: " << size;
+//							loggers::trace(s.str());
+						}
+						else if(!zero_size_foreign_chunk)
+						{
+						//	loggers::warning("foreign chunk: size is zero. supressing messages until non zero-sized chunk is found.");
+						}
+						zero_size_foreign_chunk = !size;
+						bool skip_failed(false);
+						try
+						{
+							pFile->Skip(size);
+						}
+						catch(...)
+						{
+							skip_failed = true;
+						}
+						if(skip_failed)
+						{
+						//	loggers::exception("foreign chunk is actually random/corrupted data. not reading further data.");
+							//break chunk_loop;
+							goto quit_chunk_loop;
+						}
+					}
+				}
+				quit_chunk_loop:
+				// now that we have loaded all the modules, time to prepare them.
+				//Progress.m_Progress.SetPos(16384);
+				//::Sleep(1); ///< ???
+				// test all connections for invalid machines. disconnect invalid machines.
+				for(int i(0) ; i < MAX_MACHINES ; ++i)
+				{
+					if(_pMachine[i])
+					{
+						_pMachine[i]->_connectedInputs = 0;
+						_pMachine[i]->_connectedOutputs = 0;
+						for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
+						{
+							if(_pMachine[i]->_connection[c])
+							{
+								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
+								{
+									_pMachine[i]->_connection[c] = false;
+									_pMachine[i]->_outputMachines[c] = -1;
+								}
+								else if(!_pMachine[_pMachine[i]->_outputMachines[c]])
+								{
+									_pMachine[i]->_connection[c] = false;
+									_pMachine[i]->_outputMachines[c] = -1;
+								}
+								else 
+								{
+									_pMachine[i]->_connectedOutputs++;
+								}
+							}
+							else
+							{
+								_pMachine[i]->_outputMachines[c] = -1;
+							}
 
-          }
-        }
-        catch (const char* e)
-        {
-          std::cerr << e << std::endl;
-        }
-          catch (const std::exception & e)
-        {
-          std::cerr << e.what() << std::endl;
-        }
-    }
+							if (_pMachine[i]->_inputCon[c])
+							{
+								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
+								{
+									_pMachine[i]->_inputCon[c] = false;
+									_pMachine[i]->_inputMachines[c] = -1;
+								}
+								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
+								{
+									_pMachine[i]->_inputCon[c] = false;
+									_pMachine[i]->_inputMachines[c] = -1;
+								}
+								else
+								{
+									_pMachine[i]->_connectedInputs++;
+								}
+							}
+							else
+							{
+								_pMachine[i]->_inputMachines[c] = -1;
+							}
+						}
+					}
+				}
 
-    f.close();
-    fileName = fName;
-  }
-  catch (const char* e)
-  {
-    std::cerr << e << std::endl;
-  }
-  catch (const std::exception & e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
-}
+				// translate any data that is required
+				
+				machineSoloed = solo;
+				// allow stuff to work again
+				_machineLock = false;
+				//Progress.OnCancel();
+				if((!pFile->Close()) || (chunkcount))
+				{
+					std::ostringstream s;
+					s << "Error reading from file '" << pFile->file_name() << "'" << std::endl;
+					if(chunkcount) s << "some chunks were missing in the file";
+					else s << "could not close the file";
+					std::cerr << s.str() << "Loading Error" << std::endl;
+					return false;
+				}
+				return true;
+			}
+			else if(std::strcmp(Header, "PSY2SONG") == 0)
+			{
+//				loggers::trace("chunk: PSY2SONG");
+//				return LoadOldFileFormat(pFile, fullopen);
+			}
+
+			// load did not work
+			std::cerr << "Incorrect file format" << "Loading Error" << std::endl;
+			return false;
+		}
+
+		bool Song::Save(RiffFile* pFile,bool autosave)
+		{
+			/*// NEW FILE FORMAT!!!
+			// this is much more flexible, making maintenance a breeze compared to that old hell.
+			// now you can just update one module without breaking the whole thing.
+
+			try
+			{
+				//CProgressDialog Progress;
+				if ( !autosave ) 
+				{
+				//	Progress.Create();
+				//	Progress.SetWindowText("Saving...");
+				//	Progress.ShowWindow(SW_SHOW);
+				}
+
+				std::uint32_t version, size, temp, chunkcount;
+				std::uint16_t temp16;
+
+				/*
+				===================
+				FILE HEADER
+				===================
+				id = "PSY3SONG"; // PSY2 was 1.66
+				
+				// header, this has to be at the top of the file
+				{
+					chunkcount = 3; // 3 chunks plus:
+					for(unsigned int i(0) ; i < MAX_PATTERNS    ; ++i) if(IsPatternUsed(i))          ++chunkcount; // check every pattern for validity
+					for(unsigned int i(0) ; i < MAX_MACHINES    ; ++i) if(_pMachine[i])              ++chunkcount;
+					for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i) if(!_pInstrument[i]->Empty()) ++chunkcount;
+
+					if ( !autosave ) 
+					{
+//						Progress.m_Progress.SetRange(0,chunkcount);
+//						Progress.m_Progress.SetStep(1);
+					}
+
+					// chunk header
+					{
+						pFile->Write("PSY3SONG");
+
+						version = CURRENT_FILE_VERSION;
+						pFile->Write(version);
+
+						size = sizeof chunkcount;
+						pFile->Write(size);
+					}
+					// chunk data
+					{
+						pFile->Write(chunkcount);
+					}
+				}
+
+				if ( !autosave ) 
+				{
+//					Progress.m_Progress.StepIt();
+//					::Sleep(1);
+				}
+
+				// the rest of the modules can be arranged in any order
+
+				/*
+				===================
+				SONG INFO TEXT
+				===================
+				id = "INFO"; 
+				
+				{
+					// chunk header
+					{
+						pFile->Write("INFO");
+
+						version = CURRENT_FILE_VERSION_INFO;
+						pFile->Write(version);
+
+						size = strlen(Name)+strlen(Author)+strlen(Comment)+3; // [bohan] since those are variable length, we could change from fixed size arrays to std::string
+						pFile->Write(size);
+					}
+					// chunk data
+					{
+						pFile->WriteChunk(Name,strlen(Name)+1);
+						pFile->WriteChunk(Author,strlen(Author)+1);
+						pFile->WriteChunk(Comment,strlen(Comment)+1);
+					}
+				}
+
+				if ( !autosave ) 
+				{
+//					Progress.m_Progress.StepIt();
+//					::Sleep(1);
+				}
+
+				
+				//===================
+				//SONG INFO
+				//===================
+				//id = "SNGI"; 
+				
+				{
+					// chunk header
+					{
+						pFile->Write("SNGI");
+
+						version = CURRENT_FILE_VERSION_SNGI;
+						pFile->Write(version);
+
+						size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
+						pFile->Write(size);
+					}
+					// chunk data
+					{
+						temp = SONGTRACKS;     pFile->Write(temp);
+						temp16 = int(floor(m_BeatsPerMin));							pFile->Write(temp16);
+						temp16 = int((m_BeatsPerMin-floor(m_BeatsPerMin))*100);		pFile->Write(temp16);
+						temp = m_LinesPerBeat; pFile->Write(temp);
+						temp = currentOctave;  pFile->Write(temp);
+						temp = machineSoloed;  pFile->Write(temp);
+						temp = _trackSoloed;   pFile->Write(temp);
+
+						temp = seqBus; pFile->Write(temp);
+
+						temp = midiSelected; pFile->Write(temp);
+						temp = auxcolSelected; pFile->Write(temp);
+						temp = instSelected; pFile->Write(temp);
+
+						temp = 1;  pFile->Write(temp); // sequence width
+
+						for(unsigned int i = 0; i < tracks(); i++)
+						{
+							pFile->Write(_trackMuted[i]);
+							pFile->Write(_trackArmed[i]); // remember to count them
+						}
+					}
+				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				
+				//===================
+				//SEQUENCE DATA
+				//===================
+				//id = "SEQD"; 
+				
+				for(std::uint32_t index(0) ; index < MAX_SEQUENCES ; ++index)
+				{
+					char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequence.
+
+					// chunk header
+					{
+						pFile->Write("SEQD");
+
+						version = CURRENT_FILE_VERSION_SEQD;
+						pFile->Write(version);
+
+						size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
+						pFile->Write(size);
+					}
+					// chunk data
+					{
+						pFile->Write(index); // Sequence Track number
+						temp = playLength; pFile->Write(temp); // Sequence length
+						
+						pFile->WriteChunk(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
+
+						for (unsigned int i = 0; i < playLength; i++)
+						{
+							temp = playOrder[i]; pFile->Write(temp); // Sequence data.
+						}
+					}
+				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				//
+				//===================
+				//PATTERN DATA
+				//===================
+				//id = "PATD"; 
+				//
+				for(std::uint32_t index(0) ; index < MAX_PATTERNS; ++index)
+				{
+					// check every pattern for validity
+					if (IsPatternUsed(index))
+					{
+						// ok save it
+
+						unsigned char * pSource = new unsigned char[tracks()*patternLines[index]*EVENT_SIZE];
+						unsigned char * pCopy = pSource;
+
+						for (int y = 0; y < patternLines[index]; y++)
+						{
+							unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
+							std::memcpy(pCopy,pData,EVENT_SIZE*tracks());
+							pCopy+=EVENT_SIZE*tracks();
+						}
+						
+						std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, tracks()*patternLines[index]*EVENT_SIZE);
+						delete[] pSource;
+
+						// chunk header
+						{
+							pFile->Write("PATD");
+
+							version = CURRENT_FILE_VERSION_PATD;
+							pFile->Write(version);
+
+							size = sizez77 + 4 * sizeof temp + strlen(patternName[index]) + 1;
+							pFile->Write(size);
+						}
+						// chunk data
+						{
+							pFile->Write(index);
+							temp = patternLines[index]; pFile->Write(temp);
+							temp = tracks(); pFile->Write(temp); // eventually this may be variable per pattern
+
+							pFile->WriteChunk(&patternName[index],strlen(patternName[index])+1);
+
+							pFile->Write(sizez77);
+							pFile->WriteChunk(pCopy,sizez77);
+						}
+
+						delete[] pCopy;
+					}
+				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				//
+				//===================
+				//MACHINE DATA
+				//===================
+				//id = "MACD"; 
+				//
+				// machine and instruments handle their save and load in their respective classes
+				for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
+				{
+					if (_pMachine[index])
+					{
+						std::fpos_t pos;
+
+						// chunk header
+						{
+							pFile->Write("MACD");
+
+							version = CURRENT_FILE_VERSION_MACD;
+							pFile->Write(version);
+
+							pos = pFile->GetPos();
+
+							size = 0;
+							pFile->Write(size);
+						}
+						// chunk data
+						{
+							pFile->Write(index);
+							_pMachine[index]->SaveFileChunk(pFile);
+						}
+						// chunk size in header
+						{
+							std::fpos_t const pos2(pFile->GetPos());
+							size = pos2 - pos - sizeof size;
+							pFile->Seek(pos);
+							pFile->Write(size);
+							pFile->Seek(pos2);
+						}
+
+						if ( !autosave ) 
+						{
+							Progress.m_Progress.StepIt();
+							::Sleep(1);
+						}
+					}
+				}
+
+				//
+				//===================
+				//Instrument DATA
+				//===================
+				//id = "INSD";
+				//
+				for(std::uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
+				{
+					if (!_pInstrument[index]->Empty())
+					{
+						std::fpos_t pos;
+
+						// chunk header
+						{
+							pFile->Write("INSD");
+
+							version = CURRENT_FILE_VERSION_INSD;
+							pFile->Write(version);
+
+							pos = pFile->GetPos();
+
+							size = 0;
+							pFile->Write(size);
+						}
+						// chunk data
+						{
+							pFile->Write(index);
+							_pInstrument[index]->SaveFileChunk(pFile);
+						}
+						// chunk size in header
+						{
+							std::fpos_t const pos2(pFile->GetPos());
+							size = pos2 - pos - sizeof size;
+							pFile->Seek(pos);
+							pFile->Write(size);
+							pFile->Seek(pos2);
+						}
+
+						if ( !autosave ) 
+						{
+							Progress.m_Progress.StepIt();
+							::Sleep(1);
+						}
+					}
+				}
+
+				//
+				//===
+				//end
+				//===
+				//
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.SetPos(chunkcount);
+					::Sleep(1);
+					Progress.OnCancel();
+				}
+
+				if (!pFile->Close()) throw std::runtime_error("couldn't close file");
+			}
+			catch(...)
+			{
+				std::ostringstream s;
+				s << "Error writing to " << pFile->file_name() << " !!!";
+				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
+				return false;
+			}*/
+			return true;
+		}
+
+	
 
 
 
 void Song::DestroyMachine(int mac, bool write_locked)
 {
-  Machine *iMac = _pMachine[mac];
-  Machine *iMac2;
-  if(iMac)
-  {
-    // Deleting the connections to/from other machines
-    for(int w=0; w<MAX_CONNECTIONS; w++)
-    {
-      // Checking In-Wires
-      if(iMac->_inputCon[w])
-      {
-          if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
-          {
-            iMac2 = _pMachine[iMac->_inputMachines[w]];
-            if(iMac2)
-            {
-              for(int x=0; x<MAX_CONNECTIONS; x++)
-              {
-                if( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
-                {
-                  iMac2->_connection[x] = false;
-                  iMac2->_numOutputs--; 
-                  break;
-                }
-              }
-            }
-          }
-        }
-        // Checking Out-Wires
-        if(iMac->_connection[w])
-        {
-          if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
-          {
-            iMac2 = _pMachine[iMac->_outputMachines[w]];
-            if(iMac2)
-            {
-                for(int x=0; x<MAX_CONNECTIONS; x++)
-                {
-                  if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
-                  {
-                    iMac2->_inputCon[x] = false;
-                    iMac2->_numInputs--;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      if(mac == machineSoloed) machineSoloed = -1;
-      // If it's a (Vst)Plugin, the destructor calls to release the underlying library
-      zapObject(_pMachine[mac]);
+
+			Machine *iMac = _pMachine[mac];
+			Machine *iMac2;
+			if(iMac)
+			{
+				// Deleting the connections to/from other machines
+				for(int w=0; w<MAX_CONNECTIONS; w++)
+				{
+					// Checking In-Wires
+					if(iMac->_inputCon[w])
+					{
+						if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
+						{
+							iMac2 = _pMachine[iMac->_inputMachines[w]];
+							if(iMac2)
+							{
+								for(int x=0; x<MAX_CONNECTIONS; x++)
+								{
+									if( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
+									{
+										iMac2->_connection[x] = false;
+										iMac2->_outputMachines[x]=-1;
+										iMac2->_connectedOutputs--;
+										break;
+									}
+								}
+							}
+						}
+					}
+					// Checking Out-Wires
+					if(iMac->_connection[w])
+					{
+						if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
+						{
+							iMac2 = _pMachine[iMac->_outputMachines[w]];
+							if(iMac2)
+							{
+								for(int x=0; x<MAX_CONNECTIONS; x++)
+								{
+									if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
+									{
+										iMac2->_inputCon[x] = false;
+										iMac2->_inputMachines[x]=-1;
+										iMac2->_connectedInputs--;
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if(mac == machineSoloed) machineSoloed = -1;
+			// If it's a (Vst)Plugin, the destructor calls to release the underlying library
+			zapObject(_pMachine[mac]);
 }
 
 
@@ -761,41 +1379,19 @@ int Song::GetFreeBus()
       return -1; 
     }
 
-bool Song::InsertConnection(int src, int dst, float value)
+bool Song::InsertConnection(int src, int dst, float volume)
     {
-      int freebus=-1;
-      int dfreebus=-1;
-      bool error=false;
       Machine *srcMac = _pMachine[src];
-      Machine *dstMac = _pMachine[dst];
-      if(!srcMac || !dstMac) return false;
-      if(dstMac->_mode == MACHMODE_GENERATOR) return false;
-      // Get a free output slot on the source machine
-      for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
-      {
-        if(!srcMac->_connection[c]) freebus = c;
-        // Checking that there's not an slot to the dest. machine already
-        else if(srcMac->_outputMachines[c] == dst) error = true;
-      }
-      if(freebus == -1 || error) return false;
-      // Get a free input slot on the destination machine
-      error=false;
-      for(int c=MAX_CONNECTIONS-1; c>=0; c--)
-      {
-        if(!dstMac->_inputCon[c]) dfreebus = c;
-        // Checking if the destination machine is connected with the source machine to avoid a loop.
-        else if(dstMac->_outputMachines[c] == src) error = true;
-      }
-      if(dfreebus == -1 || error) return false;
-      // Calibrating in/out properties
-      srcMac->_outputMachines[freebus] = dst;
-      srcMac->_connection[freebus] = true;
-      srcMac->_numOutputs++;
-      dstMac->_inputMachines[dfreebus] = src;
-      dstMac->_inputCon[dfreebus] = true;
-      dstMac->_numInputs++;
-      dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
-      return true;
+			Machine *dstMac = _pMachine[dst];
+			if(!srcMac || !dstMac)
+			{
+				std::ostringstream s;
+				s << "attempted to use a null machine pointer when connecting machines ids: src: " << src << ", dst: " << dst << std::endl;
+				s << "src pointer is " << srcMac << ", dst pointer is: " << dstMac;
+				//loggers::warning(s.str());
+				return false;
+			}
+			return srcMac->ConnectTo(*dstMac, InPort::id_type(0), OutPort::id_type(0), volume);
     }
 
 void Song::DeleteInstruments()
@@ -816,248 +1412,6 @@ void Song::DeleteInstruments()
 
 
 
-bool Song::save(const std::string & fileName)
-{
-  Serializer f(fileName);
-  uint32_t version, size, temp, chunkcount;
-
-  //
-  //===================
-  //FILE HEADER
-  //===================
-  //id = "PSY3SONG";
-
-  chunkcount = 3; // 3 chunks plus:
-  for(unsigned int i(0) ; i < MAX_PATTERNS    ; ++i) if(IsPatternUsed(i))          ++chunkcount; // check every pattern for validity
-  for(unsigned int i(0) ; i < MAX_MACHINES    ; ++i) if(_pMachine[i])              ++chunkcount;
-  for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i) if(!_pInstrument[i]->Empty()) ++chunkcount;
-
-  // chunk header
-  f.PutPChar("PSY3SONG", 8);
-
-  version = CURRENT_FILE_VERSION;
-  f.PutInt(version);
-  size = sizeof chunkcount;
-  f.PutInt(size);
-  // chunk data
-  f.PutInt(chunkcount);
-
-  // the rest of the modules can be arranged in any order
-
-  //
-  // ===================
-  // SONG INFO TEXT
-  // ===================
-  // id = "INFO";
-  //
-
-  // chunk header
-  f.PutPChar("INFO",4);
-
-  version = CURRENT_FILE_VERSION_INFO;
-  f.PutInt(version);
-  size = strlen(Name)+strlen(Author)+strlen(Comment)+3; 
-  // [bohan] since those are variable length, we could change from fixed size arrays to std::string
-  f.PutInt(size);
-
-  // chunk data
-
-  std::cout << Name << std::endl;
-  std::cout << Author << std::endl;
-  std::cout << Comment << std::endl;
-
-
-  f.PutString(Name);
-  f.PutString(Author);
-  f.PutString(Comment);
-
-  //
-  // ===================
-  // SONG INFO
-  // ===================
-  // id = "SNGI"; 
-  //
-
-  // chunk header
-
-  f.PutPChar("SNGI",4);
-  version = CURRENT_FILE_VERSION_SNGI;
-  f.PutInt(version);
-  size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
-  f.PutInt(size);
-
-  // chunk data
-
-  f.PutInt( SONGTRACKS     );
-  f.PutInt( m_BeatsPerMin  );
-  f.PutInt( m_LinesPerBeat );
-  f.PutInt( currentOctave  );
-  f.PutInt( machineSoloed  );
-  f.PutInt( _trackSoloed   );
-  f.PutInt( seqBus         );
-  f.PutInt( midiSelected   );
-  f.PutInt( auxcolSelected );
-  f.PutInt( instSelected   );
-  f.PutInt( 1              ); // sequence width
-
-  // chunk data
-
-  for(unsigned int i = 0; i < SONGTRACKS; i++) {
-    f.PutBool( _trackMuted[i] );
-    f.PutBool( _trackArmed[i] ); // remember to count them
-  }
-
-  //
-  // ===================
-  // SEQUENCE DATA
-  // ===================
-  // id = "SEQD";
-  //
-
-  for(uint32_t index(0) ; index < MAX_SEQUENCES ; ++index) {
-
-    char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequenc
-
-    // chunk header
-
-    f.PutPChar("SEQD",4);
-
-    version = CURRENT_FILE_VERSION_SEQD;
-    f.PutInt(version);
-
-    size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
-    f.PutInt(size);
-
-    // chunk data
-
-    f.PutInt(index);      // Sequence Track number
-    f.PutInt(playLength); // Sequence length
-
-    f.PutString(pSequenceName); // Sequence Name
-
-    for (unsigned int i = 0; i < playLength; i++)
-    {
-      f.PutInt(playOrder[i]);
-    }
-  }
-
-  //
-  // ===================
-  // PATTERN DATA
-  // ===================
-  // id = "PATD"; 
-  //
-
-  for(uint32_t index(0) ; index < MAX_PATTERNS; ++index)
-  {
-      // check every pattern for validity
-      if (IsPatternUsed(index))
-      {
-        // ok save it
-        unsigned char * pSource = new unsigned char[SONGTRACKS*patternLines[index]*EVENT_SIZE];
-
-        unsigned char * pCopy = pSource;
-
-        for (int y = 0; y < patternLines[index]; y++)
-        {
-          unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
-          std::memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
-          pCopy+=EVENT_SIZE*SONGTRACKS;
-        }
-
-        uint32_t sizez77 = DataCompression::BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[index]*EVENT_SIZE);
-        zapArray(pSource);
-
-        // chunk header
-        f.PutPChar("PATD",4);
-        version = CURRENT_FILE_VERSION_PATD;
-        f.PutInt(version);
-        size = sizez77 + 4 * sizeof temp + strlen(patternName[index]) + 1;
-        f.PutInt(size);
-
-        // chunk data
-
-        f.PutInt(index);
-        f.PutInt(patternLines[index]);
-        f.PutInt(SONGTRACKS); // eventually this may be variable per pattern
-        f.PutString(patternName[index]);
-
-        f.PutInt(sizez77);
-        f.PutPChar((char*)pCopy,sizez77);
-
-        zapArray(pCopy);
-      }
-    }
-
-    //
-    // ===================
-    // MACHINE DATA
-    // ===================
-    // id = "MACD";
-    // machine and instruments handle their save and load in their respective classes
-
-    for(uint32_t index(0) ; index < MAX_MACHINES; ++index)
-    {
-      if (_pMachine[index])
-      {
-        std::size_t pos;
-        // chunk header
-        f.PutPChar("MACD",4);
-        version = CURRENT_FILE_VERSION_MACD;
-        f.PutInt(version);
-        pos = f.GetPos();
-        size = 0;
-        f.PutInt(size);
-        // chunk data
-        f.PutInt(index);
-          _pMachine[index]->SaveFileChunk(&f);
-        // chunk size in header
-          std::size_t const pos2(f.GetPos());
-          size = pos2 - pos - sizeof size;
-          f.Seek(pos);
-          f.PutInt(size);
-          f.Seek(pos2);
-      }
-
-    }
-
-    //
-    // ===================
-    // Instrument DATA
-    // ===================
-    // id = "INSD"; 
-    //
-    for(uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
-    {
-      if (!_pInstrument[index]->Empty())
-      {
-        std::size_t pos;
-        // chunk header
-        f.PutPChar("INSD",4);
-        version = CURRENT_FILE_VERSION_INSD;
-        f.PutInt(version);
-
-        pos = f.GetPos();
-        size = 0;
-        f.PutInt(size);
-
-        // chunk data
-
-        f.PutInt(index);
-        //_pInstrument[index]->SaveFileChunk(f);
-
-        // chunk size in header
-
-        std::size_t const pos2(f.GetPos());
-        size = pos2 - pos - sizeof size;
-        f.Seek(pos);
-        f.PutInt(size);
-        f.Seek(pos2);
-      }
-    }
-
-    f.close();
-}
 
 int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
     {

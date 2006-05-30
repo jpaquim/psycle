@@ -35,14 +35,14 @@ class MachineGUI;
 */
 
 
-class Wire : public WireGUI {
+class MachineWireGUI : public WireGUI {
 public :
-    Wire() {
+    MachineWireGUI() {
       dlg = new WireDlg();
       dlg->setLine(this);
       add(dlg);
     }
-    ~Wire() {
+    ~MachineWireGUI() {
     }
 
     virtual void onMousePress  (int x, int y, int button) {
@@ -77,7 +77,7 @@ public:
 
 private:
 
-    Wire* line;
+    MachineWireGUI* line;
     MachineGUI* startGUI;
 
 

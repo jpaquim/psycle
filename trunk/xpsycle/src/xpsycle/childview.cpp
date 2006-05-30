@@ -97,7 +97,7 @@ void ChildView::onFileSaveSong( NObject * sender )
 }
 
 void ChildView::FileSaveSongNamed(const std::string & fName) {
-  _pSong->save(fName);
+//  _pSong->save(fName);
 }
 
 void ChildView::OnFileLoadSongNamed( const std::string & fName, int fType )
@@ -123,7 +123,15 @@ void ChildView::FileLoadSongNamed( std::string const & fName )
   // delete machine gui ..
     machineView_->removeMachines();
   // load Song
-  _pSong->load(fName);
+   RiffFile file;
+   if (!file.Open(fName.c_str()))
+   {
+      std::cerr << "Could not Open file. Check that the location is correct." <<  "Loading Error" << std::endl;
+      return;
+   }
+   _pSong->Load(&file);
+
+//  _pSong->load(fName);
   // set window title to new song name
   setTitleBarText();
   // create loaded machines

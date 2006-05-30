@@ -20,10 +20,12 @@
 #include "player.h"
 #include "song.h"
 #include "machine.h"
+#include "internal_machines.h"
 #include "global.h"
 #include "configuration.h"
 #include "inputhandler.h"
 #include "helpers.h"
+#include "pattern.h"
 
 Player::Player()
 {
@@ -411,15 +413,15 @@ float * Player::Work( void * context, int & numSamples )
 
     if(amount > 0)
     {
-      CPUCOST_INIT(idletime);
+//      CPUCOST_INIT(idletime);
       if( (int)pSong->_sampCount > Global::pConfig()->_pOutputDriver->_samplesPerSec)
       {
           pSong->_sampCount =0;
           for(int c=0; c<MAX_MACHINES; c++) {
             if(pSong->_pMachine[c])
             {
-              pSong->_pMachine[c]->_wireCost = 0;
-              pSong->_pMachine[c]->_cpuCost = 0;
+//              pSong->_pMachine[c]->_wireCost = 0;
+//              pSong->_pMachine[c]->_cpuCost = 0;
             }
           }
       }
@@ -442,7 +444,7 @@ float * Player::Work( void * context, int & numSamples )
               pSong->_pMachine[MASTER_INDEX]->Work(amount);
           }
           //CPUCOST_CALC(idletime, amount);
-          pSong->cpuIdle = idletime;
+//          pSong->cpuIdle = idletime;
           pSong->_sampCount += amount;
           if((pThis->_playing) && (pThis->_recording))
           {

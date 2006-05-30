@@ -116,7 +116,7 @@ void MachineView::createGUIMachines( )
                 Machine* pout = Global::pSong()->_pMachine[tmac->_outputMachines[w]];
                 MachineGUI* to = findByMachine(pout);
                 if (to != 0) {
-                  Wire* line = new Wire();
+                  MachineWireGUI* line = new MachineWireGUI();
                   line->setPoints(NPoint(10,10),NPoint(100,100));
                   scrollArea_->insert(line,0);
                   from->attachLine(line,0);
@@ -156,7 +156,7 @@ void MachineView::onNewConnection( MachineGUI * sender )
   int midW = sender->clientWidth()  / 2;
   int midH = sender->clientHeight() / 2;
 
-  line = new Wire();
+  line = new MachineWireGUI();
   line->setPoints(NPoint(sender->left()+midW,sender->top()+midH),NPoint(sender->left()+midW,sender->top()+midH));
   scrollArea_->insert(line,0);
   line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
@@ -192,7 +192,7 @@ void MachineView::onLineMousePressed( NButtonEvent * ev )
 
 void MachineView::onWireDelete( WireDlg * dlg )
 {
-  Machine* _pSrcMachine = dlg->pSrcMachine();
+/*  Machine* _pSrcMachine = dlg->pSrcMachine();
   Machine* _pDstMachine = dlg->pDstMachine();
 
   int wireIndex    = dlg->pSrcMachine()->_macIndex;
@@ -200,11 +200,11 @@ void MachineView::onWireDelete( WireDlg * dlg )
 
   _pSrcMachine->_connection[wireIndex] = false;
   _pSrcMachine->_outputMachines[wireIndex] = -1;
-  _pSrcMachine->_numOutputs--;
+  _pSrcMachine->_numOutPorts--;
 
   _pDstMachine->_inputCon[dstWireIndex] = false;
   _pDstMachine->_inputMachines[dstWireIndex]=-1;
-  _pDstMachine->_numInputs--;
+  _pDstMachine->_numInPorts--;
 
   MachineGUI* from = this->findByMachine(dlg->pSrcMachine());
   MachineGUI* to   = this->findByMachine(dlg->pDstMachine());
@@ -217,7 +217,7 @@ void MachineView::onWireDelete( WireDlg * dlg )
   NApp::flushEventQueue();
   if (window()!=0) window()->checkForRemove(0);
   scrollArea_->removeChild(dlg->line());
-  repaint();
+  repaint();*/
 }
 
 void MachineView::removeMachines( )

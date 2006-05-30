@@ -95,15 +95,15 @@ private:
 public:
     Plugin(int index);
 
-    virtual ~Plugin();
+    virtual ~Plugin() throw();
 
     virtual void Init();
     virtual void Work(int numSamples);
     virtual void Tick();
     virtual void Tick(int channel, PatternEntry * pEntry);
     virtual void Stop();
-    inline virtual const char * const GetDllName() const throw() { return _psDllName.c_str(); }
-    virtual char * GetName() { return (char *)_psName.c_str(); };
+    inline virtual std::string GetDllName() const throw() { return _psDllName.c_str(); }
+    virtual std::string GetName() const { return (char *)_psName.c_str(); };
 
     virtual int GetNumParams() { return GetInfo()->numParameters; };
     virtual int GetNumCols() { return GetInfo()->numCols; };

@@ -29,14 +29,30 @@ Song* Global::pSong() {
   return s;
 }
 
+Song & Global::song() {
+  static Song* s = new Song();
+  return *s;
+}
+
 Configuration* Global::pConfig() {
   static Configuration* c = new Configuration();
   return c;
 }
 
+Configuration & Global::configuration() {
+  static Configuration* c = new Configuration();
+  return *c;
+}
+
+
 Player * Global::pPlayer() {
   static Player* p = new Player();
   return p;
+}
+
+Player & Global::player() {
+  static Player* p = new Player();
+  return *p;
 }
 
 

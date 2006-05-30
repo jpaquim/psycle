@@ -82,7 +82,7 @@ int MasterDlg::onClose( )
 
 void MasterDlg::setVisible( bool on )
 {
-  int index = 0;
+  /*int index = 0;
   for (std::vector<Slider*>::iterator it = sliders.begin(); it < sliders.end(); it++) {
     Slider* sl = *it;
 
@@ -108,13 +108,13 @@ void MasterDlg::setVisible( bool on )
       }
     }
     index++;
-  }
+  }*/
   NWindow::setVisible(on);
 }
 
 void MasterDlg::onSliderPosChanged( NSlider * sender, double pos )
 {
-  std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
+  /*std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
   if (it != sliders.end()) {
       Slider* slider = *it;
       if (slider->led()) {
@@ -132,7 +132,7 @@ void MasterDlg::onSliderPosChanged( NSlider * sender, double pos )
             slider->led()->repaint();
         }
       }
-  }
+  }*/
 }
 
 void MasterDlg::Led::setNumber( int number )

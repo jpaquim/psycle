@@ -29,6 +29,7 @@
 #include "infodlg.h"
 #include "wavesavedlg.h"
 #include "defaultbitmaps.h"
+#include "internal_machines.h"
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
 #include <ngrs/ncheckmenuitem.h>
@@ -690,7 +691,7 @@ void MainWindow::updateComboGen() {
   for (int b=0; b<MAX_BUSES; b++) // Check Generators
   {
     if( Global::pSong()->_pMachine[b]) {
-      sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName);
+      sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName.c_str());
       genCombo_->add(new NItem(buffer));
         //cb->SetItemData(cb->GetCount()-1,b);
 
@@ -710,7 +711,7 @@ void MainWindow::updateComboGen() {
   for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
   {
     if(Global::pSong()->_pMachine[b]) {
-        sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName);
+        sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName.c_str());
         genCombo_->add(new NItem(buffer));
         //cb->SetItemData(cb->GetCount()-1,b);
       if (!found) selected++;

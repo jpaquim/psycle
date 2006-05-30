@@ -429,7 +429,7 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
         }
         // now save the song
         char filename[8000];
-        sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
+        sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName.c_str());
         saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
         return;
       }
@@ -604,7 +604,7 @@ void WaveSaveDlg::saveEnd( )
             }
             // now save the song
             char filename[8000];
-            sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+            sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName.c_str());
             saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
             return;
         }
@@ -643,7 +643,7 @@ void WaveSaveDlg::saveEnd( )
             }
         // now save the song
         char filename[8000];
-        sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
+        sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName.c_str());
         saveWav(filename,real_bits[bits],real_rate[rate],channelmode);
         return;
       }
