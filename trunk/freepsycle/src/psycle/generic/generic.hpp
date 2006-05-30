@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2006 Johan Boule <bohan@jabber.org>
-// copyright 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 2003-2006 johan boule <bohan@jabber.org>
+// copyright 2003-2006 psycledelics http://psycle.sourceforge.net
 
 ///\file
 ///\interface psycle::generic
@@ -8,6 +8,7 @@
 #include "typenames.hpp"
 #include <psycle/engine/exception.hpp>
 #include <universalis/compiler/cast.hpp>
+#include <universalis/compiler/template_constructors.hpp>
 #include <universalis/operating_system/loggers.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
@@ -23,38 +24,10 @@ namespace psycle
 	{
 		namespace basic
 		{
-			#include <boost/preprocessor/repetition/repeat.hpp>
-			#include <boost/preprocessor/control/expr_if.hpp>
-			#include <boost/preprocessor/repetition/enum_params.hpp>
-			#include <boost/preprocessor/repetition/enum_trailing_params.hpp>
-			#include <boost/preprocessor/repetition/enum_binary_params.hpp>
-			#include <boost/preprocessor/repetition/enum_trailing_binary_params.hpp>
-			#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM  UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM
-			#if PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY < PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM
-				#undef  PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY
-				#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY  PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM
-			#endif
-
-			#if 0 // this is general purpose, will go in universalis
-				#define constructor_loop(typename, init, arity) \
-					BOOST_PP_REPEAT(arity, constructor, typename) \
-					BOOST_PP_REPEAT(arity, constructor_template, init)
-
-				#define constructor(_, count, type) \
-					BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-					typename type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
-					{ \
-						return type::template create<typename type>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
-					}
-
-				#define constructor_template(_, count, init) \
-					template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
-					Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
-					{ \
-						Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
-						instance.init(); \
-						return instance; \
-					}
+			#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM  UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
+			#if PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY < PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
+				#undef  PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+				#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY  PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
 			#endif
 
 			using engine::exception;
@@ -67,49 +40,52 @@ namespace psycle
 				public std::set<typename Typenames::node*>
 			{
 				public:
+					//UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(graph, factory, init, deinit, )
 					class generic_access
 					{
 						private: friend class graph;
 							#define constructor(_, count, __) \
-								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
+								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 								Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
 									instance.init(); \
 									return instance; \
 								}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
+							void destroy(graph & instance)
+							{
+								instance.deinit();
+								delete & instance;
+							}
 					};
 
 					#define constructor(_, count, __) \
-						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
+						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 						Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create<Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra)>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
-						}
-						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
-					#undef constructor
-					
-					#define constructor(_, count, __) \
+							return generic_access::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+						} \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						typename Typenames::graph static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create<typename Typenames::graph BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra)>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return generic_access::template create< typename Typenames::graph BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						}
-						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 					#undef constructor
-
+					
 				protected:
 					typedef graph graph_type;
 
 					graph()
 					{
 						new_node_signal()   .connect(boost::bind(&graph::on_new_node   , this, _1));
-				//		delete_node_signal().connect(boost::bind(&graph::on_delete_node, this, _1));
+					//	delete_node_signal().connect(boost::bind(&graph::on_delete_node, this, _1));
 					}
 
 					void virtual init() {}
+					void virtual deinit() {}
 
 				public:
 					virtual ~graph() throw() {}
@@ -170,35 +146,36 @@ namespace psycle
 					{
 						private: friend class node;
 							#define constructor(_, count, __) \
-								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
+								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 								Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
 									instance.init(); \
 									return instance; \
 								}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
+							void destroy(node & instance)
+							{
+								instance.deinit();
+								delete & instance;
+							}
 					};
 
 					#define constructor(_, count, __) \
-						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
+						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 						Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create<Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra)>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
-						}
-						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
-					#undef constructor
-					
-					#define constructor(_, count, __) \
+							return generic_access::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+						} \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						typename Typenames::node static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create<typename Typenames::node BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra)>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return generic_access::template create< typename Typenames::node BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						}
-						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 					#undef constructor
-
+					
 				protected:
 					typedef node node_type;
 
@@ -224,13 +201,20 @@ namespace psycle
 						}
 						this->parent().new_node_signal()(*this);
 					}
-					
+
+					void virtual deinit()
+					{
+						//this->parent().delete_node_signal()(*this);
+						std::cout << "<<<<<<<<< delete generic node " << (void*)this << " ...\n";
+						delete_signal()(*this);
+						std::cout << "<<<<<<<<< delete generic node " << (void*)this << " ... done\n";
+					}
+
 				///\name destruction
 				///\{
 					virtual ~node() throw()
 					{
-						//this->parent().delete_node_signal()(*this);
-						delete_signal()(*this);
+						deinit();
 					}
 
 					public:  boost::signal<void (node &)> inline & delete_signal() throw() { return delete_signal_; }
@@ -327,33 +311,42 @@ namespace psycle
 					{
 						private: friend class port;
 							#define constructor(_, count, __) \
-								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
+								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 								Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
 									instance.init(); \
 									return instance; \
 								}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
+							void destroy(port & instance)
+							{
+								instance.deinit();
+								delete & instance;
+							}
 					};
 
 					#define constructor(_, count, __) \
-						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
+						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 						Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create<Type>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return generic_access::template create< Type >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						}
-						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 					#undef constructor
 
 				protected:
 					typedef port port_type;
 					port(typename Typenames::node & node) : child_of<typename Typenames::node>(node) {}
 					void virtual init() = 0;
+					void virtual deinit() = 0;
 					void connect(typename Typenames::port & port) throw(exception) {}
 				public:
-					virtual ~port() throw() {}
+					virtual ~port() throw()
+					{
+						//deinit();
+					}
 			};
 			
 			namespace ports
@@ -369,9 +362,9 @@ namespace psycle
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							typename Typenames::ports::output static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 							{ \
-								return Typenames::port::template create<typename Typenames::ports::output>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+								return Typenames::port::template create< typename Typenames::ports::output>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 							}
-							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
 					protected:
 						typedef output output_type;
@@ -380,7 +373,7 @@ namespace psycle
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							output(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: Typenames::port(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
-							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
 
 						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
@@ -388,10 +381,15 @@ namespace psycle
 							this->parent().new_output_port_signal()(*this);
 						}
 
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES deinit()
+						{
+							disconnect_all();
+						}
+
 					public:
 						virtual ~output() throw()
 						{
-							disconnect_all();
+							deinit();
 						}
 						
 					///\name connected input ports
@@ -473,11 +471,19 @@ namespace psycle
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							input(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: Typenames::port(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
-							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
 
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES deinit()
+						{
+							disconnect_all();
+						}
+
 					public:
-						virtual ~input() throw() {}
+						virtual ~input() throw()
+						{
+							//deinit();
+						}
 						
 						///\name (dis)connection functions
 						///\{
@@ -520,9 +526,9 @@ namespace psycle
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								typename Typenames::ports::inputs::single static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
-									return Typenames::ports::input::template create<typename Typenames::ports::inputs::single>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+									return Typenames::ports::input::template create< typename Typenames::ports::inputs::single>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 								}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 						protected:
 							typedef single single_type;
@@ -534,7 +540,7 @@ namespace psycle
 									Typenames::ports::input(BOOST_PP_ENUM_PARAMS(count, xtra)), \
 									output_port_() \
 								{}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 
 							void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
@@ -545,7 +551,7 @@ namespace psycle
 						public:
 							virtual ~single() throw()
 							{
-								disconnect_all();
+								this->deinit();
 							}
 							
 						///\name connected output port
@@ -607,9 +613,9 @@ namespace psycle
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								typename Typenames::ports::inputs::multiple static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
-									return Typenames::ports::input::template create<typename Typenames::ports::inputs::multiple>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+									return Typenames::ports::input::template create< typename Typenames::ports::inputs::multiple>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 								}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 						protected:
 							typedef multiple multiple_type;
@@ -618,7 +624,7 @@ namespace psycle
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								multiple(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								: Typenames::ports::input(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 
 							void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
@@ -629,7 +635,7 @@ namespace psycle
 						public:
 							virtual ~multiple() throw()
 							{
-								disconnect_all();
+								this->deinit();
 							}
 							
 						///\name connected output ports

@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2006 Johan Boule <bohan@jabber.org>
-// copyright 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 2003-2006 johan boule <bohan@jabber.org>
+// copyright 2003-2006 psycledelics http://psycle.sourceforge.net
 
 ///\file
 ///\interface psycle::generic::wrappers
@@ -245,7 +245,7 @@ namespace psycle
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							output(typename output::parent_type & parent, typename output::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: output::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
 				};
 
@@ -259,7 +259,7 @@ namespace psycle
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							input(typename input::parent_type & parent, typename input::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: input::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
 				};
 				
@@ -275,7 +275,7 @@ namespace psycle
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								single(typename single::parent_type & parent, typename single::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 								: single::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 					};
 
@@ -289,7 +289,7 @@ namespace psycle
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								multiple(typename multiple::parent_type & parent, typename multiple::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 								: multiple::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 					};
 				}

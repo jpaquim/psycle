@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
-// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 2003-2006 johan boule <bohan@jabber.org>
+// copyright 2003-2006 psycledelics http://psycle.sourceforge.net
 
 ///\file
 ///\interface universalis::compiler::cast
@@ -8,6 +8,7 @@
 #include <universalis/detail/project.hpp>
 #include <universalis/operating_system/loggers.hpp>
 #include "typenameof.hpp"
+#include "template_constructors.hpp"
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
 #if !defined NDEBUG
@@ -113,20 +114,11 @@ namespace universalis
 				>
 			{
 				public:
-					#include <boost/preprocessor/repetition/repeat.hpp>
-					#include <boost/preprocessor/control/expr_if.hpp>
-					#include <boost/preprocessor/repetition/enum_params.hpp>
-					#include <boost/preprocessor/repetition/enum_binary_params.hpp>
-					#define UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM  10
-					#if UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY < UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM
-						#undef  UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY
-						#define UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY  UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM
-					#endif
 					#define constructor(_, count, __) \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						underlying_wrapper(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						: Base_Wrapper(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
-						BOOST_PP_REPEAT(UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
+						BOOST_PP_REPEAT(UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 					#undef constructor
 				protected:
 					typedef underlying_wrapper underlying_wrapper_type;
