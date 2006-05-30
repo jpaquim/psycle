@@ -1044,7 +1044,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 
                     Machine *tmac = Global::pSong()->_pMachine[Global::pSong()->seqBus];
                     if (tmac) {
-                      //pView->PlayNote(note,127,false,tmac); 
+                      pView->PlayNote(note,127,false,tmac); 
                     }
 
                     int startLine  = dy_ / pView->rowHeight();
