@@ -41,7 +41,7 @@ namespace psycle
 			{
 				public:
 					//UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(graph, factory, init, deinit, )
-					class generic_access
+					class generic_access // : public unversalis::compiler::factory<graph, &graph::init, &graph::deinit>
 					{
 						private: friend class graph;
 							#define constructor(_, count, __) \
