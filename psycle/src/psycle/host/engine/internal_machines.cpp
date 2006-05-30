@@ -726,24 +726,6 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// LFO
 
-
-		// todo:
-		// - as is, control rate is proportional to MAX_BUFFER_LENGTH.. we update in work, which (at the moment) means once every 256
-		//   samples. at 44k, this means a cr of 142hz.  this is probably good enough for most purposes, but i believe it also
-		//   means that the lfo can and likely will be phased by 5.8ms depending on where it is placed in the machine view..
-		//   if we want to take the idea of modulation machines much further, we should probably put together some kind of
-		//   standard place in the processing chain where these machines will work, preferably -before- any audio
-		//   <JosepMa> About the "before any audio", the player can support this right now in two different ways:
-		//   One is in the "Machine::preWork" function, currently only used for buffer cleanup and generation of the wire visual data.
-		//   The second one is in the "Player::NotifyNewLine" function or in "Player::ExecuteGlobalCommands"
-		//   Also, note that currently, work does NOT mean 256 samples. It means *at much* 256, and quite frequently, it is a smaller
-		//   value (each line). This will change with the event based player.
-		//   processing.  this should also eliminate the need for the lfo to be connected to something to work.
-		// - respond to pulse width knob.. consider using it as a 'skew' control for sine/tri waves as in dw-tremolo?
-		// - now that we have a gui, keeping the 'position' display knob as an un-controllable control is just silly
-		// - prettify gui
-		// - vst support??
-
 		std::string LFO::_psName = "LFO";
 
 #if 0 // don't worry, msvc is the weird
@@ -761,19 +743,6 @@ namespace psycle {
 			_nCols = 3;
 			bisTicking = false;
 			_editName = "LFO";
-			for (int i=0;i<NUM_CHANS;i++)
-			{
-				macOutput[i]=-1;
-				paramOutput[i]=-1;
-				level[i]=100;
-				phase[i]=MAX_PHASE/2.0f;
-				prevVal[i]=centerVal[i]=0.0;
-			}
-			lfoPos=0.0;
-			lSpeed=MAX_SPEED/6;
-			waveform=lfo_types::sine;
-			pWidth=100;
-			FillTable();
 		}
 
 		LFO::~LFO() throw()
@@ -792,9 +761,8 @@ namespace psycle {
 				prevVal[i]=centerVal[i]=0.0;
 			}
 			lfoPos=0.0;
-			lSpeed=MAX_SPEED/6;
+			lSpeed=MAX_SPEED/10;
 			waveform=lfo_types::sine;
-			pWidth=100;
 			FillTable();
 		}
 
@@ -803,8 +771,8 @@ namespace psycle {
 			if(!bisTicking)
 			{
 				bisTicking=true;
-				if(pData->_cmd==0x01)	// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
-					lfoPos=0.0;			// against any established practices or something, let me know
+				if(pData->_cmd==0x01)
+					lfoPos=0.0;
 			}
 			bisTicking=false;
 		}
@@ -813,8 +781,6 @@ namespace psycle {
 		{
 			if(numparam==prms::wave)
 				sprintf(name,"Waveform");
-			else if(numparam==prms::pwidth)
-				sprintf(name,"Pulse Width");
 			else if(numparam==prms::speed)
 				sprintf(name,"Speed");
 			else if (numparam<prms::prm0)
@@ -823,17 +789,14 @@ namespace psycle {
 				sprintf(name,"Output Param %d",numparam-prms::prm0);
 			else if (numparam<prms::phase0)
 				sprintf(name,"Output Level %d",numparam-prms::level0);
-			else if (numparam<prms::display)
+			else if (numparam<prms::num_params)
 				sprintf(name,"Output Phase %d",numparam-prms::phase0);
-			else if (numparam==prms::display)
-				sprintf(name,"LFO Position");
 			else name[0] = '\0';
 		}
 
 		void LFO::GetParamRange(int numparam,int &minval,int &maxval)
 		{
 			if(numparam==prms::wave) { minval = 0; maxval = 4;}
-			else if (numparam==prms::pwidth) {minval = 0; maxval = 200;}
 			else if (numparam==prms::speed) {minval = 0; maxval = MAX_SPEED;}
 			else if (numparam <prms::prm0) {minval = -1; maxval = (MAX_BUSES*2)-1;}
 			else if (numparam <prms::level0)
@@ -846,8 +809,7 @@ namespace psycle {
 			}
 
 			else if (numparam <prms::phase0){minval = 0; maxval = MAX_DEPTH*2;}
-			else if (numparam <prms::display){minval = 0; maxval = MAX_PHASE; }
-			else if (numparam==prms::display){minval=0;maxval=LFO_SIZE; }
+			else if (numparam <prms::num_params){minval = 0; maxval = MAX_PHASE; }
 			else {minval=0;maxval=0; }
 
 		}
@@ -855,13 +817,11 @@ namespace psycle {
 		int LFO::GetParamValue(int numparam)
 		{
 			if(numparam==prms::wave)			return waveform;
-			else if(numparam==prms::pwidth)	return pWidth;
 			else if(numparam==prms::speed)	return lSpeed;
 			else if(numparam <prms::prm0)	return macOutput[numparam-prms::mac0];
 			else if(numparam <prms::level0)	return paramOutput[numparam-prms::prm0];
 			else if(numparam <prms::phase0)	return level[numparam-prms::level0];
-			else if(numparam <prms::display)	return phase[numparam-prms::phase0];
-			else if(numparam==prms::display)   return (int)lfoPos;
+			else if(numparam <prms::num_params)	return phase[numparam-prms::phase0];
 			else return 0;
 		}
 
@@ -879,10 +839,6 @@ namespace psycle {
 				default: throw;
 				}
 			} 
-			else if(numparam==prms::pwidth)
-			{
-				sprintf(parVal, "%i", pWidth-100);
-			}
 			else if(numparam==prms::speed)
 			{
 				if(lSpeed==0)
@@ -922,10 +878,8 @@ namespace psycle {
 			}
 			else if(numparam<prms::phase0)
 				sprintf(parVal,"%i%%", level[numparam-prms::level0]-MAX_DEPTH);
-			else if(numparam<prms::display)
+			else if(numparam<prms::num_params)
 				sprintf(parVal,"%.1f deg.", (phase[numparam-prms::phase0]-MAX_PHASE/2.0f)/float(MAX_PHASE/2.0f) * 180.0f);
-			else if(numparam==prms::display)
-				sprintf(parVal,"%.1f%%", lfoPos/(float)LFO_SIZE * 100);
 			else
 				parVal[0] = '\0';
 		}
@@ -936,11 +890,6 @@ namespace psycle {
 			{
 				waveform = value;
 				FillTable();
-				return true;
-			}
-			else if(numparam==prms::pwidth)	
-			{
-				pWidth = value;
 				return true;
 			}
 			else if(numparam==prms::speed)
@@ -1000,7 +949,7 @@ namespace psycle {
 				level[numparam-prms::level0] = value;
 				return true;
 			}
-			else if(numparam <prms::display)
+			else if(numparam <prms::num_params)
 			{
 				phase[numparam-prms::phase0] = value;
 				return true;
@@ -1008,7 +957,7 @@ namespace psycle {
 			else return false;
 		}
 
-		void LFO::Work(int numSamples)
+		void LFO::PreWork(int numSamples)
 		{
 			cpu::cycles_type cost(cpu::cycles());
 
@@ -1052,6 +1001,11 @@ namespace psycle {
 			cost = cpu::cycles() - cost;
 			work_cpu_cost(work_cpu_cost() + cost);
 		}
+		
+		void LFO::Work(int numSamples)
+		{
+			_worked=true;
+		}
 
 		bool LFO::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -1059,7 +1013,6 @@ namespace psycle {
 			pFile->Read(size);
 			pFile->Read(waveform);
 			pFile->Read(lSpeed);
-			pFile->Read(pWidth);
 			pFile->Read(macOutput);
 			pFile->Read(paramOutput);
 			pFile->Read(level);
@@ -1069,11 +1022,10 @@ namespace psycle {
 
 		void LFO::SaveSpecificChunk(RiffFile* pFile)
 		{
-			std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof pWidth + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
+			std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
 			pFile->Write(size);
 			pFile->Write(waveform);
 			pFile->Write(lSpeed);
-			pFile->Write(pWidth);
 			pFile->Write(macOutput);
 			pFile->Write(paramOutput);
 			pFile->Write(level);

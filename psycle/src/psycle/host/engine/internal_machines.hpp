@@ -191,6 +191,7 @@ namespace psycle {
 			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
@@ -206,9 +207,9 @@ namespace psycle {
 			///\{
 			int const static LFO_SIZE = 2048;
 			int const static MAX_PHASE = LFO_SIZE;
-			int const static MAX_SPEED = 10000;
+			int const static MAX_SPEED = 100000;
 			int const static MAX_DEPTH = 100;
-			int const static NUM_CHANS = 4;
+			int const static NUM_CHANS = 6;
 			///\}
 
 			struct lfo_types
@@ -224,12 +225,11 @@ namespace psycle {
 				/// our parameter indices
 				enum prm
 				{
-					wave, pwidth, speed,
-					mac0,	mac1,	mac2,	mac3,
-					prm0,	prm1,	prm2,	prm3,
-					level0,	level1,	level2,	level3,
-					phase0,	phase1,	phase2,	phase3,
-					display,
+					wave, speed,
+					mac0,	mac1,	mac2,	mac3,	mac4,	mac5,
+					prm0,	prm1,	prm2,	prm3,	prm4,	prm5,
+					level0,	level1,	level2,	level3,	level4,	level5,
+					phase0,	phase1,	phase2,	phase3,	phase4,	phase5,
 					num_params
 				};
 			};
@@ -242,7 +242,6 @@ namespace psycle {
 
 			//parameter settings
 			short waveform;	
-			int	pWidth;
 			int lSpeed;
 			short macOutput[NUM_CHANS];
 			short paramOutput[NUM_CHANS];

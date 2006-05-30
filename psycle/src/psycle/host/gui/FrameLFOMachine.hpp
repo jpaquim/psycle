@@ -29,13 +29,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				, d_defValue(0)
 				, d_bDblClkReset(true) 
 				{};
-			virtual ~LFOControl() {};
+			virtual ~LFOControl() {}
 			
-			virtual void Paint(CDC* dc,int value, char* valString)=0;
+			virtual void Paint(CDC* dc,int value, const std::string& valString)=0;
 			virtual bool LButtonDown(UINT nFlags, int x, int y, int &value)=0;
 			virtual bool MouseMove(UINT nFlags, int x, int y, int &value)=0;
 			virtual bool LButtonUp(UINT nFlags,int x, int y, int &value)=0;
 			virtual bool PointInParam(int x, int y)=0;
+			virtual void Visible(bool isVis) {d_bVisible=isVis;}
 
 			int d_x;
 			int d_y;
@@ -47,7 +48,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int d_tweakBase;
 
 			bool d_bDblClkReset;
-			char d_lblString[128];
+			bool d_bVisible;
+			std::string d_lblString;
 			ShowText d_showValue;
 			ShowText d_showLabel;
 
@@ -56,10 +58,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		class Knob : public LFOControl
 		{
 		public:
-			Knob(int x, int y, int minVal, int maxVal, char* label);
-			virtual ~Knob() {};
+			Knob(int x, int y, int minVal, int maxVal, const std::string& label);
+			virtual ~Knob() {}
 			
-			virtual void Paint(CDC* dc,int value, char* valString);
+			virtual void Paint(CDC* dc,int value, const std::string& valString);
 			virtual bool LButtonDown(UINT nFlags, int x, int y, int &value);
 			virtual bool MouseMove(UINT nFlags, int x, int y, int &value);
 			virtual bool LButtonUp(UINT nFlags,int x, int y, int &value);
@@ -80,10 +82,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		class ComboBox : public LFOControl
 		{
 		public:
-			ComboBox(int x, int y, int minVal, int maxVal, int length,  char* label);
-			virtual ~ComboBox() {};
+			ComboBox(int x, int y, int minVal, int maxVal, int length,  const std::string& label);
+			virtual ~ComboBox() {}
 			
-			virtual void Paint(CDC* dc,int value, char* valString);
+			virtual void Paint(CDC* dc,int value, const std::string& valString);
 			virtual bool LButtonDown(UINT nFlags, int x, int y, int &value);
 			virtual bool MouseMove(UINT nFlags, int x, int y, int &value);
 			virtual bool LButtonUp(UINT nFlags,int x, int y, int &value);
@@ -101,21 +103,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		};
 
-		enum
-		{
-			prm_waveform=0,
-			prm_pwidth,
-			prm_speed,
-			prm_macout0,	prm_macout1,	prm_macout2,	prm_macout3,
-			prm_prmout0,	prm_prmout1,	prm_prmout2,	prm_prmout3,
-			prm_level0,		prm_level1,		prm_level2,		prm_level3,	
-			prm_phase0,		prm_phase1,		prm_phase2,		prm_phase3,	
-			prm_lfopos,
-			num_params
-		};
-
-		int const static WIN_CX = 360;
-		int const static WIN_CY = 445;
+		int const static WIN_CX = 400;
+		int const static WIN_CY = 245;
 
 		DECLARE_DYNCREATE(CFrameLFOMachine)
 	protected:
@@ -129,24 +118,24 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		// graphics
 
 		CBitmap m_combobox;
-//		CBitmap m_sliderback;
-//		CBitmap m_sliderknob;
 		CBitmap *bmpDC;
 
-		LFOControl *d_pParams[num_params];
+		std::vector<LFOControl*> d_pParams;
+		ComboBox *d_pView;	//instanciated separately-- does not correspond to a parameter in the actual lfo
 
-		std::vector<std::string> d_machNames;
-		std::map<int, std::vector<std::string> > d_paramNames;
+		//determines which outputs are visible
+		int d_view;
 
 		// Operations
 	public:
 		virtual void SelectMachine(Machine* pMachine);
-		virtual void Generate(){};
+		virtual void SwitchView();
+		virtual void Generate(){}
 		virtual int ConvertXYtoParam(int x, int y);
 
 		// Implementation
 	protected:
-		void UpdateNames();
+		void UpdateParamRanges();
 		virtual ~CFrameLFOMachine();
 		// Generated message map functions
 		//{{AFX_MSG(CFrameLFOMachine)
