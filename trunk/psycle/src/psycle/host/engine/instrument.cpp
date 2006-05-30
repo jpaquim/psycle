@@ -264,7 +264,7 @@ namespace psycle
 				}
 
 				std::uint32_t index = 0;
-				pFile->Write("WAVE");
+				pFile->WriteChunk("WAVE",4);
 				std::uint32_t version = CURRENT_FILE_VERSION_PATD;
 				std::uint32_t size =
 					sizeof index +
