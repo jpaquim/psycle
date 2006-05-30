@@ -109,7 +109,7 @@
 
 		int RiffFile::Seek(int const & bytes)
 		{
-			_stream.seekg(bytes, std::ios::cur);
+			_stream.seekg(bytes, std::ios::beg);
 			if (_stream.eof()) throw std::runtime_error("seek failed");
 			return GetPos();
 		}
