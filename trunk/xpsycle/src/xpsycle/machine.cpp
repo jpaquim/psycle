@@ -595,7 +595,7 @@ template<typename object_array> inline object_array * zapArray(object_array *& p
 
 		Machine* Machine::LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
 		{
-			/*// assume version 0 for now
+			// assume version 0 for now
 			bool bDeleted(false);
 			Machine* pMachine;
 			MachineType type;//,oldtype;
@@ -766,7 +766,7 @@ template<typename object_array> inline object_array * zapArray(object_array *& p
 				
 			}
 			pMachine->SetPan(pMachine->_panning);
-			return pMachine;*/
+			return pMachine;
 		}
 
 
