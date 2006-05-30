@@ -503,18 +503,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnBarButton1()  // OnBpmAddOne
 		{
 			if(::GetKeyState(VK_CONTROL) < 0)
-				SetAppSongBpm(0.01);
+				SetAppSongBpm(0.01f);
 			else
-				SetAppSongBpm(1);
+				SetAppSongBpm(1.0f);
 			m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnBpmAddTen() 
 		{
 			if(::GetKeyState(VK_CONTROL) < 0)
-				SetAppSongBpm(0.1);
+				SetAppSongBpm(0.1f);
 			else
-				SetAppSongBpm(10);
+				SetAppSongBpm(10.0f);
 			m_wndView.SetFocus();	
 		}
 
