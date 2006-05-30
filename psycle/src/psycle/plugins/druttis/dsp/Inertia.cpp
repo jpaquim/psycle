@@ -20,7 +20,7 @@ Inertia::Inertia()
 	m_ticks = 0;
 	m_decr = 1;
 	m_value = 0.0f;
-	m_coeff = 0.0f;
+	m_step = 0.0f;
 	m_valid = false;
 }
 //////////////////////////////////////////////////////////////////////
@@ -91,18 +91,18 @@ float Inertia::GetValue()
 //////////////////////////////////////////////////////////////////
 void Inertia::Update()
 {
-	if ((m_length > 0) || (m_target != m_value))
+	if(m_length > 0 && m_target != m_value)
 	{
 		m_ticks = m_length;
 		m_decr = 1;
-		m_coeff = (m_target - m_value) / (float) m_ticks;
+		m_step = (m_target - m_value) / m_ticks;
 	}
 	else
 	{
 		m_ticks = 0;
 		m_decr = 0;
 		m_value = m_target;
-		m_coeff = 0;
+		m_step = 0;
 	}
 	m_valid = false;
 }
