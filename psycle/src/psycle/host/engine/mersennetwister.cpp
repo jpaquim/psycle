@@ -50,6 +50,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "mersennetwister.hpp"
+#include <cmath>
 
 namespace psycle
 {
