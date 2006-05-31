@@ -30,6 +30,8 @@ class RiffFile;
 class Instrument{
 public:
 
+    typedef int id_type;
+
     Instrument();
     ~Instrument();
 

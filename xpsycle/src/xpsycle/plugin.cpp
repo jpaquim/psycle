@@ -114,7 +114,7 @@ void Plugin::Work( int numSamples )
           while (ns)
           {
             int nextevent = (TWSActive)?TWSSamples:ns+1;
-            for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+            for (int i=0; i < Global::pSong()->tracks(); i++)
             {
               if (TriggerDelay[i]._cmd) {
                   if (TriggerDelayCounter[i] < nextevent)
@@ -129,7 +129,7 @@ void Plugin::Work( int numSamples )
                 {
                   TWSSamples -= ns;
                 }
-                for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+                for (int i=0; i < Global::pSong()->tracks(); i++)
                 {
                   // come back to this
                   if (TriggerDelay[i]._cmd)
@@ -139,7 +139,7 @@ void Plugin::Work( int numSamples )
                 }
                 try
                 {
-                  proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::pSong()->SONGTRACKS);
+                  proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::pSong()->tracks());
                 }
                 catch(const std::exception &)
                 {
@@ -150,7 +150,7 @@ void Plugin::Work( int numSamples )
                         ns -= nextevent;
                         try
                         {
-                          proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::pSong()->SONGTRACKS);
+                          proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::pSong()->tracks());
                         }
                         catch(const std::exception &)
                         {
@@ -188,7 +188,7 @@ void Plugin::Work( int numSamples )
                         if(!activecount) TWSActive = false;
                       }
                     }
-                    for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+                    for (int i=0; i < Global::pSong()->tracks(); i++)
                     {
                         // come back to this
                         if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)

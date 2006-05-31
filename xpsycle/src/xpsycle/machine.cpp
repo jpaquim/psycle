@@ -23,11 +23,6 @@
 //	{
 //		extern CPsycleApp theApp;
 
-template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
-    {
-      if(pointer) delete [] pointer;
-      return pointer = new_value;
-    }
 
 
 		void Machine::crashed(std::exception const & e) throw()

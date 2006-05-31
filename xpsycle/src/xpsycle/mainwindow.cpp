@@ -197,7 +197,7 @@ void MainWindow::initBars( )
         progressBar_->setWidth(200);
         progressBar_->setHeight(25);
         progressBar_->setVisible(false);
-        Global::pSong()->loadProgress.connect(this,&MainWindow::onSongLoadProgress);
+//        Global::pSong()->loadProgress.connect(this,&MainWindow::onSongLoadProgress);
     statusBar_->add(progressBar_);
   pane()->add(statusBar_,nAlBottom);
 
@@ -643,10 +643,10 @@ void MainWindow::onTrackChange( NItemEvent * ev )
   str << ev->item()->text();
   int track = 0;
   str >> track;
-  Global::pSong()->SONGTRACKS=track;
-  if (childView_->patternView()->cursor().x() >= Global::pSong()->SONGTRACKS)
+  Global::pSong()->tracks(track);
+  if (childView_->patternView()->cursor().x() >= Global::pSong()->tracks() )
   {
-    childView_->patternView()->setCursor(NPoint3D(Global::pSong()->SONGTRACKS,childView_->patternView()->cursor().y(),0));
+    childView_->patternView()->setCursor(NPoint3D(Global::pSong()->tracks() ,childView_->patternView()->cursor().y(),0));
   }
   childView_->patternView()->repaint();
 }
