@@ -6,8 +6,8 @@
 
 # init
 
-import packageneric
-packageneric = packageneric.packageneric()
+import packageneric.generic
+packageneric = packageneric.generic.packageneric()
 
 # source package
 
