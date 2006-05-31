@@ -795,7 +795,7 @@ namespace psycle {
 
 		void LFO::GetParamRange(int numparam,int &minval,int &maxval)
 		{
-			if(numparam==prms::wave) { minval = 0; maxval = 4;}
+			if(numparam==prms::wave) { minval = 0; maxval = lfo_types::num_lfos-1;}
 			else if (numparam==prms::speed) {minval = 0; maxval = MAX_SPEED;}
 			else if (numparam <prms::prm0) {minval = -1; maxval = (MAX_BUSES*2)-1;}
 			else if (numparam <prms::level0)
@@ -832,8 +832,7 @@ namespace psycle {
 				{
 				case lfo_types::sine: sprintf(parVal, "sine"); break;
 				case lfo_types::tri: sprintf(parVal, "triangle"); break;
-				case lfo_types::sawup: sprintf(parVal, "saw up"); break;
-				case lfo_types::sawdown: sprintf(parVal, "saw down"); break;
+				case lfo_types::saw: sprintf(parVal, "saw"); break;
 				case lfo_types::square: sprintf(parVal, "square"); break;
 				default: throw;
 				}
@@ -844,7 +843,11 @@ namespace psycle {
 					sprintf(parVal, "inf.");
 				else
 				{
-					sprintf(  parVal, "%.1f ms", 100 / float(lSpeed/float(MAX_SPEED))  );		
+					float speedInMs = 100.0f / (float)(lSpeed/(float)(MAX_SPEED));
+					if(speedInMs<1000.0f)
+						sprintf(  parVal, "%.1f ms", speedInMs);		
+					else
+						sprintf( parVal, "%.3f secs", speedInMs/1000.0f);
 				}
 			} 
 			else if(numparam<prms::prm0)
@@ -1047,16 +1050,10 @@ namespace psycle {
 					waveTable[i] = waveTable[LFO_SIZE-i-1] = i/float(LFO_SIZE/4) - 1;
 				}
 				break;
-			case lfo_types::sawup:
+			case lfo_types::saw:
 				for (int i(0);i<LFO_SIZE;++i)
 				{
 					waveTable[i] = i/float((LFO_SIZE-1)/2) - 1;
-				}
-				break;
-			case lfo_types::sawdown:
-				for(int i(0);i<LFO_SIZE;++i)
-				{
-					waveTable[i] = (LFO_SIZE-i)/float((LFO_SIZE-1)/2) - 1;
 				}
 				break;
 			case lfo_types::square:
