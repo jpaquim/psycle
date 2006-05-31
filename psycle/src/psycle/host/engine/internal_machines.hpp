@@ -216,7 +216,8 @@ namespace psycle {
 			{
 				enum lfo_type
 				{
-					sine, tri, sawup, sawdown, square
+					sine, tri, saw, /*sawdown,*/ square,	//depth ranges from -100% to 100% -- inverse saw is redundant
+					num_lfos
 				};
 			};
 

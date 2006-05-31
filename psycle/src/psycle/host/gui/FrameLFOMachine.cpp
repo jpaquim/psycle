@@ -38,6 +38,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
 			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
 			d_lblString=label;
+			d_bTweakable = true;
 		}
 
 		void CFrameLFOMachine::Knob::Paint(CDC* dc,int value, const std::string& valString)
@@ -129,6 +130,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	bool CFrameLFOMachine::Knob::MouseMove(UINT nFlags, int x, int y, int &value)
 	{
+		if(!d_bTweakable) return false;
+
 		int newval;
 		float deltay= d_twkSrc_y-y;
 		if (deltay==0.0) return false;
@@ -165,6 +168,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
 			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
 			d_lblString = label;
+			d_bTweakable = true;
 		}
 
 		void CFrameLFOMachine::ComboBox::Paint(CDC* dc,int value, const std::string& valString)
@@ -260,16 +264,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	bool CFrameLFOMachine::ComboBox::MouseMove(UINT nFlags, int x, int y, int &value)
 	{
+		if(!d_bTweakable) return false;
 		int newval;
-		float deltay= d_twkSrc_y-y;
-		if(deltay==0.0) return false;
+		float deltax= x-d_twkSrc_x;
+		if(deltax==0.0) return false;
 
 		float pixel = (d_maxValue-d_minValue) / 192.0f;
 
 		if(nFlags&MK_SHIFT) pixel=.5;
-		if(nFlags&MK_CONTROL){deltay*=.2f;}
+		if(nFlags&MK_CONTROL){deltax*=.2f;}
 
-		newval = deltay*pixel + d_tweakBase;
+		newval = deltax*pixel + d_tweakBase;
 
 		if(newval>d_maxValue) newval=d_maxValue;
 		else if(newval<d_minValue) newval=d_minValue;
@@ -316,26 +321,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		d_pParams.resize(LFO::prms::num_params);
 
-		d_pParams[LFO::prms::wave] = new ComboBox	(55-25-ComboBox::s_width,	35, 0, 4, 50, "Waveform");
+		d_pParams[LFO::prms::wave] = new ComboBox	(65-25-ComboBox::s_width,	40, 0, LFO::lfo_types::num_lfos-1, 50, "Waveform");
 		d_pParams[LFO::prms::wave]->d_bDblClkReset=false;
-		d_pParams[LFO::prms::speed]	= new Knob		(55-   Knob::s_width/2,		100, 0, LFO::MAX_SPEED, "LFO Speed");
+		d_pParams[LFO::prms::speed]	= new Knob		(65-   Knob::s_width/2,		105, 0, LFO::MAX_SPEED, "LFO Speed");
 		d_pParams[LFO::prms::speed]->d_defValue=LFO::MAX_SPEED/10;
 
 		for( int i(0); i<LFO::NUM_CHANS; ++i )
 		{
 			std::ostringstream temp;
 			temp<<"LFO Dest. Machine "<<i;
-			d_pParams[LFO::prms::mac0+i] = new ComboBox(2 * WIN_CX/3-64-ComboBox::s_width,	22+115*(i%2), -1, MAX_BUSES*2-1, 128, temp.str());
-			d_pParams[LFO::prms::prm0+i] = new Knob(	2 * WIN_CX/5-Knob::s_width/2+5,	65+115*(i%2), -1, 128, "Param");
-			d_pParams[LFO::prms::level0+i]  = new Knob(	3 * WIN_CX/5-Knob::s_width/2+25,	65+115*(i%2),  0, LFO::MAX_DEPTH*2, "Depth");
-			d_pParams[LFO::prms::phase0+i]  = new Knob(	4 * WIN_CX/5-Knob::s_width/2+25,	65+115*(i%2),  0, LFO::MAX_PHASE, "Phase");
+			d_pParams[LFO::prms::mac0+i] = new ComboBox(2 * WIN_CX/3-64-ComboBox::s_width+10,	27+115*(i%2), -1, MAX_BUSES*2-1, 128, temp.str());
+			d_pParams[LFO::prms::prm0+i] = new Knob(	2 * WIN_CX/5-Knob::s_width/2+15,	70+115*(i%2), -1, 128, "Param");
+			d_pParams[LFO::prms::level0+i]  = new Knob(	3 * WIN_CX/5-Knob::s_width/2+35,	70+115*(i%2),  0, LFO::MAX_DEPTH*2, "Depth");
+			d_pParams[LFO::prms::phase0+i]  = new Knob(	4 * WIN_CX/5-Knob::s_width/2+35,	70+115*(i%2),  0, LFO::MAX_PHASE, "Phase");
 			d_pParams[LFO::prms::mac0+i]->d_bDblClkReset=false;
+			d_pParams[LFO::prms::mac0+i]->d_bTweakable = false;
 			d_pParams[LFO::prms::prm0+i]->d_defValue=-1;
 			d_pParams[LFO::prms::level0+i]->d_defValue=LFO::MAX_DEPTH;
 			d_pParams[LFO::prms::phase0+i]->d_defValue=LFO::MAX_PHASE/2;
 		}
 
-		d_pView = new ComboBox(55-25-ComboBox::s_width,		180, 0, LFO::NUM_CHANS/2-1, 50, "Switch View");
+		d_pView = new ComboBox(65-25-ComboBox::s_width,		185, 0, LFO::NUM_CHANS/2-1, 50, "Switch View");
 		d_pView->d_bDblClkReset=false;
 
 		m_combobox.LoadBitmap(IDB_COMBOBOX);
@@ -475,8 +481,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int value = d_pLFO->GetParamValue(tweakpar);
 			if(d_pParams[tweakpar]->LButtonDown(nFlags, point.x, point.y, value))
 				d_pLFO->SetParameter(tweakpar, value);
-			istweak = true;
-			SetCapture();
+			if(d_pParams[tweakpar]->d_bTweakable)
+			{
+				istweak = true;
+				SetCapture();
+				d_shiftAndCtrlState = (nFlags & (MK_SHIFT | MK_CONTROL));
+			}
 		}
 		else if(d_pView->PointInParam(point.x, point.y))
 		{
@@ -503,8 +513,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				int value = d_pLFO->GetParamValue(tweakpar);
 				if(d_pParams[tweakpar]->LButtonDown(nFlags, point.x, point.y, value))
 					d_pLFO->SetParameter(tweakpar, value);
-				istweak = true;
-				SetCapture();
+				if(d_pParams[tweakpar]->d_bTweakable)
+				{
+					istweak = true;
+					SetCapture();
+					d_shiftAndCtrlState = (nFlags & (MK_SHIFT | MK_CONTROL));
+				}
 			}
 		}
 		else if(d_pView->PointInParam(point.x, point.y))
@@ -523,6 +537,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if(tweakpar>-1 && tweakpar<LFO::prms::num_params)
 			{
 				int value=d_pLFO->GetParamValue(tweakpar);
+
+				if( (nFlags & (MK_CONTROL | MK_SHIFT)) != d_shiftAndCtrlState )	//state of either shift or control has changed
+				{
+					d_pParams[tweakpar]->ResetTweakSrc(point.x, point.y, value);
+					d_shiftAndCtrlState = (nFlags & (MK_CONTROL | MK_SHIFT));
+				}
+
 				if(d_pParams[tweakpar]->MouseMove(nFlags, point.x, point.y, value))
 					d_pLFO->SetParameter(tweakpar, value);
 			}

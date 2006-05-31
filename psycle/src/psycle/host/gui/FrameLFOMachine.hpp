@@ -36,6 +36,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual bool MouseMove(UINT nFlags, int x, int y, int &value)=0;
 			virtual bool LButtonUp(UINT nFlags,int x, int y, int &value)=0;
 			virtual bool PointInParam(int x, int y)=0;
+			virtual void ResetTweakSrc(int x, int y, int value) {d_twkSrc_x=x; d_twkSrc_y=y; d_tweakBase = value;}
 			virtual void Visible(bool isVis) {d_bVisible=isVis;}
 
 			int d_x;
@@ -49,6 +50,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			bool d_bDblClkReset;
 			bool d_bVisible;
+			bool d_bTweakable;
 			std::string d_lblString;
 			ShowText d_showValue;
 			ShowText d_showLabel;
@@ -125,6 +127,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		//determines which outputs are visible
 		int d_view;
+
+		//used to detect shift or control presses during a tweak
+		int d_shiftAndCtrlState;
 
 		// Operations
 	public:
