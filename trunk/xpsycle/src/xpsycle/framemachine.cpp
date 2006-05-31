@@ -23,6 +23,7 @@
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include "presetsdlg.h"
+#include "deserializer.h"
 #include <ngrs/napp.h>
 #include <ngrs/nmenubar.h>
 #include <ngrs/ntogglepanel.h>

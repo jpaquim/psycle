@@ -21,6 +21,8 @@
 #include "global.h"
 #include "player.h"
 
+namespace dsp {
+
 FilterCoeff Filter::_coeffs;
 
 
@@ -196,4 +198,4 @@ FilterCoeff Filter::_coeffs;
 
       }
     
-
+}

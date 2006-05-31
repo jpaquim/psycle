@@ -14,7 +14,7 @@ const int MASTER_INDEX = 128;
 /// Max number of instruments.
 const int MAX_INSTRUMENTS = 256;
 /// Instrument index of the wave preview.
-const int PREV_WAV_INS = 255;
+//const int PREV_WAV_INS = 255;
 /// Number of tracks of the sequence (psycle just support one sequence now). Modify this, CURRENT_FILE_VERSION_SEQD and add the appropiated load and save code.
 const int MAX_SEQUENCES = 1;
 /// harcoded maximal number different patterns.

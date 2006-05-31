@@ -124,7 +124,7 @@ class Voice
     int _triggerNoteDelay;
     int _instrument;
     WaveData _wave;
-    Filter _filter;
+    dsp::Filter _filter;
     int _cutoff;
     float _coModify;
     int _channel;

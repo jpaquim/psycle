@@ -24,6 +24,8 @@
 
 #define TPI 6.28318530717958647692528676655901
 
+namespace dsp {
+
     enum FilterType{
       F_LOWPASS12 = 0,
       F_HIGHPASS12 = 1,
@@ -282,5 +284,5 @@
       float fLastSampleLeft[2];
       float fLastSampleRight[2];
     };
-  
+}  
 #endif
