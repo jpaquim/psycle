@@ -1,112 +1,87 @@
-/***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
-#include "constants.h"
+///\file
+///\brief interface file for psycle::host::Filter. based on revision 2686
+//#include <packageneric/pre-compiled.private.hpp>
+//#include PACKAGENERIC
 #include "instrument.h"
-#include "filter.h"
 #include "datacompression.h"
-#include "fileio.h"
-#include <cstdio>
+#include "filter.h"
+//#include <operating_system/logger.hpp>
+#include <cstdint>
+//namespace psycle
+//{
+//	namespace host
+//	{
+		Instrument::Instrument()
+		:
+			waveDataL(),
+			waveDataR(),
+			waveLength()
+		{
+			// clear everythingout
+			Delete();
+		}
 
+		Instrument::~Instrument()
+		{
+			delete[] waveDataL;
+			delete[] waveDataR;
+		}
 
-template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
-{
-    if(pointer) delete [] pointer;
-    return pointer = new_value;
-}
+		void Instrument::Delete()
+		{
+			// Reset envelope
+			ENV_AT = 1; // 16
+			ENV_DT = 1; // 16386
+			ENV_SL = 100; // 64
+			ENV_RT = 16; // OVERLAPTIME
+			
+			ENV_F_AT = 16;
+			ENV_F_DT = 16384;
+			ENV_F_SL = 64;
+			ENV_F_RT = 16384;
+			
+			ENV_F_CO = 64;
+			ENV_F_RQ = 64;
+			ENV_F_EA = 128;
+			ENV_F_TP = dsp::F_NONE;
+			
+			_loop = false;
+			_lines = 16;
+			
+			_NNA = 0; // NNA set to Note Cut [Fast Release]
+			
+			_pan = 128;
+			_RPAN = false;
+			_RCUT = false;
+			_RRES = false;
+			
+			DeleteLayer();
+			
+			std::sprintf(_sName, "empty");
+		}
 
+		void Instrument::DeleteLayer(void)
+		{
+			std::sprintf(waveName, "empty");
+			
+			delete[] waveDataL; waveDataL = 0;
+			delete[] waveDataR; waveDataR = 0;
+			waveLength = 0;
+			waveStereo=false;
+			waveLoopStart=0;
+			waveLoopEnd=0;
+			waveLoopType=0;
+			waveVolume=100;
+			waveFinetune=0;
+			waveTune=0;
+		}
 
-Instrument::Instrument()
-{
-  // clear everythingout
-  waveDataL = 0;
-  waveDataR = 0;
-  waveLength = 0;
-  Delete();
-}
+		bool Instrument::Empty()
+		{
+			return !waveLength;
+		}
 
-Instrument::~Instrument()
-{
-  zapArray(waveDataL);
-  zapArray(waveDataR);
-  waveLength = 0;
-}
-
-void Instrument::Delete()
-{
-  // Reset envelope
-  ENV_AT = 1; // 16
-  ENV_DT = 1; // 16386
-  ENV_SL = 100; // 64
-  ENV_RT = 16; // OVERLAPTIME
-
-  ENV_F_AT = 16;
-  ENV_F_DT = 16384;
-  ENV_F_SL = 64;
-  ENV_F_RT = 16384;
-
-  ENV_F_CO = 64;
-  ENV_F_RQ = 64;
-  ENV_F_EA = 128;
-  ENV_F_TP = F_NONE;
-
-  _loop = false;
-  _lines = 16;
-
-  _NNA = 0; // NNA set to Note Cut [Fast Release]
-
-  _pan = 128;
-  _RPAN = false;
-  _RCUT = false;
-  _RRES = false;
-
-  DeleteLayer();
-
-  sprintf(_sName,"empty");
-}
-
-void Instrument::DeleteLayer(void)
-{
-  sprintf(waveName,"empty");
-
-  zapArray(waveDataL);
-  zapArray(waveDataR);
-  waveLength = 0;
-  waveStereo=false;
-  waveLoopStart=0;
-  waveLoopEnd=0;
-  waveLoopType=0;
-  waveVolume=100;
-  waveFinetune=0;
-  waveTune=0;
-}
-
-bool Instrument::Empty()
-{
-  if (waveLength > 0) return false;
-  return true;
-}
-
-
-
-
-void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
+		void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 		{
 			Delete();
 			// assume version 0 for now
@@ -289,7 +264,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 				}
 
 				std::uint32_t index = 0;
-				pFile->Write("WAVE");
+				pFile->WriteChunk("WAVE",4);
 				std::uint32_t version = CURRENT_FILE_VERSION_PATD;
 				std::uint32_t size =
 					sizeof index +
@@ -331,3 +306,5 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 				delete[] pData2;
 			}
 		}
+//	}
+//}

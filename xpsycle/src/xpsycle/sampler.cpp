@@ -307,7 +307,7 @@ void Sampler::VoiceWork( int numsamples, int voice )
 
           // Filter section
           //
-          if (pVoice->_filter._type < F_NONE)
+          if (pVoice->_filter._type < dsp::F_NONE)
           {
               TickFilterEnvelope(voice);
               pVoice->_filter._cutoff = pVoice->_cutoff + dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
@@ -638,7 +638,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
           pVoice->_filter._q = Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_RQ;
         }
 
-        pVoice->_filter._type = (FilterType)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_TP;
+        pVoice->_filter._type = (dsp::FilterType)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_TP;
         pVoice->_coModify = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_EA;
         pVoice->_filterEnv._sustain = (float)Global::pSong()->_pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
 

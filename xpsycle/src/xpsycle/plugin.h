@@ -31,7 +31,7 @@
 @author Stefan
 */
 
-
+class DeSerializer;
 
 
 class PluginFxCallback : public CFxCallback
