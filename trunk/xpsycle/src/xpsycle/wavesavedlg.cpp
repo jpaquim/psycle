@@ -324,13 +324,13 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
 
     int count = 0;
 
-    for (int i = 0; i < pSong->SONGTRACKS; i++)
+    for (int i = 0; i < pSong->tracks(); i++)
     {
       if (!_Muted[i])
       {
         count++;
         current = i;
-        for (int j = 0; j < pSong->SONGTRACKS; j++)
+        for (int j = 0; j < pSong->tracks(); j++)
         {
           if (j != i) {
             pSong->_trackMuted[j] = true;
@@ -557,12 +557,12 @@ void WaveSaveDlg::saveEnd( )
     const int real_rate[]={8192,11025,22050,44100,48000,96000};
     const int real_bits[]={8,16,24,32};
 
-    for (int i = current+1; i < pSong->SONGTRACKS; i++)
+    for (int i = current+1; i < pSong->tracks(); i++)
     {
       if (!_Muted[i])
       {
         current = i;
-        for (int j = 0; j < pSong->SONGTRACKS; j++)
+        for (int j = 0; j < pSong->tracks(); j++)
         {
           if (j != i)
           {

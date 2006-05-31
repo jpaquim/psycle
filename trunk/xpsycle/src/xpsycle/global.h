@@ -20,6 +20,8 @@
 #ifndef PSYCLEGLOBAL_H
 #define PSYCLEGLOBAL_H
 
+#pragma once
+
     /**
     @author Stefan
     */
@@ -47,5 +49,12 @@ template<typename single_object> inline single_object * zapObject(single_object 
   if(pointer) delete pointer;
   return pointer = new_value;
 }
+
+template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
+    {
+      if(pointer) delete [] pointer;
+      return pointer = new_value;
+    }
+
 
 #endif

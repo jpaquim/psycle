@@ -148,7 +148,7 @@ const NColor & PatternView::separatorColor( )
 
 int PatternView::trackNumber( )
 {
-  return Global::pSong()->SONGTRACKS;
+  return Global::pSong()->tracks();
 }
 
 int PatternView::rowHeight( )
@@ -1304,7 +1304,7 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
         }
         //end of added by sampler
 
-      for (int t=tx;t<tx+blockNTracks && t< Global::pSong()->SONGTRACKS;t++)
+      for (int t=tx;t<tx+blockNTracks && t< Global::pSong()->tracks() ;t++)
       {
           ls=0;
           for (int l=lx;l<lx+blockNLines && l<nl;l++)
@@ -1446,13 +1446,13 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
 //        if(bMultiKey)
         {
           int i;
-          for (i = outtrack+1; i < Global::pSong()->SONGTRACKS; i++)
+          for (i = outtrack+1; i < Global::pSong()->tracks(); i++)
           {
             if (notetrack[i] == 120) {
               break;
             }
           }
-          if (i >= Global::pSong()->SONGTRACKS) {
+          if (i >= Global::pSong()->tracks()) {
             for (i = 0; i <= outtrack; i++) {
                 if (notetrack[i] == 120) {
                   break;
@@ -1775,7 +1775,7 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
           pMachine = Global::pSong()->_pMachine[mgn];
       }
 
-  for(int i=0;i<Global::pSong()->SONGTRACKS;i++) {
+  for(int i=0;i<Global::pSong()->tracks();i++) {
       if(notetrack[i]==note) {
         notetrack[i]=120;
         // build entry

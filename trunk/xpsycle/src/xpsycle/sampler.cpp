@@ -101,7 +101,7 @@ void Sampler::Work( int numSamples )
       int ns = numSamples;
       while (ns) {
         int nextevent = ns+1;
-        for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+        for (int i=0; i < Global::pSong()->tracks(); i++)
         {
           if (TriggerDelay[i]._cmd)
           {
@@ -113,7 +113,7 @@ void Sampler::Work( int numSamples )
         }
         if (nextevent > ns)
         {
-            for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+            for (int i=0; i < Global::pSong()->tracks(); i++)
             {
               // come back to this
               if (TriggerDelay[i]._cmd)
@@ -137,7 +137,7 @@ void Sampler::Work( int numSamples )
                 VoiceWork(nextevent, voice);
               }
             }
-            for (int i=0; i < Global::pSong()->SONGTRACKS; i++)
+            for (int i=0; i < Global::pSong()->tracks(); i++)
             {
               // come back to this
               if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -246,7 +246,7 @@ void Sampler::VoiceWork( int numsamples, int voice )
 
   pVoice->_sampleCounter += numsamples;
 
-  if (Global::pSong()->Invalided)
+  if (Global::pSong()->IsInvalided())
   {
     pVoice->_envelope._stage = ENV_OFF;
     return;
@@ -581,7 +581,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
       int triggered = 0;
       __uint64 w_offset = 0; /// todo not sure about type!
 
-      if (Global::pSong()->Invalided) return 0;
+      if (Global::pSong()->IsInvalided()) return 0;
 
       pVoice->_sampleCounter=0;
       pVoice->effCmd=pEntry->_cmd;

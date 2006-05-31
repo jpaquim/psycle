@@ -371,7 +371,7 @@ void SequencerBar::updatePlayOrder(bool mode)
       unsigned char* const plineOffset = Global::pSong()->_ppattern(pattern);
 
       for (int l = 0; l < Global::pSong()->patternLines[pattern]*MULTIPLY; l+=MULTIPLY) {
-        for (int t = 0; t < Global::pSong()->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE) {
+        for (int t = 0; t < Global::pSong()->tracks()*EVENT_SIZE; t+=EVENT_SIZE) {
             PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
             switch (pEntry->_cmd) {
               case 0xFF:
