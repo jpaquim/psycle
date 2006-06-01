@@ -96,6 +96,9 @@ universalis_package = packageneric.pkg_config_package(
 	description = universalis.description(),
 	modules = [universalis]
 )
+if True: #universalis_package.name() + '.pc' in BUILD_TARGETS:
+	packageneric.information('======== ' + universalis_package.name() + '.pc ========')
+	print universalis_package.pc()
 
 # install
 if False:
