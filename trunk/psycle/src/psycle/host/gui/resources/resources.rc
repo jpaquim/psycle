@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -335,6 +335,7 @@ IDB_SLIDERBACKV         BITMAP                  "Slider\\sliderP-gray.bmp"
 IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
 IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
 IDR_WAVEDFRAME          BITMAP                  "./toolbar1.bmp"
+IDB_LEDS                BITMAP                  "leds.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2379,6 +2380,15 @@ BEGIN
     LTEXT           "End",IDC_STATIC_DESTENDLABEL,178,37,14,10
 END
 
+IDD_AUTOMATOR_ZOOMBAR DIALOGEX 0, 0, 270, 12
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "-",IDC_ZOOMOUT,250,0,10,12,NOT WS_TABSTOP
+    PUSHBUTTON      "+",IDC_ZOOMIN,260,0,9,12,NOT WS_TABSTOP
+    SCROLLBAR       IDC_HSCROLL,0,1,250,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3212,7 +3222,7 @@ BEGIN
     ID_POPUP_ZOOMIN         "Zoom In"
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

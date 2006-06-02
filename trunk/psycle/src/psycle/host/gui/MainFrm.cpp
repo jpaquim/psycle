@@ -11,6 +11,7 @@
 #include "FrameMachine.hpp"
 #include "FrameMixerMachine.hpp"
 #include "FrameLFOMachine.hpp"
+#include "FrameAutomator.hpp"
 #include "VSTEditorDlg.hpp"
 #include "WireDlg.hpp"
 #include "GearRackDlg.hpp"
@@ -1491,6 +1492,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
 						break;
+					case MACH_AUTOMATOR:
+						{
+							m_pWndMac[tmac] = new CFrameAutomator(tmac);
+							((CFrameAutomator*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+							((CFrameAutomator*)m_pWndMac[tmac])->wndView = &m_wndView;
+							((CFrameAutomator*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
+
+							m_pWndMac[tmac]->LoadFrame(
+								IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION | WS_SIZEBOX,
+								this);
+							((CFrameAutomator*)m_pWndMac[tmac])->Generate();
+							((CFrameAutomator*)m_pWndMac[tmac])->SelectMachine(ma);
+							std::ostringstream winname;
+							winname<<std::setfill('0') << std::setw(2) << std::hex;
+							winname << ((CFrameAutomator*)m_pWndMac[tmac])->MachineIndex << " : " << ma->GetEditName();
+							((CFrameAutomator*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
+							isguiopen[tmac] = true;
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						}
+						break;
 
 					case MACH_VST:
 					case MACH_VSTFX:
@@ -1620,6 +1642,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						break;
 					case MACH_DUPLICATOR:
 					case MACH_LFO:
+					case MACH_AUTOMATOR:
 					case MACH_MIXER:
 					case MACH_PLUGIN:
 					case MACH_VST:

@@ -208,6 +208,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[5]->LastType0 = Machine::type_type(0);
 			_pInternalMachines[5]->LastType1 = Machine::type_type(0);
 
+			_pInternalMachines[6] = new InternalMachineInfo;
+			_pInternalMachines[6]->name = "Automator";
+			_pInternalMachines[6]->desc = "Automates machine parameters.";
+			_pInternalMachines[6]->version = "V0.1";
+			_pInternalMachines[6]->machtype = true;
+			_pInternalMachines[6]->Outputmachine = MACH_AUTOMATOR;
+			_pInternalMachines[6]->OutBus = false;
+			_pInternalMachines[6]->LastType0 = Machine::type_type(0);
+			_pInternalMachines[6]->LastType1 = Machine::type_type(0);
+
 			LoadCategoriesFile();
 			UpdateList();
 

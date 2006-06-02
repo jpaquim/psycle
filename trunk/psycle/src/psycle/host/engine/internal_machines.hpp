@@ -260,5 +260,109 @@ namespace psycle {
 			bool bisTicking;
 
 		};
+
+
+
+		/// Automator
+
+		class EnvelopeWindow;
+
+		class Automator : public Machine
+		{
+		public:
+
+			friend EnvelopeWindow;
+
+			Automator();
+			Automator(id_type index);
+			virtual ~Automator() throw();
+			virtual void Init(void);
+			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void Tick();
+			virtual void PreWork(int numSamples);
+			virtual void Work(int numSamples);
+			virtual void Stop();
+			virtual std::string GetName() const { return _psName; };
+			virtual void GetParamName(int numparam,char *name);
+			virtual void GetParamRange(int numparam,int &minval,int &maxval);
+			virtual void GetParamValue(int numparam,char *parVal);
+			virtual int GetParamValue(int numparam);
+			virtual bool SetParameter(int numparam,int value);
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+
+
+			virtual bool IsDiscrete() { return bDiscrete; }
+			virtual bool IsRelative() { return bRelative; }
+			///\name constants
+			///\{
+			int const static DSTEP_SCALER = 100;
+
+			int const static DLENGTH_MAX = 256;
+			int const static CLENGTH_MAX = 60000;	//one minute(!)
+			int const static DSTEP_MAX = 32 * DSTEP_SCALER;
+			///\}
+
+			struct prms
+			{
+				enum prm
+				{
+					discrete, relative,
+					clength, dlength, dstep,
+					num_params
+				};
+			};
+
+
+		private:
+
+			class Track
+			{
+			public:
+				Track(int mach_, int param_) : param(param_), mach(mach_), pos(0.0f) {}
+				virtual ~Track() {}
+				int const mach;
+				int const param;
+				//for relative mode-- where dest param should be when envelope is at 0
+				int centerVal;
+				//in relative mode, this is where dest param was last time we saw it
+				//in absolute mode, this is the value of the parameter when the modulation began
+				int prevVal;
+				int minVal;
+				int maxVal;
+				float pos;			//pos takes on a double meaning, depending on the mode..
+			};						//ms for continuous, and increments of dStepSize for discrete.
+
+			//interprets a track's position based on the mode and corresponding envelope
+			//returns in range [-1,1] for relative, and [0,1] for absolute
+			float EvaluatePos(float pos);
+
+			//data
+			std::vector<float> dTable;		//discrete envelope table
+			std::map<int, float> cTable;	//continuous envelope table
+
+
+			std::vector<Track*> tracks;
+
+			//length of discrete envelope, in increments of dStepSize
+			int dLength;
+			//ratio of discrete step to tick length
+			float dStepSize;
+			//length of continuous envelope, in -ms-
+			int cLength;
+
+			int sampsPerStep;
+			int sampsPerMs;
+
+			bool bDiscrete;			//true=discrete, false=continuous
+			bool bRelative;			//true=relative, false=absolute
+
+			//whether or not to put a parameter back the way we found it when we're done
+			bool bResetWhenDone;
+
+			static std::string _psName;
+			bool bisTicking;
+
+		};
 	}
 }
