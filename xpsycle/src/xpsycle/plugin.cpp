@@ -35,17 +35,17 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 PluginFxCallback Plugin::_callback;
 
 Plugin::Plugin(Machine::id_type id)
-			:
-				Machine(MACH_PLUGIN, MACHMODE_FX, id),
-				_dll(0),
-				proxy_(*this),
-				_psAuthor(""),
-				_psDllName(""),
-				_psName("")
-			{
-				_audiorange=32768.0f;
-				_editName = "native plugin";
-			}
+      :
+        Machine(MACH_PLUGIN, MACHMODE_FX, id),
+        _dll(0),
+        proxy_(*this),
+        _psAuthor(""),
+        _psDllName(""),
+        _psName("")
+      {
+        _audiorange=32768.0f;
+        _editName = "native plugin";
+      }
 
 Plugin::~ Plugin( ) throw()
 {
