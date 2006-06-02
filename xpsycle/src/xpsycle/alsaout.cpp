@@ -17,11 +17,7 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-
 #include "alsaout.h"
-
-#if !defined XPSYCLE__NO_ALSA
-
 #include "global.h"
 #include "player.h"
 
@@ -394,4 +390,8 @@ bool AlsaOut::Initialized( )
   return _running;
 }
 
-#endif // !defined XPSYCLE__NO_ALSA
+
+
+
+
+

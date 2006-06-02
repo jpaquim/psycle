@@ -26,7 +26,6 @@
 #include <ngrs/ncolor.h>
 #include <ngrs/nobject.h>
 #include <vector>
-#include <map>
 #include <string>
 #include <exception>
 
@@ -120,9 +119,6 @@ public:
 
     bool _centerCursor;
 
-    //typedef std::map<std::string, AudioDriver*> OutputDriverMap;
-    typedef std::map<std::string, int> OutputDriverMap;
-    OutputDriverMap _outputDriverMap;
     AudioDriver** _ppOutputDrivers;
     AudioDriver* _pOutputDriver;
     int _numOutputDrivers;
