@@ -110,7 +110,7 @@ void Configuration::setSkinDefaults( )
   // audio driver configuration
   _numOutputDrivers = 0;
   #if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/alsaout_conditional_build.h>
+  #include <xpsycle/alsaout_conditional_build.h>
   #endif
   #if !defined XPSYCLE__NO_ALSA
     ++_numOutputDrivers;

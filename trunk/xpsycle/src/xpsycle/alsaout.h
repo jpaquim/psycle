@@ -21,7 +21,7 @@
 #define ALSAOUT_H
 
 #if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/alsaout_conditional_build.h>
+  #include <xpsycle/alsaout_conditional_build.h>
 #endif
 
 #if !defined XPSYCLE__NO_ALSA
