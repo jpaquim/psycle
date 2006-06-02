@@ -621,6 +621,10 @@ namespace psycle
 				if ( !fullopen ) pMachine = new Dummy(index);
 				else pMachine = new LFO(index);
 				break;
+			case MACH_AUTOMATOR:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new Automator(index);
+				break;
 			case MACH_PLUGIN:
 				{
 					if(!fullopen) pMachine = new Dummy(index);

@@ -14,7 +14,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
-		const int NUM_INTERNAL_MACHINES = 6;
+		const int NUM_INTERNAL_MACHINES = 7;
 
 		class PluginInfo
 		{

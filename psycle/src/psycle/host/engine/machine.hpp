@@ -234,6 +234,7 @@ namespace psycle
 			MACH_DUPLICATOR = 13,
 			MACH_MIXER = 14,
 			MACH_LFO = 15,
+			MACH_AUTOMATOR = 16,
 			MACH_DUMMY = 255
 		};
 

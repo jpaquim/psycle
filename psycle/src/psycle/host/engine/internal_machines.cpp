@@ -1132,5 +1132,346 @@ namespace psycle {
 					Global::song()._pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Automator Machine
+		
+		// still -very- preliminary, but relatively functional
+		// (it can only be triggered from the pattern currently-- if you want to test it: 01-- is the trigger command, aux/ins column is dest
+		// machine, command parameter is dest param.. so, for example, if automator machine is 40, the command to modulate parameter 2E of
+		// mach 03 would be  --- 03 40 012E		)
+
+		//todo: -reconsider the use of std::map for the continuous envelope. i thought it'd be perfect for manipulating the x/y pairs that
+		//       comprise the continuous envelopes, but it's generated a lot of awkward code.. maybe even a std::vector<std::pair<int,float> >
+		//       would be superior, but even that one might get pretty weird if/when we try to add control points for curving segments
+		//      -implement control points, for curving segments :)  maybe some kind of simplified bezier thing? i need to consider the 
+		//       geometry of it a bit more..
+		//      -do some serious thinking about the implications of the this->PreWork(0) call in Tick() (what it's doing to timing, what
+		//       design flaws it's indicative of, etc)
+		//      -enforce link between cLength and the time index of the last point in cTable
+		//      -come up with a cooler name :)
+		//      -decide if we really want this thing to be two machines combined (meaning the discrete/continuous modes).. and if so,
+		//       decide if there's a cleaner way of dealing with the machine's dual nature
+		//      -option to stretch/squeeze envelope to match length changes
+
+		std::string Automator::_psName = "Automator";
+
+		Automator::Automator(Machine::id_type id)
+		: Machine(MACH_AUTOMATOR, MACHMODE_GENERATOR, id)
+		,dLength(64)
+		,cLength(10000)
+		,dStepSize(1.0f)
+		,bDiscrete(true)
+		,bRelative(false)
+		{
+			_numPars = prms::num_params;
+			_nCols = 0;
+			bisTicking = false;
+			_editName = "Automator";
+		}
+
+		Automator::~Automator() throw()
+		{
+			for(std::vector<Track*>::iterator iter = tracks.begin(); iter!=tracks.end(); ++iter)
+				delete *iter;
+		}
+
+		void Automator::Init()
+		{
+			Machine::Init();
+			dTable.resize(dLength);
+			for(int i(0);i<dLength/2;++i)
+			{
+				dTable[i]=i/float(dLength*2) + 0.375;
+				dTable[dLength-1-i]=dTable[i];
+			}
+			cTable.clear();
+			cTable[0]=1.0f;
+			cTable[5000]=0.0f;
+			cTable[10000]=1.0f;
+		}
+
+		void Automator::Tick( int channel,PatternEntry* pData)
+		{
+			if(!bisTicking)
+			{
+				bisTicking=true;
+				if(pData->_cmd==0x01)
+				{
+					if(Global::song()._pMachine[pData->_inst] && pData->_parameter < Global::song()._pMachine[pData->_inst]->GetNumParams())
+					{
+						tracks.push_back(new Track(pData->_inst, pData->_parameter));
+
+						int min, max;
+						Global::song()._pMachine[pData->_inst]->GetParamRange(pData->_parameter, min, max);
+
+						std::vector<Track*>::iterator iter = tracks.end()-1;
+						(*iter)->prevVal = (*iter)->centerVal = Global::song()._pMachine[pData->_inst]->GetParamValue(pData->_parameter);
+						(*iter)->minVal=min;
+						(*iter)->maxVal=max;
+						
+					}
+				}
+			}
+			bisTicking=false;
+		}
+
+		void Automator::Tick()
+		{
+			sampsPerStep = Global::player().SamplesPerRow()*dStepSize;
+			sampsPerMs = Global::player().SampleRate()/1000;
+			this->PreWork(0);	//make sure all machines are where they should be -before- they start new notes
+
+		}
+
+		void Automator::GetParamName(int numparam,char *name)
+		{
+			switch(numparam)
+			{
+			case prms::discrete:
+				sprintf(name, "Sequence Type");
+				break;
+			case prms::relative:
+				sprintf(name, "Sequence Mode");
+				break;
+			case prms::clength:
+			case prms::dlength:
+				sprintf(name, "Sequence Length");
+				break;
+			case prms::dstep:
+				sprintf(name, "Step Length");
+				break;
+			}
+		}
+
+		void Automator::GetParamRange(int numparam,int &minval,int &maxval)
+		{
+			switch(numparam)
+			{
+			case prms::discrete:
+			case prms::relative:
+				minval = 0; maxval = 1;
+				break;
+			case prms::clength:
+				minval = 0; maxval = CLENGTH_MAX;
+				break;
+			case prms::dlength:
+				minval = 0; maxval = DLENGTH_MAX;
+				break;
+			case prms::dstep:
+				minval = 0; maxval = DSTEP_MAX;
+				break;
+			}
+		}
+
+		int Automator::GetParamValue(int numparam)
+		{
+			switch(numparam)
+			{
+			case prms::discrete:
+				return (int)bDiscrete;
+			case prms::relative:
+				return (int)bRelative;
+			case prms::clength:
+				return cLength;
+			case prms::dlength:
+				return dLength;
+			case prms::dstep:
+				return (int)(dStepSize * DSTEP_SCALER);
+			}
+		}
+
+		void Automator::GetParamValue(int numparam, char *parVal)
+		{
+			switch(numparam)
+			{
+			case prms::discrete:
+				if(bDiscrete)		sprintf(parVal, "Discrete");
+				else				sprintf(parVal, "Continuous");
+				break;
+			case prms::relative:
+				if(bRelative)		sprintf(parVal, "Relative");
+				else				sprintf(parVal, "Absolute");
+				break;
+			case prms::clength:
+				if(cLength<1000)	sprintf(parVal, "%i ms", cLength);
+				else				sprintf(parVal, "%.3f secs", cLength/1000.0f);
+				break;
+			case prms::dlength:
+				sprintf(parVal, "%.2f ticks", dLength*dStepSize);
+				break;
+			case prms::dstep:
+				sprintf(parVal, "%.2f ticks", dStepSize);
+				break;
+			}
+		}
+
+		bool Automator::SetParameter(int numparam, int value)
+		{
+			switch(numparam)
+			{
+			case prms::discrete:
+				if(bDiscrete != (bool) value)
+					Stop();
+				bDiscrete = (bool)value;
+				return true;
+			case prms::relative:
+				if(bRelative != (bool) value)
+					Stop();
+				bRelative = (bool)value;
+				return true;
+			case prms::clength:
+				cLength=value;
+				cTable.erase(cTable.upper_bound(value), cTable.end());
+				return true;
+			case prms::dlength:
+				dLength=value;
+				if(dLength>dTable.size())
+					dTable.resize(dLength);
+				return true;
+			case prms::dstep:
+				dStepSize=value/(float)DSTEP_SCALER;
+				return true;
+			}
+			return false;
+		}
+
+		void Automator::PreWork(int numSamples)
+		{
+			cpu::cycles_type cost(cpu::cycles());
+			bool somethinghappened=false;
+			for(std::vector<Track*>::iterator iter = tracks.begin(); iter != tracks.end(); ++iter)
+			{
+				if( (*iter)->pos >= (bDiscrete? dLength: cLength) )
+				{
+					if(bResetWhenDone)
+					{
+						if(bRelative)
+							Global::song()._pMachine[(*iter)->mach]->SetParameter( (*iter)->param, (*iter)->centerVal );
+						else
+							Global::song()._pMachine[(*iter)->mach]->SetParameter( (*iter)->param, (*iter)->prevVal );
+					}
+					delete *iter;
+					iter = tracks.erase(iter);
+					--iter;
+				}
+				else
+				{
+					int setto;
+					int range((*iter)->maxVal-(*iter)->minVal);
+
+					if(bRelative)
+					{
+						int newval = Global::song()._pMachine[(*iter)->mach]->GetParamValue((*iter)->param);
+						(*iter)->centerVal += newval - (*iter)->prevVal;	//adjust for outside changes
+						float temp = EvaluatePos((*iter)->pos);
+						int temp2 = (*iter)->centerVal;
+						setto = temp2 + range * temp; //EvaluatePos((*iter)->pos);
+						if(setto>(*iter)->maxVal)		setto=(*iter)->maxVal;
+						else if(setto<(*iter)->minVal)	setto=(*iter)->minVal;
+						(*iter)->prevVal=setto;
+					}
+					else	//absolute mode
+						setto = (*iter)->minVal + EvaluatePos((*iter)->pos)*range;
+
+					Global::song()._pMachine[(*iter)->mach]->SetParameter( (*iter)->param, setto );
+					(*iter)->pos += numSamples/(float) (bDiscrete? sampsPerStep: sampsPerMs);
+					somethinghappened=true;
+				}
+			}
+
+			if(somethinghappened) Global::player().Tweaker=true;
+
+			cost = cpu::cycles() - cost;
+			work_cpu_cost(work_cpu_cost() + cost);
+		}
+		
+		void Automator::Work(int numSamples)
+		{
+			_worked=true;
+		}
+
+		bool Automator::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			int tablelength;
+			std::uint32_t size;
+			pFile->Read(size);
+			pFile->Read(bRelative);
+			pFile->Read(bDiscrete);
+			pFile->Read(dStepSize);
+			pFile->Read(dLength);
+			dTable.clear();
+			for(int i(0);i<dLength;++i)
+			{
+				float value;
+				pFile->Read(value);
+				dTable.push_back(value);
+			}
+			pFile->Read(tablelength);
+			cTable.clear();
+			int key(0);
+			for(int i(0);i<tablelength;++i)
+			{
+				float value;
+				pFile->Read(key);
+				pFile->Read(value);
+				cTable[key]=value;
+			}
+			cLength = key;
+
+			return true;
+		}
+
+		void Automator::SaveSpecificChunk(RiffFile* pFile)
+		{
+			int cTabSize = cTable.size();
+			std::uint32_t const size(	  sizeof bDiscrete + sizeof bRelative + sizeof dStepSize 
+										+ sizeof dLength + dLength * std::numeric_limits<float>::digits
+										+ sizeof cTabSize + cTabSize*std::numeric_limits<int>::digits + cTabSize*std::numeric_limits<float>::digits);
+			pFile->Write(size);
+			pFile->Write(bRelative);
+			pFile->Write(bDiscrete);
+			pFile->Write(dStepSize);
+			pFile->Write(dLength);
+			dTable.resize(dLength);
+			for(std::vector<float>::iterator iter = dTable.begin(); iter != dTable.end(); iter++)
+				pFile->Write(*iter);
+			pFile->Write(cTabSize);
+			for(std::map<int,float>::iterator iter = cTable.begin(); iter != cTable.end(); iter++)
+			{
+				pFile->Write(iter->first);
+				pFile->Write(iter->second);
+			}
+			
+		}
+
+		void Automator::Stop()
+		{
+			for(std::vector<Track*>::iterator iter = tracks.begin(); iter!=tracks.end(); ++iter)
+			{
+				delete *iter;	//todo: check bResetOnStop
+			}
+			tracks.clear();
+		}
+
+		float Automator::EvaluatePos(float pos)
+		{
+			float val;
+			if(bDiscrete)
+				val = dTable.at((int)floor(pos));
+			else
+			{
+				std::map<int,float>::iterator second = cTable.upper_bound((int)pos);
+				std::map<int,float>::iterator first = cTable.upper_bound((int)pos);
+				first--;
+				float weight = ( pos - first->first ) / (float)(second->first - first->first);	//position between the two neighboring nodes
+				val = (1-weight) * first->second  +  weight * second->second;					//interpolate linearly between the value of each
+			}
+			if(bRelative)
+				val = val*2-1;
+
+			return val;
+		}
 	}
 }

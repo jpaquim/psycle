@@ -120,6 +120,8 @@
 #define IDD_WAVED_CROSSFADE             258
 #define IDR_WAVEDFRAME                  258
 #define IDR_WAVED_POPUP                 260
+#define IDB_LEDS                        261
+#define IDD_AUTOMATOR_ZOOMBAR           263
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1165,7 +1167,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        261
+#define _APS_NEXT_RESOURCE_VALUE        264
 #define _APS_NEXT_COMMAND_VALUE         33048
 #define _APS_NEXT_CONTROL_VALUE         1775
 #define _APS_NEXT_SYMED_VALUE           61
