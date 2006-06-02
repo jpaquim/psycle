@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
 Configuration::Configuration()
 {
@@ -107,15 +108,27 @@ void Configuration::setSkinDefaults( )
   machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
 
   // audio driver configuration
-  _numOutputDrivers = 2;
+  _numOutputDrivers = 0;
+  #if defined XPSYCLE__CONFIGURATION
+	#include <xpsycle/alsaout_conditional_build.h>
+  #endif
+  #if !defined XPSYCLE__NO_ALSA
+    ++_numOutputDrivers;
+  #endif
   _ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
   _ppOutputDrivers[0] = new AudioDriver;
-  _ppOutputDrivers[1] = new AlsaOut();
-  _outputDriverIndex = 1;
+  _outputDriverMap["null"] = 0; //_ppOutputDrivers[0];
+  _outputDriverIndex = 0;
+  #if !defined XPSYCLE__NO_ALSA
+    _ppOutputDrivers[1] = new AlsaOut();
+    _outputDriverMap["alsa"] = 1; //_ppOutputDrivers[1];
+    _outputDriverIndex = 1;
+  #endif
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
+  enableSound = _outputDriverIndex;
 
   #if defined XPSYCLE__CONFIGURATION
-  #include <xpsycle/install_paths.defines.hpp>
+  #include <xpsycle/install_paths.h>
   hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
   iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
   pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
@@ -151,7 +164,7 @@ void Configuration::loadConfig()
   #if !defined XPSYCLE__CONFIGURATION
   // we don't have any information about the installation paths
   #else
-  #include <xpsycle/install_paths.defines.hpp>
+  #include <xpsycle/install_paths.h>
   try
   {
     loadConfig(XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml");
@@ -214,16 +227,18 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
         "the settings might have been only partially loaded ; "
         "message: " << e.what();
     throw std::runtime_error(s.str());
-    } catch(...)
-    {
-      std::ostringstream s;
-      s <<
-        "an unidentified error occured while parsing xml configuration file " << path << " ; "
-        "the settings might have been only partially loaded";
-      throw std::runtime_error(s.str());
-    }
-    // the parser defaults to empty strings on missing values
+  } catch(...)
+  {
+    std::ostringstream s;
+    s <<
+      "an unidentified error occured while parsing xml configuration file " << path << " ; "
+      "the settings might have been only partially loaded";
+    throw std::runtime_error(s.str());
+  }
+
+  // the parser defaults to empty strings on missing values
   // so we make sure not to override previous settings with empty strings
+
   {
     std::string const s(NFile::replaceTilde(NApp::config()->findPath("icondir")));
     if(s.length()) iconPath = s;
@@ -258,12 +273,18 @@ void Configuration::onConfigTagParse(const std::string & tagName )
 {
   if (tagName == "audio") {
       std::string enableStr = NApp::config()->getAttribValue("enable");
-      int enable = 0;
-      if (enableStr != "") enable = str<int>(enableStr);
-      enableSound = enable;
-      if (enable == 0) {
-        _outputDriverIndex = 0;
+      if (enableStr != "")
+      {
+        OutputDriverMap::const_iterator i(_outputDriverMap.find(enableStr));
+        if(i != _outputDriverMap.end()) _outputDriverIndex = i->second;
+        else // name not found, might be an index
+        {
+          int enable(-1);
+          try { enable = str<int>(enableStr); } catch(...) { } // [bohan] no idea if that might throw an exception when not a decimal integer
+          if (0 < enable && enable < _numOutputDrivers) _outputDriverIndex = enable;
+        }
         _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
+        enableSound = _outputDriverIndex;
       }
   }
 

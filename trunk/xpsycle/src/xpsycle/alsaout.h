@@ -20,6 +20,12 @@
 #ifndef ALSAOUT_H
 #define ALSAOUT_H
 
+#if defined XPSYCLE__CONFIGURATION
+	#include <xpsycle/alsaout_conditional_build.h>
+#endif
+
+#if !defined XPSYCLE__NO_ALSA
+
 #include "audiodriver.h"
 #include <alsa/asoundlib.h>
 #include <pthread.h>
@@ -105,5 +111,7 @@ private:
     void setValues();
 
 };
+
+#endif // !defined XPSYCLE__NO_ALSA
 
 #endif
