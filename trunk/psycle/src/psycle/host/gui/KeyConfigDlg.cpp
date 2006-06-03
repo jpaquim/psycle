@@ -190,21 +190,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if(hotkey_key==key && hotkey_mods==mods)
 				return;
 			UINT nMod=0;
-			if(mods&HOTKEYF_SHIFT)
+			if(hotkey_mods&HOTKEYF_SHIFT)
 				nMod|=MOD_S;
-			if(mods&HOTKEYF_CONTROL)
+			if(hotkey_mods&HOTKEYF_CONTROL)
 				nMod|=MOD_C;	
-			if(mods&HOTKEYF_EXT)
+			if(hotkey_mods&HOTKEYF_EXT)
 				nMod|=MOD_E;
-
-			m_lstCmds.SetItemData(idx,nMod*256+key);
 
 			// what command is selected?
 			CmdDef cmd = FindCmd(idx);
+
+			m_lstCmds.SetItemData(idx,nMod*256+hotkey_key);
 			
 			// save key definition
 			if(cmd.IsValid())
-				Global::pInputHandler->SetCmd(cmd,key,nMod);
+				Global::pInputHandler->SetCmd(cmd,hotkey_key,nMod);
 		}
 
 		void CKeyConfigDlg::FindKey(long idx,WORD&key,WORD&mods)
