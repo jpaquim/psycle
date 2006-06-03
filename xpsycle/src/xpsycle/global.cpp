@@ -30,8 +30,7 @@ Song* Global::pSong() {
 }
 
 Song & Global::song() {
-  static Song* s = new Song();
-  return *s;
+  return *pSong();
 }
 
 Configuration* Global::pConfig() {
@@ -46,13 +45,12 @@ Configuration & Global::configuration() {
 
 
 Player * Global::pPlayer() {
-  static Player* p = new Player(song());
+  static Player* p = new Player(*pSong());
   return p;
 }
 
 Player & Global::player() {
-  static Player* p = new Player(song());
-  return *p;
+  return *pPlayer();
 }
 
 

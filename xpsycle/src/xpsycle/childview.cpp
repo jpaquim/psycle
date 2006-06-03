@@ -224,7 +224,7 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
           int x = 10; int y = 10;
           int fb = Global::pSong()->GetFreeBus();
           if (newMachineDlg()->sampler()) {
-            Global::pSong()->CreateMachine(MACH_SAMPLER, x, y, 0, fb);
+            Global::pSong()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
             machineView()->addMachine(Global::pSong()->_pMachine[fb]);
             machineView()->repaint();
           } else {
