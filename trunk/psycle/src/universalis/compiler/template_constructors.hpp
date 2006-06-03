@@ -21,16 +21,16 @@
 			#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY  UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
 		#endif
 
-		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(enclosing, nested_access, init, deinit, arity) \
+		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(enclosing, nested_access, after_construction, before_destruction, arity) \
 			BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__FACTORY, enclosing) \
 			BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__FACTORY__VIRTUAL, nested_access) \
 			class nested_access \
 			{ \
 				private: friend class enclosing; \
-				BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__NEW, init) \
+				BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__NEW, after_construction) \
 				void destroy(enclosing & instance) \
 				{ \
-					instance.deinit(); \
+					instance.before_destruction(); \
 					delete & instance; \
 				} \
 			};
@@ -49,12 +49,12 @@
 				return nested_access::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 			}
 
-		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__NEW(_, count, init) \
+		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__NEW(_, count, after_construction) \
 			template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
 			Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 			{ \
 				Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
-				instance.init(); \
+				instance.after_construction(); \
 				return instance; \
 			}
 
