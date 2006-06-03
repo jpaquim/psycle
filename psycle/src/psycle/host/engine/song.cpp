@@ -234,7 +234,7 @@ namespace psycle
 							{
 								std::ostringstream s;
 								s << c << " and " << j << " have duplicate pointers";
-								MessageBox(0, s.str().c_str(), "Duplicate Machine", 0);
+								report.emit(s.str(), "Song Delete Error");
 							}
 							_pMachine[j] = 0;
 						}
@@ -971,7 +971,7 @@ namespace psycle
 				pFile->Read(size);
 				if(version > CURRENT_FILE_VERSION)
 				{
-					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
+					report.emit("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
 				}
 
 				pFile->Read(chunkcount);
@@ -1032,7 +1032,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_SNGI)
 						{
 							// there is an error, this file is newer than this build of psycle
-							MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
+							report.emit("Song Segment of File is from a newer version of psycle!","Song Load Error.");
 							pFile->Skip(size);
 						}
 						else
@@ -1093,7 +1093,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_SEQD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
+							report.emit("Sequence section of File is from a newer version of psycle!", "Song Load Error.");
 							pFile->Skip(size);
 						}
 						else
@@ -1342,7 +1342,7 @@ namespace psycle
 					s << "Error reading from file '" << pFile->file_name() << "'" << std::endl;
 					if(chunkcount) s << "some chunks were missing in the file";
 					else s << "could not close the file";
-					MessageBox(0, s.str().c_str(), "Loading Error", 0);
+					report.emit(s.str(), "Song Load Error.");
 					return false;
 				}
 				return true;
@@ -1354,7 +1354,7 @@ namespace psycle
 			}
 
 			// load did not work
-			MessageBox(0, "Incorrect file format", "Loading Error", MB_ICONERROR | MB_OK);
+			report.emit("Incorrect file format", "Song Load Error.");
 			return false;
 		}
 
@@ -1710,7 +1710,7 @@ namespace psycle
 			{
 				std::ostringstream s;
 				s << "Error writing to " << pFile->file_name() << " !!!";
-				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
+				report.emit(s.str(),"File Save Error.");
 				return false;
 			}
 			return true;

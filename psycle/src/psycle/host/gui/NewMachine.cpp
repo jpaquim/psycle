@@ -1326,7 +1326,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				DeleteFile(catcache.c_str());
 				return false;
 			}
-			
+			//\todo : When the number of internal machines changes, this causes an error with the existing cache.
 			for (int h=0; h < NUM_INTERNAL_MACHINES;h++)
 			{
 				file.Read (h);

@@ -119,6 +119,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
+			_pSong->report.connect(this,&CChildView::onSongReport);
 
 			selpos.bottom = 0;
 			newselpos.bottom = 0;
@@ -283,6 +284,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			pParentMain=(CMainFrame *)pParentFrame;
 			pParentMain->_pSong=Global::_pSong;
+		}
+
+		void CChildView::onSongReport(const std::string & message, const std::string &caption)
+		{
+			MessageBox(message.c_str(),caption.c_str(),MB_OK);
 		}
 
 		/// Timer initialization

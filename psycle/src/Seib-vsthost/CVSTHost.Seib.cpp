@@ -14,6 +14,14 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "CVSTHost.Seib.hpp"                   /* private prototypes                */
 
+#ifdef WIN32
+	#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <MMSystem.h>
+	#pragma warning(pop)
+
+#endif
+
 namespace seib {
 	namespace vst {
 		/*****************************************************************************/
@@ -22,6 +30,7 @@ namespace seib {
 		bool CFxBase::NeedsBSwap;
 		int CFxBase::FxSetVersion = 1;                /* highest known VST FX version      */
 		int CVSTHost::quantization = 0x40000000;
+		VstTimeInfo CVSTHost::vstTimeInfo;
 
 		// Data Extracted from AudioEffectx.cpp, SDK version 2.3
 		//---------------------------------------------------------------------------------------------
@@ -128,6 +137,93 @@ namespace seib {
 			SwapBytes(*pl);
 		}
 
+		/*===========================================================================*/
+		/* CFxProgram class members                                                  */
+		/*===========================================================================*/
+
+		CFxProgram::~CFxProgram()
+		{
+			FreeMemory();
+		}
+
+		void CFxProgram::FreeMemory()
+		{
+			if (pChunk)
+			{
+				delete[] pChunk;
+				pChunk = 0;
+			}
+			if (pParams)
+			{
+				delete[] pParams;
+				pParams = 0;
+			}
+		}
+
+		void CFxProgram::Init()
+		{
+			pChunk =0; pParams=0; lChunkSize=0;
+			memset(&program,0,sizeof(program));
+			szFileName[0] = '\0';
+			program.version = 1;
+		}
+
+		/*****************************************************************************/
+		/* DoCopy : combined for copy constructor and assignment operator            */
+		/*****************************************************************************/
+
+		CFxProgram & CFxProgram::DoCopy(const CFxProgram &org)
+		{
+			FreeMemory();
+
+			program = org.program;  
+			if (org.pChunk)
+			{
+				SetChunkSize(org.lChunkSize);
+				memcpy(pChunk, org.pChunk, lChunkSize);
+			}
+			else
+			{
+				if (!org.pParams || program.numParams <=0)
+					throw (int)1;
+				SetParamSize(program.numParams);
+				memcpy(pParams,org.pParams,program.numParams*sizeof(float));
+			}
+			strcpy(szFileName, org.szFileName);
+			return *this;
+		}
+		bool CFxProgram::SetParamSize(int nParams)
+		{
+			if (pParams)
+				delete[] pParams;
+			float *newpars = new float[nParams];
+			if (!newpars)
+				return false;
+			pParams=newpars;
+			program.numParams = nParams;
+			return true;
+		}
+		bool CFxProgram::SetChunkSize(int nChunkSize)
+		{
+			if (pChunk)
+				delete[] pChunk;
+			unsigned char *newchunk = new unsigned char[nChunkSize];
+			if (!newchunk)
+				return false;
+			pChunk=newchunk;
+			lChunkSize=nChunkSize;
+			return true;
+		}
+
+		bool CFxProgram::SetChunk(void *chunk)
+		{
+			if ( !pChunk )
+				return false;
+
+			memcpy(pChunk, chunk, lChunkSize); return true;
+		}
+		bool CFxProgram::Load(const char *pszFile) { return false; }
+		bool CFxProgram::Save(const char *pszFile) { return false; }
 
 		/*===========================================================================*/
 		/* CFxBank class members                                                     */
@@ -137,11 +233,11 @@ namespace seib {
 		/* CFxBank : constructor                                                     */
 		/*****************************************************************************/
 
-		CFxBank::CFxBank(char *pszFile)
+		CFxBank::CFxBank(const char *pszFile)
 		{
 			Init();                                 /* initialize data areas             */
 			if (pszFile)                            /* if a file name has been passed    */
-				LoadBank(pszFile);                    /* load the corresponding bank       */
+				Load(pszFile);                    /* load the corresponding bank       */
 		}
 
 		CFxBank::CFxBank(int nPrograms, int nParams)
@@ -157,6 +253,15 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
+		/* ~CFxBank : destructor                                                     */
+		/*****************************************************************************/
+
+		CFxBank::~CFxBank()
+		{
+			Unload();                               /* unload all data                   */
+		}
+
+		/*****************************************************************************/
 		/* Init : initializes all data areas                                         */
 		/*****************************************************************************/
 
@@ -166,13 +271,19 @@ namespace seib {
 			Unload();                               /* reset all parameters              */
 		}
 
+
 		/*****************************************************************************/
-		/* ~CFxBank : destructor                                                     */
+		/* Unload : removes a loaded bank from memory                                */
 		/*****************************************************************************/
 
-		CFxBank::~CFxBank()
+		void CFxBank::Unload()
 		{
-			Unload();                               /* unload all data                   */
+			if (bBank)
+				delete[] bBank;
+			*szFileName = '\0';                     /* reset file name                   */
+			bBank = NULL;                           /* reset bank pointer                */
+			nBankLen = 0;                           /* reset bank length                 */
+			bChunk = false;                         /* and of course it's no chunk.      */
 		}
 
 		/*****************************************************************************/
@@ -266,7 +377,7 @@ namespace seib {
 		/* LoadBank : loads a bank file                                              */
 		/*****************************************************************************/
 
-		bool CFxBank::LoadBank(char *pszFile)
+		bool CFxBank::Load(const char *pszFile)
 		{
 			FILE *fp = fopen(pszFile, "rb");        /* try to open the file              */
 			if (!fp)                                /* upon error                        */
@@ -370,7 +481,7 @@ namespace seib {
 		/* SaveBank : save bank to file                                              */
 		/*****************************************************************************/
 
-		bool CFxBank::SaveBank(char *pszFile)
+		bool CFxBank::Save(const char *pszFile)
 		{
 			if (!IsLoaded())
 				return false;
@@ -449,20 +560,6 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* Unload : removes a loaded bank from memory                                */
-		/*****************************************************************************/
-
-		void CFxBank::Unload()
-		{
-			if (bBank)
-				delete[] bBank;
-			*szFileName = '\0';                     /* reset file name                   */
-			bBank = NULL;                           /* reset bank pointer                */
-			nBankLen = 0;                           /* reset bank length                 */
-			bChunk = false;                         /* and of course it's no chunk.      */
-		}
-
-		/*****************************************************************************/
 		/* GetProgram : returns pointer to one of the loaded programs                */
 		/*****************************************************************************/
 
@@ -507,32 +604,12 @@ namespace seib {
 
 		CEffect::CEffect(LoadedAEffect &loadstruct)
 			: aEffect(0)
-			, sFileName(0)
+//			, sFileName(0)
 			, sDir(0)
 			, bEditOpen(false)
 			, bNeedIdle(false)
 			, bWantMidi(false)
 		{
-			aEffect=loadstruct.aEffect;
-		#ifdef WIN32
-			char const * name = loadstruct.sFileName;
-			char const * const p = strrchr(name, '\\');
-			if (p)
-			{
-				sDir = new char[p - name + 1];
-				if (sDir)
-				{
-					memcpy(sDir, name, p - name);
-					sDir[p - name] = '\0';
-				}
-			}
-			sFileName = new char[strlen(name) + 1];
-			if (sFileName)
-				strcpy(sFileName, name);
-		#elif MAC
-			// yet to be done
-		#endif
-
 			Load(loadstruct);
 		}
 
@@ -543,12 +620,6 @@ namespace seib {
 		CEffect::~CEffect()
 		{
 			Unload();
-
-		#ifdef WIN32
-
-		#elif MAC
-
-		#endif
 		}
 
 		/*****************************************************************************/
@@ -558,15 +629,36 @@ namespace seib {
 		void CEffect::Load(LoadedAEffect &loadstruct)
 		{
 			aEffect=loadstruct.aEffect;
-			hModule=loadstruct.hModule;
-			sFileName=loadstruct.sFileName;
+			ploader=loadstruct.pluginloader;
 
-			// The trick, tell the aEffect who we are.
-			aEffect->resvd1 = (long)this;
+		#ifdef WIN32
+			char const * name = loadstruct.sFileName;
+			char const * const p = strrchr(name, '\\');
+			if (p)
+			{
+				sDir = new char[p - name + 1];
+				if (sDir)
+				{
+					memcpy(sDir, name, p - name);
+					((char*)sDir)[p - name] = '\0';
+				}
+			}
+			else { sDir = new char[1]; ((char*)sDir)[0]='\0'; }
 
+//			sFileName = new char[strlen(name) + 1];
+//			if (sFileName)
+//				strcpy(sFileName, name);
+		#elif MAC
+			// yet to be done
+		#endif
+
+			// The trick, store the CEffect's class instance so that the host can talk to us.
+			// I am unsure what other hosts use for resvd1 and resvd2
+			aEffect->resvd1 = ToVstPtr(this);
+
+			Open();                     /* open the effect                   */
 			SetSampleRate(loadstruct.pHost->GetSampleRate()); /* adjust its sample rate            */
 			SetBlockSize(loadstruct.pHost->GetBlockSize());
-			Open();                     /* open the effect                   */
 			//6 :        Host to Plug, canDo ( bypass )   returned : 0
 			//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
 
@@ -580,29 +672,20 @@ namespace seib {
 		{
 			Close();                             /* make sure it's closed             */
 			aEffect = NULL;                         /* and reset the pointer             */
+			delete ploader;
 
 		#ifdef WIN32
-			if (hModule)                            /* if DLL instance available         */
+			if (sDir)                               /* reset directory            */
 			{
-				::FreeLibrary(hModule);               /* remove it.                        */
-				hModule = NULL;                       /* and reset the handle              */
+				delete[] sDir;	sDir = NULL;
 			}
-
-			if (sDir)                               /* reset module directory            */
-			{
-				delete[] sDir;
-				sDir = NULL;
-			}
-
-			if (sFileName)                              /* reset module name                 */
-			{
-				delete[] sFileName;
-				sFileName = NULL;
-			}
+//			if (sFileName)                              /* reset name                 */
+//			{
+//				delete[] sFileName;	sFileName = NULL;
+//			}
 		#elif MAC
 			// yet to be done!
 		#endif
-
 		}
 
 		/*****************************************************************************/
@@ -638,7 +721,7 @@ namespace seib {
 		/* EffDispatch : calls an effect's dispatcher                                */
 		/*****************************************************************************/
 
-		long CEffect::Dispatch(long opCode,long index,long value,void *ptr,float opt)
+		VstIntPtr CEffect::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 		{
 			if (!aEffect)
 				throw (int)1;
@@ -650,7 +733,7 @@ namespace seib {
 		/* EffProcess : calls an effect's process() function                        */
 		/*****************************************************************************/
 
-		void CEffect::Process(float **inputs, float **outputs, long sampleframes)
+		void CEffect::Process(float **inputs, float **outputs, VstInt32 sampleframes)
 		{
 			if (!aEffect)
 				throw (int)1;
@@ -662,7 +745,7 @@ namespace seib {
 		/* EffProcessReplacing : calls an effect's processReplacing() function       */
 		/*****************************************************************************/
 
-		void CEffect::ProcessReplacing(float **inputs, float **outputs, long sampleframes)
+		void CEffect::ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes)
 		{
 			if ((!aEffect) ||
 				(!(aEffect->flags & effFlagsCanReplacing)))
@@ -671,11 +754,19 @@ namespace seib {
 			aEffect->processReplacing(aEffect, inputs, outputs, sampleframes);
 		}
 
+		void CEffect::ProcessDouble(double **inputs, double **outputs, VstInt32 sampleframes)
+		{
+			if (!aEffect)
+				throw (int)1;
+
+			aEffect->processDoubleReplacing(aEffect, inputs, outputs, sampleframes);
+		}
+
 		/*****************************************************************************/
 		/* EffSetParameter : calls an effect's setParameter() function               */
 		/*****************************************************************************/
 
-		void CEffect::SetParameter(long index, float parameter)
+		void CEffect::SetParameter(VstInt32 index, float parameter)
 		{
 			if (!aEffect)
 				throw (int)1;
@@ -687,7 +778,7 @@ namespace seib {
 		/* EffGetParameter : calls an effect's getParameter() function               */
 		/*****************************************************************************/
 
-		float CEffect::GetParameter(long index)
+		float CEffect::GetParameter(VstInt32 index)
 		{
 			if (!aEffect)
 				throw (int)1;
@@ -701,15 +792,7 @@ namespace seib {
 
 		void * CEffect::OnGetDirectory()
 		{
-		#ifdef WIN32
-
 			return sDir;
-
-		#elif MAC
-
-			// yet to be done
-
-		#endif
 		}
 
 
@@ -764,41 +847,37 @@ namespace seib {
 
 		CEffect* CVSTHost::LoadPlugin(const char * sName)
 		{
-			/* pointer to main function          */
-			PVSTMAIN pMain = 0;
-			AEffect* aEffect;
-
-		#ifdef WIN32
-			HMODULE hModule;
-			hModule = ::LoadLibrary(sName);          /* try to load the DLL               */
-			if (hModule)                            /* if there, get its main() function */
-				//\todo : update man to "VSTPluginMain" as for new VST 2.4.
-				pMain = reinterpret_cast<PVSTMAIN>(::GetProcAddress(hModule, "main"));
-		#elif MAC
-			// yet to be done
-		#endif
-
-			if (pMain)                              /* initialize effect                 */
-				aEffect = pMain(AudioMasterCallback);
-			/* check for validity             */
-			if (aEffect && (aEffect->magic != kEffectMagic))
-				aEffect = NULL;
-
-			if (aEffect)
+			PluginLoader* loader = new PluginLoader;
+			if (!loader->loadLibrary(sName))
 			{
-				LoadedAEffect loadstruct;
-				loadstruct.aEffect = aEffect;
-				loadstruct.pHost=this;
-			#ifdef WIN32
-				loadstruct.hModule = hModule;
-				loadstruct.sFileName = (char*)sName;
-			#elif MAC
-				// yet to be done
-			#endif
-
-				return CreateEffect(loadstruct);
+				delete loader;
+				return 0;
 			}
 
+			PluginEntryProc mainEntry = loader->getMainEntry ();
+			if(!mainEntry)
+			{
+				delete loader;
+				return 0;
+			}
+
+			AEffect* effect = mainEntry (AudioMasterCallback);
+			if (effect && (effect->magic != kEffectMagic))
+			{
+				delete effect;
+				effect = NULL;
+			}
+			if (effect)
+			{
+				LoadedAEffect loadstruct;
+				loadstruct.aEffect = effect;
+				loadstruct.pHost = this;
+				loadstruct.pluginloader = loader;
+				loadstruct.sFileName = sName;
+				return CreateEffect(loadstruct);
+			}
+			
+			delete loader;
 			return 0;
 		}
 
@@ -809,43 +888,68 @@ namespace seib {
 
 		void CVSTHost::CalcTimeInfo(long lMask)
 		{
-			// SampleRate is always up-to-date.
-			// TimeSig is always up-to-date.
-
-			// the following should come directly from the player with no calculation needs.
+			// Either your player/sequencer or your overloaded member should update the following ones.
+			// They shouldn't need any calculations appart from your usual work procedures.
+			//sampleRate			(Via the SetSampeRate() function )
 			//samplePos
 			//tempo
-			//cyclestart // locator positions in quarter notes.
-			//cycleend   // locator positions in quarter notes.
+			//cyclestart			// locator positions in quarter notes.
+			//cycleend				// locator positions in quarter notes.
+			//timeSigNumerator		} Via SetTimeSignature() function
+			//timeSigDenominator	} ""	""
+			//smpteFrameRate		(See VstSmpteFrameRate in aeffectx.h)
 
-			// the following might require small to heavy calculations.
-			//nanoseconds (system time)
 			//ppqPos	(sample pos in 1ppq units)
-			//smpteOffset
-			//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
-			//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
-			const double dPos = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
-			if(lMask & kVstPpqPosValid)
+			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
+			if((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask && kVstClockValid))
 			{
 				vstTimeInfo.flags |= kVstPpqPosValid;
-				vstTimeInfo.ppqPos = dPos * vstTimeInfo.tempo / 60.L;
+				vstTimeInfo.ppqPos = seconds * vstTimeInfo.tempo / 60.L;
+
+				//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
+				if(lMask & kVstBarsValid)
+				{
+					vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* (int)vstTimeInfo.ppqPos / (int)vstTimeInfo.timeSigDenominator;
+					vstTimeInfo.flags |= kVstBarsValid;
+				}
+				//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
+				if(lMask & kVstClockValid)
+				{
+//					option 1:
+					const double onesampleclock = (60.L * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.L);		// get size of one 24ppq in samples.
+					vstTimeInfo.samplesToNextClock = onesampleclock * (((int)vstTimeInfo.samplePos / (int)onesampleclock)+1); // quantize.
+
+//					option 2:
+//					const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1);								// Quantize ppqpos
+//					const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
+//					vstTimeInfo.samplestoNextClock = sampleclockpos - ppqclockpos;									// get the difference.
+					vstTimeInfo.flags |= kVstBarsValid;
+				}
 			}
+			//smpteOffset
 			if(lMask & kVstSmpteValid)
 			{
+				//	24 fps ,  25 fps,	29.97 fps,	30 fps,	29.97 drop, 30 drop , Film 16mm ,  Film 35mm , none, none,
+				//	HDTV: 23.976 fps,	HDTV: 24.976 fps,	HDTV: 59.94 fps,	HDTV: 60 fps
 				static double fSmpteDiv[] =
-				{
-					24.f,
-					25.f,
-					29.97f,
-					30.f,
-					29.97f, // df(?)
-					30.f	// df(?)
+				{	24.f,		25.f,		29.97f,		30.f,	29.97f,		30.f ,		0.f,		0.f,	0.f,	0.f,
+					23.976f,	24.976f,	59.94f,		60.f
 				};
-				/* offset in fractions of a second   */
-				double dOffsetInSecond = dPos - floor(dPos);
+				double dOffsetInSecond = seconds - floor(seconds);
 				vstTimeInfo.smpteOffset = (long)(dOffsetInSecond *
 					fSmpteDiv[vstTimeInfo.smpteFrameRate] *
 					80.L);
+				vstTimeInfo.flags |= kVstSmpteValid;
+			}
+			//nanoseconds (system time)
+			if(lMask & kVstNanosValid)
+			{
+			#ifdef WIN32
+				vstTimeInfo.nanoSeconds = timeGetTime();
+				vstTimeInfo.flags |= kVstNanosValid;
+			#else
+				//add the appropiate code.
+			#endif
 			}
 		}
 
@@ -876,7 +980,7 @@ namespace seib {
 		/*****************************************************************************/
 		/* AudioMasterCallback : callback to be called by plugins                    */
 		/*****************************************************************************/
-		VstIntPtr* VSTCALLBACK CVSTHost::AudioMasterCallback
+		VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback
 		(
 		AEffect* effect,
 		VstInt32 opcode,
@@ -994,7 +1098,7 @@ namespace seib {
 			case audioMasterVendorSpecific :
 				return pHost->OnHostVendorSpecific(*pEffect, index, value, ptr, opt);
 			case audioMasterSetIcon :
-				// undefined in VST 2.0 specification
+				// undefined in VST 2.0 specification. Deprecated in v2.4
 				break;
 			case audioMasterCanDo :
 				return pHost->OnCanDo(*pEffect,(const char *)ptr);

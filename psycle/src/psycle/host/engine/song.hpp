@@ -9,7 +9,7 @@
 #include <psycle/host/global.hpp>
 #include "FileIO.hpp"
 #include <cstdint>
-
+#include <sigslot/sigslot.h>
 
 
 #if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
@@ -45,6 +45,7 @@ namespace psycle
 				/// destructor.
 				virtual inline ~Song() throw();
 
+				sigslot::signal2<const std::string &, const std::string &> report;
 			///\name initial values for player-related stuff
 			///\{
 				public:

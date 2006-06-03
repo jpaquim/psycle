@@ -25,6 +25,34 @@ namespace psycle
 		#define SAMPLER_CMD_EXT_NOTEOFF		0xc0
 		#define SAMPLER_CMD_EXT_NOTEDELAY	0xd0
 
+		// ms typedefs
+
+		typedef unsigned long ULONG;
+		typedef long long LONGLONG;
+		typedef unsigned long long ULONGLONG;
+		typedef unsigned long DWORD;
+		typedef ULONG* PULONG;
+		typedef PULONG ULONG_PTR;
+
+
+		typedef union _LARGE_INTEGER {
+			LONGLONG QuadPart;
+		} LARGE_INTEGER;
+
+		typedef union _ULARGE_INTEGER {
+			struct {
+				DWORD LowPart;
+				DWORD HighPart;
+			};
+
+			struct {
+				DWORD LowPart;
+				DWORD HighPart;
+			} u;
+			ULONGLONG QuadPart;
+		} ULARGE_INTEGER, 
+			*PULARGE_INTEGER;
+
 		typedef enum
 		{
 			ENV_OFF = 0,
@@ -43,7 +71,7 @@ namespace psycle
 			short* _pR;
 			bool _stereo;
 			ULARGE_INTEGER _pos;
-			signed __int64 _speed;
+			std::int64_t _speed;
 			bool _loop;
 			ULONG _loopStart;
 			ULONG _loopEnd;
