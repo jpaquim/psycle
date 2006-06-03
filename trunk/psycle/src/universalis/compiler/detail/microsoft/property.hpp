@@ -1,31 +1,31 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2006 psycledelics http://psycle.pastnotecut.org : Johan Boule
-// copyright 2005-2006 johan boule: rewritting of the property emulation: using two template-based tricks, one to get the class holding the member functions, and another to support all the operators (thanks to SFINAE).
-// Copyright (C) 2004 Boaz Harrosh: original idea for property emulation submited to wine: http://www.winehq.org/hypermail/wine-devel/2004/03/0180.html.
+// copyright 2004-2006 johan boule <bohan@jabber.org>
+// copyright 2004-2006 psycledelics http://psycle.sourceforge.net
+// copyright 2004 Boaz Harrosh: original idea for property emulation submited to wine: http://www.winehq.org/hypermail/wine-devel/2004/03/0180.html.
 
 ///\file
 #pragma once
 #include "../pragmatic/attribute.hpp"
 #if defined DIVERSALIS__COMPILER__MICROSOFT
-	//#namespace UNIVERSALIS
-		//#namespace COMPILER
-			//#namespace PROPERTY
+	//#region UNIVERSALIS
+		//#region COMPILER
+			//#region PROPERTY
 				#define UNIVERSALIS__COMPILER__PROPERTY__READER_AND_WRITER(type, name, reader, writer) UNIVERSALIS__COMPILER__ATTRIBUTE(property(get = reader, put = writer)) type name
 				#define UNIVERSALIS__COMPILER__PROPERTY__READER(           type, name, reader        ) UNIVERSALIS__COMPILER__ATTRIBUTE(property(get = reader,             )) type name
 				#define UNIVERSALIS__COMPILER__PROPERTY__WRITER(           type, name,         writer) UNIVERSALIS__COMPILER__ATTRIBUTE(property(              put = writer)) type name
-			//#endnamespace
-		//#endnamespace
-	//#endnamespace
+			//#endregion
+		//#endregion
+	//#endregion
 #else
 	#include <cstddef> // offsetof
-	//#namespace UNIVERSALIS
-		//#namespace COMPILER
-			//#namespace PROPERTY
+	//#region UNIVERSALIS
+		//#region COMPILER
+			//#region PROPERTY
 				#if defined DIVERSALIS__COMPILER__GNU
 					// Original offsetof will warn on GCC so below will turn this warning off.
 					// 010<<4 (128) is to avoid alignment fixup.
 					#undef  offsetof
-					#define offsetof(       class, member             ) offsetof__align(010<<4)
+					#define offsetof(       class, member             ) offsetof__align(class, member, 010<<4)
 					#define offsetof__align(class, member, align_bytes) (reinterpret_cast<std::size_t>(reinterpret_cast<std::ptrdiff_t>(&static_cast<class*>(align_bytes)->member)) - align_bytes)
 				#endif
 
@@ -72,7 +72,7 @@
 					)
 
 				///\internal
-				//#namespace DETAIL
+				//#region DETAIL
 					///\internal
 					#define UNIVERSALIS__COMPILER__PROPERTY__DETAIL(type_, name, reader_or_writer, accessors) \
 						/** \internal */ \
@@ -122,8 +122,8 @@
 					#define UNIVERSALIS__COMPILER__PROPERTY__DETAIL__OPERATOR__WRITER_AND_READER__UNARY( $) \
 								/** \internal */ \
 								type inline operator $  (int       ) { type value  (*this);            $ value  ; *this =     value ; return value; }
-				//#endnamespace
-			//#endnamespace
-		//#endnamespace
-	//#endnamespace
+				//#endregion
+			//#endregion
+		//#endregion
+	//#endregion
 #endif
