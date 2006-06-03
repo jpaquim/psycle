@@ -67,3 +67,43 @@
 				: BOOST_PP_SEQ_ELEM(1, types)(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
 	//#endregion
 //#endregion
+
+
+
+#if 0
+template<typename T>
+class factory
+{
+	public:
+		typedef void (*T::after_construction_type)();
+		typedef void (*T::before_destruction_type)();
+
+		factory(after_construction_type, before_destruction_type) 
+		{
+		}
+
+		class wrap
+		{
+			public:
+				inline T & operator=(T const & instance) { return this->instance_ = instance; }
+				inline     operator  T const & () const throw() { return instance_; }
+				inline     operator  T       & ()       throw() { return instance_; }
+			private:
+				T instance_;
+		};
+
+		//template<...>
+		T static & create()
+		{
+			T & instance = *new T;
+			(instance.*after_cronstruction)();
+			return instance;
+		}
+
+		void static destroy(T & instance)
+		{
+			(instance.*before_destruction)();
+			delete &instance;
+		}
+};
+#endif
