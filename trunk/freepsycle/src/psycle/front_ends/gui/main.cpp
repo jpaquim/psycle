@@ -51,7 +51,7 @@ namespace psycle
 							lock lock;
 							main.run(window);
 						}
-						delete &graph;
+						graph.destroy();
 					}
 					catch(Glib::Exception const & e)
 					{

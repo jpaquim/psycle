@@ -38,7 +38,7 @@ namespace psycle
 				adjustment_.signal_value_changed().connect(sigc::mem_fun(*this, &graph::on_zoom));
 			}
 
-			graph::~graph() throw()
+			graph::~graph()
 			{
 			}
 			
@@ -275,9 +275,9 @@ namespace psycle
 			{
 			}
 
-			void node::init()
+			void node::after_construction()
 			{
-				node_type::init();
+				node_type::after_construction();
 				int const ports(single_input_ports().size() + output_ports().size() + (multiple_input_port() ? 1 : 0));
 				real const angle_step(engine::math::pi * 2 / ports);
 				real const radius(60);

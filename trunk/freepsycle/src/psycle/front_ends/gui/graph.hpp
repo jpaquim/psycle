@@ -96,10 +96,9 @@ namespace psycle
 				public:
 					typedef Gtk::VBox base;
 
-				protected:
-					graph(underlying_type &, host::plugin_resolver & resolver); friend class generic_access;
-				public:
-					virtual ~graph() throw();
+				protected: friend class factory;
+					graph(underlying_type &, host::plugin_resolver & resolver);
+					virtual ~graph();
 
 				public:
 					host::plugin_resolver inline & resolver() { return resolver_; }
@@ -200,11 +199,9 @@ namespace psycle
 				public typenames::typenames::bases::port,
 				public Gnome::Canvas::Group
 			{
-				protected:
+				protected: friend class factory;
 					port(parent_type &, underlying_type &, real const & x, real const & y, color const &);
-				
-				public:
-					~port() throw() {}
+					virtual inline ~port() {}
 
 				protected: friend class node;
 					contraption inline & contraption_instance() throw() { return contraption_; }
@@ -226,28 +223,28 @@ namespace psycle
 			{
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output
 				{
-					protected:
-						output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
+					protected: friend class factory;
+						output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 				};
 
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input
 				{
-					protected:
-						input(parent_type &, underlying_type &, real const & x, real const & y, color const &); friend class generic_access;
+					protected: friend class factory;
+						input(parent_type &, underlying_type &, real const & x, real const & y, color const &);
 				};
 				
 				namespace inputs
 				{
 					class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single
 					{
-						protected:
-							single(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
+						protected: friend class factory;
+							single(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 					};
 
 					class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
 					{
-						protected:
-							multiple(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
+						protected: friend class factory;
+							multiple(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 					};
 				}
 			}
@@ -257,9 +254,9 @@ namespace psycle
 				public typenames::typenames::bases::node,
 				public Gnome::Canvas::Group
 			{
-				protected:
-					node(parent_type &, underlying_type &, real const & x = 0, real const & y = 0); friend class generic_access;
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init();
+				protected: friend class factory;
+					node(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
 					
 				public:
 					~node() throw() {}
