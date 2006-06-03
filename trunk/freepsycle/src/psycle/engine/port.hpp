@@ -22,10 +22,9 @@ namespace psycle
 			friend class ports::inputs::single;
 			friend class ports::inputs::multiple;
 			
-			protected:
-				port(parent_type &, name_type const &, int const & channels = 0); friend class generic_access;
-			public:
-				virtual ~port() throw();
+			protected: friend class factory;
+				port(parent_type &, name_type const &, int const & channels = 0);
+				virtual ~port();
 	
 			protected:
 				/// connects this port to another port.

@@ -18,8 +18,8 @@ namespace psycle
 	{
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::bases::graph
 		{
-			protected:
-				graph(underlying_type &); friend class generic_access;
+			protected: friend class factory;
+				graph(underlying_type &);
 		};
 
 		class coordinates
@@ -47,45 +47,45 @@ namespace psycle
 
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::bases::port, public coordinates
 		{
-			protected:
-				port(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0); friend class generic_access;
+			protected: friend class factory;
+				port(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 		};
 
 		namespace ports
 		{
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output
 			{
-				protected:
-					output(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0); friend class generic_access;
+				protected: friend class factory;
+					output(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 			};
 
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input
 			{
-				protected:
-					input(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0); friend class generic_access;
+				protected: friend class factory;
+					input(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 			};
 			
 			namespace inputs
 			{
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single
 				{
-					protected:
-						single(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0); friend class generic_access;
+					protected: friend class factory;
+						single(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 				};
 
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
 				{
-					protected:
-						multiple(parent_type &, underlying_type &, real const /*const*/ x = 0, real /*const*/ y = 0); friend class generic_access;
+					protected: friend class factory;
+						multiple(parent_type &, underlying_type &, real const /*const*/ x = 0, real /*const*/ y = 0);
 				};
 			}
 		}
 
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::typenames::bases::node, public coordinates
 		{
-			protected:
-				node(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0); friend class generic_access;
-				void init();
+			protected: friend class factory;
+				node(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
+				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
 			/*
 			private:
 				friend class boost::serialization::access;

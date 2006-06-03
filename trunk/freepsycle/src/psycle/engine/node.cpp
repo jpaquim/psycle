@@ -26,7 +26,7 @@ namespace psycle
 			}
 		}
 		
-		node::~node() throw()
+		node::~node()
 		{
 			if(loggers::trace()())
 			{
@@ -34,17 +34,9 @@ namespace psycle
 				s << "delete node: " << qualified_name();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			if(multiple_input_port()) delete multiple_input_port();
-			for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i)
-			{
-				//(**i).disconnect_all();
-				delete *i;
-			}
-			for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i)
-			{
-				//(**i).disconnect_all();
-				delete *i;
-			}
+			if(multiple_input_port()) multiple_input_port()->destroy();
+			for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) (**i).destroy();
+			for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) (**i).destroy();
 		}
 	
 		node::name_type node::qualified_name() const

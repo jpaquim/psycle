@@ -21,10 +21,9 @@ namespace psycle
 				{
 					friend class node;
 	
-					protected:
-						multiple(parent_type &, name_type const &, bool const & single_connection_is_identity_transform, int const & channels = 0); friend class generic_access;
-					public:
-						virtual ~multiple() throw();
+					protected: friend class factory;
+						multiple(parent_type &, name_type const &, bool const & single_connection_is_identity_transform, int const & channels = 0);
+						virtual ~multiple();
 		
 					protected:
 						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_channels() throw(exception);

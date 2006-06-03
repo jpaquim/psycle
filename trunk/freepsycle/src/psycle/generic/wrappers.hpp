@@ -30,7 +30,7 @@ namespace psycle
 			template<typename Typenames>
 			class graph
 			:
-				public generic::graph<Typenames>,
+				public basic::graph<Typenames>,
 				public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::graph>
 			{
 				protected:
@@ -39,14 +39,13 @@ namespace psycle
 					graph(typename graph::underlying_type & underlying) : graph::underlying_wrapper_type(underlying)
 					{
 						on_new_node_signal_connection          = underlying.         new_node_signal().connect(boost::bind(&graph::on_new_node         , this, _1    ));
-					//	on_delete_node_signal_connection       = underlying.      delete_node_signal().connect(boost::bind(&graph::on_delete_node      , this, _1    ));
 						on_new_connection_signal_connection    = underlying.   new_connection_signal().connect(boost::bind(&graph::on_new_connection   , this, _1, _2));
 						on_delete_connection_signal_connection = underlying.delete_connection_signal().connect(boost::bind(&graph::on_delete_connection, this, _1, _2));
 					}
 
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction()
 					{
-						generic::graph<Typenames>::init();
+						basic::graph<Typenames>::after_construction();
 						for(typename graph::underlying_type::const_iterator i(this->underlying().begin()) ; i != this->underlying().end() ; ++i) on_new_node(**i);
 						for(typename graph::const_iterator i(this->begin()) ; i != this->end() ; ++i)
 						{
@@ -65,11 +64,10 @@ namespace psycle
 							}
 						}
 					}
-				public:
-					virtual ~graph() throw()
+
+					virtual ~graph()
 					{
 						on_new_node_signal_connection.disconnect();
-					//	on_delete_node_signal_connection.disconnect();
 						on_new_connection_signal_connection.disconnect();
 						on_delete_connection_signal_connection.disconnect();
 					}
@@ -128,7 +126,7 @@ namespace psycle
 			template<typename Typenames>
 			class node
 			:
-				public generic::node<Typenames>,
+				public basic::node<Typenames>,
 				public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::node>
 			{
 				protected:
@@ -136,7 +134,7 @@ namespace psycle
 
 					node(typename node::parent_type & parent, typename node::underlying_type & underlying)
 					:
-						generic::node<Typenames>(parent),
+						basic::node<Typenames>(parent),
 						node::underlying_wrapper_type(underlying)
 					{
 						on_new_output_port_signal_connection         = underlying.        new_output_port_signal().connect(boost::bind(&node::on_new_output_port        , this, _1));
@@ -145,16 +143,15 @@ namespace psycle
 						on_delete_signal_connection                  = underlying.                 delete_signal().connect(boost::bind(&node::on_delete                 , this, _1));
 					}
 
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
+					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction()
 					{
-						generic::node<Typenames>::init();
+						basic::node<Typenames>::after_construction();
 						for(typename node::underlying_type::      output_ports_type::const_iterator i(this->underlying().      output_ports().begin()) ; i != this->underlying().      output_ports().end() ; ++i) on_new_output_port      (**i);
 						for(typename node::underlying_type::single_input_ports_type::const_iterator i(this->underlying().single_input_ports().begin()) ; i != this->underlying().single_input_ports().end() ; ++i) on_new_single_input_port(**i);
 						if(this->underlying().multiple_input_port()) on_new_multiple_input_port(*this->underlying().multiple_input_port());
 					}
 
-				public:
-					virtual ~node() throw()
+					virtual ~node()
 					{
 						on_new_output_port_signal_connection.disconnect();
 						on_new_single_input_port_signal_connection.disconnect();
@@ -196,7 +193,7 @@ namespace psycle
 						}
 				///\}
 
-				public://private:
+				public: //private:
 					///\return the the output port wrapper corresponding to the given underlying output port
 					typename Typenames::ports::output & underlying_wrapper(typename Typenames::underlying::ports::output & underlying_output_port)
 					{
@@ -220,7 +217,7 @@ namespace psycle
 			template<typename Typenames>
 			class port
 			:
-				public generic::port<Typenames>,
+				public basic::port<Typenames>,
 				public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::port>
 			{
 				protected:
@@ -228,7 +225,7 @@ namespace psycle
 
 					port(typename port::parent_type & parent, typename port::underlying_type & underlying)
 					:
-						generic::port<Typenames>(parent),
+						basic::port<Typenames>(parent),
 						port::underlying_wrapper_type(underlying)
 					{}
 			};
@@ -236,7 +233,7 @@ namespace psycle
 			namespace ports
 			{
 				template<typename Typenames>
-				class output : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::output, generic::ports::output<Typenames> >
+				class output : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::output, basic::ports::output<Typenames> >
 				{
 					protected:
 						typedef output output_type;
@@ -250,7 +247,7 @@ namespace psycle
 				};
 
 				template<typename Typenames>
-				class input : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::input, generic::ports::input<Typenames> >
+				class input : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::input, basic::ports::input<Typenames> >
 				{
 					protected:
 						typedef input input_type;
@@ -266,7 +263,7 @@ namespace psycle
 				namespace inputs
 				{
 					template<typename Typenames>
-					class single : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::inputs::single, generic::ports::inputs::single<Typenames> >
+					class single : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::inputs::single, basic::ports::inputs::single<Typenames> >
 					{
 						protected:
 							typedef single single_type;
@@ -280,7 +277,7 @@ namespace psycle
 					};
 
 					template<typename Typenames>
-					class multiple : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::inputs::multiple, generic::ports::inputs::multiple<Typenames> >
+					class multiple : public universalis::compiler::cast::underlying_wrapper< typename Typenames::underlying::ports::inputs::multiple, basic::ports::inputs::multiple<Typenames> >
 					{
 						protected:
 							typedef multiple multiple_type;

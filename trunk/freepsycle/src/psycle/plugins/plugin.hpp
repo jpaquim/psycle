@@ -36,9 +36,9 @@ namespace psycle
 					return psycle::engine::node::create<typename>(plugin_library_reference, graph, name); \
 				} \
 				\
-				void PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(delete)(psycle::engine::node * const node) \
+				void PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(delete)(psycle::engine::node & node) \
 				{ \
-					delete node; \
+					node.destroy(); \
 				} \
 			}
 	}

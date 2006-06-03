@@ -22,7 +22,6 @@ namespace psycle
 {
 	namespace engine
 	{
-		typedef generic::node<typenames::typenames> node_base;
 		/// node of a graph, placeholder for a dsp, aka "plugin machine".
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::typenames::bases::node, public named
 		{
@@ -32,10 +31,9 @@ namespace psycle
 			friend class ports::inputs::single;
 			friend class ports::inputs::multiple;
 			
-			protected:
-				node(plugin_library_reference &, parent_type &, name_type const &); friend class generic_access;
-			public:
-				virtual ~node() throw();
+			protected: friend class factory;
+				node(plugin_library_reference &, parent_type &, name_type const &);
+				virtual ~node();
 
 			public:
 				//typenames::plugin_library_reference inline & plugin_library_reference() const throw() { return plugin_library_reference_; }

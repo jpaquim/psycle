@@ -24,10 +24,9 @@ namespace psycle
 				friend class inputs::single;
 				friend class inputs::multiple;
 					
-				protected:
-					output(parent_type &, name_type const &, int const & channels = 0); friend class generic_access;
-				public:
-					virtual ~output() throw();
+				protected: friend class factory;
+					output(parent_type &, name_type const &, int const & channels = 0);
+					virtual ~output();
 	
 				protected:
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_buffer(engine::buffer * const);

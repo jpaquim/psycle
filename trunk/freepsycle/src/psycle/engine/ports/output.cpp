@@ -29,7 +29,7 @@ namespace psycle
 				}
 			}
 		
-			output::~output() throw()
+			output::~output()
 			{
 				if(loggers::trace()())
 				{

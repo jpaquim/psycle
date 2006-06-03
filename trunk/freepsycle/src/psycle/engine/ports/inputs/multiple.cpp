@@ -31,7 +31,7 @@ namespace psycle
 					}
 				}
 			
-				multiple::~multiple() throw()
+				multiple::~multiple()
 				{
 					if(loggers::trace()())
 					{

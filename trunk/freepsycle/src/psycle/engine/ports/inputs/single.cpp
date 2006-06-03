@@ -30,7 +30,7 @@ namespace psycle
 					}
 				}
 			
-				single::~single() throw()
+				single::~single()
 				{
 					if(loggers::trace()())
 					{
