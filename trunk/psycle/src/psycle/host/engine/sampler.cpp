@@ -453,7 +453,7 @@ namespace psycle
 
 			Voice* pVoice = &_voices[voice];
 			int triggered = 0;
-			unsigned __int64 w_offset = 0;
+			std::uint64_t w_offset = 0;
 
 			if (Global::song().IsInvalided()) return 0;
 
@@ -547,12 +547,12 @@ namespace psycle
 				if (Global::song()._pInstrument[pVoice->_instrument]->_loop)
 				{
 					double const totalsamples = double(Global::player().SamplesPerRow()*Global::song()._pInstrument[pVoice->_instrument]->_lines);
-					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
+					pVoice->_wave._speed = (std::int64_t)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}	
 				else
 				{
 					float const finetune = CValueMapper::Map_255_1(Global::song()._pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::player().SampleRate()));
+					pVoice->_wave._speed = (std::int64_t)(pow(2.0f, ((pEntry->_note+Global::song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::player().SampleRate()));
 				}
 				
 
@@ -804,7 +804,7 @@ namespace psycle
 
 		void Sampler::PerformFx(int voice)
 		{
-			__int64 shift;
+			 std::int64_t shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up

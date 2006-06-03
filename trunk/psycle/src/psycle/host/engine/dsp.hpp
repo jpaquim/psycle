@@ -213,7 +213,7 @@ namespace psycle
 
 		/// interpolator work function.
 		///\todo typdef should be inside the Resampler class itself.
-		typedef float (*PRESAMPLERFN)(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length);
+		typedef float (*PRESAMPLERFN)(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length);
 
 		/// sample interpolator.
 		class Resampler
@@ -234,7 +234,7 @@ namespace psycle
 			/// kind of interpolation.
 			ResamplerQuality _quality;
 			/// interpolation work function which does nothing.
-			static float None(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float None(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length)
 			{
 				return *pData;
 			}
@@ -269,7 +269,7 @@ namespace psycle
 			virtual ResamplerQuality GetQuality(void) { return _quality; }
 		protected:
 			/// interpolation work function which does linear interpolation.
-			static float Linear(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float Linear(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length)
 			{
 				float y0,y1;
 				y0 = *pData;
@@ -277,7 +277,7 @@ namespace psycle
 				return (y0+(y1-y0)*_lTable[res>>21]);
 			}
 			/// interpolation work function which does spline interpolation.
-			static float Spline(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float Spline(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length)
 			{
 				float yo, y0,y1, y2;
 				res = res >> 21;
@@ -311,7 +311,7 @@ namespace psycle
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.
-			static float Bandlimit(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float Bandlimit(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length)
 			{
 				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
 				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);

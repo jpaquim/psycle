@@ -4,6 +4,7 @@
 #include <psycle/host/engine/Song.hpp>
 #include <psycle/host/Configuration.hpp>
 #include <psycle/host/gui/InputHandler.hpp>
+#include <sigslot/sigslot.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
@@ -196,7 +197,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		};
 
 		/// child view window
-		class CChildView : public CWnd
+		class CChildView : public CWnd, public sigslot::has_slots<>
 		{
 		public:
 			CChildView();
@@ -369,6 +370,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		private:
 
+			void onSongReport(const std::string & message, const std::string &caption);
 			//Recent Files!!!!//
 			void AppendToRecent(std::string fName);
 			void CallOpenRecent(int pos);
