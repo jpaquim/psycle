@@ -18,10 +18,9 @@ namespace psycle
 			{
 				friend class node;
 				
-				protected:
-					input(parent_type &, name_type const &, int const & channels = 0); friend class generic_access;
-				public:
-					virtual ~input() throw();
+				protected: friend class factory;
+					input(parent_type &, name_type const &, int const & channels = 0);
+					virtual ~input();
 	
 				public:
 					void    connect(typenames::ports::output &) throw(exception);

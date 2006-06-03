@@ -28,7 +28,7 @@ namespace psycle
 				}
 			}
 		
-			input::~input() throw()
+			input::~input()
 			{
 				if(loggers::trace()())
 				{

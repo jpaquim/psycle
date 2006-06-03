@@ -75,9 +75,7 @@ namespace psycle
 		// plugin_resolver::instanciator
 
 		plugin_resolver::instanciator::instanciator(plugin_resolver & plugin_resolver, const std::string & name) throw(engine::exception)
-		#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__MICROSOFT__VERSION__MAJOR >= 8
-			try
-		#endif
+		try
 		:
 				plugin_library_reference(name),
 				plugin_resolver_(plugin_resolver),
@@ -93,18 +91,16 @@ namespace psycle
 				loggers::information()(s.str());
 			}
 		}
-		#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__MICROSOFT__VERSION__MAJOR >= 8
-			catch(std::exception const & e)
-			{
-				loggers::exception()(e.what(), UNIVERSALIS__COMPILER__LOCATION);
-				throw;
-			}
-			catch(...)
-			{
-				loggers::exception()(universalis::compiler::exceptions::ellipsis(), UNIVERSALIS__COMPILER__LOCATION);
-				throw;
-			}
-		#endif
+		catch(std::exception const & e)
+		{
+			loggers::exception()(e.what(), UNIVERSALIS__COMPILER__LOCATION);
+			throw;
+		}
+		catch(...)
+		{
+			loggers::exception()(universalis::compiler::exceptions::ellipsis(), UNIVERSALIS__COMPILER__LOCATION);
+			throw;
+		}
 	
 		std::string plugin_resolver::instanciator::name() const throw()
 		{
@@ -188,7 +184,7 @@ namespace psycle
 				loggers::information()(s.str());
 			}
 			engine::reference_counter & reference_counter(node().plugin_library_reference_instance());
-			delete &node();
+			node().destroy();
 			--reference_counter;
 		}
 	

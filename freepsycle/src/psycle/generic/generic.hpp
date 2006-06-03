@@ -41,7 +41,7 @@ namespace psycle
 			{
 				public:
 					//UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(graph, factory, init, deinit, )
-					class generic_access // : public unversalis::compiler::factory<graph, &graph::init, &graph::deinit>
+					class factory // : public unversalis::compiler::factory<graph, &graph::after_construction, &graph::before_destruction>
 					{
 						private: friend class graph;
 							#define constructor(_, count, __) \
@@ -49,14 +49,14 @@ namespace psycle
 								Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
-									instance.init(); \
+									instance.after_construction(); \
 									return instance; \
 								}
 								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
-							void destroy(graph & instance)
+							void static destroy(graph & instance)
 							{
-								instance.deinit();
+								instance.before_destruction();
 								delete & instance;
 							}
 					};
@@ -65,39 +65,36 @@ namespace psycle
 						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 						Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return factory::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						typename Typenames::graph static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create< typename Typenames::graph BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return factory::template create< typename Typenames::graph BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						}
 						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 					#undef constructor
+					void destroy()
+					{
+						factory::destroy(*this);
+					}
 					
-				protected:
+				protected: friend class factory;
 					typedef graph graph_type;
 
 					graph()
 					{
-						new_node_signal()   .connect(boost::bind(&graph::on_new_node   , this, _1));
-					//	delete_node_signal().connect(boost::bind(&graph::on_delete_node, this, _1));
+						new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1));
 					}
+					void virtual inline after_construction() {}
+					void virtual inline before_destruction() {}
+					virtual inline ~graph() {}
 
-					void virtual init() {}
-					void virtual deinit() {}
-
-				public:
-					virtual ~graph() throw() {}
-				
 				///\name signals
 				///\{
-					public:  boost::signal<void (typename Typenames::node &)> inline & new_node_signal()    throw() { return new_node_signal_; }
+					public:  boost::signal<void (typename Typenames::node &)> inline & new_node_signal() throw() { return new_node_signal_; }
 					private: boost::signal<void (typename Typenames::node &)>          new_node_signal_;
 						
-				//	public:  boost::signal<void (typename Typenames::node &)> inline & delete_node_signal() throw() { return delete_node_signal_; }
-				//	private: boost::signal<void (typename Typenames::node &)>          delete_node_signal_;
-
 					public:  boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> inline &    new_connection_signal() throw() { return new_connection_signal_; }
 					private: boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)>             new_connection_signal_;
 
@@ -142,7 +139,7 @@ namespace psycle
 					BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::ports::input   , typename Typenames::ports::inputs::multiple>::value));
 
 				public:
-					class generic_access
+					class factory
 					{
 						private: friend class node;
 							#define constructor(_, count, __) \
@@ -150,14 +147,14 @@ namespace psycle
 								Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
-									instance.init(); \
+									instance.after_construction(); \
 									return instance; \
 								}
 								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
-							void destroy(node & instance)
+							void static destroy(node & instance)
 							{
-								instance.deinit();
+								instance.before_destruction();
 								delete & instance;
 							}
 					};
@@ -166,17 +163,21 @@ namespace psycle
 						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 						Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return factory::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						typename Typenames::node static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create< typename Typenames::node BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return factory::template create< typename Typenames::node BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						}
 						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 					#undef constructor
+					void destroy()
+					{
+						factory::destroy(*this);
+					}
 					
-				protected:
+				protected: friend class factory;
 					typedef node node_type;
 
 					node(typename Typenames::graph & graph)
@@ -193,7 +194,7 @@ namespace psycle
 						new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
 					}
 
-					void virtual init()
+					void virtual after_construction()
 					{
 						if(loggers::trace()())
 						{
@@ -202,21 +203,15 @@ namespace psycle
 						this->parent().new_node_signal()(*this);
 					}
 
-					void virtual deinit()
+					void virtual before_destruction()
 					{
-						//this->parent().delete_node_signal()(*this);
-						std::cout << "<<<<<<<<< delete generic node " << (void*)this << " ...\n";
 						delete_signal()(*this);
-						std::cout << "<<<<<<<<< delete generic node " << (void*)this << " ... done\n";
 					}
+
+					virtual inline ~node() {}
 
 				///\name destruction
 				///\{
-					virtual ~node() throw()
-					{
-						deinit();
-					}
-
 					public:  boost::signal<void (node &)> inline & delete_signal() throw() { return delete_signal_; }
 					private: boost::signal<void (node &)>          delete_signal_;
 				///\}
@@ -307,7 +302,7 @@ namespace psycle
 				public child_of<typename Typenames::node>
 			{
 				public:
-					class generic_access
+					class factory
 					{
 						private: friend class port;
 							#define constructor(_, count, __) \
@@ -315,14 +310,14 @@ namespace psycle
 								Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
-									instance.init(); \
+									instance.after_construction(); \
 									return instance; \
 								}
 								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
-							void destroy(port & instance)
+							void static destroy(port & instance)
 							{
-								instance.deinit();
+								instance.before_destruction();
 								delete & instance;
 							}
 					};
@@ -331,22 +326,24 @@ namespace psycle
 						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 						Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
-							return generic_access::template create< Type >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+							return factory::template create< Type >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						}
 						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 					#undef constructor
+					void destroy()
+					{
+						factory::destroy(*this);
+					}
 
-				protected:
+				protected: friend class factory;
 					typedef port port_type;
 					port(typename Typenames::node & node) : child_of<typename Typenames::node>(node) {}
-					void virtual init() = 0;
-					void virtual deinit() = 0;
+					void virtual after_construction() = 0;
+					void virtual before_destruction() = 0;
+					virtual inline ~port() {}
+
+				protected:
 					void connect(typename Typenames::port & port) throw(exception) {}
-				public:
-					virtual ~port() throw()
-					{
-						//deinit();
-					}
 			};
 			
 			namespace ports
@@ -366,7 +363,8 @@ namespace psycle
 							}
 							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
-					protected:
+
+					protected: friend class factory;
 						typedef output output_type;
 
 						#define constructor(_, count, __) \
@@ -376,22 +374,16 @@ namespace psycle
 							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
 
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction()
 						{
 							this->parent().new_output_port_signal()(*this);
 						}
 
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES deinit()
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction()
 						{
 							disconnect_all();
 						}
 
-					public:
-						virtual ~output() throw()
-						{
-							deinit();
-						}
-						
 					///\name connected input ports
 					///\{
 						public:
@@ -464,7 +456,7 @@ namespace psycle
 					public universalis::compiler::cast::derived<typename Typenames::ports::input>,
 					public Typenames::port
 				{
-					protected:
+					protected: friend class factory;
 						typedef input input_type;
 
 						#define constructor(_, count, __) \
@@ -474,43 +466,37 @@ namespace psycle
 							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 						#undef constructor
 
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES deinit()
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction()
 						{
 							disconnect_all();
 						}
 
-					public:
-						virtual ~input() throw()
-						{
-							//deinit();
-						}
-						
-						///\name (dis)connection functions
-						///\{
-							public:
-								void connect(typename Typenames::ports::output & output_port) throw(exception)
-								{
-									assert("ports must belong to different nodes:" && &output_port.parent() != &this->parent());
-									assert("nodes of both ports must belong to the same graph:" && &output_port.parent().parent() == &this->parent().parent());
-									output_port.connect_internal_side(*this);
-									Typenames::port::connect(output_port);
-									this->connect_internal_side(output_port);
-									this->parent().parent().new_connection_signal()(*this, output_port);
-								}
-							protected:
-								void virtual connect_internal_side(typename Typenames::ports::output &) = 0;
-				
-							public:
-								void virtual disconnect_all() = 0;
-								void disconnect(typename Typenames::ports::output & output_port)
-								{
-									this->disconnect_internal_side(output_port);
-									output_port.disconnect_internal_side(*this);
-									this->parent().parent().delete_connection_signal()(*this, output_port);
-								}
-							protected:
-								void virtual disconnect_internal_side(typename Typenames::ports::output &) = 0;
-						///\}
+					///\name (dis)connection functions
+					///\{
+						public:
+							void connect(typename Typenames::ports::output & output_port) throw(exception)
+							{
+								assert("ports must belong to different nodes:" && &output_port.parent() != &this->parent());
+								assert("nodes of both ports must belong to the same graph:" && &output_port.parent().parent() == &this->parent().parent());
+								output_port.connect_internal_side(*this);
+								Typenames::port::connect(output_port);
+								this->connect_internal_side(output_port);
+								this->parent().parent().new_connection_signal()(*this, output_port);
+							}
+						protected:
+							void virtual connect_internal_side(typename Typenames::ports::output &) = 0;
+			
+						public:
+							void virtual disconnect_all() = 0;
+							void disconnect(typename Typenames::ports::output & output_port)
+							{
+								this->disconnect_internal_side(output_port);
+								output_port.disconnect_internal_side(*this);
+								this->parent().parent().delete_connection_signal()(*this, output_port);
+							}
+						protected:
+							void virtual disconnect_internal_side(typename Typenames::ports::output &) = 0;
+					///\}
 				};
 				
 				namespace inputs
@@ -530,7 +516,8 @@ namespace psycle
 								}
 								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
-						protected:
+
+						protected: friend class factory;
 							typedef single single_type;
 
 							#define constructor(_, count, __) \
@@ -543,17 +530,11 @@ namespace psycle
 								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 
-							void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
+							void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction()
 							{
 								this->parent().new_single_input_port_signal()(*this);
 							}
 
-						public:
-							virtual ~single() throw()
-							{
-								this->deinit();
-							}
-							
 						///\name connected output port
 						///\{
 							public:
@@ -617,7 +598,8 @@ namespace psycle
 								}
 								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
-						protected:
+
+						protected: friend class factory;
 							typedef multiple multiple_type;
 
 							#define constructor(_, count, __) \
@@ -627,15 +609,9 @@ namespace psycle
 								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 							#undef constructor
 
-							void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
+							void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction()
 							{
 								this->parent().new_multiple_input_port_signal()(*this);
-							}
-
-						public:
-							virtual ~multiple() throw()
-							{
-								this->deinit();
 							}
 							
 						///\name connected output ports

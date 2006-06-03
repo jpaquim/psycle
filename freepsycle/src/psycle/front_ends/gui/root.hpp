@@ -18,7 +18,7 @@ namespace psycle
 			{
 				public:
 					root(underlying::graph &, underlying::hello &);
-					virtual ~root() throw();
+					virtual ~root();
 				
 				protected:
 					underlying::hello const inline & hello() const throw() { return hello_; }

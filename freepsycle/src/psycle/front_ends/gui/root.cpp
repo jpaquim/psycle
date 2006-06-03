@@ -39,8 +39,9 @@ namespace psycle
 				//set_resize_mode(Gtk::RESIZE_IMMEDIATE);
 			}
 		
-			root::~root() throw()
+			root::~root()
 			{
+				graph_.destroy();
 			}
 		
 			void root::on_button_clicked()

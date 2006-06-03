@@ -25,9 +25,9 @@ namespace psycle
 					new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1));
 				}
 
-				void graph::init()
+				void graph::after_construction()
 				{
-					graph_base::init();
+					graph_base::after_construction();
 					for(const_iterator i(begin()) ; i != end() ; ++i)
 					{
 						loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ sched graph::init node");
@@ -77,9 +77,9 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 					new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
 				}
 
-				void node::init()
+				void node::after_construction()
 				{
-					node_base::init();
+					node_base::after_construction();
 				}
 
 				void node::on_new_output_port(typenames::ports::output & output_port)

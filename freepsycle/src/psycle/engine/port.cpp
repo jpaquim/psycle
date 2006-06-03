@@ -48,7 +48,7 @@ namespace psycle
 			}
 		}
 	
-		port::~port() throw()
+		port::~port()
 		{
 			if(loggers::trace()())
 			{

@@ -20,10 +20,9 @@ namespace psycle
 				{
 					friend class node;
 	
-					protected:
-						single(parent_type &, name_type const &, int const & channels = 0); friend class generic_access;
-					public:
-						virtual ~single() throw();
+					protected: friend class factory;
+						single(parent_type &, name_type const &, int const & channels = 0);
+						virtual ~single();
 		
 					protected:
 						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_channels() throw(exception);

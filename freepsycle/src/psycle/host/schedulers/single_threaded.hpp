@@ -65,9 +65,9 @@ namespace psycle
 				typedef generic::wrappers::graph<typenames::typenames> graph_base;
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base
 				{
-					protected:
-						graph(underlying_type &); friend class generic_access;
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init();
+					protected: friend class factory;
+						graph(underlying_type &);
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
 
 					///\name signal slots
 					///\{
@@ -79,8 +79,8 @@ namespace psycle
 				typedef generic::wrappers::port<typenames::typenames> port_base;
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base
 				{
-					protected:
-						port(parent_type &, underlying_type &); friend class generic_access;
+					protected: friend class factory;
+						port(parent_type &, underlying_type &);
 
 					///\name buffer
 					///\{	
@@ -97,8 +97,8 @@ namespace psycle
 					typedef generic::wrappers::ports::output<typenames::typenames> output_base;
 					class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base
 					{
-						protected:
-							output(parent_type &, underlying_type &); friend class generic_access;
+						protected: friend class factory;
+							output(parent_type &, underlying_type &);
 						
 						///\name schedule
 						///\{	
@@ -119,8 +119,8 @@ namespace psycle
 					typedef generic::wrappers::ports::input<typenames::typenames> input_base;
 					class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base
 					{
-						protected:
-							input(parent_type &, underlying_type &); friend class generic_access;
+						protected: friend class factory;
+							input(parent_type &, underlying_type &);
 					};
 
 					namespace inputs
@@ -128,15 +128,15 @@ namespace psycle
 						typedef generic::wrappers::ports::inputs::single<typenames::typenames> single_base;
 						class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base
 						{
-							protected:
-								single(parent_type &, underlying_type &); friend class generic_access;
+							protected: friend class factory;
+								single(parent_type &, underlying_type &);
 						};
 
 						typedef generic::wrappers::ports::inputs::multiple<typenames::typenames> multiple_base;
 						class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base
 						{
-							protected:
-								multiple(parent_type &, underlying_type &); friend class generic_access;
+							protected: friend class factory;
+								multiple(parent_type &, underlying_type &);
 						};
 					}
 				}
@@ -144,9 +144,9 @@ namespace psycle
 				typedef generic::wrappers::node<typenames::typenames> node_base;
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base
 				{
-					protected:
-						node(parent_type &, underlying_type &); friend class generic_access;
-						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init(); friend class graph; // init code moved to graph since it deals with connections
+					protected: friend class factory;
+						node(parent_type &, underlying_type &);
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction(); friend class graph; // init code moved to graph since it deals with connections
 						
 					///\name signal slots
 					///\{					

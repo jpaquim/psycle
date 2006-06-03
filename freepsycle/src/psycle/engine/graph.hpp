@@ -18,10 +18,9 @@ namespace psycle
 		/// a set of nodes
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::bases::graph, public named
 		{
-			protected:
-				graph(name_type const &); friend class generic_access;
-			public:
-				virtual ~graph() throw();
+			protected: friend class factory;
+				graph(name_type const &);
+				virtual ~graph();
 	
 			public:
 				boost::mutex inline & mutex() const { return mutex_; }

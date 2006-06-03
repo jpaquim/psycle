@@ -119,7 +119,7 @@ namespace psycle
 					loggers::information()("############################################# clean up ######################################################");
 					#if defined PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
 						loggers::information()("############################################# manual clean up ######################################################");
-						delete &graph;
+						graph.destroy();
 						delete &resolver;
 						loggers::information()("############################################# manual clean up done ######################################################");
 					#endif

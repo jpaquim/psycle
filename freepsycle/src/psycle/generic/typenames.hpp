@@ -30,8 +30,6 @@ namespace psycle
 			}
 		}
 
-		using namespace basic;
-
 		namespace wrappers
 		{
 			template<typename> class graph;
