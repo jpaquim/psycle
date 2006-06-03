@@ -63,6 +63,7 @@ namespace psycle
 		{ 
 			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // or intel?
 				///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
+				///\todo this is probably slowing down things on compilers using sse(2)
 				int i;
 				double const half(0.5);
 				_asm
