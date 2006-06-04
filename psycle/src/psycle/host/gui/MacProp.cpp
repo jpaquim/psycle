@@ -166,6 +166,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			if (dst >= 0)
 			{
+				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 				if (!Global::song().CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed","Cloning failed");

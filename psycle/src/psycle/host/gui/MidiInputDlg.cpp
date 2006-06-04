@@ -3,6 +3,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "psycle.hpp"
+#include <psycle/host/global.hpp>
 #include "OutputDlg.hpp"
 #include "MidiInputDlg.hpp"
 #include <psycle/host/configuration.hpp>
