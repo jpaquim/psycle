@@ -1017,7 +1017,7 @@ namespace psycle
 
 			pFile->Read(sDllName); // Plugin dll name
 			///\todo would be nicer with std::string and std::transform
-			for(int i(std::strlen(sDllName) - 1) ; i >= 0  ; --i) sDllName[i] = std::tolower(sDllName[i]);
+			for(std::size_t i(std::strlen(sDllName) - 1) ; i >= 0  ; --i) sDllName[i] = std::tolower(sDllName[i]);
 
 			//Patch: Automatically replace old AS's by AS2F.
 			bool wasAB=false;
