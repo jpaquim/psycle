@@ -46,6 +46,7 @@ namespace psycle
 				virtual inline ~Song() throw();
 
 				sigslot::signal2<const std::string &, const std::string &> report;
+				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
 			///\name initial values for player-related stuff
 			///\{
 				public:

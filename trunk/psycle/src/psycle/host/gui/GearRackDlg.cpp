@@ -714,6 +714,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				if (tmac2 >= 0)
 				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 					if (!Global::song().CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
@@ -746,6 +747,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				if (tmac2 >= 0)
 				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 					if (!Global::song().CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
@@ -773,6 +775,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				if (tmac2 >=0)
 				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 					if (!Global::song().CloneIns(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");

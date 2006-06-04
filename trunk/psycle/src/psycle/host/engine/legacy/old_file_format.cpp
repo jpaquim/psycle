@@ -11,9 +11,7 @@
 #include <psycle/host/engine/VSTHost.hpp>
 
 ///\todo bad coupling with the gui
-	#include <psycle/host/gui/psycle.hpp>
 	#include <psycle/host/gui/NewMachine.hpp>
-	#include <psycle/host/gui/MainFrm.hpp>
 
 #include <cstdint>
 namespace psycle
@@ -29,10 +27,8 @@ namespace psycle
 		{
 			try
 			{
-				CProgressDialog Progress;
-				Progress.Create();
-				Progress.SetWindowText("Loading old song... psycle song fileformat version 2...");
-				Progress.ShowWindow(SW_SHOW);
+				progress.emit(1,0,"");
+				progress.emit(2,0,"Loading old song... psycle song fileformat version 2...");
 				std::int32_t num,sampR;
 				bool _machineActive[128];
 				unsigned char busEffect[64];
@@ -82,7 +78,7 @@ namespace psycle
 						RemovePattern(i);
 					}
 				}
-				Progress.m_Progress.SetPos(2048);
+				progress.emit(4,2048,"");
 				::Sleep(1); ///< ???
 				// Instruments
 				pFile->Read(instSelected);
@@ -159,8 +155,7 @@ namespace psycle
 					pFile->Read(_pInstrument[i]->_RRES);
 				}
 				
-				Progress.m_Progress.SetPos(4096);
-				::Sleep(1);
+				progress.emit(4,4096,"");
 				// Waves
 				//
 				std::int32_t tmpwvsl;
@@ -213,8 +208,7 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(4096+2048);
-				::Sleep(1);
+				progress.emit(4,4096+2048,"");
 				// VST DLLs
 				//
 
@@ -236,8 +230,7 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(8192);
-				::Sleep(1);
+				progress.emit(4,8192,"");
 				// Machines
 				//
 				_machineLock = true;
@@ -257,8 +250,7 @@ namespace psycle
 					std::int32_t x,y,type;
 					if (_machineActive[i])
 					{
-						Progress.m_Progress.SetPos(8192+i*(4096/128));
-						::Sleep(1);
+						progress.emit(4,8192+i*(4096/128),"");
 
 						pFile->Read(x);
 						pFile->Read(y);
@@ -394,31 +386,10 @@ namespace psycle
 							}
 
 						}
-
-						switch (pMac[i]->_mode)
-						{
-						case MACHMODE_GENERATOR:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
-							break;
-						case MACHMODE_FX:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
-							break;
-
-						case MACHMODE_MASTER:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
-							break;
-						}
-
-						pMac[i]->SetPosX(x);
-						pMac[i]->SetPosY(y);
 					}
 				}
 
-				Progress.m_Progress.SetPos(8192+4096);
-				::Sleep(1);
+				progress.emit(4,8192+4096,"");
 
 				// Since the old file format stored volumes on each output
 				// rather than on each input, we must convert
@@ -443,8 +414,8 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(8192+4096+1024);
-				::Sleep(1);
+				progress.emit(4,8192+4096+1024,"");
+
 				for (i=0; i<128; i++) // Next, we go to fix this for each
 				{
 					if (_machineActive[i])		// valid machine (important, since we have to navigate!)
@@ -472,8 +443,8 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(8192+4096+2048);
-				::Sleep(1);
+				progress.emit(4,8192+4096+2048,"");
+
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
 					pFile->Read(_pInstrument[i]->_loop);
@@ -592,8 +563,7 @@ namespace psycle
 				// move machines around to where they really should go
 				// now we have to remap all the inputs and outputs again... ouch
 				
-				Progress.m_Progress.SetPos(8192+4096+2048+1024);
-				::Sleep(1);
+				progress.emit(4,8192+4096+2048+1024,"");
 
 				for (i = 0; i < 64; i++)
 				{
@@ -730,8 +700,7 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(8192+4096+2048+1024+512);
-				::Sleep(1);
+				progress.emit(4,8192+4096+2048+1024+512,"");
 				// test all connections
 
 				for (int c=0; c<MAX_CONNECTIONS; c++)
@@ -754,8 +723,6 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(16384);
-				::Sleep(1);
 				// test all connections for invalid machines. disconnect invalid machines.
 				for (i = 0; i < MAX_MACHINES; i++)
 				{
@@ -816,14 +783,14 @@ namespace psycle
 				_machineLock = false;
 				seqBus=0;
 				
-				Progress.OnCancel();
-				if (!pFile->Close()) throw std::runtime_error("couldn't close file");
+				progress.emit(5,0,"");
 			}
 			catch(...)
 			{
 				std::ostringstream s;
 				s << "Error reading from " << pFile->file_name() << " !!!";
 				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
+				progress.emit(5,0,"");
 				return false;
 			}
 			return true;

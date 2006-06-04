@@ -11,11 +11,7 @@
 #include "VSTHost.hpp"
 #include "DataCompression.hpp"
 #include "riff.hpp" // for Wave file loading.
-#include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/NewMachine.hpp> // Is this needed?
-#include <psycle/host/gui/MainFrm.hpp> // Is this needed?
-#include <psycle/host/gui/ChildView.hpp> // Is this needed?
-#include <psycle/host/gui/ProgressDialog.hpp> // Is this needed?
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdint>
@@ -331,21 +327,7 @@ namespace psycle
 			_saved=false;
 			fileName = "Untitled.psy";
 			
-			if((CMainFrame *)theApp.m_pMainWnd) /// gui :-(
-			{
-				CreateMachine
-					(
-						MACH_MASTER, 
-						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
-						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
-						"master",
-						MASTER_INDEX
-					);
-			}
-			else
-			{
-				CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
-			}
+			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
 		}
 
 		Machine::id_type Song::GetFreeMachine()
@@ -954,10 +936,9 @@ namespace psycle
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
 				loggers::trace("file header: PSY3SONG");
-				CProgressDialog Progress;
-				Progress.Create();
-				Progress.SetWindowText("Loading... psycle song fileformat version 3...");
-				Progress.ShowWindow(SW_SHOW);
+
+				progress.emit(1,0,"");
+				progress.emit(2,0,"Loading... psycle song fileformat version 3...");
 				std::uint32_t version = 0;
 				std::uint32_t size = 0;
 				std::uint32_t index = 0;
@@ -999,13 +980,13 @@ namespace psycle
 				/* chunk_loop: */
 				while(pFile->ReadChunk(&Header, 4))
 				{
-					Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
+					progress.emit(4,f2i((pFile->GetPos()*16384.0f)/filesize),"");
 					::Sleep(1); ///< Allow screen refresh.
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)
 					{
 						loggers::trace("chunk: INFO");
-						Progress.SetWindowText("Loading... fileformat version information...");
+						progress.emit(2,0,"Loading... fileformat version information...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1025,7 +1006,7 @@ namespace psycle
 					else if(std::strcmp(Header,"SNGI")==0)
 					{
 						loggers::trace("chunk: SNGI");
-						Progress.SetWindowText("Loading... authorship information...");
+						progress.emit(2,0,"Loading... authorship information...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1086,7 +1067,7 @@ namespace psycle
 					else if(std::strcmp(Header,"SEQD")==0)
 					{
 						loggers::trace("chunk: SEQD");
-						Progress.SetWindowText("Loading... sequence...");
+						progress.emit(2,0,"Loading... sequence...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1124,7 +1105,7 @@ namespace psycle
 					else if(std::strcmp(Header,"PATD") == 0)
 					{
 						loggers::trace("chunk: PATD");
-						Progress.SetWindowText("Loading... patterns...");
+						progress.emit(2,0,"Loading... patterns...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1172,7 +1153,7 @@ namespace psycle
 					else if(std::strcmp(Header,"MACD") == 0)
 					{
 						loggers::trace("chunk: MACD");
-						Progress.SetWindowText("Loading... machines...");
+						progress.emit(2,0,"Loading... machines...");
 						int curpos(0);
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1209,7 +1190,7 @@ namespace psycle
 					else if(std::strcmp(Header,"INSD") == 0)
 					{
 						loggers::trace("chunk: INSD");
-						Progress.SetWindowText("Loading... instruments...");
+						progress.emit(2,0,"Loading... instruments...");
 						pFile->Read(version);
 						pFile->Read(size);
 						--chunkcount;
@@ -1238,7 +1219,7 @@ namespace psycle
 						if(!zero_size_foreign_chunk)
 						{
 							loggers::warning("foreign chunk found. skipping it.");
-							Progress.SetWindowText("Loading... foreign chunk found. skipping it...");
+							progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
 						}
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1272,7 +1253,7 @@ namespace psycle
 				}
 				quit_chunk_loop:
 				// now that we have loaded all the modules, time to prepare them.
-				Progress.m_Progress.SetPos(16384);
+				progress.emit(4,16384,"");
 				::Sleep(1); ///< ???
 				// test all connections for invalid machines. disconnect invalid machines.
 				for(int i(0) ; i < MAX_MACHINES ; ++i)
@@ -1330,18 +1311,15 @@ namespace psycle
 					}
 				}
 
-				// translate any data that is required
-				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
-				machineSoloed = solo;
 				// allow stuff to work again
+				machineSoloed = solo;
 				_machineLock = false;
-				Progress.OnCancel();
-				if((!pFile->Close()) || (chunkcount))
+				progress.emit(5,0,"");
+				if(chunkcount)
 				{
 					std::ostringstream s;
 					s << "Error reading from file '" << pFile->file_name() << "'" << std::endl;
-					if(chunkcount) s << "some chunks were missing in the file";
-					else s << "could not close the file";
+					s << "some chunks were missing in the file";
 					report.emit(s.str(), "Song Load Error.");
 					return false;
 				}
@@ -1366,12 +1344,10 @@ namespace psycle
 
 			try
 			{
-				CProgressDialog Progress;
 				if ( !autosave ) 
 				{
-					Progress.Create();
-					Progress.SetWindowText("Saving...");
-					Progress.ShowWindow(SW_SHOW);
+					progress.emit(1,0,"");
+					progress.emit(2,0,"Saving...");
 				}
 
 				std::uint32_t version, size, temp, chunkcount;
@@ -1392,8 +1368,7 @@ namespace psycle
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.SetRange(0,chunkcount);
-						Progress.m_Progress.SetStep(1);
+						progress.emit(3,chunkcount,"");
 					}
 
 					// chunk header
@@ -1414,8 +1389,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-					Progress.m_Progress.StepIt();
-					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				// the rest of the modules can be arranged in any order
@@ -1447,8 +1421,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-					Progress.m_Progress.StepIt();
-					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1486,7 +1459,7 @@ namespace psycle
 
 						temp = 1;  pFile->Write(temp); // sequence width
 
-						for(unsigned int i = 0; i < tracks(); i++)
+						for(int i = 0; i < tracks(); i++)
 						{
 							pFile->Write(_trackMuted[i]);
 							pFile->Write(_trackArmed[i]); // remember to count them
@@ -1496,8 +1469,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-					Progress.m_Progress.StepIt();
-					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1527,7 +1499,7 @@ namespace psycle
 						
 						pFile->WriteChunk(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
 
-						for (unsigned int i = 0; i < playLength; i++)
+						for (int i = 0; i < playLength; i++)
 						{
 							temp = playOrder[i]; pFile->Write(temp); // Sequence data.
 						}
@@ -1536,8 +1508,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-					Progress.m_Progress.StepIt();
-					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1594,8 +1565,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-					Progress.m_Progress.StepIt();
-					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1639,8 +1609,7 @@ namespace psycle
 
 						if ( !autosave ) 
 						{
-							Progress.m_Progress.StepIt();
-							::Sleep(1);
+							progress.emit(4,-1,"");
 						}
 					}
 				}
@@ -1685,8 +1654,7 @@ namespace psycle
 
 						if ( !autosave ) 
 						{
-							Progress.m_Progress.StepIt();
-							::Sleep(1);
+							progress.emit(4,-1,"");
 						}
 					}
 				}
@@ -1699,18 +1667,15 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-					Progress.m_Progress.SetPos(chunkcount);
-					::Sleep(1);
-					Progress.OnCancel();
+					progress.emit(5,0,"");
 				}
-
-				if (!pFile->Close()) throw std::runtime_error("couldn't close file");
 			}
 			catch(...)
 			{
 				std::ostringstream s;
 				s << "Error writing to " << pFile->file_name() << " !!!";
 				report.emit(s.str(),"File Save Error.");
+				progress.emit(5,0,"");
 				return false;
 			}
 			return true;
@@ -1760,7 +1725,6 @@ namespace psycle
 			}
 
 			// save our file
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 
 			boost::filesystem::path path(Global::configuration().GetSongDir(), boost::filesystem::native);
 			path /= "psycle.tmp";
@@ -1838,46 +1802,8 @@ namespace psycle
 			file.Close();
 			boost::filesystem::remove(path);
 
-			// randomize the dst's position
-
-			int xs,ys,x,y;
-			if (src >= MAX_BUSES)
-			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
-			}
-			else 
-			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
-			}
-			x=_pMachine[dst]->GetPosX()+32;
-			y=_pMachine[dst]->GetPosY()+ys+8;
-
-			bool bCovered = true;
-			while (bCovered)
-			{
-				bCovered = false;
-				for (int i=0; i < MAX_MACHINES; i++)
-				{
-					if (i != dst)
-					{
-						if (_pMachine[i])
-						{
-							if ((abs(_pMachine[i]->GetPosX() - x) < 32) &&
-								(abs(_pMachine[i]->GetPosY() - y) < 32))
-							{
-								bCovered = true;
-								i = MAX_MACHINES;
-								x = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-xs);
-								y = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CH-ys);
-							}
-						}
-					}
-				}
-			}
-			_pMachine[dst]->SetPosX(x);
-			_pMachine[dst]->SetPosY(y);
+			_pMachine[dst]->SetPosX(_pMachine[dst]->GetPosX()+32);
+			_pMachine[dst]->SetPosY(_pMachine[dst]->GetPosY()+8);
 
 			// delete all connections
 
@@ -1967,9 +1893,6 @@ namespace psycle
 				return false;
 			}
 			// ok now we get down to business
-
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
-
 			// save our file
 
 			CString filepath = Global::configuration().GetSongDir().c_str();

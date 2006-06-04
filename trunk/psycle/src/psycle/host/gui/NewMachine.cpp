@@ -241,8 +241,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnDestroy() 
 		{
-			CDialog::OnDestroy();
+			DestroyPluginInfo();
+			//clear internal machines class
+			for (int h=0; h<NUM_INTERNAL_MACHINES; h++)
+			{
+				zapObject(_pInternalMachines[h]);
+			}
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
+			CDialog::OnDestroy();
 		}
 
 		void CNewMachine::UpdateList(bool bInit)
@@ -1170,11 +1176,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			dllNames.clear();
 			_numPlugins = -1;
-			//clear internal machines class
-			for (int h=0; h<NUM_INTERNAL_MACHINES; h++)
-			{
-				zapObject(_pInternalMachines[h]);
-			}
 		}
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount)

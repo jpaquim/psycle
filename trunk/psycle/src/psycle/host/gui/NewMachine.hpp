@@ -3,7 +3,6 @@
 #pragma once
 #include <psycle/host/gui/resources/resources.hpp>
 #include <psycle/host/engine/machine.hpp>
-#include <psycle/host/gui/ProgressDialog.hpp>
 #include <afxcoll.h>
 #include <iostream>
 #include <typeinfo>
@@ -15,6 +14,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
 		const int NUM_INTERNAL_MACHINES = 7;
+
+		class CProgressDialog;
 
 		class PluginInfo
 		{

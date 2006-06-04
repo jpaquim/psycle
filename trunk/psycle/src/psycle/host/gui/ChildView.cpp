@@ -25,6 +25,7 @@
 #include <psycle/host/gui/NewMachine.hpp>
 #include <psycle/host/gui/PatDlg.hpp>
 #include <psycle/host/gui/SwingFillDlg.hpp>
+#include <psycle/host/gui/ProgressDialog.hpp>
 #include <cmath> // SwingFill
 #include <cderr.h>
 
@@ -119,7 +120,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
-			_pSong->report.connect(this,&CChildView::onSongReport);
+			_pSong->report.connect(this,&CChildView::onSignalReport);
+			_pSong->progress.connect(this,&CChildView::onSignalProgress);
+			progressdialog=0;
 
 			selpos.bottom = 0;
 			newselpos.bottom = 0;
@@ -286,9 +289,45 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pParentMain->_pSong=Global::_pSong;
 		}
 
-		void CChildView::onSongReport(const std::string & message, const std::string &caption)
+		void CChildView::onSignalReport(const std::string & message, const std::string &caption)
 		{
 			MessageBox(message.c_str(),caption.c_str(),MB_OK);
+		}
+		void CChildView::onSignalProgress(const std::uint32_t & type, const std::uint32_t &position, const std::string& message)
+		{
+			switch (type)
+			{
+				case 1:
+					progressdialog = new CProgressDialog();
+					progressdialog->Create();
+					progressdialog->m_Progress.SetPos(0);
+					progressdialog->ShowWindow(SW_SHOW);
+					break;
+				case 2:
+					if (!progressdialog) throw (int)1;
+					progressdialog->SetWindowText(message.c_str());
+					break;
+				case 3:
+					if (!progressdialog) throw (int)1;
+					progressdialog->m_Progress.SetRange(0,position);
+				case 4:
+					if (!progressdialog) throw (int)1;
+					if ( position == -1)
+					{
+						progressdialog->m_Progress.StepIt();
+					} else progressdialog->m_Progress.SetPos(position);
+					break;
+				case 5:
+					if (progressdialog)
+					{
+						progressdialog->OnCancel();
+						delete progressdialog;
+						progressdialog=0;
+					}
+					break;
+				default:
+					break;
+			}
 		}
 
 		/// Timer initialization
@@ -423,9 +462,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				RiffFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
 				_pSong->Save(&file,true);
-				/// \todo _pSong->Save() should not close a file which doesn't open. Add the following
-				// line when fixed. There are other places which need this too.
-				//file.Close();
+				file.Close();
 			}
 		}
 
@@ -681,7 +718,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
 					}				
-					//file.Close();  <- save handles this 
+					file.Close();
 				}
 				else 
 				{
@@ -815,7 +852,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
 					}
-					//file.Close(); <- save handles this
+					file.Close();
 				}
 			}
 			else
@@ -1003,7 +1040,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							return false;
 						}
 						_pSong->Save(&file);
-						//file.Close(); <- save handles this
+						file.Close();
 						return true;
 						break;
 					case IDNO:
@@ -2023,7 +2060,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			editPosition = 0;
 			_pSong->Load(&file);
-			//file.Close(); <- load handles this
+			file.Close();
 			_pSong->_saved=true;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');

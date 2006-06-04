@@ -13,6 +13,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		class CGearTracker;
 		class XMSamplerUI;
 
+		class CProgressDialog;
+
 		int const MAX_WIRE_DIALOGS = 16;
 
 		int const MAX_DRAW_MESSAGES = 32;
@@ -370,7 +372,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		private:
 
-			void onSongReport(const std::string & message, const std::string &caption);
+			void onSignalReport(const std::string & message, const std::string &caption);
+			void onSignalProgress(const std::uint32_t & type, const std::uint32_t &position, const std::string& message);
 			//Recent Files!!!!//
 			void AppendToRecent(std::string fName);
 			void CallOpenRecent(int pos);
@@ -429,6 +432,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CBitmap machinebkg;
 			HBITMAP hbmMachineSkin;
 			HBITMAP hbmMachineBkg;
+
+			CProgressDialog* progressdialog;
 
 			
 			HBITMAP hbmMachineDial;

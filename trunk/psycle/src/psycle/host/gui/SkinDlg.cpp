@@ -3,6 +3,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "psycle.hpp"
+#include "global.hpp"
 #include "SkinDlg.hpp"
 #include <psycle/host/configuration.hpp>
 #include <psycle/host/engine/helpers.hpp>

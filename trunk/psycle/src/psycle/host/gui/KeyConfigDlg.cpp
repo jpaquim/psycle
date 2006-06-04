@@ -3,6 +3,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include <psycle/host/gui/psycle.hpp>
+#include <psycle/host/global.hpp>
 #include <psycle/host/gui/KeyConfigDlg.hpp>
 #include <psycle/host/gui/inputhandler.hpp>
 #include <psycle/host/Configuration.hpp>
