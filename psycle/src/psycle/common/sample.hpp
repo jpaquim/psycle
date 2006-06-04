@@ -24,51 +24,6 @@ namespace psycle
 
 			namespace sample { const Sample pi(static_cast<Sample>(pi)); }
 
-			template<typename Real> inline const Real remainder(const Real & numerator, const Real & denominator)
-			{
-				Real result(numerator);
-				if(result >= denominator) result -= denominator;
-				if(result >= denominator) result = std::fmod(result, denominator);
-				return result;
-			}
-
-			template<typename Real> inline const Real clipped(const Real & minimum, const Real & sample, const Real & maximum)
-			{
-				if(minimum > sample) return minimum;
-				else if(sample > maximum) return maximum;
-				else return sample;
-			}
-
-			template<typename Real> inline const int rounded(const Real & x)
-			{
-				if(x > 0) return std::floor(x + Real(0.5));
-				else return std::ceil(x - Real(0.5));
-			}
-
-			#if PSYCLE__MATH__REAL == 8
-				/// when Real is 64-bit
-				inline const int truncated(const Real & x)
-				{
-					BOOST_STATIC_ASSERT(sizeof x == 8);
-					const Real result(x - 0.5 + 6755399441055744ULL); // 2^51 + 2^52
-					return *reinterpret_cast<const int *>(&result);
-				};
-			#endif
-
-			#if 0
-				/// for 32-bit
-				inline const Sample log(const Sample & x)
-				{ 
-					BOOST_STATIC_ASSERT((sizeof x == 4));
-					//assert(f > 0); 
-					const std::int32_t i(*reinterpret_cast<const std::int32_t *>(&x));
-					return
-						( (i & 0x7f800000) >> 23 )
-						+ (i & 0x007fffff) / Sample(0x800000)
-						- 0x7f;
-				}
-			#endif
-
 			class Sin_Sequence
 			{
 			public:
