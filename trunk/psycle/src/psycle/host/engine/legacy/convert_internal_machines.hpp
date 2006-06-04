@@ -4,7 +4,8 @@
 #include <psycle/host/engine/machine.hpp>
 #include <psycle/host/engine/internal_machines.hpp>
 #include <psycle/host/engine/plugin.hpp>
-#include <psycle/scale.hpp>
+#include <psycle/common/scale.hpp>
+#include <psycle/common/math/pi.hpp>
 #include <string>
 #include <exception>
 #include <map>
@@ -15,6 +16,9 @@ namespace psycle
 	{
 		namespace convert_internal_machines
 		{
+			namespace math = common::math;
+			typedef common::Scale::Real Real;
+
 			class Converter
 			{
 			public:
@@ -80,14 +84,14 @@ namespace psycle
 							}
 							break;
 						case gainer:
-							riff.Skip(sizeof(int));
+							riff.Skip(4);
 							{
 								int parameters [1]; riff.ReadChunk(parameters, sizeof parameters);
 								if(type == gainer) retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
 							break;
 						default:
-							riff.Skip(2 * sizeof(int));
+							riff.Skip(8);
 						}
 						switch(type)
 						{
@@ -96,7 +100,7 @@ namespace psycle
 							retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							break;
 						default:
-							riff.Skip(4 * sizeof(int));
+							riff.Skip(16);
 						}
 						switch(type)
 						{
@@ -104,7 +108,7 @@ namespace psycle
 							{
 								unsigned char parameters [4];
 								riff.Read(parameters[0]);
-								riff.Skip(sizeof(char));
+								riff.Skip(1);
 								riff.Read(parameters[2]);
 								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
@@ -270,7 +274,7 @@ namespace psycle
 							switch(parameter)
 							{
 							case gain:
-								value = scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
+								value = common::scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
 								break;
 							}
 						}
@@ -328,7 +332,7 @@ namespace psycle
 								value *= maximum / 0x100;
 								break;
 							case modulation_radians_per_second:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 3e-9 * Global::pConfig->GetSamplesPerSec());
+								value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 3e-9 * Global::pConfig->GetSamplesPerSec());
 								break;
 							case left_feedback:
 							case right_feedback:
@@ -352,10 +356,10 @@ namespace psycle
 							switch(parameter)
 							{
 							case cutoff_frequency:
-								value = scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Global::pConfig->GetSamplesPerSec());
+								value = common::scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Global::pConfig->GetSamplesPerSec());
 								break;
 							case modulation_sequencer_ticks:
-								value = scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::pPlayer->SamplesPerRow());
+								value = common::scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::pPlayer->SamplesPerRow());
 								break;
 							case resonance:
 							case modulation_amplitude:
@@ -373,16 +377,16 @@ namespace psycle
 							switch(parameter)
 							{
 							case am_radians_per_second:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Global::pConfig->GetSamplesPerSec());
+								value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Global::pConfig->GetSamplesPerSec());
 								break;
 							case am_glide:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 15 * 22050 * math::pi * 2).apply_inverse(value * 5e-6 * Global::pConfig->GetSamplesPerSec() * Global::pConfig->GetSamplesPerSec());
+								value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 15 * 22050 * math::pi * 2).apply_inverse(value * 5e-6 * Global::pConfig->GetSamplesPerSec() * Global::pConfig->GetSamplesPerSec());
 								break;
 							case fm_radians_per_second:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 2.5e-5 * Global::pConfig->GetSamplesPerSec());
+								value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 2.5e-5 * Global::pConfig->GetSamplesPerSec());
 								break;
 							case fm_bandwidth:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 5e-4 * Global::pConfig->GetSamplesPerSec());
+								value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 5e-4 * Global::pConfig->GetSamplesPerSec());
 								break;
 							}
 						}

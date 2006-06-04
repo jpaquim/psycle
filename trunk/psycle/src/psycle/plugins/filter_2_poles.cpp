@@ -2,7 +2,12 @@
 /// \brief filter in the frequency domain using 2 poles
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
+#include <psycle/common/math/pi.hpp>
+#include <psycle/common/math/clip.hpp>
+#include <psycle/common/math/remainder.hpp>
 namespace psycle { namespace plugin {
+
+namespace math = common::math;
 
 class Filter_2_Poles : public Plugin
 {
@@ -67,7 +72,7 @@ public:
 			break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
-			else if((*this)(modulation_stereo_dephase) == math::sample::pi) out << "pi";
+			else if((*this)(modulation_stereo_dephase) == Sample(math::pi)) out << "pi";
 			else out << "pi / " << math::pi / (*this)(modulation_stereo_dephase);
 			break;
 		default:
@@ -183,7 +188,7 @@ void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
 	}
 }
 
-inline const Real Filter_2_Poles::process(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
+inline const Filter_2_Poles::Real Filter_2_Poles::process(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
 	float tmp = static_cast<Sample>(buffer[0]);

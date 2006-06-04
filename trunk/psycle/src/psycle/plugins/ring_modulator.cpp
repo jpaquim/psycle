@@ -2,7 +2,11 @@
 /// \brief ring modulator with frequency modulation of the amplitude modulation
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
+#include <psycle/common/math/pi.hpp>
+#include <psycle/common/math/remainder.hpp>
 namespace psycle { namespace plugin {
+
+namespace math = common::math;
 
 class Ring_Modulator : public Plugin
 {
@@ -134,7 +138,7 @@ void Ring_Modulator::process(Sample l[], Sample r[], int samples, int)
 		phases_[oscillator] = math::remainder(phases_[oscillator], math::pi * 2);
 }
 
-inline const Real Ring_Modulator::process(const Real & sample, const Real & modulation) const
+inline const Ring_Modulator::Real Ring_Modulator::process(const Real & sample, const Real & modulation) const
 {
 	return sample * modulation;
 }
