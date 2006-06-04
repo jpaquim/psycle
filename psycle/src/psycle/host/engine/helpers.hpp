@@ -3,6 +3,7 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include <cmath>
+#include <cstdint>
 #include <universalis/compiler/numeric.hpp>
 #include <boost/static_assert.hpp>
 namespace psycle
@@ -49,22 +50,21 @@ namespace psycle
 				static float fMap_255_100[257];
 		};
 
-		inline float fast_log2(float f) 
+		inline float fast_log2(float const f)
 		{ 
 			BOOST_STATIC_ASSERT((sizeof f == 4));
-			BOOST_STATIC_ASSERT((sizeof f == sizeof(int)));
 			//assert(f > 0); 
-			int i = (*(int *)&f); 
-			return (((i&0x7f800000)>>23)-0x7f)+(i&0x007fffff)/(float)0x800000; 
+			std::uint32_t const i(*reinterpret_cast<std::uint32_t const*>(&f));
+			return ((i & 0x7f800000) >> 23) - 0x7f + (i & 0x007fffff) / (float)0x800000; 
 		}
 
 		/// converts a floating point number to an integer.
-		inline int f2i(float f) 
+		inline std::int32_t f2i(float f) 
 		{ 
 			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // or intel?
 				///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
 				///\todo this is probably slowing down things on compilers using sse(2)
-				int i;
+				std::int32_t i;
 				double const half(0.5);
 				_asm
 				{ 
@@ -75,7 +75,7 @@ namespace psycle
 				return i;
 			#else
 				///\todo specify the rounding mode
-				return static_cast<int>(f);
+				return static_cast<std::int32_t>(f);
 			#endif
 		}
 		

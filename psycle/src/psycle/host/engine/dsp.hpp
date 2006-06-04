@@ -20,7 +20,7 @@ namespace psycle
 
 		/// various signal processing utility functions.
 		/// mixes two signals.
-		static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
+		inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 		{
 			--pSrcSamples;
 			--pDstSamples;
@@ -32,7 +32,7 @@ namespace psycle
 		}
 		/// multiply a signal by a ratio, inplace.
 		///\see MovMul()
-		static inline void Mul(float *pDstSamples, int numSamples, float mul)
+		inline void Mul(float *pDstSamples, int numSamples, float mul)
 		{
 			--pDstSamples;
 			do
@@ -43,7 +43,7 @@ namespace psycle
 		}
 		/// multiply a signal by a ratio.
 		///\see Mul()
-		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
+		inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
 		{
 			--pSrcSamples;
 			--pDstSamples;
@@ -53,25 +53,26 @@ namespace psycle
 			}
 			while (--numSamples);
 		}
-		static inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
+		inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 		{
 			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
 		}
 		/// zero-out a signal buffer.
-		static inline void Clear(float *pDstSamples, int numSamples)
+		inline void Clear(float *pDstSamples, int numSamples)
 		{
 			std::memset(pDstSamples, 0, numSamples * sizeof(float));
 		}
-		/// converts a double to an int.
-		static inline int F2I(double d)
+
+		/// converts a double to a std::uint32_t
+		inline std::int32_t F2I(double d)
 		{
 			const double magic(6755399441055744.0); /// 2^51 + 2^52
 			/*const*/ double tmp((d-0.5) + magic);
-			return *reinterpret_cast<int*>(&tmp);
+			return *reinterpret_cast<std::int32_t*>(&tmp);
 		};
 
 		/// finds the maximum amplitude in a signal buffer.
-		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+		inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 		{
 #if PSYCLE__CONFIGURATION__RMS_VUS
 			// This is just a test to get RMS dB values.
@@ -127,10 +128,11 @@ namespace psycle
 			return vol;
 #endif
 		}
+
 		/// finds the maximum amplitude in a signal buffer.
 		/// It contains "VST" because initially the return type for native machines 
 		/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
-		static inline float GetMaxVSTVol(float *pSamplesL, float *pSamplesR, int numSamples)
+		inline float GetMaxVSTVol(float *pSamplesL, float *pSamplesR, int numSamples)
 		{
 			return GetMaxVol(pSamplesL,pSamplesR,numSamples);
 		}
@@ -159,11 +161,11 @@ namespace psycle
 		/// Cure for malicious samples
 		/// Type : Filters Denormals, NaNs, Infinities
 		/// References : Posted by urs[AT]u-he[DOT]com
-		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const & inNumberOfSamples )
+		void inline erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const inNumberOfSamples )
 		{
-			unsigned int* inArrayOfFloats = (unsigned int*) inSamples;
-			unsigned int sample;
-			unsigned int exponent;
+			std::uint32_t* inArrayOfFloats(reinterpret_cast<std::uint32_t*>(inSamples));
+			std::uint32_t sample;
+			std::uint32_t exponent;
 			for ( int i = 0; i < inNumberOfSamples; i++ )
 			{
 				sample = *inArrayOfFloats;
@@ -178,7 +180,7 @@ namespace psycle
 
 		/// Cure for malicious samples
 		/// Type : Filters Denormals, NaNs, Infinities
-		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
+		inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
 			#if 1
 				erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
@@ -186,19 +188,22 @@ namespace psycle
 			#else
 				// a 1-bit "sinus" dither
 				float id(float(1.0E-18));
-				pSamplesL[s] += id;
-				pSamplesR[s] += id;
-				id = -id;
+				for(unsigned int s(0); s < numSamples; ++s)
+				{
+					pSamplesL[s] += id;
+					pSamplesR[s] += id;
+					id = -id;
+				}
 			#endif
 		}
 
-		static inline float dB(float amplitude) // amplitude normalized to 1.0f.
+		inline float dB(float amplitude) // amplitude normalized to 1.0f.
 		{
-			return 20.0f * log10f(amplitude);
+			return 20.0f * std::log10f(amplitude);
 		}
-		static inline float dB2Amp(float db)
+		inline float dB2Amp(float db)
 		{
-			return pow(10.0f,db/20.0f);
+			return std::pow(10.0f,db/20.0f);
 		}
 
 		/// sample interpolator kinds.
