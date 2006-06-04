@@ -3,6 +3,7 @@
 #pragma once
 #include <cmath>
 #include <psycle/host/engine/helpers.hpp>
+#include <psycle/common/math/erase_all_nans_infinities_and_denormals.hpp>
 namespace psycle
 {
 	namespace host
@@ -160,31 +161,11 @@ namespace psycle
 
 		/// Cure for malicious samples
 		/// Type : Filters Denormals, NaNs, Infinities
-		/// References : Posted by urs[AT]u-he[DOT]com
-		void inline erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const inNumberOfSamples )
-		{
-			std::uint32_t* inArrayOfFloats(reinterpret_cast<std::uint32_t*>(inSamples));
-			std::uint32_t sample;
-			std::uint32_t exponent;
-			for ( int i = 0; i < inNumberOfSamples; i++ )
-			{
-				sample = *inArrayOfFloats;
-				exponent = sample & 0x7F800000;
-
-				// exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
-				// exponent > 0 is 0 if denormalized, otherwise 1
-
-				*inArrayOfFloats++ = sample * ((exponent < 0x7F800000) & (exponent > 0));
-			}
-		}
-
-		/// Cure for malicious samples
-		/// Type : Filters Denormals, NaNs, Infinities
 		inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
 			#if 1
-				erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
-				erase_All_NaNs_Infinities_And_Denormals(pSamplesR,numsamples);
+				common::math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
+				common::math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
 			#else
 				// a 1-bit "sinus" dither
 				float id(float(1.0E-18));

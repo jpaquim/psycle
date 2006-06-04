@@ -2,8 +2,13 @@
 /// \brief delay modulated by a sine
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
+#include <psycle/common/math/sinus_sequence.hpp>
+#include <psycle/common/math/pi.hpp>
+#include <psycle/common/math/remainder.hpp>
 #include <cassert>
 namespace psycle { namespace plugin {
+
+namespace math = common::math;
 
 class Flanger : public Plugin
 {
@@ -74,7 +79,7 @@ public:
 			 break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
-			else if((*this)(modulation_stereo_dephase) == math::sample::pi) out << "pi";
+			else if((*this)(modulation_stereo_dephase) == Sample(math::pi)) out << "pi";
 			else out << "pi / " << math::pi / (*this)(modulation_stereo_dephase);
 			break;
 		case left_feedback:
@@ -103,14 +108,14 @@ public:
 protected:
 	virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
 	virtual void samples_per_second_changed();
-	inline void process(math::Sin_Sequence & sin_sequence, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
+	inline void process(math::sinus_sequence &, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
 	inline void resize(const Real & delay);
 	enum Channels { left, right, channels };
 	std::vector<Real> buffers_[channels];
 	int delay_in_samples_, writes_[channels];
 	Real weight; //<Sartorius> for interpolation
 	Real modulation_amplitude_in_samples_, modulation_radians_per_sample_, modulation_phase_;
-	math::Sin_Sequence sin_sequences_[channels];
+	math::sinus_sequence sin_sequences_[channels];
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(Flanger)
@@ -185,16 +190,15 @@ void Flanger::process(Sample l[], Sample r[], int samples, int)
 	modulation_phase_ = math::remainder(modulation_phase_ + modulation_radians_per_sample_ * samples, math::pi * 2);
 }
 
-inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw()
+inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw()
 {
-	#if 0
+	#if 0 // disabled for now because some assertion is failing
 		//<Sartorius> linear interpolation
 
 		const int size(buffer.size());
 		for(int sample(0) ; sample < samples ; ++sample)
 		{
-			const Real sin(sin_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
-
+			const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
 
 			assert(-1 <= sin);
 			assert(sin <= 1);
@@ -268,11 +272,11 @@ inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real
 			case no:
 			default:
 				{
-					const int size(buffer.size());
+					const int size(static_cast<int>(buffer.size()));
 					for(int sample(0) ; sample < samples ; ++sample)
 					{
-						const Real sin(sin_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
-						/* test without optimized sin sequence...
+						const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
+						/* test without optimized sinus sequence...
 						Real sin;
 						if(&sin_sequence == &sin_sequences_[left])
 							sin = std::sin(modulation_phase_);

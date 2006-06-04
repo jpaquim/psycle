@@ -6,7 +6,7 @@ namespace psycle
 	{
 		namespace math
 		{
-			class sinus_Sequence
+			class sinus_sequence
 			{
 				public:
 					/// [bohan] use 64-bit floating point numbers or else accuracy is not sufficient
