@@ -14,9 +14,9 @@ namespace psycle
 					inline sinus_sequence() : index_(0) {}
 					inline void operator()(real phase, real radians_per_sample) throw()
 					{
-						step_ = static_cast<real>(2 * std::cos(radians_per_sample));
-						sequence_[0] = static_cast<real>(std::sin(phase - radians_per_sample));
-						sequence_[1] = static_cast<real>(std::sin(phase - 2 * radians_per_sample));
+						step_ = (2 * std::cos(radians_per_sample));
+						sequence_[0] = (std::sin(phase - radians_per_sample));
+						sequence_[1] = (std::sin(phase - 2 * radians_per_sample));
 						index_ = 0;
 					}
 					real inline operator()() throw()
