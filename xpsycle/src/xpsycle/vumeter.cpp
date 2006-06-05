@@ -23,6 +23,7 @@
 #include "machine.h"
 #include <cmath>
 
+namespace psycle { namespace host {
 
 VuMeter::VuMeter()
   : NPanel(), l_(1),r_(1)
@@ -117,4 +118,4 @@ void VuMeter::setPegel( float l, float r )
 
 }
 
-
+}}

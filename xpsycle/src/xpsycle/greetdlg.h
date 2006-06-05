@@ -24,6 +24,8 @@
 
 class NMemo;
 
+namespace psycle { namespace host {
+
 /**
 @author Stefan Nattkemper
 */
@@ -43,5 +45,7 @@ private:
 
     void setGreetz();
 };
+
+}}
 
 #endif

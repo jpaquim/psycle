@@ -32,6 +32,8 @@
 #include <ngrs/nframeborder.h>
 
 
+namespace psycle { namespace host {
+
 SequencerBar::SequencerBar()
   : NPanel()
 {
@@ -754,3 +756,5 @@ void SequencerBar::onMoveCursorPaste( NButtonEvent * ev )
 
 //  }
 }
+
+}}

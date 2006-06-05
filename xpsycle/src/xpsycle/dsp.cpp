@@ -3,10 +3,10 @@
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "dsp.h"
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace dsp
 		{
 #if PSYCLE__CONFIGURATION__RMS_VUS	
@@ -72,3 +72,5 @@
 
 			}
 		}
+	}
+}

@@ -24,10 +24,10 @@
 
 
 
-//namespace psycle
-//{
-	//namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		/// Index of MasterMachine
 //		Machine::id_type const MASTER_INDEX(128);
 
@@ -462,5 +462,5 @@
 				/// Loader for psycle fileformat version 2.
 				bool LoadOldFileFormat(RiffFile* pFile, bool fullopen);
 		};
-//	}
-//}
+	}
+}

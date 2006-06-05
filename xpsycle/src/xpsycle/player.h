@@ -4,11 +4,12 @@
 #include "song.h"
 #include "serializer.h"
 #include "dither.h"
-//namespace psycle
-//{
-//	namespace host
-//	{
-		class Machine;
+#include "machine.h"
+namespace psycle
+{
+	namespace host
+	{
+		//class Machine;
 
 		/// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 		class Player
@@ -136,5 +137,5 @@
 			short _loop_count;
 			short _loop_line;
 		};
-//	}
-//}
+	}
+}

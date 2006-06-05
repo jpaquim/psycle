@@ -3,10 +3,10 @@
 #pragma once
 #include "constants.h"
 #include "fileio.h"
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		/// an instrument is a waveform with some extra features added around it.
 		class Instrument
 		{
@@ -95,5 +95,5 @@
 
 		/// Instrument index of the wave preview.
 		Instrument::id_type const PREV_WAV_INS(255);
-//	}
-//}
+	}
+}

@@ -25,6 +25,9 @@
 #include <inttypes.h>
 #include <ngrs/ndockpanel.h>
 
+namespace psycle {
+	namespace host {
+
 const std::string PSYCLE__VERSION="X";
 
 
@@ -237,6 +240,8 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
     }
 }
 
+}
+}
 
 
 

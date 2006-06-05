@@ -23,10 +23,14 @@
 #include <ngrs/npanel.h>
 
 class NLine;
+class NSlider;
+
+namespace psycle { namespace host {
+
 class Machine;
 class FrameMachine;
 class MasterDlg;
-class NSlider;
+
 
 /**
 @author Stefan
@@ -228,6 +232,7 @@ private:
     void onPosChanged(NSlider* sender, double value);
 };
 
-
+}
+}
 
 #endif

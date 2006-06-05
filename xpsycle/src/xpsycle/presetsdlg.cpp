@@ -30,7 +30,8 @@
 #include <ngrs/nborderlayout.h>
 #include <ngrs/nitem.h>
 
-
+namespace psycle {
+	namespace host {
 
 using namespace std;
 
@@ -191,5 +192,6 @@ void PresetsDlg::onUseClicked( NButtonEvent * ev )
   };
 }
 
-
+}
+}
 

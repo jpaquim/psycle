@@ -19,6 +19,9 @@
   ***************************************************************************/
 #include "inputhandler.h"
 
+namespace psycle {
+namespace host {
+
 InputHandler::InputHandler()
 {
 }
@@ -48,4 +51,5 @@ Key::Key( int c, int k )
   if (c ) ctrl = ControlMask; else ctrl = 0;
 }
 
-
+}
+}

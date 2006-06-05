@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <cassert>
 
+namespace psycle { namespace host {
 
 template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
 {
@@ -263,4 +264,6 @@ public:
 
 };
 
+
+}}
 #endif

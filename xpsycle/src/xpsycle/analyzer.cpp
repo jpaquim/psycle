@@ -20,7 +20,7 @@
 #include "analyzer.h"
 #include <ngrs/nwindow.h>
 
-//namespace psycle { namespace host {
+namespace psycle { namespace host {
 
 
 Analyzer::Analyzer()
@@ -191,5 +191,5 @@ void Analyzer::onTimer( )
 }
 }
 
-//}}
+}}
 

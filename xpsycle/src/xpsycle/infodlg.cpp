@@ -21,6 +21,8 @@
 #include "infodlg.h"
 #include <ngrs/nmemo.h>
 
+namespace psycle { namespace host {
+
 InfoDlg::InfoDlg()
   : NWindow()
 {
@@ -54,3 +56,5 @@ void InfoDlg::loadFromFile( const std::string & fileName )
     setTitle("Help path wrong");
   }
 }
+
+}}

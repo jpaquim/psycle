@@ -1,5 +1,9 @@
 // Constants used by psycle
 #pragma once
+namespace psycle
+{
+	namespace host
+	{
 
 /// number of samples per tweak slide update
 const int TWEAK_SLIDE_SAMPLES = 64;
@@ -77,3 +81,6 @@ typedef unsigned char byte;
 typedef unsigned short word;
 /// \todo add real detection of type size
 typedef unsigned long dword;
+
+	}
+}

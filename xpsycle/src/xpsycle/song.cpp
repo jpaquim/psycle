@@ -32,10 +32,10 @@
 //	#error "sorry, only works on little endian machines"
 //#endif
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		/// the riff WAVE/fmt chunk.
 		///\todo this is already defined elsewhere prodos : it`s defined in riff
 		///\todo is this used for file i/o ? if so we'd need byte-alignment
@@ -2068,5 +2068,5 @@
 bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 {
 }
-//	}
-//}
+  }
+}

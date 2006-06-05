@@ -5,6 +5,10 @@
 //#include <universalis/operating_system/exception.hpp>
 #include <cmath>
 #include <cfloat>
+namespace psycle
+{
+	namespace host
+	{
 	namespace dsp
 	{
 		#define TPI 6.28318530717958647692528676655901
@@ -278,3 +282,5 @@
 			float fLastSampleRight[2];
 		};
 	}
+}
+}

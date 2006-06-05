@@ -5,10 +5,10 @@
 //#include PACKAGENERIC
 #include "dither.h"
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace dsp
 		{
 			Dither::Dither() : bitdepth(16), pdf(triangular), noiseshape(none)
@@ -84,4 +84,5 @@
 				}
 			}
 		}
-//	}
+	}
+}

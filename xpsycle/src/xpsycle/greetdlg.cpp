@@ -22,6 +22,7 @@
 #include <ngrs/nmemo.h>
 #include <ngrs/nitem.h>
 
+namespace psycle { namespace host {
 
 GreetDlg::GreetDlg()
   : NWindow()
@@ -57,4 +58,4 @@ void GreetDlg::setGreetz( )
   memo->setText("_sue_ [Extreme testing],[JAZ] Our project father!]\n[SAS] SOLARiS [project-ps WebMaster]\nAlk [Extreme testing + coding]\nAll at #psycle[Efnet]\nAll the people from the Forums\nbohan\nByte\nCyanPhase for porting [VibraSynth]\ndazld\nDJMirage\nDrax_D[for asking to be here:D]\nDruttis [Machines]\nFrodix\nFelix Kaplan / Spirit of India\nFelix Petrescu 'WakaX'\nGerwin / Freeh2o\nImagineer\nKoopeer\nkrokpitr\nKrzysztof Foltman / fsm [coding help]\nksn [Psyceledics WebMaster]\nlastfuture\nLegoStar [iso]\nLoby [for being away])\nPikari\npooplog[Machines+Config]\nsampler\nTAo-AAS\nTimEr[Site Graphics and more\nVir|us\n");
 }
 
-
+}}

@@ -17,10 +17,10 @@
 #include "plugin.h" //<psycle/host/engine/plugin.hpp>
 //#include <psycle/host/engine/VSTHost.hpp>
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 //		extern CPsycleApp theApp;
 
 
@@ -810,5 +810,5 @@
 
 
 
-//	}
-//}
+	}
+}

@@ -22,9 +22,12 @@
 
 #include <ngrs/npanel.h>
 
+namespace psycle { namespace host {
+
 /**
 @author Stefan Nattkemper
 */
+
 class VuMeter : public NPanel
 {
 public:
@@ -47,5 +50,7 @@ private:
     NColor vu3;
     NColor vu4;
 };
+
+}}
 
 #endif

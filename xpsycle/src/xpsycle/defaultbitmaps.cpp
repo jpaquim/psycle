@@ -20,6 +20,9 @@
 #include "defaultbitmaps.h"
 #include "configuration.h"
 
+namespace psycle {
+	namespace host {
+
 //////// The bitmaps
 
 /* XPM */
@@ -12036,3 +12039,5 @@ NBitmap & DefaultBitmaps::machine_skin() {
 }
 
 
+}
+}

@@ -32,6 +32,8 @@ class NProgressBar;
 class NButton;
 class NItemEvent;
 
+namespace psycle { namespace host {
+
 /**
 @author Stefan Nattkemper
 */
@@ -119,5 +121,7 @@ private:
     void onNumberRBtn(NButtonEvent* ev);
     void onSequencerRBtn(NButtonEvent* ev);
 };
+
+}}
 
 #endif

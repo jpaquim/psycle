@@ -29,7 +29,8 @@
 @author Stefan
 */
 
-//namespace psycle { namespace host {
+namespace psycle {
+namespace host {
 
 
 const int MAX_SCOPE_BANDS = 128;
@@ -70,5 +71,5 @@ private:
 
 };
 
-//}}
+}}
 #endif

@@ -23,6 +23,8 @@
 #include <ngrs/nlistlayout.h>
 #include <ngrs/nmemo.h>
 
+namespace psycle { namespace host {
+
 SongpDlg::SongpDlg()
   : NWindow()
 {
@@ -83,3 +85,4 @@ void SongpDlg::setVisible( bool on )
 }
 
 
+}}

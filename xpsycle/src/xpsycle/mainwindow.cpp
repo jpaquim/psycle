@@ -38,6 +38,8 @@
 #include <ngrs/nbevelborder.h>
 #include <ngrs/nstatusbar.h>
 
+namespace psycle { namespace host {
+
 MainWindow::MainWindow()
   : NWindow()
 {
@@ -1224,3 +1226,5 @@ void MainWindow::onInstrumentCbx( NItemEvent * ev )
   Global::pSong()->auxcolSelected= index;
   insCombo_->setIndex(index);
 }
+
+}}

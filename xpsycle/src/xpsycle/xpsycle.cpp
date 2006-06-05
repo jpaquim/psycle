@@ -31,6 +31,8 @@
 
 using namespace std;
 
+using namespace psycle::host;
+
 /*inline int f2i(double d) { 
     // 2^51 + 2^
     asm volatile("fldcw %0"::"m"(0x137f));

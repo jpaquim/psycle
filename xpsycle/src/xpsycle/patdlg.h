@@ -25,6 +25,8 @@
 class NButton;
 class NSpinEdit;
 
+namespace psycle { namespace host {
+
 /**
 @author Stefan
 */
@@ -58,5 +60,7 @@ private:
     void onDecBtnClicked(NButtonEvent* ev);
 
 };
+
+}}
 
 #endif

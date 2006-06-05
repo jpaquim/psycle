@@ -33,6 +33,7 @@
 #include <ngrs/nframeborder.h>
 #include <ngrs/nfontmetrics.h>
 
+namespace psycle { namespace host {
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
 PatternView::PatternView()
@@ -1954,3 +1955,4 @@ void CChildView::
       Repaint(DMData);
     }
 */
+}}

@@ -33,6 +33,8 @@
 @author Stefan
 */
 
+namespace psycle { namespace host {
+
 class PatternView : public NPanel
 {
     class Header: public NPanel {
@@ -217,8 +219,8 @@ public:
     NScrollBar* vScrBar();
     NScrollBar* hScrBar();
 
-    void PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine);
-    void StopNote(int note,bool bTranspose=true,Machine*pMachine=NULL);
+    void PlayNote(int note,int velocity,bool bTranspose,psycle::host::Machine*pMachine);
+    void StopNote(int note,bool bTranspose=true,psycle::host::Machine* pMachine=NULL);
 
     void noteOffAny();
     void clearCursorPos();
@@ -259,4 +261,6 @@ private:
   int outtrack;
 };
 
+
+}}
 #endif

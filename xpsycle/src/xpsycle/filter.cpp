@@ -5,10 +5,10 @@
 #include "player.h"
 #include "filter.h"
 #include "global.h"
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace dsp
 		{
 			FilterCoeff Filter::_coeffs;
@@ -186,5 +186,5 @@
 
 			}
 		}
-//	}
-//}
+	}
+}

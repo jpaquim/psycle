@@ -23,6 +23,8 @@
 #include "configuration.h"
 #include "defaultbitmaps.h"
 
+namespace psycle {
+  namespace host {
 
 Song* Global::pSong() {
   static Song* s = new Song();
@@ -62,4 +64,7 @@ Global::Global()
 
 Global::~Global()
 {
+}
+
+}
 }

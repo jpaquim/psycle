@@ -27,6 +27,8 @@
 
 class NMemo;
 
+namespace psycle { namespace host {
+
 /**
 @author Stefan
 */
@@ -53,4 +55,5 @@ private:
 
 };
 
+}}
 #endif

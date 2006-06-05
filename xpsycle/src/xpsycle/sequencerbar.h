@@ -36,6 +36,8 @@ class N7SegDisplay;
 @author Stefan
 */
 
+namespace psycle { namespace host {
+
 class PatternView;
 
 class SequencerBar : public NPanel
@@ -113,4 +115,5 @@ private:
     NGridLayout gridLayout;
 };
 
+}}
 #endif

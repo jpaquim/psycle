@@ -19,6 +19,8 @@
   ***************************************************************************/
 #include "xminstrument.h"
 
+namespace psycle { namespace host {
+
 void XMInstrument::WaveData::Load(DeSerializer* file)
 { /// todo port
     uint32_t size1,size2;
@@ -145,3 +147,4 @@ XMInstrument::~XMInstrument()
 }
 
 
+}}

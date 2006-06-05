@@ -33,7 +33,8 @@
 @author Stefan
 */
 
-
+namespace psycle {
+	namespace host {
 
 class Configuration : public NObject {
 public:
@@ -238,4 +239,6 @@ private:
     void onConfigTagParse(const std::string & tagName);
 };
 
+}
+}
 #endif
