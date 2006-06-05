@@ -7,8 +7,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // internal machines
 
-//namespace psycle {
-//	namespace host {
+namespace psycle {
+	namespace host {
 
 		/// dummy machine.
 		class Dummy : public Machine
@@ -259,5 +259,5 @@
 			bool bisTicking;
 
 		};
-//	}
-//}
+	}
+}

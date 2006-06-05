@@ -26,6 +26,8 @@
 #include <ngrs/nscrollbox.h>
 #include <ngrs/nlabel.h>
 
+namespace psycle { namespace host {
+
 
 class Machine;
 class MachineGUI;
@@ -99,4 +101,5 @@ private:
 
 };
 
+}}
 #endif

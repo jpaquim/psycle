@@ -22,14 +22,18 @@
 
 #include "machine.h"
 #include "plugin_interface.h"
-#include "player.h"
 #include "global.h"
+#include "player.h"
 #include "configuration.h"
 #include <cassert>
 
 /**
 @author Stefan
 */
+
+namespace psycle {
+	namespace host {
+
 
 class DeSerializer;
 
@@ -177,5 +181,6 @@ inline void Proxy::GetData(void * pData) throw()
 inline int Proxy::GetDataSize() throw()
 { assert((*this)()); return plugin().GetDataSize(); }
 
-
+}
+}
 #endif

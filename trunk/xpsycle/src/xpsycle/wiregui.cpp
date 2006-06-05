@@ -23,6 +23,8 @@
 #include <cmath>
 #include <cstdio>
 
+namespace psycle { namespace host {
+
 template<typename X, typename Y>
 inline double min (X x,Y y) {
     return std::min((double)(x),(double)(y));
@@ -147,4 +149,4 @@ void WireGUI::drawArrow( NGraphics * g )
   g->drawPolygon(&fillPoly[3], 4);
 }
 
-
+}}

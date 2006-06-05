@@ -24,6 +24,9 @@
 #include <map>
 #include <ngrs/napp.h>
 
+namespace psycle {
+  namespace host {
+
 /**
 @author Stefan
 */
@@ -452,5 +455,8 @@ private:
     std::map<Key,int> keyMap;
 
 };
+
+}
+}
 
 #endif

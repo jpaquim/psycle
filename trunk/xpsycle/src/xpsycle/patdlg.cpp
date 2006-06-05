@@ -24,6 +24,8 @@
 #include <ngrs/npanel.h>
 #include <ngrs/nflowlayout.h>
 
+namespace psycle { namespace host {
+
 PatDlg::PatDlg()
   : NWindow()
 {
@@ -130,3 +132,4 @@ void PatDlg::onDecBtnClicked( NButtonEvent * ev )
   lineNumEdit_->repaint();
 }
 
+}}

@@ -52,10 +52,10 @@
 #include "mersennetwister.h"
 #include <cmath>
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace dsp
 		{
 			unsigned long	MersenneTwister::mt[N];		 /* the array for the state vector  */
@@ -196,7 +196,7 @@
 			}
 
 		}
-//	}
-//}
+	}
+}
 
 

@@ -24,6 +24,8 @@
 #include "machine.h"
 #include "dsp.h"
 
+namespace psycle { namespace host {
+
 MasterDlg::MasterDlg(Machine* master)
   : NWindow()
 {
@@ -158,7 +160,4 @@ MasterDlg::Led::Led( ) : number_(0)
   setFont(font);
 }
 
-
-
-
-
+}}

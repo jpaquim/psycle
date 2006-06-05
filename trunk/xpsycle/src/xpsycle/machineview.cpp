@@ -27,7 +27,7 @@
 #include <ngrs/nalignlayout.h>
 #include <ngrs/napp.h>
 
-
+namespace psycle { namespace host {
 
 MachineView::MachineView()
   : NPanel()
@@ -238,7 +238,8 @@ void MachineView::updateVUs( )
   }
 }
 
-
+}
+}
 
 
 

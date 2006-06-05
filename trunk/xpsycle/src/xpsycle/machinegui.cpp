@@ -30,6 +30,9 @@
 #include <ngrs/nwindow.h>
 #include <ngrs/nslider.h>
 
+namespace psycle {
+namespace host {
+
 NPixmap MachineGUI::pixmap;
 int MachineGUI::c = 0;
 
@@ -631,3 +634,5 @@ void MachineGUI::repaintVUMeter( )
 {
 }
 
+}
+}

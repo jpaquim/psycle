@@ -27,6 +27,8 @@
 #include <ngrs/nlabel.h>
 #include <ngrs/nbevelborder.h>
 
+namespace psycle {
+namespace host {
 
 class InfoLine : public NPanel {
 public:
@@ -104,5 +106,8 @@ private:
   void onCancelBtn(NButtonEvent* sender);
 
 };
+
+}
+}
 
 #endif

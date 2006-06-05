@@ -7,10 +7,10 @@
 #include "filter.h"
 //#include <operating_system/logger.hpp>
 #include <cstdint>
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		Instrument::Instrument()
 		:
 			waveDataL(),
@@ -306,5 +306,5 @@
 				delete[] pData2;
 			}
 		}
-//	}
-//}
+	}
+}

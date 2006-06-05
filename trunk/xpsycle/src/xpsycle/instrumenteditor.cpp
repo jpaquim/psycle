@@ -35,6 +35,9 @@
 #include <ngrs/ncheckbox.h>
 #include <ngrs/nitemevent.h>
 
+namespace psycle {
+namespace host {
+
 InstrumentEditor::InstrumentEditor()
   : NWindow()
 {
@@ -403,4 +406,7 @@ void InstrumentEditor::onPatRowEdit( const NKeyEvent & event )
 void InstrumentEditor::onShowEnvelopeEditor( NButtonEvent * ev )
 {
   envelopeEditor->setVisible(true);
+}
+
+}
 }

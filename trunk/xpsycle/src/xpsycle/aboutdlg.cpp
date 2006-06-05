@@ -20,6 +20,8 @@
 #include "aboutdlg.h"
 #include <ngrs/nlabel.h>
 
+namespace psycle { namespace host {
+
 AboutDlg::AboutDlg()
   : NWindow()
 {
@@ -44,3 +46,4 @@ int AboutDlg::onClose( )
 }
 
 
+}}

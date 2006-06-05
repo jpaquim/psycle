@@ -1,6 +1,8 @@
 #include <cstdint>
 #pragma once
 
+namespace psycle { namespace host {
+
 class PatternEntry
 		{
 			public:
@@ -62,3 +64,5 @@ namespace PatternCmd {
 				FINE_PATTERN_DELAY = 0xF0  // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
 			};
 }		
+
+}}

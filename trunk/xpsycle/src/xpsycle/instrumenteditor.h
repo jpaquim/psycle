@@ -31,6 +31,9 @@ class NCheckBox;
 class NItemEvent;
 class EnvDialog;
 
+namespace psycle {
+namespace host{
+
 /**
 @author Stefan Nattkemper
 */
@@ -87,5 +90,8 @@ private:
 
     void onPatRowEdit(const NKeyEvent & event);
 };
+
+}
+}
 
 #endif

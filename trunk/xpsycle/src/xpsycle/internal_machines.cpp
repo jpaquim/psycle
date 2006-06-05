@@ -8,8 +8,8 @@
 //\todo : The information required from this include should go to constants.hpp
 #include "inputhandler.h"
 
-//namespace psycle {
-//	namespace host {
+namespace psycle {
+	namespace host {
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Dummy
@@ -1174,4 +1174,5 @@
 					Global::song()._pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}
-//	}
+	}
+}

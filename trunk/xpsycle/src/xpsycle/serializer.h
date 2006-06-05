@@ -27,6 +27,7 @@
 
 #include <inttypes.h>
 
+namespace psycle { namespace host {
 
 /// \todo add real detection of type size
 typedef unsigned char byte;
@@ -320,5 +321,6 @@ private:
 };
 
 
+}}
 #endif
 

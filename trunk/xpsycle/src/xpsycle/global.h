@@ -20,11 +20,15 @@
 #ifndef PSYCLEGLOBAL_H
 #define PSYCLEGLOBAL_H
 
+
 #pragma once
 
     /**
     @author Stefan
     */
+
+namespace psycle {
+  namespace host {
 
     class Song;
     class Player;
@@ -56,5 +60,7 @@ template<typename object_array> inline object_array * zapArray(object_array *& p
       return pointer = new_value;
     }
 
+  }
+}
 
 #endif

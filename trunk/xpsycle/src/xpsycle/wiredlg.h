@@ -32,7 +32,7 @@
 @author Stefan
 */
 
-//namespace psycle { namespace host {
+namespace psycle { namespace host {
 
 
 class WireDlg : public NWindow
@@ -74,5 +74,5 @@ private:
 };
 
 
-//}}
+}}
 #endif

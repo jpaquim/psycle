@@ -31,6 +31,9 @@
 #include <stdexcept>
 #include <sstream>
 
+namespace psycle {
+		namespace host {
+
 Configuration::Configuration()
 {
   #if !defined XPSYCLE__CONFIGURATION
@@ -632,4 +635,7 @@ void Configuration::onConfigTagParse(const std::string & tagName )
 DefaultBitmaps & Configuration::icons( )
 {
   return *bitmaps_;
+}
+
+}
 }

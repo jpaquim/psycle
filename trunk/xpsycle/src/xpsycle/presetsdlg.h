@@ -24,6 +24,10 @@
 #include <ngrs/ndialog.h>
 
 class NListBox;
+
+namespace psycle {
+namespace host {
+
 class Machine;
 class DeSerializer;
 class FrameMachine;
@@ -78,5 +82,8 @@ private:
     void onUseClicked(NButtonEvent* ev);
 
 };
+
+}
+}
 
 #endif

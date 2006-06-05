@@ -7,10 +7,10 @@
 #include "dsp.h"
 #include <cstdint>
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 //		class CGearTracker; // forward declaration
 
 		#define SAMPLER_MAX_POLYPHONY		16
@@ -223,5 +223,5 @@
 				return (x*rand())/32768;
 			}
 		};
-//	}
-//}
+	}
+}

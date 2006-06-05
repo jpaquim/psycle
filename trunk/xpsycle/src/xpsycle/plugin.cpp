@@ -28,6 +28,9 @@
 #include <cstdlib>
 #include <inttypes.h>
 
+namespace psycle {
+  namespace host {
+
 typedef CMachineInfo * (* GETINFO) ();
 typedef CMachineInterface * (* CREATEMACHINE) ();
 
@@ -642,5 +645,7 @@ void Plugin::SaveSpecificChunk(Serializer* pFile)
     pFile->PutPChar((char*)pData, size2); // Number of parameters
     delete pData; pData = 0;
   }
-};
+}
 
+}
+}

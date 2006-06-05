@@ -34,6 +34,8 @@
 #include <ngrs/nalignlayout.h>
 #include <ngrs/ngridlayout.h>
 
+namespace psycle {
+namespace host {
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
@@ -390,7 +392,7 @@ void FrameMachine::updateValues( )
 
 
 void FrameMachine::loadPresets() {
-  std::string filename(pMac()->GetDllName());
+/*  std::string filename(pMac()->GetDllName());
 
   std::string::size_type pos = filename.find('.')  ;
   if ( pos == std::string::npos ) {
@@ -436,7 +438,7 @@ void FrameMachine::loadPresets() {
       }
   } catch (const char * e) {
       // couldn`t open presets
-  }
+  }*/
 }
 
 void FrameMachine::onLeftBtn( NButtonEvent * ev )
@@ -484,5 +486,7 @@ Preset FrameMachine::knobsPreset( )
   return prs;
 }
 
+}
+}
 
 

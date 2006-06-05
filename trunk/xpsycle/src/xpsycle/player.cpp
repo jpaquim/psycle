@@ -10,10 +10,10 @@
 #include "plugin_interface.h"
 //#include "MidiInput.h"
 #include "inputhandler.h"
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		Player::Player(Song & song)
 		:
 			song_(&song),
@@ -580,5 +580,5 @@
 				}
 			}
 		}
-//	}
-//}
+  }
+}

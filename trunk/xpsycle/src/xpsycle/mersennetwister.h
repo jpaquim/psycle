@@ -46,10 +46,10 @@
 
 //(c++-ified for psycle by dw aley)
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace dsp
 		{
 
@@ -99,5 +99,6 @@
 				static int mti;
 			};
 
-//		}
+		}
 	}
+}

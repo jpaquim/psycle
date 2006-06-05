@@ -40,13 +40,17 @@
 #include <ngrs/nfiledialog.h>
 #include <ngrs/n7segdisplay.h>
 
+class NStatusBar;
+
+namespace psycle { namespace host {
+
 class GreetDlg;
 class AboutDlg;
 class VuMeter;
 class InstrumentEditor;
 class InfoDlg;
 class WaveSaveDlg;
-class NStatusBar;
+
 
 /**
 @author Stefan
@@ -200,5 +204,7 @@ private:
     int close();
     void updateComboIns(bool updatelist);
 };
+
+}}
 
 #endif

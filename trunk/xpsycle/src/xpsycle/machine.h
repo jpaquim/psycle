@@ -12,10 +12,10 @@
 #include <vector>
 #include <cassert>
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		/// we don't really need a macro for just one little expression...
 		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
 		/// we don't really need a macro for just one little expression...
@@ -57,9 +57,8 @@
 						symbol_resolving_error(std::string const & what) : library_error(what) {}
 				};
 			}
-
 			/// Base class for exceptions caused by an error in a library function.
-/*			class function_error : public exception
+			class function_error : public exception
 			{
 				public:
 					function_error(std::string const & what, std::exception const * const exception = 0) : host::exception(what), exception_(exception) {}
@@ -68,7 +67,7 @@
 				private:
 					std::exception const * const        exception_;
 			};
-			
+/*			
 			///\relates function_error.
 			namespace function_errors
 			{
@@ -619,5 +618,5 @@
 			_volumeCounter = Dsp::GetMaxVolAccurate(_pSamplesL, _pSamplesR, numSamples);
 		};
 		*/
-//	}
-//}
+	}
+}

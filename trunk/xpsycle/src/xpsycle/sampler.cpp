@@ -7,10 +7,10 @@
 #include "player.h"
 #include "fileio.h"
 #include "configuration.h"
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		std::string Sampler::_psName = "Sampler";
 
 		Sampler::Sampler(Machine::id_type id)
@@ -828,5 +828,6 @@
 bool Sampler::LoadOldFileFormat( RiffFile * pFile )
 {
 }
-//	}
-//}
+
+}
+}

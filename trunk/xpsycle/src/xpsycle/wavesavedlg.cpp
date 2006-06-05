@@ -42,6 +42,8 @@
 #include <ngrs/nbevelborder.h>
 #include <ngrs/nitemevent.h>
 
+namespace psycle { namespace host {
+
 WaveSaveDlg::WaveSaveDlg()
   : NDialog()
 {
@@ -809,3 +811,4 @@ void WaveSaveDlg::onSequencerRBtn( NButtonEvent * ev )
   m_recmode = 2;
 }
 
+}}

@@ -26,6 +26,9 @@
 /**
 @author Stefan Nattkemper
 */
+
+namespace psycle { namespace host {
+
 class InfoDlg : public NWindow
 {
 public:
@@ -42,5 +45,7 @@ private:
     NMemo* memo;
 
 };
+
+}}
 
 #endif

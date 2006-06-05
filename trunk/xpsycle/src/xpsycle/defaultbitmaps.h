@@ -25,6 +25,10 @@
 /**
 @author Stefan Nattkemper
 */
+
+namespace psycle {
+	namespace host {
+
 class DefaultBitmaps{
 public:
     DefaultBitmaps();
@@ -109,5 +113,8 @@ private:
     NBitmap undo_;
 
 };
+
+}
+}
 
 #endif

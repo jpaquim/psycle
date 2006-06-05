@@ -21,7 +21,7 @@
 #include <ngrs/nlistlayout.h>
 #include <ngrs/nalignlayout.h>
 
-//namespace psycle { namespace host {
+namespace psycle { namespace host {
 
 WireDlg::WireDlg()
   : NWindow()
@@ -103,4 +103,4 @@ NLine * WireDlg::line( )
   return line_;
 }
 
-//}}
+}}

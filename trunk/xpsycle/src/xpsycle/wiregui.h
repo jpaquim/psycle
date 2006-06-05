@@ -25,6 +25,9 @@
 /**
 @author Stefan
 */
+
+namespace psycle { namespace host {
+
 class WireGUI : public NLine
 {
 public:
@@ -49,4 +52,5 @@ private:
 
 };
 
+}}
 #endif

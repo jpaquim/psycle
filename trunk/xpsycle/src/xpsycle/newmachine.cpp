@@ -25,6 +25,9 @@
 #include <ngrs/nlistbox.h>
 #include <ngrs/nitem.h>
 
+namespace psycle {
+	namespace host {
+
 NewMachine::NewMachine()
   : NWindow()
 {
@@ -168,4 +171,5 @@ void NewMachine::onInternalItemSelected( NItemEvent * ev )
   if (ev->text() == "Sampler") sampler_=true; else sampler_=false;
 }
 
-
+}
+}

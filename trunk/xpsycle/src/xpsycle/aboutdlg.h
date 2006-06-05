@@ -25,6 +25,9 @@
 /**
 @author Stefan Nattkemper
 */
+
+namespace psycle { namespace host {
+
 class AboutDlg : public NWindow
 {
 public:
@@ -36,4 +39,5 @@ public:
 
 };
 
+}}
 #endif

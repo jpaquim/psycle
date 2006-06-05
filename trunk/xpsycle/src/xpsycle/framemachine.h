@@ -27,18 +27,20 @@
 #include <ngrs/nbitmap.h>
 #include <ngrs/ndialog.h>
 
-const int K_XSIZE = 28;
-const int K_YSIZE = 28;
-const int K_NUMFRAMES = 63;
-const int W_ROWWIDTH = 150;
 
-
-
-class Machine;
 class NTogglePanel;
 class NButton;
 class NSlider;
 
+namespace psycle {
+namespace host {
+
+class Machine;
+
+const int K_XSIZE = 28;
+const int K_YSIZE = 28;
+const int K_NUMFRAMES = 63;
+const int W_ROWWIDTH = 150;
 
 /**
 @author Stefan
@@ -177,5 +179,8 @@ private:
 
 
 };
+
+}
+}
 
 #endif

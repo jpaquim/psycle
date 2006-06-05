@@ -23,7 +23,7 @@
 #include <ngrs/nwindow.h>
 #include <ngrs/nslider.h>
 
-
+namespace psycle { namespace host {
 
 class Machine;
 
@@ -91,4 +91,5 @@ private:
     void onSliderPosChanged(NSlider* sender, double pos);
 };
 
+}}
 #endif

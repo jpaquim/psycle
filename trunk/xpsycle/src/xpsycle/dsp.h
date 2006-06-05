@@ -4,10 +4,10 @@
 #include <cmath>
 #include "helpers.h"
 #include <cstdint>
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace dsp
 		{
 #if PSYCLE__CONFIGURATION__RMS_VUS
@@ -364,4 +364,5 @@
 			// since we're working in realtime here, it may be best to just make SINC_RESOLUTION a whole lot bigger, and drop
 			// the table interpolation altogether..
 		};
-		}
+	}
+}}

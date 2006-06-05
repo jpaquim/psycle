@@ -28,6 +28,9 @@
 #include <ngrs/nfiledialog.h>
 #include <ngrs/ntimer.h>
 
+namespace psycle {
+	namespace host {
+
 class NewMachine;
 
 /**
@@ -71,7 +74,7 @@ public:
 
 private:
 
-    Song* _pSong;
+    psycle::host::Song* _pSong;
     NewMachine* newMachineDlg_;
 
     NFileDialog* getOpenFileName_;
@@ -86,6 +89,7 @@ private:
 
 };
 
-
+}
+}
 
 #endif

@@ -19,6 +19,8 @@
   ***************************************************************************/
 #include "deserializer.h"
 
+namespace psycle { namespace host {
+
 unsigned long DeSerializer::FourCC( const char *ChunkName)
 {
     long retbuf = 0x20202020;   // four spaces (padding)
@@ -48,3 +50,5 @@ uint32_t WaveDeSerializer::NumSamples( ) const
 {
   return num_samples;
 }
+
+}}

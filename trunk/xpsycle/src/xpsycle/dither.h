@@ -3,10 +3,10 @@
 
 #include "mersennetwister.h"
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace dsp
 		{
 
@@ -42,5 +42,5 @@
 				MersenneTwister mt;
 			};
 		}
-//	}
-//}
+	}
+}
