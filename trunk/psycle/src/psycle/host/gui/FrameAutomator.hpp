@@ -2,12 +2,13 @@
 #pragma once
 #include "FrameMachine.hpp"
 #include "ScrollableDlgBar.hpp"
+#include <psycle/host/engine/internal_machines.hpp>
+
 #include <psycle/host/engine/constants.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
-	class Machine;	
-	class Automator;
+	class Machine;
 
 	class EnvelopeWindow
 	{
@@ -35,7 +36,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		int d_width, d_height;
 		//for tweaking-- iterator to the currently selected node
 		//(this seems dangerous.. how easily can this be invalidated? is there a safer way?)
-		std::map<int, float>::iterator d_curNode;
+		std::vector<Automator::Node>::iterator d_curNode;
 	};
 
 
@@ -45,8 +46,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	///todo:
 	// -add trigger button(modulates currently selected machine/parameter)
 	// -scrollbars, zoom buttons
-	// -fix continuous envelope oddities: maintain start and end points's time index, find out why one index will sometimes
-	//  vanish when another one crosses its x position
 	// -either make original led bitmaps, or make sure the synth1 guy is okay with us stealing them from his vsti :)
 	// -use different widgets for envelope length controls (h.sliders, textboxes.. anything but knobs)
 	// -draw a numbered ticks or a grid to reresent pattern rows
