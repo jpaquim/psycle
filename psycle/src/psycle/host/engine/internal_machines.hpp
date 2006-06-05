@@ -313,6 +313,16 @@ namespace psycle {
 				};
 			};
 
+			class Node
+			{
+			public:
+				Node(int time_, float value_) : time(time_), value(value_) {}
+				int time;
+				float value;
+				bool operator<(const Node &rhs) {return (time < rhs.time); }
+				bool operator<(const int rhs)   {return (time < rhs); }
+				operator int() {return this->time; }
+			};
 
 		private:
 
@@ -333,13 +343,14 @@ namespace psycle {
 				float pos;			//pos takes on a double meaning, depending on the mode..
 			};						//ms for continuous, and increments of dStepSize for discrete.
 
+
 			//interprets a track's position based on the mode and corresponding envelope
 			//returns in range [-1,1] for relative, and [0,1] for absolute
 			float EvaluatePos(float pos);
 
 			//data
 			std::vector<float> dTable;		//discrete envelope table
-			std::map<int, float> cTable;	//continuous envelope table
+			std::vector<Node> cTable;		//continuous envelope table
 
 
 			std::vector<Track*> tracks;

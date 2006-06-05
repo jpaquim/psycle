@@ -7,7 +7,6 @@
 #include <psycle/host/configuration.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -443,17 +442,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if(d_pAutomator->IsRelative())
 			{
 				dc->MoveTo(d_x, d_y+d_height/2);
-				dc->LineTo(d_x+d_width, d_y+d_height/2-1);
-				dc->MoveTo(d_x, d_y+d_height/2+1);
 				dc->LineTo(d_x+d_width, d_y+d_height/2);
+				dc->MoveTo(d_x, d_y+d_height/2+1);
+				dc->LineTo(d_x+d_width, d_y+d_height/2+1);
 			}
 			dc->SelectObject(&bluePen);
-			std::map<int, float>::iterator iter = d_pAutomator->cTable.begin();
 
-			dc->MoveTo(d_x, d_y + d_height - ((*iter).second*d_height));
+			std::vector<Automator::Node>::iterator iter = d_pAutomator->cTable.begin();
+
+			dc->MoveTo(d_x + (iter->time * d_width/d_pAutomator->cLength), d_y + d_height - (iter->value*d_height));
 			for(++iter; iter!=d_pAutomator->cTable.end(); ++iter)
-				dc->LineTo(d_x + iter->first * d_width / d_pAutomator->cLength, d_y+d_height - (iter->second*d_height) );
-				
+				dc->LineTo(d_x + iter->time*d_width/d_pAutomator->cLength,  d_y + d_height - (iter->value*d_height) );
+			
 			dc->SelectObject(oldPen);
 		}
 	}
@@ -477,11 +477,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			float yAdapted = 1 - (y-d_y)/(float)d_height;
 			float yleeway = 10/(float)d_height;
 
-			for(std::map<int, float>::iterator iter = d_pAutomator->cTable.begin(); iter!= d_pAutomator->cTable.end(); ++iter)
+			for(std::vector<Automator::Node>::iterator iter = d_pAutomator->cTable.begin(); iter!= d_pAutomator->cTable.end(); ++iter)
 			{
-				if( abs( iter->first-xInMs ) <= xleeway && abs( iter->second-yAdapted ) <= yleeway )	//click detection
+				if( abs( iter->time-xInMs ) <= xleeway && abs( iter->value-yAdapted ) <= yleeway )
 				{
-					d_curNode=iter;
+					d_curNode = iter;
 					return true;
 				}
 			}
@@ -499,19 +499,31 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		float yAdapted = 1 - (y-d_y)/(float)d_height;
 		float yleeway = 10/(float)d_height;
 
-		for(std::map<int, float>::iterator iter = d_pAutomator->cTable.begin(); iter!= d_pAutomator->cTable.end(); ++iter)
+		for(std::vector<Automator::Node>::iterator iter = d_pAutomator->cTable.begin(); iter!= d_pAutomator->cTable.end(); ++iter)
 		{
-			if( abs( iter->first-xAdapted ) <= xleeway && abs( iter->second-yAdapted ) <= yleeway )	//click detection
+			if( abs( iter->time-xAdapted ) <= xleeway && abs( iter->value-yAdapted ) <= yleeway )
 			{
 				//found one, delete it!
 				d_pAutomator->cTable.erase(iter);
+				std::sort(d_pAutomator->cTable.begin(), d_pAutomator->cTable.end());
 				return false;
 			}
 		}
 		//no nearby nodes, so we insert one:
 
-		d_curNode = (d_pAutomator->cTable.insert(std::map<int, float>::value_type(xAdapted, yAdapted))).first;	//ahh, good times
-		return true;	//(we want to be able to tweak the new one without a second mouse down)
+		Automator::Node newnode(xAdapted, yAdapted);
+		d_pAutomator->cTable.push_back(newnode);
+		std::sort(d_pAutomator->cTable.begin(), d_pAutomator->cTable.end());
+		//we don't know where the new node will be after sorting, so we have to seek it out manually..
+		for(std::vector<Automator::Node>::iterator iter = d_pAutomator->cTable.begin(); iter!= d_pAutomator->cTable.end(); ++iter)
+		{
+			if( iter->time==xAdapted && iter->value==yAdapted )
+			{
+				d_curNode = iter;
+				return true;
+			}
+		}
+		return false;	//if we make it here, something's gone awry..
 
 
 	}
@@ -533,10 +545,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else if(x>=d_x+d_width)	x = d_x + d_width-1;
 			if(y<d_y)				y = d_y;
 			else if(y>=d_y+d_height)y = d_y + d_height-1;
-			d_pAutomator->cTable.erase(d_curNode);
 			int newIdx = (int)((x-d_x)*d_pAutomator->cLength/d_width);
 			float newVal = 1 - (y-d_y)/(float)d_height;
-			d_curNode = (d_pAutomator->cTable.insert(std::map<int, float>::value_type(newIdx, newVal))).first;	//ahh, good times
+
+			d_curNode->value = newVal;
+			if(d_curNode!=d_pAutomator->cTable.begin() && d_curNode!=d_pAutomator->cTable.end()-1)
+				d_curNode->time=newIdx; 
+
+			std::sort(d_pAutomator->cTable.begin(), d_pAutomator->cTable.end());
+			for(std::vector<Automator::Node>::iterator iter = d_pAutomator->cTable.begin(); iter!= d_pAutomator->cTable.end(); ++iter)
+				if( iter->time==newIdx && iter->value==newVal )
+					d_curNode = iter;
 			
 		
 		}

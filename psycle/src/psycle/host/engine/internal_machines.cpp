@@ -1137,23 +1137,19 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Automator Machine
 		
-		// still -very- preliminary, but relatively functional
+		// still preliminary, but relatively functional
 		// (it can only be triggered from the pattern currently-- if you want to test it: 01-- is the trigger command, aux/ins column is dest
 		// machine, command parameter is dest param.. so, for example, if automator machine is 40, the command to modulate parameter 2E of
 		// mach 03 would be  --- 03 40 012E		)
 
-		//todo: -reconsider the use of std::map for the continuous envelope. i thought it'd be perfect for manipulating the x/y pairs that
-		//       comprise the continuous envelopes, but it's generated a lot of awkward code.. maybe even a std::vector<std::pair<int,float> >
-		//       would be superior, but even that one might get pretty weird if/when we try to add control points for curving segments
+		//todo: -the map for the continuous table's been replaced with a sorted vector, but i'm not convinced the pros outweigh the cons..
+		//       decide if there's a better way.
 		//      -implement control points, for curving segments :)  maybe some kind of simplified bezier thing? i need to consider the 
 		//       geometry of it a bit more..
-		//      -do some serious thinking about the implications of the this->PreWork(0) call in Tick() (what it's doing to timing, what
-		//       design flaws it's indicative of, etc)
-		//      -enforce link between cLength and the time index of the last point in cTable
 		//      -come up with a cooler name :)
 		//      -decide if we really want this thing to be two machines combined (meaning the discrete/continuous modes).. and if so,
 		//       decide if there's a cleaner way of dealing with the machine's dual nature
-		//      -option to stretch/squeeze envelope to match length changes
+		//      -option to stretch/squeeze envelope to match length changes (probably just for continuous mode)
 
 		std::string Automator::_psName = "Automator";
 
@@ -1186,10 +1182,13 @@ namespace psycle {
 				dTable[i]=i/float(dLength*2) + 0.375;
 				dTable[dLength-1-i]=dTable[i];
 			}
-			cTable.clear();
-			cTable[0]=1.0f;
-			cTable[5000]=0.0f;
-			cTable[10000]=1.0f;
+			Node start(0, 1.0f);
+			Node middle(cLength/2, 0.0f);
+			Node end(cLength, 1.0f);
+			cTable.push_back(start);
+			cTable.push_back(middle);
+			cTable.push_back(end);
+			std::sort(cTable.begin(), cTable.end());
 		}
 
 		void Automator::Tick( int channel,PatternEntry* pData)
@@ -1221,8 +1220,6 @@ namespace psycle {
 		{
 			sampsPerStep = Global::player().SamplesPerRow()*dStepSize;
 			sampsPerMs = Global::player().SampleRate()/1000;
-			this->PreWork(0);	//make sure all machines are where they should be -before- they start new notes
-
 		}
 
 		void Automator::GetParamName(int numparam,char *name)
@@ -1309,6 +1306,7 @@ namespace psycle {
 
 		bool Automator::SetParameter(int numparam, int value)
 		{
+			std::vector<Node>::iterator iter;
 			switch(numparam)
 			{
 			case prms::discrete:
@@ -1322,8 +1320,18 @@ namespace psycle {
 				bRelative = (bool)value;
 				return true;
 			case prms::clength:
+				iter = std::upper_bound(cTable.begin(), cTable.end(), value);
+				//here, iter will either point to the first element greater than the new length (if we're decreasing), or cTable.end()
+				//(if we're increasing..) if it's cTable.end(), decrement so it points to a valid index.
+				if(iter == cTable.end()) iter--;
+				else
+				{	//if we're decreasing, we want to erase anything that may be after iter in the table.. this way, if we shorten the length past
+					//two nodes, we ditch the last one and keep the value of the second-to-last.
+					cTable.erase(iter+1, cTable.end());
+				}
+				//update the last element to match the new cLength
+				iter->time=value;
 				cLength=value;
-				cTable.erase(cTable.upper_bound(value), cTable.end());
 				return true;
 			case prms::dlength:
 				dLength=value;
@@ -1416,8 +1424,10 @@ namespace psycle {
 				float value;
 				pFile->Read(key);
 				pFile->Read(value);
-				cTable[key]=value;
+				Node node(key, value);
+				cTable.push_back(node);
 			}
+			std::sort(cTable.begin(), cTable.end());	//really shouldn't be necessary, but just in case..
 			cLength = key;
 
 			return true;
@@ -1438,10 +1448,10 @@ namespace psycle {
 			for(std::vector<float>::iterator iter = dTable.begin(); iter != dTable.end(); iter++)
 				pFile->Write(*iter);
 			pFile->Write(cTabSize);
-			for(std::map<int,float>::iterator iter = cTable.begin(); iter != cTable.end(); iter++)
+			for(std::vector<Node>::iterator iter = cTable.begin(); iter != cTable.end(); ++iter)
 			{
-				pFile->Write(iter->first);
-				pFile->Write(iter->second);
+				pFile->Write(iter->time);
+				pFile->Write(iter->value);
 			}
 			
 		}
@@ -1462,11 +1472,11 @@ namespace psycle {
 				val = dTable.at((int)floor(pos));
 			else
 			{
-				std::map<int,float>::iterator second = cTable.upper_bound((int)pos);
-				std::map<int,float>::iterator first = cTable.upper_bound((int)pos);
+				std::vector<Node>::iterator first = std::upper_bound(cTable.begin(), cTable.end(), (int)pos);
+				std::vector<Node>::iterator second = first;
 				first--;
-				float weight = ( pos - first->first ) / (float)(second->first - first->first);	//position between the two neighboring nodes
-				val = (1-weight) * first->second  +  weight * second->second;					//interpolate linearly between the value of each
+				float weight = ( pos - first->time ) / (float)(second->time - first->time);	//position between the two neighboring nodes
+				val = (1-weight) * first->value + weight * second->value;					//interpolate linearly between the value of each
 			}
 			if(bRelative)
 				val = val*2-1;
