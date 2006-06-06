@@ -476,7 +476,7 @@ namespace psycle
 
 			///\}
 		protected:
-			void SetVolumeCounter(int numSamples);
+			void SetVolumeCounter(int numSamples, int multiplier=1.0f);
 			//void SetVolumeCounterAccurate(int numSamples);
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -593,11 +593,12 @@ namespace psycle
 			///\}
 		};
 
-		inline void Machine::SetVolumeCounter(int numSamples)
+		inline void Machine::SetVolumeCounter(int numSamples, int multiplier)
 		{
-			_volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
+			_volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*multiplier;
 			if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-			int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
+			else if (_volumeCounter <= 0) _volumeCounter = 1.0f;
+			int temp(f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3));// not 100% accurate, but looks as it sounds
 			// prevent downward jerkiness
 			if(temp > 97) temp = 97;
 			else if (temp <0) temp=0;

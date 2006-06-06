@@ -241,7 +241,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnDestroy() 
 		{
-			DestroyPluginInfo();
+			//\todo : bug!! If destroyed, "TestFileName()" doesn't work, but else it leaks
+			//DestroyPluginInfo();
 			//clear internal machines class
 			for (int h=0; h<NUM_INTERNAL_MACHINES; h++)
 			{

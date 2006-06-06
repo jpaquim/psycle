@@ -130,6 +130,7 @@ namespace psycle
 #endif
 		}
 
+	#if 0
 		/// finds the maximum amplitude in a signal buffer.
 		/// It contains "VST" because initially the return type for native machines 
 		/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
@@ -137,27 +138,26 @@ namespace psycle
 		{
 			return GetMaxVol(pSamplesL,pSamplesR,numSamples);
 		}
-		#if 0
-			static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
+		static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
+		{
+			return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
+		}
+		static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
+		{
+			--pSamplesL;
+			--pSamplesR;
+			float vol = 0.0f;
+			do
 			{
-				return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
+				const float volL = std::fabsf(*++pSamplesL); // not all waves are symmetrical
+				const float volR = std::fabsf(*++pSamplesR);
+				if (volL > vol) vol = volL;
+				if (volR > vol) vol = volR;
 			}
-			static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
-			{
-				--pSamplesL;
-				--pSamplesR;
-				float vol = 0.0f;
-				do
-				{
-					const float volL = std::fabsf(*++pSamplesL); // not all waves are symmetrical
-					const float volR = std::fabsf(*++pSamplesR);
-					if (volL > vol) vol = volL;
-					if (volR > vol) vol = volR;
-				}
-				while(--numSamples);
-				return vol;
-			}
-		#endif
+			while(--numSamples);
+			return vol;
+		}
+	#endif
 
 		/// Cure for malicious samples
 		/// Type : Filters Denormals, NaNs, Infinities
