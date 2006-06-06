@@ -1,7 +1,6 @@
 #pragma once
 #include "dllfinder.hpp"
 #include "machine.hpp"
-#include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -62,46 +61,22 @@ public:
 	class populate_plugin_list
 	{
 	public:
-		populate_plugin_list(std::vector<std::string> & result, std::string directory)
-		{
-			::CFileFind finder;
-			int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
-			while(loop)
-			{
-				loop = finder.FindNextFile();
-				if(finder.IsDirectory()) {
-					if(!finder.IsDots())
-					{
-						std::string sfilePath = finder.GetFilePath();
-						populate_plugin_list(result,sfilePath);
-					}
-				}
-				else
-				{
-					CString filePath=finder.GetFilePath();
-					filePath.MakeLower();
-					if(filePath.Right(4) == ".dll")
-					{
-						std::string sfilePath = filePath;
-						result.push_back(sfilePath);
-					}
-				}
-			}
-			finder.Close();
-		}
 	};
 	MappedDllFinder();
 	virtual ~MappedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	void AddPath(std::string &path);
+	virtual void AddPath(std::string &path);
 	///< Resets the Finder to the original state.
-	void ResetFinder();
-	///< searches in the map the full path for a specified dll name
-	bool LookupDllPath(std::string& name, std::string& fullpath);
+	virtual void ResetFinder();
+	///< fills in the path for the specified name so that name becomes a fullpath.
+	virtual bool LookupDllPath(std::string& name);
 protected:
 	///< Adds the dll name -> full path mapping to the map.
-	void learnDllName(const std::string & fullpath);
+	void LearnDllName(const std::string & fullpath);
+	///< fills the dllNames with all the dlls that exist in the directory specified 
+	///< and its subdirectories. Note that it's simply a file list. No check is done.
+	void populate_dll_map(std::string directory);
 
 protected:
 	std::map<std::string,std::string> dllNames;
@@ -115,23 +90,25 @@ public:
 	virtual ~CachedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	void AddPath(std::string &path);
+	virtual void AddPath(std::string &path);
 	///< Resets the Finder to the original state.
-	void ResetFinder();
-	///< searches in the map the full path for a specified dll name
-	bool LookupDllPath(std::string& name, std::string& fullpath);
+	virtual void ResetFinder();
+	///< fills in the path for the specified name so that name becomes a fullpath.
+	virtual bool LookupDllPath(std::string& name);
 
 protected:
 	///< Adds the new Plugin data to the map.
-	void learnPlugin(PluginInfo &plugininfo);
-	void CollectPlugins();
-	///< Checks if the plugin that is going to be loaded is allowed to be loaded.
-	bool TestFilename(const std::string & name);
+	void LearnPlugin(PluginInfo &plugininfo);
+	///< fills the dllInfo with the information of all plugins found in the directory specified 
+	///< and its subdirectories. If a Cache exists it will only load/fill those that are new
+	///< or modified since the cache creation.
+	void populate_plugin_map(std::string directory);
 
-	bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
+	bool LoadCacheFile();
 	bool SaveCacheFile();
 protected:
 	std::map<std::string,PluginInfo> dllInfo;
+	std::string cachefile;
 
 };
 

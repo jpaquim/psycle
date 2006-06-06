@@ -10,15 +10,17 @@ public:
 	virtual ~DllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	void AddPath(std::string &path);
+	virtual void AddPath(std::string &path);
 
 	///< Resets the Finder to the original (clean) state.
-	void ResetFinder();
+	virtual void ResetFinder();
 
-	///< searches the full path for a specified dll name
-	bool LookupDllPath(std::string& name, std::string& fullpath);
+	///< fills in the path for the specified name so that name becomes a fullpath.
+	virtual bool LookupDllPath(std::string& name);
 
 protected:
+	bool SearchFileInDir(std::string& name,std::string& path);
+
 	std::vector<std::string> base_paths;
 };
 
