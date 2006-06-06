@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::Player.Revision 2689
+///\brief implementation file for psycle::host::Player. based on psycle revision 2689
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "player.h"
