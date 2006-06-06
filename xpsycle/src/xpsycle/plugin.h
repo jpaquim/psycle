@@ -121,9 +121,21 @@ public:
 
     bool Instance(const std::string & file_name);
     bool LoadDll (std::string psFileName);
-    virtual void SaveDllName(Serializer * pFile);
-    virtual bool LoadSpecificChunk(DeSerializer * pFile, int version);
-    virtual void SaveSpecificChunk(Serializer* pFile);
+//    virtual void SaveDllName(Serializer * pFile);
+//    virtual bool LoadSpecificChunk(DeSerializer * pFile, int version);
+//    virtual void SaveSpecificChunk(Serializer* pFile);
+
+///\name (de)serialization
+			///\{
+				public:
+//					virtual bool LoadOldFileFormat(RiffFile * pFile);
+					virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+					virtual void SaveSpecificChunk(RiffFile * pFile);
+					virtual void SaveDllName      (RiffFile * pFile);
+			///\}
+
+
+
 
     inline CMachineInfo * GetInfo() throw() { return _pInfo; };
 

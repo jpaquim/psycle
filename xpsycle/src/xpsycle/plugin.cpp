@@ -561,91 +561,94 @@ bool Plugin::SetParameter(int numparam,int value)
       else return false;
     }
 
-void Plugin::SaveDllName( Serializer * pFile )
-{
-  const char* str  = _psDllName.c_str();
-  std::cout << _psDllName << std::endl;
-  //char str2[256];
-  //strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-  pFile->PutString(str);
-}
 
-bool Plugin::LoadSpecificChunk( DeSerializer * pFile, int version )
-{
-  uint32_t size = pFile->getInt(); // size of whole structure
-  if(size) {
-      if(version > CURRENT_FILE_VERSION_MACD)  {
-          pFile->skip(size);
-          std::ostringstream s; 
-          s << version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
-          << "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-          //MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-          return false;
-      } else
-      {
-          uint32_t count = pFile->getInt(); // size of vars
-          for(unsigned int i(0) ; i < count ; ++i)
-          {
-            uint32_t temp = pFile->getInt();
-            SetParameter(i, temp);
-          }
-          size -= sizeof(count) + sizeof(uint32_t) * count;
-          if(size) {
-            char * pData = new char[size];
-            pFile->read(pData, size); // Number of parameters
-            try
-            {
-              proxy().PutData(pData); // Internal load
-            }
-            catch(std::exception const &)
-            {
-              return false;
-            }
-            return true;
-        }
-      }
-    }
-    return true;
-}
+void Plugin::SaveDllName(RiffFile * pFile) 
+		{
+			pFile->WriteChunk(_psDllName.c_str(), _psDllName.length() + 1);
+		}
 
+		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			std::uint32_t size;
+			pFile->Read(size); // size of whole structure
+			if(size)
+			{
+				if(version > CURRENT_FILE_VERSION_MACD)
+				{
+					pFile->Skip(size);
+					std::ostringstream s; s
+						<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
+						<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
+//					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					return false;
+				}
+				else
+				{
+					std::uint32_t count;
+					pFile->Read(count);  // size of vars
+					/*
+					if (count)
+					{
+						pFile->ReadChunk(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+					}
+					*/
+					for(unsigned int i(0) ; i < count ; ++i)
+					{
+						std::uint32_t temp;
+						pFile->Read(temp);
+						SetParameter(i, temp);
+					}
+					size -= sizeof(count) + sizeof(std::uint32_t) * count;
+					if(size)
+					{
+						char * pData = new char[size];
+						pFile->ReadChunk(pData, size); // Number of parameters
+						try
+						{
+							proxy().PutData(pData); // Internal load
+						}
+						catch(std::exception const &)
+						{
+							return false;
+						}
+						return true;
+					}
+				}
+			}
+			return true;
+		};
 
-void Plugin::SaveSpecificChunk(Serializer* pFile)
-{
-  int count = GetNumParams();
-  int size2(0);
-  try
-  {
-      size2 = proxy().GetDataSize();
-  }
-  catch(const std::exception &)
-  {
-    // data won't be saved
-  }
-  int size = size2 + sizeof(count) + sizeof(int)*count;
-  pFile->PutInt(size);
-  pFile->PutInt(count);
-  //pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
-  for (int i = 0; i < count; i++)
-  {
-    int temp = GetParamValue(i);
-    pFile->PutInt(temp);
-  }
-  if(size2)
-  {
-    byte * pData = new byte[size2];
-    try
-    {
-        proxy().GetData(pData); // Internal save
-    }
-    catch(const std::exception &)
-    {
-        // this sucks because we already wrote the size,
-        // so now we have to write the data, even if they are corrupted.
-    }
-    pFile->PutPChar((char*)pData, size2); // Number of parameters
-    delete pData; pData = 0;
-  }
-}
-
+		void Plugin::SaveSpecificChunk(RiffFile* pFile)
+		{
+			std::uint32_t count = GetNumParams();
+			std::uint32_t size2(0);
+			try
+			{
+				size2 = proxy().GetDataSize();
+			}
+			catch(std::exception const &)
+			{
+				// data won't be saved
+			}
+			std::uint32_t size = size2 + sizeof count  + sizeof(std::uint32_t) * count;
+			pFile->Write(size);
+			pFile->Write(count);
+			for(unsigned int i(0) ; i < count ; ++i) pFile->Write<std::uint32_t>(GetParamValue(i));
+			if(size2)
+			{
+				char * pData = new char[size2];
+				try
+				{
+					proxy().GetData(pData); // Internal save
+				}
+				catch(std::exception const &)
+				{
+					// this sucks because we already wrote the size,
+					// so now we have to write the data, even if they are corrupted.
+				}
+				pFile->WriteChunk(pData, size2); // Number of parameters
+				delete[] pData;
+			}
+		};
 }
 }
