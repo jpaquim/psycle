@@ -386,6 +386,8 @@ namespace psycle
 							}
 
 						}
+						pMac[i]->SetPosX(x);
+						pMac[i]->SetPosY(y);
 					}
 				}
 
@@ -983,41 +985,42 @@ namespace psycle
 			int numParameters;
 
 			pFile->Read(sDllName); // Plugin dll name
-			///\todo would be nicer with std::string and std::transform
-			for(std::size_t i(std::strlen(sDllName) - 1) ; i >= 0  ; --i) sDllName[i] = std::tolower(sDllName[i]);
+			sDllName[255]='\0';
+			std::string strname = sDllName;
+			std::transform(strname.begin(),strname.end(),strname.begin(),std::tolower);
 
 			//Patch: Automatically replace old AS's by AS2F.
 			bool wasAB=false;
 			bool wasAS1=false;
 			bool wasAS2=false;
-			if (std::strcmp(sDllName,"arguru bass.dll" ) == 0)
+			if (strname == "arguru bass.dll" )
 			{
-				strcpy(sDllName,"arguru synth 2f.dll");
+				strname = "arguru synth 2f.dll";
 				wasAB=true;
 			}
-			if (std::strcmp(sDllName,"arguru synth.dll" ) == 0)
+			else if (strname == "arguru synth.dll" )
 			{
-				strcpy(sDllName,"arguru synth 2f.dll");
+				strname = "arguru synth 2f.dll";
 				wasAS1=true;
 			}
-			if (!std::strcmp(sDllName,"arguru synth 2.dll" ))
+			else if (strname == "arguru synth 2.dll" )
 			{
-				strcpy(sDllName,"arguru synth 2f.dll");
+				strname = "arguru synth 2f.dll";
 				wasAS2=true;
 			}
-			if (!std::strcmp(sDllName,"synth21.dll" ))
+			else if (strname == "synth21.dll" )
 			{
-				strcpy(sDllName,"arguru synth 2f.dll");
+				strname = "arguru synth 2f.dll";
 				wasAS2=true;
 			}
 
 			std::string sPath;
-			if ( !CNewMachine::lookupDllName(sDllName,sPath) ) 
+			if ( !CNewMachine::lookupDllName(strname.c_str(),sPath) ) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
 				//GetCompatible(sDllName,sPath) // If no one found, it will return a null string.
-				sPath = sDllName;
+				sPath = strname;
 			}
 			if ( !CNewMachine::TestFilename(sPath) ) 
 			{
