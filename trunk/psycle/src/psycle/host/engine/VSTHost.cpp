@@ -1397,25 +1397,16 @@ namespace psycle
 					{
 						// o_O`
 					}
-					// volume "counter"
+					Machine::SetVolumeCounter(numSamples,32768.0f);
+					if(Global::configuration().autoStopMachines)
 					{
-						_volumeCounter = dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR, numSamples) * 32768.0f;
-						if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-						int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
-						// prevent downward jerkiness
-						if(temp > 97) temp = 97;
-						if(temp > _volumeDisplay) _volumeDisplay = temp;
-						--_volumeDisplay;
-						if( Global::configuration().autoStopMachines)
+						if(_volumeCounter < 8.0f)
 						{
-							if(_volumeCounter < 8.0f)
-							{
-								_volumeCounter = 0.0f;
-								_volumeDisplay = 0;
-								_stopped = true;
-							}
-							else _stopped = false;
+							_volumeCounter = 0.0f;
+							_volumeDisplay = 0;
+							_stopped = true;
 						}
+						else _stopped = false;
 					}
 				}
 				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
@@ -1733,25 +1724,16 @@ namespace psycle
 						outputs[0] = tempSamplesL;
 						outputs[1] = tempSamplesR;
 					}
-					// volume "counter"
+					Machine::SetVolumeCounter(numSamples,32768.0f);
+					if(Global::configuration().autoStopMachines)
 					{
-						_volumeCounter = dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
-						if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-						int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
-						// prevent downward jerkiness
-						if(temp > 97) temp = 97;
-						if(temp > _volumeDisplay) _volumeDisplay = temp;
-						--_volumeDisplay;
-						if(Global::configuration().autoStopMachines)
+						if(_volumeCounter < 8.0f)
 						{
-							if(_volumeCounter < 8.0f)
-							{
-								_volumeCounter = 0.0f;
-								_volumeDisplay = 0;
-								_stopped = true;
-							}
-							else _stopped = false;
+							_volumeCounter = 0.0f;
+							_volumeDisplay = 0;
+							_stopped = true;
 						}
+						else _stopped = false;
 					}
 				}
 				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);

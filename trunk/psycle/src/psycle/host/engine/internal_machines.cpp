@@ -215,7 +215,6 @@ namespace psycle {
 		Master::~Master() throw()
 		{
 		}
-
 		void Master::Init()
 		{
 			Machine::Init();

@@ -559,14 +559,16 @@ namespace psycle
 
 		void Machine::DefineStereoInput(int numinputs)
 		{
-			numInPorts=numinputs;
-			inports = new InPort(*this,0,"Stereo In");
+			//\todo : pending implementation of multi-io.
+//			numInPorts=numinputs;
+//			inports = new InPort(*this,0,"Stereo In");
 		}
 
 		void Machine::DefineStereoOutput(int numoutputs)
 		{
-			numOutPorts=numoutputs;
-			outports = new OutPort(*this,0,"Stereo Out");
+			//\todo : pending implementation of multi-io.
+//			numOutPorts=numoutputs;
+//			outports = new OutPort(*this,0,"Stereo Out");
 		}
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
