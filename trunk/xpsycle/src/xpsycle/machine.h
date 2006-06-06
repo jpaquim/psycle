@@ -57,6 +57,7 @@ namespace psycle
 						symbol_resolving_error(std::string const & what) : library_error(what) {}
 				};
 			}
+
 			/// Base class for exceptions caused by an error in a library function.
 			class function_error : public exception
 			{
@@ -67,7 +68,7 @@ namespace psycle
 				private:
 					std::exception const * const        exception_;
 			};
-/*			
+				
 			///\relates function_error.
 			namespace function_errors
 			{
@@ -77,7 +78,8 @@ namespace psycle
 					public:
 						bad_returned_value(std::string const & what) : function_error(what) {}
 				};
-
+			}
+/*
 				///\internal
 				namespace detail
 				{

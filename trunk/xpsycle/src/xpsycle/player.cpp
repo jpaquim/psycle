@@ -482,7 +482,7 @@ namespace psycle
 					{
 						// if midi not enabled we just do the original tracker thing
 						// Master machine initiates work
-						//song()._pMachine[MASTER_INDEX]->Work(amount);
+						song()._pMachine[MASTER_INDEX]->Work(amount);
 					}
 //					PSYCLE__CPU_COST__CALCULATE(idletime, amount);
 //					song().cpu_idle(idletime);
