@@ -75,6 +75,8 @@ PatternView::PatternView()
   setTransparent(false);
 
   patternStep_ = 1;
+
+  moveCursorWhenPaste_ = false;
 }
 
 
@@ -320,6 +322,13 @@ int PatternView::editOctave( )
   return editOctave_;
 }
 
+void PatternView::setMoveCursorWhenPaste( bool on) {
+  moveCursorWhenPaste_ = on;
+}
+
+bool PatternView::moveCursorWhenPaste() const {
+  return moveCursorWhenPaste_;
+}
 
 /// End of PatternView main Class
 
@@ -1276,11 +1285,27 @@ void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
 void PatternView::PatternDraw::onPopupBlockMixPaste( NButtonEvent * ev )
 {
   pasteBlock(pView->cursor().x(),pView->cursor().y(),true);
+
+  if (pView->moveCursorWhenPaste()) {
+       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
+          pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
+       } else
+       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));
+  }
+  pView->repaint();
 }
 
 void PatternView::PatternDraw::onPopupBlockPaste( NButtonEvent * ev )
 {
   pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
+
+  if (pView->moveCursorWhenPaste()) {
+       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
+          pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
+       } else
+       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));
+  }
+  pView->repaint();
 }
 
 void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
@@ -1325,16 +1350,6 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
           }
           ++ts;
         }
-      //if (Global::pInputHandler->bMoveCursorPaste)
-      //{
-        //if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
-        //else editcur.line = nl-1;
-        //}
-
-        //bScrollDetatch=false;
-        //NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
-        //Repaint(DMData);
-        repaint();
     }
 }
 
