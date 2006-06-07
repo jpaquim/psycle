@@ -151,7 +151,11 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
 int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
 {
   // this will store the block height of same aligns; eg. the height sum of all nAlignTop components
-  int top,left,right,bottom,client = 0;
+  int top    = 0;
+  int left   = 0;
+  int right  = 0;
+  int bottom = 0;
+  int client = 0;
 
   // pointers to determinate, if a coponent with that align is there
   NVisualComponent* lastTop    = 0;
@@ -243,6 +247,7 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
   if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1111
     ymax = std::max( top + bottom + client, std::max( left, right));
   }
+
   return vgap_ + ymax;
 }
 
