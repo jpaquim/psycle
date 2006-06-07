@@ -68,8 +68,8 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1024,768);
 
-  testMenu();
-  //testMemo();
+  //testMenu();
+  testMemo();
   //testListBox();
 
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
@@ -348,12 +348,9 @@ void NTestWindow::testMemo( )
   memo->setWordWrap(true);
 //  memo->setReadOnly(true);
 
-     try {
-       memo->loadFromFile("/home/natti/ngrs3/src/ngrs/nmemo.cpp");
-     } catch (const char* e) {
-       //memo->setText("sajdslka dsalkj \n dshkjhdsa ");
-     }
+  memo->setText("hallo\ngenau\n\n\nhier\n");
 
+  std::cout << memo->text() << std::endl;
 }
 
 void NTestWindow::testFlowLayout( )

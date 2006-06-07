@@ -185,7 +185,7 @@ int NLabel::preferredWidth( ) const
     i = text_.find("\n", i);
     if (i != std::string::npos) {
        i+=1;
-       substr = text_.substr(start,i-start+1);
+       substr = text_.substr(start,i-start-1);
        start = i;
     } else substr = text_.substr(start);
      if (metrics.textWidth(substr) > xmax) xmax = metrics.textWidth(substr);

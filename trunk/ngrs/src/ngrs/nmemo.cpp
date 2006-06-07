@@ -56,7 +56,7 @@ NMemo::~NMemo()
 
 std::string NMemo::text( ) const
 {
-  textArea->text();
+  return textArea->text();
 }
 
 void NMemo::setText( const std::string & text )
@@ -163,21 +163,18 @@ void NMemo::TextArea::setText( const std::string & text )
 {
   lines.clear();
 
-  std::string delimiters = "\n";
-  // Skip delimiters at beginning.
-  std::string::size_type lastPos = text.find_first_not_of(delimiters, 0);
-  // Find first "non-delimiter".
-  std::string::size_type pos     = text.find_first_of(delimiters, lastPos);
-
-  while (std::string::npos != pos || std::string::npos != lastPos)
-  {
-     // Found a token, add it to the vector.
-     appendLine(text.substr(lastPos, pos - lastPos));
-     // Skip delimiters.  Note the "not_of"
-     lastPos = text.find_first_not_of(delimiters, pos);
-     // Find next "non-delimiter"
-     pos = text.find_first_of(delimiters, lastPos);
-  }
+  std::string substr;
+  unsigned int start = 0;
+  unsigned int i = 0;
+  do {
+    i = text.find("\n", i);
+    if (i != std::string::npos) {
+       i+=1;
+       substr = text.substr(start,i-start-1);
+       start = i;
+    } else substr = text.substr(start);
+     appendLine(substr);
+  } while (i != std::string::npos);
 
   if (lines.size() == 0) clear();
 
@@ -186,7 +183,14 @@ void NMemo::TextArea::setText( const std::string & text )
 
 std::string NMemo::TextArea::text( ) const
 {
-  return "";
+  std::string text = "";
+  std::vector< Line >::const_iterator it = lines.begin();
+  for ( ; it < lines.end(); it++ ) {
+     if (it !=lines.begin()) text+='\n';
+     const Line & line = *it;
+     text+=line.text();
+  }
+  return text;
 }
 
 void NMemo::TextArea::loadFromFile(const std::string & fileName) {
