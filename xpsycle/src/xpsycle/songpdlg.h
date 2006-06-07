@@ -29,18 +29,19 @@ class NMemo;
 
 namespace psycle { namespace host {
 
+class Song;
+
 /**
 @author Stefan
 */
 class SongpDlg : public NWindow
 {
 public:
-    SongpDlg();
+    SongpDlg(Song* pSong);
 
     ~SongpDlg();
 
     virtual int onClose();
-
     virtual void setVisible(bool on);
 
 private:
@@ -48,11 +49,12 @@ private:
     NEdit* songTitle_;
     NEdit* songCredits_;
     NMemo* songComments_;
-
     NButton* okBtn_;
 
-    void init();
+    Song* pSong_;
 
+    void init();
+    void onOkBtn(NButtonEvent* ev);
 };
 
 }}

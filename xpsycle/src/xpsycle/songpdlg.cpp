@@ -18,15 +18,14 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "songpdlg.h"
-#include "global.h"
 #include "song.h"
-#include <ngrs/nlistlayout.h>
 #include <ngrs/nmemo.h>
+#include <ngrs/nalignlayout.h>
 
 namespace psycle { namespace host {
 
-SongpDlg::SongpDlg()
-  : NWindow()
+SongpDlg::SongpDlg(Song* pSong) 
+  : NWindow(), pSong_(pSong)
 {
   init();
 }
@@ -40,29 +39,32 @@ void SongpDlg::init( )
 {
   setTitle("Song properties");
 
-  pane()->setLayout(NListLayout());
+  pane()->setLayout(NAlignLayout(5,5));
 
   NLabel* songTitleLb_ = new NLabel("Song Title");
-  pane()->add(songTitleLb_);
+  pane()->add(songTitleLb_,nAlTop);
   songTitle_    = new NEdit();
-  songTitle_->setWidth(200);
-  pane()->add(songTitle_);
+    pane()->add(songTitle_, nAlTop);
   NLabel* songCreditsLb_ = new NLabel("Song Credits");
-  pane()->add(songCreditsLb_);
-  songCredits_  = new NEdit();
-  songCredits_->setWidth(200);
-  pane()->add(songCredits_);
+  pane()->add(songCreditsLb_,nAlTop);
+    songCredits_  = new NEdit();
+  pane()->add(songCredits_, nAlTop);
   NLabel* songCommentsLb_ = new NLabel("Song comments");
-  pane()->add(songCommentsLb_);
+  pane()->add(songCommentsLb_,nAlTop);
+
+  NPanel* okPanel = new NPanel();
+    okPanel->setLayout(NAlignLayout(5,5));
+    okBtn_ = new NButton("OK");
+    okBtn_->setFlat(false);
+    okBtn_->clicked.connect(this,&SongpDlg::onOkBtn);
+    okPanel->add(okBtn_, nAlRight);
+  pane()->add(okPanel,nAlBottom);
+
   songComments_ = new NMemo();
     songComments_->setPreferredSize(200,200);
     songComments_->setWordWrap(true);
-  pane()->add(songComments_);
-  okBtn_ = new NButton("OK");
-  pane()->add(okBtn_);
-  okBtn_->setWidth(200);
+  pane()->add(songComments_, nAlClient);
 
-  pane()->updateAlign();
   pack();
 
 }
@@ -76,13 +78,25 @@ int SongpDlg::onClose( )
 void SongpDlg::setVisible( bool on )
 {
   if (on) {
-      Song* _pSong = Global::pSong();
-      songTitle_->setText(_pSong->Name);
-      songCredits_->setText(_pSong->Author);
-      songComments_->setText(_pSong->Comment);
+      songTitle_->setText(pSong_->Name);
+      songCredits_->setText(pSong_->Author);
+      songComments_->setText(pSong_->Comment);
+      setPositionToScreenCenter();
   }
   NWindow::setVisible(on);
 }
 
+void SongpDlg::onOkBtn( NButtonEvent * ev )
+{
+   // todo ask in main psycle for std::string there ...
+   std::memset(pSong_->Name, 0, sizeof pSong_->Name);
+   std::memset(pSong_->Author, 0, sizeof pSong_->Author);
+   std::memset(pSong_->Comment, 0, sizeof pSong_->Comment);
+   std::sprintf(pSong_->Name, songTitle_->text().c_str());
+   std::sprintf(pSong_->Author, songCredits_->text().c_str());
+   std::sprintf(pSong_->Comment, songComments_->text().c_str());
+   setVisible(false);
+}
 
-}}
+}} // end of psycle::host namespace
+

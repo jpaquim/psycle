@@ -152,7 +152,7 @@ void MainWindow::initMenu( )
 void MainWindow::initDialogs( )
 {
   // creates the song dialog for editing song name, author, and comment
-  add( songpDlg_ = new SongpDlg() );
+  add( songpDlg_ = new SongpDlg(Global::pSong()) );
   // creates the instrument editor for editing samples
   add( instrumentEditor = new InstrumentEditor() );
   // creates the greeting dialog, that greets people who help psycle development
