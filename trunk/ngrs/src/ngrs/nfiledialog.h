@@ -20,7 +20,7 @@
 #ifndef NFILEDIALOG_H
 #define NFILEDIALOG_H
 
-#include "nwindow.h"
+#include "ndialog.h"
 #include "nfilelistbox.h"
 #include "nflowlayout.h"
 #include "nregexp.h"
@@ -37,23 +37,16 @@ class NFrameBorder;
 /**
 @author Stefan
 */
-class NFileDialog : public NWindow
+class NFileDialog : public NDialog
 {
 public:
-    NFileDialog();
+   NFileDialog();
 
-    ~NFileDialog();
+   ~NFileDialog();
 
-
-   bool execute();
-
-   int onClose();
-
-   std::string fileName();
+   std::string fileName() const;
 
    void setDirectory(const std::string & dir);
-
-   virtual void setVisible(bool on);
 
    void addFilter(const std::string & name ,const std::string & regexp);
 
@@ -65,7 +58,6 @@ private:
 
    NPanel* toolPanel;
 
-   bool do_Execute;
    NFileListBox* fBox_;
    NFileListBox* pdBox_;
    NFileListBox* dBox_;
@@ -73,9 +65,7 @@ private:
    NEdit* dNameCtrl;
    NComboBox* fiNameCtrl;
    NCheckBox* hBox;
-
    NButton* okBtn_;
-   NFrameBorder* dirPanelBorder;
 
    void onItemSelected(NItemEvent* ev);
    void onDirItemSelected(NItemEvent* ev);

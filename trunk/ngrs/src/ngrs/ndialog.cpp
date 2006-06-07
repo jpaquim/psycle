@@ -52,3 +52,13 @@ void NDialog::doClose( bool flag )
   setExitLoop(nDestroyWindow);
 }
 
+void NDialog::setVisible( bool on )
+{
+  if (on) {
+    setPositionToScreenCenter();
+  }
+  NWindow::setVisible(on);
+}
+
+
+

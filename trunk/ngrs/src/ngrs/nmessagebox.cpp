@@ -112,10 +112,7 @@ void NMessageBox::onBtnPress( NButtonEvent * ev )
 
 void NMessageBox::setVisible( bool on )
 {
-  if (on) {
-    pack();
-    setPositionToScreenCenter();
-  }
+  if (on) pack();
   NDialog::setVisible(on);
 }
 
