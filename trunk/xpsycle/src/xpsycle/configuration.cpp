@@ -42,7 +42,7 @@ Configuration::Configuration()
   setSkinDefaults();
   defaultPatLines = 64;
   loadConfig();
-  bitmaps_ = new DefaultBitmaps();
+  bitmaps_ = new DefaultBitmaps(this);
 }
 
 
