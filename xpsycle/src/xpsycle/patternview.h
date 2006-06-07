@@ -231,6 +231,9 @@ public:
     void deleteBlock();
     void doubleLength();
 
+    void setMoveCursorWhenPaste( bool on);
+    bool moveCursorWhenPaste() const;
+
     NRect repaintLineNumberArea    (int startLine,int endLine);
 
 private:
@@ -239,6 +242,7 @@ private:
   int playPos_;
   int editOctave_;
   int patternStep_;
+  bool moveCursorWhenPaste_;
 
   NPoint3D cursor_;
   PatternDraw* drawArea;
