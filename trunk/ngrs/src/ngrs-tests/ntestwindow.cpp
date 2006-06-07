@@ -212,14 +212,14 @@ void NTestWindow::testMenu( )
      item->click.connect(this,&NTestWindow::onOpen);
   menu1->add(item);
 
-  NMenuItem* item1 = new NMenuItem("close");
+  /*NMenuItem* item1 = new NMenuItem("close");
   menu1->add(item1);
 
   NMenuItem* item2 = new NMenuItem("crass");
   menu1->add(item2);
 
     NMenuItem* item3 = new NMenuItem("jo");
-  menu1->add(item3);
+  menu1->add(item3);*/
 
   /*NPanel* test = test = new NPanel();
     test->skin_.gradientStyle=1;
