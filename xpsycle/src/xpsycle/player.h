@@ -4,6 +4,8 @@
 #include "song.h"
 #include "dither.h"
 #include "machine.h"
+#include "riff.h"
+
 namespace psycle
 {
 	namespace host
@@ -122,8 +124,7 @@ namespace psycle
 			/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 			float _pBuffer[MAX_DELAY_BUFFER];
 			/// file to which to output signal.
-			//WaveFile _outputWaveFile;
-//			Serializer _outputWaveFile;
+			WaveFile _outputWaveFile;
 			/// dither handler
 			dsp::Dither dither;
 

@@ -38,7 +38,7 @@ namespace psycle
 
 		Player::~Player() throw()
 		{
-//			if(_recording) _outputWaveFile.Close();
+			if(_recording) _outputWaveFile.Close();
 		}
 
 		void Player::Start(int pos, int line)
@@ -503,25 +503,25 @@ namespace psycle
 							for(i=0; i<amount; i++)
 							{
 								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-//								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) StopRecording(false);
+								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						case 1: // mono L
 							for(i=0; i<amount; i++)
 							{
-//								if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) StopRecording(false);
+								if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						case 2: // mono R
 							for(i=0; i<amount; i++)
 							{
-//								if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) StopRecording(false);
+								if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						default: // stereo
 							for(i=0; i<amount; i++)
 							{
-//								if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) StopRecording(false);
+								if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						}
@@ -555,12 +555,12 @@ namespace psycle
 				int channels = 2;
 				if(Global::configuration()._pOutputDriver->_channelmode != 3) channels = 1;
 				Stop();
-//				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::configuration()._pOutputDriver->_samplesPerSec, Global::configuration()._pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
-//					_recording = true;
-//				else
-//				{
-//					StopRecording(false);
-//				}
+				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::configuration()._pOutputDriver->_samplesPerSec, Global::configuration()._pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+					_recording = true;
+				else
+				{
+					StopRecording(false);
+				}
 			}
 		}
 
@@ -572,7 +572,7 @@ namespace psycle
 				SampleRate(backup_rate);
 				Global::configuration()._pOutputDriver->_bitDepth = backup_bits;
 				Global::configuration()._pOutputDriver->_channelmode = backup_channelmode;
-//				_outputWaveFile.Close();
+				_outputWaveFile.Close();
 				_recording = false;
 				if(!bOk)
 				{
