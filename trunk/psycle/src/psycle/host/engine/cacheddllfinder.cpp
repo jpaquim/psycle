@@ -2,6 +2,8 @@
 #include PACKAGENERIC
 #include "cacheddllfinder.hpp"
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
+#include "plugin.hpp"
+#include "VSTHost.hpp"
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -16,9 +18,9 @@ MappedDllFinder::~MappedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void MappedDllFinder::AddPath(std::string &path)
+void MappedDllFinder::AddPath(std::string &path,MachineType mtype)
 {
-	DllFinder::AddPath(path);
+	DllFinder::AddPath(path,mtype);
 	populate_dll_map(path);
 }
 ///< Resets the Finder to the original state.
@@ -99,10 +101,12 @@ CachedDllFinder::~CachedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void CachedDllFinder::AddPath(std::string &path)
+void CachedDllFinder::AddPath(std::string &path,MachineType mtype)
 {
-	DllFinder::AddPath(path);
-	populate_plugin_map(path);
+	//\todo: check if the directory already exists? (this could be done
+	// inside the base class and return a value
+	DllFinder::AddPath(path,mtype);
+	populate_plugin_map(path,mtype);
 }
 ///< Resets the Finder to the original state.
 void CachedDllFinder::ResetFinder()
@@ -129,24 +133,292 @@ bool CachedDllFinder::LookupDllPath(std::string& name)
 	return false;
 }
 
-///< Adds the new Plugin data to the map.
-void CachedDllFinder::LearnPlugin(PluginInfo &plugininfo)
+std::string CachedDllFinder::file_from_fullpath(std::string& path)
 {
-	std::string str=plugininfo.dllname;
+	std::string str=path;
 	// strip off path
 	std::string::size_type pos=str.rfind('\\');
 	if(pos != std::string::npos) str=str.substr(pos+1);
 	// transform string to lower case
 	std::transform(str.begin(),str.end(),str.begin(),std::tolower);
-	dllInfo[str]=plugininfo;
+	return str;
 }
+
+///< Adds the new Plugin data to the map.
+void CachedDllFinder::LearnPlugin(PluginInfo &plugininfo)
+{
+	dllInfo[file_from_fullpath(plugininfo.dllname)]=plugininfo;
+}
+
+///< fills dllNames with all the dlls that exist in the specified directory.
+///< and its subdirectories. This is done in populate_plugin_map in order to
+///< know the dll's in advance.
+void CachedDllFinder::populate_dll_list(std::vector<DllFileInfo>& dllNames, std::string directory)
+{
+	::CFileFind finder;
+	int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
+	while(loop)
+	{
+		loop = finder.FindNextFile();
+		if(finder.IsDirectory()) {
+			if(!finder.IsDots())
+			{
+				std::string sfilePath = finder.GetFilePath();
+				populate_dll_list(dllNames,sfilePath);
+			}
+		}
+		else
+		{
+			CString filePath=finder.GetFilePath();
+			filePath.MakeLower();
+			if(filePath.Right(4) == ".dll")
+			{
+				DllFileInfo finfo;
+				finder.GetLastWriteTime(&(finfo._modtime));
+				finfo._name = filePath;
+				dllNames.push_back(finfo);
+			}
+		}
+	}
+	finder.Close();
+}
+
 ///< fills the dllInfo with the information of all plugins found in the directory specified 
 ///< and its subdirectories. If a Cache exists it will only load/fill those that are new
 ///< or modified since the cache creation.
-void CachedDllFinder::populate_plugin_map(std::string directory)
+void CachedDllFinder::populate_plugin_map(std::string directory,MachineType mtype)
 {
-	//\todo!!!
+	std::vector<DllFileInfo> dllList;
+
+	populate_dll_list(dllList,directory);
+
+	for(int i(0) ; i < (int)dllList.size(); i++)
+	{
+		bool found(false);
+		logger.emit(dllList[i]._name);
+		std::map<std::string,PluginInfo>::iterator iterator
+			= dllInfo.find(file_from_fullpath(dllList[i]._name));
+		if(iterator != dllInfo.end())
+		{
+			if ( iterator->second.FileTime.dwHighDateTime ==  dllList[i]._modtime.dwHighDateTime &&
+				iterator->second.FileTime.dwLowDateTime  ==  dllList[i]._modtime.dwLowDateTime )
+			{
+				found = true;
+				const std::string error(iterator->second.error);
+				std::stringstream s;
+				if(error.empty())
+					s << "found in cache.";
+				else
+					s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
+				logger.emit(s.str());
+				break;
+			}
+			//else, we try to load it again, so found=false;
+		}
+		if (!found) 
+		{
+			logger.emit("new plugin added to cache ; ");
+			PluginInfo pinfo;
+			pinfo.dllname = dllList[i]._name;
+			pinfo.FileTime = dllList[i]._modtime;
+			pinfo.type = mtype;
+			GeneratePluginInfo(pinfo);
+			LearnPlugin(pinfo);
+		}
+	}
 }
+
+void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
+{
+	try
+	{
+		if(pinfo.type == MACH_PLUGIN)
+		{
+			Plugin plug(0);
+			try
+			{
+				plug.Instance(pinfo.dllname);
+				plug.Init(); // [bohan] hmm, we should get rid of two-stepped constructions.
+			}
+			catch(const std::exception & e)
+			{
+				std::ostringstream s; s << typeid(e).name() << std::endl;
+				if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+				pinfo.error = s.str();
+			}
+			catch(...)
+			{
+				std::ostringstream s;
+				s << "Type of exception is unknown, cannot display any further information." << std::endl;
+				pinfo.error = s.str();
+			}
+			if(!pinfo.error.empty())
+			{
+				std::ostringstream s; s
+					<< "### ERRONEOUS ###" << std::endl
+					<< pinfo.error;
+				logger.emit(s.str());
+				pinfo.allow = false;
+				pinfo.name = pinfo.dllname;
+				pinfo.desc = "???";
+				pinfo.version = "???";
+			}
+			else
+			{
+				pinfo.allow = true;
+				pinfo.name = plug.GetName();
+				{
+					std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
+					pinfo.desc = s.str();
+				}
+				{
+					std::ostringstream s; s << plug.GetInfo()->Version; // API VERSION
+					pinfo.version = s.str();
+				}
+				if(plug.IsSynth()) pinfo.mode = MACHMODE_GENERATOR;
+				else pinfo.mode = MACHMODE_FX;
+			}
+			// [bohan] plug is a stack object, so its destructor is called
+			// [bohan] at the end of its scope (this scope actually).
+			// [bohan] The problem with destructors of any object of any class is that
+			// [bohan] they are never allowed to throw any exception.
+			// [bohan] So, we catch exceptions here by calling plug.Free(); explicitly.
+			try
+			{
+				plug.Free();
+			}
+			catch(const std::exception & e)
+			{
+				std::stringstream s;
+				s
+					<< std::endl
+					<< "### ERRONEOUS ###" << std::endl
+					<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+					<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+					<< typeid(e).name() << std::endl;
+				if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+				logger.emit(s.str());
+			}
+			catch(...)
+			{
+				std::stringstream s;
+				s
+					<< std::endl
+					<< "### ERRONEOUS ###" << std::endl
+					<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+					<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+					<< "Type of exception is unknown, no further information available.";
+				logger.emit(s.str());
+			}
+		}
+		else if(pinfo.type == MACH_VST)
+		{
+			vst::plugin vstPlug(MACH_VST, MACHMODE_UNDEFINED, Machine::id_type());
+			try
+			{
+				vstPlug.Instance(pinfo.dllname);
+			}
+			catch(const std::exception & e)
+			{
+				std::ostringstream s; s << typeid(e).name() << std::endl;
+				if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+				pinfo.error = s.str();
+			}
+			catch(...)
+			{
+				std::ostringstream s; s << "Type of exception is unknown, cannot display any further information." << std::endl;
+				pinfo.error = s.str();
+			}
+			if(!pinfo.error.empty())
+			{
+				std::ostringstream s; s
+					<< "### ERRONEOUS ###" << std::endl
+					<< pinfo.error;
+				logger.emit(s.str());
+				pinfo.allow = false;
+				pinfo.name = pinfo.dllname;
+				pinfo.desc = "???";
+				pinfo.version = "???";
+			}
+			else
+			{
+				pinfo.allow = true;
+				pinfo.name = vstPlug.GetName();
+				{
+					std::ostringstream s;
+					s << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect") << " by " << vstPlug.GetVendorName();
+					pinfo.desc = s.str();
+				}
+				{
+					std::ostringstream s;
+					s << vstPlug.GetVersion();
+					pinfo.version = s.str();
+				}
+
+				if(vstPlug.IsSynth()) pinfo.mode = MACHMODE_GENERATOR;
+				else pinfo.mode = MACHMODE_FX;
+
+				logger.emit(vstPlug.GetName()); logger.emit(" - successfully instanciated");
+			}
+			// [bohan] vstPlug is a stack object, so its destructor is called
+			// [bohan] at the end of its scope (this cope actually).
+			// [bohan] The problem with destructors of any object of any class is that
+			// [bohan] they are never allowed to throw any exception.
+			// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+			try
+			{
+				vstPlug.Free();
+				// <bohan> phatmatik crashes here...
+				// <magnus> so does PSP Easyverb, in FreeLibrary
+			}
+			catch(const std::exception & e)
+			{
+				std::stringstream s; s
+					<< std::endl
+					<< "### ERRONEOUS ###" << std::endl
+					<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+					<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+					<< typeid(e).name() << std::endl;
+				if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+				logger.emit(s.str());
+			}
+			catch(...)
+			{
+				std::stringstream s; s
+					<< std::endl
+					<< "### ERRONEOUS ###" << std::endl
+					<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+					<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+					<< "Type of exception is unknown, no further information available.";
+				logger.emit(s.str());
+			}
+		}
+	}
+	catch(const std::exception & e)
+	{
+		{
+			std::stringstream s;
+			s << std::endl << "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl;
+			logger.emit(s.str());
+		}
+		{
+			std::stringstream s;
+			s << typeid(e).name() << std::endl;
+			if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+			logger.emit(s.str());
+		}
+	}
+	catch(...)
+	{
+		std::stringstream s; s
+			<< std::endl
+			<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl
+			<< "Type of exception is unknown, no further information available.";
+		logger.emit(s.str());
+	}
+}
+
+
 
 bool CachedDllFinder::LoadCacheFile()
 {

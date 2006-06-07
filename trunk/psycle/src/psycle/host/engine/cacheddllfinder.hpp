@@ -1,6 +1,10 @@
 #pragma once
+#include <iostream>
+#include <typeinfo>
+#include <map>
 #include "dllfinder.hpp"
 #include "machine.hpp"
+#include <sigslot/sigslot.h>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -52,6 +56,17 @@ public:
 #endif
 };
 
+class DllFileInfo
+{
+public:
+	DllFileInfo()
+	{
+		memset(&_modtime,0,sizeof(FILETIME));
+	}
+
+	std::string _name;
+	FILETIME _modtime;
+};
 
 class MappedDllFinder: public DllFinder
 {
@@ -66,7 +81,7 @@ public:
 	virtual ~MappedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	virtual void AddPath(std::string &path);
+	virtual void AddPath(std::string &path,MachineType mtype);
 	///< Resets the Finder to the original state.
 	virtual void ResetFinder();
 	///< fills in the path for the specified name so that name becomes a fullpath.
@@ -90,20 +105,29 @@ public:
 	virtual ~CachedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	virtual void AddPath(std::string &path);
+	virtual void AddPath(std::string &path,MachineType mtype);
 	///< Resets the Finder to the original state.
 	virtual void ResetFinder();
 	///< fills in the path for the specified name so that name becomes a fullpath.
 	virtual bool LookupDllPath(std::string& name);
+public:
+	sigslot::signal2<const std::string &, const std::string &> report;
+	sigslot::signal2<const std::string &, const std::string &> progress;
+	sigslot::signal1<const std::string &> logger;
 
 protected:
+	std::string file_from_fullpath(std::string& path);
 	///< Adds the new Plugin data to the map.
 	void LearnPlugin(PluginInfo &plugininfo);
+	///< fills dllNames with all the dlls that exist in the specified directory.
+	///< and its subdirectories. This is done in populate_plugin_map in order to
+	///< know the dll's in advance.
+	void populate_dll_list(std::vector<DllFileInfo>& dllNames, std::string directory);
 	///< fills the dllInfo with the information of all plugins found in the directory specified 
 	///< and its subdirectories. If a Cache exists it will only load/fill those that are new
 	///< or modified since the cache creation.
-	void populate_plugin_map(std::string directory);
-
+	void populate_plugin_map(std::string directory,MachineType mtype);
+	void GeneratePluginInfo(PluginInfo& pinfo);
 	bool LoadCacheFile();
 	bool SaveCacheFile();
 protected:
