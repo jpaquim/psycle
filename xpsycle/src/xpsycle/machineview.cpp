@@ -192,20 +192,21 @@ void MachineView::onLineMousePressed( NButtonEvent * ev )
 
 void MachineView::onWireDelete( WireDlg * dlg )
 {
-  dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
-/*/*  Machine* _pSrcMachine = dlg->pSrcMachine();
+  //dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
+  Machine* _pSrcMachine = dlg->pSrcMachine();
   Machine* _pDstMachine = dlg->pDstMachine();
 
-  int wireIndex    = dlg->pSrcMachine()->_macIndex;
+  int wireIndex = dlg->pSrcMachine()->FindOutputWire(_pDstMachine->_macIndex);
   int dstWireIndex = _pDstMachine->FindInputWire(_pSrcMachine->_macIndex);
 
   _pSrcMachine->_connection[wireIndex] = false;
   _pSrcMachine->_outputMachines[wireIndex] = -1;
-  _pSrcMachine->_numOutPorts--;
+  _pSrcMachine->_connectedOutputs--;
 
   _pDstMachine->_inputCon[dstWireIndex] = false;
   _pDstMachine->_inputMachines[dstWireIndex]=-1;
-  _pDstMachine->_numInPorts--;*/
+  _pDstMachine->_connectedInputs--;
+
 
   MachineGUI* from = this->findByMachine(dlg->pSrcMachine());
   MachineGUI* to   = this->findByMachine(dlg->pDstMachine());
