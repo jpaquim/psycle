@@ -21,12 +21,12 @@
 #define NALIGNLAYOUT_H
 
 #include "nlayout.h"
-
-
+#include <vector>
 
 /**
 @author Stefan
 */
+
 class NAlignLayout : public NLayout
 {
 public:
@@ -43,6 +43,9 @@ public:
     void setHgap(int hgap);
     void setVgap(int vgap);
 
+    virtual void add(NVisualComponent* comp);
+    virtual void remove(NVisualComponent* comp);
+    virtual void removeAll();
 
 
 private:
@@ -51,6 +54,8 @@ private:
     int maxY_;
 
     int hgap_,vgap_;
+
+    std::vector<NVisualComponent*> components;
 
 };
 

@@ -49,9 +49,9 @@ void NAlignLayout::align( NVisualComponent * parent )
   NVisualComponent* lastLeft   = 0;
   NVisualComponent* lastRight  = 0;
   NVisualComponent* lastBottom = 0;
-  std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
+  std::vector<NVisualComponent*>::const_iterator itr = components.begin();
 
-  for (;itr < parent->visualComponents().end(); itr++) {
+  for (;itr < components.end(); itr++) {
      NVisualComponent* visualChild = *itr;
      if (visualChild->visible()) {
       switch (visualChild->align()) {
@@ -150,55 +150,78 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
 
 int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
 {
-  int yp = 0;
-  int topMax = 0;
-  int leftTopMax = 0;
+  int top    = 0;
+  int left   = 0;
+  int right  = 0;
+  int bottom = 0;
+  int client = 0;
 
-  NVisualComponent* lastLeft    = 0;
+  NVisualComponent* lastTop    = 0;
+  NVisualComponent* lastLeft   = 0;
   NVisualComponent* lastRight  = 0;
-  NVisualComponent* lastTop     = 0;
-  NVisualComponent* lastBottom  = 0;
+  NVisualComponent* lastBottom = 0;
 
-  std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
+  bool topBeforeLeft     = 1;
+  bool topBeforeRight    = 1;
+	bool bottomBeforeLeft  = 1;
+  bool bottomBeforeRight = 1;
 
-  for (;itr < parent()->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     switch (visualChild->align()) {
-       case nAlLeft   :
-           lastLeft = visualChild;
-           leftTopMax = std::max(visualChild->preferredHeight() + 2*vgap_ , leftTopMax);
-           yp = leftTopMax;
-       break;
-        case nAlRight   :
-           lastRight = visualChild;
-           yp = visualChild->preferredHeight();
-       break;
-       case nAlTop    : {
-           lastTop = visualChild;
-           int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
-           int bottomOff  = (lastBottom == 0) ? vgap_ : parent()->clientHeight() - lastBottom->top() + vgap_ ;
-           yp = topOff + bottomOff;
-          }
-       break;
-       case nAlBottom : {
-           lastBottom = visualChild;
-           lastTop = visualChild;
-           int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
-           int bottomOff  = (lastBottom == 0) ? vgap_ : parent()->clientHeight() - lastBottom->top() + vgap_ ;
-           yp = topOff + bottomOff;
-         }
-       break;
-       case nAlClient : {
-           int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
-           int bottomOff  = (lastBottom == 0) ? vgap_ : parent()->clientHeight() - lastBottom->top() + vgap_ ;
+  std::vector<NVisualComponent*>::const_iterator it = components.begin();
 
-           yp = std::max(leftTopMax, visualChild->preferredHeight() + topOff + bottomOff);
-       }
-       break;
-      }
+  for ( ; it < components.end(); it++ ) {
+    NVisualComponent* visualChild = *it;
+    switch ( visualChild->align() ) {
+      case nAlLeft   :
+        left = std::max( left, visualChild->preferredHeight() );
+        lastLeft = visualChild;
+      break;
+      case nAlTop    :
+        if (lastLeft)  topBeforeLeft  = 0;
+        if (lastRight) topBeforeRight = 0;
+        top += vgap_ + visualChild->preferredHeight();
+        lastTop = visualChild;
+      break;
+      case nAlRight  :
+        right = std::max( right, vgap_ + visualChild->preferredHeight() );
+        lastRight = visualChild;
+      break;
+      case nAlBottom :
+        if (lastLeft)  bottomBeforeLeft  = 0;
+        if (lastRight) bottomBeforeRight = 0;
+        bottom += vgap_ + visualChild->preferredHeight();
+        lastBottom = visualChild;
+      break;
+      case nAlClient :
+        client = visualChild->preferredHeight();
+      break;
+    }
   }
 
- return yp;
+  int ymax = 0;
+
+  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {
+    ymax = std::max( top + bottom + client, std::max( left, right));
+  } else 
+  if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
+    ymax = std::max( std::max(left,right), client ) + top + bottom;
+  } else 
+  if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
+    ymax = std::max( std::max( client, right) + top, left) + bottom;
+  } else 
+  if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
+    ymax = std::max(right, std::max ( client, left ) + top ) + bottom;
+  } else 
+  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
+    ymax = std::max( std::max( client + top, right ), left) + bottom;
+  } else
+  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {
+    ymax = std::max( std::max( client + top, right) + bottom, left);
+  } else
+  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {
+    ymax = std::max( std::max( client + top, left) + bottom, right);
+  }
+
+  return vgap_ + ymax;
 }
 
 void NAlignLayout::setHgap( int hgap )
@@ -209,6 +232,25 @@ void NAlignLayout::setHgap( int hgap )
 void NAlignLayout::setVgap( int vgap )
 {
   vgap_ = vgap;
+}
+
+// this adds and removes components to the layout
+
+void NAlignLayout::add( NVisualComponent * comp )
+{
+  components.push_back(comp);
+}
+
+void NAlignLayout::remove( NVisualComponent * comp )
+{
+  std::vector<NVisualComponent*>::iterator it = components.begin();
+  it = find(components.begin(), components.end(), comp);
+  if ( it != components.end() ) components.erase(it);
+}
+
+void NAlignLayout::removeAll( )
+{
+  components.clear();
 }
 
 

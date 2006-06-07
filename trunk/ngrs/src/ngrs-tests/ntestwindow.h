@@ -74,6 +74,7 @@ private:
     void toolBarTest();
     void testSpinButton();
     void testBorderLayout();
+    void testFlowLayout();
     void testFrameBorder();
     void testLine();
     void testMenu();
