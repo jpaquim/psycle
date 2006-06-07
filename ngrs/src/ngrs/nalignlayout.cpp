@@ -150,24 +150,21 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
 
 int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
 {
-  int top    = 0;
-  int left   = 0;
-  int right  = 0;
-  int bottom = 0;
-  int client = 0;
+  // this will store the block height of same aligns; eg. the height sum of all nAlignTop components
+  int top,left,right,bottom,client = 0;
 
+  // pointers to determinate, if a coponent with that align is there
   NVisualComponent* lastTop    = 0;
   NVisualComponent* lastLeft   = 0;
   NVisualComponent* lastRight  = 0;
   NVisualComponent* lastBottom = 0;
 
-  bool topBeforeLeft     = 1;
-  bool topBeforeRight    = 1;
-	bool bottomBeforeLeft  = 1;
-  bool bottomBeforeRight = 1;
+  // flags to determine the 16 possible layout structures
+  bool topBeforeLeft, topBeforeRight, bottomBeforeLeft, bottomBeforeRight = 1;
 
   std::vector<NVisualComponent*>::const_iterator it = components.begin();
 
+  // compute for each block the preferredHeight
   for ( ; it < components.end(); it++ ) {
     NVisualComponent* visualChild = *it;
     switch ( visualChild->align() ) {
@@ -192,35 +189,60 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
         lastBottom = visualChild;
       break;
       case nAlClient :
-        client = visualChild->preferredHeight();
+        client = vgap_+visualChild->preferredHeight();
       break;
     }
   }
 
   int ymax = 0;
 
-  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {
-    ymax = std::max( top + bottom + client, std::max( left, right));
-  } else 
-  if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
+  // determine, which layout structure is there and compute the preferredHeigth of the layout
+
+  if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { // 0000
     ymax = std::max( std::max(left,right), client ) + top + bottom;
-  } else 
-  if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
-    ymax = std::max( std::max( client, right) + top, left) + bottom;
-  } else 
-  if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
+  } else
+  if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) { //0001
+    ymax = std::max( std::max(left,client) + bottom, right ) + top;
+  } else
+  if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) { //0010
+    ymax = std::max( std::max(right,client) + bottom, left ) + top;
+  } else
+  if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0011
+    ymax = std::max( std::max(client + bottom, left), right ) + top;
+  } else
+  if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { //0100
     ymax = std::max(right, std::max ( client, left ) + top ) + bottom;
-  } else 
-  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {
+  } else
+  if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//0101
+    ymax = std::max(right, std::max ( client, left ) + top + bottom);
+  } else
+  if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//0110
+    ymax = std::max(right, std::max ( top + client, right ) + bottom); // not sure
+  } else
+  if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0111
+    ymax = std::max(right, std::max ( client + bottom, left ) + top);
+  } else
+  if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1000
+    ymax = std::max( std::max( client, right) + top, left) + bottom;
+  } else
+  if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
+    ymax = std::max( std::max( client + top, left) + bottom, right);
+  } else
+  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1010
+    ymax = std::max( std::max( client + bottom, right) + top, left);
+  } else
+  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100
     ymax = std::max( std::max( client + top, right ), left) + bottom;
   } else
-  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {
+  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1101
+    ymax = std::max( std::max( client + top, left) + bottom, right);
+  } else
+  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1110
     ymax = std::max( std::max( client + top, right) + bottom, left);
   } else
-  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {
-    ymax = std::max( std::max( client + top, left) + bottom, right);
+  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1111
+    ymax = std::max( top + bottom + client, std::max( left, right));
   }
-
   return vgap_ + ymax;
 }
 
