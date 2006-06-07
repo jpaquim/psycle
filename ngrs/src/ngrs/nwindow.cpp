@@ -68,19 +68,26 @@ void NWindow::setVisible( bool on )
       repaint(pane(),NRect(0,0,width(),height()));
       if (modal_) {
          //NApp::system().setStayAbove(win());
+         XSync(NApp::system().dpy(),false);
          XMapWindow(NApp::system().dpy(),win_);
          XMapRaised(NApp::system().dpy(),win_);
          XFlush(NApp::system().dpy());
+         XSync(NApp::system().dpy(),false);
          NApp::runModal();
-      } else
+      } else {
+      XSync(NApp::system().dpy(),false);
       XMapWindow(NApp::system().dpy(),win_);
+      XSync(NApp::system().dpy(),false);
+      }
   } else if (mapped()) {
      if (lastOver_!=0) {
         lastOver_->onMouseExit();
         lastOver_ = 0;
         dragBase_ = 0;
      }
+     XSync(NApp::system().dpy(),false);
      NApp::system().unmapWindow(win_);
+     XSync(NApp::system().dpy(),false);
      graphics_->setVisible(on);
      exitLoop_ = nDestroyWindow;
   }
