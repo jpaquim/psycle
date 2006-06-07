@@ -100,7 +100,10 @@ void ChildView::onFileSaveSong( NObject * sender )
 }
 
 void ChildView::FileSaveSongNamed(const std::string & fName) {
-//  _pSong->save(fName);
+  RiffFile file;
+  file.Create(fName,true);
+  _pSong->Save(&file);
+  file.Close();
 }
 
 void ChildView::OnFileLoadSongNamed( const std::string & fName, int fType )

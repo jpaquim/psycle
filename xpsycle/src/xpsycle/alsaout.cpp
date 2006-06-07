@@ -96,7 +96,7 @@ int AlsaOut::audioStop( )
   AlsaOut::enablePlayer = 0;
 
   while (in) {
-      sleep(1);
+      usleep(100);
   }
 
 }
