@@ -20,8 +20,6 @@
 #ifndef XMINSTRUMENT_H
 #define XMINSTRUMENT_H
 
-#include "deserializer.h"
-#include "serializer.h"
 #include <utility>
 #include <string>
 #include <inttypes.h>
@@ -139,8 +137,8 @@ public:
           m_WaveLength  = iLen;
         }
 
-        void Load(DeSerializer* file);  // here is a change to main psycle
-        void Save(Serializer* file);
+//        void Load(DeSerializer* file);  // here is a change to main psycle
+//        void Save(Serializer* file);
 
         /// Wave Data Copy Operator
         void operator= (const WaveData& source)

@@ -19,8 +19,6 @@
   ***************************************************************************/
 #include "plugin.h"
 #include "inputhandler.h"
-#include "serializer.h"
-#include "deserializer.h"
 #include <ngrs/nfile.h>
 #include <dlfcn.h>
 #include <iostream>

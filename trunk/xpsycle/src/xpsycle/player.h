@@ -2,7 +2,6 @@
 ///\brief interface file for psycle::host::Player.
 #pragma once
 #include "song.h"
-#include "serializer.h"
 #include "dither.h"
 #include "machine.h"
 namespace psycle

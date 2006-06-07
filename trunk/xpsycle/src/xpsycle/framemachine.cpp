@@ -23,7 +23,6 @@
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include "presetsdlg.h"
-#include "deserializer.h"
 #include <ngrs/napp.h>
 #include <ngrs/nmenubar.h>
 #include <ngrs/ntogglepanel.h>
@@ -392,7 +391,7 @@ void FrameMachine::updateValues( )
 
 
 void FrameMachine::loadPresets() {
-/*  std::string filename(pMac()->GetDllName());
+  std::string filename(pMac()->GetDllName());
 
   std::string::size_type pos = filename.find('.')  ;
   if ( pos == std::string::npos ) {
@@ -402,10 +401,13 @@ void FrameMachine::loadPresets() {
   }
 
   try {
-      DeSerializer f(Global::pConfig()->prsPath+filename);
+      RiffFile f;
+      if (!f.Open(Global::pConfig()->prsPath+filename)) throw "couldn`t open file";
 
-      int numpresets = f.getInt();
-      int filenumpars = f.getInt();
+      int numpresets;
+      f.Read(numpresets);
+      int filenumpars;
+      f.Read(filenumpars);
 
       if (numpresets >= 0) {
         // old file format .. do not support so far ..
@@ -419,13 +421,14 @@ void FrameMachine::loadPresets() {
           int numParameters = ((Plugin*) pMac())->GetInfo()->numParameters;
           int sizeDataStruct = ((Plugin *) pMac())->proxy().GetDataSize();
 
-          numpresets = f.getInt();
-          filenumpars = f.getInt();
-          filepresetsize = f.getInt();
+          int numpresets;
+          f.Read(numpresets);
+          f.Read(filenumpars);
+          f.Read(filepresetsize);
 
           if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) return;
 
-          while (!f.eof() ) {
+          while (!f.Eof() ) {
             Preset newPreset(numParameters, sizeDataStruct);
             newPreset.loadFromFile(&f);
             NButton* prsBtn = new NButton(newPreset.name());
@@ -438,7 +441,7 @@ void FrameMachine::loadPresets() {
       }
   } catch (const char * e) {
       // couldn`t open presets
-  }*/
+  }
 }
 
 void FrameMachine::onLeftBtn( NButtonEvent * ev )

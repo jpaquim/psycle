@@ -19,10 +19,10 @@
   ***************************************************************************/
 #include "presetsdlg.h"
 #include "machine.h"
-#include "deserializer.h"
 #include "plugin.h"
 #include "global.h"
 #include "framemachine.h"
+#include "fileio.h"
 #include <ngrs/nbutton.h>
 #include <ngrs/ncheckbox.h>
 #include <ngrs/ngridlayout.h>
@@ -45,17 +45,23 @@ Preset::Preset( int numpars, int dataSize ) : numpars_(numpars), dataSize_(dataS
 }
 
 
-void Preset::loadFromFile( DeSerializer * f )
+void Preset::loadFromFile( RiffFile* f )
 {
     char cbuf[32];
-    f->read(cbuf,sizeof(cbuf));
+    f->ReadChunk(cbuf,sizeof(cbuf));
     strcpy(cbuf,cbuf);
     name_ = string(cbuf);  // read the preset name
 
-    for (int i = 0; i < numpars_; i++)
-      params_.push_back(f->getInt());
-    for (int i = 0; i < dataSize_; i++) 
-      data_.push_back(f->getByte());
+    for (int i = 0; i < numpars_; i++) {
+      int temp;
+      f->Read(temp);
+      params_.push_back(temp);
+    }
+    for (int i = 0; i < dataSize_; i++) {
+      byte temp;
+      f->Read(temp);
+      data_.push_back(temp);
+    }
 }
 
 const std::string & Preset::name( ) const
@@ -144,11 +150,14 @@ void PresetsDlg::loadPresets( )
 
   try {
       std::cout << Global::pConfig()->prsPath+filename << std::endl;
-      DeSerializer f(Global::pConfig()->prsPath+filename);
-
-      int numpresets = f.getInt();
-      int filenumpars = f.getInt();
-
+      RiffFile f;
+      if (!f.Open(Global::pConfig()->prsPath+filename)) {
+        throw "couldn`t open file";
+      }
+      int numpresets;
+      f.Read(numpresets);
+      int filenumpars;
+      f.Read(filenumpars);
       if (numpresets >= 0) {
         // old file format .. do not support so far ..
       } else {
@@ -161,13 +170,15 @@ void PresetsDlg::loadPresets( )
           int numParameters = ((Plugin*) fMac->pMac())->GetInfo()->numParameters;
           int sizeDataStruct = ((Plugin *) fMac->pMac())->proxy().GetDataSize();
 
-          numpresets = f.getInt();
-          filenumpars = f.getInt();
-          filepresetsize = f.getInt();
+          int numpresets;
+          f.Read(numpresets);
+          int filenumpars;
+          f.Read(filenumpars);
+          f.Read(filepresetsize);
 
           if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) return;
 
-          while (!f.eof() ) {
+          while (!f.Eof() ) {
             Preset newPreset(numParameters, sizeDataStruct);
             newPreset.loadFromFile(&f);
             presetMap[newPreset.name()] = newPreset;
@@ -177,6 +188,7 @@ void PresetsDlg::loadPresets( )
       }
   } catch (const char * e) {
       // couldn`t open presets
+     std::cerr << e << std::endl;
   }
 }
 
