@@ -54,6 +54,8 @@ void SequencerBar::init( )
 {
   skin_ = NApp::config()->skin("seqbar");
 
+  skin_.setBitmap(Global::pConfig()->icons().wood(),1);
+
   DefaultBitmaps & icons = Global::pConfig()->icons();
 
   NFrameBorder frBorder;
@@ -61,22 +63,31 @@ void SequencerBar::init( )
     frBorder.setLineCount(2,4,4);
   setBorder(frBorder);
 
-  setLayout(NListLayout());
+  setLayout(NAlignLayout());
   setWidth(90);
 
   patternView_ = 0;
 
+  NPanel* screwsUpStairs = new NPanel();
+     screwsUpStairs->setLayout(NAlignLayout());
+     NImage* img = new NImage();
+       img->setSharedBitmap(&icons.screw());
+     screwsUpStairs->add(img,nAlLeft);
+     img = new NImage();
+       img->setSharedBitmap(&icons.screw());
+     screwsUpStairs->add(img,nAlRight);
+  add(screwsUpStairs, nAlTop);
 
   seqPanel_ = new NPanel();
-  seqPanel_->setWidth(100);
-  add(seqPanel_);
+    seqPanel_->setWidth(100);
+  add(seqPanel_,nAlTop);
 
   NPanel* btnBar = new NPanel();
     gridLayout.setVgap(5);
     gridLayout.setHgap(5);
     btnBar->setLayout(gridLayout);
 
-    NImage* img = new NImage();
+    img = new NImage();
       img->setSharedBitmap(&icons.plus());
     btnBar->add( incshort_     = new NButton(img));
 
@@ -151,19 +162,23 @@ void SequencerBar::init( )
 
   NPanel* lengthPanel = new NPanel();
     lengthPanel->setLayout(NFlowLayout(nAlLeft,5,0));
-    lengthPanel->add(new NLabel("Len"));
+    NLabel* lenText = new NLabel("Len");
+    lengthPanel->add(lenText);
+    lenText->skin_.setTranslucent(NColor(200,200,200),60);
     NPanel* spacer = new NPanel();
         spacer->setPreferredSize(16,10);
     lengthPanel->add(spacer);
     N7SegDisplay* sampCountSeg = new N7SegDisplay(3);
-      sampCountSeg->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
+      //sampCountSeg->setColors(NColor(180,0,0),NColor(170,0,0),NColor(230,0,0));
       sampCountSeg->setNumber((int)(Global::pSong()->_sampCount));
     lengthPanel->add(sampCountSeg);
-  add(lengthPanel);
+  add(lengthPanel,nAlTop);
 
   NPanel* lenPanel = new NPanel();
     lenPanel->setLayout(NFlowLayout(nAlLeft,5,0));
-    lenPanel->add( new NLabel("Len"));
+    NLabel* lengthText =  new NLabel("Len");
+    lengthText->skin_.setTranslucent(NColor(200,200,200),50);
+    lenPanel->add( lengthText );
 
     img = new NImage();
        img->setSharedBitmap(&icons.less()); 
@@ -171,10 +186,10 @@ void SequencerBar::init( )
     declen_->clicked.connect(this,&SequencerBar::onDecLen);
 
     lenSeg1 = new N7SegDisplay(2);
-      lenSeg1->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
+      //lenSeg1->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
       lenSeg1->setNumber((int)(Global::pSong()->playLength / 60));
     lenSeg2 = new N7SegDisplay(2);
-      lenSeg2->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
+      //lenSeg2->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
     lenSeg2->setNumber((int)(Global::pSong()->playLength % 60));
 
     lenPanel->add( lenSeg1);
@@ -185,9 +200,10 @@ void SequencerBar::init( )
     lenPanel->add( inclen_     = new NButton( img,40,10));
     inclen_->clicked.connect(this,&SequencerBar::onIncLen);
     lenPanel->resize();
-  add(lenPanel);
+  add(lenPanel,nAlTop);
 
   NPanel* checkPanel = new NPanel();
+    checkPanel->skin_.setTranslucent(NColor(200,200,200),70);
     checkPanel->setLayout(NListLayout());
     checkPanel->add( follow_                = new NCheckBox("Follow song"));
     checkPanel->add( multichannel_audition_ = new NCheckBox("Multichannel\nAudition"));
@@ -195,8 +211,17 @@ void SequencerBar::init( )
     checkPanel->add( record_tweaks_         = new NCheckBox("Record Tweaks"));
     checkPanel->add( notestoeffects_        = new NCheckBox("Allow Notes\nto Effects"));
     checkPanel->add( movecursorpaste_       = new NCheckBox("Move Cursor\nWhen Paste"));
-    
-  add(checkPanel);
+  add(checkPanel,nAlTop);
+
+  NPanel* screwsDownStairs = new NPanel();
+     screwsDownStairs->setLayout(NAlignLayout());
+     img = new NImage();
+       img->setSharedBitmap(&icons.screw());
+     screwsDownStairs->add(img,nAlLeft);
+     img = new NImage();
+       img->setSharedBitmap(&icons.screw());
+     screwsDownStairs->add(img,nAlRight);
+  add(screwsDownStairs, nAlBottom);
 
   resize();
 

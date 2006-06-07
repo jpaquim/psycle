@@ -72,9 +72,13 @@ public:
     NBitmap & stop();
     NBitmap & tbmainknob();
     NBitmap & undo();
+    NBitmap & wood();
+    NBitmap & screw();
 
 private:
 
+    NBitmap screw_;
+    NBitmap wood_;
     NBitmap autoStop_;
     NBitmap help_;
     NBitmap less_;
