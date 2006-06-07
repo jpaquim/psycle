@@ -96,7 +96,6 @@ private:
     N7SegDisplay* tpbDisplay_;
 
     GreetDlg* greetDlg;
-    AboutDlg* aboutDlg;
     InfoDlg*  infoDlg;
     NFileDialog* wavRecFileDlg;
     WaveSaveDlg* wavSaveDlg;

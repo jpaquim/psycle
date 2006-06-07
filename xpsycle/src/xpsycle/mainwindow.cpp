@@ -23,7 +23,6 @@
 #include "player.h"
 #include "defaultbitmaps.h"
 #include "greetdlg.h"
-#include "aboutdlg.h"
 #include "vumeter.h"
 #include "instrumenteditor.h"
 #include "infodlg.h"
@@ -158,8 +157,6 @@ void MainWindow::initDialogs( )
   add( instrumentEditor = new InstrumentEditor() );
   // creates the greeting dialog, that greets people who help psycle development
   add( greetDlg =  new GreetDlg() );
-  // creates the version and licence copyright dialog
-  add( aboutDlg =  new AboutDlg() );
   // creates the save dialog, that ask where to store wave files, recorded from playing a psy song
   wavRecFileDlg = new NFileDialog();
     wavRecFileDlg->setMode(nSave);
@@ -1099,7 +1096,15 @@ void MainWindow::onViewMenuStatusbar( NButtonEvent * ev )
 
 void MainWindow::onHelpMenuAbout( NButtonEvent * ev )
 {
-  aboutDlg->setVisible(true);
+  NMessageBox* about = new NMessageBox();
+    about->setTitle("About Psycle(X)");
+    about->setText( std::string("Psycle version (X alpha 0.1)\n") +
+                    std::string("(c) 2006 by Psycledelics Community\n") +
+                    std::string("GNU Public Licence 2.0") );
+    about->setButtons(nMsgOkBtn);
+  add(about);
+  about->execute();
+  NApp::addRemovePipe(about);
 }
 
 void MainWindow::onHelpMenuGreeting( NButtonEvent * ev )
