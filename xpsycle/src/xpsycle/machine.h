@@ -368,7 +368,6 @@ namespace psycle
 			public:
 				Machine(type_type type, mode_type mode, id_type id);
 				virtual ~Machine() throw();
-
 			//////////////////////////////////////////////////////////////////////////
 			// Actions
 
