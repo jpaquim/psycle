@@ -192,7 +192,8 @@ void MachineView::onLineMousePressed( NButtonEvent * ev )
 
 void MachineView::onWireDelete( WireDlg * dlg )
 {
-/*  Machine* _pSrcMachine = dlg->pSrcMachine();
+  dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
+/*/*  Machine* _pSrcMachine = dlg->pSrcMachine();
   Machine* _pDstMachine = dlg->pDstMachine();
 
   int wireIndex    = dlg->pSrcMachine()->_macIndex;
@@ -204,7 +205,7 @@ void MachineView::onWireDelete( WireDlg * dlg )
 
   _pDstMachine->_inputCon[dstWireIndex] = false;
   _pDstMachine->_inputMachines[dstWireIndex]=-1;
-  _pDstMachine->_numInPorts--;
+  _pDstMachine->_numInPorts--;*/
 
   MachineGUI* from = this->findByMachine(dlg->pSrcMachine());
   MachineGUI* to   = this->findByMachine(dlg->pDstMachine());
@@ -217,7 +218,7 @@ void MachineView::onWireDelete( WireDlg * dlg )
   NApp::flushEventQueue();
   if (window()!=0) window()->checkForRemove(0);
   scrollArea_->removeChild(dlg->line());
-  repaint();*/
+  repaint();
 }
 
 void MachineView::removeMachines( )

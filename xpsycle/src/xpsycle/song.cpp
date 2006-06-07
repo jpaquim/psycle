@@ -10,7 +10,7 @@
 #include "plugin.h"
 //#include "VSTHost.hpp"
 #include "datacompression.h"
-//#include "riff.hpp" // for Wave file loading.
+#include "riff.h" // for Wave file loading.
 //#include <psycle/host/gui/psycle.hpp>
 //#include <psycle/host/gui/NewMachine.hpp> // Is this needed?
 //#include <psycle/host/gui/MainFrm.hpp> // Is this needed?
@@ -810,7 +810,7 @@ namespace psycle
 
 		bool Song::WavAlloc(Instrument::id_type instrument,const char * Wavfile)
 		{ 
-/*			assert(Wavfile != 0);
+			assert(Wavfile != 0);
 			WaveFile file;
 			ExtRiffChunkHeader hd;
 			// opens the file and read the format Header.
@@ -821,7 +821,7 @@ namespace psycle
 				return false; 
 			}
 			Invalided = true;
-			::Sleep(LOCK_LATENCY); ///< ???
+//			::Sleep(LOCK_LATENCY); ///< ???
 			// sample type	
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());
@@ -939,7 +939,7 @@ namespace psycle
 			}
 			file.Close();
 			Invalided = false;
-			return true;*/
+			return true;
 		}
 
 		bool Song::Load(RiffFile* pFile, bool fullopen)

@@ -31,6 +31,7 @@ namespace host {
 class Machine;
 class DeSerializer;
 class FrameMachine;
+class RiffFile;
 
 /**
 @author Stefan Nattkemper
@@ -43,7 +44,7 @@ class Preset {
 
       Preset(int numpars, int dataSize);
 
-      void loadFromFile(DeSerializer* f);
+      void loadFromFile(RiffFile* f);
 
       const std::string & name() const;
 
