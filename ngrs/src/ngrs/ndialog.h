@@ -37,6 +37,8 @@ public:
 
     void doClose(bool flag);
 
+    virtual void setVisible( bool on );
+
 private:
 
     bool do_execute;

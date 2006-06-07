@@ -154,7 +154,7 @@ const char * up_nav[] = {
 
 
 NFileDialog::NFileDialog()
- : NWindow()
+ : NDialog()
 {
   mode_ = nLoad;
 
@@ -165,7 +165,6 @@ NFileDialog::NFileDialog()
   NFile::cdHome();
 
   pane()->setSpacing(5,5,5,5);
-  setModal(true);
 
   NSkin paneSkin;
   paneSkin = NApp::config()->skin("filedlgpane");
@@ -287,8 +286,6 @@ NFileDialog::NFileDialog()
 
   pane()->resize();
 
-  do_Execute = false;
-
   setPosition(0,0,550,400);
 }
 
@@ -302,17 +299,8 @@ extern "C" void destroyFileDialog(NObject* p) {
     delete p;
 }
 
-
-
 NFileDialog::~NFileDialog()
 {
-  delete dirPanelBorder;
-}
-
-bool NFileDialog::execute( )
-{
-  setVisible(true);
-  return do_Execute;
 }
 
 void NFileDialog::onItemSelected( NItemEvent * ev )
@@ -349,34 +337,17 @@ void NFileDialog::onParentDirItemSelected( NItemEvent * ev )
 
 void NFileDialog::onOkBtn( NButtonEvent * sender )
 {
-  do_Execute = true;
-  setVisible(false);
-  setExitLoop(nDestroyWindow);
+  doClose(true);
 }
 
-int NFileDialog::onClose( )
-{
-  do_Execute = false;
-  setVisible(false);
-  return nDestroyWindow;
-}
-
-std::string NFileDialog::fileName( )
+std::string NFileDialog::fileName( ) const
 {
   return NFile::workingDir()+"/"+fNameCtrl->text();
 }
 
 void NFileDialog::onCancelBtn( NButtonEvent * sender )
 {
-  do_Execute = false;
-  setVisible(false);
-  setExitLoop(nDestroyWindow);
-}
-
-void NFileDialog::setVisible(bool on )
-{
-  setPositionToScreenCenter();
-  NWindow::setVisible(on);
+  doClose(false);
 }
 
 void NFileDialog::setDirectory( const std::string & dir )
