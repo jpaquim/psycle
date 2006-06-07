@@ -1,5 +1,5 @@
-//\file
-///\brief implementation file for psycle::host::Song. based on revision Revision 2686
+///\file
+///\brief implementation file for psycle::host::Song. Revision 2730
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "song.h"
@@ -11,33 +11,29 @@
 //#include "VSTHost.hpp"
 #include "datacompression.h"
 #include "riff.h" // for Wave file loading.
-//#include <psycle/host/gui/psycle.hpp>
 //#include <psycle/host/gui/NewMachine.hpp> // Is this needed?
-//#include <psycle/host/gui/MainFrm.hpp> // Is this needed?
-//#include <psycle/host/gui/ChildView.hpp> // Is this needed?
-//#include <psycle/host/gui/ProgressDialog.hpp> // Is this needed?
 //#include <boost/filesystem/path.hpp>
 //#include <boost/filesystem/operations.hpp>
 #include <cstdint>
 #include <cassert>
 #include <sstream>
 
-//#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-//	#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-//#elif PSYCLE__CONFIGURATION__SERIALIZATION
-//	#include "serialization.private.hpp"
-//#endif
+/*#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
+	#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
+#elif PSYCLE__CONFIGURATION__SERIALIZATION
+	#include "serialization.private.hpp"
+#endif
 
-//#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-//	#error "sorry, only works on little endian machines"
-//#endif
+#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+	#error "sorry, only works on little endian machines"
+#endif*/
 
-namespace psycle
-{
-	namespace host
-	{
+//namespace psycle
+//{
+//	namespace host
+//	{
 		/// the riff WAVE/fmt chunk.
-		///\todo this is already defined elsewhere prodos : it`s defined in riff
+		///\todo this is already defined elsewhere
 		///\todo is this used for file i/o ? if so we'd need byte-alignment
 		//UNIVERSALIS__COMPILER__ALIGNED(1)
 //		class WavHeader
@@ -55,10 +51,10 @@ namespace psycle
 //	}
 //}
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index)
 		{
 			Machine * machine(0);
@@ -84,6 +80,9 @@ namespace psycle
 				case MACH_LFO:
 					machine = new LFO(index);
 					break;
+//				case MACH_AUTOMATOR:
+//					machine = new Automator(index);
+//					break;
 				case MACH_DUMMY:
 					machine = new Dummy(index);
 					break;
@@ -93,7 +92,7 @@ namespace psycle
 						machine = &plugin;
 //						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
 						{
-//							delete &plugin;
+							//delete &plugin;
 //							return false;
 						}
 						try
@@ -116,30 +115,30 @@ namespace psycle
 				case MACH_VST:
 				case MACH_VSTFX:
 					{
-//						vst::plugin * plugin(0);
-//						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
-//						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
-//						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
-//						{
-//							delete plugin;
-//							return false;
-//						}
-//						try
-//						{
-//							plugin->Instance(plugin_name);
-//						}
-//						catch(std::exception const & e)
-//						{
+/*						vst::plugin * plugin(0);
+						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
+						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
+						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
+						{
+							delete plugin;
+							return false;
+						}
+						try
+						{
+							plugin->Instance(plugin_name);
+						}
+						catch(std::exception const & e)
+						{
 //							loggers::exception(e.what());
-//							delete plugin;
-//							return false;
-//						}
-//						catch(...)
-//						{
-//							delete plugin;
-//							return false;
-//						}
-						break;
+							delete plugin;
+							return false;
+						}
+						catch(...)
+						{
+							delete plugin;
+							return false;
+						}
+						break;*/
 					}
 				default:
 //					loggers::warning("failed to create requested machine type");
@@ -184,15 +183,15 @@ namespace psycle
 		}
 
 		Song::Song()
-//		#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-//			#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-//		#else
-//			#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-//				: read_write_mutex_(boost::read_write_scheduling_policy::alternating_single_read) // see: http://boost.org/doc/html/threads/concepts.html#threads.concepts.read-write-scheduling-policies.inter-class
-//			#else // original implementation
+/*		#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+			#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+		#else
+			#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
+				: read_write_mutex_(boost::read_write_scheduling_policy::alternating_single_read) // see: http://boost.org/doc/html/threads/concepts.html#threads.concepts.read-write-scheduling-policies.inter-class
+			#else // original implementation
 				// nothing
-//			#endif
-//		#endif
+			#endif
+		#endif*/
 		{
 			tracks_= MAX_TRACKS;
 			_machineLock = false;
@@ -231,7 +230,7 @@ namespace psycle
 							{
 								std::ostringstream s;
 								s << c << " and " << j << " have duplicate pointers";
-//								MessageBox(0, s.str().c_str(), "Duplicate Machine", 0);
+								report.emit(s.str(), "Song Delete Error");
 							}
 							_pMachine[j] = 0;
 						}
@@ -281,15 +280,15 @@ namespace psycle
 
 		void Song::New()
 		{
-//			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-//				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-//			#else
-//				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-//					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
-//				#else // original implementation
-//					CSingleLock lock(&door,true);
-//				#endif
-//			#endif
+/*			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#else
+				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
+					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
+				#else // original implementation
+					CSingleLock lock(&door,true);
+				#endif
+			#endif*/
 
 			seqBus=0;
 
@@ -328,21 +327,7 @@ namespace psycle
 			_saved=false;
 			fileName = "Untitled.psy";
 			
-//			if((CMainFrame *)theApp.m_pMainWnd) /// gui :-(
-//			{
-//				CreateMachine
-//					(
-//						MACH_MASTER, 
-//						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
-//						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
-//						"master",
-//						MASTER_INDEX
-//					);
-//			}
-//			else
-			{
-				CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
-			}
+			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
 		}
 
 		Machine::id_type Song::GetFreeMachine()
@@ -440,15 +425,15 @@ namespace psycle
 
 		void Song::DestroyMachine(Machine::id_type mac, bool write_locked)
 		{
-//			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-//				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-//			#else
-//				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-//					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
-//				#else // original implementation
-//					CSingleLock lock(&door, true);
-//				#endif
-//			#endif
+/*			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#else
+				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
+					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
+				#else // original implementation
+					CSingleLock lock(&door, true);
+				#endif
+			#endif*/
 			Machine *iMac = _pMachine[mac];
 			Machine *iMac2;
 			if(iMac)
@@ -951,10 +936,9 @@ namespace psycle
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
 //				loggers::trace("file header: PSY3SONG");
-//				CProgressDialog Progress;
-//				Progress.Create();
-//				Progress.SetWindowText("Loading... psycle song fileformat version 3...");
-//				Progress.ShowWindow(SW_SHOW);
+
+				progress.emit(1,0,"");
+				progress.emit(2,0,"Loading... psycle song fileformat version 3...");
 				std::uint32_t version = 0;
 				std::uint32_t size = 0;
 				std::uint32_t index = 0;
@@ -963,27 +947,27 @@ namespace psycle
 				std::uint32_t solo(0);
 				std::uint32_t chunkcount=0;
 				Header[4]=0;
-				std::size_t filesize = pFile->FileSize();
+			  size_t filesize = pFile->FileSize();
 				pFile->Read(version);
 				pFile->Read(size);
 				if(version > CURRENT_FILE_VERSION)
 				{
-//					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
+					report.emit("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
 				}
 
 				pFile->Read(chunkcount);
 				if ( size > 4)
 				{
-					//
-					//pFile->Read(fileversion);
-					//if (version == x)
-					//{}
-					//else if (...)
-					//{}
+					/*
+					pFile->Read(fileversion);
+					if (version == x)
+					{}
+					else if (...)
+					{}
 					// This is left here if someday, extra data is added to the file version chunk.
 					// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - bytesread);
-					//}
-					//
+					}
+					*/
 					pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
 				}
 
@@ -993,16 +977,16 @@ namespace psycle
 				DeleteAllPatterns();
 				Reset(); //added by sampler mainly to reset current pattern showed.
 				bool zero_size_foreign_chunk(false);
-				// chunk_loop:
+				/* chunk_loop: */
 				while(pFile->ReadChunk(&Header, 4))
 				{
-//					Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
+					progress.emit(4,f2i((pFile->GetPos()*16384.0f)/filesize),"");
 //					::Sleep(1); ///< Allow screen refresh.
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)
 					{
 //						loggers::trace("chunk: INFO");
-//						Progress.SetWindowText("Loading... fileformat version information...");
+						progress.emit(2,0,"Loading... fileformat version information...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1022,14 +1006,14 @@ namespace psycle
 					else if(std::strcmp(Header,"SNGI")==0)
 					{
 //						loggers::trace("chunk: SNGI");
-//						Progress.SetWindowText("Loading... authorship information...");
+						progress.emit(2,0,"Loading... authorship information...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
 						if(version > CURRENT_FILE_VERSION_SNGI)
 						{
 							// there is an error, this file is newer than this build of psycle
-//							MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
+							report.emit("Song Segment of File is from a newer version of psycle!","Song Load Error.");
 							pFile->Skip(size);
 						}
 						else
@@ -1083,14 +1067,14 @@ namespace psycle
 					else if(std::strcmp(Header,"SEQD")==0)
 					{
 //						loggers::trace("chunk: SEQD");
-//						Progress.SetWindowText("Loading... sequence...");
+						progress.emit(2,0,"Loading... sequence...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
 						if(version > CURRENT_FILE_VERSION_SEQD)
 						{
 							// there is an error, this file is newer than this build of psycle
-//							MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
+							report.emit("Sequence section of File is from a newer version of psycle!", "Song Load Error.");
 							pFile->Skip(size);
 						}
 						else
@@ -1121,7 +1105,7 @@ namespace psycle
 					else if(std::strcmp(Header,"PATD") == 0)
 					{
 //						loggers::trace("chunk: PATD");
-//						Progress.SetWindowText("Loading... patterns...");
+						progress.emit(2,0,"Loading... patterns...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1169,7 +1153,7 @@ namespace psycle
 					else if(std::strcmp(Header,"MACD") == 0)
 					{
 //						loggers::trace("chunk: MACD");
-//						Progress.SetWindowText("Loading... machines...");
+						progress.emit(2,0,"Loading... machines...");
 						int curpos(0);
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1206,7 +1190,7 @@ namespace psycle
 					else if(std::strcmp(Header,"INSD") == 0)
 					{
 //						loggers::trace("chunk: INSD");
-//						Progress.SetWindowText("Loading... instruments...");
+						progress.emit(2,0,"Loading... instruments...");
 						pFile->Read(version);
 						pFile->Read(size);
 						--chunkcount;
@@ -1235,7 +1219,7 @@ namespace psycle
 						if(!zero_size_foreign_chunk)
 						{
 //							loggers::warning("foreign chunk found. skipping it.");
-//							Progress.SetWindowText("Loading... foreign chunk found. skipping it...");
+							progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
 						}
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1269,7 +1253,7 @@ namespace psycle
 				}
 				quit_chunk_loop:
 				// now that we have loaded all the modules, time to prepare them.
-//				Progress.m_Progress.SetPos(16384);
+				progress.emit(4,16384,"");
 //				::Sleep(1); ///< ???
 				// test all connections for invalid machines. disconnect invalid machines.
 				for(int i(0) ; i < MAX_MACHINES ; ++i)
@@ -1327,19 +1311,16 @@ namespace psycle
 					}
 				}
 
-				// translate any data that is required
-//				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
-				machineSoloed = solo;
 				// allow stuff to work again
+				machineSoloed = solo;
 				_machineLock = false;
-//				Progress.OnCancel();
-				if((!pFile->Close()) || (chunkcount))
+				progress.emit(5,0,"");
+				if(chunkcount)
 				{
 					std::ostringstream s;
 					s << "Error reading from file '" << pFile->file_name() << "'" << std::endl;
-					if(chunkcount) s << "some chunks were missing in the file";
-					else s << "could not close the file";
-//					MessageBox(0, s.str().c_str(), "Loading Error", 0);
+					s << "some chunks were missing in the file";
+					report.emit(s.str(), "Song Load Error.");
 					return false;
 				}
 				return true;
@@ -1351,7 +1332,7 @@ namespace psycle
 			}
 
 			// load did not work
-//			MessageBox(0, "Incorrect file format", "Loading Error", MB_ICONERROR | MB_OK);
+			report.emit("Incorrect file format", "Song Load Error.");
 			return false;
 		}
 
@@ -1363,12 +1344,10 @@ namespace psycle
 
 			try
 			{
-//				CProgressDialog Progress;
 				if ( !autosave ) 
 				{
-//					Progress.Create();
-//					Progress.SetWindowText("Saving...");
-//					Progress.ShowWindow(SW_SHOW);
+					progress.emit(1,0,"");
+					progress.emit(2,0,"Saving...");
 				}
 
 				std::uint32_t version, size, temp, chunkcount;
@@ -1389,8 +1368,7 @@ namespace psycle
 
 					if ( !autosave ) 
 					{
-//						Progress.m_Progress.SetRange(0,chunkcount);
-//						Progress.m_Progress.SetStep(1);
+						progress.emit(3,chunkcount,"");
 					}
 
 					// chunk header
@@ -1411,8 +1389,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-//					Progress.m_Progress.StepIt();
-//					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				// the rest of the modules can be arranged in any order
@@ -1444,8 +1421,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-//					Progress.m_Progress.StepIt();
-//					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1483,7 +1459,7 @@ namespace psycle
 
 						temp = 1;  pFile->Write(temp); // sequence width
 
-						for(unsigned int i = 0; i < tracks(); i++)
+						for(int i = 0; i < tracks(); i++)
 						{
 							pFile->Write(_trackMuted[i]);
 							pFile->Write(_trackArmed[i]); // remember to count them
@@ -1493,8 +1469,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-//					Progress.m_Progress.StepIt();
-//					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1524,7 +1499,7 @@ namespace psycle
 						
 						pFile->WriteChunk(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
 
-						for (unsigned int i = 0; i < playLength; i++)
+						for (int i = 0; i < playLength; i++)
 						{
 							temp = playOrder[i]; pFile->Write(temp); // Sequence data.
 						}
@@ -1533,8 +1508,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-//					Progress.m_Progress.StepIt();
-//					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1591,8 +1565,7 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-//					Progress.m_Progress.StepIt();
-//					::Sleep(1);
+					progress.emit(4,-1,"");
 				}
 
 				/*
@@ -1606,7 +1579,7 @@ namespace psycle
 				{
 					if (_pMachine[index])
 					{
-						std::size_t pos;
+						size_t pos;
 
 						// chunk header
 						{
@@ -1627,7 +1600,7 @@ namespace psycle
 						}
 						// chunk size in header
 						{
-							std::size_t const pos2(pFile->GetPos());
+							size_t const pos2(pFile->GetPos());
 							size = pos2 - pos - sizeof size;
 							pFile->Seek(pos);
 							pFile->Write(size);
@@ -1636,8 +1609,7 @@ namespace psycle
 
 						if ( !autosave ) 
 						{
-//							Progress.m_Progress.StepIt();
-//							::Sleep(1);
+							progress.emit(4,-1,"");
 						}
 					}
 				}
@@ -1652,7 +1624,7 @@ namespace psycle
 				{
 					if (!_pInstrument[index]->Empty())
 					{
-						std::size_t pos;
+						size_t pos;
 
 						// chunk header
 						{
@@ -1673,7 +1645,7 @@ namespace psycle
 						}
 						// chunk size in header
 						{
-							std::size_t const pos2(pFile->GetPos());
+							size_t const pos2(pFile->GetPos());
 							size = pos2 - pos - sizeof size;
 							pFile->Seek(pos);
 							pFile->Write(size);
@@ -1682,8 +1654,7 @@ namespace psycle
 
 						if ( !autosave ) 
 						{
-//							Progress.m_Progress.StepIt();
-//							::Sleep(1);
+							progress.emit(4,-1,"");
 						}
 					}
 				}
@@ -1696,18 +1667,15 @@ namespace psycle
 
 				if ( !autosave ) 
 				{
-//					Progress.m_Progress.SetPos(chunkcount);
-//					::Sleep(1);
-//					Progress.OnCancel();
+					progress.emit(5,0,"");
 				}
-
-				if (!pFile->Close()) throw std::runtime_error("couldn't close file");
 			}
 			catch(...)
 			{
 				std::ostringstream s;
 				s << "Error writing to " << pFile->file_name() << " !!!";
-//				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
+				report.emit(s.str(),"File Save Error.");
+				progress.emit(5,0,"");
 				return false;
 			}
 			return true;
@@ -1729,7 +1697,7 @@ namespace psycle
 		///\todo mfc+winapi->std
 		bool Song::CloneMac(Machine::id_type src, Machine::id_type dst)
 		{
-/*			// src has to be occupied and dst must be empty
+			// src has to be occupied and dst must be empty
 			if (_pMachine[src] && _pMachine[dst])
 			{
 				return false;
@@ -1757,9 +1725,8 @@ namespace psycle
 			}
 
 			// save our file
-//			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 
-			boost::filesystem::path path(Global::configuration().GetSongDir(), boost::filesystem::native);
+/*			boost::filesystem::path path(Global::configuration().GetSongDir(), boost::filesystem::native);
 			path /= "psycle.tmp";
 
 			boost::filesystem::remove(path);
@@ -1835,46 +1802,8 @@ namespace psycle
 			file.Close();
 			boost::filesystem::remove(path);
 
-			// randomize the dst's position
-
-			int xs,ys,x,y;
-			if (src >= MAX_BUSES)
-			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
-			}
-			else 
-			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
-			}
-			x=_pMachine[dst]->GetPosX()+32;
-			y=_pMachine[dst]->GetPosY()+ys+8;
-
-			bool bCovered = true;
-			while (bCovered)
-			{
-				bCovered = false;
-				for (int i=0; i < MAX_MACHINES; i++)
-				{
-					if (i != dst)
-					{
-						if (_pMachine[i])
-						{
-							if ((abs(_pMachine[i]->GetPosX() - x) < 32) &&
-								(abs(_pMachine[i]->GetPosY() - y) < 32))
-							{
-								bCovered = true;
-								i = MAX_MACHINES;
-								x = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-xs);
-								y = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CH-ys);
-							}
-						}
-					}
-				}
-			}
-			_pMachine[dst]->SetPosX(x);
-			_pMachine[dst]->SetPosY(y);
+			_pMachine[dst]->SetPosX(_pMachine[dst]->GetPosX()+32);
+			_pMachine[dst]->SetPosY(_pMachine[dst]->GetPosY()+8);
 
 			// delete all connections
 
@@ -1940,16 +1869,16 @@ namespace psycle
 
 				buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
 				strcpy(_pMachine[dst]->_editName,buf);
-			#endif
-*/
+			#endif*/
+
 			return true;
 		}
 
 		///\todo mfc+winapi->std
 		bool Song::CloneIns(Instrument::id_type src, Instrument::id_type dst)
 		{
-/*			// src has to be occupied and dst must be empty
-			if (!Global::song()._pInstrument[src]->Empty() && !Global::song()._pInstrument[dst]->Empty())
+			// src has to be occupied and dst must be empty
+		/*	if (!Global::song()._pInstrument[src]->Empty() && !Global::song()._pInstrument[dst]->Empty())
 			{
 				return false;
 			}
@@ -1964,9 +1893,6 @@ namespace psycle
 				return false;
 			}
 			// ok now we get down to business
-
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
-
 			// save our file
 
 			CString filepath = Global::configuration().GetSongDir().c_str();
@@ -2064,9 +1990,9 @@ namespace psycle
 
 			return false;
 		}
-
-bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
-{
+	}
 }
-  }
+
+bool psycle::host::Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
+{
 }

@@ -1,26 +1,26 @@
 ///\file
-///\brief interface file for psycle::host::Song based on Revision 2651 main psycle
+///\brief interface file for psycle::host::Song based on Revision 2730
 #pragma once
 #include "songstructs.h"
 #include "instrument.h"
 //#include "InstPreview.hpp"
 #include "machine.h"
 #include "constants.h" // for the bloat-sized arrays and many other stuffs that should actually be moved in this file
-#include "global.h"
+//#include <psycle/host/global.hpp>
 #include "fileio.h"
 #include <cstdint>
+#include <ngrs/sigslot.h> // should be seperated for sigslot too
 
 
-
-//#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-//	#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-//#else
-//	#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-//		#include <boost/thread/read_write_mutex.hpp>
-//	#else // original implementation
-//		class CCriticalSection;
-//	#endif
-//#endif
+/*#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+	#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
+		#include <boost/thread/read_write_mutex.hpp>
+	#else // original implementation
+		class CCriticalSection;
+	#endif
+#endif*/
 
 
 
@@ -29,7 +29,7 @@ namespace psycle
 	namespace host
 	{
 		/// Index of MasterMachine
-//		Machine::id_type const MASTER_INDEX(128);
+//		Machine::id_type const MASTER_INDEX(128); i got here a redefinition
 
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
@@ -45,6 +45,8 @@ namespace psycle
 				/// destructor.
 				virtual inline ~Song() throw();
 
+				sigslot::signal2<const std::string &, const std::string &> report;
+				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
 			///\name initial values for player-related stuff
 			///\{
 				public:
@@ -109,7 +111,7 @@ namespace psycle
 					};
 					/// Returns the start offset of the requested track of pattern ps in the
 					/// pPatternData Array and creates one if none exists.
-//					PSYCLE__DEPRECATED("This sux.")
+//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
 					inline unsigned char * _ptrack(int ps, int track)
 					{
 						if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
@@ -125,7 +127,7 @@ namespace psycle
 					};
 					/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
 					///\todo doc ... how does this differs from bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-//					PSYCLE__DEPRECATED("This sux.")
+//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
 					unsigned char * CreateNewPattern(int ps);
 			///\}
 
@@ -243,22 +245,22 @@ namespace psycle
 					/// saves this song to a file.
 					bool Save(RiffFile* pFile,bool autosave=false);
 
-//					#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-//						#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-//					#elif PSYCLE__CONFIGURATION__SERIALIZATION
-//						/// saves this song to a file, as XML.
-//						void SaveXML(std::string const & file_name) throw(std::exception);
-//						friend class boost::serialization::access;
-//					#endif
+/*					#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
+						#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
+					#elif PSYCLE__CONFIGURATION__SERIALIZATION
+						/// saves this song to a file, as XML.
+						void SaveXML(std::string const & file_name) throw(std::exception);
+						friend class boost::serialization::access;
+					#endif */
 			///\}
 
 			///\name cpu cost measurement
 			///\{
 				public:
-//					void             inline cpu_idle(cpu::cycles_type const & value)       throw() { cpu_idle_ = value; }
-//					cpu::cycles_type inline cpu_idle(                              ) const throw() { return cpu_idle_; }
+/*					void             inline cpu_idle(cpu::cycles_type const & value)       throw() { cpu_idle_ = value; }
+					cpu::cycles_type inline cpu_idle(                              ) const throw() { return cpu_idle_; }
 				private:
-//					cpu::cycles_type        cpu_idle_;
+					cpu::cycles_type        cpu_idle_;*/ // How do make cpu on linux ?
 
 				public: ///\todo public->private
 					/// Number of samples processed since all cpu cost counters were reset.
@@ -279,29 +281,28 @@ namespace psycle
 
 			///\name thread synchronization
 			///\{
-//				#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-//					#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-//				#else
-//					#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-//						public:
-//							boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
+				/*#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+					#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+				#else
+					#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
+						public:
+							boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
 						private:
-//							boost::read_write_mutex mutable  read_write_mutex_;
-//					#else // original implementation
+							boost::read_write_mutex mutable  read_write_mutex_;
+					#else // original implementation
 						public: // \todo public->private
-//							CCriticalSection mutable door;
-//					#endif
-//				#endif
-			///\}
+							CCriticalSection mutable door;
+					#endif
+				#endif
+			///\}*/
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//\todo below are unencapsulated data members
 
-//			PSYCLE__PRIVATE:
+//			PSYCLE__PRIVATE: preprocessor macro stuff sux more
 				public:
-
 				///\name authorship
 				///\{
 					/// the name of the song.
@@ -327,19 +328,19 @@ namespace psycle
 
 					/// Array of Pattern data.
 					///\todo hardcoded limits and wastes
-//					PSYCLE__DEPRECATED("This sux.")
+//					PSYCLE__DEPRECATED("This sux.") //preprocessor macro stuff sux more
 					unsigned char * ppPatternData[MAX_PATTERNS];
 
-//					#if 0 // more lightweight
-//						class pattern
-//						{
-//							private:
-//								std::string name;
-//								unsigned int lines, tracks;
-//								std::vector<PatternEntries> entries;
-//						};
-//						std::vector<pattern> patterns;
-//					#endif
+					#if 0 // more lightweight
+						class pattern
+						{
+							private:
+								std::string name;
+								unsigned int lines, tracks;
+								std::vector<PatternEntries> entries;
+						};
+						std::vector<pattern> patterns;
+					#endif
 				///\}
 
 				///\name pattern sequence
