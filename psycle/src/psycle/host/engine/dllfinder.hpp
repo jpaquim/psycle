@@ -1,4 +1,5 @@
 #pragma once
+#include "machine.hpp"
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -10,7 +11,7 @@ public:
 	virtual ~DllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	virtual void AddPath(std::string &path);
+	virtual void AddPath(std::string &path,MachineType mtype);
 
 	///< Resets the Finder to the original (clean) state.
 	virtual void ResetFinder();
