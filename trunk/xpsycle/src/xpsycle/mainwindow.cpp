@@ -193,10 +193,10 @@ void MainWindow::initBars( )
     statusBar_->setLayout(NFlowLayout(nAlLeft));
       progressBar_ = new NProgressBar();
         progressBar_->setValue(0);
+        progressBar_->setMax(16385);
         progressBar_->setWidth(200);
         progressBar_->setHeight(25);
-        progressBar_->setVisible(false);
-//        Global::pSong()->loadProgress.connect(this,&MainWindow::onSongLoadProgress);
+        progressBar_->setVisible(false);        Global::pSong()->progress.connect(this,&MainWindow::onSongLoadProgress);
     statusBar_->add(progressBar_);
   pane()->add(statusBar_,nAlBottom);
 
@@ -563,8 +563,11 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
 {
   usleep(200); // ugly hack but works
   progressBar_->setVisible(true);
+  pane()->resize();
+  pane()->repaint();
   childView_->onFileLoadSong(0);
   progressBar_->setVisible(false);
+  pane()->resize();
   updateComboGen();
   sequencerBar_->updateSequencer();
   pane()->repaint();
@@ -618,12 +621,16 @@ void MainWindow::onViewMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
   }
 }
 
-void MainWindow::onSongLoadProgress( int chunkCount, int max, const std::string & header)
+void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_t & b , const std::string & t)
 {
-  progressBar_->setMax(max);
-  progressBar_->setValue(chunkCount);
-  progressBar_->repaint();
-  NApp::flushEventQueue();
+  if (a == 4) {
+    progressBar_->setValue(b);
+    NApp::flushEventQueue();
+  } else
+  if (a == 2) {
+    progressBar_->setText(t);
+    progressBar_->repaint();
+  }
 }
 
 void MainWindow::onOctaveChange( NItemEvent * ev )
