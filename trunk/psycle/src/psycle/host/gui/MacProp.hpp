@@ -17,7 +17,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Machine *pMachine;
 			Song* pSong;
 			int thisMac;
-			CString txt;
+			std::string txt;
 			bool deleted;
 			enum { IDD = IDD_MACPROP };
 			CButton	m_soloCheck;

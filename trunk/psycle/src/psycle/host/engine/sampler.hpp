@@ -128,7 +128,10 @@ namespace psycle
 			virtual void Work(int numSamples);
 			virtual void Stop();
 			virtual void Tick(int channel, PatternEntry* pData);
-			virtual std::string GetName() const { return _psName; }
+			virtual const std::string GetBrand() { return minfo.brandname; }
+			virtual const std::string GetVendorName() { return minfo.vendor; }
+			virtual const std::uint32_t GetVersion() { return minfo.version; }
+			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual bool LoadOldFileFormat(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
@@ -200,7 +203,7 @@ namespace psycle
 		protected:
 			friend CGearTracker;
 
-			static std::string _psName;
+			static InternalMachineInfo minfo;
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
 			dsp::Cubic _resampler;

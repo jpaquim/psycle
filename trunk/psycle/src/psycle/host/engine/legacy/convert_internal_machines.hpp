@@ -56,7 +56,7 @@ namespace psycle
 						{
 							char c[16];
 							riff.ReadChunk(c, 16);	c[15] = 0;
-							machine._editName = c;
+							machine.SetEditName(c);
 						}
 						riff.Read(machine._inputMachines);
 						riff.Read(machine._outputMachines);

@@ -646,7 +646,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								
 								{
 									std::ostringstream s;
-									s << _pSong->_pMachine[smac]->_editName << " Pan: ";
+									s << _pSong->_pMachine[smac]->GetEditName() << " Pan: ";
 									if(newpan != 64)
 										s << 100.0f - ((float)newpan*0.78125f) << "% Left / " << (float)newpan*0.78125f << "% Right";
 									else

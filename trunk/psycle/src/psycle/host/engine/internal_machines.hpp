@@ -6,10 +6,18 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // internal machines
-
 namespace psycle {
 	namespace host {
 
+
+		//\todo: How could something like this be created, in order to ease the enumeration of internal machines?
+/*		struct MachineAssociation
+		{
+			Machine::type_type type;
+			typename classname;
+		};
+*/
+		//////////////////////////////////////////////////////////////////////////
 		/// dummy machine.
 		class Dummy : public Machine
 		{
@@ -17,14 +25,20 @@ namespace psycle {
 			Dummy(id_type index);
 			virtual ~Dummy() throw();
 			virtual void Work(int numSamples);
-			virtual std::string GetName() const { return _psName; };
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-			/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
+		public:
+			virtual const std::string GetBrand() { return minfo.brandname; }
+			virtual const std::string GetVendorName() { return minfo.vendor; }
+			virtual const std::uint32_t GetVersion() { return minfo.version; }
+			virtual const std::uint32_t GetCategory() { return minfo.category; }
+
+			//\todo: to be removed... someday( Marks that the Dummy was in fact a VST plugin that couldn't be loaded)
 			bool wasVST;
 		protected:
-			static std::string _psName;
+			static InternalMachineInfo minfo;
 		};
 
+		//////////////////////////////////////////////////////////////////////////
 		/// note duplicator machine.
 		class DuplicatorMac : public Machine
 		{
@@ -35,7 +49,10 @@ namespace psycle {
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
-			virtual std::string GetName() const { return _psName; };
+			virtual const std::string GetBrand() { return minfo.brandname; }
+			virtual const std::string GetVendorName() { return minfo.vendor; }
+			virtual const std::uint32_t GetVersion() { return minfo.version; }
+			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -47,11 +64,11 @@ namespace psycle {
 		protected:
 			short macOutput[8];
 			short noteOffset[8];
-			static std::string _psName;
+			static InternalMachineInfo minfo;
 			bool bisTicking;
 		};
 
-
+		//////////////////////////////////////////////////////////////////////////
 		/// master machine.
 		class Master : public Machine
 		{
@@ -61,7 +78,10 @@ namespace psycle {
 			virtual ~Master() throw();
 			virtual void Init(void);
 			virtual void Work(int numSamples);
-			virtual std::string GetName() const { return _psName; };
+			virtual const std::string GetBrand() { return minfo.brandname; }
+			virtual const std::string GetVendorName() { return minfo.vendor; }
+			virtual const std::uint32_t GetVersion() { return minfo.version; }
+			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
@@ -78,9 +98,10 @@ namespace psycle {
 			float _rMax;
 			bool vuupdated;
 		protected:
-			static std::string _psName;
+			static InternalMachineInfo minfo;
 		};
 
+		//////////////////////////////////////////////////////////////////////////
 		/// mixer machine.
 		class Mixer : public Machine
 		{
@@ -127,7 +148,10 @@ namespace psycle {
 			virtual void Work(int numSamples);
 			void FxSend(int numSamples);
 			void Mix(int numSamples);
-			virtual std::string GetName() const { return _psName; };
+			virtual const std::string GetBrand() { return minfo.brandname; }
+			virtual const std::string GetVendorName() { return minfo.vendor; }
+			virtual const std::uint32_t GetVersion() { return minfo.version; }
+			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual int GetNumCols();
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
@@ -178,10 +202,10 @@ namespace psycle {
 			std::vector<send> sends;
 #endif
 
-			static std::string _psName;
+			static InternalMachineInfo minfo;
 		};
 
-
+		//////////////////////////////////////////////////////////////////////////
 		/// LFO machine
 		class LFO : public Machine
 		{
@@ -193,7 +217,10 @@ namespace psycle {
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
-			virtual std::string GetName() const { return _psName; };
+			virtual const std::string GetBrand() { return minfo.brandname; }
+			virtual const std::string GetVendorName() { return minfo.vendor; }
+			virtual const std::uint32_t GetVersion() { return minfo.version; }
+			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -256,15 +283,14 @@ namespace psycle {
 			int centerVal[NUM_CHANS];			//where knob should be at lfo==0
 
 
-			static std::string _psName;
+			static InternalMachineInfo minfo;
 			bool bisTicking;
 
 		};
 
 
-
+		//////////////////////////////////////////////////////////////////////////
 		/// Automator
-
 		class EnvelopeWindow;
 
 		class Automator : public Machine
@@ -282,7 +308,10 @@ namespace psycle {
 			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
 			virtual void Stop();
-			virtual std::string GetName() const { return _psName; };
+			virtual const std::string GetBrand() { return minfo.brandname; }
+			virtual const std::string GetVendorName() { return minfo.vendor; }
+			virtual const std::uint32_t GetVersion() { return minfo.version; }
+			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -371,7 +400,7 @@ namespace psycle {
 			//whether or not to put a parameter back the way we found it when we're done
 			bool bResetWhenDone;
 
-			static std::string _psName;
+			static InternalMachineInfo minfo;
 			bool bisTicking;
 
 		};

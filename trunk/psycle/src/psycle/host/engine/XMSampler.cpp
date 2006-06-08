@@ -27,7 +27,7 @@ namespace psycle
 		static CXResampler *pResampler = NULL;
 */
 
-		std::string XMSampler::_psName = "Sampulse";
+		InternalMachineInfo XMSampler::minfo("Sampulse Sampler V2","Sampulse","JosepMa",0,600,0);
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
@@ -2013,8 +2013,8 @@ namespace psycle
 		:
 			Machine(MACH_XMSAMPLER, MACHMODE_GENERATOR, id)
 		{
+			_editName = minfo.shortname;
 			DefineStereoOutput(1);
-			_editName = _psName;
 			_audiorange = 32768.0f;
 
 			_resampler.SetQuality(dsp::R_LINEAR);

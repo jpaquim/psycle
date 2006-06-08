@@ -4,6 +4,8 @@
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
 #include "plugin.hpp"
 #include "VSTHost.hpp"
+#include <algorithm> // std::transform
+#include <cctype>	   // std::tolower
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -266,9 +268,9 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 			else
 			{
 				pinfo.allow = true;
-				pinfo.name = plug.GetName();
+				pinfo.name = plug.GetBrand();
 				{
-					std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
+					std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetVendorName();
 					pinfo.desc = s.str();
 				}
 				{
@@ -343,7 +345,7 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 			else
 			{
 				pinfo.allow = true;
-				pinfo.name = vstPlug.GetName();
+				pinfo.name = vstPlug.GetBrand();
 				{
 					std::ostringstream s;
 					s << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect") << " by " << vstPlug.GetVendorName();
@@ -358,7 +360,7 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 				if(vstPlug.IsSynth()) pinfo.mode = MACHMODE_GENERATOR;
 				else pinfo.mode = MACHMODE_FX;
 
-				logger.emit(vstPlug.GetName()); logger.emit(" - successfully instanciated");
+				logger.emit(vstPlug.GetBrand()); logger.emit(" - successfully instanciated");
 			}
 			// [bohan] vstPlug is a stack object, so its destructor is called
 			// [bohan] at the end of its scope (this cope actually).

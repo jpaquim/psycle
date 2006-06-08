@@ -107,7 +107,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if(Global::song()._pMachine[b])
 					{
 						std::ostringstream s;
-						s << std::hex << b << ": " << Global::song()._pMachine[b]->_editName;
+						s << std::hex << b << ": " << Global::song()._pMachine[b]->GetEditName();
 						m_list.AddString(s.str().c_str());
 					}
 					else
@@ -139,7 +139,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if(Global::song()._pMachine[b])
 					{
 						std::ostringstream s;
-						s << std::hex << b << ": " << Global::song()._pMachine[b]->_editName;
+						s << std::hex << b << ": " << Global::song()._pMachine[b]->GetEditName();
 						m_list.AddString(s.str().c_str());
 					}
 					else

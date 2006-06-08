@@ -117,17 +117,17 @@ namespace psycle
 
 			///\name general info
 			///\{
-				public:  std::string virtual inline GetDllName() const { return _psDllName; }
+				public:  virtual const std::string GetDllName() { return _psDllName; }
 				private: std::string                _psDllName;
-				
-				public:  std::string virtual inline GetName() const { return _psName; };
+
+				public:  virtual const std::string GetBrand() { return _psName; }
 				private: std::string                _psName;
 
-				public:  std::string const inline & GetShortName() const throw() { return _psShortName; }
-				private: std::string                _psShortName;
-
-				public:  std::string const inline & GetAuthor() const throw() { return _psAuthor; }
+				public:  virtual const std::string GetVendorName() { return _psAuthor; }
 				private: std::string _psAuthor;
+
+				public:	virtual const std::uint32_t GetVersion() { return 0; }
+				public: virtual const std::uint32_t GetCategory() { return 0; }
 
 				public:  bool const inline & IsSynth() const throw() { return _isSynth; }
 				private: bool               _isSynth;

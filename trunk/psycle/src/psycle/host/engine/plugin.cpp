@@ -172,7 +172,6 @@ namespace psycle
 				DefineStereoInput(1);
 				DefineStereoOutput(1);
 			}
-			_psShortName = _pInfo->ShortName;
 			_editName = _pInfo->ShortName;
 			_psAuthor = _pInfo->Author;
 			_psName = _pInfo->Name;

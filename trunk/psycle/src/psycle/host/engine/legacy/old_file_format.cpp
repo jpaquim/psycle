@@ -270,7 +270,9 @@ namespace psycle
 									Machine* pOldMachine = pMac[i];
 									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 									// dummy name goes here
-									pMac[i]->_editName = pOldMachine->_editName + " (replaced)";
+									std::stringstream s;
+									s << "X!" << pOldMachine->GetEditName();
+									pOldMachine->SetEditName(s.str());
 									pMac[i]->_type = MACH_DUMMY;
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
@@ -326,7 +328,9 @@ namespace psycle
 										pOldMachine->_pSamplesL = NULL;
 										pOldMachine->_pSamplesR = NULL;
 										// dummy name goes here
-										pMac[i]->_editName = "X " + pOldMachine->_editName;
+										std::stringstream ss;
+										ss << "X!" << pOldMachine->GetEditName();
+										pOldMachine->SetEditName(ss.str());
 										zapObject(pOldMachine);
 										pMac[i]->_type = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
@@ -339,16 +343,18 @@ namespace psycle
 										}
 										catch(...)
 										{
-											std::ostringstream s;
-											s << "Plugin instancation threw an exception " << path << " - replacing with Dummy.";
-											MessageBox(NULL,s.str().c_str(), "Loading Error", MB_OK);
+											std::ostringstream ss;
+											ss << "Plugin instancation threw an exception " << path << " - replacing with Dummy.";
+											MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
 
 											Machine* pOldMachine = pMac[i];
 											pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 											pOldMachine->_pSamplesL = NULL;
 											pOldMachine->_pSamplesR = NULL;
 											// dummy name goes here
-											pMac[i]->_editName = "X " + pOldMachine->_editName;
+											std::stringstream ss2;
+											ss2 << "X!" << pOldMachine->GetEditName();
+											pOldMachine->SetEditName(ss2.str());
 											zapObject(pOldMachine);
 											pMac[i]->_type = MACH_DUMMY;
 											((Dummy*)pMac[i])->wasVST = true;
@@ -357,16 +363,18 @@ namespace psycle
 								}
 								else
 								{
-									std::ostringstream s;
-									s << "Missing VST plug-in: " << vstL[pVstPlugin->_instance].dllName;
-									MessageBox(NULL,s.str().c_str(), "Loading Error", MB_OK);
+									std::ostringstream ss;
+									ss << "Missing VST plug-in: " << vstL[pVstPlugin->_instance].dllName;
+									MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
 
 									Machine* pOldMachine = pMac[i];
 									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
 									// dummy name goes here
-									pMac[i]->_editName = "X " + pOldMachine->_editName;
+									std::stringstream ss2;
+									ss2 << "X!" << pOldMachine->GetEditName();
+									pOldMachine->SetEditName(ss2.str());
 									zapObject(pOldMachine);
 									pMac[i]->_type = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
@@ -379,7 +387,9 @@ namespace psycle
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
 								// dummy name goes here
-								pMac[i]->_editName = "X " + pOldMachine->_editName;
+								std::stringstream ss;
+								ss << "X!" << pOldMachine->GetEditName();
+								pOldMachine->SetEditName(ss.str());
 								zapObject(pOldMachine);
 								pMac[i]->_type = MACH_DUMMY;
 								((Dummy*)pMac[i])->wasVST = true;

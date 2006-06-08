@@ -110,6 +110,31 @@ namespace psycle
 			}
 		}
 
+		class InternalMachineInfo
+		{
+		public:
+			InternalMachineInfo(char const* _brandname,char const* _shortname,char const* _vendor,
+				std::uint32_t _category, std::uint32_t _version, std::uint32_t _parameters)
+				:brandname(_brandname),shortname(_shortname),vendor(_vendor),category(_category)
+				,version(_version),parameters(_parameters)
+			{
+			}
+			///< Name of the machine
+			char const *brandname;
+			///< Default Display name.
+			char const *shortname;
+			///< Authority of the machine
+			char const *vendor;
+			///< Default category.
+			//\todo: define categories.
+			const std::uint32_t category;
+			///< version numbering. Prefered form is " 1.0 -> 1000 "
+			const std::uint32_t version;
+			///< The Number of parameters that this machine exports.
+			const std::uint32_t parameters;
+			//\todo : description field?
+		};
+
 		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
 		{
@@ -217,33 +242,33 @@ namespace psycle
 
 		enum MachineType
 		{
-			MACH_UNDEFINED = -1, //< :-(
-			MACH_MASTER = 0,
-			MACH_SINE = 1, //< for psycle old fileformat version 2
-			MACH_DIST = 2, //< for psycle old fileformat version 2
-			MACH_SAMPLER = 3,
-			MACH_DELAY = 4, //< for psycle old fileformat version 2
-			MACH_2PFILTER = 5, //< for psycle old fileformat version 2
-			MACH_GAIN = 6, //< for psycle old fileformat version 2
-			MACH_FLANGER = 7, //< for psycle old fileformat version 2
-			MACH_PLUGIN = 8,
-			MACH_VST = 9,
-			MACH_VSTFX = 10,
-			MACH_SCOPE = 11,
-			MACH_XMSAMPLER = 12,
-			MACH_DUPLICATOR = 13,
-			MACH_MIXER = 14,
-			MACH_LFO = 15,
-			MACH_AUTOMATOR = 16,
-			MACH_DUMMY = 255
+			MACH_UNDEFINED	= -1, //< :-(
+			MACH_MASTER		= 0,
+			MACH_SINE		= 1, //< for psycle old fileformat version 2
+			MACH_DIST		= 2, //< for psycle old fileformat version 2
+			MACH_SAMPLER	= 3,
+			MACH_DELAY		= 4, //< for psycle old fileformat version 2
+			MACH_2PFILTER	= 5, //< for psycle old fileformat version 2
+			MACH_GAIN		= 6, //< for psycle old fileformat version 2
+			MACH_FLANGER	= 7, //< for psycle old fileformat version 2
+			MACH_PLUGIN		= 8,
+			MACH_VST		= 9,
+			MACH_VSTFX		= 10,
+			MACH_SCOPE		= 11, //< Deprecated machine. It's a GUI element now. Can be skipped when loading.
+			MACH_XMSAMPLER	= 12,
+			MACH_DUPLICATOR	= 13,
+			MACH_MIXER		= 14,
+			MACH_LFO		= 15,
+			MACH_AUTOMATOR	= 16,
+			MACH_DUMMY		= 255
 		};
 
 		enum MachineMode
 		{
-			MACHMODE_UNDEFINED = -1, //< :-(
-			MACHMODE_GENERATOR = 0,
-			MACHMODE_FX = 1,
-			MACHMODE_MASTER = 2,
+			MACHMODE_UNDEFINED	= -1, //< :-(
+			MACHMODE_GENERATOR	= 0,
+			MACHMODE_FX			= 1,
+			MACHMODE_MASTER		= 2,
 		};
 
 		/// Base class for "Machines", the audio producing elements.
@@ -442,14 +467,16 @@ namespace psycle
 					virtual bool SetDestWireVolume(id_type src, Wire::id_type, float value);
 			///\}
 
-			///\name name
+			///\name machine information
 			///\{
 				public:
-					virtual std::string GetDllName() const { return "built-in"; };
-					virtual std::string GetName() const = 0;
-
-				public:
+					virtual const std::string GetDllName() { std::string tmp; return tmp; }; //\todo: Empty string. This is (to be) used in the song saver.
+					virtual const std::string GetBrand() = 0;
+					virtual const std::string GetVendorName() = 0;
+					virtual const std::uint32_t GetVersion() = 0;
+					virtual const std::uint32_t GetCategory() = 0;
 					virtual std::string const & GetEditName() { return _editName; }
+					virtual void SetEditName(std::string newname) { _editName = newname; }
 				PSYCLE__PRIVATE:
 					std::string  _editName;
 			///\}

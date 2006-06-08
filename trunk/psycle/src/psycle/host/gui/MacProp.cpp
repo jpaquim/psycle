@@ -42,11 +42,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				std::ostringstream s;
 				s	<< std::hex << std::setfill('0') << std::setw(2)
-					<< Global::song().FindBusFromIndex(thisMac) << ": " << pMachine->_editName << "  Properties";
+					<< Global::song().FindBusFromIndex(thisMac) << ": " << pMachine->GetEditName() << "  Properties";
 				SetWindowText(s.str().c_str());
 			}
 
-			m_macname.SetWindowText(pMachine->_editName.c_str());
+			m_macname.SetWindowText(pMachine->GetEditName().c_str());
 
 			m_muteCheck.SetCheck(pMachine->_mute);
 			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
@@ -60,7 +60,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMacProp::OnChangeEdit1() 
 		{
-			 m_macname.GetWindowText(txt);
+			char value[32];
+			 m_macname.GetWindowText(value,32);
+			 txt = value;
 		}
 
 		void CMacProp::OnButton1() 
