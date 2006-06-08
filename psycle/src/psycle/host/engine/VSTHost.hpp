@@ -163,21 +163,23 @@ namespace psycle
 
 				///\name general info
 				///\{
-					public:  virtual inline std::string GetDllName() const { return _sDllName; }
+					public:  virtual const std::string GetDllName() { return _sDllName; }
 					private: std::string                 _sDllName;
 
-					public:  virtual inline std::string GetName() const { return _sProductName; }
+					public:  virtual const std::string GetBrand() { return _sProductName; }
 					private: std::string _sProductName;
 
-					public:  long int const inline & GetVersion() const throw() { return _version; }
+					public: virtual const std::uint32_t GetCategory() { return 0; }
+					public:  virtual const std::uint32_t GetVersion() { return static_cast<std::uint32_t>(_version); }
 					private: long int                  _version;
 
-					public: std::string const inline & GetVendorName() const throw() { return _sVendorName; }
+					public: virtual const std::string GetVendorName() { return _sVendorName; }
 					private: std::string                _sVendorName;
 
 					public:  bool const inline &  IsSynth() const throw() { return _isSynth; }
 					private: bool                _isSynth;
 
+					public: virtual std::uint32_t GetCategory() const { return 0; }
 				///\}
 
 				///\name calls to the plugin side go thru the proxy
@@ -417,8 +419,8 @@ namespace psycle
 					template<typename e> void rethrow(plugin & plugin, const long int operation, const e * const e = 0) throw(dispatch_error)
 					{
 						std::ostringstream s;
-						s << "Machine crashed: " << plugin._editName;
-						if(plugin.GetDllName())
+						s << "Machine crashed: " << plugin.GetEditName();
+						if(!plugin.GetDllName().empty())
 							s << ": " << plugin.GetDllName();
 						s << std::endl
 						  << "VST plugin had an exception on dispatcher operation: " << operation_description(operation) << '.' << std::endl

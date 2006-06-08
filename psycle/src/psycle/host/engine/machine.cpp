@@ -62,7 +62,7 @@ namespace psycle
 				_mute = true;
 			}
 			std::ostringstream s;
-			s << "Machine: " << _editName << ": " << GetDllName();
+			s << "Machine: " << GetEditName() << ": " << GetDllName();
 			s << std::endl << e.what() << std::endl;
 			if(minor_problem)
 			{
@@ -709,8 +709,10 @@ namespace psycle
 				//it's still necessary to limit editname length, but i'm inclined to think 128 is plenty..
 				std::vector<char> nametemp(128);
 				pFile->ReadString(&nametemp[0], nametemp.size());
+				//\todo: Use SetEditName. Btw... was this *really* necessary?
 				pMachine->_editName.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
 			}
+			//\todo: use SetEditName
 			if(bDeleted) pMachine->_editName += " (replaced)";
 			if(!fullopen) return pMachine;
 			if(!pMachine->LoadSpecificChunk(pFile,version))
@@ -740,6 +742,7 @@ namespace psycle
 					p->_connection[i]=pMachine->_connection[i];
 					p->_inputCon[i]=pMachine->_inputCon[i];
 				}
+				//\todo: use SetEditName()
 				pMachine->_editName += " (replaced)";
 				p->_numPars = 0;
 				delete pMachine;

@@ -1825,52 +1825,10 @@ namespace psycle
 				}
 			}
 
-			#if 1
-			{
-				std::stringstream s;
-				s << _pMachine[dst]->_editName << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
-				s >> _pMachine[dst]->_editName;
-			}
-			#else ///\todo rewrite this for std::string
-				int number = 1;
-				char buf[sizeof(_pMachine[dst]->_editName)+4];
-				strcpy (buf,_pMachine[dst]->_editName);
-				char* ps = strrchr(buf,' ');
-				if (ps)
-				{
-					number = atoi(ps);
-					if (number < 1)
-					{
-						number =1;
-					}
-					else
-					{
-						ps[0] = 0;
-						ps = strchr(_pMachine[dst]->_editName,' ');
-						ps[0] = 0;
-					}
-				}
-
-				for (int i = 0; i < MAX_MACHINES-1; i++)
-				{
-					if (i!=dst)
-					{
-						if (_pMachine[i])
-						{
-							if (strcmp(_pMachine[i]->_editName,buf)==0)
-							{
-								number++;
-								sprintf(buf,"%s %d",_pMachine[dst]->_editName.c_str(),number);
-								i = -1;
-							}
-						}
-					}
-				}
-
-				buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
-				strcpy(_pMachine[dst]->_editName,buf);
-			#endif
-
+			///\todo rewrite this so that it auto-numerates/auto-increases number.
+			std::stringstream s;
+			s << _pMachine[dst]->GetEditName() << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
+			_pMachine[dst]->SetEditName(s.str());
 			return true;
 		}
 

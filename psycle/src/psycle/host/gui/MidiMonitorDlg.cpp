@@ -357,7 +357,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						Machine * pMachine = Global::song()._pMachine[ genFxIdx ];
 						{
 							std::ostringstream s;
-							s << genFxIdx << ": " << pMachine->_editName;
+							s << genFxIdx << ": " << pMachine->GetEditName();
 							m_channelMap.SetItem( ch, 1, LVIF_TEXT, s.str().c_str(), 0, 0, 0, 0);
 						}
 

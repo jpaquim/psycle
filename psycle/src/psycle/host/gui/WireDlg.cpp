@@ -1102,7 +1102,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 
 			std::ostringstream s;
-			s << "[" << wireIndex << "]" << _pSrcMachine->_editName << " -> " << _pDstMachine->_editName;
+			s << "[" << wireIndex << "]" << _pSrcMachine->GetEditName() << " -> " << _pDstMachine->_editName;
 			SetWindowText(s.str().c_str());
 
 			m_slvolume.SetRange(0,256*4);

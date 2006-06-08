@@ -990,12 +990,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->GetEditName();
 							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName.c_str());
+							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->GetEditName().c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1067,12 +1067,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->GetEditName();
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName.c_str());
+							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->GetEditName().c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1149,12 +1149,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->GetEditName();
 							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName.c_str());
+							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->GetEditName().c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1213,12 +1213,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							// visually mark the machine as being selected
 							std::ostringstream s;
-							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << mac->id() << ":" << mac->GetEditName();
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, s.str().c_str());
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName.c_str());
+							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->GetEditName().c_str());
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);

@@ -11,15 +11,15 @@ namespace psycle
 {
 	namespace host
 	{
-		std::string Sampler::_psName = "Sampler";
+		InternalMachineInfo Sampler::minfo("Basic Sampler","Sampler","Arguru",0,500,0);
 
 		Sampler::Sampler(Machine::id_type id)
 		:
 			Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id)
 		{
+			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
 			DefineStereoOutput(1);
-			_editName = "Sampler";
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)

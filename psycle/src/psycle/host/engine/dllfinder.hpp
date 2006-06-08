@@ -1,5 +1,6 @@
 #pragma once
 #include "machine.hpp"
+#include <string>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

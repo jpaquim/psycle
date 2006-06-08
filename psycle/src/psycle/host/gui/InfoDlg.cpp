@@ -154,12 +154,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					// Name [Machine view editor custom name]
 					{
 						std::ostringstream s;
-						s << n + 1 << ": " << tmac->_editName;
+						s << n + 1 << ": " << tmac->GetEditName();
 						m_machlist.InsertItem(n,s.str().c_str());
 					}
 					
 					// Gear [Gear type]
-					m_machlist.SetItem(n,1,LVIF_TEXT,tmac->GetName().c_str(),0,0,0,0);
+					m_machlist.SetItem(n,1,LVIF_TEXT,tmac->GetBrand().c_str(),0,0,0,0);
 					
 					// Type [Set is generator/effect/master]
 					{

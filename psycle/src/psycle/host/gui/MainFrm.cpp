@@ -833,7 +833,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{	
 						{
 							std::ostringstream s;
-							s << std::hex << std::setw(2) << std::setfill('0') << b << ": " << _pSong->_pMachine[b]->_editName;
+							s << std::hex << std::setw(2) << std::setfill('0') << b << ": " << _pSong->_pMachine[b]->GetEditName();
 							cb->AddString(s.str().c_str());
 						}
 						cb->SetItemData(cb->GetCount()-1,b);
@@ -868,7 +868,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						{
 							std::ostringstream s;
-							s << std::hex << b << ": " << _pSong->_pMachine[b]->_editName;
+							s << std::hex << b << ": " << _pSong->_pMachine[b]->GetEditName();
 							cb->AddString(s.str().c_str());
 						}
 						cb->SetItemData(cb->GetCount()-1,b);
@@ -1386,7 +1386,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							for (int i=0;i<MAX_CONNECTIONS; i++)
 								if ( ma->_inputCon[i])
 									if (_pSong->_pMachine[ma->_inputMachines[i]])
-										m_wndView.MasterMachineDialog->macname[i] = _pSong->_pMachine[ma->_inputMachines[i]]->_editName;
+										m_wndView.MasterMachineDialog->macname[i] = _pSong->_pMachine[ma->_inputMachines[i]]->GetEditName();
 							m_wndView.MasterMachineDialog->Create();
 							CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
 							m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
@@ -1422,7 +1422,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								m_wndView.XMSamplerMachineDialog->DestroyWindow();
 							}
 						}
-						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->_editName.c_str(),&m_wndView);
+						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
 						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
 						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
 						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
@@ -1531,7 +1531,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						std::ostringstream winname;
 						winname << std::setfill('0') << std::hex << std::setw(2)
 							<< ((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex
-							<< " : " << ma->_editName;
+							<< " : " << ma->GetEditName();
 						((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
 						((CVstEditorDlg*)m_pWndMac[tmac])->ShowWindow(SW_SHOWNORMAL);
 						isguiopen[tmac] = true;
@@ -2560,7 +2560,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						if (_pSong->_pMachine[machine])
 						{
-							oss << " - " << _pSong->_pMachine[machine]->_editName;
+							oss << " - " << _pSong->_pMachine[machine]->GetEditName();
 							if (_pSong->_pMachine[machine]->_type == MACH_SAMPLER)
 							{
 								

@@ -396,7 +396,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName.c_str());
+						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->GetEditName().c_str());
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
@@ -442,7 +442,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName.c_str());
+						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->GetEditName().c_str());
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
@@ -668,7 +668,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName.c_str());
+						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->GetEditName().c_str());
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
@@ -711,7 +711,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName.c_str());
+						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->GetEditName().c_str());
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}

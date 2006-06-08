@@ -23,15 +23,18 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Dummy
 
-		std::string Dummy::_psName = "DummyPlug";
+		InternalMachineInfo Dummy::minfo("Dummy Machine","Dummy","Arguru",0,1000,0);
 
+		///< Machine::type_type is the specific type of machine ( master, plugin, sampler, ... )
+		///< Machine::mode_type is the mode of working of the machine ( effect, generator,... )
+		///< Define yours in the MachineType struct. ( right now located in machine.hpp )
 		Dummy::Dummy(Machine::id_type id)
 		: Machine(MACH_DUMMY, MACHMODE_FX, id)
 		{
 //			DefineStereoInput(1);
 //			DefineStereoOutput(1);
+			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
-			_editName = "Dummy";
 		}
 
 		Dummy::~Dummy() throw()
@@ -62,15 +65,15 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 
-		std::string DuplicatorMac::_psName = "Dupe it!";
+		InternalMachineInfo DuplicatorMac::minfo("Note Duplicator","Dupe it!","JosepMa",0,1000,16);
 
 		DuplicatorMac::DuplicatorMac(Machine::id_type id)
 		: Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id)
 		{
-			_numPars = 16;
+			_editName = minfo.shortname;
+			_numPars = minfo.parameters;
 			_nCols = 2;
 			bisTicking = false;
-			_editName = "Dupe it!";
 			for (int i=0;i<8;i++)
 			{
 				macOutput[i]=-1;
@@ -196,8 +199,7 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Master
 
-		std::string Master::_psName = "Master";
-
+		InternalMachineInfo Master::minfo("Master Machine","Master","Arguru",0,1000,0);
 		float * Master::_pMasterSamples = 0;
 
 		Master::Master(Machine::id_type id)
@@ -207,9 +209,9 @@ namespace psycle {
 			_outDry(256),
 			decreaseOnClip(false)
 		{
+			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
 			DefineStereoInput(1);
-			_editName = "Master";
 		}
 
 		Master::~Master() throw()
@@ -362,16 +364,15 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer
 
-		std::string Mixer::_psName = "Mixer";
+		InternalMachineInfo Mixer::minfo("Send/Return Mixer","Mixer","JosepMa",0,500,255);
 
 		Mixer::Mixer(Machine::id_type id)
 		: Machine(MACH_MIXER, MACHMODE_FX, id)
 		{
-			_numPars = 255;
+			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
 			DefineStereoInput(24);
 			DefineStereoOutput(1);
-			_editName = "Mixer";
 		}
 
 		Mixer::~Mixer() throw()
@@ -724,7 +725,7 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// LFO
 
-		std::string LFO::_psName = "LFO";
+		InternalMachineInfo LFO::minfo("LFO","LFO","dw",0,100,prms::num_params);
 
 #if 0 // don't worry, msvc is the weird
 		int const LFO::LFO_SIZE;
@@ -737,10 +738,9 @@ namespace psycle {
 		LFO::LFO(Machine::id_type id)
 		: Machine(MACH_LFO, MACHMODE_GENERATOR, id)
 		{
-			_numPars = prms::num_params;
+			_editName = minfo.shortname;
 			_nCols = 3;
 			bisTicking = false;
-			_editName = "LFO";
 		}
 
 		LFO::~LFO() throw()
@@ -1150,7 +1150,7 @@ namespace psycle {
 		//       decide if there's a cleaner way of dealing with the machine's dual nature
 		//      -option to stretch/squeeze envelope to match length changes (probably just for continuous mode)
 
-		std::string Automator::_psName = "Automator";
+		InternalMachineInfo Automator::minfo("Automator","Automator","dw",0,100,prms::num_params);
 
 		Automator::Automator(Machine::id_type id)
 		: Machine(MACH_AUTOMATOR, MACHMODE_GENERATOR, id)
@@ -1160,10 +1160,9 @@ namespace psycle {
 		,bDiscrete(true)
 		,bRelative(false)
 		{
-			_numPars = prms::num_params;
+			_editName = minfo.shortname;
 			_nCols = 0;
 			bisTicking = false;
-			_editName = "Automator";
 		}
 
 		Automator::~Automator() throw()

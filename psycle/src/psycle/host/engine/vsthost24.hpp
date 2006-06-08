@@ -99,8 +99,13 @@ namespace psycle
 				// Properties
 				//////////////////////////////////////////////////////////////////////////
 				virtual void SetSampleRate(int sr) { SetSampleRate((float)sr); }
-				virtual const char * const GetDllName() const throw() { return sFileName; }
-				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
+				//\todo:
+				virtual const std::string GetDllName() { return sFileName; }
+				virtual const std::string GetBrand() { return; }
+				virtual const std::string GetVendorName() { return; }
+				virtual const std::uint32_t GetVersion() { return 0; }
+				virtual const std::uint32_t GetCategory() { return 0; }
+				//
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; }
 				virtual int GetNumParams() { return numParams(); }
 				virtual void GetParamValue(int numparam, char * parval);

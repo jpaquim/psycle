@@ -1500,8 +1500,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					// make sure that no 2 machines have the same name, because that is irritating
 					{
 						std::stringstream ss;
-						ss << _pSong->_pMachine[fb]->_editName << " " << std::hex << fb;
-						ss >> _pSong->_pMachine[fb]->_editName;
+						ss << _pSong->_pMachine[fb]->GetEditName() << " " << std::hex << fb;
+						_pSong->_pMachine[fb]->SetEditName(ss.str());
 					}
 
 					pParentMain->UpdateComboGen();
@@ -3478,8 +3478,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
-				dlg.pMachine->_editName = dlg.txt;
-				pParentMain->StatusBarText(dlg.txt);
+				dlg.pMachine->SetEditName(dlg.txt);
+				pParentMain->StatusBarText(dlg.txt.c_str());
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (pParentMain->pGearRackDialog)
