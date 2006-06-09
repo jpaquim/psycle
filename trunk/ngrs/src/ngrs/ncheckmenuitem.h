@@ -39,6 +39,9 @@ public:
 
     ~NCheckMenuItem();
 
+   void setCheck(bool on);
+   bool checked() const;
+
    virtual void onMousePress(int x, int y, int button);
 
    virtual void onMouseEnter();
