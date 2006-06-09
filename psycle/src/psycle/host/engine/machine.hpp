@@ -18,9 +18,9 @@ namespace psycle
 	namespace host
 	{
 		/// we don't really need a macro for just one little expression...
-		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
+//		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
 		/// we don't really need a macro for just one little expression...
-		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
+//		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
 
 		class Machine; // forward declaration
 
@@ -109,43 +109,6 @@ namespace psycle
 				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
 			}
 		}
-
-		class InternalMachineInfo
-		{
-		public:
-			InternalMachineInfo(char const* _brandname,char const* _shortname,char const* _vendor,
-				std::uint32_t _category, std::uint32_t _version, std::uint32_t _parameters)
-				:brandname(_brandname),shortname(_shortname),vendor(_vendor),category(_category)
-				,version(_version),parameters(_parameters)
-			{
-			}
-			///< Name of the machine
-			char const *brandname;
-			///< Default Display name.
-			char const *shortname;
-			///< Authority of the machine
-			char const *vendor;
-			///< Default category.
-			//\todo: define categories.
-			const std::uint32_t category;
-			///< version numbering. Prefered form is " 1.0 -> 1000 "
-			const std::uint32_t version;
-			///< The Number of parameters that this machine exports.
-			const std::uint32_t parameters;
-			//\todo : description field?
-		};
-
-		/// Class for the Internal Machines' Parameters.
-		class CIntMachParam			
-		{
-			public:
-				/// Short name
-				const char * name;		
-				/// >= 0
-				int minValue;
-				/// <= 65535
-				int maxValue;
-		};
 
 		class AudioPort;
 
@@ -269,6 +232,55 @@ namespace psycle
 			MACHMODE_GENERATOR	= 0,
 			MACHMODE_FX			= 1,
 			MACHMODE_MASTER		= 2,
+		};
+
+		// Helper class for Machine Creation.
+		typedef Machine* (*CreatorFromType)(MachineType _id, std::string _dllname);
+
+		class InternalMachineInfo
+		{
+		public:
+			InternalMachineInfo(MachineType _type,MachineMode _mode,CreatorFromType _creator,
+				char const* _brandname,char const* _shortname,char const* _vendor,
+				std::uint32_t _category, std::uint32_t _version, std::uint32_t _parameters)
+				:type(_type),mode(_mode),CreateFromType(_creator)
+				,brandname(_brandname),shortname(_shortname),vendor(_vendor),category(_category)
+				,version(_version),parameters(_parameters)
+			{
+			}
+		public:
+			///< Class of machine (master, sampler, dummy,...). See MachineType
+			MachineType type;
+			///< Mode of the plugin, ( generator, effect,...) See MachineMode
+			MachineMode mode;
+			///< Creator function. Needed for the loader.
+			CreatorFromType CreateFromType;
+			///< Name of the machine
+			char const *brandname;
+			///< Default Display name.
+			char const *shortname;
+			///< Authority of the machine
+			char const *vendor;
+			///< Default category.
+			//\todo: define categories.
+			const std::uint32_t category;
+			///< version numbering. Prefered form is " 1.0 -> 1000 "
+			const std::uint32_t version;
+			///< The Number of parameters that this machine exports.
+			const std::uint32_t parameters;
+			//\todo : description field?
+		};
+
+		/// Class for the Internal Machines' Parameters.
+		class CIntMachParam			
+		{
+		public:
+			/// Short name
+			const char * name;		
+			/// >= 0
+			int minValue;
+			/// <= 65535
+			int maxValue;
 		};
 
 		/// Base class for "Machines", the audio producing elements.
@@ -619,6 +631,10 @@ namespace psycle
 				float TWSDestination[MAX_TWS];
 			///\}
 		};
+
+
+
+
 
 		inline void Machine::SetVolumeCounter(int numSamples, int multiplier)
 		{

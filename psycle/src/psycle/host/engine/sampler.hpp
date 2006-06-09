@@ -122,11 +122,13 @@ namespace psycle
 		class Sampler : public Machine
 		{
 		public:
-			void Tick();
 			Sampler(Machine::id_type id);
+			///< Helper class for Machine Creation.
+			static Machine* CreateFromType(MachineType _id, std::string _dllname);
 			virtual void Init();
 			virtual void Work(int numSamples);
 			virtual void Stop();
+			virtual void Tick();
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual const std::string GetBrand() { return minfo.brandname; }
 			virtual const std::string GetVendorName() { return minfo.vendor; }

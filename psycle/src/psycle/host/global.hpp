@@ -10,6 +10,7 @@ namespace psycle
 		class Player;
 		class Configuration;
 		class InputHandler;
+		class CachedDllFinder;
 		namespace dsp
 		{
 			class Resampler;
@@ -58,6 +59,8 @@ namespace psycle
 				Configuration    static inline & configuration() throw() { return *pConfig; }
 				dsp::Resampler   static inline & resampler    () throw() { return *pResampler; }
 				InputHandler     static inline & input_handler() throw() { return *pInputHandler; }
+				// For other implementations, you might wish to use Mapped or simply DllFinder instead of the Cached one.
+				CachedDllFinder  static inline & dllfinder()	 throw() { return *pDllFinder; }
 
 			PSYCLE__PRIVATE:// shouldn't be static either
 				static Song * _pSong;
@@ -65,6 +68,7 @@ namespace psycle
 				static Configuration * pConfig;
 				static dsp::Resampler * pResampler;
 				static InputHandler* pInputHandler;
+				static CachedDllFinder* pDllFinder;
 
 			public:
 				cpu::cycles_type static inline cpu_frequency(                              ) /*const*/ throw() { return cpu_frequency_; }

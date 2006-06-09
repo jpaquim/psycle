@@ -145,6 +145,11 @@ namespace psycle
 				}
 				zapObject(proxy_);
 			}
+			Machine* plugin::CreateFromType(MachineType _id, std::string _dllname)
+			{
+				//\todo:
+				//return new;
+			}
 
 			void plugin::Instance(std::string const & dllname, bool overwriteName)
 			{
@@ -1213,7 +1218,7 @@ namespace psycle
 
 			void instrument::Work(int numSamples)
 			{
-				PSYCLE__CPU_COST__INIT(cost);
+				cpu::cycles_type cost(cpu::cycles());
 				if(!_mute && instantiated)
 				{
 					if(wantidle) 
@@ -1409,7 +1414,7 @@ namespace psycle
 						else _stopped = false;
 					}
 				}
-				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+				cost = cpu::cycles() - cost;
 				work_cpu_cost(work_cpu_cost() + cost);
 				_worked = true;
 			}
@@ -1533,7 +1538,7 @@ namespace psycle
 			void fx::Work(int numSamples)
 			{
 				Machine::Work(numSamples);
-				PSYCLE__CPU_COST__INIT(cost);
+				cpu::cycles_type cost(cpu::cycles());
 				if((!_mute) && (!_stopped) && (!_bypass))
 				{
 					if(instantiated)
@@ -1736,7 +1741,7 @@ namespace psycle
 						else _stopped = false;
 					}
 				}
-				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+				cost = cpu::cycles() - cost;
 				work_cpu_cost(work_cpu_cost() + cost);
 				_worked = true;
 			}

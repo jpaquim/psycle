@@ -51,6 +51,11 @@ namespace psycle
 		{
 			Free();
 		}
+		Machine* Plugin::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			//\todo:
+			//return new;
+		}
 
 		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 			namespace boost
@@ -392,7 +397,7 @@ namespace psycle
 		void Plugin::Work(int numSamples)
 		{
 			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
-			PSYCLE__CPU_COST__INIT(cost);
+			cpu::cycles_type cost(cpu::cycles());
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
@@ -619,7 +624,7 @@ namespace psycle
 					}
 				}
 			}
-			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			cost = cpu::cycles() - cost;
 			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}
