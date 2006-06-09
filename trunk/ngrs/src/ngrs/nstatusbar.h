@@ -22,6 +22,8 @@
 
 #include "npanel.h"
 
+class NCustomStatusItem;
+
 /**
 @author Stefan Nattkemper
 */
@@ -31,6 +33,9 @@ public:
     NStatusBar();
 
     ~NStatusBar();
+
+    virtual void add(NCustomStatusItem* component);
+    virtual void add(NCustomStatusItem* component, int align);
 
 };
 
