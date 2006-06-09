@@ -21,6 +21,7 @@
 #define NTEXTSTATUSITEM_H
 
 #include "ngrs/ncustomstatusitem.h"
+#include "nlabel.h"
 
 /**
 @author Stefan Nattkemper
@@ -29,8 +30,23 @@ class NTextStatusItem : public NCustomStatusItem
 {
 public:
     NTextStatusItem();
+    NTextStatusItem(const std::string & text);
 
     ~NTextStatusItem();
+
+    void setText(const std::string & text);
+    const std::string & text() const;
+
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
+
+    virtual void resize();
+
+private:
+
+    NLabel* label_;
+
+    void init();
 
 };
 

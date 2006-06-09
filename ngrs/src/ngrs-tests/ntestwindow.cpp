@@ -51,6 +51,8 @@
 #include <ngrs/nedit.h>
 #include <ngrs/nmemo.h>
 #include <ngrs/nradiobutton.h>
+#include <ngrs/ntextstatusitem.h>
+#include <ngrs/nstatusbar.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -68,8 +70,14 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1024,768);
 
+  NStatusBar* bar = new NStatusBar();
+     NTextStatusItem* item = new NTextStatusItem("Hallo");
+     bar->add(item);
+  pane()->add(bar);
+  bar->resize();
+
   //testMenu();
-  testMemo();
+  //testMemo();
   //testListBox();
 
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());

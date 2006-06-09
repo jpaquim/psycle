@@ -18,15 +18,30 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nstatusbar.h"
+#include "nalignlayout.h"
+#include "ncustomstatusitem.h"
+
 
 NStatusBar::NStatusBar()
  : NPanel()
 {
+  setLayout(NAlignLayout());
+  setAlign(nAlBottom);
 }
 
 
 NStatusBar::~NStatusBar()
 {
+}
+
+void NStatusBar::add( NCustomStatusItem * component )
+{
+  NPanel::add(component,nAlRight);
+}
+
+void NStatusBar::add( NCustomStatusItem * component, int align )
+{
+  NPanel::add(component,align);
 }
 
 

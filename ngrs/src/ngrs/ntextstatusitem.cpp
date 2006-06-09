@@ -18,15 +18,61 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ntextstatusitem.h"
+#include "nlabel.h"
+#include "nbevelborder.h"
 
 NTextStatusItem::NTextStatusItem()
  : NCustomStatusItem()
 {
+  init();
 }
 
+NTextStatusItem::NTextStatusItem( const std::string & text )
+{
+  init();
+  label_->setText(text);
+}
+
+
+void NTextStatusItem::init( )
+{
+  label_ = new NLabel();
+  add(label_);
+  label_->setBorder(NBevelBorder(nRaised,nLowered));
+  label_->setSpacing(NSize(2,2,2,2));
+}
 
 NTextStatusItem::~NTextStatusItem()
 {
 }
+
+void NTextStatusItem::setText( const std::string & text )
+{
+  label_->setText(text);
+}
+
+const std::string & NTextStatusItem::text( ) const
+{
+  return label_->text();
+}
+
+int NTextStatusItem::preferredWidth( ) const
+{
+  return label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
+}
+
+int NTextStatusItem::preferredHeight( ) const
+{
+  return label_->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+}
+
+void NTextStatusItem::resize( )
+{
+  label_->setPosition(0,0,spacingWidth(), spacingHeight());
+}
+
+
+
+
 
 
