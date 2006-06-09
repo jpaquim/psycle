@@ -78,7 +78,10 @@ void MainWindow::initMenu( )
     fileMenu_->add(new NMenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
     fileMenu_->add(new NMenuSeperator());
     fileMenu_->add(new NMenuItem("revert to saved"));
-    fileMenu_->add(new NMenuItem("recent files"));
+    NMenuItem* recentItem = new NMenuItem("recent files");
+    fileMenu_->add(recentItem);
+    //NMenu* subRecentMenu = new NMenu();
+    //recentItem->addMenu(subRecentMenu);
     fileMenu_->add(new NMenuItem("exit"));
   menuBar_->add(fileMenu_);
 
@@ -190,14 +193,13 @@ void MainWindow::initBars( )
   initToolBar();
 
   statusBar_ = new NStatusBar();
-    statusBar_->setLayout(NFlowLayout(nAlLeft));
       progressBar_ = new NProgressBar();
         progressBar_->setValue(0);
         progressBar_->setMax(16385);
         progressBar_->setWidth(200);
         progressBar_->setHeight(25);
         progressBar_->setVisible(false);        Global::pSong()->progress.connect(this,&MainWindow::onSongLoadProgress);
-    statusBar_->add(progressBar_);
+    statusBar_->add(progressBar_,nAlLeft);
   pane()->add(statusBar_,nAlBottom);
 
   pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
