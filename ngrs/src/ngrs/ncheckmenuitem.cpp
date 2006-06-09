@@ -79,6 +79,16 @@ void NCheckMenuItem::onMouseExit( )
   NCustomMenuItem::onMouseExit();
 }
 
+void NCheckMenuItem::setCheck( bool on )
+{
+   checkBox_->setCheck(on);
+}
+
+bool NCheckMenuItem::checked( ) const
+{
+  return checkBox_->checked();
+}
+
 
 
 
