@@ -36,6 +36,7 @@ public:
 
     virtual void add(NCustomStatusItem* component);
     virtual void add(NCustomStatusItem* component, int align);
+		virtual void add(NVisualComponent* component, int align);
 
 };
 
