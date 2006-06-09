@@ -44,4 +44,9 @@ void NStatusBar::add( NCustomStatusItem * component, int align )
   NPanel::add(component,align);
 }
 
+void NStatusBar::add( NVisualComponent * component, int align )
+{
+  NPanel::add(component,align);
+}
+
 

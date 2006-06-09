@@ -21,11 +21,13 @@
 #define NTEXTSTATUSITEM_H
 
 #include "ngrs/ncustomstatusitem.h"
-#include "nlabel.h"
+
+class NLabel;
 
 /**
 @author Stefan Nattkemper
 */
+
 class NTextStatusItem : public NCustomStatusItem
 {
 public:

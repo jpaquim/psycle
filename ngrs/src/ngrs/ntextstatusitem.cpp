@@ -33,7 +33,6 @@ NTextStatusItem::NTextStatusItem( const std::string & text )
   label_->setText(text);
 }
 
-
 void NTextStatusItem::init( )
 {
   label_ = new NLabel();
