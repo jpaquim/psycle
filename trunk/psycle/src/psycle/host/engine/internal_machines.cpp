@@ -23,13 +23,13 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Dummy
 
-		InternalMachineInfo Dummy::minfo("Dummy Machine","Dummy","Arguru",0,1000,0);
+		InternalMachineInfo Dummy::minfo(MACH_DUMMY,MACHMODE_FX,Dummy::CreateFromType,"Dummy Machine","Dummy","Arguru",0,1000,0);
 
 		///< Machine::type_type is the specific type of machine ( master, plugin, sampler, ... )
 		///< Machine::mode_type is the mode of working of the machine ( effect, generator,... )
 		///< Define yours in the MachineType struct. ( right now located in machine.hpp )
 		Dummy::Dummy(Machine::id_type id)
-		: Machine(MACH_DUMMY, MACHMODE_FX, id)
+		: Machine(minfo.type, minfo.mode, id)
 		{
 //			DefineStereoInput(1);
 //			DefineStereoOutput(1);
@@ -41,6 +41,10 @@ namespace psycle {
 		{
 //			DestroyInputs();
 //			DestroyOutputs();
+		}
+		Machine* Dummy::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new Dummy(_id);
 		}
 
 		void Dummy::Work(int numSamples)
@@ -65,10 +69,11 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 
-		InternalMachineInfo DuplicatorMac::minfo("Note Duplicator","Dupe it!","JosepMa",0,1000,16);
+		//\todo: Change mode from Generator to controller.
+		InternalMachineInfo DuplicatorMac::minfo(MACH_DUPLICATOR,MACHMODE_GENERATOR,DuplicatorMac::CreateFromType,"Note Duplicator","Dupe it!","JosepMa",0,1000,16);
 
 		DuplicatorMac::DuplicatorMac(Machine::id_type id)
-		: Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id)
+		: Machine(minfo.type, minfo.mode, id)
 		{
 			_editName = minfo.shortname;
 			_numPars = minfo.parameters;
@@ -83,6 +88,11 @@ namespace psycle {
 
 		DuplicatorMac::~DuplicatorMac() throw()
 		{
+		}
+
+		Machine* DuplicatorMac::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new DuplicatorMac(_id);
 		}
 
 		void DuplicatorMac::Init()
@@ -199,15 +209,14 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Master
 
-		InternalMachineInfo Master::minfo("Master Machine","Master","Arguru",0,1000,0);
+		InternalMachineInfo Master::minfo(MACH_MASTER,MACHMODE_MASTER,Master::CreateFromType,"Master Machine","Master","Arguru",0,1000,0);
 		float * Master::_pMasterSamples = 0;
 
 		Master::Master(Machine::id_type id)
-		:
-			Machine(MACH_MASTER, MACHMODE_MASTER, id),
-			sampleCount(0),
-			_outDry(256),
-			decreaseOnClip(false)
+		: Machine(minfo.type, minfo.mode, id)
+		,sampleCount(0)
+		,_outDry(256)
+		,decreaseOnClip(false)
 		{
 			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
@@ -217,6 +226,11 @@ namespace psycle {
 		Master::~Master() throw()
 		{
 		}
+		Machine* Master::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new Master(_id);
+		}
+
 		void Master::Init()
 		{
 			Machine::Init();
@@ -364,10 +378,10 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer
 
-		InternalMachineInfo Mixer::minfo("Send/Return Mixer","Mixer","JosepMa",0,500,255);
+		InternalMachineInfo Mixer::minfo(MACH_MIXER,MACHMODE_FX,Mixer::CreateFromType,"Send/Return Mixer","Mixer","JosepMa",0,500,255);
 
 		Mixer::Mixer(Machine::id_type id)
-		: Machine(MACH_MIXER, MACHMODE_FX, id)
+		: Machine(minfo.type, minfo.mode, id)
 		{
 			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
@@ -377,6 +391,10 @@ namespace psycle {
 
 		Mixer::~Mixer() throw()
 		{
+		}
+		Machine* Mixer::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new Mixer(_id);
 		}
 
 		void Mixer::Init()
@@ -724,8 +742,8 @@ namespace psycle {
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// LFO
-
-		InternalMachineInfo LFO::minfo("LFO","LFO","dw",0,100,prms::num_params);
+		//\todo: Change mode from generator to controller
+		InternalMachineInfo LFO::minfo(MACH_LFO,MACHMODE_GENERATOR,LFO::CreateFromType,"LFO","LFO","dw",0,100,prms::num_params);
 
 #if 0 // don't worry, msvc is the weird
 		int const LFO::LFO_SIZE;
@@ -736,7 +754,7 @@ namespace psycle {
 #endif
 
 		LFO::LFO(Machine::id_type id)
-		: Machine(MACH_LFO, MACHMODE_GENERATOR, id)
+		: Machine(minfo.type, minfo.mode, id)
 		{
 			_editName = minfo.shortname;
 			_nCols = 3;
@@ -745,6 +763,10 @@ namespace psycle {
 
 		LFO::~LFO() throw()
 		{
+		}
+		Machine* LFO::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new LFO(_id);
 		}
 
 		void LFO::Init()
@@ -1150,10 +1172,10 @@ namespace psycle {
 		//       decide if there's a cleaner way of dealing with the machine's dual nature
 		//      -option to stretch/squeeze envelope to match length changes (probably just for continuous mode)
 
-		InternalMachineInfo Automator::minfo("Automator","Automator","dw",0,100,prms::num_params);
+		InternalMachineInfo Automator::minfo(MACH_AUTOMATOR,MACHMODE_GENERATOR,Automator::CreateFromType,"Automator","Automator","dw",0,100,prms::num_params);
 
 		Automator::Automator(Machine::id_type id)
-		: Machine(MACH_AUTOMATOR, MACHMODE_GENERATOR, id)
+		: Machine(minfo.type, minfo.mode, id)
 		,dLength(64)
 		,cLength(10000)
 		,dStepSize(1.0f)
@@ -1169,6 +1191,10 @@ namespace psycle {
 		{
 			for(std::vector<Track*>::iterator iter = tracks.begin(); iter!=tracks.end(); ++iter)
 				delete *iter;
+		}
+		Machine* Automator::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new Automator(_id);
 		}
 
 		void Automator::Init()

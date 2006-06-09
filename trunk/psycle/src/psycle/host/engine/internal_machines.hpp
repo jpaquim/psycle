@@ -8,15 +8,6 @@
 // internal machines
 namespace psycle {
 	namespace host {
-
-
-		//\todo: How could something like this be created, in order to ease the enumeration of internal machines?
-/*		struct MachineAssociation
-		{
-			Machine::type_type type;
-			typename classname;
-		};
-*/
 		//////////////////////////////////////////////////////////////////////////
 		/// dummy machine.
 		class Dummy : public Machine
@@ -24,6 +15,7 @@ namespace psycle {
 		public:
 			Dummy(id_type index);
 			virtual ~Dummy() throw();
+			static Machine* CreateFromType(MachineType _id, std::string _dllname);
 			virtual void Work(int numSamples);
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 		public:
@@ -46,6 +38,7 @@ namespace psycle {
 			DuplicatorMac();
 			DuplicatorMac(id_type index);
 			virtual ~DuplicatorMac() throw();
+			static Machine* CreateFromType(MachineType _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -76,6 +69,7 @@ namespace psycle {
 			Master();
 			Master(id_type index);
 			virtual ~Master() throw();
+			static Machine* CreateFromType(MachineType _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Work(int numSamples);
 			virtual const std::string GetBrand() { return minfo.brandname; }
@@ -143,6 +137,7 @@ namespace psycle {
 			Mixer();
 			Mixer(id_type index);
 			virtual ~Mixer() throw();
+			static Machine* CreateFromType(MachineType _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -213,6 +208,7 @@ namespace psycle {
 			LFO();
 			LFO(id_type index);
 			virtual ~LFO() throw();
+			static Machine* CreateFromType(MachineType _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void PreWork(int numSamples);
@@ -302,6 +298,7 @@ namespace psycle {
 			Automator();
 			Automator(id_type index);
 			virtual ~Automator() throw();
+			static Machine* CreateFromType(MachineType _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Tick();

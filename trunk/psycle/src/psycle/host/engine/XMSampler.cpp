@@ -27,7 +27,7 @@ namespace psycle
 		static CXResampler *pResampler = NULL;
 */
 
-		InternalMachineInfo XMSampler::minfo("Sampulse Sampler V2","Sampulse","JosepMa",0,600,0);
+		InternalMachineInfo XMSampler::minfo(MACH_XMSAMPLER,MACHMODE_GENERATOR,XMSampler::CreateFromType,"Sampulse Sampler V2","Sampulse","JosepMa",0,600,0);
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
@@ -2011,7 +2011,7 @@ namespace psycle
 
 		XMSampler::XMSampler(Machine::id_type id)
 		:
-			Machine(MACH_XMSAMPLER, MACHMODE_GENERATOR, id)
+			Machine(minfo.type, minfo.mode, id)
 		{
 			_editName = minfo.shortname;
 			DefineStereoOutput(1);
@@ -2046,6 +2046,10 @@ namespace psycle
 				zxxMap[i].value=0;
 			}
 //			xdsp.Init(Global::player().SampleRate(), 1.0 / (1 << 20));
+		}
+		Machine* XMSampler::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new XMSampler(_id);
 		}
 
 		void XMSampler::Init(void)
@@ -2322,7 +2326,7 @@ namespace psycle
 		{
 			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
 
-			PSYCLE__CPU_COST__INIT(cost);
+			cpu::cycles_type cost(cpu::cycles());
 			int i;
 
 			if (!_mute)
@@ -2469,7 +2473,7 @@ namespace psycle
 				}
 			}
 
-			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			cost = cpu::cycles() - cost;
 			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}// XMSampler::Work()

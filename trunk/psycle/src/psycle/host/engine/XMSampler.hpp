@@ -945,6 +945,8 @@ XMSampler::Channel::PerformFX().
 
 
 	XMSampler(int index);
+	///< Helper class for Machine Creation.
+	static Machine* CreateFromType(MachineType _id, std::string _dllname);
 
 	virtual void Init(void);
 	

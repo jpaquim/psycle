@@ -40,6 +40,14 @@
 						data[index] = c;
 						if(c == '\0') return true;
 					}
+					//\todo : put this back! it was for the case where the string was longer than max_length
+//				{
+//					char c;
+//					do
+//					{
+//						if(!ReadChunk(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
+//					} while(c);
+//				}
 				}
 				if (c==EOF) return true; else false;
 			}
@@ -107,7 +115,7 @@
 			while(count--)
 			{
 				unsigned char c;
-        _stream.read (reinterpret_cast<char *> (&c), sizeof (c));
+				_stream.read (reinterpret_cast<char *> (&c), sizeof (c));
 				if (_stream.eof()) return false;
 				if(c != *chars) return false;
 				++chars;

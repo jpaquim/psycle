@@ -101,6 +101,8 @@ namespace psycle
 					bool LoadDll (std::string const & file_name);
 					///\todo doc
 					virtual void Init();
+					///< Helper class for Machine Creation.
+					static Machine* CreateFromType(MachineType _id, std::string _dllname);
 				private:
 					/// mswindows! humpf! mswindows!
 					HINSTANCE _dll;

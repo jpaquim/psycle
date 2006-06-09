@@ -71,6 +71,11 @@ namespace psycle
 				return 0;
 			}
 
+			Machine* host::CreateFromType(MachineType _id, std::string _dllname)
+			{
+				//\todo;
+				//return new;
+			}
 
 			void host::CalcTimeInfo(long lMask)
 			{

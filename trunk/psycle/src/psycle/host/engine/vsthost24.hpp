@@ -32,6 +32,8 @@ namespace psycle
 				virtual plugin* host::GetPreviousPlugIn(CEffect & pEffect, int pinIndex);
 				virtual plugin* host::GetNextPlugIn(CEffect & pEffect, int pinIndex);
 
+				///< Helper class for Machine Creation.
+				static Machine* CreateFromType(MachineType _id, std::string _dllname);
 				virtual plugin * CreateEffect(LoadedAEffect &loadstruct) { return new plugin(loadstruct); }
 				virtual void CalcTimeInfo(long lMask = -1);
 

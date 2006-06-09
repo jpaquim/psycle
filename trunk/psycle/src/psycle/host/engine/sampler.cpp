@@ -11,11 +11,10 @@ namespace psycle
 {
 	namespace host
 	{
-		InternalMachineInfo Sampler::minfo("Basic Sampler","Sampler","Arguru",0,500,0);
+		InternalMachineInfo Sampler::minfo(MACH_SAMPLER,MACHMODE_GENERATOR,Sampler::CreateFromType,"Basic Sampler","Sampler","Arguru",0,500,0);
 
 		Sampler::Sampler(Machine::id_type id)
-		:
-			Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id)
+		:Machine(minfo.type, minfo.mode, id)
 		{
 			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
@@ -41,6 +40,10 @@ namespace psycle
 			}
 			for (Instrument::id_type i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
 		}
+		Machine* Sampler::CreateFromType(MachineType _id, std::string _dllname)
+		{
+			return new Sampler(_id);
+		}
 
 		void Sampler::Init(void)
 		{
@@ -64,7 +67,7 @@ namespace psycle
 			int numSamples)
 		{
 
-			PSYCLE__CPU_COST__INIT(cost);
+			cpu::cycles_type cost(cpu::cycles());
 			if (!_mute)
 			{
 				for (int voice=0; voice<_numVoices; voice++)
@@ -183,7 +186,7 @@ namespace psycle
 				}
 			}
 
-			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			cost = cpu::cycles() - cost;
 			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}

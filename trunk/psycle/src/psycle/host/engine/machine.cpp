@@ -439,7 +439,7 @@ namespace psycle
 		{
 			_worked = false;
 			_waitingForSound= false;
-			PSYCLE__CPU_COST__INIT(cost);
+			cpu::cycles_type cost(cpu::cycles());
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
 				float *pSamplesL = _pSamplesL;   
@@ -468,7 +468,7 @@ namespace psycle
 			_scopePrevNumSamples=numSamples;
 			dsp::Clear(_pSamplesL, numSamples);
 			dsp::Clear(_pSamplesR, numSamples);
-			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			cost = cpu::cycles() - cost;
 			wire_cpu_cost(wire_cpu_cost() + cost);
 		}
 
@@ -513,19 +513,19 @@ namespace psycle
 						if(!pInMachine->_stopped) _stopped = false;
 						if(!_mute && !_stopped)
 						{
-							PSYCLE__CPU_COST__INIT(wcost);
+							cpu::cycles_type wcost(cpu::cycles());
 							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-							PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+							wcost = cpu::cycles() - wcost;
 							wire_cpu_cost(wire_cpu_cost() + wcost);
 						}
 					}
 				}
 			}
 			{
-				PSYCLE__CPU_COST__INIT(wcost);
+				cpu::cycles_type wcost(cpu::cycles());
 					dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-				PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+				wcost = cpu::cycles() - wcost;
 				wire_cpu_cost(wire_cpu_cost() + wcost);
 			}
 		}
@@ -677,6 +677,9 @@ namespace psycle
 						}
 					}
 				}
+				break;
+			case MACH_SCOPE:
+				//deprecated
 				break;
 			default:
 				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);

@@ -193,7 +193,7 @@ void CachedDllFinder::populate_plugin_map(std::string directory,MachineType mtyp
 	std::vector<DllFileInfo> dllList;
 
 	populate_dll_list(dllList,directory);
-
+	//\todo: add the progress signal.
 	for(int i(0) ; i < (int)dllList.size(); i++)
 	{
 		bool found(false);

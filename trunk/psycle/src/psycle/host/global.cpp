@@ -139,6 +139,7 @@ namespace psycle
 		Configuration *   Global::pConfig(0);
 		cpu::cycles_type  Global::cpu_frequency_(0 /*GetCPUFreq()*/);
 		InputHandler *    Global::pInputHandler(0);
+		CachedDllFinder * Global::pDllFinder(0);
 			
 		Global::Global()
 		{
@@ -152,6 +153,7 @@ namespace psycle
 			pResampler = new dsp::Cubic;
 			pResampler->SetQuality(dsp::R_LINEAR);
 			pInputHandler = new InputHandler;
+			pDllFinder = new CachedDllFinder;
 			cpu_frequency_ = GetCPUFreq();
 			loggers::trace("Global::Global() ... initialized static objects.");
 		}

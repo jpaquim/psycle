@@ -152,6 +152,8 @@ namespace psycle
 						plugin(Machine::type_type type, Machine::mode_type mode, Machine::id_type id);
 						bool LoadDll (std::string const & file_name);
 						void Instance(std::string const & file_name, const bool overwriteName = true);
+						///< Helper class for Machine Creation.
+						static Machine* CreateFromType(MachineType _id, std::string _dllname);
 				///\}
 
 				///\name two-stepped destruction
