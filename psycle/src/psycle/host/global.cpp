@@ -264,9 +264,9 @@ namespace psycle
 			}
 			catch(...)
 			{
-				static logger instance(loggers::levels::trace, std::cout);
 				try
 				{
+					static logger instance(loggers::levels::trace, std::cout);
 					instance(loggers::levels::exception, "could not create logger");
 				}
 				catch(...)
