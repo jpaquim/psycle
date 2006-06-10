@@ -143,7 +143,7 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 	coefficients[0] = math::clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
 	coefficients[1] = 1 - coefficients[0];
 	coefficients[2] = (*this)(resonance) * (1 + 1 / coefficients[1]);
-	common::math::erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
+	math::erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
 }
 
 void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
@@ -165,7 +165,7 @@ inline const Filter_2_Poles::Real Filter_2_Poles::process(const Real & input, Re
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
-	common::math::erase_all_nans_infinities_and_denormals(buffer, channels);
+	math::erase_all_nans_infinities_and_denormals(buffer, channels);
 	switch((*this)[response])
 	{
 	case low:
