@@ -277,53 +277,30 @@ namespace psycle
 					::gst_pad_use_fixed_caps(source_pad);
 
 					// create an audio sink
-					try
-					{
-						sink_ = &instanciate("gconfaudiosink", name() + "-sink");
-					}
+					try { sink_ = &instanciate("gconfaudiosink", name() + "-sink"); }
 					catch(std::exception const & e)
 					{
 						// maybe the user didn't configure his default audio-sink, falling back to several possibilities
 						#if 0 // jacksink needs to be put in a jackbin, because it's pulling audio data.
-						if(loggers:information())
-						{
-							std::ostringstream s;
-							s
-								<< "exception: caught while trying to instanciate audio sink: " <<
-							loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-						try
-						{
-							sink_ = &instanciate("jacksink", name() + "-sink");
-						}
+						loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
+						try { sink_ = &instanciate("jacksink", name() + "-sink"); }
 						catch(...)
 						#endif
 						{
 							loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-							try
-							{
-								sink_ = &instanciate("alsasink", name() + "-sink");
-							}
+							try { sink_ = &instanciate("alsasink", name() + "-sink"); }
 							catch(...)
 							{
 								loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-								try
-								{
-									sink_ = &instanciate("esdsink", name() + "-sink");
-								}
+								try { sink_ = &instanciate("esdsink", name() + "-sink"); }
 								catch(...)
 								{
 									loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-									try
-									{
-										sink_ = &instanciate("osssink", name() + "-sink");
-									}
+									try { sink_ = &instanciate("osssink", name() + "-sink"); }
 									catch(...)
 									{
 										loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-										try
-										{
-											sink_ = &instanciate("artssink", name() + "-sink");
-										}
+										try { sink_ = &instanciate("artssink", name() + "-sink"); }
 										catch(...)
 										{
 											loggers::information()("exception: caught while trying to instanciate audio sink ; no more type to try ; bailing out.", UNIVERSALIS__COMPILER__LOCATION);
@@ -498,6 +475,12 @@ namespace psycle
 		
 			void gstreamer::do_close() throw(engine::exception)
 			{
+				if(pipeline_)
+				{
+					::gst_element_set_state(pipeline_, ::GST_STATE_NULL);
+					wait_for_state(*pipeline_, ::GST_STATE_NULL);
+					::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
+				}
 				if(sink_)
 				{
 					::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
@@ -505,12 +488,6 @@ namespace psycle
 				if(source_)
 				{
 					::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
-				}
-				if(pipeline_)
-				{
-					::gst_element_set_state(pipeline_, ::GST_STATE_NULL);
-					wait_for_state(*pipeline_, ::GST_STATE_NULL);
-					::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
 				}
 				if(caps_)
 				{
