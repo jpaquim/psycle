@@ -39,7 +39,7 @@ namespace psycle
 					if(translated)
 					{
 						crash = true;
-						#if !defined DIVERSALIS__OPERATING_SYSTEM_MICROSOFT
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 							// todo, we need some portable exception codes!
 						#else
 							switch(translated->code())
