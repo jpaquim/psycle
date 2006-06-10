@@ -231,7 +231,7 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 			++write %= size;
 			input_sample *= (*this)(dry);
 			input_sample += (*this)(wet) * buffer_read;
-			common::math::erase_all_nans_infinities_and_denormals(input_sample);
+			math::erase_all_nans_infinities_and_denormals(input_sample);
 		}
 
 	#else
@@ -304,7 +304,7 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 						++write %= size;
 						input_sample *= (*this)(dry);
 						input_sample += (*this)(wet) * buffer_read;
-						common::math::erase_all_nans_infinities_and_denormals(input_sample);
+						math::erase_all_nans_infinities_and_denormals(input_sample);
 					}
 				}
 				break;
