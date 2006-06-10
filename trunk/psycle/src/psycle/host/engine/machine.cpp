@@ -39,17 +39,21 @@ namespace psycle
 					if(translated)
 					{
 						crash = true;
-						switch(translated->code())
-						{
-							// grows the fpu exception mask so that each type of exception is only reported once
-							case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
-							case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
-							case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
-							case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
-							case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
-							case STATUS_FLOAT_STACK_CHECK:                                                                       break;
-							case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
-						}
+						#if !defined DIVERSALIS__OPERATING_SYSTEM_MICROSOFT
+							// todo, we need some portable exception codes!
+						#else
+							switch(translated->code())
+							{
+								// grows the fpu exception mask so that each type of exception is only reported once
+								case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
+								case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
+								case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
+								case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
+								case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
+								case STATUS_FLOAT_STACK_CHECK:                                                                       break;
+								case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
+							}
+						#endif
 					}
 				}
 			}
