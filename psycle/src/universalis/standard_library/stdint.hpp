@@ -5,11 +5,15 @@
 ///\file
 #pragma once
 #include <universalis/detail/project.hpp>
-#if 0 && !defined DIVERSALIS__COMPILER__MICROSOFT
+#if 0
+	// what we would like to include in an ideal world
 	#include <cstdint>
+	// C1999
+	#include <stdint.h>
 	// some unix systems had the equivalent inttypes.h for a long time
-	//#include <inttypes.h>
-#else /// microsoft has been ignoring the C1999 standard for six years now
+	#include <inttypes.h>
+#else
+	// boost takes care of all the mess for us
 	#include <boost/cstdint.hpp>
 	namespace std
 	{
