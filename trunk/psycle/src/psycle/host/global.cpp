@@ -143,10 +143,10 @@ namespace psycle
 			
 		Global::Global()
 		{
-			loggers::trace("Global::Global() ...");
 			#ifndef NDEBUG
 				operating_system::console::open();
 			#endif
+			loggers::trace("Global::Global() ...");
 			_pSong = new Song;
 			pPlayer = new Player(*_pSong); // [bohan] afaik song is never deleted/recreated from the gui, so we don't even have to care about updating the player's reference.
 			pConfig = new Configuration;
@@ -222,7 +222,7 @@ namespace psycle
 
 		void logger::operator()(const int & level, const std::string & string) throw()
 		{
-			boost::mutex::scoped_lock lock(mutex()); // scope outside the try-catch statement so that it is freed in all cases if something goes wrong.
+			boost::mutex::scoped_lock lock(mutex());
 			try
 			{
 				// could reuse the default implementation, but here we've redefined it all
