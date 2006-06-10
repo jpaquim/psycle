@@ -6,7 +6,6 @@
 ///\interface universalis::operating_system::loggers
 #pragma once
 #include <universalis/compiler/stringized.hpp>
-#include <boost/thread/mutex.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -40,7 +39,7 @@ namespace universalis
 		///\internal
 		//#region DETAIL
 			///\internal
-			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__SEPARATOR   " # "
+			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__SEPARATOR " # "
 			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 				///\internal
 				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__START "# "

@@ -6,10 +6,16 @@
 ///\brief stringization
 #pragma once
 #include <universalis/detail/project.hpp>
-#include <boost/preprocessor/stringize.hpp>
 //#region UNIVERSALIS
 	//#region COMPILER
 		/// Interprets argument as a string litteral.
-		#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) BOOST_PP_STRINGIZE(tokens)
+		#if !defined UNIVERSALIS__QUAQUAVERSALIS || !defined DIVERSALIS__COMPILER__GNU || !defined DIVERSALIS__COMPILER__MICROSOFT
+			// boost has workarounds for broken preprocessors
+			#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) BOOST_PP_STRINGIZE(tokens)
+			#include <boost/preprocessor/stringize.hpp>
+		#else
+			#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens)
+			#define UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
+		#endif
 	//#endregion
 //#endregion
