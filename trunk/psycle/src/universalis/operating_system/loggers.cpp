@@ -55,10 +55,11 @@ namespace universalis
 			// [bohan] msvc-7.1 crashes if we put this function in the implementation file instead of inlined in the header.
 			void stream_logger::do_log(int const & level, std::string const & string) throw()
 			{
+				// ansi terminal
 				int const static color [] = {0, 2, 6, 1, 5, 3, 4, 7};
 				try
 				{
-					ostream() << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m" << string << std::endl;
+					ostream() << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m" << string << '\n';
 				}
 				catch(...)
 				{
@@ -66,7 +67,7 @@ namespace universalis
 					// report the error to std::cerr ...
 					std::cerr << UNIVERSALIS__COMPILER__LOCATION << "\033[1;31mlogger crashed!\033[0m" << std::endl;
 					// ... and fallback to std::clog
-					std::clog << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m" << string << std::endl;
+					std::clog << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m" << string << '\n';
 				}
 			}
 		}
