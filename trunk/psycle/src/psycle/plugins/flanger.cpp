@@ -5,6 +5,7 @@
 #include <psycle/common/math/sinus_sequence.hpp>
 #include <psycle/common/math/pi.hpp>
 #include <psycle/common/math/remainder.hpp>
+#include <psycle/common/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cassert>
 namespace psycle { namespace plugin {
 
@@ -226,15 +227,11 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				buffer_read = buffer[read];
 			}
 			Sample & input_sample = input[sample];
-			buffer[write] = /*math::renormalized*/(input_sample + feedback * buffer_read);
+			buffer[write] = input_sample + feedback * buffer_read;
 			++write %= size;
 			input_sample *= (*this)(dry);
 			input_sample += (*this)(wet) * buffer_read;
-			// NaN and Den remover :
-			unsigned int corrected_sample = *((unsigned int*)&input_sample);
-			unsigned int exponent = corrected_sample & 0x7F800000;
-			corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-			input_sample = *((float*)&corrected_sample);
+			common::math::erase_all_nans_infinities_and_denormals(input_sample);
 		}
 
 	#else
@@ -243,32 +240,33 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 		switch((*this)[interpolation])
 		{
 			case yes: /// \todo interpolation not done for now
-	//			ULARGE_INTEGER tmposcL;
-	//			tmposcL.QuadPart = (__int64)((y0L*_fLfoAmp) *0x100000000);
-	//			int _delayedCounterL = _counter - _time + tmposcL.HighPart;
-	//
-	//			if (_delayedCounterL < 0) _delayedCounterL += 2048;
-	//			int c = (_delayedCounterL==2047) ? 0 : _delayedCounterL+1;
-	//
-	//			float y_l = pResamplerWork( 0 ,
-	//				_pBufferL[_delayedCounterL],
-	//				_pBufferL[c], 0,
-	//				tmposcL.LowPart, _delayedCounterL, 2050); // Since we already take care or buffer overrun, we set the length bigger.
-	//			if (IS_DENORMAL(y_l) ) y_l=0.0f;
-	//
-	//			ULARGE_INTEGER tmposcR;
-	//			tmposcR.QuadPart = (__int64)((y0R*_fLfoAmp) *0x100000000);
-	//			int _delayedCounterR = _counter - _time + tmposcR.HighPart;
-	//
-	//			if (_delayedCounterR < 0) _delayedCounterR += 2048;
-	//			c = (_delayedCounterR==2047) ? 0 : _delayedCounterR+1;
-	//
-	//			float y_r = pResamplerWork(	0,
-	//				_pBufferR[_delayedCounterR],
-	//				_pBufferR[c], 0,
-	//				tmposcR.LowPart, _delayedCounterR, 2050); // Since we already take care or buffer overrun, we set the length bigger.
-	//			if (IS_DENORMAL(y_r) ) y_r=0.0f;
-			
+				#if 0 // this is the original code of the internal plugin. needs to be made portable, and to have access to the resampler
+					ULARGE_INTEGER tmposcL;
+					tmposcL.QuadPart = (__int64)((y0L*_fLfoAmp) *0x100000000);
+					int _delayedCounterL = _counter - _time + tmposcL.HighPart;
+
+					if (_delayedCounterL < 0) _delayedCounterL += 2048;
+					int c = (_delayedCounterL==2047) ? 0 : _delayedCounterL+1;
+
+					float y_l = pResamplerWork( 0 ,
+						_pBufferL[_delayedCounterL],
+						_pBufferL[c], 0,
+						tmposcL.LowPart, _delayedCounterL, 2050); // Since we already take care or buffer overrun, we set the length bigger.
+					if (IS_DENORMAL(y_l) ) y_l=0.0f;
+
+					ULARGE_INTEGER tmposcR;
+					tmposcR.QuadPart = (__int64)((y0R*_fLfoAmp) *0x100000000);
+					int _delayedCounterR = _counter - _time + tmposcR.HighPart;
+
+					if (_delayedCounterR < 0) _delayedCounterR += 2048;
+					c = (_delayedCounterR==2047) ? 0 : _delayedCounterR+1;
+
+					float y_r = pResamplerWork(	0,
+						_pBufferR[_delayedCounterR],
+						_pBufferR[c], 0,
+						tmposcR.LowPart, _delayedCounterR, 2050); // Since we already take care or buffer overrun, we set the length bigger.
+					if (IS_DENORMAL(y_r) ) y_r=0.0f;
+				#endif
 			case no:
 			default:
 				{
@@ -302,15 +300,11 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 
 						const Real buffer_read(buffer[read]);
 						Sample & input_sample = input[sample];
-						buffer[write] = /*math::renormalized*/(input_sample + feedback * buffer_read);
+						buffer[write] = input_sample + feedback * buffer_read;
 						++write %= size;
 						input_sample *= (*this)(dry);
 						input_sample += (*this)(wet) * buffer_read;
-						// NaN and Den remover :
-						unsigned int corrected_sample = *((unsigned int*)&input_sample);
-						unsigned int exponent = corrected_sample & 0x7F800000;
-						corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-						input_sample = *((float*)&corrected_sample);
+						common::math::erase_all_nans_infinities_and_denormals(input_sample);
 					}
 				}
 				break;

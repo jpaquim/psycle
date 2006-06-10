@@ -5,6 +5,7 @@
 #include <psycle/common/math/pi.hpp>
 #include <psycle/common/math/clip.hpp>
 #include <psycle/common/math/remainder.hpp>
+#include <psycle/common/math/erase_all_nans_infinities_and_denormals.hpp>
 namespace psycle { namespace plugin {
 
 namespace math = common::math;
@@ -129,26 +130,6 @@ void Filter_2_Poles::parameter(const int & parameter)
 	update_coefficients();
 }
 
-/***********************************************************************
-Cure for malicious samples
-Type : Filters Denormals, NaNs, Infinities
-References : Posted by urs[AT]u-he[DOT]com
-***********************************************************************/
-void Filter_2_Poles::erase_NaNs_Infinities_And_Denormals( float* inSample )
-{
-	unsigned int* inFloat = (unsigned int*) inSample;
-
-	unsigned int sample = *inFloat;
-	unsigned int exponent = sample & 0x7F800000;
-	// exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
-	// exponent > 0 is 0 if denormalized, otherwise 1
-	int aNaN = exponent < 0x7F800000;
-	int aDen = exponent > 0;
-	*inFloat = sample * ( aNaN & aDen );
-}
-
-
-
 void Filter_2_Poles::update_coefficients()
 {
 	update_coefficients(coefficients_[left]);
@@ -159,18 +140,10 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 {
 	const Real minimum(static_cast<Real>(1e-2));
 	const Real maximum(1 - minimum);
-	coefficients[0] = math::clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
-	float tmp = static_cast<Sample>(coefficients[0]);
-	erase_NaNs_Infinities_And_Denormals(&tmp);
-	coefficients[0] = tmp;
+	coefficients[0] = math::clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
 	coefficients[1] = 1 - coefficients[0];
-	tmp = static_cast<Sample>(coefficients[1]);
-	erase_NaNs_Infinities_And_Denormals(&tmp);
-	coefficients[1] = tmp;
 	coefficients[2] = (*this)(resonance) * (1 + 1 / coefficients[1]);
-	tmp = static_cast<Sample>(coefficients[2]);
-	erase_NaNs_Infinities_And_Denormals(&tmp);
-	coefficients[2] = tmp;
+	common::math::erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
 }
 
 void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
@@ -191,13 +164,8 @@ void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
 inline const Filter_2_Poles::Real Filter_2_Poles::process(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
-	float tmp = static_cast<Sample>(buffer[0]);
-	erase_NaNs_Infinities_And_Denormals(&tmp);
-	buffer[0] = tmp;
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
-	tmp = static_cast<Sample>(buffer[1]);
-	erase_NaNs_Infinities_And_Denormals(&tmp);
-	buffer[1] = tmp;
+	common::math::erase_all_nans_infinities_and_denormals(buffer, channels);
 	switch((*this)[response])
 	{
 	case low:
