@@ -9,7 +9,7 @@
 #include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/MainFrm.hpp> // Is this needed?
 #include <psycle/host/gui/VSTEditorDlg.hpp> // Is this needed?
-#include <psycle/host/gui/InputHandler.hpp> // Is this needed?
+//#include <psycle/host/gui/InputHandler.hpp> // Is this needed?
 #include <psycle/host/gui/NewMachine.hpp> // Is this needed?
 #include <algorithm>
 #include <cctype>
@@ -127,7 +127,7 @@ namespace psycle
 				_sVendorName[0]=0;
 				for(int i(0) ; i < MAX_TRACKS; ++i)
 				{
-					trackNote[i].key = 255; // No Note.
+					trackNote[i].key = notecommands::empty; // No Note.
 					trackNote[i].midichan = 0;
 				}
 			}
@@ -458,12 +458,10 @@ namespace psycle
 
 			bool plugin::LoadDll(std::string const & file_name)
 			{
-				std::string file_name_lower_case(file_name);
-				std::transform(file_name_lower_case.begin(), file_name_lower_case.end(), file_name_lower_case.begin(), std::tolower);
-				std::string path;
-				if(CNewMachine::lookupDllName(file_name_lower_case, path))
+				std::string path = file_name;
+				std::transform(path.begin(), path.end(), path.begin(), std::tolower);
+				if(Global::dllfinder().LookupDllPath(path)) 
 				{
-					if(!CNewMachine::TestFilename(path)) return false;
 					try
 					{
 						Instance(path, false);
@@ -650,7 +648,7 @@ namespace psycle
 			{
 				if(instantiated)
 				{
-					if(trackNote[channel].key != 255)
+					if(trackNote[channel].key != notecommands::empty)
 						AddNoteOff(channel, trackNote[channel].key, true);
 
 					if(AddMIDI(0x90 | midichannel /*Midi On*/, key, velocity)) {
@@ -668,7 +666,7 @@ namespace psycle
 			{
 				if(!instantiated)
 					return false;
-				if(trackNote[channel].key == 255)
+				if(trackNote[channel].key == notecommands::empty)
 					return false;
 				VstMidiEvent * pevent;
 				if( addatStart)
@@ -701,7 +699,7 @@ namespace psycle
 				pevent->midiData[3] = 0;
 
 				note thisnote;
-				thisnote.key = 255;
+				thisnote.key = notecommands::empty;
 				thisnote.midichan = 0;
 				trackNote[channel] = thisnote;
 				return true;
@@ -1119,11 +1117,11 @@ namespace psycle
 				if(instantiated)
 				{
 					const int note = pData->_note;
-					if(pData->_note == cdefMIDICC) // Mcm (MIDI CC) Command
+					if(pData->_note == notecommands::midicc) // Mcm (MIDI CC) Command
 					{
 						AddMIDI(pData->_inst, pData->_cmd, pData->_parameter);
 					}
-					else if(note < 120) // Note on
+					else if(note <= notecommands::b9) // Note on
 					{
 						if(pData->_cmd == 0x10) // _OLD_ MIDI Command
 						{
@@ -1144,18 +1142,18 @@ namespace psycle
 							else AddNoteOn(channel, note, 127, pData->_inst & 0x0F);
 						}
 					}
-					else if(note == 120) // Note Off.
+					else if(note == notecommands::release) // Note Off.
 					{
 						if(pData->_inst == 0xFF) AddNoteOff(channel);
 						else AddNoteOff(channel, pData->_inst & 0x0F);
 					}
-					else if(note == cdefTweakM || note == cdefTweakE) // Tweak Command
+					else if(note == notecommands::tweak || note == notecommands::tweakeffect) // Tweak Command
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 						SetParameter(pData->_inst, value);
 						Global::player().Tweaker = true;
 					}
-					else if(note == cdefTweakS)
+					else if(note == notecommands::tweakslide)
 					{
 						int i;
 						if(TWSActive)
@@ -1462,11 +1460,11 @@ namespace psycle
 						else
 							AddMIDI(pData->_inst, pData->_parameter);
 					}
-					else if(pData->_note == cdefMIDICC) // Mcm (MIDI CC) Command
+					else if(pData->_note == notecommands::midicc) // Mcm (MIDI CC) Command
 					{
 						AddMIDI(pData->_inst, pData->_cmd, pData->_parameter);
 					}
-					else if(pData->_note < 120) // Note on
+					else if(pData->_note <= notecommands::b9) // Note on
 					{
 						if(pData->_cmd == 0x10) // _OLD_ MIDI Command
 						{
@@ -1487,19 +1485,19 @@ namespace psycle
 							else AddNoteOn(channel, pData->_note, 127, pData->_inst & 0x0F);
 						}
 					}
-					else if(pData->_note == 120) // Note Off.
+					else if(pData->_note == notecommands::release) // Note Off.
 					{
 						if(pData->_inst == 0xFF) AddNoteOff(channel);
 						else AddNoteOff(channel, pData->_inst & 0x0F);
 					}
 
-					else if(pData->_note == cdefTweakM || pData->_note == cdefTweakE) // Tweak command
+					else if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect) // Tweak command
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 						SetParameter(pData->_inst, value);
 						Global::player().Tweaker = true;
 					}
-					else if(pData->_note == cdefTweakS)
+					else if(pData->_note == notecommands::tweakslide)
 					{
 						int i;
 						if(TWSActive)

@@ -193,6 +193,7 @@ namespace psycle
 			private:
 				///\todo move this to the proxy class
 				plugin_interface::CMachineInfo        *  _pInfo;
+
 		};
 	}
 }

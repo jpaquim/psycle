@@ -7,9 +7,7 @@
 #include "psycle.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-#include "NewMachine.hpp"
-#include <psycle/host/version.hpp>
-#include <psycle/host/engine/midiinput.hpp>
+//#include <psycle/host/engine/midiinput.hpp>
 #include <universalis/processor/exception.hpp>
 #include <sstream>
 
@@ -135,8 +133,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			pFrame->UpdateWindow();
 			
-			CNewMachine::LoadPluginInfo();
-
 			#if defined NDEBUG // boring when developping
 				// Show splash screen
 				// If has been commented out for non-stable builds..
@@ -158,10 +154,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		int CPsycleApp::ExitInstance() 
 		{
 			_global.pConfig->Write();
-			_global.pConfig->_pOutputDriver->Enable(false);
-			Sleep(LOCK_LATENCY);
-			_global.pConfig->_pMidiInput->Close();
-			CNewMachine::DestroyPluginInfo();
 			return CWinApp::ExitInstance();
 		}
 

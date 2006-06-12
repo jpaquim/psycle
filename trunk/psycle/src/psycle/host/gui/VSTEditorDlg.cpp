@@ -7,7 +7,7 @@
 #include <psycle/host/gui/FrameMachine.hpp>
 #include <psycle/host/gui/VstGui.hpp>
 #include <psycle/host/gui/PresetsDlg.hpp>
-#include <psycle/host/gui/inputhandler.hpp>
+//#include <psycle/host/gui/inputhandler.hpp>
 #include <psycle/host/gui/MainFrm.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

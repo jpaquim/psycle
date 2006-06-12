@@ -125,7 +125,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if(viewMode == view_modes::pattern && bEditMode)
 				{ 
 					// add note
-					if(velocity > 0 && outnote != 120)
+					if(velocity > 0 && outnote != notecommands::release)
 					{
 						EnterNote(outnote,velocity,false);
 					}
@@ -164,7 +164,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._cmd = (value>>8)&255;
 			entry._parameter = value&255;
 			entry._inst = command;
-			entry._note = cdefTweakM;
+			entry._note = notecommands::tweak;
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -201,13 +201,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= 120)
+				if (pentry->_note > notecommands::b9)
 				{
 					if ((pentry->_mach != entry._mach) 
 						|| (pentry->_cmd != entry._cmd)
 						|| (pentry->_parameter != entry._parameter) 
 						|| (pentry->_inst != entry._inst) 
-						|| ((pentry->_note != cdefTweakM) && (pentry->_note != cdefTweakE) && (pentry->_note != cdefTweakS)))
+						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
@@ -246,7 +246,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._cmd = (value>>8)&255;
 			entry._parameter = value&255;
 			entry._inst = command;
-			entry._note = cdefTweakS;
+			entry._note = notecommands::tweakslide;
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -282,13 +282,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= 120)
+				if (pentry->_note > notecommands::b9)
 				{
 					if ((pentry->_mach != entry._mach) 
 						|| (pentry->_cmd != entry._cmd)
 						|| (pentry->_parameter != entry._parameter) 
 						|| (pentry->_inst != entry._inst) 
-						|| ((pentry->_note != cdefTweakM) && (pentry->_note != cdefTweakE) && (pentry->_note != cdefTweakS)))
+						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
@@ -326,7 +326,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._inst = _pSong->auxcolSelected;
 			entry._cmd = command;
 			entry._parameter = value;
-			entry._note = 255;
+			entry._note = notecommands::empty;
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -401,7 +401,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._cmd = (value>>8)&0xFF;
 			entry._parameter = value&0xFF;
 			entry._inst = command;
-			entry._note = cdefMIDICC;
+			entry._note = notecommands::midicc;
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -437,13 +437,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= 120)
+				if (pentry->_note > notecommands::b9)
 				{
 					if ((pentry->_mach != entry._mach) 
 						|| (pentry->_cmd != entry._cmd) 
 						|| (pentry->_parameter != entry._parameter) 
 						|| (pentry->_inst != entry._inst) 
-						|| (pentry->_note != cdefMIDICC))
+						|| (pentry->_note != notecommands::midicc))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
@@ -481,7 +481,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			entry._inst = value;
 			entry._cmd = 255;
 			entry._parameter = 255;
-			entry._note = 255;
+			entry._note = notecommands::empty;
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -572,16 +572,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
-				if (entry->_note >= 120)
+				if (entry->_note > notecommands::b9)
 				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->_mach = machine;
 						entry->_cmd = (value>>8)&255;
 						entry->_parameter = value&255;
 						entry->_inst = command;
-						entry->_note = cdefTweakM;
+						entry->_note = notecommands::tweak;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(draw_modes::data);
@@ -621,16 +621,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
-				if (entry->_note >= 120)
+				if (entry->_note > notecommands::b9)
 				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->_mach = machine;
 						entry->_cmd = (value>>8)&255;
 						entry->_parameter = value&255;
 						entry->_inst = command;
-						entry->_note = cdefTweakS;
+						entry->_note = notecommands::tweakslide;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(draw_modes::data);
@@ -648,10 +648,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			const int ps = _ps();
 			unsigned char * toffset;
 			
-			if (note < 0 || note > cdefTweakS ) return;
+			if (note < 0 || note >= notecommands::invalid ) return;
 
 			// octave offset
-			if(note<120)
+			if(note <= notecommands::b9)
 			{
 				if(bTranspose)
 					note+=_pSong->currentOctave*12;
@@ -697,7 +697,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					entry._note = note;
 					entry._mach = _pSong->seqBus;
 
-					if ( note < 120)
+					if ( note <= notecommands::b9)
 					{
 						if (Global::configuration()._RecordTweaks)
 						{
@@ -724,7 +724,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 					}
 
-					if (note>120)
+					if (note>notecommands::release)
 					{
 						entry._inst = _pSong->auxcolSelected;
 					}
@@ -741,7 +741,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							entry._inst = _pSong->auxcolSelected;
 						}
 						
-						if ( note < 120)
+						if ( note <= notecommands::b9)
 						{
 							tmac->Tick(editcur.track, &entry);
 						}
@@ -755,7 +755,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else 
 			{
-				if ((GetKeyState(VK_SHIFT)<0) && (note != cdefTweakM) && (note != cdefTweakE) && (note != cdefTweakS) && (note != cdefMIDICC))
+				if ((GetKeyState(VK_SHIFT)<0) && (note != notecommands::tweak) && (note != notecommands::tweakeffect) && (note != notecommands::tweakslide) && (note != notecommands::midicc))
 				{
 					if (ChordModeOffs == 0)
 					{
@@ -790,13 +790,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					return;
 				}
-				note = 120;
+				note = notecommands::release;
 			}
 			AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
 			entry->_note = note;
 			entry->_mach = _pSong->seqBus;
 
-			if ( note < 120)
+			if ( note <= notecommands::b9)
 			{
 				if (Global::configuration()._RecordTweaks)
 				{
@@ -823,7 +823,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 			}
 
-			if (note>120)
+			if (note>notecommands::release)
 			{
 				entry->_inst = _pSong->auxcolSelected;
 			}
@@ -840,7 +840,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					entry->_inst = _pSong->auxcolSelected;
 				}
 				
-				if ( note < 120)
+				if ( note <= notecommands::b9)
 				{
 					tmac->Tick(editcur.track, entry);
 				}
@@ -886,9 +886,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
 				AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-				entry->_note = 120;
+				entry->_note = notecommands::release;
 
-				Global::pInputHandler->notetrack[editcur.track]=120;
+				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
@@ -1391,7 +1391,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					int note=*(soffset+c);
 					
-					if(note<120)
+					if(note<=notecommands::b9)
 					{
 						note+=trp;
 						if(note<0) note=0; else if(note>119) note=119;
@@ -1973,7 +1973,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						
 						int note=*(toffset);
 					
-						if(note<120)
+						if(note<=notecommands::b9)
 						{
 							note+=trp;
 							if(note<0) note=0; else if(note>119) note=119;
@@ -2069,7 +2069,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 				int displace2=(blockSel.start.track*EVENT_SIZE)+((blockSel.start.line+1)*MULTIPLY);
 				
-				if ( toffset[firstrow] == cdefTweakM || toffset[firstrow] == cdefTweakE || toffset[firstrow] == cdefTweakS ||toffset[firstrow] == cdefMIDICC)
+				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide ||toffset[firstrow] == notecommands::midicc)
 				{
 					unsigned char note = toffset[firstrow];
 					unsigned char aux = toffset[firstrow+1];
@@ -2869,7 +2869,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_trackArmed[i])
 				{
-					if (Global::pInputHandler->notetrack[i] == 120)
+					if (Global::pInputHandler->notetrack[i] == notecommands::release)
 					{
 						break;
 					}
@@ -2881,7 +2881,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if (_pSong->_trackArmed[i])
 					{
-						if (Global::pInputHandler->notetrack[i] == 120)
+						if (Global::pInputHandler->notetrack[i] == notecommands::release)
 						{
 							break;
 						}

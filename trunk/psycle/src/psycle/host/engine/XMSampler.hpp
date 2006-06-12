@@ -722,7 +722,7 @@ XMSampler::Channel::PerformFX().
 		void GlobalVolSlide(int speed);
 		void PanningSlide(int speed);
 		void ChannelVolumeSlide(int speed);
-		void PitchSlide(bool bUp,int speed,int note=255);
+		void PitchSlide(bool bUp,int speed,int note=notecommands::empty);
 		void VolumeSlide(int speed);
 		void Tremor(int parameter);
 		void Vibrato(int speed,int depth = 0);

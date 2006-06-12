@@ -81,7 +81,7 @@ public:
 	virtual ~MappedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	virtual void AddPath(std::string &path,MachineType mtype);
+	virtual void AddPath(const std::string &path,MachineType mtype);
 	///< Resets the Finder to the original state.
 	virtual void ResetFinder();
 	///< fills in the path for the specified name so that name becomes a fullpath.
@@ -105,7 +105,7 @@ public:
 	virtual ~CachedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	virtual void AddPath(std::string &path,MachineType mtype);
+	virtual void AddPath(const std::string &path,MachineType mtype);
 	///< Resets the Finder to the original state.
 	virtual void ResetFinder();
 	///< fills in the path for the specified name so that name becomes a fullpath.

@@ -2,6 +2,7 @@
 ///\brief interface file for psycle::host::InputHandler.
 #pragma once
 #include <psycle/host/engine/constants.hpp>
+#include <psycle/host/engine/SongStructs.hpp>
 namespace psycle
 {
 	namespace host
@@ -39,7 +40,7 @@ namespace psycle
 		/// command it is, and for keys determine the note value
 		///\{
 		/// .
-		const int CS_KEY_START = 0;
+		const int CS_KEY_START = notecommands::c0;
 		/// .
 		const int CS_IMM_START = 256;
 		/// .
@@ -88,11 +89,11 @@ namespace psycle
 			cdefKeyGS2,
 			cdefKeyA_2,	
 
-			cdefKeyStop = 120,	///< NOTE STOP
-			cdefTweakM = 121,	///< tweak
-			cdefTweakE = 122,	///< tweak effect. Old!
-			cdefMIDICC = 123,	///< Mcm Command (MIDI CC)
-			cdefTweakS = 124,	///< tweak slide command
+			cdefKeyStop = notecommands::release,	///< NOTE STOP
+			cdefTweakM = notecommands::tweak,	///< tweak
+			cdefTweakE = notecommands::tweakeffect,	///< tweak effect. Old!
+			cdefMIDICC = notecommands::midicc,	///< Mcm Command (MIDI CC)
+			cdefTweakS = notecommands::tweakslide,	///< tweak slide command
 
 			// immediate commands
 

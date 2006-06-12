@@ -15,7 +15,7 @@ DllFinder::~DllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void DllFinder::AddPath(std::string &path,MachineType mtype)
+void DllFinder::AddPath(const std::string &path,MachineType mtype)
 {
 	//\todo: do something with the machinetype?
 	base_paths.push_back(path);

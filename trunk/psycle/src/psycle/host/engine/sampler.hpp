@@ -40,7 +40,7 @@ namespace psycle
 		} LARGE_INTEGER;
 
 		typedef union _ULARGE_INTEGER {
-			struct {
+			struct  {
 				DWORD LowPart;
 				DWORD HighPart;
 			};

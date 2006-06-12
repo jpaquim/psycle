@@ -13,7 +13,7 @@
 #include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/ChildView.hpp>
 #include <psycle/host/gui/MainFrm.hpp>
-#include <psycle/host/gui/InputHandler.hpp>
+//#include <psycle/host/gui/InputHandler.hpp>
 #include <cassert>
 namespace psycle
 {
@@ -591,7 +591,7 @@ namespace psycle
 								// note off
 								if( m_channelNoteOff[ channel ] )
 								{
-									note = 120;
+									note = notecommands::release;
 								}
 								else
 								{
@@ -607,7 +607,7 @@ namespace psycle
 							// note off
 							if( m_channelNoteOff[ channel ] )
 							{
-								note = 120;
+								note = notecommands::release;
 							}
 							else
 							{
@@ -778,7 +778,7 @@ namespace psycle
 									else
 									{
 										// zero data means do a note off
-										note = 120;
+										note = notecommands::release;
 									}
 								}
 								break;
@@ -845,7 +845,7 @@ namespace psycle
 									// set?
 									if( gParameter >= 0 )
 									{
-										note = cdefTweakM;
+										note = notecommands::tweak;
 										cmd = gParameter;
 										parameter = data2;
 									}
@@ -1304,10 +1304,10 @@ namespace psycle
 					switch( note )
 					{
 						// TWEAK
-						case cdefTweakS:
+						case notecommands::tweakslide:
 							// *********
 							// midi doesn't get a tweak slide yet
-						case cdefTweakM:
+						case notecommands::tweak:
 						{
 							int min, max;
 

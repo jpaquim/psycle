@@ -645,7 +645,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			switch(note)
 			{
-			case 255: TXTFLAT(devc,szBlankNote,x,y,srx,sry);break;
+			case notecommands::empty: TXTFLAT(devc,szBlankNote,x,y,srx,sry);break;
 		//	case 255: TXTFLAT(devc,"   ",x,y,srx,sry);break;
 			case 0:   TXTFLAT(devc,"C-0",x,y,srx,sry);break;
 			case 1:   TXTFLAT(devc,"C#0",x,y,srx,sry);break;
@@ -767,11 +767,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			case 117: TXTFLAT(devc,"A-9",x,y,srx,sry);break;
 			case 118: TXTFLAT(devc,"A#9",x,y,srx,sry);break;
 			case 119: TXTFLAT(devc,"B-9",x,y,srx,sry);break;
-			case 120: TXTFLAT(devc,"off",x,y,srx,sry);break;
-			case cdefTweakM: TXTFLAT(devc,"twk",x,y,srx,sry);break;
-			case cdefTweakE: TXTFLAT(devc,"twf",x,y,srx,sry);break;
-			case cdefMIDICC: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
-			case cdefTweakS: TXTFLAT(devc,"tws",x,y,srx,sry);break;
+			case notecommands::release: TXTFLAT(devc,"off",x,y,srx,sry);break;
+			case notecommands::tweak: TXTFLAT(devc,"twk",x,y,srx,sry);break;
+			case notecommands::tweakeffect: TXTFLAT(devc,"twf",x,y,srx,sry);break;
+			case notecommands::midicc: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
+			case notecommands::tweakslide: TXTFLAT(devc,"tws",x,y,srx,sry);break;
 			}
 		}
 

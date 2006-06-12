@@ -1535,7 +1535,7 @@ void XMSamplerUIInst::CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItem
 
 int XMSamplerUIInst::CSampleAssignEditor::GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect)
 {
-	if ( y < 20 || y > 20+m_naturalkey_height ) return 255;
+	if ( y < 20 || y > 20+m_naturalkey_height ) return notecommands::empty;
 
 	//Get the X position in natural key notes.
 	int notenatural= ((x/m_octave_width)*m_NaturalKeysPerOctave);

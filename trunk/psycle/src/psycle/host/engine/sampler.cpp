@@ -357,9 +357,9 @@ namespace psycle
 			int channel,
 			PatternEntry* pData)
 		{
-			if ( pData->_note > 120 ) // don't process twk , twf of Mcm Commands
+			if ( pData->_note > notecommands::release ) // don't process twk , twf of Mcm Commands
 			{
-				if ( pData->_cmd == 0 || pData->_note != 255) return; // Return in everything but commands!
+				if ( pData->_cmd == 0 || pData->_note != notecommands::empty) return; // Return in everything but commands!
 			}
 			if ( _mute ) return; // Avoid new note entering when muted.
 
@@ -382,7 +382,7 @@ namespace psycle
 			}
 
 
-			if ( data._note < 120 )	// Handle Note On.
+			if ( data._note <= notecommands::b9 )	// Handle Note On.
 			{
 				if ( Global::song()._pInstrument[data._inst]->waveLength == 0 ) return; // if no wave, return.
 
@@ -438,7 +438,7 @@ namespace psycle
 																			// Think on a slow fadeout and changing panning
 						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 					{
-						if ( data._note == 120 ) NoteOff(voice);//  Handle Note Off
+						if ( data._note == notecommands::release ) NoteOff(voice);//  Handle Note Off
 						useVoice=voice;
 					}
 				}
@@ -488,7 +488,7 @@ namespace psycle
 
 			int twlength = Global::song()._pInstrument[pEntry->_inst]->waveLength;
 			
-			if (pEntry->_note < 120 && twlength > 0)
+			if (pEntry->_note <= notecommands::b9 && twlength > 0)
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry->_inst;

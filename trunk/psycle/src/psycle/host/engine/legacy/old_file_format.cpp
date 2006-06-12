@@ -314,57 +314,37 @@ namespace psycle
 						init_and_load_VST:
 							if ((pMac[i]->LoadOldFileFormat(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 							{
-								std::string path;
-								if(CNewMachine::lookupDllName(vstL[pVstPlugin->_instance].dllName,path))
+								std::string path = vstL[pVstPlugin->_instance].dllName;
+								std::transform(path.begin(), path.end(), path.begin(), std::tolower);
+								if(!Global::dllfinder().LookupDllPath(path)) 
 								{
-									if(!CNewMachine::TestFilename(path))
+									try
 									{
-										std::ostringstream s;
-										s << "Missing or Corrupted VST plug-in: " << path << " - replacing with Dummy.";
-										MessageBox(NULL,s.str().c_str(), "Loading Error", MB_OK);
+										pVstPlugin->Instance(path, false);
+									}
+									catch(...)
+									{
+										std::ostringstream ss;
+										ss << "Plugin instancation threw an exception " << path << " - replacing with Dummy.";
+										MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
 
 										Machine* pOldMachine = pMac[i];
 										pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 										pOldMachine->_pSamplesL = NULL;
 										pOldMachine->_pSamplesR = NULL;
 										// dummy name goes here
-										std::stringstream ss;
-										ss << "X!" << pOldMachine->GetEditName();
-										pOldMachine->SetEditName(ss.str());
+										std::stringstream ss2;
+										ss2 << "X!" << pOldMachine->GetEditName();
+										pOldMachine->SetEditName(ss2.str());
 										zapObject(pOldMachine);
 										pMac[i]->_type = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
-									}
-									else
-									{
-										try
-										{
-											pVstPlugin->Instance(path, false);
-										}
-										catch(...)
-										{
-											std::ostringstream ss;
-											ss << "Plugin instancation threw an exception " << path << " - replacing with Dummy.";
-											MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
-
-											Machine* pOldMachine = pMac[i];
-											pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-											pOldMachine->_pSamplesL = NULL;
-											pOldMachine->_pSamplesR = NULL;
-											// dummy name goes here
-											std::stringstream ss2;
-											ss2 << "X!" << pOldMachine->GetEditName();
-											pOldMachine->SetEditName(ss2.str());
-											zapObject(pOldMachine);
-											pMac[i]->_type = MACH_DUMMY;
-											((Dummy*)pMac[i])->wasVST = true;
-										}
 									}
 								}
 								else
 								{
 									std::ostringstream ss;
-									ss << "Missing VST plug-in: " << vstL[pVstPlugin->_instance].dllName;
+									ss << "Missing  or disabled VST plug-in: " << vstL[pVstPlugin->_instance].dllName;
 									MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
 
 									Machine* pOldMachine = pMac[i];
@@ -1024,31 +1004,17 @@ namespace psycle
 				wasAS2=true;
 			}
 
-			std::string sPath;
-			if ( !CNewMachine::lookupDllName(strname.c_str(),sPath) ) 
+			Global::dllfinder().LookupDllPath(strname);
+			try
 			{
-				// Check Compatibility Table.
-				// Probably could be done with the dllNames lockup.
-				//GetCompatible(sDllName,sPath) // If no one found, it will return a null string.
-				sPath = strname;
+				Instance(strname);
 			}
-			if ( !CNewMachine::TestFilename(sPath) ) 
+			catch(...)
 			{
+				char sError[_MAX_PATH];
+				sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
+				MessageBox(NULL,sError, "Error", MB_OK);
 				result = false;
-			}
-			else 
-			{
-				try
-				{
-					Instance(sPath.c_str());
-				}
-				catch(...)
-				{
-					char sError[_MAX_PATH];
-					sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-					MessageBox(NULL,sError, "Error", MB_OK);
-					result = false;
-				}
 			}
 
 			Init();
