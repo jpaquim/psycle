@@ -8,7 +8,7 @@
 #include <psycle/host/engine/internal_machines.hpp>
 #include <psycle/host/configuration.hpp>
 #include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/gui/InputHandler.hpp>
+//#include <psycle/host/gui/InputHandler.hpp>
 namespace psycle
 {
 	namespace host
@@ -116,7 +116,7 @@ namespace psycle
 			for(int track=0; track<song().tracks(); track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(pEntry->_note < cdefTweakM || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
+				if(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::empty) // If This isn't a tweak (twk/tws/mcm) then do
 				{
 					switch(pEntry->_cmd)
 					{
@@ -243,7 +243,7 @@ namespace psycle
 							Machine *pMachine = song()._pMachine[mac];
 							if(pMachine)
 							{
-								if(pEntry->_note == cdefMIDICC && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
+								if(pEntry->_note == notecommands::midicc && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
 								{
 									// for native machines,
 									// use the value in the "instrument" field of the event as a voice number
@@ -300,12 +300,12 @@ namespace psycle
 			for(int track=0; track<song().tracks(); track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(( !song()._trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?
+				if(( !song()._trackMuted[track]) && (pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::empty)) // Is it not muted and is a note?
 				{
 					int mac = pEntry->_mach;
 					if(mac != 255) prevMachines[track] = mac;
 					else mac = prevMachines[track];
-//					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
+//					if( mac != 255 && (pEntry->_note != notecommands::empty || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
 					if( mac != 255 ) // is there a machine number and it is either a note or a command?
 					{
 						if(mac < MAX_MACHINES) //looks like a valid machine index?

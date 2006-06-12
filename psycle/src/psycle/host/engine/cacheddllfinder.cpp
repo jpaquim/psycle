@@ -20,7 +20,7 @@ MappedDllFinder::~MappedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void MappedDllFinder::AddPath(std::string &path,MachineType mtype)
+void MappedDllFinder::AddPath(const std::string &path,MachineType mtype)
 {
 	DllFinder::AddPath(path,mtype);
 	populate_dll_map(path);
@@ -103,7 +103,7 @@ CachedDllFinder::~CachedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void CachedDllFinder::AddPath(std::string &path,MachineType mtype)
+void CachedDllFinder::AddPath(const std::string &path,MachineType mtype)
 {
 	//\todo: check if the directory already exists? (this could be done
 	// inside the base class and return a value
@@ -113,6 +113,7 @@ void CachedDllFinder::AddPath(std::string &path,MachineType mtype)
 ///< Resets the Finder to the original state.
 void CachedDllFinder::ResetFinder()
 {
+	DllFinder::ResetFinder();
 	//\todo: verify that we don't need to manually delete the PluginInfo's.
 	dllInfo.clear();
 	DeleteFile(cachefile.c_str());

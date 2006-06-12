@@ -6,6 +6,7 @@
 #include <psycle/host/engine/dsp.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/player.hpp>
+#include <psycle/host/engine/cacheddllfinder.hpp>
 #include <psycle/host/configuration.hpp>
 #include <operating_system/logger.hpp>
 #include <psycle/host/gui/InputHandler.hpp>
@@ -165,6 +166,7 @@ namespace psycle
 			delete pResampler;
 			delete pConfig;
 			delete pInputHandler;
+			delete pDllFinder;
 			#ifndef NDEBUG
 				operating_system::console::close();
 			#endif
@@ -268,12 +270,13 @@ namespace psycle
 				{
 					static logger instance(loggers::levels::trace, std::cout);
 					instance(loggers::levels::exception, "could not create logger");
+					return instance;
 				}
 				catch(...)
 				{
 					std::cerr << "could not create fallback logger" << std::endl;
+					//\todo: what to return?
 				}
-				return instance;
 			}
 		}
 

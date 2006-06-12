@@ -2432,7 +2432,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 
 					if (*++patOffset == 0 && *(patOffset+1) == 0 && 
-						(*(patOffset-3) <= 120 || *(patOffset-3) == 255 ))
+						(*(patOffset-3) <= notecommands::release || *(patOffset-3) == notecommands::empty ))
 					{
 						OutData(devc,xOffset+COLX[5],yOffset,0,true);
 						patOffset++;
@@ -2496,7 +2496,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							break;
 						case 5:
 							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == notecommands::empty ))
 							{
 								OutData4(devc,xOffset+COLX[5],yOffset,0,true);
 							}
@@ -2507,7 +2507,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							break;
 						case 6:
 							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == notecommands::empty ))
 							{
 								OutData4(devc,xOffset+COLX[6],yOffset,0,true);
 							}
@@ -2518,7 +2518,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							break;
 						case 7:
 							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == notecommands::empty ))
 							{
 								OutData4(devc,xOffset+COLX[7],yOffset,0,true);
 							}
@@ -2529,7 +2529,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							break;
 						case 8:
 							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == notecommands::empty ))
 							{
 								OutData4(devc,xOffset+COLX[8],yOffset,0,true);
 							}

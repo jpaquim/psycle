@@ -9,7 +9,7 @@
 #include <psycle/host/engine/dsp.hpp>
 //#include <psycle/host/engine/fft.hpp>
 #include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/gui/InputHandler.hpp>
+//#include <psycle/host/gui/InputHandler.hpp>
 #include <psycle/host/gui/VolumeDlg.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

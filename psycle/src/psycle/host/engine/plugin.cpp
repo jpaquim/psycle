@@ -4,11 +4,11 @@
 #include PACKAGENERIC
 #include <psycle/host/engine/FileIO.hpp>
 #include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/gui/InputHandler.hpp> // Is this needed?
+//#include <psycle/host/gui/InputHandler.hpp> // Is this needed?
 #include <universalis/operating_system/exceptions/code_description.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <cctype>
-#include <psycle/host/gui/NewMachine.hpp> // Is this needed?
+#include <psycle/host/engine/cacheddllfinder.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdlib> // for environment variables functions
@@ -54,7 +54,7 @@ namespace psycle
 		Machine* Plugin::CreateFromType(MachineType _id, std::string _dllname)
 		{
 			//\todo:
-			//return new;
+			return 0;
 		}
 
 		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
@@ -149,8 +149,8 @@ namespace psycle
 					<< universalis::operating_system::exceptions::code_description();
 				throw exceptions::library_errors::loading_error(s.str());
 			}
-			GETINFO GetInfo = (GETINFO) GetProcAddress(_dll, "GetInfo");
-			if(!GetInfo)
+			GETINFO GetInfoFunc = (GETINFO) GetProcAddress(_dll, "GetInfo");
+			if(!GetInfoFunc)
 			{
 				std::ostringstream s; s
 					<< "library is not a psycle native plugin:" << std::endl
@@ -160,7 +160,7 @@ namespace psycle
 			}
 			try
 			{
-				_pInfo = GetInfo();
+				_pInfo = GetInfoFunc();
 			}
 			PSYCLE__HOST__CATCH_ALL(*this)
 			if(_pInfo->Version < plugin_interface::MI_VERSION) throw std::runtime_error("plugin format is too old");
@@ -243,19 +243,14 @@ namespace psycle
 
 		bool Plugin::LoadDll(std::string const & base_name_)
 		{
-			std::string base_name(base_name_);
-			std::transform(base_name.begin(), base_name.end(), base_name.begin(), std::tolower);
-			std::string path;
-			if(!CNewMachine::lookupDllName(base_name,path)) 
+			std::string path = base_name_;
+			std::transform(path.begin(), path.end(), path.begin(), std::tolower);
+			if(!Global::dllfinder().LookupDllPath(path)) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
 				//GetCompatible(base_name,path) // If no one found, it will return a null string.
-				path = base_name;
-			}
-			if(!CNewMachine::TestFilename(path) ) 
-			{
-				return false;
+				path = base_name_;
 			}
 			try
 			{
@@ -737,7 +732,7 @@ namespace psycle
 			{
 				return;
 			}
-			if(pData->_note == cdefTweakM || pData->_note == cdefTweakE)
+			if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
 			{
 				if(pData->_inst < _pInfo->numParameters)
 				{
@@ -756,7 +751,7 @@ namespace psycle
 					Global::player().Tweaker = true;
 				}
 			}
-			else if(pData->_note == cdefTweakS)
+			else if(pData->_note == notecommands::tweakslide)
 			{
 				if(pData->_inst < _pInfo->numParameters)
 				{

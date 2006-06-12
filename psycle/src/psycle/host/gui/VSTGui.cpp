@@ -4,7 +4,7 @@
 #include PACKAGENERIC
 #include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/VstGui.hpp>
-#include <psycle/host/gui/inputhandler.hpp>
+//#include <psycle/host/gui/inputhandler.hpp>
 #include <psycle/host/gui/MainFrm.hpp>
 #include <psycle/host/engine/machine.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)

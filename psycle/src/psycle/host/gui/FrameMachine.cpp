@@ -7,7 +7,7 @@
 #include "Childview.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
-#include "InputHandler.hpp"
+//#include "InputHandler.hpp"
 #include "MainFrm.hpp"
 #include <psycle/host/engine/machine.hpp>
 #include <psycle/host/engine/plugin.hpp>

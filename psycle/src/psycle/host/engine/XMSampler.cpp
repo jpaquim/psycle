@@ -389,7 +389,7 @@ namespace psycle
 			m_Background = false;
 			m_Stopping = false;
 			m_Period=0;
-			m_Note = 255;
+			m_Note = notecommands::empty;
 			m_Volume = 128;
 			m_RealVolume = 1.0f;
 
@@ -1102,7 +1102,7 @@ namespace psycle
 			m_InstrumentNo = 255;
 			m_pForegroundVoice = NULL;
 
-			m_Note = 255;
+			m_Note = notecommands::empty;
 			m_Period = 0;
 
 			m_Volume = 1.0f;
@@ -1737,11 +1737,11 @@ namespace psycle
 			}
 			else m_PitchSlideMem = speed &0xff;
 
-			if ( speed < 0xE0 || note !=255)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
+			if ( speed < 0xE0 || note !=notecommands::empty)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
 			{									// Porta to note does not have Fine.
 				speed<<=2;
 				if ( ForegroundVoice()) { ForegroundVoice()->m_PitchSlideSpeed= bUp?-speed:speed; }
-				if ( note != 255 ) 
+				if ( note != notecommands::empty ) 
 				{
 					if ( ForegroundVoice())	{ ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
 					m_EffectFlags |= EffectFlag::SLIDE2NOTE;
@@ -2106,15 +2106,15 @@ namespace psycle
 			if (Global::song().IsInvalided()) { return; }
 
 			// don't process twk , twf, Mcm Commands, or empty lines.
-			if ( pData->_note > 120 )
+			if ( pData->_note > notecommands::release )
 			{
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != 255 )return; // Return in everything but commands!
+				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != notecommands::empty )return; // Return in everything but commands!
 	#else
-				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != 255 )return; // Return in everything but commands!
+				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != notecommands::empty )return; // Return in everything but commands!
 	#endif
 #endif
 			}
@@ -2130,8 +2130,8 @@ namespace psycle
 			bool bPortaEffect = (pData->_cmd == CMD::PORTA2NOTE);
 	#endif
 #endif
-			bool bPorta2Note = (pData->_note < 120) && bPortaEffect;
-			bool bNoteOn = (pData->_note < 120) && !bPorta2Note;
+			bool bPorta2Note = (pData->_note <= notecommands::b9) && bPortaEffect;
+			bool bNoteOn = (pData->_note <= notecommands::b9) && !bPorta2Note;
 
 
 			Voice* currentVoice = NULL;
@@ -2193,7 +2193,7 @@ namespace psycle
 						currentVoice->IsBackground(true);
 						break;
 					}
-				} else if(pData->_note == 120 ){
+				} else if(pData->_note == notecommands::release ){
 					currentVoice->NoteOff();
 				}
 				else 
@@ -2225,7 +2225,7 @@ namespace psycle
 				}
 				else
 				{
-					if ( pData->_note != 255 ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
+					if ( pData->_note != notecommands::empty ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
 					newVoice = GetFreeVoice();
 					if ( newVoice )
 					{

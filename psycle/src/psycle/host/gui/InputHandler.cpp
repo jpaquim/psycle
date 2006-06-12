@@ -29,7 +29,7 @@ namespace psycle
 
 			// set up multi-channel playback
 			for(UINT i=0;i<MAX_TRACKS;i++)
-				notetrack[i]=120;
+				notetrack[i]=notecommands::release;
 			outtrack=0;
 
 			if(!ConfigRestore())
@@ -1099,13 +1099,13 @@ namespace psycle
 				return;
 
 			// octave offset 
-			if(note<120)
+			if(note<notecommands::release)
 			{
 				if(bTranspose)
 					note+=Global::song().currentOctave*12;
 
-				if (note > 119) 
-					note = 119;
+				if (note > notecommands::b9)
+					note = notecommands::b9;
 			}
 
 			if(pMachine==NULL)
@@ -1122,10 +1122,10 @@ namespace psycle
 			{
 				if(notetrack[i]==note)
 				{
-					notetrack[i]=120;
+					notetrack[i]=notecommands::release;
 					// build entry
 					PatternEntry entry;
-					entry._note = 120;
+					entry._note = notecommands::release;
 					entry._inst = Global::song().auxcolSelected;
 					entry._mach = Global::song().seqBus;
 					entry._cmd = 0;
@@ -1151,13 +1151,13 @@ namespace psycle
 				return;
 
 			// octave offset
-			if(note<120)
+			if(note<=notecommands::b9)
 			{
 				if(bTranspose)
 					note+=Global::song().currentOctave*12;
 
-				if (note > 119) 
-					note = 119;
+				if (note > notecommands::b9) 
+					note = notecommands::b9;
 			}
 
 			// build entry
@@ -1206,7 +1206,7 @@ namespace psycle
 					int i;
 					for (i = outtrack+1; i < Global::song().tracks(); i++)
 					{
-						if (notetrack[i] == 120)
+						if (notetrack[i] == notecommands::release)
 						{
 							break;
 						}
@@ -1215,7 +1215,7 @@ namespace psycle
 					{
 						for (i = 0; i <= outtrack; i++)
 						{
-							if (notetrack[i] == 120)
+							if (notetrack[i] == notecommands::release)
 							{
 								break;
 							}
@@ -1228,7 +1228,7 @@ namespace psycle
 					outtrack=0;
 				}
 				// this should check to see if a note is playing on that track
-				if (notetrack[outtrack] < 120)
+				if (notetrack[outtrack] <= notecommands::b9)
 				{
 					StopNote(notetrack[outtrack], bTranspose, pMachine);
 				}

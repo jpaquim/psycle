@@ -15,7 +15,7 @@
 #include <psycle/host/configuration.hpp>
 
 //\todo : The information required from this include should go to constants.hpp
-#include <psycle/host/gui/InputHandler.hpp>
+//#include <psycle/host/gui/InputHandler.hpp>
 
 namespace psycle {
 	namespace host {
@@ -113,7 +113,7 @@ namespace psycle {
 				for (int i=0;i<8;i++)
 				{
 					PatternEntry pTemp = *pData;
-					if ( pTemp._note < 120 )
+					if ( pTemp._note <= notecommands::b9 )
 					{
 						pTemp._note+=noteOffset[i];
 					}
@@ -416,13 +416,13 @@ namespace psycle {
 
 		void Mixer::Tick( int channel,PatternEntry* pData)
 		{
-			if(pData->_note == cdefTweakM)
+			if(pData->_note == notecommands::tweak)
 			{
 				int nv = (pData->_cmd<<8)+pData->_parameter;
 				SetParameter(pData->_inst,nv);
 				Global::player().Tweaker = true;
 			}
-			else if(pData->_note == cdefTweakS)
+			else if(pData->_note == notecommands::tweakslide)
 			{
 				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 			}

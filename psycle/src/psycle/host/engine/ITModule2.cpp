@@ -802,7 +802,7 @@ Special:  Bit 0: On = song message attached.
 			std::memset(mask,255,sizeof(char)*64);
 
 			PatternEntry pempty;
-			pempty._note=255; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
+			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
 			Skip(2); // packedSize
@@ -822,8 +822,8 @@ Special:  Bit 0: On = song message attached.
 					if(mask[channel]&1)
 					{
 						unsigned char note; Read(note);
-						if (note==255) pent._note = 120;
-						else if (note==254) pent._note=120; //\todo: Attention ! Psycle doesn't have a note-cut note.
+						if (note==255) pent._note = notecommands::release;
+						else if (note==254) pent._note=notecommands::release; //\todo: Attention ! Psycle doesn't have a note-cut note.
 						else pent._note = note;
 						pent._mach=0;
 						lastnote[channel]=pent._note;
@@ -1419,7 +1419,7 @@ OFFSET              Count TYPE   Description
 		{
 			unsigned char newEntry;
 			PatternEntry pempty;
-			pempty._note=255; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
+			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
 			Skip(2);//int packedSize=ReadInt(2);
@@ -1435,7 +1435,7 @@ OFFSET              Count TYPE   Description
 					if(newEntry&32)
 					{
 						std::uint8_t note; Read(note); // hi=oct, lo=note, 255=empty note, 254=key off
-						if (note==254) pent._note = 120;
+						if (note==254) pent._note = notecommands::release;
 						else if (note==255) pent._note=255;
 						else pent._note = ((note/16)*12+(note%16)+12); // +12 since ST3 C-4 is Psycle's C-5
 						Read(pent._inst); --pent._inst;

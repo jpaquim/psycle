@@ -90,14 +90,16 @@ namespace psycle
 					{
 						Plugin & plugin(*new Plugin(index));
 						machine = &plugin;
-						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
+						std::string path = plugin_name;
+						std::transform(path.begin(), path.end(), path.begin(), std::tolower);
+						if(!Global::dllfinder().LookupDllPath(path)) 
 						{
 							delete &plugin;
 							return false;
 						}
 						try
 						{
-							plugin.Instance(plugin_name);
+							plugin.Instance(path);
 						}
 						catch(std::exception const & e)
 						{
@@ -118,14 +120,16 @@ namespace psycle
 						vst::plugin * plugin(0);
 						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
 						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
-						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
+						std::string path = plugin_name;
+						std::transform(path.begin(), path.end(), path.begin(), std::tolower);
+						if(!Global::dllfinder().LookupDllPath(path)) 
 						{
 							delete plugin;
 							return false;
 						}
 						try
 						{
-							plugin->Instance(plugin_name);
+							plugin->Instance(path);
 						}
 						catch(std::exception const & e)
 						{

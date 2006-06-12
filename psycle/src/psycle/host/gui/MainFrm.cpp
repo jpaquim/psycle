@@ -16,13 +16,13 @@
 #include "WireDlg.hpp"
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
-#include "inputhandler.hpp"
 #include "KeyConfigDlg.hpp"
 #include <psycle/host/engine/helpers.hpp>
 #include <psycle/host/engine/player.hpp>
 #include <psycle/host/engine/MidiInput.hpp>
 #include <psycle/host/engine/plugin.hpp>
 #include <psycle/host/engine/internal_machines.hpp>
+#include <psycle/host/engine/cacheddllfinder.hpp>
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
@@ -373,6 +373,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//	m_wndView.Repaint();
 			m_wndView.SetFocus();
 		//	m_wndView.EnableSound();
+			Global::dllfinder().AddPath(Global::configuration().GetPluginDir(),MACH_PLUGIN);
+			Global::dllfinder().AddPath(Global::configuration().GetVstDir(),MACH_VST);
 			
 			return 0;
 		}
@@ -2351,7 +2353,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						switch (pEntry->_cmd)
 						{
 						case 0xFF:
-							if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+							if ( pEntry->_parameter != 0 && (pEntry->_note <= notecommands::release || pEntry->_note == notecommands::empty))
 							{
 								float bpmFine = _pSong->BeatsPerMin() - floor(_pSong->BeatsPerMin());
 								//bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
@@ -2360,7 +2362,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							break;
 							
 						case 0xFE:
-							if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+							if ( pEntry->_parameter != 0 && (pEntry->_note <= notecommands::release || pEntry->_note == notecommands::empty))
 							{
 								tpb=pEntry->_parameter;
 							}

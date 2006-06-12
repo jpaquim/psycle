@@ -182,7 +182,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			presetChanged = false;
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
-				numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
+				numParameters = _pMachine->GetNumParams();
 				try
 				{
 					sizeDataStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
@@ -230,7 +230,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				try
 				{
-					numParameters = static_cast<vst::plugin *>(_pMachine)->proxy().numParams();
+					numParameters = _pMachine->GetNumParams();
 				}
 				catch(const std::exception &)
 				{

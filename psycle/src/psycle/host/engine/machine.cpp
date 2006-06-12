@@ -8,7 +8,7 @@
 #include <psycle/host/gui/psycle.hpp> // Can this be removed?
 #include <psycle/host/gui/WireDlg.hpp> // Can this be removed?
 #include <psycle/host/gui/MainFrm.hpp> // Can this be removed?
-#include <psycle/host/gui/InputHandler.hpp> // Can this be removed?
+//#include <psycle/host/gui/InputHandler.hpp> // Can this be removed?
 #include <universalis/processor/exception.hpp>
 #include <algorithm>
 
@@ -683,7 +683,8 @@ namespace psycle
 				}
 				break;
 			case MACH_SCOPE:
-				//deprecated
+				//deprecated. Loading a dummy in its place.
+				pMachine = new Dummy(index);
 				break;
 			default:
 				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);

@@ -238,7 +238,7 @@ namespace psycle
 				for(int col=0;col<iTracks;col++)
 				{	
 					// reset
-					unsigned char note=255;
+					unsigned char note=notecommands::empty;
 					unsigned char instr=255;
 					unsigned char vol=0;
 					unsigned char type=0;
@@ -616,11 +616,11 @@ namespace psycle
 					switch(note)
 					{
 						case 0x00: 
-							e._note = 255;
+							e._note = notecommands::empty;
 							break;// no note
 
 						case 0x61:
-							e._note = 120;
+							e._note = notecommands::release;
 							e._inst = 255;
 							e._mach = 0;
 							break;// noteoff		
@@ -637,9 +637,9 @@ namespace psycle
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
+					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
 	#else
-					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
+					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
 	#endif
 #endif
 					{
@@ -1142,7 +1142,7 @@ namespace psycle
 				for(int col=0;col<iTracks;col++)
 				{	
 					// reset
-					unsigned char note=255;
+					unsigned char note=notecommands::empty;
 					unsigned char instr=255;
 					unsigned char type=0;
 					unsigned char param=0;
@@ -1295,7 +1295,7 @@ namespace psycle
 					if ( note != 255 ) e._note  = note+12;
 					else e._note  = note;
 
-					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
+					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
 					{
 						e._mach = 255;
 					}
