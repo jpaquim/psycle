@@ -41,6 +41,8 @@ public:
 
     ~NMenuItem();
 
+    virtual void add(NMenu* menu);
+
     virtual void onMouseEnter();
     virtual void onMouseExit();
 

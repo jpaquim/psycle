@@ -42,6 +42,16 @@ void NPopupMenu::setVisible( bool on )
   if (on) pack();
   NWindow::setVisible(on);
   setGrabEvents(on);
+  if (on) {
+    std::vector<NCustomItem*>::iterator it =items.begin();
+    lastOverItem = 0;
+    for ( ; it < items.end() ; it++ ) {
+       NCustomItem* item = *it;
+       NEvent ev1(this, "ngrs_menu_item_do_exit");
+       item->onMessage(&ev1);
+    }
+  }
+
 }
 
 void NPopupMenu::add( NCustomMenuItem * item )

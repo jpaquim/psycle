@@ -25,6 +25,26 @@
 #include "nimage.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "npopupmenu.h"
+
+/* XPM */
+const char * submenu_arrow_right_xpm[] = {
+"12 12 2 1",
+" 	c None",
+".	c black",
+"            ",
+"            ",
+"    .       ",
+"    ..      ",
+"    ...     ",
+"    ....    ",
+"    ...     ",
+"    ..      ",
+"    .       ",
+"            ",
+"            ",
+"            "};
+
 
 NMenuItem::NMenuItem()
  : NCustomMenuItem()
@@ -75,13 +95,36 @@ void NMenuItem::onMouseEnter( )
 {
   iconImg_->setTransparent(true);
   NCustomMenuItem::onMouseEnter();
+
+  if (menu_ && !menu_->mapped()) {
+     menu_->popupMenu()->setPosition(window()->left()+window()->width(), window()->top()+absoluteTop(),100,100);
+     menu_->popupMenu()->setVisible(true);
+  }
 }
 
 void NMenuItem::onMouseExit( )
 {
-  iconImg_->setTransparent(false);
-  NCustomMenuItem::onMouseExit();
+  if (menu_!=0 && (NApp::mouseOverWindow() == menu_->popupMenu())) {
+
+  } else {
+
+    iconImg_->setTransparent(false);
+    NCustomMenuItem::onMouseExit();
+
+     if (menu_!=0 && menu_->popupMenu()->mapped()) menu_->popupMenu()->setVisible(false);
+
+  }
 }
 
-
+void NMenuItem::add( NMenu * menu )
+{
+  menu_ = menu;
+  if (menu_) {
+    subMenuImg_->setBitmap(NBitmap(submenu_arrow_right_xpm));
+    subMenuImg_->setVAlign(nAlCenter);
+    subMenuImg_->setHAlign(nAlCenter);
+  } else {
+    subMenuImg_->setBitmap(NBitmap());
+  }
+}
 

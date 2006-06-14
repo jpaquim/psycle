@@ -35,6 +35,8 @@ public:
     NBitmap();
     NBitmap(const std::string & filename);
     NBitmap(const NBitmap & src);
+    NBitmap(const char** data);
+
     const NBitmap & operator= (const NBitmap & rhs);
 
     ~NBitmap();

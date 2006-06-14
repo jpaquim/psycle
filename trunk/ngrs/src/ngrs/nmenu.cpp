@@ -121,6 +121,16 @@ void NMenu::onMessage( NEvent * ev )
   }
 }
 
+bool NMenu::mapped( ) const
+{
+  return popupMenu_->mapped();
+}
+
+NPopupMenu * NMenu::popupMenu( )
+{
+  return popupMenu_;
+}
+
 
 
 
