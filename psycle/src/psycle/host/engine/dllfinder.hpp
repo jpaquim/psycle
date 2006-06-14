@@ -2,8 +2,10 @@
 #include "machine.hpp"
 #include <string>
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+namespace psycle
+{
+	namespace host
+	{
 
 class DllFinder
 {
@@ -26,5 +28,5 @@ protected:
 	std::vector<std::string> base_paths;
 };
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	}
+}

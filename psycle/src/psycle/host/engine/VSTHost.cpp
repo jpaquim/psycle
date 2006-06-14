@@ -106,6 +106,9 @@ namespace psycle
 			}
 
 			VstTimeInfo plugin::_timeInfo;
+			// The original VST host separated vst gens and vst fx. Nowadays, the difference is minimal, and the "FX" one could be removed with no problems.
+			const InternalMachineInfo plugin::minfo(MACH_VST,MACHMODE_UNDEFINED,Plugin::CreateFromType,true,"VST Host","Vst Plugin","Psycledelics",0,1200,0);
+			const InternalMachineInfo plugin::minfo2(MACH_VSTFX,MACHMODE_FX,Plugin::CreateFromType,true,"VST Host","Vst fx","Psycledelics",0,1200,0);
 
 			plugin::plugin(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
 			:

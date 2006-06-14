@@ -1066,9 +1066,9 @@ XMSampler::Channel::PerformFX().
 	int GetDeltaTick() { return m_DeltaTick; };
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
+	static const InternalMachineInfo minfo;
 protected:
 
-	static InternalMachineInfo minfo;
 	int _numVoices;
 
 	Voice m_Voices[MAX_POLYPHONY];

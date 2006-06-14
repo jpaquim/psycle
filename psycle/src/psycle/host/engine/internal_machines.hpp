@@ -24,10 +24,9 @@ namespace psycle {
 			virtual const std::uint32_t GetVersion() { return minfo.version; }
 			virtual const std::uint32_t GetCategory() { return minfo.category; }
 
+			static const InternalMachineInfo minfo;
 			//\todo: to be removed... someday( Marks that the Dummy was in fact a VST plugin that couldn't be loaded)
 			bool wasVST;
-		protected:
-			static InternalMachineInfo minfo;
 		};
 
 		//////////////////////////////////////////////////////////////////////////
@@ -54,10 +53,10 @@ namespace psycle {
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
+			static const InternalMachineInfo minfo;
 		protected:
 			short macOutput[8];
 			short noteOffset[8];
-			static InternalMachineInfo minfo;
 			bool bisTicking;
 		};
 
@@ -80,6 +79,7 @@ namespace psycle {
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
+			static const InternalMachineInfo minfo;
 			/// this is for the VstHost
 			double sampleCount;
 			int _outDry;
@@ -91,8 +91,6 @@ namespace psycle {
 			float _lMax;
 			float _rMax;
 			bool vuupdated;
-		protected:
-			static InternalMachineInfo minfo;
 		};
 
 		//////////////////////////////////////////////////////////////////////////
@@ -163,9 +161,10 @@ namespace psycle {
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
-
 			virtual float VuChan(Wire::id_type idx);
 			virtual float VuSend(Wire::id_type idx);
+
+			static const InternalMachineInfo minfo;
 		protected:
 			///\todo hardcoded limits and wastes
 			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
@@ -197,7 +196,6 @@ namespace psycle {
 			std::vector<send> sends;
 #endif
 
-			static InternalMachineInfo minfo;
 		};
 
 		//////////////////////////////////////////////////////////////////////////
@@ -258,6 +256,7 @@ namespace psycle {
 				};
 			};
 
+			static const InternalMachineInfo minfo;
 		protected:
 			//protected member funcs
 			virtual void FillTable();				//fills the lfo table based on the value of waveform
@@ -278,8 +277,6 @@ namespace psycle {
 			int prevVal[NUM_CHANS];				//value of knob when last seen-- used to compensate for outside changes
 			int centerVal[NUM_CHANS];			//where knob should be at lfo==0
 
-
-			static InternalMachineInfo minfo;
 			bool bisTicking;
 
 		};
@@ -350,6 +347,7 @@ namespace psycle {
 				operator int() {return this->time; }
 			};
 
+			static const InternalMachineInfo minfo;
 		private:
 
 			class Track
@@ -397,7 +395,6 @@ namespace psycle {
 			//whether or not to put a parameter back the way we found it when we're done
 			bool bResetWhenDone;
 
-			static InternalMachineInfo minfo;
 			bool bisTicking;
 
 		};

@@ -23,7 +23,7 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Dummy
 
-		InternalMachineInfo Dummy::minfo(MACH_DUMMY,MACHMODE_FX,Dummy::CreateFromType,"Dummy Machine","Dummy","Arguru",0,1000,0);
+		const InternalMachineInfo Dummy::minfo(MACH_DUMMY,MACHMODE_FX,Dummy::CreateFromType,false,"Dummy Machine","Dummy","Arguru",0,1000,0);
 
 		///< Machine::type_type is the specific type of machine ( master, plugin, sampler, ... )
 		///< Machine::mode_type is the mode of working of the machine ( effect, generator,... )
@@ -70,7 +70,7 @@ namespace psycle {
 		// NoteDuplicator
 
 		//\todo: Change mode from Generator to controller.
-		InternalMachineInfo DuplicatorMac::minfo(MACH_DUPLICATOR,MACHMODE_GENERATOR,DuplicatorMac::CreateFromType,"Note Duplicator","Dupe it!","JosepMa",0,1000,16);
+		const InternalMachineInfo DuplicatorMac::minfo(MACH_DUPLICATOR,MACHMODE_GENERATOR,DuplicatorMac::CreateFromType,false,"Note Duplicator","Dupe it!","JosepMa",0,1000,16);
 
 		DuplicatorMac::DuplicatorMac(Machine::id_type id)
 		: Machine(minfo.type, minfo.mode, id)
@@ -209,7 +209,7 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Master
 
-		InternalMachineInfo Master::minfo(MACH_MASTER,MACHMODE_MASTER,Master::CreateFromType,"Master Machine","Master","Arguru",0,1000,0);
+		const InternalMachineInfo Master::minfo(MACH_MASTER,MACHMODE_MASTER,Master::CreateFromType,false,"Master Machine","Master","Arguru",0,1000,0);
 		float * Master::_pMasterSamples = 0;
 
 		Master::Master(Machine::id_type id)
@@ -378,7 +378,7 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer
 
-		InternalMachineInfo Mixer::minfo(MACH_MIXER,MACHMODE_FX,Mixer::CreateFromType,"Send/Return Mixer","Mixer","JosepMa",0,500,255);
+		const InternalMachineInfo Mixer::minfo(MACH_MIXER,MACHMODE_FX,Mixer::CreateFromType,false,"Send/Return Mixer","Mixer","JosepMa",0,500,255);
 
 		Mixer::Mixer(Machine::id_type id)
 		: Machine(minfo.type, minfo.mode, id)
@@ -743,7 +743,7 @@ namespace psycle {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// LFO
 		//\todo: Change mode from generator to controller
-		InternalMachineInfo LFO::minfo(MACH_LFO,MACHMODE_GENERATOR,LFO::CreateFromType,"LFO","LFO","dw",0,100,prms::num_params);
+		const InternalMachineInfo LFO::minfo(MACH_LFO,MACHMODE_GENERATOR,LFO::CreateFromType,false,"LFO","LFO","dw",0,100,prms::num_params);
 
 #if 0 // don't worry, msvc is the weird
 		int const LFO::LFO_SIZE;
@@ -1172,7 +1172,7 @@ namespace psycle {
 		//       decide if there's a cleaner way of dealing with the machine's dual nature
 		//      -option to stretch/squeeze envelope to match length changes (probably just for continuous mode)
 
-		InternalMachineInfo Automator::minfo(MACH_AUTOMATOR,MACHMODE_GENERATOR,Automator::CreateFromType,"Automator","Automator","dw",0,100,prms::num_params);
+		const InternalMachineInfo Automator::minfo(MACH_AUTOMATOR,MACHMODE_GENERATOR,Automator::CreateFromType,false,"Automator","Automator","dw",0,100,prms::num_params);
 
 		Automator::Automator(Machine::id_type id)
 		: Machine(minfo.type, minfo.mode, id)

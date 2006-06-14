@@ -7,9 +7,10 @@
 #include <algorithm> // std::transform
 #include <cctype>	   // std::tolower
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
-
+namespace psycle
+{
+	namespace host
+	{
 
 MappedDllFinder::MappedDllFinder()
 {
@@ -537,5 +538,5 @@ bool CachedDllFinder::SaveCacheFile()
 	return true;
 }
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+}
+}
