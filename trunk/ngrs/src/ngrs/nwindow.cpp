@@ -48,6 +48,7 @@ NWindow::NWindow()
   modal_ = false;
   NVisual::setVisible(false);
   dock_ = 0;
+  exitLoop_ = nDestroyWindow;
 }
 
 
@@ -89,7 +90,6 @@ void NWindow::setVisible( bool on )
      NApp::system().unmapWindow(win_);
      XSync(NApp::system().dpy(),false);
      graphics_->setVisible(on);
-     exitLoop_ = nDestroyWindow;
   }
 }
 
@@ -294,6 +294,7 @@ int NWindow::onClose( )
   }
   exitLoop_ = nDestroyWindow;
   setVisible(false);
+  std::cout << nDestroyWindow << std::endl;
   return nDestroyWindow;
 }
 

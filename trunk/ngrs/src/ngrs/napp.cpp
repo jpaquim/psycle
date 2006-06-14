@@ -146,17 +146,21 @@ void NApp::eventLoop( )
 //        if (window->visible()) {
         exitLoop = processEvent(window, & event);
         if (window->win() != mainWin_->win()) {
-        if (exitLoop==nDestroyWindow) {
-          delete window;
-          exitLoop = 0;
-          lastOverWin_ = 0;
-        } else 
-        if (exitLoop==nDockWindow) {
+          if (exitLoop==nDestroyWindow) {
+            delete window;
+            exitLoop = 0;
+            lastOverWin_ = 0;
+          } else 
+          if (exitLoop==nDockWindow) {
            window->dock()->onDockWindow();
            exitLoop=0;
            lastOverWin_ = 0;
-        } else exitLoop=0;
+          }
   //      }
+       } else {
+          if (exitLoop==nDestroyWindow) {
+             break;
+          }
        }
      }
        //doRemove();
@@ -288,7 +292,9 @@ int NApp::processEvent( NWindow * win, XEvent * event )
           break;
 
     case ClientMessage:
-            if(event->xclient.data.l[0] == (int) NApp::system().wm_delete_window) exitloop = win->onClose();
+            if(event->xclient.data.l[0] == (int) NApp::system().wm_delete_window) {
+               exitloop = win->onClose();
+            }
          break;
 
     default : ;
