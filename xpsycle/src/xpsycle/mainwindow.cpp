@@ -80,8 +80,12 @@ void MainWindow::initMenu( )
     fileMenu_->add(new NMenuItem("revert to saved"));
     NMenuItem* recentItem = new NMenuItem("recent files");
     fileMenu_->add(recentItem);
-    //NMenu* subRecentMenu = new NMenu();
-    //recentItem->addMenu(subRecentMenu);
+    recentFileMenu_ = new NMenu();
+      recentItem->add(recentFileMenu_);
+      noneFileItem = new NMenuItem("none");
+        noneFileItem->setEnable(false);
+      recentFileMenu_->add(noneFileItem);
+      noFileWasYetLoaded = true;
     fileMenu_->add(new NMenuItem("exit"));
   menuBar_->add(fileMenu_);
 
@@ -567,7 +571,14 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   progressBar_->setVisible(true);
   pane()->resize();
   pane()->repaint();
-  childView_->onFileLoadSong(0);
+  std::string fileName;
+  if ( (fileName = childView_->onFileLoadSong(0)) != "" ) {
+    if (noFileWasYetLoaded) {
+      recentFileMenu_->removeChilds();
+      noFileWasYetLoaded = false;
+    }
+    recentFileMenu_->add(new NMenuItem(fileName));
+  }
   progressBar_->setVisible(false);
   pane()->resize();
   updateComboGen();

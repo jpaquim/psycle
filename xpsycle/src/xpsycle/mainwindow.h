@@ -64,6 +64,8 @@ public:
 
 private:
 
+    bool noFileWasYetLoaded;
+
     ChildView* childView_;
     NWindow* songpDlg_;
     NTabBook* tabBook_;
@@ -91,6 +93,8 @@ private:
     NMenu* configurationMenu_;
     NMenu* performanceMenu_;
     NMenu* helpMenu_;
+
+    NMenuItem* noneFileItem;
 
     N7SegDisplay* bpmDisplay_;
     N7SegDisplay* tpbDisplay_;

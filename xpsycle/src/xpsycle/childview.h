@@ -45,13 +45,13 @@ public:
 
     ~ChildView();
 
-    void FileLoadSongNamed(const std::string & fName);
+    std::string FileLoadSongNamed(const std::string & fName);
     void FileSaveSongNamed(const std::string & fName);
 
     void setTitleBarText( );
 
     // connect to signals
-    void onFileLoadSong(NObject* sender);
+    std::string onFileLoadSong(NObject* sender);
     void onFileSaveSong(NObject* sender);
 
     void onPatternView(NObject* sender);
@@ -83,7 +83,7 @@ private:
     MachineView* machineView_;
     PatternView* patternView_;
 
-    void OnFileLoadSongNamed(const std::string & fName, int fType);
+    std::string OnFileLoadSongNamed(const std::string & fName, int fType);
 
     void onTimer();
 
