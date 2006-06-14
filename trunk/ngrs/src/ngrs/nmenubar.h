@@ -39,6 +39,8 @@ public:
     virtual void add(NMenu* menu);
     virtual void onMessage(NEvent* ev);
 
+    virtual void removeChilds();
+
 private:
 
     bool isMenuMapped_;
