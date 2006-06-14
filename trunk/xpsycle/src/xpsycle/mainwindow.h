@@ -110,6 +110,13 @@ private:
     InstrumentEditor* instrumentEditor;
 
     NTextStatusItem* macPosStatusItem;
+    NTextStatusItem* seqPosStatusItem;
+    NTextStatusItem* seqPatStatusItem;
+    NTextStatusItem* linePosStatusItem;
+    NTextStatusItem* playTimeStatusItem;
+    NTextStatusItem* octStatusItem;
+    NTextStatusItem* editModeStatusItem;
+
 
     void initMenu();
     void initDialogs();
@@ -211,6 +218,7 @@ private:
     void updateComboIns(bool updatelist);
 
     void onMachineMoved(Machine* mac , int x, int y);
+    void onLineChanged(int line);
 };
 
 }}

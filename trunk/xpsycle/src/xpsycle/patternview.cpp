@@ -222,6 +222,7 @@ const NPoint3D & PatternView::cursor( ) const
 void PatternView::setCursor( const NPoint3D & cursor )
 {
   cursor_ = cursor;
+  lineChanged.emit(cursor_.y());
 }
 
 void PatternView::moveCursor( int dx, int dy, int dz )
@@ -251,7 +252,7 @@ void PatternView::moveCursor( int dx, int dy, int dz )
         newZ= cellCount()-1;
   }
 
-  cursor_.setXYZ(newX,newY,newZ);
+  setCursor(NPoint3D(newX,newY,newZ));
 }
 
 void PatternView::addEvent( int byteLength )

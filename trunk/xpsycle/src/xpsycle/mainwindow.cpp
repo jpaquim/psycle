@@ -209,6 +209,21 @@ void MainWindow::initBars( )
     macPosStatusItem = new NTextStatusItem();
     statusBar_->add(macPosStatusItem,nAlLeft);
     childView_->machineView()->machineMoved.connect(this,&MainWindow::onMachineMoved);
+
+    /*editModeStatusItem = new NTextStatusItem();
+    statusBar_->add(editModeStatusItem);
+    octStatusItem      = new NTextStatusItem();
+    statusBar_->add(octStatusItem);
+    playTimeStatusItem = new NTextStatusItem();
+    statusBar_->add(playTimeStatusItem);*/
+    linePosStatusItem  = new NTextStatusItem();
+      childView_->patternView()->lineChanged.connect(this,&MainWindow::onLineChanged);
+    statusBar_->add(linePosStatusItem);
+    /*seqPatStatusItem   = new NTextStatusItem();
+    statusBar_->add(seqPatStatusItem);
+    seqPosStatusItem   = new NTextStatusItem();
+    statusBar_->add(seqPosStatusItem);*/
+
   pane()->add(statusBar_,nAlBottom);
 
   pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
@@ -1260,6 +1275,12 @@ void MainWindow::onInstrumentCbx( NItemEvent * ev )
 void MainWindow::onMachineMoved( Machine * mac, int x, int y )
 {
   macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(x) +","+ stringify(y));
+  statusBar_->resize();
+  statusBar_->repaint();
+}
+
+void MainWindow::onLineChanged(int line) {
+  linePosStatusItem->setText("Line: "+stringify(line));
   statusBar_->resize();
   statusBar_->repaint();
 }
