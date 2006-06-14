@@ -219,14 +219,16 @@ void MainWindow::initBars( )
     linePosStatusItem  = new NTextStatusItem();
       childView_->patternView()->lineChanged.connect(this,&MainWindow::onLineChanged);
     statusBar_->add(linePosStatusItem);
-    /*seqPatStatusItem   = new NTextStatusItem();
+    seqPatStatusItem   = new NTextStatusItem();
     statusBar_->add(seqPatStatusItem);
     seqPosStatusItem   = new NTextStatusItem();
-    statusBar_->add(seqPosStatusItem);*/
+    statusBar_->add(seqPosStatusItem);
 
   pane()->add(statusBar_,nAlBottom);
 
   pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
+
+  sequencerBar_->selected.connect(this,&MainWindow::onSeqSelected);
 
   updateComboIns(true);
   insCombo_->setIndex(0);
@@ -1275,6 +1277,14 @@ void MainWindow::onInstrumentCbx( NItemEvent * ev )
 void MainWindow::onMachineMoved( Machine * mac, int x, int y )
 {
   macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(x) +","+ stringify(y));
+  statusBar_->resize();
+  statusBar_->repaint();
+}
+
+void MainWindow::onSeqSelected( int pos, int pat )
+{
+  seqPosStatusItem->setText("Pos: "+stringify(pos));
+  seqPatStatusItem->setText("Pat: "+stringify(pat));
   statusBar_->resize();
   statusBar_->repaint();
 }
