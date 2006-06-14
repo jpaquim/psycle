@@ -256,6 +256,10 @@ void SequencerBar::updateSequencer()
       if ( Global::pSong()->playOrderSel[i]) seqList_->setIndex(i);
   }
 
+
+  if (seqList_->selIndex() != -1) {
+    selected.emit(seqList_->selIndex(),Global::pSong()->playOrder[seqList_->selIndex()]);
+  }
 }
 
 NListBox * SequencerBar::seqList( )
@@ -280,7 +284,7 @@ void SequencerBar::onIncShort( NButtonEvent * ev )
   updateSequencer();
   seqList_->repaint();
   patternView_->repaint();
-  //m_wndView.SetFocus();*/
+
 }
 
 void SequencerBar::onIncLong( NButtonEvent * ev )
