@@ -53,6 +53,8 @@ void MachineView::init( )
 {
   scrollArea_->setBackground(NColor(150,150,180));
   scrollArea_->setTransparent(false);
+
+  selectedMachine_ = 0;
 }
 
 
@@ -84,6 +86,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           scrollArea_->add(macGui);
           machineGUIs.push_back(macGui);
+          selectedMachine_ = macGui->pMac();
       }
       break;
   }
@@ -247,12 +250,19 @@ void MachineView::updateVUs( )
 
 void MachineView::onMoveMachine( Machine * mac, int x, int y )
 {
+  selectedMachine_ = mac;
   machineMoved.emit(mac,x,y);
 }
 
+Machine * MachineView::selMachine( )
+{
+  return selectedMachine_;
+}
 
 }
 }
+
+
 
 
 

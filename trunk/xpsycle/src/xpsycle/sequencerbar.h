@@ -60,6 +60,8 @@ public:
     void onSelChangeSeqList(NItemEvent* sender);
     void updatePlayOrder(bool mode);
 
+    int patternPos() const;
+
 private:
 
     PatternView* patternView_;

@@ -79,7 +79,11 @@ public:
 
     signal3<Machine*, int, int> machineMoved;
 
+    Machine* selMachine();
+
 private:
+
+    Machine* selectedMachine_;
 
     MachineWireGUI* line;
     MachineGUI* startGUI;
