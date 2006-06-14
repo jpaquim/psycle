@@ -83,12 +83,14 @@ ChildView::~ChildView()
 }
 
 
-void ChildView::onFileLoadSong( NObject * sender )
+std::string ChildView::onFileLoadSong( NObject * sender )
 {
   if (getOpenFileName_->execute()) {
       NApp::flushEventQueue();
       OnFileLoadSongNamed(getOpenFileName_->fileName(),1);
+      return getOpenFileName_->fileName();
   }
+  return "";
 }
 
 void ChildView::onFileSaveSong( NObject * sender )
@@ -106,23 +108,24 @@ void ChildView::FileSaveSongNamed(const std::string & fName) {
   file.Close();
 }
 
-void ChildView::OnFileLoadSongNamed( const std::string & fName, int fType )
+std::string ChildView::OnFileLoadSongNamed( const std::string & fName, int fType )
 {
   if( fType == 2 )
   {
       //FILE* hFile=fopen(fName.c_str(),"rb");
       //LoadBlock(hFile);
       //fclose(hFile);
+     return "";
   } else
   {
     //if (CheckUnsavedSong("Load Song"))
       {
-        FileLoadSongNamed(fName);
+        return FileLoadSongNamed(fName);
       }
   }
 }
 
-void ChildView::FileLoadSongNamed( std::string const & fName )
+std::string ChildView::FileLoadSongNamed( std::string const & fName )
 {
   // stop player
   Global::pPlayer()->Stop();
@@ -135,7 +138,7 @@ void ChildView::FileLoadSongNamed( std::string const & fName )
   if (!file.Open(fName.c_str()))
   {
     std::cerr << "Could not Open file. Check that the location is correct." <<  "Loading Error" << std::endl;
-      return;
+      return "";
   }
   _pSong->Load(&file);
   // enable audio driver
