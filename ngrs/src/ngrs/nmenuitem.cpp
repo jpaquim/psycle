@@ -85,6 +85,7 @@ void NMenuItem::init( )
     captionLbl_->setVAlign(nAlCenter);
   NCustomMenuItem::add(captionLbl_, nAlClient);
 
+  menu_ = 0;
 }
 
 NMenuItem::~NMenuItem()
