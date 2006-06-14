@@ -38,6 +38,10 @@ public:
 
    ~NMenu();
 
+   bool mapped() const;
+
+   NPopupMenu* popupMenu();
+
    virtual NCustomMenuItem* add(NCustomMenuItem* item);
 
    virtual void onMouseEnter();
@@ -45,7 +49,6 @@ public:
    virtual void onMousePress( int x, int y, int button );
 
    virtual void onMessage(NEvent* ev);
-
 
 
 private:

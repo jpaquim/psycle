@@ -32,6 +32,12 @@ NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(
   loadFromFile(filename);
 }
 
+NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_(0),data_(0),xi(0), clp(0)
+{
+  createFromXpmData(data);
+}
+
+
 NBitmap::~NBitmap()
 {
   /*delete[] data_;
@@ -175,5 +181,6 @@ XImage * NBitmap::X11ClpData( ) const
 {
   return clp;
 }
+
 
 

@@ -76,7 +76,7 @@ NTestWindow::NTestWindow()
   pane()->add(bar);
   bar->resize();
 
-  //testMenu();
+  testMenu();
   //testMemo();
   //testListBox();
 
@@ -247,6 +247,15 @@ void NTestWindow::testMenu( )
 
   NCheckMenuItem* item5 = new NCheckMenuItem("test");
   menu1->add(item5);
+
+  NMenuItem* item6 = new NMenuItem("subtest");
+  menu1->add(item6);
+
+  NMenu* subMenu = new NMenu();
+  item6->add(subMenu);
+
+  NCheckMenuItem* sub_item = new NCheckMenuItem("test");
+  subMenu->add(sub_item);
 }
 
 void NTestWindow::testSpinButton( )
