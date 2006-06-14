@@ -203,7 +203,7 @@ void SequencerBar::init( )
   add(lenPanel,nAlTop);
 
   NPanel* checkPanel = new NPanel();
-    checkPanel->skin_.setTranslucent(NColor(200,200,200),70);
+    //checkPanel->skin_.setTranslucent(NColor(200,200,200),70);
     checkPanel->setLayout(NListLayout());
     checkPanel->add( follow_                = new NCheckBox("Follow song"));
     checkPanel->add( multichannel_audition_ = new NCheckBox("Multichannel\nAudition"));
