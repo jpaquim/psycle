@@ -179,6 +179,8 @@ public:
 
     ~PatternView();
 
+    signal1<int> lineChanged;
+
     void setSeparatorColor(const NColor & separatorColor);
     const NColor & separatorColor();
 
