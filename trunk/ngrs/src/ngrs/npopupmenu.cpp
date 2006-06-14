@@ -47,8 +47,7 @@ void NPopupMenu::setVisible( bool on )
     lastOverItem = 0;
     for ( ; it < items.end() ; it++ ) {
        NCustomItem* item = *it;
-       NEvent ev1(this, "ngrs_menu_item_do_exit");
-       item->onMessage(&ev1);
+       item->onMouseExit();
     }
   }
 
