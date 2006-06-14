@@ -88,3 +88,9 @@ void NCustomMenuItem::onMessage( NEvent * ev )
     onMouseExit();
   }
 }
+
+void NCustomMenuItem::setFont( const NFont & font )
+{
+  itemNone.setFont(font);
+  itemOver.setFont(font);
+}

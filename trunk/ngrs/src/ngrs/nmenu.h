@@ -50,6 +50,7 @@ public:
 
    virtual void onMessage(NEvent* ev);
 
+   virtual void removeChilds();
 
 private:
 

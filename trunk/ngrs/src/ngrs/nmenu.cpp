@@ -131,6 +131,11 @@ NPopupMenu * NMenu::popupMenu( )
   return popupMenu_;
 }
 
+void NMenu::removeChilds( )
+{
+  popupMenu_->removeChilds();
+}
+
 
 
 

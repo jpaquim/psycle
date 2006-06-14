@@ -33,6 +33,7 @@ NSkin::NSkin( )
   gradientPercent_ = 50;
   border_ = 0;
   arcWidth_ = arcHeight_ = 10;
+  disabledTextColor_.setRGB(180,180,180);
 }
 
 NSkin::NSkin( const NSkin & src )
@@ -66,6 +67,8 @@ NSkin::NSkin( const NSkin & src )
   bitmapBgStyle_   = src.bitmapBgStyle();
   arcWidth_        = src.gradientArcWidth();
   arcHeight_       = src.gradientArcHeight();
+
+  disabledTextColor_ = src.disabledTextColor();
 }
 
 const NSkin & NSkin::operator =( const NSkin & rhs )
@@ -99,6 +102,9 @@ const NSkin & NSkin::operator =( const NSkin & rhs )
   bitmapBgStyle_   = rhs.bitmapBgStyle();
   arcWidth_        = rhs.gradientArcWidth();
   arcHeight_       = rhs.gradientArcHeight();
+
+  disabledTextColor_ = rhs.disabledTextColor();
+
   return *this;
 }
 
@@ -151,6 +157,7 @@ const NColor & NSkin::transColor( ) const
 void NSkin::setFont( const NFont & font )
 {
   font_ = font;
+  useParentFont_ = false;
 }
 
 const NFont & NSkin::font( ) const

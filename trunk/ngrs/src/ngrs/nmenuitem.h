@@ -46,12 +46,13 @@ public:
     virtual void onMouseEnter();
     virtual void onMouseExit();
 
+    NLabel* captionLbl_;
 
 private:
 
     NMenu* menu_;
 
-    NLabel* captionLbl_;
+    
     NImage* iconImg_;
     NImage* subMenuImg_;
 

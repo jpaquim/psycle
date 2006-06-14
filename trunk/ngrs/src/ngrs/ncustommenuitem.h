@@ -46,6 +46,8 @@ public:
 
     virtual void onMessage(NEvent* ev);
 
+    virtual void setFont(const NFont & font);
+
 private:
 
     NSkin itemNone;
