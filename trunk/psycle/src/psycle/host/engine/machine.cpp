@@ -173,6 +173,8 @@ namespace psycle
 			parent_.Work(numSamples);
 		}
 
+		internal_machine_package Machine::infopackage;
+
 		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
 		:
 			_type(type),

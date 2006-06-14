@@ -202,10 +202,10 @@ namespace psycle
 
 			void Update();
 
+			static InternalMachineInfo minfo;
 		protected:
 			friend CGearTracker;
 
-			static InternalMachineInfo minfo;
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
 			dsp::Cubic _resampler;

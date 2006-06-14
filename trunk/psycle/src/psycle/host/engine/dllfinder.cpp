@@ -3,8 +3,10 @@
 #include "dllfinder.hpp"
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+namespace psycle
+{
+	namespace host
+	{
 
 DllFinder::DllFinder()
 {
@@ -71,5 +73,5 @@ bool DllFinder::SearchFileInDir(std::string& name, std::string& path)
 }
 
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	}
+}

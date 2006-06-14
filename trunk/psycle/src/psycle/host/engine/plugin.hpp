@@ -194,6 +194,8 @@ namespace psycle
 				///\todo move this to the proxy class
 				plugin_interface::CMachineInfo        *  _pInfo;
 
+				public:
+					static const InternalMachineInfo minfo;
 		};
 	}
 }

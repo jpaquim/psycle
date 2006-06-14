@@ -30,7 +30,9 @@ namespace psycle
 				#pragma warning(disable:4355) // 'this' : used in base member initializer list
 		#endif
 
-			Plugin::Plugin(Machine::id_type id)
+		const InternalMachineInfo Plugin::minfo(MACH_PLUGIN,MACHMODE_UNDEFINED,Plugin::CreateFromType,true,"Native Host","Plugin","Psycledelics",0,1100,0);
+
+		Plugin::Plugin(Machine::id_type id)
 			:
 				Machine(MACH_PLUGIN, MACHMODE_FX, id),
 				_dll(0),

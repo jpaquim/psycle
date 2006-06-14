@@ -6,8 +6,12 @@
 #include "machine.hpp"
 #include <sigslot/sigslot.h>
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+namespace psycle
+{
+	namespace host
+	{
+
+std::uint32_t const CURRENT_CACHE_MAP_VERSION = 1;
 
 class PluginInfo
 {
@@ -136,5 +140,5 @@ protected:
 
 };
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+}
+}

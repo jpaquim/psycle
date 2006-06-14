@@ -11,7 +11,7 @@ namespace psycle
 {
 	namespace host
 	{
-		InternalMachineInfo Sampler::minfo(MACH_SAMPLER,MACHMODE_GENERATOR,Sampler::CreateFromType,"Basic Sampler","Sampler","Arguru",0,500,0);
+		const InternalMachineInfo Sampler::minfo(MACH_SAMPLER,MACHMODE_GENERATOR,Sampler::CreateFromType,"Basic Sampler","Sampler","Arguru",0,500,0);
 
 		Sampler::Sampler(Machine::id_type id)
 		:Machine(minfo.type, minfo.mode, id)

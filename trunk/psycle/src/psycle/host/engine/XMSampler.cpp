@@ -27,7 +27,7 @@ namespace psycle
 		static CXResampler *pResampler = NULL;
 */
 
-		InternalMachineInfo XMSampler::minfo(MACH_XMSAMPLER,MACHMODE_GENERATOR,XMSampler::CreateFromType,"Sampulse Sampler V2","Sampulse","JosepMa",0,600,0);
+		const InternalMachineInfo XMSampler::minfo(MACH_XMSAMPLER,MACHMODE_GENERATOR,XMSampler::CreateFromType,false,"Sampulse Sampler V2","Sampulse","JosepMa",0,600,0);
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 
 		const int XMSampler::Voice::m_FineSineData[256] = {

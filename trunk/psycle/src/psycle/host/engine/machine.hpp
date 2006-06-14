@@ -7,6 +7,7 @@
 #include "constants.hpp"
 #include "FileIO.hpp"
 #include <psycle/host/global.hpp>
+#include <psycle/host/engine/internal_machines_package.hpp>
 #include <universalis/processor/exceptions/fpu.hpp>
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
@@ -203,73 +204,6 @@ namespace psycle
 				virtual void CollectData(int numSamples);
 		};
 
-		enum MachineType
-		{
-			MACH_UNDEFINED	= -1, //< :-(
-			MACH_MASTER		= 0,
-			MACH_SINE		= 1, //< for psycle old fileformat version 2
-			MACH_DIST		= 2, //< for psycle old fileformat version 2
-			MACH_SAMPLER	= 3,
-			MACH_DELAY		= 4, //< for psycle old fileformat version 2
-			MACH_2PFILTER	= 5, //< for psycle old fileformat version 2
-			MACH_GAIN		= 6, //< for psycle old fileformat version 2
-			MACH_FLANGER	= 7, //< for psycle old fileformat version 2
-			MACH_PLUGIN		= 8,
-			MACH_VST		= 9,
-			MACH_VSTFX		= 10,
-			MACH_SCOPE		= 11, //< Deprecated machine. It's a GUI element now. Can be skipped when loading.
-			MACH_XMSAMPLER	= 12,
-			MACH_DUPLICATOR	= 13,
-			MACH_MIXER		= 14,
-			MACH_LFO		= 15,
-			MACH_AUTOMATOR	= 16,
-			MACH_DUMMY		= 255
-		};
-
-		enum MachineMode
-		{
-			MACHMODE_UNDEFINED	= -1, //< :-(
-			MACHMODE_GENERATOR	= 0,
-			MACHMODE_FX			= 1,
-			MACHMODE_MASTER		= 2,
-		};
-
-		// Helper class for Machine Creation.
-		typedef Machine* (*CreatorFromType)(MachineType _id, std::string _dllname);
-
-		class InternalMachineInfo
-		{
-		public:
-			InternalMachineInfo(MachineType _type,MachineMode _mode,CreatorFromType _creator,
-				char const* _brandname,char const* _shortname,char const* _vendor,
-				std::uint32_t _category, std::uint32_t _version, std::uint32_t _parameters)
-				:type(_type),mode(_mode),CreateFromType(_creator)
-				,brandname(_brandname),shortname(_shortname),vendor(_vendor),category(_category)
-				,version(_version),parameters(_parameters)
-			{
-			}
-		public:
-			///< Class of machine (master, sampler, dummy,...). See MachineType
-			MachineType type;
-			///< Mode of the plugin, ( generator, effect,...) See MachineMode
-			MachineMode mode;
-			///< Creator function. Needed for the loader.
-			CreatorFromType CreateFromType;
-			///< Name of the machine
-			char const *brandname;
-			///< Default Display name.
-			char const *shortname;
-			///< Authority of the machine
-			char const *vendor;
-			///< Default category.
-			//\todo: define categories.
-			const std::uint32_t category;
-			///< version numbering. Prefered form is " 1.0 -> 1000 "
-			const std::uint32_t version;
-			///< The Number of parameters that this machine exports.
-			const std::uint32_t parameters;
-			//\todo : description field?
-		};
 
 		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
@@ -489,8 +423,10 @@ namespace psycle
 					virtual const std::uint32_t GetCategory() = 0;
 					virtual std::string const & GetEditName() { return _editName; }
 					virtual void SetEditName(std::string newname) { _editName = newname; }
+					virtual InternalMachineInfo& GetInfoFromType(Machine::type_type type) { return infopackage.getInfo(type); }
 				PSYCLE__PRIVATE:
 					std::string  _editName;
+					static internal_machine_package infopackage;
 			///\}
 
 			///\name parameters
