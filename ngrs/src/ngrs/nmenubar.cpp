@@ -135,3 +135,9 @@ void NMenuBar::onMessage( NEvent * ev )
      }
   }
 }
+
+void NMenuBar::removeChilds( )
+{
+  menus.clear();
+  NPanel::removeChilds();
+}

@@ -117,6 +117,9 @@ void NAlignLayout::align( NVisualComponent * parent )
 
 int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
 {
+  // todo change in a way like preferredHeight , so this is not fully working
+  // high priority
+
   int xp = 0;
 
   int topMax = 0;
@@ -171,36 +174,38 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
   // compute for each block the preferredHeight
   for ( ; it < components.end(); it++ ) {
     NVisualComponent* visualChild = *it;
-    switch ( visualChild->align() ) {
-      case nAlLeft   :
-        left = std::max( left, visualChild->preferredHeight() );
-        lastLeft = visualChild;
-      break;
-      case nAlTop    :
-        if (lastLeft)  topBeforeLeft  = 0;
-        if (lastRight) topBeforeRight = 0;
-        top += vgap_ + visualChild->preferredHeight();
-        lastTop = visualChild;
-      break;
-      case nAlRight  :
-        right = std::max( right, vgap_ + visualChild->preferredHeight() );
-        lastRight = visualChild;
-      break;
-      case nAlBottom :
-        if (lastLeft)  bottomBeforeLeft  = 0;
-        if (lastRight) bottomBeforeRight = 0;
-        bottom += vgap_ + visualChild->preferredHeight();
-        lastBottom = visualChild;
-      break;
-      case nAlClient :
-        client = vgap_+visualChild->preferredHeight();
-      break;
+    if (visualChild->visible()) {
+      switch ( visualChild->align() ) {
+        case nAlLeft   :
+          left = std::max( left, visualChild->preferredHeight() );
+          lastLeft = visualChild;
+        break;
+        case nAlTop    :
+          if (lastLeft)  topBeforeLeft  = 0;
+          if (lastRight) topBeforeRight = 0;
+          top += vgap_ + visualChild->preferredHeight();
+          lastTop = visualChild;
+        break;
+        case nAlRight  :
+          right = std::max( right, vgap_ + visualChild->preferredHeight() );
+          lastRight = visualChild;
+        break;
+        case nAlBottom :
+          if (lastLeft)  bottomBeforeLeft  = 0;
+          if (lastRight) bottomBeforeRight = 0;
+          bottom += vgap_ + visualChild->preferredHeight();
+          lastBottom = visualChild;
+        break;
+        case nAlClient :
+          client = vgap_+visualChild->preferredHeight();
+        break;
+      }
     }
   }
 
   int ymax = 0;
 
-  // determine, which layout structure is there and compute the preferredHeigth of the layout
+  // determine, which layout structure is there and compute the preferredHeight of the layout
 
   if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { // 0000
     ymax = std::max( std::max(left,right), client ) + top + bottom;
@@ -279,9 +284,3 @@ void NAlignLayout::removeAll( )
 {
   components.clear();
 }
-
-
-
-
-
-
