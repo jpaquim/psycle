@@ -62,6 +62,7 @@ void MachineView::onCreateMachine( Machine * mac )
   {
       case MACHMODE_GENERATOR: {
         MachineGUI* macGui = new GeneratorGUI(mac);
+          macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
@@ -69,6 +70,8 @@ void MachineView::onCreateMachine( Machine * mac )
       break;
       case MACHMODE_FX: {
         MachineGUI* macGui = new EffektGUI(mac);
+          macGui->moved.connect(this,&MachineView::onMoveMachine);
+          macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
@@ -76,6 +79,8 @@ void MachineView::onCreateMachine( Machine * mac )
       break;
       case MACHMODE_MASTER: {
         MachineGUI* macGui = new MasterGUI(mac);
+          macGui->newConnection.connect(this,&MachineView::onNewConnection);
+          macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           scrollArea_->add(macGui);
           machineGUIs.push_back(macGui);
@@ -240,8 +245,15 @@ void MachineView::updateVUs( )
   }
 }
 
+void MachineView::onMoveMachine( Machine * mac, int x, int y )
+{
+  machineMoved.emit(mac,x,y);
+}
+
+
 }
 }
+
 
 
 

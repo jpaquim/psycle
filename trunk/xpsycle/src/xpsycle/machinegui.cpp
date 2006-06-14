@@ -114,6 +114,8 @@ void MachineGUI::onMove( const NMoveEvent & moveEvent )
     pMac()->_x = left();
     pMac()->_y = top();
   }
+
+  moved.emit(pMac(), pMac()->_x, pMac()->_y);
 }
 
 void MachineGUI::resize( )

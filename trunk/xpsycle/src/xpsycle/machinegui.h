@@ -58,6 +58,7 @@ public:
     void detachLine(NLine* line);
 
     signal1<MachineGUI*> newConnection;
+    signal3<Machine*,int,int> moved;
 
     virtual void onMouseDoublePress(int x, int y, int button);
     virtual void onMousePress(int x, int y, int button);
