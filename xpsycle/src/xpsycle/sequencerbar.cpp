@@ -785,4 +785,15 @@ void SequencerBar::onMoveCursorPaste( NButtonEvent * ev )
    patternView_->setMoveCursorWhenPaste(movecursorpaste_->checked() );
 }
 
+int SequencerBar::patternPos( ) const
+{
+  if (seqList_->selIndex() != -1) {
+    return seqList_->selIndex(),Global::pSong()->playOrder[seqList_->selIndex()];
+  }
+
+  return -1;
+}
+
 }}
+
+

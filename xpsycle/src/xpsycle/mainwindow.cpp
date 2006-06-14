@@ -52,6 +52,8 @@ MainWindow::MainWindow()
   initViews();
   initSignals();
 
+  updateStatusBar();
+
   childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
 }
 
@@ -155,6 +157,8 @@ void MainWindow::initMenu( )
       helpMenu_->add(new NMenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
       helpMenu_->add(new NMenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
     menuBar_->add(helpMenu_);
+
+
 }
 
 void MainWindow::initDialogs( )
@@ -1295,5 +1299,21 @@ void MainWindow::onLineChanged(int line) {
   statusBar_->repaint();
 }
 
+void MainWindow::updateStatusBar( )
+{
+  Machine* mac = childView_->machineView()->selMachine();
+  if (mac) {
+    macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(mac->_x) +","+ stringify(mac->_y));
+  }
+  seqPosStatusItem->setText("Pos: "+stringify(sequencerBar_->seqList()->selIndex()));
+  seqPatStatusItem->setText("Pat: "+sequencerBar_->patternPos());
+  linePosStatusItem->setText("Line: "+stringify(childView_->patternView()->cursor().y()));
+
+  statusBar_->resize();
+  statusBar_->repaint();
+}
+
 }}
+
+
 
