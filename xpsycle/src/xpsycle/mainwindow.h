@@ -41,6 +41,7 @@
 #include <ngrs/n7segdisplay.h>
 
 class NStatusBar;
+class NTextStatusItem;
 
 namespace psycle { namespace host {
 
@@ -107,6 +108,8 @@ private:
     VuMeter* vuMeter_;
 
     InstrumentEditor* instrumentEditor;
+
+    NTextStatusItem* macPosStatusItem;
 
     void initMenu();
     void initDialogs();
@@ -206,6 +209,8 @@ private:
 
     int close();
     void updateComboIns(bool updatelist);
+
+    void onMachineMoved(Machine* mac , int x, int y);
 };
 
 }}

@@ -36,6 +36,7 @@
 #include <ngrs/nmessagebox.h>
 #include <ngrs/nbevelborder.h>
 #include <ngrs/nstatusbar.h>
+#include <ngrs/ntextstatusitem.h>
 
 namespace psycle { namespace host {
 
@@ -197,13 +198,17 @@ void MainWindow::initBars( )
   initToolBar();
 
   statusBar_ = new NStatusBar();
-      progressBar_ = new NProgressBar();
+    progressBar_ = new NProgressBar();
         progressBar_->setValue(0);
         progressBar_->setMax(16385);
         progressBar_->setWidth(200);
         progressBar_->setHeight(25);
-        progressBar_->setVisible(false);        Global::pSong()->progress.connect(this,&MainWindow::onSongLoadProgress);
+        progressBar_->setVisible(false);
+        Global::pSong()->progress.connect(this,&MainWindow::onSongLoadProgress);
     statusBar_->add(progressBar_,nAlLeft);
+    macPosStatusItem = new NTextStatusItem();
+    statusBar_->add(macPosStatusItem,nAlLeft);
+    childView_->machineView()->machineMoved.connect(this,&MainWindow::onMachineMoved);
   pane()->add(statusBar_,nAlBottom);
 
   pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
@@ -1252,4 +1257,12 @@ void MainWindow::onInstrumentCbx( NItemEvent * ev )
   insCombo_->setIndex(index);
 }
 
+void MainWindow::onMachineMoved( Machine * mac, int x, int y )
+{
+  macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(x) +","+ stringify(y));
+  statusBar_->resize();
+  statusBar_->repaint();
+}
+
 }}
+

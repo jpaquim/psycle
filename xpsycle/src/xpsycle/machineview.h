@@ -77,6 +77,8 @@ public:
 
     NPanel* scrollArea();
 
+    signal3<Machine*, int, int> machineMoved;
+
 private:
 
     MachineWireGUI* line;
@@ -94,6 +96,8 @@ private:
     void onLineMousePressed(NButtonEvent* sender);
 
     void onWireDelete(WireDlg* dlg);
+
+    void onMoveMachine(Machine* mac, int x, int y);
 
     MachineGUI* findByMachine(Machine* mac);
 
