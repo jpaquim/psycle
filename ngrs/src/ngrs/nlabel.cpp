@@ -68,6 +68,8 @@ NLabel::~NLabel()
 
 void NLabel::paint( NGraphics * g )
 {
+  if (name() == "menu_lbl2") std::cout << "size" << font().size() << std::endl;
+
   int i = 0;
   int start = 0;
   int yp_ = g->textAscent() ;

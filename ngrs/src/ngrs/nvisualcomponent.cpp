@@ -861,6 +861,21 @@ void NVisualComponent::setFocus( )
 
 void NVisualComponent::setEnable( bool on )
 {
+  setFont(oldFont);
+
+  if (!on && enabled_) {
+    oldFont = font();
+    NFont fnt = font();
+      fnt.setTextColor(skin_.disabledTextColor());
+      disableParentFont_ = skin_.parentFont();
+      skin_.useParentFont(false);
+    setFont(fnt);
+  } else
+  if (on && !enabled_) {
+    setFont(oldFont);
+    skin_.useParentFont(disableParentFont_);
+  }
+
   enabled_ = on;
 }
 

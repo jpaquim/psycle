@@ -223,6 +223,9 @@ private:
    NAlignConstraint alignConstraint_;
 
    bool enabled_;
+
+   NFont oldFont;
+   bool disableParentFont_;
 };
 
 #endif

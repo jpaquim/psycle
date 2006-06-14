@@ -157,6 +157,13 @@ void NPopupMenu::onKeyPress( const NKeyEvent & event )
   }
 }
 
+void NPopupMenu::removeChilds( )
+{
+  items.clear();
+  lastOverItem = 0;
+  pane()->removeChilds();
+}
+
 
 
 

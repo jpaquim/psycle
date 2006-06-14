@@ -218,7 +218,11 @@ void NTestWindow::testMenu( )
 
   NMenuItem* item = new NMenuItem("Open");
      item->click.connect(this,&NTestWindow::onOpen);
+     //item->setEnable(false);
   menu1->add(item);
+
+  std::cout << item->captionLbl_->font().textColor().red() << std::endl;
+  item->captionLbl_->setName("menu_lbl2");
 
   /*NMenuItem* item1 = new NMenuItem("close");
   menu1->add(item1);
@@ -245,7 +249,8 @@ void NTestWindow::testMenu( )
 //  menu1->add(item);
 //  item->click.connect(this,&NTestWindow::onOpen);
 
-  NCheckMenuItem* item5 = new NCheckMenuItem("test");
+  NCheckMenuItem* item5 = new NCheckMenuItem("test disabled");
+   item5->setEnable(false);
   menu1->add(item5);
 
   NMenuItem* item6 = new NMenuItem("subtest");
