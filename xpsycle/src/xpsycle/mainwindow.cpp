@@ -29,6 +29,7 @@
 #include "wavesavedlg.h"
 #include "defaultbitmaps.h"
 #include "internal_machines.h"
+#include "waveedframe.h"
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
 #include <ngrs/ncheckmenuitem.h>
@@ -176,6 +177,7 @@ void MainWindow::initDialogs( )
   // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
   add( infoDlg =  new InfoDlg() );
   add( wavSaveDlg = new WaveSaveDlg() );
+  add( waveEd_ = new WaveEdFrame(this));
 }
 
 // events from menuItems
@@ -558,7 +560,7 @@ void MainWindow::initToolBar( )
       psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
       psycleToolBar_->add(new NButton("Save"));
       psycleToolBar_->add(new NButton("Edit"))->clicked.connect(this,&MainWindow::onEditInstrument);
-      psycleToolBar_->add(new NButton("Wave Ed"));
+      psycleToolBar_->add(new NButton("Wave Ed"))->clicked.connect(this,&MainWindow::onEditWave);
       psycleToolBar_->resize();
 
   toolBarPanel_->add(psycleToolBar_);
@@ -1021,6 +1023,7 @@ void MainWindow::onLoadWave( NButtonEvent * ev )
     if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
     {
       updateComboIns(true);
+      waveEd_->Notify();
       //m_wndStatusBar.SetWindowText("New wave loaded");
       //WaveEditorBackUpdate();
       //m_wndInst.WaveUpdate();
@@ -1054,12 +1057,19 @@ void MainWindow::onEditInstrument( NButtonEvent * ev )
   instrumentEditor->setVisible(true);
 }
 
+void MainWindow::onEditWave( NButtonEvent * ev)
+{
+  waveEd_->Notify();
+  waveEd_->setVisible(true);
+}
+
 void MainWindow::onDecInsBtn( NButtonEvent * ev )
 {
   int index = Global::pSong()->instSelected -1;
   if (index >=0 ) {
     Global::pSong()->instSelected=   index;
     Global::pSong()->auxcolSelected= index;
+    waveEd_->Notify();
 
     insCombo_->setIndex(index);
     insCombo_->repaint();
@@ -1072,6 +1082,7 @@ void MainWindow::onIncInsBtn( NButtonEvent * ev )
   if (index <= 255) {
     Global::pSong()->instSelected=   index;
     Global::pSong()->auxcolSelected= index;
+    waveEd_->Notify();
 
     insCombo_->setIndex(index);
     insCombo_->repaint();
@@ -1275,6 +1286,7 @@ void MainWindow::onInstrumentCbx( NItemEvent * ev )
   int index = insCombo_->selIndex();
   Global::pSong()->instSelected=   index;
   Global::pSong()->auxcolSelected= index;
+  waveEd_->Notify();
   insCombo_->setIndex(index);
 }
 
