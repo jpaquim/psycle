@@ -1150,10 +1150,9 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 		if (wdWave)
 		{
 //			pParent->m_wndView.AddMacViewUndo();
-			AmpDlg->execute();
-			pos = AmpDlg->db_i;
-			if (pos != 0)
+			if (AmpDlg->execute())
 			{
+				pos = AmpDlg->db_i;
 				pSong->IsInvalided(true);
 //				Sleep(LOCK_LATENCY);
 				ratio = pow(10.0, (double) pos / (double) 2000.0);
