@@ -32,7 +32,7 @@ namespace psycle {
 	namespace host {
 
 class NewMachine;
-
+class WaveEdFrame;
 /**
 @author Stefan
 */
@@ -60,6 +60,7 @@ public:
 
     PatternView* patternView();
     MachineView* machineView();
+    WaveEdFrame* waveEditor();
 
     void play();
     void playFromStart();
@@ -82,6 +83,8 @@ private:
 
     MachineView* machineView_;
     PatternView* patternView_;
+
+    WaveEdFrame* waveEd_;
 
     std::string OnFileLoadSongNamed(const std::string & fName, int fType);
 

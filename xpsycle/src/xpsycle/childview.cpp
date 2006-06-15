@@ -21,6 +21,7 @@
 #include "configuration.h"
 #include "player.h"
 #include "newmachine.h"
+#include "waveedframe.h"
 #include <ngrs/napp.h>
 #include <inttypes.h>
 #include <ngrs/ndockpanel.h>
@@ -58,6 +59,9 @@ ChildView::ChildView()
   addPage(macDock,"Machine View");
   NDockPanel* patDock = new NDockPanel(patternView_);
   addPage(patDock,"Pattern View");
+  waveEd_ = new WaveEdFrame();
+  addPage(waveEd_,"WaveEditor");
+
   setActivePage(macDock);
 
   getOpenFileName_ = new NFileDialog();
@@ -246,8 +250,15 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
     }
 }
 
+WaveEdFrame * ChildView::waveEditor( )
+{
+  return waveEd_;
+}
+
 }
 }
+
+
 
 
 

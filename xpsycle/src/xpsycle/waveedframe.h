@@ -18,7 +18,8 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 //#include "waveedchildview.hpp"
-#include <ngrs/nwindow.h>
+
+#include <ngrs/ndockpanel.h>
 
 class NMenu;
 class NMenuBar;
@@ -29,15 +30,14 @@ namespace psycle { namespace host {
 class WaveEdChildView;
 
 /// wave editor frame window.
-class WaveEdFrame : public NWindow
+class WaveEdFrame : public NDockPanel
 {
 public:
 	WaveEdFrame();
-	WaveEdFrame(NWindow* pframe);
 	virtual ~WaveEdFrame() throw();
 	
-	virtual void setVisible(bool on);
-	virtual int onClose();
+	//virtual void setVisible(bool on);
+	//virtual int onClose();
 
 public:
 	void Notify(void);

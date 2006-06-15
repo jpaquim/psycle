@@ -70,7 +70,6 @@ public:
 	
 	WaveEdChildView();
 	virtual ~WaveEdChildView();
-	void SetParent(NWindow *parent) {pParent = parent; }
 	void SetSong(Song* song) {pSong = song; volSlider->setSong(song);}
 			
     
@@ -159,7 +158,6 @@ private:
 	NTextStatusItem *statusText;		//displays editor status
 	NTextStatusItem *modeText;			//displays mode
 	
-	NWindow *pParent;
 	Song *pSong;
 
 	NColor clrLo;
