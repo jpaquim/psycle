@@ -52,16 +52,30 @@ public:
 		Song *pSong;
 	};
 	
+	class WavePanel : public NPanel
+	{
+		public:
+		WavePanel(WaveEdChildView* wView);
+		~WavePanel();
+		virtual void paint(NGraphics *g);
+
+		virtual void onMousePress  (int x, int y, int button);
+		virtual void onMousePressed(int x, int y, int button);
+		virtual void onMouseDoublePress(int x, int y, int button);
+		virtual void onMouseOver(int x, int y);
+		virtual void onMouseExit();
+		private:
+			WaveEdChildView* wView_;
+	};
 	
 	WaveEdChildView();
 	virtual ~WaveEdChildView();
 	void SetParent(NWindow *parent) {pParent = parent; }
 	void SetSong(Song* song) {pSong = song; volSlider->setSong(song);}
 			
-    virtual void paint(NGraphics* g);
     
-    virtual void resize();
-    void ResizeZoomBar();
+  virtual void resize();
+
     
 	void SetSpecificZoom(int factor);
 
@@ -89,10 +103,7 @@ public:
 	
 	void onTimer();
 
-    virtual void onMousePress  (int x, int y, int button);
-    virtual void onMousePressed(int x, int y, int button);
-    virtual void onMouseDoublePress(int x, int y, int button);
-    virtual void onMouseOver(int x, int y);
+
 	void onSelectionZoomIn(NButtonEvent* ev);
 	void onSelectionZoomSel(NButtonEvent* ev);
 	void onSelectionZoomOut(NButtonEvent* ev);
@@ -133,6 +144,7 @@ private:
 	void InitStatusBar();
 	void UpdateStatusBar();
 
+	WavePanel* waveArea;
 	NPopupMenu *popup;
 
 	NPanel *zoomBar;

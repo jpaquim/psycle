@@ -73,6 +73,8 @@ namespace psycle { namespace host {
 		InitStatusBar();
 		InitZoomBar();
 		
+		waveArea = new WavePanel(this);
+		add(waveArea,nAlClient);
 		setAlign(nAlClient);
 
 		timer.setIntervalTime(750);
@@ -101,24 +103,6 @@ namespace psycle { namespace host {
 	{
 		NPanel::resize();
 		RefreshDisplayData(true);	
-		ResizeZoomBar();
-
-	}
-	void WaveEdChildView::ResizeZoomBar()
-	{
-		zoomBar->setPosition(0, clientHeight()-30, clientWidth(), 15);
-		zoomInButton->setPosition(clientWidth()-20, 0, 15, 15);
-		zoomOutButton->setPosition(clientWidth()-115, 0, 15, 15);		
-		zoomSlider->setPosition(clientWidth()-100, 0, 80, 15);
-		volSlider->setPosition(0, 0, 75, 15);
-		scrollBar->setPosition(75, 0, clientWidth()-190, 15);
-		
-		statusBar->setPosition(0, clientHeight()-15, clientWidth(), 15);
-		modeText->setPosition(clientWidth()-100, 0, 100, 15);
-		lengthText->setPosition(clientWidth()-350, 0, 250, 15);
-		selText->setPosition(clientWidth()-600, 0, 250, 15);
-		statusText->setPosition(0, 0, clientWidth()-600, 15);
-		
 	}
 	
 	void WaveEdChildView::InitPopupMenu()
@@ -155,10 +139,15 @@ namespace psycle { namespace host {
 	void WaveEdChildView::InitZoomBar()
 	{
 		zoomBar = new NPanel();
+		zoomBar->setLayout(NAlignLayout());
 		volSlider = new VolumeSlider();
+    volSlider->setPreferredSize(75,15);
 		zoomSlider = new NSlider();
+		zoomSlider->setPreferredSize(100,15);
 		zoomOutButton = new NButton("-");//, 15, 15);
+		zoomOutButton->setPreferredSize(15,15);
 		zoomInButton = new NButton("+");//, 15, 15);
+		zoomInButton->setPreferredSize(15,15);
 		scrollBar = new NScrollBar();
 		
 		scrollBar->setOrientation(nHorizontal);
@@ -182,12 +171,11 @@ namespace psycle { namespace host {
 		
 		add(zoomBar, nAlBottom);
 		
-		zoomBar->add(volSlider);
-		zoomBar->add(zoomOutButton);
-		zoomBar->add(zoomSlider);
-		zoomBar->add(zoomInButton);
-		zoomBar->add(scrollBar);
-		ResizeZoomBar();
+		zoomBar->add(volSlider,nAlLeft);
+		zoomBar->add(zoomOutButton,nAlRight);
+		zoomBar->add(zoomSlider,nAlRight);
+		zoomBar->add(zoomInButton,nAlRight);
+		zoomBar->add(scrollBar,nAlClient);
 	}
 
 	void WaveEdChildView::InitStatusBar()
@@ -237,7 +225,7 @@ namespace psycle { namespace host {
 		
 		//for now..
 		statusText->setText("Ready");
-		
+		statusBar->resize();
 	}
 	void WaveEdChildView::onHScroll( NObject *sender, int pos)
 	{
@@ -256,20 +244,20 @@ namespace psycle { namespace host {
 	{
 		int newzoom = (int)pos;
 		SetSpecificZoom(newzoom);
-		repaint();
+		waveArea->repaint();
 	}
 
 
-    void WaveEdChildView::paint(NGraphics* g)
+    void WaveEdChildView::WavePanel::paint(NGraphics* g)
     {
 		int wrHeight = 0;
 		int wrHeadHeight=0;
 		int c;
 
-		if(wdWave)
+		if(wView_->wdWave)
 		{
 			//const NRegion invalidRgn = g->repaintArea();
-			int const barHeight = 30;	//height of scroll bar and status bar combined
+			int const barHeight = 0;	//height of scroll bar and status bar combined
 			
 			int const nHeadHeight=clientHeight()/10;
 			int const nWidth=clientWidth();
@@ -278,7 +266,7 @@ namespace psycle { namespace host {
 			int const my =		(int)(nHeight*0.5f);
 			int const myHead =	(int)(nHeadHeight*0.5f);
 
-			if(wdStereo)
+			if(wView_->wdStereo)
 			{
 				wrHeight =		(int)(my*0.5f);
 				wrHeadHeight =	(int)(myHead*0.5f);
@@ -290,36 +278,36 @@ namespace psycle { namespace host {
 			}
 
 			//ratios used to convert from sample indices to pixels
-			float dispRatio = nWidth/(float)diLength;
-			float headDispRatio = nWidth/(float)wdLength;
+			float dispRatio = nWidth/(float)wView_->diLength;
+			float headDispRatio = nWidth/(float)wView_->wdLength;
 
-			g->setForeground(clrBlack);			
+			g->setForeground(wView_->clrBlack);
 			g->fillRect(0, 0, nWidth, clientHeight()-barHeight);
 
-			if(blLength)
+			if(wView_->blLength)
 			{
 				unsigned long selx, selx2;
-				selx =blStart;
-				selx2=blStart+blLength;
+				selx =wView_->blStart;
+				selx2=wView_->blStart+wView_->blLength;
 	
 				int HeadSelX = int(selx * headDispRatio);
 				int HeadSelX2= int(selx2* headDispRatio);
-				g->setForeground(clrWhite);
+				g->setForeground(wView_->clrWhite);
 				g->fillRect(HeadSelX, 0, HeadSelX2-HeadSelX, nHeadHeight);
 	
-				if(selx<diStart) selx=diStart;
-				if(selx2>diStart+diLength) selx2=diStart+diLength;
+				if(selx<wView_->diStart) selx=wView_->diStart;
+				if(selx2>wView_->diStart+wView_->diLength) selx2=wView_->diStart+wView_->diLength;
 				//if the selected block is entirely off the screen, the above statements will flip the order
 				if(selx2>selx)					//if not, it will just clip the drawing
 				{
-					selx = int((selx -diStart)*dispRatio) ;
-					selx2= int((selx2-diStart)*dispRatio) ;
+					selx = int((selx -wView_->diStart)*dispRatio) ;
+					selx2= int((selx2-wView_->diStart)*dispRatio) ;
 					g->fillRect(selx, nHeadHeight,  selx2-selx, nHeight);
 	
 				}
 			}
 			// Draw preliminary stuff
-			g->setForeground(clrMe);
+			g->setForeground(wView_->clrMe);
 			
 			// Left channel 0 amplitude line
 			g->drawLine(0, wrHeight+nHeadHeight,  nWidth, wrHeight+nHeadHeight);
@@ -329,91 +317,91 @@ namespace psycle { namespace host {
 			int const wrHeight_R = my + wrHeight;
 			int const wrHeadHeight_R = myHead + wrHeadHeight;
 			
-			g->setForeground(clrWhite);
+			g->setForeground(wView_->clrWhite);
 			// Header/Body divider
 			g->drawLine(0, nHeadHeight,  nWidth, nHeadHeight);
-			if(wdStereo)
+			if(wView_->wdStereo)
 			{
 				// Stereo channels separator line
-				g->setForeground(clrLo);
+				g->setForeground(wView_->clrLo);
 				g->drawLine(0, my+nHeadHeight,  nWidth, my+nHeadHeight);
 				// Stereo channels Header Separator
 				g->drawLine(0, myHead,  nWidth, myHead);
 				
-				g->setForeground(clrMe);
+				g->setForeground(wView_->clrMe);
 				// Right channel 0 amplitude line
 				g->drawLine(0, wrHeight_R+nHeadHeight,  nWidth, wrHeight_R+nHeadHeight);
 				// Right Header 0 amplitude line
 				g->drawLine(0, wrHeadHeight_R,  nWidth, wrHeadHeight_R);
 			}
 			// Draw samples in channels (Fideloop's)
-			g->setForeground(clrHi);
+			g->setForeground(wView_->clrHi);
 			for(c = 0; c < nWidth; c++)
 			{
-				g->drawLine(c, wrHeight - lDisplay.at(c).first  + nHeadHeight,
-							c, wrHeight - lDisplay.at(c).second + nHeadHeight);
-				g->drawLine(c, wrHeadHeight - lHeadDisplay.at(c).first,
-							c, wrHeadHeight - lHeadDisplay.at(c).second );
+				g->drawLine(c, wrHeight - wView_->lDisplay.at(c).first  + nHeadHeight,
+							c, wrHeight - wView_->lDisplay.at(c).second + nHeadHeight);
+				g->drawLine(c, wrHeadHeight - wView_->lHeadDisplay.at(c).first,
+							c, wrHeadHeight - wView_->lHeadDisplay.at(c).second );
 			}
-			if(wdStereo)
+			if(wView_->wdStereo)
 			{
 				//draw right channel wave data
 				for(c = 0; c < nWidth; c++)
 				{
-					g->drawLine(c,wrHeight_R - rDisplay.at(c).first + nHeadHeight,
-								c,wrHeight_R - rDisplay.at(c).second + nHeadHeight);
-					g->drawLine(c, wrHeadHeight_R-rHeadDisplay.at(c).first,
-								c, wrHeadHeight_R-rHeadDisplay.at(c).second );
+					g->drawLine(c,wrHeight_R - wView_->rDisplay.at(c).first + nHeadHeight,
+								c,wrHeight_R - wView_->rDisplay.at(c).second + nHeadHeight);
+					g->drawLine(c, wrHeadHeight_R-wView_->rHeadDisplay.at(c).first,
+								c, wrHeadHeight_R-wView_->rHeadDisplay.at(c).second );
 				}
 			}
 			//draw loop points
-			if ( wdLoop )
+			if ( wView_->wdLoop )
 			{
-				g->setForeground(clrLo);
-				g->setFont(*fntLoop);
-				if ( wdLoopS >= diStart && wdLoopS < diStart+diLength)
+				g->setForeground(wView_->clrLo);
+				g->setFont(*wView_->fntLoop);
+				if ( wView_->wdLoopS >= wView_->diStart && wView_->wdLoopS < wView_->diStart+wView_->diLength)
 				{
-					int ls = int((wdLoopS-diStart)*dispRatio);
+					int ls = int((wView_->wdLoopS-wView_->diStart)*dispRatio);
 					g->drawLine(ls, nHeadHeight,  ls, nHeight+nHeadHeight);
 					int textlen = g->textWidth("Start");
 					g->drawText(ls-textlen/2, nHeadHeight+g->textHeight(), "Start" );
 				}
-				g->setForeground(clrLo);
-				if ( wdLoopE >= diStart && wdLoopE < diStart+diLength)
+				g->setForeground(wView_->clrLo);
+				if ( wView_->wdLoopE >= wView_->diStart && wView_->wdLoopE < wView_->diStart+wView_->diLength)
 				{
-					int le = int((wdLoopE-diStart)*dispRatio);
+					int le = int((wView_->wdLoopE-wView_->diStart)*dispRatio);
 					g->drawLine(le, nHeadHeight,  le, nHeight+nHeadHeight);
 					int textLen = g->textWidth("End");
 					g->drawText( le - textLen/2, nHeight+nHeadHeight, "End");
 				}
 				
 				//draw loop points in header
-				int ls = (int)(wdLoopS * headDispRatio);
-				int le = (int)(wdLoopE * headDispRatio);
+				int ls = (int)(wView_->wdLoopS * headDispRatio);
+				int le = (int)(wView_->wdLoopE * headDispRatio);
 
-				g->setForeground(clrLo);
+				g->setForeground(wView_->clrLo);
 				g->drawLine(ls, 0,  ls, nHeadHeight);
 				g->drawLine(le, 0, le, nHeadHeight);
 			}
 
 			//draw screen size on header
-			g->setForeground(clrWhite);
-			int screenx  = int( diStart           * headDispRatio);
-			int screenx2 = int((diStart+diLength) * headDispRatio);
+			g->setForeground(wView_->clrWhite);
+			int screenx  = int( wView_->diStart           * headDispRatio);
+			int screenx2 = int((wView_->diStart+wView_->diLength) * headDispRatio);
 			g->drawLine(screenx,  0,  				screenx,  nHeadHeight-1);
 			g->drawLine(screenx,  nHeadHeight-1,	screenx2, nHeadHeight-1);
 			g->drawLine(screenx2, nHeadHeight-1,	screenx2, 0);
 			g->drawLine(screenx2, 0,				screenx,  0);
 			
-			if(cursorBlink	&&	cursorPos >= diStart	&&	cursorPos <= diStart+diLength)
+			if(wView_->cursorBlink	&&	wView_->cursorPos >= wView_->diStart	&&	wView_->cursorPos <= wView_->diStart+wView_->diLength)
 			{
-				int cursorX = int((cursorPos-diStart)*dispRatio);
+				int cursorX = int((wView_->cursorPos-wView_->diStart)*dispRatio);
 				g->drawLine(cursorX, nHeadHeight,  cursorX, nHeadHeight+nHeight);
 			}
 		}
 		else
 		{
-			g->setForeground(clrWhite);
+			g->setForeground(wView_->clrWhite);
 			g->drawText(4, 4+g->textHeight(), "No Wave Data");
 		}
 
@@ -657,33 +645,33 @@ namespace psycle { namespace host {
 	//////		Mouse event handlers
 
 
-void WaveEdChildView::onMousePress(int x, int y, int button)
+void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 {
 	if(button==1)	//left
 	{
 //		SetCapture();
-		if(wdWave)
+		if(wView_->wdWave)
 		{
 			if (   NApp::system().keyState() & ControlMask )
 			{
 //				pParent->m_wndView.AddMacViewUndo();
-				pSong->IsInvalided(true);
+				wView_->pSong->IsInvalided(true);
 //				Sleep(LOCK_LATENCY);
 
-				wdLoopS = diStart+((x*diLength)/clientWidth());
-				pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-				if (pSong->_pInstrument[wsInstrument]->waveLoopEnd < wdLoopS )
+				wView_->wdLoopS = wView_->diStart+((x*wView_->diLength)/clientWidth());
+				wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopStart=wView_->wdLoopS;
+				if (wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopEnd < wView_->wdLoopS )
 				{
-					pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
+					wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopEnd=wView_->wdLoopS;
 				}
-				wdLoopE = pSong->_pInstrument[wsInstrument]->waveLoopEnd;
+				wView_->wdLoopE = wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopEnd;
 
-				if (!wdLoop) 
+				if (!wView_->wdLoop) 
 				{
-					wdLoop=true;
-					pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+					wView_->wdLoop=true;
+					wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopType=true;
 				}
-				pSong->IsInvalided(false);
+				wView_->pSong->IsInvalided(false);
 //				pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 				repaint();
 			}
@@ -693,134 +681,134 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 				int const nHeadHeight = clientHeight()/10;
 
 
-				if(y>nHeadHeight && diLength!=0)		//we're clicking on the main body
+				if(y>nHeadHeight && wView_->diLength!=0)		//we're clicking on the main body
 				{
-					float dispRatio = nWidth/float(diLength);
-					if		( blSelection	&&
-							abs(x - f2i((blStart-diStart)			* dispRatio )) < 10 )	//mouse down on block start
+					float dispRatio = nWidth/float(wView_->diLength);
+					if		( wView_->blSelection	&&
+							abs(x - f2i((wView_->blStart-wView_->diStart)			* dispRatio )) < 10 )	//mouse down on block start
 					{
-						SelStart = blStart+blLength;				//set SelStart to the end we're -not- moving
-						cursorPos=blStart;
+						wView_->SelStart = wView_->blStart+wView_->blLength;				//set SelStart to the end we're -not- moving
+						wView_->cursorPos=wView_->blStart;
 					}
-					else if ( blSelection	&&
-							abs(x - f2i((blStart+blLength-diStart)	* dispRatio )) < 10 )	//mouse down on block end
+					else if ( wView_->blSelection	&&
+							abs(x - f2i((wView_->blStart+wView_->blLength-wView_->diStart)	* dispRatio )) < 10 )	//mouse down on block end
 					{
-						SelStart=blStart;							//set SelStart to the end we're -not- moving
-						cursorPos=blStart+blLength;
+						wView_->SelStart=wView_->blStart;							//set SelStart to the end we're -not- moving
+						wView_->cursorPos=wView_->blStart+wView_->blLength;
 					}
-					else if ( wdLoop		&&
-							abs(x - f2i((wdLoopS-diStart)			* dispRatio )) < 10 )	//mouse down on loop start
+					else if ( wView_->wdLoop		&&
+							abs(x - f2i((wView_->wdLoopS-wView_->diStart)			* dispRatio )) < 10 )	//mouse down on loop start
 					{
-						bDragLoopStart=true;
+						wView_->bDragLoopStart=true;
 					}
-					else if ( wdLoop		&&
-							abs(x - f2i((wdLoopE-diStart)			* dispRatio )) < 10 )	//mouse down on loop end
+					else if ( wView_->wdLoop		&&
+							abs(x - f2i((wView_->wdLoopE-wView_->diStart)			* dispRatio )) < 10 )	//mouse down on loop end
 					{
-						bDragLoopEnd=true;
+						wView_->bDragLoopEnd=true;
 					}
 					else
 					{
-						blSelection=false;
+						wView_->blSelection=false;
 						
-						blStart=diStart+int(x*diLength/nWidth);
-						blLength=0;
-						SelStart = blStart;
-						cursorPos = blStart;
+						wView_->blStart=wView_->diStart+int(x*wView_->diLength/nWidth);
+						wView_->blLength=0;
+						wView_->SelStart = wView_->blStart;
+						wView_->cursorPos = wView_->blStart;
 
 					}
 				}
 				else					//we're clicking on the header
 				{
-					float headDispRatio = nWidth/float(wdLength);
-					if		( blSelection		&&
-							abs( x - f2i( blStart				* headDispRatio ) ) < 10 )	//mouse down on block start
+					float headDispRatio = nWidth/float(wView_->wdLength);
+					if		( wView_->blSelection		&&
+							abs( x - f2i( wView_->blStart				* headDispRatio ) ) < 10 )	//mouse down on block start
 					{
-						SelStart = blStart+blLength;
+						wView_->SelStart = wView_->blStart+wView_->blLength;
 					}
-					else if ( blSelection		&&
-							abs( x - f2i((blStart+blLength)	* headDispRatio ) ) < 10 )	//mouse down on block end
+					else if ( wView_->blSelection		&&
+							abs( x - f2i((wView_->blStart+wView_->blLength)	* headDispRatio ) ) < 10 )	//mouse down on block end
 					{
-						SelStart = blStart;
+						wView_->SelStart = wView_->blStart;
 					}
 					else
 					{
-						blSelection=false;
+						wView_->blSelection=false;
 						
-						blStart = f2i((x*wdLength)/nWidth);
-						blLength=0;
-						SelStart = blStart;
+						wView_->blStart = f2i((x*wView_->wdLength)/nWidth);
+						wView_->blLength=0;
+						wView_->SelStart = wView_->blStart;
 
 					}
 				}
 				XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
 				repaint();
-				UpdateStatusBar();
+				wView_->UpdateStatusBar();
 			}
 		}
-		bLButtonDown = true;
+		wView_->bLButtonDown = true;
 	}
 	else if(button==3)
 	{
-		if(wdWave)
+		if(wView_->wdWave)
 		{
 
 			if ( NApp::system().keyState() & ControlMask )
 			{
 //				pParent->m_wndView.AddMacViewUndo();
-				pSong->IsInvalided(true);
+				wView_->pSong->IsInvalided(true);
 
-				wdLoopE = diStart+((x*diLength)/clientWidth());
-				pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-				if (pSong->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
+				wView_->wdLoopE = wView_->diStart+((x*wView_->diLength)/clientWidth());
+				wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopEnd=wView_->wdLoopE;
+				if (wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopStart> wView_->wdLoopE )
 				{
-					pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
+					wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopStart=wView_->wdLoopE;
 				}
-				wdLoopS = pSong->_pInstrument[wsInstrument]->waveLoopStart;
-				if (!wdLoop) 
+				wView_->wdLoopS = wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopStart;
+				if (!wView_->wdLoop) 
 				{
-					wdLoop=true;
-					pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+					wView_->wdLoop=true;
+					wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopType=true;
 				}
-				pSong->IsInvalided(false);
+				wView_->pSong->IsInvalided(false);
 //				pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 				repaint();
 
 			}
 			else	//do context menu
 			{
-				rbX=x;
-				rbY=y;
-				popup->setPosition(x, y + 10,100,100);
-				popup->setVisible(true);
+				wView_->rbX=x;
+				wView_->rbY=y;
+				wView_->popup->setPosition(x, y + 10,100,100);
+				wView_->popup->setVisible(true);
 			}
 		}
 		
 	}
 }
 	
-	void WaveEdChildView::onMouseDoublePress(int x, int y, int button)
+	void WaveEdChildView::WavePanel::onMouseDoublePress(int x, int y, int button)
 	{
 		//...
 	}
 
-	void WaveEdChildView::onMouseOver(int x, int y)
+	void WaveEdChildView::WavePanel::onMouseOver(int x, int y)
 	{
 		int const nWidth=clientWidth();
 		int const nHeadHeight = clientHeight()/10;
 
-		if(bLButtonDown && wdWave)
+		if(wView_->bLButtonDown && wView_->wdWave)
 		{
 			if(y>nHeadHeight)		//mouse is over body
 			{
-				float diRatio = (float) diLength/nWidth;
-				unsigned long newpos =  (x*diRatio+diStart > 0? (unsigned long)(x*diRatio+diStart): 0);
-				int headX = int( (diStart+x*diRatio)*nWidth/float(wdLength) );
-				if(bDragLoopStart)
+				float diRatio = (float) wView_->diLength/nWidth;
+				unsigned long newpos =  (x*diRatio+wView_->diStart > 0? (unsigned long)(x*diRatio+wView_->diStart): 0);
+				int headX = int( (wView_->diStart+x*diRatio)*nWidth/float(wView_->wdLength) );
+				if(wView_->bDragLoopStart)
 				{
-					if(newpos > wdLoopE)		wdLoopS = wdLoopE;
-					else						wdLoopS = newpos;
-					pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-					pSong->IsInvalided(false);
+					if(newpos > wView_->wdLoopE)		wView_->wdLoopS = wView_->wdLoopE;
+					else						wView_->wdLoopS = newpos;
+					wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopStart=wView_->wdLoopS;
+					wView_->pSong->IsInvalided(false);
 //					pParent->m_wndInst.WaveUpdate();
 
 					//set invalid rects
@@ -831,13 +819,13 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 					else					invHead.SetRect(prevHeadLoopS-20,0,			headX+20, nHeadHeight);
 					prevBodyLoopS=x;	prevHeadLoopS=headX;
 */				}
-				else if(bDragLoopEnd)
+				else if(wView_->bDragLoopEnd)
 				{
-					if(newpos >= wdLength)		wdLoopE = wdLength-1;
-					else if(newpos >= wdLoopS)	wdLoopE = newpos;
-					else						wdLoopE = wdLoopS;
-					pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-					pSong->IsInvalided(false);
+					if(newpos >= wView_->wdLength)		wView_->wdLoopE = wView_->wdLength-1;
+					else if(newpos >= wView_->wdLoopS)	wView_->wdLoopE = newpos;
+					else						wView_->wdLoopE = wView_->wdLoopS;
+					wView_->pSong->_pInstrument[wView_->wsInstrument]->waveLoopEnd=wView_->wdLoopE;
+					wView_->pSong->IsInvalided(false);
 //					pParent->m_wndInst.WaveUpdate();
 
 					//set invalid rects
@@ -850,19 +838,19 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 */				}
 				else
 				{
-					if (newpos >= SelStart)
+					if (newpos >= wView_->SelStart)
 					{
-						if (newpos >= wdLength)	{ newpos = wdLength-1; }
-						blStart = SelStart;
-						blLength = newpos - blStart;
-						cursorPos=blStart+blLength;
+						if (newpos >= wView_->wdLength)	{ newpos = wView_->wdLength-1; }
+						wView_->blStart = wView_->SelStart;
+						wView_->blLength = newpos - wView_->blStart;
+						wView_->cursorPos=wView_->blStart+wView_->blLength;
 					}
 					else
 					{
 						if (newpos < 0) { newpos = 0; }
-						blStart = newpos;
-						blLength = SelStart - blStart;
-						cursorPos=blStart;
+						wView_->blStart = newpos;
+						wView_->blLength = wView_->SelStart - wView_->blStart;
+						wView_->cursorPos=wView_->blStart;
 					}
 					//set invalid rects
 /*					int sampWidth = nWidth/(float)diLength+1;
@@ -873,23 +861,23 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 					prevHeadX=headX;
 					prevBodyX=x;
 */
-					UpdateStatusBar();
+					wView_->UpdateStatusBar();
 				}
 			}
 			else					//mouse is over header
 			{
-				float diRatio = (float) wdLength/nWidth;
+				float diRatio = (float) wView_->wdLength/nWidth;
 				unsigned long newpos = (x * diRatio > 0? (unsigned long)(x*diRatio): 0);
-				if (newpos >= SelStart)
+				if (newpos >= wView_->SelStart)
 				{
-					if (newpos >= wdLength)	{ newpos = wdLength-1;	}
-					blStart = SelStart;
-					blLength = newpos - blStart;
+					if (newpos >= wView_->wdLength)	{ newpos = wView_->wdLength-1;	}
+					wView_->blStart = wView_->SelStart;
+					wView_->blLength = newpos - wView_->blStart;
 				}
 				else
 				{
-					blStart = newpos;
-					blLength = SelStart-blStart;
+					wView_->blStart = newpos;
+					wView_->blLength = wView_->SelStart-wView_->blStart;
 				}
 				//set invalid rects
 /*				int bodyX = int( (x*wdLength - diStart*nWidth)/diLength );
@@ -904,40 +892,40 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 				prevBodyX=bodyX;
 				prevHeadX=x;
 */
-				UpdateStatusBar();			
+				wView_->UpdateStatusBar();			
 			}
-			blSelection=true;
+			wView_->blSelection=true;
 /*			CRect invalid;
 			invalid.UnionRect(&invBody, &invHead);
 			InvalidateRect(&invalid, false);
-*/			repaint();
+*/		wView_->repaint();
 		}
 		else 
 		{
 
 			//todo
 			
-			if(y>nHeadHeight && diLength!=0)		//mouse is over body
+			if(y>nHeadHeight && wView_->diLength!=0)		//mouse is over body
 			{
-				float dispRatio = nWidth/(float)diLength;
-				if	(		blSelection		&&
-						(	abs ( x - int((  blStart-diStart )			* dispRatio ))  < 10		||
-							abs ( x - int((  blStart+blLength-diStart)	* dispRatio ))  < 10	)	||
-						(	wdLoop &&
-						(	abs ( x - int((  wdLoopS-diStart )			* dispRatio ))  < 10		||
-							abs ( x - int((  wdLoopE-diStart )			* dispRatio ))  < 10) )
+				float dispRatio = nWidth/(float)wView_->diLength;
+				if	(		wView_->blSelection		&&
+						(	abs ( x - int((  wView_->blStart-wView_->diStart )			* dispRatio ))  < 10		||
+							abs ( x - int((  wView_->blStart+wView_->blLength-wView_->diStart)	* dispRatio ))  < 10	)	||
+						(	wView_->wdLoop &&
+						(	abs ( x - int((  wView_->wdLoopS-wView_->diStart )			* dispRatio ))  < 10		||
+							abs ( x - int((  wView_->wdLoopE-wView_->diStart )			* dispRatio ))  < 10) )
 					)
 					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
 				else
 					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_xterm));
 			}
-			else if (wdLength!=0)					//mouse is over header
+			else if (wView_->wdLength!=0)					//mouse is over header
 			{
 				
-				float dispRatio = nWidth/(float)wdLength;
-				if (		blSelection		&&
-						(	abs ( x - int(   blStart			* dispRatio ))	< 10 ||
-							abs ( x - int((  blStart+blLength)	* dispRatio ))	< 10 )
+				float dispRatio = nWidth/(float)wView_->wdLength;
+				if (		wView_->blSelection		&&
+						(	abs ( x - int(  wView_-> blStart			* dispRatio ))	< 10 ||
+							abs ( x - int((  wView_->blStart+wView_->blLength)	* dispRatio ))	< 10 )
 					)
 					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
 				else
@@ -947,26 +935,26 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 		
 	}
 
-	void WaveEdChildView::onMousePressed(int x, int y, int button)
+	void WaveEdChildView::WavePanel::onMousePressed(int x, int y, int button)
 	{
 		if(button==1)	//left
 		{
-			if(blLength==0)
-				blSelection=false;
-			if(bSnapToZero)
+			if(wView_->blLength==0)
+				wView_->blSelection=false;
+			if(wView_->bSnapToZero)
 			{
-				if(blSelection)
+				if(wView_->blSelection)
 				{
-					long delta = blStart - FindNearestZero(blStart);
-					blStart-=delta;
-					blLength+=delta;
-					blLength = FindNearestZero(blStart+blLength) - blStart;
+					long delta = wView_->blStart - wView_->FindNearestZero(wView_->blStart);
+					wView_->blStart-=delta;
+					wView_->blLength+=delta;
+					wView_->blLength = wView_->FindNearestZero(wView_->blStart+wView_->blLength) - wView_->blStart;
 				}
-				cursorPos = FindNearestZero(cursorPos);
+				wView_->cursorPos = wView_->FindNearestZero(wView_->cursorPos);
 			}
 //			ReleaseCapture();
-			bDragLoopEnd = bDragLoopStart = false;
-			bLButtonDown = false;
+			wView_->bDragLoopEnd = wView_->bDragLoopStart = false;
+			wView_->bLButtonDown = false;
 			repaint();
 		}
 	}
@@ -2228,4 +2216,21 @@ void WaveEdChildView::onMousePress(int x, int y, int button)
 			*(data+i) = static_cast<short>(current);
 		}
 	}
+
+	WaveEdChildView::WavePanel::WavePanel(WaveEdChildView* wView )
+	{
+		wView_ = wView;
+	}
+
+	WaveEdChildView::WavePanel::~ WavePanel( )
+	{
+	}
+
+	void WaveEdChildView::WavePanel::onMouseExit()
+  {
+		// reset mousearrow
+		XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_left_ptr));
+  }
+
 }}
+
