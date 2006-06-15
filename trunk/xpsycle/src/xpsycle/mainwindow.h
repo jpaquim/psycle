@@ -51,6 +51,7 @@ class VuMeter;
 class InstrumentEditor;
 class InfoDlg;
 class WaveSaveDlg;
+class WaveEdFrame;
 
 
 /**
@@ -69,6 +70,7 @@ private:
 
     ChildView* childView_;
     NWindow* songpDlg_;
+    WaveEdFrame* waveEd_;
     NTabBook* tabBook_;
     SequencerBar* sequencerBar_;
     NPanel* toolBarPanel_;
@@ -177,6 +179,7 @@ private:
 
     void onLoadWave(NButtonEvent* ev);
     void onEditInstrument(NButtonEvent* ev);
+    void onEditWave(NButtonEvent* ev);
     void onInstrumentCbx(NItemEvent* ev);
 
     void onMachineView(NButtonEvent* ev);
