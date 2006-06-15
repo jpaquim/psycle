@@ -21,10 +21,10 @@
 #include "song.h"
 #include "waveedframe.h"
 #include "waveedchildview.h"
-#include "mainwindow.h"
 #include <ngrs/nvisualcomponent.h>
 #include <ngrs/nitem.h>
 #include <ngrs/nmenubar.h>
+#include <ngrs/nmenuitem.h>
 #include <ngrs/nmenu.h>
 #include <ngrs/ncheckmenuitem.h>
 #include <ngrs/nmenuseperator.h>
@@ -57,6 +57,12 @@ namespace psycle { namespace host {
 	{
 		NWindow::setVisible(on);
 		wavView->resize();
+	}
+
+	int WaveEdFrame::onClose()
+	{
+		setVisible(false);
+		return nHideWindow;
 	}
 	
 	void WaveEdFrame::InitMenus()

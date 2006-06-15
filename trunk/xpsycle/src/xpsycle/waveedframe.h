@@ -37,6 +37,7 @@ public:
 	virtual ~WaveEdFrame() throw();
 	
 	virtual void setVisible(bool on);
+	virtual int onClose();
 
 public:
 	void Notify(void);
