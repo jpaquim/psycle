@@ -109,8 +109,7 @@ namespace psycle { namespace host {
 	{
 		wavView->SetViewData(Global::pSong()->instSelected);
 	}
-
-
+	
 /*
 		void WaveEdFrame::onPlay() {PlayFrom(wavview.GetCursorPos());}
 		void WaveEdFrame::onPlayFromStart() {PlayFrom(0);}
@@ -145,3 +144,5 @@ namespace psycle { namespace host {
 		}
 */
 }}
+
+
