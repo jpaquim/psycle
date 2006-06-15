@@ -127,17 +127,21 @@ int NEdit::computeDx( NGraphics* g, const std::string & text )
 
 int NEdit::preferredHeight( ) const
 {
+  if (ownerSize()) return NPanel::preferredHeight();
+
   NFontMetrics metrics;
   metrics.setFont(font());
-  return metrics.textHeight();// + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
+  return metrics.textHeight() + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
 }
 
 
 int NEdit::preferredWidth( ) const
-{ 
+{
+  if (ownerSize()) return NPanel::preferredWidth();
+
   NFontMetrics metrics;
   metrics.setFont(font());
-  return metrics.textWidth(text_);
+  return metrics.textWidth(text_) + spacing().left()+spacing().right()+borderLeft()+borderRight();
 }
 
 

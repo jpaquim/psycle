@@ -37,10 +37,10 @@ NSlider::~NSlider()
 void NSlider::resize( )
 {
   if (orientation_ == nVertical) {
-    slider_->setLeft(0);
+    setPos(pos_);
     slider_->setWidth(clientWidth());
   } else {
-    slider_->setTop(0);
+    setPos(pos_);
     slider_->setHeight(clientHeight());
   }
 }
