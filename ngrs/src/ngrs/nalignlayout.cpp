@@ -117,38 +117,107 @@ void NAlignLayout::align( NVisualComponent * parent )
 
 int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
 {
-  // todo change in a way like preferredHeight , so this is not fully working
-  // high priority
+  // this will store the block width of same aligns; eg. the width sum of all nAlignTop components
+  int top    = 0;
+  int left   = 0;
+  int right  = 0;
+  int bottom = 0;
+  int client = 0;
 
-  int xp = 0;
+  // pointers to determinate, if a coponent with that align is there
+  NVisualComponent* lastTop    = 0;
+  NVisualComponent* lastLeft   = 0;
+  NVisualComponent* lastRight  = 0;
+  NVisualComponent* lastBottom = 0;
 
-  int topMax = 0;
+  // flags to determine the 16 possible layout structures
+  bool topBeforeLeft, topBeforeRight, bottomBeforeLeft, bottomBeforeRight = 1;
 
-  std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
+  std::vector<NVisualComponent*>::const_iterator it = components.begin();
 
-  for (;itr < parent()->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     switch (visualChild->align()) {
-       case nAlTop    :
-           topMax = std::max(visualChild->preferredWidth() + 2 * hgap_, topMax);
-           xp = topMax;
-       break;
-       case nAlBottom    :
-           topMax = std::max(visualChild->preferredWidth() + 2 * hgap_, topMax);
-           xp = topMax;
-       break;
-       case nAlLeft   : xp = xp + visualChild->preferredWidth();
-       break;
-       case nAlRight  : xp = xp + visualChild->preferredWidth();
-       break;
-       case nAlClient : 
-          xp = xp + std::max(topMax,visualChild->preferredWidth());
-
-       break;
+  // compute for each block the preferredHeight
+  for ( ; it < components.end(); it++ ) {
+    NVisualComponent* visualChild = *it;
+    if (visualChild->visible()) {
+      switch ( visualChild->align() ) {
+        case nAlLeft   :
+          left += hgap_ + visualChild->preferredWidth();
+          lastLeft = visualChild;
+        break;
+        case nAlTop    :
+          if (lastLeft)  topBeforeLeft  = 0;
+          if (lastRight) topBeforeRight = 0;
+          top = std::max(visualChild->preferredWidth(),top);
+          lastTop = visualChild;
+        break;
+        case nAlRight  :
+          right += hgap_ + visualChild->preferredWidth();
+          lastRight = visualChild;
+        break;
+        case nAlBottom :
+          if (lastLeft)  bottomBeforeLeft  = 0;
+          if (lastRight) bottomBeforeRight = 0;
+          bottom = std::max(visualChild->preferredWidth(),bottom);
+          lastBottom = visualChild;
+        break;
+        case nAlClient :
+          client = hgap_ + visualChild->preferredWidth();
+        break;
       }
+    }
   }
 
- return xp;
+  int xmax = 0;
+
+  // determine, which layout structure is there and compute the preferredWidth of the layout
+
+  if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { // 0000
+    xmax = std::max(std::max(client + left + right, bottom),top);
+  } else
+  if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) { //0001
+    xmax = std::max(std::max(left+client,bottom)+right,top);
+  } else
+  if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) { //0010
+    xmax = std::max( std::max( right + client, bottom ) + left, top);
+  } else
+  if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0011
+    xmax = std::max(std::max(client,bottom)+left+right,top);
+  } else
+  if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { //0100
+    xmax = std::max(std::max(left+client,top)+right,bottom);
+  } else
+  if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//0101
+    xmax = std::max(std::max(left+client,top),bottom)+right;
+  } else
+  if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//0110
+    xmax = std::max(std::max(left+client,top)+right,bottom+left);
+  } else
+  if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0111
+    xmax = std::max(std::max(client,bottom)+left,top)+right;
+  } else
+  if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1000
+    xmax = std::max(std::max(client+right,top)+left,bottom);
+  } else
+  if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
+    xmax = std::max(left+top,right+bottom);
+  } else
+  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1010
+    xmax = std::max(std::max(client,bottom)+right,top)+left;
+  } else
+  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100
+    xmax = std::max(std::max(client,top)+left+right,bottom);
+  } else
+  if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1101
+    xmax = std::max(std::max(client,top)+left,bottom)+right;
+  } else
+  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1110
+    xmax = std::max(std::max(client,top)+right,bottom)+left;
+  } else
+  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1111
+    xmax = std::max(std::max(client,top),bottom)+left+right;
+  }
+
+  return hgap_ + xmax;
 }
 
 int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
