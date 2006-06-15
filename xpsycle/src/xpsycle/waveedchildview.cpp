@@ -82,9 +82,13 @@ namespace psycle { namespace host {
 		timer.timerEvent.connect(this, &WaveEdChildView::onTimer);
 		
 		AmpDlg = new WaveEdAmplifyDialog;
+		add(AmpDlg);
 		SilenceDlg = new WaveEdInsertSilenceDialog;
+		add(SilenceDlg);
 		MixDlg = new WaveEdMixDialog;
+		add(MixDlg);
 		XFadeDlg = new WaveEdCrossfadeDialog;
+		add(XFadeDlg);
 //		SetTimer(31415, 750, 0);
 //		ResetScrollBars();
 	}
@@ -172,9 +176,9 @@ namespace psycle { namespace host {
 		add(zoomBar, nAlBottom);
 		
 		zoomBar->add(volSlider,nAlLeft);
-		zoomBar->add(zoomOutButton,nAlRight);
-		zoomBar->add(zoomSlider,nAlRight);
 		zoomBar->add(zoomInButton,nAlRight);
+		zoomBar->add(zoomSlider,nAlRight);
+		zoomBar->add(zoomOutButton,nAlRight);
 		zoomBar->add(scrollBar,nAlClient);
 	}
 
