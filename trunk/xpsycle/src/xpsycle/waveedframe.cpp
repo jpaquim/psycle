@@ -35,16 +35,12 @@ namespace psycle { namespace host {
 
 	WaveEdFrame::WaveEdFrame()
 	{
-	}
-	WaveEdFrame::WaveEdFrame(NWindow* pframe)
-	{
 		wavView = new WaveEdChildView();
 
-		setPosition(0,0,800,600);
-		setPositionToScreenCenter();
+//		setPosition(0,0,800,600);
+//		setPositionToScreenCenter();
 		this->InitMenus();			
-		this->setTitle("Wave Editor");
-		wavView->SetParent(pframe);
+		//this->setTitle("Wave Editor");
 		wavView->SetSong(Global::pSong());
 		pane()->add(wavView);
 	}
@@ -53,7 +49,7 @@ namespace psycle { namespace host {
 	{
 	}
 	
-	void WaveEdFrame::setVisible(bool on)
+/*	void WaveEdFrame::setVisible(bool on)
 	{
 		NWindow::setVisible(on);
 		wavView->resize();
@@ -63,7 +59,7 @@ namespace psycle { namespace host {
 	{
 		setVisible(false);
 		return nHideWindow;
-	}
+	}*/
 	
 	void WaveEdFrame::InitMenus()
 	{

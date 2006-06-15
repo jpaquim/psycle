@@ -51,7 +51,6 @@ class VuMeter;
 class InstrumentEditor;
 class InfoDlg;
 class WaveSaveDlg;
-class WaveEdFrame;
 
 
 /**
@@ -70,7 +69,6 @@ private:
 
     ChildView* childView_;
     NWindow* songpDlg_;
-    WaveEdFrame* waveEd_;
     NTabBook* tabBook_;
     SequencerBar* sequencerBar_;
     NPanel* toolBarPanel_;

@@ -177,7 +177,7 @@ void MainWindow::initDialogs( )
   // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
   add( infoDlg =  new InfoDlg() );
   add( wavSaveDlg = new WaveSaveDlg() );
-  add( waveEd_ = new WaveEdFrame(this));
+
 }
 
 // events from menuItems
@@ -1023,7 +1023,7 @@ void MainWindow::onLoadWave( NButtonEvent * ev )
     if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
     {
       updateComboIns(true);
-      waveEd_->Notify();
+      childView_->waveEditor()->Notify();
       //m_wndStatusBar.SetWindowText("New wave loaded");
       //WaveEditorBackUpdate();
       //m_wndInst.WaveUpdate();
@@ -1059,8 +1059,8 @@ void MainWindow::onEditInstrument( NButtonEvent * ev )
 
 void MainWindow::onEditWave( NButtonEvent * ev)
 {
-  waveEd_->Notify();
-  waveEd_->setVisible(true);
+  childView_->waveEditor()->Notify();
+  //waveEd_->setVisible(true);
 }
 
 void MainWindow::onDecInsBtn( NButtonEvent * ev )
@@ -1069,7 +1069,7 @@ void MainWindow::onDecInsBtn( NButtonEvent * ev )
   if (index >=0 ) {
     Global::pSong()->instSelected=   index;
     Global::pSong()->auxcolSelected= index;
-    waveEd_->Notify();
+    childView_->waveEditor()->Notify();
 
     insCombo_->setIndex(index);
     insCombo_->repaint();
@@ -1082,7 +1082,7 @@ void MainWindow::onIncInsBtn( NButtonEvent * ev )
   if (index <= 255) {
     Global::pSong()->instSelected=   index;
     Global::pSong()->auxcolSelected= index;
-    waveEd_->Notify();
+    childView_->waveEditor()->Notify();
 
     insCombo_->setIndex(index);
     insCombo_->repaint();
@@ -1286,7 +1286,7 @@ void MainWindow::onInstrumentCbx( NItemEvent * ev )
   int index = insCombo_->selIndex();
   Global::pSong()->instSelected=   index;
   Global::pSong()->auxcolSelected= index;
-  waveEd_->Notify();
+  childView_->waveEditor()->Notify();
   insCombo_->setIndex(index);
 }
 
