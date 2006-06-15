@@ -22,6 +22,9 @@
 #include <ngrs/ncheckbox.h>
 #include <ngrs/nedit.h>
 #include <ngrs/nlabel.h>
+#include <ngrs/nalignlayout.h>
+#include <ngrs/nalignconstraint.h>
+#include <ngrs/ntablelayout.h>
 
 namespace psycle
 {
@@ -29,50 +32,52 @@ namespace psycle
 	{
 		WaveEdInsertSilenceDialog::WaveEdInsertSilenceDialog()
 		{
-			setPosition(0, 0, 247, 87);
-			setPositionToScreenCenter();
 			setTitle("Insert Silence");
-			m_atStart = new NCheckBox("At start");
-			m_atEnd = new NCheckBox("At end");
-			m_atCursor = new NCheckBox("At cursor");
+
+			NPanel* table = new NPanel();
+				NTableLayout tableLayout(2,3);
+				tableLayout.setVGap(5);
+				tableLayout.setHGap(5);
+				table->setLayout(tableLayout);
+				m_atStart = new NCheckBox("At start");
+				m_atEnd = new NCheckBox("At end");
+				m_atCursor = new NCheckBox("At cursor");
 			
-			pane()->add(m_atStart);
-			pane()->add(m_atEnd);
-			pane()->add(m_atCursor);
+			table->add(m_atStart, NAlignConstraint(nAlLeft,1,0),true);
+			table->add(m_atEnd , NAlignConstraint(nAlLeft,1,1),true);
+			table->add(m_atCursor, NAlignConstraint(nAlLeft,1,2),true);
 			
 			m_atStart->clicked.connect(this, &WaveEdInsertSilenceDialog::onInsStartClicked);
 			m_atEnd->clicked.connect(this, &WaveEdInsertSilenceDialog::onInsEndClicked);
 			m_atCursor->clicked.connect(this, &WaveEdInsertSilenceDialog::onInsCursorClicked);
-			
-			m_atStart->setPosition(88,22,80,13);
-			m_atEnd->setPosition(88,36,80,13);
-			m_atCursor->setPosition(88,50,90,13);
 
 			m_atStart->setCheck(true);
 			m_atEnd->setCheck(false);
 			m_atCursor->setCheck(false);
 
 			m_time = new NEdit;
-			pane()->add(m_time);
+			table->add(m_time,NAlignConstraint(nAlLeft,0,1),true);
 			m_time->setText("0.000");
-			m_time->setPosition(19,32,56,13);
-			{
-				NButton *btn = new NButton("Ok", false);
-				btn->clicked.connect(this, &WaveEdInsertSilenceDialog::onOkClicked);
-				pane()->add(btn);
-				btn->setPosition(181, 7, 60, 15);
-			}
+			NPanel* okPanel = new NPanel();
+			okPanel->setLayout(NAlignLayout(5,5));
 			{
 				NButton *btn = new NButton("Cancel", false);
 				btn->clicked.connect(this, &WaveEdInsertSilenceDialog::onCancelClicked);
-				pane()->add(btn);
-				btn->setPosition(181, 24, 60, 15);
+				okPanel->add(btn,nAlRight);
 			}
 			{
-				NLabel *lbl = new NLabel("Insert (in secs):");
-				pane()->add(lbl);
-				lbl->setPosition(21,17,53,14);
+				NButton *btn = new NButton("Ok", false);
+				btn->clicked.connect(this, &WaveEdInsertSilenceDialog::onOkClicked);
+				okPanel->add(btn,nAlRight);
 			}
+
+			pane()->add(okPanel,nAlBottom);
+			{
+				NLabel *lbl = new NLabel("Insert (in secs):");
+				table->add(lbl,NAlignConstraint(nAlLeft,0,0),true);
+			}
+			pane()->add(table,nAlClient);
+			pack();
 		}
 
 		void WaveEdInsertSilenceDialog::onInsStartClicked( NButtonEvent* ev)
