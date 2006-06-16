@@ -52,6 +52,8 @@ WaveSaveDlg::WaveSaveDlg()
   bits = -1;
   m_recmode = 0;
   channelmode = -1;
+  noiseshape = 0;
+  ditherpdf = (int)pdf::triangular;
 
   // init gui
 
@@ -157,9 +159,35 @@ WaveSaveDlg::WaveSaveDlg()
         cboxPanel->add(channelsCbx,nAlTop);
     audioPanel->add(cboxPanel, nAlClient);
   pane()->add(audioPanel,nAlTop);
+
+  NPanel* ditherPanel = new NPanel();
+    ditherPanel->setBorder(NBevelBorder(nNone,nLowered));
+    ditherPanel->setLayout(NAlignLayout(10, 3));
+    ditherChkBox = new NCheckBox("Enable Dither");
+      ditherChkBox->clicked.connect(this, &WaveSaveDlg::onDitherChkBox);
+      ditherChkBox->setCheck(true);
+    ditherPanel->add(ditherChkBox, nAlLeft);
+    ditherPanel->add(new NLabel("PDF"), nAlTop);
+    pdfCbx = new NComboBox();
+      pdfCbx->add(new NItem("Triangular"));
+      pdfCbx->add(new NItem("Rectangular"));
+      pdfCbx->add(new NItem("Gaussian"));
+      pdfCbx->itemSelected.connect(this, &WaveSaveDlg::onPdfSelCbx);
+      pdfCbx->setIndex(ditherpdf);
+    ditherPanel->add(pdfCbx, nAlTop);
+    ditherPanel->add(new NLabel("Noiseshaping"), nAlTop);
+    noiseshapeCbx = new NComboBox();
+      noiseshapeCbx->add(new NItem("None"));
+      noiseshapeCbx->add(new NItem("Highpass Contour"));
+      noiseshapeCbx->itemSelected.connect(this, &WaveSaveDlg::onNoiseshapeSelCbx);
+      noiseshapeCbx->setIndex(noiseshape);
+    ditherPanel->add(noiseshapeCbx, nAlTop);
+  pane()->add(ditherPanel, nAlTop);
+
   progressBar = new NProgressBar();
       progressBar->setValue(0);
   pane()->add(progressBar,nAlTop);
+
   NPanel* btnPanel = new NPanel();
     btnPanel->setLayout(NFlowLayout(nAlRight,5,5));
     closeBtn = new NButton("Close");
@@ -466,7 +494,8 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
     //m_text.SetWindowText(file.substr(pos+1).c_str());
   }
 
-  pPlayer->StartRecording(file,bits,rate,channelmode);
+  pPlayer->StartRecording(file,bits,rate,channelmode,
+                          ditherChkBox->checked(), ditherpdf, noiseshape);
 
   int tmp;
   int cont;
@@ -741,6 +770,15 @@ void WaveSaveDlg::onChannelSelCbx( NItemEvent * ev )
   channelmode = channelsCbx->selIndex();
 }
 
+void WaveSaveDlg::onPdfSelCbx( NItemEvent * ev)
+{
+  ditherpdf = pdfCbx->selIndex();
+}
+
+void WaveSaveDlg::onNoiseshapeSelCbx( NItemEvent * ev)
+{
+  noiseshape = noiseshapeCbx->selIndex();
+}
 // checkBoxEvents
 
 void WaveSaveDlg::onWireChkBox( NButtonEvent * ev )
@@ -774,6 +812,14 @@ void WaveSaveDlg::onGeneratorChkBox( NButtonEvent * ev )
     wireChkBox->repaint();
     trackChkBox->repaint();
   }
+}
+
+void WaveSaveDlg::onDitherChkBox ( NButtonEvent * ev)
+{
+  pdfCbx->setEnable(ditherChkBox->checked());
+  noiseshapeCbx->setEnable(ditherChkBox->checked());
+  pdfCbx->repaint();
+  noiseshapeCbx->repaint();
 }
 
 // Radiobutton events

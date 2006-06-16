@@ -53,6 +53,15 @@ public:
 
     virtual void setVisible(bool on);
 
+    struct pdf
+    {
+       enum pdfs
+       {
+         triangular,
+         rectangular,
+         gaussian
+       };
+    };
 private:
 
     // gui elements
@@ -72,11 +81,16 @@ private:
     NComboBox* channelsCbx;
     NProgressBar* progressBar;
     NButton* closeBtn;
+    NCheckBox* ditherChkBox;
+    NComboBox* pdfCbx;
+    NComboBox* noiseshapeCbx;
 
     // psycle sound engine variables
     int rate;
     int bits;
     int channelmode;
+    int ditherpdf;
+    int noiseshape;
 
     int lastpostick;
     int lastlinetick;
@@ -109,11 +123,14 @@ private:
     void onSampleRateCbx(NItemEvent* ev);
     void onBitSelCbx(NItemEvent* ev);
     void onChannelSelCbx(NItemEvent* ev);
+    void onPdfSelCbx(NItemEvent* ev);
+    void onNoiseshapeSelCbx(NItemEvent* ev);
 
     // checkbox events
     void onWireChkBox(NButtonEvent* ev);
     void onTrackChkBox(NButtonEvent* ev);
     void onGeneratorChkBox(NButtonEvent* ev);
+    void onDitherChkBox(NButtonEvent* ev);
 
     // radiobutton events
 
