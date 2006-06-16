@@ -23,7 +23,7 @@
 
 class NMenu;
 class NMenuBar;
-//class NToolBar;
+class NToolBar;
 
 namespace psycle { namespace host {
 
@@ -50,22 +50,24 @@ public:
 	
 	
 private:
-    void InitStatusBar();
-    void InitMenus();
-    
-//	NToolBar *toolBar;
-	
+	void InitStatusBar();
+	void InitMenus();
+	void InitToolBar();
+ 
+	NToolBar *toolBar;
 	WaveEdChildView *wavView;
-	
 
-/*
-  	void onPlay();
-	void onRelease();
-	void onPlayFromStart();
-	void onStop();
-	void onFastForward();
-	void onRewind();
+	int wsInstrument;
+	
+	void onPlay(NButtonEvent *ev);
+	void onRelease(NButtonEvent *ev);
+	void onPlayFromStart(NButtonEvent *ev);
+	void onStop(NButtonEvent *ev);
+	void onFastForward(NButtonEvent *ev);
+	void onRewind(NButtonEvent *ev);
 	void PlayFrom(unsigned long startpos);
-*/
+	void Stop();
+
 };
+
 }}

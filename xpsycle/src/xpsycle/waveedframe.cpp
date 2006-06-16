@@ -19,8 +19,10 @@
   ***************************************************************************/
 //#include "xpsycle.cpp"
 #include "song.h"
+#include "configuration.h"
 #include "waveedframe.h"
 #include "waveedchildview.h"
+#include "defaultbitmaps.h"
 #include <ngrs/nvisualcomponent.h>
 #include <ngrs/nitem.h>
 #include <ngrs/nmenubar.h>
@@ -29,19 +31,20 @@
 #include <ngrs/ncheckmenuitem.h>
 #include <ngrs/nmenuseperator.h>
 #include <ngrs/ntoolbar.h>
+#include <ngrs/nimage.h>
 
 namespace psycle { namespace host {
 
 
 	WaveEdFrame::WaveEdFrame()
 	{
-		wavView = new WaveEdChildView();
+		wavView = new WaveEdChildView(Global::pSong());
 
 //		setPosition(0,0,800,600);
 //		setPositionToScreenCenter();
-		this->InitMenus();			
+		this->InitMenus();
+		this->InitToolBar();
 		//this->setTitle("Wave Editor");
-		wavView->SetSong(Global::pSong());
 		pane()->add(wavView);
 	}
 
@@ -101,44 +104,101 @@ namespace psycle { namespace host {
 		menuBar->add(convertMenu);
 	}
 
+	void WaveEdFrame::InitToolBar( )
+	{
+	DefaultBitmaps & icons = Global::pConfig()->icons();
+	
+	toolBar = new NToolBar();
+	pane()->add(toolBar, nAlTop);
+	NImage* img;
+
+	img = new NImage();
+	img->setSharedBitmap(&icons.playstart());
+	img->setPreferredSize(25,25);
+	NButton* newBtn = new NButton(img);
+	newBtn->setHint("Play from Start");
+	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onPlayFromStart);
+
+	img = new NImage();
+	img->setSharedBitmap(&icons.play());
+	img->setPreferredSize(25,25);
+	newBtn = new NButton(img);
+	newBtn->setHint("Play from Cursor");
+	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onPlay);
+
+	img = new NImage();
+	img->setSharedBitmap(&icons.release());
+	img->setPreferredSize(25,25);
+	newBtn = new NButton(img);
+	newBtn->setHint("Release");
+	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onRelease);
+
+	img = new NImage();
+	img->setSharedBitmap(&icons.stop());
+	img->setPreferredSize(25,25);
+	newBtn = new NButton(img);
+	newBtn->setHint("Stop Playback");
+	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onStop);
+
+	img = new NImage();
+	img->setSharedBitmap(&icons.rwnd());
+	img->setPreferredSize(25,25);
+	newBtn = new NButton(img);
+	newBtn->setHint("Set Cursor to Wave Start");
+	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onRewind);
+
+	img = new NImage();
+	img->setSharedBitmap(&icons.ffwd());
+	img->setPreferredSize(25,25);
+	newBtn = new NButton(img);
+	newBtn->setHint("Set Cursor to Wave End");
+	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onFastForward);
+
+	toolBar->resize();
+}
+
+
 	void WaveEdFrame::Notify(void)
 	{
-		wavView->SetViewData(Global::pSong()->instSelected);
+		wsInstrument = Global::pSong()->instSelected;
+		wavView->SetViewData(wsInstrument);
 	}
 	
-/*
-		void WaveEdFrame::onPlay() {PlayFrom(wavview.GetCursorPos());}
-		void WaveEdFrame::onPlayFromStart() {PlayFrom(0);}
-		void WaveEdFrame::onRelease()
-		{
-			_pSong->waved.Release();
-		}
-		void WaveEdFrame::onStop()
-		{
-			_pSong->waved.Stop();
-		}
 
-		void WaveEdFrame::PlayFrom(unsigned long startPos)
-		{
-			if( startPos<0 || startPos >= _pSong->_pInstrument[wsInstrument]->waveLength )
-				return;
+	void WaveEdFrame::onPlay(NButtonEvent *ev) {PlayFrom(wavView->GetCursorPos());}
+	void WaveEdFrame::onPlayFromStart(NButtonEvent *ev) {PlayFrom(0);}
+	void WaveEdFrame::onRelease(NButtonEvent *ev)
+	{
+		Global::pSong()->waved.Release();
+	}
+	void WaveEdFrame::onStop(NButtonEvent *ev)
+	{
+		Stop();
+	}
 
-			OnStop();
+	void WaveEdFrame::PlayFrom(unsigned long startPos)
+	{
+		if( startPos<0 || startPos >= Global::pSong()->_pInstrument[wsInstrument]->waveLength )
+			return;		//this also protects against playing non-existent instruments
 
-			_pSong->waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
-			_pSong->waved.Play(startPos);
-		}
+		Stop();
 
-		void WaveEdFrame::onFastForward()
-		{
-			unsigned long wl = _pSong->_pInstrument[wsInstrument]->waveLength;
-			wavview.SetCursorPos( wl-1 );
-		}
-		void WaveEdFrame::onRewind()
-		{
-			wavview.SetCursorPos( 0 );
-		}
-*/
+		Global::pSong()->waved.SetInstrument( Global::pSong()->_pInstrument[wsInstrument] );
+		Global::pSong()->waved.Play(startPos);
+	}
+
+	void WaveEdFrame::Stop()
+	{
+		Global::pSong()->waved.Stop();
+	}
+	void WaveEdFrame::onFastForward(NButtonEvent *ev)
+	{
+		wavView->SetCursorPos( wavView->GetWaveLength()-1 );
+	}
+	void WaveEdFrame::onRewind(NButtonEvent *ev)
+	{
+		wavView->SetCursorPos( 0 );
+	}
 }}
 
 

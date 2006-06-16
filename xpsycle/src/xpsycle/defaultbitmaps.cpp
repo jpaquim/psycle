@@ -11221,6 +11221,80 @@ const char * play_xpm[] = {
 "..............",
 ".............."};
 
+/* XPM */
+const char *ffwd_xpm[] = {
+"17 17 3 1",
+"# c #000000",
+"a c #00ffff",
+". c #c5c2c5",
+".................",
+"...##........##..",
+"..#aa#......#aa#.",
+"..#aaa#.....#aa#.",
+"..#aaaa#....#aa#.",
+"..#aaaaa#...#aa#.",
+"..#aaaaaa#..#aa#.",
+"..#aaaaaaa#.#aa#.",
+"..#aaaaaaa#.#aa#.",
+"..#aaaaaa#..#aa#.",
+"..#aaaaa#...#aa#.",
+"..#aaaa#....#aa#.",
+"..#aaa#.....#aa#.",
+"..#aa#......#aa#.",
+"...##........##..",
+".................",
+"................."};
+
+/* XPM */
+const char *rwnd_xpm[] = {
+"17 17 3 1",
+"# c #000000",
+"a c #00ffff",
+". c #c5c2c5",
+".................",
+"..##........##...",
+".#aa#......#aa#..",
+".#aa#.....#aaa#..",
+".#aa#....#aaaa#..",
+".#aa#...#aaaaa#..",
+".#aa#..#aaaaaa#..",
+".#aa#.#aaaaaaa#..",
+".#aa#.#aaaaaaa#..",
+".#aa#..#aaaaaa#..",
+".#aa#...#aaaaa#..",
+".#aa#....#aaaa#..",
+".#aa#.....#aaa#..",
+".#aa#......#aa#..",
+"..##........##...",
+".................",
+"................."};
+
+/* XPM */
+const char *release_xpm[] = {
+"17 17 5 1",
+"# c #000000",
+"a c #00ffff",
+"b c #838183",
+". c #c5c2c5",
+"c c #ffffff",
+".................",
+"....#########....",
+"...#aaaaaaaaa#...",
+"...#aaaaaaaaa#...",
+"...#aaaa#aaaa#...",
+"...#aaaab#aaa#...",
+"...#aaaa.c#aa#...",
+"...#aaab.cc####..",
+"...#aa#..c#aa#.#.",
+"...#a#aab#aaa#..#",
+"....####b####b..#",
+".....#......#cb.#",
+"......#....#ccb#.",
+".......####cccb..",
+"...........#ccb..",
+"............#cb..",
+".............b..."};
+
 
 /* XPM */
 const char * plus1_xpm[] = {
@@ -17466,6 +17540,24 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   }
 
   try {
+    ffwd_.loadFromFile(pCfg->iconPath+ "ffwd.xpm");
+  } catch (const char* e) {
+    ffwd_.createFromXpmData(ffwd_xpm);
+  }
+
+  try {
+    rwnd_.loadFromFile(pCfg->iconPath+ "rwnd.xpm");
+  } catch (const char* e) {
+    rwnd_.createFromXpmData(rwnd_xpm);
+  }
+
+  try {
+    release_.loadFromFile(pCfg->iconPath+ "release.xpm");
+  } catch (const char* e) {
+    release_.createFromXpmData(release_xpm);
+  }
+
+  try {
     plus1_.loadFromFile(pCfg->iconPath+ "plus1.xpm");
   } catch (const char* e) {
     plus1_.createFromXpmData(plus1_xpm);
@@ -17666,6 +17758,21 @@ NBitmap & DefaultBitmaps::playstart( )
 NBitmap & DefaultBitmaps::play( )
 {
   return play_;
+}
+
+NBitmap & DefaultBitmaps::ffwd( )
+{
+  return ffwd_;
+}
+
+NBitmap & DefaultBitmaps::rwnd( )
+{
+  return rwnd_;
+}
+
+NBitmap & DefaultBitmaps::release( )
+{
+  return release_;
 }
 
 NBitmap & DefaultBitmaps::plus1( )
