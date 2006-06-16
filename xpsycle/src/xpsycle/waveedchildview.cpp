@@ -420,7 +420,6 @@ namespace psycle { namespace host {
 		wsInstrument = ins;
 		int wl=pSong->_pInstrument[ins]->waveLength;
 		
-		
 		if(wl)
 		{
 			wdWave=true;
@@ -446,8 +445,8 @@ namespace psycle { namespace host {
 		}
 
 		blSelection=false;
-		ResetScrollBars(true);
 		RefreshDisplayData(true);
+		ResetScrollBars(true);
 		UpdateStatusBar();
 		repaint();
 	}
