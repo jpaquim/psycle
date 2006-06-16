@@ -45,8 +45,10 @@ namespace psycle { namespace host {
 	
 	float const WaveEdChildView::zoomBase = 1.06f;
 
-	WaveEdChildView::WaveEdChildView()
+	WaveEdChildView::WaveEdChildView(Song* pSong_)
 	{
+		pSong = pSong_;
+
 		clrHi.setRGB(0x77, 0xDD, 0x00);
 		clrMe.setRGB(0xCC, 0xCC, 0xCC);
 		clrLo.setRGB(0x00, 0x00, 0xFF);
@@ -61,7 +63,7 @@ namespace psycle { namespace host {
 		bDragLoopStart = bDragLoopEnd = false;
 		SelStart=0;
 		cursorPos=0;
-		//pSong->waved.SetVolume(0.4f);
+		pSong->waved.SetVolume(0.4f);
 		wdWave=false;
 		wsInstrument=-1;
 //		prevHeadLoopS = prevBodyLoopS = prevHeadLoopE = prevBodyLoopE = 0;
@@ -144,8 +146,8 @@ namespace psycle { namespace host {
 	{
 		zoomBar = new NPanel();
 		zoomBar->setLayout(NAlignLayout());
-		volSlider = new VolumeSlider();
-    volSlider->setPreferredSize(75,15);
+		volSlider = new VolumeSlider(pSong);
+		volSlider->setPreferredSize(75,15);
 		zoomSlider = new NSlider();
 		zoomSlider->setPreferredSize(100,15);
 		zoomOutButton = new NButton("-");//, 15, 15);
@@ -160,8 +162,9 @@ namespace psycle { namespace host {
 		scrollBar->posChange.connect(this,&WaveEdChildView::onHScroll);
 		
 		volSlider->posChanged.connect(this, &WaveEdChildView::onVolSliderScroll);
-		volSlider->customSliderPaint.connect(this, &WaveEdChildView::onCustomDrawVolSlider);
 		volSlider->slider()->setTransparent(true);
+		volSlider->setRange(0, 100);
+		volSlider->setPos(pSong->waved.GetVolume()*100.0f);
 		
 		zoomSlider->setTransparent(false);
 		zoomSlider->setOrientation(nHorizontal);
@@ -240,8 +243,7 @@ namespace psycle { namespace host {
 	}
 	void WaveEdChildView::onVolSliderScroll( NSlider *slider, double pos)
 	{
-//		pSong->waved.SetVolume( pos/100.0f );
-		pSong->preview_vol = (float)pos;
+		pSong->waved.SetVolume( pos/100.0f);
 		volSlider->repaint();
 	}
 	void WaveEdChildView::onZoomSliderScroll( NSlider *slider, double pos)
@@ -451,14 +453,9 @@ namespace psycle { namespace host {
 		repaint();
 	}
 
-	void WaveEdChildView::onCustomDrawVolSlider(NSlider *slider, NGraphics* g)
-	{
-		
-	}
 	void WaveEdChildView::VolumeSlider::paint(NGraphics *g)
 	{
-//		float vol = _pSong->waved.GetVolume();
-		float vol = pSong->preview_vol;
+		float vol = pSong->waved.GetVolume();
 		NColor clrBlue;
 		NColor clrGray;
 		NColor clrBlack;
@@ -1911,8 +1908,8 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 		}
 
 		//set volume slider
-		volSlider->setRange(0, 1.0);
-		volSlider->setPos( /*pSong->waved.GetVolume()*/ pSong->preview_vol );
+		volSlider->setRange(0, 100);
+		volSlider->setPos( pSong->waved.GetVolume() * 100.0f);
 		volSlider->repaint();
 
 	}

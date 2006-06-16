@@ -475,7 +475,7 @@ namespace psycle
 						if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);
 					}
 
-//					song().DoPreviews( amount );
+					song().DoPreviews( amount );
 
 					// Inject Midi input data
 //					if(!CMidiInput::Instance()->InjectMIDI( amount ))

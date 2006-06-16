@@ -45,10 +45,9 @@ public:
 	class VolumeSlider : public NSlider
 	{
 	public:
-		VolumeSlider() { this->setOrientation(nHorizontal); }
+		VolumeSlider(Song* pSong_) { this->setOrientation(nHorizontal); pSong = pSong_; }
 		~VolumeSlider() {}
 		virtual void paint(NGraphics *g);
-		void setSong(Song* pSong_) {pSong = pSong_;}
 		Song *pSong;
 	};
 	
@@ -68,9 +67,8 @@ public:
 			WaveEdChildView* wView_;
 	};
 	
-	WaveEdChildView();
+	WaveEdChildView(Song* pSong_);
 	virtual ~WaveEdChildView();
-	void SetSong(Song* song) {pSong = song; volSlider->setSong(song);}
 			
     
   virtual void resize();
@@ -134,7 +132,6 @@ public:
 	void onHScroll( NObject *sender, int pos );
 	void onVolSliderScroll( NSlider *slider, double pos);
 	void onZoomSliderScroll( NSlider *slider, double pos);
-	void onCustomDrawVolSlider(NSlider *slider, NGraphics* g);
 		
 	
 private:

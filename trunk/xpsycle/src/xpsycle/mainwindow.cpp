@@ -27,7 +27,6 @@
 #include "instrumenteditor.h"
 #include "infodlg.h"
 #include "wavesavedlg.h"
-#include "defaultbitmaps.h"
 #include "internal_machines.h"
 #include "waveedframe.h"
 #include <ngrs/napp.h>

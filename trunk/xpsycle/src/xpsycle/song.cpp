@@ -1684,14 +1684,14 @@ namespace psycle
 		void Song::DoPreviews(int amount)
 		{
 			//todo do better.. use a vector<InstPreview*> or something instead
-/*			if(wavprev.IsEnabled())
+			if(wavprev.IsEnabled())
 			{
 				wavprev.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
 			}
 			if(waved.IsEnabled())
 			{
 				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
-			}*/
+			}
 		}
 
 		///\todo mfc+winapi->std

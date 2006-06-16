@@ -3,7 +3,7 @@
 #pragma once
 #include "songstructs.h"
 #include "instrument.h"
-//#include "InstPreview.hpp"
+#include "instpreview.h"
 #include "machine.h"
 #include "constants.h" // for the bloat-sized arrays and many other stuffs that should actually be moved in this file
 //#include <psycle/host/global.hpp>
@@ -228,9 +228,9 @@ namespace psycle
 				public:
 					//todo these ought to be dynamically allocated
 					/// Wave preview.
-//					InstPreview wavprev;
+					InstPreview wavprev;
 					/// Wave editor playback.
-//					InstPreview waved;
+					InstPreview waved;
 					/// runs the wave previewing.
 					void DoPreviews(int amount);
 			///\}

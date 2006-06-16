@@ -59,6 +59,9 @@ public:
     NBitmap & playselpattern();
     NBitmap & playstart();
     NBitmap & play();
+    NBitmap & ffwd();
+    NBitmap & rwnd();
+    NBitmap & release();
     NBitmap & plus1();
     NBitmap & plus();
     NBitmap & p();
@@ -102,6 +105,9 @@ private:
     NBitmap playselpattern_;
     NBitmap playstart_;
     NBitmap play_;
+    NBitmap ffwd_;
+    NBitmap rwnd_;
+    NBitmap release_;
     NBitmap plus1_;
     NBitmap plus_;
     NBitmap p_;
