@@ -535,10 +535,10 @@ void MainWindow::initToolBar( )
       psycleToolBar_->add(new NButton("Gear Rack"));
       psycleToolBar_->add(new NToolBarSeparator());
       auxSelectCombo_ = new NComboBox();
-      auxSelectCombo_->setWidth(70);
-      auxSelectCombo_->setHeight(20);
-      auxSelectCombo_->add(new NItem("Wave"));
-      auxSelectCombo_->setIndex(0);
+        auxSelectCombo_->setWidth(70);
+        auxSelectCombo_->setHeight(20);
+        auxSelectCombo_->add(new NItem("Wave"));
+        auxSelectCombo_->setIndex(0);
       psycleToolBar_->add(auxSelectCombo_);
       insCombo_ = new NComboBox();
         insCombo_->setWidth(158);
@@ -1038,7 +1038,7 @@ void MainWindow::updateComboIns( bool updatelist )
     insCombo_->removeChilds();
     char buffer[64];
     int listlen = 0;
-    for (int i=0;i<PREV_WAV_INS;i++)
+    for (int i=0;i<10;i++)
     {
       sprintf(buffer, "%.2X: %s", i, Global::pSong()->_pInstrument[i]->_sName);
       insCombo_->add(new NItem(buffer));
