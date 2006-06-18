@@ -82,10 +82,14 @@ namespace psycle { namespace host {
 		editMenu->add(new NMenuItem("Cut"))->click.connect(wavView,&WaveEdChildView::onEditCut);
 		editMenu->add(new NMenuItem("Crop"))->click.connect(wavView,&WaveEdChildView::onEditCrop);
 		editMenu->add(new NMenuItem("Copy"))->click.connect(wavView,&WaveEdChildView::onEditCopy);
-		editMenu->add(new NMenuItem("Paste->Insert"))->click.connect(wavView,&WaveEdChildView::onEditPaste);
-		editMenu->add(new NMenuItem("Paste->Overwrite"))->click.connect(wavView,&WaveEdChildView::onPasteOverwrite);
-		editMenu->add(new NMenuItem("Paste->Mix..."))->click.connect(wavView,&WaveEdChildView::onPasteMix);
-		editMenu->add(new NMenuItem("Paste->Crossfade..."))->click.connect(wavView,&WaveEdChildView::onPasteCrossfade);
+		NMenuItem* pasteItem = new NMenuItem("Paste");
+		editMenu->add(pasteItem);
+		NMenu* subEditMenu = new NMenu();
+		pasteItem->add(subEditMenu);
+		subEditMenu->add(new NMenuItem("Insert"))->click.connect(wavView,&WaveEdChildView::onEditPaste);
+		subEditMenu->add(new NMenuItem("Overwrite"))->click.connect(wavView,&WaveEdChildView::onPasteOverwrite);
+		subEditMenu->add(new NMenuItem("Mix..."))->click.connect(wavView,&WaveEdChildView::onPasteMix);
+		subEditMenu->add(new NMenuItem("Crossfade..."))->click.connect(wavView,&WaveEdChildView::onPasteCrossfade);
 		editMenu->add(new NMenuItem("Delete"))->click.connect(wavView,&WaveEdChildView::onEditDelete);
 		editMenu->add(new NMenuSeperator());
 		NCheckMenuItem *snapToZero = new NCheckMenuItem("Snap to Zero");
