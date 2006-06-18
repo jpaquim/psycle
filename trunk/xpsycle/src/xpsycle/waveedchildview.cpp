@@ -108,7 +108,8 @@ namespace psycle { namespace host {
 	void WaveEdChildView::resize()
 	{
 		NPanel::resize();
-		RefreshDisplayData(true);	
+		RefreshDisplayData(true);
+		ResetScrollBars();
 	}
 	
 	void WaveEdChildView::InitPopupMenu()
@@ -778,7 +779,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 			{
 				wView_->rbX=x;
 				wView_->rbY=y;
-				wView_->popup->setPosition(x, y + 10,100,100);
+				wView_->popup->setPosition(x+absoluteLeft()+window()->left(), y+absoluteTop()+window()->top(),100,100);
 				wView_->popup->setVisible(true);
 			}
 		}
@@ -1891,7 +1892,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 				//this is the same concept, except this is to give us some idea of where to draw the slider based on the existing zoom
 				//so, instead of wdLength/8 (the max zoom), we're doing wdLength/diLength (the current zoom)
 				float zoomfactor = log10(wdLength/(float)diLength)/log10(zoomBase);
-				int newpos = (int)(zoomfactor+0.5f);
+				int newpos = (int)(zoomfactor);
 				if(newpos<0)	newpos=0;		//i'm not sure how this would happen, but just in case
 				zoomSlider->setPos(newpos);
 			}

@@ -17540,6 +17540,18 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   }
 
   try {
+    playstart_flat_.loadFromFile(pCfg->iconPath+ "playstart_flat.xpm");
+  } catch (const char* e) {
+    playstart_flat_.createFromXpmData(playstart_xpm);
+  }
+
+  try {
+    play_flat_.loadFromFile(pCfg->iconPath+ "play_flat.xpm");
+  } catch (const char* e) {
+    play_flat_.createFromXpmData(play_xpm);
+  }
+
+  try {
     ffwd_.loadFromFile(pCfg->iconPath+ "ffwd.xpm");
   } catch (const char* e) {
     ffwd_.createFromXpmData(ffwd_xpm);
@@ -17621,6 +17633,12 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
     stop_.loadFromFile(pCfg->iconPath+ "stop.xpm");
   } catch (const char* e) {
     stop_.createFromXpmData(stop_xpm);
+  }
+
+  try {
+    stop_flat_.loadFromFile(pCfg->iconPath+ "stop_flat.xpm");
+  } catch (const char* e) {
+    stop_flat_.createFromXpmData(stop_xpm);
   }
 
   try {
@@ -17760,6 +17778,16 @@ NBitmap & DefaultBitmaps::play( )
   return play_;
 }
 
+NBitmap & DefaultBitmaps::playstart_flat( )
+{
+  return playstart_flat_;
+}
+
+NBitmap & DefaultBitmaps::play_flat( )
+{
+  return play_flat_;
+}
+
 NBitmap & DefaultBitmaps::ffwd( )
 {
   return ffwd_;
@@ -17828,6 +17856,11 @@ NBitmap & DefaultBitmaps::splash( )
 NBitmap & DefaultBitmaps::stop( )
 {
   return stop_;
+}
+
+NBitmap & DefaultBitmaps::stop_flat( )
+{
+  return stop_flat_;
 }
 
 NBitmap & DefaultBitmaps::tbmainknob( )

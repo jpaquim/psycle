@@ -59,6 +59,8 @@ public:
     NBitmap & playselpattern();
     NBitmap & playstart();
     NBitmap & play();
+    NBitmap & playstart_flat();
+    NBitmap & play_flat();
     NBitmap & ffwd();
     NBitmap & rwnd();
     NBitmap & release();
@@ -73,6 +75,7 @@ public:
     NBitmap & sequencer();
     NBitmap & splash();
     NBitmap & stop();
+    NBitmap & stop_flat();
     NBitmap & tbmainknob();
     NBitmap & undo();
     NBitmap & wood();
@@ -105,6 +108,8 @@ private:
     NBitmap playselpattern_;
     NBitmap playstart_;
     NBitmap play_;
+    NBitmap playstart_flat_;
+    NBitmap play_flat_;
     NBitmap ffwd_;
     NBitmap rwnd_;
     NBitmap release_;
@@ -119,6 +124,7 @@ private:
     NBitmap sequencer_;
     NBitmap splash_;
     NBitmap stop_;
+    NBitmap stop_flat_;
     NBitmap tbmainknob_;
     NBitmap undo_;
 

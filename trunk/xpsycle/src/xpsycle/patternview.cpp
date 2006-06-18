@@ -861,7 +861,7 @@ void PatternView::PatternDraw::onMousePress( int x, int y, int button )
     // todo linux paste
   } else
   if (button == 3) {
-      editPopup_->setPosition(x + absoluteLeft(), y + 10 + absoluteTop(),100,100);
+      editPopup_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
       editPopup_->setVisible(true);
   } else {
     clearOldSelection();
