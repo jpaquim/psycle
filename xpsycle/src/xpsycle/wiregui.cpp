@@ -80,7 +80,7 @@ void WireGUI::drawArrow( NGraphics * g )
   int middleX = (p1().x() + p2().x()) / 2;
   int middleY = (p1().y() + p2().y()) / 2;
 
-  double slope = atan2(middleX,middleY);
+  double slope = atan2(sin, cos);
   int rtcol = 140+abs((int)(slope*32));
 
   double altslope=slope;
@@ -103,7 +103,7 @@ void WireGUI::drawArrow( NGraphics * g )
                   max(0, min(255, btcol * deltaColG)),
                   max(0, min(255, btcol * deltaColB)));
 
-
+  NColor polyInnardsColor(192 * deltaColR, 192 * deltaColG, 192 * deltaColB);
   XPoint pol[5];
 
   pol[0].x = middleX -  (int) (cos    * triangle_size_center);
@@ -141,12 +141,13 @@ void WireGUI::drawArrow( NGraphics * g )
   g->setForeground(btBrush);
   g->fillPolygon(&fillPoly[3], 4);
 
-  g->setForeground(NColor(0,0,0));
+  g->setForeground(polyInnardsColor);
   g->drawPolygon(fillPoly,3);
-  g->setForeground(NColor(0,0,0));
   g->drawPolygon(&fillPoly[1],3);
-  g->setForeground(NColor(0,0,0));
   g->drawPolygon(&fillPoly[3], 4);
+
+  g->setForeground(NColor(0, 0, 0));
+  g->drawPolygon(&pol[1], 4);
 }
 
 }}

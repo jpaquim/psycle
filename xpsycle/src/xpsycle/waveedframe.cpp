@@ -113,14 +113,14 @@ namespace psycle { namespace host {
 	NImage* img;
 
 	img = new NImage();
-	img->setSharedBitmap(&icons.playstart());
+	img->setSharedBitmap(&icons.playstart_flat());
 	img->setPreferredSize(25,25);
 	NButton* newBtn = new NButton(img);
 	newBtn->setHint("Play from Start");
 	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onPlayFromStart);
 
 	img = new NImage();
-	img->setSharedBitmap(&icons.play());
+	img->setSharedBitmap(&icons.play_flat());
 	img->setPreferredSize(25,25);
 	newBtn = new NButton(img);
 	newBtn->setHint("Play from Cursor");
@@ -134,7 +134,7 @@ namespace psycle { namespace host {
 	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onRelease);
 
 	img = new NImage();
-	img->setSharedBitmap(&icons.stop());
+	img->setSharedBitmap(&icons.stop_flat());
 	img->setPreferredSize(25,25);
 	newBtn = new NButton(img);
 	newBtn->setHint("Stop Playback");
