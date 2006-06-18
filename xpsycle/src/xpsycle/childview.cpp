@@ -153,6 +153,7 @@ std::string ChildView::FileLoadSongNamed( std::string const & fName )
   machineView_->update();
   // emit a signal that song is loaded
   newSongLoaded.emit();
+  return "";
 }
 
 
