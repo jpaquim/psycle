@@ -92,7 +92,7 @@ void NListBox::onItemPress( NButtonEvent * ev)
 
     onItemSelected((NCustomItem*) (ev->sender()));
   } else {
-      // todo at mousewheel code
+      // todo add mousewheel code
   }
 }
 

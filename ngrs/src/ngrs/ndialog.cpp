@@ -42,6 +42,7 @@ int NDialog::onClose()
 {
   do_execute = false;
   setVisible(false);
+  setExitLoop(nDestroyWindow);
   return nDestroyWindow;
 }
 

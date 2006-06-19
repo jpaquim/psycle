@@ -71,6 +71,7 @@ private:
     NFileDialog* fDialog;
 
     void testListBox();
+    void testComboBox();
     void toolBarTest();
     void testSpinButton();
     void testBorderLayout();
