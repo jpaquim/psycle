@@ -73,6 +73,7 @@ void NComboBox::init( )
   lbox = new NListBox();
     lbox->setAlign(nAlClient);
     lbox->skin_ = NApp::config()->skin("clbox");
+    lbox->itemSelected.connect(this,&NComboBox::onItemClicked);
   popup->pane()->add(lbox);
 }
 
@@ -110,12 +111,12 @@ void NComboBox::onDownBtnClicked( NButtonEvent* ev )
 void NComboBox::add( NCustomItem * item )
 {
   lbox->add(item);
-  lbox->itemSelected.connect(this,&NComboBox::onItemClicked);
 }
 
 void NComboBox::removeChilds( )
 {
   lbox->removeChilds();
+  edit_->setText("");
 }
 
 void NComboBox::onItemClicked( NItemEvent * ev)

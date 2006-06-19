@@ -76,7 +76,8 @@ NTestWindow::NTestWindow()
   pane()->add(bar);
   bar->resize();
 
-  testMenu();
+  //testMenu();
+  testComboBox();
   //testMemo();
   //testListBox();
 
@@ -378,6 +379,16 @@ void NTestWindow::testMemo( )
 void NTestWindow::testFlowLayout( )
 {
 
+}
+
+void NTestWindow::testComboBox( )
+{
+  NComboBox* box = new NComboBox();
+    box->setPosition(10,40,200,20);
+    for (int i = 0; i < 1000; i++) {
+       box->add(new NItem(stringify(i)+" : tester"));
+    }
+  pane()->add(box);
 }
 
 
