@@ -48,6 +48,11 @@ public :
     }
 
     virtual void onMousePress  (int x, int y, int button) {
+      if(button==3)
+        dlg->setVisible(true);
+    }
+    virtual void onMouseDoublePress (int x, int y, int button) {
+      if(button==1)
         dlg->setVisible(true);
     }
 
