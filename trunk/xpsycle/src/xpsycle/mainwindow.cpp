@@ -29,6 +29,7 @@
 #include "wavesavedlg.h"
 #include "internal_machines.h"
 #include "waveedframe.h"
+#include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
 #include <ngrs/ncheckmenuitem.h>
@@ -609,6 +610,8 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   progressBar_->setVisible(false);
   pane()->resize();
   updateComboGen();
+  updateComboIns(true);
+  childView_->waveEditor()->Notify();
   sequencerBar_->updateSequencer();
   pane()->repaint();
 }
@@ -730,17 +733,20 @@ void MainWindow::updateComboGen() {
   bool found=false;
   int selected = -1;
   int line = -1;
-  char buffer[64];
+  std::ostringstream buffer;
+  buffer.setf(std::ios::uppercase);
 
   genCombo_->removeChilds();
 
   for (int b=0; b<MAX_BUSES; b++) // Check Generators
   {
     if( Global::pSong()->_pMachine[b]) {
-      sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName.c_str());
-      genCombo_->add(new NItem(buffer));
-        //cb->SetItemData(cb->GetCount()-1,b);
+      buffer.str("");
+      buffer << std::setfill('0') << std::hex << std::setw(2);
+      buffer << b << ": " << Global::pSong()->_pMachine[b]->_editName;
+      genCombo_->add(new NItem(buffer.str()));
 
+        //cb->SetItemData(cb->GetCount()-1,b);
       if (!found) selected++;
       if (Global::pSong()->seqBus == b) found = true;
       filled = true;
@@ -757,9 +763,11 @@ void MainWindow::updateComboGen() {
   for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
   {
     if(Global::pSong()->_pMachine[b]) {
-        sprintf(buffer,"%.2X: %s",b,Global::pSong()->_pMachine[b]->_editName.c_str());
-        genCombo_->add(new NItem(buffer));
-        //cb->SetItemData(cb->GetCount()-1,b);
+      buffer.str("");
+      buffer << std::setfill('0') << std::hex << std::setw(2);
+      buffer << b << ": " << Global::pSong()->_pMachine[b]->_editName;
+      genCombo_->add(new NItem(buffer.str()));
+      //cb->SetItemData(cb->GetCount()-1,b);
       if (!found) selected++;
       if (Global::pSong()->seqBus == b) found = true;
       filled = true;
@@ -773,6 +781,7 @@ void MainWindow::updateComboGen() {
   } else if (!found)  {
     selected=line;
   }
+  genCombo_->setIndex(selected);
 }
 
 void MainWindow::appNew( )
@@ -814,6 +823,9 @@ void MainWindow::appNew( )
 //  pParentMain->UpdateSequencer();
 //  pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
         //pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
+  updateComboGen();
+  updateComboIns(true);
+  childView_->waveEditor()->Notify();
   childView_->patternView()->repaint();
   childView_->machineView()->repaint();
   sequencerBar_->repaint();
@@ -1022,7 +1034,9 @@ void MainWindow::onLoadWave( NButtonEvent * ev )
     if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
     {
       updateComboIns(true);
-      childView_->waveEditor()->Notify();
+      if(insCombo_->selIndex() == Global::pSong()->instSelected)
+	      childView_->waveEditor()->Notify();
+
       //m_wndStatusBar.SetWindowText("New wave loaded");
       //WaveEditorBackUpdate();
       //m_wndInst.WaveUpdate();
@@ -1036,17 +1050,23 @@ void MainWindow::updateComboIns( bool updatelist )
 {
   if (updatelist)  {
     insCombo_->removeChilds();
-    char buffer[64];
+    std::ostringstream buffer;
+    buffer.setf(std::ios::uppercase);
+
     int listlen = 0;
-    for (int i=0;i<10;i++)
+    for (int i=0;i<PREV_WAV_INS;i++)
     {
-      sprintf(buffer, "%.2X: %s", i, Global::pSong()->_pInstrument[i]->_sName);
-      insCombo_->add(new NItem(buffer));
+      buffer.str("");
+      buffer << std::setfill('0') << std::hex << std::setw(2);
+      buffer << i << ": " << Global::pSong()->_pInstrument[i]->_sName;
+      insCombo_->add(new NItem(buffer.str()));
       listlen++;
     }
     if (Global::pSong()->auxcolSelected >= listlen) {
       Global::pSong()->auxcolSelected = 0;
     }
+    insCombo_->setIndex(Global::pSong()->instSelected);  //redraw current selection text
+    insCombo_->repaint();
   }
 }
 
@@ -1286,7 +1306,6 @@ void MainWindow::onInstrumentCbx( NItemEvent * ev )
   Global::pSong()->instSelected=   index;
   Global::pSong()->auxcolSelected= index;
   childView_->waveEditor()->Notify();
-  insCombo_->setIndex(index);
 }
 
 void MainWindow::onMachineMoved( Machine * mac, int x, int y )
