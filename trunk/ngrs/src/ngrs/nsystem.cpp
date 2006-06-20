@@ -121,6 +121,11 @@ void NSystem::initX( )
   matchVisual();
 
   wm_delete_window = XInternAtom(dpy_, "WM_DELETE_WINDOW", False);
+  wm_motif_hint = XInternAtom(dpy_,"_MOTIF_WM_HINTS\0",False);
+  net_wm_state_modal = XInternAtom(dpy_,"_NET_WM_STATE_MODAL\0",False);
+  net_wm_state = XInternAtom(dpy_,"_NET_WM_STATE\0",False);
+  net_wm_state_above = XInternAtom(dpy_,"_NET_WM_STATE_ABOVE\0",False);
+  net_wm_state_stays_on_top = XInternAtom(dpy_,"_NET_WM_STATE_STAYS_ON_TOP\0",False);
   keyState_ = 0;
 }
 
@@ -513,4 +518,54 @@ bool NSystem::isTrueColor()
 bool NSystem::propertysActive( )
 {
   return true;
+}
+
+MWMHints NSystem::getMotifHints( Window win ) const
+{
+   MWMHints hint;
+   Atom type;
+   int format;
+   unsigned long count,bytes;
+   unsigned char* data = 0;
+   if ((XGetWindowProperty(dpy(), win , wm_motif_hint, 0, 5, false, wm_motif_hint, &type, &format, &count, &bytes, &data) == Success) && (type==wm_motif_hint) && format == 32 && count >= 5) {
+     hint = *(MWMHints*) data;
+   } else {
+     hint.flags = 0L;
+     hint.functions = MWM_FUNC_ALL;
+     hint.input_mode = 0L;
+     hint.status = 0L;
+   }
+
+   if (data) XFree(data);
+
+   return hint;
+}
+
+void NSystem::setMotifHints( Window win, MWMHints hints )
+{
+  if (hints.flags != 0l) {
+        XChangeProperty(dpy(), win,wm_motif_hint, wm_motif_hint, 32,
+                        PropModeReplace, (unsigned char *) &hints, 5);
+    } else {
+        XDeleteProperty(dpy(), win, wm_motif_hint);
+    }
+}
+
+void NSystem::setMotifModalMode(Window win)
+{
+  MWMHints hints = getMotifHints(win);
+  hints.input_mode = MWM_INPUT_PRIMARY_APPLICATION_MODAL;
+  hints.flags |= MWM_HINTS_INPUT_MODE;
+  setMotifHints(win,hints);
+}
+
+void NSystem::setModalMode( Window win )
+{
+  setMotifModalMode(win);
+  Atom data[3];
+  data[0] = net_wm_state_modal;
+  data[1] = net_wm_state_above;
+  data[2] = net_wm_state_stays_on_top;
+
+  XChangeProperty(dpy_, win, net_wm_state, XA_ATOM, 32, PropModeReplace, (unsigned char *) data, 3);
 }

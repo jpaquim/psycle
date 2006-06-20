@@ -70,6 +70,8 @@ public:
    void setRange(int range);
    int range() const;
 
+
+
    void setPos(int value);
    int pos() const;
 
