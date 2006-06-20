@@ -22,7 +22,6 @@
 #include "nconfig.h"
 #include "ndockpanel.h"
 #include "nalignlayout.h"
-
 //#include <X11/extensions/Xinerama.h>
 
 NIsWindow* NWindow::isWindow = new NIsWindow();
@@ -68,12 +67,9 @@ void NWindow::setVisible( bool on )
       pane_->resize();
       repaint(pane(),NRect(0,0,width(),height()));
       if (modal_) {
+         NApp::system().setModalMode( win() );
          //NApp::system().setStayAbove(win());
-         XSync(NApp::system().dpy(),false);
          XMapWindow(NApp::system().dpy(),win_);
-         XMapRaised(NApp::system().dpy(),win_);
-         XFlush(NApp::system().dpy());
-         XSync(NApp::system().dpy(),false);
          NApp::runModal();
       } else {
       XSync(NApp::system().dpy(),false);

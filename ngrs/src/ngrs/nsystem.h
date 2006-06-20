@@ -24,11 +24,14 @@
 #include "nfont.h"
 #include "nfontstructure.h"
 #include "color_converter.hpp"
+#include "mwm.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
 /**
 @author Stefan
@@ -40,6 +43,11 @@ public:
     ~NSystem();
 
     Atom wm_delete_window;
+    Atom wm_motif_hint;
+    Atom net_wm_state;
+    Atom net_wm_state_above;
+    Atom net_wm_state_modal;
+    Atom net_wm_state_stays_on_top;
 
     Display* dpy() const;
     int depth() const;
@@ -72,6 +80,10 @@ public:
     bool isTrueColor();
     bool propertysActive();
 
+    MWMHints getMotifHints(Window win) const;
+    void setMotifModalMode(Window win);
+    void setMotifHints( Window win , MWMHints hints);
+    void setModalMode(Window win);
 
 private:
 
