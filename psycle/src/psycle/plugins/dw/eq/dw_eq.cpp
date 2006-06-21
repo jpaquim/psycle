@@ -3,6 +3,10 @@
 
 #include "../dw_filter.hpp"
 
+#ifndef M_PI
+ #define M_PI 3.14159265358979323846
+#endif
+
 namespace psycle { namespace plugin {
 
 ///////////////////////////////////
@@ -44,10 +48,10 @@ public:
 			Information::Parameter::exponential("Gain 2", 0.125,	1,		8.0),
 			Information::Parameter::exponential("Gain 3", 0.125,	1,		8.0),
 			Information::Parameter::exponential("Gain 4", 0.125,	1,		8.0),
-			Information::Parameter::linear("Bandwidth 1", 0,		0,				math::pi/3.0f),
-			Information::Parameter::linear("Bandwidth 2", .01,		math::pi/6.0f,	math::pi/3.0f),
-			Information::Parameter::linear("Bandwidth 3", .01,		math::pi/6.0f,	math::pi/3.0f),
-			Information::Parameter::linear("Bandwidth 4", 0,		0,				math::pi/3.0f)
+			Information::Parameter::linear("Bandwidth 1", 0,		0,			M_PI/3.0f),
+			Information::Parameter::linear("Bandwidth 2", .01,		M_PI/6.0f,	M_PI/3.0f),
+			Information::Parameter::linear("Bandwidth 3", .01,		M_PI/6.0f,	M_PI/3.0f),
+			Information::Parameter::linear("Bandwidth 4", 0,		0,			M_PI/3.0f)
 		};
 
 		static const Information information(
