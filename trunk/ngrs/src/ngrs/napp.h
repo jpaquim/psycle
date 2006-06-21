@@ -45,7 +45,7 @@ public:
     ~NApp();
 
    void run();
-   static void runModal();
+   static void runModal(NWindow* modalWin);
    void setMainWindow(NWindow* window);
    static void addWindow(Window handle, NWindow* window);
    static void addKeyAccelerator(const NKeyAccelerator & accelerator, NObject* notify);
@@ -92,7 +92,7 @@ private:
    static NSystem* system_;
 
    void eventLoop();
-   static void modalEventLoop();
+   static void modalEventLoop(NWindow* modalWin);
 
    static int processEvent(NWindow* win, XEvent* event);
 
