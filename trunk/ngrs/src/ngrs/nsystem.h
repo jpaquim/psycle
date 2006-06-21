@@ -36,18 +36,14 @@
 /**
 @author Stefan
 */
+
+class NAtoms;
+
 class NSystem{
 public:
     NSystem();
 
     ~NSystem();
-
-    Atom wm_delete_window;
-    Atom wm_motif_hint;
-    Atom net_wm_state;
-    Atom net_wm_state_above;
-    Atom net_wm_state_modal;
-    Atom net_wm_state_stays_on_top;
 
     Display* dpy() const;
     int depth() const;
@@ -85,7 +81,11 @@ public:
     void setMotifHints( Window win , MWMHints hints);
     void setModalMode(Window win);
 
+    const NAtoms & atoms() const;
+
 private:
+
+    NAtoms* atoms_;
 
     bool isTrueColor_;
 

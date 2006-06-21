@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nsystem.h"
+#include "natoms.h"
 #include <stdexcept>
 
 using namespace std;
@@ -25,11 +26,13 @@ using namespace std;
 NSystem::NSystem()
 {
   initX();
+  atoms_ = new NAtoms( dpy() );
 }
 
 
 NSystem::~NSystem()
 {
+  delete atoms_;
 }
 
 // here you will find all public methods
@@ -93,7 +96,8 @@ Window NSystem::registerWindow(Window parent )
                         0, depth(), InputOutput, visual(),
                         CWBackPixel | CWColormap | CWEventMask  | CWWinGravity | CWBitGravity ,
                         &attr) ;
-  XSetWMProtocols(dpy(), win_, &wm_delete_window, 1);
+  Atom windowClose = atoms().wm_delete_window();
+  XSetWMProtocols(dpy(), win_, &windowClose , 1);
 
   return win_;
 }
@@ -120,12 +124,6 @@ void NSystem::initX( )
 
   matchVisual();
 
-  wm_delete_window = XInternAtom(dpy_, "WM_DELETE_WINDOW", False);
-  wm_motif_hint = XInternAtom(dpy_,"_MOTIF_WM_HINTS\0",False);
-  net_wm_state_modal = XInternAtom(dpy_,"_NET_WM_STATE_MODAL\0",False);
-  net_wm_state = XInternAtom(dpy_,"_NET_WM_STATE\0",False);
-  net_wm_state_above = XInternAtom(dpy_,"_NET_WM_STATE_ABOVE\0",False);
-  net_wm_state_stays_on_top = XInternAtom(dpy_,"_NET_WM_STATE_STAYS_ON_TOP\0",False);
   keyState_ = 0;
 }
 
@@ -527,7 +525,7 @@ MWMHints NSystem::getMotifHints( Window win ) const
    int format;
    unsigned long count,bytes;
    unsigned char* data = 0;
-   if ((XGetWindowProperty(dpy(), win , wm_motif_hint, 0, 5, false, wm_motif_hint, &type, &format, &count, &bytes, &data) == Success) && (type==wm_motif_hint) && format == 32 && count >= 5) {
+   if ((XGetWindowProperty(dpy(), win , atoms().wm_motif_hint(), 0, 5, false, atoms().wm_motif_hint(), &type, &format, &count, &bytes, &data) == Success) && (type==atoms().wm_motif_hint()) && format == 32 && count >= 5) {
      hint = *(MWMHints*) data;
    } else {
      hint.flags = 0L;
@@ -544,10 +542,10 @@ MWMHints NSystem::getMotifHints( Window win ) const
 void NSystem::setMotifHints( Window win, MWMHints hints )
 {
   if (hints.flags != 0l) {
-        XChangeProperty(dpy(), win,wm_motif_hint, wm_motif_hint, 32,
+        XChangeProperty(dpy(), win,atoms().wm_motif_hint(), atoms().wm_motif_hint(), 32,
                         PropModeReplace, (unsigned char *) &hints, 5);
     } else {
-        XDeleteProperty(dpy(), win, wm_motif_hint);
+        XDeleteProperty(dpy(), win, atoms().wm_motif_hint());
     }
 }
 
@@ -563,9 +561,14 @@ void NSystem::setModalMode( Window win )
 {
   setMotifModalMode(win);
   Atom data[3];
-  data[0] = net_wm_state_modal;
-  data[1] = net_wm_state_above;
-  data[2] = net_wm_state_stays_on_top;
+  data[0] = atoms().net_wm_state_modal();
+  data[1] = atoms().net_wm_state_above();
+  data[2] = atoms().net_wm_state_stays_on_top();
 
-  XChangeProperty(dpy_, win, net_wm_state, XA_ATOM, 32, PropModeReplace, (unsigned char *) data, 3);
+  XChangeProperty(dpy_, win, atoms().net_wm_state(), XA_ATOM, 32, PropModeReplace, (unsigned char *) data, 3);
+}
+
+const NAtoms & NSystem::atoms( ) const
+{
+  return *atoms_;
 }

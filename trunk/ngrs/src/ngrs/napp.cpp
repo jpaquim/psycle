@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "napp.h"
+#include "natoms.h"
 #include "nimage.h"
 #include "nsplashscreen.h"
 #include "nconfig.h"
@@ -292,7 +293,7 @@ int NApp::processEvent( NWindow * win, XEvent * event )
           break;
 
     case ClientMessage:
-            if(event->xclient.data.l[0] == (int) NApp::system().wm_delete_window) {
+            if(event->xclient.data.l[0] == (int) NApp::system().atoms().wm_delete_window()) {
                exitloop = win->onClose();
             }
          break;
