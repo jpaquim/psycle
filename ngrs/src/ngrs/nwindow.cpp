@@ -70,7 +70,7 @@ void NWindow::setVisible( bool on )
          NApp::system().setModalMode( win() );
          //NApp::system().setStayAbove(win());
          XMapWindow(NApp::system().dpy(),win_);
-         NApp::runModal();
+         NApp::runModal(this);
       } else {
       XSync(NApp::system().dpy(),false);
       XMapWindow(NApp::system().dpy(),win_);

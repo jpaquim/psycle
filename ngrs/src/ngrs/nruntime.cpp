@@ -150,4 +150,12 @@ void NRuntime::onMessage( NEvent * event )
   }
 }
 
+bool NRuntime::isChildOf( NRuntime * comp ) const
+{
+  if (this == comp) return true; else
+  {
+     if (parent() != 0) return parent()->isChildOf(comp); else return false;
+  }
+}
+
 

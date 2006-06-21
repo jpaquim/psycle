@@ -169,7 +169,7 @@ void NApp::eventLoop( )
   }
 }
 
-void NApp::modalEventLoop( )
+void NApp::modalEventLoop(NWindow* modalWin )
 {
   XEvent event;
   int n;
@@ -210,12 +210,15 @@ void NApp::modalEventLoop( )
         NWindow* window = itr->second;
         window->setExitLoop(0);
 //        if (window->visible()) {
-        exitLoop = processEvent(window, & event);
-        if (window->exitLoop() == 1) {
-          // at Modal no delete here
-          exitLoop = 1;
-        } else exitLoop=0;
+        if (window == modalWin || window->isChildOf(modalWin) ||
+        event.type == Expose) {
+          exitLoop = processEvent(window, & event);
+          if (window->exitLoop() == 1) {
+            // at Modal no delete here
+            exitLoop = 1;
+          } else exitLoop=0;
   //      }
+        }
        }
      }
        //doRemove();
@@ -358,9 +361,9 @@ void NApp::addPopupWindow( NWindow * win )
   popups_.push_back(win);
 }
 
-void NApp::runModal( )
+void NApp::runModal(NWindow* modalWin )
 {
-  modalEventLoop();
+  modalEventLoop(modalWin);
 }
 
 void NApp::unmapPopupWindows( )

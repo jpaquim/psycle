@@ -74,6 +74,8 @@ public:
 
    int d2i(double d);
 
+   bool isChildOf(NRuntime* comp) const;
+
 private:
 
    NRuntime* parent_;
