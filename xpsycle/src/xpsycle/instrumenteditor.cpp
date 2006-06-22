@@ -231,7 +231,7 @@ void InstrumentEditor::init( )
 
   setPosition(0,0,400,600);
 
-  envelopeEditor = new EnvDialog();
+  envelopeEditor = new EnvDialog(Global::pSong());
   add(envelopeEditor);
 }
 
@@ -287,6 +287,8 @@ void InstrumentEditor::setInstrument( int index )
   volumeLbl->setText(stringify(Global::pSong()->_pInstrument[index]->waveVolume)+"%");
 
   pane()->resize();
+
+  envelopeEditor->InstChanged();
 
 }
 
