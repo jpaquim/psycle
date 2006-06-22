@@ -8,7 +8,6 @@
 #include <psycle/host/engine/Player.hpp>
 #include <psycle/host/gui/MainFrm.hpp>
 #include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/gui/Inputhandler.hpp>
 #include <psycle/host/engine/MidiInput.hpp>
 #include <psycle/host/gui/ConfigDlg.hpp>
 #include <psycle/host/gui/GreetDialog.hpp>
@@ -1399,14 +1398,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::NewMachine(int x, int y, Machine::id_type mac) 
 		{
 			CNewMachine dlg;
-			if(mac >= 0) dlg.LastType1 = mac < MAX_BUSES ? 0 : 1;
 			if(dlg.DoModal() == IDOK && dlg.Outputmachine >= 0)
 			{
 				Machine::id_type fb;
 				int xs,ys;
 				if (mac < 0)
 				{
-					if (dlg.OutBus) 
+					if (dlg.Outputmode) 
 					{
 						fb = Global::song().GetFreeBus();
 						xs = MachineCoords.sGenerator.width;
@@ -1421,7 +1419,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if (mac >= MAX_BUSES && !dlg.OutBus)
+					if (mac >= MAX_BUSES && !dlg.Outputmode)
 					{
 						fb = mac;
 						xs = MachineCoords.sEffect.width;
@@ -1435,7 +1433,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							Global::song().DestroyMachine(fb);
 						}
 					}
-					else if (mac < MAX_BUSES && dlg.OutBus)
+					else if (mac < MAX_BUSES && dlg.Outputmode)
 					{
 						fb = mac;
 						xs = MachineCoords.sGenerator.width;
@@ -1495,7 +1493,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if(dlg.OutBus) Global::song().seqBus = fb;
+					if(dlg.Outputmode) Global::song().seqBus = fb;
 
 					// make sure that no 2 machines have the same name, because that is irritating
 					{
