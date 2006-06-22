@@ -1871,7 +1871,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 //			if(bNewLength)
 				scrollBar->setRange(wdLength-diLength);
 
-			scrollBar->setPos(diStart);
+			//scrollBar->setPos(diStart);
 
 			//set zoom slider
 			if(bNewLength)
@@ -1901,7 +1901,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 		{
 			//disabled scrollbar
 			scrollBar->setRange(0);
-			scrollBar->setPos(0);
+			//scrollBar->setPos(0);
 
 			//disabled zoombar
 			zoomSlider->setRange(0, 0);
@@ -1911,8 +1911,6 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 		//set volume slider
 		volSlider->setRange(0, 100);
 		volSlider->setPos( pSong->waved.GetVolume() * 100.0f);
-		volSlider->repaint();
-
 	}
 
 	void WaveEdChildView::RefreshDisplayData(bool bRefreshHeader)
