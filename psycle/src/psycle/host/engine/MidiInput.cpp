@@ -1079,7 +1079,7 @@ namespace psycle
 
 		void CMidiInput::InternalClock( DWORD dwParam2 )
 		{
-			int samplesPerSecond = Global::configuration()._pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::player().SampleRate();
 
 			// WARNING! GetPlayPos() has max of 0x7FFFFF
 
@@ -1153,7 +1153,7 @@ namespace psycle
 			// get the current play sample position
 			int playPos = Global::configuration()._pOutputDriver->GetPlayPos();
 			
-			int samplesPerSecond = Global::configuration()._pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::player().SampleRate();
 
 			// calculate the latency of the MIDI message in samples (delay in getting to us)
 			// using our own timer, started at the same time (hopefully!) as the MIDI
@@ -1207,7 +1207,7 @@ namespace psycle
 
 			m_stats.flags |= FSTAT_ACTIVE;
 
-			int samplesPerSecond = Global::configuration()._pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::player().SampleRate();
 			m_stats.bufferCount = m_patCount;
 
 			// (waiting until we are sure we will have enough midi data in the buffer

@@ -11,7 +11,7 @@
 #include "VSTHost.hpp"
 #include "DataCompression.hpp"
 #include "riff.hpp" // for Wave file loading.
-#include <psycle/host/gui/NewMachine.hpp> // Is this needed?
+#include <psycle/host/engine/cacheddllfinder.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdint>
@@ -91,7 +91,6 @@ namespace psycle
 						Plugin & plugin(*new Plugin(index));
 						machine = &plugin;
 						std::string path = plugin_name;
-						std::transform(path.begin(), path.end(), path.begin(), std::tolower);
 						if(!Global::dllfinder().LookupDllPath(path)) 
 						{
 							delete &plugin;
@@ -121,7 +120,6 @@ namespace psycle
 						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
 						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
 						std::string path = plugin_name;
-						std::transform(path.begin(), path.end(), path.begin(), std::tolower);
 						if(!Global::dllfinder().LookupDllPath(path)) 
 						{
 							delete plugin;

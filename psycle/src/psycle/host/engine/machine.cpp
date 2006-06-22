@@ -4,6 +4,7 @@
 #include <psycle/host/engine/machine.hpp>
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/dsp.hpp>
+#include <psycle/host/engine/FileIO.hpp>
 #include <psycle/host/configuration.hpp>
 #include <psycle/host/gui/psycle.hpp> // Can this be removed?
 #include <psycle/host/gui/WireDlg.hpp> // Can this be removed?
@@ -12,6 +13,7 @@
 #include <universalis/processor/exception.hpp>
 #include <algorithm>
 
+#include <psycle/host/engine/internal_machine_package.hpp>
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
@@ -173,7 +175,18 @@ namespace psycle
 			parent_.Work(numSamples);
 		}
 
-		internal_machine_package Machine::infopackage;
+
+//////////////////////////////////////////////////////////////////////////
+
+		Machine* CreateFromType(Machine::type_type _type,Machine::id_type _id,std::string _dllname)
+		{
+			const InternalMachineInfo* minfo = Machine::infopackage().getInfo(_type); 
+			if (minfo)
+			{
+				return	minfo->CreateFromType(_id,_dllname);
+			}
+			return 0;
+		}
 
 		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
 		:
@@ -195,7 +208,6 @@ namespace psycle
 			_panning(0),
 			_x(0),
 			_y(0),
-			_numPars(0),
 			_nCols(1),
 			_connectedInputs(0),
 			numInPorts(0),
@@ -210,9 +222,10 @@ namespace psycle
 			_pScopeBufferL(0),
 			_pScopeBufferR(0),
 			_scopeBufferIndex(0),
-			_scopePrevNumSamples(0),
-			_editName("")
+			_scopePrevNumSamples(0)
 		{
+			_editName = infopackage().getInfo(_type)->shortname;
+			_numPars = infopackage().getInfo(_type)->parameters;
 			_pSamplesL = new float[MAX_BUFFER_LENGTH];
 			_pSamplesR = new float[MAX_BUFFER_LENGTH];
 			// Clear machine buffer samples
@@ -440,6 +453,21 @@ namespace psycle
 			}
 			return false;
 		}
+
+		InternalMachinePackage& Machine::infopackage()
+		{
+			static InternalMachinePackage* p = new InternalMachinePackage();
+			return *p;
+		}
+
+		const InternalMachineInfo* GetInfoFromType(Machine::type_type _type)
+		{
+			return Machine::infopackage().getInfo(_type);
+		}
+		const std::string Machine::GetBrand() { return infopackage().getInfo(_type)->brandname; }
+		const std::string Machine::GetVendorName() { return infopackage().getInfo(_type)->vendor; }
+		const std::uint32_t Machine::GetVersion() { return infopackage().getInfo(_type)->version; }
+		const std::uint32_t Machine::GetCategory() { return infopackage().getInfo(_type)->category; }
 
 		void Machine::PreWork(int numSamples)
 		{
@@ -753,7 +781,7 @@ namespace psycle
 					p->_inputCon[i]=pMachine->_inputCon[i];
 				}
 				//\todo: use SetEditName()
-				pMachine->_editName += " (replaced)";
+				p->_editName += " (replaced)";
 				p->_numPars = 0;
 				delete pMachine;
 				pMachine = p;

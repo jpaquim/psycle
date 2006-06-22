@@ -153,7 +153,7 @@ namespace psycle
 						bool LoadDll (std::string const & file_name);
 						void Instance(std::string const & file_name, const bool overwriteName = true);
 						///< Helper class for Machine Creation.
-						static Machine* CreateFromType(MachineType _id, std::string _dllname);
+						static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 				///\}
 
 				///\name two-stepped destruction
@@ -343,9 +343,6 @@ namespace psycle
 						virtual void SaveSpecificChunk(RiffFile* pFile) ;
 						virtual void SaveDllName(RiffFile* pFile);
 				///\}
-				public:
-					static const InternalMachineInfo minfo;
-					static const InternalMachineInfo minfo2;
 
 				//////////////////////////////////////////////////////////////////////////////////////////////////
 				//////////////////////////////////////////////////////////////////////////////////////////////////

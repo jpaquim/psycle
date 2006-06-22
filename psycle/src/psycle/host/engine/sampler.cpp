@@ -11,12 +11,9 @@ namespace psycle
 {
 	namespace host
 	{
-		const InternalMachineInfo Sampler::minfo(MACH_SAMPLER,MACHMODE_GENERATOR,Sampler::CreateFromType,"Basic Sampler","Sampler","Arguru",0,500,0);
-
 		Sampler::Sampler(Machine::id_type id)
-		:Machine(minfo.type, minfo.mode, id)
+		:Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id)
 		{
-			_editName = minfo.shortname;
 			_audiorange = 32768.0f;
 			DefineStereoOutput(1);
 
@@ -40,7 +37,7 @@ namespace psycle
 			}
 			for (Instrument::id_type i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
 		}
-		Machine* Sampler::CreateFromType(MachineType _id, std::string _dllname)
+		Machine* Sampler::CreateFromType(Machine::id_type _id, std::string _dllname)
 		{
 			return new Sampler(_id);
 		}
@@ -827,5 +824,71 @@ namespace psycle
 				break;
 			}
 		}
+
+		bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			std::uint32_t size;
+			pFile->Read(size);
+			if (size)
+			{
+				if (version > CURRENT_FILE_VERSION_MACD)
+				{
+					// data is from a newer format of psycle, it might be unsafe to load.
+					pFile->Skip(size);
+					return false;
+				}
+				else
+				{
+					std::int32_t temp;
+					pFile->Read(temp); // numSubtracks
+					_numVoices=temp;
+					pFile->Read(temp); // quality
+
+					switch (temp)
+					{
+					case 2:
+						_resampler.SetQuality(dsp::R_SPLINE);
+						break;
+					case 3:
+						_resampler.SetQuality(dsp::R_BANDLIM);
+						break;
+					case 0:
+						_resampler.SetQuality(dsp::R_NONE);
+						break;
+					default:
+					case 1:
+						_resampler.SetQuality(dsp::R_LINEAR);
+						break;
+					}
+				}
+			}
+			return true;
+		}
+
+		void Sampler::SaveSpecificChunk(RiffFile* pFile) 
+		{
+			std::int32_t temp;
+			std::uint32_t size = 2 * sizeof temp;
+			pFile->Write(size);
+			temp = _numVoices;
+			pFile->Write(temp); // numSubtracks
+			switch (_resampler.GetQuality())
+			{
+			case dsp::R_NONE:
+				temp = 0;
+				break;
+			case dsp::R_LINEAR:
+				temp = 1;
+				break;
+			case dsp::R_SPLINE:
+				temp = 2;
+				break;
+			case dsp::R_BANDLIM:
+				temp = 3;
+				break;
+			}
+			pFile->Write(temp); // quality
+		}
+
 	}
 }

@@ -1,7 +1,6 @@
 ///\file
 ///\brief interface file for psycle::host::CWireDlg.
 #pragma once
-#include <psycle/host/engine/Machine.hpp>
 #include <psycle/host/engine/constants.hpp>
 #include <afxwin.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
@@ -14,6 +13,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		#define MAX_SCOPE_BANDS 128
 		#define LOG2	0.301029995663981f
 
+		class Machine;
 		class CMultiScopeCtrl : public CStatic
 		{
 		public:

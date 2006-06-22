@@ -4,14 +4,13 @@
 #include PACKAGENERIC
 #include <psycle/host/engine/song.hpp>
 #include <psycle/host/engine/machine.hpp>
+#include <psycle/host/engine/legacy/convert_internal_machines.hpp>
 #include <psycle/host/engine/sampler.hpp>
 #include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/legacy/convert_internal_machines.hpp>
 #include <psycle/host/engine/plugin.hpp>
 #include <psycle/host/engine/VSTHost.hpp>
 
-///\todo bad coupling with the gui
-	#include <psycle/host/gui/NewMachine.hpp>
+#include <psycle/host/engine/cacheddllfinder.hpp>
 
 #include <cstdint>
 namespace psycle
@@ -50,7 +49,7 @@ namespace psycle
 				Global::player().bpm = m_BeatsPerMin;
 				Global::player().tpb = m_LinesPerBeat;
 				// The old (1.0..1.6) format assumes we output at 44100 samples/sec, so...
-				Global::player().SamplesPerRow(sampR * Global::configuration()._pOutputDriver->_samplesPerSec / 44100);
+				Global::player().SamplesPerRow(sampR * Global::player().SampleRate() / 44100);
 				pFile->Read(currentOctave);
 				pFile->Read(busMachine);
 				pFile->Read(playOrder);
@@ -315,7 +314,6 @@ namespace psycle
 							if ((pMac[i]->LoadOldFileFormat(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 							{
 								std::string path = vstL[pVstPlugin->_instance].dllName;
-								std::transform(path.begin(), path.end(), path.begin(), std::tolower);
 								if(!Global::dllfinder().LookupDllPath(path)) 
 								{
 									try

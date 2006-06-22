@@ -15,16 +15,10 @@ namespace psycle {
 		public:
 			Dummy(id_type index);
 			virtual ~Dummy() throw();
-			static Machine* CreateFromType(MachineType _id, std::string _dllname);
+			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Work(int numSamples);
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 		public:
-			virtual const std::string GetBrand() { return minfo.brandname; }
-			virtual const std::string GetVendorName() { return minfo.vendor; }
-			virtual const std::uint32_t GetVersion() { return minfo.version; }
-			virtual const std::uint32_t GetCategory() { return minfo.category; }
-
-			static const InternalMachineInfo minfo;
 			//\todo: to be removed... someday( Marks that the Dummy was in fact a VST plugin that couldn't be loaded)
 			bool wasVST;
 		};
@@ -37,14 +31,10 @@ namespace psycle {
 			DuplicatorMac();
 			DuplicatorMac(id_type index);
 			virtual ~DuplicatorMac() throw();
-			static Machine* CreateFromType(MachineType _id, std::string _dllname);
+			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
-			virtual const std::string GetBrand() { return minfo.brandname; }
-			virtual const std::string GetVendorName() { return minfo.vendor; }
-			virtual const std::uint32_t GetVersion() { return minfo.version; }
-			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -53,7 +43,6 @@ namespace psycle {
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
-			static const InternalMachineInfo minfo;
 		protected:
 			short macOutput[8];
 			short noteOffset[8];
@@ -68,18 +57,13 @@ namespace psycle {
 			Master();
 			Master(id_type index);
 			virtual ~Master() throw();
-			static Machine* CreateFromType(MachineType _id, std::string _dllname);
+			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Work(int numSamples);
-			virtual const std::string GetBrand() { return minfo.brandname; }
-			virtual const std::string GetVendorName() { return minfo.vendor; }
-			virtual const std::uint32_t GetVersion() { return minfo.version; }
-			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
-			static const InternalMachineInfo minfo;
 			/// this is for the VstHost
 			double sampleCount;
 			int _outDry;
@@ -135,16 +119,12 @@ namespace psycle {
 			Mixer();
 			Mixer(id_type index);
 			virtual ~Mixer() throw();
-			static Machine* CreateFromType(MachineType _id, std::string _dllname);
+			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
 			void FxSend(int numSamples);
 			void Mix(int numSamples);
-			virtual const std::string GetBrand() { return minfo.brandname; }
-			virtual const std::string GetVendorName() { return minfo.vendor; }
-			virtual const std::uint32_t GetVersion() { return minfo.version; }
-			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual int GetNumCols();
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
@@ -164,7 +144,6 @@ namespace psycle {
 			virtual float VuChan(Wire::id_type idx);
 			virtual float VuSend(Wire::id_type idx);
 
-			static const InternalMachineInfo minfo;
 		protected:
 			///\todo hardcoded limits and wastes
 			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
@@ -206,15 +185,11 @@ namespace psycle {
 			LFO();
 			LFO(id_type index);
 			virtual ~LFO() throw();
-			static Machine* CreateFromType(MachineType _id, std::string _dllname);
+			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
-			virtual const std::string GetBrand() { return minfo.brandname; }
-			virtual const std::string GetVendorName() { return minfo.vendor; }
-			virtual const std::uint32_t GetVersion() { return minfo.version; }
-			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -256,7 +231,6 @@ namespace psycle {
 				};
 			};
 
-			static const InternalMachineInfo minfo;
 		protected:
 			//protected member funcs
 			virtual void FillTable();				//fills the lfo table based on the value of waveform
@@ -295,17 +269,13 @@ namespace psycle {
 			Automator();
 			Automator(id_type index);
 			virtual ~Automator() throw();
-			static Machine* CreateFromType(MachineType _id, std::string _dllname);
+			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Tick();
 			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
 			virtual void Stop();
-			virtual const std::string GetBrand() { return minfo.brandname; }
-			virtual const std::string GetVendorName() { return minfo.vendor; }
-			virtual const std::uint32_t GetVersion() { return minfo.version; }
-			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
@@ -347,7 +317,6 @@ namespace psycle {
 				operator int() {return this->time; }
 			};
 
-			static const InternalMachineInfo minfo;
 		private:
 
 			class Track

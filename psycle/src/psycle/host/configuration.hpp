@@ -252,6 +252,12 @@ namespace psycle
 			int _syncDriverIndex;
 			int _midiHeadroom;
 
+			///< Selected position in the "type" combobox of "New Machine"
+			int _comboTypeSel;
+			///< Selected position in the "NameStyle" combobox of "New Machine"
+			int _comboNameSel;
+			
+
 			int defaultPatLines;
 			bool bShowSongInfoOnLoad;
 			bool bFileSaveReminders;

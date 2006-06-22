@@ -55,7 +55,7 @@ namespace psycle
 			_loop_count =0;
 			_loop_line = 0;
 			SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
-			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
+//			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			ExecuteLine();
@@ -75,7 +75,7 @@ namespace psycle
 				}
 			}
 			SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
-			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
+//			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 		}
 
 		void Player::SampleRate(const int sampleRate)
@@ -456,7 +456,7 @@ namespace psycle
 				if(amount > 0)
 				{
 					cpu::cycles_type idletime(cpu::cycles());
-					if( (int)song()._sampCount > Global::configuration()._pOutputDriver->_samplesPerSec)
+					if( (int)song()._sampCount > SampleRate())
 					{
 						song()._sampCount =0;
 						for(int c=0; c<MAX_MACHINES; c++)
@@ -538,6 +538,7 @@ namespace psycle
 			if(!_recording)
 			{
 				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
+				//       ensure correct re/initialization of variables (concretely, player::m_SampleRate and AudioDriver::_samplesPerSec)
 				backup_rate = Global::configuration()._pOutputDriver->_samplesPerSec;
 				backup_bits = Global::configuration()._pOutputDriver->_bitDepth;
 				backup_channelmode = Global::configuration()._pOutputDriver->_channelmode;

@@ -1,6 +1,8 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "dllfinder.hpp"
+#include <algorithm> // std::transform
+#include <cctype>	   // std::tolower
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
 
 namespace psycle
@@ -17,7 +19,7 @@ DllFinder::~DllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void DllFinder::AddPath(const std::string &path,MachineType mtype)
+void DllFinder::AddPath(const std::string &path,Machine::type_type mtype)
 {
 	//\todo: do something with the machinetype?
 	base_paths.push_back(path);
@@ -32,6 +34,7 @@ void DllFinder::ResetFinder()
 ///< searches the full path for a specified dll name
 bool DllFinder::LookupDllPath(std::string& name)
 {
+	std::transform(name.begin(),name.end(),name.begin(),std::tolower);
 	std::vector<std::string>::iterator iterator = base_paths.begin();
 	for (;iterator != base_paths.end();iterator++)
 	{
@@ -41,6 +44,17 @@ bool DllFinder::LookupDllPath(std::string& name)
 		}
 	}
 	return false;
+}
+
+std::string DllFinder::FileFromFullpath(const std::string& fullpath)
+{
+	std::string str=fullpath;
+	// strip off path
+	std::string::size_type pos=str.rfind('\\');
+	if(pos != std::string::npos) str=str.substr(pos+1);
+	// transform string to lower case
+	std::transform(str.begin(),str.end(),str.begin(),std::tolower);
+	return str;
 }
 
 bool DllFinder::SearchFileInDir(std::string& name, std::string& path)

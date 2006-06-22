@@ -946,7 +946,7 @@ XMSampler::Channel::PerformFX().
 
 	XMSampler(int index);
 	///< Helper class for Machine Creation.
-	static Machine* CreateFromType(MachineType _id, std::string _dllname);
+	static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 
 	virtual void Init(void);
 	
@@ -955,10 +955,6 @@ XMSampler::Channel::PerformFX().
 	virtual void Work(int numSamples);
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
-	virtual const std::string GetBrand() { return minfo.brandname; }
-	virtual const std::string GetVendorName() { return minfo.vendor; }
-	virtual const std::uint32_t GetVersion() { return minfo.version; }
-	virtual const std::uint32_t GetCategory() { return minfo.category; }
 	virtual void SetSampleRate(int sr);
 
 	virtual bool LoadOldFileFormat(RiffFile& riffFile);
@@ -1066,7 +1062,6 @@ XMSampler::Channel::PerformFX().
 	int GetDeltaTick() { return m_DeltaTick; };
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
-	static const InternalMachineInfo minfo;
 protected:
 
 	int _numVoices;

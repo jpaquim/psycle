@@ -4,8 +4,6 @@
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
 #include "plugin.hpp"
 #include "VSTHost.hpp"
-#include <algorithm> // std::transform
-#include <cctype>	   // std::tolower
 
 namespace psycle
 {
@@ -21,7 +19,7 @@ MappedDllFinder::~MappedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void MappedDllFinder::AddPath(const std::string &path,MachineType mtype)
+void MappedDllFinder::AddPath(const std::string &path,Machine::type_type mtype)
 {
 	DllFinder::AddPath(path,mtype);
 	populate_dll_map(path);
@@ -34,6 +32,7 @@ void MappedDllFinder::ResetFinder()
 ///< searches in the map the full path for a specified dll name
 bool MappedDllFinder::LookupDllPath(std::string& name)
 {
+	std::transform(name.begin(),name.end(),name.begin(),std::tolower);
 	std::map<std::string,std::string>::iterator iterator
 		= dllNames.find(name);
 	if(iterator != dllNames.end())
@@ -47,12 +46,7 @@ bool MappedDllFinder::LookupDllPath(std::string& name)
 ///< Adds the dll name -> full path mapping to the map.
 void MappedDllFinder::LearnDllName(const std::string & fullpath)
 {
-	std::string str=fullpath;
-	// strip off path
-	std::string::size_type pos=str.rfind('\\');
-	if(pos != std::string::npos) str=str.substr(pos+1);
-	// transform string to lower case
-	std::transform(str.begin(),str.end(),str.begin(),std::tolower);
+	std::string str=FileFromFullpath(fullpath);
 	dllNames[str]=fullpath;
 }
 
@@ -104,7 +98,7 @@ CachedDllFinder::~CachedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void CachedDllFinder::AddPath(const std::string &path,MachineType mtype)
+void CachedDllFinder::AddPath(const std::string &path,Machine::type_type mtype)
 {
 	//\todo: check if the directory already exists? (this could be done
 	// inside the base class and return a value
@@ -122,6 +116,7 @@ void CachedDllFinder::ResetFinder()
 ///< searches in the map the full path for a specified dll name
 bool CachedDllFinder::LookupDllPath(std::string& name)
 {
+	std::transform(name.begin(),name.end(),name.begin(),std::tolower);
 	std::map<std::string,PluginInfo>::iterator iterator
 		= dllInfo.find(name);
 	if(iterator != dllInfo.end())
@@ -137,21 +132,11 @@ bool CachedDllFinder::LookupDllPath(std::string& name)
 	return false;
 }
 
-std::string CachedDllFinder::file_from_fullpath(std::string& path)
-{
-	std::string str=path;
-	// strip off path
-	std::string::size_type pos=str.rfind('\\');
-	if(pos != std::string::npos) str=str.substr(pos+1);
-	// transform string to lower case
-	std::transform(str.begin(),str.end(),str.begin(),std::tolower);
-	return str;
-}
-
 ///< Adds the new Plugin data to the map.
 void CachedDllFinder::LearnPlugin(PluginInfo &plugininfo)
 {
-	dllInfo[file_from_fullpath(plugininfo.dllname)]=plugininfo;
+	std::string str=FileFromFullpath(plugininfo.dllname);
+	dllInfo[str]=plugininfo;
 }
 
 ///< fills dllNames with all the dlls that exist in the specified directory.
@@ -190,7 +175,7 @@ void CachedDllFinder::populate_dll_list(std::vector<DllFileInfo>& dllNames, std:
 ///< fills the dllInfo with the information of all plugins found in the directory specified 
 ///< and its subdirectories. If a Cache exists it will only load/fill those that are new
 ///< or modified since the cache creation.
-void CachedDllFinder::populate_plugin_map(std::string directory,MachineType mtype)
+void CachedDllFinder::populate_plugin_map(std::string directory,Machine::type_type mtype)
 {
 	std::vector<DllFileInfo> dllList;
 
@@ -201,7 +186,7 @@ void CachedDllFinder::populate_plugin_map(std::string directory,MachineType mtyp
 		bool found(false);
 		logger.emit(dllList[i]._name);
 		std::map<std::string,PluginInfo>::iterator iterator
-			= dllInfo.find(file_from_fullpath(dllList[i]._name));
+			= dllInfo.find(FileFromFullpath(dllList[i]._name));
 		if(iterator != dllInfo.end())
 		{
 			if ( iterator->second.FileTime.dwHighDateTime ==  dllList[i]._modtime.dwHighDateTime &&

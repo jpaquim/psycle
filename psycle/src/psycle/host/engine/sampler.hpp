@@ -124,85 +124,18 @@ namespace psycle
 		public:
 			Sampler(Machine::id_type id);
 			///< Helper class for Machine Creation.
-			static Machine* CreateFromType(MachineType _id, std::string _dllname);
+			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Init();
 			virtual void Work(int numSamples);
 			virtual void Stop();
 			virtual void Tick();
 			virtual void Tick(int channel, PatternEntry* pData);
-			virtual const std::string GetBrand() { return minfo.brandname; }
-			virtual const std::string GetVendorName() { return minfo.vendor; }
-			virtual const std::uint32_t GetVersion() { return minfo.version; }
-			virtual const std::uint32_t GetCategory() { return minfo.category; }
 			virtual bool LoadOldFileFormat(RiffFile* pFile);
-			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
-			{
-				std::uint32_t size;
-				pFile->Read(size);
-				if (size)
-				{
-					if (version > CURRENT_FILE_VERSION_MACD)
-					{
-						// data is from a newer format of psycle, it might be unsafe to load.
-						pFile->Skip(size);
-						return false;
-					}
-					else
-					{
-						std::int32_t temp;
-						pFile->Read(temp); // numSubtracks
-						_numVoices=temp;
-						pFile->Read(temp); // quality
-
-						switch (temp)
-						{
-						case 2:
-							_resampler.SetQuality(dsp::R_SPLINE);
-							break;
-						case 3:
-							_resampler.SetQuality(dsp::R_BANDLIM);
-							break;
-						case 0:
-							_resampler.SetQuality(dsp::R_NONE);
-							break;
-						default:
-						case 1:
-							_resampler.SetQuality(dsp::R_LINEAR);
-							break;
-						}
-					}
-				}
-				return true;
-			}
-
-			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
-			{
-				std::int32_t temp;
-				std::uint32_t size = 2 * sizeof temp;
-				pFile->Write(size);
-				temp = _numVoices;
-				pFile->Write(temp); // numSubtracks
-				switch (_resampler.GetQuality())
-				{
-					case dsp::R_NONE:
-						temp = 0;
-						break;
-					case dsp::R_LINEAR:
-						temp = 1;
-						break;
-					case dsp::R_SPLINE:
-						temp = 2;
-						break;
-					case dsp::R_BANDLIM:
-						temp = 3;
-						break;
-				}
-				pFile->Write(temp); // quality
-			}
+			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+			virtual void SaveSpecificChunk(RiffFile* pFile);
 
 			void Update();
 
-			static InternalMachineInfo minfo;
 		protected:
 			friend CGearTracker;
 
