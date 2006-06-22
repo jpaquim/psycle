@@ -22,6 +22,8 @@ public:
 	///< fills in the path for the specified name so that name becomes a fullpath.
 	virtual bool LookupDllPath(std::string& name);
 
+	///< returns the file extracted from the fullpath
+	std::string FileFromFullpath(const std::string& fullpath);
 protected:
 	bool SearchFileInDir(std::string& name,std::string& path);
 

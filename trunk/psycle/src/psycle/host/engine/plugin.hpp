@@ -21,7 +21,7 @@ namespace psycle
 			public:
 				inline virtual void MessBox(char* ptxt,char *caption,unsigned int type) { ::MessageBox(hWnd,ptxt,caption,type); }
 				inline virtual int GetTickLength()   { return Global::player().SamplesPerRow(); }
-				inline virtual int GetSamplingRate() { return Global::configuration().GetSamplesPerSec(); }
+				inline virtual int GetSamplingRate() { return Global::player().SampleRate(); }
 				inline virtual int GetBPM() { return Global::player().bpm; }
 				inline virtual int GetTPB() { return Global::player().tpb; }
 			PSYCLE__PRIVATE:
@@ -102,7 +102,7 @@ namespace psycle
 					///\todo doc
 					virtual void Init();
 					///< Helper class for Machine Creation.
-					static Machine* CreateFromType(MachineType _id, std::string _dllname);
+					static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 				private:
 					/// mswindows! humpf! mswindows!
 					HINSTANCE _dll;
@@ -194,8 +194,6 @@ namespace psycle
 				///\todo move this to the proxy class
 				plugin_interface::CMachineInfo        *  _pInfo;
 
-				public:
-					static const InternalMachineInfo minfo;
 		};
 	}
 }

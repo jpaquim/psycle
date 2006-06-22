@@ -71,7 +71,7 @@ namespace psycle
 				return 0;
 			}
 
-			Machine* host::CreateFromType(MachineType _id, std::string _dllname)
+			Machine* host::CreateFromType(Machine::id_type _id, std::string _dllname)
 			{
 				//\todo;
 				//return new;
@@ -195,9 +195,9 @@ namespace psycle
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->_macIndex, index, f2i(opt * quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->id(), index, f2i(opt * quantization));
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->_macIndex, index, f2i(opt * quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->id(), index, f2i(opt * quantization));
 				}
 				// This refresh shouldn't come here, player().Tweaker should do it.
 				if(host->editorWnd)

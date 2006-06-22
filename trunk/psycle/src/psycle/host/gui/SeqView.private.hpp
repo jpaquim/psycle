@@ -251,7 +251,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			curcol = seqTickOffs - (seqTickOffs%seqSteps);
 			
-			float curtime = (((Master*)(_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::player().bpm) / (60.0f * Global::configuration()._pOutputDriver->_samplesPerSec);
+			float curtime = (((Master*)(_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::player().bpm) / (60.0f * Global::player().SampleRate());
 
 			if ( (float)(curcol*seqSteps) <= curtime && Global::player()._playing )
 			{

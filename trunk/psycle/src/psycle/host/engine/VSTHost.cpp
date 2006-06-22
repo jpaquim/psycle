@@ -9,8 +9,7 @@
 #include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/MainFrm.hpp> // Is this needed?
 #include <psycle/host/gui/VSTEditorDlg.hpp> // Is this needed?
-//#include <psycle/host/gui/InputHandler.hpp> // Is this needed?
-#include <psycle/host/gui/NewMachine.hpp> // Is this needed?
+#include <psycle/host/engine/cacheddllfinder.hpp>
 #include <algorithm>
 #include <cctype>
 namespace psycle
@@ -106,9 +105,6 @@ namespace psycle
 			}
 
 			VstTimeInfo plugin::_timeInfo;
-			// The original VST host separated vst gens and vst fx. Nowadays, the difference is minimal, and the "FX" one could be removed with no problems.
-			const InternalMachineInfo plugin::minfo(MACH_VST,MACHMODE_UNDEFINED,Plugin::CreateFromType,true,"VST Host","Vst Plugin","Psycledelics",0,1200,0);
-			const InternalMachineInfo plugin::minfo2(MACH_VSTFX,MACHMODE_FX,Plugin::CreateFromType,true,"VST Host","Vst fx","Psycledelics",0,1200,0);
 
 			plugin::plugin(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
 			:
@@ -148,10 +144,10 @@ namespace psycle
 				}
 				zapObject(proxy_);
 			}
-			Machine* plugin::CreateFromType(MachineType _id, std::string _dllname)
+			Machine* plugin::CreateFromType(Machine::id_type _id, std::string _dllname)
 			{
 				//\todo:
-				//return new;
+				return 0;
 			}
 
 			void plugin::Instance(std::string const & dllname, bool overwriteName)
@@ -194,7 +190,7 @@ namespace psycle
 					throw host::exceptions::function_errors::bad_returned_value(s.str());
 				}
 				// 2: Host to Plug, setSampleRate ( 44100.000000 )
-				proxy().setSampleRate((float) Global::configuration().GetSamplesPerSec());
+				proxy().setSampleRate((float) Global::player().SampleRate());
 				// 3: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 4: Host to Plug, open
@@ -214,13 +210,13 @@ namespace psycle
 				}
 
 				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
-				proxy().setSampleRate((float) Global::configuration().GetSamplesPerSec());
+				proxy().setSampleRate((float) Global::player().SampleRate());
 				// 7: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 8: Host to Plug, setSpeakerArrangement returned: false 
 				proxy().setSpeakerArrangement(&VSTsa,&VSTsa);
 				// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
-				proxy().setSampleRate((float) Global::configuration().GetSamplesPerSec());
+				proxy().setSampleRate((float) Global::player().SampleRate());
 				// 10: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 11: Host to Plug, getProgram returned: 0 
@@ -462,7 +458,6 @@ namespace psycle
 			bool plugin::LoadDll(std::string const & file_name)
 			{
 				std::string path = file_name;
-				std::transform(path.begin(), path.end(), path.begin(), std::tolower);
 				if(Global::dllfinder().LookupDllPath(path)) 
 				{
 					try
@@ -948,7 +943,7 @@ namespace psycle
 						_timeInfo.samplePos = ((Master *) (Global::song()._pMachine[MASTER_INDEX]))->sampleCount;
 					}
 					else _timeInfo.samplePos = 0;
-					_timeInfo.sampleRate = Global::configuration().GetSamplesPerSec();
+					_timeInfo.sampleRate = Global::player().SampleRate();
 					
 					if(value & kVstNanosValid)
 					{
@@ -1035,7 +1030,7 @@ namespace psycle
 					return 0;
 				case audioMasterGetSampleRate:
 					{
-						long sampleRate=Global::configuration().GetSamplesPerSec();
+						long sampleRate=Global::player().SampleRate();
 						if(effect && host)
 							host->proxy().setSampleRate(sampleRate);
 						return sampleRate;
@@ -1111,7 +1106,6 @@ namespace psycle
 			:
 				plugin(MACH_VST, MACHMODE_GENERATOR, id)
 			{
-				_editName = "Vst2 Instr.";
 				_program = 0;
 			}
 
@@ -1434,7 +1428,6 @@ namespace psycle
 				plugin(MACH_VSTFX, MACHMODE_FX, id)
 			{
 				for(Wire::id_type i(0) ; i < MAX_CONNECTIONS; ++i) _inputConVol[i] = 1.f / 32767; // VST plugins use the range -1.0 .. +1.0
-				_editName = "Vst2 Fx";
 				_pOutSamplesL = new float[MAX_BUFFER_LENGTH];
 				_pOutSamplesR = new float[MAX_BUFFER_LENGTH];
 				dsp::Clear(_pOutSamplesL, MAX_BUFFER_LENGTH);

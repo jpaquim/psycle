@@ -4,10 +4,10 @@
 #include "FileIO.hpp"
 #include <stdexcept>
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		std::uint32_t RiffFile::FourCC(char const * null_terminated_string)
 		{
 			std::uint32_t result(0x20202020); // four spaces (padding)
@@ -32,7 +32,7 @@
 		{
 			if(max_length > 0) {
 				memset(data,0,max_length);
-				char c;
+				char c=EOF;
 				for(long index = 0; index < max_length; index++)
 				{
 					if ( (c=_stream.get())!=EOF)
@@ -156,5 +156,5 @@
 			return  (write_mode) ? _stream.tellp() : _stream.tellg();
 		}
 		
-//	}
-//}
+	}
+}

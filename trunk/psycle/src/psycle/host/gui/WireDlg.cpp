@@ -2,15 +2,16 @@
 ///\brief implementation file for psycle::host::CWireDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/engine/machine.hpp>
+#include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/WireDlg.hpp>
+#include <psycle/host/gui/VolumeDlg.hpp>
+#include <psycle/host/engine/machine.hpp>
+#include <psycle/host/engine/player.hpp>
 #include <psycle/host/engine/helpers.hpp>
 #include <psycle/host/engine/dsp.hpp>
 //#include <psycle/host/engine/fft.hpp>
 #include <psycle/host/gui/ChildView.hpp>
 //#include <psycle/host/gui/InputHandler.hpp>
-#include <psycle/host/gui/VolumeDlg.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
@@ -517,7 +518,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// ok this is a little tricky - it chases the wrapping buffer, starting at the last sample 
 			// buffered and working backwards - it does it this way to minimize chances of drawing 
 			// erroneous data across the buffering point
-			float add = (float(Global::configuration()._pOutputDriver->_samplesPerSec)/(float(freq)))/128.0f;
+			float add = (float(Global::player().SampleRate())/(float(freq)))/128.0f;
 
 			float n = float(_pSrcMachine->_scopeBufferIndex-scope_offset);
 			for (int x = 256; x > 0; x--)
@@ -1244,7 +1245,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_multiscope.scope_osc_freq = m_slsize.GetPos();
 				if (m_multiscope.hold)
 				{
-					m_slspeed.SetRange(0,SCOPE_BUF_SIZE&int(Global::configuration().GetSamplesPerSec()*2.0f/(m_multiscope.scope_osc_freq*m_multiscope.scope_osc_freq)));
+					m_slspeed.SetRange(0,SCOPE_BUF_SIZE&int(Global::player().SampleRate()*2.0f/(m_multiscope.scope_osc_freq*m_multiscope.scope_osc_freq)));
 				}
 				break;
 			case CMultiScopeCtrl::mode_spectrum:
@@ -1276,7 +1277,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (m_multiscope.hold)
 				{
 					m_lblspeed.SetWindowText("Offset:");
-					m_slspeed.SetRange(0,SCOPE_BUF_SIZE&int(Global::configuration().GetSamplesPerSec()*2.0f/(m_multiscope.scope_osc_freq*m_multiscope.scope_osc_freq)));
+					m_slspeed.SetRange(0,SCOPE_BUF_SIZE&int(Global::player().SampleRate()*2.0f/(m_multiscope.scope_osc_freq*m_multiscope.scope_osc_freq)));
 					m_slspeed.SetPos(m_multiscope.scope_offset);
 				}
 				else

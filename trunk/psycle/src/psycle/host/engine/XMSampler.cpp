@@ -2,8 +2,8 @@
 #include PACKAGENERIC
 #include <psycle/host/engine/XMInstrument.hpp>
 #include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/player.hpp>
 #include <psycle/host/engine/song.hpp>
+#include <psycle/host/engine/player.hpp>
 #include <psycle/host/engine/FileIO.hpp>
 #include <psycle/host/configuration.hpp>
 #include <universalis/processor/exception.hpp>
@@ -27,7 +27,6 @@ namespace psycle
 		static CXResampler *pResampler = NULL;
 */
 
-		const InternalMachineInfo XMSampler::minfo(MACH_XMSAMPLER,MACHMODE_GENERATOR,XMSampler::CreateFromType,false,"Sampulse Sampler V2","Sampulse","JosepMa",0,600,0);
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
@@ -2011,9 +2010,8 @@ namespace psycle
 
 		XMSampler::XMSampler(Machine::id_type id)
 		:
-			Machine(minfo.type, minfo.mode, id)
+			Machine(MACH_XMSAMPLER, MACHMODE_GENERATOR, id)
 		{
-			_editName = minfo.shortname;
 			DefineStereoOutput(1);
 			_audiorange = 32768.0f;
 
@@ -2047,7 +2045,7 @@ namespace psycle
 			}
 //			xdsp.Init(Global::player().SampleRate(), 1.0 / (1 << 20));
 		}
-		Machine* XMSampler::CreateFromType(MachineType _id, std::string _dllname)
+		Machine* XMSampler::CreateFromType(Machine::id_type _id, std::string _dllname)
 		{
 			return new XMSampler(_id);
 		}
@@ -2565,7 +2563,7 @@ namespace psycle
 				Global::song().BeatsPerMin(6 * BPM() / TicksPerRow() );
 			}
 
-			int t= Global::configuration()._pOutputDriver->_samplesPerSec * 60;
+			int t= Global::player().SampleRate() * 60;
 			int v=Global::song().BeatsPerMin();
 			int z=Global::song().LinesPerBeat();
 			Global::player().SamplesPerRow(	t / (v * z) );

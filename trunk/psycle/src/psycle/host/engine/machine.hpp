@@ -5,9 +5,7 @@
 #include "dsp.hpp"
 #include "helpers.hpp"
 #include "constants.hpp"
-#include "FileIO.hpp"
 #include <psycle/host/global.hpp>
-#include <psycle/host/engine/internal_machines_package.hpp>
 #include <universalis/processor/exceptions/fpu.hpp>
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
@@ -18,12 +16,8 @@ namespace psycle
 {
 	namespace host
 	{
-		/// we don't really need a macro for just one little expression...
-//		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
-		/// we don't really need a macro for just one little expression...
-//		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
-
 		class Machine; // forward declaration
+		class RiffFile;
 
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error
@@ -204,6 +198,36 @@ namespace psycle
 				virtual void CollectData(int numSamples);
 		};
 
+		enum MachineType
+		{
+			MACH_UNDEFINED	= -1, //< :-(
+			MACH_MASTER		= 0,
+			MACH_SINE		= 1, //< for psycle old fileformat version 2
+			MACH_DIST		= 2, //< for psycle old fileformat version 2
+			MACH_SAMPLER	= 3,
+			MACH_DELAY		= 4, //< for psycle old fileformat version 2
+			MACH_2PFILTER	= 5, //< for psycle old fileformat version 2
+			MACH_GAIN		= 6, //< for psycle old fileformat version 2
+			MACH_FLANGER	= 7, //< for psycle old fileformat version 2
+			MACH_PLUGIN		= 8,
+			MACH_VST		= 9,
+			MACH_VSTFX		= 10, //< Original host had a clear difference between VST gens and fx. Nowadays, they are almost the same.
+			MACH_SCOPE		= 11, //< Deprecated machine (existed in some betas). It's a GUI element now. If encountered, load it as a Dummy.
+			MACH_XMSAMPLER	= 12,
+			MACH_DUPLICATOR	= 13,
+			MACH_MIXER		= 14,
+			MACH_LFO		= 15,
+			MACH_AUTOMATOR	= 16,
+			MACH_DUMMY		= 255
+		};
+
+		enum MachineMode
+		{
+			MACHMODE_UNDEFINED	= -1, //< :-(
+			MACHMODE_GENERATOR	= 0,
+			MACHMODE_FX			= 1,
+			MACHMODE_MASTER		= 2,
+		};
 
 		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
@@ -216,6 +240,9 @@ namespace psycle
 			/// <= 65535
 			int maxValue;
 		};
+
+		class InternalMachineInfo;
+		class InternalMachinePackage;
 
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
@@ -333,7 +360,7 @@ namespace psycle
 			public:
 				Machine(type_type type, mode_type mode, id_type id);
 				virtual ~Machine() throw();
-
+				static Machine* CreateFromType(Machine::type_type _type,Machine::id_type _id,std::string _dllname);
 			//////////////////////////////////////////////////////////////////////////
 			// Actions
 
@@ -416,17 +443,18 @@ namespace psycle
 			///\name machine information
 			///\{
 				public:
-					virtual const std::string GetDllName() { std::string tmp; return tmp; }; //\todo: Empty string. This is (to be) used in the song saver.
-					virtual const std::string GetBrand() = 0;
-					virtual const std::string GetVendorName() = 0;
-					virtual const std::uint32_t GetVersion() = 0;
-					virtual const std::uint32_t GetCategory() = 0;
+					static InternalMachinePackage& infopackage();
+					static const InternalMachineInfo* GetInfoFromType(Machine::type_type _type);
+					virtual const std::string GetDllName() { return ""; }; //\todo: Empty string. This is (to be) used in the song saver.
+					virtual const std::string GetBrand();
+					virtual const std::string GetVendorName();
+					virtual const std::uint32_t GetVersion();
+					virtual const std::uint32_t GetCategory();
 					virtual std::string const & GetEditName() { return _editName; }
 					virtual void SetEditName(std::string newname) { _editName = newname; }
-					virtual InternalMachineInfo& GetInfoFromType(Machine::type_type type) { return infopackage.getInfo(type); }
+
 				PSYCLE__PRIVATE:
 					std::string  _editName;
-					static internal_machine_package infopackage;
 			///\}
 
 			///\name parameters
@@ -568,6 +596,51 @@ namespace psycle
 			///\}
 		};
 
+		// Helper class for Machine Creation.
+		typedef Machine* (*CreatorFromType)(Machine::id_type _id, std::string _dllname);
+
+		class InternalMachineInfo
+		{
+		public:
+			InternalMachineInfo() { ; }
+			InternalMachineInfo(Machine::type_type _type,Machine::mode_type _mode,CreatorFromType _creator, bool _host,
+				char const* _brandname,char const* _shortname,char const* _vendor,
+				std::uint32_t _category, std::uint32_t _version, std::uint32_t _parameters)
+				:type(_type),mode(_mode),CreateFromType(_creator), host(_host)
+				,brandname(_brandname),shortname(_shortname),vendor(_vendor),category(_category)
+				,version(_version),parameters(_parameters) { ; }
+
+			bool operator<(const InternalMachineInfo & info) const { return type < info.type ; }
+			void operator=(const InternalMachineInfo & info)
+			{
+				type=info.type; mode=info.mode; CreateFromType=info.CreateFromType; host=info.host;
+				brandname=info.brandname;shortname=info.shortname;vendor=info.vendor;
+				category=info.category;version=info.version;parameters=info.parameters;
+			}
+		public:
+			///< Class of machine (master, sampler, dummy,...). See MachineType
+			Machine::type_type type;
+			///< Mode of the plugin, ( generator, effect,...) See MachineMode
+			Machine::mode_type mode;
+			///< Creator function. Needed for the loader.
+			CreatorFromType CreateFromType;
+			///< Indicates if the machine is unique or a host of machines (.dll's)
+			bool host;
+			///< Name of the machine
+			char const *brandname;
+			///< Default Display name.
+			char const *shortname;
+			///< Authority of the machine
+			char const *vendor;
+			///< Default category.
+			//\todo: define categories.
+			std::uint32_t category;
+			///< version numbering. Prefered form is " 1.0 -> 1000 "
+			std::uint32_t version;
+			///< The Number of parameters that this machine exports.
+			std::uint32_t parameters;
+			//\todo : description field?
+		};
 
 
 

@@ -115,23 +115,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if ((rate < 0) || (rate >5))
 			{
-				if (Global::configuration()._pOutputDriver->_samplesPerSec <= 8192)
+				if (Global::configuration().GetSamplesPerSec() <= 8192)
 				{
 					rate = 0;
 				}
-				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 11025)
+				else if (Global::configuration().GetSamplesPerSec() <= 11025)
 				{
 					rate = 1;
 				}
-				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 22050)
+				else if (Global::configuration().GetSamplesPerSec() <= 22050)
 				{
 					rate = 2;
 				}
-				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 44100)
+				else if (Global::configuration().GetSamplesPerSec() <= 44100)
 				{
 					rate = 3;
 				}
-				else if (Global::configuration()._pOutputDriver->_samplesPerSec <= 48000)
+				else if (Global::configuration().GetSamplesPerSec() <= 48000)
 				{
 					rate = 4;
 				}

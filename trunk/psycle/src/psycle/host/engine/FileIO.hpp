@@ -10,10 +10,10 @@
 #include <sstream>
 
 
-//namespace psycle
-//{
-//	namespace host
-//	{
+namespace psycle
+{
+	namespace host
+	{
 		namespace endian
 		{
 			namespace big
@@ -100,6 +100,6 @@
 				bool write_mode;
 				std::fstream _stream;
 		};
-//	}
-//}
+	}
+}
 

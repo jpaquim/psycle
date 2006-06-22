@@ -132,7 +132,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			int index = m_driverComboBox.GetCurSel();
 			m_ppDrivers[index]->Configure();
-			Global::player().SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
+			Global::player().SampleRate(Global::configuration().GetSamplesPerSec());
 		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

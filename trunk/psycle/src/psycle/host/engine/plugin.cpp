@@ -30,8 +30,6 @@ namespace psycle
 				#pragma warning(disable:4355) // 'this' : used in base member initializer list
 		#endif
 
-		const InternalMachineInfo Plugin::minfo(MACH_PLUGIN,MACHMODE_UNDEFINED,Plugin::CreateFromType,true,"Native Host","Plugin","Psycledelics",0,1100,0);
-
 		Plugin::Plugin(Machine::id_type id)
 			:
 				Machine(MACH_PLUGIN, MACHMODE_FX, id),
@@ -42,7 +40,6 @@ namespace psycle
 				_psName("")
 			{
 				_audiorange=32768.0f;
-				_editName = "native plugin";
 			}
 
 		#if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -53,7 +50,7 @@ namespace psycle
 		{
 			Free();
 		}
-		Machine* Plugin::CreateFromType(MachineType _id, std::string _dllname)
+		Machine* Plugin::CreateFromType(Machine::id_type _id, std::string _dllname)
 		{
 			//\todo:
 			return 0;
@@ -246,7 +243,6 @@ namespace psycle
 		bool Plugin::LoadDll(std::string const & base_name_)
 		{
 			std::string path = base_name_;
-			std::transform(path.begin(), path.end(), path.begin(), std::tolower);
 			if(!Global::dllfinder().LookupDllPath(path)) 
 			{
 				// Check Compatibility Table.

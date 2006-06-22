@@ -9,7 +9,7 @@
 #include <psycle/host/audiodrivers/WaveOut.hpp>
 #include <psycle/host/audiodrivers/DirectSound.hpp>
 #include <psycle/host/audiodrivers/ASIOInterface.hpp>
-#include <psycle/host/gui/NewMachine.hpp>
+//#include <psycle/host/gui/NewMachine.hpp>
 
 namespace psycle
 {
@@ -36,6 +36,8 @@ namespace psycle
 			bFileSaveReminders = true;
 			autosaveSong = true;
 			autosaveSongTime = 10;
+			_comboTypeSel = 1;
+			_comboNameSel = 1;
 
 			SetSkinDefaults();
 			// soundcard output device
@@ -145,8 +147,8 @@ namespace psycle
 				}
 			}
 
-			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
-			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
+			reg.QueryValue("NewMacDlgpluginOrder", _comboTypeSel);
+			reg.QueryValue("NewMacDlgpluginName", _comboNameSel);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("CenterCursor", _centerCursor);
 			reg.QueryValue("FollowSong", _followSong);
@@ -335,8 +337,8 @@ namespace psycle
 					return;
 				}
 			}
-			reg.SetValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
-			reg.SetValue("NewMacDlgpluginName", CNewMachine::pluginName);
+			reg.SetValue("NewMacDlgpluginOrder", _comboTypeSel);
+			reg.SetValue("NewMacDlgpluginName", _comboNameSel);
 			reg.SetValue("WrapAround", _wrapAround);
 			reg.SetValue("CenterCursor", _centerCursor);
 			reg.SetValue("FollowSong", _followSong);
@@ -656,8 +658,8 @@ namespace psycle
 			}
 			result = reg.OpenKey("CurrentVersion");
 			if ( result != ERROR_SUCCESS) return false;
-			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
-			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
+			reg.QueryValue("NewMacDlgpluginOrder", _comboTypeSel);
+			reg.QueryValue("NewMacDlgpluginName", _comboNameSel);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("CenterCursor", _centerCursor);
 			reg.QueryValue("FollowSong", _followSong);
