@@ -950,12 +950,15 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           int lineCount  = clientHeight() / pView->rowHeight();
           int oldLine = pView->cursor().y();
           pView->moveCursor(0,pView->patternStep(),0);
+          // first clear old line to avoid flicker at scroll down
+          window()->repaint(this,repaintTrackArea(oldLine,oldLine,pView->cursor().x(),pView->cursor().x()));
+          window()->repaint(pView,pView->repaintLineNumberArea(oldLine,oldLine));
           int newLine = pView->cursor().y();
           if (newLine > startLine + lineCount-1) {
-            pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
+            pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
           }
-            window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
-            window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
+            window()->repaint(this,repaintTrackArea(newLine,newLine,pView->cursor().x(),pView->cursor().x()));
+            window()->repaint(pView,pView->repaintLineNumberArea(newLine,newLine));
 
         }
       }
@@ -970,11 +973,14 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           pView->moveCursor(0,-pView->patternStep(),0);
           int startLine  = dy_ / pView->rowHeight();
           int newLine = pView->cursor().y();
+          // frist clear oldLine to avoid flicker at bitblit
+          window()->repaint(this,repaintTrackArea(oldLine,oldLine,pView->cursor().x(),pView->cursor().x()));
+          window()->repaint(pView,pView->repaintLineNumberArea(oldLine,oldLine));
           if (newLine < startLine) {
             pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
           }
-          window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
-          window()->repaint(pView,pView->repaintLineNumberArea(newLine,oldLine));
+          window()->repaint(this,repaintTrackArea(newLine,newLine,pView->cursor().x(),pView->cursor().x()));
+          window()->repaint(pView,pView->repaintLineNumberArea(newLine,newLine));
         }
       }
       break;
