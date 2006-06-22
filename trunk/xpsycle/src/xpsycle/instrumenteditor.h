@@ -29,10 +29,10 @@ class NComboBox;
 class NSlider;
 class NCheckBox;
 class NItemEvent;
-class EnvDialog;
 
 namespace psycle {
 namespace host{
+class EnvDialog;
 
 /**
 @author Stefan Nattkemper
