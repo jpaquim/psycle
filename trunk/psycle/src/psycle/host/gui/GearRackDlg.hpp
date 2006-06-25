@@ -45,7 +45,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnProperties();
 			afx_msg void OnParameters();
 			afx_msg void OnSelchangeGearlist();
-			afx_msg void OnMachineType();
 			afx_msg void OnRadioEfx();
 			afx_msg void OnRadioGen();
 			afx_msg void OnRadioIns();

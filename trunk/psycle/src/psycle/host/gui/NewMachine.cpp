@@ -6,8 +6,8 @@
 #include <psycle/host/gui/NewMachine.hpp>
 #include <psycle/host/gui/ProgressDialog.hpp>
 #include <psycle/host/engine/cacheddllfinder.hpp>
-#include <psycle/host/configuration.hpp>
 #include <psycle/host/engine/internal_machine_package.hpp>
+#include <psycle/host/configuration.hpp>
 #undef min //\todo : ???
 #undef max //\todo : ???
 //#include <sstream>
@@ -209,7 +209,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else if (i >= IS_INTERNAL_MACHINE)
 			{
-				const InternalMachineInfo* iinfo = Machine::infopackage().getInfo(Machine::type_type(i - IS_INTERNAL_MACHINE));
+				const InternalMachineInfo* iinfo = Machine::infopackage().getInfo(Machine::class_type(i - IS_INTERNAL_MACHINE));
 				if (iinfo)
 				{
 					Outputmachine = iinfo->type;
@@ -282,20 +282,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnCheckAllow() 
 		{
-/*			for (int i=0; i<_numPlugins; i++)
+			HTREEITEM tHand = m_browser.GetSelectedItem();
+			int i = m_browser.GetItemData (tHand);
+			switch(i&NODE_IDENTIFIER)
 			{
-				if (tHand == hPlug[i])
-				{
-					_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
-					updateCache = true;
-				}
+			case IS_PLUGIN:
+//				_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
+//				updateCache = true;
+				break;
+			default:break;
 			}
-*/
 		}
 
 		void CNewMachine::OnBeginDrag(NMHDR *pNMHDR, LRESULT *pResult)
 		{
-			if (Global::configuration()._comboTypeSel == 2)  //make sure plugins are being displayed by custom category
+			if (comboTypeStyle.GetCurSel() == 2)  //make sure plugins are being displayed by custom category
 			{
 				LPNMTREEVIEW lpnmtv = (LPNMTREEVIEW)pNMHDR;
 				*pResult = 0;	// allow drag
@@ -500,7 +501,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				HTREEITEM hItem = m_browser.HitTest(newpoint, &nFlags);
 				if (hItem) m_browser.SelectItem(hItem);
 
-				if (hItem && (Global::configuration()._comboTypeSel == 2)/*&& (TVHT_ONITEM & nFlags)*/)
+				if (hItem && (comboTypeStyle.GetCurSel() == 2)/*&& (TVHT_ONITEM & nFlags)*/)
 				{				
 					//check if selected item is a folder
 					if (m_browser.GetParentItem (hItem) != hNodes[0])
@@ -885,242 +886,198 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			return true;
 		}
 
-		void CNewMachine::UpdateList(bool bInit)
+		void CNewMachine::UpdateList()
 		{
-/*			m_browser.DeleteAllItems();
-			HTREEITEM intFxNode;
-			switch(Global::configuration()._comboTypeSel)
+			m_browser.DeleteAllItems();
+			switch(comboTypeStyle.GetCurSel())
 			{
-				// sort by plugin type
-			case 0:
-				hNodes[0] = m_browser.InsertItem("Internal Machines",0,0 , TVI_ROOT, TVI_LAST);
-				m_browser.SetItemData (hNodes[0], IS_FOLDER);
-				m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
-				hNodes[1] = m_browser.InsertItem("Native plug-ins",2,2,TVI_ROOT,TVI_LAST);
-				m_browser.SetItemData (hNodes[1], IS_FOLDER);
-				m_browser.SetItemState (hNodes[1], TVIS_BOLD, TVIS_BOLD);
-				hNodes[2] = m_browser.InsertItem("VST2 plug-ins",4,4,TVI_ROOT,TVI_LAST);
-				m_browser.SetItemData (hNodes[2], IS_FOLDER);
-				m_browser.SetItemState (hNodes[2], TVIS_BOLD, TVIS_BOLD);
-				intFxNode = hNodes[0];
-				//nodeindex = 3;
+			case 0: // sort by plugin type
+				UpdateWithType(); break;
+				
+			case 1:	//sort by class of machine
+				UpdateWithMode(); break;
+				
+			case 2: //sort into custom folders
+				UpdateWithCategories(); break;
+			}
+		}
 
-				for(int i(_numPlugins - 1) ; i >= 0 ; --i)
-				{
-					if(_pPlugsInfo[i]->error.empty())
-					{
-						int imgindex;
-						HTREEITEM hitem;
-						if( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
-						{
-							if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
-							{ 
-								imgindex = 2; 
-								hitem= hNodes[1]; 
-							}
-							else 
-							{ 
-								imgindex = 4; 
-								hitem=hNodes[2]; 
-							}
-						}
-						else
-						{
-							if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
-							{ 
-								imgindex = 3; 
-								hitem= hNodes[1];
-							}
-							else 
-							{ 
-								imgindex = 5; 
-								hitem=hNodes[2];
-							}
-						}
-						HTREEITEM newitem;
-						if(pluginName)
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-						else
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-						//associate node with plugin number
-						m_browser.SetItemData (newitem, i);
-					}
-				}
+		void CNewMachine::UpdateWithType()
+		{
+			HTREEITEM imnode = m_browser.InsertItem("Internal Machines",internalgen,internalgen, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (imnode, IS_FOLDER);
+			m_browser.SetItemState (imnode, TVIS_BOLD, TVIS_BOLD);
+			HTREEITEM nnode = m_browser.InsertItem("Native plug-ins",nativegen,nativegen,TVI_ROOT,TVI_LAST);
+			m_browser.SetItemData (nnode, IS_FOLDER);
+			m_browser.SetItemState (nnode, TVIS_BOLD, TVIS_BOLD);
+			HTREEITEM vnode = m_browser.InsertItem("VST2 plug-ins",vstgen,vstgen,TVI_ROOT,TVI_LAST);
+			m_browser.SetItemData (vnode, IS_FOLDER);
+			m_browser.SetItemState (vnode, TVIS_BOLD, TVIS_BOLD);
+
+			int modetoicon[]={0,2,2,0};
+			Machine::infopackage().MoveFirst();
+			while (!Machine::infopackage().end())
+			{
 				HTREEITEM newitem;
-
-				for (int i(0);i<NUM_INTERNAL_MACHINES;i++)
+				const InternalMachineInfo* iminfo = Machine::infopackage().GetInfoAtPos();
+				if ( !iminfo->host && iminfo->mode != MACHMODE_MASTER)
 				{
-					newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hNodes[0], TVI_SORT);
-					if ( i==0 ) hInt[0]=newitem;
-					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+i);
+					newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], imnode, TVI_SORT);
+					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
 				}
+				iminfo = Machine::infopackage().MoveNext();
+			}
 
-				m_browser.Select(hNodes[LastType0],TVGN_CARET);
-				break;
-
-				//sort by class of machine
-			case 1:
-				hNodes[0] = m_browser.InsertItem("Generators",2,2 , TVI_ROOT, TVI_LAST);
-				m_browser.SetItemData (hNodes[0], IS_FOLDER);
-				m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
-				hNodes[1] = m_browser.InsertItem("Effects",3,3,TVI_ROOT,TVI_LAST);
-				m_browser.SetItemData (hNodes[1], IS_FOLDER);
-				m_browser.SetItemState (hNodes[1], TVIS_BOLD, TVIS_BOLD);
-				intFxNode = hNodes[1];
-				//nodeindex=2;
-				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
+			for(int i(_numPlugins - 1) ; i >= 0 ; --i)
+			{
+				if(_pPlugsInfo[i]->error.empty())
 				{
-					if(_pPlugsInfo[i]->error.empty())
+					int imgindex;
+					HTREEITEM hParent;
+					if( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
 					{
-						int imgindex;
-						HTREEITEM hitem;
-						HTREEITEM newitem;
-						if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
-						{
-							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-							{ 
-								imgindex = 2; 
-								hitem= hNodes[0]; 
-							}
-							else 
-							{ 
-								imgindex = 4; 
-								hitem=hNodes[0]; 
-							}
+						if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
+						{ 
+							imgindex = 2; 
+							hitem= hNodes[1]; 
 						}
-						else
-						{
-							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-							{ 
-								imgindex = 3; 
-								hitem= hNodes[1]; 
-							}
-							else 
-							{ 
-								imgindex = 5; 
-								hitem=hNodes[1]; 
-							}
+						else 
+						{ 
+							imgindex = 4; 
+							hitem=hNodes[2]; 
 						}
-						if(pluginName)
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-						else
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-						//associate the plugin number with the node
-						m_browser.SetItemData (newitem,i);
 					}
-
-				}
-				for (int i(0);i<NUM_INTERNAL_MACHINES;i++)
-				{
-					newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype?hNodes[1]:hNodes[0], TVI_SORT);
-					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+i);
-				}
-
-				m_browser.Select(hNodes[LastType1],TVGN_CARET);
-				break;
-
-				//sort into custom folders
-			case 2:
-				hNodes[0] = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
-				m_browser.SetItemData (hNodes[0], IS_FOLDER);
-				m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
-				_numCustCategories = 1;
-
-				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
-				{
-					if(_pPlugsInfo[i]->error.empty())
+					else
 					{
-						//determine plugin icons
-						int imgindex;
-						HTREEITEM hitem;
-						if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
-						{
-							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-							{ 
-								imgindex = 2; 
-							}
-							else 
-							{ 
-								imgindex = 4; 
-							}
+						if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
+						{ 
+							imgindex = 3; 
+							hitem= hNodes[1];
 						}
-						else
-						{
-							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-							{ 
-								imgindex = 3; 
-							}
-							else 
-							{ 
-								imgindex = 5; 
-							}
+						else 
+						{ 
+							imgindex = 5; 
+							hitem=hNodes[2];
 						}
-						//determine plugin folder
-						if (_pPlugsInfo[i]->category == "")
-						{
-							hCategory = hNodes[0];
-						}
-						else
-						{
-							CString restofpath = _pPlugsInfo[i]->category.c_str ();
-							int barpos = restofpath.Find ("|",0);
-							CString curcategory = restofpath.Left (barpos);
-							curcategory = curcategory.TrimRight ("|");
-							hCategory = TVI_ROOT;
-							HTREEITEM hParent;
-							while (restofpath != "")
-							{
-								hParent = hCategory;
-								hCategory = CategoryExists (hParent, curcategory);
-
-								if (hCategory == NULL)
-								{
-									//category doesn't exist
-									hNodes[_numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,6, hParent, TVI_SORT);
-									hCategory = hNodes[_numCustCategories];
-									m_browser.SetItemData (hNodes[_numCustCategories], IS_FOLDER);
-									m_browser.SetItemState (hNodes[_numCustCategories], TVIS_BOLD, TVIS_BOLD);
-									_numCustCategories++;
-								}
-								else
-								{
-									//category exists, just add to tree
-									hitem = hCategory;
-								}
-								restofpath = restofpath.Right (restofpath.GetLength () - barpos - 1);
-								barpos = restofpath.Find ("|",0);
-
-								if (barpos > -1)
-								{
-									curcategory = restofpath.Left (barpos);
-									curcategory = curcategory.TrimRight ("|");
-								}
-							}
-
-
-						}
-						// add plugin to appropriate node on tree
-						if(pluginName)
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hCategory, TVI_SORT);
-						else
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hCategory, TVI_SORT);
-
-						m_browser.SetItemData (hPlug[i],i);
 					}
+					HTREEITEM newitem;
+					if(pluginName)
+						newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hParent, TVI_SORT);
+					else
+						newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hParent, TVI_SORT);
+					//associate node with plugin number
+					m_browser.SetItemData (newitem, IS_PLUGIN+i);
+				}
+			}
 
+			m_browser.Select(hNodes[LastType0],TVGN_CARET);
+			break;
+		}
+		void CNewMachine::UpdateWithMode()
+		{
+			hNodes[0] = m_browser.InsertItem("Generators",2,2 , TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (hNodes[0], IS_FOLDER);
+			m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
+			hNodes[1] = m_browser.InsertItem("Effects",3,3,TVI_ROOT,TVI_LAST);
+			m_browser.SetItemData (hNodes[1], IS_FOLDER);
+			m_browser.SetItemState (hNodes[1], TVIS_BOLD, TVIS_BOLD);
+
+			for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
+			{
+				if(_pPlugsInfo[i]->error.empty())
+				{
+					int imgindex;
+					HTREEITEM hitem;
+					HTREEITEM newitem;
+					if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+					{
+						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+						{ 
+							imgindex = 2; 
+							hitem= hNodes[0]; 
+						}
+						else 
+						{ 
+							imgindex = 4; 
+							hitem=hNodes[0]; 
+						}
+					}
+					else
+					{
+						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+						{ 
+							imgindex = 3; 
+							hitem= hNodes[1]; 
+						}
+						else 
+						{ 
+							imgindex = 5; 
+							hitem=hNodes[1]; 
+						}
+					}
+					if(pluginName)
+						newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					else
+						newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					//associate the plugin number with the node
+					m_browser.SetItemData (newitem,IS_PLUGIN+i);
 				}
 
-				//add categories + entries for internal machines	
-				for(int i = 0 ; i < NUM_INTERNAL_MACHINES ; i++)
+			}
+			for (int i(0);i<NUM_INTERNAL_MACHINES;i++)
+			{
+				newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype?hNodes[1]:hNodes[0], TVI_SORT);
+				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+i);
+			}
+
+			m_browser.Select(hNodes[LastType1],TVGN_CARET);
+			break;
+		}
+		void CNewMachine::UpdateWithCategories()
+		{
+			hNodes[0] = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (hNodes[0], IS_FOLDER);
+			m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
+			_numCustCategories = 1;
+			HTREEITEM hCategory;
+
+			for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
+			{
+				if(_pPlugsInfo[i]->error.empty())
 				{
-					//determine internal machine folder
-					if (!_pInternalMachines[i]->category.length())
+					//determine plugin icons
+					int imgindex;
+					HTREEITEM hitem;
+					if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+					{
+						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+						{ 
+							imgindex = 2; 
+						}
+						else 
+						{ 
+							imgindex = 4; 
+						}
+					}
+					else
+					{
+						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+						{ 
+							imgindex = 3; 
+						}
+						else 
+						{ 
+							imgindex = 5; 
+						}
+					}
+					//determine plugin folder
+					if (_pPlugsInfo[i]->category == "")
 					{
 						hCategory = hNodes[0];
 					}
 					else
 					{
-						CString restofpath = _pInternalMachines[i]->category.c_str ();
+						CString restofpath = _pPlugsInfo[i]->category.c_str ();
 						int barpos = restofpath.Find ("|",0);
 						CString curcategory = restofpath.Left (barpos);
 						curcategory = curcategory.TrimRight ("|");
@@ -1140,6 +1097,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								m_browser.SetItemState (hNodes[_numCustCategories], TVIS_BOLD, TVIS_BOLD);
 								_numCustCategories++;
 							}
+							else
+							{
+								//category exists, just add to tree
+								hitem = hCategory;
+							}
 							restofpath = restofpath.Right (restofpath.GetLength () - barpos - 1);
 							barpos = restofpath.Find ("|",0);
 
@@ -1150,19 +1112,72 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							}
 						}
 
+
 					}
-					// add internal machine to appropriate node on tree
-					hInt[i] = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hCategory, TVI_SORT);
-					m_browser.SetItemData (hInt[i],IS_INTERNAL_MACHINE + i);
+					// add plugin to appropriate node on tree
+					HTREEITEM newitem;
+					if(pluginName)
+						newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hCategory, TVI_SORT);
+					else
+						newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hCategory, TVI_SORT);
+
+					m_browser.SetItemData (newitem,IS_PLUGIN+i);
 				}
 
-				// remove leading space from all folders 
-				// (space was added at front of folder name to automatically sort folders to the top)
-				RemoveCatSpaces(NULL);
-				break;
 			}
-			Outputmachine = Machine::type_type(-1);
-*/
+
+			//add categories + entries for internal machines	
+			for(int i = 0 ; i < NUM_INTERNAL_MACHINES ; i++)
+			{
+				//determine internal machine folder
+				if (!_pInternalMachines[i]->category.length())
+				{
+					hCategory = hNodes[0];
+				}
+				else
+				{
+					CString restofpath = _pInternalMachines[i]->category.c_str ();
+					int barpos = restofpath.Find ("|",0);
+					CString curcategory = restofpath.Left (barpos);
+					curcategory = curcategory.TrimRight ("|");
+					hCategory = TVI_ROOT;
+					HTREEITEM hParent;
+					while (restofpath != "")
+					{
+						hParent = hCategory;
+						hCategory = CategoryExists (hParent, curcategory);
+
+						if (hCategory == NULL)
+						{
+							//category doesn't exist
+							hNodes[_numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,6, hParent, TVI_SORT);
+							hCategory = hNodes[_numCustCategories];
+							m_browser.SetItemData (hNodes[_numCustCategories], IS_FOLDER);
+							m_browser.SetItemState (hNodes[_numCustCategories], TVIS_BOLD, TVIS_BOLD);
+							_numCustCategories++;
+						}
+						restofpath = restofpath.Right (restofpath.GetLength () - barpos - 1);
+						barpos = restofpath.Find ("|",0);
+
+						if (barpos > -1)
+						{
+							curcategory = restofpath.Left (barpos);
+							curcategory = curcategory.TrimRight ("|");
+						}
+					}
+
+				}
+				// add internal machine to appropriate node on tree
+				HTREEITEM newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hCategory, TVI_SORT);
+				m_browser.SetItemData (newitem,IS_INTERNAL_MACHINE + i);
+				//hInt[i] = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hCategory, TVI_SORT);
+				//m_browser.SetItemData (hInt[i],IS_INTERNAL_MACHINE + i);
+			}
+
+			// remove leading space from all folders 
+			// (space was added at front of folder name to automatically sort folders to the top)
+			RemoveCatSpaces(NULL);
+			break;
 		}
 
 		void CNewMachine::SetPluginCategories (HTREEITEM hItem, CString Category)

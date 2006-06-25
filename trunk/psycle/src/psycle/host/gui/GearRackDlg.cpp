@@ -585,20 +585,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if (tmp1->_inputCon[i])
 					{
-						tmp1->InitWireVolume(Global::song()._pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2ivol[i]);
+						tmp1->InitWireVolume(Global::song()._pMachine[tmp1->_inputMachines[i]]->subclass(),i,tmp2ivol[i]);
 					}
 					if (tmp2->_inputCon[i])
 					{
-						tmp2->InitWireVolume(Global::song()._pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1ivol[i]);
+						tmp2->InitWireVolume(Global::song()._pMachine[tmp2->_inputMachines[i]]->subclass(),i,tmp1ivol[i]);
 					}
 
 					if (tmp1->_connection[i])
 					{
-						Global::song()._pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,Global::song()._pMachine[tmp1->_outputMachines[i]]->FindInputWire(two),tmp2ovol[i]);
+						Global::song()._pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->subclass(),Global::song()._pMachine[tmp1->_outputMachines[i]]->FindInputWire(two),tmp2ovol[i]);
 					}
 					if (tmp2->_connection[i])
 					{
-						Global::song()._pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,Global::song()._pMachine[tmp2->_outputMachines[i]]->FindInputWire(one),tmp1ovol[i]);
+						Global::song()._pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->subclass(),Global::song()._pMachine[tmp2->_outputMachines[i]]->FindInputWire(one),tmp1ovol[i]);
 					}					
 				}
 

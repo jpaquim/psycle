@@ -406,12 +406,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							if (pParentMain->isguiopen[c])
 							{
-								if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
+								if ( _pSong->_pMachine[c]->subclass() == MACH_PLUGIN )
 								{
 									pParentMain->m_pWndMac[c]->Invalidate(false);
 								}
-								else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
-										_pSong->_pMachine[c]->_type == MACH_VSTFX )
+								else if ( _pSong->_pMachine[c]->subclass() == MACH_VST ||
+										_pSong->_pMachine[c]->subclass() == MACH_VSTFX )
 								{
 									((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
 								}

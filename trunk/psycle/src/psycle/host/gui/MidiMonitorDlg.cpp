@@ -365,7 +365,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						int instrument = pMidiInput->GetInstMap( ch );
 						
 						// required? (instruments only apply for samplers)
-						if( pMachine->_type == MACH_SAMPLER )
+						if( pMachine->subclass() == MACH_SAMPLER )
 						{
 							std::ostringstream s;
 							s << instrument << ": " << Global::song()._pInstrument[ instrument ]->_sName;

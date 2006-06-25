@@ -180,7 +180,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			m_preslist.LimitText(32);
 			presetChanged = false;
-			if( _pMachine->_type == MACH_PLUGIN)
+			if( _pMachine->subclass() == MACH_PLUGIN)
 			{
 				numParameters = _pMachine->GetNumParams();
 				try
@@ -226,7 +226,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				
 			}
-			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			else if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
 			{
 				try
 				{
@@ -337,7 +337,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
 			{
 				ofn.lpstrFilter = "Presets\0*.prs\0VST Banks\0*.fxb\0All\0*.*\0";
 			}
@@ -345,12 +345,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			if( _pMachine->_type == MACH_PLUGIN)
+			if( _pMachine->subclass() == MACH_PLUGIN)
 			{
 				std::string tmpstr = Global::configuration().GetPluginDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
-			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			else if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
 			{
 				std::string tmpstr = Global::configuration().GetVstDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
@@ -616,12 +616,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			if ( _pMachine->_type == MACH_PLUGIN )
+			if ( _pMachine->subclass() == MACH_PLUGIN )
 			{
 				std::string tmpstr = Global::configuration().GetPluginDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			else if ( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX )
 			{
 				std::string tmpstr = Global::configuration().GetVstDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
@@ -907,7 +907,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//	float *params		 //variable no. of params
 			// }
 
-			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
 			{
 				RiffFile fxb;
 
@@ -1066,7 +1066,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CPresetsDlg::TweakMachine(CPreset &preset)
 		{
 			int num=preset.GetNumPars();
-			if(_pMachine->_type == MACH_PLUGIN)
+			if(_pMachine->subclass() == MACH_PLUGIN)
 			{
 				for(int i(0) ; i < num ; ++i)
 				{
@@ -1100,7 +1100,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				m_wndFrame->Invalidate(false);
 			}
-			else if(_pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			else if(_pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
 			{
 				for(int i(0) ; i < num ; ++i)
 				{
