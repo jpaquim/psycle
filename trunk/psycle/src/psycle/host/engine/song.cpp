@@ -55,10 +55,10 @@ namespace psycle
 {
 	namespace host
 	{
-		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index)
+		bool Song::CreateMachine(Machine::class_type subclass, int x, int y, std::string const & plugin_name, Machine::id_type index)
 		{
 			Machine * machine(0);
-			switch (type)
+			switch (subclass)
 			{
 				case MACH_MASTER:
 					if(_pMachine[MASTER_INDEX]) return false;
@@ -161,7 +161,7 @@ namespace psycle
 			
 			///\todo init problem
 			{
-				if(machine->_type == MACH_VSTFX || machine->_type == MACH_VST )
+				if(machine->subclass() == MACH_VSTFX || machine->subclass() == MACH_VST )
 				{
 					
 					// Do not call VST Init() function after Instance.

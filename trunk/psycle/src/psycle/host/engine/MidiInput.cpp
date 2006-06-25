@@ -1055,7 +1055,7 @@ namespace psycle
 						Machine* pMachine = Global::song()._pMachine[mgn];
 						if (pMachine)
 						{
-							if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
+							if (pMachine->subclass() == MACH_VST || pMachine->subclass() == MACH_VSTFX )
 					{
 						((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
 								return;
@@ -1312,7 +1312,7 @@ namespace psycle
 							int min, max;
 
 							// any info
-							if( pMachine->_type == MACH_PLUGIN )
+							if( pMachine->subclass() == MACH_PLUGIN )
 							{
 								// make sure parameter in range of machine
 								if( data1 > (pMachine->GetInfo()->numParameters-1) )

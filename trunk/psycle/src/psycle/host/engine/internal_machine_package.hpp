@@ -11,15 +11,16 @@ namespace psycle{
 			InternalMachinePackage();
 			virtual ~InternalMachinePackage();
 
-			const InternalMachineInfo* getInfo(Machine::type_type type) const ;
-			const InternalMachineInfo* getFirst();
-			const InternalMachineInfo* getNext();
+			const InternalMachineInfo* GetInfo(Machine::class_type subclass) const ;
+			const void MoveFirst();
+			const void MoveNext();
+			const InternalMachineInfo* GetInfoAtPos();
 			const bool end() const ;
 			const std::uint32_t size() const ;
 
 		protected:
-			std::map<Machine::type_type,InternalMachineInfo> infomap;
-			std::map<Machine::type_type,InternalMachineInfo>::const_iterator pos;
+			std::map<Machine::class_type,InternalMachineInfo> infomap;
+			std::map<Machine::class_type,InternalMachineInfo>::const_iterator pos;
 		};
 	}
 }

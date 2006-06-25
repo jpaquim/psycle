@@ -383,9 +383,9 @@ namespace psycle
 			:CEffect(loadstruct)
 		{
 			if ( IsSynth())
-				Machine::Machine(MachineType::vstplug,MachineMode::generator,id);
+				Machine::Machine(MachineClass::vstplug,MachineMode::generator,id);
 			else 
-				Machine::Machine(MachineType::vstfxplug,MachineMode::effect,id);
+				Machine::Machine(MachineClass::vstfxplug,MachineMode::effect,id);
 		}
 
 		plugin::~plugin()
