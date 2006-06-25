@@ -1,9 +1,9 @@
 ///\implementation psycle::host::AudioDriver
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/audiodrivers/AudioDriver.hpp>
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/host/engine/constants.hpp>
+#include <psycle/audiodrivers/AudioDriver.hpp>
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/engine/constants.hpp>
 #include <cstdint>
 namespace psycle
 {

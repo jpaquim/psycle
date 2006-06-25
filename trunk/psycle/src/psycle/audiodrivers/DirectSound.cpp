@@ -2,10 +2,10 @@
 ///\implementation psycle::host::DirectSound.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/audiodrivers/DirectSound.hpp>
-//#include <psycle/host/gui/resources/resources.hpp>
-#include <psycle/host/audiodrivers/DSoundConfig.hpp>
-#include <psycle/host/engine/registry.hpp>
+#include <psycle/audiodrivers/DirectSound.hpp>
+//#include <psycle/host/resources/resources.hpp>
+#include <psycle/audiodrivers/DSoundConfig.hpp>
+#include <psycle/engine/registry.hpp>
 #include <psycle/host/configuration.hpp>
 #include <universalis/processor/exception.hpp>
 #include <process.h>
