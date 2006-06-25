@@ -732,11 +732,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
 					if (tmac)
 					{
-						if (tmac->_type == MACH_SAMPLER)
+						if (tmac->subclass() == MACH_SAMPLER)
 						{
 							entry._inst = _pSong->auxcolSelected;
 						}
-						else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+						else if (tmac->subclass() == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
 						{
 							entry._inst = _pSong->auxcolSelected;
 						}
@@ -831,11 +831,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
 			if (tmac)
 			{
-				if (tmac->_type == MACH_SAMPLER)
+				if (tmac->subclass() == MACH_SAMPLER)
 				{
 					entry->_inst = _pSong->auxcolSelected;
 				}
-				else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+				else if (tmac->subclass() == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
 				{
 					entry->_inst = _pSong->auxcolSelected;
 				}

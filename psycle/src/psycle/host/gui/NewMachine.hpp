@@ -3,29 +3,37 @@
 #pragma once
 #include <psycle/host/gui/resources/resources.hpp>
 #include <psycle/host/engine/machine.hpp>
-#include <afxcoll.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
-		const int MAX_BROWSER_NODES = 64;
-		const int MAX_BROWSER_PLUGINS = 2048;
-		const int NUM_INTERNAL_MACHINES = 7;
-		const int IS_FOLDER           = 2000000000;
-		const int IS_INTERNAL_MACHINE = 1000000000;
+		const int NODE_IDENTIFIER	  = 0xFFF00000;
+		const int IS_INTERNAL_MACHINE = 0;
+		const int IS_FOLDER           = 1<<20;
+		const int IS_PLUGIN			  = 1<<21;
+		//const int WHATEVER_ELSE	  = 1<<22; //and so on..
 		const int TIMER_INTERVAL = 100;
-
-		class CProgressDialog;
 
 		/// new machine dialog window.
 		class CNewMachine : public CDialog
 		{
+			enum listimagetype
+			{
+				internalgen=0,
+				internalfx,
+				nativegen,
+				nativefx,
+				vstgen,
+				vstfx,
+				foldercategory,
+				folderuncategorized
+			};
 		public:
 			CNewMachine(CWnd* pParent = 0);
 			~CNewMachine();
 		public:
 			///< Output value indicating the selected machine.
 			//\todo: It will not be needed when NewMachine Creates the machine and tells the song to add the new machine.
-			Machine::type_type Outputmachine;
+			Machine::class_type Outputmachine;
 			///< Output value indicating its mode.
 			//\todo: It will not be needed when NewMachine Creates the machine and tells the song to add the new machine.
 			Machine::mode_type Outputmode;
@@ -50,7 +58,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnCancelMode();
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-			// No, it is not an afx_msg....
+			// No, it is not an afx_msg. We emulate it.
 			void OnEndDrag(UINT nFlags, CPoint point);
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 			afx_msg void NMPOPUP_AddSubFolder();
@@ -69,7 +77,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		protected:
 			static bool LoadCategoriesFile();
 			static bool SaveCategoriesFile();
-			void UpdateList(bool bInit = false);
+			void UpdateList();
+			void UpdateWithType();
+			void UpdateWithMode();
+			void UpdateWithCategories();
 			void SetPluginCategories(HTREEITEM hItem, CString Category);
 			HTREEITEM CategoryExists (HTREEITEM hParent, CString category);
 			void SortChildren (HTREEITEM hParent);
@@ -77,6 +88,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void FinishDragging(BOOL bDraggingImageList);
 			void DeleteMoveUncat (HTREEITEM hParent);
 			void RemoveCatSpaces (HTREEITEM hParent);
+
+			inline int GetType(int nodeindex) { return nodeindex&NODE_IDENTIFIER; }
+			inline int GetIndex(int nodeindex) { return nodeindex&~NODE_IDENTIFIER; };
 
 			// Dialog Data
 			enum { IDD = IDD_NEWMACHINE };
@@ -90,12 +104,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CComboBox comboNameStyle;
 			CImageList imgList;
 
-			HTREEITEM hNodes[MAX_BROWSER_NODES];
-			HTREEITEM hInt[NUM_INTERNAL_MACHINES];
-			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
-			HTREEITEM tHand;
 			HTREEITEM m_hItemDrag;
-			HTREEITEM hCategory;
 
 			bool updateCache;
 			bool bCategoriesChanged;

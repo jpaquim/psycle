@@ -906,13 +906,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if ( _pSong->seqBus < MAX_BUSES ) // it's a Generator
 					{
-						if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_SAMPLER ||_pSong->_pMachine[_pSong->seqBus]->_type == MACH_XMSAMPLER  )
+						if (_pSong->_pMachine[_pSong->seqBus]->subclass() == MACH_SAMPLER ||_pSong->_pMachine[_pSong->seqBus]->subclass() == MACH_XMSAMPLER  )
 						{
 							cb2->SetCurSel(AUX_WAVES);
 							_pSong->auxcolSelected = _pSong->instSelected;
 						}
 						/* This code is disabled because the MIDI channels are rarely used.
-						else if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_VST)
+						else if (_pSong->_pMachine[_pSong->seqBus]->subclass() == MACH_VST)
 						{
 							if ( cb2->GetCurSel() == AUX_WAVES)
 							{
@@ -1058,7 +1058,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							std::memset(buffer2,0,64);
 							tmac->GetParamName(i,buffer2);
 							bool label(false);
-							if(tmac->_type == MACH_PLUGIN)
+							if(tmac->subclass() == MACH_PLUGIN)
 							{
 								if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[i]->Flags & MPF_STATE))
 									label = true;
@@ -1378,7 +1378,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					m_wndView.AddMacViewUndo();
 
-					switch (ma->_type)
+					switch (ma->subclass())
 					{
 					case MACH_MASTER:
 						if (!m_wndView.MasterMachineDialog)
@@ -1631,7 +1631,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			if (_pSong->_pMachine[mac])
 			{
-				switch (_pSong->_pMachine[mac]->_type)
+				switch (_pSong->_pMachine[mac]->subclass())
 				{
 					case MACH_MASTER:
 						if (m_wndView.MasterMachineDialog) m_wndView.MasterMachineDialog->OnCancel();
@@ -2563,7 +2563,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if (_pSong->_pMachine[machine])
 						{
 							oss << " - " << _pSong->_pMachine[machine]->GetEditName();
-							if (_pSong->_pMachine[machine]->_type == MACH_SAMPLER)
+							if (_pSong->_pMachine[machine]->subclass() == MACH_SAMPLER)
 							{
 								
 								if (_pSong->_pInstrument[toffset[1]]->_sName[0])

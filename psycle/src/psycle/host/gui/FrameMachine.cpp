@@ -121,7 +121,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// Get NumParameters
 			numParameters = _pMachine->GetNumParams();
 			ncol = _pMachine->GetNumCols();
-			if ( _pMachine->_type == MACH_PLUGIN )
+			if ( _pMachine->subclass() == MACH_PLUGIN )
 			{
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
 				if( ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
@@ -144,12 +144,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					while(parspercol*K_YSIZE < maxY) parspercol++;
 				}
 			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			else if ( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX )
 			{
 				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
 			}
 
-			if( !(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+			if( !(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
 			{
 				parspercol = numParameters/ncol;
 				if (parspercol>24)	// check for "too big" windows
@@ -234,7 +234,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int const K_YSIZE2=K_YSIZE/2;
 		//	int hsp=0;
 
-			if(!(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+			if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
 			{
 				CDC memDC;
 				CBitmap* oldbmp;
@@ -414,7 +414,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
-			if(!(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+			if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
 			{
 				tweakpar = ConvertXYtoParam(point.x,point.y);
 				if ((tweakpar > -1) && (tweakpar < numParameters))
@@ -477,7 +477,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
 		{
-			if( _pMachine->_type == MACH_PLUGIN)
+			if( _pMachine->subclass() == MACH_PLUGIN)
 			{
 				if( !(((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI) )
 				{
@@ -551,7 +551,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
-					if(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
+					if(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
 					{
 						((Plugin*)_pMachine)->GetParam(tweakpar)->ResetTweakSrc(point);
 					}
@@ -562,7 +562,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					finetweak=!finetweak;
-					if(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
+					if(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
 					{
 						((Plugin*)_pMachine)->GetParam(tweakpar)->ResetTweakSrc(point);
 					}
@@ -576,7 +576,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				else freak = (maxval-minval)/float(screenh*3/5);
 				if (finetweak) freak/=5;
 
-				if(!(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+				if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
 				{
 					double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
 
@@ -636,7 +636,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnLButtonUp(UINT nFlags, CPoint point) 
 		{
-			if(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
+			if(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
 			{
 				if(tweakpar>=0 && tweakpar<numParameters)
 				{
@@ -670,7 +670,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 		{
-			if(!(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+			if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
 				tweakpar = ConvertXYtoParam(point.x,point.y);
 			else
 			{
@@ -804,7 +804,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersResetparameters() 
 		{
-			if ( _pMachine->_type == MACH_PLUGIN)
+			if ( _pMachine->subclass() == MACH_PLUGIN)
 			{
 				int numpars = _pMachine->GetNumParams();
 				for (int c=0; c<numpars; c++)
@@ -823,7 +823,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersCommand() 
 		{
-			if ( _pMachine->_type == MACH_PLUGIN)
+			if ( _pMachine->subclass() == MACH_PLUGIN)
 			{
 				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
 				try
@@ -843,7 +843,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				istweak = false;
 			}
-			if ( _pMachine->_type == MACH_PLUGIN)
+			if ( _pMachine->subclass() == MACH_PLUGIN)
 			{
 				MessageBox
 					(
