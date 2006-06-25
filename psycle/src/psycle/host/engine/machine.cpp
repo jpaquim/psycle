@@ -178,19 +178,19 @@ namespace psycle
 
 //////////////////////////////////////////////////////////////////////////
 
-		Machine* CreateFromType(Machine::type_type _type,Machine::id_type _id,std::string _dllname)
+		Machine* CreateFromType(Machine::class_type msubclass,Machine::id_type id,std::string dllname)
 		{
-			const InternalMachineInfo* minfo = Machine::infopackage().getInfo(_type); 
+			const InternalMachineInfo* minfo = Machine::infopackage().GetInfo(msubclass); 
 			if (minfo)
 			{
-				return	minfo->CreateFromType(_id,_dllname);
+				return	minfo->CreateFromType(id,dllname);
 			}
 			return 0;
 		}
 
-		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
+		Machine::Machine(Machine::class_type msubclass, Machine::mode_type mode, Machine::id_type id)
 		:
-			_type(type),
+			_subclass(msubclass),
 			_mode(mode),
 			_macIndex(id),
 			crashed_(),
@@ -224,8 +224,8 @@ namespace psycle
 			_scopeBufferIndex(0),
 			_scopePrevNumSamples(0)
 		{
-			_editName = infopackage().getInfo(_type)->shortname;
-			_numPars = infopackage().getInfo(_type)->parameters;
+			_editName = infopackage().GetInfo(subclass())->shortname;
+			_numPars = infopackage().GetInfo(subclass())->parameters;
 			_pSamplesL = new float[MAX_BUFFER_LENGTH];
 			_pSamplesR = new float[MAX_BUFFER_LENGTH];
 			// Clear machine buffer samples
@@ -359,7 +359,7 @@ namespace psycle
 			dst_machine._inputMachines[dfreebus] = this->id();
 			dst_machine._inputCon[dfreebus] = true;
 			dst_machine._connectedInputs++;
-			dst_machine.InitWireVolume(_type, dfreebus, volume);
+			dst_machine.InitWireVolume(subclass(), dfreebus, volume);
 			return true;
 		}
 
@@ -368,11 +368,11 @@ namespace psycle
 			return false; // \todo o_O`
 		}
 
-		void Machine::InitWireVolume(Machine::type_type type, Wire::id_type wire, float value)
+		void Machine::InitWireVolume(Machine::class_type msubclass, Wire::id_type wire, float value)
 		{
-			if (type == MACH_VST || type == MACH_VSTFX )
+			if (msubclass == MACH_VST || msubclass == MACH_VSTFX )
 			{
-				if (this->_type == MACH_VST || this->_type == MACH_VSTFX ) // VST to VST, no need to convert.
+				if (this->subclass() == MACH_VST || this->subclass() == MACH_VSTFX ) // VST to VST, no need to convert.
 				{
 					_inputConVol[wire] = value;
 					_wireMultiplier[wire] = 1.0f;
@@ -383,7 +383,7 @@ namespace psycle
 					_wireMultiplier[wire] = 0.000030517578125f; // what is it?
 				}
 			}
-			else if (this->_type == MACH_VST || this->_type == MACH_VSTFX ) // native to VST, divide.
+			else if (this->subclass() == MACH_VST || this->subclass() == MACH_VSTFX ) // native to VST, divide.
 			{
 				_inputConVol[wire] = value * 0.000030517578125f; // what is it?
 				_wireMultiplier[wire] = 32768.0f;
@@ -460,14 +460,14 @@ namespace psycle
 			return *p;
 		}
 
-		const InternalMachineInfo* GetInfoFromType(Machine::type_type _type)
+		const InternalMachineInfo* GetInfoFromType(Machine::class_type msubclass)
 		{
-			return Machine::infopackage().getInfo(_type);
+			return Machine::infopackage().GetInfo(msubclass);
 		}
-		const std::string Machine::GetBrand() { return infopackage().getInfo(_type)->brandname; }
-		const std::string Machine::GetVendorName() { return infopackage().getInfo(_type)->vendor; }
-		const std::uint32_t Machine::GetVersion() { return infopackage().getInfo(_type)->version; }
-		const std::uint32_t Machine::GetCategory() { return infopackage().getInfo(_type)->category; }
+		const std::string Machine::GetBrand() { return infopackage().GetInfo(subclass())->brandname; }
+		const std::string Machine::GetVendorName() { return infopackage().GetInfo(subclass())->vendor; }
+		const std::uint32_t Machine::GetVersion() { return infopackage().GetInfo(subclass())->version; }
+		const std::uint32_t Machine::GetCategory() { return infopackage().GetInfo(subclass())->category; }
 
 		void Machine::PreWork(int numSamples)
 		{
@@ -626,12 +626,12 @@ namespace psycle
 			// assume version 0 for now
 			bool bDeleted(false);
 			Machine* pMachine;
-			MachineType type;//,oldtype;
+			Machine::class_type msubclass;//,oldtype;
 			char dllName[256];
-			pFile->Read(type);
+			pFile->Read(msubclass);
 			//oldtype=type;
 			pFile->ReadString(dllName,256);
-			switch (type)
+			switch (msubclass)
 			{
 			case MACH_MASTER:
 				if ( !fullopen ) pMachine = new Dummy(index);
@@ -671,7 +671,7 @@ namespace psycle
 						if(!p->LoadDll(dllName))
 						{
 							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
+							msubclass = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
 						}
@@ -688,7 +688,7 @@ namespace psycle
 						if(!p->LoadDll(dllName))
 						{
 							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
+							msubclass = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
 						}
@@ -705,7 +705,7 @@ namespace psycle
 						if(!p->LoadDll(dllName))
 						{
 							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
+							msubclass = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
 						}
@@ -717,13 +717,13 @@ namespace psycle
 				pMachine = new Dummy(index);
 				break;
 			default:
-				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
+				if (msubclass != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
 				pMachine = new Dummy(index);
 				break;
 			}
 			pMachine->Init();
 			std::uint32_t temp;
-			pMachine->_type = type;
+			pMachine->_subclass = msubclass;
 			pFile->Read(pMachine->_bypass);
 			pFile->Read(pMachine->_mute);
 			pFile->Read(pMachine->_panning);
@@ -762,7 +762,7 @@ namespace psycle
 				}
 				Machine* p = new Dummy(index);
 				p->Init();
-				p->_type=MACH_DUMMY;
+				p->_subclass=MACH_DUMMY;
 				p->_mode=pMachine->_mode;
 				p->_bypass=pMachine->_bypass;
 				p->_mute=pMachine->_mute;
@@ -817,7 +817,7 @@ namespace psycle
 
 		void Machine::SaveFileChunk(RiffFile* pFile)
 		{
-			pFile->Write(_type);
+			pFile->Write(subclass());
 			SaveDllName(pFile);
 			pFile->Write(_bypass);
 			pFile->Write(_mute);

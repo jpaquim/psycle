@@ -198,7 +198,7 @@ namespace psycle
 				virtual void CollectData(int numSamples);
 		};
 
-		enum MachineType
+		enum MachineClass
 		{
 			MACH_UNDEFINED	= -1, //< :-(
 			MACH_MASTER		= 0,
@@ -328,11 +328,11 @@ namespace psycle
 			///\name each machine has a type attribute so that we can make yummy switch statements
 			///\{
 				public:
-					///\see enum MachineType which defined somewhere outside
-					typedef MachineType type_type;
-					Machine::type_type inline type() const throw() { return _type; }
+					///\see enum MachineClass which defined somewhere outside
+					typedef MachineClass class_type;
+					Machine::class_type inline subclass() const throw() { return _subclass; }
 				PSYCLE__PRIVATE:
-					type_type _type;
+					class_type _subclass;
 			///\}
 
 			///\name each machine has a mode attribute so that we can make yummy switch statements
@@ -358,9 +358,9 @@ namespace psycle
 			///\}
 
 			public:
-				Machine(type_type type, mode_type mode, id_type id);
+				Machine(class_type msubclass, mode_type mode, id_type id);
 				virtual ~Machine() throw();
-				static Machine* CreateFromType(Machine::type_type _type,Machine::id_type _id,std::string _dllname);
+				static Machine* CreateFromType(Machine::class_type msubclass,Machine::id_type id,std::string dllname);
 			//////////////////////////////////////////////////////////////////////////
 			// Actions
 
@@ -399,7 +399,7 @@ namespace psycle
 			///\name connections ... wires
 			///\{
 				public:
-					virtual void InitWireVolume(type_type, Wire::id_type, float value);
+					virtual void InitWireVolume(class_type, Wire::id_type, float value);
 					virtual Wire::id_type FindInputWire(id_type);
 					virtual Wire::id_type FindOutputWire(id_type);
 			///\}
@@ -444,7 +444,7 @@ namespace psycle
 			///\{
 				public:
 					static InternalMachinePackage& infopackage();
-					static const InternalMachineInfo* GetInfoFromType(Machine::type_type _type);
+					static const InternalMachineInfo* GetInfoFromType(Machine::class_type msubclass);
 					virtual const std::string GetDllName() { return ""; }; //\todo: Empty string. This is (to be) used in the song saver.
 					virtual const std::string GetBrand();
 					virtual const std::string GetVendorName();
@@ -603,23 +603,23 @@ namespace psycle
 		{
 		public:
 			InternalMachineInfo() { ; }
-			InternalMachineInfo(Machine::type_type _type,Machine::mode_type _mode,CreatorFromType _creator, bool _host,
+			InternalMachineInfo(Machine::class_type _class,Machine::mode_type _mode,CreatorFromType _creator, bool _host,
 				char const* _brandname,char const* _shortname,char const* _vendor,
 				std::uint32_t _category, std::uint32_t _version, std::uint32_t _parameters)
-				:type(_type),mode(_mode),CreateFromType(_creator), host(_host)
+				:mclass(_class),mode(_mode),CreateFromType(_creator), host(_host)
 				,brandname(_brandname),shortname(_shortname),vendor(_vendor),category(_category)
 				,version(_version),parameters(_parameters) { ; }
 
-			bool operator<(const InternalMachineInfo & info) const { return type < info.type ; }
+			bool operator<(const InternalMachineInfo & info) const { return mclass < info.mclass; }
 			void operator=(const InternalMachineInfo & info)
 			{
-				type=info.type; mode=info.mode; CreateFromType=info.CreateFromType; host=info.host;
+				mclass=info.mclass; mode=info.mode; CreateFromType=info.CreateFromType; host=info.host;
 				brandname=info.brandname;shortname=info.shortname;vendor=info.vendor;
 				category=info.category;version=info.version;parameters=info.parameters;
 			}
 		public:
-			///< Class of machine (master, sampler, dummy,...). See MachineType
-			Machine::type_type type;
+			///< Class of machine (master, sampler, dummy,...). See MachineClass
+			Machine::class_type mclass;
 			///< Mode of the plugin, ( generator, effect,...) See MachineMode
 			Machine::mode_type mode;
 			///< Creator function. Needed for the loader.

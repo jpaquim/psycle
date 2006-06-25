@@ -19,10 +19,10 @@ DllFinder::~DllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void DllFinder::AddPath(const std::string &path,Machine::type_type mtype)
+void DllFinder::AddPath(const std::string &path,Machine::class_type subclass)
 {
-	//\todo: do something with the machinetype?
-	base_paths.push_back(path);
+	//This implementation only allows one path of each subclass
+	base_paths[subclass] = path;
 }
 
 ///< Resets the Finder to the original (clean) state.
@@ -32,11 +32,12 @@ void DllFinder::ResetFinder()
 }
 
 ///< searches the full path for a specified dll name
-bool DllFinder::LookupDllPath(std::string& name)
+bool DllFinder::LookupDllPath(std::string& name,Machine::class_type subclass)
 {
 	std::transform(name.begin(),name.end(),name.begin(),std::tolower);
-	std::vector<std::string>::iterator iterator = base_paths.begin();
-	for (;iterator != base_paths.end();iterator++)
+	std::map<std::string,std::string>::iterator iterator = base_paths.find(subclass);
+
+	if(iterator != subclass.end())
 	{
 		if (SearchFileInDir(name,*iterator))
 		{

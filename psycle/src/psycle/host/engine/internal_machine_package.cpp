@@ -20,9 +20,9 @@ namespace psycle{
 		//	infomap[MACH_2PFILTER]=
 		//	infomap[MACH_GAIN]=
 		//	infomap[MACH_FLANGER]=
-			infomap[MACH_PLUGIN]=InternalMachineInfo(MACH_PLUGIN,MACHMODE_UNDEFINED,Plugin::CreateFromType,true,"Native Host","Plugin","Psycledelics",0,1100,0);
+			infomap[MACH_PLUGIN]=InternalMachineInfo(MACH_PLUGIN,MACHMODE_UNDEFINED,Plugin::CreateFromType,true,"Native Plugin Host","Plugin","Psycledelics",0,1100,0);
 			// The original VST host separated vst gens and vst fx. Nowadays, the difference is minimal, and the "FX" one could be removed with no problems.
-			infomap[MACH_VST]=InternalMachineInfo(MACH_VST,MACHMODE_UNDEFINED,vst::plugin::CreateFromType,true,"VST Host","Vst Plugin","Psycledelics",0,1200,0);
+			infomap[MACH_VST]=InternalMachineInfo(MACH_VST,MACHMODE_UNDEFINED,vst::plugin::CreateFromType,true,"VST 2.x Plugin Host","Vst Plugin","Psycledelics",0,1200,0);
 			infomap[MACH_VSTFX]=InternalMachineInfo(MACH_VSTFX,MACHMODE_FX,vst::plugin::CreateFromType,true,"VST Host","Vst fx","Psycledelics",0,1200,0);
 			infomap[MACH_SCOPE]=InternalMachineInfo(MACH_DUMMY,MACHMODE_FX,Dummy::CreateFromType,false,"Dummy Machine","Dummy","Arguru",0,1000,0);
 			infomap[MACH_XMSAMPLER]=InternalMachineInfo(MACH_XMSAMPLER,MACHMODE_GENERATOR,XMSampler::CreateFromType,false,"Sampulse Sampler V2","Sampulse","JosepMa",0,600,0);
@@ -43,9 +43,9 @@ namespace psycle{
 			infomap.clear();
 		}
 
-		const InternalMachineInfo* InternalMachinePackage::getInfo(Machine::type_type type) const
+		const InternalMachineInfo* InternalMachinePackage::GetInfo(Machine::class_type subclass) const
 		{
-			std::map<Machine::type_type,InternalMachineInfo>::const_iterator iterator
+			std::map<Machine::class_type,InternalMachineInfo>::const_iterator iterator
 				= infomap.find(type);
 			if(iterator != infomap.end())
 			{
@@ -53,19 +53,20 @@ namespace psycle{
 			}
 			else return 0;
 		}
-		const InternalMachineInfo* InternalMachinePackage::getFirst()
+		const void InternalMachinePackage::MoveFirst()
 		{
 			pos = infomap.begin();
-			return &pos->second;
 		}
-		const InternalMachineInfo* InternalMachinePackage::getNext()
+		const void InternalMachinePackage::MoveNext()
+		{
+			pos++;
+		}
+		const InternalMachineInfo* InternalMachinePackage::GetInfoAtPos()
 		{
 			if ( pos != infomap.end())
 			{
-				pos++;
 				return &pos->second;
 			}
-
 			else return 0;
 		}
 		const bool InternalMachinePackage::end() const

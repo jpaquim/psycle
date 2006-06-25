@@ -243,7 +243,7 @@ namespace psycle
 							Machine *pMachine = song()._pMachine[mac];
 							if(pMachine)
 							{
-								if(pEntry->_note == notecommands::midicc && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
+								if(pEntry->_note == notecommands::midicc && pMachine->subclass() != MACH_VST && pMachine->subclass() != MACH_VSTFX)
 								{
 									// for native machines,
 									// use the value in the "instrument" field of the event as a voice number

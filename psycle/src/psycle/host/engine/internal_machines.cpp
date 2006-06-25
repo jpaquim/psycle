@@ -24,8 +24,8 @@ namespace psycle {
 		// How to create a new Internal Machine / Host
 		//////////////////////////////////////////////////////////////////////////
 		// Create a new subclass of Machine ( you might want to take DuplicatorMac as an example, or Plugin for host example)
-		// Define yours in the MachineType struct. ( right now located in machine.hpp ),
-		//	Machine::type_type is the machine type identifier ( master, plugin, sampler, ... )
+		// Define yours in the MachineClass struct. ( right now located in machine.hpp ),
+		//	Machine::class_type is the machine type identifier ( master, plugin, sampler, ... )
 		//  Machine::mode_type is the working mode of the machine ( effect, generator,... )
 		// and then add the minfo to InternalMachinePackage, ( internal_machine_package.cpp, creator function ).
 		// That should be all for creating/loading and saving. Might need more work for the GUI.

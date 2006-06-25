@@ -106,9 +106,9 @@ namespace psycle
 
 			VstTimeInfo plugin::_timeInfo;
 
-			plugin::plugin(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
+			plugin::plugin(Machine::class_type subclass, Machine::mode_type mode, Machine::id_type id)
 			:
-				Machine(type, mode, id),
+				Machine(subclass, mode, id),
 				queue_size(0), wantidle(false), _sDllName(""), h_dll(0), _program(0), instantiated(false), _instance(0),
 				requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0), editorWnd(0)
 			{

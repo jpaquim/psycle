@@ -149,7 +149,7 @@ namespace psycle
 				///\name the multi-stepped construction
 				///\{
 					public:
-						plugin(Machine::type_type type, Machine::mode_type mode, Machine::id_type id);
+						plugin(Machine::class_type subclass, Machine::mode_type mode, Machine::id_type id);
 						bool LoadDll (std::string const & file_name);
 						void Instance(std::string const & file_name, const bool overwriteName = true);
 						///< Helper class for Machine Creation.

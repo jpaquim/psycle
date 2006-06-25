@@ -272,7 +272,7 @@ namespace psycle
 									std::stringstream s;
 									s << "X!" << pOldMachine->GetEditName();
 									pOldMachine->SetEditName(s.str());
-									pMac[i]->_type = MACH_DUMMY;
+									pMac[i]->_subclass = MACH_DUMMY;
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
 									zapObject(pOldMachine);
@@ -335,7 +335,7 @@ namespace psycle
 										ss2 << "X!" << pOldMachine->GetEditName();
 										pOldMachine->SetEditName(ss2.str());
 										zapObject(pOldMachine);
-										pMac[i]->_type = MACH_DUMMY;
+										pMac[i]->_subclass = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
 									}
 								}
@@ -354,7 +354,7 @@ namespace psycle
 									ss2 << "X!" << pOldMachine->GetEditName();
 									pOldMachine->SetEditName(ss2.str());
 									zapObject(pOldMachine);
-									pMac[i]->_type = MACH_DUMMY;
+									pMac[i]->_subclass = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
 								}
 							}
@@ -369,7 +369,7 @@ namespace psycle
 								ss << "X!" << pOldMachine->GetEditName();
 								pOldMachine->SetEditName(ss.str());
 								zapObject(pOldMachine);
-								pMac[i]->_type = MACH_DUMMY;
+								pMac[i]->_subclass = MACH_DUMMY;
 								((Dummy*)pMac[i])->wasVST = true;
 							}
 
@@ -427,7 +427,7 @@ namespace psycle
 									val*=32768.0f; // BugFix
 								}
 
-								pMac[i]->InitWireVolume(pOrigMachine->_type,c,val);
+								pMac[i]->InitWireVolume(pOrigMachine->subclass(),c,val);
 							}
 						}
 					}
@@ -498,7 +498,7 @@ namespace psycle
 				{
 					if (_machineActive[i])
 					{
-						if ( pMac[i]->_type == MACH_DUMMY ) 
+						if ( pMac[i]->subclass() == MACH_DUMMY ) 
 						{
 							if (((Dummy*)pMac[i])->wasVST && chunkpresent )
 							{
@@ -508,8 +508,8 @@ namespace psycle
 								MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
 							}
 						}
-						else if (( pMac[i]->_type == MACH_VST ) || 
-								( pMac[i]->_type == MACH_VSTFX))
+						else if (( pMac[i]->subclass() == MACH_VST ) || 
+								( pMac[i]->subclass() == MACH_VSTFX))
 						{
 							bool chunkread = false;
 							try
