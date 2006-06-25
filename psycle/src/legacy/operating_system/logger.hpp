@@ -3,7 +3,7 @@
 #include <boost/thread/mutex.hpp>
 #include <universalis/compiler.hpp>
 #include <universalis/exception.hpp>
-#include <psycle/host/global.hpp>
+#include <psycle/host/uiglobal.hpp>
 ///\file
 ///\brief logger.
 namespace operating_system
