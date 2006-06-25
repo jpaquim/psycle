@@ -19,9 +19,9 @@ MappedDllFinder::~MappedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void MappedDllFinder::AddPath(const std::string &path,Machine::type_type mtype)
+void MappedDllFinder::AddPath(const std::string &path,Machine::class_type subclass)
 {
-	DllFinder::AddPath(path,mtype);
+	DllFinder::AddPath(path,subclass);
 	populate_dll_map(path);
 }
 ///< Resets the Finder to the original state.
@@ -30,7 +30,7 @@ void MappedDllFinder::ResetFinder()
 	dllNames.clear();
 }
 ///< searches in the map the full path for a specified dll name
-bool MappedDllFinder::LookupDllPath(std::string& name)
+bool MappedDllFinder::LookupDllPath(std::string& name,Machine::class_type subclass)
 {
 	std::transform(name.begin(),name.end(),name.begin(),std::tolower);
 	std::map<std::string,std::string>::iterator iterator
@@ -98,12 +98,12 @@ CachedDllFinder::~CachedDllFinder()
 }
 
 ///< Adds the search path, and initializes any needed variable/process.
-void CachedDllFinder::AddPath(const std::string &path,Machine::type_type mtype)
+void CachedDllFinder::AddPath(const std::string &path,Machine::class_type subclass)
 {
 	//\todo: check if the directory already exists? (this could be done
-	// inside the base class and return a value
-	DllFinder::AddPath(path,mtype);
-	populate_plugin_map(path,mtype);
+	// inside the base class and return a value)
+	DllFinder::AddPath(path,subclass);
+	populate_plugin_map(path,subclass);
 }
 ///< Resets the Finder to the original state.
 void CachedDllFinder::ResetFinder()
@@ -114,7 +114,7 @@ void CachedDllFinder::ResetFinder()
 	DeleteFile(cachefile.c_str());
 }
 ///< searches in the map the full path for a specified dll name
-bool CachedDllFinder::LookupDllPath(std::string& name)
+bool CachedDllFinder::LookupDllPath(std::string& name,Machine::class_type subclass)
 {
 	std::transform(name.begin(),name.end(),name.begin(),std::tolower);
 	std::map<std::string,PluginInfo>::iterator iterator
@@ -175,7 +175,7 @@ void CachedDllFinder::populate_dll_list(std::vector<DllFileInfo>& dllNames, std:
 ///< fills the dllInfo with the information of all plugins found in the directory specified 
 ///< and its subdirectories. If a Cache exists it will only load/fill those that are new
 ///< or modified since the cache creation.
-void CachedDllFinder::populate_plugin_map(std::string directory,Machine::type_type mtype)
+void CachedDllFinder::populate_plugin_map(std::string directory,Machine::class_type subclass)
 {
 	std::vector<DllFileInfo> dllList;
 
@@ -210,7 +210,7 @@ void CachedDllFinder::populate_plugin_map(std::string directory,Machine::type_ty
 			PluginInfo pinfo;
 			pinfo.dllname = dllList[i]._name;
 			pinfo.FileTime = dllList[i]._modtime;
-			pinfo.type = mtype;
+			pinfo.subclass = sublcass;
 			GeneratePluginInfo(pinfo);
 			LearnPlugin(pinfo);
 		}
