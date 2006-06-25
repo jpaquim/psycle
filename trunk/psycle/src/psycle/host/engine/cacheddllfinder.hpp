@@ -26,7 +26,7 @@ public:
 
 	~PluginInfo() {}
 
-	Machine::type_type type;
+	Machine::class_type subclass;
 	Machine::mode_type mode;
 	std::string name;
 	std::string desc;
@@ -85,11 +85,11 @@ public:
 	virtual ~MappedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	virtual void AddPath(const std::string &path,Machine::type_type mtype);
+	virtual void AddPath(const std::string &path,Machine::class_type subclass);
 	///< Resets the Finder to the original state.
 	virtual void ResetFinder();
 	///< fills in the path for the specified name so that name becomes a fullpath.
-	virtual bool LookupDllPath(std::string& name);
+	virtual bool LookupDllPath(std::string& name,Machine::class_type subclass);
 protected:
 	///< Adds the dll name -> full path mapping to the map.
 	void LearnDllName(const std::string & fullpath);
@@ -109,11 +109,11 @@ public:
 	virtual ~CachedDllFinder();
 
 	///< Adds the search path, and initializes any needed variable/process.
-	virtual void AddPath(const std::string &path,Machine::type_type mtype);
+	virtual void AddPath(const std::string &path,Machine::class_type subclass);
 	///< Resets the Finder to the original state.
 	virtual void ResetFinder();
 	///< fills in the path for the specified name so that name becomes a fullpath.
-	virtual bool LookupDllPath(std::string& name);
+	virtual bool LookupDllPath(std::string& name,Machine::class_type subclass);
 
 	PluginInfo& GetPluginInfo(std::string dllname) { return dllInfo.find(dllname)->second; }
 public:
@@ -131,7 +131,7 @@ protected:
 	///< fills the dllInfo with the information of all plugins found in the directory specified 
 	///< and its subdirectories. If a Cache exists it will only load/fill those that are new
 	///< or modified since the cache creation.
-	void populate_plugin_map(std::string directory,Machine::type_type mtype);
+	void populate_plugin_map(std::string directory,Machine::class_type subclass);
 	void GeneratePluginInfo(PluginInfo& pinfo);
 	bool LoadCacheFile();
 	bool SaveCacheFile();
