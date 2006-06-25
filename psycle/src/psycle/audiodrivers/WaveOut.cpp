@@ -2,12 +2,12 @@
 ///\brief implementation file for psycle::host::WaveOut.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/audiodrivers/WaveOut.hpp>
-#include <psycle/host/gui/resources/resources.hpp>
-#include <psycle/host/audiodrivers/WaveOutDialog.hpp>
-#include <psycle/host/engine/registry.hpp>
+#include <psycle/audiodrivers/WaveOut.hpp>
+#include <psycle/host/resources/resources.hpp>
+#include <psycle/audiodrivers/WaveOutDialog.hpp>
+#include <psycle/engine/registry.hpp>
 #include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
+#include <psycle/engine/MidiInput.hpp>
 #include <universalis/processor/exception.hpp>
 #include <process.h>
 namespace psycle

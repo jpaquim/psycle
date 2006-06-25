@@ -2,13 +2,13 @@
 ///\brief implementation file for psycle::host::ASIOInterface.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/audiodrivers/ASIOInterface.hpp>
-#include <psycle/host/gui/resources/resources.hpp>
-#include <psycle/host/engine/registry.hpp>
-#include <psycle/host/audiodrivers/ASIOConfig.hpp>
+#include <psycle/audiodrivers/ASIOInterface.hpp>
+#include <psycle/host/resources/resources.hpp>
+#include <psycle/engine/registry.hpp>
+#include <psycle/audiodrivers/ASIOConfig.hpp>
 #include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/engine/helpers.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/helpers/helpers.hpp>
 #include <universalis/processor/exception.hpp>
 #include <asio/asiosys.h>
 namespace psycle

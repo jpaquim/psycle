@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::ASIOInterface.
 #pragma once
-#include <psycle/host/audiodrivers/AudioDriver.hpp>
+#include <psycle/audiodrivers/AudioDriver.hpp>
 
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <asio/asiodrivers.h>
