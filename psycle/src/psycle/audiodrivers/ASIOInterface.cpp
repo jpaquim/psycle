@@ -5,8 +5,8 @@
 #include <psycle/audiodrivers/ASIOInterface.hpp>
 #include <psycle/host/resources/resources.hpp>
 #include <psycle/engine/registry.hpp>
-#include <psycle/audiodrivers/ASIOConfig.hpp>
-#include <psycle/host/configuration.hpp>
+#include <psycle/host/audiodrivers/ASIOConfig.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 #include <psycle/engine/MidiInput.hpp>
 #include <psycle/helpers/helpers.hpp>
 #include <universalis/processor/exception.hpp>
