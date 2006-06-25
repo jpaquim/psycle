@@ -2,10 +2,10 @@
 ///\brief interface file for psycle::host::Machine
 #pragma once
 #include "SongStructs.hpp"
-#include "dsp.hpp"
-#include "helpers.hpp"
+#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/helpers.hpp>
 #include "constants.hpp"
-#include <psycle/host/global.hpp>
+#include <psycle/engine/global.hpp>
 #include <universalis/processor/exceptions/fpu.hpp>
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>

@@ -6,7 +6,7 @@
 #include "InstPreview.hpp"
 #include "machine.hpp"
 #include "constants.hpp" // for the bloat-sized arrays and many other stuffs that should actually be moved in this file
-#include <psycle/host/global.hpp>
+#include <psycle/engine/global.hpp>
 #include "FileIO.hpp"
 #include <cstdint>
 #include <sigslot/sigslot.h>

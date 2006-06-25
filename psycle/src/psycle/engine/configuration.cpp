@@ -3,13 +3,13 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "configuration.hpp"
-#include <psycle/host/engine/registry.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/audiodrivers/WaveOut.hpp>
-#include <psycle/host/audiodrivers/DirectSound.hpp>
-#include <psycle/host/audiodrivers/ASIOInterface.hpp>
-//#include <psycle/host/gui/NewMachine.hpp>
+#include <psycle/engine/registry.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/audiodrivers/WaveOut.hpp>
+#include <psycle/audiodrivers/DirectSound.hpp>
+#include <psycle/audiodrivers/ASIOInterface.hpp>
+//#include <psycle/host/NewMachine.hpp>
 
 namespace psycle
 {
@@ -20,7 +20,6 @@ namespace psycle
 			_initialized = false;
 			autoStopMachines = false;
 
-			SetSkinDefaults();
 			_pOutputDriver = 0;
 
 			// midi

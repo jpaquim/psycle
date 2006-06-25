@@ -5,7 +5,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "global.hpp"
+#include <psycle/engine/global.hpp>
 //#include "machine.hpp"
 //#include "song.hpp"
 //#include <psycle/helpers/dsp.hpp>
@@ -23,7 +23,7 @@
 //#include <psycle/engine/Sampler.hpp>
 //#include <psycle/engine/XMSampler.hpp>
 //#include <psycle/engine/plugin.hpp>
-#include <psycle/host/engine/vsthost24.hpp>
+#include <psycle/engine/vsthost24.hpp>
 namespace psycle
 {
 	namespace engine

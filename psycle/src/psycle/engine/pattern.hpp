@@ -1,5 +1,5 @@
 #pragma once
-#include <psycle/host/detail/project.hpp>
+#include <psycle/engine/detail/project.hpp>
 //#include <boost/multi_array.hpp>
 #include <cstdint>
 namespace psycle

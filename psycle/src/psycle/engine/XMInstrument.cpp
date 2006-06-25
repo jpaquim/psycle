@@ -6,11 +6,11 @@
 
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/XMInstrument.hpp>
-#include <psycle/host/engine/filter.hpp>
-#include <psycle/host/engine/DataCompression.hpp>
-#include <psycle/host/engine/FileIO.hpp>
+#include <psycle/engine/configuration.hpp>
+#include <psycle/engine/XMInstrument.hpp>
+#include <psycle/engine/filter.hpp>
+#include <psycle/helpers/DataCompression.hpp>
+#include <psycle/engine/FileIO.hpp>
 #include <cassert>
 
 namespace psycle

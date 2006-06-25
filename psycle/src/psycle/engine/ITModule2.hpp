@@ -1,7 +1,7 @@
 #pragma once
-#include <psycle/host/engine/SongStructs.hpp>
-#include <psycle/host/engine/FileIO.hpp>
-#include <psycle/host/engine/song.hpp>
+#include <psycle/engine/SongStructs.hpp>
+#include <psycle/engine/FileIO.hpp>
+#include <psycle/engine/song.hpp>
 #include <cstdint>
 
 class Song;

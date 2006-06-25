@@ -1,6 +1,6 @@
 ///\interface psycle::host::Global
 #pragma once
-#include <psycle/host/detail/project.hpp>
+#include <psycle/engine/detail/project.hpp>
 #include <cstdint>
 namespace psycle
 {
@@ -8,9 +8,12 @@ namespace psycle
 	{
 		class Song;
 		class Player;
-		class Configuration;
-		class InputHandler;
-		class DllFinder;
+		//todo:
+		//class Configuration;
+		class UIConfiguration;
+		//todo:
+		//class DllFinder;
+		class CachedDllFinder;
 		namespace dsp
 		{
 			class Resampler;
@@ -43,12 +46,6 @@ namespace psycle
 				}
 				return result.value;
 			}
-			cpu::cycles_type GetNaiveCPUFreq()
-			{
-				cpu::cycles_type before(cpu::cycles());
-				::Sleep(1000); ///\todo wastes one second to startup :-(
-				return cpu::cycles() - before;
-			}
 		}
 
 		class Global
@@ -62,25 +59,38 @@ namespace psycle
 
 				Song             static inline & song         () throw() { return *_pSong; }
 				Player           static inline & player       () throw() { return *pPlayer; }
-				Configuration    static inline & configuration() throw() { return *pConfig; }
+				//todo:
+				//Configuration    static inline & configuration() throw() { return *pConfig; }
+				UIConfiguration    static inline & configuration() throw() { return *pConfig; }
 				dsp::Resampler   static inline & resampler    () throw() { return *pResampler; }
-				InputHandler     static inline & input_handler() throw() { return *pInputHandler; }
-				// For other implementations, you might wish to use Mapped or simply DllFinder instead of the Cached one.
-				DllFinder  static inline & dllfinder()	 throw() { return *pDllFinder; }
+				//todo:
+				//DllFinder  static inline & dllfinder()	 throw() { return *pDllFinder; }
+				CachedDllFinder  static inline & dllfinder()	 throw() { return *pDllFinder; }
 
 			PSYCLE__PRIVATE:// shouldn't be static either
 				static Song * _pSong;
 				static Player * pPlayer;
-				static Configuration * pConfig;
+				//todo:
+				//static Configuration * pConfig;
+				static UIConfiguration * pConfig;
 				static dsp::Resampler * pResampler;
-				static InputHandler* pInputHandler;
-				static DllFinder* pDllFinder;
+				//todo:
+				//static DllFinder* pDllFinder;
+				static CachedDllFinder* pDllFinder;
 
 			public:
+				virtual cpu::cycles_type CalculateCPUFreq();
 				cpu::cycles_type static inline cpu_frequency(                              ) /*const*/ throw() { return cpu_frequency_; }
 				void             static inline cpu_frequency(cpu::cycles_type const & value)           throw() { cpu_frequency_ = value; }
-			private:
+			protected:
 				cpu::cycles_type static        cpu_frequency_;
+				cpu::cycles_type GetNaiveCPUFreq()
+				{
+					cpu::cycles_type before(cpu::cycles());
+					::Sleep(1000); ///\todo wastes one second to startup :-(
+					return cpu::cycles() - before;
+				}
+
 		};
 
 

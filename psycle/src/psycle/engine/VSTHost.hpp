@@ -1,11 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::VSTPlugin
 #pragma once
-#include <psycle/host/engine/constants.hpp>
-#include <psycle/host/engine/helpers.hpp>
+#include <psycle/engine/constants.hpp>
+#include <psycle/helpers/helpers.hpp>
 #include <universalis/operating_system/exception.hpp>
 #include <universalis/operating_system/exceptions/code_description.hpp>
-#include <psycle/host/engine/machine.hpp>
+#include <psycle/engine/machine.hpp>
+//todo:
+#include <psycle/host/uiglobal.hpp>
+
 #define VST_FORCE_DEPRECATED 0
 #include <vst/AEffectx.h>
 namespace psycle

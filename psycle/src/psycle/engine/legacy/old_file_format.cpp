@@ -2,15 +2,15 @@
 ///\brief implementation file for psycle::host::Global.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/legacy/convert_internal_machines.hpp>
-#include <psycle/host/engine/sampler.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/engine/VSTHost.hpp>
-
-#include <psycle/host/engine/cacheddllfinder.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/legacy/convert_internal_machines.hpp>
+#include <psycle/engine/sampler.hpp>
+#include <psycle/engine/XMSampler.hpp>
+#include <psycle/engine/plugin.hpp>
+#include <psycle/engine/VSTHost.hpp>
+//todo:
+#include <psycle/host/cacheddllfinder.hpp>
 
 #include <cstdint>
 namespace psycle
@@ -314,7 +314,7 @@ namespace psycle
 							if ((pMac[i]->LoadOldFileFormat(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 							{
 								std::string path = vstL[pVstPlugin->_instance].dllName;
-								if(!Global::dllfinder().LookupDllPath(path)) 
+								if(!Global::dllfinder().LookupDllPath(path,MACH_VST)) 
 								{
 									try
 									{
@@ -1002,7 +1002,7 @@ namespace psycle
 				wasAS2=true;
 			}
 
-			Global::dllfinder().LookupDllPath(strname);
+			Global::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
 			try
 			{
 				Instance(strname);

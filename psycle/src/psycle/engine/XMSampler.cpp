@@ -1,11 +1,12 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/XMInstrument.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/FileIO.hpp>
-#include <psycle/host/configuration.hpp>
+#include <psycle/engine/XMInstrument.hpp>
+#include <psycle/engine/XMSampler.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/engine/FileIO.hpp>
+//\todo:
+#include <psycle/host/uiconfiguration.hpp>
 #include <universalis/processor/exception.hpp>
 
 

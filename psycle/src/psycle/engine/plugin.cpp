@@ -2,18 +2,20 @@
 ///\brief implementation file for psycle::host::Plugin
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/FileIO.hpp>
-#include <psycle/host/engine/plugin.hpp>
-//#include <psycle/host/gui/InputHandler.hpp> // Is this needed?
+#include <psycle/engine/FileIO.hpp>
+#include <psycle/engine/plugin.hpp>
 #include <universalis/operating_system/exceptions/code_description.hpp>
-#include <psycle/host/engine/song.hpp>
+#include <psycle/engine/song.hpp>
 #include <cctype>
-#include <psycle/host/engine/cacheddllfinder.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdlib> // for environment variables functions
 #include <string>
 #include <sstream>
+//todo:
+#include <psycle/host/uiglobal.hpp>
+#include <psycle/host/cacheddllfinder.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 namespace psycle
 {
 	namespace host
@@ -243,7 +245,7 @@ namespace psycle
 		bool Plugin::LoadDll(std::string const & base_name_)
 		{
 			std::string path = base_name_;
-			if(!Global::dllfinder().LookupDllPath(path)) 
+			if(!Global::dllfinder().LookupDllPath(path,MACH_PLUGIN)) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.

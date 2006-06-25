@@ -1,8 +1,8 @@
 #pragma once
 
-#include <psycle/host/engine/SongStructs.hpp>
-#include <psycle/host/engine/FileIO.hpp>
-#include <psycle/host/engine/XMFile.hpp>
+#include <psycle/engine/SongStructs.hpp>
+#include <psycle/engine/FileIO.hpp>
+#include <psycle/engine/XMFile.hpp>
 #include <cstdint>
 class Song;
 class XMSampler;
