@@ -1,5 +1,5 @@
 #pragma once
-#include "host/gui/resources/resources.hpp"
+#include <psycle/host/resources/resources.hpp>
 #include "plugin_interface.hpp"
 #include <map>
 //#include <afxwin.h>

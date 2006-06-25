@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CGreetDialog.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/GreetDialog.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/GreetDialog.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CGreetDialog::CGreetDialog(CWnd* pParent /* = 0 */) : CDialog(CGreetDialog::IDD, pParent)

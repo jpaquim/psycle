@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CVstEditorDlg.
 #pragma once
-#include <psycle/host/engine/VSTHost.hpp>
-#include <psycle/host/gui/DefaultVstGui.hpp>
+#include <psycle/engine/VSTHost.hpp>
+#include <psycle/host/DefaultVstGui.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class CChildView;

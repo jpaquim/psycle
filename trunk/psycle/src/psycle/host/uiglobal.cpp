@@ -4,8 +4,9 @@
 #include PACKAGENERIC
 #include <psycle/host/uiglobal.hpp>
 #include <psycle/host/uiconfiguration.hpp>
-#include <psycle/host/gui/InputHandler.hpp>
+#include <psycle/host/InputHandler.hpp>
 #include <psycle/host/cacheddllfinder.hpp>
+#include <legacy/operating_system/logger.hpp>
 
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
@@ -20,144 +21,126 @@ namespace psycle
 {
 	namespace host
 	{
-		namespace
-		{
 
-			/// CPU Frequency setup
-			/// redone by kSh
-			/// based on the WMI; doesn't work on Win9x but falls back to the old method then
-			cpu::cycles_type GetWMICPUFreq()
-			{
-				#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					#error "sorry"
-				#endif
-
-				HRESULT hres;
-				hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-				if(FAILED(hres)) return GetNaiveCPUFreq();
-				hres = CoInitializeSecurity
-					(
-						NULL, -1, NULL,	NULL, RPC_C_AUTHN_LEVEL_DEFAULT,
-						RPC_C_IMP_LEVEL_IMPERSONATE, NULL,	EOAC_NONE, NULL
-					);
-				if(FAILED(hres))
-				{
-					CoUninitialize();
-					return GetNaiveCPUFreq();
-				}
-				IWbemLocator * pLoc(0);
-				hres = CoCreateInstance
-					(
-						CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
-						IID_IWbemLocator, (LPVOID *) &pLoc
-					);
-				if(FAILED(hres))
-				{
-					CoUninitialize();
-					return GetNaiveCPUFreq();
-				}
-				IWbemServices * pSvc(0);
-				hres = pLoc->ConnectServer
-					(
-						_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0,
-						NULL, 0, 0, &pSvc
-					);
-				if(FAILED(hres))
-				{
-					pLoc->Release();
-					CoUninitialize();
-					return GetNaiveCPUFreq();
-				}
-				hres = CoSetProxyBlanket
-					(
-						pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
-						NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE,
-						NULL, EOAC_NONE
-					);
-				if(FAILED(hres))
-				{
-					pSvc->Release();
-					pLoc->Release();
-					CoUninitialize();
-					return GetNaiveCPUFreq();
-				}
-				IEnumWbemClassObject * pEnumerator(0);
-				hres = pSvc->ExecQuery
-					(
-						bstr_t("WQL"),
-						bstr_t("SELECT * FROM Win32_Processor"),
-						WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
-						NULL, &pEnumerator
-					);
-				if(FAILED(hres))
-				{
-					pSvc->Release();
-					pLoc->Release();
-					CoUninitialize();
-					return GetNaiveCPUFreq();
-				}
-				IWbemClassObject * pclsObj(0);
-				ULONG uReturn(0);
-				cpu::cycles_type result(0);
-				while(pEnumerator)
-				{
-					HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-					if(!uReturn) break;
-					VARIANT vtProp;
-					VariantInit(&vtProp);
-					hr = pclsObj->Get(L"CurrentClockSpeed", 0, &vtProp, 0, 0);
-					if(!FAILED(hr)) result = cpu::cycles_type(1000000) * vtProp.intVal; ///\todo this gives a 1MHz accuracy only.
-					VariantClear(&vtProp);
-				}
-				if(result <= 0) return GetNaiveCPUFreq();
-				pSvc->Release();
-				pLoc->Release();
-				pEnumerator->Release();
-				pclsObj->Release();
-				CoUninitialize();
-				return result;
-			}
-
-			cpu::cycles_type GetCPUFreq()
-			{
-				return GetWMICPUFreq();
-			}
-		}
-
-		InputHandler *    Global::pInputHandler(0);
+		InputHandler *    UIGlobal::pInputHandler(0);
 			
-		Global::Global()
+		UIGlobal::UIGlobal()
 		{
 			#ifndef NDEBUG
 				operating_system::console::open();
 			#endif
 			loggers::trace("Global::Global() ...");
-			_pSong = new Song;
-			pPlayer = new Player(*_pSong); // [bohan] afaik song is never deleted/recreated from the gui, so we don't even have to care about updating the player's reference.
-			pConfig = new Configuration;
-			pResampler = new dsp::Cubic;
-			pResampler->SetQuality(dsp::R_LINEAR);
 			pInputHandler = new InputHandler;
-			pDllFinder = new CachedDllFinder;
-			cpu_frequency_ = GetCPUFreq();
 			loggers::trace("Global::Global() ... initialized static objects.");
 		}
 
-		Global::~Global()
+		UIGlobal::~UIGlobal()
 		{
-			delete _pSong;
-			delete pPlayer;
-			delete pResampler;
-			delete pConfig;
 			delete pInputHandler;
-			delete pDllFinder;
 			#ifndef NDEBUG
 				operating_system::console::close();
 			#endif
 		}
 
+		cpu::cycles_type UIGlobal::CalculateCPUFreq()
+		{
+			return GetWMICPUFreq();
+		}
 
+		/// CPU Frequency setup
+		/// redone by kSh
+		/// based on the WMI; doesn't work on Win9x but falls back to the old method then
+		cpu::cycles_type UIGlobal::GetWMICPUFreq()
+		{
+#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#error "sorry"
+#endif
 
+			HRESULT hres;
+			hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+			if(FAILED(hres)) return GetNaiveCPUFreq();
+			hres = CoInitializeSecurity
+				(
+				NULL, -1, NULL,	NULL, RPC_C_AUTHN_LEVEL_DEFAULT,
+				RPC_C_IMP_LEVEL_IMPERSONATE, NULL,	EOAC_NONE, NULL
+				);
+			if(FAILED(hres))
+			{
+				CoUninitialize();
+				return GetNaiveCPUFreq();
+			}
+			IWbemLocator * pLoc(0);
+			hres = CoCreateInstance
+				(
+				CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
+				IID_IWbemLocator, (LPVOID *) &pLoc
+				);
+			if(FAILED(hres))
+			{
+				CoUninitialize();
+				return GetNaiveCPUFreq();
+			}
+			IWbemServices * pSvc(0);
+			hres = pLoc->ConnectServer
+				(
+				_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0,
+				NULL, 0, 0, &pSvc
+				);
+			if(FAILED(hres))
+			{
+				pLoc->Release();
+				CoUninitialize();
+				return GetNaiveCPUFreq();
+			}
+			hres = CoSetProxyBlanket
+				(
+				pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
+				NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE,
+				NULL, EOAC_NONE
+				);
+			if(FAILED(hres))
+			{
+				pSvc->Release();
+				pLoc->Release();
+				CoUninitialize();
+				return GetNaiveCPUFreq();
+			}
+			IEnumWbemClassObject * pEnumerator(0);
+			hres = pSvc->ExecQuery
+				(
+				bstr_t("WQL"),
+				bstr_t("SELECT * FROM Win32_Processor"),
+				WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+				NULL, &pEnumerator
+				);
+			if(FAILED(hres))
+			{
+				pSvc->Release();
+				pLoc->Release();
+				CoUninitialize();
+				return GetNaiveCPUFreq();
+			}
+			IWbemClassObject * pclsObj(0);
+			ULONG uReturn(0);
+			cpu::cycles_type result(0);
+			while(pEnumerator)
+			{
+				HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+				if(!uReturn) break;
+				VARIANT vtProp;
+				VariantInit(&vtProp);
+				hr = pclsObj->Get(L"CurrentClockSpeed", 0, &vtProp, 0, 0);
+				if(!FAILED(hr)) result = cpu::cycles_type(1000000) * vtProp.intVal; ///\todo this gives a 1MHz accuracy only.
+				VariantClear(&vtProp);
+			}
+			if(result <= 0) return GetNaiveCPUFreq();
+			pSvc->Release();
+			pLoc->Release();
+			pEnumerator->Release();
+			pclsObj->Release();
+			CoUninitialize();
+			return result;
+		}
 		
 			
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////

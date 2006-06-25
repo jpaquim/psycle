@@ -5,7 +5,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
 			// undo code not required, enter note handles it
-			CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
+			CmdDef cmd = UIGlobal::pInputHandler->KeyToCmd(nChar,nFlags);	
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
@@ -15,7 +15,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					Global::pInputHandler->StopNote(outnote);
+					UIGlobal::pInputHandler->StopNote(outnote);
 				}
 			}
 			else if ((nChar == 16) && ((nFlags & 0xC000) == 0xC000) && ChordModeOffs)
@@ -48,7 +48,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					bool success;
 					// add data
-					success = Global::pInputHandler->EnterData(nChar,nFlags);
+					success = UIGlobal::pInputHandler->EnterData(nChar,nFlags);
 
 					if ( success )
 					{
@@ -61,7 +61,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				bool success;
 				// add data
-		//		success = Global::pInputHandler->EnterDataSeq(nChar,nFlags);
+		//		success = UIGlobal::pInputHandler->EnterDataSeq(nChar,nFlags);
 				success = false;
 				if ( success )
 				{
@@ -75,13 +75,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			// get command
-			CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
+			CmdDef cmd = UIGlobal::pInputHandler->KeyToCmd(nChar,nFlags);
 
 			if(cmd.IsValid())
 			{
 				if((cmd.GetType() == CT_Immediate) || (cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
 				{			
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					UIGlobal::pInputHandler->PerformCmd(cmd,bRepeat);
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
 				{
@@ -89,7 +89,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{	
 						const int outnote = cmd.GetNote();
 						// play note
-						Global::pInputHandler->PlayNote(outnote); 
+						UIGlobal::pInputHandler->PlayNote(outnote); 
 					}
 				}
 			}
@@ -137,7 +137,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 						else
 						{
-							Global::pInputHandler->StopNote(outnote,false);	// note end
+							UIGlobal::pInputHandler->StopNote(outnote,false);	// note end
 						}
 					}			
 				}
@@ -145,9 +145,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					// play note
 					if(velocity>0)
-						Global::pInputHandler->PlayNote(outnote,velocity,false);
+						UIGlobal::pInputHandler->PlayNote(outnote,velocity,false);
 					else
-						Global::pInputHandler->StopNote(outnote,false);
+						UIGlobal::pInputHandler->StopNote(outnote,false);
 				}
 		//	}
 		}
@@ -672,7 +672,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							if (_pSong->_trackArmed[i])
 							{
-								if (Global::pInputHandler->notetrack[i] == note)
+								if (UIGlobal::pInputHandler->notetrack[i] == note)
 								{
 									editcur.track = i;
 									break;
@@ -681,7 +681,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 						if (i == _pSong->tracks())
 						{
-							Global::pInputHandler->StopNote(note,false);
+							UIGlobal::pInputHandler->StopNote(note,false);
 							return;
 						}
 					}
@@ -746,7 +746,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							tmac->Tick(editcur.track, &entry);
 						}
 					}
-					Global::pInputHandler->notetrack[editcur.track]=note;
+					UIGlobal::pInputHandler->notetrack[editcur.track]=note;
 					return;
 				}
 				line = Global::player()._lineCounter;
@@ -785,7 +785,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			PatternEntry *entry = (PatternEntry*) toffset;
 			if (velocity==0)
 			{
-				Global::pInputHandler->StopNote(note,false);
+				UIGlobal::pInputHandler->StopNote(note,false);
 				if (entry->_note == note)
 				{
 					return;
@@ -846,7 +846,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 			}
 
-			Global::pInputHandler->notetrack[editcur.track]=note;
+			UIGlobal::pInputHandler->notetrack[editcur.track]=note;
 			NewPatternDraw(editcur.track,editcur.track,line,line);
 			if (!(Global::player()._playing&&Global::configuration()._followSong))
 			{
@@ -861,7 +861,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			bScrollDetatch=false;
-			Global::pInputHandler->bDoingSelection = false;
+			UIGlobal::pInputHandler->bDoingSelection = false;
 			Repaint(draw_modes::data);
 		}
 
@@ -888,7 +888,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 				entry->_note = notecommands::release;
 
-				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
+				UIGlobal::pInputHandler->notetrack[editcur.track]=notecommands::release;
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
@@ -898,7 +898,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 
 				bScrollDetatch=false;
-				Global::pInputHandler->bDoingSelection = false;
+				UIGlobal::pInputHandler->bDoingSelection = false;
 				Repaint(draw_modes::data);
 			}
 		}
@@ -962,7 +962,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 			}
 			bScrollDetatch=false;
-			Global::pInputHandler->bDoingSelection = false;
+			UIGlobal::pInputHandler->bDoingSelection = false;
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 			Repaint(draw_modes::data);
 			return true;
@@ -989,7 +989,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 			AdvanceLine(patStep,Global::configuration()._wrapAround,false);
-			Global::pInputHandler->bDoingSelection = false;
+			UIGlobal::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
 			Repaint(draw_modes::data);
@@ -1002,7 +1002,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			unsigned char * offset = _ptrack(ps);
 			int patlines = _pSong->patternLines[ps];
 
-			if ( Global::pInputHandler->bFT2DelBehaviour )
+			if ( UIGlobal::pInputHandler->bFT2DelBehaviour )
 			{
 				if(editcur.line==0)
 					return;
@@ -1021,7 +1021,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
-			Global::pInputHandler->bDoingSelection = false;
+			UIGlobal::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
 			Repaint(draw_modes::data);
@@ -1045,7 +1045,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
-			Global::pInputHandler->bDoingSelection = false;
+			UIGlobal::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
 			Repaint(draw_modes::data);
@@ -1630,7 +1630,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					++ts;
 				}
 				
-				if (Global::pInputHandler->bMoveCursorPaste)
+				if (UIGlobal::pInputHandler->bMoveCursorPaste)
 				{
 					if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 					else editcur.line = nl-1;
@@ -2869,7 +2869,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_trackArmed[i])
 				{
-					if (Global::pInputHandler->notetrack[i] == notecommands::release)
+					if (UIGlobal::pInputHandler->notetrack[i] == notecommands::release)
 					{
 						break;
 					}
@@ -2881,7 +2881,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					if (_pSong->_trackArmed[i])
 					{
-						if (Global::pInputHandler->notetrack[i] == notecommands::release)
+						if (UIGlobal::pInputHandler->notetrack[i] == notecommands::release)
 						{
 							break;
 						}

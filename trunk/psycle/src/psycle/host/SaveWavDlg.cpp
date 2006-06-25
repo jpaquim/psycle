@@ -2,16 +2,16 @@
 ///\brief implementation file for psycle::host::CSaveWavDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/SaveWavDlg.hpp>
-//#include <psycle/host/global.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/engine/Player.hpp>
-#include <psycle/host/engine/Machine.hpp>
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/SaveWavDlg.hpp>
+//#include <psycle/host/uiglobal.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/engine/Player.hpp>
+#include <psycle/engine/Machine.hpp>
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/host/MainFrm.hpp>
 #include <iostream>
 #include <iomanip>
 #undef max // ???

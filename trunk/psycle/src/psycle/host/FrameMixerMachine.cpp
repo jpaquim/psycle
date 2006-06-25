@@ -3,10 +3,10 @@
 #include "FrameMixerMachine.hpp"
 #include "psycle.hpp"
 #include "ChildView.hpp"
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/internal_machines.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -59,8 +59,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 //		dc->FillSolidRect(x, y, width-1, half,Global::configuration().machineGUITopColor);
 //		dc->FillSolidRect(x, y+half, width-1, half-1,Global::configuration().machineGUIBottomColor);
 
-		dc->SetBkColor(Global::configuration().machineGUITopColor);
-		dc->SetTextColor(Global::configuration().machineGUIFontTopColor);
+		dc->SetBkColor(UIGlobal::configuration().machineGUITopColor);
+		dc->SetTextColor(UIGlobal::configuration().machineGUIFontTopColor);
 		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName), 0);
 	
 		DrawValue(dc,x,y,parValue);
@@ -68,8 +68,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	void CFrameMixerMachine::InfoLabel::DrawValue(CDC* dc, int x, int y,const char *parValue)
 	{
 		const int half = height/2;
-		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
-		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
+		dc->SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
+		dc->SetTextColor(UIGlobal::configuration().machineGUIFontBottomColor);
 		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue), 0);
 	}
 
@@ -82,8 +82,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 //		dc->FillSolidRect(x, y, mywidth, half,Global::configuration().machineGUITitleColor);
 //		dc->FillSolidRect(x, y+half, mywidth, half,Global::configuration().machineGUIBottomColor);
 
-		dc->SetBkColor(Global::configuration().machineGUITitleColor);
-		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
+		dc->SetBkColor(UIGlobal::configuration().machineGUITitleColor);
+		dc->SetTextColor(UIGlobal::configuration().machineGUITitleFontColor);
 		CFont *oldfont =dc->SelectObject(font_bold);
 		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
 		dc->SelectObject(oldfont);
@@ -95,8 +95,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
-		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
-		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
+		dc->SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
+		dc->SetTextColor(UIGlobal::configuration().machineGUIFontBottomColor);
 		dc->ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue), 0);
 	}
 	

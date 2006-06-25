@@ -7,7 +7,7 @@
 #include "psycle.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-//#include <psycle/host/engine/midiinput.hpp>
+//#include <psycle/engine/midiinput.hpp>
 #include <universalis/processor/exception.hpp>
 #include <sstream>
 

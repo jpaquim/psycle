@@ -1,7 +1,7 @@
 ///\interface psycle::host::Configuration
 #pragma once
-#include "version.hpp"
-#include <psycle/host/audiodrivers/AudioDriver.hpp>
+#include <psycle/host/uiversion.hpp>
+#include <psycle/engine/configuration.hpp>
 #include <cstddef>
 namespace psycle
 {
@@ -20,11 +20,11 @@ namespace psycle
 		class CMidiInput;
 
 		/// configuration.
-		class Configuration
+		class UIConfiguration : public Configuration
 		{
 		public:
-			Configuration();
-			~Configuration() throw();
+			UIConfiguration();
+			~UIConfiguration() throw();
 
 			#if defined PSYCLE__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT // make use of mfc
 				void CreateFonts();

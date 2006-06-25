@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CPsycleApp.
 #pragma once
-#include <psycle/host/gui/resources/resources.hpp> // main symbols
-#include <psycle/host/global.hpp>
+#include <psycle/host/resources/resources.hpp> // main symbols
+#include <psycle/host/uiglobal.hpp>
 #include <operating_system/logger.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -20,7 +20,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual BOOL InitInstance();
 			virtual int ExitInstance();
 		public:
-			Global _global;
+			UIGlobal _global;
 			afx_msg void OnAppAbout();
 		private:
 			void ProcessCmdLine(CMainFrame*);

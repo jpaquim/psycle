@@ -4,7 +4,7 @@
 #include PACKAGENERIC
 #include "WaveEdCrossfadeDialog.hpp"
 #include "psycle.hpp"
-#include <psycle/host/engine/helpers.hpp>
+#include <psycle/helpers/helpers.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CWaveEdCrossfadeDialog::CWaveEdCrossfadeDialog(CWnd* pParent)

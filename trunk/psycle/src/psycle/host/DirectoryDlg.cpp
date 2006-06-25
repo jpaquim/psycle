@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CDirectoryDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/DirectoryDlg.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/DirectoryDlg.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CDirectoryDlg, CPropertyPage)

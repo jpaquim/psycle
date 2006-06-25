@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/WaveEdChildView.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/WaveEdChildView.hpp>
+#include <psycle/host/MainFrm.hpp>
 #include <mmreg.h>
 #include <math.h>
 

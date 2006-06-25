@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CGearRackDlg.
 #pragma once
-#include <psycle/host/gui/ChildView.hpp>
+#include <psycle/host/ChildView.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// gear rack window.

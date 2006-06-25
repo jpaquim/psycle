@@ -2,12 +2,13 @@
 ///\brief implementation file for psycle::host::CPresetsDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/PresetsDlg.hpp>
-#include <psycle/host/engine/Plugin.hpp>
-#include <psycle/host/engine/VSTHost.hpp>
-#include <psycle/host/gui/FrameMachine.hpp>
-#include <psycle/host/engine/FileIO.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/PresetsDlg.hpp>
+#include <psycle/engine/Plugin.hpp>
+#include <psycle/engine/VSTHost.hpp>
+#include <psycle/host/FrameMachine.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/FileIO.hpp>
 
 #define use_boost 0 // causes an exception with paths that contain spaces
 #if use_boost

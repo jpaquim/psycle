@@ -1,7 +1,7 @@
 ///\file
 ///\interface psycle::host::CMidiInputDlg.
 #pragma once
-#include <psycle/host/audiodrivers/AudioDriver.hpp>
+#include <psycle/audiodrivers/AudioDriver.hpp>
 #include <vector>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

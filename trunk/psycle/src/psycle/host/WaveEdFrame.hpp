@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdFrame.
 #pragma once
-#include <psycle/host/gui/WaveEdChildView.hpp>
+#include <psycle/host/WaveEdChildView.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class CMainFrame;

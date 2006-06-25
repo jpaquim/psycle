@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CWireDlg.
 #pragma once
-#include <psycle/host/engine/constants.hpp>
+#include <psycle/engine/constants.hpp>
 #include <afxwin.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

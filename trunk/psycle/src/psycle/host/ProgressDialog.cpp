@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CProgressDialog.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/ProgressDialog.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/ProgressDialog.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)

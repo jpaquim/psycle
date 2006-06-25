@@ -2,13 +2,13 @@
 ///\brief implementation file for psycle::host::CVstEditorDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/VstEditorDlg.hpp>
-#include <psycle/host/gui/FrameMachine.hpp>
-#include <psycle/host/gui/VstGui.hpp>
-#include <psycle/host/gui/PresetsDlg.hpp>
-//#include <psycle/host/gui/inputhandler.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/VstEditorDlg.hpp>
+#include <psycle/host/FrameMachine.hpp>
+#include <psycle/host/VstGui.hpp>
+#include <psycle/host/PresetsDlg.hpp>
+//#include <psycle/host/inputhandler.hpp>
+#include <psycle/host/MainFrm.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define VST_PARAMETRIC_WIDTH 228

@@ -2,16 +2,16 @@
 ///\brief implementation file for psycle::host::CWireDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/WireDlg.hpp>
-#include <psycle/host/gui/VolumeDlg.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/host/engine/dsp.hpp>
-//#include <psycle/host/engine/fft.hpp>
-#include <psycle/host/gui/ChildView.hpp>
-//#include <psycle/host/gui/InputHandler.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/WireDlg.hpp>
+#include <psycle/host/VolumeDlg.hpp>
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/helpers/dsp.hpp>
+//#include <psycle/helpers/fft.hpp>
+#include <psycle/host/ChildView.hpp>
+//#include <psycle/host/InputHandler.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 

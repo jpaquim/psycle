@@ -3,10 +3,10 @@
 
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/gui/XMSamplerMixerPage.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/host/XMSamplerMixerPage.hpp>
+#include <psycle/engine/XMSampler.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

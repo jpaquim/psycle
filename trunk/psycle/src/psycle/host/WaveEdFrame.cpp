@@ -2,10 +2,10 @@
 ///\brief implementation file for psycle::host::CWaveEdFrame.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/gui/WaveEdFrame.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/host/WaveEdFrame.hpp>
+#include <psycle/host/MainFrm.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)

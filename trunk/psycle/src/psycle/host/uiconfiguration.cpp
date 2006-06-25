@@ -2,20 +2,20 @@
 ///\implementation psycle::host::Configuration.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "configuration.hpp"
-#include <psycle/host/engine/registry.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/audiodrivers/WaveOut.hpp>
-#include <psycle/host/audiodrivers/DirectSound.hpp>
-#include <psycle/host/audiodrivers/ASIOInterface.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/registry.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/audiodrivers/WaveOut.hpp>
+#include <psycle/audiodrivers/DirectSound.hpp>
+#include <psycle/audiodrivers/ASIOInterface.hpp>
 //#include <psycle/host/gui/NewMachine.hpp>
 
 namespace psycle
 {
 	namespace host
 	{
-		Configuration::Configuration()
+		UIConfiguration::UIConfiguration()
 		{
 			_initialized = false;
 			_wrapAround = true;
@@ -111,7 +111,7 @@ namespace psycle
 			}
 		}
 
-		Configuration::~Configuration() throw()
+		UIConfiguration::~UIConfiguration() throw()
 		{
 			seqFont.DeleteObject();
 			generatorFont.DeleteObject();
@@ -124,7 +124,7 @@ namespace psycle
 			zapObject(_pMidiInput);
 		}
 
-		bool Configuration::Read()
+		bool UIConfiguration::Read()
 		{
 			_initialized = true;
 			Registry reg;
@@ -321,7 +321,7 @@ namespace psycle
 			return true;
 		}
 
-		void Configuration::Write()
+		void UIConfiguration::Write()
 		{
 			Registry reg;
 			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
@@ -463,47 +463,47 @@ namespace psycle
 			reg.CloseRootKey();
 		}
 
-		void Configuration::SetInstrumentDir(std::string const & s)
+		void UIConfiguration::SetInstrumentDir(std::string const & s)
 		{
 			instrument_dir_ = s;
 		}
 
-		void Configuration::SetCurrentInstrumentDir(std::string const & s)
+		void UIConfiguration::SetCurrentInstrumentDir(std::string const & s)
 		{
 			current_instrument_dir_ = s;
 		}
 
-		void Configuration::SetSongDir(std::string const & s)
+		void UIConfiguration::SetSongDir(std::string const & s)
 		{
 			song_dir_ = s;
 		}
 
-		void Configuration::SetCurrentSongDir(std::string const & s)
+		void UIConfiguration::SetCurrentSongDir(std::string const & s)
 		{
 			current_song_dir_ = s;
 		}
 
-		void Configuration::SetSkinDir(std::string const & s)
+		void UIConfiguration::SetSkinDir(std::string const & s)
 		{
 			skin_dir_ = s;
 		}
 
-		void Configuration::SetPluginDir(std::string const & s)
+		void UIConfiguration::SetPluginDir(std::string const & s)
 		{
 			plugin_dir_ = s;
 		}
 
-		void Configuration::SetVstDir(std::string const & s)
+		void UIConfiguration::SetVstDir(std::string const & s)
 		{
 			vst_dir_ = s;
 		}
 
-		void Configuration::Error(std::string const & what)
+		void UIConfiguration::Error(std::string const & what)
 		{
 			MessageBox(0, what.c_str(), "Psycle", MB_ICONERROR | MB_OK);
 		}
 
-		bool Configuration::CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic)
+		bool UIConfiguration::CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic)
 		{
 			f.DeleteObject();
 			CString sFace(sFontFace.c_str());
@@ -523,7 +523,7 @@ namespace psycle
 			return true;
 		}
 
-		void Configuration::CreateFonts()
+		void UIConfiguration::CreateFonts()
 		{	
 			bool bBold = pattern_font_flags & 1;
 			bool bItalic = pattern_font_flags & 2;
@@ -554,7 +554,7 @@ namespace psycle
 			}
 		}
 
-		void Configuration::SetSkinDefaults()
+		void UIConfiguration::SetSkinDefaults()
 		{
 			_linenumbers = true;
 			_linenumbersHex = false;
@@ -645,7 +645,7 @@ namespace psycle
 
 
 
-		bool Configuration::ReadVersion17()
+		bool UIConfiguration::ReadVersion17()
 		{
 			// Code to import the devices (waveout/DX/Asio) is in their loaders.
 

@@ -2,11 +2,11 @@
 ///\brief implementation file for psycle::host::CMidiMonitorDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/MidiMonitorDlg.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/MidiMonitorDlg.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/machine.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)

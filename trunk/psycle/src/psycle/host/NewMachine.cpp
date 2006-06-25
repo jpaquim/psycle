@@ -2,12 +2,12 @@
 ///\brief implementation file for psycle::host::CNewMachine.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/NewMachine.hpp>
-#include <psycle/host/gui/ProgressDialog.hpp>
-#include <psycle/host/engine/cacheddllfinder.hpp>
-#include <psycle/host/engine/internal_machine_package.hpp>
-#include <psycle/host/configuration.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/NewMachine.hpp>
+#include <psycle/host/ProgressDialog.hpp>
+#include <psycle/host/cacheddllfinder.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/internal_machine_package.hpp>
 #undef min //\todo : ???
 #undef max //\todo : ???
 //#include <sstream>
@@ -925,10 +925,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], imnode, TVI_SORT);
 					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
 				}
-				iminfo = Machine::infopackage().MoveNext();
+				Machine::infopackage().MoveNext();
 			}
 
-			for(int i(_numPlugins - 1) ; i >= 0 ; --i)
+/*			for(int i(_numPlugins - 1) ; i >= 0 ; --i)
 			{
 				if(_pPlugsInfo[i]->error.empty())
 				{
@@ -971,11 +971,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 			m_browser.Select(hNodes[LastType0],TVGN_CARET);
-			break;
+*/
 		}
 		void CNewMachine::UpdateWithMode()
 		{
-			hNodes[0] = m_browser.InsertItem("Generators",2,2 , TVI_ROOT, TVI_LAST);
+/*			hNodes[0] = m_browser.InsertItem("Generators",2,2 , TVI_ROOT, TVI_LAST);
 			m_browser.SetItemData (hNodes[0], IS_FOLDER);
 			m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
 			hNodes[1] = m_browser.InsertItem("Effects",3,3,TVI_ROOT,TVI_LAST);
@@ -1032,10 +1032,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_browser.Select(hNodes[LastType1],TVGN_CARET);
 			break;
+*/
 		}
 		void CNewMachine::UpdateWithCategories()
 		{
-			hNodes[0] = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
+/*			hNodes[0] = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
 			m_browser.SetItemData (hNodes[0], IS_FOLDER);
 			m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
 			_numCustCategories = 1;
@@ -1178,7 +1179,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// (space was added at front of folder name to automatically sort folders to the top)
 			RemoveCatSpaces(NULL);
 			break;
-		}
+*/		}
 
 		void CNewMachine::SetPluginCategories (HTREEITEM hItem, CString Category)
 		{

@@ -1,9 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
-#include <psycle/host/engine/Song.hpp>
-#include <psycle/host/Configuration.hpp>
-#include <psycle/host/gui/InputHandler.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/host/InputHandler.hpp>
 #include <sigslot/sigslot.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

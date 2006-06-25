@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::CGearTracker.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/GearTracker.hpp>
-#include <psycle/host/gui/ChildView.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/GearTracker.hpp>
+#include <psycle/host/ChildView.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CGearTracker::CGearTracker(CChildView* pParent)

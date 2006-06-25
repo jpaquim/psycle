@@ -8,20 +8,20 @@ namespace psycle
 	namespace host
 	{
 		class InputHandler;
-		class CachedDllFinder;
 
-		class Global
+		class UIGlobal : public Global
 		{
 			public:
-				Global();
-				~Global() throw();
+				UIGlobal();
+				~UIGlobal() throw();
 
 				///\todo use singleton pattern instead of static public vars
 				//Global static inline & singleton() { static Global instance; return instance; }
 
 				InputHandler     static inline & input_handler() throw() { return *pInputHandler; }
-				// For other implementations, you might wish to use Mapped or simply DllFinder instead of the Cached one.
-				CachedDllFinder  static inline & dllfinder()	 throw() { return *pDllFinder; }
+
+				virtual cpu::cycles_type CalculateCPUFreq();
+				cpu::cycles_type GetWMICPUFreq();
 
 			PSYCLE__PRIVATE:// shouldn't be static either
 				static InputHandler* pInputHandler;

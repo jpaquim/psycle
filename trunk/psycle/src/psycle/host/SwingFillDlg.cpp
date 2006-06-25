@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CSwingFillDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/SwingFillDlg.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/SwingFillDlg.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CSwingFillDlg::CSwingFillDlg(CWnd* pParent) : CDialog(CSwingFillDlg::IDD, pParent)
