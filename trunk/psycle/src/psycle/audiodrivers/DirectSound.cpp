@@ -4,9 +4,11 @@
 #include PACKAGENERIC
 #include <psycle/audiodrivers/DirectSound.hpp>
 //#include <psycle/host/resources/resources.hpp>
-#include <psycle/audiodrivers/DSoundConfig.hpp>
+//\todo:
+#include <psycle/host/audiodrivers/DSoundConfig.hpp>
 #include <psycle/engine/registry.hpp>
-#include <psycle/host/configuration.hpp>
+//\todo:
+#include <psycle/host/uiconfiguration.hpp>
 #include <universalis/processor/exception.hpp>
 #include <process.h>
 namespace psycle

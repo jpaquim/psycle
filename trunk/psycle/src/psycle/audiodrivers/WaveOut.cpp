@@ -4,9 +4,10 @@
 #include PACKAGENERIC
 #include <psycle/audiodrivers/WaveOut.hpp>
 #include <psycle/host/resources/resources.hpp>
-#include <psycle/audiodrivers/WaveOutDialog.hpp>
+#include <psycle/host/audiodrivers/WaveOutDialog.hpp>
 #include <psycle/engine/registry.hpp>
-#include <psycle/host/configuration.hpp>
+//\todo:
+#include <psycle/host/uiconfiguration.hpp>
 #include <psycle/engine/MidiInput.hpp>
 #include <universalis/processor/exception.hpp>
 #include <process.h>
