@@ -18,7 +18,7 @@
 	\endverbatim
 */
 #pragma once
-#include <psycle/host/detail/project.hpp>
+//#include <psycle/host/detail/project.hpp>
 namespace psycle
 {
 	namespace host

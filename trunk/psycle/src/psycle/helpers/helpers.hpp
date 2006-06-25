@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CValueMapper.
 #pragma once
-#include <psycle/host/detail/project.hpp>
+//#include <psycle/host/detail/project.hpp>
 #include <cmath>
 #include <cstdint>
 #include <universalis/compiler/numeric.hpp>

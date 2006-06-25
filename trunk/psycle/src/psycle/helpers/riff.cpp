@@ -32,7 +32,7 @@
 */
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/riff.hpp>
+#include <psycle/helpers/riff.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
