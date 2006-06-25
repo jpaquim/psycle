@@ -2,14 +2,10 @@
 ///\brief implementation file for psycle::host::Global.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/global.hpp>
-#include <psycle/host/engine/dsp.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/cacheddllfinder.hpp>
-#include <psycle/host/configuration.hpp>
-#include <operating_system/logger.hpp>
+#include <psycle/host/uiglobal.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 #include <psycle/host/gui/InputHandler.hpp>
+#include <psycle/host/cacheddllfinder.hpp>
 
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
@@ -26,12 +22,6 @@ namespace psycle
 	{
 		namespace
 		{
-			cpu::cycles_type GetNaiveCPUFreq()
-			{
-				cpu::cycles_type before(cpu::cycles());
-				::Sleep(1000); ///\todo wastes one second to startup :-(
-				return cpu::cycles() - before;
-			}
 
 			/// CPU Frequency setup
 			/// redone by kSh
@@ -134,13 +124,7 @@ namespace psycle
 			}
 		}
 
-		Song *            Global::_pSong(0);
-		Player *          Global::pPlayer(0);
-		dsp::Resampler *  Global::pResampler(0);
-		Configuration *   Global::pConfig(0);
-		cpu::cycles_type  Global::cpu_frequency_(0 /*GetCPUFreq()*/);
 		InputHandler *    Global::pInputHandler(0);
-		CachedDllFinder * Global::pDllFinder(0);
 			
 		Global::Global()
 		{
