@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::dsp::Dither
 
-#include <psycle/host/engine/mersennetwister.hpp>
+#include <psycle/helpers/mersennetwister.hpp>
 
 namespace psycle
 {

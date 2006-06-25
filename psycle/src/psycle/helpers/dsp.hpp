@@ -2,8 +2,8 @@
 ///\brief various signal processing utility functions and classes, psycle::host::Cubic amongst others.
 #pragma once
 #include <cmath>
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/common/math/erase_all_nans_infinities_and_denormals.hpp>
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 namespace psycle
 {
 	namespace host

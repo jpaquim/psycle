@@ -25,7 +25,7 @@
 **********************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/fft.hpp>
+#include <psycle/helpers/fft.hpp>
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
