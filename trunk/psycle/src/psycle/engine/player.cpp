@@ -2,13 +2,14 @@
 ///\brief implementation file for psycle::host::Player.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-//#include <psycle/host/gui/InputHandler.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/internal_machines.hpp>
+//\todo:
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/MidiInput.hpp>
+//#include <psycle/host/InputHandler.hpp>
 namespace psycle
 {
 	namespace host

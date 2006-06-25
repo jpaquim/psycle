@@ -1,12 +1,13 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/ITModule2.hpp>
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
+#include <psycle/engine/ITModule2.hpp>
+#include <psycle/engine/configuration.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/engine/XMSampler.hpp>
 #include <cstdint>
-
+//todo:
+#include <psycle/host/uiglobal.hpp>
 
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT

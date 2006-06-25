@@ -2,8 +2,8 @@
 //\brief implementation file for psycle::host::InstPreview.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "InstPreview.hpp"
-#include <psycle/host/engine/Instrument.hpp>
+#include <psycle/engine/InstPreview.hpp>
+#include <psycle/engine/Instrument.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

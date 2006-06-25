@@ -1,27 +1,27 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/dsp.hpp>
-#include <psycle/host/engine/FileIO.hpp>
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/gui/psycle.hpp> // Can this be removed?
-#include <psycle/host/gui/WireDlg.hpp> // Can this be removed?
-#include <psycle/host/gui/MainFrm.hpp> // Can this be removed?
-//#include <psycle/host/gui/InputHandler.hpp> // Can this be removed?
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/FileIO.hpp>
+#include <psycle/engine/configuration.hpp>
+#include <psycle/helpers/dsp.hpp>
+#include <psycle/host/psycle.hpp> // Can this be removed?
+#include <psycle/host/WireDlg.hpp> // Can this be removed?
+#include <psycle/host/MainFrm.hpp> // Can this be removed?
+//#include <psycle/host/InputHandler.hpp> // Can this be removed?
 #include <universalis/processor/exception.hpp>
 #include <algorithm>
 
-#include <psycle/host/engine/internal_machine_package.hpp>
+#include <psycle/engine/internal_machine_package.hpp>
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
-#include <psycle/host/engine/internal_machines.hpp>
-#include <psycle/host/engine/Sampler.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/engine/VSTHost.hpp>
+#include <psycle/engine/internal_machines.hpp>
+#include <psycle/engine/Sampler.hpp>
+#include <psycle/engine/XMSampler.hpp>
+#include <psycle/engine/plugin.hpp>
+#include <psycle/engine/VSTHost.hpp>
 
 namespace psycle
 {

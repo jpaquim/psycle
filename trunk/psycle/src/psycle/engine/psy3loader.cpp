@@ -1,7 +1,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/psy3loader.hpp>
-#include <psycle/host/engine/song.hpp>
+#include <psycle/engine/psy3loader.hpp>
+#include <psycle/engine/song.hpp>
 
 namespace psycle {
 	namespace host {

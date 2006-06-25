@@ -2,11 +2,13 @@
 ///\brief implementation file for psycle::host::Sampler.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/sampler.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/FileIO.hpp>
-#include <psycle/host/configuration.hpp>
+#include <psycle/engine/sampler.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/engine/FileIO.hpp>
+//\todo:
+//#include <psycle/engine/configuration.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 namespace psycle
 {
 	namespace host

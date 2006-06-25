@@ -1,11 +1,13 @@
 #pragma once
-#include <psycle/host/detail/project.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/common/scale.hpp>
-#include <psycle/common/math/pi.hpp>
+#include <psycle/engine/detail/project.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/internal_machines.hpp>
+#include <psycle/engine/plugin.hpp>
+//\todo:
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/helpers/scale.hpp>
+#include <psycle/helpers/math/pi.hpp>
 #include <string>
 #include <exception>
 #include <map>

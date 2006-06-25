@@ -1,11 +1,11 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/internal_machine_package.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
-#include <psycle/host/engine/sampler.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/engine/VSTHost.hpp>
+#include <psycle/engine/internal_machine_package.hpp>
+#include <psycle/engine/internal_machines.hpp>
+#include <psycle/engine/sampler.hpp>
+#include <psycle/engine/XMSampler.hpp>
+#include <psycle/engine/plugin.hpp>
+#include <psycle/engine/VSTHost.hpp>
 
 namespace psycle{
 	namespace host{
@@ -46,7 +46,7 @@ namespace psycle{
 		const InternalMachineInfo* InternalMachinePackage::GetInfo(Machine::class_type subclass) const
 		{
 			std::map<Machine::class_type,InternalMachineInfo>::const_iterator iterator
-				= infomap.find(type);
+				= infomap.find(subclass);
 			if(iterator != infomap.end())
 			{
 				return &iterator->second;

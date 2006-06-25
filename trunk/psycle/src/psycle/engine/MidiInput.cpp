@@ -8,12 +8,14 @@
 #include "player.hpp"
 #include "plugin.hpp"
 #include "VSTHost.hpp"
-#include "helpers.hpp"
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
-//#include <psycle/host/gui/InputHandler.hpp>
+#include <psycle/helpers/helpers.hpp>
+//todo:
+#include <psycle/host/uiconfiguration.hpp>
+
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/ChildView.hpp>
+#include <psycle/host/MainFrm.hpp>
+//#include <psycle/host/InputHandler.hpp>
 #include <cassert>
 namespace psycle
 {

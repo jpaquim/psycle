@@ -10,12 +10,12 @@
 #include "internal_machines.hpp"
 
 //\todo: These three includes need to be replaced by a "host" callback which gives such information.
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/configuration.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 
 //\todo : The information required from this include should go to constants.hpp
-//#include <psycle/host/gui/InputHandler.hpp>
+//#include <psycle/host/InputHandler.hpp>
 
 namespace psycle {
 	namespace host {

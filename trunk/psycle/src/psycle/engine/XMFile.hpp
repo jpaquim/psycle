@@ -1,4 +1,4 @@
-#include <psycle/host/detail/project.hpp>
+#include <psycle/engine/detail/project.hpp>
 #include <cstdint>
 #pragma once
 namespace psycle

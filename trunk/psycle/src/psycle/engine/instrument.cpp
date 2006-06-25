@@ -3,7 +3,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "instrument.hpp"
-#include "DataCompression.hpp"
+#include <psycle/helpers/DataCompression.hpp>
 #include "filter.hpp"
 #include <operating_system/logger.hpp>
 #include <cstdint>

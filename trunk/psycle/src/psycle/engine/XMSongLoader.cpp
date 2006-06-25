@@ -5,14 +5,14 @@
  */
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/resources/resources.hpp> // Is this needed?
-#include <psycle/host/gui/ProgressDialog.hpp> // Is this needed?
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp> // It wouldn't be needed, since it is already included in "song.h"
-#include <psycle/host/engine/XMInstrument.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/XMSongLoader.hpp>
-#include <psycle/host/engine/player.hpp>
+#include <psycle/host/resources/resources.hpp> // Is this needed?
+#include <psycle/host/ProgressDialog.hpp> // Is this needed?
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/machine.hpp> // It wouldn't be needed, since it is already included in "song.h"
+#include <psycle/engine/XMInstrument.hpp>
+#include <psycle/engine/XMSampler.hpp>
+#include <psycle/engine/XMSongLoader.hpp>
+#include <psycle/engine/player.hpp>
 
 
 

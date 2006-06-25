@@ -1,14 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::vsthost
 #pragma once
-//#include <psycle/host/detail/project.hpp>
+//#include <psycle/engine/detail/project.hpp>
 //#include <universalis/processor/exceptions/fpu.hpp>
 //#include <universalis/compiler/location.hpp>
 #include "machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
 //#include "SongStructs.hpp"
 //#include "constants.hpp"
-//#include "global.hpp"
+//#include <psycle/engine/global.hpp>
 //#include "FileIO.hpp"
 //#include <psycle/helpers/dsp.hpp>
 //#include <psycle/helpers/helpers.hpp>

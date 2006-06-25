@@ -1,6 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "dllfinder.hpp"
+#include <psycle/engine/dllfinder.hpp>
 #include <algorithm> // std::transform
 #include <cctype>	   // std::tolower
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
@@ -35,11 +35,11 @@ void DllFinder::ResetFinder()
 bool DllFinder::LookupDllPath(std::string& name,Machine::class_type subclass)
 {
 	std::transform(name.begin(),name.end(),name.begin(),std::tolower);
-	std::map<std::string,std::string>::iterator iterator = base_paths.find(subclass);
+	std::map<Machine::class_type,std::string>::iterator iterator = base_paths.find(subclass);
 
-	if(iterator != subclass.end())
+	if(iterator != base_paths.end())
 	{
-		if (SearchFileInDir(name,*iterator))
+		if (SearchFileInDir(name,iterator->second))
 		{
 			return true;
 		}

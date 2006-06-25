@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::Player.
 #pragma once
 #include "song.hpp"
-#include "riff.hpp"
-#include "dither.hpp"
+#include <psycle/helpers/riff.hpp>
+#include <psycle/helpers/dither.hpp>
 namespace psycle
 {
 	namespace host

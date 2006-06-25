@@ -1,5 +1,6 @@
 ///\interface psycle::host::Configuration
 #pragma once
+#include <psycle/audiodrivers/AudioDriver.hpp>
 #include <cstddef>
 namespace psycle
 {
@@ -7,7 +8,6 @@ namespace psycle
 	{
 
 		class CMidiInput;
-		class AudioDriver;
 
 		/// configuration.
 		class Configuration

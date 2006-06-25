@@ -6,10 +6,10 @@
 #include "song.hpp"
 #include "player.hpp"
 #include "internal_machines.hpp"
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/MainFrm.hpp> // Is this needed?
-#include <psycle/host/gui/VSTEditorDlg.hpp> // Is this needed?
-#include <psycle/host/engine/cacheddllfinder.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/MainFrm.hpp> // Is this needed?
+#include <psycle/host/VSTEditorDlg.hpp> // Is this needed?
+#include <psycle/host/cacheddllfinder.hpp>
 #include <algorithm>
 #include <cctype>
 namespace psycle
@@ -458,7 +458,7 @@ namespace psycle
 			bool plugin::LoadDll(std::string const & file_name)
 			{
 				std::string path = file_name;
-				if(Global::dllfinder().LookupDllPath(path)) 
+				if(Global::dllfinder().LookupDllPath(path,MACH_VST)) 
 				{
 					try
 					{

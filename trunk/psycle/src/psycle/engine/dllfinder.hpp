@@ -1,5 +1,5 @@
 #pragma once
-#include "machine.hpp"
+#include <psycle/engine/machine.hpp>
 #include <string>
 
 namespace psycle
@@ -28,7 +28,7 @@ public:
 protected:
 	bool SearchFileInDir(std::string& name,std::string& path);
 
-	std::map<Machine::class_type,std::string>
+	std::map<Machine::class_type,std::string> base_paths;
 };
 
 	}

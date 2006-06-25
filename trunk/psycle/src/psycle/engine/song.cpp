@@ -9,9 +9,12 @@
 #include "XMSampler.hpp"
 #include "plugin.hpp"
 #include "VSTHost.hpp"
-#include "DataCompression.hpp"
-#include "riff.hpp" // for Wave file loading.
-#include <psycle/host/engine/cacheddllfinder.hpp>
+#include <psycle/helpers/DataCompression.hpp>
+#include <psycle/helpers/riff.hpp> // for Wave file loading.
+//\todo:
+#include <psycle/host/cacheddllfinder.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdint>
@@ -91,7 +94,7 @@ namespace psycle
 						Plugin & plugin(*new Plugin(index));
 						machine = &plugin;
 						std::string path = plugin_name;
-						if(!Global::dllfinder().LookupDllPath(path)) 
+						if(!Global::dllfinder().LookupDllPath(path,MACH_PLUGIN)) 
 						{
 							delete &plugin;
 							return false;
@@ -117,10 +120,10 @@ namespace psycle
 				case MACH_VSTFX:
 					{
 						vst::plugin * plugin(0);
-						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
-						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
+						if (subclass == MACH_VST) machine = plugin = new vst::instrument(index);
+						else if (subclass == MACH_VSTFX)	machine = plugin = new vst::fx(index);
 						std::string path = plugin_name;
-						if(!Global::dllfinder().LookupDllPath(path)) 
+						if(!Global::dllfinder().LookupDllPath(path,MACH_VST)) 
 						{
 							delete plugin;
 							return false;
