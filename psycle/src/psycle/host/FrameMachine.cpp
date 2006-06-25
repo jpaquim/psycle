@@ -9,10 +9,10 @@
 #include "PresetsDlg.hpp"
 //#include "InputHandler.hpp"
 #include "MainFrm.hpp"
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/engine/VSTHost.hpp>
-#include <psycle/host/engine/helpers.hpp>
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/plugin.hpp>
+#include <psycle/engine/VSTHost.hpp>
+#include <psycle/helpers/helpers.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
@@ -289,13 +289,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						//dc.SetTextColor(0x00CCDDEE + nc);
 						if ((tweakpar == c) && (istweak))
 						{
-							dc.SetBkColor(Global::configuration().machineGUIHTopColor);
-							dc.SetTextColor(Global::configuration().machineGUIHFontTopColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUIHTopColor);
+							dc.SetTextColor(UIGlobal::configuration().machineGUIHFontTopColor);
 						}
 						else
 						{
-							dc.SetBkColor(Global::configuration().machineGUITopColor);
-							dc.SetTextColor(Global::configuration().machineGUIFontTopColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
+							dc.SetTextColor(UIGlobal::configuration().machineGUIFontTopColor);
 						}
 						dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
 						
@@ -303,13 +303,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						//dc.SetTextColor(0x0044EEFF + nc);
 						if ((tweakpar == c) && (istweak))
 						{
-							dc.SetBkColor(Global::configuration().machineGUIHBottomColor);
-							dc.SetTextColor(Global::configuration().machineGUIHFontBottomColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUIHBottomColor);
+							dc.SetTextColor(UIGlobal::configuration().machineGUIHFontBottomColor);
 						}
 						else
 						{
-							dc.SetBkColor(Global::configuration().machineGUIBottomColor);
-							dc.SetTextColor(Global::configuration().machineGUIFontBottomColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
+							dc.SetTextColor(UIGlobal::configuration().machineGUIFontBottomColor);
 						}
 						dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
 					}
@@ -318,30 +318,30 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
 						{
 							//dc.SetBkColor(0x00788D93);
-							dc.SetBkColor(Global::configuration().machineGUITopColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
 							dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
 							
 							//dc.SetBkColor(0x00687D83);
-							dc.SetBkColor(Global::configuration().machineGUIBottomColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
 							dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 						}
 						else
 						{
 							//dc.SetBkColor(0x00788D93);
-							dc.SetBkColor(Global::configuration().machineGUITopColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
 							dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + K_YSIZE / 4), "", 0);
 						
 							//dc.SetBkColor(0x0088a8b4);
 							//dc.SetTextColor(0x00FFFFFF);
-							dc.SetBkColor(Global::configuration().machineGUITitleColor);
-							dc.SetTextColor(Global::configuration().machineGUITitleFontColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUITitleColor);
+							dc.SetTextColor(UIGlobal::configuration().machineGUITitleFontColor);
 
 							dc.SelectObject(&font_bold);
 							dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
 							dc.SelectObject(&font);
 
 							//dc.SetBkColor(0x00687D83);
-							dc.SetBkColor(Global::configuration().machineGUIBottomColor);
+							dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
 							dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE), "", 0);
 						}
 					}
@@ -364,14 +364,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						//dc.SetBkColor(0x00788D93);
 						//dc.SetTextColor(0x00CCDDEE);
-						dc.SetBkColor(Global::configuration().machineGUITopColor);
-						dc.SetTextColor(Global::configuration().machineGUIFontTopColor);
+						dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
+						dc.SetTextColor(UIGlobal::configuration().machineGUIFontTopColor);
 						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
 
 						//dc.SetBkColor(0x00687D83);
 						//dc.SetTextColor(0x0044EEFF);
-						dc.SetBkColor(Global::configuration().machineGUIBottomColor);
-						dc.SetTextColor(Global::configuration().machineGUIFontBottomColor);
+						dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
+						dc.SetTextColor(UIGlobal::configuration().machineGUIFontBottomColor);
 						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 
 						y_knob += K_YSIZE;
@@ -448,9 +448,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							wndView->AddMacViewUndo();
 							_pMachine->SetParameter(tweakpar,newval);
-							if (Global::configuration()._RecordTweaks)
+							if (UIGlobal::configuration()._RecordTweaks)
 							{
-								if (Global::configuration()._RecordMouseTweaksSmooth)
+								if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
 								{
 									wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
 								}
@@ -506,9 +506,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							{
 								wndView->AddMacViewUndo();
 								_pMachine->SetParameter(tweakpar,newval);
-								if (Global::configuration()._RecordTweaks)
+								if (UIGlobal::configuration()._RecordTweaks)
 								{
-									if (Global::configuration()._RecordMouseTweaksSmooth)
+									if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
 									{
 										wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
 									}
@@ -586,9 +586,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					_pMachine->SetParameter(tweakpar,(int) nv);
 					prevval=(int)nv;
 
-					if (Global::configuration()._RecordTweaks)
+					if (UIGlobal::configuration()._RecordTweaks)
 					{
-						if (Global::configuration()._RecordMouseTweaksSmooth)
+						if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
 						{
 							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
 						}
@@ -611,10 +611,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							&& setvals[i] <= ((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MaxValue)
 						{
 							_pMachine->SetParameter(setparams[i],setvals[i]);
-							if (Global::configuration()._RecordTweaks)	//todo: while i haven't tested it, i can't imagine recording tweaks on something like an
+							if (UIGlobal::configuration()._RecordTweaks)	//todo: while i haven't tested it, i can't imagine recording tweaks on something like an
 							{									//xymod grid coming out too well.. to do it properly, we'd need to implement a means
 																//of splitting the recording into separate tracks for each parameter.
-								if (Global::configuration()._RecordMouseTweaksSmooth)
+								if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
 								{
 									wndView->MousePatternTweakSlide(MachineIndex, setparams[i], setvals[i]-((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MinValue);
 								}
@@ -646,9 +646,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						if( ((Plugin*)_pMachine)->GetParam(tweakpar)->LButtonUp(point.x, point.y, newval))
 						{
 							_pMachine->SetParameter(tweakpar, newval);
-							if (Global::configuration()._RecordTweaks)
+							if (UIGlobal::configuration()._RecordTweaks)
 							{
-								if (Global::configuration()._RecordMouseTweaksSmooth)
+								if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
 								{
 									wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
 								}
@@ -741,7 +741,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			// ignore repeats: nFlags&0x4000
 			const BOOL bRepeat = nFlags&0x4000;
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			CmdDef cmd(UIGlobal::pInputHandler->KeyToCmd(nChar,nFlags));
 			if(!bRepeat && cmd.IsValid())
 			{
 				switch(cmd.GetType())
@@ -749,15 +749,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				case CT_Note:
 					{
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::configuration()._notesToEffects)
-							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || UIGlobal::configuration()._notesToEffects)
+							UIGlobal::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
-							Global::pInputHandler->PlayNote(outnote,127,true, 0);
+							UIGlobal::pInputHandler->PlayNote(outnote,127,true, 0);
 					}
 					break;
 
 				case CT_Immediate:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					UIGlobal::pInputHandler->PerformCmd(cmd,bRepeat);
 					break;
 				}
 			}
@@ -769,15 +769,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
 
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			CmdDef cmd(UIGlobal::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::configuration()._notesToEffects)
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||UIGlobal::configuration()._notesToEffects)
 				{
-					Global::pInputHandler->StopNote(outnote,true,_pMachine);
+					UIGlobal::pInputHandler->StopNote(outnote,true,_pMachine);
 				}
-				else Global::pInputHandler->StopNote(outnote,true,NULL);
+				else UIGlobal::pInputHandler->StopNote(outnote,true,NULL);
 			}
 
 			//wndView->KeyUp(nChar, nRepCnt, nFlags);

@@ -6,7 +6,7 @@
 /// - it provides a bugfree initialization of the plugin.
 /// - it provides the events samples_per_second_changed and sequencer_ticks_per_second_changed, which were not part of the original interface (i don't know if it's been fixed in the host nowadays).
 #pragma once
-#include <psycle/common/scale.hpp>
+#include <psycle/helpers/scale.hpp>
 #include <universalis/compiler.hpp>
 #include <string>
 #include <sstream>

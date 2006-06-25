@@ -1,12 +1,12 @@
 ///\file
 ///\brief interface file for psycle::host::CConfigDlg.
 #pragma once
-#include <psycle/host/gui/DirectoryDlg.hpp>
-#include <psycle/host/gui/SkinDlg.hpp>
-#include <psycle/host/gui/OutputDlg.hpp>
-#include <psycle/host/gui/MidiInputDlg.hpp>
-#include <psycle/host/Configuration.hpp>
-#include <psycle/host/gui/KeyConfigDlg.hpp>
+#include <psycle/host/DirectoryDlg.hpp>
+#include <psycle/host/SkinDlg.hpp>
+#include <psycle/host/OutputDlg.hpp>
+#include <psycle/host/MidiInputDlg.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/host/KeyConfigDlg.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// config window.
@@ -25,7 +25,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CKeyConfigDlg _keyDlg;
 		// Operations
 		public:
-			void Init(Configuration* pConfig,int dlgnum=0);
+			void Init(UIConfiguration* pConfig,int dlgnum=0);
 		// Overrides
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CConfigDlg)
@@ -37,7 +37,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual ~CConfigDlg();
 			// Generated message map functions
 		protected:
-			Configuration* _pConfig;
+			UIConfiguration* _pConfig;
 			//{{AFX_MSG(CConfigDlg)
  				// NOTE - the ClassWizard will add and remove member functions here.
 			//}}AFX_MSG

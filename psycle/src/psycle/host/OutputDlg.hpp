@@ -1,7 +1,7 @@
 ///\file
 ///\interface file for psycle::host::COutputDlg.
 #pragma once
-#include <psycle/host/audiodrivers/AudioDriver.hpp>
+#include <psycle/audiodrivers/audiodriver.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// audio device output config window.

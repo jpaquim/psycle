@@ -1,9 +1,9 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/XMSamplerUI.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/gui/ChildView.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/XMSamplerUI.hpp>
+#include <psycle/engine/XMSampler.hpp>
+#include <psycle/host/ChildView.hpp>
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog

@@ -2,10 +2,10 @@
 ///\brief implementation file for psycle::host::CDirectoryDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/XMSamplerUIGeneral.hpp>
-#include <psycle/host/engine/XMInstrument.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/XMSamplerUIGeneral.hpp>
+#include <psycle/engine/XMInstrument.hpp>
+#include <psycle/engine/XMSampler.hpp>
 #include ".\xmsampleruigeneral.hpp" // Hmm?
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

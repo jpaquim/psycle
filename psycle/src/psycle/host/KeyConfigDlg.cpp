@@ -2,12 +2,11 @@
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/global.hpp>
-#include <psycle/host/gui/KeyConfigDlg.hpp>
-#include <psycle/host/gui/inputhandler.hpp>
-#include <psycle/host/Configuration.hpp>
-#include ".\keyconfigdlg.hpp" // What the heck is this?
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/uiglobal.hpp>
+#include <psycle/host/KeyConfigDlg.hpp>
+#include <psycle/host/inputhandler.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
@@ -65,7 +64,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CKeyConfigDlg::FillCmdList()
 		{
 			// add command definitions
-			InputHandler* pinp = Global::pInputHandler;
+			InputHandler* pinp = UIGlobal::pInputHandler;
 			bool written[max_cmds];
 			int j,i,pos;
 
@@ -108,10 +107,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CDialog::OnInitDialog();
 			
-			m_cmdCtrlPlay.SetCheck(Global::pInputHandler->bCtrlPlay?1:0);
-			m_cmdNewHomeBehaviour.SetCheck(Global::pInputHandler->bFT2HomeBehaviour?1:0);
-			m_cmdFT2Del.SetCheck(Global::pInputHandler->bFT2DelBehaviour?1:0);
-			m_cmdShiftArrows.SetCheck(Global::pInputHandler->bShiftArrowsDoSelect?1:0);
+			m_cmdCtrlPlay.SetCheck(UIGlobal::pInputHandler->bCtrlPlay?1:0);
+			m_cmdNewHomeBehaviour.SetCheck(UIGlobal::pInputHandler->bFT2HomeBehaviour?1:0);
+			m_cmdFT2Del.SetCheck(UIGlobal::pInputHandler->bFT2DelBehaviour?1:0);
+			m_cmdShiftArrows.SetCheck(UIGlobal::pInputHandler->bShiftArrowsDoSelect?1:0);
 
 			m_save_reminders.SetCheck(Global::configuration().bFileSaveReminders?1:0);
 			m_tweak_smooth.SetCheck(Global::configuration()._RecordMouseTweaksSmooth?1:0);
@@ -205,7 +204,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			// save key definition
 			if(cmd.IsValid())
-				Global::pInputHandler->SetCmd(cmd,hotkey_key,nMod);
+				UIGlobal::pInputHandler->SetCmd(cmd,hotkey_key,nMod);
 		}
 
 		void CKeyConfigDlg::FindKey(long idx,WORD&key,WORD&mods)
@@ -214,7 +213,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 //			CmdDef cmd = FindCmd(idx);
 			// locate which key is that command
 //			if(cmd.IsValid())
-//				Global::pInputHandler->CmdToKey(cmd,key,mods);
+//				UIGlobal::pInputHandler->CmdToKey(cmd,key,mods);
 
 			int j = m_lstCmds.GetItemData(idx)/256;
 			key = m_lstCmds.GetItemData(idx)%256;
@@ -230,7 +229,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CmdDef CKeyConfigDlg::FindCmd(long idx)
 		{	
 			// init
-			InputHandler* pinp = Global::pInputHandler;
+			InputHandler* pinp = UIGlobal::pInputHandler;
 			int j = m_lstCmds.GetItemData(idx)/256;
 			int i = m_lstCmds.GetItemData(idx)%256;
 			CmdDef cmd = pinp->cmdLUT[j][i];
@@ -245,7 +244,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_lstCmds.GetText(idx,cmdDesc);
 
 			// convert string to cmd
-			cmd = Global::pInputHandler->StringToCmd(cmdDesc);
+			cmd = UIGlobal::pInputHandler->StringToCmd(cmdDesc);
 */
 			return cmd;
 		}
@@ -254,7 +253,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			// user cancelled,
 			// restore from saved settings
-			Global::pInputHandler->ConfigRestore();
+			UIGlobal::pInputHandler->ConfigRestore();
 			CDialog::OnCancel();
 		}
 
@@ -263,13 +262,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// update last key
 			OnSelchangeCmdlist();
 
-			Global::pInputHandler->bCtrlPlay  = m_cmdCtrlPlay.GetCheck()?true:false;
-			Global::pInputHandler->bFT2HomeBehaviour = m_cmdNewHomeBehaviour.GetCheck()?true:false;
-			Global::pInputHandler->bFT2DelBehaviour = m_cmdFT2Del.GetCheck()?true:false;
-			Global::pInputHandler->bShiftArrowsDoSelect = m_cmdShiftArrows.GetCheck()?true:false;
+			UIGlobal::pInputHandler->bCtrlPlay  = m_cmdCtrlPlay.GetCheck()?true:false;
+			UIGlobal::pInputHandler->bFT2HomeBehaviour = m_cmdNewHomeBehaviour.GetCheck()?true:false;
+			UIGlobal::pInputHandler->bFT2DelBehaviour = m_cmdFT2Del.GetCheck()?true:false;
+			UIGlobal::pInputHandler->bShiftArrowsDoSelect = m_cmdShiftArrows.GetCheck()?true:false;
 			
 			// save settings
-			Global::pInputHandler->ConfigSave();
+			UIGlobal::pInputHandler->ConfigSave();
 			
 			Global::configuration()._wrapAround = m_wrap.GetCheck()?true:false;
 			Global::configuration()._centerCursor = m_centercursor.GetCheck()?true:false;
@@ -361,7 +360,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									q++;
 									int cmddata = atoi(q);
 									CmdSet ID = CmdSet(cmddata);
-									Global::pInputHandler->SetCmd(ID,i,j);
+									UIGlobal::pInputHandler->SetCmd(ID,i,j);
 								}
 							}
 						}
@@ -421,9 +420,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					for(UINT i=0;i<256;i++)
 					{
-						if(Global::pInputHandler->cmdLUT[j][i].IsValid())
+						if(UIGlobal::pInputHandler->cmdLUT[j][i].IsValid())
 						{
-							fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",j,i,Global::pInputHandler->cmdLUT[j][i].ID,Global::pInputHandler->cmdLUT[j][i].GetName());
+							fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",j,i,UIGlobal::pInputHandler->cmdLUT[j][i].ID,UIGlobal::pInputHandler->cmdLUT[j][i].GetName());
 						}
 					}
 				}
@@ -435,7 +434,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			WORD key = 0;
 			WORD mods = 0;
-			Global::pInputHandler->BuildCmdLUT();
+			UIGlobal::pInputHandler->BuildCmdLUT();
 			FillCmdList();
 			m_lstCmds.SetCurSel(0);
 			FindKey(0,key,mods);
@@ -456,7 +455,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				nMod|=MOD_C;
 			if(mods&HOTKEYF_EXT)
 				nMod|=MOD_E;
-			Global::pInputHandler->SetCmd(cdefNull,nKey,nMod);
+			UIGlobal::pInputHandler->SetCmd(cdefNull,nKey,nMod);
 			m_hotkey0.SetHotKey(0,0);
 		}
 

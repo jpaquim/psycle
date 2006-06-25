@@ -4,10 +4,10 @@
 #include "FrameLFOMachine.hpp"
 #include "psycle.hpp"
 #include "ChildView.hpp"
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/song.hpp>
+#include <psycle/engine/machine.hpp>
+#include <psycle/engine/internal_machines.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
@@ -33,10 +33,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			d_showLabel=top;
 			d_showValue=bottom;
-			d_valBkColor = Global::configuration().machineGUIBottomColor;
-			d_lblBkColor = Global::configuration().machineGUIBottomColor;
-			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
-			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
+			d_valBkColor = UIGlobal::configuration().machineGUIBottomColor;
+			d_lblBkColor = UIGlobal::configuration().machineGUIBottomColor;
+			d_valTextColor = UIGlobal::configuration().machineGUIFontBottomColor;
+			d_lblTextColor = UIGlobal::configuration().machineGUIFontBottomColor;
 			d_lblString=label;
 			d_bTweakable = true;
 		}
@@ -164,9 +164,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			d_showLabel=top;
 			d_showValue=bottom;
-			d_lblBkColor = Global::configuration().machineGUIBottomColor;
-			d_valTextColor = Global::configuration().machineGUIFontBottomColor;
-			d_lblTextColor = Global::configuration().machineGUIFontBottomColor;
+			d_lblBkColor = UIGlobal::configuration().machineGUIBottomColor;
+			d_valTextColor = UIGlobal::configuration().machineGUIFontBottomColor;
+			d_lblTextColor = UIGlobal::configuration().machineGUIFontBottomColor;
 			d_lblString = label;
 			d_bTweakable = true;
 		}
@@ -420,7 +420,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CBitmap *oldbmp2=ComboBox::s_ComboBoxDC.SelectObject(&m_combobox);
 
 		//draw bg color
-		bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,Global::configuration().machineGUIBottomColor);
+		bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,UIGlobal::configuration().machineGUIBottomColor);
 		//draw lfo params
 		char temp[128];
 		for(int i(0);i<LFO::prms::num_params;++i)

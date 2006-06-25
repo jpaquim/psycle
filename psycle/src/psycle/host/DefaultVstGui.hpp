@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CDefaultVstGui.
 #pragma once
-#include <psycle/host/engine/VSTHost.hpp>
-#include <psycle/host/gui/ChildView.hpp>
+#include <psycle/engine/VSTHost.hpp>
+#include <psycle/host/ChildView.hpp>
 #include <afxext.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

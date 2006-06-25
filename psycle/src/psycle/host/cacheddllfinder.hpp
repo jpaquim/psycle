@@ -2,8 +2,8 @@
 #include <iostream>
 #include <typeinfo>
 #include <map>
-#include "dllfinder.hpp"
-#include "machine.hpp"
+#include <psycle/engine/dllfinder.hpp>
+#include <psycle/engine/machine.hpp>
 #include <sigslot/sigslot.h>
 
 namespace psycle
@@ -17,7 +17,7 @@ class PluginInfo
 {
 public:
 	PluginInfo()
-		: type(MACH_UNDEFINED)
+		: subclass(MACH_UNDEFINED)
 		, mode(MACHMODE_UNDEFINED)
 		, allow(true)
 	{
@@ -40,7 +40,7 @@ public:
 	void operator=(PluginInfo& newinfo)
 	{
 		mode=newinfo.mode;
-		type=newinfo.type;
+		subclass=newinfo.subclass;
 		strcpy(version,newinfo.version);
 		strcpy(name,newinfo.name);
 		strcpy(desc,newinfo.desc);
@@ -49,7 +49,7 @@ public:
 	}
 	friend bool operator!=(PluginInfo& info1,PluginInfo& info2)
 	{
-		if ((info1.type != info2.type) ||
+		if ((info1.subclass != info2.subclass) ||
 			(info1.mode != info2.mode) ||
 			(strcmp(info1.version,info2.version) != 0 ) ||
 			(strcmp(info1.desc,info2.desc) != 0 ) ||

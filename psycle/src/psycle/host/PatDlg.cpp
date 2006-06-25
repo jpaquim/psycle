@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::CPatDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/engine/constants.hpp>
-#include <psycle/host/gui/PatDlg.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/engine/constants.hpp>
+#include <psycle/host/PatDlg.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)

@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::InputHandler.
 #pragma once
-#include <psycle/host/engine/constants.hpp>
-#include <psycle/host/engine/SongStructs.hpp>
+#include <psycle/engine/constants.hpp>
+#include <psycle/engine/SongStructs.hpp>
 namespace psycle
 {
 	namespace host

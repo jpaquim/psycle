@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::CConfigDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/ConfigDlg.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/ConfigDlg.hpp>
+#include <psycle/host/MainFrm.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
@@ -28,7 +28,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		BEGIN_MESSAGE_MAP(CConfigDlg, CPropertySheet)
 		END_MESSAGE_MAP()
 
-		void CConfigDlg::Init(Configuration* pConfig,int dlgnum) 
+		void CConfigDlg::Init(UIConfiguration* pConfig,int dlgnum) 
 		{
 			_pConfig = pConfig;
 			_skinDlg._patternSeparatorColor = pConfig->pvc_separator;

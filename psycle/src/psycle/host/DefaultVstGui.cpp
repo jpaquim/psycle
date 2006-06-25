@@ -2,11 +2,11 @@
 ///\brief implementation file for psycle::host::CDefaultVstGui.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/DefaultVstGui.hpp>
-#include <psycle/host/engine/Helpers.hpp>
-#include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/configuration.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/DefaultVstGui.hpp>
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/host/ChildView.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)

@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
-#include <psycle/host/gui/resources/resources.hpp>
-#include <psycle/host/engine/machine.hpp>
+#include <psycle/host/resources/resources.hpp>
+#include <psycle/engine/machine.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
@@ -105,6 +105,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CImageList imgList;
 
 			HTREEITEM m_hItemDrag;
+			//\todo: to be deleted
+			HTREEITEM hNodes[1];
 
 			bool updateCache;
 			bool bCategoriesChanged;

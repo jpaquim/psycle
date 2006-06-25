@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
-#include <psycle/host/gui/InputHandler.hpp>
+#include <psycle/host/InputHandler.hpp>
 #include "afxwin.h"
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

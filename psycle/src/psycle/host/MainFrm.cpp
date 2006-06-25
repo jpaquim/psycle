@@ -17,12 +17,12 @@
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
 #include "KeyConfigDlg.hpp"
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
-#include <psycle/host/engine/cacheddllfinder.hpp>
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/engine/plugin.hpp>
+#include <psycle/engine/internal_machines.hpp>
+#include <psycle/host/cacheddllfinder.hpp>
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
@@ -128,7 +128,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		CMainFrame::CMainFrame()
 		{
-			Global::pInputHandler->SetMainFrame(this);
+			UIGlobal::pInputHandler->SetMainFrame(this);
 			vuprevR = 0;
 			vuprevL = 0;
 			seqcopybufferlength = 0;
@@ -140,7 +140,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CMainFrame::~CMainFrame()
 		{
 //			Gdiplus::GdiplusShutdown(gdiplusToken); // GDI+ stuff
-			Global::pInputHandler->SetMainFrame(NULL);
+			UIGlobal::pInputHandler->SetMainFrame(NULL);
 			if(pGearRackDialog) pGearRackDialog->OnCancel();
 		}
 
@@ -323,22 +323,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			// set multichannel audition checkbox status
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MULTICHANNEL_AUDITION);
-			cb->SetCheck(Global::pInputHandler->bMultiKey?1:0);
+			cb->SetCheck(UIGlobal::pInputHandler->bMultiKey?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MOVECURSORPASTE);
-			cb->SetCheck(Global::pInputHandler->bMoveCursorPaste?1:0);
+			cb->SetCheck(UIGlobal::pInputHandler->bMoveCursorPaste?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF);
-			cb->SetCheck(Global::configuration()._RecordNoteoff?1:0);
+			cb->SetCheck(UIGlobal::configuration()._RecordNoteoff?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS);
-			cb->SetCheck(Global::configuration()._RecordTweaks?1:0);
+			cb->SetCheck(UIGlobal::configuration()._RecordTweaks?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_NOTESTOEFFECTS);
-			cb->SetCheck(Global::configuration()._notesToEffects?1:0);
+			cb->SetCheck(UIGlobal::configuration()._notesToEffects?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW);
-			cb->SetCheck(Global::configuration()._followSong?1:0);
+			cb->SetCheck(UIGlobal::configuration()._followSong?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCSHORT);
 			hi = (HBITMAP)bplus; cb->SetBitmap(hi);
@@ -362,7 +362,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			DragAcceptFiles(true);
 
-			Global::configuration().CreateFonts();
+			UIGlobal::configuration().CreateFonts();
 
 			// Finally initializing timer
 			
@@ -373,8 +373,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//	m_wndView.Repaint();
 			m_wndView.SetFocus();
 		//	m_wndView.EnableSound();
-			Global::dllfinder().AddPath(Global::configuration().GetPluginDir(),MACH_PLUGIN);
-			Global::dllfinder().AddPath(Global::configuration().GetVstDir(),MACH_VST);
+			UIGlobal::dllfinder().AddPath(UIGlobal::configuration().GetPluginDir(),MACH_PLUGIN);
+			UIGlobal::dllfinder().AddPath(UIGlobal::configuration().GetVstDir(),MACH_VST);
 			
 			return 0;
 		}
@@ -435,10 +435,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				CloseAllMacGuis();
 				m_wndView._outputActive = false;
-				Global::player().Stop();
-				Global::configuration()._pOutputDriver->Enable(false);
+				UIGlobal::player().Stop();
+				UIGlobal::configuration()._pOutputDriver->Enable(false);
 				// MIDI IMPLEMENTATION
-				Global::configuration()._pMidiInput->Close();
+				UIGlobal::configuration()._pMidiInput->Close();
 
 				//Recent File List;
 				((CPsycleApp*)AfxGetApp())->SaveRecent(this);
@@ -558,15 +558,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			char buffer[16];
 			if ( x != 0.0f )
 			{
-				if (Global::player()._playing ) 
+				if (UIGlobal::player()._playing ) 
 				{
-					Global::song().BeatsPerMin(Global::player().bpm+x);
+					UIGlobal::song().BeatsPerMin(UIGlobal::player().bpm+x);
 				}
-				else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
-				Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-				sprintf(buffer,"%0.2f",Global::song().BeatsPerMin());
+				else UIGlobal::song().BeatsPerMin(UIGlobal::song().BeatsPerMin()+x);
+				UIGlobal::player().SetBPM(UIGlobal::song().BeatsPerMin(),UIGlobal::song().LinesPerBeat());
+				sprintf(buffer,"%0.2f",UIGlobal::song().BeatsPerMin());
 			}
-			else sprintf(buffer,"%0.2f",Global::player().bpm);
+			else sprintf(buffer,"%0.2f",UIGlobal::player().bpm);
 			
 			((CStatic *)m_wndControl.GetDlgItem(IDC_BPMLABEL))->SetWindowText(buffer);
 		}
@@ -576,15 +576,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			char buffer[16];
 			if ( x != 0)
 			{
-				if (Global::player()._playing ) 
+				if (UIGlobal::player()._playing ) 
 				{
-					Global::song().LinesPerBeat(Global::player().tpb+x);
+					UIGlobal::song().LinesPerBeat(UIGlobal::player().tpb+x);
 				}
-				else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
-				Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
-				sprintf(buffer,"%d",Global::song().LinesPerBeat());
+				else UIGlobal::song().LinesPerBeat(UIGlobal::song().LinesPerBeat()+x);
+				UIGlobal::player().SetBPM(UIGlobal::song().BeatsPerMin(), UIGlobal::song().LinesPerBeat());
+				sprintf(buffer,"%d",UIGlobal::song().LinesPerBeat());
 			}
-			else sprintf(buffer, "%d", Global::player().tpb);
+			else sprintf(buffer, "%d", UIGlobal::player().tpb);
 			
 			((CStatic *)m_wndControl.GetDlgItem(IDC_TPBLABEL))->SetWindowText(buffer);
 		}
@@ -641,14 +641,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnClipbut() 
 		{
-			((Master*)(Global::song()._pMachine[MASTER_INDEX]))->_clip = false;
+			((Master*)(UIGlobal::song()._pMachine[MASTER_INDEX]))->_clip = false;
 			m_wndView.SetFocus();
 		}
 
 		//l and r are the left and right vu meter values
 		void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
 		{
-			if (Global::configuration().draw_vus)
+			if (UIGlobal::configuration().draw_vus)
 			{
 				if(l<1)l=1;
 				if(r<1)r=1;
@@ -1179,7 +1179,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 			dlg._pSong = _pSong;
-			std::string tmpstr = Global::configuration().GetCurrentInstrumentDir();
+			std::string tmpstr = UIGlobal::configuration().GetCurrentInstrumentDir();
 			dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1222,7 +1222,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				int index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::configuration().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
+					UIGlobal::configuration().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 				}
 			}
 
@@ -1359,7 +1359,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnPsyhelp() 
 		{
-			CString helppath(Global::configuration().appPath().c_str());
+			CString helppath(UIGlobal::configuration().appPath().c_str());
 			helppath +=  "Docs\\psycle.chm";
 			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);
 		}
@@ -1716,11 +1716,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			if((ep!=m_wndView.editPosition))// && ( cc->GetSelCount() == 1))
 			{
-				if ((Global::player()._playing) && (Global::configuration()._followSong))
+				if ((UIGlobal::player()._playing) && (UIGlobal::configuration()._followSong))
 				{
-					bool b = Global::player()._playBlock;
-					Global::player().Start(ep,0);
-					Global::player()._playBlock = b;
+					bool b = UIGlobal::player()._playBlock;
+					UIGlobal::player().Start(ep,0);
+					UIGlobal::player()._playBlock = b;
 				}
 				m_wndView.editPosition=ep;
 				m_wndView.prevEditPosition=ep;
@@ -1729,7 +1729,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if(cpid!=_pSong->playOrder[ep])
 				{
 					m_wndView.Repaint(draw_modes::pattern);
-					if (Global::player()._playing) {
+					if (UIGlobal::player()._playing) {
 						m_wndView.Repaint(draw_modes::playback);
 					}
 				}		
@@ -1755,15 +1755,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			*/		
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int const ep=cc->GetCurSel();
-			if (Global::player()._playing)
+			if (UIGlobal::player()._playing)
 			{
-				bool b = Global::player()._playBlock;
-				Global::player().Start(ep,0);
-				Global::player()._playBlock = b;
+				bool b = UIGlobal::player()._playBlock;
+				UIGlobal::player().Start(ep,0);
+				UIGlobal::player()._playBlock = b;
 			}
 			else
 			{
-				Global::player().Start(ep,0);
+				UIGlobal::player().Start(ep,0);
 			}
 			m_wndView.editPosition=ep;
 			//Following two lines by alk to disable view change to pattern mode when 
@@ -1888,7 +1888,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					_pSong->playOrder[edpos]=MAX_PATTERNS-1;
 				}
 
-				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",Global::configuration().defaultPatLines,false);
+				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",UIGlobal::configuration().defaultPatLines,false);
 
 				UpdatePlayOrder(true);
 				UpdateSequencer(m_wndView.editPosition);
@@ -2243,59 +2243,59 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnMultichannelAudition() 
 		{
-			Global::pInputHandler->bMultiKey = !Global::pInputHandler->bMultiKey;
+			UIGlobal::pInputHandler->bMultiKey = !UIGlobal::pInputHandler->bMultiKey;
 			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnMoveCursorPaste()
 		{
-			Global::pInputHandler->bMoveCursorPaste = !Global::pInputHandler->bMoveCursorPaste;
+			UIGlobal::pInputHandler->bMoveCursorPaste = !UIGlobal::pInputHandler->bMoveCursorPaste;
 			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnRecordNoteoff() 
 		{
-			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF))->GetCheck() ) Global::configuration()._RecordNoteoff=true;
-			else Global::configuration()._RecordNoteoff=false;
+			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF))->GetCheck() ) UIGlobal::configuration()._RecordNoteoff=true;
+			else UIGlobal::configuration()._RecordNoteoff=false;
 			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnRecordTweaks() 
 		{
-			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS))->GetCheck() ) Global::configuration()._RecordTweaks=true;
-			else Global::configuration()._RecordTweaks=false;
+			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS))->GetCheck() ) UIGlobal::configuration()._RecordTweaks=true;
+			else UIGlobal::configuration()._RecordTweaks=false;
 			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnNotestoeffects() 
 		{
-			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_NOTESTOEFFECTS))->GetCheck() ) Global::configuration()._notesToEffects=true;
-			else Global::configuration()._notesToEffects=false;
+			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_NOTESTOEFFECTS))->GetCheck() ) UIGlobal::configuration()._notesToEffects=true;
+			else UIGlobal::configuration()._notesToEffects=false;
 			m_wndView.SetFocus();
 			
 		}
 
 		void CMainFrame::OnFollowSong() 
 		{
-			Global::configuration()._followSong = ((CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck()?true:false;
+			UIGlobal::configuration()._followSong = ((CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck()?true:false;
 			CListBox* pSeqList = (CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 
-			if (( Global::configuration()._followSong ) && ( Global::player()._playing ))
+			if (( UIGlobal::configuration()._followSong ) && ( UIGlobal::player()._playing ))
 			{
 				m_wndView.ChordModeOffs = 0;
 				m_wndView.bScrollDetatch=false;
-				if (pSeqList->GetCurSel() != Global::player()._playPosition)
+				if (pSeqList->GetCurSel() != UIGlobal::player()._playPosition)
 				{
 					pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
-					pSeqList->SetSel(Global::player()._playPosition,true);
+					pSeqList->SetSel(UIGlobal::player()._playPosition,true);
 				}
-				if ( m_wndView.editPosition  != Global::player()._playPosition )
+				if ( m_wndView.editPosition  != UIGlobal::player()._playPosition )
 				{
-					m_wndView.editPosition=Global::player()._playPosition;
+					m_wndView.editPosition=UIGlobal::player()._playPosition;
 					m_wndView.Repaint(draw_modes::pattern);
 				}
 			}
-			else if ( !Global::player()._playing )
+			else if ( !UIGlobal::player()._playing )
 			{
 				pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
 				for (int i=0;i<MAX_SONG_POSITIONS;i++ )
@@ -2406,9 +2406,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			pCmdUI->Enable();
 			CString str;
-			if (Global::player()._playing)
+			if (UIGlobal::player()._playing)
 			{
-				str.Format("Pos %.2X", Global::player()._playPosition); 
+				str.Format("Pos %.2X", UIGlobal::player()._playPosition); 
 			}
 			else
 			{
@@ -2421,13 +2421,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			pCmdUI->Enable(); 
 			CString str;
-			if (Global::player()._playing)
+			if (UIGlobal::player()._playing)
 			{
-				str.Format("Pat %.2X", Global::player()._playPattern); 
+				str.Format("Pat %.2X", UIGlobal::player()._playPattern); 
 			}
 			else
 			{
-				str.Format("Pat %.2X", Global::song().playOrder[m_wndView.editPosition]); 
+				str.Format("Pat %.2X", UIGlobal::song().playOrder[m_wndView.editPosition]); 
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -2436,9 +2436,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			pCmdUI->Enable(); 
 			CString str;
-			if (Global::player()._playing)
+			if (UIGlobal::player()._playing)
 			{
-				str.Format("Line %u", Global::player()._lineCounter); 
+				str.Format("Line %u", UIGlobal::player()._lineCounter); 
 			}
 			else
 			{
@@ -2450,10 +2450,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnUpdateIndicatorTime(CCmdUI *pCmdUI) 
 		{
 			pCmdUI->Enable(); 
-			if (Global::player()._playing)
+			if (UIGlobal::player()._playing)
 			{
 				CString str;
-				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::player()._playTimem / 60, Global::player()._playTimem % 60, f2i(Global::player()._playTime), f2i(Global::player()._playTime*100)-(f2i(Global::player()._playTime)*100)); 
+				str.Format( "%.2u:%.2u:%.2u.%.2u", UIGlobal::player()._playTimem / 60, UIGlobal::player()._playTimem % 60, f2i(UIGlobal::player()._playTime), f2i(UIGlobal::player()._playTime*100)-(f2i(UIGlobal::player()._playTime)*100)); 
 				pCmdUI->SetText(str); 
 			}
 		}
@@ -2472,7 +2472,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnUpdateIndicatorFollow(CCmdUI *pCmdUI) 
 		{
-			if (Global::configuration()._followSong)
+			if (UIGlobal::configuration()._followSong)
 			{
 				pCmdUI->Enable(); 
 			}
@@ -2484,7 +2484,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI) 
 		{
-			if (Global::configuration()._RecordNoteoff)
+			if (UIGlobal::configuration()._RecordNoteoff)
 			{
 				pCmdUI->Enable(); 
 			}
@@ -2496,7 +2496,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI) 
 		{
-			if (Global::configuration()._RecordTweaks)
+			if (UIGlobal::configuration()._RecordTweaks)
 			{
 				pCmdUI->Enable(); 
 			}
@@ -2554,7 +2554,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				oss << _pSong->Name
 					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
 
-				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::player()._playing))
+				if ((m_wndView.viewMode==view_modes::pattern)	&& (!UIGlobal::player()._playing))
 				{
 					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
 					int machine = toffset[2];

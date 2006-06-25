@@ -2,8 +2,8 @@
 #include PACKAGENERIC
 #include "cacheddllfinder.hpp"
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
-#include "plugin.hpp"
-#include "VSTHost.hpp"
+#include <psycle/engine/plugin.hpp>
+#include <psycle/engine/VSTHost.hpp>
 
 namespace psycle
 {
@@ -210,7 +210,7 @@ void CachedDllFinder::populate_plugin_map(std::string directory,Machine::class_t
 			PluginInfo pinfo;
 			pinfo.dllname = dllList[i]._name;
 			pinfo.FileTime = dllList[i]._modtime;
-			pinfo.subclass = sublcass;
+			pinfo.subclass = subclass;
 			GeneratePluginInfo(pinfo);
 			LearnPlugin(pinfo);
 		}
@@ -221,7 +221,7 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 {
 	try
 	{
-		if(pinfo.type == MACH_PLUGIN)
+		if(pinfo.subclass == MACH_PLUGIN)
 		{
 			Plugin plug(0);
 			try
@@ -300,7 +300,7 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 				logger.emit(s.str());
 			}
 		}
-		else if(pinfo.type == MACH_VST)
+		else if(pinfo.subclass == MACH_VST)
 		{
 			vst::plugin vstPlug(MACH_VST, MACHMODE_UNDEFINED, Machine::id_type());
 			try
@@ -461,7 +461,7 @@ bool CachedDllFinder::LoadCacheFile()
 		}
 		file.Read(p.allow);
 		file.Read(p.mode);
-		file.Read(p.type);
+		file.Read(p.subclass);
 		file.ReadString(p.name);
 		file.ReadString(p.desc);
 		file.ReadString(p.version);
@@ -514,7 +514,7 @@ bool CachedDllFinder::SaveCacheFile()
 		}
 		file.Write(iterator->second.allow);
 		file.Write(iterator->second.mode);
-		file.Write(iterator->second.type);
+		file.Write(iterator->second.subclass);
 		file.WriteChunk(iterator->second.name.c_str(),iterator->second.name.length()+1);
 		file.WriteChunk(iterator->second.desc.c_str(),iterator->second.desc.length()+1);
 		file.WriteChunk(iterator->second.version.c_str(),iterator->second.version.length()+1);

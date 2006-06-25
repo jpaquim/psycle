@@ -2,12 +2,12 @@
 ///\brief implementation file for psycle::host::CGearRackDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/GearRackDlg.hpp>
-#include <psycle/host/gui/WaveEdFrame.hpp>
-#include <psycle/host/engine/Song.hpp>
-#include <psycle/host/engine/Machine.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/GearRackDlg.hpp>
+#include <psycle/host/WaveEdFrame.hpp>
+#include <psycle/engine/Song.hpp>
+#include <psycle/engine/Machine.hpp>
+#include <psycle/host/MainFrm.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		int CGearRackDlg::DisplayMode = 0;

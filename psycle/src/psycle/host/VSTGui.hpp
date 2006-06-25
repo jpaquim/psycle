@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CVstGui.
 #pragma once
 #include "ChildView.hpp"
-#include <psycle/host/engine/VSTHost.hpp>
+#include <psycle/engine/VSTHost.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// vst gui window.

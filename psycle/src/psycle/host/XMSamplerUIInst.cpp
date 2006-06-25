@@ -1,9 +1,9 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/XMSamplerUIInst.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/player.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/XMSamplerUIInst.hpp>
+#include <psycle/engine/XMSampler.hpp>
+#include <psycle/engine/player.hpp>
 #include ".\xmsampleruiinst.hpp" // Hmm?
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)

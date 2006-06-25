@@ -3,12 +3,12 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "psycle.hpp"
-#include <psycle/host/global.hpp>
+#include <psycle/host/uiglobal.hpp>
 #include "OutputDlg.hpp"
 #include "MidiInputDlg.hpp"
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/engine/MidiInput.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
@@ -63,7 +63,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				s << std::hex << model;
 				gui.SetWindowText(s.str().c_str());
 			}
-			void write_to_gui(CMidiInputDlg::group & gui, Configuration::midi_type::group_type const & model)
+			void write_to_gui(CMidiInputDlg::group & gui, UIConfiguration::midi_type::group_type const & model)
 			{
 				gui.record.SetCheck(model.record());
 				gui.type.SetCurSel(model.type());
@@ -77,20 +77,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CPropertyPage::OnInitDialog();
 
-			raw.SetCheck(Global::configuration().midi().raw());
+			raw.SetCheck(UIGlobal::configuration().midi().raw());
 
 			velocity.type.AddString("cmd");
 			velocity.type.AddString("ins");
-			write_to_gui(velocity, Global::configuration().midi().velocity());
+			write_to_gui(velocity, UIGlobal::configuration().midi().velocity());
 
 			pitch.type.AddString("cmd");
 			pitch.type.AddString("twk");
 			pitch.type.AddString("tws");
 			pitch.type.AddString("ins");
 			pitch.type.AddString("mcm");
-			write_to_gui(pitch, Global::configuration().midi().pitch());
+			write_to_gui(pitch, UIGlobal::configuration().midi().pitch());
 
-			assert(groups.size() == Global::configuration().midi().groups().size());
+			assert(groups.size() == UIGlobal::configuration().midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
 				groups[i]->type.AddString("cmd");
@@ -98,8 +98,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				groups[i]->type.AddString("tws");
 				groups[i]->type.AddString("ins");
 				groups[i]->type.AddString("mcm");
-				write_to_gui(*groups[i], Global::configuration().midi().group(i));
-				write_to_gui_text(groups[i]->message, Global::configuration().midi().group(i).message());
+				write_to_gui(*groups[i], UIGlobal::configuration().midi().group(i));
+				write_to_gui_text(groups[i]->message, UIGlobal::configuration().midi().group(i).message());
 			}
 
 			return true;
@@ -114,7 +114,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				gui.GetWindowText(mfc);
 				hexstring_to_integer(static_cast<char const * const>(mfc), model);
 			}
-			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model)
+			void read_from_gui(CMidiInputDlg::group const & gui, UIConfiguration::midi_type::group_type & model)
 			{
 				model.record() = gui.record.GetCheck();
 				model.type() = gui.type.GetCurSel();
@@ -127,14 +127,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMidiInputDlg::OnOK() 
 		{
-			Global::configuration().midi().raw() = raw.GetCheck();
-			read_from_gui(velocity, Global::configuration().midi().velocity());
-			read_from_gui(pitch, Global::configuration().midi().pitch());
-			assert(groups.size() == Global::configuration().midi().groups().size());
+			UIGlobal::configuration().midi().raw() = raw.GetCheck();
+			read_from_gui(velocity, UIGlobal::configuration().midi().velocity());
+			read_from_gui(pitch, UIGlobal::configuration().midi().pitch());
+			assert(groups.size() == UIGlobal::configuration().midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
-				read_from_gui(*groups[i], Global::configuration().midi().group(i));
-				read_from_gui_text(groups[i]->message, Global::configuration().midi().group(i).message());
+				read_from_gui(*groups[i], UIGlobal::configuration().midi().group(i));
+				read_from_gui_text(groups[i]->message, UIGlobal::configuration().midi().group(i).message());
 			}
 			CPropertyPage::OnOK();
 		}

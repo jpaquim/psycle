@@ -3,10 +3,10 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "psycle.hpp"
-#include "global.hpp"
+#include <psycle/host/uiglobal.hpp>
 #include "SkinDlg.hpp"
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/helpers.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/helpers/helpers.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define MAX_FONTS 256

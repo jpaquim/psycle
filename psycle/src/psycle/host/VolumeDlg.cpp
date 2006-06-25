@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CVolumeDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/VolumeDlg.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/VolumeDlg.hpp>
 #include <math.h>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

@@ -2,12 +2,12 @@
 ///\brief implementation file for psycle::host::COutputDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/OutputDlg.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/song.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/OutputDlg.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/engine/song.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 

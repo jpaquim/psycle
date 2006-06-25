@@ -2,12 +2,11 @@
 ///\brief implementation file for psycle::host::CMasterDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/gui/MasterDlg.hpp>
-#include <psycle/host/engine/Dsp.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/ChildView.hpp>
+#include <psycle/host/MasterDlg.hpp>
+#include <psycle/helpers/Dsp.hpp>
 #include <boost/preprocessor/arithmetic/inc.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CMasterDlg::CMasterDlg(CChildView* pParent)

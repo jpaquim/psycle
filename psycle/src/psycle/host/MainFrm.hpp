@@ -1,10 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::CMainFrame.
 #pragma once
-#include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/gui/InstrumentEditor.hpp>
-#include <psycle/host/gui/InfoDlg.hpp>
-#include <psycle/host/gui/MidiMonitorDlg.hpp>
+#include <psycle/host/ChildView.hpp>
+#include <psycle/host/InstrumentEditor.hpp>
+#include <psycle/host/InfoDlg.hpp>
+#include <psycle/host/MidiMonitorDlg.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class Song;

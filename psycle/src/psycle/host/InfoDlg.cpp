@@ -2,12 +2,12 @@
 ///\brief implementation file for psycle::host::CInfoDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/InfoDlg.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/InfoDlg.hpp>
 //#include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/Song.hpp>
-#include <psycle/host/engine/player.hpp>
-#include <psycle/host/engine/Machine.hpp>
+#include <psycle/engine/Song.hpp>
+#include <psycle/engine/player.hpp>
+#include <psycle/engine/Machine.hpp>
 #include <sstream>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

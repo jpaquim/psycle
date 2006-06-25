@@ -2,29 +2,29 @@
 ///\brief implementation file for psycle::host::CChildView.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/version.hpp>
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/Configuration.hpp>
-#include <psycle/host/engine/Player.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
-#include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/gui/ConfigDlg.hpp>
-#include <psycle/host/gui/GreetDialog.hpp>
-#include <psycle/host/gui/SaveWavDlg.hpp>
-#include <psycle/host/gui/SongpDlg.hpp>
-#include <psycle/host/engine/XMSongLoader.hpp>
-#include <psycle/host/engine/ITModule2.hpp>
-#include <psycle/host/gui/MasterDlg.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
-#include <psycle/host/gui/XMSamplerUI.hpp>
-#include <psycle/host/gui/VstEditorDlg.hpp>
-#include <psycle/host/gui/WireDlg.hpp>
-#include <psycle/host/gui/MacProp.hpp>
-#include <psycle/host/gui/NewMachine.hpp>
-#include <psycle/host/gui/PatDlg.hpp>
-#include <psycle/host/gui/SwingFillDlg.hpp>
-#include <psycle/host/gui/ProgressDialog.hpp>
+#include <psycle/host/uiversion.hpp>
+#include <psycle/host/psycle.hpp>
+#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/Player.hpp>
+#include <psycle/host/MainFrm.hpp>
+#include <psycle/host/ChildView.hpp>
+#include <psycle/engine/MidiInput.hpp>
+#include <psycle/host/ConfigDlg.hpp>
+#include <psycle/host/GreetDialog.hpp>
+#include <psycle/host/SaveWavDlg.hpp>
+#include <psycle/host/SongpDlg.hpp>
+#include <psycle/engine/XMSongLoader.hpp>
+#include <psycle/engine/ITModule2.hpp>
+#include <psycle/host/MasterDlg.hpp>
+#include <psycle/engine/internal_machines.hpp>
+#include <psycle/host/XMSamplerUI.hpp>
+#include <psycle/host/VstEditorDlg.hpp>
+#include <psycle/host/WireDlg.hpp>
+#include <psycle/host/MacProp.hpp>
+#include <psycle/host/NewMachine.hpp>
+#include <psycle/host/PatDlg.hpp>
+#include <psycle/host/SwingFillDlg.hpp>
+#include <psycle/host/ProgressDialog.hpp>
 #include <cmath> // SwingFill
 #include <cderr.h>
 
@@ -107,7 +107,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			for (int c=0; c<256; c++) FLATSIZES[c]=8;
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c) WireDialog[c] = 0;
 
-			Global::pInputHandler->SetChildView(this);
+			UIGlobal::pInputHandler->SetChildView(this);
 			Global::pResampler->SetQuality(dsp::R_LINEAR);
 
 			//_getcwd(m_appdir,_MAX_PATH);
@@ -129,7 +129,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		CChildView::~CChildView()
 		{
-			Global::pInputHandler->SetChildView(NULL);
+			UIGlobal::pInputHandler->SetChildView(NULL);
 			KillRedo();
 			KillUndo();
 			if(bmpDC)

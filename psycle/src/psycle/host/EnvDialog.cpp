@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::CEnvDialog.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/engine/Song.hpp>
-#include <psycle/host/gui/EnvDialog.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/engine/Song.hpp>
+#include <psycle/host/EnvDialog.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CEnvDialog::CEnvDialog(CWnd* pParent)

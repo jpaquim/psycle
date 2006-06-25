@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CInstrumentEditor.
 #pragma once
-#include <psycle/host/gui/resources/resources.hpp>
+#include <psycle/host/resources/resources.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class Song;

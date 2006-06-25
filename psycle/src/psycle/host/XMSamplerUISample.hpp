@@ -1,6 +1,6 @@
 #pragma once
 #include "afxwin.h"
-#include <psycle/host/engine/XMInstrument.hpp>
+#include <psycle/engine/XMInstrument.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

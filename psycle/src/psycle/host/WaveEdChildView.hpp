@@ -1,11 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdChildView.
 #pragma once
-#include <psycle/host/gui/WaveEdAmplifyDialog.hpp>
-#include <psycle/host/gui/WaveEdMixDialog.hpp>
-#include <psycle/host/gui/WaveEdInsertSilenceDialog.hpp>
-#include <psycle/host/gui/WaveEdCrossfadeDialog.hpp>
-#include <psycle/host/gui/ScrollableDlgBar.hpp>
+#include <psycle/host/WaveEdAmplifyDialog.hpp>
+#include <psycle/host/WaveEdMixDialog.hpp>
+#include <psycle/host/WaveEdInsertSilenceDialog.hpp>
+#include <psycle/host/WaveEdCrossfadeDialog.hpp>
+#include <psycle/host/ScrollableDlgBar.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class CMainFrame;

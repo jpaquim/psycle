@@ -2,11 +2,11 @@
 ///\brief implementation file for psycle::host::CInstrumentEditor.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
-#include <psycle/host/gui/InstrumentEditor.hpp>
-#include <psycle/host/gui/EnvDialog.hpp>
-#include <psycle/host/engine/constants.hpp>
+#include <psycle/host/Psycle.hpp>
+#include <psycle/host/MainFrm.hpp>
+#include <psycle/host/InstrumentEditor.hpp>
+#include <psycle/host/EnvDialog.hpp>
+#include <psycle/engine/constants.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CInstrumentEditor::CInstrumentEditor(CWnd* pParent)

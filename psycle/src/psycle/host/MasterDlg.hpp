@@ -1,9 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::CMasterDlg.
 #pragma once
-#include <psycle/host/engine/Machine.hpp>
-#include <psycle/host/engine/internal_machines.hpp>
-#include <psycle/host/engine/constants.hpp>
+#include <psycle/engine/Machine.hpp>
+#include <psycle/engine/internal_machines.hpp>
+#include <psycle/engine/constants.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
