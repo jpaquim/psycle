@@ -603,17 +603,17 @@ namespace psycle
 		{
 		public:
 			InternalMachineInfo() { ; }
-			InternalMachineInfo(Machine::class_type _class,Machine::mode_type _mode,CreatorFromType _creator, bool _host,
+			InternalMachineInfo(Machine::class_type _class,Machine::mode_type _mode,CreatorFromType _creator, bool _host, bool _deprecated,
 				char const* _brandname,char const* _shortname,char const* _vendor,
 				std::uint32_t _category, std::uint32_t _version, std::uint32_t _parameters)
-				:mclass(_class),mode(_mode),CreateFromType(_creator), host(_host)
+				:mclass(_class),mode(_mode),CreateFromType(_creator), host(_host), deprecated(_deprecated)
 				,brandname(_brandname),shortname(_shortname),vendor(_vendor),category(_category)
 				,version(_version),parameters(_parameters) { ; }
 
 			bool operator<(const InternalMachineInfo & info) const { return mclass < info.mclass; }
 			void operator=(const InternalMachineInfo & info)
 			{
-				mclass=info.mclass; mode=info.mode; CreateFromType=info.CreateFromType; host=info.host;
+				mclass=info.mclass; mode=info.mode; CreateFromType=info.CreateFromType; host=info.host; deprecated=info.deprecated;
 				brandname=info.brandname;shortname=info.shortname;vendor=info.vendor;
 				category=info.category;version=info.version;parameters=info.parameters;
 			}
@@ -626,6 +626,8 @@ namespace psycle
 			CreatorFromType CreateFromType;
 			///< Indicates if the machine is unique or a host of machines (.dll's)
 			bool host;
+			///< Indicates that this Info exists just for compatibility reasons (loading old songs).
+			bool deprecated;
 			///< Name of the machine
 			char const *brandname;
 			///< Default Display name.

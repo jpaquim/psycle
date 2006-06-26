@@ -18,14 +18,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			enum listimagetype
 			{
-				internalgen=0,
+				foldercategory=0,
+				folderuncategorized,
+				crashedplugin,
+				empty,
+				internalgen,
 				internalfx,
 				nativegen,
 				nativefx,
 				vstgen,
 				vstfx,
-				foldercategory,
-				folderuncategorized
 			};
 		public:
 			CNewMachine(CWnd* pParent = 0);
@@ -107,6 +109,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			HTREEITEM m_hItemDrag;
 			//\todo: to be deleted
 			HTREEITEM hNodes[1];
+			std::map<HTREEITEM,std::string> plugidentify;
 
 			bool updateCache;
 			bool bCategoriesChanged;
