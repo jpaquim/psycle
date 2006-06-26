@@ -12,11 +12,11 @@ namespace psycle{
 			virtual ~InternalMachinePackage();
 
 			const InternalMachineInfo* GetInfo(Machine::class_type subclass) const ;
-			const void MoveFirst();
-			const void MoveNext();
+			void MoveFirst();
+			void MoveNext();
 			const InternalMachineInfo* GetInfoAtPos();
-			const bool end() const ;
-			const std::uint32_t size() const ;
+			bool end() const ;
+			std::uint32_t size() const ;
 
 		protected:
 			std::map<Machine::class_type,InternalMachineInfo> infomap;

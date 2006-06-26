@@ -116,6 +116,14 @@ public:
 	virtual bool LookupDllPath(std::string& name,Machine::class_type subclass);
 
 	PluginInfo& GetPluginInfo(std::string dllname) { return dllInfo.find(dllname)->second; }
+	void MoveFirst();
+	void MoveNext();
+	const PluginInfo* GetInfoAtPos();
+	bool end() const ;
+	std::uint32_t size() const ;
+	void MoveFirstOf(Machine::class_type subclass);
+	void MoveNextOf(Machine::class_type subclass);
+
 public:
 	sigslot::signal2<const std::string &, const std::string &> report;
 	sigslot::signal2<const std::string &, const std::string &> progress;
@@ -137,6 +145,7 @@ protected:
 	bool SaveCacheFile();
 protected:
 	std::map<std::string,PluginInfo> dllInfo;
+	std::map<std::string,PluginInfo>::iterator infoit;
 	std::string cachefile;
 
 };

@@ -10,7 +10,7 @@
 /// simple bit encoder
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/DataCompression.hpp>
+#include <psycle/helpers/DataCompression.hpp>
 #include <cstring>
 
 namespace psycle

@@ -132,6 +132,50 @@ bool CachedDllFinder::LookupDllPath(std::string& name,Machine::class_type subcla
 	return false;
 }
 
+void CachedDllFinder::MoveFirst()
+{
+	infoit = dllInfo.begin();
+}
+void CachedDllFinder::MoveNext()
+{
+	infoit++;
+}
+const PluginInfo* CachedDllFinder::GetInfoAtPos()
+{
+	if ( infoit != dllInfo.end())
+	{
+		return &infoit->second;
+	}
+	else return 0;
+}
+bool CachedDllFinder::end() const
+{
+	return (infoit == dllInfo.end());
+}
+std::uint32_t CachedDllFinder::size() const
+{
+	return dllInfo.size();
+
+}
+void CachedDllFinder::MoveFirstOf(Machine::class_type subclass)
+{
+	MoveFirst();
+	while (infoit != dllInfo.end() && infoit->second.subclass != subclass)
+	{
+		infoit++;
+	}
+}
+void CachedDllFinder::MoveNextOf(Machine::class_type subclass)
+{
+	MoveNext();
+	while (infoit != dllInfo.end() && infoit->second.subclass != subclass)
+	{
+		infoit++;
+	}
+}
+
+
+
 ///< Adds the new Plugin data to the map.
 void CachedDllFinder::LearnPlugin(PluginInfo &plugininfo)
 {

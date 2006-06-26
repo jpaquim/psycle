@@ -904,135 +904,143 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::UpdateWithType()
 		{
-			HTREEITEM imnode = m_browser.InsertItem("Internal Machines",internalgen,internalgen, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (imnode, IS_FOLDER);
-			m_browser.SetItemState (imnode, TVIS_BOLD, TVIS_BOLD);
-			HTREEITEM nnode = m_browser.InsertItem("Native plug-ins",nativegen,nativegen,TVI_ROOT,TVI_LAST);
-			m_browser.SetItemData (nnode, IS_FOLDER);
-			m_browser.SetItemState (nnode, TVIS_BOLD, TVIS_BOLD);
-			HTREEITEM vnode = m_browser.InsertItem("VST2 plug-ins",vstgen,vstgen,TVI_ROOT,TVI_LAST);
-			m_browser.SetItemData (vnode, IS_FOLDER);
-			m_browser.SetItemState (vnode, TVIS_BOLD, TVIS_BOLD);
+			// 1.Creates a branch for Internal machines, and then iterates through the internalmachinepackage, adding the machines to
+			//   this branch, or creating new branches for hosts.
 
-			int modetoicon[]={0,2,2,0};
+			std::vector<HTREEITEM> itemhosts;
+
+			HTREEITEM newitem = m_browser.InsertItem("Internal Machines",internalgen,internalgen, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (newitem, IS_FOLDER);
+			m_browser.SetItemState (newitem, TVIS_BOLD, TVIS_BOLD);
+			itemhosts.push_back(newitem);
+
+			int modetoicon[]={internalgen,internalfx,internalfx,internalgen};
+			Machine::infopackage().MoveFirst();
+			while (!Machine::infopackage().end())
+			{
+				const InternalMachineInfo* iminfo = Machine::infopackage().GetInfoAtPos();
+				if ( !iminfo->host )
+				{
+					if (iminfo->mode != MACHMODE_MASTER && !iminfo->deprecated)
+					{
+						newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], itemhosts[0], TVI_SORT);
+						m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
+					}
+				}
+				else if (!iminfo->deprecated)
+				{
+					newitem = m_browser.InsertItem(iminfo->brandname,internalgen+(itemhosts.size()*2),internalgen+(itemhosts.size()*2), TVI_ROOT, TVI_LAST);
+					m_browser.SetItemData (newitem, IS_FOLDER+iminfo->mclass);
+					m_browser.SetItemState (newitem, TVIS_BOLD, TVIS_BOLD);
+					itemhosts.push_back(newitem);
+				}
+				Machine::infopackage().MoveNext();
+			}
+			HTREEITEM nonfunctional = m_browser.InsertItem("Non Functional",crashedplugin,crashedplugin, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (nonfunctional, IS_FOLDER);
+			m_browser.SetItemState (nonfunctional, TVIS_BOLD, TVIS_BOLD);
+
+			// 2.Iterates through the detected hosts, in order to add the machines of each host to the list.
+
+			int index=2;
+			std::vector<HTREEITEM>::iterator iterhosts = itemhosts.begin();
+			iterhosts++;// skip internal host.
+			while(iterhosts != itemhosts.end())
+			{
+				Machine::class_type hosttype = static_cast<Machine::class_type>(GetIndex(m_browser.GetItemData (*iterhosts)));
+				Global::dllfinder().MoveFirstOf(hosttype);
+				while (!Global::dllfinder().end())
+				{
+					HTREEITEM newitem;
+					const PluginInfo* minfo = Global::dllfinder().GetInfoAtPos();
+					if (minfo->error.empty())
+					{
+						if (comboNameStyle.GetCurSel() == 0)
+							newitem = m_browser.InsertItem(minfo->dllname.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], *iterhosts, TVI_SORT);
+						else
+							newitem = m_browser.InsertItem(minfo->name.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], *iterhosts, TVI_SORT);
+					}
+					else
+						newitem = m_browser.InsertItem(minfo->dllname.c_str(), crashedplugin, crashedplugin, nonfunctional, TVI_SORT);
+					m_browser.SetItemData (newitem, IS_PLUGIN+minfo->subclass);
+					//In order to be able to identify the selection in the plugin cache
+					plugidentify[newitem]=Global::dllfinder().FileFromFullpath(minfo->dllname);
+					Global::dllfinder().MoveNextOf(hosttype);
+				}
+				index+=2;
+				iterhosts++;
+			}
+//			m_browser.Select(hNodes[LastType0],TVGN_CARET);
+		}
+		void CNewMachine::UpdateWithMode()
+		{
+			// 1.Creates branches for generators and effects, and then iterates through the internalmachinepackage, adding the machines to
+			//   each branch
+
+			std::vector<InternalMachineInfo> itemhosts;
+
+			HTREEITEM itemgens = m_browser.InsertItem("Generators",internalgen,internalgen, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (itemgens, IS_FOLDER);
+			m_browser.SetItemState (itemgens, TVIS_BOLD, TVIS_BOLD);
+			HTREEITEM itemfx = m_browser.InsertItem("Effects",internalfx,internalfx, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (itemfx, IS_FOLDER);
+			m_browser.SetItemState (itemfx, TVIS_BOLD, TVIS_BOLD);
+
+			int modetoicon[]={internalgen,internalfx,internalfx,internalgen};
+			HTREEITEM modetoitem[]={itemgens,itemfx,itemfx,itemgens};
 			Machine::infopackage().MoveFirst();
 			while (!Machine::infopackage().end())
 			{
 				HTREEITEM newitem;
 				const InternalMachineInfo* iminfo = Machine::infopackage().GetInfoAtPos();
-				if ( !iminfo->host && iminfo->mode != MACHMODE_MASTER)
+				if ( !iminfo->host && !iminfo->deprecated)
 				{
-					newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], imnode, TVI_SORT);
+					newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], modetoitem[iminfo->mode], TVI_SORT);
 					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
 				}
+				else if (!iminfo->deprecated)
+				{
+					itemhosts.push_back(*iminfo);
+				}
+
 				Machine::infopackage().MoveNext();
 			}
+			HTREEITEM nonfunctional = m_browser.InsertItem("Non Functional",crashedplugin,crashedplugin, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (nonfunctional, IS_FOLDER);
+			m_browser.SetItemState (nonfunctional, TVIS_BOLD, TVIS_BOLD);
 
-/*			for(int i(_numPlugins - 1) ; i >= 0 ; --i)
+			// 2.Iterates through the Plugin Cache, in order to add the machines of each host to the list.
+			//   (probably not the best way, but I do it this way to know the icon.
+			int index=2;
+			std::vector<InternalMachineInfo>::iterator iterhosts = itemhosts.begin();
+			while(iterhosts != itemhosts.end())
 			{
-				if(_pPlugsInfo[i]->error.empty())
+				Machine::class_type hosttype = iterhosts->mclass;
+				Global::dllfinder().MoveFirstOf(hosttype);
+				while (!Global::dllfinder().end())
 				{
-					int imgindex;
-					HTREEITEM hParent;
-					if( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
-					{
-						if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
-						{ 
-							imgindex = 2; 
-							hitem= hNodes[1]; 
-						}
-						else 
-						{ 
-							imgindex = 4; 
-							hitem=hNodes[2]; 
-						}
-					}
-					else
-					{
-						if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
-						{ 
-							imgindex = 3; 
-							hitem= hNodes[1];
-						}
-						else 
-						{ 
-							imgindex = 5; 
-							hitem=hNodes[2];
-						}
-					}
 					HTREEITEM newitem;
-					if(pluginName)
-						newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hParent, TVI_SORT);
-					else
-						newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hParent, TVI_SORT);
-					//associate node with plugin number
-					m_browser.SetItemData (newitem, IS_PLUGIN+i);
-				}
-			}
-
-			m_browser.Select(hNodes[LastType0],TVGN_CARET);
-*/
-		}
-		void CNewMachine::UpdateWithMode()
-		{
-/*			hNodes[0] = m_browser.InsertItem("Generators",2,2 , TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (hNodes[0], IS_FOLDER);
-			m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
-			hNodes[1] = m_browser.InsertItem("Effects",3,3,TVI_ROOT,TVI_LAST);
-			m_browser.SetItemData (hNodes[1], IS_FOLDER);
-			m_browser.SetItemState (hNodes[1], TVIS_BOLD, TVIS_BOLD);
-
-			for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
-			{
-				if(_pPlugsInfo[i]->error.empty())
-				{
-					int imgindex;
-					HTREEITEM hitem;
-					HTREEITEM newitem;
-					if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+					const PluginInfo* minfo = Global::dllfinder().GetInfoAtPos();
+					if (minfo->error.empty())
 					{
-						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-						{ 
-							imgindex = 2; 
-							hitem= hNodes[0]; 
-						}
-						else 
-						{ 
-							imgindex = 4; 
-							hitem=hNodes[0]; 
-						}
+						if (comboNameStyle.GetCurSel() == 0)
+							newitem = m_browser.InsertItem(minfo->dllname.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
+						else
+							newitem = m_browser.InsertItem(minfo->name.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
 					}
-					else
-					{
-						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-						{ 
-							imgindex = 3; 
-							hitem= hNodes[1]; 
-						}
-						else 
-						{ 
-							imgindex = 5; 
-							hitem=hNodes[1]; 
-						}
-					}
-					if(pluginName)
-						newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-					else
-						newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-					//associate the plugin number with the node
-					m_browser.SetItemData (newitem,IS_PLUGIN+i);
+					else 
+						newitem = m_browser.InsertItem(minfo->dllname.c_str(), crashedplugin, crashedplugin, nonfunctional, TVI_SORT);
+					m_browser.SetItemData (newitem, IS_PLUGIN+minfo->subclass);
+					//In order to be able to identify the selection in the plugin cache
+					plugidentify[newitem]=Global::dllfinder().FileFromFullpath(minfo->dllname);
+
+					Global::dllfinder().MoveNextOf(hosttype);
 				}
-
+				index+=2;
+				iterhosts++;
 			}
-			for (int i(0);i<NUM_INTERNAL_MACHINES;i++)
-			{
-				newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype?hNodes[1]:hNodes[0], TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+i);
-			}
+//			m_browser.Select(hNodes[LastType0],TVGN_CARET);
 
-			m_browser.Select(hNodes[LastType1],TVGN_CARET);
-			break;
-*/
 		}
 		void CNewMachine::UpdateWithCategories()
 		{
