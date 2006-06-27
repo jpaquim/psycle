@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "nsystem.h"
 #include "natoms.h"
+#include "nwindow.h"
 #include <stdexcept>
 
 using namespace std;
@@ -571,4 +572,11 @@ void NSystem::setModalMode( Window win )
 const NAtoms & NSystem::atoms( ) const
 {
   return *atoms_;
+}
+
+void NSystem::setFocus( NWindow* window )
+{
+  if ( window->mapped() ) {
+     XSetInputFocus(dpy(), window->win(), RevertToParent, CurrentTime);
+  }
 }

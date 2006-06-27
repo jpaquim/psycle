@@ -32,16 +32,16 @@ public:
 
     ~NDialog();
 
-    bool execute();
+    int execute();
     int onClose( );
 
-    void doClose(bool flag);
+    void doClose(int flag);
 
     virtual void setVisible( bool on );
 
 private:
 
-    bool do_execute;
+    int do_execute;
 
 };
 

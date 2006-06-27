@@ -24,14 +24,15 @@
 
 class NButton;
 class NLabel;
+class NImage;
 
 
 /**
 @author Stefan Nattkemper
 */
 
-const int nMsgOkBtn = 0;
-const int nMsgCancelBtn = 1;
+const int nMsgCancelBtn = 0;
+const int nMsgOkBtn = 1;
 const int nMsgUseBtn = 2;
 
 class NMessageBox : public NDialog
@@ -46,6 +47,8 @@ public:
     void setButtonText(const std::string & ok,const std::string & use, const std::string & cancel);
     void setText(const std::string & msgText);
 
+    NImage* icon();
+
     signal1<NObject*> use;
 
     virtual void setVisible(bool on);
@@ -55,6 +58,8 @@ private:
     NButton* okBtn;
     NButton* cancelBtn;
     NButton* useBtn;
+
+    NImage* iconImg;
 
     NLabel* textLbl;
 
