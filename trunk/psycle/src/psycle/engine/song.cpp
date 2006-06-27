@@ -94,11 +94,13 @@ namespace psycle
 						Plugin & plugin(*new Plugin(index));
 						machine = &plugin;
 						std::string path = plugin_name;
+						/*
 						if(!Global::dllfinder().LookupDllPath(path,MACH_PLUGIN)) 
 						{
 							delete &plugin;
 							return false;
 						}
+						*/
 						try
 						{
 							plugin.Instance(path);
@@ -123,11 +125,13 @@ namespace psycle
 						if (subclass == MACH_VST) machine = plugin = new vst::instrument(index);
 						else if (subclass == MACH_VSTFX)	machine = plugin = new vst::fx(index);
 						std::string path = plugin_name;
+						/*
 						if(!Global::dllfinder().LookupDllPath(path,MACH_VST)) 
 						{
 							delete plugin;
 							return false;
 						}
+						*/
 						try
 						{
 							plugin->Instance(path);

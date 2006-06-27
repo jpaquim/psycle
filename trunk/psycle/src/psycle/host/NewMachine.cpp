@@ -25,7 +25,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			: CDialog(CNewMachine::IDD, pParent)
 			, Outputmachine(MACH_UNDEFINED)
 			, Outputmode(MACHMODE_UNDEFINED)
-			, updateCache(false)
+			, bCacheChanged(false)
 		{
 		}
 
@@ -114,9 +114,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else if (Outputmachine > -1) // This is to ensure that the selection is a machine, and not a folder
 			{			
 				//do normal closing/saving action
-				//\todo: 
-				//if (bCategoriesChanged) SetPluginCategories(NULL, NULL);
-				//if (bCategoriesChanged) SaveCategoriesFile();
 				if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
 				CDialog::OnOK();
 			}
@@ -135,15 +132,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				//\todo: 
-				//if (bCategoriesChanged) SetPluginCategories(NULL, NULL);
-				//if (bCategoriesChanged)	SaveCategoriesFile();
 				CDialog::OnCancel();
 			}
 		}
 
 		void CNewMachine::OnDestroy() 
 		{
+			if (bCacheChanged) Global::dllfinder().ForceSaveOnDestroy();
+			//\todo: 
+			//if (bCategoriesChanged) SetPluginCategories(NULL, NULL);
+			//if (bCategoriesChanged) SaveCategoriesFile();
+
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 			CDialog::OnDestroy();
 		}
@@ -193,85 +192,61 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-/*
-//			NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; // not used
 			CString name, desc, dll, version;
 
-			tHand = m_browser.GetSelectedItem();
+			HTREEITEM tHand = m_browser.GetSelectedItem();
 			int i = m_browser.GetItemData (tHand);
-			if (i >= IS_FOLDER)
+			
+			switch(GetType(i))
 			{
-				Outputmachine = MACH_UNDEFINED;
-				Outputmode = MACHMODE_UNDEFINED;
-				name = ""; desc = ""; dll = ""; version = "";
-				m_Allow.SetCheck(false);
-				m_Allow.EnableWindow(false);
-			}
-			else if (i >= IS_INTERNAL_MACHINE)
-			{
-				const InternalMachineInfo* iinfo = Machine::infopackage().getInfo(Machine::class_type(i - IS_INTERNAL_MACHINE));
-				if (iinfo)
+			case IS_FOLDER:
 				{
-					Outputmachine = iinfo->type;
-					Outputmode = iinfo->mode;
-					name = iinfo->brandname;
-					desc = "Internal Machine by ": desc.Append(iinfo->vendor);
-					dll = "None (Internal Machine)";
-					version.Format("%d",iinfo->version);
-					m_Allow.SetCheck(true);
+					Outputmachine = MACH_UNDEFINED;
+					Outputmode = MACHMODE_UNDEFINED;
+					name = ""; desc = ""; dll = ""; version = "";
+					m_Allow.SetCheck(false);
 					m_Allow.EnableWindow(false);
 				}
-			}
-			else
-			{
-				//ShowMessage (i, _pPlugsInfo[i]->category.c_str ()) ;
-				std::string str = _pPlugsInfo[i]->dllname;
-				std::string::size_type pos = str.rfind('\\');
-				if(pos != std::string::npos)
-					str=str.substr(pos+1);
-				dll = str.c_str();
-				name = _pPlugsInfo[i]->name.c_str();
-				desc = _pPlugsInfo[i]->desc.c_str();
-				version = _pPlugsInfo[i]->version.c_str();
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
+				break;
+			case IS_INTERNAL_MACHINE:
 				{
-					Outputmachine = MACH_PLUGIN;
-					LastType0 = 1;
-					if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+					const InternalMachineInfo* iinfo = Machine::infopackage().GetInfo(Machine::class_type(GetIndex(i)));
+					if ( iinfo )
 					{
-						OutBus = true;
-						LastType1 = 0;
-					}
-					else
-					{
-						LastType1 = 1;
+						Outputmachine = iinfo->mclass;
+						Outputmode = iinfo->mode;
+						name = iinfo->brandname;
+						desc = "Internal Machine by "; desc.Append(iinfo->vendor);
+						dll = "None (Internal Machine)";
+						version.Format("%d",iinfo->version);
+						m_Allow.SetCheck(true);
+						m_Allow.EnableWindow(false);
 					}
 				}
-				else
+				break;
+			case IS_PLUGIN:
 				{
-					LastType0 = 2;
-					if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
-					{
-						Outputmachine = MACH_VST;
-						OutBus = true;
-						LastType1 = 0;
-					}
-					else
-					{
-						Outputmachine = MACH_VSTFX;
-						LastType1 = 1;
-					}
+					std::map<HTREEITEM,std::string>::iterator iditer = plugidentify.find(tHand);
+					const PluginInfo& minfo = Global::dllfinder().GetPluginInfo(iditer->second);
+					//\todo: temporary hack.
+					if (minfo.subclass == MACH_VST && minfo.mode == MACHMODE_FX) Outputmachine = MACH_VSTFX;
+					else Outputmachine = minfo.subclass;
+					Outputmode = minfo.mode;
+					dll = iditer->second.c_str();
+					name = minfo.name.c_str();
+					desc = minfo.desc.c_str();
+					version = minfo.version.c_str();
+					m_Allow.SetCheck(!minfo.allow);
+					m_Allow.EnableWindow(true);
+					psOutputDll = minfo.dllname;
 				}
-				psOutputDll = _pPlugsInfo[i]->dllname;
-				m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
-				m_Allow.EnableWindow(true);
+				break;
 			}
 			m_nameLabel.SetWindowText(name);
 			m_descLabel.SetWindowText(desc);
 			m_dllnameLabel.SetWindowText(dll);
 			m_versionLabel.SetWindowText(version);
 			*pResult = 0;
-*/
 		}
 
 		void CNewMachine::OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -284,13 +259,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			HTREEITEM tHand = m_browser.GetSelectedItem();
 			int i = m_browser.GetItemData (tHand);
-			switch(i&NODE_IDENTIFIER)
+			switch(GetType(i))
 			{
 			case IS_PLUGIN:
-//				_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
-//				updateCache = true;
+				{
+					std::map<HTREEITEM,std::string>::iterator iditer = plugidentify.find(tHand);
+					PluginInfo& minfo = Global::dllfinder().GetPluginInfo(iditer->second);
+					minfo.allow = !m_Allow.GetCheck();
+					bCacheChanged = true;
+				}
 				break;
-			default:break;
 			}
 		}
 
@@ -1044,12 +1022,72 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 		void CNewMachine::UpdateWithCategories()
 		{
-/*			hNodes[0] = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
+			// 1.Creates branches for generators and effects, and then iterates through the internalmachinepackage, adding the machines to
+			//   each branch
+/*
+			std::vector<HTREEITEM> itemcateg;
+
+			HTREEITEM hCategory = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
 			m_browser.SetItemData (hNodes[0], IS_FOLDER);
 			m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
-			_numCustCategories = 1;
-			HTREEITEM hCategory;
+			itemcateg.push_back(hCategory);
 
+			int modetoicon[]={internalgen,internalfx,internalfx,internalgen};
+			Machine::infopackage().MoveFirst();
+			while (!Machine::infopackage().end())
+			{
+				HTREEITEM newitem;
+				const InternalMachineInfo* iminfo = Machine::infopackage().GetInfoAtPos();
+				if ( !iminfo->host && !iminfo->deprecated)
+				{
+					newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], modetoitem[iminfo->mode], TVI_SORT);
+					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
+				}
+				else if (!iminfo->deprecated)
+				{
+					itemhosts.push_back(*iminfo);
+				}
+
+				Machine::infopackage().MoveNext();
+			}
+			HTREEITEM nonfunctional = m_browser.InsertItem("Non Functional",crashedplugin,crashedplugin, TVI_ROOT, TVI_LAST);
+			m_browser.SetItemData (nonfunctional, IS_FOLDER);
+			m_browser.SetItemState (nonfunctional, TVIS_BOLD, TVIS_BOLD);
+
+			// 2.Iterates through the Plugin Cache, in order to add the machines of each host to the list.
+			//   (probably not the best way, but I do it this way to know the icon.
+			int index=2;
+			std::vector<InternalMachineInfo>::iterator iterhosts = itemhosts.begin();
+			while(iterhosts != itemhosts.end())
+			{
+				Machine::class_type hosttype = iterhosts->mclass;
+				Global::dllfinder().MoveFirstOf(hosttype);
+				while (!Global::dllfinder().end())
+				{
+					HTREEITEM newitem;
+					const PluginInfo* minfo = Global::dllfinder().GetInfoAtPos();
+					if (minfo->error.empty())
+					{
+						if (comboNameStyle.GetCurSel() == 0)
+							newitem = m_browser.InsertItem(minfo->dllname.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
+						else
+							newitem = m_browser.InsertItem(minfo->name.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
+					}
+					else 
+						newitem = m_browser.InsertItem(minfo->dllname.c_str(), crashedplugin, crashedplugin, nonfunctional, TVI_SORT);
+					m_browser.SetItemData (newitem, IS_PLUGIN+minfo->subclass);
+					//In order to be able to identify the selection in the plugin cache
+					plugidentify[newitem]=Global::dllfinder().FileFromFullpath(minfo->dllname);
+
+					Global::dllfinder().MoveNextOf(hosttype);
+				}
+				index+=2;
+				iterhosts++;
+			}
+*/
+			//			m_browser.Select(hNodes[LastType0],TVGN_CARET);
+
+/*
 			for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
 			{
 				if(_pPlugsInfo[i]->error.empty())

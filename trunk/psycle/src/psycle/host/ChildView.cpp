@@ -1398,28 +1398,28 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::NewMachine(int x, int y, Machine::id_type mac) 
 		{
 			CNewMachine dlg;
-			if(dlg.DoModal() == IDOK && dlg.Outputmachine >= 0)
+			if(dlg.DoModal() == IDOK && dlg.Outputmachine != MACH_UNDEFINED)
 			{
 				Machine::id_type fb;
 				int xs,ys;
 				if (mac < 0)
 				{
-					if (dlg.Outputmode) 
-					{
-						fb = Global::song().GetFreeBus();
-						xs = MachineCoords.sGenerator.width;
-						ys = MachineCoords.sGenerator.height;
-					}
-					else 
+					if (dlg.Outputmode == MACHMODE_FX)
 					{
 						fb = Global::song().GetFreeFxBus();
 						xs = MachineCoords.sEffect.width;
 						ys = MachineCoords.sEffect.height;
 					}
+					else 
+					{
+						fb = Global::song().GetFreeBus();
+						xs = MachineCoords.sGenerator.width;
+						ys = MachineCoords.sGenerator.height;
+					}
 				}
 				else
 				{
-					if (mac >= MAX_BUSES && !dlg.Outputmode)
+					if (mac >= MAX_BUSES && dlg.Outputmode == MACHMODE_FX)
 					{
 						fb = mac;
 						xs = MachineCoords.sEffect.width;
@@ -1433,7 +1433,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							Global::song().DestroyMachine(fb);
 						}
 					}
-					else if (mac < MAX_BUSES && dlg.Outputmode)
+					else if (mac < MAX_BUSES && dlg.Outputmode != MACHMODE_FX)
 					{
 						fb = mac;
 						xs = MachineCoords.sGenerator.width;
