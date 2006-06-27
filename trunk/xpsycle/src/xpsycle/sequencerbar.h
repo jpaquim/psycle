@@ -51,7 +51,7 @@ public:
     signal2<int,int> selected;
 
     void setPatternView(PatternView* patternView);
-    bool followSong();
+    bool followSong() const;
 
     void updateSequencer();
 
