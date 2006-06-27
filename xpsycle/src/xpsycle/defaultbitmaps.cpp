@@ -25,6 +25,137 @@ namespace psycle {
 
 //////// The bitmaps
 
+
+/* XPM */
+const char * alert_xpm[] = {
+"32 32 93 2",
+"  	c None",
+". 	c #B8B8A0",
+"+ 	c #ACAC90",
+"@ 	c #A4A485",
+"# 	c #9C9C7B",
+"$ 	c #888860",
+"% 	c #B3B399",
+"& 	c #C1C194",
+"* 	c #E4E478",
+"= 	c #FFFF52",
+"- 	c #FFFF40",
+"; 	c #FFFF3F",
+"> 	c #D9D940",
+", 	c #8C8C37",
+"' 	c #4A4A0D",
+") 	c #B5B57E",
+"! 	c #FFFF21",
+"~ 	c #FFFF0A",
+"{ 	c #FFFF00",
+"] 	c #FFFF03",
+"^ 	c #FFFF0D",
+"/ 	c #FFFF10",
+"( 	c #616100",
+"_ 	c #949470",
+": 	c #DFDF5E",
+"< 	c #FFFF1F",
+"[ 	c #FFFF04",
+"} 	c #B3B300",
+"| 	c #2B2B00",
+"1 	c #7B7B4F",
+"2 	c #FFFF37",
+"3 	c #EBEB00",
+"4 	c #DEDE00",
+"5 	c #DADA00",
+"6 	c #D9D900",
+"7 	c #ECEC00",
+"8 	c #F9F900",
+"9 	c #FEFE00",
+"0 	c #222200",
+"a 	c #6E6E3D",
+"b 	c #FFFF22",
+"c 	c #E3E300",
+"d 	c #C6C6C6",
+"e 	c #000000",
+"f 	c #FFFF02",
+"g 	c #D1D100",
+"h 	c #1D1D00",
+"i 	c #E5E500",
+"j 	c #FFFF0B",
+"k 	c #FFFF05",
+"l 	c #E7E700",
+"m 	c #FFFF07",
+"n 	c #848400",
+"o 	c #FFFF12",
+"p 	c #F5F500",
+"q 	c #FFFF16",
+"r 	c #FFFF08",
+"s 	c #FAFA00",
+"t 	c #F2F200",
+"u 	c #FFFF1A",
+"v 	c #FFFF13",
+"w 	c #FFFF06",
+"x 	c #EFEF00",
+"y 	c #FDFD00",
+"z 	c #F6F600",
+"A 	c #FFFF01",
+"B 	c #FFFF17",
+"C 	c #FFFF0E",
+"D 	c #EDED00",
+"E 	c #F7F700",
+"F 	c #E4E400",
+"G 	c #FFFF1E",
+"H 	c #FFFF1C",
+"I 	c #5F5F2A",
+"J 	c #FFFF15",
+"K 	c #FCFC00",
+"L 	c #B7B700",
+"M 	c #191900",
+"N 	c #404000",
+"O 	c #C9C900",
+"P 	c #656500",
+"Q 	c #101000",
+"R 	c #5D5D00",
+"S 	c #F0F000",
+"T 	c #DBDB00",
+"U 	c #9C9C00",
+"V 	c #2A2A00",
+"W 	c #3B3B00",
+"X 	c #7D7D00",
+"Y 	c #B0B000",
+"Z 	c #515100",
+"` 	c #1B1B00",
+" .	c #131300",
+"                                                                ",
+"                                                                ",
+"          . + @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ # $           ",
+"      % & * = - - - - - - - - - - - - - - - - - - ; > , '       ",
+"      ) = ! ~ { { { { { { { { { { { { { { { { { { ] ^ / (       ",
+"    _ : < { { { { { { { { { { { { { { { { { { { { { { [ } |     ",
+"    1 2 ~ { { { { { { { 3 4 5 6 4 7 8 9 { { { { { { { ] 5 0     ",
+"    a b { { { { { { { { c d e e e d 9 f { { { { { { { { g h     ",
+"    a b { { { { { { { { i e e e e e j k { { { { { { { { g h     ",
+"    a b { { { { { { { { l e e e e e / m { { { { { { { { g h     ",
+"    a b { { { { { { { { l e e e e e / m { { { { { { { { g h     ",
+"    a b { { { { { { { { l e e e e e / m { { { { { { { { g h     ",
+"    a b { { { { { { { { l e e e e e / m { { { { { { { { g h     ",
+"    a b { { { { { { { { 3 n e e e e o m { { { { { { { { g h     ",
+"    a b { { { { { { { { p d e e e d q r { { { { { { { { g h     ",
+"    a b { { { { { { { { s t e e e u v w { { { { { { { { g h     ",
+"    a b { { { { { { { { s x n e n q j f { { { { { { { { g h     ",
+"    a b { { { { { { { { y z d e d q r { { { { { { { { { g h     ",
+"    a b { { { { { { { { 9 s A e B C ] 9 { { { { { { { { g h     ",
+"    a b { { { { { { { { s D l D t p s 9 { { { { { { { { g h     ",
+"    a b { { { { { { { { E F d e e d 9 f { { { { { { { { g h     ",
+"    a b { { { { { { { { E i e e e e j k { { { { { { { { g h     ",
+"    a b { { { { { { { { 8 D e e e e v m { { { { { { { { g h     ",
+"    a b { { { { { { { { y s d e e d B r { { { { { { { { g h     ",
+"    a b { { { { { { { { A [ C u G H o w { { { { { { { { g h     ",
+"    I J K { { { { { { { A ] w ~ j ~ w f { { { { { { { p L M     ",
+"    N O 8 { { { { { { { { { { { { { { { { { { { { { { 4 P Q     ",
+"      R 4 S K { { { { { { { { { { { { { { { { { { p T U h       ",
+"      V W X Y } } } } } } } } } } } } } } } } } } U Z ` Q       ",
+"           .Q Q Q Q Q Q Q Q Q Q Q Q Q Q Q Q Q Q Q Q Q           ",
+"                                                                ",
+"                                                                "};
+
+
 /* XPM */
 const char * screw_xpm[] = {
 "20 20 106 2",
@@ -17363,6 +17494,7 @@ const char * undo_xpm[] = {
 
 DefaultBitmaps::DefaultBitmaps()
 {
+  alert_.createFromXpmData(alert_xpm);
   autoStop_.createFromXpmData(autostop_xpm);
   help_.createFromXpmData(help_xpm);
   less_.createFromXpmData(less_xpm);
@@ -17406,6 +17538,7 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
 {
   screw_.createFromXpmData(screw_xpm);
   wood_.createFromXpmData(wood_xpm);
+  alert_.createFromXpmData(alert_xpm);
 
   try {
     autoStop_.loadFromFile(pCfg->iconPath+ "autostop.xpm");
@@ -17887,8 +18020,15 @@ NBitmap & DefaultBitmaps::screw( )
   return screw_;
 }
 
+NBitmap & DefaultBitmaps::alert( )
+{
+  return alert_;
+}
+
 }
 }
+
+
 
 
 

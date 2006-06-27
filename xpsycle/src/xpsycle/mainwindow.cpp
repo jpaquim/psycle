@@ -1113,10 +1113,24 @@ bool MainWindow::checkUnsavedSong( )
   NMessageBox* box = new NMessageBox("Save changes of : "+Global::pSong()->fileName+" ?");
   box->setTitle("New Song");
   box->setButtonText("Yes","No","Abort");
+  box->icon()->setSharedBitmap(&Global::pConfig()->icons().alert());
+  box->icon()->setPreferredSize(Global::pConfig()->icons().alert().width(),Global::pConfig()->icons().alert().height());
   add(box);
-  bool result = box->execute();
-  if (result == true) {
+  bool result = false;
+  int choice = box->execute();
+  std::cout << choice << std::endl;
+  switch (choice) {
+    case nMsgOkBtn :
       childView_->onFileSaveSong(0);
+      result = true;
+    break;
+    case nMsgUseBtn:
+      result = true;
+    break;
+    case nMsgCancelBtn:
+      result = false;
+    break;
+
   }
   NApp::addRemovePipe(box);
   return result;

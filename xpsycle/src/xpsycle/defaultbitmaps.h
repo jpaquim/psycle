@@ -36,6 +36,7 @@ public:
 
     ~DefaultBitmaps();
 
+    NBitmap & alert();
     NBitmap & autoStop();
     NBitmap & help();
     NBitmap & less();
@@ -83,6 +84,7 @@ public:
 
 private:
 
+    NBitmap alert_;
     NBitmap screw_;
     NBitmap wood_;
     NBitmap autoStop_;
