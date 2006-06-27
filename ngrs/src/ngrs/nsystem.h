@@ -38,6 +38,7 @@
 */
 
 class NAtoms;
+class NWindow;
 
 class NSystem{
 public:
@@ -80,6 +81,7 @@ public:
     void setMotifModalMode(Window win);
     void setMotifHints( Window win , MWMHints hints);
     void setModalMode(Window win);
+    void setFocus( NWindow* window );
 
     const NAtoms & atoms() const;
 

@@ -235,6 +235,7 @@ int NApp::processEvent( NWindow * win, XEvent * event )
         if (win->doubleBuffered()) win->graphics()->swap(NRect(event->xexpose.x,event->xexpose.y,event->xexpose.width,event->xexpose.height)); else
         doRepaint(win);
     break;
+    break;
     case ConfigureNotify:{
       while (XCheckMaskEvent(NApp::system().dpy(),StructureNotifyMask , event));
        if (event->xconfigure.width - 2*event->xconfigure.border_width != win->graphics()->dblWidth() || event->xconfigure.height != win->graphics()->dblHeight()  ) {

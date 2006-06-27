@@ -68,7 +68,7 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-  setPosition(0,0,1024,768);
+  setPosition(0,0,100,100);
 
   NStatusBar* bar = new NStatusBar();
      NTextStatusItem* item = new NTextStatusItem("Hallo");

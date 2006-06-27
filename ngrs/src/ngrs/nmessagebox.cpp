@@ -22,6 +22,7 @@
 #include "nflowlayout.h"
 #include "nalignlayout.h"
 #include "nlabel.h"
+#include "nimage.h"
 
 NMessageBox::NMessageBox()
  : NDialog()
@@ -39,6 +40,9 @@ NMessageBox::NMessageBox( const std::string & msgText )
 void NMessageBox::init( )
 {
   setTitle("Message");
+
+  iconImg = new NImage();
+  pane()->add(iconImg, nAlLeft);
 
   NPanel* btnPnl = new NPanel();
     btnPnl->setLayout(NAlignLayout(5,5));
@@ -100,13 +104,13 @@ void NMessageBox::setText( const std::string & msgText )
 void NMessageBox::onBtnPress( NButtonEvent * ev )
 {
   if (ev->sender()==okBtn) {
-     doClose(true);
+     doClose(nMsgOkBtn);
   } else
   if (ev->sender()==useBtn) {
-     use.emit(this);
+     doClose(nMsgUseBtn);
   } else
   if (ev->sender()==cancelBtn) {
-    doClose(false);
+    doClose(nMsgCancelBtn);
   }
 }
 
@@ -115,6 +119,13 @@ void NMessageBox::setVisible( bool on )
   if (on) pack();
   NDialog::setVisible(on);
 }
+
+NImage * NMessageBox::icon( )
+{
+  return iconImg;
+}
+
+
 
 
 

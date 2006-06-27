@@ -31,7 +31,7 @@ NDialog::~NDialog()
 {
 }
 
-bool NDialog::execute( )
+int NDialog::execute( )
 {
   setPositionToScreenCenter();
   setVisible(true);
@@ -46,7 +46,7 @@ int NDialog::onClose()
   return nDestroyWindow;
 }
 
-void NDialog::doClose( bool flag )
+void NDialog::doClose( int flag )
 {
   do_execute = flag;
   setVisible(false);
