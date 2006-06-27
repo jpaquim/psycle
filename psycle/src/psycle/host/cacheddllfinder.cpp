@@ -89,11 +89,12 @@ CachedDllFinder::CachedDllFinder()
 	if(pos != std::string::npos)
 		path=path.substr(0,pos);
 	cachefile=path + "\\psycle.plugin-scan.cache";
-
+	bforcedsaving=false;
 	LoadCacheFile();
 }
 CachedDllFinder::~CachedDllFinder()
 {
+	if (bforcedsaving) SaveCacheFile();
 	dllInfo.clear();
 }
 

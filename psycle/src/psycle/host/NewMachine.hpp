@@ -111,7 +111,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			HTREEITEM hNodes[1];
 			std::map<HTREEITEM,std::string> plugidentify;
 
-			bool updateCache;
+			bool bCacheChanged;
 			bool bCategoriesChanged;
 
 			///< Number of Plugins that contain a customized category

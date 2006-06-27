@@ -124,6 +124,7 @@ public:
 	void MoveFirstOf(Machine::class_type subclass);
 	void MoveNextOf(Machine::class_type subclass);
 
+	void ForceSaveOnDestroy() { bforcedsaving =true; }
 public:
 	sigslot::signal2<const std::string &, const std::string &> report;
 	sigslot::signal2<const std::string &, const std::string &> progress;
@@ -147,6 +148,7 @@ protected:
 	std::map<std::string,PluginInfo> dllInfo;
 	std::map<std::string,PluginInfo>::iterator infoit;
 	std::string cachefile;
+	bool bforcedsaving;
 
 };
 
