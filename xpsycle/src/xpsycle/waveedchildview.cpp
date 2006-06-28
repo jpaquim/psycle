@@ -109,7 +109,6 @@ namespace psycle { namespace host {
 	{
 		NPanel::resize();
 		RefreshDisplayData(true);
-		ResetScrollBars();
 	}
 	
 	void WaveEdChildView::InitPopupMenu()
