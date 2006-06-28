@@ -84,6 +84,7 @@ private:
     void testSegDisplay();
     void testTable();
     void testMemo();
+    void testMsgBox();
 
     void onOpen(NButtonEvent* ev);
     void onSliderPosChanged(double v);

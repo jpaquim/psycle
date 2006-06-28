@@ -77,16 +77,25 @@ NFileListBox::~NFileListBox()
 }
 
 
-void NFileListBox::setDirectory( std::string directory )
+void NFileListBox::setDirectory( const std::string & directory )
 {
   dir_ = directory;
+}
+
+const std::string & NFileListBox::directory( ) const
+{
+  return dir_;
+}
+
+void NFileListBox::update( )
+{
   std::string oldDir = NFile::workingDir();
 
   removeChilds();
 
   std::vector<std::string> list;
   if (mode_ & nFiles) {
-      list = fSystem.fileList(directory);
+      list = fSystem.fileList( directory() );
       for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
         std::string entry = *it;
 
@@ -102,7 +111,7 @@ void NFileListBox::setDirectory( std::string directory )
       }
   }
   if (mode_ & nDirs) {
-      std::vector<std::string> list = fSystem.dirList(directory);
+      std::vector<std::string> list = fSystem.dirList( directory() );
       for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
         std::string entry = *it;
         if ((showHiddenFiles_) || (!showHiddenFiles_ && entry!="" && ((entry[0]!='.') || entry.find("..")==0))) {
@@ -120,6 +129,7 @@ void NFileListBox::setDirectory( std::string directory )
   NFile::cd(oldDir);
   resize();
 }
+
 
 void NFileListBox::onItemSelected( NCustomItem * item )
 {
@@ -179,4 +189,7 @@ void NFileListBox::setShowHiddenFiles( bool on )
   showHiddenFiles_ = on;
   setDirectory(dir_);
 }
+
+
+
 

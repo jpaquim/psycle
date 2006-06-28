@@ -52,6 +52,8 @@ public:
 
    void setMode(int mode); // save/load
 
+   virtual void setVisible( bool on );
+
 private:
 
    int mode_;

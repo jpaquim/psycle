@@ -357,6 +357,11 @@ void NFileDialog::setDirectory( const std::string & dir )
   fBox_->setDirectory(NFile::workingDir());
   pdBox_->setDirectory(NFile::parentWorkingDir());
   dBox_->setDirectory(NFile::workingDir());
+  if ( mapped() ) {
+    fBox_->update();
+    pdBox_->update();
+    dBox_->update();
+  }
   dBox_->repaint();
   pdBox_->repaint();
   fBox_->repaint();
@@ -403,6 +408,19 @@ void NFileDialog::onHiddenCheckBoxClicked( NButtonEvent * ev )
   dBox_->setShowHiddenFiles(hBox->checked());
   pdBox_->setShowHiddenFiles(hBox->checked());
   pane()->repaint();
+}
+
+void NFileDialog::setVisible( bool on )
+{
+  if (on) {
+    fBox_->update();
+    pdBox_->update();
+    dBox_->update();
+  } else {
+    fBox_->removeChilds();
+    dBox_->removeChilds();
+  }
+  NDialog::setVisible(on);
 }
 
 
