@@ -17739,7 +17739,7 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   }
 
   try {
-    save_audio_.loadFromFile(pCfg->iconPath+ "save_audio.xpm");
+    save_audio_.loadFromFile(pCfg->iconPath+ "saveaudio.xpm");
   } catch (const char* e) {
     save_audio_.createFromXpmData(saveaudio_xpm);
   }

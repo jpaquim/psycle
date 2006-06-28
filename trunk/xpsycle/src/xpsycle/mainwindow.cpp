@@ -174,6 +174,9 @@ void MainWindow::initDialogs( )
   wavRecFileDlg = new NFileDialog();
     wavRecFileDlg->setMode(nSave);
   add(wavRecFileDlg);
+  wavSaveFileDlg = new NFileDialog();
+    wavSaveFileDlg->setMode(nSave);
+  add(wavSaveFileDlg);
   // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
   add( infoDlg =  new InfoDlg() );
   add( wavSaveDlg = new WaveSaveDlg() );
@@ -558,7 +561,7 @@ void MainWindow::initToolBar( )
       psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onIncInsBtn);
 
       psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
-      psycleToolBar_->add(new NButton("Save"));
+      psycleToolBar_->add(new NButton("Save"))->clicked.connect(this,&MainWindow::onSaveWave);
       psycleToolBar_->add(new NButton("Edit"))->clicked.connect(this,&MainWindow::onEditInstrument);
       psycleToolBar_->add(new NButton("Wave Ed"))->clicked.connect(this,&MainWindow::onEditWave);
       psycleToolBar_->resize();
@@ -1357,7 +1360,36 @@ void MainWindow::updateStatusBar( )
   statusBar_->repaint();
 }
 
+void MainWindow::onSaveWave( NButtonEvent * ev )
+{
+  WaveFile output;
+  Song* _pSong = Global::pSong();
+
+  if (_pSong->_pInstrument[_pSong->instSelected]->waveLength)
+  {
+    if ( wavSaveFileDlg->execute() )
+    {
+       output.OpenForWrite(wavSaveFileDlg->fileName().c_str(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
+       if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo)
+       {
+         for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength; c++)
+         {
+           output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR + c) );
+         }
+       }
+       else {
+         output.WriteData(_pSong->_pInstrument[_pSong->instSelected]->waveDataL, _pSong->_pInstrument[_pSong->instSelected]->waveLength);
+       }
+       output.Close();
+     }
+   }
+   //else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
+   //m_wndView.SetFocus();
+}
+
 }}
+
+
 
 
 
