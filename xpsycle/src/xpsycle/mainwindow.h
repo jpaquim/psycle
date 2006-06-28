@@ -103,6 +103,7 @@ private:
     GreetDlg* greetDlg;
     InfoDlg*  infoDlg;
     NFileDialog* wavRecFileDlg;
+    NFileDialog* wavSaveFileDlg;
     WaveSaveDlg* wavSaveDlg;
 
     VuMeter* vuMeter_;
@@ -176,6 +177,7 @@ private:
     void onHelpMenuWhatsNew(NButtonEvent* ev);
 
     void onLoadWave(NButtonEvent* ev);
+    void onSaveWave(NButtonEvent* ev);
     void onEditInstrument(NButtonEvent* ev);
     void onEditWave(NButtonEvent* ev);
     void onInstrumentCbx(NItemEvent* ev);
