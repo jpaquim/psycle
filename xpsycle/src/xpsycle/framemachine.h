@@ -149,6 +149,8 @@ public:
     Machine* pMac();
     void updateValues();
 
+    signal3<int,int,int> patternTweakSlide;
+
 private:
 
     std::map<NButton*,Preset> presetMap;
@@ -175,7 +177,6 @@ private:
     void loadPresets();
     void onAddPrs(NButtonEvent* ev);
     void onLoadPrs(NButtonEvent* ev);
-
 
 
 };

@@ -227,6 +227,8 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
+    frameMachine->patternTweakSlide.connect(this,&GeneratorGUI::onTweakSlide);
+  add(frameMachine);
 
   vuPanel_ = new VUPanel(this);
     vuPanel_->setPosition(dGeneratorVu.left(),dGeneratorVu.top(),dGeneratorVu.width(),dGeneratorVu.height());
@@ -419,6 +421,8 @@ EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
+     frameMachine->patternTweakSlide.connect(this,&EffektGUI::onTweakSlide);
+  add(frameMachine);
 
   vuPanel_ = new VUPanel(this);
     vuPanel_->setPosition(dGeneratorVu.left(),dGeneratorVu.top(),dGeneratorVu.width(),dGeneratorVu.height());
@@ -636,5 +640,16 @@ void MachineGUI::repaintVUMeter( )
 {
 }
 
+void EffektGUI::onTweakSlide( int machine, int command, int value )
+{
+  patternTweakSlide.emit(machine,command,value);
+}
+
+void GeneratorGUI::onTweakSlide( int machine, int command, int value )
+{
+  patternTweakSlide.emit(machine,command,value);
+}
+
 }
 }
+

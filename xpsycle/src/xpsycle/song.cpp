@@ -1990,6 +1990,57 @@ namespace psycle
 
 			return false;
 		}
+void Song::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
+{
+  bool bEditMode = true;
+
+	// UNDO CODE MIDI PATTERN TWEAK
+	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+	//if(viewMode == VMPattern && bEditMode)
+	{ 
+		// write effect
+		const int ps = playOrder[patternPosition];
+		int line = Global::pPlayer()->_lineCounter;
+		unsigned char * toffset;
+		if (Global::pPlayer()->_playing&&Global::pConfig()->_followSong)
+		{
+			if(_trackArmedCount)
+			{
+//				SelectNextTrack();
+			}
+			else if (!Global::pConfig()->_RecordUnarmed)
+			{	
+				return;
+			}
+			toffset = _ptrack(ps,track)+(line*MULTIPLY);
+		}
+		else
+		{
+			toffset = _ptrackline(ps, track, line);
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		if (entry->_note >= 120)
+		{
+			if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+			{
+				//AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				entry->_mach = machine;
+				entry->_cmd = (value>>8)&255;
+				entry->_parameter = value&255;
+				entry->_inst = command;
+				entry->_note = cdefTweakS;
+
+				//NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+				//Repaint(DMData);
+			}
+		}
+	}
+}
+
+
 	}
 }
 

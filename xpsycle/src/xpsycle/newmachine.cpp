@@ -89,6 +89,7 @@ NewMachine::NewMachine()
             generatorfBox_->setAlign(nAlClient);
             generatorfBox_->setDirectory(Global::pConfig()->pluginPath);
             generatorfBox_->setActiveFilter(".so");
+            generatorfBox_->update();
             generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
         generatorPage->add(generatorfBox_);
     NPanel* effectPage = new NPanel();

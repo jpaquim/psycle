@@ -127,6 +127,9 @@ public:
 
     bool enableSound;
 
+    bool _RecordTweaks;
+    bool _RecordUnarmed;
+
     inline int GetSamplesPerSec() const throw()
     {
       return _pOutputDriver->_samplesPerSec;

@@ -194,6 +194,7 @@ private:
     void onNewMachine(NButtonEvent* ev);
 
     void onRecordWav(NButtonEvent* ev);
+    void onRecordNotesMode(NButtonEvent* ev);
 
     void setAppSongBpm(int x);
     void setAppSongTpb(int x);

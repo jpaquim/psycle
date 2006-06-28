@@ -50,6 +50,7 @@ ChildView::ChildView()
 
   machineView_ = new MachineView();
     machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
+    machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
   patternView_ = new PatternView();
     patternView_->setBackground(Global::pConfig()->pvc_row);
     patternView_->setForeground(Global::pConfig()->pvc_background);
@@ -77,7 +78,7 @@ ChildView::ChildView()
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(80);
-//  timer.enableTimer();
+  timer.enableTimer();
 
 }
 
@@ -256,8 +257,15 @@ WaveEdFrame * ChildView::waveEditor( )
   return waveEd_;
 }
 
+void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
+{
+  Global::pSong()->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().x(),patternView_->cursor().y());
+}
+
 }
 }
+
+
 
 
 

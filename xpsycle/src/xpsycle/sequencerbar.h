@@ -51,6 +51,7 @@ public:
     signal2<int,int> selected;
 
     void setPatternView(PatternView* patternView);
+
     bool followSong() const;
 
     void updateSequencer();
@@ -113,6 +114,7 @@ private:
     void onDecLen(NButtonEvent* ev);
     void onIncLen(NButtonEvent* ev);
     void onMoveCursorPaste(NButtonEvent* ev);
+    void onRecordTweakChange(NButtonEvent* ev);
 
     std::vector<int> seqCopyBuffer;
 

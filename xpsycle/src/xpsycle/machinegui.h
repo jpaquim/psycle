@@ -59,6 +59,7 @@ public:
 
     signal1<MachineGUI*> newConnection;
     signal3<Machine*,int,int> moved;
+    signal3<int,int,int> patternTweakSlide;
 
     virtual void onMouseDoublePress(int x, int y, int button);
     virtual void onMousePress(int x, int y, int button);
@@ -81,6 +82,8 @@ private:
     Machine* mac_;
     std::vector<LineAttachment> attachedLines;
     NLine* line;
+
+
 };
 
 
@@ -169,6 +172,7 @@ private:
 
     void setSkin();
     void onPosChanged(NSlider* sender, double value);
+    void onTweakSlide( int machine, int command, int value );
 };
 
 
@@ -231,6 +235,8 @@ private:
 
     void setSkin();
     void onPosChanged(NSlider* sender, double value);
+
+    void onTweakSlide( int machine, int command, int value );
 };
 
 }

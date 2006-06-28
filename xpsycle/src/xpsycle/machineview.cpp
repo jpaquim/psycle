@@ -66,6 +66,7 @@ void MachineView::onCreateMachine( Machine * mac )
         MachineGUI* macGui = new GeneratorGUI(mac);
           macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
+          macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
         }
@@ -75,6 +76,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
+          macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
       }
@@ -259,8 +261,15 @@ Machine * MachineView::selMachine( )
   return selectedMachine_;
 }
 
+void MachineView::onTweakSlide( int machine, int command, int value )
+{
+  patternTweakSlide.emit(machine,command,value);
+}
+
 }
 }
+
+
 
 
 
