@@ -123,6 +123,8 @@ public:
     void setDock(NDockPanel* dock);
     NDockPanel* dock();
 
+    const NRect & userGeometry() const;
+
 private:
 
    bool modal_;
@@ -156,6 +158,12 @@ private:
 
    NDockPanel* dock_;
 
+
+   // user wanted size and position
+
+   NRect userPos;
+
+   void checkGeometry();
 };
 
 #endif

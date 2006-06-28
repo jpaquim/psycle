@@ -37,7 +37,10 @@ public:
 
     ~NFileListBox();
 
-    void setDirectory(std::string directory);
+    void setDirectory(const std::string & directory);
+    const std::string & directory() const;
+
+    void update();
 
     virtual void onItemSelected(NCustomItem * item);
 
@@ -51,6 +54,7 @@ public:
     void addFilter(const std::string & name ,const std::string & regexp);
 
     void setShowHiddenFiles(bool on);
+
 
 private:
 

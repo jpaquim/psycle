@@ -76,7 +76,7 @@ NTestWindow::NTestWindow()
   pane()->add(bar);
   bar->resize();
 
-  //testMenu();
+  testMenu();
   testComboBox();
   //testMemo();
   //testListBox();
@@ -141,14 +141,7 @@ void NTestWindow::onSliderPosChanged( double v )
 
 void NTestWindow::onOpen( NButtonEvent * ev )
 {
-  NMessageBox* msg = new NMessageBox("Daten gehen verloren!");
-  add(msg);
-  msg->pack();
-  std::cout << msg->pane()->preferredHeight() << std::endl;
-  msg->execute();
-  NApp::addRemovePipe(msg);
-  
-  //fDialog->execute();
+  testMsgBox();
 }
 
 void NTestWindow::testBorderLayout( )
@@ -389,6 +382,17 @@ void NTestWindow::testComboBox( )
        box->add(new NItem(stringify(i)+" : tester"));
     }
   pane()->add(box);
+}
+
+void NTestWindow::testMsgBox( )
+{
+  NMessageBox* box = new NMessageBox("Save changes of : name ?");
+    box->setTitle("New Song");
+    box->setButtonText("Yes","No","Abort");
+  add(box);
+  bool result = false;
+  int choice = box->execute();
+
 }
 
 

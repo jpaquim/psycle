@@ -131,7 +131,10 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
   NVisualComponent* lastBottom = 0;
 
   // flags to determine the 16 possible layout structures
-  bool topBeforeLeft, topBeforeRight, bottomBeforeLeft, bottomBeforeRight = 1;
+  bool topBeforeLeft     = 1;
+  bool topBeforeRight    = 1;
+  bool bottomBeforeLeft  = 1;
+  bool bottomBeforeRight = 1;
 
   std::vector<NVisualComponent*>::const_iterator it = components.begin();
 
@@ -201,7 +204,10 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
   if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
     xmax = std::max(left+top,right+bottom);
   } else
-  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1010
+  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1010
+    xmax = std::max(std::max(client+right,bottom),top)+left;
+  } else
+  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1011
     xmax = std::max(std::max(client,bottom)+right,top)+left;
   } else
   if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100
@@ -236,7 +242,10 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
   NVisualComponent* lastBottom = 0;
 
   // flags to determine the 16 possible layout structures
-  bool topBeforeLeft, topBeforeRight, bottomBeforeLeft, bottomBeforeRight = 1;
+  bool topBeforeLeft     = 1;
+  bool topBeforeRight    = 1;
+  bool bottomBeforeLeft  = 1;
+  bool bottomBeforeRight = 1;
 
   std::vector<NVisualComponent*>::const_iterator it = components.begin();
 
@@ -306,7 +315,10 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
   if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
     ymax = std::max( std::max( client + top, left) + bottom, right);
   } else
-  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1010
+  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1010
+    ymax = std::max( std::max( client, right) + top + bottom, left);
+  } else
+  if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1011
     ymax = std::max( std::max( client + bottom, right) + top, left);
   } else
   if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100

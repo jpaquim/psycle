@@ -33,6 +33,7 @@ NWindow::NWindow()
   changeState_ = true;
   dblBuffer_ = true;
   win_ = NApp::system().registerWindow(NApp::system().rootWindow());
+  userPos.setPosition(0,0,200,200);
   NApp::addWindow(win_, this);
   pane_ = new NPanel();
     pane_->setLayout(NAlignLayout());
@@ -69,12 +70,16 @@ void NWindow::setVisible( bool on )
       if (modal_) {
          NApp::system().setModalMode( win() );
          //NApp::system().setStayAbove(win());
+         NApp::system().setWindowPosition(win(), userPos.left(),userPos.top(),userPos.width(),userPos.height());
          XMapWindow(NApp::system().dpy(),win_);
+         checkGeometry();
          NApp::runModal(this);
       } else {
-      XSync(NApp::system().dpy(),false);
-      XMapWindow(NApp::system().dpy(),win_);
-      XSync(NApp::system().dpy(),false);
+        XSync(NApp::system().dpy(),false);
+        NApp::system().setWindowPosition(win(), userPos.left(),userPos.top(),userPos.width(),userPos.height());
+        XMapWindow(NApp::system().dpy(),win_);
+        checkGeometry();
+        XSync(NApp::system().dpy(),false);
       }
   } else if (mapped()) {
      if (lastOver_!=0) {
@@ -350,27 +355,28 @@ void NWindow::onKeyRelease( const NKeyEvent & keyEvent )
 
 void NWindow::setPosition( int x, int y, int width, int height )
 {
+  userPos.setPosition(x,y,width,height);
   NApp::system().setWindowPosition(win_,x,y,width,height);
 }
 
 void NWindow::setLeft( int left )
 {
-  NApp::system().setWindowPosition(win_,left,top(),width(),height());
+  setPosition(left, top(), width(), height());
 }
 
 void NWindow::setTop( int top )
 {
-  NApp::system().setWindowPosition(win_,left(),top,width(),height());
+  setPosition(left(), top, width(), height());
 }
 
 void NWindow::setWidth( int width )
 {
-  NApp::system().setWindowPosition(win_,left(),top(),width,height());
+  setPosition(left(), top(), width, height());
 }
 
 void NWindow::setHeight( int height )
 {
-  NApp::system().setWindowPosition(win_,left(),top(),width(),height);
+  setPosition(left(), top(), width(), height);
 }
 
 void NWindow::add( NWindow * window )
@@ -408,6 +414,7 @@ void NWindow::pack( )
 {
   if (pane()->layout()!=NULL) {
     pane()->layout()->align(pane());
+    std::cout << "pack-width:" << pane()->layout()->preferredWidth(pane()) << std::endl;
     int pW = std::max( pane()->layout()->preferredWidth(pane()) +
                        pane()->spacing().left() + pane()->spacing().right() ,10);
     int pH = std::max( pane()->layout()->preferredHeight(pane()) +
@@ -586,6 +593,31 @@ void NWindow::setPositionToScreenTop(int height)
 void NWindow::setSize( int width, int height )
 {
   setPosition(left(),top(),width,height);
+}
+
+const NRect & NWindow::userGeometry( ) const
+{
+  return userPos;
+}
+
+void NWindow::checkGeometry( )
+{
+  // works only with mapped windows
+  if (userPos.left() != left() || userPos.top() != top() ) {
+      std::cout << "userleft:" << userPos.left() << std::endl;
+      std::cout << "usertop:" << userPos.top() << std::endl;
+      XMoveWindow(NApp::system().dpy(), win(), userPos.left(), userPos.top() );
+      std::cout << "wmleft:" << left() << std::endl;
+      std::cout << "wmtop:" <<  top() << std::endl;
+  }
+
+  if (userPos.width() != width() || userPos.height() != height() ) {
+     std::cout << userPos.width() << std::endl;
+     std::cout << userPos.height() << std::endl;
+     XResizeWindow(NApp::system().dpy(), win(), userPos.width(), userPos.height());
+     std::cout << width() << std::endl;
+     std::cout << height() << std::endl;
+  }
 }
 
 
