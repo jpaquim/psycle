@@ -97,7 +97,7 @@ namespace psycle
 						}
 						try
 						{
-							plugin.Instance(plugin_name);
+							plugin.LoadDll(plugin_name);
 						}
 						catch(std::exception const & e)
 						{

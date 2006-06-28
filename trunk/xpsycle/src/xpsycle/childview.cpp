@@ -242,7 +242,7 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
             machineView()->addMachine(Global::pSong()->_pMachine[fb]);
             machineView()->repaint();
           } else {
-          Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName().c_str(),fb);
+          Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName(),fb);
             machineView()->addMachine(Global::pSong()->_pMachine[fb]);
             machineView()->repaint();
           }
