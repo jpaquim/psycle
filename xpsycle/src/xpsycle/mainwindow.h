@@ -145,6 +145,7 @@ private:
     void onFileSave(NButtonEvent* ev);
     void onFileSaveAs(NButtonEvent* ev);
     void onRenderAsWave(NButtonEvent* ev);
+    void onFileExit(NButtonEvent* ev);
 
     void onEditUndo(NButtonEvent* ev);
     void onEditRedo(NButtonEvent* ev);

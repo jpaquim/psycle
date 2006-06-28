@@ -90,7 +90,7 @@ void MainWindow::initMenu( )
         noneFileItem->setEnable(false);
       recentFileMenu_->add(noneFileItem);
       noFileWasYetLoaded = true;
-    fileMenu_->add(new NMenuItem("exit"));
+    fileMenu_->add(new NMenuItem("exit"))->click.connect(this,&MainWindow::onFileExit);
   menuBar_->add(fileMenu_);
 
   // Creates the edit menu
@@ -1387,7 +1387,16 @@ void MainWindow::onSaveWave( NButtonEvent * ev )
    //m_wndView.SetFocus();
 }
 
+void MainWindow::onFileExit( NButtonEvent * ev )
+{
+  if (checkUnsavedSong()) {
+    exit(0);
+  }
+}
+
 }}
+
+
 
 
 
