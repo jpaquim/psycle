@@ -43,6 +43,8 @@ Configuration::Configuration()
   defaultPatLines = 64;
   loadConfig();
   bitmaps_ = new DefaultBitmaps(this);
+  _RecordTweaks = false;
+  _RecordUnarmed = true;
 }
 
 

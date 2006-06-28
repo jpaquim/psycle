@@ -356,7 +356,7 @@ namespace psycle
 					///\todo hardcoded limits and wastes
 					bool playOrderSel[MAX_SONG_POSITIONS];
 				///\}
-
+					void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 				///\name machines
 				///\{
 					/// Sort of semaphore to not allow doing something with machines when they are changing (deleting,creating, etc..)

@@ -90,6 +90,8 @@ private:
 
     void onTimer();
 
+    void onTweakSlide(int machine, int command, int value);
+
 };
 
 }

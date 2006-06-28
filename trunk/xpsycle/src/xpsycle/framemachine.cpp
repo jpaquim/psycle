@@ -341,6 +341,10 @@ void FrameMachine::onKnobValueChange( Knob* sender,int value , int param )
   int val_v = pMachine_->GetParamValue(param);
   sender->setValue(val_v);
   sender->repaint();
+  if (Global::configuration()._RecordTweaks)
+  {
+    patternTweakSlide.emit(pMac()->_macIndex, param, value);
+  }
 }
 
 
@@ -488,6 +492,8 @@ Preset FrameMachine::knobsPreset( )
 
   return prs;
 }
+
+
 
 }
 }

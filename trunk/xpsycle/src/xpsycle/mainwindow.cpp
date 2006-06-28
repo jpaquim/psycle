@@ -315,6 +315,7 @@ void MainWindow::initToolBar( )
     img->setPreferredSize(25,25);
   NButton* recNotes = new NButton(img);
     recNotes->setHint("Record Notes Mode");
+    recNotes->clicked.connect(this,&MainWindow::onRecordNotesMode);
   toolBar1_->add(recNotes);
 
   toolBar1_->add(new NToolBarSeparator());
@@ -1394,11 +1395,18 @@ void MainWindow::onFileExit( NButtonEvent * ev )
   }
 }
 
+void MainWindow::onRecordNotesMode( NButtonEvent * ev )
+{
+  /*bEditMode = true;
+  if (sequencerBar_->followSong() && bEditMode)
+  {
+    bEditMode = false;
+  }
+  else
+  {
+    sequencerBar_->setFollowSong(true);
+    bEditMode = true;
+  }*/
+}
+
 }}
-
-
-
-
-
-
-

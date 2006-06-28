@@ -209,6 +209,7 @@ void SequencerBar::init( )
     checkPanel->add( multichannel_audition_ = new NCheckBox("Multichannel\nAudition"));
     checkPanel->add( record_noteoff_        = new NCheckBox("Record NoteOffs"));
     checkPanel->add( record_tweaks_         = new NCheckBox("Record Tweaks"));
+    record_tweaks_->clicked.connect(this,&SequencerBar::onRecordTweakChange);
     checkPanel->add( notestoeffects_        = new NCheckBox("Allow Notes\nto Effects"));
     checkPanel->add( movecursorpaste_       = new NCheckBox("Move Cursor\nWhen Paste"));
     movecursorpaste_->clicked.connect(this,&SequencerBar::onMoveCursorPaste);
@@ -794,6 +795,13 @@ int SequencerBar::patternPos( ) const
   return -1;
 }
 
+void SequencerBar::onRecordTweakChange( NButtonEvent * ev )
+{
+  Global::configuration()._RecordTweaks = record_tweaks_->checked();
+}
+
 }}
+
+
 
 

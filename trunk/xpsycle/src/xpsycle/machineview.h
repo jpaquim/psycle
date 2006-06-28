@@ -83,6 +83,7 @@ public:
     NPanel* scrollArea();
 
     signal3<Machine*, int, int> machineMoved;
+    signal3<int,int,int> patternTweakSlide;
 
     Machine* selMachine();
 
@@ -111,6 +112,7 @@ private:
     MachineGUI* findByMachine(Machine* mac);
 
     std::vector<MachineGUI*> machineGUIs;
+    void onTweakSlide(int machine, int command, int value);
 
 };
 
