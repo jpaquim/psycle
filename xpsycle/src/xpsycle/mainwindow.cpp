@@ -983,6 +983,7 @@ void MainWindow::onTimer( )
 {
   if (Global::pPlayer()->_playing) {
     int oldPos = childView_->patternView()->editPosition();
+    Global::pConfig()->_followSong = sequencerBar_->followSong();
     childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
 
     if (sequencerBar_->followSong() && oldPos != Global::pPlayer()->_playPosition) {
