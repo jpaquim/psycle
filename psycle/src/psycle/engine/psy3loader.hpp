@@ -8,27 +8,27 @@ namespace psycle {
 		class Song;
 		class RiffFile;
 
-		class Psy3Loader
+		class Psy3Filter
 		{
 		public:
-			Psy3Loader();
-			virtual ~Psy3Loader();
+			Psy3Filter();
+			virtual ~Psy3Filter();
 
-			bool Test(std::string fourcc);
-			Song* Load(RiffFile* file);
+			static bool Test(std::string fourcc);
+			bool Load(RiffFile* file,Song& song);
 			bool Save(RiffFile* file,const Song& song);
 
 			sigslot::signal2<const std::string &, const std::string &> report;
 			sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
 		protected:
-			bool LoadSONGv0(RiffFile* file,Song& song);
-			bool LoadINFOv0(RiffFile* file,Song& song);
-			bool LoadSNGIv0(RiffFile* file,Song& song);
-			bool LoadSEQDv0(RiffFile* file,Song& song);
-			bool LoadPATDv0(RiffFile* file,Song& song);
-			bool LoadMACDv0(RiffFile* file,Song& song);
-			bool LoadINSDv0(RiffFile* file,Song& song);
-			bool LoadWAVEv0(RiffFile* file,Song& song);
+			int LoadSONGv0(RiffFile* file,Song& song);
+			bool LoadINFOv0(RiffFile* file,Song& song,int minorversion);
+			bool LoadSNGIv0(RiffFile* file,Song& song,int minorversion);
+			bool LoadSEQDv0(RiffFile* file,Song& song,int minorversion);
+			bool LoadPATDv0(RiffFile* file,Song& song,int minorversion);
+			bool LoadMACDv0(RiffFile* file,Song& song,int minorversion);
+			bool LoadINSDv0(RiffFile* file,Song& song,int minorversion);
+			bool LoadWAVEv0(RiffFile* file,Song& song,int minorversion);
 
 			bool SaveSONGv0(RiffFile* file,const Song& song);
 			bool SaveINFOv0(RiffFile* file,const Song& song);

@@ -671,7 +671,6 @@ namespace psycle
 						if(!p->LoadDll(dllName))
 						{
 							pMachine = new Dummy(index);
-							msubclass = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
 						}
@@ -688,7 +687,6 @@ namespace psycle
 						if(!p->LoadDll(dllName))
 						{
 							pMachine = new Dummy(index);
-							msubclass = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
 						}
@@ -705,7 +703,6 @@ namespace psycle
 						if(!p->LoadDll(dllName))
 						{
 							pMachine = new Dummy(index);
-							msubclass = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
 						}

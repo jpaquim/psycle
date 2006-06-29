@@ -146,8 +146,67 @@ namespace psycle
 			}
 			Machine* plugin::CreateFromType(Machine::id_type _id, std::string _dllname)
 			{
-				//\todo:
+				//\todo: this is ugly, hopefully the new host will have this much better.
+				std::string dllfile = Global::dllfinder().FileFromFullpath(_dllname);
+				PluginInfo pluginfo = Global::dllfinder().GetPluginInfo(dllfile);
+
+				if (pluginfo.mode == MACHMODE_GENERATOR)
+				{
+					instrument *ins = new instrument(_id);
+					if (ins->LoadDll(_dllname))
+					{
+						return ins;
+					}
+				}
+				else if (pluginfo.mode == MACHMODE_FX)
+				{
+					fx *vstfx = new fx(_id);
+					if (vstfx->LoadDll(_dllname))
+					{
+						return vstfx;
+					}
+				}
 				return 0;
+			}
+
+			bool plugin::LoadDll(std::string const & file_name)
+			{
+				std::string path = file_name;
+				if(Global::dllfinder().LookupDllPath(path,MACH_VST)) 
+				{
+					try
+					{
+						Instance(path, false);
+					}
+					catch(const std::exception & e)
+					{
+						std::ostringstream s; s
+							<< "Exception while instanciating plugin: " << path << std::endl
+							<< "Replacing with dummy." << std::endl
+							<< universalis::compiler::typenameof(e) << std::endl
+							<< e.what();
+						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
+						return false;
+					}
+					catch(...)
+					{
+						std::ostringstream s; s
+							<< "Exception while instanciating plugin: " << path << std::endl
+							<< "Replacing with dummy." << std::endl
+							<< "Unkown type of exception: " << universalis::compiler::exceptions::ellipsis();
+						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
+						return false;
+					}
+				}
+				else
+				{
+					std::ostringstream s; s
+						<< "Missing plugin: " << file_name << std::endl
+						<< "Replacing with dummy.";
+					MessageBox(0, s.str().c_str(), "Plugin Loading Error", MB_OK | MB_ICONWARNING);
+					return false;
+				}
+				return true;
 			}
 
 			void plugin::Instance(std::string const & dllname, bool overwriteName)
@@ -453,46 +512,6 @@ namespace psycle
 				{
 					pFile->WriteChunk(pData, size);
 				}
-			}
-
-			bool plugin::LoadDll(std::string const & file_name)
-			{
-				std::string path = file_name;
-				if(Global::dllfinder().LookupDllPath(path,MACH_VST)) 
-				{
-					try
-					{
-						Instance(path, false);
-					}
-					catch(const std::exception & e)
-					{
-						std::ostringstream s; s
-							<< "Exception while instanciating plugin: " << path << std::endl
-							<< "Replacing with dummy." << std::endl
-							<< universalis::compiler::typenameof(e) << std::endl
-							<< e.what();
-						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
-						return false;
-					}
-					catch(...)
-					{
-						std::ostringstream s; s
-							<< "Exception while instanciating plugin: " << path << std::endl
-							<< "Replacing with dummy." << std::endl
-							<< "Unkown type of exception: " << universalis::compiler::exceptions::ellipsis();
-						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
-						return false;
-					}
-				}
-				else
-				{
-					std::ostringstream s; s
-						<< "Missing plugin: " << file_name << std::endl
-						<< "Replacing with dummy.";
-					MessageBox(0, s.str().c_str(), "Plugin Loading Error", MB_OK | MB_ICONWARNING);
-					return false;
-				}
-				return true;
 			}
 
 			void plugin::GetParamValue(int numparam, char * parval)

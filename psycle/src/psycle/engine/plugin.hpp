@@ -93,16 +93,16 @@ namespace psycle
 			///\name the complicated quadristepped (@#$%§!) construction
 			///\{
 				public:
+					///< Helper class for Machine Creation.
+					static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 					///\todo doc
 					Plugin(Machine::id_type id);
 					///\todo doc
-					void Instance(std::string const & file_name);
-					///\todo doc
 					bool LoadDll (std::string const & file_name);
 					///\todo doc
+					void Instance(std::string const & file_name);
+					///\todo doc
 					virtual void Init();
-					///< Helper class for Machine Creation.
-					static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 				private:
 					/// mswindows! humpf! mswindows!
 					HINSTANCE _dll;
