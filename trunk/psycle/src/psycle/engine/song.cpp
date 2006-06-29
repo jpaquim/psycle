@@ -14,6 +14,7 @@
 //\todo:
 #include <psycle/host/cacheddllfinder.hpp>
 #include <psycle/host/uiconfiguration.hpp>
+#include <psycle/engine/Psy3Loader.hpp>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -945,6 +946,11 @@ namespace psycle
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
 				loggers::trace("file header: PSY3SONG");
+				//\todo: This is just an implementation in order to test and validate the new loader.
+				Psy3Filter songloader;
+				if (!songloader.Test(Header)) report.emit("songloader.test() hasn't worked!","bla");
+				songloader.Load(pFile,*this);
+				return true;
 
 				progress.emit(1,0,"");
 				progress.emit(2,0,"Loading... psycle song fileformat version 3...");

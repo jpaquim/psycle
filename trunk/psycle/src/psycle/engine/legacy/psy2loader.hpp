@@ -8,14 +8,14 @@ namespace psycle {
 		class Song;
 		class RiffFile;
 
-		class Psy2Loader
+		class Psy2Filter
 		{
 		public:
-			Psy2Loader();
-			virtual ~Psy2Loader();
+			Psy2Filter();
+			virtual ~Psy2Filter();
 
 			bool Test(std::string fourcc);
-			Song* Load(RiffFile* file);
+			bool Load(RiffFile* file,Song& song);
 			bool Save(RiffFile* file,Song& song);
 
 			sigslot::signal2<const std::string &, const std::string &> report;
