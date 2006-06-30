@@ -258,8 +258,10 @@ void CachedDllFinder::populate_plugin_map(std::string directory,Machine::class_t
 			pinfo.subclass = subclass;
 			GeneratePluginInfo(pinfo);
 			LearnPlugin(pinfo);
+			bforcedsaving=true;
 		}
 	}
+	if (bforcedsaving) { SaveCacheFile(); bforcedsaving=false; }
 }
 
 void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
@@ -268,11 +270,19 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 	{
 		if(pinfo.subclass == MACH_PLUGIN)
 		{
+			//\todo: BIG TODO! the try{} catch doesn't work right now because the exceptions are already catched in LoadDll!
+			//We need a way to work around this.
 			Plugin plug(0);
 			try
 			{
-				plug.Instance(pinfo.dllname);
-				plug.Init(); // [bohan] hmm, we should get rid of two-stepped constructions.
+				if(!Global::dllfinder().LookupDllPath(pinfo.dllname,MACH_PLUGIN)) 
+				{	
+					if( plug.LoadDll(pinfo.dllname) )
+					{
+						plug.Init(); // [bohan] hmm, we should get rid of two-stepped constructions.
+					}
+					else pinfo.error = "Loading Error";
+				}
 			}
 			catch(const std::exception & e)
 			{
@@ -350,7 +360,10 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 			vst::plugin vstPlug(MACH_VST, MACHMODE_UNDEFINED, Machine::id_type());
 			try
 			{
-				vstPlug.Instance(pinfo.dllname);
+				if(Global::dllfinder().LookupDllPath(pinfo.dllname,MACH_VST)) 
+				{
+					vstPlug.Instance(pinfo.dllname);
+				}
 			}
 			catch(const std::exception & e)
 			{

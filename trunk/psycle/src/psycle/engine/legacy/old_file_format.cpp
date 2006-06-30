@@ -318,7 +318,7 @@ namespace psycle
 								{
 									try
 									{
-										pVstPlugin->Instance(path, false);
+										pVstPlugin->LoadDll(path,false);
 									}
 									catch(...)
 									{
@@ -1005,7 +1005,7 @@ namespace psycle
 			Global::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
 			try
 			{
-				Instance(strname);
+				LoadDll(strname);
 			}
 			catch(...)
 			{

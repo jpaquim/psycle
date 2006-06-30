@@ -2,10 +2,10 @@
 /// \brief delay modulated by a sine
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
-#include <psycle/common/math/sinus_sequence.hpp>
-#include <psycle/common/math/pi.hpp>
-#include <psycle/common/math/remainder.hpp>
-#include <psycle/common/math/erase_all_nans_infinities_and_denormals.hpp>
+#include <psycle/helpers/math/sinus_sequence.hpp>
+#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/remainder.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cassert>
 namespace psycle { namespace plugin {
 

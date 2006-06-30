@@ -2,8 +2,8 @@
 /// \brief ring modulator with frequency modulation of the amplitude modulation
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
-#include <psycle/common/math/pi.hpp>
-#include <psycle/common/math/remainder.hpp>
+#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/remainder.hpp>
 namespace psycle { namespace plugin {
 
 namespace math = common::math;

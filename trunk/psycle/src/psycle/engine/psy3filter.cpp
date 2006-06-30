@@ -1,6 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/engine/psy3loader.hpp>
+#include <psycle/engine/psy3filter.hpp>
 #include <psycle/engine/FileIO.hpp>
 #include <psycle/engine/song.hpp>
 #include <psycle/helpers/DataCompression.hpp>
@@ -98,7 +98,7 @@ namespace psycle {
 					{
 						LoadPATDv0(file,song,version&0x00FF);
 						//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-						if (version == 0x0000) size += 4; 
+						if (version == 0x0000) size = file->GetPos()-fileposition; 
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -217,6 +217,8 @@ namespace psycle {
 		}
 		bool Psy3Filter::Save(RiffFile* file,const Song& song)
 		{
+			//\todo:
+			bool autosave=false;
 			if ( !autosave ) 
 			{
 				progress.emit(1,0,"");
@@ -232,23 +234,28 @@ namespace psycle {
 				progress.emit(4,-1,"");
 				SaveSNGIv0(file,song);
 				progress.emit(4,-1,"");
-				SaveSEQDv0(file,song);
-				progress.emit(4,-1,"");
 			}
 			else
 			{
 				SaveSONGv0(file,song);
 				SaveINFOv0(file,song);
 				SaveSNGIv0(file,song);
-				SaveSEQDv0(file,song);
+			}
+			for(std::uint32_t index(0) ; index < MAX_SEQUENCES ; ++index)
+			{
+				SaveSEQDv0(file,song,index);
+				if ( !autosave ) 
+				{
+					progress.emit(4,-1,"");
+				}
 			}
 
 			for(std::uint32_t index(0) ; index < MAX_PATTERNS; ++index)
 			{
 				// check every pattern for validity
-				if (IsPatternUsed(index))
+				if (song.IsPatternUsed(index))
 				{
-					SavePATDv0(file,song);
+					SavePATDv0(file,song,index);
 					if ( !autosave ) 
 					{
 						progress.emit(4,-1,"");
@@ -257,9 +264,9 @@ namespace psycle {
 			}
 			for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
 			{
-				if (_pMachine[index])
+				if (song._pMachine[index])
 				{
-					SaveMACDv0(file,song);
+					SaveMACDv0(file,song,index);
 					if ( !autosave ) 
 					{
 						progress.emit(4,-1,"");
@@ -268,9 +275,9 @@ namespace psycle {
 			}
 			for(std::uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
 			{
-				if (!_pInstrument[index]->Empty())
+				if (!song._pInstrument[index]->Empty())
 				{
-					SaveINSDv0(file,song);
+					SaveINSDv0(file,song,index);
 					if ( !autosave ) 
 					{
 						progress.emit(4,-1,"");
@@ -463,6 +470,7 @@ namespace psycle {
 		bool Psy3Filter::SaveSONGv0(RiffFile* file,const Song& song)
 		{
 			std::uint32_t chunkcount;
+			std::uint32_t version, size;
 			// chunk header;
 			{
 				file->WriteChunk("SONG",4);
@@ -477,208 +485,217 @@ namespace psycle {
 			for(unsigned int i(0) ; i < MAX_MACHINES    ; ++i) if(song._pMachine[i])              ++chunkcount;
 			for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i) if(!song._pInstrument[i]->Empty()) ++chunkcount;
 
-			if ( !autosave ) 
-			{
-				progress.emit(3,chunkcount,"");
-			}
 			// chunk data
 			{
 				file->Write(chunkcount);
 			}
+//			if ( !autosave ) 
+//			{
+//				progress.emit(3,chunkcount,"");
+//			}
+			//\todo:
+			return true;
 		}
 		bool Psy3Filter::SaveINFOv0(RiffFile* file,const Song& song)
 		{
+			std::uint32_t version, size;
 			// chunk header
 			{
-				pFile->WriteChunk("INFO",4);
+				file->WriteChunk("INFO",4);
 
 				version = VERSION_INFO;
-				pFile->Write(version);
+				file->Write(version);
 
-				size = strlen(Name)+strlen(Author)+strlen(Comment)+3; // [bohan] since those are variable length, we could change from fixed size arrays to std::string
-				pFile->Write(size);
+				size = strlen(song.Name)+strlen(song.Author)+strlen(song.Comment)+3; // [bohan] since those are variable length, we could change from fixed size arrays to std::string
+				file->Write(size);
 			}
 			// chunk data
 			{
-				pFile->WriteChunk(Name,strlen(Name)+1);
-				pFile->WriteChunk(Author,strlen(Author)+1);
-				pFile->WriteChunk(Comment,strlen(Comment)+1);
+				file->WriteChunk(song.Name,strlen(song.Name)+1);
+				file->WriteChunk(song.Author,strlen(song.Author)+1);
+				file->WriteChunk(song.Comment,strlen(song.Comment)+1);
 			}
+			//\todo:
+			return true;
 		}
 		bool Psy3Filter::SaveSNGIv0(RiffFile* file,const Song& song)
 		{
+			std::uint32_t version, size, temp;
+			std::uint16_t temp16;
 			// chunk header
 			{
-				pFile->WriteChunk("SNGI",4);
+				file->WriteChunk("SNGI",4);
 
 				version = VERSION_SNGI;
-				pFile->Write(version);
+				file->Write(version);
 
-				size = (11*sizeof(temp))+(tracks()*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
-				pFile->Write(size);
+				size = (11*sizeof(temp))+(song.tracks()*(sizeof(song._trackMuted[0])+sizeof(song._trackArmed[0])));
+				file->Write(size);
 			}
 			// chunk data
 			{
-				temp = tracks();     pFile->Write(temp);
-				temp16 = int(floor(m_BeatsPerMin));							pFile->Write(temp16);
-				temp16 = int((m_BeatsPerMin-floor(m_BeatsPerMin))*100);		pFile->Write(temp16);
-				temp = m_LinesPerBeat; pFile->Write(temp);
-				temp = currentOctave;  pFile->Write(temp);
-				temp = machineSoloed;  pFile->Write(temp);
-				temp = _trackSoloed;   pFile->Write(temp);
+				temp = song.tracks();     file->Write(temp);
+				temp16 = int(floor(song.m_BeatsPerMin));							file->Write(temp16);
+				temp16 = int((song.m_BeatsPerMin-floor(song.m_BeatsPerMin))*100);		file->Write(temp16);
+				temp = song.m_LinesPerBeat; file->Write(temp);
+				temp = song.currentOctave;  file->Write(temp);
+				temp = song.machineSoloed;  file->Write(temp);
+				temp = song._trackSoloed;   file->Write(temp);
 
-				temp = seqBus; pFile->Write(temp);
+				temp = song.seqBus; file->Write(temp);
 
-				temp = midiSelected; pFile->Write(temp);
-				temp = auxcolSelected; pFile->Write(temp);
-				temp = instSelected; pFile->Write(temp);
+				temp = song.midiSelected; file->Write(temp);
+				temp = song.auxcolSelected; file->Write(temp);
+				temp = song.instSelected; file->Write(temp);
 
-				temp = 1;  pFile->Write(temp); // sequence width
+				temp = 1;  file->Write(temp); // sequence width
 
-				for(int i = 0; i < tracks(); i++)
+				for(int i = 0; i < song.tracks(); i++)
 				{
-					pFile->Write(_trackMuted[i]);
-					pFile->Write(_trackArmed[i]); // remember to count them
+					file->Write(song._trackMuted[i]);
+					file->Write(song._trackArmed[i]); // remember to count them
 				}
 			}
-
+			//\todo:
+			return true;
 		}
-		bool Psy3Filter::SaveSEQDv0(RiffFile* file,const Song& song)
+		bool Psy3Filter::SaveSEQDv0(RiffFile* file,const Song& song,int index)
 		{
-			for(std::uint32_t index(0) ; index < MAX_SEQUENCES ; ++index)
+			std::uint32_t version, size, temp;
+			//\todo: This needs to be replaced when converting to Multisequence.
+			char* pSequenceName = "seq0\0";
+			// chunk header
 			{
-				char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequence.
+				file->WriteChunk("SEQD",4);
 
-				// chunk header
+				version = CURRENT_FILE_VERSION_SEQD;
+				file->Write(version);
+
+				size = ((song.playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
+				file->Write(size);
+			}
+			// chunk data
+			{
+				file->Write(index); // Sequence Track number
+				temp = song.playLength; file->Write(temp); // Sequence length
+
+				file->WriteChunk(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
+
+				for (int i = 0; i < song.playLength; i++)
 				{
-					pFile->WriteChunk("SEQD",4);
-
-					version = CURRENT_FILE_VERSION_SEQD;
-					pFile->Write(version);
-
-					size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
-					pFile->Write(size);
-				}
-				// chunk data
-				{
-					pFile->Write(index); // Sequence Track number
-					temp = playLength; pFile->Write(temp); // Sequence length
-
-					pFile->WriteChunk(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
-
-					for (int i = 0; i < playLength; i++)
-					{
-						temp = playOrder[i]; pFile->Write(temp); // Sequence data.
-					}
+					temp = song.playOrder[i]; file->Write(temp); // Sequence data.
 				}
 			}
+			//\todo:
+			return true;
 		}
-		bool Psy3Filter::SavePATDv0(RiffFile* file,const Song& song)
+		bool Psy3Filter::SavePATDv0(RiffFile* file,const Song& song,int index)
 		{
-			unsigned char * pSource = new unsigned char[tracks()*patternLines[index]*EVENT_SIZE];
+			std::uint32_t version, size, temp;
+			unsigned char * pSource = new unsigned char[song.tracks()*song.patternLines[index]*EVENT_SIZE];
 			unsigned char * pCopy = pSource;
 
-			for (int y = 0; y < patternLines[index]; y++)
+			for (int y = 0; y < song.patternLines[index]; y++)
 			{
-				unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
-				std::memcpy(pCopy,pData,EVENT_SIZE*tracks());
-				pCopy+=EVENT_SIZE*tracks();
+				unsigned char * pData = song.ppPatternData[index]+(y*MULTIPLY);
+				std::memcpy(pCopy,pData,EVENT_SIZE*song.tracks());
+				pCopy+=EVENT_SIZE*song.tracks();
 			}
 
-			std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, tracks()*patternLines[index]*EVENT_SIZE);
+			std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, song.tracks()*song.patternLines[index]*EVENT_SIZE);
 			delete[] pSource;
 
 			// chunk header
 			{
-				pFile->WriteChunk("PATD",4);
+				file->WriteChunk("PATD",4);
 
 				version = CURRENT_FILE_VERSION_PATD;
-				pFile->Write(version);
+				file->Write(version);
 
-				size = sizez77 + 4 * sizeof temp + strlen(patternName[index]) + 1;
-				pFile->Write(size);
+				size = sizez77 + 4 * sizeof temp + strlen(song.patternName[index]) + 1;
+				file->Write(size);
 			}
 			// chunk data
 			{
-				pFile->Write(index);
-				temp = patternLines[index]; pFile->Write(temp);
-				temp = tracks(); pFile->Write(temp); // eventually this may be variable per pattern
+				file->Write(index);
+				temp = song.patternLines[index]; file->Write(temp);
+				temp = song.tracks(); file->Write(temp); // eventually this may be variable per pattern
 
-				pFile->WriteChunk(&patternName[index],strlen(patternName[index])+1);
+				file->WriteChunk(&song.patternName[index],strlen(song.patternName[index])+1);
 
-				pFile->Write(sizez77);
-				pFile->WriteChunk(pCopy,sizez77);
+				file->Write(sizez77);
+				file->WriteChunk(pCopy,sizez77);
 			}
 
 			delete[] pCopy;
+			//\todo:
+			return true;
 		}
-		bool Psy3Filter::SaveMACDv0(RiffFile* file,const Song& song)
+		bool Psy3Filter::SaveMACDv0(RiffFile* file,const Song& song,int index)
 		{
+			std::uint32_t version, size;
 			std::fpos_t pos;
 
 			// chunk header
 			{
-				pFile->WriteChunk("MACD",4);
+				file->WriteChunk("MACD",4);
 
 				version = CURRENT_FILE_VERSION_MACD;
-				pFile->Write(version);
+				file->Write(version);
 
-				pos = pFile->GetPos();
+				pos = file->GetPos();
 
 				size = 0;
-				pFile->Write(size);
+				file->Write(size);
 			}
 			// chunk data
 			{
-				pFile->Write(index);
-				_pMachine[index]->SaveFileChunk(pFile);
+				file->Write(index);
+				song._pMachine[index]->SaveFileChunk(file);
 			}
 			// chunk size in header
 			{
-				std::fpos_t const pos2(pFile->GetPos());
+				std::fpos_t const pos2(file->GetPos());
 				size = pos2 - pos - sizeof size;
-				pFile->Seek(pos);
-				pFile->Write(size);
-				pFile->Seek(pos2);
+				file->Seek(pos);
+				file->Write(size);
+				file->Seek(pos2);
 			}
+			//\todo:
+			return true;
 		}
-		bool Psy3Filter::SaveINSDv0(RiffFile* file,const Song& song)
+		bool Psy3Filter::SaveINSDv0(RiffFile* file,const Song& song, int index)
 		{
+			std::uint32_t version, size;
 			std::fpos_t pos;
 
 			// chunk header
 			{
-				pFile->WriteChunk("INSD",4);
+				file->WriteChunk("INSD",4);
 
 				version = CURRENT_FILE_VERSION_INSD;
-				pFile->Write(version);
+				file->Write(version);
 
-				pos = pFile->GetPos();
+				pos = file->GetPos();
 
 				size = 0;
-				pFile->Write(size);
+				file->Write(size);
 			}
 			// chunk data
 			{
-				pFile->Write(index);
-				_pInstrument[index]->SaveFileChunk(pFile);
+				file->Write(index);
+				song._pInstrument[index]->SaveFileChunk(file);
 			}
 			// chunk size in header
 			{
-				std::fpos_t const pos2(pFile->GetPos());
+				std::fpos_t const pos2(file->GetPos());
 				size = pos2 - pos - sizeof size;
-				pFile->Seek(pos);
-				pFile->Write(size);
-				pFile->Seek(pos2);
+				file->Seek(pos);
+				file->Write(size);
+				file->Seek(pos2);
 			}
+			//\todo:
+			return true;
 		}
-
-
-
-
-
-
-
-
 	}
 }

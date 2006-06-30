@@ -80,7 +80,7 @@ namespace psycle
 					/// deletes all the patterns of this song.
 					void DeleteAllPatterns();
 					/// Used to detect if an especific pattern index contains any data.
-					bool IsPatternUsed(int i);
+					bool IsPatternUsed(int i) const;
 					/// removes a pattern from this song.
 					void RemovePattern(int ps);
 			///\}
