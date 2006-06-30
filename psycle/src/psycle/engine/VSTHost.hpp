@@ -153,7 +153,7 @@ namespace psycle
 				///\{
 					public:
 						plugin(Machine::class_type subclass, Machine::mode_type mode, Machine::id_type id);
-						bool LoadDll (std::string const & file_name);
+						bool LoadDll (std::string const & file_name, const bool overwriteName = true);
 						void Instance(std::string const & file_name, const bool overwriteName = true);
 						///< Helper class for Machine Creation.
 						static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);

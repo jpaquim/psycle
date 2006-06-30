@@ -18,7 +18,7 @@ namespace psycle{
 			infomap[MACH_DIST]=InternalMachineInfo(MACH_DIST,MACHMODE_FX,Dummy::CreateFromType,false,true,"Ayeternal Dist!","Dist!","Arguru and bohan",0,1000,0);
 			infomap[MACH_SAMPLER]=InternalMachineInfo(MACH_SAMPLER,MACHMODE_GENERATOR,Sampler::CreateFromType,false,false,"Basic Sampler","Sampler","Arguru",0,500,0);
 			infomap[MACH_DELAY]=InternalMachineInfo(MACH_DELAY,MACHMODE_FX,Dummy::CreateFromType,false,true,"Ayeternal Delay","Delay","Arguru and bohan",0,1000,0);
-			infomap[MACH_2PFILTER]=InternalMachineInfo(MACH_2PFILTER,MACHMODE_FX,Dummy::CreateFromType,true,false,"Ayeternal 2Pfilter","2pfilter","Arguru and bohan",0,1000,0);
+			infomap[MACH_2PFILTER]=InternalMachineInfo(MACH_2PFILTER,MACHMODE_FX,Dummy::CreateFromType,false,true,"Ayeternal 2Pfilter","2pfilter","Arguru and bohan",0,1000,0);
 			infomap[MACH_GAIN]=InternalMachineInfo(MACH_GAIN,MACHMODE_FX,Dummy::CreateFromType,false,true,"Ayeternal Gain","Gain","Arguru and bohan",0,1000,0);
 			infomap[MACH_FLANGER]=InternalMachineInfo(MACH_FLANGER,MACHMODE_FX,Dummy::CreateFromType,false,true,"Ayeternal Flanger","Flanger","Arguru and bohan",0,1000,0);
 			infomap[MACH_PLUGIN]=InternalMachineInfo(MACH_PLUGIN,MACHMODE_UNDEFINED,Plugin::CreateFromType,true,false,"Native Plugin Host","Plugin","Psycledelics",0,1100,0);

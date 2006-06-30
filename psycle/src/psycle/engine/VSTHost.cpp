@@ -169,7 +169,7 @@ namespace psycle
 				return 0;
 			}
 
-			bool plugin::LoadDll(std::string const & file_name)
+			bool plugin::LoadDll(std::string const & file_name, const bool overwriteName)
 			{
 				std::string path = file_name;
 				if(Global::dllfinder().LookupDllPath(path,MACH_VST)) 

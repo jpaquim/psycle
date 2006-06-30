@@ -211,7 +211,7 @@ namespace psycle {
 		float * Master::_pMasterSamples = 0;
 
 		Master::Master(Machine::id_type id)
-		: Machine(MACH_MASTER, MACHMODE_FX, id)
+		: Machine(MACH_MASTER, MACHMODE_MASTER, id)
 		,sampleCount(0)
 		,_outDry(256)
 		,decreaseOnClip(false)

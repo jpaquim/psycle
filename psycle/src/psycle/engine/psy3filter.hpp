@@ -33,11 +33,11 @@ namespace psycle {
 			bool SaveSONGv0(RiffFile* file,const Song& song);
 			bool SaveINFOv0(RiffFile* file,const Song& song);
 			bool SaveSNGIv0(RiffFile* file,const Song& song);
-			bool SaveSEQDv0(RiffFile* file,const Song& song);
-			bool SavePATDv0(RiffFile* file,const Song& song);
-			bool SaveMACDv0(RiffFile* file,const Song& song);
-			bool SaveINSDv0(RiffFile* file,const Song& song);
-			bool SaveWAVEv0(RiffFile* file,const Song& song);
+			bool SaveSEQDv0(RiffFile* file,const Song& song,int index);
+			bool SavePATDv0(RiffFile* file,const Song& song,int index);
+			bool SaveMACDv0(RiffFile* file,const Song& song,int index);
+			bool SaveINSDv0(RiffFile* file,const Song& song,int index);
+			bool SaveWAVEv0(RiffFile* file,const Song& song,int index);
 
 		protected:
 			static std::string const FILE_FOURCC;

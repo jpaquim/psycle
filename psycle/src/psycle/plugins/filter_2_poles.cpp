@@ -2,10 +2,10 @@
 /// \brief filter in the frequency domain using 2 poles
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
-#include <psycle/common/math/pi.hpp>
-#include <psycle/common/math/clip.hpp>
-#include <psycle/common/math/remainder.hpp>
-#include <psycle/common/math/erase_all_nans_infinities_and_denormals.hpp>
+#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/clip.hpp>
+#include <psycle/helpers/math/remainder.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 namespace psycle { namespace plugin {
 
 namespace math = common::math;
