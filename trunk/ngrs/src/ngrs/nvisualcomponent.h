@@ -226,6 +226,7 @@ private:
 
    NFont oldFont;
    bool disableParentFont_;
+
 };
 
 #endif

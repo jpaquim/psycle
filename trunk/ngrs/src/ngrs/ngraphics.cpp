@@ -857,3 +857,21 @@ void NGraphics::putPixmap( int destX, int destY, int width, int height, NPixmap 
 
 }
 
+// sets and gets the pen (line style etc ..)
+
+void NGraphics::setPen( const NPen & pen )
+{
+  pen_ = pen;
+  XSetLineAttributes(NApp::system().dpy(), gcp , pen.lineWidth(), (int) pen. lineStyle(), CapButt, JoinRound);
+}
+
+const NPen & NGraphics::pen( ) const
+{
+  return pen_;
+}
+
+void NGraphics::resetPen( )
+{
+  setPen(NPen());
+}
+

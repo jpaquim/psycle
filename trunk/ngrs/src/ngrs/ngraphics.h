@@ -28,6 +28,7 @@
 #include "nfntstring.h"
 #include "nregion.h"
 #include "npixmap.h"
+#include "npen.h"
 
 
 /**
@@ -46,6 +47,10 @@ public:
 
     void setRegion(const NRegion & region);
     NRegion region();
+
+    void setPen(const NPen & pen);
+    const NPen & pen() const;
+    void resetPen();
 
     void drawLine(long x,long y,long x1, long y1);
     void drawRect( int x, int y, int width, int height );
@@ -134,6 +139,8 @@ private:
    XftDraw* drawWin;
 
    NRegion region_;
+
+   NPen pen_;
 
    bool visible_;
 };
