@@ -26,7 +26,7 @@ vector<NTimer*> NTimer::timerList;
 NTimer::NTimer()
 {
  ms_=1000;
- enabled=false;
+ enabled_ = false;
  count_=0;
 }
 
@@ -40,14 +40,14 @@ NTimer::~NTimer()
 void NTimer::enableTimer( )
 {
  timerList.push_back(this);
- enabled=true;
+ enabled_ = true;
 }
 
 void NTimer::disableTimer( )
 {
  vector<NTimer*>::iterator it = find(timerList.begin(),timerList.end(),this);
  if (it!=timerList.end()) timerList.erase(it);
- enabled=false;
+ enabled_ = false;
 }
 
 void NTimer::setIntervalTime( int ms )
@@ -56,7 +56,7 @@ void NTimer::setIntervalTime( int ms )
  count_=ms;
 }
 
-int NTimer::intervalTime( )
+int NTimer::intervalTime( ) const
 {
  return ms_;
 }
@@ -86,4 +86,9 @@ int NTimer::count( )
 
 void NTimer::onTimerEvent( )
 {
+}
+
+bool NTimer::enabled( ) const
+{
+  return enabled_;
 }

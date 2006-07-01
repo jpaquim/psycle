@@ -105,8 +105,8 @@ private:
 
    void scrollComponent(NVisualComponent* control, int dx, int dy);
 
-   void onDecBtnClicked(NButtonEvent* ev);
-   void onIncBtnClicked(NButtonEvent* ev);
+   void onDecBtnClick(NButtonEvent* ev);
+   void onIncBtnClick(NButtonEvent* ev);
 
    void onScrollAreaClick(NButtonEvent* ev);
 

@@ -126,11 +126,13 @@ void NScrollBar::init( )
   orientation_ = nVertical;
 
   incBtn = new NButton(inc,12,12);//up,10,10);
-  incBtn->clicked.connect(this,&NScrollBar::onIncBtnClicked);
+  incBtn->click.connect(this,&NScrollBar::onIncBtnClick);
   incBtn->setFlat(false);
+  incBtn->setRepeatMode(true);
   decBtn = new NButton(dec,12,12);
-  decBtn->clicked.connect(this,&NScrollBar::onDecBtnClicked);
+  decBtn->click.connect(this,&NScrollBar::onDecBtnClick);
   decBtn->setFlat(false);
+  decBtn->setRepeatMode(true);
 
   add(incBtn);
   add(decBtn);
@@ -394,7 +396,7 @@ int NScrollBar::step( ) const
   return step_;
 }
 
-void NScrollBar::onDecBtnClicked( NButtonEvent * ev )
+void NScrollBar::onDecBtnClick( NButtonEvent * ev )
 {
   if ( orientation() == nVertical ) {
     slider_->setTop( std::max(0, slider_->top() - 10) );
@@ -405,7 +407,7 @@ void NScrollBar::onDecBtnClicked( NButtonEvent * ev )
   onSliderMove();
 }
 
-void NScrollBar::onIncBtnClicked( NButtonEvent * ev )
+void NScrollBar::onIncBtnClick( NButtonEvent * ev )
 {
   if ( orientation() == nVertical ) {
     slider_->setTop( std::min(sliderArea_->height() - slider_->height(), slider_->top() + 10) );

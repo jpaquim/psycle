@@ -68,17 +68,10 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-  setPosition(0,0,100,100);
+  testScrollBar();
+  // testTimerButton();
 
-  NStatusBar* bar = new NStatusBar();
-     NTextStatusItem* item = new NTextStatusItem("Hallo");
-     bar->add(item);
-  pane()->add(bar);
-  bar->resize();
-
-  testMenu();
-  testComboBox();
-  //testMemo();
+//testMemo();
   //testListBox();
 
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
@@ -393,6 +386,34 @@ void NTestWindow::testMsgBox( )
   bool result = false;
   int choice = box->execute();
 
+}
+
+void NTestWindow::testTimerButton( )
+{
+  info = new NLabel();
+   info->setPosition(200,50,200,20);
+  pane()->add(info);
+
+  counter = 0;
+  NButton* btn1 = new NButton("press me");
+    btn1->setPosition(10,100,200,20);
+    btn1->click.connect(this, &NTestWindow::onBtnClick);
+    btn1->setRepeatMode(true);
+  pane()->add(btn1);
+}
+
+void NTestWindow::onBtnClick( NButtonEvent * ev )
+{
+  info->setText(stringify(counter));
+  info->repaint();
+  counter++;
+}
+
+void NTestWindow::testScrollBar( )
+{
+  NScrollBar* scrollBar = new NScrollBar();
+  scrollBar->setOrientation(nVertical);
+  pane()->add(scrollBar,nAlRight);
 }
 
 

@@ -41,8 +41,8 @@ public:
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
 
-    signal1<NButtonEvent*> incClicked;
-    signal1<NButtonEvent*> decClicked;
+    signal1<NButtonEvent*> incClick;
+    signal1<NButtonEvent*> decClick;
 
 private:
 
@@ -55,8 +55,8 @@ private:
     NBitmap incBit_;
     NBitmap decBit_;
 
-    void onIncBtnClicked(NButtonEvent* ev);
-    void onDecBtnClicked(NButtonEvent* ev);
+    void onIncBtnClick(NButtonEvent* ev);
+    void onDecBtnClick(NButtonEvent* ev);
 
 };
 
