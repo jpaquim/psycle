@@ -58,7 +58,11 @@ WireGUI::~WireGUI()
 
 void WireGUI::paint( NGraphics * g )
 {
+  NPen pen;
+  pen.setLineWidth(2);
+  g->setPen(pen);
   NLine::paint(g);
+  g->resetPen();
 
   g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
   drawArrow(g);
