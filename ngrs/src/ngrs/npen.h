@@ -26,6 +26,37 @@ enum LineStyle {nLineSolid          = LineSolid,
                 nLineOnOffDash      = LineOnOffDash,
                 nLineLineDoubleDash = LineDoubleDash };
 
+enum CapStyle  {nCapNotLast     =  CapNotLast,
+                nCapButt        =  CapButt,
+                nCapRound       =  CapRound,
+                nCapProjecting  =  CapProjecting};
+
+enum JoinStyle { nJoinMiter = JoinMiter,
+                 nJoinRound = JoinRound,
+                 nJoinBevel = JoinBevel };
+
+enum FillStyle { nFillSolid          = FillSolid,
+                 nFillTiled          = FillTiled,
+                 nFillStippled       = FillStippled,
+                 nFillOpaqueStippled = FillOpaqueStippled };
+
+enum LogicStyle { nClear        = GXclear,
+                  nAnd          = GXand,
+                  nAndReverse   = GXandReverse,
+                  nCopy         = GXcopy,
+                  nAndInverted  = GXandInverted,
+                  nNoop         = GXnoop,
+                  nXor          = GXxor,
+                  nOr           = GXor,
+                  nNor          = GXnor,
+                  nEquiv        = GXequiv,
+                  nInvert       = GXinvert,
+                  nOrReverse    = GXorReverse,
+                  nCopyInverted = GXcopyInverted,
+                  nXorInverted  = GXorInverted,
+                  nNand         = GXnand,
+                  nSet          = GXset };
+
 /**
 @author Stefan Nattkemper
 */
@@ -42,12 +73,26 @@ public:
     void setLineStyle(LineStyle style);
     LineStyle lineStyle() const;
 
+    void setCapStyle(CapStyle style);
+    CapStyle capStyle() const;
+
+    void setJoinStyle(JoinStyle style);
+    JoinStyle joinStyle() const;
+
+    void setFillStyle(FillStyle style);
+    FillStyle fillStyle() const;
+
+    void setFunction(int function); // sets the logical flags
+    int function() const;
+
 private:
 
     int lineWidth_;
-    LineStyle style_;
-
-    XGCValues gcv;
+    LineStyle lineStyle_;
+    CapStyle  capStyle_;
+    JoinStyle joinStyle_;
+    FillStyle fillStyle_;
+    int function_;
 
 };
 

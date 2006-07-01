@@ -862,7 +862,16 @@ void NGraphics::putPixmap( int destX, int destY, int width, int height, NPixmap 
 void NGraphics::setPen( const NPen & pen )
 {
   pen_ = pen;
-  XSetLineAttributes(NApp::system().dpy(), gcp , pen.lineWidth(), (int) pen. lineStyle(), CapButt, JoinRound);
+
+  if (dblBuffer_) {
+    XSetLineAttributes(NApp::system().dpy(), gcp , pen.lineWidth(), (int) pen. lineStyle(), pen.capStyle(), pen.joinStyle() );
+    XSetFillStyle(NApp::system().dpy(), gcp, pen.fillStyle() );
+    XSetFunction(NApp::system().dpy(), gcp, pen.function() );
+  } else {
+    XSetLineAttributes(NApp::system().dpy(), gc() , pen.lineWidth(), (int) pen. lineStyle(), pen.capStyle(), pen.joinStyle() );
+    XSetFillStyle(NApp::system().dpy(), gc() , pen.fillStyle() );
+    XSetFunction(NApp::system().dpy(), gc() , pen.function() );
+  }
 }
 
 const NPen & NGraphics::pen( ) const
