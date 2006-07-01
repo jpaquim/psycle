@@ -56,8 +56,8 @@ private:
     void onOkBtn(NButtonEvent* sender);
     void onCancelBtn(NButtonEvent* sender);
 
-    void onIncBtnClicked(NButtonEvent* ev);
-    void onDecBtnClicked(NButtonEvent* ev);
+    void onIncBtnClick(NButtonEvent* ev);
+    void onDecBtnClick(NButtonEvent* ev);
 
 };
 
