@@ -22,7 +22,11 @@
 NPen::NPen()
 {
   lineWidth_ = 1;
-  style_ = nLineSolid;
+  lineStyle_ = nLineSolid;
+  capStyle_  = nCapButt;
+  joinStyle_ = nJoinMiter;
+  fillStyle_ = nFillSolid;
+  function_  = nCopy;
 }
 
 
@@ -42,10 +46,50 @@ int NPen::lineWidth( ) const
 
 void NPen::setLineStyle( LineStyle style )
 {
-  style_ = style;
+  lineStyle_ = style;
 }
 
 LineStyle NPen::lineStyle( ) const
 {
-  return style_;
+  return lineStyle_;
+}
+
+void NPen::setCapStyle( CapStyle style )
+{
+  capStyle_ = style;
+}
+
+CapStyle NPen::capStyle( ) const
+{
+  return capStyle_;
+}
+
+void NPen::setJoinStyle( JoinStyle style )
+{
+  joinStyle_ = style;
+}
+
+JoinStyle NPen::joinStyle( ) const
+{
+  return joinStyle_;
+}
+
+void NPen::setFillStyle( FillStyle style )
+{
+  fillStyle_ = style;
+}
+
+FillStyle NPen::fillStyle( ) const
+{
+  return fillStyle_;
+}
+
+void NPen::setFunction( int function )
+{
+  function_ = function;
+}
+
+int NPen::function( ) const
+{
+  return function_;
 }
