@@ -35,8 +35,8 @@ PatDlg::PatDlg()
   lineNumber_ = 0;
   lineNumEdit_ = new NSpinEdit();
     lineNumEdit_->setPosition(10,10,100,lineNumEdit_->preferredHeight());
-    lineNumEdit_->decClicked.connect(this,&PatDlg::onDecBtnClicked);
-    lineNumEdit_->incClicked.connect(this,&PatDlg::onIncBtnClicked);
+    lineNumEdit_->decClick.connect(this,&PatDlg::onDecBtnClick);
+    lineNumEdit_->incClick.connect(this,&PatDlg::onIncBtnClick);
   pane()->add(lineNumEdit_);
 
   NPanel* bPnl = new NPanel();
@@ -112,7 +112,7 @@ bool PatDlg::adaptSize() {
   return false;
 }
 
-void PatDlg::onIncBtnClicked( NButtonEvent * ev )
+void PatDlg::onIncBtnClick( NButtonEvent * ev )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();
@@ -122,7 +122,7 @@ void PatDlg::onIncBtnClicked( NButtonEvent * ev )
   lineNumEdit_->repaint();
 }
 
-void PatDlg::onDecBtnClicked( NButtonEvent * ev )
+void PatDlg::onDecBtnClick( NButtonEvent * ev )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();
