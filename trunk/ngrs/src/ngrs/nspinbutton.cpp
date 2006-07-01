@@ -64,8 +64,11 @@ NSpinButton::NSpinButton()
   decBtn_->setFlat(false);
   incBtn_->setFlat(false);
 
-  decBtn_->clicked.connect(this,&NSpinButton::onDecBtnClicked);
-  incBtn_->clicked.connect(this,&NSpinButton::onIncBtnClicked);
+  decBtn_->click.connect(this,&NSpinButton::onDecBtnClick);
+  incBtn_->click.connect(this,&NSpinButton::onIncBtnClick);
+
+  decBtn_->setRepeatMode(true);
+  incBtn_->setRepeatMode(true);
 }
 
 
@@ -92,14 +95,14 @@ int NSpinButton::preferredHeight( ) const
   return decBtn_->preferredHeight(),incBtn_->preferredHeight() + spacing().top() + spacing().bottom() + 5;
 }
 
-void NSpinButton::onIncBtnClicked( NButtonEvent * ev )
+void NSpinButton::onIncBtnClick( NButtonEvent * ev )
 {
-  incClicked.emit(ev);
+  incClick.emit(ev);
 }
 
-void NSpinButton::onDecBtnClicked( NButtonEvent * ev )
+void NSpinButton::onDecBtnClick( NButtonEvent * ev )
 {
-  decClicked.emit(ev);
+  decClick.emit(ev);
 }
 
 

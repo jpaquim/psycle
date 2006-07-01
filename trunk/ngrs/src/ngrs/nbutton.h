@@ -23,6 +23,7 @@
 #include "ncustombutton.h"
 #include "nimage.h"
 #include "nbevelborder.h"
+#include "ntimer.h"
 
 class NWindow;
 class NLabel;
@@ -46,6 +47,10 @@ public:
     void setFlat(bool on);
     void setHint(const std::string & text);
 
+    virtual void onMousePress (int x, int y, int button);
+    virtual void onMousePressed (int x, int y, int button);
+
+
     virtual void onMouseExit();
     virtual void onMouseEnter();
     virtual void setDown(bool on);
@@ -55,6 +60,8 @@ public:
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
 
+    void setRepeatMode( bool on);
+    void setRepeatPolicy( int interval, int startLatency = 100 );
 
 private:
 
@@ -72,6 +79,14 @@ private:
     NWindow* hint;
     NLabel* hintLbl;
 
+    bool repeatMode_;
+    NTimer repeatTimer;
+    NTimer startLatencyTimer;
+
+    int button_;
+
+    void onStartTimer();
+    void onRepeatTimer();
 };
 
 #endif

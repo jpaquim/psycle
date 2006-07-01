@@ -37,9 +37,10 @@ public:
     sigslot::signal0<> timerEvent;
 
     void enableTimer();
+    bool enabled() const;
     void disableTimer();
     void setIntervalTime(int ms);
-    int intervalTime();
+    int intervalTime() const;
 
     static std::vector<NTimer*> timerList;
     static void selectTimeOut(int us);
@@ -51,7 +52,7 @@ public:
 private:
 
     int ms_;
-    bool enabled;
+    bool enabled_;
     int count_;
 
 };

@@ -25,8 +25,8 @@ NSpinEdit::NSpinEdit()
   add( edit_ = new NEdit() );
   add( spinBtn_  = new NSpinButton() );
 
-  spinBtn_->decClicked.connect(this,&NSpinEdit::onDecBtnClicked);
-  spinBtn_->incClicked.connect(this,&NSpinEdit::onIncBtnClicked);
+  spinBtn_->decClick.connect(this,&NSpinEdit::onDecBtnClick);
+  spinBtn_->incClick.connect(this,&NSpinEdit::onIncBtnClick);
 }
 
 
@@ -55,14 +55,14 @@ std::string NSpinEdit::text( ) const
   return edit_->text();
 }
 
-void NSpinEdit::onIncBtnClicked( NButtonEvent * ev )
+void NSpinEdit::onIncBtnClick( NButtonEvent * ev )
 {
-  incClicked.emit(ev);
+  incClick.emit(ev);
 }
 
-void NSpinEdit::onDecBtnClicked( NButtonEvent * ev )
+void NSpinEdit::onDecBtnClick( NButtonEvent * ev )
 {
-  decClicked.emit(ev);
+  decClick.emit(ev);
 }
 
 

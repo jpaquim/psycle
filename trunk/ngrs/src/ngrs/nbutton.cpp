@@ -153,6 +153,13 @@ void NButton::init( )
   hint = 0;
   hintLbl = 0;
 
+  // inits the repeat Mode for the button .. at default off
+  repeatMode_ = false;
+  button_ = 1;
+  repeatTimer.setIntervalTime(50);
+  repeatTimer.timerEvent.connect(this,&NButton::onRepeatTimer);
+  startLatencyTimer.setIntervalTime(100);
+  startLatencyTimer.timerEvent.connect(this,&NButton::onStartTimer);
 }
 
 void NButton::setDown( bool on )
@@ -181,6 +188,50 @@ void NButton::setHint( const std::string & text )
      add(hint);
   }
   hintLbl->setText(text);
+}
+
+void NButton::setRepeatMode( bool on )
+{
+  repeatMode_ = on;
+}
+
+void NButton::setRepeatPolicy( int interval, int startLatency )
+{
+  repeatTimer.setIntervalTime(interval);
+  startLatencyTimer.setIntervalTime(startLatency);
+}
+
+void NButton::onMousePress( int x, int y, int button )
+{
+  NCustomButton::onMousePress(x, y, button);
+
+  if (repeatMode_ ) {
+    if (!startLatencyTimer.enabled() ) {
+        button_ = button;
+        startLatencyTimer.enableTimer();
+    }
+  }
+}
+
+void NButton::onMousePressed( int x, int y, int button )
+{
+  NCustomButton::onMousePressed(x, y, button);
+
+  if (repeatMode_) {
+    repeatTimer.disableTimer();
+    startLatencyTimer.disableTimer();
+  }
+}
+
+void NButton::onStartTimer( )
+{
+  startLatencyTimer.disableTimer();
+  repeatTimer.enableTimer();
+}
+
+void NButton::onRepeatTimer( )
+{
+  NCustomButton::onMousePress(0,0,button_);
 }
 
 

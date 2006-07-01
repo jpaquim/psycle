@@ -64,11 +64,14 @@ public:
 
 private:
 
+    int counter; // this is for timer button test;
+
     NProgressBar* pBar;
     NSlider* slider;
     NWindow* scrollWin;
     NFileListBox* fileBox;
     NFileDialog* fDialog;
+    NLabel* info;
 
     void testListBox();
     void testComboBox();
@@ -85,10 +88,13 @@ private:
     void testTable();
     void testMemo();
     void testMsgBox();
+    void testTimerButton();
+    void testScrollBar();
 
     void onOpen(NButtonEvent* ev);
     void onSliderPosChanged(double v);
     void onQuit(NObject* sender);
+    void onBtnClick(NButtonEvent* ev);
 };
 
 #endif
