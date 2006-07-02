@@ -17,25 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PATTERNLINE_H
-#define PATTERNLINE_H
+#include "patternevent.h"
 
-/**
-@author Stefan Nattkemper
-*/
-
+PatternEvent::PatternEvent()
+{
+}
 
 
-class PatternLine{
-public:
-    PatternLine();
-
-    ~PatternLine();
-
-private:
+PatternEvent::~PatternEvent()
+{
+}
 
 
-
-};
-
-#endif
