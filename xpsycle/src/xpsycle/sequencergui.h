@@ -25,13 +25,83 @@
 /**
 @author Stefan Nattkemper
 */
+
+class NScrollBox;
+class NLabel;
+class NToolBar;
+
+
+namespace psycle {
+	namespace host {
+
 class SequencerGUI : public NPanel
 {
+  class SequencerLine : public NPanel {
+
+    class SequencerItem : public NPanel {
+      public:
+       SequencerItem();
+       ~SequencerItem();
+
+       virtual void resize();
+
+      private:
+
+        NLabel* caption_;
+
+    };
+
+    public :
+
+     SequencerLine();
+     ~SequencerLine();
+
+    signal1<SequencerLine*> click;
+
+    virtual void paint(NGraphics* g);
+
+    virtual void onMousePress(int x, int y, int button);
+
+    void addItem();
+
+  };
+
+class Area : public NPanel {
+  public :
+     Area();
+     ~Area();
+
+    void drawTimeGrid(NGraphics* g);
+
+    virtual void paint(NGraphics* g);
+
+};
+
+
 public:
     SequencerGUI();
 
     ~SequencerGUI();
 
+private:
+
+    SequencerLine* lastLine;
+    SequencerLine* selectedLine;
+
+    void addSequencerLine();
+
+    NScrollBox* scrollBox_;
+    Area* scrollArea_;
+    NToolBar* toolBar_;
+
+    void onNewTrack(NButtonEvent* ev);
+
+    void onNewPattern(NButtonEvent* ev);
+
+    void onSequencerLineClick(SequencerLine* line);
+
 };
+
+}}
 
 #endif

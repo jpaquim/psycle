@@ -33,6 +33,8 @@ namespace psycle {
 
 class NewMachine;
 class WaveEdFrame;
+class SequencerGUI;
+
 /**
 @author Stefan
 */
@@ -83,6 +85,8 @@ private:
 
     MachineView* machineView_;
     PatternView* patternView_;
+    SequencerGUI* sequencerView_;
+
 
     WaveEdFrame* waveEd_;
 
