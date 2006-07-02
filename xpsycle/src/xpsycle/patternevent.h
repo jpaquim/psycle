@@ -20,6 +20,8 @@
 #ifndef PATTERNEVENT_H
 #define PATTERNEVENT_H
 
+#include <cstdint>
+
 /**
 @author Stefan Nattkemper
 */
@@ -28,6 +30,29 @@ public:
     PatternEvent();
 
     ~PatternEvent();
+
+    void setNote(std::uint8_t value);
+    std::uint8_t note() const;
+
+    void setInstrument(std::uint8_t instrument);
+    std::uint8_t instrument() const;
+
+    void setMachine(std::uint8_t machine);
+    std::uint8_t machine() const;
+
+    void setCommand(std::uint8_t command);
+    std::uint8_t command() const;
+
+    void setParameter(std::uint8_t parameter);
+    std::uint8_t parameter() const;
+
+private:
+
+    std::uint8_t _note;
+    std::uint8_t _inst;
+    std::uint8_t _mach;
+    std::uint8_t _cmd;
+    std::uint8_t _parameter;
 
 };
 
