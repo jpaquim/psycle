@@ -22,6 +22,7 @@
 #include "player.h"
 #include "newmachine.h"
 #include "waveedframe.h"
+#include "sequencergui.h"
 #include <ngrs/napp.h>
 #include <inttypes.h>
 #include <ngrs/ndockpanel.h>
@@ -55,6 +56,8 @@ ChildView::ChildView()
     patternView_->setBackground(Global::pConfig()->pvc_row);
     patternView_->setForeground(Global::pConfig()->pvc_background);
     patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
+  sequencerView_ = new SequencerGUI();
+
 
   NDockPanel* macDock = new NDockPanel(machineView_);
   addPage(macDock,"Machine View");
@@ -62,6 +65,8 @@ ChildView::ChildView()
   addPage(patDock,"Pattern View");
   waveEd_ = new WaveEdFrame();
   addPage(waveEd_,"WaveEditor");
+  NDockPanel* seqDock = new NDockPanel(sequencerView_);
+  addPage(seqDock,"Sequencer View");
 
   setActivePage(macDock);
 
