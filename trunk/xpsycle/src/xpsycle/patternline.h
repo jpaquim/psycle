@@ -20,6 +20,9 @@
 #ifndef PATTERNLINE_H
 #define PATTERNLINE_H
 
+#include "patternevent.h"
+#include <map>
+
 /**
 @author Stefan Nattkemper
 */
@@ -32,9 +35,13 @@ public:
 
     ~PatternLine();
 
+    const PatternEvent & trackAt(int index) const;
+    void setPatternEvent(const PatternEvent & event, int index);
+
 private:
 
-
+    std::map<int, PatternEvent> tracks;
+    PatternEvent zeroTrack;
 
 };
 

@@ -28,4 +28,19 @@ PatternLine::~PatternLine()
 {
 }
 
+const PatternEvent & PatternLine::trackAt( int index ) const
+{
+  std::map<int, PatternEvent>::const_iterator itr;
+  if ( (itr = tracks.find( index )) != tracks.end() ) {
+    return itr->second;
+  } else {
+    return zeroTrack;
+  }
+}
+
+void PatternLine::setPatternEvent( const PatternEvent & event, int index )
+{
+  tracks[index] = event;
+}
+
 
