@@ -17,45 +17,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PATTERNSEQUENCE_H
-#define PATTERNSEQUENCE_H
+#include "sequencergui.h"
 
-#include "singlepattern.h"
-#include <map>
-
-/**
-@author Stefan Nattkemper
-*/
-
-class PatternSequenceRow {
-public :
-   PatternSequenceRow();
-   PatternSequenceRow(int col, SinglePattern* pattern);
-   ~PatternSequenceRow();
-
-   void add(int col, SinglePattern* pattern);
-
-   SinglePattern* colAt(int index);
-
-private:
-
-   std::map<int, SinglePattern*> colMap;
-
-};
-
-class PatternSequence{
-public:
-    PatternSequence();
-
-    ~PatternSequence();
-
-    void add(int col, int tick, SinglePattern* pattern);
+SequencerGUI::SequencerGUI()
+ : NPanel()
+{
+}
 
 
-private:
+SequencerGUI::~SequencerGUI()
+{
+}
 
-    std::map<int,PatternSequenceRow> rows;
 
-};
-
-#endif
