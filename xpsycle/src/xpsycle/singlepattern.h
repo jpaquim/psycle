@@ -20,10 +20,14 @@
 #ifndef SINGLEPATTERN_H
 #define SINGLEPATTERN_H
 
+#include "patternline.h"
+#include <list>
+
 /**
 @author Stefan Nattkemper
 */
-class SinglePattern{
+
+class SinglePattern : public std::list<PatternLine> {
 public:
     SinglePattern();
 
