@@ -20,14 +20,40 @@
 #ifndef PATTERNSEQUENCE_H
 #define PATTERNSEQUENCE_H
 
+#include "singlepattern.h"
+#include <map>
+
 /**
 @author Stefan Nattkemper
 */
+
+class PatternSequenceRow {
+public :
+   PatternSequenceRow();
+   PatternSequenceRow(int col, SinglePattern* pattern);
+   ~PatternSequenceRow();
+
+   void add(int col, SinglePattern* pattern);
+
+   SinglePattern* colAt(int index);
+
+private:
+
+   std::map<int, SinglePattern*> colMap;
+
+};
+
 class PatternSequence{
 public:
     PatternSequence();
 
     ~PatternSequence();
+
+    void add(int col, int tick, SinglePattern* pattern);
+
+private:
+
+    std::map<int,PatternSequenceRow> rows;
 
 };
 

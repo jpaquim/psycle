@@ -19,6 +19,20 @@
  ***************************************************************************/
 #include "patternsequence.h"
 
+PatternSequenceRow::PatternSequenceRow( )
+{
+}
+
+PatternSequenceRow::PatternSequenceRow( int col, SinglePattern * pattern )
+{
+  colMap[col] = pattern;
+}
+
+PatternSequenceRow::~ PatternSequenceRow( )
+{
+}
+
+
 PatternSequence::PatternSequence()
 {
 }
@@ -27,5 +41,34 @@ PatternSequence::PatternSequence()
 PatternSequence::~PatternSequence()
 {
 }
+
+void PatternSequence::add( int col, int tick, SinglePattern* pattern )
+{
+   // tick means here the row number
+   std::map<int,PatternSequenceRow>::iterator itr;
+   if ( (itr = rows.find( tick )) == rows.end() ) {
+       rows[tick] = PatternSequenceRow(col, pattern);
+   } else {
+       itr->second.add(col, pattern);
+   }
+}
+
+void PatternSequenceRow::add( int col, SinglePattern * pattern )
+{
+  colMap[col] = pattern;
+}
+
+SinglePattern * PatternSequenceRow::colAt( int index )
+{
+  std::map<int, SinglePattern*>::iterator itr;
+  if ( (itr = colMap.find( index )) == colMap.end() ) {
+    return 0;
+  } else {
+    return itr->second;
+  }
+}
+
+
+
 
 
