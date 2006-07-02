@@ -28,4 +28,54 @@ PatternEvent::~PatternEvent()
 {
 }
 
+void PatternEvent::setNote( std::uint8_t value )
+{
+  _note = value;
+}
+
+std::uint8_t PatternEvent::note( ) const
+{
+  return _note;
+}
+
+void PatternEvent::setInstrument( std::uint8_t instrument )
+{
+  _inst = instrument;
+}
+
+std::uint8_t PatternEvent::instrument( ) const
+{
+  return _inst;
+}
+
+void PatternEvent::setMachine( std::uint8_t machine )
+{
+  _mach = machine;
+}
+
+std::uint8_t PatternEvent::machine( ) const
+{
+  return _mach;
+}
+
+void PatternEvent::setCommand( std::uint8_t command )
+{
+  _cmd = command;
+}
+
+std::uint8_t PatternEvent::command( ) const
+{
+  return _cmd;
+}
+
+void PatternEvent::setParameter( std::uint8_t parameter )
+{
+  _parameter = parameter;
+}
+
+std::uint8_t PatternEvent::parameter( ) const
+{
+  return _parameter;
+}
+
 
