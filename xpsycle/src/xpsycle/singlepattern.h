@@ -33,11 +33,24 @@ public:
 
     ~SinglePattern();
 
+    std::list<PatternLine>::iterator startItr(float position);
+
+    void setData(float position, int track, const PatternEvent & data);
+    const PatternEvent & dataAt(float position, int track);
+
+    void setBeatZoom(int zoom);
+    int beatZoom() const;
+
+    void setBeats(int beats);
+    int beats() const;
 
 private:
 
     int beats_;
+    int beatZoom_;
 
+    PatternLine* lastLine;
+    PatternEvent zeroTrack;
 };
 
 #endif

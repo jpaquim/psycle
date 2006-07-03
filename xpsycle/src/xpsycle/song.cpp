@@ -2047,3 +2047,8 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 bool psycle::host::Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 {
 }
+
+PatternData & psycle::host::Song::patternData( )
+{
+  return patternData_;
+}

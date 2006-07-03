@@ -22,6 +22,7 @@
 
 #include "patdlg.h"
 #include "song.h"
+#include "singlepattern.h"
 #include <ngrs/npage.h>
 #include <ngrs/nbitmap.h>
 #include <ngrs/npoint3d.h>
@@ -184,6 +185,7 @@ public:
     void setSeparatorColor(const NColor & separatorColor);
     const NColor & separatorColor();
 
+
     int rowHeight();
     int colWidth();
     int headerHeight();
@@ -238,7 +240,14 @@ public:
 
     NRect repaintLineNumberArea    (int startLine,int endLine);
 
+    void setPattern(SinglePattern* pattern);
+
+    void setBeatZoom(int tpb);
+    int beatZoom() const;
+
 private:
+
+  SinglePattern* pattern_;
 
   int editPosition_, prevEditPosition_;
   int playPos_;

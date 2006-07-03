@@ -30,7 +30,7 @@ PatDlg::PatDlg()
   : NWindow()
 {
   setPosition(0,0,200,100);
-  setTitle("Pattern Lines");
+  setTitle("Pattern Beats");
 
   lineNumber_ = 0;
   lineNumEdit_ = new NSpinEdit();
