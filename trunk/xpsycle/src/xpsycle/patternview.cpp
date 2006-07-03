@@ -77,6 +77,8 @@ PatternView::PatternView()
   patternStep_ = 1;
 
   moveCursorWhenPaste_ = false;
+
+  pattern_ = 0;
 }
 
 
@@ -195,7 +197,10 @@ int PatternView::cellWidth( )
 
 int PatternView::lineNumber( )
 {
-  return Global::pSong()->patternLines[Global::pSong()->playOrder[editPosition()]];
+  if (pattern_)
+    return pattern_->beatZoom() * pattern_->beats();
+  else
+   return 64;
 
 }
 
@@ -667,8 +672,8 @@ void PatternView::PatternDraw::paint( NGraphics * g )
 
   for (int y = startLine; y <= endLine; y++) {
     if (!(y == pView->playPos()) || pView->editPosition() != Global::pPlayer()->_playPosition) {
-      if ( !(y % Global::pSong()->LinesPerBeat())) {
-        if (!(y%(Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig))) {
+      if ( !(y % pView->beatZoom())) {
+        if (!(y%( pView->beatZoom()*Global::pConfig()->pv_timesig))) {
             g->setForeground(Global::pConfig()->pvc_row4beat);
             g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
             g->setForeground(Global::pConfig()->pvc_rowbeat);
@@ -788,16 +793,23 @@ void PatternView::PatternDraw::drawCellBg( NGraphics * g, int track, int line, i
 
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
-  // draw Cursor bg;
-
   drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
 
   char tbuf[16];
-  for (int y = startLine; y <= endLine; y++) {
-      unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (y*MULTIPLY) + (startTrack)*5;
+
+  float position = startLine / (float) pView->pattern_->beatZoom();
+
+  std::list<PatternLine>::iterator it = pView->pattern_->startItr(position);
+
+  for ( ; it != pView->pattern_->end(); it++) {
+    PatternLine & line = *it;
+    int y = line.tickPosition() * pView->pattern_->beatZoom();
+
+    unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (y*MULTIPLY) + (startTrack)*5;
     for (int x = startTrack; x <= endTrack; x++) {
-      drawText(g, x,y,0,pView->noteToString(*patOffset));
-      patOffset++;
+      PatternEvent event = line.trackAt(x);
+      drawText(g, x,y,0,pView->noteToString( event.note() ));
+/*      patOffset++;
       int COL = pView->noteCellWidth();
       for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
       int value = *patOffset;
@@ -823,7 +835,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
                   COL+=4 * pView->cellWidth();
                   } break;
       }
-      }
+      }*/
     }
   }
 }
@@ -1056,8 +1068,14 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                   unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (pView->cursor().y() *MULTIPLY) + (pView->cursor().x())*5;
 
                   if (pView->cursor().z()==0) {
+
+                    float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
+
                     note += pView->editOctave()*12;
-                    *patOffset = note;
+
+                    PatternEvent data = pView->pattern_->dataAt(position,pView->cursor().x());
+                    data.setNote(note);
+                    pView->pattern_->setData(position,pView->cursor().x(),data);
 
                     Machine *tmac = Global::pSong()->_pMachine[Global::pSong()->seqBus];
                     if (tmac) {
@@ -1977,4 +1995,26 @@ void CChildView::
       Repaint(DMData);
     }
 */
+
+int PatternView::beatZoom( ) const
+{
+  if (pattern_)
+     return pattern_->beatZoom();
+  else
+     return 4;
+}
+
+void PatternView::setPattern( SinglePattern * pattern )
+{
+  pattern_ = pattern;
+}
+
+void PatternView::setBeatZoom( int tpb )
+{
+  if (pattern_)
+     pattern_->setBeatZoom(tpb);
+}
+
 }}
+
+

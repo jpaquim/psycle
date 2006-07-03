@@ -931,17 +931,9 @@ void MainWindow::setAppSongBpm(int x)
 
 void MainWindow::setAppSongTpb(int x)
 {
-  int tpb = 0;
+  int tpb = childView_->patternView()->beatZoom() + x;
 
-  if ( x != 0)
-  {
-      if (Global::pPlayer()->_playing )
-        Global::pSong()->LinesPerBeat(Global::pPlayer()->tpb+x);
-      else 
-        Global::pSong()->LinesPerBeat(Global::pSong()->LinesPerBeat()+x);
-        Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(), Global::pSong()->LinesPerBeat());
-        tpb = Global::pSong()->LinesPerBeat();
-  } else tpb = Global::pPlayer()->tpb;
+  childView_->patternView()->setBeatZoom(tpb);
 
   tpbDisplay_->setNumber(tpb);
 

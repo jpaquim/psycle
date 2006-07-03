@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <ngrs/sigslot.h> // should be seperated for sigslot too
 #include "patterndata.h"
+#include "patternsequence.h"
 
 /*#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
 	#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
@@ -41,6 +42,8 @@ namespace psycle
 
 				/// Initializes the song to an empty one.
 				void New();
+				PatternData & patternData();
+
 			private:
 					PatternData patternData_;
 
