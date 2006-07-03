@@ -798,11 +798,13 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
   char tbuf[16];
 
   float position = startLine / (float) pView->pattern_->beatZoom();
+  float endPosition = endLine / (float) pView->pattern_->beatZoom();
 
   std::list<PatternLine>::iterator it = pView->pattern_->startItr(position);
 
   for ( ; it != pView->pattern_->end(); it++) {
     PatternLine & line = *it;
+    if (line.tickPosition() > endPosition) break;
     int y = line.tickPosition() * pView->pattern_->beatZoom();
 
     unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (y*MULTIPLY) + (startTrack)*5;
