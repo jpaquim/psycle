@@ -25,6 +25,8 @@
 #include <ngrs/nframeborder.h>
 #include <ngrs/ntoolbar.h>
 #include <ngrs/ntoolbarseparator.h>
+#include <ngrs/nlistbox.h>
+#include <ngrs/nitem.h>
 
 namespace psycle {
 	namespace host {
@@ -72,6 +74,12 @@ SequencerGUI::SequencerLine::SequencerItem::~ SequencerItem( )
 {
 }
 
+void SequencerGUI::SequencerLine::SequencerItem::setText( const std::string & text )
+{
+  caption_->setText(text);
+}
+
+
 void SequencerGUI::SequencerLine::SequencerItem::resize( )
 {
   caption_->setPosition(0,0,clientWidth(), clientHeight());
@@ -91,10 +99,11 @@ void SequencerGUI::SequencerLine::paint( NGraphics * g )
   g->drawLine(0 ,cw / 2 , clientWidth(), cw / 2);
 }
 
-void SequencerGUI::SequencerLine::addItem( )
+void SequencerGUI::SequencerLine::addItem(const std::string & name )
 {
   SequencerItem* item = new SequencerItem();
-  item->setPosition(0,10,100,30);
+    item->setPosition(0,10,100,30);
+    item->setText(name);
   add(item);
 }
 
@@ -110,23 +119,28 @@ SequencerGUI::SequencerGUI()
 {
   setLayout( NAlignLayout() );
 
+  counter = 0;
+
   toolBar_ = new NToolBar();
-    toolBar_->add( new NLabel("Pattern - "));
-    toolBar_->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewPattern);
-    toolBar_->add( new NButton("Clone"));
-    toolBar_->add( new NButton("Ins"));
-    toolBar_->add( new NButton("Cut"));
-    toolBar_->add( new NButton("Copy"));
-    toolBar_->add( new NButton("Paste"));
-    toolBar_->add( new NButton("Delete"));
-    toolBar_->add( new NButton("Clear"));
-    toolBar_->add( new NButton("Sort"));
-    toolBar_->add(new NToolBarSeparator());
-    toolBar_->add( new NLabel("Track - "));
     toolBar_->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewTrack);
     toolBar_->add( new NButton("Insert"));
     toolBar_->add( new NButton("Delete"));
   add(toolBar_, nAlTop);
+
+  NPanel* patternPanel = new NPanel();
+    patternPanel->setLayout( NAlignLayout() );
+    patternPanel->add(new NLabel("Patterns"), nAlTop);
+
+    NToolBar* patToolBar = new NToolBar();
+      patToolBar->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewPattern);
+      patToolBar->add( new NButton("Delete"));
+      patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerGUI::onAddPattern);
+    patternPanel->add(patToolBar, nAlTop);
+
+    patternBox_ = new NListBox();
+      patternBox_->setPreferredSize(100,50);
+    patternPanel->add(patternBox_, nAlClient);
+  add(patternPanel, nAlLeft);
 
   scrollBox_ = new NScrollBox();
     scrollArea_ = new Area();
@@ -149,7 +163,6 @@ SequencerGUI::~SequencerGUI()
 void SequencerGUI::addSequencerLine( )
 {
   SequencerLine* line = new SequencerLine();
-  line->addItem();
   line->click.connect(this, &SequencerGUI::onSequencerLineClick);
   if (!lastLine)
      line->setPosition(0,0,1000,50);
@@ -168,9 +181,22 @@ void SequencerGUI::onNewTrack( NButtonEvent * ev )
 
 void SequencerGUI::onNewPattern( NButtonEvent * ev )
 {
+  patternBox_->add(new NItem("Pattern" + stringify(counter) ));
+  patternBox_->repaint();
+  counter++;
+}
+
+void SequencerGUI::onAddPattern( NButtonEvent * ev )
+{
   if (selectedLine) {
-     selectedLine->addItem();
-     selectedLine->repaint();
+     int i= patternBox_->selIndex();
+     if ( i!=-1) {
+        NCustomItem* item = patternBox_->itemAt(i);
+        if (item) {
+          selectedLine->addItem(item->text());
+          selectedLine->repaint();
+        }
+     }
   }
 }
 
@@ -181,6 +207,9 @@ void SequencerGUI::onSequencerLineClick( SequencerLine * line )
 
 
 }}
+
+
+
 
 
 

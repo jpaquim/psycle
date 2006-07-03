@@ -21,8 +21,13 @@
 
 PatternLine::PatternLine()
 {
+  tickPosition_ = 0;
 }
 
+PatternLine::PatternLine( float position )
+{
+  tickPosition_ = position;
+}
 
 PatternLine::~PatternLine()
 {
@@ -42,5 +47,21 @@ void PatternLine::setPatternEvent( const PatternEvent & event, int index )
 {
   tracks[index] = event;
 }
+
+void PatternLine::setTickPosition( float position )
+{
+  tickPosition_ = position;
+}
+
+float PatternLine::tickPosition( ) const
+{
+  return tickPosition_;
+}
+
+
+
+
+
+
 
 

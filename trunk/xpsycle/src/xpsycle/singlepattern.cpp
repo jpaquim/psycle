@@ -21,6 +21,7 @@
 
 SinglePattern::SinglePattern()
 {
+  beats_ = 4;
 }
 
 
