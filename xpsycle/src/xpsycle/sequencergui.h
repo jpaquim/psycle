@@ -29,7 +29,7 @@
 class NScrollBox;
 class NLabel;
 class NToolBar;
-
+class NListBox;
 
 namespace psycle {
 	namespace host {
@@ -44,6 +44,7 @@ class SequencerGUI : public NPanel
        ~SequencerItem();
 
        virtual void resize();
+       void setText(const std::string & text);
 
       private:
 
@@ -62,7 +63,7 @@ class SequencerGUI : public NPanel
 
     virtual void onMousePress(int x, int y, int button);
 
-    void addItem();
+    void addItem(const std::string & name);
 
   };
 
@@ -85,6 +86,8 @@ public:
 
 private:
 
+    int counter;
+
     SequencerLine* lastLine;
     SequencerLine* selectedLine;
 
@@ -93,11 +96,11 @@ private:
     NScrollBox* scrollBox_;
     Area* scrollArea_;
     NToolBar* toolBar_;
+    NListBox* patternBox_;
 
     void onNewTrack(NButtonEvent* ev);
-
     void onNewPattern(NButtonEvent* ev);
-
+    void onAddPattern(NButtonEvent* ev);
     void onSequencerLineClick(SequencerLine* line);
 
 };

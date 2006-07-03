@@ -33,6 +33,11 @@ public:
 
     ~SinglePattern();
 
+
+private:
+
+    int beats_;
+
 };
 
 #endif
