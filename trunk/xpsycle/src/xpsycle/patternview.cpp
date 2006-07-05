@@ -805,7 +805,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
   for ( ; it != pView->pattern_->end(); it++) {
     PatternLine & line = *it;
     if (line.tickPosition() > endPosition) break;
-    int y = line.tickPosition() * pView->pattern_->beatZoom();
+    int y = d2i(line.tickPosition() * pView->pattern_->beatZoom());
 
     unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (y*MULTIPLY) + (startTrack)*5;
     for (int x = startTrack; x <= endTrack; x++) {
