@@ -22,26 +22,24 @@
 
 #include "singlepattern.h"
 #include <map>
+#include <vector>
 
 /**
 @author Stefan Nattkemper
 */
 
-class PatternSequenceRow {
-public :
-   PatternSequenceRow();
-   PatternSequenceRow(int col, SinglePattern* pattern);
-   ~PatternSequenceRow();
+class SequenceLine {
+public:
+   SequenceLine();
+   ~SequenceLine();
 
-   void add(int col, SinglePattern* pattern);
-
-   SinglePattern* colAt(int index);
 
 private:
 
-   std::map<int, SinglePattern*> colMap;
+   std::map<float,SinglePattern*> line;
 
 };
+
 
 class PatternSequence{
 public:
@@ -49,12 +47,11 @@ public:
 
     ~PatternSequence();
 
-    void add(int col, int tick, SinglePattern* pattern);
 
 
 private:
 
-    std::map<int,PatternSequenceRow> rows;
+    std::vector<SequenceLine> lines;
 
 };
 
