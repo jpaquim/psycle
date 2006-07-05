@@ -42,7 +42,7 @@ class SequenceEntry {
   private:
 
      SinglePattern* pattern_;
-     float tickPosition_;
+     double tickPosition_;
 
 };
 
