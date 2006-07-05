@@ -20,15 +20,19 @@
 #ifndef SEQUENCERBAR_H
 #define SEQUENCERBAR_H
 
+#include "patterndata.h"
+
+#include <map>
 #include <ngrs/npanel.h>
 #include <ngrs/ncheckbox.h>
 #include <ngrs/nlistlayout.h>
 #include <ngrs/nlistbox.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nflowlayout.h>
-#include <ngrs/ngridlayout.h>
 #include <ngrs/nimage.h>
 #include <ngrs/ngroupbox.h>
+#include <ngrs/nitem.h>
+
 
 class N7SegDisplay;
 
@@ -42,54 +46,34 @@ class PatternView;
 
 class SequencerBar : public NPanel
 {
+
+
 public:
     SequencerBar();
-    SequencerBar(PatternView* view_);
 
     ~SequencerBar();
 
-    signal2<int,int> selected;
+    signal1<SinglePattern*> selected;
+    signal1<SinglePattern*> added;
 
-    void setPatternView(PatternView* patternView);
+    void setPatternData(PatternData* data);
 
     bool followSong() const;
 
     void updateSequencer();
 
-    NListBox* seqList();
-
     void onSelChangeSeqList(NItemEvent* sender);
-    void updatePlayOrder(bool mode);
-
-    int patternPos() const;
 
 private:
 
-    PatternView* patternView_;
+    PatternData* patternData_;
 
     void init();
 
-    NPanel* seqPanel_;
-    NListBox* seqList_;
-    N7SegDisplay* lenSeg1;
-    N7SegDisplay* lenSeg2;
-    N7SegDisplay* sampCountSeg;
+    int counter;
 
-    NButton* incshort_;
-    NButton* decshort_;
-    NButton* inclong_;
-    NButton* declong_;
-    NButton* seqnew_;
-    NButton* seqduplicate_;
-    NButton* seqins_;
-    NButton* seqcut_;
-    NButton* seqcopy_;
-    NButton* seqpaste_;
-    NButton* seqdelete_;
-    NButton* seqclr_;
-    NButton* seqsrt_;
-    NButton* declen_;
-    NButton* inclen_;
+    NListBox* patternBox_;
+
 
     NCheckBox* follow_;
     NCheckBox* multichannel_audition_;
@@ -98,27 +82,15 @@ private:
     NCheckBox* notestoeffects_;
     NCheckBox* movecursorpaste_;
 
-    void onIncShort(NButtonEvent* ev);
-    void onDecShort(NButtonEvent* ev);
-    void onIncLong(NButtonEvent* ev);
-    void onDecLong(NButtonEvent* ev);
-    void onSeqNew(NButtonEvent* ev);
-    void onSeqIns(NButtonEvent* ev);
-    void onSeqCopy(NButtonEvent* ev);
-    void onSeqPaste(NButtonEvent* ev);
-    void onSeqSort(NButtonEvent* ev);
-    void onSeqDelete(NButtonEvent* ev);
-    void onSeqCut(NButtonEvent* ev);
-    void onSeqClone(NButtonEvent* ev);
-    void onSeqClear(NButtonEvent* ev);
-    void onDecLen(NButtonEvent* ev);
-    void onIncLen(NButtonEvent* ev);
+    void onNewPattern( NButtonEvent * ev );
+
+    void onItemSelected(NItemEvent* ev);
+    void onPatternAdd(NButtonEvent* ev);
+
     void onMoveCursorPaste(NButtonEvent* ev);
     void onRecordTweakChange(NButtonEvent* ev);
 
-    std::vector<int> seqCopyBuffer;
-
-    NGridLayout gridLayout;
+    std::map<NCustomItem*, SinglePattern*> itemMap;
 };
 
 }}

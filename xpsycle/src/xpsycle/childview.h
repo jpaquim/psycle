@@ -63,6 +63,7 @@ public:
     PatternView* patternView();
     MachineView* machineView();
     WaveEdFrame* waveEditor();
+    SequencerGUI* sequencerView();
 
     void play();
     void playFromStart();

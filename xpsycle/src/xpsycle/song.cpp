@@ -2048,7 +2048,7 @@ bool psycle::host::Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 {
 }
 
-PatternData & psycle::host::Song::patternData( )
+PatternData * psycle::host::Song::patternData( )
 {
-  return patternData_;
+  return &patternData_;
 }

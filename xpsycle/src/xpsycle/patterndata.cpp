@@ -18,26 +18,37 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patterndata.h"
+#include <algorithm>
 
 PatternData::PatternData()
 {
-  patterns[0] = SinglePattern();
+  createNewPattern("Pattern0");
 }
 
 
 PatternData::~PatternData()
 {
-}
-
-SinglePattern * PatternData::patternAt( int index )
-{
-  std::map<int, SinglePattern>::iterator itr;
-  if ( (itr = patterns.find( index )) == patterns.end() ) {
-    return 0;
-  } else {
-    return &itr->second;
+  for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
+    delete *it;
   }
 }
 
 
+SinglePattern* PatternData::createNewPattern( const std::string & name )
+{
+  SinglePattern* pattern = new SinglePattern();
+  pattern->setName(name);
+  push_back(pattern);
+
+  return pattern;
+}
+
+SinglePattern * PatternData::findByPtr( SinglePattern * ptr )
+{
+  std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
+  if (it != end() ) return *it;
+
+  return 0;
+
+}
 

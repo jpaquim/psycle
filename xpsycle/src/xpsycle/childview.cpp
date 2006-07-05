@@ -85,7 +85,7 @@ ChildView::ChildView()
   timer.setIntervalTime(80);
   timer.enableTimer();
 
-  patternView_->setPattern(Global::song().patternData().patternAt(0));
+  patternView_->setPattern( Global::song().patternData()->at(0));
 }
 
 
@@ -268,8 +268,15 @@ void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
   Global::pSong()->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().x(),patternView_->cursor().y());
 }
 
+SequencerGUI * ChildView::sequencerView( )
+{
+  return sequencerView_;
+}
+
 }
 }
+
+
 
 
 

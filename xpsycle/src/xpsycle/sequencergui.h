@@ -20,7 +20,9 @@
 #ifndef SEQUENCERGUI_H
 #define SEQUENCERGUI_H
 
+#include "singlepattern.h"
 #include <npanel.h>
+
 
 /**
 @author Stefan Nattkemper
@@ -46,9 +48,13 @@ class SequencerGUI : public NPanel
        virtual void resize();
        void setText(const std::string & text);
 
+       void setPattern(SinglePattern* pattern);
+       SinglePattern* pattern();
+
       private:
 
         NLabel* caption_;
+        SinglePattern* pattern_;
 
     };
 
@@ -63,7 +69,7 @@ class SequencerGUI : public NPanel
 
     virtual void onMousePress(int x, int y, int button);
 
-    void addItem(const std::string & name);
+    void addItem(SinglePattern* pattern);
 
   };
 
@@ -84,6 +90,8 @@ public:
 
     ~SequencerGUI();
 
+    void addPattern(SinglePattern* pattern);
+
 private:
 
     int counter;
@@ -100,7 +108,6 @@ private:
 
     void onNewTrack(NButtonEvent* ev);
     void onNewPattern(NButtonEvent* ev);
-    void onAddPattern(NButtonEvent* ev);
     void onSequencerLineClick(SequencerLine* line);
 
 };

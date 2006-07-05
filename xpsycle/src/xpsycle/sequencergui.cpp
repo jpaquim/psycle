@@ -68,17 +68,13 @@ SequencerGUI::SequencerLine::SequencerItem::SequencerItem( )
   setMoveable(nMvHorizontal);
 
   setTransparent(false);
+
+  pattern_ = 0;
 }
 
 SequencerGUI::SequencerLine::SequencerItem::~ SequencerItem( )
 {
 }
-
-void SequencerGUI::SequencerLine::SequencerItem::setText( const std::string & text )
-{
-  caption_->setText(text);
-}
-
 
 void SequencerGUI::SequencerLine::SequencerItem::resize( )
 {
@@ -99,11 +95,11 @@ void SequencerGUI::SequencerLine::paint( NGraphics * g )
   g->drawLine(0 ,cw / 2 , clientWidth(), cw / 2);
 }
 
-void SequencerGUI::SequencerLine::addItem(const std::string & name )
+void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
 {
   SequencerItem* item = new SequencerItem();
     item->setPosition(0,10,100,30);
-    item->setText(name);
+    item->setPattern(pattern);
   add(item);
 }
 
@@ -126,21 +122,6 @@ SequencerGUI::SequencerGUI()
     toolBar_->add( new NButton("Insert"));
     toolBar_->add( new NButton("Delete"));
   add(toolBar_, nAlTop);
-
-  NPanel* patternPanel = new NPanel();
-    patternPanel->setLayout( NAlignLayout() );
-    patternPanel->add(new NLabel("Patterns"), nAlTop);
-
-    NToolBar* patToolBar = new NToolBar();
-      patToolBar->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewPattern);
-      patToolBar->add( new NButton("Delete"));
-      patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerGUI::onAddPattern);
-    patternPanel->add(patToolBar, nAlTop);
-
-    patternBox_ = new NListBox();
-      patternBox_->setPreferredSize(100,50);
-    patternPanel->add(patternBox_, nAlClient);
-  add(patternPanel, nAlLeft);
 
   scrollBox_ = new NScrollBox();
     scrollArea_ = new Area();
@@ -186,27 +167,39 @@ void SequencerGUI::onNewPattern( NButtonEvent * ev )
   counter++;
 }
 
-void SequencerGUI::onAddPattern( NButtonEvent * ev )
-{
-  if (selectedLine) {
-     int i= patternBox_->selIndex();
-     if ( i!=-1) {
-        NCustomItem* item = patternBox_->itemAt(i);
-        if (item) {
-          selectedLine->addItem(item->text());
-          selectedLine->repaint();
-        }
-     }
-  }
-}
 
 void SequencerGUI::onSequencerLineClick( SequencerLine * line )
 {
   selectedLine = line;
 }
 
+void SequencerGUI::addPattern( SinglePattern * pattern )
+{
+  if (selectedLine) {
+    selectedLine->addItem( pattern );
+    selectedLine->repaint();
+ }
+}
+
+void SequencerGUI::SequencerLine::SequencerItem::setPattern( SinglePattern * pattern )
+{
+  pattern_ = pattern;
+
+  if (pattern_) {
+     caption_->setText( pattern_->name() );
+  }
+}
+
+SinglePattern * SequencerGUI::SequencerLine::SequencerItem::pattern( )
+{
+  return pattern_;
+}
+
+
 
 }}
+
+
 
 
 
