@@ -21,6 +21,7 @@
 #define SEQUENCERGUI_H
 
 #include "singlepattern.h"
+#include "patternsequence.h"
 #include <npanel.h>
 
 
@@ -48,13 +49,13 @@ class SequencerGUI : public NPanel
        virtual void resize();
        void setText(const std::string & text);
 
-       void setPattern(SinglePattern* pattern);
-       SinglePattern* pattern();
+       void setSequenceEntry(SequenceEntry* entry);
+       SequenceEntry* sequenceEntry();
 
       private:
 
         NLabel* caption_;
-        SinglePattern* pattern_;
+        SequenceEntry* sequenceEntry_;
 
     };
 
@@ -69,7 +70,14 @@ class SequencerGUI : public NPanel
 
     virtual void onMousePress(int x, int y, int button);
 
+    void setSequenceLine(SequenceLine* line);
+    SequenceLine* sequenceLine();
+
     void addItem(SinglePattern* pattern);
+
+   private:
+
+      SequenceLine* seqLine_;
 
   };
 
@@ -90,6 +98,8 @@ public:
 
     ~SequencerGUI();
 
+    void setPatternSequence(PatternSequence* sequence);
+
     void addPattern(SinglePattern* pattern);
 
 private:
@@ -98,6 +108,7 @@ private:
 
     SequencerLine* lastLine;
     SequencerLine* selectedLine;
+    PatternSequence* patternSequence_;
 
     void addSequencerLine();
 

@@ -2040,6 +2040,10 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 	}
 }
 
+PatternSequence * Song::patternSequence( )
+{
+  return &patternSequence_;
+}
 
 	}
 }
@@ -2052,3 +2056,4 @@ PatternData * psycle::host::Song::patternData( )
 {
   return &patternData_;
 }
+
