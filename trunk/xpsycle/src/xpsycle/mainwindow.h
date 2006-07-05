@@ -224,7 +224,8 @@ private:
 
     void onMachineMoved(Machine* mac , int x, int y);
     void onLineChanged(int line);
-    void onSeqSelected(int pos, int pat);
+    void onSeqSelected(SinglePattern* pattern);
+    void onSeqAdded(SinglePattern* pattern);
 
     void updateStatusBar();
 };

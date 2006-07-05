@@ -29,6 +29,7 @@
 #include "wavesavedlg.h"
 #include "internal_machines.h"
 #include "waveedframe.h"
+#include "sequencergui.h"
 #include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
@@ -194,7 +195,7 @@ void MainWindow::initViews( )
 {
   pane()->add(childView_);
   childView_->setTitleBarText();
-  sequencerBar_->setPatternView(childView_->patternView());
+  sequencerBar_->setPatternData( Global::pSong()->patternData() );
 }
 
 void MainWindow::initBars( )
@@ -236,6 +237,7 @@ void MainWindow::initBars( )
   pane()->add(statusBar_,nAlBottom);
 
   pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
+  sequencerBar_->added.connect(this,&MainWindow::onSeqAdded);
 
   sequencerBar_->selected.connect(this,&MainWindow::onSeqSelected);
 
@@ -979,8 +981,8 @@ void MainWindow::onTimer( )
     childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
 
     if (sequencerBar_->followSong() && oldPos != Global::pPlayer()->_playPosition) {
-        sequencerBar_->updatePlayOrder(true);
-        sequencerBar_->updateSequencer();
+        //sequencerBar_->updatePlayOrder(true);
+        //sequencerBar_->updateSequencer();
     }
   }
 
@@ -1326,12 +1328,10 @@ void MainWindow::onMachineMoved( Machine * mac, int x, int y )
   statusBar_->repaint();
 }
 
-void MainWindow::onSeqSelected( int pos, int pat )
+void MainWindow::onSeqSelected( SinglePattern* pattern )
 {
-  seqPosStatusItem->setText("Pos: "+stringify(pos));
-  seqPatStatusItem->setText("Pat: "+stringify(pat));
-  statusBar_->resize();
-  statusBar_->repaint();
+  childView_->patternView()->setPattern(pattern);
+  childView_->patternView()->repaint();
 }
 
 void MainWindow::onLineChanged(int line) {
@@ -1346,9 +1346,9 @@ void MainWindow::updateStatusBar( )
   if (mac) {
     macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(mac->_x) +","+ stringify(mac->_y));
   }
-  seqPosStatusItem->setText("Pos: "+stringify(sequencerBar_->seqList()->selIndex()));
+/*  seqPosStatusItem->setText("Pos: "+stringify(sequencerBar_->seqList()->selIndex()));
   seqPatStatusItem->setText("Pat: "+sequencerBar_->patternPos());
-  linePosStatusItem->setText("Line: "+stringify(childView_->patternView()->cursor().y()));
+  linePosStatusItem->setText("Line: "+stringify(childView_->patternView()->cursor().y()));*/
 
   statusBar_->resize();
   statusBar_->repaint();
@@ -1402,4 +1402,11 @@ void MainWindow::onRecordNotesMode( NButtonEvent * ev )
   }*/
 }
 
+void MainWindow::onSeqAdded( SinglePattern * pattern )
+{
+  childView_->sequencerView()->addPattern( pattern);
+}
+
+
 }}
+

@@ -109,6 +109,17 @@ std::list< PatternLine >::iterator SinglePattern::startItr( float position )
   return begin();
 }
 
+void SinglePattern::setName( const std::string & name )
+{
+  name_ = name;
+}
+
+const std::string & SinglePattern::name( ) const
+{
+  return name_;
+}
+
+
 
 
 

@@ -21,22 +21,21 @@
 #define PATTERNDATA_H
 
 #include "singlepattern.h"
-#include <map>
+#include <vector>
 
 /**
 @author Stefan Nattkemper
 */
-class PatternData {
+class PatternData : public std::vector<SinglePattern*> {
 public:
     PatternData();
 
     ~PatternData();
 
-    SinglePattern * patternAt( int index );
+    SinglePattern* findByPtr(SinglePattern* ptr);
 
-private:
+    SinglePattern* createNewPattern(const std::string & name);
 
-    std::map<int,SinglePattern> patterns;
 
 };
 

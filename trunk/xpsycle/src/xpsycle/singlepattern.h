@@ -22,6 +22,7 @@
 
 #include "patternline.h"
 #include <list>
+#include <string>
 
 /**
 @author Stefan Nattkemper
@@ -44,10 +45,15 @@ public:
     void setBeats(int beats);
     int beats() const;
 
+    void setName(const std::string & name);
+    const std::string & name() const;
+
 private:
 
     int beats_;
     int beatZoom_;
+
+    std::string name_;
 
     PatternLine* lastLine;
     PatternEvent zeroTrack;
