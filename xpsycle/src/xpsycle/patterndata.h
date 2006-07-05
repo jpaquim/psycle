@@ -17,40 +17,26 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SINGLEPATTERN_H
-#define SINGLEPATTERN_H
+#ifndef PATTERNDATA_H
+#define PATTERNDATA_H
 
-#include "patternline.h"
-#include <list>
+#include "singlepattern.h"
+#include <map>
 
 /**
 @author Stefan Nattkemper
 */
-
-class SinglePattern : public std::list<PatternLine> {
+class PatternData {
 public:
-    SinglePattern();
+    PatternData();
 
-    ~SinglePattern();
+    ~PatternData();
 
-    std::list<PatternLine>::iterator startItr(float position);
-
-    void setData(float position, int track, const PatternEvent & data);
-    const PatternEvent & dataAt(float position, int track);
-
-    void setBeatZoom(int zoom);
-    int beatZoom() const;
-
-    void setBeats(int beats);
-    int beats() const;
+    SinglePattern * patternAt( int index );
 
 private:
 
-    int beats_;
-    int beatZoom_;
-
-    PatternLine* lastLine;
-    PatternEvent zeroTrack;
+    std::map<int,SinglePattern> patterns;
 
 };
 
