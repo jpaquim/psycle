@@ -21,22 +21,43 @@
 #define PATTERNSEQUENCE_H
 
 #include "singlepattern.h"
-#include <map>
 #include <vector>
+#include <list>
 
 /**
 @author Stefan Nattkemper
 */
 
+class SequenceEntry {
+  public:
+     SequenceEntry();
+     ~SequenceEntry();
+
+     void setPattern(SinglePattern* pattern);
+     SinglePattern* pattern();
+
+     void setTickPosition(double tick);
+     double tickPosition() const;
+
+  private:
+
+     SinglePattern* pattern_;
+     float tickPosition_;
+
+};
+
 class SequenceLine {
+
 public:
    SequenceLine();
    ~SequenceLine();
 
+   SequenceEntry* createEntry(SinglePattern* pattern, float position);
+
 
 private:
 
-   std::map<float,SinglePattern*> line;
+   std::list<SequenceEntry*> line;
 
 };
 
@@ -47,11 +68,13 @@ public:
 
     ~PatternSequence();
 
+    SequenceLine* createNewLine();
 
 
 private:
 
-    std::vector<SequenceLine> lines;
+    std::vector<SequenceLine*> lines;
+
 
 };
 

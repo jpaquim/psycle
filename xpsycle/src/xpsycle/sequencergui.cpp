@@ -32,6 +32,8 @@ namespace psycle {
 	namespace host {
 
 
+// this is the sequencer Area
+
 SequencerGUI::Area::Area( )
 {
   setBackground(NColor(150,150,180));
@@ -57,6 +59,10 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
   }
 }
 
+// end of Area class
+
+
+// this is the gui class of one pattern entry
 SequencerGUI::SequencerLine::SequencerItem::SequencerItem( )
 {
   caption_ = new NLabel("Pattern");
@@ -69,17 +75,37 @@ SequencerGUI::SequencerLine::SequencerItem::SequencerItem( )
 
   setTransparent(false);
 
-  pattern_ = 0;
+  sequenceEntry_ = 0;
 }
 
 SequencerGUI::SequencerLine::SequencerItem::~ SequencerItem( )
 {
 }
 
+void SequencerGUI::SequencerLine::SequencerItem::setSequenceEntry( SequenceEntry * sequenceEntry )
+{
+  sequenceEntry_ = sequenceEntry;
+
+  if (sequenceEntry_) {
+     caption_->setText( sequenceEntry_->pattern()->name() );
+  }
+}
+
+SequenceEntry * SequencerGUI::SequencerLine::SequencerItem::sequenceEntry( )
+{
+  return sequenceEntry_;
+}
+
+
 void SequencerGUI::SequencerLine::SequencerItem::resize( )
 {
   caption_->setPosition(0,0,clientWidth(), clientHeight());
 }
+
+// end of SequencerItem class
+
+
+// this is the gui class that represents one SequenceLine
 
 SequencerGUI::SequencerLine::SequencerLine( )
 {
@@ -99,7 +125,7 @@ void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
 {
   SequencerItem* item = new SequencerItem();
     item->setPosition(0,10,100,30);
-    item->setPattern(pattern);
+    item->setSequenceEntry(sequenceLine()->createEntry(pattern, 0));
   add(item);
 }
 
@@ -133,7 +159,7 @@ SequencerGUI::SequencerGUI()
   lastLine = 0;
   selectedLine = 0;
 
-  addSequencerLine();
+  patternSequence_ = 0;
 }
 
 
@@ -141,9 +167,15 @@ SequencerGUI::~SequencerGUI()
 {
 }
 
+void SequencerGUI::setPatternSequence( PatternSequence * sequence )
+{
+  patternSequence_ = sequence;
+}
+
 void SequencerGUI::addSequencerLine( )
 {
   SequencerLine* line = new SequencerLine();
+  line->setSequenceLine( patternSequence_->createNewLine() );
   line->click.connect(this, &SequencerGUI::onSequencerLineClick);
   if (!lastLine)
      line->setPosition(0,0,1000,50);
@@ -181,23 +213,23 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
  }
 }
 
-void SequencerGUI::SequencerLine::SequencerItem::setPattern( SinglePattern * pattern )
+void SequencerGUI::SequencerLine::setSequenceLine( SequenceLine * line )
 {
-  pattern_ = pattern;
-
-  if (pattern_) {
-     caption_->setText( pattern_->name() );
-  }
+  seqLine_ = line;
 }
 
-SinglePattern * SequencerGUI::SequencerLine::SequencerItem::pattern( )
+SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
 {
-  return pattern_;
+  return seqLine_;
 }
 
 
 
 }}
+
+
+
+
 
 
 

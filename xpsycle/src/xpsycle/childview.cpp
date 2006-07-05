@@ -56,8 +56,9 @@ ChildView::ChildView()
     patternView_->setBackground(Global::pConfig()->pvc_row);
     patternView_->setForeground(Global::pConfig()->pvc_background);
     patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
-  sequencerView_ = new SequencerGUI();
 
+  sequencerView_ = new SequencerGUI();
+  sequencerView_->setPatternSequence(Global::pSong()->patternSequence());
 
   NDockPanel* macDock = new NDockPanel(machineView_);
   addPage(macDock,"Machine View");
