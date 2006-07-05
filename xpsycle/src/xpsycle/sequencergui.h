@@ -47,6 +47,8 @@ class SequencerGUI : public NPanel
        ~SequencerItem();
 
        virtual void resize();
+       virtual void onMove(const NMoveEvent & moveEvent);
+
        void setText(const std::string & text);
 
        void setSequenceEntry(SequenceEntry* entry);

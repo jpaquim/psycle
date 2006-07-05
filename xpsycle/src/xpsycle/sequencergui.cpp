@@ -102,6 +102,13 @@ void SequencerGUI::SequencerLine::SequencerItem::resize( )
   caption_->setPosition(0,0,clientWidth(), clientHeight());
 }
 
+void SequencerGUI::SequencerLine::SequencerItem::onMove( const NMoveEvent & moveEvent )
+{
+  sequenceEntry_->setTickPosition( left() );
+  caption_->setText( sequenceEntry_->pattern()->name() + ":" + stringify(sequenceEntry_->tickPosition()));
+}
+
+
 // end of SequencerItem class
 
 
@@ -226,6 +233,7 @@ SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
 
 
 }}
+
 
 
 
