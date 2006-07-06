@@ -22,6 +22,7 @@
 NCustomItem::NCustomItem()
  : NPanel()
 {
+  obj_ = 0;
 }
 
 
@@ -32,6 +33,21 @@ NCustomItem::~NCustomItem()
 std::string NCustomItem::text( )
 {
   return "";
+}
+
+void NCustomItem::setObject( NObject * obj )
+{
+  obj_ = obj;
+}
+
+NObject * NCustomItem::object( )
+{
+  return obj_;
+}
+
+bool NCustomItem::operator <( const NCustomItem & rhs ) const
+{
+  return (this < &rhs);
 }
 
 

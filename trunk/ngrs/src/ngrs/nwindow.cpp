@@ -258,6 +258,7 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
              dragBase->setTop(dragBaseParent->spacingHeight()-dragBase_->height());
          } else dragBase_->setTop(newTop);
     } else vary=0;
+    dragBase->onMove(NMoveEvent());
     if (!(dragBase_->moveable().style() & nMvNoneRepaint)) {
        NRegion newDrag = dragBase->geometry()->region();
        NRegion repaintArea = newDrag | oldDrag;
@@ -265,7 +266,6 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
        repaint(pane(),repaintArea);
        oldDrag = newDrag;
     }
-    dragBase->onMove(NMoveEvent());
      }
    }
 }
