@@ -28,9 +28,15 @@
 @author Stefan Nattkemper
 */
 
+
+
+
+class SequenceLine;
+
 class SequenceEntry {
   public:
      SequenceEntry();
+     SequenceEntry(SequenceLine* line);
      ~SequenceEntry();
 
      void setPattern(SinglePattern* pattern);
@@ -38,26 +44,26 @@ class SequenceEntry {
 
      void setTickPosition(double tick);
      double tickPosition() const;
+     float patternBeats() const;
 
   private:
 
+     SequenceLine* line_;
      SinglePattern* pattern_;
      double tickPosition_;
 
 };
 
-class SequenceLine {
+class SequenceLine : public  std::list<SequenceEntry*> 
+{
 
 public:
    SequenceLine();
    ~SequenceLine();
 
-   SequenceEntry* createEntry(SinglePattern* pattern, float position);
+   SequenceEntry* createEntry(SinglePattern* pattern, double position);
 
-
-private:
-
-   std::list<SequenceEntry*> line;
+   double tickLength() const;
 
 };
 

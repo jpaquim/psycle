@@ -34,9 +34,11 @@ namespace psycle {
 
 // this is the sequencer Area
 
-SequencerGUI::Area::Area( )
+SequencerGUI::Area::Area( SequencerGUI* seqGui )
 {
   setBackground(NColor(150,150,180));
+
+  sView = seqGui;
 }
 
 SequencerGUI::Area::~ Area( )
@@ -51,10 +53,9 @@ void SequencerGUI::Area::paint( NGraphics * g )
 
 void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
 {
-  int timeDx = 20;
   for (int i = 0; i < 1000; i++) {
      g->setForeground(NColor(220,220,220));
-     g->drawLine(i*timeDx,0,i*timeDx,clientHeight());
+     g->drawLine(i* sView->beatPxLength(),0,d2i(i*sView->beatPxLength()),clientHeight());
      if (i % 10) g->setForeground(NColor(180,180,180));
   }
 }
@@ -63,7 +64,7 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
 
 
 // this is the gui class of one pattern entry
-SequencerGUI::SequencerLine::SequencerItem::SequencerItem( )
+SequencerGUI::SequencerLine::SequencerItem::SequencerItem( SequencerGUI* seqGui )
 {
   caption_ = new NLabel("Pattern");
     caption_->setVAlign(nAlCenter);
@@ -76,6 +77,8 @@ SequencerGUI::SequencerLine::SequencerItem::SequencerItem( )
   setTransparent(false);
 
   sequenceEntry_ = 0;
+
+  sView = seqGui;
 }
 
 SequencerGUI::SequencerLine::SequencerItem::~ SequencerItem( )
@@ -104,7 +107,7 @@ void SequencerGUI::SequencerLine::SequencerItem::resize( )
 
 void SequencerGUI::SequencerLine::SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
-  sequenceEntry_->setTickPosition( left() );
+  sequenceEntry_->setTickPosition( left() / (double) sView->beatPxLength() );
   caption_->setText( sequenceEntry_->pattern()->name() + ":" + stringify(sequenceEntry_->tickPosition()));
 }
 
@@ -114,8 +117,9 @@ void SequencerGUI::SequencerLine::SequencerItem::onMove( const NMoveEvent & move
 
 // this is the gui class that represents one SequenceLine
 
-SequencerGUI::SequencerLine::SequencerLine( )
+SequencerGUI::SequencerLine::SequencerLine( SequencerGUI* seqGui )
 {
+  sView = seqGui;
 }
 
 SequencerGUI::SequencerLine::~ SequencerLine( )
@@ -126,19 +130,36 @@ void SequencerGUI::SequencerLine::paint( NGraphics * g )
 {
   int cw = clientHeight();
   g->drawLine(0 ,cw / 2 , clientWidth(), cw / 2);
+
+  if (sView->selectedLine_ && sView->selectedLine_ == this) {
+    g->setForeground(NColor(0,0,255));
+    g->drawRect(0,0, clientWidth()-1, clientHeight()-1);
+  }
 }
 
 void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
 {
-  SequencerItem* item = new SequencerItem();
-    item->setPosition(0,10,100,30);
-    item->setSequenceEntry(sequenceLine()->createEntry(pattern, 0));
+  double endTick = sequenceLine()->tickLength();
+
+  SequencerItem* item = new SequencerItem(sView);
+    item->setPosition(d2i(sView->beatPxLength() * endTick),10,pattern->beats() * sView->beatPxLength() ,30);
+    item->setSequenceEntry(sequenceLine()->createEntry(pattern, endTick));
   add(item);
 }
 
 void SequencerGUI::SequencerLine::onMousePress( int x, int y, int button )
 {
   click.emit(this);
+}
+
+void SequencerGUI::SequencerLine::setSequenceLine( SequenceLine * line )
+{
+  seqLine_ = line;
+}
+
+SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
+{
+  return seqLine_;
 }
 
 // main class
@@ -149,6 +170,7 @@ SequencerGUI::SequencerGUI()
   setLayout( NAlignLayout() );
 
   counter = 0;
+  beatPxLength_ = 20; // default value for one beat
 
   toolBar_ = new NToolBar();
     toolBar_->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewTrack);
@@ -157,14 +179,14 @@ SequencerGUI::SequencerGUI()
   add(toolBar_, nAlTop);
 
   scrollBox_ = new NScrollBox();
-    scrollArea_ = new Area();
+    scrollArea_ = new Area( this );
       scrollArea_->setLayout(NAutoScrollLayout());
       scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
     scrollBox_->setScrollPane(scrollArea_);
   add(scrollBox_, nAlClient);
 
   lastLine = 0;
-  selectedLine = 0;
+  selectedLine_ = 0;
 
   patternSequence_ = 0;
 }
@@ -174,6 +196,11 @@ SequencerGUI::~SequencerGUI()
 {
 }
 
+int SequencerGUI::beatPxLength( ) const
+{
+  return beatPxLength_;
+}
+
 void SequencerGUI::setPatternSequence( PatternSequence * sequence )
 {
   patternSequence_ = sequence;
@@ -181,7 +208,7 @@ void SequencerGUI::setPatternSequence( PatternSequence * sequence )
 
 void SequencerGUI::addSequencerLine( )
 {
-  SequencerLine* line = new SequencerLine();
+  SequencerLine* line = new SequencerLine( this );
   line->setSequenceLine( patternSequence_->createNewLine() );
   line->click.connect(this, &SequencerGUI::onSequencerLineClick);
   if (!lastLine)
@@ -191,6 +218,7 @@ void SequencerGUI::addSequencerLine( )
   scrollArea_->add(line);
 
   lastLine = line;
+
 }
 
 void SequencerGUI::onNewTrack( NButtonEvent * ev )
@@ -209,30 +237,25 @@ void SequencerGUI::onNewPattern( NButtonEvent * ev )
 
 void SequencerGUI::onSequencerLineClick( SequencerLine * line )
 {
-  selectedLine = line;
+  selectedLine_ = line;
+  repaint();
 }
 
 void SequencerGUI::addPattern( SinglePattern * pattern )
 {
-  if (selectedLine) {
-    selectedLine->addItem( pattern );
-    selectedLine->repaint();
+  if ( selectedLine_ ) {
+    selectedLine_->addItem( pattern );
+    selectedLine_->repaint();
  }
-}
-
-void SequencerGUI::SequencerLine::setSequenceLine( SequenceLine * line )
-{
-  seqLine_ = line;
-}
-
-SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
-{
-  return seqLine_;
 }
 
 
 
 }}
+
+
+
+
 
 
 
