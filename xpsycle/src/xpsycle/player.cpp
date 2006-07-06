@@ -418,6 +418,7 @@ namespace psycle
 
 		float * Player::Work(int & numSamples)
 		{
+			double masterTickEndPosition = ( (bpm/60)* ( ((Master*)song()._pMachine[MASTER_INDEX])->sampleCount+ numSamples) / (double) SampleRate());
 			int amount;
 			Master::_pMasterSamples = _pBuffer;
 			int numSamplex = numSamples;

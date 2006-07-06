@@ -111,6 +111,9 @@ void SequencerGUI::SequencerLine::SequencerItem::onMove( const NMoveEvent & move
   caption_->setText( sequenceEntry_->pattern()->name() + ":" + stringify(sequenceEntry_->tickPosition()));
 }
 
+void SequencerGUI::SequencerLine::SequencerItem::onMousePress( int x, int y, int button )
+{
+}
 
 // end of SequencerItem class
 
@@ -252,6 +255,10 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 
 
 }}
+
+
+
+
 
 
 
