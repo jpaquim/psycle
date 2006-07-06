@@ -59,6 +59,7 @@ void SequenceEntry::setTickPosition( double tick )
   tickPosition_ = tick;
   if (line_) {
     line_->sort(LessByPointedToValue());
+    line_->patternSequence()->sort(LessByPointedToValue());
   }
 }
 
@@ -80,7 +81,14 @@ float SequenceEntry::patternBeats() const
 // represents one track/line in the sequencer and contains a list of patternEntrys, wich holds a pointer and tickposition to a SinglePattern
 SequenceLine::SequenceLine( )
 {
+  patternSequence_ = 0;
 }
+
+SequenceLine::SequenceLine( PatternSequence * patSeq )
+{
+  patternSequence_ = patSeq;
+}
+
 
 SequenceLine::~ SequenceLine( )
 {
@@ -92,9 +100,12 @@ SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double positi
 {
   SequenceEntry* entry = new SequenceEntry(this);
     entry->setPattern(pattern);
-    entry->setTickPosition(position);
-
-    push_back(entry);
+  push_back(entry);
+  entry->setTickPosition(position);
+  if (patternSequence_) {
+     patternSequence_->push_back(entry);
+     patternSequence_->sort(LessByPointedToValue());
+  }
 
   return entry;
 }
@@ -106,6 +117,12 @@ double SequenceLine::tickLength( ) const
   } else
   return 0;
 }
+
+PatternSequence * SequenceLine::patternSequence( )
+{
+  return patternSequence_;
+}
+
 
 //end of sequenceLine;
 
@@ -127,11 +144,13 @@ PatternSequence::~PatternSequence()
 
 SequenceLine * PatternSequence::createNewLine( )
 {
-  SequenceLine* line = new SequenceLine();
+  SequenceLine* line = new SequenceLine(this);
   lines.push_back(line);
 
   return line;
 }
+
+
 
 
 

@@ -54,21 +54,30 @@ class SequenceEntry {
 
 };
 
+class PatternSequence;
+
 class SequenceLine : public  std::list<SequenceEntry*> 
 {
 
 public:
    SequenceLine();
+   SequenceLine(PatternSequence* patSeq);
    ~SequenceLine();
 
    SequenceEntry* createEntry(SinglePattern* pattern, double position);
 
    double tickLength() const;
 
+   PatternSequence* patternSequence();
+
+private:
+
+   PatternSequence* patternSequence_;
+
 };
 
 
-class PatternSequence{
+class PatternSequence : public std::list<SequenceEntry*> {
 public:
     PatternSequence();
 

@@ -47,6 +47,7 @@ class SequencerGUI : public NPanel
        SequencerItem( SequencerGUI* seqGui );
        ~SequencerItem();
 
+       virtual void onMousePress(int x, int y, int button);
        virtual void resize();
        virtual void onMove(const NMoveEvent & moveEvent);
 
@@ -95,6 +96,7 @@ class Area : public NPanel {
     void drawTimeGrid(NGraphics* g);
 
     virtual void paint(NGraphics* g);
+
 
   private:
 
