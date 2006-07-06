@@ -35,6 +35,14 @@ public:
 
     virtual std::string text();
 
+    void setObject( NObject* obj);
+    NObject* object();
+
+   bool operator<(const NCustomItem & rhs) const;
+
+private:
+
+   NObject* obj_;
 
 };
 
