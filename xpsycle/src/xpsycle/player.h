@@ -30,6 +30,7 @@ namespace psycle
 		public:
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
+			void AdvancePlayPos( double masterTickEndPosition );
 			/// Initial Loop. Read new line and Interpretate the Global commands.
 			void ExecuteGlobalCommands();
 			/// Notify all machines that a new Tick() comes.
@@ -111,6 +112,10 @@ namespace psycle
 				/// whether to apply dither to recording
 				bool _dodither;
 			///\}
+
+		protected:
+			std::list<SequenceEntry*>::iterator playIterator;
+			std::list<SequenceEntry*> playingSeqEntries;
 
 		private:
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.

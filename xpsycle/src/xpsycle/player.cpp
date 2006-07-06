@@ -34,6 +34,7 @@ namespace psycle
 			bpm(125)
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
+			playIterator = song.patternSequence()->begin();
 		}
 
 		Player::~Player() throw()
@@ -44,6 +45,7 @@ namespace psycle
 		void Player::Start(int pos, int line)
 		{
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
+			playIterator = song_->patternSequence()->begin();
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
@@ -411,6 +413,18 @@ namespace psycle
 			_lineChanged = true;
 		}
 
+		void Player::AdvancePlayPos( double masterTickEndPosition )
+		{
+			std::list<SequenceEntry*> processing;
+			while (playIterator != song_->patternSequence()->end()) {
+        SequenceEntry* entry = *playIterator;
+				if (entry->tickPosition() < masterTickEndPosition) {
+					processing.push_back(entry);
+					playIterator++;
+				} else break;
+			}
+		}
+
 		float * Player::Work(void* context, int & numSamples)
 		{
 			return reinterpret_cast<Player*>(context)->Work(numSamples);
@@ -585,3 +599,5 @@ namespace psycle
 
   }
 }
+
+
