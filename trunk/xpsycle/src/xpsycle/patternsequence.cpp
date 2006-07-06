@@ -47,6 +47,7 @@ SequenceEntry::~ SequenceEntry( )
 void SequenceEntry::setPattern( SinglePattern * pattern )
 {
   pattern_ = pattern;
+  playIterator_ = pattern_->begin();
 }
 
 SinglePattern * SequenceEntry::pattern( )
@@ -71,6 +72,26 @@ double SequenceEntry::tickPosition( ) const
 float SequenceEntry::patternBeats() const
 {
   return pattern_->beats();
+}
+
+void SequenceEntry::setPlayIteratorToBegin( )
+{
+  playIterator_ = pattern_->begin();
+}
+
+std::list< PatternLine >::iterator & SequenceEntry::playIterator( )
+{
+  return playIterator_;
+}
+
+std::list< PatternLine >::iterator SequenceEntry::begin( )
+{
+  pattern_->end();
+}
+
+std::list< PatternLine >::iterator SequenceEntry::end( )
+{
+  return pattern_->end();
 }
 
 
@@ -149,6 +170,9 @@ SequenceLine * PatternSequence::createNewLine( )
 
   return line;
 }
+
+
+
 
 
 

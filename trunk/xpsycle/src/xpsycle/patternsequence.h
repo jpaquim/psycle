@@ -46,7 +46,15 @@ class SequenceEntry {
      double tickPosition() const;
      float patternBeats() const;
 
+     void setPlayIteratorToBegin();
+     std::list<PatternLine>::iterator & playIterator();
+     std::list<PatternLine>::iterator begin();
+     std::list<PatternLine>::iterator end();
+
+
   private:
+
+     std::list<PatternLine>::iterator playIterator_;
 
      SequenceLine* line_;
      SinglePattern* pattern_;
@@ -75,7 +83,6 @@ private:
    PatternSequence* patternSequence_;
 
 };
-
 
 class PatternSequence : public std::list<SequenceEntry*> {
 public:
