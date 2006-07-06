@@ -39,11 +39,12 @@ namespace psycle {
 
 class SequencerGUI : public NPanel
 {
+  public:
   class SequencerLine : public NPanel {
 
     class SequencerItem : public NPanel {
       public:
-       SequencerItem();
+       SequencerItem( SequencerGUI* seqGui );
        ~SequencerItem();
 
        virtual void resize();
@@ -59,11 +60,13 @@ class SequencerGUI : public NPanel
         NLabel* caption_;
         SequenceEntry* sequenceEntry_;
 
+        SequencerGUI* sView;
+
     };
 
     public :
 
-     SequencerLine();
+     SequencerLine( SequencerGUI* seqGui );
      ~SequencerLine();
 
     signal1<SequencerLine*> click;
@@ -80,17 +83,22 @@ class SequencerGUI : public NPanel
    private:
 
       SequenceLine* seqLine_;
+      SequencerGUI* sView;
 
   };
 
 class Area : public NPanel {
   public :
-     Area();
+     Area(SequencerGUI* seqGui);
      ~Area();
 
     void drawTimeGrid(NGraphics* g);
 
     virtual void paint(NGraphics* g);
+
+  private:
+
+     SequencerGUI* sView;
 
 };
 
@@ -101,15 +109,18 @@ public:
     ~SequencerGUI();
 
     void setPatternSequence(PatternSequence* sequence);
-
     void addPattern(SinglePattern* pattern);
+
+    int beatPxLength() const;
+
+    SequencerLine* selectedLine_;
 
 private:
 
     int counter;
+    int beatPxLength_;
 
     SequencerLine* lastLine;
-    SequencerLine* selectedLine;
     PatternSequence* patternSequence_;
 
     void addSequencerLine();

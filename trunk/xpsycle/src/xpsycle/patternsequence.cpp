@@ -18,12 +18,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patternsequence.h"
-
+#include <iostream>
 // pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
+
+struct LessByPointedToValue
+      : std::binary_function<SequenceEntry const *, SequenceEntry const *, bool>
+   {
+      bool operator()(SequenceEntry const * x, SequenceEntry const * y) const
+         { return x->tickPosition() < y->tickPosition(); }
+   };
 
 SequenceEntry::SequenceEntry( )
 {
   pattern_ = 0;
+  line_ = 0;
+}
+
+SequenceEntry::SequenceEntry( SequenceLine * line )
+{
+  pattern_ = 0;
+  line_ = line;
 }
 
 SequenceEntry::~ SequenceEntry( )
@@ -43,12 +57,22 @@ SinglePattern * SequenceEntry::pattern( )
 void SequenceEntry::setTickPosition( double tick )
 {
   tickPosition_ = tick;
+  if (line_) {
+    line_->sort(LessByPointedToValue());
+  }
 }
 
 double SequenceEntry::tickPosition( ) const
 {
   return tickPosition_;
 }
+
+float SequenceEntry::patternBeats() const
+{
+  return pattern_->beats();
+}
+
+
 // end of PatternEntry
 
 
@@ -60,20 +84,29 @@ SequenceLine::SequenceLine( )
 
 SequenceLine::~ SequenceLine( )
 {
-  std::list<SequenceEntry*>::iterator it = line.begin();
-  for ( it; it != line.end(); it++) delete *it;
+  std::list<SequenceEntry*>::iterator it = begin();
+  for ( it; it != end(); it++) delete *it;
 }
 
-SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, float position )
+SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double position )
 {
-  SequenceEntry* entry = new SequenceEntry();
+  SequenceEntry* entry = new SequenceEntry(this);
     entry->setPattern(pattern);
     entry->setTickPosition(position);
 
-    line.push_back(entry);
+    push_back(entry);
 
   return entry;
 }
+
+double SequenceLine::tickLength( ) const
+{
+  if (size() > 0 ) {
+    return back()->tickPosition() + back()->patternBeats();
+  } else
+  return 0;
+}
+
 //end of sequenceLine;
 
 
@@ -99,6 +132,14 @@ SequenceLine * PatternSequence::createNewLine( )
 
   return line;
 }
+
+
+
+
+
+
+
+
 
 
 
