@@ -20,7 +20,9 @@
 #ifndef PATTERNEVENT_H
 #define PATTERNEVENT_H
 
+#include "pattern.h"
 #include <cstdint>
+
 
 /**
 @author Stefan Nattkemper
@@ -45,6 +47,8 @@ public:
 
     void setParameter(std::uint8_t parameter);
     std::uint8_t parameter() const;
+
+    psycle::host::PatternEntry* entry();
 
 private:
 
