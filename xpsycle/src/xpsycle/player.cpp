@@ -486,7 +486,7 @@ namespace psycle
 					std::list<std::pair<double,PatternLine* > >::iterator lineIt = tempPlayList.begin();
 
 					for ( ; lineIt != tempPlayList.end(); lineIt++) {
-						std::pair<double,PatternLine* >pair; = *lineIt;
+						std::pair<double,PatternLine* >pair = *lineIt;
 						ExecuteNotes( pair.first, *(pair.second));
 					}
 //						ExecuteNotes();

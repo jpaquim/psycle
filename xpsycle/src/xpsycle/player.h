@@ -98,7 +98,7 @@ namespace psycle
 
 				void RecalcSPB() { SamplesPerBeat((m_SampleRate*60)/bpm); }
 				const float SamplesPerBeat(){ return m_SamplesPerBeat;};
-				void SamplesPerBeat(const float samplePerBeat){m_SamplesPerRow = samplePerRow;};
+				void SamplesPerBeat(const float samplePerBeat){m_SamplesPerBeat = samplePerBeat;};
 
 				const int SampleRate() { return m_SampleRate; }
 				void SampleRate(const int sampleRate);
