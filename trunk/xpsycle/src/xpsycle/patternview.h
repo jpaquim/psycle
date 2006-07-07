@@ -241,6 +241,7 @@ public:
     NRect repaintLineNumberArea    (int startLine,int endLine);
 
     void setPattern(SinglePattern* pattern);
+    SinglePattern* pattern();
 
     void setBeatZoom(int tpb);
     int beatZoom() const;
@@ -268,6 +269,7 @@ private:
 
   void resize();
 
+  void onPatternDelete(SinglePattern* pattern);
   void onHScrollBar(NObject* sender, int pos);
   void onVScrollBar(NObject* sender, int pos);
 
