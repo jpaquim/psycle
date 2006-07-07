@@ -120,7 +120,7 @@ void Configuration::setSkinDefaults( )
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
   #if defined XPSYCLE__CONFIGURATION
-  #include <xpsycle/install_paths.defines.hpp>
+  #include <xpsycle/install_paths.h>
   hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
   iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
   pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
@@ -156,7 +156,7 @@ void Configuration::loadConfig()
   #if !defined XPSYCLE__CONFIGURATION
   // we don't have any information about the installation paths
   #else
-  #include <xpsycle/install_paths.defines.hpp>
+  #include <xpsycle/install_paths.h>
   try
   {
     loadConfig(XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml");
