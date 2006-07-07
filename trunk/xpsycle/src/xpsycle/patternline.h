@@ -29,7 +29,7 @@
 
 
 
-class PatternLine{
+class PatternLine : public std::map<int, PatternEvent>  {
 public:
     PatternLine();
     PatternLine(float position);
@@ -46,7 +46,6 @@ private:
 
     float tickPosition_;
 
-    std::map<int, PatternEvent> tracks;
     PatternEvent zeroTrack;
 
 };
