@@ -31,6 +31,7 @@ namespace psycle
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
 			void AdvancePlayPos( double masterTickEndPosition );
+			void prepareEvents(  double masterTickEndPosition, std::list<PatternLine*> & tempPlayLines  );
 			/// Initial Loop. Read new line and Interpretate the Global commands.
 			void ExecuteGlobalCommands();
 			/// Notify all machines that a new Tick() comes.

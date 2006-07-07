@@ -36,7 +36,7 @@ PatternLine::~PatternLine()
 const PatternEvent & PatternLine::trackAt( int index ) const
 {
   std::map<int, PatternEvent>::const_iterator itr;
-  if ( (itr = tracks.find( index )) != tracks.end() ) {
+  if ( (itr = find( index )) != end() ) {
     return itr->second;
   } else {
     return zeroTrack;
@@ -45,7 +45,7 @@ const PatternEvent & PatternLine::trackAt( int index ) const
 
 void PatternLine::setPatternEvent( const PatternEvent & event, int index )
 {
-  tracks[index] = event;
+  (*this)[index] = event;
 }
 
 void PatternLine::setTickPosition( float position )

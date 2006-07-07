@@ -425,6 +425,24 @@ namespace psycle
 			}
 		}
 
+		void Player::prepareEvents(  double masterTickEndPosition , std::list<PatternLine*> & tempPlayLines )
+		{
+			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
+			for ( ; it != playingSeqEntries.end(); it++ ) {
+				SequenceEntry* entry = *it;
+				double offset = masterTickEndPosition - entry->tickPosition();
+				std::list<PatternLine>::iterator & lineItr = entry->playIterator();
+				for ( ; lineItr != entry->end(); lineItr++) {
+					PatternLine & line = *lineItr;
+					if (line.tickPosition() >= offset) break;
+					tempPlayLines.push_back(&line);
+				}
+				if (lineItr == entry->end()) {
+					playingSeqEntries.erase(it); //\todo: maybe save the it
+				}
+			}
+		}
+
 		float * Player::Work(void* context, int & numSamples)
 		{
 			return reinterpret_cast<Player*>(context)->Work(numSamples);
@@ -599,5 +617,7 @@ namespace psycle
 
   }
 }
+
+
 
 
