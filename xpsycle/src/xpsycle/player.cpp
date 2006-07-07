@@ -302,7 +302,7 @@ namespace psycle
 		}
 
 		/// Final Loop. Read new line for notes to send to the Machines
-		void Player::ExecuteNotes(  PatternLine & line )
+		void Player::ExecuteNotes(  double offset , PatternLine & line )
 		{
 			std::map<int, PatternEvent>::iterator trackItr = line.begin();
 			for ( ; trackItr != line.end() ; trackItr++) {
@@ -430,7 +430,7 @@ namespace psycle
 			}
 		}
 
-		void Player::prepareEvents(  double masterTickEndPosition , std::list<PatternLine*> & tempPlayLines )
+		void Player::prepareEvents(  double masterTickEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines )
 		{
 			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
 			for ( ; it != playingSeqEntries.end(); it++ ) {
@@ -440,7 +440,10 @@ namespace psycle
 				for ( ; lineItr != entry->end(); lineItr++) {
 					PatternLine & line = *lineItr;
 					if (line.tickPosition() >= offset) break;
-					tempPlayLines.push_back(&line);
+					std::pair<double,PatternLine* > pair;
+					pair.first  = offset;
+					pair.second = &line;
+					tempPlayLines.push_back(pair);
 				}
 				if (lineItr == entry->end()) {
 					playingSeqEntries.erase(it); //\todo: maybe save the it
@@ -480,13 +483,14 @@ namespace psycle
 					{
 						// Advance position in the sequencer
 						AdvancePlayPos(masterTickEndPosition);
-						std::list<PatternLine*> tempPlayList;
+						std::list<std::pair<double,PatternLine* > > tempPlayList;
 						prepareEvents(masterTickEndPosition,tempPlayList);
 						
-						std::list<PatternLine*>::iterator lineIt = tempPlayList.begin();
+						std::list<std::pair<double,PatternLine* > >::iterator lineIt = tempPlayList.begin();
+
 						for ( ; lineIt != tempPlayList.end(); lineIt++) {
-							PatternLine* line = *lineIt;
-							ExecuteNotes(*line);
+							std::pair<double,PatternLine* >pair = *lineIt;
+							ExecuteNotes( pair.first, *(pair.second));
 						}
 //						ExecuteNotes();
 					}
