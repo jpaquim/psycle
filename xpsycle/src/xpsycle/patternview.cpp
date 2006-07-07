@@ -200,7 +200,7 @@ int PatternView::lineNumber( )
   if (pattern_)
     return pattern_->beatZoom() * pattern_->beats();
   else
-   return 64;
+   return 0;
 
 }
 
@@ -793,6 +793,7 @@ void PatternView::PatternDraw::drawCellBg( NGraphics * g, int track, int line, i
 
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
+  if ( pView->pattern() ) {
   drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
 
   char tbuf[16];
@@ -839,6 +840,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
       }
       }*/
     }
+  }
   }
 }
 
@@ -2009,6 +2011,19 @@ int PatternView::beatZoom( ) const
 void PatternView::setPattern( SinglePattern * pattern )
 {
   pattern_ = pattern;
+  if (pattern_)
+    pattern_->beforeDelete.connect(this,&PatternView::onPatternDelete);
+}
+
+SinglePattern * PatternView::pattern( )
+{
+  return pattern_;
+}
+
+void PatternView::onPatternDelete( SinglePattern * pattern )
+{
+  pattern_ = 0;
+  repaint();
 }
 
 void PatternView::setBeatZoom( int tpb )
@@ -2018,5 +2033,7 @@ void PatternView::setBeatZoom( int tpb )
 }
 
 }}
+
+
 
 
