@@ -479,16 +479,20 @@ namespace psycle
 					if (_playing)
 					{
 						// Advance position in the sequencer
-						AdvancePosition();
-						// Global commands are executed first so that the values for BPM and alike
-						// are up-to-date when "NotifyNewLine()" is called.
-//						ExecuteGlobalCommands();
-						NotifyNewLine();
+						AdvancePlayPos(masterTickEndPosition);
+						std::list<PatternLine*> tempPlayList;
+						prepareEvents(masterTickEndPosition,tempPlayList);
+						
+						std::list<PatternLine*>::iterator lineIt = tempPlayList.begin();
+						for ( ; lineIt != tempPlayList.end(); lineIt++) {
+							PatternLine* line = *lineIt;
+							ExecuteNotes(*line);
+						}
 //						ExecuteNotes();
 					}
 					else
 					{
-						NotifyNewLine();
+//						NotifyNewLine();
 					}
 				}
 				// Processing plant
