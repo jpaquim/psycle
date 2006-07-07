@@ -104,21 +104,25 @@ namespace psycle
 
 		void Player::ExecuteLine(void)
 		{
-			ExecuteGlobalCommands();
+//			ExecuteGlobalCommands();
 			NotifyNewLine();
-			ExecuteNotes();
+//			ExecuteNotes();
 		}
 		// Initial Loop. Read new line and Interpret the Global commands.
-		void Player::ExecuteGlobalCommands(void)
+/*		void Player::ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines )
 		{
 			_patternjump = -1;
 			_linejump = -1;
 			int mIndex = 0;
-			unsigned char* const plineOffset = song()._ptrackline(_playPattern,0,_lineCounter);
-
-			for(int track=0; track<song().tracks(); track++)
+			std::list<PatternLine*>::iterator lineItr = tempPlayLines.begin();
+			for ( ; lineItr < tempPlayLines.end(); lineItr++);
 			{
-				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
+				PatternLine* line = *lineItr;
+				std::map<int, PatternEvent>::iterator trackItr = line->begin();
+				for ( ; trackItr != line->end() ; trackItr++) {
+					PatternEvent dataEntry = trackItr->second;
+					int trackNumber = trackItr->first;
+			
 				if(pEntry->_note < cdefTweakM || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
 				{
 					switch(pEntry->_cmd)
@@ -279,11 +283,12 @@ namespace psycle
 						}
 					}
 				}
+				}
 			}
-		}
+		}*/
 
 		// Notify all machines that a new Tick() comes.
-		void Player::NotifyNewLine(void)
+		void Player::NotifyNewLine( )
 		{
 			for(int tc=0; tc<MAX_MACHINES; tc++)
 			{
@@ -297,15 +302,15 @@ namespace psycle
 		}
 
 		/// Final Loop. Read new line for notes to send to the Machines
-		void Player::ExecuteNotes(void)
+		void Player::ExecuteNotes(  PatternLine & line )
 		{
-			unsigned char* const plineOffset = song()._ptrackline(_playPattern,0,_lineCounter);
-			for(int track=0; track<song().tracks(); track++)
-			{
-				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(( !song()._trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?
+			std::map<int, PatternEvent>::iterator trackItr = line.begin();
+			for ( ; trackItr != line.end() ; trackItr++) {
+				PatternEvent entry = trackItr->second;
+				int track = trackItr->first;
+				if(( !song()._trackMuted[track]) && (entry.note() < cdefTweakM || entry.note() == 255)) // Is it not muted and is a note?
 				{
-					int mac = pEntry->_mach;
+					int mac = entry.machine();
 					if(mac != 255) prevMachines[track] = mac;
 					else mac = prevMachines[track];
 //					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
@@ -316,33 +321,33 @@ namespace psycle
 							Machine *pMachine = song()._pMachine[mac];
 							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
 							{
-								if(pEntry->_cmd == PatternCmd::NOTE_DELAY)
+								if(entry.command() == PatternCmd::NOTE_DELAY)
 								{
 									// delay
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*SamplesPerRow())/256;
+									memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
+									pMachine->TriggerDelayCounter[track] = ((entry.parameter()+1)*SamplesPerRow())/256;
 								}
-								else if(pEntry->_cmd == PatternCmd::RETRIGGER)
+								else if(entry.command() == PatternCmd::RETRIGGER)
 								{
 									// retrigger
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
+									memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
+									pMachine->RetriggerRate[track] = (entry.parameter()+1);
 									pMachine->TriggerDelayCounter[track] = 0;
 								}
-								else if(pEntry->_cmd == PatternCmd::RETR_CONT)
+								else if(entry.command() == PatternCmd::RETR_CONT)
 								{
 									// retrigger continue
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									if(pEntry->_parameter&0xf0) pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
+									memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
+									if(entry.parameter()&0xf0) pMachine->RetriggerRate[track] = (entry.parameter()&0xf0);
 								}
-								else if (pEntry->_cmd == PatternCmd::ARPEGGIO)
+								else if (entry.command() == PatternCmd::ARPEGGIO)
 								{
 									// arpeggio
 									//\todo : Add Memory.
 									//\todo : This won't work... What about sampler's NNA's?
-									if (pEntry->_parameter)
+									if (entry.parameter())
 									{
-										memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+										memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
 										pMachine->ArpeggioCount[track] = 1;
 									}
 									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
@@ -350,7 +355,7 @@ namespace psycle
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
-									pMachine->Tick(track, pEntry);
+									pMachine->Tick(track, entry.entry());
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
@@ -360,7 +365,7 @@ namespace psycle
 				}
 			}
 			_samplesRemaining = SamplesPerRow();
-		}	
+		}
 
 
 		void Player::AdvancePosition()
@@ -477,9 +482,9 @@ namespace psycle
 						AdvancePosition();
 						// Global commands are executed first so that the values for BPM and alike
 						// are up-to-date when "NotifyNewLine()" is called.
-						ExecuteGlobalCommands();
+//						ExecuteGlobalCommands();
 						NotifyNewLine();
-						ExecuteNotes();
+//						ExecuteNotes();
 					}
 					else
 					{

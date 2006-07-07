@@ -26,6 +26,7 @@ PatternEvent::PatternEvent() :
   _cmd(0),
   _parameter(0)
 {
+
 }
 
 
@@ -81,6 +82,11 @@ void PatternEvent::setParameter( std::uint8_t parameter )
 std::uint8_t PatternEvent::parameter( ) const
 {
   return _parameter;
+}
+
+psycle::host::PatternEntry * PatternEvent::entry( )
+{
+  return (psycle::host::PatternEntry*) this;
 }
 
 
