@@ -96,6 +96,24 @@ class SequencerGUI : public NPanel
   };
 
 
+
+class SequencerBeatLineal : public NPanel {
+  public :
+     SequencerBeatLineal(SequencerGUI* seqGui);
+     ~SequencerBeatLineal();
+
+     virtual void paint(NGraphics* g);
+     virtual int preferredHeight() const;
+
+  private:
+
+     SequencerGUI* sView;
+
+     void drawLineal(NGraphics* g, int dx);
+
+};
+
+
 class Area : public NPanel {
   public :
      Area(SequencerGUI* seqGui);
@@ -130,6 +148,7 @@ private:
     int counter;
     int beatPxLength_;
 
+    SequencerBeatLineal* beatLineal_;
     SequencerLine* lastLine;
     PatternSequence* patternSequence_;
 
