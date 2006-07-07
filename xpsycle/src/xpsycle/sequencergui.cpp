@@ -32,6 +32,67 @@ namespace psycle {
 	namespace host {
 
 
+// this is the bpm lineal
+
+SequencerGUI::SequencerBeatLineal::SequencerBeatLineal(SequencerGUI* seqGui )
+{
+  sView = seqGui;
+  setBackground(NColor(255,255,255));
+  setTransparent(false);
+}
+
+SequencerGUI::SequencerBeatLineal::~ SequencerBeatLineal( )
+{
+}
+
+void SequencerGUI::SequencerBeatLineal::paint( NGraphics * g )
+{
+  drawLineal(g, 0);
+}
+
+void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
+{
+  g->setForeground(NColor(0,0,220));
+
+  int cw = clientWidth();
+  int ch = clientHeight();
+
+  std::string timeScaleText = "t = bpm";
+  int rightIdent = 2;
+  int scaleTextWidth = g->textWidth(timeScaleText) + rightIdent;
+  g->drawText(cw - scaleTextWidth, g->textAscent(), timeScaleText);
+
+  g->setForeground(NColor(220,220,220));
+
+  g->drawLine(0, ch - 10, cw, ch - 10);
+
+  for (int i = 0; i < cw / sView->beatPxLength() ; i++) {
+     if (! (i % 4)) {
+        g->setForeground(NColor(180,180,180));
+        g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
+        if (i * sView->beatPxLength() < cw - scaleTextWidth) {
+          std::string beatLabel = stringify(i);
+          int textWidth = g->textWidth(beatLabel);
+          g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
+        }
+     }
+     else {
+        g->setForeground(NColor(220,220,220));
+        g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
+    }
+  }
+
+}
+
+int SequencerGUI::SequencerBeatLineal::preferredHeight( ) const
+{
+  NFontMetrics metrics(font());
+
+  return metrics.textHeight() + 10;
+}
+
+
+
 // this is the sequencer Area
 
 SequencerGUI::Area::Area( SequencerGUI* seqGui )
@@ -202,6 +263,9 @@ SequencerGUI::SequencerGUI()
     toolBar_->add( new NButton("Delete"));
   add(toolBar_, nAlTop);
 
+  beatLineal_ = new SequencerBeatLineal(this);
+  add(beatLineal_, nAlTop);
+
   scrollBox_ = new NScrollBox();
     scrollArea_ = new Area( this );
       scrollArea_->setLayout(NAutoScrollLayout());
@@ -276,6 +340,8 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 
 
 }}
+
+
 
 
 

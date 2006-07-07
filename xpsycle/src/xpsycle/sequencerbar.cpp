@@ -141,22 +141,23 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
 void SequencerBar::onDeletePattern( NButtonEvent * ev )
 {
   NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
-  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.begin();
 
-  SinglePattern* pattern = 0;
+  if (item) {
+    SinglePattern* pattern = 0;
+    std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.begin();
+    for ( ; itr != itemMap.end(); itr++) {
+      if (itr->first == item) {
+        pattern = itr->second;
+        break;
+      }
+     }
 
-  for ( ; itr != itemMap.end(); itr++) {
-     if (itr->first == item) {
-       pattern = itr->second;
-       break;
+     if (pattern) {
+       delete pattern;
+       patternBox_->removeChild(item);
+       patternBox_->repaint();
      }
   }
-
-  if (pattern) delete pattern;
-
-  patternBox_->removeChild(item);
-  patternBox_->repaint();
-
 }
 
 
