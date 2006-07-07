@@ -95,6 +95,11 @@ namespace psycle
 				const int SamplesPerRow(){ return m_SamplesPerRow;};
 				/// Sets the number of samples that it takes for each row of the pattern to be played
 				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
+
+				void RecalcSPB() { SamplesPerBeat((m_SampleRate*60)/bpm); }
+				const float SamplesPerBeat(){ return m_SamplesPerBeat;};
+				void SamplesPerBeat(const float samplePerBeat){m_SamplesPerRow = samplePerRow;};
+
 				const int SampleRate() { return m_SampleRate; }
 				void SampleRate(const int sampleRate);
 			///\}
@@ -137,6 +142,7 @@ namespace psycle
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()
 			int m_SamplesPerRow;
+			float m_SamplesPerBeat;
 			int m_SampleRate;
 			short _patternjump;
 			short _linejump;

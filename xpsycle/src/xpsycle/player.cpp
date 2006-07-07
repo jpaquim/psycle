@@ -421,10 +421,10 @@ namespace psycle
 		void Player::AdvancePlayPos( double masterTickEndPosition )
 		{
 			while (playIterator != song_->patternSequence()->end()) {
-        SequenceEntry* entry = *playIterator;
+		        SequenceEntry* entry = *playIterator;
 				if (entry->tickPosition() < masterTickEndPosition) {
-				entry->setPlayIteratorToBegin();
-				playingSeqEntries.push_back(entry);
+					entry->setPlayIteratorToBegin();
+					playingSeqEntries.push_back(entry);
 					playIterator++;
 				} else break;
 			}
@@ -435,13 +435,14 @@ namespace psycle
 			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
 			for ( ; it != playingSeqEntries.end(); it++ ) {
 				SequenceEntry* entry = *it;
-				double offset = masterTickEndPosition - entry->tickPosition();
+				double offsetstart = (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount) - (entry->tickPosition()*SamplesPerBeat());
+				double offsetend = masterTickEndPosition - entry->tickPosition();
 				std::list<PatternLine>::iterator & lineItr = entry->playIterator();
 				for ( ; lineItr != entry->end(); lineItr++) {
 					PatternLine & line = *lineItr;
-					if (line.tickPosition() >= offset) break;
+					if (line.tickPosition() >= offsetend) break;
 					std::pair<double,PatternLine* > pair;
-					pair.first  = offset;
+					pair.first  = offsetstart;
 					pair.second = &line;
 					tempPlayLines.push_back(pair);
 				}
@@ -458,7 +459,7 @@ namespace psycle
 
 		float * Player::Work(int & numSamples)
 		{
-			double masterTickEndPosition = ( (bpm/60)* ( ((Master*)song()._pMachine[MASTER_INDEX])->sampleCount+ numSamples) / (double) SampleRate());
+			double masterTickEndPosition =  (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount+ numSamples)*SamplesPerBeat();
 			int amount;
 			Master::_pMasterSamples = _pBuffer;
 			int numSamplex = numSamples;
@@ -475,29 +476,24 @@ namespace psycle
 			{
 				if(numSamplex > MAX_BUFFER_LENGTH) amount = MAX_BUFFER_LENGTH; else amount = numSamplex;
 				// Tick handler function
-				if((_playing) && (amount >= _samplesRemaining)) amount = _samplesRemaining;
-				// Song play
-				if((_samplesRemaining <=0))
+				if (_playing)
 				{
-					if (_playing)
-					{
-						// Advance position in the sequencer
-						AdvancePlayPos(masterTickEndPosition);
-						std::list<std::pair<double,PatternLine* > > tempPlayList;
-						prepareEvents(masterTickEndPosition,tempPlayList);
-						
-						std::list<std::pair<double,PatternLine* > >::iterator lineIt = tempPlayList.begin();
+					// Advance position in the sequencer
+					AdvancePlayPos(masterTickEndPosition);
+					std::list<std::pair<double,PatternLine* > > tempPlayList;
+					prepareEvents(masterTickEndPosition,tempPlayList);
+					
+					std::list<std::pair<double,PatternLine* > >::iterator lineIt = tempPlayList.begin();
 
-						for ( ; lineIt != tempPlayList.end(); lineIt++) {
-							std::pair<double,PatternLine* >pair = *lineIt;
-							ExecuteNotes( pair.first, *(pair.second));
-						}
+					for ( ; lineIt != tempPlayList.end(); lineIt++) {
+						std::pair<double,PatternLine* >pair; = *lineIt;
+						ExecuteNotes( pair.first, *(pair.second));
+					}
 //						ExecuteNotes();
-					}
-					else
-					{
+				}
+				else
+				{
 //						NotifyNewLine();
-					}
 				}
 				// Processing plant
 				if(amount > 0)
@@ -575,7 +571,7 @@ namespace psycle
 					Master::_pMasterSamples += amount * 2;
 					numSamplex -= amount;
 				}
-				if(_playing) _samplesRemaining -= amount;
+				_samplesRemaining -= amount;
 			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
 			return _pBuffer;
 		}
