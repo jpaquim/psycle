@@ -20,7 +20,7 @@
 #ifndef ESOUNDOUT_H
 #define ESOUNDOUT_H
 
-#include <audiodriver.h>
+#include "audiodriver.h"
 
 /**
 @author Stefan Nattkemper

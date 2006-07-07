@@ -22,7 +22,7 @@
 
 #include "singlepattern.h"
 #include "patternsequence.h"
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 
 /**
