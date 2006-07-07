@@ -42,6 +42,7 @@ class SequencerGUI : public NPanel
   public:
   class SequencerLine : public NPanel {
 
+
     class SequencerItem : public NPanel {
       public:
        SequencerItem( SequencerGUI* seqGui );
@@ -83,10 +84,17 @@ class SequencerGUI : public NPanel
 
    private:
 
+      bool lock;
+
       SequenceLine* seqLine_;
       SequencerGUI* sView;
 
+      std::vector<SequencerItem*> items;
+
+      void onDeleteEntry(SequenceEntry* entry);
+
   };
+
 
 class Area : public NPanel {
   public :

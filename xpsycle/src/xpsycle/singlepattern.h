@@ -20,6 +20,7 @@
 #ifndef SINGLEPATTERN_H
 #define SINGLEPATTERN_H
 
+#include <ngrs/sigslot.h>
 #include "patternline.h"
 #include <list>
 #include <string>
@@ -33,6 +34,8 @@ public:
     SinglePattern();
 
     ~SinglePattern();
+
+    sigslot::signal1<SinglePattern*> beforeDelete;
 
     std::list<PatternLine>::iterator startItr(float position);
 

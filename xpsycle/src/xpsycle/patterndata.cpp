@@ -23,11 +23,13 @@
 PatternData::PatternData()
 {
   createNewPattern("Pattern0");
+  lock = false;
 }
 
 
 PatternData::~PatternData()
 {
+  lock = true;
   for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
     delete *it;
   }
@@ -50,5 +52,13 @@ SinglePattern * PatternData::findByPtr( SinglePattern * ptr )
 
   return 0;
 
+}
+
+void PatternData::onDeletePattern( SinglePattern* ptr )
+{
+  if (!lock) {
+    std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
+    if (it != end() ) erase(it);
+  }
 }
 

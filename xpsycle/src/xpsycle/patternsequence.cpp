@@ -42,6 +42,7 @@ SequenceEntry::SequenceEntry( SequenceLine * line )
 
 SequenceEntry::~ SequenceEntry( )
 {
+  beforeDelete.emit(this);
 }
 
 void SequenceEntry::setPattern( SinglePattern * pattern )
@@ -95,6 +96,7 @@ std::list< PatternLine >::iterator SequenceEntry::end( )
 }
 
 
+
 // end of PatternEntry
 
 
@@ -123,6 +125,8 @@ SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double positi
     entry->setPattern(pattern);
   push_back(entry);
   entry->setTickPosition(position);
+  entry->pattern()->beforeDelete.connect(this,&SequenceLine::onDeletePattern);
+  entry->pattern()->beforeDelete.connect(patternSequence_ ,&PatternSequence::onDeletePattern);
   if (patternSequence_) {
      patternSequence_->push_back(entry);
      patternSequence_->sort(LessByPointedToValue());
@@ -144,6 +148,17 @@ PatternSequence * SequenceLine::patternSequence( )
   return patternSequence_;
 }
 
+void SequenceLine::onDeletePattern( SinglePattern * pattern )
+{
+   std::list<SequenceEntry*>::iterator it = begin();
+   for ( ; it != end(); it++) {
+      SequenceEntry* entry = *it;
+      if (entry->pattern() == pattern) {
+         erase(it);
+         break;
+      }
+   }
+}
 
 //end of sequenceLine;
 
@@ -170,6 +185,24 @@ SequenceLine * PatternSequence::createNewLine( )
 
   return line;
 }
+
+
+void PatternSequence::onDeletePattern( SinglePattern * pattern )
+{
+  std::list<SequenceEntry*>::iterator it = begin();
+   for ( ; it != end(); it++) {
+      SequenceEntry* entry = *it;
+      if (entry->pattern() == pattern) {
+         erase(it);
+         delete entry;
+         break;
+      }
+   }
+}
+
+
+
+
 
 
 

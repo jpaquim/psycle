@@ -415,11 +415,11 @@ namespace psycle
 
 		void Player::AdvancePlayPos( double masterTickEndPosition )
 		{
-			std::list<SequenceEntry*> processing;
 			while (playIterator != song_->patternSequence()->end()) {
         SequenceEntry* entry = *playIterator;
 				if (entry->tickPosition() < masterTickEndPosition) {
-					processing.push_back(entry);
+				entry->setPlayIteratorToBegin();
+				playingSeqEntries.push_back(entry);
 					playIterator++;
 				} else break;
 			}
