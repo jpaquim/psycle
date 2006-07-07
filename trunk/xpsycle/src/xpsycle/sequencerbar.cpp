@@ -69,7 +69,7 @@ void SequencerBar::init( )
 
     NToolBar* patToolBar = new NToolBar();
       patToolBar->add( new NButton("New"))->clicked.connect(this,&SequencerBar::onNewPattern);
-      patToolBar->add( new NButton("Delete"));
+      patToolBar->add( new NButton("Delete"))->clicked.connect(this,&SequencerBar::onDeletePattern);
       patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
     patternPanel->add(patToolBar, nAlTop);
 
@@ -138,6 +138,27 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
   counter++;
 }
 
+void SequencerBar::onDeletePattern( NButtonEvent * ev )
+{
+  NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.begin();
+
+  SinglePattern* pattern = 0;
+
+  for ( ; itr != itemMap.end(); itr++) {
+     if (itr->first == item) {
+       pattern = itr->second;
+       break;
+     }
+  }
+
+  if (pattern) delete pattern;
+
+  patternBox_->removeChild(item);
+  patternBox_->repaint();
+
+}
+
 
 }}
 
@@ -170,6 +191,8 @@ void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
   }
 
 }
+
+
 
 
 

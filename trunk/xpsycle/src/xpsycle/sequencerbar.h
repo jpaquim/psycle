@@ -83,6 +83,7 @@ private:
     NCheckBox* movecursorpaste_;
 
     void onNewPattern( NButtonEvent * ev );
+    void onDeletePattern( NButtonEvent* ev );
 
     void onItemSelected(NItemEvent* ev);
     void onPatternAdd(NButtonEvent* ev);

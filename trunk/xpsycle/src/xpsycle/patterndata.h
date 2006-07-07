@@ -35,7 +35,12 @@ public:
     SinglePattern* findByPtr(SinglePattern* ptr);
 
     SinglePattern* createNewPattern(const std::string & name);
+    void deletePattern(SinglePattern* ptr);
 
+private:
+
+   bool lock;
+   void onDeletePattern(SinglePattern* ptr);
 
 };
 

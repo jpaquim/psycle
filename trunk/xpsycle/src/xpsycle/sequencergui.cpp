@@ -118,15 +118,18 @@ void SequencerGUI::SequencerLine::SequencerItem::onMousePress( int x, int y, int
 // end of SequencerItem class
 
 
+
 // this is the gui class that represents one SequenceLine
 
 SequencerGUI::SequencerLine::SequencerLine( SequencerGUI* seqGui )
 {
   sView = seqGui;
+  lock = false;
 }
 
 SequencerGUI::SequencerLine::~ SequencerLine( )
 {
+  lock = true;
 }
 
 void SequencerGUI::SequencerLine::paint( NGraphics * g )
@@ -147,6 +150,8 @@ void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
   SequencerItem* item = new SequencerItem(sView);
     item->setPosition(d2i(sView->beatPxLength() * endTick),10,pattern->beats() * sView->beatPxLength() ,30);
     item->setSequenceEntry(sequenceLine()->createEntry(pattern, endTick));
+    item->sequenceEntry()->beforeDelete.connect( this,&SequencerGUI::SequencerLine::onDeleteEntry);
+    items.push_back(item);
   add(item);
 }
 
@@ -163,6 +168,22 @@ void SequencerGUI::SequencerLine::setSequenceLine( SequenceLine * line )
 SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
 {
   return seqLine_;
+}
+
+void SequencerGUI::SequencerLine::onDeleteEntry( SequenceEntry * entry )
+{
+  if (!lock) {
+    std::vector<SequencerItem*>::iterator it = items.begin();
+    for ( ; it < items.end(); it++) {
+      SequencerItem* item = *it;
+      if (item->sequenceEntry() == entry) {
+         items.erase(it);
+         removeChild(item);
+         repaint();
+         break;
+      }
+    }
+  }
 }
 
 // main class
@@ -255,6 +276,8 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 
 
 }}
+
+
 
 
 

@@ -39,6 +39,8 @@ class SequenceEntry {
      SequenceEntry(SequenceLine* line);
      ~SequenceEntry();
 
+     sigslot::signal1<SequenceEntry*> beforeDelete;
+
      void setPattern(SinglePattern* pattern);
      SinglePattern* pattern();
 
@@ -64,7 +66,7 @@ class SequenceEntry {
 
 class PatternSequence;
 
-class SequenceLine : public  std::list<SequenceEntry*> 
+class SequenceLine : public  std::list<SequenceEntry*>, public sigslot::has_slots<>
 {
 
 public:
@@ -82,9 +84,11 @@ private:
 
    PatternSequence* patternSequence_;
 
+   void onDeletePattern(SinglePattern* pattern);
+
 };
 
-class PatternSequence : public std::list<SequenceEntry*> {
+class PatternSequence : public std::list<SequenceEntry*>,public sigslot::has_slots<> {
 public:
     PatternSequence();
 
@@ -92,11 +96,11 @@ public:
 
     SequenceLine* createNewLine();
 
+    void onDeletePattern(SinglePattern* pattern);
 
 private:
 
     std::vector<SequenceLine*> lines;
-
 
 };
 

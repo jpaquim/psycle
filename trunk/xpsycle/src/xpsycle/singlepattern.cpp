@@ -30,6 +30,7 @@ SinglePattern::SinglePattern()
 
 SinglePattern::~SinglePattern()
 {
+  beforeDelete.emit(this);
 }
 
 void SinglePattern::setBeatZoom( int zoom )
