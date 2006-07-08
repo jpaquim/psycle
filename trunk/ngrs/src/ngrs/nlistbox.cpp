@@ -112,6 +112,11 @@ void NListBox::removeChilds( )
   listBoxPane_->setScrollDy(0);
 }
 
+void NListBox::removeChild( NCustomItem * item )
+{
+  listBoxPane_->removeChild(item);
+}
+
 void NListBox::deSelectItems( )
 {
   for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
@@ -185,6 +190,8 @@ void NListBox::setOrientation( int orientation )
     setHScrollBarPolicy(nAlwaysVisible);
   }
 }
+
+
 
 
 

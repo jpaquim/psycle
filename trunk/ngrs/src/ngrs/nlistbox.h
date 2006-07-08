@@ -43,6 +43,7 @@ public:
 
     virtual void onItemSelected(NCustomItem * item);
     virtual void removeChilds();
+    virtual void removeChild(NCustomItem* item);
 
     int itemCount();
     void setIndex(unsigned int i);

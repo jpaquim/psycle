@@ -68,7 +68,7 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-  testScrollBar();
+  //testScrollBar();
   // testTimerButton();
 
 //testMemo();
@@ -82,18 +82,18 @@ NTestWindow::NTestWindow()
     box->setPosition(10,40,100,20);
   pane()->add(box);*/
 
-  /*NCustomTreeView* view = new NCustomTreeView();
+  NCustomTreeView* view = new NCustomTreeView();
     NLabel* lb = new NLabel("Test");
-    view->rootNode()->pane()->add(lb,nAlClient);
+    view->rootNode()->pane()->add(lb,nAlTop);
 
-      for (int i = 0; i < 10; i++) {
+      /*for (int i = 0; i < 10; i++) {
         NTreeNode* tr = new NTreeNode();
         tr->pane()->add(new NLabel("sub"),nAlClient);
         view->rootNode()->childNodePane()->add(tr,nAlTop);
-      }
+      }*/
   pane()->add(view);
 
-  view->setPosition(10,50,200,200);*/
+  view->setPosition(10,50,200,200);
 
   /*NLabel* lb = new NLabel("Hallo");
     lb->setPosition(10,120,100,120);
