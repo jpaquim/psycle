@@ -43,6 +43,7 @@ class SequenceEntry {
 
      void setPattern(SinglePattern* pattern);
      SinglePattern* pattern();
+     SinglePattern* pattern() const;
 
      void setTickPosition(double tick);
      double tickPosition() const;
@@ -98,9 +99,11 @@ public:
 
     void onDeletePattern(SinglePattern* pattern);
 
+    const std::vector<SequenceLine*> & lines() const;
+
 private:
 
-    std::vector<SequenceLine*> lines;
+    std::vector<SequenceLine*> lines_;
 
 };
 
