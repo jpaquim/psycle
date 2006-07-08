@@ -144,19 +144,16 @@ void SequencerBar::onDeletePattern( NButtonEvent * ev )
 
   if (item) {
     SinglePattern* pattern = 0;
-    std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.begin();
-    for ( ; itr != itemMap.end(); itr++) {
-      if (itr->first == item) {
-        pattern = itr->second;
-        break;
-      }
-     }
 
-     if (pattern) {
-       delete pattern;
-       patternBox_->removeChild(item);
-       patternBox_->repaint();
-     }
+    std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
+    if(itr!=itemMap.end())
+      pattern = itr->second;
+
+    if (pattern) {
+      delete pattern;
+      patternBox_->removeChild(item);
+      patternBox_->repaint();
+    }
   }
 }
 
@@ -168,29 +165,17 @@ void SequencerBar::onDeletePattern( NButtonEvent * ev )
 void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 {
   NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
-  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.begin();
-
-  for ( ; itr != itemMap.end(); itr++) {
-     if (itr->first == item) {
-       selected.emit(itr->second);
-       break;
-     }
-  }
-
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
+  if(itr!=itemMap.end())
+     selected.emit(itr->second);
 }
 
 void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
 {
   NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
-  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.begin();
-
-  for ( ; itr != itemMap.end(); itr++) {
-     if (itr->first == item) {
-       added.emit(itr->second);
-       break;
-     }
-  }
-
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
+  if(itr!=itemMap.end())
+    added.emit(itr->second);
 }
 
 
