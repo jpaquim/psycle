@@ -71,6 +71,8 @@ NFlipBar::NFlipBar()
  : NPanel()
 {
   add( flipper_ = new NFlipper(this) );
+  setBackground(NColor(100,100,100));
+  setTransparent(false);
 }
 
 
