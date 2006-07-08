@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Machine
 #pragma once
+#include "patternevent.h"
 #include "songstructs.h"
 #include "dsp.h"
 #include "helpers.h"
@@ -251,12 +252,32 @@ namespace psycle
 			MACHMODE_MASTER = 2,
 		};
 
+		class WorkEvent {
+			public:
+				WorkEvent();
+				WorkEvent(double offset, int track, const PatternEvent & patternEvent);
+				const PatternEvent &  event() const;
+				double offset() const;
+				int track() const;
+
+			private:
+				PatternEvent event_;
+				double offset_;
+				int track_;
+		};
+
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
 		{
 
 			///\name crash handling
 			///\{
+				public:
+					virtual int GenerateAudioInTicks(int numsamples);
+					virtual int GenerateAudio(int numsamples);
+					virtual void AddEvent(double offset, int track, const PatternEvent & event);
+				protected:
+					std::vector<WorkEvent> workEvents;
 				public:
 					/// This function should be called when an exception was thrown from the machine.
 					/// This will mark the machine as crashed, i.e. crashed() will return true,

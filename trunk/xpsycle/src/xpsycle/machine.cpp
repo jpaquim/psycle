@@ -531,6 +531,7 @@ namespace psycle
 //				PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
 //				wire_cpu_cost(wire_cpu_cost() + wcost);
 			}
+			GenerateAudio( numSamples );
 		}
 
 		//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
@@ -808,7 +809,54 @@ namespace psycle
 			pFile->Write(temp);
 		}
 
-
+		void Machine::AddEvent( double offset, int track, const PatternEvent & event )
+		{
+				workEvents.push_back( WorkEvent(offset,track,event));
+		}
 
 	}
 }
+
+psycle::host::WorkEvent::WorkEvent( )
+{
+}
+
+psycle::host::WorkEvent::WorkEvent( double offset, int track, const PatternEvent & patternEvent )
+{
+	offset_ = offset;
+	track_ = track;
+	event_ = patternEvent;
+}
+
+const PatternEvent &  psycle::host::WorkEvent::event( ) const
+{
+	return event_;
+}
+
+double psycle::host::WorkEvent::offset( ) const
+{
+	return offset_;
+}
+
+int psycle::host::WorkEvent::track( ) const
+{
+	return track_;
+}
+
+int psycle::host::Machine::GenerateAudioInTicks( int numsamples )
+{
+}
+
+int psycle::host::Machine::GenerateAudio( int numsamples )
+{
+	double offset = 0;
+	std::vector<WorkEvent>::iterator it = workEvents.begin();
+	for ( ; it < workEvents.end(); it++) {
+		WorkEvent & workEvent = *it;
+		GenerateAudioInTicks(workEvent.offset() - offset);
+		Tick(workEvent.track(),workEvent.event().entry());
+		offset= workEvent.offset();
+	}
+	if ( offset < numsamples ) GenerateAudioInTicks(numsamples-offset);
+}
+

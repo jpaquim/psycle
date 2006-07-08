@@ -89,4 +89,9 @@ psycle::host::PatternEntry * PatternEvent::entry( )
   return (psycle::host::PatternEntry*) this;
 }
 
+psycle::host::PatternEntry * PatternEvent::entry( ) const
+{
+  return (psycle::host::PatternEntry*) this;
+}
+
 
