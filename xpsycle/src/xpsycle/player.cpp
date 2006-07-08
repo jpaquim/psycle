@@ -46,7 +46,7 @@ namespace psycle
 		void Player::Start(int pos, int line)
 		{
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
-			playIterator = song_->patternSequence()->begin();
+			playIterator = song()->patternSequence()->begin();
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
@@ -423,7 +423,7 @@ namespace psycle
 
 		void Player::AdvancePlayPos( double masterTickEndPosition )
 		{
-			while (playIterator != song_->patternSequence()->end()) {
+			while (playIterator != song().patternSequence()->end()) {
 		        SequenceEntry* entry = *playIterator;
 				if (entry->tickPosition() < masterTickEndPosition) {
 					entry->setPlayIteratorToBegin();
@@ -438,21 +438,20 @@ namespace psycle
 			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
 			while ( it != playingSeqEntries.end() ) {
 				SequenceEntry* entry = *it;
-				double offsetstart = (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount) - (entry->tickPosition()*SamplesPerBeat());
 				double offsetend = masterTickEndPosition - entry->tickPosition();
 				std::list<PatternLine>::iterator & lineItr = entry->playIterator();
 				for ( ; lineItr != entry->end(); lineItr++) {
 					PatternLine & line = *lineItr;
 					if (line.tickPosition() >= offsetend) break;
 					std::pair<double,PatternLine* > pair;
-					pair.first  = offsetstart;
+					pair.first  = (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount) - ((entry->tickPosition()+line->tickPosition())*SamplesPerBeat());
 					pair.second = &line;
 					tempPlayLines.push_back(pair);
 				}
 				if (lineItr == entry->end()) {
-					playingSeqEntries.erase(it++); //\todo: maybe save the it
+					playingSeqEntries.erase(it++); 
 				} else
-				it++;
+					it++;
 			}
 		}
 
