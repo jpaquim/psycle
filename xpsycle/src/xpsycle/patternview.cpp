@@ -1097,7 +1097,15 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                   window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
                   window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
                 } else  {
-                  int off = (pView->cursor().z()+1) / 2;
+									if (pView->cursor().z() == 5) {
+											float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
+
+                    PatternEvent data = pView->pattern_->dataAt(position,pView->cursor().x());
+                    //data.setNote(note);
+                    //pView->pattern_->setData(position,pView->cursor().x(),data);
+
+									}
+/*                  int off = (pView->cursor().z()+1) / 2;
                   patOffset +=off;
                   unsigned char newByte;
                   if (pView->cursor().z() % 2 == 1) 
@@ -1130,7 +1138,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                       pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
                     }
                     window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
-                    window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
+                    window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));*/
                 }
             }
           }

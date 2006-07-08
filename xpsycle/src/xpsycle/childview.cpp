@@ -86,7 +86,6 @@ ChildView::ChildView()
   timer.setIntervalTime(80);
   timer.enableTimer();
 
-  patternView_->setPattern( Global::song().patternData()->at(0));
 }
 
 
