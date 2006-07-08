@@ -49,6 +49,7 @@ public:
     std::uint8_t parameter() const;
 
     psycle::host::PatternEntry* entry();
+		psycle::host::PatternEntry* entry() const;
 
 private:
 

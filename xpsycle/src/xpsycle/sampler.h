@@ -130,7 +130,7 @@ namespace psycle
 			void Tick();
 			Sampler(Machine::id_type id);
 			virtual void Init();
-			virtual void Work(int numSamples);
+			virtual int GenerateAudioInTicks(int numSamples);
 			virtual void Stop();
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual std::string GetName() const { return _psName; }

@@ -20,8 +20,8 @@
 #ifndef SINGLEPATTERN_H
 #define SINGLEPATTERN_H
 
-#include <ngrs/sigslot.h>
 #include "patternline.h"
+#include <ngrs/sigslot.h>
 #include <list>
 #include <string>
 

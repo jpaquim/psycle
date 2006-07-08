@@ -105,9 +105,8 @@ void Plugin::Init( )
   }
 }
 
-void Plugin::Work( int numSamples )
+int Plugin::GenerateAudioInTicks( int numSamples )
 {
-  if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
   if (!_mute) {
     if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
       int ns = numSamples;
