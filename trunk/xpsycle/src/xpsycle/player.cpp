@@ -46,7 +46,7 @@ namespace psycle
 		void Player::Start(int pos, int line)
 		{
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
-			playIterator = song()->patternSequence()->begin();
+			playIterator = song().patternSequence()->begin();
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
@@ -444,7 +444,7 @@ namespace psycle
 					PatternLine & line = *lineItr;
 					if (line.tickPosition() >= offsetend) break;
 					std::pair<double,PatternLine* > pair;
-					pair.first  = (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount) - ((entry->tickPosition()+line->tickPosition())*SamplesPerBeat());
+					pair.first  = (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount) - ((entry->tickPosition()+line.tickPosition())*SamplesPerBeat());
 					pair.second = &line;
 					tempPlayLines.push_back(pair);
 				}
