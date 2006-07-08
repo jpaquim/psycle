@@ -436,7 +436,7 @@ namespace psycle
 		void Player::prepareEvents(  double masterTickEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines )
 		{
 			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
-			for ( ; it != playingSeqEntries.end(); it++ ) {
+			while ( it != playingSeqEntries.end() ) {
 				SequenceEntry* entry = *it;
 				double offsetstart = (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount) - (entry->tickPosition()*SamplesPerBeat());
 				double offsetend = masterTickEndPosition - entry->tickPosition();
@@ -450,8 +450,9 @@ namespace psycle
 					tempPlayLines.push_back(pair);
 				}
 				if (lineItr == entry->end()) {
-					playingSeqEntries.erase(it); //\todo: maybe save the it
-				}
+					playingSeqEntries.erase(it++); //\todo: maybe save the it
+				} else
+				it++;
 			}
 		}
 
