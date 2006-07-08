@@ -30,6 +30,7 @@ namespace psycle
 			_loop_line(0),
 			m_SampleRate(44100),
 			m_SamplesPerRow((44100*60)/(125*4)),
+			m_SamplesPerBeat((44100*60/125)),
 			tpb(4),
 			bpm(125)
 		{
@@ -88,6 +89,7 @@ namespace psycle
 			{
 				m_SampleRate = sampleRate;
 				RecalcSPR();
+				RecalcSPB();
 				for(int i(0) ; i < MAX_MACHINES; ++i)
 				{
 					if(song()._pMachine[i]) song()._pMachine[i]->SetSampleRate(sampleRate);
@@ -99,6 +101,7 @@ namespace psycle
 			if ( _tpb != 0) tpb=_tpb;
 			if ( _bpm != 0) bpm=_bpm;
 			RecalcSPR();
+			RecalcSPB();
 			//\todo : Find out if we should notify the plugins of this change.
 		}
 
@@ -371,7 +374,7 @@ namespace psycle
 		void Player::AdvancePosition()
 		{
 			if ( _patternjump!=-1 ) _playPosition= _patternjump;
-			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = true; }
+			if ( _SPRChanged ) { RecalcSPR(); RecalcSPB(); _SPRChanged = true; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
 			else _lineCounter++;
 			_playTime += 60 / float (bpm * tpb);
