@@ -56,6 +56,11 @@ SinglePattern * SequenceEntry::pattern( )
   return pattern_;
 }
 
+SinglePattern * SequenceEntry::pattern( ) const
+{
+  return pattern_;
+}
+
 void SequenceEntry::setTickPosition( double tick )
 {
   tickPosition_ = tick;
@@ -172,8 +177,8 @@ PatternSequence::PatternSequence()
 
 PatternSequence::~PatternSequence()
 {
-  std::vector<SequenceLine*>::iterator it = lines.begin();
-  for ( it; it != lines.end(); it++) delete *it;
+  std::vector<SequenceLine*>::iterator it = lines_.begin();
+  for ( it; it != lines_.end(); it++) delete *it;
 }
 
 
@@ -181,11 +186,15 @@ PatternSequence::~PatternSequence()
 SequenceLine * PatternSequence::createNewLine( )
 {
   SequenceLine* line = new SequenceLine(this);
-  lines.push_back(line);
+  lines_.push_back(line);
 
   return line;
 }
 
+const std::vector< SequenceLine * > & PatternSequence::lines( ) const
+{
+  return lines_;
+}
 
 void PatternSequence::onDeletePattern( SinglePattern * pattern )
 {
@@ -199,6 +208,10 @@ void PatternSequence::onDeletePattern( SinglePattern * pattern )
       }
    }
 }
+
+
+
+
 
 
 
