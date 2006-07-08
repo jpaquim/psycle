@@ -22,7 +22,6 @@
 
 PatternData::PatternData()
 {
-  createNewPattern("Pattern0");
   lock = false;
 }
 

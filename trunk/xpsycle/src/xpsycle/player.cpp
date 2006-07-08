@@ -355,7 +355,7 @@ namespace psycle
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
-									pMachine->Tick(track, entry.entry());
+									pMachine->AddEvent(offset, track, entry);
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
