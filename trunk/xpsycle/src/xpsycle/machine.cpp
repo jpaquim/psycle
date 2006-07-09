@@ -499,7 +499,9 @@ namespace psycle
 								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
+								//std::cout << pInMachine->_macIndex << "before work" << numSamples << std::endl;
 								pInMachine->Work(numSamples);
+								//std::cout << pInMachine->_macIndex << "after work" << numSamples << std::endl;
 							}
 							/*
 							This could be a different Undenormalize funtion, using the already calculated
@@ -821,9 +823,9 @@ psycle::host::WorkEvent::WorkEvent( )
 {
 }
 
-psycle::host::WorkEvent::WorkEvent( double offset, int track, const PatternEvent & patternEvent )
+psycle::host::WorkEvent::WorkEvent( double beatOffset, int track, const PatternEvent & patternEvent )
 {
-	offset_ = offset;
+	offset_ = beatOffset;
 	track_ = track;
 	event_ = patternEvent;
 }
@@ -833,7 +835,7 @@ const PatternEvent &  psycle::host::WorkEvent::event( ) const
 	return event_;
 }
 
-double psycle::host::WorkEvent::offset( ) const
+double psycle::host::WorkEvent::beatOffset( ) const
 {
 	return offset_;
 }
@@ -845,18 +847,20 @@ int psycle::host::WorkEvent::track( ) const
 
 int psycle::host::Machine::GenerateAudioInTicks( int numsamples )
 {
+  return 0;
 }
 
 int psycle::host::Machine::GenerateAudio( int numsamples )
 {
-	double offset = 0;
+	double beatOffset = 0;
 	std::vector<WorkEvent>::iterator it = workEvents.begin();
 	for ( ; it < workEvents.end(); it++) {
 		WorkEvent & workEvent = *it;
-		GenerateAudioInTicks(workEvent.offset() - offset);
+		if (workEvent.beatOffset() - beatOffset != 0) GenerateAudioInTicks( (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat() ); // todo maybe round
 		Tick(workEvent.track(),workEvent.event().entry());
-		offset= workEvent.offset();
+		beatOffset= workEvent.beatOffset();
 	}
-	if ( offset < numsamples ) GenerateAudioInTicks(numsamples-offset);
+	if ( beatOffset * Global::player().SamplesPerBeat() < numsamples )
+			GenerateAudioInTicks(numsamples-beatOffset * Global::player().SamplesPerBeat());
 }
 
