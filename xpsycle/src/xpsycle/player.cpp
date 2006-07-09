@@ -305,7 +305,7 @@ namespace psycle
 		}
 
 		/// Final Loop. Read new line for notes to send to the Machines
-		void Player::ExecuteNotes(  double offset , PatternLine & line )
+		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
 			std::map<int, PatternEvent>::iterator trackItr = line.begin();
 			for ( ; trackItr != line.end() ; trackItr++) {
@@ -358,7 +358,7 @@ namespace psycle
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
-									pMachine->AddEvent(offset, track, entry);
+									pMachine->AddEvent(beatOffset, track, entry);
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
@@ -421,11 +421,11 @@ namespace psycle
 			_lineChanged = true;
 		}
 
-		void Player::AdvancePlayPos( double masterTickEndPosition )
+		void Player::AdvancePlayPos( double masterBeatEndPosition )
 		{
 			while (playIterator != song().patternSequence()->end()) {
 		        SequenceEntry* entry = *playIterator;
-				if (entry->tickPosition() < masterTickEndPosition) {
+				if (entry->tickPosition() < masterBeatEndPosition) {
 					entry->setPlayIteratorToBegin();
 					playingSeqEntries.push_back(entry);
 					playIterator++;
@@ -433,18 +433,21 @@ namespace psycle
 			}
 		}
 
-		void Player::prepareEvents(  double masterTickEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines )
+		void Player::prepareEvents(  double masterBeatEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines )
 		{
+			double masterBeatBegin = ((((Master*)song()._pMachine[MASTER_INDEX])->sampleCount)/ (double)SamplesPerBeat());
+
 			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
 			while ( it != playingSeqEntries.end() ) {
 				SequenceEntry* entry = *it;
-				double offsetend = masterTickEndPosition - entry->tickPosition();
+				double offsetend   = masterBeatEndPosition - entry->tickPosition();
+				double offsetStart = masterBeatBegin       - entry->tickPosition();
 				std::list<PatternLine>::iterator & lineItr = entry->playIterator();
 				for ( ; lineItr != entry->end(); lineItr++) {
 					PatternLine & line = *lineItr;
 					if (line.tickPosition() >= offsetend) break;
 					std::pair<double,PatternLine* > pair;
-					pair.first  = (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount) - ((entry->tickPosition()+line.tickPosition())*SamplesPerBeat());
+					pair.first = offsetStart + line.tickPosition();
 					pair.second = &line;
 					tempPlayLines.push_back(pair);
 				}
@@ -462,7 +465,7 @@ namespace psycle
 
 		float * Player::Work(int & numSamples)
 		{
-			double masterTickEndPosition =  (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount+ numSamples)*SamplesPerBeat();
+			double masterBeatEndPosition =  (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount+ numSamples)/ (double) SamplesPerBeat();
 			int amount;
 			Master::_pMasterSamples = _pBuffer;
 			int numSamplex = numSamples;
@@ -482,9 +485,9 @@ namespace psycle
 				if (_playing)
 				{
 					// Advance position in the sequencer
-					AdvancePlayPos(masterTickEndPosition);
+					AdvancePlayPos(masterBeatEndPosition);
 					std::list<std::pair<double,PatternLine* > > tempPlayList;
-					prepareEvents(masterTickEndPosition,tempPlayList);
+					prepareEvents(masterBeatEndPosition,tempPlayList);
 					
 					std::list<std::pair<double,PatternLine* > >::iterator lineIt = tempPlayList.begin();
 
@@ -527,7 +530,9 @@ namespace psycle
 					{
 						// if midi not enabled we just do the original tracker thing
 						// Master machine initiates work
+						//std::cout << "before work" << amount << std::endl;
 						song()._pMachine[MASTER_INDEX]->Work(amount);
+						//std::cout << "after work" << amount << std::endl;
 					}
 //					PSYCLE__CPU_COST__CALCULATE(idletime, amount);
 //					song().cpu_idle(idletime);

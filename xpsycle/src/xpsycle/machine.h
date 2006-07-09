@@ -255,9 +255,9 @@ namespace psycle
 		class WorkEvent {
 			public:
 				WorkEvent();
-				WorkEvent(double offset, int track, const PatternEvent & patternEvent);
+				WorkEvent(double beatOffset, int track, const PatternEvent & patternEvent);
 				const PatternEvent &  event() const;
-				double offset() const;
+				double beatOffset() const;
 				int track() const;
 
 			private:

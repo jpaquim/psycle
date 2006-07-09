@@ -30,14 +30,14 @@ namespace psycle
 		public:
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
-			void AdvancePlayPos( double masterTickEndPosition );
-			void prepareEvents(  double masterTickEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines  );
+			void AdvancePlayPos( double masterBeatEndPosition );
+			void prepareEvents(  double masterBeatEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines  );
 			/// Initial Loop. Read new line and Interpretate the Global commands.
 			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
 			/// Notify all machines that a new Tick() comes.
 			void NotifyNewLine();
 			/// Final Loop. Read new line for notes to send to the Machines
-			void ExecuteNotes( double offset, PatternLine & line );
+			void ExecuteNotes( double beatOffset , PatternLine & line );
 			/// Function to englobe all the three functions above.
 			void ExecuteLine();
 
