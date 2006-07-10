@@ -450,7 +450,6 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
       img->setSharedBitmap(&icons.more());
-      img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
     img->setPreferredSize(25,25);
 
     NButton* bpmIncBtnOne = new NButton(img);

@@ -308,6 +308,14 @@ namespace psycle
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
 			std::map<int, PatternEvent>::iterator trackItr = line.begin();
+			std::cout << "here" << std::endl;
+			std::cout << beatOffset << std::endl;
+					for ( ; trackItr != line.end() ; trackItr++) {
+						PatternEvent entry = trackItr->second;
+						std::cout << entry.note() << std::endl;
+					}
+			std::cout << "here2" << std::endl;
+			trackItr = line.begin();
 			for ( ; trackItr != line.end() ; trackItr++) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
@@ -452,7 +460,7 @@ namespace psycle
 					tempPlayLines.push_back(pair);
 				}
 				if (lineItr == entry->end()) {
-					playingSeqEntries.erase(it++); 
+					playingSeqEntries.erase(it++);
 				} else
 					it++;
 			}
@@ -467,6 +475,7 @@ namespace psycle
 		{
 			double masterBeatEndPosition =  (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount+ numSamples)/ (double) SamplesPerBeat();
 			int amount;
+			//std::cout << masterBeatEndPosition << std::endl;
 			Master::_pMasterSamples = _pBuffer;
 			int numSamplex = numSamples;
 //			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
@@ -530,9 +539,9 @@ namespace psycle
 					{
 						// if midi not enabled we just do the original tracker thing
 						// Master machine initiates work
-						//std::cout << "before work" << amount << std::endl;
+						std::cout << "before work" << amount << std::endl;
 						song()._pMachine[MASTER_INDEX]->Work(amount);
-						//std::cout << "after work" << amount << std::endl;
+						std::cout << "after work" << amount << std::endl;
 					}
 //					PSYCLE__CPU_COST__CALCULATE(idletime, amount);
 //					song().cpu_idle(idletime);
