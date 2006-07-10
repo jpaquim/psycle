@@ -21,6 +21,7 @@
 #define DEFAULTBITMAPS_H
 
 #include <ngrs/nbitmap.h>
+#include <ngrs/npixmap.h>
 
 /**
 @author Stefan Nattkemper
@@ -44,7 +45,7 @@ public:
     NBitmap & littleleft();
     NBitmap & littleright();
     NBitmap & machines();
-    NBitmap & machine_skin();
+    NPixmap & machine_skin();
     NBitmap & masterbk();
     NBitmap & minus1();
     NBitmap & minus();
@@ -94,7 +95,7 @@ private:
     NBitmap littleleft_;
     NBitmap littleright_;
     NBitmap machines_;
-    NBitmap machine_skin_;
+    NPixmap machine_skin_;
     NBitmap masterbk_;
     NBitmap minus1_;
     NBitmap minus_;

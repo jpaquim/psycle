@@ -18006,7 +18006,7 @@ NBitmap & DefaultBitmaps::undo( )
   return undo_;
 }
 
-NBitmap & DefaultBitmaps::machine_skin() {
+NPixmap & DefaultBitmaps::machine_skin() {
   return machine_skin_;
 }
 
