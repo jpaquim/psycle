@@ -49,7 +49,7 @@ MachineGUI::MachineGUI(Machine* mac)
         //pixmap = Global::pBitmaps()->machine_skin(); 
     else {
         std::cout << Global::pConfig()->iconPath+ "machine_skin.xpm" << std::endl;
-        pixmap.loadFromFile(Global::pConfig()->iconPath+ "machine_skin.xpm");
+//        pixmap.loadFromFile(Global::pConfig()->iconPath+ "machine_skin.xpm");
     }
   }
   c++;
