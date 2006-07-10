@@ -48,10 +48,10 @@ int main(int argc, char *argv[])
     NApp app;
 
     Global gl;
-
+/* at an not guilty path here can be an segfault so outcomment so far
     NSplashScreen* splash = new NSplashScreen();
     splash->loadImageFromFile(Global::pConfig()->iconPath + "/splash.xpm");
-    app.setSplashScreen(splash);
+    app.setSplashScreen(splash);*/
 
     NWindow* mainWin = new MainWindow();
     app.setMainWindow(mainWin);
