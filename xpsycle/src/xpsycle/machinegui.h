@@ -51,8 +51,6 @@ public:
 
     ~MachineGUI();
 
-    static NPixmap pixmap;
-
     Machine* pMac();
     void attachLine(NLine* line, int point);
     void detachLine(NLine* line);
@@ -72,8 +70,6 @@ public:
 
 private:
 
-
-    static int c;
     NBorder* myBorder_;
 
     NRegion oldDrag;
