@@ -75,6 +75,8 @@ void NPixmap::loadFromFile( const std::string & filename )
                                 (char*) (NFile::replaceTilde(filename).c_str()),
                                 &pixmap_,&shapepixmap_,&attr);
 
+  if (err != XpmSuccess) throw "couldn`t open file";
+
   width_  = attr.width;
   height_ = attr.height;
 }
