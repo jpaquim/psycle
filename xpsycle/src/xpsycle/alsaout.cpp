@@ -19,6 +19,7 @@
   ***************************************************************************/
 #include "alsaout.h"
 #include "global.h"
+#include "configuration.h"
 #include "player.h"
 
 int AlsaOut::enablePlayer = 0;
@@ -78,7 +79,7 @@ void AlsaOut::configure( )
 
 void AlsaOut::setDefault( )
 {
-    device = "plughw:0";    // playback device
+    device = psycle::host::Global::configuration().device_name.c_str();  // playback device
     rate = 44100; // stream rate
     format = SND_PCM_FORMAT_S16; // sample format
     channels = 2; // count of channels

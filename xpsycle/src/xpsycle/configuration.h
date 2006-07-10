@@ -125,7 +125,9 @@ public:
     int _numOutputDrivers;
     int _outputDriverIndex;
 
+    // sound stuff
     bool enableSound;
+    std::string device_name;
 
     bool _RecordTweaks;
     bool _RecordUnarmed;

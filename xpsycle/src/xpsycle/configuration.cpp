@@ -58,6 +58,7 @@ void Configuration::setSkinDefaults( )
   autoStopMachines = false;
   _centerCursor = false;
   enableSound = 0;
+  device_name = "plughw:0";
 
   _linenumbers       = true;
   _linenumbersHex    = false;
@@ -261,6 +262,9 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
 
 void Configuration::onConfigTagParse(const std::string & tagName )
 {
+  if (tagName == "alsa") {
+    device_name = NApp::config()->getAttribValue("device");
+  }
   if (tagName == "audio") {
       std::string enableStr = NApp::config()->getAttribValue("enable");
       int enable = 0;
