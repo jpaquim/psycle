@@ -813,7 +813,7 @@ namespace psycle
 
 		void Machine::AddEvent( double offset, int track, const PatternEvent & event )
 		{
-				workEvents.push_back( WorkEvent(offset,track,event));
+			workEvents.push_back( WorkEvent(offset,track,event));
 		}
 
 	}
@@ -847,20 +847,32 @@ int psycle::host::WorkEvent::track( ) const
 
 int psycle::host::Machine::GenerateAudioInTicks( int numsamples )
 {
+	std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
   return 0;
 }
 
 int psycle::host::Machine::GenerateAudio( int numsamples )
 {
 	double beatOffset = 0;
+	int processedsamples = 0;
 	
 	for(; !workEvents.empty(); workEvents.pop_front()) {
+
 		WorkEvent & workEvent = workEvents.front();
-		if (workEvent.beatOffset() - beatOffset != 0) GenerateAudioInTicks( (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat() ); // todo maybe round
+		int processsamples = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
+		std::cout << "Generating audio, looping, processsamples : " << processsamples << std::endl;
+		if (processsamples > 0) GenerateAudioInTicks( processsamples ); // todo maybe round
+		else if ( processsamples < 0 ) std::cout << " ERROR! workEvent.beatOffset() : " << workEvent.beatOffset() << " beatOffset: " << beatOffset;
+		processedsamples+=processsamples;
 		Tick(workEvent.track(),workEvent.event().entry());
 		beatOffset= workEvent.beatOffset();
 	}
-	if ( beatOffset * Global::player().SamplesPerBeat() < numsamples )
-			GenerateAudioInTicks(numsamples-beatOffset * Global::player().SamplesPerBeat());
+	int processsamples = numsamples- processedsamples;
+	if ( processsamples > 0 )
+	{
+		GenerateAudioInTicks(processsamples);
+	}
+	else if ( processsamples < 0 ) std::cout << " ERROR! beatOffset :" << beatOffset << std::endl;
+
 }
 

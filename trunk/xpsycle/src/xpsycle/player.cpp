@@ -308,13 +308,13 @@ namespace psycle
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
 			std::map<int, PatternEvent>::iterator trackItr = line.begin();
-			std::cout << "here" << std::endl;
+			std::cout << "Lines in array, (beatoffset, notes)" << std::endl;
 			std::cout << beatOffset << std::endl;
 					for ( ; trackItr != line.end() ; trackItr++) {
 						PatternEvent entry = trackItr->second;
 						std::cout << entry.note() << std::endl;
 					}
-			std::cout << "here2" << std::endl;
+			std::cout << "done lines in array" << std::endl;
 			trackItr = line.begin();
 			for ( ; trackItr != line.end() ; trackItr++) {
 				PatternEvent entry = trackItr->second;
@@ -366,7 +366,9 @@ namespace psycle
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
+									std::cout << "before addevent" << std::endl;
 									pMachine->AddEvent(beatOffset, track, entry);
+									std::cout << "after addevent" << std::endl;
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
@@ -432,7 +434,7 @@ namespace psycle
 		void Player::AdvancePlayPos( double masterBeatEndPosition )
 		{
 			while (playIterator != song().patternSequence()->end()) {
-		        SequenceEntry* entry = *playIterator;
+				SequenceEntry* entry = *playIterator;
 				if (entry->tickPosition() < masterBeatEndPosition) {
 					entry->setPlayIteratorToBegin();
 					playingSeqEntries.push_back(entry);
@@ -450,13 +452,17 @@ namespace psycle
 				SequenceEntry* entry = *it;
 				double offsetend   = masterBeatEndPosition - entry->tickPosition();
 				double offsetStart = masterBeatBegin       - entry->tickPosition();
+				std::cout << "offsetstart : " << offsetStart << " offsetEnd: " << offsetend << std::endl;
 				std::list<PatternLine>::iterator & lineItr = entry->playIterator();
 				for ( ; lineItr != entry->end(); lineItr++) {
 					PatternLine & line = *lineItr;
 					if (line.tickPosition() >= offsetend) break;
 					std::pair<double,PatternLine* > pair;
-					pair.first = offsetStart + line.tickPosition();
+					pair.first = line.tickPosition() - offsetStart;
 					pair.second = &line;
+					std::cout << "pair.first: " << pair.first << std::endl;
+					if ( pair.first < 0 )
+					std::cout << "ERROR! : masterbeatbegin "<< masterBeatBegin << " pattern.tick:" << entry->tickPosition() << " line.tick :" << line.tickPosition() << std::endl;
 					tempPlayLines.push_back(pair);
 				}
 				if (lineItr == entry->end()) {
