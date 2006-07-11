@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <cstdint>
 #include <vector>
+#include <deque>
 #include <cassert>
 
 namespace psycle
@@ -277,7 +278,7 @@ namespace psycle
 					virtual int GenerateAudio(int numsamples);
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
 				protected:
-					std::vector<WorkEvent> workEvents;
+					std::deque<WorkEvent> workEvents;
 				public:
 					/// This function should be called when an exception was thrown from the machine.
 					/// This will mark the machine as crashed, i.e. crashed() will return true,

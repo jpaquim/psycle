@@ -853,9 +853,9 @@ int psycle::host::Machine::GenerateAudioInTicks( int numsamples )
 int psycle::host::Machine::GenerateAudio( int numsamples )
 {
 	double beatOffset = 0;
-	std::vector<WorkEvent>::iterator it = workEvents.begin();
-	for ( ; it < workEvents.end(); it++) {
-		WorkEvent & workEvent = *it;
+	
+	for(; !workEvents.empty(); workEvents.pop_front()) {
+		WorkEvent & workEvent = workEvents.front();
 		if (workEvent.beatOffset() - beatOffset != 0) GenerateAudioInTicks( (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat() ); // todo maybe round
 		Tick(workEvent.track(),workEvent.event().entry());
 		beatOffset= workEvent.beatOffset();
