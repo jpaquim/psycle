@@ -246,6 +246,10 @@ public:
     void setBeatZoom(int tpb);
     int beatZoom() const;
 
+
+    void setActiveMachineIdx(int idx);
+    int selectedMachineIndex() const;
+
 private:
 
   SinglePattern* pattern_;
@@ -254,6 +258,7 @@ private:
   int playPos_;
   int editOctave_;
   int patternStep_;
+  int selectedMacIdx_;
   bool moveCursorWhenPaste_;
 
   NPoint3D cursor_;

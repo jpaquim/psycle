@@ -228,6 +228,8 @@ private:
     void onSeqAdded(SinglePattern* pattern);
 
     void updateStatusBar();
+
+    void onNewMachineDialogAdded(Machine* mac);
 };
 
 }}

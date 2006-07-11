@@ -22,7 +22,7 @@
 PatternEvent::PatternEvent() :
   _note(255),
   _inst(255),
-  _mach(0),
+  _mach(255),
   _cmd(0),
   _parameter(0)
 {
