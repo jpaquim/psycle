@@ -59,6 +59,7 @@ public:
     void onPatternView(NObject* sender);
 
     signal0<> newSongLoaded;
+    signal1<Machine*> newMachineAdded;
 
     PatternView* patternView();
     MachineView* machineView();

@@ -79,6 +79,8 @@ PatternView::PatternView()
   moveCursorWhenPaste_ = false;
 
   pattern_ = 0;
+
+  selectedMacIdx_ = 255;
 }
 
 
@@ -808,11 +810,11 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
     if (line.tickPosition() > endPosition) break;
     int y = d2i(line.tickPosition() * pView->pattern_->beatZoom());
 
-    unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (y*MULTIPLY) + (startTrack)*5;
     for (int x = startTrack; x <= endTrack; x++) {
       PatternEvent event = line.trackAt(x);
       drawText(g, x,y,0,pView->noteToString( event.note() ));
-/*      patOffset++;
+      unsigned char* patOffset = (unsigned char*) event.entry();
+      patOffset++;
       int COL = pView->noteCellWidth();
       for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
       int value = *patOffset;
@@ -838,7 +840,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
                   COL+=4 * pView->cellWidth();
                   } break;
       }
-      }*/
+      }
     }
   }
   }
@@ -1069,8 +1071,6 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 
               if (note == cdefKeyStop && pView->cursor().z()==0) pView->noteOffAny(); else
               {
-                  unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (pView->cursor().y() *MULTIPLY) + (pView->cursor().x())*5;
-
                   if (pView->cursor().z()==0) {
 
                     float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
@@ -1078,6 +1078,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                     note += pView->editOctave()*12;
 
                     PatternEvent data = pView->pattern_->dataAt(position,pView->cursor().x());
+                    data.setMachine(pView->selectedMachineIndex());
                     data.setNote(note);
                     pView->pattern_->setData(position,pView->cursor().x(),data);
 
@@ -1097,16 +1098,11 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                   window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
                   window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
                 } else  {
-									if (pView->cursor().z() == 5) {
-											float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
 
-                    PatternEvent data = pView->pattern_->dataAt(position,pView->cursor().x());
-                    //data.setNote(note);
-                    //pView->pattern_->setData(position,pView->cursor().x(),data);
-
-									}
-/*                  int off = (pView->cursor().z()+1) / 2;
-                  patOffset +=off;
+                  int off = (pView->cursor().z()+1) / 2;
+                  float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
+                  PatternEvent data = pView->pattern_->dataAt(position,pView->cursor().x());
+                  unsigned char* patOffset = (unsigned char*) data.entry() + off;
                   unsigned char newByte;
                   if (pView->cursor().z() % 2 == 1) 
                     newByte = (*patOffset & 0x0F) | (0xF0 & (hex_value(event.scancode()) << 4));
@@ -1118,6 +1114,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                       newByte = (*patOffset & 0x00) | (0xF0 & (hex_value(event.scancode()) << 4));
                   }
                   *patOffset = newByte;
+                  pView->pattern_->setData(position,pView->cursor().x(),data);
 
                     int eventIdx      =  pView->eventFromCol(pView->cursor().z());
                     int eventLen      =  pView->eventLength(eventIdx);
@@ -1138,7 +1135,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                       pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
                     }
                     window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
-                    window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));*/
+                    window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
                 }
             }
           }
@@ -2045,3 +2042,15 @@ void PatternView::setBeatZoom( int tpb )
 
 
 
+
+
+
+void psycle::host::PatternView::setActiveMachineIdx( int idx )
+{
+  selectedMacIdx_ = idx;
+}
+
+int psycle::host::PatternView::selectedMachineIndex( ) const
+{
+  return selectedMacIdx_;
+}

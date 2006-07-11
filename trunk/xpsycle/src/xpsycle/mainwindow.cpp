@@ -50,6 +50,7 @@ MainWindow::MainWindow()
   initMenu();
   initDialogs();
   childView_ = new ChildView();
+  childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
   initBars();
   initViews();
   initSignals();
@@ -1406,6 +1407,15 @@ void MainWindow::onSeqAdded( SinglePattern * pattern )
   childView_->sequencerView()->addPattern( pattern);
 }
 
+void MainWindow::onNewMachineDialogAdded( Machine * mac )
+{
+  childView_->patternView()->setActiveMachineIdx(mac->_macIndex);
+  updateComboGen();
+  genCombo_->repaint();
+}
+
 
 }}
+
+
 

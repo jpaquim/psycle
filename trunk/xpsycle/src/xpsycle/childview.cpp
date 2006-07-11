@@ -247,10 +247,12 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
           if (newMachineDlg()->sampler()) {
             Global::pSong()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
             machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+            newMachineAdded.emit(Global::pSong()->_pMachine[fb]);
             machineView()->repaint();
           } else {
           Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName(),fb);
             machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+            newMachineAdded.emit(Global::pSong()->_pMachine[fb]);
             machineView()->repaint();
           }
       }
