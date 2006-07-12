@@ -20,44 +20,47 @@
 #include "patterndata.h"
 #include <algorithm>
 
-PatternData::PatternData()
+namespace psycle
 {
-  lock = false;
+	namespace host
+	{
+
+		PatternData::PatternData()
+		{
+			lock = false;
+		}
+
+		PatternData::~PatternData()
+		{
+			lock = true;
+			for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
+				delete *it;
+			}
+		}
+
+
+		SinglePattern* PatternData::createNewPattern( const std::string & name )
+		{
+			SinglePattern* pattern = new SinglePattern();
+			pattern->setName(name);
+			push_back(pattern);
+			return pattern;
+		}
+
+		SinglePattern * PatternData::findByPtr( SinglePattern * ptr )
+		{
+			std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
+			if (it != end() ) return *it;
+			return 0;
+		}
+
+		void PatternData::onDeletePattern( SinglePattern* ptr )
+		{
+			if (!lock) {
+				std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
+				if (it != end() ) erase(it);
+			}
+		}
+
+	}
 }
-
-
-PatternData::~PatternData()
-{
-  lock = true;
-  for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
-    delete *it;
-  }
-}
-
-
-SinglePattern* PatternData::createNewPattern( const std::string & name )
-{
-  SinglePattern* pattern = new SinglePattern();
-  pattern->setName(name);
-  push_back(pattern);
-
-  return pattern;
-}
-
-SinglePattern * PatternData::findByPtr( SinglePattern * ptr )
-{
-  std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
-  if (it != end() ) return *it;
-
-  return 0;
-
-}
-
-void PatternData::onDeletePattern( SinglePattern* ptr )
-{
-  if (!lock) {
-    std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
-    if (it != end() ) erase(it);
-  }
-}
-

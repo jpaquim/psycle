@@ -27,27 +27,33 @@
 @author Stefan Nattkemper
 */
 
+namespace psycle
+{
+	namespace host
+	{
 
+		class PatternLine : public std::map<int, PatternEvent>  {
+		public:
+			PatternLine();
+			PatternLine(float position);
 
-class PatternLine : public std::map<int, PatternEvent>  {
-public:
-    PatternLine();
-    PatternLine(float position);
+			~PatternLine();
 
-    ~PatternLine();
+			const PatternEvent & trackAt(int index) const;
+			void setPatternEvent(const PatternEvent & event, int index);
 
-    const PatternEvent & trackAt(int index) const;
-    void setPatternEvent(const PatternEvent & event, int index);
+			void setTickPosition(float position);
+			float tickPosition() const;
 
-    void setTickPosition(float position);
-    float tickPosition() const;
+		private:
 
-private:
+			float tickPosition_;
 
-    float tickPosition_;
+			PatternEvent zeroTrack;
 
-    PatternEvent zeroTrack;
+		};
 
-};
+	}
+}
 
 #endif

@@ -28,83 +28,88 @@
 @author Stefan Nattkemper
 */
 
-
-
-
-class SequenceLine;
-
-class SequenceEntry {
-  public:
-     SequenceEntry();
-     SequenceEntry(SequenceLine* line);
-     ~SequenceEntry();
-
-     sigslot::signal1<SequenceEntry*> beforeDelete;
-
-     void setPattern(SinglePattern* pattern);
-     SinglePattern* pattern();
-     SinglePattern* pattern() const;
-
-     void setTickPosition(double tick);
-     double tickPosition() const;
-     float patternBeats() const;
-
-     void setPlayIteratorToBegin();
-     std::list<PatternLine>::iterator & playIterator();
-     std::list<PatternLine>::iterator begin();
-     std::list<PatternLine>::iterator end();
-
-
-  private:
-
-     std::list<PatternLine>::iterator playIterator_;
-
-     SequenceLine* line_;
-     SinglePattern* pattern_;
-     double tickPosition_;
-
-};
-
-class PatternSequence;
-
-class SequenceLine : public  std::list<SequenceEntry*>, public sigslot::has_slots<>
+namespace psycle
 {
+	namespace host
+	{
 
-public:
-   SequenceLine();
-   SequenceLine(PatternSequence* patSeq);
-   ~SequenceLine();
+		class SequenceLine;
 
-   SequenceEntry* createEntry(SinglePattern* pattern, double position);
+		class SequenceEntry {
+		public:
+			SequenceEntry();
+			SequenceEntry(SequenceLine* line);
+			~SequenceEntry();
 
-   double tickLength() const;
+			sigslot::signal1<SequenceEntry*> beforeDelete;
 
-   PatternSequence* patternSequence();
+			void setPattern(SinglePattern* pattern);
+			SinglePattern* pattern();
+			SinglePattern* pattern() const;
 
-private:
+			void setTickPosition(double tick);
+			double tickPosition() const;
+			float patternBeats() const;
 
-   PatternSequence* patternSequence_;
+			void setPlayIteratorToBegin();
+			std::list<PatternLine>::iterator & playIterator();
+			std::list<PatternLine>::iterator begin();
+			std::list<PatternLine>::iterator end();
 
-   void onDeletePattern(SinglePattern* pattern);
 
-};
+			private:
 
-class PatternSequence : public std::list<SequenceEntry*>,public sigslot::has_slots<> {
-public:
-    PatternSequence();
+			std::list<PatternLine>::iterator playIterator_;
 
-    ~PatternSequence();
+			SequenceLine* line_;
+			SinglePattern* pattern_;
+			double tickPosition_;
 
-    SequenceLine* createNewLine();
+		};
 
-    void onDeletePattern(SinglePattern* pattern);
+		class PatternSequence;
 
-    const std::vector<SequenceLine*> & lines() const;
+		class SequenceLine : public  std::list<SequenceEntry*>, public sigslot::has_slots<>
+		{
 
-private:
+		public:
+			SequenceLine();
+			SequenceLine(PatternSequence* patSeq);
+			~SequenceLine();
 
-    std::vector<SequenceLine*> lines_;
+			SequenceEntry* createEntry(SinglePattern* pattern, double position);
 
-};
+			double tickLength() const;
+
+			PatternSequence* patternSequence();
+
+		private:
+
+			PatternSequence* patternSequence_;
+
+			void onDeletePattern(SinglePattern* pattern);
+
+		};
+
+		class PatternSequence : public std::list<SequenceEntry*>,public sigslot::has_slots<> {
+		public:
+			PatternSequence();
+
+			~PatternSequence();
+
+			SequenceLine* createNewLine();
+
+			void onDeletePattern(SinglePattern* pattern);
+
+			const std::vector<SequenceLine*> & lines() const;
+
+		private:
+
+			std::vector<SequenceLine*> lines_;
+
+		};
+
+	}
+}
 
 #endif

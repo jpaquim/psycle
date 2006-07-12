@@ -2045,15 +2045,17 @@ PatternSequence * Song::patternSequence( )
   return &patternSequence_;
 }
 
-	}
-}
-
-bool psycle::host::Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
+bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 {
 }
 
-PatternData * psycle::host::Song::patternData( )
+PatternData * Song::patternData( )
 {
   return &patternData_;
 }
+
+
+	}
+}
+
 
