@@ -27,38 +27,46 @@
 /**
 @author Stefan Nattkemper
 */
-class PatternEvent{
-public:
-    PatternEvent();
 
-    ~PatternEvent();
+namespace psycle
+{
+	namespace host
+	{
 
-    void setNote(std::uint8_t value);
-    std::uint8_t note() const;
+		class PatternEvent{
+		public:
+			PatternEvent();
 
-    void setInstrument(std::uint8_t instrument);
-    std::uint8_t instrument() const;
+			~PatternEvent();
 
-    void setMachine(std::uint8_t machine);
-    std::uint8_t machine() const;
+			void setNote(std::uint8_t value);
+			std::uint8_t note() const;
 
-    void setCommand(std::uint8_t command);
-    std::uint8_t command() const;
+			void setInstrument(std::uint8_t instrument);
+			std::uint8_t instrument() const;
 
-    void setParameter(std::uint8_t parameter);
-    std::uint8_t parameter() const;
+			void setMachine(std::uint8_t machine);
+			std::uint8_t machine() const;
 
-    psycle::host::PatternEntry* entry();
-		psycle::host::PatternEntry* entry() const;
+			void setCommand(std::uint8_t command);
+			std::uint8_t command() const;
 
-private:
+			void setParameter(std::uint8_t parameter);
+			std::uint8_t parameter() const;
 
-    std::uint8_t _note;
-    std::uint8_t _inst;
-    std::uint8_t _mach;
-    std::uint8_t _cmd;
-    std::uint8_t _parameter;
+			PatternEntry* entry();
+			PatternEntry* entry() const;
 
-};
+		private:
+
+			std::uint8_t _note;
+			std::uint8_t _inst;
+			std::uint8_t _mach;
+			std::uint8_t _cmd;
+			std::uint8_t _parameter;
+
+		};
+	}
+}
 
 #endif

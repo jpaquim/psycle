@@ -29,38 +29,46 @@
 @author Stefan Nattkemper
 */
 
-class SinglePattern : public std::list<PatternLine> {
-public:
-    SinglePattern();
+namespace psycle
+{
+	namespace host
+	{
 
-    ~SinglePattern();
+		class SinglePattern : public std::list<PatternLine> {
+		public:
+			SinglePattern();
 
-    sigslot::signal1<SinglePattern*> beforeDelete;
+			~SinglePattern();
 
-    std::list<PatternLine>::iterator startItr(float position);
+			sigslot::signal1<SinglePattern*> beforeDelete;
 
-    void setData(float position, int track, const PatternEvent & data);
-    const PatternEvent & dataAt(float position, int track);
+			std::list<PatternLine>::iterator startItr(float position);
 
-    void setBeatZoom(int zoom);
-    int beatZoom() const;
+			void setData(float position, int track, const PatternEvent & data);
+			const PatternEvent & dataAt(float position, int track);
 
-    void setBeats(int beats);
-    int beats() const;
+			void setBeatZoom(int zoom);
+			int beatZoom() const;
 
-    void setName(const std::string & name);
-    const std::string & name() const;
+			void setBeats(int beats);
+			int beats() const;
 
-private:
+			void setName(const std::string & name);
+			const std::string & name() const;
 
-    int beats_;
-    int beatZoom_;
+		private:
 
-    std::string name_;
+			int beats_;
+			int beatZoom_;
 
-    PatternLine* lastLine;
-    PatternEvent zeroTrack;
+			std::string name_;
 
-};
+			PatternLine* lastLine;
+			PatternEvent zeroTrack;
+
+		};
+
+	}
+}
 
 #endif

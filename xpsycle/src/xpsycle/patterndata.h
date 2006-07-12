@@ -26,22 +26,30 @@
 /**
 @author Stefan Nattkemper
 */
-class PatternData : public std::vector<SinglePattern*> {
-public:
-    PatternData();
 
-    ~PatternData();
+namespace psycle
+{
+	namespace host
+	{
 
-    SinglePattern* findByPtr(SinglePattern* ptr);
+		class PatternData : public std::vector<SinglePattern*> {
+		public:
+			PatternData();
 
-    SinglePattern* createNewPattern(const std::string & name);
-    void deletePattern(SinglePattern* ptr);
+			~PatternData();
 
-private:
+			SinglePattern* findByPtr(SinglePattern* ptr);
 
-   bool lock;
-   void onDeletePattern(SinglePattern* ptr);
+			SinglePattern* createNewPattern(const std::string & name);    
+			void deletePattern(SinglePattern* ptr);
 
-};
+		private:
 
+			bool lock;
+			void onDeletePattern(SinglePattern* ptr);
+
+		};
+
+	}
+}
 #endif

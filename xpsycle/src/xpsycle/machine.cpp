@@ -816,14 +816,11 @@ namespace psycle
 			workEvents.push_back( WorkEvent(offset,track,event));
 		}
 
-	}
-}
-
-psycle::host::WorkEvent::WorkEvent( )
+WorkEvent::WorkEvent( )
 {
 }
 
-psycle::host::WorkEvent::WorkEvent( double beatOffset, int track, const PatternEvent & patternEvent )
+WorkEvent::WorkEvent( double beatOffset, int track, const PatternEvent & patternEvent )
 {
 	offset_ = beatOffset;
 	track_ = track;
@@ -835,23 +832,23 @@ const PatternEvent &  psycle::host::WorkEvent::event( ) const
 	return event_;
 }
 
-double psycle::host::WorkEvent::beatOffset( ) const
+double WorkEvent::beatOffset( ) const
 {
 	return offset_;
 }
 
-int psycle::host::WorkEvent::track( ) const
+int WorkEvent::track( ) const
 {
 	return track_;
 }
 
-int psycle::host::Machine::GenerateAudioInTicks( int numsamples )
+int Machine::GenerateAudioInTicks( int numsamples )
 {
 	std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
   return 0;
 }
 
-int psycle::host::Machine::GenerateAudio( int numsamples )
+int Machine::GenerateAudio( int numsamples )
 {
 	double beatOffset = 0;
 	int processedsamples = 0;
@@ -874,5 +871,11 @@ int psycle::host::Machine::GenerateAudio( int numsamples )
 	}
 	else if ( processsamples < 0 ) std::cout << " ERROR! beatOffset :" << beatOffset << std::endl;
 
+}
+
+
+
+
+	}
 }
 
