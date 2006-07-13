@@ -73,7 +73,7 @@ void SequencerItem::resize( )
 
 void SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
-  sequenceEntry_->setTickPosition( left() / (double) sView->beatPxLength() );
+/*  sequenceEntry_->setTickPosition( left() / (double) sView->beatPxLength() );
 /*  caption_->setText( sequenceEntry_->pattern()->name() + ":" + stringify(sequenceEntry_->tickPosition()));*/
 }
 

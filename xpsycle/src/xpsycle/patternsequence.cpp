@@ -27,20 +27,15 @@ namespace psycle
 
 		// pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
 
-		struct LessByPointedToValue
-			: std::binary_function<SequenceEntry const *, SequenceEntry const *, bool>
-		{
-			bool operator()(SequenceEntry const * x, SequenceEntry const * y) const
-				{ return x->tickPosition() < y->tickPosition(); }
-		};
-
 		SequenceEntry::SequenceEntry( )
 		{
 			line_ = 0;
+			pattern_ = 0;
 		}
 
 		SequenceEntry::SequenceEntry( SequenceLine * line )
 		{
+			pattern_ = 0;
 			line_ = line;
 		}
 
@@ -49,115 +44,29 @@ namespace psycle
 			beforeDelete.emit(this);
 		}
 
-		void SequenceEntry::setTickPosition( double tick )
-		{
-			tickPosition_ = tick;
-			if (line_) {
-				line_->sort(LessByPointedToValue());
-				line_->patternSequence()->sort(LessByPointedToValue());
-			}
-		}
-
-		double SequenceEntry::tickPosition( ) const
-		{
-			return tickPosition_;
-		}
-
-		double psycle::host::SequenceEntry::beatLength( ) const
-		{
-			return 0;
-		}
-
-
-		void SequenceEntry::setPlayIteratorToBegin( )
-		{
-				// affects only classes with a playiterator
-		}
-
-		bool SequenceEntry::prepare( double masterBeatBeginposition, double masterBeatEndPosition, std::list< std::pair < double , PatternLine * > > & tempPlayLines )
-		{
-			return false;
-		}
-
-		// end of PatternEntry
-
-
-		// a PatternSequenceEntry
-
-		PatternSequenceEntry::PatternSequenceEntry( )
-		{
-			pattern_ = 0;
-		}
-
-		PatternSequenceEntry::PatternSequenceEntry( SequenceLine * line ) 
-			: SequenceEntry( line)
-		{
-		}
-
-		void PatternSequenceEntry::setPattern( SinglePattern * pattern )
+		void SequenceEntry::setPattern( SinglePattern * pattern )
 		{
 			pattern_ = pattern;
-			playIterator_ = pattern_->begin();
 		}
 
-		SinglePattern * PatternSequenceEntry::pattern( )
+		SinglePattern * SequenceEntry::pattern( )
 		{
 			return pattern_;
 		}
 
-		SinglePattern * PatternSequenceEntry::pattern( ) const
+		SinglePattern * SequenceEntry::pattern( ) const
 		{
 			return pattern_;
 		}
 
-		double PatternSequenceEntry::beatLength() const
+		float SequenceEntry::patternBeats() const
 		{
 			return pattern_->beats();
 		}
 
-		void PatternSequenceEntry::setPlayIteratorToBegin( )
-		{
-			playIterator_ = pattern_->begin();
-		}
+		// end of PatternEntry
 
-		std::list< PatternLine >::iterator & PatternSequenceEntry::playIterator( )
-		{
-			return playIterator_;
-		}
-
-		std::list< PatternLine >::iterator PatternSequenceEntry::begin( )
-		{
-			pattern_->end();
-		}
-
-		std::list< PatternLine >::iterator PatternSequenceEntry::end( )
-		{
-			return pattern_->end();
-		}
-
-		bool PatternSequenceEntry::prepare(double masterBeatBeginPosition, double masterBeatEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines )
-		{
-			double offsetend   = masterBeatEndPosition     - tickPosition();
-			double offsetStart = masterBeatBeginPosition   - tickPosition();
-			std::cout << "offsetstart : " << offsetStart << " offsetEnd: " << offsetend << std::endl;
-			std::list<PatternLine>::iterator & lineItr = playIterator();
-				for ( ; lineItr != end(); lineItr++) {
-					PatternLine & line = *lineItr;
-					if (line.tickPosition() >= offsetend) break;
-					std::pair<double,PatternLine* > pair;
-					pair.first = line.tickPosition() - offsetStart;
-					pair.second = &line;
-					std::cout << "pair.first: " << pair.first << std::endl;
-					if ( pair.first < 0 )
-					std::cout << "ERROR! : masterbeatbegin "<< masterBeatBeginPosition << " pattern.tick:" << tickPosition() << " line.tick :" << line.tickPosition() << std::endl;
-					tempPlayLines.push_back(pair);
-				}
-				if (lineItr == end() )
-					return true;
-				else return false;
-		}
-
-		// represents one track/line in the sequencer and contains a list of patternEntrys, wich holds a pointer and tickposition to a SinglePattern
+		// represents one track/line in the sequencer
 		SequenceLine::SequenceLine( )
 		{
 			patternSequence_ = 0;
@@ -171,53 +80,72 @@ namespace psycle
 
 		SequenceLine::~ SequenceLine( )
 		{
-			std::list<SequenceEntry*>::iterator it = begin();
-			for ( it; it != end(); it++) delete *it;
+			iterator it = begin();
+			for ( it; it != end(); it++) delete it->second;
 		}
 
 		SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double position )
 		{
-			PatternSequenceEntry* entry = new PatternSequenceEntry(this);
+			SequenceEntry* entry = new SequenceEntry(this);
 			entry->setPattern(pattern);
-			push_back(entry);
-			entry->setTickPosition(position);
+			insert(value_type(position, entry));
 			entry->pattern()->beforeDelete.connect(this,&SequenceLine::onDeletePattern);
-			entry->pattern()->beforeDelete.connect(patternSequence_ ,&PatternSequence::onDeletePattern);
-			if (patternSequence_) {
-				patternSequence_->push_back(entry);
-				patternSequence_->sort(LessByPointedToValue());
-  		}
+			std::cout<<"Sequence entry created. parent track's size is "<<size()<<std::endl;
+			std::cout<<"associated pattern size is "<<entry->pattern()->size()<<std::endl;
 
 			return entry;
 		}
 
+
+		double SequenceLine::tickLength( ) const
+		{
+			if (size() > 0 ) {
+				return rbegin()->first + rbegin()->second->patternBeats();
+			} else
+  		return 0;
+		}
 
 		PatternSequence * SequenceLine::patternSequence( )
 		{
 			return patternSequence_;
 		}
 
-		double SequenceLine::tickLength( ) const
-		{
-			if (size() > 0 ) {
-				return back()->tickPosition() + back()->beatLength();
-  		} else
-  		return 0;
-		}
-
 		void SequenceLine::onDeletePattern( SinglePattern * pattern )
 		{
-			// todo rewrok deleting at all!
-/*			std::list<SequenceEntry*>::iterator it = begin();
-			for ( ; it != end(); it++) {
-				SequenceEntry* entry = *it;
-				if (entry->pattern() == pattern) {
+			// todo rework deleting at all!
+			for (iterator it = begin(); it != end(); it++) {
+				if ( it->second->pattern() == pattern) {
 					erase(it);
 					break;
 				}
-			}*/
+			}
 		}
 
+		void SequenceLine::MoveEntry(SequenceEntry* entry, double newpos)
+		{
+			iterator iter = begin();
+			for(; iter!= end(); ++iter)
+			{
+				if(iter->second==entry)
+				break;
+			}
+			if(iter!=end())
+			{
+				double oldpos = iter->first;
+				erase(iter);
+				insert(value_type(newpos, entry));
+			}
+		}
+
+		const std::string & SequenceLine::name() const
+		{
+			return name_;
+		}
+
+		void SequenceLine::setName(const std::string & newname)
+		{
+			name_=newname;
+		}
 		//end of sequenceLine;
 
 
@@ -230,43 +158,49 @@ namespace psycle
 
 		PatternSequence::~PatternSequence()
 		{
-			std::vector<SequenceLine*>::iterator it = lines_.begin();
-			for ( it; it != lines_.end(); it++) delete *it;
+			for(iterator it = begin(); it != end(); ++it)
+				delete *it;
 		}
-
 
 
 		SequenceLine * PatternSequence::createNewLine( )
 		{
 			SequenceLine* line = new SequenceLine(this);
-			lines_.push_back(line);
+			push_back(line);
+			std::cout<<"New track created. patternsequence.size(): "<<size()<<std::endl;
 
 			return line;
 		}
 
-		const std::vector< SequenceLine * > & PatternSequence::lines( ) const
+		void PatternSequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
 		{
-			return lines_;
+			for( iterator seqIt = this->begin(); seqIt != this->end(); ++seqIt )
+			{
+				SequenceLine *pTrack = *seqIt;
+
+				//find the first sequenceentry that begins at or after start+length, and iterate backwards
+				std::map<double, SequenceEntry*>::iterator trackIt(pTrack->lower_bound( start+length ));
+
+				//    std::map<double, SequenceEntry*>::reverse_iterator trackIt(pTrack->lower_bound( start+length ));
+				//    for(; trackIt != track->rend() && trackIt->first + trackIt->second->patternBeats() >= start; ++trackIt )
+
+				///\todo: this loop is kind of clumsy.. best would be a for loop with a reverse_iterator, but i'm having trouble making it work. (lower_bound returns an iterator, and when casted to a reverse_iterator it somehow ends up in the wrong place)
+				if(trackIt!=pTrack->begin()) {
+					while((--trackIt)->first + trackIt->second->patternBeats() >= start)
+					{
+						SinglePattern* pPat = trackIt->second->pattern();
+						std::map<double, PatternLine>::iterator patIt   = pPat->lower_bound( start-trackIt->first ),
+						patEnd = pPat->lower_bound( start+length-trackIt->first );
+						for( ; patIt != patEnd; ++patIt)
+							events.insert( std::pair<const double, PatternLine>( patIt->first + trackIt->first, patIt->second ) );
+						if(trackIt==pTrack->begin())
+						break;
+      		}
+    		}
+  		}
 		}
 
-		void PatternSequence::onDeletePattern( SinglePattern * pattern )
-		{
-/*			std::list<SequenceEntry*>::iterator it = begin();
-			for ( ; it != end(); it++) {
-				SequenceEntry* entry = *it;
-				if (entry->pattern() == pattern) {
-					erase(it);
-					delete entry;
-					break;
-				}
-			}*/
-		}
-
-	}
-}
 
 
-
-
-
-
+	} // end of host namespace
+} // end of psycle namespace

@@ -124,6 +124,61 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
 // end of Area class
 
 
+// this is the gui class of one pattern entry
+SequencerGUI::SequencerLine::SequencerItem::SequencerItem( SequencerGUI* seqGui )
+{
+  caption_ = new NLabel("Pattern");
+    caption_->setVAlign(nAlCenter);
+    caption_->setHAlign(nAlCenter);
+  add(caption_);
+
+  setBorder (NFrameBorder());
+  setMoveable(nMvHorizontal);
+
+  setTransparent(false);
+
+  sequenceEntry_ = 0;
+
+  sView = seqGui;
+}
+
+SequencerGUI::SequencerLine::SequencerItem::~ SequencerItem( )
+{
+}
+
+void SequencerGUI::SequencerLine::SequencerItem::setSequenceEntry( SequenceEntry * sequenceEntry )
+{
+  sequenceEntry_ = sequenceEntry;
+
+  if (sequenceEntry_) {
+     caption_->setText( sequenceEntry_->pattern()->name() );
+  }
+}
+
+SequenceEntry * SequencerGUI::SequencerLine::SequencerItem::sequenceEntry( )
+{
+  return sequenceEntry_;
+}
+
+
+void SequencerGUI::SequencerLine::SequencerItem::resize( )
+{
+  caption_->setPosition(0,0,clientWidth(), clientHeight());
+}
+
+void SequencerGUI::SequencerLine::SequencerItem::onMove( const NMoveEvent & moveEvent )
+{
+  sequenceEntry_->track()->MoveEntry(sequenceEntry_, left() / (double) sView->beatPxLength() );
+//  caption_->setText( sequenceEntry_->pattern()->name() + ":" + stringify(sequenceEntry_->tickPosition()));
+}
+
+void SequencerGUI::SequencerLine::SequencerItem::onMousePress( int x, int y, int button )
+{
+}
+
+// end of SequencerItem class
+
+
 
 // this is the gui class that represents one SequenceLine
 
@@ -285,5 +340,3 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 
 
 }}
-
-

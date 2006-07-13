@@ -250,6 +250,8 @@ public:
     void setActiveMachineIdx(int idx);
     int selectedMachineIndex() const;
 
+    void clearCurr();
+
 private:
 
   SinglePattern* pattern_;
@@ -286,3 +288,4 @@ private:
 
 }}
 #endif
+

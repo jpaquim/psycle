@@ -30,8 +30,6 @@ namespace psycle
 		public:
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
-			void AdvancePlayPos( double masterBeatEndPosition );
-			void prepareEvents(  double masterBeatEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines  );
 			/// Initial Loop. Read new line and Interpretate the Global commands.
 			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
 			/// Notify all machines that a new Tick() comes.
@@ -104,6 +102,12 @@ namespace psycle
 				void SampleRate(const int sampleRate);
 			///\}
 
+		private:
+			/// current master playback position
+			double playPos;
+
+		public:
+
 			/// used by the plugins to indicate that they need redraw.
 			bool Tweaker;
 
@@ -118,10 +122,6 @@ namespace psycle
 				/// whether to apply dither to recording
 				bool _dodither;
 			///\}
-
-		protected:
-			std::list<SequenceEntry*>::iterator playIterator;
-			std::list<SequenceEntry*> playingSeqEntries;
 
 		private:
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
