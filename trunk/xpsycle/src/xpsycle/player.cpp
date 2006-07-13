@@ -445,32 +445,22 @@ namespace psycle
 
 		void Player::prepareEvents(  double masterBeatEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines )
 		{
-			double masterBeatBegin = ((((Master*)song()._pMachine[MASTER_INDEX])->sampleCount)/ (double)SamplesPerBeat());
+			double masterBeatBeginPosition = ((((Master*)song()._pMachine[MASTER_INDEX])->sampleCount)/ (double)SamplesPerBeat());
 
 			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
 			while ( it != playingSeqEntries.end() ) {
 				SequenceEntry* entry = *it;
-				double offsetend   = masterBeatEndPosition - entry->tickPosition();
-				double offsetStart = masterBeatBegin       - entry->tickPosition();
-				std::cout << "offsetstart : " << offsetStart << " offsetEnd: " << offsetend << std::endl;
-				std::list<PatternLine>::iterator & lineItr = entry->playIterator();
-				for ( ; lineItr != entry->end(); lineItr++) {
-					PatternLine & line = *lineItr;
-					if (line.tickPosition() >= offsetend) break;
-					std::pair<double,PatternLine* > pair;
-					pair.first = line.tickPosition() - offsetStart;
-					pair.second = &line;
-					std::cout << "pair.first: " << pair.first << std::endl;
-					if ( pair.first < 0 )
-					std::cout << "ERROR! : masterbeatbegin "<< masterBeatBegin << " pattern.tick:" << entry->tickPosition() << " line.tick :" << line.tickPosition() << std::endl;
-					tempPlayLines.push_back(pair);
-				}
-				if (lineItr == entry->end()) {
+				if (entry->prepare(masterBeatBeginPosition,masterBeatEndPosition, tempPlayLines)) {
 					playingSeqEntries.erase(it++);
-				} else
-					it++;
+				}
+				it++;
 			}
 		}
+
+		/*bool Player::prepareEntry( double masterBeatEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines ,SequenceEntry * entry )
+		{
+			return true;
+		}*/
 
 		float * Player::Work(void* context, int & numSamples)
 		{
