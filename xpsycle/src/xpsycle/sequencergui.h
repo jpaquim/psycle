@@ -37,34 +37,17 @@ class NListBox;
 namespace psycle {
 	namespace host {
 
+
+class SequencerGUI;
+
+
 class SequencerGUI : public NPanel
 {
   public:
   class SequencerLine : public NPanel {
 
 
-    class SequencerItem : public NPanel {
-      public:
-       SequencerItem( SequencerGUI* seqGui );
-       ~SequencerItem();
 
-       virtual void onMousePress(int x, int y, int button);
-       virtual void resize();
-       virtual void onMove(const NMoveEvent & moveEvent);
-
-       void setText(const std::string & text);
-
-       void setSequenceEntry(SequenceEntry* entry);
-       SequenceEntry* sequenceEntry();
-
-      private:
-
-        NLabel* caption_;
-        SequenceEntry* sequenceEntry_;
-
-        SequencerGUI* sView;
-
-    };
 
     public :
 

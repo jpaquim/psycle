@@ -21,8 +21,10 @@
 #define PATTERNSEQUENCE_H
 
 #include "singlepattern.h"
+#include "sequenceritemgui.h"
 #include <vector>
 #include <list>
+
 
 /**
 @author Stefan Nattkemper
@@ -43,28 +45,44 @@ namespace psycle
 
 			sigslot::signal1<SequenceEntry*> beforeDelete;
 
+			void setTickPosition(double tick);
+			double tickPosition() const;
+			virtual double beatLength() const;
+
+			virtual void setPlayIteratorToBegin();
+			virtual bool prepare(double masterBeatBeginposition, double masterBeatEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines );
+
+		private:
+
+			SequenceLine* line_;
+			double tickPosition_;
+
+		};
+
+
+
+		class PatternSequenceEntry : public SequenceEntry {
+		public:
+			PatternSequenceEntry();
+			PatternSequenceEntry(SequenceLine* line);
+
 			void setPattern(SinglePattern* pattern);
 			SinglePattern* pattern();
 			SinglePattern* pattern() const;
 
-			void setTickPosition(double tick);
-			double tickPosition() const;
-			float patternBeats() const;
+			virtual double beatLength() const;
 
-			void setPlayIteratorToBegin();
+			virtual void setPlayIteratorToBegin();
 			std::list<PatternLine>::iterator & playIterator();
 			std::list<PatternLine>::iterator begin();
 			std::list<PatternLine>::iterator end();
 
+			virtual bool prepare(double masterBeatBeginposition, double masterBeatEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines );
 
-			private:
 
-			std::list<PatternLine>::iterator playIterator_;
-
-			SequenceLine* line_;
+		private:
 			SinglePattern* pattern_;
-			double tickPosition_;
-
+			std::list<PatternLine>::iterator playIterator_;
 		};
 
 		class PatternSequence;
