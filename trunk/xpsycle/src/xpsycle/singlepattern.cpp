@@ -28,8 +28,6 @@ namespace psycle
 		{
 			beats_ = 4;
 			beatZoom_ = 4;
-
-			lastLine = 0;
 		}
 
 
@@ -56,62 +54,6 @@ namespace psycle
 		int SinglePattern::beats( ) const
 		{
 			return beats_;
-		}
-
-		const PatternEvent & SinglePattern::dataAt( float position, int track )
-		{
-			std::list<PatternLine>::iterator it = begin();
-
-			for (; it != end(); it++) {
-				PatternLine & line = *it;
-				lastLine = &line;
-				if (line.tickPosition() == position) {
-					return line.trackAt(track);
-				}
-			}
-			return zeroTrack;
-		}
-
-		void SinglePattern::setData( float position, int track, const PatternEvent & data )
-		{
-			if (lastLine && lastLine->tickPosition() == position ) {
-				lastLine->setPatternEvent(data, track);
-			} else {
-			bool inserted = false;
-				std::list<PatternLine>::iterator it = begin();
-				for (; it != end(); it++) {
-					PatternLine & line = *it;
-					if (line.tickPosition() == position) {
-						line.setPatternEvent(data,track);
-					} else
-					if (line.tickPosition() > position) {
-						PatternLine line(position);
-						line.setPatternEvent(data,track);
-						insert(it, line);
-						inserted = true;
-					}
-				}
-				if (!inserted) {
-					PatternLine line(position);
-					line.setPatternEvent(data,track);
-					push_back(line);
-				}
-			}
-		}
-
-		std::list< PatternLine >::iterator SinglePattern::startItr( float position )
-		{
-			std::list<PatternLine>::iterator it = begin();
-			for (; it != end(); it++) {
-				PatternLine & line = *it;
-				if (line.tickPosition() == position) {
-					return it;
-				} else
-			if (line.tickPosition() > position) {
-				return it;
-			}
-		}
-		return begin();
 		}
 
 		void SinglePattern::setName( const std::string & name )

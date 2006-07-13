@@ -24,6 +24,7 @@
 #include "sequenceritemgui.h"
 #include <vector>
 #include <list>
+#include <string>
 
 
 /**
@@ -45,49 +46,22 @@ namespace psycle
 
 			sigslot::signal1<SequenceEntry*> beforeDelete;
 
-			void setTickPosition(double tick);
-			double tickPosition() const;
-			virtual double beatLength() const;
-
-			virtual void setPlayIteratorToBegin();
-			virtual bool prepare(double masterBeatBeginposition, double masterBeatEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines );
-
-		private:
-
-			SequenceLine* line_;
-			double tickPosition_;
-
-		};
-
-
-
-		class PatternSequenceEntry : public SequenceEntry {
-		public:
-			PatternSequenceEntry();
-			PatternSequenceEntry(SequenceLine* line);
-
 			void setPattern(SinglePattern* pattern);
 			SinglePattern* pattern();
 			SinglePattern* pattern() const;
 
-			virtual double beatLength() const;
+			float patternBeats() const;
 
-			virtual void setPlayIteratorToBegin();
-			std::list<PatternLine>::iterator & playIterator();
-			std::list<PatternLine>::iterator begin();
-			std::list<PatternLine>::iterator end();
-
-			virtual bool prepare(double masterBeatBeginposition, double masterBeatEndPosition, std::list<std::pair<double,PatternLine* > > & tempPlayLines );
-
+			SequenceLine* track() {return line_;}
 
 		private:
+			SequenceLine* line_;
 			SinglePattern* pattern_;
-			std::list<PatternLine>::iterator playIterator_;
 		};
 
 		class PatternSequence;
 
-		class SequenceLine : public  std::list<SequenceEntry*>, public sigslot::has_slots<>
+		class SequenceLine : public  std::map<double, SequenceEntry*>, public sigslot::has_slots<>
 		{
 
 		public:
@@ -101,32 +75,29 @@ namespace psycle
 
 			PatternSequence* patternSequence();
 
+			void MoveEntry(SequenceEntry* entry, double newpos);
+
+			const std::string & name() const;
+			void setName(const std::string & newname);
+
 		private:
 
+			std::string name_;
 			PatternSequence* patternSequence_;
 
 			void onDeletePattern(SinglePattern* pattern);
-
 		};
 
-		class PatternSequence : public std::list<SequenceEntry*>,public sigslot::has_slots<> {
+		class PatternSequence : public std::vector<SequenceLine*>,public sigslot::has_slots<> {
 		public:
 			PatternSequence();
 
 			~PatternSequence();
 
 			SequenceLine* createNewLine();
-
-			void onDeletePattern(SinglePattern* pattern);
-
-			const std::vector<SequenceLine*> & lines() const;
-
+			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
 		private:
-
-			std::vector<SequenceLine*> lines_;
-
 		};
-
 	}
 }
 

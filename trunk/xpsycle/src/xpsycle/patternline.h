@@ -35,21 +35,7 @@ namespace psycle
 		class PatternLine : public std::map<int, PatternEvent>  {
 		public:
 			PatternLine();
-			PatternLine(float position);
-
 			~PatternLine();
-
-			const PatternEvent & trackAt(int index) const;
-			void setPatternEvent(const PatternEvent & event, int index);
-
-			void setTickPosition(float position);
-			float tickPosition() const;
-
-		private:
-
-			float tickPosition_;
-
-			PatternEvent zeroTrack;
 
 		};
 

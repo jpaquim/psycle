@@ -32,10 +32,10 @@ namespace psycle
 			m_SamplesPerRow((44100*60)/(125*4)),
 			m_SamplesPerBeat((44100*60/125)),
 			tpb(4),
-			bpm(125)
+			bpm(125),
+			playPos(0.0)
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
-			playIterator = song.patternSequence()->begin();
 		}
 
 		Player::~Player() throw()
@@ -46,7 +46,6 @@ namespace psycle
 		void Player::Start(int pos, int line)
 		{
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
-			playIterator = song().patternSequence()->begin();
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
@@ -62,6 +61,7 @@ namespace psycle
 			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
+			playPos = 0.0;
 			ExecuteLine();
 		}
 
@@ -308,15 +308,8 @@ namespace psycle
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
 			std::map<int, PatternEvent>::iterator trackItr = line.begin();
-			std::cout << "Lines in array, (beatoffset, notes)" << std::endl;
-			std::cout << beatOffset << std::endl;
-					for ( ; trackItr != line.end() ; trackItr++) {
-						PatternEvent entry = trackItr->second;
-						std::cout << entry.note() << std::endl;
-					}
-			std::cout << "done lines in array" << std::endl;
-			trackItr = line.begin();
-			for ( ; trackItr != line.end() ; trackItr++) {
+			for ( ; trackItr != line.end() ; ++trackItr) {
+
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
 				if(( !song()._trackMuted[track]) && (entry.note() < cdefTweakM || entry.note() == 255)) // Is it not muted and is a note?
@@ -366,9 +359,7 @@ namespace psycle
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
-									std::cout << "before addevent" << std::endl;
 									pMachine->AddEvent(beatOffset, track, entry);
-									std::cout << "after addevent" << std::endl;
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
@@ -431,36 +422,6 @@ namespace psycle
 			_lineChanged = true;
 		}
 
-		void Player::AdvancePlayPos( double masterBeatEndPosition )
-		{
-			while (playIterator != song().patternSequence()->end()) {
-				SequenceEntry* entry = *playIterator;
-				if (entry->tickPosition() < masterBeatEndPosition) {
-					entry->setPlayIteratorToBegin();
-					playingSeqEntries.push_back(entry);
-					playIterator++;
-				} else break;
-			}
-		}
-
-		void Player::prepareEvents(  double masterBeatEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines )
-		{
-			double masterBeatBeginPosition = ((((Master*)song()._pMachine[MASTER_INDEX])->sampleCount)/ (double)SamplesPerBeat());
-
-			std::list<SequenceEntry*>::iterator it =  playingSeqEntries.begin();
-			while ( it != playingSeqEntries.end() ) {
-				SequenceEntry* entry = *it;
-				if (entry->prepare(masterBeatBeginPosition,masterBeatEndPosition, tempPlayLines)) {
-					playingSeqEntries.erase(it++);
-				}
-				it++;
-			}
-		}
-
-		/*bool Player::prepareEntry( double masterBeatEndPosition , std::list<std::pair<double,PatternLine* > > & tempPlayLines ,SequenceEntry * entry )
-		{
-			return true;
-		}*/
 
 		float * Player::Work(void* context, int & numSamples)
 		{
@@ -469,9 +430,8 @@ namespace psycle
 
 		float * Player::Work(int & numSamples)
 		{
-			double masterBeatEndPosition =  (((Master*)song()._pMachine[MASTER_INDEX])->sampleCount+ numSamples)/ (double) SamplesPerBeat();
+			double beatLength = numSamples/(double) SamplesPerBeat();
 			int amount;
-			//std::cout << masterBeatEndPosition << std::endl;
 			Master::_pMasterSamples = _pBuffer;
 			int numSamplex = numSamples;
 //			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
@@ -489,18 +449,17 @@ namespace psycle
 				// Tick handler function
 				if (_playing)
 				{
-					// Advance position in the sequencer
-					AdvancePlayPos(masterBeatEndPosition);
-					std::list<std::pair<double,PatternLine* > > tempPlayList;
-					prepareEvents(masterBeatEndPosition,tempPlayList);
-					
-					std::list<std::pair<double,PatternLine* > >::iterator lineIt = tempPlayList.begin();
+					std::multimap<double, PatternLine> events;
+					song().patternSequence()->GetLinesInRange(playPos, beatLength, events);
+//					std::cout<<"playPos: "<<playPos<<", beatLength: "<<beatLength<<", events.size(): "<<events.size()<<std::endl;
 
-					for ( ; lineIt != tempPlayList.end(); lineIt++) {
-						std::pair<double,PatternLine* >pair = *lineIt;
-						ExecuteNotes( pair.first, *(pair.second));
+					if(!events.empty())
+					{
+						std::multimap<double, PatternLine>::iterator it = events.begin();
+						for( ; it != events.end(); ++it)
+							ExecuteNotes(it->first-playPos, it->second);
 					}
-//						ExecuteNotes();
+						playPos+=beatLength;
 				}
 				else
 				{

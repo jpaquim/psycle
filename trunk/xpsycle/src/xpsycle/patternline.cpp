@@ -27,47 +27,14 @@ namespace psycle
 		
 		PatternLine::PatternLine()
 		{
-			tickPosition_ = 0;
-		}
-
-		PatternLine::PatternLine( float position )
-		{
-			tickPosition_ = position;
 		}
 
 		PatternLine::~PatternLine()
 		{
 		}
 
-		const PatternEvent & PatternLine::trackAt( int index ) const
-		{
-			std::map<int, PatternEvent>::const_iterator itr;
-			if ( (itr = find( index )) != end() ) {
-				return itr->second;
-			}
-			else {
-				return zeroTrack;
-			}
-		}
-
-		void PatternLine::setPatternEvent( const PatternEvent & event, int index )
-		{
-			(*this)[index] = event;
-		}
-
-		void PatternLine::setTickPosition( float position )
-		{
-			tickPosition_ = position;
-		}
-
-		float PatternLine::tickPosition( ) const
-		{
-			return tickPosition_;
-		}
-
 	}
 }
-
 
 
 

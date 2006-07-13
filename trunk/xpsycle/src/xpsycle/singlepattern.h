@@ -22,7 +22,7 @@
 
 #include "patternline.h"
 #include <ngrs/sigslot.h>
-#include <list>
+#include <map>
 #include <string>
 
 /**
@@ -34,18 +34,13 @@ namespace psycle
 	namespace host
 	{
 
-		class SinglePattern : public std::list<PatternLine> {
+		class SinglePattern : public std::map<double, PatternLine> {
 		public:
 			SinglePattern();
 
 			~SinglePattern();
 
 			sigslot::signal1<SinglePattern*> beforeDelete;
-
-			std::list<PatternLine>::iterator startItr(float position);
-
-			void setData(float position, int track, const PatternEvent & data);
-			const PatternEvent & dataAt(float position, int track);
 
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
@@ -62,10 +57,6 @@ namespace psycle
 			int beatZoom_;
 
 			std::string name_;
-
-			PatternLine* lastLine;
-			PatternEvent zeroTrack;
-
 		};
 
 	}
