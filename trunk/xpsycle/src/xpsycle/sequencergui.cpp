@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "sequencergui.h"
-#include <ngrs/nscrollbox.h>
-#include <ngrs/nautoscrolllayout.h>
+#include "sequencerbeatchangelineal.h"
+#include <ngrs/nscrollbar.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nframeborder.h>
@@ -266,12 +266,25 @@ SequencerGUI::SequencerGUI()
   beatLineal_ = new SequencerBeatLineal(this);
   add(beatLineal_, nAlTop);
 
-  scrollBox_ = new NScrollBox();
-    scrollArea_ = new Area( this );
-      scrollArea_->setLayout(NAutoScrollLayout());
-      scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
-    scrollBox_->setScrollPane(scrollArea_);
-  add(scrollBox_, nAlClient);
+  // create scrollBars
+  hBar = new NScrollBar();
+    hBar->setOrientation(nHorizontal);
+    hBar->setHeight(15);
+    //hBar->posChange.connect(this,&PatternView::onHScrollBar);
+  add(hBar, nAlBottom);
+
+  beatChangeLineal_ = new SequencerBeatChangeLineal(this);
+  add( beatChangeLineal_, nAlBottom );
+
+  vBar = new NScrollBar();
+    vBar->setWidth(15);
+    vBar->setOrientation(nVertical);
+    //vBar->posChange.connect(this,&PatternView::onVScrollBar);
+  add(vBar, nAlRight);
+
+  // the main Sequencer gui
+  scrollArea_ = new Area( this );
+  add(scrollArea_, nAlClient);
 
   lastLine = 0;
   selectedLine_ = 0;
@@ -292,6 +305,11 @@ int SequencerGUI::beatPxLength( ) const
 void SequencerGUI::setPatternSequence( PatternSequence * sequence )
 {
   patternSequence_ = sequence;
+}
+
+PatternSequence * SequencerGUI::patternSequence( )
+{
+  return patternSequence_;
 }
 
 void SequencerGUI::addSequencerLine( )
@@ -340,3 +358,5 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 
 
 }}
+
+

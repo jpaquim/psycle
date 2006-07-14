@@ -25,6 +25,32 @@ namespace psycle
 	namespace host
 	{
 
+
+		BpmChangeEvent::BpmChangeEvent( )
+		{
+			bpm_ = 125;
+		}
+
+		BpmChangeEvent::BpmChangeEvent( int bpm )
+		{
+			bpm_ = bpm;
+		}
+
+		BpmChangeEvent::~ BpmChangeEvent( )
+		{
+		}
+
+		void BpmChangeEvent::setBpm( int bpm )
+		{
+			bpm_ = bpm;
+		}
+
+		int BpmChangeEvent::bpm( ) const
+		{
+			return bpm_;
+		}
+
+
 		// pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
 
 		SequenceEntry::SequenceEntry( )
@@ -153,6 +179,8 @@ namespace psycle
 		// PatternSequence
 		PatternSequence::PatternSequence()
 		{
+			std::map<double, BpmChangeEvent*>::iterator it = bpmChangeEvents.begin();
+			for ( it; it != bpmChangeEvents.end(); it++) delete it->second;
 		}
 
 
@@ -171,6 +199,11 @@ namespace psycle
 
 			return line;
 		}
+
+//todo move pattern data to here
+//		PatternData* PatternSequence::patternData() {
+//			return &patternData_;
+//		}
 
 		void PatternSequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
 		{
@@ -200,7 +233,36 @@ namespace psycle
   		}
 		}
 
+		BpmChangeEvent * PatternSequence::createBpmChangeEntry( double position , int bpm)
+		{
+			BpmChangeEvent* bpmEvent = new BpmChangeEvent(bpm);
+			bpmChangeEvents[position] = bpmEvent;
 
+			return bpmEvent;
+		}
+
+		void PatternSequence::MoveBpmChangeEntry( BpmChangeEvent * entry, double newpos )
+		{
+			std::map<double, BpmChangeEvent*>::iterator iter = bpmChangeEvents.begin();
+			for(; iter!= bpmChangeEvents.end(); ++iter)
+			{
+				if(iter->second==entry)
+				break;
+			}
+			if(iter!=bpmChangeEvents.end())
+			{
+				double oldpos = iter->first;
+				bpmChangeEvents.erase(iter);
+				bpmChangeEvents[newpos] = entry;
+			}
+
+		}
 
 	} // end of host namespace
-} // end of psycle namespace
+}
+
+
+
+
+
+ // end of psycle namespace

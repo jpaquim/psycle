@@ -22,6 +22,7 @@
 
 #include "singlepattern.h"
 #include "sequenceritemgui.h"
+#include "patterndata.h"
 #include <vector>
 #include <list>
 #include <string>
@@ -37,6 +38,19 @@ namespace psycle
 	{
 
 		class SequenceLine;
+
+		class BpmChangeEvent {
+			public:
+					BpmChangeEvent();
+					BpmChangeEvent(int bpm);
+					~BpmChangeEvent();
+
+					void setBpm( int bpm );
+					int bpm() const;
+
+			private:
+					int bpm_;
+    };
 
 		class SequenceEntry {
 		public:
@@ -96,7 +110,16 @@ namespace psycle
 
 			SequenceLine* createNewLine();
 			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
+
+			//PatternData* patternData();
+			BpmChangeEvent* createBpmChangeEntry(double position, int bpm);
+			void MoveBpmChangeEntry(BpmChangeEvent* entry, double newpos);
+
 		private:
+
+			//PatternData patternData_; todo move patterndata to here
+			std::map<double, BpmChangeEvent*> bpmChangeEvents;
+
 		};
 	}
 }
