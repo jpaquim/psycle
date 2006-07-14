@@ -29,13 +29,15 @@
 @author Stefan Nattkemper
 */
 
-class NScrollBox;
+class NScrollBar;
 class NLabel;
 class NToolBar;
 class NListBox;
 
 namespace psycle {
 	namespace host {
+
+class SequencerBeatChangeLineal;
 
 class SequencerGUI : public NPanel
 {
@@ -96,7 +98,6 @@ class SequencerGUI : public NPanel
   };
 
 
-
 class SequencerBeatLineal : public NPanel {
   public :
      SequencerBeatLineal(SequencerGUI* seqGui);
@@ -137,11 +138,14 @@ public:
     ~SequencerGUI();
 
     void setPatternSequence(PatternSequence* sequence);
+    PatternSequence* patternSequence();
+
     void addPattern(SinglePattern* pattern);
 
     int beatPxLength() const;
 
     SequencerLine* selectedLine_;
+
 
 private:
 
@@ -149,12 +153,15 @@ private:
     int beatPxLength_;
 
     SequencerBeatLineal* beatLineal_;
+    SequencerBeatChangeLineal* beatChangeLineal_;
     SequencerLine* lastLine;
     PatternSequence* patternSequence_;
 
     void addSequencerLine();
 
-    NScrollBox* scrollBox_;
+    NScrollBar* hBar;
+    NScrollBar* vBar;
+
     Area* scrollArea_;
     NToolBar* toolBar_;
     NListBox* patternBox_;

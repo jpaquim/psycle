@@ -17,54 +17,74 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "singlepattern.h"
+#ifndef SEQUENCERBEATCHANGELINEAL_H
+#define SEQUENCERBEATCHANGELINEAL_H
 
-namespace psycle
+#include <npanel.h>
+
+
+
+/**
+@author Stefan Nattkemper
+*/
+
+class NEdit;
+
+namespace psycle {
+	namespace host {
+
+class SequencerGUI;
+class PatternSequence;
+class BpmChangeEvent;
+
+class SequencerBeatChangeLineal : public NPanel
 {
-	namespace host
-	{
 
-		SinglePattern::SinglePattern()
-		{
-			beats_ = 4;
-			beatZoom_ = 4;
-		}
+    class BeatChangeTriangle : public NPanel {
+    public:
+        BeatChangeTriangle();
+        BeatChangeTriangle(SequencerGUI * gui);
+        ~BeatChangeTriangle();
+
+        void setBpmChangeEvent(BpmChangeEvent* event);
+
+        virtual void onMove(const NMoveEvent & moveEvent);
+        virtual void paint( NGraphics* g);
+        virtual int preferredHeight() const;
+        virtual void resize();
+
+    private:
+
+        SequencerGUI* sView;
+        NEdit* bpmEdt_;
+
+        int tWidth;
+        int tHeight;
+
+        BpmChangeEvent* bpmChangeEvent_;
+
+    };
+
+public:
+    SequencerBeatChangeLineal();
+    SequencerBeatChangeLineal(SequencerGUI* seqGui);
+
+    ~SequencerBeatChangeLineal();
+
+    virtual void paint( NGraphics* g );
+
+    virtual int preferredHeight() const;
+
+    virtual void onMouseDoublePress(int x, int y, int button);
+
+    virtual void resize();
+
+private:
+
+   SequencerGUI* sView;
+
+};
 
 
-		SinglePattern::~SinglePattern()
-		{
-			beforeDelete.emit(this);
-		}
-
-		void SinglePattern::setBeatZoom( int zoom )
-		{
-			beatZoom_ = zoom;
-		}
-
-		int SinglePattern::beatZoom( ) const
-		{
-			return beatZoom_;
-		}
-
-		void SinglePattern::setBeats( int beats )
-		{
-			beats_ = beats;
-		}
-
-		int SinglePattern::beats( ) const
-		{
-			return beats_;
-		}
-
-		void SinglePattern::setName( const std::string & name )
-		{
-			name_ = name;
-		}
-
-		const std::string & SinglePattern::name( ) const
-		{
-			return name_;
-		}
-
-	}
-}
+}}
+#endif
