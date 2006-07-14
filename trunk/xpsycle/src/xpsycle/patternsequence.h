@@ -115,6 +115,8 @@ namespace psycle
 			BpmChangeEvent* createBpmChangeEntry(double position, int bpm);
 			void MoveBpmChangeEntry(BpmChangeEvent* entry, double newpos);
 
+			const std::map<double, BpmChangeEvent*> & bpmChanges();
+
 		private:
 
 			//PatternData patternData_; todo move patterndata to here

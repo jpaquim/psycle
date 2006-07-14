@@ -258,8 +258,15 @@ namespace psycle
 
 		}
 
+		const std::map< double, BpmChangeEvent * > & PatternSequence::bpmChanges( )
+		{
+			return bpmChangeEvents;
+		}
+
 	} // end of host namespace
 }
+
+
 
 
 
