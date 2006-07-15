@@ -40,19 +40,19 @@ void NLine::paint( NGraphics * g )
   g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
 }
 
-void NLine::setPoints( NPoint p1, NPoint p2 )
+void NLine::setPoints( const NPoint & p1, const NPoint & p2 )
 {
   lineShape->setPoints(p1,p2);
 }
 
 
 
-const NPoint & NLine::p1( )
+const NPoint & NLine::p1( ) const
 {
   return lineShape->p1();
 }
 
-const NPoint & NLine::p2( )
+const NPoint & NLine::p2( ) const
 {
   return lineShape->p2();
 }

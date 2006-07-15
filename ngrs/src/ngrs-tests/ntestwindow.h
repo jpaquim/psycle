@@ -95,6 +95,8 @@ private:
     void onSliderPosChanged(double v);
     void onQuit(NObject* sender);
     void onBtnClick(NButtonEvent* ev);
+
+    void onColorSelected(const NColor & color);
 };
 
 #endif

@@ -53,6 +53,8 @@
 #include <ngrs/nradiobutton.h>
 #include <ngrs/ntextstatusitem.h>
 #include <ngrs/nstatusbar.h>
+#include <ngrs/ncolorchooser.h>
+#include <ngrs/ncolorcombobox.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -68,6 +70,14 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
+  NColorComboBox* colorBox = new NColorComboBox();
+     colorBox->setPosition(10,10,100,15);
+  pane()->add(colorBox);
+
+  /*NColorChooser* chooser = new NColorChooser();
+    chooser->setPosition(0,0,500,500);
+    chooser->colorSelected.connect(this, &NTestWindow::onColorSelected);
+  pane()->add(chooser);*/
   //testScrollBar();
   // testTimerButton();
 
@@ -82,7 +92,7 @@ NTestWindow::NTestWindow()
     box->setPosition(10,40,100,20);
   pane()->add(box);*/
 
-  NCustomTreeView* view = new NCustomTreeView();
+  /*NCustomTreeView* view = new NCustomTreeView();
 
   NTreeNode* node1 = new NTreeNode();
   view->addNode(node1);
@@ -109,10 +119,10 @@ NTestWindow::NTestWindow()
         NTreeNode* tr = new NTreeNode();
         tr->pane()->add(new NLabel("sub"),nAlClient);
         view->rootNode()->childNodePane()->add(tr,nAlTop);
-      }*/
+      }
   pane()->add(view);
 
-  view->setPosition(10,50,200,200);
+  view->setPosition(10,50,200,200);*/
 
  
 
@@ -435,6 +445,12 @@ void NTestWindow::testScrollBar( )
   NScrollBar* scrollBar = new NScrollBar();
   scrollBar->setOrientation(nVertical);
   pane()->add(scrollBar,nAlRight);
+}
+
+void NTestWindow::onColorSelected( const NColor & color )
+{
+  pane()->setBackground(color);
+  pane()->repaint();
 }
 
 
