@@ -78,6 +78,8 @@ void NListBox::insert( NCustomItem * component, int index , bool align )
 void NListBox::add( NCustomItem * component )
 {
   add(component,true);
+  component->mousePress.connect(this,&NListBox::onItemPress);
+  component->setTransparent(true);
 }
 
 void NListBox::onItemPress( NButtonEvent * ev)

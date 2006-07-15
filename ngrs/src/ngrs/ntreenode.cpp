@@ -21,6 +21,7 @@
 #include "nalignlayout.h"
 #include "nframeborder.h"
 #include "nlabel.h"
+#include "ncustomitem.h"
 
 
 
@@ -47,10 +48,29 @@ void NTreeNode::addNode( NTreeNode * node )
   subNodes->add(node, nAlTop);
 }
 
-void NTreeNode::addEntry( NVisualComponent * entry )
+void NTreeNode::addEntry( NCustomItem * entry )
 {
   entries_->add(entry, nAlTop);
+  entry->mousePress.connect(this,&NTreeNode::onItemPress);
+  entry->setTransparent(true);
 }
+
+void NTreeNode::setHeader( NCustomItem * entry )
+{
+  header()->add(entry, nAlClient);
+  entry->mousePress.connect(this,&NTreeNode::onItemPress);
+  entry->setTransparent(true);
+}
+
+void NTreeNode::onItemPress( NButtonEvent * ev )
+{
+  if (ev->button() == 1) {
+    NCustomItem* item = static_cast<NCustomItem*>(ev->sender());
+    itemSelected.emit(this, item);
+  }
+}
+
+
 
 
 

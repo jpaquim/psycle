@@ -87,19 +87,19 @@ NTestWindow::NTestWindow()
   NTreeNode* node1 = new NTreeNode();
   view->addNode(node1);
 
-  node1->header()->add(new NLabel("Header1"), nAlClient);
+  node1->setHeader(new NItem("Header1"));
 
   for (int i = 0; i < 10; i++) {
-     node1->addEntry(new NLabel("entry"+stringify(i)));
+     node1->addEntry(new NItem("entry"+stringify(i)));
   }
 
   NTreeNode* node2 = new NTreeNode();
   view->addNode(node2);
 
-  node2->header()->add(new NLabel("Header2"), nAlClient);
+  node2->setHeader(new NItem("Header2"));
 
   for (int i = 0; i < 10; i++) {
-     node2->addEntry(new NLabel("entryB"+stringify(i)));
+     node2->addEntry(new NItem("entryB"+stringify(i)));
   }
 
   /*  NLabel* lb = new NLabel("Test");

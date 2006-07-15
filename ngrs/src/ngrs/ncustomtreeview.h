@@ -21,6 +21,7 @@
 #define NCUSTOMTREEVIEW_H
 
 #include "npanel.h"
+#include "nitemevent.h"
 
 /**
 @author Stefan Nattkemper
@@ -28,6 +29,7 @@
 
 class NTreeNode;
 class NScrollBox;
+class NCustomItem;
 
 
 class NCustomTreeView : public NPanel
@@ -39,11 +41,22 @@ public:
 
     void addNode( NTreeNode* node);
 
+    signal1<NItemEvent*> itemSelected;
+
+    NTreeNode* selectedTreeNode();
+    NCustomItem* selectedItem();
 
 private:
 
     NScrollBox* scrollBox_;
     NPanel* scrollArea_;
+    NCustomItem* selectedItem_;
+    NTreeNode* selectedTreeNode_;
+
+    NSkin itemBg;
+    NSkin itemFg;
+
+    void onSelectedItem(NTreeNode* node, NCustomItem* sender);
 
 };
 

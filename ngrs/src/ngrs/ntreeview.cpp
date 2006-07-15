@@ -28,6 +28,7 @@ NTreeView::NTreeView()
   setLayout(NAlignLayout());
   setBorder(NFrameBorder());
   add( rootNode_ = new NTreeNode(), nAlTop );
+
 }
 
 
