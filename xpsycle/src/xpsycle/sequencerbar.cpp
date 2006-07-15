@@ -32,6 +32,7 @@
 #include <ngrs/nframeborder.h>
 #include <ngrs/ntoolbar.h>
 #include <ngrs/ngridlayout.h>
+#include <ngrs/ntreenode.h>
 
 
 namespace psycle { namespace host {
@@ -68,12 +69,12 @@ void SequencerBar::init( )
     patternPanel->add(new NLabel("Patterns"), nAlTop);
 
     NToolBar* patToolBar = new NToolBar();
-      patToolBar->add( new NButton("New"))->clicked.connect(this,&SequencerBar::onNewPattern);
-      patToolBar->add( new NButton("Delete"))->clicked.connect(this,&SequencerBar::onDeletePattern);
+      patToolBar->add( new NButton("New Category"))->clicked.connect(this,&SequencerBar::onNewCategory);
+      patToolBar->add( new NButton("New Pattern"))->clicked.connect(this,&SequencerBar::onNewPattern);
       patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
     patternPanel->add(patToolBar, nAlTop);
 
-    patternBox_ = new NListBox();
+    patternBox_ = new NCustomTreeView();
       patternBox_->setPreferredSize(100,200);
       patternBox_->itemSelected.connect(this,&SequencerBar::onItemSelected);
 
@@ -125,35 +126,27 @@ void SequencerBar::onRecordTweakChange( NButtonEvent * ev )
   Global::configuration()._RecordTweaks = record_tweaks_->checked();
 }
 
-void SequencerBar::onNewPattern( NButtonEvent * ev )
+void SequencerBar::onNewCategory( NButtonEvent * ev )
 {
-  SinglePattern* pattern = patternData_->createNewPattern("Pattern" + stringify(counter) );
+  NTreeNode* node = new NTreeNode();
+  node->setHeader(new NItem("Category"));
 
-  NItem* item = new NItem( pattern->name() );
-  patternBox_->add(item);
-
-  itemMap[item] = pattern;
-
+  patternBox_->addNode(node);
+  patternBox_->resize();
   patternBox_->repaint();
-  counter++;
 }
 
-void SequencerBar::onDeletePattern( NButtonEvent * ev )
+void SequencerBar::onNewPattern( NButtonEvent * ev )
 {
-  NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
-
-  if (item) {
-    SinglePattern* pattern = 0;
-
-    std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
-    if(itr!=itemMap.end())
-      pattern = itr->second;
-
-    if (pattern) {
-      delete pattern;
-      patternBox_->removeChild(item);
-      patternBox_->repaint();
-    }
+  if (patternBox_->selectedTreeNode() ) {
+     NTreeNode* node = patternBox_->selectedTreeNode();
+     SinglePattern* pattern = patternData_->createNewPattern("Pattern" + stringify(counter) );
+     NItem* item = new NItem( pattern->name() );
+     node->addEntry(item);
+     itemMap[item] = pattern;
+     patternBox_->resize();
+     patternBox_->repaint();
+     counter++;
   }
 }
 
@@ -164,18 +157,20 @@ void SequencerBar::onDeletePattern( NButtonEvent * ev )
 
 void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 {
-  NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
+/*  NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
   std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
   if(itr!=itemMap.end())
-     selected.emit(itr->second);
+     selected.emit(itr->second);*/
 }
 
 void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
 {
-  NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
-  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
-  if(itr!=itemMap.end())
-    added.emit(itr->second);
+  NCustomItem* item = patternBox_->selectedItem();
+  if (item) {
+    std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
+    if(itr!=itemMap.end())
+      added.emit(itr->second);
+  }
 }
 
 

@@ -26,7 +26,7 @@
 #include <ngrs/npanel.h>
 #include <ngrs/ncheckbox.h>
 #include <ngrs/nlistlayout.h>
-#include <ngrs/nlistbox.h>
+#include <ngrs/ncustomtreeview.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nflowlayout.h>
 #include <ngrs/nimage.h>
@@ -72,7 +72,7 @@ private:
 
     int counter;
 
-    NListBox* patternBox_;
+    NCustomTreeView* patternBox_;
 
 
     NCheckBox* follow_;
@@ -82,8 +82,8 @@ private:
     NCheckBox* notestoeffects_;
     NCheckBox* movecursorpaste_;
 
-    void onNewPattern( NButtonEvent * ev );
-    void onDeletePattern( NButtonEvent* ev );
+    void onNewCategory( NButtonEvent * ev );
+    void onNewPattern( NButtonEvent* ev );
 
     void onItemSelected(NItemEvent* ev);
     void onPatternAdd(NButtonEvent* ev);
