@@ -20,14 +20,21 @@
 #include "ncustomtreeview.h"
 #include "ntreenode.h"
 #include "nalignlayout.h"
-#include "nframeborder.h"
+#include "nautoscrolllayout.h"
+#include "nscrollbox.h"
 
 NCustomTreeView::NCustomTreeView()
  : NPanel()
 {
   setLayout(NAlignLayout());
-  setBorder(NFrameBorder());
-  add( rootNode_ = new NTreeNode(), nAlTop );
+
+  scrollBox_ = new NScrollBox();
+    scrollArea_ = new NPanel();
+      scrollArea_->setLayout( NAlignLayout() );
+      scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
+    scrollBox_->setScrollPane(scrollArea_);
+  add(scrollBox_, nAlClient);
+
 }
 
 
@@ -35,9 +42,10 @@ NCustomTreeView::~NCustomTreeView()
 {
 }
 
-NTreeNode * NCustomTreeView::rootNode( )
+
+void NCustomTreeView::addNode( NTreeNode * node )
 {
-   return rootNode_;
+  scrollArea_->add( node, nAlTop );
 }
 
 

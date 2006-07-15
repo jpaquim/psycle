@@ -34,10 +34,12 @@ public:
 
     ~NFlipBox();
 
-    void setFlipPane(NPanel * pane);
+    NPanel* pane();
+    NPanel* header();
+
+    int flipperWidth() const;
 
     virtual int preferredHeight() const;
-    virtual int preferredWidth() const;
 
 private:
 

@@ -83,7 +83,26 @@ NTestWindow::NTestWindow()
   pane()->add(box);*/
 
   NCustomTreeView* view = new NCustomTreeView();
-    NLabel* lb = new NLabel("Test");
+
+  NTreeNode* node1 = new NTreeNode();
+  view->addNode(node1);
+
+  node1->header()->add(new NLabel("Header1"), nAlClient);
+
+  for (int i = 0; i < 10; i++) {
+     node1->addEntry(new NLabel("entry"+stringify(i)));
+  }
+
+  NTreeNode* node2 = new NTreeNode();
+  view->addNode(node2);
+
+  node2->header()->add(new NLabel("Header2"), nAlClient);
+
+  for (int i = 0; i < 10; i++) {
+     node2->addEntry(new NLabel("entryB"+stringify(i)));
+  }
+
+  /*  NLabel* lb = new NLabel("Test");
     view->rootNode()->pane()->add(lb,nAlTop);
 
       /*for (int i = 0; i < 10; i++) {
@@ -94,6 +113,8 @@ NTestWindow::NTestWindow()
   pane()->add(view);
 
   view->setPosition(10,50,200,200);
+
+ 
 
   /*NLabel* lb = new NLabel("Hallo");
     lb->setPosition(10,120,100,120);

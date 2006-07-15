@@ -25,6 +25,10 @@
 /**
 @author Stefan Nattkemper
 */
+
+class NImage;
+class NBitmap;
+
 class NFlipBar : public NPanel
 {
 
@@ -37,17 +41,21 @@ class NFlipBar : public NPanel
 
        ~NFlipper();
 
-       virtual void paint(NGraphics* g);
        virtual void onMousePress(int x, int y, int button);
+
+       virtual int preferredWidth() const;
+       virtual int preferredHeight() const;
 
     private:
 
        bool expanded_;
 
-       NFlipBar* flipBar_;
+       NImage* expandImg_;
 
-       void drawMinus(NGraphics* g);
-       void drawPlus(NGraphics* g);
+       NBitmap expandBmp;
+       NBitmap expandedBmp;
+
+       NFlipBar* flipBar_;
 
 
   };
@@ -57,17 +65,18 @@ public:
 
     ~NFlipBar();
 
-    virtual void resize();
-
     bool expanded() const;
 
     signal1<NFlipBar*> change;
 
-    virtual int preferredWidth() const;
+    NPanel* header();
+
+    int flipperWidth() const;
 
 private:
 
     NFlipper* flipper_;
+    NPanel* header_;
 
     void onFlipClick();
 

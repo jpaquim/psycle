@@ -20,16 +20,20 @@
 #include "nflipbox.h"
 #include "nflipbar.h"
 #include "nalignlayout.h"
+#include "nlabel.h"
 
 NFlipBox::NFlipBox()
  : NPanel()
 {
   setLayout(NAlignLayout());
 
-  pane_ = 0;
+  flipBar_ = new NFlipBar();
+    flipBar_->change.connect(this,&NFlipBox::onFlipChange);
+  add (flipBar_  , nAlTop);
 
-  add (flipBar_ = new NFlipBar() , nAlLeft);
-  flipBar_->change.connect(this,&NFlipBox::onFlipChange);
+  pane_ = new NPanel();
+    pane_->setLayout(NAlignLayout());
+  add( pane_ , nAlClient);
 
 }
 
@@ -41,15 +45,15 @@ NFlipBox::~NFlipBox()
 int NFlipBox::preferredHeight( ) const
 {
    if (flipBar_->expanded())
-      return (pane_) ? pane_->preferredHeight() : minimumHeight();
+      return flipBar_->preferredHeight() + pane_->preferredHeight();
    else
-      return (pane_) ? pane_->minimumHeight() : minimumHeight();
+      return flipBar_->preferredHeight();
 }
 
-int NFlipBox::preferredWidth( ) const
-{
-  return flipBar_->preferredWidth() + (!pane_ ? 0 : pane_->preferredWidth());
-}
+//int NFlipBox::preferredWidth( ) const
+//{
+//  return flipBar_->preferredWidth() + (!pane_ ? 0 : pane_->preferredWidth());
+//}
 
 void NFlipBox::onFlipChange( NFlipBar * sender )
 {
@@ -58,10 +62,19 @@ void NFlipBox::onFlipChange( NFlipBar * sender )
   ((NVisualComponent*)parent())->repaint();
 }
 
-void NFlipBox::setFlipPane( NPanel * pane )
+NPanel* NFlipBox::pane()
 {
-  pane_ = pane;
-  add (pane , nAlTop);
+  return pane_;
+}
+
+NPanel * NFlipBox::header( )
+{
+  return flipBar_->header();
+}
+
+int NFlipBox::flipperWidth( ) const
+{
+  return flipBar_->flipperWidth();
 }
 
 
