@@ -27,6 +27,8 @@
 */
 
 class NTreeNode;
+class NScrollBox;
+
 
 class NCustomTreeView : public NPanel
 {
@@ -35,11 +37,13 @@ public:
 
     ~NCustomTreeView();
 
-    NTreeNode* rootNode();
+    void addNode( NTreeNode* node);
+
 
 private:
 
-    NTreeNode* rootNode_;
+    NScrollBox* scrollBox_;
+    NPanel* scrollArea_;
 
 };
 

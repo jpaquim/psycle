@@ -19,15 +19,53 @@
  ***************************************************************************/
 #include "nflipbar.h"
 #include "nalignlayout.h"
+#include "nimage.h"
+#include "nbitmap.h"
 
 // flipper
 
-NFlipBar::NFlipper::NFlipper( NFlipBar * flipBar ) : expanded_(true), flipBar_(flipBar)
+/* XPM */
+const char * expanded_xpm[] = {
+"12 6 2 1",
+" 	c None",
+".	c black",
+"            ",
+"  .......   ",
+"   .....    ",
+"    ...     ",
+"     .      ",
+"            "};
+
+/* XPM */
+const char * expand_xpm[] = {
+"12 12 2 1",
+" 	c None",
+".	c black",
+"            ",
+"            ",
+"    .       ",
+"    ..      ",
+"    ...     ",
+"    ....    ",
+"    ...     ",
+"    ..      ",
+"    .       ",
+"            ",
+"            ",
+"            "};
+
+
+
+NFlipBar::NFlipper::NFlipper( NFlipBar * flipBar ) : expanded_(false), flipBar_(flipBar)
 {
-  setWidth(10);
-  setHeight(10);
-  setBackground(NColor(255,255,255));
-  setTransparent(false);
+  expandBmp.createFromXpmData(expand_xpm);
+  expandedBmp.createFromXpmData(expanded_xpm);
+
+  expandImg_ = new NImage();
+    expandImg_->setVAlign(nAlCenter);
+    expandImg_->setHAlign(nAlCenter);
+    expandImg_->setSharedBitmap(&expandBmp);
+  add(expandImg_);
 }
 
 NFlipBar::NFlipper::~ NFlipper( )
@@ -37,32 +75,26 @@ NFlipBar::NFlipper::~ NFlipper( )
 void NFlipBar::NFlipper::onMousePress( int x, int y, int button )
 {
   expanded_ = !expanded_;
+
+  if (expanded_)
+     expandImg_->setSharedBitmap(&expandedBmp);
+  else
+     expandImg_->setSharedBitmap(&expandBmp);
+
   flipBar_->onFlipClick();
 }
 
-void NFlipBar::NFlipper::paint( NGraphics * g )
+
+int NFlipBar::NFlipper::preferredWidth( ) const
 {
-  g->setForeground(NColor(0,0,0));
-  if (expanded_) 
-    drawPlus(g);
-  else
-    drawMinus(g);
+  return expandImg_->preferredWidth();
 }
 
-void NFlipBar::NFlipper::drawMinus( NGraphics * g )
+int NFlipBar::NFlipper::preferredHeight( ) const
 {
-  int h2 = spacingHeight()/2;
-  g->drawLine(2,h2,spacingWidth()-3,h2);
+  return expandImg_->preferredHeight();
 }
 
-void NFlipBar::NFlipper::drawPlus( NGraphics * g )
-{
-  int w2 = (spacingWidth())/2 ;
-  int h2 = (spacingHeight())/2;
-
-  g->drawLine(w2,2,w2,spacingHeight()-3); 
-  g->drawLine(2,h2,spacingWidth()-3,h2);
-}
 
 // flipbar
 
@@ -70,9 +102,14 @@ void NFlipBar::NFlipper::drawPlus( NGraphics * g )
 NFlipBar::NFlipBar()
  : NPanel()
 {
-  add( flipper_ = new NFlipper(this) );
-  setBackground(NColor(100,100,100));
-  setTransparent(false);
+  setLayout( NAlignLayout() );
+
+  flipper_ = new NFlipper(this);
+  add(  flipper_, nAlLeft);
+
+  header_ = new NPanel();
+    header_->setLayout( NAlignLayout() );
+  add( header_ , nAlClient);
 }
 
 
@@ -86,9 +123,9 @@ void NFlipBar::onFlipClick( )
   repaint();
 }
 
-void NFlipBar::resize( )
+NPanel* NFlipBar::header()
 {
-  flipper_->setPosition(0,(clientHeight()-flipper_->height())/2,flipper_->width(), flipper_->height());
+  return header_;
 }
 
 bool NFlipBar::expanded( ) const
@@ -96,10 +133,15 @@ bool NFlipBar::expanded( ) const
    return flipper_->expanded_;
 }
 
-int NFlipBar::preferredWidth( ) const
+int NFlipBar::flipperWidth( ) const
 {
-  return 20;
+  return flipper_->preferredWidth();
 }
+
+
+
+
+
 
 
 

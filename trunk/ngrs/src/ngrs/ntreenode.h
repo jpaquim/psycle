@@ -28,37 +28,20 @@
 class NTreeNode : public NFlipBox
 {
 
-  class NodePanel : public NPanel {
-  public:
-
-    friend class NTreeNode;
-
-    NodePanel(NTreeNode* node);
-
-    ~NodePanel();
-
-    virtual int minimumWidth() const;
-    virtual int minimumHeight() const;
-
-  private:
-
-    NTreeNode* node_;
-    NPanel*  pane_;
-    NPanel*  childNodePane_;
-
-  };
 
 public:
     NTreeNode();
 
     ~NTreeNode();
 
-    NPanel* pane();
-    NPanel* childNodePane();
+    virtual void addEntry(NVisualComponent* entry);
+    virtual void addNode(NTreeNode* node);
+
 
 private:
 
-    NodePanel* panel_;
+    NPanel* entries_;
+    NPanel* subNodes;
 
 };
 

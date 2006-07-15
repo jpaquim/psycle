@@ -20,65 +20,38 @@
 #include "ntreenode.h"
 #include "nalignlayout.h"
 #include "nframeborder.h"
-
-
-NTreeNode::NodePanel::NodePanel( NTreeNode * node ) : node_(node)
-{
-  setLayout(NAlignLayout());
-
-  pane_ = new NPanel();
-     pane_->setLayout(NAlignLayout());
-  add( pane_, nAlTop);
-
-  childNodePane_ = new NPanel();
-    childNodePane_->setLayout(NAlignLayout());
-  add( childNodePane_, nAlTop);
-}
-
-NTreeNode::NodePanel::~ NodePanel( )
-{
-}
-
-
-int NTreeNode::NodePanel::minimumWidth( ) const
-{
-  return node_->pane()->preferredWidth();
-}
-
-int NTreeNode::NodePanel::minimumHeight( ) const
-{
-  return node_->pane()->preferredHeight();
-}
+#include "nlabel.h"
 
 
 
 NTreeNode::NTreeNode()
  : NFlipBox()
 {
-  setLayout(NAlignLayout());
-  setBorder(NFrameBorder());
+  entries_ = new NPanel();
+     entries_->setLayout( NAlignLayout() );
+     entries_->setSpacing(flipperWidth(),0,0,0);
+  pane()->add(entries_, nAlTop);
 
-  panel_ = new NodePanel(this);
-
-  setFlipPane(panel_);
-
+  subNodes = new NPanel();
+    subNodes->setLayout( NAlignLayout() );
+  pane()->add(subNodes, nAlTop);
 
 }
-
 
 NTreeNode::~NTreeNode()
 {
 }
 
-NPanel * NTreeNode::pane( )
+void NTreeNode::addNode( NTreeNode * node )
 {
-  return panel_->pane_;
+  subNodes->add(node, nAlTop);
 }
 
-NPanel * NTreeNode::childNodePane( )
+void NTreeNode::addEntry( NVisualComponent * entry )
 {
-  return panel_->childNodePane_;
+  entries_->add(entry, nAlTop);
 }
+
 
 
 
