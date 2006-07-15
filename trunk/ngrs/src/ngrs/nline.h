@@ -34,10 +34,10 @@ public:
     ~NLine();
 
     virtual void paint(NGraphics* g);
-    void setPoints(NPoint p1, NPoint p2);
+    void setPoints( const NPoint & p1, const NPoint & p2);
 
-    const NPoint & p1();
-    const NPoint & p2();
+    const NPoint & p1() const;
+    const NPoint & p2() const;
 
 private:
 

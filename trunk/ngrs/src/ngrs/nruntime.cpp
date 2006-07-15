@@ -130,7 +130,7 @@ NRuntime * NRuntime::parent( ) const
   return parent_;
 }
 
-int NRuntime::d2i(double d)
+int NRuntime::d2i(double d) const
  {
    return (int) ( d<0?d-.5:d+.5);
  }

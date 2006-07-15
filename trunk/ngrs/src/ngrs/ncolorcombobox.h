@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,68 +17,42 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NRUNTIME_H
-#define NRUNTIME_H
+#ifndef NCOLORCOMBOBOX_H
+#define NCOLORCOMBOBOX_H
 
-#include "nobject.h"
-#include <vector>
-#include <iostream>
-#include <sstream>
-
-class NVisitor;
-
-
-template<class T> inline T str(const std::string &  value) {
-   T result;
-
-   std::stringstream str;
-   str << value;
-   str >> result;
-
-   return result;
-}
-
+#include <npanel.h>
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
-class NObject;
 
-class NRuntime : public NObject
+class NColorChooser;
+class NButton;
+class NImage;
+class NPopupWindow;
+
+class NColorComboBox : public NPanel
 {
 public:
-    NRuntime();
+    NColorComboBox();
 
-   virtual ~NRuntime();
+    ~NColorComboBox();
 
-   std::vector<NRuntime*> components;
-
-   void add(NRuntime* component);
-   void insert(NRuntime* component, int index);
-   virtual void removeChild(NRuntime* child);
-   virtual void removeChilds();
-   virtual void erase(NRuntime* child);
-
-   void setParent(NRuntime* parent);
-   NRuntime* parent();
-   NRuntime* parent() const;
-
-   virtual bool visit(NVisitor* v);
-   virtual void onMessage( NEvent * event );
-
-   static std::string stringify(double x);
-   static std::string stringify(int x);
-   static std::string trim(std::string str);
-
-   int componentSize();
-
-   int d2i(double d) const;
-
-   bool isChildOf(NRuntime* comp) const;
+    signal1<const NColor &> colorSelected;
 
 private:
 
-   NRuntime* parent_;
+   NBitmap down;
+
+   NPanel* colorPanel_;
+   NButton* downBtn_;
+
+   NColorChooser* colorChooser;
+   NPopupWindow*  popup;
+
+   void init();
+   void onDownBtnClicked(NButtonEvent * ev);
+   void onColorSelected(const NColor & color);
 
 };
 
