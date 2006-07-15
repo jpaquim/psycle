@@ -22,6 +22,10 @@
 #include "nalignlayout.h"
 #include "nautoscrolllayout.h"
 #include "nscrollbox.h"
+#include "ncustomitem.h"
+#include "napp.h"
+#include "nconfig.h"
+
 
 NCustomTreeView::NCustomTreeView()
  : NPanel()
@@ -32,8 +36,16 @@ NCustomTreeView::NCustomTreeView()
     scrollArea_ = new NPanel();
       scrollArea_->setLayout( NAlignLayout() );
       scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
+      scrollArea_->setBackground(NColor(255,255,255));
+      scrollArea_->setTransparent(false);
     scrollBox_->setScrollPane(scrollArea_);
   add(scrollBox_, nAlClient);
+
+  selectedItem_ = 0;
+  selectedTreeNode_ = 0;
+
+  itemBg = NApp::config()->skin("lbitemsel");
+  itemFg = NApp::config()->skin("lbitemnone");
 
 }
 
@@ -46,6 +58,36 @@ NCustomTreeView::~NCustomTreeView()
 void NCustomTreeView::addNode( NTreeNode * node )
 {
   scrollArea_->add( node, nAlTop );
+  node->itemSelected.connect(this,&NCustomTreeView::onSelectedItem);
+}
+
+void NCustomTreeView::onSelectedItem(NTreeNode* node, NCustomItem * sender )
+{
+  selectedTreeNode_ = node;
+
+  NItemEvent ev(sender,sender->text());
+  itemSelected.emit(&ev);
+
+  sender->setSkin(itemBg);
+  sender->repaint();
+
+
+  if (selectedItem_) {
+    selectedItem_->setSkin(itemFg);
+    selectedItem_->repaint();
+  }
+
+  selectedItem_ = sender;
+}
+
+NTreeNode * NCustomTreeView::selectedTreeNode( )
+{
+  return selectedTreeNode_;
+}
+
+NCustomItem * NCustomTreeView::selectedItem( )
+{
+  return selectedItem_;
 }
 
 

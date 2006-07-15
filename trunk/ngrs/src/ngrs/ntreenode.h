@@ -25,6 +25,9 @@
 /**
 @author Stefan Nattkemper
 */
+
+class NCustomItem;
+
 class NTreeNode : public NFlipBox
 {
 
@@ -34,7 +37,10 @@ public:
 
     ~NTreeNode();
 
-    virtual void addEntry(NVisualComponent* entry);
+    signal2<NTreeNode*, NCustomItem*> itemSelected;
+
+    virtual void setHeader(NCustomItem* entry);
+    virtual void addEntry(NCustomItem* entry);
     virtual void addNode(NTreeNode* node);
 
 
@@ -42,6 +48,8 @@ private:
 
     NPanel* entries_;
     NPanel* subNodes;
+
+    void onItemPress(NButtonEvent * ev);
 
 };
 
