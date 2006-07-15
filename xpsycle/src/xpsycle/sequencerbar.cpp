@@ -157,10 +157,10 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
 
 void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 {
-/*  NCustomItem* item = patternBox_->itemAt(patternBox_->selIndex());
+  NCustomItem* item = patternBox_->selectedItem();
   std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
   if(itr!=itemMap.end())
-     selected.emit(itr->second);*/
+     selected.emit(itr->second);
 }
 
 void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
