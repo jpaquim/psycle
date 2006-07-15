@@ -65,9 +65,6 @@ void NCustomTreeView::onSelectedItem(NTreeNode* node, NCustomItem * sender )
 {
   selectedTreeNode_ = node;
 
-  NItemEvent ev(sender,sender->text());
-  itemSelected.emit(&ev);
-
   sender->setSkin(itemBg);
   sender->repaint();
 
@@ -78,6 +75,9 @@ void NCustomTreeView::onSelectedItem(NTreeNode* node, NCustomItem * sender )
   }
 
   selectedItem_ = sender;
+
+  NItemEvent ev(sender,sender->text());
+  itemSelected.emit(&ev);
 }
 
 NTreeNode * NCustomTreeView::selectedTreeNode( )
