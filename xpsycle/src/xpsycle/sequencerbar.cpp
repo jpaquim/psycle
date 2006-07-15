@@ -37,6 +37,50 @@
 
 namespace psycle { namespace host {
 
+
+SequencerBar::CategoryItem::CategoryItem( const std::string & text )
+{
+  init();
+  label_->setText(text);
+}
+
+SequencerBar::CategoryItem::CategoryItem( )
+{
+  init();
+}
+
+
+void SequencerBar::CategoryItem::init( )
+{
+  setLayout( NAlignLayout(5,0) );
+  label_ = new NLabel();
+  add(label_, nAlLeft);
+  colorBox_ = new NColorComboBox();
+    colorBox_->setPreferredSize(50,15);
+  add(colorBox_, nAlClient);
+}
+
+
+SequencerBar::CategoryItem::~ CategoryItem( )
+{
+}
+
+void SequencerBar::CategoryItem::setText( const std::string & text )
+{
+  label_->setText(text);
+}
+
+std::string SequencerBar::CategoryItem::text( )
+{
+  return label_->text();
+}
+
+
+
+
+
+
+
 SequencerBar::SequencerBar()
   : NPanel()
 {
@@ -129,7 +173,8 @@ void SequencerBar::onRecordTweakChange( NButtonEvent * ev )
 void SequencerBar::onNewCategory( NButtonEvent * ev )
 {
   NTreeNode* node = new NTreeNode();
-  node->setHeader(new NItem("Category"));
+
+  node->setHeader(new CategoryItem("Category"));
 
   patternBox_->addNode(node);
   patternBox_->resize();
@@ -172,6 +217,8 @@ void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
       added.emit(itr->second);
   }
 }
+
+
 
 
 

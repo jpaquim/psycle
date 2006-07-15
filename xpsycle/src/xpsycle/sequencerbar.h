@@ -32,6 +32,7 @@
 #include <ngrs/nimage.h>
 #include <ngrs/ngroupbox.h>
 #include <ngrs/nitem.h>
+#include <ngrs/ncolorcombobox.h>
 
 
 class N7SegDisplay;
@@ -46,6 +47,25 @@ class PatternView;
 
 class SequencerBar : public NPanel
 {
+
+  class CategoryItem : public NCustomItem {
+  public :
+     CategoryItem(const std::string & text);
+     CategoryItem();
+     ~CategoryItem();
+
+     void setText(const std::string & text);
+
+     virtual std::string text();
+
+  private:
+
+     NLabel* label_;
+     NColorComboBox* colorBox_;
+
+     void init();
+
+  };
 
 
 public:
