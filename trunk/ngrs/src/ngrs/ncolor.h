@@ -32,6 +32,7 @@ class NColor{
 public:
     NColor();
     NColor(int red, int green, int blue);
+    NColor(long hcolorref );
     NColor(const std:: string & rgbStr);
 
     ~NColor();
