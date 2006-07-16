@@ -65,6 +65,19 @@ private:
 
 };
 
+class PatternItem : public NItem {
+public:
+
+   PatternItem(SinglePattern* pattern, const std::string & text);
+   ~PatternItem();
+
+   virtual void setText(const std::string & text);
+
+private:
+
+   SinglePattern* pattern_;
+
+};
 
 class SequencerBar : public NPanel
 {

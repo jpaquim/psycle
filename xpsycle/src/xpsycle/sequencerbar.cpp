@@ -80,6 +80,21 @@ void CategoryItem::paint( NGraphics * g )
 
 
 
+PatternItem::PatternItem( SinglePattern* pattern,  const std::string & text )
+: NItem(text)
+{
+  pattern_ = pattern;
+}
+
+PatternItem::~ PatternItem( )
+{
+}
+
+void PatternItem::setText( const std::string & text )
+{
+  pattern_->setName(text);
+  NItem::setText(text);
+}
 
 
 
@@ -97,6 +112,8 @@ SequencerBar::~SequencerBar()
 
 void SequencerBar::init( )
 {
+  DefaultBitmaps & icons = Global::pConfig()->icons();
+
   counter = 0;
   patternData_ = 0;
 
@@ -115,7 +132,12 @@ void SequencerBar::init( )
     patternPanel->add(new NLabel("Patterns"), nAlTop);
 
     NToolBar* patToolBar = new NToolBar();
-      patToolBar->add( new NButton("New Category"))->clicked.connect(this,&SequencerBar::onNewCategory);
+      NImage* img = new NImage();
+      img->setSharedBitmap(&icons.new_category());
+      img->setPreferredSize(25,25);
+      NButton* newCatBtn = new NButton(img);
+        newCatBtn->setHint("New Category");
+      patToolBar->add( newCatBtn )->clicked.connect(this,&SequencerBar::onNewCategory);
       patToolBar->add( new NButton("New Pattern"))->clicked.connect(this,&SequencerBar::onNewPattern);
       patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
     patternPanel->add(patToolBar, nAlTop);
@@ -195,7 +217,7 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
   if (patternBox_->selectedTreeNode() ) {
      NTreeNode* node = patternBox_->selectedTreeNode();
      SinglePattern* pattern = patternData_->createNewPattern("Pattern" + stringify(counter) );
-     NItem* item = new NItem( pattern->name() );
+     PatternItem* item = new PatternItem( pattern, pattern->name() );
      node->addEntry(item);
      patternMap[item] = pattern;
      patternBox_->resize();
@@ -234,6 +256,10 @@ void psycle::host::SequencerBar::onNameChanged( const std::string & name )
     item->setText(name);
   patternBox_->repaint();
 }
+
+
+
+
 
 
 
