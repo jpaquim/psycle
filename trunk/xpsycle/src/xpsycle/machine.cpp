@@ -821,10 +821,10 @@ WorkEvent::WorkEvent( )
 }
 
 WorkEvent::WorkEvent( double beatOffset, int track, const PatternEvent & patternEvent )
+: offset_(beatOffset)
+, track_(track)
+, event_(patternEvent)
 {
-	offset_ = beatOffset;
-	track_ = track;
-	event_ = patternEvent;
 }
 
 const PatternEvent &  psycle::host::WorkEvent::event( ) const

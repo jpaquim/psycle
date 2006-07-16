@@ -27,7 +27,7 @@ namespace psycle
 
 		SinglePattern::SinglePattern()
 		{
-			beats_ = 4;
+			beats_ = 16;
 			beatZoom_ = 4;
 			category_ = 0;
 		}

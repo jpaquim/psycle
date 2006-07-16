@@ -4,41 +4,61 @@
 namespace psycle { namespace host {
 
 class PatternEntry
-		{
-			public:
-				inline PatternEntry()
-				:
-					_note(255),
-					_inst(255),
-					/*#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-						#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-					#else
-						#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-							_volume(255),
-						#endif
-					#endif*/
-					_mach(255),
-					_cmd(0),
-					_parameter(0)
-				{
-				}
-				std::uint8_t _note;
-				std::uint8_t _inst;
-/*				#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-				#else
-					#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-						std::uint8_t _volume;
-						std::uint8_t _cmd;
-						std::uint8_t _parameter;
-						std::uint8_t _mach;
-					#else*/
-						std::uint8_t _mach;
-						std::uint8_t _cmd;
-						std::uint8_t _parameter;
-					//#endif
-				//#endif
+{
+public:
+	inline PatternEntry()
+		:
+		_note(255),
+		_inst(255),
+		/*#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+			#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+		#else
+			#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+				_volume(255),
+			#endif
+		#endif*/
+		_mach(255),
+		_cmd(0),
+		_parameter(0)
+	{
+	}
+	std::uint8_t _note;
+	std::uint8_t _inst;
+/*	#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+		#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+	#else
+		#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+			std::uint8_t _volume;
+			std::uint8_t _cmd;
+			std::uint8_t _parameter;
+			std::uint8_t _mach;
+		#else*/
+			std::uint8_t _mach;
+			std::uint8_t _cmd;
+			std::uint8_t _parameter;
+		//#endif
+	//#endif
 };
+
+class GlobalEvent
+{
+public:
+	GlobalEvent(int parameter_) : parameter(parameter_) {}
+	virtual ~GlobalEvent() {}
+	
+	enum Types {
+		BPM_CHANGE,
+		SET_VOLUME,
+		SET_PANNING,
+		JUMP_TO,
+		SET_BYPASS,
+		SET_MUTE,
+		PATTERN_LOOP
+	} type;
+
+	float parameter;
+};
+
 
 namespace PatternCmd {
 			enum 

@@ -303,6 +303,19 @@ namespace psycle
 			}
 
 		}
+		void Player::ProcessGlobalEvent(GlobalEvent *event)
+		{
+			switch (event->type)
+			{
+			case GlobalEvent::BPM_CHANGE:
+				this->SetBPM(event->parameter);
+std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event->parameter<<std::endl;
+				break;
+			default:
+				break;
+			}
+
+		}
 
 		/// Final Loop. Read new line for notes to send to the Machines
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
@@ -431,9 +444,7 @@ namespace psycle
 		float * Player::Work(int & numSamples)
 		{
 			double beatLength = numSamples/(double) SamplesPerBeat();
-			int amount;
 			Master::_pMasterSamples = _pBuffer;
-			int numSamplex = numSamples;
 //			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
 //				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 //			#else
@@ -443,28 +454,79 @@ namespace psycle
 //					CSingleLock crit(&song().door, true);
 //				#endif
 //			#endif
+//			if(numSamplex > MAX_BUFFER_LENGTH) amount = MAX_BUFFER_LENGTH; else amount = numSamplex;
+			// Tick handler function
+			if (_playing)
+			{
+				std::multimap<double, PatternLine> events;
+				std::vector<GlobalEvent*> globals;
+
+				//processing of each buffer is subdivided into chunks, determined by the placement of any global events.
+				double chunkBeatEnd;	//end beat position of the current chunk-- i.e., the next global event's position.
+				double chunkBeatSize;	//number of beats in the chunk.
+				int chunkSampleSize;	//number of samples needed to process for this chunk.
+				int processedSamples(0);//this is used to counter rounding errors of sample/beat conversions
+				bool bFirst(true);	//whether this is the first time through the loop.  this is passed to GetNextGlobalEvents()
+						//to specify that we're including events at exactly playPos -only- on the first iteration--
+						//otherwise we'll get the first event over and over again.
+				do {
+					//get the next round of global events.  we need to repopulate the list of globals and patternlines
+					//each time through the loop because global events can potentially move the song's beatposition elsewhere.
+					globals.clear();
+					chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(playPos, beatLength, globals, bFirst);
+
+					//determine chunk length in beats and samples.
+					chunkBeatSize = chunkBeatEnd-playPos;	
+					if(globals.empty())
+						chunkSampleSize = numSamples - processedSamples;
+					else
+						chunkSampleSize = chunkBeatSize * SamplesPerBeat();
+
+					//get all patternlines occuring before the next global event, execute them, and process
+					events.clear();
+					song().patternSequence()->GetLinesInRange(playPos, chunkBeatSize, events);
+					for( std::multimap<double, PatternLine>::iterator lineIt=events.begin()
+					   ; lineIt!= events.end()
+					   ; ++lineIt)
+						ExecuteNotes(lineIt->first - playPos, lineIt->second);
+
+					if(chunkSampleSize>0)
+					{
+						Process(chunkSampleSize);
+						processedSamples+=chunkSampleSize;
+					}
+					
+					//increase playPos prior to executing globals, in case one of the globals needs it or wants to change it.
+					playPos=chunkBeatEnd;
+					beatLength-=chunkBeatSize;
+
+					//execute this batch of global events
+					for( std::vector<GlobalEvent*>::iterator globIt = globals.begin()
+					   ; globIt!=globals.end()
+					   ; ++globIt)
+					{
+						ProcessGlobalEvent(*globIt);
+						delete *globIt;
+					}
+
+					bFirst=false;
+				} while(!globals.empty());  //if globals is empty, then we've processed through to the end of the buffer.
+			}
+			else
+			{
+//					NotifyNewLine();
+				Process(numSamples);
+			}
+			return _pBuffer;
+		}
+
+		void Player::Process(int & numSamples)
+		{
+			int amount(numSamples);
+			int numSamplex = numSamples;
+
 			do
 			{
-				if(numSamplex > MAX_BUFFER_LENGTH) amount = MAX_BUFFER_LENGTH; else amount = numSamplex;
-				// Tick handler function
-				if (_playing)
-				{
-					std::multimap<double, PatternLine> events;
-					song().patternSequence()->GetLinesInRange(playPos, beatLength, events);
-//					std::cout<<"playPos: "<<playPos<<", beatLength: "<<beatLength<<", events.size(): "<<events.size()<<std::endl;
-
-					if(!events.empty())
-					{
-						std::multimap<double, PatternLine>::iterator it = events.begin();
-						for( ; it != events.end(); ++it)
-							ExecuteNotes(it->first-playPos, it->second);
-					}
-						playPos+=beatLength;
-				}
-				else
-				{
-//						NotifyNewLine();
-				}
 				// Processing plant
 				if(amount > 0)
 				{
@@ -472,23 +534,23 @@ namespace psycle
 					if( (int)song()._sampCount > Global::configuration()._pOutputDriver->_samplesPerSec)
 					{
 						song()._sampCount =0;
-						for(int c=0; c<MAX_MACHINES; c++)
-						{
-							if(song()._pMachine[c])
-							{
+//						for(int c=0; c<MAX_MACHINES; c++)
+//						{
+//							if(song()._pMachine[c])
+//							{
 //								song()._pMachine[c]->wire_cpu_cost(0);
 //								song()._pMachine[c]->work_cpu_cost(0);
-							}
-						}
+//							}
+//						}
 					}
 					// Reset all machine buffers
 					for(int c=0; c<MAX_MACHINES; c++)
 					{
 						if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);
 					}
-
+	
 					song().DoPreviews( amount );
-
+	
 					// Inject Midi input data
 //					if(!CMidiInput::Instance()->InjectMIDI( amount ))
 					{
@@ -545,7 +607,6 @@ namespace psycle
 				}
 				_samplesRemaining -= amount;
 			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
-			return _pBuffer;
 		}
 
 		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape)

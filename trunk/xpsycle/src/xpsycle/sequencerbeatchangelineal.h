@@ -20,7 +20,7 @@
 #ifndef SEQUENCERBEATCHANGELINEAL_H
 #define SEQUENCERBEATCHANGELINEAL_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 
 

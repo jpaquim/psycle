@@ -57,21 +57,21 @@ void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
   int cw = clientWidth();
   int ch = clientHeight();
 
-  std::string timeScaleText = "t = bpm";
-  int rightIdent = 2;
-  int scaleTextWidth = g->textWidth(timeScaleText) + rightIdent;
-  g->drawText(cw - scaleTextWidth, g->textAscent(), timeScaleText);
+  //std::string timeScaleText = "t = bpm";
+  //int rightIdent = 2;
+  //int scaleTextWidth = g->textWidth(timeScaleText) + rightIdent;
+  //g->drawText(cw - scaleTextWidth, g->textAscent(), timeScaleText);
 
   g->setForeground(NColor(220,220,220));
 
   g->drawLine(0, ch - 10, cw, ch - 10);
 
   for (int i = 0; i < cw / sView->beatPxLength() ; i++) {
-     if (! (i % 4)) {
+     if (! (i % 16)) {
         g->setForeground(NColor(180,180,180));
         g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
-        if (i * sView->beatPxLength() < cw - scaleTextWidth) {
-          std::string beatLabel = stringify(i);
+        if (i * sView->beatPxLength() < cw/* - scaleTextWidth*/) {
+          std::string beatLabel = stringify(i/4);
           int textWidth = g->textWidth(beatLabel);
           g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
         }
@@ -261,7 +261,7 @@ SequencerGUI::SequencerGUI()
   setLayout( NAlignLayout() );
 
   counter = 0;
-  beatPxLength_ = 20; // default value for one beat
+  beatPxLength_ = 5; // default value for one beat
 
   toolBar_ = new NToolBar();
     toolBar_->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewTrack);
