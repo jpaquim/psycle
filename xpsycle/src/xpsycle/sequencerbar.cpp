@@ -38,43 +38,45 @@
 namespace psycle { namespace host {
 
 
-SequencerBar::CategoryItem::CategoryItem( const std::string & text )
+CategoryItem::CategoryItem( const std::string & text )
 {
   init();
   label_->setText(text);
 }
 
-SequencerBar::CategoryItem::CategoryItem( )
+CategoryItem::CategoryItem( )
 {
   init();
 }
 
 
-void SequencerBar::CategoryItem::init( )
+void CategoryItem::init( )
 {
   setLayout( NAlignLayout(5,0) );
   label_ = new NLabel();
   add(label_, nAlLeft);
-  colorBox_ = new NColorComboBox();
-    colorBox_->setPreferredSize(50,15);
-  add(colorBox_, nAlClient);
 }
 
 
-SequencerBar::CategoryItem::~ CategoryItem( )
+CategoryItem::~ CategoryItem( )
 {
 }
 
-void SequencerBar::CategoryItem::setText( const std::string & text )
+void CategoryItem::setText( const std::string & text )
 {
   label_->setText(text);
 }
 
-std::string SequencerBar::CategoryItem::text( )
+std::string CategoryItem::text( ) const
 {
   return label_->text();
 }
 
+void CategoryItem::paint( NGraphics * g )
+{
+  g->setForeground( NColor(255,0,0) );
+  g->drawRect(0,0,clientWidth()-1, clientHeight()-1);
+}
 
 
 
@@ -109,7 +111,7 @@ void SequencerBar::init( )
   setWidth(90);
 
   NPanel* patternPanel = new NPanel();
-    patternPanel->setLayout( NAlignLayout() );
+    patternPanel->setLayout( NAlignLayout(0,5) );
     patternPanel->add(new NLabel("Patterns"), nAlTop);
 
     NToolBar* patToolBar = new NToolBar();
@@ -118,14 +120,21 @@ void SequencerBar::init( )
       patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
     patternPanel->add(patToolBar, nAlTop);
 
+    propertyBox_ = new PatternBoxProperties();
+       propertyBox_->nameChanged.connect(this,&SequencerBar::onNameChanged);
+    patternPanel->add(propertyBox_, nAlBottom);
+
     patternBox_ = new NCustomTreeView();
       patternBox_->setPreferredSize(100,200);
       patternBox_->itemSelected.connect(this,&SequencerBar::onItemSelected);
 
     patternPanel->add(patternBox_, nAlClient);
+
   add(patternPanel, nAlTop);
 
+  ///\ todo remove this somewhere else and rename this class to patternBox
 
+/*
   NPanel* checkPanel = new NPanel();
     //checkPanel->skin_.setTranslucent(NColor(200,200,200),70);
     checkPanel->setLayout(NListLayout());
@@ -138,7 +147,7 @@ void SequencerBar::init( )
     checkPanel->add( movecursorpaste_       = new NCheckBox("Move Cursor\nWhen Paste"));
     movecursorpaste_->clicked.connect(this,&SequencerBar::onMoveCursorPaste);
   add(checkPanel,nAlTop);
-
+*/
 
 //  seqList()->itemSelected.connect(this,&SequencerBar::onSelChangeSeqList);
 
@@ -188,7 +197,7 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
      SinglePattern* pattern = patternData_->createNewPattern("Pattern" + stringify(counter) );
      NItem* item = new NItem( pattern->name() );
      node->addEntry(item);
-     itemMap[item] = pattern;
+     patternMap[item] = pattern;
      patternBox_->resize();
      patternBox_->repaint();
      counter++;
@@ -203,8 +212,9 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
 void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 {
   NCustomItem* item = patternBox_->selectedItem();
-  std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
-  if(itr!=itemMap.end())
+  if (item) propertyBox_->setName( item->text() );
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+  if(itr!=patternMap.end())
      selected.emit(itr->second);
 }
 
@@ -212,11 +222,20 @@ void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
 {
   NCustomItem* item = patternBox_->selectedItem();
   if (item) {
-    std::map<NCustomItem*, SinglePattern*>::iterator itr = itemMap.find(item);
-    if(itr!=itemMap.end())
+    std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+    if(itr!=patternMap.end())
       added.emit(itr->second);
   }
 }
+
+void psycle::host::SequencerBar::onNameChanged( const std::string & name )
+{
+  NCustomItem* item = patternBox_->selectedItem();
+    item->setText(name);
+  patternBox_->repaint();
+}
+
+
 
 
 

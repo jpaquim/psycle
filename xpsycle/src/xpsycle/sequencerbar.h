@@ -21,6 +21,7 @@
 #define SEQUENCERBAR_H
 
 #include "patterndata.h"
+#include "patternboxproperties.h"
 
 #include <map>
 #include <ngrs/npanel.h>
@@ -32,7 +33,6 @@
 #include <ngrs/nimage.h>
 #include <ngrs/ngroupbox.h>
 #include <ngrs/nitem.h>
-#include <ngrs/ncolorcombobox.h>
 
 
 class N7SegDisplay;
@@ -45,27 +45,30 @@ namespace psycle { namespace host {
 
 class PatternView;
 
+
+class CategoryItem : public NCustomItem {
+public :
+   CategoryItem(const std::string & text);
+   CategoryItem();
+   ~CategoryItem();
+
+   virtual void setText(const std::string & text);
+   virtual std::string text() const;
+
+   virtual void paint( NGraphics* g);
+
+private:
+
+   NLabel* label_;
+
+   void init();
+
+};
+
+
 class SequencerBar : public NPanel
 {
 
-  class CategoryItem : public NCustomItem {
-  public :
-     CategoryItem(const std::string & text);
-     CategoryItem();
-     ~CategoryItem();
-
-     void setText(const std::string & text);
-
-     virtual std::string text();
-
-  private:
-
-     NLabel* label_;
-     NColorComboBox* colorBox_;
-
-     void init();
-
-  };
 
 
 public:
@@ -86,6 +89,7 @@ public:
 
 private:
 
+
     PatternData* patternData_;
 
     void init();
@@ -93,6 +97,7 @@ private:
     int counter;
 
     NCustomTreeView* patternBox_;
+    PatternBoxProperties* propertyBox_;
 
 
     NCheckBox* follow_;
@@ -111,7 +116,10 @@ private:
     void onMoveCursorPaste(NButtonEvent* ev);
     void onRecordTweakChange(NButtonEvent* ev);
 
-    std::map<NCustomItem*, SinglePattern*> itemMap;
+    void onNameChanged(const std::string & name);
+
+    std::map<NCustomItem*, SinglePattern*> patternMap;
+    std::map<CategoryItem*, SinglePattern*> categoryMap;
 };
 
 }}
