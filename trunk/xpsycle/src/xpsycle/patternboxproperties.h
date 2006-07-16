@@ -25,6 +25,10 @@
 class NColorComboBox;
 class NEdit;
 
+namespace psycle { namespace host {
+
+class CategoryItem;
+
 /**
 @author Stefan Nattkemper
 */
@@ -39,14 +43,22 @@ public:
     const std::string & name() const;
 
     signal1<const std::string &> nameChanged;
+    signal1<const NColor &> colorChanged;
+
+    void setCategoryItem(CategoryItem* cat);
 
 private:
+
+    CategoryItem* cat_;
 
     NColorComboBox* clBox;
     NEdit* categoryEdt;
 
     void onKeyPress(const NKeyEvent &);
+    void onColorChange(const NColor & color);
 
 };
+
+}}
 
 #endif

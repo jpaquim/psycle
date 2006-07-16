@@ -107,6 +107,11 @@ void CategoryItem::paint( NGraphics * g )
   g->fillPolygon(pts,3);
 }
 
+PatternCategory * CategoryItem::category( )
+{
+  return category_;
+}
+
 
 
 PatternItem::PatternItem( SinglePattern* pattern,  const std::string & text )
@@ -236,6 +241,7 @@ void SequencerBar::onNewCategory( NButtonEvent * ev )
   CategoryTreeNode* node = new CategoryTreeNode(category);
   categoryMap[node]=category;
   CategoryItem* catItem = new CategoryItem(category,"Category");
+  catItems.push_back(catItem);
   node->setHeader(catItem);
 
   patternBox_->addNode(node);
@@ -270,6 +276,10 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
 void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 {
   NCustomItem* item = patternBox_->selectedItem();
+
+  std::vector<CategoryItem*>::iterator it = find(catItems.begin(),catItems.end(),item);
+  if ( it != catItems.end() )  propertyBox_->setCategoryItem(*it);
+
   if (item) propertyBox_->setName( item->text() );
   std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
   if(itr!=patternMap.end())
@@ -292,6 +302,9 @@ void psycle::host::SequencerBar::onNameChanged( const std::string & name )
     item->setText(name);
   patternBox_->repaint();
 }
+
+
+
 
 
 

@@ -71,6 +71,8 @@ public :
 
    virtual void paint( NGraphics* g);
 
+   PatternCategory* category();
+
 private:
 
    NLabel* label_;
@@ -148,6 +150,7 @@ private:
     void onNameChanged(const std::string & name);
 
     std::map<NTreeNode*, PatternCategory*> categoryMap;
+    std::vector<CategoryItem*> catItems;
 
     std::map<NCustomItem*, SinglePattern*> patternMap;
 

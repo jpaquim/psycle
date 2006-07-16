@@ -215,7 +215,7 @@ void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
   double endTick = sequenceLine()->tickLength();
 
   SequencerItem* item = new SequencerItem(sView);
-    item->setPosition(d2i(sView->beatPxLength() * endTick),10,pattern->beats() * sView->beatPxLength() ,30);
+    item->setPosition(d2i(sView->beatPxLength() * endTick),5,pattern->beats() * sView->beatPxLength() ,20);
     item->setSequenceEntry(sequenceLine()->createEntry(pattern, endTick));
     item->sequenceEntry()->beforeDelete.connect( this,&SequencerGUI::SequencerLine::onDeleteEntry);
     items.push_back(item);
@@ -324,9 +324,9 @@ void SequencerGUI::addSequencerLine( )
   line->setSequenceLine( patternSequence_->createNewLine() );
   line->click.connect(this, &SequencerGUI::onSequencerLineClick);
   if (!lastLine)
-     line->setPosition(0,0,1000,50);
+     line->setPosition(0,0,1000,30);
   else
-     line->setPosition(0,lastLine->top() + lastLine->height(),1000,50);
+     line->setPosition(0,lastLine->top() + lastLine->height(),1000,30);
   scrollArea_->add(line);
 
   lastLine = line;
