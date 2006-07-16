@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "singlepattern.h"
+#include "patterndata.h"
 
 namespace psycle
 {
@@ -28,6 +29,7 @@ namespace psycle
 		{
 			beats_ = 4;
 			beatZoom_ = 4;
+			category_ = 0;
 		}
 
 
@@ -66,5 +68,17 @@ namespace psycle
 			return name_;
 		}
 
+		void SinglePattern::setCategory( PatternCategory * category )
+		{
+			category_ = category;
+		}
+
+		PatternCategory * SinglePattern::category( )
+		{
+			return category_;
+		}
+
 	}
 }
+
+

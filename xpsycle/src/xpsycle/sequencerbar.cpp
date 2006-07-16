@@ -38,10 +38,27 @@
 namespace psycle { namespace host {
 
 
-CategoryItem::CategoryItem( const std::string & text )
+CategoryTreeNode::CategoryTreeNode( PatternCategory * cat )
+{
+  cat_ = cat;
+}
+
+CategoryTreeNode::~ CategoryTreeNode( )
+{
+}
+
+PatternCategory * CategoryTreeNode::category( )
+{
+  return cat_;
+}
+
+
+
+CategoryItem::CategoryItem( PatternCategory* category , const std::string & text )
 {
   init();
   label_->setText(text);
+  category_ = category;
 }
 
 CategoryItem::CategoryItem( )
@@ -74,8 +91,20 @@ std::string CategoryItem::text( ) const
 
 void CategoryItem::paint( NGraphics * g )
 {
-  g->setForeground( NColor(255,0,0) );
+  g->setForeground( NColor(category_->color()) );
   g->drawRect(0,0,clientWidth()-1, clientHeight()-1);
+
+  int cw = clientWidth();
+
+  XPoint pts[3];
+  pts[0].x = cw-6;
+  pts[0].y = 0;
+  pts[1].x = cw-1;
+  pts[1].y = 0;
+  pts[2].x = cw-1;
+  pts[2].y = 6;
+
+  g->fillPolygon(pts,3);
 }
 
 
@@ -117,8 +146,6 @@ void SequencerBar::init( )
   counter = 0;
   patternData_ = 0;
 
-  skin_ = NApp::config()->skin("seqbar");
-
   NFrameBorder frBorder;
     frBorder.setOval();
     frBorder.setLineCount(2,4,4);
@@ -147,7 +174,7 @@ void SequencerBar::init( )
     patternPanel->add(propertyBox_, nAlBottom);
 
     patternBox_ = new NCustomTreeView();
-      patternBox_->setPreferredSize(100,200);
+      patternBox_->setPreferredSize(100,300);
       patternBox_->itemSelected.connect(this,&SequencerBar::onItemSelected);
 
     patternPanel->add(patternBox_, nAlClient);
@@ -203,9 +230,13 @@ void SequencerBar::onRecordTweakChange( NButtonEvent * ev )
 
 void SequencerBar::onNewCategory( NButtonEvent * ev )
 {
-  NTreeNode* node = new NTreeNode();
+  PatternCategory* category = patternData_->createNewCategory("category");
+	category->setColor(0x0000FF);
 
-  node->setHeader(new CategoryItem("Category"));
+  CategoryTreeNode* node = new CategoryTreeNode(category);
+  categoryMap[node]=category;
+  CategoryItem* catItem = new CategoryItem(category,"Category");
+  node->setHeader(catItem);
 
   patternBox_->addNode(node);
   patternBox_->resize();
@@ -216,13 +247,18 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
 {
   if (patternBox_->selectedTreeNode() ) {
      NTreeNode* node = patternBox_->selectedTreeNode();
-     SinglePattern* pattern = patternData_->createNewPattern("Pattern" + stringify(counter) );
-     PatternItem* item = new PatternItem( pattern, pattern->name() );
-     node->addEntry(item);
-     patternMap[item] = pattern;
-     patternBox_->resize();
-     patternBox_->repaint();
-     counter++;
+
+     std::map<NTreeNode*, PatternCategory*>::iterator itr = categoryMap.find(node);
+     if(itr != categoryMap.end()) {
+        PatternCategory* cat = itr->second;
+        SinglePattern* pattern = cat->createNewPattern("Pattern" + stringify(counter) );
+        PatternItem* item = new PatternItem( pattern, pattern->name() );
+        node->addEntry(item);
+        patternMap[item] = pattern;
+        patternBox_->resize();
+        patternBox_->repaint();
+        counter++;
+     }
   }
 }
 
@@ -256,6 +292,8 @@ void psycle::host::SequencerBar::onNameChanged( const std::string & name )
     item->setText(name);
   patternBox_->repaint();
 }
+
+
 
 
 

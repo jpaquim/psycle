@@ -155,6 +155,12 @@ void SequencerGUI::SequencerLine::SequencerItem::setSequenceEntry( SequenceEntry
   }
 }
 
+void SequencerGUI::SequencerLine::SequencerItem::paint( NGraphics * g )
+{
+  g->setForeground( NColor( sequenceEntry_->pattern()->category()->color() ));
+  g->fillRect(0,0,clientWidth()-1, clientHeight()-1);
+}
+
 SequenceEntry * SequencerGUI::SequencerLine::SequencerItem::sequenceEntry( )
 {
   return sequenceEntry_;
@@ -358,5 +364,7 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 
 
 }}
+
+
 
 

@@ -32,21 +32,34 @@ namespace psycle
 	namespace host
 	{
 
-		class PatternData : public std::vector<SinglePattern*> {
+		class PatternCategory : std::vector<SinglePattern*> {
+		public:
+			PatternCategory();
+			PatternCategory(const std::string & name);
+			~PatternCategory();
+
+			void setName(const std::string & name);
+			const std::string & name() const;
+
+			SinglePattern* createNewPattern(const std::string & name);
+			void setColor(long color);
+			long color() const;
+
+		private:
+
+			std::string name_;
+			long color_;
+
+		};
+
+
+		class PatternData : public std::vector<PatternCategory*> {
 		public:
 			PatternData();
 
 			~PatternData();
 
-			SinglePattern* findByPtr(SinglePattern* ptr);
-
-			SinglePattern* createNewPattern(const std::string & name);    
-			void deletePattern(SinglePattern* ptr);
-
-		private:
-
-			bool lock;
-			void onDeletePattern(SinglePattern* ptr);
+			PatternCategory* createNewCategory(const std::string & name);
 
 		};
 

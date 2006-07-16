@@ -33,7 +33,7 @@
 #include <ngrs/nimage.h>
 #include <ngrs/ngroupbox.h>
 #include <ngrs/nitem.h>
-
+#include <ngrs/ntreenode.h>
 
 class N7SegDisplay;
 
@@ -46,9 +46,23 @@ namespace psycle { namespace host {
 class PatternView;
 
 
+class CategoryTreeNode: public NTreeNode {
+public:
+    CategoryTreeNode(PatternCategory* cat);
+    ~CategoryTreeNode();
+
+    PatternCategory* category();
+
+private:
+
+    PatternCategory* cat_;
+
+};
+
+
 class CategoryItem : public NCustomItem {
 public :
-   CategoryItem(const std::string & text);
+   CategoryItem(PatternCategory* category, const std::string & text);
    CategoryItem();
    ~CategoryItem();
 
@@ -60,6 +74,8 @@ public :
 private:
 
    NLabel* label_;
+
+   PatternCategory* category_;
 
    void init();
 
@@ -131,8 +147,10 @@ private:
 
     void onNameChanged(const std::string & name);
 
+    std::map<NTreeNode*, PatternCategory*> categoryMap;
+
     std::map<NCustomItem*, SinglePattern*> patternMap;
-    std::map<CategoryItem*, SinglePattern*> categoryMap;
+
 };
 
 }}

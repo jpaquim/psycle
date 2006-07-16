@@ -34,6 +34,8 @@ namespace psycle
 	namespace host
 	{
 
+		class PatternCategory;
+
 		class SinglePattern : public std::map<double, PatternLine> {
 		public:
 			SinglePattern();
@@ -51,12 +53,16 @@ namespace psycle
 			void setName(const std::string & name);
 			const std::string & name() const;
 
+			void setCategory(PatternCategory* category);
+			PatternCategory* category();
+
 		private:
 
 			int beats_;
 			int beatZoom_;
-
 			std::string name_;
+
+			PatternCategory* category_;
 		};
 
 	}

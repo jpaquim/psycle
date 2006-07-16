@@ -25,42 +25,85 @@ namespace psycle
 	namespace host
 	{
 
-		PatternData::PatternData()
+		PatternCategory::PatternCategory( )
 		{
-			lock = false;
+			color_ = 0;
 		}
 
-		PatternData::~PatternData()
+		PatternCategory::PatternCategory( const std::string & name )
 		{
-			lock = true;
+			name_ = name;
+			color_ = 0;
+		}
+
+		PatternCategory::~ PatternCategory( )
+		{
 			for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
 				delete *it;
 			}
 		}
 
-
-		SinglePattern* PatternData::createNewPattern( const std::string & name )
+		SinglePattern* PatternCategory::createNewPattern( const std::string & name )
 		{
 			SinglePattern* pattern = new SinglePattern();
+			pattern->setCategory(this);
 			pattern->setName(name);
 			push_back(pattern);
 			return pattern;
 		}
 
-		SinglePattern * PatternData::findByPtr( SinglePattern * ptr )
+
+		void PatternCategory::setName( const std::string & name )
 		{
-			std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
-			if (it != end() ) return *it;
-			return 0;
+			name_ = name;
 		}
 
-		void PatternData::onDeletePattern( SinglePattern* ptr )
+		const std::string & PatternCategory::name( ) const
 		{
-			if (!lock) {
-				std::vector<SinglePattern*>::iterator it = find(begin(), end(), ptr);
-				if (it != end() ) erase(it);
+			return name_;
+		}
+
+		void PatternCategory::setColor( long color )
+		{
+			color_ = color;
+		}
+
+		long PatternCategory::color( ) const
+		{
+			return color_;
+		}
+
+		// end of Category class
+
+
+		// the pattern data class
+		PatternData::PatternData()
+		{
+		}
+
+		PatternData::~PatternData()
+		{
+			for (std::vector<PatternCategory*>::iterator it = begin(); it < end(); it++) {
+				delete *it;
 			}
+		}
+
+
+		PatternCategory * PatternData::createNewCategory( const std::string & name )
+		{
+			PatternCategory* category = new PatternCategory();
+			category->setName(name);
+			push_back(category);
+			return category;
 		}
 
 	}
 }
+
+
+
+
+
+
+
+
