@@ -42,14 +42,14 @@ namespace psycle
 		class BpmChangeEvent {
 			public:
 					BpmChangeEvent();
-					BpmChangeEvent(int bpm);
+					BpmChangeEvent(float bpm);
 					~BpmChangeEvent();
 
-					void setBpm( int bpm );
-					int bpm() const;
+					void setBpm( float bpm );
+					float bpm() const;
 
 			private:
-					int bpm_;
+					float bpm_;
     };
 
 		class SequenceEntry {
@@ -112,11 +112,15 @@ namespace psycle
 			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
 
 			//PatternData* patternData();
-			BpmChangeEvent* createBpmChangeEntry(double position, int bpm);
+			BpmChangeEvent* createBpmChangeEntry(double position, float bpm);
 			void MoveBpmChangeEntry(BpmChangeEvent* entry, double newpos);
 
 			const std::map<double, BpmChangeEvent*> & bpmChanges();
 
+			///populates globals with a list of the first row of global events between beatpositions start and start+length.
+			///\param bInclusive whether to include events with positions of exactly start.
+			///\return the beat position of the global events, or if there are none, start+length.
+			double GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive);
 		private:
 
 			//PatternData patternData_; todo move patterndata to here

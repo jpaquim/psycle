@@ -32,6 +32,7 @@ namespace psycle
 			void AdvancePosition();
 			/// Initial Loop. Read new line and Interpretate the Global commands.
 			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
+			void ProcessGlobalEvent(GlobalEvent *event);
 			/// Notify all machines that a new Tick() comes.
 			void NotifyNewLine();
 			/// Final Loop. Read new line for notes to send to the Machines
@@ -80,6 +81,9 @@ namespace psycle
 			float * Work(int & nsamples);
 		//private:
 			static float * Work(void* context, int& nsamples);
+
+		private:
+			void Process(int & nsamples);
 
 		public:
 			/// ...

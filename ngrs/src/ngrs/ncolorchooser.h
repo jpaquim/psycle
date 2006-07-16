@@ -20,7 +20,7 @@
 #ifndef NCOLORCHOOSER_H
 #define NCOLORCHOOSER_H
 
-#include <npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper

@@ -157,7 +157,7 @@ void SequencerBeatChangeLineal::onMouseDoublePress( int x, int y, int button )
 {
   if (button == 1) {
     BeatChangeTriangle* triangle = new BeatChangeTriangle(sView);
-      BpmChangeEvent* bpmChangeEvent = sView->patternSequence()-> createBpmChangeEntry(x / (double) sView->beatPxLength() ,120);
+      BpmChangeEvent* bpmChangeEvent = sView->patternSequence()-> createBpmChangeEntry(x / (double) sView->beatPxLength() ,120.0f);
       triangle->setBpmChangeEvent(bpmChangeEvent);
       triangle->setPosition(x, 10,30,30);
     add(triangle);

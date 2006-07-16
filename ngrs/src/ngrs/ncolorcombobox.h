@@ -20,7 +20,7 @@
 #ifndef NCOLORCOMBOBOX_H
 #define NCOLORCOMBOBOX_H
 
-#include <npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper

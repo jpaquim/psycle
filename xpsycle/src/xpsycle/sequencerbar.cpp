@@ -219,7 +219,8 @@ void SequencerBar::updateSequencer()
 
 bool SequencerBar::followSong( ) const
 {
-  return follow_->checked();
+  //return follow_->checked();
+return false;
 }
 
 void SequencerBar::onMoveCursorPaste( NButtonEvent * ev )
@@ -230,7 +231,7 @@ void SequencerBar::onMoveCursorPaste( NButtonEvent * ev )
 
 void SequencerBar::onRecordTweakChange( NButtonEvent * ev )
 {
-  Global::configuration()._RecordTweaks = record_tweaks_->checked();
+ // Global::configuration()._RecordTweaks = record_tweaks_->checked();
 }
 
 void SequencerBar::onNewCategory( NButtonEvent * ev )
