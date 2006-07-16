@@ -56,6 +56,8 @@ namespace psycle
 			void setCategory(PatternCategory* category);
 			PatternCategory* category();
 
+			void clearEmptyLines();
+
 		private:
 
 			int beats_;

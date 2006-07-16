@@ -106,6 +106,9 @@ namespace psycle
 				void SampleRate(const int sampleRate);
 			///\}
 
+		public:
+			double PlayPos() const {return playPos;}
+			double SetPlayPos(int newpos) {playPos=newpos;}
 		private:
 			/// current master playback position
 			double playPos;

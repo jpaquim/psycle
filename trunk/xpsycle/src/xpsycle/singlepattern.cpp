@@ -78,6 +78,19 @@ namespace psycle
 			return category_;
 		}
 
+		void SinglePattern::clearEmptyLines()
+		{
+			for( std::map<double, PatternLine>::iterator it = begin()
+			   ; it!=end()
+			   ; )
+			{
+				if(it->second.empty())
+					erase(it++);
+				else
+					++it;
+			}
+		}
+
 	}
 }
 

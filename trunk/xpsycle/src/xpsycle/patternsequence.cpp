@@ -116,8 +116,6 @@ namespace psycle
 			entry->setPattern(pattern);
 			insert(value_type(position, entry));
 			entry->pattern()->beforeDelete.connect(this,&SequenceLine::onDeletePattern);
-			std::cout<<"Sequence entry created. parent track's size is "<<size()<<std::endl;
-			std::cout<<"associated pattern size is "<<entry->pattern()->size()<<std::endl;
 
 			return entry;
 		}
@@ -195,8 +193,6 @@ namespace psycle
 		{
 			SequenceLine* line = new SequenceLine(this);
 			push_back(line);
-			std::cout<<"New track created. patternsequence.size(): "<<size()<<std::endl;
-
 			return line;
 		}
 
@@ -211,24 +207,16 @@ namespace psycle
 			{
 				SequenceLine *pTrack = *seqIt;
 
-				//find the first sequenceentry that begins at or after start+length, and iterate backwards
-				std::map<double, SequenceEntry*>::iterator trackIt(pTrack->lower_bound( start+length ));
+				typedef std::map<double, SequenceEntry*>::reverse_iterator RTrackIt;
 
-				//    std::map<double, SequenceEntry*>::reverse_iterator trackIt(pTrack->lower_bound( start+length ));
-				//    for(; trackIt != track->rend() && trackIt->first + trackIt->second->patternBeats() >= start; ++trackIt )
-
-				///\todo: this loop is kind of clumsy.. best would be a for loop with a reverse_iterator, but i'm having trouble making it work. (lower_bound returns an iterator, and when casted to a reverse_iterator it somehow ends up in the wrong place)
-				if(trackIt!=pTrack->begin()) {
-					while((--trackIt)->first + trackIt->second->patternBeats() >= start)
-					{
-						SinglePattern* pPat = trackIt->second->pattern();
-						std::map<double, PatternLine>::iterator patIt   = pPat->lower_bound( start-trackIt->first ),
-						patEnd = pPat->lower_bound( start+length-trackIt->first );
-						for( ; patIt != patEnd; ++patIt)
-							events.insert( std::pair<const double, PatternLine>( patIt->first + trackIt->first, patIt->second ) );
-						if(trackIt==pTrack->begin())
-						break;
-					}
+				RTrackIt trackIt = (RTrackIt)( pTrack->lower_bound(start+length) );
+				for(; trackIt != pTrack->rend() && trackIt->first + trackIt->second->patternBeats() >= start; ++trackIt )
+				{
+					SinglePattern* pPat = trackIt->second->pattern();
+					std::map<double, PatternLine>::iterator patIt   = pPat->lower_bound( start-trackIt->first ),
+					patEnd = pPat->lower_bound( start+length-trackIt->first );
+					for( ; patIt != patEnd; ++patIt)
+						events.insert( std::pair<const double, PatternLine>( patIt->first + trackIt->first, patIt->second ) );
 				}
 			}
 		}
