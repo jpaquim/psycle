@@ -37,6 +37,7 @@ NTreeNode::NTreeNode()
     subNodes->setLayout( NAlignLayout() );
   pane()->add(subNodes, nAlTop);
 
+  headerItem_ = 0;
 }
 
 NTreeNode::~NTreeNode()
@@ -57,6 +58,7 @@ void NTreeNode::addEntry( NCustomItem * entry )
 
 void NTreeNode::setHeader( NCustomItem * entry )
 {
+  headerItem_ = entry;
   header()->add(entry, nAlClient);
   entry->mousePress.connect(this,&NTreeNode::onItemPress);
   entry->setTransparent(true);
@@ -68,6 +70,11 @@ void NTreeNode::onItemPress( NButtonEvent * ev )
     NCustomItem* item = static_cast<NCustomItem*>(ev->sender());
     itemSelected.emit(this, item);
   }
+}
+
+NCustomItem * NTreeNode::headerItem( )
+{
+  return headerItem_;
 }
 
 
