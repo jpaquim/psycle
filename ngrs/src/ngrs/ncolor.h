@@ -46,6 +46,7 @@ public:
     void setRGB(const std::string & rgbStr);
 
     unsigned long colorValue() const;
+    long hColorRef() const;
 
     bool operator==(const NColor & color);
     const NColor operator-(const NColor & rhs ) {

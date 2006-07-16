@@ -133,6 +133,11 @@ void NColor::setHCOLORREF( long int hcolorref )
   value = NApp::system().getXColorValue(r,g,b);
 }
 
+long NColor::hColorRef( ) const
+{
+  return (b << 16) | (g << 8) | r;
+}
+
 
 
 

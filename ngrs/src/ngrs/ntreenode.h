@@ -44,10 +44,14 @@ public:
     virtual void addNode(NTreeNode* node);
 
 
+    NCustomItem* headerItem();
+
 private:
 
     NPanel* entries_;
     NPanel* subNodes;
+
+   NCustomItem* headerItem_;
 
     void onItemPress(NButtonEvent * ev);
 
