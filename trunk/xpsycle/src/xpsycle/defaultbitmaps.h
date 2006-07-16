@@ -82,9 +82,11 @@ public:
     NBitmap & undo();
     NBitmap & wood();
     NBitmap & screw();
+    NBitmap & new_category();
 
 private:
 
+    NBitmap new_category_;
     NBitmap alert_;
     NBitmap screw_;
     NBitmap wood_;
