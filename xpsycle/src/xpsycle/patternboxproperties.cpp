@@ -18,12 +18,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patternboxproperties.h"
+#include "sequencerbar.h"
+#include "patterndata.h"
 #include <ngrs/nframeborder.h>
 #include <ngrs/ntablelayout.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nedit.h>
 #include <ngrs/ncolorcombobox.h>
+
+namespace psycle { namespace host {
 
 PatternBoxProperties::PatternBoxProperties()
  : NFlipBox()
@@ -45,10 +49,12 @@ PatternBoxProperties::PatternBoxProperties()
     table->add(categoryEdt, NAlignConstraint(nAlLeft,1,0),true);
     table->add(new NLabel("Color"), NAlignConstraint(nAlLeft,0,1),true);
     clBox = new NColorComboBox();
+      clBox->colorSelected.connect(this,&PatternBoxProperties::onColorChange);
       clBox->setPreferredSize(50,15);
     table->add(clBox, NAlignConstraint(nAlLeft,1,1),true);
   pane()->add(table, nAlClient);
 
+  cat_ = 0;
 }
 
 
@@ -72,4 +78,22 @@ void PatternBoxProperties::onKeyPress( const NKeyEvent & )
   nameChanged.emit(categoryEdt->text());
 }
 
+void PatternBoxProperties::onColorChange( const NColor & color )
+{
+  if (cat_ != 0) {
+     int r = color.red();
+     int g = color.green();
+     int b = color.blue();
+     long href = (b << 16) | (g << 8) | r;
+     cat_->category()->setColor( href );
+     cat_->repaint();
+  }
+}
 
+void PatternBoxProperties::setCategoryItem( CategoryItem * cat )
+{
+  cat_ = cat;
+}
+
+
+}}
