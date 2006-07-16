@@ -52,6 +52,8 @@ SequencerBeatChangeLineal::BeatChangeTriangle::BeatChangeTriangle( SequencerGUI 
   bpmEdt_ = new NEdit("120");
   add(bpmEdt_);
 
+  bpmEdt_->keyPress.connect(this,&SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress);
+
   bpmChangeEvent_ = 0;
 
   sView = gui;
@@ -105,6 +107,11 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::resize( )
 void SequencerBeatChangeLineal::BeatChangeTriangle::onMove( const NMoveEvent & moveEvent )
 {
   sView->patternSequence()->MoveBpmChangeEntry(bpmChangeEvent_, left() / (double) sView->beatPxLength() );
+}
+
+void SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress( const NKeyEvent & event )
+{
+  bpmChangeEvent_->setBpm( str<float>(bpmEdt_->text()) );
 }
 
 // the Main class of the BeatChangeLineal
@@ -182,6 +189,8 @@ void SequencerBeatChangeLineal::resize( )
 
 
 }}
+
+
 
 
 

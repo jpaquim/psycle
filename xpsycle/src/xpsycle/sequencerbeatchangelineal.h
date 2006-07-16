@@ -63,6 +63,8 @@ class SequencerBeatChangeLineal : public NPanel
 
         BpmChangeEvent* bpmChangeEvent_;
 
+        void onKeyPress(const NKeyEvent & event);
+
     };
 
 public:
