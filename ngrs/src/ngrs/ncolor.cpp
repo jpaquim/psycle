@@ -41,6 +41,14 @@ NColor::NColor(int red,int green,int blue) : r(red), g(green), b(blue)
   value = NApp::system().getXColorValue(r,g,b);
 }
 
+NColor::NColor( long hcolorref )
+{
+  b = (hcolorref>>16) & 0xff;
+  g = (hcolorref>>8 ) & 0xff;
+  r = (hcolorref    ) & 0xff;
+  value = NApp::system().getXColorValue(r,g,b);
+}
+
 NColor::~NColor()
 {
 }
@@ -124,6 +132,8 @@ void NColor::setHCOLORREF( long int hcolorref )
   r = (hcolorref    ) & 0xff;
   value = NApp::system().getXColorValue(r,g,b);
 }
+
+
 
 
 
