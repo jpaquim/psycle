@@ -303,18 +303,61 @@ namespace psycle
 			}
 
 		}
-		void Player::ProcessGlobalEvent(GlobalEvent *event)
+		void Player::ProcessGlobalEvent(GlobalEvent *pEvent)
 		{
-			switch (event->type)
+			Machine::id_type mIndex;
+			switch (pEvent->type)
 			{
 			case GlobalEvent::BPM_CHANGE:
-				this->SetBPM(event->parameter);
-std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event->parameter<<std::endl;
+				this->SetBPM(pEvent->parameter);
+std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<pEvent->parameter<<std::endl;
 				break;
+			case GlobalEvent::JUMP_TO:
+				this->SetPlayPos(pEvent->parameter);
+				break;
+			case GlobalEvent::SET_BYPASS:
+				mIndex = pEvent->target;
+				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->_mode == MACHMODE_FX )
+					song()._pMachine[mIndex]->_bypass = true;
+				break;
+			case GlobalEvent::UNSET_BYPASS:
+				mIndex = pEvent->target;
+				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->_mode == MACHMODE_FX )
+					song()._pMachine[mIndex]->_bypass = false;
+				break;
+			case GlobalEvent::SET_MUTE:
+				mIndex = pEvent->target;
+				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] )
+					song()._pMachine[mIndex]->_mute = true;
+				break;
+			case GlobalEvent::UNSET_MUTE:
+				mIndex = pEvent->target;
+				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] )
+					song()._pMachine[mIndex]->_mute = false;
+				break;
+			case GlobalEvent::SET_VOLUME:
+				if(pEvent->target == 255)
+				{
+					((Master*)(song()._pMachine[MASTER_INDEX]))->_outDry = pEvent->parameter;
+				}
+				else 
+				{
+					mIndex = pEvent->target;
+					if(mIndex < MAX_MACHINES)
+					{
+						Wire::id_type wire(pEvent->target2);
+						if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1(pEvent->parameter));
+					}
+				}
+			case GlobalEvent::SET_PANNING:
+				mIndex = pEvent->target;
+				if(mIndex < MAX_MACHINES)
+					if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetPan(pEvent->parameter);
+				break;
+
 			default:
 				break;
 			}
-
 		}
 
 		/// Final Loop. Read new line for notes to send to the Machines

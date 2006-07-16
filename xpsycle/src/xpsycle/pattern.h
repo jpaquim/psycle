@@ -52,11 +52,14 @@ public:
 		SET_PANNING,
 		JUMP_TO,
 		SET_BYPASS,
+		UNSET_BYPASS,
 		SET_MUTE,
-		PATTERN_LOOP
+		UNSET_MUTE,
+		LOOP_TO
 	} type;
 
 	float parameter;
+	int target, target2;
 };
 
 

@@ -923,6 +923,56 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
   }
 
   switch (event.scancode()) {
+    case XK_Tab : {
+	int oldTrack = pView->cursor().x();
+	int curLine = pView->cursor().y();
+	//oddity.. this if never passes on my system. also, pressing shift-tab in the pattern view and holding shift is
+	//equivalent to holding down the left mouse button..
+        if (NApp::system().keyState() & ShiftMask) {
+		pView->moveCursor(-1,0,0); std::cout<<"bam"<<std::endl;
+		int newTrack = pView->cursor().x();
+		window()->repaint(this,repaintTrackArea(curLine,curLine,newTrack,oldTrack));
+	} else {
+		pView->moveCursor(1,0,0);
+		int newTrack = pView->cursor().x();
+		window()->repaint(this,repaintTrackArea(curLine,curLine,oldTrack,newTrack));
+	}
+	window()->repaint(pView,pView->repaintLineNumberArea(curLine,curLine));
+    }
+    break;
+    case XK_Insert : {
+        int startLine = dy_ / pView->rowHeight();
+	int lastLine = pView->pattern()->beats()*pView->beatZoom();
+        int lineCount = clientHeight() / pView->rowHeight();
+        int curLine = pView->cursor().y();
+	int curTrack = pView->cursor().x();
+
+	double lineInc = 1.0f / (float)pView->beatZoom();
+
+	std::map<double, PatternLine>::reverse_iterator it = pView->pattern()->rbegin();
+	std::map<double, PatternLine>::reverse_iterator end
+		= (std::map<double, PatternLine>::reverse_iterator
+		( pView->pattern()->lower_bound(curLine*lineInc)) );
+
+	for(; it != end; ++it)
+	{
+		double beatPos = it->first;
+		PatternLine &curLine = it->second;
+		if(curLine.count(curTrack))
+		{
+			PatternEvent &tempEvent(curLine[curTrack]);
+			double newpos = beatPos + lineInc;
+			if(newpos < pView->pattern()->beats())
+				(*pView->pattern())[newpos][curTrack]=tempEvent;
+			curLine.erase(curTrack);
+		}
+	}
+	pView->pattern()->clearEmptyLines();
+
+        window()->repaint(this,repaintTrackArea(curLine,lastLine,pView->cursor().x(),pView->cursor().x()));
+        window()->repaint(pView,pView->repaintLineNumberArea(curLine,lastLine));
+    }
+    break;
     case XK_BackSpace : {
         pView->clearCursorPos();
         int startLine  = dy_ / pView->rowHeight();
