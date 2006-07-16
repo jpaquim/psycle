@@ -33,7 +33,8 @@ public:
 
     ~NCustomItem();
 
-    virtual std::string text();
+    virtual void setText(const std::string & text);
+    virtual std::string text() const;
 
     void setObject( NObject* obj);
     NObject* object();

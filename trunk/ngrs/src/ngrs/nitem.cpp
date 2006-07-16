@@ -64,12 +64,12 @@ int NItem::preferredHeight( ) const
   return label_->preferredHeight();
 }
 
-std::string NItem::text( )
+std::string NItem::text( ) const
 {
   return label_->text();
 }
 
-void NItem::setText( const std::string text )
+void NItem::setText( const std::string & text )
 {
   label_->setText(text);
 }

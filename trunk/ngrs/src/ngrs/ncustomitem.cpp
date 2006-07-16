@@ -30,7 +30,7 @@ NCustomItem::~NCustomItem()
 {
 }
 
-std::string NCustomItem::text( )
+std::string NCustomItem::text( ) const
 {
   return "";
 }
@@ -48,6 +48,10 @@ NObject * NCustomItem::object( )
 bool NCustomItem::operator <( const NCustomItem & rhs ) const
 {
   return (this < &rhs);
+}
+
+void NCustomItem::setText( const std::string & text )
+{
 }
 
 

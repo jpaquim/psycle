@@ -37,9 +37,9 @@ public:
 
    ~NItem();
 
-   void setText(const std::string text);
+   void setText(const std::string & text);
 
-   virtual std::string text();
+   virtual std::string text() const;
 
    virtual void resize();
 
