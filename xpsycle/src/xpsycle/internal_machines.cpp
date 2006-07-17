@@ -32,7 +32,7 @@ namespace psycle {
 //			DestroyOutputs();
 		}
 
-		int Dummy::GenerateAudioInTicks(int numSamples)
+		int Dummy::GenerateAudioInTicks(int startSample, int numSamples)
 		{
 //			cpu::cycles_type cost(cpu::cycles());
 			Machine::SetVolumeCounter(numSamples);
@@ -160,7 +160,7 @@ namespace psycle {
 			else return false;
 		}
 
-		int DuplicatorMac::GenerateAudioInTicks(int numSamples)
+		int DuplicatorMac::GenerateAudioInTicks(int startSample, int numSamples)
 		{
 			_worked = true;
 		}
@@ -218,7 +218,7 @@ namespace psycle {
 			_clip = false;
 		}
 
-		int Master::GenerateAudioInTicks(int numSamples)
+		int Master::GenerateAudioInTicks(int startSample, int numSamples)
 		{
 #if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 			universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
@@ -397,7 +397,7 @@ namespace psycle {
 			}
 		}
 
-		int Mixer::GenerateAudioInTicks(int numSamples)
+		int Mixer::GenerateAudioInTicks(int startSample, int numSamples)
 		{
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
 			// Step Two, prepare input signals for the Send Fx, and make them work
@@ -995,7 +995,7 @@ namespace psycle {
 			else return false;
 		}
 
-		int LFO::GenerateAudioInTicks(int numSamples)
+		int LFO::GenerateAudioInTicks(int startSample, int numSamples)
 		{
 //			cpu::cycles_type cost(cpu::cycles());
 

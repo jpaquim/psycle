@@ -16,7 +16,7 @@ namespace psycle {
 		public:
 			Dummy(id_type index);
 			virtual ~Dummy() throw();
-			virtual int GenerateAudioInTicks(int numSamples);
+			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
@@ -34,7 +34,7 @@ namespace psycle {
 			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
-			virtual int GenerateAudioInTicks(int numSamples);
+			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
@@ -61,7 +61,7 @@ namespace psycle {
 			Master(id_type index);
 			virtual ~Master() throw();
 			virtual void Init(void);
-			virtual int GenerateAudioInTicks(int numSamples);
+			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual std::string GetName() const { return _psName; };
 //			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
@@ -123,7 +123,7 @@ namespace psycle {
 			virtual ~Mixer() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
-			virtual int GenerateAudioInTicks(int numSamples);
+			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			void FxSend(int numSamples);
 			void Mix(int numSamples);
 			virtual std::string GetName() const { return _psName; };
@@ -190,7 +190,7 @@ namespace psycle {
 			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
-			virtual int GenerateAudioInTicks(int numSamples);
+			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam,int &minval,int &maxval);
