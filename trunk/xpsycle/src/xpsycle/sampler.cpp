@@ -61,6 +61,7 @@ namespace psycle
 		}
 
 		int Sampler::GenerateAudioInTicks(
+			int startSample, 
 			int numSamples)
 		{
 

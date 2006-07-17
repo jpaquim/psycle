@@ -102,7 +102,7 @@ public:
     virtual ~Plugin() throw();
 
     virtual void Init();
-    virtual int GenerateAudioInTicks(int numSamples);
+    virtual int GenerateAudioInTicks(int startSample, int numSamples);
     virtual void Tick();
     virtual void Tick(int channel, PatternEntry * pEntry);
     virtual void Stop();

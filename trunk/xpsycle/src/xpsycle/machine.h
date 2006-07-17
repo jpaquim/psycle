@@ -274,7 +274,7 @@ namespace psycle
 			///\name crash handling
 			///\{
 				public:
-					virtual int GenerateAudioInTicks(int numsamples);
+					virtual int GenerateAudioInTicks(int startSample, int numsamples);
 					virtual int GenerateAudio(int numsamples);
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
 				protected:

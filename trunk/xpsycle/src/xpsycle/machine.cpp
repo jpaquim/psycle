@@ -842,7 +842,7 @@ int WorkEvent::track( ) const
 	return track_;
 }
 
-int Machine::GenerateAudioInTicks( int numsamples )
+int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 {
 	std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
   return 0;
@@ -858,7 +858,7 @@ int Machine::GenerateAudio( int numsamples )
 		WorkEvent & workEvent = workEvents.front();
 		int processsamples = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
 		std::cout << "Generating audio, looping, processsamples : " << processsamples << std::endl;
-		if (processsamples > 0) GenerateAudioInTicks( processsamples ); // todo maybe round
+		if (processsamples > 0) GenerateAudioInTicks( processedsamples, processsamples ); // todo maybe round
 		else if ( processsamples < 0 ) std::cout << " ERROR! workEvent.beatOffset() : " << workEvent.beatOffset() << " beatOffset: " << beatOffset;
 		processedsamples+=processsamples;
 		Tick(workEvent.track(),workEvent.event().entry());
@@ -867,7 +867,7 @@ int Machine::GenerateAudio( int numsamples )
 	int processsamples = numsamples- processedsamples;
 	if ( processsamples > 0 )
 	{
-		GenerateAudioInTicks(processsamples);
+		GenerateAudioInTicks(processedsamples, processsamples);
 	}
 	else if ( processsamples < 0 ) std::cout << " ERROR! beatOffset :" << beatOffset << std::endl;
 

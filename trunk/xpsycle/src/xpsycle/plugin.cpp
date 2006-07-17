@@ -105,12 +105,12 @@ void Plugin::Init( )
   }
 }
 
-int Plugin::GenerateAudioInTicks( int numSamples )
+int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
   if (!_mute) {
     if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
       int ns = numSamples;
-      int us = 0;
+      int us = startSample;
           while (ns)
           {
             int nextevent = (TWSActive)?TWSSamples:ns+1;
