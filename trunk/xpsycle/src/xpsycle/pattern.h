@@ -40,28 +40,6 @@ public:
 	//#endif
 };
 
-class GlobalEvent
-{
-public:
-	GlobalEvent(int parameter_) : parameter(parameter_) {}
-	virtual ~GlobalEvent() {}
-	
-	enum Types {
-		BPM_CHANGE,
-		SET_VOLUME,
-		SET_PANNING,
-		JUMP_TO,
-		SET_BYPASS,
-		UNSET_BYPASS,
-		SET_MUTE,
-		UNSET_MUTE,
-		LOOP_TO
-	} type;
-
-	float parameter;
-	int target, target2;
-};
-
 
 namespace PatternCmd {
 			enum 

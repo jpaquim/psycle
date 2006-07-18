@@ -25,6 +25,47 @@ namespace psycle
 	namespace host
 	{
 
+		GlobalEvent::GlobalEvent( ) : parameter_(0), target_(-1), target2_(-1)
+		{
+		}
+
+		GlobalEvent::GlobalEvent( float parameter ) : parameter_(parameter), target_(-1), target2_(-1)
+		{
+		}
+
+		GlobalEvent::~ GlobalEvent( )
+		{
+		}
+
+		void GlobalEvent::setParameter( float parameter )
+		{
+      parameter_ = parameter;
+		}
+
+		float GlobalEvent::parameter( ) const
+		{
+			return parameter_;
+		} // end of psycle namespace
+
+		void GlobalEvent::setTarget( int target )
+		{
+			target_ = target;
+		}
+
+		int GlobalEvent::target( ) const
+		{
+			return target_;
+		}
+
+		void GlobalEvent::setTarget2( int target )
+		{
+			target2_ = target;
+		}
+
+		int GlobalEvent::target2( ) const
+		{
+			return target2_;
+		}
 
 		BpmChangeEvent::BpmChangeEvent( )
 		{
@@ -269,6 +310,11 @@ namespace psycle
 		}
 
 	} // end of host namespace
-} // end of psycle namespace
+}
+
+
+
+
+
 
 
