@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "sequencergui.h"
 #include "sequencerbeatchangelineal.h"
+#include "singlepattern.h"
+#include "zoombar.h"
 #include <ngrs/nscrollbar.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>
@@ -27,6 +29,7 @@
 #include <ngrs/ntoolbarseparator.h>
 #include <ngrs/nlistbox.h>
 #include <ngrs/nitem.h>
+
 
 namespace psycle {
 	namespace host {
@@ -158,7 +161,7 @@ void SequencerGUI::SequencerLine::SequencerItem::setSequenceEntry( SequenceEntry
 void SequencerGUI::SequencerLine::SequencerItem::paint( NGraphics * g )
 {
   g->setForeground( NColor( sequenceEntry_->pattern()->category()->color() ));
-  g->fillRect(0,0,clientWidth()-1, clientHeight()-1);
+  g->fillRect(0,0, clientWidth(), clientHeight() );
 }
 
 SequenceEntry * SequencerGUI::SequencerLine::SequencerItem::sequenceEntry( )
@@ -253,6 +256,18 @@ void SequencerGUI::SequencerLine::onDeleteEntry( SequenceEntry * entry )
   }
 }
 
+void SequencerGUI::SequencerLine::resize( )
+{
+  std::vector<SequencerItem*>::iterator it = items.begin();
+  for ( ; it < items.end(); it++) {
+    SequencerItem* item = *it;
+    double tickPosition = item->sequenceEntry()->tickPosition();
+    SinglePattern* pattern = item->sequenceEntry()->pattern();
+
+    item->setPosition(d2i(sView->beatPxLength() * tickPosition),5,pattern->beats() * sView->beatPxLength(),20);
+  }
+}
+
 // main class
 
 SequencerGUI::SequencerGUI()
@@ -273,11 +288,18 @@ SequencerGUI::SequencerGUI()
   add(beatLineal_, nAlTop);
 
   // create scrollBars
-  hBar = new NScrollBar();
-    hBar->setOrientation(nHorizontal);
-    hBar->setHeight(15);
-    //hBar->posChange.connect(this,&PatternView::onHScrollBar);
-  add(hBar, nAlBottom);
+  NPanel* hBarPanel = new NPanel();
+    hBarPanel->setLayout( NAlignLayout() );
+    zoomHBar = new ZoomBar();
+    zoomHBar->posChanged.connect(this, &SequencerGUI::onZoomHBarPosChanged);
+    zoomHBar->setRange(5,50);
+    hBarPanel->add(zoomHBar, nAlRight);
+    hBar = new NScrollBar();
+      hBar->setOrientation(nHorizontal);
+      hBar->setPreferredSize(100,15);
+      //hBar->posChange.connect(this,&PatternView::onHScrollBar);
+    hBarPanel->add(hBar, nAlClient);
+  add(hBarPanel, nAlBottom);
 
   beatChangeLineal_ = new SequencerBeatChangeLineal(this);
   add( beatChangeLineal_, nAlBottom );
@@ -362,8 +384,24 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 }
 
 
+void SequencerGUI::onZoomHBarPosChanged( ZoomBar * zoomBar, double newPos )
+{
+  if (newPos < 5) newPos = 5;
+  beatPxLength_ = (int) newPos;
+  std::cout << beatPxLength_ << std::endl;
+  std::vector<NVisualComponent*>::const_iterator it = scrollArea_->visualComponents().begin();
+  for ( ; it < scrollArea_->visualComponents().end(); it++) {
+     NVisualComponent* comp = *it;
+     comp->resize();
+  }
+  repaint();
+}
 
 }}
+
+
+
+
 
 
 

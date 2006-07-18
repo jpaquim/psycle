@@ -142,6 +142,21 @@ namespace psycle
 			return pattern_->beats();
 		}
 
+		double SequenceEntry::tickPosition( ) const
+		{
+			std::map<double, SequenceEntry*>::iterator iter = line_->begin();
+			for(; iter!= line_->end(); ++iter)
+			{
+				if(iter->second==this)
+				break;
+			}
+			if(iter!=line_->end())
+			{
+				return iter->first;
+			}
+			return 0;
+		}
+
 		// end of PatternEntry
 
 		// represents one track/line in the sequencer
@@ -322,6 +337,8 @@ namespace psycle
 
 	} // end of host namespace
 }
+
+
 
 
 
