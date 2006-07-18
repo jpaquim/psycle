@@ -736,7 +736,7 @@ void NVisualComponent::erase( )
   NRuntime::erase();
 }
 
-const std::vector< NVisualComponent * > & NVisualComponent::visualComponents( )
+const std::vector< NVisualComponent * > & NVisualComponent::visualComponents( ) const
 {
   return visualComponents_;
 }
