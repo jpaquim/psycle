@@ -21,7 +21,6 @@
 #define PATTERNSEQUENCE_H
 
 #include "singlepattern.h"
-#include "sequenceritemgui.h"
 #include "patterndata.h"
 #include <vector>
 #include <list>
@@ -84,8 +83,6 @@ namespace psycle
 
 			double tickPosition() const;
 
-			sigslot::signal1<SequenceEntry*> beforeDelete;
-
 			void setPattern(SinglePattern* pattern);
 			SinglePattern* pattern();
 			SinglePattern* pattern() const;
@@ -110,6 +107,7 @@ namespace psycle
 			~SequenceLine();
 
 			SequenceEntry* createEntry(SinglePattern* pattern, double position);
+			void removeSinglePatternEntries(SinglePattern* pattern);
 
 			double tickLength() const;
 
@@ -125,7 +123,6 @@ namespace psycle
 			std::string name_;
 			PatternSequence* patternSequence_;
 
-			void onDeletePattern(SinglePattern* pattern);
 		};
 
 		class PatternSequence : public std::vector<SequenceLine*>,public sigslot::has_slots<> {
@@ -140,6 +137,10 @@ namespace psycle
 
 			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
 
+
+			PatternData* patternData();
+			void removeSinglePattern(SinglePattern* pattern);
+
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
 			///\return the beat position of the global events, or if there are none, start+length.
@@ -153,7 +154,8 @@ namespace psycle
 
 		private:
 
-			//PatternData patternData_; todo move patterndata to here
+			PatternData patternData_;
+
 			GlobalMap globalEvents_;
 
 		};

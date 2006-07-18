@@ -276,7 +276,6 @@ private:
 
   void resize();
 
-  void onPatternDelete(SinglePattern* pattern);
   void onHScrollBar(NObject* sender, int pos);
   void onVScrollBar(NObject* sender, int pos);
 

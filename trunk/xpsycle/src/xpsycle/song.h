@@ -42,7 +42,6 @@ namespace psycle
 
 				/// Initializes the song to an empty one.
 				void New();
-				PatternData* patternData();
 				PatternSequence* patternSequence();
 
 			private:

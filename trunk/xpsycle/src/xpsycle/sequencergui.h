@@ -23,7 +23,7 @@
 #include "singlepattern.h"
 #include "patternsequence.h"
 #include <ngrs/npanel.h>
-
+#include <list>
 
 /**
 @author Stefan Nattkemper
@@ -86,6 +86,8 @@ class SequencerGUI : public NPanel
     SequenceLine* sequenceLine();
 
     void addItem(SinglePattern* pattern);
+    void removeItems(SinglePattern* pattern);
+
 
      virtual void resize();
 
@@ -96,9 +98,8 @@ class SequencerGUI : public NPanel
       SequenceLine* seqLine_;
       SequencerGUI* sView;
 
-      std::vector<SequencerItem*> items;
+      std::list<SequencerItem*> items;
 
-      void onDeleteEntry(SequenceEntry* entry);
 
   };
 
@@ -146,6 +147,7 @@ public:
     PatternSequence* patternSequence();
 
     void addPattern(SinglePattern* pattern);
+    void removePattern(SinglePattern* pattern);
 
     int beatPxLength() const;
 
@@ -178,6 +180,8 @@ private:
     void onSequencerLineClick(SequencerLine* line);
 
     void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
+
+    std::vector<SequencerLine*> lines;
 };
 
 }}

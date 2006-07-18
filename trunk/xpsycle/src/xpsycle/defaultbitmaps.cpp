@@ -26,6 +26,39 @@ namespace psycle {
 //////// The bitmaps
 
 /* XPM */
+
+/* XPM */
+const char * delpatterns_xpm[] = {
+"19 17 11 1",
+" 	c None",
+".	c #000000",
+"+	c #E9EBD7",
+"@	c #40494A",
+"#	c #C09235",
+"$	c #00FF00",
+"%	c #686C69",
+"&	c #A3A49B",
+"*	c #E11414",
+"=	c #DDD6A8",
+"-	c #B9BF97",
+"                   ",
+"   ..............  ",
+"   .++@#@+++# $%.  ",
+"   .+ ###       .  ",
+"   .  @%@     &&.  ",
+"   .***.......*..  ",
+"   .==**====-**-.  ",
+"   .-- **--=&*-&.  ",
+"   .====** **---.  ",
+"   .- =--***&-&-.  ",
+"   .&&&&&**&&&&&.  ",
+"   .====****----.  ",
+"   .--**---**-&-.  ",
+"   .=**== ==**--.  ",
+"   .**...........  ",
+"                   ",
+"                   "};
+
 const char * newcat_xpm[] = {
 "20 16 179 2",
 "  	c None",
@@ -17731,6 +17764,7 @@ DefaultBitmaps::DefaultBitmaps()
   undo_.createFromXpmData(undo_xpm);
   machine_skin_.createFromXpmData(machine_skin_xpm);
   new_category_.createFromXpmData(newcat_xpm);
+  delPattern_.createFromXpmData(delpatterns_xpm);
 }
 
 DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
@@ -17739,6 +17773,7 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   screw_.createFromXpmData(screw_xpm);
   wood_.createFromXpmData(wood_xpm);
   alert_.createFromXpmData(alert_xpm);
+  delPattern_.createFromXpmData(delpatterns_xpm);
 
   try {
     autoStop_.loadFromFile(pCfg->iconPath+ "autostop.xpm");
@@ -18230,9 +18265,15 @@ NBitmap & DefaultBitmaps::new_category( )
   return new_category_;
 }
 
+NBitmap & DefaultBitmaps::delPattern( )
+{
+  return delPattern_;
+}
 
 }
 }
+
+
 
 
 

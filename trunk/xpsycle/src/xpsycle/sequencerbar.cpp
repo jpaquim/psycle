@@ -24,6 +24,8 @@
 #include "patternview.h"
 #include "defaultbitmaps.h"
 #include "player.h"
+#include "sequencergui.h"
+
 #include <ngrs/nlabel.h>
 #include <ngrs/nitem.h>
 #include <ngrs/napp.h>
@@ -149,7 +151,8 @@ void SequencerBar::init( )
   DefaultBitmaps & icons = Global::pConfig()->icons();
 
   counter = 0;
-  patternData_ = 0;
+  seqGui = 0;
+  patView = 0;
 
   NFrameBorder frBorder;
     frBorder.setOval();
@@ -171,6 +174,14 @@ void SequencerBar::init( )
         newCatBtn->setHint("New Category");
       patToolBar->add( newCatBtn )->clicked.connect(this,&SequencerBar::onNewCategory);
       patToolBar->add( new NButton("New Pattern"))->clicked.connect(this,&SequencerBar::onNewPattern);
+      img = new NImage();
+      img->setSharedBitmap(&icons.delPattern());
+      img->setPreferredSize(25,25);
+      NButton* delPatBtn = new NButton(img);
+        delPatBtn->setHint("Delete Category");
+      patToolBar->add( delPatBtn )->clicked.connect(this,&SequencerBar::onDeletePattern);
+
+
       patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
     patternPanel->add(patToolBar, nAlTop);
 
@@ -207,9 +218,14 @@ void SequencerBar::init( )
 
 }
 
-void SequencerBar::setPatternData( PatternData * patternData )
+void SequencerBar::setSequenceGUI(SequencerGUI* sequenceGUI)
 {
-  patternData_ = patternData;
+  seqGui = sequenceGUI;
+}
+
+void SequencerBar::setPatternView( PatternView * patternView )
+{
+  patView = patternView;
 }
 
 void SequencerBar::updateSequencer()
@@ -236,7 +252,7 @@ void SequencerBar::onRecordTweakChange( NButtonEvent * ev )
 
 void SequencerBar::onNewCategory( NButtonEvent * ev )
 {
-  PatternCategory* category = patternData_->createNewCategory("category");
+  PatternCategory* category = seqGui->patternSequence()-> patternData()->createNewCategory("category");
 	category->setColor(0x0000FF);
 
   CategoryTreeNode* node = new CategoryTreeNode(category);
@@ -269,6 +285,33 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
   }
 }
 
+void SequencerBar::onDeletePattern( NButtonEvent* ev ) {
+  NCustomItem* item = patternBox_->selectedItem();
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+
+  if(itr!=patternMap.end())
+  {
+     SinglePattern* pattern = itr->second;
+     patternMap.erase(itr);
+     ((NVisualComponent*)item->parent())->erase(item);
+     //item->erase(); ///\todo put this in customtreeview
+     NApp::addRemovePipe(item);
+     patternBox_->resize(); ///\todo end
+     patternBox_->repaint();
+
+     seqGui->removePattern(pattern);
+     seqGui->repaint();
+
+     if (patView) {
+       if (patView->pattern() == pattern) {
+         patView->setPattern(0);
+         patView->repaint();
+       }
+     }
+
+     seqGui->patternSequence()->removeSinglePattern(pattern);
+  }
+}
 
 }}
 
@@ -283,8 +326,10 @@ void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 
   if (item) propertyBox_->setName( item->text() );
   std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
-  if(itr!=patternMap.end())
-     selected.emit(itr->second);
+  if(itr!=patternMap.end()) {
+     patView->setPattern(itr->second);
+     patView->repaint();
+  }
 }
 
 void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
@@ -303,6 +348,8 @@ void psycle::host::SequencerBar::onNameChanged( const std::string & name )
     item->setText(name);
   patternBox_->repaint();
 }
+
+
 
 
 

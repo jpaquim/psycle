@@ -2049,11 +2049,6 @@ bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 {
 }
 
-PatternData * Song::patternData( )
-{
-  return &patternData_;
-}
-
 
 	}
 }

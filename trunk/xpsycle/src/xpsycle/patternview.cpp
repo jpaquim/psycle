@@ -2099,8 +2099,6 @@ int PatternView::beatZoom( ) const
 void PatternView::setPattern( SinglePattern * pattern )
 {
   pattern_ = pattern;
-  if (pattern_)
-    pattern_->beforeDelete.connect(this,&PatternView::onPatternDelete);
 }
 
 SinglePattern * PatternView::pattern( )
@@ -2108,11 +2106,6 @@ SinglePattern * PatternView::pattern( )
   return pattern_;
 }
 
-void PatternView::onPatternDelete( SinglePattern * pattern )
-{
-  pattern_ = 0;
-  repaint();
-}
 
 void PatternView::setBeatZoom( int tpb )
 {

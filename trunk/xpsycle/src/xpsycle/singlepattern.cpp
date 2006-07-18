@@ -35,7 +35,6 @@ namespace psycle
 
 		SinglePattern::~SinglePattern()
 		{
-			beforeDelete.emit(this);
 		}
 
 		void SinglePattern::setBeatZoom( int zoom )
