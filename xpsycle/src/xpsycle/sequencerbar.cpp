@@ -347,6 +347,16 @@ void psycle::host::SequencerBar::onNameChanged( const std::string & name )
   NCustomItem* item = patternBox_->selectedItem();
     item->setText(name);
   patternBox_->repaint();
+
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+  if(itr!=patternMap.end()) {
+    std::vector<SequencerItem*> list = seqGui->guiItemsByPattern(itr->second);
+    std::vector<SequencerItem*>::iterator it = list.begin();
+    for ( ; it < list.end(); it++) {
+       SequencerItem* guiItem = *it;
+       guiItem->repaint();
+    }
+  }
 }
 
 

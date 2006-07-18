@@ -22,60 +22,7 @@
 
 #include <ngrs/npanel.h>
 
-/**
-@author Stefan Nattkemper
-*/
-
-class NLabel;
-
-namespace psycle {
-	namespace host {
 
 
-class SequencerGUI;
-class SequenceEntry;
 
-class SequencerItem : public NPanel {
-  public:
-    SequencerItem( SequencerGUI* seqGui );
-    ~SequencerItem();
-
-    virtual void onMousePress(int x, int y, int button);
-    virtual void resize();
-    virtual void onMove(const NMoveEvent & moveEvent);
-
-    void setText(const std::string & text);
-
-    virtual void setSequenceEntry(SequenceEntry* entry);
-    SequenceEntry* sequenceEntry();
-
-  private:
-
-    NLabel* caption_;
-    SequenceEntry* sequenceEntry_;
-
-    SequencerGUI* sView;
-
-};
-
-class PatternSequencerItem : public SequencerItem {
-  public:
-    PatternSequencerItem( SequencerGUI* seqGui );
-    ~PatternSequencerItem();
-};
-
-class GlobalSequencerItem : public SequencerItem {
-  public:
-     GlobalSequencerItem( SequencerGUI* seqGui );
-     ~GlobalSequencerItem();
-    };
-
-class GlobalBpmSequencerItem : public GlobalSequencerItem {
-public :
-  GlobalBpmSequencerItem( SequencerGUI* seqGui );
-  ~GlobalBpmSequencerItem();
-};
-
-
-}}
 #endif
