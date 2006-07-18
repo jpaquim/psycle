@@ -158,4 +158,9 @@ bool NRuntime::isChildOf( NRuntime * comp ) const
   }
 }
 
+void NRuntime::erase( )
+{
+  if (parent()) parent()->erase(this);
+}
+
 

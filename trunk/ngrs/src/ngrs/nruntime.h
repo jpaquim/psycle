@@ -58,6 +58,7 @@ public:
    virtual void removeChild(NRuntime* child);
    virtual void removeChilds();
    virtual void erase(NRuntime* child);
+   virtual void erase();
 
    void setParent(NRuntime* parent);
    NRuntime* parent();
