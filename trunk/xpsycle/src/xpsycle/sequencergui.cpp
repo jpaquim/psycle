@@ -128,13 +128,8 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
 
 
 // this is the gui class of one pattern entry
-SequencerGUI::SequencerLine::SequencerItem::SequencerItem( SequencerGUI* seqGui )
+SequencerItem::SequencerItem( SequencerGUI* seqGui )
 {
-  caption_ = new NLabel("Pattern");
-    caption_->setVAlign(nAlCenter);
-    caption_->setHAlign(nAlCenter);
-  add(caption_);
-
   setBorder (NFrameBorder());
   setMoveable(nMvHorizontal);
 
@@ -145,43 +140,48 @@ SequencerGUI::SequencerLine::SequencerItem::SequencerItem( SequencerGUI* seqGui 
   sView = seqGui;
 }
 
-SequencerGUI::SequencerLine::SequencerItem::~ SequencerItem( )
+SequencerItem::~ SequencerItem( )
 {
 }
 
-void SequencerGUI::SequencerLine::SequencerItem::setSequenceEntry( SequenceEntry * sequenceEntry )
+void SequencerItem::setSequenceEntry( SequenceEntry * sequenceEntry )
 {
   sequenceEntry_ = sequenceEntry;
-
-  if (sequenceEntry_) {
-     caption_->setText( sequenceEntry_->pattern()->name() );
-  }
 }
 
-void SequencerGUI::SequencerLine::SequencerItem::paint( NGraphics * g )
+void SequencerItem::paint( NGraphics * g )
 {
+  int cw = clientWidth();
+  int ch = clientHeight();
+
+  int tw = g->textWidth(sequenceEntry_->pattern()->name());
+
+  int xp = (cw - tw) / 2;
+  int yp = (ch + g->textHeight() /2 ) / 2;
+
   g->setForeground( NColor( sequenceEntry_->pattern()->category()->color() ));
   g->fillRect(0,0, clientWidth(), clientHeight() );
+  g->drawText( xp, yp, sequenceEntry_->pattern()->name());
 }
 
-SequenceEntry * SequencerGUI::SequencerLine::SequencerItem::sequenceEntry( )
+SequenceEntry * SequencerItem::sequenceEntry( )
 {
   return sequenceEntry_;
 }
 
 
-void SequencerGUI::SequencerLine::SequencerItem::resize( )
+void SequencerItem::resize( )
 {
-  caption_->setPosition(0,0,clientWidth(), clientHeight());
+
 }
 
-void SequencerGUI::SequencerLine::SequencerItem::onMove( const NMoveEvent & moveEvent )
+void SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
   sequenceEntry_->track()->MoveEntry(sequenceEntry_, left() / (double) sView->beatPxLength() );
-//  caption_->setText( sequenceEntry_->pattern()->name() + ":" + stringify(sequenceEntry_->tickPosition()));
+
 }
 
-void SequencerGUI::SequencerLine::SequencerItem::onMousePress( int x, int y, int button )
+void SequencerItem::onMousePress( int x, int y, int button )
 {
 }
 
@@ -262,6 +262,19 @@ void SequencerGUI::SequencerLine::resize( )
 
     item->setPosition(d2i(sView->beatPxLength() * tickPosition),5,pattern->beats() * sView->beatPxLength(),20);
   }
+}
+
+std::vector<SequencerItem*> SequencerGUI::SequencerLine::itemsByPattern( SinglePattern * pattern )
+{
+  std::vector<SequencerItem*> list;
+  std::list<SequencerItem*>::iterator it = items.begin();
+  for ( ; it != items.end(); it++) {
+    SequencerItem* item = *it;
+    if (item->sequenceEntry()->pattern() == pattern) {
+      list.push_back(item);
+    }
+  }
+  return list;
 }
 
 // main class
@@ -403,7 +416,24 @@ void SequencerGUI::removePattern( SinglePattern * pattern )
   }
 }
 
+std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( SinglePattern * pattern )
+{
+  std::vector<SequencerItem*> list;
+
+  std::vector<SequencerLine*>::iterator it = lines.begin();
+  for (; it < lines.end(); it++) {
+    SequencerLine* line = *it;
+    std::vector<SequencerItem*> temp = line->itemsByPattern(pattern);
+    list.insert( list.end() , temp.begin(), temp.end());
+  }
+  return list;
+}
+
+
 }}
+
+
+
 
 
 

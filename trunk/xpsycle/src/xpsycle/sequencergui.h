@@ -40,13 +40,10 @@ namespace psycle {
 
 class SequencerBeatChangeLineal;
 
-class SequencerGUI : public NPanel
-{
-  public:
-  class SequencerLine : public NPanel {
+class SequencerGUI;
 
 
-    class SequencerItem : public NPanel {
+class SequencerItem : public NPanel {
       public:
        SequencerItem( SequencerGUI* seqGui );
        ~SequencerItem();
@@ -64,13 +61,15 @@ class SequencerGUI : public NPanel
 
       private:
 
-        NLabel* caption_;
         SequenceEntry* sequenceEntry_;
-
         SequencerGUI* sView;
 
-    };
+};
 
+class SequencerGUI : public NPanel
+{
+  public:
+  class SequencerLine : public NPanel {
     public :
 
      SequencerLine( SequencerGUI* seqGui );
@@ -88,6 +87,7 @@ class SequencerGUI : public NPanel
     void addItem(SinglePattern* pattern);
     void removeItems(SinglePattern* pattern);
 
+    std::vector<SequencerItem*> itemsByPattern(SinglePattern* pattern);
 
      virtual void resize();
 
@@ -148,6 +148,8 @@ public:
 
     void addPattern(SinglePattern* pattern);
     void removePattern(SinglePattern* pattern);
+
+    std::vector<SequencerItem*> guiItemsByPattern(SinglePattern* pattern);
 
     int beatPxLength() const;
 
