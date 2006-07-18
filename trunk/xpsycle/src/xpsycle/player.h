@@ -28,30 +28,16 @@ namespace psycle
 			Song * song_;
 
 		public:
-			/// Moves the cursor one line forward, changing the pattern if needed.
-			void AdvancePosition();
-			/// Initial Loop. Read new line and Interpretate the Global commands.
-			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
 			void ProcessGlobalEvent(const GlobalEvent & event);
 			/// Notify all machines that a new Tick() comes.
 			void NotifyNewLine();
 			/// Final Loop. Read new line for notes to send to the Machines
 			void ExecuteNotes( double beatOffset , PatternLine & line );
-			/// Function to englobe all the three functions above.
-			void ExecuteLine();
 
 //		PSYCLE__PRIVATE:
 		public:
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
-			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
-			bool _SPRChanged;
-			/// the line currently being played in the current pattern
-			int _lineCounter;
-			/// the sequence position currently being played
-			int _playPosition;
-			/// the pattern currently being played.
-			int _playPattern;
 			/// elapsed time since playing started. Units is seconds and the float type allows for storing milliseconds.
 			float _playTime;
 			/// elapsed time since playing started in minutes.It just serves to complement the previous variable
@@ -60,13 +46,8 @@ namespace psycle
 			/// the current beats per minute at which to play the song.
 			/// can be changed from the song itself using commands.
 			float bpm;
-			/// the current ticks per beat at which to play the song.
-			/// can be changed from the song itself using commands.
-			int tpb;
-			/// Contains the number of samples until a line change comes in.
-			int _samplesRemaining;
 			/// starts to play.
-			void Start(int pos,int line);
+			void Start(double pos);
 			/// wether this player has been started.
 			bool _playing;
 			/// wether this player should only play the selected block in the sequence.
@@ -91,13 +72,6 @@ namespace psycle
 
 			///\name sample rate
 			///\{
-				/// ...
-				void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
-				/// Returns the number of samples that it takes for each row of the pattern to be played
-				const int SamplesPerRow(){ return m_SamplesPerRow;};
-				/// Sets the number of samples that it takes for each row of the pattern to be played
-				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
-
 				void RecalcSPB() { SamplesPerBeat((m_SampleRate*60)/bpm); }
 				const float SamplesPerBeat(){ return m_SamplesPerBeat;};
 				void SamplesPerBeat(const float samplePerBeat){m_SamplesPerBeat = samplePerBeat;};
@@ -146,15 +120,49 @@ namespace psycle
 			/// dither handler
 			dsp::Dither dither;
 
+			float m_SamplesPerBeat;
+			int m_SampleRate;
+
+
+		///\name deprecated by multiseq
+		///\{
+		public:
+				/// ...
+				void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
+				/// Returns the number of samples that it takes for each row of the pattern to be played
+				const int SamplesPerRow(){ return m_SamplesPerRow;};
+				/// Sets the number of samples that it takes for each row of the pattern to be played
+				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
+			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
+			bool _SPRChanged;
+			/// the line currently being played in the current pattern
+			int _lineCounter;
+			/// the sequence position currently being played
+			int _playPosition;
+			/// the pattern currently being played.
+			int _playPattern;
+			/// Moves the cursor one line forward, changing the pattern if needed.
+			void AdvancePosition();
+			/// Initial Loop. Read new line and Interpretate the Global commands.
+			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
+			/// Function to englobe all the three functions above.
+			void ExecuteLine();
+			/// the current ticks per beat at which to play the song.
+			/// can be changed from the song itself using commands.
+			int tpb;
+			/// Contains the number of samples until a line change comes in.
+			int _samplesRemaining;
+
+
+		private:
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()
 			int m_SamplesPerRow;
-			float m_SamplesPerBeat;
-			int m_SampleRate;
 			short _patternjump;
 			short _linejump;
 			short _loop_count;
 			short _loop_line;
+		///\}
 		};
 	}
 }

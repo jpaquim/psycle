@@ -70,77 +70,6 @@ namespace psycle
 						else if ( value > BeatsPerMinType(999.99) ) m_BeatsPerMin = BeatsPerMinType(999.99);
 						else m_BeatsPerMin = value;
 					};
-
-					const int LinesPerBeat(){return m_LinesPerBeat;};
-					void LinesPerBeat(const int value)
-					{
-						if ( value < 1 )m_LinesPerBeat = 1;
-						else if ( value > 31 ) m_LinesPerBeat = 31;
-						else m_LinesPerBeat = value;
-					};
-			///\}
-
-			///\name patterns
-			///\{
-				public:
-					/// the number of pattern used in this song.
-					int GetNumPatternsUsed();
-					/// Returns the first unused pattern in the pPatternData[] Array.
-					int GetBlankPatternUnused(int rval = 0);
-					/// creates a new pattern.
-					bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-					/// deletes all the patterns of this song.
-					void DeleteAllPatterns();
-					/// Used to detect if an especific pattern index contains any data.
-					bool IsPatternUsed(int i);
-					/// removes a pattern from this song.
-					void RemovePattern(int ps);
-			///\}
-
-			///\name pattern tracks
-			///\{
-				public:
-					/// The number of tracks in each pattern of this song.
-					///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
-					/* unsigned */ int inline tracks() const throw() { return tracks_; }
-					/// The number of tracks in each pattern of this song.
-					///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
-					void inline tracks(/* unsigned */  int const tracks) throw() { assert(tracks >= 0); assert(tracks < MAX_TRACKS); this->tracks_ = tracks; }
-				private:
-					unsigned int tracks_;
-			///\}
-
-			///\name pattern low-level/memory access. \todo shouldn't be public considering it's way too low-level
-			///\{
-				public: // <-- argh!
-					/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
-					/// This function now is the same as doing &pPatternData[ps]
-//					PSYCLE__DEPRECATED("This sux.")
-					inline unsigned char * _ppattern(int ps)
-					{
-						if(!ppPatternData[ps]) return CreateNewPattern(ps);
-						return ppPatternData[ps];
-					};
-					/// Returns the start offset of the requested track of pattern ps in the
-					/// pPatternData Array and creates one if none exists.
-//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
-					inline unsigned char * _ptrack(int ps, int track)
-					{
-						if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
-						return ppPatternData[ps] + (track*EVENT_SIZE);
-					};
-					/// Returns the start offset of the requested line of the track of pattern ps in
-					/// the pPatternData Array and creates one if none exists.
-//					PSYCLE__DEPRECATED("This sux.")
-					inline unsigned char * _ptrackline(int ps, int track, int line)
-					{
-						if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
-						return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
-					};
-					/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
-					///\todo doc ... how does this differs from bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
-					unsigned char * CreateNewPattern(int ps);
 			///\}
 
 			///\name machines
@@ -328,47 +257,6 @@ namespace psycle
 					char Comment[256];
 				///\}
 
-				///\name patterns
-				///\{
-					/// Pattern name 
-					///\todo hardcoded limits and wastes
-					char patternName[MAX_PATTERNS][32];
-
-					/// number of lines of each pattern
-					///\todo hardcoded limits and wastes
-					int patternLines[MAX_PATTERNS];
-
-					/// Array of Pattern data.
-					///\todo hardcoded limits and wastes
-//					PSYCLE__DEPRECATED("This sux.") //preprocessor macro stuff sux more
-					unsigned char * ppPatternData[MAX_PATTERNS];
-
-					#if 0 // more lightweight
-						class pattern
-						{
-							private:
-								std::string name;
-								unsigned int lines, tracks;
-								std::vector<PatternEntries> entries;
-						};
-						std::vector<pattern> patterns;
-					#endif
-				///\}
-
-				///\name pattern sequence
-				///\{
-					/// Length, in patterns, of the sequence.
-					int playLength;
-
-					/// Sequence of patterns.
-					///\todo hardcoded limits and wastes
-					unsigned char playOrder[MAX_SONG_POSITIONS];
-
-					/// Selection of patterns (for the "playBlock()" play mode)
-					///\todo hardcoded limits and wastes
-					bool playOrderSel[MAX_SONG_POSITIONS];
-				///\}
-					void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 				///\name machines
 				///\{
 					/// Sort of semaphore to not allow doing something with machines when they are changing (deleting,creating, etc..)
@@ -397,10 +285,6 @@ namespace psycle
 					/// the initial beats per minute (BPM) when the song is started playing.
 					/// This can be changed in patterns using a command, but this value will not be affected.
 					float m_BeatsPerMin;
-
-					/// the initial ticks per beat (TPB) when the song is started playing.
-					/// This can be changed in patterns using a command, but this value will not be affected.
-					int m_LinesPerBeat;
 				///\}
 
 				///\name various player-related stuff
@@ -474,6 +358,130 @@ namespace psycle
 
 				/// Loader for psycle fileformat version 2.
 				bool LoadOldFileFormat(RiffFile* pFile, bool fullopen);
+
+
+
+
+
+
+			///\name deprecated by multiseq
+			///\{
+			public:
+				/// the initial ticks per beat (TPB) when the song is started playing.
+				/// This can be changed in patterns using a command, but this value will not be affected.
+				int m_LinesPerBeat;
+				///\name patterns
+				///\{
+					/// Pattern name 
+					///\todo hardcoded limits and wastes
+					char patternName[MAX_PATTERNS][32];
+
+					/// number of lines of each pattern
+					///\todo hardcoded limits and wastes
+					int patternLines[MAX_PATTERNS];
+
+					/// Array of Pattern data.
+					///\todo hardcoded limits and wastes
+//					PSYCLE__DEPRECATED("This sux.") //preprocessor macro stuff sux more
+					unsigned char * ppPatternData[MAX_PATTERNS];
+
+					#if 0 // more lightweight
+						class pattern
+						{
+							private:
+								std::string name;
+								unsigned int lines, tracks;
+								std::vector<PatternEntries> entries;
+						};
+						std::vector<pattern> patterns;
+					#endif
+				///\}
+
+				///\name pattern sequence
+				///\{
+					/// Length, in patterns, of the sequence.
+					int playLength;
+
+					/// Sequence of patterns.
+					///\todo hardcoded limits and wastes
+					unsigned char playOrder[MAX_SONG_POSITIONS];
+
+					/// Selection of patterns (for the "playBlock()" play mode)
+					///\todo hardcoded limits and wastes
+					bool playOrderSel[MAX_SONG_POSITIONS];
+				///\}
+				///\name pattern low-level/memory access. \todo shouldn't be public considering it's way too low-level
+				///\{
+					public: // <-- argh!
+						/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
+						/// This function now is the same as doing &pPatternData[ps]
+	//					PSYCLE__DEPRECATED("This sux.")
+						inline unsigned char * _ppattern(int ps)
+						{
+							if(!ppPatternData[ps]) return CreateNewPattern(ps);
+							return ppPatternData[ps];
+						};
+						/// Returns the start offset of the requested track of pattern ps in the
+						/// pPatternData Array and creates one if none exists.
+	//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
+						inline unsigned char * _ptrack(int ps, int track)
+						{
+							if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
+							return ppPatternData[ps] + (track*EVENT_SIZE);
+						};
+						/// Returns the start offset of the requested line of the track of pattern ps in
+						/// the pPatternData Array and creates one if none exists.
+	//					PSYCLE__DEPRECATED("This sux.")
+						inline unsigned char * _ptrackline(int ps, int track, int line)
+						{
+							if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
+							return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
+						};
+						/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
+						///\todo doc ... how does this differs from bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
+	//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
+						unsigned char * CreateNewPattern(int ps);
+				///\}
+	
+						const int LinesPerBeat(){return m_LinesPerBeat;};
+						void LinesPerBeat(const int value)
+						{
+							if ( value < 1 )m_LinesPerBeat = 1;
+							else if ( value > 31 ) m_LinesPerBeat = 31;
+							else m_LinesPerBeat = value;
+						};
+				///\name patterns
+				///\{
+					public:
+						/// the number of pattern used in this song.
+						int GetNumPatternsUsed();
+						/// Returns the first unused pattern in the pPatternData[] Array.
+						int GetBlankPatternUnused(int rval = 0);
+						/// creates a new pattern.
+						bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
+						/// deletes all the patterns of this song.
+						void DeleteAllPatterns();
+						/// Used to detect if an especific pattern index contains any data.
+						bool IsPatternUsed(int i);
+						/// removes a pattern from this song.
+						void RemovePattern(int ps);
+				///\}
+						void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
+
+	
+				///\name pattern tracks
+				///\{
+					public:
+						/// The number of tracks in each pattern of this song.
+						///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
+						/* unsigned */ int inline tracks() const throw() { return tracks_; }
+						/// The number of tracks in each pattern of this song.
+						///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
+						void inline tracks(/* unsigned */  int const tracks) throw() { assert(tracks >= 0); assert(tracks < MAX_TRACKS); this->tracks_ = tracks; }
+					private:
+						unsigned int tracks_;
+				///\}
+			///\}
 		};
 	}
 }

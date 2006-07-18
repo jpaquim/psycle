@@ -20,7 +20,7 @@
 #ifndef ZOOMBAR_H
 #define ZOOMBAR_H
 
-#include <npanel.h>
+#include <ngrs/npanel.h>
 
 /**
 @author Stefan Nattkemper

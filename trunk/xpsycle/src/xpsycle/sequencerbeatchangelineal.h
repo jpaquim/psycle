@@ -35,7 +35,7 @@ namespace psycle {
 
 class SequencerGUI;
 class PatternSequence;
-class BpmChangeEvent;
+class GlobalEvent;
 
 class SequencerBeatChangeLineal : public NPanel
 {
@@ -46,7 +46,7 @@ class SequencerBeatChangeLineal : public NPanel
         BeatChangeTriangle(SequencerGUI * gui);
         ~BeatChangeTriangle();
 
-        void setBpmChangeEvent(BpmChangeEvent* event);
+        void setBpmChangeEvent(GlobalEvent* event);
 
         virtual void onMove(const NMoveEvent & moveEvent);
         virtual void paint( NGraphics* g);
@@ -61,7 +61,7 @@ class SequencerBeatChangeLineal : public NPanel
         int tWidth;
         int tHeight;
 
-        BpmChangeEvent* bpmChangeEvent_;
+        GlobalEvent* bpmChangeEvent_;
 
         void onKeyPress(const NKeyEvent & event);
 
