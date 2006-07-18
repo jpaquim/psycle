@@ -135,22 +135,28 @@ SequencerBeatChangeLineal::~SequencerBeatChangeLineal()
 
 void SequencerBeatChangeLineal::paint( NGraphics * g )
 {
+  NRect area = g->repaintArea().rectClipBox();
+
   g->setForeground(NColor(0,0,220));
 
   int cw = clientWidth();
   int ch = clientHeight();
 
-  std::string timeScaleText = "bpm change";
+  /*std::string timeScaleText = "bpm change";
   int rightIdent = 2;
   int scaleTextWidth = g->textWidth(timeScaleText) + rightIdent;
-  g->drawText(cw - scaleTextWidth, 10 + 2 + g->textAscent(), timeScaleText);
+  g->drawText(cw - scaleTextWidth + scrollDx(), 10 + 2 + g->textAscent(), timeScaleText);*/
 
   g->setForeground(NColor(220,220,220));
 
-  g->drawLine(0, 10, cw, 10);
+  g->drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
 
-  for (int i = 0; i < cw / sView->beatPxLength() ; i++) {
-     if (! (i % 4)) {
+  int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
+  int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
+
+
+  for (int i = start; i < end ; i++) {
+     if (! (i % 16)) {
         g->setForeground(NColor(180,180,180));
         g->drawLine(i* sView->beatPxLength(),10,d2i(i*sView->beatPxLength()), 0);
      }
@@ -190,24 +196,5 @@ void SequencerBeatChangeLineal::resize( )
 }
 
 
-}}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} // end of host namespace
+} // end of psycle namespace
