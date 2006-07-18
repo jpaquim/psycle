@@ -96,6 +96,8 @@ namespace psycle
 			SequenceEntry(SequenceLine* line);
 			~SequenceEntry();
 
+			double tickPosition() const;
+
 			sigslot::signal1<SequenceEntry*> beforeDelete;
 
 			void setPattern(SinglePattern* pattern);

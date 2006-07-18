@@ -33,6 +33,7 @@ class NScrollBar;
 class NLabel;
 class NToolBar;
 class NListBox;
+class ZoomBar;
 
 namespace psycle {
 	namespace host {
@@ -85,6 +86,8 @@ class SequencerGUI : public NPanel
     SequenceLine* sequenceLine();
 
     void addItem(SinglePattern* pattern);
+
+     virtual void resize();
 
    private:
 
@@ -164,6 +167,8 @@ private:
     NScrollBar* hBar;
     NScrollBar* vBar;
 
+    ZoomBar* zoomHBar;
+
     Area* scrollArea_;
     NToolBar* toolBar_;
     NListBox* patternBox_;
@@ -172,6 +177,7 @@ private:
     void onNewPattern(NButtonEvent* ev);
     void onSequencerLineClick(SequencerLine* line);
 
+    void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
 };
 
 }}
