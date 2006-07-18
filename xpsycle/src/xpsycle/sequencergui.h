@@ -78,8 +78,8 @@ class SequencerGUI : public NPanel
     signal1<SequencerLine*> click;
 
     virtual void paint(NGraphics* g);
-
     virtual void onMousePress(int x, int y, int button);
+    virtual int preferredWidth() const;
 
     void setSequenceLine(SequenceLine* line);
     SequenceLine* sequenceLine();
@@ -129,7 +129,8 @@ class Area : public NPanel {
     void drawTimeGrid(NGraphics* g);
 
     virtual void paint(NGraphics* g);
-
+    virtual int preferredWidth() const;
+    virtual void resize();
 
   private:
 
@@ -156,6 +157,8 @@ public:
     SequencerLine* selectedLine_;
 
 
+    virtual void resize();
+
 private:
 
     int counter;
@@ -180,8 +183,10 @@ private:
     void onNewTrack(NButtonEvent* ev);
     void onNewPattern(NButtonEvent* ev);
     void onSequencerLineClick(SequencerLine* line);
-
     void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
+    void onHScrollBar(NObject* sender, int pos);
+    void onVScrollBar(NObject* sender, int pos);
+
 
     std::vector<SequencerLine*> lines;
 };
