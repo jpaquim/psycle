@@ -37,6 +37,38 @@ namespace psycle
 	namespace host
 	{
 
+		class GlobalEvent
+		{
+			public:
+				GlobalEvent();
+				GlobalEvent(float parameter_);
+				virtual ~GlobalEvent();
+	
+				enum Types {
+					BPM_CHANGE,
+					SET_VOLUME,
+					SET_PANNING,
+					JUMP_TO,
+					SET_BYPASS,
+					UNSET_BYPASS,
+					SET_MUTE,
+					UNSET_MUTE,
+					LOOP_TO
+				} type;
+
+				void setParameter(float parameter);
+				float parameter() const;
+				void setTarget(int target);
+				int target() const;
+				void setTarget2(int target);
+				int target2() const;
+
+				private:
+					float parameter_;
+					int target_, target2_;
+};
+
+
 		class SequenceLine;
 
 		class BpmChangeEvent {
