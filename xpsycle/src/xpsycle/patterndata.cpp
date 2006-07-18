@@ -52,6 +52,17 @@ namespace psycle
 			return pattern;
 		}
 
+		bool PatternCategory::removePattern( SinglePattern * pattern )
+		{
+			iterator it = find(begin(), end(), pattern);
+			if ( it != end() ) {
+				SinglePattern* pattern = *it;
+				erase(it);
+				delete(pattern);
+				return true;
+			}
+			return false;
+		}
 
 		void PatternCategory::setName( const std::string & name )
 		{
@@ -97,8 +108,21 @@ namespace psycle
 			return category;
 		}
 
+		void PatternData::removeSinglePattern( SinglePattern * pattern )
+		{
+			iterator it = begin();
+			for ( ; it < end(); it++) {
+				PatternCategory* cat = *it;
+				if (cat->removePattern(pattern)) break;
+			}
+		}
+
 	}
 }
+
+
+
+
 
 
 

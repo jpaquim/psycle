@@ -220,9 +220,20 @@ void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
   SequencerItem* item = new SequencerItem(sView);
     item->setPosition(d2i(sView->beatPxLength() * endTick),5,pattern->beats() * sView->beatPxLength() ,20);
     item->setSequenceEntry(sequenceLine()->createEntry(pattern, endTick));
-    item->sequenceEntry()->beforeDelete.connect( this,&SequencerGUI::SequencerLine::onDeleteEntry);
     items.push_back(item);
   add(item);
+}
+
+void SequencerGUI::SequencerLine::removeItems( SinglePattern * pattern )
+{
+  std::list<SequencerItem*>::iterator it = items.begin();
+  while ( it != items.end()) {
+    SequencerItem* item = *it;
+    if (item->sequenceEntry()->pattern() == pattern) {
+      items.erase(it++);
+      removeChild(item);
+    } else it++;
+	}
 }
 
 void SequencerGUI::SequencerLine::onMousePress( int x, int y, int button )
@@ -240,26 +251,11 @@ SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
   return seqLine_;
 }
 
-void SequencerGUI::SequencerLine::onDeleteEntry( SequenceEntry * entry )
-{
-  if (!lock) {
-    std::vector<SequencerItem*>::iterator it = items.begin();
-    for ( ; it < items.end(); it++) {
-      SequencerItem* item = *it;
-      if (item->sequenceEntry() == entry) {
-         items.erase(it);
-         removeChild(item);
-         repaint();
-         break;
-      }
-    }
-  }
-}
 
 void SequencerGUI::SequencerLine::resize( )
 {
-  std::vector<SequencerItem*>::iterator it = items.begin();
-  for ( ; it < items.end(); it++) {
+  std::list<SequencerItem*>::iterator it = items.begin();
+  for ( ; it != items.end(); it++) {
     SequencerItem* item = *it;
     double tickPosition = item->sequenceEntry()->tickPosition();
     SinglePattern* pattern = item->sequenceEntry()->pattern();
@@ -343,6 +339,7 @@ PatternSequence * SequencerGUI::patternSequence( )
 void SequencerGUI::addSequencerLine( )
 {
   SequencerLine* line = new SequencerLine( this );
+  lines.push_back(line);
   line->setSequenceLine( patternSequence_->createNewLine() );
   line->click.connect(this, &SequencerGUI::onSequencerLineClick);
   if (!lastLine)
@@ -397,7 +394,20 @@ void SequencerGUI::onZoomHBarPosChanged( ZoomBar * zoomBar, double newPos )
   repaint();
 }
 
+void SequencerGUI::removePattern( SinglePattern * pattern )
+{
+  std::vector<SequencerLine*>::iterator it = lines.begin();
+  for (; it < lines.end(); it++) {
+    SequencerLine* line = *it;
+    line->removeItems(pattern);
+  }
+}
+
 }}
+
+
+
+
 
 
 

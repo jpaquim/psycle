@@ -196,7 +196,8 @@ void MainWindow::initViews( )
 {
   pane()->add(childView_);
   childView_->setTitleBarText();
-  sequencerBar_->setPatternData( Global::pSong()->patternData() );
+  sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
+  sequencerBar_->setPatternView( childView_->patternView() );
 }
 
 void MainWindow::initBars( )
@@ -239,8 +240,6 @@ void MainWindow::initBars( )
 
   pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
   sequencerBar_->added.connect(this,&MainWindow::onSeqAdded);
-
-  sequencerBar_->selected.connect(this,&MainWindow::onSeqSelected);
 
   updateComboIns(true);
   insCombo_->setIndex(0);
@@ -1328,11 +1327,6 @@ void MainWindow::onMachineMoved( Machine * mac, int x, int y )
   statusBar_->repaint();
 }
 
-void MainWindow::onSeqSelected( SinglePattern* pattern )
-{
-  childView_->patternView()->setPattern(pattern);
-  childView_->patternView()->repaint();
-}
 
 void MainWindow::onLineChanged(int line) {
   linePosStatusItem->setText("Line: "+stringify(line));

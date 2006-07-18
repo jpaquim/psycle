@@ -42,8 +42,6 @@ namespace psycle
 
 			~SinglePattern();
 
-			sigslot::signal1<SinglePattern*> beforeDelete;
-
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
 

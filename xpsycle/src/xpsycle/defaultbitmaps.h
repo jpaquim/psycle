@@ -58,6 +58,7 @@ public:
     NBitmap & open();
     NBitmap & pattern_header_skin();
     NBitmap & patterns();
+    NBitmap & delPattern();
     NBitmap & playselpattern();
     NBitmap & playstart();
     NBitmap & play();
@@ -132,6 +133,7 @@ private:
     NBitmap stop_flat_;
     NBitmap tbmainknob_;
     NBitmap undo_;
+    NBitmap delPattern_;
 
 };
 

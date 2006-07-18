@@ -94,7 +94,6 @@ namespace psycle
 
 		SequenceEntry::~ SequenceEntry( )
 		{
-			beforeDelete.emit(this);
 		}
 
 		void SequenceEntry::setPattern( SinglePattern * pattern )
@@ -157,11 +156,20 @@ namespace psycle
 			SequenceEntry* entry = new SequenceEntry(this);
 			entry->setPattern(pattern);
 			insert(value_type(position, entry));
-			entry->pattern()->beforeDelete.connect(this,&SequenceLine::onDeletePattern);
-
 			return entry;
 		}
 
+		void SequenceLine::removeSinglePatternEntries( SinglePattern* pattern )
+		{
+			iterator it = begin();
+			while ( it != end() ) {
+				SequenceEntry* entry = it->second;
+				if ( entry->pattern() == pattern) {
+					delete entry;
+					erase(it++);
+				} else it++;
+			}
+		}
 
 		double SequenceLine::tickLength( ) const
 		{
@@ -176,16 +184,6 @@ namespace psycle
 			return patternSequence_;
 		}
 
-		void SequenceLine::onDeletePattern( SinglePattern * pattern )
-		{
-			// todo rework deleting at all!
-			for (iterator it = begin(); it != end(); it++) {
-				if ( it->second->pattern() == pattern) {
-					erase(it);
-					break;
-				}
-			}
-		}
 
 		void SequenceLine::MoveEntry(SequenceEntry* entry, double newpos)
 		{
@@ -238,10 +236,9 @@ namespace psycle
 			return line;
 		}
 
-//todo move pattern data to here
-//		PatternData* PatternSequence::patternData() {
-//			return &patternData_;
-//		}
+		PatternData* PatternSequence::patternData() {
+			return &patternData_;
+		}
 
 		void PatternSequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
 		{
@@ -310,15 +307,18 @@ namespace psycle
 			return globalEvents_;
 		}
 
+		void PatternSequence::removeSinglePattern( SinglePattern * pattern )
+		{
+			for(iterator it = begin(); it != end(); ++it) {
+				(*it)->removeSinglePatternEntries(pattern);
+			}
+			patternData_.removeSinglePattern(pattern);
+		}
+
 	} // end of host namespace
+
+
 }
-
-
-
-
-
-
-
 
 
 

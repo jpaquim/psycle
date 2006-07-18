@@ -20,7 +20,7 @@
 #ifndef SEQUENCERBAR_H
 #define SEQUENCERBAR_H
 
-#include "patterndata.h"
+#include "patternsequence.h"
 #include "patternboxproperties.h"
 
 #include <map>
@@ -44,7 +44,7 @@ class N7SegDisplay;
 namespace psycle { namespace host {
 
 class PatternView;
-
+class SequencerGUI;
 
 class CategoryTreeNode: public NTreeNode {
 public:
@@ -107,10 +107,11 @@ public:
 
     ~SequencerBar();
 
-    signal1<SinglePattern*> selected;
     signal1<SinglePattern*> added;
+    signal1<SinglePattern*> removed;
 
-    void setPatternData(PatternData* data);
+    void setSequenceGUI(SequencerGUI* sequenceGUI);
+    void setPatternView(PatternView* patternView);
 
     bool followSong() const;
 
@@ -120,8 +121,8 @@ public:
 
 private:
 
-
-    PatternData* patternData_;
+    SequencerGUI* seqGui;
+    PatternView* patView;
 
     void init();
 
@@ -140,6 +141,7 @@ private:
 
     void onNewCategory( NButtonEvent * ev );
     void onNewPattern( NButtonEvent* ev );
+    void onDeletePattern( NButtonEvent* ev );
 
     void onItemSelected(NItemEvent* ev);
     void onPatternAdd(NButtonEvent* ev);

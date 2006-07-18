@@ -42,8 +42,11 @@ namespace psycle
 			const std::string & name() const;
 
 			SinglePattern* createNewPattern(const std::string & name);
+			bool removePattern(SinglePattern* pattern);
+
 			void setColor(long color);
 			long color() const;
+
 
 		private:
 
@@ -60,6 +63,7 @@ namespace psycle
 			~PatternData();
 
 			PatternCategory* createNewCategory(const std::string & name);
+			void removeSinglePattern(SinglePattern* pattern);
 
 		};
 
