@@ -491,19 +491,29 @@ void SequencerGUI::onHScrollBar( NObject * sender, int pos )
 
     int diffX  = newPos - scrollArea_->scrollDx();
     if (diffX < scrollArea_->clientWidth()) {
+      // scrolls the area
       NRect rect = scrollArea_->blitMove(diffX,0, scrollArea_->absoluteSpacingGeometry());
       scrollArea_->setScrollDx(newPos);
       window()->repaint(scrollArea_,rect);
 
+      // scrolls the beat lineal
       rect = beatLineal_->blitMove(diffX,0, beatLineal_->absoluteSpacingGeometry());
       beatLineal_->setScrollDx(newPos);
       window()->repaint(beatLineal_,rect);
       beatLineal_->repaint();
+
+      // scrolls the beatchangelineal
+      rect = beatChangeLineal_->blitMove(diffX,0, beatChangeLineal_->absoluteSpacingGeometry());
+      beatChangeLineal_->setScrollDx(newPos);
+      window()->repaint(beatChangeLineal_,rect);
+      beatChangeLineal_->repaint();
     } else {
       scrollArea_->setScrollDx(newPos);
       scrollArea_->repaint(scrollArea_);
       beatLineal_->setScrollDx(newPos);
       beatLineal_->repaint();
+      beatChangeLineal_->setScrollDx(newPos);
+      beatChangeLineal_->repaint();
     }
   }
 }
