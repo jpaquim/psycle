@@ -522,7 +522,7 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
 
       pPlayer->_playBlock=false;
       lastpostick=0;
-      pPlayer->Start(0,0);
+      pPlayer->Start(0.0);
     break;
     case 1:
         name = this->numberEdt->text();
@@ -538,7 +538,8 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
         }
         lastpostick=pstart;
         pSong->playOrderSel[cont]=true;
-        pPlayer->Start(pstart,0);
+	pPlayer->Start(0.0);
+        //pPlayer->Start(pstart,0);
         pPlayer->_playBlock=true;
         pPlayer->_loopSong=false;
     break;
@@ -556,7 +557,8 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
         progressBar->setRange(0,j);
 
         lastpostick=pstart;
-        pPlayer->Start(pstart,0);
+	pPlayer->Start(0.0);
+//        pPlayer->Start(pstart,0);
         pPlayer->_playBlock=true;
         pPlayer->_loopSong=false;
     break;

@@ -78,31 +78,6 @@ namespace psycle
 		}
 
 
-		BpmChangeEvent::BpmChangeEvent( )
-		{
-			bpm_ = 125.0f;
-		}
-
-		BpmChangeEvent::BpmChangeEvent( float bpm )
-		{
-			bpm_ = bpm;
-		}
-
-		BpmChangeEvent::~ BpmChangeEvent( )
-		{
-		}
-
-		void BpmChangeEvent::setBpm( float bpm )
-		{
-			bpm_ = bpm;
-		}
-
-		float BpmChangeEvent::bpm( ) const
-		{
-			return bpm_;
-		}
-
-
 		// pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
 
 		SequenceEntry::SequenceEntry( )
@@ -244,8 +219,6 @@ namespace psycle
 		// PatternSequence
 		PatternSequence::PatternSequence()
 		{
-			std::map<double, BpmChangeEvent*>::iterator it = bpmChangeEvents.begin();
-			for ( it; it != bpmChangeEvents.end(); it++) delete it->second;
 		}
 
 
@@ -253,6 +226,8 @@ namespace psycle
 		{
 			for(iterator it = begin(); it != end(); ++it)
 				delete *it;
+			GlobalIter it = globalEvents_.begin();
+			for (; it != globalEvents_.end(); it++) delete it->second;
 		}
 
 
@@ -290,49 +265,49 @@ namespace psycle
 
 		double PatternSequence::GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive)
 		{
-			std::map<double, BpmChangeEvent*>::iterator iter
-				= ( bInclusive ?
-				  bpmChangeEvents.lower_bound(start) :
-				  bpmChangeEvents.upper_bound(start) );
-
-			if(iter != bpmChangeEvents.end() && iter->first < start+length)
+			GlobalIter firstIt = ( bInclusive ?
+				  	globalEvents_.lower_bound(start) :
+				  	globalEvents_.upper_bound(start) );
+			if(firstIt != globalEvents_.end() && firstIt->first < start+length)
 			{
-				GlobalEvent* bpmchange = new GlobalEvent(iter->second->bpm());
-				bpmchange->setType(GlobalEvent::BPM_CHANGE);
-				globals.push_back(bpmchange);
-				return iter->first;
+				double pos = firstIt->first;
+				GlobalIter lastIt = globalEvents_.upper_bound(pos);
+				for(; firstIt != lastIt; ++firstIt)
+					globals.push_back(firstIt->second);
+				return pos;
 			}
 			return start+length;
 		}
 
-		BpmChangeEvent * PatternSequence::createBpmChangeEntry( double position , float bpm)
+		GlobalEvent * PatternSequence::createBpmChangeEntry( double position , float bpm)
 		{
-			BpmChangeEvent* bpmEvent = new BpmChangeEvent(bpm);
-			bpmChangeEvents[position] = bpmEvent;
+			GlobalEvent* bpmEvent = new GlobalEvent(bpm);
+			bpmEvent->setType(GlobalEvent::BPM_CHANGE);
+			globalEvents_.insert(GlobalMap::value_type(position, bpmEvent));
 
 			return bpmEvent;
 		}
 
-		void PatternSequence::MoveBpmChangeEntry( BpmChangeEvent * entry, double newpos )
+		void PatternSequence::moveGlobalEvent( GlobalEvent * entry, double newpos )
 		{
-			std::map<double, BpmChangeEvent*>::iterator iter = bpmChangeEvents.begin();
-			for(; iter!= bpmChangeEvents.end(); ++iter)
+			GlobalIter iter = globalEvents_.begin();
+			for(; iter!= globalEvents_.end(); ++iter)
 			{
 				if(iter->second==entry)
 				break;
 			}
-			if(iter!=bpmChangeEvents.end())
+			if(iter!=globalEvents_.end())
 			{
 				double oldpos = iter->first;
-				bpmChangeEvents.erase(iter);
-				bpmChangeEvents[newpos] = entry;
+				globalEvents_.erase(iter);
+				globalEvents_.insert(GlobalMap::value_type(newpos, entry) );
 			}
 
 		}
 
-		const std::map< double, BpmChangeEvent * > & PatternSequence::bpmChanges( )
+		const PatternSequence::GlobalMap & PatternSequence::globalEvents( )
 		{
-			return bpmChangeEvents;
+			return globalEvents_;
 		}
 
 	} // end of host namespace

@@ -71,24 +71,10 @@ namespace psycle
 					float parameter_;
 					int target_, target2_;
 					GlobalType type_;
-
-};
+		};
 
 
 		class SequenceLine;
-
-		class BpmChangeEvent {
-			public:
-					BpmChangeEvent();
-					BpmChangeEvent(float bpm);
-					~BpmChangeEvent();
-
-					void setBpm( float bpm );
-					float bpm() const;
-
-			private:
-					float bpm_;
-    };
 
 		class SequenceEntry {
 		public:
@@ -145,26 +131,30 @@ namespace psycle
 		class PatternSequence : public std::vector<SequenceLine*>,public sigslot::has_slots<> {
 		public:
 			PatternSequence();
-
 			~PatternSequence();
 
+			typedef std::multimap<double, GlobalEvent*> GlobalMap;
+			typedef GlobalMap::iterator GlobalIter;
+
 			SequenceLine* createNewLine();
+
 			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
-
-			//PatternData* patternData();
-			BpmChangeEvent* createBpmChangeEntry(double position, float bpm);
-			void MoveBpmChangeEntry(BpmChangeEvent* entry, double newpos);
-
-			const std::map<double, BpmChangeEvent*> & bpmChanges();
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
 			///\return the beat position of the global events, or if there are none, start+length.
 			double GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive);
+
+			//PatternData* patternData();
+
+			GlobalEvent* createBpmChangeEntry(double position, float bpm);
+			void moveGlobalEvent(GlobalEvent* entry, double newpos);
+			const GlobalMap & globalEvents();
+
 		private:
 
 			//PatternData patternData_; todo move patterndata to here
-			std::map<double, BpmChangeEvent*> bpmChangeEvents;
+			GlobalMap globalEvents_;
 
 		};
 	}

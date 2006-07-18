@@ -22,6 +22,7 @@
 #include "patternsequence.h"
 #include <ngrs/nfontmetrics.h>
 #include <ngrs/nedit.h>
+#include <stdexcept>
 
 namespace psycle {
 	namespace host {
@@ -64,10 +65,11 @@ SequencerBeatChangeLineal::BeatChangeTriangle::~ BeatChangeTriangle( )
 {
 }
 
-void SequencerBeatChangeLineal::BeatChangeTriangle::setBpmChangeEvent( BpmChangeEvent * event )
+void SequencerBeatChangeLineal::BeatChangeTriangle::setBpmChangeEvent( GlobalEvent * event )
 {
+  if(event->type() != GlobalEvent::BPM_CHANGE ) throw std::invalid_argument("Wrong global event type in setBpmChangeEvent()");
   bpmChangeEvent_ = event;
-  bpmEdt_->setText( stringify( event->bpm() ) );
+  bpmEdt_->setText( stringify( event->parameter() ) );
 }
 
 void SequencerBeatChangeLineal::BeatChangeTriangle::paint( NGraphics * g )
@@ -106,12 +108,12 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::resize( )
 
 void SequencerBeatChangeLineal::BeatChangeTriangle::onMove( const NMoveEvent & moveEvent )
 {
-  sView->patternSequence()->MoveBpmChangeEntry(bpmChangeEvent_, left() / (double) sView->beatPxLength() );
+  sView->patternSequence()->moveGlobalEvent(bpmChangeEvent_, left() / (double) sView->beatPxLength() );
 }
 
 void SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress( const NKeyEvent & event )
 {
-  bpmChangeEvent_->setBpm( str<float>(bpmEdt_->text()) );
+  bpmChangeEvent_->setParameter( str<float>(bpmEdt_->text()) );
 }
 
 // the Main class of the BeatChangeLineal
@@ -164,7 +166,7 @@ void SequencerBeatChangeLineal::onMouseDoublePress( int x, int y, int button )
 {
   if (button == 1) {
     BeatChangeTriangle* triangle = new BeatChangeTriangle(sView);
-      BpmChangeEvent* bpmChangeEvent = sView->patternSequence()-> createBpmChangeEntry(x / (double) sView->beatPxLength() ,120.0f);
+      GlobalEvent* bpmChangeEvent = sView->patternSequence()-> createBpmChangeEntry(x / (double) sView->beatPxLength() ,120.0f);
       triangle->setBpmChangeEvent(bpmChangeEvent);
       triangle->setPosition(x, 10,30,30);
     add(triangle);

@@ -43,15 +43,15 @@ namespace psycle
 			if(_recording) _outputWaveFile.Close();
 		}
 
-		void Player::Start(int pos, int line)
+		void Player::Start(double pos)
 		{
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
-			_lineCounter = line;
+			_lineCounter = 0; //line;
 			_SPRChanged = false;
-			_playPosition= pos;
+			_playPosition= 0; //pos;
 			_playPattern = song().playOrder[_playPosition];
 			_playTime = 0;
 			_playTimem = 0;
@@ -61,7 +61,7 @@ namespace psycle
 			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
-			playPos = 0.0;
+			playPos = pos;
 			ExecuteLine();
 		}
 
@@ -549,7 +549,6 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 					   ; ++globIt)
 					{
 						ProcessGlobalEvent(*(*globIt));
-						delete *globIt;
 					}
 
 					bFirst=false;
