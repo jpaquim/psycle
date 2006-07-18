@@ -185,7 +185,7 @@ public:
     virtual void erase(NVisualComponent* child);
     virtual void erase();
 
-    const std::vector<NVisualComponent*> & visualComponents();
+    const std::vector<NVisualComponent*> & visualComponents() const;
 
     virtual void setPreferredSize(int width, int height);
 
