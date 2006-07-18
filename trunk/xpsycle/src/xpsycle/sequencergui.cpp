@@ -56,6 +56,8 @@ void SequencerGUI::SequencerBeatLineal::paint( NGraphics * g )
 
 void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
 {
+  NRect area = g->repaintArea().rectClipBox();
+
   g->setForeground(NColor(0,0,220));
 
   int cw = clientWidth();
@@ -68,17 +70,18 @@ void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
 
   g->setForeground(NColor(220,220,220));
 
-  g->drawLine(0, ch - 10, cw, ch - 10);
+  g->drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
 
-  for (int i = 0; i < cw / sView->beatPxLength() ; i++) {
+  int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
+  int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
+
+  for (int i = start ; i < end ; i++) {
      if (! (i % 16)) {
         g->setForeground(NColor(180,180,180));
         g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
-        if (i * sView->beatPxLength() < cw/* - scaleTextWidth*/) {
-          std::string beatLabel = stringify(i/4);
-          int textWidth = g->textWidth(beatLabel);
-          g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
-        }
+        std::string beatLabel = stringify(i/4);
+        int textWidth = g->textWidth(beatLabel);
+        g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
      }
      else {
         g->setForeground(NColor(220,220,220));
@@ -215,7 +218,7 @@ void SequencerItem::resize( )
 void SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
   sequenceEntry_->track()->MoveEntry(sequenceEntry_, left() / (double) sView->beatPxLength() );
-
+  sView->resize();
 }
 
 void SequencerItem::onMousePress( int x, int y, int button )
@@ -491,9 +494,16 @@ void SequencerGUI::onHScrollBar( NObject * sender, int pos )
       NRect rect = scrollArea_->blitMove(diffX,0, scrollArea_->absoluteSpacingGeometry());
       scrollArea_->setScrollDx(newPos);
       window()->repaint(scrollArea_,rect);
+
+      rect = beatLineal_->blitMove(diffX,0, beatLineal_->absoluteSpacingGeometry());
+      beatLineal_->setScrollDx(newPos);
+      window()->repaint(beatLineal_,rect);
+      beatLineal_->repaint();
     } else {
       scrollArea_->setScrollDx(newPos);
       scrollArea_->repaint(scrollArea_);
+      beatLineal_->setScrollDx(newPos);
+      beatLineal_->repaint();
     }
   }
 }
