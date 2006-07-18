@@ -21,6 +21,12 @@
 #define ALSAOUT_H
 
 #include "audiodriver.h"
+
+#if defined XPSYCLE__CONFIGURATION
+	#include <xpsycle/alsaout_conditional_build.h>
+#endif
+#if !defined XPSYCLE__NO_ALSA
+
 #include <alsa/asoundlib.h>
 #include <pthread.h>
 
@@ -106,4 +112,5 @@ private:
 
 };
 
+#endif // !defined XPSYCLE__NO_ALSA
 #endif

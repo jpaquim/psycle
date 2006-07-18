@@ -112,27 +112,35 @@ void Configuration::setSkinDefaults( )
   machineGUITitleColor.setHCOLORREF(0x00000000);
   machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
 
-  // audio driver configuration
-  _numOutputDrivers = 2;
-  _ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
-  _ppOutputDrivers[0] = new AudioDriver;
-  _ppOutputDrivers[1] = new AlsaOut();
-  _outputDriverIndex = 1;
-  _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
+	// audio driver configuration
+	_numOutputDrivers = 2;
+	_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
+	_ppOutputDrivers[0] = new AudioDriver;
+	#if defined XPSYCLE__CONFIGURATION
+		#include <xpsycle/alsaout_conditional_build.h>
+	#endif
+	#if !defined XPSYCLE__NO_ALSA
+		_ppOutputDrivers[1] = new AlsaOut();
+		_outputDriverIndex = 1;
+	#else
+		_ppOutputDrivers[1] = 0;
+		_outputDriverIndex = 0;
+	#endif
+	_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
   #if defined XPSYCLE__CONFIGURATION
-  #include <xpsycle/install_paths.h>
-  hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
-  iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
-  pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
-  prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
+	#include <xpsycle/install_paths.h>
+	hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
+	iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
+	pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
+	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
   #else
-  // we don't have any information about the installation paths,
-  // so, we can only assume everything is at a fixed place, like under the user home dir
-  hlpPath = NFile::replaceTilde("~/xpsycle/doc/");
-  iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
-  pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
-  prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
+	// we don't have any information about the installation paths,
+	// so, we can only assume everything is at a fixed place, like under the user home dir
+	hlpPath = NFile::replaceTilde("~/xpsycle/doc/");
+	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
+	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
+	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
   #endif
 
   #if !defined NDEBUG

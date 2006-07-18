@@ -17,6 +17,11 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
+#if defined XPSYCLE__CONFIGURATION
+	#include <xpsycle/alsaout_conditional_build.h>
+#endif
+#if !defined XPSYCLE__NO_ALSA
+
 #include "alsaout.h"
 #include "global.h"
 #include "configuration.h"
@@ -391,8 +396,4 @@ bool AlsaOut::Initialized( )
   return _running;
 }
 
-
-
-
-
-
+#endif // !defined XPSYCLE__NO_ALSA
