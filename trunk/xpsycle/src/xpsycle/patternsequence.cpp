@@ -25,11 +25,11 @@ namespace psycle
 	namespace host
 	{
 
-		GlobalEvent::GlobalEvent( ) : parameter_(0), target_(-1), target2_(-1)
+		GlobalEvent::GlobalEvent( ) : parameter_(0), target_(-1), target2_(-1), type_(NONE)
 		{
 		}
 
-		GlobalEvent::GlobalEvent( float parameter ) : parameter_(parameter), target_(-1), target2_(-1)
+		GlobalEvent::GlobalEvent( float parameter ): parameter_(parameter), target_(-1), target2_(-1),type_(NONE)
 		{
 		}
 
@@ -66,6 +66,17 @@ namespace psycle
 		{
 			return target2_;
 		}
+
+		void GlobalEvent::setType( GlobalType type )
+		{
+			type_ = type;
+		}
+
+		GlobalEvent::GlobalType GlobalEvent::type( ) const
+		{
+			return type_;
+		}
+
 
 		BpmChangeEvent::BpmChangeEvent( )
 		{
@@ -272,7 +283,7 @@ namespace psycle
 			if(iter != bpmChangeEvents.end() && iter->first < start+length)
 			{
 				GlobalEvent* bpmchange = new GlobalEvent(iter->second->bpm());
-				bpmchange->type=GlobalEvent::BPM_CHANGE;
+				bpmchange->setType(GlobalEvent::BPM_CHANGE);
 				globals.push_back(bpmchange);
 				return iter->first;
 			}
@@ -311,6 +322,8 @@ namespace psycle
 
 	} // end of host namespace
 }
+
+
 
 
 
