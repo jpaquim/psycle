@@ -29,6 +29,7 @@
 #include <ngrs/ntoolbarseparator.h>
 #include <ngrs/nlistbox.h>
 #include <ngrs/nitem.h>
+#include <ngrs/nwindow.h>
 
 
 namespace psycle {
@@ -122,6 +123,42 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
      g->drawLine(i* sView->beatPxLength(),0,d2i(i*sView->beatPxLength()),clientHeight());
      if (i % 10) g->setForeground(NColor(180,180,180));
   }
+}
+
+int SequencerGUI::Area::preferredWidth( ) const
+{
+  std::vector<NVisualComponent*>::const_iterator itr = visualComponents().begin();
+
+  int xp = 100;
+
+  for (;itr < visualComponents().end(); itr++) {
+    NVisualComponent* visualChild = *itr;
+    xp = std::max(visualChild->preferredWidth(), xp);
+  }
+
+  return xp;
+}
+
+void SequencerGUI::Area::resize( )
+{
+  std::vector<NVisualComponent*>::const_iterator itr = visualComponents().begin();
+
+  int xp = clientWidth();
+
+  for (;itr < visualComponents().end(); itr++) {
+    NVisualComponent* visualChild = *itr;
+    xp = std::max(visualChild->preferredWidth(), xp);
+  }
+
+
+
+  itr = visualComponents().begin();
+
+  for (;itr < visualComponents().end(); itr++) {
+    NVisualComponent* visualChild = *itr;
+    visualChild->setWidth(xp);
+  }
+
 }
 
 // end of Area class
@@ -277,6 +314,15 @@ std::vector<SequencerItem*> SequencerGUI::SequencerLine::itemsByPattern( SingleP
   return list;
 }
 
+int SequencerGUI::SequencerLine::preferredWidth( ) const
+{
+  if (items.size() > 0) {
+     SequencerItem* last = items.back();
+     return std::max(100, last->left() + last->width());
+  } else
+  return 100;
+}
+
 // main class
 
 SequencerGUI::SequencerGUI()
@@ -286,6 +332,8 @@ SequencerGUI::SequencerGUI()
 
   counter = 0;
   beatPxLength_ = 5; // default value for one beat
+
+  scrollArea_ = new Area( this );
 
   toolBar_ = new NToolBar();
     toolBar_->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewTrack);
@@ -306,7 +354,7 @@ SequencerGUI::SequencerGUI()
     hBar = new NScrollBar();
       hBar->setOrientation(nHorizontal);
       hBar->setPreferredSize(100,15);
-      //hBar->posChange.connect(this,&PatternView::onHScrollBar);
+      hBar->posChange.connect(this,&SequencerGUI::onHScrollBar);
     hBarPanel->add(hBar, nAlClient);
   add(hBarPanel, nAlBottom);
 
@@ -316,11 +364,10 @@ SequencerGUI::SequencerGUI()
   vBar = new NScrollBar();
     vBar->setWidth(15);
     vBar->setOrientation(nVertical);
-    //vBar->posChange.connect(this,&PatternView::onVScrollBar);
+    vBar->posChange.connect(this,&SequencerGUI::onVScrollBar);
   add(vBar, nAlRight);
 
   // the main Sequencer gui
-  scrollArea_ = new Area( this );
   add(scrollArea_, nAlClient);
 
   lastLine = 0;
@@ -389,6 +436,7 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 {
   if ( selectedLine_ ) {
     selectedLine_->addItem( pattern );
+    resize();
     selectedLine_->repaint();
  }
 }
@@ -429,8 +477,46 @@ std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( SinglePattern * pat
   return list;
 }
 
+void SequencerGUI::onVScrollBar( NObject * sender, int pos )
+{
+}
+
+void SequencerGUI::onHScrollBar( NObject * sender, int pos )
+{
+  int newPos = pos;
+  if (newPos != scrollArea_->scrollDx()) {
+
+    int diffX  = newPos - scrollArea_->scrollDx();
+    if (diffX < scrollArea_->clientWidth()) {
+      NRect rect = scrollArea_->blitMove(diffX,0, scrollArea_->absoluteSpacingGeometry());
+      scrollArea_->setScrollDx(newPos);
+      window()->repaint(scrollArea_,rect);
+    } else {
+      scrollArea_->setScrollDx(newPos);
+      scrollArea_->repaint(scrollArea_);
+    }
+  }
+}
+
+void SequencerGUI::resize( )
+{
+  // calls the AlignLayout
+  NPanel::resize();
+  // set the ScrollBar range new
+  hBar->setRange(scrollArea_->preferredWidth() - clientWidth());
+}
 
 }}
+
+
+
+
+
+
+
+
+
+
 
 
 
