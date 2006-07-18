@@ -183,6 +183,7 @@ public:
     virtual void removeChilds();
     virtual void removeChild( NVisualComponent * child );
     virtual void erase(NVisualComponent* child);
+    virtual void erase();
 
     const std::vector<NVisualComponent*> & visualComponents();
 

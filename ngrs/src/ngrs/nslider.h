@@ -51,6 +51,7 @@ public:
 
     void resize();
     void setOrientation(int orientation);
+    int orientation() const;
 
     virtual void paint(NGraphics* g);
 
@@ -58,7 +59,7 @@ public:
 
     void setRange(double min, double max);
     void setPos(double pos);
-    double pos();
+    double pos() const;
 
     NPanel* slider();
 

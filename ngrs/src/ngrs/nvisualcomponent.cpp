@@ -731,6 +731,11 @@ void NVisualComponent::erase( NVisualComponent * child )
   }
 }
 
+void NVisualComponent::erase( )
+{
+  NRuntime::erase();
+}
+
 const std::vector< NVisualComponent * > & NVisualComponent::visualComponents( )
 {
   return visualComponents_;
@@ -883,3 +888,5 @@ bool NVisualComponent::enabled( ) const
 {
   return enabled_;
 }
+
+

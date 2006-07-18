@@ -86,6 +86,11 @@ void NSlider::setOrientation( int orientation )
   resize();
 }
 
+int NSlider::orientation( ) const
+{
+  return orientation_;
+}
+
 void NSlider::paint( NGraphics * g )
 {
   if (trackLine_) {
@@ -120,7 +125,7 @@ void NSlider::setPos( double pos )
   pos_ = pos;
 }
 
-double NSlider::pos( )
+double NSlider::pos( ) const
 {
   return pos_;
 }
@@ -129,6 +134,8 @@ NPanel * NSlider::slider( )
 {
   return slider_;
 }
+
+
 
 
 

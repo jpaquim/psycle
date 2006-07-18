@@ -70,9 +70,9 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-  NColorComboBox* colorBox = new NColorComboBox();
+/*  NColorComboBox* colorBox = new NColorComboBox();
      colorBox->setPosition(10,10,100,15);
-  pane()->add(colorBox);
+  pane()->add(colorBox);*/
 
   /*NColorChooser* chooser = new NColorChooser();
     chooser->setPosition(0,0,500,500);
@@ -92,7 +92,7 @@ NTestWindow::NTestWindow()
     box->setPosition(10,40,100,20);
   pane()->add(box);*/
 
-  /*NCustomTreeView* view = new NCustomTreeView();
+  NCustomTreeView* view = new NCustomTreeView();
 
   NTreeNode* node1 = new NTreeNode();
   view->addNode(node1);
@@ -112,29 +112,23 @@ NTestWindow::NTestWindow()
      node2->addEntry(new NItem("entryB"+stringify(i)));
   }
 
-  /*  NLabel* lb = new NLabel("Test");
-    view->rootNode()->pane()->add(lb,nAlTop);
+  itemD = new NItem("delme");
+  node2->addEntry(itemD);
 
-      /*for (int i = 0; i < 10; i++) {
-        NTreeNode* tr = new NTreeNode();
-        tr->pane()->add(new NLabel("sub"),nAlClient);
-        view->rootNode()->childNodePane()->add(tr,nAlTop);
-      }
   pane()->add(view);
 
-  view->setPosition(10,50,200,200);*/
+  view->setPosition(10,50,200,200);
 
- 
 
   /*NLabel* lb = new NLabel("Hallo");
     lb->setPosition(10,120,100,120);
   pane()->add(lb);*/
 
-/*  NButton* btn = new NButton("hallo");
-    btn->setPosition(100,100,100,20);
+  NButton* btn = new NButton("delete");
+    btn->setPosition(220,50,100,20);
     btn->setFlat(false);
-    btn->setHint("Button zum drücken");
-  pane()->add(btn);*/
+    btn->clicked.connect(this,&NTestWindow::onDelete);
+  pane()->add(btn);
   //testMenu();
   //testSegDisplay();
 
@@ -450,6 +444,12 @@ void NTestWindow::testScrollBar( )
 void NTestWindow::onColorSelected( const NColor & color )
 {
   pane()->setBackground(color);
+  pane()->repaint();
+}
+
+void NTestWindow::onDelete( NButtonEvent * ev )
+{
+  ((NVisualComponent*)itemD->parent())->erase(itemD);
   pane()->repaint();
 }
 

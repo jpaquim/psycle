@@ -72,6 +72,7 @@ private:
     NFileListBox* fileBox;
     NFileDialog* fDialog;
     NLabel* info;
+    NCustomItem* itemD;
 
     void testListBox();
     void testComboBox();
@@ -97,6 +98,7 @@ private:
     void onBtnClick(NButtonEvent* ev);
 
     void onColorSelected(const NColor & color);
+    void onDelete(NButtonEvent* ev);
 };
 
 #endif
