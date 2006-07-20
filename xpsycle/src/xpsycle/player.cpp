@@ -102,7 +102,7 @@ namespace psycle
 			if ( _bpm != 0) bpm=_bpm;
 			RecalcSPR();
 			RecalcSPB();
-			//\todo : Find out if we should notify the plugins of this change.
+			///\todo : Find out if we should notify the plugins of this change.
 		}
 
 		void Player::ExecuteLine(void)
@@ -132,7 +132,7 @@ namespace psycle
 					{
 					case PatternCmd::SET_TEMPO:
 						if(pEntry->_parameter != 0)
-						{	//\todo: implement the Tempo slide
+						{	///\todo: implement the Tempo slide
 							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
 							float bpmFine = song().BeatsPerMin() -floor(song().BeatsPerMin());
 							bpm = pEntry->_parameter + bpmFine;
@@ -403,8 +403,8 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 								else if (entry.command() == PatternCmd::ARPEGGIO)
 								{
 									// arpeggio
-									//\todo : Add Memory.
-									//\todo : This won't work... What about sampler's NNA's?
+									///\todo : Add Memory.
+									///\todo : This won't work... What about sampler's NNA's?
 									if (entry.parameter())
 									{
 										memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
@@ -655,7 +655,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 		{
 			if(!_recording)
 			{
-				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
+				///\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
 				backup_rate = Global::configuration()._pOutputDriver->_samplesPerSec;
 				backup_bits = Global::configuration()._pOutputDriver->_bitDepth;
 				backup_channelmode = Global::configuration()._pOutputDriver->_channelmode;

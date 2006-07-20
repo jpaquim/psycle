@@ -107,7 +107,10 @@ private:
     bool finetweak;
     bool ultrafinetweak;
 
-    int sourcepoint;
+//  y position of the mouse when starting a mousedrag (knob tweak)
+	int sourcepoint;
+//  value of the knob in that position
+    int tweakbase;
 
     static int c;
     static NBitmap kbitmap;

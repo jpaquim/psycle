@@ -180,8 +180,8 @@ namespace psycle
 		class AudioPort
 		{
 			public:
-				//\todo: Port creation, assign buffers to it (passed via ctor? they might be shared/pooled). 
-				//\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
+				///\todo: Port creation, assign buffers to it (passed via ctor? they might be shared/pooled). 
+				///\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
 				AudioPort(Machine & parent, int arrangement, std::string const & name) : parent_(parent), name_(name), arrangement_(arrangement) {}
 				virtual ~AudioPort() {}
 				virtual void CollectData(int numSamples) {}
@@ -191,7 +191,7 @@ namespace psycle
 				virtual inline bool NumberOfWires() { return wires_.size(); }
 				virtual inline int Arrangement() throw() { return arrangement_; }
 				virtual inline Machine * GetMachine() throw() { return &parent_; }
-				//\todo : should change arrangement/name be allowed? (Mutating Port?)
+				///\todo : should change arrangement/name be allowed? (Mutating Port?)
 				virtual inline void ChangeArrangement(int arrangement) { this->arrangement_ = arrangement; }
 				virtual inline std::string const & Name() const throw() { return name_; }
 				virtual inline void ChangeName(std::string const & name) { this->name_ = name; }
@@ -509,7 +509,7 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//\todo below are unencapsulated data members
+		///\todo below are unencapsulated data members
 
                 public:
 //		PSYCLE__PRIVATE:
