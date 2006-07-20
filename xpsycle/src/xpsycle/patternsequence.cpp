@@ -333,7 +333,23 @@ namespace psycle
 				globalEvents_.erase(iter);
 				globalEvents_.insert(GlobalMap::value_type(newpos, entry) );
 			}
+		}
 
+		double PatternSequence::globalTickPosition( GlobalEvent * event ) const
+		{
+			// O(n) runtime here (multiplies from gui resize to O(n^2)!!!!
+			// this is worse and could be avoided if Global Events have a tickPosition and we avoid instead that map
+			GlobalMap::const_iterator iter = globalEvents_.begin();
+			for(; iter!= globalEvents_.end(); ++iter)
+			{
+				if(iter->second==event)
+				break;
+			}
+			if(iter!=globalEvents_.end())
+			{
+				return iter->first;
+			}
+			return 0;
 		}
 
 		const PatternSequence::GlobalMap & PatternSequence::globalEvents( )
@@ -353,6 +369,8 @@ namespace psycle
 
 
 }
+
+
 
 
 
