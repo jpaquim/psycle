@@ -57,6 +57,10 @@ void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRe
   }
 }
 
+void NLayout::insert( class NVisualComponent * comp, int index )
+{
+}
+
 void NLayout::add( class NVisualComponent * comp )
 {
 }
@@ -68,6 +72,8 @@ void NLayout::remove( class NVisualComponent * comp )
 void NLayout::removeAll( )
 {
 }
+
+
 
 
 
