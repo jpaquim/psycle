@@ -32,6 +32,11 @@
 #include <ngrs/nslider.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/ngridlayout.h>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <cstdlib>
+
 
 namespace psycle {
 namespace host {
@@ -156,26 +161,28 @@ void FrameMachine::initParameterGUI( )
       if (!bDrawKnob) {
         Header* cell = new Header();
         char parName[64];
-        pMachine_->GetParamName(format(c,cols,rows),parName);
+        pMachine_->GetParamName(newC,parName);
         cell->setText(parName);
         knobPanel->add(cell);
       } else {
-        Knob* cell = new Knob(format(c,cols,rows));
+        Knob* cell = new Knob(newC);
         cell->valueChanged.connect(this,&FrameMachine::onKnobValueChange);
         char parName[64];
-        pMachine_->GetParamName(format(c,cols,rows),parName);
+        pMachine_->GetParamName(newC,parName);
         char buffer[128];
-        pMachine_->GetParamValue(format(c,cols,rows),buffer);
+        pMachine_->GetParamValue(newC,buffer);
         cell->setText(parName);
-        int val_v = pMachine_->GetParamValue(format(c,cols,rows));
+        int val_v = pMachine_->GetParamValue(newC);
         cell->setValue(val_v);
         int min_v; int max_v;
-        pMachine_->GetParamRange(format(c,cols,rows),min_v,max_v);
+        pMachine_->GetParamRange(newC,min_v,max_v);
         cell->setRange(min_v,max_v);
-        cell->setValueAsText(buffer);
+		  std::string valuestring(buffer);
+        cell->setValueAsText(valuestring);
         knobPanel->add(cell);
       }
   }
+  updateValues();
   pack();
 }
 
@@ -193,7 +200,8 @@ Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), f
   NFont font = NFont("Suse sans",6,nMedium | nStraight | nAntiAlias);
   font.setTextColor(Global::pConfig()->machineGUIFontBottomColor);
   vLabel->setFont(font);
-  vLabel->setText(stringify(value_)+"%");
+  tvalue =stringify(value_)+"%";
+  setValueAsText(tvalue);
   font.setTextColor(Global::pConfig()->machineGUIFontTopColor);
   label->setFont(font);
 }
@@ -201,7 +209,10 @@ Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), f
 void Knob::setValue( int value )
 {
   value_ = value;
-  if (tvalue=="") vLabel->setText(stringify(value)+"%");
+  if (tvalue=="") { 
+	  tvalue = stringify(value_)+"%";
+	  setValueAsText(tvalue);
+  }
 }
 
 void Knob::setRange( int min, int max )
@@ -285,6 +296,7 @@ void Knob::onMousePress( int x, int y, int button )
   if (NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y)) {
     istweak = true;
     sourcepoint = y;
+	  tweakbase = value_;
   }
 }
 
@@ -294,22 +306,22 @@ void Knob::onMouseOver( int x, int y )
       if (( ultrafinetweak && !(NApp::system().keyState() & ShiftMask )) || //shift-key has been left.
           ( !ultrafinetweak && (NApp::system().keyState() & ShiftMask))) //shift-key has just been pressed
       {
-        sourcepoint=y;
+         sourcepoint=y;
         ultrafinetweak=!ultrafinetweak;
+		  tweakbase = value_;
       }
       else if (( finetweak && !(NApp::system().keyState() & ControlMask )) || //control-key has been left.
       ( !finetweak && (NApp::system().keyState() & ControlMask))) //control-key has just been pressed
       {
         sourcepoint = y;
         finetweak=!finetweak;
+		  tweakbase=value_;
       }
-
 
     int maxval = max_range;
     int minval = min_range;
-    int tweakbase = value_;
 
-    int screenh = window()->height();
+    int screenh = NApp::system().screenHeight();
     double freak = 0.5;
     if ( ultrafinetweak ) freak = 0.5f;
     else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
@@ -336,10 +348,11 @@ void FrameMachine::onKnobValueChange( Knob* sender,int value , int param )
 {
   pMachine_->SetParameter(param, value);
   char buffer[128];
-  pMachine_->GetParamValue(param,buffer);
-  sender->setValueAsText(buffer);
   int val_v = pMachine_->GetParamValue(param);
   sender->setValue(val_v);
+  pMachine_->GetParamValue(param,buffer);
+	std::string valuestring(buffer);
+  sender->setValueAsText(valuestring);
   sender->repaint();
   if (Global::configuration()._RecordTweaks)
   {
@@ -374,18 +387,21 @@ void FrameMachine::updateValues( )
       int min_v,max_v,val_v;
       int newC = format(c,cols,rows);
       pMachine_->GetParamRange(newC,min_v,max_v);
+  
+ 	  
       bool bDrawKnob = (min_v==max_v)?false:true;
       if (!bDrawKnob) {
       } else {
         Knob* cell = (Knob*) knobPanel->visualComponents().at(c);
         char buffer[128];
-        pMachine_->GetParamValue(format(c,cols,rows),buffer);
-        int val_v = pMachine_->GetParamValue(format(c,cols,rows));
+        pMachine_->GetParamValue(newC,buffer);
+        int val_v = pMachine_->GetParamValue(newC);
         cell->setValue(val_v);
         int min_v; int max_v;
-        pMachine_->GetParamRange(format(c,cols,rows),min_v,max_v);
+        pMachine_->GetParamRange(newC,min_v,max_v);
         cell->setRange(min_v,max_v);
-        cell->setValueAsText(buffer);
+		  std::string valuestring(buffer);
+        cell->setValueAsText(valuestring);
       }
   }
 
@@ -497,5 +513,3 @@ Preset FrameMachine::knobsPreset( )
 
 }
 }
-
-

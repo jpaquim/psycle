@@ -1,11 +1,11 @@
 #include "internal_machines.h"
 
-//\todo: These three includes need to be replaced by a "host" callback which gives such information.
+///\todo: These three includes need to be replaced by a "host" callback which gives such information.
 #include "song.h"
 #include "player.h"
 #include "configuration.h"
 
-//\todo : The information required from this include should go to constants.hpp
+///\todo : The information required from this include should go to constants.hpp
 #include "inputhandler.h"
 
 namespace psycle {
@@ -393,7 +393,7 @@ namespace psycle {
 			}
 			else if(pData->_note == cdefTweakS)
 			{
-				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
+				///\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 			}
 		}
 

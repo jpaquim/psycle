@@ -90,7 +90,7 @@ namespace psycle
 					{
 						Plugin & plugin(*new Plugin(index));
 						machine = &plugin;
-//						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
+//						if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
 						{
 							//delete &plugin;
 //							return false;
@@ -118,7 +118,7 @@ namespace psycle
 /*						vst::plugin * plugin(0);
 						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
 						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
-						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
+						if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
 						{
 							delete plugin;
 							return false;
@@ -367,7 +367,7 @@ namespace psycle
 				{
 					w = dmac->FindInputWire(wiresource);
 					dmac->GetWireVolume(w,volume);
-					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+					if (InsertConnection(wiresource, wiredest,volume)) ///\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
 						// delete the old wire
 						_pMachine[wiresource]->_connection[wireindex] = false;
@@ -400,7 +400,7 @@ namespace psycle
 				if (smac)
 				{
 					_pMachine[wiredest]->GetWireVolume(wireindex,volume);
-					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+					if (InsertConnection(wiresource, wiredest,volume)) ///\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
 						// delete the old wire
 						int wire = smac->FindOutputWire(wiredest);

@@ -23,6 +23,11 @@ namespace psycle
 	{
 //		extern CPsycleApp theApp;
 
+///\todo: This is the official panning formula for MIDI. Implement it in psycle?
+//	Left Channel Gain [dB] = 20*log (cos (Pi/2* max(0,CC#10 – 1)/126)
+//	Right Channel Gain [dB] = 20*log (sin (Pi /2* max(0,CC#10 – 1)/126)
+
+
 
 
 		void Machine::crashed(std::exception const & e) throw()
@@ -98,7 +103,7 @@ namespace psycle
 			SetVolume(volume);
 			senderport->Connected(this);
 			receiverport->Connected(this);
-			//\todo : need a way get a wire index.
+			///\todo : need a way get a wire index.
 		}
 
 		void Wire::ChangeSource(AudioPort* newsource)
@@ -122,7 +127,7 @@ namespace psycle
 		void Wire::CollectData(int numSamples)
 		{
 			senderport->CollectData(numSamples);
-			//\todo : apply volume, panning and mapping.
+			///\todo : apply volume, panning and mapping.
 		}
 
 		void Wire::SetVolume(float newvol)
@@ -142,7 +147,7 @@ namespace psycle
 		{
 			if ( port == senderport ) senderport=0; else receiverport=0;
 			port->Disconnected(this);
-			//\todo : need a way to indicate to the main Machine that this wire index is now free.
+			///\todo : need a way to indicate to the main Machine that this wire index is now free.
 		}
 
 		void AudioPort::Connected(Wire *wire)
@@ -159,7 +164,7 @@ namespace psycle
 
 		void InPort::CollectData(int numSamples)
 		{
-			//\todo : need to clean the buffer first? wire(0)processreplacing() while(wires) wire(1+).processadding() ?
+			///\todo : need to clean the buffer first? wire(0)processreplacing() while(wires) wire(1+).processadding() ?
 			for(wires_type::const_iterator i(wires_.begin()); i != wires_.end(); ++i)
 			{
 				(**i).CollectData(numSamples);
@@ -844,8 +849,8 @@ int WorkEvent::track( ) const
 
 int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 {
-	std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
-  return 0;
+	//std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
+	return 0;
 }
 
 int Machine::GenerateAudio( int numsamples )

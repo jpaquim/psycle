@@ -83,7 +83,7 @@ namespace psycle
 
 				bool               ReadString(std::string &);
 				bool               ReadString(char *, std::size_t const & max_length);
-				//\todo : Implement a WriteString() to complement ReadString, and a ReadSizedString() which would do the same as ReadString
+				///\todo : Implement a WriteString() to complement ReadString, and a ReadSizedString() which would do the same as ReadString
 				//		which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
 				//		setting the last char to null.
 
