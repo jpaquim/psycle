@@ -80,6 +80,7 @@ class SequencerGUI : public NPanel
     virtual void paint(NGraphics* g);
     virtual void onMousePress(int x, int y, int button);
     virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
     void setSequenceLine(SequenceLine* line);
     SequenceLine* sequenceLine();
@@ -92,8 +93,6 @@ class SequencerGUI : public NPanel
      virtual void resize();
 
    private:
-
-      bool lock;
 
       SequenceLine* seqLine_;
       SequencerGUI* sView;
@@ -167,6 +166,7 @@ private:
     SequencerBeatLineal* beatLineal_;
     SequencerBeatChangeLineal* beatChangeLineal_;
     SequencerLine* lastLine;
+    SequencerItem* selectedItem_;
     PatternSequence* patternSequence_;
 
     void addSequencerLine();
@@ -181,6 +181,9 @@ private:
     NListBox* patternBox_;
 
     void onNewTrack(NButtonEvent* ev);
+    void onInsertTrack(NButtonEvent* ev);
+    void onDeleteTrack(NButtonEvent* ev);
+
     void onNewPattern(NButtonEvent* ev);
     void onSequencerLineClick(SequencerLine* line);
     void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);

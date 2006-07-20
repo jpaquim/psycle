@@ -30,6 +30,7 @@
 #include <ngrs/nlistbox.h>
 #include <ngrs/nitem.h>
 #include <ngrs/nwindow.h>
+#include <ngrs/nbevelborder.h>
 
 
 namespace psycle {
@@ -157,9 +158,14 @@ void SequencerGUI::Area::resize( )
 
   itr = visualComponents().begin();
 
+  int yp = 0;
+
   for (;itr < visualComponents().end(); itr++) {
     NVisualComponent* visualChild = *itr;
+    visualChild->setHeight( visualChild->preferredHeight() );
     visualChild->setWidth(xp);
+    visualChild->setTop(yp);
+    yp+= visualChild->preferredHeight();
   }
 
 }
@@ -234,19 +240,15 @@ void SequencerItem::onMousePress( int x, int y, int button )
 SequencerGUI::SequencerLine::SequencerLine( SequencerGUI* seqGui )
 {
   sView = seqGui;
-  lock = false;
+  setBorder( NBevelBorder( nNone, nLowered) );
 }
 
 SequencerGUI::SequencerLine::~ SequencerLine( )
 {
-  lock = true;
 }
 
 void SequencerGUI::SequencerLine::paint( NGraphics * g )
 {
-  int cw = clientHeight();
-  g->drawLine(0 ,cw / 2 , clientWidth(), cw / 2);
-
   if (sView->selectedLine_ && sView->selectedLine_ == this) {
     g->setForeground(NColor(0,0,255));
     g->drawRect(0,0, clientWidth()-1, clientHeight()-1);
@@ -326,6 +328,11 @@ int SequencerGUI::SequencerLine::preferredWidth( ) const
   return 100;
 }
 
+int SequencerGUI::SequencerLine::preferredHeight( ) const
+{
+  return 30;
+}
+
 // main class
 
 SequencerGUI::SequencerGUI()
@@ -339,9 +346,9 @@ SequencerGUI::SequencerGUI()
   scrollArea_ = new Area( this );
 
   toolBar_ = new NToolBar();
-    toolBar_->add( new NButton("New"))->clicked.connect(this,&SequencerGUI::onNewTrack);
-    toolBar_->add( new NButton("Insert"));
-    toolBar_->add( new NButton("Delete"));
+    toolBar_->add( new NButton("Add Track"))->clicked.connect(this,&SequencerGUI::onNewTrack);
+    toolBar_->add( new NButton("Insert Track"))->clicked.connect(this,&SequencerGUI::onInsertTrack);;
+    toolBar_->add( new NButton("Delete Track"))->clicked.connect(this,&SequencerGUI::onDeleteTrack);;
   add(toolBar_, nAlTop);
 
   beatLineal_ = new SequencerBeatLineal(this);
@@ -375,6 +382,7 @@ SequencerGUI::SequencerGUI()
 
   lastLine = 0;
   selectedLine_ = 0;
+  selectedItem_ = 0;
 
   patternSequence_ = 0;
 }
@@ -405,12 +413,9 @@ void SequencerGUI::addSequencerLine( )
   lines.push_back(line);
   line->setSequenceLine( patternSequence_->createNewLine() );
   line->click.connect(this, &SequencerGUI::onSequencerLineClick);
-  if (!lastLine)
-     line->setPosition(0,0,1000,30);
-  else
-     line->setPosition(0,lastLine->top() + lastLine->height(),1000,30);
-  scrollArea_->add(line);
 
+  scrollArea_->add(line);
+  scrollArea_->resize();
   lastLine = line;
 
 }
@@ -419,6 +424,39 @@ void SequencerGUI::onNewTrack( NButtonEvent * ev )
 {
   addSequencerLine();
   repaint();
+}
+
+void SequencerGUI::onInsertTrack( NButtonEvent * ev )
+{
+  if (selectedLine_) {
+    SequencerLine* line = new SequencerLine( this );
+    lines.push_back(line);
+    line->setSequenceLine( patternSequence_->createNewLine() );
+    line->click.connect(this, &SequencerGUI::onSequencerLineClick);
+
+    int index = selectedLine_->zOrder();
+    scrollArea_->insert(line, index);
+    scrollArea_->resize();
+    lastLine = line;
+    scrollArea_->repaint();
+  }
+}
+
+void SequencerGUI::onDeleteTrack( NButtonEvent * ev )
+{
+  if (selectedLine_) {
+
+    SequenceLine* line = selectedLine_->sequenceLine();
+
+    std::vector<SequencerLine*>::iterator it = find(lines.begin(), lines.end(), selectedLine_);
+    if (it != lines.end() ) lines.erase(it);
+
+    scrollArea_->removeChild(selectedLine_);
+    scrollArea_->resize();
+
+    patternSequence_->removeLine(line);
+    scrollArea_->repaint();
+  }
 }
 
 void SequencerGUI::onNewPattern( NButtonEvent * ev )
@@ -440,7 +478,7 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
   if ( selectedLine_ ) {
     selectedLine_->addItem( pattern );
     resize();
-    selectedLine_->repaint();
+    repaint();
  }
 }
 
@@ -527,25 +565,6 @@ void SequencerGUI::resize( )
 }
 
 }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
