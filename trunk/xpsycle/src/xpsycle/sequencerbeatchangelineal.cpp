@@ -72,6 +72,11 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::setBpmChangeEvent( GlobalEve
   bpmEdt_->setText( stringify( event->parameter() ) );
 }
 
+GlobalEvent * SequencerBeatChangeLineal::BeatChangeTriangle::bpmChangeEvent( )
+{
+  return bpmChangeEvent_;
+}
+
 void SequencerBeatChangeLineal::BeatChangeTriangle::paint( NGraphics * g )
 {
   int cw = clientWidth();
@@ -108,7 +113,7 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::resize( )
 
 void SequencerBeatChangeLineal::BeatChangeTriangle::onMove( const NMoveEvent & moveEvent )
 {
-  sView->patternSequence()->moveGlobalEvent(bpmChangeEvent_, left() / (double) sView->beatPxLength() );
+  sView->patternSequence()->moveGlobalEvent(bpmChangeEvent_, (left() +15) / (double) sView->beatPxLength() );
 }
 
 void SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress( const NKeyEvent & event )
@@ -176,6 +181,8 @@ void SequencerBeatChangeLineal::onMouseDoublePress( int x, int y, int button )
       triangle->setBpmChangeEvent(bpmChangeEvent);
       triangle->setPosition(x-15, 10,30,30);
     add(triangle);
+    beatChanges.push_back(triangle);
+    resize();
     repaint();
   }
 }
@@ -188,10 +195,11 @@ int SequencerBeatChangeLineal::preferredHeight( ) const
 
 void SequencerBeatChangeLineal::resize( )
 {
-  std::vector<NVisualComponent*>::const_iterator it = visualComponents().begin();
-  for ( ; it != visualComponents().end(); it++) {
-    NVisualComponent* comp = *it;
-    comp->setHeight(comp->preferredHeight());
+  std::list<BeatChangeTriangle*>::iterator it = beatChanges.begin();
+  for ( ; it !=beatChanges.end(); it++) {
+    BeatChangeTriangle* item = *it;
+    double tickPosition = sView->patternSequence()->globalTickPosition(item->bpmChangeEvent() );
+    item->setPosition(d2i(sView->beatPxLength() * tickPosition) - 15,5,30,item->preferredHeight());
   }
 }
 

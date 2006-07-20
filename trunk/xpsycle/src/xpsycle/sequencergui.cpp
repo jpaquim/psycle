@@ -550,12 +550,7 @@ void SequencerGUI::onZoomHBarPosChanged( ZoomBar * zoomBar, double newPos )
 {
   if (newPos < 5) newPos = 5;
   beatPxLength_ = (int) newPos;
-  std::cout << beatPxLength_ << std::endl;
-  std::vector<NVisualComponent*>::const_iterator it = scrollArea_->visualComponents().begin();
-  for ( ; it < scrollArea_->visualComponents().end(); it++) {
-     NVisualComponent* comp = *it;
-     comp->resize();
-  }
+  resize();
   repaint();
 }
 

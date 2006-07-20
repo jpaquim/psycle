@@ -47,6 +47,7 @@ class SequencerBeatChangeLineal : public NPanel
         ~BeatChangeTriangle();
 
         void setBpmChangeEvent(GlobalEvent* event);
+        GlobalEvent* bpmChangeEvent();
 
         virtual void onMove(const NMoveEvent & moveEvent);
         virtual void paint( NGraphics* g);
@@ -84,6 +85,7 @@ public:
 private:
 
    SequencerGUI* sView;
+   std::list<BeatChangeTriangle*> beatChanges;
 
 };
 
