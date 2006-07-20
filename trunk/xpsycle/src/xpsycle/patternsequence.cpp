@@ -25,6 +25,8 @@ namespace psycle
 	namespace host
 	{
 
+		int SequenceLine::idCounter = 0;
+
 		GlobalEvent::GlobalEvent( ) : parameter_(0), target_(-1), target2_(-1), type_(NONE)
 		{
 		}
@@ -137,6 +139,8 @@ namespace psycle
 		SequenceLine::SequenceLine( )
 		{
 			patternSequence_ = 0;
+			lineId_ = idCounter;
+			idCounter++;
 		}
 
 		SequenceLine::SequenceLine( PatternSequence * patSeq )
@@ -210,6 +214,11 @@ namespace psycle
 		{
 			name_=newname;
 		}
+
+		int SequenceLine::id( ) const
+		{
+			return lineId_;
+		}
 		//end of sequenceLine;
 
 
@@ -234,6 +243,15 @@ namespace psycle
 			SequenceLine* line = new SequenceLine(this);
 			push_back(line);
 			return line;
+		}
+
+		void PatternSequence::removeLine( SequenceLine * line )
+		{
+			iterator it = find(begin(), end(), line);
+			if ( it != end() ) {
+				erase(it);
+				delete line;
+			}
 		}
 
 		PatternData* PatternSequence::patternData() {
@@ -319,6 +337,10 @@ namespace psycle
 
 
 }
+
+
+
+
 
 
 
