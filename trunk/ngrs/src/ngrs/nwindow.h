@@ -125,6 +125,10 @@ public:
 
     const NRect & userGeometry() const;
 
+    virtual void setMinimumWidth (int minWidth);
+    virtual void setMinimumHeight(int minHeight);
+
+
 private:
 
    bool modal_;

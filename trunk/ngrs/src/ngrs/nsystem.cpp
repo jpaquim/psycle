@@ -330,6 +330,16 @@ void NSystem::setWindowPosition(Window win, int left, int top, int width, int he
   XSync(dpy(),false);
 }
 
+void NSystem::setWindowMinimumSize( Window win, int minWidth, int minHeight )
+{
+  XSizeHints *size_hints = XAllocSizeHints();
+    size_hints->flags = PMinSize;
+    size_hints->min_width  = minWidth;
+    size_hints->min_height = minHeight;
+    XSetNormalHints(dpy(),win,size_hints);
+  XFree(size_hints);
+}
+
 void NSystem::destroyWindow( Window win )
 {
   XDestroyWindow(dpy(), win);
@@ -580,3 +590,5 @@ void NSystem::setFocus( NWindow* window )
      XSetInputFocus(dpy(), window->win(), RevertToParent, CurrentTime);
   }
 }
+
+

@@ -71,12 +71,14 @@ void NWindow::setVisible( bool on )
          NApp::system().setModalMode( win() );
          //NApp::system().setStayAbove(win());
          NApp::system().setWindowPosition(win(), userPos.left(),userPos.top(),userPos.width(),userPos.height());
+         NApp::system().setWindowMinimumSize(win(),minimumWidth(), minimumHeight());
          XMapWindow(NApp::system().dpy(),win_);
          checkGeometry();
          NApp::runModal(this);
       } else {
         XSync(NApp::system().dpy(),false);
         NApp::system().setWindowPosition(win(), userPos.left(),userPos.top(),userPos.width(),userPos.height());
+        NApp::system().setWindowMinimumSize(win(),minimumWidth(), minimumHeight());
         XMapWindow(NApp::system().dpy(),win_);
         checkGeometry();
         XSync(NApp::system().dpy(),false);
@@ -421,6 +423,8 @@ void NWindow::pack( )
                        pane()->spacing().top() + pane()->spacing().bottom()
                        ,10);
      setPosition(left(),top(),pW,pH);
+     setMinimumWidth(pW);
+     setMinimumHeight(pH);
   }
 }
 
@@ -618,6 +622,18 @@ void NWindow::checkGeometry( )
      std::cout << width() << std::endl;
      std::cout << height() << std::endl;
   }
+}
+
+void NWindow::setMinimumWidth( int minWidth )
+{
+  NVisual::setMinimumWidth(minWidth);
+  NApp::system().setWindowMinimumSize(win(), minWidth , minimumHeight() );
+}
+
+void NWindow::setMinimumHeight( int minHeight )
+{
+  NVisual::setMinimumHeight(minHeight);
+  NApp::system().setWindowMinimumSize(win(), minimumWidth(), minHeight );
 }
 
 
