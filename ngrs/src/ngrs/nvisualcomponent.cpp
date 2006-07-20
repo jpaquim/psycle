@@ -790,6 +790,10 @@ void NVisualComponent::insert( NVisualComponent * component, unsigned int index 
   if (index <= visualComponents_.size()) {
     NRuntime::insert(component,index);
     visualComponents_.insert(visualComponents_.begin()+index,component);
+    if (layout_!=0) {
+      layout_->insert(component, index);
+      layout_->align(this);
+    }
   } else add(component);
 }
 
