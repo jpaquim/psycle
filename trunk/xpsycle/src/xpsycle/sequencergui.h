@@ -48,6 +48,7 @@ class SequencerItem : public NPanel {
        SequencerItem( SequencerGUI* seqGui );
        ~SequencerItem();
 
+       signal1<SequencerItem*> click;
 
        virtual void paint( NGraphics* g);
        virtual void onMousePress(int x, int y, int button);
@@ -59,7 +60,12 @@ class SequencerItem : public NPanel {
        void setSequenceEntry(SequenceEntry* entry);
        SequenceEntry* sequenceEntry();
 
+       void setSelected(bool on);
+       bool selected();
+
       private:
+
+        bool selected_;
 
         SequenceEntry* sequenceEntry_;
         SequencerGUI* sView;
@@ -76,11 +82,14 @@ class SequencerGUI : public NPanel
      ~SequencerLine();
 
     signal1<SequencerLine*> click;
+    signal1<SequencerItem*> itemClick;
 
     virtual void paint(NGraphics* g);
     virtual void onMousePress(int x, int y, int button);
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
+
+    virtual void removeChild(NVisualComponent* item);
 
     void setSequenceLine(SequenceLine* line);
     SequenceLine* sequenceLine();
@@ -99,6 +108,7 @@ class SequencerGUI : public NPanel
 
       std::list<SequencerItem*> items;
 
+      void onSequencerItemClick(SequencerItem* item);
 
   };
 
@@ -185,11 +195,13 @@ private:
     void onDeleteTrack(NButtonEvent* ev);
 
     void onNewPattern(NButtonEvent* ev);
+    void onDeleteEntry(NButtonEvent* ev);
+
     void onSequencerLineClick(SequencerLine* line);
+    void onSequencerItemClick(SequencerItem* item);
     void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
     void onHScrollBar(NObject* sender, int pos);
     void onVScrollBar(NObject* sender, int pos);
-
 
     std::vector<SequencerLine*> lines;
 };

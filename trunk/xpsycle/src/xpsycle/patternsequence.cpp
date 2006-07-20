@@ -205,6 +205,22 @@ namespace psycle
 			}
 		}
 
+		void SequenceLine::removeEntry( SequenceEntry * entry )
+		{
+      iterator iter = begin();
+			for(; iter!= end(); ++iter)
+			{
+				if(iter->second==entry)
+				break;
+			}
+			if(iter!=end())
+			{
+				SequenceEntry* entry = iter->second;
+				erase(iter);
+				delete entry;
+			}
+		}
+
 		const std::string & SequenceLine::name() const
 		{
 			return name_;
@@ -337,6 +353,8 @@ namespace psycle
 
 
 }
+
+
 
 
 

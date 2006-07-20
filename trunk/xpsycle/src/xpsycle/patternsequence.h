@@ -98,7 +98,7 @@ namespace psycle
 
 		class PatternSequence;
 
-		class SequenceLine : public  std::map<double, SequenceEntry*>, public sigslot::has_slots<>
+		class SequenceLine : public  std::map<double, SequenceEntry*>
 		{
 
 		public:
@@ -114,6 +114,7 @@ namespace psycle
 			PatternSequence* patternSequence();
 
 			void MoveEntry(SequenceEntry* entry, double newpos);
+			void removeEntry(SequenceEntry* entry);
 
 			const std::string & name() const;
 			void setName(const std::string & newname);
