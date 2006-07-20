@@ -176,13 +176,9 @@ void SequencerGUI::Area::resize( )
 // this is the gui class of one pattern entry
 SequencerItem::SequencerItem( SequencerGUI* seqGui )
 {
-  setBorder (NFrameBorder());
   setMoveable(nMvHorizontal);
-
   setTransparent(false);
-
   sequenceEntry_ = 0;
-
   sView = seqGui;
 }
 
@@ -208,6 +204,14 @@ void SequencerItem::paint( NGraphics * g )
   g->setForeground( NColor( sequenceEntry_->pattern()->category()->color() ));
   g->fillRect(0,0, clientWidth(), clientHeight() );
   g->drawText( xp, yp, sequenceEntry_->pattern()->name());
+
+  if (selected_) {
+    g->setForeground( NColor( 0,0,255) );
+    g->drawRect(0,0, clientWidth()-1, clientHeight()-1 );
+  }  else {
+    g->setForeground( NColor( 180,180,180) );
+    g->drawRect(0,0, clientWidth()-1, clientHeight()-1 );
+  }
 }
 
 SequenceEntry * SequencerItem::sequenceEntry( )
@@ -229,6 +233,18 @@ void SequencerItem::onMove( const NMoveEvent & moveEvent )
 
 void SequencerItem::onMousePress( int x, int y, int button )
 {
+  selected_ = true;
+  click.emit(this);
+}
+
+void SequencerItem::setSelected( bool on )
+{
+  selected_ = on;
+}
+
+bool SequencerItem::selected( )
+{
+  return selected_;
 }
 
 // end of SequencerItem class
@@ -260,6 +276,7 @@ void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
   double endTick = sequenceLine()->tickLength();
 
   SequencerItem* item = new SequencerItem(sView);
+    item->click.connect(this,&SequencerGUI::SequencerLine::onSequencerItemClick);
     item->setPosition(d2i(sView->beatPxLength() * endTick),5,pattern->beats() * sView->beatPxLength() ,20);
     item->setSequenceEntry(sequenceLine()->createEntry(pattern, endTick));
     items.push_back(item);
@@ -276,6 +293,13 @@ void SequencerGUI::SequencerLine::removeItems( SinglePattern * pattern )
       removeChild(item);
     } else it++;
 	}
+}
+
+void SequencerGUI::SequencerLine::removeChild( NVisualComponent * item )
+{
+  std::list<SequencerItem*>::iterator it = find( items.begin(), items.end(), item );
+  if (it != items.end() ) items.erase(it);
+  NPanel::removeChild(item);
 }
 
 void SequencerGUI::SequencerLine::onMousePress( int x, int y, int button )
@@ -333,6 +357,14 @@ int SequencerGUI::SequencerLine::preferredHeight( ) const
   return 30;
 }
 
+void SequencerGUI::SequencerLine::onSequencerItemClick( SequencerItem * item )
+{
+  itemClick.emit(item);
+}
+
+// end of SequencerLine class
+
+
 // main class
 
 SequencerGUI::SequencerGUI()
@@ -347,8 +379,10 @@ SequencerGUI::SequencerGUI()
 
   toolBar_ = new NToolBar();
     toolBar_->add( new NButton("Add Track"))->clicked.connect(this,&SequencerGUI::onNewTrack);
-    toolBar_->add( new NButton("Insert Track"))->clicked.connect(this,&SequencerGUI::onInsertTrack);;
-    toolBar_->add( new NButton("Delete Track"))->clicked.connect(this,&SequencerGUI::onDeleteTrack);;
+    toolBar_->add( new NButton("Insert Track"))->clicked.connect(this,&SequencerGUI::onInsertTrack);
+    toolBar_->add( new NButton("Delete Track"))->clicked.connect(this,&SequencerGUI::onDeleteTrack);
+    toolBar_->add(new NToolBarSeparator());
+    toolBar_->add( new NButton("Delete Entry"))->clicked.connect(this,&SequencerGUI::onDeleteEntry);
   add(toolBar_, nAlTop);
 
   beatLineal_ = new SequencerBeatLineal(this);
@@ -410,6 +444,7 @@ PatternSequence * SequencerGUI::patternSequence( )
 void SequencerGUI::addSequencerLine( )
 {
   SequencerLine* line = new SequencerLine( this );
+  line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
   lines.push_back(line);
   line->setSequenceLine( patternSequence_->createNewLine() );
   line->click.connect(this, &SequencerGUI::onSequencerLineClick);
@@ -419,6 +454,8 @@ void SequencerGUI::addSequencerLine( )
   lastLine = line;
 
 }
+
+// track operations
 
 void SequencerGUI::onNewTrack( NButtonEvent * ev )
 {
@@ -473,6 +510,20 @@ void SequencerGUI::onSequencerLineClick( SequencerLine * line )
   repaint();
 }
 
+void SequencerGUI::onSequencerItemClick( SequencerItem * item )
+{
+  if (item != selectedItem_) {
+    if (selectedItem_) {
+      selectedItem_->setSelected(false);
+      selectedItem_->repaint();
+    }
+    selectedItem_ = item;
+    item->repaint();
+  }
+}
+
+// entry operations
+
 void SequencerGUI::addPattern( SinglePattern * pattern )
 {
   if ( selectedLine_ ) {
@@ -482,6 +533,18 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
  }
 }
 
+void SequencerGUI::onDeleteEntry( NButtonEvent * ev )
+{
+  if (selectedItem_) {
+    SequenceEntry* entry = selectedItem_->sequenceEntry();
+    NVisualComponent* parentContainer = (NVisualComponent*) (selectedItem_->parent());
+    parentContainer->removeChild(selectedItem_);
+    resize();
+    repaint();
+    entry->track()->removeEntry(entry);
+    selectedItem_ = 0;
+  }
+}
 
 void SequencerGUI::onZoomHBarPosChanged( ZoomBar * zoomBar, double newPos )
 {
@@ -565,9 +628,5 @@ void SequencerGUI::resize( )
 }
 
 }}
-
-
-
-
 
 
