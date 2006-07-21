@@ -13,4 +13,4 @@ main()
 	done
 } &&
 
-main "$0"
+main "$@"
