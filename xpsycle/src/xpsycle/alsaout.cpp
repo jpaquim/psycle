@@ -18,7 +18,7 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/alsaout_conditional_build.h>
+	#include <xpsycle/alsa_conditional_build.h>
 #endif
 #if !defined XPSYCLE__NO_ALSA
 

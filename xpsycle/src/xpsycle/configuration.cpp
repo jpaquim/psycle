@@ -117,7 +117,7 @@ void Configuration::setSkinDefaults( )
 	_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
 	_ppOutputDrivers[0] = new AudioDriver;
 	#if defined XPSYCLE__CONFIGURATION
-		#include <xpsycle/alsaout_conditional_build.h>
+		#include <xpsycle/alsa_conditional_build.h>
 	#endif
 	#if !defined XPSYCLE__NO_ALSA
 		_ppOutputDrivers[1] = new AlsaOut();
