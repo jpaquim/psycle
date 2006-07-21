@@ -120,7 +120,7 @@ namespace psycle
 
 		double SequenceEntry::tickPosition( ) const
 		{
-			std::map<double, SequenceEntry*>::iterator iter = line_->begin();
+			SequenceLine::iterator iter = line_->begin();
 			for(; iter!= line_->end(); ++iter)
 			{
 				if(iter->second==this)
@@ -280,16 +280,16 @@ namespace psycle
 			{
 				SequenceLine *pTrack = *seqIt;
 
-				typedef std::map<double, SequenceEntry*>::reverse_iterator RTrackIt;
+				typedef SequenceLine::reverse_iterator RTrackIt;
 
 				RTrackIt trackIt = (RTrackIt)( pTrack->lower_bound(start+length) );
 				for(; trackIt != pTrack->rend() && trackIt->first + trackIt->second->patternBeats() >= start; ++trackIt )
 				{
 					SinglePattern* pPat = trackIt->second->pattern();
-					std::map<double, PatternLine>::iterator patIt   = pPat->lower_bound( start-trackIt->first ),
+					SinglePattern::iterator patIt   = pPat->lower_bound( start-trackIt->first ),
 					patEnd = pPat->lower_bound( start+length-trackIt->first );
 					for( ; patIt != patEnd; ++patIt)
-						events.insert( std::pair<const double, PatternLine>( patIt->first + trackIt->first, patIt->second ) );
+						events.insert( SinglePattern::value_type( patIt->first + trackIt->first, patIt->second ) );
 				}
 			}
 		}

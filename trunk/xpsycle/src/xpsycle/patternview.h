@@ -120,60 +120,62 @@ class PatternView : public NPanel
 
       void copyBlock(bool cutit);
       void pasteBlock(int tx,int lx,bool mix,bool save = true);
-      void blockTranspose(int trp);
       void deleteBlock();
-      void doubleLength();
+      void transposeBlock(int trp);
+      void scaleBlock(float factor);
 
 
     private:
 
-    NPopupMenu* editPopup_;
-    PatDlg* patDlg;
-    PatternView* pView;
-    int dx_, dy_;
+      NPopupMenu* editPopup_;
+      PatDlg* patDlg;
+      PatternView* pView;
+      int dx_, dy_;
 
-    bool doDrag_;
-    bool doSelect_;
-    bool doShiftSel_;
+      bool doDrag_;
+      bool doSelect_;
+      bool doShiftSel_;
 
-    NSize selection_;
-    NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
-    NPoint3D selStartPoint_;
-    NPoint3D selCursor; // for keyboard drag
+      NSize selection_;
+      NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
+      NPoint3D selStartPoint_;
+      NPoint3D selCursor; // for keyboard drag
 
-    void drawText(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
-    void drawData(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
+      void drawText(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
+      void drawData(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
 
-    void drawCellBg(NGraphics* g, int track, int line, int col, const NColor & bgColor);
+      void drawCellBg(NGraphics* g, int track, int line, int col, const NColor & bgColor);
 
-    void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
-    void drawSelBg(NGraphics* g, const NSize & selArea);
+      void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+      void drawSelBg(NGraphics* g, const NSize & selArea);
 
-    NPoint3D intersectCell(int x, int y);
-    void clearOldSelection();
+      NPoint3D intersectCell(int x, int y);
+      void clearOldSelection();
 
-    bool isBlockCopied;
-    int blockNTracks;
-    int blockNLines;
-    NSize blockLastOrigin;
+      bool isBlockCopied;
+      NSize blockLastOrigin;
 
-    void startSel(const NPoint3D & p);
-    void doSel(const NPoint3D & p);
-    void endSel();
-  
-    void onPopupBlockCopy(NButtonEvent* ev);
-    void onPopupBlockCut(NButtonEvent* ev);
-    void onPopupBlockPaste(NButtonEvent* ev);
-    void onPopupBlockDelete(NButtonEvent* ev);
-    void onPopupBlockMixPaste(NButtonEvent* ev);
-    void onPopupTranspose1(NButtonEvent* ev);
-    void onPopupTranspose12(NButtonEvent* ev);
-    void onPopupTranspose_1(NButtonEvent* ev);
-    void onPopupTranspose_12(NButtonEvent* ev);
-    void onPopupPattern(NButtonEvent* ev);
+      void startSel(const NPoint3D & p);
+      void doSel(const NPoint3D & p);
+      void endSel();
 
-    unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
-  };
+      void onPopupBlockCopy(NButtonEvent* ev);
+      void onPopupBlockCut(NButtonEvent* ev);
+      void onPopupBlockPaste(NButtonEvent* ev);
+      void onPopupBlockDelete(NButtonEvent* ev);
+      void onPopupBlockMixPaste(NButtonEvent* ev);
+      void onPopupTranspose1(NButtonEvent* ev);
+      void onPopupTranspose12(NButtonEvent* ev);
+      void onPopupTranspose_1(NButtonEvent* ev);
+      void onPopupTranspose_12(NButtonEvent* ev);
+      void onPopupPattern(NButtonEvent* ev);
+
+      SinglePattern clipboard;
+
+      unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
+      int blockNTracks;
+      int blockNLines;
+    };
 
 public:
     PatternView();
@@ -234,6 +236,7 @@ public:
     void blockTranspose(int trp);
     void deleteBlock();
     void doubleLength();
+    void halveLength();
 
     void setMoveCursorWhenPaste( bool on);
     bool moveCursorWhenPaste() const;

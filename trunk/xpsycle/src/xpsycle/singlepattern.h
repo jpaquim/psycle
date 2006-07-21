@@ -56,6 +56,11 @@ namespace psycle
 
 			void clearEmptyLines();
 
+			void scaleBlock(int left, int right, double top, double bottom, float factor);
+			void transposeBlock(int left, int right, double top, double bottom, int trp);
+			void deleteBlock(int left, int right, double top, double bottom);
+
+			void clearPosition(double beatpos, int track, int column);
 		private:
 
 			int beats_;

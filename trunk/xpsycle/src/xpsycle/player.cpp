@@ -363,7 +363,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 		/// Final Loop. Read new line for notes to send to the Machines
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
-			std::map<int, PatternEvent>::iterator trackItr = line.begin();
+			PatternLine::iterator trackItr = line.begin();
 			for ( ; trackItr != line.end() ; ++trackItr) {
 
 				PatternEvent entry = trackItr->second;
