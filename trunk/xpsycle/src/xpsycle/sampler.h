@@ -211,7 +211,7 @@ namespace psycle
 			dsp::Cubic _resampler;
 
 			void PerformFx(int voice);
-			void VoiceWork(int numsamples, int voice);
+			void VoiceWork(int startSample, int numsamples, int voice);
 			void NoteOff(int voice);
 			void NoteOffFast(int voice);
 			int VoiceTick(int channel, PatternEntry* pData);

@@ -100,7 +100,7 @@ namespace psycle
 						}
 						for (int voice=0; voice<_numVoices; voice++)
 						{
-							VoiceWork(ns, voice);
+							VoiceWork(startSample, ns, voice);
 						}
 						ns = 0;
 					}
@@ -111,7 +111,7 @@ namespace psycle
 							ns -= nextevent;
 							for (int voice=0; voice<_numVoices; voice++)
 							{
-								VoiceWork(nextevent, voice);
+								VoiceWork(startSample, nextevent, voice);
 							}
 						}
 						for (int i=0; i < Global::song().tracks(); i++)
@@ -197,12 +197,12 @@ namespace psycle
 			}
 		}
 
-		void Sampler::VoiceWork(int numsamples, int voice)
+		void Sampler::VoiceWork(int startSample, int numsamples, int voice)
 		{
 			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
-			float* pSamplesL = _pSamplesL;
-			float* pSamplesR = _pSamplesR;
+			float* pSamplesL = _pSamplesL+startSample;
+			float* pSamplesR = _pSamplesR+startSample;
 			float left_output;
 			float right_output;
 
