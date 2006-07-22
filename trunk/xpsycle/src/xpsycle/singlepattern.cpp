@@ -54,6 +54,24 @@ namespace psycle
 			}
 		}
 
+		bool SinglePattern::barStart( double pos ) const
+		{
+			if (pos - ((int) pos) != 0) return false;
+			int bts = 0;
+			std::vector<TimeSignature>::const_iterator it = timeSignatures.begin();
+			for (; it < timeSignatures.end(); it++)
+			{
+				const TimeSignature & signature = *it;
+				for (int count = 0; count < signature.count(); count++) {
+					if (bts == pos) {
+						return true;
+					}
+					bts += signature.numerator();
+				}
+			}
+			return false;
+		}
+
 		int SinglePattern::beats( ) const
 		{
 			int bts = 0;
@@ -213,5 +231,7 @@ namespace psycle
 
 	}
 }
+
+
 
 

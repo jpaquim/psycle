@@ -51,6 +51,8 @@ namespace psycle
 
 			int beats() const;
 
+			bool barStart(double pos) const;
+
 			void setName(const std::string & name);
 			const std::string & name() const;
 

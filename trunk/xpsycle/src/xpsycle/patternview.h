@@ -85,6 +85,7 @@ class PatternView : public NPanel
         ~TimeSignaturePanel();
 
         virtual void paint(NGraphics* g);
+        virtual int preferredWidth() const;
 
         void setDy(int dy);
         int dy();
