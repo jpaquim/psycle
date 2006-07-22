@@ -77,19 +77,23 @@ void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
   int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
 
   for (int i = start ; i < end ; i++) {
-     if (! (i % 16)) {
-        g->setForeground(NColor(180,180,180));
-        g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
-        std::string beatLabel = stringify(i/4);
-        int textWidth = g->textWidth(beatLabel);
-        g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
-     }
-     else {
         g->setForeground(NColor(220,220,220));
         g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
-    }
   }
 
+  for (int i = start ; i < end ; i++) {
+    TimeSignature sig = sView->patternSequence()->timeSignature(i);
+		int k = i;
+		for ( ; i < k+sig.beats(); i++) {
+			if (! ((i-k) % sig.numerator() )) {
+ 				g->setForeground(NColor(180,180,180));
+				g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
+				std::string beatLabel = stringify(i/4);
+				int textWidth = g->textWidth(beatLabel);
+				g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
+			}
+		}
+  }
 }
 
 int SequencerGUI::SequencerBeatLineal::preferredHeight( ) const

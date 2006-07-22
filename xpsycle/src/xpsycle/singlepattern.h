@@ -76,6 +76,8 @@ namespace psycle
 			PatternCategory* category_;
 			std::vector<TimeSignature> timeSignatures;
 
+			TimeSignature zeroTime;
+
 		};
 
 	}

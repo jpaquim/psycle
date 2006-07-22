@@ -148,6 +148,8 @@ namespace psycle
 			PatternData* patternData();
 			void removeSinglePattern(SinglePattern* pattern);
 
+			TimeSignature timeSignature(double pos) const;
+
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
 			///\return the beat position of the global events, or if there are none, start+length.

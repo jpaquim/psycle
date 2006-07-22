@@ -62,7 +62,15 @@ namespace psycle
 
 		const TimeSignature & SinglePattern::playPosTimeSignature(double pos) const
 		{
-				// todo implement
+				int bts = 0;
+				std::vector<TimeSignature>::const_iterator it = timeSignatures.begin();
+				for (; it < timeSignatures.end(); it++)
+				{
+					const TimeSignature & timeSignature = *it;
+					bts += timeSignature.beats();
+					if (pos < bts) return timeSignature;
+				}
+				return zeroTime;
 		}
 
 		bool SinglePattern::barStart( double pos , TimeSignature & signature ) const
