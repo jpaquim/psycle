@@ -32,6 +32,7 @@
 #include <ngrs/nmenuseperator.h>
 #include <ngrs/nframeborder.h>
 #include <ngrs/nfontmetrics.h>
+#include <ngrs/ntoolbar.h>
 
 namespace psycle { namespace host {
 
@@ -54,6 +55,8 @@ PatternView::PatternView()
     vBar->posChange.connect(this,&PatternView::onVScrollBar);
   add(vBar, nAlRight);
 
+  // create the patternview toolbar
+  add(toolBar = new NToolBar() ,nAlTop);
 
   // create the left linenumber panel
   add(lineNumber_ = new LineNumber(this), nAlLeft);
