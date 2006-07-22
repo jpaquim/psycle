@@ -57,7 +57,11 @@ PatternView::PatternView()
 
   // create the patternview toolbar
   add(toolBar = new NToolBar() ,nAlTop);
+  initToolBar();
 
+  // create the left timesignature panel
+  timeSignaturePanel_ = new TimeSignaturePanel(this);
+  add(timeSignaturePanel_, nAlLeft);
   // create the left linenumber panel
   add(lineNumber_ = new LineNumber(this), nAlLeft);
   // create the headertrack panel
@@ -135,6 +139,21 @@ void PatternView::onVScrollBar( NObject * sender, int pos )
   }
   }
 }
+
+void PatternView::initToolBar( )
+{
+  toolBar->add(new NButton("add Bar"))->clicked.connect(this,&PatternView::onAddBar);
+}
+
+void PatternView::onAddBar( NButtonEvent * ev )
+{
+  if ( pattern_ ) {
+    pattern_->addBar();
+    resize();
+    repaint();
+  }
+}
+
 
 void PatternView::resize( )
 {
@@ -509,6 +528,33 @@ int PatternView::Header::skinColWidth( )
 
 
 
+///
+/// The Line Number Panel Class
+///
+PatternView::TimeSignaturePanel::TimeSignaturePanel( PatternView * pPatternView )
+{
+  pView = pPatternView;
+  dy_ = 0;
+}
+
+PatternView::TimeSignaturePanel::~ TimeSignaturePanel( )
+{
+}
+
+void PatternView::TimeSignaturePanel::paint( NGraphics * g )
+{
+}
+
+int PatternView::TimeSignaturePanel::dy( )
+{
+  return dy_;
+}
+
+void PatternView::TimeSignaturePanel::setDy( int dy )
+{
+  dy_ = dy;
+}
+/// End of TimeSinaturePanel Class
 
 
 
@@ -2065,5 +2111,8 @@ int psycle::host::PatternView::selectedMachineIndex( ) const
 {
   return selectedMacIdx_;
 }
+
+
+
 
 

@@ -21,8 +21,10 @@
 #define SINGLEPATTERN_H
 
 #include "patternline.h"
+#include "timesignature.h"
 #include <ngrs/sigslot.h>
 #include <map>
+#include <vector>
 #include <string>
 
 /**
@@ -45,7 +47,8 @@ namespace psycle
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
 
-			void setBeats(int beats);
+			void addBar();
+
 			int beats() const;
 
 			void setName(const std::string & name);
@@ -68,6 +71,8 @@ namespace psycle
 			std::string name_;
 
 			PatternCategory* category_;
+			std::vector<TimeSignature> timeSignatures;
+
 		};
 
 	}

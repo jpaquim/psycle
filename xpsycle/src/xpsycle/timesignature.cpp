@@ -19,10 +19,17 @@
  ***************************************************************************/
 #include "timesignature.h"
 
+namespace psycle
+{
+	namespace host
+	{
+
+
 TimeSignature::TimeSignature() :
   numerator_(4),
   denominator_(4)
 {
+  count_ = 1;
 }
 
 TimeSignature::~TimeSignature()
@@ -50,4 +57,28 @@ int TimeSignature::denominator( ) const
 {
   return denominator_;
 }
+
+void TimeSignature::setCount( int count )
+{
+  count_ = count;
+}
+
+int TimeSignature::count( ) const
+{
+  return count_;
+}
+
+void TimeSignature::incCount( )
+{
+  count_++;
+}
+
+int TimeSignature::beats( ) const
+{
+  return numerator_ * count_;
+}
+
+}}
+
+
 

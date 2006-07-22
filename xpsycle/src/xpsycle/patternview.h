@@ -79,6 +79,22 @@ class PatternView : public NPanel
     };
 
 
+    class TimeSignaturePanel : public NPanel {
+      public:
+        TimeSignaturePanel( PatternView* pPatternView );
+        ~TimeSignaturePanel();
+
+        virtual void paint(NGraphics* g);
+
+        void setDy(int dy);
+        int dy();
+
+      private:
+
+        PatternView* pView;
+        int dy_;
+
+    };
 
 
     class LineNumber : public NPanel {
@@ -274,6 +290,7 @@ private:
   NScrollBar* hBar;
   NScrollBar* vBar;
   Header*     header;
+  TimeSignaturePanel* timeSignaturePanel_;
   LineNumber* lineNumber_;
   NColor      separatorColor_;
   NToolBar*   toolBar;
@@ -285,9 +302,13 @@ private:
   void onHScrollBar(NObject* sender, int pos);
   void onVScrollBar(NObject* sender, int pos);
 
+  void initToolBar();
+  void onAddBar(NButtonEvent* ev);
+
   /// multi-key playback state stuff
   int notetrack[MAX_TRACKS];
   int outtrack;
+
 };
 
 

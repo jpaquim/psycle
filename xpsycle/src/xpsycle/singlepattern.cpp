@@ -27,7 +27,7 @@ namespace psycle
 
 		SinglePattern::SinglePattern()
 		{
-			beats_ = 16;
+			timeSignatures.push_back( TimeSignature() );
 			beatZoom_ = 4;
 			category_ = 0;
 		}
@@ -47,14 +47,23 @@ namespace psycle
 			return beatZoom_;
 		}
 
-		void SinglePattern::setBeats( int beats )
+		void SinglePattern::addBar( )
 		{
-			beats_ = beats;
+			if ( timeSignatures.size() > 0 ) {
+				timeSignatures.back().incCount();
+			}
 		}
 
 		int SinglePattern::beats( ) const
 		{
-			return beats_;
+			int bts = 0;
+			std::vector<TimeSignature>::const_iterator it = timeSignatures.begin();
+			for (; it < timeSignatures.end(); it++)
+			{
+				const TimeSignature & signature = *it;
+				bts += signature.beats();
+			}
+			return bts;
 		}
 
 		void SinglePattern::setName( const std::string & name )
