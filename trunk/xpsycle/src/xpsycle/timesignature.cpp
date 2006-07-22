@@ -32,6 +32,13 @@ TimeSignature::TimeSignature() :
   count_ = 1;
 }
 
+TimeSignature::TimeSignature(int numerator, int denominator) :
+  numerator_(numerator),
+  denominator_(denominator)
+{
+  count_ = 1;
+}
+
 TimeSignature::~TimeSignature()
 {
 }

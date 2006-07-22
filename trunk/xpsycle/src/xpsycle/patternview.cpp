@@ -33,6 +33,8 @@
 #include <ngrs/nframeborder.h>
 #include <ngrs/nfontmetrics.h>
 #include <ngrs/ntoolbar.h>
+#include <ngrs/ncombobox.h>
+#include <ngrs/nitem.h>
 
 namespace psycle { namespace host {
 
@@ -151,13 +153,24 @@ void PatternView::onVScrollBar( NObject * sender, int pos )
 
 void PatternView::initToolBar( )
 {
+  meterCbx = new NComboBox();
+    meterCbx->add(new NItem("4/4"));
+    meterCbx->add(new NItem("3/4"));
+    meterCbx->setPreferredSize(50,15);
+    meterCbx->setIndex(0);
+  toolBar->add(meterCbx);
   toolBar->add(new NButton("add Bar"))->clicked.connect(this,&PatternView::onAddBar);
 }
 
 void PatternView::onAddBar( NButtonEvent * ev )
 {
   if ( pattern_ ) {
-    pattern_->addBar();
+    std::string meter = meterCbx->text();
+    int pos = meter.find("/");
+    std::string num = meter.substr(0,pos);
+    std::string denom = meter.substr(pos+1);
+
+    pattern_->addBar( TimeSignature(str<int>(num), str<int>(denom)) );
     resize();
     repaint();
   }
@@ -552,6 +565,8 @@ PatternView::TimeSignaturePanel::~ TimeSignaturePanel( )
 
 void PatternView::TimeSignaturePanel::paint( NGraphics * g )
 {
+  TimeSignature signature;
+
   int startLine = dy_ / pView->rowHeight();
   int rDiff   = g->repaintArea().rectClipBox().top() - absoluteTop() + pView->headerHeight();
   int offT = rDiff / pView->rowHeight();
@@ -572,8 +587,10 @@ void PatternView::TimeSignaturePanel::paint( NGraphics * g )
   if ( pView->pattern() )
       for (int i = offT; i < count; i++) {
          float position = i / (float) pView->pattern()->beatZoom();
-        if ( pView->pattern()->barStart(position) )
-        g->drawText(clientWidth()-g->textWidth("4/4")-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,"4/4");
+        if ( pView->pattern()->barStart(position, signature) ) {
+          std::string caption = stringify(signature.numerator())+"/"+stringify(signature.denominator());
+          g->drawText(clientWidth()-g->textWidth(caption)-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,caption);
+        }
       }
 
     g->drawText(1,pView->headerHeight()-1,"bar");
@@ -747,79 +764,83 @@ PatternView::PatternDraw::~ PatternDraw( )
 
 void PatternView::PatternDraw::paint( NGraphics * g )
 {
-  NPoint lineArea = linesFromRepaint(g->repaintArea());
-  int startLine = lineArea.x();
-  int endLine   = lineArea.y();
+  if (pView->pattern()) {
+    TimeSignature signature;
+    NPoint lineArea = linesFromRepaint(g->repaintArea());
+    int startLine = lineArea.x();
+    int endLine   = lineArea.y();
 
-  NPoint trackArea = tracksFromRepaint(g->repaintArea());
-  int startTrack = trackArea.x();
-  int endTrack   = trackArea.y();
+    NPoint trackArea = tracksFromRepaint(g->repaintArea());
+    int startTrack = trackArea.x();
+    int endTrack   = trackArea.y();
 
-  g->setForeground(Global::pConfig()->pvc_rowbeat);
+    g->setForeground(Global::pConfig()->pvc_rowbeat);
 
-  int trackWidth = ((endTrack+1) * pView->colWidth()) - dx();
-  int lineHeight = ((endLine +1) * pView->rowHeight()) - dy();
+    int trackWidth = ((endTrack+1) * pView->colWidth()) - dx();
+    int lineHeight = ((endLine +1) * pView->rowHeight()) - dy();
 
-  for (int y = startLine; y <= endLine; y++) {
-    if (!(y == pView->playPos()) || pView->editPosition() != Global::pPlayer()->_playPosition) {
+    for (int y = startLine; y <= endLine; y++) {
+      float position = y / (float) pView->pattern()->beatZoom();
+      if (!(y == pView->playPos()) || pView->editPosition() != Global::pPlayer()->_playPosition) {
       if ( !(y % pView->beatZoom())) {
-        if (!(y%( pView->beatZoom()*Global::pConfig()->pv_timesig))) {
-            g->setForeground(Global::pConfig()->pvc_row4beat);
+          if ((pView->pattern()->barStart(position, signature) )) {
+              g->setForeground(Global::pConfig()->pvc_row4beat);
+              g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
+              g->setForeground(Global::pConfig()->pvc_rowbeat);
+          } else {
             g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
-            g->setForeground(Global::pConfig()->pvc_rowbeat);
-        } else {
-          g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
+          }
         }
+      } else  {
+        g->setForeground(Global::pConfig()->pvc_playbar);
+        g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
+        g->setForeground(Global::pConfig()->pvc_rowbeat);
       }
-    } else  {
-      g->setForeground(Global::pConfig()->pvc_playbar);
-      g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
-      g->setForeground(Global::pConfig()->pvc_rowbeat);
     }
-  }
 
-  drawSelBg(g,selection_);
+    drawSelBg(g,selection_);
 
-  g->setForeground(pView->foreground());
+    g->setForeground(pView->foreground());
 
-  for (int y = startLine; y <= endLine; y++)
-    g->drawLine(0,y*pView->rowHeight() - dy_,trackWidth,y*pView->rowHeight()-dy_);
+    for (int y = startLine; y <= endLine; y++)
+      g->drawLine(0,y*pView->rowHeight() - dy_,trackWidth,y*pView->rowHeight()-dy_);
 
-  for (int i = startTrack; i <= endTrack; i++) // 3px space at begin of trackCol
+    for (int i = startTrack; i <= endTrack; i++) // 3px space at begin of trackCol
       g->fillRect(i*pView->colWidth()-dx_,0,3,lineHeight);
 
-  g->setForeground(pView->separatorColor());
-  for (int i = startTrack; i <= endTrack; i++)  // col separators
+    g->setForeground(pView->separatorColor());
+    for (int i = startTrack; i <= endTrack; i++)  // col separators
       g->drawLine(i*pView->colWidth()-dx_,0,i*pView->colWidth()-dx_,lineHeight);
 
-  g->setForeground(pView->foreground());
+    g->setForeground(pView->foreground());
 
-  for (int x = startTrack; x <= endTrack; x++) {
+    for (int x = startTrack; x <= endTrack; x++) {
       int COL = pView->noteCellWidth();
       for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
-      switch (*it) {
-      case 1:
+        switch (*it) {
+        case 1:
             g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,lineHeight);
             COL+=2 * pView->cellWidth();
-      break;
-      case 2:
+        break;
+        case 2:
             g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,lineHeight);
             COL+=4 * pView->cellWidth();
-      break;
+        break;
+        }
       }
     }
+
+    drawPattern(g,startLine,endLine,startTrack,endTrack);
+
+    g->setForeground(NColor(0,0,80));
+    int endTop     = pView->lineNumber() * pView->rowHeight() - dy();
+    int endHeight  = std::max(0, clientHeight() - endTop);
+    g->fillRect(0,endTop,clientWidth(),endHeight);
+
+    int endLeft     = pView->trackNumber() * pView->colWidth() - dx();
+    int endWidth    = std::max(0, clientWidth() - endLeft);
+    g->fillRect(endLeft,0,endWidth,clientHeight());
   }
-
-  drawPattern(g,startLine,endLine,startTrack,endTrack);
-
-  g->setForeground(NColor(0,0,80));
-  int endTop     = pView->lineNumber() * pView->rowHeight() - dy();
-  int endHeight  = std::max(0, clientHeight() - endTop);
-  g->fillRect(0,endTop,clientWidth(),endHeight);
-
-  int endLeft     = pView->trackNumber() * pView->colWidth() - dx();
-  int endWidth    = std::max(0, clientWidth() - endLeft);
-  g->fillRect(endLeft,0,endWidth,clientHeight());
 }
 
 void PatternView::PatternDraw::setDy( int dy )
