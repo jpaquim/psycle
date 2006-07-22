@@ -23,6 +23,13 @@
 /**
 @author Stefan Nattkemper
 */
+
+namespace psycle
+{
+	namespace host
+	{
+
+
 class TimeSignature{
 public:
     TimeSignature();
@@ -35,11 +42,19 @@ public:
     int denominator() const;
     void setDenominator(int value);
 
+    void setCount(int count);
+    void incCount();
+    int count() const;
+
+    int beats() const;
+
 private:
 
     int numerator_;
     int denominator_;
+    int count_;
 
 };
 
+}}
 #endif
