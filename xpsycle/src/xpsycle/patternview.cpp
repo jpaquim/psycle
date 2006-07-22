@@ -125,8 +125,17 @@ void PatternView::onVScrollBar( NObject * sender, int pos )
       if (diffY < drawArea->clientHeight()) {
         NRect rect = lineNumber_->blitMove(0,diffY,NRect(lineNumber_->absoluteSpacingLeft(),lineNumber_->absoluteSpacingTop()+headerHeight(),lineNumber_->spacingWidth(),lineNumber_->spacingHeight()-headerHeight()));
         lineNumber_->setDy(newPos);
-        if (diffY < 0) rect.setHeight(rect.height()+headerHeight());
+
+        NRect rect2 = timeSignaturePanel_->blitMove(0,diffY,NRect(timeSignaturePanel_->absoluteSpacingLeft(),timeSignaturePanel_->absoluteSpacingTop()+headerHeight(),timeSignaturePanel_->spacingWidth(),timeSignaturePanel_->spacingHeight()-headerHeight()));
+        timeSignaturePanel_->setDy(newPos);
+
+        if (diffY < 0) {
+           rect.setHeight(rect.height()+headerHeight());
+           rect2.setHeight(rect2.height()+headerHeight());
+        }
+
         window()->repaint(lineNumber_,rect);
+        window()->repaint(timeSignaturePanel_,rect2);
         rect = drawArea->blitMove(0,diffY,drawArea->absoluteSpacingGeometry());
         drawArea->setDy(newPos);
         window()->repaint(drawArea,rect);
@@ -529,7 +538,7 @@ int PatternView::Header::skinColWidth( )
 
 
 ///
-/// The Line Number Panel Class
+/// The TimeSignature Number Panel Class
 ///
 PatternView::TimeSignaturePanel::TimeSignaturePanel( PatternView * pPatternView )
 {
@@ -543,6 +552,31 @@ PatternView::TimeSignaturePanel::~ TimeSignaturePanel( )
 
 void PatternView::TimeSignaturePanel::paint( NGraphics * g )
 {
+  int startLine = dy_ / pView->rowHeight();
+  int rDiff   = g->repaintArea().rectClipBox().top() - absoluteTop() + pView->headerHeight();
+  int offT = rDiff / pView->rowHeight();
+  if (offT < 0) offT = 0;
+  offT = 0;
+  int offB = (rDiff+g->repaintArea().rectClipBox().height()) / pView->rowHeight();
+  if (offB < 0) offB = 0;
+  int count = std::min(clientHeight() / pView->rowHeight(),offB);
+
+//  for (int i = offT; i < count; i++)
+//      g->drawLine(0,i*pView->rowHeight()+pView->headerHeight(),
+//                  clientWidth(),i*pView->rowHeight()+pView->headerHeight());
+
+  g->setForeground(pView->separatorColor());
+  g->drawLine(0,0,0,clientHeight());
+  g->drawLine(clientWidth()-1,0,clientWidth()-1,clientHeight());
+
+  if ( pView->pattern() )
+      for (int i = offT; i < count; i++) {
+         float position = i / (float) pView->pattern()->beatZoom();
+        if ( pView->pattern()->barStart(position) )
+        g->drawText(clientWidth()-g->textWidth("4/4")-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,"4/4");
+      }
+
+    g->drawText(1,pView->headerHeight()-1,"bar");
 }
 
 int PatternView::TimeSignaturePanel::dy( )
@@ -554,6 +588,11 @@ void PatternView::TimeSignaturePanel::setDy( int dy )
 {
   dy_ = dy;
 }
+
+int PatternView::TimeSignaturePanel::preferredWidth() const {
+  return 40;
+}
+
 /// End of TimeSinaturePanel Class
 
 
