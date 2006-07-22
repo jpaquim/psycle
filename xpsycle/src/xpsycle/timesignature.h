@@ -33,6 +33,7 @@ namespace psycle
 class TimeSignature{
 public:
     TimeSignature();
+    TimeSignature(int numerator, int denominator);
 
     ~TimeSignature();
 

@@ -35,6 +35,7 @@
 */
 
 class NToolBar;
+class NComboBox;
 
 namespace psycle { namespace host {
 
@@ -295,6 +296,7 @@ private:
   LineNumber* lineNumber_;
   NColor      separatorColor_;
   NToolBar*   toolBar;
+  NComboBox*  meterCbx;
 
   std::string noteToString(int value);
 

@@ -47,11 +47,12 @@ namespace psycle
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
 
-			void addBar();
+			void addBar( const TimeSignature & signature );
 
 			int beats() const;
 
-			bool barStart(double pos) const;
+			bool barStart(double pos, TimeSignature & signature) const;
+			const TimeSignature & playPosTimeSignature(double pos) const;
 
 			void setName(const std::string & name);
 			const std::string & name() const;

@@ -47,26 +47,38 @@ namespace psycle
 			return beatZoom_;
 		}
 
-		void SinglePattern::addBar( )
+		void SinglePattern::addBar( const TimeSignature & signature )
 		{
 			if ( timeSignatures.size() > 0 ) {
+				TimeSignature & last = timeSignatures.back();
+				if (last.numerator()   != signature.numerator() ||
+						last.denominator() != signature.denominator() )
+				{
+					timeSignatures.push_back(signature);
+				} else
 				timeSignatures.back().incCount();
 			}
 		}
 
-		bool SinglePattern::barStart( double pos ) const
+		const TimeSignature & SinglePattern::playPosTimeSignature(double pos) const
+		{
+				// todo implement
+		}
+
+		bool SinglePattern::barStart( double pos , TimeSignature & signature ) const
 		{
 			if (pos - ((int) pos) != 0) return false;
 			int bts = 0;
 			std::vector<TimeSignature>::const_iterator it = timeSignatures.begin();
 			for (; it < timeSignatures.end(); it++)
 			{
-				const TimeSignature & signature = *it;
-				for (int count = 0; count < signature.count(); count++) {
+				const TimeSignature & timeSignature = *it;
+				for (int count = 0; count < timeSignature.count(); count++) {
 					if (bts == pos) {
+						signature = timeSignature;
 						return true;
 					}
-					bts += signature.numerator();
+					bts += timeSignature.numerator();
 				}
 			}
 			return false;
