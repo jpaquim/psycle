@@ -80,25 +80,6 @@ class PatternView : public NPanel
     };
 
 
-    class TimeSignaturePanel : public NPanel {
-      public:
-        TimeSignaturePanel( PatternView* pPatternView );
-        ~TimeSignaturePanel();
-
-        virtual void paint(NGraphics* g);
-        virtual int preferredWidth() const;
-
-        void setDy(int dy);
-        int dy();
-
-      private:
-
-        PatternView* pView;
-        int dy_;
-
-    };
-
-
     class LineNumber : public NPanel {
     public:
       LineNumber(PatternView* pPatternView);
@@ -292,7 +273,6 @@ private:
   NScrollBar* hBar;
   NScrollBar* vBar;
   Header*     header;
-  TimeSignaturePanel* timeSignaturePanel_;
   LineNumber* lineNumber_;
   NColor      separatorColor_;
   NToolBar*   toolBar;
