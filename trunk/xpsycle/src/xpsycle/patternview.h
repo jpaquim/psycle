@@ -34,6 +34,8 @@
 @author Stefan
 */
 
+class NToolBar;
+
 namespace psycle { namespace host {
 
 class PatternView : public NPanel
@@ -274,6 +276,7 @@ private:
   Header*     header;
   LineNumber* lineNumber_;
   NColor      separatorColor_;
+  NToolBar*   toolBar;
 
   std::string noteToString(int value);
 
