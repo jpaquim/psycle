@@ -146,4 +146,9 @@ int NComboBox::selIndex( ) const
   return lbox->selIndex();
 }
 
+const std::string & NComboBox::text( ) const
+{
+  return edit_->text();
+}
+
 

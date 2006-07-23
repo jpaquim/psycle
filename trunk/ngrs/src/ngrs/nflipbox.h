@@ -37,6 +37,8 @@ public:
     NPanel* pane();
     NPanel* header();
 
+    void setExpanded(bool on);
+
     int flipperWidth() const;
 
     virtual int preferredHeight() const;

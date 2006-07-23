@@ -41,6 +41,8 @@ class NFlipBar : public NPanel
 
        ~NFlipper();
 
+       void setExpanded(bool on);
+
        virtual void onMousePress(int x, int y, int button);
 
        virtual int preferredWidth() const;
@@ -65,6 +67,7 @@ public:
 
     ~NFlipBar();
 
+    void setExpanded(bool on);
     bool expanded() const;
 
     signal1<NFlipBar*> change;
