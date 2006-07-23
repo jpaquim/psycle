@@ -365,23 +365,6 @@ namespace psycle
 			patternData_.removeSinglePattern(pattern);
 		}
 
-		TimeSignature PatternSequence::timeSignature(double pos) const {
-
-			TimeSignature sig;
-			int lastPos = 32000;
-
-			for( const_iterator seqIt = begin(); seqIt != end(); ++seqIt )
-			{
-				SequenceLine* line = *seqIt;
-				SequenceLine::const_iterator entryIt = line->lower_bound(pos);
-				if ( entryIt != line->end() ) {
-					SequenceEntry * entry = entryIt->second;
-					if (pos + entry->tickPosition() < lastPos )
-						 sig = entry->pattern()->playPosTimeSignature(  pos - entry->tickPosition() );
-				}
-			}
-			return sig;
-		}
 
 	} // end of host namespace
 
