@@ -139,6 +139,7 @@ class Area : public NPanel {
 
     virtual void paint(NGraphics* g);
     virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
     virtual void resize();
 
   private:

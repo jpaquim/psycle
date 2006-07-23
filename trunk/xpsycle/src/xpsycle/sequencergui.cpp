@@ -57,17 +57,10 @@ void SequencerGUI::SequencerBeatLineal::paint( NGraphics * g )
 
 void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
 {
- NRect area = g->repaintArea().rectClipBox();
-
-  g->setForeground(NColor(0,0,220));
+  NRect area = g->repaintArea().rectClipBox();
 
   int cw = clientWidth();
   int ch = clientHeight();
-
-  //std::string timeScaleText = "t = bpm";
-  //int rightIdent = 2;
-  //int scaleTextWidth = g->textWidth(timeScaleText) + rightIdent;
-  //g->drawText(cw - scaleTextWidth, g->textAscent(), timeScaleText);
 
   g->setForeground(NColor(220,220,220));
 
@@ -123,9 +116,22 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
 {
   for (int i = 0; i < 1000; i++) {
      g->setForeground(NColor(220,220,220));
-     g->drawLine(i* sView->beatPxLength(),0,d2i(i*sView->beatPxLength()),clientHeight());
-     if (i % 10) g->setForeground(NColor(180,180,180));
+     g->drawLine(i* sView->beatPxLength(),-scrollDy(),d2i(i*sView->beatPxLength()),clientHeight()+scrollDy());
   }
+}
+
+int SequencerGUI::Area::preferredHeight( ) const
+{
+  std::vector<NVisualComponent*>::const_iterator itr = visualComponents().begin();
+
+  int yp = 0;
+
+  for (;itr < visualComponents().end(); itr++) {
+    NVisualComponent* visualChild = *itr;
+    yp += visualChild->preferredHeight();
+  }
+
+  return yp;
 }
 
 int SequencerGUI::Area::preferredWidth( ) const
@@ -459,6 +465,7 @@ void SequencerGUI::addSequencerLine( )
 void SequencerGUI::onNewTrack( NButtonEvent * ev )
 {
   addSequencerLine();
+  resize();
   repaint();
 }
 
@@ -474,6 +481,7 @@ void SequencerGUI::onInsertTrack( NButtonEvent * ev )
     scrollArea_->insert(line, index);
     scrollArea_->resize();
     lastLine = line;
+    resize();
     scrollArea_->repaint();
   }
 }
@@ -492,6 +500,7 @@ void SequencerGUI::onDeleteTrack( NButtonEvent * ev )
 
     patternSequence_->removeLine(line);
     scrollArea_->repaint();
+    selectedLine_ = 0;
   }
 }
 
@@ -577,12 +586,24 @@ std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( SinglePattern * pat
 
 void SequencerGUI::onVScrollBar( NObject * sender, int pos )
 {
+  int newPos = pos;
+  if (newPos != scrollArea_->scrollDy() && newPos >= 0) {
+      int diffY  = newPos - scrollArea_->scrollDy();
+      if (diffY < scrollArea_->clientHeight()) {
+        NRect rect = scrollArea_->blitMove(0,diffY, scrollArea_->absoluteSpacingGeometry());
+        scrollArea_->setScrollDy(newPos);
+        window()->repaint(scrollArea_,rect);
+      } else {
+        scrollArea_->setScrollDy(newPos);
+        scrollArea_->repaint();
+    }
+  }
 }
 
 void SequencerGUI::onHScrollBar( NObject * sender, int pos )
 {
   int newPos = pos;
-  if (newPos != scrollArea_->scrollDx()) {
+  if (newPos != scrollArea_->scrollDx() && newPos >= 0) {
 
     int diffX  = newPos - scrollArea_->scrollDx();
     if (diffX < scrollArea_->clientWidth()) {
@@ -617,10 +638,9 @@ void SequencerGUI::resize( )
 {
   // calls the AlignLayout
   NPanel::resize();
-  // set the ScrollBar range new
-  hBar->setRange(scrollArea_->preferredWidth() - clientWidth());
+  // set the ScrollBar`s range new
+  hBar->setRange( scrollArea_->preferredWidth()  - scrollArea_->clientWidth()  );
+  vBar->setRange( scrollArea_->preferredHeight() - scrollArea_->clientHeight() );
 }
 
 }}
-
-
