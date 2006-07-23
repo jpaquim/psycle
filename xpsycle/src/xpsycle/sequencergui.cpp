@@ -236,6 +236,11 @@ void SequencerItem::onMove( const NMoveEvent & moveEvent )
   sView->resize();
 }
 
+void SequencerItem::onMoveEnd( const NMoveEvent & moveEvent )
+{
+  sView->repaint();
+}
+
 void SequencerItem::onMousePress( int x, int y, int button )
 {
   selected_ = true;
@@ -644,3 +649,5 @@ void SequencerGUI::resize( )
 }
 
 }}
+
+
