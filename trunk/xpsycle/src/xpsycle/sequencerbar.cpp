@@ -256,6 +256,7 @@ void SequencerBar::onNewCategory( NButtonEvent * ev )
 	category->setColor(0x0000FF);
 
   CategoryTreeNode* node = new CategoryTreeNode(category);
+  node->setExpanded(true);
   categoryMap[node]=category;
   CategoryItem* catItem = new CategoryItem(category,"Category");
   catItems.push_back(catItem);
