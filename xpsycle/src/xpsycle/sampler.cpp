@@ -195,6 +195,7 @@ namespace psycle
 			{
 				NoteOffFast(i);
 			}
+			Machine::Stop();		
 		}
 
 		void Sampler::VoiceWork(int startSample, int numsamples, int voice)

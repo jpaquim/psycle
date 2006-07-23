@@ -13,6 +13,7 @@
 #include <vector>
 #include <deque>
 #include <cassert>
+#include <map>
 
 namespace psycle
 {
@@ -279,6 +280,8 @@ namespace psycle
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
 				protected:
 					std::deque<WorkEvent> workEvents;
+				    std::map<int,int> playCol;
+					int playColIndex;
 				public:
 					/// This function should be called when an exception was thrown from the machine.
 					/// This will mark the machine as crashed, i.e. crashed() will return true,
@@ -402,7 +405,7 @@ namespace psycle
 					virtual void WorkNoMix(int numSamples);
 					virtual void Tick() {};
 					virtual void Tick(int track, PatternEntry * pData) {};
-					virtual void Stop() {};
+					virtual void Stop() { playCol.clear(); playColIndex =0; }
 			///\}
 
 			///\name (de)serialization

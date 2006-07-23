@@ -857,16 +857,21 @@ int Machine::GenerateAudio( int numsamples )
 {
 	double beatOffset = 0;
 	int processedsamples = 0;
+	std::map<int,int>::iterator colsIt;
 	
 	for(; !workEvents.empty(); workEvents.pop_front()) {
 
 		WorkEvent & workEvent = workEvents.front();
 		int processsamples = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
-		std::cout << "Generating audio, looping, processsamples : " << processsamples << std::endl;
+//		std::cout << "Generating audio, looping, processsamples : " << processsamples << std::endl;
 		if (processsamples > 0) GenerateAudioInTicks( processedsamples, processsamples ); // todo maybe round
-		else if ( processsamples < 0 ) std::cout << " ERROR! workEvent.beatOffset() : " << workEvent.beatOffset() << " beatOffset: " << beatOffset;
+		else if ( processsamples < 0 ) std::cerr << " ERROR! in Machine::GenerateAudio() : workEvent.beatOffset() : " << workEvent.beatOffset() << " beatOffset: " << beatOffset;
 		processedsamples+=processsamples;
-		Tick(workEvent.track(),workEvent.event().entry());
+		
+		///\todo: beware of using more than MAX_TRACKS. Stop(); resets the list, but until that, playColIndex keeps increasing.
+		colsIt = playCol.find(workEvent.track());
+		if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
+		Tick(colsIt->second,workEvent.event().entry());
 		beatOffset= workEvent.beatOffset();
 	}
 	int processsamples = numsamples- processedsamples;
@@ -874,7 +879,7 @@ int Machine::GenerateAudio( int numsamples )
 	{
 		GenerateAudioInTicks(processedsamples, processsamples);
 	}
-	else if ( processsamples < 0 ) std::cout << " ERROR! beatOffset :" << beatOffset << std::endl;
+	else if ( processsamples < 0 ) std::cerr << " ERROR! in Machine::GenerateAudio() : beatOffset :" << beatOffset << std::endl;
 
 }
 
@@ -883,4 +888,3 @@ int Machine::GenerateAudio( int numsamples )
 
 	}
 }
-
