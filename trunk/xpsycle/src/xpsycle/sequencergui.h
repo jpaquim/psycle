@@ -54,6 +54,7 @@ class SequencerItem : public NPanel {
        virtual void onMousePress(int x, int y, int button);
        virtual void resize();
        virtual void onMove(const NMoveEvent & moveEvent);
+       virtual void onMoveEnd(const NMoveEvent & moveEvent);
 
        void setText(const std::string & text);
 
