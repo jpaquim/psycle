@@ -953,6 +953,8 @@ void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 {
+ ///\todo: Verify the correct usage of InputHandler->getEnumCodeByKey, concretely in relation to StateMasks.
+
   if (doDrag_ != (NApp::system().keyState() & ShiftMask) && 
                   !(NApp::system().keyState() & ControlMask)) {
       if (!doDrag_) {
@@ -1154,7 +1156,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       break;
       default: {
           switch
-            (Global::pConfig()->inputHandler.getEnumCodeByKey(Key(NApp::system().keyState(),event.scancode()))) 
+            (Global::pConfig()->inputHandler.getEnumCodeByKey(Key(NApp::system().keyState() & ControlMask,event.scancode()))) 
           {
             case cdefBlockCopy :
                 copyBlock(false);
@@ -2103,8 +2105,3 @@ int psycle::host::PatternView::selectedMachineIndex( ) const
 {
   return selectedMacIdx_;
 }
-
-
-
-
-

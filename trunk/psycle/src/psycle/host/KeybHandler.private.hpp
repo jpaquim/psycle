@@ -679,6 +679,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								}
 							}
 						}
+						///\todo : errm.. == or !=  ????
 						if (i == _pSong->tracks())
 						{
 							UIGlobal::pInputHandler->StopNote(note,false);

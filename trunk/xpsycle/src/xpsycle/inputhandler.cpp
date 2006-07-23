@@ -48,6 +48,7 @@ void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
 Key::Key( int c, int k )
 {
   scancode = k;
+///\todo: this needs to be reworked, first fix xml parser to user ControlMask instead of 0/1. Later on, think about ShiftMask or others..
   if (c ) ctrl = ControlMask; else ctrl = 0;
 }
 
