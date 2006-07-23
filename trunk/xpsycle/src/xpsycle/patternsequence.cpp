@@ -274,26 +274,52 @@ namespace psycle
 			return &patternData_;
 		}
 
+		////////////////////////////////////////////////////////////////////////////
+		// GetLinesInRange
+		// Objective: return the PatternLines that are active in the range [start, start+length).
+	    // Parameters: 
+		//		start : start time in beats since playback begin.
+		// 	length: length of the range. start+length is the last position (non inclusive)
+		//		(return) events : A multimap of lines (multimap of beatposition and PatternLine )
 		void PatternSequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
 		{
+			int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
+		    // Iterate over each timeline of the sequence,
 			for( iterator seqIt = this->begin(); seqIt != this->end(); ++seqIt )
 			{
-				SequenceLine *pTrack = *seqIt;
-
-				typedef SequenceLine::reverse_iterator RTrackIt;
-
-				RTrackIt trackIt = (RTrackIt)( pTrack->lower_bound(start+length) );
-				for(; trackIt != pTrack->rend() && trackIt->first + trackIt->second->patternBeats() >= start; ++trackIt )
+				SequenceLine *pSLine = *seqIt;
+				// locate the "sequenceEntry"s which starts nearer to "start+length"
+				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(start+length) );
+				// and iterate backwards to include any other that is inside the range [start,start+length)
+				// (The UI won't allow more than one pattern for the same range in the same timeline, but 
+				// this was left open in the player code)
+				for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt )
 				{
-					SinglePattern* pPat = trackIt->second->pattern();
-					SinglePattern::iterator patIt   = pPat->lower_bound( start-trackIt->first ),
-					patEnd = pPat->lower_bound( start+length-trackIt->first );
+					// take the pattern,
+					SinglePattern* pPat = sLineIt->second->pattern();
+					SinglePattern::iterator patIt   = pPat->lower_bound( start-sLineIt->first ),
+					patEnd = pPat->lower_bound( start+length-sLineIt->first );
+					// and iterate through the lines that are inside the range
 					for( ; patIt != patEnd; ++patIt)
-						events.insert( SinglePattern::value_type( patIt->first + trackIt->first, patIt->second ) );
+						{
+						PatternLine *thisline= &(patIt->second);
+						PatternLine tmpline;
+						PatternLine::iterator lineIt = thisline->begin();
+						// Since the player needs to differentiate between tracks of different SequenceEntrys, 
+						// we generate a temporary PatternLine with a special column value.
+						for( ;lineIt != thisline->end() ;lineIt++)
+						{
+							tmpline[seqlineidx*1024+lineIt->first]=lineIt->second;
+						}
+						
+						// finally add the PatternLine to the event map.
+						events.insert( SinglePattern::value_type( patIt->first + sLineIt->first, tmpline ) );
+						}
 				}
+			    seqlineidx++;
 			}
 		}
-
+	
 		double PatternSequence::GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive)
 		{
 			GlobalIter firstIt = ( bInclusive ?
@@ -370,15 +396,3 @@ namespace psycle
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -450,6 +450,7 @@ void Plugin::Stop( )
   catch(const std::exception &)
   {
   }
+  Machine::Stop();
 }
 
 struct ToLower
