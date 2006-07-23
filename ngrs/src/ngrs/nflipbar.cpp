@@ -74,14 +74,18 @@ NFlipBar::NFlipper::~ NFlipper( )
 
 void NFlipBar::NFlipper::onMousePress( int x, int y, int button )
 {
-  expanded_ = !expanded_;
+  setExpanded(!expanded_);
+  flipBar_->onFlipClick();
+}
 
+void NFlipBar::NFlipper::setExpanded( bool on )
+{
+  expanded_ = on;
   if (expanded_)
      expandImg_->setSharedBitmap(&expandedBmp);
   else
      expandImg_->setSharedBitmap(&expandBmp);
 
-  flipBar_->onFlipClick();
 }
 
 
@@ -138,15 +142,7 @@ int NFlipBar::flipperWidth( ) const
   return flipper_->preferredWidth();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+void NFlipBar::setExpanded( bool on )
+{
+  flipper_->setExpanded(on);
+}

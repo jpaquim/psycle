@@ -77,4 +77,7 @@ int NFlipBox::flipperWidth( ) const
   return flipBar_->flipperWidth();
 }
 
-
+void NFlipBox::setExpanded( bool on )
+{
+  flipBar_->setExpanded(on);
+}

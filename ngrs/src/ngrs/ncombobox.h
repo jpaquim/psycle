@@ -42,6 +42,8 @@ public:
 
     signal1<NItemEvent*> itemSelected;
 
+    const std::string & text() const;
+
     virtual void resize();
     virtual int preferredHeight() const;
 
