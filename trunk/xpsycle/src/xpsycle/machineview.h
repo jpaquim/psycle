@@ -89,7 +89,7 @@ public:
 
 private:
 
-    Machine* selectedMachine_;
+    MachineGUI* selectedMachine_;
 
     MachineWireGUI* line;
     MachineGUI* startGUI;
@@ -114,6 +114,7 @@ private:
     std::vector<MachineGUI*> machineGUIs;
     void onTweakSlide(int machine, int command, int value);
 
+    void onMachineSelected(MachineGUI* gui);
 };
 
 }}

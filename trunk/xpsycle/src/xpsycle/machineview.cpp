@@ -67,6 +67,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
+          macGui->selected.connect(this,&MachineView::onMachineSelected);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
         }
@@ -77,6 +78,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
+          macGui->selected.connect(this,&MachineView::onMachineSelected);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
       }
@@ -86,9 +88,9 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
+          macGui->selected.connect(this,&MachineView::onMachineSelected);
           scrollArea_->add(macGui);
           machineGUIs.push_back(macGui);
-          selectedMachine_ = macGui->pMac();
       }
       break;
   }
@@ -252,13 +254,15 @@ void MachineView::updateVUs( )
 
 void MachineView::onMoveMachine( Machine * mac, int x, int y )
 {
-  selectedMachine_ = mac;
   machineMoved.emit(mac,x,y);
 }
 
 Machine * MachineView::selMachine( )
 {
-  return selectedMachine_;
+  if (selectedMachine_)
+    return selectedMachine_->pMac();
+  else
+    return 0;
 }
 
 void MachineView::onTweakSlide( int machine, int command, int value )
@@ -266,8 +270,23 @@ void MachineView::onTweakSlide( int machine, int command, int value )
   patternTweakSlide.emit(machine,command,value);
 }
 
+void MachineView::onMachineSelected( MachineGUI * gui )
+{
+  if (selectedMachine_ && gui != selectedMachine_) {
+     selectedMachine_->setSelected(false);
+     selectedMachine_->repaint();
+  }
+  if (gui != selectedMachine_) {
+    selectedMachine_ = gui;
+    gui->setSelected(true);
+    gui->repaint();
+  }
+}
+
 }
 }
+
+
 
 
 

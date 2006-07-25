@@ -86,12 +86,16 @@ namespace psycle
 		{
 			line_ = 0;
 			pattern_ = 0;
+			startPos_ = 0;
+			endPos_ = PatternEnd;
 		}
 
 		SequenceEntry::SequenceEntry( SequenceLine * line )
 		{
 			pattern_ = 0;
 			line_ = line;
+			startPos_ = 0;
+			endPos_ = PatternEnd;
 		}
 
 		SequenceEntry::~ SequenceEntry( )

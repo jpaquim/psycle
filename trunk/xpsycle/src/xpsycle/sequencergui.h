@@ -170,6 +170,8 @@ public:
 
     virtual void resize();
 
+    void addSequencerLine();
+
 private:
 
     int counter;
@@ -180,8 +182,6 @@ private:
     SequencerLine* lastLine;
     SequencerItem* selectedItem_;
     PatternSequence* patternSequence_;
-
-    void addSequencerLine();
 
     NScrollBar* hBar;
     NScrollBar* vBar;
