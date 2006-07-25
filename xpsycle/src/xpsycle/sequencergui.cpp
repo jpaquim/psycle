@@ -462,7 +462,7 @@ void SequencerGUI::addSequencerLine( )
   scrollArea_->add(line);
   scrollArea_->resize();
   lastLine = line;
-
+  selectedLine_ = line;
 }
 
 // track operations
@@ -486,6 +486,7 @@ void SequencerGUI::onInsertTrack( NButtonEvent * ev )
     scrollArea_->insert(line, index);
     scrollArea_->resize();
     lastLine = line;
+    selectedLine_ = line;
     resize();
     scrollArea_->repaint();
   }

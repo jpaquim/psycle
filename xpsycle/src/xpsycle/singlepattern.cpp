@@ -27,7 +27,9 @@ namespace psycle
 
 		SinglePattern::SinglePattern()
 		{
-			timeSignatures.push_back( TimeSignature() );
+			TimeSignature timeSig;
+			timeSig.setCount(4);
+			timeSignatures.push_back( timeSig  );
 			beatZoom_ = 4;
 			category_ = 0;
 		}

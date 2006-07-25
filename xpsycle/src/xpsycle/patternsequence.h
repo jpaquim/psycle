@@ -36,6 +36,8 @@ namespace psycle
 	namespace host
 	{
 
+		const int PatternEnd = -1;
+
 		class GlobalEvent
 		{
 			public:
@@ -77,6 +79,7 @@ namespace psycle
 
 		class SequenceEntry {
 		public:
+
 			SequenceEntry();
 			SequenceEntry(SequenceLine* line);
 			~SequenceEntry();
@@ -94,6 +97,8 @@ namespace psycle
 		private:
 			SequenceLine* line_;
 			SinglePattern* pattern_;
+			double startPos_; // here we can "shrink" the pattern of the entry
+			double endPos_;
 		};
 
 		class PatternSequence;

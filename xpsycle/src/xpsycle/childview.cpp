@@ -59,6 +59,7 @@ ChildView::ChildView()
 
   sequencerView_ = new SequencerGUI();
   sequencerView_->setPatternSequence(Global::pSong()->patternSequence());
+  sequencerView_->addSequencerLine();
 
   NDockPanel* macDock = new NDockPanel(machineView_);
   addPage(macDock,"Machine View");

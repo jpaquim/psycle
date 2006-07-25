@@ -58,6 +58,9 @@ public:
     signal1<MachineGUI*> newConnection;
     signal3<Machine*,int,int> moved;
     signal3<int,int,int> patternTweakSlide;
+    signal1<MachineGUI*> selected;
+
+    int ident();
 
     virtual void onMouseDoublePress(int x, int y, int button);
     virtual void onMousePress(int x, int y, int button);
@@ -66,7 +69,11 @@ public:
     virtual void onMoveEnd(const NMoveEvent & moveEvent);
     virtual void resize();
 
+    virtual void paint(NGraphics* g);
+
     virtual void repaintVUMeter();
+
+    void setSelected(bool on);
 
 private:
 
@@ -79,7 +86,7 @@ private:
     std::vector<LineAttachment> attachedLines;
     NLine* line;
 
-
+    bool selected_;
 };
 
 

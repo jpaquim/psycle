@@ -37,10 +37,11 @@ namespace host {
 MachineGUI::MachineGUI(Machine* mac)
   : NPanel()
 {
+  selected_ = 0;
   line = 0;
   mac_ = mac;
   setMoveable(NMoveable(nMvHorizontal | nMvVertical | nMvNoneRepaint | nMvTopLimit | nMvLeftLimit));
-  setPosition(mac->_x,mac_->_y,200,30);
+  setPosition(mac->_x,mac_->_y,200+2*ident(),30+2*ident());
 
   setFont(NFont("Suse sans",6, nMedium | nStraight | nAntiAlias));
 }
@@ -54,6 +55,32 @@ MachineGUI::~MachineGUI()
 Machine * MachineGUI::pMac( )
 {
   return mac_;
+}
+
+void MachineGUI::paint( NGraphics * g )
+{
+  if (selected_) {
+     int cw = clientWidth();
+     int ch = clientHeight();
+     int size = 10;
+     // upper left corner
+     g->drawLine(0,0,size,0);
+     g->drawLine(0,0,0,size);
+     // upper right corner
+     g->drawLine(cw-size,0,cw,0);
+     g->drawLine(cw-1,0,cw-1,size);
+     // lower left corner
+     g->drawLine(0,ch-size,0,ch-1);
+     g->drawLine(0,ch-1,size,ch-1);
+     // lower right corner
+     g->drawLine(cw-1,ch-size,cw-1,ch);
+     g->drawLine(cw-size,ch-1,cw-1,ch-1);
+  }
+}
+
+void MachineGUI::setSelected( bool on )
+{
+  selected_ = on;
 }
 
 void MachineGUI::attachLine( NLine * line, int point )
@@ -100,11 +127,17 @@ void MachineGUI::onMove( const NMoveEvent & moveEvent )
   oldDrag = newDrag;
 
   if (pMac()) {
-    pMac()->_x = left();
-    pMac()->_y = top();
+    pMac()->_x = left() ;
+    pMac()->_y = top()  ;
   }
 
   moved.emit(pMac(), pMac()->_x, pMac()->_y);
+}
+
+int MachineGUI::ident( )
+{
+  // this is the ident for selection border
+  return 5;
 }
 
 void MachineGUI::resize( )
@@ -120,14 +153,16 @@ void MachineGUI::resize( )
     }
   }
 }
+// end of Machine GUI class
 
 
+
+// the MasterGUI class
 MasterGUI::MasterGUI(Machine* mac) : MachineGUI(mac)
 {
   setSkin();
   masterDlg = new MasterDlg(mac);
   setBackground(NColor(0,0,200));
-
 }
 
 MasterGUI::~ MasterGUI( )
@@ -138,8 +173,8 @@ void MasterGUI::setSkin( )
 {
   bgCoords.setPosition(0,0,148,48);
   setTransparent(true);
-  setHeight(bgCoords.height());
-  setWidth(bgCoords.width());
+  setHeight(bgCoords.height() + 2*ident());
+  setWidth(bgCoords.width()   + 2*ident() );
   setBackground(NColor(0,0,200));
 
   muteCoords.setPosition(0,145,15,14);
@@ -150,6 +185,14 @@ void MasterGUI::setSkin( )
 
 void MasterGUI::paint( NGraphics * g )
 {
+  MachineGUI::paint(g);
+  // save old translation pos from the grpahics handler
+  long xTrans = g->xTranslation();
+  long yTrans = g->yTranslation();
+  // move translation to have place for selection border
+  g->setTranslation(xTrans + ident(), yTrans+ ident());
+
+
   g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), Global::configuration().icons().machine_skin(), bgCoords.left(), bgCoords.top());
 
   if (pMac()->_mute)
@@ -157,6 +200,9 @@ void MasterGUI::paint( NGraphics * g )
 
   if (Global::pSong()->machineSoloed == pMac()->_macIndex)
     g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
+
+  // reset translation to original
+  g->setTranslation( xTrans, yTrans );
 }
 
 void MasterGUI::onMousePress( int x, int y, int button )
@@ -203,7 +249,7 @@ void MasterGUI::onMousePress( int x, int y, int button )
     }
   }
 }
-
+// end of MasterGUI class
 
 
 
@@ -231,6 +277,13 @@ GeneratorGUI::~ GeneratorGUI( )
 
 void GeneratorGUI::paint( NGraphics * g )
 {
+  MachineGUI::paint(g);
+  // save old translation pos from the grpahics handler
+  long xTrans = g->xTranslation();
+  long yTrans = g->yTranslation();
+  // move translation to have place for selection border
+  g->setTranslation(xTrans + ident(), yTrans+ ident());
+
   g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), Global::configuration().icons().machine_skin(), bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), stringify(pMac()->_macIndex)+":"+pMac()->_editName);
 
@@ -241,6 +294,8 @@ void GeneratorGUI::paint( NGraphics * g )
   if (Global::pSong()->machineSoloed == pMac()->_macIndex)
     g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
 
+  // reset old Translation
+  g->setTranslation(xTrans, yTrans );
 }
 
 void GeneratorGUI::setSkin( )
@@ -257,8 +312,8 @@ void GeneratorGUI::setSkin( )
   dGeneratorVu.setPosition(10,35,130,4);
   sGenerator.setPosition(0,47,148,47);
 
-  setHeight(bgCoords.height());
-  setWidth(bgCoords.width());
+  setHeight(bgCoords.height() + 2*ident() );
+  setWidth(bgCoords.width()   + 2*ident() );
 
   sGenPan.setPosition(45,145,16,5);
 
@@ -266,7 +321,7 @@ void GeneratorGUI::setSkin( )
   setWidth(bgCoords.width());
   setTransparent(true);
 
-  panSlider_->setPosition(45 ,26,91,sGenPan.height());
+  panSlider_->setPosition(45 + ident() ,26 + ident(),91,sGenPan.height());
   panSlider_->setOrientation(nHorizontal);
   panSlider_->setTrackLine(false);
   panSlider_->setRange(0,127);
@@ -287,7 +342,7 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
 {
   MachineGUI::onMousePress(x,y,button);
   if (button==1) {
-      if (dMuteCoords.intersects(x,y)) { // mute or unmute
+      if (dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
@@ -298,7 +353,7 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
         }
         repaint();
       } else
-      if (dSoloCoords.intersects(x,y)) { // solo or unsolo
+      if (dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
         if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
           Global::pSong()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
@@ -387,6 +442,7 @@ void GeneratorGUI::customSliderPaint( NSlider * sl, NGraphics * g )
 {
   g->putPixmap(0,0,sGenPan.width(),sGenPan.height(),Global::configuration().icons().machine_skin(),sGenPan.left(),sGenPan.top());
 }
+// end of GeneratorGUI class
 
 
 
@@ -399,8 +455,7 @@ void GeneratorGUI::customSliderPaint( NSlider * sl, NGraphics * g )
 
 
 
-
-
+// the Effekt Gui class
 
 EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 {
@@ -414,7 +469,7 @@ EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
   add(frameMachine);
 
   vuPanel_ = new VUPanel(this);
-    vuPanel_->setPosition(dGeneratorVu.left(),dGeneratorVu.top(),dGeneratorVu.width(),dGeneratorVu.height());
+    vuPanel_->setPosition(dGeneratorVu.left() + ident(),dGeneratorVu.top() + ident(),dGeneratorVu.width(),dGeneratorVu.height());
     vuPanel_->setTransparent(false);
   add(vuPanel_);
 }
@@ -425,6 +480,13 @@ EffektGUI::~ EffektGUI( )
 
 void EffektGUI::paint( NGraphics * g )
 {
+  MachineGUI::paint(g);
+  // save old translation pos from the grpahics handler
+  long xTrans = g->xTranslation();
+  long yTrans = g->yTranslation();
+  // move translation to have place for selection border
+  g->setTranslation(xTrans + ident(), yTrans+ ident());
+
   g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), Global::configuration().icons().machine_skin(), bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), pMac()->_editName);
 
@@ -433,6 +495,9 @@ void EffektGUI::paint( NGraphics * g )
 
   if (Global::pSong()->machineSoloed == pMac()->_macIndex)
     g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
+
+  // move translation to original
+  g->setTranslation(xTrans, yTrans);
 }
 
 void EffektGUI::setSkin( )
@@ -446,11 +511,11 @@ void EffektGUI::setSkin( )
   soloCoords.setPosition(15,145,15,14);
   dSoloCoords.setPosition(26,5,15,14);
 
-  setHeight(bgCoords.height());
-  setWidth(bgCoords.width());
+  setHeight(bgCoords.height() + 2*ident() );
+  setWidth(bgCoords.width()   + 2*ident() );
   setTransparent(true);
 
-  panSlider_->setPosition(46 ,26,91,sEffectPan.height());
+  panSlider_->setPosition(46+ident() ,26+ident(),91,sEffectPan.height());
   panSlider_->setOrientation(nHorizontal);
   panSlider_->setTrackLine(false);
   panSlider_->setRange(0,127);
@@ -482,7 +547,7 @@ void EffektGUI::onMousePress( int x, int y, int button )
 {
   MachineGUI::onMousePress(x,y,button);
   if (button==1) {
-      if (dMuteCoords.intersects(x,y)) { // mute or unmute
+      if (dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
@@ -493,7 +558,7 @@ void EffektGUI::onMousePress( int x, int y, int button )
         }
         repaint();
       } else
-      if (dSoloCoords.intersects(x,y)) { // solo or unsolo
+      if (dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
         if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
           Global::pSong()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
@@ -579,6 +644,7 @@ void EffektGUI::VUPanel::paint( NGraphics * g )
 void MachineGUI::onMousePress( int x, int y, int button )
 {
   if (button==3) newConnection.emit(this);
+  if (button==1) selected.emit(this);
 }
 
 void MachineGUI::detachLine( NLine * line )
@@ -641,4 +707,9 @@ void GeneratorGUI::onTweakSlide( int machine, int command, int value )
 
 }
 }
+
+
+
+
+
 
