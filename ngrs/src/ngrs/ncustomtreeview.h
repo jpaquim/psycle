@@ -46,6 +46,8 @@ public:
     NTreeNode* selectedTreeNode();
     NCustomItem* selectedItem();
 
+    virtual void removeChilds();
+
 private:
 
     NScrollBox* scrollBox_;
