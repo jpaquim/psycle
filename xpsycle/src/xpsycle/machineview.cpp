@@ -283,8 +283,21 @@ void MachineView::onMachineSelected( MachineGUI * gui )
   }
 }
 
+void MachineView::setSelectedMachine( Machine* mac)
+{
+  for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+    MachineGUI* machineGUI = *it;
+    if ( machineGUI->pMac() == mac) {
+       onMachineSelected(machineGUI);
+       break;
+    }
+  }
+}
+
 }
 }
+
+
 
 
 

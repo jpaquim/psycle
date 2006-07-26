@@ -526,6 +526,7 @@ void MainWindow::initToolBar( )
         genCombo_->setHeight(20);
         updateComboGen();
         genCombo_->setIndex(0);
+        genCombo_->itemSelected.connect(this,&MainWindow::onGeneratorCbx);
       psycleToolBar_->add(genCombo_);
 
       img = new NImage();
@@ -1408,8 +1409,24 @@ void MainWindow::onNewMachineDialogAdded( Machine * mac )
   genCombo_->repaint();
 }
 
+void MainWindow::onGeneratorCbx( NItemEvent * ev )
+{
+  std::string text = genCombo_->text();
+  if (text.length() > 2) {
+     std::string hexNumber = text.substr(0,2);
+     std::stringstream hexStream(hexNumber); 
+     int hex = -1;
+     hexStream >> std::hex >> hex;
+     if (hex != -1) {
+         Global::pSong()->seqBus = hex;
+         childView_->machineView()->setSelectedMachine( Global::pSong()->_pMachine[hex] );
+     }
+  }
+}
 
 }}
+
+
 
 
 
