@@ -395,8 +395,20 @@ namespace psycle
 			patternData_.removeSinglePattern(pattern);
 		}
 
+		void PatternSequence::removeAll( )
+		{
+			for(iterator it = begin(); it != end(); ++it) {
+				delete *it;
+			}
+			clear();
+			patternData_.removeAll();
+		}
+
 
 	} // end of host namespace
 
 
 }
+
+
+

@@ -36,6 +36,7 @@ namespace psycle
 		class PatternEvent{
 		public:
 			PatternEvent();
+			PatternEvent(const PatternEntry & entry); // for compatible file load
 
 			~PatternEvent();
 
@@ -56,6 +57,8 @@ namespace psycle
 
 			PatternEntry* entry();
 			PatternEntry* entry() const;
+
+			bool isEmpty() const;
 
 		private:
 

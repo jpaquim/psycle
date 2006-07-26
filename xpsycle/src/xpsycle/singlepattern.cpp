@@ -29,9 +29,10 @@ namespace psycle
 		{
 			TimeSignature timeSig;
 			timeSig.setCount(4);
-			timeSignatures.push_back( timeSig  );
+			timeSignatures_.push_back( timeSig  );
 			beatZoom_ = 4;
 			category_ = 0;
+			id_ = 0;
 		}
 
 
@@ -51,22 +52,22 @@ namespace psycle
 
 		void SinglePattern::addBar( const TimeSignature & signature )
 		{
-			if ( timeSignatures.size() > 0 ) {
-				TimeSignature & last = timeSignatures.back();
+			if ( timeSignatures_.size() > 0 ) {
+				TimeSignature & last = timeSignatures_.back();
 				if (last.numerator()   != signature.numerator() ||
 						last.denominator() != signature.denominator() )
 				{
-					timeSignatures.push_back(signature);
+					timeSignatures_.push_back(signature);
 				} else
-				timeSignatures.back().incCount();
+				timeSignatures_.back().incCount();
 			}
 		}
 
 		const TimeSignature & SinglePattern::playPosTimeSignature(double pos) const
 		{
 				int bts = 0;
-				std::vector<TimeSignature>::const_iterator it = timeSignatures.begin();
-				for (; it < timeSignatures.end(); it++)
+				std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
+				for (; it < timeSignatures_.end(); it++)
 				{
 					const TimeSignature & timeSignature = *it;
 					bts += timeSignature.beats();
@@ -79,8 +80,8 @@ namespace psycle
 		{
 			if (pos - ((int) pos) != 0) return false;
 			int bts = 0;
-			std::vector<TimeSignature>::const_iterator it = timeSignatures.begin();
-			for (; it < timeSignatures.end(); it++)
+			std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
+			for (; it < timeSignatures_.end(); it++)
 			{
 				const TimeSignature & timeSignature = *it;
 				for (int count = 0; count < timeSignature.count(); count++) {
@@ -94,11 +95,11 @@ namespace psycle
 			return false;
 		}
 
-		int SinglePattern::beats( ) const
+		float SinglePattern::beats( ) const
 		{
-			int bts = 0;
-			std::vector<TimeSignature>::const_iterator it = timeSignatures.begin();
-			for (; it < timeSignatures.end(); it++)
+			float bts = 0;
+			std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
+			for (; it < timeSignatures_.end(); it++)
 			{
 				const TimeSignature & signature = *it;
 				bts += signature.beats();
@@ -249,10 +250,25 @@ namespace psycle
 			
 		}
 
+		std::vector< TimeSignature > & SinglePattern::timeSignatures( )
+		{
+  		return timeSignatures_;
+		}
 
+		void SinglePattern::setID( int id )
+		{
+			id_ = id;
+		}
+
+		int SinglePattern::id( ) const
+		{
+			return id_;
+		}
 
 	}
 }
+
+
 
 
 

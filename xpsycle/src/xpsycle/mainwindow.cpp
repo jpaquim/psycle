@@ -618,7 +618,8 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   updateComboGen();
   updateComboIns(true);
   childView_->waveEditor()->Notify();
-  sequencerBar_->updateSequencer();
+  sequencerBar_->update();
+  childView_->sequencerView()->update();
   pane()->repaint();
 }
 
@@ -820,7 +821,8 @@ void MainWindow::appNew( )
   childView_->setTitleBarText();
   childView_->patternView()->setEditPosition(0);
   Global::pSong()->seqBus=0;
-  sequencerBar_->updateSequencer();
+  sequencerBar_->update();
+  childView_->sequencerView()->update();
   childView_->machineView()->createGUIMachines();
   //pParentMain->PsybarsUpdate(); // Updates all values of the bars
 //  pParentMain->WaveEditorBackUpdate();

@@ -146,6 +146,7 @@ namespace psycle
 
 			SequenceLine* createNewLine();
 			void removeLine(SequenceLine* line);
+			void removeAll();
 
 			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
 

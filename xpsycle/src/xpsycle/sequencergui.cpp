@@ -650,6 +650,42 @@ void SequencerGUI::resize( )
   vBar->setRange( scrollArea_->preferredHeight() - scrollArea_->clientHeight() );
 }
 
+void SequencerGUI::update( )
+{
+  lines.clear();
+  scrollArea_->removeChilds();
+  std::vector<SequenceLine*>::iterator it = patternSequence()->begin();
+  for ( ; it < patternSequence()->end(); it++) {
+    SequenceLine* seqLine = *it;
+    SequencerLine* line = new SequencerLine( this );
+    line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
+    lines.push_back(line);
+    line->setSequenceLine( seqLine );
+    line->click.connect(this, &SequencerGUI::onSequencerLineClick);
+    scrollArea_->add(line);
+    scrollArea_->resize();
+    lastLine = line;
+    selectedLine_ = line;
+    // now iterate the sequence entries
+    SequenceLine::iterator iter = seqLine->begin();
+    for(; iter!= seqLine->end(); ++iter)
+    {
+      SequenceEntry* entry = iter->second;
+      SequencerItem* item = new SequencerItem( this );
+      item->click.connect(line,&SequencerGUI::SequencerLine::onSequencerItemClick);
+      item->setSequenceEntry( entry );
+      line->items.push_back(item);
+      line->add(item);
+
+    }
+
+
+  }
+  resize();
+}
+
 }}
+
+
 
 

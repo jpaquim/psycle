@@ -2074,6 +2074,7 @@ int PatternView::beatZoom( ) const
 void PatternView::setPattern( SinglePattern * pattern )
 {
   pattern_ = pattern;
+  resize();
 }
 
 SinglePattern * PatternView::pattern( )
