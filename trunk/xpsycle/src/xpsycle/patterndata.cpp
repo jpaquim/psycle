@@ -27,13 +27,13 @@ namespace psycle
 
 		PatternCategory::PatternCategory( )
 		{
-			color_ = 0;
+			color_ = 0x00FF0000;
 		}
 
 		PatternCategory::PatternCategory( const std::string & name )
 		{
 			name_ = name;
-			color_ = 0;
+			color_ = 0x00FF0000;
 		}
 
 		PatternCategory::~ PatternCategory( )
@@ -84,6 +84,15 @@ namespace psycle
 			return color_;
 		}
 
+		SinglePattern * psycle::host::PatternCategory::findById( int id )
+		{
+			for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
+				SinglePattern* pat = *it;
+				if (pat->id() == id) return pat;
+			}
+			return 0;
+		}
+
 		// end of Category class
 
 
@@ -117,8 +126,33 @@ namespace psycle
 			}
 		}
 
+		void PatternData::removeAll( )
+		{
+			for (std::vector<PatternCategory*>::iterator it = begin(); it < end(); it++) {
+				delete *it;
+			}
+			clear();
+		}
+
+		SinglePattern * PatternData::findById( int id )
+		{
+			iterator it = begin();
+			for ( ; it < end(); it++) {
+				PatternCategory* cat = *it;
+				SinglePattern* pat = cat->findById(id);
+				if (pat) return pat;
+			}
+			return 0;
+		}
+
 	}
 }
+
+
+
+
+
+
 
 
 

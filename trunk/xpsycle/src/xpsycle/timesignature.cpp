@@ -30,6 +30,8 @@ TimeSignature::TimeSignature() :
   denominator_(4)
 {
   count_ = 1;
+  ownerDefined_ = false;
+  ownerDefinedBeats_ = 0;
 }
 
 TimeSignature::TimeSignature(int numerator, int denominator) :
@@ -37,7 +39,16 @@ TimeSignature::TimeSignature(int numerator, int denominator) :
   denominator_(denominator)
 {
   count_ = 1;
+  ownerDefined_ = false;
+  ownerDefinedBeats_ = 0;
 }
+
+TimeSignature::TimeSignature( float ownerDefinedBeats )
+{
+  ownerDefined_ = true;
+  ownerDefinedBeats_ = ownerDefinedBeats;
+}
+
 
 TimeSignature::~TimeSignature()
 {
@@ -50,6 +61,7 @@ void TimeSignature::setNumerator( int value )
 
 int TimeSignature::numerator( ) const
 {
+  if (ownerDefined_) return 4;
   return numerator_;
 }
 
@@ -62,6 +74,7 @@ void TimeSignature::setDenominator( int value )
 
 int TimeSignature::denominator( ) const
 {
+  if (ownerDefined_) return 4;
   return denominator_;
 }
 
@@ -80,12 +93,13 @@ void TimeSignature::incCount( )
   count_++;
 }
 
-int TimeSignature::beats( ) const
+float TimeSignature::beats( ) const
 {
-  return numerator_ * count_;
+  if (ownerDefined_)
+     return ownerDefinedBeats_;
+  else
+     return numerator_ * count_;
 }
 
 }}
-
-
 

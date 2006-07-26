@@ -228,9 +228,32 @@ void SequencerBar::setPatternView( PatternView * patternView )
   patView = patternView;
 }
 
-void SequencerBar::updateSequencer()
+void SequencerBar::update()
 {
+  patternBox_->removeChilds();
+  categoryMap.clear();
+  catItems.clear();
+  patternMap.clear();
 
+  std::vector<PatternCategory*>::iterator it = seqGui->patternSequence()->patternData()->begin();
+  for ( ; it < seqGui->patternSequence()->patternData()->end(); ++it) {
+    PatternCategory* category = *it;
+    CategoryTreeNode* node = new CategoryTreeNode(category);
+    node->setExpanded(true);
+    categoryMap[node]=category;
+    CategoryItem* catItem = new CategoryItem(category,"Category");
+    catItems.push_back(catItem);
+    node->setHeader(catItem);
+    patternBox_->addNode(node);
+    std::vector<SinglePattern*>::iterator patIt = category->begin();
+    for ( ; patIt < category->end(); patIt++) {
+       SinglePattern* pattern = *patIt;
+       PatternItem* item = new PatternItem( pattern, pattern->name() );
+       node->addEntry(item);
+       patternMap[item] = pattern;
+    }
+  }
+  resize();
 }
 
 bool SequencerBar::followSong( ) const

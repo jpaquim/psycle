@@ -933,6 +933,12 @@ namespace psycle
 			pFile->ReadChunk(&Header, 8);
 			Header[8]=0;
 
+			patternSequence()->removeAll();
+			// creatse a single Pattern Category
+			PatternCategory* singleCat = patternSequence()-> patternData()->createNewCategory("SinglePattern");
+			// here we add in one single Line the patterns
+			SequenceLine* singleLine = patternSequence()->createNewLine();
+
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
 //				loggers::trace("file header: PSY3SONG");
@@ -1135,11 +1141,37 @@ namespace psycle
 								unsigned char * pDest;
 								DataCompression::BEERZ77Decomp2(pSource, &pDest);
 								zapArray(pSource,pDest);
-								for(int y(0) ; y < patternLines[index] ; ++y)
+								// create a SinglePattern
+								std::string indexStr;
+								std::ostringstream o;
+								if (!(o << index))
+									indexStr = "error"; 
+								else
+									indexStr = o.str();
+								SinglePattern* pat =
+										singleCat->createNewPattern(std::string(patternName[index])+indexStr);
+								pat->setBeatZoom(m_LinesPerBeat);
+								TimeSignature & sig =  pat->timeSignatures().back();
+								float beats = patternLines[index] / (float) m_LinesPerBeat;
+								pat->setID(index);
+								sig.setCount((int) (beats / 4) );
+								float uebertrag = beats - ((int) beats);
+								if ( uebertrag != 0) {
+									TimeSignature uebertragSig(uebertrag);
+									pat->addBar(uebertragSig);
+								}
+								for(int y(0) ; y < patternLines[index] ; ++y) // lines
 								{
-									unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
-									std::memcpy(pData, pSource, tracks() * EVENT_SIZE);
-									pSource += tracks() * EVENT_SIZE;
+									for (int x = 0; x < tracks(); x++) {
+										PatternEntry entry;
+										std::memcpy((unsigned char*) &entry, pSource, EVENT_SIZE);
+										PatternEvent event(entry);
+										if (!event.isEmpty()) {
+											float position = y / (float) m_LinesPerBeat;
+											(*pat)[position][x] = event;
+										}
+									pSource += EVENT_SIZE;
+									}
 								}
 								zapArray(pDest);
 							}
@@ -1253,6 +1285,15 @@ namespace psycle
 				}
 				quit_chunk_loop:
 				// now that we have loaded all the modules, time to prepare them.
+				double pos = 0;
+				for (int i(0) ; i < playLength; ++i)
+				{
+					int temp = playOrder[i];
+					SinglePattern* pat = patternSequence()->patternData()->findById(temp);
+					singleLine->createEntry(pat,pos);
+					pos+=pat->beats();
+				}
+
 				progress.emit(4,16384,"");
 //				::Sleep(1); ///< ???
 				// test all connections for invalid machines. disconnect invalid machines.

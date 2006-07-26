@@ -34,6 +34,7 @@ class TimeSignature{
 public:
     TimeSignature();
     TimeSignature(int numerator, int denominator);
+    TimeSignature(float ownerDefinedBeats);
 
     ~TimeSignature();
 
@@ -47,13 +48,16 @@ public:
     void incCount();
     int count() const;
 
-    int beats() const;
+    float beats() const;
 
 private:
 
     int numerator_;
     int denominator_;
     int count_;
+
+    bool ownerDefined_;
+    float ownerDefinedBeats_;
 
 };
 

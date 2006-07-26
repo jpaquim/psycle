@@ -44,12 +44,15 @@ namespace psycle
 
 			~SinglePattern();
 
+			void setID(int id);
+			int id() const;
+
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
 
 			void addBar( const TimeSignature & signature );
 
-			int beats() const;
+			float beats() const;
 
 			bool barStart(double pos, TimeSignature & signature) const;
 			const TimeSignature & playPosTimeSignature(double pos) const;
@@ -67,16 +70,20 @@ namespace psycle
 			void deleteBlock(int left, int right, double top, double bottom);
 
 			void clearPosition(double beatpos, int track, int column);
+
+			std::vector<TimeSignature> &  timeSignatures();
+
 		private:
 
-			int beats_;
 			int beatZoom_;
 			std::string name_;
 
 			PatternCategory* category_;
-			std::vector<TimeSignature> timeSignatures;
+			std::vector<TimeSignature> timeSignatures_;
 
 			TimeSignature zeroTime;
+
+			int id_;
 
 		};
 

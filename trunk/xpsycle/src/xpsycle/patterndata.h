@@ -32,7 +32,7 @@ namespace psycle
 	namespace host
 	{
 
-		class PatternCategory : std::vector<SinglePattern*> {
+		class PatternCategory : public std::vector<SinglePattern*> {
 		public:
 			PatternCategory();
 			PatternCategory(const std::string & name);
@@ -47,6 +47,7 @@ namespace psycle
 			void setColor(long color);
 			long color() const;
 
+			SinglePattern* findById(int id);
 
 		private:
 
@@ -64,6 +65,9 @@ namespace psycle
 
 			PatternCategory* createNewCategory(const std::string & name);
 			void removeSinglePattern(SinglePattern* pattern);
+			void removeAll();
+
+			SinglePattern* findById(int id);
 
 		};
 

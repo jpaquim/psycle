@@ -115,9 +115,10 @@ public:
 
     bool followSong() const;
 
-    void updateSequencer();
+    void update();
 
     void onSelChangeSeqList(NItemEvent* sender);
+
 
 private:
 

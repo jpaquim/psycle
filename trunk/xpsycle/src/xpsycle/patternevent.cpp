@@ -35,6 +35,14 @@ namespace psycle
 				
 		}
 
+		PatternEvent::PatternEvent( const PatternEntry & entry ) :
+			_note( entry._note ),
+			_inst( entry._inst ),
+			_mach( entry._mach ),
+			_cmd(  entry._cmd  ),
+			_parameter( entry._parameter )
+		{
+		}
 
 		PatternEvent::~PatternEvent()
 		{
@@ -100,5 +108,14 @@ namespace psycle
 			return (psycle::host::PatternEntry*) this;
 		}
 
+		bool PatternEvent::isEmpty( ) const
+		{
+			if (_note == 255 && _inst == 255 && _mach == 255 && _cmd == 0 && _parameter == 0)
+				return true;
+			else
+				return false;
+		}
+
 	} // end of host namespace
-}//end of psycle namespace
+}
+//end of psycle namespace

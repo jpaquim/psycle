@@ -102,14 +102,14 @@ class SequencerGUI : public NPanel
 
      virtual void resize();
 
+    std::list<SequencerItem*> items;
+
+    void onSequencerItemClick(SequencerItem* item);
+
    private:
 
       SequenceLine* seqLine_;
       SequencerGUI* sView;
-
-      std::list<SequencerItem*> items;
-
-      void onSequencerItemClick(SequencerItem* item);
 
   };
 
@@ -167,6 +167,7 @@ public:
 
     SequencerLine* selectedLine_;
 
+    void update();
 
     virtual void resize();
 
