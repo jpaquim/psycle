@@ -34,6 +34,7 @@ namespace psycle {
 			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void PreWork(int numSamples);
 			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
