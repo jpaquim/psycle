@@ -90,4 +90,11 @@ NCustomItem * NCustomTreeView::selectedItem( )
   return selectedItem_;
 }
 
+void NCustomTreeView::removeChilds( )
+{
+  scrollArea_->removeChilds();
+  selectedItem_ = 0;
+  selectedTreeNode_ = 0;
+}
+
 
