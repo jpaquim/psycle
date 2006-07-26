@@ -73,6 +73,8 @@ public:
 
     ~MachineView();
 
+    void setSelectedMachine( Machine* mac);
+
     void createGUIMachines();
     void addMachine(Machine* mac);
     void removeMachines();

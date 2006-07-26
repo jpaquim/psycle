@@ -266,7 +266,7 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
   add(frameMachine);
 
   vuPanel_ = new VUPanel(this);
-    vuPanel_->setPosition(dGeneratorVu.left(),dGeneratorVu.top(),dGeneratorVu.width(),dGeneratorVu.height());
+    vuPanel_->setPosition(dGeneratorVu.left() + ident(),dGeneratorVu.top() + ident(),dGeneratorVu.width(),dGeneratorVu.height());
     vuPanel_->setTransparent(false);
   add(vuPanel_);
 }
@@ -317,8 +317,6 @@ void GeneratorGUI::setSkin( )
 
   sGenPan.setPosition(45,145,16,5);
 
-  setHeight(bgCoords.height());
-  setWidth(bgCoords.width());
   setTransparent(true);
 
   panSlider_->setPosition(45 + ident() ,26 + ident(),91,sGenPan.height());

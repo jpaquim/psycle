@@ -230,6 +230,8 @@ private:
 
     void onNewMachineDialogAdded(Machine* mac);
 
+    void onGeneratorCbx(NItemEvent* ev);
+
 };
 
 }}

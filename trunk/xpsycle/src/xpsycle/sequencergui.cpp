@@ -185,6 +185,7 @@ SequencerItem::SequencerItem( SequencerGUI* seqGui )
   setTransparent(false);
   sequenceEntry_ = 0;
   sView = seqGui;
+  selected_ = false;
 }
 
 SequencerItem::~ SequencerItem( )
