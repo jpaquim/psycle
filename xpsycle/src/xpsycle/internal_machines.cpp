@@ -81,7 +81,29 @@ namespace psycle {
 				noteOffset[i]=0;
 			}
 		}
-
+		void DuplicatorMac::PreWork(int numSamples)
+		{
+			for(; !workEvents.empty(); workEvents.pop_front()) {
+			
+				WorkEvent & workEvent = workEvents.front();
+				if ( !_mute && !bisTicking)
+				{
+					bisTicking=true;
+					for (int i=0;i<8;i++)
+					{
+						
+						PatternEvent temp = workEvent.event();
+						if ( temp.note() < 120 )
+						{
+							temp.setNote(temp.note() +noteOffset[i]);
+						}
+						if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL 
+							&& Global::song()._pMachine[macOutput[i]] != this) Global::song()._pMachine[macOutput[i]]->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
+					}
+				}
+				bisTicking=false;
+			}
+		}
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
 			if ( !_mute && !bisTicking)
