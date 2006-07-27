@@ -426,58 +426,6 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			_samplesRemaining = SamplesPerRow();
 		}
 
-
-		void Player::AdvancePosition()
-		{ /*
-			if ( _patternjump!=-1 ) _playPosition= _patternjump;
-			if ( _SPRChanged ) { RecalcSPR(); RecalcSPB(); _SPRChanged = true; }
-			if ( _linejump!=-1 ) _lineCounter=_linejump;
-			else _lineCounter++;
-			_playTime += 60 / float (bpm * tpb);
-			if(_playTime>60)
-			{
-				_playTime-=60;
-				_playTimem++;
-			}
-			if(_lineCounter >= song().patternLines[_playPattern])
-			{
-				_lineCounter = 0;
-				if(!_playBlock)
-					_playPosition++;
-				else
-				{
-					_playPosition++;
-					while(_playPosition< song().playLength && (!song().playOrderSel[_playPosition]))
-						_playPosition++;
-				}
-			}
-			if( _playPosition >= song().playLength)
-			{	
-				// Don't loop the recording
-				if(_recording)
-				{
-					StopRecording();
-				}
-				if( _loopSong )
-				{
-					_playPosition = 0;
-					if(( _playBlock) && (song().playOrderSel[_playPosition] == false))
-					{
-						while((!song().playOrderSel[_playPosition]) && ( _playPosition< song().playLength)) _playPosition++;
-					}
-				}
-				else 
-				{
-					_playing = false;
-					_playBlock =false;
-				}
-			}
-			// this is outside the if, so that _patternjump works
-			_playPattern = song().playOrder[_playPosition];
-			_lineChanged = true;*/
-		}
-
-
 		float * Player::Work(void* context, int & numSamples)
 		{
 			return reinterpret_cast<Player*>(context)->Work(numSamples);
