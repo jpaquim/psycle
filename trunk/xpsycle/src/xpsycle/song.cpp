@@ -1,60 +1,45 @@
 ///\file
-///\brief implementation file for psycle::host::Song. Revision 2730
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
+///\brief implementation file for psycle::host::Song
 #include "song.h"
 #include "machine.h"
 #include "internal_machines.h"
 #include "sampler.h"
 #include "xmsampler.h"
 #include "plugin.h"
-//#include "VSTHost.hpp"
 #include "datacompression.h"
-#include "riff.h" // for Wave file loading.
-//#include <psycle/host/gui/NewMachine.hpp> // Is this needed?
-//#include <boost/filesystem/path.hpp>
-//#include <boost/filesystem/operations.hpp>
+#include "riff.h"
 #include <cstdint>
 #include <cassert>
 #include <sstream>
-
-/*#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-	#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__SERIALIZATION
-	#include "serialization.private.hpp"
-#endif
-
-#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-	#error "sorry, only works on little endian machines"
-#endif*/
-
-//namespace psycle
-//{
-//	namespace host
-//	{
-		/// the riff WAVE/fmt chunk.
-		///\todo this is already defined elsewhere
-		///\todo is this used for file i/o ? if so we'd need byte-alignment
-		//UNIVERSALIS__COMPILER__ALIGNED(1)
-//		class WavHeader
-//		{
-//		public:
-//			char chunkID[4];
-//			std::uint32_t chunkSize;
-//			std::uint16_t wFormatTag;
-//			std::uint16_t wChannels;
-//			std::uint32_t dwSamplesPerSec;
-//			std::uint32_t dwAvgBytesPerSec;
-//			std::uint16_t wBlockAlign;
-//			std::uint16_t wBitsPerSample;
-//		};
-//	}
-//}
 
 namespace psycle
 {
 	namespace host
 	{
+		Song::Song()
+		{
+			tracks_= MAX_TRACKS;
+			_machineLock = false;
+			Invalided = false;
+//			PW_Phase = 0;
+//			PW_Stage = 0;
+//			PW_Length = 0;
+			// setting the preview wave volume to 25%
+			preview_vol = 0.25f;
+			
+			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
+			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
+			Reset();
+		}
+
+		Song::~Song()
+		{
+			DestroyAllMachines();
+			DestroyAllInstruments();
+		}
+
+
+
 		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index)
 		{
 			Machine * machine(0);
@@ -182,36 +167,6 @@ namespace psycle
 			return smac;
 		}
 
-		Song::Song()
-/*		#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-			#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-		#else
-			#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-				: read_write_mutex_(boost::read_write_scheduling_policy::alternating_single_read) // see: http://boost.org/doc/html/threads/concepts.html#threads.concepts.read-write-scheduling-policies.inter-class
-			#else // original implementation
-				// nothing
-			#endif
-		#endif*/
-		{
-			tracks_= MAX_TRACKS;
-			_machineLock = false;
-			Invalided = false;
-//			PW_Phase = 0;
-//			PW_Stage = 0;
-//			PW_Length = 0;
-			// setting the preview wave volume to 25%
-			preview_vol = 0.25f;
-			
-			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
-			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
-			Reset();
-		}
-
-		Song::~Song() throw()
-		{
-			DestroyAllMachines();
-			DestroyAllInstruments();
-		}
 
 		void Song::DestroyAllMachines(bool write_locked)
 		{
@@ -260,7 +215,6 @@ namespace psycle
 			}
 			machineSoloed = -1;
 			_trackSoloed = -1;
-			playLength=1;
 		}
 
 		void Song::New()
@@ -929,7 +883,7 @@ namespace psycle
 								char pTemp[256];
 								// play length for this sequence
 								pFile->Read(temp);
-								playLength = temp;
+								int playLength = temp;
 								// name, for multipattern, for now unused
 								pFile->ReadString(pTemp, sizeof pTemp);
 								for (int i(0) ; i < playLength; ++i)
@@ -970,7 +924,8 @@ namespace psycle
 								int numLines = temp;
 								// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 								pFile->Read(temp);
-								pFile->ReadString(patternName[index], sizeof *patternName);
+								char patternName[32];
+								pFile->ReadString(patternName, sizeof patternName);
 								pFile->Read(size);
 								unsigned char * pSource = new unsigned char[size];
 								pFile->ReadChunk(pSource, size);
@@ -985,7 +940,7 @@ namespace psycle
 								else
 									indexStr = o.str();
 								SinglePattern* pat =
-										singleCat->createNewPattern(std::string(patternName[index])+indexStr);
+										singleCat->createNewPattern(std::string(patternName)+indexStr);
 								pat->setBeatZoom(m_LinesPerBeat);
 								TimeSignature & sig =  pat->timeSignatures().back();
 								float beats = numLines / (float) m_LinesPerBeat;

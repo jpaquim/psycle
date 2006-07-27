@@ -141,8 +141,6 @@ namespace psycle
 			int _playPosition;
 			/// the pattern currently being played.
 			/// Moves the cursor one line forward, changing the pattern if needed.
-			void AdvancePosition();
-			/// Initial Loop. Read new line and Interpretate the Global commands.
 			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
 			/// Function to englobe all the three functions above.
 			void ExecuteLine();

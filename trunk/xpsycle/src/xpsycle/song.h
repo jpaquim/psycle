@@ -26,8 +26,9 @@ namespace psycle
 		class Song
 		{
 			public:
-				/// constructor.
 				Song();
+
+				virtual ~Song();
 
 				/// Initializes the song to an empty one.
 				void New();
@@ -39,12 +40,6 @@ namespace psycle
 				PatternSequence patternSequence_;
 
 			public:
-
-
-
-
-				/// destructor.
-				virtual inline ~Song() throw();
 
 				sigslot::signal2<const std::string &, const std::string &> report;
 				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
@@ -129,6 +124,17 @@ namespace psycle
 			///\name instruments
 			///\{
 				public:
+			///\name IsInvalided
+			///\todo doc ... what's that?
+			///\{
+				public:
+					bool IsInvalided(){return Invalided;};
+					void IsInvalided(const bool value){Invalided = value;};
+				private:
+					/// \todo doc
+					bool Invalided;
+			///\}
+				public:
 					/// clones an instrument.
 					bool CloneIns(Instrument::id_type src, Instrument::id_type dst);
 					/// resets the instrument and delete each sample/layer that it uses.
@@ -175,15 +181,6 @@ namespace psycle
 					/// saves this song to a file.
 					bool Save(RiffFile* pFile,bool autosave=false);
 
-/*					#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-						#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-					#elif PSYCLE__CONFIGURATION__SERIALIZATION
-						/// saves this song to a file, as XML.
-						void SaveXML(std::string const & file_name) throw(std::exception);
-						friend class boost::serialization::access;
-					#endif */
-			///\}
-
 			///\name cpu cost measurement
 			///\{
 				public:
@@ -196,17 +193,6 @@ namespace psycle
 					/// Number of samples processed since all cpu cost counters were reset.
 					/// We accumulate this sample count along with cpu costs until we compute the percentages, for example, every second.
 					unsigned int _sampCount;
-			///\}
-
-			///\name IsInvalided
-			///\todo doc ... what's that?
-			///\{
-				public:
-					bool IsInvalided(){return Invalided;};
-					void IsInvalided(const bool value){Invalided = value;};
-				private:
-					/// \todo doc
-					bool Invalided;
 			///\}
 
 			///\todo below are unencapsulated data members
@@ -329,28 +315,12 @@ namespace psycle
 				bool LoadOldFileFormat(RiffFile* pFile, bool fullopen);
 
 
-
-
-
-
 			///\name deprecated by multiseq
 			///\{
 			public:
 				/// the initial ticks per beat (TPB) when the song is started playing.
 				/// This can be changed in patterns using a command, but this value will not be affected.
 				int m_LinesPerBeat;
-				///\name patterns
-				///\{
-					/// Pattern name 
-					///\todo hardcoded limits and wastes
-					char patternName[MAX_PATTERNS][32];
-
-
-				///\name pattern sequence
-				///\{
-					/// Length, in patterns, of the sequence.
-					int playLength;
-
 						const int LinesPerBeat(){return m_LinesPerBeat;};
 						void LinesPerBeat(const int value)
 						{
