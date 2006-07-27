@@ -699,7 +699,7 @@ void MainWindow::onTrackChange( NItemEvent * ev )
   str << ev->item()->text();
   int track = 0;
   str >> track;
-  Global::pSong()->tracks(track);
+  Global::pSong()->setTracks(track);
   if (childView_->patternView()->cursor().x() >= Global::pSong()->tracks() )
   {
     childView_->patternView()->setCursor(NPoint3D(Global::pSong()->tracks() ,childView_->patternView()->cursor().y(),0));

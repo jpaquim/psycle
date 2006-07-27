@@ -78,9 +78,9 @@ int SongpDlg::onClose( )
 void SongpDlg::setVisible( bool on )
 {
   if (on) {
-      songTitle_->setText(pSong_->Name);
-      songCredits_->setText(pSong_->Author);
-      songComments_->setText(pSong_->Comment);
+      songTitle_->setText(pSong_->name() );
+      songCredits_->setText(pSong_->author() );
+      songComments_->setText(pSong_->comment() );
       setPositionToScreenCenter();
   }
   NWindow::setVisible(on);
@@ -88,13 +88,9 @@ void SongpDlg::setVisible( bool on )
 
 void SongpDlg::onOkBtn( NButtonEvent * ev )
 {
-   // todo ask in main psycle for std::string there ...
-   std::memset(pSong_->Name, 0, sizeof pSong_->Name);
-   std::memset(pSong_->Author, 0, sizeof pSong_->Author);
-   std::memset(pSong_->Comment, 0, sizeof pSong_->Comment);
-   std::sprintf(pSong_->Name, songTitle_->text().c_str());
-   std::sprintf(pSong_->Author, songCredits_->text().c_str());
-   std::sprintf(pSong_->Comment, songComments_->text().c_str());
+   pSong_->setName( songTitle_->text() );
+   pSong_->setAuthor( songCredits_->text() );
+   pSong_->setComment( songComments_->text() );
    setVisible(false);
 }
 

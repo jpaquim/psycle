@@ -5,11 +5,10 @@
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
-#include "constants.h" // for the bloat-sized arrays and many other stuffs that should actually be moved in this file
-//#include <psycle/host/global.hpp>
+#include "constants.h" 
 #include "fileio.h"
 #include <cstdint>
-#include <ngrs/sigslot.h> // should be seperated for sigslot too
+#include <ngrs/sigslot.h>
 #include "patterndata.h"
 #include "patternsequence.h"
 
@@ -30,19 +29,42 @@ namespace psycle
 
 				virtual ~Song();
 
-				/// Initializes the song to an empty one.
+				// Initializes the song to an empty one.
 				void New();
 				PatternSequence* patternSequence();
+
+				//authorship
+				void setName(const std::string & name);
+				const std::string & name() const;
+				void setAuthor(const std::string & author);
+				const std::string & author() const;
+				void setComment(const std::string & comment);
+				const std::string & comment() const;
+
+				// The number of tracks in each pattern of this song.
+				unsigned int tracks() const;
+				void setTracks( unsigned int trackCount) ;
+
+				// signals
+				sigslot::signal2<const std::string &, const std::string &> report;
+				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
 
 			private:
 
 				PatternData patternData_;
 				PatternSequence patternSequence_;
 
+				unsigned int tracks_;
+
+				//authorship
+				std::string name_;
+				std::string author_;
+				std::string comment_;
+
+
 			public:
 
-				sigslot::signal2<const std::string &, const std::string &> report;
-				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
+
 			///\name initial values for player-related stuff
 			///\{
 				public:
@@ -199,18 +221,6 @@ namespace psycle
 
 //			PSYCLE__PRIVATE: preprocessor macro stuff sux more
 				public:
-				///\name authorship
-				///\{
-					/// the name of the song.
-					///\todo hardcoded limits and wastes
-					char Name[64];
-					/// the author of the song.
-					///\todo hardcoded limits and wastes
-					char Author[64];
-					/// the comments on the song
-					///\todo hardcoded limits and wastes
-					char Comment[256];
-				///\}
 
 				///\name machines
 				///\{
@@ -315,7 +325,7 @@ namespace psycle
 				bool LoadOldFileFormat(RiffFile* pFile, bool fullopen);
 
 
-			///\name deprecated by multiseq
+			///\name deprecated by multiseq for appregio we need an workaround
 			///\{
 			public:
 				/// the initial ticks per beat (TPB) when the song is started playing.
@@ -332,19 +342,10 @@ namespace psycle
 						void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 
 	
-				///\name pattern tracks
-				///\{
 					public:
-						/// The number of tracks in each pattern of this song.
-						///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
-						/* unsigned */ int inline tracks() const throw() { return tracks_; }
-						/// The number of tracks in each pattern of this song.
-						///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
-						void inline tracks(/* unsigned */  int const tracks) throw() { assert(tracks >= 0); assert(tracks < MAX_TRACKS); this->tracks_ = tracks; }
-					private:
-						unsigned int tracks_;
-				///\}
-			///\}
+
+
+
 		};
 	}
 }

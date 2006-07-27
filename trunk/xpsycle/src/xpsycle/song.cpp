@@ -21,12 +21,8 @@ namespace psycle
 			tracks_= MAX_TRACKS;
 			_machineLock = false;
 			Invalided = false;
-//			PW_Phase = 0;
-//			PW_Stage = 0;
-//			PW_Length = 0;
-			// setting the preview wave volume to 25%
 			preview_vol = 0.25f;
-			
+
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
 			Reset();
@@ -231,15 +227,9 @@ namespace psycle
 
 			seqBus=0;
 
-			///\todo std::string
-			{
-				std::memset(Name, 0, sizeof Name);
-				std::memset(Author, 0, sizeof Author);
-				std::memset(Comment, 0, sizeof Comment);
-				std::sprintf(Name, "Untitled");
-				std::sprintf(Author, "Unnamed");
-				std::sprintf(Comment, "No Comments");
-			}
+			name_    = "Untitled";
+			author_  = "Unnamed";
+			comment_ = "No Comments";
 
 			/// gui stuff
 			currentOctave=4;
@@ -795,9 +785,16 @@ namespace psycle
 						}
 						else
 						{
+							char Name[64];
+							char Author[64];
+							char Comment[255];
+
 							pFile->ReadString(Name, sizeof Name);
+							setName(Name);
 							pFile->ReadString(Author, sizeof Author);
+							setAuthor(Author);
 							pFile->ReadString(Comment, sizeof Comment);
+							setComment(Comment);
 						}
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
@@ -821,7 +818,7 @@ namespace psycle
 
 							// # of tracks for whole song
 							pFile->Read(temp);
-							tracks(temp);
+							setTracks(temp);
 							// bpm
 							pFile->Read(temp16);
 							int BPMCoarse = temp16;
@@ -1525,8 +1522,51 @@ bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 {
 }
 
+		unsigned int Song::tracks( ) const
+		{
+			return tracks_;
+		}
 
-	}
+		void Song::setTracks( unsigned int trackCount )
+		{
+			tracks_ = trackCount;
+		}
+
+		void Song::setName( const std::string & name )
+		{
+			name_ = name;
+		}
+
+		const std::string & Song::name( ) const
+		{
+			return name_;
+		}
+
+		void Song::setAuthor( const std::string & author )
+		{
+			author_ = author;
+		}
+
+		const std::string & Song::author( ) const
+		{
+			return author_;
+		}
+
+		void Song::setComment( const std::string & comment )
+		{
+			comment_ = comment;
+		}
+
+		const std::string & Song::comment( ) const
+		{
+			return comment_;
+		}
+
 }
+}
+
+
+
+
 
 
