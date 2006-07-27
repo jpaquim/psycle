@@ -56,7 +56,7 @@ namespace psycle
 			_playTimem = 0;
 			_loop_count =0;
 			_loop_line = 0;
-			SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
+			SetBPM(song().bpm(), song().LinesPerBeat());
 			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
@@ -77,7 +77,7 @@ namespace psycle
 					for(int c = 0; c < MAX_TRACKS; c++) song()._pMachine[i]->TriggerDelay[c]._cmd = 0;
 				}
 			}
-			SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
+			SetBPM(song().bpm(),song().LinesPerBeat());
 			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
 		}
 
