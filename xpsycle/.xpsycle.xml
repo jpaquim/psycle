@@ -6,7 +6,7 @@
 
 <!-- audio configuration -->
 
-<audio enable='0' />
+<audio enable='1' />
 
 
 <!-- gui configuration -->
