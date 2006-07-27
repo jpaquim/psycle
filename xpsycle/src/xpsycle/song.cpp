@@ -236,7 +236,7 @@ namespace psycle
 
 			// General properties
 			{
-				m_BeatsPerMin=125.0;
+				bpm_ = 125.0f;
 				m_LinesPerBeat=4;
 			}
 			// Clean up allocated machines.
@@ -823,7 +823,7 @@ namespace psycle
 							pFile->Read(temp16);
 							int BPMCoarse = temp16;
 							pFile->Read(temp16);
-							m_BeatsPerMin = BPMCoarse + temp16/100.0f;
+							setBpm( BPMCoarse + temp16/100.0f );
 							// tpb
 							pFile->Read(temp);
 							m_LinesPerBeat = temp;
@@ -855,7 +855,7 @@ namespace psycle
 								pFile->Read(_trackArmed[i]);
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
-							Global::player().SetBPM(m_BeatsPerMin,m_LinesPerBeat);
+							Global::player().SetBPM( bpm() ,m_LinesPerBeat);
 						}
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
@@ -1562,8 +1562,21 @@ bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 			return comment_;
 		}
 
+		void Song::setBpm( float bpm )
+		{
+				if (bpm > 0 && bpm < 1000)
+					bpm_ = bpm;
+		}
+
+		float Song::bpm( ) const
+		{
+			return bpm_;
+		}
+
 }
 }
+
+
 
 
 

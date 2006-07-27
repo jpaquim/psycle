@@ -12,8 +12,6 @@
 #include "patterndata.h"
 #include "patternsequence.h"
 
-
-
 namespace psycle
 {
 	namespace host
@@ -45,6 +43,10 @@ namespace psycle
 				unsigned int tracks() const;
 				void setTracks( unsigned int trackCount) ;
 
+				// start bpm for song, can be overwritten through global bpm event
+				void setBpm(float bpm);
+				float bpm() const;
+
 				// signals
 				sigslot::signal2<const std::string &, const std::string &> report;
 				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
@@ -56,6 +58,8 @@ namespace psycle
 
 				unsigned int tracks_;
 
+				float bpm_;
+
 				//authorship
 				std::string name_;
 				std::string author_;
@@ -63,20 +67,6 @@ namespace psycle
 
 
 			public:
-
-
-			///\name initial values for player-related stuff
-			///\{
-				public:
-					typedef float BeatsPerMinType;
-					const BeatsPerMinType BeatsPerMin(){return m_BeatsPerMin;};
-					void BeatsPerMin(const BeatsPerMinType value)
-					{ 
-						if ( value < BeatsPerMinType(32) ) m_BeatsPerMin = BeatsPerMinType(32);
-						else if ( value > BeatsPerMinType(999.99) ) m_BeatsPerMin = BeatsPerMinType(999.99);
-						else m_BeatsPerMin = value;
-					};
-			///\}
 
 			///\name machines
 			///\{
@@ -244,14 +234,6 @@ namespace psycle
 					///\todo hardcoded limits and wastes
 					Instrument * _pInstrument[MAX_INSTRUMENTS];
 				///\}
-
-				///\name initial values for player-related stuff
-				///\{
-					/// the initial beats per minute (BPM) when the song is started playing.
-					/// This can be changed in patterns using a command, but this value will not be affected.
-					float m_BeatsPerMin;
-				///\}
-
 				///\name various player-related stuff
 				///\{
 					/// The index of the selected MIDI program for note entering
@@ -340,11 +322,6 @@ namespace psycle
 						};
 
 						void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
-
-	
-					public:
-
-
 
 		};
 	}

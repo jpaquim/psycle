@@ -907,10 +907,10 @@ void MainWindow::setAppSongBpm(int x)
     int bpm = 0;
     if ( x != 0 ) {
       if (Global::pPlayer()->_playing )  {
-        Global::pSong()->BeatsPerMin(Global::pPlayer()->bpm+x);
-      } else Global::pSong()->BeatsPerMin(Global::pSong()->BeatsPerMin()+x);
-      Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(),Global::pSong()->LinesPerBeat());
-      bpm = Global::pSong()->BeatsPerMin();
+        Global::pSong()->setBpm(Global::pPlayer()->bpm+x);
+      } else Global::pSong()->setBpm(Global::pSong()->bpm()+x);
+      Global::pPlayer()->SetBPM(Global::pSong()->bpm(),Global::pSong()->LinesPerBeat());
+      bpm = Global::pSong()->bpm();
     }
     else bpm = Global::pPlayer()->bpm;
 
