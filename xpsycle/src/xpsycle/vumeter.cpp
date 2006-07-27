@@ -61,7 +61,7 @@ void VuMeter::paint( NGraphics * g )
   int log_r=(int) (100*std::log10(r_));
 
   log_l= std::max( log_l - 225 , 0);
-  log_r= std::max( log_r - 255 , 0);
+  log_r= std::max( log_r - 225 , 0);
 
 
   if (log_r || vuprevR) {
