@@ -473,7 +473,7 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
 
 void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode )
 {
-  std::cout << bits << std::endl;
+/*  std::cout << bits << std::endl;
   std::cout << rate << std::endl;
   std::cout << channelmode << std::endl;
 
@@ -566,7 +566,7 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
       saveEnd();
       return;
   }
-  pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
+  pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);*/
 }
 
 void WaveSaveDlg::saveEnd( )
@@ -725,7 +725,7 @@ int WaveSaveDlg::audioOutThread( void * ptr )
 
 void WaveSaveDlg::saveTick( )
 {
-  Song* pSong = Global::pSong();
+/*  Song* pSong = Global::pSong();
   Player* pPlayer = Global::pPlayer();
 
   for (int i=lastpostick+1;i<pPlayer->_playPosition;i++)
@@ -744,7 +744,7 @@ void WaveSaveDlg::saveTick( )
   if (!kill_thread )
   {
 //     progressBar->setPos(tickcont);
-  }
+  }*/
 }
 
 void WaveSaveDlg::setVisible( bool on )

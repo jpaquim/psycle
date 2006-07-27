@@ -1652,6 +1652,7 @@ void PatternView::PatternDraw::transposeBlock(int trp)
 
 void PatternView::noteOffAny()
 {
+  /*
   const int ps = Global::pSong()->playOrder[editPosition()];
   unsigned char * offset = Global::pSong()->_ptrack(ps,cursor_.x());
   unsigned char * toffset = Global::pSong()->_ptrackline(ps,cursor_.x(),cursor_.y());
@@ -1671,6 +1672,7 @@ void PatternView::noteOffAny()
   notetrack[cursor_.x()]=120;
 
   window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
+  */
 }
 
 
@@ -1718,7 +1720,7 @@ int PatternView::eventLength(int event) {
 }
 
 void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
-{
+{/*
   int patNum = Global::pSong()->playOrder[pView->editPosition()];
   int nlines = Global::pSong()->patternLines[patNum];
 
@@ -1734,7 +1736,7 @@ void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
       pView->vBar->setRange((pView->lineNumber()-1-count)*pView->rowHeight());
       repaint();
     }
-  }
+  }*/
 }
 
 void PatternView::PatternDraw::onPopupTranspose1( NButtonEvent * ev )

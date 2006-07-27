@@ -13,27 +13,16 @@
 #include "patterndata.h"
 #include "patternsequence.h"
 
-/*#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-	#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-		#include <boost/thread/read_write_mutex.hpp>
-	#else // original implementation
-		class CCriticalSection;
-	#endif
-#endif*/
-
 
 
 namespace psycle
 {
 	namespace host
 	{
-		/// Index of MasterMachine
-//		Machine::id_type const MASTER_INDEX(128); i got here a redefinition
-
 		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
+		/// this include patterns, pattern sequence, machines 
+		///and their initial parameters and coordinates, wavetables
+
 		class Song
 		{
 			public:
@@ -45,6 +34,7 @@ namespace psycle
 				PatternSequence* patternSequence();
 
 			private:
+
 				PatternData patternData_;
 				PatternSequence patternSequence_;
 
@@ -219,26 +209,6 @@ namespace psycle
 					bool Invalided;
 			///\}
 
-			///\name thread synchronization
-			///\{
-				/*#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-					#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-				#else
-					#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-						public:
-							boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
-						private:
-							boost::read_write_mutex mutable  read_write_mutex_;
-					#else // original implementation
-						public: // \todo public->private
-							CCriticalSection mutable door;
-					#endif
-				#endif
-			///\}*/
-
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			///\todo below are unencapsulated data members
 
 //			PSYCLE__PRIVATE: preprocessor macro stuff sux more
@@ -375,26 +345,6 @@ namespace psycle
 					///\todo hardcoded limits and wastes
 					char patternName[MAX_PATTERNS][32];
 
-					/// number of lines of each pattern
-					///\todo hardcoded limits and wastes
-					int patternLines[MAX_PATTERNS];
-
-					/// Array of Pattern data.
-					///\todo hardcoded limits and wastes
-//					PSYCLE__DEPRECATED("This sux.") //preprocessor macro stuff sux more
-					unsigned char * ppPatternData[MAX_PATTERNS];
-
-					#if 0 // more lightweight
-						class pattern
-						{
-							private:
-								std::string name;
-								unsigned int lines, tracks;
-								std::vector<PatternEntries> entries;
-						};
-						std::vector<pattern> patterns;
-					#endif
-				///\}
 
 				///\name pattern sequence
 				///\{
@@ -408,40 +358,7 @@ namespace psycle
 					/// Selection of patterns (for the "playBlock()" play mode)
 					///\todo hardcoded limits and wastes
 					bool playOrderSel[MAX_SONG_POSITIONS];
-				///\}
-				///\name pattern low-level/memory access. \todo shouldn't be public considering it's way too low-level
-				///\{
-					public: // <-- argh!
-						/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
-						/// This function now is the same as doing &pPatternData[ps]
-	//					PSYCLE__DEPRECATED("This sux.")
-						inline unsigned char * _ppattern(int ps)
-						{
-							if(!ppPatternData[ps]) return CreateNewPattern(ps);
-							return ppPatternData[ps];
-						};
-						/// Returns the start offset of the requested track of pattern ps in the
-						/// pPatternData Array and creates one if none exists.
-	//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
-						inline unsigned char * _ptrack(int ps, int track)
-						{
-							if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
-							return ppPatternData[ps] + (track*EVENT_SIZE);
-						};
-						/// Returns the start offset of the requested line of the track of pattern ps in
-						/// the pPatternData Array and creates one if none exists.
-	//					PSYCLE__DEPRECATED("This sux.")
-						inline unsigned char * _ptrackline(int ps, int track, int line)
-						{
-							if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
-							return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
-						};
-						/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
-						///\todo doc ... how does this differs from bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-	//					PSYCLE__DEPRECATED("This sux.") preprocessor macro stuff sux more
-						unsigned char * CreateNewPattern(int ps);
-				///\}
-	
+
 						const int LinesPerBeat(){return m_LinesPerBeat;};
 						void LinesPerBeat(const int value)
 						{
@@ -449,22 +366,7 @@ namespace psycle
 							else if ( value > 31 ) m_LinesPerBeat = 31;
 							else m_LinesPerBeat = value;
 						};
-				///\name patterns
-				///\{
-					public:
-						/// the number of pattern used in this song.
-						int GetNumPatternsUsed();
-						/// Returns the first unused pattern in the pPatternData[] Array.
-						int GetBlankPatternUnused(int rval = 0);
-						/// creates a new pattern.
-						bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-						/// deletes all the patterns of this song.
-						void DeleteAllPatterns();
-						/// Used to detect if an especific pattern index contains any data.
-						bool IsPatternUsed(int i);
-						/// removes a pattern from this song.
-						void RemovePattern(int ps);
-				///\}
+
 						void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 
 	

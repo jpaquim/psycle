@@ -202,7 +202,6 @@ namespace psycle
 			// setting the preview wave volume to 25%
 			preview_vol = 0.25f;
 			
-			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
 			Reset();
@@ -212,7 +211,6 @@ namespace psycle
 		{
 			DestroyAllMachines();
 			DestroyAllInstruments();
-			DeleteAllPatterns();
 		}
 
 		void Song::DestroyAllMachines(bool write_locked)
@@ -253,14 +251,7 @@ namespace psycle
 					delete _pMachine[i];
 					_pMachine[i] = 0;
 			}
-			for(int i(0) ; i < MAX_PATTERNS; ++i)
-			{
-				// All pattern reset
-				if(Global::pConfig) patternLines[i]=Global::configuration().defaultPatLines;
-				else patternLines[i]=64;
-				std::sprintf(patternName[i], "Untitled"); 
-			}
-			CreateNewPattern(0);
+
 			_trackArmedCount = 0;
 			for(int i(0) ; i < MAX_TRACKS; ++i)
 			{
@@ -315,7 +306,6 @@ namespace psycle
 			// Cleaning instruments
 			DeleteInstruments();
 			// Clear patterns
-			DeleteAllPatterns();
 			
 			// Clear sequence
 			Reset();
@@ -490,153 +480,6 @@ namespace psycle
 			zapObject(_pMachine[mac]);
 		}
 
-		void Song::DeleteAllPatterns()
-		{
-			tracks(16);
-			for(int i=0; i<MAX_PATTERNS; i++) RemovePattern(i);
-		}
-
-		void Song::RemovePattern(int ps)
-		{
-			zapArray(ppPatternData[ps]);
-		}
-
-		unsigned char * Song::CreateNewPattern(int ps)
-		{
-			RemovePattern(ps);
-			ppPatternData[ps] = new unsigned char[MULTIPLY2];
-			PatternEntry blank;
-			unsigned char * pData = ppPatternData[ps];
-			for(int i = 0; i < MULTIPLY2; i+= EVENT_SIZE)
-			{
-				memcpy(pData,&blank,EVENT_SIZE);
-				pData+= EVENT_SIZE;
-			}
-			return ppPatternData[ps];
-		}
-
-		bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
-		{
-			PatternEntry blank;
-			unsigned char *toffset;
-			if(adaptsize)
-			{
-				float step;
-				if( patternLines[pattern] > lines ) 
-				{
-					step= (float)patternLines[pattern]/lines;
-					for(int t=0;t<tracks();t++)
-					{
-						toffset=_ptrack(pattern,t);
-						int l;
-						for(l = 1 ; l < lines; ++l)
-						{
-							std::memcpy(toffset + l * MULTIPLY, toffset + f2i(l * step) * MULTIPLY,EVENT_SIZE);
-						}
-						while(l < patternLines[pattern])
-						{
-							// This wouldn't be necessary if we really allocate a new pattern.
-							std::memcpy(toffset + (l * MULTIPLY), &blank, EVENT_SIZE);
-							++l;
-						}
-					}
-					patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
-				}
-				else if(patternLines[pattern] < lines)
-				{
-					step= (float)lines/patternLines[pattern];
-					int nl= patternLines[pattern];
-					for(int t=0;t<tracks();t++)
-					{
-						toffset=_ptrack(pattern,t);
-						for(int l=nl-1;l>0;l--)
-						{
-							std::memcpy(toffset + f2i(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
-							int tz(f2i(l * step) - 1);
-							while (tz > (l - 1) * step)
-							{
-								std::memcpy(toffset + tz * MULTIPLY, &blank, EVENT_SIZE);
-								--tz;
-							}
-						}
-					}
-					patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
-				}
-			}
-			else
-			{
-				int l(patternLines[pattern]);
-				while(l < lines)
-				{
-					// This wouldn't be necessary if we really allocate a new pattern.
-					for(int t(0) ; t < tracks() ; ++t)
-					{
-						toffset=_ptrackline(pattern,t,l);
-						memcpy(toffset,&blank,EVENT_SIZE);
-					}
-					++l;
-				}
-				patternLines[pattern] = lines;
-			}
-			std::sprintf(patternName[pattern], name);
-			return true;
-		}
-
-		int Song::GetNumPatternsUsed()
-		{
-			int rval(0);
-			for(int c(0) ; c < playLength ; ++c) if(rval < playOrder[c]) rval = playOrder[c];
-			++rval;
-			if(rval > MAX_PATTERNS - 1) rval = MAX_PATTERNS - 1;
-			return rval;
-		}
-
-		int Song::GetBlankPatternUnused(int rval)
-		{
-			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
-			PatternEntry blank;
-			bool bTryAgain(true);
-			while(bTryAgain && rval < MAX_PATTERNS - 1)
-			{
-				for(int c(0) ; c < playLength ; ++c)
-				{
-					if(rval == playOrder[c]) 
-					{
-						++rval;
-						c = -1;
-					}
-				}
-				// now test to see if data is really blank
-				bTryAgain = false;
-				if(rval < MAX_PATTERNS - 1)
-				{
-					unsigned char *offset_source(_ppattern(rval));
-					for(int t(0) ; t < MULTIPLY2 ; t += EVENT_SIZE)
-					{
-						if(memcmp(offset_source+t,&blank,EVENT_SIZE) != 0 )
-						{
-							++rval;
-							bTryAgain = true;
-							t = MULTIPLY2;
-						}
-					}
-				}
-			}
-			if(rval > MAX_PATTERNS - 1)
-			{
-				rval = 0;
-				for(int c(0) ; c < playLength ; ++c)
-				{
-					if(rval == playOrder[c]) 
-					{
-						++rval;
-						c = -1;
-					}
-				}
-				if(rval > MAX_PATTERNS - 1) rval = MAX_PATTERNS - 1;
-			}
-			return rval;
-		}
 
 		int Song::GetFreeBus()
 		{
@@ -980,7 +823,6 @@ namespace psycle
 				DestroyAllMachines();
 				_machineLock = true;
 				DeleteInstruments();
-				DeleteAllPatterns();
 				Reset(); //added by sampler mainly to reset current pattern showed.
 				bool zero_size_foreign_chunk(false);
 				/* chunk_loop: */
@@ -1130,8 +972,7 @@ namespace psycle
 								// num lines
 								pFile->Read(temp);
 								// clear it out if it already exists
-								RemovePattern(index);
-								patternLines[index] = temp;
+								int numLines = temp;
 								// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 								pFile->Read(temp);
 								pFile->ReadString(patternName[index], sizeof *patternName);
@@ -1152,7 +993,7 @@ namespace psycle
 										singleCat->createNewPattern(std::string(patternName[index])+indexStr);
 								pat->setBeatZoom(m_LinesPerBeat);
 								TimeSignature & sig =  pat->timeSignatures().back();
-								float beats = patternLines[index] / (float) m_LinesPerBeat;
+								float beats = numLines / (float) m_LinesPerBeat;
 								pat->setID(index);
 								sig.setCount((int) (beats / 4) );
 								float uebertrag = beats - ((int) beats);
@@ -1160,7 +1001,7 @@ namespace psycle
 									TimeSignature uebertragSig(uebertrag);
 									pat->addBar(uebertragSig);
 								}
-								for(int y(0) ; y < patternLines[index] ; ++y) // lines
+								for(int y(0) ; y < numLines ; ++y) // lines
 								{
 									for (int x = 0; x < tracks(); x++) {
 										PatternEntry entry;
@@ -1379,347 +1220,7 @@ namespace psycle
 
 		bool Song::Save(RiffFile* pFile,bool autosave)
 		{
-			// NEW FILE FORMAT!!!
-			// this is much more flexible, making maintenance a breeze compared to that old hell.
-			// now you can just update one module without breaking the whole thing.
-
-			try
-			{
-				if ( !autosave ) 
-				{
-					progress.emit(1,0,"");
-					progress.emit(2,0,"Saving...");
-				}
-
-				std::uint32_t version, size, temp, chunkcount;
-				std::uint16_t temp16;
-
-				/*
-				===================
-				FILE HEADER
-				===================
-				id = "PSY3SONG"; // PSY2 was 1.66
-				*/
-				// header, this has to be at the top of the file
-				{
-					chunkcount = 3; // 3 chunks plus:
-					for(unsigned int i(0) ; i < MAX_PATTERNS    ; ++i) if(IsPatternUsed(i))          ++chunkcount; // check every pattern for validity
-					for(unsigned int i(0) ; i < MAX_MACHINES    ; ++i) if(_pMachine[i])              ++chunkcount;
-					for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i) if(!_pInstrument[i]->Empty()) ++chunkcount;
-
-					if ( !autosave ) 
-					{
-						progress.emit(3,chunkcount,"");
-					}
-
-					// chunk header
-					{
-						pFile->WriteChunk("PSY3SONG",8);
-
-						version = CURRENT_FILE_VERSION;
-						pFile->Write(version);
-
-						size = sizeof chunkcount;
-						pFile->Write(size);
-					}
-					// chunk data
-					{
-						pFile->Write(chunkcount);
-					}
-				}
-
-				if ( !autosave ) 
-				{
-					progress.emit(4,-1,"");
-				}
-
-				// the rest of the modules can be arranged in any order
-
-				/*
-				===================
-				SONG INFO TEXT
-				===================
-				id = "INFO"; 
-				*/
-				{
-					// chunk header
-					{
-						pFile->WriteChunk("INFO",4);
-
-						version = CURRENT_FILE_VERSION_INFO;
-						pFile->Write(version);
-
-						size = strlen(Name)+strlen(Author)+strlen(Comment)+3; // [bohan] since those are variable length, we could change from fixed size arrays to std::string
-						pFile->Write(size);
-					}
-					// chunk data
-					{
-						pFile->WriteChunk(Name,strlen(Name)+1);
-						pFile->WriteChunk(Author,strlen(Author)+1);
-						pFile->WriteChunk(Comment,strlen(Comment)+1);
-					}
-				}
-
-				if ( !autosave ) 
-				{
-					progress.emit(4,-1,"");
-				}
-
-				/*
-				===================
-				SONG INFO
-				===================
-				id = "SNGI"; 
-				*/
-				{
-					// chunk header
-					{
-						pFile->WriteChunk("SNGI",4);
-
-						version = CURRENT_FILE_VERSION_SNGI;
-						pFile->Write(version);
-
-						size = (11*sizeof(temp))+(tracks()*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
-						pFile->Write(size);
-					}
-					// chunk data
-					{
-						temp = tracks();     pFile->Write(temp);
-						temp16 = int(floor(m_BeatsPerMin));							pFile->Write(temp16);
-						temp16 = int((m_BeatsPerMin-floor(m_BeatsPerMin))*100);		pFile->Write(temp16);
-						temp = m_LinesPerBeat; pFile->Write(temp);
-						temp = currentOctave;  pFile->Write(temp);
-						temp = machineSoloed;  pFile->Write(temp);
-						temp = _trackSoloed;   pFile->Write(temp);
-
-						temp = seqBus; pFile->Write(temp);
-
-						temp = midiSelected; pFile->Write(temp);
-						temp = auxcolSelected; pFile->Write(temp);
-						temp = instSelected; pFile->Write(temp);
-
-						temp = 1;  pFile->Write(temp); // sequence width
-
-						for(int i = 0; i < tracks(); i++)
-						{
-							pFile->Write(_trackMuted[i]);
-							pFile->Write(_trackArmed[i]); // remember to count them
-						}
-					}
-				}
-
-				if ( !autosave ) 
-				{
-					progress.emit(4,-1,"");
-				}
-
-				/*
-				===================
-				SEQUENCE DATA
-				===================
-				id = "SEQD"; 
-				*/
-				for(std::uint32_t index(0) ; index < MAX_SEQUENCES ; ++index)
-				{
-					char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequence.
-
-					// chunk header
-					{
-						pFile->WriteChunk("SEQD",4);
-
-						version = CURRENT_FILE_VERSION_SEQD;
-						pFile->Write(version);
-
-						size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
-						pFile->Write(size);
-					}
-					// chunk data
-					{
-						pFile->Write(index); // Sequence Track number
-						temp = playLength; pFile->Write(temp); // Sequence length
-						
-						pFile->WriteChunk(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
-
-						for (int i = 0; i < playLength; i++)
-						{
-							temp = playOrder[i]; pFile->Write(temp); // Sequence data.
-						}
-					}
-				}
-
-				if ( !autosave ) 
-				{
-					progress.emit(4,-1,"");
-				}
-
-				/*
-				===================
-				PATTERN DATA
-				===================
-				id = "PATD"; 
-				*/
-				for(std::uint32_t index(0) ; index < MAX_PATTERNS; ++index)
-				{
-					// check every pattern for validity
-					if (IsPatternUsed(index))
-					{
-						// ok save it
-
-						unsigned char * pSource = new unsigned char[tracks()*patternLines[index]*EVENT_SIZE];
-						unsigned char * pCopy = pSource;
-
-						for (int y = 0; y < patternLines[index]; y++)
-						{
-							unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
-							std::memcpy(pCopy,pData,EVENT_SIZE*tracks());
-							pCopy+=EVENT_SIZE*tracks();
-						}
-						
-						std::uint32_t sizez77 = DataCompression::BEERZ77Comp2(pSource, &pCopy, tracks()*patternLines[index]*EVENT_SIZE);
-						delete[] pSource;
-
-						// chunk header
-						{
-							pFile->WriteChunk("PATD",4);
-
-							version = CURRENT_FILE_VERSION_PATD;
-							pFile->Write(version);
-
-							size = sizez77 + 4 * sizeof temp + strlen(patternName[index]) + 1;
-							pFile->Write(size);
-						}
-						// chunk data
-						{
-							pFile->Write(index);
-							temp = patternLines[index]; pFile->Write(temp);
-							temp = tracks(); pFile->Write(temp); // eventually this may be variable per pattern
-
-							pFile->WriteChunk(&patternName[index],strlen(patternName[index])+1);
-
-							pFile->Write(sizez77);
-							pFile->WriteChunk(pCopy,sizez77);
-						}
-
-						delete[] pCopy;
-					}
-				}
-
-				if ( !autosave ) 
-				{
-					progress.emit(4,-1,"");
-				}
-
-				/*
-				===================
-				MACHINE DATA
-				===================
-				id = "MACD"; 
-				*/
-				// machine and instruments handle their save and load in their respective classes
-				for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
-				{
-					if (_pMachine[index])
-					{
-						size_t pos;
-
-						// chunk header
-						{
-							pFile->WriteChunk("MACD",4);
-
-							version = CURRENT_FILE_VERSION_MACD;
-							pFile->Write(version);
-
-							pos = pFile->GetPos();
-
-							size = 0;
-							pFile->Write(size);
-						}
-						// chunk data
-						{
-							pFile->Write(index);
-							_pMachine[index]->SaveFileChunk(pFile);
-						}
-						// chunk size in header
-						{
-							size_t const pos2(pFile->GetPos());
-							size = pos2 - pos - sizeof size;
-							pFile->Seek(pos);
-							pFile->Write(size);
-							pFile->Seek(pos2);
-						}
-
-						if ( !autosave ) 
-						{
-							progress.emit(4,-1,"");
-						}
-					}
-				}
-
-				/*
-				===================
-				Instrument DATA
-				===================
-				id = "INSD"; 
-				*/
-				for(std::uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
-				{
-					if (!_pInstrument[index]->Empty())
-					{
-						size_t pos;
-
-						// chunk header
-						{
-							pFile->WriteChunk("INSD",4);
-
-							version = CURRENT_FILE_VERSION_INSD;
-							pFile->Write(version);
-
-							pos = pFile->GetPos();
-
-							size = 0;
-							pFile->Write(size);
-						}
-						// chunk data
-						{
-							pFile->Write(index);
-							_pInstrument[index]->SaveFileChunk(pFile);
-						}
-						// chunk size in header
-						{
-							size_t const pos2(pFile->GetPos());
-							size = pos2 - pos - sizeof size;
-							pFile->Seek(pos);
-							pFile->Write(size);
-							pFile->Seek(pos2);
-						}
-
-						if ( !autosave ) 
-						{
-							progress.emit(4,-1,"");
-						}
-					}
-				}
-
-				/*
-				===
-				end
-				===
-				*/
-
-				if ( !autosave ) 
-				{
-					progress.emit(5,0,"");
-				}
-			}
-			catch(...)
-			{
-				std::ostringstream s;
-				s << "Error writing to " << pFile->file_name() << " !!!";
-				report.emit(s.str(),"File Save Error.");
-				progress.emit(5,0,"");
-				return false;
-			}
-			return true;
+			///\todo rework for multitracking
 		}
 
 		void Song::DoPreviews(int amount)
@@ -2014,26 +1515,10 @@ namespace psycle
 			return true;
 		}
 
-		bool Song::IsPatternUsed(int i)
-		{
-			if(!ppPatternData[i]) return false;
-
-			for (int j = 0; j < playLength; j++) if (playOrder[j] == i) return true;
-
-			// check to see if it is empty
-			{
-				PatternEntry blank;
-				unsigned char * pData = ppPatternData[i];
-				for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
-					if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
-						return true;
-			}
-
-			return false;
-		}
 void Song::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
 {
-  bool bEditMode = true;
+		///\todo reowkr for multitracking
+/*  bool bEditMode = true;
 
 	// UNDO CODE MIDI PATTERN TWEAK
 	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
@@ -2078,7 +1563,7 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 				//Repaint(DMData);
 			}
 		}
-	}
+	}*/
 }
 
 PatternSequence * Song::patternSequence( )

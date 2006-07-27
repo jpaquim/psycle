@@ -429,7 +429,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 
 
 		void Player::AdvancePosition()
-		{
+		{ /*
 			if ( _patternjump!=-1 ) _playPosition= _patternjump;
 			if ( _SPRChanged ) { RecalcSPR(); RecalcSPB(); _SPRChanged = true; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
@@ -475,7 +475,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			}
 			// this is outside the if, so that _patternjump works
 			_playPattern = song().playOrder[_playPosition];
-			_lineChanged = true;
+			_lineChanged = true;*/
 		}
 
 
