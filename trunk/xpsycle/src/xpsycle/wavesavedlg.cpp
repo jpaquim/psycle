@@ -227,13 +227,6 @@ void WaveSaveDlg::initVars( )
   pathEdt->setText(name);
   setTitle(name);
 
-  char num[3];
-  sprintf(num,"%02x",pSong->playOrder[0]);
-  numberEdt->setText(num);
-  sprintf(num,"%02x",0);
-  fromEdt->setText(num);
-  sprintf(num,"%02x",pSong->playLength-1);
-  toEdt->setText(num);
 
   if ( (rate < 0) || (rate >5) )
   {
@@ -337,8 +330,6 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
 
   playblock = pPlayer->_playBlock;
   loopsong = pPlayer->_loopSong;
-  memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
-  memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
 
   std::string name = pathEdt->text();
 
@@ -579,7 +570,6 @@ void WaveSaveDlg::saveEnd( )
   }
   Global::pPlayer()->_playBlock = playblock;
   Global::pPlayer()->_loopSong  = loopsong;
-  memcpy(Global::pSong()->playOrderSel,sel,MAX_SONG_POSITIONS);
   Global::pConfig()->_pOutputDriver->Enable(true);
   //Global::pConfig->_pMidiInput->Open();
 

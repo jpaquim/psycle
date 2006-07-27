@@ -261,12 +261,6 @@ namespace psycle
 			machineSoloed = -1;
 			_trackSoloed = -1;
 			playLength=1;
-			for(int i(0) ; i < MAX_SONG_POSITIONS; ++i)
-			{
-				playOrder[i]=0; // All pattern reset
-				playOrderSel[i]=false;
-			}
-			playOrderSel[0]=true;
 		}
 
 		void Song::New()
@@ -776,6 +770,7 @@ namespace psycle
 			pFile->ReadChunk(&Header, 8);
 			Header[8]=0;
 
+			std::vector<int> seqList;
 			patternSequence()->removeAll();
 			// creatse a single Pattern Category
 			PatternCategory* singleCat = patternSequence()-> patternData()->createNewCategory("SinglePattern");
@@ -940,7 +935,7 @@ namespace psycle
 								for (int i(0) ; i < playLength; ++i)
 								{
 									pFile->Read(temp);
-									playOrder[i] = temp;
+									seqList.push_back(temp);
 								}
 							}
 							else
@@ -1127,10 +1122,10 @@ namespace psycle
 				quit_chunk_loop:
 				// now that we have loaded all the modules, time to prepare them.
 				double pos = 0;
-				for (int i(0) ; i < playLength; ++i)
+				std::vector<int>::iterator it = seqList.begin();
+				for ( ; it < seqList.end(); ++it)
 				{
-					int temp = playOrder[i];
-					SinglePattern* pat = patternSequence()->patternData()->findById(temp);
+					SinglePattern* pat = patternSequence()->patternData()->findById(*it);
 					singleLine->createEntry(pat,pos);
 					pos+=pat->beats();
 				}

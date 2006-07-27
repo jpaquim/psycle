@@ -712,20 +712,6 @@ void MainWindow::onBarStop(NButtonEvent* ev)
   bool pl = Global::pPlayer()->_playing;
   bool blk = Global::pPlayer()->_playBlock;
   Global::pPlayer()->Stop();
-  // pParentMain->SetAppSongBpm(0);
-  // pParentMain->SetAppSongTpb(0);
-
-  if (pl) {
-    if ( Global::pConfig()->_followSong && blk) {
-        //editPosition=prevEditPosition;
-        //pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
-        //Repaint(DMPattern);
-    } else {
-        memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-        Global::pSong()->playOrderSel[childView_->patternView()->editPosition()] = true;
-        //Repaint(DMCursor); 
-    }
-  }
 }
 
 void MainWindow::closePsycle()

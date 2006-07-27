@@ -140,7 +140,6 @@ namespace psycle
 			/// the sequence position currently being played
 			int _playPosition;
 			/// the pattern currently being played.
-			int _playPattern;
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
 			/// Initial Loop. Read new line and Interpretate the Global commands.

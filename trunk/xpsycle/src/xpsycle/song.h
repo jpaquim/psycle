@@ -351,14 +351,6 @@ namespace psycle
 					/// Length, in patterns, of the sequence.
 					int playLength;
 
-					/// Sequence of patterns.
-					///\todo hardcoded limits and wastes
-					unsigned char playOrder[MAX_SONG_POSITIONS];
-
-					/// Selection of patterns (for the "playBlock()" play mode)
-					///\todo hardcoded limits and wastes
-					bool playOrderSel[MAX_SONG_POSITIONS];
-
 						const int LinesPerBeat(){return m_LinesPerBeat;};
 						void LinesPerBeat(const int value)
 						{

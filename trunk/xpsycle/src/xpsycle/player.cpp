@@ -52,7 +52,6 @@ namespace psycle
 			_lineCounter = 0; //line;
 			_SPRChanged = false;
 			_playPosition= 0; //pos;
-			_playPattern = song().playOrder[_playPosition];
 			_playTime = 0;
 			_playTimem = 0;
 			_loop_count =0;
