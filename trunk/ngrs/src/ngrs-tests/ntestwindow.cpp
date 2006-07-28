@@ -70,9 +70,9 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-/*  NColorComboBox* colorBox = new NColorComboBox();
+  NColorComboBox* colorBox = new NColorComboBox();
      colorBox->setPosition(10,10,100,15);
-  pane()->add(colorBox);*/
+  pane()->add(colorBox);
 
   /*NColorChooser* chooser = new NColorChooser();
     chooser->setPosition(0,0,500,500);
@@ -92,7 +92,7 @@ NTestWindow::NTestWindow()
     box->setPosition(10,40,100,20);
   pane()->add(box);*/
 
-  NCustomTreeView* view = new NCustomTreeView();
+  /*NCustomTreeView* view = new NCustomTreeView();
 
   NTreeNode* node1 = new NTreeNode();
   view->addNode(node1);
@@ -124,11 +124,11 @@ NTestWindow::NTestWindow()
     lb->setPosition(10,120,100,120);
   pane()->add(lb);*/
 
-  NButton* btn = new NButton("delete");
+  /*NButton* btn = new NButton("delete");
     btn->setPosition(220,50,100,20);
     btn->setFlat(false);
     btn->clicked.connect(this,&NTestWindow::onDelete);
-  pane()->add(btn);
+  pane()->add(btn);*/
   //testMenu();
   //testSegDisplay();
 

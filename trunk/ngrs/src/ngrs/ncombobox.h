@@ -54,6 +54,12 @@ public:
     int selIndex() const;
     int itemCount();
 
+    virtual void onItemClicked(NItemEvent * ev);
+
+protected:
+
+   NEdit* edit();
+
 private:
 
    NBitmap down;
@@ -67,7 +73,6 @@ private:
    void init();
 
    void onDownBtnClicked(NButtonEvent * ev);
-   void onItemClicked(NItemEvent * ev);
 
 };
 

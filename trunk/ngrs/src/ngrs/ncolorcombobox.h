@@ -20,18 +20,14 @@
 #ifndef NCOLORCOMBOBOX_H
 #define NCOLORCOMBOBOX_H
 
-#include "npanel.h"
+#include "ncombobox.h"
 
 /**
 @author Stefan Nattkemper
 */
 
-class NColorChooser;
-class NButton;
-class NImage;
-class NPopupWindow;
 
-class NColorComboBox : public NPanel
+class NColorComboBox : public NComboBox
 {
 public:
     NColorComboBox();
@@ -40,19 +36,18 @@ public:
 
     signal1<const NColor &> colorSelected;
 
+    virtual void onItemClicked(NItemEvent * ev);
+    virtual void add(class NColorItem* item);
+
+    virtual void removeChilds();
+    virtual void removeChild( NVisualComponent * child );
+    virtual void erase(NVisualComponent* child);
+
 private:
 
-   NBitmap down;
+    void init();
 
-   NPanel* colorPanel_;
-   NButton* downBtn_;
-
-   NColorChooser* colorChooser;
-   NPopupWindow*  popup;
-
-   void init();
-   void onDownBtnClicked(NButtonEvent * ev);
-   void onColorSelected(const NColor & color);
+    std::vector<class NColorItem*> items;
 
 };
 

@@ -151,4 +151,9 @@ const std::string & NComboBox::text( ) const
   return edit_->text();
 }
 
+NEdit * NComboBox::edit( )
+{
+  return edit_;
+}
+
 
