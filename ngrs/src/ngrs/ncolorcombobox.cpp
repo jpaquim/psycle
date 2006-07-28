@@ -18,27 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ncolorcombobox.h"
-#include "ncolorchooser.h"
-#include "nbutton.h"
-#include "nimage.h"
-#include "npopupwindow.h"
+#include "ncoloritem.h"
+#include "nedit.h"
 #include "napp.h"
-#include "nalignlayout.h"
-
-const char * arrow_down2_xpm[] = {
-"12 6 2 1",
-" 	c None",
-".	c black",
-"            ",
-"  .......   ",
-"   .....    ",
-"    ...     ",
-"     .      ",
-"            "};
-
+#include "nitemevent.h"
 
 NColorComboBox::NColorComboBox()
- : NPanel()
+ : NComboBox()
 {
   init();
 }
@@ -50,46 +36,59 @@ NColorComboBox::~NColorComboBox()
 
 void NColorComboBox::init( )
 {
-  setLayout( NAlignLayout() );
+  add( new NColorItem( NColor(0,0,0), "black" ) );
+  add( new NColorItem( NColor(0,0,255), "blue" ) );
+  add( new NColorItem( NColor(0,255,0), "green" ) );
+  add( new NColorItem( NColor(255,0,0), "red" ) );
 
-  down.createFromXpmData(arrow_down2_xpm);
-  NImage* downImg = new NImage();
-  downImg->setBitmap(down);
+  setIndex(0);
 
-  downBtn_ = new NButton(downImg,12,6);
-    downBtn_->setWidth(15);
-    downBtn_->setFlat(false);
-    downBtn_->click.connect(this,&NColorComboBox::onDownBtnClicked);
-  NPanel::add(downBtn_, nAlRight);
-
-  colorPanel_   = new NPanel();
-    colorPanel_->setTransparent(false);
-    colorPanel_->setBackground(NColor(0,0,0));
-  NPanel::add(colorPanel_ , nAlClient);
-
-  popup = new NPopupWindow();
-  NPanel::add(popup);
-
-  colorChooser = new NColorChooser();
-    colorChooser->colorSelected.connect(this,&NColorComboBox::onColorSelected);
-  popup->pane()->add(colorChooser, nAlClient);
+  NSkin skin;
+  skin.setTransparent(false);
+  skin.setBackground(NColor(255,255,255));
+  edit()->setSkin(skin);
+  edit()->setBackground( NColor(0,0,0) );
 }
 
-void NColorComboBox::onDownBtnClicked( NButtonEvent * ev )
+void NColorComboBox::onItemClicked( NItemEvent * ev )
 {
-  if (!NApp::popupUnmapped_) {
-     NWindow* win = window();
-     popup->setPosition(win->left()+absoluteLeft(), win->top()+absoluteTop()+height(),width(),100);
-     popup->setVisible(true);
+  NApp::unmapPopupWindows();
+  std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), ev->sender());
+  if (it != items.end()) {
+     NColorItem* item = *it;
+     edit()->setBackground( item->color() );
+     edit()->repaint();
+     colorSelected.emit(item->color());
   }
 }
 
-void NColorComboBox::onColorSelected( const NColor & color )
+void NColorComboBox::add( NColorItem * item )
 {
-  colorPanel_->setBackground(color);
-  colorPanel_->repaint();
-  colorSelected.emit(color);
+  NComboBox::add(item);
+  items.push_back(item);
 }
+
+void NColorComboBox::removeChilds( )
+{
+  items.clear();
+  NComboBox::removeChilds();
+}
+
+void NColorComboBox::removeChild( NVisualComponent * child )
+{
+  std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), child);
+  if (it != items.end()) items.erase(it);
+  NComboBox::removeChild(child);
+}
+
+void NColorComboBox::erase( NVisualComponent * child )
+{
+  std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), child);
+  if (it != items.end()) items.erase(it);
+  NComboBox::erase(child);
+}
+
+
 
 
 

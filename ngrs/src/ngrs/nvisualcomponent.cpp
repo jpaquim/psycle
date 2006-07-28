@@ -51,6 +51,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
    region &= oldRegion;   // do intersection
 
    if (!region.isEmpty()) {
+
     g->resetPen();
 
     g->setRepaintArea(repaintArea);  // set repaintArea to graphics
