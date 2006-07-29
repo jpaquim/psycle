@@ -181,13 +181,13 @@ namespace psycle
 				}
 
 				// For invalid version chunks, or chunks that haven't been read correctly/completely.
-				//if  (file.GetPos() != fileposition+size)
-				//{
+				if  (file.GetPos() != fileposition+size)
+				{
 					//\todo: verify how it works with invalid data.
-//					if (file->GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
-//					else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
+					if (file->GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
+					else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
 					//file.Seek(fileposition+size);
-				//}
+				}
 				--chunkcount;
 			}
 
