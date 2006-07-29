@@ -20,7 +20,7 @@
 #ifndef PSY3FILTER_H
 #define PSY3FILTER_H
 
-#include <psyfilter.h>
+#include "psyfilter.h"
 
 /**
 @author Stefan Nattkemper
