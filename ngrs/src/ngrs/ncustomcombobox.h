@@ -20,7 +20,7 @@
 #ifndef NCUSTOMCOMBOBOX_H
 #define NCUSTOMCOMBOBOX_H
 
-#include <npanel.h>
+#include "npanel.h"
 
 /**
 @author Stefan Nattkemper
