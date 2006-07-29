@@ -125,7 +125,7 @@ namespace psycle
 					{
 						LoadSNGIv0(&file,song,version&0x00FF);
 						//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-						 if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool);
+						if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool); 
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -145,7 +145,7 @@ namespace psycle
 					{
 						LoadPATDv0(&file,song,version&0x00FF);
 						//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-						if (version == 0x0000) size = file.GetPos()-fileposition; 
+						if ((version == 0x0000) &&( file->GetPos() == fileposition+size+4)) size += 4; 
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -181,13 +181,13 @@ namespace psycle
 				}
 
 				// For invalid version chunks, or chunks that haven't been read correctly/completely.
-				if  (file.GetPos() != fileposition+size)
-				{
+				//if  (file.GetPos() != fileposition+size)
+				//{
 					//\todo: verify how it works with invalid data.
 //					if (file->GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
 //					else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
-					file.Seek(fileposition+size);
-				}
+					//file.Seek(fileposition+size);
+				//}
 				--chunkcount;
 			}
 
