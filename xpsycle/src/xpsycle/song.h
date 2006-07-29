@@ -59,7 +59,6 @@ namespace psycle
 				PatternSequence patternSequence_;
 
 				unsigned int tracks_;
-
 				float bpm_;
 
 				//authorship
@@ -304,10 +303,6 @@ namespace psycle
 						int numpars;
 						float * pars;
 				};
-
-				/// Loader for psycle fileformat version 2.
-				bool LoadOldFileFormat(RiffFile* pFile, bool fullopen);
-
 
 			///\name deprecated by multiseq for appregio we need an workaround
 			///\{

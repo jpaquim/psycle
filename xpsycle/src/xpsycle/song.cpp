@@ -1065,14 +1065,10 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 	}*/
 }
 
-PatternSequence * Song::patternSequence( )
-{
-  return &patternSequence_;
-}
-
-bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
-{
-}
+		PatternSequence * Song::patternSequence( )
+		{
+			return &patternSequence_;
+		}
 
 		unsigned int Song::tracks( ) const
 		{
@@ -1127,11 +1123,5 @@ bool Song::LoadOldFileFormat( RiffFile * pFile, bool fullopen )
 
 }
 }
-
-
-
-
-
-
 
 
