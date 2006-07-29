@@ -146,13 +146,13 @@ std::string ChildView::FileLoadSongNamed( std::string const & fName )
   // delete machine gui ..
   machineView_->removeMachines();
   // load Song
-  RiffFile file;
+  /*RiffFile file;
   if (!file.Open(fName.c_str()))
   {
     std::cerr << "Could not Open file. Check that the location is correct." <<  "Loading Error" << std::endl;
       return "";
-  }
-  _pSong->Load(&file);
+  }*/
+  _pSong->load(fName);
   // enable audio driver
   Global::configuration()._pOutputDriver->Enable(true);
   // set window title to new song name
