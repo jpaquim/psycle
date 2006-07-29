@@ -26,7 +26,7 @@ namespace psycle
 	namespace host
 	{
 
-		std::vector<PsyFilter*> PsyFilter::filters;
+		std::vector<PsyFilter> PsyFilter::filters;
 		int PsyFilter::c = 0;
 
 
@@ -34,7 +34,7 @@ namespace psycle
 		{
 			if (c==0) {
 				c++;
-				filters.push_back(new Psy3Filter());
+				filters.push_back(Psy3Filter());
 			}
 		}
 
@@ -63,11 +63,11 @@ namespace psycle
 
 		void PsyFilter::loadSong( const std::string & fileName, Song & song )
 		{
-			std::vector<PsyFilter*>::iterator it = filters->begin();
-			for (  ; it < filters->end(); it++) {
-				PsyFilter* filter = *it;
-				if ( filter->testFormat(fileName) ) {
-					filter->load(fileName,song);
+			std::vector<PsyFilter>::iterator it = filters.begin();
+			for (  ; it < filters.end(); it++) {
+				PsyFilter & filter = *it;
+				if ( filter.testFormat(fileName) ) {
+					filter.load(fileName,song);
 					break;
 				}
 			}
@@ -75,11 +75,11 @@ namespace psycle
 
 		void PsyFilter::saveSong( const std::string & fileName, Song & song, int version ) const
 		{
-			std::vector<PsyFilter*>::iterator it = filters->begin();
-			for (  ; it < filters->end(); it++) {
-				PsyFilter* filter = *it;
-				if ( filter->version() == version ) {
-					filter->save(fileName,song);
+			std::vector<PsyFilter>::iterator it = filters.begin();
+			for (  ; it < filters.end(); it++) {
+				PsyFilter filter = *it;
+				if ( filter.version() == version ) {
+					filter.save(fileName,song);
 					break;
 				}
 			}
