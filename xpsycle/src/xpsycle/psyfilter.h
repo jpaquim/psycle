@@ -39,7 +39,7 @@ namespace psycle
 
 			virtual ~PsyFilter();
 
-			void loadSong(const std::string & fileName, Song & song);
+			bool loadSong(const std::string & fileName, Song & song);
 			void saveSong(const std::string & fileName, Song & song, int version) const;
 
 			//signals
@@ -51,7 +51,7 @@ namespace psycle
 
 			virtual int version() const;
 			virtual bool testFormat(const std::string & fileName);
-			virtual void load(const std::string & fileName, Song & song);
+			virtual bool load(const std::string & fileName, Song & song);
 			virtual void save(const std::string & fileName, const Song & song) const;
 
 		private:
@@ -59,6 +59,7 @@ namespace psycle
 			static int c;
 			static std::vector<PsyFilter*> filters;
 
+			bool fileIsReadable( const std::string & file );
 
 		};
 

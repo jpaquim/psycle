@@ -43,7 +43,7 @@ namespace psycle
 			protected:
 
 				virtual bool testFormat(const std::string & fileName);
-				virtual void load(const std::string & fileName, Song & song);
+				virtual bool load(const std::string & fileName, Song & song);
 
 				virtual int LoadSONGv0(RiffFile* file,Song& song);
 				virtual bool LoadINFOv0(RiffFile* file,Song& song,int minorversion);

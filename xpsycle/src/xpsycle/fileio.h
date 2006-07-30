@@ -55,6 +55,10 @@ namespace psycle
 				std::string file_name_;
 
 			public:
+
+				RiffFile();
+				~RiffFile();
+
 				///\todo shouldn't be public
 				RiffChunkHeader _header;
 

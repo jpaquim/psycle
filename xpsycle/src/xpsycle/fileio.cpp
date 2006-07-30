@@ -8,6 +8,15 @@ namespace psycle
 {
 	namespace host
 	{
+
+		RiffFile::RiffFile( )
+		{
+		}
+
+		RiffFile::~ RiffFile( )
+		{
+		}
+
 		std::uint32_t RiffFile::FourCC(char const * null_terminated_string)
 		{
 			std::uint32_t result(0x20202020); // four spaces (padding)
@@ -150,3 +159,4 @@ namespace psycle
 		
 	}
 }
+

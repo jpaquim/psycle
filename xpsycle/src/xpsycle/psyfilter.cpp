@@ -43,7 +43,7 @@ namespace psycle
 		{
 		}
 
-		void PsyFilter::load( const std::string & fileName, Song & song )
+		bool PsyFilter::load( const std::string & fileName, Song & song )
 		{
 		}
 
@@ -61,16 +61,19 @@ namespace psycle
 			return 0;
 		}
 
-		void PsyFilter::loadSong( const std::string & fileName, Song & song )
+		bool PsyFilter::loadSong( const std::string & fileName, Song & song )
 		{
-			std::vector<PsyFilter*>::iterator it = filters.begin();
-			for (  ; it < filters.end(); it++) {
-				PsyFilter* filter = *it;
-				if ( filter->testFormat(fileName) ) {
-					filter->load(fileName,song);
-					break;
+			if ( fileIsReadable( fileName ) ) {
+				std::vector<PsyFilter*>::iterator it = filters.begin();
+				for (  ; it < filters.end(); it++) {
+					PsyFilter* filter = *it;
+					if ( filter->testFormat(fileName) ) {
+						return filter->load(fileName,song);
+						break;
+					}
 				}
-			}
+      }
+			return false;
 		}
 
 		void PsyFilter::saveSong( const std::string & fileName, Song & song, int version ) const
@@ -83,6 +86,14 @@ namespace psycle
 					break;
 				}
 			}
+		}
+
+
+		bool PsyFilter::fileIsReadable( const std::string & file )
+		{
+			std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
+			if (!_stream.is_open ()) return false;
+			return true;
 		}
 
 

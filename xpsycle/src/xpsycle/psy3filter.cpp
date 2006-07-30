@@ -77,7 +77,7 @@ namespace psycle
 			singleLine = song.patternSequence()->createNewLine();
 }
 
-		void Psy3Filter::load( const std::string & fileName, Song & song )
+		bool Psy3Filter::load( const std::string & fileName, Song & song )
 		{
 			RiffFile file;
 			file.Open(fileName);
@@ -154,7 +154,7 @@ namespace psycle
 					progress.emit(2,0,"Loading... Song machines...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
-						LoadMACDv0(&file,song,version&0x00FF);
+							LoadMACDv0(&file,song,version&0x00FF);
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -271,7 +271,7 @@ namespace psycle
 				report.emit(s.str(), "Song Load Error.");
 			}
 			//\todo:
-			//return true;
+			return true;
 		}
 
 		int Psy3Filter::LoadSONGv0(RiffFile* file,Song& song)
