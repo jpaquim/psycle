@@ -54,6 +54,7 @@ Plugin::~ Plugin( ) throw()
 
 bool Plugin::Instance(const std::string & file_name)
 {
+   try {
   _dll = dlopen(file_name.c_str(), RTLD_LAZY);
     if (!_dll) {
         std::cerr << "Cannot load library: " << dlerror() << '\n';
@@ -89,6 +90,9 @@ bool Plugin::Instance(const std::string & file_name)
     }
     }
   return true;
+  } catch (...) {
+    return false;
+  }
 }
 
 

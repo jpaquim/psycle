@@ -153,6 +153,7 @@ std::string ChildView::FileLoadSongNamed( std::string const & fName )
       return "";
   }*/
   _pSong->load(fName);
+
   // enable audio driver
   Global::configuration()._pOutputDriver->Enable(true);
   // set window title to new song name
