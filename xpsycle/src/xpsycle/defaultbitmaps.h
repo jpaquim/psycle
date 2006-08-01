@@ -37,6 +37,8 @@ public:
 
     ~DefaultBitmaps();
 
+    NBitmap & addTrack();
+    NBitmap & deleteTrack();
     NBitmap & alert();
     NBitmap & autoStop();
     NBitmap & help();
@@ -87,6 +89,7 @@ public:
 
 private:
 
+    NBitmap addTrack_;
     NBitmap new_category_;
     NBitmap alert_;
     NBitmap screw_;
@@ -134,7 +137,7 @@ private:
     NBitmap tbmainknob_;
     NBitmap undo_;
     NBitmap delPattern_;
-
+    NBitmap deleteTrack_;
 };
 
 }
