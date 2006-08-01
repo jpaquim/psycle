@@ -28,6 +28,78 @@ namespace psycle {
 /* XPM */
 
 /* XPM */
+const char * add_tracks_xpm[] = {
+"22 18 49 1",
+" 	c None",
+".	c #666666",
+"+	c #939393",
+"@	c #FF0400",
+"#	c #9E0606",
+"$	c #E6E6E6",
+"%	c #C7D485",
+"&	c #CBD692",
+"*	c #C7D484",
+"=	c #C9D58C",
+"-	c #B7B7B7",
+";	c #C4C4C4",
+">	c #B2A47B",
+",	c #C8BD99",
+"'	c #DDBF66",
+")	c #D5B760",
+"!	c #E2DCCC",
+"~	c #E4C050",
+"{	c #D7AD32",
+"]	c #D4CCB8",
+"^	c #CFB459",
+"/	c #DCB73F",
+"(	c #E3C666",
+"_	c #F2D76E",
+":	c #EDCA4F",
+"<	c #D7B344",
+"[	c #B2892D",
+"}	c #AA8E58",
+"|	c #C8AA50",
+"1	c #ECCB58",
+"2	c #FADC63",
+"3	c #F9D653",
+"4	c #DDB435",
+"5	c #AA8A45",
+"6	c #DBD9D5",
+"7	c #D7AF3B",
+"8	c #F4D150",
+"9	c #F3CC41",
+"0	c #BA8A19",
+"a	c #CCB88C",
+"b	c #D0A52D",
+"c	c #BD9227",
+"d	c #B98C25",
+"e	c #B38210",
+"f	c #9D7829",
+"g	c #D2CCC0",
+"h	c #99753A",
+"i	c #A38A68",
+"j	c #DFD9D5",
+"......................",
+".++@#$$.%%%%%%%%%%%%%.",
+".++#@$$.%&*%***%%*%=%.",
+"........-------------.",
+".++;;$$.%%%%%%%%%%%%%.",
+".++;;$$.%%%%%%%%%%%%%.",
+"........-------------.",
+".++;;$$.$$$$$$$$$$$$$.",
+".++;;$$.$$$$$$$$$$$$$.",
+"........----->,------.",
+".++;;$$.$$$$$')$$$$$$.",
+".++;;$$.$$$$!~{]$$$$$.",
+"........--^/(_:<[}---.",
+"           |12345     ",
+"           67890      ",
+"           abcdea     ",
+"           afg hi     ",
+"                 j    "};
+
+
+/* XPM */
 const char * delpatterns_xpm[] = {
 "19 17 11 1",
 " 	c None",
@@ -17723,6 +17795,47 @@ const char * undo_xpm[] = {
 "................",
 "................"};
 
+/* XPM */
+const char * delete_track_xpm[] = {
+"22 18 19 1",
+" 	c None",
+".	c #666666",
+"+	c #939393",
+"@	c #FF0400",
+"#	c #9E0606",
+"$	c #E6E6E6",
+"%	c #C7D485",
+"&	c #CBD692",
+"*	c #C7D484",
+"=	c #C9D58C",
+"-	c #B7B7B7",
+";	c #C4C4C4",
+">	c #C1BEBE",
+",	c #CF0000",
+"'	c #A39C9C",
+")	c #C8C5C5",
+"!	c #B4B1B1",
+"~	c #927D7D",
+"{	c #DADADA",
+"......................",
+".++@#$$.%%%%%%%%%%%%%.",
+".++#@$$.%&*%***%%*%=%.",
+"........-------------.",
+".++;;$$.%%%%%%%%%%%%%.",
+".++;;$$.%%%%%%%%%%%%%.",
+"........-------------.",
+"                      ",
+"                      ",
+"                      ",
+"          >,'   ',    ",
+"          ),,, ',,    ",
+"           ),,,,,     ",
+"             ,,,      ",
+"            ,,,,,     ",
+"           ',,,,,'    ",
+"          !,,  ),,!   ",
+"           ~)   )~{   "};
+
 
 DefaultBitmaps::DefaultBitmaps()
 {
@@ -17765,6 +17878,8 @@ DefaultBitmaps::DefaultBitmaps()
   machine_skin_.createFromXpmData(machine_skin_xpm);
   new_category_.createFromXpmData(newcat_xpm);
   delPattern_.createFromXpmData(delpatterns_xpm);
+  addTrack_.createFromXpmData(add_tracks_xpm);
+  deleteTrack_.createFromXpmData(delete_track_xpm);
 }
 
 DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
@@ -17774,6 +17889,8 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   wood_.createFromXpmData(wood_xpm);
   alert_.createFromXpmData(alert_xpm);
   delPattern_.createFromXpmData(delpatterns_xpm);
+  addTrack_.createFromXpmData(add_tracks_xpm);
+  deleteTrack_.createFromXpmData(delete_track_xpm);
 
   try {
     autoStop_.loadFromFile(pCfg->iconPath+ "autostop.xpm");
@@ -18270,8 +18387,22 @@ NBitmap & DefaultBitmaps::delPattern( )
   return delPattern_;
 }
 
+NBitmap & DefaultBitmaps::addTrack( )
+{
+  return addTrack_;
+}
+
+NBitmap & DefaultBitmaps::deleteTrack( )
+{
+  return deleteTrack_;
+}
+
+
 }
 }
+
+
+
 
 
 

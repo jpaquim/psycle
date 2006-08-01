@@ -21,6 +21,9 @@
 #include "sequencerbeatchangelineal.h"
 #include "singlepattern.h"
 #include "zoombar.h"
+#include "global.h"
+#include "configuration.h"
+#include "defaultbitmaps.h"
 #include <ngrs/nscrollbar.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>
@@ -99,7 +102,9 @@ int SequencerGUI::SequencerBeatLineal::preferredHeight( ) const
 
 SequencerGUI::Area::Area( SequencerGUI* seqGui )
 {
-  setBackground(NColor(150,150,180));
+  setBackground(Global::pConfig()->pvc_row);
+  setTransparent(false);
+
 
   sView = seqGui;
 }
@@ -398,10 +403,26 @@ SequencerGUI::SequencerGUI()
 
   scrollArea_ = new Area( this );
 
+  DefaultBitmaps & icons = Global::pConfig()->icons();
+
+  NImage* img;
+
   toolBar_ = new NToolBar();
-    toolBar_->add( new NButton("Add Track"))->clicked.connect(this,&SequencerGUI::onNewTrack);
-    toolBar_->add( new NButton("Insert Track"))->clicked.connect(this,&SequencerGUI::onInsertTrack);
-    toolBar_->add( new NButton("Delete Track"))->clicked.connect(this,&SequencerGUI::onDeleteTrack);
+    img = new NImage();
+    img->setSharedBitmap(&icons.addTrack());
+    img->setPreferredSize(25,25);
+    NButton* btn;
+    btn = new NButton(img);
+    btn->setHint("Insert Track ");
+    toolBar_->add( btn )->clicked.connect(this,&SequencerGUI::onInsertTrack);
+
+    img = new NImage();
+    img->setSharedBitmap(&icons.deleteTrack());
+    img->setPreferredSize(25,25);
+    btn = new NButton(img);
+    btn->setHint("Delete Track ");
+    toolBar_->add( btn)->clicked.connect(this,&SequencerGUI::onDeleteTrack);
+
     toolBar_->add(new NToolBarSeparator());
     toolBar_->add( new NButton("Delete Entry"))->clicked.connect(this,&SequencerGUI::onDeleteEntry);
   add(toolBar_, nAlTop);
@@ -479,15 +500,13 @@ void SequencerGUI::addSequencerLine( )
 
 // track operations
 
-void SequencerGUI::onNewTrack( NButtonEvent * ev )
-{
-  addSequencerLine();
-  resize();
-  repaint();
-}
-
 void SequencerGUI::onInsertTrack( NButtonEvent * ev )
 {
+  if (lines.size() == 0) {
+   addSequencerLine();
+   resize();
+   repaint();
+  } else
   if (selectedLine_) {
     SequencerLine* line = new SequencerLine( this );
     lines.push_back(line);

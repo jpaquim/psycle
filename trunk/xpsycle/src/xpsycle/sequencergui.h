@@ -193,7 +193,6 @@ private:
     NToolBar* toolBar_;
     NListBox* patternBox_;
 
-    void onNewTrack(NButtonEvent* ev);
     void onInsertTrack(NButtonEvent* ev);
     void onDeleteTrack(NButtonEvent* ev);
 
