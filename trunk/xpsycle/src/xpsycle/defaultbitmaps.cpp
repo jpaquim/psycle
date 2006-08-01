@@ -17836,6 +17836,79 @@ const char * delete_track_xpm[] = {
 "          !,,  ),,!   ",
 "           ~)   )~{   "};
 
+/* XPM */
+const char * move_track_up_xpm[] = {
+"22 18 14 1",
+" 	c None",
+".	c #666666",
+"+	c #939393",
+"@	c #FF0400",
+"#	c #9E0606",
+"$	c #E6E6E6",
+"%	c #C7D485",
+"&	c #CBD692",
+"*	c #C7D484",
+"=	c #3A3A3A",
+"-	c #C9D58C",
+";	c #B7B7B7",
+">	c #C4C4C4",
+",	c #62664E",
+"......................",
+".++@#$$.%%%%%%%%%%%%%.",
+".++#@$$.%&*%**=%%*%-%.",
+"........;;;;;===;;;;;.",
+".++>>$$.%%%%=====%%%%.",
+".++>>$$.%%%=======%%%.",
+"........;;;;;===;;;;;.",
+".++>>$$.%%%%%===%%%%%.",
+".++>>$$.%%%%%===%%%%%.",
+"........;;;;;===;;;;;.",
+".++>>$$.%%%%%===%%%%%.",
+".++>>$$.%%%%%===%%%%%.",
+"........;;;;;===;;;;;.",
+".++>>$$.,,,,,,,,,,,,,.",
+".++>>$$.,,,,,,,,,,,,,.",
+"........;;;;;;;;;;;;;.",
+".++>>$$.%%%%%%%%%%%%%.",
+".++>>$$.%%%%%%%%%%%%%."};
+
+
+/* XPM */
+const char * move_track_down_xpm[] = {
+"22 18 14 1",
+" 	c None",
+".	c #666666",
+"+	c #939393",
+"@	c #FF0400",
+"#	c #9E0606",
+"$	c #E6E6E6",
+"%	c #C7D485",
+"&	c #CBD692",
+"*	c #C7D484",
+"=	c #C9D58C",
+"-	c #B7B7B7",
+";	c #C4C4C4",
+">	c #62664E",
+",	c #3A3A3A",
+"......................",
+".++@#$$.%%%%%%%%%%%%%.",
+".++#@$$.%&*%*%%%%*%=%.",
+"........-------------.",
+".++;;$$.>>>>>>>>>>>>>.",
+".++;;$$.>>>>>>>>>>>>>.",
+"........-----,,,-----.",
+".++;;$$.%%%%%,,,%%%%%.",
+".++;;$$.%%%%%,,,%%%%%.",
+"........-----,,,-----.",
+".++;;$$.%%%%%,,,%%%%%.",
+".++;;$$.%%%%%,,,%%%%%.",
+"........-----,,,-----.",
+".++;;$$.%%%,,,,,,,%%%.",
+".++;;$$.%%%%,,,,,%%%%.",
+"........-----,,,-----.",
+".++;;$$.%%%%%%,%%%%%%.",
+".++;;$$.%%%%%%%%%%%%%."};
+
 
 DefaultBitmaps::DefaultBitmaps()
 {
@@ -17880,6 +17953,8 @@ DefaultBitmaps::DefaultBitmaps()
   delPattern_.createFromXpmData(delpatterns_xpm);
   addTrack_.createFromXpmData(add_tracks_xpm);
   deleteTrack_.createFromXpmData(delete_track_xpm);
+  moveDownTrack_.createFromXpmData(move_track_down_xpm);
+  moveUpTrack_.createFromXpmData(move_track_up_xpm);
 }
 
 DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
@@ -17891,6 +17966,8 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   delPattern_.createFromXpmData(delpatterns_xpm);
   addTrack_.createFromXpmData(add_tracks_xpm);
   deleteTrack_.createFromXpmData(delete_track_xpm);
+  moveDownTrack_.createFromXpmData(move_track_down_xpm);
+  moveUpTrack_.createFromXpmData(move_track_up_xpm);
 
   try {
     autoStop_.loadFromFile(pCfg->iconPath+ "autostop.xpm");
@@ -18397,6 +18474,15 @@ NBitmap & DefaultBitmaps::deleteTrack( )
   return deleteTrack_;
 }
 
+NBitmap & DefaultBitmaps::moveDownTrack( )
+{
+  return moveDownTrack_;
+}
+
+NBitmap & DefaultBitmaps::moveUpTrack( )
+{
+  return moveUpTrack_;
+}
 
 }
 }

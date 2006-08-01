@@ -86,6 +86,8 @@ public:
     NBitmap & wood();
     NBitmap & screw();
     NBitmap & new_category();
+    NBitmap & moveDownTrack();
+    NBitmap & moveUpTrack();
 
 private:
 
@@ -138,6 +140,8 @@ private:
     NBitmap undo_;
     NBitmap delPattern_;
     NBitmap deleteTrack_;
+    NBitmap moveDownTrack_;
+    NBitmap moveUpTrack_;
 };
 
 }
