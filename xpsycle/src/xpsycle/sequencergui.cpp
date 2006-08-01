@@ -423,7 +423,22 @@ SequencerGUI::SequencerGUI()
     btn->setHint("Delete Track ");
     toolBar_->add( btn)->clicked.connect(this,&SequencerGUI::onDeleteTrack);
 
+    img = new NImage();
+    img->setSharedBitmap(&icons.moveDownTrack());
+    img->setPreferredSize(25,25);
+    btn = new NButton(img);
+    btn->setHint("Move Down Track ");
+    toolBar_->add( btn)->clicked.connect(this,&SequencerGUI::onMoveDownTrack);
+
+    img = new NImage();
+    img->setSharedBitmap(&icons.moveUpTrack());
+    img->setPreferredSize(25,25);
+    btn = new NButton(img);
+    btn->setHint("Move Up Track ");
+    toolBar_->add( btn)->clicked.connect(this,&SequencerGUI::onMoveUpTrack);
+
     toolBar_->add(new NToolBarSeparator());
+
     toolBar_->add( new NButton("Delete Entry"))->clicked.connect(this,&SequencerGUI::onDeleteEntry);
   add(toolBar_, nAlTop);
 
@@ -541,6 +556,34 @@ void SequencerGUI::onDeleteTrack( NButtonEvent * ev )
   }
 }
 
+void SequencerGUI::onMoveDownTrack( NButtonEvent * ev )
+{
+  if (selectedLine_) {
+     int i = selectedLine_->zOrder();
+     if ( i < componentZOrderSize() - 1 ) {
+       scrollArea_->erase(selectedLine_);
+       scrollArea_->insert(selectedLine_,i+1);
+       patternSequence_->moveDownLine(selectedLine_->sequenceLine());
+       scrollArea_->resize();
+       scrollArea_->repaint();
+     }
+  }
+}
+
+void SequencerGUI::onMoveUpTrack( NButtonEvent * ev )
+{
+  if (selectedLine_) {
+     int i = selectedLine_->zOrder();
+     if ( i > 0 ) {
+       scrollArea_->erase(selectedLine_);
+       scrollArea_->insert(selectedLine_,i-1);
+       patternSequence_->moveUpLine(selectedLine_->sequenceLine());
+       scrollArea_->resize();
+       scrollArea_->repaint();
+     }
+  }
+}
+
 void SequencerGUI::onNewPattern( NButtonEvent * ev )
 {
   patternBox_->add(new NItem("Pattern" + stringify(counter) ));
@@ -590,6 +633,7 @@ void SequencerGUI::onDeleteEntry( NButtonEvent * ev )
     selectedItem_ = 0;
   }
 }
+
 
 void SequencerGUI::onZoomHBarPosChanged( ZoomBar * zoomBar, double newPos )
 {
@@ -708,8 +752,6 @@ void SequencerGUI::update( )
       line->add(item);
 
     }
-
-
   }
   resize();
 }

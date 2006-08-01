@@ -414,6 +414,23 @@ namespace psycle
 			return max;
 		}
 
+		void PatternSequence::moveUpLine(SequenceLine* line) {
+			iterator it = find( begin(), end(), line);
+			iterator it2 = it++;
+			std::swap(it,it2);
+		}
+
+		void PatternSequence::moveDownLine(SequenceLine* line) {
+			iterator it = find( begin(), end(), line);
+			if ( it != end() ) {
+				iterator it = find( begin(), end(), line);
+				iterator it2 = it--;
+				std::swap(it,it2);
+			}
+
+		}
+
+
 	} // end of host namespace
 
 

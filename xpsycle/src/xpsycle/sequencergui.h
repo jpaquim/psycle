@@ -195,6 +195,8 @@ private:
 
     void onInsertTrack(NButtonEvent* ev);
     void onDeleteTrack(NButtonEvent* ev);
+    void onMoveDownTrack(NButtonEvent* ev);
+    void onMoveUpTrack(NButtonEvent* ev);
 
     void onNewPattern(NButtonEvent* ev);
     void onDeleteEntry(NButtonEvent* ev);

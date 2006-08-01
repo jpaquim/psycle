@@ -167,6 +167,9 @@ namespace psycle
 
 			double tickLength() const;
 
+			void moveDownLine(SequenceLine* line);
+			void moveUpLine(SequenceLine* line);
+
 		private:
 
 			PatternData patternData_;
