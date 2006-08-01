@@ -25,9 +25,8 @@ namespace psycle
 			Invalided = false;
 			preview_vol = 0.25f;
 
-			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
-			Reset();
+			clear();
 		}
 
 		Song::~Song()
@@ -36,6 +35,64 @@ namespace psycle
 			DestroyAllInstruments();
 		}
 
+
+		void psycle::host::Song::clear( )
+		{
+			_machineLock = false;
+			Invalided = false;
+			preview_vol = 0.25f;
+
+
+			tracks_= MAX_TRACKS;
+			seqBus=0;
+
+			name_    = "Untitled";
+			author_  = "Unnamed";
+			comment_ = "No Comments";
+
+			/// gui stuff
+			currentOctave=4;
+
+			// General properties
+			{
+				bpm_ = 125.0f;
+				m_LinesPerBeat=4;
+			}
+			// Clean up allocated machines.
+			DestroyAllMachines(true);
+			// Cleaning instruments
+			DeleteInstruments();
+			// Clear patterns
+			patternSequence()->removeAll();
+			// Clear sequence
+			_sampCount=0;
+			// Cleaning pattern allocation info
+			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
+			for(int i(0) ; i < MAX_MACHINES ; ++i)
+			{
+					if (_pMachine[i]) delete _pMachine[i];
+					_pMachine[i] = 0;
+			}
+
+			_trackArmedCount = 0;
+			for(int i(0) ; i < MAX_TRACKS; ++i)
+			{
+				_trackMuted[i] = false;
+				_trackArmed[i] = false;
+			}
+			machineSoloed = -1;
+			_trackSoloed = -1;
+
+
+			instSelected = 0;
+			midiSelected = 0;
+			auxcolSelected = 0;
+
+			_saved=false;
+			fileName = "Untitled.psy";
+			
+			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
+		}
 
 
 		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index)
@@ -193,72 +250,6 @@ namespace psycle
 			_machineLock = false;
 		}
 
-		void Song::Reset()
-		{
-//			cpu_idle(0);
-			_sampCount=0;
-			// Cleaning pattern allocation info
-			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
-			for(int i(0) ; i < MAX_MACHINES ; ++i)
-			{
-					delete _pMachine[i];
-					_pMachine[i] = 0;
-			}
-
-			_trackArmedCount = 0;
-			for(int i(0) ; i < MAX_TRACKS; ++i)
-			{
-				_trackMuted[i] = false;
-				_trackArmed[i] = false;
-			}
-			machineSoloed = -1;
-			_trackSoloed = -1;
-		}
-
-		void Song::New()
-		{
-/*			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-			#else
-				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
-				#else // original implementation
-					CSingleLock lock(&door,true);
-				#endif
-			#endif*/
-
-			seqBus=0;
-
-			name_    = "Untitled";
-			author_  = "Unnamed";
-			comment_ = "No Comments";
-
-			/// gui stuff
-			currentOctave=4;
-
-			// General properties
-			{
-				bpm_ = 125.0f;
-				m_LinesPerBeat=4;
-			}
-			// Clean up allocated machines.
-			DestroyAllMachines(true);
-			// Cleaning instruments
-			DeleteInstruments();
-			// Clear patterns
-			
-			// Clear sequence
-			Reset();
-
-			instSelected = 0;
-			midiSelected = 0;
-			auxcolSelected = 0;
-
-			_saved=false;
-			fileName = "Untitled.psy";
-			
-			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
-		}
 
 		Machine::id_type Song::GetFreeMachine()
 		{
@@ -1123,5 +1114,7 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 
 }
 }
+
+
 
 

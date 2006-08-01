@@ -793,7 +793,7 @@ void MainWindow::appNew( )
     // midi implementation
     //Global::pConfig->_pMidiInput->Close();
     //Sleep(LOCK_LATENCY);
-    Global::pSong()->New();
+    Global::pSong()->clear();
     //_outputActive = true;
     //if (!Global::pConfig->_pOutputDriver->Enable(true))
     //{

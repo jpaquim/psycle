@@ -78,8 +78,10 @@ void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
         g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
      }
      else {
-        g->setForeground(NColor(220,220,220));
-        g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
+        if (sView->beatPxLength() > 3) {
+          g->setForeground(NColor(220,220,220));
+          g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
+        }
     }
   }
 }
@@ -114,9 +116,16 @@ void SequencerGUI::Area::paint( NGraphics * g )
 
 void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
 {
-  for (int i = 0; i < 1000; i++) {
-     g->setForeground(NColor(220,220,220));
-     g->drawLine(i* sView->beatPxLength(),-scrollDy(),d2i(i*sView->beatPxLength()),clientHeight()+scrollDy());
+   NRect area = g->repaintArea().rectClipBox();
+
+  int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
+  int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
+
+  for (int i = start ; i <= end ; i++) {
+     if ( sView->beatPxLength() > 3 || (sView->beatPxLength() <= 3 && (!( i %16)))  ) {
+       g->setForeground(NColor(220,220,220));
+       g->drawLine(i* sView->beatPxLength(),-scrollDy(),d2i(i*sView->beatPxLength()),clientHeight()+scrollDy());
+     }
   }
 }
 
@@ -292,6 +301,7 @@ void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
     item->setSequenceEntry(sequenceLine()->createEntry(pattern, endTick));
     items.push_back(item);
   add(item);
+
 }
 
 void SequencerGUI::SequencerLine::removeItems( SinglePattern * pattern )
@@ -403,8 +413,9 @@ SequencerGUI::SequencerGUI()
   NPanel* hBarPanel = new NPanel();
     hBarPanel->setLayout( NAlignLayout() );
     zoomHBar = new ZoomBar();
+    zoomHBar->setRange(2,50);
+    zoomHBar->setPos(5);
     zoomHBar->posChanged.connect(this, &SequencerGUI::onZoomHBarPosChanged);
-    zoomHBar->setRange(5,50);
     hBarPanel->add(zoomHBar, nAlRight);
     hBar = new NScrollBar();
       hBar->setOrientation(nHorizontal);
@@ -563,7 +574,7 @@ void SequencerGUI::onDeleteEntry( NButtonEvent * ev )
 
 void SequencerGUI::onZoomHBarPosChanged( ZoomBar * zoomBar, double newPos )
 {
-  if (newPos < 5) newPos = 5;
+  if (newPos < 2) newPos = 2;
   beatPxLength_ = (int) newPos;
   resize();
   repaint();
@@ -684,7 +695,10 @@ void SequencerGUI::update( )
   resize();
 }
 
+
 }}
+
+
 
 
 

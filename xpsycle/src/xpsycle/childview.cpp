@@ -38,8 +38,6 @@ ChildView::ChildView()
 {
   // reset the song global ..
   _pSong = Global::pSong();
-  Global::pSong()->New();
-  Global::pSong()->seqBus=0;
   // end of strange main psycle code
 
 
@@ -145,13 +143,7 @@ std::string ChildView::FileLoadSongNamed( std::string const & fName )
   Global::configuration()._pOutputDriver->Enable(false);
   // delete machine gui ..
   machineView_->removeMachines();
-  // load Song
-  /*RiffFile file;
-  if (!file.Open(fName.c_str()))
-  {
-    std::cerr << "Could not Open file. Check that the location is correct." <<  "Loading Error" << std::endl;
-      return "";
-  }*/
+
   _pSong->load(fName);
 
   // enable audio driver
