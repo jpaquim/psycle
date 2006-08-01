@@ -21,6 +21,7 @@
 #define ZOOMBAR_H
 
 #include <ngrs/npanel.h>
+#include <ngrs/nbitmap.h>
 
 /**
 @author Stefan Nattkemper
@@ -28,6 +29,7 @@
 
 class NButton;
 class NSlider;
+class NImage;
 
 class ZoomBar : public NPanel
 {
@@ -45,6 +47,8 @@ public:
     void setPos(double pos);
     double pos() const;
 
+    void customSliderPaint(NSlider* sl, NGraphics* g);
+
 private:
 
    int orientation_;
@@ -52,6 +56,10 @@ private:
    NButton* decBtn;
    NButton* incBtn;
    NSlider* zoomSlider;
+
+   NBitmap zoomOutBpm;
+   NBitmap zoomInBpm;
+   NBitmap sliderBpm;
 
    void init();
 

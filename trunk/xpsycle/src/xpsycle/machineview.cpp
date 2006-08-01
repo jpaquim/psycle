@@ -296,17 +296,3 @@ void MachineView::setSelectedMachine( Machine* mac)
 
 }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
