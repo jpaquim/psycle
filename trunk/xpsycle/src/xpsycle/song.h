@@ -27,8 +27,8 @@ namespace psycle
 
 				virtual ~Song();
 
-				// Initializes the song to an empty one.
-				void New();
+				void clear(); // clears all song data
+
 				PatternSequence* patternSequence();
 
 				// loads a song
@@ -289,9 +289,6 @@ namespace psycle
 			// private implementation details
 
 			private:
-
-				/// Resets some variables to their default values (used inside New(); )
-				void Reset();
 
 				/// used only during loading?
 				/// \todo why is this here?

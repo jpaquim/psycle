@@ -84,15 +84,14 @@ namespace psycle
 			progress.emit(1,0,"");
 			progress.emit(2,0,"Loading... psycle song fileformat version 3...");
 
-			preparePatternSequence(song);
-
 			// skip header
 			char Header[9];
 			file.ReadChunk(&Header, 8);
 			Header[8]=0;
 
 			//\todo:
-			song.New();
+			song.clear();
+			preparePatternSequence(song);
 			size_t filesize = file.FileSize();
 			std::uint32_t version = 0;
 			std::uint32_t size = 0;

@@ -165,6 +165,8 @@ namespace psycle
 																											// same problem at entries we get a O(n ^2) here!
 			const GlobalMap & globalEvents();
 
+			double tickLength() const;
+
 		private:
 
 			PatternData patternData_;

@@ -404,11 +404,22 @@ namespace psycle
 			patternData_.removeAll();
 		}
 
+		double PatternSequence::tickLength( ) const
+		{
+			double max = 0;
+			for(const_iterator it = begin(); it != end(); ++it) {
+				SequenceLine* line = *it;
+				max = std::max(line->tickLength(), max);
+			}
+			return max;
+		}
 
 	} // end of host namespace
 
 
 }
+
+
 
 
 
