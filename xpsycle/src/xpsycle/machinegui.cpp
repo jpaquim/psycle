@@ -705,9 +705,3 @@ void GeneratorGUI::onTweakSlide( int machine, int command, int value )
 
 }
 }
-
-
-
-
-
-
