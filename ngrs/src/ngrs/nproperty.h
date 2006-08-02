@@ -141,6 +141,7 @@ class NPropertyMap
 			typedef void const * AnyValue;
 			typedef Map<AnyClass, AnyValue, AnyValue> AnyMap;
 			AnyMap anyMap;
+			std::vector<Key> publishVector;
 
 			template<typename Class, typename GetValue, typename SetValue>
 			Map<Class, GetValue, SetValue> & map()
@@ -181,6 +182,17 @@ class NPropertyMap
 	///\name getter and setter functions
 	///\{
 		public:
+
+			void publish(const Key & key) {
+				///\ todo check if exits
+				publishVector.push_back(key);
+			}
+
+			void hideAll() {
+				///\ todo implemet a hide for single Key , too
+				publishVector.clear();
+			}
+
 			std::type_info const & getType(Key const & key) const throw(std::exception)
 			{
 				return find<AnyClass, AnyValue, AnyValue>(key).getType();
@@ -226,6 +238,10 @@ class NPropertyMap
 				std::vector<Key> listing;
 				for (AnyMap::const_iterator i(anyMap.begin()) ; i != anyMap.end() ; ++i) listing.push_back(i->first);
 				return listing;
+			}
+
+			const std::vector<Key> & publishedNames() const {
+				return publishVector;
 			}
  
 		private:
