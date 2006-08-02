@@ -137,6 +137,26 @@ namespace psycle
 			return 0;
 		}
 
+		void SequenceEntry::setStartPos( float pos )
+		{
+			startPos_ = pos;
+		}
+
+		float SequenceEntry::startPos( ) const
+		{
+			return startPos_;
+		}
+
+		void SequenceEntry::setEndPos( float pos )
+		{
+			endPos_ = pos;
+		}
+
+		float SequenceEntry::endPos( ) const
+		{
+			return endPos_;
+		}
+
 		// end of PatternEntry
 
 		// represents one track/line in the sequencer
@@ -435,6 +455,8 @@ namespace psycle
 
 
 }
+
+
 
 
 

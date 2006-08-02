@@ -282,3 +282,5 @@ SequencerGUI * ChildView::sequencerView( )
 
 
 
+
+

@@ -94,11 +94,17 @@ namespace psycle
 
 			SequenceLine* track() {return line_;}
 
+			void setStartPos( float pos );
+			float startPos() const;
+
+			void setEndPos( float pos );
+			float endPos() const;
+
 		private:
 			SequenceLine* line_;
 			SinglePattern* pattern_;
-			double startPos_; // here we can "shrink" the pattern of the entry
-			double endPos_;
+			float startPos_; // here we can "shrink" the pattern of the entry
+			float endPos_;
 		};
 
 		class PatternSequence;
