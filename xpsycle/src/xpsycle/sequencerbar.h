@@ -35,7 +35,7 @@
 #include <ngrs/nitem.h>
 #include <ngrs/ntreenode.h>
 
-class N7SegDisplay;
+class NObjectInspector;
 
 /**
 @author Stefan
@@ -119,6 +119,8 @@ public:
 
     void onSelChangeSeqList(NItemEvent* sender);
 
+    void setEntry(NObject* obj);
+
 
 private:
 
@@ -131,7 +133,7 @@ private:
 
     NCustomTreeView* patternBox_;
     PatternBoxProperties* propertyBox_;
-
+    NObjectInspector* entryBox_;
 
     NCheckBox* follow_;
     NCheckBox* multichannel_audition_;
@@ -139,6 +141,7 @@ private:
     NCheckBox* record_tweaks_;
     NCheckBox* notestoeffects_;
     NCheckBox* movecursorpaste_;
+
 
     void onNewCategory( NButtonEvent * ev );
     void onNewPattern( NButtonEvent* ev );

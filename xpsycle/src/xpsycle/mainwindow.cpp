@@ -51,6 +51,7 @@ MainWindow::MainWindow()
   initDialogs();
   childView_ = new ChildView();
   childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
+  childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
   initBars();
   initViews();
   initSignals();
@@ -1412,7 +1413,15 @@ void MainWindow::onGeneratorCbx( NItemEvent * ev )
   }
 }
 
+void MainWindow::onSequencerEntryClick( SequencerItem * item )
+{
+  std::cout << item->sequenceEntry()->tickPosition() << std::endl;
+  sequencerBar_->setEntry(item);
+}
+
 }}
+
+
 
 
 

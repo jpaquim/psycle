@@ -51,6 +51,7 @@ class VuMeter;
 class InstrumentEditor;
 class InfoDlg;
 class WaveSaveDlg;
+class SequencerItem;
 
 
 /**
@@ -231,6 +232,8 @@ private:
     void onNewMachineDialogAdded(Machine* mac);
 
     void onGeneratorCbx(NItemEvent* ev);
+
+    void onSequencerEntryClick( SequencerItem* item);
 
 };
 

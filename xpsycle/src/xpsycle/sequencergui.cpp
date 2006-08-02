@@ -34,6 +34,7 @@
 #include <ngrs/nitem.h>
 #include <ngrs/nwindow.h>
 #include <ngrs/nbevelborder.h>
+#include <ngrs/nproperty.h>
 
 
 namespace psycle {
@@ -200,6 +201,11 @@ SequencerItem::SequencerItem( SequencerGUI* seqGui )
   sequenceEntry_ = 0;
   sView = seqGui;
   selected_ = false;
+  if (properties()) {
+     properties()->bind("start", *this, &SequencerItem::start, &SequencerItem::setStart);
+     properties()->publish("start");
+  }
+
 }
 
 SequencerItem::~ SequencerItem( )
@@ -260,6 +266,7 @@ void SequencerItem::onMousePress( int x, int y, int button )
 {
   selected_ = true;
   click.emit(this);
+  sView->entryClick.emit(this);
 }
 
 void SequencerItem::setSelected( bool on )
@@ -270,6 +277,16 @@ void SequencerItem::setSelected( bool on )
 bool SequencerItem::selected( )
 {
   return selected_;
+}
+
+void SequencerItem::setStart( float start )
+{
+  sequenceEntry_->setStartPos(start);
+}
+
+float SequencerItem::start( ) const
+{
+  return sequenceEntry_->startPos();
 }
 
 // end of SequencerItem class
@@ -758,6 +775,8 @@ void SequencerGUI::update( )
 
 
 }}
+
+
 
 
 

@@ -35,6 +35,8 @@
 #include <ngrs/ntoolbar.h>
 #include <ngrs/ngridlayout.h>
 #include <ngrs/ntreenode.h>
+#include <ngrs/nobjectinspector.h>
+#include <ngrs/nproperty.h>
 
 
 namespace psycle { namespace host {
@@ -189,6 +191,10 @@ void SequencerBar::init( )
        propertyBox_->nameChanged.connect(this,&SequencerBar::onNameChanged);
     patternPanel->add(propertyBox_, nAlBottom);
 
+    entryBox_ = new NObjectInspector();
+      entryBox_->setPreferredSize(100,100);
+    patternPanel->add(entryBox_, nAlBottom);
+
     patternBox_ = new NCustomTreeView();
       patternBox_->setPreferredSize(100,300);
       patternBox_->itemSelected.connect(this,&SequencerBar::onItemSelected);
@@ -196,6 +202,8 @@ void SequencerBar::init( )
     patternPanel->add(patternBox_, nAlClient);
 
   add(patternPanel, nAlTop);
+
+
 
   ///\ todo remove this somewhere else and rename this class to patternBox
 
@@ -381,6 +389,12 @@ void psycle::host::SequencerBar::onNameChanged( const std::string & name )
        guiItem->repaint();
     }
   }
+}
+
+void psycle::host::SequencerBar::setEntry( NObject * obj )
+{
+ // entryBox_->setControlObject(obj);
+ // entryBox_->repaint();
 }
 
 

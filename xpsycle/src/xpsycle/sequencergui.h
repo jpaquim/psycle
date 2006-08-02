@@ -35,6 +35,7 @@ class NToolBar;
 class NListBox;
 class ZoomBar;
 
+
 namespace psycle {
 	namespace host {
 
@@ -63,6 +64,9 @@ class SequencerItem : public NPanel {
 
        void setSelected(bool on);
        bool selected();
+
+       void setStart(float start);
+       float start() const;
 
       private:
 
@@ -154,6 +158,8 @@ public:
     SequencerGUI();
 
     ~SequencerGUI();
+
+    signal1<SequencerItem*> entryClick;
 
     void setPatternSequence(PatternSequence* sequence);
     PatternSequence* patternSequence();
