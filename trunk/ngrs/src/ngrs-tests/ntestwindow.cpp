@@ -56,6 +56,7 @@
 #include <ngrs/ncolorchooser.h>
 #include <ngrs/ncolorcombobox.h>
 #include <ngrs/nobjectinspector.h>
+#include <ngrs/nproperty.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -73,7 +74,10 @@ NTestWindow::NTestWindow()
 {
   NObjectInspector* ins = new NObjectInspector();
     ins->setPosition(10,10,200,200);
-    ins->setControlObject(new NLabel());
+    NLabel* lb = new NLabel();
+    lb->properties()->publish("name");
+    ins->setControlObject(lb);
+
   pane()->add(ins);
 
   /*

@@ -22,6 +22,8 @@
 
 #include "ntable.h"
 
+class NEdit;
+
 /**
 @author Stefan Nattkemper
 */
@@ -40,6 +42,10 @@ private:
    NObject* obj_;
 
    void updateView();
+
+   void onStringEdit(const NKeyEvent & event);
+
+   std::vector<NEdit*> edits;
 
 };
 

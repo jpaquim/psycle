@@ -153,7 +153,7 @@ NPoint NEdit::getScreenPos(NGraphics* g, const std::string & text )
   int h = g->textAscent()+g->textDescent();
 
   switch (valign_) {
-    case nAlCenter : yp = d2i( (spacingHeight()+g->textAscent()) / 2); break;
+    case nAlCenter : yp = (clientHeight() + g->textHeight() /2 ) / 2; break;
     case nAlTop    : yp = h;                  break;
     case nAlBottom : yp = (int) spacingHeight()- g->textDescent();         break;
     default        : yp = h;                  break;

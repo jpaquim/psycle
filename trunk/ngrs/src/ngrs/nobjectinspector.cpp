@@ -20,6 +20,7 @@
 #include "nobjectinspector.h"
 #include "nproperty.h"
 #include "nlabel.h"
+#include "nedit.h"
 
 NObjectInspector::NObjectInspector()
  : NTable()
@@ -46,7 +47,10 @@ NObject * NObjectInspector::controlObject( )
 void NObjectInspector::updateView( )
 {
   removeChilds();
-  std::vector<std::string> names = obj_->properties()->methodNames();
+  edits.clear();
+
+  std::vector<std::string> names = obj_->properties()->publishedNames();
+
   std::vector<std::string>::iterator it =  names.begin();
   int y = 0;
   for (; it < names.end(); it++) {
@@ -54,6 +58,16 @@ void NObjectInspector::updateView( )
     if (obj_->properties()->getType(name)==typeid(std::string)) {
       NLabel* label = new NLabel(name);
       add(label,0,y);
+      NEdit* edit = new NEdit();
+        edit->setSkin(NSkin());
+        NBevelBorder bvl(nNone,nLowered);
+        bvl.setSpacing(NSize(2,2,2,2));
+        edit->setBorder(bvl);
+        edit->setName(name);
+        edit->setPreferredSize(100,15);
+        edit->keyPress.connect(this,&NObjectInspector::onStringEdit);
+      add(edit,1,y);
+      edits.push_back(edit);
       y++;
     } else
     if (obj_->properties()->getType(name)==typeid(int)) {
@@ -61,7 +75,17 @@ void NObjectInspector::updateView( )
       add(label,0,y);
        //listBox->add(new NItem(name));
       y++;
-    }
+    } else
+    if (obj_->properties()->getType(name)==typeid(NColor)) {
 
+    }
+  }
+}
+
+void NObjectInspector::onStringEdit( const NKeyEvent & event )
+{
+  std::vector<NEdit*>::iterator it = find( edits.begin(), edits.end(), event.sender() );
+  if ( it != edits.end() ) {
+    obj_->properties()->set(event.sender()->name(), (*it)->text() );
   }
 }
