@@ -55,6 +55,7 @@
 #include <ngrs/nstatusbar.h>
 #include <ngrs/ncolorchooser.h>
 #include <ngrs/ncolorcombobox.h>
+#include <ngrs/nobjectinspector.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -70,9 +71,16 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
+  NObjectInspector* ins = new NObjectInspector();
+    ins->setPosition(10,10,200,200);
+    ins->setControlObject(new NLabel());
+  pane()->add(ins);
+
+  /*
   NColorComboBox* colorBox = new NColorComboBox();
      colorBox->setPosition(10,10,100,15);
   pane()->add(colorBox);
+  */
 
   /*NColorChooser* chooser = new NColorChooser();
     chooser->setPosition(0,0,500,500);

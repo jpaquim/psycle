@@ -17,29 +17,51 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTABLE_H
-#define NTABLE_H
+#include "nobjectinspector.h"
+#include "nproperty.h"
+#include "nlabel.h"
 
-#include "nscrollbox.h"
-
-/**
-@author Stefan Nattkemper
-*/
-class NTable : public NScrollBox
+NObjectInspector::NObjectInspector()
+ : NTable()
 {
-public:
-    NTable();
+  obj_ = 0;
+}
 
-    ~NTable();
 
-    virtual void add(NVisualComponent* comp, int col, int row, bool update=true);
+NObjectInspector::~NObjectInspector()
+{
+}
 
-    virtual void removeChilds();
+void NObjectInspector::setControlObject( NObject * obj )
+{
+  obj_ = obj;
+  updateView();
+}
 
-private:
+NObject * NObjectInspector::controlObject( )
+{
+  return obj_;
+}
 
-   NPanel* tablePane;
+void NObjectInspector::updateView( )
+{
+  removeChilds();
+  std::vector<std::string> names = obj_->properties()->methodNames();
+  std::vector<std::string>::iterator it =  names.begin();
+  int y = 0;
+  for (; it < names.end(); it++) {
+    std:: string name = *it;
+    if (obj_->properties()->getType(name)==typeid(std::string)) {
+      NLabel* label = new NLabel(name);
+      add(label,0,y);
+      y++;
+    } else
+    if (obj_->properties()->getType(name)==typeid(int)) {
+      NLabel* label = new NLabel(name);
+      add(label,0,y);
+       //listBox->add(new NItem(name));
+      y++;
+    }
 
-};
-
-#endif
+  }
+}

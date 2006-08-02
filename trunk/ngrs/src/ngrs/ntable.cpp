@@ -39,4 +39,9 @@ void NTable::add( NVisualComponent * comp, int col, int row,  bool update )
   tablePane->add(comp,NAlignConstraint(nAlLeft,col,row),update);
 }
 
+void NTable::removeChilds( )
+{
+  tablePane->removeChilds();
+}
+
 

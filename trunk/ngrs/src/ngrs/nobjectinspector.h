@@ -17,28 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTABLE_H
-#define NTABLE_H
+#ifndef NOBJECTINSPECTOR_H
+#define NOBJECTINSPECTOR_H
 
-#include "nscrollbox.h"
+#include "ntable.h"
 
 /**
 @author Stefan Nattkemper
 */
-class NTable : public NScrollBox
+class NObjectInspector : public NTable
 {
 public:
-    NTable();
+    NObjectInspector();
 
-    ~NTable();
+    ~NObjectInspector();
 
-    virtual void add(NVisualComponent* comp, int col, int row, bool update=true);
-
-    virtual void removeChilds();
+    void setControlObject(NObject* obj);
+    NObject* controlObject();
 
 private:
 
-   NPanel* tablePane;
+   NObject* obj_;
+
+   void updateView();
 
 };
 
