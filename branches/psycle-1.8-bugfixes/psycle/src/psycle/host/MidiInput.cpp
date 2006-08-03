@@ -9,7 +9,7 @@
 #include "Player.hpp"
 #include "Configuration.hpp"
 #include "Plugin.hpp"
-#include "VstHost.hpp"
+#include "VstHost24.hpp"
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
 #include "Helpers.hpp"

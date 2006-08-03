@@ -11,7 +11,7 @@
 #include "Sampler.hpp"
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
-#include "VSTHost.hpp"
+#include "VSTHost24.hpp"
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
 #include "Riff.hpp" // for Wave file loading.
@@ -54,13 +54,13 @@ namespace psycle
 
 		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index)
 		{
-			Machine* pMachine;
-			Master* pMaster;
-			Sampler* pSampler;
-			XMSampler* pXMSampler;
-			DuplicatorMac* pDuplicator;
-			Plugin* pPlugin;
-			vst::plugin* pVstPlugin;
+			Machine* pMachine(0);
+			Master* pMaster(0);
+			Sampler* pSampler(0);
+			XMSampler* pXMSampler(0);
+			DuplicatorMac* pDuplicator(0);
+			Plugin* pPlugin(0);
+			vst::plugin *vstPlug(0);
 			switch (type)
 			{
 			case MACH_MASTER:
@@ -103,33 +103,8 @@ namespace psycle
 					break;
 				}
 			case MACH_VST:
-				{
-					pMachine = pVstPlugin = new vst::instrument(index);
-					if(!CNewMachine::TestFilename(psPluginDll)) 
-					{
-						zapObject(pMachine);
-						return false;
-					}
-					try
-					{
-						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
-					}
-					catch(std::exception const & e)
-					{
-						loggers::exception(e.what());
-						zapObject(pMachine); 
-						return false;
-					}
-					catch(...)
-					{
-						zapObject(pMachine);
-						return false;
-					}
-					break;
-				}
 			case MACH_VSTFX:
 				{
-					pMachine = pVstPlugin = new vst::fx(index);
 					if(!CNewMachine::TestFilename(psPluginDll)) 
 					{
 						zapObject(pMachine);
@@ -137,7 +112,12 @@ namespace psycle
 					}
 					try
 					{
-						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
+						pMachine = vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(psPluginDll));
+
+						if(vstPlug)
+						{
+							vstPlug->_macIndex=index;
+						}
 					}
 					catch(std::exception const & e)
 					{
@@ -1593,71 +1573,67 @@ namespace psycle
 						case MACH_VST:
 						case MACH_VSTFX:
 							{
-							
-							if ( type == MACH_VST ) 
-							{
-								pMac[i] = pVstPlugin = new vst::instrument(i);
-							}
-							else if ( type == MACH_VSTFX ) 
-							{
-								pMac[i] = pVstPlugin = new vst::fx(i);
-							}
-							if ((pMac[i]->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
-							{
-								char sPath2[_MAX_PATH];
-								CString sPath;
 								std::string temp;
-								if(CNewMachine::lookupDllName(vstL[pVstPlugin->_instance].dllName,temp))
+								char sPath[_MAX_PATH];
+								char sError[128];
+								bool berror=false;
+								vst::plugin* pTempMac = new vst::plugin(0);
+								unsigned char program;
+								int instance;
+								// The trick: We need to load the information from the file in order to know the "instance" number
+								// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
+								// the newly created plugin.
+								pTempMac->PreLoad(pFile,program,instance);
+								assert(instance < OLD_MAX_PLUGINS);
+								if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp)))
 								{
-									sPath=temp.c_str();
-									strcpy(sPath2,sPath);
-									if (!CNewMachine::TestFilename(sPath2))
+									berror=true;
+									sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
+								}
+								else
+								{
+									strcpy(sPath,temp.c_str());
+									if (!CNewMachine::TestFilename(sPath))
 									{
-										char sError[128];
-										sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
-										MessageBox(NULL,sError, "Loading Error", MB_OK);
-
-										Machine* pOldMachine = pMac[i];
-										pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-										pOldMachine->_pSamplesL = NULL;
-										pOldMachine->_pSamplesR = NULL;
-										// dummy name goes here
-										sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-										zapObject(pOldMachine);
-										pMac[i]->_type = MACH_DUMMY;
-										((Dummy*)pMac[i])->wasVST = true;
+										berror=true;
+										sprintf(sError,"This VST plug-in is Disabled\"%s\" - replacing with Dummy.",sPath);
 									}
 									else
 									{
 										try
 										{
-											pVstPlugin->Instance(sPath2, false); // <bohan> why not using Load?
+											pMac[i] = pVstPlugin = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath));
+
+											if (pVstPlugin)
+											{
+												pVstPlugin->LoadFromMac(pTempMac);
+												pVstPlugin->SetProgram(program);
+												const int numpars = vstL[instance].numpars;
+												for (int c(0) ; c < numpars; ++c)
+												{
+													try
+													{
+														pVstPlugin->SetParameter(c, vstL[instance].pars[c]);
+													}
+													catch(const std::exception &)
+													{
+														// o_O`
+													}
+												}
+											}
 										}
 										catch(...)
 										{
-											char sError[128];
-											sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
-											MessageBox(NULL,sError, "Loading Error", MB_OK);
-
-											Machine* pOldMachine = pMac[i];
-											pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-											pOldMachine->_pSamplesL = NULL;
-											pOldMachine->_pSamplesR = NULL;
-											// dummy name goes here
-											sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-											zapObject(pOldMachine);
-											pMac[i]->_type = MACH_DUMMY;
-											((Dummy*)pMac[i])->wasVST = true;
+											berror=true;
+											sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath);
 										}
 									}
 								}
-								else
+								if (berror)
 								{
-									char sError[128];
-									sprintf(sError,"Missing VST plug-in \"%s\"",vstL[pVstPlugin->_instance].dllName);
 									MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-									Machine* pOldMachine = pMac[i];
+									Machine* pOldMachine = pTempMac;
 									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
@@ -1667,19 +1643,6 @@ namespace psycle
 									pMac[i]->_type = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
 								}
-							}
-							else
-							{
-								Machine* pOldMachine = pMac[i];
-								pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-								pOldMachine->_pSamplesL = NULL;
-								pOldMachine->_pSamplesR = NULL;
-								// dummy name goes here
-								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-								zapObject(pOldMachine);
-								pMac[i]->_type = MACH_DUMMY;
-								((Dummy*)pMac[i])->wasVST = true;
-							}
 							break;
 							}
 						case MACH_SCOPE:
@@ -1858,13 +1821,13 @@ namespace psycle
 							{
 								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
 								if(chunkpresent) chunkread = plugin.LoadChunk(pFile);
-								plugin.proxy().dispatcher(effSetProgram, 0, plugin._program);
+								//plugin.SetProgram(plugin._program);
 							}
 							catch(const std::exception &)
 							{
 								// o_O`
 							}
-							if(!chunkpresent || !chunkread)
+/*							if(!chunkpresent || !chunkread)
 							{
 								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
 								const int vi = plugin._instance;
@@ -1873,7 +1836,7 @@ namespace psycle
 								{
 									try
 									{
-										plugin.proxy().setParameter(c, vstL[vi].pars[c]);
+										plugin.SetParameter(c, vstL[vi].pars[c]);
 									}
 									catch(const std::exception &)
 									{
@@ -1881,6 +1844,7 @@ namespace psycle
 									}
 								}
 							}
+							*/
 						}
 					}
 				}

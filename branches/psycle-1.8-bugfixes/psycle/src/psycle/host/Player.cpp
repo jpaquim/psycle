@@ -355,7 +355,6 @@ namespace psycle
 					}
 				}
 			}
-			_samplesRemaining = SamplesPerRow();
 		}	
 
 
@@ -430,14 +429,15 @@ namespace psycle
 			{
 				if(numSamplex > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamplex;
 				// Tick handler function
-				if((pThis->_playing) && (amount >= pThis->_samplesRemaining)) amount = pThis->_samplesRemaining;
+				if(amount >= pThis->_samplesRemaining) amount = pThis->_samplesRemaining;
+				//if((pThis->_playing) && (amount >= pThis->_samplesRemaining)) amount = pThis->_samplesRemaining;
 				// Song play
 				if((pThis->_samplesRemaining <=0))
 				{
 					if (pThis->_playing)
-				{
-					// Advance position in the sequencer
-					pThis->AdvancePosition();
+					{
+						// Advance position in the sequencer
+						pThis->AdvancePosition();
 						// Global commands are executed first so that the values for BPM and alike
 						// are up-to-date when "NotifyNewLine()" is called.
 						pThis->ExecuteGlobalCommands();
@@ -448,6 +448,7 @@ namespace psycle
 					{
 						pThis->NotifyNewLine();
 					}
+					pThis->_samplesRemaining = pThis->SamplesPerRow();
 				}
 				// Processing plant
 				if(amount > 0)
@@ -523,7 +524,8 @@ namespace psycle
 					Master::_pMasterSamples += amount * 2;
 					numSamplex -= amount;
 				}
-				if(pThis->_playing) pThis->_samplesRemaining -= amount;
+				 pThis->_samplesRemaining -= amount;
+				 //if(pThis->_playing) pThis->_samplesRemaining -= amount;
 			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
 
 			return pThis->_pBuffer;

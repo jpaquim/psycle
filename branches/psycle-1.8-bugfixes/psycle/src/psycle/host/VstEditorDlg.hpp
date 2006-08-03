@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CVstEditorDlg.
 #pragma once
-#include "VSTHost.hpp"
+#include "VSTHost24.hpp"
 #include "DefaultVstGui.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)

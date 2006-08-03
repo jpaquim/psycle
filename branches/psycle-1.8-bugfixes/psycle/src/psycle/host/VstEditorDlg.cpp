@@ -8,7 +8,7 @@
 #include "PresetsDlg.hpp"
 #include "inputhandler.hpp"
 #include "MainFrm.hpp"
-#include <Vst/AEffEditor.h>
+//#include <Vst/AEffEditor.h>
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		#define VST_PARAMETRIC_WIDTH 228
@@ -53,7 +53,7 @@ NAMESPACE__BEGIN(psycle)
 			_splitter.CreateStatic(this, 1, 2);
 			try
 			{
-				editorgui = _pMachine->proxy().flags() & effFlagsHasEditor;
+				editorgui = _pMachine->HasEditor();
 			}
 			catch(const std::exception &)
 			{
@@ -65,10 +65,9 @@ NAMESPACE__BEGIN(psycle)
 				_splitter.CreateView(0, VST_UI_PANE, RUNTIME_CLASS(CVstGui), size, pContext);
 				pGui = _splitter.GetPane(0, VST_UI_PANE);
 				((CVstGui*)pGui)->_pMachine= _pMachine;
-				((CVstGui*)pGui)->proxy = &_pMachine->proxy();
 				try
 				{
-					_pMachine->proxy().dispatcher(effEditOpen, 0, 0, pGui->m_hWnd);
+					_pMachine->EditOpen(pGui->m_hWnd);
 				}
 				catch(const std::exception &)
 				{
@@ -77,7 +76,7 @@ NAMESPACE__BEGIN(psycle)
 				try
 				{
 					ERect * er;
-					_pMachine->proxy().dispatcher(effEditGetRect, 0, 0, &er);
+					_pMachine->EditGetRect(&er);
 					width = er->right - er->left;
 					height = er->bottom - er->top;
 				}
@@ -97,7 +96,7 @@ NAMESPACE__BEGIN(psycle)
 				int numParameters;
 				try
 				{
-					numParameters = _pMachine->proxy().numParams();
+					numParameters = _pMachine->GetNumParams();
 				}
 				catch(const std::exception &)
 				{
@@ -169,7 +168,7 @@ NAMESPACE__BEGIN(psycle)
 			int numParameters;
 			try
 			{
-				numParameters = reinterpret_cast<vst::plugin *>(_pMachine)->proxy().numParams();
+				numParameters = _pMachine->GetNumParams();
 			}
 			catch(const std::exception &)
 			{
@@ -181,10 +180,9 @@ NAMESPACE__BEGIN(psycle)
 			}
 			for(int c(0); c < numParameters ; ++c)
 			{
-				const float randsem(static_cast<float>(rand() * 0.000030517578125f));
 				try
 				{
-					reinterpret_cast<vst::plugin *>(_pMachine)->proxy().setParameter(c, randsem);
+					_pMachine->SetParameter(c, rand());
 				}
 				catch(const std::exception &)
 				{

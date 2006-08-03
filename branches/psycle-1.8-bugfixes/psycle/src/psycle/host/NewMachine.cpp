@@ -4,7 +4,7 @@
 #include "psycle.hpp"
 #include "NewMachine.hpp"
 #include "Plugin.hpp"
-#include "VstHost.hpp"
+#include "VstHost24.hpp"
 #include "ProgressDialog.hpp"
 #undef min //\todo : ???
 #undef max //\todo : ???
@@ -706,10 +706,10 @@ NAMESPACE__BEGIN(psycle)
 						else if(type == MACH_VST)
 						{
 							_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
-							vst::plugin vstPlug;
+							vst::plugin *vstPlug=0;
 							try
 							{
-								 vstPlug.Instance(fileName);
+								vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(fileName.c_str()));
 							}
 							catch(const std::exception & e)
 							{
@@ -739,23 +739,23 @@ NAMESPACE__BEGIN(psycle)
 							else
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
-								_pPlugsInfo[currentPlugsCount]->name = vstPlug.GetName();
+								_pPlugsInfo[currentPlugsCount]->name = vstPlug->GetName();
 								{
 									std::ostringstream s;
-									s << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect") << " by " << vstPlug.GetVendorName();
+									s << (vstPlug->IsSynth() ? "VST2 instrument" : "VST2 effect") << " by " << vstPlug->GetVendorName();
 									_pPlugsInfo[currentPlugsCount]->desc = s.str();
 								}
 								{
 									std::ostringstream s;
-									s << vstPlug.GetVersion();
+									s << vstPlug->GetVersion();
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
 								
-								if(vstPlug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+								if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
 
 								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
-								out << vstPlug.GetName() << " - successfully instanciated";
+								out << vstPlug->GetName() << " - successfully instanciated";
 								out.flush();
 							}
 							++currentPlugsCount;
@@ -766,7 +766,7 @@ NAMESPACE__BEGIN(psycle)
 							// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
 							try
 							{
-								vstPlug.Free();
+								delete vstPlug;
 								// [bohan] phatmatik crashes here...
 								// <magnus> so does PSP Easyverb, in FreeLibrary
 							}

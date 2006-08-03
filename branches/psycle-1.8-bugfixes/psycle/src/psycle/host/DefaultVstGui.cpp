@@ -75,7 +75,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			int nump;
 			try
 			{
-				nump = _pMachine->proxy().numPrograms();
+				nump = _pMachine->numPrograms();
 			}
 			catch(const std::exception &)
 			{
@@ -90,7 +90,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 				{
 					/// \todo Not used but... needed? (to call before getprogramname)
 					//int categories = _pMachine->proxy().dispatcher(effGetNumProgramCategories); categories; // not used
-					_pMachine->proxy().dispatcher(effGetProgramNameIndexed, i, -1, s2);
+					_pMachine->GetProgramNameIndexed(-1, i, s2);
 				}
 				catch(const std::exception &)
 				{
@@ -101,7 +101,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			}
 			try
 			{
-				m_program.SetCurSel(_pMachine->proxy().dispatcher(effGetProgram));
+				m_program.SetCurSel(_pMachine->GetProgram());
 			}
 			catch(const std::exception &)
 			{
@@ -116,7 +116,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			long int params;
 			try
 			{
-				params = _pMachine->proxy().numParams();
+				params = _pMachine->numParams();
 			}
 			catch(const std::exception &)
 			{
@@ -128,7 +128,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 				std::memset(str, 0, 64);
 				try
 				{
-					_pMachine->proxy().dispatcher(effGetParamName, i, 0, str);
+					_pMachine->GetParamName(i, str);
 				}
 				catch(const std::exception &)
 				{
@@ -137,7 +137,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 				bool b;
 				try
 				{
-					b = _pMachine->proxy().dispatcher(effCanBeAutomated, i);
+					b = _pMachine->CanBeAutomated(i);
 				}
 				catch(const std::exception &)
 				{
@@ -151,11 +151,11 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			m_parlist.SetCurSel(0);
 		}
 
-		void CDefaultVstGui::UpdateText(float value)
+		void CDefaultVstGui::UpdateText(int value)
 		{
 			char str[512],str2[32];
 			_pMachine->DescribeValue(nPar,str);
-			sprintf(str2,"\t[Hex: %4X]",f2i(value*65535.0f));
+			sprintf(str2,"\t[Hex: %4X]",value);
 			strcat(str,str2);
 			m_text.SetWindowText(str);
 		}
@@ -163,19 +163,18 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 		void CDefaultVstGui::UpdateOne()
 		{
 			//update scroll bar with initial value
-			float value;
+			int value;
 			try
 			{
-				value = _pMachine->proxy().getParameter(nPar);
+				value = _pMachine->GetParamValue(nPar);
 			}
 			catch(const std::exception &)
 			{
 				value = 0; // hmm
 			}
 			UpdateText(value);
-			value *= vst::quantization;
 			updatingvalue =true;
-			m_slider.SetPos(vst::quantization -(f2i(value)));
+			m_slider.SetPos(vst::quantization -value);
 			updatingvalue =false;
 		}
 
@@ -186,8 +185,8 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 				nPar=par;
 				m_parlist.SetCurSel(par);
 			}
-			UpdateText(value);
 			value *= vst::quantization;
+			UpdateText(value);
 			updatingvalue=true;
 			m_slider.SetPos(vst::quantization -(f2i(value)));
 			updatingvalue=false;
@@ -205,16 +204,15 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			if(!updatingvalue)
 			{
 				int val1(vst::quantization - m_slider.GetPos());
-				float value = static_cast<float>(val1) / vst::quantization;
 				try
 				{
-					_pMachine->proxy().setParameter(nPar, value);
+					_pMachine->SetParameter(nPar, val1);
 				}
 				catch(const std::exception &)
 				{
 					// o_O`
 				}
-				UpdateText(value);
+				UpdateText(val1);
 				// well, this isn't so hard... just put the twk record here
 				if(Global::pConfig->_RecordTweaks)
 				{
@@ -238,7 +236,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			int const se=m_program.GetCurSel();
 			try
 			{
-				_pMachine->proxy().dispatcher(effSetProgram, 0, se);
+				_pMachine->SetProgram(se);
 			}
 			catch(const std::exception &)
 			{
@@ -262,7 +260,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 				m_program.SetCurSel(se);
 				try
 				{
-					_pMachine->proxy().dispatcher(effSetProgram, 0, se);
+					_pMachine->SetProgram(se);
 				}
 				catch(const std::exception &)
 				{

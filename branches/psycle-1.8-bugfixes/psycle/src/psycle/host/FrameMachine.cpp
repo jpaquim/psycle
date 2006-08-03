@@ -7,7 +7,7 @@
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
 #include "Plugin.hpp"
-#include "VSTHost.hpp"
+#include "VSTHost24.hpp"
 #include "InputHandler.hpp"
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
@@ -55,10 +55,11 @@ NAMESPACE__BEGIN(psycle)
 			finetweak=false;
 			ultrafinetweak=false;
 			
-			if (Global::pConfig->bBmpDial)
+/*			if (Global::pConfig->bBmpDial)
 				wndView->LoadMachineDial();
 			else
 				wndView->machinedial.LoadBitmap(IDB_KNOB);
+*/
 			b_font.CreatePointFont(80,"Tahoma");
 //			b_font_bold.CreatePointFont(80,"Tahoma Bold");
 			CString sFace("Tahoma");
@@ -79,27 +80,19 @@ NAMESPACE__BEGIN(psycle)
 
 			// Get NumParameters
 			ncol=1;
+			numParameters = _pMachine->GetNumParams();
+
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
-				numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
 				ncol = ((Plugin*)_pMachine)->GetInfo()->numCols;
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				try
-				{
-					numParameters = ((vst::plugin*)_pMachine)->proxy().numParams();
-				}
-				catch(const std::exception &)
-				{
-					numParameters = 0;
-				}
 				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
 			}
 			else if ( _pMachine->_type == MACH_DUPLICATOR)
 			{
-				numParameters = _pMachine->GetNumParams();
 				ncol = 2;
 			}
 			parspercol = numParameters/ncol;
@@ -258,7 +251,7 @@ NAMESPACE__BEGIN(psycle)
 					max_v = vst::quantization;
 					try
 					{
-						val_v = f2i(plugin.proxy().getParameter(c) * vst::quantization);
+						val_v = _pMachine->GetParamValue(c);
 					}
 					catch(const std::exception &)
 					{
@@ -271,7 +264,7 @@ NAMESPACE__BEGIN(psycle)
 					}
 					try
 					{
-						plugin.proxy().dispatcher(effGetParamName, c, 0, parName);
+						_pMachine->GetParamName(c, parName);
 					}
 					catch(const std::exception &)
 					{
@@ -415,31 +408,13 @@ NAMESPACE__BEGIN(psycle)
 			{
 				sourcepoint = point.y;
 
-				if ( _pMachine->_type == MACH_PLUGIN )
+				try
 				{
-					try
-					{
-						tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
-					}
-					catch(const std::exception &)
-					{
-						tweakbase = 0;
-					}
+					tweakbase = _pMachine->GetParamValue(tweakpar);
 				}
-				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+				catch(const std::exception &)
 				{
-					try
-					{
-						tweakbase = int(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
-					}
-					catch(const std::exception &)
-					{
-						tweakbase = 0;
-					}
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR )
-				{
-					tweakbase = tweakbase = _pMachine->GetParamValue(tweakpar);
+					tweakbase = 0;
 				}
 				istweak = true;
 				SetCapture();
@@ -476,31 +451,13 @@ NAMESPACE__BEGIN(psycle)
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{
-					if ( _pMachine->_type == MACH_PLUGIN )
+					try
 					{
-						try
-						{
-							tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
+						tweakbase=_pMachine->GetParamValue(tweakpar);
 					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+					catch(const std::exception &)
 					{
-						try
-						{
-							tweakbase=f2i(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						tweakbase = _pMachine->GetParamValue(tweakpar);
+						tweakbase = 0;
 					}
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
@@ -508,31 +465,13 @@ NAMESPACE__BEGIN(psycle)
 				else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
 					( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
 				{
-					if ( _pMachine->_type == MACH_PLUGIN )
+					try
 					{
-						try
-						{
-							tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
+						tweakbase=_pMachine->GetParamValue(tweakpar);
 					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+					catch(const std::exception &)
 					{
-						try
-						{
-							tweakbase=f2i(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						tweakbase = _pMachine->GetParamValue(tweakpar);
+						tweakbase = 0;
 					}
 					sourcepoint=point.y;
 					finetweak=!finetweak;
@@ -585,7 +524,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					try
 					{
-						((vst::plugin*)_pMachine)->proxy().setParameter(tweakpar,(float)(nv/(float)vst::quantization));
+						_pMachine->SetParameter(tweakpar,nv);
 					}
 					catch(const std::exception &)
 					{
@@ -678,7 +617,7 @@ NAMESPACE__BEGIN(psycle)
 						max_v = vst::quantization;
 						try
 						{
-							((vst::plugin*)_pMachine)->proxy().dispatcher(effGetParamName, thispar, 0, name);
+							_pMachine->GetParamName(thispar, name);
 						}
 						catch(const std::exception &)
 						{
@@ -686,7 +625,7 @@ NAMESPACE__BEGIN(psycle)
 						}
 						try
 						{
-							dlg.m_Value = f2i(((vst::plugin*)_pMachine)->proxy().getParameter(thispar) * vst::quantization);
+							dlg.m_Value = _pMachine->GetParamValue(thispar);
 						}
 						catch(const std::exception &)
 						{
@@ -738,7 +677,7 @@ NAMESPACE__BEGIN(psycle)
 					{
 						try
 						{
-							((vst::plugin*)_pMachine)->proxy().setParameter(thispar,(float)(nv/(float)vst::quantization));
+							_pMachine->SetParameter(thispar,nv);
 						}
 						catch(const std::exception &)
 						{

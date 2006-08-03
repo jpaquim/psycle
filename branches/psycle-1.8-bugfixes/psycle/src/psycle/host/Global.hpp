@@ -1,6 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::Global.
 #pragma once
+
+namespace std
+{
+	typedef boost::uint32_t uint32_t;
+	typedef boost::uint64_t	uint64_t;
+	typedef boost::int64_t	int64_t;
+	typedef boost::int32_t	int32_t;
+}
 namespace psycle
 {
 	namespace host
@@ -13,6 +21,38 @@ namespace psycle
 		{
 			class Resampler;
 		}
+		namespace vst
+		{
+			class host;
+		}
+
+
+		//\todo: move this source to a better place.
+		namespace cpu
+		{
+			//\todo: Microsoft Specific:
+			// QueryPerformanceFrequency()
+			// QueryPerformanceCounter()
+			typedef std::int64_t cycles_type;
+			cycles_type inline cycles()
+			{
+				union result_type
+				{
+					std::uint64_t value;
+					struct split_type
+					{
+						std::uint32_t lo, hi;
+					} split;
+				} result;
+				__asm
+				{
+					rdtsc; // copies the x86 64-bit cpu cycle time stamp counter to edx and eax
+					mov result.split.hi, edx;
+					mov result.split.lo, eax;
+				}
+				return result.value;
+			}
+		}
 
 		class Global
 		{
@@ -20,12 +60,23 @@ namespace psycle
 		public:
 			Global();
 			virtual ~Global() throw();
+
 			static Song * _pSong;
 			static Player * pPlayer;
 			static Configuration * pConfig;
 			static dsp::Resampler * pResampler;
 			static unsigned int _cpuHz;
 			static InputHandler* pInputHandler;
+			static vst::host* pVstHost;
+
+			static inline Song           & song() { return *_pSong; }
+			static inline Player         & player(){ return *pPlayer; }
+			static inline Configuration  & configuration(){ return *pConfig; }
+			static inline dsp::Resampler & resampler(){ return *pResampler; }
+			static inline vst::host		 & vsthost(){ return *pVstHost; }
+
+			static inline cpu::cycles_type cpu_frequency(                              ) /*const*/ throw() { return _cpuHz; }
+//			void             inline cpu_frequency(cpu::cycles_type const & value)           throw() { cpu_frequency_ = value; }
 		};
 
 		namespace loggers

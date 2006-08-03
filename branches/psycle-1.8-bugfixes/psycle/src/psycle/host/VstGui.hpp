@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CVstGui.
 #pragma once
-#include "VstHost.hpp"
+#include "VstHost24.hpp"
 #include "ChildView.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
@@ -10,8 +10,9 @@ NAMESPACE__BEGIN(psycle)
 		{
 			DECLARE_DYNCREATE(CVstGui)
 			CVstGui(int n){};
-			vst::proxy * proxy;
-			Machine* _pMachine;
+			vst::plugin* _pMachine;
+//			vst::proxy * proxy;
+//			Machine* _pMachine;
 		protected:
 			CVstGui(); // protected constructor used by dynamic creation
 		// Attributes

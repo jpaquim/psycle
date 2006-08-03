@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CDefaultVstGui.
 #pragma once
-#include "VSTHost.hpp"
+#include "VSTHost24.hpp"
 #include "ChildView.hpp"
 #include <afxext.h>
 NAMESPACE__BEGIN(psycle)
@@ -17,7 +17,7 @@ NAMESPACE__BEGIN(psycle)
 			void Init();
 			void UpdateOne();
 			void UpdateParList();
-			void UpdateText(float value);
+			void UpdateText(int value);
 			void UpdateNew(int par,float value);
 
 			int MachineIndex;

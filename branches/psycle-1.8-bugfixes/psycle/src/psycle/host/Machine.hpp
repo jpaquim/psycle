@@ -142,6 +142,7 @@ namespace psycle
 		public:
 			static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
 			Machine();
+			Machine(MachineType msubclass, MachineMode mode, int id);
 			virtual ~Machine() throw();
 			virtual void Init();
 			virtual void PreWork(int numSamples);

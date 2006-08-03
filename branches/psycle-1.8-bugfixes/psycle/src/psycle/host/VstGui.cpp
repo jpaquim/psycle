@@ -6,7 +6,7 @@
 #include "inputhandler.hpp"
 #include "MainFrm.hpp"
 #include "Machine.hpp"
-#include <Vst/AEffEditor.h>
+//#include <Vst/AEffEditor.h>
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
@@ -35,14 +35,6 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstGui::DoTheInit()
 		{
-			try
-			{
-				proxy->dispatcher(effEditTop);
-			}
-			catch(const std::exception &)
-			{
-				// o_O`
-			}
 			SetTimer(0, 25, 0);
 		}
 
@@ -55,7 +47,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			try
 			{
-				proxy->dispatcher(effEditClose);
+				_pMachine->EditClose();
 			}
 			catch(const std::exception &)
 			{
@@ -69,7 +61,7 @@ NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnEnterIdle(nWhy, pWho);
 			try
 			{
-				proxy->dispatcher(effEditIdle);
+				_pMachine->EditIdle();
 			}
 			catch(const std::exception &)
 			{
@@ -81,7 +73,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			try
 			{
-				proxy->dispatcher(effEditIdle);
+				_pMachine->EditIdle();
 			}
 			catch(const std::exception &)
 			{

@@ -8,6 +8,7 @@
 #include "Configuration.hpp"
 #include <operating_system/logger.hpp>
 #include "InputHandler.hpp"
+#include "vsthost24.hpp"
 namespace psycle
 {
 	namespace host
@@ -16,9 +17,10 @@ namespace psycle
 		Player * Global::pPlayer(0);
 		dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
-		unsigned int Global::_cpuHz;
+		unsigned int Global::_cpuHz(1);
 		InputHandler * Global::pInputHandler(0);
-			
+		vst::host *Global::pVstHost(0);
+
 		Global::Global()
 		{
 			#ifndef NDEBUG
@@ -30,6 +32,7 @@ namespace psycle
 			pResampler = new dsp::Cubic;
 			pResampler->SetQuality(dsp::R_LINEAR);
 			pInputHandler = new InputHandler;
+			pVstHost = new vst::host;
 		}
 
 		Global::~Global()
@@ -39,12 +42,11 @@ namespace psycle
 			zapObject(pResampler);
 			zapObject(pConfig);
 			zapObject(pInputHandler);
+			zapObject(pVstHost);
 			#ifndef NDEBUG
 				operating_system::console::close();
 			#endif
 		}
-
-
 
 		
 			

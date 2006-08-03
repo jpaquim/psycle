@@ -4,7 +4,7 @@
 #include "psycle.hpp"
 #include "PresetsDlg.hpp"
 #include "Plugin.hpp"
-#include "VSTHost.hpp"
+#include "VSTHost24.hpp"
 #include "FrameMachine.hpp"
 #include "FileIO.hpp"
 NAMESPACE__BEGIN(psycle)
@@ -174,9 +174,11 @@ NAMESPACE__BEGIN(psycle)
 			m_preslist.LimitText(32);
 			presetChanged = false;
 			CString buffer;
+
+			numParameters = _pMachine->GetNumParams();
+
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
-				numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
 				try
 				{
 					sizeDataStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
@@ -222,26 +224,14 @@ NAMESPACE__BEGIN(psycle)
 				buffer = _pMachine->GetDllName();
 			}
 			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
-			{
-				try
-				{
-					numParameters = reinterpret_cast<vst::plugin *>(_pMachine)->proxy().numParams();
-				}
-				catch(const std::exception &)
-				{
-					numParameters = 0;
-				}
-				catch(...) // reinterpret_cast sucks
-				{
-					numParameters = 0;
-				}
+			{ 
 				iniPreset.Init(numParameters);
 				int i(0);
 				while(i < numParameters)
 				{
 					try
 					{
-						iniPreset.SetParam(i, f2i(reinterpret_cast<vst::plugin *>(_pMachine)->proxy().getParameter(i) * 65535));
+						iniPreset.SetParam(i, f2i(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
 					}
 					catch(const std::exception &)
 					{
@@ -1066,7 +1056,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					try
 					{
-						reinterpret_cast<vst::plugin *>(_pMachine)->proxy().setParameter(i, preset.GetParam(i) / 65535.0f);
+						reinterpret_cast<vst::plugin *>(_pMachine)->SetParameter(i, preset.GetParam(i) / 65535.0f);
 					}
 					catch(const std::exception &)
 					{

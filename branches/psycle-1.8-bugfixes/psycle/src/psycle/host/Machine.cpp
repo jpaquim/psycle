@@ -9,13 +9,14 @@
 #include "WireDlg.hpp"
 #include "MainFrm.hpp"
 #include "InputHandler.hpp"
+#include "NewMachine.hpp"
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
 #include "Sampler.hpp"
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
-#include "VSTHost.hpp"
+#include "VSTHost24.hpp"
 namespace psycle
 {
 	namespace host
@@ -87,6 +88,13 @@ namespace psycle
 			}
 			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
 			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
+		}
+		Machine::Machine(MachineType msubclass, MachineMode mode, int id)
+		{
+		//	Machine();
+			_type=msubclass;
+			_mode=mode;
+			_macIndex=id;
 		}
 
 		Machine::Machine()
@@ -471,41 +479,39 @@ namespace psycle
 				}
 				break;
 			case MACH_VST:
-				{
-					if(!fullopen) pMachine = new Dummy(index);
-					else 
-					{
-						vst::instrument * p;
-						pMachine = p = new vst::instrument(index);
-						if(!p->LoadDll(dllName))
-						{
-							char sError[MAX_PATH + 100];
-							sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
-							MessageBox(NULL,sError, "Loading Error", MB_OK);
-							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
-							delete p;
-							bDeleted = true;
-						}
-					}
-				}
-				break;
 			case MACH_VSTFX:
 				{
 					if(!fullopen) pMachine = new Dummy(index);
 					else 
 					{
-						vst::fx * p;
-						pMachine = p = new vst::fx(index);
-						if(!p->LoadDll(dllName))
+						std::string sPath;
+						vst::plugin *vstPlug=0;
+
+						if(!CNewMachine::lookupDllName(dllName,sPath)) 
+						{
+							// Check Compatibility Table.
+							// Probably could be done with the dllNames lockup.
+							//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
+							sPath = dllName;
+						}
+						if(CNewMachine::TestFilename(sPath) ) 
+						{
+							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath.c_str()));
+						}
+
+						if(!vstPlug)
 						{
 							char sError[MAX_PATH + 100];
-							sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
+							sprintf(sError,"Replacing VST plug-in \"%s\" with Dummy.",dllName);
 							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
-							delete p;
 							bDeleted = true;
+						}
+						else
+						{
+							vstPlug->_macIndex=index;
+							pMachine = vstPlug;
 						}
 					}
 				}
