@@ -323,8 +323,14 @@ namespace psycle
 				{
 					// take the pattern,
 					SinglePattern* pPat = sLineIt->second->pattern();
-					SinglePattern::iterator patIt   = pPat->lower_bound( start-sLineIt->first ),
-					patEnd = pPat->lower_bound( start+length-sLineIt->first );
+					float entryLength = sLineIt->second->endPos() - sLineIt->second->startPos();
+					double entryStart = sLineIt->first;
+					float entryStartOffset  = sLineIt->second->startPos();
+					float entryEndOffset  = sLineIt->second->endPos();
+					
+					SinglePattern::iterator patIt   = pPat->lower_bound( start - entryStart + entryStartOffset),
+					patEnd = pPat->lower_bound( std::min(start+length-entryStart+entryStartOffset,(double) entryEndOffset) );
+
 					// and iterate through the lines that are inside the range
 					for( ; patIt != patEnd; ++patIt)
 						{
