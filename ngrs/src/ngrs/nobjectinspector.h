@@ -34,6 +34,8 @@ public:
 
     ~NObjectInspector();
 
+    signal1<NObject*> changed;
+
     void setControlObject(NObject* obj);
     NObject* controlObject();
 
@@ -44,6 +46,7 @@ private:
    void updateView();
 
    void onStringEdit(const NKeyEvent & event);
+   void onFloatEdit(const NKeyEvent & event);
 
    std::vector<NEdit*> edits;
 

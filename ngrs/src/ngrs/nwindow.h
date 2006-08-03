@@ -110,7 +110,7 @@ public:
     int exitLoop();
     void setExitLoop(int flag);
 
-    void checkForRemove(NVisualComponent* obj);
+    void checkForRemove(NRuntime* obj);
 
     void setMoveFocus(NVisualComponent* moveable, int pickPoint);
 
