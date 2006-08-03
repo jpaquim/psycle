@@ -512,9 +512,23 @@ void NWindow::setPositionToScreenCenter( )
   setPosition( (NApp::system().screenWidth() - width()) / 2,  (NApp::system().screenHeight() - height()) / 2, width(), height());
 }
 
-void NWindow::checkForRemove( NVisualComponent * obj )
+void NWindow::checkForRemove( NRuntime * obj )
 {
-  dragBase_ = lastOver_ = selectedBase_ = 0;
+  if ( lastOver_ == obj || (lastOver_ && lastOver_->isChildOf(obj)))  {
+     lastOver_ = 0;
+     dragBase_ = 0;
+     selectedBase_ = 0;
+  } else
+  if ( dragBase_ == obj || (dragBase_ && dragBase_->isChildOf(obj)))    {
+     lastOver_ = 0;
+     dragBase_ = 0;
+     selectedBase_ = 0;
+  } else
+  if ( selectedBase_ == obj || (selectedBase_ && selectedBase_->isChildOf(obj))) {
+    lastOver_ = 0;
+    dragBase_ = 0;
+    selectedBase_ = 0;
+  }
 }
 
 void NWindow::setMoveFocus( NVisualComponent * moveable, int pickPoint )

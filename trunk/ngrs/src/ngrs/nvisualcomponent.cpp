@@ -694,10 +694,10 @@ void NVisualComponent::removeChilds( )
 {
    for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
    NRuntime* child = *it;
+    if (window()!=0) window()->checkForRemove(child);
     child->setParent(NULL);
     NApp::addRemovePipe(child);
   }
-  if (window()!=0) window()->checkForRemove(0);
   components.clear();
   visualComponents_.clear();
   if (layout_!=0) {

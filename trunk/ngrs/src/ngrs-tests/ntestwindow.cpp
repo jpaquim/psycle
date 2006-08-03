@@ -80,6 +80,7 @@ NTestWindow::NTestWindow()
 
   pane()->add(ins);
 
+
   /*
   NColorComboBox* colorBox = new NColorComboBox();
      colorBox->setPosition(10,10,100,15);
