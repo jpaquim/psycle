@@ -105,6 +105,8 @@ namespace psycle
 		void SequenceEntry::setPattern( SinglePattern * pattern )
 		{
 			pattern_ = pattern;
+			startPos_ = 0;
+			endPos_   = pattern->beats();
 		}
 
 		SinglePattern * SequenceEntry::pattern( )

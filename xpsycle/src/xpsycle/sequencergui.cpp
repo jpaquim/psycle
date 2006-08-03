@@ -202,8 +202,10 @@ SequencerItem::SequencerItem( SequencerGUI* seqGui )
   sView = seqGui;
   selected_ = false;
   if (properties()) {
-     properties()->bind("start", *this, &SequencerItem::start, &SequencerItem::setStart);
-     properties()->publish("start");
+     properties()->bind("startOffset", *this, &SequencerItem::start, &SequencerItem::setStart);
+     properties()->publish("startOffset");
+     properties()->bind("endOffset", *this, &SequencerItem::endOffset, &SequencerItem::setEndOffset);
+     properties()->publish("endOffset");
   }
 
 }
@@ -282,11 +284,25 @@ bool SequencerItem::selected( )
 void SequencerItem::setStart( float start )
 {
   sequenceEntry_->setStartPos(start);
+  sView->resize();
+  sView->repaint();
 }
 
 float SequencerItem::start( ) const
 {
   return sequenceEntry_->startPos();
+}
+
+void SequencerItem::setEndOffset( float pos )
+{
+  sequenceEntry_->setEndPos( pos );
+  sView->resize();
+  sView->repaint();
+}
+
+float SequencerItem::endOffset( ) const
+{
+  return sequenceEntry_->endPos();
 }
 
 // end of SequencerItem class
@@ -369,7 +385,7 @@ void SequencerGUI::SequencerLine::resize( )
     double tickPosition = item->sequenceEntry()->tickPosition();
     SinglePattern* pattern = item->sequenceEntry()->pattern();
 
-    item->setPosition(d2i(sView->beatPxLength() * tickPosition),5,pattern->beats() * sView->beatPxLength(),20);
+    item->setPosition(d2i(sView->beatPxLength() * tickPosition),5, (item->endOffset()-item->start()) * sView->beatPxLength(),20);
   }
 }
 
@@ -775,11 +791,3 @@ void SequencerGUI::update( )
 
 
 }}
-
-
-
-
-
-
-
-

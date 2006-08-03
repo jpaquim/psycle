@@ -393,8 +393,9 @@ void psycle::host::SequencerBar::onNameChanged( const std::string & name )
 
 void psycle::host::SequencerBar::setEntry( NObject * obj )
 {
- // entryBox_->setControlObject(obj);
- // entryBox_->repaint();
+  entryBox_->setControlObject(obj);
+  entryBox_->resize();
+  repaint();
 }
 
 

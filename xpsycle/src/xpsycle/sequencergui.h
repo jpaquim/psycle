@@ -68,6 +68,10 @@ class SequencerItem : public NPanel {
        void setStart(float start);
        float start() const;
 
+       void setEndOffset(float start);
+       float endOffset() const;
+
+
       private:
 
         bool selected_;
