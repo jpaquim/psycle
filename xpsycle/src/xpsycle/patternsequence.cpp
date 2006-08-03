@@ -328,16 +328,10 @@ namespace psycle
 					float entryStartOffset  = sLineIt->second->startPos();
 					float entryEndOffset  = sLineIt->second->endPos();
 					
-					SinglePattern::iterator patIt   = pPat->lower_bound( start - entryStart + entryStartOffset),
+					SinglePattern::iterator patIt = pPat->lower_bound( std::min(start - entryStart + entryStartOffset , (double)entryEndOffset)),
 					patEnd = pPat->lower_bound( std::min(start+length-entryStart+entryStartOffset,(double) entryEndOffset) );
 
 					// and iterate through the lines that are inside the range
-					double v1 = 0;
-					double v2 = 0;
-					if (patIt  != pPat->end()) v1 = patIt->first;
-					if (patEnd != pPat->end()) v2 = patEnd->first;
-
-					if (v1 < v2)
 					for( ; patIt != patEnd; ++patIt)
 						{
 						PatternLine *thisline= &(patIt->second);
