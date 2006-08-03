@@ -1,7 +1,6 @@
 #pragma once
 #include <psycle/engine/SongStructs.hpp>
 #include <psycle/engine/FileIO.hpp>
-#include <psycle/engine/song.hpp>
 #include <cstdint>
 
 class Song;
@@ -11,6 +10,7 @@ namespace psycle
 	namespace host
 	{
 		class XMSampler;
+		class Song;
 
 		class ITModule2 : public RiffFile
 		{

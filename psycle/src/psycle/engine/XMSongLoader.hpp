@@ -4,12 +4,14 @@
 #include <psycle/engine/FileIO.hpp>
 #include <psycle/engine/XMFile.hpp>
 #include <cstdint>
-class Song;
-class XMSampler;
-class XMInstrument;
 
 namespace psycle{
 namespace host{
+
+	class Song;
+	class XMSampler;
+	class XMInstrument;
+
 	class XMSongLoader : public RiffFile
 	{
 	public:

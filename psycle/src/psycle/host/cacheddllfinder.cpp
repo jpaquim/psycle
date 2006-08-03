@@ -275,14 +275,11 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 			Plugin plug(0);
 			try
 			{
-				if(!Global::dllfinder().LookupDllPath(pinfo.dllname,MACH_PLUGIN)) 
-				{	
-					if( plug.LoadDll(pinfo.dllname) )
-					{
-						plug.Init(); // [bohan] hmm, we should get rid of two-stepped constructions.
-					}
-					else pinfo.error = "Loading Error";
+				if( plug.LoadDll(pinfo.dllname) )
+				{
+					plug.Init(); // [bohan] hmm, we should get rid of two-stepped constructions.
 				}
+				else pinfo.error = "Loading Error";
 			}
 			catch(const std::exception & e)
 			{
@@ -360,10 +357,7 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 			vst::plugin vstPlug(MACH_VST, MACHMODE_UNDEFINED, Machine::id_type());
 			try
 			{
-				if(Global::dllfinder().LookupDllPath(pinfo.dllname,MACH_VST)) 
-				{
-					vstPlug.Instance(pinfo.dllname);
-				}
+				vstPlug.Instance(pinfo.dllname)
 			}
 			catch(const std::exception & e)
 			{

@@ -8,7 +8,8 @@
 namespace psycle {
 	namespace host {
 
-		std::string const Psy3Filter::FILE_FOURCC = "PSY3";
+		//\todo: FOURCC should be "PSY3" and the first chunk be "SONG"
+		std::string const Psy3Filter::FILE_FOURCC = "PSY3SONG";
 		/// Current version of the Song file and its chunks.
 		/// format: 0xAABB
 		/// A = Major version. It can't be loaded, skip the whole chunk. (Right now the loader does it, so simply do nothing)
@@ -78,7 +79,7 @@ namespace psycle {
 					{
 						LoadSNGIv0(file,song,version&0x00FF);
 						//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-						if (version == 0x0000) size = 76; 
+						if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool); 
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -98,7 +99,7 @@ namespace psycle {
 					{
 						LoadPATDv0(file,song,version&0x00FF);
 						//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-						if (version == 0x0000) size = file->GetPos()-fileposition; 
+						if ((version == 0x0000) &&( file.GetPos() == fileposition+size+4)) size += 4; 
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}

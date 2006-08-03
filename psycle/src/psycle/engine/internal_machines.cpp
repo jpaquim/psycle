@@ -228,6 +228,12 @@ namespace psycle {
 			return new Master(_id);
 		}
 
+		void Master::Stop()
+		{
+			_clip = false;
+			sampleCount = 0;
+		}
+
 		void Master::Init()
 		{
 			Machine::Init();
@@ -240,6 +246,13 @@ namespace psycle {
 			_rMax = 1;
 			vuupdated = false;
 			_clip = false;
+		}
+		void Master::Tick(PatternEntry *pEntry)
+		{
+			if ( pEntry->_note == PatternCmd::SET_VOLUME )
+			{
+				_outDry = pEntry->_parameter;
+			}
 		}
 
 		void Master::Work(int numSamples)
@@ -974,6 +987,7 @@ namespace psycle {
 
 		void LFO::PreWork(int numSamples)
 		{
+			Machine::PreWork();
 			cpu::cycles_type cost(cpu::cycles());
 
 			int maxVal=0, minVal=0;
@@ -1361,6 +1375,7 @@ namespace psycle {
 
 		void Automator::PreWork(int numSamples)
 		{
+			Machine::PreWork();
 			cpu::cycles_type cost(cpu::cycles());
 			bool somethinghappened=false;
 			for(std::vector<Track*>::iterator iter = tracks.begin(); iter != tracks.end(); ++iter)

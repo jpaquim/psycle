@@ -59,6 +59,8 @@ namespace psycle {
 			virtual ~Master() throw();
 			static Machine* CreateFromType(Machine::id_type _id, std::string _dllname);
 			virtual void Init(void);
+			virtual void Stop();
+			virtual void Tick(PatternEntry *pEntry);
 			virtual void Work(int numSamples);
 			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
