@@ -1,47 +1,58 @@
 ///\file
 ///\brief interface file for psycle::host::Player.
 #pragma once
-#include "song.hpp"
+//#include "song.hpp"
 #include <psycle/helpers/riff.hpp>
 #include <psycle/helpers/dither.hpp>
+#include <psycle/engine/machine.hpp>
 namespace psycle
 {
 	namespace host
 	{
 		class Machine;
+		class Song;
 
 		/// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 		class Player
 		{
 		public:
 			/// constructor.
+			Player();
 			Player(Song &);
 			/// destructor.
 			virtual ~Player() throw();
 
 		public:
-			Song inline & song() throw() { return *song_; }
-			void song(Song & song) { this-> song_ = &song; }
+			/// starts to play.
+			void Start(int pos,int line);
+			/// stops playing.
+			void Stop();
+			/// work function. (Entrance for the callback function (audiodriver)
+			static float * Work(void* context, int& nsamples);
 		private:
-			Song * song_;
+			float * Work(int & nsamples);
 
 		public:
-			/// Moves the cursor one line forward, changing the pattern if needed.
+			/// Moves the playback cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
-			/// Initial Loop. Read new line and Interpretate the Global commands.
+			/// Initial Loop. Read new line and execute Global commands/tweaks.
 			void ExecuteGlobalCommands();
 			/// Notify all machines that a new Tick() comes.
 			void NotifyNewLine();
-			/// Final Loop. Read new line for notes to send to the Machines
+			/// Final Loop. Read the line again for notes to send to the Machines
 			void ExecuteNotes();
-			/// Function to englobe all the three functions above.
+			/// Function to encapsulate all the three functions above.
 			void ExecuteLine();
+
+		public:
+			Song inline & song() throw() { return *song_; }
+			void song(Song & song) { this->song_ = &song; }
+		private:
+			Song * song_;
 
 		PSYCLE__PRIVATE:
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
-			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
-			bool _SPRChanged;
 			/// the line currently being played in the current pattern
 			int _lineCounter;
 			/// the sequence position currently being played
@@ -59,24 +70,12 @@ namespace psycle
 			/// the current ticks per beat at which to play the song.
 			/// can be changed from the song itself using commands.
 			int tpb;
-			/// Contains the number of samples until a line change comes in.
-			int _samplesRemaining;
-			/// starts to play.
-			void Start(int pos,int line);
 			/// wether this player has been started.
 			bool _playing;
 			/// wether this player should only play the selected block in the sequence.
 			bool _playBlock;
 			/// wheter this player should play the song/block in loop.
 			bool _loopSong;
-
-		public:
-			/// stops playing.
-			void Stop();
-			/// work function. (Entrance for the callback function (audiodriver)
-			float * Work(int & nsamples);
-		//private:
-			static float * Work(void* context, int& nsamples);
 
 		public:
 			/// ...
@@ -125,6 +124,10 @@ namespace psycle
 			/// dither handler
 			dsp::Dither dither;
 
+			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
+			bool _SPRChanged;
+			/// Contains the number of samples until a line change comes in.
+			int _samplesRemaining;
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()
 			int m_SamplesPerRow;

@@ -16,36 +16,13 @@ namespace psycle
 {
 	namespace host
 	{
-
-		Song *            Global::_pSong(0);
-		Player *          Global::pPlayer(0);
-		dsp::Resampler *  Global::pResampler(0);
-		UIConfiguration *   Global::pConfig(0);
-		cpu::cycles_type  Global::cpu_frequency_(0 /*GetCPUFreq()*/);
-		CachedDllFinder * Global::pDllFinder(0);
-			
 		Global::Global()
 		{
-			_pSong = new Song;
-			pPlayer = new Player(*_pSong); // [bohan] afaik song is never deleted/recreated from the gui, so we don't even have to care about updating the player's reference.
-			//todo:
-			//pConfig = new Configuration;
-			pConfig = new UIConfiguration;
-			pResampler = new dsp::Cubic;
-			pResampler->SetQuality(dsp::R_LINEAR);
-			//todo
-			//pDllFinder = new DllFinder;
-			pDllFinder = new CachedDllFinder;
 			cpu_frequency_ = CalculateCPUFreq();
 		}
 
 		Global::~Global()
 		{
-			delete _pSong;
-			delete pPlayer;
-			delete pResampler;
-			delete pConfig;
-			delete pDllFinder;
 		}
 
 		cpu::cycles_type Global::CalculateCPUFreq()

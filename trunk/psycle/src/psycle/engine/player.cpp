@@ -5,18 +5,23 @@
 #include <psycle/engine/player.hpp>
 #include <psycle/engine/song.hpp>
 #include <psycle/engine/machine.hpp>
+// needed because of the use of Master.
 #include <psycle/engine/internal_machines.hpp>
 //\todo:
-#include <psycle/host/uiconfiguration.hpp>
+//#include <psycle/host/uiconfiguration.hpp>
 #include <psycle/engine/MidiInput.hpp>
-//#include <psycle/host/InputHandler.hpp>
+
 namespace psycle
 {
 	namespace host
 	{
-		Player::Player(Song & song)
+		Player::Player(Song & song) 
+		{
+			Player();
+			song_ = &song;
+		}
+		Player::Player()
 		:
-			song_(&song),
 			_playing(false),
 			_playBlock(false),
 			_recording(false),
@@ -28,6 +33,7 @@ namespace psycle
 			_linejump(-1),
 			_loop_count(0),
 			_loop_line(0),
+			song_(0),
 			m_SampleRate(44100),
 			m_SamplesPerRow((44100*60)/(125*4)),
 			tpb(4),
@@ -44,8 +50,6 @@ namespace psycle
 		void Player::Start(int pos, int line)
 		{
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
-			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
-			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
 			_lineCounter = line;
 			_SPRChanged = false;
@@ -209,7 +213,7 @@ namespace psycle
 					case PatternCmd::SET_VOLUME:
 						if(pEntry->_mach == 255)
 						{
-							((Master*)(song()._pMachine[MASTER_INDEX]))->_outDry = pEntry->_parameter;
+							song()._pMachine[MASTER_INDEX]->Tick(track,pEntry);
 						}
 						else 
 						{
@@ -357,7 +361,6 @@ namespace psycle
 					}
 				}
 			}
-			_samplesRemaining = SamplesPerRow();
 		}	
 
 
@@ -434,7 +437,7 @@ namespace psycle
 			{
 				if(numSamplex > MAX_BUFFER_LENGTH) amount = MAX_BUFFER_LENGTH; else amount = numSamplex;
 				// Tick handler function
-				if((_playing) && (amount >= _samplesRemaining)) amount = _samplesRemaining;
+				if(amount >= _samplesRemaining) amount = _samplesRemaining;
 				// Song play
 				if((_samplesRemaining <=0))
 				{
@@ -452,6 +455,7 @@ namespace psycle
 					{
 						NotifyNewLine();
 					}
+					_samplesRemaining = SamplesPerRow();					
 				}
 				// Processing plant
 				if(amount > 0)
@@ -475,6 +479,7 @@ namespace psycle
 						if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);
 					}
 
+					//\todo: Sampler::DoPreviews( amount );
 					song().DoPreviews( amount );
 
 					// Inject Midi input data
@@ -529,7 +534,7 @@ namespace psycle
 					Master::_pMasterSamples += amount * 2;
 					numSamplex -= amount;
 				}
-				if(_playing) _samplesRemaining -= amount;
+				_samplesRemaining -= amount;
 			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
 			return _pBuffer;
 		}

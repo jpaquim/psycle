@@ -948,7 +948,7 @@ namespace psycle
 				loggers::trace("file header: PSY3SONG");
 				//\todo: This is just an implementation in order to test and validate the new loader.
 				Psy3Filter songloader;
-//				if (!songloader.Test(Header)) report.emit("songloader.test() hasn't worked!","bla");
+				if (!songloader.Test(Header)) report.emit("songloader.test() hasn't worked!","bla");
 				songloader.Load(pFile,*this);
 				return true;
 

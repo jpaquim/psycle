@@ -4,6 +4,7 @@
 #include PACKAGENERIC
 #include "instrument.hpp"
 #include <psycle/helpers/DataCompression.hpp>
+#include <psycle/engine/FileIO.hpp>
 #include "filter.hpp"
 #include <operating_system/logger.hpp>
 #include <cstdint>

@@ -2,11 +2,12 @@
 ///\brief interface file for psycle::host::Filter.
 #pragma once
 #include "constants.hpp"
-#include "FileIO.hpp"
 namespace psycle
 {
 	namespace host
 	{
+		class RiffFile;
+
 		/// an instrument is a waveform with some extra features added around it.
 		class Instrument
 		{

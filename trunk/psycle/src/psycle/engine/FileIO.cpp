@@ -40,7 +40,8 @@ namespace psycle
 						data[index] = c;
 						if(c == '\0') return true;
 					}
-					//\todo : put this back! it was for the case where the string was longer than max_length
+				}
+//\todo : put this back! it was for the case where the string was longer than max_length
 //				{
 //					char c;
 //					do
@@ -48,7 +49,6 @@ namespace psycle
 //						if(!ReadChunk(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
 //					} while(c);
 //				}
-				}
 				if (c==EOF) return true; else false;
 			}
 			return false;
