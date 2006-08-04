@@ -196,7 +196,8 @@ void SequencerGUI::Area::resize( )
 // this is the gui class of one pattern entry
 SequencerItem::SequencerItem( SequencerGUI* seqGui )
 {
-  setMoveable(nMvHorizontal);
+  setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvLeftLimit));
+
   setTransparent(false);
   sequenceEntry_ = 0;
   sView = seqGui;
@@ -253,10 +254,62 @@ void SequencerItem::resize( )
 
 }
 
+
+NRegion SequencerItem::entriesInRegion( )
+{
+  const std::vector<SequencerItem*> & selItems = sView->selectedItems();
+
+  NRegion region;
+
+  for (std::vector<SequencerItem*>::const_iterator it = selItems.begin(); it < selItems.end(); it++) {
+    SequencerItem* item = *it;
+    region = region | item->geometry()->region();
+  }
+
+  return region;
+}
+
+void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
+{
+  oldDrag = entriesInRegion();
+  oldLeft = left();
+}
+
 void SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
-  sequenceEntry_->track()->MoveEntry(sequenceEntry_, left() / (double) sView->beatPxLength() );
+  const std::vector<SequencerItem*> & selItems = sView->selectedItems();
+
+  std::vector<SequencerItem*>::const_iterator it = find(selItems.begin(), selItems.end(),this);
+
+  if (it != selItems.end() ) {
+
+  int moveDx = left() - oldLeft;
+  oldLeft = left();
+
+
+  for (std::vector<SequencerItem*>::const_iterator it = selItems.begin(); it < selItems.end(); it++) {
+    SequencerItem* item = *it;
+    int newLeft = 0;
+    if (item != this) newLeft = item->left() + moveDx; else newLeft = item->left();
+    item->sequenceEntry()->track()->MoveEntry(item->sequenceEntry(), newLeft / (double) sView->beatPxLength() );
+  }
   sView->resize();
+
+  NRegion newDrag = entriesInRegion();
+  NRegion repaintArea = newDrag | oldDrag;
+
+  int parentAbsLeft = sView->scrollArea()->absoluteLeft() - sView->scrollArea()->scrollDx();
+  int parentAbsTop  = sView->scrollArea()->absoluteTop() - sView->scrollArea()->scrollDy();
+
+  repaintArea.move(parentAbsLeft, parentAbsTop);
+
+  window()->repaint(sView->scrollArea(),repaintArea);
+
+  oldDrag = newDrag;
+  } else {
+
+  }
+
 }
 
 void SequencerItem::onMoveEnd( const NMoveEvent & moveEvent )
@@ -632,6 +685,8 @@ void SequencerGUI::onSequencerLineClick( SequencerLine * line )
 
 void SequencerGUI::onSequencerItemClick( SequencerItem * item )
 {
+  if (!(NApp::system().keyState() & ShiftMask)) {
+
   std::vector<SequencerItem*>::iterator it = selectedItems_.begin();
 
   if (NApp::system().keyState() & ControlMask) {
@@ -658,7 +713,7 @@ void SequencerGUI::onSequencerItemClick( SequencerItem * item )
     item->repaint();
   }
 
-
+  }
 }
 
 // entry operations
@@ -812,5 +867,22 @@ void SequencerGUI::update( )
   resize();
 }
 
+const std::vector< SequencerItem * > & SequencerGUI::selectedItems( )
+{
+  return selectedItems_;
+}
+
+NPanel * SequencerGUI::scrollArea( )
+{
+  return scrollArea_;
+}
 
 }}
+
+
+
+
+
+
+
+

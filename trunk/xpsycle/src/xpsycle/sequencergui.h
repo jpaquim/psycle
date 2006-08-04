@@ -56,6 +56,7 @@ class SequencerItem : public NPanel {
        virtual void resize();
        virtual void onMove(const NMoveEvent & moveEvent);
        virtual void onMoveEnd(const NMoveEvent & moveEvent);
+       virtual void onMoveStart(const NMoveEvent & moveEvent);
 
        void setText(const std::string & text);
 
@@ -78,6 +79,11 @@ class SequencerItem : public NPanel {
 
         SequenceEntry* sequenceEntry_;
         SequencerGUI* sView;
+
+        NRegion entriesInRegion();
+        NRegion oldDrag;
+
+        int oldLeft;
 
 };
 
@@ -182,6 +188,10 @@ public:
     virtual void resize();
 
     void addSequencerLine();
+
+    const std::vector<SequencerItem*> & selectedItems();
+
+    NPanel* scrollArea();
 
 private:
 
