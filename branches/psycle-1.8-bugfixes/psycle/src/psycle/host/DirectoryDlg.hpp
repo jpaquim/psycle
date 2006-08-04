@@ -20,7 +20,7 @@ NAMESPACE__BEGIN(psycle)
 			std::string _skinPathBuf;
 			bool initializingDlg;
 			CDirectoryDlg();
-			~CDirectoryDlg();
+			virtual ~CDirectoryDlg();
 		// Dialog Data
 			//{{AFX_DATA(CDirectoryDlg)
 			enum { IDD = IDD_DIRECTORIES };

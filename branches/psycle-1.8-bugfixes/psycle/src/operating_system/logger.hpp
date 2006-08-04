@@ -51,6 +51,7 @@ namespace operating_system
 	private:
 		static bool got_a_console_window_;
 		console();
+		///\todo: add "virtual" ?
 		~console();
 		static console singleton;
 	};

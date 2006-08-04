@@ -23,7 +23,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				std::memset(&FileTime, 0, sizeof FileTime);
 			}
-			~PluginInfo() throw()
+			virtual ~PluginInfo() throw()
 			{
 			}
 			std::string dllname;
@@ -64,7 +64,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			CNewMachine(CWnd* pParent = 0);
-			~CNewMachine();
+			virtual ~CNewMachine();
 			CImageList imgList;
 			HTREEITEM tHand;
 			int Outputmachine;

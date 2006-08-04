@@ -1,7 +1,7 @@
 /*****************************************************************************/
-/* CVSTHost.hpp: interface for the CVSTHost class.							 */
-/* Work Derived from vsthost.												 */
-/* vsthost is Copyright (c) H. Seib, 2002-2005								 */
+/* CVSTHost.hpp: interface for the CVSTHost class (for VST SDK 2.4).		 */
+/* Work Derived from vsthost (1.16i).										 */
+/* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /* Please, read file src/Seib-vsthost/readme.txt before using these sources	 */
 /*****************************************************************************/
@@ -13,135 +13,91 @@
 /*****************************************************************************/
 
 #pragma once
+/// Tell the SDK that we want to support all the VST specs, not only VST2.4
 #define VST_FORCE_DEPRECATED 0
-#include <vst/AEffectx.h>               /* VST header files                  */
-#include <vst/vstfxstore.h>
-//#include <vst/AEffEditor.h>
+#include <vst2.x/AEffectx.h>               /* VST header files                  */
+#include <vst2.x/vstfxstore.h>
 
 namespace seib {
 	namespace vst {
 
-		struct fxmainheader
-		{
-			VstInt32 chunkMagic;		///< 'CcnK'
-			VstInt32 byteSize;			///< size of this chunk, excl. magic + byteSize
-			VstInt32 fxMagic;			///< 'FxCk' (regular) or 'FPCh' (opaque chunk)
-		};
-		struct fxprogramheader
-		{
-			VstInt32 version;			///< format version (currently 1)
-			VstInt32 fxID;				///< fx unique ID
-			VstInt32 fxVersion;			///< fx version
-
-			VstInt32 numParams;			///< number of parameters
-			char prgName[28];			///< program name (null-terminated ASCII string)
-		};
-		struct fxbankheader
-		{
-			VstInt32 version;			///< format version (1 or 2)
-			VstInt32 fxID;				///< fx unique ID
-			VstInt32 fxVersion;			///< fx version
-
-			VstInt32 numPrograms;		///< number of programs
-
-			#if VST_2_4_EXTENSIONS
-				VstInt32 currentProgram;	///< version 2: current program number
-				char future[124];			///< reserved, should be zero
-			#else
-				char future[128];			///< reserved, should be zero
-			#endif
-		};
-
 		/*****************************************************************************/
 		/* CFxBase : base class for FX Bank / Program Files                          */
 		/*****************************************************************************/
-
 		class CFxBase
 		{
 		public:
-			CFxBase();
-		public:
-			virtual bool Load(const char *pszFile)=0;
-			virtual bool Save(const char *pszFile)=0;
-		protected:
-			static bool NeedsBSwap;
-			static int FxProgramVersion;
-			static int FxBankVersion;
-		protected:
-			void SwapBytes(float &f);
-			void SwapBytes(VstInt32 &l);
-			void SwapBytes(long &l);
+			CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion);
+			CFxBase(const char *pszFile);
 
-			void *rawdata;
+			bool Save(const char *pszFile);
+			long GetVersion() { return version; }
+			long GetFxID() {  return fxID; }
+			long GetFxVersion() { return fxVersion; }
+		protected:
+			VstInt32 fxMagic;			///< 'FxCk' (regular) or 'FPCh' (opaque chunk)
+			VstInt32 version;			///< format version
+			VstInt32 fxID;				///< fx unique ID
+			VstInt32 fxVersion;			///< fx version
+		protected:
+			virtual bool LoadData() { return ReadHeader(); }
+			virtual bool SaveData() { return WriteHeader(); }
+			template <class T>
+			bool Read(T &f);
+			bool Write(T f);
+			bool ReadHeader();
+			bool WriteHeader();
+		private:
+			static bool NeedsBSwap;
+		private:
+			bool Load(const char *pszFile);
+			FILE* pf;
+			template <class T>
+			void SwapBytes(T &f);
 		};
+
 		/*****************************************************************************/
 		/* CFxProgram : class for an .fxp (Program) file                             */
 		/*****************************************************************************/
-
 		class CFxProgram : public CFxBase
 		{
 		public:
-			// Create program from a .fxp file.
-			CFxProgram(const char *pszFile = 0) { Init(); 	if (pszFile)  Load(pszFile); }
-			// Create empty instance with size = #parameters (bChunk=false) or chunk of specified size (bChunk=true)
-			CFxProgram(int size, bool bChunk=false) { Init(); if (bChunk) SetChunkSize(size);	else SetParamSize(size); }
-			//Copy constructor.
+			CFxProgram(const char *pszFile = 0):CFxBase(pszFile){  }
+			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion):CFxBase(1,_fxID, _fxVersion) { }
 			CFxProgram(CFxProgram const &org){ Init(); DoCopy(org); }
 			virtual ~CFxProgram();
 			CFxProgram & operator=(CFxProgram const &org) { return DoCopy(org); }
-		public:
-			virtual bool Load(const char *pszFile);
-			virtual bool Save(const char *pszFile);
 
-			bool SetParamSize(int nParams);
-			bool SetChunkSize(int nChunkSize);
-			bool IsChunk() { return !!pChunk; }
 			// access functions
-		public:
-			long GetVersion() { return program.version; }
-			long GetFxID() {  return program.fxID; }
-			void SetFxID(long id) {  program.fxID = id;  }
-			long GetFxVersion() { return program.fxVersion; }
-			void SetFxVersion(long v) { program.fxVersion = v; }
-			long GetNumParams() { if (pChunk) return 0; return program.numParams; }
-			long GetChunkSize() { if (!pChunk) return 0; return lChunkSize; }
-			void *GetChunk() { if (!pChunk) return 0; return pChunk; }
-			bool SetChunk(void *chunk);
-
-			char * GetProgramName()	{ return program.prgName;	}
+			const char * GetProgramName()	{ return prgName;	}
 			void SetProgramName(const char *name = "")
 			{
-				std::strncpy(program.prgName, name, sizeof(program.prgName));
-				program.prgName[sizeof(program.prgName)-1] = '\0';
+				std::strncpy(prgName, name, sizeof(prgName)-1);
 			}
-			float GetParameter(int nParm)
-			{
-				if (!pParams) return 0;
-				return pParams[nParm];
-			}
-			bool SetParameter(int nParm, float val = 0.0)
-			{
-				if (!pParams) return false;
-				if (nParm > program.numParams) return false;
-				if (val < 0.0)
-					val = 0.0;
-				if (val > 1.0)
-					val = 1.0;
-				pParams[nParm] = val;
-				return true;
-			}
+			long GetNumParams() { if (pChunk) return 0; return numParams; }
+			long SetNumParams() { }
+			float GetParameter(int nParm) {  return (pParams && nParm < numParams) ? pParams[nParm] : 0; }
+			bool SetParameter(int nParm, float val = 0.0);
+			bool SetParameter(float* pnewparams,int params);
+			long GetChunkSize() { if (!pChunk) return 0; return lChunkSize; }
+			void *GetChunk() { if (!pChunk) return 0; return pChunk; }
+			bool SetChunk(void *chunk, int size);
+			bool IsChunk() { return !!pChunk; }
 
 		protected:
-			char szFileName[256];
-			fxprogramheader program;
-			float* pParams;
-			unsigned char* pChunk;
-			int lChunkSize;
+			char prgName[28];			///< program name (null-terminated ASCII string)
+
+			VstInt32 numParams;			///< number of parameters
+			VstInt32 lChunkSize;		///< size of program data
+			float* pParams;				///< variable sized array with parameter values
+			unsigned char* pChunk;		///< variable sized array with opaque program data
 
 		protected:
 			void Init();
 			CFxProgram & DoCopy(CFxProgram const &org);
 			void FreeMemory();
+			virtual bool LoadData();
+			virtual bool SaveData();
 
 		};
 
@@ -160,8 +116,6 @@ namespace seib {
 			virtual ~CFxBank();
 			CFxBank & operator=(CFxBank const &org) { return DoCopy(org); }
 		public:
-			virtual bool Load(const char *pszFile);
-			virtual bool Save(const char *pszFile);
 			virtual void Unload();
 			virtual bool IsLoaded() { return !!bBank; }
 
@@ -171,11 +125,6 @@ namespace seib {
 
 			// access functions
 		public:
-			long GetVersion() { if (!bBank) return 0; return ((fxBank*)bBank)->version; }
-			long GetFxID() { if (!bBank) return 0; return ((fxBank*)bBank)->fxID; }
-			void SetFxID(long id) { if (bBank) ((fxBank*)bBank)->fxID = id; if (!bChunk) for (int i = GetNumPrograms() -1; i >= 0; i--) GetProgram(i)->fxID = id; }
-			long GetFxVersion() { if (!bBank) return 0; return ((fxBank*)bBank)->fxVersion; }
-			void SetFxVersion(long v) { if (bBank) ((fxBank*)bBank)->fxVersion = v; if (!bChunk) for (int i = GetNumPrograms() -1; i >= 0; i--) GetProgram(i)->fxVersion = v; }
 			long GetNumPrograms() { if (!bBank) return 0; return ((fxBank*)bBank)->numPrograms; }
 			long GetNumParams() { if (bChunk) return 0; return GetProgram(0)->numParams; }
 			long GetChunkSize() { if (!bChunk) return 0; return ((fxBank *)bBank)->content.data.size; }
@@ -242,7 +191,7 @@ namespace seib {
 				: module (0)
 			{}
 
-			~PluginLoader ()
+			virtual ~PluginLoader ()
 			{
 				if(module)
 				{

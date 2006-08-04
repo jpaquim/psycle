@@ -60,6 +60,7 @@ namespace psycle
 		protected:
 
 			Canvas (HDC hdc): _hdc (hdc) {}
+			virtual ~Canvas();
 
 			HDC  _hdc;
 		};
@@ -71,7 +72,7 @@ namespace psycle
 				: Canvas (::CreateCompatibleDC (hdc))
 			{}
 
-			~MemCanvas ()
+			virtual ~MemCanvas ()
 			{
 				::DeleteDC(_hdc); 
 			}
@@ -83,7 +84,7 @@ namespace psycle
 			/// Constructor obtains the DC
 			PaintCanvas (HWND hwnd) : Canvas (BeginPaint (hwnd, & _paint)), _hwnd (hwnd) {}
 			/// Destructor releases the DC
-			~PaintCanvas() throw()
+			virtual ~PaintCanvas() throw()
 			{
 				EndPaint (_hwnd, & _paint);
 			}
@@ -96,7 +97,7 @@ namespace psycle
 		{
 		public:
 			UpdateCanvas (HWND hwnd) : Canvas (GetDC (hwnd)), _hwnd(hwnd) {}
-			~UpdateCanvas() throw()
+			virtual ~UpdateCanvas() throw()
 			{
 				ReleaseDC (_hwnd, _hdc);
 			}
@@ -129,7 +130,7 @@ namespace psycle
 				return h;
 			}
 		    			
-			Bitmap::Bitmap (Canvas & canvas, int dx, int dy) : _hBitmap (0)
+			Bitmap (Canvas & canvas, int dx, int dy) : _hBitmap (0)
 			{
 				CreateCompatible (canvas, dx, dy);
 			}
@@ -177,7 +178,7 @@ namespace psycle
 				_hBitmap = ::CreateCompatibleBitmap (canvas, width, height);
 			}
 
-			~Bitmap ()
+			virtual ~Bitmap ()
 			{
 				Free ();
 			}

@@ -12,7 +12,7 @@ namespace psycle
 		{
 		public:
 			Instrument();
-			~Instrument();
+			virtual ~Instrument();
 			void Delete();
 			void DeleteLayer(void);
 			void LoadFileChunk(RiffFile* pFile,int version,bool fullopen=true);

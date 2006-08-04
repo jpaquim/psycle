@@ -90,7 +90,7 @@ namespace psycle
 			};
 
 			/// Destructor
-			~WaveData(){
+			virtual ~WaveData(){
 				DeleteWaveData();
 			};
 
@@ -253,7 +253,7 @@ namespace psycle
 				operator=(other);
 			}
 
-			~Envelope(){;}
+			virtual ~Envelope(){;}
 
 			// Init
 			void Init()
@@ -396,7 +396,7 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument Class declaration
 		XMInstrument();
-		~XMInstrument();
+		virtual ~XMInstrument();
 
 		void Init();
 
@@ -553,7 +553,7 @@ namespace psycle
 	class SampleList{
 	public:
 		SampleList(){top=0;};
-		~SampleList(){};
+		virtual ~SampleList(){};
 		int AddSample(XMInstrument::WaveData &wave)
 		{
 			if ( top+1<MAX_INSTRUMENTS)
@@ -581,7 +581,7 @@ namespace psycle
 	class InstrumentList {
 	public:
 		InstrumentList(){top=0;}
-		~InstrumentList(){};
+		virtual ~InstrumentList(){};
 		int AddIns(XMInstrument &ins)
 		{
 			if ( top+1<MAX_INSTRUMENTS)

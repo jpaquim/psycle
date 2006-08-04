@@ -1,6 +1,7 @@
 /*****************************************************************************/
-/* CVSTHost.cpp: implementation of the CVSTHost class.                       */
-/* Work Derived from vsthost. Copyright (c) H. Seib, 2002-2005               */
+/* CVSTHost.cpp: implementation of the CVSTHost class (for VST SDK 2.4).     */
+/* Work Derived from vsthost (1.16i).										 */
+/* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /* Please, read file src/Seib-vsthost/readme.txt before using these sources	 */
 /*****************************************************************************/
@@ -31,22 +32,9 @@ namespace seib {
 		/* Static Data                                                               */
 		/*****************************************************************************/
 		bool CFxBase::NeedsBSwap;
-		int CFxBase::FxProgramVersion = 1;
-#if VST_2_4_EXTENSIONS
-		int CFxBase::FxBankVersion = 2;
-#else
-		int CFxBase::FxBankVersion = 1;
-#endif
 		int CVSTHost::quantization = 0x40000000;
 		VstTimeInfo CVSTHost::vstTimeInfo;
 
-		// Data Extracted from AudioEffectx.cpp, SDK version 2.3
-		//---------------------------------------------------------------------------------------------
-		// 'canDo' strings. note other 'canDos' can be evaluated by calling the according
-		// function, for instance if getSampleRate returns 0, you
-		// will certainly want to assume that this selector is not supported.
-		//---------------------------------------------------------------------------------------------
-	
 		namespace exceptions
 		{
 			namespace dispatch_errors
@@ -55,45 +43,42 @@ namespace seib {
 				{
 					switch(opcode)
 					{
-#if defined $
-#error "macro clash"
-#endif
-#define $(code) case audioMaster##code: return "audioMaster"#code;
+						#if defined $
+							#error "macro clash"
+						#endif
+						#define $(code) case audioMaster##code: return "audioMaster"#code;
 
-							// from AEffect.h
-							$(Automate)		$(Version)	$(CurrentId)	$(Idle)	$(PinConnected)
+						// from AEffect.h
+						$(Automate)		$(Version)	$(CurrentId)	$(Idle)	$(PinConnected)
 
-							// from aeffectx.h
+						// from aeffectx.h
 
-							$(WantMidi)	$(GetTime)
-							$(ProcessEvents)$(SetTime)
-							$(TempoAt)
-							$(GetNumAutomatableParameters) $(GetParameterQuantization)
+						$(WantMidi)	$(GetTime)	$(ProcessEvents)$(SetTime)	$(TempoAt)
+						
+						$(GetNumAutomatableParameters) $(GetParameterQuantization)
 
-							$(IOChanged)
+						$(IOChanged) $(NeedIdle)
 
-							$(NeedIdle)
+						$(SizeWindow)	$(GetSampleRate)$(GetBlockSize)	$(GetInputLatency)
+						$(GetOutputLatency)	$(GetPreviousPlug)	$(GetNextPlug)
+						$(WillReplaceOrAccumulate)
 
-							$(SizeWindow)	$(GetSampleRate)$(GetBlockSize)	$(GetInputLatency)
-							$(GetOutputLatency)	$(GetPreviousPlug)	$(GetNextPlug)
-							$(WillReplaceOrAccumulate)
+						$(GetCurrentProcessLevel)$(GetAutomationState)	$(OfflineStart)
+						$(OfflineRead)	$(OfflineWrite)	$(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
 
-							$(GetCurrentProcessLevel)$(GetAutomationState)	$(OfflineStart)
-							$(OfflineRead)	$(OfflineWrite)	$(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
+						$(SetOutputSampleRate)	$(GetOutputSpeakerArrangement)
 
-							$(SetOutputSampleRate)	$(GetOutputSpeakerArrangement)
+						$(GetVendorString) $(GetProductString)	$(GetVendorVersion)		$(VendorSpecific)
 
-							$(GetVendorString) $(GetProductString)	$(GetVendorVersion)		$(VendorSpecific)
+						$(SetIcon)	$(CanDo)	$(GetLanguage)		$(OpenWindow)	$(CloseWindow)
 
-							$(SetIcon)	$(CanDo)	$(GetLanguage)		$(OpenWindow)	$(CloseWindow)
+						$(GetDirectory)	$(UpdateDisplay)	$(BeginEdit)	$(EndEdit)	$(OpenFileSelector)
+						$(CloseFileSelector)	$(EditFile)
 
-							$(GetDirectory)	$(UpdateDisplay)	$(BeginEdit)	$(EndEdit)	$(OpenFileSelector)
-							$(CloseFileSelector)	$(EditFile)
+						$(GetChunkFile)	$(GetInputSpeakerArrangement)
+						#undef $
 
-							$(GetChunkFile)	$(GetInputSpeakerArrangement)
-#undef $
-
-							default:
+						default:
 						{
 							std::ostringstream s;
 							s << "unknown opcode " << opcode;
@@ -109,104 +94,124 @@ namespace seib {
 			}
 		}
 
+		// Data Extracted from audioeffectx.cpp, SDK version 2.4
+		//---------------------------------------------------------------------------------------------
+		// 'canDo' strings. note other 'canDos' can be evaluated by calling the according
+		// function, for instance if getSampleRate returns 0, you
+		// will certainly want to assume that this selector is not supported.
+		//---------------------------------------------------------------------------------------------
 
-		const char* hostCanDos [] =
+		/*! hostCanDos strings Plug-in -> Host */
+		namespace HostCanDos
 		{
-			"sendVstEvents",
-			"sendVstMidiEvent",
-			"sendVstTimeInfo",
-			"receiveVstEvents",
-			"receiveVstMidiEvent",
-			"receiveVstTimeInfo",
+			const char* canDoSendVstEvents = "sendVstEvents"; ///< Host supports send of Vst events to plug-in
+			const char* canDoSendVstMidiEvent = "sendVstMidiEvent"; ///< Host supports send of MIDI events to plug-in
+			const char* canDoSendVstTimeInfo = "sendVstTimeInfo"; ///< Host supports send of VstTimeInfo to plug-in
+			const char* canDoReceiveVstEvents = "receiveVstEvents"; ///< Host can receive Vst events from plug-in
+			const char* canDoReceiveVstMidiEvent = "receiveVstMidiEvent"; ///< Host can receive MIDI events from plug-in 
+			const char* canDoReportConnectionChanges = "reportConnectionChanges"; ///< Host will indicates the plug-in when something change in plug-in´s routing/connections with #suspend/#resume/#setSpeakerArrangement 
+			const char* canDoAcceptIOChanges = "acceptIOChanges"; ///< Host supports #ioChanged ()
+			const char* canDoSizeWindow = "sizeWindow"; ///< used by VSTGUI
+			const char* canDoOffline = "offline"; ///< Host supports offline feature
+			const char* canDoOpenFileSelector = "openFileSelector"; ///< Host supports function #openFileSelector ()
+			const char* canDoCloseFileSelector = "closeFileSelector"; ///< Host supports function #closeFileSelector ()
+			const char* canDoStartStopProcess = "startStopProcess"; ///< Host supports functions #startProcess () and #stopProcess ()
+			const char* canDoShellCategory = "shellCategory"; ///< 'shell' handling via uniqueID. If supported by the Host and the Plug-in has the category #kPlugCategShell
+			const char* canDoSendVstMidiEventFlagIsRealtime = "sendVstMidiEventFlagIsRealtime"; ///< Host supports flags for #VstMidiEvent
+		}
 
-			"reportConnectionChanges",
-			"acceptIOChanges",
-			"sizeWindow",
-
-			"asyncProcessing",
-			"offline",
-			"supplyIdle",
-			"supportShell",		// 'shell' handling via uniqueID as suggested by Waves
-			"openFileSelector"
-		#if VST_2_2_EXTENSIONS
-			,
-			"editFile",
-			"closeFileSelector"
-		#endif // VST_2_2_EXTENSIONS
-		#if VST_2_3_EXTENSIONS
-			,
-			"startStopProcess"
-		#endif // VST_2_3_EXTENSIONS
-		};
-
-		const char* plugCanDos [] =
+		//-------------------------------------------------------------------------------------------------------
+		/*! plugCanDos strings Host -> Plug-in */
+		namespace PlugCanDos
 		{
-			"sendVstEvents",
-			"sendVstMidiEvent",
-			"sendVstTimeInfo",
-			"receiveVstEvents",
-			"receiveVstMidiEvent",
-			"receiveVstTimeInfo",
-			"offline",
-			"plugAsChannelInsert",
-			"plugAsSend",
-			"mixDryWet",
-			"noRealTime",
-			"multipass",
-			"metapass",
-			"1in1out",
-			"1in2out",
-			"2in1out",
-			"2in2out",
-			"2in4out",
-			"4in2out",
-			"4in4out",
-			"4in8out",	// 4:2 matrix to surround bus
-			"8in4out",	// surround bus to 4:2 matrix
-			"8in8out"
-		#if VST_2_1_EXTENSIONS
-			,
-			"midiProgramNames",
-			"conformsToWindowRules"		// mac: doesn't mess with grafport. general: may want
-			// to call sizeWindow (). if you want to use sizeWindow (),
-			// you must return true (1) in canDo ("conformsToWindowRules")
-		#endif // VST_2_1_EXTENSIONS
-		#if VST_2_3_EXTENSIONS
-			,
-			"bypass"
-		#endif // VST_2_3_EXTENSIONS
-		};
+			const char* canDoSendVstEvents = "sendVstEvents"; ///< plug-in will send Vst events to Host
+			const char* canDoSendVstMidiEvent = "sendVstMidiEvent"; ///< plug-in will send MIDI events to Host
+			const char* canDoReceiveVstEvents = "receiveVstEvents"; ///< plug-in can receive MIDI events from Host
+			const char* canDoReceiveVstMidiEvent = "receiveVstMidiEvent"; ///< plug-in can receive MIDI events from Host 
+			const char* canDoReceiveVstTimeInfo = "receiveVstTimeInfo"; ///< plug-in can receive Time info from Host 
+			const char* canDoOffline = "offline"; ///< plug-in supports offline functions (#offlineNotify, #offlinePrepare, #offlineRun)
+			const char* canDoMidiProgramNames = "midiProgramNames"; ///< plug-in supports function #getMidiProgramName ()
+			const char* canDoBypass = "bypass"; ///< plug-in supports function #setBypass ()
+		}
 
-		/*****************************************************************************/
-		/* SwapBytes : swaps bytes for big/little-endian difference                  */
-		/*****************************************************************************/
+		/*===========================================================================*/
+		/* CFxBase class members                                                     */
+		/*===========================================================================*/
 
-		CFxBase::CFxBase()
+		CFxBase::CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion)
+			: fxMagic(0)
+			, version(_version)
+			, fxID(_fxID)
+			, fxVersion(_fxVersion)
 		{
 			const char szChnk[] = "CcnK";
 			const long lChnk = cMagic;
 			NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
 		}
-		void CFxBase::SwapBytes(long &l)
-		{	//\todo : could this be improved?
-			unsigned char *b = (unsigned char *)&l;
-			long intermediate =  ((long)b[0] << 24) |
-				((long)b[1] << 16) |
-				((long)b[2] << 8) |
-				(long)b[3];
-			l = intermediate;
-		}
-		void CFxBase::SwapBytes(VstInt32 &l)
+		CFxBase::CFxBase(const char *pszFile)
 		{
-			long *pl = (long*)&l;
-			SwapBytes(*pl);
+			Load(pszFile);
 		}
 
-		void CFxBase::SwapBytes(float &f)
-		{
-			long *pl = (long *)&f;
-			SwapBytes(*pl);
+		template <class T>
+		void CFxBase::SwapBytes(T &l)
+		{	///\todo: could this be improved?
+			unsigned char *b = (unsigned char *)&l;
+			T intermediate =  ((T)b[0] << 24) |
+				((T)b[1] << 16) |
+				((T)b[2] << 8) |
+				(T)b[3];
+			l = intermediate;
 		}
+
+		template <class T>
+		bool CFxBase::Read(T &f)	{ int i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap) SwapBytes(f); return (bool)i; }
+		bool CFxBase::Write(T f)	{ if (NeedsBSwap) SwapBytes(f); int i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
+		void CFxBase::Rewind(int bytes) { fseek(pf,-bytes,SEEK_CUR); }
+		void CFxBase::Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
+		bool CFxBase::ReadHeader()
+		{
+			VstInt32 chunkMagic(0),byteSize(0);
+			Read(chunkMagic);
+			if (chunkMagic != cMagic)
+				return false;
+			Read(byteSize);
+			Read(fxMagic);
+			Read(version);
+			Read(fxID);
+			Read(fxVersion);
+		}
+		bool CFxBase::WriteHeader()
+		{
+			Write(cMagic);
+			Write(0);
+			Write(fxMagic);
+			Write(version);
+			Write(fxID);
+			Write(fxVersion);
+		}
+
+		bool CFxBase::Load(const char *pszFile)
+		{
+			pf = fopen(pszFile, "rb");
+			if (!pf)
+				return false;
+
+			bool retval = LoadData();
+			fclose(pf);
+			return retval;
+		}
+		bool CFxBase::Save(const char *pszFile)
+		{
+			pf = fopen(pszFile, "wb");
+			if (!pf)
+				return false;
+
+			bool retval = SaveData();
+			fclose(pf);
+			return retval;
+		}
+
 
 		/*===========================================================================*/
 		/* CFxProgram class members                                                  */
@@ -223,20 +228,20 @@ namespace seib {
 			{
 				delete[] pChunk;
 				pChunk = 0;
+				lChunkSize = 0;
 			}
 			if (pParams)
 			{
 				delete[] pParams;
 				pParams = 0;
+				numParams = 0;
 			}
 		}
 
 		void CFxProgram::Init()
 		{
-			pChunk =0; pParams=0; lChunkSize=0;
-			memset(&program,0,sizeof(program));
-			szFileName[0] = '\0';
-			program.version = 1;
+			numParams = 0; pParams = 0; lChunkSize = 0; pChunk = 0;
+			memset(prgName,0,sizeof(prgName));
 		}
 
 		/*****************************************************************************/
@@ -247,7 +252,7 @@ namespace seib {
 		{
 			FreeMemory();
 
-			program = org.program;  
+			program = org.program;
 			if (org.pChunk)
 			{
 				SetChunkSize(org.lChunkSize);
@@ -255,12 +260,11 @@ namespace seib {
 			}
 			else
 			{
-				if (!org.pParams || program.numParams <=0)
+				if (!org.pParams || numParams <=0)
 					throw (int)1;
-				SetParamSize(program.numParams);
+				SetParamSize(org.numParams);
 				memcpy(pParams,org.pParams,program.numParams*sizeof(float));
 			}
-			strcpy(szFileName, org.szFileName);
 			return *this;
 		}
 		bool CFxProgram::SetParamSize(int nParams)
@@ -290,11 +294,20 @@ namespace seib {
 		{
 			if ( !pChunk )
 				return false;
-
 			memcpy(pChunk, chunk, lChunkSize); return true;
 		}
-		bool CFxProgram::Load(const char *pszFile) { return false; }
-		bool CFxProgram::Save(const char *pszFile) { return false; }
+
+		bool CFxProgram::SetParameter(int nParm, float val)
+		{
+			if (!pParams) return false;
+			if (nParm > numParams) return false;
+			if (val < 0.0)
+				val = 0.0;
+			if (val > 1.0)
+				val = 1.0;
+			pParams[nParm] = val;
+			return true;
+		}
 
 		/*===========================================================================*/
 		/* CFxBank class members                                                     */

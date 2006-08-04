@@ -79,7 +79,7 @@ NAMESPACE__BEGIN(psycle)
 			int _effect_font_point;
 
 			CSkinDlg();
-			~CSkinDlg();
+			virtual ~CSkinDlg();
 
 			std::string _skinPathBuf;
 

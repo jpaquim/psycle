@@ -59,7 +59,7 @@ namespace psycle
 			DDCRET  Seek ( long offset );
 		public:
 			ExtRiffFile();
-			~ExtRiffFile();
+			virtual ~ExtRiffFile();
 			ExtRiffFileMode CurrentFileMode() const   {return fmode;}
 			DDCRET Open ( const char *Filename, ExtRiffFileMode NewMode );
 			DDCRET Write  ( const void *Data, unsigned NumBytes );

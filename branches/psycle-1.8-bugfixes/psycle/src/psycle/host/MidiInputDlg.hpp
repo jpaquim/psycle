@@ -18,7 +18,7 @@ NAMESPACE__BEGIN(psycle)
 			virtual void DoDataExchange(CDataExchange* pDX);
 		public:
 			CMidiInputDlg();
-			~CMidiInputDlg();
+			virtual ~CMidiInputDlg();
 			int const static IDD = IDD_MIDI_INPUT;
 			class group_with_message;
 			class group

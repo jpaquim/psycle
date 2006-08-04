@@ -13,7 +13,7 @@ namespace psycle
 		{
 			public:
 				Registry();
-				~Registry();
+				virtual ~Registry();
 				typedef ::HKEY key;
 				typedef std::string name;
 				typedef unsigned long int type;

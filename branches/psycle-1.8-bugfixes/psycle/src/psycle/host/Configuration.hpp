@@ -20,7 +20,7 @@ namespace psycle
 		{
 		public:
 			Configuration();
-			~Configuration() throw();
+			virtual ~Configuration() throw();
 
 			void CreateFonts();
 			bool CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic);

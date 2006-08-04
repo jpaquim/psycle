@@ -311,7 +311,7 @@ XMSampler::Channel::PerformFX().
 			};
 		};*/
 		EnvelopeController(){;};
-		~EnvelopeController(){;};
+		virtual ~EnvelopeController(){;};
 
 		void Init(XMInstrument::Envelope *pEnvelope = NULL);
 

@@ -17,7 +17,7 @@ namespace psycle
 			class BitsBlock {
 			public:
 				BitsBlock(){ pdata=NULL;rpos=NULL;rend=NULL;rembits=0; };
-				~BitsBlock(){ zapArray(pdata); };
+				virtual ~BitsBlock(){ zapArray(pdata); };
 				bool ReadBlock(OldPsyFile* pFile);
 				unsigned long ReadBits(unsigned char bitwidth);
 			private:
@@ -28,7 +28,7 @@ namespace psycle
 			};
 
 			ITModule2(void);
-			~ITModule2(void);
+			virtual ~ITModule2(void);
 
 //////////////////////////////////////////////////////////////////////////
 ///    IT Fileformat
