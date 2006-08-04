@@ -29,6 +29,8 @@ namespace seib {
 		public:
 			CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion);
 			CFxBase(const char *pszFile);
+			CFxBase & operator=(CFxBase const &org) { return DoCopy(org); }
+			CFxBase & DoCopy(const CFxBase &org);
 
 			bool Save(const char *pszFile);
 			long GetVersion() { return version; }
@@ -43,8 +45,8 @@ namespace seib {
 			virtual bool LoadData() { return ReadHeader(); }
 			virtual bool SaveData() { return WriteHeader(); }
 			template <class T>
-			bool Read(T &f);
-			bool Write(T f);
+			bool Read(T &f,bool allowswap=true);
+			bool Write(T f,bool allowswap=true);
 			bool ReadHeader();
 			bool WriteHeader();
 		private:
@@ -62,33 +64,34 @@ namespace seib {
 		class CFxProgram : public CFxBase
 		{
 		public:
-			CFxProgram(const char *pszFile = 0):CFxBase(pszFile){  }
-			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion):CFxBase(1,_fxID, _fxVersion) { }
-			CFxProgram(CFxProgram const &org){ Init(); DoCopy(org); }
+			CFxProgram(const char *pszFile = 0):CFxBase(pszFile){ }
+			// Create a CFxProgram from parameters.
+			// If data==0 , create an empty Program of size "size", else, copy the contents of "data" to the new arrays.
+			// isChunk tells if this is going to act as a regular program or a chunk one.
+			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool=isChunk=false, void*data=0):CFxBase(1,_fxID, _fxVersion);
+			CFxProgram(CFxProgram const &org){ DoCopy(org); }
 			virtual ~CFxProgram();
-			CFxProgram & operator=(CFxProgram const &org) { return DoCopy(org); }
+			CFxProgram & operator=(CFxProgram const &org) { FreeMemory(); return DoCopy(org); }
 
 			// access functions
 			const char * GetProgramName()	{ return prgName;	}
 			void SetProgramName(const char *name = "")
 			{
+				//leave last char for null.
 				std::strncpy(prgName, name, sizeof(prgName)-1);
 			}
-			long GetNumParams() { if (pChunk) return 0; return numParams; }
-			long SetNumParams() { }
-			float GetParameter(int nParm) {  return (pParams && nParm < numParams) ? pParams[nParm] : 0; }
-			bool SetParameter(int nParm, float val = 0.0);
-			bool SetParameter(float* pnewparams,int params);
-			long GetChunkSize() { if (!pChunk) return 0; return lChunkSize; }
-			void *GetChunk() { if (!pChunk) return 0; return pChunk; }
-			bool SetChunk(void *chunk, int size);
+			long GetNumParams() { return numParams; }
+			float GetParameter(VstInt32 nParm) {  return (nParm < numParams) ? pParams[nParm] : 0; }
+			bool SetParameter(VstInt32 nParm, float val = 0.0);
+			long GetChunkSize() { return sizeof(pChunk); }
+			void *GetChunk() { return pChunk; }
+			bool CopyChunk(const void *chunk) { memcpy(pChunk,chunk,sizeof(pChunk)); }
 			bool IsChunk() { return !!pChunk; }
 
 		protected:
 			char prgName[28];			///< program name (null-terminated ASCII string)
 
 			VstInt32 numParams;			///< number of parameters
-			VstInt32 lChunkSize;		///< size of program data
 			float* pParams;				///< variable sized array with parameter values
 			unsigned char* pChunk;		///< variable sized array with opaque program data
 
@@ -99,6 +102,13 @@ namespace seib {
 			virtual bool LoadData();
 			virtual bool SaveData();
 
+		private:
+			void ChunkMode() { FreeMemory(); fxMagic = chunkPresetMagic; }
+			void ParamMode() { FreeMemory(); fxMagic = fMagic; }
+			bool SetParameters(const float* pnewparams,int params);
+			bool SetChunk(const void *chunk, VstInt32 size=0);
+			bool SetNumParams(VstInt32 nPars);
+			void SetChunkSize(VstInt32 size);
 		};
 
 
@@ -109,27 +119,26 @@ namespace seib {
 		class CFxBank : public CFxBase
 		{
 		public:
-			CFxBank(const char *pszFile = 0);
-			CFxBank(int nPrograms, int nParams);
-			CFxBank(int nChunkSize);
+			CFxBank(const char *pszFile = 0):CFxBase(pszFile){ }
+			// Create a CFxBank from parameters.
+			// If isChunk == false, it creates and empty bank of "size" programs, and data is ignored.
+			// else, creates a chunk of size "size", and copies the contents of "data" if it is not zero.
+			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool=isChunk=false, void*data=0):CFxBase(2,_fxID, _fxVersion);
 			CFxBank(CFxBank const &org) { DoCopy(org); }
 			virtual ~CFxBank();
-			CFxBank & operator=(CFxBank const &org) { return DoCopy(org); }
+			CFxBank & operator=(CFxBank const &org) { FreeMemory(); return DoCopy(org); }
 		public:
-			virtual void Unload();
 			virtual bool IsLoaded() { return !!bBank; }
 
-			bool IsChunk() { return bChunk; }
-			bool SetSize(int nPrograms, int nParams);
-			bool SetSize(int nChunkSize);
+			bool IsChunk() { return !!bChunk; }
 
 			// access functions
 		public:
-			long GetNumPrograms() { if (!bBank) return 0; return ((fxBank*)bBank)->numPrograms; }
-			long GetNumParams() { if (bChunk) return 0; return GetProgram(0)->numParams; }
+			long GetNumPrograms() { return numPrograms; }
 			long GetChunkSize() { if (!bChunk) return 0; return ((fxBank *)bBank)->content.data.size; }
 			void *GetChunk() { if (!bChunk) return 0; return ((fxBank *)bBank)->content.data.chunk; }
-			bool SetChunk(void *chunk) { if (!bChunk) return false; memcpy(((fxBank *)bBank)->content.data.chunk, chunk, ((fxBank *)bBank)->content.data.size); return true; }
+			//Don't need to set size except if sizeof(chunk) isn't the size of your data.
+			bool SetChunk(void *chunk,VstInt32 size=0) { if (!bChunk) return false; memcpy(((fxBank *)bBank)->content.data.chunk, chunk, ((fxBank *)bBank)->content.data.size); return true; }
 
 			fxProgram * GetProgram(int nProgNum);
 			char * GetProgramName(int nProgram)
@@ -168,10 +177,10 @@ namespace seib {
 			}
 
 		protected:
-			char szFileName[256];
-			unsigned char * bBank;
-			int nBankLen;
-			bool bChunk;
+			VstInt32 numPrograms;
+			VstInt32 currentProgram
+			unsigned char * pChunk;
+			CFxProgram* pPrograms
 
 		protected:
 			void Init();

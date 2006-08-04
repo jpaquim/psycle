@@ -152,7 +152,13 @@ namespace seib {
 		{
 			Load(pszFile);
 		}
-
+		CFxBase & CFxBase::DoCopy(const CFxBase &org)
+		{
+			fxMagic=org.fxMagic;
+			version=org.version;
+			fxID=org.fxID;
+			fxVersion=org.fxVersion;
+		}
 		template <class T>
 		void CFxBase::SwapBytes(T &l)
 		{	///\todo: could this be improved?
@@ -165,8 +171,8 @@ namespace seib {
 		}
 
 		template <class T>
-		bool CFxBase::Read(T &f)	{ int i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap) SwapBytes(f); return (bool)i; }
-		bool CFxBase::Write(T f)	{ if (NeedsBSwap) SwapBytes(f); int i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
+		bool CFxBase::Read(T &f,bool allowswap)	{ int i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap && allowswap) SwapBytes(f); return (bool)i; }
+		bool CFxBase::Write(T f, bool allowswap)	{ if (NeedsBSwap && allowswap) SwapBytes(f); int i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
 		void CFxBase::Rewind(int bytes) { fseek(pf,-bytes,SEEK_CUR); }
 		void CFxBase::Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
 		bool CFxBase::ReadHeader()
@@ -217,6 +223,22 @@ namespace seib {
 		/* CFxProgram class members                                                  */
 		/*===========================================================================*/
 
+		CFxProgram::CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool=isChunk=false, void*data=0):CFxBase(1,_fxID, _fxVersion)
+		{
+			Init();
+			if (!data)
+			{
+				//Initialize empty program
+				if (isChunk) SetChunkSize(size);
+				else SetNumParams(size);
+			}
+			else
+			{
+				if (isChunk) SetCunk(data,size);
+				else SetParameters(data,size);
+			}
+		}
+		
 		CFxProgram::~CFxProgram()
 		{
 			FreeMemory();
@@ -228,7 +250,6 @@ namespace seib {
 			{
 				delete[] pChunk;
 				pChunk = 0;
-				lChunkSize = 0;
 			}
 			if (pParams)
 			{
@@ -240,72 +261,116 @@ namespace seib {
 
 		void CFxProgram::Init()
 		{
-			numParams = 0; pParams = 0; lChunkSize = 0; pChunk = 0;
+			numParams = 0; pParams = 0; pChunk = 0;
 			memset(prgName,0,sizeof(prgName));
+			ParamMode();
 		}
-
-		/*****************************************************************************/
-		/* DoCopy : combined for copy constructor and assignment operator            */
-		/*****************************************************************************/
 
 		CFxProgram & CFxProgram::DoCopy(const CFxProgram &org)
 		{
-			FreeMemory();
-
-			program = org.program;
+			CFxBase::DoCopy(org);
+			memcpy(prgName,org.prgName,sizeof(prgName))
 			if (org.pChunk)
 			{
-				SetChunkSize(org.lChunkSize);
-				memcpy(pChunk, org.pChunk, lChunkSize);
+				SetChunk(org.pChunk);
 			}
 			else
 			{
-				if (!org.pParams || numParams <=0)
-					throw (int)1;
-				SetParamSize(org.numParams);
-				memcpy(pParams,org.pParams,program.numParams*sizeof(float));
+				SetParameters(org.pParams,org.numParams);
 			}
 			return *this;
 		}
-		bool CFxProgram::SetParamSize(int nParams)
+
+
+		bool CFxProgram::SetNumParams(VstInt32 nPars)
 		{
-			if (pParams)
-				delete[] pParams;
-			float *newpars = new float[nParams];
+			if (nPars <=0 )
+				return false;
+			ParamMode();
+			float *pParams = new float[nPars];
 			if (!newpars)
 				return false;
-			pParams=newpars;
-			program.numParams = nParams;
+			numParams = nParams;
 			return true;
 		}
-		bool CFxProgram::SetChunkSize(int nChunkSize)
-		{
-			if (pChunk)
-				delete[] pChunk;
-			unsigned char *newchunk = new unsigned char[nChunkSize];
-			if (!newchunk)
-				return false;
-			pChunk=newchunk;
-			lChunkSize=nChunkSize;
-			return true;
-		}
-
-		bool CFxProgram::SetChunk(void *chunk)
-		{
-			if ( !pChunk )
-				return false;
-			memcpy(pChunk, chunk, lChunkSize); return true;
-		}
-
 		bool CFxProgram::SetParameter(int nParm, float val)
 		{
-			if (!pParams) return false;
-			if (nParm > numParams) return false;
+			if (nParm >= numParams)
+				return false;
 			if (val < 0.0)
 				val = 0.0;
-			if (val > 1.0)
+			else if (val > 1.0)
 				val = 1.0;
 			pParams[nParm] = val;
+			return true;
+		}
+		bool CFxProgram::SetParameters(const float* pnewparams,int params)
+		{
+			if (!SetNumParams(params))
+				return false;
+			memcpy(pParams,pnewparams,sizeof(pParams));
+		}
+		bool CFxProgram::SetChunkSize(vstInt32 size)
+		{
+			if (nPars <=0 )
+				return false;
+			ChunkMode();
+			pChunk = new unsigned char[size];
+			return !!pChunk;
+
+		}
+		bool CFxProgram::SetChunk(void *chunk,vstInt32 size)
+		{
+			if(!chunk)
+				return false;
+			if (!size)
+				if (!SetChunkSize(sizeof(chunk)))
+					return false;
+			else
+				if (!SetChunkSize(size))
+					return false;
+			CopyChunk(chunk);
+			return true;
+		}
+
+		bool CFxProgram::LoadData()
+		{
+			CFxBase::LoadData();
+			Read(numParams);
+			Read(prgName);
+			if(IsChunk())
+			{
+				VstInt32 size;
+				Read(size);
+				if (!SetChunkSize(size))
+					return false;
+				Read(pCunk,false);
+			}
+			else
+			{
+				if (!SetNumParams(numParams))
+					return false;
+				for(int i = 0 ; i < numParams ; i++)
+					Read(pParams[i]);
+			}
+			return true;
+		}
+		bool CFxProgram::SaveData()
+		{
+			CFxBase::SaveData();
+			Write(numParams);
+			Write(prgName);
+			if(IsChunk())
+			{
+				Write(GetChunkSize());
+				Write(pChunk,false);
+			}
+			else
+			{
+				Write(numParams);
+				for (int i = 0; i < numParams ; i++)
+					Write(pParams[i]);
+			}
 			return true;
 		}
 
