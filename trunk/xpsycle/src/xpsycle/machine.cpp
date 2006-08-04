@@ -865,7 +865,7 @@ int Machine::GenerateAudio( int numsamples )
 		int processsamples = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
 //		std::cout << "Generating audio, looping, processsamples : " << processsamples << std::endl;
 		if (processsamples > 0) GenerateAudioInTicks( processedsamples, processsamples ); // todo maybe round
-		else if ( processsamples < 0 ) std::cerr << " ERROR! in Machine::GenerateAudio() : workEvent.beatOffset() : " << workEvent.beatOffset() << " beatOffset: " << beatOffset;
+		else if ( processsamples < 0 ) std::cerr << " ERROR(1)! in Machine::GenerateAudio() : workEvent.beatOffset() : " << workEvent.beatOffset() << " beatOffset: " << beatOffset;
 		processedsamples+=processsamples;
 		
 		///\todo: beware of using more than MAX_TRACKS. Stop(); resets the list, but until that, playColIndex keeps increasing.
@@ -879,7 +879,7 @@ int Machine::GenerateAudio( int numsamples )
 	{
 		GenerateAudioInTicks(processedsamples, processsamples);
 	}
-	else if ( processsamples < 0 ) std::cerr << " ERROR! in Machine::GenerateAudio() : beatOffset :" << beatOffset << std::endl;
+	else if ( processsamples < 0 ) std::cerr << " ERROR(2)! in Machine::GenerateAudio() : beatOffset :" << beatOffset << " ; numsamples::" << numsamples << " ; processedsamples : " << processedsamples  << std::endl;
 
 }
 
