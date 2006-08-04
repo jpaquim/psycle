@@ -263,7 +263,11 @@ NRegion SequencerItem::entriesInRegion( )
 
   for (std::vector<SequencerItem*>::const_iterator it = selItems.begin(); it < selItems.end(); it++) {
     SequencerItem* item = *it;
-    region = region | item->geometry()->region();
+    NRegion itemregion = item->geometry()->region();
+    int parentAbsLeft = ((NVisualComponent*) item->parent())->absoluteLeft() - ((NVisualComponent*) item->parent())->scrollDx();
+    int parentAbsTop  = ((NVisualComponent*) item->parent())->absoluteTop() - ((NVisualComponent*) item->parent())->scrollDy();;
+    itemregion.move(parentAbsLeft, parentAbsTop);
+    region = region | itemregion;
   }
 
   return region;
@@ -278,11 +282,6 @@ void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
 void SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
   const std::vector<SequencerItem*> & selItems = sView->selectedItems();
-
-  std::vector<SequencerItem*>::const_iterator it = find(selItems.begin(), selItems.end(),this);
-
-  if (it != selItems.end() ) {
-
   int moveDx = left() - oldLeft;
   oldLeft = left();
 
@@ -298,18 +297,9 @@ void SequencerItem::onMove( const NMoveEvent & moveEvent )
   NRegion newDrag = entriesInRegion();
   NRegion repaintArea = newDrag | oldDrag;
 
-  int parentAbsLeft = sView->scrollArea()->absoluteLeft() - sView->scrollArea()->scrollDx();
-  int parentAbsTop  = sView->scrollArea()->absoluteTop() - sView->scrollArea()->scrollDy();
-
-  repaintArea.move(parentAbsLeft, parentAbsTop);
-
   window()->repaint(sView->scrollArea(),repaintArea);
 
   oldDrag = newDrag;
-  } else {
-
-  }
-
 }
 
 void SequencerItem::onMoveEnd( const NMoveEvent & moveEvent )
@@ -609,6 +599,7 @@ void SequencerGUI::onInsertTrack( NButtonEvent * ev )
   } else
   if (selectedLine_) {
     SequencerLine* line = new SequencerLine( this );
+    line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
     lines.push_back(line);
     line->setSequenceLine( patternSequence_->createNewLine() );
     line->click.connect(this, &SequencerGUI::onSequencerLineClick);
@@ -680,39 +671,26 @@ void SequencerGUI::onNewPattern( NButtonEvent * ev )
 void SequencerGUI::onSequencerLineClick( SequencerLine * line )
 {
   selectedLine_ = line;
+  deselectAll();
   repaint();
 }
 
 void SequencerGUI::onSequencerItemClick( SequencerItem * item )
 {
-  if (!(NApp::system().keyState() & ShiftMask)) {
+  std::vector<SequencerItem*>::iterator it;
+  it = find( selectedItems_.begin(), selectedItems_.end(), item);
 
-  std::vector<SequencerItem*>::iterator it = selectedItems_.begin();
-
-  if (NApp::system().keyState() & ControlMask) {
-    it = find( selectedItems_.begin(), selectedItems_.end(), item);
-    if (it != selectedItems_.end()) {
-      SequencerItem* selectedItem = *it;
-      selectedItem->setSelected(false);
-      selectedItem->repaint();
+  if (it == selectedItems_.end()) {
+    if (NApp::system().keyState() & ControlMask) {
+      selectedItems_.push_back(item);
+      item->setSelected(true);
+      item->repaint();
     } else {
+      deselectAll();
       selectedItems_.push_back(item);
       item->setSelected(true);
       item->repaint();
     }
-  } else {
-    // deselect all
-    for ( ; it < selectedItems_.end(); it++) {
-      SequencerItem* selectedItem = *it;
-      selectedItem->setSelected(false);
-      selectedItem->repaint();
-    }
-    selectedItems_.clear();
-    selectedItems_.push_back(item);
-    item->setSelected(true);
-    item->repaint();
-  }
-
   }
 }
 
@@ -877,7 +855,20 @@ NPanel * SequencerGUI::scrollArea( )
   return scrollArea_;
 }
 
+void SequencerGUI::deselectAll( )
+{
+  std::vector<SequencerItem*>::iterator it = selectedItems_.begin();
+  for ( ; it < selectedItems_.end(); it++) {
+    SequencerItem* selectedItem = *it;
+    selectedItem->setSelected(false);
+    selectedItem->repaint();
+   }
+   selectedItems_.clear();
+}
+
 }}
+
+
 
 
 
