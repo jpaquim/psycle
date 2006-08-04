@@ -193,6 +193,8 @@ public:
 
     NPanel* scrollArea();
 
+    void deselectAll();
+
 private:
 
     int counter;
