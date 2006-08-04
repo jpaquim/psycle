@@ -191,7 +191,7 @@ private:
     SequencerBeatLineal* beatLineal_;
     SequencerBeatChangeLineal* beatChangeLineal_;
     SequencerLine* lastLine;
-    SequencerItem* selectedItem_;
+    std::vector<SequencerItem*> selectedItems_;
     PatternSequence* patternSequence_;
 
     NScrollBar* hBar;
