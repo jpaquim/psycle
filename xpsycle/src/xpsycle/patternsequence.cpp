@@ -323,13 +323,14 @@ namespace psycle
 				{
 					// take the pattern,
 					SinglePattern* pPat = sLineIt->second->pattern();
-					float entryLength = sLineIt->second->endPos() - sLineIt->second->startPos();
 					double entryStart = sLineIt->first;
 					float entryStartOffset  = sLineIt->second->startPos();
 					float entryEndOffset  = sLineIt->second->endPos();
+					float entryLength = entryEndOffset - entryStartOffset;
+					double relativeStart = start - entryStart + entryStartOffset;
 					
-					SinglePattern::iterator patIt = pPat->lower_bound( std::min(start - entryStart + entryStartOffset , (double)entryEndOffset)),
-					patEnd = pPat->lower_bound( std::min(start+length-entryStart+entryStartOffset,(double) entryEndOffset) );
+					SinglePattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
+					patEnd = pPat->lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
 
 					// and iterate through the lines that are inside the range
 					for( ; patIt != patEnd; ++patIt)
@@ -344,8 +345,8 @@ namespace psycle
 							tmpline[seqlineidx*1024+lineIt->first]=lineIt->second;
 						}
 						
-						// finally add the PatternLine to the event map.
-						events.insert( SinglePattern::value_type( patIt->first + sLineIt->first, tmpline ) );
+						// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
+						events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 						}
 				}
 			    seqlineidx++;
@@ -463,10 +464,3 @@ namespace psycle
 
 
 }
-
-
-
-
-
-
-
