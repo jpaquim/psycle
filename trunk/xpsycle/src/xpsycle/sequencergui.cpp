@@ -507,7 +507,6 @@ SequencerGUI::SequencerGUI()
 
   lastLine = 0;
   selectedLine_ = 0;
-  selectedItem_ = 0;
 
   patternSequence_ = 0;
 }
@@ -633,14 +632,33 @@ void SequencerGUI::onSequencerLineClick( SequencerLine * line )
 
 void SequencerGUI::onSequencerItemClick( SequencerItem * item )
 {
-  if (item != selectedItem_) {
-    if (selectedItem_) {
-      selectedItem_->setSelected(false);
-      selectedItem_->repaint();
+  std::vector<SequencerItem*>::iterator it = selectedItems_.begin();
+
+  if (NApp::system().keyState() & ControlMask) {
+    it = find( selectedItems_.begin(), selectedItems_.end(), item);
+    if (it != selectedItems_.end()) {
+      SequencerItem* selectedItem = *it;
+      selectedItem->setSelected(false);
+      selectedItem->repaint();
+    } else {
+      selectedItems_.push_back(item);
+      item->setSelected(true);
+      item->repaint();
     }
-    selectedItem_ = item;
+  } else {
+    // deselect all
+    for ( ; it < selectedItems_.end(); it++) {
+      SequencerItem* selectedItem = *it;
+      selectedItem->setSelected(false);
+      selectedItem->repaint();
+    }
+    selectedItems_.clear();
+    selectedItems_.push_back(item);
+    item->setSelected(true);
     item->repaint();
   }
+
+
 }
 
 // entry operations
@@ -656,15 +674,20 @@ void SequencerGUI::addPattern( SinglePattern * pattern )
 
 void SequencerGUI::onDeleteEntry( NButtonEvent * ev )
 {
-  if (selectedItem_) {
-    SequenceEntry* entry = selectedItem_->sequenceEntry();
-    NVisualComponent* parentContainer = (NVisualComponent*) (selectedItem_->parent());
-    parentContainer->removeChild(selectedItem_);
-    resize();
-    repaint();
+  std::vector<SequencerItem*>::iterator it = selectedItems_.begin();
+
+  // deselect all
+  for ( ; it < selectedItems_.end(); it++) {
+    SequencerItem* selectedItem = *it;
+    SequenceEntry* entry = selectedItem->sequenceEntry();
+    NVisualComponent* parentContainer = (NVisualComponent*) (selectedItem->parent());
+    parentContainer->removeChild(selectedItem);
     entry->track()->removeEntry(entry);
-    selectedItem_ = 0;
   }
+  selectedItems_.clear();
+
+  resize();
+  repaint();
 }
 
 
