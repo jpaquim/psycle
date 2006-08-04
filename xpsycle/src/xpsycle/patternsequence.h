@@ -109,7 +109,7 @@ namespace psycle
 
 		class PatternSequence;
 
-		class SequenceLine : public  std::map<double, SequenceEntry*>
+		class SequenceLine : public  std::multimap<double, SequenceEntry*>
 		{
 
 		public:
