@@ -281,7 +281,9 @@ private:
   NColor      separatorColor_;
   NToolBar*   toolBar;
   NComboBox* patternCombo_;
+  NComboBox* octaveCombo_;
   NComboBox*  meterCbx;
+  NComboBox* trackCombo_;
 
   std::string noteToString(int value);
 
@@ -299,6 +301,8 @@ private:
 
   void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
   void onPatternStepChange(NItemEvent* ev);
+  void onOctaveChange(NItemEvent* ev);
+  void onTrackChange(NItemEvent* ev);
 
 };
 

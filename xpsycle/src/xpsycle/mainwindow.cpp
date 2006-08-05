@@ -244,9 +244,6 @@ void MainWindow::initBars( )
 
   updateComboIns(true);
   insCombo_->setIndex(0);
-  octaveCombo_->setIndex(4);
-  childView_->patternView()->setEditOctave(4);
-  trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16
 }
 
 void MainWindow::initToolBar( )
@@ -390,15 +387,6 @@ void MainWindow::initToolBar( )
   toolBar1_->resize();
 
   psycleControlBar_ = new NToolBar();
-    psycleControlBar_->add(new NLabel("Tracks"));
-    trackCombo_ = new NComboBox();
-      trackCombo_->setWidth(40);
-      trackCombo_->setHeight(20);
-      trackCombo_->itemSelected.connect(this,&MainWindow::onTrackChange);
-    psycleControlBar_->add(trackCombo_);
-      for(int i=4;i<=MAX_TRACKS;i++) {
-        trackCombo_->add(new NItem(stringify(i)));
-      }
     psycleControlBar_->add(new NLabel("Tempo"));
 
     img = new NImage();
@@ -435,14 +423,6 @@ void MainWindow::initToolBar( )
       moremoreBmp->setFlat(false);
       moremoreBmp->clicked.connect(this,&MainWindow::onBpmAddTen);
     psycleControlBar_->add(moremoreBmp);
-
-    psycleControlBar_->add(new NLabel("Octave"));
-    octaveCombo_ = new NComboBox();
-      for (int i=0; i<9; i++) octaveCombo_->add(new NItem(stringify(i)));
-      octaveCombo_->itemSelected.connect(this,&MainWindow::onOctaveChange);
-      octaveCombo_->setWidth(40);
-      octaveCombo_->setHeight(20);
-    psycleControlBar_->add(octaveCombo_);
 
     psycleControlBar_->add(new NLabel("VU"));
     NPanel* vuPanel = new NPanel();
@@ -621,30 +601,6 @@ void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_
     progressBar_->setText(t);
     progressBar_->repaint();
   }
-}
-
-void MainWindow::onOctaveChange( NItemEvent * ev )
-{
-  std::stringstream str; 
-  str << ev->item()->text();
-  int octave = 0;
-  str >> octave;
-  childView_->patternView()->setEditOctave(octave);
-}
-
-
-void MainWindow::onTrackChange( NItemEvent * ev )
-{
-  std::stringstream str; 
-  str << ev->item()->text();
-  int track = 0;
-  str >> track;
-  Global::pSong()->setTracks(track);
-  if (childView_->patternView()->cursor().x() >= Global::pSong()->tracks() )
-  {
-    childView_->patternView()->setCursor(NPoint3D(Global::pSong()->tracks() ,childView_->patternView()->cursor().y(),0));
-  }
-  childView_->patternView()->repaint();
 }
 
 void MainWindow::onBarStop(NButtonEvent* ev)
