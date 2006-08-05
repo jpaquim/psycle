@@ -35,6 +35,7 @@
 #include <ngrs/nwindow.h>
 #include <ngrs/nbevelborder.h>
 #include <ngrs/nproperty.h>
+#include <ngrs/ncheckbox.h>
 
 
 namespace psycle {
@@ -273,23 +274,26 @@ NRegion SequencerItem::entriesInRegion( )
   return region;
 }
 
-void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
-{
-  oldDrag = entriesInRegion();
-  oldLeft = left();
-}
 
 void SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
   const std::vector<SequencerItem*> & selItems = sView->selectedItems();
+
+  if (sView->gridSnap()) {
+    int beatPos = left() / sView->beatPxLength();
+    int newItemLeft = beatPos * sView->beatPxLength();
+    setLeft(newItemLeft);
+  }
+
   int moveDx = left() - oldLeft;
+
   oldLeft = left();
 
 
   for (std::vector<SequencerItem*>::const_iterator it = selItems.begin(); it < selItems.end(); it++) {
     SequencerItem* item = *it;
     int newLeft = 0;
-    if (item != this) newLeft = item->left() + moveDx; else newLeft = item->left();
+    if (item != this) newLeft = item->left() + moveDx; else newLeft = left();
     item->sequenceEntry()->track()->MoveEntry(item->sequenceEntry(), newLeft / (double) sView->beatPxLength() );
   }
   sView->resize();
@@ -305,6 +309,12 @@ void SequencerItem::onMove( const NMoveEvent & moveEvent )
 void SequencerItem::onMoveEnd( const NMoveEvent & moveEvent )
 {
   sView->repaint();
+}
+
+void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
+{
+  oldDrag = entriesInRegion();
+  oldLeft = left();
 }
 
 void SequencerItem::onMousePress( int x, int y, int button )
@@ -516,6 +526,9 @@ SequencerGUI::SequencerGUI()
     toolBar_->add(new NToolBarSeparator());
 
     toolBar_->add( new NButton("Delete Entry"))->clicked.connect(this,&SequencerGUI::onDeleteEntry);
+    snapToGridCheck_ = new NCheckBox("Snap to Beat");
+    snapToGridCheck_->setCheck(true);
+    toolBar_->add( snapToGridCheck_ );
   add(toolBar_, nAlTop);
 
   beatLineal_ = new SequencerBeatLineal(this);
@@ -866,7 +879,14 @@ void SequencerGUI::deselectAll( )
    selectedItems_.clear();
 }
 
+bool SequencerGUI::gridSnap( ) const
+{
+  return snapToGridCheck_->checked();
+}
+
+
 }}
+
 
 
 
