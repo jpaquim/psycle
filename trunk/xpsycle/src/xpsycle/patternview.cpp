@@ -25,6 +25,7 @@
 #include "player.h"
 #include "machine.h"
 #include "defaultbitmaps.h"
+#include "zoombar.h"
 #include <ngrs/napp.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nwindow.h>
@@ -35,6 +36,8 @@
 #include <ngrs/ntoolbar.h>
 #include <ngrs/ncombobox.h>
 #include <ngrs/nitem.h>
+#include <ngrs/nitemevent.h>
+#include <ngrs/nlabel.h>
 
 namespace psycle { namespace host {
 
@@ -44,12 +47,20 @@ PatternView::PatternView()
 {
   setLayout(NAlignLayout());
 
-  // create scrollBars
-  hBar = new NScrollBar();
-    hBar->setOrientation(nHorizontal);
-    hBar->setHeight(15);
-    hBar->posChange.connect(this,&PatternView::onHScrollBar);
-  add(hBar, nAlBottom);
+  // hbar with beat zoom
+  NPanel* hBarPanel = new NPanel();
+    hBarPanel->setLayout( NAlignLayout() );
+    zoomHBar = new ZoomBar();
+    zoomHBar->setRange(1,100);
+    zoomHBar->setPos(4);
+    zoomHBar->posChanged.connect(this, &PatternView::onZoomHBarPosChanged);
+    hBarPanel->add(zoomHBar, nAlRight);
+    hBar = new NScrollBar();
+      hBar->setOrientation(nHorizontal);
+      hBar->setPreferredSize(100,15);
+      hBar->posChange.connect(this,&PatternView::onHScrollBar);
+    hBarPanel->add(hBar, nAlClient);
+  add(hBarPanel, nAlBottom);
 
   vBar = new NScrollBar();
     vBar->setWidth(15);
@@ -95,6 +106,12 @@ PatternView::PatternView()
 
 PatternView::~PatternView()
 {
+}
+
+void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
+  setBeatZoom( (int) newPos );
+  //tpbDisplay_->setNumber(tpb);
+  repaint();
 }
 
 void PatternView::onHScrollBar( NObject * sender, int pos )
@@ -155,6 +172,15 @@ void PatternView::initToolBar( )
     meterCbx->setIndex(0);
   toolBar->add(meterCbx);
   toolBar->add(new NButton("add Bar"))->clicked.connect(this,&PatternView::onAddBar);
+  toolBar->add(new NLabel("Pattern Step"));
+  patternCombo_ = new NComboBox();
+    for (int i = 1; i <=16; i++) 
+      patternCombo_->add(new NItem(stringify(i)));
+    patternCombo_->setIndex(0);
+    patternCombo_->itemSelected.connect(this,&PatternView::onPatternStepChange);
+    patternCombo_->setWidth(40);
+    patternCombo_->setHeight(20);
+  toolBar->add(patternCombo_);
 }
 
 void PatternView::onAddBar( NButtonEvent * ev )
@@ -2087,8 +2113,11 @@ SinglePattern * PatternView::pattern( )
 
 void PatternView::setBeatZoom( int tpb )
 {
-  if (pattern_)
+  if (pattern_ && tpb >= 1) {
      pattern_->setBeatZoom(tpb);
+     int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
+     vBar->setRange((lineNumber()-1-count)*rowHeight());
+  }
 }
 
 }}
@@ -2107,4 +2136,11 @@ void psycle::host::PatternView::setActiveMachineIdx( int idx )
 int psycle::host::PatternView::selectedMachineIndex( ) const
 {
   return selectedMacIdx_;
+}
+
+void psycle::host::PatternView::onPatternStepChange( NItemEvent * ev )
+{
+  if (patternCombo_->selIndex()!=-1) {
+      setPatternStep(patternCombo_->selIndex()+1);
+  }
 }

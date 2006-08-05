@@ -360,35 +360,6 @@ void MainWindow::initToolBar( )
   toolBar1_->add(new NToolBarSeparator());
 
   img = new NImage();
-    img->setSharedBitmap(&icons.machines());
-    img->setPreferredSize(25,25);
-  NButton* macBtn_ = new NButton(img);
-    macBtn_->setFlat(false);
-    macBtn_->setToggle(true);
-    macBtn_->setHint("Machines");
-    macBtn_->clicked.connect(this,&MainWindow::onMachineView);
-  toolBar1_->add(macBtn_);
-
-  img = new NImage();
-    img->setSharedBitmap(&icons.patterns());
-    img->setPreferredSize(25,25);
-  NButton* patBtn_ = new NButton(img);
-    patBtn_->clicked.connect(this,&MainWindow::onPatternView);
-    patBtn_->setFlat(false);
-    patBtn_->setToggle(true);
-    patBtn_->setHint("Patterns");
-  toolBar1_->add(patBtn_);
-
-  img = new NImage();
-    img->setSharedBitmap(&icons.sequencer());
-    img->setPreferredSize(25,25);
-  NButton* seqBtn = new NButton(img);
-    seqBtn->setHint("Sequencer");
-  toolBar1_->add(seqBtn)->clicked.connect(this,&MainWindow::onSequencerView);
-
-  toolBar1_->add(new NToolBarSeparator());
-
-  img = new NImage();
     img->setSharedBitmap(&icons.newmachine());
     img->setPreferredSize(25,25);
   NButton* newMacBtn = new NButton(img);
@@ -465,29 +436,6 @@ void MainWindow::initToolBar( )
       moremoreBmp->clicked.connect(this,&MainWindow::onBpmAddTen);
     psycleControlBar_->add(moremoreBmp);
 
-    psycleControlBar_->add(new NLabel("Lines per beat"));
-
-    img = new NImage();
-      img->setSharedBitmap(&icons.less());
-      img->setPreferredSize(25,25);
-    NButton* lessTpbButton = new NButton(img);
-        lessTpbButton->setFlat(false);
-        lessTpbButton->clicked.connect(this,&MainWindow::onTpbDecOne);
-    psycleControlBar_->add(lessTpbButton);
-
-    tpbDisplay_ = new N7SegDisplay(2);
-      tpbDisplay_->setColors(NColor(250,250,250),NColor(100,100,100),NColor(230,230,230));
-      tpbDisplay_->setNumber(4);
-    psycleControlBar_->add(tpbDisplay_);
-
-    img = new NImage();
-      img->setSharedBitmap(&icons.more());
-      img->setPreferredSize(25,25);
-    NButton* moreTpbButton = new NButton(img);
-        moreTpbButton->setFlat(false);
-        moreTpbButton->clicked.connect(this,&MainWindow::onTpbIncOne);
-    psycleControlBar_->add(moreTpbButton);
-
     psycleControlBar_->add(new NLabel("Octave"));
     octaveCombo_ = new NComboBox();
       for (int i=0; i<9; i++) octaveCombo_->add(new NItem(stringify(i)));
@@ -512,15 +460,6 @@ void MainWindow::initToolBar( )
   toolBarPanel_->add(psycleControlBar_);
 
   psycleToolBar_ = new NToolBar();
-      psycleToolBar_->add(new NLabel("Pattern Step"));
-      patternCombo_ = new NComboBox();
-      for (int i = 1; i <=16; i++) 
-        patternCombo_->add(new NItem(stringify(i)));
-      patternCombo_->setIndex(0);
-      patternCombo_->itemSelected.connect(this,&MainWindow::onPatternStepChange);
-      patternCombo_->setWidth(40);
-      patternCombo_->setHeight(20);
-      psycleToolBar_->add(patternCombo_);
       psycleToolBar_->add(new NToolBarSeparator());
       genCombo_ = new NComboBox();
         genCombo_->setWidth(158);
@@ -920,30 +859,6 @@ void MainWindow::setAppSongBpm(int x)
     bpmDisplay_->repaint();
 }
 
-void MainWindow::setAppSongTpb(int x)
-{
-  int tpb = childView_->patternView()->beatZoom() + x;
-
-  childView_->patternView()->setBeatZoom(tpb);
-
-  tpbDisplay_->setNumber(tpb);
-
-  psycleControlBar_->repaint();
-}
-
-
-void MainWindow::onTpbDecOne(NButtonEvent* ev)
-{
-  setAppSongTpb(-1);
-  childView_->patternView()->repaint();
-}
-
-void MainWindow::onTpbIncOne(NButtonEvent* ev)
-{
-  setAppSongTpb(1);
-  childView_->patternView()->repaint();
-}
-
 void MainWindow::onRecordWav( NButtonEvent * ev )
 {
   if (!Global::pPlayer()->_recording)
@@ -1122,13 +1037,6 @@ bool MainWindow::checkUnsavedSong( )
   }
   NApp::addRemovePipe(box);
   return result;
-}
-
-void MainWindow::onPatternStepChange( NItemEvent * ev )
-{
-  if (patternCombo_->selIndex()!=-1) {
-      childView_->patternView()->setPatternStep(patternCombo_->selIndex()+1);
-  }
 }
 
 // Sequencer menu events

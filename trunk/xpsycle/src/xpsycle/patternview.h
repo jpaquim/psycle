@@ -36,8 +36,11 @@
 
 class NToolBar;
 class NComboBox;
+class ZoomBar;
+class NItemEvent;
 
 namespace psycle { namespace host {
+
 
 class PatternView : public NPanel
 {
@@ -271,11 +274,13 @@ private:
   PatternDraw* drawArea;
 
   NScrollBar* hBar;
+  ZoomBar* zoomHBar;
   NScrollBar* vBar;
   Header*     header;
   LineNumber* lineNumber_;
   NColor      separatorColor_;
   NToolBar*   toolBar;
+  NComboBox* patternCombo_;
   NComboBox*  meterCbx;
 
   std::string noteToString(int value);
@@ -291,6 +296,9 @@ private:
   /// multi-key playback state stuff
   int notetrack[MAX_TRACKS];
   int outtrack;
+
+  void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
+  void onPatternStepChange(NItemEvent* ev);
 
 };
 
