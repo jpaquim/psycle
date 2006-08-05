@@ -34,7 +34,7 @@ class NLabel;
 class NToolBar;
 class NListBox;
 class ZoomBar;
-
+class NCheckBox;
 
 namespace psycle {
 	namespace host {
@@ -195,11 +195,14 @@ public:
 
     void deselectAll();
 
+    bool gridSnap() const;
+
 private:
 
     int counter;
     int beatPxLength_;
 
+    NCheckBox* snapToGridCheck_;
     SequencerBeatLineal* beatLineal_;
     SequencerBeatChangeLineal* beatChangeLineal_;
     SequencerLine* lastLine;
