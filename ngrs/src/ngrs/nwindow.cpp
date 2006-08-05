@@ -153,6 +153,12 @@ void NWindow::onMousePress( int x, int y, int button )
   graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
   if (obj!=NULL) {
+    // send mousepress
+    if ( obj->enabled() ) {
+      obj->onMousePress( x - obj->absoluteSpacingLeft() +
+      obj->scrollDx(), y - obj->absoluteSpacingTop() + obj->scrollDy(), button);
+    }
+    // end of mousepress
     if (obj!=pane_ && (mapped())) {
       if (button==1) {
         dragBase_ = obj;
@@ -160,10 +166,6 @@ void NWindow::onMousePress( int x, int y, int button )
       }
      }
     selectedBase_ = dragBase_;
-    if ( obj->enabled() ) {
-      obj->onMousePress( x - obj->absoluteSpacingLeft() +
-      obj->scrollDx(), y - obj->absoluteSpacingTop() + obj->scrollDy(), button);
-    }
   }
 }
 
