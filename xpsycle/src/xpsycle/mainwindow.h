@@ -76,7 +76,6 @@ private:
         NButton* barPlayFromStartBtn_;
     NToolBar* toolBar1_;
     NToolBar* psycleToolBar_;
-      NComboBox* patternCombo_;
       NComboBox* genCombo_;
       NComboBox* insCombo_;
       NComboBox* auxSelectCombo_;
@@ -99,7 +98,6 @@ private:
     NMenuItem* noneFileItem;
 
     N7SegDisplay* bpmDisplay_;
-    N7SegDisplay* tpbDisplay_;
 
     GreetDlg* greetDlg;
     InfoDlg*  infoDlg;
@@ -190,7 +188,6 @@ private:
 
     void onSongLoadProgress(const std::uint32_t& , const std::uint32_t& , const std::string&);
     void onOctaveChange(NItemEvent* ev);
-    void onPatternStepChange(NItemEvent* ev);
     void onTrackChange(NItemEvent* ev);
     void onNewMachine(NButtonEvent* ev);
 
@@ -198,15 +195,11 @@ private:
     void onRecordNotesMode(NButtonEvent* ev);
 
     void setAppSongBpm(int x);
-    void setAppSongTpb(int x);
 
     void onBpmIncOne(NButtonEvent* ev);
     void onBpmAddTen(NButtonEvent* ev);
     void onBpmDecOne(NButtonEvent* ev);
     void onBpmDecTen(NButtonEvent* ev);
-
-    void onTpbDecOne(NButtonEvent* ev);
-    void onTpbIncOne(NButtonEvent* ev);
 
     void onDecInsBtn(NButtonEvent* ev);
     void onIncInsBtn(NButtonEvent* ev);
