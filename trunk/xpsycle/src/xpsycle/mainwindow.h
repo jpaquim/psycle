@@ -80,8 +80,6 @@ private:
       NComboBox* insCombo_;
       NComboBox* auxSelectCombo_;
     NToolBar* psycleControlBar_;
-      NComboBox* trackCombo_;
-      NComboBox* octaveCombo_;
       NSlider*   masterSlider_;
     NStatusBar* statusBar_;
       NProgressBar* progressBar_;
@@ -187,8 +185,6 @@ private:
     void onSequencerView(NButtonEvent* ev);
 
     void onSongLoadProgress(const std::uint32_t& , const std::uint32_t& , const std::string&);
-    void onOctaveChange(NItemEvent* ev);
-    void onTrackChange(NItemEvent* ev);
     void onNewMachine(NButtonEvent* ev);
 
     void onRecordWav(NButtonEvent* ev);

@@ -181,6 +181,29 @@ void PatternView::initToolBar( )
     patternCombo_->setWidth(40);
     patternCombo_->setHeight(20);
   toolBar->add(patternCombo_);
+
+  toolBar->add(new NLabel("Octave"));
+  octaveCombo_ = new NComboBox();
+    for (int i=0; i<9; i++) octaveCombo_->add(new NItem(stringify(i)));
+    octaveCombo_->itemSelected.connect(this,&PatternView::onOctaveChange);
+    octaveCombo_->setWidth(40);
+    octaveCombo_->setHeight(20);
+    octaveCombo_->setIndex(4);
+    setEditOctave(4);
+  toolBar->add(octaveCombo_);
+
+  toolBar->add(new NLabel("Tracks"));
+  trackCombo_ = new NComboBox();
+    trackCombo_->setWidth(40);
+    trackCombo_->setHeight(20);
+    trackCombo_->itemSelected.connect(this,&PatternView::onTrackChange);
+    for(int i=4;i<=MAX_TRACKS;i++) {
+      trackCombo_->add(new NItem(stringify(i)));
+    }
+    trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16
+  toolBar->add(trackCombo_);
+
+
 }
 
 void PatternView::onAddBar( NButtonEvent * ev )
@@ -2119,6 +2142,31 @@ void PatternView::setBeatZoom( int tpb )
      vBar->setRange((lineNumber()-1-count)*rowHeight());
   }
 }
+
+void PatternView::onOctaveChange( NItemEvent * ev )
+{
+  std::stringstream str; 
+  str << ev->item()->text();
+  int octave = 0;
+  str >> octave;
+  setEditOctave(octave);
+}
+
+void PatternView::onTrackChange( NItemEvent * ev )
+{
+  std::stringstream str; 
+  str << ev->item()->text();
+  int track = 0;
+  str >> track;
+  Global::pSong()->setTracks(track);
+  if (cursor().x() >= Global::pSong()->tracks() )
+  {
+    setCursor(NPoint3D(Global::pSong()->tracks() ,cursor().y(),0));
+  }
+  repaint();
+}
+
+
 
 }}
 
