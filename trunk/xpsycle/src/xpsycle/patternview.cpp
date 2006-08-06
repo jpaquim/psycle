@@ -92,8 +92,6 @@ PatternView::PatternView()
 
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
 
-  setTransparent(false);
-
   patternStep_ = 1;
 
   moveCursorWhenPaste_ = false;
@@ -447,6 +445,8 @@ PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) 
   setSkin();
   setHeight(bgCoords.height());
   skinColWidth_ = bgCoords.width();
+  setBackground(Global::pConfig()->pvc_row);
+  setTransparent(false);
 }
 
 PatternView::Header::~ Header( )
@@ -602,6 +602,8 @@ int PatternView::Header::skinColWidth( )
     setBorder(NFrameBorder());
     pView = pPatternView;
     setWidth(60);
+    setBackground(Global::pConfig()->pvc_row);
+    setTransparent(false);
   }
 
   PatternView::LineNumber::~ LineNumber( )
@@ -681,6 +683,8 @@ int PatternView::Header::skinColWidth( )
 
 PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : dx_(0),dy_(0),doDrag_(0),doSelect_(0),NPanel()
 {
+  setTransparent(false);
+  setBackground(Global::pConfig()->pvc_row);
   setName("debug::patternDraw");
   pView = pPatternView;
   editPopup_ = new NPopupMenu();

@@ -51,7 +51,6 @@ ChildView::ChildView()
     machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
     machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
   patternView_ = new PatternView();
-    patternView_->setBackground(Global::pConfig()->pvc_row);
     patternView_->setForeground(Global::pConfig()->pvc_background);
     patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
 
