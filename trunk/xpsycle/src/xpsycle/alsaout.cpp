@@ -28,14 +28,14 @@
 #include "player.h"
 
 int AlsaOut::enablePlayer = 0;
-bool AlsaOut::in = 0;
+bool AlsaOut::running = false;
 
 
 AlsaOut::AlsaOut( ) :
     AudioDriver(),
-    _running(false),
-    _initialized(false),
-    _timerActive(false)
+//    _running(false),
+    _initialized(false)
+//   , _timerActive(false)
 {
 }
 
@@ -49,7 +49,7 @@ void AlsaOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
   _pCallback = pCallback;
   _callbackContext = context;
   _initialized = true;
-  _running = false;
+  running = false;
   setDefault();
   audioStart();
 }
@@ -61,13 +61,13 @@ bool AlsaOut::Enable( bool e )
 
 bool AlsaOut::Start( )
 {
-  if(_running) return true;
-  AlsaOut::enablePlayer = _running = 1;
+  if(running) return true;
+  AlsaOut::enablePlayer = running = 1;
 }
 
 bool AlsaOut::Stop( )
 {
-  _timerActive = false;
+//  _timerActive = false;
   audioStop();
 }
 
@@ -94,17 +94,16 @@ void AlsaOut::setDefault( )
     buffer_size;
     period_size;
     output = NULL;
-    AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
+//    AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
 }
 
 int AlsaOut::audioStop( )
 {
   AlsaOut::enablePlayer = 0;
 
-  while (in) {
+  while (running) {
       usleep(100);
   }
-
 }
 
 int AlsaOut::audioStart(  )
@@ -160,7 +159,11 @@ int AlsaOut::audioStart(  )
     areas[chn].step = channels * 16;
   }
 
-  if (0 == pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this)) return EXIT_SUCCESS;
+  if (0 == pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this))
+  {	
+	  AlsaOut::enablePlayer = 1;
+	  return EXIT_SUCCESS;
+  }
   return 1;
 }
 
@@ -350,7 +353,7 @@ int AlsaOut::write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channe
   int err, cptr;
   if (enablePlayer > 0) enablePlayer = 2;
   while (1) {
-    in = true;
+//    in = true;
     if (enablePlayer >0) {
     FillBuffer(areas, 0, period_size);
     ptr = samples;
@@ -370,7 +373,11 @@ int AlsaOut::write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channe
       cptr -= err;
     }
    }
-   in = false;
+	else
+	{
+		usleep(1000);
+	   running = false;
+	}
   }
 }
 
@@ -393,7 +400,7 @@ int AlsaOut::AlsaOut::audioOutThread( void * ptr )
 
 bool AlsaOut::Initialized( )
 {
-  return _running;
+  return _initialized;
 }
 
 #endif // !defined XPSYCLE__NO_ALSA

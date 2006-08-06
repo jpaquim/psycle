@@ -84,7 +84,7 @@ class PluginOut : public AudioDriver
   ///\}
 
   public:
-    ~PlugingOut();
+    ~PluginOut();
 
   private:
     std::string library_file_name_;
