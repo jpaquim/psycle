@@ -704,13 +704,14 @@ namespace psycle
 		bool Song::load(const std::string & fileName)
 		{
 			PsyFilter filter;
-			filter.loadSong(fileName, *this);
-			return true;
+			return filter.loadSong(fileName, *this);
 		}
 
 		bool Song::Save(RiffFile* pFile,bool autosave)
 		{
-			///\todo rework for multitracking
+			PsyFilter filter;
+			filter.saveSong(fileName, *this,4);
+			return true;
 		}
 
 		void Song::DoPreviews(int amount)

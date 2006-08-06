@@ -20,6 +20,7 @@
 #include "psyfilter.h"
 
 #include "psy3filter.h"
+#include "psy4filter.h"
 
 namespace psycle
 {
@@ -35,6 +36,7 @@ namespace psycle
 			if (c==0) {
 				c++;
 				filters.push_back(new Psy3Filter());
+				filters.push_back(new Psy4Filter());
 			}
 		}
 
