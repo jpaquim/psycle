@@ -74,7 +74,7 @@ ChildView::ChildView()
   add(getOpenFileName_);
 
   getSaveFileName_ = new NFileDialog();
-    getSaveFileName_->addFilter("*.psy [psy3 song format]","!S*.psy");
+    getSaveFileName_->addFilter("*.psy [psy4 song format]","!S*.psy");
     getSaveFileName_->setMode(nSave);
   add(getSaveFileName_);
 
@@ -111,10 +111,7 @@ void ChildView::onFileSaveSong( NObject * sender )
 }
 
 void ChildView::FileSaveSongNamed(const std::string & fName) {
-  RiffFile file;
-  file.Create(fName,true);
-  _pSong->Save(&file);
-  file.Close();
+  _pSong->save(fName);
 }
 
 std::string ChildView::OnFileLoadSongNamed( const std::string & fName, int fType )

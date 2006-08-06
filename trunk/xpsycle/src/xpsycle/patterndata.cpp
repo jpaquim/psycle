@@ -25,15 +25,21 @@ namespace psycle
 	namespace host
 	{
 
+		int PatternCategory::idCounter = 0;
+
 		PatternCategory::PatternCategory( )
 		{
 			color_ = 0x00FF0000;
+			id_ = idCounter;
+			idCounter++;
 		}
 
 		PatternCategory::PatternCategory( const std::string & name )
 		{
 			name_ = name;
 			color_ = 0x00FF0000;
+			id_ = idCounter;
+			idCounter++;
 		}
 
 		PatternCategory::~ PatternCategory( )
@@ -93,6 +99,17 @@ namespace psycle
 			return 0;
 		}
 
+		void PatternCategory::setID( int id )
+		{
+			id_ = id;
+			idCounter = std::max(id_,idCounter)+1;
+		}
+
+		int PatternCategory::id( ) const
+		{
+			return id_;
+		}
+
 		// end of Category class
 
 
@@ -147,7 +164,6 @@ namespace psycle
 
 	}
 }
-
 
 
 

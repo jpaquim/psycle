@@ -38,24 +38,6 @@ namespace psycle {
 
 				virtual int version() const;
 
-			protected:
-
-				virtual bool testFormat(const std::string & fileName);
-				virtual void save(const std::string & fileName, const Song & song) const;
-
-				virtual bool LoadSNGIv0(RiffFile* file,Song& song,int minorversion);
-
-				virtual bool SaveSONGv0(RiffFile* file,const Song& song);
-				virtual bool SaveINFOv0(RiffFile* file,const Song& song);
-				virtual bool SaveSNGIv0(RiffFile* file,const Song& song);
-				virtual bool SaveSEQDv0(RiffFile* file,const Song& song);
-				virtual bool SavePATDv0(RiffFile* file,const Song& song);
-				virtual bool SaveMACDv0(RiffFile* file,const Song& song,int index);
-				virtual bool SaveINSDv0(RiffFile* file,const Song& song,int index);
-				virtual bool SaveWAVEv0(RiffFile* file,const Song& song,int index);
-
-				static std::uint32_t const VERSION_SNGI;
-
 		};
 
 	}

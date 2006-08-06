@@ -49,10 +49,17 @@ namespace psycle
 
 			SinglePattern* findById(int id);
 
+			void setID(int id);
+			int id() const;
+
+
 		private:
 
 			std::string name_;
 			long color_;
+
+			int id_;
+			static int idCounter;
 
 		};
 
