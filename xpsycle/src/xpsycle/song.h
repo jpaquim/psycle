@@ -30,9 +30,11 @@ namespace psycle
 				void clear(); // clears all song data
 
 				PatternSequence* patternSequence();
+				const PatternSequence & patternSequence() const;
 
 				// loads a song
 				bool load(const std::string & fileName);
+				bool save(const std::string & fileName);
 
 				//authorship
 				void setName(const std::string & name);
@@ -184,15 +186,6 @@ namespace psycle
 					void DoPreviews(int amount);
 			///\}
 
-			///\name (de)serialization
-			///\{
-				public:
-					/// loads a file into this song object.
-					///\param fullopen  used in context of the winamp/foobar player plugins (\todo doc not only!), where it allows to get the info of the file, without needing to open it completely.
-					
-
-					/// saves this song to a file.
-					bool Save(RiffFile* pFile,bool autosave=false);
 
 			///\name cpu cost measurement
 			///\{

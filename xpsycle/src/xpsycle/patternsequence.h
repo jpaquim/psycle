@@ -158,6 +158,8 @@ namespace psycle
 
 
 			PatternData* patternData();
+			const PatternData & patternData() const;
+
 			void removeSinglePattern(SinglePattern* pattern);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.

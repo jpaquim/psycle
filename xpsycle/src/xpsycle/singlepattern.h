@@ -72,6 +72,7 @@ namespace psycle
 			void clearPosition(double beatpos, int track, int column);
 
 			std::vector<TimeSignature> &  timeSignatures();
+			const std::vector<TimeSignature> &  timeSignatures() const;
 
 		private:
 
@@ -84,6 +85,7 @@ namespace psycle
 			TimeSignature zeroTime;
 
 			int id_;
+			static int idCounter;
 
 		};
 

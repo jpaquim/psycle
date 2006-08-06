@@ -707,7 +707,7 @@ namespace psycle
 			return filter.loadSong(fileName, *this);
 		}
 
-		bool Song::Save(RiffFile* pFile,bool autosave)
+		bool Song::save(const std::string & fileName)
 		{
 			PsyFilter filter;
 			filter.saveSong(fileName, *this,4);
@@ -1062,6 +1062,11 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 			return &patternSequence_;
 		}
 
+		const PatternSequence & psycle::host::Song::patternSequence( ) const
+		{
+			return patternSequence_;
+		}
+
 		unsigned int Song::tracks( ) const
 		{
 			return tracks_;
@@ -1115,6 +1120,8 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 
 }
 }
+
+
 
 
 

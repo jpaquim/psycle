@@ -300,6 +300,11 @@ namespace psycle
 			return &patternData_;
 		}
 
+		const PatternData & psycle::host::PatternSequence::patternData( ) const
+		{
+			return patternData_;
+		}
+
 		////////////////////////////////////////////////////////////////////////////
 		// GetLinesInRange
 		// Objective: return the PatternLines that are active in the range [start, start+length).
@@ -464,3 +469,5 @@ namespace psycle
 
 
 }
+
+

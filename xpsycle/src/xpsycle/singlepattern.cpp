@@ -25,6 +25,8 @@ namespace psycle
 	namespace host
 	{
 
+		int SinglePattern::idCounter = 0;
+
 		SinglePattern::SinglePattern()
 		{
 			TimeSignature timeSig;
@@ -32,7 +34,8 @@ namespace psycle
 			timeSignatures_.push_back( timeSig  );
 			beatZoom_ = 4;
 			category_ = 0;
-			id_ = 0;
+			id_ = idCounter;
+			idCounter++;
 		}
 
 
@@ -255,9 +258,15 @@ namespace psycle
   		return timeSignatures_;
 		}
 
+		const std::vector< TimeSignature > & SinglePattern::timeSignatures( ) const
+		{
+  		return timeSignatures_;
+		}
+
 		void SinglePattern::setID( int id )
 		{
 			id_ = id;
+			idCounter = std::max(id_,idCounter)+1;
 		}
 
 		int SinglePattern::id( ) const
