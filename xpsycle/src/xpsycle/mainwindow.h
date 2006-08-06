@@ -77,8 +77,6 @@ private:
     NToolBar* toolBar1_;
     NToolBar* psycleToolBar_;
       NComboBox* genCombo_;
-      NComboBox* insCombo_;
-      NComboBox* auxSelectCombo_;
     NToolBar* psycleControlBar_;
       NSlider*   masterSlider_;
     NStatusBar* statusBar_;
@@ -100,12 +98,9 @@ private:
     GreetDlg* greetDlg;
     InfoDlg*  infoDlg;
     NFileDialog* wavRecFileDlg;
-    NFileDialog* wavSaveFileDlg;
     WaveSaveDlg* wavSaveDlg;
 
     VuMeter* vuMeter_;
-
-    InstrumentEditor* instrumentEditor;
 
     NTextStatusItem* macPosStatusItem;
     NTextStatusItem* seqPosStatusItem;
@@ -174,12 +169,6 @@ private:
     void onHelpMenuTweaking(NButtonEvent* ev);
     void onHelpMenuWhatsNew(NButtonEvent* ev);
 
-    void onLoadWave(NButtonEvent* ev);
-    void onSaveWave(NButtonEvent* ev);
-    void onEditInstrument(NButtonEvent* ev);
-    void onEditWave(NButtonEvent* ev);
-    void onInstrumentCbx(NItemEvent* ev);
-
     void onMachineView(NButtonEvent* ev);
     void onPatternView(NButtonEvent* ev);
     void onSequencerView(NButtonEvent* ev);
@@ -197,9 +186,6 @@ private:
     void onBpmDecOne(NButtonEvent* ev);
     void onBpmDecTen(NButtonEvent* ev);
 
-    void onDecInsBtn(NButtonEvent* ev);
-    void onIncInsBtn(NButtonEvent* ev);
-
     void updateComboGen();
     void appNew();
 
@@ -210,7 +196,6 @@ private:
     bool checkUnsavedSong();
 
     int close();
-    void updateComboIns(bool updatelist);
 
     void onMachineMoved(Machine* mac , int x, int y);
     void onLineChanged(int line);

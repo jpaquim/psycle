@@ -24,14 +24,22 @@
 class NMenu;
 class NMenuBar;
 class NToolBar;
+class NComboBox;
+class NItemEvent;
+class NFileDialog;
 
 namespace psycle { namespace host {
 
 class WaveEdChildView;
+class WaveSaveDlg;
+class InstrumentEditor;
+
 
 /// wave editor frame window.
 class WaveEdFrame : public NDockPanel
 {
+
+
 public:
 	WaveEdFrame();
 	virtual ~WaveEdFrame() throw();
@@ -55,7 +63,11 @@ private:
 	void InitToolBar();
  
 	NToolBar *toolBar;
+	NComboBox* insCombo_;
+	NComboBox* auxSelectCombo_;
 	WaveEdChildView *wavView;
+	NFileDialog* wavSaveFileDlg;
+	InstrumentEditor* instrumentEditor;
 
 	int wsInstrument;
 	
@@ -67,6 +79,17 @@ private:
 	void onRewind(NButtonEvent *ev);
 	void PlayFrom(unsigned long startpos);
 	void Stop();
+
+	void onLoadWave(NButtonEvent* ev);
+	void onSaveWave(NButtonEvent* ev);
+	void onEditInstrument(NButtonEvent* ev);
+	void onEditWave(NButtonEvent* ev);
+	void onInstrumentCbx(NItemEvent* ev);
+
+	void updateComboIns(bool updatelist);
+
+	void onDecInsBtn(NButtonEvent* ev);
+	void onIncInsBtn(NButtonEvent* ev);
 
 };
 

@@ -19,12 +19,17 @@
   ***************************************************************************/
 //#include "xpsycle.cpp"
 #include "song.h"
+#include "riff.h"
 #include "configuration.h"
 #include "waveedframe.h"
 #include "waveedchildview.h"
 #include "defaultbitmaps.h"
+#include "instrumenteditor.h"
+#include <iomanip>
+#include <iostream>
 #include <ngrs/nvisualcomponent.h>
 #include <ngrs/nitem.h>
+#include <ngrs/nitemevent.h>
 #include <ngrs/nmenubar.h>
 #include <ngrs/nmenuitem.h>
 #include <ngrs/nmenu.h>
@@ -32,6 +37,10 @@
 #include <ngrs/nmenuseperator.h>
 #include <ngrs/ntoolbar.h>
 #include <ngrs/nimage.h>
+#include <ngrs/ncombobox.h>
+#include <ngrs/nfiledialog.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/ntoolbarseparator.h>
 
 namespace psycle { namespace host {
 
@@ -46,24 +55,17 @@ namespace psycle { namespace host {
 		this->InitToolBar();
 		//this->setTitle("Wave Editor");
 		pane()->add(wavView);
+		wavSaveFileDlg = new NFileDialog();
+			wavSaveFileDlg->setMode(nSave);
+		add(wavSaveFileDlg);
+		// creates the instrument editor for editing samples
+  	add( instrumentEditor = new InstrumentEditor() );
 	}
 
 	WaveEdFrame::~WaveEdFrame() throw()
 	{
 	}
-	
-/*	void WaveEdFrame::setVisible(bool on)
-	{
-		NWindow::setVisible(on);
-		wavView->resize();
-	}
-
-	int WaveEdFrame::onClose()
-	{
-		setVisible(false);
-		return nHideWindow;
-	}*/
-	
+		
 	void WaveEdFrame::InitMenus()
 	{
 		menuBar=new NMenuBar();
@@ -159,6 +161,35 @@ namespace psycle { namespace host {
 	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onFastForward);
 
 	toolBar->resize();
+	toolBar->add(new NToolBarSeparator());
+		auxSelectCombo_ = new NComboBox();
+		auxSelectCombo_->setWidth(70);
+		auxSelectCombo_->setHeight(20);
+		auxSelectCombo_->add(new NItem("Wave"));
+		auxSelectCombo_->setIndex(0);
+	toolBar->add(auxSelectCombo_);
+	insCombo_ = new NComboBox();
+		insCombo_->setWidth(158);
+		insCombo_->setHeight(20);
+		insCombo_->itemSelected.connect(this,&WaveEdFrame::onInstrumentCbx);
+	toolBar->add(insCombo_);
+
+	img = new NImage();
+		img->setSharedBitmap(&icons.littleleft());
+		img->setPreferredSize(25,25);
+	toolBar->add(new NButton(img))->clicked.connect(this,&WaveEdFrame::onDecInsBtn);
+
+	img = new NImage();
+		img->setSharedBitmap(&icons.littleright());
+		img->setPreferredSize(25,25);
+	toolBar->add(new NButton(img))->clicked.connect(this,&WaveEdFrame::onIncInsBtn);
+
+	toolBar->add(new NButton("Load"))->clicked.connect(this,&WaveEdFrame::onLoadWave);
+	toolBar->add(new NButton("Save"))->clicked.connect(this,&WaveEdFrame::onSaveWave);
+	toolBar->add(new NButton("Edit"))->clicked.connect(this,&WaveEdFrame::onEditInstrument);
+	toolBar->add(new NButton("Wave Ed"))->clicked.connect(this,&WaveEdFrame::onEditWave);
+	insCombo_->setIndex(0);
+	updateComboIns(true);
 }
 
 
@@ -203,6 +234,130 @@ namespace psycle { namespace host {
 	{
 		wavView->SetCursorPos( 0 );
 	}
+
+	void WaveEdFrame::onLoadWave( NButtonEvent * ev )
+	{
+		NFileDialog* dialog = new NFileDialog();
+		add(dialog);
+
+		dialog->addFilter("Wav Files(*.wav)","!S*.wav");
+
+		if (dialog->execute()) {
+			int si = Global::pSong()->instSelected;
+			//added by sampler
+			if ( Global::pSong()->_pInstrument[si]->waveLength != 0)
+			{
+        //if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
+			}
+
+		if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
+		{
+			updateComboIns(true);
+			if(insCombo_->selIndex() == Global::pSong()->instSelected)
+			Notify();
+		}
+	}
+	NApp::addRemovePipe(dialog);
+}
+
+	void WaveEdFrame::onSaveWave( NButtonEvent * ev )
+	{
+		WaveFile output;
+		Song* _pSong = Global::pSong();
+
+		if (_pSong->_pInstrument[_pSong->instSelected]->waveLength)
+		{
+			if ( wavSaveFileDlg->execute() )
+			{
+				output.OpenForWrite(wavSaveFileDlg->fileName().c_str(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
+				if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo)
+				{
+					for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength; c++)
+					{
+						output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR + c) );
+					}
+				}
+			else {
+				output.WriteData(_pSong->_pInstrument[_pSong->instSelected]->waveDataL, _pSong->_pInstrument[_pSong->instSelected]->waveLength);
+			}
+			output.Close();
+			}
+		}
+   //else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
+   //m_wndView.SetFocus();
+}
+
+
+void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
+{
+		instrumentEditor->setInstrument(Global::pSong()->instSelected);
+		instrumentEditor->setVisible(true);
+}
+
+	void WaveEdFrame::onEditWave( NButtonEvent * ev)
+	{
+		Notify();
+	}
+
+	void WaveEdFrame::onDecInsBtn( NButtonEvent * ev )
+	{
+		int index = Global::pSong()->instSelected -1;
+		if (index >=0 ) {
+			Global::pSong()->instSelected=   index;
+			Global::pSong()->auxcolSelected= index;
+			Notify();
+
+			insCombo_->setIndex(index);
+			insCombo_->repaint();
+		}
+	}
+
+	void WaveEdFrame::onIncInsBtn( NButtonEvent * ev )
+	{
+		int index = Global::pSong()->instSelected +1;
+		if (index <= 255) {
+			Global::pSong()->instSelected=   index;
+			Global::pSong()->auxcolSelected= index;
+			Notify();
+
+			insCombo_->setIndex(index);
+			insCombo_->repaint();
+		}
+	}
+
+	void WaveEdFrame::onInstrumentCbx( NItemEvent * ev )
+	{
+		int index = insCombo_->selIndex();
+		Global::pSong()->instSelected=   index;
+		Global::pSong()->auxcolSelected= index;
+		Notify();
+	}
+
+	void WaveEdFrame::updateComboIns( bool updatelist )
+	{
+		if (updatelist)  {
+			insCombo_->removeChilds();
+			std::ostringstream buffer;
+			buffer.setf(std::ios::uppercase);
+
+			int listlen = 0;
+			for (int i=0;i<PREV_WAV_INS;i++)
+			{
+				buffer.str("");
+				buffer << std::setfill('0') << std::hex << std::setw(2);
+				buffer << i << ": " << Global::pSong()->_pInstrument[i]->_sName;
+				insCombo_->add(new NItem(buffer.str()));
+				listlen++;
+			}
+			if (Global::pSong()->auxcolSelected >= listlen) {
+				Global::pSong()->auxcolSelected = 0;
+		}
+		insCombo_->setIndex(Global::pSong()->instSelected);  //redraw current selection text
+		insCombo_->repaint();
+  }
+}
+
+
 }}
 
 

@@ -26,10 +26,10 @@
 #include "vumeter.h"
 #include "instrumenteditor.h"
 #include "infodlg.h"
-#include "wavesavedlg.h"
 #include "internal_machines.h"
 #include "waveedframe.h"
 #include "sequencergui.h"
+#include "wavesavedlg.h"
 #include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
@@ -132,7 +132,7 @@ void MainWindow::initMenu( )
       viewMenu_->add(new NMenuSeperator());
       viewMenu_->add(new NMenuItem("Add machine",icons.newmachine()))->click.connect(this,&MainWindow::onNewMachine);
       viewMenu_->add(new NMenuSeperator());
-      viewMenu_->add(new NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
+//      viewMenu_->add(new NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
     menuBar_->add(viewMenu_);
 
     // Creates the configuration menu
@@ -169,17 +169,12 @@ void MainWindow::initDialogs( )
 {
   // creates the song dialog for editing song name, author, and comment
   add( songpDlg_ = new SongpDlg(Global::pSong()) );
-  // creates the instrument editor for editing samples
-  add( instrumentEditor = new InstrumentEditor() );
   // creates the greeting dialog, that greets people who help psycle development
   add( greetDlg =  new GreetDlg() );
   // creates the save dialog, that ask where to store wave files, recorded from playing a psy song
   wavRecFileDlg = new NFileDialog();
     wavRecFileDlg->setMode(nSave);
   add(wavRecFileDlg);
-  wavSaveFileDlg = new NFileDialog();
-    wavSaveFileDlg->setMode(nSave);
-  add(wavSaveFileDlg);
   // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
   add( infoDlg =  new InfoDlg() );
   add( wavSaveDlg = new WaveSaveDlg() );
@@ -241,9 +236,6 @@ void MainWindow::initBars( )
 
   pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
   sequencerBar_->added.connect(this,&MainWindow::onSeqAdded);
-
-  updateComboIns(true);
-  insCombo_->setIndex(0);
 }
 
 void MainWindow::initToolBar( )
@@ -366,9 +358,9 @@ void MainWindow::initToolBar( )
   img = new NImage();
     img->setSharedBitmap(&icons.openeditor());
     img->setPreferredSize(25,25);
-  NButton* editInsBtn = new NButton(img);
+/*  NButton* editInsBtn = new NButton(img);
     editInsBtn->setHint("Edit Instrument");
-  toolBar1_->add(editInsBtn)->clicked.connect(this,&MainWindow::onEditInstrument);
+  toolBar1_->add(editInsBtn)->clicked.connect(this,&MainWindow::onEditInstrument);*/
 
   toolBar1_->add(new NToolBarSeparator());
 
@@ -460,34 +452,6 @@ void MainWindow::initToolBar( )
       psycleToolBar_->add(new NButton(img));
 
       psycleToolBar_->add(new NButton("Gear Rack"));
-      psycleToolBar_->add(new NToolBarSeparator());
-      auxSelectCombo_ = new NComboBox();
-        auxSelectCombo_->setWidth(70);
-        auxSelectCombo_->setHeight(20);
-        auxSelectCombo_->add(new NItem("Wave"));
-        auxSelectCombo_->setIndex(0);
-      psycleToolBar_->add(auxSelectCombo_);
-      insCombo_ = new NComboBox();
-        insCombo_->setWidth(158);
-        insCombo_->setHeight(20);
-        insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
-      psycleToolBar_->add(insCombo_);
-
-      img = new NImage();
-        img->setSharedBitmap(&icons.littleleft());
-        img->setPreferredSize(25,25);
-      psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onDecInsBtn);
-
-      img = new NImage();
-        img->setSharedBitmap(&icons.littleright());
-        img->setPreferredSize(25,25);
-      psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onIncInsBtn);
-
-      psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
-      psycleToolBar_->add(new NButton("Save"))->clicked.connect(this,&MainWindow::onSaveWave);
-      psycleToolBar_->add(new NButton("Edit"))->clicked.connect(this,&MainWindow::onEditInstrument);
-      psycleToolBar_->add(new NButton("Wave Ed"))->clicked.connect(this,&MainWindow::onEditWave);
-      psycleToolBar_->resize();
 
   toolBarPanel_->add(psycleToolBar_);
 
@@ -536,7 +500,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   progressBar_->setVisible(false);
   pane()->resize();
   updateComboGen();
-  updateComboIns(true);
+//  updateComboIns(true);
   childView_->waveEditor()->Notify();
   sequencerBar_->update();
   childView_->sequencerView()->update();
@@ -714,7 +678,7 @@ void MainWindow::appNew( )
 //  pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
         //pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
   updateComboGen();
-  updateComboIns(true);
+//  updateComboIns(true);
   childView_->waveEditor()->Notify();
   childView_->patternView()->repaint();
   childView_->machineView()->repaint();
@@ -873,98 +837,6 @@ void MainWindow::onMachineView(NButtonEvent* ev) {
 void MainWindow::onPatternView(NButtonEvent* ev) {
   childView_->setActivePage(1);
   childView_->repaint();
-}
-
-void MainWindow::onLoadWave( NButtonEvent * ev )
-{
-  NFileDialog* dialog = new NFileDialog();
-  add(dialog);
-
-  dialog->addFilter("Wav Files(*.wav)","!S*.wav");
-
-  if (dialog->execute()) {
-    int si = Global::pSong()->instSelected;
-    //added by sampler
-    if ( Global::pSong()->_pInstrument[si]->waveLength != 0)
-    {
-        //if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
-    }
-
-    if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
-    {
-      updateComboIns(true);
-      if(insCombo_->selIndex() == Global::pSong()->instSelected)
-	      childView_->waveEditor()->Notify();
-
-      //m_wndStatusBar.SetWindowText("New wave loaded");
-      //WaveEditorBackUpdate();
-      //m_wndInst.WaveUpdate();
-    }
-  }
-
-  NApp::addRemovePipe(dialog);
-}
-
-void MainWindow::updateComboIns( bool updatelist )
-{
-  if (updatelist)  {
-    insCombo_->removeChilds();
-    std::ostringstream buffer;
-    buffer.setf(std::ios::uppercase);
-
-    int listlen = 0;
-    for (int i=0;i<PREV_WAV_INS;i++)
-    {
-      buffer.str("");
-      buffer << std::setfill('0') << std::hex << std::setw(2);
-      buffer << i << ": " << Global::pSong()->_pInstrument[i]->_sName;
-      insCombo_->add(new NItem(buffer.str()));
-      listlen++;
-    }
-    if (Global::pSong()->auxcolSelected >= listlen) {
-      Global::pSong()->auxcolSelected = 0;
-    }
-    insCombo_->setIndex(Global::pSong()->instSelected);  //redraw current selection text
-    insCombo_->repaint();
-  }
-}
-
-void MainWindow::onEditInstrument( NButtonEvent * ev )
-{
-  instrumentEditor->setInstrument(Global::pSong()->instSelected);
-  instrumentEditor->setVisible(true);
-}
-
-void MainWindow::onEditWave( NButtonEvent * ev)
-{
-  childView_->waveEditor()->Notify();
-  //waveEd_->setVisible(true);
-}
-
-void MainWindow::onDecInsBtn( NButtonEvent * ev )
-{
-  int index = Global::pSong()->instSelected -1;
-  if (index >=0 ) {
-    Global::pSong()->instSelected=   index;
-    Global::pSong()->auxcolSelected= index;
-    childView_->waveEditor()->Notify();
-
-    insCombo_->setIndex(index);
-    insCombo_->repaint();
-  }
-}
-
-void MainWindow::onIncInsBtn( NButtonEvent * ev )
-{
-  int index = Global::pSong()->instSelected +1;
-  if (index <= 255) {
-    Global::pSong()->instSelected=   index;
-    Global::pSong()->auxcolSelected= index;
-    childView_->waveEditor()->Notify();
-
-    insCombo_->setIndex(index);
-    insCombo_->repaint();
-  }
 }
 
 bool MainWindow::checkUnsavedSong( )
@@ -1166,13 +1038,6 @@ void MainWindow::onEditSeqCut( NButtonEvent * ev )
 {
 }
 
-void MainWindow::onInstrumentCbx( NItemEvent * ev )
-{
-  int index = insCombo_->selIndex();
-  Global::pSong()->instSelected=   index;
-  Global::pSong()->auxcolSelected= index;
-  childView_->waveEditor()->Notify();
-}
 
 void MainWindow::onMachineMoved( Machine * mac, int x, int y )
 {
@@ -1202,32 +1067,6 @@ void MainWindow::updateStatusBar( )
   statusBar_->repaint();
 }
 
-void MainWindow::onSaveWave( NButtonEvent * ev )
-{
-  WaveFile output;
-  Song* _pSong = Global::pSong();
-
-  if (_pSong->_pInstrument[_pSong->instSelected]->waveLength)
-  {
-    if ( wavSaveFileDlg->execute() )
-    {
-       output.OpenForWrite(wavSaveFileDlg->fileName().c_str(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
-       if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo)
-       {
-         for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength; c++)
-         {
-           output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR + c) );
-         }
-       }
-       else {
-         output.WriteData(_pSong->_pInstrument[_pSong->instSelected]->waveDataL, _pSong->_pInstrument[_pSong->instSelected]->waveLength);
-       }
-       output.Close();
-     }
-   }
-   //else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
-   //m_wndView.SetFocus();
-}
 
 void MainWindow::onFileExit( NButtonEvent * ev )
 {
