@@ -47,19 +47,19 @@ public:
     virtual void configure();
     virtual bool Enable(bool e);
 
-    bool _timerActive;
+//    bool _timerActive;
 
 private:
 
-    int iret1;
-    static void* pollerThread(void* ptr);
+//    int iret1;
+//    static void* pollerThread(void* ptr);
     void* _callbackContext;
     AUDIODRIVERWORKFN _pCallback;
     pthread_t threadid;
 
 
     bool _initialized;
-    bool _running;
+//    bool _running;
 
     
     void setDefault();
@@ -85,7 +85,7 @@ private:
     snd_pcm_t *handle;
 
     static int enablePlayer; // -1: has stopped, 0: stop!, 1: play!, 2: is playing
-    static bool in;
+    static bool running;
     int method;       // 0:WRITE 1:WRITE&POLL 2:ASYNC 3:async_direct 4:direct_interleaved
                       // 5:direct_noninterleaved 6:DIRECT_WRITE
     signed short *samples;
@@ -108,7 +108,7 @@ private:
     int write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
 
     static int audioOutThread(void * ptr);
-    void setValues();
+//    void setValues();
 
 };
 

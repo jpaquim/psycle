@@ -36,7 +36,7 @@ namespace psycle
 		}
 
 
-		void psycle::host::Song::clear( )
+		void Song::clear( )
 		{
 			_machineLock = false;
 			Invalided = false;
@@ -1062,7 +1062,7 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 			return &patternSequence_;
 		}
 
-		const PatternSequence & psycle::host::Song::patternSequence( ) const
+		const PatternSequence & Song::patternSequence( ) const
 		{
 			return patternSequence_;
 		}
@@ -1120,9 +1120,3 @@ void Song::patternTweakSlide(int machine, int command, int value, int patternPos
 
 }
 }
-
-
-
-
-
-

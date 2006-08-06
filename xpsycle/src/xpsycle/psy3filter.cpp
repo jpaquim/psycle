@@ -85,9 +85,10 @@ namespace psycle
 			progress.emit(2,0,"Loading... psycle song fileformat version 3...");
 
 			// skip header
-			char Header[9];
-			file.ReadChunk(&Header, 8);
-			Header[8]=0;
+			file.Skip(8);
+//			char Header[9];
+//			file.ReadChunk(&Header, 8);
+//			Header[8]=0;
 
 			//\todo:
 			song.clear();
@@ -185,7 +186,7 @@ namespace psycle
 					//\todo: verify how it works with invalid data.
 //					if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
 //					else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
-					//file.Seek(fileposition+size);
+					file.Seek(fileposition+size);
 				}
 				--chunkcount;
 			}
@@ -194,7 +195,7 @@ namespace psycle
 
 			//\todo: Move this to something like "song.validate()" 
 
-				// now that we have loaded all the modules, time to prepare them.
+				// now that we have loaded all the patterns, time to prepare them.
 				double pos = 0;
 				std::vector<int>::iterator it = seqList.begin();
 				for ( ; it < seqList.end(); ++it)
@@ -420,7 +421,7 @@ namespace psycle
 				file->ReadString(patternName, sizeof patternName);
 				file->Read(size);
 				unsigned char * pSource = new unsigned char[size];
-				file->ReadChunk(pSource, size);
+				fileread = file->ReadChunk(pSource, size);
 				unsigned char * pDest;
 				DataCompression::BEERZ77Decomp2(pSource, &pDest);
 				zapArray(pSource,pDest);
@@ -469,6 +470,8 @@ namespace psycle
 			if(index < MAX_MACHINES)
 			{
 				Machine::id_type const id(index);
+				///\todo: song.clear() creates an empty song with a Master Machine. This loader doesn't
+				// try to free that allocated machine.
 				song._pMachine[index] = Machine::LoadFileChunk(file, id, minorversion, true);
 			}
 			return (bool)song._pMachine[index];
