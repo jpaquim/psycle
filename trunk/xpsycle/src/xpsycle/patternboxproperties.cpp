@@ -35,7 +35,7 @@ PatternBoxProperties::PatternBoxProperties()
   NFrameBorder fr;
   setBorder(fr);
 
-  header()->add(new NLabel("Properties"), nAlClient);
+  header()->add(new NLabel("Pattern Properties"), nAlClient);
 
   NPanel* table = new NPanel();
     NTableLayout tableLayout(2,2);

@@ -164,9 +164,13 @@ void SequencerBar::init( )
   setLayout(NAlignLayout());
   setWidth(90);
 
-  NPanel* patternPanel = new NPanel();
-    patternPanel->setLayout( NAlignLayout(0,5) );
-    patternPanel->add(new NLabel("Patterns"), nAlTop);
+  NFlipBox* flipBox = new NFlipBox();
+    NFrameBorder fr;
+    flipBox->setBorder(fr);
+    flipBox->header()->add(new NLabel("Pattern properties"), nAlClient);
+
+    NPanel* patternPanel = new NPanel();
+    patternPanel->setLayout( NAlignLayout() );
 
     NToolBar* patToolBar = new NToolBar();
       NImage* img = new NImage();
@@ -187,21 +191,28 @@ void SequencerBar::init( )
       patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
     patternPanel->add(patToolBar, nAlTop);
 
-    propertyBox_ = new PatternBoxProperties();
-       propertyBox_->nameChanged.connect(this,&SequencerBar::onNameChanged);
-    patternPanel->add(propertyBox_, nAlBottom);
-
-    entryBox_ = new NObjectInspector();
-      entryBox_->setPreferredSize(100,100);
-    patternPanel->add(entryBox_, nAlBottom);
-
     patternBox_ = new NCustomTreeView();
       patternBox_->setPreferredSize(100,300);
       patternBox_->itemSelected.connect(this,&SequencerBar::onItemSelected);
-
     patternPanel->add(patternBox_, nAlClient);
 
-  add(patternPanel, nAlTop);
+    flipBox->pane()->add(patternPanel, nAlClient);
+    flipBox->setExpanded(true);
+    add(flipBox, nAlTop);
+
+    propertyBox_ = new PatternBoxProperties();
+       propertyBox_->nameChanged.connect(this,&SequencerBar::onNameChanged);
+    add(propertyBox_, nAlTop);
+
+    flipBox = new NFlipBox();
+      entryBox_ = new NObjectInspector();
+        entryBox_->setPreferredSize(100,100);
+      flipBox->setBorder(fr);
+      flipBox->header()->add(new NLabel("Sequence Properties"), nAlClient);
+
+    flipBox->pane()->add(entryBox_, nAlClient);
+
+    add(flipBox, nAlTop);
 
 
 
