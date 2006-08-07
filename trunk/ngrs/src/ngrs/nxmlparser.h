@@ -20,26 +20,34 @@
 #ifndef NXMLPARSER_H
 #define NXMLPARSER_H
 
+#include "sigslot.h"
 #include <string>
+
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/sax2/SAX2XMLReader.hpp>
+#include <xercesc/sax2/XMLReaderFactory.hpp>
+#include <xercesc/sax2/DefaultHandler.hpp>
+#include <xercesc/util/XMLString.hpp>
+
 
 /**
 @author Stefan Nattkemper
 */
+
 class NXmlParser{
 public:
     NXmlParser();
 
     ~NXmlParser();
 
-    void parse(const std::string & text);
+    sigslot::signal1<const std::string &> tagParse;
 
-private:
+    void parseFile(const std::string & fileName);
+    std::string getAttribValue(const std::string & name);
 
-    std::string comment;
-    int commentCounter;
+    const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
 
-    bool commentStart(char c);
-    int commentSkip(const std::string & text, int actualPos);
+
 };
 
 #endif
