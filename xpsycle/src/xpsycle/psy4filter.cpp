@@ -153,32 +153,33 @@ namespace psycle {
 				}
 			} else 
 			if (tagName == "machine") {
-				int id  = str_hex<int> (parser.getAttribValue("id"));
-				int type  = str_hex<int> (parser.getAttribValue("type"));
+				int id  = str<int> (parser.getAttribValue("id"));
+				int type  = str<int> (parser.getAttribValue("type"));
 				std::string pluginname = parser.getAttribValue("pluginname");
 				if(id < MAX_MACHINES)
 				{
 					lastMachine = Machine::create((MachineType)type, id, pluginname);
 					song_->_pMachine[id] = lastMachine;
 					lastMachine->_macIndex = id;
-					lastMachine->_bypass  = str_hex<int> (parser.getAttribValue("bypass"));
-					lastMachine->_mute    = str_hex<int> (parser.getAttribValue("bypass"));
-					lastMachine->_panning = str_hex<int> (parser.getAttribValue("pan"));
-					lastMachine->_panning = str_hex<int> (parser.getAttribValue("pan"));
-					lastMachine->SetPosX(str_hex<int> (parser.getAttribValue("x")));
-					lastMachine->SetPosY(str_hex<int> (parser.getAttribValue("y")));
+					lastMachine->_bypass  = str<int> (parser.getAttribValue("bypass"));
+					lastMachine->_mute    = str<int> (parser.getAttribValue("bypass"));
+					lastMachine->_panning = str<int> (parser.getAttribValue("pan"));
+					lastMachine->_panning = str<int> (parser.getAttribValue("pan"));
+					lastMachine->SetPosX(str<int> (parser.getAttribValue("x")));
+					lastMachine->SetPosY(str<int> (parser.getAttribValue("y")));
 					lastMachine->_connectedInputs = str_hex<int> (parser.getAttribValue("connectedinputs"));
 					lastMachine->_connectedOutputs = str_hex<int> (parser.getAttribValue("connectedoutputs"));
 				}
 			} else 
 			if (tagName == "connection" && lastMachine) {
-				int index = str_hex<int> (parser.getAttribValue("index"));
-				int out_mac = str_hex<int> (parser.getAttribValue("outputmac"));
-				int in_mac = str_hex<int> (parser.getAttribValue("inputmac"));
+				int index = str<int> (parser.getAttribValue("index"));
+				int out_mac = str<int> (parser.getAttribValue("outputmac"));
+				int in_mac = str<int> (parser.getAttribValue("inputmac"));
+				std::cout << "mac:" << lastMachine->_macIndex << ", con:" << index << "," << in_mac << "," << out_mac << std::endl;
 				float wire_mult = str<float> (parser.getAttribValue("wiremult"));
 				float input_vol = str<float> (parser.getAttribValue("index"));
-				int connection = str_hex<int> (parser.getAttribValue("connection"));
-				int input_con = str_hex<int> (parser.getAttribValue("inputcon"));
+				int connection = str<int> (parser.getAttribValue("connection"));
+				int input_con = str<int> (parser.getAttribValue("inputcon"));
 				lastMachine->_inputMachines[index] = in_mac;
 				lastMachine->_outputMachines[index] = out_mac;
 				lastMachine->_inputConVol[index] = input_vol;
