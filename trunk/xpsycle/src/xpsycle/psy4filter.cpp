@@ -167,8 +167,8 @@ namespace psycle {
 					lastMachine->_panning = str_hex<int> (parser.getAttribValue("pan"));
 					lastMachine->SetPosX(str_hex<int> (parser.getAttribValue("x")));
 					lastMachine->SetPosY(str_hex<int> (parser.getAttribValue("y")));
-					lastMachine->_connectedInputs = str_hex<int> (parser.getAttribValue("connectedInputs"));
-					lastMachine->_connectedInputs = str_hex<int> (parser.getAttribValue("connectedOutputs"));
+					lastMachine->_connectedInputs = str_hex<int> (parser.getAttribValue("connectedinputs"));
+					lastMachine->_connectedOutputs = str_hex<int> (parser.getAttribValue("connectedoutputs"));
 				}
 			} else 
 			if (tagName == "connection" && lastMachine) {
