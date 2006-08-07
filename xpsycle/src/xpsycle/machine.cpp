@@ -682,7 +682,9 @@ namespace psycle
 				break;
 			default:
 //				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
-                                std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
+				if (type != MACH_DUMMY ) {
+                                std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << (int) type << std::endl;
+				}
 				pMachine = new Dummy(index);
 				break;
 			}
@@ -879,9 +881,9 @@ namespace psycle
 			xml << " pan='" << (int) _panning <<  std::hex << "'";
 			xml << " x='"   << (int) _x <<  std::hex << "'";
 			xml << " y='"   << (int) _y <<  std::hex << "'";
-			xml << " name='" << GetEditName() << "'";
-			xml << " connectedInputs='" << _connectedInputs <<  std::hex << "'";
-			xml << " connectedOutputs='" << _connectedOutputs <<  std::hex << "' />";
+			//xml << " name='" << GetEditName() << "'";
+			xml << " connectedinputs='" << _connectedInputs <<  std::hex << "'";
+			xml << " connectedoutputs='" << _connectedOutputs <<  std::hex << "' >";
 			xml << std::endl;
 			for(int i = 0; i < MAX_CONNECTIONS; i++) {
 				xml << "<connection ";
