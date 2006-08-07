@@ -710,8 +710,7 @@ namespace psycle
 		bool Song::save(const std::string & fileName)
 		{
 			PsyFilter filter;
-			filter.saveSong(fileName, *this,4);
-			return true;
+			return filter.saveSong(fileName, *this,4);
 		}
 
 		void Song::DoPreviews(int amount)

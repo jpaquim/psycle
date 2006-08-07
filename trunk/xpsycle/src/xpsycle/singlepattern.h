@@ -74,6 +74,8 @@ namespace psycle
 			std::vector<TimeSignature> &  timeSignatures();
 			const std::vector<TimeSignature> &  timeSignatures() const;
 
+			std::string toXml() const;
+
 		private:
 
 			int beatZoom_;

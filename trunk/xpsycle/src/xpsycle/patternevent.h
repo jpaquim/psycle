@@ -22,7 +22,7 @@
 
 #include "pattern.h"
 #include <cstdint>
-
+#include <string>
 
 /**
 @author Stefan Nattkemper
@@ -59,6 +59,8 @@ namespace psycle
 			PatternEntry* entry() const;
 
 			bool isEmpty() const;
+
+			std::string toXml(int track) const;
 
 		private:
 

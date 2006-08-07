@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patternline.h"
+#include <sstream>
 
 namespace psycle
 {
@@ -33,8 +34,23 @@ namespace psycle
 		{
 		}
 
+		std::string PatternLine::toXml( float pos ) const
+		{
+			std::ostringstream xml;
+			xml << "<patline pos='" << pos << "'>" << std::endl;
+			for ( const_iterator it = begin() ; it != end() ; it++ ) {
+				int trackNumber = it->first;
+				const PatternEvent & event = it->second;
+				xml << event.toXml( trackNumber );
+			}
+			xml << "</patline>" << std::endl;
+			return xml.str();
+		}
+
 	}
 }
+
+
 
 
 

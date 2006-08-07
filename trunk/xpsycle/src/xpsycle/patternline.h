@@ -37,6 +37,8 @@ namespace psycle
 			PatternLine();
 			~PatternLine();
 
+			std::string toXml( float pos ) const;
+
 		};
 
 	}

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "patterndata.h"
 #include <algorithm>
+#include <sstream>
 
 namespace psycle
 {
@@ -110,6 +111,18 @@ namespace psycle
 			return id_;
 		}
 
+		std::string PatternCategory::toXml( ) const
+		{
+			std::ostringstream xml;
+			xml << "<category name='" << name() << "'>" << std::endl;
+			for ( const_iterator it = begin(); it < end(); it++) {
+				SinglePattern* pattern = *it;
+				xml << pattern->toXml();
+			}
+			xml << "</category>" << std::endl;
+			return xml.str();
+		}
+
 		// end of Category class
 
 
@@ -162,22 +175,17 @@ namespace psycle
 			return 0;
 		}
 
+		std::string PatternData::toXml( ) const
+		{
+			std::ostringstream xml;
+			xml << "<patterndata>" << std::endl;
+			for ( const_iterator it = begin(); it < end(); it++) {
+				PatternCategory* category = *it;
+				xml << category->toXml();
+			}
+			xml << "</patterndata>" << std::endl;
+			return xml.str();
+		}
+
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

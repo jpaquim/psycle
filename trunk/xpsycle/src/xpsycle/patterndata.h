@@ -52,6 +52,7 @@ namespace psycle
 			void setID(int id);
 			int id() const;
 
+			std::string toXml() const;
 
 		private:
 
@@ -75,6 +76,8 @@ namespace psycle
 			void removeAll();
 
 			SinglePattern* findById(int id);
+
+			std::string toXml() const;
 
 		};
 
