@@ -40,7 +40,7 @@ namespace psycle
 			virtual ~PsyFilter();
 
 			bool loadSong(const std::string & fileName, Song & song);
-			void saveSong(const std::string & fileName, Song & song, int version) const;
+			bool saveSong(const std::string & fileName, Song & song, int version);
 
 			//signals
 			sigslot::signal2<const std::string &, const std::string &> report;
@@ -52,7 +52,7 @@ namespace psycle
 			virtual int version() const;
 			virtual bool testFormat(const std::string & fileName);
 			virtual bool load(const std::string & fileName, Song & song);
-			virtual void save(const std::string & fileName, const Song & song) const;
+			virtual bool save(const std::string & fileName, const Song & song);
 
 		private:
 

@@ -20,7 +20,11 @@
 #ifndef PSY4FILTER_H
 #define PSY4FILTER_H
 
-#include "psy3filter.h"
+#include "psyfilter.h"
+#include <ngrs/sigslot.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 /**
 @author Stefan Nattkemper
@@ -29,7 +33,7 @@
 namespace psycle {
 	namespace host {
 
-		class Psy4Filter : public Psy3Filter
+		class Psy4Filter : public PsyFilter, public sigslot::has_slots<>
 		{
 			public:
 				Psy4Filter();
@@ -37,6 +41,17 @@ namespace psycle {
 				~Psy4Filter();
 
 				virtual int version() const;
+
+				virtual bool testFormat(const std::string & fileName);
+				virtual bool load(const std::string & fileName, Song & song);
+				virtual bool save( const std::string & fileName, const Song & song );
+
+			private:
+
+				std::fstream _stream;
+				void onDetectFilterTag(const std::string & tagName);
+				void onTagParse(const std::string & tagName);
+				bool isPsy4;
 
 		};
 

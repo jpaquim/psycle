@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "singlepattern.h"
 #include "patterndata.h"
+#include <sstream>
 
 namespace psycle
 {
@@ -274,8 +275,23 @@ namespace psycle
 			return id_;
 		}
 
+		std::string SinglePattern::toXml( ) const
+		{
+			std::ostringstream xml;
+			xml << "<pattern>" << std::endl;
+			for ( const_iterator it = begin() ; it != end() ; it++ ) {
+				float beatPos = it->first;
+				const PatternLine & line = it->second;
+				xml << line.toXml( beatPos );
+			}
+			xml << "</pattern>" << std::endl;
+			return xml.str();
+		}
+
 	}
 }
+
+
 
 
 

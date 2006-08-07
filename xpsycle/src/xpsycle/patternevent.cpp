@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patternevent.h"
+#include <sstream>
+
 
 namespace psycle
 {
@@ -116,6 +118,15 @@ namespace psycle
 				return false;
 		}
 
+		std::string PatternEvent::toXml( int track ) const
+		{
+			std::ostringstream xml;
+			xml << "<patevent track='" << track << std::hex << "' note='" << (int)_note << std::hex << +"' mac='" << (int)_mach << std::hex
+					<< "' inst='" << (int)_inst << std::hex << "' cmd='" << (int)_cmd << std::hex
+					<< "' param='" << (int)_parameter << std::hex << "' />" << std::endl;
+
+    	return xml.str();
+		}
+
 	} // end of host namespace
-}
-//end of psycle namespace
+}//end of psycle namespace

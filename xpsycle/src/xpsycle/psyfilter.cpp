@@ -47,10 +47,12 @@ namespace psycle
 
 		bool PsyFilter::load( const std::string & fileName, Song & song )
 		{
+			return false;
 		}
 
-		void PsyFilter::save( const std::string & fileName, const Song & song ) const
+		bool PsyFilter::save( const std::string & fileName, const Song & song )
 		{
+			return false;
 		}
 
 		bool PsyFilter::testFormat( const std::string & fileName )
@@ -78,16 +80,17 @@ namespace psycle
 			return false;
 		}
 
-		void PsyFilter::saveSong( const std::string & fileName, Song & song, int version ) const
+		bool PsyFilter::saveSong( const std::string & fileName, Song & song, int version )
 		{
 			std::vector<PsyFilter*>::iterator it = filters.begin();
 			for (  ; it < filters.end(); it++) {
 				PsyFilter* filter = *it;
 				if ( filter->version() == version ) {
-					filter->save(fileName,song);
+					return filter->save(fileName,song);
 					break;
 				}
 			}
+			return false;
 		}
 
 
