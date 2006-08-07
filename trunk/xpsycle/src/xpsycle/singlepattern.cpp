@@ -278,7 +278,7 @@ namespace psycle
 		std::string SinglePattern::toXml( ) const
 		{
 			std::ostringstream xml;
-			xml << "<pattern>" << std::endl;
+			xml << "<pattern name='" << name() << "'>" << std::endl;
 			for ( const_iterator it = begin() ; it != end() ; it++ ) {
 				float beatPos = it->first;
 				const PatternLine & line = it->second;

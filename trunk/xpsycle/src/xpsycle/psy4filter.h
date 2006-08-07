@@ -22,6 +22,7 @@
 
 #include "psyfilter.h"
 #include <ngrs/sigslot.h>
+#include <ngrs/nxmlparser.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -48,10 +49,18 @@ namespace psycle {
 
 			private:
 
+				NXmlParser parser;
+
 				std::fstream _stream;
 				void onDetectFilterTag(const std::string & tagName);
 				void onTagParse(const std::string & tagName);
 				bool isPsy4;
+
+				PatternCategory* lastCategory;
+				SinglePattern* lastPattern;
+				float lastPatternPos;
+
+				Song* song_;
 
 		};
 

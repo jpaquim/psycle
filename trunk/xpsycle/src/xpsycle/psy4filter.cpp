@@ -19,7 +19,27 @@
  ***************************************************************************/
 #include "psy4filter.h"
 #include "fileio.h"
-#include <ngrs/nxmlparser.h>
+
+template<class T> inline T str(const std::string &  value) {
+   T result;
+
+   std::stringstream str;
+   str << value;
+   str >> result;
+
+   return result;
+}
+
+template<class T> inline T str_hex(const std::string &  value) {
+   T result;
+
+   std::stringstream str;
+   str << value;
+   str >> std::hex >> result;
+
+   return result;
+}
+
 
 namespace psycle {
 	namespace host {
@@ -28,6 +48,7 @@ namespace psycle {
 		Psy4Filter::Psy4Filter()
 			: PsyFilter()
 		{
+			song_ = 0;
 		}
 
 
@@ -56,8 +77,9 @@ namespace psycle {
 
 		bool Psy4Filter::load( const std::string & fileName, Song & song )
 		{
+			song_ = &song;
+			lastCategory = 0;
 			std::cout << "psy4filter detected for load" << std::endl;
-			NXmlParser parser;
 			parser.tagParse.connect(this,&Psy4Filter::onTagParse);
 			parser.parseFile(fileName);
 			return isPsy4;
@@ -67,7 +89,27 @@ namespace psycle {
 		void Psy4Filter::onTagParse( const std::string & tagName )
 		{
 			if (tagName == "category") {
+				std::string catName = parser.getAttribValue(tagName);
+				lastCategory = song_->patternSequence()->patternData()->createNewCategory("name");
+			} else
+			if (tagName == "pattern" && lastCategory) {
+				std::string patName = parser.getAttribValue("name");
+				lastPattern = lastCategory->createNewPattern(patName);
+			} else
+			if (tagName == "patline" && lastPattern) {
+				lastPatternPos = str<float> (parser.getAttribValue("pos"));
+			} else
+			if (tagName == "patevent" && lastPattern) {
+					int trackNumber = str_hex<int> (parser.getAttribValue("track"));
 
+					PatternEvent data;
+					data.setMachine( str_hex<int> (parser.getAttribValue("mac")) );
+					data.setInstrument( str_hex<int> (parser.getAttribValue("inst")) );
+					data.setNote( str_hex<int> (parser.getAttribValue("note")) );
+					data.setParameter( str_hex<int> (parser.getAttribValue("param")) );
+					data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
+
+					(*lastPattern)[lastPatternPos][trackNumber]=data;
 			}
 		}
 
