@@ -125,7 +125,7 @@ namespace psycle
 					<< "' inst='" << (int)_inst << std::hex << "' cmd='" << (int)_cmd << std::hex
 					<< "' param='" << (int)_parameter << std::hex << "' />" << std::endl;
 
-    	return xml.str();
+			return xml.str();
 		}
 
 	} // end of host namespace

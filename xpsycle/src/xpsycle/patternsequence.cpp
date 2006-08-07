@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "patternsequence.h"
 #include <iostream>
+#include <sstream>
 
 namespace psycle
 {
@@ -461,13 +462,22 @@ namespace psycle
 				iterator it2 = it--;
 				std::swap(it,it2);
 			}
-
 		}
 
+		std::string PatternSequence::toXml( ) const
+		{
+			std::ostringstream xml;
+			xml << "<sequence>" << std::endl;
+			for(const_iterator it = begin(); it != end(); ++it) {
+				SequenceLine* line = *it;
+			}
+			xml << "</sequence>" << std::endl;
+    	return xml.str();
+		}
 
 	} // end of host namespace
-
-
 }
+
+
 
 

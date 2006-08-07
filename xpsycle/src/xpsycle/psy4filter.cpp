@@ -148,6 +148,7 @@ namespace psycle {
 			xml << "<global>" << std::endl;
 			xml << "</global>" << std::endl;
 			xml << song.patternSequence().patternData().toXml();
+			xml << song.patternSequence().toXml();
 			xml << "<machines>" << std::endl;
 			xml << "</machines>" << std::endl;
 			xml << "<instruments>" << std::endl;
