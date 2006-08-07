@@ -900,7 +900,20 @@ namespace psycle
 				xml << " connection='" << _connection[i]  << "'";
 				xml << " inputcon='" << _inputCon[i] << "' />" << std::endl;
 			}
+			xml << specificXml();
 			xml << "</machine>";
+			return xml.str();
+		}
+
+		std::string Machine::specificXml( ) const
+		{
+			std::ostringstream xml;
+			std::uint32_t count = GetNumParams();
+			for(unsigned int i = 0; i < count; i++)
+			{
+				std::uint32_t temp = GetParamValue(i);
+				xml << "<numparams id='" << i << "'" << " value='" << (int) count << "'>" << std::endl;
+			}
 			return xml.str();
 		}
 
@@ -925,7 +938,7 @@ namespace psycle
 				pFile->Write(_inputCon[i]);
 			}
 			pFile->WriteChunk(GetEditName().c_str(), GetEditName().length()+1);	//a max of 128 chars will be read on song load, but there's no real
-																			//reason to limit what gets saved here.. (is there?)			SaveSpecificChunk(pFile);
+			SaveSpecificChunk(pFile);
 		}
 
 		void Machine::SaveSpecificChunk(RiffFile* pFile) 
@@ -1026,6 +1039,8 @@ int Machine::GenerateAudio( int numsamples )
 
 	}
 }
+
+
 
 
 

@@ -514,7 +514,7 @@ void Plugin::GetParamName(int numparam, char * name)
         minval = maxval = 0;
       }
     }
-    int Plugin::GetParamValue(int numparam)
+    int Plugin::GetParamValue(int numparam) const
     {
       if(numparam < _pInfo->numParameters)
       {

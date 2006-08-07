@@ -86,7 +86,7 @@ public:
     inline bool PlayWave(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
     inline void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
     inline void StopWave() throw(); //exceptions::function_error);
-    inline int * Vals() throw(); //exceptions::function_error);
+    inline int * Vals() const throw(); //exceptions::function_error);
     inline void callback() throw(); //exceptions::function_error);
 };
 
@@ -109,15 +109,16 @@ public:
     inline virtual std::string GetDllName() const throw() { return _psDllName.c_str(); }
     virtual std::string GetName() const { return (char *)_psName.c_str(); };
 
-    virtual int GetNumParams() { return GetInfo()->numParameters; };
+    virtual int GetNumParams() const { return GetInfo()->numParameters; };
     virtual int GetNumCols() { return GetInfo()->numCols; };
     virtual void GetParamName(int numparam, char * name);
     virtual void GetParamRange(int numparam,int &minval, int &maxval);
-    virtual int GetParamValue(int numparam);
+    virtual int GetParamValue(int numparam) const;
     virtual void GetParamValue(int numparam,char* parval);
     virtual bool SetParameter(int numparam,int value);
 
     inline Proxy & proxy() throw() { return proxy_; };
+    inline const Proxy & proxy() const throw() { return proxy_; };
 
     bool Instance(const std::string & file_name);
     bool LoadDll (std::string psFileName);
@@ -137,7 +138,7 @@ public:
 
 
 
-    inline CMachineInfo * GetInfo() throw() { return _pInfo; };
+    inline CMachineInfo * GetInfo() const throw() { return _pInfo; };
 
 private:
     void* _dll;
@@ -154,6 +155,7 @@ private:
 inline void Proxy::Init() throw()
 { assert((*this)()); plugin().Init(); }
 inline CMachineInterface & Proxy::plugin() throw() { return *plugin_; }
+inline const CMachineInterface & Proxy::plugin() const throw() { return *plugin_; }
 inline void Proxy::SequencerTick() throw() { plugin().SequencerTick(); }
 inline void Proxy::ParameterTweak(int par, int val) throw()
 { assert((*this)()); plugin().ParameterTweak(par, val);  }
@@ -180,7 +182,7 @@ inline void Proxy::StopWave() throw()
 { assert((*this)());plugin().StopWave(); }
 inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw()
 { assert((*this)()); fflush(stdout); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
-inline int * Proxy::Vals() throw()
+inline int * Proxy::Vals() const throw()
 { assert((*this)()); return plugin().Vals; }
 inline void Proxy::Stop() throw()
 { assert((*this)()); plugin().Stop();  }
