@@ -64,7 +64,8 @@ namespace psycle
 					timeSignatures_.push_back(signature);
 				} else
 				timeSignatures_.back().incCount();
-			}
+			} else
+					timeSignatures_.push_back(signature);
 		}
 
 		const TimeSignature & SinglePattern::playPosTimeSignature(double pos) const
@@ -97,6 +98,11 @@ namespace psycle
 				}
 			}
 			return false;
+		}
+
+		void host::SinglePattern::clearBars( )
+		{
+			timeSignatures_.clear();
 		}
 
 		float SinglePattern::beats( ) const
@@ -278,7 +284,21 @@ namespace psycle
 		std::string SinglePattern::toXml( ) const
 		{
 			std::ostringstream xml;
-			xml << "<pattern name='" << name() << "'>" << std::endl;
+			xml << "<pattern name='" << name() << "' zoom='" << beatZoom() << std::hex << "'>" << std::endl;
+			std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
+			for ( ; it < timeSignatures_.end(); it++) {
+				const TimeSignature & sign = *it;
+				xml << "<sign ";
+				if (sign.ownerDefined()) {
+					xml << "free='" << sign.beats() <<"'";
+				} else {
+					xml << "num='" << sign.numerator() << "' ";
+					xml << "denom='" << sign.numerator() << "' ";
+					xml << "count='" << sign.count() << "' ";
+				}
+				xml << "/>" << std::endl;
+			}
+
 			for ( const_iterator it = begin() ; it != end() ; it++ ) {
 				float beatPos = it->first;
 				const PatternLine & line = it->second;
@@ -290,6 +310,8 @@ namespace psycle
 
 	}
 }
+
+
 
 
 
