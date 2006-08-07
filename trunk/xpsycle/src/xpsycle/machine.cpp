@@ -873,27 +873,32 @@ namespace psycle
 		{
 			std::ostringstream xml;
 			xml << "<machine ";
-			xml << " id='" << _macIndex << std::hex << "'";
-			xml << " type='" << (int)_type << std::hex << "'";
+			xml << " id='" << _macIndex << "'";
+			xml << " type='" << (int)_type << "'";
 			xml << " pluginname='" << GetDllName() << "'";
-			xml << " bypass='" << (int) _bypass << std::hex << "'";
-			xml << " mute='" << (int) _mute <<  std::hex << "'";
-			xml << " pan='" << (int) _panning <<  std::hex << "'";
-			xml << " x='"   << (int) _x <<  std::hex << "'";
-			xml << " y='"   << (int) _y <<  std::hex << "'";
+			xml << " bypass='" << (int) _bypass << "'";
+			xml << " mute='" << (int) _mute << "'";
+			xml << " pan='" << (int) _panning << "'";
+			xml << " x='"   << (int) _x << "'";
+			xml << " y='"   << (int) _y <<  "'";
 			//xml << " name='" << GetEditName() << "'";
-			xml << " connectedinputs='" << _connectedInputs <<  std::hex << "'";
-			xml << " connectedoutputs='" << _connectedOutputs <<  std::hex << "' >";
+			xml << " connectedinputs='" << _connectedInputs << "'";
+			xml << " connectedoutputs='" << _connectedOutputs << "' >";
 			xml << std::endl;
+
+			std::cout << _macIndex << "," << _connectedOutputs << std::endl;
+
 			for(int i = 0; i < MAX_CONNECTIONS; i++) {
 				xml << "<connection ";
-				xml << " index='" << i <<  std::hex <<  "'" << std::endl;
-				xml << " inputmac='" << _inputMachines[i] <<  std::hex << "'";
-				xml << " outputmac='" << _outputMachines[i] <<  std::hex << "'";
+				xml << " index='" << i  <<  "'" << std::endl;
+				xml << " inputmac='" << _inputMachines[i]  << "'";
+				std::cout << _inputMachines[i] << std::endl;
+				xml << " outputmac='" << _outputMachines[i] << "'";
+				std::cout << _outputMachines[i] << std::endl;
 				xml << " inputvol='" << _inputConVol[i] << "'";
 				xml << " wiremult='" << _wireMultiplier[i] << "'";
-				xml << " connection='" << _connection[i] <<  std::hex << "'";
-				xml << " inputcon='" << _inputCon[i] << "' />" <<  std::hex << std::endl;
+				xml << " connection='" << _connection[i]  << "'";
+				xml << " inputcon='" << _inputCon[i] << "' />" << std::endl;
 			}
 			xml << "</machine>";
 			return xml.str();
