@@ -77,6 +77,7 @@ namespace psycle {
 
 		bool Psy4Filter::load( const std::string & fileName, Song & song )
 		{
+			song.patternSequence()->patternData()->removeAll();
 			song.patternSequence()->removeAll();
 
 			song_ = &song;
@@ -154,6 +155,8 @@ namespace psycle {
 
 		bool Psy4Filter::save( const std::string & fileName, const Song & song )
 		{
+			bool autosave = false;
+
 			_stream.open(fileName.c_str (), std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
 			if (!_stream.is_open ()) return false;
 			_stream.seekg (0, std::ios::beg);
@@ -171,6 +174,17 @@ namespace psycle {
 			xml << song.patternSequence().patternData().toXml();
 			xml << song.patternSequence().toXml();
 			xml << "<machines>" << std::endl;
+			for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
+			{
+				if (song._pMachine[index])
+				{
+					xml << song._pMachine[index]->toXml();
+					if ( !autosave )
+					{
+						progress.emit(4,-1,"");
+					}
+				}
+			}
 			xml << "</machines>" << std::endl;
 			xml << "<instruments>" << std::endl;
 			xml << "</instruments>" << std::endl;
