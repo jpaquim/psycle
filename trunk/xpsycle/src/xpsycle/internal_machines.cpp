@@ -4,6 +4,7 @@
 #include "song.h"
 #include "player.h"
 #include "configuration.h"
+#include <sstream>
 
 ///\todo : The information required from this include should go to constants.hpp
 #include "inputhandler.h"
@@ -140,7 +141,7 @@ namespace psycle {
 			else if ( numparam < 16) { minval = -48; maxval = 48; }
 		}
 
-		int DuplicatorMac::GetParamValue(int numparam)
+		int DuplicatorMac::GetParamValue(int numparam) const
 		{
 			if (numparam >=0 && numparam<8)
 			{
@@ -151,7 +152,7 @@ namespace psycle {
 			else return 0;
 		}
 
-		void DuplicatorMac::GetParamValue(int numparam, char *parVal)
+		void DuplicatorMac::GetParamValue(int numparam, char *parVal) const
 		{
 			if (numparam >=0 && numparam <8)
 			{
@@ -202,6 +203,16 @@ namespace psycle {
 			pFile->Write(size);
 			pFile->Write(macOutput);
 			pFile->Write(noteOffset);
+		}
+
+		std::string DuplicatorMac::specificXml( ) const
+		{
+			std::ostringstream xml;
+			for ( int i = 0; i < 8; i++ ) {
+				xml << "<duplicator macOutput='" << macOutput[i] << "'>" << std::endl;
+			}
+			return xml.str();
+
 		}
 
 
@@ -1195,3 +1206,5 @@ namespace psycle {
 		}
 	}
 }
+
+
