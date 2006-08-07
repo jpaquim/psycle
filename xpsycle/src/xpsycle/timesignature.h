@@ -49,6 +49,7 @@ public:
     int count() const;
 
     float beats() const;
+    bool ownerDefined() const;
 
 private:
 

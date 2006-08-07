@@ -55,6 +55,8 @@ namespace psycle
 			float beats() const;
 
 			bool barStart(double pos, TimeSignature & signature) const;
+			void clearBars();
+
 			const TimeSignature & playPosTimeSignature(double pos) const;
 
 			void setName(const std::string & name);

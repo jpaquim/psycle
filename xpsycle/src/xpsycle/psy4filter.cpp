@@ -94,10 +94,28 @@ namespace psycle {
 			} else
 			if (tagName == "pattern" && lastCategory) {
 				std::string patName = parser.getAttribValue("name");
+				int beatZoom = str_hex<int> (parser.getAttribValue("zoom"));
 				lastPattern = lastCategory->createNewPattern(patName);
+				lastPattern->clearBars();
+				lastPattern->setBeatZoom(beatZoom);
 			} else
 			if (tagName == "patline" && lastPattern) {
 				lastPatternPos = str<float> (parser.getAttribValue("pos"));
+			} else
+			if (tagName == "sign" && lastPattern) {
+				std::string freeStr = parser.getAttribValue("free");
+				if (freeStr != "") {
+					float free = str<float> (freeStr);
+					TimeSignature sig(free);
+					lastPattern->addBar(sig);
+				} else {
+					int num = str<int> (parser.getAttribValue("num"));
+					int denom = str<int> (parser.getAttribValue("denom"));
+					int count = str<int> (parser.getAttribValue("count"));
+					TimeSignature sig(num,denom);
+					sig.setCount(count);
+					lastPattern->addBar(sig);
+				}
 			} else
 			if (tagName == "patevent" && lastPattern) {
 					int trackNumber = str_hex<int> (parser.getAttribValue("track"));

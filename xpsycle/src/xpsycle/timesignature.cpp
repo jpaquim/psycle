@@ -101,5 +101,12 @@ float TimeSignature::beats( ) const
      return numerator_ * count_;
 }
 
+bool TimeSignature::ownerDefined( ) const
+{
+  return ownerDefined_;
+}
+
 }}
+
+
 
