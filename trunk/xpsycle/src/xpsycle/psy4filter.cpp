@@ -77,8 +77,12 @@ namespace psycle {
 
 		bool Psy4Filter::load( const std::string & fileName, Song & song )
 		{
+			song.patternSequence()->removeAll();
+
 			song_ = &song;
 			lastCategory = 0;
+			lastPattern  = 0;
+			lastSeqLine  = 0;
 			std::cout << "psy4filter detected for load" << std::endl;
 			parser.tagParse.connect(this,&Psy4Filter::onTagParse);
 			parser.parseFile(fileName);
@@ -98,6 +102,8 @@ namespace psycle {
 				lastPattern = lastCategory->createNewPattern(patName);
 				lastPattern->clearBars();
 				lastPattern->setBeatZoom(beatZoom);
+				int pat_id  = str_hex<int> (parser.getAttribValue("id"));
+				lastPattern->setID(pat_id);
 			} else
 			if (tagName == "patline" && lastPattern) {
 				lastPatternPos = str<float> (parser.getAttribValue("pos"));
@@ -128,6 +134,21 @@ namespace psycle {
 					data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
 
 					(*lastPattern)[lastPatternPos][trackNumber]=data;
+			} else
+			if (tagName == "seqline") {
+				lastSeqLine = song_->patternSequence()->createNewLine();
+			} else 
+			if (tagName == "seqentry" && lastSeqLine) {
+				double pos =  str<double> (parser.getAttribValue("pos"));
+				int pat_id  = str_hex<int> (parser.getAttribValue("patid"));
+				float startPos = str<float> (parser.getAttribValue("start"));
+				float endPos = str<float> (parser.getAttribValue("end"));
+				SinglePattern* pattern = song_->patternSequence()->patternData()->findById(pat_id);
+				if (pattern) {
+					SequenceEntry* entry = lastSeqLine->createEntry(pattern, pos);
+					entry->setStartPos(startPos);
+					entry->setEndPos(endPos);
+				}
 			}
 		}
 

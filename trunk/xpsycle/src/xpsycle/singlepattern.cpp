@@ -284,7 +284,7 @@ namespace psycle
 		std::string SinglePattern::toXml( ) const
 		{
 			std::ostringstream xml;
-			xml << "<pattern name='" << name() << "' zoom='" << beatZoom() << std::hex << "'>" << std::endl;
+			xml << "<pattern name='" << name() << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
 			std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
 			for ( ; it < timeSignatures_.end(); it++) {
 				const TimeSignature & sign = *it;
