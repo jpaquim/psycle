@@ -160,6 +160,13 @@ namespace psycle
 			return endPos_;
 		}
 
+		std::string SequenceEntry::toXml( double pos ) const
+		{
+			std::ostringstream xml;
+			xml << "<seqentry pos='" << pos << "' patid='" << pattern()->id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' />" << std::endl;
+    	return xml.str();
+		}
+
 		// end of PatternEntry
 
 		// represents one track/line in the sequencer
@@ -261,6 +268,18 @@ namespace psycle
 		int SequenceLine::id( ) const
 		{
 			return lineId_;
+		}
+
+		std::string SequenceLine::toXml( ) const
+		{
+			std::ostringstream xml;
+			xml << "<seqline>" << std::endl;
+			for(const_iterator it = begin(); it != end(); ++it) {
+				SequenceEntry* entry = it->second;
+				xml << entry->toXml( it-> first);
+			}
+			xml << "</seqline>" << std::endl;
+    	return xml.str();
 		}
 		//end of sequenceLine;
 
@@ -470,14 +489,11 @@ namespace psycle
 			xml << "<sequence>" << std::endl;
 			for(const_iterator it = begin(); it != end(); ++it) {
 				SequenceLine* line = *it;
+				xml << line->toXml();
 			}
 			xml << "</sequence>" << std::endl;
     	return xml.str();
 		}
 
 	} // end of host namespace
-}
-
-
-
-
+} // end of psycle namespace

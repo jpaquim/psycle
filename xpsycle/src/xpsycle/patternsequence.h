@@ -100,6 +100,8 @@ namespace psycle
 			void setEndPos( float pos );
 			float endPos() const;
 
+			std::string toXml(double pos) const;
+
 		private:
 			SequenceLine* line_;
 			SinglePattern* pattern_;
@@ -131,6 +133,8 @@ namespace psycle
 			void setName(const std::string & newname);
 
 			int id() const;
+
+			std::string toXml() const;
 
 		private:
 
