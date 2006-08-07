@@ -7,7 +7,6 @@
 #include "configuration.h"
 #include <algorithm>
 #include "analyzer.h"
-
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
@@ -16,6 +15,7 @@
 //#include <psycle/host/engine/XMSampler.hpp>
 #include "plugin.h" //<psycle/host/engine/plugin.hpp>
 //#include <psycle/host/engine/VSTHost.hpp>
+#include <sstream>
 
 namespace psycle
 {
@@ -772,6 +772,32 @@ namespace psycle
 			return pMachine;
 		}
 
+		std::string Machine::toXml( ) const
+		{
+			std::ostringstream xml;
+			xml << "<machine ";
+			xml << " type='" << (int)_type << std::hex << "'";
+			xml << " pluginname='" << GetDllName() << "'";
+			xml << " bypass='" << (int) _bypass << "'";
+			xml << " mute='" << (int) _mute << "'";
+			xml << " pan='" << (int) _panning << "'";
+			xml << " x='"   << (int) _x << "'";
+			xml << " y='"   << (int) _y << "'";
+			xml << " name='" << GetEditName() << "'>";
+			xml << std::endl;
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				xml << "<connection ";
+				xml << " index='" << i << "'" << std::endl;
+				xml << " inputmac='" << _inputMachines[i] << "'";
+				xml << " outputmac='" << _outputMachines[i] << "'";
+				xml << " inputvol='" << _inputConVol[i] << "'";
+				xml << " wiremult='" << _wireMultiplier[i] << "'";
+				xml << " connection='" << _connection[i] << "'";
+				xml << " inputcon='" << _inputCon[i] << "' />" << std::endl;
+			}
+			xml << "</machine>";
+			return xml.str();
+		}
 
 		void Machine::SaveFileChunk(RiffFile* pFile)
 		{
@@ -895,3 +921,5 @@ int Machine::GenerateAudio( int numsamples )
 
 	}
 }
+
+

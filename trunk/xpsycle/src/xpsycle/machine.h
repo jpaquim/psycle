@@ -280,7 +280,7 @@ namespace psycle
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
 				protected:
 					std::deque<WorkEvent> workEvents;
-				    std::map<int,int> playCol;
+					std::map<int,int> playCol;
 					int playColIndex;
 				public:
 					/// This function should be called when an exception was thrown from the machine.
@@ -415,6 +415,7 @@ namespace psycle
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 					static Machine * LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen=true);
 					virtual void SaveFileChunk(RiffFile * pFile);
+					virtual std::string toXml() const;
 					virtual void SaveSpecificChunk(RiffFile * pFile);
 				protected: friend class Song;
 					/// Loader for psycle fileformat version 2.
@@ -479,7 +480,7 @@ namespace psycle
 					virtual std::string GetName() const = 0;
 
 				public:
-					virtual std::string const & GetEditName() { return _editName; }
+					virtual std::string const & GetEditName() const { return _editName; }
 				//PSYCLE__PRIVATE:
 					std::string  _editName;
 			///\}
