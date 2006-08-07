@@ -18,6 +18,72 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nxmlparser.h"
+#include <iostream>
+#include <xercesc/sax2/Attributes.hpp>
+
+XERCES_CPP_NAMESPACE_USE;
+
+
+class SAX2Handler : public DefaultHandler {
+
+public:
+    void startElement(
+        const   XMLCh* const    uri,
+        const   XMLCh* const    localname,
+        const   XMLCh* const    qname,
+        const   Attributes&     attrs
+    );
+
+    void fatalError(const SAXParseException&);
+
+    void setParser(NXmlParser* parser) { pParser = parser;};
+
+    std::string getValue(const std::string & name, const Attributes& attrs) {
+       std::string erg;
+       try {
+         XMLCh* str = XMLString::transcode(name.c_str());
+         const XMLCh* strCh = attrs.getValue(str);
+         char* id = XMLString::transcode(strCh);
+         erg = std::string(id);
+         XMLString::release(&id);
+         XMLString::release(&str);
+       } catch (std::exception e) {
+           return "";
+        }
+      return erg;
+    }
+
+private:
+
+    NXmlParser* pParser;
+
+};
+
+
+void SAX2Handler::startElement(const   XMLCh* const    uri,
+                            const   XMLCh* const    localname,
+                            const   XMLCh* const    qname,
+                            const   Attributes&     attrs)
+{
+    char* message = XMLString::transcode(localname);
+    //cout << "I saw element: "<< message << endl;
+    std::string tagName = std::string(message);
+
+    pParser->tagParse.emit(tagName);
+    pParser->attrs = &attrs;
+    XMLString::release(&message);
+}
+
+
+void SAX2Handler::fatalError(const SAXParseException& exception)
+{
+    char* message = XMLString::transcode(exception.getMessage());
+    std::cout << "xml error: " << message
+         << " at line: " << exception.getLineNumber()
+         << std::endl;
+}
+
+
 
 NXmlParser::NXmlParser()
 {
@@ -28,39 +94,64 @@ NXmlParser::~NXmlParser()
 {
 }
 
-void NXmlParser::parse( const std::string & text )
+
+void NXmlParser::parseFile( const std::string & fileName )
 {
-  int pos = 0;
-  for (std::string::const_iterator i = text.begin(); i < text.end() ; i++) {
-     char c = *i;
-       if (commentStart(c)) pos = commentSkip(text,pos);
+  attrs = 0;
+
+  try {
+    XMLPlatformUtils::Initialize();
   }
-}
-
-
- // [15]  Comment  ::=  <!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
-
-bool NXmlParser::commentStart(char c)
-{
-  // test here for <!--
-
-  comment.push_back(c);
-
-  if (comment.length() == 4) {
-      if (comment == "<!--") {
-         comment = "";
-         return true;
-      } else comment = "";
+  catch (const XMLException& toCatch) {
+     char* message = XMLString::transcode(toCatch.getMessage());
+     std::cout << "xml parse error: Exception message is: \n"
+                 << message << "\n";
+     XMLString::release(&message);
   }
-  return false;
 
+  SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+
+  SAX2Handler* defaultHandler = new SAX2Handler();
+  defaultHandler->setParser(this);
+  parser->setContentHandler(defaultHandler);
+  parser->setErrorHandler(defaultHandler);
+  try {
+    parser->parse(fileName.c_str());
+  }
+  catch (const XMLException& toCatch) {
+     char* message = XMLString::transcode(toCatch.getMessage());
+     std::cout << "xml parse error: Exception message is: \n"
+                 << message << "\n";
+     XMLString::release(&message);
+   }
+   catch (const SAXParseException& toCatch) {
+     char* message = XMLString::transcode(toCatch.getMessage());
+     std::cout << "xml parse error: Exception message is: \n"
+                 << message << "\n";
+     XMLString::release(&message);
+   }
+   catch (...) {
+     std::cerr << "Xml Parser Unexpected Exception" << std::endl;
+   }
+
+  delete parser;
+  delete defaultHandler;
+  XMLPlatformUtils::Terminate();
 }
 
-int NXmlParser::commentSkip( const std::string & text, int actualPos )
+std::string NXmlParser::getAttribValue( const std::string & name )
 {
-  int newPos = text.find("-->", actualPos);
-    // if (newPos == text.string::npos) this is an error of xml file ..
-  return newPos;
+   std::string erg;
+       try {
+       XMLCh* str = XMLString::transcode(name.c_str());
+       const XMLCh* strCh = attrs->getValue(str);
+       char* id = XMLString::transcode(strCh);
+       erg = std::string(id);
+       XMLString::release(&id);
+       XMLString::release(&str);
+       } catch (std::exception e)
+       {
+           return "";
+       }
+      return erg;
 }
-
-
