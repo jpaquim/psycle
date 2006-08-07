@@ -169,14 +169,15 @@ namespace psycle
 
 			GlobalEvent* createBpmChangeEntry(double position, float bpm);
 			void moveGlobalEvent(GlobalEvent* entry, double newpos);
-			double globalTickPosition( GlobalEvent * event) const; // maybe a map is for the gui not the best
-																											// same problem at entries we get a O(n ^2) here!
+			double globalTickPosition( GlobalEvent * event) const;
 			const GlobalMap & globalEvents();
 
 			double tickLength() const;
 
 			void moveDownLine(SequenceLine* line);
 			void moveUpLine(SequenceLine* line);
+
+			std::string toXml() const;
 
 		private:
 
