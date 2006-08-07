@@ -596,6 +596,101 @@ namespace psycle
 			return true;
 		};
 
+		Machine * Machine::create( MachineType type , int index, const std::string & dllname )
+		{
+			bool fullopen = true;
+			bool bDeleted(false);
+			Machine* pMachine;
+			switch (type)
+			{
+			case MACH_MASTER:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new Master(index);
+				break;
+			case MACH_SAMPLER:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new Sampler(index);
+				break;
+			case MACH_XMSAMPLER:
+				//if ( !fullopen )
+						pMachine = new Dummy(index);
+						type = MACH_DUMMY;
+				//else pMachine = new XMSampler(index);
+				break;
+			case MACH_DUPLICATOR:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new DuplicatorMac(index);
+				break;
+			case MACH_MIXER:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new Mixer(index);
+				break;
+			case MACH_LFO:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new LFO(index);
+				break;
+			case MACH_PLUGIN:
+				{
+					if(!fullopen) pMachine = new Dummy(index);
+					else 
+					{
+						Plugin * p;
+						pMachine = p = new Plugin(index);
+						if(!p->LoadDll(dllname))
+						{
+							pMachine = new Dummy(index);
+							type = MACH_DUMMY;
+							delete p;
+							bDeleted = true;
+						}
+					}
+				}
+				break;
+			case MACH_VST:
+				{
+					if(!fullopen) pMachine = new Dummy(index);
+					else 
+					{
+//						vst::instrument * p;
+//						pMachine = p = new vst::instrument(index);
+//						if(!p->LoadDll(dllName))
+//						{
+							pMachine = new Dummy(index);
+							type = MACH_DUMMY;
+//							delete p;
+//							bDeleted = true;
+						//}
+					}
+				}
+				break;
+			case MACH_VSTFX:
+				{
+//					if(!fullopen) pMachine = new Dummy(index);
+//					else 
+//					{
+//						vst::fx * p;
+//						pMachine = p = new vst::fx(index);
+//						if(!p->LoadDll(dllName))
+//						{
+							pMachine = new Dummy(index);
+							type = MACH_DUMMY;
+//							delete p;
+//							bDeleted = true;
+//						}
+//					}
+				}
+				break;
+			default:
+//				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
+                                std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
+				pMachine = new Dummy(index);
+				break;
+			}
+			pMachine->Init();
+			pMachine->_macIndex = index;
+			return pMachine;
+		}
+
 		Machine* Machine::LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
 		{
 			// assume version 0 for now
@@ -776,24 +871,27 @@ namespace psycle
 		{
 			std::ostringstream xml;
 			xml << "<machine ";
+			xml << " id='" << _macIndex << std::hex << "'";
 			xml << " type='" << (int)_type << std::hex << "'";
 			xml << " pluginname='" << GetDllName() << "'";
-			xml << " bypass='" << (int) _bypass << "'";
-			xml << " mute='" << (int) _mute << "'";
-			xml << " pan='" << (int) _panning << "'";
-			xml << " x='"   << (int) _x << "'";
-			xml << " y='"   << (int) _y << "'";
-			xml << " name='" << GetEditName() << "'>";
+			xml << " bypass='" << (int) _bypass << std::hex << "'";
+			xml << " mute='" << (int) _mute <<  std::hex << "'";
+			xml << " pan='" << (int) _panning <<  std::hex << "'";
+			xml << " x='"   << (int) _x <<  std::hex << "'";
+			xml << " y='"   << (int) _y <<  std::hex << "'";
+			xml << " name='" << GetEditName() << "'";
+			xml << " connectedInputs='" << _connectedInputs <<  std::hex << "'";
+			xml << " connectedOutputs='" << _connectedOutputs <<  std::hex << "' />";
 			xml << std::endl;
 			for(int i = 0; i < MAX_CONNECTIONS; i++) {
 				xml << "<connection ";
-				xml << " index='" << i << "'" << std::endl;
-				xml << " inputmac='" << _inputMachines[i] << "'";
-				xml << " outputmac='" << _outputMachines[i] << "'";
+				xml << " index='" << i <<  std::hex <<  "'" << std::endl;
+				xml << " inputmac='" << _inputMachines[i] <<  std::hex << "'";
+				xml << " outputmac='" << _outputMachines[i] <<  std::hex << "'";
 				xml << " inputvol='" << _inputConVol[i] << "'";
 				xml << " wiremult='" << _wireMultiplier[i] << "'";
-				xml << " connection='" << _connection[i] << "'";
-				xml << " inputcon='" << _inputCon[i] << "' />" << std::endl;
+				xml << " connection='" << _connection[i] <<  std::hex << "'";
+				xml << " inputcon='" << _inputCon[i] << "' />" <<  std::hex << std::endl;
 			}
 			xml << "</machine>";
 			return xml.str();
@@ -921,5 +1019,7 @@ int Machine::GenerateAudio( int numsamples )
 
 	}
 }
+
+
 
 
