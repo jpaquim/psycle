@@ -278,6 +278,9 @@ namespace psycle
 					virtual int GenerateAudioInTicks(int startSample, int numsamples);
 					virtual int GenerateAudio(int numsamples);
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
+
+					static Machine* create(MachineType type, int index, const std::string & dllname);
+
 				protected:
 					std::deque<WorkEvent> workEvents;
 					std::map<int,int> playCol;

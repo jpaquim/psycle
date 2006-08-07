@@ -79,11 +79,12 @@ namespace psycle {
 		{
 			song.patternSequence()->patternData()->removeAll();
 			song.patternSequence()->removeAll();
-
+			song.clear();
 			song_ = &song;
 			lastCategory = 0;
 			lastPattern  = 0;
 			lastSeqLine  = 0;
+			lastMachine  = 0;
 			std::cout << "psy4filter detected for load" << std::endl;
 			parser.tagParse.connect(this,&Psy4Filter::onTagParse);
 			parser.parseFile(fileName);
@@ -150,6 +151,40 @@ namespace psycle {
 					entry->setStartPos(startPos);
 					entry->setEndPos(endPos);
 				}
+			} else 
+			if (tagName == "machine") {
+				int id  = str_hex<int> (parser.getAttribValue("id"));
+				int type  = str_hex<int> (parser.getAttribValue("type"));
+				std::string pluginname = parser.getAttribValue("pluginname");
+				if(id < MAX_MACHINES)
+				{
+					lastMachine = Machine::create((MachineType)type, id, pluginname);
+					song_->_pMachine[id] = lastMachine;
+					lastMachine->_macIndex = id;
+					lastMachine->_bypass  = str_hex<int> (parser.getAttribValue("bypass"));
+					lastMachine->_mute    = str_hex<int> (parser.getAttribValue("bypass"));
+					lastMachine->_panning = str_hex<int> (parser.getAttribValue("pan"));
+					lastMachine->_panning = str_hex<int> (parser.getAttribValue("pan"));
+					lastMachine->SetPosX(str_hex<int> (parser.getAttribValue("x")));
+					lastMachine->SetPosY(str_hex<int> (parser.getAttribValue("y")));
+					lastMachine->_connectedInputs = str_hex<int> (parser.getAttribValue("connectedInputs"));
+					lastMachine->_connectedInputs = str_hex<int> (parser.getAttribValue("connectedOutputs"));
+				}
+			} else 
+			if (tagName == "connection" && lastMachine) {
+				int index = str_hex<int> (parser.getAttribValue("index"));
+				int out_mac = str_hex<int> (parser.getAttribValue("outputmac"));
+				int in_mac = str_hex<int> (parser.getAttribValue("inputmac"));
+				float wire_mult = str<float> (parser.getAttribValue("wiremult"));
+				float input_vol = str<float> (parser.getAttribValue("index"));
+				int connection = str_hex<int> (parser.getAttribValue("connection"));
+				int input_con = str_hex<int> (parser.getAttribValue("inputcon"));
+				lastMachine->_inputMachines[index] = in_mac;
+				lastMachine->_outputMachines[index] = out_mac;
+				lastMachine->_inputConVol[index] = input_vol;
+				lastMachine->_wireMultiplier[index] = wire_mult;
+				lastMachine->_connection[index] = connection;
+				lastMachine->_inputCon[index] = input_con;
 			}
 		}
 

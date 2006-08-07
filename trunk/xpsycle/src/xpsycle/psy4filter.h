@@ -59,6 +59,7 @@ namespace psycle {
 				PatternCategory* lastCategory;
 				SinglePattern* lastPattern;
 				SequenceLine* lastSeqLine;
+				Machine* lastMachine;
 				float lastPatternPos;
 
 				Song* song_;
