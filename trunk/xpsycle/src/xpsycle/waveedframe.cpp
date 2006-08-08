@@ -45,9 +45,10 @@
 namespace psycle { namespace host {
 
 
-	WaveEdFrame::WaveEdFrame()
+	WaveEdFrame::WaveEdFrame( Song* song )
 	{
-		wavView = new WaveEdChildView(Global::pSong());
+		_pSong = song;
+		wavView = new WaveEdChildView( song );
 
 //		setPosition(0,0,800,600);
 //		setPositionToScreenCenter();
@@ -59,11 +60,16 @@ namespace psycle { namespace host {
 			wavSaveFileDlg->setMode(nSave);
 		add(wavSaveFileDlg);
 		// creates the instrument editor for editing samples
-  	add( instrumentEditor = new InstrumentEditor() );
+  	add( instrumentEditor = new InstrumentEditor(song) );
 	}
 
 	WaveEdFrame::~WaveEdFrame() throw()
 	{
+	}
+
+	Song * WaveEdFrame::pSong( )
+	{
+		return _pSong;
 	}
 		
 	void WaveEdFrame::InitMenus()
@@ -195,7 +201,7 @@ namespace psycle { namespace host {
 
 	void WaveEdFrame::Notify(void)
 	{
-		wsInstrument = Global::pSong()->instSelected;
+		wsInstrument = pSong()->instSelected;
 		wavView->SetViewData(wsInstrument);
 	}
 	
@@ -204,7 +210,7 @@ namespace psycle { namespace host {
 	void WaveEdFrame::onPlayFromStart(NButtonEvent *ev) {PlayFrom(0);}
 	void WaveEdFrame::onRelease(NButtonEvent *ev)
 	{
-		Global::pSong()->waved.Release();
+		pSong()->waved.Release();
 	}
 	void WaveEdFrame::onStop(NButtonEvent *ev)
 	{
@@ -213,18 +219,18 @@ namespace psycle { namespace host {
 
 	void WaveEdFrame::PlayFrom(unsigned long startPos)
 	{
-		if( startPos<0 || startPos >= Global::pSong()->_pInstrument[wsInstrument]->waveLength )
+		if( startPos<0 || startPos >= pSong()->_pInstrument[wsInstrument]->waveLength )
 			return;		//this also protects against playing non-existent instruments
 
 		Stop();
 
-		Global::pSong()->waved.SetInstrument( Global::pSong()->_pInstrument[wsInstrument] );
-		Global::pSong()->waved.Play(startPos);
+		pSong()->waved.SetInstrument( pSong()->_pInstrument[wsInstrument] );
+		pSong()->waved.Play(startPos);
 	}
 
 	void WaveEdFrame::Stop()
 	{
-		Global::pSong()->waved.Stop();
+		pSong()->waved.Stop();
 	}
 	void WaveEdFrame::onFastForward(NButtonEvent *ev)
 	{
@@ -243,17 +249,17 @@ namespace psycle { namespace host {
 		dialog->addFilter("Wav Files(*.wav)","!S*.wav");
 
 		if (dialog->execute()) {
-			int si = Global::pSong()->instSelected;
+			int si = pSong()->instSelected;
 			//added by sampler
-			if ( Global::pSong()->_pInstrument[si]->waveLength != 0)
+			if ( pSong()->_pInstrument[si]->waveLength != 0)
 			{
         //if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
 			}
 
-		if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
+		if (pSong()->WavAlloc(si,dialog->fileName().c_str()))
 		{
 			updateComboIns(true);
-			if(insCombo_->selIndex() == Global::pSong()->instSelected)
+			if(insCombo_->selIndex() == pSong()->instSelected)
 			Notify();
 		}
 	}
@@ -263,7 +269,7 @@ namespace psycle { namespace host {
 	void WaveEdFrame::onSaveWave( NButtonEvent * ev )
 	{
 		WaveFile output;
-		Song* _pSong = Global::pSong();
+		Song* _pSong = pSong();
 
 		if (_pSong->_pInstrument[_pSong->instSelected]->waveLength)
 		{
@@ -290,7 +296,7 @@ namespace psycle { namespace host {
 
 void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
 {
-		instrumentEditor->setInstrument(Global::pSong()->instSelected);
+		instrumentEditor->setInstrument( pSong()->instSelected);
 		instrumentEditor->setVisible(true);
 }
 
@@ -301,10 +307,10 @@ void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
 
 	void WaveEdFrame::onDecInsBtn( NButtonEvent * ev )
 	{
-		int index = Global::pSong()->instSelected -1;
+		int index = pSong()->instSelected -1;
 		if (index >=0 ) {
-			Global::pSong()->instSelected=   index;
-			Global::pSong()->auxcolSelected= index;
+			pSong()->instSelected=   index;
+			pSong()->auxcolSelected= index;
 			Notify();
 
 			insCombo_->setIndex(index);
@@ -314,10 +320,10 @@ void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
 
 	void WaveEdFrame::onIncInsBtn( NButtonEvent * ev )
 	{
-		int index = Global::pSong()->instSelected +1;
+		int index = pSong()->instSelected +1;
 		if (index <= 255) {
-			Global::pSong()->instSelected=   index;
-			Global::pSong()->auxcolSelected= index;
+			pSong()->instSelected=   index;
+			pSong()->auxcolSelected= index;
 			Notify();
 
 			insCombo_->setIndex(index);
@@ -328,8 +334,8 @@ void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
 	void WaveEdFrame::onInstrumentCbx( NItemEvent * ev )
 	{
 		int index = insCombo_->selIndex();
-		Global::pSong()->instSelected=   index;
-		Global::pSong()->auxcolSelected= index;
+		pSong()->instSelected=   index;
+		pSong()->auxcolSelected= index;
 		Notify();
 	}
 
@@ -345,19 +351,21 @@ void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
 			{
 				buffer.str("");
 				buffer << std::setfill('0') << std::hex << std::setw(2);
-				buffer << i << ": " << Global::pSong()->_pInstrument[i]->_sName;
+				buffer << i << ": " << pSong()->_pInstrument[i]->_sName;
 				insCombo_->add(new NItem(buffer.str()));
 				listlen++;
 			}
-			if (Global::pSong()->auxcolSelected >= listlen) {
-				Global::pSong()->auxcolSelected = 0;
+			if (pSong()->auxcolSelected >= listlen) {
+				pSong()->auxcolSelected = 0;
 		}
-		insCombo_->setIndex(Global::pSong()->instSelected);  //redraw current selection text
+		insCombo_->setIndex( pSong()->instSelected);  //redraw current selection text
 		insCombo_->repaint();
   }
 }
 
 
 }}
+
+
 
 

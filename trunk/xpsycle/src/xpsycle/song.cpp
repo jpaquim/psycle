@@ -25,7 +25,9 @@ namespace psycle
 			Invalided = false;
 			preview_vol = 0.25f;
 
+			for(int i(0) ; i < MAX_MACHINES ; ++i) _pMachine[i] = 0;
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
+
 			clear();
 		}
 
@@ -102,33 +104,33 @@ namespace psycle
 			{
 				case MACH_MASTER:
 					if(_pMachine[MASTER_INDEX]) return false;
-					machine = new Master(index);
+					machine = new Master(index, this);
 					index = MASTER_INDEX;
 					break;
 				case MACH_SAMPLER:
-					machine = new Sampler(index);
+					machine = new Sampler(index,this);
 					break;
 				case MACH_XMSAMPLER:
 //					machine = new XMSampler(index);
 					break;
 				case MACH_DUPLICATOR:
-					machine = new DuplicatorMac(index);
+					machine = new DuplicatorMac(index, this);
 					break;
 				case MACH_MIXER:
-					machine = new Mixer(index);
+					machine = new Mixer(index, this);
 					break;
 				case MACH_LFO:
-					machine = new LFO(index);
+					machine = new LFO(index, this);
 					break;
 //				case MACH_AUTOMATOR:
 //					machine = new Automator(index);
 //					break;
 				case MACH_DUMMY:
-					machine = new Dummy(index);
+					machine = new Dummy(index, this);
 					break;
 				case MACH_PLUGIN:
 					{
-						Plugin & plugin(*new Plugin(index));
+						Plugin & plugin(*new Plugin(index,this));
 						machine = &plugin;
 //						if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
 						{

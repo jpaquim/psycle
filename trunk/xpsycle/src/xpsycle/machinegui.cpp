@@ -198,7 +198,7 @@ void MasterGUI::paint( NGraphics * g )
   if (pMac()->_mute)
     g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), Global::configuration().icons().machine_skin(), muteCoords.left(), muteCoords.top());
 
-  if (Global::pSong()->machineSoloed == pMac()->_macIndex)
+  if ( pMac()->song()->machineSoloed == pMac()->_macIndex)
     g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
 
   // reset translation to original
@@ -214,36 +214,36 @@ void MasterGUI::onMousePress( int x, int y, int button )
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
           pMac()->_volumeDisplay=0;
-          if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-            Global::pSong()->machineSoloed = -1;
+          if ( pMac()->song()->machineSoloed == pMac()->_macIndex ) {
+            pMac()->song()->machineSoloed = -1;
           }
         }
         repaint();
       } else
       if (dSoloCoords.intersects(x,y)) { // solo or unsolo
-        if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-          Global::pSong()->machineSoloed = -1;
+        if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
+          pMac()->song()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
-            if ( Global::pSong()->_pMachine[i] ) {
-              if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-                Global::pSong()->_pMachine[i]->_mute = false;
+            if ( pMac()->song()->_pMachine[i] ) {
+              if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+                pMac()->song()->_pMachine[i]->_mute = false;
               }
             }
           }
         } else {
           for ( int i=0;i<MAX_MACHINES;i++ ) {
-          if ( Global::pSong()->_pMachine[i] )
+          if ( pMac()->song()->_pMachine[i] )
           {
-            if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
+            if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
             {
-                Global::pSong()->_pMachine[i]->_mute = true;
-                Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
-                Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+                pMac()->song()->_pMachine[i]->_mute = true;
+                pMac()->song()->_pMachine[i]->_volumeCounter=0.0f;
+                pMac()->song()->_pMachine[i]->_volumeDisplay=0;
               }
             }
           }
           pMac()->_mute = false;
-          Global::pSong()->machineSoloed = pMac()->_macIndex;
+          pMac()->song()->machineSoloed = pMac()->_macIndex;
         }
       repaint();
     }
@@ -291,7 +291,7 @@ void GeneratorGUI::paint( NGraphics * g )
   if (pMac()->_mute)
     g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), Global::configuration().icons().machine_skin(), muteCoords.left(), muteCoords.top());
 
-  if (Global::pSong()->machineSoloed == pMac()->_macIndex)
+  if (pMac()->song()->machineSoloed == pMac()->_macIndex)
     g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
 
   // reset old Translation
@@ -345,36 +345,36 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
           pMac()->_volumeDisplay=0;
-          if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-            Global::pSong()->machineSoloed = -1;
+          if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
+            pMac()->song()->machineSoloed = -1;
           }
         }
         repaint();
       } else
       if (dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
-        if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-          Global::pSong()->machineSoloed = -1;
+        if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
+          pMac()->song()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
-            if ( Global::pSong()->_pMachine[i] ) {
-              if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-                Global::pSong()->_pMachine[i]->_mute = false;
+            if ( pMac()->song()->_pMachine[i] ) {
+              if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+                pMac()->song()->_pMachine[i]->_mute = false;
               }
             }
           }
         } else {
           for ( int i=0;i<MAX_MACHINES;i++ ) {
-          if ( Global::pSong()->_pMachine[i] )
+          if ( pMac()->song()->_pMachine[i] )
           {
-            if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
+            if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
             {
-                Global::pSong()->_pMachine[i]->_mute = true;
-                Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
-                Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+                pMac()->song()->_pMachine[i]->_mute = true;
+                pMac()->song()->_pMachine[i]->_volumeCounter=0.0f;
+                pMac()->song()->_pMachine[i]->_volumeDisplay=0;
               }
             }
           }
           pMac()->_mute = false;
-          Global::pSong()->machineSoloed = pMac()->_macIndex;
+          pMac()->song()->machineSoloed = pMac()->_macIndex;
         }
       repaint();
     }
@@ -491,7 +491,7 @@ void EffektGUI::paint( NGraphics * g )
   if (pMac()->_mute)
     g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), Global::configuration().icons().machine_skin(), muteCoords.left(), muteCoords.top());
 
-  if (Global::pSong()->machineSoloed == pMac()->_macIndex)
+  if (pMac()->song()->machineSoloed == pMac()->_macIndex)
     g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
 
   // move translation to original
@@ -550,36 +550,36 @@ void EffektGUI::onMousePress( int x, int y, int button )
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
           pMac()->_volumeDisplay=0;
-          if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-            Global::pSong()->machineSoloed = -1;
+          if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
+            pMac()->song()->machineSoloed = -1;
           }
         }
         repaint();
       } else
       if (dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
-        if (Global::pSong()->machineSoloed == pMac()->_macIndex ) {
-          Global::pSong()->machineSoloed = -1;
+        if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
+          pMac()->song()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
-            if ( Global::pSong()->_pMachine[i] ) {
-              if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-                Global::pSong()->_pMachine[i]->_mute = false;
+            if ( pMac()->song()->_pMachine[i] ) {
+              if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+                pMac()->song()->_pMachine[i]->_mute = false;
               }
             }
           }
         } else {
           for ( int i=0;i<MAX_MACHINES;i++ ) {
-          if ( Global::pSong()->_pMachine[i] )
+          if ( pMac()->song()->_pMachine[i] )
           {
-            if (( Global::pSong()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
+            if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
             {
-                Global::pSong()->_pMachine[i]->_mute = true;
-                Global::pSong()->_pMachine[i]->_volumeCounter=0.0f;
-                Global::pSong()->_pMachine[i]->_volumeDisplay=0;
+                pMac()->song()->_pMachine[i]->_mute = true;
+                pMac()->song()->_pMachine[i]->_volumeCounter=0.0f;
+                pMac()->song()->_pMachine[i]->_volumeDisplay=0;
               }
             }
           }
           pMac()->_mute = false;
-          Global::pSong()->machineSoloed = pMac()->_macIndex;
+          pMac()->song()->machineSoloed = pMac()->_macIndex;
         }
       repaint();
     }

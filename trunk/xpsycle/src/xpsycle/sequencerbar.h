@@ -107,7 +107,6 @@ public:
 
     ~SequencerBar();
 
-    signal1<SinglePattern*> added;
     signal1<SinglePattern*> removed;
 
     void setSequenceGUI(SequencerGUI* sequenceGUI);

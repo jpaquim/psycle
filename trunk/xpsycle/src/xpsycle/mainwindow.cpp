@@ -47,32 +47,53 @@ MainWindow::MainWindow()
 {
   setPosition(0,0,1024,768);
 
-  book = new NTabBook();
-    page = new NPanel();
-    page->setLayout( NAlignLayout());
-  book->addPage(page,"Song01");
-  book->addPage(new NPanel(),"Song01");
-  book->addPage(new NPanel(),"Song02");
-  book->addPage(new NPanel(),"Song03");
-  book->addPage(new NPanel(),"Song04");
-
   initMenu();
-  initDialogs();
-  childView_ = new ChildView();
-  childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
-  childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
   initBars();
-  initViews();
-  initSignals();
+  initDialogs();
 
+  book = new NTabBook();
+  pane()->add(book,nAlClient);
+
+  initSongs();
+
+
+/*
   updateStatusBar();
 
-  childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
+  childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);*/
 }
 
 
 MainWindow::~MainWindow()
 {
+  std::vector<Song*>::iterator it;
+  for ( ; it < songs_.end(); it++) 
+    delete *it;
+}
+
+void MainWindow::initSongs( )
+{
+  Song* song = new Song();
+  songs_.push_back(song);
+  Global::pPlayer()->song(*song);
+  addSongToGui(*song);
+}
+
+void MainWindow::addSongToGui( Song & song )
+{
+  page = new NPanel();
+    page->setLayout( NAlignLayout());
+  book->addPage(page,"Song");
+
+  page->add(sequencerBar_ = new SequencerBar(), nAlLeft);
+
+  childView_ = new ChildView( song );
+    childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
+    childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
+  page->add( childView_, nAlClient);
+
+  sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
+  sequencerBar_->setPatternView( childView_->patternView() );
 }
 
 void MainWindow::initMenu( )
@@ -170,14 +191,13 @@ void MainWindow::initMenu( )
       helpMenu_->add(new NMenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
       helpMenu_->add(new NMenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
     menuBar_->add(helpMenu_);
-
-
 }
+
 
 void MainWindow::initDialogs( )
 {
   // creates the song dialog for editing song name, author, and comment
-  add( songpDlg_ = new SongpDlg(Global::pSong()) );
+//  add( songpDlg_ = new SongpDlg(Global::pSong()) );
   // creates the greeting dialog, that greets people who help psycle development
   add( greetDlg =  new GreetDlg() );
   // creates the save dialog, that ask where to store wave files, recorded from playing a psy song
@@ -187,7 +207,6 @@ void MainWindow::initDialogs( )
   // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
   add( infoDlg =  new InfoDlg() );
   add( wavSaveDlg = new WaveSaveDlg() );
-
 }
 
 // events from menuItems
@@ -195,15 +214,6 @@ void MainWindow::initDialogs( )
 void MainWindow::showSongpDlg( NButtonEvent* ev )
 {
   songpDlg_->setVisible(true);
-}
-
-void MainWindow::initViews( )
-{
-  pane()->add(book,nAlClient);
-  page->add(childView_, nAlClient);
-  childView_->setTitleBarText();
-  sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
-  sequencerBar_->setPatternView( childView_->patternView() );
 }
 
 void MainWindow::initBars( )
@@ -222,11 +232,11 @@ void MainWindow::initBars( )
         progressBar_->setWidth(200);
         progressBar_->setHeight(25);
         progressBar_->setVisible(false);
-        Global::pSong()->progress.connect(this,&MainWindow::onSongLoadProgress);
+      //  Global::pSong()->progress.connect(this,&MainWindow::onSongLoadProgress);
     statusBar_->add(progressBar_,nAlLeft);
     macPosStatusItem = new NTextStatusItem();
     statusBar_->add(macPosStatusItem,nAlLeft);
-    childView_->machineView()->machineMoved.connect(this,&MainWindow::onMachineMoved);
+    //childView_->machineView()->machineMoved.connect(this,&MainWindow::onMachineMoved);
 
     /*editModeStatusItem = new NTextStatusItem();
     statusBar_->add(editModeStatusItem);
@@ -235,7 +245,7 @@ void MainWindow::initBars( )
     playTimeStatusItem = new NTextStatusItem();
     statusBar_->add(playTimeStatusItem);*/
     linePosStatusItem  = new NTextStatusItem();
-      childView_->patternView()->lineChanged.connect(this,&MainWindow::onLineChanged);
+      //childView_->patternView()->lineChanged.connect(this,&MainWindow::onLineChanged);
     statusBar_->add(linePosStatusItem);
     seqPatStatusItem   = new NTextStatusItem();
     statusBar_->add(seqPatStatusItem);
@@ -243,9 +253,6 @@ void MainWindow::initBars( )
     statusBar_->add(seqPosStatusItem);
 
   pane()->add(statusBar_,nAlBottom);
-
-  page->add(sequencerBar_ = new SequencerBar(), nAlLeft);
-  sequencerBar_->added.connect(this,&MainWindow::onSeqAdded);
 }
 
 void MainWindow::initToolBar( )
@@ -363,7 +370,7 @@ void MainWindow::initToolBar( )
     img->setPreferredSize(25,25);
   NButton* newMacBtn = new NButton(img);
     newMacBtn->setHint("New Machine");
-  toolBar1_->add(newMacBtn)->clicked.connect(childView_,&ChildView::onMachineViewDblClick);
+  toolBar1_->add(newMacBtn);//->clicked.connect(childView_,&ChildView::onMachineViewDblClick);
 
   img = new NImage();
     img->setSharedBitmap(&icons.openeditor());
@@ -468,16 +475,6 @@ void MainWindow::initToolBar( )
   toolBarPanel_->resize();
 }
 
-void MainWindow::initSignals( )
-{
-/*  fileMenu_->itemClicked.connect(this, &MainWindow::onFileMenuItemClicked);
-  helpMenu_->itemClicked.connect(this, &MainWindow::onHelpMenuItemClicked);
-  viewMenu_->itemClicked.connect(this, &MainWindow::onViewMenuItemClicked);
-  childView_->newSongLoaded.connect(sequencerBar_,&SequencerBar::updateSequencer);
-  barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);*/
-}
-
-
 void MainWindow::onBarPlay( NButtonEvent * ev )
 {
   childView_->play();
@@ -490,7 +487,11 @@ void MainWindow::onBarPlayFromStart( NButtonEvent * ev )
 
 void MainWindow::onFileNew( NButtonEvent * ev )
 {
-  appNew();
+  Song* song = new Song();
+  songs_.push_back(song);
+  this->addSongToGui(*song);
+  pane()->resize();
+  pane()->repaint();
 }
 
 void MainWindow::onFileOpen( NButtonEvent * ev )
@@ -530,41 +531,6 @@ void MainWindow::onFileSaveAs( NButtonEvent * ev )
   pane()->repaint();
 }
 
-void MainWindow::onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv)
-{
-  if (itemEv->text()=="Song properties") {
-      songpDlg_->setVisible(true);
-  } else
-  if (itemEv->text()=="Exit") {
-      closePsycle();
-  }
-}
-
-void MainWindow::onViewMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
-{
-  if (itemEv->text()=="Toolbar") {
-  } else
-  if (itemEv->text()=="MachineBar") {
-  } else
-  if (itemEv->text()=="SequencerBar") {
-      
-  } else
-  if (itemEv->text()=="StatusBar") {
-  } else
-  if (itemEv->text()=="Add machine") {
-      if (childView_->newMachineDlg()->execute()) {
-          if (childView_->newMachineDlg()->outBus()) {
-            // Generator selected
-            int x = 10; int y = 10;
-            int fb = Global::pSong()->GetFreeBus();
-            Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, childView_->newMachineDlg()->getDllName().c_str(),fb);
-            childView_->machineView()->addMachine(Global::pSong()->_pMachine[fb]);
-            childView_->machineView()->repaint();
-          }
-      }
-  }
-}
-
 void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_t & b , const std::string & t)
 {
   if (a == 4) {
@@ -592,7 +558,7 @@ void MainWindow::closePsycle()
 
 void MainWindow::updateComboGen() {
 
-  bool filled=false;
+ /* bool filled=false;
   bool found=false;
   int selected = -1;
   int line = -1;
@@ -644,7 +610,7 @@ void MainWindow::updateComboGen() {
   } else if (!found)  {
     selected=line;
   }
-  genCombo_->setIndex(selected);
+  genCombo_->setIndex(selected);*/
 }
 
 void MainWindow::appNew( )
@@ -663,7 +629,7 @@ void MainWindow::appNew( )
     // midi implementation
     //Global::pConfig->_pMidiInput->Close();
     //Sleep(LOCK_LATENCY);
-    Global::pSong()->clear();
+//    Global::pSong()->clear();
     //_outputActive = true;
     //if (!Global::pConfig->_pOutputDriver->Enable(true))
     //{
@@ -676,7 +642,7 @@ void MainWindow::appNew( )
   }
   childView_->setTitleBarText();
   childView_->patternView()->setEditPosition(0);
-  Global::pSong()->seqBus=0;
+//  Global::pSong()->seqBus=0;
   sequencerBar_->update();
   childView_->sequencerView()->update();
   childView_->machineView()->createGUIMachines();
@@ -693,64 +659,8 @@ void MainWindow::appNew( )
   childView_->patternView()->repaint();
   childView_->machineView()->repaint();
   sequencerBar_->repaint();
-
-
 }
 
-
-void MainWindow::onEditMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
-{
-  if (itemEv->text()=="Undo") {
-
-  } else
-  if (itemEv->text()=="Redo") {
-
-  } else
-  if (itemEv->text()=="Pattern Cut") {
-
-  } else 
-  if (itemEv->text()=="Pattern Copy") {
-
-  } else
-  if (itemEv->text()=="Pattern Paste") {
-
-  } else
-  if (itemEv->text()=="Pattern Mix Paster") {
-
-  } else
-  if (itemEv->text()=="Pattern Delete") {
-
-  } else
-  if (itemEv->text()=="Block Cut") {
-    childView_->patternView()->copyBlock(true);
-    childView_->patternView()->repaint();
-  } else
-  if (itemEv->text()=="Block Copy") {
-    childView_->patternView()->copyBlock(false);
-    childView_->patternView()->repaint();
-  } else
-  if (itemEv->text()=="Block Paste") {
-    PatternView* pView = childView_->patternView();
-    pView->pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
-    childView_->patternView()->repaint();
-  } else
-  if (itemEv->text()=="Block Mix Paste") {
-
-  } else
-  if (itemEv->text()=="Block Delete") {
-    childView_->patternView()->deleteBlock();
-    childView_->patternView()->repaint();
-  } else
-  if (itemEv->text()=="Sequence Cut") {
-
-  } else
-  if (itemEv->text()=="Sequence Copy") {
-
-  } else
-  if (itemEv->text()=="Sequence Delete") {
-
-  }
-}
 
 void MainWindow::onBpmIncOne(NButtonEvent* ev)  // OnBpmAddOne
 {
@@ -774,7 +684,7 @@ void MainWindow::onBpmDecTen(NButtonEvent* ev)
 
 void MainWindow::setAppSongBpm(int x)
 {
-    int bpm = 0;
+ /*   int bpm = 0;
     if ( x != 0 ) {
       if (Global::pPlayer()->_playing )  {
         Global::pSong()->setBpm(Global::pPlayer()->bpm+x);
@@ -786,7 +696,7 @@ void MainWindow::setAppSongBpm(int x)
 
     bpmDisplay_->setNumber(Global::pPlayer()->bpm);
 
-    bpmDisplay_->repaint();
+    bpmDisplay_->repaint();*/
 }
 
 void MainWindow::onRecordWav( NButtonEvent * ev )
@@ -809,7 +719,7 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
 
 void MainWindow::onTimer( )
 {
-  if (Global::pPlayer()->_playing) {
+  /*if (Global::pPlayer()->_playing) {
     int oldPos = childView_->patternView()->editPosition();
     Global::pConfig()->_followSong = sequencerBar_->followSong();
     childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
@@ -825,7 +735,7 @@ void MainWindow::onTimer( )
   vuMeter_->repaint();
   ((Master*)Global::pSong()->_pMachine[MASTER_INDEX])->vuupdated = true;
 
-  childView_->machineView()->updateVUs();
+  childView_->machineView()->updateVUs();*/
 }
 
 void MainWindow::updateBars( )
@@ -851,7 +761,7 @@ void MainWindow::onPatternView(NButtonEvent* ev) {
 
 bool MainWindow::checkUnsavedSong( )
 {
-  NMessageBox* box = new NMessageBox("Save changes of : "+Global::pSong()->fileName+" ?");
+/*  NMessageBox* box = new NMessageBox("Save changes of : "+Global::pSong()->fileName+" ?");
   box->setTitle("New Song");
   box->setButtonText("Yes","No","Abort");
   box->icon()->setSharedBitmap(&Global::pConfig()->icons().alert());
@@ -874,7 +784,8 @@ bool MainWindow::checkUnsavedSong( )
 
   }
   NApp::addRemovePipe(box);
-  return result;
+  return result;*/
+  return true;
 }
 
 // Sequencer menu events
@@ -1113,7 +1024,7 @@ void MainWindow::onNewMachineDialogAdded( Machine * mac )
 
 void MainWindow::onGeneratorCbx( NItemEvent * ev )
 {
-  std::string text = genCombo_->text();
+/*  std::string text = genCombo_->text();
   if (text.length() > 2) {
      std::string hexNumber = text.substr(0,2);
      std::stringstream hexStream(hexNumber); 
@@ -1123,7 +1034,7 @@ void MainWindow::onGeneratorCbx( NItemEvent * ev )
          Global::pSong()->seqBus = hex;
          childView_->machineView()->setSelectedMachine( Global::pSong()->_pMachine[hex] );
      }
-  }
+  }*/
 }
 
 void MainWindow::onSequencerEntryClick( SequencerItem * item )
@@ -1133,10 +1044,3 @@ void MainWindow::onSequencerEntryClick( SequencerItem * item )
 }
 
 }}
-
-
-
-
-
-
-

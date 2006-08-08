@@ -42,9 +42,11 @@
 namespace psycle { namespace host {
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
-PatternView::PatternView()
+PatternView::PatternView( Song* song )
   : NPanel()
 {
+  _pSong = song;
+
   setLayout(NAlignLayout());
 
   // hbar with beat zoom
@@ -241,7 +243,7 @@ const NColor & PatternView::separatorColor( )
 
 int PatternView::trackNumber( )
 {
-  return Global::pSong()->tracks();
+  return _pSong->tracks();
 }
 
 int PatternView::rowHeight( )
@@ -487,19 +489,19 @@ void PatternView::Header::paint( NGraphics * g )
                   track0X*noCoords.width(), noCoords.top());
 
     // blit the mute LED
-    if (Global::pSong()->_trackMuted[i]) {
+    if (  pView->pSong()->_trackMuted[i]) {
         g->putBitmap(xOff+dMuteCoords.x(),0+dMuteCoords.y(),sMuteCoords.width(),sMuteCoords.height(), bitmap,
                   sMuteCoords.left(), sMuteCoords.top());
     }
 
     // blit the solo LED
-    if (Global::pSong()->_trackSoloed == i) {
+    if ( pView->pSong()->_trackSoloed == i) {
         g->putBitmap(xOff+dSoloCoords.x(),0+dSoloCoords.y(),sSoloCoords.width(),sSoloCoords.height(), bitmap,
                   sSoloCoords.left(), sSoloCoords.top());
     }
 
     // blit the record LED
-    if (Global::pSong()->_trackArmed[i]) {
+    if ( pView->pSong()->_trackArmed[i]) {
         g->putBitmap(xOff+dRecCoords.x(),0+dRecCoords.y(),sRecCoords.width(),sRecCoords.height(), bitmap,
                   sRecCoords.left(), sRecCoords.top());
     }
@@ -543,38 +545,38 @@ void PatternView::Header::onMousePress( int x, int y, int button )
 
 void PatternView::Header::onSoloLedClick( int track )
 {
-  if (Global::pSong()->_trackSoloed != track )
+  if ( pView->pSong()->_trackSoloed != track )
   {
     for ( int i=0;i<MAX_TRACKS;i++ ) {
-      Global::pSong()->_trackMuted[i] = true;
+      pView->pSong()->_trackMuted[i] = true;
     }
-    Global::pSong()->_trackMuted[track] = false;
-    Global::pSong()->_trackSoloed = track;
+    pView->pSong()->_trackMuted[track] = false;
+    pView->pSong()->_trackSoloed = track;
   }
   else
   {
     for ( int i=0;i<MAX_TRACKS;i++ )
     {
-      Global::pSong()->_trackMuted[i] = false;
+      pView->pSong()->_trackMuted[i] = false;
     }
-    Global::pSong()->_trackSoloed = -1;
+    pView->pSong()->_trackSoloed = -1;
   }
   repaint();
 }
 
 void PatternView::Header::onMuteLedClick( int track )
 {
-  Global::pSong()->_trackMuted[track] = !(Global::pSong()->_trackMuted[track]);
+  pView->pSong()->_trackMuted[track] = !(pView->pSong()->_trackMuted[track]);
   repaint();
 }
 
 void PatternView::Header::onRecLedClick(int track) {
-  Global::pSong()->_trackArmed[track] = ! Global::pSong()->_trackArmed[track];
-  Global::pSong()->_trackArmedCount = 0;
+  pView->pSong()->_trackArmed[track] = ! pView->pSong()->_trackArmed[track];
+  pView->pSong()->_trackArmedCount = 0;
   for ( int i=0;i<MAX_TRACKS;i++ ) {
-      if (Global::pSong()->_trackArmed[i])
+      if ( pView->pSong()->_trackArmed[i] )
       {
-        Global::pSong()->_trackArmedCount++;
+        pView->pSong()->_trackArmedCount++;
       }
   }
   repaint();
@@ -1179,7 +1181,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       }
       break;
       case XK_Page_Up: {
-        int lines = (Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
+        int lines = (pView->pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
 
         int oldLine = pView->cursor().y();
         pView->moveCursor(0,-lines,0);
@@ -1193,7 +1195,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       }
       break;
       case XK_Page_Down:{
-        int lines = (Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
+        int lines = (pView->pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
 
         int startLine  = dy_ / pView->rowHeight();
         int lineCount  = clientHeight() / pView->rowHeight();
@@ -1261,7 +1263,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                     (*pView->pattern_)[position][pView->cursor().x()].setMachine(pView->selectedMachineIndex());
                     (*pView->pattern_)[position][pView->cursor().x()].setNote(note);
 
-                    Machine *tmac = Global::pSong()->_pMachine[Global::pSong()->seqBus];
+                    Machine *tmac = pView->pSong()->_pMachine[pView->pSong()->seqBus];
                     if (tmac) {
                       pView->PlayNote(note,127,false,tmac); 
                     }
@@ -1610,7 +1612,7 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
     // octave offset
     if(note<120) {
         if(bTranspose)
-        note+=Global::pSong()->currentOctave*12;
+        note+=pSong()->currentOctave*12;
         if (note > 119)
         note = 119;
       }
@@ -1618,8 +1620,8 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
       // build entry
       PatternEntry entry;
       entry._note = note;
-      entry._inst = Global::pSong()->auxcolSelected;
-      entry._mach = Global::pSong()->seqBus;	// Not really needed.
+      entry._inst = pSong()->auxcolSelected;
+      entry._mach = pSong()->seqBus;	// Not really needed.
 
       if(velocity != 127 && Global::pConfig()->midi().velocity().record())
       {
@@ -1644,10 +1646,10 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
       // play it
       if(pMachine==NULL)
       {
-        int mgn = Global::pSong()->seqBus;
+        int mgn = pSong()->seqBus;
 
         if (mgn < MAX_MACHINES) {
-            pMachine = Global::pSong()->_pMachine[mgn];
+            pMachine = pSong()->_pMachine[mgn];
         }
       }
 
@@ -1656,13 +1658,13 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
 //        if(bMultiKey)
         {
           int i;
-          for (i = outtrack+1; i < Global::pSong()->tracks(); i++)
+          for (i = outtrack+1; i < pSong()->tracks(); i++)
           {
             if (notetrack[i] == 120) {
               break;
             }
           }
-          if (i >= Global::pSong()->tracks()) {
+          if (i >= pSong()->tracks()) {
             for (i = 0; i <= outtrack; i++) {
                 if (notetrack[i] == 120) {
                   break;
@@ -1945,25 +1947,25 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
 
   // octave offset
   if(note<120) {
-      if(bTranspose) note+=Global::pSong()->currentOctave*12;
+      if(bTranspose) note+=pSong()->currentOctave*12;
       if (note > 119) note = 119;
   }
 
   if(pMachine==NULL) {
-      int mgn = Global::pSong()->seqBus;
+      int mgn = pSong()->seqBus;
 
       if (mgn < MAX_MACHINES) {
-          pMachine = Global::pSong()->_pMachine[mgn];
+          pMachine = pSong()->_pMachine[mgn];
       }
 
-  for(int i=0;i<Global::pSong()->tracks();i++) {
+  for(int i=0; i<pSong()->tracks(); i++) {
       if(notetrack[i]==note) {
         notetrack[i]=120;
         // build entry
         PatternEntry entry;
         entry._note = 120+0;
-        entry._inst = Global::pSong()->auxcolSelected;
-        entry._mach = Global::pSong()->seqBus;;
+        entry._inst = pSong()->auxcolSelected;
+        entry._mach = pSong()->seqBus;;
         entry._cmd = 0;
         entry._parameter = 0;
 
@@ -2137,6 +2139,10 @@ SinglePattern * PatternView::pattern( )
   return pattern_;
 }
 
+Song * PatternView::pSong( )
+{
+  return _pSong;
+}
 
 void PatternView::setBeatZoom( int tpb )
 {
@@ -2162,10 +2168,10 @@ void PatternView::onTrackChange( NItemEvent * ev )
   str << ev->item()->text();
   int track = 0;
   str >> track;
-  Global::pSong()->setTracks(track);
-  if (cursor().x() >= Global::pSong()->tracks() )
+  pSong()->setTracks(track);
+  if (cursor().x() >= pSong()->tracks() )
   {
-    setCursor(NPoint3D(Global::pSong()->tracks() ,cursor().y(),0));
+    setCursor(NPoint3D(pSong()->tracks() ,cursor().y(),0));
   }
   repaint();
 }
@@ -2196,3 +2202,5 @@ void psycle::host::PatternView::onPatternStepChange( NItemEvent * ev )
       setPatternStep(patternCombo_->selIndex()+1);
   }
 }
+
+

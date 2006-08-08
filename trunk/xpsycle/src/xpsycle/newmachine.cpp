@@ -28,9 +28,11 @@
 namespace psycle {
 	namespace host {
 
-NewMachine::NewMachine()
+NewMachine::NewMachine( Song* song )
   : NWindow()
 {
+  _pSong = song;
+
   sampler_ = false;
 
   setPosition(100,100,500,500);
@@ -117,7 +119,7 @@ int NewMachine::onClose( )
 
 void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
 {
-  Plugin plugin(0);
+  Plugin plugin(0, _pSong );
   std::cout << ev->item()->text() << std::endl;
   if (plugin.LoadDll(ev->item()->text())) {;
     plugin.GetName();

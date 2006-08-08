@@ -212,14 +212,14 @@ void WaveSaveDlg::initVars( )
 {
   // init variables
 
-  threadopen = 0;
+/*  threadopen = 0;
   kill_thread = 1;
   lastpostick = 0;
   lastlinetick = 0;
 
   std::string name;// = Global::pConfig->GetCurrentSongDir();
   //name+='\\';
-  Song* pSong = Global::pSong();
+//  Song* pSong = Global::pSong();
 
   name+= Global::pSong()->fileName;
   name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
@@ -278,7 +278,7 @@ void WaveSaveDlg::initVars( )
     {
       bits = 3;
     }
-  }
+  }*/
 
 }
 
@@ -307,7 +307,7 @@ void WaveSaveDlg::onCloseBtn( NButtonEvent * ev )
 
 void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
 {
-  Song *pSong     = Global::pSong();
+/*  Song *pSong     = Global::pSong();
   Player *pPlayer = Global::pPlayer();
 
   closeBtn->setText("Stop");
@@ -459,7 +459,7 @@ void WaveSaveDlg::onSaveBtn( NButtonEvent * ev )
     saveEnd();
   } else {
       saveWav(name,real_bits[bits],real_rate[rate],channelmode);
-  }
+  }*/
 }
 
 void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode )
@@ -562,7 +562,7 @@ void WaveSaveDlg::saveWav( std::string file, int bits, int rate, int channelmode
 
 void WaveSaveDlg::saveEnd( )
 {
-  saving=false;
+/*  saving=false;
   kill_thread=1;
   if ( autostop )
   {
@@ -683,7 +683,7 @@ void WaveSaveDlg::saveEnd( )
 
   closeBtn->setText("Close");
   pane()->resize();
-  pane()->repaint();
+  pane()->repaint();*/
 }
 
 int WaveSaveDlg::audioOutThread( void * ptr )

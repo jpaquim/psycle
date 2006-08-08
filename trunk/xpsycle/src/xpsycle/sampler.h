@@ -128,7 +128,7 @@ namespace psycle
 		{
 		public:
 			void Tick();
-			Sampler(Machine::id_type id);
+			Sampler(Machine::id_type id, Song* song);
 			virtual void Init();
 			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual void Stop();

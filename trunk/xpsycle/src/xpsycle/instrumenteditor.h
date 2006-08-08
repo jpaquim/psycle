@@ -32,7 +32,9 @@ class NItemEvent;
 
 namespace psycle {
 namespace host{
+
 class EnvDialog;
+class Song;
 
 /**
 @author Stefan Nattkemper
@@ -40,7 +42,7 @@ class EnvDialog;
 class InstrumentEditor : public NWindow
 {
 public:
-    InstrumentEditor();
+    InstrumentEditor( Song * song );
 
     ~InstrumentEditor();
 
@@ -50,6 +52,8 @@ public:
     virtual int onClose();
 
 private:
+
+    Song* _pSong;
 
     NLabel*    instNumberLbl;
     NButton*   incInstBtn;

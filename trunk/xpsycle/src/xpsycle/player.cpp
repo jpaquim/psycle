@@ -14,9 +14,9 @@ namespace psycle
 {
 	namespace host
 	{
-		Player::Player(Song & song)
+		Player::Player()
 		:
-			song_(&song),
+			song_(0),
 			_playing(false),
 			_playBlock(false),
 			_recording(false),

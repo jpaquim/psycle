@@ -30,6 +30,8 @@
 namespace psycle {
 namespace host {
 
+class Song;
+
 class InfoLine : public NPanel {
 public:
 
@@ -69,7 +71,7 @@ private:
 class NewMachine : public NWindow
 {
 public:
-    NewMachine();
+    NewMachine( Song* song );
 
     ~NewMachine();
 
@@ -83,6 +85,7 @@ public:
 
 private:
 
+  Song* _pSong;
   std::string dllName_;
 
   bool do_Execute;

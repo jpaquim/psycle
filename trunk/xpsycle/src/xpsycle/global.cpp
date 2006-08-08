@@ -26,14 +26,6 @@
 namespace psycle {
   namespace host {
 
-Song* Global::pSong() {
-  static Song* s = new Song();
-  return s;
-}
-
-Song & Global::song() {
-  return *pSong();
-}
 
 Configuration* Global::pConfig() {
   static Configuration* c = new Configuration();
@@ -47,7 +39,7 @@ Configuration & Global::configuration() {
 
 
 Player * Global::pPlayer() {
-  static Player* p = new Player(*pSong());
+  static Player* p = new Player();
   return p;
 }
 

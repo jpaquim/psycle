@@ -35,9 +35,9 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 
 PluginFxCallback Plugin::_callback;
 
-Plugin::Plugin(Machine::id_type id)
+Plugin::Plugin(Machine::id_type id , Song* song)
 			:
-				Machine(MACH_PLUGIN, MACHMODE_FX, id),
+				Machine(MACH_PLUGIN, MACHMODE_FX, id, song),
 				_dll(0),
 				proxy_(*this),
 				_psAuthor(""),
@@ -119,7 +119,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
           while (ns)
           {
             int nextevent = (TWSActive)?TWSSamples:ns+1;
-            for (int i=0; i < Global::pSong()->tracks(); i++)
+            for (int i=0; i < song()->tracks(); i++)
             {
               if (TriggerDelay[i]._cmd) {
                   if (TriggerDelayCounter[i] < nextevent)
@@ -134,7 +134,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
                 {
                   TWSSamples -= ns;
                 }
-                for (int i=0; i < Global::pSong()->tracks(); i++)
+                for (int i=0; i < song()->tracks(); i++)
                 {
                   // come back to this
                   if (TriggerDelay[i]._cmd)
@@ -144,7 +144,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
                 }
                 try
                 {
-                  proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::pSong()->tracks());
+                  proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
                 }
                 catch(const std::exception &)
                 {
@@ -155,7 +155,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
                         ns -= nextevent;
                         try
                         {
-                          proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::pSong()->tracks());
+                          proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, song()->tracks());
                         }
                         catch(const std::exception &)
                         {
@@ -193,7 +193,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
                         if(!activecount) TWSActive = false;
                       }
                     }
-                    for (int i=0; i < Global::pSong()->tracks(); i++)
+                    for (int i=0; i < song()->tracks(); i++)
                     {
                         // come back to this
                         if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)

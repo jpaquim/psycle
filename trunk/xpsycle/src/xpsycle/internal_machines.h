@@ -14,7 +14,7 @@ namespace psycle {
 		class Dummy : public Machine
 		{
 		public:
-			Dummy(id_type index);
+			Dummy(id_type index, Song* song);
 			virtual ~Dummy() throw();
 			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual std::string GetName() const { return _psName; };
@@ -30,7 +30,7 @@ namespace psycle {
 		{
 		public:
 			DuplicatorMac();
-			DuplicatorMac(id_type index);
+			DuplicatorMac(id_type index, Song* song);
 			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
@@ -59,7 +59,7 @@ namespace psycle {
 		{
 		public:
 			Master();
-			Master(id_type index);
+			Master(id_type index, Song* song);
 			virtual ~Master() throw();
 			virtual void Init(void);
 			virtual int GenerateAudioInTicks(int startSample, int numSamples);
@@ -120,7 +120,7 @@ namespace psycle {
 				return12
 			};
 			Mixer();
-			Mixer(id_type index);
+			Mixer(id_type index, Song* song);
 			virtual ~Mixer() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
@@ -187,7 +187,7 @@ namespace psycle {
 		{
 		public:
 			LFO();
-			LFO(id_type index);
+			LFO(id_type index, Song* song);
 			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);

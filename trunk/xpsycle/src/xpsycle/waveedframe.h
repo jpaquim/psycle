@@ -33,6 +33,7 @@ namespace psycle { namespace host {
 class WaveEdChildView;
 class WaveSaveDlg;
 class InstrumentEditor;
+class Song;
 
 
 /// wave editor frame window.
@@ -41,9 +42,9 @@ class WaveEdFrame : public NDockPanel
 
 
 public:
-	WaveEdFrame();
+	WaveEdFrame( Song* song );
 	virtual ~WaveEdFrame() throw();
-	
+	Song* pSong();
 	//virtual void setVisible(bool on);
 	//virtual int onClose();
 
@@ -58,6 +59,9 @@ public:
 	
 	
 private:
+
+	Song* _pSong;
+
 	void InitStatusBar();
 	void InitMenus();
 	void InitToolBar();
