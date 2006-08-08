@@ -47,6 +47,15 @@ MainWindow::MainWindow()
 {
   setPosition(0,0,1024,768);
 
+  book = new NTabBook();
+    page = new NPanel();
+    page->setLayout( NAlignLayout());
+  book->addPage(page,"Song01");
+  book->addPage(new NPanel(),"Song01");
+  book->addPage(new NPanel(),"Song02");
+  book->addPage(new NPanel(),"Song03");
+  book->addPage(new NPanel(),"Song04");
+
   initMenu();
   initDialogs();
   childView_ = new ChildView();
@@ -190,7 +199,8 @@ void MainWindow::showSongpDlg( NButtonEvent* ev )
 
 void MainWindow::initViews( )
 {
-  pane()->add(childView_);
+  pane()->add(book,nAlClient);
+  page->add(childView_, nAlClient);
   childView_->setTitleBarText();
   sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
   sequencerBar_->setPatternView( childView_->patternView() );
@@ -234,7 +244,7 @@ void MainWindow::initBars( )
 
   pane()->add(statusBar_,nAlBottom);
 
-  pane()->add(sequencerBar_ = new SequencerBar(), nAlLeft);
+  page->add(sequencerBar_ = new SequencerBar(), nAlLeft);
   sequencerBar_->added.connect(this,&MainWindow::onSeqAdded);
 }
 

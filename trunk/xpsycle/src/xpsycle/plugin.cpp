@@ -55,6 +55,7 @@ Plugin::~ Plugin( ) throw()
 bool Plugin::Instance(const std::string & file_name)
 {
    try {
+   std::cout << file_name << std::endl;
   _dll = dlopen(file_name.c_str(), RTLD_LAZY);
     if (!_dll) {
         std::cerr << "Cannot load library: " << dlerror() << '\n';
@@ -514,7 +515,7 @@ void Plugin::GetParamName(int numparam, char * name)
         minval = maxval = 0;
       }
     }
-    int Plugin::GetParamValue(int numparam) const
+    int Plugin::GetParamValue(int numparam)
     {
       if(numparam < _pInfo->numParameters)
       {

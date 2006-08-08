@@ -167,7 +167,7 @@ void SequencerBar::init( )
   NFlipBox* flipBox = new NFlipBox();
     NFrameBorder fr;
     flipBox->setBorder(fr);
-    flipBox->header()->add(new NLabel("Pattern properties"), nAlClient);
+    flipBox->header()->add(new NLabel("Pattern box"), nAlClient);
 
     NPanel* patternPanel = new NPanel();
     patternPanel->setLayout( NAlignLayout() );

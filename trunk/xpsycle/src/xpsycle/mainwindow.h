@@ -39,6 +39,7 @@
 #include <ngrs/nprogressbar.h>
 #include <ngrs/nfiledialog.h>
 #include <ngrs/n7segdisplay.h>
+#include <ngrs/ntabbook.h>
 
 class NStatusBar;
 class NTextStatusItem;
@@ -110,6 +111,8 @@ private:
     NTextStatusItem* octStatusItem;
     NTextStatusItem* editModeStatusItem;
 
+    NPanel* page;
+    NTabBook* book;
 
     void initMenu();
     void initDialogs();
