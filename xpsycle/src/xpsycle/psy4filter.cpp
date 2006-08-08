@@ -46,7 +46,6 @@ namespace psycle {
 
 
 		Psy4Filter::Psy4Filter()
-			: PsyFilter()
 		{
 			song_ = 0;
 		}
@@ -56,7 +55,7 @@ namespace psycle {
 		{
 		}
 
-		int psycle::host::Psy4Filter::version( ) const
+		int Psy4Filter::version( ) const
 		{
 			return 4;
 		}
@@ -88,8 +87,147 @@ namespace psycle {
 			std::cout << "psy4filter detected for load" << std::endl;
 			parser.tagParse.connect(this,&Psy4Filter::onTagParse);
 			parser.parseFile(fileName);
+
+
+			if (true) {
+				RiffFile file;
+				int pos = fileName.find(".");
+				file.Open(fileName.substr(0,pos)+".bin");
+				progress.emit(1,0,"");
+				progress.emit(2,0,"Loading... psycle bin data ...");
+
+				// skip header
+				file.Skip(8);
+				//\todo:
+				size_t filesize = file.FileSize();
+				std::uint32_t version = 0;
+				std::uint32_t size = 0;
+				char header[5];
+				header[4]=0;
+				std::uint32_t chunkcount = LoadSONGv0(&file,song);
+				std::cout << chunkcount << std::endl;
+			/* chunk_loop: */
+
+				while(file.ReadChunk(&header, 4) && chunkcount)
+				{
+					file.Read(version);
+					file.Read(size);
+
+					int fileposition = file.GetPos();
+					progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
+
+					if(std::strcmp(header,"MACD") == 0)
+					{
+						progress.emit(2,0,"Loading... Song machines...");
+						if ((version&0xFF00) == 0x0000) // chunkformat v0
+						{
+								LoadMACDv0(&file,song,version&0x00FF);
+						}
+						//else if ( (version&0xFF00) == 0x0100 ) //and so on
+					}
+					else if(std::strcmp(header,"INSD") == 0)
+					{
+						progress.emit(2,0,"Loading... Song instruments...");
+						if ((version&0xFF00) == 0x0000) // chunkformat v0
+						{
+							LoadINSDv0(&file,song,version&0x00FF);
+						}
+						//else if ( (version&0xFF00) == 0x0100 ) //and so on
+					}
+					else
+					{
+//					loggers::warning("foreign chunk found. skipping it.");
+						progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
+						std::ostringstream s;
+							s << "foreign chunk: version: " << version << ", size: " << size;
+//					loggers::trace(s.str());
+						if(size && size < filesize-fileposition)
+						{
+							file.Skip(size);
+						}
+					}
+					// For invalid version chunks, or chunks that haven't been read correctly/completely.
+					if  (file.GetPos() != fileposition+size)
+					{
+					//\todo: verify how it works with invalid data.
+//					if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
+//					else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
+						file.Seek(fileposition+size);
+					}
+					--chunkcount;
+				}
+				progress.emit(4,16384,"");
+
+				//\todo: Move this to something like "song.validate()" 
+
+				// test all connections for invalid machines. disconnect invalid machines.
+				for(int i(0) ; i < MAX_MACHINES ; ++i)
+				{
+					if(song._pMachine[i])
+					{
+						song._pMachine[i]->_connectedInputs = 0;
+						song._pMachine[i]->_connectedOutputs = 0;
+						for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
+						{
+							if(song._pMachine[i]->_connection[c])
+							{
+								if(song._pMachine[i]->_outputMachines[c] < 0 || song._pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
+								{
+									song._pMachine[i]->_connection[c] = false;
+									song._pMachine[i]->_outputMachines[c] = -1;
+								}
+								else if(!song._pMachine[song._pMachine[i]->_outputMachines[c]])
+								{
+									song._pMachine[i]->_connection[c] = false;
+									song._pMachine[i]->_outputMachines[c] = -1;
+								}
+								else 
+								{
+									song._pMachine[i]->_connectedOutputs++;
+								}
+							}
+							else
+							{
+								song._pMachine[i]->_outputMachines[c] = -1;
+							}
+
+							if (song._pMachine[i]->_inputCon[c])
+							{
+								if (song._pMachine[i]->_inputMachines[c] < 0 || song._pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
+								{
+									song._pMachine[i]->_inputCon[c] = false;
+									song._pMachine[i]->_inputMachines[c] = -1;
+								}
+								else if (!song._pMachine[song._pMachine[i]->_inputMachines[c]])
+								{
+									song._pMachine[i]->_inputCon[c] = false;
+									song._pMachine[i]->_inputMachines[c] = -1;
+								}
+								else
+								{
+									song._pMachine[i]->_connectedInputs++;
+								}
+							}
+							else
+							{
+								song._pMachine[i]->_inputMachines[c] = -1;
+							}
+						}
+					}
+				}
+
+				progress.emit(5,0,"");
+				if(chunkcount)
+				{
+					std::ostringstream s;
+					s << "Error reading from file '" << file.file_name() << "'" << std::endl;
+					s << "some chunks were missing in the file";
+					report.emit(s.str(), "Song Load Error.");
+				}
+				//\todo:
+			}
+
 			return isPsy4;
-			return false;
 		}
 
 		void Psy4Filter::onTagParse( const std::string & tagName )
@@ -151,52 +289,23 @@ namespace psycle {
 					entry->setStartPos(startPos);
 					entry->setEndPos(endPos);
 				}
-			} else 
-			if (tagName == "machine") {
-				int id  = str<int> (parser.getAttribValue("id"));
-				int type  = str<int> (parser.getAttribValue("type"));
-				std::string pluginname = parser.getAttribValue("pluginname");
-				if(id < MAX_MACHINES)
-				{
-					lastMachine = Machine::create((MachineType)type, id, pluginname);
-					song_->_pMachine[id] = lastMachine;
-					lastMachine->_macIndex = id;
-					lastMachine->_bypass  = str<int> (parser.getAttribValue("bypass"));
-					lastMachine->_mute    = str<int> (parser.getAttribValue("bypass"));
-					lastMachine->_panning = str<int> (parser.getAttribValue("pan"));
-					lastMachine->_panning = str<int> (parser.getAttribValue("pan"));
-					lastMachine->SetPosX(str<int> (parser.getAttribValue("x")));
-					lastMachine->SetPosY(str<int> (parser.getAttribValue("y")));
-					lastMachine->_connectedInputs = str_hex<int> (parser.getAttribValue("connectedinputs"));
-					lastMachine->_connectedOutputs = str_hex<int> (parser.getAttribValue("connectedoutputs"));
-				}
-			} else 
-			if (tagName == "connection" && lastMachine) {
-				int index = str<int> (parser.getAttribValue("index"));
-				int out_mac = str<int> (parser.getAttribValue("outputmac"));
-				int in_mac = str<int> (parser.getAttribValue("inputmac"));
-				std::cout << "mac:" << lastMachine->_macIndex << ", con:" << index << "," << in_mac << "," << out_mac << std::endl;
-				float wire_mult = str<float> (parser.getAttribValue("wiremult"));
-				float input_vol = str<float> (parser.getAttribValue("index"));
-				int connection = str<int> (parser.getAttribValue("connection"));
-				int input_con = str<int> (parser.getAttribValue("inputcon"));
-				lastMachine->_inputMachines[index] = in_mac;
-				lastMachine->_outputMachines[index] = out_mac;
-				lastMachine->_inputConVol[index] = input_vol;
-				lastMachine->_wireMultiplier[index] = wire_mult;
-				lastMachine->_connection[index] = connection;
-				lastMachine->_inputCon[index] = input_con;
 			}
 		}
 
 		bool Psy4Filter::save( const std::string & fileName, const Song & song )
 		{
 			bool autosave = false;
+			//\todo:
+			if ( !autosave )
+			{
+				progress.emit(1,0,"");
+				progress.emit(2,0,"Saving...");
+			}
 
-			_stream.open(fileName.c_str (), std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
+
+			_stream.open(std::string(fileName+".xml").c_str() , std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
 			if (!_stream.is_open ()) return false;
 			_stream.seekg (0, std::ios::beg);
-			
 
 			std::ostringstream xml;
 			xml << "<psy4>" << std::endl;
@@ -205,30 +314,163 @@ namespace psycle {
 			xml << "<author text='" << song.author()  << "' />" << std::endl;;
 			xml << "<coment text='" << song.comment() << "' />" << std::endl;;
 			xml << "</info>" << std::endl;
-			xml << "<global>" << std::endl;
-			xml << "</global>" << std::endl;
 			xml << song.patternSequence().patternData().toXml();
 			xml << song.patternSequence().toXml();
-			xml << "<machines>" << std::endl;
+			xml << "</psy4>" << std::endl;
+
+			_stream << xml.str() << std::endl;
+			_stream.close();
+
+			//\todo:
+			if ( !autosave )
+			{
+				progress.emit(1,0,"");
+				progress.emit(2,0,"Saving binary data...");
+			}
+
+			RiffFile file;
+			file.Create(std::string(fileName+".bin").c_str(), true);
+
+			file.WriteChunk("PSY4",4);
+			saveSONGv0(&file,song);
+
 			for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
 			{
 				if (song._pMachine[index])
 				{
-					xml << song._pMachine[index]->toXml();
+					saveMACDv0(&file,song,index);
 					if ( !autosave )
 					{
 						progress.emit(4,-1,"");
 					}
 				}
 			}
-			xml << "</machines>" << std::endl;
-			xml << "<instruments>" << std::endl;
-			xml << "</instruments>" << std::endl;
-			xml << "</psy4>" << std::endl;
+			for(std::uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
+			{
+				if (!song._pInstrument[index]->Empty())
+				{
+					saveINSDv0(&file,song,index);
+					if ( !autosave )
+					{
+						progress.emit(4,-1,"");
+					}
+				}
+			}
+			//\todo:
+			file.Close();
+			return true;
+		}
 
-			_stream << xml.str() << std::endl;
-			_stream.close();
+		int Psy4Filter::LoadSONGv0(RiffFile* file,Song& song)
+		{
+			std::uint32_t fileversion = 0;
+			std::uint32_t size = 0;
+			std::uint32_t chunkcount = 0;
+			file->Read(fileversion);
+			file->Read(size);
+			if(fileversion > CURRENT_FILE_VERSION)
+			{
+				report.emit("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
+			}
+			file->Read(chunkcount);
+			const int bytesread=4;
+			if ( size > 4)
+			{
+				file->Skip(size - bytesread);// Size of the current header DATA // This ensures that any extra data is skipped.
+			}
+			return chunkcount;
+		}
+
+		bool Psy4Filter::saveSONGv0( RiffFile * file, const Song & song )
+		{
+			std::uint32_t chunkcount;
+			std::uint32_t version, size;
+			// chunk header;
+
+			file->WriteChunk("SONG",4);
+			version = FILE_VERSION;
+			file->Write(version);
+			size = sizeof chunkcount;
+			file->Write(size);
+
+			chunkcount = 3; // 3 chunks plus:
+			for(unsigned int i(0) ; i < MAX_MACHINES    ; ++i)
+					if(song._pMachine[i]) ++chunkcount;
+			for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i)
+				 if(!song._pInstrument[i]->Empty()) ++chunkcount;
+
+			file->Write(chunkcount);
+
+			return true;
+		}
+
+		bool Psy4Filter::saveMACDv0( RiffFile * file, const Song & song, int index )
+		{
+			std::uint32_t version, size;
+			std::size_t pos;
+
+			// chunk header
+
+			file->WriteChunk("MACD",4);
+			version = CURRENT_FILE_VERSION_MACD;
+			file->Write(version);
+			pos = file->GetPos();
+			size = 0;
+			file->Write(size);
+
+			// chunk data
+
+			file->Write(index);
+			song._pMachine[index]->SaveFileChunk(file);
+
+			// chunk size in header
+
+			std::size_t const pos2 = file->GetPos();
+			size = pos2 - pos - sizeof size;
+			file->Seek(pos);
+			file->Write(size);
+			file->Seek(pos2);
+
+			//\todo:
+			return true;
+		}
+
+		bool Psy4Filter::saveINSDv0( RiffFile * file, const Song & song, int index )
+		{
+			std::uint32_t version, size;
+			std::size_t pos;
+
+			// chunk header
+
+			file->WriteChunk("INSD",4);
+			version = CURRENT_FILE_VERSION_INSD;
+			file->Write(version);
+			pos = file->GetPos();
+			size = 0;
+			file->Write(size);
+
+			// chunk data
+
+			file->Write(index);
+			song._pInstrument[index]->SaveFileChunk(file);
+
+			// chunk size in header
+
+			std::size_t const pos2 = file->GetPos();
+			size = pos2 - pos - sizeof size;
+			file->Seek(pos);
+			file->Write(size);
+			file->Seek(pos2);
+
+			//\todo:
+			return true;
+		}
+
+		bool Psy4Filter::saveWAVEv0( RiffFile * file, const Song & song, int index )
+		{
 		}
 
 	}
 }
+
+

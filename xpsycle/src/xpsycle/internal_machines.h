@@ -39,12 +39,11 @@ namespace psycle {
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
-			virtual void GetParamValue(int numparam,char *parVal) const;
-			virtual int GetParamValue(int numparam) const;
+			virtual void GetParamValue(int numparam,char *parVal);
+			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 
-			virtual std::string specificXml() const;
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
 		protected:

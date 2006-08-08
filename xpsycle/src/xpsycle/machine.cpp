@@ -7,6 +7,7 @@
 #include "configuration.h"
 #include <algorithm>
 #include "analyzer.h"
+
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
@@ -15,7 +16,6 @@
 //#include <psycle/host/engine/XMSampler.hpp>
 #include "plugin.h" //<psycle/host/engine/plugin.hpp>
 //#include <psycle/host/engine/VSTHost.hpp>
-#include <sstream>
 
 namespace psycle
 {
@@ -596,103 +596,6 @@ namespace psycle
 			return true;
 		};
 
-		Machine * Machine::create( MachineType type , int index, const std::string & dllname )
-		{
-			bool fullopen = true;
-			bool bDeleted(false);
-			Machine* pMachine;
-			switch (type)
-			{
-			case MACH_MASTER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Master(index);
-				break;
-			case MACH_SAMPLER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Sampler(index);
-				break;
-			case MACH_XMSAMPLER:
-				//if ( !fullopen )
-						pMachine = new Dummy(index);
-						type = MACH_DUMMY;
-				//else pMachine = new XMSampler(index);
-				break;
-			case MACH_DUPLICATOR:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new DuplicatorMac(index);
-				break;
-			case MACH_MIXER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Mixer(index);
-				break;
-			case MACH_LFO:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new LFO(index);
-				break;
-			case MACH_PLUGIN:
-				{
-					if(!fullopen) pMachine = new Dummy(index);
-					else 
-					{
-						Plugin * p;
-						pMachine = p = new Plugin(index);
-						if(!p->LoadDll(dllname))
-						{
-							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
-							delete p;
-							bDeleted = true;
-						}
-					}
-				}
-				break;
-			case MACH_VST:
-				{
-					if(!fullopen) pMachine = new Dummy(index);
-					else 
-					{
-//						vst::instrument * p;
-//						pMachine = p = new vst::instrument(index);
-//						if(!p->LoadDll(dllName))
-//						{
-							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
-//							delete p;
-//							bDeleted = true;
-						//}
-					}
-				}
-				break;
-			case MACH_VSTFX:
-				{
-//					if(!fullopen) pMachine = new Dummy(index);
-//					else 
-//					{
-//						vst::fx * p;
-//						pMachine = p = new vst::fx(index);
-//						if(!p->LoadDll(dllName))
-//						{
-							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
-//							delete p;
-//							bDeleted = true;
-//						}
-//					}
-				}
-				break;
-			default:
-//				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
-				if (type != MACH_DUMMY ) {
-                                std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << (int) type << std::endl;
-				}
-				pMachine = new Dummy(index);
-				break;
-			}
-			pMachine->Init();
-			pMachine->_macIndex = index;
-			return pMachine;
-		}
-
 		Machine* Machine::LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
 		{
 			// assume version 0 for now
@@ -869,53 +772,6 @@ namespace psycle
 			return pMachine;
 		}
 
-		std::string Machine::toXml( ) const
-		{
-			std::ostringstream xml;
-			xml << "<machine ";
-			xml << " id='" << _macIndex << "'";
-			xml << " type='" << (int)_type << "'";
-			xml << " pluginname='" << GetDllName() << "'";
-			xml << " bypass='" << (int) _bypass << "'";
-			xml << " mute='" << (int) _mute << "'";
-			xml << " pan='" << (int) _panning << "'";
-			xml << " x='"   << (int) _x << "'";
-			xml << " y='"   << (int) _y <<  "'";
-			//xml << " name='" << GetEditName() << "'";
-			xml << " connectedinputs='" << _connectedInputs << "'";
-			xml << " connectedoutputs='" << _connectedOutputs << "' >";
-			xml << std::endl;
-
-			std::cout << _macIndex << "," << _connectedOutputs << std::endl;
-
-			for(int i = 0; i < MAX_CONNECTIONS; i++) {
-				xml << "<connection ";
-				xml << " index='" << i  <<  "'" << std::endl;
-				xml << " inputmac='" << _inputMachines[i]  << "'";
-				std::cout << _inputMachines[i] << std::endl;
-				xml << " outputmac='" << _outputMachines[i] << "'";
-				std::cout << _outputMachines[i] << std::endl;
-				xml << " inputvol='" << _inputConVol[i] << "'";
-				xml << " wiremult='" << _wireMultiplier[i] << "'";
-				xml << " connection='" << _connection[i]  << "'";
-				xml << " inputcon='" << _inputCon[i] << "' />" << std::endl;
-			}
-			xml << specificXml();
-			xml << "</machine>";
-			return xml.str();
-		}
-
-		std::string Machine::specificXml( ) const
-		{
-			std::ostringstream xml;
-			std::uint32_t count = GetNumParams();
-			for(unsigned int i = 0; i < count; i++)
-			{
-				std::uint32_t temp = GetParamValue(i);
-				xml << "<numparams id='" << i << "'" << " value='" << (int) count << "'>" << std::endl;
-			}
-			return xml.str();
-		}
 
 		void Machine::SaveFileChunk(RiffFile* pFile)
 		{
@@ -938,6 +794,7 @@ namespace psycle
 				pFile->Write(_inputCon[i]);
 			}
 			pFile->WriteChunk(GetEditName().c_str(), GetEditName().length()+1);	//a max of 128 chars will be read on song load, but there's no real
+  	//reason to limit what gets saved here.. (is there?)
 			SaveSpecificChunk(pFile);
 		}
 
@@ -1039,9 +896,3 @@ int Machine::GenerateAudio( int numsamples )
 
 	}
 }
-
-
-
-
-
-

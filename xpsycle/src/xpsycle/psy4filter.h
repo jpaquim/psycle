@@ -20,7 +20,7 @@
 #ifndef PSY4FILTER_H
 #define PSY4FILTER_H
 
-#include "psyfilter.h"
+#include "psy3filter.h"
 #include <ngrs/sigslot.h>
 #include <ngrs/nxmlparser.h>
 #include <iostream>
@@ -34,7 +34,7 @@
 namespace psycle {
 	namespace host {
 
-		class Psy4Filter : public PsyFilter, public sigslot::has_slots<>
+		class Psy4Filter : public Psy3Filter, public sigslot::has_slots<>
 		{
 			public:
 				Psy4Filter();
@@ -46,6 +46,15 @@ namespace psycle {
 				virtual bool testFormat(const std::string & fileName);
 				virtual bool load(const std::string & fileName, Song & song);
 				virtual bool save( const std::string & fileName, const Song & song );
+
+			protected:
+
+				int LoadSONGv0(RiffFile* file,Song& song);
+
+				bool saveSONGv0(RiffFile* file,const Song& song);
+				bool saveMACDv0(RiffFile* file,const Song& song,int index);
+				bool saveINSDv0(RiffFile* file,const Song& song,int index);
+				bool saveWAVEv0(RiffFile* file,const Song& song,int index);
 
 			private:
 
