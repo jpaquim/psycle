@@ -33,36 +33,33 @@ namespace psycle {
 const std::string PSYCLE__VERSION="X";
 
 
-ChildView::ChildView()
+ChildView::ChildView( Song & song )
   : NTabBook()
 {
-  // reset the song global ..
-  _pSong = Global::pSong();
-  // end of strange main psycle code
+  _pSong = &song;
 
-
-  newMachineDlg_ = new NewMachine();
+  newMachineDlg_ = new NewMachine( _pSong );
   add(newMachineDlg_);
 
   setTabBarAlign(nAlBottom);
   setAlign(nAlClient);
 
-  machineView_ = new MachineView();
+  machineView_ = new MachineView( _pSong );
     machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
     machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
-  patternView_ = new PatternView();
+  patternView_ = new PatternView( _pSong );
     patternView_->setForeground(Global::pConfig()->pvc_background);
     patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
 
   sequencerView_ = new SequencerGUI();
-  sequencerView_->setPatternSequence(Global::pSong()->patternSequence());
+  sequencerView_->setPatternSequence( _pSong->patternSequence());
   sequencerView_->addSequencerLine();
 
   NDockPanel* macDock = new NDockPanel(machineView_);
   addPage(macDock,"Machine View");
   NDockPanel* patDock = new NDockPanel(patternView_);
   addPage(patDock,"Pattern View");
-  waveEd_ = new WaveEdFrame();
+  waveEd_ = new WaveEdFrame( &song);
   addPage(waveEd_,"WaveEditor");
   NDockPanel* seqDock = new NDockPanel(sequencerView_);
   addPage(seqDock,"Sequencer View");
@@ -158,7 +155,7 @@ void ChildView::setTitleBarText( )
 {
   std::string titlename = "[";
 
-  titlename+=Global::pSong()->fileName;
+  titlename += _pSong->fileName;
   /*if(pUndoList) {
       if (UndoSaved != pUndoList->counter) titlename+=" *"; else
       if (UndoMacSaved != UndoMacCounter)  titlename+=" *"; else
@@ -233,16 +230,16 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
       if (newMachineDlg()->outBus()) {
           // Generator selected
           int x = 10; int y = 10;
-          int fb = Global::pSong()->GetFreeBus();
+          int fb = _pSong->GetFreeBus();
           if (newMachineDlg()->sampler()) {
-            Global::pSong()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
-            machineView()->addMachine(Global::pSong()->_pMachine[fb]);
-            newMachineAdded.emit(Global::pSong()->_pMachine[fb]);
+            _pSong->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
+            machineView()->addMachine( _pSong->_pMachine[fb]);
+            newMachineAdded.emit( _pSong->_pMachine[fb]);
             machineView()->repaint();
           } else {
-          Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName(),fb);
-            machineView()->addMachine(Global::pSong()->_pMachine[fb]);
-            newMachineAdded.emit(Global::pSong()->_pMachine[fb]);
+            _pSong->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName(),fb);
+            machineView()->addMachine( _pSong->_pMachine[fb]);
+            newMachineAdded.emit( _pSong->_pMachine[fb]);
             machineView()->repaint();
           }
       }
@@ -257,7 +254,7 @@ WaveEdFrame * ChildView::waveEditor( )
 
 void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
 {
-  Global::pSong()->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().x(),patternView_->cursor().y());
+  _pSong->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().x(),patternView_->cursor().y());
 }
 
 SequencerGUI * ChildView::sequencerView( )
@@ -267,16 +264,3 @@ SequencerGUI * ChildView::sequencerView( )
 
 }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

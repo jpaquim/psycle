@@ -25,6 +25,7 @@ namespace psycle
 		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
 
 		class Machine; // forward declaration
+		class Song;
 
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error
@@ -391,10 +392,12 @@ namespace psycle
 			///\}
 
 			public:
-				Machine(type_type type, mode_type mode, id_type id);
+				Machine(type_type type, mode_type mode, id_type id, Song * song);
 				virtual ~Machine() throw();
-			//////////////////////////////////////////////////////////////////////////
-			// Actions
+				Song* song();
+
+			private:
+				Song* _pSong;
 
 			///\name the life cycle of a mahine
 			///\{
@@ -413,7 +416,7 @@ namespace psycle
 				public:
 					virtual void SaveDllName(RiffFile * pFile);
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-					static Machine * LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen=true);
+					static Machine * LoadFileChunk(Song* pSong , RiffFile* pFile, Machine::id_type index, int version,bool fullopen=true);
 					virtual void SaveFileChunk(RiffFile * pFile);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
 				protected: friend class Song;

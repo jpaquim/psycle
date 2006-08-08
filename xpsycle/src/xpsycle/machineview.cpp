@@ -29,9 +29,11 @@
 
 namespace psycle { namespace host {
 
-MachineView::MachineView()
+MachineView::MachineView( Song* song )
   : NPanel()
 {
+  _pSong = song;
+
   setLayout(NAlignLayout());
 
   scrollBox_ = new NScrollBox();
@@ -111,7 +113,7 @@ void MachineView::createGUIMachines( )
   // add Gui to Machine
   for(int c=0;c<MAX_MACHINES;c++)
   {
-    Machine* mac = Global::pSong()->_pMachine[c];
+    Machine* mac = _pSong->_pMachine[c];
     if (mac) { onCreateMachine(mac); }
   }
 
@@ -119,13 +121,13 @@ void MachineView::createGUIMachines( )
   // add Wires
   for(int c=0;c<MAX_MACHINES;c++)
   {
-      Machine* tmac = Global::pSong()->_pMachine[c];
+      Machine* tmac = _pSong->_pMachine[c];
       if (tmac) for (int w=0; w<MAX_CONNECTIONS; w++)
       {
         if (tmac->_connection[w]) {
               MachineGUI* from = findByMachine(tmac);
               if (from!=0) {
-                Machine* pout = Global::pSong()->_pMachine[tmac->_outputMachines[w]];
+                Machine* pout = _pSong->_pMachine[tmac->_outputMachines[w]];
                 MachineGUI* to = findByMachine(pout);
                 if (to != 0) {
                   MachineWireGUI* line = new MachineWireGUI();
@@ -184,7 +186,7 @@ void MachineView::onLineMousePressed( NButtonEvent * ev )
     for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
       MachineGUI* machineGUI = *it;
       if (machineGUI->clipBox().intersects(line->left()+ev->x(),line->top()+ev->y())) {
-        Global::pSong()->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
+        _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
         startGUI->attachLine(line,0);
         machineGUI->attachLine(line,1);
         line->setMoveable(NMoveable());

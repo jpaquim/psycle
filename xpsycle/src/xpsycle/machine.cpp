@@ -176,7 +176,7 @@ namespace psycle
 			parent_.Work(numSamples);
 		}
 
-		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
+		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id, Song * song)
 		:
 			_type(type),
 			_mode(mode),
@@ -214,6 +214,7 @@ namespace psycle
 			_scopePrevNumSamples(0),
 			_editName("")
 		{
+			_pSong = song;
 			_pSamplesL = new float[MAX_BUFFER_LENGTH];
 			_pSamplesR = new float[MAX_BUFFER_LENGTH];
 			// Clear machine buffer samples
@@ -411,7 +412,7 @@ namespace psycle
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = Global::song()._pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = _pSong->_pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -428,7 +429,7 @@ namespace psycle
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = Global::song()._pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = _pSong->_pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -489,7 +490,7 @@ namespace psycle
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
+					Machine* pInMachine = _pSong->_pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						/*
@@ -549,7 +550,7 @@ namespace psycle
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
+					Machine* pInMachine = _pSong->_pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -596,7 +597,7 @@ namespace psycle
 			return true;
 		};
 
-		Machine* Machine::LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
+		Machine* Machine::LoadFileChunk(Song* pSong, RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
 		{
 			// assume version 0 for now
 			bool bDeleted(false);
@@ -609,41 +610,41 @@ namespace psycle
 			switch (type)
 			{
 			case MACH_MASTER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Master(index);
+				if ( !fullopen ) pMachine = new Dummy(index, pSong);
+				else pMachine = new Master(index, pSong);
 				break;
 			case MACH_SAMPLER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Sampler(index);
+				if ( !fullopen ) pMachine = new Dummy(index, pSong);
+				else pMachine = new Sampler(index, pSong );
 				break;
 			case MACH_XMSAMPLER:
 				//if ( !fullopen ) 
-                                pMachine = new Dummy(index);
-                                type = MACH_DUMMY;
+				pMachine = new Dummy(index, pSong);
+				type = MACH_DUMMY;
 				//else pMachine = new XMSampler(index);
 				break;
 			case MACH_DUPLICATOR:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new DuplicatorMac(index);
+				if ( !fullopen ) pMachine = new Dummy(index, pSong);
+				else pMachine = new DuplicatorMac(index, pSong);
 				break;
 			case MACH_MIXER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Mixer(index);
+				if ( !fullopen ) pMachine = new Dummy(index, pSong);
+				else pMachine = new Mixer(index, pSong);
 				break;
 			case MACH_LFO:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new LFO(index);
+				if ( !fullopen ) pMachine = new Dummy(index, pSong);
+				else pMachine = new LFO(index, pSong);
 				break;
 			case MACH_PLUGIN:
 				{
-					if(!fullopen) pMachine = new Dummy(index);
+					if(!fullopen) pMachine = new Dummy(index, pSong);
 					else 
 					{
 						Plugin * p;
-						pMachine = p = new Plugin(index);
+						pMachine = p = new Plugin(index, pSong);
 						if(!p->LoadDll(dllName))
 						{
-							pMachine = new Dummy(index);
+							pMachine = new Dummy(index, pSong);
 							type = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
@@ -653,14 +654,14 @@ namespace psycle
 				break;
 			case MACH_VST:
 				{
-					if(!fullopen) pMachine = new Dummy(index);
+					if(!fullopen) pMachine = new Dummy(index, pSong);
 					else 
 					{
 //						vst::instrument * p;
 //						pMachine = p = new vst::instrument(index);
 //						if(!p->LoadDll(dllName))
 //						{
-							pMachine = new Dummy(index);
+							pMachine = new Dummy(index, pSong);
 							type = MACH_DUMMY;
 //							delete p;
 //							bDeleted = true;
@@ -677,7 +678,7 @@ namespace psycle
 //						pMachine = p = new vst::fx(index);
 //						if(!p->LoadDll(dllName))
 //						{
-							pMachine = new Dummy(index);
+							pMachine = new Dummy(index, pSong);
 							type = MACH_DUMMY;
 //							delete p;
 //							bDeleted = true;
@@ -688,7 +689,7 @@ namespace psycle
 			default:
 //				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
                                 std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
-				pMachine = new Dummy(index);
+				pMachine = new Dummy(index, pSong);
 				break;
 			}
 			pMachine->Init();
@@ -729,7 +730,7 @@ namespace psycle
                                         std::cerr << s.str() << std::endl;
 					//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				}
-				Machine* p = new Dummy(index);
+				Machine* p = new Dummy(index, pSong);
 				p->Init();
 				p->_type=MACH_DUMMY;
 				p->_mode=pMachine->_mode;
@@ -891,8 +892,13 @@ int Machine::GenerateAudio( int numsamples )
 
 }
 
-
+Song * Machine::song( )
+{
+  return _pSong;
+}
 
 
 	}
 }
+
+

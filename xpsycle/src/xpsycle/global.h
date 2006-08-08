@@ -40,11 +40,9 @@ namespace psycle {
 
         ~Global();
 
-        static Song* pSong();
         static Player* pPlayer();
         static Configuration* pConfig();
         static Configuration & configuration();
-        static Song & Global::song();
         static Player & Global::player();
     };
 

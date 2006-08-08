@@ -67,6 +67,10 @@ public:
 
 private:
 
+    std::vector<Song*> songs_;
+    void initSongs();
+    void addSongToGui(Song & song);
+
     bool noFileWasYetLoaded;
 
     ChildView* childView_;
@@ -116,10 +120,8 @@ private:
 
     void initMenu();
     void initDialogs();
-    void initViews();
     void initBars();
     void initToolBar();
-    void initSignals();
     void initMachineView();
 
     void updateBars();
@@ -130,10 +132,7 @@ private:
     void onBarPlayFromStart(NButtonEvent* ev);
     void onBarStop(NButtonEvent* ev);
 
-    void onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
-    void onViewMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
     void onHelpMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
-    void onEditMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
 
     void onFileNew(NButtonEvent* ev);
     void onFileOpen(NButtonEvent* ev);

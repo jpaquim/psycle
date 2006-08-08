@@ -43,7 +43,7 @@ class SequencerGUI;
 class ChildView : public NTabBook
 {
 public:
-    ChildView();
+    ChildView( Song & song);
 
     ~ChildView();
 
@@ -79,7 +79,7 @@ public:
 
 private:
 
-    psycle::host::Song* _pSong;
+    Song* _pSong;
     NewMachine* newMachineDlg_;
 
     NFileDialog* getOpenFileName_;

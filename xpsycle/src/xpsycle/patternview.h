@@ -42,6 +42,8 @@ class NItemEvent;
 namespace psycle { namespace host {
 
 
+class Song;
+
 class PatternView : public NPanel
 {
     class Header: public NPanel {
@@ -182,9 +184,11 @@ class PatternView : public NPanel
     };
 
 public:
-    PatternView();
+    PatternView( Song * song);
 
     ~PatternView();
+
+    Song* pSong();
 
     signal1<int> lineChanged;
 
@@ -261,6 +265,7 @@ public:
 
 private:
 
+  Song* _pSong;
   SinglePattern* pattern_;
 
   int editPosition_, prevEditPosition_;

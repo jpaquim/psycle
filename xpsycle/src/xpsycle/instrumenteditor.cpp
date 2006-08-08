@@ -38,8 +38,8 @@
 namespace psycle {
 namespace host {
 
-InstrumentEditor::InstrumentEditor()
-  : NWindow()
+InstrumentEditor::InstrumentEditor( Song * song )
+  : NWindow(), _pSong(song)
 {
   init();
 }
@@ -231,7 +231,7 @@ void InstrumentEditor::init( )
 
   setPosition(0,0,400,600);
 
-  envelopeEditor = new EnvDialog(Global::pSong());
+  envelopeEditor = new EnvDialog( _pSong );
   add(envelopeEditor);
 }
 
@@ -243,48 +243,48 @@ int InstrumentEditor::onClose( )
 
 void InstrumentEditor::setInstrument( int index )
 {
-  Global::pSong()->instSelected=   index;
-  Global::pSong()->auxcolSelected= index;
+  _pSong->instSelected=   index;
+  _pSong->auxcolSelected= index;
 
   char buf[64]; sprintf(buf,"%.2X",index);
   instNumberLbl->setText(buf);
 
-  instNameEd->setText(Global::pSong()->_pInstrument[index]->_sName);
+  instNameEd->setText( _pSong->_pInstrument[index]->_sName);
 
-  newNoteActionCb->setIndex(Global::pSong()->_pInstrument[index]->_NNA);
+  newNoteActionCb->setIndex( _pSong->_pInstrument[index]->_NNA);
 
   // Volume bar
-  volumeSlider->setPos(Global::pSong()->_pInstrument[index]->waveVolume);
-  fineTuneSlider->setPos(Global::pSong()->_pInstrument[index]->waveFinetune+256);
+  volumeSlider->setPos( _pSong->_pInstrument[index]->waveVolume);
+  fineTuneSlider->setPos( _pSong->_pInstrument[index]->waveFinetune+256);
 
-  panningSlider->setPos(Global::pSong()->_pInstrument[index]->_pan);
-  rndPanningCbx->setCheck(Global::pSong()->_pInstrument[index]->_RPAN);
-  rndVCFCutCbx->setCheck(Global::pSong()->_pInstrument[index]->_RCUT);
-  rndVCFResoCbx->setCheck(Global::pSong()->_pInstrument[index]->_RRES);
+  panningSlider->setPos( _pSong->_pInstrument[index]->_pan);
+  rndPanningCbx->setCheck( _pSong->_pInstrument[index]->_RPAN);
+  rndVCFCutCbx->setCheck( _pSong->_pInstrument[index]->_RCUT);
+  rndVCFResoCbx->setCheck( _pSong->_pInstrument[index]->_RRES);
 
-  panningLbl->setText(stringify(Global::pSong()->_pInstrument[index]->_pan));
+  panningLbl->setText(stringify( _pSong->_pInstrument[index]->_pan));
 
-  octLbl->setText(noteToString((Global::pSong()->_pInstrument[index]->waveTune+48)));
+  octLbl->setText(noteToString(( _pSong->_pInstrument[index]->waveTune+48)));
 
-  bool const ils = Global::pSong()->_pInstrument[index]->_loop;
+  bool const ils = _pSong->_pInstrument[index]->_loop;
 
   playSampleFitCbx->setCheck(ils);
-  patRowEdt->setText(stringify(Global::pSong()->_pInstrument[index]->_lines));
+  patRowEdt->setText(stringify( _pSong->_pInstrument[index]->_lines));
 
   // Set looptype
-  if(Global::pSong()->_pInstrument[index]->waveLoopType)
+  if( _pSong->_pInstrument[index]->waveLoopType)
       loopLbl->setText("Forward");
   else
       loopLbl->setText("Off");
 
   // Display Loop Points & Wave Length	
 
-  loopAtFromLbl->setText(stringify((int)Global::pSong()->_pInstrument[index]->waveLoopStart));
-  loopAtToLbl->setText(stringify((int)Global::pSong()->_pInstrument[index]->waveLoopEnd));
-  lenLbl->setText(stringify((int)Global::pSong()->_pInstrument[index]->waveLength));
+  loopAtFromLbl->setText(stringify((int) _pSong->_pInstrument[index]->waveLoopStart));
+  loopAtToLbl->setText(stringify((int) _pSong->_pInstrument[index]->waveLoopEnd));
+  lenLbl->setText(stringify((int) _pSong->_pInstrument[index]->waveLength));
 
-  fineTuneLbl->setText(stringify(Global::pSong()->_pInstrument[index]->waveFinetune));
-  volumeLbl->setText(stringify(Global::pSong()->_pInstrument[index]->waveVolume)+"%");
+  fineTuneLbl->setText(stringify( _pSong->_pInstrument[index]->waveFinetune));
+  volumeLbl->setText(stringify( _pSong->_pInstrument[index]->waveVolume)+"%");
 
   pane()->resize();
 
@@ -325,84 +325,84 @@ void InstrumentEditor::onBtnPress( NButtonEvent * ev )
       pane()->repaint();
   } else
   if (ev->sender() == killBtn) {
-    Global::pSong()->DeleteInstrument(instrumentIndex());
+    _pSong->DeleteInstrument(instrumentIndex());
     setInstrument(instrumentIndex());
     pane()->resize();
     pane()->repaint();
   } else
   if (ev->sender() == rndPanningCbx) {
-    Global::pSong()->_pInstrument[instrumentIndex()]->_RPAN = rndPanningCbx->checked();
+    _pSong->_pInstrument[instrumentIndex()]->_RPAN = rndPanningCbx->checked();
   } else
   if (ev->sender() == rndVCFCutCbx) {
-    Global::pSong()->_pInstrument[instrumentIndex()]->_RCUT = rndVCFCutCbx->checked();
+    _pSong->_pInstrument[instrumentIndex()]->_RCUT = rndVCFCutCbx->checked();
   } else
   if (ev->sender() == rndVCFResoCbx) {
-    Global::pSong()->_pInstrument[instrumentIndex()]->_RRES = rndVCFResoCbx->checked();
+    _pSong->_pInstrument[instrumentIndex()]->_RRES = rndVCFResoCbx->checked();
   } else
   if (ev->sender() == octDecBtn) {
-      if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-37)
-        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune-=12;
-      else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
-      octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+      if ( _pSong->_pInstrument[instrumentIndex()]->waveTune>-37)
+        _pSong->_pInstrument[instrumentIndex()]->waveTune-=12;
+      else _pSong->_pInstrument[instrumentIndex()]->waveTune=-48;
+      octLbl->setText(noteToString(( _pSong->_pInstrument[instrumentIndex()]->waveTune+48)));
       octLbl->repaint();
   } else
   if (ev->sender() == octIncBtn) {
-      if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune < 60)
-        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=12;
-      else 
-        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=71;
-      octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+      if ( _pSong->_pInstrument[instrumentIndex()]->waveTune < 60)
+        _pSong->_pInstrument[instrumentIndex()]->waveTune+=12;
+      else
+        _pSong->_pInstrument[instrumentIndex()]->waveTune=71;
+      octLbl->setText(noteToString(( _pSong->_pInstrument[instrumentIndex()]->waveTune+48)));
       octLbl->repaint();
   } else
   if (ev->sender() == noteDecBtn) {
-      if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-47)
-        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune-=1;
-      else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
-      octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+      if ( _pSong->_pInstrument[instrumentIndex()]->waveTune>-47)
+        _pSong->_pInstrument[instrumentIndex()]->waveTune-=1;
+      else _pSong->_pInstrument[instrumentIndex()]->waveTune=-48;
+      octLbl->setText(noteToString(( _pSong->_pInstrument[instrumentIndex()]->waveTune+48)));
       octLbl->repaint();
   } else
   if (ev->sender() == noteIncBtn) {
-    if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune < 71)
-        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=1;
-    else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=71;
-    octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+    if ( _pSong->_pInstrument[instrumentIndex()]->waveTune < 71)
+        _pSong->_pInstrument[instrumentIndex()]->waveTune+=1;
+    else _pSong->_pInstrument[instrumentIndex()]->waveTune=71;
+    octLbl->setText(noteToString(( _pSong->_pInstrument[instrumentIndex()]->waveTune+48)));
     octLbl->repaint();
   }
 }
 
 int InstrumentEditor::instrumentIndex( )
 {
-    return Global::pSong()->instSelected;
+    return _pSong->instSelected;
 }
 
 void InstrumentEditor::onComboSelected( NItemEvent * ev )
 {
   if (newNoteActionCb->selIndex()!=-1)
-    Global::pSong()->_pInstrument[instrumentIndex()]->_NNA = newNoteActionCb->selIndex();
+    _pSong->_pInstrument[instrumentIndex()]->_NNA = newNoteActionCb->selIndex();
 }
 
 void InstrumentEditor::onSliderMove( NSlider * sender, double pos )
 {
   if (sender == panningSlider) {
-    Global::pSong()->_pInstrument[instrumentIndex()]->_pan = (int) pos;
-    panningLbl->setText(stringify(Global::pSong()->_pInstrument[instrumentIndex()]->_pan));
+    _pSong->_pInstrument[instrumentIndex()]->_pan = (int) pos;
+    panningLbl->setText(stringify(_pSong->_pInstrument[instrumentIndex()]->_pan));
     panningLbl->repaint();
   } else
   if (sender == volumeSlider) {
-    Global::pSong()->_pInstrument[instrumentIndex()]->waveVolume = (int) pos;
-    volumeLbl->setText(stringify(Global::pSong()->_pInstrument[instrumentIndex()]->waveVolume)+"%");
+    _pSong->_pInstrument[instrumentIndex()]->waveVolume = (int) pos;
+    volumeLbl->setText(stringify(_pSong->_pInstrument[instrumentIndex()]->waveVolume)+"%");
     volumeLbl->repaint();
   } else
   if (sender == fineTuneSlider) {
-    Global::pSong()->_pInstrument[instrumentIndex()]->waveFinetune=(int) pos - 256;
-    fineTuneLbl->setText(stringify(Global::pSong()->_pInstrument[instrumentIndex()]->waveFinetune));
+    _pSong->_pInstrument[instrumentIndex()]->waveFinetune=(int) pos - 256;
+    fineTuneLbl->setText(stringify(_pSong->_pInstrument[instrumentIndex()]->waveFinetune));
     fineTuneLbl->repaint();
   }
 }
 
 void InstrumentEditor::onPatRowEdit( const NKeyEvent & event )
 {
-  Global::pSong()->_pInstrument[instrumentIndex()]->_lines = str<int>(patRowEdt->text());
+  _pSong->_pInstrument[instrumentIndex()]->_lines = str<int>(patRowEdt->text());
 }
 
 void InstrumentEditor::onShowEnvelopeEditor( NButtonEvent * ev )

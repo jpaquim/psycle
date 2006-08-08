@@ -31,6 +31,7 @@ namespace psycle { namespace host {
 
 class Machine;
 class MachineGUI;
+class Song;
 
 /**
 @author Stefan
@@ -69,7 +70,7 @@ private:
 class MachineView : public NPanel
 {
 public:
-    MachineView();
+    MachineView( Song* song );
 
     ~MachineView();
 
@@ -91,6 +92,7 @@ public:
 
 private:
 
+    Song* _pSong;
     MachineGUI* selectedMachine_;
 
     MachineWireGUI* line;

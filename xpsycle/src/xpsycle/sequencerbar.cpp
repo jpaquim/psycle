@@ -381,7 +381,7 @@ void psycle::host::SequencerBar::onPatternAdd( NButtonEvent * ev )
   if (item) {
     std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
     if(itr!=patternMap.end())
-      added.emit(itr->second);
+      seqGui->addPattern(itr->second);
   }
 }
 
