@@ -56,6 +56,8 @@ MainWindow::MainWindow()
 
   initSongs();
 
+  // move to update bars
+  updateComboGen();
 
 /*
   updateStatusBar();
@@ -77,6 +79,8 @@ void MainWindow::initSongs( )
   songs_.push_back(song);
   Global::pPlayer()->song(*song);
   addSongToGui(*song);
+
+  selectedSong_ = song;
 }
 
 void MainWindow::addSongToGui( Song & song )
@@ -453,7 +457,6 @@ void MainWindow::initToolBar( )
       genCombo_ = new NComboBox();
         genCombo_->setWidth(158);
         genCombo_->setHeight(20);
-        updateComboGen();
         genCombo_->setIndex(0);
         genCombo_->itemSelected.connect(this,&MainWindow::onGeneratorCbx);
       psycleToolBar_->add(genCombo_);
@@ -558,7 +561,7 @@ void MainWindow::closePsycle()
 
 void MainWindow::updateComboGen() {
 
- /* bool filled=false;
+  bool filled=false;
   bool found=false;
   int selected = -1;
   int line = -1;
@@ -569,15 +572,15 @@ void MainWindow::updateComboGen() {
 
   for (int b=0; b<MAX_BUSES; b++) // Check Generators
   {
-    if( Global::pSong()->_pMachine[b]) {
+    if( selectedSong_->_pMachine[b]) {
       buffer.str("");
       buffer << std::setfill('0') << std::hex << std::setw(2);
-      buffer << b << ": " << Global::pSong()->_pMachine[b]->_editName;
+      buffer << b << ": " << selectedSong_->_pMachine[b]->_editName;
       genCombo_->add(new NItem(buffer.str()));
 
         //cb->SetItemData(cb->GetCount()-1,b);
       if (!found) selected++;
-      if (Global::pSong()->seqBus == b) found = true;
+      if (selectedSong_->seqBus == b) found = true;
       filled = true;
     }
   }
@@ -591,14 +594,14 @@ void MainWindow::updateComboGen() {
 
   for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
   {
-    if(Global::pSong()->_pMachine[b]) {
+    if(selectedSong_->_pMachine[b]) {
       buffer.str("");
       buffer << std::setfill('0') << std::hex << std::setw(2);
-      buffer << b << ": " << Global::pSong()->_pMachine[b]->_editName;
+      buffer << b << ": " << selectedSong_->_pMachine[b]->_editName;
       genCombo_->add(new NItem(buffer.str()));
       //cb->SetItemData(cb->GetCount()-1,b);
       if (!found) selected++;
-      if (Global::pSong()->seqBus == b) found = true;
+      if (selectedSong_->seqBus == b) found = true;
       filled = true;
     }
   }
@@ -610,7 +613,7 @@ void MainWindow::updateComboGen() {
   } else if (!found)  {
     selected=line;
   }
-  genCombo_->setIndex(selected);*/
+  genCombo_->setIndex(selected);
 }
 
 void MainWindow::appNew( )
@@ -684,19 +687,19 @@ void MainWindow::onBpmDecTen(NButtonEvent* ev)
 
 void MainWindow::setAppSongBpm(int x)
 {
- /*   int bpm = 0;
+    int bpm = 0;
     if ( x != 0 ) {
       if (Global::pPlayer()->_playing )  {
-        Global::pSong()->setBpm(Global::pPlayer()->bpm+x);
-      } else Global::pSong()->setBpm(Global::pSong()->bpm()+x);
-      Global::pPlayer()->SetBPM(Global::pSong()->bpm(),Global::pSong()->LinesPerBeat());
-      bpm = Global::pSong()->bpm();
+        selectedSong_->setBpm(Global::pPlayer()->bpm+x);
+      } else selectedSong_->setBpm(selectedSong_->bpm()+x);
+      Global::pPlayer()->SetBPM(selectedSong_->bpm(),selectedSong_->LinesPerBeat());
+      bpm = selectedSong_->bpm();
     }
     else bpm = Global::pPlayer()->bpm;
 
     bpmDisplay_->setNumber(Global::pPlayer()->bpm);
 
-    bpmDisplay_->repaint();*/
+    bpmDisplay_->repaint();
 }
 
 void MainWindow::onRecordWav( NButtonEvent * ev )
@@ -719,7 +722,7 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
 
 void MainWindow::onTimer( )
 {
-  /*if (Global::pPlayer()->_playing) {
+  if (Global::pPlayer()->_playing) {
     int oldPos = childView_->patternView()->editPosition();
     Global::pConfig()->_followSong = sequencerBar_->followSong();
     childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
@@ -730,12 +733,12 @@ void MainWindow::onTimer( )
     }
   }
 
-  vuMeter_->setPegel(Global::pSong()->_pMachine[MASTER_INDEX]->_lMax,
-  Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
+  vuMeter_->setPegel(selectedSong_->_pMachine[MASTER_INDEX]->_lMax,
+  selectedSong_->_pMachine[MASTER_INDEX]->_rMax );
   vuMeter_->repaint();
-  ((Master*)Global::pSong()->_pMachine[MASTER_INDEX])->vuupdated = true;
+  ((Master*)selectedSong_->_pMachine[MASTER_INDEX])->vuupdated = true;
 
-  childView_->machineView()->updateVUs();*/
+  childView_->machineView()->updateVUs();
 }
 
 void MainWindow::updateBars( )
@@ -761,7 +764,7 @@ void MainWindow::onPatternView(NButtonEvent* ev) {
 
 bool MainWindow::checkUnsavedSong( )
 {
-/*  NMessageBox* box = new NMessageBox("Save changes of : "+Global::pSong()->fileName+" ?");
+ NMessageBox* box = new NMessageBox("Save changes of : "+selectedSong_->fileName+" ?");
   box->setTitle("New Song");
   box->setButtonText("Yes","No","Abort");
   box->icon()->setSharedBitmap(&Global::pConfig()->icons().alert());
@@ -784,8 +787,7 @@ bool MainWindow::checkUnsavedSong( )
 
   }
   NApp::addRemovePipe(box);
-  return result;*/
-  return true;
+  return result;
 }
 
 // Sequencer menu events
@@ -1024,17 +1026,17 @@ void MainWindow::onNewMachineDialogAdded( Machine * mac )
 
 void MainWindow::onGeneratorCbx( NItemEvent * ev )
 {
-/*  std::string text = genCombo_->text();
+  std::string text = genCombo_->text();
   if (text.length() > 2) {
      std::string hexNumber = text.substr(0,2);
      std::stringstream hexStream(hexNumber); 
      int hex = -1;
      hexStream >> std::hex >> hex;
      if (hex != -1) {
-         Global::pSong()->seqBus = hex;
-         childView_->machineView()->setSelectedMachine( Global::pSong()->_pMachine[hex] );
+         selectedSong_->seqBus = hex;
+         childView_->machineView()->setSelectedMachine( selectedSong_->_pMachine[hex] );
      }
-  }*/
+  }
 }
 
 void MainWindow::onSequencerEntryClick( SequencerItem * item )

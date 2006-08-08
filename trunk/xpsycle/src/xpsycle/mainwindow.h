@@ -71,6 +71,8 @@ private:
     void initSongs();
     void addSongToGui(Song & song);
 
+    Song* selectedSong_;
+
     bool noFileWasYetLoaded;
 
     ChildView* childView_;
