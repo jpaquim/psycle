@@ -45,6 +45,9 @@ public:
     void setActivePage(int index);
     void setTabBarAlign(int align);
 
+    void setTabBarVisible( bool on);
+    bool tabBarVisible() const;
+
     NCustomButton* tab(NPanel* page);
 
 private:

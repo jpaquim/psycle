@@ -89,6 +89,16 @@ NCustomButton * NTabBook::tab( NPanel * page )
   return tabBar_->tab(page);
 }
 
+void NTabBook::setTabBarVisible( bool on )
+{
+  tabBar_->setVisible(on);
+}
+
+bool NTabBook::tabBarVisible( ) const
+{
+  return tabBar_->visible();
+}
+
 
 
 
