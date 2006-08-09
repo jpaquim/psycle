@@ -39,6 +39,8 @@ namespace psycle
 
 				~WaveFileOut();
 
+				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+
 				// starts stops file writing
 				virtual bool Enable(bool e);
 
@@ -49,6 +51,10 @@ namespace psycle
 
 				std::string fileName_;
 
+				void* _callbackContext; // Player callback
+				AUDIODRIVERWORKFN _pCallback;
+				bool _initialized;
+
 				int iret1;
 				pthread_t threadid;
 
@@ -56,7 +62,13 @@ namespace psycle
 
 				static int audioOutThread(void * ptr);
 
+				void writeBuffer();
+
 				WaveFile _outputWaveFile;
+
+				float _pSamplesL[441];
+			/// right data
+				float _pSamplesR[441];
 
 		};
 
