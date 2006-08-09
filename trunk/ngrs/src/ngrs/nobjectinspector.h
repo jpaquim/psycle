@@ -47,6 +47,7 @@ private:
 
    void onStringEdit(const NKeyEvent & event);
    void onFloatEdit(const NKeyEvent & event);
+   void onIntEdit(const NKeyEvent & event);
 
    std::vector<NEdit*> edits;
 
