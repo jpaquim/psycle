@@ -501,7 +501,7 @@ SequencerGUI::SequencerGUI()
   waveOut = new WaveFileOut();
   waveOut->Initialize(Global::pPlayer()->Work, Global::pPlayer());
   waveOut->recordStopped.connect(this,&SequencerGUI::onRecordStop);
-  waveOut->setFileName("test.wav");
+  waveOut->setFileName("test1.wav");
 
   counter = 0;
   beatPxLength_ = 5; // default value for one beat
