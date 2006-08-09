@@ -29,11 +29,19 @@ namespace psycle
 			: AudioDriver()
 		{
 			kill_thread = 0;
+			_initialized = false;
 		}
 
 
 		WaveFileOut::~WaveFileOut()
 		{
+		}
+
+		void WaveFileOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
+		{
+			_pCallback = pCallback;
+			_callbackContext = context;
+			_initialized = true;
 		}
 
 		void WaveFileOut::setFileName( const std::string & fileName )
@@ -60,19 +68,79 @@ namespace psycle
 					}
 
 			} else { // disable fileout
+				 kill_thread = 0;
 				_outputWaveFile.Close();
 				_recording = false;
+				usleep(500); // give thread time to close
 			}
 			return _recording;
 		}
 
 		int WaveFileOut::audioOutThread( void * ptr )
 		{
-			
+			WaveFileOut* waveFileOut = (WaveFileOut*) ptr;
+			waveFileOut->writeBuffer();
 		}
 
-	}
-}
+		void WaveFileOut::writeBuffer( )
+		{
+			bool _recording = true;
+
+			int count = 441;
+			int amount = count;
+
+			while(!(kill_thread) && _recording)
+			{
+				float const * input(_pCallback(_callbackContext, count));
+				usleep(100); // give cpu time to breath
+
+				for (int i = 0; i < 441; i++) {
+      		_pSamplesL[i] = *input++;
+					_pSamplesR[i] = *input++;
+  			}
+
+				float* pL = _pSamplesL;
+				float* pR = _pSamplesR;
+
+				// Processing plant
+				int i;
+				switch(_channelmode)
+				{
+					case 0: // mono mix
+						for( i = 0; i<amount; i++)
+							{
+								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
+								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS)  _recording = false;
+							}
+							break;
+						case 1: // mono L
+							for( i = 0; i<amount; i++)
+							{
+								if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) _recording = false;
+							}
+							break;
+						case 2: // mono R
+							for( i = 0; i<amount; i++)
+							{
+								if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) _recording = false;
+							}
+							break;
+						default: // stereo
+							for( i = 0; i<amount; i++)
+							{
+								if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) _recording = false;
+							}
+							break;
+					}
+				}
+			pthread_exit(0);
+		}
+
+
+	} // end of host namespace
+} // end of psycle namespace
+
+
 
 
 
