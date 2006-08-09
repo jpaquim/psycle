@@ -23,6 +23,7 @@
 #include "singlepattern.h"
 #include "patternsequence.h"
 #include <ngrs/npanel.h>
+#include <ngrs/nbutton.h>
 #include <list>
 
 /**
@@ -42,7 +43,8 @@ namespace psycle {
 class SequencerBeatChangeLineal;
 
 class SequencerGUI;
-
+class WaveFileOut;
+class AudioDriver;
 
 class SequencerItem : public NPanel {
       public:
@@ -202,6 +204,9 @@ public:
 
 private:
 
+    AudioDriver* oldDriver;
+    WaveFileOut* waveOut;
+
     int counter;
     int beatPxLength_;
 
@@ -214,6 +219,8 @@ private:
 
     NScrollBar* hBar;
     NScrollBar* vBar;
+
+    NButton* renderBtn;
 
     ZoomBar* zoomHBar;
 
@@ -234,6 +241,9 @@ private:
     void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
     void onHScrollBar(NObject* sender, int pos);
     void onVScrollBar(NObject* sender, int pos);
+
+    void onRenderAsWave(NButtonEvent* ev);
+    void onRecordStop();
 
     std::vector<SequencerLine*> lines;
 };

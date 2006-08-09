@@ -26,6 +26,8 @@
 @author Stefan
 */
 
+namespace psycle { namespace host {
+
 class AudioDriverInfo {
 public:
     char const *_psName;
@@ -59,5 +61,7 @@ protected:
     static AudioDriverInfo _info;
 
 };
+
+}}
 
 #endif

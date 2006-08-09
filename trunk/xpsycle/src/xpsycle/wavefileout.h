@@ -22,6 +22,7 @@
 
 #include <audiodriver.h>
 #include "riff.h"
+#include <ngrs/sigslot.h>
 
 namespace psycle
 {
@@ -38,6 +39,8 @@ namespace psycle
 				WaveFileOut();
 
 				~WaveFileOut();
+
+				signal0<> recordStopped;
 
 				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 

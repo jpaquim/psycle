@@ -19,6 +19,8 @@
   ***************************************************************************/
 #include "audiodriver.h"
 
+namespace psycle { namespace host {
+
 AudioDriverInfo AudioDriver::_info = { "Silent" };
 
 AudioDriver::AudioDriver() : 
@@ -36,3 +38,4 @@ AudioDriver::~AudioDriver()
 }
 
 
+}}

@@ -177,7 +177,7 @@ namespace psycle
 		std::string SequenceEntry::toXml( double pos ) const
 		{
 			std::ostringstream xml;
-			xml << "<seqentry pos='" << pos << "' patid='" << pattern()->id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "'transpose='" << transpose() << std::hex << "' />" << std::endl;
+			xml << "<seqentry pos='" << pos << "' patid='" << pattern()->id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "transpose='" << transpose() << std::hex << "' />" << std::endl;
     	return xml.str();
 		}
 
