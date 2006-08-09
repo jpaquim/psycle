@@ -20,6 +20,8 @@
 #include "esoundout.h"
 #include "esd.h"
 
+namespace psycle { namespace host {
+
 ESoundOut::ESoundOut()
  : AudioDriver()
 {
@@ -151,3 +153,5 @@ int ESoundOut::write_buffer(char *buffer, long size)
 		return 0;
 return 0;
 }
+
+}}

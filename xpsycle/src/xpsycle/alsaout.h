@@ -34,6 +34,8 @@
 /**
 @author Stefan
 */
+namespace psycle { namespace host {
+
 class AlsaOut : public AudioDriver
 {
 public:
@@ -111,6 +113,8 @@ private:
 //    void setValues();
 
 };
+
+}}
 
 #endif // !defined XPSYCLE__NO_ALSA
 #endif

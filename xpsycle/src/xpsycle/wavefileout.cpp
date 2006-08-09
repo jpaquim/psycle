@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "wavefileout.h"
+#include "player.h"
 
 
 namespace psycle
@@ -60,7 +61,9 @@ namespace psycle
 			bool _recording = false;
 			if (e && !threadOpen) {
 					kill_thread = 0;
-					if(_outputWaveFile.OpenForWrite(fileName().c_str(), _samplesPerSec, _bitDepth, _channelmode ) == DDC_SUCCESS)
+					int channels = 2;
+					if(_channelmode != 3) channels = 1;
+					if(_outputWaveFile.OpenForWrite(fileName().c_str(), _samplesPerSec, _bitDepth, channels ) == DDC_SUCCESS)
 							_recording = true;
 					else
 							_recording = false;
@@ -91,10 +94,14 @@ namespace psycle
 			int count = 441;
 			int amount = count;
 
-			while(!(kill_thread) && _recording)
+			Player* player = (Player*)_callbackContext;
+
+			while(!(kill_thread) && _recording && player->PlayPos() <= player->song().patternSequence()->tickLength())
 			{
-				float const * input(_pCallback(_callbackContext, count));
 				usleep(100); // give cpu time to breath
+
+				if ( ((Player*)_callbackContext)->_playing) {
+				float const * input(_pCallback(_callbackContext, count));
 
 				for (int i = 0; i < 441; i++) {
       		_pSamplesL[i] = *input++;
@@ -135,8 +142,10 @@ namespace psycle
 							break;
 					}
 				}
+			}
 			_outputWaveFile.Close();
 			threadOpen = 0;
+			recordStopped.emit();
 			pthread_exit(0);
 		}
 

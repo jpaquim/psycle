@@ -27,6 +27,8 @@
 #include "configuration.h"
 #include "player.h"
 
+namespace psycle { namespace host {
+
 int AlsaOut::enablePlayer = 0;
 bool AlsaOut::running = false;
 
@@ -402,5 +404,7 @@ bool AlsaOut::Initialized( )
 {
   return _initialized;
 }
+
+}}
 
 #endif // !defined XPSYCLE__NO_ALSA

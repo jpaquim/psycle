@@ -22,6 +22,8 @@
 #include "singlepattern.h"
 #include "zoombar.h"
 #include "global.h"
+#include "player.h"
+#include "wavefileout.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include <ngrs/nscrollbar.h>
@@ -496,6 +498,11 @@ SequencerGUI::SequencerGUI()
 {
   setLayout( NAlignLayout() );
 
+  waveOut = new WaveFileOut();
+  waveOut->Initialize(Global::pPlayer()->Work, Global::pPlayer());
+  waveOut->recordStopped.connect(this,&SequencerGUI::onRecordStop);
+  waveOut->setFileName("test.wav");
+
   counter = 0;
   beatPxLength_ = 5; // default value for one beat
 
@@ -541,6 +548,11 @@ SequencerGUI::SequencerGUI()
     snapToGridCheck_ = new NCheckBox("Snap to Beat");
     snapToGridCheck_->setCheck(true);
     toolBar_->add( snapToGridCheck_ );
+
+		toolBar_->add(new NToolBarSeparator());
+
+    toolBar_->add( renderBtn = new NButton("Render As Wave"))->clicked.connect(this,&SequencerGUI::onRenderAsWave);
+
   add(toolBar_, nAlTop);
 
   beatLineal_ = new SequencerBeatLineal(this);
@@ -896,16 +908,39 @@ bool SequencerGUI::gridSnap( ) const
   return snapToGridCheck_->checked();
 }
 
+void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
+{
+  // stop player
+  Global::pPlayer()->Stop();
+  // disable driver
+  Global::pConfig()->_pOutputDriver->Enable(false);
+  oldDriver = Global::pConfig()->_pOutputDriver;
+  Global::pConfig()->_pOutputDriver = waveOut; // swap driver
+
+  // start new driver
+  waveOut->Enable(true);
+
+  renderBtn->setText("Stop rendering");
+  toolBar_->resize();
+  toolBar_->repaint();
+
+  Global::pPlayer()->Start(0);
+}
+
+void SequencerGUI::onRecordStop( )
+{
+  Global::pConfig()->_pOutputDriver = oldDriver;
+
+  if (oldDriver) {
+    Global::pConfig()->_pOutputDriver->Enable(true);
+  }
+
+  renderBtn->setText("Render As Wave");
+  toolBar_->resize();
+  toolBar_->repaint();
+}
 
 }}
-
-
-
-
-
-
-
-
 
 
 

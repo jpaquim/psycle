@@ -25,6 +25,9 @@
 /**
 @author Stefan Nattkemper
 */
+
+namespace psycle { namespace host {
+
 class ESoundOut : public AudioDriver
 {
 public:
@@ -72,5 +75,7 @@ private:
     int write_buffer(char *buffer, long size);
 
 };
+
+}}
 
 #endif
