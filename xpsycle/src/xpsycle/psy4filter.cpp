@@ -283,11 +283,13 @@ namespace psycle {
 				int pat_id  = str_hex<int> (parser.getAttribValue("patid"));
 				float startPos = str<float> (parser.getAttribValue("start"));
 				float endPos = str<float> (parser.getAttribValue("end"));
+				int transpose  = str_hex<int> (parser.getAttribValue("transpose"));
 				SinglePattern* pattern = song_->patternSequence()->patternData()->findById(pat_id);
 				if (pattern) {
 					SequenceEntry* entry = lastSeqLine->createEntry(pattern, pos);
 					entry->setStartPos(startPos);
 					entry->setEndPos(endPos);
+					entry->setTranspose(transpose);
 				}
 			}
 		}
