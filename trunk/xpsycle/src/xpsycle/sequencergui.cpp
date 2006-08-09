@@ -208,6 +208,8 @@ SequencerItem::SequencerItem( SequencerGUI* seqGui )
      properties()->publish("startOffset");
      properties()->bind("endOffset", *this, &SequencerItem::endOffset, &SequencerItem::setEndOffset);
      properties()->publish("endOffset");
+     properties()->bind("transpose", *this, &SequencerItem::transpose, &SequencerItem::setTranspose);
+     properties()->publish("transpose");
   }
 
 }
@@ -356,6 +358,16 @@ void SequencerItem::setEndOffset( float pos )
 float SequencerItem::endOffset( ) const
 {
   return sequenceEntry_->endPos();
+}
+
+void SequencerItem::setTranspose( int offset )
+{
+  sequenceEntry_->setTranspose( offset );
+}
+
+int SequencerItem::transpose( ) const
+{
+  return sequenceEntry_->transpose();
 }
 
 // end of SequencerItem class
@@ -886,6 +898,7 @@ bool SequencerGUI::gridSnap( ) const
 
 
 }}
+
 
 
 
