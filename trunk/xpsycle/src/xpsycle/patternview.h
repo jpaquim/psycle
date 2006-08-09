@@ -299,6 +299,7 @@ private:
 
   void initToolBar();
   void onAddBar(NButtonEvent* ev);
+  void onDeleteBar(NButtonEvent* ev);
 
   /// multi-key playback state stuff
   int notetrack[MAX_TRACKS];

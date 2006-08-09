@@ -51,6 +51,7 @@ namespace psycle
 			int beatZoom() const;
 
 			void addBar( const TimeSignature & signature );
+			void removeBar( float pos);
 
 			float beats() const;
 
