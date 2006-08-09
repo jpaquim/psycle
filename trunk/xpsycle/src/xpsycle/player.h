@@ -59,12 +59,12 @@ namespace psycle
 			/// stops playing.
 			void Stop();
 			/// work function. (Entrance for the callback function (audiodriver)
-			float * Work(int & nsamples);
+			float * Work(int nsamples);
 		//private:
 			static float * Work(void* context, int& nsamples);
 
 		private:
-			void Process(int & nsamples);
+			void Process(int nsamples);
 
 		public:
 			/// ...
@@ -91,18 +91,6 @@ namespace psycle
 
 			/// used by the plugins to indicate that they need redraw.
 			bool Tweaker;
-
-			///\name secondary output device, write to a file
-			///\{
-				/// starts the recording output device.
-				void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1, bool dodither=false, int ditherpdf=0, int noiseshape=0);
-				/// stops the recording output device.
-				void StopRecording(bool bOk = true);
-				/// wether the recording device has been started.
-				bool _recording;
-				/// whether to apply dither to recording
-				bool _dodither;
-			///\}
 
 		private:
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.

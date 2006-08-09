@@ -431,21 +431,12 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			return reinterpret_cast<Player*>(context)->Work(numSamples);
 		}
 
-		float * Player::Work(int & numSamples)
+		float * Player::Work(int numSamples)
 		{
-			double beatLength = numSamples/(double) SamplesPerBeat();
+			// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
 			Master::_pMasterSamples = _pBuffer;
-//			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-//				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-//			#else
-//				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-//					boost::read_write_mutex::scoped_read_write_lock lock(song().read_write_mutex(),boost::read_write_lock_state::read_locked);
-//				#else // original implementation
-//					CSingleLock crit(&song().door, true);
-//				#endif
-//			#endif
-//			if(numSamplex > MAX_BUFFER_LENGTH) amount = MAX_BUFFER_LENGTH; else amount = numSamplex;
-			// Tick handler function
+			double beatLength = numSamples/(double) SamplesPerBeat();
+//			CSingleLock crit(&song().door, true);
 			if (_playing)
 			{
 				std::multimap<double, PatternLine> events;
@@ -474,6 +465,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 
 					//get all patternlines occuring before the next global event, execute them, and process
 					events.clear();
+					///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 					song().patternSequence()->GetLinesInRange(playPos, chunkBeatSize, events);
 					for( std::multimap<double, PatternLine>::iterator lineIt=events.begin()
 					   ; lineIt!= events.end()
@@ -503,149 +495,46 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			}
 			else
 			{
-//					NotifyNewLine();
+				///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
+				playPos=beatLength;
+//				if (playPos> "signumerator") playPos-=signumerator;
 				Process(numSamples);
 			}
 			return _pBuffer;
 		}
 
-		void Player::Process(int & numSamples)
+		void Player::Process(int numSamples)
 		{
-			int amount(numSamples);
-			int numSamplex = numSamples;
-
-			do
+			int remainingsamles = numSamples;
+			while (remainingsamples)
 			{
-				// Processing plant
-				if(amount > 0)
-				{
-//					PSYCLE__CPU_COST__INIT(idletime);
-					if( (int)song()._sampCount > Global::configuration()._pOutputDriver->_samplesPerSec)
-					{
-						song()._sampCount =0;
-//						for(int c=0; c<MAX_MACHINES; c++)
+				int amount = std::min(remainingsamples,STREAM_SIZE);
+//				if( (int)song()._sampCount > Global::configuration()._pOutputDriver->_samplesPerSec)
+//				{
+//					song()._sampCount =0;
+//					for(int c=0; c<MAX_MACHINES; c++)
+//					{
+//						if(song()._pMachine[c])
 //						{
-//							if(song()._pMachine[c])
-//							{
-//								song()._pMachine[c]->wire_cpu_cost(0);
-//								song()._pMachine[c]->work_cpu_cost(0);
-//							}
+//							song()._pMachine[c]->wire_cpu_cost(0);
+//							song()._pMachine[c]->work_cpu_cost(0);
 //						}
-					}
-					// Reset all machine buffers
-					for(int c=0; c<MAX_MACHINES; c++)
-					{
-						if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);
-					}
-	
-					song().DoPreviews( amount );
-	
-					// Inject Midi input data
-//					if(!CMidiInput::Instance()->InjectMIDI( amount ))
-					{
-						// if midi not enabled we just do the original tracker thing
-						// Master machine initiates work
-//						std::cout << "before work" << amount << std::endl;
-						song()._pMachine[MASTER_INDEX]->Work(amount);
-//						std::cout << "after work" << amount << std::endl;
-					}
-//					PSYCLE__CPU_COST__CALCULATE(idletime, amount);
-//					song().cpu_idle(idletime);
-					song()._sampCount += amount;
-					if((_playing) && (_recording))
-					{
-						float* pL(song()._pMachine[MASTER_INDEX]->_pSamplesL);
-						float* pR(song()._pMachine[MASTER_INDEX]->_pSamplesR);
-						if(_dodither)
-						{
-							dither.Process(pL, amount);
-							dither.Process(pR, amount);
-						}
-						int i;
-						switch(Global::configuration()._pOutputDriver->_channelmode)
-						{
-						case 0: // mono mix
-							for(i=0; i<amount; i++)
-							{
-								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) StopRecording(false);
-							}
-							break;
-						case 1: // mono L
-							for(i=0; i<amount; i++)
-							{
-								if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) StopRecording(false);
-							}
-							break;
-						case 2: // mono R
-							for(i=0; i<amount; i++)
-							{
-								if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) StopRecording(false);
-							}
-							break;
-						default: // stereo
-							for(i=0; i<amount; i++)
-							{
-								if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) StopRecording(false);
-							}
-							break;
-						}
-					}
-					Master::_pMasterSamples += amount * 2;
-					numSamplex -= amount;
+//					}
+//				}
+				// Reset all machine buffers
+				for(int c=0; c<MAX_MACHINES; c++)
+				{
+					if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);
 				}
-				_samplesRemaining -= amount;
-			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
-		}
 
-		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape)
-		{
-			if(!_recording)
-			{
-				///\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
-				backup_rate = Global::configuration()._pOutputDriver->_samplesPerSec;
-				backup_bits = Global::configuration()._pOutputDriver->_bitDepth;
-				backup_channelmode = Global::configuration()._pOutputDriver->_channelmode;
-				if(samplerate > 0) { SampleRate(samplerate); Global::configuration()._pOutputDriver->_samplesPerSec = samplerate; }
-				if(bitdepth > 0) Global::configuration()._pOutputDriver->_bitDepth = bitdepth;
-				if(channelmode >= 0) Global::configuration()._pOutputDriver->_channelmode = channelmode;
-				if(_dodither=dodither)	//(not a typo)
-				{
-					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
-					else			dither.SetBitDepth(Global::configuration()._pOutputDriver->_bitDepth);
-					dither.SetPdf((dsp::Dither::Pdf)ditherpdf);
-					dither.SetNoiseShaping((dsp::Dither::NoiseShape)noiseshape);
-				}
-				int channels = 2;
-				if(Global::configuration()._pOutputDriver->_channelmode != 3) channels = 1;
-				Stop();
-				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::configuration()._pOutputDriver->_samplesPerSec, Global::configuration()._pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
-					_recording = true;
-				else
-				{
-					StopRecording(false);
-				}
+				song().DoPreviews( amount );
+				song()._pMachine[MASTER_INDEX]->Work(amount);
+
+				//Move the pointer forward for the next Master::Work() iteration.
+				Master::_pMasterSamples += amount * 2;
+				remainingsamples -= amount;
 			}
 		}
-
-		void Player::StopRecording(bool bOk)
-		{
-			if(_recording)
-			{
-				Global::configuration()._pOutputDriver->_samplesPerSec = backup_rate;
-				SampleRate(backup_rate);
-				Global::configuration()._pOutputDriver->_bitDepth = backup_bits;
-				Global::configuration()._pOutputDriver->_channelmode = backup_channelmode;
-				_outputWaveFile.Close();
-				_recording = false;
-				if(!bOk)
-				{
-//					MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
-				}
-			}
-		}
-
-
   }
 }
 
