@@ -86,17 +86,21 @@ namespace psycle
 		SequenceEntry::SequenceEntry( )
 		{
 			line_ = 0;
-			pattern_ = 0;
-			startPos_ = 0;
-			endPos_ = PatternEnd;
+			init();
 		}
 
 		SequenceEntry::SequenceEntry( SequenceLine * line )
 		{
-			pattern_ = 0;
 			line_ = line;
+			init();
+		}
+
+		void SequenceEntry::init( )
+		{
+			pattern_ = 0;
 			startPos_ = 0;
 			endPos_ = PatternEnd;
+			transpose_ = 0;
 		}
 
 		SequenceEntry::~ SequenceEntry( )
@@ -138,6 +142,16 @@ namespace psycle
 				return iter->first;
 			}
 			return 0;
+		}
+
+		void SequenceEntry::setTranspose( int offset )
+		{
+			transpose_ = offset;
+		}
+
+		int SequenceEntry::transpose( ) const
+		{
+			return transpose_;
 		}
 
 		void SequenceEntry::setStartPos( float pos )
@@ -368,6 +382,7 @@ namespace psycle
 						for( ;lineIt != thisline->end() ;lineIt++)
 						{
 							tmpline[seqlineidx*1024+lineIt->first]=lineIt->second;
+							tmpline[seqlineidx*1024+lineIt->first].setNote(tmpline[seqlineidx*1024+lineIt->first].note()+sLineIt->second->transpose() );
 						}
 						
 						// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.

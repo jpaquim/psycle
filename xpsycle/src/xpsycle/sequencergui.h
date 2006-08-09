@@ -72,6 +72,9 @@ class SequencerItem : public NPanel {
        void setEndOffset(float start);
        float endOffset() const;
 
+       void setTranspose( int offset );
+       int transpose() const;
+
 
       private:
 

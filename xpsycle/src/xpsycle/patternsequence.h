@@ -100,13 +100,21 @@ namespace psycle
 			void setEndPos( float pos );
 			float endPos() const;
 
+			void setTranspose( int offset );
+			int transpose() const;
+
 			std::string toXml(double pos) const;
 
 		private:
-			SequenceLine* line_;
-			SinglePattern* pattern_;
-			float startPos_; // here we can "shrink" the pattern of the entry
-			float endPos_;
+
+			SequenceLine* line_; 			// the sequence track , the sequence belongs to
+			SinglePattern* pattern_; 	// the wrapped pattern
+			float startPos_;					// here we can shrink the pattern of the entry
+			float endPos_;						// endpos shrink (from begin of a pattern starting at 0)
+			int transpose_;						// a transpose offset for the entry
+
+			void init();
+
 		};
 
 		class PatternSequence;
