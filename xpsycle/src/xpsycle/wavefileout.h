@@ -56,6 +56,8 @@ namespace psycle
 				bool _initialized;
 
 				int iret1;
+				int threadOpen;
+
 				pthread_t threadid;
 
 				int kill_thread;

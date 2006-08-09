@@ -29,6 +29,7 @@ namespace psycle
 			: AudioDriver()
 		{
 			kill_thread = 0;
+			threadOpen = 0;
 			_initialized = false;
 		}
 
@@ -57,7 +58,7 @@ namespace psycle
 		bool WaveFileOut::Enable( bool e )
 		{
 			bool _recording = false;
-			if (e && !_recording) {
+			if (e && !threadOpen) {
 					kill_thread = 0;
 					if(_outputWaveFile.OpenForWrite(fileName().c_str(), _samplesPerSec, _bitDepth, _channelmode ) == DDC_SUCCESS)
 							_recording = true;
@@ -68,7 +69,7 @@ namespace psycle
 					}
 
 			} else 
-			if (!e && _recording) { // disable fileout
+			if (!e && threadOpen) { // disable fileout
 				 kill_thread = 0;
 				_recording = false;
 				usleep(500); // give thread time to close
@@ -85,6 +86,7 @@ namespace psycle
 		void WaveFileOut::writeBuffer( )
 		{
 			bool _recording = true;
+			threadOpen = 1;
 
 			int count = 441;
 			int amount = count;
@@ -134,6 +136,7 @@ namespace psycle
 					}
 				}
 			_outputWaveFile.Close();
+			threadOpen = 0;
 			pthread_exit(0);
 		}
 
