@@ -68,6 +68,35 @@ namespace psycle
 					timeSignatures_.push_back(signature);
 		}
 
+		void SinglePattern::removeBar( float pos )
+		{
+			float searchPos = 0;
+			std::vector<TimeSignature>::iterator it = timeSignatures_.begin();
+			for (; it < timeSignatures_.end(); it++) {
+				TimeSignature & timeSignature = *it;
+				float oldPos = searchPos;
+				searchPos += timeSignature.beats();
+				if (searchPos > pos) {
+						// found our bar
+						float beginPos = searchPos;
+						float endPos   = oldPos;
+
+						SinglePattern::iterator startIt = lower_bound(pos);
+						SinglePattern::iterator endIt   = upper_bound(pos);
+
+						if (startIt != end() && endIt != end() ) {
+								erase(startIt, endIt);
+						}
+						if (timeSignature.count() > 1) {
+							timeSignature.setCount(timeSignature.count()-1);
+						} else {
+							timeSignatures_.erase(it);
+						}
+						break;
+				}
+			}
+		}
+
 		const TimeSignature & SinglePattern::playPosTimeSignature(double pos) const
 		{
 				int bts = 0;
@@ -310,6 +339,8 @@ namespace psycle
 
 	}
 }
+
+
 
 
 

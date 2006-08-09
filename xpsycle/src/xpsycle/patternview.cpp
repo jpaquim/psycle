@@ -172,6 +172,7 @@ void PatternView::initToolBar( )
     meterCbx->setIndex(0);
   toolBar->add(meterCbx);
   toolBar->add(new NButton("add Bar"))->clicked.connect(this,&PatternView::onAddBar);
+  toolBar->add(new NButton("delete Bar"))->clicked.connect(this,&PatternView::onDeleteBar);
   toolBar->add(new NLabel("Pattern Step"));
   patternCombo_ = new NComboBox();
     for (int i = 1; i <=16; i++) 
@@ -220,6 +221,15 @@ void PatternView::onAddBar( NButtonEvent * ev )
   }
 }
 
+void PatternView::onDeleteBar(NButtonEvent* ev)
+{
+  if ( pattern_ ) {
+    float position = cursor().y() / (float) pattern_->beatZoom();
+    pattern_->removeBar(position);
+    resize();
+    repaint();
+  }
+}
 
 void PatternView::resize( )
 {
