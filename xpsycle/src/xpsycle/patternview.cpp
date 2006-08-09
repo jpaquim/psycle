@@ -1707,27 +1707,16 @@ void PatternView::PatternDraw::transposeBlock(int trp)
 
 void PatternView::noteOffAny()
 {
-  /*
-  const int ps = Global::pSong()->playOrder[editPosition()];
-  unsigned char * offset = Global::pSong()->_ptrack(ps,cursor_.x());
-  unsigned char * toffset = Global::pSong()->_ptrackline(ps,cursor_.x(),cursor_.y());
+  if (pattern_) {
+    float position = cursor().y() / (float) pattern_->beatZoom();
 
-  // realtime note entering
-  if (Global::pPlayer()->_playing&&Global::pConfig()->_followSong)
-  {
-      //toffset = offset+(Global::pPlayer()->_lineCounter*MULTIPLY);
-  } else
-  {
-      toffset = Global::pSong()->_ptrackline(ps,cursor_.x(),cursor_.y());
+    PatternEvent data;
+    data.setNote(120);
+
+    (*pattern_)[position][cursor().x()]=data;
+
+    window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
   }
-
-  // build entry
-  PatternEntry *entry = (PatternEntry*) toffset;
-  entry->_note = 120;
-  notetrack[cursor_.x()]=120;
-
-  window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
-  */
 }
 
 
