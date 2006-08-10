@@ -1,2 +1,72 @@
 #! /usr/bin/env scons
 
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006 johan boule <bohan@jabber.org>
+# copyright 2006 psycledelics http://psycle.pastnotecut.org
+
+# init
+
+import packageneric.generic
+packageneric = packageneric.generic.packageneric()
+
+# source package
+
+bohan = packageneric.person('Johan Boule', 'bohan.debian.diversalis@retropaganda.info')
+
+source_package = packageneric.source_package(
+	name = 'diversalis',
+	version = packageneric.version(0, 0),
+	description = 'diversalis preprocessor definitions describing the platform',
+	long_description =
+'''\
+diversalis is a set of preprocessor definitions which describe the platform.
+Platform specificities can be categorized into:
+ - conformance with the C++ standard library
+ - compiler extensions to the C++ standard
+ - operating system features
+ - CPU features
+
+There is no runtime package.'''
+)
+
+# pkg-config packages
+
+diversalis_package = packageneric.pkg_config_package(
+	name = 'diversalis-' + str(source_package.version().major()),
+	version = source_package.version(),
+	description = source_package.description()
+)
+if True: #diversalis_package.name() + '.pc' in BUILD_TARGETS:
+	packageneric.information('======== ' + diversalis_package.name() + '.pc ========')
+	print diversalis_package.pc()
+
+# debian
+
+diversalis_dev = packageneric.debian_package(
+	name = 'lib-' + diversalis_package.name() + '-dev',
+	section = 'libdevel',
+	description = diversalis_package.description(),
+	long_description = 'This package contains the development files.',
+)
+diversalis_dev.add_build_depends(diversalis_package.build_depends())
+#diversalis_dev.add_files(universalis_package.headers())
+#diversalis_dev.add_files(universalis_package.pkg_config())
+
+diversalis_doc = packageneric.debian_package(
+	name = 'lib-' + diversalis_package.name() + '-doc',
+	section = 'doc',
+	architecture = 'all',
+	description = diversalis_package.description(),
+	long_description = 'This package contains the documentation.'
+)
+
+debian = packageneric.debian(
+	source_package = source_package,
+	maintainer = bohan,
+	section = 'libdevel',
+	binary_packages = [diversalis_dev, diversalis_doc],
+)
+if 'debian/control' in BUILD_TARGETS:
+	packageneric.information('======== debian/control ========')
+	#debian_control = packageneric.environment().Value(debian.control())
+	print debian.control()
