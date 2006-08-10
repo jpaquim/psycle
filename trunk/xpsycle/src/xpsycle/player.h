@@ -19,7 +19,7 @@ namespace psycle
 			/// constructor.
 			Player();
 			/// destructor.
-			virtual ~Player() throw();
+			virtual ~Player();
 
 		public:
 			Song inline & song() throw() { return *song_; }
