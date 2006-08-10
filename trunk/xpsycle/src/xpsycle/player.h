@@ -139,7 +139,9 @@ namespace psycle
 				/// Returns the number of samples that it takes for each row of the pattern to be played
 				const int SamplesPerRow(){ return m_SamplesPerRow;};
 				/// Sets the number of samples that it takes for each row of the pattern to be played
-				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
+				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;}
+				/// Reports the LinesPerBeat (used for machines that require "ticks" between commands).
+				int LinesPerBeat() { return tpb; }
 			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
 			bool _SPRChanged;
 			/// the line currently being played in the current pattern
