@@ -862,9 +862,9 @@ int Machine::GenerateAudio( int numsamples )
 	//position [0.0-linesperbeat] converted to "Tick()" lines
 	const double positionInLines = positionInBeat*Global::player().LinesPerBeat();
 	//position in samples of the next "Tick()" Line
-	const int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))*Global::player().SamplesPerRow();
+	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))*Global::player().SamplesPerRow();
 	//Next event, initialized to "out of scope".
-	const int nextevent = numsamples+1;
+	int nextevent = numsamples+1;
 	//beat offset, in beats, counting from the function call.
 	double beatOffset = 0;
 	std::map<int,int>::iterator colsIt;
@@ -875,16 +875,16 @@ int Machine::GenerateAudio( int numsamples )
 		WorkEvent & workEvent = workEvents.front();
 		nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
 	}
-
+  int samplestoprocess = 0;
 	for(int processedsamples=0;processedsamples<numsamples; processedsamples+=samplestoprocess)
 	{
 		if ( processedsamples == nextLineInSamples )
 		{
 			Tick();
-			beatOffset= processedsamples/Global::player().SamplesPerBeat();
-			nextLineInSamples=Global::player().SamplesPerRow();
+			beatOffset= processedsamples/ (double)Global::player().SamplesPerBeat();
+			nextLineInSamples+=Global::player().SamplesPerRow();
 		}
-		if ( processedsamples == nextevent )
+		while ( processedsamples == nextevent )
 		{
 			WorkEvent & workEvent = workEvents.front();
 			///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
@@ -892,16 +892,16 @@ int Machine::GenerateAudio( int numsamples )
 			if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
 			Tick(colsIt->second,workEvent.event().entry());
 			beatOffset= workEvent.beatOffset();
-			workEvents.pop_front()
+			workEvents.pop_front();
 			if (!workEvents.empty())
 			{
 				workEvent = workEvents.front();
 				nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
-			}
+			} else nextevent = numsamples+1;
 		}
 
 		//minimum between remaining samples, next "Tick()" and next event
-		int samplestoprocess= std::min(numsamples-processedsamples,std::min(nextLineInSamples,nextevent));
+		samplestoprocess= std::min(numsamples-processedsamples,std::min(nextLineInSamples,nextevent));
 
 		GenerateAudioInTicks(processedsamples,samplestoprocess);
 	}
