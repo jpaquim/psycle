@@ -1,5 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Player.
+/// schedule the processing of machines, sends signal buffers and sequence events to them, ...
+
 #pragma once
 #include "song.h"
 #include "dither.h"
@@ -10,29 +12,46 @@ namespace psycle
 {
 	namespace host
 	{
-		//class Machine;
 
-		/// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 		class Player
 		{
 		public:
-			/// constructor.
+
 			Player();
-			/// destructor.
+
 			virtual ~Player();
 
-		public:
-			Song inline & song() throw() { return *song_; }
-			void song(Song & song) { this-> song_ = &song; }
-		private:
-			Song * song_;
+			Song inline & song() throw() {
+				return *song_;
+			}
 
-		public:
-			void ProcessGlobalEvent(const GlobalEvent & event);
-			/// Notify all machines that a new Tick() comes.
-			void NotifyNewLine();
+			void inline song(Song & song) {
+				song_ = &song;
+			}
+
+			void setFileName( const std::string & fileName);
+			const std::string fileName() const;
+
+			sigslot::signal0<> recordStopped;
+
+			void setAutoRecording( bool on );
+			void startRecording( );
+			void stopRecording( );
+
+
+		private:
+
+			Song * song_;
+			std::string fileName_;
+
+			bool autoRecord_;
+			bool recording_;
+
 			/// Final Loop. Read new line for notes to send to the Machines
 			void ExecuteNotes( double beatOffset , PatternLine & line );
+			void ProcessGlobalEvent(const GlobalEvent & event);
+			void Process(int nsamples);
+
 
 //		PSYCLE__PRIVATE:
 		public:
@@ -63,8 +82,6 @@ namespace psycle
 		//private:
 			static float * Work(void* context, int& nsamples);
 
-		private:
-			void Process(int nsamples);
 
 		public:
 			/// ...
@@ -111,6 +128,8 @@ namespace psycle
 			float m_SamplesPerBeat;
 			int m_SampleRate;
 
+			void writeSamplesToFile( int amount );
+			bool _doDither;
 
 		///\name deprecated by multiseq
 		///\{
@@ -130,10 +149,6 @@ namespace psycle
 			/// the pattern currently being played.
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
-			/// Function to englobe all the three functions above.
-			void ExecuteLine();
-			/// the current ticks per beat at which to play the song.
-			/// can be changed from the song itself using commands.
 			int tpb;
 			/// Contains the number of samples until a line change comes in.
 			int _samplesRemaining;

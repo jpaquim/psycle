@@ -500,8 +500,8 @@ SequencerGUI::SequencerGUI()
 
   waveOut = new WaveFileOut();
   waveOut->Initialize(Global::pPlayer()->Work, Global::pPlayer());
-  waveOut->recordStopped.connect(this,&SequencerGUI::onRecordStop);
-  waveOut->setFileName("test1.wav");
+  Global::pPlayer()->recordStopped.connect(this,&SequencerGUI::onRecordStop);
+  Global::pPlayer()->setFileName("test1.wav");
 
   counter = 0;
   beatPxLength_ = 5; // default value for one beat
@@ -924,11 +924,13 @@ void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
   toolBar_->resize();
   toolBar_->repaint();
 
+  Global::pPlayer()->setAutoRecording(true);
   Global::pPlayer()->Start(0);
 }
 
 void SequencerGUI::onRecordStop( )
 {
+  Global::pPlayer()->setAutoRecording(false);
   Global::pConfig()->_pOutputDriver = oldDriver;
 
   if (oldDriver) {
