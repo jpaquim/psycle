@@ -901,9 +901,9 @@ int Machine::GenerateAudio( int numsamples )
 		}
 
 		//minimum between remaining samples, next "Tick()" and next event
-		samplestoprocess= std::min(numsamples-processedsamples,std::min(nextLineInSamples,nextevent));
+		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
 
-		GenerateAudioInTicks(processedsamples,samplestoprocess);
+    if (samplestoprocess >0) GenerateAudioInTicks(processedsamples,samplestoprocess);
 	}
 }
 
