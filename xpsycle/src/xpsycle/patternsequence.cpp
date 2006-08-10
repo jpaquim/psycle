@@ -26,8 +26,6 @@ namespace psycle
 	namespace host
 	{
 
-		int SequenceLine::idCounter = 0;
-
 		GlobalEvent::GlobalEvent( ) : parameter_(0), target_(-1), target2_(-1), type_(NONE)
 		{
 		}
@@ -187,8 +185,6 @@ namespace psycle
 		SequenceLine::SequenceLine( )
 		{
 			patternSequence_ = 0;
-			lineId_ = idCounter;
-			idCounter++;
 		}
 
 		SequenceLine::SequenceLine( PatternSequence * patSeq )
@@ -277,11 +273,6 @@ namespace psycle
 		void SequenceLine::setName(const std::string & newname)
 		{
 			name_=newname;
-		}
-
-		int SequenceLine::id( ) const
-		{
-			return lineId_;
 		}
 
 		std::string SequenceLine::toXml( ) const
