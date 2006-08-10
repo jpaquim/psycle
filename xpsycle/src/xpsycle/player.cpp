@@ -304,9 +304,9 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			else
 			{
 				///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-				playPos=beatLength;
-//				if (playPos> "signumerator") playPos-=signumerator;
 				Process(numSamples);
+//				playPos+=beatLength;
+//				if (playPos> "signumerator") playPos-=signumerator;
 			}
 			return _pBuffer;
 		}
