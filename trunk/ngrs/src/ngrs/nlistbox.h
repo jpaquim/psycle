@@ -56,11 +56,14 @@ public:
 
     void setOrientation(int orientation);
 
+    std::vector<NCustomItem*> & items();
+
 private:
 
     NPanel* listBoxPane_;
     bool multiSelect_;
     std::vector<NCustomItem*> selItems_;
+    std::vector<NCustomItem*> items_;
 
     NSkin itemBg;
     NSkin itemFg;
