@@ -35,6 +35,8 @@ namespace psycle
 			playPos(0.0)
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
+			_doDither = false;
+			autoRecord_ = false;
 		}
 
 		Player::~Player()
@@ -44,6 +46,8 @@ namespace psycle
 		void Player::Start(double pos)
 		{
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
+			if (autoRecord_) startRecording();
+
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
@@ -59,7 +63,6 @@ namespace psycle
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			playPos = pos;
-			ExecuteLine();
 		}
 
 		void Player::Stop(void)
@@ -102,204 +105,6 @@ namespace psycle
 			///\todo : Find out if we should notify the plugins of this change.
 		}
 
-		void Player::ExecuteLine(void)
-		{
-//			ExecuteGlobalCommands();
-			NotifyNewLine();
-//			ExecuteNotes();
-		}
-		// Initial Loop. Read new line and Interpret the Global commands.
-/*		void Player::ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines )
-		{
-			_patternjump = -1;
-			_linejump = -1;
-			int mIndex = 0;
-			std::list<PatternLine*>::iterator lineItr = tempPlayLines.begin();
-			for ( ; lineItr < tempPlayLines.end(); lineItr++);
-			{
-				PatternLine* line = *lineItr;
-				std::map<int, PatternEvent>::iterator trackItr = line->begin();
-				for ( ; trackItr != line->end() ; trackItr++) {
-					PatternEvent dataEntry = trackItr->second;
-					int trackNumber = trackItr->first;
-			
-				if(pEntry->_note < cdefTweakM || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
-				{
-					switch(pEntry->_cmd)
-					{
-					case PatternCmd::SET_TEMPO:
-						if(pEntry->_parameter != 0)
-						{	///\todo: implement the Tempo slide
-							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
-							float bpmFine = song().BeatsPerMin() -floor(song().BeatsPerMin());
-							bpm = pEntry->_parameter + bpmFine;
-							RecalcSPR();
-						}
-						break;
-					case PatternCmd::EXTENDED:
-						if(pEntry->_parameter != 0)
-						{
-							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
-							{
-								tpb=pEntry->_parameter;
-								RecalcSPR();
-							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_BYPASS )
-							{
-								mIndex = pEntry->_mach;
-								if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->_mode == MACHMODE_FX )
-								{
-									if ( pEntry->_parameter&0x0F )
-										song()._pMachine[mIndex]->_bypass = true;
-									else
-										song()._pMachine[mIndex]->_bypass = false;
-								}
-							}
-
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_MUTE )
-							{
-								mIndex = pEntry->_mach;
-								if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->_mode == MACHMODE_FX )
-								{
-									if ( pEntry->_parameter&0x0F )
-										song()._pMachine[mIndex]->_mute = true;
-									else
-										song()._pMachine[mIndex]->_mute = false;
-								}
-							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
-							{
-								SamplesPerRow(SamplesPerRow()*(1+(pEntry->_parameter&0x0F)));
-								_SPRChanged=true;
-							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
-							{
-								SamplesPerRow(SamplesPerRow()*(1.0f+((pEntry->_parameter&0x0F)*tpb/24.0f)));
-								_SPRChanged=true;
-							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
-							{
-								int value = pEntry->_parameter&0x0F;
-								if (value == 0 )
-								{
-									_loop_line = _lineCounter;
-								} else {
-									if ( _loop_count == 0 )
-									{ 
-										_loop_count = value;
-										_linejump = _loop_line;
-									} else {
-										if (--_loop_count) _linejump = _loop_line;
-										else _loop_line = _lineCounter+1; //This prevents infinite loop in specific cases.
-									}
-								}
-							}
-						}
-						break;
-					case PatternCmd::JUMP_TO_ORDER:
-						if ( pEntry->_parameter < song().playLength ){
-							_patternjump=pEntry->_parameter;
-							_linejump=0;
-						}
-						break;
-					case PatternCmd::BREAK_TO_LINE:
-						if (_patternjump ==-1) 
-						{
-							_patternjump=(_playPosition+1>=song().playLength)?0:_playPosition+1;
-						}
-						if ( pEntry->_parameter >= song().patternLines[_patternjump])
-						{
-							_linejump = song().patternLines[_patternjump];
-						} else { _linejump= pEntry->_parameter; }
-						break;
-					case PatternCmd::SET_VOLUME:
-						if(pEntry->_mach == 255)
-						{
-							((Master*)(song()._pMachine[MASTER_INDEX]))->_outDry = pEntry->_parameter;
-						}
-						else 
-						{
-							Machine::id_type mIndex(pEntry->_mach);
-							if(mIndex < MAX_MACHINES)
-							{
-								Wire::id_type wire(pEntry->_inst);
-								if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1(pEntry->_parameter));
-							}
-						}
-						break;
-					case  PatternCmd::SET_PANNING:
-						mIndex = pEntry->_mach;
-						if(mIndex < MAX_MACHINES)
-						{
-							if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetPan(pEntry->_parameter>>1);
-						}
-
-						break;
-					}
-				}
-				// Check For Tweak or MIDI CC
-				else if(!song()._trackMuted[track])
-				{
-					int mac = pEntry->_mach;
-					if((mac != 255) || (prevMachines[track] != 255))
-					{
-						if(mac != 255) prevMachines[track] = mac;
-						else mac = prevMachines[track];
-						if(mac < MAX_MACHINES)
-						{
-							Machine *pMachine = song()._pMachine[mac];
-							if(pMachine)
-							{
-								if(pEntry->_note == cdefMIDICC && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
-								{
-									// for native machines,
-									// use the value in the "instrument" field of the event as a voice number
-									int voice(pEntry->_inst);
-									// make a copy of the pattern entry, because we're going to modify it.
-									PatternEntry entry(*pEntry);
-									entry._inst = 0;
-									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
-									if(voice < song().tracks())
-									{
-										pMachine->Tick(voice, &entry);
-									}
-									else if(voice == 0xff)
-									{
-										// special voice value which means we want to send the same command to all voices
-										for(int voice(0) ; voice < song().tracks() ; ++voice)
-										{
-											pMachine->Tick(voice, &entry);
-										}
-									}
-									else ; // probably an out of range voice value (with the classic tracker way, it's limited to the number of pattern tracks)
-								}
-								else // midi cc for vst, or other commands
-								{
-									// for vst machines,
-									// classic tracking, use the track number as the channel/voice number
-									pMachine->Tick(track, pEntry);
-								}
-							}
-						}
-					}
-				}
-				}
-			}
-		}*/
-
-		// Notify all machines that a new Tick() comes.
-		void Player::NotifyNewLine( )
-		{
-			for(int tc=0; tc<MAX_MACHINES; tc++)
-			{
-				if(song()._pMachine[tc])
-				{
-					song()._pMachine[tc]->Tick();
-					for(int c = 0; c < MAX_TRACKS; c++) song()._pMachine[tc]->TriggerDelay[c]._cmd = 0;
-				}
-			}
-
-		}
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
 			Machine::id_type mIndex;
@@ -435,6 +240,11 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			Master::_pMasterSamples = _pBuffer;
 			double beatLength = numSamples/(double) SamplesPerBeat();
 //			CSingleLock crit(&song().door, true);
+
+			if (autoRecord_ && PlayPos() >= song().patternSequence()->tickLength()) {
+				stopRecording();
+			}
+
 			if (_playing)
 			{
 				std::multimap<double, PatternLine> events;
@@ -507,18 +317,6 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			while (remainingsamples)
 			{
 				int amount = std::min(remainingsamples,STREAM_SIZE);
-//				if( (int)song()._sampCount > Global::configuration()._pOutputDriver->_samplesPerSec)
-//				{
-//					song()._sampCount =0;
-//					for(int c=0; c<MAX_MACHINES; c++)
-//					{
-//						if(song()._pMachine[c])
-//						{
-//							song()._pMachine[c]->wire_cpu_cost(0);
-//							song()._pMachine[c]->work_cpu_cost(0);
-//						}
-//					}
-//				}
 				// Reset all machine buffers
 				for(int c=0; c<MAX_MACHINES; c++)
 				{
@@ -528,14 +326,90 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 				song().DoPreviews( amount );
 				song()._pMachine[MASTER_INDEX]->Work(amount);
 
+				if ( (recording_ && !autoRecord_) || // controlled by record button
+						(recording_ && _playing && autoRecord_) ) { // controlled by play
+					// write sample to file
+					writeSamplesToFile( amount);
+				}
+
 				//Move the pointer forward for the next Master::Work() iteration.
 				Master::_pMasterSamples += amount * 2;
 				remainingsamples -= amount;
 			}
 		}
-  }
-}
 
 
+		// buffer to wav_file methods
 
+		void Player::setFileName( const std::string & fileName) {
+			fileName_ = fileName;
+		}
 
+		const std::string Player::fileName() const {
+			return fileName_;
+		}
+
+		void Player::writeSamplesToFile( int amount ) {
+			float* pL(song()._pMachine[MASTER_INDEX]->_pSamplesL);
+			float* pR(song()._pMachine[MASTER_INDEX]->_pSamplesR);
+			if(_doDither) {
+				dither.Process(pL, amount);
+				dither.Process(pR, amount);
+			}
+			int i;
+			switch(Global::configuration()._pOutputDriver->_channelmode)
+			{
+				case 0: // mono mix
+					for( i = 0; i < amount; i++)
+					{
+						//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither. 	 
+						if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) stopRecording();
+					}
+				break;
+				case 1: // mono L
+					for( i = 0; i < amount; i++ )
+					{
+						if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) stopRecording();
+					}
+				break;
+				case 2: // mono R
+					for( i = 0; i < amount; i++)
+					{
+						if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) stopRecording();
+					}
+				break;
+				default: // stereo
+					for( i = 0; i < amount; i++)
+					{
+						if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) stopRecording();
+					}
+				break;
+			}
+
+		}
+
+		void Player::setAutoRecording( bool on ) {
+			autoRecord_ = true;
+		}
+
+		void Player::startRecording( ) {
+
+			int channels = 2;
+			if(Global::configuration()._pOutputDriver->_channelmode != 3) channels = 1;
+
+			if(_outputWaveFile.OpenForWrite(fileName().c_str(), Global::configuration()._pOutputDriver->_samplesPerSec, Global::configuration()._pOutputDriver->_bitDepth, channels ) == DDC_SUCCESS)
+				recording_ = true;
+			else
+				recording_ = false;
+		}
+
+		void Player::stopRecording( ) {
+			if (recording_) {
+				_outputWaveFile.Close();
+				recordStopped.emit();
+			}
+			recording_ = false;
+		}
+
+	} // end of host namespace
+} // end of psycle namespace
