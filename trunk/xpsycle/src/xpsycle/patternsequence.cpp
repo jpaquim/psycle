@@ -372,11 +372,12 @@ namespace psycle
 						// we generate a temporary PatternLine with a special column value.
 						for( ;lineIt != thisline->end() ;lineIt++)
 						{
-							tmpline[seqlineidx*1024+lineIt->first]=lineIt->second;
-							tmpline[seqlineidx*1024+lineIt->first].setNote(tmpline[seqlineidx*1024+lineIt->first].note()+sLineIt->second->transpose() );
+							tmpline[lineIt->first]=lineIt->second;
+							tmpline[lineIt->first].setNote(tmpline[lineIt->first].note()+sLineIt->second->transpose() );
 						}
 						
 						// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
+						tmpline.setSequenceTrack(seqlineidx);
 						events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 						}
 				}
