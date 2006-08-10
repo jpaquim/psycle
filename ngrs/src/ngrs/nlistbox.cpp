@@ -63,12 +63,19 @@ void NListBox::add( NCustomItem * component , bool align)
   listBoxPane_->add(component,nAlCenter);
   component->mousePress.connect(this,&NListBox::onItemPress);
   component->setTransparent(true);
+  items_.push_back(component);
   if (align) listBoxPane_->resize();
 }
 
 void NListBox::insert( NCustomItem * component, int index , bool align )
 {
   listBoxPane_->insert(component,index);
+
+  if (index <= items_.size())
+    items_.insert(items_.begin()+index,component);
+  else
+    items_.push_back(component);
+
   component->mousePress.connect(this,&NListBox::onItemPress);
   component->setTransparent(true);
   if (align) listBoxPane_->resize();
@@ -108,6 +115,7 @@ void NListBox::onItemSelected( NCustomItem * item )
 
 void NListBox::removeChilds( )
 {
+  items_.clear();
   selItems_.clear();
   listBoxPane_->removeChilds();
   listBoxPane_->setScrollDx(0);
@@ -116,6 +124,8 @@ void NListBox::removeChilds( )
 
 void NListBox::removeChild( NCustomItem * item )
 {
+  std::vector<NCustomItem*>::iterator it = find( items_.begin(), items_.end(), item );
+  if ( it != items_.end() ) items_.erase(it);
   listBoxPane_->removeChild(item);
 }
 
@@ -191,6 +201,11 @@ void NListBox::setOrientation( int orientation )
   if (orientation == nHorizontal) {
     setHScrollBarPolicy(nAlwaysVisible);
   }
+}
+
+std::vector< NCustomItem * > & NListBox::items( )
+{
+  return items_;
 }
 
 

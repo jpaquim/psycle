@@ -156,4 +156,9 @@ NEdit * NComboBox::edit( )
   return edit_;
 }
 
+std::vector< NCustomItem * > & NComboBox::items( )
+{
+  return lbox->items();
+}
+
 
