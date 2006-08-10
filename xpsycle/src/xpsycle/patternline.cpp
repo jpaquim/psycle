@@ -28,6 +28,7 @@ namespace psycle
 		
 		PatternLine::PatternLine()
 		{
+			 sequencerTrack_ = 0;
 		}
 
 		PatternLine::~PatternLine()
@@ -47,8 +48,20 @@ namespace psycle
 			return xml.str();
 		}
 
+		void PatternLine::setSequenceTrack( int track )
+		{
+			 sequencerTrack_ = track;
+		}
+
+		int PatternLine::sequenceTrack( ) const
+		{
+			 return sequencerTrack_;
+		}
+
 	}
 }
+
+
 
 
 

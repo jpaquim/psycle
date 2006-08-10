@@ -169,7 +169,6 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			for ( ; trackItr != line.end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
-				std::cout << track << std::endl;
 				if(( !song()._trackMuted[track]) && (entry.note() < cdefTweakM || entry.note() == 255)) // Is it not muted and is a note?
 				{
 					int mac = entry.machine();
@@ -217,10 +216,9 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
-									pMachine->AddEvent(beatOffset, track, entry);
+									pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
-									std::cout << "add Event" << std::endl;
 								}
 							}
 						}

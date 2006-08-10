@@ -37,7 +37,14 @@ namespace psycle
 			PatternLine();
 			~PatternLine();
 
+			void setSequenceTrack(int track);
+			int sequenceTrack() const;
+
 			std::string toXml( float pos ) const;
+
+		private:
+
+			int sequencerTrack_;
 
 		};
 
