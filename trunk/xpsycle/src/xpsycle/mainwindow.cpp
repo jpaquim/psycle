@@ -42,6 +42,17 @@
 
 namespace psycle { namespace host {
 
+template<class T> inline T str_hex(const std::string &  value) {
+   T result;
+
+   std::stringstream str;
+   str << value;
+   str >> std::hex >> result;
+
+   return result;
+}
+
+
 MainWindow::MainWindow()
   : NWindow()
 {
@@ -94,6 +105,7 @@ void MainWindow::addSongToGui( Song & song )
   childView_ = new ChildView( song );
     childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
     childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
+    childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
   page->add( childView_, nAlClient);
 
   sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
@@ -705,6 +717,26 @@ void MainWindow::setAppSongBpm(int x)
 void MainWindow::onRecordWav( NButtonEvent * ev )
 {
 
+}
+
+void MainWindow::onMachineSelected( Machine* mac ) {
+  std::vector< NCustomItem * > items = genCombo_->items();
+  std::vector< NCustomItem * >::iterator it = items.begin();
+
+  int idx = 0;
+  for ( ; it < items.end(); it++) {
+     NCustomItem* item = *it;
+     if (item->text().length() > 2) {
+       int macIdx = str_hex<int>( item->text().substr(0,2) );
+       if (macIdx == mac->_macIndex) {
+         selectedSong_->seqBus = macIdx;
+         genCombo_->setIndex(idx);
+         genCombo_->repaint();
+         break;
+       }
+     }
+     idx++;
+  }
 }
 
 void MainWindow::onTimer( )

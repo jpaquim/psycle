@@ -282,6 +282,7 @@ void MachineView::onMachineSelected( MachineGUI * gui )
     selectedMachine_ = gui;
     gui->setSelected(true);
     gui->repaint();
+    selected.emit(gui->pMac());
   }
 }
 

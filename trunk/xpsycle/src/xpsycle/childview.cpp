@@ -46,6 +46,7 @@ ChildView::ChildView( Song & song )
 
   machineView_ = new MachineView( _pSong );
     machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
+    machineView_->selected.connect(this,&ChildView::onMachineSelected);
     machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
   patternView_ = new PatternView( _pSong );
     patternView_->setForeground(Global::pConfig()->pvc_background);
@@ -221,6 +222,10 @@ MachineView * ChildView::machineView( )
 NewMachine * ChildView::newMachineDlg( )
 {
   return newMachineDlg_;
+}
+
+void ChildView::onMachineSelected( Machine* mac ) {
+   machineSelected.emit( mac );
 }
 
 void ChildView::onMachineViewDblClick( NButtonEvent * ev )
