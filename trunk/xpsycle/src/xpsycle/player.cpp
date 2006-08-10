@@ -167,9 +167,9 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 		{
 			PatternLine::iterator trackItr = line.begin();
 			for ( ; trackItr != line.end() ; ++trackItr) {
-
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
+				std::cout << track << std::endl;
 				if(( !song()._trackMuted[track]) && (entry.note() < cdefTweakM || entry.note() == 255)) // Is it not muted and is a note?
 				{
 					int mac = entry.machine();
@@ -220,6 +220,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 									pMachine->AddEvent(beatOffset, track, entry);
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
+									std::cout << "add Event" << std::endl;
 								}
 							}
 						}
@@ -277,8 +278,9 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 					song().patternSequence()->GetLinesInRange(playPos, chunkBeatSize, events);
 					for( std::multimap<double, PatternLine>::iterator lineIt=events.begin()
 					   ; lineIt!= events.end()
-					   ; ++lineIt)
+					   ; ++lineIt) {
 						ExecuteNotes(lineIt->first - playPos, lineIt->second);
+						}
 
 					if(chunkSampleSize>0)
 					{

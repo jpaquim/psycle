@@ -140,17 +140,12 @@ namespace psycle
 			const std::string & name() const;
 			void setName(const std::string & newname);
 
-			int id() const;
-
 			std::string toXml() const;
 
 		private:
 
 			std::string name_;
 			PatternSequence* patternSequence_;
-			int lineId_;
-
-			static int idCounter;
 
 		};
 
