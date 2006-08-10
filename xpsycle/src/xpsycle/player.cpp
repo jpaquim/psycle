@@ -19,7 +19,6 @@ namespace psycle
 			song_(0),
 			_playing(false),
 			_playBlock(false),
-			_recording(false),
 			Tweaker(false),
 			_samplesRemaining(0),
 			_lineCounter(0),
@@ -38,9 +37,8 @@ namespace psycle
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 		}
 
-		Player::~Player() throw()
+		Player::~Player()
 		{
-			if(_recording) _outputWaveFile.Close();
 		}
 
 		void Player::Start(double pos)
@@ -505,7 +503,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 
 		void Player::Process(int numSamples)
 		{
-			int remainingsamles = numSamples;
+			int remainingsamples = numSamples;
 			while (remainingsamples)
 			{
 				int amount = std::min(remainingsamples,STREAM_SIZE);

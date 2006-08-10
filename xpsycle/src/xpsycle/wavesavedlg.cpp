@@ -688,29 +688,7 @@ void WaveSaveDlg::saveEnd( )
 
 int WaveSaveDlg::audioOutThread( void * ptr )
 {
-  WaveSaveDlg* pWaveSaveDlg = (WaveSaveDlg*) ptr;
-  pWaveSaveDlg->threadopen++;
-  Player* pPlayer = Global::pPlayer();
-  int stream_size = 8192; // Player has just a single buffer of 65535 samples to allocate both channels
-  //int stream_buffer[65535];
-  while(!(pWaveSaveDlg->kill_thread))
-  {
-    if (!pPlayer->_recording) // the player automatically closes the wav recording when looping.
-    {
-      pPlayer->Stop();
-      pWaveSaveDlg->saveEnd();
-      pWaveSaveDlg->threadopen--;
-      pthread_exit(0);
-    }
-    pPlayer->Work(pPlayer,stream_size);
-    pWaveSaveDlg->saveTick();
-  }
 
-  pPlayer->Stop();
-  pPlayer->StopRecording();
-  pWaveSaveDlg->saveEnd();
-  pWaveSaveDlg->threadopen--;
-  pthread_exit(0);
 }
 
 void WaveSaveDlg::saveTick( )

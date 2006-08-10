@@ -704,20 +704,7 @@ void MainWindow::setAppSongBpm(int x)
 
 void MainWindow::onRecordWav( NButtonEvent * ev )
 {
-  if (!Global::pPlayer()->_recording)
-  {
-      if (wavRecFileDlg->execute()) {
-        Global::pPlayer()->StartRecording(wavRecFileDlg->fileName());
-      }
-      if ( Global::pConfig()->autoStopMachines )
-      {
-        //OnAutostop();
-      }
-  }
-  else
-  {
-      Global::pPlayer()->StopRecording();
-  }
+
 }
 
 void MainWindow::onTimer( )
