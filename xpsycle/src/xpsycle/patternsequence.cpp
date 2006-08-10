@@ -350,7 +350,7 @@ namespace psycle
 		{
 			int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
 		    // Iterate over each timeline of the sequence,
-			for( iterator seqIt = this->begin(); seqIt != this->end(); ++seqIt )
+			for( iterator seqIt = begin(); seqIt != end(); ++seqIt )
 			{
 				SequenceLine *pSLine = *seqIt;
 				// locate the "sequenceEntry"s which starts nearer to "start+length"

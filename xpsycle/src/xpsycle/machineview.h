@@ -85,6 +85,7 @@ public:
 
     NPanel* scrollArea();
 
+    signal1<Machine*> selected;
     signal3<Machine*, int, int> machineMoved;
     signal3<int,int,int> patternTweakSlide;
 

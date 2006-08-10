@@ -213,6 +213,8 @@ private:
 
     void onSequencerEntryClick( SequencerItem* item);
 
+    void onMachineSelected( Machine* mac );
+
 };
 
 }}

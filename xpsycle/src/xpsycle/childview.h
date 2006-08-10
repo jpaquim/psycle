@@ -60,6 +60,7 @@ public:
 
     signal0<> newSongLoaded;
     signal1<Machine*> newMachineAdded;
+    signal1<Machine*> machineSelected;
 
     PatternView* patternView();
     MachineView* machineView();
@@ -95,8 +96,9 @@ private:
     std::string OnFileLoadSongNamed(const std::string & fName, int fType);
 
     void onTimer();
-
     void onTweakSlide(int machine, int command, int value);
+
+    void onMachineSelected( Machine* mac );
 
 };
 
