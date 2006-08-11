@@ -357,7 +357,7 @@ void CachedDllFinder::GeneratePluginInfo(PluginInfo& pinfo)
 			vst::plugin vstPlug(MACH_VST, MACHMODE_UNDEFINED, Machine::id_type());
 			try
 			{
-				vstPlug.Instance(pinfo.dllname)
+				vstPlug.Instance(pinfo.dllname);
 			}
 			catch(const std::exception & e)
 			{
