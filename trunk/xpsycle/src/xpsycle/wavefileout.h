@@ -20,7 +20,7 @@
 #ifndef WAVEFILEOUT_H
 #define WAVEFILEOUT_H
 
-#include <audiodriver.h>
+#include "audiodriver.h"
 #include "riff.h"
 #include <ngrs/sigslot.h>
 
