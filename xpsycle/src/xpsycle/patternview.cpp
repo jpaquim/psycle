@@ -251,25 +251,25 @@ const NColor & PatternView::separatorColor( )
   return separatorColor_;
 }
 
-int PatternView::trackNumber( )
+int PatternView::trackNumber( ) const
 {
   return _pSong->tracks();
 }
 
-int PatternView::rowHeight( )
+int PatternView::rowHeight( ) const
 {
   return 12;
 }
 
-int PatternView::headerHeight( )
+int PatternView::headerHeight( ) const
 {
   return header->height()-1;
 }
 
-int PatternView::colWidth( )
+int PatternView::colWidth( ) const
 {
   int col = noteCellWidth();
-  for (std::vector<int>::iterator it = eventSize.begin(); it < eventSize.end(); it++) {
+  for (std::vector<int>::const_iterator it = eventSize.begin(); it < eventSize.end(); it++) {
     switch (*it) {
     case 1: col+=2*cellWidth();
     break;
@@ -281,21 +281,21 @@ int PatternView::colWidth( )
   return std::max(header->skinColWidth(),col);
 }
 
-int PatternView::noteCellWidth( )
+int PatternView::noteCellWidth( ) const
 {
   NFontMetrics metrics(font());
   int width = metrics.textWidth("C#-10");
   return width;
 }
 
-int PatternView::cellWidth( )
+int PatternView::cellWidth( ) const
 {
   //NFontMetrics metrics(font());
   //int width = metrics.textWidth("_");
   return 12;
 }
 
-int PatternView::lineNumber( )
+int PatternView::lineNumber( ) const
 {
   if (pattern_)
     return pattern_->beatZoom() * pattern_->beats();
@@ -304,7 +304,7 @@ int PatternView::lineNumber( )
 
 }
 
-int PatternView::playPos( )
+int PatternView::playPos( ) const
 {
   return playPos_;
 }
@@ -314,7 +314,7 @@ void PatternView::setPrevEditPosition( int pos )
   prevEditPosition_ = pos;
 }
 
-int PatternView::prevEditPosition( )
+int PatternView::prevEditPosition( ) const
 {
   return prevEditPosition_;
 }
@@ -372,7 +372,7 @@ void PatternView::setEditPosition( int pos )
   vBar->setRange((lineNumber()-1-count)*rowHeight());
 }
 
-int PatternView::editPosition( )
+int PatternView::editPosition( ) const
 {
   return editPosition_;
 }
@@ -423,7 +423,7 @@ void PatternView::setEditOctave( int octave )
   editOctave_ = octave;
 }
 
-int PatternView::editOctave( )
+int PatternView::editOctave( ) const
 {
   return editOctave_;
 }
@@ -1411,10 +1411,10 @@ NPoint PatternView::PatternDraw::tracksFromRepaint( const NRegion & repaintArea 
   return NPoint(start,end);
 }
 
-int PatternView::cellCount( )
+int PatternView::cellCount( ) const
 {
   int count = 1;
-  for (std::vector<int>::iterator it = eventSize.begin(); it < eventSize.end(); it++)
+  for (std::vector<int>::const_iterator it = eventSize.begin(); it < eventSize.end(); it++)
     switch (*it) {
         case 1  : count+=2; break;
         case 2  : count+=4; break;
@@ -1739,9 +1739,9 @@ void PatternView::clearCursorPos( )
 }
 
 
-int PatternView::eventFromCol(int col) {
+int PatternView::eventFromCol(int col) const {
   int count = 0; int index = 0;
-  for (std::vector<int>::iterator it = eventSize.begin(); it < eventSize.end(); it++) {
+  for (std::vector<int>::const_iterator it = eventSize.begin(); it < eventSize.end(); it++) {
     switch (*it) {
         case 1  : count+=2; break;
         case 2  : count+=4; break;
@@ -1769,7 +1769,7 @@ int PatternView::colStartFromEvent( int event )
 }
 
 
-int PatternView::eventLength(int event) {
+int PatternView::eventLength(int event) const {
   if (event >= 0 && event < eventSize.size()) return eventSize.at(event); else return -1;
 }
 

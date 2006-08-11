@@ -196,27 +196,27 @@ public:
     const NColor & separatorColor();
 
 
-    int rowHeight();
-    int colWidth();
-    int headerHeight();
-    int noteCellWidth();
-    int cellWidth();
-    int cellCount();
+    int rowHeight() const;
+    int colWidth() const;
+    int headerHeight() const;
+    int noteCellWidth() const;
+    int cellWidth() const;
+    int cellCount() const;
 
-    int lineNumber();
-    int trackNumber();
+    int lineNumber() const;
+    int trackNumber() const;
 
     void addEvent( int byteLength );
     int colStartFromEvent(int event);
-    int eventFromCol(int col);
-    int eventLength(int event);
+    int eventFromCol(int col) const;
+    int eventLength(int event) const;
     std::vector<int> eventSize;
 
     void setEditPosition(int pos);
     void setPrevEditPosition(int pos);
-    int editPosition();
-    int prevEditPosition();
-    int playPos();
+    int editPosition() const;
+    int prevEditPosition() const;
+    int playPos() const;
 
     void setPatternStep(int step);
     int patternStep() const;
@@ -224,7 +224,7 @@ public:
     void updatePlayBar(bool followSong);
 
     void setEditOctave(int octave);
-    int editOctave();
+    int editOctave() const;
 
     const NPoint3D & cursor() const;
     void setCursor(const NPoint3D & cursor);
