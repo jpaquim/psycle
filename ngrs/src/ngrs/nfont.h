@@ -35,8 +35,7 @@ enum NFontStyleEnum { nBold=1,nMedium=2, nItalic=4, nStraight=8, nAntiAlias=16};
 class NFont{
 public:
     NFont();
-    NFont(std::string name,int size);
-    NFont::NFont( std::string name, int size=10,int style=nMedium | nStraight | nAntiAlias);
+    NFont( std::string name, int size=10,int style=nMedium | nStraight | nAntiAlias);
 
     ~NFont();
 
