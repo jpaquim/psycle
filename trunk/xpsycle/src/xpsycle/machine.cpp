@@ -875,15 +875,15 @@ int Machine::GenerateAudio( int numsamples )
 		WorkEvent & workEvent = workEvents.front();
 		nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
 	}
-  int samplestoprocess = 0;
+	int samplestoprocess = 0;
 	for(int processedsamples=0;processedsamples<numsamples; processedsamples+=samplestoprocess)
 	{
 		if ( processedsamples == nextLineInSamples )
 		{
 			Tick();
-			beatOffset= processedsamples/ (double)Global::player().SamplesPerBeat();
 			nextLineInSamples+=Global::player().SamplesPerRow();
 		}
+
 		while ( processedsamples == nextevent )
 		{
 			WorkEvent & workEvent = workEvents.front();
@@ -902,8 +902,11 @@ int Machine::GenerateAudio( int numsamples )
 
 		//minimum between remaining samples, next "Tick()" and next event
 		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
+	//samplestoprocess= std::min(numsamples,nextevent)-processedsamples;
 
-    if (samplestoprocess >0) GenerateAudioInTicks(processedsamples,samplestoprocess);
+	if ( (processedsamples >0 && processedsamples+ samplestoprocess != numsamples) || samplestoprocess == 0)
+		std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << std::endl;
+    /*if (samplestoprocess >0) */GenerateAudioInTicks(processedsamples,samplestoprocess);
 	}
 }
 
@@ -915,5 +918,3 @@ Song * Machine::song( )
 
 	}
 }
-
-

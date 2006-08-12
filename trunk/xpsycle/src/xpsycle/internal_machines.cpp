@@ -106,7 +106,7 @@ namespace psycle {
 		}
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
-			if ( !_mute && !bisTicking)
+/*			if ( !_mute && !bisTicking)
 			{
 				bisTicking=true;
 				for (int i=0;i<8;i++)
@@ -121,6 +121,7 @@ namespace psycle {
 				}
 			}
 			bisTicking=false;
+*/		
 		}
 
 		void DuplicatorMac::GetParamName(int numparam,char *name)

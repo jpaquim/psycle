@@ -90,8 +90,8 @@ void AlsaOut::setDefault( )
     rate = 44100; // stream rate
     format = SND_PCM_FORMAT_S16; // sample format
     channels = 2; // count of channels
-    buffer_time = 50000; // ring buffer length in us
-    period_time = 10000; // period time in us
+    buffer_time = 80000; // ring buffer length in us
+    period_time = 20000; // period time in us
 
     buffer_size;
     period_size;
