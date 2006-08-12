@@ -198,7 +198,14 @@ public:
     virtual void setFocus();
     virtual bool focus() const;
 
+    void setTabOrder( int index );
+    int tabOrder() const;
+
+    virtual void onExit();
+
 private:
+
+   std::vector<NVisualComponent*> tabOrder_;
 
    std::vector<NVisualComponent*> visualComponents_;
 
