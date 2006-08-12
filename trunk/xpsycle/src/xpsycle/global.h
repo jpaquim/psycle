@@ -43,7 +43,7 @@ namespace psycle {
         static Player* pPlayer();
         static Configuration* pConfig();
         static Configuration & configuration();
-        static Player & Global::player();
+        static Player & player();
     };
 
 template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)

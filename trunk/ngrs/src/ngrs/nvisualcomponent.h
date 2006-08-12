@@ -178,7 +178,7 @@ public:
 
     void insert(NVisualComponent* component, unsigned int index);
 
-    NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area);
+    NRect blitMove(int dx, int dy, const NRect & area);
 
     virtual void removeChilds();
     virtual void removeChild( NVisualComponent * child );
