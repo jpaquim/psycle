@@ -176,6 +176,8 @@ public:
     virtual void add(NVisualComponent* component, int align, bool update);
     virtual void add(NVisualComponent* component, const NAlignConstraint & align, bool update);
 
+    virtual void onKeyPress(const NKeyEvent & event);
+
     void insert(NVisualComponent* component, unsigned int index);
 
     NRect blitMove(int dx, int dy, const NRect & area);
@@ -202,6 +204,7 @@ public:
     int tabOrder() const;
 
     virtual void onExit();
+    virtual void onEnter();
 
 private:
 
