@@ -22,6 +22,9 @@
 #include "song.h"
 #include "global.h"
 #include "alsaout.h"
+#include "jackout.h"
+#include "gstreamerout.h"
+#include "esoundout.h"
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
@@ -113,19 +116,50 @@ void Configuration::setSkinDefaults( )
   machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
 
 	// audio driver configuration
-	_numOutputDrivers = 2;
-	_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
-	_ppOutputDrivers[0] = new AudioDriver;
+	_numOutputDrivers = 1;
 	#if defined XPSYCLE__CONFIGURATION
 		#include <xpsycle/alsa_conditional_build.h>
+		#include <xpsycle/gstreamer_conditional_build.h>
+		#include <xpsycle/esound_conditional_build.h>
 	#endif
 	#if !defined XPSYCLE__NO_ALSA
-		_ppOutputDrivers[1] = new AlsaOut();
-		_outputDriverIndex = 1;
-	#else
-		_ppOutputDrivers[1] = 0;
-		_outputDriverIndex = 0;
+		++_numOutputDrivers;
 	#endif
+	#if !defined XPSYCLE__NO_GSTREAMER
+		++_numOutputDrivers;
+	#endif
+	#if !defined XPSYCLE__NO_JACK
+		++_numOutputDrivers;
+	#endif
+	#if !defined XPSYCLE__NO_ESOUND
+		++_numOutputDrivers;
+	#endif
+	_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
+	{
+		unsigned int index(0);
+		_ppOutputDrivers[index] = new AudioDriver;
+		_outputDriverIndex = index;
+		#if !defined XPSYCLE__NO_ALSA
+			++index;
+			_ppOutputDrivers[index] = new AlsaOut;
+			if(!_outputDriverIndex) _outputDriverIndex = index;
+		#endif
+		#if !defined XPSYCLE__NO_JACK
+			++index;
+			_ppOutputDrivers[index] = new JackOut;
+			if(!_outputDriverIndex) _outputDriverIndex = index;
+		#endif
+		#if !defined XPSYCLE__NO_GSTREAMER
+			++index;
+			_ppOutputDrivers[index] = new GStreamerOut;
+			if(!_outputDriverIndex) _outputDriverIndex = index;
+		#endif
+		#if !defined XPSYCLE__NO_ESOUND
+			++index;
+			_ppOutputDrivers[index] = new ESoundOut;
+			if(!_outputDriverIndex) _outputDriverIndex = index;
+		#endif
+	}
 	_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
   #if defined XPSYCLE__CONFIGURATION
