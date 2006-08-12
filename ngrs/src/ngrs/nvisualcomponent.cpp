@@ -156,6 +156,10 @@ void NVisualComponent::onExit() {
   repaint();
 }
 
+void NVisualComponent::onEnter() {
+  repaint();
+}
+
 void NVisualComponent::drawChildren( NGraphics * g, const NRegion & repaintArea , NVisualComponent* sender )
 {
   if (layout_ == 0) {
@@ -957,4 +961,34 @@ int NVisualComponent::tabOrder() const {
   }
 
   return -1;
+}
+
+void NVisualComponent::onKeyPress(const NKeyEvent & event) {
+  if ((event.scancode() == XK_Tab || event.scancode() == XK_ISO_Left_Tab  )&& parent() ) {
+    if (parent()->visit(isVisualComponent)) {
+      NVisualComponent* par = (NVisualComponent*) parent();
+      std::vector<NVisualComponent*>::iterator it = find( par->tabOrder_.begin(),par->tabOrder_.end(), this );
+			if (  event.scancode() == XK_ISO_Left_Tab && it != par->tabOrder_.end() ) {
+					if ( it != par->tabOrder_.begin() && (par->tabOrder_.size() > 0) ) {
+						it--;
+						window()->setFocus( *it);
+					} else {
+						if ( it == par->tabOrder_.begin() && (par->tabOrder_.size() > 0) ) {
+							window()->setFocus( par->tabOrder_.back() );
+						}
+					}
+			}	else {
+			if ( it != par->tabOrder_.end() ) {
+					it++;
+					if ( it != par->tabOrder_.end() ) {
+						window()->setFocus( *it );
+					} else {
+						if (par->tabOrder_.size() > 0) window()->setFocus( *(par->tabOrder_.begin()) );
+					}
+				} else {
+					if (par->tabOrder_.size() > 0) window()->setFocus( *(par->tabOrder_.begin()) );
+				}
+			}
+    }
+  }
 }

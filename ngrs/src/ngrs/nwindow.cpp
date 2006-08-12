@@ -594,10 +594,11 @@ void NWindow::setFocus( )
 void NWindow::setFocus( NVisualComponent * comp )
 {
   if (comp) {
+    NVisualComponent* oldFocus = selectedBase_;
     checkForRemove(0);
     graphics_->setRegion(NRect(0,0,width(),height()));
-
     selectedBase_ = comp;
+    if (oldFocus) oldFocus->onExit();
     selectedBase_->onEnter();
   }
 }

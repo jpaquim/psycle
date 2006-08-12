@@ -72,6 +72,7 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
+  /*
   NObjectInspector* ins = new NObjectInspector();
     ins->setPosition(10,10,200,200);
     NLabel* lb = new NLabel();
@@ -79,7 +80,15 @@ NTestWindow::NTestWindow()
     ins->setControlObject(lb);
 
   pane()->add(ins);
+  */
 
+  // tabOrderTest
+
+  for (int i = 0; i < 5 ; i++) {
+    NButton* btn = new NButton("Button"+stringify(i));
+    btn->setFlat( false );
+    pane()->add(  btn , nAlTop );
+  }
 
   /*
   NColorComboBox* colorBox = new NColorComboBox();
