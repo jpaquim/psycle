@@ -141,11 +141,19 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     if ((skin_.border()!=0)) {
         g->setClipping(region);
         skin_.border()->paint(g,*geometry());
+        if ( focus() ) {
+           g->setForeground( NColor (0,0,255) );
+           g->drawRect(geometry()->rectArea() );
+        }
     }
     g->setRegion(oldRegion);              // restore old region
 
    }
   }
+}
+
+void NVisualComponent::onExit() {
+  repaint();
 }
 
 void NVisualComponent::drawChildren( NGraphics * g, const NRegion & repaintArea , NVisualComponent* sender )
@@ -589,6 +597,9 @@ void NVisualComponent::add( NVisualComponent * component )
       layout_->add(component);
       layout_->align(this);
   }
+
+  // adding to tabOrderMap
+  tabOrder_.push_back(component);
 }
 
 void NVisualComponent::add( NVisualComponent * component, int align, bool update )
@@ -604,6 +615,8 @@ void NVisualComponent::add( NVisualComponent * component, int align, bool update
       layout_->add(component);
       if (update) layout_->align(this);
   }
+
+  tabOrder_.push_back(component);
 }
 
 void NVisualComponent::add( NVisualComponent * component, const NAlignConstraint & align, bool update )
@@ -619,6 +632,8 @@ void NVisualComponent::add( NVisualComponent * component, const NAlignConstraint
       layout_->add(component);
       if (update) layout_->align(this);
   }
+
+  tabOrder_.push_back(component);
 }
 
 NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area)
@@ -700,6 +715,8 @@ void NVisualComponent::removeChilds( )
   }
   components.clear();
   visualComponents_.clear();
+  tabOrder_.clear();
+
   if (layout_!=0) {
       layout_->removeAll();
       layout_->align(this);
@@ -713,6 +730,10 @@ void NVisualComponent::removeChild( NVisualComponent * child )
   child->setParent(0);
   std::vector<NVisualComponent*>::iterator vItr = find(visualComponents_.begin(),visualComponents_.end(),child);
   visualComponents_.erase(vItr);
+
+  std::vector<NVisualComponent*>::iterator tItr = find(tabOrder_.begin(),tabOrder_.end(),child);
+  if ( tItr != tabOrder_.end() ) tabOrder_.erase(tItr);
+
   NApp::addRemovePipe(child);
   if (window()!=0) window()->checkForRemove(0);
   if (layout_!=0) {
@@ -898,3 +919,42 @@ bool NVisualComponent::enabled( ) const
 }
 
 
+void NVisualComponent::setTabOrder( int index ) {
+
+  if ( parent() != 0 ) {
+
+     NVisualComponent* par = (NVisualComponent*) parent();
+
+     if (index < par->tabOrder_.size() ) {
+       std::vector<NVisualComponent*>::iterator it = par->tabOrder_.begin();
+       int count = -1;
+       for ( ; it < par->tabOrder_.end(); it++ ) {
+         NVisualComponent* child = *it;
+         count ++;
+         if ( count == index ) break;
+       }
+       std::vector<NVisualComponent*>::iterator oldIt =
+          find( par->tabOrder_.begin() , par->tabOrder_.end(), this);
+
+       if (oldIt != par->tabOrder_.end() && count!=-1 && count < par->tabOrder_.size() ) {
+         swap(it, oldIt);
+       }
+     }
+  }
+}
+
+int NVisualComponent::tabOrder() const {
+
+  if ( parent() ) {
+    int count = 0;
+    NVisualComponent* par = (NVisualComponent*) parent();
+    std::vector<NVisualComponent*>::iterator it = par->tabOrder_.begin();
+    for ( ; it < par->tabOrder_.end(); it++ ) {
+      NVisualComponent* child = *it;
+      if ( child == this ) return count;
+      count++;
+    }
+  }
+
+  return -1;
+}
