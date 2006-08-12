@@ -70,7 +70,9 @@ public:
 
     virtual void setFocus();
     virtual bool focus() const;
-    virtual void onFocus();
+
+    virtual void onEnter(); // got focus
+    virtual void onExit();  // lost focus
 
     virtual void onKeyPress(const NKeyEvent & event);
     virtual void onKeyRelease(const NKeyEvent & event);

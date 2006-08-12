@@ -165,7 +165,9 @@ void NWindow::onMousePress( int x, int y, int button )
         initDrag(obj,x,y);
       }
      }
+    NVisualComponent* oldFocus = selectedBase_;
     selectedBase_ = dragBase_;
+    if (oldFocus && oldFocus != selectedBase_) oldFocus->onExit();
   }
 }
 
@@ -174,7 +176,7 @@ void NWindow::onMousePressed( int x, int y, int button )
   if (dragBase_!=0 && dragBase_->enabled()) dragBase_->onMousePressed( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop(), button);
   if (button==1) endDrag(dragBase_,x,y);
   dragBase_ = 0;
-  if ( selectedBase_!=0 && selectedBase_->enabled() ) selectedBase_->onFocus();
+  if ( selectedBase_!=0 && selectedBase_->enabled() ) selectedBase_->onEnter();
 }
 
 void NWindow::onMouseOver( int x, int y )
@@ -596,7 +598,7 @@ void NWindow::setFocus( NVisualComponent * comp )
     graphics_->setRegion(NRect(0,0,width(),height()));
 
     selectedBase_ = comp;
-    selectedBase_->onFocus();
+    selectedBase_->onEnter();
   }
 }
 
