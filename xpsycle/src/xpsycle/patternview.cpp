@@ -1268,10 +1268,19 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 
                     float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
 
-                    note += pView->editOctave()*12;
 
-                    (*pView->pattern_)[position][pView->cursor().x()].setMachine(pView->pSong()->seqBus);
-                    (*pView->pattern_)[position][pView->cursor().x()].setNote(note);
+                    note += pView->editOctave()*12;
+///\todo write nearest
+  //                  SinglePattern::iterator it = pView->pattern()->find_nearest(position);
+
+//                    if ( it != pView->pattern()->end() && it->first != position)
+//                    {
+//                      it->second[pView->cursor().x()].setMachine(pView->pSong()->seqBus);
+//                      it->second[pView->cursor().x()].setNote(note);
+//                    } else {
+                      (*pView->pattern_)[position][pView->cursor().x()].setMachine(pView->pSong()->seqBus);
+                      (*pView->pattern_)[position][pView->cursor().x()].setNote(note);
+//                    }
 
                     Machine *tmac = pView->pSong()->_pMachine[pView->pSong()->seqBus];
                     if (tmac) {

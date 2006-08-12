@@ -166,6 +166,11 @@ namespace psycle
 			return category_;
 		}
 
+
+		float SinglePattern::beatsPerLine() const {
+			return 1 / beatZoom();
+		}
+
 		void SinglePattern::clearEmptyLines()
 		{
 			for( iterator it = begin(); it != end(); )
@@ -337,8 +342,29 @@ namespace psycle
 			return xml.str();
 		}
 
+		SinglePattern::iterator SinglePattern::find_nearest( float value )
+		{
+			///\todo write it
+			/*int fractional = std::floor(value);
+			int mod = (int) ( value / beatsPerLine() );
+			float low_key   = mod * beatsPerLine() + fractional;
+			iterator low_it = lower_bound(low_key);
+			if ( low_it != end() ) {
+				if (low_it->first >= low_key + beatsPerLine() ) {
+					low_it++;
+					if (low_it != end()) {
+						if (low_it->first <= low_key) return low_it;
+					}
+					return end();
+				}
+			}
+			return low_it;*/
+		}
+
 	}
 }
+
+
 
 
 

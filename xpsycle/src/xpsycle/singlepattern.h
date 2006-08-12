@@ -66,6 +66,10 @@ namespace psycle
 			void setCategory(PatternCategory* category);
 			PatternCategory* category();
 
+			float beatsPerLine() const;
+			SinglePattern::iterator find_nearest( float value );
+//			const_iterator find_nearest( float value ) const;
+
 			void clearEmptyLines();
 
 			void scaleBlock(int left, int right, double top, double bottom, float factor);
