@@ -47,7 +47,8 @@ public:
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
 
-    virtual void onFocus();
+    virtual void onEnter();
+    virtual void onExit();
 
     void setVAlign(int align);
     void setHAlign(int align);

@@ -311,7 +311,12 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
  }
 }
 
-void NEdit::onFocus( )
+void NEdit::onExit()
+{
+  repaint();
+}
+
+void NEdit::onEnter( )
 {
   repaint();
 }

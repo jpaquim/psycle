@@ -224,7 +224,11 @@ bool NVisual::focus( ) const
   return true;
 }
 
-void NVisual::onFocus( )
+void NVisual::onEnter( )
+{
+}
+
+void NVisual::onExit( )
 {
 }
 
