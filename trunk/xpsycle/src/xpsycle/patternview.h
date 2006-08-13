@@ -116,7 +116,7 @@ class PatternView : public NPanel
 
       virtual void onMousePress(int x, int y, int button);
       virtual void onMousePressed(int x, int y, int button);
-      virtual void onMouseOver(int x, int y);
+      virtual void onMouseOver	(int x, int y);
       virtual void onKeyPress(const NKeyEvent & event);
       virtual void onKeyRelease(const NKeyEvent & event);
 

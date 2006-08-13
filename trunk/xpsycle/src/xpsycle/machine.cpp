@@ -878,7 +878,7 @@ int Machine::GenerateAudio( int numsamples )
 	int samplestoprocess = 0;
 	for(int processedsamples=0;processedsamples<numsamples; processedsamples+=samplestoprocess)
 	{
-		if ( processedsamples == nextLineInSamples )
+//		if ( processedsamples == nextLineInSamples )
 		{
 			Tick();
 			nextLineInSamples+=Global::player().SamplesPerRow();
