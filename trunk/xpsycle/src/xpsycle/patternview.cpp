@@ -74,9 +74,6 @@ PatternView::PatternView( Song* song )
   add(toolBar = new NToolBar() ,nAlTop);
   initToolBar();
 
-  // create the left timesignature panel
-  //timeSignaturePanel_ = new TimeSignaturePanel(this);
-  //add(timeSignaturePanel_, nAlLeft);
   // create the left linenumber panel
   add(lineNumber_ = new LineNumber(this), nAlLeft);
   // create the headertrack panel
@@ -612,7 +609,7 @@ int PatternView::Header::skinColWidth( )
 ///
   PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : NPanel(), dy_(0)
   {
-    setBorder(NFrameBorder());
+    setBorder( NFrameBorder() );
     pView = pPatternView;
     setWidth(60);
     setBackground(Global::pConfig()->pvc_row);
@@ -651,6 +648,21 @@ int PatternView::Header::skinColWidth( )
         g->drawText(clientWidth()-g->textWidth(stringify(i+startLine))-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,stringify(i+startLine));
         if ( pView->pattern() ) {
           float position = (i+ startLine) / (float) pView->pattern()->beatZoom();
+          SinglePattern::iterator it = pView->pattern()->find_nearest(i+startLine);
+          if (it != pView->pattern()->end()) {
+            if (it->first != position) {
+              int xOff = clientWidth()-g->textWidth(stringify(i+startLine))- 10 ;
+              int yOff = i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight() - 3;
+              g->drawLine( xOff , yOff+1, xOff, yOff - pView->rowHeight() + 5);
+              if (it->first < position) {
+                g->drawLine( xOff , yOff - pView->rowHeight() + 5, xOff-3, yOff - pView->rowHeight() + 8);
+                g->drawLine( xOff , yOff - pView->rowHeight() + 5, xOff+4, yOff - pView->rowHeight() + 9);
+              } else {
+                 g->drawLine( xOff , yOff +1, xOff-3, yOff - 2);
+                g->drawLine(  xOff , yOff +1, xOff+4, yOff - 3);
+              }
+            }
+          }
           if ( pView->pattern()->barStart(position, signature) ) {
             std::string caption = stringify(signature.numerator())+"/"+stringify(signature.denominator());
             g->drawText(0,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,caption);
@@ -1483,6 +1495,7 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
     int left = selection_.left();
     double top = selection_.top() / (double)pView->beatZoom();
     double bottom = selection_.bottom() / (double)pView->beatZoom();
+
     for( SinglePattern::iterator lineIt = pView->pattern()->lower_bound(top)
        ; lineIt != pView->pattern()->end() && lineIt->first < bottom
        ; ++lineIt )
