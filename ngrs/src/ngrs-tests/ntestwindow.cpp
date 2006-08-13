@@ -90,6 +90,15 @@ NTestWindow::NTestWindow()
     pane()->add(  btn , nAlTop );
   }
 
+  NPanel* panel = new NPanel();
+    panel->setLayout( NAlignLayout() );
+    for (int i = 5; i < 10 ; i++) {
+      NButton* btn = new NButton("Button"+stringify(i));
+      btn->setFlat( false );
+      panel->add(  btn , nAlTop );
+    }
+  pane()->add(panel, nAlClient);
+
   /*
   NColorComboBox* colorBox = new NColorComboBox();
      colorBox->setPosition(10,10,100,15);

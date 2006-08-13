@@ -203,6 +203,9 @@ public:
     void setTabOrder( int index );
     int tabOrder() const;
 
+    void setTabStop( bool on );
+    bool tabStop() const;
+
     virtual void onExit();
     virtual void onEnter();
 
@@ -238,6 +241,7 @@ private:
    NFont oldFont;
    bool disableParentFont_;
 
+   bool tabStop_;
 };
 
 #endif
