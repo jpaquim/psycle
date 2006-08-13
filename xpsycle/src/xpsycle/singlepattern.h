@@ -50,6 +50,10 @@ namespace psycle
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
 
+
+			void setEvent( int line, int track, const PatternEvent & event );
+			PatternEvent event( int line, int track );
+
 			void addBar( const TimeSignature & signature );
 			void removeBar( float pos);
 
@@ -67,7 +71,7 @@ namespace psycle
 			PatternCategory* category();
 
 			float beatsPerLine() const;
-			SinglePattern::iterator find_nearest( float value );
+			SinglePattern::iterator find_nearest( int linenr );
 //			const_iterator find_nearest( float value ) const;
 
 			void clearEmptyLines();
@@ -76,7 +80,7 @@ namespace psycle
 			void transposeBlock(int left, int right, double top, double bottom, int trp);
 			void deleteBlock(int left, int right, double top, double bottom);
 
-			void clearPosition(double beatpos, int track, int column);
+			void clearPosition(int line, int track, int column);
 
 			std::vector<TimeSignature> &  timeSignatures();
 			const std::vector<TimeSignature> &  timeSignatures() const;

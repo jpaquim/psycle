@@ -274,19 +274,20 @@ namespace psycle
 			clearEmptyLines();
 		}
 
-		void SinglePattern::clearPosition(double beatpos, int track, int column)
+		void SinglePattern::clearPosition(int linenr, int track, int column)
 		{
-			if(!count(beatpos)) return;
+			if( linenr >= size() ) return;
 
-			PatternLine &line = (*this)[beatpos];
+			iterator it = find_nearest(linenr);
+			if ( it == end() ) return;
 
-			if(!line.count(track)) return;
+			PatternLine &line = it->second;
 			
 			if(column==0)
 			{
 				line.erase(track);
-				if(line.empty()) 
-					erase(beatpos);
+				if(line.empty())
+					erase(it);
 				return;
 			}
 			
@@ -344,33 +345,41 @@ namespace psycle
 			return xml.str();
 		}
 
-		SinglePattern::iterator SinglePattern::find_nearest( float value )
+		SinglePattern::iterator SinglePattern::find_nearest( int line )
 		{
-			
 			SinglePattern::iterator result;
 			// first check if we have a line
-			result = find( value);
+			result = find( line / (float) beatZoom()  );
 			if ( result != end() ) return result;
 
-			//std::cout << "wanted value: " << value << std::endl;
+			double low = (line - 0.5) / (float) beatZoom();
+			double up  = (line + 0.5) / (float) beatZoom();
 
-			int fullBeat = std::floor( value );
-			//std::cout << "fullbeat: " << fullBeat << std::endl;
-			//std::cout << "beatsPerLine: " << beatsPerLine() << std::endl;
-			int count = (int) ( value / beatsPerLine() );
-			//std::cout << "count: " << count << std::endl;
-			// the lower exact line start according to the actual beatZoom
-			float low_key   = fullBeat + count * beatsPerLine();
-			//std::cout << "low_key: " << low_key << std::endl;
-			result = lower_bound( low_key );
-			// recheck what we have found..
-			if ( result != end() && result->first < low_key + beatsPerLine() ) {
-					// we found a nearest one
-					//std::cout << "upper_bound: " << low_key + beatsPerLine() << std::endl;
-					return result;
+			result = lower_bound( low );
+
+			if ( result != end() && result->first >=low && result->first < up ) {
+				return result;
 			}
-
 			return end();
+		}
+
+		void SinglePattern::setEvent( int line, int track, const PatternEvent & event ) {
+			iterator it = find_nearest( line );
+			if ( it != end())
+			{
+				it->second[track] = event;
+			} else {
+				float position = line / (float) beatZoom();
+				(*this)[position][track] = event;
+			}
+		}
+
+		PatternEvent SinglePattern::event( int line, int track ) {
+			iterator it = find_nearest( line );
+			if ( it != end())
+				return it->second[track];
+			else
+				return PatternEvent();
 		}
 
 	}

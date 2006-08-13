@@ -109,6 +109,7 @@ PatternView::~PatternView()
 }
 
 void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
+  int pos = ( (int) newPos + ((int) newPos % 2));
   setBeatZoom( (int) newPos );
   //tpbDisplay_->setNumber(tpb);
   repaint();
@@ -914,7 +915,9 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
   for ( ; it != pView->pattern_->end(); it++) {
     PatternLine & line = it->second;
     if (it->first > endPosition) break;
-    int y = d2i(it->first * pView->pattern_->beatZoom());
+    int y = d2i (it->first * pView->pattern_->beatZoom());
+
+    //std::cout << "pos:" << y << "," << it->first << std::endl;
 
     PatternLine::iterator eventIt = line.lower_bound(startTrack);
     for(; eventIt != line.end() && eventIt->first < endTrack; ++eventIt) {
@@ -1265,31 +1268,11 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
               if (note == cdefKeyStop && pView->cursor().z()==0) pView->noteOffAny(); else
               {
                   if (pView->cursor().z()==0) {
-
-                    float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
-
-
-                    note += pView->editOctave()*12;
-///\todo write nearest
-                    SinglePattern::iterator it = pView->pattern()->find_nearest(position);
-
-                    if ( it != pView->pattern()->end())
-                    {
-                      it->second[pView->cursor().x()].setMachine(pView->pSong()->seqBus);
-                      it->second[pView->cursor().x()].setNote(note);
-                    } else {
-                      (*pView->pattern_)[position][pView->cursor().x()].setMachine(pView->pSong()->seqBus);
-                      (*pView->pattern_)[position][pView->cursor().x()].setNote(note);
-                    }
-
-                    Machine *tmac = pView->pSong()->_pMachine[pView->pSong()->seqBus];
-                    if (tmac) {
-                      pView->PlayNote(note,127,false,tmac); 
-                    }
-
-                    int startLine  = dy_ / pView->rowHeight();
+										int startLine  = dy_ / pView->rowHeight();
                     int lineCount  = clientHeight() / pView->rowHeight();
                     int oldLine = pView->cursor().y();
+
+                    pView->enterNote( note );
                     pView->moveCursor(0,1,0);
                     int newLine = pView->cursor().y();
                     if (newLine > startLine + lineCount-1) {
@@ -1343,6 +1326,20 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       }}}
       break;
   }
+}
+
+void PatternView::enterNote( int note ) {
+ if ( pattern() ) {
+   PatternEvent event = pattern()->event( cursor().y(), cursor().x() );
+
+   Machine* tmac = pSong()->_pMachine[ pSong()->seqBus ];
+
+   event.setNote( editOctave() * 12 + note );
+   if (tmac) event.setMachine( tmac->_macIndex );
+   pattern()->setEvent( cursor().y(), cursor().x(), event );
+
+   if (tmac) PlayNote( note, 127, false, tmac);
+ }
 }
 
 
@@ -1741,10 +1738,9 @@ void PatternView::noteOffAny()
 
 void PatternView::clearCursorPos( )
 {
-  int track(cursor_.x());
-  double beatpos(cursor_.y() / (double)pattern_->beatZoom());
-  int column(cursor_.z());
-  pattern_->clearPosition(beatpos, track, column);
+  if ( pattern() ) {
+    pattern_->clearPosition( cursor().y(), cursor().x(), cursor().z() );
+  }
 }
 
 
