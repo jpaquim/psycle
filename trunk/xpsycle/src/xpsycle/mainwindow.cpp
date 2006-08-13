@@ -56,16 +56,7 @@ template<class T> inline T str_hex(const std::string &  value) {
 MainWindow::MainWindow()
   : NWindow()
 {
-	for (float b = 0; b < 1; b+=0.01) {
-		std::cout << "l=" << (int) (b*4 + 0.5) << "beat=" << b << std::endl;
-	}
-
-  for (int l = 0; l < 12; l++) {
-		std::cout << "lb" << (l-0.5) / (float) 4 << ",hb" << (l+0.5)/ (float) 4 << std::endl;
-	}
-
-
-  setTitle ("] Psycle Modular Music Creation Studio ( X alpha ");
+  setTitle ("] Psycle Modular Music Creation Studio[ ( X alpha ) ");
 
   setPosition(0,0,1024,768);
 

@@ -1268,7 +1268,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
               if (note == cdefKeyStop && pView->cursor().z()==0) pView->noteOffAny(); else
               {
                   if (pView->cursor().z()==0) {
-										int startLine  = dy_ / pView->rowHeight();
+                    int startLine  = dy_ / pView->rowHeight();
                     int lineCount  = clientHeight() / pView->rowHeight();
                     int oldLine = pView->cursor().y();
 
@@ -1276,8 +1276,8 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                     pView->moveCursor(0,1,0);
                     int newLine = pView->cursor().y();
                     if (newLine > startLine + lineCount-1) {
-                    pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
-                  }
+                      pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
+                    }
                   window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
                   window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
                 } else  {
@@ -1724,12 +1724,9 @@ void PatternView::PatternDraw::transposeBlock(int trp)
 void PatternView::noteOffAny()
 {
   if (pattern_) {
-    float position = cursor().y() / (float) pattern_->beatZoom();
-
-    PatternEvent data;
-    data.setNote(120);
-
-    (*pattern_)[position][cursor().x()]=data;
+    PatternEvent event;
+    event.setNote(120);
+    pattern()->setEvent( cursor().y(), cursor().x(), event );
 
     window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
   }
