@@ -910,6 +910,13 @@ bool SequencerGUI::gridSnap( ) const
 
 void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
 {
+  if (renderBtn->text()=="Stop rendering") {
+    Global::pPlayer()->stopRecording();
+    Global::pConfig()->_pOutputDriver->Enable(false);
+    onRecordStop();
+    return;
+  }
+
   // stop player
   Global::pPlayer()->Stop();
   // disable driver
