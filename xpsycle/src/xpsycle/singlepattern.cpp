@@ -21,6 +21,7 @@
 #include "patterndata.h"
 #include <sstream>
 #include <iostream>
+#include <cmath>
 
 namespace psycle
 {
