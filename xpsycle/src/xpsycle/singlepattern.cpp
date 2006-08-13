@@ -276,14 +276,12 @@ namespace psycle
 
 		void SinglePattern::clearPosition(int linenr, int track, int column)
 		{
-			if( linenr >= size() ) return;
-
 			iterator it = find_nearest(linenr);
 			if ( it == end() ) return;
 
-			PatternLine &line = it->second;
+			PatternLine & line = it->second;
 			
-			if(column==0)
+			if( column==0 )
 			{
 				line.erase(track);
 				if(line.empty())
