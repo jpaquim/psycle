@@ -20,6 +20,7 @@
 #include "singlepattern.h"
 #include "patterndata.h"
 #include <sstream>
+#include <iostream>
 
 namespace psycle
 {
@@ -168,7 +169,7 @@ namespace psycle
 
 
 		float SinglePattern::beatsPerLine() const {
-			return 1 / beatZoom();
+			return 1 / (float) beatZoom();
 		}
 
 		void SinglePattern::clearEmptyLines()
@@ -344,21 +345,31 @@ namespace psycle
 
 		SinglePattern::iterator SinglePattern::find_nearest( float value )
 		{
-			///\todo write it
-			/*int fractional = std::floor(value);
-			int mod = (int) ( value / beatsPerLine() );
-			float low_key   = mod * beatsPerLine() + fractional;
-			iterator low_it = lower_bound(low_key);
-			if ( low_it != end() ) {
-				if (low_it->first >= low_key + beatsPerLine() ) {
-					low_it++;
-					if (low_it != end()) {
-						if (low_it->first <= low_key) return low_it;
-					}
-					return end();
-				}
+			
+			SinglePattern::iterator result;
+			// first check if we have a line
+			result = find( value);
+			if ( result != end() ) return result;
+
+			//std::cout << "wanted value: " << value << std::endl;
+
+			int fullBeat = std::floor( value );
+			//std::cout << "fullbeat: " << fullBeat << std::endl;
+			//std::cout << "beatsPerLine: " << beatsPerLine() << std::endl;
+			int count = (int) ( value / beatsPerLine() );
+			//std::cout << "count: " << count << std::endl;
+			// the lower exact line start according to the actual beatZoom
+			float low_key   = fullBeat + count * beatsPerLine();
+			//std::cout << "low_key: " << low_key << std::endl;
+			result = lower_bound( low_key );
+			// recheck what we have found..
+			if ( result != end() && result->first < low_key + beatsPerLine() ) {
+					// we found a nearest one
+					//std::cout << "upper_bound: " << low_key + beatsPerLine() << std::endl;
+					return result;
 			}
-			return low_it;*/
+
+			return end();
 		}
 
 	}

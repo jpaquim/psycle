@@ -30,7 +30,7 @@ namespace psycle {
 
 SequencerBeatChangeLineal::BeatChangeTriangle::BeatChangeTriangle( )
 {
-  setMoveable( nMvHorizontal );
+  setMoveable( nMvLeftLimit | nMvHorizontal );
 
   tWidth  = 10;
   tHeight = 10;
