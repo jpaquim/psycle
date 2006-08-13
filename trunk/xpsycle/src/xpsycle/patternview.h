@@ -292,6 +292,8 @@ private:
 
   std::string noteToString(int value);
 
+  void enterNote( int note );
+
   void resize();
 
   void onHScrollBar(NObject* sender, int pos);
