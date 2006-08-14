@@ -878,12 +878,14 @@ int Machine::GenerateAudio( int numsamples )
 	int samplestoprocess = 0;
 	for(int processedsamples=0;processedsamples<numsamples; processedsamples+=samplestoprocess)
 	{
-//		if ( processedsamples == nextLineInSamples )
+/*
+ *		Pending Bugfixing.
+		if ( processedsamples == nextLineInSamples )
 		{
 			Tick();
 			nextLineInSamples+=Global::player().SamplesPerRow();
 		}
-
+*/
 		while ( processedsamples == nextevent )
 		{
 			WorkEvent & workEvent = workEvents.front();
@@ -901,8 +903,8 @@ int Machine::GenerateAudio( int numsamples )
 		}
 
 		//minimum between remaining samples, next "Tick()" and next event
-		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
-	//samplestoprocess= std::min(numsamples,nextevent)-processedsamples;
+//		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
+		samplestoprocess= std::min(numsamples,nextevent)-processedsamples;
 
 	if ( (processedsamples >0 && processedsamples+ samplestoprocess != numsamples) || samplestoprocess == 0)
 		std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << std::endl;
