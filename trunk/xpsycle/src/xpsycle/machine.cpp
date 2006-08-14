@@ -852,6 +852,7 @@ int WorkEvent::track( ) const
 int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 {
 	//std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
+	workEvents.clear();
 	return 0;
 }
 
@@ -865,15 +866,16 @@ int Machine::GenerateAudio( int numsamples )
 	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))*Global::player().SamplesPerRow();
 	//Next event, initialized to "out of scope".
 	int nextevent = numsamples+1;
-	//beat offset, in beats, counting from the function call.
-	double beatOffset = 0;
+	int previousline = nextLineInSamples;
 	std::map<int,int>::iterator colsIt;
 
 	// check for next event.
 	if (!workEvents.empty())
 	{
 		WorkEvent & workEvent = workEvents.front();
-		nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
+		nextevent = workEvent.beatOffset() * Global::player().SamplesPerBeat();
+		// correcting rounding errors.
+		if ( nextevent == nextLineInSamples+1 ) nextLineInSamples = nextevent;
 	}
 	int samplestoprocess = 0;
 	for(int processedsamples=0;processedsamples<numsamples; processedsamples+=samplestoprocess)
@@ -881,6 +883,7 @@ int Machine::GenerateAudio( int numsamples )
 		if ( processedsamples == nextLineInSamples )
 		{
 			Tick();
+			previousline = nextLineInSamples;
 			nextLineInSamples+=Global::player().SamplesPerRow();
 		}
 
@@ -891,7 +894,6 @@ int Machine::GenerateAudio( int numsamples )
 			colsIt = playCol.find(workEvent.track());
 			if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
 			Tick(colsIt->second,workEvent.event().entry());
-			beatOffset= workEvent.beatOffset();
 			workEvents.pop_front();
 			if (!workEvents.empty())
 			{
@@ -906,13 +908,14 @@ int Machine::GenerateAudio( int numsamples )
 //		samplestoprocess= std::min(numsamples,nextevent)-processedsamples;
 
 		if ( (processedsamples !=0 && processedsamples+ samplestoprocess != numsamples) || samplestoprocess <= 0)
-			std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << std::endl;
+		{
+			std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << "-" << nextLineInSamples << "(" << previousline << ")" << "-" << nextevent << std::endl;
+		}
 		GenerateAudioInTicks(processedsamples,samplestoprocess);
 	}
 	// reallocate events remaining in the buffer, This happens when soundcard buffer is bigger than STREAM_SIZE (machine buffer).
 	//	Since events are generated once per soundcard work(), events have to be reallocated for the next machine Work() call.
-	beatOffset= numsamples/Global::player().SamplesPerBeat();
-	reallocateRemainingEvents(beatOffset);
+	reallocateRemainingEvents(numsamples/Global::player().SamplesPerBeat());
 }
 
 Song * Machine::song( )
