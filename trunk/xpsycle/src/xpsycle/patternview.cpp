@@ -87,7 +87,9 @@ PatternView::PatternView( Song* song )
   addEvent(1); // add one byte event to trackerline
   addEvent(2); // add two byte event to trackerline
 
-  editPosition_ = prevEditPosition_ = playPos_ = editOctave_ = outtrack = 0;
+  editPosition_ = prevEditPosition_ = playPos_  = outtrack = 0;
+
+  editOctave_ = 4;
 
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
 
@@ -924,12 +926,15 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 
   SinglePattern::iterator it = pView->pattern_->find_nearest(startLine);
 
+  int lastLine = -1;
   for ( ; it != pView->pattern_->end(); it++ ) {
     PatternLine & line = it->second;
 
     int y = d2i (it->first * pView->pattern_->beatZoom());
     if (y > endLine) break;
     //std::cout << "pos:" << y << "," << it->first << std::endl;
+
+    if (y != lastLine) {
 
     PatternLine::iterator eventIt = line.lower_bound(startTrack);
     for(; eventIt != line.end() && eventIt->first < endTrack; ++eventIt) {
@@ -965,6 +970,8 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
       }
       }
     }
+    }
+    lastLine = y;
   }
   }
 }
@@ -1350,7 +1357,7 @@ void PatternView::enterNote( int note ) {
    if (tmac) event.setMachine( tmac->_macIndex );
    pattern()->setEvent( cursor().y(), cursor().x(), event );
 
-   if (tmac) PlayNote( note, 127, false, tmac);
+   if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);
  }
 }
 
