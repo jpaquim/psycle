@@ -19,7 +19,10 @@
  ***************************************************************************/
 #ifndef ESOUNDOUT_H
 #define ESOUNDOUT_H
-
+#if defined XPSYCLE__CONFIGURATION
+	#include <xpsycle/esound_conditional_build.h>
+#endif
+#if !defined XPSYCLE__NO_ESOUND
 #include "audiodriver.h"
 
 /**
@@ -78,4 +81,5 @@ private:
 
 }}
 
+#endif // !defined XPSYCLE__NO_ESOUND
 #endif
