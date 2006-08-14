@@ -72,6 +72,7 @@ namespace psycle
 
 			float beatsPerLine() const;
 			SinglePattern::iterator find_nearest( int linenr );
+			SinglePattern::iterator find_lower_nearest( int linenr );
 //			const_iterator find_nearest( float value ) const;
 
 			void clearEmptyLines();

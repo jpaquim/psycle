@@ -350,7 +350,7 @@ namespace psycle
 			result = find( line / (float) beatZoom()  );
 			if ( result != end() ) return result;
 
-			double low = (line - 0.5) / (float) beatZoom();
+			double low = ( (line - 0.5) / (float) beatZoom() );
 			double up  = (line + 0.5) / (float) beatZoom();
 
 			result = lower_bound( low );
@@ -360,6 +360,23 @@ namespace psycle
 			}
 			return end();
 		}
+
+		SinglePattern::iterator SinglePattern::find_lower_nearest( int linenr ) {
+			SinglePattern::iterator result;
+			// first check if we have a line
+			result = find( linenr / (float) beatZoom()  );
+			if ( result != end() ) return result;
+
+			double low = (linenr - 0.5) / (float) beatZoom();
+			double up  = (linenr + 0.5) / (float) beatZoom();
+
+			result = lower_bound( low );
+
+			if ( result != end() && result->first >=low ) {
+				return result;
+			}
+			return end();
+		};
 
 		void SinglePattern::setEvent( int line, int track, const PatternEvent & event ) {
 			iterator it = find_nearest( line );
