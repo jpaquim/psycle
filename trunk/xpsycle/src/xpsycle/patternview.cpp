@@ -937,7 +937,8 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
   float position = startLine / (float) pView->pattern_->beatZoom();
   float endPosition = endLine / (float) pView->pattern_->beatZoom();
 
-  SinglePattern::iterator it = pView->pattern_->find_nearest(startLine);
+
+  SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
 
   int lastLine = -1;
   for ( ; it != pView->pattern_->end(); it++ ) {
@@ -945,7 +946,6 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 
     int y = d2i (it->first * pView->pattern_->beatZoom());
     if (y > endLine) break;
-    //std::cout << "pos:" << y << "," << it->first << std::endl;
 
     if (y != lastLine) {
 
