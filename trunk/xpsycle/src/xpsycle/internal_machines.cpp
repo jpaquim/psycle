@@ -32,7 +32,7 @@ namespace psycle {
 //			DestroyOutputs();
 		}
 
-		int Dummy::GenerateAudioInTicks(int startSample, int numSamples)
+		int Dummy::GenerateAudio(int numSamples)
 		{
 //			cpu::cycles_type cost(cpu::cycles());
 			Machine::SetVolumeCounter(numSamples);
@@ -83,6 +83,7 @@ namespace psycle {
 		}
 		void DuplicatorMac::PreWork(int numSamples)
 		{
+			Machine::PreWork(numSamples);
 			for(; !workEvents.empty(); workEvents.pop_front()) {
 			
 				WorkEvent & workEvent = workEvents.front();
@@ -183,7 +184,7 @@ namespace psycle {
 			else return false;
 		}
 
-		int DuplicatorMac::GenerateAudioInTicks(int startSample, int numSamples)
+		int DuplicatorMac::GenerateAudio(int numSamples)
 		{
 			_worked = true;
 		}
@@ -241,7 +242,7 @@ namespace psycle {
 			_clip = false;
 		}
 
-		int Master::GenerateAudioInTicks(int startSample, int numSamples)
+		int Master::GenerateAudio(int numSamples)
 		{
 #if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 			universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
@@ -251,7 +252,7 @@ namespace psycle {
 			//if(!_mute)
 			//{
 			float mv = CValueMapper::Map_255_1(_outDry);
-
+		
 			float *pSamples = _pMasterSamples;
 			float *pSamplesL = _pSamplesL;
 			float *pSamplesR = _pSamplesR;

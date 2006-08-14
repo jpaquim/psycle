@@ -112,6 +112,10 @@ void Plugin::Init( )
 
 int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
+      int ns = numSamples;
+      int us = startSample;
+                  proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
+/*
   if (!_mute) {
     if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
       int ns = numSamples;
@@ -325,6 +329,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
             }
         }
       }
+*/	  
       //CPUCOST_CALC(cost, numSamples);
       //_cpuCost += cost;
       _worked = true;

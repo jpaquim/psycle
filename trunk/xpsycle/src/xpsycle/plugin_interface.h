@@ -24,7 +24,7 @@
   #endif
 
   /// in number of samples (per channel).
-  int const MAX_BUFFER_LENGTH = 1024;
+  int const MAX_BUFFER_LENGTH = 256;
 
   /// CMachineParameter flags.
   int const MPF_LABEL = 0;
