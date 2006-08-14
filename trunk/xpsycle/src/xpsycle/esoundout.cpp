@@ -17,6 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#if defined XPSYCLE__CONFIGURATION
+	#include <xpsycle/esound_conditional_build.h>
+#endif
+#if !defined XPSYCLE__NO_ESOUND
 #include "esoundout.h"
 #include "esd.h"
 
@@ -155,3 +159,4 @@ return 0;
 }
 
 }}
+#endif // !defined XPSYCLE__NO_ESOUND
