@@ -102,15 +102,12 @@ PatternView::PatternView( Song* song )
   selectedMacIdx_ = 255;
 }
 
-
 PatternView::~PatternView()
 {
 }
 
 void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
-  int pos = ( (int) newPos + ((int) newPos % 2));
   setBeatZoom( (int) newPos );
-  //tpbDisplay_->setNumber(tpb);
   repaint();
 }
 
@@ -2183,16 +2180,16 @@ Song * PatternView::pSong( )
 
 void PatternView::setBeatZoom( int tpb )
 {
-  if (pattern_ && tpb >= 1) {
-     pattern_->setBeatZoom(tpb);
-     int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
-     vBar->setRange((lineNumber()-1-count)*rowHeight());
+  if (pattern_) {
+     pattern_->setBeatZoom( std::max(tpb, 1) );
+     int count = (drawArea->clientHeight() - headerHeight()) / rowHeight();
+     vBar->setRange( ( lineNumber() - 1 - count) * rowHeight());
   }
 }
 
 void PatternView::onOctaveChange( NItemEvent * ev )
 {
-  std::stringstream str; 
+  std::stringstream str;
   str << ev->item()->text();
   int octave = 0;
   str >> octave;
