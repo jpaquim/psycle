@@ -160,6 +160,8 @@ void NButton::init( )
   repeatTimer.timerEvent.connect(this,&NButton::onRepeatTimer);
   startLatencyTimer.setIntervalTime(100);
   startLatencyTimer.timerEvent.connect(this,&NButton::onStartTimer);
+
+  setTabStop(true);
 }
 
 void NButton::setDown( bool on )

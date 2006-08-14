@@ -141,10 +141,10 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     if ((skin_.border()!=0)) {
         g->setClipping(region);
         skin_.border()->paint(g,*geometry());
-        if ( focus() ) {
-           g->setForeground( NColor (0,0,255) );
-           g->drawRect(geometry()->rectArea() );
-        }
+    }
+    if ( focus() ) {
+//      g->setForeground( NColor (0,0,255) );
+//      g->drawRect(geometry()->rectArea() );
     }
     g->setRegion(oldRegion);              // restore old region
 
@@ -972,7 +972,25 @@ bool NVisualComponent::tabStop() const {
 }
 
 void NVisualComponent::onKeyPress(const NKeyEvent & event) {
-  if ((event.scancode() == XK_Tab || event.scancode() == XK_ISO_Left_Tab  )&& parent() ) {
+
+  if ( parent() ) {
+    switch ( event.scancode() ) {
+      case XK_Tab :
+        tabRight();
+      break;
+      case XK_ISO_Left_Tab :
+        tabLeft();
+      break;
+      default : ;
+    }
+  }
+
+/*  if ((event.scancode() == XK_Tab ) tabRight();
+  || event.scancode() == XK_ISO_Left_Tab  )&& parent() )
+
+
+
+{
     if (parent()->visit(isVisualComponent)) {
       NVisualComponent* par = (NVisualComponent*) parent();
       std::vector<NVisualComponent*>::iterator it = find( par->tabOrder_.begin(),par->tabOrder_.end(), this );
@@ -998,5 +1016,34 @@ void NVisualComponent::onKeyPress(const NKeyEvent & event) {
 				}
 			}
     }
+  }*/
+}
+
+void NVisualComponent::tabRight() {
+  // first give child focus
+  if ( visualComponents_.size() > 0) {
+     std::vector<NVisualComponent*>::iterator it = visualComponents_.begin();
+     window()->setFocus( *it );
+  } else
+  {
+    NVisualComponent* par = (NVisualComponent*) parent();
+    if (par->tabOrder_.size() > 0) {
+      std::vector<NVisualComponent*>::iterator it=find( par->tabOrder_.begin(),par->tabOrder_.end(), this );
+      if ( it != par->tabOrder_.end() ) {
+        it++;
+        if ( it != par->tabOrder_.end() )
+          window()->setFocus( *it );
+        else
+          window()->setFocus( *(par->tabOrder_.begin()) );
+      } else
+        window()->setFocus( *(par->tabOrder_.begin()) );
+    }
   }
+
+}
+
+void NVisualComponent::tabLeft() {
+ if (parent()->visit(isVisualComponent)) {
+    NVisualComponent* par = (NVisualComponent*) parent();
+ }
 }

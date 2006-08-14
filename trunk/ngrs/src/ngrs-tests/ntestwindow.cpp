@@ -87,6 +87,7 @@ NTestWindow::NTestWindow()
   for (int i = 0; i < 5 ; i++) {
     NButton* btn = new NButton("Button"+stringify(i));
     btn->setFlat( false );
+    btn->setEvents(true);
     pane()->add(  btn , nAlTop );
   }
 
@@ -95,6 +96,7 @@ NTestWindow::NTestWindow()
     for (int i = 5; i < 10 ; i++) {
       NButton* btn = new NButton("Button"+stringify(i));
       btn->setFlat( false );
+      btn->setEvents(true);
       panel->add(  btn , nAlTop );
     }
   pane()->add(panel, nAlClient);
