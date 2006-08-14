@@ -878,14 +878,12 @@ int Machine::GenerateAudio( int numsamples )
 	int samplestoprocess = 0;
 	for(int processedsamples=0;processedsamples<numsamples; processedsamples+=samplestoprocess)
 	{
-/*
- *		Pending Bugfixing.
 		if ( processedsamples == nextLineInSamples )
 		{
 			Tick();
 			nextLineInSamples+=Global::player().SamplesPerRow();
 		}
-*/
+
 		while ( processedsamples == nextevent )
 		{
 			WorkEvent & workEvent = workEvents.front();
@@ -898,18 +896,23 @@ int Machine::GenerateAudio( int numsamples )
 			if (!workEvents.empty())
 			{
 				workEvent = workEvents.front();
-				nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
+			//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
+				nextevent = workEvent.beatOffset() * Global::player().SamplesPerBeat();
 			} else nextevent = numsamples+1;
 		}
 
 		//minimum between remaining samples, next "Tick()" and next event
-//		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
-		samplestoprocess= std::min(numsamples,nextevent)-processedsamples;
+		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
+//		samplestoprocess= std::min(numsamples,nextevent)-processedsamples;
 
-	if ( (processedsamples >0 && processedsamples+ samplestoprocess != numsamples) || samplestoprocess == 0)
-		std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << std::endl;
-    /*if (samplestoprocess >0) */GenerateAudioInTicks(processedsamples,samplestoprocess);
+		if ( (processedsamples !=0 && processedsamples+ samplestoprocess != numsamples) || samplestoprocess <= 0)
+			std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << std::endl;
+		GenerateAudioInTicks(processedsamples,samplestoprocess);
 	}
+	// reallocate events remaining in the buffer, This happens when soundcard buffer is bigger than STREAM_SIZE (machine buffer).
+	//	Since events are generated once per soundcard work(), events have to be reallocated for the next machine Work() call.
+	beatOffset= numsamples/Global::player().SamplesPerBeat();
+	reallocateRemainingEvents(beatOffset);
 }
 
 Song * Machine::song( )
@@ -917,6 +920,15 @@ Song * Machine::song( )
   return _pSong;
 }
 
+void Machine::reallocateRemainingEvents(double beatOffset)
+{
+	std::deque<WorkEvent>::iterator it = workEvents.begin();
+	while(it != workEvents.end())
+	{
+		it->changeposition(it->beatOffset()-beatOffset);
+		it++;
+	}
+}
 
 	}
 }

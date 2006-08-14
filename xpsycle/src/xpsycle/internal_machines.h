@@ -16,7 +16,7 @@ namespace psycle {
 		public:
 			Dummy(id_type index, Song* song);
 			virtual ~Dummy() throw();
-			virtual int GenerateAudioInTicks(int startSample, int numSamples);
+			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
@@ -35,7 +35,7 @@ namespace psycle {
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void PreWork(int numSamples);
-			virtual int GenerateAudioInTicks(int startSample, int numSamples);
+			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
@@ -62,7 +62,7 @@ namespace psycle {
 			Master(id_type index, Song* song);
 			virtual ~Master() throw();
 			virtual void Init(void);
-			virtual int GenerateAudioInTicks(int startSample, int numSamples);
+			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
 //			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);

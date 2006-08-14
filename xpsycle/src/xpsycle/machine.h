@@ -262,6 +262,7 @@ namespace psycle
 				const PatternEvent &  event() const;
 				double beatOffset() const;
 				int track() const;
+				void changeposition(double beatOffset) { offset_ = beatOffset; }
 
 			private:
 				PatternEvent event_;
@@ -279,6 +280,7 @@ namespace psycle
 					virtual int GenerateAudioInTicks(int startSample, int numsamples);
 					virtual int GenerateAudio(int numsamples);
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
+					virtual void reallocateRemainingEvents(double beatOffset);
 				protected:
 					std::deque<WorkEvent> workEvents;
 				    std::map<int,int> playCol;
