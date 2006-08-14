@@ -647,13 +647,29 @@ int PatternView::Header::skinColWidth( )
           g->setForeground(Global::pConfig()->pvc_cursor);
           g->fillRect(0,i*pView->rowHeight()+pView->headerHeight(),clientWidth()-1,pView->rowHeight());
         }
-        g->drawText(clientWidth()-g->textWidth(stringify(i+startLine))-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,stringify(i+startLine));
+        std::string text = stringify(i+startLine);
         if ( pView->pattern() ) {
           float position = (i+ startLine) / (float) pView->pattern()->beatZoom();
           SinglePattern::iterator it = pView->pattern()->find_nearest(i+startLine);
           if (it != pView->pattern()->end()) {
+            // check out how many hidden lines there are
+            int lastLine = d2i (it->first * pView->pattern_->beatZoom());
+            int y = lastLine;
+            SinglePattern::iterator it2 = it;
+            int count = 0;
+            do {
+              y = d2i (it2->first * pView->pattern_->beatZoom());
+              if ( y != lastLine) break;
+              it2++;
+              count++;
+            } while (it2 != pView->pattern()->end() && y == lastLine);
+
+            if ( count > 1 ) {
+              text+= std::string(":") + stringify( count );
+            }
+            // check if line is on beatzoom raster else draw arrow up or down hint
             if (it->first != position) {
-              int xOff = clientWidth()-g->textWidth(stringify(i+startLine))- 10 ;
+              int xOff = clientWidth()-g->textWidth(text)- 10 ;
               int yOff = i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight() - 3;
               g->drawLine( xOff , yOff+1, xOff, yOff - pView->rowHeight() + 5);
               if (it->first < position) {
@@ -670,7 +686,7 @@ int PatternView::Header::skinColWidth( )
             g->drawText(0,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,caption);
           }
         }
-
+        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,text);
       }
 
     g->drawText(1,pView->headerHeight()-1,"Line");
