@@ -242,6 +242,9 @@ private:
    bool disableParentFont_;
 
    bool tabStop_;
+
+   void tabRight();
+   void tabLeft();
 };
 
 #endif
