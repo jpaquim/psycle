@@ -1,6 +1,7 @@
 /// \file
 /// \brief scale facilities for machine parameters
 #pragma once
+#include <cmath>
 namespace psycle
 {
 	namespace common
@@ -65,7 +66,7 @@ namespace psycle
 			{
 				public:
 					Exponential(const Real & input_maximum, const Real & output_minimum, const Real & output_maximum)
-					: Scale(input_maximum, static_cast<Real>(::log(output_minimum)), static_cast<Real>(::log(output_maximum)))
+					: Scale(input_maximum, static_cast<Real>(std::log(output_minimum)), static_cast<Real>(std::log(output_maximum)))
 					{
 						ratio_ = (this->output_maximum() - this->output_minimum()) / input_maximum;
 						offset_ = this->output_minimum() / ratio_;
@@ -76,7 +77,7 @@ namespace psycle
 					}
 					inline virtual const Real apply_inverse(const Real & sample) const
 					{
-						return static_cast<Real>(::log(sample) / ratio_ - offset_);
+						return static_cast<Real>(std::log(sample) / ratio_ - offset_);
 					}
 				private:
 					Real offset_, ratio_;
@@ -86,7 +87,7 @@ namespace psycle
 			{
 				public:
 					Logarithmic(const Real & input_maximum, const Real & output_minimum, const Real & output_maximum)
-					: Scale(input_maximum, static_cast<Real>(::log(output_minimum)), static_cast<Real>(::log(output_maximum)))
+					: Scale(input_maximum, static_cast<Real>(std::log(output_minimum)), static_cast<Real>(std::log(output_maximum)))
 					{
 						ratio_ = (this->output_maximum() - this->output_minimum()) / input_maximum;
 						offset_ = this->output_minimum() / ratio_;
@@ -95,11 +96,11 @@ namespace psycle
 					};
 					inline virtual const Real apply(const Real & sample) const
 					{
-						return static_cast<Real>(output_minimum_maximum_sum_ - ::exp((offset_plus_input_maximum_ - sample) * ratio_));
+						return static_cast<Real>(output_minimum_maximum_sum_ - std::exp((offset_plus_input_maximum_ - sample) * ratio_));
 					}
 					inline virtual const Real apply_inverse(const Real & sample) const
 					{
-						return static_cast<Real>(offset_plus_input_maximum_ - ::log(output_minimum_maximum_sum_ - sample) / ratio_);
+						return static_cast<Real>(offset_plus_input_maximum_ - std::log(output_minimum_maximum_sum_ - sample) / ratio_);
 					}
 				private:
 					Real offset_, ratio_, output_minimum_maximum_sum_, offset_plus_input_maximum_;
