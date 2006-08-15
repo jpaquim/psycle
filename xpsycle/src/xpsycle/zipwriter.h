@@ -25,6 +25,7 @@
 #include <time.h>
 
 #ifdef __cplusplus
+ #include <ostream>
  extern "C" {
 #endif
 
@@ -129,6 +130,7 @@ int zipwriter_finish(zipwriter *d);
 */
 
 void zipwriter_copy(int in, zipwriter_file *out);
+
 
 #ifdef __cplusplus
  };

@@ -20,6 +20,7 @@
 #include "psy4filter.h"
 #include "fileio.h"
 #include "zipwriter.h"
+#include "zipwriterstream.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -312,12 +313,11 @@ namespace psycle {
 				progress.emit(2,0,"Saving...");
 			}
 
-		// ideally, you should create a temporary file on the same physical
-	  // disk as the target zipfile... 
+			// ideally, you should create a temporary file on the same physical
+	  	// disk as the target zipfile... 
 
-			_stream.open(std::string("psycle_tmp.xml").c_str() , std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
-			if (!_stream.is_open ()) return false;
-			_stream.seekg (0, std::ios::beg);
+			zipwriter *z = zipwriter_start(open(std::string(fileName+".zip").c_str(), O_RDWR|O_CREAT, 0666));
+			zipwriterfilestream xmlFile(z, std::string("/xml/"+fileName+".xml").c_str());
 
 			std::ostringstream xml;
 			xml << "<psy4>" << std::endl;
@@ -330,35 +330,14 @@ namespace psycle {
 			xml << song.patternSequence().toXml();
 			xml << "</psy4>" << std::endl;
 
-			_stream << xml.str() << std::endl;
-			_stream.close();
+			xmlFile << xml.str();
+			xmlFile.close();
 
-      // tempfile created 
-      // now open zip
-			zipwriter *z;
+
 			zipwriter_file *f;
 
 
-      std::string zipName = fileName+".zip";
-			z = zipwriter_start(open(zipName.c_str(), O_RDWR|O_CREAT, 0666));
-
-			// notice how this works? zipwriter_addfile() allocates a file entry,
-	    // and then you use zipwriter_write() as much as you like to add stuff
-	    // to the file. note the third argument of zipwriter_addfile() is the
-	    // compression level. we only support deflate() so these are really
-	    // the zlib mem levels...
-
-      // here we add the xml part
-			// the xml part contains song info, project settings , patterndata,
-			// and sequencerdata
-
-      f = zipwriter_addfile(z, std::string("/xml/"+fileName+".xml").c_str(), 9);
-	    zipwriter_copy(open("psycle_tmp.xml", O_RDONLY), f);
-
-			f = zipwriter_addfile(z, "FirstFile.9", 9);
-			zipwriter_write(f, "1234567890", 10);
-
-
+     
 
 			//\todo:
 			if ( !autosave )
