@@ -98,17 +98,25 @@ void MainWindow::initSongs( )
 
 void MainWindow::addSongToGui( Song & song )
 {
+  std::cout << "here" << std::endl;
+
   page = new NPanel();
     page->setLayout( NAlignLayout());
   book->addPage(page,"Song");
 
+  std::cout << "here1" << std::endl;
+
   page->add(sequencerBar_ = new SequencerBar(), nAlLeft);
+
+  std::cout << "here2" << std::endl;
 
   childView_ = new ChildView( song );
     childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
     childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
   page->add( childView_, nAlClient);
+
+  std::cout << "here3" << std::endl;
 
   sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
   sequencerBar_->setPatternView( childView_->patternView() );

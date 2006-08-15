@@ -19,6 +19,12 @@
  ***************************************************************************/
 #include "psy4filter.h"
 #include "fileio.h"
+#include "zipwriter.h"
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <ngrs/nfile.h>
 
 template<class T> inline T str(const std::string &  value) {
    T result;
@@ -294,8 +300,10 @@ namespace psycle {
 			}
 		}
 
-		bool Psy4Filter::save( const std::string & fileName, const Song & song )
+		bool Psy4Filter::save( const std::string & file_Name, const Song & song )
 		{
+			std::string fileName = NFile::extractFileNameFromPath(file_Name);
+
 			bool autosave = false;
 			//\todo:
 			if ( !autosave )
@@ -304,8 +312,10 @@ namespace psycle {
 				progress.emit(2,0,"Saving...");
 			}
 
+		// ideally, you should create a temporary file on the same physical
+	  // disk as the target zipfile... 
 
-			_stream.open(std::string(fileName+".xml").c_str() , std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
+			_stream.open(std::string("psycle_tmp.xml").c_str() , std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
 			if (!_stream.is_open ()) return false;
 			_stream.seekg (0, std::ios::beg);
 
@@ -323,6 +333,33 @@ namespace psycle {
 			_stream << xml.str() << std::endl;
 			_stream.close();
 
+      // tempfile created 
+      // now open zip
+			zipwriter *z;
+			zipwriter_file *f;
+
+
+      std::string zipName = fileName+".zip";
+			z = zipwriter_start(open(zipName.c_str(), O_RDWR|O_CREAT, 0666));
+
+			// notice how this works? zipwriter_addfile() allocates a file entry,
+	    // and then you use zipwriter_write() as much as you like to add stuff
+	    // to the file. note the third argument of zipwriter_addfile() is the
+	    // compression level. we only support deflate() so these are really
+	    // the zlib mem levels...
+
+      // here we add the xml part
+			// the xml part contains song info, project settings , patterndata,
+			// and sequencerdata
+
+      f = zipwriter_addfile(z, std::string("/xml/"+fileName+".xml").c_str(), 9);
+	    zipwriter_copy(open("psycle_tmp.xml", O_RDONLY), f);
+
+			f = zipwriter_addfile(z, "FirstFile.9", 9);
+			zipwriter_write(f, "1234567890", 10);
+
+
+
 			//\todo:
 			if ( !autosave )
 			{
@@ -331,7 +368,7 @@ namespace psycle {
 			}
 
 			RiffFile file;
-			file.Create(std::string(fileName+".bin").c_str(), true);
+			file.Create(std::string("psycle_tmp.bin").c_str(), true);
 
 			file.WriteChunk("PSY4",4);
 			saveSONGv0(&file,song);
@@ -360,6 +397,15 @@ namespace psycle {
 			}
 			//\todo:
 			file.Close();
+
+      // copy the bin data to the zip
+      f = zipwriter_addfile(z, std::string("/bin/"+fileName+".bin").c_str(), 9);
+	    zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
+
+      if (!zipwriter_finish(z)) {
+				return false;
+			}
+      
 			return true;
 		}
 
