@@ -38,6 +38,7 @@
 #include <ngrs/nitem.h>
 #include <ngrs/nitemevent.h>
 #include <ngrs/nlabel.h>
+#include <ngrs/nsystem.h>
 
 namespace psycle { namespace host {
 
@@ -1517,6 +1518,12 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
     double top = selection_.top() / (double)pView->beatZoom();
     double bottom = selection_.bottom() / (double)pView->beatZoom();
 
+		std::string xmlSel;
+		xmlSel+="<patternsel startTrack='' endTrack='' startLine='' endLine=''>";
+    xmlSel+=pView->pattern()->toXml( selection_.left(),selection_.right(),selection_.top(),selection_.bottom() );
+    xmlSel+="</patternsel>";
+		NApp::system().clipBoard().setAsText(xmlSel);
+
     for( SinglePattern::iterator lineIt = pView->pattern()->lower_bound(top)
        ; lineIt != pView->pattern()->end() && lineIt->first < bottom
        ; ++lineIt )
@@ -1575,6 +1582,8 @@ void PatternView::PatternDraw::onPopupBlockPaste( NButtonEvent * ev )
 
 void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
 {
+
+  std::cout << NApp::system().clipBoard().asText() << std::endl;
 
   if(isBlockCopied)
   {
