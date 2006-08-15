@@ -73,7 +73,6 @@ int zipfilestreambuf::underflow( ) // used for input buffer only
 
 int zipfilestreambuf::sync( )
 {
-		std::cout << "here-sync" << std::endl;
     if ( pptr() && pptr() > pbase()) {
         if ( flush_buffer() == EOF)
             return -1;
@@ -86,8 +85,22 @@ int zipfilestreambuf::flush_buffer( )
   // Separate the writing of the buffer from overflow() and
   // sync() operation.
   int w = pptr() - pbase();
-  if (zipwriter_write(f, pbase(), w) != w)
+  
+  int block_size = ZW_BUFSIZE;
+  int blocks = (w / block_size);
+
+  char *buf = pbase();
+
+  for (int i = 0; i < blocks; i++) {		
+    if (zipwriter_write(f, &buf[i*block_size], block_size) == 0)
       return EOF;
+  }
+  int r = w - (blocks*block_size);
+  if (zipwriter_write(f, &buf[blocks*block_size], r) != 0)
+      return EOF;
+
+  std::cout << r << blocks << std::endl;
+
   pbump( -w);
   return w;
 }
