@@ -56,14 +56,17 @@ void zipfilestreambuf::close( )
 
 int zipfilestreambuf::overflow( int c ) // used for output buffer only
 {
+
 	if ( !f )
         return EOF;
     if (c != EOF) {
         *pptr() = c;
         pbump(1);
     }
+
     if ( flush_buffer() == EOF)
         return EOF;
+
     return c;
 }
 
@@ -86,19 +89,10 @@ int zipfilestreambuf::flush_buffer( )
   // sync() operation.
   int w = pptr() - pbase();
   
-  int block_size = ZW_BUFSIZE;
-  int blocks = (w / block_size);
-
-  char *buf = pbase();
-
-  for (int i = 0; i < blocks; i++) {		
-    if (zipwriter_write(f, &buf[i*block_size], block_size) == 0)
-      return EOF;
-  }
-  int r = w - (blocks*block_size);
-  if (zipwriter_write(f, &buf[blocks*block_size], r) != 0)
-      return EOF;
-
+  if (w==0) return EOF;
+ 
+  if (zipwriter_write(f, pbase(), w) == 0) return EOF;
+  
   pbump( -w);
   return w;
 }
