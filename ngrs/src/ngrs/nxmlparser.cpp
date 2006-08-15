@@ -19,9 +19,86 @@
  ***************************************************************************/
 #include "nxmlparser.h"
 #include <iostream>
+#include <xercesc/parsers/SAXParser.hpp>
 #include <xercesc/sax2/Attributes.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
+#include <xercesc/util/OutOfMemoryException.hpp>
 
 XERCES_CPP_NAMESPACE_USE;
+
+#ifndef MEMPARSE_ENCODING
+   #if defined(OS390)
+      #define MEMPARSE_ENCODING "ibm-1047-s390"
+   #elif defined(OS400)
+      #define MEMPARSE_ENCODING "ibm037"
+   #else
+      #define MEMPARSE_ENCODING "ascii"
+   #endif
+#endif /* ifndef MEMPARSE_ENCODING */
+
+// ---------------------------------------------------------------------------
+//  Includes for all the program files to see
+// ---------------------------------------------------------------------------
+#include <string.h>
+#include <stdlib.h>
+#include <xercesc/util/PlatformUtils.hpp>
+
+
+#if defined(XERCES_NEW_IOSTREAMS)
+#include <iostream>
+#else
+#include <iostream.h>
+#endif
+
+
+
+
+// ---------------------------------------------------------------------------
+//  This is a simple class that lets us do easy (though not terribly efficient)
+//  trancoding of XMLCh data to local code page for display.
+// ---------------------------------------------------------------------------
+class StrX
+{
+public :
+    // -----------------------------------------------------------------------
+    //  Constructors and Destructor
+    // -----------------------------------------------------------------------
+    StrX(const XMLCh* const toTranscode)
+    {
+        // Call the private transcoding method
+        fLocalForm = XMLString::transcode(toTranscode);
+    }
+
+    ~StrX()
+    {
+        XMLString::release(&fLocalForm);
+    }
+
+
+    // -----------------------------------------------------------------------
+    //  Getter methods
+    // -----------------------------------------------------------------------
+    const char* localForm() const
+    {
+        return fLocalForm;
+    }
+
+
+private :
+    // -----------------------------------------------------------------------
+    //  Private data members
+    //
+    //  fLocalForm
+    //      This is the local code page form of the string.
+    // -----------------------------------------------------------------------
+    char*   fLocalForm;
+};
+
+inline XERCES_STD_QUALIFIER ostream& operator<<(XERCES_STD_QUALIFIER ostream& target, const StrX& toDump)
+{
+    target << toDump.localForm();
+    return target;
+}
 
 
 class SAX2Handler : public DefaultHandler {
@@ -154,4 +231,74 @@ std::string NXmlParser::getAttribValue( const std::string & name )
            return "";
        }
       return erg;
+}
+
+int NXmlParser::parseString( const std::string & text )
+{
+
+  try {
+    XMLPlatformUtils::Initialize();
+  }
+  catch (const XMLException& toCatch) {
+     char* message = XMLString::transcode(toCatch.getMessage());
+     std::cout << "xml parse error: Exception message is: \n"
+                 << message << "\n";
+     XMLString::release(&message);
+  }
+
+
+  SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+  SAX2Handler defaultHandler;
+  defaultHandler.setParser(this);
+  parser->setContentHandler(&defaultHandler);
+  parser->setErrorHandler(&defaultHandler);
+
+  const char* gMemBufId = "textparse";
+
+  MemBufInputSource* memBufIS = new MemBufInputSource
+  (
+        (const XMLByte*)text.c_str()
+        , strlen(text.c_str())
+        , gMemBufId
+        , false
+  );
+
+  std::cout << "hejdslkj" << std::endl;
+
+  int errorCount = 0;
+  int errorCode = 0;
+  try
+    {
+        parser->parse(*memBufIS);
+        const unsigned long endMillis = XMLPlatformUtils::getCurrentMillis();
+        errorCount = parser->getErrorCount();
+    }
+    catch (const OutOfMemoryException&)
+    {
+        XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
+        errorCode = 5;
+    }
+    catch (const XMLException& e)
+    {
+        XERCES_STD_QUALIFIER cerr << "\nError during parsing memory stream:\n"
+             << "Exception message is:  \n"
+             << StrX(e.getMessage()) << "\n" << XERCES_STD_QUALIFIER endl;
+        errorCode = 4;
+    }
+    if(errorCode) {
+        XMLPlatformUtils::Terminate();
+        return errorCode;
+    }
+
+   delete parser;
+
+   delete memBufIS;
+
+   // And call the termination method
+   XMLPlatformUtils::Terminate();
+
+   if (errorCount > 0)
+        return 4;
+   else
+        return 0;
 }

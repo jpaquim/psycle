@@ -57,6 +57,7 @@
 #include <ngrs/ncolorcombobox.h>
 #include <ngrs/nobjectinspector.h>
 #include <ngrs/nproperty.h>
+#include <ngrs/nxmlparser.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -72,6 +73,12 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
+
+  NXmlParser parser;
+
+  std::string text = "<hallo></hallo>";
+
+  parser.parseString(text);
 
   NApp::system().clipBoard().setAsText("Hallo");
 
