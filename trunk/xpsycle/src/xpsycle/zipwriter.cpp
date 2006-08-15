@@ -455,7 +455,7 @@ static void _zm_deflate_finish(zipwriter_file *f)
 	}
 }
 
-void zipwriter_copy(int in, zipwriter_file *out) 
+static void zipwriter_copy(int in, zipwriter_file *out) 
 {
 	char buffer[65536];
 	int r, j;
