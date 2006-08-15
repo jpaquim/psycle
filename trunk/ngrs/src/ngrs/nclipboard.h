@@ -20,14 +20,42 @@
 #ifndef NCLIPBOARD_H
 #define NCLIPBOARD_H
 
+#include <string>
+#include <vector>
+
 /**
 @author Stefan Nattkemper
 */
+
+const unsigned char CF_TEXT = 1;
+
+
 class NClipBoard{
+
+class ClipBoardData : public std::vector<unsigned char> {
+
+public :
+
+  ClipBoardData();
+  ~ClipBoardData();
+
+  void setFormat( unsigned char format);
+  unsigned char format( ) const;
+
+};
+
+
 public:
     NClipBoard();
 
     ~NClipBoard();
+
+    void setAsText( const std::string & text );
+    std::string asText() const;
+
+private:
+
+    ClipBoardData data_;
 
 };
 

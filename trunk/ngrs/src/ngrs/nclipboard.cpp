@@ -19,6 +19,35 @@
  ***************************************************************************/
 #include "nclipboard.h"
 
+// clipboard data class
+
+NClipBoard::ClipBoardData::ClipBoardData( )
+{
+}
+
+NClipBoard::ClipBoardData::~ ClipBoardData( )
+{
+}
+
+void NClipBoard::ClipBoardData::setFormat( unsigned char format )
+{
+  if ( size() == 0 ) {
+    push_back(format);
+  } else {
+    (*this)[0] = format;
+  }
+}
+
+unsigned char NClipBoard::ClipBoardData::format( ) const
+{
+  if ( size() == 0 )
+    return 0;
+  else
+    return *begin();
+}
+
+// start clipboard
+
 NClipBoard::NClipBoard()
 {
 }
@@ -28,4 +57,24 @@ NClipBoard::~NClipBoard()
 {
 }
 
+void NClipBoard::setAsText( const std::string & text )
+{
+  data_.setFormat( CF_TEXT );
 
+  std::string::const_iterator it = text.begin();
+  for ( ; it != text.end(); it++) {
+    data_.push_back(*it);
+  }
+
+  data_.push_back(0);
+}
+
+std::string NClipBoard::asText( ) const
+{
+  std::string text = "";
+  if (data_.format() == CF_TEXT) {
+     text = std::string( (const char*) &data_[1] );
+  }
+
+  return text;
+}

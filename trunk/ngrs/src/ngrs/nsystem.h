@@ -24,6 +24,7 @@
 #include "nfont.h"
 #include "nfontstructure.h"
 #include "color_converter.hpp"
+#include "nclipboard.h"
 #include "mwm.h"
 
 #include <X11/Xlib.h>
@@ -86,6 +87,9 @@ public:
 
     const NAtoms & atoms() const;
 
+    NClipBoard & clipBoard();
+    const NClipBoard & clipBoard() const;
+
 private:
 
     NAtoms* atoms_;
@@ -116,6 +120,8 @@ private:
     static std::string fontPattern(const NFont & font);
     static char ** getFontList(Display* dpy, std::string pattern, int* count);
     static std::string getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size);
+
+    NClipBoard clipBoard_;
 };
 
 #endif
