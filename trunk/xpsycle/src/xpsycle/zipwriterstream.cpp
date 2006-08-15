@@ -99,8 +99,6 @@ int zipfilestreambuf::flush_buffer( )
   if (zipwriter_write(f, &buf[blocks*block_size], r) != 0)
       return EOF;
 
-  std::cout << r << blocks << std::endl;
-
   pbump( -w);
   return w;
 }
