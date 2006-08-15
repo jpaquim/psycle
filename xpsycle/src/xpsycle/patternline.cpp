@@ -48,6 +48,26 @@ namespace psycle
 			return xml.str();
 		}
 
+		std::string PatternLine::toXml( float pos, int startTrack, int endTrack ) const
+		{
+			if ( startTrack > endTrack ) return "";
+
+			std::ostringstream xml;
+			const_iterator it =  lower_bound(startTrack);
+			if ( it == end() ) return "";
+
+			xml << "<patline pos='" << pos << "'>" << std::endl;
+			for ( ; it != end() ; it++ ) {
+				int trackNumber = it->first;
+				if (trackNumber>endTrack) break;
+				const PatternEvent & event = it->second;
+				xml << event.toXml( trackNumber );
+			}
+			xml << "</patline>" << std::endl;
+			return xml.str();
+		}
+
+
 		void PatternLine::setSequenceTrack( int track )
 		{
 			 sequencerTrack_ = track;

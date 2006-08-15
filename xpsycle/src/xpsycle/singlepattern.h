@@ -73,6 +73,7 @@ namespace psycle
 			float beatsPerLine() const;
 			SinglePattern::iterator find_nearest( int linenr );
 			SinglePattern::iterator find_lower_nearest( int linenr );
+			SinglePattern::const_iterator find_lower_nearest( int linenr ) const;
 //			const_iterator find_nearest( float value ) const;
 
 			void clearEmptyLines();
@@ -87,6 +88,7 @@ namespace psycle
 			const std::vector<TimeSignature> &  timeSignatures() const;
 
 			std::string toXml() const;
+			std::string toXml( int startTrack, int endTrack, int startLine, int endLine) const;
 
 		private:
 

@@ -343,6 +343,27 @@ namespace psycle
 			return xml.str();
 		}
 
+		std::string SinglePattern::toXml( int startTrack, int endTrack, int startLine, int endLine ) const
+		{
+			// this is without timesignature
+
+      SinglePattern::const_iterator it = find_lower_nearest(startLine);
+			if ( it == end() ) return "";
+
+      std::ostringstream xml;
+			xml << "<pattern name='" << name() << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
+
+			for (  ; it != end() ; it++ ) {
+				float beatPos = it->first;
+				const PatternLine & line = it->second;
+				if ( (int) ( beatPos * beatZoom() + 0.5 ) > endLine ) break;
+				xml << line.toXml( beatPos ,  startTrack, endTrack);
+			}
+			xml << "</pattern>" << std::endl;
+			return xml.str();
+		}
+
+
 		SinglePattern::iterator SinglePattern::find_nearest( int line )
 		{
 			SinglePattern::iterator result;
@@ -378,6 +399,24 @@ namespace psycle
 			return end();
 		};
 
+		SinglePattern::const_iterator SinglePattern::find_lower_nearest( int linenr ) const
+		{
+			SinglePattern::const_iterator result;
+			// first check if we have a line
+			result = find( linenr / (float) beatZoom()  );
+			if ( result != end() ) return result;
+
+			double low = (linenr - 0.5) / (float) beatZoom();
+			double up  = (linenr + 0.5) / (float) beatZoom();
+
+			result = lower_bound( low );
+
+			if ( result != end() && result->first >=low ) {
+				return result;
+			}
+			return end();
+		}
+
 		void SinglePattern::setEvent( int line, int track, const PatternEvent & event ) {
 			iterator it = find_nearest( line );
 			if ( it != end())
@@ -399,6 +438,9 @@ namespace psycle
 
 	}
 }
+
+
+
 
 
 

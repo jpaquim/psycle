@@ -21,8 +21,14 @@
 #define ZIPWRITERSTREAM_H
 
 #include <iostream>
+#include <ostream>
 #include <fstream>
+#include <sstream>
 
+
+#ifndef ZW_BUFSIZE
+#define ZW_BUFSIZE 65536
+#endif
 
 class zipwriter_file;
 class zipwriter;
@@ -30,6 +36,7 @@ class zipwriter;
 /**
 @author Stefan Nattkemper
 */
+
 
 class zipfilestreambuf : public std::streambuf {
 
@@ -85,5 +92,7 @@ public:
  
 
 };
+
+
 
 #endif
