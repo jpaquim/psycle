@@ -50,7 +50,7 @@ public :
 
 private:
 
-		static const int bufferSize = 10*65335 ;    // size of data buff
+		static const int bufferSize = 1024 ;    // size of data buff
 		char             buffer[bufferSize]; // data buffer
 
 		zipwriter_file *f;
