@@ -1505,6 +1505,7 @@ void PatternView::PatternDraw::onPopupBlockCut( NButtonEvent * ev )
 
 void PatternView::PatternDraw::copyBlock( bool cutit )
 {
+  
   // UNDO CODE HERE CUT
   //if(blockSelected)
   {
