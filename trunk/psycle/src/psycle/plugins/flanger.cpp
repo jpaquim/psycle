@@ -7,6 +7,7 @@
 #include <psycle/helpers/math/remainder.hpp>
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cassert>
+#include <vector>
 namespace psycle { namespace plugin {
 
 namespace math = common::math;
