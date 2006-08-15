@@ -72,6 +72,11 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
+
+  NApp::system().clipBoard().setAsText("Hallo");
+
+  std::cout << NApp::system().clipBoard().asText() << std::endl;
+
   /*
   NObjectInspector* ins = new NObjectInspector();
     ins->setPosition(10,10,200,200);

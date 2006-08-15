@@ -591,4 +591,14 @@ void NSystem::setFocus( NWindow* window )
   }
 }
 
+NClipBoard & NSystem::clipBoard( )
+{
+  return clipBoard_;
+}
+
+const NClipBoard & NSystem::clipBoard( ) const
+{
+  return clipBoard_;
+}
+
 
