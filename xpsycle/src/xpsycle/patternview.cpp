@@ -1582,7 +1582,11 @@ void PatternView::PatternDraw::onPopupBlockPaste( NButtonEvent * ev )
 
 void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
 {
-
+  if ( NApp::system().clipBoard().asText() != "" ) {
+    NXmlParser parser;
+    parser.tagParse.connect(this, &PatternView::PatternDraw::onTagParse);
+    parser.parseString( NApp::system().clipBoard().asText() );
+  }
   std::cout << NApp::system().clipBoard().asText() << std::endl;
 
   if(isBlockCopied)
@@ -2245,6 +2249,13 @@ void psycle::host::PatternView::onPatternStepChange( NItemEvent * ev )
   if (patternCombo_->selIndex()!=-1) {
       setPatternStep(patternCombo_->selIndex()+1);
   }
+}
+
+void psycle::host::PatternView::PatternDraw::onTagParse( const std::string & tagName  )
+{
+  if (tagName == "patternsel") {
+     std::cout << "yeah" << std::endl;
+	}
 }
 
 

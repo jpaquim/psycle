@@ -28,6 +28,7 @@
 #include <ngrs/npoint3d.h>
 #include <ngrs/npopupmenu.h>
 #include <ngrs/nscrollbar.h>
+#include <ngrs/nxmlparser.h>
 #include <map>
 
 /**
@@ -181,6 +182,8 @@ class PatternView : public NPanel
       unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
       int blockNTracks;
       int blockNLines;
+
+      void onTagParse( const std::string & tagName );
     };
 
 public:
@@ -267,6 +270,7 @@ private:
 
   Song* _pSong;
   SinglePattern* pattern_;
+  NXmlParser xmlParser;
 
   int editPosition_, prevEditPosition_;
   int playPos_;
@@ -312,6 +316,7 @@ private:
   void onOctaveChange(NItemEvent* ev);
   void onTrackChange(NItemEvent* ev);
 
+  
 };
 
 
