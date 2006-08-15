@@ -35,7 +35,7 @@ class mi : public CMachineInterface
 {
 public:
 	void InitWaveTable();
-	void mi::updateOsc(int osc);
+	void updateOsc(int osc);
 	mi();
 	virtual ~mi();
 
