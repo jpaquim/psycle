@@ -36,12 +36,14 @@ zipfilestreambuf::~ zipfilestreambuf( )
 {
 }
 
-zipfilestreambuf * zipfilestreambuf::open( zipwriter * writer, const char * name )
+zipfilestreambuf * zipfilestreambuf::open( zipwriter * writer, const char * name , int compression)
 {
   if (!open_) {
     z = writer;
-    f = zipwriter_addfile(z, name, 9);
-    open_ = 1;
+    f = zipwriter_addfile(z, name, compression );
+		if (f) {
+			open_ = 1;
+		}
   }
   return this;
 }
@@ -108,10 +110,10 @@ zipfilestreambase::zipfilestreambase( )
    init( &buf);
 }
 
-zipfilestreambase::zipfilestreambase(  zipwriter *z, const char * name )
+zipfilestreambase::zipfilestreambase(  zipwriter *z, const char * name , int compression)
 {
 	init( &buf);
-	if ( ! buf.open( z, name))
+	if ( ! buf.open( z, name, compression))
         clear( rdstate() | std::ios::badbit);
 }
 
@@ -131,8 +133,8 @@ zipwriterfilestream::~ zipwriterfilestream( )
 {
 }
 
-zipwriterfilestream::zipwriterfilestream( zipwriter * z, const char * name )
-	: zipfilestreambase( z, name), std::ostream( &buf)
+zipwriterfilestream::zipwriterfilestream( zipwriter * z, const char * name , int compression)
+	: zipfilestreambase( z, name, compression), std::ostream( &buf)
 {}
 
 

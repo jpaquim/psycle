@@ -37,7 +37,7 @@ public :
 
 		zipfilestreambuf();
 
-		zipfilestreambuf* open(  zipwriter *writer, const char* name);
+		zipfilestreambuf* open(  zipwriter *writer, const char* name, int compression);
 
     void close();
 
@@ -70,7 +70,7 @@ protected:
 public:
 
 		zipfilestreambase();
-		zipfilestreambase(  zipwriter *z, const char* name);
+		zipfilestreambase(  zipwriter *z, const char* name, int compression);
 		~zipfilestreambase();
 
 		void close();
@@ -79,7 +79,7 @@ public:
 
 class zipwriterfilestream : public zipfilestreambase, public std::ostream {
 public:
-		zipwriterfilestream( zipwriter *z, const char* name );
+		zipwriterfilestream( zipwriter *z, const char* name, int compression = 9);
 
 		~zipwriterfilestream();
  
