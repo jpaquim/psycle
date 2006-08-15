@@ -43,6 +43,8 @@ public:
     static void cdHome();
     static std::string replaceTilde(const std::string & path);
     static std::string env(const std::string & envName);
+    static std::string extractFileNameFromPath(const std::string & fileName);
+
 };
 
 #endif

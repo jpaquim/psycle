@@ -206,3 +206,15 @@ std::string NFile::env( const std::string & envName )
     }
   #endif
 }
+
+std::string NFile::extractFileNameFromPath(const std::string & fileName) {
+  std::string fileWithoutPathName = "";
+
+  int i = fileName.rfind("/");
+
+  if (i != std::string::npos  &&  i != fileName.length() - 1 ) {
+     fileWithoutPathName = fileName.substr(i+1);
+  }
+
+  return fileWithoutPathName;
+}
