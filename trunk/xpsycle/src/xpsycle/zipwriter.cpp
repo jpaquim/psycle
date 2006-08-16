@@ -37,8 +37,6 @@ static void _zm_deflate_start(zipwriter_file *f);
 static void _zm_deflate_chunk(zipwriter_file *f, const void *buf, unsigned int len);
 static void _zm_deflate_finish(zipwriter_file *f);
 
-
-
 static zipwriter_method zm_store = { ZIPWRITER_STORE, 0, _zm_store_chunk, 0 };
 static zipwriter_method zm_deflate = { ZIPWRITER_DEFLATE,
 		_zm_deflate_start, _zm_deflate_chunk, _zm_deflate_finish };
@@ -51,10 +49,10 @@ zipwriter *zipwriter_start(int outfd)
 	if (outfd == -1) return 0;
 	if (lseek(outfd, 0, SEEK_SET) != 0) return 0;
 
-	z = (zipwriter*) malloc(sizeof(zipwriter));
+	z = (zipwriter*)malloc(sizeof(zipwriter));
 	if (!z) return 0;
 
-	z->compressor_state[0] = malloc(sizeof(z_stream));
+	z->compressor_state[0] = (void*)malloc(sizeof(z_stream));
 	if (!z->compressor_state[0]) {
 		free(z);
 		return 0;
@@ -73,7 +71,7 @@ void zipwriter_comment(zipwriter *z, const void *buf, size_t length)
 	if (!z || z->err) return;
 	free(z->tail);
 	z->comment_length = length;
-	z->tail = (unsigned char*) malloc(length + 22);
+	z->tail = (unsigned char *)malloc(length + 22);
 	if (!z->tail) {
 		z->err = errno;
 		return;
@@ -92,18 +90,18 @@ zipwriter_file *zipwriter_addfile(zipwriter *d, const char *name,
 
 	_zw_tail(d);
 
-	f = (zipwriter_file*) malloc(sizeof(zipwriter_file));
+	f = (zipwriter_file*)malloc(sizeof(zipwriter_file));
 	if (!f) {
 		d->err = errno;
 		return 0;
 	}
-	f->head = (unsigned char*) malloc(strlen(name)+30);
+	f->head = (unsigned char *)malloc(strlen(name)+30);
 	if (!f->head) {
 		d->err = errno;
 		free(f);
 		return 0;
 	}
-	f->head2 = (unsigned char*)malloc(strlen(name)+46);
+	f->head2 = (unsigned char *)malloc(strlen(name)+46);
 	if (!f->head2) {
 		d->err = errno;
 		free(f->head);
@@ -112,7 +110,7 @@ zipwriter_file *zipwriter_addfile(zipwriter *d, const char *name,
 	}
 
 	memcpy(f->head2, "PK\1\2"
-		"\027\03"	/* 4 made by version */
+		"\027\00"	/* 4 made by version */
 		"\012\00"	/* 6 version needed to extract */
 		"\0\0"		/* 8 general purpose bit flag */
 		"\1\1"		/* 10 compression method */
@@ -198,7 +196,7 @@ int zipwriter_write(zipwriter_file *f, const void *buf, size_t len)
 {
 	if (!f || (f->top && f->top->err)) return 0;
 
-	f->crc32 = crc32( f->crc32,(const Bytef*) buf, len);
+	f->crc32 = crc32(f->crc32, (const unsigned char *)buf, len);
 	f->len += len;
 
 	if (f->proc->chunk) f->proc->chunk(f, buf, len);
@@ -344,6 +342,9 @@ static void _zw_tail(zipwriter *d)
 	/* copy head options */
 	memcpy(f->head2+8, f->head+6, 24);
 
+	/* ascii? */
+	if (f->flags & ZIPWRITER_FILE_TEXT) f->head2[36] |= 1;
+
 	/* local offset */
 	dt = f->head_off;
 	f->head2[42] = dt & 255; 
@@ -401,7 +402,7 @@ static void _zm_deflate_chunk(zipwriter_file *f, const void *buf, unsigned int l
 {
 	z_stream *s = (z_stream *)f->top->compressor_state[0];
 
-	s->next_in = (Bytef*)buf;
+	s->next_in = (unsigned char *)buf;
 	s->avail_in = len;
 
 CONT:	if (s->avail_out == 0) {

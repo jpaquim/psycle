@@ -76,7 +76,7 @@ namespace psycle {
 			return isPsy4;
 		}
 
-		void Psy4Filter::onDetectFilterTag( const std::string & tagName )
+		void Psy4Filter::onDetectFilterTag( const NXmlParser & parser, const std::string & tagName )
 		{
 			if (tagName == "psy4") isPsy4 = true;
 		}
@@ -237,7 +237,7 @@ namespace psycle {
 			return isPsy4;
 		}
 
-		void Psy4Filter::onTagParse( const std::string & tagName )
+		void Psy4Filter::onTagParse(const NXmlParser & parser, const std::string & tagName )
 		{
 			if (tagName == "category") {
 				std::string catName = parser.getAttribValue(tagName);

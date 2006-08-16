@@ -41,7 +41,6 @@ namespace psycle
 			int sequenceTrack() const;
 
 			std::string toXml( float pos ) const;
-			std::string toXml( float pos , int startTrack, int endTrack) const;
 
 		private:
 

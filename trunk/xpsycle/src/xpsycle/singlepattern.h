@@ -88,7 +88,13 @@ namespace psycle
 			const std::vector<TimeSignature> &  timeSignatures() const;
 
 			std::string toXml() const;
-			std::string toXml( int startTrack, int endTrack, int startLine, int endLine) const;
+
+			SinglePattern block( int left, int right, int top, int bottom );
+			void copyBlock(int left, int top, const SinglePattern & pattern);
+			void mixBlock(int left, int top, const SinglePattern & pattern);
+
+			void deleteBlock( int left, int right, int top, int bottom );
+
 
 		private:
 

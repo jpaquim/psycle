@@ -177,13 +177,10 @@ class PatternView : public NPanel
       void onPopupTranspose_12(NButtonEvent* ev);
       void onPopupPattern(NButtonEvent* ev);
 
-      SinglePattern clipboard;
+			SinglePattern pasteBuffer;
+      void onTagParse( const NXmlParser & parser, const std::string & tagName );
+      float lastXmlLineBeatPos;
 
-      unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
-      int blockNTracks;
-      int blockNLines;
-
-      void onTagParse( const std::string & tagName );
     };
 
 public:
