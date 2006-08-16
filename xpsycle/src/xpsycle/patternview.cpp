@@ -1519,9 +1519,20 @@ void PatternView::PatternDraw::onPopupBlockCut( NButtonEvent * ev )
 void PatternView::PatternDraw::copyBlock( bool cutit )
 {  
 	isBlockCopied=true;
+	pasteBuffer.clear();
 	SinglePattern copyPattern = pView->pattern()->block( selection_.left(), selection_.right(), selection_.top(), selection_.bottom() );
+	
+	float start = selection_.top()    / (float) pView->pattern()->beatZoom();
+	float end   = selection_.bottom() / (float) pView->pattern()->beatZoom();
 
-	NApp::system().clipBoard().setAsText( copyPattern.toXml() );
+  std::string xml = "<patsel beats='" + stringify( end - start ); 
+	xml+= "' tracks='"+ stringify( selection_.right() - selection_.left() );
+	xml+= "'>"; 
+	xml+= copyPattern.toXml();
+  xml+= "</patsel>";
+
+	NApp::system().clipBoard().setAsText( xml );
+
 
 	if (cutit) {
 		pView->pattern()->deleteBlock( selection_.left(), selection_.right(), selection_.top(), selection_.bottom() );
@@ -1566,9 +1577,15 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
   if ( NApp::system().clipBoard().asText() != "" ) {
     NXmlParser parser;
 		lastXmlLineBeatPos = 0.0;
+		xmlTracks = 0;
+		xmlBeats = 0;
     parser.tagParse.connect(this, &PatternView::PatternDraw::onTagParse);
     parser.parseString( NApp::system().clipBoard().asText() );
-		
+	
+		if (!mix)
+			pView->pattern()->copyBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
+		else
+			pView->pattern()->mixBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
   }
 }
 
@@ -1783,23 +1800,7 @@ int PatternView::eventLength(int event) const {
 }
 
 void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
-{/*
-  int patNum = Global::pSong()->playOrder[pView->editPosition()];
-  int nlines = Global::pSong()->patternLines[patNum];
-
-  patDlg->setLineNumber(nlines);
-  if (patDlg->execute()) {
-
-    if ( nlines != patDlg->lineNumber() ) {
-      //AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-      //AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-      Global::pSong()->AllocNewPattern(patNum,"",patDlg->lineNumber(),patDlg->adaptSize()?true:false);
-      if (pView->cursor().y() > patDlg->lineNumber()) pView->setCursor(NPoint3D(pView->cursor().x(),patDlg->lineNumber()-1,pView->cursor().z()));
-      int count = (clientHeight()-pView->headerHeight()) / pView->rowHeight();
-      pView->vBar->setRange((pView->lineNumber()-1-count)*pView->rowHeight());
-      repaint();
-    }
-  }*/
+{
 }
 
 void PatternView::PatternDraw::onPopupTranspose1( NButtonEvent * ev )
@@ -2085,6 +2086,12 @@ void psycle::host::PatternView::onPatternStepChange( NItemEvent * ev )
 
 void psycle::host::PatternView::PatternDraw::onTagParse( const NXmlParser & parser, const std::string & tagName  )
 {
+	if (tagName == "patsel") {
+		xmlTracks = str<int>   (parser.getAttribValue("tracks"));
+		xmlBeats = str<float> (parser.getAttribValue("beats"));
+		std::cout << "tracks:" << xmlTracks << std::endl;
+		std::cout << "beats:" << xmlBeats << std::endl;
+	} else
   if (tagName == "patline") {
 			lastXmlLineBeatPos = str<float> (parser.getAttribValue("pos"));     
 	} else
@@ -2098,7 +2105,6 @@ void psycle::host::PatternView::PatternDraw::onTagParse( const NXmlParser & pars
 		data.setParameter( str_hex<int> (parser.getAttribValue("param")) );
 		data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
 
-		float pasteStartPos = pView->cursor().y() / (float) pView->pattern()->beatZoom();
-		(*pView->pattern())[pasteStartPos+lastXmlLineBeatPos][pView->cursor().x()+trackNumber]=data;
+		pasteBuffer[lastXmlLineBeatPos][trackNumber]=data;
 	}
 }

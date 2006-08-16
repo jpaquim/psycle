@@ -445,23 +445,35 @@ namespace psycle
 			return newPattern;
 		}
 
-		void SinglePattern::copyBlock(int left, int top, const SinglePattern & pattern) {
-			
+		void SinglePattern::copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats) {			
+			float pasteStartPos = top / (float) beatZoom();
+			deleteBlock(left,left+tracks, pasteStartPos, pasteStartPos+ maxBeats);
+			for( SinglePattern::const_iterator lineIt = pattern.begin()
+					; lineIt != pattern.end() && lineIt->first < maxBeats; ++lineIt )
+			{
+				const PatternLine & line = lineIt->second;
+				for( PatternLine::const_iterator entryIt = line.begin()
+	          ; entryIt != line.end() && entryIt->first <= tracks
+	          ; entryIt++ )
+				{
+				(*this)[pasteStartPos+lineIt->first][left+entryIt->first]=entryIt->second;
+				}
+			}
 		}
 
-		void SinglePattern::mixBlock(int left, int top, const SinglePattern & pattern) {
-			/*int pasteStartPos = (int) ( top / (float) beatZoom() );
-			for( SinglePattern::const_iterator lineIt;
-					; lineIt != end() ; ++lineIt )
+		void SinglePattern::mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats) {
+			float pasteStartPos =  top / (float) beatZoom() ;
+			for( SinglePattern::const_iterator lineIt = pattern.begin()
+					; lineIt != pattern.end() && lineIt->first < maxBeats; ++lineIt )
 			{
-				PatternLine & line = lineIt->second;
-				for( PatternLine::iterator entryIt = line.lower_bound( left )
-	          ; entryIt != line.end()
-	          ; )
+				const PatternLine & line = lineIt->second;
+				for( PatternLine::const_iterator entryIt = line.begin()
+	          ; entryIt != line.end() && entryIt->first <= tracks
+	          ; entryIt++ )
 				{
-				(this*)[pasteStartPos+lineIt->first][left+trackNumber]=data;
+				(*this)[pasteStartPos+lineIt->first][left+entryIt->first]=entryIt->second;
 				}
-			}*/
+			}
 		}
 
 		void SinglePattern::deleteBlock( int left, int right, int top, int bottom )
