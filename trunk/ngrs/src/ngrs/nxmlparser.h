@@ -40,11 +40,11 @@ public:
 
     ~NXmlParser();
 
-    sigslot::signal1<const std::string &> tagParse;
+    sigslot::signal2< const NXmlParser &, const std::string & > tagParse;
 
     void parseFile(const std::string & fileName);
     int parseString( const std::string & text );
-    std::string getAttribValue(const std::string & name);
+    std::string getAttribValue(const std::string & name) const;
 
     const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
 

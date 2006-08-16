@@ -59,6 +59,7 @@ NClipBoard::~NClipBoard()
 
 void NClipBoard::setAsText( const std::string & text )
 {
+  data_.clear();
   data_.setFormat( CF_TEXT );
 
   std::string::const_iterator it = text.begin();
