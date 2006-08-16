@@ -102,6 +102,15 @@ class PatternView : public NPanel
     };
 
 
+		class TweakHeader : public NPanel {
+			public:
+
+				TweakHeader();
+
+				~TweakHeader();
+
+		};
+
 		class TweakGUI : public NPanel {
 		public:
 				TweakGUI( PatternView* pPatternView);

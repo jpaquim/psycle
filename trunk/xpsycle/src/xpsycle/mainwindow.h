@@ -73,11 +73,13 @@ private:
 
     Song* selectedSong_;
 
+
     bool noFileWasYetLoaded;
 
     ChildView* childView_;
     NWindow* songpDlg_;
     NTabBook* tabBook_;
+		
     SequencerBar* sequencerBar_;
     NPanel* toolBarPanel_;
         NButton* barPlayFromStartBtn_;
@@ -214,6 +216,10 @@ private:
     void onSequencerEntryClick( SequencerItem* item);
 
     void onMachineSelected( Machine* mac );
+
+		void onCloseSongTabPressed( NButtonEvent* ev );
+
+		std::map<NObject*, NPanel*> songMap;
 
 };
 
