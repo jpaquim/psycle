@@ -101,6 +101,19 @@ class PatternView : public NPanel
       int dy_;
     };
 
+
+		class TweakGUI : public NPanel {
+		public:
+				TweakGUI( PatternView* pPatternView);
+
+				~TweakGUI();
+		private:
+
+				PatternView* pView;
+				int preferredWidth() const;
+			
+		};
+
     class PatternDraw : public NPanel {
     public:
       PatternDraw(PatternView* pPatternView);
@@ -279,7 +292,9 @@ private:
   bool moveCursorWhenPaste_;
 
   NPoint3D cursor_;
+
   PatternDraw* drawArea;
+	TweakGUI* tweakGUI;
 
   NScrollBar* hBar;
   ZoomBar* zoomHBar;

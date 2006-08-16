@@ -114,7 +114,9 @@ NewMachine::~NewMachine()
 
 int NewMachine::onClose( )
 {
+	do_Execute = false;
   setVisible(false);
+  setExitLoop(nDestroyWindow);
 }
 
 void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
