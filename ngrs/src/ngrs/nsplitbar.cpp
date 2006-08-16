@@ -42,7 +42,9 @@ NSplitBar::~NSplitBar()
 void NSplitBar::init( )
 {
   setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
-  setPreferredSize(3,3);
+  setPreferredSize(5,5);
+  setMinimumWidth(1);
+  setMinimumHeight(1);
   skin_ = NApp::config()->skin("splitbar");
 }
 
@@ -56,16 +58,23 @@ void NSplitBar::onMove( const NMoveEvent & moveEvent )
 
     itr = find(p->visualComponents().begin(),p->visualComponents().end(),this);
 
+
+    if ( align() == nAlRight ) {
+        itr--;
+        if (itr != p->visualComponents().end() ) {
+          NVisualComponent* rightVc = *itr;
+          rightVc->setPreferredSize( std::max( rightVc->width() - ( left() + width() - rightVc->left() ), rightVc->minimumWidth()), rightVc->height() );
+          p->resize();
+          p->repaint();
+        }
+    } else
     if (itr > p->visualComponents().begin()) {
       itr--;
       leftVc = *itr;
-    }
-
-    if (leftVc!=0) {
       leftVc->setPreferredSize( left() - leftVc->left(), leftVc->height());
       p->resize();
       p->repaint();
-    }
+     }
   } else
   if (orientation_ == nHorizontal) {
     NVisualComponent* topVc = 0;
@@ -93,7 +102,7 @@ void NSplitBar::setOrientation( int orientation )
 {
   setGradientOrientation(!orientation);
   orientation_ = orientation;
-  setPreferredSize(3,3);
+  setPreferredSize(5,5);
   if (orientation == nVertical) {
      setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
   } else
