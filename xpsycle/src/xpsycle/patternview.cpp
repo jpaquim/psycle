@@ -39,6 +39,7 @@
 #include <ngrs/nitemevent.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nsystem.h>
+#include <ngrs/nsplitbar.h>
 
 namespace psycle { namespace host {
 
@@ -62,20 +63,6 @@ PatternView::PatternView( Song* song )
 
   setLayout(NAlignLayout());
 
-  // hbar with beat zoom
-  NPanel* hBarPanel = new NPanel();
-    hBarPanel->setLayout( NAlignLayout() );
-    zoomHBar = new ZoomBar();
-    zoomHBar->setRange(1,100);
-    zoomHBar->setPos(4);
-    zoomHBar->posChanged.connect(this, &PatternView::onZoomHBarPosChanged);
-    hBarPanel->add(zoomHBar, nAlRight);
-    hBar = new NScrollBar();
-      hBar->setOrientation(nHorizontal);
-      hBar->setPreferredSize(100,15);
-      hBar->posChange.connect(this,&PatternView::onHScrollBar);
-    hBarPanel->add(hBar, nAlClient);
-  add(hBarPanel, nAlBottom);
 
   vBar = new NScrollBar();
     vBar->setWidth(15);
@@ -87,12 +74,44 @@ PatternView::PatternView( Song* song )
   add(toolBar = new NToolBar() ,nAlTop);
   initToolBar();
 
+
   // create the left linenumber panel
   add(lineNumber_ = new LineNumber(this), nAlLeft);
-  // create the headertrack panel
-  add(header      = new Header(this), nAlTop);
-  // create the pattern panel
-  add(drawArea    = new PatternDraw(this), nAlClient);
+	
+	
+
+	// sub group tweaker and patterndraw
+	NPanel* drawGroup = new NPanel();
+		drawGroup->setLayout( NAlignLayout() );
+		// create tweak gui
+		drawGroup->add(tweakGUI = new TweakGUI(this), nAlRight);
+		// splitbar
+		drawGroup->add( new NSplitBar(), nAlRight);
+  	// create the pattern panel
+		NPanel* subGroup = new NPanel();
+			subGroup->setLayout( NAlignLayout() );
+      // create the headertrack panel
+      subGroup->add(header      = new Header(this), nAlTop);
+			// hbar with beat zoom
+  		NPanel* hBarPanel = new NPanel();
+    		hBarPanel->setLayout( NAlignLayout() );
+    		zoomHBar = new ZoomBar();
+    		zoomHBar->setRange(1,100);
+    		zoomHBar->setPos(4);
+    		zoomHBar->posChanged.connect(this, &PatternView::onZoomHBarPosChanged);
+    		hBarPanel->add(zoomHBar, nAlRight);
+    		hBar = new NScrollBar();
+      		hBar->setOrientation(nHorizontal);
+      		hBar->setPreferredSize(100,15);
+      		hBar->posChange.connect(this,&PatternView::onHScrollBar);
+    		hBarPanel->add(hBar, nAlClient);
+  		subGroup->add(hBarPanel, nAlBottom);
+      // create the drawArea
+      subGroup->add(drawArea    = new PatternDraw(this), nAlClient);
+    drawGroup->add( subGroup, nAlClient );
+	
+	add(drawGroup, nAlClient);
+	
 
   setFont(NFont("System",8,nMedium | nStraight ));
 
@@ -716,8 +735,18 @@ int PatternView::Header::skinColWidth( )
 
 
 
+PatternView::TweakGUI::TweakGUI( PatternView* pPatternView) {
+	pView = pPatternView;
+}
 
+PatternView::TweakGUI::~TweakGUI() {
 
+}
+
+int PatternView::TweakGUI::preferredWidth() const {
+	if ( ownerSize() ) return NVisualComponent::preferredWidth();
+	return 20;
+}
 
 
 
@@ -1067,6 +1096,7 @@ void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 {
  ///\todo: Verify the correct usage of InputHandler->getEnumCodeByKey, concretely in relation to StateMasks.
+  if ( !pView->pattern() ) return;
 
   if (doDrag_ != (NApp::system().keyState() & ShiftMask) && 
                   !(NApp::system().keyState() & ControlMask)) {
@@ -1902,6 +1932,8 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
 }
 
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
+	if ( !pView->pattern() ) return;
+
   if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) endSel();
 
   if (pView->cursor().z()==0) {
