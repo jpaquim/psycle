@@ -146,8 +146,9 @@ void SAX2Handler::startElement(const   XMLCh* const    uri,
     //cout << "I saw element: "<< message << endl;
     std::string tagName = std::string(message);
 
-    pParser->tagParse.emit(*pParser, tagName);
     pParser->attrs = &attrs;
+    pParser->tagParse.emit(*pParser, tagName);
+
     XMLString::release(&message);
 }
 
