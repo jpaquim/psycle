@@ -58,6 +58,7 @@
 #include <ngrs/nobjectinspector.h>
 #include <ngrs/nproperty.h>
 #include <ngrs/nxmlparser.h>
+#include <ngrs/nsplitbar.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -74,7 +75,19 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-  NXmlParser parser;
+	NPanel* panel2 = new NPanel();
+		panel2->setBackground( NColor(0,0,255) );
+		panel2->setTransparent( false );
+	pane()->add( panel2, nAlRight);
+
+	NSplitBar* bar = new NSplitBar();
+	pane()->add( bar, nAlRight );
+
+	NPanel* panel1 = new NPanel();
+	pane()->add( panel1, nAlClient);
+
+
+/*  NXmlParser parser;
 
   std::string text = "<hallo></hallo>";
 
@@ -96,7 +109,7 @@ NTestWindow::NTestWindow()
 
   // tabOrderTest
 
-  for (int i = 0; i < 5 ; i++) {
+  /*for (int i = 0; i < 5 ; i++) {
     NButton* btn = new NButton("Button"+stringify(i));
     btn->setFlat( false );
     btn->setEvents(true);
@@ -111,7 +124,7 @@ NTestWindow::NTestWindow()
       btn->setEvents(true);
       panel->add(  btn , nAlTop );
     }
-  pane()->add(panel, nAlClient);
+  pane()->add(panel, nAlClient);*/
 
   /*
   NColorComboBox* colorBox = new NColorComboBox();
