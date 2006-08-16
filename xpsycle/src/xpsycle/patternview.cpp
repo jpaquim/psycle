@@ -42,6 +42,18 @@
 
 namespace psycle { namespace host {
 
+
+template<class T> inline T str_hex(const std::string &  value) {
+   T result;
+
+   std::stringstream str;
+   str << value;
+   str >> std::hex >> result;
+
+   return result;
+}
+
+
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
 PatternView::PatternView( Song* song )
   : NPanel()
@@ -1505,47 +1517,16 @@ void PatternView::PatternDraw::onPopupBlockCut( NButtonEvent * ev )
 }
 
 void PatternView::PatternDraw::copyBlock( bool cutit )
-{
-  
-  // UNDO CODE HERE CUT
-  //if(blockSelected)
-  {
-    clipboard.clear();
-    isBlockCopied=true;
+{  
+	isBlockCopied=true;
+	SinglePattern copyPattern = pView->pattern()->block( selection_.left(), selection_.right(), selection_.top(), selection_.bottom() );
 
-    int right = selection_.right();
-    int left = selection_.left();
-    double top = selection_.top() / (double)pView->beatZoom();
-    double bottom = selection_.bottom() / (double)pView->beatZoom();
+	NApp::system().clipBoard().setAsText( copyPattern.toXml() );
 
-		std::string xmlSel;
-		xmlSel+="<patternsel startTrack='' endTrack='' startLine='' endLine=''>";
-    xmlSel+=pView->pattern()->toXml( selection_.left(),selection_.right(),selection_.top(),selection_.bottom() );
-    xmlSel+="</patternsel>";
-		NApp::system().clipBoard().setAsText(xmlSel);
-
-    for( SinglePattern::iterator lineIt = pView->pattern()->lower_bound(top)
-       ; lineIt != pView->pattern()->end() && lineIt->first < bottom
-       ; ++lineIt )
-    {
-       PatternLine newLine;
-       PatternLine & line = lineIt->second;
-
-       for( PatternLine::iterator entryIt = line.lower_bound(left)
-          ; entryIt != line.end() && entryIt->first < right
-          ; )
-       {
-          newLine.insert(PatternLine::value_type(entryIt->first-left, entryIt->second));
-          if(cutit) line.erase(entryIt++);
-	  else ++entryIt;
-       }
-       clipboard.insert(SinglePattern::value_type(lineIt->first-top, newLine) );
-
-    }
-    pView->pattern()->clearEmptyLines();
-
-    if (cutit) repaint();
-  }
+	if (cutit) {
+		pView->pattern()->deleteBlock( selection_.left(), selection_.right(), selection_.top(), selection_.bottom() );
+		pView->repaint();
+	}
 }
 
 void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
@@ -1559,10 +1540,10 @@ void PatternView::PatternDraw::onPopupBlockMixPaste( NButtonEvent * ev )
   pasteBlock(pView->cursor().x(),pView->cursor().y(),true);
 
   if (pView->moveCursorWhenPaste()) {
-       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
+/*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
           pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
        } else
-       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));
+       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
   }
   pView->repaint();
 }
@@ -1572,10 +1553,10 @@ void PatternView::PatternDraw::onPopupBlockPaste( NButtonEvent * ev )
   pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
 
   if (pView->moveCursorWhenPaste()) {
-       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
+/*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
           pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
        } else
-       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));
+       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
   }
   pView->repaint();
 }
@@ -1584,33 +1565,12 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
 {
   if ( NApp::system().clipBoard().asText() != "" ) {
     NXmlParser parser;
+		lastXmlLineBeatPos = 0.0;
     parser.tagParse.connect(this, &PatternView::PatternDraw::onTagParse);
     parser.parseString( NApp::system().clipBoard().asText() );
-  }
-  std::cout << NApp::system().clipBoard().asText() << std::endl;
-
-  if(isBlockCopied)
-  {
-    double maxBeat = pView->pattern()->beats();
-    int curBeat = pView->cursor().y() / pView->beatZoom();
-    int curTrack = pView->cursor().x();
-
-    for( SinglePattern::iterator lineIt = clipboard.begin()
-       ; lineIt != clipboard.end() && lineIt->first + curBeat < maxBeat
-       ; ++lineIt )
-    {
-       PatternLine & line = lineIt->second;
-       for( PatternLine::iterator entryIt = line.begin()
-          ; entryIt != line.end()
-          ; ++entryIt)
-       {
-          (*pView->pattern())[lineIt->first+curBeat][entryIt->first+curTrack] = entryIt->second;
-       }
-    }
+		
   }
 }
-
-
 
 void PatternView::updatePlayBar(bool followSong)
 {
@@ -2028,29 +1988,6 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
   }
 }
 
-/*const int ps = Global::pSong()->playOrder[editPosition()];
-  unsigned char * offset = Global::pSong()->_ptrack(ps,cursor_.x());
-  unsigned char * toffset = Global::pSong()->_ptrackline(ps,cursor_.x(),cursor_.y());
-
-  if ( cursor_.z() == 0 ) {
-      memset(offset+(cursor_.y()*MULTIPLY),255,3*sizeof(char));
-      memset(offset+(cursor_.y()*MULTIPLY)+3,0,2*sizeof(char));
-  }
-  else if (cursor_.z() < 5 ) { 
-    *(toffset+(cursor().z()+1)/2)= 255;
-  } else
-  {
-    *(toffset+(cursor().z()+1)/2)= 0; 
-  }
-
-int ps=Global::pSong()->playOrder[pView->editPosition()];
-
-  for (int t=selection_.left(); t < selection_.right();t++)
-    for (int l=selection_.top(); l< selection_.bottom();l++)
-            memcpy(Global::pSong()->_ptrackline(ps,t,l),&blank,EVENT_SIZE);
-
-*/
-
 void PatternView::PatternDraw::scaleBlock(float factor )
 {
 	int right = selection_.right();
@@ -2070,103 +2007,6 @@ void PatternView::halveLength()
 {
   drawArea->scaleBlock(0.5f);
 }
-
-
-// next todo
-
-/*
-
-
-void CChildView::
-    {
-      // UNDO CODE DOUBLE LENGTH
-      unsigned char *toffset;
-      PatternEntry blank;
-      int st, et, sl, el,nl;
-
-      int ps = _ps();
-      if ( blockSelected )
-      {
-    ///////////////////////////////////////////////////////// Add ROW
-        st=blockSel.start.track;		
-        et=blockSel.end.track+1;
-        sl=blockSel.start.line;			
-        nl=((blockSel.end.line-sl)/2)+1;
-        el=blockSel.end.line;
-        AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2,editcur.track,editcur.line,editcur.col,editPosition);
-      }
-      else 
-      {
-        st=0;		
-        et=_pSong->SONGTRACKS;		
-        sl=0;
-        nl= _pSong->patternLines[ps]/2;	
-        el=_pSong->patternLines[ps]-1;
-        AddUndo(ps,0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
-      }
-
-      for (int t=st;t<et;t++)
-      {
-        toffset=_ptrack(ps,t);
-        memcpy(toffset+el*MULTIPLY,&blank,EVENT_SIZE);
-        for (int l=nl-1;l>0;l--)
-        {
-          memcpy(toffset+(sl+l*2)*MULTIPLY,toffset+(sl+l)*MULTIPLY,EVENT_SIZE);
-          memcpy(toffset+(sl+(l*2)-1)*MULTIPLY,&blank,EVENT_SIZE);
-        }
-      }
-
-      NewPatternDraw(st,et,sl,el);
-      Repaint(DMData);
-    }
-
-    void CChildView::HalveLength()
-    {
-      // UNDO CODE HALF LENGTH
-      unsigned char *toffset;
-      int st, et, sl, el,nl;
-      int ps = _ps();
-      PatternEntry blank;
-
-      if ( blockSelected )
-      {
-    ///////////////////////////////////////////////////////// Add ROW
-        st=blockSel.start.track;	
-        et=blockSel.end.track+1;
-        sl=blockSel.start.line;		
-        nl=blockSel.end.line-sl+1;
-        el=nl/2;
-        AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl,editcur.track,editcur.line,editcur.col,editPosition);
-      }
-      else 
-      {
-        st=0;	
-        et=_pSong->SONGTRACKS;		
-        sl=0;
-        nl=_pSong->patternLines[ps];	
-        el=_pSong->patternLines[ps]/2;
-        AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition) ;
-      }
-      
-      for (int t=st;t<et;t++)
-      {
-        toffset=_ptrack(ps,t);
-        int l;
-        for (l=1;l<el;l++)
-        {
-          memcpy(toffset+(l+sl)*MULTIPLY,toffset+((l*2)+sl)*MULTIPLY,EVENT_SIZE);
-        }
-        while (l < nl)
-        {
-          memcpy(toffset+((l+sl)*MULTIPLY),&blank,EVENT_SIZE);
-          l++;
-        }
-      }
-
-      NewPatternDraw(st,et,sl,nl+sl);
-      Repaint(DMData);
-    }
-*/
 
 int PatternView::beatZoom( ) const
 {
@@ -2224,15 +2064,7 @@ void PatternView::onTrackChange( NItemEvent * ev )
   repaint();
 }
 
-
-
 }}
-
-
-
-
-
-
 
 void psycle::host::PatternView::setActiveMachineIdx( int idx )
 {
@@ -2251,11 +2083,22 @@ void psycle::host::PatternView::onPatternStepChange( NItemEvent * ev )
   }
 }
 
-void psycle::host::PatternView::PatternDraw::onTagParse( const std::string & tagName  )
+void psycle::host::PatternView::PatternDraw::onTagParse( const NXmlParser & parser, const std::string & tagName  )
 {
-  if (tagName == "patternsel") {
-     std::cout << "yeah" << std::endl;
+  if (tagName == "patline") {
+			lastXmlLineBeatPos = str<float> (parser.getAttribValue("pos"));     
+	} else
+	if ( tagName == "patevent" && pView->pattern() ) {
+		int trackNumber = str_hex<int> (parser.getAttribValue("track"));
+
+		PatternEvent data;
+		data.setMachine( str_hex<int> (parser.getAttribValue("mac")) );
+		data.setInstrument( str_hex<int> (parser.getAttribValue("inst")) );
+		data.setNote( str_hex<int> (parser.getAttribValue("note")) );
+		data.setParameter( str_hex<int> (parser.getAttribValue("param")) );
+		data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
+
+		float pasteStartPos = pView->cursor().y() / (float) pView->pattern()->beatZoom();
+		pasteBuffer[pasteStartPos+lastXmlLineBeatPos][pView->cursor().x()+trackNumber]=data;
 	}
 }
-
-

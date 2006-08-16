@@ -25,11 +25,16 @@
 #include <time.h>
 
 #ifdef __cplusplus
- #include <ostream>
- extern "C" {
+extern "C" {
 #endif
 
 #ifndef ZW_BUFSIZE
+/* this is a compile-time tunable. I wouldn't recommend making it smaller
+ * than this as some compression methods (deflate) use the size of this in
+ * electing a strategy. the only reason you should want to make this smaller
+ * is to compile zipwriter on small-memory implementations. This must not be
+ * smaller than 16K (16384) however, without reducing MAX_WBITS in zlib
+ */
 #define ZW_BUFSIZE 65536
 #endif
 
@@ -108,8 +113,30 @@ void zipwriter_comment(zipwriter *z, const void *buf, size_t length);
 zipwriter_file *zipwriter_addfile(zipwriter *d, const char *name,
 		unsigned int flags);
 #define ZIPWRITER_STORE		0
+#define ZIPWRITER_DEFLATE1	1
+#define ZIPWRITER_DEFLATE2	2
+#define ZIPWRITER_DEFLATE3	3
+#define ZIPWRITER_DEFLATE4	4
+#define ZIPWRITER_DEFLATE5	5
+#define ZIPWRITER_DEFLATE6	6
+#define ZIPWRITER_DEFLATE7	7
+#define ZIPWRITER_DEFLATE8	8
+#define ZIPWRITER_DEFLATE9	9
+#define ZIPWRITER_DEFLATEx(x)	x
 #define ZIPWRITER_DEFLATE	8
 #define ZIPWRITER_COMPRESS_MASK	0xffff
+/* this is optional; it doesn't affect the behavior of zipwriter
+ * when writing files to the zipfile, so unless you're actually making
+ * your "text" files have MS-DOS style line-endings (\x0d\x0a), you
+ * should probably use ZIPWRITER_FILE_BINARY i.e. leave this alone.
+ *
+ * on the other hand, if you _really_ want to make text files, the
+ * functionality is exposed here to at least set the bit in the zipfile
+ * so that Info-ZIP on UNIX, MacOS, Amiga, and etc, will translate the
+ * appropriate line-endings...
+ */
+#define ZIPWRITER_FILE_BINARY	0x00000
+#define ZIPWRITER_FILE_TEXT	0x10000
 
 /* writes a chunk of data to the current file. returns zero if f isn't
  * opened, if it isn't the current file, or if write() fails. when
@@ -126,14 +153,10 @@ int zipwriter_write(zipwriter_file *f, const void *buf, size_t len);
  */
 int zipwriter_finish(zipwriter *d);
 
-/* copies a file into a zip
-*/
-
 void zipwriter_copy(int in, zipwriter_file *out);
 
-
 #ifdef __cplusplus
- };
+};
 #endif
 
 #endif

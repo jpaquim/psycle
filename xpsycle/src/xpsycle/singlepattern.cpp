@@ -343,27 +343,6 @@ namespace psycle
 			return xml.str();
 		}
 
-		std::string SinglePattern::toXml( int startTrack, int endTrack, int startLine, int endLine ) const
-		{
-			// this is without timesignature
-
-      SinglePattern::const_iterator it = find_lower_nearest(startLine);
-			if ( it == end() ) return "";
-
-      std::ostringstream xml;
-			xml << "<pattern name='" << name() << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
-
-			for (  ; it != end() ; it++ ) {
-				float beatPos = it->first;
-				const PatternLine & line = it->second;
-				if ( (int) ( beatPos * beatZoom() + 0.5 ) > endLine ) break;
-				xml << line.toXml( beatPos ,  startTrack, endTrack);
-			}
-			xml << "</pattern>" << std::endl;
-			return xml.str();
-		}
-
-
 		SinglePattern::iterator SinglePattern::find_nearest( int line )
 		{
 			SinglePattern::iterator result;
@@ -436,10 +415,88 @@ namespace psycle
 				return PatternEvent();
 		}
 
-	}
-}
+	
+		SinglePattern SinglePattern::block( int left, int right, int top, int bottom )
+		{
+			// copies a given block into a new Pattern
+			// the range is:
+			// startTrack >= tracks < endTracks ; startLine >= lines < endLines
+
+			float topBeat = top / (float) beatZoom();
+
+			SinglePattern newPattern;
+
+			for( SinglePattern::iterator lineIt = find_lower_nearest( top )
+					; lineIt != end() ; ++lineIt )
+			{
+				PatternLine newLine;
+				PatternLine & line = lineIt->second;
+				int y = (int) ( lineIt->first * beatZoom() + 0.5 );
+				if ( y >= bottom ) break;
+		
+				for( PatternLine::iterator entryIt = line.lower_bound( left )
+	          ; entryIt != line.end() && entryIt->first < right
+	          ; ++entryIt)
+				{
+    	      newLine.insert(PatternLine::value_type( entryIt->first-left, entryIt->second));
+  	  	}   
+				newPattern.insert( SinglePattern::value_type( lineIt->first-topBeat, newLine ) );
+			}
+			return newPattern;
+		}
+
+		void SinglePattern::copyBlock(int left, int top, const SinglePattern & pattern) {
+			
+		}
+
+		void SinglePattern::mixBlock(int left, int top, const SinglePattern & pattern) {
+			/*int pasteStartPos = (int) ( top / (float) beatZoom() );
+			for( SinglePattern::const_iterator lineIt;
+					; lineIt != end() ; ++lineIt )
+			{
+				PatternLine & line = lineIt->second;
+				for( PatternLine::iterator entryIt = line.lower_bound( left )
+	          ; entryIt != line.end()
+	          ; )
+				{
+				(this*)[pasteStartPos+lineIt->first][left+trackNumber]=data;
+				}
+			}*/
+		}
+
+		void SinglePattern::deleteBlock( int left, int right, int top, int bottom )
+		{
+			// deletes a given block into a new Pattern
+			// the range is:
+			// startTrack >= tracks < endTracks ; startLine >= lines < endLines
+
+			SinglePattern newPattern;
+
+			for( SinglePattern::iterator lineIt = find_lower_nearest( top )
+					; lineIt != end() ; )
+			{
+				PatternLine & line = lineIt->second;
+				int y = (int) ( lineIt->first * beatZoom() + 0.5 );
+				if ( y >= bottom ) break;
+		
+				for( PatternLine::iterator entryIt = line.lower_bound( left )
+	          ; entryIt != line.end() && entryIt->first < right
+	          ; )
+				{
+    	      line.erase(entryIt++);
+  	  	}   
+				if (line.size() == 0) 
+					erase(lineIt++);
+				else 
+					++lineIt;
+			}
+		}
 
 
+//          if(cutit) line.erase(entryIt++);
+//	  else ++entryIt;
+	}	// end of host namespace
+}	// end of psycle namespace
 
 
 
