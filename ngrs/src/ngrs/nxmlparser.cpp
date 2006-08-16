@@ -146,7 +146,7 @@ void SAX2Handler::startElement(const   XMLCh* const    uri,
     //cout << "I saw element: "<< message << endl;
     std::string tagName = std::string(message);
 
-    pParser->tagParse.emit(tagName);
+    pParser->tagParse.emit(*pParser, tagName);
     pParser->attrs = &attrs;
     XMLString::release(&message);
 }
@@ -216,7 +216,7 @@ void NXmlParser::parseFile( const std::string & fileName )
   XMLPlatformUtils::Terminate();
 }
 
-std::string NXmlParser::getAttribValue( const std::string & name )
+std::string NXmlParser::getAttribValue( const std::string & name ) const
 {
    std::string erg;
        try {
