@@ -180,6 +180,8 @@ class PatternView : public NPanel
 			SinglePattern pasteBuffer;
       void onTagParse( const NXmlParser & parser, const std::string & tagName );
       float lastXmlLineBeatPos;
+			int xmlTracks;
+			float xmlBeats;
 
     };
 
