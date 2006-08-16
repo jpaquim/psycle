@@ -131,24 +131,7 @@ std::string ChildView::OnFileLoadSongNamed( const std::string & fName, int fType
 
 std::string ChildView::FileLoadSongNamed( std::string const & fName )
 {
-  // stop player
-  Global::pPlayer()->Stop();
-  // disable audio driver
-  Global::configuration()._pOutputDriver->Enable(false);
-  // delete machine gui ..
-  machineView_->removeMachines();
-
-  _pSong->load(fName);
-
-  // enable audio driver
-  Global::configuration()._pOutputDriver->Enable(true);
-  // set window title to new song name
-  setTitleBarText();
-  // create loaded machines
-  machineView_->update();
-  // emit a signal that song is loaded
-  newSongLoaded.emit();
-  return "";
+  return fName;
 }
 
 

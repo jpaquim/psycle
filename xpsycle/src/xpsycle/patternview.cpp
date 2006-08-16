@@ -734,6 +734,15 @@ int PatternView::Header::skinColWidth( )
 /// End of Line Number Panel
 
 
+PatternView::TweakHeader::TweakHeader() {
+
+}
+
+PatternView::TweakHeader::~TweakHeader() {
+
+}
+
+
 
 PatternView::TweakGUI::TweakGUI( PatternView* pPatternView) {
 	pView = pPatternView;

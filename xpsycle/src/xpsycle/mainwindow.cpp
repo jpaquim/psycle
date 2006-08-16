@@ -98,17 +98,11 @@ void MainWindow::initSongs( )
 
 void MainWindow::addSongToGui( Song & song )
 {
-  std::cout << "here" << std::endl;
-
   page = new NPanel();
     page->setLayout( NAlignLayout());
-  book->addPage(page,"Song");
-
-  std::cout << "here1" << std::endl;
+  book->addPage(page, song.name() );
 
   page->add(sequencerBar_ = new SequencerBar(), nAlLeft);
-
-  std::cout << "here2" << std::endl;
 
   childView_ = new ChildView( song );
     childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
@@ -116,10 +110,32 @@ void MainWindow::addSongToGui( Song & song )
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
   page->add( childView_, nAlClient);
 
-  std::cout << "here3" << std::endl;
-
   sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
   sequencerBar_->setPatternView( childView_->patternView() );
+
+  book->setActivePage(page);
+
+	NTab* tab = book->tab(page);
+  tab->setEnablePopupMenu(true);
+  NPopupMenu* menu = tab->popupMenu();
+  NMenuItem* closeSong = new NMenuItem("Close");
+  menu->add(closeSong);
+  closeSong->click.connect(this,&MainWindow::onCloseSongTabPressed);
+
+  songMap[closeSong] = page;
+
+}
+
+void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
+   std::map<NObject*,NPanel*>::iterator it = songMap.find( ev->sender() ); 
+   if ( it != songMap.end() ) {
+		 std::cout << "here" << std::endl;
+     NPanel* panel = it->second;
+     book->removePage(panel);
+     pane()->resize();
+     pane()->repaint();
+		 songMap.erase(it);
+   }
 }
 
 void MainWindow::initMenu( )
@@ -527,11 +543,26 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   pane()->repaint();
   std::string fileName;
   if ( (fileName = childView_->onFileLoadSong(0)) != "" ) {
-    if (noFileWasYetLoaded) {
-      recentFileMenu_->removeChilds();
-      noFileWasYetLoaded = false;
-    }
-    recentFileMenu_->add(new NMenuItem(fileName));
+			// stop player
+			Global::pPlayer()->Stop();
+			// disable audio driver
+			Global::configuration()._pOutputDriver->Enable(false);
+			
+			Song* song = new Song();
+			songs_.push_back(song);
+
+			song->load(fileName);
+
+			addSongToGui(*song);
+
+			// enable audio driver
+			Global::configuration()._pOutputDriver->Enable(true);
+
+      if (noFileWasYetLoaded) {
+        recentFileMenu_->removeChilds();
+        noFileWasYetLoaded = false;
+      }
+      recentFileMenu_->add(new NMenuItem(fileName));
   }
   progressBar_->setVisible(false);
   pane()->resize();
@@ -772,8 +803,6 @@ void MainWindow::onTimer( )
 
 void MainWindow::updateBars( )
 {
-  int p[] = {1, 2, 3, 4, 5};
-  std::vector<int> a(p, p+5);
 }
 
 int MainWindow::close( )
