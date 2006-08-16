@@ -40,6 +40,7 @@ public:
 
     NPanel* addNewPage(const std::string & tabName);
     void addPage(NPanel* page, const std::string & tabName);
+    void removePage( NPanel* page );
 
     void setActivePage(NPanel* page);
     void setActivePage(int index);
@@ -48,7 +49,7 @@ public:
     void setTabBarVisible( bool on);
     bool tabBarVisible() const;
 
-    NCustomButton* tab(NPanel* page);
+    NTab* tab(NPanel* page);
 
 private:
 

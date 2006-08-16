@@ -30,14 +30,8 @@ NTabBook::NTabBook()
    tabBar_ = new NTabBar();
    add(tabBar_, nAlTop);
 
-   std::cout << "h" << preferredHeight() << std::endl;
-
    book_ = new NNoteBook();
-   //add(book_, nAlClient);
-
    add(book_,nAlClient);
-
-   std::cout << "b" << preferredHeight() << std::endl;
 
    tabBar_->setNoteBook(book_);
 }
@@ -55,6 +49,15 @@ NPanel * NTabBook::addNewPage( const std::string & tabName )
   tabBar_->addTab(tab, page);
   book_->add(page);
   return page;
+}
+
+void NTabBook::removePage( NPanel * page )
+{
+  NTab* tabbutton = tab(page);
+  if (tabbutton) {
+    tabBar_->removeChild(tabbutton);
+    book_->removeChild(page);
+  }
 }
 
 void NTabBook::addPage( NPanel * page, const std::string & tabName )
@@ -84,9 +87,9 @@ void NTabBook::setTabBarAlign( int align )
   updateAlign();
 }
 
-NCustomButton * NTabBook::tab( NPanel * page )
+NTab * NTabBook::tab( NPanel * page )
 {
-  return tabBar_->tab(page);
+  return (NTab*) tabBar_->tab(page);
 }
 
 void NTabBook::setTabBarVisible( bool on )
@@ -98,6 +101,8 @@ bool NTabBook::tabBarVisible( ) const
 {
   return tabBar_->visible();
 }
+
+
 
 
 
