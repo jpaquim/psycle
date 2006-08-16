@@ -118,4 +118,17 @@ void NTabBar::setActiveTab( unsigned int index )
   }
 }
 
+void NTabBar::removeChild( NVisualComponent * child )
+{
+  std::map<NObject*,NPanel*>::iterator itr = pageMap_.begin();
+  for ( ; itr != pageMap_.end(); itr++) {
+    if (itr->second == child) {
+       pageMap_.erase(itr);
+      break;
+    }
+  }
+
+  NVisualComponent::removeChild(child);
+}
+
 

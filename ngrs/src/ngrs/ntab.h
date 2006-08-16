@@ -21,6 +21,7 @@
 #define NTAB_H
 
 #include "ncustombutton.h"
+#include "npopupmenu.h"
 
 /**
 @author Stefan
@@ -36,11 +37,20 @@ public:
     virtual void setDown(bool on);
     virtual int preferredHeight() const;
 
+    void setEnablePopupMenu( bool on);
+
+    virtual void onMousePress( int x, int y, int button);
+
+    NPopupMenu* popupMenu();
 
 private:
 
     NSkin noneSk;
     NSkin downSk;
+
+    bool enablePopup_;
+
+    NPopupMenu* popupMenu_;
 
     void init();
 

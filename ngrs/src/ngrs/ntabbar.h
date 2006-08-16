@@ -48,6 +48,8 @@ public:
    void setActiveTab(NPanel* page);
    void setActiveTab(unsigned int index);
 
+   virtual void removeChild( NVisualComponent * child );
+
 
 private:
 

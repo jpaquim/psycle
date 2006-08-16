@@ -41,6 +41,10 @@ void NTab::init( )
   noneSk = NApp::config()->skin("tabnone");
 
   setSkin(noneSk);
+
+  enablePopup_ = false;
+  popupMenu_ = new NPopupMenu();
+  add( popupMenu_ );
 }
 
 NTab::~NTab()
@@ -60,6 +64,25 @@ void NTab::setDown( bool on )
 int NTab::preferredHeight( ) const
 {
   return ((down()) ? 5 : 0 ) + NCustomButton::preferredHeight();
+}
+
+void NTab::setEnablePopupMenu( bool on )
+{
+  enablePopup_ = on;
+}
+
+NPopupMenu * NTab::popupMenu( )
+{
+  return popupMenu_;
+}
+
+void NTab::onMousePress( int x, int y, int button )
+{
+  if (enablePopup_ && button == 3) {
+      popupMenu_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
+      popupMenu_->setVisible(true);
+  } else
+  NCustomButton::onMousePress( x, y, button );
 }
 
 
