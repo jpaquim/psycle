@@ -2099,6 +2099,6 @@ void psycle::host::PatternView::PatternDraw::onTagParse( const NXmlParser & pars
 		data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
 
 		float pasteStartPos = pView->cursor().y() / (float) pView->pattern()->beatZoom();
-		pasteBuffer[pasteStartPos+lastXmlLineBeatPos][pView->cursor().x()+trackNumber]=data;
+		(*pView->pattern())[pasteStartPos+lastXmlLineBeatPos][pView->cursor().x()+trackNumber]=data;
 	}
 }
