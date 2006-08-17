@@ -37,12 +37,14 @@ class Song;
 class SongpDlg : public NWindow
 {
 public:
-    SongpDlg(Song* pSong);
+    SongpDlg( );
 
     ~SongpDlg();
 
     virtual int onClose();
     virtual void setVisible(bool on);
+
+		void setSong( Song* pSong );
 
 private:
 

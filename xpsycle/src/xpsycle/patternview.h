@@ -94,7 +94,7 @@ class PatternView : public NPanel
       virtual void paint(NGraphics* g);
 
       void setDy(int dy);
-      int dy();
+      int dy() const;
 
     private:
       PatternView* pView;
@@ -111,17 +111,6 @@ class PatternView : public NPanel
 
 		};
 
-		class TweakGUI : public NPanel {
-		public:
-				TweakGUI( PatternView* pPatternView);
-
-				~TweakGUI();
-		private:
-
-				PatternView* pView;
-				int preferredWidth() const;
-			
-		};
 
     class PatternDraw : public NPanel {
     public:
@@ -134,8 +123,8 @@ class PatternView : public NPanel
       void setDy(int dy);
       void setDx(int dx);
 
-      int dy();
-      int dx();
+      int dy() const;
+      int dx() const;
 
       virtual void onMousePress(int x, int y, int button);
       virtual void onMousePressed(int x, int y, int button);
@@ -205,7 +194,17 @@ class PatternView : public NPanel
 			int xmlTracks;
 			float xmlBeats;
 
+			void repaintBlock( const NSize & block );
+
     };
+
+
+    class TweakGUI : public NPanel {
+		public:
+				TweakGUI( PatternView* pPatternView);
+
+				~TweakGUI();			
+		};
 
 public:
     PatternView( Song * song);

@@ -24,8 +24,8 @@
 
 namespace psycle { namespace host {
 
-SongpDlg::SongpDlg(Song* pSong) 
-  : NWindow(), pSong_(pSong)
+SongpDlg::SongpDlg( ) 
+  : NWindow(), pSong_(0)
 {
   init();
 }
@@ -33,6 +33,11 @@ SongpDlg::SongpDlg(Song* pSong)
 
 SongpDlg::~SongpDlg()
 {
+}
+
+void SongpDlg::setSong( Song * pSong )
+{
+  pSong_ = pSong;
 }
 
 void SongpDlg::init( )
@@ -77,7 +82,7 @@ int SongpDlg::onClose( )
 
 void SongpDlg::setVisible( bool on )
 {
-  if (on) {
+  if (pSong_ && on) {
       songTitle_->setText(pSong_->name() );
       songCredits_->setText(pSong_->author() );
       songComments_->setText(pSong_->comment() );
@@ -88,11 +93,15 @@ void SongpDlg::setVisible( bool on )
 
 void SongpDlg::onOkBtn( NButtonEvent * ev )
 {
+  if (pSong_) {
    pSong_->setName( songTitle_->text() );
    pSong_->setAuthor( songCredits_->text() );
    pSong_->setComment( songComments_->text() );
    setVisible(false);
+  }
 }
 
-}} // end of psycle::host namespace
+}}
+
+ // end of psycle::host namespace
 
