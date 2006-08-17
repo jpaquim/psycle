@@ -102,8 +102,8 @@ ChildView::~ChildView()
 {
   delete _pSong;
 }
-
-
+  
+ 
 std::string ChildView::onFileLoadSong( NObject * sender )
 {
   if (getOpenFileName_->execute()) {

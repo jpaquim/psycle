@@ -45,6 +45,8 @@ namespace psycle
 
 		void Player::Start(double pos)
 		{
+      if ( !song_ ) return;
+
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
 
@@ -67,6 +69,8 @@ namespace psycle
 
 		void Player::Stop(void)
 		{
+      if ( !song_ ) return;
+
 			// Stop song enviroment
 			_playing = false;
 			_playBlock = false;
