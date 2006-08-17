@@ -78,6 +78,7 @@ NPopupMenu * NTab::popupMenu( )
 
 void NTab::onMousePress( int x, int y, int button )
 {
+  std::cout << "tab pressed " << std::endl;
   if (enablePopup_ && button == 3) {
       popupMenu_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
       popupMenu_->setVisible(true);

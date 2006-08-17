@@ -115,3 +115,18 @@ NVisualComponent * NTogglePanel::selectedComponent( )
 {
   return selectedComp_;
 }
+
+void NTogglePanel::removeChild( NVisualComponent * child )
+{
+  if (child == selectedComp_) {
+    selectedComp_ = 0;
+  }
+
+  NPanel::removeChild( child );
+}
+
+void NTogglePanel::removeChilds( )
+{
+  selectedComp_ = 0;
+  NPanel::removeChilds();
+}

@@ -164,7 +164,7 @@ void NApp::eventLoop( )
           }
        }
      }
-       //doRemove();
+     callRemovePipe();
     }
   }
 }
@@ -221,7 +221,7 @@ void NApp::modalEventLoop(NWindow* modalWin )
         }
        }
      }
-       //doRemove();
+     NApp::callRemovePipe();
   }
 }
 
@@ -357,9 +357,17 @@ NWindow * NApp::mouseOverWindow( )
   } else return 0;
 }
 
-void NApp::addPopupWindow( NWindow * win )
+void NApp::registerPopupWindow( NWindow * win )
 {
   popups_.push_back(win);
+}
+
+void NApp::unregisterPopupWindow( NWindow * win )
+{
+  std::vector<NWindow*>::iterator it = find(popups_.begin(), popups_.end(), win);
+  if (it != popups_.end() ) {
+    popups_.erase( it );
+  }
 }
 
 void NApp::runModal(NWindow* modalWin )
@@ -448,9 +456,11 @@ void NApp::addRemovePipe( NRuntime * component )
 void NApp::callRemovePipe( )
 {
  for (std::vector<NRuntime*>::iterator iter = removePipe.begin(); iter<removePipe.end(); iter++) {
+  lastOverWin_ = 0;
   NRuntime* component = *iter;
     delete component;
- } 
+ }
+ removePipe.clear();
 }
 
 void NApp::enterThread( )
@@ -463,6 +473,8 @@ void NApp::leaveThread( )
 {
   in_thread_=false;
 }
+
+
 
 
 

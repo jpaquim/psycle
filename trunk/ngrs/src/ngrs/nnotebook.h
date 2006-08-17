@@ -41,6 +41,9 @@ public:
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
 
+    virtual void removeChild( NVisualComponent* child );
+    virtual void removeChilds();
+
 
 private:
 
