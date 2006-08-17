@@ -235,6 +235,8 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 
 		float * Player::Work(int numSamples)
 		{
+			if ( !song_ ) return _pBuffer;
+
 			// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
 			Master::_pMasterSamples = _pBuffer;
 			double beatLength = numSamples/(double) SamplesPerBeat();

@@ -69,73 +69,84 @@ MainWindow::MainWindow()
 
   initSongs();
 
+ 
   // move to update bars
-  updateComboGen();
+  //updateComboGen();
 
-/*
-  updateStatusBar();
 
-  childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);*/
+//  updateStatusBar();
+
+  //childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
 }
 
 
 MainWindow::~MainWindow()
 {
-  std::vector<Song*>::iterator it;
-  for ( ; it < songs_.end(); it++) 
-    delete *it;
 }
 
 void MainWindow::initSongs( )
 {
-  Song* song = new Song();
-  songs_.push_back(song);
-  Global::pPlayer()->song(*song);
-  addSongToGui(*song);
-
-  selectedSong_ = song;
+  ChildView* view = addChildView();
+  selectedSong_ = view->song();
+  view->enableSound();
 }
 
-void MainWindow::addSongToGui( Song & song )
+ChildView* MainWindow::addChildView()
 {
-  page = new NPanel();
-    page->setLayout( NAlignLayout());
-  book->addPage(page, song.name() );
-
-  page->add(sequencerBar_ = new SequencerBar(), nAlLeft);
-
-  childView_ = new ChildView( song );
+  childView_ = new ChildView( );
     childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
     childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
-  page->add( childView_, nAlClient);
+  book->addPage( childView_, childView_->song()->name() );
+  book->setActivePage( childView_ );
 
-  sequencerBar_->setSequenceGUI( childView_->sequencerView() ) ;
-  sequencerBar_->setPatternView( childView_->patternView() );
-
-  book->setActivePage(page);
-
-	NTab* tab = book->tab(page);
+	NTab* tab = book->tab( childView_ );
+  tab->click.connect(this,&MainWindow::onTabChange);
   tab->setEnablePopupMenu(true);
   NPopupMenu* menu = tab->popupMenu();
   NMenuItem* closeSong = new NMenuItem("Close");
-  menu->add(closeSong);
+  menu->add( closeSong );
   closeSong->click.connect(this,&MainWindow::onCloseSongTabPressed);
 
-  songMap[closeSong] = page;
+  songMap[closeSong] = childView_;
+  songTabMap[tab] = childView_;
 
+  songpDlg_->setSong( childView_->song() );
+
+
+  Global::pPlayer()->song( *childView_->song() );
+
+
+  return childView_;
 }
 
 void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
-   std::map<NObject*,NPanel*>::iterator it = songMap.find( ev->sender() ); 
+   std::map<NObject*,ChildView*>::iterator it = songMap.find( ev->sender() ); 
    if ( it != songMap.end() ) {
-		 std::cout << "here" << std::endl;
+     std::map<NObject*,ChildView*>::iterator tabIt = songTabMap.begin();
+     for ( ; tabIt != songTabMap.end() ; tabIt++ ) {
+       if ( tabIt->second == it->second ) {
+         songTabMap.erase( tabIt );
+         break;
+       }
+     }
+
      NPanel* panel = it->second;
      book->removePage(panel);
      pane()->resize();
      pane()->repaint();
 		 songMap.erase(it);
    }
+}
+
+void MainWindow::onTabChange( NButtonEvent * ev )
+{
+  std::map<NObject*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
+  if ( it != songMap.end() ) {
+    ChildView* view = it->second;
+		Global::pPlayer()->Stop();
+    Global::pPlayer()->song( *view->song() );
+  }
 }
 
 void MainWindow::initMenu( )
@@ -239,7 +250,7 @@ void MainWindow::initMenu( )
 void MainWindow::initDialogs( )
 {
   // creates the song dialog for editing song name, author, and comment
-//  add( songpDlg_ = new SongpDlg(Global::pSong()) );
+  add( songpDlg_ = new SongpDlg( ) );
   // creates the greeting dialog, that greets people who help psycle development
   add( greetDlg =  new GreetDlg() );
   // creates the save dialog, that ask where to store wave files, recorded from playing a psy song
@@ -528,9 +539,7 @@ void MainWindow::onBarPlayFromStart( NButtonEvent * ev )
 
 void MainWindow::onFileNew( NButtonEvent * ev )
 {
-  Song* song = new Song();
-  songs_.push_back(song);
-  this->addSongToGui(*song);
+  addChildView();  
   pane()->resize();
   pane()->repaint();
 }
@@ -547,14 +556,11 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
 			Global::pPlayer()->Stop();
 			// disable audio driver
 			Global::configuration()._pOutputDriver->Enable(false);
-			
-			Song* song = new Song();
-			songs_.push_back(song);
-
-			song->load(fileName);
-
-			addSongToGui(*song);
-
+		
+      ChildView* newView = addChildView();  
+  
+			newView->song()->load(fileName);
+      newView->update();
 			// enable audio driver
 			Global::configuration()._pOutputDriver->Enable(true);
 
@@ -568,9 +574,6 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   pane()->resize();
   updateComboGen();
 //  updateComboIns(true);
-  childView_->waveEditor()->Notify();
-  sequencerBar_->update();
-  childView_->sequencerView()->update();
   pane()->repaint();
 }
 
@@ -699,7 +702,7 @@ void MainWindow::appNew( )
   childView_->setTitleBarText();
   childView_->patternView()->setEditPosition(0);
 //  Global::pSong()->seqBus=0;
-  sequencerBar_->update();
+  //sequencerBar_->update();
   childView_->sequencerView()->update();
   childView_->machineView()->createGUIMachines();
   //pParentMain->PsybarsUpdate(); // Updates all values of the bars
@@ -714,7 +717,7 @@ void MainWindow::appNew( )
   childView_->waveEditor()->Notify();
   childView_->patternView()->repaint();
   childView_->machineView()->repaint();
-  sequencerBar_->repaint();
+//  sequencerBar_->repaint();
 }
 
 
@@ -784,13 +787,13 @@ void MainWindow::onTimer( )
 {
   if (Global::pPlayer()->_playing) {
     int oldPos = childView_->patternView()->editPosition();
-    Global::pConfig()->_followSong = sequencerBar_->followSong();
-    childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
+ //   Global::pConfig()->_followSong = sequencerBar_->followSong();
+//    childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
 
-    if (sequencerBar_->followSong() && oldPos != Global::pPlayer()->_playPosition) {
+    //if (sequencerBar_->followSong() && oldPos != Global::pPlayer()->_playPosition) {
         //sequencerBar_->updatePlayOrder(true);
         //sequencerBar_->updateSequencer();
-    }
+    //}
   }
 
   vuMeter_->setPegel(selectedSong_->_pMachine[MASTER_INDEX]->_lMax,
@@ -811,13 +814,11 @@ int MainWindow::close( )
 }
 
 void MainWindow::onMachineView(NButtonEvent* ev) {
-  childView_->setActivePage(0);
-  childView_->repaint();
+  childView_->showMachineView();
 }
 
 void MainWindow::onPatternView(NButtonEvent* ev) {
-  childView_->setActivePage(1);
-  childView_->repaint();
+  childView_->showPatternView();
 }
 
 bool MainWindow::checkUnsavedSong( )
@@ -875,9 +876,9 @@ void MainWindow::onViewMenuMachinebar( NButtonEvent * ev )
 
 void MainWindow::onViewMenuSequencerbar( NButtonEvent * ev )
 {
-  sequencerBar_->setVisible(!sequencerBar_->visible());
-  pane()->resize();
-  pane()->repaint();
+  //sequencerBar_->setVisible(!sequencerBar_->visible());
+  //pane()->resize();
+  //pane()->repaint();
 }
 
 void MainWindow::onViewMenuStatusbar( NButtonEvent * ev )
@@ -1099,8 +1100,9 @@ void MainWindow::onGeneratorCbx( NItemEvent * ev )
 
 void MainWindow::onSequencerEntryClick( SequencerItem * item )
 {
-  std::cout << item->sequenceEntry()->tickPosition() << std::endl;
-  sequencerBar_->setEntry(item);
+//  sequencerBar_->setEntry(item);
 }
 
 }}
+
+

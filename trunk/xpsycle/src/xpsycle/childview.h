@@ -23,10 +23,13 @@
 #include "machineview.h"
 #include "patternview.h"
 #include "song.h"
+#include "sequencerbar.h"
 #include "global.h"
 #include <ngrs/ntabbook.h>
 #include <ngrs/nfiledialog.h>
 #include <ngrs/ntimer.h>
+#include <ngrs/ntabbook.h>
+
 
 namespace psycle {
 	namespace host {
@@ -40,12 +43,14 @@ class SequencerGUI;
 */
 
 
-class ChildView : public NTabBook
+class ChildView : public NPanel
 {
 public:
-    ChildView( Song & song);
+    ChildView( );
 
     ~ChildView();
+
+    Song* song();
 
     std::string FileLoadSongNamed(const std::string & fName);
     void FileSaveSongNamed(const std::string & fName);
@@ -77,15 +82,23 @@ public:
 
     void onMachineViewDblClick(NButtonEvent* ev);
 
+		void showMachineView();
+		void showPatternView();
+
+		void update();
 
 private:
 
     Song* _pSong;
+
     NewMachine* newMachineDlg_;
+
+    NTabBook* tabBook_;
 
     NFileDialog* getOpenFileName_;
     NFileDialog* getSaveFileName_;
 
+    SequencerBar* sequencerBar_;
     MachineView* machineView_;
     PatternView* patternView_;
     SequencerGUI* sequencerView_;

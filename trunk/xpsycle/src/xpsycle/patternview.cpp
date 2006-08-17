@@ -74,12 +74,9 @@ PatternView::PatternView( Song* song )
   add(toolBar = new NToolBar() ,nAlTop);
   initToolBar();
 
-
   // create the left linenumber panel
   add(lineNumber_ = new LineNumber(this), nAlLeft);
 	
-	
-
 	// sub group tweaker and patterndraw
 	NPanel* drawGroup = new NPanel();
 		drawGroup->setLayout( NAlignLayout() );
@@ -241,8 +238,8 @@ void PatternView::onAddBar( NButtonEvent * ev )
   if ( pattern_ ) {
     std::string meter = meterCbx->text();
     int pos = meter.find("/");
-    std::string num = meter.substr(0,pos);
-    std::string denom = meter.substr(pos+1);
+    std::string num   = meter.substr( 0, pos);
+    std::string denom = meter.substr( pos+1 );
 
     pattern_->addBar( TimeSignature(str<int>(num), str<int>(denom)) );
     resize();
@@ -470,15 +467,6 @@ bool PatternView::moveCursorWhenPaste() const {
 
 
 
-
-
-
-
-
-
-
-
-
 /// The Header Panel Class
 PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , NPanel()
 {
@@ -634,7 +622,6 @@ int PatternView::Header::skinColWidth( )
 /// End of Header Class
 
 
-
 ///
 /// The Line Number Panel Class
 ///
@@ -721,13 +708,11 @@ int PatternView::Header::skinColWidth( )
     g->drawText(1,pView->headerHeight()-1,"Line");
   }
 
-  void PatternView::LineNumber::setDy( int dy )
-  {
+  void PatternView::LineNumber::setDy( int dy ) {
     dy_ = dy;
   }
 
-  int PatternView::LineNumber::dy( )
-  {
+  int PatternView::LineNumber::dy( ) const {
     return dy_;
   }
 
@@ -742,27 +727,13 @@ PatternView::TweakHeader::~TweakHeader() {
 
 }
 
-
-
-PatternView::TweakGUI::TweakGUI( PatternView* pPatternView) {
-	pView = pPatternView;
+PatternView::TweakGUI::TweakGUI( PatternView* pPatternView)
+{
 }
 
 PatternView::TweakGUI::~TweakGUI() {
 
 }
-
-int PatternView::TweakGUI::preferredWidth() const {
-	if ( ownerSize() ) return NVisualComponent::preferredWidth();
-	return 20;
-}
-
-
-
-
-
-
-
 
 
 ///
@@ -776,7 +747,7 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : dx_(0),dy_
 {
   setTransparent(false);
   setBackground(Global::pConfig()->pvc_row);
-  setName("debug::patternDraw");
+
   pView = pPatternView;
   editPopup_ = new NPopupMenu();
   add(editPopup_);
@@ -924,7 +895,7 @@ void PatternView::PatternDraw::setDy( int dy )
   dy_ = dy;
 }
 
-int PatternView::PatternDraw::dy( )
+int PatternView::PatternDraw::dy( ) const
 {
   return dy_;
 }
@@ -934,7 +905,7 @@ void PatternView::PatternDraw::setDx( int dx )
   dx_ = dx;
 }
 
-int PatternView::PatternDraw::dx( )
+int PatternView::PatternDraw::dx( ) const
 {
   return dx_;
 }
@@ -981,13 +952,12 @@ void PatternView::PatternDraw::drawCellBg( NGraphics * g, int track, int line, i
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
   if ( pView->pattern() ) {
-  drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
+   drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
 
   char tbuf[16];
 
   float position = startLine / (float) pView->pattern_->beatZoom();
   float endPosition = endLine / (float) pView->pattern_->beatZoom();
-
 
   SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
 
@@ -1039,7 +1009,6 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
   }
   }
 }
-
 
 
 void PatternView::PatternDraw::onMousePress( int x, int y, int button )
@@ -1126,11 +1095,11 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
         if (NApp::system().keyState() & ShiftMask) {
 		pView->moveCursor(-1,0,0); std::cout<<"bam"<<std::endl;
 		int newTrack = pView->cursor().x();
-		window()->repaint(this,repaintTrackArea(curLine,curLine,newTrack,oldTrack));
+    repaintBlock( NSize( newTrack,curLine, oldTrack, curLine ) );
 	} else {
 		pView->moveCursor(1,0,0);
 		int newTrack = pView->cursor().x();
-		window()->repaint(this,repaintTrackArea(curLine,curLine,oldTrack,newTrack));
+		repaintBlock( NSize( oldTrack,curLine, newTrack, curLine ) );
 	}
 	window()->repaint(pView,pView->repaintLineNumberArea(curLine,curLine));
     }
@@ -1540,9 +1509,9 @@ NPoint3D PatternView::PatternDraw::intersectCell( int x, int y )
 
 void PatternView::PatternDraw::clearOldSelection( )
 {
-  NRect r = repaintTrackArea(selection_.top(),selection_.bottom(),selection_.left(),selection_.right());
+  NSize oldSel = selection_;  
   selection_.setSize(0,0,0,0);
-  window()->repaint(this,r);
+  repaintBlock( selection_ );
 }
 
 void PatternView::PatternDraw::onPopupBlockCopy( NButtonEvent * ev )
@@ -1577,6 +1546,10 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
 		pView->pattern()->deleteBlock( selection_.left(), selection_.right(), selection_.top(), selection_.bottom() );
 		pView->repaint();
 	}
+}
+
+void PatternView::PatternDraw::repaintBlock( const NSize & block ) {
+  window()->repaint(this,repaintTrackArea(block.top(),block.bottom(),block.left(), block.right()));
 }
 
 void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
@@ -1638,6 +1611,7 @@ void PatternView::updatePlayBar(bool followSong)
       int oldPlayPos = playPos_;
       playPos_ = Global::pPlayer()->_lineCounter;
       if (oldPlayPos < playPos_)
+        
         window()->repaint(drawArea,drawArea->repaintTrackArea(oldPlayPos,playPos_,startTrack,trackCount+startTrack));
       else if (oldPlayPos > playPos_) {
         window()->repaint(drawArea,drawArea->repaintTrackArea(oldPlayPos,oldPlayPos,startTrack,trackCount+startTrack));
@@ -1769,9 +1743,6 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
 
 void PatternView::PatternDraw::transposeBlock(int trp)
 {
-    // UNDO CODE TRANSPOSE
-//   if ( blockSelected == true ) 
-//   {
 	int right = selection_.right();
 	int left =  selection_.left();
 	double top = selection_.top() / (double)pView->beatZoom();
@@ -1862,15 +1833,11 @@ void PatternView::PatternDraw::onPopupTranspose_12( NButtonEvent * ev )
 	transposeBlock(-12);
 }
 
-
-
 void PatternView::PatternDraw::startSel(const NPoint3D & p)
 {
   selStartPoint_ = p;
-  selection_.setLeft(p.x());
-  selection_.setTop(p.y());
-  selection_.setRight(p.x());
-  selection_.setBottom(p.y());
+  selection_.setSize( p.x(), p.y(), p.x(), p.y() );
+  
   oldSelection_ = selection_;
   doDrag_ = true;
   doSelect_ = false;
@@ -1943,7 +1910,8 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
 	if ( !pView->pattern() ) return;
 
-  if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) endSel();
+  if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R )
+ 		endSel();
 
   if (pView->cursor().z()==0) {
     int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
@@ -1993,7 +1961,7 @@ int PatternView::patternStep() const {
 
 void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
 {
-  if (!(note>=0 && note < 128)) return;
+  if (!(note >=0 && note < 128)) return;
 
   // octave offset
   if(note<120) {
@@ -2085,20 +2053,12 @@ void PatternView::setBeatZoom( int tpb )
 
 void PatternView::onOctaveChange( NItemEvent * ev )
 {
-  std::stringstream str;
-  str << ev->item()->text();
-  int octave = 0;
-  str >> octave;
-  setEditOctave(octave);
+  setEditOctave( str<int> ( ev->item()->text() ) );
 }
 
 void PatternView::onTrackChange( NItemEvent * ev )
 {
-  std::stringstream str; 
-  str << ev->item()->text();
-  int track = 0;
-  str >> track;
-  pSong()->setTracks(track);
+  pSong()->setTracks( str<int>( ev->item()->text() ) );
   if (cursor().x() >= pSong()->tracks() )
   {
     setCursor(NPoint3D(pSong()->tracks() ,cursor().y(),0));

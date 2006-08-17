@@ -67,9 +67,8 @@ public:
 
 private:
 
-    std::vector<Song*> songs_;
     void initSongs();
-    void addSongToGui(Song & song);
+    ChildView* addChildView();
 
     Song* selectedSong_;
 
@@ -77,10 +76,9 @@ private:
     bool noFileWasYetLoaded;
 
     ChildView* childView_;
-    NWindow* songpDlg_;
+    SongpDlg* songpDlg_;
     NTabBook* tabBook_;
 		
-    SequencerBar* sequencerBar_;
     NPanel* toolBarPanel_;
         NButton* barPlayFromStartBtn_;
     NToolBar* toolBar1_;
@@ -218,8 +216,10 @@ private:
     void onMachineSelected( Machine* mac );
 
 		void onCloseSongTabPressed( NButtonEvent* ev );
+		void onTabChange( NButtonEvent* ev );
 
-		std::map<NObject*, NPanel*> songMap;
+		std::map<NObject*, ChildView*> songMap;
+    std::map<NObject*, ChildView*> songTabMap;
 
 };
 
