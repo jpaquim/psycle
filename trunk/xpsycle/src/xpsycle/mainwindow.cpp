@@ -1120,14 +1120,20 @@ void MainWindow::onGeneratorCbx( NItemEvent * ev )
 
 void MainWindow::onSequencerEntryClick( SequencerItem * item )
 {
-//  sequencerBar_->setEntry(item);
+  if (!selectedChildView_) return;
+
+  selectedChildView_->sequencerBar()->setEntry(item);
 }
 
 }}
 
 void psycle::host::MainWindow::updateNewSong( )
 {
+  if (!selectedChildView_) return;
+
   updateComboGen();
+  bpmDisplay_->setNumber( (int) selectedChildView_->song()->bpm() );
+  bpmDisplay_->repaint();
 }
 
 

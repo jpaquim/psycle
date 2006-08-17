@@ -203,6 +203,7 @@ namespace psycle { namespace host {
 	{
 		wsInstrument = pSong()->instSelected;
 		wavView->SetViewData(wsInstrument);
+    //updateComboIns( true );
 	}
 	
 

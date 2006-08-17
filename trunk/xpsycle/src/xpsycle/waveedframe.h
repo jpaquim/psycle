@@ -57,6 +57,7 @@ public:
 	NMenu *viewMenu;
 	NMenu *convertMenu;
 	
+  void updateComboIns(bool updatelist);
 	
 private:
 
@@ -90,7 +91,6 @@ private:
 	void onEditWave(NButtonEvent* ev);
 	void onInstrumentCbx(NItemEvent* ev);
 
-	void updateComboIns(bool updatelist);
 
 	void onDecInsBtn(NButtonEvent* ev);
 	void onIncInsBtn(NButtonEvent* ev);
