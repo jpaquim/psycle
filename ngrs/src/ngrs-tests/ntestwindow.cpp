@@ -75,22 +75,17 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-  NTabBook* book = new NTabBook();
-    NPanel* page = new NPanel();
-    book->addPage( page, "toll" );
-    book->removePage(page);
+  setName("testwindow");
 
-	NPanel* panel2 = new NPanel();
-		panel2->setBackground( NColor(0,0,255) );
-		panel2->setTransparent( false );
-	pane()->add( panel2, nAlRight);
+  fDialog = new NFileDialog();
+     fDialog->setName("fdialog");
+  add(fDialog);
 
-	NSplitBar* bar = new NSplitBar();
-	pane()->add( bar, nAlRight );
+  NButton* btn1 = new NButton("open FileDialog");
+  btn1->setPosition(10,10,100,20);
+  pane()->add(btn1);
 
-	NPanel* panel1 = new NPanel();
-	pane()->add( panel1, nAlClient);
-
+  btn1->clicked.connect(this, &NTestWindow::onBtnClick);
 
 /*  NXmlParser parser;
 
@@ -492,9 +487,7 @@ void NTestWindow::testTimerButton( )
 
 void NTestWindow::onBtnClick( NButtonEvent * ev )
 {
-  info->setText(stringify(counter));
-  info->repaint();
-  counter++;
+  fDialog->execute();
 }
 
 void NTestWindow::testScrollBar( )

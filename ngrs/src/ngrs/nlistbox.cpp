@@ -126,6 +126,10 @@ void NListBox::removeChild( NCustomItem * item )
 {
   std::vector<NCustomItem*>::iterator it = find( items_.begin(), items_.end(), item );
   if ( it != items_.end() ) items_.erase(it);
+
+  it = find( selItems_.begin(), selItems_.end(), item );
+  if ( it != selItems_.end() ) selItems_.erase(it);
+
   listBoxPane_->removeChild(item);
 }
 
