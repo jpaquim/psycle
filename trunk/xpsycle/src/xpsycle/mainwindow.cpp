@@ -133,19 +133,28 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
        }
      }
 
+     bool update = false;
      ChildView* view = it->second;
      if (view == selectedChildView_) {
        Global::pPlayer()->Stop();
-       Global::pPlayer()->song(0);
+       Global::pPlayer()->song(0);       
        selectedChildView_ = 0;
-       updateNewSong();
+       update = true;
      }
      songMap.erase(it);
      book->removePage(view);
-       
-     std::cout << songMap.size() << std::endl;
-     std::cout << songTabMap.size() << std::endl;
-		 
+
+     if (update) {
+        std::map<NObject*,ChildView*>::iterator songIt = songTabMap.begin();
+        for ( ; songIt != songTabMap.end() ; songIt++ ) {
+          if ( songIt->second == book->activePage() ) {
+           selectedChildView_ = songIt->second;         
+           Global::pPlayer()->song( selectedChildView_->song() );
+           updateNewSong();
+          } 
+        }
+     } 
+       		 
      if (songMap.size() <= 1) {
        book->setTabBarVisible(false);
      }
@@ -738,7 +747,7 @@ void MainWindow::setAppSongBpm(int x)
     }
     else bpm = Global::pPlayer()->bpm;
 
-    bpmDisplay_->setNumber(Global::pPlayer()->bpm);
+    bpmDisplay_->setNumber( (int) Global::pPlayer()->bpm );
 
     bpmDisplay_->repaint();
 }
