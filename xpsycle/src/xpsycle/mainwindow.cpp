@@ -65,6 +65,7 @@ MainWindow::MainWindow()
   initDialogs();
 
   book = new NTabBook();
+    book->setTabBarVisible( false );
   pane()->add(book,nAlClient);
 
   initSongs();
@@ -113,6 +114,7 @@ ChildView* MainWindow::addChildView()
 
   songpDlg_->setSong( childView_->song() );
 
+  if (songMap.size() > 1) book->setTabBarVisible(true);
 
   Global::pPlayer()->song( *childView_->song() );
 
@@ -133,9 +135,13 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
 
      NPanel* panel = it->second;
      book->removePage(panel);
+   
+		 songMap.erase(it);
+     if (songMap.size() <= 1) {
+       book->setTabBarVisible(false);
+     }
      pane()->resize();
      pane()->repaint();
-		 songMap.erase(it);
    }
 }
 
