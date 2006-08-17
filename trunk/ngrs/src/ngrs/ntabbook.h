@@ -49,6 +49,8 @@ public:
     void setTabBarVisible( bool on);
     bool tabBarVisible() const;
 
+    NVisualComponent* activePage();
+
     NTab* tab( NVisualComponent* page );
 
 private:

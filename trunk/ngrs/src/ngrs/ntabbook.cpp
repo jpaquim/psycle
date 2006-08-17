@@ -105,6 +105,11 @@ bool NTabBook::tabBarVisible( ) const
   return tabBar_->visible();
 }
 
+NVisualComponent * NTabBook::activePage( )
+{
+  return book_->activePage();
+}
+
 
 
 

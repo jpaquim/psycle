@@ -35,6 +35,8 @@ public:
     void add(NVisualComponent* page);
     void setActivePage(NVisualComponent* page);
     void setActivePage(unsigned int index);
+    NVisualComponent* activePage();
+
 
     virtual void resize();
 

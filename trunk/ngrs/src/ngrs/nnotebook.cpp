@@ -103,4 +103,9 @@ void NNoteBook::removeChilds( )
   NPanel::removeChilds();
 }
 
+NVisualComponent * NNoteBook::activePage( )
+{
+  return visiblePage_;
+}
+
 
