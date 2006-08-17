@@ -150,26 +150,30 @@ int NWindow::height( ) const
 
 void NWindow::onMousePress( int x, int y, int button )
 {
-  NVisualComponent* oldFocus = selectedBase_;
+  NVisualComponent* oldFocus = 0;
 
   graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
   if (obj!=NULL) {
     // send mousepress
     if ( obj->enabled() ) {
+      oldFocus = selectedBase_;
       selectedBase_ = obj;
-      obj->onMousePress( x - obj->absoluteSpacingLeft() +
-      obj->scrollDx(), y - obj->absoluteSpacingTop() + obj->scrollDy(), button);
-    }
-    // end of mousepress
-    if (obj!=pane_ && (mapped())) {
-      if (button==1) {
-        dragBase_ = obj;
-        initDrag(obj,x,y);
+      if (oldFocus && oldFocus != selectedBase_) oldFocus->onExit();
+      if (selectedBase_) {
+        selectedBase_->onMousePress( x - selectedBase_->absoluteSpacingLeft() +
+        selectedBase_->scrollDx(), y - selectedBase_->absoluteSpacingTop() + selectedBase_->scrollDy(), button);
       }
-     }
 
-    if (oldFocus && oldFocus != selectedBase_) oldFocus->onExit();
+      // end of mousepress
+      if (selectedBase_ && selectedBase_!=pane_ && (mapped())) {
+        if (button==1) {
+          dragBase_ = selectedBase_;
+          initDrag(obj,x,y);
+        }
+      }
+    }
+
   }
 }
 
