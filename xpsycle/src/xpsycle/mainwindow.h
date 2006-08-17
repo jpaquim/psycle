@@ -120,6 +120,8 @@ private:
     NPanel* page;
     NTabBook* book;
 
+    int count;
+
     void initMenu();
     void initDialogs();
     void initBars();

@@ -21,12 +21,12 @@ namespace psycle
 
 			virtual ~Player();
 
-			Song inline & song() throw() {
+			Song inline & song() {
 				return *song_;
 			}
 
-			void inline song(Song & song) {
-				song_ = &song;
+			void inline song(Song * song) {
+				song_ = song;
 			}
 
 			void setFileName( const std::string & fileName);

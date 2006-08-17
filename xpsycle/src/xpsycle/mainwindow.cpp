@@ -72,7 +72,7 @@ MainWindow::MainWindow()
 
   updateNewSong();
  
-
+  count = 0;
 //  updateStatusBar();
 
   //childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
@@ -95,8 +95,10 @@ ChildView* MainWindow::addChildView()
     childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
     childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
-  book->addPage( childView_, childView_->song()->name() );
+  book->addPage( childView_, childView_->song()->name() + stringify(count) );
   book->setActivePage( childView_ );
+
+  count++;
 
 	NTab* tab = book->tab( childView_ );
   tab->click.connect(this,&MainWindow::onTabChange);
@@ -113,12 +115,12 @@ ChildView* MainWindow::addChildView()
 
   if (songMap.size() > 1) book->setTabBarVisible(true);
 
-  Global::pPlayer()->song( *childView_->song() );
+  Global::pPlayer()->song( childView_->song() );
 
   selectedChildView_ =  childView_;
 
   return childView_;
-}
+} 
 
 void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
    std::map<NObject*,ChildView*>::iterator it = songMap.find( ev->sender() ); 
@@ -133,12 +135,17 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
 
      ChildView* view = it->second;
      if (view == selectedChildView_) {
+       Global::pPlayer()->Stop();
+       Global::pPlayer()->song(0);
        selectedChildView_ = 0;
        updateNewSong();
      }
+     songMap.erase(it);
      book->removePage(view);
-   
-		 songMap.erase(it);
+       
+     std::cout << songMap.size() << std::endl;
+     std::cout << songTabMap.size() << std::endl;
+		 
      if (songMap.size() <= 1) {
        book->setTabBarVisible(false);
      }
@@ -149,11 +156,12 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
 
 void MainWindow::onTabChange( NButtonEvent * ev )
 {
-  std::map<NObject*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
-  if ( it != songMap.end() ) {
+ std::map<NObject*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
+  if ( it != songTabMap.end() ) {
     ChildView* view = it->second;
+    std::cout << view->song()->name() << std::endl;
 		Global::pPlayer()->Stop();
-    Global::pPlayer()->song( *view->song() );
+    Global::pPlayer()->song( view->song() );
     selectedChildView_ = view;
     updateNewSong();
     pane()->repaint();
