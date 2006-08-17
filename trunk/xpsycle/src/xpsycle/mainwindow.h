@@ -70,7 +70,7 @@ private:
     void initSongs();
     ChildView* addChildView();
 
-    Song* selectedSong_;
+    ChildView* selectedChildView_;
 
 
     bool noFileWasYetLoaded;
@@ -220,6 +220,8 @@ private:
 
 		std::map<NObject*, ChildView*> songMap;
     std::map<NObject*, ChildView*> songTabMap;
+
+    void updateNewSong();
 
 };
 

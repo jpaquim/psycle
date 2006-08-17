@@ -69,6 +69,7 @@ public:
 
     PatternView* patternView();
     MachineView* machineView();
+    SequencerBar* sequencerBar();
     WaveEdFrame* waveEditor();
     SequencerGUI* sequencerView();
 
@@ -84,6 +85,7 @@ public:
 
 		void showMachineView();
 		void showPatternView();
+    void showSequencerView();
 
 		void update();
 
