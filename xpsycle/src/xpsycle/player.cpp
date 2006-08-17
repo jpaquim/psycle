@@ -88,6 +88,8 @@ namespace psycle
 
 		void Player::SampleRate(const int sampleRate)
 		{
+       if ( !song_ ) return;
+
 			///\todo update the source code of the plugins...
 			if(m_SampleRate != sampleRate)
 			{
