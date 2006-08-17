@@ -32,8 +32,8 @@ public:
 
     ~NNoteBook();
 
-    void add(NPanel* page);
-    void setActivePage(NPanel* page);
+    void add(NVisualComponent* page);
+    void setActivePage(NVisualComponent* page);
     void setActivePage(unsigned int index);
 
     virtual void resize();
@@ -44,7 +44,7 @@ public:
 
 private:
 
-    NPanel* visiblePage_;
+    NVisualComponent* visiblePage_;
 
 };
 

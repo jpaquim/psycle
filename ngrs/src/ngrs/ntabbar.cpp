@@ -38,7 +38,7 @@ NTabBar::~NTabBar()
 {
 }
 
-void NTabBar::addTab( NTab * tab, NPanel* page )
+void NTabBar::addTab( NTab * tab, NVisualComponent* page )
 {
   NTogglePanel::add(tab);
 
@@ -58,7 +58,7 @@ void NTabBar::setNoteBook( NNoteBook * noteBook )
 void NTabBar::onTabClick( NButtonEvent * ev )
 {
  if (noteBook_!=0) {
-   std::map<NObject*,NPanel*>::iterator itr;
+   std::map< NObject*, NVisualComponent* >::iterator itr;
    if ( (itr = pageMap_.find(ev->sender())) == pageMap_.end())
    {
        // not my Tab
@@ -87,9 +87,9 @@ void NTabBar::setOrientation( int orientation )
   }
 }
 
-void NTabBar::setActiveTab( NPanel * page )
+void NTabBar::setActiveTab( NVisualComponent * page )
 {
-  std::map<NObject*,NPanel*>::iterator itr = pageMap_.begin();
+  std::map< NObject*, NVisualComponent* >::iterator itr = pageMap_.begin();
   for ( ; itr != pageMap_.end(); itr++) {
     if (itr->second == page) {
        setDown((NCustomButton*)itr->first);
@@ -98,9 +98,9 @@ void NTabBar::setActiveTab( NPanel * page )
   repaint();
 }
 
-NCustomButton * NTabBar::tab( NPanel * page )
+NCustomButton * NTabBar::tab( NVisualComponent * page )
 {
-  std::map<NObject*,NPanel*>::iterator itr = pageMap_.begin();
+  std::map< NObject*, NVisualComponent* >::iterator itr = pageMap_.begin();
   for ( ; itr != pageMap_.end(); itr++) {
     if (itr->second == page) {
        return (NCustomButton*) itr->first;
@@ -120,7 +120,7 @@ void NTabBar::setActiveTab( unsigned int index )
 
 void NTabBar::removeChild( NVisualComponent * child )
 {
-  std::map<NObject*,NPanel*>::iterator itr = pageMap_.begin();
+  std::map<NObject*,NVisualComponent*>::iterator itr = pageMap_.begin();
   for ( ; itr != pageMap_.end(); itr++) {
     if (itr->second == child) {
        pageMap_.erase(itr);
