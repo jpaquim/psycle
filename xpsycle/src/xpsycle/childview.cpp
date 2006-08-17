@@ -23,6 +23,7 @@
 #include "newmachine.h"
 #include "waveedframe.h"
 #include "sequencergui.h"
+#include "sequencerbar.h"
 #include <ngrs/napp.h>
 #include <inttypes.h>
 #include <ngrs/ndockpanel.h>
@@ -268,6 +269,12 @@ Song * ChildView::song( )
   return _pSong;
 }
 
+SequencerBar * ChildView::sequencerBar( )
+{
+  return sequencerBar_;
+}
+
+
 }
 }
 
@@ -290,5 +297,12 @@ void psycle::host::ChildView::update( )
   sequencerView()->update();
   machineView()->update();
 }
+
+void psycle::host::ChildView::showSequencerView( )
+{
+  tabBook_->setActivePage(3);
+  repaint();
+}
+
 
 
