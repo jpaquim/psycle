@@ -24,12 +24,13 @@ NPopupWindow::NPopupWindow()
  : NWindow()
 {
   setDecoration(false);
-  NApp::addPopupWindow(this);
+  NApp::registerPopupWindow(this);
 }
 
 
 NPopupWindow::~NPopupWindow()
 {
+  NApp::unregisterPopupWindow(this);
 }
 
 void NPopupWindow::onMessage( NEvent * ev )

@@ -729,6 +729,8 @@ void NVisualComponent::removeChilds( )
 
 void NVisualComponent::removeChild( NVisualComponent * child )
 {
+  std::cout << "remove child" << std::endl;
+
   std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
   components.erase(itr);
   child->setParent(0);
@@ -739,8 +741,8 @@ void NVisualComponent::removeChild( NVisualComponent * child )
   if ( tItr != tabOrder_.end() ) tabOrder_.erase(tItr);
 
   NApp::addRemovePipe(child);
-  if (window()!=0) window()->checkForRemove(0);
-  if (layout_!=0) {
+  if ( window() ) window()->checkForRemove(child);
+  if ( layout_ ) {
       layout_->remove(child);
       layout_->align(this);
   }

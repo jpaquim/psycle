@@ -54,7 +54,8 @@ public:
    static void doRepaint(NWindow* win);
 
    static NWindow* mouseOverWindow();
-   static void addPopupWindow(NWindow* win);
+   static void registerPopupWindow(NWindow* win);
+   static void unregisterPopupWindow(NWindow* win);
    static void unmapPopupWindows();
 
    static bool popupUnmapped_;

@@ -75,6 +75,11 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
+  NTabBook* book = new NTabBook();
+    NPanel* page = new NPanel();
+    book->addPage( page, "toll" );
+    book->removePage(page);
+
 	NPanel* panel2 = new NPanel();
 		panel2->setBackground( NColor(0,0,255) );
 		panel2->setTransparent( false );

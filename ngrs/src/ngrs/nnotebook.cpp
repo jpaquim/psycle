@@ -91,4 +91,16 @@ int NNoteBook::preferredHeight( ) const
   } else return 10;
 }
 
+void NNoteBook::removeChild( NVisualComponent * child )
+{
+  if ( child == visiblePage_ ) visiblePage_ = 0;
+  NPanel::removeChild( child ) ;
+}
+
+void NNoteBook::removeChilds( )
+{
+  visiblePage_ = 0;
+  NPanel::removeChilds();
+}
+
 

@@ -128,7 +128,7 @@ void NTabBar::removeChild( NVisualComponent * child )
     }
   }
 
-  NVisualComponent::removeChild(child);
+  NTogglePanel::removeChild(child);
 }
 
 

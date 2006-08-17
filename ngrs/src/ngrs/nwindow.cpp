@@ -518,6 +518,11 @@ void NWindow::setPositionToScreenCenter( )
 
 void NWindow::checkForRemove( NRuntime * obj )
 {
+  if (obj == 0) {
+     lastOver_ = 0;
+     dragBase_ = 0;
+     selectedBase_ = 0;
+  } else
   if ( lastOver_ == obj || (lastOver_ && lastOver_->isChildOf(obj)))  {
      lastOver_ = 0;
      dragBase_ = 0;

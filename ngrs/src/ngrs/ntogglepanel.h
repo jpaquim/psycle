@@ -40,6 +40,9 @@ public:
     virtual void add(NCustomButton* component, const NAlignConstraint & align );
     virtual void add(NVisualComponent* component, const NAlignConstraint & align );
 
+    virtual void removeChild( NVisualComponent* child);
+    virtual void removeChilds();
+
     void setDown(NCustomButton* btn);
 
     NVisualComponent* selectedComponent();
