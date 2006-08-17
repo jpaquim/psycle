@@ -51,16 +51,19 @@ NPanel * NTabBook::addNewPage( const std::string & tabName )
   return page;
 }
 
-void NTabBook::removePage( NPanel * page )
+void NTabBook::removePage( NVisualComponent * page )
 {
-  NTab* tabbutton = tab(page);
-  if (tabbutton) {
-    tabBar_->removeChild(tabbutton);
-    book_->removeChild(page);
+  NTab* tabbutton = tab( page );
+  if ( tabbutton ) {
+    tabBar_->removeChild( tabbutton );
+    book_->removeChild( page );
+    if ( book_->visualComponents().size() > 0 ) {
+      setActivePage( book_->visualComponents().back() );
+    }
   }
 }
 
-void NTabBook::addPage( NPanel * page, const std::string & tabName )
+void NTabBook::addPage( NVisualComponent * page, const std::string & tabName )
 {
   NTab* tab = new NTab();
   tab->setText(tabName);
@@ -68,7 +71,7 @@ void NTabBook::addPage( NPanel * page, const std::string & tabName )
   book_->add(page);
 }
 
-void NTabBook::setActivePage( NPanel * page )
+void NTabBook::setActivePage( NVisualComponent * page )
 {
   book_->setActivePage(page);
   tabBar_->setActiveTab(page);
@@ -87,7 +90,7 @@ void NTabBook::setTabBarAlign( int align )
   updateAlign();
 }
 
-NTab * NTabBook::tab( NPanel * page )
+NTab * NTabBook::tab( NVisualComponent * page )
 {
   return (NTab*) tabBar_->tab(page);
 }

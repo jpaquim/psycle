@@ -39,17 +39,17 @@ public:
     ~NTabBook();
 
     NPanel* addNewPage(const std::string & tabName);
-    void addPage(NPanel* page, const std::string & tabName);
-    void removePage( NPanel* page );
+    void addPage(NVisualComponent* page, const std::string & tabName);
+    void removePage( NVisualComponent* page );
 
-    void setActivePage(NPanel* page);
+    void setActivePage(NVisualComponent* page);
     void setActivePage(int index);
     void setTabBarAlign(int align);
 
     void setTabBarVisible( bool on);
     bool tabBarVisible() const;
 
-    NTab* tab(NPanel* page);
+    NTab* tab( NVisualComponent* page );
 
 private:
 

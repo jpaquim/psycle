@@ -40,12 +40,12 @@ public:
 
     ~NTabBar();
 
-   void addTab(NTab* tab, NPanel* page);
+   void addTab(NTab* tab, NVisualComponent* page);
    void setNoteBook(NNoteBook* noteBook);
-   NCustomButton* tab(NPanel* page);
+   NCustomButton* tab(NVisualComponent* page);
 
    void setOrientation(int orientation);
-   void setActiveTab(NPanel* page);
+   void setActiveTab(NVisualComponent* page);
    void setActiveTab(unsigned int index);
 
    virtual void removeChild( NVisualComponent * child );
@@ -57,7 +57,7 @@ private:
 
    int orientation_;
 
-   std::map<NObject*,NPanel*> pageMap_;
+   std::map< NObject*, NVisualComponent* > pageMap_;
    NNoteBook* noteBook_;
 
    void onTabClick(NButtonEvent* sender);
