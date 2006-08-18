@@ -11,7 +11,7 @@
 //#include <operating_system/logger.hpp>
 #include <cstdint>
 
-template<class T> inline std::string toHex(T value , int nums = 4) {
+template<class T> inline std::string toHex(T value , int nums = 8) {
 
 		std::ostringstream buffer;
 		buffer.setf(std::ios::uppercase);
@@ -26,10 +26,10 @@ template<class T> inline std::string toHex(T value , int nums = 4) {
 template<class T> inline T str_hex(const std::string &  value, int pos) {
    T result;
 
-	 pos = pos*4;
+	 pos = pos*8;
 
    std::stringstream str;
-   str << value.substr(pos,4);
+   str << value.substr(pos,8);
    str >> std::hex >> result;
 
    return result;
@@ -339,6 +339,8 @@ namespace psycle
 
 		std::string Instrument::toXml( ) const
 		{
+    std::cout << "loopStart" << waveLoopStart << std::endl;
+
 			std::ostringstream xml;
       xml << "<instrument name='" << std::string(_sName) << "'>" << std::endl;
 
@@ -496,10 +498,11 @@ namespace psycle
 
 			int pos = 0;
 
-      waveLength = str_hex<int> (header,pos++);
+      waveLength = str_hex<unsigned int> (header,pos++);
+			std::cout << waveLength << std::endl;
 			waveVolume = str_hex<int> (header,pos++);
-			waveLoopStart = str_hex<int> (header,pos++);
-			waveLoopEnd = str_hex<int> (header,pos++);
+			waveLoopStart = str_hex<unsigned int> (header,pos++);
+			waveLoopEnd = str_hex<unsigned int> (header,pos++);
        
 			waveTune = str_hex<int> (header,pos++);
 			waveFinetune = str_hex<int> (header,pos++);
