@@ -30,6 +30,7 @@
 #include "waveedframe.h"
 #include "sequencergui.h"
 #include "wavesavedlg.h"
+#include "newmachine.h"
 #include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
@@ -39,6 +40,7 @@
 #include <ngrs/nbevelborder.h>
 #include <ngrs/nstatusbar.h>
 #include <ngrs/ntextstatusitem.h>
+#include <ngrs/nfiledialog.h>
 
 namespace psycle { namespace host {
 
@@ -68,6 +70,9 @@ MainWindow::MainWindow()
     book->setTabBarVisible( false );
   pane()->add(book,nAlClient);
 
+  newMachineDlg_ = new NewMachine( );
+  add(newMachineDlg_);
+
   initSongs();
 
   updateNewSong();
@@ -95,6 +100,7 @@ ChildView* MainWindow::addChildView()
     childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
     childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
+    childView_->machineViewDblClick.connect(this,&MainWindow::onNewMachine);
   book->addPage( childView_, childView_->song()->name() + stringify(count) );
   book->setActivePage( childView_ );
 
@@ -574,47 +580,68 @@ void MainWindow::onFileNew( NButtonEvent * ev )
 
 void MainWindow::onFileOpen( NButtonEvent * ev )
 {
-  usleep(200); // ugly hack but works
-  progressBar_->setVisible(true);
-  pane()->resize();
-  pane()->repaint();
-  std::string fileName;
-  if ( (fileName = childView_->onFileLoadSong(0)) != "" ) {
-			// stop player
-			Global::pPlayer()->Stop();
-			// disable audio driver
-			Global::configuration()._pOutputDriver->Enable(false);
-		
-      ChildView* newView = addChildView();  
-  
-			newView->song()->load(fileName);
-      newView->update();
-			// enable audio driver
-			Global::configuration()._pOutputDriver->Enable(true);
+  // add and create the temporay fileDialog
+  NFileDialog* openDialog = new NFileDialog();
+    openDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
+  add( openDialog );
 
-      if (noFileWasYetLoaded) {
-        recentFileMenu_->removeChilds();
-        noFileWasYetLoaded = false;
-      }
-      recentFileMenu_->add(new NMenuItem(fileName));
+  if ( !openDialog->execute() ) {
+     std::string fileName = openDialog->fileName();
+     //  progressBar_->setVisible(true);
+     //pane()->resize();
+     // pane()->repaint();
+     if ( fileName != "" ) {
+			 // stop player
+			 Global::pPlayer()->Stop();
+			 // disable audio driver
+			 Global::configuration()._pOutputDriver->Enable(false);
+		   // add a new Song tab
+       ChildView* newView = addChildView();  
+       // load the song
+			 newView->song()->load(fileName);
+       // update gui to new song
+       updateNewSong();
+       pane()->resize();
+       pane()->repaint();
+			 // enable audio driver
+			 Global::configuration()._pOutputDriver->Enable(true);
+       // update file recent open sub menu
+       if (noFileWasYetLoaded) {
+         recentFileMenu_->removeChilds();
+         noFileWasYetLoaded = false;
+       }
+       recentFileMenu_->add(new NMenuItem(fileName));
+     }
+     //progressBar_->setVisible(false);
   }
-  progressBar_->setVisible(false);
-  updateNewSong();
-  pane()->resize();
-  pane()->repaint();
+
+  // remove the "Open"-FileDialog
+  removeChild( openDialog);
 }
 
 void MainWindow::onFileSave( NButtonEvent * ev )
 {
+ 
 }
 
 void MainWindow::onFileSaveAs( NButtonEvent * ev )
 {
-  usleep(200); // ugly hack but works
-  progressBar_->setVisible(true);
-  childView_->onFileSaveSong(0);
-  progressBar_->setVisible(false);
-  pane()->repaint();
+  if ( !selectedChildView_ ) return;
+
+  NFileDialog* saveDialog = new NFileDialog();
+    saveDialog->addFilter("*.psy [psy4 song format]","!S*.psy");
+    saveDialog->setMode(nSave);
+  add( saveDialog );
+
+  if ( saveDialog->execute() ) {
+    selectedChildView_->song()->save( saveDialog->fileName() );
+  }
+
+  //progressBar_->setVisible(true);
+  //childView_->onFileSaveSong(0);  
+  //progressBar_->setVisible(false);
+  
+  removeChild( saveDialog );
 }
 
 void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_t & b , const std::string & t)
@@ -742,7 +769,7 @@ void MainWindow::setAppSongBpm(int x)
       if (Global::pPlayer()->_playing )  {
         selectedSong_->setBpm(Global::pPlayer()->bpm+x);
       } else selectedSong_->setBpm(selectedSong_->bpm()+x);
-      Global::pPlayer()->SetBPM(selectedSong_->bpm(),selectedSong_->LinesPerBeat());
+      Global::pPlayer()->SetBPM( (int) selectedSong_->bpm(),selectedSong_->LinesPerBeat());
       bpm = selectedSong_->bpm();
     }
     else bpm = Global::pPlayer()->bpm;
@@ -832,10 +859,9 @@ bool MainWindow::checkUnsavedSong( )
   add(box);
   bool result = false;
   int choice = box->execute();
-  std::cout << choice << std::endl;
   switch (choice) {
     case nMsgOkBtn :
-      childView_->onFileSaveSong(0);
+      onFileSave(0);
       result = true;
     break;
     case nMsgUseBtn:
@@ -939,8 +965,28 @@ void MainWindow::onHelpMenuKeys( NButtonEvent * ev )
 
 void MainWindow::onNewMachine( NButtonEvent * ev )
 {
-  
-  childView_->onMachineViewDblClick(ev);
+  if ( !selectedChildView_ ) return;
+
+  if (ev->button()==1) {
+   if (newMachineDlg_->execute()) {
+      if (newMachineDlg_->outBus()) {
+          // Generator selected
+          int x = 10; int y = 10;
+          int fb = selectedChildView_->song()->GetFreeBus();
+          if (newMachineDlg_->sampler()) {
+            selectedChildView_->song()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
+            childView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
+            childView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
+            childView_->machineView()->repaint();
+          } else {
+            childView_->song()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg_->getDllName(),fb);
+            childView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
+            childView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
+            childView_->machineView()->repaint();
+          }
+      }
+    }
+  }
 }
 
 void MainWindow::onRenderAsWave( NButtonEvent * ev )
@@ -1135,5 +1181,3 @@ void psycle::host::MainWindow::updateNewSong( )
   bpmDisplay_->setNumber( (int) selectedChildView_->song()->bpm() );
   bpmDisplay_->repaint();
 }
-
-

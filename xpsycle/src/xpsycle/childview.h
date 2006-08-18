@@ -26,7 +26,6 @@
 #include "sequencerbar.h"
 #include "global.h"
 #include <ngrs/ntabbook.h>
-#include <ngrs/nfiledialog.h>
 #include <ngrs/ntimer.h>
 #include <ngrs/ntabbook.h>
 
@@ -34,7 +33,7 @@
 namespace psycle {
 	namespace host {
 
-class NewMachine;
+
 class WaveEdFrame;
 class SequencerGUI;
 
@@ -52,20 +51,14 @@ public:
 
     Song* song();
 
-    std::string FileLoadSongNamed(const std::string & fName);
-    void FileSaveSongNamed(const std::string & fName);
-
     void setTitleBarText( );
-
-    // connect to signals
-    std::string onFileLoadSong(NObject* sender);
-    void onFileSaveSong(NObject* sender);
-
+    
     void onPatternView(NObject* sender);
 
-    signal0<> newSongLoaded;
+    // connect to signals
     signal1<Machine*> newMachineAdded;
     signal1<Machine*> machineSelected;
+    signal1<NButtonEvent*> machineViewDblClick;
 
     PatternView* patternView();
     MachineView* machineView();
@@ -76,8 +69,6 @@ public:
     void play();
     void playFromStart();
     void enableSound();
-
-    NewMachine* newMachineDlg();
 
     NTimer timer;
 
@@ -93,12 +84,9 @@ private:
 
     Song* _pSong;
 
-    NewMachine* newMachineDlg_;
-
     NTabBook* tabBook_;
 
-    NFileDialog* getOpenFileName_;
-    NFileDialog* getSaveFileName_;
+//    NFileDialog* getSaveFileName_;
 
     SequencerBar* sequencerBar_;
     MachineView* machineView_;

@@ -71,7 +71,7 @@ private:
 class NewMachine : public NWindow
 {
 public:
-    NewMachine( Song* song );
+    NewMachine( );
 
     ~NewMachine();
 
@@ -85,7 +85,6 @@ public:
 
 private:
 
-  Song* _pSong;
   std::string dllName_;
 
   bool do_Execute;

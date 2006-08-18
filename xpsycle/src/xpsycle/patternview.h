@@ -24,7 +24,6 @@
 #include "song.h"
 #include "singlepattern.h"
 #include <ngrs/npage.h>
-#include <ngrs/nbitmap.h>
 #include <ngrs/npoint3d.h>
 #include <ngrs/npopupmenu.h>
 #include <ngrs/nscrollbar.h>
@@ -66,8 +65,6 @@ class PatternView : public NPanel
       NPoint dSoloCoords;
       NPoint dgX0Coords;
       NPoint dg0XCoords;
-
-      NBitmap bitmap;
 
       virtual void onMousePress(int x, int y, int button);
       virtual int preferredWidth();

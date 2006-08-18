@@ -39,9 +39,6 @@ ChildView::ChildView()
 {
   _pSong = new Song();
 
-  newMachineDlg_ = new NewMachine( _pSong );
-  add(newMachineDlg_);
-
   setLayout( NAlignLayout() );
 
   add(sequencerBar_ = new SequencerBar(), nAlLeft);
@@ -68,8 +65,6 @@ ChildView::ChildView()
   sequencerView_->addSequencerLine();
 
   
-
-
   NDockPanel* macDock = new NDockPanel(machineView_);
   tabBook_->addPage(macDock,"Machine View");
   NDockPanel* patDock = new NDockPanel(patternView_);
@@ -80,15 +75,6 @@ ChildView::ChildView()
   tabBook_->addPage(seqDock,"Sequencer View");
 
   tabBook_->setActivePage(macDock);
-
-  getOpenFileName_ = new NFileDialog();
-    getOpenFileName_->addFilter("*.psy [psy3 song format]","!S*.psy");
-  add(getOpenFileName_);
-
-  getSaveFileName_ = new NFileDialog();
-    getSaveFileName_->addFilter("*.psy [psy4 song format]","!S*.psy");
-    getSaveFileName_->setMode(nSave);
-  add(getSaveFileName_);
 
   machineView_->createGUIMachines();
 
@@ -103,52 +89,6 @@ ChildView::~ChildView()
   delete _pSong;
 }
   
- 
-std::string ChildView::onFileLoadSong( NObject * sender )
-{
-  if (getOpenFileName_->execute()) {
-      NApp::flushEventQueue();
-      OnFileLoadSongNamed(getOpenFileName_->fileName(),1);
-      return getOpenFileName_->fileName();
-  }
-  return "";
-}
-
-void ChildView::onFileSaveSong( NObject * sender )
-{
-  if (getSaveFileName_->execute()) {
-      NApp::flushEventQueue();
-      FileSaveSongNamed(getSaveFileName_->fileName());
-  }
-}
-
-void ChildView::FileSaveSongNamed(const std::string & fName) {
-  _pSong->save(fName);
-}
-
-std::string ChildView::OnFileLoadSongNamed( const std::string & fName, int fType )
-{
-  if( fType == 2 )
-  {
-      //FILE* hFile=fopen(fName.c_str(),"rb");
-      //LoadBlock(hFile);
-      //fclose(hFile);
-     return "";
-  } else
-  {
-    //if (CheckUnsavedSong("Load Song"))
-      {
-        return FileLoadSongNamed(fName);
-      }
-  }
-}
-
-std::string ChildView::FileLoadSongNamed( std::string const & fName )
-{
-  return fName;
-}
-
-
 void ChildView::setTitleBarText( )
 {
   std::string titlename = "[";
@@ -216,37 +156,13 @@ MachineView * ChildView::machineView( )
   return machineView_;
 }
 
-NewMachine * ChildView::newMachineDlg( )
-{
-  return newMachineDlg_;
-}
-
 void ChildView::onMachineSelected( Machine* mac ) {
    machineSelected.emit( mac );
 }
 
 void ChildView::onMachineViewDblClick( NButtonEvent * ev )
 {
-  if (ev->button()==1) {
-    if (newMachineDlg()->execute()) {
-      if (newMachineDlg()->outBus()) {
-          // Generator selected
-          int x = 10; int y = 10;
-          int fb = _pSong->GetFreeBus();
-          if (newMachineDlg()->sampler()) {
-            _pSong->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
-            machineView()->addMachine( _pSong->_pMachine[fb]);
-            newMachineAdded.emit( _pSong->_pMachine[fb]);
-            machineView()->repaint();
-          } else {
-            _pSong->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName(),fb);
-            machineView()->addMachine( _pSong->_pMachine[fb]);
-            newMachineAdded.emit( _pSong->_pMachine[fb]);
-            machineView()->repaint();
-          }
-      }
-    }
-    }
+  machineViewDblClick.emit( ev );
 }
 
 WaveEdFrame * ChildView::waveEditor( )
@@ -304,6 +220,3 @@ void psycle::host::ChildView::showSequencerView( )
   tabBook_->setActivePage(3);
   repaint();
 }
-
-
-

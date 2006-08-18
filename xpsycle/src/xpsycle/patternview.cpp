@@ -470,7 +470,6 @@ bool PatternView::moveCursorWhenPaste() const {
 /// The Header Panel Class
 PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , NPanel()
 {
-  bitmap = Global::pConfig()->icons().pattern_header_skin();
   setSkin();
   setHeight(bgCoords.height());
   skinColWidth_ = bgCoords.width();
@@ -498,6 +497,8 @@ void PatternView::Header::setSkin( )
 
 void PatternView::Header::paint( NGraphics * g )
 {
+  NBitmap & bitmap = Global::pConfig()->icons().pattern_header_skin();
+
   int startTrack = scrollDx() / pView->colWidth();
   int trackCount = spacingWidth() / pView->colWidth();
 
