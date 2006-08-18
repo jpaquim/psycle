@@ -585,7 +585,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
     openDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
   add( openDialog );
 
-  if ( !openDialog->execute() ) {
+  if ( openDialog->execute() ) {
      std::string fileName = openDialog->fileName();
      //  progressBar_->setVisible(true);
      //pane()->resize();
@@ -600,6 +600,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
        // load the song
 			 newView->song()->load(fileName);
        // update gui to new song
+       newView->update();
        updateNewSong();
        pane()->resize();
        pane()->repaint();

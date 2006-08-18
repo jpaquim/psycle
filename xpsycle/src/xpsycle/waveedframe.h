@@ -17,9 +17,9 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-//#include "waveedchildview.hpp"
 
 #include <ngrs/ndockpanel.h>
+#include <ngrs/nxmlparser.h>
 
 class NMenu;
 class NMenuBar;
@@ -91,9 +91,23 @@ private:
 	void onEditWave(NButtonEvent* ev);
 	void onInstrumentCbx(NItemEvent* ev);
 
+  void onSlotCopy(NButtonEvent* ev);
+  void onSlotPaste(NButtonEvent* ev);
 
 	void onDecInsBtn(NButtonEvent* ev);
 	void onIncInsBtn(NButtonEvent* ev);
+
+	bool mySel_;
+	int leftSize;
+	int rightSize;
+	bool onWaveLeft;
+	unsigned char* pDataLeft;
+	unsigned char* pDataRight;
+
+	int data_pos;
+	
+	void onTagParse( const NXmlParser & parser, const std::string & tagName );
+	
 
 };
 

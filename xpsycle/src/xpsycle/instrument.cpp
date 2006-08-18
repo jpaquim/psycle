@@ -5,8 +5,38 @@
 #include "instrument.h"
 #include "datacompression.h"
 #include "filter.h"
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 //#include <operating_system/logger.hpp>
 #include <cstdint>
+
+template<class T> inline std::string toHex(T value , int nums = 4) {
+
+		std::ostringstream buffer;
+		buffer.setf(std::ios::uppercase);
+
+		buffer.str("");
+		buffer << std::setfill('0') << std::hex << std::setw( nums );
+		buffer << (int) value;
+
+		return buffer.str();
+}
+
+template<class T> inline T str_hex(const std::string &  value, int pos) {
+   T result;
+
+	 pos = pos*4;
+
+   std::stringstream str;
+   str << value.substr(pos,4);
+   str >> std::hex >> result;
+
+   return result;
+}
+
+
+
 namespace psycle
 {
 	namespace host
@@ -306,5 +336,191 @@ namespace psycle
 				delete[] pData2;
 			}
 		}
-	}
+
+		std::string Instrument::toXml( ) const
+		{
+			std::ostringstream xml;
+      xml << "<instrument name='" << std::string(_sName) << "'>" << std::endl;
+
+      xml << "<header bin='";
+      xml << toHex(_loop);
+      xml << toHex(_lines);      
+			xml << toHex(_NNA);
+
+			xml << toHex(ENV_AT);
+			xml << toHex(ENV_DT);
+			xml << toHex(ENV_SL);
+			xml << toHex(ENV_RT);
+			
+			xml << toHex(ENV_F_AT);
+			xml << toHex(ENV_F_DT);
+			xml << toHex(ENV_F_SL);
+			xml << toHex(ENV_F_RT);
+
+			xml << toHex(ENV_F_CO);
+			xml << toHex(ENV_F_RQ);
+			xml << toHex(ENV_F_EA);
+			xml << toHex(ENV_F_TP);
+
+			xml << toHex(_pan);
+			xml << toHex(_RPAN);
+			xml << toHex(_RCUT);
+			xml << toHex(_RRES);
+
+			// now we have to write out the waves, but only if valid
+
+			int numwaves = (waveLength > 0) ? 1 : 0; // The sampler has never supported more than one sample per instrument, even when the GUI did.
+
+			xml << toHex(numwaves);
+			
+			xml << "'>" << std::endl;
+
+			if (waveLength > 0)
+			{
+				std::uint8_t * pData1(0);
+				std::uint8_t * pData2(0);
+				std::uint32_t size1=0,size2=0;
+
+				size1 = DataCompression::SoundSquash(waveDataL,&pData1,waveLength);
+				if (waveStereo)
+				{
+					size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
+				}
+				
+				std::uint32_t index = 0;
+				xml << "<wave name='" << waveName << "' bin='";
+				std::uint32_t version = CURRENT_FILE_VERSION_WAVE;
+				std::uint32_t size =
+					sizeof index +
+					sizeof waveLength +
+					sizeof waveVolume +
+					sizeof waveLoopStart +
+					sizeof waveLoopEnd +
+					sizeof waveTune +
+					sizeof waveFinetune +
+					sizeof waveStereo +
+					std::strlen(waveName) + 1 +
+					size1 +
+					size2;
+        
+        xml << toHex(waveLength);
+				xml << toHex(waveVolume);
+				xml << toHex(waveLoopStart);
+				xml << toHex(waveLoopEnd);
+       
+				xml << toHex(waveTune);
+				xml << toHex(waveFinetune);
+				xml << toHex(waveLoopType);
+				xml << toHex(waveStereo);
+
+				xml << "'>" << std::endl;
+
+				xml << "<waveleft size='">
+				xml << toHex(size1) <<"'>";
+				
+				for (int k = 0; k < size1; k++) {
+					xml << "<hex v='" << toHex(pData1[k]) << "'/>";
+				}				
+				xml << std::endl;
+				xml << "</waveleft>" << std::endl;
+				delete[] pData1;
+				if (waveStereo)
+				{
+					xml << "<waveright size='">
+					xml << toHex(size2) <<"'>";
+				
+					for (int k = 0; k < size2; k++) {
+						xml << "<hex v='" << toHex(pData2[k]) << "'/>";
+					}				
+					xml << std::endl;
+					xml << "</waveright>" << std::endl;
+				}
+				delete[] pData2;
+			}
+			xml << "</wave>" << std::endl;
+			xml << "</header>";
+			xml << "</instrument>";
+
+			return xml.str();
+		}
+
+		void Instrument::createHeader( const std::string & header )
+		{
+			int pos=0;
+			
+      _loop = str_hex<int> (header, pos++);
+      _lines = str_hex<int> (header, pos++);
+			_NNA = str_hex<int> (header, pos++);
+			ENV_AT = str_hex<int> (header, pos++);
+			ENV_DT = str_hex<int> (header, pos++);
+			ENV_SL = str_hex<int> (header, pos++);
+			ENV_RT = str_hex<int> (header, pos++);
+			
+			ENV_F_AT = str_hex<int> (header,pos++);
+			ENV_F_DT = str_hex<int> (header,pos++);
+			ENV_F_SL = str_hex<int> (header,pos++);
+			ENV_F_RT = str_hex<int> (header,pos++);
+
+			ENV_F_CO = str_hex<int> (header,pos++);
+			ENV_F_RQ = str_hex<int> (header,pos++);
+			ENV_F_EA = str_hex<int> (header,pos++);
+			ENV_F_TP = str_hex<int> (header,pos++);
+
+			_pan = str_hex<int> (header,pos++);
+			_RPAN = str_hex<int> (header,pos++);
+			_RCUT = str_hex<int> (header,pos++);
+			_RRES = str_hex<int> (header,pos++);
+
+      int numwaves = str_hex<int> (header,pos++);
+		}
+
+		void Instrument::setName( const std::string & name )
+		{
+			int size_count = 0;
+			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
+				_sName[size_count] = *it;
+			}	
+      _sName[size_count++] = '0';
+		}
+
+		void Instrument::createWavHeader( const std::string & name, const std::string & header )
+		{
+			int size_count = 0;
+			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
+				waveName[size_count] = *it;
+			}	
+      waveName[size_count++] = '0';
+
+			int pos = 0;
+
+      waveLength = str_hex<int> (header,pos++);
+			waveVolume = str_hex<int> (header,pos++);
+			waveLoopStart = str_hex<int> (header,pos++);
+			waveLoopEnd = str_hex<int> (header,pos++);
+       
+			waveTune = str_hex<int> (header,pos++);
+			waveFinetune = str_hex<int> (header,pos++);
+			waveLoopType = str_hex<int> (header,pos++);
+			waveStereo = str_hex<int> (header,pos++);
+		}
+
+		void Instrument::setCompressedData( unsigned char * left, unsigned char * right )
+		{			
+			bool err = DataCompression::SoundDesquash( left , &waveDataL );
+			if (waveStereo) {
+				bool err = DataCompression::SoundDesquash( right, &waveDataR );
+			}
+		}
+
+	} // end of psycle host namespace
 }
+
+
+
+
+
+
+
+
+
+ // end of psycle namespace
