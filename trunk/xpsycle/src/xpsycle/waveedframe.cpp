@@ -455,10 +455,9 @@ void WaveEdFrame::onTagParse( const NXmlParser & parser, const std::string & tag
 		} else 
 		if ( tagName == "hex" ) {
 			if (onWaveLeft) {
-				pDataLeft[data_pos++] = str_hex<int>( parser.getAttribValue("v") );
-
+				inst->getData( pDataLeft, parser.getAttribValue("v"));
 			} else {
-				pDataRight[data_pos++] = str_hex<int>( parser.getAttribValue("v") );
+				inst->getData( pDataRight, parser.getAttribValue("v"));
 			}
 		}
 	}
