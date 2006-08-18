@@ -3,6 +3,8 @@
 #pragma once
 #include "constants.h"
 #include "fileio.h"
+#include <string>
+
 namespace psycle
 {
 	namespace host
@@ -90,6 +92,17 @@ namespace psycle
 			char waveName[32];
 			signed short *waveDataL;
 			signed short *waveDataR;
+
+			// xml copy paste methods
+      std::string toXml() const;
+			void setName( const std::string & name );
+			void createHeader( const std::string & header );
+			void createWavHeader( const std::string & name, const std::string & header );
+			void setCompressedData( unsigned char* left, unsigned char* right );
+
+			private:
+
+
 			///\}
 		};
 

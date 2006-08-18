@@ -41,6 +41,18 @@
 #include <ngrs/nfiledialog.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/ntoolbarseparator.h>
+#include <ngrs/napp.h>
+#include <iostream>
+
+template<class T> inline T str_hex(const std::string &  value) {
+   T result;
+
+   std::stringstream str;
+   str << value;
+   str >> std::hex >> result;
+
+   return result;
+}
 
 namespace psycle { namespace host {
 
@@ -194,6 +206,9 @@ namespace psycle { namespace host {
 	toolBar->add(new NButton("Save"))->clicked.connect(this,&WaveEdFrame::onSaveWave);
 	toolBar->add(new NButton("Edit"))->clicked.connect(this,&WaveEdFrame::onEditInstrument);
 	toolBar->add(new NButton("Wave Ed"))->clicked.connect(this,&WaveEdFrame::onEditWave);
+
+  toolBar->add(new NButton("Copy"))->clicked.connect(this,&WaveEdFrame::onSlotCopy);
+  toolBar->add(new NButton("Paste"))->clicked.connect(this,&WaveEdFrame::onSlotPaste);
 	insCombo_->setIndex(0);
 	updateComboIns(true);
 }
@@ -364,8 +379,94 @@ void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
   }
 }
 
+void WaveEdFrame::onSlotCopy( NButtonEvent * ev )
+{
+  if ( pSong()->_pInstrument[ pSong()->instSelected ] ) {
+		std::string xml = "<instsel>";
+		xml+= pSong()->_pInstrument[ pSong()->instSelected ]->toXml();
+		xml+= "</instsel>";		
+		NApp::system().clipBoard().setAsText( xml );
+  }
+}
+
+void WaveEdFrame::onSlotPaste( NButtonEvent * ev )
+{
+	if ( NApp::system().clipBoard().asText() != "" ) {
+    NXmlParser parser;
+		mySel_ = false;
+    parser.tagParse.connect(this, &WaveEdFrame::onTagParse);
+    parser.parseString( NApp::system().clipBoard().asText() );		
+
+		if (mySel_ && (pDataLeft!=0 || pDataRight!=0) ) {
+			Instrument* inst = pSong()->_pInstrument[ pSong()->instSelected ];
+			if (inst) {
+				inst->setCompressedData(  pDataLeft, pDataRight);
+				delete pDataLeft;
+				delete pDataRight;
+			}	
+			updateComboIns(true);
+			Notify();
+			repaint();
+		}
+
+  }
+	
+}
+
+void WaveEdFrame::onTagParse( const NXmlParser & parser, const std::string & tagName ) {
+	if (tagName == "instsel") {
+		mySel_ = true;
+		onWaveLeft = true;
+		pDataLeft = 0;
+		pDataRight = 0;
+		if (pSong()->_pInstrument[ pSong()->instSelected ]) {
+			delete pSong()->_pInstrument[ pSong()->instSelected ];
+		}
+		pSong()->_pInstrument[ pSong()->instSelected ] = new Instrument();				
+	} else
+	if ( tagName == "instrument" ) {
+		std::string name = parser.getAttribValue("name");
+		Instrument* inst = pSong()->_pInstrument[ pSong()->instSelected ];
+		inst->setName( name );
+	} else
+  if (mySel_) {
+		Instrument* inst = pSong()->_pInstrument[ pSong()->instSelected ];
+
+		if ( tagName == "header" ) {
+			std::string bin  = parser.getAttribValue("bin");
+			inst->createHeader( bin );			
+		} else
+		if ( tagName == "wave" ) {
+			std::string name = parser.getAttribValue("name");
+			std::string bin  = parser.getAttribValue("bin");
+			inst->createWavHeader( name, bin);
+		} else 
+		if ( tagName == "waveleft" ) {
+			onWaveLeft = true;
+			data_pos = 0;
+			leftSize = str_hex<int>( parser.getAttribValue("size") );
+			pDataLeft = new std::uint8_t[leftSize+4];
+		} else
+		if ( tagName == "waveright" ) {
+			onWaveLeft = false;
+			data_pos = 0;
+			rightSize = str_hex<int>( parser.getAttribValue("size") );
+			pDataRight = new std::uint8_t[rightSize+4];
+		} else 
+		if ( tagName == "hex" ) {
+			if (onWaveLeft) {
+				pDataLeft[data_pos++] = str_hex<int>( parser.getAttribValue("v") );
+
+			} else {
+				pDataRight[data_pos++] = str_hex<int>( parser.getAttribValue("v") );
+			}
+		}
+	}
+}
 
 }}
+
+
 
 
 
