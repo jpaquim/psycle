@@ -75,6 +75,8 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
+  testMenu();
+
   setName("testwindow");
 
   fDialog = new NFileDialog();

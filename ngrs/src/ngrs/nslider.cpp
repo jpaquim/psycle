@@ -38,7 +38,7 @@ void NSlider::resize( )
 {
   if (orientation_ == nVertical) {
     setPos(pos_);
-    slider_->setWidth(clientWidth());
+    if (clientWidth() > 0) slider_->setWidth(clientWidth());
   } else {
     setPos(pos_);
     slider_->setHeight(clientHeight());
@@ -69,10 +69,17 @@ void NSlider::Slider::onMove( const NMoveEvent & moveEvent )
 void NSlider::onSliderMove( )
 {
    double range = max_ - min_;
-   if (orientation_ == nVertical)
+
+   if (range == 0)
+
+   std::cout << orientation_ << std::endl;
+
+   if (orientation_ == nVertical) {
      pos_ = ( range / (clientHeight()- slider_->height()) ) * slider_->top();
+   }
    else
      pos_ = ( range / (clientWidth() - slider_->width())  ) * slider_->left();
+   
    posChanged.emit(this,pos_);
 }
 
@@ -118,11 +125,16 @@ void NSlider::setRange( double min, double max )
 void NSlider::setPos( double pos )
 {
   double range = max_ - min_;
+
+  pos_ = pos;
+
+  if (range == 0) return;
+
   if (orientation_ == nVertical)
      slider_->setTop(  (int) (pos  / ((range / (clientHeight()- slider_->height()))) ));
-  else
+  else 
      slider_->setLeft( (int) (pos  / ((range / (clientWidth() - slider_->width()))) ));
-  pos_ = pos;
+  
 }
 
 double NSlider::pos( ) const
