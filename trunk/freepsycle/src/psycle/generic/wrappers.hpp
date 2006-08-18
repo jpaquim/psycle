@@ -53,7 +53,7 @@ namespace psycle
 							typename Typenames::node & node(**i);
 							for(typename Typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i)
 							{
-							loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ generic wrappers graph::init port");
+								loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ generic wrappers graph::init port");
 								typename Typenames::ports::output & output_port(**i);
 								for(typename Typenames::ports::output::underlying_type::input_ports_type::const_iterator i(output_port.underlying().input_ports().begin()) ; i != output_port.underlying().input_ports().end() ; ++i)
 								{

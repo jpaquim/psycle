@@ -514,8 +514,8 @@ namespace psycle
 							case 2:
 							{
 								window_to_world(x, y, x, y);
-								///\todo this seems to instanciate two nodes
-								node & node_instance(*Gtk::manage(&node::create(graph_instance(), graph_instance().resolver()("sine", graph_instance(), "node"), x, y)));
+								//node & node_instance(*Gtk::manage(&node::create(graph_instance(), graph_instance().resolver()("sine", graph_instance(), "node"), x, y)));
+								graph_instance().resolver()("sine", graph_instance(), "node");
 								//return true;
 							}
 							break;
