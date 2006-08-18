@@ -23,7 +23,6 @@
 #include "songpdlg.h"
 #include "childview.h"
 #include "sequencerbar.h"
-#include "newmachine.h"
 #include <ngrs/nwindow.h>
 #include <ngrs/nmenubar.h>
 #include <ngrs/nmenu.h>
@@ -41,8 +40,11 @@
 #include <ngrs/n7segdisplay.h>
 #include <ngrs/ntabbook.h>
 
+
 class NStatusBar;
 class NTextStatusItem;
+class NFileDialog;
+
 
 namespace psycle { namespace host {
 
@@ -53,7 +55,7 @@ class InstrumentEditor;
 class InfoDlg;
 class WaveSaveDlg;
 class SequencerItem;
-
+class NewMachine;
 
 /**
 @author Stefan
@@ -106,6 +108,7 @@ private:
     InfoDlg*  infoDlg;
     NFileDialog* wavRecFileDlg;
     WaveSaveDlg* wavSaveDlg;
+    NewMachine* newMachineDlg_;
 
     VuMeter* vuMeter_;
 
