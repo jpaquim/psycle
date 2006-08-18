@@ -17,28 +17,35 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
+
 #include "wiredlg.h"
 #include <ngrs/nlistlayout.h>
 #include <ngrs/nalignlayout.h>
+#include <cmath>
 
 namespace psycle { namespace host {
 
 WireDlg::WireDlg()
   : NWindow()
 {
+  setTitle("Wire Connection");
+
   line_ = 0;
   _pSrcMachine = _pDstMachine = 0;
 
+  
+
   NPanel* btnPnl = new NPanel();
-    btnPnl->setLayout(NListLayout());
-    modeBtn = new NButton("Scope Mode");
+    btnPnl->setLayout( NAlignLayout() );
+    /*modeBtn = new NButton("Scope Mode");
       modeBtn->setFlat(false);
     btnPnl->add(modeBtn);
     NPanel* sliderPnl = new NPanel();
-      sliderPnl->setLayout(NAlignLayout());
+      sliderPnl->setLayout( NAlignLayout() );
       holdBtn = new NButton("Hold");
         holdBtn->setFlat(false);
       sliderPnl->add(holdBtn,nAlRight);
+
       slider = new NSlider();
         slider->setOrientation(nHorizontal);
         slider->setPreferredSize(200,20);
@@ -51,10 +58,26 @@ WireDlg::WireDlg()
     delBtn = new NButton("Delete Connection");
       delBtn->clicked.connect(this,&WireDlg::onDeleteBtn);
       delBtn->setFlat(false);
-    btnPnl->add(delBtn);
-    analyzer = new Analyzer();
-    pane()->add(analyzer,nAlClient);
+    btnPnl->add(delBtn);*/
+    delBtn = new NButton("Delete Connection");
+      delBtn->clicked.connect(this,&WireDlg::onDeleteBtn);
+      delBtn->setFlat(false);
+    btnPnl->add(delBtn, nAlTop);
+
   pane()->add(btnPnl,nAlBottom);
+
+  
+  NPanel* volPanel = new NPanel();
+   volPanel->setLayout ( NAlignLayout() );
+    volSlider = new NSlider();
+      volSlider->setRange( 0, 256*4 );
+      volSlider->setPreferredSize( 20, 200 );
+      volSlider->posChanged.connect(this, &WireDlg::onVolPosChanged);
+    volPanel->add( volSlider, nAlClient );
+  pane()->add( volPanel, nAlRight );
+
+  analyzer = new Analyzer();
+  pane()->add( analyzer, nAlClient);
 
   setPosition(10,10,300,300);
 }
@@ -62,6 +85,17 @@ WireDlg::WireDlg()
 
 WireDlg::~WireDlg()
 {
+}
+
+void psycle::host::WireDlg::setVisible( bool on )
+{  
+  if (on && pDstMachine()) {
+    float val = 0;
+    pDstMachine()->GetWireVolume( wireIdx(), val);
+	  int t = (int)std::sqrt( val *16384*4*4);
+    volSlider->setPos( 254 * 4 - t );
+  }
+  NWindow::setVisible( on );
 }
 
 int WireDlg::onClose( )
@@ -103,4 +137,29 @@ NLine * WireDlg::line( )
   return line_;
 }
 
+void WireDlg::onVolPosChanged( NSlider * slider, double pos )
+{
+  std::cout << pos << std::endl;
+	if ( pDstMachine() && pSrcMachine() && wireIdx() != -1 ) {
+		const float curvol = ((256*4-pos)*(256*4-pos))/(16384.0f*4*4);
+		pDstMachine()->SetWireVolume( wireIdx(), curvol );
+	} 
+}   
+ 
+int WireDlg::wireIdx( )
+{
+  if ( pDstMachine() && pSrcMachine() )
+	  return pDstMachine()->FindInputWire( pSrcMachine()->_macIndex );
+  else
+    return -1;
+}
+
+
+
 }}
+
+
+
+
+
+

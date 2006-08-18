@@ -120,6 +120,8 @@ private:
     void onTweakSlide(int machine, int command, int value);
 
     void onMachineSelected(MachineGUI* gui);
+
+		virtual void onKeyPress(const NKeyEvent & event);
 };
 
 }}
