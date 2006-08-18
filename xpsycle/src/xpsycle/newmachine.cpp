@@ -119,6 +119,7 @@ int NewMachine::onClose( )
 
 void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
 {
+  sampler_=false;
   Plugin plugin(0, 0 );
   std::cout << ev->item()->text() << std::endl;
   if (plugin.LoadDll(ev->item()->text())) {;
