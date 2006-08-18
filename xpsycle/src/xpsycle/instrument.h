@@ -100,6 +100,8 @@ namespace psycle
 			void createWavHeader( const std::string & name, const std::string & header );
 			void setCompressedData( unsigned char* left, unsigned char* right );
 
+			void getData( unsigned char* data, const std::string & dataStr);
+
 			private:
 
 

@@ -418,10 +418,11 @@ namespace psycle
 				xml << "<waveleft size='">
 				xml << toHex(size1) <<"'>";
 				
+				xml << "<hex v='";
 				for (int k = 0; k < size1; k++) {
-					xml << "<hex v='" << toHex(pData1[k]) << "'/>";
+					xml << toHex(pData1[k],2);
 				}				
-				xml << std::endl;
+				xml << "'/>" << std::endl;
 				xml << "</waveleft>" << std::endl;
 				delete[] pData1;
 				if (waveStereo)
@@ -429,9 +430,11 @@ namespace psycle
 					xml << "<waveright size='">
 					xml << toHex(size2) <<"'>";
 				
+					xml << "<hex v='";
 					for (int k = 0; k < size2; k++) {
-						xml << "<hex v='" << toHex(pData2[k]) << "'/>";
-					}				
+						xml << toHex(pData2[k], 2);
+					}
+					xml << "'/>" << std::endl;				
 					xml << std::endl;
 					xml << "</waveright>" << std::endl;
 				}
@@ -512,8 +515,24 @@ namespace psycle
 			}
 		}
 
+		void Instrument::getData( unsigned char * data, const std::string & dataStr )
+		{
+			std::string::const_iterator it = dataStr.begin();
+			int byte_pos = 0;
+			while ( it != dataStr.end() ) {
+				char hex[3];
+				hex[0] = *it; it++;
+				hex[1] = *it; it++;
+				hex[2] = 0;				
+
+				data[byte_pos++] = str_hex<int> ( std::string(hex), 0);
+			}
+		}
+
 	} // end of psycle host namespace
 }
+
+
 
 
 
