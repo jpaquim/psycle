@@ -77,7 +77,6 @@ private:
 
     bool noFileWasYetLoaded;
 
-    ChildView* childView_;
     SongpDlg* songpDlg_;
     NTabBook* tabBook_;
 		

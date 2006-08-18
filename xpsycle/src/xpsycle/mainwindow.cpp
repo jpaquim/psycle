@@ -96,7 +96,7 @@ void MainWindow::initSongs( )
 
 ChildView* MainWindow::addChildView()
 {
-  childView_ = new ChildView( );
+  ChildView* childView_ = new ChildView( );
     childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
     childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
@@ -563,12 +563,14 @@ void MainWindow::initToolBar( )
 
 void MainWindow::onBarPlay( NButtonEvent * ev )
 {
-  childView_->play();
+  if ( !selectedChildView_ ) return;
+  selectedChildView_->play();
 }
 
 void MainWindow::onBarPlayFromStart( NButtonEvent * ev )
 {
-  childView_->playFromStart();
+  if ( !selectedChildView_ ) return;
+  selectedChildView_->playFromStart();
 }
 
 void MainWindow::onFileNew( NButtonEvent * ev )
@@ -825,7 +827,8 @@ void MainWindow::onTimer( )
   vuMeter_->repaint();
   ((Master*)selectedSong_->_pMachine[MASTER_INDEX])->vuupdated = true;
 
-  childView_->machineView()->updateVUs();
+  if ( !selectedChildView_ ) return;
+  selectedChildView_->machineView()->updateVUs();
 }
 
 void MainWindow::updateBars( )
@@ -976,14 +979,14 @@ void MainWindow::onNewMachine( NButtonEvent * ev )
           int fb = selectedChildView_->song()->GetFreeBus();
           if (newMachineDlg_->sampler()) {
             selectedChildView_->song()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
-            childView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
-            childView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
-            childView_->machineView()->repaint();
+            selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
+            selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
+            selectedChildView_->machineView()->repaint();
           } else {
-            childView_->song()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg_->getDllName(),fb);
-            childView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
-            childView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
-            childView_->machineView()->repaint();
+            selectedChildView_->song()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg_->getDllName(),fb);
+            selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
+            selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
+            selectedChildView_->machineView()->repaint();
           }
       }
     }
@@ -1097,7 +1100,9 @@ void MainWindow::onLineChanged(int line) {
 
 void MainWindow::updateStatusBar( )
 {
-  Machine* mac = childView_->machineView()->selMachine();
+  if ( !selectedChildView_ ) return;  
+
+  Machine* mac = selectedChildView_->machineView()->selMachine();
   if (mac) {
     macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(mac->_x) +","+ stringify(mac->_y));
   }
@@ -1160,7 +1165,7 @@ void MainWindow::onGeneratorCbx( NItemEvent * ev )
      hexStream >> std::hex >> hex;
      if (hex != -1) {
          selectedSong_->seqBus = hex;
-         childView_->machineView()->setSelectedMachine( selectedSong_->_pMachine[hex] );
+         selectedChildView_->machineView()->setSelectedMachine( selectedSong_->_pMachine[hex] );
      }
   }
 }
