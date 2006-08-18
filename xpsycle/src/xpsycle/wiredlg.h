@@ -54,10 +54,13 @@ public:
     void setLine(NLine* line);
     NLine* line();
 
+		virtual void setVisible( bool on);
+
 private:
 
     Analyzer* analyzer;
 
+    NSlider* volSlider;
     NSlider* slider;
     NSlider* slider2;
 
@@ -70,7 +73,11 @@ private:
 
     NLine* line_;
 
+		void onVolPosChanged(NSlider* slider, double pos);
+
     void onDeleteBtn(NButtonEvent* ev);
+
+		int wireIdx();
 };
 
 

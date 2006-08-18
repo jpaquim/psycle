@@ -75,6 +75,8 @@ public:
 
     void setSelected(bool on);
 
+		std::vector<LineAttachment> attachedLines;
+
 private:
 
     NBorder* myBorder_;
@@ -83,7 +85,6 @@ private:
     NRegion linesRegion();
 
     Machine* mac_;
-    std::vector<LineAttachment> attachedLines;
     NLine* line;
 
     bool selected_;

@@ -297,5 +297,15 @@ void MachineView::setSelectedMachine( Machine* mac)
   }
 }
 
+void MachineView::onKeyPress( const NKeyEvent & event )
+{
+	if ( selectedMachine_ && event.scancode() == XK_Delete ) {
+		// todo remove machine
+	}
+
+}
+
 }
 }
+
+
