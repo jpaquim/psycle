@@ -70,6 +70,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
           macGui->selected.connect(this,&MachineView::onMachineSelected);
+					macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
         }
@@ -81,6 +82,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
           macGui->selected.connect(this,&MachineView::onMachineSelected);
+          macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
       }
@@ -91,6 +93,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->selected.connect(this,&MachineView::onMachineSelected);
+          macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
           scrollArea_->add(macGui);
           machineGUIs.push_back(macGui);
       }
@@ -297,15 +300,19 @@ void MachineView::setSelectedMachine( Machine* mac)
   }
 }
 
-void MachineView::onKeyPress( const NKeyEvent & event )
+void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
 {
-	if ( selectedMachine_ && event.scancode() == XK_Delete ) {
 		// todo remove machine
-	}
-
+  int index = machineGUI->pMac()->_macIndex;
+	_pSong->DestroyMachine( index );
+  selectedMachine_ = 0;
+  update();		
+  machineDeleted.emit(index);
 }
 
 }
 }
+
+
 
 
