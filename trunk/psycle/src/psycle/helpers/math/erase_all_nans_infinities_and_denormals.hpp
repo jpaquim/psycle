@@ -23,7 +23,7 @@ namespace psycle
 						#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 							0x7f800000
 						#else
-							#error sorry, wasn't much thought
+							#error sorry, was not much thought
 						#endif
 					);
 					std::uint32_t const exponent(bits & exponent_mask);
