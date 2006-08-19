@@ -50,6 +50,8 @@ public:
 
 public:
 	void Notify(void);
+
+	signal2<int,bool> updateInstrumentCbx;
 	
 	NMenuBar *menuBar;
 	NMenu *processMenu;
@@ -57,7 +59,6 @@ public:
 	NMenu *viewMenu;
 	NMenu *convertMenu;
 	
-  void updateComboIns(bool updatelist);
 	
 private:
 
@@ -68,7 +69,6 @@ private:
 	void InitToolBar();
  
 	NToolBar *toolBar;
-	NComboBox* insCombo_;
 	NComboBox* auxSelectCombo_;
 	WaveEdChildView *wavView;
 	NFileDialog* wavSaveFileDlg;
@@ -89,7 +89,6 @@ private:
 	void onSaveWave(NButtonEvent* ev);
 	void onEditInstrument(NButtonEvent* ev);
 	void onEditWave(NButtonEvent* ev);
-	void onInstrumentCbx(NItemEvent* ev);
 
   void onSlotCopy(NButtonEvent* ev);
   void onSlotPaste(NButtonEvent* ev);

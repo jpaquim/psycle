@@ -302,7 +302,7 @@ void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
   NLine* line = sView->scrollArea()->vLine();
     line->setPoints( NPoint( left(), sView->scrollArea()->scrollDy() ), NPoint( left(), sView->scrollArea()->clientHeight() + sView->scrollArea()->scrollDy() ) );
     line->setVisible(true);
-  sView->repaint();
+  line->repaint();
 }
 
 void SequencerItem::onMove( const NMoveEvent & moveEvent )

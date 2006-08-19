@@ -180,17 +180,13 @@ namespace psycle { namespace host {
 
 	toolBar->resize();
 	toolBar->add(new NToolBarSeparator());
-		auxSelectCombo_ = new NComboBox();
-		auxSelectCombo_->setWidth(70);
+		/*auxSelectCombo_ = new NComboBox();
+	/*	auxSelectCombo_->setWidth(70);
 		auxSelectCombo_->setHeight(20);
 		auxSelectCombo_->add(new NItem("Wave"));
 		auxSelectCombo_->setIndex(0);
-	toolBar->add(auxSelectCombo_);
-	insCombo_ = new NComboBox();
-		insCombo_->setWidth(158);
-		insCombo_->setHeight(20);
-		insCombo_->itemSelected.connect(this,&WaveEdFrame::onInstrumentCbx);
-	toolBar->add(insCombo_);
+	toolBar->add(auxSelectCombo_);*/
+	
 
 	img = new NImage();
 		img->setSharedBitmap(&icons.littleleft());
@@ -209,8 +205,7 @@ namespace psycle { namespace host {
 
   toolBar->add(new NButton("Copy"))->clicked.connect(this,&WaveEdFrame::onSlotCopy);
   toolBar->add(new NButton("Paste"))->clicked.connect(this,&WaveEdFrame::onSlotPaste);
-	insCombo_->setIndex(0);
-	updateComboIns(true);
+	
 }
 
 
@@ -274,9 +269,8 @@ namespace psycle { namespace host {
 
 		if (pSong()->WavAlloc(si,dialog->fileName().c_str()))
 		{
-			updateComboIns(true);
-			if(insCombo_->selIndex() == pSong()->instSelected)
 			Notify();
+			updateInstrumentCbx( pSong()->instSelected, true );
 		}
 	}
 	NApp::addRemovePipe(dialog);
@@ -329,8 +323,7 @@ void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
 			pSong()->auxcolSelected= index;
 			Notify();
 
-			insCombo_->setIndex(index);
-			insCombo_->repaint();
+			updateInstrumentCbx.emit( index, false );		
 		}
 	}
 
@@ -342,42 +335,10 @@ void WaveEdFrame::onEditInstrument( NButtonEvent * ev )
 			pSong()->auxcolSelected= index;
 			Notify();
 
-			insCombo_->setIndex(index);
-			insCombo_->repaint();
+			updateInstrumentCbx.emit( index, false );
 		}
 	}
 
-	void WaveEdFrame::onInstrumentCbx( NItemEvent * ev )
-	{
-		int index = insCombo_->selIndex();
-		pSong()->instSelected=   index;
-		pSong()->auxcolSelected= index;
-		Notify();
-	}
-
-	void WaveEdFrame::updateComboIns( bool updatelist )
-	{
-		if (updatelist)  {
-			insCombo_->removeChilds();
-			std::ostringstream buffer;
-			buffer.setf(std::ios::uppercase);
-
-			int listlen = 0;
-			for (int i=0;i<PREV_WAV_INS;i++)
-			{
-				buffer.str("");
-				buffer << std::setfill('0') << std::hex << std::setw(2);
-				buffer << i << ": " << pSong()->_pInstrument[i]->_sName;
-				insCombo_->add(new NItem(buffer.str()));
-				listlen++;
-			}
-			if (pSong()->auxcolSelected >= listlen) {
-				pSong()->auxcolSelected = 0;
-		}
-		insCombo_->setIndex( pSong()->instSelected);  //redraw current selection text
-		insCombo_->repaint();
-  }
-}
 
 void WaveEdFrame::onSlotCopy( NButtonEvent * ev )
 {
@@ -404,7 +365,7 @@ void WaveEdFrame::onSlotPaste( NButtonEvent * ev )
 				delete pDataLeft;
 				delete pDataRight;
 			}	
-			updateComboIns(true);
+			updateInstrumentCbx.emit( pSong()->instSelected , true );
 			Notify();
 			repaint();
 		}

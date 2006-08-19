@@ -1390,9 +1390,16 @@ void PatternView::enterNote( int note ) {
 
    event.setNote( editOctave() * 12 + note );
    if (tmac) event.setMachine( tmac->_macIndex );
+
+   if (tmac && tmac->_type == MACH_SAMPLER ) {
+     event.setInstrument( pSong()->instSelected );
+	 }
+
    pattern()->setEvent( cursor().y(), cursor().x(), event );
 
    if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);
+
+   
  }
 }
 
