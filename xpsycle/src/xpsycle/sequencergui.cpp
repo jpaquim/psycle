@@ -111,6 +111,10 @@ SequencerGUI::Area::Area( SequencerGUI* seqGui )
 
 
   sView = seqGui;
+  
+  vLine_ = new NLine();
+    vLine_->setVisible( false );
+  add( vLine_ );
 }
 
 SequencerGUI::Area::~ Area( )
@@ -138,6 +142,14 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
   }
 }
 
+NLine* SequencerGUI::Area::vLine() {
+  return vLine_;
+}
+
+NLine* SequencerGUI::Area::vLine() const {
+  return vLine_;
+}
+
 int SequencerGUI::Area::preferredHeight( ) const
 {
   std::vector<NVisualComponent*>::const_iterator itr = visualComponents().begin();
@@ -146,7 +158,8 @@ int SequencerGUI::Area::preferredHeight( ) const
 
   for (;itr < visualComponents().end(); itr++) {
     NVisualComponent* visualChild = *itr;
-    yp += visualChild->preferredHeight();
+    if ( visualChild != vLine() )
+      yp += visualChild->preferredHeight();
   }
 
   return yp;
@@ -160,7 +173,8 @@ int SequencerGUI::Area::preferredWidth( ) const
 
   for (;itr < visualComponents().end(); itr++) {
     NVisualComponent* visualChild = *itr;
-    xp = std::max(visualChild->preferredWidth(), xp);
+    if (visualChild != vLine() )
+      xp = std::max(visualChild->preferredWidth(), xp);
   }
 
   return xp;
@@ -174,7 +188,8 @@ void SequencerGUI::Area::resize( )
 
   for (;itr < visualComponents().end(); itr++) {
     NVisualComponent* visualChild = *itr;
-    xp = std::max(visualChild->preferredWidth(), xp);
+    if ( visualChild != vLine() ) 
+      xp = std::max(visualChild->preferredWidth(), xp);
   }
 
 
@@ -185,12 +200,13 @@ void SequencerGUI::Area::resize( )
 
   for (;itr < visualComponents().end(); itr++) {
     NVisualComponent* visualChild = *itr;
-    visualChild->setHeight( visualChild->preferredHeight() );
-    visualChild->setWidth(xp);
-    visualChild->setTop(yp);
-    yp+= visualChild->preferredHeight();
+    if ( visualChild != vLine() ) {
+      visualChild->setHeight( visualChild->preferredHeight() );
+      visualChild->setWidth(xp);
+      visualChild->setTop(yp);
+      yp+= visualChild->preferredHeight();
+    }
   }
-
 }
 
 // end of Area class
@@ -278,6 +294,16 @@ NRegion SequencerItem::entriesInRegion( )
   return region;
 }
 
+void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
+{
+  oldDrag = entriesInRegion();
+  oldLeft = left();  
+
+  NLine* line = sView->scrollArea()->vLine();
+    line->setPoints( NPoint( left(), sView->scrollArea()->scrollDy() ), NPoint( left(), sView->scrollArea()->clientHeight() + sView->scrollArea()->scrollDy() ) );
+    line->setVisible(true);
+  sView->repaint();
+}
 
 void SequencerItem::onMove( const NMoveEvent & moveEvent )
 {
@@ -302,23 +328,29 @@ void SequencerItem::onMove( const NMoveEvent & moveEvent )
   }
   sView->resize();
 
+  NLine* line = sView->scrollArea()->vLine();
+  
+
   NRegion newDrag = entriesInRegion();
-  NRegion repaintArea = newDrag | oldDrag;
+  NRegion repaintArea = newDrag | oldDrag | line->absoluteGeometry();
+
+  line->setPoints( NPoint( left(), sView->scrollArea()->scrollDy() ), NPoint( left(), sView->scrollArea()->clientHeight() + sView->scrollArea()->scrollDy() ) );
+
+  repaintArea |= line->absoluteGeometry();
 
   window()->repaint(sView->scrollArea(),repaintArea);
 
   oldDrag = newDrag;
+
+  
+    
 }
 
 void SequencerItem::onMoveEnd( const NMoveEvent & moveEvent )
 {
-  sView->repaint();
-}
-
-void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
-{
-  oldDrag = entriesInRegion();
-  oldLeft = left();
+  NLine* line = sView->scrollArea()->vLine();
+  line->setVisible( false );
+  line->repaint();
 }
 
 void SequencerItem::onMousePress( int x, int y, int button )
@@ -887,7 +919,7 @@ const std::vector< SequencerItem * > & SequencerGUI::selectedItems( )
   return selectedItems_;
 }
 
-NPanel * SequencerGUI::scrollArea( )
+SequencerGUI::Area * SequencerGUI::scrollArea( )
 {
   return scrollArea_;
 }

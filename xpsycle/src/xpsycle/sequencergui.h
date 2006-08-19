@@ -24,6 +24,7 @@
 #include "patternsequence.h"
 #include <ngrs/npanel.h>
 #include <ngrs/nbutton.h>
+#include <ngrs/nline.h>
 #include <list>
 
 /**
@@ -36,6 +37,7 @@ class NToolBar;
 class NListBox;
 class ZoomBar;
 class NCheckBox;
+class NLine;
 
 namespace psycle {
 	namespace host {
@@ -162,9 +164,14 @@ class Area : public NPanel {
     virtual int preferredHeight() const;
     virtual void resize();
 
+		NLine* vLine();
+    NLine* vLine() const;
+
   private:
 
      SequencerGUI* sView;
+
+     NLine* vLine_;
 
 };
 
@@ -196,7 +203,7 @@ public:
 
     const std::vector<SequencerItem*> & selectedItems();
 
-    NPanel* scrollArea();
+    Area* scrollArea();
 
     void deselectAll();
 
