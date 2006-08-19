@@ -161,4 +161,9 @@ std::vector< NCustomItem * > & NComboBox::items( )
   return lbox->items();
 }
 
+NCustomItem * NComboBox::itemAt( unsigned int index )
+{
+  return lbox->itemAt( index );
+}
+
 

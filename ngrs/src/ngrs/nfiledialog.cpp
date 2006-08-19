@@ -158,6 +158,9 @@ NFileDialog::NFileDialog()
 {
   mode_ = nLoad;
 
+	setMinimumHeight(400);
+	setMinimumWidth(300);
+
   pane()->setLayout(NAlignLayout(5,5));
 
   setTitle("Load");
