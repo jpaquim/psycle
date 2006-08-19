@@ -629,6 +629,7 @@ namespace psycle
 			///\}
                      float _lMax;
 	             float _rMax;
+       int _outDry;
 		};
 
 		inline void Machine::SetVolumeCounter(int numSamples)

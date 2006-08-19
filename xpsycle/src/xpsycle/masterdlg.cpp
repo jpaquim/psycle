@@ -31,14 +31,13 @@ MasterDlg::MasterDlg(Machine* master)
 {
   pMaster = master;
 
-/*  if (Global::pConfig()->iconPath=="") 
-        pane()->skin_.setBitmap(Global::pBitmaps()->masterbk());
-    else;
-        //pane()->skin_.bitmap.loadFromFile(Global::pConfig()->iconPath+ "masterbk.xpm");*/
+	const NBitmap & bg = Global::pConfig()->icons().masterbk();
 
-  //pane()->skin_.bitmapBgStyle = 1;
+	pane()->skin_.setBitmap( bg , 1);
 
-  // if (pane()->skin_.bitmap.X11data()!=0) setPosition(0,0,pane()->skin_.bitmap.width(),pane()->skin_.bitmap.height());
+	setMinimumHeight( bg.height() );
+  setMinimumWidth( bg. width() );
+  setPosition(0,0, bg.width(),bg.height());
 
   init();
 }
@@ -84,7 +83,7 @@ int MasterDlg::onClose( )
 
 void MasterDlg::setVisible( bool on )
 {
-  /*int index = 0;
+  int index = 0;
   for (std::vector<Slider*>::iterator it = sliders.begin(); it < sliders.end(); it++) {
     Slider* sl = *it;
 
@@ -110,13 +109,13 @@ void MasterDlg::setVisible( bool on )
       }
     }
     index++;
-  }*/
+  }
   NWindow::setVisible(on);
 }
 
 void MasterDlg::onSliderPosChanged( NSlider * sender, double pos )
 {
-  /*std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
+  std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
   if (it != sliders.end()) {
       Slider* slider = *it;
       if (slider->led()) {
@@ -134,7 +133,7 @@ void MasterDlg::onSliderPosChanged( NSlider * sender, double pos )
             slider->led()->repaint();
         }
       }
-  }*/
+  }
 }
 
 void MasterDlg::Led::setNumber( int number )
