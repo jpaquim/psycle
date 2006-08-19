@@ -105,7 +105,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     }
 
     if (moveable().style() & nMvRectPicker) geometry()->drawRectPicker(g);
-    geometry()->drawPicker(g);
+    if (moveable().style() & nMvPolygonPicker) geometry()->drawPicker(g);
 
     bool spacingClip_ = (!(spacing().left() == 0 && spacing().top() ==0 && spacing().bottom()==0 && spacing().right() == 0 && borderTop()==0 && borderLeft()==0 && borderBottom()==0 && borderRight()==0));
 
