@@ -53,6 +53,8 @@ public:
     void setIndex(int i);
     int selIndex() const;
     int itemCount();
+    NCustomItem* itemAt(unsigned int index);
+
     std::vector<NCustomItem*> & items();
 
     virtual void onItemClicked(NItemEvent * ev);
