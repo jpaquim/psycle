@@ -561,6 +561,14 @@ void MainWindow::initToolBar( )
 				insCombo_->setWidth(158);
 				insCombo_->setHeight(20);
 				insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
+				for (int i=0;i<PREV_WAV_INS;i++)
+				{
+          std::ostringstream buffer;
+					buffer.str("");
+					buffer << std::setfill('0') << std::hex << std::setw(2);
+					buffer << i << ": " << "empty";
+					insCombo_->add(new NItem(buffer.str()));
+				}
 			psycleToolBar_->add(insCombo_);
 
 
@@ -584,7 +592,6 @@ void MainWindow::initToolBar( )
 		if ( !selectedChildView_) return;
 
 		if (updatelist)  {
-			insCombo_->removeChilds();
 			std::ostringstream buffer;
 			buffer.setf(std::ios::uppercase);
 
@@ -594,14 +601,12 @@ void MainWindow::initToolBar( )
 				buffer.str("");
 				buffer << std::setfill('0') << std::hex << std::setw(2);
 				buffer << i << ": " << selectedChildView_->song()->_pInstrument[i]->_sName;
-				insCombo_->add(new NItem(buffer.str()));
+				insCombo_->itemAt(i)->setText( buffer.str());
 				listlen++;
 			}
 			if (selectedChildView_->song()->auxcolSelected >= listlen) {
 				selectedChildView_->song()->auxcolSelected = 0;
-		}
-		insCombo_->setIndex( selectedChildView_->song()->instSelected );  //redraw current selection text
-		insCombo_->repaint();
+		}    
   }
 }
 
@@ -1229,7 +1234,6 @@ void psycle::host::MainWindow::updateNewSong( )
 {
   if (!selectedChildView_) return;
 
-  insCombo_->setIndex(0);
 	updateComboIns(true);
   updateComboGen();
 
@@ -1241,8 +1245,10 @@ void psycle::host::MainWindow::onUpdateInstrumentCbx( int index , bool update )
 {
   if ( !selectedChildView_ ) return;
 
-  if (update)
+  if (update) {
   	updateComboIns(true);
+    setIndex(0);
+  }
 	else {
     insCombo_->setIndex(index);
 		insCombo_->repaint();
