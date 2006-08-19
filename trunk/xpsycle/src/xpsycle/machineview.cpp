@@ -63,7 +63,7 @@ void MachineView::init( )
 void MachineView::onCreateMachine( Machine * mac )
 {
   switch (mac->_mode)
-  {
+  {		
       case MACHMODE_GENERATOR: {
         MachineGUI* macGui = new GeneratorGUI(mac);
           macGui->moved.connect(this,&MachineView::onMoveMachine);

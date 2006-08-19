@@ -101,6 +101,7 @@ ChildView* MainWindow::addChildView()
     childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
     childView_->machineViewDblClick.connect(this,&MainWindow::onNewMachine);
+		childView_->waveEditor()->updateInstrumentCbx.connect(this,&MainWindow::onUpdateInstrumentCbx);
   book->addPage( childView_, childView_->song()->name() + stringify(count) );
   book->setActivePage( childView_ );
 
@@ -556,10 +557,55 @@ void MainWindow::initToolBar( )
 
       psycleToolBar_->add(new NButton("Gear Rack"));
 
+			insCombo_ = new NComboBox();
+				insCombo_->setWidth(158);
+				insCombo_->setHeight(20);
+				insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
+			psycleToolBar_->add(insCombo_);
+
+
   toolBarPanel_->add(psycleToolBar_);
 
   toolBarPanel_->resize();
 }
+
+	void MainWindow::onInstrumentCbx( NItemEvent * ev )
+	{
+		if ( !selectedChildView_) return;
+
+		int index = insCombo_->selIndex();
+		selectedChildView_->song()->instSelected=   index;
+		selectedChildView_->song()->auxcolSelected= index;
+		selectedChildView_->waveEditor()->Notify();
+	}
+
+	void MainWindow::updateComboIns( bool updatelist )
+	{
+		if ( !selectedChildView_) return;
+
+		if (updatelist)  {
+			insCombo_->removeChilds();
+			std::ostringstream buffer;
+			buffer.setf(std::ios::uppercase);
+
+			int listlen = 0;
+			for (int i=0;i<PREV_WAV_INS;i++)
+			{
+				buffer.str("");
+				buffer << std::setfill('0') << std::hex << std::setw(2);
+				buffer << i << ": " << selectedChildView_->song()->_pInstrument[i]->_sName;
+				insCombo_->add(new NItem(buffer.str()));
+				listlen++;
+			}
+			if (selectedChildView_->song()->auxcolSelected >= listlen) {
+				selectedChildView_->song()->auxcolSelected = 0;
+		}
+		insCombo_->setIndex( selectedChildView_->song()->instSelected );  //redraw current selection text
+		insCombo_->repaint();
+  }
+}
+
+
 
 void MainWindow::onBarPlay( NButtonEvent * ev )
 {
@@ -1183,7 +1229,23 @@ void psycle::host::MainWindow::updateNewSong( )
 {
   if (!selectedChildView_) return;
 
+  insCombo_->setIndex(0);
+	updateComboIns(true);
   updateComboGen();
+
   bpmDisplay_->setNumber( (int) selectedChildView_->song()->bpm() );
   bpmDisplay_->repaint();
+}
+
+void psycle::host::MainWindow::onUpdateInstrumentCbx( int index , bool update )
+{
+  if ( !selectedChildView_ ) return;
+
+  if (update)
+  	updateComboIns(true);
+	else {
+    insCombo_->setIndex(index);
+		insCombo_->repaint();
+  }
+	
 }

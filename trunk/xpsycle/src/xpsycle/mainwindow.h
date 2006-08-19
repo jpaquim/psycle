@@ -90,6 +90,8 @@ private:
     NStatusBar* statusBar_;
       NProgressBar* progressBar_;
 
+		NToolBar* playBar;
+
     NMenuBar* menuBar_;
     NMenu* fileMenu_;
     NMenu* recentFileMenu_;
@@ -121,6 +123,8 @@ private:
 
     NPanel* page;
     NTabBook* book;
+
+    NComboBox* insCombo_;
 
     int count;
 
@@ -193,6 +197,10 @@ private:
     void onBpmAddTen(NButtonEvent* ev);
     void onBpmDecOne(NButtonEvent* ev);
     void onBpmDecTen(NButtonEvent* ev);
+
+		void onUpdateInstrumentCbx( int index , bool update );
+    void onInstrumentCbx(NItemEvent* ev);
+		void updateComboIns(bool updatelist);
 
     void updateComboGen();
     void appNew();

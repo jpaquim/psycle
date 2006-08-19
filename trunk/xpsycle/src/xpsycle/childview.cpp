@@ -209,7 +209,6 @@ void psycle::host::ChildView::showPatternView( )
 void psycle::host::ChildView::update( )
 {
   waveEditor()->Notify();
-  waveEditor()->updateComboIns(true);
   sequencerBar_->update();
   sequencerView()->update();
   machineView()->update();
