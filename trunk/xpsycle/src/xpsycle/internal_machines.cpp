@@ -218,9 +218,9 @@ namespace psycle {
 			:
 		Machine(MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
-			_outDry(256),
 			decreaseOnClip(false)
 		{
+      _outDry = 256;
 			_audiorange = 32768.0f;
 			DefineStereoInput(1);
 			_editName = "Master";

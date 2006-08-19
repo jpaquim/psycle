@@ -70,7 +70,6 @@ namespace psycle {
 
 			/// this is for the VstHost
 			double sampleCount;
-			int _outDry;
 			bool _clip;
 			bool decreaseOnClip;
 			static float* _pMasterSamples;

@@ -213,7 +213,9 @@ namespace psycle
 			_scopeBufferIndex(0),
 			_scopePrevNumSamples(0),
 			_editName("")
+			
 		{
+      _outDry = 256;
 			_pSong = song;
 			_pSamplesL = new float[MAX_BUFFER_LENGTH];
 			_pSamplesR = new float[MAX_BUFFER_LENGTH];
