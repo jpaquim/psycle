@@ -1235,6 +1235,7 @@ void psycle::host::MainWindow::updateNewSong( )
   if (!selectedChildView_) return;
 
 	updateComboIns(true);
+  insCombo_->setIndex(0);
   updateComboGen();
 
   bpmDisplay_->setNumber( (int) selectedChildView_->song()->bpm() );
@@ -1248,6 +1249,7 @@ void psycle::host::MainWindow::onUpdateInstrumentCbx( int index , bool update )
   if (update) {
   	updateComboIns(true);
     insCombo_->setIndex(0);
+    insCombo_->repaint();
   }
 	else {
     insCombo_->setIndex(index);
