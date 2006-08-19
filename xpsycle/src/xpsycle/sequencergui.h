@@ -164,6 +164,8 @@ class Area : public NPanel {
     virtual int preferredHeight() const;
     virtual void resize();
 
+		virtual void removeChilds();
+
 		NLine* vLine();
     NLine* vLine() const;
 
