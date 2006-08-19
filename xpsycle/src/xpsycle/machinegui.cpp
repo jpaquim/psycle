@@ -703,5 +703,19 @@ void GeneratorGUI::onTweakSlide( int machine, int command, int value )
   patternTweakSlide.emit(machine,command,value);
 }
 
+
 }
+}
+
+
+void psycle::host::GeneratorGUI::onKeyPress( const NKeyEvent & event )
+{
+  if ( event.scancode() == XK_Delete ) 
+    deleteRequest.emit(this);
+}
+
+void psycle::host::EffektGUI::onKeyPress( const NKeyEvent & event )
+{
+  if ( event.scancode() == XK_Delete ) 
+    deleteRequest.emit(this);
 }

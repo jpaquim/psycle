@@ -88,6 +88,7 @@ public:
     signal1<Machine*> selected;
     signal3<Machine*, int, int> machineMoved;
     signal3<int,int,int> patternTweakSlide;
+    signal1<int> machineDeleted;
 
     Machine* selMachine();
 
@@ -121,7 +122,7 @@ private:
 
     void onMachineSelected(MachineGUI* gui);
 
-		virtual void onKeyPress(const NKeyEvent & event);
+		void onMachineDeleteRequest( MachineGUI* machineGUI );
 };
 
 }}

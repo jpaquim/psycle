@@ -44,12 +44,17 @@ class MachineGUI : public NPanel
 
         NLine* line;
         int point;
+
+				MachineGUI* in;
+
   };
 
 public:
     MachineGUI(Machine* mac);
 
     ~MachineGUI();
+
+		signal1<MachineGUI*> deleteRequest;
 
     Machine* pMac();
     void attachLine(NLine* line, int point);
@@ -134,7 +139,7 @@ public:
 
       private:
 
-        GeneratorGUI* pGui_;
+				GeneratorGUI* pGui_;
 
     };
 
@@ -152,6 +157,8 @@ public:
     virtual void onMouseDoublePress(int x, int y, int button);
 
     virtual void paint(NGraphics* g);
+
+    virtual void onKeyPress( const NKeyEvent & event);
 
 private:
 
@@ -214,6 +221,8 @@ public:
     virtual void paint(NGraphics* g);
 
     virtual void repaintVUMeter();
+
+		virtual void onKeyPress( const NKeyEvent & event );
 
 private:
 

@@ -191,6 +191,8 @@ private:
     void onRecordWav(NButtonEvent* ev);
     void onRecordNotesMode(NButtonEvent* ev);
 
+		void onMachineDeleted( int machineIndex );
+
     void setAppSongBpm(int x);
 
     void onBpmIncOne(NButtonEvent* ev);
