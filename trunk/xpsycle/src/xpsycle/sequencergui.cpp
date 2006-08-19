@@ -180,6 +180,13 @@ int SequencerGUI::Area::preferredWidth( ) const
   return xp;
 }
 
+void SequencerGUI::Area::removeChilds() {
+  NPanel::removeChilds();
+  vLine_ = new NLine();
+    vLine_->setVisible(false);
+  add(vLine_);  
+}
+
 void SequencerGUI::Area::resize( )
 {
   std::vector<NVisualComponent*>::const_iterator itr = visualComponents().begin();
@@ -886,6 +893,7 @@ void SequencerGUI::update( )
 {
   lines.clear();
   scrollArea_->removeChilds();
+  
   std::vector<SequenceLine*>::iterator it = patternSequence()->begin();
   for ( ; it < patternSequence()->end(); it++) {
     SequenceLine* seqLine = *it;
