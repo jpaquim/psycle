@@ -1247,7 +1247,7 @@ void psycle::host::MainWindow::onUpdateInstrumentCbx( int index , bool update )
 
   if (update) {
   	updateComboIns(true);
-    setIndex(0);
+    insCombo_->setIndex(0);
   }
 	else {
     insCombo_->setIndex(index);
