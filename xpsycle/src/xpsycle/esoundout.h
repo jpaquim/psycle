@@ -49,13 +49,13 @@ namespace psycle
 
 				unsigned int channels_;
 				int channels_flag();
+
+				void setDefaults();
 				
 				unsigned int bits_;
 				int bits_flag();
 				
 				unsigned int rate_;
-
-				void setDefault();
 				
 				void open_output() throw(std::exception);
 				std::string host_;
@@ -82,7 +82,6 @@ namespace psycle
 
 				void writeBuffer();
 
-				void setDefaults();
 
 		};
 	}
