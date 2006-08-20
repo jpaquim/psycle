@@ -44,6 +44,9 @@ namespace psycle
 
 		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * context)
 		{
+			#if !defined NDEBUG
+				std::cout << "initializing esound\n";
+			#endif
 			callback_ = callback;
 			callback_context_ = context;
 			setDefault();
@@ -70,6 +73,9 @@ namespace psycle
 
 		bool ESoundOut::Enable(bool e)
 		{
+			#if !defined NDEBUG
+				std::cout << "enabling esound\n";
+			#endif
 			//if(e) start() else stop();
 			return true;
 			if(e == enabled_) return true;
@@ -85,7 +91,7 @@ namespace psycle
 				usleep(500); // give thread time to close
 			}
 			assert(enabled_ = e);
-			return true;
+			return enabled_;
 		}
 
 		int ESoundOut::bits_flag()
@@ -152,6 +158,8 @@ namespace psycle
 		{
 			while(!stop_requested_)
 			{
+				int sample_count(device_buffer_ / 4);
+				float * input(callback_(callback_context_, sample_count));
 				std::cout << "foo\n";
 				usleep(1000);
 			}
