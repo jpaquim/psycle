@@ -345,10 +345,10 @@ void NSystem::destroyWindow( Window win )
   XDestroyWindow(dpy(), win);
 }
 
-int NSystem::pixelsize( ) const
+int NSystem::pixelSize( int depth ) const
 {
  int pixelsize;
- switch(depth())
+ switch( depth )
       {
       case 8:
         pixelsize=1;

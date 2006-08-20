@@ -236,8 +236,11 @@ int NApp::processEvent( NWindow * win, XEvent * event )
         doRepaint(win);
     break;
     break;
+		case MapNotify:
+			doRepaint(win);
+		break;
     case ConfigureNotify:{
-      while (XCheckMaskEvent(NApp::system().dpy(),StructureNotifyMask , event));
+			while (XCheckTypedWindowEvent( NApp::system().dpy(), win->win() , ConfigureNotify, event));
        if (event->xconfigure.width - 2*event->xconfigure.border_width != win->graphics()->dblWidth() || event->xconfigure.height != win->graphics()->dblHeight()  ) {
          doRepaint(win);
        }

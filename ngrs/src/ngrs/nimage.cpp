@@ -126,12 +126,7 @@ void NImage::createFromXpmData(const char** data)
   attr.numsymbols = 256;
   attr.color_key = XPM_GRAY;
 
-  XImage* xi;
-  XImage* clp;
-  int err = XpmCreateImageFromData(NApp::system().dpy(),(char**)(data),&xi,&clp,0);
-  if (err == XpmSuccess) {
-     bitmap24bpp_.setX11Data(xi,clp);
-  }
+	bitmap24bpp_.createFromXpmData(data);
 }
 
 void NImage::setBitmap( const NBitmap & bitmap )
