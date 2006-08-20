@@ -160,7 +160,7 @@ void Configuration::setSkinDefaults( )
 			if(!_outputDriverIndex) _outputDriverIndex = index;
 		#endif
 	}
-	_pOutputDriver = _ppOutputDrivers[3];
+	_pOutputDriver = _ppOutputDrivers[4];
 
   #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/install_paths.h>

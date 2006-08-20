@@ -118,7 +118,7 @@ namespace psycle
 
 		std::string ESoundOut::host_port()
 		{
-			std::string nrv;
+			std::string nrv(std::getenv("ESPEAKER"));
 			// ESD host:port
 			if(port_ > 0 && host_.length())
 			{
@@ -136,7 +136,7 @@ namespace psycle
 			format |= bits_flag();
 			if((output_ = esd_open_sound(host_port().c_str())) < 0)
 			{
-				throw std::runtime_error("failed to open esound output");
+				throw std::runtime_error("failed to open esound output " + host_port());
 			};
 			fd_ = esd_play_stream_fallback
 			(
@@ -156,9 +156,12 @@ namespace psycle
 		
 		void ESoundOut::thread_function()
 		{
+			#if !defined NDEBUG
+				std::cout << "esound thread started\n";
+			#endif
 			while(!stop_requested_)
 			{
-				int sample_count(device_buffer_ / 4);
+				int sample_count(8192);
 				float * input(callback_(callback_context_, sample_count));
 				std::cout << "foo\n";
 				usleep(1000);
