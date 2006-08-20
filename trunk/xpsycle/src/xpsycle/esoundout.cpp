@@ -44,21 +44,10 @@ namespace psycle
 
 		void ESoundOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
 		{
-<<<<<<< .mine
-			_pCallback = pCallback;
-			_callbackContext = context;
-			_initialized = true;
-
-=======
-			#if !defined NDEBUG
-				std::cout << "initializing esound\n";
-			#endif
-			callback_ = callback;
-			callback_context_ = context;
-			setDefault();
-			open_output();
-			initialized_ = true;
->>>>>>> .r3159
+			kill_thread = 0;
+			threadOpen = 0;
+			_initialized = false;
+			setDefaults();     
 		}
 
 		bool ESoundOut::Initialized( )
@@ -89,10 +78,10 @@ namespace psycle
 
 		void ESoundOut::Configure( )
 		{
-			setDefault();
+			setDefaults();
 		}
 
-		void ESoundOut::setDefault( )
+		void ESoundOut::setDefaults( )
 		{
 			channels_ = 2;
 			bits_ = 16;
@@ -101,7 +90,6 @@ namespace psycle
 
 		bool ESoundOut::Enable(bool e)
 		{
-<<<<<<< .mine
 			bool threadStarted = false;
 			if (e && !threadOpen) {
 					kill_thread = 0;
@@ -111,38 +99,11 @@ namespace psycle
 			if (!e && threadOpen) {
 				kill_thread = 1;
 				threadStarted = false;
-=======
-			#if !defined NDEBUG
-				std::cout << "enabling esound\n";
-			#endif
-			//if(e) start() else stop();
-			return true;
-			if(e == enabled_) return true;
-			if(e)
-			{
-				stop_requested_ = false;
-				pthread_create(&thread_id_, 0, (void* (*) (void*)) thread_function_static, (void*) this);
-				enabled_ = true;
-			}
-			else
-			{
-				stop_requested_ = true;
->>>>>>> .r3159
 				usleep(500); // give thread time to close
 			}
-<<<<<<< .mine
 			return threadStarted;
-=======
-			assert(enabled_ = e);
-			return enabled_;
->>>>>>> .r3159
 		}
-
-		void ESoundOut::setDefaults( )
-		{
-		}
-
-
+		
 		int ESoundOut::audioOutThread( void * ptr )
 		{
 			ESoundOut* esoundOut = ( ESoundOut* ) ptr;
@@ -204,34 +165,8 @@ namespace psycle
 			device_buffer_ *= bits_ / 8 * channels_;
 		}
 
-<<<<<<< .mine
-	
-=======
-		void * ESoundOut::thread_function_static(void * object)
-		{
-			reinterpret_cast<ESoundOut*>(object)->thread_function();
-		}
-		
-		void ESoundOut::thread_function()
-		{
-			while(!stop_requested_)
-			{
-				int sample_count(device_buffer_ / 4);
-				float * input(callback_(callback_context_, sample_count));
-				std::cout << "foo\n";
-				usleep(1000);
-			}
-			enabled_ = false;
-		}
-		
->>>>>>> .r3159
-		int ESoundOut::write_buffer(char *buffer, long size)
-		{
-			if(fd_ > 0) return write(fd_, buffer, size);
-			else return 0;
-		}
-	}
-}
+	} // end of psycle host
+} // end of psycle namespace
 
 
 
