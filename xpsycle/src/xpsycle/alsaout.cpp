@@ -199,7 +199,6 @@ void AlsaOut::FillBuffer(const snd_pcm_channel_area_t * areas, snd_pcm_uframes_t
       *samples[1] = *input++;
       samples[1] += steps[1];
   }
-
 }
 
 int AlsaOut::set_hwparams(snd_pcm_t *handle,

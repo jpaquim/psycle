@@ -388,7 +388,7 @@ void GeneratorGUI::repaintVUMeter( )
 
 void GeneratorGUI::VUPanel::paint( NGraphics * g )
 {
-  int vol = pGui_->pMac()->_volumeDisplay;
+  /*int vol = pGui_->pMac()->_volumeDisplay;
   int max = pGui_->pMac()->_volumeMaxDisplay;
 
   vol *= pGui_->dGeneratorVu.width();
@@ -432,7 +432,7 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
       g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), Global::configuration().icons().machine_skin(),
                   pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
       }
-
+*/
 }
 
 
@@ -593,7 +593,7 @@ void EffektGUI::repaintVUMeter( )
 
 void EffektGUI::VUPanel::paint( NGraphics * g )
 {
-  int vol = pGui_->pMac()->_volumeDisplay;
+  /*int vol = pGui_->pMac()->_volumeDisplay;
   int max = pGui_->pMac()->_volumeMaxDisplay;
 
   vol *= pGui_->dGeneratorVu.width();
@@ -636,7 +636,7 @@ void EffektGUI::VUPanel::paint( NGraphics * g )
       g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), Global::configuration().icons().machine_skin(),
                   pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
       }
-
+*/
 }
 
 void MachineGUI::onMousePress( int x, int y, int button )

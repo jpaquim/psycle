@@ -889,21 +889,24 @@ int Machine::GenerateAudio( int numsamples )
 			nextLineInSamples+=Global::player().SamplesPerRow();
 		}
 
-		while ( processedsamples == nextevent )
+		
+		while ( processedsamples == nextevent  )
 		{
-			WorkEvent & workEvent = workEvents.front();
-			///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
-			colsIt = playCol.find(workEvent.track());
-			if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
-			Tick(colsIt->second,workEvent.event().entry());
-			workEvents.pop_front();
-			if (!workEvents.empty())
-			{
-				workEvent = workEvents.front();
-			//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
-				nextevent = workEvent.beatOffset() * Global::player().SamplesPerBeat();
+			if (!workEvents.empty()) {
+				WorkEvent & workEvent = workEvents.front();
+				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
+				colsIt = playCol.find(workEvent.track());
+				if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
+				Tick(colsIt->second,workEvent.event().entry());
+				workEvents.pop_front();
+				if (!workEvents.empty())
+				{
+					workEvent = workEvents.front();
+				//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
+					nextevent = workEvent.beatOffset() * Global::player().SamplesPerBeat();
+				} else nextevent = numsamples+1;
 			} else nextevent = numsamples+1;
-		}
+		} 
 
 		//minimum between remaining samples, next "Tick()" and next event
 		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
