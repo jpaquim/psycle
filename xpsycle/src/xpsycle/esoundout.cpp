@@ -79,24 +79,33 @@ namespace psycle
 			rate_ = 44100;
 		}
 
-		int ESoundOut::bitsFlag()
+		int ESoundOut::bitsFlag() throw(std::exception)
 		{
 			switch(bits_)
 			{
 				case 8: return ESD_BITS8; break;
 				case 16: return ESD_BITS16; break;
-				case 24: return ESD_BITS16; break;
+				default:
+					{
+						std::ostringstream s;
+						s << "unsupported audio bit depth: " << bits_ << " (must be 8 or 16)";
+						throw std::runtime_error(s.str());
+					}
 			}
-			return 0;
 		}
 
-		int ESoundOut::channelsFlag()
+		int ESoundOut::channelsFlag() throw(std::exception)
 		{
 			switch(channels_)
 			{
 				case 1: return ESD_MONO; break;
 				case 2: return ESD_STEREO; break;
-				default: return ESD_STEREO; // no more than 2 channels
+				default:
+					{
+						std::ostringstream s;
+						s << "unsupported audio channel count: " << channels_ << " (must be 1 or 2)";
+						throw std::runtime_error(s.str());
+					}
 			}
 		}
 
@@ -105,7 +114,11 @@ namespace psycle
 			std::string nrv;
 			{
 				char * env(std::getenv("ESPEAKER"));
-				if(env) nrv = env;
+				if(env)
+				{
+					nrv = env;
+					return nrv;
+				}
 			}
 			// ESD host:port
 			if(port_ > 0 && host_.length())
@@ -122,17 +135,10 @@ namespace psycle
 			esd_format_t format = ESD_STREAM | ESD_PLAY;
 			format |= channelsFlag();
 			format |= bitsFlag();
-			if((output_ = esd_open_sound(hostPort().c_str())) <= 0)
-			{
-				throw std::runtime_error("failed to open esound output '" + hostPort() + "'");
-			};
-			fd_ = esd_play_stream_fallback
-			(
-				format,
-				rate_,
-				hostPort().c_str(),
-				"psycle"
-			);
+			//if((output_ = esd_open_sound(hostPort().c_str())) < 0)
+			//	throw std::runtime_error("failed to open esound output '" + hostPort() + "'");
+			if((fd_ = esd_play_stream_fallback(format, rate_, hostPort().c_str(), "psycle")) < 0)
+				throw std::runtime_error("failed to open esound output stream '" + hostPort() + "'");
 			deviceBuffer_ = esd_get_latency(output_);
 			deviceBuffer_ *= bits_ / 8 * channels_;
 		}
