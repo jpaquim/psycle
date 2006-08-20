@@ -32,49 +32,40 @@ namespace psycle
 	{
 		ESoundOut::ESoundOut()
 		:
-			AudioDriver()			
+			AudioDriver(),
+			initialized_(false),
+			threadRunning_(false),
+			killThread_(false),
+			callback_(0),
+			callbackContext_(0),
+			host_(),
+			port_(0)
 		{
-      kill_thread = 0;
-			threadOpen = 0;
+			setDefaults();
 		}
 
 		ESoundOut::~ESoundOut()
 		{
+			Enable(false);
+			close();
 		}
 
-		void ESoundOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
+		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)
 		{
-			kill_thread = 0;
-			threadOpen = 0;
-			_initialized = false;
-			setDefaults();     
+			#if !defined NDEBUG
+				std::cout << "initializing esound\n";
+			#endif
+			assert(!threadRunning_);
+			open();
+			callback_ = callback;
+			callbackContext_ = callbackContext;
+			initialized_ = true;
 		}
 
-		bool ESoundOut::Initialized( )
+		bool ESoundOut::Initialized()
 		{
-			return _initialized;
+			return initialized_;
 		}
-
-		void ESoundOut::writeBuffer( )
-		{
-			threadOpen = 1;
-
-			int count = 441;
-
-
-			while(!(kill_thread))
-			{
-				usleep(100); // give cpu time to breath
-
-				float const * input(_pCallback(_callbackContext, count));
-				std::cout << "spam me" << std::endl;
-			}
-
-			threadOpen = 0;
-			pthread_exit(0);
-		}
-
-
 
 		void ESoundOut::Configure( )
 		{
@@ -88,29 +79,7 @@ namespace psycle
 			rate_ = 44100;
 		}
 
-		bool ESoundOut::Enable(bool e)
-		{
-			bool threadStarted = false;
-			if (e && !threadOpen) {
-					kill_thread = 0;
-					pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
-					threadStarted = true;
-			} else
-			if (!e && threadOpen) {
-				kill_thread = 1;
-				threadStarted = false;
-				usleep(500); // give thread time to close
-			}
-			return threadStarted;
-		}
-		
-		int ESoundOut::audioOutThread( void * ptr )
-		{
-			ESoundOut* esoundOut = ( ESoundOut* ) ptr;
-			esoundOut->writeBuffer();
-		}
-
-		int ESoundOut::bits_flag()
+		int ESoundOut::bitsFlag()
 		{
 			switch(bits_)
 			{
@@ -121,7 +90,7 @@ namespace psycle
 			return 0;
 		}
 
-		int ESoundOut::channels_flag()
+		int ESoundOut::channelsFlag()
 		{
 			switch(channels_)
 			{
@@ -129,12 +98,15 @@ namespace psycle
 				case 2: return ESD_STEREO; break;
 				default: return ESD_STEREO; // no more than 2 channels
 			}
-			return 0;
 		}
 
-		std::string ESoundOut::host_port()
+		std::string ESoundOut::hostPort()
 		{
 			std::string nrv;
+			{
+				char * env(std::getenv("ESPEAKER"));
+				if(env) nrv = env;
+			}
 			// ESD host:port
 			if(port_ > 0 && host_.length())
 			{
@@ -145,32 +117,74 @@ namespace psycle
 			return nrv;
 		}
 
-		void ESoundOut::open_output() throw(std::exception)
+		void ESoundOut::open() throw(std::exception)
 		{
 			esd_format_t format = ESD_STREAM | ESD_PLAY;
-			format |= channels_flag();
-			format |= bits_flag();
-			if((output_ = esd_open_sound(host_port().c_str())) < 0)
+			format |= channelsFlag();
+			format |= bitsFlag();
+			if((output_ = esd_open_sound(hostPort().c_str())) <= 0)
 			{
-				throw std::runtime_error("failed to open esound output");
+				throw std::runtime_error("failed to open esound output '" + hostPort() + "'");
 			};
 			fd_ = esd_play_stream_fallback
 			(
 				format,
 				rate_,
-				host_port().c_str(),
+				hostPort().c_str(),
 				"psycle"
 			);
-			device_buffer_ = esd_get_latency(output_);
-			device_buffer_ *= bits_ / 8 * channels_;
+			deviceBuffer_ = esd_get_latency(output_);
+			deviceBuffer_ *= bits_ / 8 * channels_;
+		}
+		
+		void ESoundOut::close() throw(std::exception)
+		{
+			///\todo
+		}
+
+		bool ESoundOut::Enable(bool e)
+		{
+			#if !defined NDEBUG
+				std::cout << (e ? "en" : "dis") << "abling esound\n";
+			#endif
+			bool threadStarted = false;
+			if (e && !threadRunning_) {
+					killThread_ = false;
+					pthread_create(&threadId_, NULL, (void*(*)(void*))audioOutThreadStatic, (void*) this);
+					threadStarted = true;
+			} else
+			if (!e && threadRunning_) {
+				killThread_ = true;
+				usleep(500); // give thread time to close
+				threadStarted = false;
+			}
+			return threadStarted;
+		}
+		
+		int ESoundOut::audioOutThreadStatic( void * ptr )
+		{
+			reinterpret_cast<ESoundOut*>(ptr)->audioOutThread();
+		}
+
+		void ESoundOut::audioOutThread()
+		{
+			threadRunning_ = true;
+
+			int count = 8192;
+
+			while(!killThread_)
+			{
+				usleep(100); // give cpu time to breath
+
+				float const * input(callback_(callbackContext_, count));
+				std::cout << "spam me" << std::endl;
+			}
+
+			threadRunning_ = false;
+			pthread_exit(0);
 		}
 
 	} // end of psycle host
 } // end of psycle namespace
-
-
-
-
-
 
 #endif // !defined XPSYCLE__NO_ESOUND

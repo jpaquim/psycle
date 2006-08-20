@@ -38,51 +38,45 @@ namespace psycle
 			public:
 				virtual void Configure();
 
+			public:
 				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 				virtual bool Initialized();			
-							
+			private:
+				bool initialized_;
+				
+			public:		
 				virtual bool Enable(bool e);			
 				
 			private:
-
-				bool initialized_;
-
 				unsigned int channels_;
-				int channels_flag();
+				int channelsFlag();
 
-				void setDefaults();
-				
 				unsigned int bits_;
-				int bits_flag();
+				int bitsFlag();
 				
 				unsigned int rate_;
 				
-				void open_output() throw(std::exception);
+				void setDefaults();
+				
+				void open() throw(std::exception);
+				void close() throw(std::exception);
 				std::string host_;
 				int port_;
-				std::string host_port();
+				std::string hostPort();
 				int output_;
 				int fd_;
 
-				pthread_t thread_id_;
+				pthread_t threadId_;
+				static int audioOutThreadStatic(void*);
+				void audioOutThread();
+				bool threadRunning_;
+				bool killThread_;
+
+				AUDIODRIVERWORKFN callback_;
+				void* callbackContext_; // Player callback
 				
-				void* _callbackContext; // Player callback
-				AUDIODRIVERWORKFN _pCallback;
-				bool _initialized;
-				
-				long device_buffer_;
-				int read_buffer(char * buffer, long size);
-				int write_buffer(char * buffer, long size);
-
-        int iret1;
-				int threadOpen;
-				pthread_t threadid;
-				int kill_thread;
-				static int audioOutThread(void * ptr);
-
-				void writeBuffer();
-
-
+				int writeBuffer(char * buffer, long size);
+				long deviceBuffer_;
 		};
 	}
 }
