@@ -26,6 +26,7 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
+#include <cerrno>
 namespace psycle
 {
 	namespace host
@@ -109,6 +110,7 @@ namespace psycle
 			}
 		}
 
+		/// ESD host:port
 		std::string ESoundOut::hostPort()
 		{
 			std::string nrv;
@@ -120,7 +122,6 @@ namespace psycle
 					return nrv;
 				}
 			}
-			// ESD host:port
 			if(port_ > 0 && host_.length())
 			{
 				std::ostringstream s;
@@ -135,17 +136,23 @@ namespace psycle
 			esd_format_t format = ESD_STREAM | ESD_PLAY;
 			format |= channelsFlag();
 			format |= bitsFlag();
-			//if((output_ = esd_open_sound(hostPort().c_str())) < 0)
-			//	throw std::runtime_error("failed to open esound output '" + hostPort() + "'");
-			if((fd_ = esd_play_stream_fallback(format, rate_, hostPort().c_str(), "psycle")) < 0)
-				throw std::runtime_error("failed to open esound output stream '" + hostPort() + "'");
+			if((output_ = esd_open_sound(hostPort().c_str())) < 0)
+			{
+				std::string s(std::strerror(errno));
+				throw std::runtime_error("failed to open esound output '" + hostPort() + "': " + s);
+			}
 			deviceBuffer_ = esd_get_latency(output_);
 			deviceBuffer_ *= bits_ / 8 * channels_;
+			if((fd_ = esd_play_stream_fallback(format, rate_, hostPort().c_str(), "psycle")) < 0)
+			{
+				std::string s(std::strerror(errno));
+				throw std::runtime_error("failed to open esound output stream '" + hostPort() + "': " + s);
+			}
 		}
 		
 		void ESoundOut::close() throw(std::exception)
 		{
-			///\todo
+			esd_close(output_);
 		}
 
 		bool ESoundOut::Enable(bool e)
