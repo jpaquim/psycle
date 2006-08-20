@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
+ *   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,62 +23,63 @@
 #endif
 #if !defined XPSYCLE__NO_ESOUND
 #include "audiodriver.h"
-
-/**
-@author Stefan Nattkemper
-*/
-
-namespace psycle { namespace host {
-
-class ESoundOut : public AudioDriver
+#include <pthread.h>
+#include <exception>
+namespace psycle
 {
-public:
-    ESoundOut();
+	namespace host
+	{
+		class ESoundOut : public AudioDriver
+		{
+			public:
+				ESoundOut();
+				~ESoundOut();
+				
+			public:
+				virtual void Configure();
 
-    ~ESoundOut();
+			public:
+				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+				virtual bool Initialized();
+			private:
+				bool initialized_;
+				
+			public:
+				virtual bool Enable(bool e);
+			private:
+				bool enabled_;
 
-    virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-    virtual bool Initialized();
-    virtual void configure();
-    virtual bool Enable(bool e);
+			private:
+				unsigned int channels_;
+				int channels_flag();
+				
+				unsigned int bits_;
+				int bits_flag();
+				
+				unsigned int rate_;
 
-private:
+				void setDefault();
+				
+				void open_output() throw(std::exception);
+				std::string host_;
+				int port_;
+				std::string host_port();
+				int output_;
+				int fd_;
 
-    void setDefault();
-
-    int iret1;
-    static void* pollerThread(void* ptr);
-    void* _callbackContext;
-    AUDIODRIVERWORKFN _pCallback;
-    pthread_t threadid;
-
-    unsigned int channels;
-    unsigned int bits;
-    unsigned int rate;
-
-    bool _initialized;
-    bool _running;
-
-
-    int get_bit_flag(int bits);
-    int get_channels_flag(int channels);
-    std::string translate_device_string(const std::string & server, int port);
-    int esd_in, esd_out, esd_duplex;
-    int esd_in_fd, esd_out_fd, esd_duplex_fd;
-    char device_string[1024];
-
-    int open_output();
-
-    std::string esound_out_server;
-    int esound_out_port;
-    long device_buffer;
-
-    int read_buffer(char *buffer, long size);
-    int write_buffer(char *buffer, long size);
-
-};
-
-}}
-
+				pthread_t thread_id_;
+				static void * thread_function_static(void *);
+				void thread_function();
+				bool stop_requested_;
+				
+				AUDIODRIVERWORKFN callback_;
+				void * callback_context_;
+				
+				long device_buffer_;
+				int read_buffer(char * buffer, long size);
+				int write_buffer(char * buffer, long size);
+		};
+	}
+}
 #endif // !defined XPSYCLE__NO_ESOUND
 #endif
