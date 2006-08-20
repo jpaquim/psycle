@@ -73,6 +73,8 @@ NSkin::NSkin( const NSkin & src )
 
 const NSkin & NSkin::operator =( const NSkin & rhs )
 {
+  if (border_) delete border_;
+
   if (rhs.border())
     border_ = rhs.border()->clone();
   else
@@ -115,6 +117,7 @@ NSkin::~ NSkin( )
 
 void NSkin::setBorder( const NBorder & border )
 {
+	if (border_) delete border_;
   border_ = border.clone();
 }
 

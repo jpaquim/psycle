@@ -49,7 +49,7 @@ public:
 
     Display* dpy() const;
     int depth() const;
-    int pixelsize() const;
+    int pixelSize( int depth ) const;
     int screen() const;
     Window rootWindow() const;
     Visual *visual() const;

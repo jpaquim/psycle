@@ -40,11 +40,10 @@ NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_
 
 NBitmap::~NBitmap()
 {
-  /*delete[] data_;
-  if (xi!=0) {
-   xi->data = 0;
-   XDestroyImage(xi);
-  }*/
+	if (xi)
+		XDestroyImage(xi);
+  if (clp)
+		XDestroyImage(clp);
 }
 
 unsigned char const * NBitmap::dataPtr( ) const
@@ -55,25 +54,6 @@ unsigned char const * NBitmap::dataPtr( ) const
 void NBitmap::setDepth( int depth )
 {
   depth_ = depth;
-}
-
-void NBitmap::setSize( int width, int height )
-{
-   xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), NApp::system().depth(), ZPixmap,0,(char*)data_,width,height,32,width*pixelsize());
-
-  /*if (width>0 && height >0) {
-    if (data_ == 0) {
-       data_ = (pRGBA) new char[width*height*pixelsize()];
-       xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), NApp::system().depth(), ZPixmap,0,(char*)data_,width,height,32,width*pixelsize());
-    } else {
-      pRGBA tmp_ = (pRGBA) new char[width*height*pixelsize()];
-      xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), NApp::system().depth(), ZPixmap,0,(char*)data_,width,height,32,width*pixelsize());
-      delete[] data_;
-      data_ = tmp_;
-    }
-    width_  = width;
-    height_ = height;
-  }*/
 }
 
 int NBitmap::depth( ) const
@@ -116,14 +96,22 @@ XImage * NBitmap::X11data( ) const
   return xi;
 }
 
-NBitmap::NBitmap( const NBitmap & src ) : depth_(24),width_(0),height_(0),data_(0),xi(0),clp(0)
+NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(0),xi(0),clp(0)
 {
-  xi = src.X11data();
-  clp = src.X11ClpData();
-   /*setSize(src.width(),src.height());
-   for (int i = 0; i < width_ * height_ * src.pixelsize(); i++) {
-      data_[i] = src.dataPtr()[i];
-   }*/
+	if (rhs.X11data() == 0) {
+		// empty Bitmap
+		// do just nothing
+	} else {
+		xi = cloneXImage( rhs.X11data() );
+	}
+
+	if (rhs.X11ClpData() == 0) {
+		// empty Bitmap
+		// do just nothing
+	} else {
+		clp = cloneXImage( rhs.X11ClpData() );
+	}
+
 }
 
 void NBitmap::setX11Data( XImage * ximage, XImage* clp_ )
@@ -135,27 +123,34 @@ void NBitmap::setX11Data( XImage * ximage, XImage* clp_ )
 
 const NBitmap & NBitmap::operator =( const NBitmap & rhs )
 {
-   /*setSize(rhs.width(),rhs.height());
-   for (int i = 0; i < width_ * height_*rhs.pixelsize(); i++) {
-      data_[i] = rhs.dataPtr()[i];
-   }
-   if (xi!=0) {
-      xi->data =(char*) data_;
-   }*/
-  clp = rhs.X11ClpData();
-  xi = rhs.X11data();
+	deleteBitmapData();
+
+	if (rhs.X11data() == 0) {
+		// empty Bitmap
+		// do just nothing
+	} else {
+		xi = cloneXImage( rhs.X11data() );
+	}
+
+	if (rhs.X11ClpData() == 0) {
+		// empty Bitmap
+		// do just nothing
+	} else {
+		clp = cloneXImage( rhs.X11ClpData() );
+	}
+	
   return *this;
 }
 
 void NBitmap::loadFromFile( const std::string & filename )
 {
+	deleteBitmapData();
+
   try {
     NBitmap bmp1 = NApp::filter.at(0)->loadFromFile(NFile::replaceTilde(filename));
-    xi  = bmp1.X11data();
-    clp = bmp1.X11ClpData();
+    xi  = cloneXImage( bmp1.X11data() );
+    clp = cloneXImage( bmp1.X11ClpData() );
   } catch (const char* e) {
-     xi = 0;
-     clp = 0;
      throw "couldn`t open file";
   }
 }
@@ -163,6 +158,8 @@ void NBitmap::loadFromFile( const std::string & filename )
 
 void NBitmap::createFromXpmData(const char** data)
 {
+	deleteBitmapData();
+
   XpmColorSymbol cs[256];
   XpmAttributes attr;
   attr.valuemask = XpmCloseness;
@@ -180,6 +177,46 @@ void NBitmap::createFromXpmData(const char** data)
 XImage * NBitmap::X11ClpData( ) const
 {
   return clp;
+}
+
+XImage * NBitmap::cloneXImage( XImage * src_xi )
+{
+  if ( src_xi ) {
+		int width  = src_xi->width;
+		int height = src_xi->height;
+		int depth  = src_xi->depth;
+		int pad    = src_xi->bitmap_pad;
+		int bytes_per_line = src_xi->bytes_per_line;
+
+		int pixelsize = NApp::system().pixelSize( depth );
+
+		unsigned char* src_data = reinterpret_cast<unsigned char*> (src_xi->data);
+		unsigned char* dst_data = 0;
+
+		dst_data = reinterpret_cast<unsigned char*> ( malloc( width * height * pixelsize ) );
+		memcpy( dst_data, src_data, width * height * pixelsize );				
+
+  	XImage* dst_xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), depth, ZPixmap,0,(char*) dst_data , width, height, pad , bytes_per_line );
+
+		return dst_xi;
+	}
+
+  return 0;
+}
+
+void NBitmap::deleteBitmapData( )
+{
+  if (xi) {
+		// destroys the image
+		XDestroyImage(xi);
+		xi = 0;
+	}
+
+	if (clp) {
+		// destroys the transparent image mask
+		XDestroyImage(clp);
+		clp = 0;
+	}
 }
 
 

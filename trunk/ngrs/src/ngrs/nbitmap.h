@@ -34,7 +34,7 @@ class NBitmap : public NObject
 public:
     NBitmap();
     NBitmap(const std::string & filename);
-    NBitmap(const NBitmap & src);
+    NBitmap(const NBitmap & rhs);
     NBitmap(const char** data);
 
     const NBitmap & operator= (const NBitmap & rhs);
@@ -49,7 +49,6 @@ public:
     int height()    const;
 
     void setDepth(int depth);
-    void setSize(int width, int height);
 
     XImage* X11data() const;
     XImage* X11ClpData() const;
@@ -69,6 +68,10 @@ private:
 
     XImage* xi;
     XImage* clp;
+
+		void deleteBitmapData();
+
+		XImage* cloneXImage( XImage* src_xi );
 };
 
 #endif

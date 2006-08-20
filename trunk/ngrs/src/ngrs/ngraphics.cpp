@@ -264,7 +264,7 @@ void NGraphics::fillTranslucent( int x, int y, int width, int height, NColor col
 {
   XImage* xi = XGetImage(NApp::system().dpy(),doubleBufferPixmap_,x+dx_,y+dy_,width,height,AllPlanes,ZPixmap);
   unsigned char* data = (unsigned char*) xi->data;
-  int pixelsize = NApp::system().pixelsize();
+  int pixelsize = NApp::system().pixelSize( NApp::system().depth() );
   double anteil = percent / 100.0f;
   if (pixelsize == 4)
   for (int i = 0; i < xi->width*xi->height*pixelsize;i=i+pixelsize) {
