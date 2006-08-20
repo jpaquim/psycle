@@ -49,10 +49,10 @@ namespace psycle
 				
 			private:
 				unsigned int channels_;
-				int channelsFlag();
+				int channelsFlag() throw(std::exception);
 
 				unsigned int bits_;
-				int bitsFlag();
+				int bitsFlag() throw(std::exception);
 				
 				unsigned int rate_;
 				
