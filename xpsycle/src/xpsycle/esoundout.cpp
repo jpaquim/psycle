@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
+ *   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,141 +21,148 @@
 #endif
 #if !defined XPSYCLE__NO_ESOUND
 #include "esoundout.h"
-#include "esd.h"
-
-namespace psycle { namespace host {
-
-ESoundOut::ESoundOut()
- : AudioDriver()
+#include <esd.h>
+#include <stdexcept>
+#include <iostream>
+#include <sstream>
+#include <cassert>
+namespace psycle
 {
-  _running     = false;
-  _initialized = false;
+	namespace host
+	{
+		ESoundOut::ESoundOut()
+		:
+			AudioDriver(),
+			initialized_(false),
+			enabled_(false)
+		{
+		}
+
+		ESoundOut::~ESoundOut()
+		{
+		}
+
+		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * context)
+		{
+			callback_ = callback;
+			callback_context_ = context;
+			setDefault();
+			open_output();
+			initialized_ = true;
+		}
+
+		bool ESoundOut::Initialized( )
+		{
+		  return initialized_;
+		}
+
+		void ESoundOut::Configure( )
+		{
+			setDefault();
+		}
+
+		void ESoundOut::setDefault( )
+		{
+			channels_ = 2;
+			bits_ = 16;
+			rate_ = 44100;
+		}
+
+		bool ESoundOut::Enable(bool e)
+		{
+			//if(e) start() else stop();
+			return true;
+			if(e == enabled_) return true;
+			if(e)
+			{
+				stop_requested_ = false;
+				pthread_create(&thread_id_, 0, (void* (*) (void*)) thread_function_static, (void*) this);
+				enabled_ = true;
+			}
+			else
+			{
+				stop_requested_ = true;
+				usleep(500); // give thread time to close
+			}
+			assert(enabled_ = e);
+			return true;
+		}
+
+		int ESoundOut::bits_flag()
+		{
+			switch(bits_)
+			{
+				case 8: return ESD_BITS8; break;
+				case 16: return ESD_BITS16; break;
+				case 24: return ESD_BITS16; break;
+			}
+			return 0;
+		}
+
+		int ESoundOut::channels_flag()
+		{
+			switch(channels_)
+			{
+				case 1: return ESD_MONO; break;
+				case 2: return ESD_STEREO; break;
+				default: return ESD_STEREO; // no more than 2 channels
+			}
+			return 0;
+		}
+
+		std::string ESoundOut::host_port()
+		{
+			std::string nrv;
+			// ESD host:port
+			if(port_ > 0 && host_.length())
+			{
+				std::ostringstream s;
+				s << host_ << ":" << port_;
+				nrv = s.str();
+			}
+			return nrv;
+		}
+
+		void ESoundOut::open_output() throw(std::exception)
+		{
+			esd_format_t format = ESD_STREAM | ESD_PLAY;
+			format |= channels_flag();
+			format |= bits_flag();
+			if((output_ = esd_open_sound(host_port().c_str())) < 0)
+			{
+				throw std::runtime_error("failed to open esound output");
+			};
+			fd_ = esd_play_stream_fallback
+			(
+				format,
+				rate_,
+				host_port().c_str(),
+				"psycle"
+			);
+			device_buffer_ = esd_get_latency(output_);
+			device_buffer_ *= bits_ / 8 * channels_;
+		}
+
+		void * ESoundOut::thread_function_static(void * object)
+		{
+			reinterpret_cast<ESoundOut*>(object)->thread_function();
+		}
+		
+		void ESoundOut::thread_function()
+		{
+			while(!stop_requested_)
+			{
+				std::cout << "foo\n";
+				usleep(1000);
+			}
+			enabled_ = false;
+		}
+		
+		int ESoundOut::write_buffer(char *buffer, long size)
+		{
+			if(fd_ > 0) return write(fd_, buffer, size);
+			else return 0;
+		}
+	}
 }
-
-
-ESoundOut::~ESoundOut()
-{
-}
-
-void ESoundOut::Initialize( AUDIODRIVERWORKFN pCallback, void * context )
-{
-  _pCallback = pCallback;
-  _callbackContext = context;
-  _initialized = true;
-  _running = false;
-  setDefault();
-  open_output();
-}
-
-bool ESoundOut::Initialized( )
-{
-  return _running;
-}
-
-void ESoundOut::configure( )
-{
-}
-
-bool ESoundOut::Enable( bool e )
-{
-}
-
-int ESoundOut::get_bit_flag( int bits )
-{
-  switch(bits)
-  {
-    case 8:
-      return ESD_BITS8;
-    break;
-
-    case 16:
-      return ESD_BITS16;
-    break;
-
-   case 24:
-      return ESD_BITS16;
-   break;
-  }
-  return 0;
-}
-
-// No more than 2 channels in ESD
-int ESoundOut::get_channels_flag(int channels)
-{
-  switch(channels)
-  {
-    case 1:
-      return ESD_MONO;
-    break;
-
-    case 2:
-      return ESD_STEREO;
-    break;
-
-    default:
-      return ESD_STEREO;
-    break;
-  }
-  return 0;
-}
-
-std::string ESoundOut::translate_device_string(const std::string & server, int port)
-{
-  char device_string[8000];
-// ESD server
-  if(port > 0 && strlen(server.c_str()))
-    sprintf(device_string, "%s:%d", server.c_str(), port);
-  else
-    sprintf(device_string, "");
-  return std::string(device_string);
-}
-
-int ESoundOut::open_output()
-{
-  esd_format_t format = ESD_STREAM | ESD_PLAY;
-
-  format |= get_channels_flag(channels);
-  format |= get_bit_flag(bits);
-
-  if((esd_out = esd_open_sound(translate_device_string(esound_out_server, esound_out_port).c_str())) <= 0)
-  {
-    fprintf(stderr, "AudioESound::open_output: open failed\n");
-    return 1;
-  };
-  esd_out_fd = esd_play_stream_fallback(format,
-      rate,
-      translate_device_string(esound_out_server.c_str(),esound_out_port).c_str(),
-      "Bcast 2000");
-  device_buffer = esd_get_latency(esd_out);
-  device_buffer *= bits / 8 * channels;
-  return 0;
-}
-
-void ESoundOut::setDefault( )
-{
-  channels = 2;
-  bits = 16;
-  rate = 44100;
-}
-
-
-int ESoundOut::read_buffer(char *buffer, long size)
-{
-	if(esd_in_fd > 0)
-		return read(esd_in_fd, buffer, size);
-	else
-		return 1;
-return 0;
-}
-
-int ESoundOut::write_buffer(char *buffer, long size)
-{
-	if(esd_out_fd > 0)
-		return write(esd_out_fd, buffer, size);
-	else
-		return 0;
-return 0;
-}
-
-}}
 #endif // !defined XPSYCLE__NO_ESOUND
