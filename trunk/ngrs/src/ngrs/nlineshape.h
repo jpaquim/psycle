@@ -32,6 +32,8 @@ public:
 
     ~NLineShape();
 
+		virtual NLineShape* clone() const;   // Uses the copy constructor
+
     virtual void setPosition(int left, int top, int width, int height);
     virtual void setLeft(int left);
     virtual void setTop(int top);

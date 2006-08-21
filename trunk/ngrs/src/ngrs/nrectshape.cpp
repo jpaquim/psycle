@@ -79,6 +79,11 @@ NRegion NRectShape::spacingRegion( const NSize & spacing )
           ));
 }
 
+NRectShape * NRectShape::clone( ) const
+{
+  return new NRectShape(*this);
+}
+
 
 
 

@@ -59,6 +59,8 @@ public:
     virtual NRegion region();
     virtual NRegion spacingRegion(const NSize & spacing);
 
+		virtual NShape* clone()  const = 0;   // Uses the copy constructor
+
 
 private:
 
