@@ -8,6 +8,7 @@
 <!-- audio configuration -->
 
 <audio enable='0' />
+<driver name='alsa' />
 
 <!-- plugin configuration -->
 

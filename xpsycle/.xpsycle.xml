@@ -7,7 +7,7 @@
 <!-- audio configuration -->
 
 <audio enable='1' />
-
+<driver name='alsa' />
 
 <!-- gui configuration -->
 
