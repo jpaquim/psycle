@@ -40,6 +40,8 @@ namespace psycle
 
 				~WaveFileOut();
 
+				virtual AudioDriverInfo info() const;
+
 				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 
 				// starts stops file writing

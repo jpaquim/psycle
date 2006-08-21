@@ -31,6 +31,7 @@ namespace psycle
 {
 	namespace host
 	{
+
 		ESoundOut::ESoundOut()
 		:
 			AudioDriver(),
@@ -49,6 +50,11 @@ namespace psycle
 		{
 			Enable(false);
 			close();
+		}
+
+		AudioDriverInfo ESoundOut::info( ) const
+		{
+			return AudioDriverInfo("esd");
 		}
 
 		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)
@@ -220,6 +226,8 @@ namespace psycle
 		}
 
 	} // end of psycle host
-} // end of psycle namespace
+}
+
+ // end of psycle namespace
 
 #endif // !defined XPSYCLE__NO_ESOUND

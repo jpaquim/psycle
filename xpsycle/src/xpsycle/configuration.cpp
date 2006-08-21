@@ -115,53 +115,35 @@ void Configuration::setSkinDefaults( )
   machineGUITitleColor.setHCOLORREF(0x00000000);
   machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
 
-	// audio driver configuration
-	_numOutputDrivers = 1;
-	#if defined XPSYCLE__CONFIGURATION
-		#include <xpsycle/alsa_conditional_build.h>
-		#include <xpsycle/gstreamer_conditional_build.h>
-		#include <xpsycle/esound_conditional_build.h>
-	#endif
-	#if !defined XPSYCLE__NO_ALSA
-		++_numOutputDrivers;
-	#endif
-	#if !defined XPSYCLE__NO_GSTREAMER
-		++_numOutputDrivers;
-	#endif
-	#if !defined XPSYCLE__NO_JACK
-		++_numOutputDrivers;
-	#endif
-	#if !defined XPSYCLE__NO_ESOUND
-		++_numOutputDrivers;
-	#endif
-	_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
-	{
-		unsigned int index(0);
-		_ppOutputDrivers[index] = new AudioDriver;
-		_outputDriverIndex = index;
+	{	
+		AudioDriver* driver = 0;
+		driver = new AudioDriver;
+		_pSilentDriver = driver;
+		driverMap[ driver->info().name() ] = driver;
 		#if !defined XPSYCLE__NO_ALSA
-			++index;
-			_ppOutputDrivers[index] = new AlsaOut;
-			if(!_outputDriverIndex) _outputDriverIndex = index;
+			driver = new AlsaOut;
+			std::cout << "registered:" <<  driver->info().name() << std::endl;
+			driverMap[ driver->info().name() ] = driver;
 		#endif
 		#if !defined XPSYCLE__NO_JACK
-			++index;
-			_ppOutputDrivers[index] = new JackOut;
-			if(!_outputDriverIndex) _outputDriverIndex = index;
+			driver = new JackOut;
+			std::cout << "registered:" <<  driver->info().name() << std::endl;
+			driverMap[ driver->info().name() ] = driver;
 		#endif
 		#if !defined XPSYCLE__NO_GSTREAMER
-			++index;
-			_ppOutputDrivers[index] = new GStreamerOut;
-			if(!_outputDriverIndex) _outputDriverIndex = index;
+			driver = new GStreamerOut;
+			std::cout << "registered:" <<  driver->info().name() << std::endl;
+			driverMap[ driver->info().name() ] = driver;
 		#endif
-		#if !defined XPSYCLE__NO_ESOUND
-			++index;
-			_ppOutputDrivers[index] = new ESoundOut;
-			if(!_outputDriverIndex) _outputDriverIndex = index;
+		#if !defined XPSYCLE__NO_ESOUND			
+			driver = new ESoundOut;
+			std::cout << "registered:" <<  driver->info().name() << std::endl;
+			driverMap[ driver->info().name() ] = driver;
 		#endif
 	}
 
-	_pOutputDriver = new ESoundOut;
+	setDriverByName("silent");
+	enableSound = false;
 
   #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/install_paths.h>
@@ -191,36 +173,30 @@ void Configuration::setSkinDefaults( )
   mv_triangle_size = 22;
 }
 
+void Configuration::setDriverByName( const std::string & driverName )
+{
+	std::map< std::string, AudioDriver*>::iterator it = driverMap.begin();
+
+	if ( ( it = driverMap.find( driverName ) ) != driverMap.end() ) {
+		// driver found
+		_pOutputDriver = it->second;
+		std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
+	}
+	else {
+		// driver not found, set silent default driver
+		_pOutputDriver = _pSilentDriver;
+		std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
+	}
+}
+
+
 void Configuration::loadConfig()
 {
   NApp::config()->tagParse.connect(this,&Configuration::onConfigTagParse);
 
   // system-wide
 
-  #if !defined XPSYCLE__CONFIGURATION
-  // we don't have any information about the installation paths
-  #else
-  #include <xpsycle/install_paths.h>
-  try
-  {
-    loadConfig(XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml");
-  }
-  catch(std::exception const & e)
-  {
-    std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
-  }
-  #endif
-
-  // user home
-
-  try {
-      loadConfig(NFile::replaceTilde("~/.xpsycle.xml"));
-  }
-  catch(std::exception const & e) {
-    std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
-  }
-
-  // environment
+	// environment
   // this is most useful for developpers.
   // you can test xpsycle directly from within the build dir,
   // pointing various paths to the source or build dir.
@@ -233,7 +209,33 @@ void Configuration::loadConfig()
     {
       std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
     }
+  } else {
+
+
+  #if !defined XPSYCLE__CONFIGURATION
+  // we don't have any information about the installation paths
+		// try user home
+  	try {
+      loadConfig(NFile::replaceTilde("~/.xpsycle.xml"));
+  	}
+  	catch(std::exception const & e) {
+    	std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
+  	}
+  #else
+  #include <xpsycle/install_paths.h>
+  try
+  {
+    loadConfig(XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml");
   }
+  catch(std::exception const & e)
+  {
+    std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
+  }
+  #endif
+
+  }
+
+  
 }
 
 void Configuration::loadConfig(std::string const & path) throw(std::exception)
@@ -301,24 +303,28 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
     << "xpsycle: configuration: preset dir: " << prsPath << "\n"
     << "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
   #endif
+
+	doEnableSound = true;
 }
 
 void Configuration::onConfigTagParse(const std::string & tagName )
 {
+	if (tagName == "driver" && doEnableSound) {		
+			setDriverByName(NApp::config()->getAttribValue("name"));
+	} else
   if (tagName == "alsa") {
     device_name = NApp::config()->getAttribValue("device");
-  }
+  } else
   if (tagName == "audio") {
       std::string enableStr = NApp::config()->getAttribValue("enable");
       int enable = 0;
       if (enableStr != "") enable = str<int>(enableStr);
       enableSound = enable;
       if (enable == 0) {
-        _outputDriverIndex = 0;
-        _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
-      }
-  }
-
+				setDriverByName("silent");
+				doEnableSound = false;
+      } else doEnableSound = true;
+  } else
   if (tagName == "key") {
       std::string id         = NApp::config()->getAttribValue("id");
       std::string ctrlStr    = NApp::config()->getAttribValue("ctrl");
@@ -688,3 +694,5 @@ DefaultBitmaps & Configuration::icons( )
 
 }
 }
+
+

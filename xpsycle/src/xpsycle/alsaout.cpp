@@ -45,6 +45,10 @@ AlsaOut::~AlsaOut()
 {
 }
 
+AudioDriverInfo AlsaOut::info( ) const
+{
+	return AudioDriverInfo("alsa");
+}
 
 void AlsaOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
 {
@@ -405,5 +409,6 @@ bool AlsaOut::Initialized( )
 }
 
 }}
+
 
 #endif // !defined XPSYCLE__NO_ALSA

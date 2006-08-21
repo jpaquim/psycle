@@ -43,6 +43,7 @@ public:
 
     ~AlsaOut();
 
+		virtual AudioDriverInfo info() const;
 
     virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
     virtual bool Initialized();

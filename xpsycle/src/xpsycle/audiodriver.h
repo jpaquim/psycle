@@ -30,7 +30,19 @@ namespace psycle { namespace host {
 
 class AudioDriverInfo {
 public:
-    char const *_psName;
+
+		AudioDriverInfo( const std::string & name ) {
+			name_ = name;
+		}
+
+    const std::string & name() {
+			return name_;
+		}
+
+private:
+
+		std::string name_;
+		
 };
 
 typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
@@ -40,6 +52,8 @@ public:
     AudioDriver();
 
     ~AudioDriver();
+
+		virtual AudioDriverInfo info() const;
 
     virtual void Reset(void) {};
     virtual bool Enable(bool e) { return false; };
@@ -56,9 +70,6 @@ public:
 
     signal0<> tick;
 
-protected:
-
-    static AudioDriverInfo _info;
 
 };
 

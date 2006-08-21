@@ -21,7 +21,6 @@
 
 namespace psycle { namespace host {
 
-AudioDriverInfo AudioDriver::_info = { "Silent" };
 
 AudioDriver::AudioDriver() : 
     _samplesPerSec(44100)
@@ -37,5 +36,11 @@ AudioDriver::~AudioDriver()
 {
 }
 
+AudioDriverInfo AudioDriver::info( ) const
+{
+  return AudioDriverInfo("silent");
+}
 
 }}
+
+

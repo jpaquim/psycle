@@ -33,8 +33,7 @@ Configuration* Global::pConfig() {
 }
 
 Configuration & Global::configuration() {
-  static Configuration* c = new Configuration();
-  return *c;
+  return *pConfig();
 }
 
 
