@@ -160,7 +160,8 @@ void Configuration::setSkinDefaults( )
 			if(!_outputDriverIndex) _outputDriverIndex = index;
 		#endif
 	}
-	_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
+
+	_pOutputDriver = new ESoundOut;
 
   #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/install_paths.h>

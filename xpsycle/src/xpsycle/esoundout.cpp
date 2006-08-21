@@ -57,7 +57,6 @@ namespace psycle
 				std::cout << "initializing esound\n";
 			#endif
 			assert(!threadRunning_);
-			open();
 			callback_ = callback;
 			callbackContext_ = callbackContext;
 			initialized_ = true;
@@ -139,10 +138,11 @@ namespace psycle
 			if((output_ = esd_open_sound(hostPort().c_str())) < 0)
 			{
 				std::string s(std::strerror(errno));
+				std::cout << "failed to open esound output '" + hostPort() + "': " + s << std::endl;
 				throw std::runtime_error("failed to open esound output '" + hostPort() + "': " + s);
 			}
 			deviceBuffer_ = esd_get_latency(output_);
-			deviceBuffer_ *= bits_ / 8 * channels_;
+			//deviceBuffer_ *= bits_ / 8 * channels_;
 			if((fd_ = esd_play_stream_fallback(format, rate_, hostPort().c_str(), "psycle")) < 0)
 			{
 				std::string s(std::strerror(errno));
@@ -156,12 +156,13 @@ namespace psycle
 		}
 
 		bool ESoundOut::Enable(bool e)
-		{
+		{		
 			#if !defined NDEBUG
 				std::cout << (e ? "en" : "dis") << "abling esound\n";
 			#endif
 			bool threadStarted = false;
 			if (e && !threadRunning_) {
+					open();
 					killThread_ = false;
 					pthread_create(&threadId_, NULL, (void*(*)(void*))audioOutThreadStatic, (void*) this);
 					threadStarted = true;
@@ -183,16 +184,37 @@ namespace psycle
 		{
 			threadRunning_ = true;
 
-			int count = 8192;
-
-			while(!killThread_)
-			{
-				usleep(100); // give cpu time to breath
-
-				float const * input(callback_(callbackContext_, count));
-				std::cout << "spam me" << std::endl;
+			if (bits_ == 16) {
+				std::cout << deviceBuffer_ << std::endl;
+				short buf[deviceBuffer_]; /* really should be same size as latency buffer */
+				int count = sizeof(buf);
+	
+				while(!killThread_)
+				{
+					//int newCount =  count/(2*channels_);
+					int newCount = deviceBuffer_;// / (2*channels_);
+ 					float const * input(callback_(callbackContext_, newCount));
+					for (int i = 0; i < newCount; i++) {
+						buf[i] = *input++;
+					}
+					write(fd_, buf,  sizeof(buf));
+				}
+			} else {
+				unsigned char buf[8192];
+				int count = sizeof(buf);
+	
+				while(!killThread_)
+				{
+          /*int newCount = count/ channels_;
+					float const * input(callback_(callbackContext_, newCount));
+					for (int i = 0; i < count; i++) {
+						buf[i] = *input++;
+						buf[i] ^= 0x80;
+					}
+					write(fd_, buf, sizeof(buf));*/
+				}
 			}
-
+			close();
 			threadRunning_ = false;
 			pthread_exit(0);
 		}
