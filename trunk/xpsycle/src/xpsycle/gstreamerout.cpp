@@ -7,6 +7,14 @@ namespace psycle
 {
 	namespace host
 	{
+
+		AudioDriverInfo GStreamerOut::info( ) const
+		{
+			return AudioDriverInfo("gstreamer");
+		}
+
 	}
 }
+
+
 #endif // !defined XPSYCLE__NO_GSTREAMER

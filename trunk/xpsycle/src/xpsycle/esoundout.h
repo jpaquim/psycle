@@ -35,6 +35,9 @@ namespace psycle
 				ESoundOut();
 				~ESoundOut();
 				
+				virtual AudioDriverInfo info() const;
+
+
 			public:
 				virtual void Configure();
 
@@ -77,6 +80,9 @@ namespace psycle
 				
 				int writeBuffer(char * buffer, long size);
 				long deviceBuffer_;
+
+				
+
 		};
 	}
 }

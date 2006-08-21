@@ -51,6 +51,8 @@ public:
 
     DefaultBitmaps & icons();
 
+		void setDriverByName( const std::string & driverName );
+
     bool autoStopMachines;
     std::string iconPath;
     std::string pluginPath;
@@ -120,14 +122,14 @@ public:
 
     bool _centerCursor;
 
-    AudioDriver** _ppOutputDrivers;
     AudioDriver* _pOutputDriver;
-    int _numOutputDrivers;
-    int _outputDriverIndex;
+		AudioDriver* _pSilentDriver;
 
     // sound stuff
     bool enableSound;
     std::string device_name;
+
+		bool doEnableSound;
 
     bool _RecordTweaks;
     bool _RecordUnarmed;
@@ -242,6 +244,8 @@ private:
 
     void setSkinDefaults();
     void onConfigTagParse(const std::string & tagName);
+
+		std::map<std::string, AudioDriver*> driverMap;
 };
 
 }

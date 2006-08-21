@@ -10,6 +10,10 @@ namespace psycle
 		{
 			class JackOut : public AudioDriver
 			{
+				public:
+
+						virtual AudioDriverInfo info() const;
+
 			};
 	}
 }

@@ -39,6 +39,11 @@ namespace psycle
 		{
 		}
 
+		AudioDriverInfo WaveFileOut::info( ) const
+		{
+			return AudioDriverInfo("wavefile");
+		}
+
 		void WaveFileOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
 		{
 			_pCallback = pCallback;

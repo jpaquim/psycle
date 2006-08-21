@@ -10,6 +10,9 @@ namespace psycle
 		{
 			class GStreamerOut : public AudioDriver
 			{
+				public:
+
+					virtual AudioDriverInfo info() const;
 			};
 	}
 }
