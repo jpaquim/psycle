@@ -193,8 +193,8 @@ XImage * NBitmap::cloneXImage( XImage * src_xi )
 		unsigned char* src_data = reinterpret_cast<unsigned char*> (src_xi->data);
 		unsigned char* dst_data = 0;
 
-		dst_data = reinterpret_cast<unsigned char*> ( malloc( width * height * pixelsize ) );
-		memcpy( dst_data, src_data, width * height * pixelsize );				
+		dst_data = reinterpret_cast<unsigned char*> ( malloc( bytes_per_line * height ) );
+		memcpy( dst_data, src_data, bytes_per_line * height );				
 
   	XImage* dst_xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), depth, ZPixmap,0,(char*) dst_data , width, height, pad , bytes_per_line );
 

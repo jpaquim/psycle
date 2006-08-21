@@ -179,11 +179,11 @@ NFileDialog::NFileDialog()
       navLayout.setBaseLine(nAlCenter);
     navPanel->setLayout(navLayout);
     NImage* leftXpm  = new NImage();
-       leftXpm->createFromXpmData(left_nav);
+//       leftXpm->createFromXpmData(left_nav);
     NImage* rightXpm = new NImage();
-       rightXpm->createFromXpmData(right_nav);
+       //rightXpm->createFromXpmData(right_nav);
     NImage* upXpm = new NImage();
-       upXpm->createFromXpmData(up_nav);
+//       upXpm->createFromXpmData(up_nav);
     NButton* upBtn = new NButton(upXpm,10,10);
       upBtn->clicked.connect(this,&NFileDialog::onUpBtnPressed);
     navPanel->add(upBtn);
