@@ -342,7 +342,9 @@ void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
 
              XSetClipMask(NApp::system().dpy(), gcp, pix);
              XSetClipOrigin(NApp::system().dpy(), gcp, x+dx_, y+dy_);
+						 // todo valgrind check error on some images
              XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp, bitmap.X11data(), 0, 0, x+dx_, y+dy_, bitmap.width(), bitmap.height() );
+						 // valgrind check error end
              XSetClipMask(NApp::system().dpy(), gcp, None);
              XFreeGC(NApp::system().dpy(), gc1);
              XFreePixmap(NApp::system().dpy(), pix);

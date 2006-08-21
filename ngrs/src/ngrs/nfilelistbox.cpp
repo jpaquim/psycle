@@ -20,7 +20,7 @@
 
 /* XPM */
 const char * group_xpm[] = {
-"16 16 10 1",
+"15 15 10 1",
 " 	c None",
 ".	c #020204",
 "+	c #826E54",
@@ -48,7 +48,6 @@ const char * group_xpm[] = {
 "                ",
 "                "};
 
-
 #include "nfilelistbox.h"
 #include "nlabel.h"
 #include "nflowlayout.h"
@@ -61,7 +60,7 @@ NFileListBox::NFileListBox()
   mode_ = nFiles | nDirs;
   setTransparent(false);
   setBackground(NColor(255,255,255));
-  sharedDirIcon_.createFromXpmData(group_xpm);
+  sharedDirIcon_.createFromXpmData( group_xpm );
   activeFilter = 0;
   showHiddenFiles_ = false;
 }
@@ -118,7 +117,7 @@ void NFileListBox::update( )
           NItem* item = new NItem();
             item->setText(entry);
             NImage* icon = new NImage();
-              icon->setSharedBitmap(&sharedDirIcon_);
+               icon->setBitmap(sharedDirIcon_);
             item->add(icon);
             item->mousePress.connect(this,&NFileListBox::onDirItemSelected);
           add (item, false);

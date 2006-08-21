@@ -75,6 +75,21 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
+	std::cout << "start of malloc" << std::endl;
+
+	NBitmap bitmap;
+	bitmap.createFromXpmData(a_xpm);
+
+  NBitmap bitmap2;
+ 	bitmap2 = bitmap;
+
+  NImage* img = new NImage(bitmap2);
+		img->setPosition(10,50,200,200);
+  pane()->add(img);
+
+	std::cout << "end of malloc" << std::endl;
+
+
   testMenu();
 
   setName("testwindow");
