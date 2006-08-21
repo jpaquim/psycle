@@ -41,6 +41,8 @@ public:
     virtual NRegion region();
     virtual NRegion spacingRegion(const NSize & spacing);
 
+		virtual NRectShape* clone() const;   // Uses the copy constructor
+
 
 private:
 

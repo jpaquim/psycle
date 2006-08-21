@@ -24,13 +24,14 @@ NLine::NLine()
  : NVisualComponent()
 {
   lineShape = new NLineShape();
-  setGeometry(lineShape);
-  lineShape->setClippingDistance(30);
+	lineShape->setClippingDistance(30);
+  setGeometry(lineShape);  
 }
 
 
 NLine::~NLine()
 {
+  delete lineShape;
 }
 
 void NLine::paint( NGraphics * g )

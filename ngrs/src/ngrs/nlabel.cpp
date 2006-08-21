@@ -20,6 +20,7 @@
  ***************************************************************************/
 #include "nlabel.h"
 #include "nproperty.h"
+#include "nrectshape.h"
 
 using namespace std;
 
@@ -37,7 +38,8 @@ NLabel::NLabel( string text )
 
 void NLabel::init( )
 {
-  setGeometry(new NRectShape());
+	rectShape = new NRectShape();
+  setGeometry( rectShape );
   geometry()->setPosition(0,0,10,10);
   metrics.setFont(font());
   mnemonic_ = '\0';
@@ -64,6 +66,7 @@ extern "C" void destroyLabel(NObject* p) {
 
 NLabel::~NLabel()
 {
+  delete rectShape;
 }
 
 void NLabel::paint( NGraphics * g )

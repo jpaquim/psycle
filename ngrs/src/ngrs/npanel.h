@@ -26,12 +26,19 @@
 /**
 @author Stefan
 */
+
+class NRectShape;
+
 class NPanel : public NVisualComponent
 {
 public:
     NPanel();
 
     ~NPanel();
+
+private:
+
+    NRectShape* rectShape;
 
 };
 

@@ -21,9 +21,10 @@
 #define NLABEL_H
 
 #include "nvisualcomponent.h"
-#include "nrectshape.h"
 #include <string>
 #include "nfontmetrics.h"
+
+class NRectShape;
 
 /**
 @author Stefan
@@ -69,6 +70,7 @@ private:
    NBitmap rotateBmp;
    std::string text_;
    NFontMetrics metrics;
+	 NRectShape* rectShape;
 
    std::vector<int> breakPoints;
 

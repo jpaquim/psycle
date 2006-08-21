@@ -37,6 +37,11 @@ NLineShape::~NLineShape()
 {
 }
 
+NLineShape * NLineShape::clone( ) const
+{
+  return new NLineShape(*this);
+}
+
 NPoint NLineShape::pickerAt( int i )
 {
   if (i == 0) return p1_; else return p2_;
@@ -224,6 +229,8 @@ int NLineShape::d2i(double d)
  {
    return (int) ( d<0?d-.5:d+.5);
  }
+
+
 
 
 

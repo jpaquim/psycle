@@ -23,7 +23,8 @@
 NPanel::NPanel()
  : NVisualComponent()
 {
-  setGeometry(new NRectShape());
+  rectShape = new NRectShape();
+  setGeometry( rectShape );
   setTransparent(false);
   geometry()->setPosition(0,0,10,10);
   setBackground(NColor(200,200,200));
@@ -33,6 +34,7 @@ NPanel::NPanel()
 
 NPanel::~NPanel()
 {
+  delete rectShape;
 }
 
 // the class factories
