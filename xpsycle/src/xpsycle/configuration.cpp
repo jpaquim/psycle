@@ -183,7 +183,7 @@ void Configuration::setDriverByName( const std::string & driverName )
 		std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
 	}
 	else {
-		// driver not found, set silent default driver
+		// driver not found,  set silent default driver
 		_pOutputDriver = _pSilentDriver;
 		std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
 	}
