@@ -40,11 +40,6 @@ const int MAX_LINES = 256;
 #endif*/
 const int EVENT_SIZE = 5;
 
-/// PSY2-fileformat Constants
-const int OLD_MAX_TRACKS = 32;
-const int OLD_MAX_WAVES  = 16;
-const int OLD_MAX_INSTRUMENTS = 255;
-const int OLD_MAX_PLUGINS = 256;
 /// \todo Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
 const int LOCK_LATENCY = 256;
 /// \todo changing this breaks file format.

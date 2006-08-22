@@ -67,7 +67,7 @@ namespace psycle
 		}
 
 
-		void psycle::host::Psy3Filter::preparePatternSequence( Song & song )
+		void Psy3Filter::preparePatternSequence( Song & song )
 		{
 			seqList.clear();
 			song.patternSequence()->removeAll();
@@ -75,7 +75,7 @@ namespace psycle
 			singleCat = song.patternSequence()-> patternData()->createNewCategory("SinglePattern");
 			// here we add in one single Line the patterns
 			singleLine = song.patternSequence()->createNewLine();
-}
+		}
 
 		bool Psy3Filter::load( const std::string & fileName, Song & song )
 		{
