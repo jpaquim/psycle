@@ -40,7 +40,7 @@ namespace psycle
 				New();
 				pFile->ReadChunk(Name, 32); Name[31]=0;
 				pFile->ReadChunk(Author, 32); Author[31]=0;
-				pFile->ReadChunk(Comment, 128); Comment[31]=0;
+				pFile->ReadChunk(Comment, 128); Comment[127]=0;
 				unsigned int tmp;
 				pFile->Read(tmp);
 				m_BeatsPerMin=tmp;
