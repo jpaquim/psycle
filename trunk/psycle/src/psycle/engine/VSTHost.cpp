@@ -133,15 +133,7 @@ namespace psycle
 
 			plugin::~plugin() throw()
 			{
-				try
-				{
-					Free();
-				}
-				catch(...)
-				{
-					// wow.. cannot do anything in a destructor
-					assert(false);
-				}
+				Free();
 				zapObject(proxy_);
 			}
 			Machine* plugin::CreateFromType(Machine::id_type _id, std::string _dllname)
@@ -291,8 +283,8 @@ namespace psycle
 				// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
 				proxy().setProgram(0);
 				proxy().mainsChanged(true);
-				{
-					char temp[32];
+				if (proxy().uniqueId() != 0 ) {
+					char temp[65];
 					/// [bohan] \todo ProductName is a missleading name
 					/// confusion possible with: effGetProductString, // fills <ptr> with a string with product name (max 64 char)
 					if(proxy().getEffectName(temp) && temp[0]) _sProductName=temp;
@@ -308,6 +300,7 @@ namespace psycle
 						_sProductName=temp.substr(0,temp.rfind('.'));
 					}
 				}
+
 				if(overwriteName) _editName = _sProductName;
 				// Compatibility hack
 				if(_sProductName == "sc-101") requiresRepl = true;
@@ -891,8 +884,8 @@ namespace psycle
 					return 0; // index, value, returns 0
 				case audioMasterVersion:			
 					return 9; // vst version, currently 7 (0 for older)
-				case audioMasterCurrentId:			
-					break;
+				case audioMasterCurrentId:
+					return 0;
 				case audioMasterIdle: // call application idle routine (this will call effEditIdle for all open editors too) 
 					if(effect && host)
 					{

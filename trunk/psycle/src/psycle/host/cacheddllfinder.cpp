@@ -4,6 +4,7 @@
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
 #include <psycle/engine/plugin.hpp>
 #include <psycle/engine/VSTHost.hpp>
+#include <psycle/engine/FileIO.hpp>
 
 namespace psycle
 {

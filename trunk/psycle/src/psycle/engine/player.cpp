@@ -8,7 +8,7 @@
 // needed because of the use of Master.
 #include <psycle/engine/internal_machines.hpp>
 //\todo:
-//#include <psycle/host/uiconfiguration.hpp>
+#include <psycle/host/uiconfiguration.hpp>
 #include <psycle/engine/MidiInput.hpp>
 
 namespace psycle
@@ -16,29 +16,24 @@ namespace psycle
 	namespace host
 	{
 		Player::Player(Song & song) 
+			:_playing(false)
+			,_playBlock(false)
+			,_recording(false)
+			,Tweaker(false)
+			,_samplesRemaining(0)
+			,_lineCounter(0)
+			,_loopSong(true)
+			,_patternjump(-1)
+			,_linejump(-1)
+			,_loop_count(0)
+			,_loop_line(0)
+			,song_(0)
+			,m_SampleRate(44100)
+			,m_SamplesPerRow((44100*60)/(125*4))
+			,tpb(4)
+			,bpm(125)
 		{
-			Player();
 			song_ = &song;
-		}
-		Player::Player()
-		:
-			_playing(false),
-			_playBlock(false),
-			_recording(false),
-			Tweaker(false),
-			_samplesRemaining(0),
-			_lineCounter(0),
-			_loopSong(true),
-			_patternjump(-1),
-			_linejump(-1),
-			_loop_count(0),
-			_loop_line(0),
-			song_(0),
-			m_SampleRate(44100),
-			m_SamplesPerRow((44100*60)/(125*4)),
-			tpb(4),
-			bpm(125)
-		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 		}
 

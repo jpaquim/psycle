@@ -104,7 +104,9 @@ namespace psycle
 						*/
 						try
 						{
-							plugin.Instance(path);
+							// Functions "LoadDll()" from both, Plugin and vst::plugin should be modified
+							// in order to allow output to the logger. Else, it always shows the message to the user.
+							plugin.LoadDll(path);
 						}
 						catch(std::exception const & e)
 						{

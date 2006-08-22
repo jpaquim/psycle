@@ -118,7 +118,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
-			_pSong = Global::_pSong;
+			_pSong = Global::pSong;
 			_pSong->report.connect(this,&CChildView::onSignalReport);
 			_pSong->progress.connect(this,&CChildView::onSignalProgress);
 			progressdialog=0;
@@ -285,7 +285,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::ValidateParent()
 		{
 			pParentMain=(CMainFrame *)pParentFrame;
-			pParentMain->_pSong=Global::_pSong;
+			pParentMain->_pSong=Global::pSong;
 		}
 
 		void CChildView::onSignalReport(const std::string & message, const std::string &caption)
@@ -1330,7 +1330,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnFileSongproperties() 
 		{	CSongpDlg dlg;
-			dlg._pSong=Global::_pSong;
+			dlg._pSong=Global::pSong;
 			dlg.DoModal();
 			pParentMain->StatusBarIdle();
 			//Repaint();
