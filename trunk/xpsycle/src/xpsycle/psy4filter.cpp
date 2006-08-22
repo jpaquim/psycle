@@ -21,11 +21,15 @@
 #include "fileio.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
+#include "zipreader.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <ngrs/nfile.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 template<class T> inline T str(const std::string &  value) {
    T result;
@@ -69,10 +73,43 @@ namespace psycle {
 
 		bool Psy4Filter::testFormat( const std::string & fileName )
 		{
+			zipreader *z;
+			zipreader_file *f;
+			int fd = open( fileName.c_str(), O_RDONLY );
+			z = zipreader_open( fd );
+			int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT, 0666);
+			f = zipreader_seek(z, "/xml/song.xml");
+
+			if (!zipreader_extract(f, outFd )) {
+				zipreader_close( z );	
+				close( outFd );
+				close( fd );
+				return false;
+			}			
+			close( outFd );
+
+			f = zipreader_seek(z, "/bin/song.bin");
+			outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT, 0666);
+			std::cout << "here0" << std::endl;
+			if (!zipreader_extract(f, outFd )) {
+				std::cout << "here1" << std::endl;
+				zipreader_close( z );	
+				close( outFd );
+				close( fd );
+				std::cout << "here2" << std::endl;
+				return false;
+			}			
+			std::cout << "here3" << std::endl;
+			close( outFd );
+			
+			zipreader_close( z );
+			close( fd );
+
 			NXmlParser parser;
 			isPsy4 = false;
 			parser.tagParse.connect(this,&Psy4Filter::onDetectFilterTag);
-			parser.parseFile(fileName);
+			parser.parseFile("psytemp.xml");
+			std::cout << "format is " << isPsy4 << std::endl;
 			return isPsy4;
 		}
 
@@ -93,13 +130,12 @@ namespace psycle {
 			lastMachine  = 0;
 			std::cout << "psy4filter detected for load" << std::endl;
 			parser.tagParse.connect(this,&Psy4Filter::onTagParse);
-			parser.parseFile(fileName);
+			parser.parseFile("psytemp.xml");
 
 
 			if (true) {
 				RiffFile file;
-				int pos = fileName.find(".");
-				file.Open(fileName.substr(0,pos)+".bin");
+				file.Open("psytemp.bin");
 				progress.emit(1,0,"");
 				progress.emit(2,0,"Loading... psycle bin data ...");
 
@@ -317,7 +353,7 @@ namespace psycle {
 	  	// disk as the target zipfile... 
 
 			zipwriter *z = zipwriter_start(open(std::string(fileName+".zip").c_str(), O_RDWR|O_CREAT, 0666));
-			zipwriterfilestream xmlFile(z, std::string("/xml/"+fileName+".xml").c_str());
+			//zipwriterfilestream xmlFile(z, "/xml/song.xml" );
 
 			std::ostringstream xml;
 			xml << "<psy4>" << std::endl;
@@ -330,16 +366,14 @@ namespace psycle {
 			xml << song.patternSequence().toXml();
 			xml << "</psy4>" << std::endl;
 
-			xmlFile << xml.str();
-			xmlFile.close();
+			//xmlFile << xml.str();
+			//xmlFile.close();
 
 
 			zipwriter_file *f;
 
 
-     
-
-			//\todo:
+ 			//\todo:
 			if ( !autosave )
 			{
 				progress.emit(1,0,"");
@@ -378,7 +412,7 @@ namespace psycle {
 			file.Close();
 
       // copy the bin data to the zip
-      f = zipwriter_addfile(z, std::string("/bin/"+fileName+".bin").c_str(), 9);
+      f = zipwriter_addfile(z, std::string("/bin/song.bin").c_str(), 9);
 	    zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
 
       if (!zipwriter_finish(z)) {
