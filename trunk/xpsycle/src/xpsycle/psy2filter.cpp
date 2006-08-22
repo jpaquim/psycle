@@ -162,6 +162,21 @@ bool Psy2Filter::LoadSEQD(RiffFile* file,Song& song)
 				file->Read(tmp); song.setTracks(tmp);
 
 }
+
+
+		PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
+		{
+			PatternEvent event;
+
+			event.setNote(*data++);
+			event.setInstrument(*data++);
+			event.setMachine(*data++);
+			event.setCommand(*data++);
+			event.setParameter(*data++);
+
+			return event;
+		}
+
 bool Psy2Filter::LoadPATD(RiffFile* file,Song& song,int index)
 {
 				std::int32_t numLines;
@@ -194,9 +209,9 @@ bool Psy2Filter::LoadPATD(RiffFile* file,Song& song,int index)
 				for(int y(0) ; y < numLines ; ++y) // lines
 				{
 					for (int x = 0; x < song.tracks(); x++) {
-						PatternEntry entry;
+						unsigned char entry[5];
 						file->Read(entry);
-						PatternEvent event(entry);
+						PatternEvent event = convertEntry(entry);
 						if (!event.isEmpty()) {
 							float position = y / (float) song.m_LinesPerBeat;
 							(*pat)[position][x] = event;

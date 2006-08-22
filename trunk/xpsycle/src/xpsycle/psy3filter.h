@@ -74,6 +74,7 @@ namespace psycle
 				PatternCategory* singleCat;
 				SequenceLine* singleLine;
 
+				PatternEvent convertEntry( unsigned char* data) const;
 
 				void preparePatternSequence(Song & song);
 

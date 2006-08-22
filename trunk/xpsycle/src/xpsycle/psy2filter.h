@@ -90,7 +90,7 @@ protected:
 			convert_internal_machines::Converter converter;
 
 				void preparePatternSequence(Song & song);
-
+				PatternEvent convertEntry( unsigned char * data ) const;
 	
 		// TODO: add member variables...
 	

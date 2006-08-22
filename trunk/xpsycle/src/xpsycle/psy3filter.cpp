@@ -400,6 +400,17 @@ namespace psycle
 			return fileread;
 		}
 
+		PatternEvent Psy3Filter::convertEntry( unsigned char * data ) const
+		{
+			PatternEvent event;
+			event.setNote(*data++);
+			event.setInstrument(*data++);
+			event.setMachine(*data++);
+			event.setCommand(*data++);
+			event.setParameter(*data++);
+			return event;
+		}
+
 		bool Psy3Filter::LoadPATDv0(RiffFile* file,Song& song,int minorversion)
 		{
 			std::uint32_t index = 0;
@@ -447,9 +458,9 @@ namespace psycle
 				for(int y(0) ; y < numLines ; ++y) // lines
 				{
 					for (int x = 0; x < song.tracks(); x++) {
-						PatternEntry entry;
-						std::memcpy((unsigned char*) &entry, pSource, EVENT_SIZE);
-						PatternEvent event(entry);
+						unsigned char entry[5] ;
+						std::memcpy( &entry, pSource, 5);
+						PatternEvent event = convertEntry(entry);
 						if (!event.isEmpty()) {
 							float position = y / (float) song.m_LinesPerBeat;
 							(*pat)[position][x] = event;
@@ -489,4 +500,5 @@ namespace psycle
 		}
 		
 	} // end of host namespace
-} // end of psycle namespace
+}
+ // end of psycle namespace
