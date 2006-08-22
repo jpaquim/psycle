@@ -827,9 +827,5 @@ namespace psycle
 			}
 		}
 
-bool Sampler::LoadOldFileFormat( RiffFile * pFile )
-{
-}
-
 }
 }

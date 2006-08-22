@@ -43,7 +43,6 @@ namespace psycle {
 			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
 		protected:
@@ -64,9 +63,10 @@ namespace psycle {
 			virtual void Init(void);
 			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
-//			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
+			/// Loader for psycle fileformat version 2.
+			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 
 			/// this is for the VstHost
 			double sampleCount;

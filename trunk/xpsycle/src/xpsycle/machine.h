@@ -421,8 +421,10 @@ namespace psycle
 					static Machine * LoadFileChunk(Song* pSong , RiffFile* pFile, Machine::id_type index, int version,bool fullopen=true);
 					virtual void SaveFileChunk(RiffFile * pFile);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
-				protected: friend class Song;
 					/// Loader for psycle fileformat version 2.
+					virtual bool LoadPsy2FileFormat(RiffFile* pFile);
+				protected:
+					friend class Song;
 					
 			///\}
 
@@ -484,7 +486,8 @@ namespace psycle
 					virtual std::string GetName() const = 0;
 
 				public:
-					virtual std::string const & GetEditName() { return _editName; }
+					virtual std::string const &GetEditName() { return _editName; }
+					virtual std::string const SetEditName(std::string editname) { _editName = editname; }
 				//PSYCLE__PRIVATE:
 					std::string  _editName;
 			///\}

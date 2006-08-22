@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "psyfilter.h"
 
+#include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
 
@@ -35,6 +36,7 @@ namespace psycle
 		{
 			if (c==0) {
 				c++;
+				filters.push_back(new Psy2Filter());
 				filters.push_back(new Psy3Filter());
 				filters.push_back(new Psy4Filter());
 			}
@@ -104,7 +106,3 @@ namespace psycle
 
 	} // end of host namespace
 } // end of psycle namespace
-
-
-
-
