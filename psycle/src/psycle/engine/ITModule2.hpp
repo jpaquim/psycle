@@ -3,8 +3,6 @@
 #include <psycle/engine/FileIO.hpp>
 #include <cstdint>
 
-class Song;
-
 namespace psycle
 {
 	namespace host

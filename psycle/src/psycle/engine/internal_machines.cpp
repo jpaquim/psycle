@@ -987,7 +987,7 @@ namespace psycle {
 
 		void LFO::PreWork(int numSamples)
 		{
-			Machine::PreWork();
+			Machine::PreWork(numSamples);
 			cpu::cycles_type cost(cpu::cycles());
 
 			int maxVal=0, minVal=0;
@@ -1375,7 +1375,7 @@ namespace psycle {
 
 		void Automator::PreWork(int numSamples)
 		{
-			Machine::PreWork();
+			Machine::PreWork(numSamples);
 			cpu::cycles_type cost(cpu::cycles());
 			bool somethinghappened=false;
 			for(std::vector<Track*>::iterator iter = tracks.begin(); iter != tracks.end(); ++iter)

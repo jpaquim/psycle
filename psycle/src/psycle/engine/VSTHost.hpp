@@ -122,6 +122,7 @@ namespace psycle
 						/// Gets the VST implementation's Version that the plugin uses. ( 1.0,2.0,2.1,2.2 or 2.3)
 						long int inline getVstVersion() { return dispatcher(effGetVstVersion); }
 						long int inline getEffectName  (char * result) { assert(result); *result = 0; return dispatcher(effGetEffectName  , 0, 0, result); }
+						long int inline getProductString  (char * result) { assert(result); *result = 0; return dispatcher(effGetProductString  , 0, 0, result); }
 						long int inline getVendorString(char * result) { assert(result); *result = 0; return dispatcher(effGetVendorString, 0, 0, result); }
 						long int inline setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement)
 						{

@@ -17,7 +17,7 @@ namespace psycle
 		{
 		public:
 			/// constructor.
-			Player();
+			//Player();
 			Player(Song &);
 			/// destructor.
 			virtual ~Player() throw();

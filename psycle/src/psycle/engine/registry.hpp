@@ -1,7 +1,7 @@
 ///\file
 ///\interface psycle::host::Registry.
 #pragma once
-#include <psycle/host/uiglobal.hpp>
+#include <psycle/host/uiglobal.hpp> // use of "loggers"
 #include <string>
 #include <boost/static_assert.hpp>
 namespace psycle

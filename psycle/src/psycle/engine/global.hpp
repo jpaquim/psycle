@@ -9,8 +9,12 @@ namespace psycle
 	{
 		class Song;
 		class Player;
-		class Configuration;
-		class DllFinder;
+		//todo:
+		//class Configuration;
+		class UIConfiguration;
+		//todo:
+		//class DllFinder;
+		class CachedDllFinder;
 
 		namespace dsp
 		{
@@ -56,17 +60,25 @@ namespace psycle
 			Global();
 			~Global() throw();
 
-			static Song *pSong;
-			static Configuration *pConfig;
-			static Player *pPlayer;
-			static dsp::Resampler *pResampler;
-			static DllFinder *pFinder;
+			static Song * pSong;
+			static Player * pPlayer;
+			//todo:
+			//static Configuration * pConfig;
+			static UIConfiguration * pConfig;
+			static dsp::Resampler * pResampler;
+			//todo:
+			//static DllFinder* pDllFinder;
+			static CachedDllFinder* pDllFinder;
 
 			static inline Song           & song() { return *pSong; }
 			static inline Player         & player(){ return *pPlayer; }
-			static inline Configuration  & configuration(){ return *pConfig; }
+			///\todo:
+//			static inline Configuration  & configuration(){ return *pConfig; }
+			static inline UIConfiguration  & configuration(){ return *pConfig; }
 			static inline dsp::Resampler & resampler(){ return *pResampler; }
-			static inline DllFinder      & dllfinder(){ return *pFinder; }
+			///\todo:
+//			static inline DllFinder      & dllfinder(){ return *pFinder; }
+			static inline CachedDllFinder      & dllfinder(){ return *pDllFinder; }
 /*
 			virtual Song           & song();
 			virtual Player         & player();
@@ -74,7 +86,7 @@ namespace psycle
 			virtual dsp::Resampler & resampler();
 			virtual DllFinder      & dllfinder();
 */
-			cpu::cycles_type inline cpu_frequency(                              ) /*const*/ throw() { return cpu_frequency_; }
+			static cpu::cycles_type inline cpu_frequency(                              ) /*const*/ throw() { return cpu_frequency_; }
 //			void             inline cpu_frequency(cpu::cycles_type const & value)           throw() { cpu_frequency_ = value; }
 		protected:
 			virtual cpu::cycles_type CalculateCPUFreq();

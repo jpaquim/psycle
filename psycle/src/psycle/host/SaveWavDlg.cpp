@@ -84,7 +84,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 
 			threadopen = 0;
-			Song* pSong = Global::_pSong;
+			Song* pSong = Global::pSong;
 			thread_handle=INVALID_HANDLE_VALUE;
 			kill_thread=1;
 			lastpostick=0;
@@ -252,7 +252,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::OnSavewave() 
 		{
-			Song *pSong = Global::_pSong;
+			Song *pSong = Global::pSong;
 			Player *pPlayer = Global::pPlayer;
 
 			m_savewave.EnableWindow(false);
@@ -460,7 +460,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 		{
 			saving=true;
 			Player *pPlayer = Global::pPlayer;
-			Song *pSong = Global::_pSong;
+			Song *pSong = Global::pSong;
 			pPlayer->StopRecording();
 			Global::configuration()._pOutputDriver->Enable(false);
 			Global::configuration()._pMidiInput->Close();
@@ -609,7 +609,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 
 			if (m_savetracks.GetCheck())
 			{
-				Song *pSong = Global::_pSong;
+				Song *pSong = Global::pSong;
 
 				const int real_rate[]={8192,11025,22050,44100,48000,96000};
 				const int real_bits[]={8,16,24,32};
@@ -642,7 +642,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 
 			else if (m_savewires.GetCheck())
 			{
-				Song *pSong = Global::_pSong;
+				Song *pSong = Global::pSong;
 
 				const int real_rate[]={8192,11025,22050,44100,48000,96000};
 				const int real_bits[]={8,16,24,32};
@@ -685,7 +685,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 
 			else if (m_savegens.GetCheck())
 			{
-				Song *pSong = Global::_pSong;
+				Song *pSong = Global::pSong;
 
 				const int real_rate[]={8192,11025,22050,44100,48000,96000};
 				const int real_bits[]={8,16,24,32};
@@ -771,7 +771,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 
 		void CSaveWavDlg::SaveTick()
 		{
-			Song* pSong = Global::_pSong;
+			Song* pSong = Global::pSong;
 			Player* pPlayer = Global::pPlayer;
 			for (int i=lastpostick+1;i<pPlayer->_playPosition;i++)
 			{

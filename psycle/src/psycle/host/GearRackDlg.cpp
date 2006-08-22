@@ -658,7 +658,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::ExchangeIns(Instrument::id_type one, Instrument::id_type two)
 		{
-			Song* pSong = Global::_pSong;
+			Song* pSong = Global::pSong;
 			Instrument * tmpins;
 
 			m_pParent->AddMacViewUndo();
