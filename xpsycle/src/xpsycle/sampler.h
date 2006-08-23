@@ -132,7 +132,7 @@ namespace psycle
 			virtual void Init();
 			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual void Stop();
-			virtual void Tick(int channel, PatternEntry* pData);
+			virtual void Tick(int channel, const PatternEvent & data );
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -215,7 +215,7 @@ namespace psycle
 			void VoiceWork(int startSample, int numsamples, int voice);
 			void NoteOff(int voice);
 			void NoteOffFast(int voice);
-			int VoiceTick(int channel, PatternEntry* pData);
+			int VoiceTick(int channel, const PatternEvent & pEntry );
 			inline void TickEnvelope(int voice);
 			inline void TickFilterEnvelope(int voice);
 			Instrument::id_type lastInstrument[MAX_TRACKS];

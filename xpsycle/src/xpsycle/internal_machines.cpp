@@ -105,7 +105,7 @@ namespace psycle {
 				bisTicking=false;
 			}
 		}
-		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
+		void DuplicatorMac::Tick( int channel, const PatternEvent & pData)
 		{
 /*			if ( !_mute && !bisTicking)
 			{
@@ -407,15 +407,15 @@ namespace psycle {
 			}
 		}
 
-		void Mixer::Tick( int channel,PatternEntry* pData)
+		void Mixer::Tick( int channel, const PatternEvent & pData )
 		{
-			if(pData->_note == cdefTweakM)
+			if(pData.note() == cdefTweakM)
 			{
-				int nv = (pData->_cmd<<8)+pData->_parameter;
-				SetParameter(pData->_inst,nv);
+				int nv = (pData.command() << 8)+pData.parameter();
+				SetParameter(pData.instrument(), nv);
 				Global::player().Tweaker = true;
 			}
-			else if(pData->_note == cdefTweakS)
+			else if( pData.note() == cdefTweakS)
 			{
 				///\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 			}
@@ -809,12 +809,12 @@ namespace psycle {
 			FillTable();
 		}
 
-		void LFO::Tick( int channel,PatternEntry* pData)
+		void LFO::Tick( int channel, const PatternEvent & pData )
 		{
 			if(!bisTicking)
 			{
 				bisTicking=true;
-				if(pData->_cmd==0x01)	// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
+				if(pData.command() == 0x01)	// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
 					lfoPos=0.0;			// against any established practices or something, let me know
 			}
 			bisTicking=false;

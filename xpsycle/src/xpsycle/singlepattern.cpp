@@ -289,6 +289,11 @@ namespace psycle
 				return;
 			}
 			
+			/*PatternEvent & event = line[track];
+			if ( column >=1 && <=3 ) {
+
+			}*/
+
 			PatternEntry *pEntry = line[track].entry();
 			if (column < 5 )   { *((std::uint8_t*)pEntry+(column+1)/2) = 255; }
 			else	                { *((std::uint8_t*)pEntry+(column+1)/2) = 0; }
