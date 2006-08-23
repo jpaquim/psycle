@@ -600,16 +600,16 @@ public:
 	void NoteOff();
 	float GetSample();
 #ifndef SYNTH_ULTRALIGHT
-	inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, unsigned int dir, float Pos);
+	inline float GetInterpolatedSampleOSC(unsigned int osc, unsigned int dir, float Pos);
 #else
-	inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, float Pos);
+	inline float GetInterpolatedSampleOSC(unsigned int osc, float Pos);
 #endif
-	inline float CSynthTrack::GetPhaseSampleOSCEven();
-	inline float CSynthTrack::GetPhaseSampleOSCOdd();
-	inline float CSynthTrack::GetPhaseSampleOSC(unsigned int osc);
-	inline float CSynthTrack::GetPhaseSampleMix();
-	inline float CSynthTrack::DoFilter(int num, float input);
-	inline float CSynthTrack::HandleOverdrive(float input);
+	inline float GetPhaseSampleOSCEven();
+	inline float GetPhaseSampleOSCOdd();
+	inline float GetPhaseSampleOSC(unsigned int osc);
+	inline float GetPhaseSampleMix();
+	inline float DoFilter(int num, float input);
+	inline float HandleOverdrive(float input);
 
 	void NoteOn(int note, int cmd, int val);
 	void Init(SYNPAR *tspar);
@@ -729,17 +729,22 @@ private:
 
 };
 
-inline int f2i(float flt) 
+///\todo #include <psycle/helpers/xxxxx>, or just static_cast directly
+inline int f2i(float flt)
 { 
-  int i; 
-  static const double half = 0.5f; 
-  _asm 
-  { 
-     fld flt 
-     fsub half 
-     fistp i 
-  } 
-  return i;
+	#if 1
+		return static_cast<int>(flt - 0.5);
+	#else // x87 fpu blergh...
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#endif
 }
 
 inline void CSynthTrack::FilterTick()
