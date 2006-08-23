@@ -79,7 +79,7 @@ namespace psycle
 				if(song()._pMachine[i])
 				{
 					song()._pMachine[i]->Stop();
-					for(int c = 0; c < MAX_TRACKS; c++) song()._pMachine[i]->TriggerDelay[c]._cmd = 0;
+					for(int c = 0; c < MAX_TRACKS; c++) song()._pMachine[i]->TriggerDelay[c].setCommand( 0 );
 				}
 			}
 			SetBPM(song().bpm(),song().LinesPerBeat());
@@ -191,20 +191,20 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 								if(entry.command() == PatternCmd::NOTE_DELAY)
 								{
 									// delay
-									memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
+									pMachine->TriggerDelay[track] = entry;
 									pMachine->TriggerDelayCounter[track] = ((entry.parameter()+1)*SamplesPerRow())/256;
 								}
 								else if(entry.command() == PatternCmd::RETRIGGER)
 								{
 									// retrigger
-									memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
+									pMachine->TriggerDelay[track] = entry;
 									pMachine->RetriggerRate[track] = (entry.parameter()+1);
 									pMachine->TriggerDelayCounter[track] = 0;
 								}
 								else if(entry.command() == PatternCmd::RETR_CONT)
 								{
 									// retrigger continue
-									memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
+									pMachine->TriggerDelay[track] = entry;
 									if(entry.parameter()&0xf0) pMachine->RetriggerRate[track] = (entry.parameter()&0xf0);
 								}
 								else if (entry.command() == PatternCmd::ARPEGGIO)
@@ -214,14 +214,14 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 									///\todo : This won't work... What about sampler's NNA's?
 									if (entry.parameter())
 									{
-										memcpy(&pMachine->TriggerDelay[track], entry.entry(), sizeof(PatternEntry));
+										pMachine->TriggerDelay[track] = entry;
 										pMachine->ArpeggioCount[track] = 1;
 									}
 									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
 								}
 								else
 								{
-									pMachine->TriggerDelay[track]._cmd = 0;
+									pMachine->TriggerDelay[track].setCommand( 0 );
 									pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;

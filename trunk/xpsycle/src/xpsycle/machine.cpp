@@ -227,7 +227,7 @@ namespace psycle
 			}
 			for (int c = 0; c<MAX_TRACKS; c++)
 			{
-				TriggerDelay[c]._cmd = 0;
+				TriggerDelay[c].setCommand( 0 );
 				TriggerDelayCounter[c]=0;
 				RetriggerRate[c]=256;
 				ArpeggioCount[c]=0;
@@ -897,7 +897,7 @@ int Machine::GenerateAudio( int numsamples )
 				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
 				colsIt = playCol.find(workEvent.track());
 				if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
-				Tick(colsIt->second,workEvent.event().entry());
+				Tick(colsIt->second, workEvent.event() );
 				workEvents.pop_front();
 				if (!workEvents.empty())
 				{

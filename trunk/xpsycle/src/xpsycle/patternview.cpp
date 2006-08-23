@@ -1679,10 +1679,10 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
       }
 
       // build entry
-      PatternEntry entry;
-      entry._note = note;
-      entry._inst = pSong()->auxcolSelected;
-      entry._mach = pSong()->seqBus;	// Not really needed.
+      PatternEvent entry;
+      entry.setNote( note );
+      entry.setInstrument( pSong()->auxcolSelected );
+      entry.setMachine( pSong()->seqBus );	// Not really needed.
 
       if(velocity != 127 && Global::pConfig()->midi().velocity().record())
       {
@@ -1691,17 +1691,17 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
           switch(Global::pConfig()->midi().velocity().type())
           {
             case 0:
-              entry._cmd = Global::pConfig()->midi().velocity().command();
-              entry._parameter = par;
+              entry.setCommand( Global::pConfig()->midi().velocity().command() );
+              entry.setParameter( par );
             break;
             case 3:
-              entry._inst = par;
+              entry.setInstrument( par );
             break;
           }
       } else
       {
-          entry._cmd=0;
-          entry._parameter=0;
+          entry.setCommand( 0 );
+          entry.setParameter( 0 );
       }
 
       // play it
@@ -1743,7 +1743,7 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
 
         // play
         notetrack[outtrack]=note;
-        pMachine->Tick(outtrack,&entry);
+        pMachine->Tick(outtrack, entry);
       }
 }
 
@@ -1988,17 +1988,17 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
       if(notetrack[i]==note) {
         notetrack[i]=120;
         // build entry
-        PatternEntry entry;
-        entry._note = 120+0;
-        entry._inst = pSong()->auxcolSelected;
-        entry._mach = pSong()->seqBus;;
-        entry._cmd = 0;
-        entry._parameter = 0;
+        PatternEvent entry;
+        entry.setNote( 120+0 );
+        entry.setInstrument( pSong()->auxcolSelected );
+        entry.setMachine( pSong()->seqBus );
+        entry.setCommand( 0 );
+        entry.setParameter( 0 );
 
         // play it
 
         if (pMachine) {
-          pMachine->Tick(i,&entry);
+          pMachine->Tick(i, entry);
         }
       }
     }

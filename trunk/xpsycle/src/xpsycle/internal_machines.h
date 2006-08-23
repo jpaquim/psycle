@@ -33,7 +33,7 @@ namespace psycle {
 			DuplicatorMac(id_type index, Song* song);
 			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
-			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
@@ -122,7 +122,7 @@ namespace psycle {
 			Mixer(id_type index, Song* song);
 			virtual ~Mixer() throw();
 			virtual void Init(void);
-			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			void FxSend(int numSamples);
 			void Mix(int numSamples);
@@ -189,7 +189,7 @@ namespace psycle {
 			LFO(id_type index, Song* song);
 			virtual ~LFO() throw();
 			virtual void Init(void);
-			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual int GenerateAudioInTicks(int startSample, int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);

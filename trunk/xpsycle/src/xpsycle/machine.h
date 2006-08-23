@@ -409,7 +409,7 @@ namespace psycle
 					virtual void Work(int numSamples);
 					virtual void WorkNoMix(int numSamples);
 					virtual void Tick() {};
-					virtual void Tick(int track, PatternEntry * pData) {};
+					virtual void Tick(int track, const PatternEvent & data ) {};
 					virtual void Stop() { playCol.clear(); playColIndex =0; }
 			///\}
 
@@ -610,7 +610,7 @@ namespace psycle
 			///\ various player-related states
 			///\{
 				///\todo hardcoded limits and wastes
-				PatternEntry TriggerDelay[MAX_TRACKS];
+				PatternEvent TriggerDelay[MAX_TRACKS];
 				///\todo hardcoded limits and wastes
 				int TriggerDelayCounter[MAX_TRACKS];
 				///\todo hardcoded limits and wastes

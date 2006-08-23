@@ -344,28 +344,28 @@ void Plugin::Tick()
   }
 }
 
-void Plugin::Tick( int channel, PatternEntry * pData )
+void Plugin::Tick( int channel, const PatternEvent & pData )
 {
   try
   {
-      proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
+      proxy().SeqTick(channel, pData.note(), pData.instrument(), pData.command(), pData.parameter());
   }
   catch(const std::exception &)
   {
       return;
   }
-  if(pData->_note == cdefTweakM || pData->_note == cdefTweakE)
+  if(pData.note() == cdefTweakM || pData.note() == cdefTweakE)
   {
-      if(pData->_inst < _pInfo->numParameters)
+      if( pData.instrument() < _pInfo->numParameters)
       {
-        int nv = (pData->_cmd<<8)+pData->_parameter;
-          int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-          int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+        int nv = (pData.command() << 8) +pData.parameter();
+          int const min = _pInfo->Parameters[pData.instrument()]->MinValue;
+          int const max = _pInfo->Parameters[pData.instrument()]->MaxValue;
           nv += min;
           if(nv > max) nv = max;
           try
           {
-            proxy().ParameterTweak(pData->_inst, nv);
+            proxy().ParameterTweak(pData.instrument(), nv);
           }
           catch(const std::exception &)
           {
@@ -373,9 +373,9 @@ void Plugin::Tick( int channel, PatternEntry * pData )
           Global::pPlayer()->Tweaker = true;
         }
       }
-      else if(pData->_note == cdefTweakS)
+      else if(pData.note() == cdefTweakS)
       {
-        if(pData->_inst < _pInfo->numParameters)
+        if(pData.instrument() < _pInfo->numParameters)
         {
           int i;
           if(TWSActive)
@@ -383,7 +383,7 @@ void Plugin::Tick( int channel, PatternEntry * pData )
             // see if a tweak slide for this parameter is already happening
             for(i = 0; i < MAX_TWS; i++)
             {
-              if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+              if((TWSInst[i] == pData.instrument()) && (TWSDelta[i] != 0))
               {
                 // yes
                 break;
@@ -411,15 +411,15 @@ void Plugin::Tick( int channel, PatternEntry * pData )
           }
           if (i < MAX_TWS)
           {
-            TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
-            float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
-            float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
+            TWSDestination[i] = float(pData.command() << 8)+pData.parameter();
+            float min = float(_pInfo->Parameters[pData.instrument()]->MinValue);
+            float max = float(_pInfo->Parameters[pData.instrument()]->MaxValue);
             TWSDestination[i] += min;
             if (TWSDestination[i] > max)
             {
               TWSDestination[i] = max;
             }
-            TWSInst[i] = pData->_inst;
+            TWSInst[i] = pData.instrument();
             try
             {
               TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
@@ -434,14 +434,14 @@ void Plugin::Tick( int channel, PatternEntry * pData )
           else
           {
             // we have used all our slots, just send a twk
-            int nv = (pData->_cmd<<8)+pData->_parameter;
-            int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-            int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+            int nv = (pData.command() << 8)+pData.parameter();
+            int const min = _pInfo->Parameters[pData.instrument()]->MinValue;
+            int const max = _pInfo->Parameters[pData.instrument()]->MaxValue;
             nv += min;
             if (nv > max) nv = max;
             try
             {
-              proxy().ParameterTweak(pData->_inst, nv);
+              proxy().ParameterTweak(pData.instrument(), nv);
             }
             catch(const std::exception &)
             {
