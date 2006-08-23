@@ -118,6 +118,7 @@ namespace psycle
 
 				public:
 					canvas inline & canvas_instance() throw() { return canvas_; }
+					//typenames::canvas inline & canvas() throw() { return canvas_; }
 					inline operator canvas & () throw() { return canvas_instance(); }
 					inline operator Gnome::Canvas::Group & () throw() { return *canvas_instance().root(); }
 					inline operator Gnome::Canvas::Group * () throw() { return canvas_instance().root(); }
@@ -126,6 +127,7 @@ namespace psycle
 					void on_zoom();
 				private:
 					canvas canvas_;
+					//typenames::canvas canvas_;
 					Gtk::ScrolledWindow scroll_;
 					Gtk::Adjustment adjustment_;
 					Gtk::SpinButton spin_;
@@ -205,8 +207,10 @@ namespace psycle
 
 				protected: friend class node;
 					contraption inline & contraption_instance() throw() { return contraption_; }
+					//typenames::contraption inline & contraption() throw() { return contraption_; }
 				private:
 					contraption contraption_;
+					//typenames::contraption contraption_;
 				
 				protected:
 					Gnome::Canvas::Line inline & line() throw() { return line_; }
@@ -263,8 +267,10 @@ namespace psycle
 
 				protected:
 					contraption inline & contraption_instance() throw() { return contraption_; }
+					//typenames::contraption inline & contraption() throw() { return contraption_; }
 				private:
 					contraption contraption_;
+					//typenames::contraption contraption_;
 				
 				protected:
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);

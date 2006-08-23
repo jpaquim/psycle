@@ -514,8 +514,11 @@ namespace psycle
 							case 2:
 							{
 								window_to_world(x, y, x, y);
-								//node & node_instance(*Gtk::manage(&node::create(graph_instance(), graph_instance().resolver()("sine", graph_instance(), "node"), x, y)));
-								graph_instance().resolver()("sine", graph_instance(), "node");
+								node::underlying_type & underlying(graph_instance().resolver()("sine", graph_instance(), "node"));
+								node & underlying_wrapper(graph_instance().underlying_wrapper(underlying));
+								Gtk::manage(&underlying_wrapper);
+								underlying_wrapper.property_x() = x;
+								underlying_wrapper.property_y() = y;
 								//return true;
 							}
 							break;
