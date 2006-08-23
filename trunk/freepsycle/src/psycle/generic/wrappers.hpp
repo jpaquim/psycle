@@ -100,7 +100,7 @@ namespace psycle
 						}
 				///\}
 
-				private:
+				public:
 					///\return the the node wrapper corresponding to the given underlying node
 					typename Typenames::node & underlying_wrapper(typename Typenames::underlying::node & underlying_node)
 					{
@@ -110,6 +110,7 @@ namespace psycle
 						return **i;
 					}
 
+				private:
 					///\return the the output port wrapper corresponding to the given underlying output port
 					typename Typenames::ports::output & underlying_wrapper(typename Typenames::underlying::ports::output & underlying_output_port)
 					{
