@@ -178,8 +178,8 @@ TODO LIST
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
  
-#include "synthtrack.h"
-#include <memory.h>
+#include "SynthTrack.h"
+#include <cstring> // was <memory.h>
 
 //#define PREVIEW
 #define FILEVERSION 4
