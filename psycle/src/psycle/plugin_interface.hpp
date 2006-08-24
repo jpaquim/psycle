@@ -1,4 +1,4 @@
-#error
+#error ...
 ///\file
 ///\brief the original machine interface api
 ///\see plugin.hpp another, more object-oriented, interface api
