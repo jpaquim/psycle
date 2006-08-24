@@ -18,7 +18,7 @@ namespace psycle
 			Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id, song)
 		{
 			_audiorange = 32768.0f;
-			DefineStereoOutput(1);
+//			DefineStereoOutput(1);
 			_editName = "Sampler";
 
 			_resampler.SetQuality(dsp::R_LINEAR);

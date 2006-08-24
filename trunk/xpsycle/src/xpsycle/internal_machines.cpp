@@ -222,7 +222,7 @@ namespace psycle {
 		{
     		  _outDry = 256;
 			_audiorange = 32768.0f;
-			DefineStereoInput(1);
+//			DefineStereoInput(1);
 			_editName = "Master";
 		}
 		Master::~Master() throw()
@@ -397,8 +397,8 @@ namespace psycle {
 		{
 			_numPars = 255;
 			_audiorange = 32768.0f;
-			DefineStereoInput(24);
-			DefineStereoOutput(1);
+//			DefineStereoInput(24);
+//			DefineStereoOutput(1);
 			_editName = "Mixer";
 		}
 		Mixer::~Mixer() throw()

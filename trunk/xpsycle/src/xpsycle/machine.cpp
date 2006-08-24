@@ -902,9 +902,9 @@ int Machine::GenerateAudio( int numsamples )
 				workEvents.pop_front();
 				if (!workEvents.empty())
 				{
-					workEvent = workEvents.front();
+					WorkEvent & workEvent1 = workEvents.front();
 				//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
-					nextevent = workEvent.beatOffset() * Global::player().SamplesPerBeat();
+					nextevent = workEvent1.beatOffset() * Global::player().SamplesPerBeat();
 				} else nextevent = numsamples+1;
 			} else nextevent = numsamples+1;
 		} 
