@@ -36,6 +36,7 @@ namespace psycle {
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);
+			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
