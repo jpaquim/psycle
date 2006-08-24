@@ -218,6 +218,12 @@ void NWindow::initDrag( NVisualComponent * dragBase, int x, int y )
   dragOffset.setSize(dragBase_->absoluteLeft()-x,dragBase_->absoluteTop()-y,dragBase_->absoluteLeft() + dragBase_->width() - x,dragBase_->absoluteTop()  + dragBase_->height()- y);
 
   if (dragBase->moveable().style() & nMvRectPicker) dragRectPoint = dragBase->overRectPickPoint(x , y);
+	
+	if (dragBase->moveable().style() & nMvLeftBorder) {
+		if ( abs(dragBase_->absoluteLeft()- x) <=5 ) dragRectPoint = nLeftMiddleCorner; else
+		if ( abs(dragBase_->absoluteLeft() + dragBase_->width() - x) <=5 ) dragRectPoint = nRightMiddleCorner;
+	} 
+
   dragPoint = dragBase->overPickPoint(x,y);
 }
 
