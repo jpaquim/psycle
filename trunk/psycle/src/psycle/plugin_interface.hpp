@@ -1,3 +1,4 @@
+#error error on purpose to test the build bot
 ///\file
 ///\brief the original machine interface api
 ///\see plugin.hpp another, more object-oriented, interface api
