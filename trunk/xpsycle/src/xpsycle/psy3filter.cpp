@@ -311,7 +311,7 @@ namespace psycle
 		{
 				char Name[64];
 				char Author[64];
-				char Comment[255];
+				char Comment[256];
 
 				file->ReadString(Name, 64);
 				song.setName(Name);

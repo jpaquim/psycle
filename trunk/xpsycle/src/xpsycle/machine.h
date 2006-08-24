@@ -190,7 +190,7 @@ namespace psycle
 				virtual void Connected(Wire * wire);
 				virtual void Disconnected(Wire * wire);
 				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires_.size()); return wires_[index]; }
-				virtual inline bool NumberOfWires() { return wires_.size(); }
+				virtual inline int NumberOfWires() { return wires_.size(); }
 				virtual inline int Arrangement() throw() { return arrangement_; }
 				virtual inline Machine * GetMachine() throw() { return &parent_; }
 				///\todo : should change arrangement/name be allowed? (Mutating Port?)
@@ -409,7 +409,7 @@ namespace psycle
 					virtual void Work(int numSamples);
 					virtual void WorkNoMix(int numSamples);
 					virtual void Tick() {};
-					virtual void Tick(int track, const PatternEvent & data ) {};
+					virtual void Tick(int channel, const PatternEvent & data ) {;}
 					virtual void Stop() { playCol.clear(); playColIndex =0; }
 			///\}
 
@@ -487,7 +487,7 @@ namespace psycle
 
 				public:
 					virtual std::string const &GetEditName() { return _editName; }
-					virtual std::string const SetEditName(std::string editname) { _editName = editname; }
+					virtual void SetEditName(std::string editname) { _editName = editname; }
 				//PSYCLE__PRIVATE:
 					std::string  _editName;
 			///\}
