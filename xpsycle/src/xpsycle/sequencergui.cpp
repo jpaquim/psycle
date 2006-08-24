@@ -75,6 +75,7 @@ void SequencerGUI::SequencerBeatLineal::drawLineal( NGraphics* g, int dx )
   g->drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
 
   int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
+	///\ todo end seems not valid 
   int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
 
   for (int i = start ; i < end ; i++) {

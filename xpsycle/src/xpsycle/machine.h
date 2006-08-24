@@ -265,9 +265,11 @@ namespace psycle
 				void changeposition(double beatOffset) { offset_ = beatOffset; }
 
 			private:
-				PatternEvent event_;
+				
 				double offset_;
 				int track_;
+				PatternEvent event_;
+
 		};
 
 		/// Base class for "Machines", the audio producing elements.
