@@ -1,3 +1,4 @@
+#include <stdio.h>
 /*
  * zipreader
  * a library for reading zipfiles
@@ -25,7 +26,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #include <zlib.h>
 
@@ -42,6 +42,14 @@ static int _load(int fd, char *buf, size_t bufsize)
 		bufsize -= r;
 	}
 	return 1;
+}
+static void _zr_fix_name(char **fn)
+{
+	for (;;) {
+		if (strncmp(*fn, "./", 2) == 0) (*fn) = (*fn) + 2;
+		else if (**fn == '/') (*fn) = (*fn) + 1;
+		else break;
+	}
 }
 static zipreader *_zr_step2(int fd, unsigned int a, unsigned int b, unsigned int y)
 {
@@ -118,6 +126,9 @@ static zipreader *_zr_step2(int fd, unsigned int a, unsigned int b, unsigned int
 			| (((unsigned int)head1[24]) << 16)
 			| (((unsigned int)head1[25]) << 24);
 		z->file[i].filename_ptr = ((unsigned char *)z) + names;
+
+		_zr_fix_name((char**)&z->file[i].filename_ptr);
+
 		names += n+1;
 		if (names > tail) goto FAIL;
 		if (!_load(fd, (char*)z->file[i].filename_ptr, n)) goto FAIL;
@@ -298,7 +309,7 @@ static int _zm_readin(zipreader_file *f, int outfd,
 
 struct deflate_memory {
 	z_stream str;
-	unsigned char buf[65536];
+	unsigned char buf[65548];
 };
 
 static int _zm_inflate_fin(zipreader_file *f, unsigned int *xcrc32, int outfd, void *extra)
@@ -316,7 +327,9 @@ static int _zm_inflate_fin(zipreader_file *f, unsigned int *xcrc32, int outfd, v
 
 		r = inflate(&dm->str, Z_FINISH);
 		if (r != Z_OK && r != Z_STREAM_END) return 0;
-		_zm_write(f,xcrc32, outfd, dm->buf, sizeof(dm->buf)-dm->str.avail_out, 0);
+		if (sizeof(dm->buf) != dm->str.avail_out) {
+			_zm_write(f,xcrc32, outfd, dm->buf, sizeof(dm->buf)-dm->str.avail_out, 0);
+		}
 
 	} while (r == Z_OK);
 	return 1;
@@ -324,25 +337,31 @@ static int _zm_inflate_fin(zipreader_file *f, unsigned int *xcrc32, int outfd, v
 static int _zm_inflate(zipreader_file *f, unsigned int *xcrc32, int outfd, void *buf, size_t len, void *extra)
 {
 	struct deflate_memory *dm;
+	int flush;
 	int r;
 
 	dm = (struct deflate_memory *)extra;
 	dm->str.next_in = (Bytef*)buf;
 	dm->str.avail_in = len;
-	dm->str.next_out = (Bytef*)dm->buf;
-	dm->str.avail_out = sizeof(dm->buf);
+
+	flush = Z_NO_FLUSH;
 	while (dm->str.avail_in > 0) {
 		dm->str.next_out = (Bytef*)dm->buf;
 		dm->str.avail_out = sizeof(dm->buf);
-		r = inflate(&dm->str, Z_SYNC_FLUSH);
+		r = inflate(&dm->str, flush);
 		if (r != Z_OK && r != Z_STREAM_END) return 0;
-		_zm_write(f,xcrc32,outfd, dm->buf, sizeof(dm->buf)-dm->str.avail_out, 0);
+		if (sizeof(dm->buf) != dm->str.avail_out) {
+			_zm_write(f,xcrc32,outfd, dm->buf, sizeof(dm->buf)-dm->str.avail_out, 0);
+		}
+		if (flush==Z_FINISH && r == Z_STREAM_END) return 1;
+		flush = Z_FINISH;
 	}
 	return 1;
 }
 
 int zipreader_extract(zipreader_file *f, int outfd)
 {
+	int r;
 	if (!f || !f->top) return 0;
 	switch (f->method) {
 	case 0: /* STORE */
@@ -352,7 +371,9 @@ int zipreader_extract(zipreader_file *f, int outfd)
 			auto struct deflate_memory dm;
 			memset(&dm, 0, sizeof(dm));
 			if (inflateInit2(&dm.str, -MAX_WBITS) != Z_OK) return 0;
-			return _zm_readin(f, outfd, _zm_inflate, _zm_inflate_fin, &dm);
+			r = _zm_readin(f, outfd, _zm_inflate, _zm_inflate_fin, &dm);
+			inflateEnd(&dm.str);
+			return r;
 		};
 	};
 	return 0;

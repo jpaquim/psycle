@@ -42,9 +42,9 @@ struct zipreader_file {
 struct zipreader {
 	int fd;
 	unsigned int files;
+	unsigned int _fnp;
 	off_t *headers; /* pointers to local headers */
 	zipreader_file file[1]; /* array */
-	unsigned int _fnp;
 };
 
 #ifdef __cplusplus
