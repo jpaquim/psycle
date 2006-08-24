@@ -157,7 +157,7 @@ namespace psycle
 				virtual void SetVolume(float newvol);
 				virtual void SetPan(float newpan);
 				virtual inline int GetIndex() { return index; }
-				virtual inline int SetIndex(int idx) { index = idx; }
+				virtual inline void SetIndex(int idx) { index = idx; }
 				
 			protected:
 				virtual void Disconnect(AudioPort* port);

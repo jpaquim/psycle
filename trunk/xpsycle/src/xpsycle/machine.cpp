@@ -880,7 +880,8 @@ int Machine::GenerateAudio( int numsamples )
 		if ( nextevent == nextLineInSamples+1 ) nextLineInSamples = nextevent;
 	}
 	int samplestoprocess = 0;
-	for(int processedsamples=0;processedsamples<numsamples; processedsamples+=samplestoprocess)
+	int processedsamples = 0;
+	for(;processedsamples<numsamples; processedsamples+=samplestoprocess)
 	{
 		if ( processedsamples == nextLineInSamples )
 		{
