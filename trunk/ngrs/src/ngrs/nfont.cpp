@@ -35,7 +35,7 @@ NFont::NFont( std::string name, int size,int style ) : name_(name),size_(size),s
 
 NFont::~NFont()
 {
-
+  
 }
 
 // setter

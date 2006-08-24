@@ -75,21 +75,14 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-	std::cout << "start of malloc" << std::endl;
-
-	NBitmap bitmap;
-	bitmap.createFromXpmData(a_xpm);
-
-  NBitmap bitmap2;
- 	bitmap2 = bitmap;
-
-  NImage* img = new NImage(bitmap2);
-		img->setPosition(10,50,200,200);
-  pane()->add(img);
-
-	std::cout << "end of malloc" << std::endl;
+  NPanel* panel = new NPanel();
+		panel->setPosition(10,10,100,20);
+		panel->setBorder( NFrameBorder() );
+		panel->setMoveable( NMoveable( nMvLeftBorder | nMvRightBorder | nMvHorizontal) );
+	pane()->add(panel);
 
 
+	/*
   testMenu();
 
   setName("testwindow");
@@ -102,7 +95,7 @@ NTestWindow::NTestWindow()
   btn1->setPosition(10,10,100,20);
   pane()->add(btn1);
 
-  btn1->clicked.connect(this, &NTestWindow::onBtnClick);
+  btn1->clicked.connect(this, &NTestWindow::onBtnClick);*/
 
 /*  NXmlParser parser;
 
