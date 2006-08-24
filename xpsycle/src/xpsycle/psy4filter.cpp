@@ -78,7 +78,7 @@ namespace psycle {
 			int fd = open( fileName.c_str(), O_RDONLY );
 			z = zipreader_open( fd );
 			int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT, 0666);
-			f = zipreader_seek(z, "./bin/song.bin");
+			f = zipreader_seek(z, "xml/song.xml");
 
 			if (!zipreader_extract(f, outFd )) {
 				zipreader_close( z );	
@@ -88,19 +88,15 @@ namespace psycle {
 			}			
 			close( outFd );
 
-			/*f = zipreader_seek(z, "./bin/song.bin");
+			f = zipreader_seek(z, "bin/song.bin");
 			outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT, 0666);
-			std::cout << "here0" << std::endl;
 			if (!zipreader_extract(f, outFd )) {
-				std::cout << "here1" << std::endl;
 				zipreader_close( z );	
 				close( outFd );
 				close( fd );
-				std::cout << "here2" << std::endl;
 				return false;
 			}			
-			std::cout << "here3" << std::endl;
-			close( outFd );*/
+			close( outFd );
 			
 			zipreader_close( z );
 			close( fd );
@@ -353,7 +349,7 @@ namespace psycle {
 	  	// disk as the target zipfile... 
 
 			zipwriter *z = zipwriter_start(open(std::string(fileName+".zip").c_str(), O_RDWR|O_CREAT, 0666));
-			zipwriterfilestream xmlFile(z, "./xml/song.xml" );
+			zipwriterfilestream xmlFile(z, "xml/song.xml" );
 
 			std::ostringstream xml;
 			xml << "<psy4>" << std::endl;
@@ -412,7 +408,7 @@ namespace psycle {
 			file.Close();
 
       // copy the bin data to the zip
-      f = zipwriter_addfile(z, std::string("./bin/song.bin").c_str(), 9);
+      f = zipwriter_addfile(z, std::string("bin/song.bin").c_str(), 9);
 	    zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
 
       if (!zipwriter_finish(z)) {

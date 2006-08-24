@@ -38,6 +38,7 @@ class NListBox;
 class ZoomBar;
 class NCheckBox;
 class NLine;
+class NEdit;
 
 namespace psycle {
 	namespace host {
@@ -47,6 +48,28 @@ class SequencerBeatChangeLineal;
 class SequencerGUI;
 class WaveFileOut;
 class AudioDriver;
+
+
+class SequencerLoopItem : public NPanel {
+public:
+
+		SequencerLoopItem( SequencerGUI* seqGui );
+
+		~SequencerLoopItem();
+
+		virtual void paint( NGraphics* g);
+
+		virtual int preferredWidth() const;
+		virtual int preferredHeight() const;
+
+		virtual void resize();
+
+private:
+
+		SequencerGUI* sView;
+		NEdit* loopEdit;
+
+};
 
 class SequencerItem : public NPanel {
       public:
@@ -244,6 +267,7 @@ private:
 
     void onNewPattern(NButtonEvent* ev);
     void onDeleteEntry(NButtonEvent* ev);
+		void onAddLoop(NButtonEvent* ev);
 
     void onSequencerLineClick(SequencerLine* line);
     void onSequencerItemClick(SequencerItem* item);

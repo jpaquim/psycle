@@ -38,6 +38,7 @@
 #include <ngrs/nbevelborder.h>
 #include <ngrs/nproperty.h>
 #include <ngrs/ncheckbox.h>
+#include <ngrs/nedit.h>
 
 
 namespace psycle {
@@ -583,6 +584,8 @@ SequencerGUI::SequencerGUI()
 
     toolBar_->add(new NToolBarSeparator());
 
+		toolBar_->add( new NButton("Add Loop")) ->clicked.connect(this,&SequencerGUI::onAddLoop);
+
     toolBar_->add( new NButton("Delete Entry"))->clicked.connect(this,&SequencerGUI::onDeleteEntry);
     snapToGridCheck_ = new NCheckBox("Snap to Beat");
     snapToGridCheck_->setCheck(true);
@@ -989,7 +992,63 @@ void SequencerGUI::onRecordStop( )
   toolBar_->repaint();
 }
 
+void SequencerGUI::onAddLoop(NButtonEvent* ev) {
+  SequencerLoopItem* item = new SequencerLoopItem(this);
+		item->setPosition( 0, beatLineal_->preferredHeight()-10, 100,10);
+	beatLineal_->add(item);
+	beatLineal_->repaint();
+}
+
+
+/// loop item class
+
+SequencerLoopItem::SequencerLoopItem( SequencerGUI * seqGui )
+{
+  sView = seqGui;
+	setMoveable( NMoveable( nMvHorizontal | nMvLeftLimit | nMvLeftBorder | nMvRightBorder) );
+
+	loopEdit = new NEdit("01");
+	add(loopEdit);
+}
+
+SequencerLoopItem::~ SequencerLoopItem( )
+{
+}
+
+
+void SequencerLoopItem::paint( NGraphics * g )
+{
+	int cw = clientWidth();
+	int ch = clientHeight();
+	g->setForeground( NColor( 0,0,255));
+	// left border
+	g->drawLine(0,0,0,ch-1);
+	// draw dots left
+	g->fillRect(2,ch / 2 -2,1,1);
+	g->fillRect(2,ch / 2 +2,1,1);
+	// right border
+	g->drawLine(cw-1,0,cw-1,ch-1);
+  g->drawLine(cw-3,0,cw-3,ch-1);
+	// draw dots right
+	g->fillRect(cw-5,ch / 2 -2,1,1);
+	g->fillRect(cw-5,ch / 2 +2,1,1);
+}
+
+int SequencerLoopItem::preferredWidth() const {
+  return 100;
+}
+
+int SequencerLoopItem::preferredHeight() const {
+  return 10;
+}
+
+void SequencerLoopItem::resize() {
+	loopEdit->setPosition( clientWidth() - loopEdit->preferredWidth() - 7, 0, loopEdit->preferredWidth(), clientHeight() );
+}
+
 }}
+
+
 
 
 
