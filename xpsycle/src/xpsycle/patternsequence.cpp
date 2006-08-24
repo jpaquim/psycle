@@ -20,6 +20,7 @@
 #include "patternsequence.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 namespace psycle
 {
@@ -300,8 +301,7 @@ namespace psycle
 		{
 			for(iterator it = begin(); it != end(); ++it)
 				delete *it;
-			GlobalIter it = globalEvents_.begin();
-			for (; it != globalEvents_.end(); it++) delete it->second;
+			for (GlobalIter it = globalEvents_.begin(); it != globalEvents_.end(); it++) delete it->second;
 		}
 
 

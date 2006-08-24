@@ -29,40 +29,40 @@
 //todo:
 //#include "cacheddllfinder.h"
 #include <algorithm>
+#include <cctype>
 
 
 namespace psycle
 {
 	namespace host
 	{
-struct ToLower
-    {
-      char operator() (char c) const  { return std::tolower(c); }
-    };
+		struct ToLower
+	    {
+	      char operator() (char c) const  { return std::tolower(c); }
+	    };
 	
 
-std::string const Psy2Filter::FILE_FOURCC = "PSY2";
-const int Psy2Filter::PSY2_MAX_TRACKS = 32;
-const int Psy2Filter::PSY2_MAX_WAVES  = 16;
-const int Psy2Filter::PSY2_MAX_INSTRUMENTS = 255;
-const int Psy2Filter::PSY2_MAX_PLUGINS = 256;
+		std::string const Psy2Filter::FILE_FOURCC = "PSY2";
+		const int Psy2Filter::PSY2_MAX_TRACKS = 32;
+		const int Psy2Filter::PSY2_MAX_WAVES  = 16;
+		const int Psy2Filter::PSY2_MAX_INSTRUMENTS = 255;
+		const int Psy2Filter::PSY2_MAX_PLUGINS = 256;
 
 
-Psy2Filter::Psy2Filter() : PsyFilter()
-{
-	singleCat=0;
-	singleLine=0;
-}
+		Psy2Filter::Psy2Filter() : PsyFilter()
+		{
+			singleCat=0;
+			singleLine=0;
+		}
 
 
-Psy2Filter::~Psy2Filter()
-{
-	// TODO: put destructor code here
+		Psy2Filter::~Psy2Filter()
+		{
+			// TODO: put destructor code here
+		}
 
-}
-
-bool Psy2Filter::testFormat(const std::string & fileName)
-{
+		bool Psy2Filter::testFormat(const std::string & fileName)
+		{
 			RiffFile file;
 			file.Open(fileName);
 			char Header[9];
@@ -71,7 +71,7 @@ bool Psy2Filter::testFormat(const std::string & fileName)
 			file.Close();
 			if (strcmp(Header,"PSY2SONG")==0) return true;
 			return false;
-}
+		}
 		void Psy2Filter::preparePatternSequence( Song & song )
 		{
 			seqList.clear();
@@ -80,10 +80,10 @@ bool Psy2Filter::testFormat(const std::string & fileName)
 			singleCat = song.patternSequence()-> patternData()->createNewCategory("SinglePattern");
 			// here we add in one single Line the patterns
 			singleLine = song.patternSequence()->createNewLine();
-}
+		}
 
-bool Psy2Filter::load(const std::string & fileName, Song & song)
-{
+		bool Psy2Filter::load(const std::string & fileName, Song & song)
+		{
 			std::int32_t num;
 			RiffFile file;
 			file.Open(fileName);
@@ -100,69 +100,69 @@ bool Psy2Filter::load(const std::string & fileName, Song & song)
 			LoadSEQD(&file,song);
 
 			file.Read(num);
-				Machine::id_type i;
-				for(i =0 ; i < num; ++i)
-				{
-					LoadPATD(&file,song,i);
-				}
+			Machine::id_type i;
+			for(i =0 ; i < num; ++i)
+			{
+				LoadPATD(&file,song,i);
+			}
 			LoadINSD(&file,song);
 			LoadWAVD(&file,song);
 			PreLoadVSTs(&file,song);
 			LoadMACD(&file,song);
 			TidyUp(&file,song);
+			return true;
+		}
 
-}
+		bool Psy2Filter::LoadINFO(RiffFile* file,Song& song)
+		{
+			char Name[32];
+			char Author[32];
+			char Comment[128];
 
-bool Psy2Filter::LoadINFO(RiffFile* file,Song& song)
-{
-				char Name[32];
-				char Author[32];
-				char Comment[128];
+			file->ReadChunk(Name, 32); Name[31]=0;
+			song.setName(Name);
+			file->ReadChunk(Author, 32); Author[31]=0;
+			song.setAuthor(Author);
+			bool err = file->ReadChunk(Comment, 128); Comment[127]=0;
+			song.setComment(Comment);
+			return err;
+		}
 
-				file->ReadChunk(Name, 32); Name[31]=0;
-				song.setName(Name);
-				file->ReadChunk(Author, 32); Author[31]=0;
-				song.setAuthor(Author);
-				bool err = file->ReadChunk(Comment, 128); Comment[127]=0;
-				song.setComment(Comment);
-				return err;
-}
+		bool Psy2Filter::LoadSNGI(RiffFile* file,Song& song)
+		{
+			std::int32_t tmp;
+			unsigned char oct;
+			file->Read(tmp);
+			song.setBpm(tmp);
 
-bool Psy2Filter::LoadSNGI(RiffFile* file,Song& song)
-{
-				std::int32_t tmp;
-				unsigned char oct;
-				file->Read(tmp);
-				song.setBpm(tmp);
-
-				file->Read(tmp);
-				if( tmp <= 0)
-				{
-					// Shouldn't happen but has happened.
-					song.m_LinesPerBeat = 4;
-				}
-				else song.m_LinesPerBeat = 44100 * 15 * 4 / (tmp * song.bpm());
+			file->Read(tmp);
+			if( tmp <= 0)
+			{
+				// Shouldn't happen but has happened.
+				song.m_LinesPerBeat = 4;
+			}
+			else song.m_LinesPerBeat = 44100 * 15 * 4 / (tmp * song.bpm());
 
 			file->Read(oct);
 			song.currentOctave = oct;
 
 			file->Read(busMachine);
-}
-bool Psy2Filter::LoadSEQD(RiffFile* file,Song& song)
-{
-				std::int32_t length,tmp;
-				unsigned char playOrder[128];
-				file->Read(playOrder);
-				file->Read(length);
-				for (int i(0) ; i < length; ++i)
-				{
-					seqList.push_back(playOrder[i]);
-				}
+			return true;
+		}
+		bool Psy2Filter::LoadSEQD(RiffFile* file,Song& song)
+		{
+			std::int32_t length,tmp;
+			unsigned char playOrder[128];
+			file->Read(playOrder);
+			file->Read(length);
+			for (int i(0) ; i < length; ++i)
+			{
+				seqList.push_back(playOrder[i]);
+			}
 
-				file->Read(tmp); song.setTracks(tmp);
-
-}
-
+			file->Read(tmp); song.setTracks(tmp);
+			return true;
+		}
 
 		PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
 		{
@@ -177,8 +177,8 @@ bool Psy2Filter::LoadSEQD(RiffFile* file,Song& song)
 			return event;
 		}
 
-bool Psy2Filter::LoadPATD(RiffFile* file,Song& song,int index)
-{
+		bool Psy2Filter::LoadPATD(RiffFile* file,Song& song,int index)
+		{
 				std::int32_t numLines;
 				char patternName[32];
 				file->Read(numLines);
@@ -220,288 +220,271 @@ bool Psy2Filter::LoadPATD(RiffFile* file,Song& song,int index)
 					file->Skip((PSY2_MAX_TRACKS-song.tracks())*EVENT_SIZE);
 				}
 			}
-		///\todo: ?
-/*					else
-					{
-						patternLines[i] = 64;
-						RemovePattern(i);
-					}
+			///\todo: ?
+/*			else
+			{
+				patternLines[i] = 64;
+				RemovePattern(i);
+			}
 */
-}
-bool Psy2Filter::LoadINSD(RiffFile* file,Song& song)
-{
-				std::int32_t i;
-				file->Read(song.instSelected);
+			return true;
+		}
+		bool Psy2Filter::LoadINSD(RiffFile* file,Song& song)
+		{
+			std::int32_t i;
+			file->Read(song.instSelected);
 
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->ReadChunk(song._pInstrument[i]->_sName,32); song._pInstrument[i]->_sName[31]=0;
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->_NNA);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_AT);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_DT);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_SL);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_RT);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_AT);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_DT);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_SL);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_RT);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_CO);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_RQ);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_EA);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->ENV_F_TP);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->_pan);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->_RPAN);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->_RCUT);
-				}
-				for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
-				{
-					file->Read(song._pInstrument[i]->_RRES);
-				}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->ReadChunk(song._pInstrument[i]->_sName,32); song._pInstrument[i]->_sName[31]=0;
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->_NNA);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_AT);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_DT);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_SL);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_RT);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_AT);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_DT);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_SL);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_RT);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_CO);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_RQ);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_EA);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->ENV_F_TP);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->_pan);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->_RPAN);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->_RCUT);
+			}
+			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
+			{
+				file->Read(song._pInstrument[i]->_RRES);
+			}
+			return true;
+		}
 				
-}
-
-bool Psy2Filter::LoadWAVD(RiffFile* file,Song& song)
-{
+		bool Psy2Filter::LoadWAVD(RiffFile* file,Song& song)
+		{
 			std::int32_t i;
-				// Skip wave selected
-				file->Skip(4);
-				for (i=0; i<PSY2_MAX_INSTRUMENTS; i++)
+			// Skip wave selected
+			file->Skip(4);
+			for (i=0; i<PSY2_MAX_INSTRUMENTS; i++)
+			{
+				for (int w=0; w<PSY2_MAX_WAVES; w++)
 				{
-					for (int w=0; w<PSY2_MAX_WAVES; w++)
+					std::uint32_t wltemp;
+					file->Read(wltemp);
+				
+					if (wltemp > 0)
 					{
-						std::uint32_t wltemp;
-						file->Read(wltemp);
-					
-						if (wltemp > 0)
+						if ( w == 0 )
 						{
-							if ( w == 0 )
+							Instrument& pIns = *(song._pInstrument[i]);
+							std::int16_t tmpFineTune;
+							pIns.waveLength=wltemp;
+							file->ReadChunk(pIns.waveName, 32); pIns.waveName[31]=0;
+							file->Read(pIns.waveVolume);
+							file->Read(tmpFineTune);
+							pIns.waveFinetune=tmpFineTune;
+							file->Read(pIns.waveLoopStart);
+							file->Read(pIns.waveLoopEnd);
+							file->Read(pIns.waveLoopType);
+							file->Read(pIns.waveStereo);
+							pIns.waveDataL = new std::int16_t[pIns.waveLength];
+							file->ReadChunk(pIns.waveDataL, pIns.waveLength * sizeof(std::int16_t));
+							if (pIns.waveStereo)
 							{
-								Instrument& pIns = *(song._pInstrument[i]);
-								std::int16_t tmpFineTune;
-								pIns.waveLength=wltemp;
-								file->ReadChunk(pIns.waveName, 32); pIns.waveName[31]=0;
-								file->Read(pIns.waveVolume);
-								file->Read(tmpFineTune);
-								pIns.waveFinetune=tmpFineTune;
-								file->Read(pIns.waveLoopStart);
-								file->Read(pIns.waveLoopEnd);
-								file->Read(pIns.waveLoopType);
-								file->Read(pIns.waveStereo);
-								pIns.waveDataL = new std::int16_t[pIns.waveLength];
-								file->ReadChunk(pIns.waveDataL, pIns.waveLength * sizeof(std::int16_t));
-								if (pIns.waveStereo)
-								{
-									pIns.waveDataR = new std::int16_t[pIns.waveLength];
-									file->ReadChunk(pIns.waveDataR, pIns.waveLength * sizeof(std::int16_t));
-								}
+								pIns.waveDataR = new std::int16_t[pIns.waveLength];
+								file->ReadChunk(pIns.waveDataR, pIns.waveLength * sizeof(std::int16_t));
 							}
-							else 
+						}
+						else 
+						{
+							//skip info
+							file->Skip(42+sizeof(bool));
+							bool stereo;
+							file->Read(stereo);
+							//skip data.
+							file->Skip(wltemp*2);
+							if ( stereo )
 							{
-								//skip info
-								file->Skip(42+sizeof(bool));
-								bool stereo;
-								file->Read(stereo);
-								//skip data.
 								file->Skip(wltemp*2);
-								if ( stereo )
-								{
-									file->Skip(wltemp*2);
-								}
 							}
 						}
 					}
 				}
-}
-bool Psy2Filter::PreLoadVSTs(RiffFile* file,Song& song)
-{
+			}
+			return true;
+		}
+		bool Psy2Filter::PreLoadVSTs(RiffFile* file,Song& song)
+		{
 			std::int32_t i;
-				for (i=0; i<PSY2_MAX_PLUGINS; i++)
+			for (i=0; i<PSY2_MAX_PLUGINS; i++)
+			{
+				file->Read(vstL[i].valid);
+				if( vstL[i].valid )
 				{
-					file->Read(vstL[i].valid);
-					if( vstL[i].valid )
-					{
-						file->ReadChunk(vstL[i].dllName,128); vstL[i].dllName[127]=0;
-						std::string strname = vstL[i].dllName;
-						std::transform(strname.begin(),strname.end(),strname.begin(),ToLower());
-						std::strcpy(vstL[i].dllName,strname.c_str());
-					
-						file->Read(vstL[i].numpars);
-						vstL[i].pars = new float[vstL[i].numpars];
+					file->ReadChunk(vstL[i].dllName,128); vstL[i].dllName[127]=0;
+					std::string strname = vstL[i].dllName;
+					std::transform(strname.begin(),strname.end(),strname.begin(),ToLower());
+					std::strcpy(vstL[i].dllName,strname.c_str());
+				
+					file->Read(vstL[i].numpars);
+					vstL[i].pars = new float[vstL[i].numpars];
 
-						for (int c=0; c<vstL[i].numpars; c++)
-						{
-							file->Read(vstL[i].pars[c]);
-						}
+					for (int c=0; c<vstL[i].numpars; c++)
+					{
+						file->Read(vstL[i].pars[c]);
 					}
 				}
+			}
+			return true;
+		}
+		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song)
+		{
+			std::int32_t i;
+			file->Read(_machineActive);
+			std::memset(pMac,0,sizeof pMac);
 
-}
-bool Psy2Filter::LoadMACD(RiffFile* file,Song& song)
-{
-				std::int32_t i;
-				file->Read(_machineActive);
-				std::memset(pMac,0,sizeof pMac);
-
-				for (i=0; i<128; i++)
+			for (i=0; i<128; i++)
+			{
+				Sampler* pSampler;
+//				XMSampler* pXMSampler;
+				Plugin* pPlugin;
+//				vst::plugin * pVstPlugin(0);
+				std::int32_t x,y,type;
+				if (_machineActive[i])
 				{
-					Sampler* pSampler;
-//					XMSampler* pXMSampler;
-					Plugin* pPlugin;
-//					vst::plugin * pVstPlugin(0);
-					std::int32_t x,y,type;
-					if (_machineActive[i])
+					progress.emit(4,8192+i*(4096/128),"");
+
+					file->Read(x);
+					file->Read(y);
+
+					file->Read(type);
+
+					if(converter.plugin_names().exists(type))
+						pMac[i] = &converter.redirect(i, type, *file,song);
+					else switch (type)
 					{
-						progress.emit(4,8192+i*(4096/128),"");
-
-						file->Read(x);
-						file->Read(y);
-
-						file->Read(type);
-
-						if(converter.plugin_names().exists(type))
-							pMac[i] = &converter.redirect(i, type, *file,song);
-						else switch (type)
+					case MACH_PLUGIN:
+					{
+						pMac[i] = pPlugin = new Plugin(i,&song);
+						// Should the "Init()" function go here? -> No. Needs to load the dll first.
+						if (!pMac[i]->LoadPsy2FileFormat(file))
 						{
-						case MACH_PLUGIN:
-							{
-								pMac[i] = pPlugin = new Plugin(i,&song);
-								// Should the "Init()" function go here? -> No. Needs to load the dll first.
-								if (!pMac[i]->LoadPsy2FileFormat(file))
-								{
-									Machine* pOldMachine = pMac[i];
-									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-									// dummy name goes here
-									std::stringstream s;
-									s << "X!" << pOldMachine->GetEditName();
-									pOldMachine->SetEditName(s.str());
-									pMac[i]->_type = MACH_DUMMY;
-									pOldMachine->_pSamplesL = NULL;
-									pOldMachine->_pSamplesR = NULL;
-									zapObject(pOldMachine);
-								}
-								break;
-							}
-						case MACH_MASTER:
-							pMac[i] = song._pMachine[MASTER_INDEX];
-							goto init_and_load;
-						case MACH_SAMPLER:
-							pMac[i] = pSampler = new Sampler(i,&song);
-							goto init_and_load;
-//						case MACH_XMSAMPLER:
-//							pMac[i] = pXMSampler = new XMSampler(i);
-//							goto init_and_load;
-						case MACH_VST:
-						case MACH_VSTFX:
-//							if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
-//							else if (type == MACH_VSTFX)	pMac[i] = pVstPlugin = new vst::fx(i);
-							pMac[i] = new Dummy(i,&song);
-							goto init_and_load_VST;
-						case MACH_SCOPE:
-						case MACH_DUMMY:
-							pMac[i] = new Dummy(i,&song);
-							goto init_and_load;
-						default:
-							{
-								std::ostringstream s;
-								s << "unkown machine type: " << type;
-//								MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
-							}
-							pMac[i] = new Dummy(i,&song);
-
-						init_and_load:
-							pMac[i]->Init();
-							pMac[i]->LoadPsy2FileFormat(file);
-							break;
-						init_and_load_VST:
-							pMac[i]->LoadPsy2FileFormat(file);
-								std::stringstream s;
-								s << "X!" << pMac[i]->GetEditName();
-								pMac[i]->SetEditName(s.str());
-						
-							file->Skip(sizeof(bool)+5);
+							Machine* pOldMachine = pMac[i];
+							pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+							// dummy name goes here
+							std::stringstream s;
+							s << "X!" << pOldMachine->GetEditName();
+							pOldMachine->SetEditName(s.str());
+							pMac[i]->_type = MACH_DUMMY;
+							pOldMachine->_pSamplesL = NULL;
+							pOldMachine->_pSamplesR = NULL;
+							zapObject(pOldMachine);
+						}
+						break;
+					}
+					case MACH_MASTER:
+						pMac[i] = song._pMachine[MASTER_INDEX];
+						goto init_and_load;
+					case MACH_SAMPLER:
+						pMac[i] = pSampler = new Sampler(i,&song);
+						goto init_and_load;
+//					case MACH_XMSAMPLER:
+//						pMac[i] = pXMSampler = new XMSampler(i);
+//						goto init_and_load;
+					case MACH_VST:
+					case MACH_VSTFX:
+//						if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+//						else if (type == MACH_VSTFX)	pMac[i] = pVstPlugin = new vst::fx(i);
+						pMac[i] = new Dummy(i,&song);
+						goto init_and_load_VST;
+					case MACH_SCOPE:
+					case MACH_DUMMY:
+						pMac[i] = new Dummy(i,&song);
+						goto init_and_load;
+					default:
+					{
+						std::ostringstream s;
+						s << "unkown machine type: " << type;
+//						MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+					}
+						pMac[i] = new Dummy(i,&song);
+		
+					init_and_load:
+						pMac[i]->Init();
+						pMac[i]->LoadPsy2FileFormat(file);
+						break;
+					init_and_load_VST:
+						pMac[i]->LoadPsy2FileFormat(file);
+						std::stringstream s;
+						s << "X!" << pMac[i]->GetEditName();
+						pMac[i]->SetEditName(s.str());
+			
+						file->Skip(sizeof(bool)+5);
 /*
-							if ((pMac[i]->LoadOldFileFormat(file)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
+						if ((pMac[i]->LoadOldFileFormat(file)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
+						{
+							std::string path = vstL[pVstPlugin->_instance].dllName;
+							if(!Global::dllfinder().LookupDllPath(path,MACH_VST)) 
 							{
-								std::string path = vstL[pVstPlugin->_instance].dllName;
-								if(!Global::dllfinder().LookupDllPath(path,MACH_VST)) 
+								try
 								{
-									try
-									{
-										pVstPlugin->LoadDll(path,false);
-									}
-									catch(...)
-									{
-										std::ostringstream ss;
-										ss << "Plugin instancation threw an exception " << path << " - replacing with Dummy.";
-										MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
-
-										Machine* pOldMachine = pMac[i];
-										pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-										pOldMachine->_pSamplesL = NULL;
-										pOldMachine->_pSamplesR = NULL;
-										// dummy name goes here
-										std::stringstream ss2;
-										ss2 << "X!" << pOldMachine->GetEditName();
-										pOldMachine->SetEditName(ss2.str());
-										zapObject(pOldMachine);
-										pMac[i]->_subclass = MACH_DUMMY;
-										((Dummy*)pMac[i])->wasVST = true;
-									}
+									pVstPlugin->LoadDll(path,false);
 								}
-								else
+								catch(...)
 								{
 									std::ostringstream ss;
-									ss << "Missing  or disabled VST plug-in: " << vstL[pVstPlugin->_instance].dllName;
+									ss << "Plugin instancation threw an exception " << path << " - replacing with Dummy.";
 									MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
-
+			
 									Machine* pOldMachine = pMac[i];
 									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 									pOldMachine->_pSamplesL = NULL;
@@ -517,265 +500,283 @@ bool Psy2Filter::LoadMACD(RiffFile* file,Song& song)
 							}
 							else
 							{
+								std::ostringstream ss;
+								ss << "Missing  or disabled VST plug-in: " << vstL[pVstPlugin->_instance].dllName;
+								MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
+			
 								Machine* pOldMachine = pMac[i];
 								pMac[i] = new Dummy(*((Dummy*)pOldMachine));
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
 								// dummy name goes here
-								std::stringstream ss;
-								ss << "X!" << pOldMachine->GetEditName();
-								pOldMachine->SetEditName(ss.str());
+								std::stringstream ss2;
+								ss2 << "X!" << pOldMachine->GetEditName();
+								pOldMachine->SetEditName(ss2.str());
 								zapObject(pOldMachine);
 								pMac[i]->_subclass = MACH_DUMMY;
 								((Dummy*)pMac[i])->wasVST = true;
 							}
-*/
 						}
-						pMac[i]->SetPosX(x);
-						pMac[i]->SetPosY(y);
+						else
+						{
+							Machine* pOldMachine = pMac[i];
+							pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+							pOldMachine->_pSamplesL = NULL;
+							pOldMachine->_pSamplesR = NULL;
+							// dummy name goes here
+							std::stringstream ss;
+							ss << "X!" << pOldMachine->GetEditName();
+							pOldMachine->SetEditName(ss.str());
+							zapObject(pOldMachine);
+							pMac[i]->_subclass = MACH_DUMMY;
+							((Dummy*)pMac[i])->wasVST = true;
+						}
+*/
+					}
+					pMac[i]->SetPosX(x);
+					pMac[i]->SetPosY(y);
+				}
+			}
+			
+			// Extra data, Information about instruments, and machines.
+		
+			for (i=0; i<PSY2_MAX_INSTRUMENTS; i++)
+			{
+				file->Read(song._pInstrument[i]->_loop);
+			}
+			for (i=0; i<PSY2_MAX_INSTRUMENTS; i++)
+			{
+				file->Read(song._pInstrument[i]->_lines);
+			}
+
+			if ( file->Read(busEffect) == false ) // Patch 1: BusEffects (twf)
+			{
+				int j=0;
+				for ( i=0;i<128;i++ ) 
+				{
+					if (_machineActive[i] && pMac[i]->_mode != MACHMODE_GENERATOR )
+					{
+						busEffect[j]=i;	
+						j++;
 					}
 				}
-			
-				// Extra data, Information about instruments, and machines.
-			
-				for (i=0; i<PSY2_MAX_INSTRUMENTS; i++)
+				for (j; j < 64; j++)
 				{
-					file->Read(song._pInstrument[i]->_loop);
+					busEffect[j] = 255;
 				}
-				for (i=0; i<PSY2_MAX_INSTRUMENTS; i++)
-				{
-					file->Read(song._pInstrument[i]->_lines);
-				}
-
-				if ( file->Read(busEffect) == false ) // Patch 1: BusEffects (twf)
-				{
-					int j=0;
-					for ( i=0;i<128;i++ ) 
+			}
+			// Patch 1.2: Fixes crash/inconsistence when deleting a machine which couldn't be loaded
+			// (.dll not found, or Load failed), which is, then, replaced by a DUMMY machine.
+			int j=0;
+			for ( i=0;i<64;i++ ) 
+			{
+				if (busMachine[i] != 255 && _machineActive[busMachine[i]]) 
+				{ // If there's a machine in the generators' bus that it is not a generator:
+					if (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR ) 
 					{
-						if (_machineActive[i] && pMac[i]->_mode != MACHMODE_GENERATOR )
+						pMac[busMachine[i]]->_mode = MACHMODE_FX;
+						while (busEffect[j] != 255 && j<MAX_BUSES) 
 						{
-							busEffect[j]=i;	
 							j++;
 						}
-					}
-					for (j; j < 64; j++)
-					{
-						busEffect[j] = 255;
+						busEffect[j]=busMachine[i];
+						busMachine[i]=255;
 					}
 				}
-				// Patch 1.2: Fixes crash/inconsistence when deleting a machine which couldn't be loaded
-				// (.dll not found, or Load failed), which is, then, replaced by a DUMMY machine.
-				int j=0;
-				for ( i=0;i<64;i++ ) 
+			}
+			for ( i=0;i<64;i++ ) 
+			{
+				if ((busMachine[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)) 
 				{
-					if (busMachine[i] != 255 && _machineActive[busMachine[i]]) 
-					{ // If there's a machine in the generators' bus that it is not a generator:
-						if (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR ) 
+					busMachine[i] = 255;
+				}
+				if ((busEffect[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busEffect[i]]->_mode != MACHMODE_FX)) 
+				{
+					busEffect[i] = 255;
+				}
+			}
+
+/*			bool chunkpresent=false;
+			file->Read(chunkpresent); // Patch 2: VST's Chunk.
+
+			if ( fullopen ) for ( i=0;i<128;i++ ) 
+			{
+				if (_machineActive[i])
+				{
+					if ( pMac[i]->subclass() == MACH_DUMMY ) 
+					{
+						if (((Dummy*)pMac[i])->wasVST && chunkpresent )
 						{
-							pMac[busMachine[i]]->_mode = MACHMODE_FX;
-							while (busEffect[j] != 255 && j<MAX_BUSES) 
-							{
-								j++;
-							}
-							busEffect[j]=busMachine[i];
-							busMachine[i]=255;
+							// Since we don't know if the plugin saved it or not, 
+							// we're stuck on letting the loading crash/behave incorrectly.
+							// There should be a flag, like in the VST loading Section to be correct.
+							MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
 						}
 					}
-				}
-				for ( i=0;i<64;i++ ) 
-				{
-					if ((busMachine[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)) 
+					else if (( pMac[i]->subclass() == MACH_VST ) || 
+							( pMac[i]->subclass() == MACH_VSTFX))
 					{
-						busMachine[i] = 255;
-					}
-					if ((busEffect[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busEffect[i]]->_mode != MACHMODE_FX)) 
-					{
-						busEffect[i] = 255;
-					}
-				}
-
-/*				bool chunkpresent=false;
-				file->Read(chunkpresent); // Patch 2: VST's Chunk.
-
-				if ( fullopen ) for ( i=0;i<128;i++ ) 
-				{
-					if (_machineActive[i])
-					{
-						if ( pMac[i]->subclass() == MACH_DUMMY ) 
+						bool chunkread = false;
+						try
 						{
-							if (((Dummy*)pMac[i])->wasVST && chunkpresent )
-							{
-								// Since we don't know if the plugin saved it or not, 
-								// we're stuck on letting the loading crash/behave incorrectly.
-								// There should be a flag, like in the VST loading Section to be correct.
-								MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
-							}
+							vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
+							if(chunkpresent) chunkread = plugin.LoadChunkOldFileFormat(file);
+							plugin.proxy().dispatcher(effSetProgram, 0, plugin._program);
 						}
-						else if (( pMac[i]->subclass() == MACH_VST ) || 
-								( pMac[i]->subclass() == MACH_VSTFX))
+						catch(const std::exception &)
 						{
-							bool chunkread = false;
-							try
+							// o_O`
+						}
+						if(!chunkpresent || !chunkread)
+						{
+							vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
+							const int vi = plugin._instance;
+							const int numpars = vstL[vi].numpars;
+							for (int c(0) ; c < numpars; ++c)
 							{
-								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
-								if(chunkpresent) chunkread = plugin.LoadChunkOldFileFormat(file);
-								plugin.proxy().dispatcher(effSetProgram, 0, plugin._program);
-							}
-							catch(const std::exception &)
-							{
-								// o_O`
-							}
-							if(!chunkpresent || !chunkread)
-							{
-								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
-								const int vi = plugin._instance;
-								const int numpars = vstL[vi].numpars;
-								for (int c(0) ; c < numpars; ++c)
+								try
 								{
-									try
-									{
-										plugin.proxy().setParameter(c, vstL[vi].pars[c]);
-									}
-									catch(const std::exception &)
-									{
-										// o_O`
-									}
+									plugin.proxy().setParameter(c, vstL[vi].pars[c]);
+								}
+								catch(const std::exception &)
+								{
+									// o_O`
 								}
 							}
 						}
 					}
 				}
-*/				
+			}
+*/
 			
-
-}
-bool Psy2Filter::TidyUp(RiffFile*file,Song&song)
-{
+			return true;
+		}
+		bool Psy2Filter::TidyUp(RiffFile*file,Song&song)
+		{
 			std::int32_t i;
 			// Clean "pars" array.
 			for (i=0; i<PSY2_MAX_PLUGINS; i++) 
+			{
+				if( vstL[i].valid )
 				{
-					if( vstL[i].valid )
+					zapObject(vstL[i].pars);
+				}
+			}
+			
+			// now that we have loaded all the patterns, time to prepare them in the multisequence.
+			double pos = 0;
+			std::vector<int>::iterator it = seqList.begin();
+			for ( ; it < seqList.end(); ++it)
+			{
+				SinglePattern* pat = song.patternSequence()->patternData()->findById(*it);
+				singleLine->createEntry(pat,pos);
+				pos+=pat->beats();
+			}
+		
+		
+			// Since the old file format stored volumes on each output
+			// rather than on each input, we must convert
+			//
+			float volMatrix[128][MAX_CONNECTIONS];
+			for (i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
+			{
+				if (!_machineActive[i])
+				{
+					zapObject(pMac[i]);
+				}
+				else if (!pMac[i])
+				{
+					_machineActive[i] = false;
+				}
+				else 
+				{
+					for (int c=0; c<MAX_CONNECTIONS; c++)
 					{
-						zapObject(vstL[i].pars);
+						volMatrix[i][c] = pMac[i]->_inputConVol[c];
 					}
 				}
+			}
 			
-				// now that we have loaded all the patterns, time to prepare them in the multisequence.
-				double pos = 0;
-				std::vector<int>::iterator it = seqList.begin();
-				for ( ; it < seqList.end(); ++it)
+			for (i=0; i<128; i++) // Next, we go to fix this for each
+			{
+				if (_machineActive[i])		// valid machine (important, since we have to navigate!)
 				{
-					SinglePattern* pat = song.patternSequence()->patternData()->findById(*it);
-					singleLine->createEntry(pat,pos);
-					pos+=pat->beats();
-				}
-			
-			
-				// Since the old file format stored volumes on each output
-				// rather than on each input, we must convert
-				//
-				float volMatrix[128][MAX_CONNECTIONS];
-				for (i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
-				{
-					if (!_machineActive[i])
+					for (int c=0; c<MAX_CONNECTIONS; c++) // all of its input connections.
 					{
-						zapObject(pMac[i]);
-					}
-					else if (!pMac[i])
-					{
-						_machineActive[i] = false;
-					}
-					else 
-					{
-						for (int c=0; c<MAX_CONNECTIONS; c++)
+						if (pMac[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
 						{
-							volMatrix[i][c] = pMac[i]->_inputConVol[c];
-						}
-					}
-				}
-				
-				for (i=0; i<128; i++) // Next, we go to fix this for each
-				{
-					if (_machineActive[i])		// valid machine (important, since we have to navigate!)
-					{
-						for (int c=0; c<MAX_CONNECTIONS; c++) // all of its input connections.
-						{
-							if (pMac[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
+							Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
+							int d = pOrigMachine->FindOutputWire(i);
+
+							float val = volMatrix[pMac[i]->_inputMachines[c]][d];
+							if( val >= 4.000001f ) 
 							{
-								Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
-								int d = pOrigMachine->FindOutputWire(i);
-
-								float val = volMatrix[pMac[i]->_inputMachines[c]][d];
-								if( val >= 4.000001f ) 
-								{
-									val*=0.000030517578125f; // BugFix
-								}
-								else if ( val < 0.00004f) 
-								{
-									val*=32768.0f; // BugFix
-								}
-
-								pMac[i]->InitWireVolume(pOrigMachine->_type,c,val);
+								val*=0.000030517578125f; // BugFix
 							}
+							else if ( val < 0.00004f) 
+							{
+								val*=32768.0f; // BugFix
+							}
+
+							pMac[i]->InitWireVolume(pOrigMachine->_type,c,val);
 						}
 					}
 				}
+			}
 
-				// move machines around to where they really should go
-				// now we have to remap all the inputs and outputs again... ouch
-				
+			// move machines around to where they really should go
+			// now we have to remap all the inputs and outputs again... ouch
+			
 
-				for (i = 0; i < 64; i++)
+			for (i = 0; i < 64; i++)
+			{
+				if ((busMachine[i] < MAX_MACHINES-1) && (busMachine[i] > 0))
 				{
-					if ((busMachine[i] < MAX_MACHINES-1) && (busMachine[i] > 0))
+					if (_machineActive[busMachine[i]])
 					{
-						if (_machineActive[busMachine[i]])
+						if (pMac[busMachine[i]]->_mode == MACHMODE_GENERATOR)
 						{
-							if (pMac[busMachine[i]]->_mode == MACHMODE_GENERATOR)
-							{
-								song._pMachine[i] = pMac[busMachine[i]];
-								_machineActive[busMachine[i]] = false; // don't update this twice;
+							song._pMachine[i] = pMac[busMachine[i]];
+							_machineActive[busMachine[i]] = false; // don't update this twice;
 
-								for (int c=0; c<MAX_CONNECTIONS; c++)
+							for (int c=0; c<MAX_CONNECTIONS; c++)
+							{
+								if (song._pMachine[i]->_inputCon[c])
 								{
-									if (song._pMachine[i]->_inputCon[c])
+									for (int x=0; x<64; x++)
+									{
+										if (song._pMachine[i]->_inputMachines[c] == busMachine[x])
+										{
+											song._pMachine[i]->_inputMachines[c] = x;
+											break;
+										}
+										else if (song._pMachine[i]->_inputMachines[c] == busEffect[x])
+										{
+											song._pMachine[i]->_inputMachines[c] = x+MAX_BUSES;
+											break;
+										}
+									}
+								}
+
+								if (song._pMachine[i]->_connection[c])
+								{
+									if (song._pMachine[i]->_outputMachines[c] == 0)
+									{
+										song._pMachine[i]->_outputMachines[c] = MASTER_INDEX;
+									}
+									else
 									{
 										for (int x=0; x<64; x++)
 										{
-											if (song._pMachine[i]->_inputMachines[c] == busMachine[x])
+											if (song._pMachine[i]->_outputMachines[c] == busMachine[x])
 											{
-												song._pMachine[i]->_inputMachines[c] = x;
+												song._pMachine[i]->_outputMachines[c] = x;
 												break;
 											}
-											else if (song._pMachine[i]->_inputMachines[c] == busEffect[x])
+											else if (song._pMachine[i]->_outputMachines[c] == busEffect[x])
 											{
-												song._pMachine[i]->_inputMachines[c] = x+MAX_BUSES;
+												song._pMachine[i]->_outputMachines[c] = x+MAX_BUSES;
 												break;
-											}
-										}
-									}
-
-									if (song._pMachine[i]->_connection[c])
-									{
-										if (song._pMachine[i]->_outputMachines[c] == 0)
-										{
-											song._pMachine[i]->_outputMachines[c] = MASTER_INDEX;
-										}
-										else
-										{
-											for (int x=0; x<64; x++)
-											{
-												if (song._pMachine[i]->_outputMachines[c] == busMachine[x])
-												{
-													song._pMachine[i]->_outputMachines[c] = x;
-													break;
-												}
-												else if (song._pMachine[i]->_outputMachines[c] == busEffect[x])
-												{
-													song._pMachine[i]->_outputMachines[c] = x+MAX_BUSES;
-													break;
-												}
 											}
 										}
 									}
@@ -783,53 +784,53 @@ bool Psy2Filter::TidyUp(RiffFile*file,Song&song)
 							}
 						}
 					}
-					if ((busEffect[i] < MAX_MACHINES-1) && (busEffect[i] > 0))
+				}
+				if ((busEffect[i] < MAX_MACHINES-1) && (busEffect[i] > 0))
+				{
+					if (_machineActive[busEffect[i]])
 					{
-						if (_machineActive[busEffect[i]])
+						if (pMac[busEffect[i]]->_mode == MACHMODE_FX)
 						{
-							if (pMac[busEffect[i]]->_mode == MACHMODE_FX)
-							{
-								song._pMachine[i+MAX_BUSES] = pMac[busEffect[i]];
-								_machineActive[busEffect[i]] = false; // don't do this again
+							song._pMachine[i+MAX_BUSES] = pMac[busEffect[i]];
+							_machineActive[busEffect[i]] = false; // don't do this again
 
-								for (int c=0; c<MAX_CONNECTIONS; c++)
+							for (int c=0; c<MAX_CONNECTIONS; c++)
+							{
+								if (song._pMachine[i+MAX_BUSES]->_inputCon[c])
 								{
-									if (song._pMachine[i+MAX_BUSES]->_inputCon[c])
+									for (int x=0; x<64; x++)
+									{
+										if (song._pMachine[i+MAX_BUSES]->_inputMachines[c] == busMachine[x])
+										{
+											song._pMachine[i+MAX_BUSES]->_inputMachines[c] = x;
+											break;
+										}
+										else if (song._pMachine[i+MAX_BUSES]->_inputMachines[c] == busEffect[x])
+										{
+											song._pMachine[i+MAX_BUSES]->_inputMachines[c] = x+MAX_BUSES;
+											break;
+										}
+									}
+								}
+								if (song._pMachine[i+MAX_BUSES]->_connection[c])
+								{
+									if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == 0)
+									{
+										song._pMachine[i+MAX_BUSES]->_outputMachines[c] = MASTER_INDEX;
+									}
+									else
 									{
 										for (int x=0; x<64; x++)
 										{
-											if (song._pMachine[i+MAX_BUSES]->_inputMachines[c] == busMachine[x])
+											if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == busMachine[x])
 											{
-												song._pMachine[i+MAX_BUSES]->_inputMachines[c] = x;
+												song._pMachine[i+MAX_BUSES]->_outputMachines[c] = x;
 												break;
 											}
-											else if (song._pMachine[i+MAX_BUSES]->_inputMachines[c] == busEffect[x])
+											else if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == busEffect[x])
 											{
-												song._pMachine[i+MAX_BUSES]->_inputMachines[c] = x+MAX_BUSES;
+												song._pMachine[i+MAX_BUSES]->_outputMachines[c] = x+MAX_BUSES;
 												break;
-											}
-										}
-									}
-									if (song._pMachine[i+MAX_BUSES]->_connection[c])
-									{
-										if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == 0)
-										{
-											song._pMachine[i+MAX_BUSES]->_outputMachines[c] = MASTER_INDEX;
-										}
-										else
-										{
-											for (int x=0; x<64; x++)
-											{
-												if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == busMachine[x])
-												{
-													song._pMachine[i+MAX_BUSES]->_outputMachines[c] = x;
-													break;
-												}
-												else if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == busEffect[x])
-												{
-													song._pMachine[i+MAX_BUSES]->_outputMachines[c] = x+MAX_BUSES;
-													break;
-												}
 											}
 										}
 									}
@@ -838,112 +839,114 @@ bool Psy2Filter::TidyUp(RiffFile*file,Song&song)
 						}
 					}
 				}
-				for (int c=0; c<MAX_CONNECTIONS; c++)
+			}
+			for (int c=0; c<MAX_CONNECTIONS; c++)
+			{
+				if (song._pMachine[MASTER_INDEX]->_inputCon[c])
 				{
-					if (song._pMachine[MASTER_INDEX]->_inputCon[c])
+					for (int x=0; x<64; x++)
 					{
-						for (int x=0; x<64; x++)
+						if (song._pMachine[MASTER_INDEX]->_inputMachines[c] == busMachine[x])
 						{
-							if (song._pMachine[MASTER_INDEX]->_inputMachines[c] == busMachine[x])
-							{
-								song._pMachine[MASTER_INDEX]->_inputMachines[c] = x;
-								break;
-							}
-							else if (song._pMachine[MASTER_INDEX]->_inputMachines[c] == busEffect[x])
-							{
-								song._pMachine[MASTER_INDEX]->_inputMachines[c] = x+MAX_BUSES;
-								break;
-							}
+							song._pMachine[MASTER_INDEX]->_inputMachines[c] = x;
+							break;
+						}
+						else if (song._pMachine[MASTER_INDEX]->_inputMachines[c] == busEffect[x])
+						{
+							song._pMachine[MASTER_INDEX]->_inputMachines[c] = x+MAX_BUSES;
+							break;
 						}
 					}
 				}
-			
+			}
+		
 
-			
-				// fix machine #s
+		
+			// fix machine #s
 
-				for (i = 0; i < MAX_MACHINES-1; i++)
+			for (i = 0; i < MAX_MACHINES-1; i++)
+			{
+				if (song._pMachine[i])
 				{
-					if (song._pMachine[i])
+					song._pMachine[i]->_macIndex = i;
+					for (int j = i+1; j < MAX_MACHINES-1; j++)
 					{
-						song._pMachine[i]->_macIndex = i;
-						for (int j = i+1; j < MAX_MACHINES-1; j++)
+						if (song._pMachine[i] == song._pMachine[j])
 						{
-							if (song._pMachine[i] == song._pMachine[j])
-							{
-								assert(false);
-								// we have duplicate machines...
-								// this should NEVER happen
-								// delete the second one :(
-								song._pMachine[j] = NULL;
-								// and we should remap anything that had wires to it to the first one
-							}
+							assert(false);
+							// we have duplicate machines...
+							// this should NEVER happen
+							// delete the second one :(
+							song._pMachine[j] = NULL;
+							// and we should remap anything that had wires to it to the first one
 						}
 					}
 				}
-				
+			}
 			
-				// test all connections for invalid machines. disconnect invalid machines.
-				for (i = 0; i < MAX_MACHINES; i++)
+		
+			// test all connections for invalid machines. disconnect invalid machines.
+			for (i = 0; i < MAX_MACHINES; i++)
+			{
+				if (song._pMachine[i])
 				{
-					if (song._pMachine[i])
-					{
-						song._pMachine[i]->_connectedInputs = 0;
-						song._pMachine[i]->_connectedOutputs = 0;
+					song._pMachine[i]->_connectedInputs = 0;
+					song._pMachine[i]->_connectedOutputs = 0;
 
-						for (int c = 0; c < MAX_CONNECTIONS; c++)
+					for (int c = 0; c < MAX_CONNECTIONS; c++)
+					{
+						if (song._pMachine[i]->_connection[c])
 						{
-							if (song._pMachine[i]->_connection[c])
+							if (song._pMachine[i]->_outputMachines[c] < 0 || song._pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 							{
-								if (song._pMachine[i]->_outputMachines[c] < 0 || song._pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
-								{
-									song._pMachine[i]->_connection[c]=false;
-									song._pMachine[i]->_outputMachines[c]=-1;
-								}
-								else if (!song._pMachine[song._pMachine[i]->_outputMachines[c]])
-								{
-									song._pMachine[i]->_connection[c]=false;
-									song._pMachine[i]->_outputMachines[c]=-1;
-								}
-								else 
-								{
-									song._pMachine[i]->_connectedOutputs++;
-								}
+								song._pMachine[i]->_connection[c]=false;
+								song._pMachine[i]->_outputMachines[c]=-1;
+							}
+							else if (!song._pMachine[song._pMachine[i]->_outputMachines[c]])
+							{
+								song._pMachine[i]->_connection[c]=false;
+								song._pMachine[i]->_outputMachines[c]=-1;
+							}
+							else 
+							{
+								song._pMachine[i]->_connectedOutputs++;
+							}
+						}
+						else
+						{
+							song._pMachine[i]->_outputMachines[c]=255;
+						}
+
+						if (song._pMachine[i]->_inputCon[c])
+						{
+							if (song._pMachine[i]->_inputMachines[c] < 0 || song._pMachine[i]->_inputMachines[c] >= MAX_MACHINES-1)
+							{
+								song._pMachine[i]->_inputCon[c]=false;
+								song._pMachine[i]->_inputMachines[c]=-1;
+							}
+							else if (!song._pMachine[song._pMachine[i]->_inputMachines[c]])
+							{
+								song._pMachine[i]->_inputCon[c]=false;
+								song._pMachine[i]->_inputMachines[c]=-1;
 							}
 							else
 							{
-								song._pMachine[i]->_outputMachines[c]=255;
+								song._pMachine[i]->_connectedInputs++;
 							}
-
-							if (song._pMachine[i]->_inputCon[c])
-							{
-								if (song._pMachine[i]->_inputMachines[c] < 0 || song._pMachine[i]->_inputMachines[c] >= MAX_MACHINES-1)
-								{
-									song._pMachine[i]->_inputCon[c]=false;
-									song._pMachine[i]->_inputMachines[c]=-1;
-								}
-								else if (!song._pMachine[song._pMachine[i]->_inputMachines[c]])
-								{
-									song._pMachine[i]->_inputCon[c]=false;
-									song._pMachine[i]->_inputMachines[c]=-1;
-								}
-								else
-								{
-									song._pMachine[i]->_connectedInputs++;
-								}
-							}
-							else
-							{
-								song._pMachine[i]->_inputMachines[c]=255;
-							}
+						}
+						else
+						{
+							song._pMachine[i]->_inputMachines[c]=255;
 						}
 					}
 				}
-			
-			// Reparse any pattern for converted machines.
-				converter.retweak(song);
-				song.seqBus=0;
-}
+			}
+		
+		// Reparse any pattern for converted machines.
+			converter.retweak(song);
+			song.seqBus=0;
+			return true;
+		}
 
 
 		bool Machine::LoadPsy2FileFormat(RiffFile* pFile)
@@ -1165,13 +1168,13 @@ bool Psy2Filter::TidyUp(RiffFile*file,Song&song)
 //			Global::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
 			try
 			{
-				LoadDll(strname);
+				result = LoadDll(strname);
 			}
 			catch(...)
 			{
 //				char sError[_MAX_PATH];
-	//			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-		//		MessageBox(NULL,sError, "Error", MB_OK);
+//				sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
+//				MessageBox(NULL,sError, "Error", MB_OK);
 				result = false;
 			}
 

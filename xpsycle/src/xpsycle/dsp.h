@@ -128,6 +128,7 @@ namespace psycle
 			return vol;
 #endif
 		}
+		#if 0
 		/// finds the maximum amplitude in a signal buffer.
 		/// It contains "VST" because initially the return type for native machines 
 		/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
@@ -135,7 +136,6 @@ namespace psycle
 		{
 			return GetMaxVol(pSamplesL,pSamplesR,numSamples);
 		}
-		#if 0
 			static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
 			{
 				return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));

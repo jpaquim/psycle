@@ -99,7 +99,7 @@ namespace psycle
 
 		public:
 			double PlayPos() const {return playPos;}
-			double SetPlayPos(int newpos) {playPos=newpos;}
+			void SetPlayPos(int newpos) {playPos=newpos;}
 		private:
 			/// current master playback position
 			double playPos;

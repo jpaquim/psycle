@@ -84,6 +84,7 @@ namespace psycle
 			}
 			SetBPM(song().bpm(),song().LinesPerBeat());
 			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
+			if (autoRecord_) stopRecording();
 		}
 
 		void Player::SampleRate(const int sampleRate)
@@ -175,7 +176,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			for ( ; trackItr != line.end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
-				if(( !song()._trackMuted[track]) && (entry.note() < cdefTweakM || entry.note() == 255)) // Is it not muted and is a note?
+				if(( !song()._trackMuted[track]) && (entry.note() < notecommands::tweak || entry.note() == 255)) // Is it not muted and is a note?
 				{
 					int mac = entry.machine();
 					if(mac != 255) prevMachines[track] = mac;

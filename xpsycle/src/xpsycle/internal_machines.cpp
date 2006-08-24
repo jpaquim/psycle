@@ -23,7 +23,6 @@ namespace psycle {
 //			DefineStereoInput(1);
 //			DefineStereoOutput(1);
 			_audiorange = 32768.0f;
-			_audiorange = 32768.0f;
 			_editName = "Dummy";
 		}
 		Dummy::~Dummy() throw()
@@ -187,6 +186,7 @@ namespace psycle {
 		int DuplicatorMac::GenerateAudio(int numSamples)
 		{
 			_worked = true;
+			return numSamples;
 		}
 
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -220,7 +220,7 @@ namespace psycle {
 			sampleCount(0),
 			decreaseOnClip(false)
 		{
-      _outDry = 256;
+    		  _outDry = 256;
 			_audiorange = 32768.0f;
 			DefineStereoInput(1);
 			_editName = "Master";
@@ -228,6 +228,12 @@ namespace psycle {
 		Master::~Master() throw()
 		{
 		}
+		void Master::Stop()
+		{
+			_clip = false;
+			sampleCount = 0;
+		}
+
 		void Master::Init()
 		{
 			Machine::Init();
@@ -240,6 +246,13 @@ namespace psycle {
 			_rMax = 1;
 			vuupdated = false;
 			_clip = false;
+		}
+		void Master::Tick(int channel, const PatternEvent & data )
+		{
+			if ( data.note() == PatternCmd::SET_VOLUME )
+			{
+				_outDry = data.parameter();
+			}
 		}
 
 		int Master::GenerateAudio(int numSamples)
@@ -352,6 +365,7 @@ namespace psycle {
 //			cost = cpu::cycles() - cost;
 //			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
+			return numSamples;
 		}
 
 		bool Master::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -421,9 +435,10 @@ namespace psycle {
 			}
 		}
 
-		int Mixer::GenerateAudioInTicks(int startSample, int numSamples)
+		int Mixer::GenerateAudio(int numSamples)
 		{
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
+			Machine::WorkNoMix(numSamples);
 			// Step Two, prepare input signals for the Send Fx, and make them work
 			FxSend(numSamples);
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
@@ -774,23 +789,12 @@ namespace psycle {
 			_nCols = 3;
 			bisTicking = false;
 			_editName = "LFO";
-			for (int i=0;i<NUM_CHANS;i++)
-			{
-				macOutput[i]=-1;
-				paramOutput[i]=-1;
-				level[i]=100;
-				phase[i]= (int) MAX_PHASE/2.0f;
-				prevVal[i]=centerVal[i]=0.0;
-			}
-			lfoPos=0.0;
-			lSpeed=MAX_SPEED/6;
-			waveform=lfo_types::sine;
-			pWidth=100;
-			FillTable();
 		}
+
 		LFO::~LFO() throw()
 		{
 		}
+
 		void LFO::Init()
 		{
 			Machine::Init();
@@ -800,12 +804,11 @@ namespace psycle {
 				paramOutput[i]=-1;
 				level[i]=100;
 				phase[i]=MAX_PHASE/2.0f;
-				prevVal[i] = centerVal[i]= 0;
+				prevVal[i]=centerVal[i]=0.0;
 			}
 			lfoPos=0.0;
-			lSpeed=MAX_SPEED/6;
+			lSpeed=MAX_SPEED/10;
 			waveform=lfo_types::sine;
-			pWidth=100;
 			FillTable();
 		}
 
@@ -824,8 +827,6 @@ namespace psycle {
 		{
 			if(numparam==prms::wave)
 				sprintf(name,"Waveform");
-			else if(numparam==prms::pwidth)
-				sprintf(name,"Pulse Width");
 			else if(numparam==prms::speed)
 				sprintf(name,"Speed");
 			else if (numparam<prms::prm0)
@@ -834,17 +835,14 @@ namespace psycle {
 				sprintf(name,"Output Param %d",numparam-prms::prm0);
 			else if (numparam<prms::phase0)
 				sprintf(name,"Output Level %d",numparam-prms::level0);
-			else if (numparam<prms::display)
+			else if (numparam<prms::num_params)
 				sprintf(name,"Output Phase %d",numparam-prms::phase0);
-			else if (numparam==prms::display)
-				sprintf(name,"LFO Position");
 			else name[0] = '\0';
 		}
 
 		void LFO::GetParamRange(int numparam,int &minval,int &maxval)
 		{
-			if(numparam==prms::wave) { minval = 0; maxval = 4;}
-			else if (numparam==prms::pwidth) {minval = 0; maxval = 200;}
+			if(numparam==prms::wave) { minval = 0; maxval = lfo_types::num_lfos-1;}
 			else if (numparam==prms::speed) {minval = 0; maxval = MAX_SPEED;}
 			else if (numparam <prms::prm0) {minval = -1; maxval = (MAX_BUSES*2)-1;}
 			else if (numparam <prms::level0)
@@ -857,8 +855,7 @@ namespace psycle {
 			}
 
 			else if (numparam <prms::phase0){minval = 0; maxval = MAX_DEPTH*2;}
-			else if (numparam <prms::display){minval = 0; maxval = MAX_PHASE; }
-			else if (numparam==prms::display){minval=0;maxval=LFO_SIZE; }
+			else if (numparam <prms::num_params){minval = 0; maxval = MAX_PHASE; }
 			else {minval=0;maxval=0; }
 
 		}
@@ -866,13 +863,11 @@ namespace psycle {
 		int LFO::GetParamValue(int numparam)
 		{
 			if(numparam==prms::wave)			return waveform;
-			else if(numparam==prms::pwidth)	return pWidth;
 			else if(numparam==prms::speed)	return lSpeed;
 			else if(numparam <prms::prm0)	return macOutput[numparam-prms::mac0];
 			else if(numparam <prms::level0)	return paramOutput[numparam-prms::prm0];
 			else if(numparam <prms::phase0)	return level[numparam-prms::level0];
-			else if(numparam <prms::display)	return phase[numparam-prms::phase0];
-			else if(numparam==prms::display)   return (int)lfoPos;
+			else if(numparam <prms::num_params)	return phase[numparam-prms::phase0];
 			else return 0;
 		}
 
@@ -884,23 +879,22 @@ namespace psycle {
 				{
 				case lfo_types::sine: sprintf(parVal, "sine"); break;
 				case lfo_types::tri: sprintf(parVal, "triangle"); break;
-				case lfo_types::sawup: sprintf(parVal, "saw up"); break;
-				case lfo_types::sawdown: sprintf(parVal, "saw down"); break;
+				case lfo_types::saw: sprintf(parVal, "saw"); break;
 				case lfo_types::square: sprintf(parVal, "square"); break;
 				default: throw;
 				}
 			} 
-			else if(numparam==prms::pwidth)
-			{
-				sprintf(parVal, "%i", pWidth-100);
-			}
 			else if(numparam==prms::speed)
 			{
 				if(lSpeed==0)
 					sprintf(parVal, "inf.");
 				else
 				{
-					sprintf(  parVal, "%.1f ms", 100 / float(lSpeed/float(MAX_SPEED))  );		
+					float speedInMs = 100.0f / (float)(lSpeed/(float)(MAX_SPEED));
+					if(speedInMs<1000.0f)
+						sprintf(  parVal, "%.1f ms", speedInMs);		
+					else
+						sprintf( parVal, "%.3f secs", speedInMs/1000.0f);
 				}
 			} 
 			else if(numparam<prms::prm0)
@@ -933,10 +927,8 @@ namespace psycle {
 			}
 			else if(numparam<prms::phase0)
 				sprintf(parVal,"%i%%", level[numparam-prms::level0]-MAX_DEPTH);
-			else if(numparam<prms::display)
+			else if(numparam<prms::num_params)
 				sprintf(parVal,"%.1f deg.", (phase[numparam-prms::phase0]-MAX_PHASE/2.0f)/float(MAX_PHASE/2.0f) * 180.0f);
-			else if(numparam==prms::display)
-				sprintf(parVal,"%.1f%%", lfoPos/(float)LFO_SIZE * 100);
 			else
 				parVal[0] = '\0';
 		}
@@ -947,11 +939,6 @@ namespace psycle {
 			{
 				waveform = value;
 				FillTable();
-				return true;
-			}
-			else if(numparam==prms::pwidth)	
-			{
-				pWidth = value;
 				return true;
 			}
 			else if(numparam==prms::speed)
@@ -1011,7 +998,7 @@ namespace psycle {
 				level[numparam-prms::level0] = value;
 				return true;
 			}
-			else if(numparam <prms::display)
+			else if(numparam <prms::num_params)
 			{
 				phase[numparam-prms::phase0] = value;
 				return true;
@@ -1019,8 +1006,9 @@ namespace psycle {
 			else return false;
 		}
 
-		int LFO::GenerateAudioInTicks(int startSample, int numSamples)
+		void LFO::PreWork(int numSamples)
 		{
+			Machine::PreWork(numSamples);
 //			cpu::cycles_type cost(cpu::cycles());
 
 			int maxVal=0, minVal=0;
@@ -1063,6 +1051,12 @@ namespace psycle {
 //			cost = cpu::cycles() - cost;
 //			work_cpu_cost(work_cpu_cost() + cost);
 		}
+		
+		int LFO::GenerateAudio(int numSamples)
+		{
+			_worked=true;
+			return numSamples;
+		}
 
 		bool LFO::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -1070,7 +1064,6 @@ namespace psycle {
 			pFile->Read(size);
 			pFile->Read(waveform);
 			pFile->Read(lSpeed);
-			pFile->Read(pWidth);
 			pFile->Read(macOutput);
 			pFile->Read(paramOutput);
 			pFile->Read(level);
@@ -1080,11 +1073,10 @@ namespace psycle {
 
 		void LFO::SaveSpecificChunk(RiffFile* pFile)
 		{
-			std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof pWidth + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
+			std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
 			pFile->Write(size);
 			pFile->Write(waveform);
 			pFile->Write(lSpeed);
-			pFile->Write(pWidth);
 			pFile->Write(macOutput);
 			pFile->Write(paramOutput);
 			pFile->Write(level);
@@ -1107,16 +1099,10 @@ namespace psycle {
 					waveTable[i] = waveTable[LFO_SIZE-i-1] = i/float(LFO_SIZE/4) - 1;
 				}
 				break;
-			case lfo_types::sawup:
+			case lfo_types::saw:
 				for (int i(0);i<LFO_SIZE;++i)
 				{
 					waveTable[i] = i/float((LFO_SIZE-1)/2) - 1;
-				}
-				break;
-			case lfo_types::sawdown:
-				for(int i(0);i<LFO_SIZE;++i)
-				{
-					waveTable[i] = (LFO_SIZE-i)/float((LFO_SIZE-1)/2) - 1;
 				}
 				break;
 			case lfo_types::square:

@@ -921,6 +921,8 @@ int Machine::GenerateAudio( int numsamples )
 	// reallocate events remaining in the buffer, This happens when soundcard buffer is bigger than STREAM_SIZE (machine buffer).
 	//	Since events are generated once per soundcard work(), events have to be reallocated for the next machine Work() call.
 	reallocateRemainingEvents(numsamples/Global::player().SamplesPerBeat());
+	
+	return processedsamples;
 }
 
 Song * Machine::song( )

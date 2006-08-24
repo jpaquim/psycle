@@ -187,6 +187,7 @@ namespace psycle
 //			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 //			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
+			return numSamples;
 		}
 
 		void Sampler::Stop(void)

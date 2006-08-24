@@ -164,7 +164,7 @@ inline const Plugin & Proxy::host() const throw() { return host_; }
 inline void Proxy::callback() throw()
     { assert((*this)()); plugin().pCB = host().GetCallback(); }
 
-inline const bool Proxy::operator()() const throw() { return plugin_; }
+inline const bool Proxy::operator()() const throw() { return !!plugin_; }
 inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
 {
   zapObject(this->plugin_,plugin);
@@ -186,7 +186,7 @@ inline int * Proxy::Vals() throw()
 inline void Proxy::Stop() throw()
 { assert((*this)()); plugin().Stop();  }
 inline bool Proxy::DescribeValue(char * txt, const int param, const int value) throw()
-{ assert((*this)()); plugin().DescribeValue(txt, param, value); }
+{ assert((*this)()); return plugin().DescribeValue(txt, param, value); }
 inline void Proxy::PutData(void * pData) throw()
 { assert((*this)()); plugin().PutData(pData);  }
 inline void Proxy::GetData(void * pData) throw()
