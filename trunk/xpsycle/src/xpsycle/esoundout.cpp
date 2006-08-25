@@ -148,6 +148,9 @@ namespace psycle
 				std::cout << "failed to open esound output '" + hostPort() + "': " + s << std::endl;
 				throw std::runtime_error("failed to open esound output '" + hostPort() + "': " + s);
 			}
+			{
+				int resume(esd_resume(output_));
+			}
 			deviceBuffer_ = esd_get_latency(output_);
 			//deviceBuffer_ *= bits_ / 8 * channels_;
 			if((fd_ = esd_play_stream_fallback(format, rate_, hostPort().c_str(), "psycle")) < 0)
