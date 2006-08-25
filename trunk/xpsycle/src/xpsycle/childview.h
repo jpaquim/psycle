@@ -68,7 +68,6 @@ public:
 
     void play();
     void playFromStart();
-    void enableSound();
 
     NTimer timer;
 
