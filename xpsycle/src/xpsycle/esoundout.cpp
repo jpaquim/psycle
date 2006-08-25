@@ -192,7 +192,7 @@ namespace psycle
 			threadRunning_ = true;
 			std::cout << "xpsycle: esound: device buffer: " << deviceBuffer_ << std::endl;
 			if (bits_ == 16) {
-				std::int16_t buf[deviceBuffer_ / 2];
+				std::int16_t buf[deviceBuffer_ / 2 / channels_];
 				int bytes(sizeof buf);
 				int samples(bytes / 2);
 				while(!killThread_)
@@ -202,7 +202,7 @@ namespace psycle
 					if(write(fd_, buf, bytes) < 0) std::cout << "xpsycle: esound: write failed.\n";
 				}
 			} else {
-				std::uint8_t buf[deviceBuffer_];
+				std::uint8_t buf[deviceBuffer_ / channels_];
 				int bytes(sizeof buf);
 				int samples(bytes);
 				while(!killThread_)
