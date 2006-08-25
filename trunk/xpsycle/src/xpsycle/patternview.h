@@ -129,23 +129,17 @@ class PatternView : public NPanel
       virtual void onKeyPress(const NKeyEvent & event);
       virtual void onKeyRelease(const NKeyEvent & event);
 
-      NRect repaintTrackArea         (int startLine,int endLine,int startTrack, int endTrack);
-      NPoint linesFromRepaint(const NRegion & repaintArea);
-      NPoint tracksFromRepaint(const NRegion & repaintArea);
-
       void copyBlock(bool cutit);
       void pasteBlock(int tx,int lx,bool mix,bool save = true);
       void deleteBlock();
       void transposeBlock(int trp);
       void scaleBlock(float factor);
 
-
     private:
 
       NPopupMenu* editPopup_;
       PatDlg* patDlg;
       PatternView* pView;
-      int dx_, dy_;
 
       bool doDrag_;
       bool doSelect_;
