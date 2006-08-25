@@ -198,14 +198,17 @@ namespace psycle
 			int deviceBufferSamples(deviceBuffer_ * (3 - channels_) * 44100 / rate_);
 			std::cout << "xpsycle: esound: device buffer: samples " << deviceBufferSamples << std::endl;
 			if (bits_ == 16) {
-				std::int16_t buf[deviceBufferSamples];
-				int bytes(sizeof buf);
-				int samples(bytes / 2);
+				std::cout << deviceBuffer_ << std::endl;
+				int bufSize = deviceBuffer_/sizeof(short);
+				signed short buf[bufSize]; /* really should be same size as latency buffer */
+				int newCount = bufSize*0.5; // stereo
 				while(!killThread_)
 				{
-					float const * input(callback_(callbackContext_, samples));
-					for (int i(0); i < samples; ++i) buf[i] = *input++;
-					if(write(fd_, buf, bytes) < 0) std::cout << "xpsycle: esound: write failed.\n";
+ 					float const * input(callback_(callbackContext_, newCount));
+					for (int i = 0; i < bufSize; i++) {
+						buf[i] = *input++;
+					}
+					if(write(fd_, buf, sizeof(buf)) < 0) std::cout << "xpsycle: esound: write failed.\n";
 				}
 			} else {
 				std::uint8_t buf[deviceBufferSamples];
