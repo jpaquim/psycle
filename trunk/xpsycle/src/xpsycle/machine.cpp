@@ -894,7 +894,7 @@ int Machine::GenerateAudio( int numsamples )
 		while ( processedsamples == nextevent  )
 		{
 			if (!workEvents.empty()) {
-				WorkEvent & workEvent = workEvents.front();
+				WorkEvent & workEvent = *workEvents.begin();
 				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
 				colsIt = playCol.find(workEvent.track());
 				if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
@@ -902,7 +902,7 @@ int Machine::GenerateAudio( int numsamples )
 				workEvents.pop_front();
 				if (!workEvents.empty())
 				{
-					WorkEvent & workEvent1 = workEvents.front();
+					WorkEvent & workEvent1 = *workEvents.begin();
 				//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
 					nextevent = workEvent1.beatOffset() * Global::player().SamplesPerBeat();
 				} else nextevent = numsamples+1;
