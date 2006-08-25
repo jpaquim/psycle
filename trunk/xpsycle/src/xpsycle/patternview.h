@@ -45,7 +45,7 @@ namespace psycle { namespace host {
 
 class Song;
 
-class PatternView : public CustomPatternView
+class PatternView : public NPanel
 {
     class Header: public NPanel {
     public:
@@ -110,20 +110,19 @@ class PatternView : public CustomPatternView
 		};
 
 
-    class PatternDraw : public NPanel {
+    class PatternDraw : public CustomPatternView {
     public:
+
       PatternDraw(PatternView* pPatternView);
       ~PatternDraw();
 
+			virtual int colWidth() const;
+			virtual int rowHeight() const;
+			virtual int lineNumber() const;
+			virtual int trackNumber() const;
 
-      virtual void paint(NGraphics* g);
-
-      void setDy(int dy);
-      void setDx(int dx);
-
-      int dy() const;
-      int dx() const;
-
+      virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+      
       virtual void onMousePress(int x, int y, int button);
       virtual void onMousePressed(int x, int y, int button);
       virtual void onMouseOver	(int x, int y);

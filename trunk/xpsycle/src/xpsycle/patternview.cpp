@@ -57,7 +57,7 @@ template<class T> inline T str_hex(const std::string &  value) {
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
 PatternView::PatternView( Song* song )
-  : CustomPatternView()
+  : NPanel()
 {
   _pSong = song;
 
@@ -744,7 +744,7 @@ PatternView::TweakGUI::~TweakGUI() {
 ///
 
 
-PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : dx_(0),dy_(0),doDrag_(0),doSelect_(0),NPanel()
+PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatternView(), dx_(0),dy_(0),doDrag_(0),doSelect_(0)
 {
   setTransparent(false);
   setBackground(Global::pConfig()->pvc_row);
@@ -810,22 +810,31 @@ PatternView::PatternDraw::~ PatternDraw( )
 {
 }
 
-void PatternView::PatternDraw::paint( NGraphics * g )
+int PatternView::PatternDraw::colWidth() const {
+  return pView->colWidth();
+}
+
+int PatternView::PatternDraw::rowHeight() const {
+	return pView->rowHeight();
+}
+
+int PatternView::PatternDraw::lineNumber() const {
+	return pView->lineNumber();
+}
+
+int PatternView::PatternDraw::trackNumber() const {
+	return pView->trackNumber();
+}
+
+void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack)
 {
   if (pView->pattern()) {
     TimeSignature signature;
-    NPoint lineArea = linesFromRepaint(g->repaintArea());
-    int startLine = lineArea.x();
-    int endLine   = lineArea.y();
-
-    NPoint trackArea = tracksFromRepaint(g->repaintArea());
-    int startTrack = trackArea.x();
-    int endTrack   = trackArea.y();
 
     g->setForeground(Global::pConfig()->pvc_rowbeat);
 
-    int trackWidth = ((endTrack+1) * pView->colWidth()) - dx();
-    int lineHeight = ((endLine +1) * pView->rowHeight()) - dy();
+    int trackWidth = ((endTrack+1) * colWidth()) - dx();
+    int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
     for (int y = startLine; y <= endLine; y++) {
       float position = y / (float) pView->pattern()->beatZoom();
@@ -833,15 +842,15 @@ void PatternView::PatternDraw::paint( NGraphics * g )
       if ( !(y % pView->beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
               g->setForeground(Global::pConfig()->pvc_row4beat);
-              g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
+              g->fillRect(0, y*rowHeight() - dy_,trackWidth, rowHeight());
               g->setForeground(Global::pConfig()->pvc_rowbeat);
           } else {
-            g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
+            g->fillRect(0, y* rowHeight() - dy_,trackWidth, rowHeight());
           }
         }
       } else  {
         g->setForeground(Global::pConfig()->pvc_playbar);
-        g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
+        g->fillRect(0, y*rowHeight() - dy_, trackWidth, rowHeight());
         g->setForeground(Global::pConfig()->pvc_rowbeat);
       }
     }
@@ -851,14 +860,14 @@ void PatternView::PatternDraw::paint( NGraphics * g )
     g->setForeground(pView->foreground());
 
     for (int y = startLine; y <= endLine; y++)
-      g->drawLine(0,y*pView->rowHeight() - dy_,trackWidth,y*pView->rowHeight()-dy_);
+      g->drawLine(0,y* rowHeight() - dy_,trackWidth,y* rowHeight()-dy_);
 
     for (int i = startTrack; i <= endTrack; i++) // 3px space at begin of trackCol
-      g->fillRect(i*pView->colWidth()-dx_,0,3,lineHeight);
+      g->fillRect(i*colWidth()-dx_,0,3,lineHeight);
 
     g->setForeground(pView->separatorColor());
     for (int i = startTrack; i <= endTrack; i++)  // col separators
-      g->drawLine(i*pView->colWidth()-dx_,0,i*pView->colWidth()-dx_,lineHeight);
+      g->drawLine(i* colWidth()-dx_,0,i* colWidth()-dx_,lineHeight);
 
     g->setForeground(pView->foreground());
 
@@ -867,11 +876,11 @@ void PatternView::PatternDraw::paint( NGraphics * g )
       for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
         switch (*it) {
         case 1:
-            g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,lineHeight);
+            g->drawLine(x*pView->colWidth()+COL-dx_,0,x*colWidth()+COL-dx_,lineHeight);
             COL+=2 * pView->cellWidth();
         break;
         case 2:
-            g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,lineHeight);
+            g->drawLine(x*colWidth()+COL-dx_,0,x*colWidth()+COL-dx_,lineHeight);
             COL+=4 * pView->cellWidth();
         break;
         }
@@ -879,38 +888,8 @@ void PatternView::PatternDraw::paint( NGraphics * g )
     }
 
     drawPattern(g,startLine,endLine,startTrack,endTrack);
-
-    g->setForeground(NColor(0,0,80));
-    int endTop     = pView->lineNumber() * pView->rowHeight() - dy();
-    int endHeight  = std::max(0, clientHeight() - endTop);
-    g->fillRect(0,endTop,clientWidth(),endHeight);
-
-    int endLeft     = pView->trackNumber() * pView->colWidth() - dx();
-    int endWidth    = std::max(0, clientWidth() - endLeft);
-    g->fillRect(endLeft,0,endWidth,clientHeight());
   }
 }
-
-void PatternView::PatternDraw::setDy( int dy )
-{
-  dy_ = dy;
-}
-
-int PatternView::PatternDraw::dy( ) const
-{
-  return dy_;
-}
-
-void PatternView::PatternDraw::setDx( int dx )
-{
-  dx_ = dx;
-}
-
-int PatternView::PatternDraw::dx( ) const
-{
-  return dx_;
-}
-
 
 void PatternView::PatternDraw::drawText(NGraphics* g, int track, int line, int eventOffset, const std::string & text )
 {
