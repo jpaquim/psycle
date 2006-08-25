@@ -55,9 +55,15 @@ namespace psycle {
 					virtual void onKeyPress(const NKeyEvent & event);
 					virtual void onKeyRelease(const NKeyEvent & event);
 
+					NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
+      		NPoint linesFromRepaint(const NRegion & repaintArea) const;
+      		NPoint tracksFromRepaint(const NRegion & repaintArea) const;
+
+
 			protected:
 
 					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+
 
 			private:
 
@@ -65,9 +71,6 @@ namespace psycle {
 
 					void init();
 
-					NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
-      		NPoint linesFromRepaint(const NRegion & repaintArea) const;
-      		NPoint tracksFromRepaint(const NRegion & repaintArea) const;
 
 		};
 	}
