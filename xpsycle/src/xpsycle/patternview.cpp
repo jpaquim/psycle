@@ -57,7 +57,7 @@ template<class T> inline T str_hex(const std::string &  value) {
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
 PatternView::PatternView( Song* song )
-  : NPanel()
+  : CustomPatternView()
 {
   _pSong = song;
 
