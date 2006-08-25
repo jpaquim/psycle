@@ -52,17 +52,17 @@ namespace psycle
 				
 			private:
 				unsigned int channels_;
-				int channelsFlag() throw(std::exception);
+				int channelsFlag();
 
 				unsigned int bits_;
-				int bitsFlag() throw(std::exception);
+				int bitsFlag();
 				
 				unsigned int rate_;
 				
 				void setDefaults();
 				
-				void open() throw(std::exception);
-				void close() throw(std::exception);
+				int open();
+				int close();
 				std::string host_;
 				int port_;
 				std::string hostPort();

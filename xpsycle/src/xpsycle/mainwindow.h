@@ -207,6 +207,7 @@ private:
     void updateComboGen();
     void appNew();
 
+		void enableSound( );
     void closePsycle();  // last but not least, all has an end
 
     void onTimer();
