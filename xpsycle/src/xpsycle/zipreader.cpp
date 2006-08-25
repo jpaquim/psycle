@@ -1,4 +1,3 @@
-#include <stdio.h>
 /*
  * zipreader
  * a library for reading zipfiles
@@ -21,6 +20,7 @@
  */
 #include "zipreader.h"
 
+#include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -337,24 +337,21 @@ static int _zm_inflate_fin(zipreader_file *f, unsigned int *xcrc32, int outfd, v
 static int _zm_inflate(zipreader_file *f, unsigned int *xcrc32, int outfd, void *buf, size_t len, void *extra)
 {
 	struct deflate_memory *dm;
-	int flush;
 	int r;
 
 	dm = (struct deflate_memory *)extra;
 	dm->str.next_in = (Bytef*)buf;
 	dm->str.avail_in = len;
 
-	flush = Z_NO_FLUSH;
 	while (dm->str.avail_in > 0) {
 		dm->str.next_out = (Bytef*)dm->buf;
 		dm->str.avail_out = sizeof(dm->buf);
-		r = inflate(&dm->str, flush);
+		r = inflate(&dm->str, Z_SYNC_FLUSH);
 		if (r != Z_OK && r != Z_STREAM_END) return 0;
 		if (sizeof(dm->buf) != dm->str.avail_out) {
 			_zm_write(f,xcrc32,outfd, dm->buf, sizeof(dm->buf)-dm->str.avail_out, 0);
 		}
-		if (flush==Z_FINISH && r == Z_STREAM_END) return 1;
-		flush = Z_FINISH;
+		if (r == Z_STREAM_END) return 1;
 	}
 	return 1;
 }
@@ -378,5 +375,3 @@ int zipreader_extract(zipreader_file *f, int outfd)
 	};
 	return 0;
 }
-
-
