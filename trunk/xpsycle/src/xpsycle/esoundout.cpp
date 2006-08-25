@@ -27,6 +27,7 @@
 #include <sstream>
 #include <cassert>
 #include <cerrno>
+#include <cstdint>
 namespace psycle
 {
 	namespace host
@@ -60,7 +61,7 @@ namespace psycle
 		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)
 		{
 			#if !defined NDEBUG
-				std::cout << "initializing esound\n";
+				std::cout << "xpsycle: esound: initializing\n";
 			#endif
 			assert(!threadRunning_);
 			callback_ = callback;
@@ -164,7 +165,7 @@ namespace psycle
 		bool ESoundOut::Enable(bool e)
 		{		
 			#if !defined NDEBUG
-				std::cout << (e ? "en" : "dis") << "abling esound\n";
+				std::cout << "xpsycle: esound: " << (e ? "en" : "dis") << "abling\n";
 			#endif
 			bool threadStarted = false;
 			if (e && !threadRunning_) {
@@ -189,35 +190,26 @@ namespace psycle
 		void ESoundOut::audioOutThread()
 		{
 			threadRunning_ = true;
-
+			std::cout << "xpsycle: esound: device buffer: " << deviceBuffer_ << std::endl;
 			if (bits_ == 16) {
-				std::cout << deviceBuffer_ << std::endl;
-				short buf[deviceBuffer_]; /* really should be same size as latency buffer */
-				int count = sizeof(buf);
-	
+				std::int16_t buf[deviceBuffer_];
+				int bytes(sizeof buf);
+				int samples(bytes / 2);
 				while(!killThread_)
 				{
-					//int newCount =  count/(2*channels_);
-					int newCount = deviceBuffer_;// / (2*channels_);
- 					float const * input(callback_(callbackContext_, newCount));
-					for (int i = 0; i < newCount; i++) {
-						buf[i] = *input++;
-					}
-					write(fd_, buf,  sizeof(buf));
+					float const * input(callback_(callbackContext_, samples));
+					for (int i(0); i < samples; ++i) buf[i] = *input++ * 4; // * 4 because psycle's normalized amplitude is 16384
+					if(write(fd_, buf, bytes) < 0) std::cout << "xpsycle: esound: write failed.\n";
 				}
 			} else {
-				unsigned char buf[8192];
-				int count = sizeof(buf);
-	
+				std::uint8_t buf[deviceBuffer_];
+				int bytes(sizeof buf);
+				int samples(bytes);
 				while(!killThread_)
 				{
-          /*int newCount = count/ channels_;
-					float const * input(callback_(callbackContext_, newCount));
-					for (int i = 0; i < count; i++) {
-						buf[i] = *input++;
-						buf[i] ^= 0x80;
-					}
-					write(fd_, buf, sizeof(buf));*/
+					float const * input(callback_(callbackContext_, samples));
+					for (int i(0); i < samples; ++i) buf[i] = *input++ / 64 + 128; // / 64 because psycle's normalized amplitude is 16384
+					if(write(fd_, buf, bytes) < 0) std::cout << "xpsycle: esound: write failed.\n";
 				}
 			}
 			close();
