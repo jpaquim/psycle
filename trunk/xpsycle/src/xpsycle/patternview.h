@@ -23,6 +23,7 @@
 #include "patdlg.h"
 #include "song.h"
 #include "singlepattern.h"
+#include "custompatternview.h"
 #include <ngrs/npage.h>
 #include <ngrs/npoint3d.h>
 #include <ngrs/npopupmenu.h>
@@ -44,7 +45,7 @@ namespace psycle { namespace host {
 
 class Song;
 
-class PatternView : public NPanel
+class PatternView : public CustomPatternView
 {
     class Header: public NPanel {
     public:
