@@ -50,7 +50,6 @@ namespace psycle
 		ESoundOut::~ESoundOut()
 		{
 			Enable(false);
-			close();
 		}
 
 		AudioDriverInfo ESoundOut::info( ) const
