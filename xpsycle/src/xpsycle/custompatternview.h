@@ -26,13 +26,51 @@
 @author Stefan Nattkemper
 */
 
-class CustomPatternView : public NPanel
-{
-public:
-    CustomPatternView();
+namespace psycle {
+	namespace host	{	
 
-    ~CustomPatternView();
+		class CustomPatternView : public NPanel
+		{
+			public:
+					CustomPatternView();
 
-};
+					~CustomPatternView();
+
+					virtual int colWidth() const;
+					virtual int rowHeight() const;
+					virtual int lineNumber() const;
+					virtual int trackNumber() const;
+
+      		void setDx(int dx);
+					int dx() const;
+					void setDy(int dy);
+					int dy() const;
+
+					virtual void paint(NGraphics* g);
+
+					virtual void onMousePress(int x, int y, int button);
+					virtual void onMousePressed(int x, int y, int button);
+					virtual void onMouseOver	(int x, int y);
+
+					virtual void onKeyPress(const NKeyEvent & event);
+					virtual void onKeyRelease(const NKeyEvent & event);
+
+			protected:
+
+					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+
+			private:
+
+					int dx_, dy_;
+
+					void init();
+
+					NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
+      		NPoint linesFromRepaint(const NRegion & repaintArea) const;
+      		NPoint tracksFromRepaint(const NRegion & repaintArea) const;
+
+		};
+	}
+}
 
 #endif
