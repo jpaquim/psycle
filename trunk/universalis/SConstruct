@@ -80,8 +80,15 @@ universalis = packageneric.module(
 	build_depends = [diversalis]
 )
 import os.path
-universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp'))
-universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
+if False:
+	universalis_sources = packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp')
+	universalis.add_sources(universalis_sources)
+	universalis_headers = packageneric.find('src', 'universalis', '*.hpp')
+	universalis_sources.append(universalis_headers)
+	source_package.add_files(universalis_sources)
+else:
+	universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp'))
+	universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
 universalis.add_include_path('src')
 universalis.add_include_path('tmp')
 if universalis.name() in BUILD_TARGETS:
@@ -102,11 +109,9 @@ if True: #universalis_package.name() + '.pc' in BUILD_TARGETS:
 
 # install
 if False:
-	installation_paths = packageneric.installation_paths()
-	packageneric.environment().install('install', installation_paths.lib(), universalis.libraries())
-	packageneric.environment().install('install', installation_paths.include(), universalis.headers())
-	#packageneric.environment().alias('install', installation_paths.lib())
-	#packageneric.environment().alias('install', installation_paths.include())
+	packageneric.install('lib', universalis.targets())
+	packageneric.install('include', universalis_headers)
+	packageneric.install('pkg-config', universalis_package.targets())
 
 # debian
 
