@@ -198,7 +198,7 @@ namespace psycle
 				while(!killThread_)
 				{
 					float const * input(callback_(callbackContext_, samples));
-					for (int i(0); i < samples; ++i) buf[i] = *input++ * 4; // * 4 because psycle's normalized amplitude is 16384
+					for (int i(0); i < samples; ++i) buf[i] = *input++ * 2; // * 4 because psycle's normalized amplitude is 16384
 					if(write(fd_, buf, bytes) < 0) std::cout << "xpsycle: esound: write failed.\n";
 				}
 			} else {
@@ -208,7 +208,7 @@ namespace psycle
 				while(!killThread_)
 				{
 					float const * input(callback_(callbackContext_, samples));
-					for (int i(0); i < samples; ++i) buf[i] = *input++ / 64 + 128; // / 64 because psycle's normalized amplitude is 16384
+					for (int i(0); i < samples; ++i) buf[i] = *input++ / 128 + 128; // / 64 because psycle's normalized amplitude is 16384
 					if(write(fd_, buf, bytes) < 0) std::cout << "xpsycle: esound: write failed.\n";
 				}
 			}
