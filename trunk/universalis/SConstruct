@@ -147,3 +147,7 @@ if 'debian/control' in BUILD_TARGETS:
 	#debian_control = packageneric.environment().Value(debian.control())
 	print debian.control()
 
+import SCons.Builder
+class DebianControlBuilder(SCons.Builder.BuilderBase):
+	def __init__(self):
+		SCons.Builder.__init__(self)
