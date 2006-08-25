@@ -151,6 +151,7 @@ namespace psycle
 			{
 				int resume(esd_resume(output_));
 			}
+			esd_print_all_info(esd_get_all_info(output_));
 			deviceBuffer_ = esd_get_latency(output_);
 			//deviceBuffer_ *= bits_ / 8 * channels_;
 			if((fd_ = esd_play_stream_fallback(format, rate_, hostPort().c_str(), "psycle")) < 0)
