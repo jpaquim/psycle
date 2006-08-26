@@ -20,7 +20,7 @@
 #ifndef NHINT_H
 #define NHINT_H
 
-#include <nwindow.h>
+#include "nwindow.h"
 
 /**
 @author Stefan Nattkemper
