@@ -28,6 +28,7 @@
 
 class NListBox;
 class NObjectInspector;
+class NItemEvent;
 
 namespace psycle {
 	namespace host	{	
@@ -46,10 +47,10 @@ namespace psycle {
 
 				NListBox* driverLbx;
 				Configuration* config_;
-
 				NObjectInspector* objInspector_;
 
 				void initDriverBox();
+				void onItemSelected(NItemEvent* ev);
 
 		};
 

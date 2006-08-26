@@ -19,11 +19,13 @@
  ***************************************************************************/
 #include "audioconfigdlg.h"
 #include "configuration.h"
+#include "audiodriver.h"
 #include <ngrs/nlistbox.h>
 #include <ngrs/nitem.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nobjectinspector.h>
+#include <ngrs/nitemevent.h>
 
 namespace psycle {
 	namespace host	{	
@@ -44,6 +46,7 @@ namespace psycle {
 				driverPanel->add(new NLabel("Select A Driver"), nAlTop );
 				driverLbx = new NListBox( );
 					driverLbx->setPreferredSize(100,100);
+					driverLbx->itemSelected.connect(this, & AudioConfigDlg::onItemSelected);
 				driverPanel->add( driverLbx , nAlClient);
 			pane()->add( driverPanel, nAlLeft );
 
@@ -83,6 +86,17 @@ namespace psycle {
 			}
 		}
 
+		void AudioConfigDlg::onItemSelected( NItemEvent * ev )
+		{
+      std::map<std::string, AudioDriver*> & driverMap =  config_->driverMap();
+			std::map<std::string, AudioDriver*>::iterator it = driverMap.find( ev->text() );
+			if ( it != driverMap.end() ) {
+				AudioDriver* driver = it->second;
+				objInspector_->setControlObject( driver );
+				objInspector_->repaint();
+			}
+		}
+
 		int AudioConfigDlg::onClose( )
 		{
 				setVisible(false);
@@ -91,6 +105,8 @@ namespace psycle {
 
 	}
 }
+
+
 
 
 
