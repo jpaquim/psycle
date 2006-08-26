@@ -303,7 +303,6 @@ int PatternView::colWidth( ) const
     break;
     }
   }
-
   return std::max(header->skinColWidth(),col);
 }
 
@@ -323,11 +322,7 @@ int PatternView::cellWidth( ) const
 
 int PatternView::lineNumber( ) const
 {
-  if (pattern_)
-    return pattern_->beatZoom() * pattern_->beats();
-  else
-   return 0;
-
+  return ( pattern_) ? pattern_->beatZoom() * pattern_->beats() : 0;  
 }
 
 int PatternView::playPos( ) const
