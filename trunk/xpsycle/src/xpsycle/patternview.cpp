@@ -744,7 +744,7 @@ PatternView::TweakGUI::~TweakGUI() {
 ///
 
 
-PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatternView(), doDrag_(0),doSelect_(0)
+PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatternView()
 {
   setTransparent(false);
   setBackground(Global::pConfig()->pvc_row);
@@ -855,7 +855,7 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
       }
     }
 
-    drawSelBg(g,selection_);
+    drawSelBg(g,selection());
 
     g->setForeground(pView->foreground());
 
@@ -993,6 +993,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 
 void PatternView::PatternDraw::onMousePress( int x, int y, int button )
 {
+  CustomPatternView::onMousePress( x, y, button );
   if (button == 6) {
       std::cout << "wheel mouse scroll left" << std::endl;
       // wheel mouse scroll left
@@ -1025,19 +1026,12 @@ void PatternView::PatternDraw::onMousePress( int x, int y, int button )
   if (button == 3) {
       editPopup_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
       editPopup_->setVisible(true);
-  } else {
-    clearOldSelection();
-    NPoint3D p = intersectCell(x,y);
-    startSel(p);
   }
 }
 
 void PatternView::PatternDraw::onMouseOver( int x, int y )
 {
-  if (doDrag_) {
-    NPoint3D p = intersectCell(x,y);
-    doSel(p);
-  }
+  CustomPatternView::onMouseOver( x, y);
 }
 
 char inline hex_value(char c) { if(c >= 'A') return 10 + c - 'A'; else return c - '0'; }
@@ -1045,10 +1039,10 @@ char inline hex_value(char c) { if(c >= 'A') return 10 + c - 'A'; else return c 
 void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 {
   if (button==1) {
-    if (!doSelect_) pView->setCursor(intersectCell(x,y));
-    pView->repaint();
-    endSel();
+    if ( !doSelect() ) pView->setCursor(intersectCell(x,y));
+    pView->repaint();    
   }
+  CustomPatternView::onMousePressed(x,y,button);
 }
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
@@ -1056,9 +1050,9 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
  ///\todo: Verify the correct usage of InputHandler->getEnumCodeByKey, concretely in relation to StateMasks.
   if ( !pView->pattern() ) return;
 
-  if (doDrag_ != (NApp::system().keyState() & ShiftMask) && 
+  if (doDrag() != (NApp::system().keyState() & ShiftMask) && 
                   !(NApp::system().keyState() & ControlMask)) {
-      if (!doDrag_) {
+      if (!doDrag() ) {
         clearOldSelection();
         startSel(pView->cursor());
         selCursor = pView->cursor();
@@ -1429,12 +1423,6 @@ NPoint3D PatternView::PatternDraw::intersectCell( int x, int y )
   return NPoint3D(track,line,cell);
 }
 
-void PatternView::PatternDraw::clearOldSelection( )
-{
-  NSize oldSel = selection_;  
-  selection_.setSize(0,0,0,0);
-  repaintBlock( selection_ );
-}
 
 void PatternView::PatternDraw::onPopupBlockCopy( NButtonEvent * ev )
 {
@@ -1450,13 +1438,13 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
 {  
 	isBlockCopied=true;
 	pasteBuffer.clear();
-	SinglePattern copyPattern = pView->pattern()->block( selection_.left(), selection_.right(), selection_.top(), selection_.bottom() );
+	SinglePattern copyPattern = pView->pattern()->block( selection().left(), selection().right(), selection().top(), selection().bottom() );
 	
-	float start = selection_.top()    / (float) pView->pattern()->beatZoom();
-	float end   = selection_.bottom() / (float) pView->pattern()->beatZoom();
+	float start = selection().top()    / (float) pView->pattern()->beatZoom();
+	float end   = selection().bottom() / (float) pView->pattern()->beatZoom();
 
   std::string xml = "<patsel beats='" + stringify( end - start ); 
-	xml+= "' tracks='"+ stringify( selection_.right() - selection_.left() );
+	xml+= "' tracks='"+ stringify( selection().right() - selection().left() );
 	xml+= "'>"; 
 	xml+= copyPattern.toXml();
   xml+= "</patsel>";
@@ -1465,14 +1453,11 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
 
 
 	if (cutit) {
-		pView->pattern()->deleteBlock( selection_.left(), selection_.right(), selection_.top(), selection_.bottom() );
+		pView->pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
 		pView->repaint();
 	}
 }
 
-void PatternView::PatternDraw::repaintBlock( const NSize & block ) {
-  window()->repaint(this,repaintTrackArea(block.top(),block.bottom(),block.left(), block.right()));
-}
 
 void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
 {
@@ -1665,14 +1650,14 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
 
 void PatternView::PatternDraw::transposeBlock(int trp)
 {
-	int right = selection_.right();
-	int left =  selection_.left();
-	double top = selection_.top() / (double)pView->beatZoom();
-	double bottom = selection_.bottom() / (double)pView->beatZoom();
+	int right = selection().right();
+	int left =  selection().left();
+	double top = selection().top() / (double)pView->beatZoom();
+	double bottom = selection().bottom() / (double)pView->beatZoom();
 
 	pView->pattern()->transposeBlock(left, right, top, bottom, trp);
 
-	window()->repaint(this,repaintTrackArea(selection_.top(),selection_.bottom(),left,right));
+	window()->repaint(this,repaintTrackArea(selection().top(),selection().bottom(),left,right));
 //   }
 }
 
@@ -1755,79 +1740,6 @@ void PatternView::PatternDraw::onPopupTranspose_12( NButtonEvent * ev )
 	transposeBlock(-12);
 }
 
-void PatternView::PatternDraw::startSel(const NPoint3D & p)
-{
-  selStartPoint_ = p;
-  selection_.setSize( p.x(), p.y(), p.x(), p.y() );
-  
-  oldSelection_ = selection_;
-  doDrag_ = true;
-  doSelect_ = false;
-}
-
-void PatternView::PatternDraw::endSel( )
-{
-  doDrag_ = false;
-  doSelect_ = false;
-}
-
-void PatternView::PatternDraw::doSel(const NPoint3D & p )
-{
-  doSelect_=true;
-    if (p.x() < selStartPoint_.x()) {
-        selection_.setLeft(std::max(p.x(),0)); 
-        int startTrack  = dx() / pView->colWidth();
-        if (selection_.left() < startTrack && startTrack > 0) {
-            pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
-        }
-    }
-    else
-    if (p.x() == selStartPoint_.x()) {
-      selection_.setLeft (std::max(p.x(),0));
-      selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
-    } else
-    if (p.x() > selStartPoint_.x()) {
-        selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
-        int startTrack  = dx() / pView->colWidth();
-        int trackCount  = clientWidth() / pView->colWidth();
-        if (selection_.right() > startTrack + trackCount) {
-            pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
-        } else
-        if (selection_.right() < startTrack && startTrack > 0) {
-            pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
-        }
-    }
-    if (p.y() < selStartPoint_.y()) {
-        selection_.setTop(std::max(p.y(),0));
-        int startLine  = dy() / pView->rowHeight();
-        if (selection_.top() < startLine && startLine >0) {
-            pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
-          }
-    } else
-    if (p.y() == selStartPoint_.y()) {
-      selection_.setTop (p.y());
-      selection_.setBottom(p.y()+1);
-    } else
-    if (p.y() > selStartPoint_.y()) {
-          selection_.setBottom(std::min(p.y()+1,pView->lineNumber()));
-          int startLine  = dy() / pView->rowHeight();
-          int lineCount  = clientHeight() / pView->rowHeight();
-          if (selection_.bottom() > startLine + lineCount) {
-            pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
-          } else
-          if (selection_.bottom() < startLine && startLine >0) {
-            pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
-          }
-    }
-
-    if (oldSelection_ != selection_) {
-      // these is totally unoptimized todo repaint only new area
-      NSize clipBox = selection_.clipBox(oldSelection_);
-      NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
-      window()->repaint(this,r);
-      oldSelection_ = selection_;
-    }
-}
 
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
 	if ( !pView->pattern() ) return;
@@ -1858,10 +1770,10 @@ void PatternView::blockTranspose( int trp )
 
 void PatternView::PatternDraw::deleteBlock( )
 {
-    int right = selection_.right();
-    int left = selection_.left();
-    double top = selection_.top() / (double) pView->beatZoom();
-    double bottom = selection_.bottom() / (double) pView->beatZoom();
+    int right = selection().right();
+    int left = selection().left();
+    double top = selection().top() / (double) pView->beatZoom();
+    double bottom = selection().bottom() / (double) pView->beatZoom();
 
     pView->pattern()->deleteBlock(left, right, top, bottom);
     repaint();
@@ -1922,12 +1834,12 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
 
 void PatternView::PatternDraw::scaleBlock(float factor )
 {
-	int right = selection_.right();
-	int left =  selection_.left();
-	double top = selection_.top() / (double)pView->beatZoom();
-	double bottom = selection_.bottom() / (double)pView->beatZoom();
+	int right = selection().right();
+	int left =  selection().left();
+	double top = selection().top() / (double)pView->beatZoom();
+	double bottom = selection().bottom() / (double)pView->beatZoom();
 	pView->pattern()->scaleBlock(left, right, top, bottom, factor);
-	window()->repaint(this,repaintTrackArea(selection_.top(),selection_.bottom()*std::max(factor,1.0f),left,right));
+	window()->repaint(this,repaintTrackArea(selection().top(),selection().bottom()*std::max(factor,1.0f),left,right));
 	pView->pattern()->clearEmptyLines();
 }
 

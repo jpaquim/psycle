@@ -25,7 +25,6 @@
 #include "singlepattern.h"
 #include "custompatternview.h"
 #include <ngrs/npage.h>
-#include <ngrs/npoint3d.h>
 #include <ngrs/npopupmenu.h>
 #include <ngrs/nscrollbar.h>
 #include <ngrs/nxmlparser.h>
@@ -135,20 +134,18 @@ class PatternView : public NPanel
       void transposeBlock(int trp);
       void scaleBlock(float factor);
 
+		protected:
+
+				virtual NPoint3D intersectCell( int x, int y );
+
+
     private:
 
       NPopupMenu* editPopup_;
       PatDlg* patDlg;
       PatternView* pView;
 
-      bool doDrag_;
-      bool doSelect_;
-      bool doShiftSel_;
-
-      NSize selection_;
-      NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
-      NPoint3D selStartPoint_;
-      NPoint3D selCursor; // for keyboard drag
+			NPoint3D selCursor; // for keyboard drag
 
       void drawText(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
       void drawData(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
@@ -158,15 +155,11 @@ class PatternView : public NPanel
       void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
       void drawSelBg(NGraphics* g, const NSize & selArea);
 
-      NPoint3D intersectCell(int x, int y);
-      void clearOldSelection();
+      
 
       bool isBlockCopied;
       NSize blockLastOrigin;
 
-      void startSel(const NPoint3D & p);
-      void doSel(const NPoint3D & p);
-      void endSel();
 
       void onPopupBlockCopy(NButtonEvent* ev);
       void onPopupBlockCut(NButtonEvent* ev);
@@ -184,8 +177,6 @@ class PatternView : public NPanel
       float lastXmlLineBeatPos;
 			int xmlTracks;
 			float xmlBeats;
-
-			void repaintBlock( const NSize & block );
 
     };
 

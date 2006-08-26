@@ -21,6 +21,7 @@
 #define CUSTOMPATTERNVIEW_H
 
 #include <ngrs/npanel.h>
+#include <ngrs/npoint3d.h>
 
 /**
 @author Stefan Nattkemper
@@ -55,12 +56,26 @@ namespace psycle {
 					virtual void onKeyPress(const NKeyEvent & event);
 					virtual void onKeyRelease(const NKeyEvent & event);
 
+					void repaintBlock( const NSize & block );
 					NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
       		NPoint linesFromRepaint(const NRegion & repaintArea) const;
       		NPoint tracksFromRepaint(const NRegion & repaintArea) const;
 
+					const NSize & selection() const;
+					void clearOldSelection();
+
 
 			protected:
+
+					virtual NPoint3D intersectCell(int x, int y);
+					virtual void startSel(const NPoint3D & p);
+					virtual void doSel(const NPoint3D & p);
+					virtual void endSel();
+
+
+					const NPoint3D & selStartPoint() const;
+					bool doSelect() const;
+					bool doDrag() const;
 
 					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 
@@ -68,6 +83,15 @@ namespace psycle {
 			private:
 
 					int dx_, dy_;
+
+					// selection variables
+					bool doDrag_;
+					bool doSelect_;
+					bool doShiftSel_;
+					NSize selection_;
+					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
+					NPoint3D selStartPoint_;				
+
 
 					void init();
 
