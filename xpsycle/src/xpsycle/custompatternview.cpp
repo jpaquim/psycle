@@ -19,11 +19,13 @@
  ***************************************************************************/
 #include "custompatternview.h"
 
+#include <ngrs/nwindow.h>
+
 namespace psycle {
 	namespace host	{	
 
 		CustomPatternView::CustomPatternView()
-			 : NPanel()
+			 : NPanel(), doDrag_(0),doSelect_(0)
 		{
 			init();
 		}
@@ -98,15 +100,24 @@ namespace psycle {
 		}
 
 		void CustomPatternView::onMousePress(int x, int y, int button) {
-
+			if ( button == 1) {
+    		clearOldSelection();
+    		NPoint3D p = intersectCell(x,y);
+    		startSel(p);
+  		}
 		}
 
 		void CustomPatternView::onMousePressed(int x, int y, int button) {
-
+			if (button == 1) {
+				endSel(); 
+			}
 		}
 
 		void CustomPatternView::onMouseOver	(int x, int y) {
-
+			if (doDrag_) {
+    		NPoint3D p = intersectCell(x,y);
+    		doSel(p);
+  		}
 		}
 
 		void CustomPatternView::onKeyPress(const NKeyEvent & event) {
@@ -117,6 +128,11 @@ namespace psycle {
 
 		}
 		
+		void CustomPatternView::repaintBlock( const NSize & block ) {
+  		window()->repaint(this,repaintTrackArea(block.top(),block.bottom(),block.left(), block.right()));
+		}
+
+
 
 		NRect CustomPatternView::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {
 			int top    = startLine    * rowHeight()  + absoluteTop()  - dy_;
@@ -167,6 +183,107 @@ namespace psycle {
 			// the end
 			end         = std::min(end - endOff, trackNumber()-1);
 			return NPoint(start,end);
+		}
+
+		bool CustomPatternView::doSelect() const {
+			return doSelect_;
+		}
+
+		bool CustomPatternView::doDrag() const {
+			return doDrag_;
+		}
+
+		void CustomPatternView::clearOldSelection( )
+		{
+			NSize oldSel = selection_;  
+  		selection_.setSize(0,0,0,0);
+  		repaintBlock( selection_ );
+		}
+
+		const NSize & CustomPatternView::selection() const {
+			return selection_;
+		}
+
+		void CustomPatternView::startSel(const NPoint3D & p)
+		{
+			selStartPoint_ = p;
+			selection_.setSize( p.x(), p.y(), p.x(), p.y() );
+  
+			oldSelection_ = selection_;
+			doDrag_ = true;
+			doSelect_ = false;
+		}
+
+		void CustomPatternView::endSel( )
+		{
+			doDrag_ = false;
+			doSelect_ = false;
+		}
+
+		void CustomPatternView::doSel(const NPoint3D & p )
+		{
+			doSelect_=true;
+			if (p.x() < selStartPoint().x()) {
+        selection_.setLeft(std::max(p.x(),0)); 
+        int startTrack  = dx() / colWidth();
+        //if (selection_.left() < startTrack && startTrack > 0) {
+        //    pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
+       // }
+    	}
+			else
+			if (p.x() == selStartPoint_.x()) {
+      	selection_.setLeft (std::max(p.x(),0));
+				selection_.setRight(std::min(p.x()+1, trackNumber()));
+			} else
+			if (p.x() > selStartPoint_.x()) {
+				selection_.setRight(std::min(p.x()+1, trackNumber()));
+				int startTrack  = dx() / colWidth();
+				int trackCount  = clientWidth() / colWidth();
+			//	if (selection_.right() > startTrack + trackCount) {
+		//			pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
+			//	}// else
+			//	if (selection_.right() < startTrack && startTrack > 0) {
+			//		pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
+			//	}
+			}
+			if (p.y() < selStartPoint_.y()) {
+				selection_.setTop(std::max(p.y(),0));
+				int startLine  = dy() / rowHeight();
+				//if (selection_.top() < startLine && startLine >0) {
+				//	pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
+				//}
+			} else
+			if (p.y() == selStartPoint_.y()) {
+				selection_.setTop (p.y());
+				selection_.setBottom(p.y()+1);
+			} else
+			if (p.y() > selStartPoint_.y()) {
+				selection_.setBottom(std::min(p.y()+1, lineNumber()));
+				int startLine  = dy() / rowHeight();
+				int lineCount  = clientHeight() / rowHeight();
+				//if (selection_.bottom() > startLine + lineCount) {
+				//	pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
+				//} else
+				//if (selection_.bottom() < startLine && startLine >0) {
+				//	pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
+				//}
+			}
+
+			if (oldSelection_ != selection_) {
+				// these is totally unoptimized todo repaint only new area
+				NSize clipBox = selection_.clipBox(oldSelection_);
+				NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
+				window()->repaint(this,r);
+				oldSelection_ = selection_;
+			}
+		}
+
+		const NPoint3D & CustomPatternView::selStartPoint() const {
+			return selStartPoint_;
+		}
+
+		NPoint3D CustomPatternView::intersectCell( int x, int y ){
+			return NPoint3D(0,0,0);
 		}
 
 	} // end of host namespace
