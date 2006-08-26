@@ -496,7 +496,7 @@ void SequencerGUI::SequencerLine::resize( )
     item->setPosition(d2i(sView->beatPxLength() * tickPosition),5, (item->endOffset()-item->start()) * sView->beatPxLength(),20);
   }
 }
-
+ 
 std::vector<SequencerItem*> SequencerGUI::SequencerLine::itemsByPattern( SinglePattern * pattern )
 {
   std::vector<SequencerItem*> list;
