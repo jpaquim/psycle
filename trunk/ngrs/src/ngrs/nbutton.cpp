@@ -25,6 +25,7 @@
 #include "nframeborder.h"
 #include "nbutton.h"
 #include "nproperty.h"
+#include "nhint.h"
 
 using namespace std;
 
@@ -151,7 +152,6 @@ void NButton::init( )
   setSkin(btnFlat_);
 
   hint = 0;
-  hintLbl = 0;
 
   // inits the repeat Mode for the button .. at default off
   repeatMode_ = false;
@@ -180,16 +180,11 @@ void NButton::setDown( bool on )
 void NButton::setHint( const std::string & text )
 {
   if (hint==0) {
-     hint = new NWindow();
-       hintLbl = new NLabel();
-         hint->pane()->setBackground(NColor(0xFF,0xFF,0xD0));
-         hint->pane()->setBorder(NFrameBorder());
-         hint->pane()->setSpacing(NSize(2,2,2,2));
-         hint->setDecoration(false);
-       hint->pane()->add(hintLbl, nAlClient);
+     hint = new NHint();
+       hint->setText( text );
      add(hint);
-  }
-  hintLbl->setText(text);
+  } else
+  hint->setText(text);
 }
 
 void NButton::setRepeatMode( bool on )
