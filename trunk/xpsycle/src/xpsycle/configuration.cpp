@@ -119,26 +119,26 @@ void Configuration::setSkinDefaults( )
 		AudioDriver* driver = 0;
 		driver = new AudioDriver;
 		_pSilentDriver = driver;
-		driverMap[ driver->info().name() ] = driver;
+		driverMap_[ driver->info().name() ] = driver;
 		#if !defined XPSYCLE__NO_ALSA
 			driver = new AlsaOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
-			driverMap[ driver->info().name() ] = driver;
+			driverMap_[ driver->info().name() ] = driver;
 		#endif
 		#if !defined XPSYCLE__NO_JACK
 			driver = new JackOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
-			driverMap[ driver->info().name() ] = driver;
+			driverMap_[ driver->info().name() ] = driver;
 		#endif
 		#if !defined XPSYCLE__NO_GSTREAMER
 			driver = new GStreamerOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
-			driverMap[ driver->info().name() ] = driver;
+			driverMap_[ driver->info().name() ] = driver;
 		#endif
 		#if !defined XPSYCLE__NO_ESOUND			
 			driver = new ESoundOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
-			driverMap[ driver->info().name() ] = driver;
+			driverMap_[ driver->info().name() ] = driver;
 		#endif
 	}
 
@@ -175,9 +175,9 @@ void Configuration::setSkinDefaults( )
 
 void Configuration::setDriverByName( const std::string & driverName )
 {
-	std::map< std::string, AudioDriver*>::iterator it = driverMap.begin();
+	std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 
-	if ( ( it = driverMap.find( driverName ) ) != driverMap.end() ) {
+	if ( ( it = driverMap_.find( driverName ) ) != driverMap_.end() ) {
 		// driver found
 		_pOutputDriver = it->second;
 		std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
