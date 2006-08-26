@@ -31,6 +31,7 @@
 #include "sequencergui.h"
 #include "wavesavedlg.h"
 #include "newmachine.h"
+#include "audioconfigdlg.h"
 #include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
@@ -72,6 +73,9 @@ MainWindow::MainWindow()
 
   newMachineDlg_ = new NewMachine( );
   add(newMachineDlg_);
+
+	audioConfigDlg = new AudioConfigDlg();
+	add( audioConfigDlg );
 
   initSongs();
   enableSound();
@@ -208,6 +212,11 @@ void MainWindow::onTabChange( NButtonEvent * ev )
   }
 }
 
+
+void MainWindow::onConfigMenuAudio(NButtonEvent* ev) {
+	audioConfigDlg->setVisible( true );
+}
+
 void MainWindow::initMenu( )
 {
   menuBar_ = new NMenuBar();
@@ -284,7 +293,7 @@ void MainWindow::initMenu( )
       configurationMenu_->add(new NMenuSeperator());
       configurationMenu_->add(new NMenuItem("Loop Playback"));
       configurationMenu_->add(new NMenuSeperator());
-      configurationMenu_->add(new NMenuItem("Settings"));
+      configurationMenu_->add(new NMenuItem("Audio Settings"))->click.connect(this,&MainWindow::onConfigMenuAudio);
     menuBar_->add(configurationMenu_);
 
     // Creates the performance menu

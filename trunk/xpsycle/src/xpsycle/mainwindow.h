@@ -56,6 +56,7 @@ class InfoDlg;
 class WaveSaveDlg;
 class SequencerItem;
 class NewMachine;
+class AudioConfigDlg;
 
 /**
 @author Stefan
@@ -126,6 +127,8 @@ private:
 
     NComboBox* insCombo_;
 
+		AudioConfigDlg* audioConfigDlg;
+
     int count;
 
     void initMenu();
@@ -173,6 +176,8 @@ private:
     void onViewMenuMachinebar(NButtonEvent* ev);
     void onViewMenuSequencerbar(NButtonEvent* ev);
     void onViewMenuStatusbar(NButtonEvent* ev);
+
+		void onConfigMenuAudio(NButtonEvent* ev);
 
     void onHelpMenuAbout(NButtonEvent* ev);
     void onHelpMenuGreeting(NButtonEvent* ev);
