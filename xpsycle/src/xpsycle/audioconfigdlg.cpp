@@ -18,19 +18,69 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "audioconfigdlg.h"
+#include "configuration.h"
+#include <ngrs/nlistbox.h>
+#include <ngrs/nitem.h>
+#include <ngrs/nalignlayout.h>
+#include <ngrs/nlabel.h>
+#include <ngrs/nobjectinspector.h>
 
 namespace psycle {
 	namespace host	{	
 
-		AudioConfigDlg::AudioConfigDlg()
-		  : NWindow()
+		AudioConfigDlg::AudioConfigDlg( Configuration* cfg )
+		  : NWindow( ),
+				config_(cfg)
 		{
+			setTitle("Audio settings");
+		
 			setMinimumWidth(300);
 			setMinimumHeight(200);
+
+			pane()->setLayout( NAlignLayout( 5, 5 ) );
+
+			NPanel* driverPanel = new NPanel();
+				driverPanel->setLayout( NAlignLayout() );
+				driverPanel->add(new NLabel("Select A Driver"), nAlTop );
+				driverLbx = new NListBox( );
+					driverLbx->setPreferredSize(100,100);
+				driverPanel->add( driverLbx , nAlClient);
+			pane()->add( driverPanel, nAlLeft );
+
+			NPanel* btnPanel = new NPanel();
+				btnPanel->setLayout ( NAlignLayout(5,5) );
+				NButton* useBtn = new NButton("use");
+					useBtn->setFlat( false );
+				btnPanel->add( useBtn, nAlRight );
+				NButton* saveBtn = new NButton("save");
+					saveBtn->setFlat( false );
+				btnPanel->add( saveBtn, nAlRight );
+				NButton* cancelBtn = new NButton("cancel");
+					cancelBtn->setFlat( false );
+				btnPanel->add( cancelBtn, nAlRight );
+			pane()->add( btnPanel, nAlBottom);
+
+			pane()->add(new NLabel("Set Driver Properties"), nAlTop );
+
+			objInspector_ = new NObjectInspector();
+			pane()->add( objInspector_, nAlClient );
+			
+
+			initDriverBox();
 		}
 
 		AudioConfigDlg::~AudioConfigDlg()
 		{
+		}
+
+		void AudioConfigDlg::initDriverBox( )
+		{
+      std::map<std::string, AudioDriver*> & driverMap =  config_->driverMap();
+			std::map<std::string, AudioDriver*>::iterator it = driverMap.begin();
+			for ( ; it != driverMap.end(); it++ ) {
+				std::string driverName = it->first;
+				driverLbx->add( new NItem( driverName ) );
+			}
 		}
 
 		int AudioConfigDlg::onClose( )
@@ -41,5 +91,7 @@ namespace psycle {
 
 	}
 }
+
+
 
 

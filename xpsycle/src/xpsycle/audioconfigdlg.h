@@ -26,17 +26,30 @@
 @author Stefan Nattkemper
 */
 
+class NListBox;
+class NObjectInspector;
+
 namespace psycle {
 	namespace host	{	
 
+		class Configuration;
+
 		class AudioConfigDlg : public NWindow {
 		public:
-				AudioConfigDlg();
+				AudioConfigDlg( Configuration* cfg );
 
 				~AudioConfigDlg();
 
 				virtual int onClose();
 
+		private:
+
+				NListBox* driverLbx;
+				Configuration* config_;
+
+				NObjectInspector* objInspector_;
+
+				void initDriverBox();
 
 		};
 

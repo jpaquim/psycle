@@ -74,7 +74,7 @@ MainWindow::MainWindow()
   newMachineDlg_ = new NewMachine( );
   add(newMachineDlg_);
 
-	audioConfigDlg = new AudioConfigDlg();
+	audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
 	add( audioConfigDlg );
 
   initSongs();

@@ -238,6 +238,8 @@ public:
 
     midi_type                midi_;
 
+		
+
 private:
 
     DefaultBitmaps* bitmaps_;
@@ -245,7 +247,14 @@ private:
     void setSkinDefaults();
     void onConfigTagParse(const std::string & tagName);
 
-		std::map<std::string, AudioDriver*> driverMap;
+		std::map<std::string, AudioDriver*> driverMap_;
+
+public:
+
+		std::map<std::string, AudioDriver*> & driverMap() {
+			return driverMap_;
+		}
+
 };
 
 }
