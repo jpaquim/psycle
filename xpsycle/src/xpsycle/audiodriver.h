@@ -47,7 +47,7 @@ private:
 
 typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
 
-class AudioDriver : NObject {
+class AudioDriver : public NObject {
 public:
     AudioDriver();
 
@@ -61,6 +61,15 @@ public:
     virtual void Configure(void) {};
     virtual bool Initialized(void) { return true; };
     virtual bool Configured(void) { return true; };
+
+		void setSamplesPerSec( int samples );
+		int samplesPerSec() const;
+
+    void setBitDepth( int depth );
+		int bitDepth() const;
+
+		void setChannelMode( int mode );
+		int channelMode() const;
 
     int _numBlocks;
     int _blockSize;

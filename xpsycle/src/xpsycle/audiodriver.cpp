@@ -19,6 +19,8 @@
   ***************************************************************************/
 #include "audiodriver.h"
 
+#include <ngrs/nproperty.h>
+
 namespace psycle { namespace host {
 
 
@@ -29,8 +31,43 @@ AudioDriver::AudioDriver() :
   , _numBlocks(0)
   , _blockSize(0)
 {
+	properties()->bind("Samples/sec", *this, &AudioDriver::samplesPerSec,  &AudioDriver::setSamplesPerSec);
+	properties()->publish("Samples/sec");
+  properties()->bind("Bitdepth", *this, &AudioDriver::bitDepth,  &AudioDriver::setBitDepth);
+	properties()->publish("Bitdepth");
+	properties()->bind("ChannelMode", *this, &AudioDriver::channelMode,  &AudioDriver::setChannelMode);
+	properties()->publish("ChannelMode");
 }
 
+void AudioDriver::setSamplesPerSec( int samples )
+{
+  _samplesPerSec = samples;
+}
+
+int AudioDriver::samplesPerSec( ) const
+{
+  return _samplesPerSec;
+}
+
+void AudioDriver::setBitDepth( int depth )
+{
+  _bitDepth = depth;
+}
+
+void AudioDriver::setChannelMode( int mode )
+{
+  mode = _channelmode;
+}
+
+int AudioDriver::channelMode( ) const
+{
+  return _channelmode;
+}
+
+int AudioDriver::bitDepth( ) const
+{
+	return _bitDepth;
+}
 
 AudioDriver::~AudioDriver()
 {
@@ -42,5 +79,11 @@ AudioDriverInfo AudioDriver::info( ) const
 }
 
 }}
+
+
+
+
+
+
 
 
