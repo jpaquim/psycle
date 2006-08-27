@@ -7,6 +7,7 @@
 #include "helpers.h"
 #include "constants.h"
 #include "fileio.h"
+#include "playertimeinfo.h"
 #include <stdexcept>
 #include <cstdint>
 #include <vector>
@@ -278,14 +279,17 @@ namespace psycle
 			///\name crash handling
 			///\{
 				public:
-					virtual int GenerateAudioInTicks(int startSample, int numsamples);
-					virtual int GenerateAudio(int numsamples );
+					virtual int GenerateAudioInTicks(int startSample, int numsamples, const PlayerTimeInfo & timeInfo);
+					virtual int GenerateAudio(int numsamples , const PlayerTimeInfo & timeInfo);
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
 					virtual void reallocateRemainingEvents(double beatOffset);
+
 				protected:
 					std::deque<WorkEvent> workEvents;
 				    std::map<int,int> playCol;
 					int playColIndex;
+
+
 				public:
 					/// This function should be called when an exception was thrown from the machine.
 					/// This will mark the machine as crashed, i.e. crashed() will return true,
@@ -407,10 +411,10 @@ namespace psycle
 				public:
 					virtual void Init();
 					virtual void PreWork(int numSamples);
-					virtual void Work(int numSamples);
-					virtual void WorkNoMix(int numSamples);
-					virtual void Tick() {};
-					virtual void Tick(int channel, const PatternEvent & data ) {;}
+					virtual void Work(int numSamples, const PlayerTimeInfo & timeInfo);
+					virtual void WorkNoMix(int numSamples, const PlayerTimeInfo & timeInfo);
+					virtual void Tick( const PlayerTimeInfo & timeInfo ) {};
+					virtual void Tick(int channel, const PatternEvent & data , const PlayerTimeInfo & timeInfo) {;}
 					virtual void Stop() { playCol.clear(); playColIndex =0; }
 			///\}
 

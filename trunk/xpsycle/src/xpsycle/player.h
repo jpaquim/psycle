@@ -8,6 +8,7 @@
 #include "machine.h"
 #include "riff.h"
 #include "audiodriver.h"
+#include "playertimeinfo.h"
 
 namespace psycle
 {
@@ -41,8 +42,11 @@ namespace psycle
 			void startRecording( );
 			void stopRecording( );
 
+			const PlayerTimeInfo & timeInfo() const;
 
 		private:
+
+			PlayerTimeInfo timeInfo_;
 
 			Song * song_;
 			std::string fileName_;
@@ -102,11 +106,7 @@ namespace psycle
 			///\}
 
 		public:
-			double PlayPos() const {return playPos;}
-			void SetPlayPos(int newpos) {playPos=newpos;}
-		private:
-			/// current master playback position
-			double playPos;
+			double PlayPos() const { return timeInfo_.playBeatPos(); }
 
 		public:
 
@@ -139,23 +139,20 @@ namespace psycle
 		///\{
 		public:
 				/// ...
-				void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
+				void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm* timeInfo_.linesPerBeat())); }
 				/// Returns the number of samples that it takes for each row of the pattern to be played
 				const int SamplesPerRow(){ return m_SamplesPerRow;};
 				/// Sets the number of samples that it takes for each row of the pattern to be played
 				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;}
 				/// Reports the LinesPerBeat (used for machines that require "ticks" between commands).
-				int LinesPerBeat() { return tpb; }
+				int LinesPerBeat() { return timeInfo_.linesPerBeat(); }
 			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
 			bool _SPRChanged;
 			/// the line currently being played in the current pattern
-			int _lineCounter;
-			/// the sequence position currently being played
-			int _playPosition;
+			int _lineCounter;			
 			/// the pattern currently being played.
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			//void ExecuteGlobalCommands( std::list<PatternLine*> & tempPlayLines );
-			int tpb;
 			/// Contains the number of samples until a line change comes in.
 			int _samplesRemaining;
 
