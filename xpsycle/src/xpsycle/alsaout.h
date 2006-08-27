@@ -43,6 +43,8 @@ public:
 
     ~AlsaOut();
 
+		virtual AlsaOut* clone()  const;   // Uses the copy constructor
+
 		virtual AudioDriverInfo info() const;
 
     virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);

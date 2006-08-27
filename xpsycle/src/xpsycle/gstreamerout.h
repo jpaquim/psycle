@@ -13,6 +13,8 @@ namespace psycle
 				public:
 
 					virtual AudioDriverInfo info() const;
+
+					virtual GStreamerOut* clone()  const; // Uses the copy constructor
 			};
 	}
 }

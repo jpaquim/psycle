@@ -13,8 +13,13 @@ namespace psycle
 			return AudioDriverInfo("gstreamer");
 		}
 
-	}
-}
+		GStreamerOut * GStreamerOut::clone( ) const
+		{
+			return new GStreamerOut(*this);
+		}
+	
+	} // end of host namespace
+} // end of psycle namespace
 
 
 #endif // !defined XPSYCLE__NO_GSTREAMER

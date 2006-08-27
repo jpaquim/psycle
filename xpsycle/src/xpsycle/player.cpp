@@ -6,7 +6,6 @@
 #include "song.h"
 #include "machine.h"
 #include "internal_machines.h"
-#include "configuration.h"
 #include "plugin_interface.h"
 //#include "MidiInput.h"
 #include "inputhandler.h"
@@ -37,15 +36,17 @@ namespace psycle
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 			_doDither = false;
 			autoRecord_ = false;
+			driver_ = 0;
 		}
 
 		Player::~Player()
 		{
+			if ( driver_ ) delete driver_;
 		}
 
 		void Player::Start(double pos)
 		{
-      if ( !song_ ) return;
+      if ( !song_ && !driver_ ) return;
 
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
@@ -61,7 +62,7 @@ namespace psycle
 			_loop_count =0;
 			_loop_line = 0;
 			SetBPM(song().bpm(), song().LinesPerBeat());
-			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
+			SampleRate( 44100 );
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			playPos = pos;
@@ -69,7 +70,7 @@ namespace psycle
 
 		void Player::Stop(void)
 		{
-      if ( !song_ ) return;
+      if ( !song_  && driver_ ) return;
 
 			// Stop song enviroment
 			_playing = false;
@@ -83,7 +84,7 @@ namespace psycle
 				}
 			}
 			SetBPM(song().bpm(),song().LinesPerBeat());
-			SampleRate(Global::configuration()._pOutputDriver->_samplesPerSec);
+			SampleRate(driver_->_samplesPerSec);
 			if (autoRecord_) stopRecording();
 		}
 
@@ -359,6 +360,9 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 		}
 
 		void Player::writeSamplesToFile( int amount ) {
+
+			if (!song_ && !driver_) return;
+
 			float* pL(song()._pMachine[MASTER_INDEX]->_pSamplesL);
 			float* pR(song()._pMachine[MASTER_INDEX]->_pSamplesR);
 			if(_doDither) {
@@ -366,7 +370,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 				dither.Process(pR, amount);
 			}
 			int i;
-			switch(Global::configuration()._pOutputDriver->_channelmode)
+			switch( driver_->_channelmode )
 			{
 				case 0: // mono mix
 					for( i = 0; i < amount; i++)
@@ -403,10 +407,12 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 
 		void Player::startRecording( ) {
 
-			int channels = 2;
-			if(Global::configuration()._pOutputDriver->_channelmode != 3) channels = 1;
+			if ( !song_ && !driver_ ) return;
 
-			if(_outputWaveFile.OpenForWrite(fileName().c_str(), Global::configuration()._pOutputDriver->_samplesPerSec, Global::configuration()._pOutputDriver->_bitDepth, channels ) == DDC_SUCCESS)
+			int channels = 2;
+			if ( driver_->_channelmode != 3 ) channels = 1;
+
+			if(_outputWaveFile.OpenForWrite(fileName().c_str(), driver_->_samplesPerSec, driver_->_bitDepth, channels ) == DDC_SUCCESS)
 				recording_ = true;
 			else
 				recording_ = false;
@@ -418,6 +424,28 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 				recordStopped.emit();
 			}
 			recording_ = false;
+		}
+
+		void Player::setDriver(  const AudioDriver & driver ) {
+			if ( !driver_) delete driver_;
+			driver_ = driver.clone();
+			if (!driver_->Initialized())
+  		{
+				driver_->Initialize( Work, this );
+			}
+  		if (!driver_->Configured())
+  		{
+      	driver_->Configure();
+				SampleRate(driver_->_samplesPerSec);
+  			//   _outputActive = true;
+  		}
+			if (driver_->Enable(true))
+			{
+			//   _outputActive = true;
+			} else {
+				if (driver_) delete driver_;
+				driver_ = new AudioDriver();
+			}
 		}
 
 	} // end of host namespace

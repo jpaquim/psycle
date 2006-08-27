@@ -20,6 +20,7 @@
 #include "psy3filter.h"
 #include "fileio.h"
 #include "datacompression.h"
+#include "global.h" // for zapArray shit
 
 namespace psycle
 {

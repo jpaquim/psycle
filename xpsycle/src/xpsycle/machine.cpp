@@ -861,11 +861,19 @@ int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 int Machine::GenerateAudio( int numsamples )
 {
 	//position [0.0-1.0] inside the current beat.
+	/// this is unbelivebale crap here
+	///\todo remove this!!!!!
 	const double positionInBeat = Global::player().PlayPos()-static_cast<int>(Global::player().PlayPos());
+	/// this is unbelivebale crap here
+	///\todo remove this!!!!!
 	//position [0.0-linesperbeat] converted to "Tick()" lines
 	const double positionInLines = positionInBeat*Global::player().LinesPerBeat();
 	//position in samples of the next "Tick()" Line
+	/// this is unbelivebale crap here
+	///\todo remove this!!!!!
 	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))*Global::player().SamplesPerRow();
+	/// this is unbelivebale crap here
+	///\todo remove this!!!!!
 	//Next event, initialized to "out of scope".
 	int nextevent = numsamples+1;
 	int previousline = nextLineInSamples;

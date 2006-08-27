@@ -14,6 +14,8 @@ namespace psycle
 
 						virtual AudioDriverInfo info() const;
 
+						virtual JackOut* clone()  const;   // Uses the copy constructor
+
 			};
 	}
 }

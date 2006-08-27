@@ -7,6 +7,7 @@
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
+#include "audiodriver.h"
 
 namespace psycle
 {
@@ -20,6 +21,8 @@ namespace psycle
 			Player();
 
 			virtual ~Player();
+
+			void setDriver(  const AudioDriver & driver );
 
 			Song inline & song() {
 				return *song_;
@@ -43,6 +46,7 @@ namespace psycle
 
 			Song * song_;
 			std::string fileName_;
+			AudioDriver* driver_;
 
 			bool autoRecord_;
 			bool recording_;

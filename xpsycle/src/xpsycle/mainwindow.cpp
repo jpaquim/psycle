@@ -96,22 +96,7 @@ MainWindow::~MainWindow()
 void MainWindow::enableSound( )
 {
   AudioDriver* pOut = Global::pConfig()->_pOutputDriver;
-  if (!pOut->Initialized())
-  {
-      pOut->Initialize(Global::pPlayer()->Work, Global::pPlayer());
-  }
-  if (!pOut->Configured())
-  {
-      pOut->Configure();
-      Global::pPlayer()->SampleRate(pOut->_samplesPerSec);
-  //   _outputActive = true;
-  }
-  if (pOut->Enable(true))
-  {
-  //   _outputActive = true;
-  } else {
-  		Global::pConfig()->setDriverByName("silent");
-	}
+	Global::pPlayer()->setDriver( *pOut );  
 }
 
 

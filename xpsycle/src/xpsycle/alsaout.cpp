@@ -45,6 +45,11 @@ AlsaOut::~AlsaOut()
 {
 }
 
+AlsaOut * AlsaOut::clone( ) const
+{
+  return new AlsaOut(*this);
+}
+
 AudioDriverInfo AlsaOut::info( ) const
 {
 	return AudioDriverInfo("alsa");
@@ -409,6 +414,7 @@ bool AlsaOut::Initialized( )
 }
 
 }}
+
 
 
 #endif // !defined XPSYCLE__NO_ALSA
