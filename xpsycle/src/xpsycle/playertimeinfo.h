@@ -23,12 +23,40 @@
 /**
 @author Stefan Nattkemper
 */
-class PlayerTimeInfo{
-public:
-    PlayerTimeInfo();
 
-    ~PlayerTimeInfo();
+/// class for play time informations
 
-};
+namespace psycle
+{
+	namespace host
+	{
+
+		class PlayerTimeInfo {
+		public:
+				PlayerTimeInfo();
+				~PlayerTimeInfo();
+
+				/// the sequence position currently being played in beats
+				void setPlayBeatPos( double pos );
+				double playBeatPos() const;
+
+				/// the current master sample position
+				void setSamplePos( int pos );
+				int samplePos() const;
+
+				/// for old psycle machines 
+				void setLinesPerBeat( int lines );
+				int linesPerBeat() const;
+				
+		private:
+
+				double playBeatPos_;
+				int samplePos_;
+				int lpb_;
+
+		};
+
+	} // end of host namespace
+} // end of psycle namespace
 
 #endif
