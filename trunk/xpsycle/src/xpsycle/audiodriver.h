@@ -62,6 +62,8 @@ public:
     virtual bool Initialized(void) { return true; };
     virtual bool Configured(void) { return true; };
 
+		virtual AudioDriver* clone()  const;
+
 		void setSamplesPerSec( int samples );
 		int samplesPerSec() const;
 

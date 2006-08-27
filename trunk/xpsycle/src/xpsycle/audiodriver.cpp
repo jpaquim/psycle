@@ -39,6 +39,12 @@ AudioDriver::AudioDriver() :
 	properties()->publish("ChannelMode");
 }
 
+AudioDriver * AudioDriver::clone( ) const
+{
+  return new AudioDriver(*this);
+}
+
+
 void AudioDriver::setSamplesPerSec( int samples )
 {
   _samplesPerSec = samples;
@@ -79,6 +85,7 @@ AudioDriverInfo AudioDriver::info( ) const
 }
 
 }}
+
 
 
 

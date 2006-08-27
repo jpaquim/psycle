@@ -39,6 +39,12 @@ namespace psycle
 		{
 		}
 
+		WaveFileOut * WaveFileOut::clone( ) const
+		{
+			return new WaveFileOut(*this);
+		}
+
+
 		AudioDriverInfo WaveFileOut::info( ) const
 		{
 			return AudioDriverInfo("wavefile");

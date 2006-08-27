@@ -25,6 +25,7 @@
 #include "waveedchildview.h"
 #include "defaultbitmaps.h"
 #include "instrumenteditor.h"
+#include "global.h"
 #include <iomanip>
 #include <iostream>
 #include <ngrs/nvisualcomponent.h>

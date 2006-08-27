@@ -954,7 +954,7 @@ bool SequencerGUI::gridSnap( ) const
 
 void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
 {
-  if (renderBtn->text()=="Stop rendering") {
+  /*if (renderBtn->text()=="Stop rendering") {
     Global::pPlayer()->stopRecording();
     Global::pConfig()->_pOutputDriver->Enable(false);
     onRecordStop();
@@ -976,12 +976,12 @@ void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
   toolBar_->repaint();
 
   Global::pPlayer()->setAutoRecording(true);
-  Global::pPlayer()->Start(0);
+  Global::pPlayer()->Start(0);*/
 }
 
 void SequencerGUI::onRecordStop( )
 {
-  Global::pPlayer()->setAutoRecording(false);
+  /*Global::pPlayer()->setAutoRecording(false);
   Global::pConfig()->_pOutputDriver = oldDriver;
 
   if (oldDriver) {
@@ -990,7 +990,7 @@ void SequencerGUI::onRecordStop( )
 
   renderBtn->setText("Render As Wave");
   toolBar_->resize();
-  toolBar_->repaint();
+  toolBar_->repaint();*/
 }
 
 void SequencerGUI::onAddLoop(NButtonEvent* ev) {

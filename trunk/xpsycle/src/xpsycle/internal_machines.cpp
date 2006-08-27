@@ -7,6 +7,8 @@
 
 ///\todo : The information required from this include should go to constants.hpp
 #include "inputhandler.h"
+///\todo : this is crap
+#include "global.h"
 
 namespace psycle {
 	namespace host {

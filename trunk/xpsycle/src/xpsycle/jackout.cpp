@@ -12,8 +12,15 @@ namespace psycle
 		{
 			return AudioDriverInfo("jack");
 		}
+		
+		JackOut * JackOut::clone( ) const
+		{
+			return new JackOut(*this);
+		}
 
 	}
 }
+
+
 
 #endif // !defined XPSYCLE__NO_JACK

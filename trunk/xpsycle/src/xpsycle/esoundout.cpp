@@ -52,6 +52,11 @@ namespace psycle
 			Enable(false);
 		}
 
+		ESoundOut * ESoundOut::clone( ) const
+		{
+			return new ESoundOut(*this);
+		}
+
 		AudioDriverInfo ESoundOut::info( ) const
 		{
 			return AudioDriverInfo("esd");
@@ -225,6 +230,8 @@ namespace psycle
 
 	} // end of psycle host
 }
+
+
 
  // end of psycle namespace
 

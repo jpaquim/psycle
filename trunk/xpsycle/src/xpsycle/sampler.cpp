@@ -7,6 +7,7 @@
 #include "player.h"
 #include "fileio.h"
 #include "configuration.h"
+#include "global.h"
 namespace psycle
 {
 	namespace host

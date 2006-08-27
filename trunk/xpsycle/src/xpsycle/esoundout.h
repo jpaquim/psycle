@@ -35,6 +35,8 @@ namespace psycle
 				ESoundOut();
 				~ESoundOut();
 				
+				virtual ESoundOut* clone()  const;   // Uses the copy constructor
+
 				virtual AudioDriverInfo info() const;
 
 

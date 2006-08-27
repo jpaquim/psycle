@@ -7,7 +7,6 @@
 #include "helpers.h"
 #include "constants.h"
 #include "fileio.h"
-#include "global.h"
 #include <stdexcept>
 #include <cstdint>
 #include <vector>
