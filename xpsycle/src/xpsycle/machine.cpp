@@ -861,15 +861,59 @@ int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 int Machine::GenerateAudio( int numsamples )
 {
 	//position [0.0-1.0] inside the current beat.
+/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+///\todo dont pollute our new code with old psycle crap
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!
 	/// this is unbelivebale crap here
 	///\todo remove this!!!!!
 	const double positionInBeat = Global::player().PlayPos()-static_cast<int>(Global::player().PlayPos());
 	/// this is unbelivebale crap here
 	///\todo remove this!!!!!
 	//position [0.0-linesperbeat] converted to "Tick()" lines
+/// this is unbelivebale crap here
+	///\todo remove this!!!!!
 	const double positionInLines = positionInBeat*Global::player().LinesPerBeat();
+/// this is unbelivebale crap here
+	///\todo remove this!!!!!
 	//position in samples of the next "Tick()" Line
 	/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
+	///\todo remove this!!!!!/// this is unbelivebale crap here
 	///\todo remove this!!!!!
 	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))*Global::player().SamplesPerRow();
 	/// this is unbelivebale crap here
