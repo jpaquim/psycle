@@ -19,13 +19,57 @@
  ***************************************************************************/
 #include "playertimeinfo.h"
 
-PlayerTimeInfo::PlayerTimeInfo()
+/// class for play time informations
+
+namespace psycle
 {
+	namespace host
+	{
+
+
+		PlayerTimeInfo::PlayerTimeInfo( )
+			: playBeatPos_(0.0),
+				samplePos_(0),
+				lpb_(4)
+		{
+		}
+
+		PlayerTimeInfo::~ PlayerTimeInfo( )		
+		{
+		}
+
+		void PlayerTimeInfo::setPlayBeatPos( double pos )
+		{
+			playBeatPos_ = pos;
+		}
+
+		double PlayerTimeInfo::playBeatPos( ) const
+		{
+			return playBeatPos_;
+		}
+
+		void PlayerTimeInfo::setSamplePos( int pos )
+		{
+			samplePos_ = pos;
+		}
+
+		int PlayerTimeInfo::samplePos( ) const
+		{
+			return samplePos_;
+		}
+
+		void PlayerTimeInfo::setLinesPerBeat( int lines )
+		{
+			lpb_ = lines;
+		}
+
+		int PlayerTimeInfo::linesPerBeat( ) const
+		{
+			return lpb_;
+		}
+
+
+	} // end of hostnamespace
 }
 
-
-PlayerTimeInfo::~PlayerTimeInfo()
-{
-}
-
-
+ // end of psycle namespace
