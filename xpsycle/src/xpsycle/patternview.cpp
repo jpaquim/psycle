@@ -833,7 +833,7 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 
     for (int y = startLine; y <= endLine; y++) {
       float position = y / (float) pView->pattern()->beatZoom();
-      if (!(y == pView->playPos()) || pView->editPosition() != Global::pPlayer()->_playPosition) {
+      if (!(y == pView->playPos()) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
       if ( !(y % pView->beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
               g->setForeground(Global::pConfig()->pvc_row4beat);
@@ -1637,7 +1637,7 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
 
         // play
         notetrack[outtrack]=note;
-        pMachine->Tick(outtrack, entry);
+        pMachine->Tick(outtrack, entry, PlayerTimeInfo());
       }
 }
 
@@ -1819,7 +1819,7 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
         // play it
 
         if (pMachine) {
-          pMachine->Tick(i, entry);
+          pMachine->Tick(i, entry, PlayerTimeInfo() );
         }
       }
     }

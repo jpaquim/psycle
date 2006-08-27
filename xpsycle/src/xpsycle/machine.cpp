@@ -175,7 +175,7 @@ namespace psycle
 
 		void OutPort::CollectData(int numSamples)
 		{
-			parent_.Work(numSamples);
+//			parent_.Work(numSamples);
 		}
 
 		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id, Song * song)
@@ -487,7 +487,7 @@ namespace psycle
 
 		/// Each machine is expected to produce its output in its own
 		/// _pSamplesX buffers.
-		void Machine::Work(int numSamples)
+		void Machine::Work(int numSamples, const PlayerTimeInfo & timeInfo )
 		{
 			_waitingForSound=true;
 			for (int i=0; i<MAX_CONNECTIONS; i++)
@@ -510,7 +510,7 @@ namespace psycle
 									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
 								//std::cout << pInMachine->_macIndex << "before work" << numSamples << std::endl;
-								pInMachine->Work(numSamples);
+								pInMachine->Work( numSamples, timeInfo );
 								//std::cout << pInMachine->_macIndex << "after work" << numSamples << std::endl;
 							}
 							/*
@@ -543,11 +543,11 @@ namespace psycle
 //				PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
 //				wire_cpu_cost(wire_cpu_cost() + wcost);
 			}
-			GenerateAudio( numSamples );
+			GenerateAudio( numSamples , timeInfo );
 		}
 
 		//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
-		void Machine::WorkNoMix(int numSamples)
+		void Machine::WorkNoMix(int numSamples, const PlayerTimeInfo & timeInfo)
 		{
 			_waitingForSound=true;
 			for (int i=0; i<MAX_CONNECTIONS; i++)
@@ -563,7 +563,7 @@ namespace psycle
 								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
-								pInMachine->Work(numSamples);
+								pInMachine->Work(numSamples, timeInfo);
 							}
 							pInMachine->_waitingForSound = false;
 						}
@@ -853,14 +853,14 @@ int WorkEvent::track( ) const
 	return track_;
 }
 
-int Machine::GenerateAudioInTicks(int startSample, int numsamples )
+int Machine::GenerateAudioInTicks(int startSample, int numsamples, const PlayerTimeInfo & timeInfo )
 {
 	//std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
 	workEvents.clear();
 	return 0;
 }
 
-int Machine::GenerateAudio( int numsamples )
+int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 {
 	//position [0.0-1.0] inside the current beat.
 /// this is unbelivebale crap here
@@ -896,30 +896,11 @@ int Machine::GenerateAudio( int numsamples )
 	///\todo remove this!!!!!
 	/// this is unbelivebale crap here
 	///\todo remove this!!!!!
-	const double positionInBeat = Global::player().PlayPos()-static_cast<int>(Global::player().PlayPos());
-	/// this is unbelivebale crap here
-	///\todo remove this!!!!!
+	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 	//position [0.0-linesperbeat] converted to "Tick()" lines
-/// this is unbelivebale crap here
-	///\todo remove this!!!!!
 	const double positionInLines = positionInBeat*Global::player().LinesPerBeat();
-/// this is unbelivebale crap here
-	///\todo remove this!!!!!
 	//position in samples of the next "Tick()" Line
-	/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!
 	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))*Global::player().SamplesPerRow();
-	/// this is unbelivebale crap here
-	///\todo remove this!!!!!
 	//Next event, initialized to "out of scope".
 	int nextevent = numsamples+1;
 	int previousline = nextLineInSamples;
@@ -939,7 +920,7 @@ int Machine::GenerateAudio( int numsamples )
 	{
 		if ( processedsamples == nextLineInSamples )
 		{
-			Tick();
+			Tick( timeInfo );
 			previousline = nextLineInSamples;
 			nextLineInSamples+=Global::player().SamplesPerRow();
 		}
@@ -952,7 +933,7 @@ int Machine::GenerateAudio( int numsamples )
 				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
 				colsIt = playCol.find(workEvent.track());
 				if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
-				Tick(colsIt->second, workEvent.event() );
+				Tick(colsIt->second, workEvent.event(), timeInfo );
 				workEvents.pop_front();
 				if (!workEvents.empty())
 				{
@@ -971,7 +952,7 @@ int Machine::GenerateAudio( int numsamples )
 		{
 			std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << "-" << nextLineInSamples << "(" << previousline << ")" << "-" << nextevent << std::endl;
 		}
-		GenerateAudioInTicks(processedsamples,samplestoprocess);
+		GenerateAudioInTicks(processedsamples,samplestoprocess, timeInfo);
 	}
 	// reallocate events remaining in the buffer, This happens when soundcard buffer is bigger than STREAM_SIZE (machine buffer).
 	//	Since events are generated once per soundcard work(), events have to be reallocated for the next machine Work() call.

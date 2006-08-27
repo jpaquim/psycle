@@ -47,7 +47,7 @@ class PluginFxCallback : public CFxCallback
     inline virtual int GetTickLength() { return Global::pPlayer()->SamplesPerRow(); }
     inline virtual int GetSamplingRate() { return Global::pConfig()->GetSamplesPerSec(); }
     inline virtual int GetBPM() { return Global::pPlayer()->bpm; }
-    inline virtual int GetTPB() { return Global::pPlayer()->tpb; }
+    inline virtual int GetTPB() { return Global::pPlayer()->LinesPerBeat(); }
 };
 
 class Plugin; // forward declaration
@@ -102,9 +102,9 @@ public:
     virtual ~Plugin() throw();
 
     virtual void Init();
-    virtual int GenerateAudioInTicks(int startSample, int numSamples);
-    virtual void Tick();
-    virtual void Tick(int channel, const PatternEvent & pEntry);
+    virtual int GenerateAudioInTicks(int startSample, int numSamples, const PlayerTimeInfo & timeInfo);
+    virtual void Tick(const PlayerTimeInfo & timeInfo);
+    virtual void Tick(int channel, const PatternEvent & pEntry, const PlayerTimeInfo & timeInfo);
     virtual void Stop();
     inline virtual std::string GetDllName() const throw() { return _psDllName.c_str(); }
     virtual std::string GetName() const { return (char *)_psName.c_str(); };

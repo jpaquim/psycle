@@ -13,6 +13,7 @@ namespace psycle
 {
 	namespace host
 	{
+
 		Player::Player()
 		:
 			song_(0),
@@ -29,9 +30,7 @@ namespace psycle
 			m_SampleRate(44100),
 			m_SamplesPerRow((44100*60)/(125*4)),
 			m_SamplesPerBeat((44100*60/125)),
-			tpb(4),
-			bpm(125),
-			playPos(0.0)
+			bpm(125)
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 			_doDither = false;
@@ -42,6 +41,11 @@ namespace psycle
 		Player::~Player()
 		{
 			if ( driver_ ) delete driver_;
+		}
+
+		const PlayerTimeInfo & Player::timeInfo( ) const
+		{
+			return timeInfo_;
 		}
 
 		void Player::Start(double pos)
@@ -56,7 +60,6 @@ namespace psycle
 			_lineChanged = true;
 			_lineCounter = 0; //line;
 			_SPRChanged = false;
-			_playPosition= 0; //pos;
 			_playTime = 0;
 			_playTimem = 0;
 			_loop_count =0;
@@ -65,7 +68,7 @@ namespace psycle
 			SampleRate( 44100 );
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
-			playPos = pos;
+			timeInfo_.setPlayBeatPos( pos );
 		}
 
 		void Player::Stop(void)
@@ -106,7 +109,7 @@ namespace psycle
 		}
 		void Player::SetBPM(float _bpm,int _tpb)
 		{
-			if ( _tpb != 0) tpb=_tpb;
+			timeInfo_.setLinesPerBeat( _tpb );
 			if ( _bpm != 0) bpm=_bpm;
 			RecalcSPR();
 			RecalcSPB();
@@ -120,10 +123,10 @@ namespace psycle
 			{
 			case GlobalEvent::BPM_CHANGE:
 				SetBPM(event.parameter() );
-std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.parameter() <<std::endl;
+std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new bpm: "<<event.parameter() <<std::endl;
 				break;
 			case GlobalEvent::JUMP_TO:
-				this->SetPlayPos( event.parameter() );
+				timeInfo_.setPlayBeatPos( event.parameter() );
 				break;
 			case GlobalEvent::SET_BYPASS:
 				mIndex = event.target();
@@ -219,7 +222,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 										pMachine->TriggerDelay[track] = entry;
 										pMachine->ArpeggioCount[track] = 1;
 									}
-									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
+									pMachine->RetriggerRate[track] = SamplesPerRow()* timeInfo_.linesPerBeat() / 24;
 								}
 								else
 								{
@@ -250,7 +253,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 			double beatLength = numSamples/(double) SamplesPerBeat();
 //			CSingleLock crit(&song().door, true);
 
-			if (autoRecord_ && PlayPos() >= song().patternSequence()->tickLength()) {
+			if (autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
 				stopRecording();
 			}
 
@@ -271,10 +274,10 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 					//get the next round of global events.  we need to repopulate the list of globals and patternlines
 					//each time through the loop because global events can potentially move the song's beatposition elsewhere.
 					globals.clear();
-					chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(playPos, beatLength, globals, bFirst);
+					chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(timeInfo_.playBeatPos(), beatLength, globals, bFirst);
 
 					//determine chunk length in beats and samples.
-					chunkBeatSize = chunkBeatEnd-playPos;	
+					chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
 					if(globals.empty())
 						chunkSampleSize = numSamples - processedSamples;
 					else
@@ -283,11 +286,11 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 					//get all patternlines occuring before the next global event, execute them, and process
 					events.clear();
 					///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-					song().patternSequence()->GetLinesInRange(playPos, chunkBeatSize, events);
+					song().patternSequence()->GetLinesInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
 					for( std::multimap<double, PatternLine>::iterator lineIt=events.begin()
 					   ; lineIt!= events.end()
 					   ; ++lineIt) {
-						ExecuteNotes(lineIt->first - playPos, lineIt->second);
+						ExecuteNotes(lineIt->first - timeInfo_.playBeatPos(), lineIt->second);
 						}
 
 					if(chunkSampleSize>0)
@@ -297,7 +300,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 					}
 					
 					//increase playPos prior to executing globals, in case one of the globals needs it or wants to change it.
-					playPos=chunkBeatEnd;
+					timeInfo_.setPlayBeatPos( chunkBeatEnd );
 					beatLength-=chunkBeatSize;
 
 					//execute this batch of global events
@@ -334,7 +337,7 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 				}
 
 				song().DoPreviews( amount );
-				song()._pMachine[MASTER_INDEX]->Work(amount);
+				song()._pMachine[MASTER_INDEX]->Work(amount, timeInfo_ );
 
 				if ( (recording_ && !autoRecord_) || // controlled by record button
 						(recording_ && _playing && autoRecord_) ) { // controlled by play
@@ -449,4 +452,8 @@ std::cout<<"bpm change event found. position: "<<playPos<<", new bpm: "<<event.p
 		}
 
 	} // end of host namespace
-} // end of psycle namespace
+}
+
+
+
+ // end of psycle namespace

@@ -127,12 +127,12 @@ namespace psycle
 		class Sampler : public Machine
 		{
 		public:
-			void Tick();
+			void Tick(const PlayerTimeInfo & timeInfo);
 			Sampler(Machine::id_type id, Song* song);
 			virtual void Init();
-			virtual int GenerateAudioInTicks(int startSample, int numSamples);
+			virtual int GenerateAudioInTicks(int startSample, int numSamples,const PlayerTimeInfo & timeInfo);
 			virtual void Stop();
-			virtual void Tick(int channel, const PatternEvent & data );
+			virtual void Tick(int channel, const PatternEvent & data, const PlayerTimeInfo & timeInfo );
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -212,12 +212,12 @@ namespace psycle
 			dsp::Cubic _resampler;
 
 			void PerformFx(int voice);
-			void VoiceWork(int startSample, int numsamples, int voice);
-			void NoteOff(int voice);
-			void NoteOffFast(int voice);
-			int VoiceTick(int channel, const PatternEvent & pEntry );
-			inline void TickEnvelope(int voice);
-			inline void TickFilterEnvelope(int voice);
+			void VoiceWork(int startSample, int numsamples, int voice, const PlayerTimeInfo & timeInfo);
+			void NoteOff(int voice, const PlayerTimeInfo & timeInfo);
+			void NoteOffFast(int voice );
+			int VoiceTick(int channel, const PatternEvent & pEntry , const PlayerTimeInfo & timeInfo);
+			inline void TickEnvelope(int voice, const PlayerTimeInfo & timeInfo);
+			inline void TickFilterEnvelope(int voice, const PlayerTimeInfo & timeInfo);
 			Instrument::id_type lastInstrument[MAX_TRACKS];
 			static inline int alteRand(int x)
 			{
