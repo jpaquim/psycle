@@ -279,7 +279,7 @@ namespace psycle
 			///\{
 				public:
 					virtual int GenerateAudioInTicks(int startSample, int numsamples);
-					virtual int GenerateAudio(int numsamples, double masterBeatPosition );
+					virtual int GenerateAudio(int numsamples );
 					virtual void AddEvent(double offset, int track, const PatternEvent & event);
 					virtual void reallocateRemainingEvents(double beatOffset);
 				protected:

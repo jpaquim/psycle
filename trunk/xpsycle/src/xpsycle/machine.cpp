@@ -3,7 +3,9 @@
 #include "machine.h"
 #include "song.h"
 #include "dsp.h"
+///\todo remove global from machine
 #include "global.h"
+///\todo remove global from machine
 #include "configuration.h"
 #include <algorithm>
 #include "analyzer.h"
