@@ -90,7 +90,6 @@ else:
 	universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp'))
 	universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
 universalis.add_include_path('src')
-universalis.add_include_path('tmp')
 if universalis.name() in BUILD_TARGETS:
 	universalis.show()
 	universalis_library = universalis.targets()
