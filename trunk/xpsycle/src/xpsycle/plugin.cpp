@@ -429,7 +429,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData, const PlayerTimeInfo
             catch(const std::exception &)
             {
             }
-            TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer()->SamplesPerRow();
+            TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/ timeInfo.samplesPerRow();
             TWSSamples = 0;
             TWSActive = true;
           }

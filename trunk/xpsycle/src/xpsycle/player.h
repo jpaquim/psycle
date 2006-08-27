@@ -44,6 +44,11 @@ namespace psycle
 
 			const PlayerTimeInfo & timeInfo() const;
 
+			void setBpm( int bpm );
+			float bpm() const;
+
+			void SampleRate(const int sampleRate);
+
 		private:
 
 			PlayerTimeInfo timeInfo_;
@@ -70,9 +75,7 @@ namespace psycle
 			/// elapsed time since playing started in minutes.It just serves to complement the previous variable
 			///\todo There is no need for two vars.
 			int _playTimem;
-			/// the current beats per minute at which to play the song.
-			/// can be changed from the song itself using commands.
-			float bpm;
+			
 			/// starts to play.
 			void Start(double pos);
 			/// wether this player has been started.
@@ -90,22 +93,6 @@ namespace psycle
 		//private:
 			static float * Work(void* context, int& nsamples);
 
-
-		public:
-			/// ...
-			void SetBPM(float _bpm,int _tpb=0);
-
-			///\name sample rate
-			///\{
-				void RecalcSPB() { SamplesPerBeat((m_SampleRate*60)/bpm); }
-				const float SamplesPerBeat(){ return m_SamplesPerBeat;};
-				void SamplesPerBeat(const float samplePerBeat){m_SamplesPerBeat = samplePerBeat;};
-
-				const int SampleRate() { return m_SampleRate; }
-				void SampleRate(const int sampleRate);
-			///\}
-
-		public:
 			double PlayPos() const { return timeInfo_.playBeatPos(); }
 
 		public:
@@ -129,21 +116,13 @@ namespace psycle
 			/// dither handler
 			dsp::Dither dither;
 
-			float m_SamplesPerBeat;
-			int m_SampleRate;
-
 			void writeSamplesToFile( int amount );
 			bool _doDither;
 
 		///\name deprecated by multiseq
 		///\{
 		public:
-				/// ...
-				void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm* timeInfo_.linesPerBeat())); }
-				/// Returns the number of samples that it takes for each row of the pattern to be played
-				const int SamplesPerRow(){ return m_SamplesPerRow;};
-				/// Sets the number of samples that it takes for each row of the pattern to be played
-				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;}
+				
 				/// Reports the LinesPerBeat (used for machines that require "ticks" between commands).
 				int LinesPerBeat() { return timeInfo_.linesPerBeat(); }
 			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
@@ -158,9 +137,7 @@ namespace psycle
 
 
 		private:
-			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
-			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()
-			int m_SamplesPerRow;
+			
 			short _patternjump;
 			short _linejump;
 			short _loop_count;

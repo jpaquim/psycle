@@ -137,7 +137,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i, TriggerDelay[i], timeInfo);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
+									TriggerDelayCounter[i] = (RetriggerRate[i]*timeInfo.samplesPerRow())/256;
 								}
 								else
 								{
@@ -150,7 +150,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i, TriggerDelay[i], timeInfo);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
+									TriggerDelayCounter[i] = (RetriggerRate[i]*timeInfo.samplesPerRow())/256;
 									int parameter = TriggerDelay[i].parameter() & 0x0f;
 									if (parameter < 9)
 									{
@@ -221,8 +221,8 @@ namespace psycle
 				if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 				{
 					pVoice->_triggerNoteDelay = pVoice->_sampleCounter+ pVoice->effVal;
-					pVoice->_envelope._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::player().SampleRate());
-					pVoice->_filterEnv._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
+					pVoice->_envelope._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/timeInfo.sampleRate());
+					pVoice->_filterEnv._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/timeInfo.sampleRate());
 					pVoice->effretTicks--;
 					pVoice->_wave._pos.QuadPart = 0;
 					if ( pVoice->effretMode == 1 )
@@ -471,7 +471,7 @@ namespace psycle
 				case SAMPLER_CMD_EXTENDED:
 					if ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
-						pVoice->_triggerNoteOff = (Global::player().SamplesPerRow()/6)*(pEntry.parameter() & 0x0f);
+						pVoice->_triggerNoteOff = (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f);
 					}
 					else if (((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry.parameter() & 0x0f) == 0 ))
 					{
@@ -527,7 +527,7 @@ namespace psycle
 				{
 					pVoice->_filterEnv._stage = ENV_ATTACK;
 				}
-				pVoice->_filterEnv._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
+				pVoice->_filterEnv._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/timeInfo.sampleRate());
 				pVoice->_filterEnv._value = 0;
 				
 				// Init Wave
@@ -553,13 +553,13 @@ namespace psycle
 				//
 				if ( song()->_pInstrument[pVoice->_instrument]->_loop)
 				{
-					double const totalsamples = double(Global::player().SamplesPerRow()*song()->_pInstrument[pVoice->_instrument]->_lines);
+					double const totalsamples = double(timeInfo.samplesPerRow()*song()->_pInstrument[pVoice->_instrument]->_lines);
 					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}	
 				else
 				{
 					float const finetune = CValueMapper::Map_255_1(song()->_pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry.note()+song()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::player().SampleRate()));
+					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry.note()+song()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
 				}
 				
 
@@ -617,12 +617,12 @@ namespace psycle
 
 				// Init Amplitude Envelope
 				//
-				pVoice->_envelope._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::player().SampleRate());
+				pVoice->_envelope._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/timeInfo.sampleRate());
 				pVoice->_envelope._value = 0.0f;
 				pVoice->_envelope._sustain = (float)song()->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
 				if (( pEntry.command() == SAMPLER_CMD_EXTENDED) && ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
-					pVoice->_triggerNoteDelay = (Global::player().SamplesPerRow()/6)*(pEntry.parameter() & 0x0f);
+					pVoice->_triggerNoteDelay = (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f);
 					pVoice->_envelope._stage = ENV_OFF;
 				}
 				else
@@ -630,7 +630,7 @@ namespace psycle
 					if (pEntry.command() == SAMPLER_CMD_RETRIG && (pEntry.parameter() & 0x0f) > 0)
 					{
 						pVoice->effretTicks=(pEntry.parameter() & 0x0f); // number of Ticks.
-						pVoice->effVal= (Global::player().SamplesPerRow()/(pVoice->effretTicks+1));
+						pVoice->effVal= (timeInfo.samplesPerRow()/(pVoice->effretTicks+1));
 						
 						int volmod = (pEntry.parameter() & 0xf0)>>4; // Volume modifier.
 						switch (volmod) 
@@ -722,7 +722,7 @@ namespace psycle
 				{
 					pVoice->_filterEnv._stage = ENV_DECAY;
 					pVoice->_filterEnv._value = 1.0f;
-					pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / song()->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::player().SampleRate());
+					pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / song()->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/timeInfo.sampleRate());
 				}
 				break;
 			case ENV_DECAY:
@@ -758,7 +758,7 @@ namespace psycle
 				{
 					pVoice->_envelope._value = 1.0f;
 					pVoice->_envelope._stage = ENV_DECAY;
-					pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/song()->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::player().SampleRate());
+					pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/song()->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/timeInfo.sampleRate());
 				}
 				break;
 			case ENV_DECAY:
@@ -790,8 +790,8 @@ namespace psycle
 			{
 				pVoice->_envelope._stage = ENV_RELEASE;
 				pVoice->_filterEnv._stage = ENV_RELEASE;
-				pVoice->_envelope._step = (pVoice->_envelope._value/song()->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::player().SampleRate());
-				pVoice->_filterEnv._step = (pVoice->_filterEnv._value/song()->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::player().SampleRate());
+				pVoice->_envelope._step = (pVoice->_envelope._value/song()->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/timeInfo.sampleRate());
+				pVoice->_filterEnv._step = (pVoice->_filterEnv._value/song()->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/timeInfo.sampleRate());
 			}
 		}
 

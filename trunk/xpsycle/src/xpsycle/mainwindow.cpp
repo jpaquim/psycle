@@ -839,14 +839,14 @@ void MainWindow::setAppSongBpm(int x)
     int bpm = 0;
     if ( x != 0 ) {
       if (Global::pPlayer()->_playing )  {
-        selectedSong_->setBpm(Global::pPlayer()->bpm+x);
+        selectedSong_->setBpm(Global::pPlayer()->timeInfo().bpm()+x);
       } else selectedSong_->setBpm(selectedSong_->bpm()+x);
-      Global::pPlayer()->SetBPM( (int) selectedSong_->bpm(),selectedSong_->LinesPerBeat());
+      Global::pPlayer()->setBpm( (int) selectedSong_->bpm() );
       bpm = selectedSong_->bpm();
     }
-    else bpm = Global::pPlayer()->bpm;
+    else bpm = Global::pPlayer()->bpm();
 
-    bpmDisplay_->setNumber( (int) Global::pPlayer()->bpm );
+    bpmDisplay_->setNumber( (int) Global::pPlayer()->bpm() );
 
     bpmDisplay_->repaint();
 }
