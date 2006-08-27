@@ -44,10 +44,10 @@ class PluginFxCallback : public CFxCallback
     //HWND hWnd;
     inline virtual void MessBox(char* ptxt,char *caption,unsigned int type) { //MessageBox(hWnd,ptxt,caption,type); 
     }
-    inline virtual int GetTickLength() { return Global::pPlayer()->SamplesPerRow(); }
+    inline virtual int GetTickLength() { return Global::pPlayer()->timeInfo().samplesPerRow(); }
     inline virtual int GetSamplingRate() { return Global::pConfig()->GetSamplesPerSec(); }
-    inline virtual int GetBPM() { return Global::pPlayer()->bpm; }
-    inline virtual int GetTPB() { return Global::pPlayer()->LinesPerBeat(); }
+    inline virtual int GetBPM() { return Global::pPlayer()->timeInfo().bpm(); }
+    inline virtual int GetTPB() { return Global::pPlayer()->timeInfo().linesPerBeat(); }
 };
 
 class Plugin; // forward declaration

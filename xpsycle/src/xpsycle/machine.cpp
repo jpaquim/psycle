@@ -3,9 +3,6 @@
 #include "machine.h"
 #include "song.h"
 #include "dsp.h"
-///\todo remove global from machine
-#include "global.h"
-///\todo remove global from machine
 #include "configuration.h"
 #include <algorithm>
 #include "analyzer.h"
@@ -900,7 +897,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 	//position [0.0-linesperbeat] converted to "Tick()" lines
 	const double positionInLines = positionInBeat*Global::player().LinesPerBeat();
 	//position in samples of the next "Tick()" Line
-	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))*Global::player().SamplesPerRow();
+	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow();
 	//Next event, initialized to "out of scope".
 	int nextevent = numsamples+1;
 	int previousline = nextLineInSamples;
@@ -910,7 +907,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 	if (!workEvents.empty())
 	{
 		WorkEvent & workEvent = workEvents.front();
-		nextevent = workEvent.beatOffset() * Global::player().SamplesPerBeat();
+		nextevent = workEvent.beatOffset() * timeInfo.samplesPerBeat();
 		// correcting rounding errors.
 		if ( nextevent == nextLineInSamples+1 ) nextLineInSamples = nextevent;
 	}
@@ -922,7 +919,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 		{
 			Tick( timeInfo );
 			previousline = nextLineInSamples;
-			nextLineInSamples+=Global::player().SamplesPerRow();
+			nextLineInSamples+= timeInfo.samplesPerRow(); 
 		}
 
 		
@@ -939,7 +936,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 				{
 					WorkEvent & workEvent1 = *workEvents.begin();
 				//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
-					nextevent = workEvent1.beatOffset() * Global::player().SamplesPerBeat();
+					nextevent = workEvent1.beatOffset() * timeInfo.samplesPerBeat();
 				} else nextevent = numsamples+1;
 			} else nextevent = numsamples+1;
 		} 
@@ -952,11 +949,11 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 		{
 			std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << "-" << nextLineInSamples << "(" << previousline << ")" << "-" << nextevent << std::endl;
 		}
-		GenerateAudioInTicks(processedsamples,samplestoprocess, timeInfo);
+		GenerateAudioInTicks( processedsamples, samplestoprocess, timeInfo);
 	}
 	// reallocate events remaining in the buffer, This happens when soundcard buffer is bigger than STREAM_SIZE (machine buffer).
 	//	Since events are generated once per soundcard work(), events have to be reallocated for the next machine Work() call.
-	reallocateRemainingEvents(numsamples/Global::player().SamplesPerBeat());
+	reallocateRemainingEvents( numsamples/ timeInfo.samplesPerBeat() ); 
 	
 	return processedsamples;
 }

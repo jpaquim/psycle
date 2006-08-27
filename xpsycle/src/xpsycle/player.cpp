@@ -26,11 +26,7 @@ namespace psycle
 			_patternjump(-1),
 			_linejump(-1),
 			_loop_count(0),
-			_loop_line(0),
-			m_SampleRate(44100),
-			m_SamplesPerRow((44100*60)/(125*4)),
-			m_SamplesPerBeat((44100*60/125)),
-			bpm(125)
+			_loop_line(0)
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 			_doDither = false;
@@ -48,6 +44,17 @@ namespace psycle
 			return timeInfo_;
 		}
 
+		void Player::setBpm( int bpm )
+		{
+			timeInfo_.setBpm( bpm );
+		}
+
+		float Player::bpm( ) const
+		{
+			return timeInfo_.bpm();
+		}
+
+
 		void Player::Start(double pos)
 		{
       if ( !song_ && !driver_ ) return;
@@ -64,11 +71,10 @@ namespace psycle
 			_playTimem = 0;
 			_loop_count =0;
 			_loop_line = 0;
-			SetBPM(song().bpm(), song().LinesPerBeat());
-			SampleRate( 44100 );
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			timeInfo_.setPlayBeatPos( pos );
+			timeInfo_.setLinesPerBeat( song().LinesPerBeat() );
 		}
 
 		void Player::Stop(void)
@@ -86,8 +92,9 @@ namespace psycle
 					for(int c = 0; c < MAX_TRACKS; c++) song()._pMachine[i]->TriggerDelay[c].setCommand( 0 );
 				}
 			}
-			SetBPM(song().bpm(),song().LinesPerBeat());
-			SampleRate(driver_->_samplesPerSec);
+			setBpm( song().bpm() );
+			timeInfo_.setLinesPerBeat( song().LinesPerBeat() );
+			SampleRate( driver_->_samplesPerSec );
 			if (autoRecord_) stopRecording();
 		}
 
@@ -96,33 +103,22 @@ namespace psycle
        if ( !song_ ) return;
 
 			///\todo update the source code of the plugins...
-			if(m_SampleRate != sampleRate)
+
+			timeInfo_.setSampleRate( sampleRate );
+
+			for(int i(0) ; i < MAX_MACHINES; ++i)
 			{
-				m_SampleRate = sampleRate;
-				RecalcSPR();
-				RecalcSPB();
-				for(int i(0) ; i < MAX_MACHINES; ++i)
-				{
-					if(song()._pMachine[i]) song()._pMachine[i]->SetSampleRate(sampleRate);
-				}
+				if(song()._pMachine[i]) song()._pMachine[i]->SetSampleRate( sampleRate );
 			}
 		}
-		void Player::SetBPM(float _bpm,int _tpb)
-		{
-			timeInfo_.setLinesPerBeat( _tpb );
-			if ( _bpm != 0) bpm=_bpm;
-			RecalcSPR();
-			RecalcSPB();
-			///\todo : Find out if we should notify the plugins of this change.
-		}
-
+		
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
 			Machine::id_type mIndex;
 			switch (event.type())
 			{
 			case GlobalEvent::BPM_CHANGE:
-				SetBPM(event.parameter() );
+				setBpm (event.parameter() );
 std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new bpm: "<<event.parameter() <<std::endl;
 				break;
 			case GlobalEvent::JUMP_TO:
@@ -197,7 +193,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 								{
 									// delay
 									pMachine->TriggerDelay[track] = entry;
-									pMachine->TriggerDelayCounter[track] = ((entry.parameter()+1)*SamplesPerRow())/256;
+									pMachine->TriggerDelayCounter[track] = ((entry.parameter()+1)*timeInfo_.samplesPerRow())/256;
 								}
 								else if(entry.command() == PatternCmd::RETRIGGER)
 								{
@@ -222,7 +218,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 										pMachine->TriggerDelay[track] = entry;
 										pMachine->ArpeggioCount[track] = 1;
 									}
-									pMachine->RetriggerRate[track] = SamplesPerRow()* timeInfo_.linesPerBeat() / 24;
+									pMachine->RetriggerRate[track] = timeInfo_.samplesPerRow()* timeInfo_.linesPerBeat() / 24;
 								}
 								else
 								{
@@ -236,7 +232,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					}
 				}
 			}
-			_samplesRemaining = SamplesPerRow();
+			_samplesRemaining = timeInfo_.samplesPerRow();
 		}
 
 		float * Player::Work(void* context, int & numSamples)
@@ -250,7 +246,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 			// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
 			Master::_pMasterSamples = _pBuffer;
-			double beatLength = numSamples/(double) SamplesPerBeat();
+			double beatLength = numSamples/(double) timeInfo_.samplesPerBeat();
 //			CSingleLock crit(&song().door, true);
 
 			if (autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
@@ -281,7 +277,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					if(globals.empty())
 						chunkSampleSize = numSamples - processedSamples;
 					else
-						chunkSampleSize = chunkBeatSize * SamplesPerBeat();
+						chunkSampleSize = chunkBeatSize * timeInfo_.samplesPerBeat();
 
 					//get all patternlines occuring before the next global event, execute them, and process
 					events.clear();
@@ -452,8 +448,4 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		}
 
 	} // end of host namespace
-}
-
-
-
- // end of psycle namespace
+} // end of psycle namespace

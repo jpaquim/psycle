@@ -47,12 +47,31 @@ namespace psycle
 				/// for old psycle machines 
 				void setLinesPerBeat( int lines );
 				int linesPerBeat() const;
+
+				/// the current beats per minute at which to play the song.
+				/// can be changed from the song itself using commands.
+				void setBpm( float bpm );
+				float bpm() const;
+
+				void setSampleRate( int rate );
+				int sampleRate( ) const;
+
+				float samplesPerBeat() const;
+				float samplesPerRow() const;
+
 				
 		private:
 
 				double playBeatPos_;
 				int samplePos_;
 				int lpb_;
+				float bpm_;
+				int sampleRate_;
+				float samplesPerBeat_;
+				float samplesPerRow_;
+
+				void recalcSPB();
+				void recalcSPR();
 
 		};
 
