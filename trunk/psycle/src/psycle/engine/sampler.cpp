@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/sampler.hpp>
 #include <psycle/engine/song.hpp>
 #include <psycle/engine/player.hpp>

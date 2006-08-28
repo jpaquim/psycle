@@ -4,7 +4,7 @@
 
 ///\implementation universalis::exception
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "exception.hpp"
 #include "operating_system/loggers.hpp"

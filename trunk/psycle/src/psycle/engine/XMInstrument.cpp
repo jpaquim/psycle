@@ -5,7 +5,7 @@
  */
 
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/configuration.hpp>
 #include <psycle/engine/XMInstrument.hpp>
 #include <psycle/engine/filter.hpp>

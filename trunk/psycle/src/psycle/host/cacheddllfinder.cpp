@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "cacheddllfinder.hpp"
 #include "afxwin.h"	// For CFileFind. If an alternative method is found, this can be removed.
 #include <psycle/engine/plugin.hpp>

@@ -9,7 +9,7 @@
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/helpers/DataCompression.hpp>
 #include <cstring>
 

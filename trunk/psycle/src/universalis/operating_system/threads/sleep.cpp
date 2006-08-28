@@ -4,7 +4,7 @@
 
 ///\implementation universalis::operating_system::threads::sleep
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "sleep.hpp"
 #if /* boost::thread::sleep returns on interruptions */ /*defined UNIVERSALIS__QUAQUAVERSALIS &&*/ defined DIVERSALIS__OPERATING_SYSTEM__POSIX

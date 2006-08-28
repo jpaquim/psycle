@@ -24,7 +24,7 @@
 
 **********************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/helpers/fft.hpp>
 #include <cstdlib>
 #include <cstdio>

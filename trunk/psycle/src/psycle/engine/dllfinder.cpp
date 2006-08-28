@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/dllfinder.hpp>
 #include <algorithm> // std::transform
 #include <cctype>	   // std::tolower

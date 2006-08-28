@@ -4,7 +4,7 @@
 
 ///\implementation universalis::operating_system::detail::check_version
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "check_version.hpp"
 #include "../loggers.hpp"

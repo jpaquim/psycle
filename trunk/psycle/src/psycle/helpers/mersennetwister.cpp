@@ -48,7 +48,7 @@
 ///todo: inlining and such
 
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "mersennetwister.hpp"
 #include <cmath>
 

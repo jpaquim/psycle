@@ -5,7 +5,7 @@
 ///\file
 ///\brief
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "code_description.hpp"
 #include <universalis/standard_library/exceptions/code_description.hpp>

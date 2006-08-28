@@ -4,7 +4,7 @@
 
 ///\implementation universalis::compiler::detail::demangled
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "demangle.hpp"
 #if defined DIVERSALIS__COMPILER__GNU

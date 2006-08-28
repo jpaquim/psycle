@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "FrameMixerMachine.hpp"
 #include "psycle.hpp"
 #include "ChildView.hpp"

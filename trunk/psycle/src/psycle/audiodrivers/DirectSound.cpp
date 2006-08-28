@@ -1,7 +1,7 @@
 ///\file
 ///\implementation psycle::host::DirectSound.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/audiodrivers/DirectSound.hpp>
 //#include <psycle/host/resources/resources.hpp>
 //\todo:

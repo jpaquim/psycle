@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "song.hpp"
 #include "machine.hpp"
 #include "internal_machines.hpp"

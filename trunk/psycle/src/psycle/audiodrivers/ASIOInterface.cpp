@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/audiodrivers/ASIOInterface.hpp>
 #include <psycle/host/resources/resources.hpp>
 #include <psycle/engine/registry.hpp>

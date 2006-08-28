@@ -4,7 +4,7 @@
 
 ///\file
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "allocators.hpp"
 #include <diversalis/compiler.hpp>
