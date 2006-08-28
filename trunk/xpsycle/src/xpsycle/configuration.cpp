@@ -58,7 +58,6 @@ Configuration::~Configuration()
 
 void Configuration::setSkinDefaults( )
 {
-  autoStopMachines = false;
   _centerCursor = false;
   enableSound = 0;
   device_name = "plughw:0";

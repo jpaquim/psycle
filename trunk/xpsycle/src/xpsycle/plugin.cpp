@@ -18,6 +18,7 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "plugin.h"
+#include "configuration.h"
 //#include "inputhandler.h"
 //#include <ngrs/nfile.h>
 #include <dlfcn.h>
@@ -27,6 +28,7 @@
 //#include <inttypes.h>
 #include <algorithm>
 #include <cctype>
+
 
 namespace psycle {
   namespace host {
@@ -372,7 +374,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData, const PlayerTimeInfo
           catch(const std::exception &)
           {
           }
-          Global::pPlayer()->Tweaker = true;
+          Player::Instance()->Tweaker = true;
         }
       }
 	else if(pData.note() == notecommands::tweakslide)
@@ -450,7 +452,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData, const PlayerTimeInfo
             }
           }
         }
-        Global::pPlayer()->Tweaker = true;
+         Player::Instance()->Tweaker = true;
       }
 }
 

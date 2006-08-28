@@ -117,7 +117,7 @@ PatternView * ChildView::patternView( )
 void ChildView::play( )
 {
   patternView_->setPrevEditPosition(patternView_->editPosition());
-  Global::pPlayer()->Start(0.0);
+  Player::Instance()->Start(0.0);
 }
 
 
@@ -128,7 +128,7 @@ void ChildView::playFromStart()
     //bScrollDetatch=false;
   }
   patternView_->setPrevEditPosition(patternView_->editPosition());
-  Global::pPlayer()->Start(0.0);
+  Player::Instance()->Start(0.0);
   //pParentMain->StatusBarIdle();
 }
 

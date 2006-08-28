@@ -22,10 +22,9 @@
 
 #include "machine.h"
 #include "plugin_interface.h"
-#include "global.h"
 #include "player.h"
-#include "configuration.h"
 #include <cassert>
+#include "global.h"
 
 /**
 @author Stefan
@@ -35,19 +34,16 @@ namespace psycle {
 	namespace host {
 
 
-class DeSerializer;
-
-
 class PluginFxCallback : public CFxCallback
 {
   public:
     //HWND hWnd;
     inline virtual void MessBox(char* ptxt,char *caption,unsigned int type) { //MessageBox(hWnd,ptxt,caption,type); 
     }
-    inline virtual int GetTickLength() { return Global::pPlayer()->timeInfo().samplesPerRow(); }
-    inline virtual int GetSamplingRate() { return Global::pConfig()->GetSamplesPerSec(); }
-    inline virtual int GetBPM() { return Global::pPlayer()->timeInfo().bpm(); }
-    inline virtual int GetTPB() { return Global::pPlayer()->timeInfo().linesPerBeat(); }
+    inline virtual int GetTickLength() { return Player::Instance()->timeInfo().samplesPerRow(); }
+    inline virtual int GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
+    inline virtual int GetBPM() { return Player::Instance()->timeInfo().bpm(); }
+    inline virtual int GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
 };
 
 class Plugin; // forward declaration
@@ -121,9 +117,6 @@ public:
 
     bool Instance(const std::string & file_name);
     bool LoadDll (std::string psFileName);
-//    virtual void SaveDllName(Serializer * pFile);
-//    virtual bool LoadSpecificChunk(DeSerializer * pFile, int version);
-//    virtual void SaveSpecificChunk(Serializer* pFile);
 
 ///\name (de)serialization
 			///\{

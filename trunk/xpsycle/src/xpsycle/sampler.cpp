@@ -6,8 +6,7 @@
 #include "song.h"
 #include "player.h"
 #include "fileio.h"
-#include "configuration.h"
-#include "global.h"
+
 namespace psycle
 {
 	namespace host
@@ -174,7 +173,7 @@ namespace psycle
 					}
 				}
 				Machine::SetVolumeCounter(numSamples);
-				if ( Global::configuration().autoStopMachines )
+				if ( Player::Instance()->autoStopMachines )
 				{
 					if (_volumeCounter < 8.0f)	{
 						_volumeCounter = 0.0f;

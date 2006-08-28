@@ -37,16 +37,6 @@ Configuration & Global::configuration() {
 }
 
 
-Player * Global::pPlayer() {
-  static Player* p = new Player();
-  return p;
-}
-
-Player & Global::player() {
-  return *pPlayer();
-}
-
-
 Global::Global()
 {
 

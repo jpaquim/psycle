@@ -429,7 +429,7 @@ namespace psycle {
 			{
 				int nv = (pData.command() << 8)+pData.parameter();
 				SetParameter(pData.instrument(), nv);
-				Global::player().Tweaker = true;
+				Player::Instance()->Tweaker = true;
 			}
 			else if( pData.note() == cdefTweakS)
 			{
@@ -449,7 +449,7 @@ namespace psycle {
 			{
 				Mix(numSamples);
 				Machine::SetVolumeCounter(numSamples);
-				if ( Global::configuration().autoStopMachines )
+				if ( Player::Instance()->autoStopMachines )
 				{
 					if (_volumeCounter < 8.0f)
 					{
@@ -1043,10 +1043,10 @@ namespace psycle {
 			}
 
 			if(bRedraw)
-				Global::player().Tweaker=true;
+				Player::Instance()->Tweaker=true;
 			bRedraw=false;
 
-			float minms = Global::configuration()._pOutputDriver->_samplesPerSec /1000.0f * 100.0f;	//100ms in samples
+			float minms = Player::Instance()->timeInfo().sampleRate() /1000.0f * 100.0f;	//100ms in samples
 			lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
 			if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 
