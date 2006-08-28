@@ -36,10 +36,22 @@ namespace psycle {
 
 		class Psy4Filter : public Psy3Filter, public sigslot::has_slots<>
 		{
-			public:
-				Psy4Filter();
+				// Singleton Pattern
+			protected:
+	  		Psy4Filter();          
+  			virtual ~Psy4Filter();
 
-				~Psy4Filter();
+			private:
+				Psy4Filter( Psy4Filter const & );
+  			Psy4Filter& operator=(Psy4Filter const&);
+
+			public:
+					static Psy4Filter* Instance() {
+					// don`t use multithreaded
+						static Psy4Filter s;
+ 						return &s; 
+					}
+				// Singleton pattern end
 
 				virtual int version() const;
 
