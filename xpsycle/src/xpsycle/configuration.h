@@ -52,8 +52,7 @@ public:
     DefaultBitmaps & icons();
 
 		void setDriverByName( const std::string & driverName );
-
-    bool autoStopMachines;
+    
     std::string iconPath;
     std::string pluginPath;
     std::string prsPath;

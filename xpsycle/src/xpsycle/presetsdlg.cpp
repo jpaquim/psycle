@@ -23,6 +23,7 @@
 #include "global.h"
 #include "framemachine.h"
 #include "fileio.h"
+#include "configuration.h"
 #include <ngrs/nbutton.h>
 #include <ngrs/ncheckbox.h>
 #include <ngrs/ngridlayout.h>

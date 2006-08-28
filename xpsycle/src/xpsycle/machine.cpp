@@ -895,7 +895,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 	///\todo remove this!!!!!
 	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 	//position [0.0-linesperbeat] converted to "Tick()" lines
-	const double positionInLines = positionInBeat*Global::player().LinesPerBeat();
+	const double positionInLines = positionInBeat*Player::Instance()->LinesPerBeat();
 	//position in samples of the next "Tick()" Line
 	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow();
 	//Next event, initialized to "out of scope".

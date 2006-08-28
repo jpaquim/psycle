@@ -31,7 +31,6 @@ namespace psycle {
   namespace host {
 
     class Song;
-    class Player;
     class Configuration;
 
     class Global{
@@ -40,10 +39,8 @@ namespace psycle {
 
         ~Global();
 
-        static Player* pPlayer();
         static Configuration* pConfig();
         static Configuration & configuration();
-        static Player & player();
     };
 
 template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)

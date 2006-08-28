@@ -19,6 +19,7 @@
   ***************************************************************************/
 #include "newmachine.h"
 #include "plugin.h"
+#include "configuration.h"
 #include <ngrs/nborderlayout.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>

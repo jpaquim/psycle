@@ -96,7 +96,7 @@ MainWindow::~MainWindow()
 void MainWindow::enableSound( )
 {
   AudioDriver* pOut = Global::pConfig()->_pOutputDriver;
-	Global::pPlayer()->setDriver( *pOut );  
+	Player::Instance()->setDriver( *pOut );  
 }
 
 
@@ -135,7 +135,7 @@ ChildView* MainWindow::addChildView()
 
   if (songMap.size() > 1) book->setTabBarVisible(true);
 
-  Global::pPlayer()->song( childView_->song() );
+  Player::Instance()->song( childView_->song() );
 
   selectedChildView_ =  childView_;
 
@@ -156,8 +156,8 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
      bool update = false;
      ChildView* view = it->second;
      if (view == selectedChildView_) {
-       Global::pPlayer()->Stop();
-       Global::pPlayer()->song(0);       
+       Player::Instance()->Stop();
+       Player::Instance()->song(0);       
        selectedChildView_ = 0;
        update = true;
      }
@@ -169,7 +169,7 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
         for ( ; songIt != songTabMap.end() ; songIt++ ) {
           if ( songIt->second == book->activePage() ) {
            selectedChildView_ = songIt->second;         
-           Global::pPlayer()->song( selectedChildView_->song() );
+           Player::Instance()->song( selectedChildView_->song() );
            updateNewSong();
           } 
         }
@@ -189,8 +189,8 @@ void MainWindow::onTabChange( NButtonEvent * ev )
   if ( it != songTabMap.end() ) {
     ChildView* view = it->second;
     std::cout << view->song()->name() << std::endl;
-		Global::pPlayer()->Stop();
-    Global::pPlayer()->song( view->song() );
+		Player::Instance()->Stop();
+    Player::Instance()->song( view->song() );
     selectedChildView_ = view;
     updateNewSong();
     pane()->repaint();
@@ -663,7 +663,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
      // pane()->repaint();
      if ( fileName != "" ) {
 			 // stop player
-			 Global::pPlayer()->Stop();
+			 Player::Instance()->Stop();
 			 // disable audio driver
 			 //Global::configuration()._pOutputDriver->Enable(false);
 		   // add a new Song tab
@@ -730,9 +730,9 @@ void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_
 
 void MainWindow::onBarStop(NButtonEvent* ev)
 {
-  bool pl = Global::pPlayer()->_playing;
-  bool blk = Global::pPlayer()->_playBlock;
-  Global::pPlayer()->Stop();
+  bool pl = Player::Instance()->_playing;
+  bool blk = Player::Instance()->_playBlock;
+  Player::Instance()->Stop();
 }
 
 void MainWindow::closePsycle()
@@ -838,15 +838,15 @@ void MainWindow::setAppSongBpm(int x)
 
     int bpm = 0;
     if ( x != 0 ) {
-      if (Global::pPlayer()->_playing )  {
-        selectedSong_->setBpm(Global::pPlayer()->timeInfo().bpm()+x);
+      if ( Player::Instance()->_playing )  {
+        selectedSong_->setBpm(  Player::Instance()->timeInfo().bpm()+x);
       } else selectedSong_->setBpm(selectedSong_->bpm()+x);
-      Global::pPlayer()->setBpm( (int) selectedSong_->bpm() );
+       Player::Instance()->setBpm( (int) selectedSong_->bpm() );
       bpm = selectedSong_->bpm();
     }
-    else bpm = Global::pPlayer()->bpm();
+    else bpm =  Player::Instance()->bpm();
 
-    bpmDisplay_->setNumber( (int) Global::pPlayer()->bpm() );
+    bpmDisplay_->setNumber( (int)  Player::Instance()->bpm() );
 
     bpmDisplay_->repaint();
 }
@@ -887,7 +887,7 @@ void MainWindow::onTimer( )
   if ( !selectedChildView_ ) return;
   Song* selectedSong_ = selectedChildView_->song();
 
-  if (Global::pPlayer()->_playing) {
+  if ( Player::Instance()->_playing) {
     
   }
 

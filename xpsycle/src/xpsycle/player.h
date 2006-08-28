@@ -17,11 +17,22 @@ namespace psycle
 
 		class Player
 		{
+		// Singleton Pattern
+		private:
+	  	Player();          
+  		~Player();
+			Player( Player const & );
+  		Player& operator=(Player const&);
+
 		public:
-
-			Player();
-
-			virtual ~Player();
+			static Player* Instance() {
+					// note keep sure a player instance is created from the gui
+					// before starting audiothread
+					// or use single threaded only
+					static Player s;
+ 					return &s; 
+			}
+		// Singleton pattern end
 
 			void setDriver(  const AudioDriver & driver );
 
@@ -32,6 +43,12 @@ namespace psycle
 			void inline song(Song * song) {
 				song_ = song;
 			}
+
+			/// starts to play.
+			void Start(double pos);
+
+			/// stops playing.
+			void Stop();
 
 			void setFileName( const std::string & fileName);
 			const std::string fileName() const;
@@ -48,6 +65,9 @@ namespace psycle
 			float bpm() const;
 
 			void SampleRate(const int sampleRate);
+
+			bool autoStopMachines;
+			
 
 		private:
 
@@ -76,8 +96,7 @@ namespace psycle
 			///\todo There is no need for two vars.
 			int _playTimem;
 			
-			/// starts to play.
-			void Start(double pos);
+
 			/// wether this player has been started.
 			bool _playing;
 			/// wether this player should only play the selected block in the sequence.
@@ -86,8 +105,7 @@ namespace psycle
 			bool _loopSong;
 
 		public:
-			/// stops playing.
-			void Stop();
+			
 			/// work function. (Entrance for the callback function (audiodriver)
 			float * Work(int nsamples);
 		//private:

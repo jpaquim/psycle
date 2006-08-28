@@ -540,9 +540,9 @@ SequencerGUI::SequencerGUI()
   setLayout( NAlignLayout() );
 
   waveOut = new WaveFileOut();
-  waveOut->Initialize(Global::pPlayer()->Work, Global::pPlayer());
-  Global::pPlayer()->recordStopped.connect(this,&SequencerGUI::onRecordStop);
-  Global::pPlayer()->setFileName("test1.wav");
+  waveOut->Initialize(Player::Instance()->Work, Player::Instance());
+  Player::Instance()->recordStopped.connect(this,&SequencerGUI::onRecordStop);
+  Player::Instance()->setFileName("test1.wav");
 
   counter = 0;
   beatPxLength_ = 5; // default value for one beat

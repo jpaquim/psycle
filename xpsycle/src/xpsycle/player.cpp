@@ -32,6 +32,7 @@ namespace psycle
 			_doDither = false;
 			autoRecord_ = false;
 			driver_ = 0;
+			autoStopMachines = false;
 		}
 
 		Player::~Player()
