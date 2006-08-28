@@ -4,7 +4,7 @@
 
 ///\implementation universalis::operating_system::loggers
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "terminal.hpp"
 #include "loggers.hpp"

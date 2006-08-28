@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/internal_machine_package.hpp>
 #include <psycle/engine/internal_machines.hpp>
 #include <psycle/engine/sampler.hpp>

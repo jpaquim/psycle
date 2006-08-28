@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/Psycle.hpp>
 #include <psycle/host/XMSamplerUI.hpp>
 #include <psycle/engine/XMSampler.hpp>

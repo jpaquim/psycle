@@ -3,7 +3,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "psycle.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"

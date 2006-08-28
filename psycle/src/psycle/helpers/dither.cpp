@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::dsp::Dither
 
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "dither.hpp"
 
 namespace psycle

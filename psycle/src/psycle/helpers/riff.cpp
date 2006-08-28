@@ -31,7 +31,7 @@
 	\endverbatim
 */
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/helpers/riff.hpp>
 #include <cstdio>
 #include <cstdlib>

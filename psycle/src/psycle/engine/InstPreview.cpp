@@ -1,7 +1,7 @@
 //\file
 //\brief implementation file for psycle::host::InstPreview.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/InstPreview.hpp>
 #include <psycle/engine/Instrument.hpp>
 

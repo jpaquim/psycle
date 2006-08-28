@@ -4,7 +4,7 @@
 
 ///\implementation universalis::operating_system::dynamic_link::resolver
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "resolver.hpp"
 #include <universalis/exception.hpp>

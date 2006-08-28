@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Global.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/uiglobal.hpp>
 #include <psycle/host/uiconfiguration.hpp>
 #include <psycle/host/InputHandler.hpp>

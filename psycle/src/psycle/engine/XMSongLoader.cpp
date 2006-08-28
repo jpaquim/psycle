@@ -4,7 +4,7 @@
  *  $Revision$
  */
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/resources/resources.hpp> // Is this needed?
 #include <psycle/host/ProgressDialog.hpp> // Is this needed?
 #include <psycle/engine/song.hpp>

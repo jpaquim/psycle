@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/audiodrivers/WaveOut.hpp>
 #include <psycle/host/resources/resources.hpp>
 #include <psycle/host/audiodrivers/WaveOutDialog.hpp>

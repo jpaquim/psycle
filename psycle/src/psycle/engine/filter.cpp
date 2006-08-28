@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Filter.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/player.hpp>
 #include <psycle/engine/filter.hpp>
 #include <psycle/engine/global.hpp>

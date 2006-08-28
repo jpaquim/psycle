@@ -1,7 +1,7 @@
 ///\file
 ///\implementation psycle::host::CDSoundConfig.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/audiodrivers/DSoundConfig.hpp>
 #pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union

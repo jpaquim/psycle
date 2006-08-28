@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CASIOConfig.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/psycle.hpp>
 #include <psycle/host/audiodrivers/ASIOConfig.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)

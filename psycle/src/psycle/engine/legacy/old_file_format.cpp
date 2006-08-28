@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Global.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/legacy/psy2filter.hpp>
 #include <psycle/engine/FileIO.hpp>
 #include <psycle/engine/song.hpp>

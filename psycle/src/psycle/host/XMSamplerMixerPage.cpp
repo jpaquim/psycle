@@ -2,7 +2,7 @@
 //
 
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/Psycle.hpp>
 #include <psycle/engine/song.hpp>
 #include <psycle/host/XMSamplerMixerPage.hpp>

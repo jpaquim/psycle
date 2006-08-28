@@ -3,7 +3,7 @@
 
 ///\implementation psycle::coal::host
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "detail/project.private.hpp"
 #if 1 || defined PSYCLE__COAL__EXPERIMENTAL
 #include "host.hpp"

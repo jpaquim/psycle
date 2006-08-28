@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::COutputDlg.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/Psycle.hpp>
 #include <psycle/host/OutputDlg.hpp>
 #include <psycle/engine/MidiInput.hpp>

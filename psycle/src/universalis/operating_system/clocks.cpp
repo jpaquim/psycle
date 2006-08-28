@@ -4,7 +4,7 @@
 
 ///\implementation universalis::operating_system::clock
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #if 0
 #include "clock.hpp"

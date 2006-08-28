@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/engine/psy3filter.hpp>
 #include <psycle/engine/FileIO.hpp>
 #include <psycle/engine/song.hpp>

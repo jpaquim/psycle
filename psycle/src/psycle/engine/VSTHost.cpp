@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::plugin
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "VSTHost.hpp"
 #include "song.hpp"
 #include "player.hpp"

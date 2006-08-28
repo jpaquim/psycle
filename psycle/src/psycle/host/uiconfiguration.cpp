@@ -1,7 +1,7 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include <psycle/host/uiconfiguration.hpp>
 #include <psycle/engine/registry.hpp>
 #include <psycle/engine/MidiInput.hpp>

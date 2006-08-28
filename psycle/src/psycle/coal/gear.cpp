@@ -3,7 +3,7 @@
 
 ///\implementation psycle::coal::gear
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "detail/project.private.hpp"
 #if defined PSYCLE__COAL__EXPERIMENTAL
 #include "gear.hpp"

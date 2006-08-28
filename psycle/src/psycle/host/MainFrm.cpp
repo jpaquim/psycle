@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "psycle.hpp"
 #include "MainFrm.hpp"
 #include "WavFileDlg.hpp"
