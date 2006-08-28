@@ -36,9 +36,9 @@ namespace psycle
 		{
 			if (c==0) {
 				c++;
-				filters.push_back(new Psy2Filter());
-				filters.push_back(new Psy3Filter());
-				filters.push_back(new Psy4Filter());
+				filters.push_back( Psy2Filter::Instance() );
+				filters.push_back( Psy3Filter::Instance() );
+				filters.push_back( Psy4Filter::Instance() );
 			}
 		}
 

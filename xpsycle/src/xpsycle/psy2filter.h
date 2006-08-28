@@ -46,10 +46,25 @@ protected:
 						int numpars;
 						float * pars;
 				};
+
+
+			// Singleton Pattern
+		protected:
+	  	Psy2Filter();          
+  		virtual ~Psy2Filter();
+
+		private:
+			Psy2Filter( Psy2Filter const & );
+  		Psy2Filter& operator=(Psy2Filter const&);
+
+		public:
+			static Psy2Filter* Instance() {
+					// don`t use multithreaded
+					static Psy2Filter s;
+ 					return &s; 
+			}
+			// Singleton pattern end
 	
-	public:
-		Psy2Filter();
-		virtual ~Psy2Filter();
 	
 			protected:
 

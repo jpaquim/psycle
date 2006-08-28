@@ -35,12 +35,24 @@ namespace psycle
 
 		class Psy3Filter : public PsyFilter
 		{
-			public:
-				Psy3Filter();
+				// Singleton Pattern
+		protected:
+	  		Psy3Filter();          
+  			virtual ~Psy3Filter();
 
-				~Psy3Filter();
+		private:
+				Psy3Filter( Psy3Filter const & );
+  			Psy3Filter& operator=(Psy3Filter const&);
 
-			protected:
+		public:
+				static Psy3Filter* Instance() {
+					// don`t use multithreaded
+					static Psy3Filter s;
+ 					return &s; 
+				}
+		// Singleton pattern end
+
+		protected:
 
 				virtual bool testFormat(const std::string & fileName);
 				virtual bool load(const std::string & fileName, Song & song);
