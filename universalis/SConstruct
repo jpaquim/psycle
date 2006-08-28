@@ -73,6 +73,7 @@ boost_libraries = packageneric.external_package(
 # modules
 
 universalis = packageneric.module(
+	source_package = source_package,
 	name = 'lib-universalis-' + str(source_package.version().major()),
 	version = source_package.version(),
 	description = source_package.description(),
