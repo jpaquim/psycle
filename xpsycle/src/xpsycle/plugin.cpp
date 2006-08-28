@@ -114,7 +114,7 @@ void Plugin::Init( )
   }
 }
 
-int Plugin::GenerateAudioInTicks(int startSample,  int numSamples, const PlayerTimeInfo & timeInfo)
+int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
       int ns = numSamples;
       int us = startSample;
@@ -339,7 +339,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples, const PlayerT
       _worked = true;
 }
 
-void Plugin::Tick(const PlayerTimeInfo & timeInfo)
+void Plugin::Tick( )
 {
   try {
       proxy().SequencerTick();
@@ -348,8 +348,10 @@ void Plugin::Tick(const PlayerTimeInfo & timeInfo)
   }
 }
 
-void Plugin::Tick( int channel, const PatternEvent & pData, const PlayerTimeInfo & timeInfo )
+void Plugin::Tick( int channel, const PatternEvent & pData )
 {
+  const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+
   try
   {
       proxy().SeqTick(channel, pData.note(), pData.instrument(), pData.command(), pData.parameter());

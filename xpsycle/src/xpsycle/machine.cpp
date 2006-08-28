@@ -484,7 +484,7 @@ namespace psycle
 
 		/// Each machine is expected to produce its output in its own
 		/// _pSamplesX buffers.
-		void Machine::Work(int numSamples, const PlayerTimeInfo & timeInfo )
+		void Machine::Work(int numSamples )
 		{
 			_waitingForSound=true;
 			for (int i=0; i<MAX_CONNECTIONS; i++)
@@ -507,7 +507,7 @@ namespace psycle
 									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
 								//std::cout << pInMachine->_macIndex << "before work" << numSamples << std::endl;
-								pInMachine->Work( numSamples, timeInfo );
+								pInMachine->Work( numSamples );
 								//std::cout << pInMachine->_macIndex << "after work" << numSamples << std::endl;
 							}
 							/*
@@ -540,11 +540,11 @@ namespace psycle
 //				PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
 //				wire_cpu_cost(wire_cpu_cost() + wcost);
 			}
-			GenerateAudio( numSamples , timeInfo );
+			GenerateAudio( numSamples );
 		}
 
 		//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
-		void Machine::WorkNoMix(int numSamples, const PlayerTimeInfo & timeInfo)
+		void Machine::WorkNoMix( int numSamples )
 		{
 			_waitingForSound=true;
 			for (int i=0; i<MAX_CONNECTIONS; i++)
@@ -560,7 +560,7 @@ namespace psycle
 								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
-								pInMachine->Work(numSamples, timeInfo);
+								pInMachine->Work( numSamples );
 							}
 							pInMachine->_waitingForSound = false;
 						}
@@ -850,49 +850,17 @@ int WorkEvent::track( ) const
 	return track_;
 }
 
-int Machine::GenerateAudioInTicks(int startSample, int numsamples, const PlayerTimeInfo & timeInfo )
+int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 {
 	//std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
 	workEvents.clear();
 	return 0;
 }
 
-int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
+int Machine::GenerateAudio( int numsamples )
 {
+  const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 	//position [0.0-1.0] inside the current beat.
-/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-///\todo dont pollute our new code with old psycle crap
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!/// this is unbelivebale crap here
-	///\todo remove this!!!!!
-	/// this is unbelivebale crap here
-	///\todo remove this!!!!!
 	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 	//position [0.0-linesperbeat] converted to "Tick()" lines
 	const double positionInLines = positionInBeat*Player::Instance()->LinesPerBeat();
@@ -917,7 +885,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 	{
 		if ( processedsamples == nextLineInSamples )
 		{
-			Tick( timeInfo );
+			Tick( );
 			previousline = nextLineInSamples;
 			nextLineInSamples+= timeInfo.samplesPerRow(); 
 		}
@@ -930,7 +898,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
 				colsIt = playCol.find(workEvent.track());
 				if ( colsIt == playCol.end() ) { playCol[workEvent.track()]=playColIndex++;  colsIt = playCol.find(workEvent.track()); }
-				Tick(colsIt->second, workEvent.event(), timeInfo );
+				Tick(colsIt->second, workEvent.event() );
 				workEvents.pop_front();
 				if (!workEvents.empty())
 				{
@@ -949,7 +917,7 @@ int Machine::GenerateAudio( int numsamples, const PlayerTimeInfo & timeInfo  )
 		{
 			std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << "-" << nextLineInSamples << "(" << previousline << ")" << "-" << nextevent << std::endl;
 		}
-		GenerateAudioInTicks( processedsamples, samplestoprocess, timeInfo);
+		GenerateAudioInTicks( processedsamples, samplestoprocess );
 	}
 	// reallocate events remaining in the buffer, This happens when soundcard buffer is bigger than STREAM_SIZE (machine buffer).
 	//	Since events are generated once per soundcard work(), events have to be reallocated for the next machine Work() call.

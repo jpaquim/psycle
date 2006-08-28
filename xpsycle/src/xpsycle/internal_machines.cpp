@@ -106,8 +106,9 @@ namespace psycle {
 				bisTicking=false;
 			}
 		}
-		void DuplicatorMac::Tick( int channel, const PatternEvent & pData, const PlayerTimeInfo & timeInfo)
+		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
 		{
+			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 /*			if ( !_mute && !bisTicking)
 			{
 				bisTicking=true;
@@ -185,7 +186,7 @@ namespace psycle {
 			else return false;
 		}
 
-		int DuplicatorMac::GenerateAudio(int numSamples, const PlayerTimeInfo & timeInfo)
+		int DuplicatorMac::GenerateAudio( int numSamples )
 		{
 			_worked = true;
 			return numSamples;
@@ -249,7 +250,7 @@ namespace psycle {
 			vuupdated = false;
 			_clip = false;
 		}
-		void Master::Tick(int channel, const PatternEvent & data, const PlayerTimeInfo & timeInfo )
+		void Master::Tick(int channel, const PatternEvent & data )
 		{
 			if ( data.note() == PatternCmd::SET_VOLUME )
 			{
@@ -257,7 +258,7 @@ namespace psycle {
 			}
 		}
 
-		int Master::GenerateAudio(int numSamples, const PlayerTimeInfo & timeInfo)
+		int Master::GenerateAudio( int numSamples )
 		{
 #if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 			universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
@@ -423,7 +424,7 @@ namespace psycle {
 			}
 		}
 
-		void Mixer::Tick( int channel, const PatternEvent & pData, const PlayerTimeInfo & timeInfo)
+		void Mixer::Tick( int channel, const PatternEvent & pData )
 		{
 			if(pData.note() == cdefTweakM)
 			{
@@ -437,12 +438,12 @@ namespace psycle {
 			}
 		}
 
-		int Mixer::GenerateAudio(int numSamples, const PlayerTimeInfo & timeInfo)
+		int Mixer::GenerateAudio( int numSamples )
 		{
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
-			Machine::WorkNoMix(numSamples, timeInfo );
+			Machine::WorkNoMix( numSamples );
 			// Step Two, prepare input signals for the Send Fx, and make them work
-			FxSend(numSamples, timeInfo );
+			FxSend( numSamples );
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
 //			cpu::cycles_type cost(cpu::cycles());
 			if(!_mute && !_stopped )
@@ -471,8 +472,11 @@ namespace psycle {
 			_worked = true;
 		}
 
-		void Mixer::FxSend(int numSamples, const PlayerTimeInfo & timeInfo )
+		void Mixer::FxSend(int numSamples )
 		{
+
+			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{
 				if (_sendValid[i])
@@ -510,7 +514,7 @@ namespace psycle {
 								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 #endif
 
-								pSendMachine->Work(numSamples, timeInfo);
+								pSendMachine->Work( numSamples );
 							}
 
 							{
@@ -814,7 +818,7 @@ namespace psycle {
 			FillTable();
 		}
 
-		void LFO::Tick( int channel, const PatternEvent & pData, const PlayerTimeInfo & timeInfo )
+		void LFO::Tick( int channel, const PatternEvent & pData )
 		{
 			if(!bisTicking)
 			{
@@ -1054,7 +1058,7 @@ namespace psycle {
 //			work_cpu_cost(work_cpu_cost() + cost);
 		}
 		
-		int LFO::GenerateAudio(int numSamples, const PlayerTimeInfo & timeInfo )
+		int LFO::GenerateAudio( int numSamples )
 		{
 			_worked=true;
 			return numSamples;
@@ -1123,7 +1127,7 @@ namespace psycle {
 			}
 		}
 
-		void LFO::ParamStart(int which)
+		void LFO::ParamStart( int which )
 		{
 			if(which<0 || which>=NUM_CHANS) return;  //jic
 			int destMac = macOutput[which];
