@@ -1637,7 +1637,7 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
 
         // play
         notetrack[outtrack]=note;
-        pMachine->Tick(outtrack, entry, PlayerTimeInfo());
+        pMachine->Tick(outtrack, entry );
       }
 }
 
@@ -1819,7 +1819,7 @@ void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
         // play it
 
         if (pMachine) {
-          pMachine->Tick(i, entry, PlayerTimeInfo() );
+          pMachine->Tick( i, entry );
         }
       }
     }

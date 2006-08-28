@@ -334,7 +334,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				}
 
 				song().DoPreviews( amount );
-				song()._pMachine[MASTER_INDEX]->Work(amount, timeInfo_ );
+				song()._pMachine[MASTER_INDEX]->Work(amount );
 
 				if ( (recording_ && !autoRecord_) || // controlled by record button
 						(recording_ && _playing && autoRecord_) ) { // controlled by play

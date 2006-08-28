@@ -60,11 +60,9 @@ namespace psycle
 			}
 		}
 
-		int Sampler::GenerateAudioInTicks(
-			int startSample, 
-			int numSamples, const PlayerTimeInfo & timeInfo)
+		int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 		{
-
+			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 //			PSYCLE__CPU_COST__INIT(cost);
 			if (!_mute)
 			{
@@ -100,7 +98,7 @@ namespace psycle
 						}
 						for (int voice=0; voice<_numVoices; voice++)
 						{
-							VoiceWork(startSample, ns, voice, timeInfo);
+							VoiceWork(startSample, ns, voice );
 						}
 						ns = 0;
 					}
@@ -111,7 +109,7 @@ namespace psycle
 							ns -= nextevent;
 							for (int voice=0; voice<_numVoices; voice++)
 							{
-								VoiceWork(startSample, nextevent, voice, timeInfo);
+								VoiceWork(startSample, nextevent, voice );
 							}
 						}
 						for (int i=0; i < song()->tracks(); i++)
@@ -122,7 +120,7 @@ namespace psycle
 								if (TriggerDelayCounter[i] == nextevent)
 								{
 									// do event
-									Tick(i, TriggerDelay[i], timeInfo);
+									Tick(i, TriggerDelay[i] );
 									TriggerDelay[i].setCommand( 0 );
 								}
 								else
@@ -135,7 +133,7 @@ namespace psycle
 								if (TriggerDelayCounter[i] == nextevent)
 								{
 									// do event
-									Tick(i, TriggerDelay[i], timeInfo);
+									Tick(i, TriggerDelay[i] );
 									TriggerDelayCounter[i] = (RetriggerRate[i]*timeInfo.samplesPerRow())/256;
 								}
 								else
@@ -148,7 +146,7 @@ namespace psycle
 								if (TriggerDelayCounter[i] == nextevent)
 								{
 									// do event
-									Tick(i, TriggerDelay[i], timeInfo);
+									Tick(i, TriggerDelay[i] );
 									TriggerDelayCounter[i] = (RetriggerRate[i]*timeInfo.samplesPerRow())/256;
 									int parameter = TriggerDelay[i].parameter() & 0x0f;
 									if (parameter < 9)
@@ -199,8 +197,9 @@ namespace psycle
 			Machine::Stop();		
 		}
 
-		void Sampler::VoiceWork(int startSample, int numsamples, int voice, const PlayerTimeInfo & timeInfo)
+		void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 		{
+			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
 			float* pSamplesL = _pSamplesL+startSample;
@@ -250,7 +249,7 @@ namespace psycle
 			else if ((pVoice->_triggerNoteOff) && (pVoice->_sampleCounter >= pVoice->_triggerNoteOff))
 			{
 				pVoice->_triggerNoteOff = 0;
-				NoteOff( voice, timeInfo );
+				NoteOff( voice );
 			}
 
 			pResamplerWork = _resampler._pWorkFn;
@@ -275,7 +274,7 @@ namespace psycle
 					//
 					if (pVoice->_filter._type < dsp::F_NONE)
 					{
-						TickFilterEnvelope(voice, timeInfo);
+						TickFilterEnvelope( voice );
 						pVoice->_filter._cutoff = pVoice->_cutoff + dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
@@ -297,7 +296,7 @@ namespace psycle
 						}
 					}
 
-					TickEnvelope(voice, timeInfo );
+					TickEnvelope( voice );
 
 					// calculate volume
 					
@@ -342,7 +341,7 @@ namespace psycle
 			}
 		}
 
-		void Sampler::Tick(const PlayerTimeInfo & timeInfo)
+		void Sampler::Tick( )
 		{
 			for (int voice=0;voice<_numVoices;voice++)
 			{
@@ -353,9 +352,8 @@ namespace psycle
 				}
 			}
 		}
-		void Sampler::Tick(
-			int channel,
-			const PatternEvent & pData, const PlayerTimeInfo & timeInfo)
+
+		void Sampler::Tick( int channel, const PatternEvent & pData )
 		{
 			if ( pData.note() > 120 ) // don't process twk , twf of Mcm Commands
 			{
@@ -414,10 +412,10 @@ namespace psycle
 						switch (song()->_pInstrument[_voices[voice]._instrument]->_NNA)
 						{
 						case 0:
-							NoteOffFast(voice);
+							NoteOffFast( voice );
 							break;
 						case 1:
-							NoteOff(voice, timeInfo);
+							NoteOff( voice );
 							break;
 						}
 						if ( useVoice == -1 ) { useVoice = voice; }
@@ -438,7 +436,7 @@ namespace psycle
 																			// Think on a slow fadeout and changing panning
 						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 					{
-						if ( data.note() == 120 ) NoteOff(voice, timeInfo);//  Handle Note Off
+						if ( data.note() == 120 ) NoteOff( voice );//  Handle Note Off
 						useVoice=voice;
 					}
 				}
@@ -448,12 +446,12 @@ namespace psycle
 			// If you want to make a command that controls more than one voice (the entire channel, for
 			// example) you'll need to change this. Otherwise, add it to VoiceTick().
 
-			VoiceTick(useVoice, data, timeInfo); 
+			VoiceTick( useVoice, data ); 
 		}
 
-		int Sampler::VoiceTick(int voice, const PatternEvent & entry, const PlayerTimeInfo & timeInfo)
+		int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		{		
-
+			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 			PatternEvent pEntry = entry;
 
 			Voice* pVoice = &_voices[voice];
@@ -708,9 +706,10 @@ namespace psycle
 
 		}
 
-		void Sampler::TickFilterEnvelope(
-			int voice, const PlayerTimeInfo & timeInfo)
+		void Sampler::TickFilterEnvelope( int voice )
 		{
+      const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+
 			Voice* pVoice = &_voices[voice];
 			switch (pVoice->_filterEnv._stage)
 			{
@@ -745,9 +744,10 @@ namespace psycle
 			}
 		}
 
-		void Sampler::TickEnvelope(
-			int voice, const PlayerTimeInfo & timeInfo)
+		void Sampler::TickEnvelope( int voice )
 		{
+      const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+
 			Voice* pVoice = &_voices[voice];
 			switch (pVoice->_envelope._stage)
 			{
@@ -781,12 +781,13 @@ namespace psycle
 			}
 		}
 
-		void Sampler::NoteOff(
-			int voice, const PlayerTimeInfo & timeInfo)
+		void Sampler::NoteOff( int voice )
 		{
 			Voice* pVoice = &_voices[voice];
 			if (pVoice->_envelope._stage != ENV_OFF)
 			{
+				const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+
 				pVoice->_envelope._stage = ENV_RELEASE;
 				pVoice->_filterEnv._stage = ENV_RELEASE;
 				pVoice->_envelope._step = (pVoice->_envelope._value/song()->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/timeInfo.sampleRate());
@@ -794,8 +795,7 @@ namespace psycle
 			}
 		}
 
-		void Sampler::NoteOffFast(
-			int voice )
+		void Sampler::NoteOffFast( int voice )
 		{
 			Voice* pVoice = &_voices[voice];
 			if (pVoice->_envelope._stage != ENV_OFF)
@@ -808,7 +808,7 @@ namespace psycle
 			}
 		}
 
-		void Sampler::PerformFx(int voice)
+		void Sampler::PerformFx( int voice )
 		{
 			__int64 shift;
 			switch(_voices[voice].effCmd)
