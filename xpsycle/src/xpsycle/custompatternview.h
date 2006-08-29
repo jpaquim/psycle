@@ -86,6 +86,8 @@ namespace psycle {
 					void addEvent( const ColumnEvent & event );
 					std::string noteToString( int value );
 
+					void drawDataN(NGraphics* g, int track, int line, int eventnr, int data );
+
 			protected:
 
 					virtual NPoint3D intersectCell(int x, int y);
@@ -133,6 +135,11 @@ namespace psycle {
 
 					std::vector<ColumnEvent> events_;
 
+					void drawBlockData( NGraphics * g, int track, int line, int eventOffset, const std::string & text );
+
+					void drawStringData(NGraphics* g, int track, int line, int eventOffset, const std::string & text );
+
+					int eventOffset( int eventnr ) const;
 
 		};
 	}
