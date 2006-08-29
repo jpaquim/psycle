@@ -51,6 +51,66 @@ namespace psycle {
 		}
 
 
+		PatCursor::PatCursor() :
+			track_(0), 
+			line_(0), 
+			eventNr_(0), 
+			col_(0) 
+		{
+		}
+
+		PatCursor::PatCursor(int track, int line, int eventNr, int col) :
+			track_( track ), 
+			line_( line ), 
+			eventNr_( eventNr ), 
+			col_( col ) 
+		{
+		}
+
+		PatCursor::~PatCursor() {
+
+		}
+
+		void PatCursor::setPosition( int track, int line, int eventNr, int col ) {
+			track_ = track;
+			line_  = line;
+			eventNr_ = eventNr;
+			col_ = col;
+		}
+
+		void PatCursor::setTrack( int track ) {
+			track_ = track;
+		}
+
+		int PatCursor::track() const {
+			return track_;
+		}
+
+		void PatCursor::setLine( int line ) {
+			line_ = line;
+		}
+
+		int PatCursor::line() const {
+			return line_;
+		}
+
+		void PatCursor::setEventNr( int eventNr ) {
+			eventNr_ = eventNr;
+		}
+
+		int PatCursor::eventNr() const {
+			return eventNr_;
+		}
+
+		void PatCursor::setCol( int col) {
+			col_ = col;
+		}
+
+		int PatCursor::col() const {
+			return col_;
+		}
+
+
 
 		CustomPatternView::CustomPatternView()
 			 : NPanel(), doDrag_(0),doSelect_(0)
