@@ -119,6 +119,7 @@ class PatternView : public NPanel
 			virtual int rowHeight() const;
 			virtual int lineNumber() const;
 			virtual int trackNumber() const;
+			virtual int beatZoom() const;
 
       virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
       
@@ -137,7 +138,8 @@ class PatternView : public NPanel
 		protected:
 
 				virtual NPoint3D intersectCell( int x, int y );
-
+				virtual void drawColumnGrid( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+				virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
     private:
 
@@ -151,11 +153,7 @@ class PatternView : public NPanel
       void drawData(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
 
       void drawCellBg(NGraphics* g, int track, int line, int col, const NColor & bgColor);
-
-      void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
-      void drawSelBg(NGraphics* g, const NSize & selArea);
-
-      
+        
 
       bool isBlockCopied;
       NSize blockLastOrigin;

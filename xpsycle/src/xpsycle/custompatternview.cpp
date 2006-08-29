@@ -37,6 +37,8 @@ namespace psycle {
 		void CustomPatternView::init() {			
 			dx_ = 0;
 			dy_ = 0;
+			separatorColor_ = NColor(200,200,200);
+			selectionColor_ = NColor(0,0,255);
 		}
 
 		int CustomPatternView::lineNumber() const {
@@ -54,6 +56,18 @@ namespace psycle {
 				
 		int CustomPatternView::rowHeight() const {
 			return 12;
+		}
+
+		int CustomPatternView::beatZoom() const {
+			return 4;
+		}
+
+		const NColor & CustomPatternView::separatorColor() const {
+			return separatorColor_;
+		}
+
+		const NColor & CustomPatternView::selectionColor() const {
+			return selectionColor_;
 		}
 
 		void CustomPatternView::setDx(int dx) {
@@ -83,7 +97,10 @@ namespace psycle {
     	int endTrack   = trackArea.y();
 
 			customPaint(g, startLine, endLine, startTrack, endTrack);
+				
+		}
 
+		void CustomPatternView::drawRestArea(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
 			g->setForeground(NColor(0,0,80));
 			int endTop     = lineNumber() * rowHeight() - dy();
 			int endHeight  = std::max(0, clientHeight() - endTop);
@@ -92,11 +109,53 @@ namespace psycle {
 			int endLeft     = trackNumber() * colWidth() - dx();
 			int endWidth    = std::max(0, clientWidth() - endLeft);
 			g->fillRect(endLeft,0,endWidth,clientHeight());
+		}
+
+		void CustomPatternView::drawTrackGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
+			int trackWidth = ((endTrack+1) * colWidth()) - dx();
+  		int lineHeight = ((endLine +1) * rowHeight()) - dy();
+
+			g->setForeground( foreground() );
+
+			for (int y = startLine; y <= endLine; y++)
+      g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
+
+			for (int i = startTrack; i <= endTrack; i++) // 3px space at begin of trackCol
+      g->fillRect(i*colWidth()-dx(),0,3,lineHeight);
+
+			g->setForeground( separatorColor() );
+				for (int i = startTrack; i <= endTrack; i++)  // col separators
+      g->drawLine(i* colWidth()-dx(),0,i* colWidth()-dx(),lineHeight);
+
+    	g->setForeground( foreground() );
+
+		}
+
+		void CustomPatternView::drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
+
+		}
+
+		void CustomPatternView::drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
 
 		}
 
 		void CustomPatternView::customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack ) {
+			drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
+			drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
+			drawPattern(g, startLine, endLine, startTrack, endTrack);
+			drawRestArea(g, startLine, endLine, startTrack, endTrack);
+			drawSelBg( g, selection() );
+		}
 
+		void CustomPatternView::drawSelBg(NGraphics* g, const NSize & selArea) {
+			int x1Off = selArea.left() * colWidth()  ;
+			int y1Off = selArea.top()  * rowHeight() ;
+
+			int x2Off = selArea.right()  * colWidth() ;
+			int y2Off = selArea.bottom() * rowHeight();
+
+			g->setForeground( selectionColor() );
+			g->fillRect(x1Off - dx(), y1Off -dy(), x2Off-x1Off, y2Off-y1Off);
 		}
 
 		void CustomPatternView::onMousePress(int x, int y, int button) {
