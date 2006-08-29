@@ -142,7 +142,7 @@ void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
 
 void PatternView::onHScrollBar( NObject * sender, int pos )
 {
-  int newPos = (pos / colWidth()) * colWidth();
+  int newPos = (pos / drawArea->colWidth()) * drawArea->colWidth();
 
   if (newPos != drawArea->dx()) {
     header->setScrollDx(newPos);
@@ -287,23 +287,18 @@ int PatternView::rowHeight( ) const
   return 12;
 }
 
+int PatternView::colWidth() const {
+	return drawArea->colWidth();
+}
+
 int PatternView::headerHeight( ) const
 {
   return header->height()-1;
 }
 
-int PatternView::colWidth( ) const
+int PatternView::headerWidth( ) const
 {
-  int col = noteCellWidth();
-  for (std::vector<int>::const_iterator it = eventSize.begin(); it < eventSize.end(); it++) {
-    switch (*it) {
-    case 1: col+=2*cellWidth();
-    break;
-    case 2: col+=4*cellWidth();
-    break;
-    }
-  }
-  return std::max(header->skinColWidth(),col);
+  return header->skinColWidth();
 }
 
 int PatternView::noteCellWidth( ) const
@@ -778,7 +773,8 @@ PatternView::PatternDraw::~ PatternDraw( )
 }
 
 int PatternView::PatternDraw::colWidth() const {
-  return pView->colWidth();
+	int col = CustomPatternView::colWidth();
+  return std::max( pView->headerWidth() , col );
 }
 
 int PatternView::PatternDraw::rowHeight() const {
