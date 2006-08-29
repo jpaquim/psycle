@@ -821,6 +821,10 @@ int PatternView::PatternDraw::trackNumber() const {
 	return pView->trackNumber();
 }
 
+int PatternView::PatternDraw::beatZoom() const {
+	return pView->beatZoom();
+}
+
 void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack)
 {
   if (pView->pattern()) {
@@ -832,9 +836,9 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
     int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
     for (int y = startLine; y <= endLine; y++) {
-      float position = y / (float) pView->pattern()->beatZoom();
+      float position = y / (float) beatZoom();
       if (!(y == pView->playPos()) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
-      if ( !(y % pView->beatZoom())) {
+      if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
               g->setForeground(Global::pConfig()->pvc_row4beat);
               g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
@@ -850,23 +854,22 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
       }
     }
 
-    drawSelBg(g,selection());
+		drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
+		drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
+		drawPattern(g, startLine, endLine, startTrack, endTrack);
+		drawRestArea(g, startLine, endLine, startTrack, endTrack);
+		drawSelBg(g,selection());
+  }
+}
 
-    g->setForeground(pView->foreground());
 
-    for (int y = startLine; y <= endLine; y++)
-      g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
+void PatternView::PatternDraw::drawColumnGrid( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack )  {
 
-    for (int i = startTrack; i <= endTrack; i++) // 3px space at begin of trackCol
-      g->fillRect(i*colWidth()-dx(),0,3,lineHeight);
+	int trackWidth = ((endTrack+1) * colWidth()) - dx();
+  int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
-    g->setForeground(pView->separatorColor());
-    for (int i = startTrack; i <= endTrack; i++)  // col separators
-      g->drawLine(i* colWidth()-dx(),0,i* colWidth()-dx(),lineHeight);
 
-    g->setForeground(pView->foreground());
-
-    for (int x = startTrack; x <= endTrack; x++) {
+	for (int x = startTrack; x <= endTrack; x++) {
       int COL = pView->noteCellWidth();
       for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
         switch (*it) {
@@ -880,9 +883,6 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
         break;
         }
       }
-    }
-
-    drawPattern(g,startLine,endLine,startTrack,endTrack);
   }
 }
 
@@ -1392,19 +1392,6 @@ int PatternView::cellCount( ) const
   return count;
 }
 
-
-void PatternView::PatternDraw::drawSelBg( NGraphics * g, const NSize & selArea )
-{
-  int x1Off = selArea.left() * pView->colWidth()  ;
-  int y1Off = selArea.top()  * pView->rowHeight() ;
-
-  int x2Off = selArea.right()  * pView->colWidth() ;
-  int y2Off = selArea.bottom() * pView->rowHeight();
-
-  g->setForeground(Global::pConfig()->pvc_selection);
-  g->fillRect(x1Off - dx(), y1Off -dy(), x2Off-x1Off, y2Off-y1Off);
-
-}
 
 NPoint3D PatternView::PatternDraw::intersectCell( int x, int y )
 {

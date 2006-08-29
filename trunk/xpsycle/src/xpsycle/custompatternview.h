@@ -41,6 +41,10 @@ namespace psycle {
 					virtual int rowHeight() const;
 					virtual int lineNumber() const;
 					virtual int trackNumber() const;
+					virtual int beatZoom() const;
+
+					const NColor & separatorColor() const;
+					const NColor & selectionColor() const;
 
       		void setDx(int dx);
 					int dx() const;
@@ -78,6 +82,17 @@ namespace psycle {
 					bool doDrag() const;
 
 					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+					
+
+					virtual void drawTrackGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
+
+					virtual void drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
+
+					virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+
+					virtual void drawRestArea(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+
+					virtual void drawSelBg( NGraphics* g, const NSize & selArea );
 
 
 			private:
@@ -92,6 +107,8 @@ namespace psycle {
 					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
 					NPoint3D selStartPoint_;				
 
+					NColor separatorColor_;
+					NColor selectionColor_;
 
 					void init();
 
