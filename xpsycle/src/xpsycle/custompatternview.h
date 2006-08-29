@@ -30,6 +30,21 @@
 namespace psycle {
 	namespace host	{	
 
+		class ColumnEvent {			
+			public:
+
+				ColumnEvent( int type );
+				~ColumnEvent();
+
+				enum colType { hex2 = 0, hex4 = 1, note = 2 };
+
+				int type() const;
+
+			private:
+				
+				int type_;
+		};
+
 		class CustomPatternView : public NPanel
 		{
 			public:
@@ -68,6 +83,8 @@ namespace psycle {
 					const NSize & selection() const;
 					void clearOldSelection();
 
+					void addEvent( const ColumnEvent & event );
+					std::string noteToString( int value );
 
 			protected:
 
@@ -76,6 +93,8 @@ namespace psycle {
 					virtual void doSel(const NPoint3D & p);
 					virtual void endSel();
 
+					virtual int noteCellWidth() const;
+					virtual int cellWidth() const;
 
 					const NPoint3D & selStartPoint() const;
 					bool doSelect() const;
@@ -111,6 +130,8 @@ namespace psycle {
 					NColor selectionColor_;
 
 					void init();
+
+					std::vector<ColumnEvent> events_;
 
 
 		};
