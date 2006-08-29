@@ -149,12 +149,8 @@ class PatternView : public NPanel
 
 			NPoint3D selCursor; // for keyboard drag
 
-      void drawText(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
-      void drawData(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
-
       void drawCellBg(NGraphics* g, int track, int line, int col, const NColor & bgColor);
         
-
       bool isBlockCopied;
       NSize blockLastOrigin;
 
@@ -295,8 +291,6 @@ private:
   NComboBox* octaveCombo_;
   NComboBox*  meterCbx;
   NComboBox* trackCombo_;
-
-  std::string noteToString(int value);
 
   void enterNote( int note );
 

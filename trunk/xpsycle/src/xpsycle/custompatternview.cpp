@@ -22,9 +22,22 @@
 
 #include <ngrs/nwindow.h>
 #include <ngrs/nfontmetrics.h>
+#include <iostream>
+#include <iomanip>
 
 namespace psycle {
 	namespace host	{	
+
+		template<class T> inline std::string toHex(T value , int nums = 2) {
+			std::ostringstream buffer;
+			buffer.setf(std::ios::uppercase);
+
+			buffer.str("");
+			buffer << std::setfill('0') << std::hex << std::setw( nums );
+			buffer << (int) value;
+			return buffer.str();
+		}
+
 
 		ColumnEvent::ColumnEvent( int type ) {
 			type_ = type;
@@ -183,6 +196,64 @@ namespace psycle {
 
 		}
 
+		void CustomPatternView::drawDataN(NGraphics* g, int track, int line, int eventnr, int data ) {
+			if ( eventnr < events_.size() ) {
+				const ColumnEvent & event = events_.at( eventnr );
+				switch ( event.type() ) {
+					case ColumnEvent::hex2 :
+						drawBlockData( g, track, line, eventOffset(eventnr), toHex(data,2) );
+					break;
+					case ColumnEvent::hex4 :
+						drawBlockData( g, track, line, eventOffset(eventnr), toHex(data,4) );
+					break;
+					case ColumnEvent::note :					
+						drawStringData( g, track, line, eventOffset(eventnr), noteToString(data) );
+					break;
+					default: ;
+				}
+			}
+		}
+
+		void CustomPatternView::drawBlockData( NGraphics * g, int track, int line, int eventOffset, const std::string & text )
+		{
+			int xOff = track * colWidth()+3 + eventOffset - dx();
+			int yOff = line  * rowHeight() + rowHeight()  - dy();
+
+			int col = 0;
+			for (int i = 0; i < text.length(); i++) {
+				g->drawText(xOff + col,yOff,text.substr(i,1));
+				col += cellWidth();
+			}
+		}
+
+		void CustomPatternView::drawStringData(NGraphics* g, int track, int line, int eventOffset, const std::string & text )
+		{
+			int xOff = track * colWidth()+3 + eventOffset - dx();
+			int yOff = line  * rowHeight() + rowHeight()  - dy();
+
+			g->drawText(xOff,yOff,text);
+		}
+
+		int CustomPatternView::eventOffset( int eventnr ) const {
+			std::vector<ColumnEvent>::const_iterator it = events_.begin();
+			int nr = 0;
+			int offset = 0;
+			for ( ; it < events_.end(); it++, nr++ ) {
+				const ColumnEvent & event = *it;
+				if (nr == eventnr) {
+					return offset;
+				}
+				switch ( event.type() ) {
+					case ColumnEvent::hex2 : offset+= 2*cellWidth(); 	break;
+					case ColumnEvent::hex4 : offset+= 4*cellWidth(); 	break;
+					case ColumnEvent::note : offset+= noteCellWidth(); break;
+					default: ;
+				}
+			}
+			return -1;
+		}
+
+
 		void CustomPatternView::customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack ) {
 			drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
 			drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
@@ -228,7 +299,9 @@ namespace psycle {
 		}
 
 		void CustomPatternView::onKeyRelease(const NKeyEvent & event) {
-
+			if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) {
+				endSel();
+			}
 		}
 		
 		void CustomPatternView::repaintBlock( const NSize & block ) {

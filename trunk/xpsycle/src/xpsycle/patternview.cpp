@@ -398,37 +398,6 @@ int PatternView::editPosition( ) const
   return editPosition_;
 }
 
-std::string PatternView::noteToString( int value )
-{
-  if (value==255) return "";
-  switch (value) {
-      case cdefTweakM: return "twk"; break;
-      case cdefTweakE: return "twf"; break;
-      case cdefMIDICC: return "mcm"; break;
-      case cdefTweakS: return "tws"; break;
-      case 120       : return "off"; break;
-      case 255       : return "";    break;
-  }
-
-  int octave = value / 12;
-
-  switch (value % 12) {
-      case 0:   return "C-" + stringify(octave); break;
-      case 1:   return "C#" + stringify(octave); break;
-      case 2:   return "D-" + stringify(octave); break;
-      case 3:   return "D#" + stringify(octave); break;
-      case 4:   return "E-" + stringify(octave); break;
-      case 5:   return "F-" + stringify(octave); break;
-      case 6:   return "F#" + stringify(octave); break;
-      case 7:   return "G-" + stringify(octave); break;
-      case 8:   return "G#" + stringify(octave); break;
-      case 9:   return "A-" + stringify(octave); break;
-      case 10:  return "A#" + stringify(octave); break;
-      case 11:  return "B-" + stringify(octave); break;
-  }
-  return "err";
-}
-
 NScrollBar * PatternView::vScrBar( )
 {
   return vBar;
@@ -865,26 +834,6 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
   }
 }
 
-void PatternView::PatternDraw::drawText(NGraphics* g, int track, int line, int eventOffset, const std::string & text )
-{
-  int xOff = track * pView->colWidth()+3 + eventOffset        - dx();
-  int yOff = line  * pView->rowHeight() + pView->rowHeight()  - dy();
-
-  g->drawText(xOff,yOff,text);
-}
-
-void PatternView::PatternDraw::drawData( NGraphics * g, int track, int line, int eventOffset, const std::string & text )
-{
-  int xOff = track * pView->colWidth()+3 + eventOffset        - dx();
-  int yOff = line  * pView->rowHeight() + pView->rowHeight()  - dy();
-
-  int col = 0;
-  for (int i = 0; i < text.length(); i++) {
-      g->drawText(xOff + col,yOff,text.substr(i,1));
-      col += pView->cellWidth();
-  }
-}
-
 void PatternView::PatternDraw::drawCellBg( NGraphics * g, int track, int line, int col, const NColor & bgColor )
 {
   int xOff = track * pView->colWidth()+3 - dx();
@@ -905,63 +854,32 @@ void PatternView::PatternDraw::drawCellBg( NGraphics * g, int track, int line, i
 
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
-  if ( pView->pattern() ) {
-   drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
+	if ( pView->pattern() ) {
+		drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
 
-  char tbuf[16];
+		SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
 
-  float position = startLine / (float) pView->pattern_->beatZoom();
-  float endPosition = endLine / (float) pView->pattern_->beatZoom();
-
-  SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
-
-  int lastLine = -1;
-  for ( ; it != pView->pattern_->end(); it++ ) {
-    PatternLine & line = it->second;
-
-    int y = d2i (it->first * pView->pattern_->beatZoom());
-    if (y > endLine) break;
-
-    if (y != lastLine) {
-
-    PatternLine::iterator eventIt = line.lower_bound(startTrack);
-    for(; eventIt != line.end() && eventIt->first < endTrack; ++eventIt) {
-      PatternEvent event = eventIt->second;
-      int x = eventIt->first;
-      drawText(g, x,y,0,pView->noteToString( event.note() ));
-      unsigned char* patOffset = (unsigned char*) event.entry();
-      patOffset++;
-      int COL = pView->noteCellWidth();
-      for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
-      int value = *patOffset;
-      switch (*it) {
-        case 1  :{
-                  sprintf(tbuf,"%.2X",value); 
-                  if (value!=255) {
-                    drawData(g,x,y,COL,tbuf);
-                  }
-                  COL+=2 * pView->cellWidth();
-                  patOffset++;
-                  } break;
-        case 2  :{
-                  if (*patOffset == 0 && *(patOffset+1) == 0 && (*(patOffset-3) <= 120 || *(patOffset-3) == 255 )) 
-                  { patOffset+=2;} else {
-                    sprintf(tbuf,"%.2X",value);
-                    patOffset++;
-                    int value = *patOffset;
-                    sprintf(&tbuf[2],"%.2X",value);
-                    if (value!=255) drawData(g,x,y,COL,tbuf);
-                    patOffset++;
-                  }
-                  COL+=4 * pView->cellWidth();
-                  } break;
-      }
-      }
-    }
-    }
-    lastLine = y;
-  }
-  }
+		int lastLine = -1;
+		for ( ; it != pView->pattern_->end(); it++ ) {
+			PatternLine & line = it->second;
+			int y = d2i (it->first * pView->pattern_->beatZoom());
+			if (y > endLine) break;
+			if (y != lastLine) {
+				PatternLine::iterator eventIt = line.lower_bound(startTrack);
+				for(; eventIt != line.end() && eventIt->first < endTrack; ++eventIt) {
+					PatternEvent event = eventIt->second;
+					int x = eventIt->first;
+					drawDataN( g, x, y, 0, event.note() );
+					if (event.instrument() != 255) drawDataN( g, x, y, 1, event.instrument() );
+					if (event.machine() != 255) drawDataN( g, x, y, 2, event.machine() );
+					if (event.command() != 0 || event.parameter() != 0) {
+						drawDataN( g, x, y, 3, (event.command() << 8) | event.parameter() );
+					}
+					lastLine = y;
+				}
+			}
+		}
+	}
 }
 
 
@@ -1695,10 +1613,8 @@ void PatternView::PatternDraw::onPopupTranspose_12( NButtonEvent * ev )
 
 
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
+  CustomPatternView::onKeyRelease( event );
 	if ( !pView->pattern() ) return;
-
-  if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R )
- 		endSel();
 
   if (pView->cursor().z()==0) {
     int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
