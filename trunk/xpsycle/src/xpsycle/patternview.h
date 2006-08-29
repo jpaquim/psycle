@@ -138,7 +138,7 @@ class PatternView : public NPanel
 		protected:
 
 				virtual NPoint3D intersectCell( int x, int y );
-				virtual void drawColumnGrid( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+//				virtual void drawColumnGrid( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 				virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
     private:

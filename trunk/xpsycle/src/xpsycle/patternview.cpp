@@ -460,8 +460,6 @@ bool PatternView::moveCursorWhenPaste() const {
 /// End of PatternView main Class
 
 
-
-
 /// The Header Panel Class
 PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , NPanel()
 {
@@ -741,6 +739,11 @@ PatternView::TweakGUI::~TweakGUI() {
 
 PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatternView()
 {
+	addEvent( ColumnEvent::note );
+	addEvent( ColumnEvent::hex2 );
+	addEvent( ColumnEvent::hex2 );
+	addEvent( ColumnEvent::hex4 );
+
   setTransparent(false);
   setBackground(Global::pConfig()->pvc_row);
 
@@ -859,30 +862,6 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 		drawPattern(g, startLine, endLine, startTrack, endTrack);
 		drawRestArea(g, startLine, endLine, startTrack, endTrack);
 		drawSelBg(g,selection());
-  }
-}
-
-
-void PatternView::PatternDraw::drawColumnGrid( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack )  {
-
-	int trackWidth = ((endTrack+1) * colWidth()) - dx();
-  int lineHeight = ((endLine +1) * rowHeight()) - dy();
-
-
-	for (int x = startTrack; x <= endTrack; x++) {
-      int COL = pView->noteCellWidth();
-      for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
-        switch (*it) {
-        case 1:
-            g->drawLine(x*pView->colWidth()+COL-dx(),0,x*colWidth()+COL-dx(),lineHeight);
-            COL+=2 * pView->cellWidth();
-        break;
-        case 2:
-            g->drawLine(x*colWidth()+COL-dx(),0,x*colWidth()+COL-dx(),lineHeight);
-            COL+=4 * pView->cellWidth();
-        break;
-        }
-      }
   }
 }
 
@@ -1371,8 +1350,6 @@ void PatternView::enterNote( int note ) {
  }
 }
 
-
-
 NRect PatternView::repaintLineNumberArea(int startLine, int endLine)
 {
   int top    = startLine    * rowHeight()  + drawArea->absoluteTop()  - drawArea->dy();
@@ -1433,13 +1410,11 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
 
 	NApp::system().clipBoard().setAsText( xml );
 
-
 	if (cutit) {
 		pView->pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
 		pView->repaint();
 	}
 }
-
 
 void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
 {
@@ -1543,7 +1518,6 @@ void PatternView::updatePlayBar(bool followSong)
   }*/
 }
 
-
 void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine)
 {
     // stop any notes with the same value
@@ -1628,8 +1602,6 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
       }
 }
 
-
-
 void PatternView::PatternDraw::transposeBlock(int trp)
 {
 	int right = selection().right();
@@ -1654,7 +1626,6 @@ void PatternView::noteOffAny()
     window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
   }
 }
-
 
 void PatternView::clearCursorPos( )
 {
@@ -1881,7 +1852,6 @@ void PatternView::onTrackChange( NItemEvent * ev )
   }
   repaint();
 }
-
 }}
 
 void psycle::host::PatternView::setActiveMachineIdx( int idx )

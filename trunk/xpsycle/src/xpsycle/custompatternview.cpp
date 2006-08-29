@@ -18,11 +18,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "custompatternview.h"
+#include "inputhandler.h"
 
 #include <ngrs/nwindow.h>
+#include <ngrs/nfontmetrics.h>
 
 namespace psycle {
 	namespace host	{	
+
+		ColumnEvent::ColumnEvent( int type ) {
+			type_ = type;
+		}
+
+    ColumnEvent::~ColumnEvent() {
+		}
+
+		int ColumnEvent::type() const {
+			return type_;
+		}
+
+
 
 		CustomPatternView::CustomPatternView()
 			 : NPanel(), doDrag_(0),doSelect_(0)
@@ -32,6 +47,10 @@ namespace psycle {
 
 		CustomPatternView::~CustomPatternView()
 		{
+		}
+
+		void CustomPatternView::addEvent( const ColumnEvent & event ) {
+			events_.push_back( event );
 		}
 	
 		void CustomPatternView::init() {			
@@ -131,8 +150,33 @@ namespace psycle {
 
 		}
 
-		void CustomPatternView::drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
+		int CustomPatternView::noteCellWidth() const {
+			NFontMetrics metrics(font());
+			int width = metrics.textWidth("C#-10");
+			return width;
+		}
 
+		int CustomPatternView::cellWidth() const {
+			return 12;
+		}
+
+		void CustomPatternView::drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
+			int trackWidth = ((endTrack+1) * colWidth()) - dx();
+			int lineHeight = ((endLine +1) * rowHeight()) - dy();
+
+			for (int x = startTrack; x <= endTrack; x++) {
+				std::vector<ColumnEvent>::iterator it = events_.begin();
+				int col = 0;
+				for ( ; it < events_.end(); it++) {
+					ColumnEvent & event = *it;
+        	switch ( event.type() ) {
+						case ColumnEvent::hex2 : col+= 2*cellWidth(); 	break;
+						case ColumnEvent::hex4 : col+= 4*cellWidth(); 	break;
+						case ColumnEvent::note : col+= noteCellWidth(); break;
+					}
+					g->drawLine(x*colWidth()+col-dx(),0,x*colWidth()+col-dx(),lineHeight);
+				}
+			}
 		}
 
 		void CustomPatternView::drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
@@ -344,6 +388,38 @@ namespace psycle {
 		NPoint3D CustomPatternView::intersectCell( int x, int y ){
 			return NPoint3D(0,0,0);
 		}
+
+		std::string CustomPatternView::noteToString( int value )
+		{
+			if (value==255) return "";
+			switch (value) {
+				case cdefTweakM: return "twk"; break;
+				case cdefTweakE: return "twf"; break;
+				case cdefMIDICC: return "mcm"; break;
+				case cdefTweakS: return "tws"; break;
+				case 120       : return "off"; break;
+				case 255       : return "";    break;
+			}
+
+			int octave = value / 12;
+
+			switch (value % 12) {
+      	case 0:   return "C-" + stringify(octave); break;
+				case 1:   return "C#" + stringify(octave); break;
+				case 2:   return "D-" + stringify(octave); break;
+				case 3:   return "D#" + stringify(octave); break;
+				case 4:   return "E-" + stringify(octave); break;
+				case 5:   return "F-" + stringify(octave); break;
+				case 6:   return "F#" + stringify(octave); break;
+				case 7:   return "G-" + stringify(octave); break;
+				case 8:   return "G#" + stringify(octave); break;
+				case 9:   return "A-" + stringify(octave); break;
+				case 10:  return "A#" + stringify(octave); break;
+				case 11:  return "B-" + stringify(octave); break;
+			}
+			return "err";
+		}
+
 
 	} // end of host namespace
 } // end of psycle namespace
