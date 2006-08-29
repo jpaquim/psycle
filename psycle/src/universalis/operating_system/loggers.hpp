@@ -4,7 +4,7 @@
 
 ///\interface universalis::operating_system::loggers
 #pragma once
-#include PACKAGENERIC
+#include <packageneric/module.private.hpp>
 #include "exception.hpp"
 #include <universalis/compiler/compiler.hpp>
 #include <universalis/compiler/typenameof.hpp>
