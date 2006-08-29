@@ -45,6 +45,33 @@ namespace psycle {
 				int type_;
 		};
 
+		class PatCursor {
+		public:
+
+			PatCursor();
+			PatCursor( int track, int line, int eventNr, int col );
+			~PatCursor();
+
+			void setPosition( int track, int line, int eventNr, int col );
+
+			void setTrack( int x);
+			int track() const;
+			void setLine( int y);
+			int line() const;
+			void setEventNr( int event );
+			int eventNr() const;
+			void setCol( int col);
+			int col() const;
+
+		private:
+
+			int track_;
+			int line_;
+			int eventNr_;
+			int col_;
+			
+		};
+
 		class CustomPatternView : public NPanel
 		{
 			public:
