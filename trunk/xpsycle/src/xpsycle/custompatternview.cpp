@@ -143,7 +143,20 @@ namespace psycle {
 	
 		int CustomPatternView::colWidth( ) const
 		{
-			return 100;
+			std::vector<ColumnEvent>::const_iterator it = events_.begin();
+			int offset = 0;
+			for ( ; it < events_.end(); it++) {
+				const ColumnEvent & event = *it;
+
+				switch ( event.type() ) {
+					case ColumnEvent::hex2 : offset+= 2*cellWidth(); 	break;
+					case ColumnEvent::hex4 : offset+= 4*cellWidth(); 	break;
+					case ColumnEvent::note : offset+= noteCellWidth(); break;
+					default: ;
+				}
+			}
+
+			return offset;
 		}
 				
 		int CustomPatternView::rowHeight() const {

@@ -155,6 +155,9 @@ namespace psycle {
 					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
 					NPoint3D selStartPoint_;				
 
+					//cursor
+					PatCursor cursor_;
+
 					NColor separatorColor_;
 					NColor selectionColor_;
 

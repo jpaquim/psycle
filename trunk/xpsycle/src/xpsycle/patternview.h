@@ -196,8 +196,11 @@ public:
 
 
     int rowHeight() const;
-    int colWidth() const;
+
+		int colWidth() const;
+    int headerWidth() const;
     int headerHeight() const;
+
     int noteCellWidth() const;
     int cellWidth() const;
     int cellCount() const;
