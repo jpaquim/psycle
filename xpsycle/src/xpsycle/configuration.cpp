@@ -25,6 +25,7 @@
 #include "jackout.h"
 #include "gstreamerout.h"
 #include "esoundout.h"
+//todo when ready: #include "nasout.h"
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
@@ -134,8 +135,13 @@ void Configuration::setSkinDefaults( )
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
-		#if !defined XPSYCLE__NO_ESOUND			
+		#if !defined XPSYCLE__NO_ESOUND
 			driver = new ESoundOut;
+			std::cout << "registered:" <<  driver->info().name() << std::endl;
+			driverMap_[ driver->info().name() ] = driver;
+		#endif
+		#if !defined XPSYCLE__NO_NAS
+			driver = new AudioDriver; //\todo dummy for now
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
