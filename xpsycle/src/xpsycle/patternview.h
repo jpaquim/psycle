@@ -137,9 +137,7 @@ class PatternView : public NPanel
 
 		protected:
 
-				virtual NPoint3D intersectCell( int x, int y );
-//				virtual void drawColumnGrid( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
-				virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+			virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
     private:
 
@@ -147,13 +145,9 @@ class PatternView : public NPanel
       PatDlg* patDlg;
       PatternView* pView;
 
-			NPoint3D selCursor; // for keyboard drag
-
-      void drawCellBg(NGraphics* g, int track, int line, int col, const NColor & bgColor);
-        
+             
       bool isBlockCopied;
       NSize blockLastOrigin;
-
 
       void onPopupBlockCopy(NButtonEvent* ev);
       void onPopupBlockCut(NButtonEvent* ev);
@@ -201,18 +195,8 @@ public:
     int headerWidth() const;
     int headerHeight() const;
 
-    int noteCellWidth() const;
-    int cellWidth() const;
-    int cellCount() const;
-
     int lineNumber() const;
     int trackNumber() const;
-
-    void addEvent( int byteLength );
-    int colStartFromEvent(int event);
-    int eventFromCol(int col) const;
-    int eventLength(int event) const;
-    std::vector<int> eventSize;
 
     void setEditPosition(int pos);
     void setPrevEditPosition(int pos);
@@ -227,19 +211,14 @@ public:
 
     void setEditOctave(int octave);
     int editOctave() const;
-
-    const NPoint3D & cursor() const;
-    void setCursor(const NPoint3D & cursor);
-    void moveCursor(int dx, int dy, int dz);
-
+    
     NScrollBar* vScrBar();
     NScrollBar* hScrBar();
 
     void PlayNote(int note,int velocity,bool bTranspose,psycle::host::Machine*pMachine);
     void StopNote(int note,bool bTranspose=true,psycle::host::Machine* pMachine=NULL);
 
-    void noteOffAny();
-    void clearCursorPos();
+    void noteOffAny( const PatCursor & cursor );
 
     void copyBlock(bool cutit);
     void pasteBlock(int tx,int lx,bool mix,bool save = true);
@@ -278,8 +257,6 @@ private:
   int selectedMacIdx_;
   bool moveCursorWhenPaste_;
 
-  NPoint3D cursor_;
-
   PatternDraw* drawArea;
 	TweakGUI* tweakGUI;
 
@@ -295,7 +272,7 @@ private:
   NComboBox*  meterCbx;
   NComboBox* trackCombo_;
 
-  void enterNote( int note );
+  void enterNote( const PatCursor & cursor, int note );
 
   void resize();
 
