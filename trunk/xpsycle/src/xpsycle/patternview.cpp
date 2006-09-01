@@ -60,9 +60,7 @@ PatternView::PatternView( Song* song )
   : NPanel()
 {
   _pSong = song;
-
   setLayout(NAlignLayout());
-
 
   vBar = new NScrollBar();
     vBar->setWidth(15);
@@ -106,28 +104,15 @@ PatternView::PatternView( Song* song )
       // create the drawArea
       subGroup->add(drawArea    = new PatternDraw(this), nAlClient);
     drawGroup->add( subGroup, nAlClient );
-	
 	add(drawGroup, nAlClient);
 	
-
   setFont(NFont("System",8,nMedium | nStraight ));
-
-  addEvent(1); // add one byte event to trackerline
-  addEvent(1); // add one byte event to trackerline
-  addEvent(2); // add two byte event to trackerline
-
   editPosition_ = prevEditPosition_ = playPos_  = outtrack = 0;
-
   editOctave_ = 4;
-
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
-
   patternStep_ = 1;
-
   moveCursorWhenPaste_ = false;
-
   pattern_ = 0;
-
   selectedMacIdx_ = 255;
 }
 
@@ -229,8 +214,6 @@ void PatternView::initToolBar( )
     }
     trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16
   toolBar->add(trackCombo_);
-
-
 }
 
 void PatternView::onAddBar( NButtonEvent * ev )
@@ -250,10 +233,10 @@ void PatternView::onAddBar( NButtonEvent * ev )
 void PatternView::onDeleteBar(NButtonEvent* ev)
 {
   if ( pattern_ ) {
-    float position = cursor().y() / (float) pattern_->beatZoom();
-    pattern_->removeBar(position);
-    resize();
-    repaint();
+//    float position = drawArea.cursor().line() / (float) pattern_->beatZoom();
+//    pattern_->removeBar(position);
+//    resize();
+//    repaint();
   }
 }
 
@@ -301,20 +284,6 @@ int PatternView::headerWidth( ) const
   return header->skinColWidth();
 }
 
-int PatternView::noteCellWidth( ) const
-{
-  NFontMetrics metrics(font());
-  int width = metrics.textWidth("C#-10");
-  return width;
-}
-
-int PatternView::cellWidth( ) const
-{
-  //NFontMetrics metrics(font());
-  //int width = metrics.textWidth("_");
-  return 12;
-}
-
 int PatternView::lineNumber( ) const
 {
   return ( pattern_) ? pattern_->beatZoom() * pattern_->beats() : 0;  
@@ -333,52 +302,6 @@ void PatternView::setPrevEditPosition( int pos )
 int PatternView::prevEditPosition( ) const
 {
   return prevEditPosition_;
-}
-
-const NPoint3D & PatternView::cursor( ) const
-{
-  return cursor_;
-}
-
-void PatternView::setCursor( const NPoint3D & cursor )
-{
-  cursor_ = cursor;
-  lineChanged.emit(cursor_.y());
-}
-
-void PatternView::moveCursor( int dx, int dy, int dz )
-{
-  int newX = std::min(std::max(cursor_.x()+dx,0),trackNumber()-1);
-  int newY = std::min(std::max(0,cursor_.y()+dy),lineNumber()-1);
-
-  int newZ = cursor_.z()+dz;
-
-  if (newZ >= cellCount() ) {
-      newX++;
-      if (newX > trackNumber()-1) {
-        newX = trackNumber()-1;
-        newZ = cursor_.z();
-      }
-      else 
-        newZ=0;
-  } else
-
-  if (newZ < 0 ) {
-      newX--;
-      if (newX < 0) {
-        newX = 0;
-        newZ = 0;
-      }
-      else
-        newZ= cellCount()-1;
-  }
-
-  setCursor(NPoint3D(newX,newY,newZ));
-}
-
-void PatternView::addEvent( int byteLength )
-{
-  eventSize.push_back(byteLength);
 }
 
 void PatternView::setEditPosition( int pos )
@@ -617,10 +540,10 @@ int PatternView::Header::skinColWidth( )
     g->drawLine(clientWidth()-1,0,clientWidth()-1,clientHeight());
 
       for (int i = offT; i < count; i++) {
-        if (i+startLine == pView->cursor().y()) {
-          g->setForeground(Global::pConfig()->pvc_cursor);
-          g->fillRect(0,i*pView->rowHeight()+pView->headerHeight(),clientWidth()-1,pView->rowHeight());
-        }
+        //if (i+startLine == pView->cursor().line()) {
+        //  g->setForeground(Global::pConfig()->pvc_cursor);
+        //  g->fillRect(0,i*pView->rowHeight()+pView->headerHeight(),clientWidth()-1,pView->rowHeight());
+        //}
         std::string text = stringify(i+startLine);
         if ( pView->pattern() ) {
           float position = (i+ startLine) / (float) pView->pattern()->beatZoom();
@@ -822,36 +745,19 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
       }
     }
 
+		drawSelBg(g,selection());
 		drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
 		drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
 		drawPattern(g, startLine, endLine, startTrack, endTrack);
 		drawRestArea(g, startLine, endLine, startTrack, endTrack);
-		drawSelBg(g,selection());
+		
   }
 }
-
-void PatternView::PatternDraw::drawCellBg( NGraphics * g, int track, int line, int col, const NColor & bgColor )
-{
-  int xOff = track * pView->colWidth()+3 - dx();
-  int yOff = line  * pView->rowHeight()  - dy();
-
-  int cellWidth = pView->noteCellWidth()-3;
-  int colOffset = 0;
-
-  if (col>0) {
-    cellWidth = pView->cellWidth();
-    colOffset = pView->noteCellWidth()-3 + (col-1)*pView->cellWidth();
-  }
-
-  g->setForeground(bgColor);
-  g->fillRect(xOff + colOffset,yOff, cellWidth,pView->rowHeight());
-}
-
 
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
 	if ( pView->pattern() ) {
-		drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
+		drawCellBg(g, cursor(), Global::pConfig()->pvc_cursor );
 
 		SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
 
@@ -865,11 +771,11 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 				for(; eventIt != line.end() && eventIt->first < endTrack; ++eventIt) {
 					PatternEvent event = eventIt->second;
 					int x = eventIt->first;
-					drawDataN( g, x, y, 0, event.note() );
-					if (event.instrument() != 255) drawDataN( g, x, y, 1, event.instrument() );
-					if (event.machine() != 255) drawDataN( g, x, y, 2, event.machine() );
+					drawData( g, x, y, 0, event.note() );
+					if (event.instrument() != 255) drawData( g, x, y, 1, event.instrument() );
+					if (event.machine() != 255) drawData( g, x, y, 2, event.machine() );
 					if (event.command() != 0 || event.parameter() != 0) {
-						drawDataN( g, x, y, 3, (event.command() << 8) | event.parameter() );
+						drawData( g, x, y, 3, (event.command() << 8) | event.parameter() );
 					}
 					lastLine = y;
 				}
@@ -922,345 +828,74 @@ void PatternView::PatternDraw::onMouseOver( int x, int y )
   CustomPatternView::onMouseOver( x, y);
 }
 
-char inline hex_value(char c) { if(c >= 'A') return 10 + c - 'A'; else return c - '0'; }
-
 void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
-{
-  if (button==1) {
-    if ( !doSelect() ) pView->setCursor(intersectCell(x,y));
-    pView->repaint();    
-  }
+{  
   CustomPatternView::onMousePressed(x,y,button);
 }
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 {
- ///\todo: Verify the correct usage of InputHandler->getEnumCodeByKey, concretely in relation to StateMasks.
-  if ( !pView->pattern() ) return;
+	CustomPatternView::onKeyPress( event );
 
-  if (doDrag() != (NApp::system().keyState() & ShiftMask) && 
-                  !(NApp::system().keyState() & ControlMask)) {
-      if (!doDrag() ) {
-        clearOldSelection();
-        startSel(pView->cursor());
-        selCursor = pView->cursor();
-        selCursor.setZ(0);
-      }
-  }
+	if ( !pView->pattern() ) return;
 
-  switch (event.scancode()) {
-    case XK_Tab : {
-	int oldTrack = pView->cursor().x();
-	int curLine = pView->cursor().y();
-	//oddity.. this if never passes on my system. also, pressing shift-tab in the pattern view and holding shift is
-	//equivalent to holding down the left mouse button..
-        if (NApp::system().keyState() & ShiftMask) {
-		pView->moveCursor(-1,0,0); std::cout<<"bam"<<std::endl;
-		int newTrack = pView->cursor().x();
-    repaintBlock( NSize( newTrack,curLine, oldTrack, curLine ) );
-	} else {
-		pView->moveCursor(1,0,0);
-		int newTrack = pView->cursor().x();
-		repaintBlock( NSize( oldTrack,curLine, newTrack, curLine ) );
-	}
-	window()->repaint(pView,pView->repaintLineNumberArea(curLine,curLine));
-    }
-    break;
-    case XK_Insert : {
-        int startLine = dy() / pView->rowHeight();
-	int lastLine = pView->pattern()->beats()*pView->beatZoom();
-        int lineCount = clientHeight() / pView->rowHeight();
-        int curLine = pView->cursor().y();
-	int curTrack = pView->cursor().x();
-
-	double lineInc = 1.0f / (float)pView->beatZoom();
-
-	SinglePattern::reverse_iterator it = pView->pattern()->rbegin();
-	SinglePattern::reverse_iterator end
-		= (SinglePattern::reverse_iterator
-		( pView->pattern()->lower_bound(curLine*lineInc)) );
-
-	for(; it != end; ++it)
-	{
-		double beatPos = it->first;
-		PatternLine &curLine = it->second;
-		if(curLine.count(curTrack))
-		{
-			PatternEvent &tempEvent(curLine[curTrack]);
-			double newpos = beatPos + lineInc;
-			if(newpos < pView->pattern()->beats())
-				(*pView->pattern())[newpos][curTrack]=tempEvent;
-			curLine.erase(curTrack);
+	if ( cursor().eventNr() == 0 ) {
+		// a note event
+		int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
+		if ( note == cdefKeyStop ) {
+			pView->noteOffAny( cursor() );
+		} else
+		if (note >=0 && note < 120) {
+			pView->enterNote( cursor(), note );
+			moveCursor(0,1);
+		}
+	} else
+	if ( isHex(event.scancode()) ) {
+		if ( cursor().eventNr() == 1 ) {
+			// inst select
+			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+			unsigned char newByte = convertDigit( event.scancode(), patEvent.instrument(), cursor().col() );
+			patEvent.setInstrument( newByte );
+			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+			repaintCursorPos( cursor() );
+		} else 
+		if ( cursor().eventNr() == 2) {
+			// mac select
+			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+			unsigned char newByte = convertDigit( event.scancode(), patEvent.machine(), cursor().col() );
+			patEvent.setMachine( newByte );
+			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+			repaintCursorPos( cursor() );
+		} else
+		if ( cursor().eventNr() == 3) {
+			// comand or parameter
+			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+			if (cursor().col() < 2 ) {
+				unsigned char newByte = convertDigit( event.scancode(), patEvent.command(), cursor().col() );
+				patEvent.setCommand( newByte );
+				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+			}
+			else {
+				unsigned char newByte = convertDigit( event.scancode(), patEvent.parameter(), cursor().col() - 2 );
+				patEvent.setParameter( newByte );
+				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+			}
+			repaintCursorPos( cursor() );
 		}
 	}
-	pView->pattern()->clearEmptyLines();
-
-        window()->repaint(this,repaintTrackArea(curLine,lastLine,pView->cursor().x(),pView->cursor().x()));
-        window()->repaint(pView,pView->repaintLineNumberArea(curLine,lastLine));
-    }
-    break;
-    case XK_BackSpace : {
-        pView->clearCursorPos();
-        int startLine  = dy() / pView->rowHeight();
-        int lineCount  = clientHeight() / pView->rowHeight();
-        int oldLine = pView->cursor().y();
-        pView->moveCursor(0,-1,0);
-        int newLine = pView->cursor().y();
-        window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
-        window()->repaint(pView,pView->repaintLineNumberArea(newLine,oldLine));
-
-          if (newLine < startLine) {
-            pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
-          }
-    }
-    break;
-    case XK_Delete: {
-        pView->clearCursorPos();
-        int startLine  = dy() / pView->rowHeight();
-        int lineCount  = clientHeight() / pView->rowHeight();
-        int oldLine = pView->cursor().y();
-        pView->moveCursor(0,1,0);
-        int newLine = pView->cursor().y();
-        window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
-        window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
-
-          if (newLine > startLine + lineCount-1) {
-            pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
-          }
-    }
-    break;
-    case XK_Left: {
-        if (NApp::system().keyState() & ShiftMask) {
-          // selMode
-          selCursor.setX(std::max(selCursor.x()-1,0));
-          doSel(selCursor);
-        } else {
-          int oldTrack = pView->cursor().x();
-          pView->moveCursor(0,0,-1);
-          int newTrack = pView->cursor().x();
-          int startTrack  = dx() / pView->colWidth();
-          if (newTrack < startTrack) {
-              pView->hScrBar()->setPos( (newTrack) * pView->colWidth());
-          }
-        window()->repaint(this,repaintTrackArea(pView->cursor().y(),pView->cursor().y(),newTrack,oldTrack));
-        }
-    }
-    break;
-    case XK_Right: {
-        if (NApp::system().keyState() & ShiftMask) {
-          // selMode
-          selCursor.setX(std::min(selCursor.x()+1,pView->trackNumber()-1));
-          doSel(selCursor);
-        } else {
-          int oldTrack = pView->cursor().x();
-          pView->moveCursor(0,0,1);
-          int newTrack    = pView->cursor().x();
-          int trackCount  = clientWidth() / pView->colWidth();
-          int startTrack  = dx() / pView->colWidth();
-          if (newTrack > startTrack + trackCount -1) {
-            pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
-          }
-          window()->repaint(this,repaintTrackArea(pView->cursor().y(),pView->cursor().y(),oldTrack,newTrack));
-        }
-      }
-      break;
-      case XK_Down : {
-        if (NApp::system().keyState() & ShiftMask) {
-          // selMode
-          selCursor.setY(std::min(selCursor.y()+1,pView->lineNumber()-1));
-          doSel(selCursor);
-        } else {
-          int startLine  = dy() / pView->rowHeight();
-          int lineCount  = clientHeight() / pView->rowHeight();
-          int oldLine = pView->cursor().y();
-          pView->moveCursor(0,pView->patternStep(),0);
-          // first clear old line to avoid flicker at scroll down
-          window()->repaint(this,repaintTrackArea(oldLine,oldLine,pView->cursor().x(),pView->cursor().x()));
-          window()->repaint(pView,pView->repaintLineNumberArea(oldLine,oldLine));
-          int newLine = pView->cursor().y();
-          if (newLine > startLine + lineCount-1) {
-            pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
-          }
-            window()->repaint(this,repaintTrackArea(newLine,newLine,pView->cursor().x(),pView->cursor().x()));
-            window()->repaint(pView,pView->repaintLineNumberArea(newLine,newLine));
-
-        }
-      }
-      break;
-      case XK_Up: {
-        if (NApp::system().keyState() & ShiftMask) {
-          // selMode
-          selCursor.setY(std::max(selCursor.y()-1,0));
-          doSel(selCursor);
-        } else {
-          int oldLine = pView->cursor().y();
-          pView->moveCursor(0,-pView->patternStep(),0);
-          int startLine  = dy() / pView->rowHeight();
-          int newLine = pView->cursor().y();
-          // frist clear oldLine to avoid flicker at bitblit
-          window()->repaint(this,repaintTrackArea(oldLine,oldLine,pView->cursor().x(),pView->cursor().x()));
-          window()->repaint(pView,pView->repaintLineNumberArea(oldLine,oldLine));
-          if (newLine < startLine) {
-            pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
-          }
-          window()->repaint(this,repaintTrackArea(newLine,newLine,pView->cursor().x(),pView->cursor().x()));
-          window()->repaint(pView,pView->repaintLineNumberArea(newLine,newLine));
-        }
-      }
-      break;
-      case XK_Page_Up: {
-        int lines = (pView->pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
-
-        int oldLine = pView->cursor().y();
-        pView->moveCursor(0,-lines,0);
-        int startLine  = dy() / pView->rowHeight();
-        int newLine = pView->cursor().y();
-        if (newLine <= startLine) {
-            pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
-        }
-        window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
-        window()->repaint(pView,pView->repaintLineNumberArea(newLine,oldLine));
-      }
-      break;
-      case XK_Page_Down:{
-        int lines = (pView->pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
-
-        int startLine  = dy() / pView->rowHeight();
-        int lineCount  = clientHeight() / pView->rowHeight();
-        int oldLine = pView->cursor().y();
-        pView->moveCursor(0,lines,0);
-        int newLine = pView->cursor().y();
-        if (newLine > startLine + lineCount-1) {
-            pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
-        }
-        window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
-        window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
-      }
-      break;
-      default: {
-          switch
-            (Global::pConfig()->inputHandler.getEnumCodeByKey(Key(NApp::system().keyState() & ControlMask,event.scancode()))) 
-          {
-            case cdefBlockCopy :
-                copyBlock(false);
-            break;
-            case cdefBlockDelete :
-                deleteBlock();
-                repaint();
-            break;
-            case cdefBlockPaste :
-                pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
-            break;
-            case cdefBlockMix :
-                pasteBlock(pView->cursor().x(),pView->cursor().y(),true);
-            break;
-            case cdefTransposeBlockInc:
-                transposeBlock(1);
-            break;
-            case cdefTransposeBlockInc12:
-                transposeBlock(12);
-            break;
-            case cdefTransposeBlockDec:
-                transposeBlock(-1);
-            break;
-            case cdefTransposeBlockDec12:
-                transposeBlock(-12);
-            break;
-            case cdefBlockDouble:
-                scaleBlock(2.0f);
-            break;
-            case cdefBlockHalve:
-                scaleBlock(0.5f);
-            break;
-            case cdefRowClear:
-                pView->clearCursorPos();
-            break;
-
-          default: {
-              if (event.buffer()!="") {
-              int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
-
-              if (note == cdefKeyStop && pView->cursor().z()==0) pView->noteOffAny(); else
-              {
-                  if (pView->cursor().z()==0) {
-                    int startLine  = dy() / pView->rowHeight();
-                    int lineCount  = clientHeight() / pView->rowHeight();
-                    int oldLine = pView->cursor().y();
-
-                    pView->enterNote( note );
-                    pView->moveCursor(0,1,0);
-                    int newLine = pView->cursor().y();
-                    if (newLine > startLine + lineCount-1) {
-                      pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
-                    }
-                  window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
-                  window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
-                } else  {
-
-                  int off = (pView->cursor().z()+1) / 2;
-                  float position = pView->cursor().y() / (float) pView->pattern_->beatZoom();
-
-                    PatternEvent data = (*pView->pattern_)[position][pView->cursor().x()];
-                  unsigned char* patOffset = (unsigned char*) data.entry() + off;
-                  unsigned char newByte;
-                  if (pView->cursor().z() % 2 == 1) 
-                    newByte = (*patOffset & 0x0F) | (0xF0 & (hex_value(event.scancode()) << 4));
-                  else
-                    newByte = (*patOffset & 0xF0) | (0x0F & (hex_value(event.scancode())));
-
-                  if (*patOffset == 255) {
-                    // set to 0
-                      newByte = (*patOffset & 0x00) | (0xF0 & (hex_value(event.scancode()) << 4));
-                  }
-                  *patOffset = newByte;
-                  (*pView->pattern_)[position][pView->cursor().x()]=data;
-
-                    int eventIdx      =  pView->eventFromCol(pView->cursor().z());
-                    int eventLen      =  pView->eventLength(eventIdx);
-                    int eventColStart =  pView->colStartFromEvent(eventIdx);
-
-                    int startLine  = dy() / pView->rowHeight();
-                    int lineCount  = clientHeight() / pView->rowHeight();
-                    int oldLine = pView->cursor().y();
-
-                    if (pView->cursor().z() - eventColStart >= 2*eventLen - 1) {
-                      pView->moveCursor(0,1,0);
-                      pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y(),eventColStart));
-                    } else
-                        pView->moveCursor(0,0,1);
-
-                    int newLine = pView->cursor().y();
-                    if (newLine > startLine + lineCount-1) {
-                      pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
-                    }
-                    window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
-                    window()->repaint(pView,pView->repaintLineNumberArea(oldLine,newLine));
-                }
-            }
-          }
-      }}}
-      break;
-  }
 }
 
-void PatternView::enterNote( int note ) {
+void PatternView::enterNote( const PatCursor & cursor, int note ) {
  if ( pattern() ) {
-   PatternEvent event = pattern()->event( cursor().y(), cursor().x() );
-
+   PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
    Machine* tmac = pSong()->_pMachine[ pSong()->seqBus ];
-
    event.setNote( editOctave() * 12 + note );
    if (tmac) event.setMachine( tmac->_macIndex );
-
    if (tmac && tmac->_type == MACH_SAMPLER ) {
      event.setInstrument( pSong()->instSelected );
 	 }
-
-   pattern()->setEvent( cursor().y(), cursor().x(), event );
-
-   if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);
-
-   
+   pattern()->setEvent( cursor.line(), cursor.track(), event );
+   if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);   
  }
 }
 
@@ -1271,31 +906,6 @@ NRect PatternView::repaintLineNumberArea(int startLine, int endLine)
 
   return NRect(lineNumber_->absoluteLeft(),top,lineNumber_->clientWidth(),bottom - top);
 }
-
-int PatternView::cellCount( ) const
-{
-  int count = 1;
-  for (std::vector<int>::const_iterator it = eventSize.begin(); it < eventSize.end(); it++)
-    switch (*it) {
-        case 1  : count+=2; break;
-        case 2  : count+=4; break;
-    }
-  return count;
-}
-
-
-NPoint3D PatternView::PatternDraw::intersectCell( int x, int y )
-{
-  int track = ( x + dx() ) / pView->colWidth();
-  int line  = ( y + dy() ) / pView->rowHeight();
-
-  int colOff   = ( x + dx() ) -  (track*pView->colWidth() + pView->noteCellWidth() );
-  int cell = 0;
-  if (colOff >= 0) cell = colOff / pView->cellWidth() + 1;
-
-  return NPoint3D(track,line,cell);
-}
-
 
 void PatternView::PatternDraw::onPopupBlockCopy( NButtonEvent * ev )
 {
@@ -1338,7 +948,7 @@ void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
 
 void PatternView::PatternDraw::onPopupBlockMixPaste( NButtonEvent * ev )
 {
-  pasteBlock(pView->cursor().x(),pView->cursor().y(),true);
+  pasteBlock( cursor().track(), cursor().line(),true);
 
   if (pView->moveCursorWhenPaste()) {
 /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
@@ -1351,7 +961,7 @@ void PatternView::PatternDraw::onPopupBlockMixPaste( NButtonEvent * ev )
 
 void PatternView::PatternDraw::onPopupBlockPaste( NButtonEvent * ev )
 {
-  pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
+  pasteBlock( cursor().track(), cursor().line(), false);
 
   if (pView->moveCursorWhenPaste()) {
 /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
@@ -1530,58 +1140,22 @@ void PatternView::PatternDraw::transposeBlock(int trp)
 }
 
 
-void PatternView::noteOffAny()
+void PatternView::noteOffAny( const PatCursor & cursor )
 {
   if (pattern_) {
     PatternEvent event;
     event.setNote(120);
-    pattern()->setEvent( cursor().y(), cursor().x(), event );
-
-    window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
+    pattern()->setEvent( cursor.line(), cursor.track(), event );
+		drawArea->repaintCursorPos( cursor );    
   }
 }
 
-void PatternView::clearCursorPos( )
+/*void PatternView::clearCursorPos( const PatCursor & cursor )
 {
   if ( pattern() ) {
-    pattern_->clearPosition( cursor().y(), cursor().x(), cursor().z() );
+    pattern_->clearPosition( cursor.line(), cursor.track(), cursor.eventNr() );
   }
-}
-
-
-int PatternView::eventFromCol(int col) const {
-  int count = 0; int index = 0;
-  for (std::vector<int>::const_iterator it = eventSize.begin(); it < eventSize.end(); it++) {
-    switch (*it) {
-        case 1  : count+=2; break;
-        case 2  : count+=4; break;
-    }
-    if (count >= col) return index;
-    index++;
-  }
-  return -1;  // out of range
-}
-
-
-int PatternView::colStartFromEvent( int event )
-{
-  int col = 1; 
-  int count = 0;
-  for (std::vector<int>::iterator it = eventSize.begin(); it < eventSize.end(); it++) {
-    if (count >= event) return col;
-    switch (*it) {
-        case 1  : col+=2; break;
-        case 2  : col+=4; break;
-    }
-    count++;
-  }
-  return -1;  // out of range
-}
-
-
-int PatternView::eventLength(int event) const {
-  if (event >= 0 && event < eventSize.size()) return eventSize.at(event); else return -1;
-}
+}*/
 
 void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
 {
@@ -1612,9 +1186,9 @@ void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
   CustomPatternView::onKeyRelease( event );
 	if ( !pView->pattern() ) return;
 
-  if (pView->cursor().z()==0) {
+  if ( cursor().eventNr() == 0 ) {
     int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
-    pView->StopNote(outnote);
+    pView->StopNote( outnote );
   }
 }
 
@@ -1758,10 +1332,10 @@ void PatternView::onOctaveChange( NItemEvent * ev )
 void PatternView::onTrackChange( NItemEvent * ev )
 {
   pSong()->setTracks( str<int>( ev->item()->text() ) );
-  if (cursor().x() >= pSong()->tracks() )
-  {
-    setCursor(NPoint3D(pSong()->tracks() ,cursor().y(),0));
-  }
+  //if (cursor().track() >= pSong()->tracks() )
+  //{
+  //  setCursor( PatCursor( pSong()->tracks() ,cursor().line(),0,0) );
+  //}
   repaint();
 }
 }}

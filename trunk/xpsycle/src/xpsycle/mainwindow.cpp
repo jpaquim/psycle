@@ -1106,7 +1106,7 @@ void MainWindow::onEditBlockMixPaste( NButtonEvent * ev )
 {
   if ( !selectedChildView_ ) return;
 
-  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().x(), selectedChildView_->patternView()->cursor().y(), true);
+//  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().track(), selectedChildView_->patternView()->cursor().line(), true);
 }
 
 void MainWindow::onEditBlockDelete( NButtonEvent * ev )
@@ -1125,7 +1125,7 @@ void MainWindow::onEditBlockPaste( NButtonEvent * ev )
 {
   if ( !selectedChildView_ ) return;
 
-  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().x(), selectedChildView_->patternView()->cursor().y(), false);
+//  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().track(), selectedChildView_->patternView()->cursor().line(), false);
 }
 
 void MainWindow::onEditBlockCopy( NButtonEvent * ev )

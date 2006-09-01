@@ -154,7 +154,7 @@ WaveEdFrame * ChildView::waveEditor( )
 
 void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
 {
-  _pSong->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().x(),patternView_->cursor().y());
+//  _pSong->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().track(),patternView_->cursor().line());
 }
 
 SequencerGUI * ChildView::sequencerView( )

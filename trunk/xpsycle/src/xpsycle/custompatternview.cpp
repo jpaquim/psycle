@@ -50,12 +50,23 @@ namespace psycle {
 			return type_;
 		}
 
+		int ColumnEvent::cols() const {
+			int cols_ = 1;
+			switch ( type_ ) {
+				case ColumnEvent::hex2 : cols_ = 2; break;
+				case ColumnEvent::hex4 : cols_ = 4; break;
+				case ColumnEvent::note : cols_ = 1; break;
+				default: ;
+			}
+			return cols_;
+		}
+
 
 		PatCursor::PatCursor() :
 			track_(0), 
 			line_(0), 
-			eventNr_(0), 
-			col_(0) 
+			eventNr_(3), 
+			col_(3) 
 		{
 		}
 
@@ -175,6 +186,14 @@ namespace psycle {
 			return selectionColor_;
 		}
 
+		void CustomPatternView::setCursor( const PatCursor & cursor ) {
+			cursor_ = cursor;
+		}
+
+		const PatCursor & CustomPatternView::cursor() const {
+			return cursor_;
+		}
+
 		void CustomPatternView::setDx(int dx) {
 			dx_ = dx;
 		}
@@ -269,18 +288,18 @@ namespace psycle {
 
 		}
 
-		void CustomPatternView::drawDataN(NGraphics* g, int track, int line, int eventnr, int data ) {
+		void CustomPatternView::drawData(NGraphics* g, int track, int line, int eventnr, int data ) {
 			if ( eventnr < events_.size() ) {
 				const ColumnEvent & event = events_.at( eventnr );
 				switch ( event.type() ) {
 					case ColumnEvent::hex2 :
-						drawBlockData( g, track, line, eventOffset(eventnr), toHex(data,2) );
+						drawBlockData( g, track, line, eventOffset(eventnr,0), toHex(data,2) );
 					break;
 					case ColumnEvent::hex4 :
-						drawBlockData( g, track, line, eventOffset(eventnr), toHex(data,4) );
+						drawBlockData( g, track, line, eventOffset(eventnr,0), toHex(data,4) );
 					break;
 					case ColumnEvent::note :					
-						drawStringData( g, track, line, eventOffset(eventnr), noteToString(data) );
+						drawStringData( g, track, line, eventOffset(eventnr,0), noteToString(data) );
 					break;
 					default: ;
 				}
@@ -307,14 +326,23 @@ namespace psycle {
 			g->drawText(xOff,yOff,text);
 		}
 
-		int CustomPatternView::eventOffset( int eventnr ) const {
+		void CustomPatternView::drawCellBg(NGraphics* g, const PatCursor & cursor, const NColor & bgColor) {
+			int xOff = cursor.track() * colWidth() - dx();
+  		int yOff = cursor.line()  * rowHeight()  - dy();
+  		int colOffset = eventOffset( cursor.eventNr(), cursor.col() );
+			g->setForeground(bgColor);
+			g->fillRect( xOff + colOffset, yOff, eventColWidth( cursor.eventNr() ), rowHeight() );
+		}
+
+		int CustomPatternView::eventOffset( int eventnr, int col ) const {
 			std::vector<ColumnEvent>::const_iterator it = events_.begin();
 			int nr = 0;
 			int offset = 0;
 			for ( ; it < events_.end(); it++, nr++ ) {
 				const ColumnEvent & event = *it;
 				if (nr == eventnr) {
-					return offset;
+					int colOff = col * cellWidth();
+					return offset + colOff;
 				}
 				switch ( event.type() ) {
 					case ColumnEvent::hex2 : offset+= 2*cellWidth(); 	break;
@@ -326,6 +354,35 @@ namespace psycle {
 			return -1;
 		}
 
+		int CustomPatternView::eventWidth( int eventnr ) const {	
+			int eventWidth_ = 0;
+			if ( eventnr < events_.size() ) {
+				const ColumnEvent & event = events_.at(eventnr);
+			
+				switch ( event.type() ) {
+					case ColumnEvent::hex2 : eventWidth_= 2*cellWidth(); 	break;
+					case ColumnEvent::hex4 : eventWidth_= 4*cellWidth(); 	break;
+					case ColumnEvent::note : eventWidth_= noteCellWidth(); break;
+					default: ;
+				}
+			}
+			return eventWidth_;
+		}
+
+		int CustomPatternView::eventColWidth( int eventnr ) const {
+			int eventColWidth_ = 0;
+			if ( eventnr < events_.size() ) {
+				const ColumnEvent & event = events_.at(eventnr);
+			
+				switch ( event.type() ) {
+					case ColumnEvent::hex2 : eventColWidth_= cellWidth(); 	break;
+					case ColumnEvent::hex4 : eventColWidth_= cellWidth(); 	break;
+					case ColumnEvent::note : eventColWidth_= noteCellWidth(); break;
+					default: ;
+				}
+			}
+			return eventColWidth_;
+		}
 
 		void CustomPatternView::customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack ) {
 			drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
@@ -349,7 +406,7 @@ namespace psycle {
 		void CustomPatternView::onMousePress(int x, int y, int button) {
 			if ( button == 1) {
     		clearOldSelection();
-    		NPoint3D p = intersectCell(x,y);
+    		PatCursor p = intersectCell(x,y);
     		startSel(p);
   		}
 		}
@@ -357,18 +414,101 @@ namespace psycle {
 		void CustomPatternView::onMousePressed(int x, int y, int button) {
 			if (button == 1) {
 				endSel(); 
+    		if ( !doSelect() ) cursor_ = intersectCell(x,y);
+    		repaint();    
 			}
 		}
 
 		void CustomPatternView::onMouseOver	(int x, int y) {
 			if (doDrag_) {
-    		NPoint3D p = intersectCell(x,y);
+    		PatCursor p = intersectCell(x,y);
     		doSel(p);
   		}
 		}
 
 		void CustomPatternView::onKeyPress(const NKeyEvent & event) {
+			if (doDrag() != (NApp::system().keyState() & ShiftMask) &&
+                     !(NApp::system().keyState() & ControlMask)) {
+				if (!doDrag()) {
+					clearOldSelection();
+					startSel( cursor() );
+					selCursor_ = cursor();
+					selCursor_.setEventNr(0);
+					selCursor_.setCol(0);
+      	}
+			}
 
+			// navigation
+			switch (event.scancode()) {
+				case XK_Tab  :
+				break;
+				case XK_Left :
+					moveCursor(-1,0);
+				break;
+				case XK_Right:
+					moveCursor(1,0);
+				break;
+				case XK_Up:
+					moveCursor(0,-1);
+				break;
+				case XK_Down:
+					moveCursor(0,1);
+				break;
+				case XK_Page_Up:
+				break;
+				case XK_Page_Down:
+				break;
+			}
+
+		}
+
+		int CustomPatternView::moveCursor( int dx, int dy) {
+			// dx -1 left hex digit move
+			// dx +1 rigth hex digit move
+			// dy in lines
+			PatCursor oldCursor = cursor_;
+			int eventnr = cursor().eventNr();
+			if ( dx > 0 ) {			
+				if ( eventnr < events_.size() ) {
+					const ColumnEvent & event = events_.at( eventnr );
+					int maxCols = event.cols();
+					if ( cursor_.col() + 1 < maxCols ) {
+						cursor_.setCol( cursor_.col() + 1);
+					} else
+					if (eventnr + 1 < events_.size() ) {
+						cursor_.setCol( 0 );
+						cursor_.setEventNr( eventnr + 1);
+					} else {
+						cursor_.setTrack( cursor_.track() + 1 );
+						cursor_.setEventNr(0);
+						cursor_.setCol(0);
+					}
+					window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), oldCursor.track(), cursor_.track()) );
+				}
+			} else 
+			if ( dx < 0 ) {
+				if ( cursor_.col() > 0 ) {
+					cursor_.setCol( cursor_.col() - 1);
+				} else 
+				if ( cursor_.eventNr() > 0 ) {
+					cursor_.setEventNr( cursor_.eventNr() - 1 );
+					const ColumnEvent & event = events_.at( cursor_.eventNr() );
+					cursor_.setCol( event.cols() - 1 );					
+				} else {
+					if ( cursor_.track() > 0 ) {
+						cursor_.setTrack( cursor_.track() -1 );
+						cursor_.setEventNr( events_.size() -1 );
+						const ColumnEvent & event = events_.at( cursor_.eventNr() );
+						cursor_.setCol( event.cols() - 1 );
+					}		
+				}
+				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), oldCursor.track()) );
+			}
+			if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
+				cursor_.setLine( cursor_.line() + dy);
+				window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
+				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
+			}		
 		}
 
 		void CustomPatternView::onKeyRelease(const NKeyEvent & event) {
@@ -376,12 +516,31 @@ namespace psycle {
 				endSel();
 			}
 		}
+
+		char hex_value(char c) { if(c >= 'A') return 10 + c - 'A'; else return c - '0'; }
+
+		unsigned char CustomPatternView::convertDigit( int scanCode, unsigned char oldByte, int col ) const {
+			unsigned char newByte = 0;
+ 			if (col == 0)
+				newByte = (oldByte & 0x0F) | (0xF0 & (hex_value(scanCode) << 4));
+			else
+				newByte = (oldByte & 0xF0) | (0x0F & (hex_value(scanCode)));
+
+			return newByte;
+		}
+
+		bool CustomPatternView::isHex( int c ) {
+			if ( ( (c >= 'a') && (c <='f') ) || ( (c>='0' && c <='9') ) ) return true;
+			return false;
+		}
 		
 		void CustomPatternView::repaintBlock( const NSize & block ) {
   		window()->repaint(this,repaintTrackArea(block.top(),block.bottom(),block.left(), block.right()));
 		}
 
-
+		void CustomPatternView::repaintCursorPos( const PatCursor & cursor ) {
+			window()->repaint(this,repaintTrackArea(cursor.line(),cursor.line(),cursor.track(), cursor.track()));
+		}
 
 		NRect CustomPatternView::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {
 			int top    = startLine    * rowHeight()  + absoluteTop()  - dy_;
@@ -453,10 +612,10 @@ namespace psycle {
 			return selection_;
 		}
 
-		void CustomPatternView::startSel(const NPoint3D & p)
+		void CustomPatternView::startSel(const PatCursor & p)
 		{
 			selStartPoint_ = p;
-			selection_.setSize( p.x(), p.y(), p.x(), p.y() );
+			selection_.setSize( p.track(), p.line(), p.track(), p.line() );
   
 			oldSelection_ = selection_;
 			doDrag_ = true;
@@ -469,23 +628,23 @@ namespace psycle {
 			doSelect_ = false;
 		}
 
-		void CustomPatternView::doSel(const NPoint3D & p )
+		void CustomPatternView::doSel(const PatCursor & p )
 		{
 			doSelect_=true;
-			if (p.x() < selStartPoint().x()) {
-        selection_.setLeft(std::max(p.x(),0)); 
+			if (p.track() < selStartPoint().track()) {
+        selection_.setLeft(std::max(p.track(),0)); 
         int startTrack  = dx() / colWidth();
         //if (selection_.left() < startTrack && startTrack > 0) {
         //    pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
        // }
     	}
 			else
-			if (p.x() == selStartPoint_.x()) {
-      	selection_.setLeft (std::max(p.x(),0));
-				selection_.setRight(std::min(p.x()+1, trackNumber()));
+			if (p.track() == selStartPoint_.track()) {
+      	selection_.setLeft (std::max(p.track(),0));
+				selection_.setRight(std::min(p.track()+1, trackNumber()));
 			} else
-			if (p.x() > selStartPoint_.x()) {
-				selection_.setRight(std::min(p.x()+1, trackNumber()));
+			if (p.track() > selStartPoint_.track()) {
+				selection_.setRight(std::min(p.track()+1, trackNumber()));
 				int startTrack  = dx() / colWidth();
 				int trackCount  = clientWidth() / colWidth();
 			//	if (selection_.right() > startTrack + trackCount) {
@@ -495,19 +654,19 @@ namespace psycle {
 			//		pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
 			//	}
 			}
-			if (p.y() < selStartPoint_.y()) {
-				selection_.setTop(std::max(p.y(),0));
+			if (p.line() < selStartPoint_.line()) {
+				selection_.setTop(std::max(p.line(),0));
 				int startLine  = dy() / rowHeight();
 				//if (selection_.top() < startLine && startLine >0) {
 				//	pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
 				//}
 			} else
-			if (p.y() == selStartPoint_.y()) {
-				selection_.setTop (p.y());
-				selection_.setBottom(p.y()+1);
+			if (p.line() == selStartPoint_.line()) {
+				selection_.setTop (p.line());
+				selection_.setBottom(p.line()+1);
 			} else
-			if (p.y() > selStartPoint_.y()) {
-				selection_.setBottom(std::min(p.y()+1, lineNumber()));
+			if (p.line() > selStartPoint_.line()) {
+				selection_.setBottom(std::min(p.line()+1, lineNumber()));
 				int startLine  = dy() / rowHeight();
 				int lineCount  = clientHeight() / rowHeight();
 				//if (selection_.bottom() > startLine + lineCount) {
@@ -527,12 +686,40 @@ namespace psycle {
 			}
 		}
 
-		const NPoint3D & CustomPatternView::selStartPoint() const {
+		const PatCursor & CustomPatternView::selStartPoint() const {
 			return selStartPoint_;
 		}
 
-		NPoint3D CustomPatternView::intersectCell( int x, int y ){
-			return NPoint3D(0,0,0);
+		PatCursor CustomPatternView::intersectCell( int x, int y ) {
+			int track = ( x + dx() ) / colWidth();
+			int line  = ( y + dy() ) / rowHeight();
+			int colOff   = ( x + dx() ) -  track*colWidth();
+
+			std::vector<ColumnEvent>::const_iterator it = events_.begin();
+			int nr = 0;
+			int offset = 0;
+			int lastOffset = 0;
+			for ( ; it < events_.end(); it++, nr++ ) {				
+				const ColumnEvent & event = *it;				
+				switch ( event.type() ) {
+					case ColumnEvent::hex2 : offset+= 2*cellWidth(); 	break;
+					case ColumnEvent::hex4 : offset+= 4*cellWidth(); 	break;
+					case ColumnEvent::note : offset+= noteCellWidth(); break;
+					default: ;
+				}
+				if (offset > colOff) {
+					// found our event
+					if ( event.type() == ColumnEvent::note ) 
+						return PatCursor(track,line,nr,0);
+					else {
+						int cellStart = colOff - lastOffset;
+						int col = cellStart  / cellWidth();
+						return PatCursor(track,line,nr,col);
+					}			
+				}
+				lastOffset = offset;
+			}
+			return PatCursor();
 		}
 
 		std::string CustomPatternView::noteToString( int value )

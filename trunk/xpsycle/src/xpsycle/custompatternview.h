@@ -39,6 +39,7 @@ namespace psycle {
 				enum colType { hex2 = 0, hex4 = 1, note = 2 };
 
 				int type() const;
+				int cols() const;
 
 			private:
 				
@@ -102,6 +103,7 @@ namespace psycle {
 					virtual void onKeyPress(const NKeyEvent & event);
 					virtual void onKeyRelease(const NKeyEvent & event);
 
+					void repaintCursorPos( const PatCursor & cursor );
 					void repaintBlock( const NSize & block );
 					NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
       		NPoint linesFromRepaint(const NRegion & repaintArea) const;
@@ -113,25 +115,32 @@ namespace psycle {
 					void addEvent( const ColumnEvent & event );
 					std::string noteToString( int value );
 
-					void drawDataN(NGraphics* g, int track, int line, int eventnr, int data );
+					void drawData(NGraphics* g, int track, int line, int eventnr, int data );
+
+					const PatCursor & cursor() const;
+					void setCursor( const PatCursor & cursor );
+
+					int moveCursor( int dx, int dy ); // dx is one hex digit
+
+					unsigned char convertDigit( int scanCode, unsigned char oldByte, int col ) const;
+					bool isHex( int scanCode );
 
 			protected:
 
-					virtual NPoint3D intersectCell(int x, int y);
-					virtual void startSel(const NPoint3D & p);
-					virtual void doSel(const NPoint3D & p);
+					virtual PatCursor intersectCell(int x, int y);
+					virtual void startSel(const PatCursor & p);
+					virtual void doSel(const PatCursor & p);
 					virtual void endSel();
 
 					virtual int noteCellWidth() const;
 					virtual int cellWidth() const;
 
-					const NPoint3D & selStartPoint() const;
+					const PatCursor & selStartPoint() const;
 					bool doSelect() const;
 					bool doDrag() const;
 
 					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 					
-
 					virtual void drawTrackGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
 
 					virtual void drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
@@ -141,6 +150,9 @@ namespace psycle {
 					virtual void drawRestArea(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
 					virtual void drawSelBg( NGraphics* g, const NSize & selArea );
+
+					virtual void drawCellBg(NGraphics* g, const PatCursor & cursor, const NColor & bgColor);
+
 
 
 			private:
@@ -153,10 +165,11 @@ namespace psycle {
 					bool doShiftSel_;
 					NSize selection_;
 					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
-					NPoint3D selStartPoint_;				
+					PatCursor selStartPoint_;				
 
 					//cursor
 					PatCursor cursor_;
+					PatCursor selCursor_; // for keyboard drag
 
 					NColor separatorColor_;
 					NColor selectionColor_;
@@ -169,7 +182,10 @@ namespace psycle {
 
 					void drawStringData(NGraphics* g, int track, int line, int eventOffset, const std::string & text );
 
-					int eventOffset( int eventnr ) const;
+					int eventOffset( int eventnr, int col ) const;
+					int eventWidth( int eventnr ) const;
+					int eventColWidth( int eventnr ) const;
+
 
 		};
 	}
