@@ -59,7 +59,6 @@ namespace psycle
 		void Player::Start(double pos)
 		{
       if ( !song_ && !driver_ ) return;
-
 			Stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
 
@@ -427,22 +426,28 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		}
 
 		void Player::setDriver(  const AudioDriver & driver ) {
-			if ( !driver_) delete driver_;
+			std::cout << "entering player::setaudio" << std::endl;
+			if ( driver_) delete driver_;
 			driver_ = driver.clone();
+			std::cout << "cloned driver " << std::endl;
 			if (!driver_->Initialized())
-  		{
+  			{
 				driver_->Initialize( Work, this );
 			}
-  		if (!driver_->Configured())
-  		{
-      	driver_->Configure();
+			std::cout << " driver initialized" << std::endl;
+	  		if (!driver_->Configured())
+	  		{
+			      	driver_->Configure();
 				SampleRate(driver_->_samplesPerSec);
   			//   _outputActive = true;
-  		}
+	  		}
+			std::cout << " driver configured" << std::endl;
 			if (driver_->Enable(true))
 			{
+			std::cout << "driver enabled " << driver_->info().name() << std::endl;
 			//   _outputActive = true;
 			} else {
+			std::cout << "setting null driver " << std::endl;
 				if (driver_) delete driver_;
 				driver_ = new AudioDriver();
 			}

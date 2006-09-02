@@ -25,7 +25,11 @@
 #include "jackout.h"
 #include "gstreamerout.h"
 #include "esoundout.h"
+<<<<<<< .mine
+#include "netaudioout.h"
+=======
 //todo when ready: #include "nasout.h"
+>>>>>>> .r3289
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
