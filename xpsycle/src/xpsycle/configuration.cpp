@@ -25,11 +25,7 @@
 #include "jackout.h"
 #include "gstreamerout.h"
 #include "esoundout.h"
-<<<<<<< .mine
 #include "netaudioout.h"
-=======
-//todo when ready: #include "nasout.h"
->>>>>>> .r3289
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
@@ -144,8 +140,8 @@ void Configuration::setSkinDefaults( )
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
-		#if !defined XPSYCLE__NO_NAS
-			driver = new AudioDriver; //\todo dummy for now
+		#if !defined XPSYCLE__NO_NETAUDIO
+			driver = new NetAudio;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
