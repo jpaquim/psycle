@@ -17,9 +17,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/nas_conditional_build.h>
+	#include <xpsycle/netaudio_conditional_build.h>
 #endif
-#if !defined XPSYCLE__NO_NAS
+#if !defined XPSYCLE__NO_NETAUDIO
 #include "netaudioout.h"
 #include <stdexcept>
 #include <iostream>
@@ -344,4 +344,4 @@ namespace psycle
 
  // end of psycle namespace
 
-#endif // !defined XPSYCLE__NO_NAS
+#endif // !defined XPSYCLE__NO_NETAUDIO
