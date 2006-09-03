@@ -173,7 +173,8 @@ namespace psycle {
 
 					NColor separatorColor_;
 					NColor selectionColor_;
-
+					int colIdent;
+					
 					void init();
 
 					std::vector<ColumnEvent> events_;

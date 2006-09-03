@@ -65,15 +65,15 @@ namespace psycle {
 		PatCursor::PatCursor() :
 			track_(0), 
 			line_(0), 
-			eventNr_(3), 
-			col_(3) 
+			eventNr_(0), 
+			col_(0) 
 		{
 		}
 
 		PatCursor::PatCursor(int track, int line, int eventNr, int col) :
 			track_( track ), 
 			line_( line ), 
-			eventNr_( eventNr ), 
+ 			eventNr_( eventNr ), 
 			col_( col ) 
 		{
 		}
@@ -142,6 +142,7 @@ namespace psycle {
 			dy_ = 0;
 			separatorColor_ = NColor(200,200,200);
 			selectionColor_ = NColor(0,0,255);
+			colIdent = 3;
 		}
 
 		int CustomPatternView::lineNumber() const {
@@ -167,7 +168,7 @@ namespace psycle {
 				}
 			}
 
-			return offset;
+			return offset + colIdent ;
 		}
 				
 		int CustomPatternView::rowHeight() const {
@@ -244,8 +245,8 @@ namespace psycle {
 			for (int y = startLine; y <= endLine; y++)
       g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
 
-			for (int i = startTrack; i <= endTrack; i++) // 3px space at begin of trackCol
-      g->fillRect(i*colWidth()-dx(),0,3,lineHeight);
+			for (int i = startTrack; i <= endTrack; i++) //  oolIdent px space at begin of trackCol
+      g->fillRect(i*colWidth()-dx(),0,colIdent,lineHeight);
 
 			g->setForeground( separatorColor() );
 				for (int i = startTrack; i <= endTrack; i++)  // col separators
@@ -279,7 +280,7 @@ namespace psycle {
 						case ColumnEvent::hex4 : col+= 4*cellWidth(); 	break;
 						case ColumnEvent::note : col+= noteCellWidth(); break;
 					}
-					g->drawLine(x*colWidth()+col-dx(),0,x*colWidth()+col-dx(),lineHeight);
+					g->drawLine(x*colWidth()+colIdent+col-dx(),0,x*colWidth()+colIdent+col-dx(),lineHeight);
 				}
 			}
 		}
@@ -308,7 +309,7 @@ namespace psycle {
 
 		void CustomPatternView::drawBlockData( NGraphics * g, int track, int line, int eventOffset, const std::string & text )
 		{
-			int xOff = track * colWidth()+3 + eventOffset - dx();
+			int xOff = track * colWidth()+ colIdent + eventOffset - dx();
 			int yOff = line  * rowHeight() + rowHeight()  - dy();
 
 			int col = 0;
@@ -320,14 +321,14 @@ namespace psycle {
 
 		void CustomPatternView::drawStringData(NGraphics* g, int track, int line, int eventOffset, const std::string & text )
 		{
-			int xOff = track * colWidth()+3 + eventOffset - dx();
+			int xOff = track * colWidth()+ colIdent + eventOffset - dx();
 			int yOff = line  * rowHeight() + rowHeight()  - dy();
 
 			g->drawText(xOff,yOff,text);
 		}
 
 		void CustomPatternView::drawCellBg(NGraphics* g, const PatCursor & cursor, const NColor & bgColor) {
-			int xOff = cursor.track() * colWidth() - dx();
+			int xOff = cursor.track() * colWidth() + colIdent - dx();
   		int yOff = cursor.line()  * rowHeight()  - dy();
   		int colOffset = eventOffset( cursor.eventNr(), cursor.col() );
 			g->setForeground(bgColor);
@@ -693,12 +694,12 @@ namespace psycle {
 		PatCursor CustomPatternView::intersectCell( int x, int y ) {
 			int track = ( x + dx() ) / colWidth();
 			int line  = ( y + dy() ) / rowHeight();
-			int colOff   = ( x + dx() ) -  track*colWidth();
+			int colOff   = ( x + dx() ) -  (track*colWidth() - colIdent);
 
 			std::vector<ColumnEvent>::const_iterator it = events_.begin();
 			int nr = 0;
-			int offset = 0;
-			int lastOffset = 0;
+			int offset = colIdent;
+			int lastOffset = colIdent;
 			for ( ; it < events_.end(); it++, nr++ ) {				
 				const ColumnEvent & event = *it;				
 				switch ( event.type() ) {
