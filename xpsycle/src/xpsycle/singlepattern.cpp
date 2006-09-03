@@ -274,30 +274,21 @@ namespace psycle
 			clearEmptyLines();
 		}
 
-		void SinglePattern::clearPosition(int linenr, int track, int column)
-		{
+		bool SinglePattern::lineIsEmpty( int linenr ) const {
+			const_iterator it = find_nearest(linenr);
+			const PatternLine & line = it->second;
+			if ( it == end() ) 
+				return true;
+			else
+				return false;
+		}
+
+		void SinglePattern::clearTrack( int linenr , int tracknr ) {
 			iterator it = find_nearest(linenr);
-			if ( it == end() ) return;
-
 			PatternLine & line = it->second;
-			
-			if( column==0 )
-			{
-				line.erase(track);
-				if(line.empty())
-					erase(it);
-				return;
-			}
-			
-			/*PatternEvent & event = line[track];
-			if ( column >=1 && <=3 ) {
-
-			}*/
-
-			PatternEntry *pEntry = line[track].entry();
-			if (column < 5 )   { *((std::uint8_t*)pEntry+(column+1)/2) = 255; }
-			else	                { *((std::uint8_t*)pEntry+(column+1)/2) = 0; }
-			
+			if ( it == end() ) return;
+			line.erase(tracknr);
+			if ( line.empty() ) erase(it);
 		}
 
 		std::vector< TimeSignature > & SinglePattern::timeSignatures( )
@@ -351,6 +342,24 @@ namespace psycle
 		SinglePattern::iterator SinglePattern::find_nearest( int line )
 		{
 			SinglePattern::iterator result;
+			// first check if we have a line
+			result = find( line / (float) beatZoom()  );
+			if ( result != end() ) return result;
+
+			double low = ( (line - 0.5) / (float) beatZoom() );
+			double up  = (line + 0.5) / (float) beatZoom();
+
+			result = lower_bound( low );
+
+			if ( result != end() && result->first >=low && result->first < up ) {
+				return result;
+			}
+			return end();
+		}
+
+		SinglePattern::const_iterator SinglePattern::find_nearest( int line ) const
+		{
+			SinglePattern::const_iterator result;
 			// first check if we have a line
 			result = find( line / (float) beatZoom()  );
 			if ( result != end() ) return result;

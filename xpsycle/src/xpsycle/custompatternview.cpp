@@ -505,9 +505,12 @@ namespace psycle {
 				}
 				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), oldCursor.track()) );
 			}
+
 			if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
 				cursor_.setLine( cursor_.line() + dy);
 				window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
+				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
+			} else if (dy!=0) {
 				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
 			}		
 		}
