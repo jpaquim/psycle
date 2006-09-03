@@ -141,7 +141,7 @@ void Configuration::setSkinDefaults( )
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
 		#if !defined XPSYCLE__NO_NETAUDIO
-			driver = new NetAudio;
+			driver = new NetAudioOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
