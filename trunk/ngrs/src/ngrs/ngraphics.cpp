@@ -319,7 +319,10 @@ int NGraphics::textAscent( )
 
 int NGraphics::textDescent( )
 {
-  return 0;
+ if (!fntStruct.antialias)
+   return (fntStruct.xFnt->max_bounds.descent);
+ else 
+   return fntStruct.xftFnt->descent;
 }
 
 

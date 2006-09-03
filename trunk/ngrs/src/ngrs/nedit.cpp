@@ -26,12 +26,12 @@ using namespace std;
 
 
 NEdit::NEdit()
- : NPanel(), autoSize_(0),readOnly_(0),valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
+ : NPanel(), autoSize_(0),readOnly_(0),valign_(nAlCenter),halign_(nAlLeft),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
 {
   init();
 }
 
-NEdit::NEdit( const std::string & text ) : NPanel(), autoSize_(0), readOnly_(0), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0), text_(text)
+NEdit::NEdit( const std::string & text ) : NPanel(), autoSize_(0), readOnly_(0), valign_(nAlCenter),halign_(nAlLeft),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0), text_(text)
 {
   init();
 }
@@ -90,7 +90,7 @@ void NEdit::drawCursor(NGraphics* g, const std::string & text )
 
   NPoint screenPos = getScreenPos(g, text );
   int w = g->textWidth(text.substr(0,pos()));
-  g->drawLine(screenPos.x()+w,screenPos.y(),screenPos.x()+w,screenPos.y() - g->textAscent());
+  g->drawLine(screenPos.x()+w,screenPos.y() + g->textDescent(),screenPos.x()+w,screenPos.y() - g->textAscent());
   g->setForeground(oldColor);
 }
 
@@ -129,7 +129,7 @@ int NEdit::preferredHeight( ) const
 {
   if (ownerSize()) return NPanel::preferredHeight();
 
-  NFontMetrics metrics;
+  NFontMetrics metrics( font() );
   metrics.setFont(font());
   return metrics.textHeight() + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
 }
@@ -153,7 +153,7 @@ NPoint NEdit::getScreenPos(NGraphics* g, const std::string & text )
   int h = g->textAscent()+g->textDescent();
 
   switch (valign_) {
-    case nAlCenter : yp = (clientHeight() + g->textHeight() /2 ) / 2; break;
+    case nAlCenter : yp = (clientHeight() - g->textHeight()) / 2  + g->textAscent(); break;
     case nAlTop    : yp = h;                  break;
     case nAlBottom : yp = (int) spacingHeight()- g->textDescent();         break;
     default        : yp = h;                  break;

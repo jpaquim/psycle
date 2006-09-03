@@ -48,12 +48,11 @@ public:
    virtual int preferredHeight() const;
 
    void setVAlign(int align);
+   int vAlign() const;
    void setHAlign(int align);
+   int hAlign() const;
 
    void setTextOrientation(int orientation);
-
-   int vAlign();
-   int hAlign();
 
    void resize();
 
