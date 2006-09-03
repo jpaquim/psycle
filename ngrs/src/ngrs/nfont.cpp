@@ -23,7 +23,7 @@
 using namespace std;
 
 
-NFont::NFont() : name_("Suse sans"),size_(10),style_(nMedium | nStraight | nAntiAlias)
+NFont::NFont() : name_("9x15"),size_(10),style_(nMedium | nStraight)
 {
   systemFnt = NApp::system().getXFontValues(*this);
 }

@@ -366,16 +366,13 @@ NSkin NConfig::skin( const std::string & identifier )
   if (identifier == "toolbar") {
       NBevelBorder border(nLowered,nRaised);
       skin.setBorder(border);
-      skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "filedlgpane") {
-    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
     skin.setBackground(NColor(200,200,200));
     skin.useParentBackground(false);
     skin.setTransparent(false);
   } else
-  if (identifier == "pane") {
-    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
+  if (identifier == "pane") {    
     skin.setBackground(NColor(200,200,200));
     skin.useParentBackground(false);
     skin.setTransparent(false);
@@ -398,7 +395,6 @@ NSkin NConfig::skin( const std::string & identifier )
     skin.setTransparent(false);
   } else
   if (identifier == "mitemover") {
-     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
      NFrameBorder fr(true,4,4);
      fr.setSpacing(NSize(0,0,0,0));
      skin.setBorder(fr);
@@ -406,10 +402,8 @@ NSkin NConfig::skin( const std::string & identifier )
      skin.setTransparent(false);
   } else
   if (identifier == "mitemnone") {
-    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "popup_menu_bg") {
-    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
     skin.setBackground(NColor(240,240,240));
     skin.useParentBackground(false);
     skin.setTransparent(false);
@@ -420,14 +414,12 @@ NSkin NConfig::skin( const std::string & identifier )
     skin.setTransparent(false);
   } else
   if (identifier == "mbtnover") {
-     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
      skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),2,nVertical,10,5,5);
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
      skin.setBorder(fr);
   } else
   if (identifier == "mbtnnone") {
-    skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "mbar") {
      skin.setGradient(NColor(230,230,230),NColor(250,250,250),NColor(240,240,240),2,nVertical,10,4,4);
@@ -436,37 +428,31 @@ NSkin NConfig::skin( const std::string & identifier )
   if (identifier == "clbox") {
   } else
   if (identifier == "btnup") {
-     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
      skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(180,180,180),2,nVertical,10,5,5);
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
      skin.setBorder(fr);
   } else 
   if (identifier == "btnover") {
-     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
      skin.setGradient(NColor(250,250,250),NColor(255,255,255),NColor(210,210,210),2,nVertical,10,5,5);
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
      skin.setBorder(fr);
   } else 
   if (identifier == "btndown") {
-     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
      skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),2,nVertical,10,5,5);
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
      skin.setBorder(fr);
   } else
   if (identifier == "btnflat") {
-     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
   } else
   if (identifier == "tabup") {
-     skin.setFont(NFont("Suse Sans",8,nMedium | nAntiAlias));
      skin.setGradient(NColor(230,230,230),NColor(240,240,240),NColor(200,200,200),1,nVertical,10,5,5);
   } else
   if (identifier == "tabnone") {
-     NFont fnt("Suse Sans",8,nMedium | nAntiAlias);
-     fnt.setTextColor(NColor(100,100,100));
-     skin.setFont(fnt);
+     //fnt.setTextColor(NColor(100,100,100));
+//     skin.setFont(fnt);
      skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),1,nVertical,10,5,5);
   } else
   if (identifier == "sbar_vsl") {

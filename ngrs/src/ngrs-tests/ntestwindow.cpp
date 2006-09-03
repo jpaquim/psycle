@@ -75,12 +75,25 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-  NPanel* panel = new NPanel();
+/*  NPanel* panel = new NPanel();
 		panel->setPosition(10,10,100,20);
 		panel->setBorder( NFrameBorder() );
 		panel->setMoveable( NMoveable( nMvLeftBorder | nMvRightBorder | nMvHorizontal) );
-	pane()->add(panel);
+	pane()->add(panel);*/
 
+	NEdit* btn = new NEdit("Hgenau");
+	btn->setVAlign( nAlCenter );
+	btn->setBackground(NColor(255,255,255));
+	btn->setTransparent(false);
+	btn->setFont( NFont("Suse Sans",12,nMedium | nAntiAlias) );
+	pane()->add( btn , nAlTop );
+  NLabel* btn1 = new NLabel("Hgenau");
+	btn1->setVAlign( nAlCenter );
+	btn1->setBackground(NColor(100,255,255));
+	btn1->setTransparent(false);
+	btn1->setFont( NFont("Suse Sans",12,nMedium ) );
+	btn1->setPosition(10,100,200,200);
+	pane()->add( btn1  );
 
 	/*
   testMenu();

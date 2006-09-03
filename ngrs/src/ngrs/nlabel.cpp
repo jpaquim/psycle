@@ -96,9 +96,9 @@ void NLabel::paint( NGraphics * g )
         default:
         ;
       }
-
-      switch (valign_) {
-        case nAlCenter : yp_ = (clientHeight() + g->textHeight() /2 ) / 2;
+			
+      switch (valign_) {				
+        case nAlCenter : yp_ = (clientHeight() - g->textHeight()) / 2  + g->textAscent();
         break;
         case nAlBottom : yp_ = clientHeight() - g->textDescent();
         break;
@@ -218,12 +218,12 @@ void NLabel::setHAlign( int align )
   halign_ = align;
 }
 
-int NLabel::vAlign( )
+int NLabel::vAlign( ) const
 {
   return valign_;
 }
 
-int NLabel::hAlign( )
+int NLabel::hAlign( ) const
 {
   return halign_;
 }
@@ -247,8 +247,6 @@ void NLabel::computeBreakPoints( )
      breakPoints.push_back(last);
   }
 }
-
-
 
 int NLabel::findWidthMax(long width, const std::string & data, bool wbreak)
 {
