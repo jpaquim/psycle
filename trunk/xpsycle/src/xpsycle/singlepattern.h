@@ -71,10 +71,16 @@ namespace psycle
 			PatternCategory* category();
 
 			float beatsPerLine() const;
+
+			void clearTrack( int linenr , int tracknr );
+			bool lineIsEmpty( int linenr ) const;
+
 			SinglePattern::iterator find_nearest( int linenr );
+			SinglePattern::const_iterator find_nearest( int linenr ) const;
+
 			SinglePattern::iterator find_lower_nearest( int linenr );
 			SinglePattern::const_iterator find_lower_nearest( int linenr ) const;
-//			const_iterator find_nearest( float value ) const;
+			
 
 			void clearEmptyLines();
 
@@ -82,7 +88,6 @@ namespace psycle
 			void transposeBlock(int left, int right, double top, double bottom, int trp);
 			void deleteBlock(int left, int right, double top, double bottom);
 
-			void clearPosition(int line, int track, int column);
 
 			std::vector<TimeSignature> &  timeSignatures();
 			const std::vector<TimeSignature> &  timeSignatures() const;

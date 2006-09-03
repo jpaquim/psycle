@@ -835,9 +835,36 @@ void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 {
+  if ( !pView->pattern() ) return;
 	CustomPatternView::onKeyPress( event );
 
-	if ( !pView->pattern() ) return;
+	switch ( event.scancode() ) {
+		case XK_BackSpace:
+			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
+				PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+				if ( cursor().eventNr() == 0) {
+					pView->pattern()->clearTrack( cursor().line(), cursor().track() );
+				} else
+				if (cursor().eventNr() == 1) {					
+					patEvent.setInstrument(255);
+					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
+				} else
+				if (cursor().eventNr() == 2) {					
+					patEvent.setMachine(255);
+					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
+				} else
+				if (cursor().eventNr() == 3 ) {					
+					patEvent.setCommand(0);
+					patEvent.setParameter(0);
+					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
+				} 					
+			}
+			moveCursor(0,-1); 
+			return;
+		break;
+		default: ;
+	}
+				
 
 	if ( cursor().eventNr() == 0 ) {
 		// a note event
