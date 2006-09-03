@@ -233,10 +233,10 @@ void PatternView::onAddBar( NButtonEvent * ev )
 void PatternView::onDeleteBar(NButtonEvent* ev)
 {
   if ( pattern_ ) {
-//    float position = drawArea.cursor().line() / (float) pattern_->beatZoom();
-//    pattern_->removeBar(position);
-//    resize();
-//    repaint();
+    float position = drawArea->cursor().line() / (float) pattern_->beatZoom();
+    pattern_->removeBar(position);
+    resize();
+    repaint();
   }
 }
 
@@ -1176,13 +1176,6 @@ void PatternView::noteOffAny( const PatCursor & cursor )
 		drawArea->repaintCursorPos( cursor );    
   }
 }
-
-/*void PatternView::clearCursorPos( const PatCursor & cursor )
-{
-  if ( pattern() ) {
-    pattern_->clearPosition( cursor.line(), cursor.track(), cursor.eventNr() );
-  }
-}*/
 
 void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
 {
