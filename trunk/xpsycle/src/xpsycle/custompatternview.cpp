@@ -444,16 +444,18 @@ namespace psycle {
 				case XK_Tab  :
 				break;
 				case XK_Left :
-					moveCursor(-1,0);
+            moveCursor(-1,0);
 				break;
 				case XK_Right:
-					moveCursor(1,0);
+						moveCursor(1,0);
 				break;
 				case XK_Up:
-					moveCursor(0,-1);
+					if ( cursor().line() > 0 )
+						moveCursor(0,-1);
 				break;
 				case XK_Down:
-					moveCursor(0,1);
+					if ( cursor().line()+1 < lineNumber() )
+					  moveCursor(0,1);
 				break;
 				case XK_Page_Up:
 				break;
@@ -479,7 +481,8 @@ namespace psycle {
 					if (eventnr + 1 < events_.size() ) {
 						cursor_.setCol( 0 );
 						cursor_.setEventNr( eventnr + 1);
-					} else {
+					} else 
+					if (cursor_.track()+1 < trackNumber() ) {
 						cursor_.setTrack( cursor_.track() + 1 );
 						cursor_.setEventNr(0);
 						cursor_.setCol(0);
