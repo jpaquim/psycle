@@ -844,8 +844,8 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
   if ( !pView->pattern() ) return;
 	CustomPatternView::onKeyPress( event );
 
-	switch ( event.scancode() ) {
-		case XK_Left:
+	switch ( event.scancode() ) {		
+		case XK_Left :
 			// check for scroll
       if ( (cursor().track()) * colWidth() - dx() < 0 ) {
          pView->hBar->setPos( (cursor().track()) * colWidth() );
@@ -867,6 +867,20 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       return;
     break;
     case XK_Up:
+      // check for scroll
+      if ( (cursor().line()) * rowHeight() - dy() < 0 ) {
+         pView->vBar->setPos( (cursor().line()) * rowHeight() );
+      }
+      return;
+    break;
+		case XK_End:
+      // check for scroll
+      if ( (cursor().line()+1) * rowHeight() - dy() > clientHeight() ) {
+        pView->vBar->setPos( (cursor().line()+1) * rowHeight() - clientHeight() );
+      }
+      return;
+    break;
+    case XK_Home:
       // check for scroll
       if ( (cursor().line()) * rowHeight() - dy() < 0 ) {
          pView->vBar->setPos( (cursor().line()) * rowHeight() );
