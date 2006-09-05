@@ -35,6 +35,8 @@ NewMachine::NewMachine( )
 {
   sampler_ = false;
 
+	setTitle("Add New Machine");
+
   setPosition(100,100,500,500);
   NFont fnt("Suse sans",8,nStraight | nMedium | nAntiAlias);
   pane()->setFont(fnt);

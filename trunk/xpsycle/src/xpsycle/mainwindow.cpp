@@ -1266,6 +1266,11 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 			case XK_F5 :
 				selectedChildView_->showSequencerView();
 			break;
+			case XK_F9 :
+				selectedChildView_->showMachineView();
+        NButtonEvent btnEvent( this, 0,0,1, "");
+				onNewMachine( &btnEvent );
+			break;
 		}
 	}
 
