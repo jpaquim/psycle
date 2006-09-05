@@ -129,9 +129,9 @@ public:
 	void onPopupZoomIn(NButtonEvent* ev);
 	void onPopupZoomOut(NButtonEvent* ev);
 	
-	void onHScroll( NObject *sender, int pos );
-	void onVolSliderScroll( NSlider *slider, double pos);
-	void onZoomSliderScroll( NSlider *slider, double pos);
+	void onHScroll( NScrollBar *sender );
+	void onVolSliderScroll( NSlider *slider );
+	void onZoomSliderScroll( NSlider *slider );
 		
 	
 private:

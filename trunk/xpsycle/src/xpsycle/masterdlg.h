@@ -88,7 +88,7 @@ private:
     Machine* pMaster;
 
     void init();
-    void onSliderPosChanged(NSlider* sender, double pos);
+    void onSliderPosChanged( NSlider* sender );
 };
 
 }}

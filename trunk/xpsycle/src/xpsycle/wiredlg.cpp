@@ -72,7 +72,7 @@ WireDlg::WireDlg()
     volSlider = new NSlider();
       volSlider->setRange( 0, 256*4 );
       volSlider->setPreferredSize( 20, 200 );
-      volSlider->posChanged.connect(this, &WireDlg::onVolPosChanged);
+      volSlider->change.connect(this, &WireDlg::onVolPosChanged);
     volPanel->add( volSlider, nAlClient );
   pane()->add( volPanel, nAlRight );
 
@@ -137,11 +137,10 @@ NLine * WireDlg::line( )
   return line_;
 }
 
-void WireDlg::onVolPosChanged( NSlider * slider, double pos )
+void WireDlg::onVolPosChanged( NSlider * slider )
 {
-  std::cout << pos << std::endl;
 	if ( pDstMachine() && pSrcMachine() && wireIdx() != -1 ) {
-		const float curvol = ((256*4-pos)*(256*4-pos))/(16384.0f*4*4);
+		const float curvol = ((256*4-slider->pos())*(256*4-slider->pos()))/(16384.0f*4*4);
 		pDstMachine()->SetWireVolume( wireIdx(), curvol );
 	} 
 }   

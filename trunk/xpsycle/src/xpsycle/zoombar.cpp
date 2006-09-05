@@ -411,6 +411,7 @@ ZoomBar::~ZoomBar()
 void ZoomBar::init( )
 {
   orientation_ = nHorizontal;
+  increment_ = 1;
 
   setLayout( NAlignLayout() );
 
@@ -424,6 +425,7 @@ void ZoomBar::init( )
     decBtn->setFlat(false);
     decBtn->setPreferredSize(20,15);
     decBtn->setFlat(true);
+    decBtn->clicked.connect( this, &ZoomBar::onDecButton );
   add(decBtn, nAlLeft);
 
   img = new NImage(zoomInBpm);
@@ -432,12 +434,13 @@ void ZoomBar::init( )
     incBtn->setFlat(false);
     incBtn->setPreferredSize(20,15);
     incBtn->setFlat(true);
+    incBtn->clicked.connect( this, &ZoomBar::onIncButton );
   add(incBtn, nAlRight);
 
   zoomSlider = new NSlider();
     zoomSlider->setOrientation(nHorizontal);
-    zoomSlider->setPreferredSize(100,15);
-    zoomSlider->posChanged.connect(this, &ZoomBar::onPosChanged);
+    zoomSlider->setPreferredSize(120,15);
+    zoomSlider->change.connect(this, &ZoomBar::onPosChanged);
     zoomSlider->customSliderPaint.connect(this,&ZoomBar::customSliderPaint);
   add(zoomSlider, nAlClient);
 }
@@ -452,9 +455,9 @@ int ZoomBar::orientation( ) const
   return orientation_;
 }
 
-void ZoomBar::onPosChanged( NSlider * slider, double pos )
+void ZoomBar::onPosChanged( NSlider * slider )
 {
-  posChanged.emit(this, pos);
+  posChanged.emit(this, slider->pos() );
 }
 
 void ZoomBar::setRange( double min, double max )
@@ -475,6 +478,16 @@ double ZoomBar::pos( ) const
 void ZoomBar::customSliderPaint( NSlider * sl, NGraphics * g )
 {
   g->putBitmap(0,0,sliderBpm.width(),sliderBpm.height(),sliderBpm,0,0);
+}
+
+void ZoomBar::onIncButton( NButtonEvent * ev )
+{
+  zoomSlider->setPos( zoomSlider->pos() + increment_ );
+}
+
+void ZoomBar::onDecButton( NButtonEvent * ev )
+{
+  zoomSlider->setPos(zoomSlider->pos() - increment_);
 }
 
 

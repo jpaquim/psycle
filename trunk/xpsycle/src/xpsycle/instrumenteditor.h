@@ -89,7 +89,7 @@ private:
 
     void onBtnPress(NButtonEvent* ev);
     void onComboSelected(NItemEvent* ev);
-    void onSliderMove(NSlider* sender, double pos);
+    void onSliderMove( NSlider* sender );
     void onShowEnvelopeEditor(NButtonEvent* ev);
 
     void onPatRowEdit(const NKeyEvent & event);

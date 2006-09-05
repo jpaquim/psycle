@@ -97,13 +97,13 @@ public:
 private:
 	void init();
 
-	void onEnvSliderMoved(NSlider *slider, double pos);
-	void onSustainSliderMoved(NSlider *slider, double pos);
+	void onEnvSliderMoved( NSlider *slider );
+	void onSustainSliderMoved( NSlider *slider );
 
-	void onCutoffSliderMoved(NSlider *slider, double pos);
-	void onQSliderMoved(NSlider *slider, double pos);
+	void onCutoffSliderMoved( NSlider *slider );
+	void onQSliderMoved( NSlider *slider );
 	void onFilterModeSelected(NItemEvent *ev);
-	void onEnvAmtSliderMoved(NSlider *slider, double pos);
+	void onEnvAmtSliderMoved( NSlider *slider );
 };
 
 }}

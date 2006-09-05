@@ -39,12 +39,12 @@ namespace psycle
 			Instrument* m_pInstrument;
 			//current playback position in samples
 			unsigned long m_pos;
-			//whether we're currently playing
-			bool m_bPlaying;
 			//whether we're currently looping
 			bool m_bLoop;
 			//playback volume
 			float m_vol;
+			//whether we're currently playing
+			bool m_bPlaying;
 		};
 
 }}

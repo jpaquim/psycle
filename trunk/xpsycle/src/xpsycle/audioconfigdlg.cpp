@@ -26,6 +26,7 @@
 #include <ngrs/nlabel.h>
 #include <ngrs/nobjectinspector.h>
 #include <ngrs/nitemevent.h>
+#include <ngrs/nbutton.h>
 
 namespace psycle {
 	namespace host	{	

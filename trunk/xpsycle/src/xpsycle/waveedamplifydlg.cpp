@@ -67,15 +67,15 @@ namespace psycle
 
 			m_slider->setOrientation(nHorizontal);
 			pane()->add(sliderPanel,nAlTop);
-			m_slider->posChanged.connect(this, &WaveEdAmplifyDialog::onSliderPosChanged);
+			m_slider->change.connect(this, &WaveEdAmplifyDialog::onSliderPosChanged);
 			m_slider->setRange(0, 14400); 	// Don't use (-,+) range. It fucks up with the "0"
 			m_slider->setPos(9600);
-			onSliderPosChanged(m_slider, 9600);	//needs a push
 			pack();
 		}
 
-		void WaveEdAmplifyDialog::onSliderPosChanged(NSlider*, double pos) 
+		void WaveEdAmplifyDialog::onSliderPosChanged(NSlider* slider) 
 		{
+      double pos = slider->pos();
 			float db =  (float) (pos-9600)*0.01f;
 			std::ostringstream s;
 			s<<db;

@@ -612,7 +612,7 @@ SequencerGUI::SequencerGUI()
     hBar = new NScrollBar();
       hBar->setOrientation(nHorizontal);
       hBar->setPreferredSize(100,15);
-      hBar->posChange.connect(this,&SequencerGUI::onHScrollBar);
+      hBar->change.connect(this,&SequencerGUI::onHScrollBar);
     hBarPanel->add(hBar, nAlClient);
   add(hBarPanel, nAlBottom);
 
@@ -622,7 +622,7 @@ SequencerGUI::SequencerGUI()
   vBar = new NScrollBar();
     vBar->setWidth(15);
     vBar->setOrientation(nVertical);
-    vBar->posChange.connect(this,&SequencerGUI::onVScrollBar);
+    vBar->change.connect(this,&SequencerGUI::onVScrollBar);
   add(vBar, nAlRight);
 
   // the main Sequencer gui
@@ -834,9 +834,9 @@ std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( SinglePattern * pat
   return list;
 }
 
-void SequencerGUI::onVScrollBar( NObject * sender, int pos )
+void SequencerGUI::onVScrollBar( NScrollBar * sender )
 {
-  int newPos = pos;
+  int newPos = static_cast<int>( sender->pos() );
   if (newPos != scrollArea_->scrollDy() && newPos >= 0) {
       int diffY  = newPos - scrollArea_->scrollDy();
       if (diffY < scrollArea_->clientHeight()) {
@@ -850,9 +850,9 @@ void SequencerGUI::onVScrollBar( NObject * sender, int pos )
   }
 }
 
-void SequencerGUI::onHScrollBar( NObject * sender, int pos )
+void SequencerGUI::onHScrollBar( NScrollBar * sender )
 {
-  int newPos = pos;
+  int newPos = static_cast<int>( sender->pos() );
   if (newPos != scrollArea_->scrollDx() && newPos >= 0) {
 
     int diffX  = newPos - scrollArea_->scrollDx();
@@ -889,8 +889,8 @@ void SequencerGUI::resize( )
   // calls the AlignLayout
   NPanel::resize();
   // set the ScrollBar`s range new
-  hBar->setRange( scrollArea_->preferredWidth()  - scrollArea_->clientWidth()  );
-  vBar->setRange( scrollArea_->preferredHeight() - scrollArea_->clientHeight() );
+  hBar->setRange( 0, scrollArea_->preferredWidth()  - scrollArea_->clientWidth()  );
+  vBar->setRange( 0, scrollArea_->preferredHeight() - scrollArea_->clientHeight() );
 }
 
 void SequencerGUI::update( )

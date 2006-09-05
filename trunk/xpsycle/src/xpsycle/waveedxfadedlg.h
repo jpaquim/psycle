@@ -40,7 +40,7 @@ namespace psycle
 		protected:
 			void onOkClicked(NButtonEvent *ev);
 			void onCancelClicked(NButtonEvent *ev);
-			void onSliderMoved(NSlider* slider, double pos);
+			void onSliderMoved( NSlider* slider );
 		private:
 			NSlider		*m_srcStartVol;
 			NSlider		*m_srcEndVol;

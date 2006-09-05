@@ -426,9 +426,3 @@ void WaveEdFrame::onTagParse( const NXmlParser & parser, const std::string & tag
 }
 
 }}
-
-
-
-
-
-

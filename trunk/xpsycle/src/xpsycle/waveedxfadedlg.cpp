@@ -99,12 +99,11 @@ namespace psycle
 			m_destStartVol->setPos(1000);
 			m_srcEndVol->setPos(1000);
 			m_destEndVol->setPos(2000);
-			m_srcStartVol->posChanged.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
-			m_destStartVol->posChanged.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
-			m_srcEndVol->posChanged.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
-			m_destEndVol->posChanged.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
+			m_srcStartVol->change.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
+			m_destStartVol->change.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
+			m_srcEndVol->change.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
+			m_destEndVol->change.connect(this, &WaveEdCrossfadeDialog::onSliderMoved);
 			
-			onSliderMoved(m_srcStartVol, 2000); //initial label update
 
 		}
 
@@ -124,7 +123,7 @@ namespace psycle
 		}
 
 
-		void WaveEdCrossfadeDialog::onSliderMoved(NSlider* slider, double pos)
+		void WaveEdCrossfadeDialog::onSliderMoved( NSlider* slider )
 		{
 			float vol;
 			std::ostringstream temp;

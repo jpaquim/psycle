@@ -42,9 +42,13 @@ namespace psycle
 
 			std::string toXml( float pos ) const;
 
+			std::map<int, PatternEvent> & tweaks();
+
 		private:
 
 			int sequencerTrack_;
+
+			std::map<int, PatternEvent> tweakMap;
 
 		};
 

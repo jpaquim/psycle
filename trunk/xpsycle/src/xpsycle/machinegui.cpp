@@ -257,7 +257,7 @@ void MasterGUI::onMousePress( int x, int y, int button )
 GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 {
   panSlider_ = new NSlider();
-    panSlider_->posChanged.connect(this,&GeneratorGUI::onPosChanged);
+    panSlider_->change.connect(this,&GeneratorGUI::onPosChanged);
   add(panSlider_);
 
   setSkin();
@@ -329,7 +329,7 @@ void GeneratorGUI::setSkin( )
   panSlider_->slider()->setHeight(sGenPan.height());
 }
 
-void GeneratorGUI::onPosChanged(NSlider* sender, double value )
+void GeneratorGUI::onPosChanged(NSlider* sender )
 {
   if (pMac()) {
     pMac()->SetPan( (int) panSlider_->pos());
@@ -458,7 +458,7 @@ void GeneratorGUI::customSliderPaint( NSlider * sl, NGraphics * g )
 EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 {
   panSlider_ = new NSlider();
-    panSlider_->posChanged.connect(this,&EffektGUI::onPosChanged);
+    panSlider_->change.connect(this,&EffektGUI::onPosChanged);
   add(panSlider_);
 
   setSkin();
@@ -529,7 +529,7 @@ void EffektGUI::setSkin( )
 }
 
 
-void EffektGUI::onPosChanged(NSlider* sender, double value )
+void EffektGUI::onPosChanged( NSlider* sender )
 {
   if (pMac()) {
     pMac()->SetPan( (int) panSlider_->pos());
