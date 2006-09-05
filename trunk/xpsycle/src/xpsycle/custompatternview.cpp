@@ -553,7 +553,7 @@ namespace psycle {
 			}
 
 			if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
-				cursor_.setLine( cursor_.line() + dy);
+				cursor_.setLine( std::min(cursor_.line() + dy, lineNumber()-1));
 				window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
 				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
 			} else if (dy!=0) {

@@ -881,31 +881,20 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			return;
 		break;
     case XK_Down:
-      // check for scroll
-      if ( (cursor().line()+1) * rowHeight() - dy() > clientHeight() ) {
-        pView->vBar->setPos( (cursor().line()+1) * rowHeight() - clientHeight() );
-      }
+			checkDownScroll();
       return;
     break;
     case XK_Up:
-      // check for scroll
-      if ( (cursor().line()) * rowHeight() - dy() < 0 ) {
-         pView->vBar->setPos( (cursor().line()) * rowHeight() );
-      }
+			checkUpScroll();
       return;
     break;
 		case XK_End:
-      // check for scroll
-      if ( (cursor().line()+1) * rowHeight() - dy() > clientHeight() ) {
-        pView->vBar->setPos( (cursor().line()+1) * rowHeight() - clientHeight() );
-      }
+      checkDownScroll();
       return;
     break;
     case XK_Home:
       // check for scroll
-      if ( (cursor().line()) * rowHeight() - dy() < 0 ) {
-         pView->vBar->setPos( (cursor().line()) * rowHeight() );
-      }
+      checkUpScroll();
       return;
     break;
 		case XK_Tab:
@@ -943,6 +932,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				} 					
 			}
 			moveCursor(0,-1); 
+			checkUpScroll();
 			return;
 		break;
 		default: ;
@@ -958,6 +948,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		if (note >=0 && note < 120) {
 			pView->enterNote( cursor(), note );
 			moveCursor(0,1);
+			checkDownScroll();
 		}
 	} else
 	if ( isHex(event.scancode()) ) {
@@ -971,6 +962,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			 moveCursor(1,0);			
       else
        moveCursor(-1,1);
+			checkDownScroll();
 		} else 
 		if ( cursor().eventNr() == 2) {
 			// mac select
@@ -982,6 +974,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			 moveCursor(1,0);			
       else
        moveCursor(-1,1);
+			checkDownScroll();
 		} else
 		if ( cursor().eventNr() == 3) {
 			// comand or parameter
@@ -1000,9 +993,23 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 					moveCursor(1,0);			
 				else
 					moveCursor(-3,1);
-			}
-			
+				checkDownScroll();
+			}			
 		}
+	}
+}
+
+void PatternView::PatternDraw::checkDownScroll() {
+	// check for scroll
+	if ( (cursor().line()+1) * rowHeight() - dy() > clientHeight() ) {
+		pView->vBar->setPos( (std::min(cursor().line(),lineNumber()-1)+1) * rowHeight() - clientHeight() );
+	}
+}
+
+void PatternView::PatternDraw::checkUpScroll() {
+  // check for scroll
+	if ( (cursor().line()) * rowHeight() - dy() < 0 ) {
+		pView->vBar->setPos( std::max(0,cursor().line()) * rowHeight());
 	}
 }
 
