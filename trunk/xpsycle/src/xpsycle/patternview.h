@@ -131,6 +131,8 @@ class PatternView : public NPanel
       virtual void onKeyPress(const NKeyEvent & event);
       virtual void onKeyRelease(const NKeyEvent & event);
 
+			virtual void doSel(const PatCursor & p);
+
       void copyBlock(bool cutit);
       void pasteBlock(int tx,int lx,bool mix,bool save = true);
       void deleteBlock();
@@ -179,8 +181,6 @@ class PatternView : public NPanel
 		};
 
 public:
-
-    friend class LineNumber;
 
     PatternView( Song * song);
 
@@ -259,7 +259,6 @@ private:
   int editPosition_, prevEditPosition_;
   int playPos_;
   int editOctave_;
-  int patternStep_;
   int selectedMacIdx_;
   bool moveCursorWhenPaste_;
 
