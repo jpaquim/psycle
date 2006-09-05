@@ -459,15 +459,17 @@ void NScrollBar::updateControl( )
 
 void NScrollBar::updateControlRange( )
 {
+   // maybe this can be better done through a resize signal from the scrollcomponent
+   // but needs first check if a deadlock can occur
    if ( control_ ) {
     switch ( scrollPolicy_ ) {
       case nDy :
         min_ = 0;
-        max_ = control_->clientHeight();
+        max_ = control_->clientHeight() - control_->spacingHeight();
       break;
       case nDx :
         min_ = 0;
-        max_ = control_->clientWidth();
+        max_ = control_->clientWidth() - control_->spacingWidth();
       break;
     }
   }
