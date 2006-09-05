@@ -120,6 +120,9 @@ public:
 
     void setEntry(NObject* obj);
 
+		void selectNextPattern();
+		void selectPrevPattern();
+
 
 private:
 

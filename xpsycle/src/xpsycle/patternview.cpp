@@ -73,7 +73,12 @@ PatternView::PatternView( Song* song )
   initToolBar();
 
   // create the left linenumber panel
-  add(lineNumber_ = new LineNumber(this), nAlLeft);
+	NPanel* linePanel = new NPanel();
+    linePanel->setLayout( NAlignLayout() );
+    NPanel* lineHeaderLabel = new NPanel();
+		linePanel->add( lineHeaderLabel, nAlTop );
+  	linePanel->add( lineNumber_ = new LineNumber(this), nAlClient);
+  add( linePanel, nAlLeft );
 	
 	// sub group tweaker and patterndraw
 	NPanel* drawGroup = new NPanel();
@@ -87,6 +92,7 @@ PatternView::PatternView( Song* song )
 			subGroup->setLayout( NAlignLayout() );
       // create the headertrack panel
       subGroup->add(header      = new Header(this), nAlTop);
+			lineHeaderLabel->setPreferredSize( 20, header->preferredHeight()-1 );
 			// hbar with beat zoom
   		NPanel* hBarPanel = new NPanel();
     		hBarPanel->setLayout( NAlignLayout() );
@@ -155,14 +161,10 @@ void PatternView::onVScrollBar( NScrollBar * sender )
   if (newPos != drawArea->dy()) {
     int diffY  = newPos - lineNumber_->dy();
       if (diffY < drawArea->clientHeight()) {
-        NRect rect = lineNumber_->blitMove(0,diffY,NRect(lineNumber_->absoluteSpacingLeft(),lineNumber_->absoluteSpacingTop()+headerHeight(),lineNumber_->spacingWidth(),lineNumber_->spacingHeight()-headerHeight()));
+        NRect rect = lineNumber_->blitMove(0,diffY,lineNumber_->absoluteSpacingGeometry());
         lineNumber_->setDy(newPos);
+				window()->repaint(lineNumber_,rect);
 
-        if (diffY < 0) {
-           rect.setHeight(rect.height()+headerHeight());
-        }
-
-        window()->repaint(lineNumber_,rect);
         rect = drawArea->blitMove(0,diffY,drawArea->absoluteSpacingGeometry());
         drawArea->setDy(newPos);
         window()->repaint(drawArea,rect);
@@ -528,32 +530,42 @@ int PatternView::Header::skinColWidth( )
   void PatternView::LineNumber::paint( NGraphics * g )
   {
     TimeSignature signature;
-    int startLine = dy_ / pView->rowHeight();
-    int rDiff   = g->repaintArea().rectClipBox().top() - absoluteTop() + pView->headerHeight();
-    int offT = rDiff / pView->rowHeight();
-    if (offT < 0) offT = 0;
-    offT = 0;
-    int offB = (rDiff+g->repaintArea().rectClipBox().height()) / pView->rowHeight();
-    if (offB < 0) offB = 0;
-    int count = std::min(clientHeight() / pView->rowHeight(),offB);
 
-    for (int i = offT; i < count; i++)
-      g->drawLine(0,i*pView->rowHeight()+pView->headerHeight(),
-                  clientWidth(),i*pView->rowHeight()+pView->headerHeight());
+		NRect repaintRect = g->repaintArea().rectClipBox();
+		int absTop  = absoluteTop();
+		int ch      = clientHeight();
+		// the start for whole repaint
+		int start    = dy_ / pView->rowHeight();
+		// the offset for the repaint expose request
+		int startOff = std::max((repaintRect.top() - absTop) / (pView->rowHeight()),(long)0);
+  	// the start
+		start        = std::min(start + startOff, pView->lineNumber()-1);
+		// the endline for whole repaint
+	  int end     = (dy_ + ch) / (pView->rowHeight());
+		// the offset for the repaint expose request
+		int endOff  = std::max((ch-(repaintRect.top()-absTop + repaintRect.height())) / (pView->rowHeight()), (long)0);
+		// the end
+		end         = std::min(end - endOff, pView->lineNumber()-1);
+
+		int startLine = start;
+    int endLine   = end;
+
+    for (int i = startLine; i <= endLine; i++)
+      g->drawLine(0,(i+1)*pView->rowHeight() - dy() -1,
+                  clientWidth(),(i+1)*pView->rowHeight() -1 - dy() );
 
     g->setForeground(pView->separatorColor());
-    g->drawLine(0,0,0,clientHeight());
-    g->drawLine(clientWidth()-1,0,clientWidth()-1,clientHeight());
+    g->drawLine(0,0,0,clientHeight() );
 
-      for (int i = offT; i < count; i++) {
+      for (int i = startLine; i <= endLine; i++) {
         //if (i+startLine == pView->cursor().line()) {
         //  g->setForeground(Global::pConfig()->pvc_cursor);
         //  g->fillRect(0,i*pView->rowHeight()+pView->headerHeight(),clientWidth()-1,pView->rowHeight());
         //}
-        std::string text = stringify(i+startLine);
+        std::string text = stringify( i );
         if ( pView->pattern() ) {
-          float position = (i+ startLine) / (float) pView->pattern()->beatZoom();
-          SinglePattern::iterator it = pView->pattern()->find_nearest(i+startLine);
+          float position = i  / (float) pView->pattern()->beatZoom();
+          SinglePattern::iterator it = pView->pattern()->find_nearest(i);
           if (it != pView->pattern()->end()) {
             // check out how many hidden lines there are
             int lastLine = d2i (it->first * pView->pattern_->beatZoom());
@@ -573,7 +585,7 @@ int PatternView::Header::skinColWidth( )
             // check if line is on beatzoom raster else draw arrow up or down hint
             if ( std::abs(it->first - position) > 0.001) {
               int xOff = clientWidth()-g->textWidth(text)- 10 ;
-              int yOff = i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight() - 3;
+              int yOff = i*pView->rowHeight()+pView->rowHeight() -1 - 3 -dy();
               g->drawLine( xOff , yOff+1, xOff, yOff - pView->rowHeight() + 5);
               if (it->first < position) {
                 g->drawLine( xOff , yOff - pView->rowHeight() + 5, xOff-3, yOff - pView->rowHeight() + 8);
@@ -586,13 +598,11 @@ int PatternView::Header::skinColWidth( )
           }
           if ( pView->pattern()->barStart(position, signature) ) {
             std::string caption = stringify(signature.numerator())+"/"+stringify(signature.denominator());
-            g->drawText(0,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,caption);
+            g->drawText(0,i*pView->rowHeight()+pView->rowHeight()-1 - dy(),caption);
           }
         }
-        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight()-1,text);
+        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+pView->rowHeight()-1-dy(),text);
       }
-
-    g->drawText(1,pView->headerHeight()-1,"Line");
   }
 
   void PatternView::LineNumber::setDy( int dy ) {
@@ -602,6 +612,10 @@ int PatternView::Header::skinColWidth( )
   int PatternView::LineNumber::dy( ) const {
     return dy_;
   }
+
+  int PatternView::LineNumber::preferredWidth() const {
+    return 70;
+	}
 
 /// End of Line Number Panel
 
@@ -1012,8 +1026,8 @@ void PatternView::repaintLineNumber( int startLine, int endLine ) {
 
 NRect PatternView::repaintLineNumberArea(int startLine, int endLine)
 {
-  int top    = startLine    * rowHeight()  + drawArea->absoluteTop()  - drawArea->dy();
-  int bottom = (endLine+1)  * rowHeight()  + drawArea->absoluteTop()  - drawArea->dy();
+  int top    = startLine    * rowHeight()  + drawArea->absoluteTop()  - lineNumber_->dy();
+  int bottom = (endLine+3)  * rowHeight()  + drawArea->absoluteTop()  - lineNumber_->dy();
 
   return NRect(lineNumber_->absoluteLeft(),top,lineNumber_->clientWidth(),bottom - top);
 }

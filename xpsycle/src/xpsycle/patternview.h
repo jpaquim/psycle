@@ -93,6 +93,8 @@ class PatternView : public NPanel
       void setDy(int dy);
       int dy() const;
 
+			virtual int preferredWidth() const;
+
     private:
       PatternView* pView;
       int dy_;
@@ -177,6 +179,9 @@ class PatternView : public NPanel
 		};
 
 public:
+
+    friend class LineNumber;
+
     PatternView( Song * song);
 
     ~PatternView();

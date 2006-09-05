@@ -42,6 +42,7 @@
 #include <ngrs/nstatusbar.h>
 #include <ngrs/ntextstatusitem.h>
 #include <ngrs/nfiledialog.h>
+#include <ngrs/nsystem.h>
 
 namespace psycle { namespace host {
 
@@ -1266,10 +1267,21 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 			case XK_F5 :
 				selectedChildView_->showSequencerView();
 			break;
-			case XK_F9 :
-				selectedChildView_->showMachineView();
-        NButtonEvent btnEvent( this, 0,0,1, "");
-				onNewMachine( &btnEvent );
+			case XK_F9 : {
+				 selectedChildView_->showMachineView();
+         NButtonEvent btnEvent( this, 0,0,1, "");
+				 onNewMachine( &btnEvent );
+        }
+			break;
+			case XK_Up :
+				if (NApp::system().keyState() & ControlMask) {
+					selectedChildView_->sequencerBar()->selectPrevPattern();
+				}
+			break;
+			case XK_Down :
+				if (NApp::system().keyState() & ControlMask) {
+					selectedChildView_->sequencerBar()->selectNextPattern();
+				}
 			break;
 		}
 	}
