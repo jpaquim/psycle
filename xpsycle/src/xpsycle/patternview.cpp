@@ -571,7 +571,7 @@ int PatternView::Header::skinColWidth( )
               text+= std::string(":") + stringify( count );
             }
             // check if line is on beatzoom raster else draw arrow up or down hint
-            if (it->first != position) {
+            if ( std::abs(it->first - position) > 0.001) {
               int xOff = clientWidth()-g->textWidth(text)- 10 ;
               int yOff = i*pView->rowHeight()+pView->rowHeight()+pView->headerHeight() - 3;
               g->drawLine( xOff , yOff+1, xOff, yOff - pView->rowHeight() + 5);
