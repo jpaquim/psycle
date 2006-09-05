@@ -473,8 +473,8 @@ namespace psycle {
 				if ( eventnr < events_.size() ) {
 					const ColumnEvent & event = events_.at( eventnr );
 					int maxCols = event.cols();
-					if ( cursor_.col() + 1 < maxCols ) {
-						cursor_.setCol( cursor_.col() + 1);
+					if ( cursor_.col() + dx < maxCols ) {
+						cursor_.setCol( cursor_.col() + dx);
 					} else
 					if (eventnr + 1 < events_.size() ) {
 						cursor_.setCol( 0 );
@@ -488,8 +488,8 @@ namespace psycle {
 				}
 			} else 
 			if ( dx < 0 ) {
-				if ( cursor_.col() > 0 ) {
-					cursor_.setCol( cursor_.col() - 1);
+				if ( cursor_.col() + dx >= 0 ) {
+					cursor_.setCol( cursor_.col() + dx);
 				} else 
 				if ( cursor_.eventNr() > 0 ) {
 					cursor_.setEventNr( cursor_.eventNr() - 1 );
@@ -523,12 +523,20 @@ namespace psycle {
 
 		char hex_value(char c) { if(c >= 'A') return 10 + c - 'A'; else return c - '0'; }
 
-		unsigned char CustomPatternView::convertDigit( int scanCode, unsigned char oldByte, int col ) const {
+		unsigned char CustomPatternView::convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const {
 			unsigned char newByte = 0;
- 			if (col == 0)
-				newByte = (oldByte & 0x0F) | (0xF0 & (hex_value(scanCode) << 4));
-			else
-				newByte = (oldByte & 0xF0) | (0x0F & (hex_value(scanCode)));
+ 			if (col == 0) {
+        if (oldByte == defaultValue)
+          newByte = ( 0 & 0x0F ) | ( 0xF0 & (hex_value(scanCode) << 4 ) );
+        else
+				  newByte = ( oldByte & 0x0F ) | ( 0xF0 & ( hex_value(scanCode) << 4) );
+      }
+			else {
+        if (oldByte == defaultValue)
+				  newByte = ( 0 & 0xF0 ) | ( 0x0F & (hex_value(scanCode)) );
+        else
+          newByte = ( oldByte & 0xF0 ) | ( 0x0F & (hex_value(scanCode) ) );
+      }
 
 			return newByte;
 		}

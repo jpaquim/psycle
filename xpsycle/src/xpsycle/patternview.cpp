@@ -887,33 +887,44 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		if ( cursor().eventNr() == 1 ) {
 			// inst select
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
-			unsigned char newByte = convertDigit( event.scancode(), patEvent.instrument(), cursor().col() );
+			unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.instrument(), cursor().col() );
 			patEvent.setInstrument( newByte );
 			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-			repaintCursorPos( cursor() );
+      if (cursor().col() == 0)
+			 moveCursor(1,0);			
+      else
+       moveCursor(-1,1);
 		} else 
 		if ( cursor().eventNr() == 2) {
 			// mac select
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
-			unsigned char newByte = convertDigit( event.scancode(), patEvent.machine(), cursor().col() );
+			unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.machine(), cursor().col() );
 			patEvent.setMachine( newByte );
 			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-			repaintCursorPos( cursor() );
+      if (cursor().col() == 0)
+			 moveCursor(1,0);			
+      else
+       moveCursor(-1,1);
 		} else
 		if ( cursor().eventNr() == 3) {
 			// comand or parameter
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
 			if (cursor().col() < 2 ) {
-				unsigned char newByte = convertDigit( event.scancode(), patEvent.command(), cursor().col() );
+				unsigned char newByte = convertDigit( 0x00, event.scancode(), patEvent.command(), cursor().col() );
 				patEvent.setCommand( newByte );
 				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+        moveCursor(1,0);
 			}
 			else {
-				unsigned char newByte = convertDigit( event.scancode(), patEvent.parameter(), cursor().col() - 2 );
+				unsigned char newByte = convertDigit( 0x00, event.scancode(), patEvent.parameter(), cursor().col() - 2 );
 				patEvent.setParameter( newByte );
 				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+        if (cursor().col() < 3)
+					moveCursor(1,0);			
+				else
+					moveCursor(-3,1);
 			}
-			repaintCursorPos( cursor() );
+			
 		}
 	}
 }
