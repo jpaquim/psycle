@@ -342,10 +342,7 @@ namespace psycle
 		SinglePattern::iterator SinglePattern::find_nearest( int line )
 		{
 			SinglePattern::iterator result;
-			// first check if we have a line
-			result = find( line / (float) beatZoom()  );
-			if ( result != end() ) return result;
-
+			
 			double low = ( (line - 0.5) / (float) beatZoom() );
 			double up  = (line + 0.5) / (float) beatZoom();
 
@@ -360,12 +357,9 @@ namespace psycle
 		SinglePattern::const_iterator SinglePattern::find_nearest( int line ) const
 		{
 			SinglePattern::const_iterator result;
-			// first check if we have a line
-			result = find( line / (float) beatZoom()  );
-			if ( result != end() ) return result;
 
-			double low = ( (line - 0.5) / (float) beatZoom() );
-			double up  = (line + 0.5) / (float) beatZoom();
+			double low = ( (line - 0.499999) / (float) beatZoom() );
+			double up  = (line + 0.49999999) / (float) beatZoom();
 
 			result = lower_bound( low );
 
@@ -377,9 +371,6 @@ namespace psycle
 
 		SinglePattern::iterator SinglePattern::find_lower_nearest( int linenr ) {
 			SinglePattern::iterator result;
-			// first check if we have a line
-			result = find( linenr / (float) beatZoom()  );
-			if ( result != end() ) return result;
 
 			double low = (linenr - 0.5) / (float) beatZoom();
 			double up  = (linenr + 0.5) / (float) beatZoom();
@@ -395,9 +386,6 @@ namespace psycle
 		SinglePattern::const_iterator SinglePattern::find_lower_nearest( int linenr ) const
 		{
 			SinglePattern::const_iterator result;
-			// first check if we have a line
-			result = find( linenr / (float) beatZoom()  );
-			if ( result != end() ) return result;
 
 			double low = (linenr - 0.5) / (float) beatZoom();
 			double up  = (linenr + 0.5) / (float) beatZoom();
