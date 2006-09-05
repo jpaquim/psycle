@@ -650,7 +650,7 @@ namespace psycle {
 		{
 			NSize oldSel = selection_;  
   		selection_.setSize(0,0,0,0);
-  		repaintBlock( selection_ );
+  		repaintBlock( oldSel );
 		}
 
 		const NSize & CustomPatternView::selection() const {
@@ -678,10 +678,6 @@ namespace psycle {
 			doSelect_=true;
 			if (p.track() < selStartPoint().track()) {
         selection_.setLeft(std::max(p.track(),0)); 
-        int startTrack  = dx() / colWidth();
-        //if (selection_.left() < startTrack && startTrack > 0) {
-        //    pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
-       // }
     	}
 			else
 			if (p.track() == selStartPoint_.track()) {
@@ -690,21 +686,10 @@ namespace psycle {
 			} else
 			if (p.track() > selStartPoint_.track()) {
 				selection_.setRight(std::min(p.track()+1, trackNumber()));
-				int startTrack  = dx() / colWidth();
-				int trackCount  = clientWidth() / colWidth();
-			//	if (selection_.right() > startTrack + trackCount) {
-		//			pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
-			//	}// else
-			//	if (selection_.right() < startTrack && startTrack > 0) {
-			//		pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
-			//	}
 			}
 			if (p.line() < selStartPoint_.line()) {
 				selection_.setTop(std::max(p.line(),0));
-				int startLine  = dy() / rowHeight();
-				//if (selection_.top() < startLine && startLine >0) {
-				//	pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
-				//}
+				selection_.setBottom( std::min(selection_.bottom(), selStartPoint_.line()+1));
 			} else
 			if (p.line() == selStartPoint_.line()) {
 				selection_.setTop (p.line());
@@ -712,14 +697,7 @@ namespace psycle {
 			} else
 			if (p.line() > selStartPoint_.line()) {
 				selection_.setBottom(std::min(p.line()+1, lineNumber()));
-				int startLine  = dy() / rowHeight();
-				int lineCount  = clientHeight() / rowHeight();
-				//if (selection_.bottom() > startLine + lineCount) {
-				//	pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
-				//} else
-				//if (selection_.bottom() < startLine && startLine >0) {
-				//	pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
-				//}
+				selection_.setTop( std::max(selection_.top(), selStartPoint_.line()));
 			}
 
 			if (oldSelection_ != selection_) {
@@ -736,9 +714,9 @@ namespace psycle {
 		}
 
 		PatCursor CustomPatternView::intersectCell( int x, int y ) {
-			int track = ( x + dx() ) / colWidth();
+			int track = ( x + dx() ) / colWidth() ;
 			int line  = ( y + dy() ) / rowHeight();
-			int colOff   = ( x + dx() ) -  (track*colWidth() - colIdent);
+			int colOff   = ( x + dx() ) -  (track*colWidth());
 
 			std::vector<ColumnEvent>::const_iterator it = events_.begin();
 			int nr = 0;
