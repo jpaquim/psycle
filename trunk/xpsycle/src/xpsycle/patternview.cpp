@@ -92,7 +92,7 @@ PatternView::PatternView( Song* song )
 			subGroup->setLayout( NAlignLayout() );
       // create the headertrack panel
       subGroup->add(header      = new Header(this), nAlTop);
-			lineHeaderLabel->setPreferredSize( 20, header->preferredHeight()-1 );
+			lineHeaderLabel->setPreferredSize( 20, header->preferredHeight() );
 			// hbar with beat zoom
   		NPanel* hBarPanel = new NPanel();
     		hBarPanel->setLayout( NAlignLayout() );
