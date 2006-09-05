@@ -21,6 +21,7 @@
 #include "nproperty.h"
 #include "nlabel.h"
 #include "nedit.h"
+#include "nbevelborder.h"
 
 NObjectInspector::NObjectInspector()
  : NTable()

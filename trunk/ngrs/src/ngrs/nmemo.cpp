@@ -795,3 +795,13 @@ NRect NMemo::TextArea::Line::repaintLineArea( ) const
 
   return NRect(left_,top_,right_ - left_,bottom_ - top_);
 }
+
+void NMemo::resize( )
+{
+  NTextBase::resize();
+  NFontMetrics metrics( font() );
+  vBar->setSmallChange( metrics.textHeight() );
+  vBar->setLargeChange( metrics.textHeight() );        
+  hBar->setSmallChange( metrics.textHeight() );
+  hBar->setLargeChange( metrics.textHeight() );
+}

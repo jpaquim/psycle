@@ -46,7 +46,7 @@ public:
 
     ~NSlider();
 
-    sigslot::signal2<NSlider*,double> posChanged;
+    sigslot::signal1<NSlider*> change;
     sigslot::signal2<NSlider*, NGraphics*> customSliderPaint;
 
     void resize();
@@ -57,8 +57,8 @@ public:
 
     void setTrackLine(bool on);
 
-    void setRange(double min, double max);
-    void setPos(double pos);
+    void setRange( double min, double max );
+    void setPos( double pos );
     double pos() const;
 
     NPanel* slider();
@@ -72,6 +72,8 @@ private:
 
    Slider* slider_;
    int orientation_;
+
+   void updateSlider();
 
    void onSliderMove();
 };

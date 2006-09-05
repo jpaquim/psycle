@@ -22,6 +22,7 @@
 #include "napp.h"
 #include "nconfig.h"
 #include "ntablelayout.h"
+#include "nscrollbar.h"
 
 NListBox::NListBox()
  : NScrollBox()
@@ -210,6 +211,18 @@ void NListBox::setOrientation( int orientation )
 std::vector< NCustomItem * > & NListBox::items( )
 {
   return items_;
+}
+
+void NListBox::resize( )
+{
+  NScrollBox::resize();
+  if ( items_.size() > 0 ) {
+    NCustomItem* item = *(items_.begin());
+    horBar()->setLargeChange( item->height() );
+    horBar()->setSmallChange( item->height() );
+    verBar()->setLargeChange( item->height() );
+    verBar()->setSmallChange( item->height() );
+  }
 }
 
 

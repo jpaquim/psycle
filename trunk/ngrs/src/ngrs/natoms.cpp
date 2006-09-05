@@ -27,6 +27,9 @@ NAtoms::NAtoms(Display* dpy)
   net_wm_state_above_ = XInternAtom(dpy,"_NET_WM_STATE_ABOVE\0",False);
   net_wm_state_stays_on_top_ = XInternAtom(dpy,"_NET_WM_STATE_STAYS_ON_TOP\0",False);
   net_wm_state_modal_ = XInternAtom(dpy,"_NET_WM_STATE_MODAL\0",False);
+
+	primary_sel_ = XInternAtom(dpy, "PRIMARY", False);
+  targets_ = XInternAtom(dpy, "TARGETS", False);
 }
 
 
@@ -62,5 +65,15 @@ Atom NAtoms::net_wm_state_stays_on_top( ) const
 Atom NAtoms::net_wm_state_modal( ) const
 {
   return net_wm_state_modal_;
+}
+
+Atom NAtoms::primary_sel( ) const
+{
+  return primary_sel_;
+}
+
+Atom NAtoms::targets( ) const
+{
+  return targets_;
 }
 

@@ -99,6 +99,9 @@ private:
 
     void onColorSelected(const NColor & color);
     void onDelete(NButtonEvent* ev);
+
+		void onSelection();
+    void onScrollPosChange( NScrollBar* bar );
 };
 
 #endif

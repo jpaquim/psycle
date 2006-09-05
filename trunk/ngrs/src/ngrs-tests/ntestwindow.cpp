@@ -21,6 +21,8 @@
 #include "ntestwindow.h"
 
 #include <ngrs/napp.h>
+#include <ngrs/nsystem.h>
+#include <ngrs/natoms.h>
 #include <ngrs/nautoscrolllayout.h>
 #include <ngrs/nline.h>
 #include <ngrs/ntoolbar.h>
@@ -59,6 +61,7 @@
 #include <ngrs/nproperty.h>
 #include <ngrs/nxmlparser.h>
 #include <ngrs/nsplitbar.h>
+#include <ngrs/nscrollbar.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -75,13 +78,33 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
+	/*NButton* btn = new NButton("hallo");
+		btn->clicked.connect(this, &NTestWindow::onBtnClick);
+	pane()->add( btn, nAlTop);
+
+
+	std::cout << "winid:" << win() << std::endl;*/
+
+ /* NSlider* slider = new NSlider();
+    slider->setRange(0,100);
+    slider->setPosition(10,10,200,200);
+  pane()->add(slider);*/
+
+/*   NScrollBar* bar = new NScrollBar();
+     bar->setPosition(10,10,200,20);
+     bar->setOrientation( nHorizontal );
+     bar->change.connect( this, &NTestWindow::onScrollPosChange);
+   pane()->add( bar );*/
+
+  testComboBox();
+
 /*  NPanel* panel = new NPanel();
 		panel->setPosition(10,10,100,20);
 		panel->setBorder( NFrameBorder() );
 		panel->setMoveable( NMoveable( nMvLeftBorder | nMvRightBorder | nMvHorizontal) );
 	pane()->add(panel);*/
 
-	NEdit* btn = new NEdit("Hgenau");
+/*	NEdit* btn = new NEdit("Hgenau");
 	btn->setVAlign( nAlCenter );
 	btn->setBackground(NColor(255,255,255));
 	btn->setTransparent(false);
@@ -93,7 +116,7 @@ NTestWindow::NTestWindow()
 	btn1->setTransparent(false);
 	btn1->setFont( NFont("Suse Sans",12,nMedium ) );
 	btn1->setPosition(10,100,200,200);
-	pane()->add( btn1  );
+	pane()->add( btn1  );*/
 
 	/*
   testMenu();
@@ -510,7 +533,9 @@ void NTestWindow::testTimerButton( )
 
 void NTestWindow::onBtnClick( NButtonEvent * ev )
 {
-  fDialog->execute();
+  //fDialog->execute();
+  //Request a list of possible conversions
+	requestSelection();
 }
 
 void NTestWindow::testScrollBar( )
@@ -530,6 +555,43 @@ void NTestWindow::onDelete( NButtonEvent * ev )
 {
   ((NVisualComponent*)itemD->parent())->erase(itemD);
   pane()->repaint();
+}
+
+void NTestWindow::onSelection( )
+{
+  Atom actual_type;
+  int actual_format;
+  unsigned long nitems;
+  unsigned long bytes_after;
+  unsigned char *ret=0;
+			
+  int read_bytes = 1024;	
+
+  //Keep trying to read the selection until there are no
+  //bytes unread.
+  do
+   {
+     if(ret != 0) XFree(ret);
+		 XGetWindowProperty(NApp::system().dpy(), win(), NApp::system().atoms().primary_sel(), 0, read_bytes, False, AnyPropertyType,
+     &actual_type, &actual_format, &nitems, &bytes_after, 
+     &ret);
+     read_bytes *= 2;
+   }while(bytes_after != 0);
+			
+   std::cout << std::endl;
+//   std::cout << "Actual type: " << GetAtomName(NApp::system().dpy(), actual_type) << std::endl;
+   std::cout << "Actual format: " << actual_format << std::endl;
+   std::cout << "Number of items: " << nitems <<  std::endl;
+   std::cout << "Bytes left: " << bytes_after <<  std::endl;
+
+   //Dump the binary data
+    std::cout.write((char*)ret, nitems * actual_format/8);
+    std::cerr << std::endl;
+}
+
+void NTestWindow::onScrollPosChange( NScrollBar * bar )
+{
+  std::cout << bar->pos() << std::endl;
 }
 
 

@@ -94,6 +94,9 @@ NSystem & NApp::system( )
 
 void NApp::eventLoop( )
 {
+	
+
+
   if (mainWin_!=0) {
        mainWin_->setVisible(true);
   }
@@ -263,6 +266,10 @@ int NApp::processEvent( NWindow * win, XEvent * event )
         popupUnmapped_ = false;
       }
     break;
+		case SelectionNotify:
+			if( event->xselection.property != None)
+        win->onSelection();
+		break;
     case ButtonRelease:
         win->onMousePressed(event->xbutton.x,event->xbutton.y,event->xbutton.button);
     break;

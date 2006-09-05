@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nscrollbox.h"
+#include "nscrollbar.h"
 
 NScrollBox::NScrollBox()
  : NPanel()
@@ -32,23 +33,23 @@ NScrollBox::~NScrollBox()
 
 void NScrollBox::init( )
 {
-  horBar = new NScrollBar();
-    horBar->setOrientation(nHorizontal);
-    horBar->posChange.connect(this,&NScrollBox::onHPosChange);
-  add(horBar);
-  verBar = new NScrollBar();
-    verBar->setOrientation(nVertical);
-    verBar->posChange.connect(this,&NScrollBox::onVPosChange);
-  add(verBar);
+  horBar_ = new NScrollBar();
+    horBar_->setOrientation(nHorizontal);
+    horBar_->change.connect(this,&NScrollBox::onHPosChange);
+  add( horBar_ );
+  verBar_ = new NScrollBar();
+    verBar_->setOrientation(nVertical);
+    verBar_->change.connect(this,&NScrollBox::onVPosChange);
+  add( verBar_ );
   scrollPane_ = 0;
 }
 
 void NScrollBox::resize( )
 {
-  horBar->setPosition(0,clientHeight()-15,clientWidth(),15);
+  horBar_->setPosition(0,clientHeight()-15,clientWidth(),15);
   int horOff = 0;
-  if (horBar->visible()) horOff = 15;
-  verBar->setPosition(clientWidth()-15,0,15,clientHeight()-horOff);
+  if (horBar_->visible()) horOff = 15;
+  verBar_->setPosition(clientWidth()-15,0,15,clientHeight()-horOff);
   if (scrollPane_!=0) scrollPane_->setPosition(0,0,clientWidth()-15, clientHeight()-horOff);
 }
 
@@ -56,8 +57,8 @@ void NScrollBox::setScrollPane( NVisualComponent * scrollPane )
 {
   add(scrollPane);
   scrollPane_ = scrollPane;
-    verBar->setControl(scrollPane_, nDy);
-    horBar->setControl(scrollPane_, nDx);
+    verBar_->setControl( scrollPane_, nDy );
+    horBar_->setControl( scrollPane_, nDx );
   resize();
 }
 
@@ -68,19 +69,29 @@ NVisualComponent * NScrollBox::scrollPane( )
 
 void NScrollBox::setHScrollBarPolicy( int policy )
 {
-  if (policy & nNoneVisible) {
-    horBar->setVisible(false);
+  if ( policy & nNoneVisible ) {
+    horBar_->setVisible(false);
   }
 }
 
-void NScrollBox::onVPosChange( NObject * sender, int pos )
+void NScrollBox::onVPosChange( NScrollBar * sender )
 {
 
 }
 
-void NScrollBox::onHPosChange( NObject * sender, int pos )
+void NScrollBox::onHPosChange( NScrollBar * sender )
 {
 
+}
+
+NScrollBar * NScrollBox::horBar( )
+{
+  return horBar_;
+}
+
+NScrollBar * NScrollBox::verBar( )
+{
+  return verBar_;
 }
 
 

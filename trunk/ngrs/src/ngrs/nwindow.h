@@ -128,6 +128,9 @@ public:
     virtual void setMinimumWidth (int minWidth);
     virtual void setMinimumHeight(int minHeight);
 
+		void requestSelection();
+		virtual void onSelection();
+
 
 private:
 
