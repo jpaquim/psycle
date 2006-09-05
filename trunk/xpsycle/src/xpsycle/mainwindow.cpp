@@ -319,6 +319,9 @@ void MainWindow::initDialogs( )
 
 void MainWindow::showSongpDlg( NButtonEvent* ev )
 {
+  if ( !selectedChildView_) return;
+
+  songpDlg_->setSong( selectedChildView_->song() );
   songpDlg_->setVisible(true);
 }
 
@@ -664,6 +667,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
      if ( fileName != "" ) {
 			 // stop player
 			 Player::Instance()->Stop();
+       songpDlg_->setVisible(false);
 			 // disable audio driver
 			 //Global::configuration()._pOutputDriver->Enable(false);
 		   // add a new Song tab

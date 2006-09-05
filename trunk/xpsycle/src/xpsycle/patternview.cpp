@@ -985,6 +985,10 @@ void PatternView::enterNote( const PatCursor & cursor, int note ) {
  }
 }
 
+void PatternView::repaintLineNumber( int startLine, int endLine ) {
+
+}
+
 NRect PatternView::repaintLineNumberArea(int startLine, int endLine)
 {
   int top    = startLine    * rowHeight()  + drawArea->absoluteTop()  - drawArea->dy();
