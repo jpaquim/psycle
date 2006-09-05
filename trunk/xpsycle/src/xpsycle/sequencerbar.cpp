@@ -356,6 +356,28 @@ void SequencerBar::onDeletePattern( NButtonEvent* ev ) {
   }
 }
 
+void SequencerBar::selectNextPattern() {
+	NCustomItem* item = patternBox_->selectedItem();
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+  
+  if ( itr != patternMap.end() ) {
+		itr++;
+		if (itr != patternMap.end() ) {
+			// todo under construction
+		}
+	}
+}
+
+void SequencerBar::selectPrevPattern() {
+  NCustomItem* item = patternBox_->selectedItem();
+  std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+
+	if ( itr != patternMap.end() && itr != patternMap.begin() ) {
+		itr--;
+		// todo under construction
+	}
+}
+
 }}
 
 
