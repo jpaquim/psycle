@@ -866,6 +866,32 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				Player::Instance()->Start(0);
 			}
 		break;
+		case XK_Page_Up:
+		{
+			TimeSignature signature;
+			for (int y = cursor().line()-1; y >= 0; y--) {
+				float position = y / (float) beatZoom();
+				if ((pView->pattern()->barStart(position, signature) )) {
+					moveCursor(0, y - cursor().line() );
+					checkUpScroll();
+					break;
+				}
+			}
+    }
+		break;
+		case XK_Page_Down:
+		{
+			TimeSignature signature;
+			for (int y = cursor().line()+1; y < lineNumber(); y++) {
+				float position = y / (float) beatZoom();
+				if ((pView->pattern()->barStart(position, signature) )) {
+					moveCursor(0,y - cursor().line());
+					checkDownScroll();
+					break;
+				}
+			}
+		}
+		break;
 		case XK_Left :
 			// check for scroll
       if ( (cursor().track()) * colWidth() - dx() < 0 ) {
