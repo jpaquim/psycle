@@ -142,6 +142,7 @@ namespace psycle {
 			dy_ = 0;
 			separatorColor_ = NColor(200,200,200);
 			selectionColor_ = NColor(0,0,255);
+			patternStep_ = 1;
 			colIdent = 3;
 		}
 
@@ -193,6 +194,14 @@ namespace psycle {
 
 		const PatCursor & CustomPatternView::cursor() const {
 			return cursor_;
+		}
+
+		void CustomPatternView::setPatternStep( int step ) {
+			patternStep_ = step;
+		}
+
+    int CustomPatternView::patternStep() const {
+			return patternStep_;
 		}
 
 		void CustomPatternView::setDx(int dx) {
@@ -441,6 +450,10 @@ namespace psycle {
 
 			// navigation
 			switch (event.scancode()) {
+				case XK_Page_Up:
+				break;
+				case XK_Page_Down:				
+				break;
 				case XK_Home : 
 				{
 					PatCursor oldCursor = cursor();
@@ -480,16 +493,16 @@ namespace psycle {
 						moveCursor(1,0);
 				break;
 				case XK_Up:
-					if ( cursor().line() > 0 )
-						moveCursor(0,-1);
+					if ( cursor().line() - patternStep() >= 0 )
+						moveCursor(0, -patternStep() );
+					else
+						moveCursor(0, -cursor().line() );
 				break;
 				case XK_Down:
-					if ( cursor().line()+1 < lineNumber() )
-					  moveCursor(0,1);
-				break;
-				case XK_Page_Up:
-				break;
-				case XK_Page_Down:
+					if ( cursor().line()+patternStep() < lineNumber() )
+					  moveCursor( 0, patternStep() );
+					else
+						moveCursor( 0, lineNumber()-1 - cursor().line() );
 				break;
 			}
 
@@ -657,9 +670,14 @@ namespace psycle {
 			return selection_;
 		}
 
+		const PatCursor & CustomPatternView::selCursor() const {
+			return selCursor_;
+		}
+
 		void CustomPatternView::startSel(const PatCursor & p)
 		{
 			selStartPoint_ = p;
+			selCursor_ = p;
 			selection_.setSize( p.track(), p.line(), p.track(), p.line() );
   
 			oldSelection_ = selection_;
@@ -707,6 +725,7 @@ namespace psycle {
 				window()->repaint(this,r);
 				oldSelection_ = selection_;
 			}
+      selCursor_ = p;
 		}
 
 		const PatCursor & CustomPatternView::selStartPoint() const {

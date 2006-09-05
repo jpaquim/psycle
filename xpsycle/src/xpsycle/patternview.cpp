@@ -116,7 +116,7 @@ PatternView::PatternView( Song* song )
   editPosition_ = prevEditPosition_ = playPos_  = outtrack = 0;
   editOctave_ = 4;
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
-  patternStep_ = 1;
+
   moveCursorWhenPaste_ = false;
   pattern_ = 0;
   selectedMacIdx_ = 255;
@@ -1006,6 +1006,10 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	}
 }
 
+void PatternView::PatternDraw::doSel(const PatCursor & selCursor) {
+  CustomPatternView::doSel( selCursor );
+}
+
 void PatternView::enterNote( const PatCursor & cursor, int note ) {
  if ( pattern() ) {
    PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
@@ -1343,11 +1347,11 @@ void PatternView::deleteBlock( )
 
 void PatternView::setPatternStep( int step )
 {
-  patternStep_ = step;
+  drawArea->setPatternStep( step );
 }
 
 int PatternView::patternStep() const {
-  return patternStep_;
+  return drawArea->patternStep();
 }
 
 void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )

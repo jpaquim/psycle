@@ -86,6 +86,9 @@ namespace psycle {
 					virtual int trackNumber() const;
 					virtual int beatZoom() const;
 
+					void setPatternStep( int step );
+					int patternStep() const;
+
 					const NColor & separatorColor() const;
 					const NColor & selectionColor() const;
 
@@ -128,6 +131,7 @@ namespace psycle {
 			protected:
 
 					virtual PatCursor intersectCell(int x, int y);
+					const PatCursor & selCursor() const;
 					virtual void startSel(const PatCursor & p);
 					virtual void doSel(const PatCursor & p);
 					virtual void endSel();
@@ -173,6 +177,8 @@ namespace psycle {
 
 					NColor separatorColor_;
 					NColor selectionColor_;
+					int patternStep_;
+
 					int colIdent;
 					
 					void init();
