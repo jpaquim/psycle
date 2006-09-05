@@ -122,7 +122,7 @@ namespace psycle {
 
 					int moveCursor( int dx, int dy ); // dx is one hex digit
 
-					unsigned char convertDigit( int scanCode, unsigned char oldByte, int col ) const;
+					unsigned char convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const;
 					bool isHex( int scanCode );
 
 			protected:
