@@ -458,6 +458,20 @@ namespace psycle {
         }
 				break;
 				case XK_Tab  :
+					if ( cursor().track()+1 < trackNumber() ) {
+						PatCursor oldCursor = cursor();
+						setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
+						repaintCursorPos(oldCursor);
+						repaintCursorPos( cursor() ); 
+					}
+				break;
+				case XK_ISO_Left_Tab:
+					if ( cursor().track() > 0 ) {
+						PatCursor oldCursor = cursor();
+						setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );
+						repaintCursorPos(oldCursor);
+						repaintCursorPos( cursor() ); 
+					}
 				break;
 				case XK_Left :
             moveCursor(-1,0);

@@ -887,6 +887,20 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       }
       return;
     break;
+		case XK_Tab:
+			//check for scroll
+			if ( (cursor().track()+1) * colWidth() - dx() > clientWidth() ) {
+        pView->hBar->setPos( (cursor().track()+1) * colWidth() - clientWidth() );
+      }
+			return;
+		break;
+		case XK_ISO_Left_Tab:
+			// check for scroll
+      if ( (cursor().track()) * colWidth() - dx() < 0 ) {
+         pView->hBar->setPos( (cursor().track()) * colWidth() );
+      }
+      return;
+		break;
 		case XK_BackSpace:
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 				PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
