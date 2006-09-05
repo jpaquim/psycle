@@ -231,6 +231,7 @@ public:
     bool moveCursorWhenPaste() const;
 
     NRect repaintLineNumberArea    (int startLine,int endLine);
+    void repaintLineNumber( int startLine, int endLine );
 
     void setPattern(SinglePattern* pattern);
     SinglePattern* pattern();
