@@ -68,6 +68,8 @@ public:
 
     ~MainWindow();
 
+		virtual void onKeyPress( const NKeyEvent & event);
+
 private:
 
     void initSongs();
@@ -242,6 +244,7 @@ private:
     std::map<NObject*, ChildView*> songTabMap;
 
     void updateNewSong();
+
 
 };
 

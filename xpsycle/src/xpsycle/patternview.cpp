@@ -845,6 +845,13 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	CustomPatternView::onKeyPress( event );
 
 	switch ( event.scancode() ) {		
+		case ' ':
+			if (Player::Instance()->_playing) {
+				Player::Instance()->Stop();
+			} else {
+				Player::Instance()->Start(0);
+			}
+		break;
 		case XK_Left :
 			// check for scroll
       if ( (cursor().track()) * colWidth() - dx() < 0 ) {
