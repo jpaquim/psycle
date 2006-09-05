@@ -28,6 +28,7 @@
 const int nSave = 1;
 const int nLoad = 2;
 
+class NButton;
 class NCheckBox;
 class NLabel;
 class NEdit;

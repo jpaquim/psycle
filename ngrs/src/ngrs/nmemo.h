@@ -160,6 +160,8 @@ public:
 
     void clear();
 
+    virtual void resize();
+
 private:
 
     TextArea* textArea;

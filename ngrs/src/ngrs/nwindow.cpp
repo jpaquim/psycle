@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "nwindow.h"
 #include "napp.h"
+#include "nsystem.h"
+#include "natoms.h"
 #include "nconfig.h"
 #include "ndockpanel.h"
 #include "nalignlayout.h"
@@ -671,6 +673,18 @@ void NWindow::setMinimumHeight( int minHeight )
   NVisual::setMinimumHeight(minHeight);
   NApp::system().setWindowMinimumSize(win(), minimumWidth(), minHeight );
 }
+
+void NWindow::requestSelection( )
+{
+  XConvertSelection( NApp::system().dpy(), NApp::system().atoms().primary_sel(), NApp::system().atoms().targets(), NApp::system().atoms().primary_sel(), win(), CurrentTime);
+	XFlush(NApp::system().dpy());
+}
+
+void NWindow::onSelection( )
+{
+}
+
+
 
 
 

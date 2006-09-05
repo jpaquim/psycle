@@ -85,7 +85,6 @@ const char * arrow_left_xpm[] = {
 "            "};
 
 
-/// todo scrollbar shouldnt implement the logic , but a more advanced component like scrollbox
 
 NScrollBar::NScrollBar()
  : NPanel()
@@ -116,10 +115,12 @@ void NScrollBar::init( )
   inc->setBitmap(down);
   dec->setBitmap(up);
 
-  range_ = 0;
-  step_ =  16;
-  pos_  =  0;
-
+  pos_ = 0;
+  min_ = 0;
+  max_ = 10;
+  largeChange_ = 1;
+  smallChange_ =  1;
+  
   control_ = 0;
   scrollPolicy_ = nDy;
 
@@ -218,46 +219,30 @@ void NScrollBar::setControl( NVisualComponent * control , int scrollPolicy)
 
 void NScrollBar::onSliderMove( )
 {
-  switch ( scrollPolicy_) {
-      case nDy : {
-         int dy = slider_->top();
-         if (control_!=0) {
-           dy = (int)( (( control_->clientHeight() - control_->spacingHeight()) / ((double) sliderArea_->spacingHeight() - slider_->height())) * slider_->top());
-           scrollComponent(control_,control_->scrollDx(),dy);
-           pos_ = dy;
-         } else {
-            dy = (int) d2i(((range_ /((double) (sliderArea_->clientHeight()-slider_->height()))) * dy));
-            posChange.emit(this,dy);
-         }
-      }
-      break;
-      case nDx : {
-         int dx = slider_->left();
-         if (control_!=0) {
-           dx = (int)( (( control_->clientWidth() - control_->spacingWidth()) / ((double) sliderArea_->clientWidth() - slider_->width())) * slider_->left());
-           scrollComponent(control_,dx,control_->scrollDy());
-         }
-         posChange.emit(this,(int) (range_ /((double) (sliderArea_->clientWidth()-slider_->width())) * dx));
-      }
-      break;
-      default:;
-    }
+  double range_ = max_ - min_;
 
-  /*if (control_!=0) {
-    switch ( scrollPolicy_) {
-      case nDy : {
-        //control_->setScrollDy(0);
-        control_->setScrollDx(dy);//slider_->top());
-        control_->repaint();
-       }
+  if ( control_ ) {
+    switch ( scrollPolicy_ ) {
+      case nDy :
+        range_ = control_->clientHeight() - control_->spacingHeight();
       break;
       case nDx :
-        control_->setScrollDx(slider_->left());
-        control_->repaint();
+        range_ = control_->clientWidth() - control_->spacingWidth();
       break;
-      default:;
     }
-  }*/
+  }
+
+  switch (orientation_) {
+   case nVertical :
+     pos_ = ( range_ / (sliderArea_->clientHeight()- slider_->height()) ) * slider_->top();
+   break;
+   default :
+     pos_ = ( range_ / (sliderArea_->clientWidth() - slider_->width())  ) * slider_->left();
+  }
+
+  updateControl();
+  change.emit( this );
+  scroll.emit( this );
 }
 
 NScrollBar::Slider::Slider( NScrollBar * sl )
@@ -341,87 +326,20 @@ void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )
    }
 }
 
-void NScrollBar::setRange( int range )
-{
-  range_ = range;
-}
-
-int NScrollBar::range( ) const
-{
-  return range_;
-}
-
-void NScrollBar::Slider::onMousePress( int x, int y, int button )
-{
-
-}
-
-void NScrollBar::Slider::onMousePressed( int x, int y, int button )
-{
-
-}
-
-void NScrollBar::setPos( int value )
-{
-  pos_ = value;
-  switch ( scrollPolicy_) {
-      case nDy : {
-         int sliderTop = 0;
-         if (control_==0)
-           sliderTop =(int)( (value * (sliderArea_->clientHeight()-slider_->height())) / (double) range_ );
-         else
-           sliderTop =(int)( (value * (sliderArea_->clientHeight()-slider_->height())) / (double) (control_->clientHeight() - control_->spacingHeight()) );
-         slider_->setTop(std::min(sliderTop,sliderArea_->clientHeight()-slider_->height()));
-         sliderArea_->repaint();
-         onSliderMove();
-      }
-      break;
-      case nDx : {
-         int sliderLeft =(int)( (value * (sliderArea_->clientWidth()-slider_->width())) / (double) range_ );
-         slider_->setLeft(std::min(sliderLeft,sliderArea_->clientWidth()-slider_->width()));
-         sliderArea_->repaint();
-         onSliderMove();
-      }
-      break;
-  }
-}
-
-void NScrollBar::setStep( int step )
-{
-  step_ = step;
-}
-
-int NScrollBar::step( ) const
-{
-  return step_;
-}
-
 void NScrollBar::onDecBtnClick( NButtonEvent * ev )
 {
-  if ( orientation() == nVertical ) {
-    slider_->setTop( std::max(0, slider_->top() - 10) );
-  } else {
-    slider_->setLeft( std::max(0, slider_->left() - 10) );
-  }
-  sliderArea_->repaint();
-  onSliderMove();
+  updateControlRange();
+  setPos( std::max( min_ , pos_ - smallChange_ ) );
+  scroll.emit( this );
 }
 
 void NScrollBar::onIncBtnClick( NButtonEvent * ev )
 {
-  if ( orientation() == nVertical ) {
-    slider_->setTop( std::min(sliderArea_->height() - slider_->height(), slider_->top() + 10) );
-  } else {
-    slider_->setLeft( std::min(sliderArea_->width() - slider_->width(), slider_->left() + 10) );
-  }
-  sliderArea_->repaint();
-  onSliderMove();
+  updateControlRange();
+  setPos ( std::min( max_, pos_ + smallChange_) );
+  scroll.emit( this );
 }
 
-int NScrollBar::pos( ) const
-{
-  return pos_;
-}
 
 void NScrollBar::onScrollAreaClick( NButtonEvent * ev )
 {
@@ -429,31 +347,130 @@ void NScrollBar::onScrollAreaClick( NButtonEvent * ev )
     if ( orientation() == nHorizontal ) {
      if (ev->x() > slider_->left() + slider_->width() ) {
        // mouse was pressed right to slider so increment position
-       slider_->setLeft( std::min(sliderArea_->width() - slider_->width(), slider_->left() + 10) );
+       updateControlRange();
+       setPos( std::min( max_ , pos_ + largeChange_ ) );
+       scroll.emit( this );
       } else {
        // mouse was pressed left to slider so decrement position
-       slider_->setLeft( std::max(0, slider_->left() - 10) );
+       updateControlRange();
+       setPos( std::max( min_ , pos_ - largeChange_ ) );
+       scroll.emit( this );
       }
     } else
     {
       if (ev->y() > slider_->top() + slider_->height() ) {
        // mouse was pressed under slider so increment position
-       slider_->setTop( std::min(sliderArea_->height() - slider_->height(), slider_->top() + 10) );
+       updateControlRange();
+       setPos( std::min( max_ , pos_ + largeChange_ ) );
       } else {
        // mouse was pressed above slider so decrement position
-       slider_->setTop( std::max(0, slider_->top() - 10) );
+       updateControlRange();
+       setPos( std::max( min_ , pos_ - largeChange_ ) );
+       scroll.emit( this );
       }
     }
-    sliderArea_->repaint();
-    onSliderMove();
   }
 }
 
+void NScrollBar::setLargeChange( double step )
+{
+  largeChange_ = step;
+}
 
+double NScrollBar::largeChange( ) const
+{
+  return largeChange_;
+}
 
+void NScrollBar::setSmallChange( double step )
+{
+  smallChange_ = step;
+}
 
+double NScrollBar::smallChange( ) const
+{
+  return smallChange_;
+}
 
+void NScrollBar::setPos( double pos )
+{
+  pos_ = pos;
+  updateSlider(); 
+  sliderArea_->repaint();
+  updateControl();
 
+	change.emit(this );  
+}
 
+double NScrollBar::pos() const {
+  return pos_;
+}
+
+void NScrollBar::setRange( double min, double max )
+{
+  min_ = min;
+  max_ = max;
+}
+
+double NScrollBar::range( ) const
+{
+  return max_ - min_;
+}
+
+void NScrollBar::updateSlider( )
+{
+  double range_ = max_ - min_;
+
+  if ( control_ ) {
+    switch ( scrollPolicy_ ) {
+      case nDy :
+        range_ = control_->clientHeight() - control_->spacingHeight();
+      break;
+      case nDx :
+        range_ = control_->clientWidth() - control_->spacingWidth();
+      break;
+    }
+  }
+
+  if ( range_ == 0 ) return;
+
+  if ( orientation_ == nVertical )
+     slider_->setTop(  (int) (pos_  / ((range_ / (sliderArea_->clientHeight()- slider_->height()))) ));
+  else 
+     slider_->setLeft( (int) (pos_  / ((range_ / (sliderArea_->clientWidth() - slider_->width()))) ));
+
+}
+
+void NScrollBar::updateControl( )
+{
+  if ( control_ ) {
+    switch ( scrollPolicy_ ) {
+      case nDy :
+        scrollComponent(control_,control_->scrollDx(), static_cast<int>(pos_) );    
+        control_->repaint();
+      break;
+      case nDx :
+        scrollComponent(control_, static_cast<int>(pos_), control_->scrollDy());
+        control_->repaint();
+      break;
+    }
+  }  
+}
+
+void NScrollBar::updateControlRange( )
+{
+   if ( control_ ) {
+    switch ( scrollPolicy_ ) {
+      case nDy :
+        min_ = 0;
+        max_ = control_->clientHeight();
+      break;
+      case nDx :
+        min_ = 0;
+        max_ = control_->clientWidth();
+      break;
+    }
+  }
+}
 
 

@@ -26,6 +26,7 @@
 #include "ncheckbox.h"
 #include "nlabel.h"
 #include "nedit.h"
+#include "nbutton.h"
 #include "ncombobox.h"
 #include "nframeborder.h"
 #include "nsplitbar.h"

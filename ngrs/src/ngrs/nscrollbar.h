@@ -36,9 +36,6 @@ class NScrollBar : public NPanel
       Slider(NScrollBar* sl);
       ~Slider();
 
-      virtual void onMousePress(int x, int y, int button);
-      virtual void onMousePressed(int x, int y, int button);
-
       virtual void onMove(const NMoveEvent & moveEvent);
 
   private:
@@ -49,32 +46,35 @@ class NScrollBar : public NPanel
 
 
 public:
-    NScrollBar();
-    NScrollBar(int orientation);
+   NScrollBar();
+   NScrollBar(int orientation);
 
-    ~NScrollBar();
+   ~NScrollBar();
 
-   signal2<NObject*,int> posChange;
+   signal1<NScrollBar*> change;
+   signal1<NScrollBar*> scroll;
 
    virtual void resize();
 
    void setOrientation(int orientation);
    int orientation() const;
 
-   void setStep(int step);
-   int step() const;
+   void setPos(double value);
+   double pos() const;
+
+   void setRange(double min, double max);
+   double range() const;
+
+   void setLargeChange( double step );
+   double largeChange() const;
+
+   void setSmallChange(double step);
+   double smallChange() const;
 
    void setControl(NVisualComponent* control, int scrollPolicy);
    void onSliderMove();
 
-   void setRange(int range);
-   int range() const;
-
-
-
-   void setPos(int value);
-   int pos() const;
-
+   
 private:
 
    NImage* inc;
@@ -91,9 +91,12 @@ private:
 
    int orientation_;
    int scrollPolicy_;
-   int range_;
-   int step_;
-   int pos_;
+   
+   double pos_;
+   double min_, max_;
+   double smallChange_;
+   double largeChange_;
+
 
    NButton* incBtn;
    NButton* decBtn;
@@ -109,6 +112,10 @@ private:
    void onIncBtnClick(NButtonEvent* ev);
 
    void onScrollAreaClick(NButtonEvent* ev);
+
+   void updateSlider();
+   void updateControl();
+   void updateControlRange();
 
 };
 

@@ -40,6 +40,9 @@ public:
    Atom net_wm_state_stays_on_top() const;
    Atom net_wm_state_modal() const;
 
+   Atom primary_sel() const;
+   Atom targets() const;
+
 private:
 
    Atom wm_delete_window_;
@@ -48,6 +51,9 @@ private:
    Atom net_wm_state_above_;
    Atom net_wm_state_stays_on_top_;
    Atom net_wm_state_modal_;
+
+   Atom primary_sel_;
+   Atom targets_;
 
 };
 

@@ -37,11 +37,11 @@ NSlider::~NSlider()
 void NSlider::resize( )
 {
   if (orientation_ == nVertical) {
-    setPos(pos_);
     if (clientWidth() > 0) slider_->setWidth(clientWidth());
+    updateSlider();
   } else {
-    setPos(pos_);
     slider_->setHeight(clientHeight());
+    updateSlider();
   }
 }
 
@@ -70,17 +70,17 @@ void NSlider::onSliderMove( )
 {
    double range = max_ - min_;
 
-   if (range == 0)
+   if ( range != 0 ) {
+     switch (orientation_) {
+       case nVertical :
+          pos_ = ( range / (clientHeight()- slider_->height()) ) * slider_->top();
+       break;
+       default :
+          pos_ = ( range / (clientWidth() - slider_->width())  ) * slider_->left();
+     }
 
-   std::cout << orientation_ << std::endl;
-
-   if (orientation_ == nVertical) {
-     pos_ = ( range / (clientHeight()- slider_->height()) ) * slider_->top();
-   }
-   else
-     pos_ = ( range / (clientWidth() - slider_->width())  ) * slider_->left();
-   
-   posChanged.emit(this,pos_);
+    change.emit( this );
+  }
 }
 
 void NSlider::setOrientation( int orientation )
@@ -124,17 +124,21 @@ void NSlider::setRange( double min, double max )
 
 void NSlider::setPos( double pos )
 {
-  double range = max_ - min_;
-
   pos_ = pos;
+  updateSlider(); 
+	change.emit( this );  
+}
+
+void NSlider::updateSlider()
+{
+  double range = max_ - min_;
 
   if (range == 0) return;
 
   if (orientation_ == nVertical)
-     slider_->setTop(  (int) (pos  / ((range / (clientHeight()- slider_->height()))) ));
+     slider_->setTop(  (int) (pos_  / ((range / (clientHeight()- slider_->height()))) ));
   else 
-     slider_->setLeft( (int) (pos  / ((range / (clientWidth() - slider_->width()))) ));
-  
+     slider_->setLeft( (int) (pos_  / ((range / (clientWidth() - slider_->width()))) ));
 }
 
 double NSlider::pos( ) const
@@ -146,6 +150,8 @@ NPanel * NSlider::slider( )
 {
   return slider_;
 }
+
+
 
 
 

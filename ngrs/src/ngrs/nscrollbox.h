@@ -21,7 +21,6 @@
 #define NSCROLLBOX_H
 
 #include "npanel.h"
-#include "nscrollbar.h"
 
 const int nAlwaysVisible = 1;
 const int nNoneVisible   = 2;
@@ -29,6 +28,9 @@ const int nNoneVisible   = 2;
 /**
 @author Stefan
 */
+
+class NScrollBar;
+
 class NScrollBox : public NPanel
 {
 public:
@@ -42,15 +44,18 @@ public:
 
     void setHScrollBarPolicy(int policy);
 
+    NScrollBar* horBar();
+    NScrollBar* verBar();
+
 private:
 
-   NScrollBar* horBar;
-   NScrollBar* verBar;
+   NScrollBar* horBar_;
+   NScrollBar* verBar_;
    NVisualComponent* scrollPane_;
 
    void init();
-   void onVPosChange(NObject* sender, int pos);
-   void onHPosChange(NObject* sender, int pos);
+   void onVPosChange( NScrollBar* sender );
+   void onHPosChange( NScrollBar* sender );
 
 };
 

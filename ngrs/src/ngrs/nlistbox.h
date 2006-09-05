@@ -58,6 +58,8 @@ public:
 
     std::vector<NCustomItem*> & items();
 
+    virtual void resize();
+
 private:
 
     NPanel* listBoxPane_;
