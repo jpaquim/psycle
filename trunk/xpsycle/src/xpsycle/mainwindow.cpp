@@ -1250,6 +1250,28 @@ void MainWindow::onSequencerEntryClick( SequencerItem * item )
   selectedChildView_->sequencerBar()->setEntry(item);
 }
 
+void MainWindow::onKeyPress( const NKeyEvent & event )
+{
+  if ( selectedChildView_ ) {
+		switch (event.scancode() ) {
+			case XK_F2 :
+				selectedChildView_->showMachineView();
+			break;
+			case XK_F3 :
+				selectedChildView_->showPatternView();
+			break;
+			case XK_F4 :
+				selectedChildView_->showWaveView();
+			break;
+			case XK_F5 :
+				selectedChildView_->showSequencerView();
+			break;
+		}
+	}
+
+  NWindow::onKeyPress( event);
+}
+
 }}
 
 void psycle::host::MainWindow::updateNewSong( )
@@ -1285,3 +1307,4 @@ void psycle::host::MainWindow::onMachineDeleted( int machineIndex )
   updateComboGen();
   genCombo_->repaint();
 }
+

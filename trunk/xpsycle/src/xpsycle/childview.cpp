@@ -196,6 +196,14 @@ void psycle::host::ChildView::update( )
   machineView()->update();
 }
 
+
+void psycle::host::ChildView::showWaveView( )
+{
+  tabBook_->setActivePage(2);
+  repaint();
+}
+
+
 void psycle::host::ChildView::showSequencerView( )
 {
   tabBook_->setActivePage(3);

@@ -75,6 +75,7 @@ public:
 
 		void showMachineView();
 		void showPatternView();
+    void showWaveView();
     void showSequencerView();
 
 		void update();
