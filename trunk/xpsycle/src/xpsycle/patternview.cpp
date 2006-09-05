@@ -774,7 +774,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 			if (y > endLine) break;
 			if (y != lastLine) {
 				PatternLine::iterator eventIt = line.lower_bound(startTrack);
-				for(; eventIt != line.end() && eventIt->first < endTrack; ++eventIt) {
+				for(; eventIt != line.end() && eventIt->first <= endTrack; ++eventIt) {
 					PatternEvent event = eventIt->second;
 					int x = eventIt->first;
 					drawData( g, x, y, 0, event.note() );
