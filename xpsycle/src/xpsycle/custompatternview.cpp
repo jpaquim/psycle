@@ -441,6 +441,22 @@ namespace psycle {
 
 			// navigation
 			switch (event.scancode()) {
+				case XK_Home : 
+				{
+					PatCursor oldCursor = cursor();
+					cursor_.setLine( 0 );
+          repaintCursorPos( oldCursor );
+          repaintCursorPos( cursor() ); 
+        }
+				break;
+				case XK_End:
+				{
+					PatCursor oldCursor = cursor();
+					cursor_.setLine( lineNumber() -1 );
+          repaintCursorPos(oldCursor);
+          repaintCursorPos( cursor() ); 
+        }
+				break;
 				case XK_Tab  :
 				break;
 				case XK_Left :
