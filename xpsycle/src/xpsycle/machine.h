@@ -184,7 +184,7 @@ namespace psycle
 			public:
 				///\todo: Port creation, assign buffers to it (passed via ctor? they might be shared/pooled). 
 				///\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
-				AudioPort(Machine & parent, int arrangement, std::string const & name) : parent_(parent), name_(name), arrangement_(arrangement) {}
+				AudioPort(Machine & parent, int arrangement, std::string const & name) : parent_(parent),  arrangement_(arrangement), name_(name) {}
 				virtual ~AudioPort() {}
 				virtual void CollectData(int numSamples) {}
 				virtual void Connected(Wire * wire);

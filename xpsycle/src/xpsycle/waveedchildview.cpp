@@ -157,18 +157,18 @@ namespace psycle { namespace host {
 		scrollBar = new NScrollBar();
 		
 		scrollBar->setOrientation(nHorizontal);
-		scrollBar->setStep(1);
+		scrollBar->setSmallChange(1);
  
-		scrollBar->posChange.connect(this,&WaveEdChildView::onHScroll);
+		scrollBar->change.connect(this,&WaveEdChildView::onHScroll);
 		
-		volSlider->posChanged.connect(this, &WaveEdChildView::onVolSliderScroll);
 		volSlider->slider()->setTransparent(true);
 		volSlider->setRange(0, 100);
 		volSlider->setPos(pSong->waved.GetVolume()*100.0f);
+    volSlider->change.connect(this, &WaveEdChildView::onVolSliderScroll);
 		
 		zoomSlider->setTransparent(false);
 		zoomSlider->setOrientation(nHorizontal);
-		zoomSlider->posChanged.connect(this, &WaveEdChildView::onZoomSliderScroll);
+		zoomSlider->change.connect(this, &WaveEdChildView::onZoomSliderScroll);
 		
 		zoomOutButton->clicked.connect(this, &WaveEdChildView::onSelectionZoomOut);
 		zoomOutButton->setFlat(false);
@@ -232,23 +232,22 @@ namespace psycle { namespace host {
 		
 		//for now..
 		statusText->setText("Ready");
-		statusBar->resize();
 	}
-	void WaveEdChildView::onHScroll( NObject *sender, int pos)
-	{
-		diStart = pos;
+	void WaveEdChildView::onHScroll( NScrollBar *sender )
+	{  
+		diStart = sender->pos();
 		if(diStart>wdLength-diLength) diStart = wdLength-diLength;
 		RefreshDisplayData();
 		repaint();			
 	}
-	void WaveEdChildView::onVolSliderScroll( NSlider *slider, double pos)
+	void WaveEdChildView::onVolSliderScroll( NSlider *slider)
 	{
-		pSong->waved.SetVolume( pos/100.0f);
+		pSong->waved.SetVolume( slider->pos() / 100.0f);
 		volSlider->repaint();
 	}
-	void WaveEdChildView::onZoomSliderScroll( NSlider *slider, double pos)
+	void WaveEdChildView::onZoomSliderScroll( NSlider *slider )
 	{
-		int newzoom = (int)pos;
+		int newzoom = (int) slider->pos();
 		SetSpecificZoom(newzoom);
 		waveArea->repaint();
 	}
@@ -1868,7 +1867,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 		{
 			//set horizontal scroll bar
 //			if(bNewLength)
-				scrollBar->setRange(wdLength-diLength);
+				scrollBar->setRange( 0, wdLength-diLength );
 
 			//scrollBar->setPos(diStart);
 
@@ -1890,21 +1889,21 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 
 				//this is the same concept, except this is to give us some idea of where to draw the slider based on the existing zoom
 				//so, instead of wdLength/8 (the max zoom), we're doing wdLength/diLength (the current zoom)
-				float zoomfactor = log10(wdLength/(float)diLength)/log10(zoomBase);
-				int newpos = (int)(zoomfactor);
-				if(newpos<0)	newpos=0;		//i'm not sure how this would happen, but just in case
-				zoomSlider->setPos(newpos);
+				//float zoomfactor = log10(wdLength/(float)diLength)/log10(zoomBase);
+				//int newpos = (int)(zoomfactor);
+				//if(newpos<0)	newpos=0;		//i'm not sure how this would happen, but just in case
+				//zoomSlider->setPos(newpos);
 			}
 		}
 		else
 		{
 			//disabled scrollbar
-			scrollBar->setRange(0);
+			//scrollBar->setRange(0);
 			//scrollBar->setPos(0);
 
 			//disabled zoombar
 			zoomSlider->setRange(0, 0);
-			zoomSlider->setPos(0);
+			//zoomSlider->setPos(0);
 		}
 
 		//set volume slider

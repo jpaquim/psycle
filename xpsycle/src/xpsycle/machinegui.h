@@ -182,7 +182,7 @@ private:
     void customSliderPaint(NSlider* sl, NGraphics* g);
 
     void setSkin();
-    void onPosChanged(NSlider* sender, double value);
+    void onPosChanged( NSlider* sender );
     void onTweakSlide( int machine, int command, int value );
 };
 
@@ -247,8 +247,7 @@ private:
     void customSliderPaint(NSlider* sl, NGraphics* g);
 
     void setSkin();
-    void onPosChanged(NSlider* sender, double value);
-
+    void onPosChanged( NSlider* sender );
     void onTweakSlide( int machine, int command, int value );
 };
 

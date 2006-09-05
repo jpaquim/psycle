@@ -101,7 +101,7 @@ void InstrumentEditor::init( )
           panningSlider->setWidth(150);
           panningSlider->setHeight(20);
           panningSlider->setRange(0,256);
-          panningSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
+          panningSlider->change.connect(this,&InstrumentEditor::onSliderMove);
         panningPnl->add(panningSlider,nAlLeft);
         panningLbl = new NLabel("   ");
             panningLbl->setBorder(NBevelBorder(nNone,nLowered));
@@ -143,7 +143,7 @@ void InstrumentEditor::init( )
           volumeSlider->setWidth(150);
           volumeSlider->setHeight(20);
           volumeSlider->setRange(0,512);
-          volumeSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
+          volumeSlider->change.connect(this,&InstrumentEditor::onSliderMove);
         volumePnl->add(volumeSlider,nAlLeft);
         volumeLbl = new NLabel("   ");
             volumeLbl->setBorder(NBevelBorder(nNone,nLowered));
@@ -158,7 +158,7 @@ void InstrumentEditor::init( )
           fineTuneSlider->setWidth(150);
           fineTuneSlider->setHeight(20);
           fineTuneSlider->setRange(0,256);
-          fineTuneSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
+          fineTuneSlider->change.connect(this,&InstrumentEditor::onSliderMove);
         fineTunePnl->add(fineTuneSlider,nAlLeft);
         fineTuneLbl = new NLabel("   ");
             fineTuneLbl->setBorder(NBevelBorder(nNone,nLowered));
@@ -381,8 +381,9 @@ void InstrumentEditor::onComboSelected( NItemEvent * ev )
     _pSong->_pInstrument[instrumentIndex()]->_NNA = newNoteActionCb->selIndex();
 }
 
-void InstrumentEditor::onSliderMove( NSlider * sender, double pos )
+void InstrumentEditor::onSliderMove( NSlider * sender )
 {
+  double pos = sender->pos();
   if (sender == panningSlider) {
     _pSong->_pInstrument[instrumentIndex()]->_pan = (int) pos;
     panningLbl->setText(stringify(_pSong->_pInstrument[instrumentIndex()]->_pan));

@@ -41,7 +41,7 @@ namespace psycle
 		protected:
 			void onOkClicked(NButtonEvent* ev);
 			void onCancelClicked(NButtonEvent* ev);
-			void onSliderPosChanged(NSlider*, double pos);
+			void onSliderPosChanged( NSlider* sender );
 		};
 
 }}

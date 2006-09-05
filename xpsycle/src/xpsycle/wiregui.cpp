@@ -97,17 +97,17 @@ void WireGUI::drawArrow( NGraphics * g )
   int btcol = 240 - abs((int)((altslope-0.79) * 32));
 
 
-  NColor rtBrush(max(0, min(255, rtcol * deltaColR)),
-                  max(0, min(255, rtcol * deltaColG)),
-                  max(0, min(255, rtcol * deltaColB)));
-  NColor ltBrush(max(0, min(255, ltcol * deltaColR)),
-                  max(0, min(255, ltcol * deltaColG)),
-                  max(0, min(255, ltcol * deltaColB)));
-  NColor btBrush(max(0, min(255, btcol * deltaColR)),
-                  max(0, min(255, btcol * deltaColG)),
-                  max(0, min(255, btcol * deltaColB)));
+  NColor rtBrush((int) max(0, min(255, rtcol * deltaColR)),
+                  (int) max(0, min(255, rtcol * deltaColG)),
+                  (int) max(0, min(255, rtcol * deltaColB)));
+  NColor ltBrush( (int) max(0, min(255, ltcol * deltaColR)),
+                  (int) max(0, min(255, ltcol * deltaColG)),
+                  (int) max(0, min(255, ltcol * deltaColB)));
+  NColor btBrush( (int) max(0, min(255, btcol * deltaColR)),
+                  (int) max(0, min(255, btcol * deltaColG)),
+                  (int) max(0, min(255, btcol * deltaColB)));
 
-  NColor polyInnardsColor(192 * deltaColR, 192 * deltaColG, 192 * deltaColB);
+  NColor polyInnardsColor((int) ( 192 * deltaColR ), (int) (192 * deltaColG) , (int) (192 * deltaColB) );
   XPoint pol[5];
 
   pol[0].x = middleX -  (int) (cos    * triangle_size_center);

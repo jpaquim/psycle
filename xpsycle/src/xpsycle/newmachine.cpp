@@ -25,6 +25,7 @@
 #include <ngrs/nlabel.h>
 #include <ngrs/nlistbox.h>
 #include <ngrs/nitem.h>
+#include <ngrs/nbutton.h>
 
 namespace psycle {
 	namespace host {

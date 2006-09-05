@@ -51,8 +51,8 @@ namespace psycle
 			void onOkClicked(NButtonEvent *ev);
 			void onCancelClicked(NButtonEvent *ev);
 		public:
-			void onDestSliderMoved(NSlider* slider, double pos);
-			void onSrcSliderMoved(NSlider* slider, double pos);
+			void onDestSliderMoved( NSlider* slider );
+			void onSrcSliderMoved( NSlider* slider );
 			void OnBnClickedFadeoutcheck(NButtonEvent *ev);
 			void OnBnClickedFadeincheck(NButtonEvent *ev);
 		};

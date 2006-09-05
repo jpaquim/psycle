@@ -276,8 +276,8 @@ private:
 
   void resize();
 
-  void onHScrollBar(NObject* sender, int pos);
-  void onVScrollBar(NObject* sender, int pos);
+  void onHScrollBar( NScrollBar* sender );
+  void onVScrollBar( NScrollBar* sender );
 
   void initToolBar();
   void onAddBar(NButtonEvent* ev);

@@ -52,6 +52,7 @@ public:
 private:
 
    int orientation_;
+	 int increment_;
 
    NButton* decBtn;
    NButton* incBtn;
@@ -63,7 +64,9 @@ private:
 
    void init();
 
-   void onPosChanged(NSlider* slider, double pos);
+   void onPosChanged( NSlider* slider );
+   void onIncButton( NButtonEvent* ev );
+   void onDecButton( NButtonEvent* ev );
 };
 
 #endif

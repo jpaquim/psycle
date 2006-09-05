@@ -73,7 +73,7 @@ private:
 
     NLine* line_;
 
-		void onVolPosChanged(NSlider* slider, double pos);
+		void onVolPosChanged( NSlider* slider );
 
     void onDeleteBtn(NButtonEvent* ev);
 

@@ -65,7 +65,7 @@ PatternView::PatternView( Song* song )
   vBar = new NScrollBar();
     vBar->setWidth(15);
     vBar->setOrientation(nVertical);
-    vBar->posChange.connect(this,&PatternView::onVScrollBar);
+    vBar->change.connect(this,&PatternView::onVScrollBar);
   add(vBar, nAlRight);
 
   // create the patternview toolbar
@@ -98,7 +98,7 @@ PatternView::PatternView( Song* song )
     		hBar = new NScrollBar();
       		hBar->setOrientation(nHorizontal);
       		hBar->setPreferredSize(100,15);
-      		hBar->posChange.connect(this,&PatternView::onHScrollBar);
+      		hBar->change.connect(this,&PatternView::onHScrollBar);
     		hBarPanel->add(hBar, nAlClient);
   		subGroup->add(hBarPanel, nAlBottom);
       // create the drawArea
@@ -125,8 +125,9 @@ void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
   repaint();
 }
 
-void PatternView::onHScrollBar( NObject * sender, int pos )
+void PatternView::onHScrollBar( NScrollBar * sender )
 {
+  double pos = sender->pos();
   int newPos = (pos / drawArea->colWidth()) * drawArea->colWidth();
 
   if (newPos != drawArea->dx()) {
@@ -145,8 +146,9 @@ void PatternView::onHScrollBar( NObject * sender, int pos )
   }
 }
 
-void PatternView::onVScrollBar( NObject * sender, int pos )
+void PatternView::onVScrollBar( NScrollBar * sender )
 {
+  double pos = sender->pos();
   if (pos >= 0) {
   int newPos = (pos / rowHeight()) * rowHeight();
 
@@ -245,9 +247,13 @@ void PatternView::resize( )
   // calls the AlignLayout to reorder scroll-,-header,-linenumber- and patternpanels
   NPanel::resize();
   // set the Range to the new headerwidth
-  hBar->setRange(header->preferredWidth() - clientWidth());
+  hBar->setRange( 0, header->preferredWidth() - clientWidth());
+  hBar->setSmallChange( drawArea->colWidth() );
+  hBar->setLargeChange( drawArea->colWidth() );
   int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
-  vBar->setRange((lineNumber()-1-count)*rowHeight());
+  vBar->setRange( 0, (lineNumber()-1-count)*rowHeight());
+  vBar->setSmallChange( drawArea->rowHeight() ); 
+  vBar->setLargeChange( drawArea->rowHeight() );
 }
 
 void PatternView::setSeparatorColor( const NColor & separatorColor )
@@ -308,7 +314,7 @@ void PatternView::setEditPosition( int pos )
 {
   editPosition_ = pos;
   int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
-  vBar->setRange((lineNumber()-1-count)*rowHeight());
+  vBar->setRange( 0, (lineNumber()-1-count)*rowHeight());
 }
 
 int PatternView::editPosition( ) const
@@ -1340,7 +1346,7 @@ void PatternView::setBeatZoom( int tpb )
   if (pattern_) {
      pattern_->setBeatZoom( std::max(tpb, 1) );
      int count = (drawArea->clientHeight() - headerHeight()) / rowHeight();
-     vBar->setRange( ( lineNumber() - 1 - count) * rowHeight());
+     vBar->setRange( 0,  ( lineNumber() - 1 - count) * rowHeight());
   }
 }
 

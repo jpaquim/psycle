@@ -226,6 +226,7 @@ namespace psycle
 				_quality = R_NONE;
 				_pWorkFn = T_None;
 			};
+
 			/// work function corresponding to the selected kind.
 			PRESAMPLERFN _pWorkFn;
 			/// sets the kind of interpolation.

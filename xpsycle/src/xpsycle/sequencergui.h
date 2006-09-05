@@ -272,8 +272,8 @@ private:
     void onSequencerLineClick(SequencerLine* line);
     void onSequencerItemClick(SequencerItem* item);
     void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);
-    void onHScrollBar(NObject* sender, int pos);
-    void onVScrollBar(NObject* sender, int pos);
+    void onHScrollBar( NScrollBar* sender );
+    void onVScrollBar( NScrollBar* sender );
 
     void onRenderAsWave(NButtonEvent* ev);
     void onRecordStop();

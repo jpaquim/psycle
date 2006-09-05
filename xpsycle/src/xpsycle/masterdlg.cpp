@@ -53,7 +53,7 @@ void MasterDlg::init( )
     Slider* slider = new Slider();
       slider->setTrackLine(false);
       slider->setRange(0,208);
-      slider->posChanged.connect(this,&MasterDlg::onSliderPosChanged);
+      slider->change.connect(this,&MasterDlg::onSliderPosChanged);
       slider->setIndex(i);
     pane()->add(slider);
 
@@ -113,21 +113,21 @@ void MasterDlg::setVisible( bool on )
   NWindow::setVisible(on);
 }
 
-void MasterDlg::onSliderPosChanged( NSlider * sender, double pos )
+void MasterDlg::onSliderPosChanged( NSlider * sender  )
 {
   std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
   if (it != sliders.end()) {
       Slider* slider = *it;
       if (slider->led()) {
         if (slider->index() > 0) {
-          float db = ((208-pos)/4.0f)-40.0f;
+          float db = ((208- sender->pos() )/4.0f)-40.0f;
           pMaster->SetWireVolume(slider->index()-1,dsp::dB2Amp(db));
           slider->led()->setNumber(db);
           slider->led()->repaint();
         } else {
           // slidermaster
 
-            float db = ((208-pos)/4.0f)-40.0f;
+            float db = ((208- sender->pos() )/4.0f)-40.0f;
             pMaster->_outDry = int(dsp::dB2Amp(db)*256.0f);
             slider->led()->setNumber(db);
             slider->led()->repaint();

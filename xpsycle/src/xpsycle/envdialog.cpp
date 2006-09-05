@@ -163,10 +163,10 @@ EnvDialog::EnvDialog(Song* pSong_)
 	m_a_decay_slider->setOrientation(nHorizontal);
 	m_a_sustain_slider->setOrientation(nHorizontal);
 	m_a_release_slider->setOrientation(nHorizontal);
-	m_a_attack_slider->posChanged.connect(this, &EnvDialog::onEnvSliderMoved);
-	m_a_decay_slider->posChanged.connect(this, &EnvDialog::onEnvSliderMoved);
-	m_a_sustain_slider->posChanged.connect(this, &EnvDialog::onSustainSliderMoved);
-	m_a_release_slider->posChanged.connect(this, &EnvDialog::onEnvSliderMoved);
+	m_a_attack_slider->change.connect(this, &EnvDialog::onEnvSliderMoved);
+	m_a_decay_slider->change.connect(this, &EnvDialog::onEnvSliderMoved);
+	m_a_sustain_slider->change.connect(this, &EnvDialog::onSustainSliderMoved);
+	m_a_release_slider->change.connect(this, &EnvDialog::onEnvSliderMoved);
 	
 	m_f_attack_slider->setRange(1,65536);
 	m_f_decay_slider->setRange(1,65536);
@@ -176,21 +176,21 @@ EnvDialog::EnvDialog(Song* pSong_)
 	m_f_decay_slider->setOrientation(nHorizontal);
 	m_f_sustain_slider->setOrientation(nHorizontal);
 	m_f_release_slider->setOrientation(nHorizontal);
-	m_f_attack_slider->posChanged.connect(this, &EnvDialog::onEnvSliderMoved);
-	m_f_decay_slider->posChanged.connect(this, &EnvDialog::onEnvSliderMoved);
-	m_f_sustain_slider->posChanged.connect(this, &EnvDialog::onSustainSliderMoved);
-	m_f_release_slider->posChanged.connect(this, &EnvDialog::onEnvSliderMoved);
+	m_f_attack_slider->change.connect(this, &EnvDialog::onEnvSliderMoved);
+	m_f_decay_slider->change.connect(this, &EnvDialog::onEnvSliderMoved);
+	m_f_sustain_slider->change.connect(this, &EnvDialog::onSustainSliderMoved);
+	m_f_release_slider->change.connect(this, &EnvDialog::onEnvSliderMoved);
 		
 	m_cutoff_slider->setRange(0,127);
 	m_q_slider->setRange(0,127);
 	m_cutoff_slider->setOrientation(nHorizontal);
 	m_q_slider->setOrientation(nHorizontal);
-	m_cutoff_slider->posChanged.connect(this, &EnvDialog::onCutoffSliderMoved);
-	m_q_slider->posChanged.connect(this, &EnvDialog::onQSliderMoved);
+	m_cutoff_slider->change.connect(this, &EnvDialog::onCutoffSliderMoved);
+	m_q_slider->change.connect(this, &EnvDialog::onQSliderMoved);
 	
 	m_envelope_slider->setRange(0,256); // Don't use (-,+) range. It fucks up with the "0"
 	m_envelope_slider->setOrientation(nHorizontal);
-	m_envelope_slider->posChanged.connect(this, &EnvDialog::onEnvAmtSliderMoved);
+	m_envelope_slider->change.connect(this, &EnvDialog::onEnvAmtSliderMoved);
 
 	m_filtercombo->add(new NItem("LowPass"));
 	m_filtercombo->add(new NItem("HiPass"));
@@ -244,19 +244,19 @@ void EnvDialog::init()
 	m_envelope_slider->repaint();
 
 	//force initial drawing
-	onEnvSliderMoved(m_a_attack_slider, m_a_attack_slider->pos());
-	onEnvSliderMoved(m_a_decay_slider, m_a_decay_slider->pos());
-	onSustainSliderMoved(m_a_sustain_slider, m_a_sustain_slider->pos());
-	onEnvSliderMoved(m_a_release_slider, m_a_release_slider->pos());
+	onEnvSliderMoved( m_a_attack_slider );
+	onEnvSliderMoved( m_a_decay_slider );
+	onSustainSliderMoved(m_a_sustain_slider );
+	onEnvSliderMoved( m_a_release_slider );
 
-	onEnvSliderMoved(m_f_attack_slider, m_f_attack_slider->pos());
-	onEnvSliderMoved(m_f_decay_slider, m_f_decay_slider->pos());
-	onSustainSliderMoved(m_f_sustain_slider, m_f_sustain_slider->pos());
-	onEnvSliderMoved(m_f_release_slider, m_f_release_slider->pos());
-	onCutoffSliderMoved(m_cutoff_slider, m_cutoff_slider->pos());
+	onEnvSliderMoved(m_f_attack_slider );
+	onEnvSliderMoved(m_f_decay_slider );
+	onSustainSliderMoved(m_f_sustain_slider );
+	onEnvSliderMoved(m_f_release_slider );
+	onCutoffSliderMoved(m_cutoff_slider );
 
-	onQSliderMoved(m_q_slider, m_q_slider->pos());
-	onEnvAmtSliderMoved(m_envelope_slider, m_envelope_slider->pos());
+	onQSliderMoved( m_q_slider );
+	onEnvAmtSliderMoved( m_envelope_slider );
 }
 void EnvDialog::InstChanged()
 {
@@ -269,8 +269,9 @@ int EnvDialog::onClose( )
 	return nHideWindow;
 }
 
-void EnvDialog::onEnvSliderMoved(NSlider *slider, double pos)
+void EnvDialog::onEnvSliderMoved( NSlider *slider )
 {
+  double pos = slider->pos();
 	int si = pSong->instSelected;
 
 	std::ostringstream buffer;
@@ -337,8 +338,9 @@ void EnvDialog::onEnvSliderMoved(NSlider *slider, double pos)
 	pane()->resize();
 }
 
-void EnvDialog::onSustainSliderMoved(NSlider *slider, double pos)
+void EnvDialog::onSustainSliderMoved( NSlider *slider )
 {
+  double pos = slider->pos();
 	int si=pSong->instSelected;
 
 	std::ostringstream buffer;
@@ -374,8 +376,9 @@ void EnvDialog::onSustainSliderMoved(NSlider *slider, double pos)
 	pane()->resize();
 }
 
-void EnvDialog::onCutoffSliderMoved(NSlider *slider, double pos)
+void EnvDialog::onCutoffSliderMoved( NSlider *slider )
 {
+  double pos = slider->pos();
 	int si=pSong->instSelected;
 
 	pSong->_pInstrument[si]->ENV_F_CO = (int)pos;
@@ -385,8 +388,10 @@ void EnvDialog::onCutoffSliderMoved(NSlider *slider, double pos)
 	m_cutoff_label->repaint();
 	pane()->resize();
 }
-void EnvDialog::onQSliderMoved(NSlider *slider, double pos)
+
+void EnvDialog::onQSliderMoved( NSlider *slider )
 {
+  double pos = slider->pos();
 	int si=pSong->instSelected;
 
 	pSong->_pInstrument[si]->ENV_F_RQ = pos;
@@ -402,8 +407,9 @@ void EnvDialog::onFilterModeSelected(NItemEvent *ev)
 	int si=pSong->instSelected;
 	pSong->_pInstrument[si]->ENV_F_TP = m_filtercombo->selIndex();
 }
-void EnvDialog::onEnvAmtSliderMoved(NSlider *slider, double pos)
+void EnvDialog::onEnvAmtSliderMoved( NSlider *slider )
 {
+  double pos = slider->pos();
 	int si=pSong->instSelected;
 	pSong->_pInstrument[si]->ENV_F_EA = pos-128;
 	std::ostringstream buffer;

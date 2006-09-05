@@ -89,14 +89,12 @@ namespace psycle
 				grp->setPosition(16,24,60,127);
 			}
 */			
-			m_srcVol->posChanged.connect(this, &WaveEdMixDialog::onSrcSliderMoved);
+			m_srcVol->change.connect(this, &WaveEdMixDialog::onSrcSliderMoved);
 			m_srcVol->setRange(0, 2000);		// 0.0% to 200.0%
 			m_srcVol->setPos(1000);
-			onSrcSliderMoved(m_srcVol, 1000);
-			m_destVol->posChanged.connect(this, &WaveEdMixDialog::onDestSliderMoved);
+			m_destVol->change.connect(this, &WaveEdMixDialog::onDestSliderMoved);
 			m_destVol->setRange(0, 2000);
 			m_destVol->setPos(1000);
-			onDestSliderMoved(m_destVol, 1000);
 
 			m_bFadeIn->setCheck(false);
 			m_bFadeOut->setCheck(false);
@@ -137,11 +135,11 @@ namespace psycle
 		}
 
 
-		void WaveEdMixDialog::onDestSliderMoved(NSlider *slider, double pos)
-		{
+		void WaveEdMixDialog::onDestSliderMoved( NSlider *slider )
+		{     
 			std::ostringstream temp;
 			temp.setf(std::ios::fixed);
-			float vol = (2000-pos)/10.0f;
+			float vol = (2000 - slider->pos() )/10.0f;
 			if(vol==0)
 				temp<<"0.0%"<<std::endl<<"(-inf. dB)";
 			else
@@ -153,11 +151,11 @@ namespace psycle
 			m_destVolText->repaint();
 		}
 
-		void WaveEdMixDialog::onSrcSliderMoved(NSlider *slider, double pos)
+		void WaveEdMixDialog::onSrcSliderMoved( NSlider *slider )
 		{
 			std::ostringstream temp;
 			temp.setf(std::ios::fixed);
-			float vol = (2000-pos)/10.0f;
+			float vol = (2000- slider->pos() )/10.0f;
 			if(vol==0)
 				temp<<"0.0%"<<std::endl<<"(-inf. dB)";
 			else
@@ -169,7 +167,7 @@ namespace psycle
 			m_srcVolText->repaint();
 		}
 
-		void WaveEdMixDialog::OnBnClickedFadeoutcheck(NButtonEvent* ev)
+		void WaveEdMixDialog::OnBnClickedFadeoutcheck( NButtonEvent* ev )
 		{
 			m_fadeOutTime->setEnable(m_bFadeOut->checked());
 		}

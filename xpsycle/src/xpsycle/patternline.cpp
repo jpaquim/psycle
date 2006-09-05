@@ -58,8 +58,15 @@ namespace psycle
 			 return sequencerTrack_;
 		}
 
+		std::map< int, PatternEvent > & PatternLine::tweaks( )
+		{
+			return tweakMap;
+		}
+
 	}
 }
+
+
 
 
 
