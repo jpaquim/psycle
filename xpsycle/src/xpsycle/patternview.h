@@ -170,6 +170,9 @@ class PatternView : public NPanel
 			int xmlTracks;
 			float xmlBeats;
 
+			void checkDownScroll();
+			void checkUpScroll();
+
     };
 
 
