@@ -845,6 +845,34 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	CustomPatternView::onKeyPress( event );
 
 	switch ( event.scancode() ) {
+		case XK_Left:
+			// check for scroll
+      if ( (cursor().track()) * colWidth() - dx() < 0 ) {
+         pView->hBar->setPos( (cursor().track()) * colWidth() );
+      }
+      return;
+		break;
+		case XK_Right:
+			//check for scroll
+			if ( (cursor().track()+1) * colWidth() - dx() > clientWidth() ) {
+        pView->hBar->setPos( (cursor().track()+1) * colWidth() - clientWidth() );
+      }
+			return;
+		break;
+    case XK_Down:
+      // check for scroll
+      if ( (cursor().line()+1) * rowHeight() - dy() > clientHeight() ) {
+        pView->vBar->setPos( (cursor().line()+1) * rowHeight() - clientHeight() );
+      }
+      return;
+    break;
+    case XK_Up:
+      // check for scroll
+      if ( (cursor().line()) * rowHeight() - dy() < 0 ) {
+         pView->vBar->setPos( (cursor().line()) * rowHeight() );
+      }
+      return;
+    break;
 		case XK_BackSpace:
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 				PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
@@ -1354,11 +1382,16 @@ Song * PatternView::pSong( )
 
 void PatternView::setBeatZoom( int tpb )
 {
-  if (pattern_) {
-     pattern_->setBeatZoom( std::max(tpb, 1) );
-     int count = (drawArea->clientHeight() - headerHeight()) / rowHeight();
-     vBar->setRange( 0,  ( lineNumber() - 1 - count) * rowHeight());
-  }
+	if (pattern_) {    
+		pattern_->setBeatZoom( std::max(tpb, 1) );
+		int count = (drawArea->clientHeight() - headerHeight()) / rowHeight();
+		vBar->setRange( 0,  ( lineNumber() - 1 - count) * rowHeight());
+		if ( drawArea->cursor().line() > lineNumber()-1 ) {
+			PatCursor newCursor = drawArea->cursor();
+			newCursor.setLine( lineNumber() - 1 );
+			drawArea->setCursor( newCursor );
+    }
+	}
 }
 
 void PatternView::onOctaveChange( NItemEvent * ev )
