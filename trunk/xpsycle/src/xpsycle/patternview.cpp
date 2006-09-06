@@ -126,6 +126,10 @@ PatternView::~PatternView()
 {
 }
 
+void PatternView::setFocus() {
+  drawArea->setFocus();
+}
+
 void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
   setBeatZoom( (int) newPos );
   repaint();
@@ -185,9 +189,14 @@ void PatternView::initToolBar( )
     meterCbx->add(new NItem("3/4"));
     meterCbx->setPreferredSize(50,15);
     meterCbx->setIndex(0);
+		meterCbx->enableFocus(false);
   toolBar->add(meterCbx);
-  toolBar->add(new NButton("add Bar"))->clicked.connect(this,&PatternView::onAddBar);
-  toolBar->add(new NButton("delete Bar"))->clicked.connect(this,&PatternView::onDeleteBar);
+  NButton* btn = toolBar->add(new NButton("add Bar"));
+  btn->clicked.connect(this,&PatternView::onAddBar);
+  btn->enableFocus( false);
+  btn = toolBar->add(new NButton("delete Bar"));
+  btn->clicked.connect(this,&PatternView::onDeleteBar);
+  btn->enableFocus(false);
   toolBar->add(new NLabel("Pattern Step"));
   patternCombo_ = new NComboBox();
     for (int i = 1; i <=16; i++) 
@@ -196,6 +205,7 @@ void PatternView::initToolBar( )
     patternCombo_->itemSelected.connect(this,&PatternView::onPatternStepChange);
     patternCombo_->setWidth(40);
     patternCombo_->setHeight(20);
+    patternCombo_->enableFocus(false);
   toolBar->add(patternCombo_);
 
   toolBar->add(new NLabel("Octave"));
@@ -205,6 +215,7 @@ void PatternView::initToolBar( )
     octaveCombo_->setWidth(40);
     octaveCombo_->setHeight(20);
     octaveCombo_->setIndex(4);
+    octaveCombo_->enableFocus(false);
     setEditOctave(4);
   toolBar->add(octaveCombo_);
 

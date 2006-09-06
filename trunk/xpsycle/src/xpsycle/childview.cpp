@@ -65,14 +65,22 @@ ChildView::ChildView()
   sequencerView_->addSequencerLine();
 
   
-  NDockPanel* macDock = new NDockPanel(machineView_);
+  macDock = new NDockPanel(machineView_);
   tabBook_->addPage(macDock,"Machine View");
-  NDockPanel* patDock = new NDockPanel(patternView_);
+  NTab* tab = tabBook_->tab( macDock );
+  tab->click.connect(this,&ChildView::onTabChange);
+  patDock = new NDockPanel(patternView_);
   tabBook_->addPage(patDock,"Pattern View");
+  tab = tabBook_->tab( patDock );
+  tab->click.connect(this,&ChildView::onTabChange);
   waveEd_ = new WaveEdFrame( song() );
   tabBook_->addPage(waveEd_,"WaveEditor");
-  NDockPanel* seqDock = new NDockPanel(sequencerView_);
+  tab = tabBook_->tab( waveEd_ );
+  tab->click.connect(this,&ChildView::onTabChange);
+  seqDock = new NDockPanel(sequencerView_);
   tabBook_->addPage(seqDock,"Sequencer View");
+  tab = tabBook_->tab( seqDock );
+  tab->click.connect(this,&ChildView::onTabChange);
 
   tabBook_->setActivePage(macDock);
 
@@ -185,6 +193,7 @@ void psycle::host::ChildView::showMachineView( )
 void psycle::host::ChildView::showPatternView( )
 {
   tabBook_->setActivePage(1);
+  patternView_->setFocus();
   repaint();
 }
 
@@ -208,4 +217,11 @@ void psycle::host::ChildView::showSequencerView( )
 {
   tabBook_->setActivePage(3);
   repaint();
+}
+
+void psycle::host::ChildView::onTabChange( NButtonEvent * ev )
+{
+  if (tabBook_->activePage() == patDock ) {
+    patternView()->setFocus();
+	}
 }

@@ -93,6 +93,9 @@ private:
     PatternView* patternView_;
     SequencerGUI* sequencerView_;
 
+    NDockPanel* macDock;
+    NDockPanel* patDock;
+		NDockPanel* seqDock;
 
     WaveEdFrame* waveEd_;
 
@@ -102,6 +105,7 @@ private:
     void onTweakSlide(int machine, int command, int value);
 
     void onMachineSelected( Machine* mac );
+    void onTabChange(NButtonEvent* ev);
 
 };
 

@@ -564,6 +564,7 @@ void MainWindow::initToolBar( )
         genCombo_->setWidth(158);
         genCombo_->setHeight(20);
         genCombo_->setIndex(0);
+        genCombo_->enableFocus(false);
         genCombo_->itemSelected.connect(this,&MainWindow::onGeneratorCbx);
       psycleToolBar_->add(genCombo_);
 
@@ -582,6 +583,7 @@ void MainWindow::initToolBar( )
 			insCombo_ = new NComboBox();
 				insCombo_->setWidth(158);
 				insCombo_->setHeight(20);
+				insCombo_->enableFocus(false);
 				insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
 				for (int i=0;i<PREV_WAV_INS;i++)
 				{
