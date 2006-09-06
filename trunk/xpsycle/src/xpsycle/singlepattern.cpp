@@ -291,6 +291,14 @@ namespace psycle
 			if ( line.empty() ) erase(it);
 		}
 
+		void SinglePattern::clearTweakTrack( int linenr , int tracknr ) {
+			iterator it = find_nearest(linenr);
+			PatternLine & line = it->second;
+			if ( it == end() ) return;
+			line.tweaks().erase(tracknr);
+			if ( line.empty() ) erase(it);
+		}
+
 		std::vector< TimeSignature > & SinglePattern::timeSignatures( )
 		{
   		return timeSignatures_;
@@ -416,6 +424,26 @@ namespace psycle
 			else
 				return PatternEvent();
 		}
+
+		void SinglePattern::setTweakEvent( int line, int track, const PatternEvent & event ) {
+			iterator it = find_nearest( line );
+			if ( it != end())
+			{
+				it->second.tweaks()[track] = event;
+			} else {
+				float position = line / (float) beatZoom();
+				(*this)[position].tweaks()[track] = event;
+			}
+		}
+
+		PatternEvent SinglePattern::tweakEvent( int line, int track ) {
+			iterator it = find_nearest( line );
+			if ( it != end())
+				return it->second.tweaks()[track];
+			else
+				return PatternEvent();
+		}
+
 
 	
 		SinglePattern SinglePattern::block( int left, int right, int top, int bottom )

@@ -44,6 +44,8 @@ namespace psycle
 
 			std::map<int, PatternEvent> & tweaks();
 
+			virtual bool empty() const;
+
 		private:
 
 			int sequencerTrack_;

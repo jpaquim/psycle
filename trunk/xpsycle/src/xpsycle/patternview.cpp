@@ -62,6 +62,13 @@ PatternView::PatternView( Song* song )
   _pSong = song;
   setLayout(NAlignLayout());
 
+  hBar = 0;
+  vBar = 0;
+  tweakHBar = 0;
+  tweakGUI = 0;
+  header = 0;
+  drawArea = 0;
+
   vBar = new NScrollBar();
     vBar->setWidth(15);
     vBar->setOrientation(nVertical);
@@ -84,7 +91,16 @@ PatternView::PatternView( Song* song )
 	NPanel* drawGroup = new NPanel();
 		drawGroup->setLayout( NAlignLayout() );
 		// create tweak gui
-		drawGroup->add(tweakGUI = new TweakGUI(this), nAlRight);
+    NPanel* tweakGroup = new NPanel();
+      tweakGroup->setLayout( NAlignLayout() );
+      tweakGroup->add( tweakHeader = new TweakHeader(this), nAlTop);
+      tweakHBar = new NScrollBar();
+        tweakHBar->setOrientation(nHorizontal);
+        tweakHBar->setPreferredSize(100,15);
+        tweakHBar->change.connect(this,&PatternView::onHTweakScrollBar);
+      tweakGroup->add( tweakHBar, nAlBottom );
+      tweakGroup->add( tweakGUI = new TweakGUI(this), nAlClient) ;
+		drawGroup->add ( tweakGroup, nAlRight );
 		// splitbar
 		drawGroup->add( new NSplitBar(), nAlRight);
   	// create the pattern panel
@@ -93,6 +109,7 @@ PatternView::PatternView( Song* song )
       // create the headertrack panel
       subGroup->add(header      = new Header(this), nAlTop);
 			lineHeaderLabel->setPreferredSize( 20, header->preferredHeight() );
+      tweakHeader->setPreferredSize( 20, header->preferredHeight() );
 			// hbar with beat zoom
   		NPanel* hBarPanel = new NPanel();
     		hBarPanel->setLayout( NAlignLayout() );
@@ -156,6 +173,28 @@ void PatternView::onHScrollBar( NScrollBar * sender )
   }
 }
 
+void PatternView::onHTweakScrollBar( NScrollBar * sender )
+{
+  double pos = sender->pos();
+  int newPos = (pos / tweakGUI->colWidth()) * tweakGUI->colWidth();
+
+  if (newPos != tweakGUI->dx()) {
+    tweakHeader->setScrollDx(newPos);
+    tweakHeader->repaint();
+
+    int diffX  = newPos - tweakGUI->dx();
+    if (diffX < tweakGUI->clientWidth()) {
+      NRect rect = tweakGUI->blitMove(diffX,0, tweakGUI->absoluteSpacingGeometry());
+      tweakGUI->setDx(newPos);
+      window()->repaint(tweakGUI,rect);
+    } else {
+      tweakGUI->setDx(newPos);
+      tweakGUI->repaint();
+    }
+  }
+}
+
+
 void PatternView::onVScrollBar( NScrollBar * sender )
 {
   double pos = sender->pos();
@@ -172,14 +211,39 @@ void PatternView::onVScrollBar( NScrollBar * sender )
         rect = drawArea->blitMove(0,diffY,drawArea->absoluteSpacingGeometry());
         drawArea->setDy(newPos);
         window()->repaint(drawArea,rect);
+
+        rect = tweakGUI->blitMove(0,diffY,tweakGUI->absoluteSpacingGeometry());
+        tweakGUI->setDy(newPos);
+        window()->repaint(tweakGUI,rect);
+
     } else {
         lineNumber_->setDy(newPos);
         drawArea->setDy(newPos);
         lineNumber_->repaint();
         drawArea->repaint();
+				tweakGUI->repaint();
     }
   }
   }
+}
+
+void PatternView::updateRange() {
+// set the Range to the new headerwidth  
+  if ( !hBar || !header || !drawArea ||! tweakHBar) return;
+
+  hBar->setRange( 0, header->preferredWidth() - drawArea->clientWidth());
+  hBar->setSmallChange( drawArea->colWidth() );
+  hBar->setLargeChange( drawArea->colWidth() );
+
+  // set the Range to the new headerwidth
+  tweakHBar->setRange( 0, tweakHeader->preferredWidth() - tweakGUI->clientWidth());
+  tweakHBar->setSmallChange( tweakGUI->colWidth() );
+  tweakHBar->setLargeChange( tweakGUI->colWidth() );
+
+  int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
+  vBar->setRange( 0, (lineNumber()-1-count)*rowHeight());
+  vBar->setSmallChange( drawArea->rowHeight() ); 
+  vBar->setLargeChange( drawArea->rowHeight() );
 }
 
 void PatternView::initToolBar( )
@@ -227,7 +291,7 @@ void PatternView::initToolBar( )
     for(int i=4;i<=MAX_TRACKS;i++) {
       trackCombo_->add(new NItem(stringify(i)));
     }
-    trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16
+    trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
   toolBar->add(trackCombo_);
 }
 
@@ -259,14 +323,8 @@ void PatternView::resize( )
 {
   // calls the AlignLayout to reorder scroll-,-header,-linenumber- and patternpanels
   NPanel::resize();
-  // set the Range to the new headerwidth
-  hBar->setRange( 0, header->preferredWidth() - clientWidth());
-  hBar->setSmallChange( drawArea->colWidth() );
-  hBar->setLargeChange( drawArea->colWidth() );
-  int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
-  vBar->setRange( 0, (lineNumber()-1-count)*rowHeight());
-  vBar->setSmallChange( drawArea->rowHeight() ); 
-  vBar->setLargeChange( drawArea->rowHeight() );
+  updateRange();
+  
 }
 
 void PatternView::setSeparatorColor( const NColor & separatorColor )
@@ -291,6 +349,10 @@ int PatternView::rowHeight( ) const
 
 int PatternView::colWidth() const {
 	return drawArea->colWidth();
+}
+
+int PatternView::tweakColWidth() const {
+  return tweakGUI->colWidth();
 }
 
 int PatternView::headerHeight( ) const
@@ -511,7 +573,7 @@ void PatternView::Header::onRecLedClick(int track) {
 
 int PatternView::Header::preferredWidth( )
 {
-  return (pView->trackNumber()+2)*pView->colWidth();
+  return (pView->trackNumber())*pView->colWidth();
 }
 
 int PatternView::Header::skinColWidth( )
@@ -631,20 +693,244 @@ int PatternView::Header::skinColWidth( )
 /// End of Line Number Panel
 
 
-PatternView::TweakHeader::TweakHeader() {
-
+PatternView::TweakHeader::TweakHeader( PatternView* pPatternView ) {
+  pView = pPatternView;
 }
 
 PatternView::TweakHeader::~TweakHeader() {
 
 }
 
+int PatternView::TweakHeader::preferredWidth() {
+  return (16)*pView->tweakColWidth();  
+}
+
+
 PatternView::TweakGUI::TweakGUI( PatternView* pPatternView)
 {
+  pView = pPatternView;
+  addEvent( ColumnEvent::hex4 );
 }
 
 PatternView::TweakGUI::~TweakGUI() {
 
+}
+
+void PatternView::TweakGUI::customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
+  if (pView->pattern()) {
+    TimeSignature signature;
+
+    g->setForeground(Global::pConfig()->pvc_rowbeat);
+
+    int trackWidth = ((endTrack+1) * colWidth()) - dx();
+    int lineHeight = ((endLine +1) * rowHeight()) - dy();
+
+    for (int y = startLine; y <= endLine; y++) {
+      float position = y / (float) beatZoom();
+      if (!(y == pView->playPos()) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
+      if ( !(y % beatZoom())) {
+          if ((pView->pattern()->barStart(position, signature) )) {
+              g->setForeground(Global::pConfig()->pvc_row4beat);
+              g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
+              g->setForeground(Global::pConfig()->pvc_rowbeat);
+          } else {
+            g->fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
+          }
+        }
+      } else  {
+        g->setForeground(Global::pConfig()->pvc_playbar);
+        g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
+        g->setForeground(Global::pConfig()->pvc_rowbeat);
+      }
+    }
+
+		drawSelBg(g,selection());
+		drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
+		drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
+		drawPattern(g, startLine, endLine, startTrack, endTrack);
+		drawRestArea(g, startLine, endLine, startTrack, endTrack);
+  }
+}
+
+void PatternView::TweakGUI::resize() {
+  pView->updateRange();
+}
+
+void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
+   CustomPatternView::onKeyPress( event );
+
+		switch ( event.scancode() ) {		
+		case ' ':
+			if (Player::Instance()->_playing) {
+				Player::Instance()->Stop();
+			} else {
+				Player::Instance()->Start(0);
+			}
+		break;
+		case XK_Page_Up:
+		{
+			TimeSignature signature;
+			for (int y = cursor().line()-1; y >= 0; y--) {
+				float position = y / (float) beatZoom();
+				if ((pView->pattern()->barStart(position, signature) )) {
+					moveCursor(0, y - cursor().line() );
+					pView->checkUpScroll( cursor() );
+					break;
+				}
+			}
+    }
+		break;
+		case XK_Page_Down:
+		{
+			TimeSignature signature;
+			for (int y = cursor().line()+1; y < lineNumber(); y++) {
+				float position = y / (float) beatZoom();
+				if ((pView->pattern()->barStart(position, signature) )) {
+					moveCursor(0,y - cursor().line());
+					pView->checkDownScroll( cursor() );
+					break;
+				}
+			}
+		}
+		break;
+		case XK_Left :
+			checkLeftScroll( cursor() );
+      return;
+		break;
+		case XK_Right:
+			checkRightScroll( cursor() );
+			return;
+		break;
+    case XK_Down:
+			pView->checkDownScroll( cursor() );
+      return;
+    break;
+    case XK_Up:
+			pView->checkUpScroll( cursor() );
+      return;
+    break;
+		case XK_End:
+      pView->checkDownScroll( cursor() );
+      return;
+    break;
+    case XK_Home:
+      pView->checkUpScroll( cursor() );
+      return;
+    break;
+		case XK_Tab:
+			checkRightScroll( cursor() );
+			return;
+		break;
+		case XK_ISO_Left_Tab:
+			checkLeftScroll( cursor() );
+      return;
+		break;
+		case XK_BackSpace:
+			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
+					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
+			}
+			moveCursor(0,-1); 
+			pView->checkUpScroll( cursor() );
+			return;
+		break;
+		default: ;
+	}
+
+
+   
+    if (isHex(event.scancode()))
+		if ( cursor().eventNr() == 0) {
+			// comand or parameter
+			PatternEvent patEvent = pView->pattern()->tweakEvent( cursor().line(), cursor().track() );			
+			if (cursor().col() < 2 ) {
+				unsigned char newByte = convertDigit( 0x00, event.scancode(), patEvent.command(), cursor().col() );
+				patEvent.setCommand( newByte );
+				pView->pattern()->setTweakEvent( cursor().line(), cursor().track(), patEvent );
+        moveCursor(1,0);
+			}
+			else {
+				unsigned char newByte = convertDigit( 0x00, event.scancode(), patEvent.parameter(), cursor().col() - 2 );
+				patEvent.setParameter( newByte );
+				pView->pattern()->setTweakEvent( cursor().line(), cursor().track(), patEvent );
+        if (cursor().col() < 3)
+					moveCursor(1,0);			
+				else
+					moveCursor(-3,1);
+				  pView->checkDownScroll( cursor() );
+			}			
+		}
+
+}
+
+void PatternView::TweakGUI::drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
+	if ( pView->pattern() ) {
+		drawCellBg(g, cursor(), Global::pConfig()->pvc_cursor );
+
+		SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
+
+		int lastLine = -1;
+		for ( ; it != pView->pattern_->end(); it++ ) {
+			PatternLine & line = it->second;
+			int y = d2i (it->first * pView->pattern_->beatZoom());
+			if (y > endLine) break;
+			if (y != lastLine) {
+				PatternLine::iterator eventIt = line.tweaks().lower_bound(startTrack);
+				for(; eventIt != line.tweaks().end() && eventIt->first <= endTrack; ++eventIt) {
+					PatternEvent event = eventIt->second;
+					int x = eventIt->first;
+					if (event.command() != 0 || event.parameter() != 0) {
+						drawData( g, x, y, 0, (event.command() << 8) | event.parameter() );
+					}
+					lastLine = y;
+				}
+			}
+		}
+	}
+}
+
+int PatternView::TweakGUI::colWidth() const {
+  return CustomPatternView::colWidth(); 
+}
+
+int PatternView::TweakGUI::rowHeight() const {
+  return pView->rowHeight();
+}
+
+int PatternView::TweakGUI::lineNumber() const {
+  return pView->lineNumber();
+}
+
+int PatternView::TweakGUI::trackNumber() const {
+  return 16; // hardcoded so far
+}
+
+int PatternView::TweakGUI::beatZoom() const {
+  return pView->beatZoom();
+}
+
+void PatternView::TweakGUI::checkLeftScroll( const PatCursor & cursor ) {
+ // check for scroll
+	if ( (cursor.track()) * colWidth() - dx() < 0) {
+		pView->tweakHBar->setPos( std::max( cursor.track(), 0) * colWidth() );
+	}	
+}
+
+void PatternView::TweakGUI::checkRightScroll( const PatCursor & cursor ) {
+	//check for scroll
+	if ( (cursor.track()+1) * colWidth() - dx() > clientWidth() ) {
+		pView->tweakHBar->setPos( std::min( cursor.track()+1 , trackNumber()) * colWidth() - clientWidth() );
+	}
+}
+
+int PatternView::TweakGUI::doSel(const PatCursor & selCursor) {
+  int dir = CustomPatternView::doSel( selCursor );
+
+	pView->checkDownScroll( selCursor );
+	pView->checkUpScroll( selCursor );
+	checkLeftScroll( selCursor );
+  checkRightScroll( selCursor );
+	
+  return dir;
 }
 
 
@@ -724,6 +1010,10 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatt
 
 PatternView::PatternDraw::~ PatternDraw( )
 {
+}
+
+void PatternView::PatternDraw::resize() {
+  pView->updateRange();
 }
 
 int PatternView::PatternDraw::colWidth() const {
@@ -884,7 +1174,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				float position = y / (float) beatZoom();
 				if ((pView->pattern()->barStart(position, signature) )) {
 					moveCursor(0, y - cursor().line() );
-					checkUpScroll( cursor() );
+					pView->checkUpScroll( cursor() );
 					break;
 				}
 			}
@@ -897,7 +1187,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				float position = y / (float) beatZoom();
 				if ((pView->pattern()->barStart(position, signature) )) {
 					moveCursor(0,y - cursor().line());
-					checkDownScroll( cursor() );
+					pView->checkDownScroll( cursor() );
 					break;
 				}
 			}
@@ -912,19 +1202,19 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			return;
 		break;
     case XK_Down:
-			checkDownScroll( cursor() );
+			pView->checkDownScroll( cursor() );
       return;
     break;
     case XK_Up:
-			checkUpScroll( cursor() );
+			pView->checkUpScroll( cursor() );
       return;
     break;
 		case XK_End:
-      checkDownScroll( cursor() );
+      pView->checkDownScroll( cursor() );
       return;
     break;
     case XK_Home:
-      checkUpScroll( cursor() );
+      pView->checkUpScroll( cursor() );
       return;
     break;
 		case XK_Tab:
@@ -956,7 +1246,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				} 					
 			}
 			moveCursor(0,-1); 
-			checkUpScroll( cursor() );
+			pView->checkUpScroll( cursor() );
 			return;
 		break;
 		default: ;
@@ -972,7 +1262,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		if (note >=0 && note < 120) {
 			pView->enterNote( cursor(), note );
 			moveCursor(0,1);
-			checkDownScroll( cursor() );
+			pView->checkDownScroll( cursor() );
 		}
 	} else
 	if ( isHex(event.scancode()) ) {
@@ -986,7 +1276,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			 moveCursor(1,0);			
       else
        moveCursor(-1,1);
-       checkDownScroll( cursor() );
+       pView->checkDownScroll( cursor() );
 		} else 
 		if ( cursor().eventNr() == 2) {
 			// mac select
@@ -998,7 +1288,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			 moveCursor(1,0);			
       else
        moveCursor(-1,1);
-			checkDownScroll( cursor() );
+			 pView->checkDownScroll( cursor() );
 		} else
 		if ( cursor().eventNr() == 3) {
 			// comand or parameter
@@ -1017,23 +1307,23 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 					moveCursor(1,0);			
 				else
 					moveCursor(-3,1);
-				checkDownScroll( cursor() );
+				pView->checkDownScroll( cursor() );
 			}			
 		}
 	}
 }
 
-void PatternView::PatternDraw::checkDownScroll( const PatCursor & cursor ) {
+void PatternView::checkDownScroll( const PatCursor & cursor ) {
 	// check for scroll
-	if ( (cursor.line()+1) * rowHeight() - dy() > clientHeight() ) {
-		pView->vBar->setPos( (std::min(cursor.line(),lineNumber()-1)+1) * rowHeight() - clientHeight() );
+	if ( (cursor.line()+1) * drawArea->rowHeight() - drawArea->dy() > drawArea->clientHeight() ) {
+		vBar->setPos( (std::min(cursor.line(),lineNumber()-1)+1) * drawArea->rowHeight() - drawArea->clientHeight() );
 	}
 }
 
-void PatternView::PatternDraw::checkUpScroll( const PatCursor & cursor ) {
+void PatternView::checkUpScroll( const PatCursor & cursor ) {
   // check for scroll
-	if ( (cursor.line()) * rowHeight() - dy() < 0 ) {
-		pView->vBar->setPos( std::max(0,cursor.line()) * rowHeight());
+	if ( (cursor.line()) * drawArea->rowHeight() - drawArea->dy() < 0 ) {
+		vBar->setPos( std::max(0,cursor.line()) * drawArea->rowHeight());
 	}
 }
 
@@ -1054,8 +1344,8 @@ void PatternView::PatternDraw::checkRightScroll( const PatCursor & cursor ) {
 int PatternView::PatternDraw::doSel(const PatCursor & selCursor) {
   int dir = CustomPatternView::doSel( selCursor );
 
-	checkDownScroll( selCursor );
-	checkUpScroll( selCursor );
+	pView->checkDownScroll( selCursor );
+	pView->checkUpScroll( selCursor );
 	checkLeftScroll( selCursor );
   checkRightScroll( selCursor );
 	
