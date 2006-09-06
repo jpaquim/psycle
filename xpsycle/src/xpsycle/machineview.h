@@ -56,7 +56,7 @@ public :
       if(button==1)
         dlg->setVisible(true);
     }
-
+   
     WireDlg* dialog() { return dlg;}
 
 private:
@@ -109,7 +109,7 @@ private:
     void onDestroyMachine(Machine* mac);
 
     void onNewConnection(MachineGUI* sender);
-    void onLineMousePressed(NButtonEvent* sender);
+    void onLineMoveEnd( const NMoveEvent & event);
 
     void onWireDelete(WireDlg* dlg);
 

@@ -178,32 +178,30 @@ void MachineView::onNewConnection( MachineGUI * sender )
   scrollArea_->insert(line,0);
   line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
   repaint();
-  line->setMoveFocus(0);
-  line->mousePressed.connect(this,&MachineView::onLineMousePressed);
+  line->setMoveFocus(0); 
+  line->moveEnd.connect(this,&MachineView::onLineMoveEnd);
 }
 
-void MachineView::onLineMousePressed( NButtonEvent * ev )
+void MachineView::onLineMoveEnd( const NMoveEvent & ev)
 {
-  if (ev->button() == 3) {
-    bool found = false;
-    for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
-      MachineGUI* machineGUI = *it;
-      if (machineGUI->clipBox().intersects(line->left()+ev->x(),line->top()+ev->y())) {
-        _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
-        startGUI->attachLine(line,0);
-        machineGUI->attachLine(line,1);
-        line->setMoveable(NMoveable());
-        line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
-        line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-        found = true;
-        repaint();
-        break;
-      }
-    }
-    if (!found) {
-      scrollArea_->removeChild(line);
+  bool found = false;
+  for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+    MachineGUI* machineGUI = *it;
+    if (machineGUI->clipBox().intersects(line->left()+ev.x(),line->top()+ev.y())) {
+      _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
+      startGUI->attachLine(line,0);
+      machineGUI->attachLine(line,1);
+      line->setMoveable(NMoveable());
+      line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
+      line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
+      found = true;
       repaint();
+      break;
     }
+  }
+  if (!found) {
+    scrollArea_->removeChild(line);
+    repaint();
   }
 }
 

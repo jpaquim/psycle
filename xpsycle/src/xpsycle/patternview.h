@@ -254,6 +254,8 @@ public:
 
     void clearCurr();
 
+    virtual void setFocus();
+
 private:
 
   Song* _pSong;
