@@ -51,6 +51,7 @@ NWindow::NWindow()
   NVisual::setVisible(false);
   dock_ = 0;
   exitLoop_ = nDestroyWindow;
+  oldFocus_ = 0;
 }
 
 
@@ -152,16 +153,16 @@ int NWindow::height( ) const
 
 void NWindow::onMousePress( int x, int y, int button )
 {
-  NVisualComponent* oldFocus = 0;
+  oldFocus_ = 0;
 
   graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
   if (obj!=NULL) {
     // send mousepress
     if ( obj->enabled() ) {
-      oldFocus = selectedBase_;
+      oldFocus_ = selectedBase_;
       selectedBase_ = obj;
-      if (oldFocus && oldFocus != selectedBase_) oldFocus->onExit();
+      if (selectedBase_->focusEnabled() && oldFocus_ && oldFocus_ != selectedBase_) oldFocus_->onExit();
       if (selectedBase_) {
         selectedBase_->onMousePress( x - selectedBase_->absoluteSpacingLeft() +
         selectedBase_->scrollDx(), y - selectedBase_->absoluteSpacingTop() + selectedBase_->scrollDy(), button);
@@ -184,7 +185,10 @@ void NWindow::onMousePressed( int x, int y, int button )
   if (dragBase_!=0 && dragBase_->enabled()) dragBase_->onMousePressed( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop(), button);
   if (button==1) endDrag(dragBase_,x,y);
   dragBase_ = 0;
-  if ( selectedBase_!=0 && selectedBase_->enabled() ) selectedBase_->onEnter();
+  if ( selectedBase_ && selectedBase_->enabled() && selectedBase_->focusEnabled() ) selectedBase_->onEnter(); 
+   else
+  if ( oldFocus_ ) selectedBase_ = oldFocus_;
+
 }
 
 void NWindow::onMouseOver( int x, int y )
@@ -532,6 +536,9 @@ void NWindow::setPositionToScreenCenter( )
 
 void NWindow::checkForRemove( NRuntime * obj )
 {
+  if (obj == oldFocus_) {
+		oldFocus_ = 0;
+	}
   if (obj == 0) {
      lastOver_ = 0;
      dragBase_ = 0;

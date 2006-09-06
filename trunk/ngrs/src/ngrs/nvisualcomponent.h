@@ -200,6 +200,9 @@ public:
     virtual void setFocus();
     virtual bool focus() const;
 
+		void enableFocus( bool on );
+		bool focusEnabled() const;
+
     void setTabOrder( int index );
     int tabOrder() const;
 
@@ -242,6 +245,7 @@ private:
    bool disableParentFont_;
 
    bool tabStop_;
+   bool focusEnabled_;
 
    void tabRight();
    void tabLeft();

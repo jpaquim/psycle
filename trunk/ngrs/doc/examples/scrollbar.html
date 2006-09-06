@@ -10,7 +10,7 @@ The NScrollBar component is used for vertical and horizontal scrollbars. Automat
 Methods
 </h3>
 <p>
-setRange/range --doubleXdouble : the minimum, maximum position value
+setRange/range --double X double : the minimum, maximum position value
 <br>
 setPos/pos --double : the position of the Thumb relative to the range
 <br>
@@ -20,13 +20,13 @@ setLargeChange/largeChange--double : position change when pressing the area abov
 <br>
 setOrientation --nVertical/nHorizontal : the orientation of the scrollbar
 <br>
-setControl --NVisualComponent*X(nDx/nDy): automatic scrolling of children components and graphic gc of controlComponent. nDx scroll is horizontal, nDy scroll is vertical. range is set to the client width minus real view width of the component.
+setControl --NVisualComponent* X (nDx/nDy): automatic scrolling of children components and graphic gc of controlComponent. nDx scroll is horizontal, nDy scroll is vertical. range is set to the client width minus real view width of the component.
 </p>
 <h3>
 Events
 </h3>
-change<NScrollBar*>: is emitted at setPos, down/up button press, above below thumb press, thumb scroll
-scroll<NScrollBar*>: is emitted at down/up button press, above below thumb press, thumb scroll
+change --NScrollBar*: is emitted at setPos, down/up button press, above below thumb press, thumb scroll
+scroll --NScrollBar*: is emitted at down/up button press, above below thumb press, thumb scroll
 
 </body>
 </html>

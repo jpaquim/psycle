@@ -96,7 +96,13 @@ NTestWindow::NTestWindow()
      bar->change.connect( this, &NTestWindow::onScrollPosChange);
    pane()->add( bar );*/
 
-  testComboBox();
+  NScrollBar* bar = new NScrollBar();
+  pane()->add( bar, nAlLeft );
+
+  NMemo* memo = new NMemo();
+  pane()->add( memo, nAlClient );
+
+  //testComboBox();
 
 /*  NPanel* panel = new NPanel();
 		panel->setPosition(10,10,100,20);

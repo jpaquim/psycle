@@ -28,7 +28,7 @@ using namespace std;
 NIsVisualComponent* NVisualComponent::isVisualComponent = new NIsVisualComponent();
 
 NVisualComponent::NVisualComponent()
- : NVisual(), clipping_(1), events_(1), scrollDx_(0), scrollDy_(0), layout_(0), win_(0), clSzPolicy(0), ownerSizeSet_(0), ownerPreferredWidth_(0), ownerPreferredHeight_(0), enabled_(1), tabStop_(0)
+ : NVisual(), clipping_(1), events_(1), scrollDx_(0), scrollDy_(0), layout_(0), win_(0), clSzPolicy(0), ownerSizeSet_(0), ownerPreferredWidth_(0), ownerPreferredHeight_(0), enabled_(1), tabStop_(0), focusEnabled_(1)
 {
   if (properties()) properties()->bind("align", *this, &NVisualComponent::align, &NVisualComponent::setAlign);
 
@@ -1048,4 +1048,17 @@ void NVisualComponent::tabLeft() {
  if (parent()->visit(isVisualComponent)) {
     NVisualComponent* par = (NVisualComponent*) parent();
  }
+}
+
+void NVisualComponent::enableFocus( bool on )
+{
+  focusEnabled_ = on;
+}
+
+bool NVisualComponent::focusEnabled( ) const
+{
+	if (focusEnabled_ && parent() && parent()->visit(NVisualComponent::isVisualComponent)) {
+     return ((NVisualComponent*) parent())->focusEnabled();
+  }
+  return focusEnabled_;
 }
