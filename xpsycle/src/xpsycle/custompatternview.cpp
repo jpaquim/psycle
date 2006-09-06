@@ -140,7 +140,7 @@ namespace psycle {
 		void CustomPatternView::init() {			
 			dx_ = 0;
 			dy_ = 0;
-			separatorColor_ = NColor(200,200,200);
+			separatorColor_.setHCOLORREF(0x00400000);
 			selectionColor_ = NColor(0,0,255);
 			patternStep_ = 1;
 			colIdent = 3;
@@ -276,6 +276,7 @@ namespace psycle {
 		}
 
 		void CustomPatternView::drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
+			g->setForeground( foreground() );
 			int trackWidth = ((endTrack+1) * colWidth()) - dx();
 			int lineHeight = ((endLine +1) * rowHeight()) - dy();
 

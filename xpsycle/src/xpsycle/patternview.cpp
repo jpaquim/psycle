@@ -40,6 +40,7 @@
 #include <ngrs/nlabel.h>
 #include <ngrs/nsystem.h>
 #include <ngrs/nsplitbar.h>
+#include <ngrs/ncheckbox.h>
 
 namespace psycle { namespace host {
 
@@ -91,7 +92,7 @@ PatternView::PatternView( Song* song )
 	NPanel* drawGroup = new NPanel();
 		drawGroup->setLayout( NAlignLayout() );
 		// create tweak gui
-    NPanel* tweakGroup = new NPanel();
+    tweakGroup = new NPanel();
       tweakGroup->setLayout( NAlignLayout() );
       tweakGroup->add( tweakHeader = new TweakHeader(this), nAlTop);
       tweakHBar = new NScrollBar();
@@ -99,10 +100,12 @@ PatternView::PatternView( Song* song )
         tweakHBar->setPreferredSize(100,15);
         tweakHBar->change.connect(this,&PatternView::onHTweakScrollBar);
       tweakGroup->add( tweakHBar, nAlBottom );
-      tweakGroup->add( tweakGUI = new TweakGUI(this), nAlClient) ;
-		drawGroup->add ( tweakGroup, nAlRight );
+      tweakGroup->add( tweakGUI = new TweakGUI(this), nAlClient) ;      
+		drawGroup->add ( tweakGroup, nAlLeft );
+    drawGroup->setPreferredSize( 2*tweakGUI->colWidth() , 100);
 		// splitbar
-		drawGroup->add( new NSplitBar(), nAlRight);
+    splitBar = new NSplitBar();
+		drawGroup->add( splitBar, nAlLeft );
   	// create the pattern panel
 		NPanel* subGroup = new NPanel();
 			subGroup->setLayout( NAlignLayout() );
@@ -293,6 +296,10 @@ void PatternView::initToolBar( )
     }
     trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
   toolBar->add(trackCombo_);
+
+  sideBox = new NCheckBox("Tweak left/right");
+     sideBox->clicked.connect(this,&PatternView::onSideChange);
+  toolBar->add(sideBox);
 }
 
 void PatternView::onAddBar( NButtonEvent * ev )
@@ -317,6 +324,18 @@ void PatternView::onDeleteBar(NButtonEvent* ev)
     resize();
     repaint();
   }
+}
+
+void PatternView::onSideChange( NButtonEvent* ev ) {
+   if (sideBox->checked() ) {
+     tweakGroup->setAlign(nAlRight);
+	   splitBar->setAlign( nAlRight );
+   } else {
+     tweakGroup->setAlign(nAlLeft);
+	   splitBar->setAlign( nAlLeft );
+   }
+   resize();
+   repaint();
 }
 
 void PatternView::resize( )
@@ -710,6 +729,9 @@ PatternView::TweakGUI::TweakGUI( PatternView* pPatternView)
 {
   pView = pPatternView;
   addEvent( ColumnEvent::hex4 );
+  setMinimumWidth(1);
+  setTransparent(false);
+  setBackground(Global::pConfig()->pvc_row);
 }
 
 PatternView::TweakGUI::~TweakGUI() {
@@ -745,8 +767,8 @@ void PatternView::TweakGUI::customPaint(NGraphics* g, int startLine, int endLine
     }
 
 		drawSelBg(g,selection());
-		drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
 		drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
+    drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
 		drawPattern(g, startLine, endLine, startTrack, endTrack);
 		drawRestArea(g, startLine, endLine, startTrack, endTrack);
   }
@@ -831,6 +853,14 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			}
 			moveCursor(0,-1); 
 			pView->checkUpScroll( cursor() );
+			return;
+		break;
+    case XK_Delete:
+			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
+					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
+			}
+			moveCursor(0,1); 
+			pView->checkDownScroll( cursor() );
 			return;
 		break;
 		default: ;
@@ -1066,9 +1096,9 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
       }
     }
 
-		drawSelBg(g,selection());
-		drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
+		drawSelBg(g,selection());		
 		drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
+    drawTrackGrid(g, startLine, endLine, startTrack, endTrack);	
 		drawPattern(g, startLine, endLine, startTrack, endTrack);
 		drawRestArea(g, startLine, endLine, startTrack, endTrack);
 		
@@ -1226,29 +1256,15 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       return;
 		break;
 		case XK_BackSpace:
-			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
-				PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
-				if ( cursor().eventNr() == 0) {
-					pView->pattern()->clearTrack( cursor().line(), cursor().track() );
-				} else
-				if (cursor().eventNr() == 1) {					
-					patEvent.setInstrument(255);
-					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
-				} else
-				if (cursor().eventNr() == 2) {					
-					patEvent.setMachine(255);
-					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
-				} else
-				if (cursor().eventNr() == 3 ) {					
-					patEvent.setCommand(0);
-					patEvent.setParameter(0);
-					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
-				} 					
-			}
+			clearCursorPos();
 			moveCursor(0,-1); 
 			pView->checkUpScroll( cursor() );
 			return;
 		break;
+    case XK_Delete:
+      clearCursorPos();
+      moveCursor(0,1); 
+			pView->checkDownScroll( cursor() );
 		default: ;
 	}
 				
@@ -1311,6 +1327,29 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			}			
 		}
 	}
+}
+
+void PatternView::PatternDraw::clearCursorPos() {
+		if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
+				PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+				if ( cursor().eventNr() == 0) {
+					pView->pattern()->clearTrack( cursor().line(), cursor().track() );
+				} else
+				if (cursor().eventNr() == 1) {					
+					patEvent.setInstrument(255);
+					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
+				} else
+				if (cursor().eventNr() == 2) {					
+					patEvent.setMachine(255);
+					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
+				} else
+				if (cursor().eventNr() == 3 ) {					
+					patEvent.setCommand(0);
+					patEvent.setParameter(0);
+					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
+				} 					
+			}
+	
 }
 
 void PatternView::checkDownScroll( const PatCursor & cursor ) {

@@ -36,6 +36,8 @@
 
 class NToolBar;
 class NComboBox;
+class NCheckBox;
+class NSplitBar;
 class ZoomBar;
 class NItemEvent;
 
@@ -144,6 +146,8 @@ class PatternView : public NPanel
              
       bool isBlockCopied;
       NSize blockLastOrigin;
+
+      void clearCursorPos();
 
       void onPopupBlockCopy(NButtonEvent* ev);
       void onPopupBlockCut(NButtonEvent* ev);
@@ -308,6 +312,7 @@ private:
 
   NScrollBar* hBar;
   NScrollBar* tweakHBar;
+  NCheckBox* sideBox;
   ZoomBar* zoomHBar;
   NScrollBar* vBar;
   Header*     header;
@@ -318,6 +323,8 @@ private:
   NComboBox* octaveCombo_;
   NComboBox*  meterCbx;
   NComboBox* trackCombo_;
+  NSplitBar* splitBar;
+  NPanel* tweakGroup;
 
   void enterNote( const PatCursor & cursor, int note );
 
@@ -339,6 +346,7 @@ private:
   void onPatternStepChange(NItemEvent* ev);
   void onOctaveChange(NItemEvent* ev);
   void onTrackChange(NItemEvent* ev);
+  void onSideChange( NButtonEvent* ev );
 			
 	void checkUpScroll( const PatCursor & cursor );
 	void checkDownScroll( const PatCursor & cursor );
