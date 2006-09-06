@@ -104,6 +104,8 @@ NScrollBar::~NScrollBar()
 
 void NScrollBar::init( )
 {
+  enableFocus( false );
+
   inc    = new NImage();
   dec    = new NImage();
 
