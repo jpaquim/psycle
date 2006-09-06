@@ -19,13 +19,23 @@
  ***************************************************************************/
 #include "nmoveevent.h"
 
-NMoveEvent::NMoveEvent()
+NMoveEvent::NMoveEvent( int x, int y ) : x_(x), y_(y)
 {
 }
 
 
 NMoveEvent::~NMoveEvent()
 {
+}
+
+int NMoveEvent::x( ) const
+{
+  return x_;
+}
+
+int NMoveEvent::y( ) const
+{
+  return y_;
 }
 
 

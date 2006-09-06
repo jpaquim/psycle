@@ -102,6 +102,8 @@ private:
 
 		void onSelection();
     void onScrollPosChange( NScrollBar* bar );
+
+    virtual void onMousePress( int x, int y, int button);
 };
 
 #endif
