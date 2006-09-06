@@ -99,16 +99,7 @@ class PatternView : public NPanel
       PatternView* pView;
       int dy_;
     };
-
-
-		class TweakHeader : public NPanel {
-			public:
-
-				TweakHeader();
-
-				~TweakHeader();
-
-		};
+		
 
 
     class PatternDraw : public CustomPatternView {
@@ -136,6 +127,8 @@ class PatternView : public NPanel
       void deleteBlock();
       void transposeBlock(int trp);
       void scaleBlock(float factor);
+
+      virtual void resize();
 
 		protected:
 
@@ -169,19 +162,57 @@ class PatternView : public NPanel
 			int xmlTracks;
 			float xmlBeats;
 
-			void checkLeftScroll( const PatCursor & cursor );
+      void checkLeftScroll( const PatCursor & cursor );
 			void checkRightScroll( const PatCursor & cursor );
-			void checkUpScroll( const PatCursor & cursor );
-			void checkDownScroll( const PatCursor & cursor );
 
     };
 
+    class TweakHeader : public NPanel {
+			public:
 
-    class TweakGUI : public NPanel {
+				TweakHeader(  PatternView* pPatternView );
+
+				~TweakHeader();
+
+        virtual int preferredWidth();
+
+      private:
+
+        PatternView* pView;
+
+		};
+
+
+    class TweakGUI : public CustomPatternView {
 		public:
 				TweakGUI( PatternView* pPatternView);
 
 				~TweakGUI();			
+
+				virtual int colWidth() const;
+        virtual int rowHeight() const;
+        virtual int lineNumber() const;
+        virtual int trackNumber() const;
+        virtual int beatZoom() const;
+
+        virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+
+				virtual void onKeyPress(const NKeyEvent & event);        
+
+        virtual void resize();
+
+    protected:
+
+        virtual int doSel(const PatCursor & p);
+        void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+
+    private:
+
+        PatternView* pView;
+
+        void checkLeftScroll( const PatCursor & cursor );
+			  void checkRightScroll( const PatCursor & cursor );
+
 		};
 
 public:
@@ -200,6 +231,7 @@ public:
 
     int rowHeight() const;
 
+		int tweakColWidth() const;
 		int colWidth() const;
     int headerWidth() const;
     int headerHeight() const;
@@ -256,6 +288,8 @@ public:
 
     virtual void setFocus();
 
+		void updateRange();
+
 private:
 
   Song* _pSong;
@@ -270,8 +304,10 @@ private:
 
   PatternDraw* drawArea;
 	TweakGUI* tweakGUI;
+  TweakHeader* tweakHeader;
 
   NScrollBar* hBar;
+  NScrollBar* tweakHBar;
   ZoomBar* zoomHBar;
   NScrollBar* vBar;
   Header*     header;
@@ -288,6 +324,7 @@ private:
   void resize();
 
   void onHScrollBar( NScrollBar* sender );
+  void onHTweakScrollBar( NScrollBar* sender );
   void onVScrollBar( NScrollBar* sender );
 
   void initToolBar();
@@ -302,6 +339,9 @@ private:
   void onPatternStepChange(NItemEvent* ev);
   void onOctaveChange(NItemEvent* ev);
   void onTrackChange(NItemEvent* ev);
+			
+	void checkUpScroll( const PatCursor & cursor );
+	void checkDownScroll( const PatCursor & cursor );
 
   
 };

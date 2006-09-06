@@ -54,6 +54,10 @@ namespace psycle
 			void setEvent( int line, int track, const PatternEvent & event );
 			PatternEvent event( int line, int track );
 
+			void setTweakEvent( int line, int track, const PatternEvent & event );
+			PatternEvent tweakEvent( int line, int track );
+
+
 			void addBar( const TimeSignature & signature );
 			void removeBar( float pos);
 
@@ -73,6 +77,7 @@ namespace psycle
 			float beatsPerLine() const;
 
 			void clearTrack( int linenr , int tracknr );
+			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
 
 			SinglePattern::iterator find_nearest( int linenr );
@@ -99,7 +104,7 @@ namespace psycle
 			void mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
 
 			void deleteBlock( int left, int right, int top, int bottom );
-
+			
 
 		private:
 

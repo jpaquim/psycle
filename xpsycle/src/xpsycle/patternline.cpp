@@ -63,6 +63,10 @@ namespace psycle
 			return tweakMap;
 		}
 
+		bool PatternLine::empty() const {
+			return ( std::map<int,PatternEvent>::empty() && tweakMap.empty() );
+		}
+
 	}
 }
 
