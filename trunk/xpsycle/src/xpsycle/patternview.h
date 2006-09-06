@@ -131,8 +131,6 @@ class PatternView : public NPanel
       virtual void onKeyPress(const NKeyEvent & event);
       virtual void onKeyRelease(const NKeyEvent & event);
 
-			virtual void doSel(const PatCursor & p);
-
       void copyBlock(bool cutit);
       void pasteBlock(int tx,int lx,bool mix,bool save = true);
       void deleteBlock();
@@ -141,6 +139,7 @@ class PatternView : public NPanel
 
 		protected:
 
+			virtual int doSel(const PatCursor & p);
 			virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
     private:
@@ -170,8 +169,10 @@ class PatternView : public NPanel
 			int xmlTracks;
 			float xmlBeats;
 
-			void checkDownScroll();
-			void checkUpScroll();
+			void checkLeftScroll( const PatCursor & cursor );
+			void checkRightScroll( const PatCursor & cursor );
+			void checkUpScroll( const PatCursor & cursor );
+			void checkDownScroll( const PatCursor & cursor );
 
     };
 

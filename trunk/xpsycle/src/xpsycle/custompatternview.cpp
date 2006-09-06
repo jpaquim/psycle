@@ -691,11 +691,13 @@ namespace psycle {
 			doSelect_ = false;
 		}
 
-		void CustomPatternView::doSel(const PatCursor & p )
+		int CustomPatternView::doSel(const PatCursor & p )
 		{
+			int dir = nodir;
 			doSelect_=true;
 			if (p.track() < selStartPoint().track()) {
         selection_.setLeft(std::max(p.track(),0)); 
+				dir = west;
     	}
 			else
 			if (p.track() == selStartPoint_.track()) {
@@ -704,10 +706,12 @@ namespace psycle {
 			} else
 			if (p.track() > selStartPoint_.track()) {
 				selection_.setRight(std::min(p.track()+1, trackNumber()));
+				dir = east;
 			}
 			if (p.line() < selStartPoint_.line()) {
 				selection_.setTop(std::max(p.line(),0));
 				selection_.setBottom( std::min(selection_.bottom(), selStartPoint_.line()+1));
+				dir |= north;
 			} else
 			if (p.line() == selStartPoint_.line()) {
 				selection_.setTop (p.line());
@@ -716,6 +720,7 @@ namespace psycle {
 			if (p.line() > selStartPoint_.line()) {
 				selection_.setBottom(std::min(p.line()+1, lineNumber()));
 				selection_.setTop( std::max(selection_.top(), selStartPoint_.line()));
+				dir |= south;
 			}
 
 			if (oldSelection_ != selection_) {
@@ -726,6 +731,7 @@ namespace psycle {
 				oldSelection_ = selection_;
 			}
       selCursor_ = p;
+			return dir;
 		}
 
 		const PatCursor & CustomPatternView::selStartPoint() const {
