@@ -101,6 +101,7 @@ PatternView::PatternView( Song* song )
         tweakHBar->change.connect(this,&PatternView::onHTweakScrollBar);
       tweakGroup->add( tweakHBar, nAlBottom );
       tweakGroup->add( tweakGUI = new TweakGUI(this), nAlClient) ;      
+      tweakGroup->setMinimumWidth(1);
 		drawGroup->add ( tweakGroup, nAlLeft );
     drawGroup->setPreferredSize( 2*tweakGUI->colWidth() , 100);
 		// splitbar
