@@ -76,9 +76,12 @@ namespace psycle {
 		class CustomPatternView : public NPanel
 		{
 			public:
+
 					CustomPatternView();
 
 					~CustomPatternView();
+
+					enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
 
 					virtual int colWidth() const;
 					virtual int rowHeight() const;
@@ -133,7 +136,7 @@ namespace psycle {
 					virtual PatCursor intersectCell(int x, int y);
 					const PatCursor & selCursor() const;
 					virtual void startSel(const PatCursor & p);
-					virtual void doSel(const PatCursor & p);
+					virtual int doSel(const PatCursor & p);
 					virtual void endSel();
 
 					virtual int noteCellWidth() const;

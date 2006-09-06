@@ -873,7 +873,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				float position = y / (float) beatZoom();
 				if ((pView->pattern()->barStart(position, signature) )) {
 					moveCursor(0, y - cursor().line() );
-					checkUpScroll();
+					checkUpScroll( cursor() );
 					break;
 				}
 			}
@@ -886,55 +886,42 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				float position = y / (float) beatZoom();
 				if ((pView->pattern()->barStart(position, signature) )) {
 					moveCursor(0,y - cursor().line());
-					checkDownScroll();
+					checkDownScroll( cursor() );
 					break;
 				}
 			}
 		}
 		break;
 		case XK_Left :
-			// check for scroll
-      if ( (cursor().track()) * colWidth() - dx() < 0 ) {
-         pView->hBar->setPos( (cursor().track()) * colWidth() );
-      }
+			checkLeftScroll( cursor() );
       return;
 		break;
 		case XK_Right:
-			//check for scroll
-			if ( (cursor().track()+1) * colWidth() - dx() > clientWidth() ) {
-        pView->hBar->setPos( (cursor().track()+1) * colWidth() - clientWidth() );
-      }
+			checkRightScroll( cursor() );
 			return;
 		break;
     case XK_Down:
-			checkDownScroll();
+			checkDownScroll( cursor() );
       return;
     break;
     case XK_Up:
-			checkUpScroll();
+			checkUpScroll( cursor() );
       return;
     break;
 		case XK_End:
-      checkDownScroll();
+      checkDownScroll( cursor() );
       return;
     break;
     case XK_Home:
-      // check for scroll
-      checkUpScroll();
+      checkUpScroll( cursor() );
       return;
     break;
 		case XK_Tab:
-			//check for scroll
-			if ( (cursor().track()+1) * colWidth() - dx() > clientWidth() ) {
-        pView->hBar->setPos( (cursor().track()+1) * colWidth() - clientWidth() );
-      }
+			checkRightScroll( cursor() );
 			return;
 		break;
 		case XK_ISO_Left_Tab:
-			// check for scroll
-      if ( (cursor().track()) * colWidth() - dx() < 0 ) {
-         pView->hBar->setPos( (cursor().track()) * colWidth() );
-      }
+			checkLeftScroll( cursor() );
       return;
 		break;
 		case XK_BackSpace:
@@ -958,7 +945,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				} 					
 			}
 			moveCursor(0,-1); 
-			checkUpScroll();
+			checkUpScroll( cursor() );
 			return;
 		break;
 		default: ;
@@ -974,7 +961,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		if (note >=0 && note < 120) {
 			pView->enterNote( cursor(), note );
 			moveCursor(0,1);
-			checkDownScroll();
+			checkDownScroll( cursor() );
 		}
 	} else
 	if ( isHex(event.scancode()) ) {
@@ -988,7 +975,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			 moveCursor(1,0);			
       else
        moveCursor(-1,1);
-			checkDownScroll();
+       checkDownScroll( cursor() );
 		} else 
 		if ( cursor().eventNr() == 2) {
 			// mac select
@@ -1000,7 +987,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			 moveCursor(1,0);			
       else
        moveCursor(-1,1);
-			checkDownScroll();
+			checkDownScroll( cursor() );
 		} else
 		if ( cursor().eventNr() == 3) {
 			// comand or parameter
@@ -1019,28 +1006,49 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 					moveCursor(1,0);			
 				else
 					moveCursor(-3,1);
-				checkDownScroll();
+				checkDownScroll( cursor() );
 			}			
 		}
 	}
 }
 
-void PatternView::PatternDraw::checkDownScroll() {
+void PatternView::PatternDraw::checkDownScroll( const PatCursor & cursor ) {
 	// check for scroll
-	if ( (cursor().line()+1) * rowHeight() - dy() > clientHeight() ) {
-		pView->vBar->setPos( (std::min(cursor().line(),lineNumber()-1)+1) * rowHeight() - clientHeight() );
+	if ( (cursor.line()+1) * rowHeight() - dy() > clientHeight() ) {
+		pView->vBar->setPos( (std::min(cursor.line(),lineNumber()-1)+1) * rowHeight() - clientHeight() );
 	}
 }
 
-void PatternView::PatternDraw::checkUpScroll() {
+void PatternView::PatternDraw::checkUpScroll( const PatCursor & cursor ) {
   // check for scroll
-	if ( (cursor().line()) * rowHeight() - dy() < 0 ) {
-		pView->vBar->setPos( std::max(0,cursor().line()) * rowHeight());
+	if ( (cursor.line()) * rowHeight() - dy() < 0 ) {
+		pView->vBar->setPos( std::max(0,cursor.line()) * rowHeight());
 	}
 }
 
-void PatternView::PatternDraw::doSel(const PatCursor & selCursor) {
-  CustomPatternView::doSel( selCursor );
+void PatternView::PatternDraw::checkLeftScroll( const PatCursor & cursor ) {
+ // check for scroll
+	if ( (cursor.track()) * colWidth() - dx() < 0) {
+		pView->hBar->setPos( std::max( cursor.track(), 0) * colWidth() );
+	}	
+}
+
+void PatternView::PatternDraw::checkRightScroll( const PatCursor & cursor ) {
+	//check for scroll
+	if ( (cursor.track()+1) * colWidth() - dx() > clientWidth() ) {
+		pView->hBar->setPos( std::min( cursor.track()+1 , trackNumber()) * colWidth() - clientWidth() );
+	}
+}
+
+int PatternView::PatternDraw::doSel(const PatCursor & selCursor) {
+  int dir = CustomPatternView::doSel( selCursor );
+
+	checkDownScroll( selCursor );
+	checkUpScroll( selCursor );
+	checkLeftScroll( selCursor );
+  checkRightScroll( selCursor );
+	
+  return dir;
 }
 
 void PatternView::enterNote( const PatCursor & cursor, int note ) {
