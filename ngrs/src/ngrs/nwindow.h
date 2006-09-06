@@ -149,6 +149,7 @@ private:
    NGraphics* graphics_;
    NVisualComponent* dragBase_;
    NVisualComponent* selectedBase_;
+   NVisualComponent* mousePressBase_;
 	 NVisualComponent* oldFocus_;
    int dragX,dragY,dragOldX,dragOldY;
    NSize dragOffset;

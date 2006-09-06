@@ -809,10 +809,12 @@ void NVisualComponent::setGradientOrientation( int orientation )
 
 void NVisualComponent::onMoveStart( const NMoveEvent & moveEvent )
 {
+  moveStart.emit(moveEvent);
 }
 
 void NVisualComponent::onMoveEnd( const NMoveEvent & moveEvent )
 {
+  moveEnd.emit(moveEvent);
 }
 
 void NVisualComponent::insert( NVisualComponent * component, unsigned int index )

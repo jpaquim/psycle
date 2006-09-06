@@ -96,11 +96,9 @@ NTestWindow::NTestWindow()
      bar->change.connect( this, &NTestWindow::onScrollPosChange);
    pane()->add( bar );*/
 
-  NScrollBar* bar = new NScrollBar();
-  pane()->add( bar, nAlLeft );
+   
 
-  NMemo* memo = new NMemo();
-  pane()->add( memo, nAlClient );
+   
 
   //testComboBox();
 
@@ -539,9 +537,7 @@ void NTestWindow::testTimerButton( )
 
 void NTestWindow::onBtnClick( NButtonEvent * ev )
 {
-  //fDialog->execute();
-  //Request a list of possible conversions
-	requestSelection();
+  
 }
 
 void NTestWindow::testScrollBar( )
@@ -598,6 +594,17 @@ void NTestWindow::onSelection( )
 void NTestWindow::onScrollPosChange( NScrollBar * bar )
 {
   std::cout << bar->pos() << std::endl;
+}
+
+void NTestWindow::onMousePress( int x, int y, int button )
+{
+  NWindow::onMousePress(x,y,button);
+
+  NLine* line = new NLine();
+     line->setPoints( NPoint(x,y), NPoint(x,y));
+     line->setMoveable( nMvPolygonPicker );
+   pane()->add(line);
+  line->setMoveFocus(0);
 }
 
 
