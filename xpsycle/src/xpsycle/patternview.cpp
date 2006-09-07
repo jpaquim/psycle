@@ -69,6 +69,8 @@ PatternView::PatternView( Song* song )
   tweakGUI = 0;
   header = 0;
   drawArea = 0;
+	tweakHeader = 0;
+  pattern_ = 0;
 
   vBar = new NScrollBar();
     vBar->setWidth(15);
@@ -138,8 +140,7 @@ PatternView::PatternView( Song* song )
   editOctave_ = 4;
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
 
-  moveCursorWhenPaste_ = false;
-  pattern_ = 0;
+  moveCursorWhenPaste_ = false;  
   selectedMacIdx_ = 255;
 }
 
@@ -233,7 +234,7 @@ void PatternView::onVScrollBar( NScrollBar * sender )
 
 void PatternView::updateRange() {
 // set the Range to the new headerwidth  
-  if ( !hBar || !header || !drawArea ||! tweakHBar) return;
+  if ( !hBar || !tweakHeader || !header || !drawArea ||! tweakHBar) return;
 
   hBar->setRange( 0, header->preferredWidth() - drawArea->clientWidth());
   hBar->setSmallChange( drawArea->colWidth() );
@@ -742,9 +743,18 @@ void PatternView::TweakHeader::paint( NGraphics* g ) {
 
   g->setForeground(pView->separatorColor());
   for (int i = startTrack; i <= std::min(startTrack + trackCount ,pView->trackNumber() - 1); i++) {
+    int parameterIndex = 0;
+    int machineIndex   = 0xFF;    
+		if ( pView->pattern() ) {
+      TweakTrackInfo info = pView->pattern()->tweakInfo( i );
+      parameterIndex = info.parameterIdx();
+      machineIndex   = info.machineIdx();    
+		}
 
-    const int trackX0 = i/16;
-    const int track0X = i%16;
+    const int digit1_X0 = machineIndex / 16;
+    const int digit1_0X = machineIndex % 16;
+    const int digit2_X0 = parameterIndex / 16;
+    const int digit2_0X = parameterIndex % 16;
 
     int xOff = i* pView->tweakColWidth();
     int center = ( pView->tweakColWidth() - skinColWidth() ) / 2;
@@ -753,14 +763,14 @@ void PatternView::TweakHeader::paint( NGraphics* g ) {
                   bgCoords.left(), bgCoords.top());
 
     g->putBitmap(xOff+14,3,noCoords.width(),noCoords.height(), bitmap,
-                  trackX0*noCoords.width(), noCoords.top());
+                  digit1_X0*noCoords.width(), noCoords.top());
     g->putBitmap(xOff+22,3,noCoords.width(),noCoords.height(), bitmap,
-                  track0X*noCoords.width(), noCoords.top());  
+                  digit1_0X*noCoords.width(), noCoords.top());  
 
     g->putBitmap(xOff+23 + 14,3,noCoords.width(),noCoords.height(), bitmap,
-                  trackX0*noCoords.width(), noCoords.top());
+                  digit2_X0*noCoords.width(), noCoords.top());
     g->putBitmap(xOff+23 + 22,3,noCoords.width(),noCoords.height(), bitmap,
-                  track0X*noCoords.width(), noCoords.top());  
+                  digit2_0X*noCoords.width(), noCoords.top());  
 
     if (i!=0) g->drawLine(i*pView->tweakColWidth(),0,i*pView->tweakColWidth(),clientWidth()); // col seperator
   }

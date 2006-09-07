@@ -29,9 +29,16 @@ namespace psycle
 	{
 
 		TweakTrackInfo::TweakTrackInfo() :
-				macIdx_(0),
+				macIdx_(0xFF),
 				paramIdx_(0),
 				type_( twk )
+		{
+		}
+
+		TweakTrackInfo::TweakTrackInfo( int mac, int param, TweakType type) :
+				macIdx_( mac),
+				paramIdx_( param),
+				type_( type )
 		{
 		}
 
@@ -50,6 +57,13 @@ namespace psycle
 		TweakTrackInfo::TweakType TweakTrackInfo::type() const {
 			return type_;
 		}
+
+    bool TweakTrackInfo::operator<(const TweakTrackInfo & key) const {
+      long key1 = machineIdx() | parameterIdx() << 8;
+      long key2 = key.machineIdx() | key.parameterIdx() <<8;
+      return key1 < key2;
+    };
+
 
 
 		int SinglePattern::idCounter = 0;
@@ -558,23 +572,30 @@ namespace psycle
 			}
 		}
 
+		TweakTrackInfo SinglePattern::tweakInfo( int track ) const
+		{
+			std::map<TweakTrackInfo, int>::const_iterator it = tweakInfoMap.begin();
+			for ( ; it != tweakInfoMap.end(); it++ ) {
+				if ( it->second == track ) return it->first;
+			}
+			return TweakTrackInfo();
+		}
 
-//          if(cutit) line.erase(entryIt++);
-//	  else ++entryIt;
+		int SinglePattern::tweakTrack( const TweakTrackInfo & info )
+		{
+			std::map<TweakTrackInfo, int>::const_iterator it = tweakInfoMap.begin();
+			if ( (it = tweakInfoMap.find(info)) != tweakInfoMap.end() ) {
+				return it->second;
+			} else {
+				int maxTrack = 0;
+				for ( it = tweakInfoMap.begin(); it != tweakInfoMap.begin(); it++) {
+					maxTrack = std::max( maxTrack, it->second + 1 );
+				}
+				tweakInfoMap[info] = maxTrack;
+				return maxTrack;
+			}
+		}
+
+
 	}	// end of host namespace
-}	// end of psycle namespace
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}// end of psycle namespace

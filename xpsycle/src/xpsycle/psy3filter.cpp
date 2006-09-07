@@ -21,6 +21,7 @@
 #include "fileio.h"
 #include "datacompression.h"
 #include "global.h" // for zapArray shit
+#include "inputhandler.h"
 
 namespace psycle
 {
@@ -464,6 +465,9 @@ namespace psycle
 						PatternEvent event = convertEntry(entry);
 						if (!event.isEmpty()) {
 							float position = y / (float) song.m_LinesPerBeat;
+							if (event.note() == cdefTweakM) {
+							 (*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
+							} else
 							(*pat)[position][x] = event;
 						}
 						pSource += EVENT_SIZE;
