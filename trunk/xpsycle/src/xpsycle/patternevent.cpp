@@ -32,7 +32,8 @@ namespace psycle
 			_inst(255),
 			_mach(255),
 			_cmd(0),
-			_parameter(0)
+			_parameter(0),
+			_volume(255)
 		{
 				
 		}
@@ -42,7 +43,8 @@ namespace psycle
 			_inst( entry._inst ),
 			_mach( entry._mach ),
 			_cmd(  entry._cmd  ),
-			_parameter( entry._parameter )
+			_parameter( entry._parameter ),
+			_volume( 255 )
 		{
 		}
 
@@ -98,6 +100,14 @@ namespace psycle
 		std::uint8_t PatternEvent::parameter( ) const
 		{
 			return _parameter;
+		}
+
+		void PatternEvent::setVolume(std::uint8_t vol) {
+			_volume = vol;
+		}
+
+		std::uint8_t PatternEvent::volume() const {
+			return _volume;
 		}
 
 		PatternEntry * PatternEvent::entry( )

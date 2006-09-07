@@ -55,6 +55,9 @@ namespace psycle
 			void setParameter(std::uint8_t parameter);
 			std::uint8_t parameter() const;
 
+			void setVolume(std::uint8_t parameter);
+			std::uint8_t volume() const;
+
 			PatternEntry* entry();
 			PatternEntry* entry() const;
 
@@ -69,6 +72,7 @@ namespace psycle
 			std::uint8_t _mach;
 			std::uint8_t _cmd;
 			std::uint8_t _parameter;
+			std::uint8_t _volume;
 
 		};
 	}

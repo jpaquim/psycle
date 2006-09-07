@@ -1033,6 +1033,7 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatt
 	addEvent( ColumnEvent::note );
 	addEvent( ColumnEvent::hex2 );
 	addEvent( ColumnEvent::hex2 );
+  addEvent( ColumnEvent::hex2 );
 	addEvent( ColumnEvent::hex4 );
 
   setTransparent(false);
@@ -1182,8 +1183,9 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 					drawData( g, x, y, 0, event.note() );
 					if (event.instrument() != 255) drawData( g, x, y, 1, event.instrument() );
 					if (event.machine() != 255) drawData( g, x, y, 2, event.machine() );
+					if (event.machine() != 255) drawData( g, x, y, 3, event.volume() );
 					if (event.command() != 0 || event.parameter() != 0) {
-						drawData( g, x, y, 3, (event.command() << 8) | event.parameter() );
+						drawData( g, x, y, 4, (event.command() << 8) | event.parameter() );
 					}
 					lastLine = y;
 				}
@@ -1363,7 +1365,20 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
        moveCursor(-1,1);
 			 pView->checkDownScroll( cursor() );
 		} else
+		
 		if ( cursor().eventNr() == 3) {
+			// mac select
+			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+			unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.volume(), cursor().col() );
+			patEvent.setVolume( newByte );
+			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+      if (cursor().col() == 0)
+			 moveCursor(1,0);			
+      else
+       moveCursor(-1,1);
+			 pView->checkDownScroll( cursor() );
+		} else
+		if ( cursor().eventNr() == 4) {
 			// comand or parameter
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
 			if (cursor().col() < 2 ) {
@@ -1400,7 +1415,11 @@ void PatternView::PatternDraw::clearCursorPos() {
 					patEvent.setMachine(255);
 					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
 				} else
-				if (cursor().eventNr() == 3 ) {					
+				if (cursor().eventNr() == 3) {					
+					patEvent.setVolume(255);
+					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
+				} else
+				if (cursor().eventNr() == 4 ) {					
 					patEvent.setCommand(0);
 					patEvent.setParameter(0);
 					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
