@@ -385,6 +385,11 @@ int PatternView::headerWidth( ) const
   return header->skinColWidth();
 }
 
+int PatternView::tweakHeaderWidth( ) const
+{
+  return tweakHeader->skinColWidth();
+}
+
 int PatternView::lineNumber( ) const
 {
   return ( pattern_) ? pattern_->beatZoom() * pattern_->beats() : 0;  
@@ -715,10 +720,51 @@ int PatternView::Header::skinColWidth( )
 
 PatternView::TweakHeader::TweakHeader( PatternView* pPatternView ) {
   pView = pPatternView;
+
+  bgCoords.setPosition(0,0,59,18);
+  noCoords.setPosition(0,18,7,12);
 }
 
 PatternView::TweakHeader::~TweakHeader() {
 
+}
+
+int PatternView::TweakHeader::skinColWidth() const {
+  return bgCoords.width();
+}
+
+void PatternView::TweakHeader::paint( NGraphics* g ) {
+
+  NBitmap & bitmap = Global::pConfig()->icons().tweakHeader();
+
+  int startTrack = scrollDx() / pView->tweakColWidth();
+  int trackCount = spacingWidth() / pView->tweakColWidth();
+
+  g->setForeground(pView->separatorColor());
+  for (int i = startTrack; i <= std::min(startTrack + trackCount ,pView->trackNumber() - 1); i++) {
+
+    const int trackX0 = i/16;
+    const int track0X = i%16;
+
+    int xOff = i* pView->tweakColWidth();
+    int center = ( pView->tweakColWidth() - skinColWidth() ) / 2;
+    xOff += center;
+		g->putBitmap(xOff,0,bgCoords.width(),bgCoords.height(), bitmap, 
+                  bgCoords.left(), bgCoords.top());
+
+    g->putBitmap(xOff+14,3,noCoords.width(),noCoords.height(), bitmap,
+                  trackX0*noCoords.width(), noCoords.top());
+    g->putBitmap(xOff+22,3,noCoords.width(),noCoords.height(), bitmap,
+                  track0X*noCoords.width(), noCoords.top());  
+
+    g->putBitmap(xOff+23 + 14,3,noCoords.width(),noCoords.height(), bitmap,
+                  trackX0*noCoords.width(), noCoords.top());
+    g->putBitmap(xOff+23 + 22,3,noCoords.width(),noCoords.height(), bitmap,
+                  track0X*noCoords.width(), noCoords.top());  
+
+    if (i!=0) g->drawLine(i*pView->tweakColWidth(),0,i*pView->tweakColWidth(),clientWidth()); // col seperator
+  }
+  
 }
 
 int PatternView::TweakHeader::preferredWidth() {
@@ -920,7 +966,7 @@ void PatternView::TweakGUI::drawPattern(NGraphics* g, int startLine, int endLine
 }
 
 int PatternView::TweakGUI::colWidth() const {
-  return CustomPatternView::colWidth(); 
+  return std::max( pView->tweakHeaderWidth(), CustomPatternView::colWidth() );
 }
 
 int PatternView::TweakGUI::rowHeight() const {

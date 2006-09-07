@@ -38,6 +38,27 @@ namespace psycle
 
 		class PatternCategory;
 
+    class TweakTrackInfo {
+		public:
+
+			enum TweakType { twk, tws, mdi, aut };
+
+			TweakTrackInfo();
+			~TweakTrackInfo();
+
+			int machineIdx()    const;
+			int parameterIdx()  const;
+			TweakType type()          const;
+
+		private:
+
+			int macIdx_;
+			int paramIdx_;
+			TweakType type_;
+
+		};
+
+
 		class SinglePattern : public std::map<double, PatternLine> {
 		public:
 			SinglePattern();

@@ -276,6 +276,8 @@ namespace psycle {
 		}
 
 		void CustomPatternView::drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
+      if ( events_.size() == 0 ) return;
+
 			g->setForeground( foreground() );
 			int trackWidth = ((endTrack+1) * colWidth()) - dx();
 			int lineHeight = ((endLine +1) * rowHeight()) - dy();
@@ -283,7 +285,7 @@ namespace psycle {
 			for (int x = startTrack; x <= endTrack; x++) {
 				std::vector<ColumnEvent>::iterator it = events_.begin();
 				int col = 0;
-				for ( ; it < events_.end(); it++) {
+				for ( ; it < events_.end()-1; it++) {
 					ColumnEvent & event = *it;
         	switch ( event.type() ) {
 						case ColumnEvent::hex2 : col+= 2*cellWidth(); 	break;

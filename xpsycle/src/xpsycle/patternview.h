@@ -179,8 +179,14 @@ class PatternView : public NPanel
 				~TweakHeader();
 
         virtual int preferredWidth();
+        virtual void paint( NGraphics* g );
+
+        int skinColWidth() const;
 
       private:
+
+        NRect bgCoords;
+        NRect noCoords;
 
         PatternView* pView;
 
@@ -238,6 +244,7 @@ public:
 		int tweakColWidth() const;
 		int colWidth() const;
     int headerWidth() const;
+    int tweakHeaderWidth() const;
     int headerHeight() const;
 
     int lineNumber() const;
