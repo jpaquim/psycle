@@ -77,6 +77,9 @@ public:
     virtual void onKeyPress(const NKeyEvent & event);
     virtual void onKeyRelease(const NKeyEvent & event);
 
+    void setCursor( int crIdentifier );
+    int cursor() const;
+
     NShape* geometry();
     NShape* geometry() const;
     void setGeometry(NShape* geometry);
@@ -103,6 +106,7 @@ private:
     NShape* geometry_;
     bool visible_;
     int minWidth_, minHeight_;
+    int cursorId_;
 
 };
 

@@ -137,6 +137,10 @@ public:
     virtual void onMove(const NMoveEvent & moveEvent);
     virtual void onMoveEnd(const NMoveEvent & moveEvent);
 
+    virtual void onMouseExit();
+    virtual void onMouseEnter();
+
+
     void repaint(bool swap = true);
 
     void setWindow(class NWindow* win);

@@ -26,6 +26,7 @@
 #include "color_converter.hpp"
 #include "nclipboard.h"
 #include "mwm.h"
+#include "ncrdefine.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
@@ -33,10 +34,12 @@
 #include <X11/keysym.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/cursorfont.h>
 
 /**
 @author Stefan
 */
+
 
 class NAtoms;
 class NWindow;
@@ -90,6 +93,9 @@ public:
     NClipBoard & clipBoard();
     const NClipBoard & clipBoard() const;
 
+		void setCursor( int crIdentifier, NWindow* win );
+    int cursor() const;
+
 private:
 
     NAtoms* atoms_;
@@ -99,6 +105,9 @@ private:
     int depth_;
     int screen_;
     int keyState_;
+    int cursorId_;
+
+    
 
     typedef ngrs::color_converter<8, unsigned long int> color_converter;
     color_converter color_converter_;
@@ -111,6 +120,7 @@ private:
     std::map<NFont,NFontStructure>  xfntCache;
     std::map<NFont,NFontStructure>  xftfntCache;
     std::map<unsigned long,unsigned long> colorCache;
+    std::map<int, Cursor> cursorMap;
 
     void initX();
     void matchVisual();
@@ -120,6 +130,8 @@ private:
     static std::string fontPattern(const NFont & font);
     static char ** getFontList(Display* dpy, std::string pattern, int* count);
     static std::string getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size);
+
+    void initCursorMap();
 
     NClipBoard clipBoard_;
 };

@@ -102,10 +102,10 @@ public:
 
 
     void setDoubleBuffer(bool on);
-    bool doubleBuffered();
+    bool doubleBuffered() const;
 
     void setModal(bool on);
-    bool modal();
+    bool modal() const;
 
     int exitLoop();
     void setExitLoop(int flag);

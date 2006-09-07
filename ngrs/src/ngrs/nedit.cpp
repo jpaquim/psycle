@@ -58,6 +58,8 @@ void NEdit::init( )
 
   valign_ = nAlCenter;
   halign_ = nAlLeft;
+
+  setCursor ( nCrIBeam );
 }
 
 
