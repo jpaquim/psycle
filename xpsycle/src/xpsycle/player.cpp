@@ -172,7 +172,19 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		/// Final Loop. Read new line for notes to send to the Machines
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
-			PatternLine::iterator trackItr = line.begin();
+			PatternLine::iterator trackItr = line.tweaks().begin();
+			for ( ; trackItr != line.tweaks().end() ; ++trackItr) {
+					PatternEvent entry = trackItr->second;
+					int track = trackItr->first;
+					int mac = entry.machine();
+					if(mac < MAX_MACHINES) //looks like a valid machine index?
+					{
+							Machine *pMachine = song()._pMachine[mac];
+							pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
+					}
+			}
+
+			trackItr = line.begin();
 			for ( ; trackItr != line.end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
