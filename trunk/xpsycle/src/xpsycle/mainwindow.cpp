@@ -672,7 +672,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
 			 Player::Instance()->Stop();
        songpDlg_->setVisible(false);
 			 // disable audio driver
-			 //Global::configuration()._pOutputDriver->Enable(false);
+			 Global::configuration()._pOutputDriver->Enable(false);
 		   // add a new Song tab
        ChildView* newView = addChildView();  
        // load the song
@@ -683,7 +683,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
        pane()->resize();
        pane()->repaint();
 			 // enable audio driver
-			 //Global::configuration()._pOutputDriver->Enable(true);
+			 Global::configuration()._pOutputDriver->Enable(true);
        // update file recent open sub menu
        if (noFileWasYetLoaded) {
          recentFileMenu_->removeChilds();

@@ -117,11 +117,13 @@ void FrameMachine::init( )
     prs->add(defaultPrsBtn,nAlLeft);
     NButton* rightPrsBtn = new NButton(">");
         rightPrsBtn->setFlat(false);
-        rightPrsBtn->clicked.connect(this,&FrameMachine::onRightBtn);
+        rightPrsBtn->click.connect(this,&FrameMachine::onRightBtn);
+        rightPrsBtn->setRepeatMode(true);
     prs->add(rightPrsBtn,nAlRight);
     NButton* leftPrsBtn = new NButton("<");
         leftPrsBtn->setFlat(false);
-        leftPrsBtn->clicked.connect(this,&FrameMachine::onLeftBtn);
+        leftPrsBtn->setRepeatMode(true);
+        leftPrsBtn->click.connect(this,&FrameMachine::onLeftBtn);
     prs->add(leftPrsBtn,nAlRight);
     prsPanel = new NTogglePanel();
       NFlowLayout fl(nAlLeft,5,5);
@@ -450,12 +452,13 @@ void FrameMachine::loadPresets() {
 
           while (!f.Eof() ) {
             Preset newPreset(numParameters, sizeDataStruct);
-            newPreset.loadFromFile(&f);
-            NButton* prsBtn = new NButton(newPreset.name());
-              prsBtn->setFlat(false);
-              prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
-            prsPanel->add(prsBtn);
-            presetMap[prsBtn] = newPreset;
+            if (newPreset.loadFromFile(&f)) {
+              NButton* prsBtn = new NButton(newPreset.name());
+                prsBtn->setFlat(false);
+                prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
+              prsPanel->add(prsBtn);
+              presetMap[prsBtn] = newPreset;
+            }
           }
         }
       }

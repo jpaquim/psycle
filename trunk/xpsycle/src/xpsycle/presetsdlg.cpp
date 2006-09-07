@@ -46,11 +46,11 @@ Preset::Preset( int numpars, int dataSize ) : numpars_(numpars), dataSize_(dataS
 }
 
 
-void Preset::loadFromFile( RiffFile* f )
+bool Preset::loadFromFile( RiffFile* f )
 {
     char cbuf[32];
-    f->ReadChunk(cbuf,sizeof(cbuf));
-    strcpy(cbuf,cbuf);
+    if (!f->ReadChunk(cbuf,sizeof(cbuf))) return 0;
+    
     name_ = string(cbuf);  // read the preset name
 
     for (int i = 0; i < numpars_; i++) {

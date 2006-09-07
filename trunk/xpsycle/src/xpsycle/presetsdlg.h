@@ -44,7 +44,7 @@ class Preset {
 
       Preset(int numpars, int dataSize);
 
-      void loadFromFile(RiffFile* f);
+      bool loadFromFile(RiffFile* f);
 
       const std::string & name() const;
 

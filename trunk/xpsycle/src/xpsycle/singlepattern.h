@@ -44,11 +44,15 @@ namespace psycle
 			enum TweakType { twk, tws, mdi, aut };
 
 			TweakTrackInfo();
+			TweakTrackInfo( int mac, int param, TweakType type );
+
 			~TweakTrackInfo();
 
 			int machineIdx()    const;
 			int parameterIdx()  const;
 			TweakType type()          const;
+
+      bool operator<(const TweakTrackInfo & key) const;
 
 		private:
 
@@ -125,7 +129,9 @@ namespace psycle
 			void mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
 
 			void deleteBlock( int left, int right, int top, int bottom );
-			
+
+			TweakTrackInfo tweakInfo( int track ) const;
+			int tweakTrack( const TweakTrackInfo & info);
 
 		private:
 
@@ -139,6 +145,8 @@ namespace psycle
 
 			int id_;
 			static int idCounter;
+
+			std::map<TweakTrackInfo, int> tweakInfoMap;
 
 		};
 
