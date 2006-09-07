@@ -105,9 +105,11 @@ void NSplitBar::setOrientation( int orientation )
   setPreferredSize(5,5);
   if (orientation == nVertical) {
      setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
+     setCursor( nCrVSplit );
   } else
   if (orientation == nHorizontal) {
      setMoveable(NMoveable(nMvVertical | nMvNoneRepaint | nMvParentLimit));
+     setCursor( nCrHSplit );
   }
 }
 

@@ -473,6 +473,16 @@ void NVisualComponent::setClipping( bool on )
   clipping_ = on;
 }
 
+void NVisualComponent::onMouseExit() {
+  NVisual::onMouseExit();
+  NApp::system().setCursor( nCrDefault , window() );
+}
+
+void NVisualComponent::onMouseEnter() {
+  NVisual::onMouseEnter();
+  NApp::system().setCursor( cursor(), window() );
+}
+
 int NVisualComponent::align( ) const
 {
   return alignConstraint_.align();

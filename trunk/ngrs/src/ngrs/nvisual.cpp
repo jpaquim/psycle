@@ -19,9 +19,11 @@
  ***************************************************************************/
 #include "nvisual.h"
 #include "nproperty.h"
+#include "napp.h"
+#include "nsystem.h"
 
 NVisual::NVisual()
- : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10)
+ : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10), cursorId_( nCrDefault )
 {
     if (properties()) properties()->bind("left", *this, &NVisual::left, &NVisual::setLeft);
 
@@ -40,6 +42,14 @@ void NVisual::setVisible( bool on )
 int NVisual::visible( )
 {
   return visible_;
+}
+
+void NVisual::setCursor( int crIdentifier ) {
+  cursorId_ = crIdentifier;
+}
+
+int NVisual::cursor() const {
+  return cursorId_;
 }
 
 void NVisual::onMousePress( int x, int y, int button )

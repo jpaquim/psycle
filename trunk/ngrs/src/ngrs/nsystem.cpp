@@ -20,7 +20,9 @@
 #include "nsystem.h"
 #include "natoms.h"
 #include "nwindow.h"
+#include "napp.h"
 #include <stdexcept>
+
 
 using namespace std;
 
@@ -28,12 +30,20 @@ NSystem::NSystem()
 {
   initX();
   atoms_ = new NAtoms( dpy() );
+  cursorId_ = nCrDefault;
+  initCursorMap();
 }
 
 
 NSystem::~NSystem()
 {
   delete atoms_;
+  std::map<int,Cursor>::iterator it = cursorMap.begin();
+  for ( ; it != cursorMap.end(); it++ ) {
+    {
+      XFreeCursor( dpy(), it->second );  
+    }
+  }
 }
 
 // here you will find all public methods
@@ -78,6 +88,45 @@ void NSystem::setKeyState( int keyState )
   keyState_ = keyState;
 }
 
+void NSystem::setCursor( int crIdentifier , NWindow* win) {  
+  if ( crIdentifier != cursorId_ && win && win->win() ) {
+    std::map<int,Cursor>::iterator it = cursorMap.find( crIdentifier );
+    if ( it != cursorMap.end() ) {
+      XDefineCursor( dpy(), win->win(), it->second);
+      XFlush( dpy() );
+    }
+    cursorId_ = crIdentifier;
+  }
+}
+
+int NSystem::cursor() const {
+  return cursorId_;
+}
+
+void NSystem::initCursorMap() {
+
+  cursorMap[ nCrDefault   ] = XCreateFontCursor( dpy(), XC_top_left_arrow );
+	cursorMap[ nCrNone      ] = None;
+	cursorMap[ nCrArrow     ] = XCreateFontCursor( dpy(), XC_top_left_arrow );
+	cursorMap[ nCrCross     ] = XCreateFontCursor( dpy(), XC_cross );
+	cursorMap[ nCrIBeam     ] = XCreateFontCursor( dpy(), XC_xterm );
+	cursorMap[ nCrSize      ] = XCreateFontCursor( dpy(), XC_fleur );
+	cursorMap[ nCrSizeNESW  ] = XCreateFontCursor( dpy(), XC_top_right_corner );
+	cursorMap[ nCrSizeNS    ] = XCreateFontCursor( dpy(), XC_double_arrow );
+	cursorMap[ nCrSizeNWSE  ] = XCreateFontCursor( dpy(), XC_bottom_right_corner );
+	cursorMap[ nCrSizeWE    ] = XCreateFontCursor( dpy(), XC_sb_up_arrow);
+	cursorMap[ nCrUpArrow   ] = XCreateFontCursor( dpy(), XC_sb_up_arrow);
+  cursorMap[ nCrHourGlass ] = XCreateFontCursor( dpy(), XC_watch );
+  cursorMap[ nCrDrag      ] = XCreateFontCursor( dpy(), XC_X_cursor );  
+  cursorMap[ nCrNoDrop    ] = XCreateFontCursor( dpy(), XC_X_cursor);
+  cursorMap[ nCrHSplit    ] = XCreateFontCursor( dpy(), XC_sb_v_double_arrow );
+  cursorMap[ nCrVSplit    ] = XCreateFontCursor( dpy(), XC_sb_h_double_arrow );
+  cursorMap[ nCrMultiDrag ] = XCreateFontCursor( dpy(), XC_hand1 );
+  cursorMap[ nCrNo        ] = XCreateFontCursor( dpy(), XC_X_cursor );
+  cursorMap[ nCrAppStart  ] = XCreateFontCursor( dpy(), XC_watch );
+  cursorMap[ nCrHandPoint ] = XCreateFontCursor( dpy(), XC_hand1 );
+}
+
 Window NSystem::registerWindow(Window parent )
 {
   Window win_ = 0;
@@ -115,7 +164,7 @@ void NSystem::initX( )
     std::ostringstream s;
     s << "ngrs: failed to open default display. is the DISPLAY environment variable set to some available display?";
     std::cerr << s << std::endl;
-    throw std::runtime_error(s.str().c_str());
+    exit(0);
   }
   screen_     = DefaultScreen(dpy_);
   rootWindow_ = RootWindow(dpy_, screen_);

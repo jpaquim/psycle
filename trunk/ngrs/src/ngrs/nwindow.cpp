@@ -508,7 +508,7 @@ void NWindow::setDoubleBuffer( bool on )
   graphics_->setDoubleBuffer(on);
 }
 
-bool NWindow::doubleBuffered( )
+bool NWindow::doubleBuffered( ) const
 {
   return dblBuffer_;
 }
@@ -518,7 +518,7 @@ void NWindow::setModal( bool on )
   modal_ = on;
 }
 
-bool NWindow::modal( )
+bool NWindow::modal( ) const
 {
   return modal_;
 }

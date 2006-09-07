@@ -78,6 +78,13 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
+   std::cout << "testwin-id:" << win() << std::endl;
+   testEdit();
+
+   NSplitBar* spl = new NSplitBar();
+   spl->setOrientation( nHorizontal );
+   pane()->add( spl, nAlTop);
+
 	/*NButton* btn = new NButton("hallo");
 		btn->clicked.connect(this, &NTestWindow::onBtnClick);
 	pane()->add( btn, nAlTop);
