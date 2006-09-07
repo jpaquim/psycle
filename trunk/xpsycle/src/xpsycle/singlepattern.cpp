@@ -28,6 +28,30 @@ namespace psycle
 	namespace host
 	{
 
+		TweakTrackInfo::TweakTrackInfo() :
+				macIdx_(0),
+				paramIdx_(0),
+				type_( twk )
+		{
+		}
+
+		TweakTrackInfo::~TweakTrackInfo() {
+
+		}
+
+		int TweakTrackInfo::machineIdx() const {
+			return macIdx_;
+		}
+
+		int TweakTrackInfo::parameterIdx() const {
+			return paramIdx_;
+		}
+
+		TweakTrackInfo::TweakType TweakTrackInfo::type() const {
+			return type_;
+		}
+
+
 		int SinglePattern::idCounter = 0;
 
 		SinglePattern::SinglePattern()

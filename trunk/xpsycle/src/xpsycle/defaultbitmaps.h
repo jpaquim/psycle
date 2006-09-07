@@ -37,6 +37,7 @@ public:
 
     ~DefaultBitmaps();
 
+    NBitmap & tweakHeader();
     NBitmap & addTrack();
     NBitmap & deleteTrack();
     NBitmap & alert();
@@ -142,6 +143,7 @@ private:
     NBitmap deleteTrack_;
     NBitmap moveDownTrack_;
     NBitmap moveUpTrack_;
+    NBitmap tweakHeader_;
 };
 
 }
