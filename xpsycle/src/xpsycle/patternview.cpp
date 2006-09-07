@@ -1183,7 +1183,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 					drawData( g, x, y, 0, event.note() );
 					if (event.instrument() != 255) drawData( g, x, y, 1, event.instrument() );
 					if (event.machine() != 255) drawData( g, x, y, 2, event.machine() );
-					if (event.machine() != 255) drawData( g, x, y, 3, event.volume() );
+					if (event.volume() != 255) drawData( g, x, y, 3, event.volume() );
 					if (event.command() != 0 || event.parameter() != 0) {
 						drawData( g, x, y, 4, (event.command() << 8) | event.parameter() );
 					}
