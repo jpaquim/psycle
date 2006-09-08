@@ -876,7 +876,7 @@ namespace psycle {
 		PatCursor CustomPatternView::intersectCell( int x, int y ) {
 			int track = findTrackByScreenX( x + dx() );
 			int line  = ( y + dy() ) / rowHeight();
-			int colOff   = ( x + dx() ) -  (track*colWidth());
+			int colOff   = ( x + dx() ) -  xOffByTrack(track);
 
 			std::vector<ColumnEvent>::const_iterator it = events_.begin();
 			int nr = 0;

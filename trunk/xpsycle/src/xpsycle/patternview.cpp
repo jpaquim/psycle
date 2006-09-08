@@ -507,6 +507,7 @@ void PatternView::Header::paint( NGraphics * g )
     int xOff = trackGeometry.left();
     if (xOff - scrollDx() > spacingWidth() ) break;
     int center =  ( trackGeometry.width() - patNav.width() - skinColWidth()) / 2;
+		if ( center > 0 ) {
     int xOffc = xOff + patNav.width() + center;
     g->putBitmap(xOffc,0,std::min((int)bgCoords.width(),trackGeometry.width()) ,bgCoords.height(), bitmap, 
                   bgCoords.left(), bgCoords.top());
@@ -532,11 +533,11 @@ void PatternView::Header::paint( NGraphics * g )
         g->putBitmap(xOffc+dRecCoords.x(),0+dRecCoords.y(),sRecCoords.width(),sRecCoords.height(), bitmap,
                   sRecCoords.left(), sRecCoords.top());
     }
-
+		}
 		g->putBitmap(xOff, 0,patNav.width(),patNav.height(), patNav, 
                   0, 0);
 
-    if (it->first!=0) g->drawLine( xOffc, 0, xOffc, clientHeight()); // col seperator
+    if (it->first!=0) g->drawLine( xOff, 0, xOff, clientHeight()); // col seperator
   }
 }
 
