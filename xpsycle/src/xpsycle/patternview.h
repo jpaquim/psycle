@@ -113,7 +113,6 @@ class PatternView : public NPanel
 			virtual int colWidth() const;
 			virtual int rowHeight() const;
 			virtual int lineNumber() const;
-			virtual int trackNumber() const;
 			virtual int beatZoom() const;
 
       virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
@@ -227,6 +226,8 @@ class PatternView : public NPanel
 
 public:
 
+		friend class Header;
+
     PatternView( Song * song);
 
     ~PatternView();
@@ -243,6 +244,7 @@ public:
 
 		int tweakColWidth() const;
 		int colWidth() const;
+		const std::map<int, TrackGeometry> & trackGeometrics() const;
     int headerWidth() const;
     int tweakHeaderWidth() const;
     int headerHeight() const;

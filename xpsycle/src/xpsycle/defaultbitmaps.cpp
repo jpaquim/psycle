@@ -25,6 +25,91 @@ namespace psycle {
 
 //////// The bitmaps
 
+/* XPM */
+const char * nav_xpm[] = {
+"33 18 63 1",
+" 	c None",
+".	c #B5BDCE",
+"+	c #BDC6CE",
+"@	c #BDC6D6",
+"#	c #ADB5C6",
+"$	c #A5ADC6",
+"%	c #9CADBD",
+"&	c #9CA5BD",
+"*	c #94A5B5",
+"=	c #949CB5",
+"-	c #8494AD",
+";	c #717F9E",
+">	c #9CA5B5",
+",	c #A5ADBD",
+"'	c #636F8C",
+")	c #7B84A5",
+"!	c #637394",
+"~	c #52637B",
+"{	c #6F7B94",
+"]	c #5A637B",
+"^	c #4A5263",
+"/	c #5A6B84",
+"(	c #525A6B",
+"_	c #424A5A",
+":	c #8C94AD",
+"<	c #848CA5",
+"[	c #5A6373",
+"}	c #424252",
+"|	c #5A6363",
+"1	c #293131",
+"2	c #5A5A63",
+"3	c #424A52",
+"4	c #7B8CA5",
+"5	c #606B78",
+"6	c #525A63",
+"7	c #676F77",
+"8	c #5A636B",
+"9	c #4A4A5A",
+"0	c #ADB5BD",
+"a	c #8C9CAD",
+"b	c #6B7384",
+"c	c #4A525A",
+"d	c #949CAD",
+"e	c #B5BDC6",
+"f	c #B5B5C6",
+"g	c #737B84",
+"h	c #63636B",
+"i	c #52525A",
+"j	c #9098A5",
+"k	c #949CA5",
+"l	c #4A5252",
+"m	c #424A4A",
+"n	c #9C9CA5",
+"o	c #848C94",
+"p	c #636B6B",
+"q	c #424242",
+"r	c #394242",
+"s	c #84848C",
+"t	c #6B7373",
+"u	c #313939",
+"v	c #393939",
+"w	c #525252",
+"x	c #313131",
+".+@+...............##$%&*=====*-;",
+"#...#####>,##,>,##,>,##,>,##>,-;'",
+"####$,,,$$,,,,$,,,,$,,,,$,,,$,)!~",
+",$,%,,,,,,,,,,,,,,,,,,,,,,,,,,{]^",
+"&>*===========================/(_",
+">*=:<<<<<<<<<<<<<<<<<<<<<<<<<<[^}",
+"&>>>))))|1))|1))))21))))21))))]^3",
+"%,,>4<<|14<<4|1<<4<21<421<<44<563",
+",,,,<-|1<<--<-|1-<-<2121<--<<-5(_",
+",,,,:|1::::::::|1:::2111::::::789",
+"#00,aa|1aaaaaa|1aaaa2121aaaaaab8c",
+"##00d**|1d**d|1**d*21*d21**dd*b8c",
+"ef#0>>>>|1>>|1>>>>21>>>>21>>>>ghi",
+"e#0,>>>>>>>>>>>>>>>>>>>>>>>>>>7|c",
+"0,>jkkkkkkkkkkkkkkkkkkkkkkkkkk2lm",
+"0nogphhhpphhhhphhhhphhhhphhhphmqr",
+"nst2lmmmllmmmmlmmmmlmmmmlmmmlmuuv",
+"spwqxxxxxxxxxxxxxxxxxxxxxxxxxxxxu"};
+
 
 /* XPM */
 const char * tweak_header_xpm[] = {
@@ -18247,7 +18332,7 @@ DefaultBitmaps::DefaultBitmaps()
   moveDownTrack_.createFromXpmData(move_track_down_xpm);
   moveUpTrack_.createFromXpmData(move_track_up_xpm);
   tweakHeader_.createFromXpmData(tweak_header_xpm);
-
+  patNav_.createFromXpmData( nav_xpm );
 }
 
 DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
@@ -18262,6 +18347,7 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   moveDownTrack_.createFromXpmData(move_track_down_xpm);
   moveUpTrack_.createFromXpmData(move_track_up_xpm);
   tweakHeader_.createFromXpmData(tweak_header_xpm);
+	patNav_.createFromXpmData( nav_xpm );
 
 
   try {
@@ -18781,6 +18867,10 @@ NBitmap & DefaultBitmaps::moveUpTrack( )
 
 NBitmap & DefaultBitmaps::tweakHeader() {
   return tweakHeader_;
+}
+
+NBitmap & DefaultBitmaps::patNav() {
+  return patNav_;
 }
 
 }
