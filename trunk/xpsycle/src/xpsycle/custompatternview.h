@@ -73,6 +73,39 @@ namespace psycle {
 			
 		};
 
+		class CustomPatternView;
+
+		class TrackGeometry {
+		public:			
+
+			TrackGeometry();
+
+			TrackGeometry( CustomPatternView* patternView );
+
+			~TrackGeometry();
+
+			void setLeft( int left );
+			int left() const;
+
+			void setWidth( int width );
+			int width() const;			
+
+			void setVisibleColumns( int cols );
+			int visibleColumns() const;
+
+			void setVisible( bool on);
+			bool visible() const;
+
+		private:
+
+			CustomPatternView* pView;
+			int left_;
+			int width_;
+			int visibleColumns_;
+			int visible_;
+
+		};
+
 		class CustomPatternView : public NPanel
 		{
 			public:
@@ -84,9 +117,14 @@ namespace psycle {
 					enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
 
 					virtual int colWidth() const;
+					virtual int visibleColWidth( int maxEvents ) const;
+
 					virtual int rowHeight() const;
 					virtual int lineNumber() const;
+
+					void setTrackNumber( int number );
 					virtual int trackNumber() const;
+					
 					virtual int beatZoom() const;
 
 					void setPatternStep( int step );
@@ -131,6 +169,21 @@ namespace psycle {
 					unsigned char convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const;
 					bool isHex( int scanCode );
 
+					int tracksWidth() const;
+
+					const std::map<int, TrackGeometry> & trackGeometrics() const;
+
+					int findTrackByScreenX( int x ) const;
+					int xOffByTrack( int track ) const;
+					int xEndByTrack( int track ) const;
+					int trackWidth( int track ) const;
+
+					void setVisibleEvents( int track , int eventCount );
+					int visibleEvents( int track ) const;
+
+					void setDefaultVisibleEvents( int defaultSize );
+					void setTrackMinWidth( int size );
+
 			protected:
 
 					virtual PatCursor intersectCell(int x, int y);
@@ -165,6 +218,7 @@ namespace psycle {
 			private:
 
 					int dx_, dy_;
+					int trackNumber_;
 
 					// selection variables
 					bool doDrag_;
@@ -173,6 +227,8 @@ namespace psycle {
 					NSize selection_;
 					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
 					PatCursor selStartPoint_;				
+
+					int defaultSize_;
 
 					//cursor
 					PatCursor cursor_;
@@ -188,14 +244,18 @@ namespace psycle {
 
 					std::vector<ColumnEvent> events_;
 
-					void drawBlockData( NGraphics * g, int track, int line, int eventOffset, const std::string & text );
+					void drawBlockData( NGraphics * g, int xOff, int line, const std::string & text );
 
-					void drawStringData(NGraphics* g, int track, int line, int eventOffset, const std::string & text );
+					void drawStringData(NGraphics* g, int xOff, int line, const std::string & text );
 
 					int eventOffset( int eventnr, int col ) const;
 					int eventWidth( int eventnr ) const;
 					int eventColWidth( int eventnr ) const;
 
+					std::map<int, TrackGeometry> trackGeometryMap;
+					void alignTracks();
+
+					int trackMinWidth_;
 
 		};
 	}

@@ -35,7 +35,8 @@ namespace psycle
 			_parameter(0),
 			_volume(255)
 		{
-				
+			for (int i = 0; i < 10; i++) 
+			paraCmdList_.push_back( PcmType() );
 		}
 
 		PatternEvent::PatternEvent( const PatternEntry & entry ) :
@@ -46,6 +47,8 @@ namespace psycle
 			_parameter( entry._parameter ),
 			_volume( 255 )
 		{
+			for (int i = 0; i < 10; i++) 
+			paraCmdList_.push_back( PcmType() );
 		}
 
 		PatternEvent::~PatternEvent()
@@ -126,6 +129,10 @@ namespace psycle
 				return true;
 			else
 				return false;
+		}
+
+		PatternEvent::PcmListType & PatternEvent::paraCmdList() {
+			return paraCmdList_;
 		}
 
 		std::string PatternEvent::toXml( int track ) const

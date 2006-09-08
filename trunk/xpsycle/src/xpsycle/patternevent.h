@@ -22,7 +22,7 @@
 
 #include "pattern.h"
 #include <cstdint>
-#include <string>
+#include <vector>
 
 /**
 @author Stefan Nattkemper
@@ -35,6 +35,10 @@ namespace psycle
 
 		class PatternEvent{
 		public:
+
+			typedef std::vector< std::pair<std::uint8_t,std::uint8_t> > PcmListType;
+			typedef std::pair<std::uint8_t,std::uint8_t> PcmType;
+
 			PatternEvent();
 			PatternEvent(const PatternEntry & entry); // for compatible file load
 
@@ -65,6 +69,8 @@ namespace psycle
 
 			std::string toXml(int track) const;
 
+			PcmListType & paraCmdList();
+
 		private:
 
 			std::uint8_t _note;
@@ -73,6 +79,8 @@ namespace psycle
 			std::uint8_t _cmd;
 			std::uint8_t _parameter;
 			std::uint8_t _volume;
+			
+			PcmListType paraCmdList_;
 
 		};
 	}

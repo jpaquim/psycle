@@ -89,6 +89,7 @@ public:
     NBitmap & new_category();
     NBitmap & moveDownTrack();
     NBitmap & moveUpTrack();
+		NBitmap & patNav();
 
 private:
 
@@ -144,6 +145,7 @@ private:
     NBitmap moveDownTrack_;
     NBitmap moveUpTrack_;
     NBitmap tweakHeader_;
+		NBitmap patNav_;
 };
 
 }

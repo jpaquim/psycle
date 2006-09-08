@@ -104,6 +104,7 @@ PatternView::PatternView( Song* song )
       tweakGroup->add( tweakHBar, nAlBottom );
       tweakGroup->add( tweakGUI = new TweakGUI(this), nAlClient) ;      
       tweakGroup->setMinimumWidth(1);
+			tweakGUI->setTrackMinWidth( tweakHeader->skinColWidth() );
 		drawGroup->add ( tweakGroup, nAlLeft );
     drawGroup->setPreferredSize( 2*tweakGUI->colWidth() , 100);
 		// splitbar
@@ -360,7 +361,7 @@ const NColor & PatternView::separatorColor( )
 
 int PatternView::trackNumber( ) const
 {
-  return _pSong->tracks();
+  return drawArea->trackNumber();
 }
 
 int PatternView::rowHeight( ) const
@@ -451,6 +452,10 @@ bool PatternView::moveCursorWhenPaste() const {
   return moveCursorWhenPaste_;
 }
 
+const std::map<int, TrackGeometry> & PatternView::trackGeometrics() const {
+	return drawArea->trackGeometrics();
+}
+
 /// End of PatternView main Class
 
 
@@ -485,43 +490,53 @@ void PatternView::Header::setSkin( )
 void PatternView::Header::paint( NGraphics * g )
 {
   NBitmap & bitmap = Global::pConfig()->icons().pattern_header_skin();
+	NBitmap & patNav = Global::pConfig()->icons().patNav();
 
-  int startTrack = scrollDx() / pView->colWidth();
-  int trackCount = spacingWidth() / pView->colWidth();
+  int startTrack = pView->drawArea->findTrackByScreenX( scrollDx() );
 
   g->setForeground(pView->separatorColor());
-  for (int i = startTrack; i <= std::min(startTrack + trackCount ,pView->trackNumber() - 1); i++) {
-    const int trackX0 = i/10;
-    const int track0X = i%10;
-    int xOff = i* pView->colWidth();
-    int center = (pView->colWidth() - skinColWidth()) / 2;
-    xOff += center;
-    g->putBitmap(xOff,0,bgCoords.width(),bgCoords.height(), bitmap, 
+
+	std::map<int, TrackGeometry>::const_iterator it;
+	it = pView->trackGeometrics().lower_bound( startTrack );
+
+  for ( ; it != pView->trackGeometrics().end() && it->first <= pView->trackNumber() - 1; it++) {
+		const TrackGeometry & trackGeometry = it->second;
+
+    const int trackX0 = it->first / 10;
+    const int track0X = it->first % 10;
+    int xOff = trackGeometry.left();
+    if (xOff - scrollDx() > spacingWidth() ) break;
+    int center =  ( trackGeometry.width() - patNav.width() - skinColWidth()) / 2;
+    int xOffc = xOff + patNav.width() + center;
+    g->putBitmap(xOffc,0,std::min((int)bgCoords.width(),trackGeometry.width()) ,bgCoords.height(), bitmap, 
                   bgCoords.left(), bgCoords.top());
-    g->putBitmap(xOff+dgX0Coords.x(),0+dgX0Coords.y(),noCoords.width(),noCoords.height(), bitmap,
+    g->putBitmap(xOffc+dgX0Coords.x(),0+dgX0Coords.y(),noCoords.width(),noCoords.height(), bitmap,
                   trackX0*noCoords.width(), noCoords.top());
-    g->putBitmap(xOff+dg0XCoords.x(),0+dg0XCoords.y(),noCoords.width(),noCoords.height(), bitmap,
+    g->putBitmap(xOffc+dg0XCoords.x(),0+dg0XCoords.y(),noCoords.width(),noCoords.height(), bitmap,
                   track0X*noCoords.width(), noCoords.top());
 
     // blit the mute LED
-    if (  pView->pSong()->_trackMuted[i]) {
-        g->putBitmap(xOff+dMuteCoords.x(),0+dMuteCoords.y(),sMuteCoords.width(),sMuteCoords.height(), bitmap,
+    if (  pView->pSong()->_trackMuted[it->first]) {
+        g->putBitmap(xOffc+dMuteCoords.x(),0+dMuteCoords.y(),sMuteCoords.width(),sMuteCoords.height(), bitmap,
                   sMuteCoords.left(), sMuteCoords.top());
     }
 
     // blit the solo LED
-    if ( pView->pSong()->_trackSoloed == i) {
-        g->putBitmap(xOff+dSoloCoords.x(),0+dSoloCoords.y(),sSoloCoords.width(),sSoloCoords.height(), bitmap,
+    if ( pView->pSong()->_trackSoloed == it->first) {
+        g->putBitmap(xOffc+dSoloCoords.x(),0+dSoloCoords.y(),sSoloCoords.width(),sSoloCoords.height(), bitmap,
                   sSoloCoords.left(), sSoloCoords.top());
     }
 
     // blit the record LED
-    if ( pView->pSong()->_trackArmed[i]) {
-        g->putBitmap(xOff+dRecCoords.x(),0+dRecCoords.y(),sRecCoords.width(),sRecCoords.height(), bitmap,
+    if ( pView->pSong()->_trackArmed[it->first]) {
+        g->putBitmap(xOffc+dRecCoords.x(),0+dRecCoords.y(),sRecCoords.width(),sRecCoords.height(), bitmap,
                   sRecCoords.left(), sRecCoords.top());
     }
 
-    if (i!=0) g->drawLine(i*pView->colWidth(),0,i*pView->colWidth(),clientWidth()); // col seperator
+		g->putBitmap(xOff, 0,patNav.width(),patNav.height(), patNav, 
+                  0, 0);
+
+    if (it->first!=0) g->drawLine( xOffc, 0, xOffc, clientHeight()); // col seperator
   }
 }
 
@@ -531,11 +546,43 @@ void PatternView::Header::onMousePress( int x, int y, int button )
   if (button == 1)
   {
       // determine the track column, the mousepress occured on
-      int track = x / pView->colWidth();
+      int track = pView->drawArea->findTrackByScreenX( x );
+
       // find out the start offset of the header bitmap
-      NPoint off(track * pView->colWidth() + (pView->colWidth() - skinColWidth()) / 2,0);
+			NBitmap & patNav = Global::pConfig()->icons().patNav();
+      NPoint off( patNav.width()+ pView->drawArea->xOffByTrack( track ) + (pView->drawArea->trackWidth( track ) - patNav.width() - skinColWidth()) / 2,0);
+			// find out the start offset of the nav buttons
+			NPoint navOff( pView->drawArea->xOffByTrack( track ),0); 
+
+			NRect decCol( navOff.x() , navOff.y(), 10, patNav.height() );
+			NRect incCol( navOff.x() +10, navOff.y(), 10, patNav.height() );
+			NRect xCol( navOff.x() +20, navOff.y(), 10, patNav.height() );
+
       // the rect area of the solo led
       NRect solo(off.x() + dSoloCoords.x(), off.y() + dSoloCoords.y(), sSoloCoords.width(), sSoloCoords.height());
+
+			std::map<int, TrackGeometry>::const_iterator it;
+			it = pView->trackGeometrics().lower_bound( track );
+
+			if (incCol.intersects(x,y)) {
+				int visibleEvents = pView->drawArea->visibleEvents( track );
+				pView->drawArea->setVisibleEvents( track,  visibleEvents +1);
+				pView->updateRange();
+				pView->repaint();
+			} else 
+  		if (decCol.intersects(x,y)) {
+				int visibleEvents = pView->drawArea->visibleEvents( track );
+				pView->drawArea->setVisibleEvents( track, std::max(1,visibleEvents -1));
+				pView->updateRange();
+				pView->repaint();
+			} else
+			if (xCol.intersects(x,y)) {
+				int visibleEvents = pView->drawArea->visibleEvents( track );
+				pView->drawArea->setVisibleEvents( track, 1);
+				pView->updateRange();
+				pView->repaint();
+			}
+
       // now check point intersection for solo
       if (solo.intersects(x,y)) {
           onSoloLedClick(track);
@@ -599,7 +646,7 @@ void PatternView::Header::onRecLedClick(int track) {
 
 int PatternView::Header::preferredWidth( )
 {
-  return (pView->trackNumber())*pView->colWidth();
+  return (pView->drawArea->tracksWidth());
 }
 
 int PatternView::Header::skinColWidth( )
@@ -786,9 +833,11 @@ PatternView::TweakGUI::TweakGUI( PatternView* pPatternView)
 {
   pView = pPatternView;
   addEvent( ColumnEvent::hex4 );
+	setDefaultVisibleEvents( 1 );
   setMinimumWidth(1);
   setTransparent(false);
   setBackground(Global::pConfig()->pvc_row);
+  setTrackNumber( 16 );
 }
 
 PatternView::TweakGUI::~TweakGUI() {
@@ -997,7 +1046,7 @@ int PatternView::TweakGUI::beatZoom() const {
 
 void PatternView::TweakGUI::checkLeftScroll( const PatCursor & cursor ) {
  // check for scroll
-	if ( (cursor.track()) * colWidth() - dx() < 0) {
+	if ( ( cursor.track()) * colWidth() - dx() < 0) {
 		pView->tweakHBar->setPos( std::max( cursor.track(), 0) * colWidth() );
 	}	
 }
@@ -1035,6 +1084,15 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatt
 	addEvent( ColumnEvent::hex2 );
   addEvent( ColumnEvent::hex2 );
 	addEvent( ColumnEvent::hex4 );
+
+	// just for test !
+	addEvent( ColumnEvent::hex4 );
+	addEvent( ColumnEvent::hex4 );
+	addEvent( ColumnEvent::hex4 );
+	// end of multi paraCmd
+
+  setDefaultVisibleEvents( 5 );
+	setTrackNumber( 64 );
 
   setTransparent(false);
   setBackground(Global::pConfig()->pvc_row);
@@ -1117,10 +1175,6 @@ int PatternView::PatternDraw::lineNumber() const {
 	return pView->lineNumber();
 }
 
-int PatternView::PatternDraw::trackNumber() const {
-	return pView->trackNumber();
-}
-
 int PatternView::PatternDraw::beatZoom() const {
 	return pView->beatZoom();
 }
@@ -1132,7 +1186,7 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 
     g->setForeground(Global::pConfig()->pvc_rowbeat);
 
-    int trackWidth = ((endTrack+1) * colWidth()) - dx();
+    int trackWidth = xEndByTrack( endTrack ) - dx();
     int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
     for (int y = startLine; y <= endLine; y++) {
@@ -1186,9 +1240,21 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 					if (event.volume() != 255) drawData( g, x, y, 3, event.volume() );
 					if (event.command() != 0 || event.parameter() != 0) {
 						drawData( g, x, y, 4, (event.command() << 8) | event.parameter() );
-					}
-					lastLine = y;
-				}
+					}										
+					
+				  PatternEvent::PcmListType & pcList = event.paraCmdList();
+				  PatternEvent::PcmListType::iterator it = pcList.begin();
+				  int count = 0;
+				  for ( ; it < pcList.end(); it++, count++ ) {
+					  PatternEvent::PcmType & pc = *it;
+					  int command = pc.first;
+					  int parameter = pc.second;
+					  if ( command != 0 || parameter != 0) {
+					    drawData( g, x, y, 5+count, ( command << 8) | parameter );
+					 }
+				 }
+	      }
+				lastLine = y;
 			}
 		}
 	}
@@ -1378,18 +1444,42 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
        moveCursor(-1,1);
 			 pView->checkDownScroll( cursor() );
 		} else
-		if ( cursor().eventNr() == 4) {
+		if ( cursor().eventNr() >= 4) {
 			// comand or parameter
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
 			if (cursor().col() < 2 ) {
-				unsigned char newByte = convertDigit( 0x00, event.scancode(), patEvent.command(), cursor().col() );
-				patEvent.setCommand( newByte );
+				int cmdValue;
+				if (cursor().eventNr() == 4) {
+					cmdValue = patEvent.command();
+				} else {
+					PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+					cmdValue = pc.first;
+				}
+				unsigned char newByte = convertDigit( 0x00, event.scancode(), cmdValue, cursor().col() );
+				if (cursor().eventNr() == 4) {
+					patEvent.setCommand( newByte );
+				} else {
+					PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+					pc.first = newByte;					
+				}
 				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
         moveCursor(1,0);
 			}
 			else {
-				unsigned char newByte = convertDigit( 0x00, event.scancode(), patEvent.parameter(), cursor().col() - 2 );
-				patEvent.setParameter( newByte );
+				int paraValue;
+				if (cursor().eventNr() == 4) {
+					paraValue = patEvent.parameter();
+				} else {
+					PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+					paraValue = pc.second;
+				}
+				unsigned char newByte = convertDigit( 0x00, event.scancode(), paraValue, cursor().col() - 2 );
+				if (cursor().eventNr() == 4) {
+					patEvent.setParameter( newByte );
+				} else {
+					PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+					pc.second = newByte;					
+				}
 				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
         if (cursor().col() < 3)
 					moveCursor(1,0);			
@@ -1423,9 +1513,12 @@ void PatternView::PatternDraw::clearCursorPos() {
 					patEvent.setCommand(0);
 					patEvent.setParameter(0);
 					pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
-				} 					
-			}
-	
+				} else {					
+					PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+					pc.first = 0;
+					pc.second = 0;
+				}			
+			}	
 }
 
 void PatternView::checkDownScroll( const PatCursor & cursor ) {
@@ -1444,15 +1537,15 @@ void PatternView::checkUpScroll( const PatCursor & cursor ) {
 
 void PatternView::PatternDraw::checkLeftScroll( const PatCursor & cursor ) {
  // check for scroll
-	if ( (cursor.track()) * colWidth() - dx() < 0) {
-		pView->hBar->setPos( std::max( cursor.track(), 0) * colWidth() );
+	if ( xOffByTrack(cursor.track()) - dx() < 0) {
+		pView->hBar->setPos( xOffByTrack(std::max( cursor.track(), 0)) );
 	}	
 }
 
 void PatternView::PatternDraw::checkRightScroll( const PatCursor & cursor ) {
 	//check for scroll
-	if ( (cursor.track()+1) * colWidth() - dx() > clientWidth() ) {
-		pView->hBar->setPos( std::min( cursor.track()+1 , trackNumber()) * colWidth() - clientWidth() );
+	if ( xOffByTrack(std::max( cursor.track()+1, 0)) - dx() > clientWidth() ) {
+		pView->hBar->setPos( xOffByTrack(std::min( cursor.track()+1 , trackNumber())) - clientWidth() );
 	}
 }
 
@@ -1880,7 +1973,7 @@ int PatternView::beatZoom( ) const
 
 void PatternView::setPattern( SinglePattern * pattern )
 {
-  pattern_ = pattern;
+  pattern_ = pattern;  
   resize();
 }
 
@@ -1916,6 +2009,8 @@ void PatternView::onOctaveChange( NItemEvent * ev )
 void PatternView::onTrackChange( NItemEvent * ev )
 {
   pSong()->setTracks( str<int>( ev->item()->text() ) );
+	drawArea->setTrackNumber( pSong()->tracks() ); 
+	updateRange();
   //if (cursor().track() >= pSong()->tracks() )
   //{
   //  setCursor( PatCursor( pSong()->tracks() ,cursor().line(),0,0) );
