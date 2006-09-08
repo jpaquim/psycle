@@ -654,7 +654,7 @@ namespace psycle {
 					if ( cursor_.col() + dx < maxCols ) {
 						cursor_.setCol( cursor_.col() + dx);
 					} else
-					if (eventnr + 1 < events_.size() ) {
+					if (eventnr + 1 < visibleEvents( cursor_.track()) ) {
 						cursor_.setCol( 0 );
 						cursor_.setEventNr( eventnr + 1);
 					} else 
@@ -677,7 +677,7 @@ namespace psycle {
 				} else {
 					if ( cursor_.track() > 0 ) {
 						cursor_.setTrack( cursor_.track() -1 );
-						cursor_.setEventNr( events_.size() -1 );
+						cursor_.setEventNr( visibleEvents( cursor_.track() -1 )-1 );
 						const ColumnEvent & event = events_.at( cursor_.eventNr() );
 						cursor_.setCol( event.cols() - 1 );
 					}		
