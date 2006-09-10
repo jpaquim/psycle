@@ -25,12 +25,13 @@
 #include "ncustomitem.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nwindow.h"
 
 
 NCustomTreeView::NCustomTreeView()
  : NPanel()
 {
-  setLayout(NAlignLayout());
+  setLayout( NAlignLayout() );
 
   scrollBox_ = new NScrollBox();
     scrollArea_ = new NPanel();
@@ -69,7 +70,7 @@ void NCustomTreeView::onSelectedItem(NTreeNode* node, NCustomItem * sender )
   sender->repaint();
 
 
-  if (selectedItem_) {
+  if (selectedItem_ && sender!=selectedItem_ ) {
     selectedItem_->setSkin(itemFg);
     selectedItem_->repaint();
   }
@@ -97,4 +98,12 @@ void NCustomTreeView::removeChilds( )
   selectedTreeNode_ = 0;
 }
 
-
+void NCustomTreeView::removeItem( NCustomItem * item )
+{
+  if ( item && item->isChildOf( this ) ) {
+    if ( item == selectedItem_ ) selectedItem_ = 0;
+	  item->erase();
+	  if ( window() ) window()->checkForRemove( item );
+	  NApp::addRemovePipe(item);
+  }
+}

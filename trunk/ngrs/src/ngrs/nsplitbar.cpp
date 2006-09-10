@@ -84,16 +84,23 @@ void NSplitBar::onMove( const NMoveEvent & moveEvent )
 
     itr = find(p->visualComponents().begin(),p->visualComponents().end(),this);
 
+
+    if ( align() == nAlBottom ) {
+        itr--;
+        if (itr != p->visualComponents().end() ) {
+          NVisualComponent* bottomVc = *itr;
+          bottomVc->setPreferredSize( bottomVc->width(), std::max( bottomVc->height() - ( top() + height() - bottomVc->top() ), bottomVc->minimumHeight()) );
+          p->resize();
+          p->repaint();
+        }
+    } else
     if (itr > p->visualComponents().begin()) {
       itr--;
       topVc = *itr;
-    }
-
-    if (topVc!=0) {
-      topVc->setPreferredSize( topVc->width(), top() - topVc->top());
+      topVc->setPreferredSize( topVc->width(), top() - topVc->top() );
       p->resize();
       p->repaint();
-    }
+     }
 
   }
 }

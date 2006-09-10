@@ -27,7 +27,6 @@
 #include "ndockpanel.h"
 
 
-NSystem* NApp::system_ = 0;
 NConfig* NApp::config_ = 0;
 
 std::vector<NRuntime*> NApp::removePipe;
@@ -86,8 +85,7 @@ void NApp::setMainWindow( NWindow* window )
 
 NSystem & NApp::system( )
 {
-  if (!system_) system_ = new NSystem(); 
-  return *system_;
+  return *NSystem::Instance();
 }
 
 // private methods

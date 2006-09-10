@@ -38,9 +38,11 @@ NSystem::NSystem()
 NSystem::~NSystem()
 {
   delete atoms_;
+	std::cout << "deleting cursor" << std::endl;
   std::map<int,Cursor>::iterator it = cursorMap.begin();
   for ( ; it != cursorMap.end(); it++ ) {
     {
+	    if (it->second != None )
       XFreeCursor( dpy(), it->second );  
     }
   }

@@ -47,6 +47,7 @@ public:
     NCustomItem* selectedItem();
 
     virtual void removeChilds();
+		void removeItem( NCustomItem* item );
 
 private:
 

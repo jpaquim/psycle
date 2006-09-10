@@ -28,7 +28,6 @@ NLineShape::NLineShape()
   p2_.setXY(10,10);
   pickWidth_ = pickHeight_ = 5;
   distance_ = 5;
-  region_ = 0;
   calculateRectArea();
 }
 
@@ -100,10 +99,11 @@ void NLineShape::calculateRectArea( )
    pts[3].x = p1_.x()-dx;
    pts[3].y = p1_.y()+dy;
 
-   Region region = XPolygonRegion(pts,4,WindingRule);
-   XRectangle r;
-   XClipBox(region, &r);
-   NShape::setPosition(r.x,r.y,r.width,r.height);
+   NRegion region;
+   region.setPolygon(pts,4);
+
+   NRect r = region.rectClipBox();
+   NShape::setPosition( r.left(), r.top(), r.width(), r.height() );
 }
 
 void NLineShape::move( int dx, int dy )
@@ -226,9 +226,9 @@ NRegion NLineShape::spacingRegion( const NSize & spacing )
 
 
 int NLineShape::d2i(double d)
- {
+{
    return (int) ( d<0?d-.5:d+.5);
- }
+}
 
 
 

@@ -90,8 +90,6 @@ private:
    static std::map<Window,NWindow*> winMap;
    static NWindow* mainWin_;
 
-   static NSystem* system_;
-
    void eventLoop();
    static void modalEventLoop(NWindow* modalWin);
 
