@@ -36,6 +36,7 @@ namespace psycle {
 
 class WaveEdFrame;
 class SequencerGUI;
+class VirtualPattern;
 
 /**
 @author Stefan
@@ -65,6 +66,7 @@ public:
     SequencerBar* sequencerBar();
     WaveEdFrame* waveEditor();
     SequencerGUI* sequencerView();
+    VirtualPattern* virtualPattern();
 
     void play();
     void playFromStart();
@@ -92,6 +94,7 @@ private:
     MachineView* machineView_;
     PatternView* patternView_;
     SequencerGUI* sequencerView_;
+    VirtualPattern* virtualPattern_;
 
     NDockPanel* macDock;
     NDockPanel* patDock;

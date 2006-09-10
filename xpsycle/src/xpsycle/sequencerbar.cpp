@@ -336,10 +336,8 @@ void SequencerBar::onDeletePattern( NButtonEvent* ev ) {
   {
      SinglePattern* pattern = itr->second;
      patternMap.erase(itr);
-     ((NVisualComponent*)item->parent())->erase(item);
-     //item->erase(); ///\todo put this in customtreeview
-     NApp::addRemovePipe(item);
-     patternBox_->resize(); ///\todo end
+		 patternBox_->removeItem( item );
+     patternBox_->resize();
      patternBox_->repaint();
 
      seqGui->removePattern(pattern);

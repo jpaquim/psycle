@@ -79,8 +79,6 @@ public:
     int _channelmode;
     int _bitDepth;
 
-    signal0<> tick;
-
 
 };
 

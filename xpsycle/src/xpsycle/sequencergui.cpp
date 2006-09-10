@@ -39,6 +39,7 @@
 #include <ngrs/nproperty.h>
 #include <ngrs/ncheckbox.h>
 #include <ngrs/nedit.h>
+#include <ngrs/nsplitbar.h>
 
 
 namespace psycle {
@@ -600,6 +601,7 @@ SequencerGUI::SequencerGUI()
 
   beatLineal_ = new SequencerBeatLineal(this);
   add(beatLineal_, nAlTop);
+	
 
   // create scrollBars
   NPanel* hBarPanel = new NPanel();
