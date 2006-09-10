@@ -45,10 +45,20 @@ class NAtoms;
 class NWindow;
 
 class NSystem{
-public:
-    NSystem();
+    // Singleton Pattern
+    private:
+      NSystem();
+      ~NSystem();
+			NSystem( NSystem const & );
+  		NSystem& operator=(NSystem const&);
 
-    ~NSystem();
+		public:
+			static NSystem* Instance() {
+					//use only single threaded!
+					static NSystem s;
+ 					return &s; 
+			}
+		// Singleton pattern end
 
     Display* dpy() const;
     int depth() const;

@@ -774,7 +774,11 @@ void NVisualComponent::erase( NVisualComponent * child )
 
 void NVisualComponent::erase( )
 {
-  NRuntime::erase();
+	if (parent() && parent()->visit(NVisualComponent::isVisualComponent)) { 
+  	static_cast<NVisualComponent*>(parent())->erase(this);
+	} else
+  if ( parent() )
+    NVisual::erase();
 }
 
 const std::vector< NVisualComponent * > & NVisualComponent::visualComponents( ) const

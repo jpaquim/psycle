@@ -73,8 +73,6 @@ private:
 
    int distance_;
 
-   Region region_;
-
 };
 
 #endif
