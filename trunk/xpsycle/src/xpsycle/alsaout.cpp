@@ -200,12 +200,11 @@ void AlsaOut::FillBuffer(const snd_pcm_channel_area_t * areas, snd_pcm_uframes_t
   // fill the channel areas
 
   float const * input(_pCallback(_callbackContext, count));
-  tick.emit();
+
   while (count-- > 0) {
-  //   (*audioPlayer).getSample(audioPlayer);
-      *samples[0] = *input++;
+      *samples[0] = static_cast<short int>( *input++ );
       samples[0] += steps[0];
-      *samples[1] = *input++;
+      *samples[1] = static_cast<short int>( *input++ );
       samples[1] += steps[1];
   }
 }

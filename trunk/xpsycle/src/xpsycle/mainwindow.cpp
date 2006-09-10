@@ -51,7 +51,7 @@ template<class T> inline T str_hex(const std::string &  value) {
 
    std::stringstream str;
    str << value;
-   str >> std::hex >> result;
+   if (! (str >> std::hex >> result) ) return -1;
 
    return result;
 }
@@ -63,6 +63,7 @@ MainWindow::MainWindow()
   setTitle ("] Psycle Modular Music Creation Studio[ ( X alpha ) ");
 
   setPosition(0,0,1024,768);
+	count = 0;
 
   initMenu();
   initBars();
@@ -83,7 +84,7 @@ MainWindow::MainWindow()
 
   updateNewSong();
  
-  count = 0;
+  
 //  updateStatusBar();
 
   //childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
@@ -116,7 +117,7 @@ ChildView* MainWindow::addChildView()
     childView_->machineViewDblClick.connect(this,&MainWindow::onNewMachine);
 		childView_->waveEditor()->updateInstrumentCbx.connect(this,&MainWindow::onUpdateInstrumentCbx);
 		childView_->machineView()->machineDeleted.connect(this,&MainWindow::onMachineDeleted);
-  book->addPage( childView_, childView_->song()->name() + stringify(count) );
+  book->addPage( childView_, childView_->song()->name() + stringify( count ) );
   book->setActivePage( childView_ );
 
   count++;
@@ -672,7 +673,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
 			 Player::Instance()->Stop();
        songpDlg_->setVisible(false);
 			 // disable audio driver
-			 Global::configuration()._pOutputDriver->Enable(false);
+			 //Global::configuration()._pOutputDriver->Enable(false);
 		   // add a new Song tab
        ChildView* newView = addChildView();  
        // load the song
@@ -683,7 +684,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
        pane()->resize();
        pane()->repaint();
 			 // enable audio driver
-			 Global::configuration()._pOutputDriver->Enable(true);
+			 //Global::configuration()._pOutputDriver->Enable(true);
        // update file recent open sub menu
        if (noFileWasYetLoaded) {
          recentFileMenu_->removeChilds();
@@ -878,6 +879,7 @@ void MainWindow::onMachineSelected( Machine* mac ) {
      NCustomItem* item = *it;
      if (item->text().length() > 2) {
        int macIdx = str_hex<int>( item->text().substr(0,2) );
+
        if (macIdx == mac->_macIndex) {
          selectedSong_->seqBus = macIdx;
          genCombo_->setIndex(idx);

@@ -24,9 +24,11 @@
 #include "waveedframe.h"
 #include "sequencergui.h"
 #include "sequencerbar.h"
+#include "virtualpattern.h"
 #include <ngrs/napp.h>
 #include <inttypes.h>
 #include <ngrs/ndockpanel.h>
+#include <ngrs/nsplitbar.h>
 
 namespace psycle {
 	namespace host {
@@ -64,6 +66,8 @@ ChildView::ChildView()
   sequencerView_->setPatternSequence( _pSong->patternSequence());
   sequencerView_->addSequencerLine();
 
+	virtualPattern_ = new VirtualPattern();
+
   
   macDock = new NDockPanel(machineView_);
   tabBook_->addPage(macDock,"Machine View");
@@ -77,7 +81,14 @@ ChildView::ChildView()
   tabBook_->addPage(waveEd_,"WaveEditor");
   tab = tabBook_->tab( waveEd_ );
   tab->click.connect(this,&ChildView::onTabChange);
-  seqDock = new NDockPanel(sequencerView_);
+  NPanel* seqGroup = new NPanel();
+		seqGroup->setLayout( NAlignLayout() );
+    seqGroup->add( virtualPattern_, nAlBottom);
+    NSplitBar* splitBar = new NSplitBar();
+		splitBar->setOrientation( nHorizontal );
+    seqGroup->add( splitBar, nAlBottom );
+    seqGroup->add( sequencerView_, nAlClient);
+	seqDock = new NDockPanel(seqGroup);
   tabBook_->addPage(seqDock,"Sequencer View");
   tab = tabBook_->tab( seqDock );
   tab->click.connect(this,&ChildView::onTabChange);
@@ -121,6 +132,10 @@ PatternView * ChildView::patternView( )
   return patternView_;
 }
 
+VirtualPattern* ChildView::virtualPattern()
+{
+  return virtualPattern_;
+}
 
 void ChildView::play( )
 {
