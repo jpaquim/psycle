@@ -85,12 +85,11 @@ NTestWindow::NTestWindow()
    spl->setOrientation( nHorizontal );
    pane()->add( spl, nAlTop);
 
-	/*NButton* btn = new NButton("hallo");
+	NButton* btn = new NButton("hint test");
+		btn->setHint("Save as audio File");
 		btn->clicked.connect(this, &NTestWindow::onBtnClick);
 	pane()->add( btn, nAlTop);
 
-
-	std::cout << "winid:" << win() << std::endl;*/
 
  /* NSlider* slider = new NSlider();
     slider->setRange(0,100);

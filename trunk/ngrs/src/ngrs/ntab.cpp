@@ -83,6 +83,7 @@ void NTab::onMousePress( int x, int y, int button )
       popupMenu_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
       popupMenu_->setVisible(true);
   } else
+  if ( !( toggle() && down() ) )
   NCustomButton::onMousePress( x, y, button );
 }
 

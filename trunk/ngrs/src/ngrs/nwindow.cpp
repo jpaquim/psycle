@@ -444,11 +444,16 @@ void NWindow::pack( )
 {
   if (pane()->layout()!=NULL) {
     pane()->layout()->align(pane());
-    std::cout << "pack-width:" << pane()->layout()->preferredWidth(pane()) << std::endl;
+   // std::cout << "pack-width:" << pane()->layout()->preferredWidth(pane()) << std::endl;
+
+		// should really not be hardcoded but read out from xlib
+		int windowBorderWidth = 2;
+		int windowBorderHeight = 2;
+
     int pW = std::max( pane()->layout()->preferredWidth(pane()) +
-                       pane()->spacing().left() + pane()->spacing().right() ,10);
+                       pane()->spacing().left() + pane()->spacing().right() + windowBorderWidth ,10);
     int pH = std::max( pane()->layout()->preferredHeight(pane()) +
-                       pane()->spacing().top() + pane()->spacing().bottom()
+                       pane()->spacing().top() + pane()->spacing().bottom() + windowBorderHeight
                        ,10);
      setPosition(left(),top(),pW,pH);
      setMinimumWidth(pW);
