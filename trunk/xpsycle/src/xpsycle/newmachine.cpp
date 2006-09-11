@@ -19,6 +19,7 @@
   ***************************************************************************/
 #include "newmachine.h"
 #include "plugin.h"
+#include "ladspamachine.h"
 #include "configuration.h"
 #include <ngrs/nborderlayout.h>
 #include <ngrs/nalignlayout.h>
@@ -103,6 +104,22 @@ NewMachine::NewMachine( )
         internalPage_->add(new NItem("Sampler"));
         internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
+
+		std::string ladspa_path = std::getenv("LADSPA_PATH");
+
+		NPanel* ladspaPage = new NPanel();
+			ladspaPage->setLayout(NAlignLayout());
+			NFileListBox* ladspaBox_ = new NFileListBox();
+			ladspaBox_->addFilter(".so","!S*.so!S*");
+            ladspaBox_->setMode(nFiles);
+            ladspaBox_->setAlign(nAlClient);
+            ladspaBox_->setDirectory( ladspa_path );
+            ladspaBox_->setActiveFilter(".so");
+            ladspaBox_->update();
+            ladspaBox_->itemSelected.connect(this,&NewMachine::onLADSPAItemSelected);
+        ladspaPage->add(ladspaBox_);
+	tabBook_->addPage(ladspaPage,"ladspaPage");
+
   pane()->add(tabBook_);
 
 
@@ -126,8 +143,7 @@ void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
   sampler_=false;
   Plugin plugin(0, 0 );
   std::cout << ev->item()->text() << std::endl;
-  if (plugin.LoadDll(ev->item()->text())) {;
-    plugin.GetName();
+  if (plugin.LoadDll(ev->item()->text())) {
     name->setText(plugin.GetName());
   //libName->setText(plugin.GetDllName());
     dllName_ = plugin.GetDllName();
@@ -177,6 +193,17 @@ bool NewMachine::sampler( )
 void NewMachine::onInternalItemSelected( NItemEvent * ev )
 {
   if (ev->text() == "Sampler") sampler_=true; else sampler_=false;
+}
+
+void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
+		LADSPAMachine plugin(0, 0 );
+		if (plugin.loadPlugin( ev->item()->text()) ) {
+    	name->setText( plugin.label() );
+			description->setText( plugin.name() );
+		}
+  
+		pane()->resize();
+    pane()->repaint();
 }
 
 }
