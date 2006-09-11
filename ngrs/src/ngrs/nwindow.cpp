@@ -156,6 +156,7 @@ void NWindow::onMousePress( int x, int y, int button )
 {
   oldFocus_ = 0;
 	dragBase_ = 0;
+	mousePressBase_ = 0;
 
   graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
@@ -191,7 +192,7 @@ void NWindow::onMousePressed( int x, int y, int button )
   if ( selectedBase_ && selectedBase_->enabled() && selectedBase_->focusEnabled() ) selectedBase_->onEnter(); 
    else
   if ( oldFocus_ ) selectedBase_ = oldFocus_;
-
+	mousePressBase_ = 0;
 }
 
 void NWindow::onMouseOver( int x, int y )
@@ -201,7 +202,12 @@ void NWindow::onMouseOver( int x, int y )
     NApp::mouseOverWindow();
     if (dragBase_->moveable().style()!=0) doDrag(dragBase_,x,y);
     dragBase_->onMouseOver( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop());
-  } else {
+  } else 
+	if (mousePressBase_!=NULL) {
+    NApp::mouseOverWindow();
+    mousePressBase_->onMouseOver( x - mousePressBase_->absoluteSpacingLeft(), y - mousePressBase_->absoluteSpacingTop());
+	} else
+  {
     NVisualComponent* over = pane_->overObject(graphics_,x,y);
     if (lastOver_!=0 && over!=lastOver_ && lastOver_->enabled()) lastOver_->onMouseExit();
     if (over!=0 && over->enabled()) {
