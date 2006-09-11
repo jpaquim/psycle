@@ -155,6 +155,7 @@ int NWindow::height( ) const
 void NWindow::onMousePress( int x, int y, int button )
 {
   oldFocus_ = 0;
+	dragBase_ = 0;
 
   graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
@@ -171,8 +172,8 @@ void NWindow::onMousePress( int x, int y, int button )
       }
 
       // end of mousepress
-      if (selectedBase_ && selectedBase_!=pane_ && (mapped())) {
-        if (button==1) {
+      if (selectedBase_ && !dragBase_ && selectedBase_!=pane_ && (mapped())) {
+        if ( selectedBase_->moveable().style() ) {
           dragBase_ = selectedBase_;
           initDrag(obj,x,y);
         }
