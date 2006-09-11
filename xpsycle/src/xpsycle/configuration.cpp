@@ -35,6 +35,10 @@
 #include <stdexcept>
 #include <sstream>
 
+#if defined XPSYCLE__CONFIGURATION
+#include <xpsycle/install_paths.h>
+#endif
+
 namespace psycle {
 		namespace host {
 
@@ -201,12 +205,13 @@ void Configuration::loadConfig()
 
   // system-wide
 
-	// environment
+  // environment
   // this is most useful for developpers.
   // you can test xpsycle directly from within the build dir,
   // pointing various paths to the source or build dir.
-  char const * const path(std::getenv("XPSYCLE__CONFIGURATION"));
-  if(path) {
+  char const * const xpsycleenv(std::getenv("XPSYCLE__CONFIGURATION"));
+  std::string path= (xpsycleenv?xpsycleenv:"");
+  if(path.length()!=0) {
     try {
       loadConfig(path);
     }
@@ -215,31 +220,28 @@ void Configuration::loadConfig()
       std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
     }
   } else {
+	path=NFile::replaceTilde("~/.xpsycle.xml");
+	if (path.length()!=0) {
+  		try {
+		      loadConfig(NFile::replaceTilde("~/.xpsycle.xml"));
+		}
+  		catch(std::exception const & e) {
+		    	std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
+	  	}
+	} else {
 
-
-  #if !defined XPSYCLE__CONFIGURATION
-  // we don't have any information about the installation paths
-		// try user home
-  	try {
-      loadConfig(NFile::replaceTilde("~/.xpsycle.xml"));
-  	}
-  	catch(std::exception const & e) {
-    	std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
-  	}
-  #else
-  #include <xpsycle/install_paths.h>
-  try
-  {
-    loadConfig(XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml");
-  }
-  catch(std::exception const & e)
-  {
-    std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
-  }
-  #endif
-
-  }
-
+  	path=XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
+	if (path.length()!=0){
+		try {
+		    loadConfig(path);
+		 }
+		  catch(std::exception const & e)
+		  {
+			std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
+		  }
+		}
+	}
+   }
   
 }
 

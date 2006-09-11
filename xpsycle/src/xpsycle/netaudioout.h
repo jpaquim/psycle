@@ -209,10 +209,10 @@ namespace psycle
 				AuServer* aud_;
 				AuFlowID flow_;
 				AuDeviceID device_;
-				AuEventHandlerRec handler_;
+				AuEventHandlerRec* handler_;
 				AuElement nas_elements[3];
 
-				//static AuBool EventHandlerFunc(AuServer *aud, AuEvent *ev, AuEventHandlerRec *handler);
+				static AuBool EventHandlerFunc(AuServer *aud, AuEvent *ev, AuEventHandlerRec *handler);
 				static int audioOutThreadStatic(void*);
 				void audioOutThread();
 				pthread_t threadId_;
