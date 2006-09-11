@@ -38,10 +38,19 @@ namespace psycle {
 
 				bool loadPlugin( const std::string & fileName );
 
+				const LADSPA_Descriptor * pluginDescriptor();
+
+				virtual std::string GetName() const;
+
+				std::string name() const;
+				std::string label() const;
+				std::string libName() const;
+
 		private:
 
 			void* pluginHandle_;
 			std::string ladspa_path;
+			std::string libName_;
 
 			const LADSPA_Descriptor * psDescriptor;
 

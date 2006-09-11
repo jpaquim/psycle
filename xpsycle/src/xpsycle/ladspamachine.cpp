@@ -43,44 +43,73 @@ namespace psycle {
 		bool LADSPAMachine::loadPlugin( const std::string & fileName )
 		{			
 			#ifdef linux
-			pluginHandle_ = dlopen( std::string(ladspa_path + fileName).c_str() , RTLD_NOW);
+			pluginHandle_ = dlopen( std::string(ladspa_path + "/"+ fileName).c_str() , RTLD_NOW);
 			#endif
 			if ( !pluginHandle_ ) {
 				#ifdef linux
         std::cerr << "Cannot load library: " << dlerror() << std::endl;
 				#endif
         return false;
+			}
 
-				LADSPA_Descriptor_Function pfDescriptorFunction = 0;
-  			unsigned long lPluginIndex;
+			LADSPA_Descriptor_Function pfDescriptorFunction = 0;
+  		unsigned long lPluginIndex;
 
-				#ifdef linux
-				pfDescriptorFunction
+			#ifdef linux
+			pfDescriptorFunction
 				= (LADSPA_Descriptor_Function)dlsym( pluginHandle_,
                                         "ladspa_descriptor");
+			#endif
+
+			if (!pfDescriptorFunction) {
+				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
+				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+				#ifdef linux
+					std::cerr << dlerror() << std::endl;
 				#endif
+				return false;
+			}
 
-				if (!pfDescriptorFunction) {
-					std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
-					std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
-					#ifdef linux
-						std::cerr << dlerror() << std::endl;
-					#endif
-					return false;
+			for (lPluginIndex = 0;; lPluginIndex++) {
+				psDescriptor = pfDescriptorFunction(lPluginIndex);
+				if (psDescriptor != NULL)
+					break;
+    		if (psDescriptor == NULL) {
+					std::cerr <<
+             "Unable to find label in plugin library file" << std::endl;
+     			return false;         
 				}
-
-				for (lPluginIndex = 0;; lPluginIndex++) {
-					psDescriptor = pfDescriptorFunction(lPluginIndex);
-    			if (psDescriptor == NULL) {
-						std::cerr <<
-              "Unable to find label in plugin library file" << std::endl;
-     				return false;         
-					}
-    		}
 
 				return true;
 			}
 		} // end of loadPlugin
+
+
+		const LADSPA_Descriptor * LADSPAMachine::pluginDescriptor() {
+			return psDescriptor;
+		}
+
+		std::string LADSPAMachine::GetName() const {
+			return name();
+		}
+
+		std::string LADSPAMachine::name() const {
+			if (psDescriptor)
+				return psDescriptor->Name;
+			else
+				return "";
+		}
+
+		std::string LADSPAMachine::label() const {
+			if (psDescriptor)
+				return psDescriptor->Label;
+			else
+				return "";
+		}
+
+		std::string LADSPAMachine::libName() const {
+			return libName_;
+		}
 
 	}
 }

@@ -103,6 +103,7 @@ private:
 
   void onGeneratorItemSelected(NItemEvent* ev);
   void onInternalItemSelected(NItemEvent* ev);
+	void onLADSPAItemSelected(NItemEvent* ev);	
 
   void onOkBtn(NButtonEvent* sender);
   void onCancelBtn(NButtonEvent* sender);
