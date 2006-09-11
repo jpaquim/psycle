@@ -27,9 +27,9 @@ NHint::NHint()
   setDecoration(false);
 
   pane()->setBorder(NFrameBorder());
-  pane()->setSpacing(NSize(2,2,2,2));
 
   label_ = new NLabel();
+	label_->setSpacing(NSize(2,2,2,2));
 	pane()->add(label_, nAlClient);
 
   pane()->setBackground(NColor(0xFF,0xFF,0xD0));

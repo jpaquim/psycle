@@ -215,6 +215,7 @@ NFileDialog::NFileDialog()
         pdBox_->setDirectory(NFile::parentWorkingDir());
         pdBox_->setAlign(nAlTop);
         pdBox_->itemSelected.connect(this,&NFileDialog::onParentDirItemSelected);
+				pdBox_->setMinimumHeight(20);
       dirPanel->add(pdBox_);
       NSplitBar* splitBar = new NSplitBar(nHorizontal);
       dirPanel->add(splitBar,nAlTop);
