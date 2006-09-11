@@ -9,6 +9,7 @@
 #include "psyfilter.h"
 #include "datacompression.h"
 #include "riff.h"
+#include "ladspamachine.h"
 #include <cstdint>
 #include <cassert>
 #include <sstream>
@@ -155,6 +156,14 @@ namespace psycle
 					}
 					break;
 				case MACH_VST:
+        break;
+				case MACH_LADSPA:
+				{
+						LADSPAMachine* plugin = new LADSPAMachine(index,this);
+						machine = plugin;
+						plugin->loadPlugin(plugin_name);
+				}
+				break;
 				case MACH_VSTFX:
 					{
 /*						vst::plugin * plugin(0);

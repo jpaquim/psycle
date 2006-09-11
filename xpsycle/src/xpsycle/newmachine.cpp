@@ -36,6 +36,8 @@ NewMachine::NewMachine( )
 {
   sampler_ = false;
 
+	id_ = MACH_UNDEFINED;
+
 	setTitle("Add New Machine");
 
   setPosition(100,100,500,500);
@@ -149,6 +151,8 @@ void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
     dllName_ = plugin.GetDllName();
     description->setText(std::string("Psycle Instrument by ")+ std::string(plugin.GetInfo()->Author));
     apiVersion->setText(stringify(plugin.GetInfo()->Version));
+		id_ = MACH_PLUGIN;
+
 
     pane()->resize();
     pane()->repaint();
@@ -192,7 +196,12 @@ bool NewMachine::sampler( )
 
 void NewMachine::onInternalItemSelected( NItemEvent * ev )
 {
-  if (ev->text() == "Sampler") sampler_=true; else sampler_=false;
+  if (ev->text() == "Sampler") {
+		sampler_= true; 
+		id_ = MACH_SAMPLER;
+	} else {
+		sampler_ = false;
+	}
 }
 
 void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
@@ -200,10 +209,16 @@ void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
 		if (plugin.loadPlugin( ev->item()->text()) ) {
     	name->setText( plugin.label() );
 			description->setText( plugin.name() );
+			id_ = MACH_LADSPA;
+			dllName_ = plugin.libName();
 		}
   
 		pane()->resize();
     pane()->repaint();
+}
+
+Machine::id_type NewMachine::selectedType() const {
+	return id_;
 }
 
 }
