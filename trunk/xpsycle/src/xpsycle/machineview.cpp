@@ -79,7 +79,6 @@ void MachineView::onCreateMachine( Machine * mac )
         MachineGUI* macGui = new EffektGUI(mac);
           macGui->moved.connect(this,&MachineView::onMoveMachine);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
-          macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
           macGui->selected.connect(this,&MachineView::onMachineSelected);
           macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
@@ -91,7 +90,6 @@ void MachineView::onCreateMachine( Machine * mac )
         MachineGUI* macGui = new MasterGUI(mac);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->moved.connect(this,&MachineView::onMoveMachine);
-          macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->selected.connect(this,&MachineView::onMachineSelected);
           macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
           scrollArea_->add(macGui);
@@ -168,6 +166,7 @@ MachineGUI * MachineView::findByMachine( Machine * mac )
 
 void MachineView::onNewConnection( MachineGUI * sender )
 {
+  std::cout << "yuppy" << std::endl;
   startGUI = sender;
 
   int midW = sender->clientWidth()  / 2;
@@ -183,7 +182,7 @@ void MachineView::onNewConnection( MachineGUI * sender )
 }
 
 void MachineView::onLineMoveEnd( const NMoveEvent & ev)
-{
+{	
   bool found = false;
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
@@ -202,7 +201,8 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev)
   if (!found) {
     scrollArea_->removeChild(line);
     repaint();
-  }
+  } else 
+		line->setMoveable( NMoveable() );
 }
 
 void MachineView::onWireDelete( WireDlg * dlg )

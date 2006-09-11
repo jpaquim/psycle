@@ -119,5 +119,5 @@ private:
 
 }}
 
-#endif // !defined XPSYCLE__NO_ALSA
+#endif   // !defined XPSYCLE__NO_ALSA
 #endif

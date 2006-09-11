@@ -46,7 +46,7 @@ class PluginFxCallback : public CFxCallback
     inline virtual int GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
 };
 
-class Plugin; // forward declaration
+class Plugin;  // forward declaration
 /// Proxy between the host and a plugin.
 
 class Proxy
