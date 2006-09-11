@@ -26,6 +26,7 @@
 #include <ngrs/ngroupbox.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nbevelborder.h>
+#include "machine.h"
 
 namespace psycle {
 namespace host {
@@ -83,12 +84,16 @@ public:
     bool outBus();
     bool sampler();
 
+		Machine::id_type selectedType() const;
+
 private:
 
   std::string dllName_;
 
   bool do_Execute;
   bool sampler_;
+
+	Machine::id_type id_;
 
   InfoLine* name;
   InfoLine* libName;
