@@ -70,9 +70,9 @@ namespace psycle
 		bool	JackOut::Enable( bool e )
 		{
 			if ( e ) {
-				registerToJackServer();
+				return registerToJackServer();
 			} else {
-				jack_client_close (client);
+				return jack_client_close (client);
 			}
 		}
 
