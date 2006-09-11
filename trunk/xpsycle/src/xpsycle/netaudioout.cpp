@@ -129,7 +129,7 @@ namespace psycle
 				AuCloseServer(aud_);
 				return false;
 			}
-			//handler_ = AuRegisterEventHandler(aud, 0, 0, 0, EventHandlerFunc,(AuPointer) *this)))
+//			handler_ = AuRegisterEventHandler(aud_, 0, 0, 0, EventHandlerFunc,(AuPointer) &(*this));
 
 			// 2)locate an stereo output device
 			AuDeviceID device = AuNone;
@@ -138,6 +138,7 @@ namespace psycle
 				if ((AuDeviceKind(dev) == AuComponentKindPhysicalOutput) &&
 					AuDeviceNumTracks(dev) == 2) {
 						device = AuDeviceIdentifier(dev);
+						std::cout << "i:" << i << " device ID :" << device << std::endl;
 						break;
 					}
 			}
@@ -155,16 +156,16 @@ namespace psycle
 				latency_, latency_/ 2, 0, NULL);
 			AuMakeElementExportDevice(&nas_elements[1], 0, device_, _samplesPerSec,
 				AuUnlimitedSamples, 0, NULL);
-			AuSetElements(aud_, flow_, AuTrue, 2, nas_elements, &status);
-			if (status != AuSuccess) {
-				std::cout << "Can't set audio elements" << nas_error(aud_,status) << std::endl;
-				AuCloseServer(aud_);
-				return false;
-			}
+			AuSetElements(aud_, flow_, AuTrue, 2, nas_elements, NULL);
+//			if (status != AuSuccess) {
+//				std::cout << "Can't set audio elements" << nas_error(aud_,status) << std::endl;
+//				AuCloseServer(aud_);
+//				return false;
+//			}
 
 
+			std::cout << " netaudio opened at " << hostPort() << std::endl;
 			return true;
-			std::cout << " netaudio opened " << hostPort() << std::endl;
 		}
 		
 		bool NetAudioOut::close()
@@ -195,48 +196,31 @@ namespace psycle
 			return nrv;
 		}
 
-/*		static AuBool NetAudioOut::EventHandlerFunc(AuServer *aud, AuEvent *ev, AuEventHandlerRec *handler)
+		AuBool NetAudioOut::EventHandlerFunc(AuServer *aud, AuEvent *ev, AuEventHandlerRec *handler)
 		{
-			GlobalDataPtr   g = (GlobalDataPtr) handler->data;
+		//	GlobalDataPtr   g = (GlobalDataPtr) handler->data;
 			AuElementNotifyEvent *event = (AuElementNotifyEvent *) ev;
 
 			if (ev->type == AuEventTypeElementNotify) {
 			switch (event->kind)
 			{
 				case AuElementNotifyKindHighWater:
-					readData(g, event);
-					writeData(g);
+//					readData(g, event);
+//					writeData(g);
 					break;
 				case AuElementNotifyKindLowWater:
-					g->outBytes += event->num_bytes;
-					writeData(g);
+//					g->outBytes += event->num_bytes;
+//					writeData(g);
 					break;
 				case AuElementNotifyKindState:
 					switch (event->cur_state)
 					{
 					case AuStateStop:
-						if (handler == g->remote.handler)
-						{
-							if (g->remote.callback)
-								(*g->remote.callback) (g);
-						}
-						else
-						{
-							if (g->local.callback)
-								(*g->local.callback) (g);
-						}
+					//	(*g->local.callback) (g);
 						break;
 					case AuStatePause:
-						if (aud == g->local.aud)
-						{
-							readData(g, event);
-							writeData(g);
-						}
-						else
-						{
-							g->outBytes += event->num_bytes;
-							writeData(g);
-						}
+//						readData(g, event);
+//						writeData(g);
 						break;
 					}
 					break;
@@ -244,7 +228,6 @@ namespace psycle
 
 			return AuTrue;
 		}
-*/
 
 		int NetAudioOut::audioOutThreadStatic( void * ptr )
 		{

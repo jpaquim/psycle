@@ -183,7 +183,7 @@ namespace psycle
 			} else
 			if (!e && threadRunning_) {
 				killThread_ = true;
-				usleep(500); // give thread time to close
+				while(threadRunning_) usleep(500); // give thread time to close
 				threadStarted = false;
 			}
 			return threadStarted;
