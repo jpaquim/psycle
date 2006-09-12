@@ -161,7 +161,7 @@ namespace psycle
 				{
 						LADSPAMachine* plugin = new LADSPAMachine(index,this);
 						machine = plugin;
-						plugin->loadPlugin(plugin_name);
+						plugin->loadDll(plugin_name);
 				}
 				break;
 				case MACH_VSTFX:

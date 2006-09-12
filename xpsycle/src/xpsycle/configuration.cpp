@@ -25,7 +25,7 @@
 #include "jackout.h"
 #include "gstreamerout.h"
 #include "esoundout.h"
-//#include "netaudioout.h"
+#include "netaudioout.h"
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
@@ -144,11 +144,11 @@ void Configuration::setSkinDefaults( )
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
-		/*#if !defined XPSYCLE__NO_NETAUDIO
+		#if !defined XPSYCLE__NO_NETAUDIO
 			driver = new NetAudioOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
-		#endif*/
+		#endif
 	}
 
 	setDriverByName("silent");
@@ -189,13 +189,13 @@ void Configuration::setDriverByName( const std::string & driverName )
 	if ( ( it = driverMap_.find( driverName ) ) != driverMap_.end() ) {
 		// driver found
 		_pOutputDriver = it->second;
-		std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
 	}
 	else {
 		// driver not found,  set silent default driver
 		_pOutputDriver = _pSilentDriver;
-		std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
 	}
+	std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
+
 }
 
 
@@ -242,7 +242,6 @@ void Configuration::loadConfig()
 		}
 	}
    }
-  
 }
 
 void Configuration::loadConfig(std::string const & path) throw(std::exception)

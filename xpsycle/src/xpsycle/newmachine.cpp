@@ -106,8 +106,9 @@ NewMachine::NewMachine( )
         internalPage_->add(new NItem("Sampler"));
         internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
-
-		std::string ladspa_path = std::getenv("LADSPA_PATH");
+         const char* bla = std::getenv("LADSPA_PATH");
+	 std::string ladspa_path = bla ? bla : "";
+//		std::string ladspa_path = std::getenv("LADSPA_PATH");
 
 		NPanel* ladspaPage = new NPanel();
 			ladspaPage->setLayout(NAlignLayout());
@@ -206,11 +207,11 @@ void NewMachine::onInternalItemSelected( NItemEvent * ev )
 
 void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
 		LADSPAMachine plugin(0, 0 );
-		if (plugin.loadPlugin( ev->item()->text()) ) {
+		if (plugin.loadDll( ev->item()->text()) ) {
     	name->setText( plugin.label() );
-			description->setText( plugin.name() );
+			description->setText( plugin.GetName() );
 			id_ = MACH_LADSPA;
-			dllName_ = plugin.libName();
+			dllName_ = plugin.GetDllName();
 		}
   
 		pane()->resize();
