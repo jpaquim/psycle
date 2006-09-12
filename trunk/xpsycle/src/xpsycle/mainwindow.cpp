@@ -65,23 +65,28 @@ MainWindow::MainWindow()
   setPosition(0,0,1024,768);
 	count = 0;
 
+  std::cout<< "initmenu" <<std::endl;
   initMenu();
+  std::cout << "initbars"<<std::endl;
   initBars();
+  std::cout << "initdialogs" <<std::endl;
   initDialogs();
-
+  std::cout << "book" << std::endl;
   book = new NTabBook();
     book->setTabBarVisible( false );
   pane()->add(book,nAlClient);
 
+  std::cout << "newmachine" << std::endl;
   newMachineDlg_ = new NewMachine( );
   add(newMachineDlg_);
-
+std::cout << "audioconfig" << std::endl;
 	audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
 	add( audioConfigDlg );
-
+std::cout << "initsongs" << std::endl;
   initSongs();
+  std::cout << "enablesound" << std::endl;
   enableSound();
-
+std::cout << " updatenewsong" << std::endl;
   updateNewSong();
  
   

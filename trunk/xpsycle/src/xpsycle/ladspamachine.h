@@ -31,31 +31,52 @@ namespace psycle {
 
 		class LADSPAMachine: public Machine {
 		public:
+            
+            LADSPAMachine( Machine::id_type id, Song* song );
+			virtual ~LADSPAMachine() throw();
 
-				LADSPAMachine( Machine::id_type id, Song* song );
+        public:
+            virtual void Init();
+            virtual int GenerateAudioInTicks( int startSample, int numSamples );
+            virtual void Tick(int channel, const PatternEvent & pEntry );
+            virtual void Stop(){}
+            inline virtual std::string GetDllName() const throw() { return libName_.c_str(); }
+            virtual std::string GetName() const { return (char *) psDescriptor->Name; };
 
-				virtual ~LADSPAMachine() throw();
+            virtual int GetNumParams() { return psDescriptor->PortCount; } // This is not correct, but for now it's ok.
+            virtual int GetNumCols() { (GetNumParams()/24)+1; } 
+            virtual void GetParamName(int numparam, char * name);
+            virtual void GetParamRange(int numparam,int &minval, int &maxval);
+            virtual int GetParamValue(int numparam);
+            virtual void GetParamValue(int numparam,char* parval);
+            virtual bool SetParameter(int numparam,int value);
 
-				bool loadPlugin( const std::string & fileName );
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveDllName      (RiffFile * pFile);
 
-				const LADSPA_Descriptor * pluginDescriptor();
 
-				virtual std::string GetName() const;
-
-				std::string name() const;
-				std::string label() const;
-				std::string libName() const;
+        public:
+			bool loadDll( const std::string & fileName ,int pluginIndex=0);
+            const LADSPA_Descriptor* pluginDescriptor() { return psDescriptor; }
+			std::string label() const
+			{
+			     return (psDescriptor)?psDescriptor->Label:"";
+			}
 
 		private:
+		
+            void *dlopenLADSPA(const char * pcFilename, int iFlag);
+            void prepareStructures(void);
 
-			void* pluginHandle_;
-			std::string ladspa_path;
+			void* libHandle_;
 			std::string libName_;
 
 			const LADSPA_Descriptor * psDescriptor;
+			/*const*/ LADSPA_Handle pluginHandle;
+			LADSPA_Data **ppfValues;
 
 		};
-
 	}
 }
 
