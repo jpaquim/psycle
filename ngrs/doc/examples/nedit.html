@@ -1,0 +1,34 @@
+<html>
+<body>
+<h1>NEdit</h1>
+<h3>
+Short Description:
+</h3>
+The NEdit component is a single line edit control. As data it holds a std::string.
+</h3>
+<h3>
+Methods
+</h3>
+<p>
+setText/text --std::string : setting and getting the string
+<br>
+setPos/pos --unsigned int : sets the cursor pos.
+<br>
+selText --std::string : gets a evtl. selected text.
+<br>
+setReadOnly -- bool : deactivates the keyboard functions
+<br>
+setVAlign -- int : sets the vertical text alignment : values nAlTop, nAlBottom, nAlCenter
+<br>
+setHAlign -- int : sets the horizontal text alignment : values nAlLeft, nAlRight, nAlCenter
+<br>
+</p>
+<h3>
+Events
+</h3>
+keyPress -- const NKeyEvent & : is fired at keypress
+<br>
+alternativ override : void onKeyPress(const NKeyEvent & keyevent);
+
+</body>
+</html>

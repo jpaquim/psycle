@@ -78,7 +78,9 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-   std::cout << "testwin-id:" << win() << std::endl;
+  testEdit();
+
+/*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();
 
    NSplitBar* spl = new NSplitBar();
@@ -88,7 +90,7 @@ NTestWindow::NTestWindow()
 	NButton* btn = new NButton("hint test");
 		btn->setHint("Save as audio File");
 		btn->clicked.connect(this, &NTestWindow::onBtnClick);
-	pane()->add( btn, nAlTop);
+	pane()->add( btn, nAlTop);*/
 
 
  /* NSlider* slider = new NSlider();
@@ -606,11 +608,11 @@ void NTestWindow::onMousePress( int x, int y, int button )
 {
   NWindow::onMousePress(x,y,button);
 
-  NLine* line = new NLine();
+  /*NLine* line = new NLine();
      line->setPoints( NPoint(x,y), NPoint(x,y));
      line->setMoveable( nMvPolygonPicker );
    pane()->add(line);
-  line->setMoveFocus(0);
+  line->setMoveFocus(0);*/
 }
 
 

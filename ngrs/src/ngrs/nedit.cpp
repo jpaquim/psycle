@@ -80,7 +80,25 @@ void NEdit::paint( NGraphics * g )
 
   NPoint screenPos = getScreenPos(g, text_);
 
-  g->drawText( screenPos.x() , screenPos.y() ,text_);
+	if ( selEndIdx_ != selStartIdx_ ) {
+		std::string startText = text_.substr(0, selStartIdx_ );
+		std::string midText   = text_.substr(selStartIdx_, selEndIdx_-selStartIdx_);
+		std::string endText   = text_.substr(selEndIdx_);
+
+		int xoff = screenPos.x();
+		g->drawText(  xoff , screenPos.y() , startText );
+		xoff+= g->textWidth( startText );
+    NColor oldColor = foreground();
+		g->setForeground( NColor(0,0,255));
+		g->fillRect( xoff, 0, g->textWidth( midText ), clientHeight() );
+		setForeground( oldColor );
+		g->drawText(  xoff , screenPos.y() , midText );
+		xoff+= g->textWidth( midText );
+		g->drawText(  xoff , screenPos.y() , endText );
+
+	} else {
+  	g->drawText( screenPos.x() , screenPos.y() ,text_);
+	}
 
   if (focus() && !readOnly_) drawCursor(g,text_);
 }
@@ -100,16 +118,24 @@ int NEdit::computeDx( NGraphics* g, const std::string & text )
 {
   if (autoSize_) return 0;
 
-  int dx = 0;
+  dx = 0;
 
   NPoint screenPos = getScreenPos(g, text );
 
-  int w  = g->textWidth(text.substr(0,pos()));
-  int wa = g->textWidth(text);
+	int w = 0;
+	int wa = g->textWidth(text);
+
+	if ( pos() == text.length() )
+		w  = wa + g->textWidth("A");
+	else
+    w = g->textWidth(text.substr(0,pos()+1));
 
   switch (halign_) {
       case nAlLeft:
-          if (screenPos.x()+w > spacingWidth()) dx = w - spacingWidth();
+          if (screenPos.x()+w >= spacingWidth()) {
+						dx = w - spacingWidth(); 
+					}
+						else
           if (screenPos.x()+w < 0 ) dx = w;
       break;
       case nAlRight:
@@ -333,6 +359,43 @@ void NEdit::setReadOnly( bool on )
   readOnly_ = on;
 }
 
+void NEdit::onMousePress( int x, int y, int button ) {
+  NPanel::onMousePress( x, y, button );  
+
+	NFntString myText;
+  myText.setText( text_ );
+  int newPos = findWidthMax( x + dx, myText );
+  pos_ = newPos;
+  repaint();
+}
+
+int NEdit::findWidthMax(long width, const NFntString & data ) const
+{
+  NFontMetrics metrics(font());
+  int Low = 0; int High = data.length();  int Mid=High;
+  while( Low <= High ) {
+    Mid = ( Low + High ) / 2;
+    NFntString s     = data.substr(0,Mid);
+    NFntString snext;
+    if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
+    int w     = metrics.textWidth(s);
+    if(  w < width  ) {
+                        int wnext = metrics.textWidth(snext);
+                        if (wnext  >= width ) break;
+                        Low = Mid + 1; 
+                      } else
+                      {
+                        High = Mid - 1;
+                      }
+  }  
+  return Mid;
+
+}
+
+std::string NEdit::selText() const {
+  std::string midText   = text_.substr(selStartIdx_, selEndIdx_-selStartIdx_);
+  return midText;
+}
 
 
 

@@ -40,12 +40,15 @@ public:
 
     void setText(const std::string & text);
     const std::string & text() const;
+		std::string selText() const;
 
     virtual void paint(NGraphics* g);
     virtual void onKeyPress(const NKeyEvent & keyevent);
 
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
+
+		virtual void onMousePress( int x, int y, int button );
 
     virtual void onEnter();
     virtual void onExit();
@@ -76,6 +79,7 @@ private:
     NPoint getScreenPos(NGraphics* g, const std::string & text );
     int computeDx( NGraphics* g, const std::string & text );
     void drawCursor(NGraphics* g, const std::string & text );
+		int findWidthMax(long width, const NFntString & data ) const;
 
     void init();
 
