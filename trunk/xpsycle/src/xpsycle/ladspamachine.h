@@ -37,14 +37,14 @@ namespace psycle {
 
         public:
             virtual void Init();
-            virtual int GenerateAudioInTicks( int startSample, int numSamples );
+            virtual int GenerateAudio(int numSamples );
             virtual void Tick(int channel, const PatternEvent & pEntry );
             virtual void Stop(){}
             inline virtual std::string GetDllName() const throw() { return libName_.c_str(); }
-            virtual std::string GetName() const { return (char *) psDescriptor->Name; };
+            virtual std::string GetName() const { return (char *) (psDescriptor)?psDescriptor->Name:""; };
 
             virtual int GetNumParams() { return psDescriptor->PortCount; } // This is not correct, but for now it's ok.
-            virtual int GetNumCols() { (GetNumParams()/24)+1; } 
+            virtual int GetNumCols() { (GetNumParams()/12)+1; } 
             virtual void GetParamName(int numparam, char * name);
             virtual void GetParamRange(int numparam,int &minval, int &maxval);
             virtual int GetParamValue(int numparam);
@@ -68,13 +68,15 @@ namespace psycle {
 		
             void *dlopenLADSPA(const char * pcFilename, int iFlag);
             void prepareStructures(void);
-
+			LADSPA_Data GetMinValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
+			LADSPA_Data GetMaxValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
+			void SetDefaultsForControls();
 			void* libHandle_;
 			std::string libName_;
 
 			const LADSPA_Descriptor * psDescriptor;
 			/*const*/ LADSPA_Handle pluginHandle;
-			LADSPA_Data **ppfValues;
+			LADSPA_Data *pValues;
 
 		};
 	}

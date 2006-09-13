@@ -106,9 +106,13 @@ NewMachine::NewMachine( )
         internalPage_->add(new NItem("Sampler"));
         internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
-         const char* bla = std::getenv("LADSPA_PATH");
-	 std::string ladspa_path = bla ? bla : "";
-//		std::string ladspa_path = std::getenv("LADSPA_PATH");
+
+
+              const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
+              if ( !pcLADSPAPath) pcLADSPAPath = "/usr/lib/ladspa/";
+              std::string ladspa_path(pcLADSPAPath);
+              int dotpos = ladspa_path.find(':',0);
+			  if (dotpos != ladspa_path.npos) ladspa_path = ladspa_path.substr(0,dotpos);
 
 		NPanel* ladspaPage = new NPanel();
 			ladspaPage->setLayout(NAlignLayout());
@@ -208,12 +212,16 @@ void NewMachine::onInternalItemSelected( NItemEvent * ev )
 void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
 		LADSPAMachine plugin(0, 0 );
 		if (plugin.loadDll( ev->item()->text()) ) {
-    	name->setText( plugin.label() );
+			std::cout << "settext" << std::endl;
+			name->setText( plugin.label() );
+			std::cout << "description" << std::endl;
 			description->setText( plugin.GetName() );
 			id_ = MACH_LADSPA;
+			std::cout << "dllname" << std::endl;
 			dllName_ = plugin.GetDllName();
 		}
-  
+  		std::cout << "going out" << std::endl;
+
 		pane()->resize();
     pane()->repaint();
 }
