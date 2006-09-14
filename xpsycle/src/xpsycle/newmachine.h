@@ -27,6 +27,7 @@
 #include <ngrs/nlabel.h>
 #include <ngrs/nbevelborder.h>
 #include "machine.h"
+#include "pluginfinder.h"
 
 namespace psycle {
 namespace host {
@@ -93,6 +94,8 @@ private:
   bool do_Execute;
   bool sampler_;
 
+	PluginFinder finder;
+
 	Machine::id_type id_;
 
   InfoLine* name;
@@ -105,6 +108,7 @@ private:
 
   NFileListBox* generatorfBox_;
   NFileListBox* effectfBox_;
+	NListBox* ladspaBox_;
 
   void onGeneratorItemSelected(NItemEvent* ev);
   void onInternalItemSelected(NItemEvent* ev);

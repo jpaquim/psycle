@@ -362,6 +362,7 @@ namespace psycle
 			}
 			return true;
 		}
+
 		bool Psy2Filter::PreLoadVSTs(RiffFile* file,Song& song)
 		{
 			std::int32_t i;

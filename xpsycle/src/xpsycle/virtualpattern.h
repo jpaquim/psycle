@@ -30,6 +30,14 @@
 namespace psycle {
 	namespace host {
 
+		class VirtualPatternSequenceHeader : NPanel {
+
+			VirtualPatternSequenceHeader();
+
+			~VirtualPatternSequenceHeader();
+
+		};
+
 		class VirtualPattern : public NPanel {
 		public:
 				VirtualPattern();

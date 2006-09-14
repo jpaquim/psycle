@@ -22,6 +22,16 @@
 namespace psycle {
 	namespace host {
 
+
+		VirtualPatternSequenceHeader::VirtualPatternSequenceHeader() : NPanel() {
+
+		}
+
+		VirtualPatternSequenceHeader::~VirtualPatternSequenceHeader() {
+
+		}
+
+
 		VirtualPattern::VirtualPattern()
 		{
 		}

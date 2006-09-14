@@ -25,7 +25,7 @@
 #include "jackout.h"
 #include "gstreamerout.h"
 #include "esoundout.h"
-#include "netaudioout.h"
+//#include "netaudioout.h"
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
 #include <ngrs/nconfig.h>
@@ -144,11 +144,11 @@ void Configuration::setSkinDefaults( )
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif
-		#if !defined XPSYCLE__NO_NETAUDIO
+		/*#if !defined XPSYCLE__NO_NETAUDIO
 			driver = new NetAudioOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
-		#endif
+		#endif*/
 	}
 
 	setDriverByName("silent");
@@ -230,7 +230,7 @@ void Configuration::loadConfig()
 	  	}
 	} else {
 
-  	path=XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
+/*  	path=XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
 	if (path.length()!=0){
 		try {
 		    loadConfig(path);
@@ -239,7 +239,7 @@ void Configuration::loadConfig()
 		  {
 			std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 		  }
-		}
+		}*/
 	}
    }
 }
