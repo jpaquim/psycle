@@ -60,7 +60,7 @@ void NRegion::setRect( const NRect & rect )
 void NRegion::setPolygon(XPoint*  pts , int size)
 {
   XDestroyRegion(region_);
-  region_ = XPolygonRegion(pts,4,WindingRule);
+  region_ = XPolygonRegion(pts,size,WindingRule);
   update = true;
 }
 
