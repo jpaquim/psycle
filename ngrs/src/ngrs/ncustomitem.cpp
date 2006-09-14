@@ -23,6 +23,7 @@ NCustomItem::NCustomItem()
  : NPanel()
 {
   obj_ = 0;
+	value_ = 0;
 }
 
 
@@ -43,6 +44,14 @@ void NCustomItem::setObject( NObject * obj )
 NObject * NCustomItem::object( )
 {
   return obj_;
+}
+
+void NCustomItem::setIntValue( int value ) {
+  value_ = value;
+}
+
+int NCustomItem::intValue() const {
+  return value_;
 }
 
 bool NCustomItem::operator <( const NCustomItem & rhs ) const
