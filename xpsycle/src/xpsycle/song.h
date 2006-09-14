@@ -75,17 +75,17 @@ namespace psycle
 			///\{
 				public:
 					/// creates a new machine in this song.
-					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy") throw(std::exception)
+					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy", int pluginIndex = 0) throw(std::exception)
 					{
 						Machine::id_type const array_index(GetFreeMachine());
 						if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
-						if(!CreateMachine(type, x, y, plugin_name, array_index))
+						if(!CreateMachine(type, x, y, plugin_name, array_index, pluginIndex))
 							throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
 						return *_pMachine[array_index];
 					}
 
 					/// creates a new machine in this song.
-					bool CreateMachine(Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type);
+					bool CreateMachine(Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type, int pluginIndex);
 
 					/// Gets the first free slot in the pMachine[] Array
 					///\todo it's low-level.. should be private.

@@ -38,6 +38,7 @@ NewMachine::NewMachine( )
   sampler_ = false;
 
 	id_ = MACH_UNDEFINED;
+	pluginIndex_ = 0;
 
 	setTitle("Add New Machine");
 
@@ -214,6 +215,7 @@ void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
 		
 		LADSPAMachine plugin(0, 0 );
 		if (plugin.loadDll( item->text(), item->intValue() ) ) {
+			pluginIndex_ = item->intValue();
 			std::cout << "settext" << std::endl;
 			name->setText( plugin.label() );
 			std::cout << "description" << std::endl;
@@ -230,6 +232,10 @@ void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
 
 Machine::id_type NewMachine::selectedType() const {
 	return id_;
+}
+
+int NewMachine::pluginIndex() const {
+  return pluginIndex_;
 }
 
 }

@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "pluginfinder.h"
 #include "ladspamachine.h"
-#include <nfile.h>
+#include <ngrs/nfile.h>
 
 namespace psycle
 {
@@ -168,8 +168,7 @@ namespace psycle
 			std::string ladspa_path(pcLADSPAPath);
 			int dotpos = ladspa_path.find(':',0);
 			if (dotpos != ladspa_path.npos) ladspa_path = ladspa_path.substr(0,dotpos);
-
-			LADSPAMachine plugin(0, 0 );
+			
 
 			const LADSPA_Descriptor * psDescriptor;
 			LADSPA_Descriptor_Function pfDescriptorFunction;
@@ -181,6 +180,7 @@ namespace psycle
 			std::vector<std::string>::iterator it = fileList.begin();
 			for ( ; it < fileList.end(); it++ ) {
 				std::string fileName = *it;
+				LADSPAMachine plugin(0, 0 );
 				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path+ "/" +fileName);
 				if (pfDescriptorFunction) {
 					for (lPluginIndex = 0;; lPluginIndex++) {
