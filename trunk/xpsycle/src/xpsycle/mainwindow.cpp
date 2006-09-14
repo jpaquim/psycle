@@ -1074,7 +1074,7 @@ void MainWindow::onNewMachine( NButtonEvent * ev )
             selectedChildView_->machineView()->repaint();
           } else 
 					if (newMachineDlg_->selectedType() == MACH_LADSPA){
-						selectedChildView_->song()->CreateMachine(MACH_LADSPA, x, y, newMachineDlg_->getDllName(),fb);
+						selectedChildView_->song()->CreateMachine(MACH_LADSPA, x, y, newMachineDlg_->getDllName(),fb, newMachineDlg_->pluginIndex());
             selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->machineView()->repaint();

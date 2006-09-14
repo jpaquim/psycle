@@ -86,6 +86,7 @@ public:
     bool sampler();
 
 		Machine::id_type selectedType() const;
+		int pluginIndex() const;
 
 private:
 
@@ -97,6 +98,7 @@ private:
 	PluginFinder finder;
 
 	Machine::id_type id_;
+  int pluginIndex_;
 
   InfoLine* name;
   InfoLine* libName;

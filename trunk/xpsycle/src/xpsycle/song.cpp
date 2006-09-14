@@ -98,7 +98,7 @@ namespace psycle
 		}
 
 
-		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index)
+		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index, int pluginIndex)
 		{
 			Machine * machine(0);
 			switch (type)
@@ -161,7 +161,7 @@ namespace psycle
 				{
 						LADSPAMachine* plugin = new LADSPAMachine(index,this);
 						machine = plugin;
-						plugin->loadDll(plugin_name);
+						plugin->loadDll(plugin_name, pluginIndex);
 				}
 				break;
 				case MACH_VSTFX:
