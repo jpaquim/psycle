@@ -57,6 +57,9 @@ namespace psycle {
 
 
         public:
+
+					LADSPA_Descriptor_Function loadDescriptorFunction( const std::string & fileName );
+
 			bool loadDll( const std::string & fileName ,int pluginIndex=0);
             const LADSPA_Descriptor* pluginDescriptor() { return psDescriptor; }
 			std::string label() const

@@ -21,6 +21,7 @@
 #include "plugin.h"
 #include "ladspamachine.h"
 #include "configuration.h"
+#include "newmachine.h"
 #include <ngrs/nborderlayout.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>
@@ -107,24 +108,23 @@ NewMachine::NewMachine( )
         internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
 
-
-              const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
-              if ( !pcLADSPAPath) pcLADSPAPath = "/usr/lib/ladspa/";
-              std::string ladspa_path(pcLADSPAPath);
-              int dotpos = ladspa_path.find(':',0);
-			  if (dotpos != ladspa_path.npos) ladspa_path = ladspa_path.substr(0,dotpos);
+		finder.scanAll();
 
 		NPanel* ladspaPage = new NPanel();
 			ladspaPage->setLayout(NAlignLayout());
-			NFileListBox* ladspaBox_ = new NFileListBox();
-			ladspaBox_->addFilter(".so","!S*.so!S*");
-            ladspaBox_->setMode(nFiles);
-            ladspaBox_->setAlign(nAlClient);
-            ladspaBox_->setDirectory( ladspa_path );
-            ladspaBox_->setActiveFilter(".so");
-            ladspaBox_->update();
-            ladspaBox_->itemSelected.connect(this,&NewMachine::onLADSPAItemSelected);
-        ladspaPage->add(ladspaBox_);
+        ladspaBox_ = new NListBox();
+        ladspaBox_->itemSelected.connect(this,&NewMachine::onLADSPAItemSelected);
+				std::map< PluginFinderKey, PluginInfo >::const_iterator it = finder.begin();
+				for ( ; it != finder.end(); it++ ) {
+					PluginFinderKey key = it->first;
+					PluginInfo info = it->second;
+					if ( info.type() == MACH_LADSPA ) {
+						NItem* item = new NItem( info.libName() );
+						item->setIntValue( key.index() );
+						ladspaBox_->add( item );
+					}
+				}			
+      ladspaPage->add(ladspaBox_, nAlClient);
 	tabBook_->addPage(ladspaPage,"ladspaPage");
 
   pane()->add(tabBook_);
@@ -210,8 +210,10 @@ void NewMachine::onInternalItemSelected( NItemEvent * ev )
 }
 
 void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
+		NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
+		
 		LADSPAMachine plugin(0, 0 );
-		if (plugin.loadDll( ev->item()->text()) ) {
+		if (plugin.loadDll( item->text(), item->intValue() ) ) {
 			std::cout << "settext" << std::endl;
 			name->setText( plugin.label() );
 			std::cout << "description" << std::endl;

@@ -161,7 +161,8 @@ void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
 void PatternView::onHScrollBar( NScrollBar * sender )
 {
   double pos = sender->pos();
-  int newPos = (pos / drawArea->colWidth()) * drawArea->colWidth();
+
+  int newPos = drawArea->xOffByTrack( drawArea->findTrackByScreenX( pos ) );
 
   if (newPos != drawArea->dx()) {
     header->setScrollDx(newPos);
@@ -238,6 +239,7 @@ void PatternView::updateRange() {
   if ( !hBar || !tweakHeader || !header || !drawArea ||! tweakHBar) return;
 
   hBar->setRange( 0, header->preferredWidth() - drawArea->clientWidth());
+	// this is only a hint for the standard colwidth.. not 100 percent correct
   hBar->setSmallChange( drawArea->colWidth() );
   hBar->setLargeChange( drawArea->colWidth() );
 

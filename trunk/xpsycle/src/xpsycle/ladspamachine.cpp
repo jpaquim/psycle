@@ -162,6 +162,30 @@ namespace psycle {
 		} // end of loadPlugin
 
 
+		LADSPA_Descriptor_Function LADSPAMachine::loadDescriptorFunction( const std::string & fileName ) {
+			// Step one: Open the shared library.
+			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
+			if ( !libHandle_ ) {
+				std::cerr << "Cannot load library: " << dlerror() << std::endl;
+		        return 0;
+			}
+			std::cout << "step two" << std::endl;
+            // Step two: Get the entry function.
+			LADSPA_Descriptor_Function pfDescriptorFunction =
+				 (LADSPA_Descriptor_Function)dlsym( libHandle_, "ladspa_descriptor");
+
+			if (!pfDescriptorFunction) {
+				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
+				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+				std::cerr << dlerror() << std::endl;
+				dlclose(libHandle_); libHandle_=0;
+				return 0;
+			}
+
+			return pfDescriptorFunction;
+
+		}
+
 		void LADSPAMachine::prepareStructures()
 		{
 		      // Audio Buffers

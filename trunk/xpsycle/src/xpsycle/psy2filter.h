@@ -35,9 +35,9 @@ namespace psycle
 		class RiffFile;
 
 
-class Psy2Filter : public PsyFilter
-{
-protected:
+		class Psy2Filter : public PsyFilter
+		{
+		protected:
 				class VSTLoader
 				{
 					public:
