@@ -39,11 +39,15 @@ public:
     void setObject( NObject* obj);
     NObject* object();
 
+		void setIntValue( int value );
+		int intValue() const;
+
    bool operator<(const NCustomItem & rhs) const;
 
 private:
 
    NObject* obj_;
+   int value_;
 
 };
 
