@@ -311,9 +311,10 @@ namespace psycle {
 			
 			if (LADSPA_IS_HINT_BOUNDED_BELOW(iHintDescriptor)) {
 				LADSPA_Data fBound = values_[lPortIndex].minval();
-/*			if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0) 
-					// fBound*=samplerate;
-*/				  
+			std::cout << " min value:" << fBound << std::endl;
+			if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0) 
+					 fBound*=samplerate;
+				  
 				  return fBound;
 			}
 			else if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor)) {
@@ -325,10 +326,11 @@ namespace psycle {
 		LADSPA_Data LADSPAMachine::GetMaxValue(int lPortIndex,LADSPA_PortRangeHintDescriptor iHintDescriptor)
 		{
 			  if (LADSPA_IS_HINT_BOUNDED_ABOVE(iHintDescriptor)) {
-				LADSPA_Data fBound = values_[lPortIndex].minval();
-/*			if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0)
+				LADSPA_Data fBound = values_[lPortIndex].maxval();
+			  std::cout << " max value:" << fBound << std::endl;
+			if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0)
 					// fBound*=samplerate;
-*/				  
+				  
 				return fBound;
 			}
 			else if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor)) {
