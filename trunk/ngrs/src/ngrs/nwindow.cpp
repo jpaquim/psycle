@@ -58,6 +58,7 @@ NWindow::NWindow()
 
 NWindow::~NWindow()
 {
+  std::cout << "deleting" << name() << std::endl;
   if (mapped()) NApp::system().unmapWindow(win_);
   delete graphics_;
   NApp::removeWindow(win_);
@@ -331,7 +332,6 @@ int NWindow::onClose( )
   }
   exitLoop_ = nDestroyWindow;
   setVisible(false);
-  std::cout << nDestroyWindow << std::endl;
   return nDestroyWindow;
 }
 
