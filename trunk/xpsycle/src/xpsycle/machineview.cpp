@@ -182,7 +182,7 @@ void MachineView::onNewConnection( MachineGUI * sender )
 }
 
 void MachineView::onLineMoveEnd( const NMoveEvent & ev)
-{	
+{	 
   bool found = false;
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
@@ -194,15 +194,16 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev)
       line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
       line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
       found = true;
-      repaint();
+      repaint(); 
       break;
-    }
+    } 
   }
   if (!found) {
+		line->dialog()->setName("wiredlg");
     scrollArea_->removeChild(line);
     repaint();
   } else 
-		line->setMoveable( NMoveable() );
+		line->setMoveable( NMoveable() ); 
 }
 
 void MachineView::onWireDelete( WireDlg * dlg )
@@ -283,8 +284,8 @@ void MachineView::onMachineSelected( MachineGUI * gui )
     selectedMachine_ = gui;
     gui->setSelected(true);
     gui->repaint();
-    selected.emit(gui->pMac());
-  }
+    selected.emit(gui->pMac()); 
+  } 
 }
 
 void MachineView::setSelectedMachine( Machine* mac)
@@ -304,10 +305,10 @@ void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
   int index = machineGUI->pMac()->_macIndex;
 	_pSong->DestroyMachine( index );
   selectedMachine_ = 0;
-  update();		
-  machineDeleted.emit(index);
+  update();		 
+  machineDeleted.emit(index); 
 }
-
+ 
 }
 }
 

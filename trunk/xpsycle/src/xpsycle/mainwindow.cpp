@@ -961,7 +961,7 @@ bool MainWindow::checkUnsavedSong( )
   }
   NApp::addRemovePipe(box);
   return result;
-}
+}  
 
 // Sequencer menu events
 
@@ -971,7 +971,7 @@ void MainWindow::onSequencerView( NButtonEvent * ev )
 
   selectedChildView_->showSequencerView();
 }
-
+   
 void MainWindow::onViewMenuToolbar( NButtonEvent * ev )
 {
   toolBar1_->setVisible(!toolBar1_->visible());
