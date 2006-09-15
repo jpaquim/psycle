@@ -20,6 +20,7 @@
 #include "ladspamachine.h"
 #include "player.h"
 #include <dlfcn.h>
+#include "dsp.h"
 
 namespace psycle {
 	namespace host {
@@ -29,17 +30,16 @@ namespace psycle {
 		{
 			_audiorange = 1.0f;
 			_editName = "ladspa plug";
-			pValues=0;
 			psDescriptor = 0;
 			pluginHandle = 0;
 			libHandle_=0;
+			pOutSamplesL= new LADSPA_Data[STREAM_SIZE];
+			pOutSamplesR= new LADSPA_Data[STREAM_SIZE];
 		}
 
 
 		LADSPAMachine::~LADSPAMachine() throw()
         {
-                ///\todo: deactivate if activated
-           if ( pValues ) delete[] pValues;
             if ( pluginHandle )
             {
                 if ( psDescriptor->deactivate ) psDescriptor->deactivate(pluginHandle);
@@ -48,6 +48,8 @@ namespace psycle {
 				psDescriptor=0;
              }
             if ( libHandle_ ) dlclose(libHandle_);
+			delete[] pOutSamplesL;
+			delete[] pOutSamplesR;
 		}
 		
 /*****************************************************************************
@@ -158,6 +160,7 @@ namespace psycle {
 
             if (psDescriptor->activate) psDescriptor->activate(pluginHandle);
 			libName_ = fileName;
+			_editName = label();
    			return true;
 		} // end of loadPlugin
 
@@ -188,44 +191,42 @@ namespace psycle {
 
 		void LADSPAMachine::prepareStructures()
 		{
-		      // Audio Buffers
-		    LADSPA_Data *ppbuffers[]={_pSamplesL,_pSamplesR};
-            int lBufferIndex = 0;
-            for (int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
-                LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
-                if (LADSPA_IS_PORT_INPUT(iPortDescriptor) 
-                    && LADSPA_IS_PORT_AUDIO(iPortDescriptor))
-                        psDescriptor->connect_port(pluginHandle,lPortIndex,
-                    	   ppbuffers[lBufferIndex++]);
-                 // Only Stereo for now.
-                 if (lBufferIndex==2) break;
-            }
-            
-            lBufferIndex = 0;
-            for (int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
-                LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
-                if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor) 
-                    && LADSPA_IS_PORT_AUDIO(iPortDescriptor))
-                        psDescriptor->connect_port(pluginHandle,lPortIndex,
-                    	   ppbuffers[lBufferIndex++]);
-                 // Only Stereo for now.
-                 if (lBufferIndex==2) break;
-            }
-
             // Controls
-            pValues = new LADSPA_Data[psDescriptor->PortCount];
-            lBufferIndex = 0;
+		    LADSPA_Data *ppbuffersIn[]={_pSamplesL,_pSamplesR};
+		    LADSPA_Data *ppbuffersOut[]={pOutSamplesL,pOutSamplesR};
+		
+            _numPars=0;
+			int indexinput(0),indexoutput(0);
             for (int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
                 LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
                 if (LADSPA_IS_PORT_CONTROL(iPortDescriptor)) {
+					LadspaParam parameter(iPortDescriptor,psDescriptor->PortRangeHints[lPortIndex],psDescriptor->PortNames[lPortIndex]);
+					values_.push_back(parameter);
                     if (LADSPA_IS_PORT_INPUT(iPortDescriptor))
+					{
                         psDescriptor->connect_port(pluginHandle,lPortIndex,
-                    	   &pValues[lBufferIndex++]);
+                    	   values_[_numPars].valueaddress());
+					}
                     else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor))
+					{
                         psDescriptor->connect_port(pluginHandle,lPortIndex,
-                    	   &pValues[lBufferIndex++]);
+                    	   controls_[_numPars].valueaddress());
+					}
+					_numPars++;
                 }
+				else if (LADSPA_IS_PORT_AUDIO(iPortDescriptor))
+				{
+					 // Only Stereo for now.
+					// note, the connections are inverted because we do an inversion in PreWork() (in order to avoid the BROKEN_INPLACE problems)
+					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)  && indexoutput < 2 )
+                        psDescriptor->connect_port(pluginHandle,lPortIndex,
+                    	   ppbuffersOut[indexoutput++]);
+					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)  && indexinput < 2 )
+                        psDescriptor->connect_port(pluginHandle,lPortIndex,
+                    	   ppbuffersIn[indexinput++]);
+				}
             }
+			_nCols = (GetNumParams()/12)+1;
 		}
 		
         void LADSPAMachine::Init()
@@ -241,72 +242,111 @@ namespace psycle {
             }
         }
 	
+		void LADSPAMachine::PreWork(int numSamples)
+		{
+			float *tmpbufL(_pSamplesL),*tmpbufR(_pSamplesR);
+			_pSamplesL=pOutSamplesL; _pSamplesR=pOutSamplesR;
+			pOutSamplesL=tmpbufL; pOutSamplesR=tmpbufR;
+			Machine::PreWork(numSamples);
+			dsp::Clear(pOutSamplesL,sizeof(pOutSamplesL));dsp::Clear(pOutSamplesR,sizeof(pOutSamplesR));
+		}
 
 		int LADSPAMachine:: GenerateAudio(int numSamples )
 		{
-	           psDescriptor->run(pluginHandle,numSamples);
-	           return numSamples;
+			float *tmpbufL(_pSamplesL),*tmpbufR(_pSamplesR);
+			psDescriptor->run(pluginHandle,numSamples);
+			_pSamplesL=pOutSamplesL; _pSamplesR=pOutSamplesR;
+			pOutSamplesL=tmpbufL; pOutSamplesR=tmpbufR;
+			return numSamples;
 		}
          void  LADSPAMachine::GetParamName(int numparam, char * name)
 		{
-			strcpy(name,psDescriptor->PortNames[numparam]);
+			strcpy(name,values_[numparam].name());
 		}
          void  LADSPAMachine::GetParamRange(int numparam,int &minval, int &maxval)
 		{
-			LADSPA_PortRangeHintDescriptor iHintDescriptor = psDescriptor->PortRangeHints[numparam].HintDescriptor;
-			minval=GetMinValue(numparam,iHintDescriptor)*32768;
-			maxval=GetMaxValue(numparam,iHintDescriptor)*32768;
+			LADSPA_PortRangeHintDescriptor iHintDescriptor = values_[numparam].hint();
+			minval=GetMinValue(numparam,iHintDescriptor);
+			maxval=GetMaxValue(numparam,iHintDescriptor);
 			
 		}
 		///\ todo: use the hings in the get/setparamvalue
-         int  LADSPAMachine::GetParamValue(int numparam) { return pValues[numparam]; } 
-         void LADSPAMachine:: GetParamValue(int numparam,char* parval) {}
-         bool  LADSPAMachine::SetParameter(int numparam,int value) {pValues[numparam]=value; return true;}
+         int  LADSPAMachine::GetParamValue(int numparam) { return values_[numparam].value(); } 
+         void LADSPAMachine:: GetParamValue(int numparam,char* parval) 
+		{
+			LADSPA_PortRangeHintDescriptor iHintDescriptor = values_[numparam].hint();
+			float value = values_[numparam].value();
+			if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor))
+			{
+				std::strcpy(parval, (value>0.0)?"on":"off");
+			}
+			else 
+			{
+				if (LADSPA_IS_HINT_LOGARITHMIC(iHintDescriptor))
+				{
+					value = log(value);
+				}
+				if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor))
+				{
+					value = value*Player::Instance()->timeInfo().sampleRate();;
+				}
+				if (LADSPA_IS_HINT_INTEGER(iHintDescriptor)) 
+				{
+					std::sprintf(parval, "%.0f", value);
+				}
+				else
+				{
+					std::sprintf(parval, "%.4f", value);
+				}
+			}
+		 }
+         bool  LADSPAMachine::SetParameter(int numparam,int value) { values_[numparam].setValue(value); return true;}
 
 		bool  LADSPAMachine::LoadSpecificChunk(RiffFile * pFile, int version) {return false;}
 		void  LADSPAMachine::SaveSpecificChunk(RiffFile * pFile) {}
 		void  LADSPAMachine::SaveDllName      (RiffFile * pFile){}
 
-		LADSPA_Data LADSPAMachine::GetMinValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor)
+		LADSPA_Data LADSPAMachine::GetMinValue(int lPortIndex,LADSPA_PortRangeHintDescriptor iHintDescriptor)
 		{
-				if (LADSPA_IS_HINT_BOUNDED_BELOW(iHintDescriptor)) {
-					LADSPA_Data fBound = psDescriptor->PortRangeHints[lPortIndex].LowerBound;
-/*					if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0) 
-					  printf("%g*srate", fBound);
-					else
-					  printf("%g", fBound);
+			
+			if (LADSPA_IS_HINT_BOUNDED_BELOW(iHintDescriptor)) {
+				LADSPA_Data fBound = values_[lPortIndex].minval();
+/*			if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0) 
+					// fBound*=samplerate;
 */				  
-					  return fBound;
-				}
-				else if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor)) {
-					return 0;
-				}
+				  return fBound;
+			}
+			else if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor)) {
+				return 0;
+			}
+			//else if (LADSPA_IS_HINT_LOGARITHMIC(iHintDescriptor)) 
+			else return 0;
 		}
-		LADSPA_Data LADSPAMachine::GetMaxValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor)
+		LADSPA_Data LADSPAMachine::GetMaxValue(int lPortIndex,LADSPA_PortRangeHintDescriptor iHintDescriptor)
 		{
-				  if (LADSPA_IS_HINT_BOUNDED_ABOVE(iHintDescriptor)) {
-					LADSPA_Data fBound = psDescriptor->PortRangeHints[lPortIndex].UpperBound;
-/*					if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0)
-					  printf("%g*srate", fBound);
-					else
-					  printf("%g", fBound);
+			  if (LADSPA_IS_HINT_BOUNDED_ABOVE(iHintDescriptor)) {
+				LADSPA_Data fBound = values_[lPortIndex].minval();
+/*			if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0)
+					// fBound*=samplerate;
 */				  
-			  }
-				else if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor)) {
-					return 1;
-				}
+				return fBound;
+			}
+			else if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor)) {
+				return 1;
+			}
+			//else if (LADSPA_IS_HINT_LOGARITHMIC(iHintDescriptor)) 
+			else return 1;
 		}
 
 		void LADSPAMachine::SetDefaultsForControls()
 		{
-            pValues = new LADSPA_Data[psDescriptor->PortCount];
             int lBufferIndex = 0;
 			LADSPA_Data fDefault=0;
             for (int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
                 LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
                 if (LADSPA_IS_PORT_CONTROL(iPortDescriptor)) {
-                    if (LADSPA_IS_PORT_INPUT(iPortDescriptor))
-					{
+//                    if (LADSPA_IS_PORT_INPUT(iPortDescriptor))
+	//				{
 						LADSPA_PortRangeHintDescriptor iHintDescriptor = psDescriptor->PortRangeHints[lPortIndex].HintDescriptor;					
 						switch (iHintDescriptor & LADSPA_HINT_DEFAULT_MASK) {
 						case LADSPA_HINT_DEFAULT_NONE:
@@ -379,9 +419,9 @@ namespace psycle {
 						if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fDefault != 0) {
 							// fDefault*=samplerate;
 						}
-						pValues[lPortIndex]=fDefault;
+						values_[lPortIndex].setValue(fDefault);
 						
-					}
+//					}
                 }
             }
 		}

@@ -361,9 +361,9 @@ namespace psycle
 
 		void Machine::InitWireVolume(Machine::type_type type, Wire::id_type wire, float value)
 		{
-			if (type == MACH_VST || type == MACH_VSTFX )
+			if (type == MACH_VST || type == MACH_VSTFX  || type == MACH_LADSPA)
 			{
-				if (this->_type == MACH_VST || this->_type == MACH_VSTFX ) // VST to VST, no need to convert.
+				if (this->_type == MACH_VST || this->_type == MACH_VSTFX || this->_type == MACH_LADSPA) // VST to VST, no need to convert.
 				{
 					_inputConVol[wire] = value;
 					_wireMultiplier[wire] = 1.0f;
@@ -374,7 +374,7 @@ namespace psycle
 					_wireMultiplier[wire] = 0.000030517578125f; // what is it?
 				}
 			}
-			else if (this->_type == MACH_VST || this->_type == MACH_VSTFX ) // native to VST, divide.
+			else if (this->_type == MACH_VST || this->_type == MACH_VSTFX || this->_type == MACH_LADSPA ) // native to VST, divide.
 			{
 				_inputConVol[wire] = value * 0.000030517578125f; // what is it?
 				_wireMultiplier[wire] = 32768.0f;
