@@ -41,7 +41,7 @@ namespace psycle {
 			LADSPA_PortDescriptor descriptor() { return descriptor_; }
 			LADSPA_PortRangeHintDescriptor hint() { return hint_.HintDescriptor; }
 			LADSPA_Data minval() { return hint_.LowerBound; }
-			LADSPA_Data maxvall() { return hint_.UpperBound; }
+			LADSPA_Data maxval() { return hint_.UpperBound; }
 			LADSPA_Data value() { return value_; }
 			LADSPA_Data* valueaddress() { return &value_; }
 			void setValue(LADSPA_Data data) { value_ =  data; }
