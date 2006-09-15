@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
+ *   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
+ *   Made in Germany                                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -29,29 +29,29 @@
 class NRegion{
 public:
     NRegion();
-    NRegion(const NRect & rect);
+    NRegion( const NRect & rect );
 
     ~NRegion();
 
-    NRegion(const NRegion & src);
-    const NRegion & operator= (const NRegion & rhs);
+    NRegion( const NRegion & src );
+    const NRegion & operator= ( const NRegion & rhs );
 
-    void shrink(int dx, int dy);
-    void move(int dx, int dy);
-    void setRect(const NRect & rect);
-    void setPolygon(XPoint*  pts , int size);
+    void shrink( int dx, int dy );
+    void move( int dx, int dy );
+    void setRect( const NRect & rect );
+    void setPolygon( XPoint*  pts, int size );
     bool isEmpty() const;
     const NRect & rectClipBox() const;
-    bool intersects(int x, int y);
+    bool intersects( int x, int y ) const;
 
 
-    inline NRegion & operator &= (const NRegion &); // intersection
+    inline NRegion & operator &= ( const NRegion & ); // intersection
 
-    inline NRegion & operator |= (const NRegion &); // union
+    inline NRegion & operator |= ( const NRegion & ); // union
 
-    inline NRegion & operator -= (const NRegion &); // difference
+    inline NRegion & operator -= ( const NRegion & ); // difference
 
-    inline NRegion & operator ^= (const NRegion &); // symetric difference
+    inline NRegion & operator ^= ( const NRegion & ); // symetric difference
 
 
       // warning: this pointer can change
@@ -72,54 +72,54 @@ private:
     mutable bool update;
 };
 
-inline NRegion & NRegion::operator &= (const NRegion & that)
+inline NRegion & NRegion::operator &= ( const NRegion & that )
 {
   XIntersectRegion(*this, that, *this);
   return *this;
 }
 
-inline NRegion operator & (const NRegion & lhs , const NRegion & rhs)
+inline NRegion operator & ( const NRegion & lhs, const NRegion & rhs )
 {
-  NRegion nrv(lhs);
+  NRegion nrv( lhs );
   nrv &= rhs;
   return nrv;
 }
 
-inline NRegion & NRegion::operator |= (const NRegion & that)
+inline NRegion & NRegion::operator |= ( const NRegion & that )
 {
-  XUnionRegion(*this, that, *this);
+  XUnionRegion( *this, that, *this );
   return *this;
 }
 
-inline NRegion operator | (const NRegion & lhs, const NRegion & rhs)
+inline NRegion operator | ( const NRegion & lhs, const NRegion & rhs )
 {
-  NRegion nrv(lhs);
+  NRegion nrv( lhs );
   nrv |= rhs;
   return nrv;
 }
 
-inline NRegion & NRegion::operator -= (const NRegion & that)
+inline NRegion & NRegion::operator -= ( const NRegion & that )
 {
-  XSubtractRegion(*this, that, *this);
+  XSubtractRegion( *this, that, *this );
   return *this;
 }
 
-inline NRegion operator - (const NRegion & lhs, const NRegion & rhs)
+inline NRegion operator - ( const NRegion & lhs, const NRegion & rhs )
 {
-  NRegion nrv(lhs);
+  NRegion nrv( lhs );
   nrv -= rhs;
   return nrv;
 }
 
-inline NRegion & NRegion::operator ^= (const NRegion & that)
+inline NRegion & NRegion::operator ^= ( const NRegion & that )
 {
-  XXorRegion(*this, that, *this);
+  XXorRegion( *this, that, *this );
   return *this;
 }
 
-inline NRegion operator ^ (const NRegion & lhs , const NRegion & rhs)
+inline NRegion operator ^ ( const NRegion & lhs , const NRegion & rhs )
 {
-  NRegion nrv(lhs);
+  NRegion nrv( lhs );
   nrv ^= rhs;
   return nrv;
 }

@@ -34,6 +34,7 @@ NRuntime::~NRuntime()
     vector<NRuntime*>::iterator it = find(parent()->components.begin(),parent()->components.end(),this);
     if (it!=parent()->components.end()) parent()->components.erase(it);
   }
+
   for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
     NRuntime* child = *it;
     child->setParent(NULL);

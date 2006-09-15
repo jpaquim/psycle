@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
+ *   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
+ *   Made in Germany, France                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -33,13 +33,13 @@ NRegion::NRegion( const NRect & rect )
   rectangle.y= (short) rect.top();
   rectangle.width=(unsigned short)  rect.width();
   rectangle.height=(unsigned short) rect.height();
-  XUnionRectWithRegion(&rectangle,region_,region_);
+  XUnionRectWithRegion( &rectangle, region_, region_ );
   update = true;
 }
 
 NRegion::~NRegion()
 {
-  XDestroyRegion(region_);
+  XDestroyRegion( region_ );
 }
 
 void NRegion::setRect( const NRect & rect )
@@ -51,16 +51,16 @@ void NRegion::setRect( const NRect & rect )
   rectangle.y= (short) rect.top();
   rectangle.width=(unsigned short)  rect.width();
   rectangle.height=(unsigned short) rect.height();
-  XUnionRectWithRegion(&rectangle,region_,region_);
+  XUnionRectWithRegion( &rectangle, region_, region_ );
   update = true;
 }
 
 
 // shouldnt be XPoint
-void NRegion::setPolygon(XPoint*  pts , int size)
+void NRegion::setPolygon( XPoint*  pts , int size )
 {
-  XDestroyRegion(region_);
-  region_ = XPolygonRegion(pts,size,WindingRule);
+  XDestroyRegion( region_ );
+  region_ = XPolygonRegion( pts, size, WindingRule );
   update = true;
 }
 
@@ -68,15 +68,15 @@ void NRegion::setPolygon(XPoint*  pts , int size)
 NRegion::NRegion( const NRegion & src )
 {
   region_ = XCreateRegion();
-  XUnionRegion(region_, src.xRegion(), region_);
+  XUnionRegion( region_, src.xRegion(), region_ );
   update = true;
 }
 
 const NRegion & NRegion::operator =( const NRegion & rhs )
 {
-  XDestroyRegion(region_);
+  XDestroyRegion( region_);
   region_ = XCreateRegion();
-  XUnionRegion(region_, rhs.xRegion(), region_);
+  XUnionRegion( region_, rhs.xRegion(), region_ );
   update = true;
   return *this;
 }
@@ -84,33 +84,33 @@ const NRegion & NRegion::operator =( const NRegion & rhs )
 
 bool NRegion::isEmpty( ) const
 {
-  return XEmptyRegion(region_);
+  return XEmptyRegion( region_ );
 }
 
 void NRegion::move( int dx, int dy )
 {
-  XOffsetRegion(region_, dx, dy);
+  XOffsetRegion( region_, dx, dy );
   update = true;
 }
 
 void NRegion::shrink( int dx, int dy )
 {
-  XShrinkRegion(region_, dx, dy);
+  XShrinkRegion( region_, dx, dy );
   update = true;
 }
 
 const NRect & NRegion::rectClipBox( ) const
 {
-  if (update) {
+  if ( update ) {
     XRectangle r;
-    XClipBox(region_, &r);
-    clipBox.setPosition(r.x,r.y,r.width,r.height);
+    XClipBox( region_, &r  );
+    clipBox.setPosition( r.x, r.y, r.width, r.height );
     update = false;
   }
   return clipBox;
 }
 
-bool NRegion::intersects( int x, int y )
+bool NRegion::intersects( int x, int y ) const
 {
-  return XPointInRegion(region_,x,y);
+  return XPointInRegion( region_, x, y );
 }

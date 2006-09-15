@@ -750,12 +750,13 @@ void NVisualComponent::removeChild( NVisualComponent * child )
   std::vector<NVisualComponent*>::iterator tItr = find(tabOrder_.begin(),tabOrder_.end(),child);
   if ( tItr != tabOrder_.end() ) tabOrder_.erase(tItr);
 
-  NApp::addRemovePipe(child);
   if ( window() ) window()->checkForRemove(child);
-  if ( layout_ ) {
+    if ( layout_ ) {
       layout_->remove(child);
       layout_->align(this);
-  }
+		}
+  NApp::addRemovePipe(child);
+  
 }
 
 void NVisualComponent::erase( NVisualComponent * child )

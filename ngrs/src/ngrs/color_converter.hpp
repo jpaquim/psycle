@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 johan boule <bohan@jabber.org>   *
- *   Copyright (C) 2006 psycledelics development team <http://psycle.sourceforge.net>   *
+ *   Copyright (C) 2006 johan boule <bohan@jabber.org>                     *
+ *   Made in France                                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *

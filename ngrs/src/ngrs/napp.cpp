@@ -134,9 +134,8 @@ void NApp::eventLoop( )
        }
        c+=10;
     }
-
     while (XPending(system().dpy())) {
-     XNextEvent(system().dpy(), &event);
+     	XNextEvent(system().dpy(), &event);
        system().setKeyState(event.xkey.state);
        std::map<Window,NWindow*>::iterator itr;
        int winId = event.xany.window;
@@ -165,8 +164,8 @@ void NApp::eventLoop( )
           }
        }
      }
-     callRemovePipe();
     }
+    callRemovePipe();
   }
 }
 
@@ -198,7 +197,6 @@ void NApp::modalEventLoop(NWindow* modalWin )
           repaintWin_.clear();
        }
     }
-
     while (XPending(system().dpy()) && exitLoop==0) {
      XNextEvent(system().dpy(), &event);
        system().setKeyState(event.xkey.state);
@@ -327,8 +325,11 @@ void NApp::removeWindow( Window handle )
  {
    // not my windows
  } else {
-   winMap.erase(itr);
+	 std::vector<NWindow*>::iterator it = find( repaintWin_.begin(), repaintWin_.end(), itr->second);
+	 if ( it != repaintWin_.end() )repaintWin_.erase(it);
+	 winMap.erase(itr);
  }
+ 
 }
 
 void NApp::doRepaint( NWindow * win )
@@ -464,10 +465,10 @@ void NApp::addRemovePipe( NRuntime * component )
 void NApp::callRemovePipe( )
 {
  for (std::vector<NRuntime*>::iterator iter = removePipe.begin(); iter<removePipe.end(); iter++) {
-  lastOverWin_ = 0;
+  lastOverWin_ = 0;  
   NRuntime* component = *iter;
     delete component;
- }
+ } 
  removePipe.clear();
 }
 
