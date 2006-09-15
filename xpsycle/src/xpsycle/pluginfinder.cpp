@@ -175,7 +175,7 @@ namespace psycle
 			unsigned long lPluginIndex;
 
 			std::vector<std::string> fileList;
-      fileList = NFile::fileList( ladspa_path );
+			fileList = NFile::fileList( ladspa_path );
 
 			std::vector<std::string>::iterator it = fileList.begin();
 			for ( ; it < fileList.end(); it++ ) {
@@ -190,7 +190,7 @@ namespace psycle
 						}
 						PluginInfo info;
 						info.setType( MACH_LADSPA );
-						info.setName( psDescriptor->Label );
+						info.setName( psDescriptor->Name );
 						info.setLibName( fileName );
 						PluginFinderKey key(fileName, lPluginIndex );
 						(*this)[key] = info;

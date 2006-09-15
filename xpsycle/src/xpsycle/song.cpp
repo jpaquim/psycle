@@ -105,8 +105,8 @@ namespace psycle
 			{
 				case MACH_MASTER:
 					if(_pMachine[MASTER_INDEX]) return false;
-					machine = new Master(index, this);
 					index = MASTER_INDEX;
+					machine = new Master(index, this);
 					break;
 				case MACH_SAMPLER:
 					machine = new Sampler(index,this);
