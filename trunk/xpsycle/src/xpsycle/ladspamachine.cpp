@@ -313,7 +313,7 @@ namespace psycle {
 				LADSPA_Data fBound = values_[lPortIndex].minval();
 			std::cout << " min value:" << fBound << std::endl;
 			if (LADSPA_IS_HINT_SAMPLE_RATE(iHintDescriptor) && fBound != 0) 
-					 fBound*=samplerate;
+					 fBound*=Player::Instance()->timeInfo().sampleRate();
 				  
 				  return fBound;
 			}
