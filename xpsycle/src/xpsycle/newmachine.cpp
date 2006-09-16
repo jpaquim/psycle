@@ -249,6 +249,7 @@ void NewMachine::setPlugin( NCustomItem* item ) {
       description->setText( "Psycle Instrument by "+ info.author() );
       apiVersion->setText( info.version() ); 
 			id_ = info.type();
+      pluginIndex_ = key.index();
 		  
     }
 		pane()->resize();
