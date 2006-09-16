@@ -32,25 +32,28 @@ namespace psycle {
 		class LadspaParam
 		{
 		public:
-			LadspaParam(LADSPA_PortDescriptor descriptor,LADSPA_PortRangeHint hint, const char *newname)
-			:descriptor_(descriptor)
-			,hint_(hint)
-			,portName_(newname)
-			,value_(0)
-			{;}
+			LadspaParam(LADSPA_PortDescriptor descriptor,LADSPA_PortRangeHint hint, const char *newname);
 			LADSPA_PortDescriptor descriptor() { return descriptor_; }
 			LADSPA_PortRangeHintDescriptor hint() { return hint_.HintDescriptor; }
-			LADSPA_Data minval() { return hint_.LowerBound; }
-			LADSPA_Data maxval() { return hint_.UpperBound; }
-			LADSPA_Data value() { return value_; }
-			LADSPA_Data* valueaddress() { return &value_; }
-			void setValue(LADSPA_Data data) { value_ =  data; }
 			const char* name() { return portName_; }
+			LADSPA_Data rawvalue() { return value_; }
+			LADSPA_Data* valueaddress() { return &value_; }
+			int value() ;
+			void setValue(int data);
+			void setrawvalue(LADSPA_Data data) { value_ = data; }
+			void setDefault();
+			LADSPA_Data minval() { return integer_ ? (minVal_*rangeMultiplier_) : 0; }
+			LADSPA_Data maxval() { return integer_ ? (maxVal_-minVal_) : 65535; }
 		private:
 			LADSPA_PortDescriptor descriptor_;
 			LADSPA_PortRangeHint hint_;
 			const char * portName_;
 			LADSPA_Data value_;
+			LADSPA_Data minVal_;
+			LADSPA_Data maxVal_;
+			float rangeMultiplier_;
+			bool integer_;
+			bool logaritmic_;
 		};
 	
 		class LADSPAMachine: public Machine {
