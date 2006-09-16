@@ -576,7 +576,7 @@ bool Plugin::SetParameter(int numparam,int value)
     }
 
 
-void Plugin::SaveDllName(RiffFile * pFile) 
+		void Plugin::SaveDllName(RiffFile * pFile) 
 		{
 			pFile->WriteChunk(_psDllName.c_str(), _psDllName.length() + 1);
 		}
