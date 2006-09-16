@@ -28,6 +28,7 @@
 #include <ngrs/nlistbox.h>
 #include <ngrs/nitem.h>
 #include <ngrs/nbutton.h>
+#include <ngrs/nframeborder.h>
 
 namespace psycle {
 	namespace host {
@@ -40,32 +41,31 @@ NewMachine::NewMachine( )
 
 	setTitle("Add New Machine");
 
-  setPosition(100,100,500,500);
-  NFont fnt("Suse sans",8,nStraight | nMedium | nAntiAlias);
-  pane()->setFont(fnt);
+  setPosition(100,100,700,500);
 
-  pane()->setLayout(NBorderLayout());
+  pane()->setLayout( NAlignLayout(10,5) );
 
   setModal(true);
   do_Execute = false;
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
-    bPnl->setLayout(NFlowLayout(nAlRight));
+    bPnl->setLayout( NAlignLayout(5,10) );
     NButton* okBtn = new NButton("Open");
       okBtn->clicked.connect(this,&NewMachine::onOkBtn);
       okBtn->setFlat(false);
-    bPnl->add(okBtn);
+    bPnl->add(okBtn, nAlRight );
     NButton* cancelBtn = new NButton("Cancel");
       cancelBtn->clicked.connect(this,&NewMachine::onCancelBtn);
       cancelBtn->setFlat(false);
-    bPnl->add(cancelBtn);
-  pane()->add(bPnl);
+    bPnl->add(cancelBtn, nAlRight);
+  pane()->add(bPnl, nAlBottom);
 
   NPanel* properties = new NPanel();
-    properties->setPreferredSize(210,100);
+		properties->setBorder ( NFrameBorder( true,5,5 ) );
+    properties->setPreferredSize(240,100);
     properties->setAlign(nAlRight);
-    properties->setLayout(NAlignLayout());
+    properties->setLayout(NAlignLayout(5,5));
     macProperty = new NGroupBox();
       macProperty->setAlign(nAlTop);
       macProperty->setHeaderText("Machine Properties");
@@ -83,7 +83,7 @@ NewMachine::NewMachine( )
       macProperty->resize();
     properties->add(macProperty);
     properties->resize();
-  pane()->add(properties);
+  pane()->add(properties, nAlRight);
 
 
   finder.scanAll();
