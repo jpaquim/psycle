@@ -19,6 +19,9 @@
  ***************************************************************************/
 #include "pluginfinder.h"
 #include "ladspamachine.h"
+#include "plugin.h"
+#include "configuration.h"
+#include "global.h"
 #include <ngrs/nfile.h>
 
 namespace psycle
@@ -63,6 +66,15 @@ namespace psycle
 		const std::string & PluginInfo::name() const {
 			return name_;
 		}
+
+		void PluginInfo::setAuthor( const std::string & author ) {
+			author_ = author;
+		}
+
+		const std::string & PluginInfo::author() const {
+			return author_;
+		}
+
 
 		void PluginInfo::setDesc( const std::string & desc ) {
 			desc_ = desc;
@@ -121,6 +133,9 @@ namespace psycle
 		}
 
 
+		PluginFinderKey::PluginFinderKey( ) : index_(0) {
+
+		}
 
 		PluginFinderKey::PluginFinderKey( const std::string & name, int index ) :
 			name_( name ),
@@ -157,8 +172,18 @@ namespace psycle
 		{
 		}
 
+
+		PluginInfo PluginFinder::info( const PluginFinderKey & key ) const {
+			PluginFinder::const_iterator it = find( key );
+			if ( it != end() ) 
+				return it->second;
+			else
+				return PluginInfo();
+		}
+
 		void PluginFinder::scanAll() {
-			scanLadspa();
+			scanNatives();
+			scanLadspa();		
 		}
 
 		void PluginFinder::scanLadspa() {
@@ -199,5 +224,33 @@ namespace psycle
 			}			
 		}
 
+		void PluginFinder::scanNatives() {
+
+			std::string psycle_path = Global::pConfig()->pluginPath;
+
+			std::vector<std::string> fileList;
+			fileList = NFile::fileList( psycle_path );
+
+			std::vector<std::string>::iterator it = fileList.begin();
+
+			for ( ; it < fileList.end(); it++ ) {
+				std::string fileName = *it;
+				Plugin plugin(0, 0 );
+				if ( plugin.LoadDll( fileName ) ) {
+						PluginInfo info;
+						info.setType( MACH_PLUGIN );
+						info.setName( plugin.GetName() );
+						info.setMode( plugin.mode() );
+						info.setLibName( plugin.GetDllName() );
+						std::ostringstream o;
+						std::string version = "";
+    				if (!(o << plugin.GetInfo()->Version )) version = o.str();
+						info.setVersion( version );
+						info.setAuthor( plugin.GetInfo()->Author );
+						PluginFinderKey key( plugin.GetDllName(), 0 );
+						(*this)[key] = info;
+				}
+			}
+		}
 	}
 }

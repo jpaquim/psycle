@@ -49,6 +49,9 @@ namespace psycle
 					void setName( const std::string & name );
 					const std::string & name() const;
 
+					void setAuthor( const std::string & name );
+					const std::string & author() const;
+
 					void setDesc( const std::string & desc );
 					const std::string & desc() const;
 
@@ -75,6 +78,7 @@ namespace psycle
 				Machine::type_type subclass_;
 				Machine::mode_type mode_;
 				std::string name_;
+				std::string author_;
 				std::string desc_;
 				std::string version_;
 				std::string libName_;
@@ -88,6 +92,8 @@ namespace psycle
 
 		class PluginFinderKey {
 		public:
+
+				PluginFinderKey( );
 				PluginFinderKey( const std::string & name, int index = 0);
 				~PluginFinderKey();
 
@@ -112,9 +118,12 @@ namespace psycle
 
 			void scanAll();
 
+			PluginInfo info( const PluginFinderKey & key ) const;
+
 		private:
 
 			void scanLadspa();
+			void scanNatives();
 
 		};
 	}

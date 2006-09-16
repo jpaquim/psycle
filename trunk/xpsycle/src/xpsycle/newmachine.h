@@ -83,7 +83,6 @@ public:
 
     std::string getDllName();
     bool outBus();
-    bool sampler();
 
 		Machine::id_type selectedType() const;
 		int pluginIndex() const;
@@ -93,7 +92,6 @@ private:
   std::string dllName_;
 
   bool do_Execute;
-  bool sampler_;
 
 	PluginFinder finder;
 
@@ -108,16 +106,26 @@ private:
 
   NTabBook* tabBook_;
 
-  NFileListBox* generatorfBox_;
-  NFileListBox* effectfBox_;
+  NListBox* generatorfBox_;
+  NListBox* effectfBox_;
 	NListBox* ladspaBox_;
 
   void onGeneratorItemSelected(NItemEvent* ev);
+	void onEffectItemSelected(NItemEvent* ev);
   void onInternalItemSelected(NItemEvent* ev);
 	void onLADSPAItemSelected(NItemEvent* ev);	
 
   void onOkBtn(NButtonEvent* sender);
   void onCancelBtn(NButtonEvent* sender);
+
+	std::map< NCustomItem*, PluginFinderKey > pluginIdentify_;
+
+	void setPlugin( NCustomItem* item );
+
+  void onEffectTabChange( NButtonEvent* ev );
+  void onGeneratorTabChange( NButtonEvent* ev );
+  void onLADSPATabChange( NButtonEvent* ev );
+  void onInternalTabChange( NButtonEvent* ev );
 
 };
 
