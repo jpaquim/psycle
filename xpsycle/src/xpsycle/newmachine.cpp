@@ -35,8 +35,6 @@ namespace psycle {
 NewMachine::NewMachine( )
   : NWindow()
 {
-  sampler_ = false;
-
 	id_ = MACH_UNDEFINED;
 	pluginIndex_ = 0;
 
@@ -88,47 +86,82 @@ NewMachine::NewMachine( )
   pane()->add(properties);
 
 
+  finder.scanAll();
+
   tabBook_ = new NTabBook();
     tabBook_->setAlign(nAlClient);
     NPanel* generatorPage = new NPanel();
         generatorPage->setLayout(NAlignLayout());
-          generatorfBox_ = new NFileListBox();
-            generatorfBox_->addFilter(".so","!S*.so!S*");
-            generatorfBox_->setMode(nFiles);
+          generatorfBox_ = new NListBox();
             generatorfBox_->setAlign(nAlClient);
-            generatorfBox_->setDirectory(Global::pConfig()->pluginPath);
-            generatorfBox_->setActiveFilter(".so");
-            generatorfBox_->update();
             generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
+						std::map< PluginFinderKey, PluginInfo >::const_iterator it = finder.begin();
+						for ( ; it != finder.end(); it++ ) {
+							PluginFinderKey key = it->first;
+							PluginInfo info = it->second;
+							if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_GENERATOR ) {
+								NItem* item = new NItem( info.name() );
+								item->setIntValue( key.index() );
+								generatorfBox_->add( item );
+								pluginIdentify_[item] = key;
+							}					
+						}
         generatorPage->add(generatorfBox_);
+
     NPanel* effectPage = new NPanel();
+      effectPage->setLayout ( NAlignLayout() );
+      effectfBox_ = new NListBox();
+      effectfBox_->setAlign(nAlClient);
+      effectfBox_->itemSelected.connect(this,&NewMachine::onEffectItemSelected);
+			it = finder.begin();
+      for ( ; it != finder.end(); it++ ) {
+        PluginFinderKey key = it->first;
+        PluginInfo info = it->second;
+        if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_FX ) {
+         NItem* item = new NItem( info.name() );
+         effectfBox_->add( item );
+         pluginIdentify_[item] = key;
+        }					
+      }
+    effectPage->add( effectfBox_ , nAlClient);
+
+
     tabBook_->addPage(effectPage,"Effects");
     tabBook_->addPage(generatorPage,"Generators");
     NListBox* internalPage_ = new NListBox();
         internalPage_->add(new NItem("Sampler"));
         internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
-
-		finder.scanAll();
-
+	  
+  	
 		NPanel* ladspaPage = new NPanel();
 			ladspaPage->setLayout(NAlignLayout());
         ladspaBox_ = new NListBox();
         ladspaBox_->itemSelected.connect(this,&NewMachine::onLADSPAItemSelected);
-				std::map< PluginFinderKey, PluginInfo >::const_iterator it = finder.begin();
+				it = finder.begin();
 				for ( ; it != finder.end(); it++ ) {
 					PluginFinderKey key = it->first;
 					PluginInfo info = it->second;
 					if ( info.type() == MACH_LADSPA ) {
-						NItem* item = new NItem( info.libName() );
+						NItem* item = new NItem( info.name() );
 						item->setIntValue( key.index() );
 						ladspaBox_->add( item );
-					}
+						pluginIdentify_[item] = key;
+					}					
 				}			
       ladspaPage->add(ladspaBox_, nAlClient);
 	tabBook_->addPage(ladspaPage,"ladspaPage");
 
   pane()->add(tabBook_);
+
+  NTab* tab = tabBook_->tab( effectPage );
+    tab->click.connect(this,&NewMachine::onEffectTabChange);
+  tab = tabBook_->tab( generatorPage );
+    tab->click.connect(this,&NewMachine::onGeneratorTabChange);
+  //tab = tabBook_->tab( internalPage );
+  //  tab->click.connect(this,&NewMachine::onInternalTabChange);
+  tab = tabBook_->tab( ladspaPage );
+    tab->click.connect(this,&NewMachine::onLADSPATabChange);
 
 
   tabBook_->setActivePage(1);
@@ -144,25 +177,6 @@ int NewMachine::onClose( )
 	do_Execute = false;
   setVisible(false);
   setExitLoop(nDestroyWindow);
-}
-
-void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
-{
-  sampler_=false;
-  Plugin plugin(0, 0 );
-  std::cout << ev->item()->text() << std::endl;
-  if (plugin.LoadDll(ev->item()->text())) {
-    name->setText(plugin.GetName());
-  //libName->setText(plugin.GetDllName());
-    dllName_ = plugin.GetDllName();
-    description->setText(std::string("Psycle Instrument by ")+ std::string(plugin.GetInfo()->Author));
-    apiVersion->setText(stringify(plugin.GetInfo()->Version));
-		id_ = MACH_PLUGIN;
-
-
-    pane()->resize();
-    pane()->repaint();
-  }
 }
 
 void NewMachine::onOkBtn( NButtonEvent * sender )
@@ -195,37 +209,48 @@ bool NewMachine::outBus( )
   return true;   // true = Generator, false = Effect
 }
 
-bool NewMachine::sampler( )
-{
-  return sampler_;
-}
-
 void NewMachine::onInternalItemSelected( NItemEvent * ev )
 {
   if (ev->text() == "Sampler") {
-		sampler_= true; 
 		id_ = MACH_SAMPLER;
 	} else {
-		sampler_ = false;
+
 	}
 }
 
-void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
-		NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
-		
-		LADSPAMachine plugin(0, 0 );
-		if (plugin.loadDll( item->text(), item->intValue() ) ) {
-			pluginIndex_ = item->intValue();
-			std::cout << "settext" << std::endl;
-			name->setText( plugin.label() );
-			std::cout << "description" << std::endl;
-			description->setText( plugin.GetName() );
-			id_ = MACH_LADSPA;
-			std::cout << "dllname" << std::endl;
-			dllName_ = plugin.GetDllName();
-		}
-  		std::cout << "going out" << std::endl;
+void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
+{
+  NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
+  setPlugin ( item );
+}
 
+void NewMachine::onEffectItemSelected(NItemEvent* ev) {
+	  NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
+    setPlugin( item );
+}
+
+void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
+   NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
+   setPlugin( item );
+}
+
+void NewMachine::setPlugin( NCustomItem* item ) {
+    std::map< NCustomItem*, PluginFinderKey >::iterator it;		
+		it = pluginIdentify_.find( item );
+
+    if ( it != pluginIdentify_.end() ) {
+
+			PluginInfo info = finder.info( it->second );
+			const PluginFinderKey & key = it->second;
+
+			name->setText( info.name() );
+    	dllName_ = info.libName();
+      libName->setText( dllName_ );
+      description->setText( "Psycle Instrument by "+ info.author() );
+      apiVersion->setText( info.version() ); 
+			id_ = info.type();
+		  
+    }
 		pane()->resize();
     pane()->repaint();
 }
@@ -238,5 +263,30 @@ int NewMachine::pluginIndex() const {
   return pluginIndex_;
 }
 
+void NewMachine::onEffectTabChange( NButtonEvent * ev )
+{
+  NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
+  if  (item) setPlugin ( item );
+}
+
+void NewMachine::onGeneratorTabChange( NButtonEvent * ev )
+{
+  NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
+  if  (item) setPlugin ( item );
+}
+
+void NewMachine::onLADSPATabChange( NButtonEvent * ev )
+{
+ NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
+  if  (item) setPlugin ( item );
+}
+
+void NewMachine::onInternalTabChange( NButtonEvent * ev )
+{
+  
+}
+
 }
 }
+
+
