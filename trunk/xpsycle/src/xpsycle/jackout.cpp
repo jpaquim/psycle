@@ -159,13 +159,15 @@ namespace psycle
 		{
 			jack_default_audio_sample_t *out_1 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_1, nframes);
 			jack_default_audio_sample_t *out_2 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_2, nframes);
- 				
- 			float const * input(_pCallback(_callbackContext, nframes));
-			
-			int count;
-			while ( count < nframes) {
+ 
+			int nframesint = nframes;
+			float const * input(_pCallback(_callbackContext, nframesint));
+
+			int count=0;
+			while ( count < nframesint) {
 				out_1[ count ] = *input++  / 32768.0f;
-				out_2[ count ] = *input++  / 32768.0f;				
+				out_2[ count ] = *input++  / 32768.0f;
+				count++;
 			}
 			return 0;
 		}
