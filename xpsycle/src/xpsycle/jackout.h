@@ -53,14 +53,10 @@ namespace psycle
 
 		private:
 
-
 			// psycle variables
 			bool _initialized;
 			void* _callbackContext;
 			AUDIODRIVERWORKFN _pCallback;
-
-			// thread variables
-			pthread_t threadid;
 
 			// jack variables
 			jack_port_t *output_port_1;

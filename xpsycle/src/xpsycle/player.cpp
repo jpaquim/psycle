@@ -450,19 +450,20 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 	  		if (!driver_->Configured())
 	  		{
 			      	driver_->Configure();
-				SampleRate(driver_->_samplesPerSec);
+//					SampleRate(driver_->_samplesPerSec);
   			//   _outputActive = true;
 	  		}
 			std::cout << " driver configured" << std::endl;
 			if (driver_->Enable(true))
 			{
-			std::cout << "driver enabled " << driver_->info().name() << std::endl;
+				std::cout << "driver enabled " << driver_->info().name() << std::endl;
 			//   _outputActive = true;
 			} else {
-			std::cout << "setting null driver " << std::endl;
+				std::cout << "setting null driver " << std::endl;
 				if (driver_) delete driver_;
 				driver_ = new AudioDriver();
 			}
+				SampleRate(driver_->_samplesPerSec);
 		}
 
 	} // end of host namespace
