@@ -79,14 +79,21 @@ namespace psycle
 		// Jack special functions
 
 		bool JackOut::registerToJackServer() {
+			jack_options_t options = JackNullOption;
+			jack_status_t status;
  			// try to become a client of the JACK server
-			const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
+/*			const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
 
 			if ( (client = jack_client_new ( registerCPtr )) == 0) {
  				std::cerr << "jack server not running?\n" << std::endl;
 				return 0;
  			}
-
+*/
+			if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
+			{
+ 				std::cerr << "jack server not running?\n" << std::endl;
+				return 0;
+			}
 
 			// tell the JACK server to call `process()' whenever
 			// there is work to be done.
@@ -96,9 +103,6 @@ namespace psycle
 			 // display the current sample rate. 
 
 			std::cout << "engine sample rate: %"  << jack_get_sample_rate (client) << std::endl;
-
-			setSamplesPerSec( jack_get_sample_rate (client) );
-			setBitDepth( 16 ); // hardcoded so far
 
 			// create output port
 
@@ -114,6 +118,9 @@ namespace psycle
  				std::cout << "cannot activate client" << std::endl;
 				return 0;
  			}
+
+			setSamplesPerSec( jack_get_sample_rate (client) );
+			setBitDepth( 16 ); // hardcoded so far
 
 			if ((ports = jack_get_ports (client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
 				std::cout << "Cannot find any physical playback ports" << std::endl;
@@ -148,30 +155,20 @@ namespace psycle
 			return 0;      
  		}
 
-		int JackOut::fillBuffer( jack_nframes_t nframes ) {
+		int JackOut::fillBuffer( jack_nframes_t nframes )
+		{
 			jack_default_audio_sample_t *out_1 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_1, nframes);
-
 			jack_default_audio_sample_t *out_2 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_2, nframes);
  				
-			jack_default_audio_sample_t out1_buf[ nframes * sizeof(jack_default_audio_sample_t)];
-
-			jack_default_audio_sample_t out2_buf[ nframes * sizeof(jack_default_audio_sample_t)];
-
-			int count = nframes;
+ 			float const * input(_pCallback(_callbackContext, nframes));
 			
- 			float const * input(_pCallback(_callbackContext, count));
-			
-			// convert stero into two buffers;
-
-			// sounds trashy sth wrong here or above
-			while ( count--  > 0) {
+			int count;
+			while ( count < nframes) {
 				out_1[ count ] = *input++  / 32768.0f;
 				out_2[ count ] = *input++  / 32768.0f;				
 			}
-
 			return 0;
 		}
-
 	}
 }
 

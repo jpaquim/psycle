@@ -65,7 +65,7 @@ void Configuration::setSkinDefaults( )
 {
   _centerCursor = false;
   enableSound = 0;
-  device_name = "plughw:0";
+  device_name = "default";
 
   _linenumbers       = true;
   _linenumbersHex    = false;
@@ -700,5 +700,3 @@ DefaultBitmaps & Configuration::icons( )
 
 }
 }
-
-
