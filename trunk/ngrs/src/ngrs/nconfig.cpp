@@ -310,7 +310,7 @@ const char * hbar_xpm[] = {
 /* XPM */
 const char * vknob_xpm[] = {
 "11 20 5 1",
-"@	c None",
+"@	c #CCCCCC",
 ".	c #CECECE",
 "+	c #CECECD",
 "#	c #DEDEDE",
@@ -335,6 +335,17 @@ const char * vknob_xpm[] = {
 "#+@+#+@+#++",
 "+$+@+$+@+$.",
 "@+#+@+#+@++"};
+
+const char * arrow_test_xpm[] = {
+"12 6 2 1",
+" 	c white",
+".	c black",
+"            ",
+"     .      ",
+"    ...     ",
+"   .....    ",
+"  .......   ",
+"            "};
 
 
 NConfig::NConfig()

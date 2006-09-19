@@ -102,6 +102,11 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
       int xp =(int)  d2i((spacingWidth()  - skin_.bitmap().width())  / 2.0f);
       int yp = (int) d2i((spacingHeight() - skin_.bitmap().height()) / 2.0f);
       g->putBitmap(left()+xp,top()+yp,skin_.bitmap());
+    } else
+    if (skin_.bitmapBgStyle() == 3 && NWindow::paintFlag) {
+      // stretch      
+      if ( width() && height() ) 
+        g->putStretchBitmap(left(),top(),skin_.bitmap() , width(), height() );
     }
 
     if (moveable().style() & nMvRectPicker) geometry()->drawRectPicker(g);

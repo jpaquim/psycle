@@ -73,7 +73,7 @@ unsigned long NColor::colorValue( ) const
   return value;
 }
 
-bool NColor::operator ==( const NColor & color )
+bool NColor::operator ==( const NColor & color ) const
 {
   return ( (color.blue() == blue()) && (color.red() == red()) && (color.green() == green()) );
 }

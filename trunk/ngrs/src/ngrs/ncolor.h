@@ -48,7 +48,7 @@ public:
     unsigned long colorValue() const;
     long hColorRef() const;
 
-    bool operator==(const NColor & color);
+    bool operator==(const NColor & color) const;
     const NColor operator-(const NColor & rhs ) {
        return NColor(red() - rhs.red(), green()- rhs.green(), blue() - rhs.blue());
     }
