@@ -95,11 +95,16 @@ class PatternView : public NPanel
       void setDy(int dy);
       int dy() const;
 
+      void setTextColor( const NColor& textColor );
+			const NColor & textColor() const;
+
 			virtual int preferredWidth() const;
 
     private:
       PatternView* pView;
       int dy_;
+
+			NColor textColor_;
     };
 		
 
@@ -141,7 +146,6 @@ class PatternView : public NPanel
       NPopupMenu* editPopup_;
       PatDlg* patDlg;
       PatternView* pView;
-
              
       bool isBlockCopied;
       NSize blockLastOrigin;
@@ -302,6 +306,7 @@ public:
     virtual void setFocus();
 
 		void updateRange();
+		void updateSkin();
 
 private:
 

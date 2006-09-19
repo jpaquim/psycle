@@ -196,9 +196,14 @@ namespace psycle {
 			defaultSize_ = 0;
 			separatorColor_.setHCOLORREF(0x00400000);
 			selectionColor_ = NColor(0,0,255);
+			cursorColor_.setHCOLORREF(0x000000e0);
 			patternStep_ = 1;
 			colIdent = 3;
 			trackMinWidth_ = 20;
+			lineGridEnabled_ = true;
+			colGridEnabled_ = true;
+			textColor_ = NColor(0,0,0);
+			defaultNoteStr_ = "---";
 		}
 
 		int CustomPatternView::lineNumber() const {
@@ -285,12 +290,101 @@ namespace psycle {
 			return 4;
 		}
 
+		void CustomPatternView::setSeparatorColor( const NColor & color ) {
+			separatorColor_ = color;
+		}
+
 		const NColor & CustomPatternView::separatorColor() const {
 			return separatorColor_;
 		}
 
+		void CustomPatternView::setSelectionColor( const NColor & selColor ) {
+			selectionColor_ = selColor;
+		}
+
 		const NColor & CustomPatternView::selectionColor() const {
 			return selectionColor_;
+		}
+
+		void CustomPatternView::setCursorColor( const NColor & cursorColor )
+		{
+			cursorColor_ = cursorColor;
+		}
+
+		const NColor & CustomPatternView::cursorColor() const {
+			return cursorColor_;
+		}
+
+		void CustomPatternView::setBarColor( const NColor & barColor ) {
+			barColor_ = barColor;
+		}
+
+		const NColor & CustomPatternView::barColor() const {
+			return barColor_;
+		}
+
+		void CustomPatternView::setBeatColor( const NColor & beatColor ) {
+			beatColor_ = beatColor;
+		}
+
+		const NColor & CustomPatternView::beatColor() const {
+			return beatColor_;
+		}
+
+		void CustomPatternView::setPlayBarColor( const NColor & playBarColor ) {
+			playBarColor_ = playBarColor;
+		}
+
+		const NColor & CustomPatternView::playBarColor() const {
+			return playBarColor_;
+		}
+
+		void CustomPatternView::setBigTrackSeparatorColor( const NColor & color ) {
+			bigTrackSeparatorColor_ = color;
+		}
+
+		const NColor & CustomPatternView::bigTrackSeparatorColor() const {
+			return bigTrackSeparatorColor_;
+		}
+
+		void CustomPatternView::setLineSeparatorColor( const NColor & color ) {
+			lineSepColor_ = color;
+		}
+
+		const NColor & CustomPatternView::lineSeparatorColor() const {
+			return lineSepColor_;
+		}
+
+		void CustomPatternView::setLineGridEnabled( bool on ) {
+			lineGridEnabled_ = on;
+		}
+
+		bool CustomPatternView::lineGridEnabled() const {
+			return lineGridEnabled_;
+		}
+
+		void CustomPatternView::setColGridEnabled( bool on ) {
+			colGridEnabled_ = on;
+		}
+
+		bool CustomPatternView::colGridEnabled() const {
+			return colGridEnabled_;
+		}
+
+		void CustomPatternView::setTextColor( const NColor & color ) {
+			textColor_ = color;
+		}
+
+		const NColor & CustomPatternView::textColor() const {
+			return textColor_;
+		}
+
+		void CustomPatternView::setBeatTextColor( const NColor & color ) {
+			beatTextColor_ = color;
+		}
+
+		const NColor & CustomPatternView::beatTextColor() {
+			return beatTextColor_;
 		}
 
 		void CustomPatternView::setCursor( const PatCursor & cursor ) {
@@ -365,11 +459,13 @@ namespace psycle {
 
   		int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
-			g->setForeground( foreground() );
+			if ( lineGridEnabled() ) {
+				g->setForeground( lineSeparatorColor() );
+				for (int y = startLine; y <= endLine; y++)
+      		g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
+			}
 
-			for (int y = startLine; y <= endLine; y++)
-      g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
-
+			g->setForeground( bigTrackSeparatorColor() );
 			it = trackGeometrics().lower_bound( startTrack );
 			for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) //  oolIdent px space at begin of trackCol
       g->fillRect( it->second.left() - dx(),0,colIdent,lineHeight);
@@ -394,9 +490,9 @@ namespace psycle {
 		}
 
 		void CustomPatternView::drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
-      if ( events_.size() == 0 ) return;
+      if ( events_.size() == 0 || !colGridEnabled() ) return;
 
-			g->setForeground( foreground() );
+			g->setForeground( separatorColor() );
 			int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
 			std::map<int, TrackGeometry>::const_iterator it;
@@ -423,7 +519,7 @@ namespace psycle {
 
 		}
 
-		void CustomPatternView::drawData(NGraphics* g, int track, int line, int eventnr, int data ) {
+		void CustomPatternView::drawData(NGraphics* g, int track, int line, int eventnr, int data, const NColor & color ) {
 
 			std::map<int, TrackGeometry>::const_iterator it;
 			it = trackGeometrics().lower_bound( track );
@@ -435,37 +531,37 @@ namespace psycle {
 				const ColumnEvent & event = events_.at( eventnr );
 				switch ( event.type() ) {
 					case ColumnEvent::hex2 :
-						drawBlockData( g, xOff + eventOffset(eventnr,0), line, toHex(data,2) );
+						drawBlockData( g, xOff + eventOffset(eventnr,0), line, toHex(data,2), color );
 					break;
 					case ColumnEvent::hex4 :
-						drawBlockData( g, xOff + eventOffset(eventnr,0), line, toHex(data,4) );
+						drawBlockData( g, xOff + eventOffset(eventnr,0), line, toHex(data,4), color );
 					break;
 					case ColumnEvent::note :					
-						drawStringData( g, xOff + eventOffset(eventnr,0), line, noteToString(data) );
+						drawStringData( g, xOff + eventOffset(eventnr,0), line, noteToString(data),color );
 					break;
 					default: ;
 				}
 			}
 		}
 
-		void CustomPatternView::drawBlockData( NGraphics * g, int xOff, int line, const std::string & text )
+		void CustomPatternView::drawBlockData( NGraphics * g, int xOff, int line, const std::string & text, const NColor & color)
 		{					
 			int yOff = line  * rowHeight() + rowHeight()  - dy();
 			int col = 0;
 			for (int i = 0; i < text.length(); i++) {
-				g->drawText(xOff + col,yOff,text.substr(i,1));
+				g->drawText(xOff + col,yOff,text.substr(i,1), color);
 				col += cellWidth();
 			}
 		}
 
-		void CustomPatternView::drawStringData(NGraphics* g, int xOff, int line, const std::string & text )
+		void CustomPatternView::drawStringData(NGraphics* g, int xOff, int line, const std::string & text, const NColor & color )
 		{
 			int yOff = line  * rowHeight() + rowHeight()  - dy();
 
-			g->drawText(xOff,yOff,text);
+			g->drawText(xOff,yOff,text, color );
 		}
 
-		void CustomPatternView::drawCellBg(NGraphics* g, const PatCursor & cursor, const NColor & bgColor) {
+		void CustomPatternView::drawCellBg(NGraphics* g, const PatCursor & cursor ) {
 			std::map<int, TrackGeometry>::const_iterator it;
 			it = trackGeometrics().lower_bound( cursor.track() );
 			if ( it == trackGeometrics().end() ) return;
@@ -473,7 +569,7 @@ namespace psycle {
 			int xOff = it->second.left() + colIdent - dx();
   		int yOff = cursor.line()  * rowHeight()  - dy();
   		int colOffset = eventOffset( cursor.eventNr(), cursor.col() );
-			g->setForeground(bgColor);
+			g->setForeground( cursorColor_ );
 			g->fillRect( xOff + colOffset, yOff, eventColWidth( cursor.eventNr() ), rowHeight() );
 		}
 
@@ -907,14 +1003,14 @@ namespace psycle {
 
 		std::string CustomPatternView::noteToString( int value )
 		{
-			if (value==255) return "";
+
 			switch (value) {
 				case cdefTweakM: return "twk"; break;
 				case cdefTweakE: return "twf"; break;
 				case cdefMIDICC: return "mcm"; break;
 				case cdefTweakS: return "tws"; break;
 				case 120       : return "off"; break;
-				case 255       : return "";    break;
+				case 255       : return "---"; break;//defaultNoteStr_; break;
 			}
 
 			int octave = value / 12;

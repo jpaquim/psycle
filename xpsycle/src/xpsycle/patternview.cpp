@@ -25,6 +25,7 @@
 #include "player.h"
 #include "machine.h"
 #include "defaultbitmaps.h"
+#include "skinreader.h"
 #include "zoombar.h"
 #include <ngrs/napp.h>
 #include <ngrs/nalignlayout.h>
@@ -143,10 +144,50 @@ PatternView::PatternView( Song* song )
 
   moveCursorWhenPaste_ = false;  
   selectedMacIdx_ = 255;
+
+	updateSkin();
 }
 
 PatternView::~PatternView()
 {
+}
+
+void PatternView::updateSkin() {
+
+  drawArea->setSelectionColor( SkinReader::Instance()->patview_sel_bg_color() );
+	drawArea->setCursorColor( SkinReader::Instance()->patview_cursor_bg_color() );
+	drawArea->setBarColor( SkinReader::Instance()->patview_bar_bg_color() );
+	drawArea->setBeatColor( SkinReader::Instance()->patview_beat_bg_color() );
+	drawArea->setBackground( SkinReader::Instance()->patview_bg_color() );
+	drawArea->setPlayBarColor( SkinReader::Instance()->patview_playbar_bg_color() );
+	drawArea->setBigTrackSeparatorColor(
+     SkinReader::Instance()->patview_track_big_sep_color()
+  );
+	drawArea->setLineSeparatorColor(SkinReader::Instance()->patview_line_sep_color());
+	drawArea->setLineGridEnabled(SkinReader::Instance()->patview_line_sep_enabled());
+	drawArea->setColGridEnabled(SkinReader::Instance()->patview_col_sep_enabled());
+	drawArea->setSeparatorColor(SkinReader::Instance()->patview_col_sep_color());
+	drawArea->setTextColor(SkinReader::Instance()->patview_text_color());
+	drawArea->setBeatTextColor(SkinReader::Instance()->patview_beat_text_color());
+
+	tweakGUI->setSelectionColor( SkinReader::Instance()->patview_sel_bg_color() );
+	tweakGUI->setCursorColor( SkinReader::Instance()->patview_cursor_bg_color() );
+	tweakGUI->setBarColor( SkinReader::Instance()->patview_bar_bg_color() );
+	tweakGUI->setBeatColor( SkinReader::Instance()->patview_beat_bg_color() );
+	tweakGUI->setBackground( SkinReader::Instance()->patview_bg_color() );
+	tweakGUI->setPlayBarColor( SkinReader::Instance()->patview_playbar_bg_color() );
+	tweakGUI->setBigTrackSeparatorColor(
+     SkinReader::Instance()->patview_track_big_sep_color()
+  );
+	tweakGUI->setLineSeparatorColor(SkinReader::Instance()->patview_line_sep_color());
+	tweakGUI->setLineGridEnabled(SkinReader::Instance()->patview_line_sep_enabled());
+	tweakGUI->setColGridEnabled(SkinReader::Instance()->patview_col_sep_enabled());
+	tweakGUI->setSeparatorColor(SkinReader::Instance()->patview_col_sep_color());
+	tweakGUI->setTextColor( SkinReader::Instance()->patview_text_color() );
+	tweakGUI->setBeatTextColor(SkinReader::Instance()->patview_beat_text_color());
+
+	lineNumber_->setBackground ( SkinReader::Instance()->patview_bg_color() );
+  lineNumber_->setTextColor( SkinReader::Instance()->patview_text_color() );
 }
 
 void PatternView::setFocus() {
@@ -668,13 +709,20 @@ int PatternView::Header::skinColWidth( )
     setBorder( NFrameBorder() );
     pView = pPatternView;
     setWidth(60);
-    setBackground(Global::pConfig()->pvc_row);
     setTransparent(false);
   }
 
   PatternView::LineNumber::~ LineNumber( )
   {
   }
+
+	void PatternView::LineNumber::setTextColor( const NColor& textColor ) {
+		textColor_ = textColor;
+	}
+
+	const NColor & PatternView::LineNumber::textColor() const {
+		return textColor_;
+	}
 
   void PatternView::LineNumber::paint( NGraphics * g )
   {
@@ -747,10 +795,10 @@ int PatternView::Header::skinColWidth( )
           }
           if ( pView->pattern()->barStart(position, signature) ) {
             std::string caption = stringify(signature.numerator())+"/"+stringify(signature.denominator());
-            g->drawText(0,i*pView->rowHeight()+pView->rowHeight()-1 - dy(),caption);
+            g->drawText(0,i*pView->rowHeight()+pView->rowHeight()-1 - dy(),caption, textColor() );
           }
         }
-        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+pView->rowHeight()-1-dy(),text);
+        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+pView->rowHeight()-1-dy(),text, textColor() );
       }
   }
 
@@ -861,17 +909,16 @@ void PatternView::TweakGUI::customPaint(NGraphics* g, int startLine, int endLine
       if (!(y == pView->playPos()) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
       if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
-              g->setForeground(Global::pConfig()->pvc_row4beat);
+              g->setForeground( barColor() );
               g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
-              g->setForeground(Global::pConfig()->pvc_rowbeat);
           } else {
+						g->setForeground( beatColor() );
             g->fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
           }
         }
       } else  {
-        g->setForeground(Global::pConfig()->pvc_playbar);
+        g->setForeground( playBarColor() );
         g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
-        g->setForeground(Global::pConfig()->pvc_rowbeat);
       }
     }
 
@@ -1003,7 +1050,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 
 void PatternView::TweakGUI::drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
 	if ( pView->pattern() ) {
-		drawCellBg(g, cursor(), Global::pConfig()->pvc_cursor );
+		drawCellBg( g, cursor() );
 
 		SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
 
@@ -1018,7 +1065,7 @@ void PatternView::TweakGUI::drawPattern(NGraphics* g, int startLine, int endLine
 					PatternEvent event = eventIt->second;
 					int x = eventIt->first;
 					if (event.command() != 0 || event.parameter() != 0) {
-						drawData( g, x, y, 0, (event.command() << 8) | event.parameter() );
+						drawData( g, x, y, 0, (event.command() << 8) | event.parameter(), textColor() );
 					}
 					lastLine = y;
 				}
@@ -1197,17 +1244,17 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
       if (!(y == pView->playPos()) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
       if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
-              g->setForeground(Global::pConfig()->pvc_row4beat);
+              g->setForeground( barColor() );
               g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
               g->setForeground(Global::pConfig()->pvc_rowbeat);
           } else {
+						g->setForeground( beatColor() );
             g->fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
           }
         }
       } else  {
-        g->setForeground(Global::pConfig()->pvc_playbar);
+        g->setForeground( playBarColor() );
         g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
-        g->setForeground(Global::pConfig()->pvc_rowbeat);
       }
     }
 
@@ -1223,29 +1270,62 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
 	if ( pView->pattern() ) {
-		drawCellBg(g, cursor(), Global::pConfig()->pvc_cursor );
+		drawCellBg( g, cursor()  );
 
 		SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
+    TimeSignature signature;
 
 		int lastLine = -1;
-		for ( ; it != pView->pattern_->end(); it++ ) {
-			PatternLine & line = it->second;
-			int y = d2i (it->first * pView->pattern_->beatZoom());
-			if (y > endLine) break;
+		PatternLine* line;
+		PatternLine emptyLine;
+
+		for ( int y = startLine; y <= endLine; y++) {
+
+			if ( it != pView->pattern_->end() )	{
+				int liney = d2i (it->first * pView->pattern_->beatZoom());
+				if (liney == y ) {
+					line = &it->second;
+					it++;
+				} else line = &emptyLine;
+			} else line = &emptyLine;
+
+
 			if (y != lastLine) {
-				PatternLine::iterator eventIt = line.lower_bound(startTrack);
-				for(; eventIt != line.end() && eventIt->first <= endTrack; ++eventIt) {
-					PatternEvent event = eventIt->second;
-					int x = eventIt->first;
-					drawData( g, x, y, 0, event.note() );
-					if (event.instrument() != 255) drawData( g, x, y, 1, event.instrument() );
-					if (event.machine() != 255) drawData( g, x, y, 2, event.machine() );
-					if (event.volume() != 255) drawData( g, x, y, 3, event.volume() );
-					if (event.command() != 0 || event.parameter() != 0) {
-						drawData( g, x, y, 4, (event.command() << 8) | event.parameter() );
+				NColor tColor = textColor();
+
+      	if ( !(y % beatZoom())) {
+          if ((pView->pattern()->barStart(it->first, signature) )) {
+              //tColor = g->setForeground( barColor() );              
+          } else {
+							tColor = beatTextColor();
+          }
+				}
+
+				PatternLine::iterator eventIt = line->lower_bound(startTrack);
+				PatternEvent emptyEvent;
+				PatternEvent* event;
+
+				for ( int x = startTrack; x <= endTrack; x++ ) {
+				
+					if ( eventIt != line->end() && eventIt->first <= endTrack ) {
+						int trackx = eventIt->first;
+						if ( x == trackx) {
+						  event = &eventIt->second;
+							eventIt++;
+						} else {
+							event = &emptyEvent;
+						}
+					} else event = &emptyEvent;
+
+					drawData( g, x, y, 0, event->note() , tColor );
+					if (event->instrument() != 255) drawData( g, x, y, 1, event->instrument(), tColor );
+					if (event->machine() != 255) drawData( g, x, y, 2, event->machine(), tColor );
+					if (event->volume() != 255) drawData( g, x, y, 3, event->volume(), tColor );
+					if (event->command() != 0 || event->parameter() != 0) {
+						drawData( g, x, y, 4, (event->command() << 8) | event->parameter(), tColor );
 					}										
 					
-				  PatternEvent::PcmListType & pcList = event.paraCmdList();
+				  PatternEvent::PcmListType & pcList = event->paraCmdList();
 				  PatternEvent::PcmListType::iterator it = pcList.begin();
 				  int count = 0;
 				  for ( ; it < pcList.end(); it++, count++ ) {
@@ -1253,7 +1333,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 					  int command = pc.first;
 					  int parameter = pc.second;
 					  if ( command != 0 || parameter != 0) {
-					    drawData( g, x, y, 5+count, ( command << 8) | parameter );
+					    drawData( g, x, y, 5+count, ( command << 8) | parameter , tColor );
 					 }
 				 }
 	      }

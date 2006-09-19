@@ -130,8 +130,42 @@ namespace psycle {
 					void setPatternStep( int step );
 					int patternStep() const;
 
+					void setSeparatorColor( const NColor & color );
 					const NColor & separatorColor() const;
+
+					void setLineSeparatorColor( const NColor & color );
+					const NColor & lineSeparatorColor() const;
+
+
+					void setBigTrackSeparatorColor( const NColor & selColor );
+					const NColor & bigTrackSeparatorColor() const;
+
+					void setSelectionColor( const NColor & selColor );
 					const NColor & selectionColor() const;
+
+					void setCursorColor( const NColor & cursorColor );
+					const NColor & cursorColor() const;
+
+					void setBarColor( const NColor & barColor );
+					const NColor & barColor() const;
+
+					void setBeatColor( const NColor & beatColor );
+					const NColor & beatColor() const;
+
+					void setPlayBarColor( const NColor & playBarColor );
+					const NColor & playBarColor() const;
+
+					void setLineGridEnabled( bool on );
+					bool lineGridEnabled() const;
+
+					void setColGridEnabled( bool on );
+					bool colGridEnabled() const;
+
+					void setBeatTextColor( const NColor & color );
+					const NColor & beatTextColor();
+
+					void setTextColor( const NColor & color);
+					const NColor & textColor() const;
 
       		void setDx(int dx);
 					int dx() const;
@@ -159,7 +193,7 @@ namespace psycle {
 					void addEvent( const ColumnEvent & event );
 					std::string noteToString( int value );
 
-					void drawData(NGraphics* g, int track, int line, int eventnr, int data );
+					void drawData(NGraphics* g, int track, int line, int eventnr, int data , const NColor & color);
 
 					const PatCursor & cursor() const;
 					void setCursor( const PatCursor & cursor );
@@ -211,7 +245,7 @@ namespace psycle {
 
 					virtual void drawSelBg( NGraphics* g, const NSize & selArea );
 
-					virtual void drawCellBg(NGraphics* g, const PatCursor & cursor, const NColor & bgColor);
+					virtual void drawCellBg(NGraphics* g, const PatCursor & cursor );
 
 
 
@@ -236,6 +270,18 @@ namespace psycle {
 
 					NColor separatorColor_;
 					NColor selectionColor_;
+					NColor cursorColor_;
+					NColor barColor_;
+					NColor beatColor_;
+					NColor playBarColor_;
+					NColor bigTrackSeparatorColor_;
+					NColor lineSepColor_;
+					NColor textColor_;
+					NColor beatTextColor_;
+
+					bool lineGridEnabled_;
+					bool colGridEnabled_;
+
 					int patternStep_;
 
 					int colIdent;
@@ -244,9 +290,9 @@ namespace psycle {
 
 					std::vector<ColumnEvent> events_;
 
-					void drawBlockData( NGraphics * g, int xOff, int line, const std::string & text );
+					void drawBlockData( NGraphics * g, int xOff, int line, const std::string & text, const NColor & color );
 
-					void drawStringData(NGraphics* g, int xOff, int line, const std::string & text );
+					void drawStringData(NGraphics* g, int xOff, int line, const std::string & text , const NColor & color);
 
 					int eventOffset( int eventnr, int col ) const;
 					int eventWidth( int eventnr ) const;
@@ -256,6 +302,8 @@ namespace psycle {
 					void alignTracks();
 
 					int trackMinWidth_;
+
+					std::string defaultNoteStr_;
 
 		};
 	}

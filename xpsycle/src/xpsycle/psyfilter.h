@@ -54,6 +54,8 @@ namespace psycle
 			virtual bool load(const std::string & fileName, Song & song);
 			virtual bool save(const std::string & fileName, const Song & song);
 
+			virtual std::string filePostfix() const;
+
 		private:
 
 			static int c;

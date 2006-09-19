@@ -348,7 +348,7 @@ namespace psycle {
 			// ideally, you should create a temporary file on the same physical
 	  	// disk as the target zipfile... 
 
-			zipwriter *z = zipwriter_start(open(std::string(fileName+".zip").c_str(), O_RDWR|O_CREAT, 0666));
+			zipwriter *z = zipwriter_start(open(fileName.c_str(), O_RDWR|O_CREAT, 0666));
 			zipwriterfilestream xmlFile(z, "xml/song.xml" );
 
 			std::ostringstream xml;
@@ -375,6 +375,11 @@ namespace psycle {
 				progress.emit(1,0,"");
 				progress.emit(2,0,"Saving binary data...");
 			}
+
+			// we create here a temp file, cause our RiffFile is a fstream
+			// and the zipwriter is only a ostream
+			// modifiying the Rifffile makes it possible
+			// to write direct into the zip without using a temp here
 
 			RiffFile file;
 			file.Create(std::string("psycle_tmp.bin").c_str(), true);
@@ -414,7 +419,12 @@ namespace psycle {
       if (!zipwriter_finish(z)) {
 				return false;
 			}
-      
+
+			// remove temp file
+			 if( std::remove("psycle_tmp.bin") == -1 )
+    			std::cerr << "Error deleting temp file" << std::endl;
+  
+     
 			return true;
 		}
 

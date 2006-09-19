@@ -32,6 +32,7 @@
 #include "wavesavedlg.h"
 #include "newmachine.h"
 #include "audioconfigdlg.h"
+#include "skinreader.h"
 #include <iomanip>
 #include <ngrs/napp.h>
 #include <ngrs/nitem.h>
@@ -60,6 +61,9 @@ template<class T> inline T str_hex(const std::string &  value) {
 MainWindow::MainWindow()
   : NWindow()
 {
+
+  SkinReader::Instance()->setDefaults();
+
   setTitle ("] Psycle Modular Music Creation Studio[ ( X alpha ) ");
 
   setPosition(0,0,1024,768);
@@ -93,6 +97,9 @@ std::cout << " updatenewsong" << std::endl;
 //  updateStatusBar();
 
   //childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
+
+ 
+
 }
 
 
