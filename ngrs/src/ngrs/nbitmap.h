@@ -58,6 +58,8 @@ public:
     void loadFromFile(const std::string & filename);
     void createFromXpmData(const char** data);
 
+		// this really should be a cloned NBItmap then.
+		XImage* cloneXImage( XImage* src_xi );
 
 private:
 
@@ -71,7 +73,7 @@ private:
 
 		void deleteBitmapData();
 
-		XImage* cloneXImage( XImage* src_xi );
+		
 };
 
 #endif

@@ -188,6 +188,26 @@ void NGraphics::drawText( int x, int y, const std::string & text )
   }
 }
 
+void NGraphics::drawText(int x, int y, const std::string & text, const NColor & color ) {
+	if (!fntStruct.antialias)  {
+    if (!( color == oldColor)) {
+       if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
+                  else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
+    }
+    if (dblBuffer_)
+       XDrawString(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
+    else
+       XDrawString(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
+    setForeground(old);
+ } else
+ {
+    fFtColor.color.red   = color.red() * ( 0xFFFF/255);
+    fFtColor.color.green = color.green() * ( 0xFFFF/255);
+    fFtColor.color.blue  = color.blue() * ( 0xFFFF/255);
+    drawXftString(x+dx_,y+dy_,text.c_str());
+  }
+}
+
 void NGraphics::drawRect( int x, int y, int width, int height )
 {
   if (dblBuffer_)
@@ -325,6 +345,60 @@ int NGraphics::textDescent( )
    return fntStruct.xftFnt->descent;
 }
 
+
+void NGraphics::putStretchBitmap(int x, int y, const NBitmap & bitmap, int width, int height ) {
+   if (bitmap.X11data() != 0) {
+
+      if (dblBuffer_) {
+         if (bitmap.X11ClpData()==0) {
+            // first create a new data for the stretched image
+            int pixelsize = NApp::system().pixelSize( NApp::system().depth() );
+            unsigned char* dst_data = reinterpret_cast<unsigned char*> ( malloc( width * height * pixelsize) );
+            for ( int i = 0; i < width* height * pixelsize; i++ ) {
+              dst_data[i];
+						}
+
+            // get the original data
+						unsigned char* originalData = (unsigned char*) bitmap.X11data();
+            // calculate the xtretch / ystretch
+  					double xstretch = 1; // (double)bitmap.width() / width;
+            double ystretch = 1; //(double)bitmap.height() / height;
+
+            // we have 24 bpp resolution
+            if (pixelsize == 4)
+                // loop over the original bitmap data
+                for (int i = 0; i < bitmap.width(); i++) {
+                  for (int j = 0; j < bitmap.height(); j++) {
+                    unsigned char r = originalData[(i*bitmap.width()+j)*pixelsize];
+                    unsigned char g = originalData[(i*bitmap.width()+j)*pixelsize+1];
+                    unsigned char b = originalData[(i*bitmap.width()+j)*pixelsize+2];
+  
+										int newDataPos = std::min( (int) (((i*ystretch)*width + j*xstretch)*pixelsize), width*height*pixelsize - pixelsize);
+
+                    dst_data[newDataPos] =  r;
+                    dst_data[newDataPos+1] =  g;
+                    dst_data[newDataPos+2] =  b;
+                  }
+                }
+
+                // create now a new XImage from the stretched data
+
+                int depth  = bitmap.X11data()->depth;
+                int pad    = bitmap.X11data()->bitmap_pad;
+                int bytes_per_line = bitmap.X11data()->bytes_per_line;
+
+                XImage* xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), depth, ZPixmap,0,(char*) dst_data , width, height, pad , bytes_per_line );                 
+
+                // write the image to the screen
+
+                XPutImage(NApp::system().dpy(),doubleBufferPixmap_,gcp,xi,0,0,x+dx_,y+dy_,xi->width,xi->height);
+
+								 // destroys the image
+                XDestroyImage(xi);
+              }
+						} 
+          }              
+}
 
 void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
 {

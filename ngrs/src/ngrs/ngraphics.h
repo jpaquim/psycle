@@ -34,6 +34,10 @@
 /**
 @author Stefan
 */
+
+const int nBltNormal = 0;
+const int nBltStretch = 1;
+
 class NGraphics{
 public:
     NGraphics(Window winID);
@@ -77,6 +81,7 @@ public:
 
     void setFont(const NFont & font);
     void drawText(int x, int y, const std::string & text);
+		void drawText(int x, int y, const std::string & text, const NColor & color);
     void drawText(int x, int y, const NFntString & text);
     int textWidth(const std::string & text) const;
     int textWidth( const NFntString & text ) const;
@@ -91,7 +96,8 @@ public:
 
     void fillTranslucent(int x, int y, int width, int height, NColor color, int percent);
 
-    void putBitmap(int x, int y, const NBitmap & bitmap);
+    void putBitmap(int x, int y, const NBitmap & bitmap );
+    void putStretchBitmap(int x, int y, const NBitmap & bitmap, int width, int height );
     void putBitmap(int destX, int destY, int width, int height, const NBitmap & bitmap, int srcX, int srcY );
     void putPixmap(int destX, int destY, int width, int height, NPixmap & pixmap, int srcX, int srcY );
 
