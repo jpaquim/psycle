@@ -57,6 +57,10 @@ namespace psycle
 			return false;
 		}
 
+		std::string  PsyFilter::filePostfix() const {
+			return "psy";
+		}
+
 		bool PsyFilter::testFormat( const std::string & fileName )
 		{
 			return false;
@@ -88,7 +92,14 @@ namespace psycle
 			for (  ; it < filters.end(); it++) {
 				PsyFilter* filter = *it;
 				if ( filter->version() == version ) {
-					return filter->save(fileName,song);
+					// check postfix
+					std::string newFileName = fileName;
+					int dotPos = fileName.rfind(".");
+					if ( dotPos == std::string::npos ) 
+						// append postfix
+						newFileName = fileName + "." + filter->filePostfix();
+
+					return filter->save(newFileName,song);
 					break;
 				}
 			}

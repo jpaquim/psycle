@@ -58,6 +58,7 @@ class SequencerItem;
 class NewMachine;
 class AudioConfigDlg;
 
+
 /**
 @author Stefan
 */

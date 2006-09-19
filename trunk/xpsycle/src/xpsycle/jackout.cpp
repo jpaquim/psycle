@@ -79,21 +79,21 @@ namespace psycle
 		// Jack special functions
 
 		bool JackOut::registerToJackServer() {
-			jack_options_t options = JackNullOption;
-			jack_status_t status;
+	//		jack_options_t options = JackNullOption;
+//			jack_status_t status;
  			// try to become a client of the JACK server
-/*			const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
+			const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
 
 			if ( (client = jack_client_new ( registerCPtr )) == 0) {
  				std::cerr << "jack server not running?\n" << std::endl;
 				return 0;
  			}
-*/
-			if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
+
+/*			if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
 			{
  				std::cerr << "jack server not running?\n" << std::endl;
 				return 0;
-			}
+			}*/
 
 			// tell the JACK server to call `process()' whenever
 			// there is work to be done.

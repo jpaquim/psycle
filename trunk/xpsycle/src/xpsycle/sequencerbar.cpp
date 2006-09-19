@@ -149,7 +149,7 @@ SequencerBar::~SequencerBar()
 }
 
 void SequencerBar::init( )
-{
+{  
   DefaultBitmaps & icons = Global::pConfig()->icons();
 
   counter = 0;
