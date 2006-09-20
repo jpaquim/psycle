@@ -84,7 +84,7 @@ void NRect::setLeft( long left )
   left_ = left;
 }
 
-bool NRect::intersects( const NPoint & p )
+bool NRect::intersects( const NPoint & p ) const
 {
   if ((left() <= p.x()) && (width()+ left() >= p.x()) && (top()  <= p.y())
                         && (height()+top()  >= p.y())) return true; else return false;
@@ -117,7 +117,7 @@ bool NRect::operator !=( const NRect & rhs ) const
  return !(*this == rhs);
 }
 
-bool NRect::intersects( long x, long y )
+bool NRect::intersects( long x, long y ) const
 {
    if ((left() <= x) && (width()+ left() >= x) && (top()  <= y)
                         && (height()+top()  >= y))

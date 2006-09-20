@@ -48,6 +48,8 @@ public:
     void loadFromFile( const std::string & filename );
     void createFromXpmData(const char** data);
 
+    bool empty() const;
+
 
 private:
 
