@@ -46,8 +46,8 @@ public:
     long int bottom() const;
 
     bool hasIntersection( const NRect & r2) const;
-    bool intersects(const NPoint & p);
-    bool intersects(long x, long y);
+    bool intersects(const NPoint & p) const;
+    bool intersects(long x, long y) const;
     void intersects( const NRect & r2, NRect & result ) const;
 
     bool operator==(const NRect & rhs) const;

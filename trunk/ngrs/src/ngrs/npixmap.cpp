@@ -114,6 +114,11 @@ void NPixmap::createFromXpmData( const char ** data )
   height_ = attr.height;
 }
 
+bool NPixmap::empty( ) const
+{
+  return !( pixmap_ || shapepixmap_ );
+}
+
 
 
 
