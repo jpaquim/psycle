@@ -219,5 +219,7 @@ void NBitmap::deleteBitmapData( )
 	}
 }
 
-
+bool NBitmap::empty() const {
+  return !(xi || clp);
+}
 

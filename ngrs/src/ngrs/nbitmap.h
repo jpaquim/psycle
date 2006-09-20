@@ -61,6 +61,8 @@ public:
 		// this really should be a cloned NBItmap then.
 		XImage* cloneXImage( XImage* src_xi );
 
+    bool empty() const;
+
 private:
 
     int depth_;
