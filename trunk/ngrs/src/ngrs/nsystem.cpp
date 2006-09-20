@@ -234,9 +234,18 @@ string NSystem::getFontPattern( const NFont & font )
   string xfntname = "";
   if (isWellFormedFont(font.fontString())) return font.fontString();
   else {
+		// first search alias
+		int count = 0;
+		char** myFonts = getFontList(dpy(), font.name(), &count);
+		if ( count!=0) {
+			xfntname = myFonts[0];
+			XFreeFontNames(myFonts);
+			return xfntname;
+		}
+		
     string pattern = fontPattern(font);
-    int count = 0;
-    char** myFonts = getFontList(dpy(), pattern, &count);
+    count = 0;
+     myFonts = getFontList(dpy(), pattern, &count);
     if (count!=0) {
       xfntname = getFontPatternWithSizeStyle(dpy(),0,myFonts[0],font.size()*10);
     }
