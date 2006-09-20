@@ -140,6 +140,9 @@ namespace psycle {
 					void setBigTrackSeparatorColor( const NColor & selColor );
 					const NColor & bigTrackSeparatorColor() const;
 
+					void setSmallTrackSeparatorColor( const NColor & color );
+					const NColor & smallTrackSeparatorColor() const;
+
 					void setSelectionColor( const NColor & selColor );
 					const NColor & selectionColor() const;
 
@@ -166,6 +169,15 @@ namespace psycle {
 
 					void setTextColor( const NColor & color);
 					const NColor & textColor() const;
+
+					void setTrackLeftIdent( int ident );
+					int trackLeftIdent() const;
+
+					void setTrackRightIdent( int ident );
+					int trackRightIdent() const;
+
+					void setBigTrackSeparatorWidth( int ident );
+					int bigTrackSeparatorWidth() const;
 
       		void setDx(int dx);
 					int dx() const;
@@ -218,6 +230,8 @@ namespace psycle {
 					void setDefaultVisibleEvents( int defaultSize );
 					void setTrackMinWidth( int size );
 
+					void alignTracks();
+
 			protected:
 
 					virtual PatCursor intersectCell(int x, int y);
@@ -248,7 +262,6 @@ namespace psycle {
 					virtual void drawCellBg(NGraphics* g, const PatCursor & cursor );
 
 
-
 			private:
 
 					int dx_, dy_;
@@ -275,6 +288,7 @@ namespace psycle {
 					NColor beatColor_;
 					NColor playBarColor_;
 					NColor bigTrackSeparatorColor_;
+					NColor smallTrackSeparatorColor_;
 					NColor lineSepColor_;
 					NColor textColor_;
 					NColor beatTextColor_;
@@ -299,9 +313,11 @@ namespace psycle {
 					int eventColWidth( int eventnr ) const;
 
 					std::map<int, TrackGeometry> trackGeometryMap;
-					void alignTracks();
+					
 
 					int trackMinWidth_;
+					int trackLeftIdent_;
+					int trackRightIdent_;
 
 					std::string defaultNoteStr_;
 

@@ -27,6 +27,17 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+template<class T> inline T str(const std::string &  value) {
+   T result;
+
+   std::stringstream str;
+   str << value;
+   str >> result;
+
+   return result;
+}
+
+
 namespace psycle { 
 	namespace host {
 
@@ -54,16 +65,21 @@ namespace psycle {
 
 			mem +="<patternview>";
 
-			mem +="<cursor bgcolor='179:217:34' sel_bgcolor='100:100:100' />";
-			mem +="<bar bgcolor='70:71:69' sel_bgcolor='200:200:200'/>";
-			mem +="<beat bgcolor='50:51:49' sel_bgcolor='10:220:10' textcolor='199:199:199'/>";
-			mem +="<lines bgcolor='34:32:35' sel_bgcolor='140:68:41' textcolor='255:255:255'/>";
-			mem +="<playbar bgcolor='132:162:30' sel_bgcolor='0:0:200'/>";
-			mem +="<bigtrackseparator bgcolor='145:147:147' />";
+			mem +="<cursor bgcolor='179:217:34' textcolor='0:0:0' />";
+			mem +="<bar bgcolor='70:71:69' sel_bgcolor='162:101:68'/>";
+			mem +="<beat bgcolor='50:51:49' sel_bgcolor='142:81:48' textcolor='199:199:199' sel_textcolor='216:154:120'/>";
+			mem +="<lines bgcolor='34:32:35' sel_bgcolor='140:68:41' textcolor='255:255:255' sel_textcolor='239:175:140'/>";
+			mem +="<playbar bgcolor='42:47:39' sel_bgcolor='0:0:200'/>";
+			mem +="<bigtrackseparator bgcolor='145:147:147' width='2' />";
+			mem +="<smalltrackseparator bgcolor='105:107:107' />";
 			mem +="<lineseparator enable='0' bgcolor='145:147:147'/>";
 			mem +="<colseparator enable='0' bgcolor='145:147:147'/>";
+			mem +="<trackident left ='2' right='2'/>";
 			mem +="</patternview>";
 			mem +="</psyskin>";
+
+			patview_track_left_ident_ = 0;
+			patview_track_right_ident_ = 0;
 
 			NXmlParser parser;
 			parser.tagParse.connect( this, &SkinReader::onTagParse );
@@ -120,6 +136,10 @@ namespace psycle {
 				if ( bgcolor != "" ) {
 					patview_cursor_bg_color_ = NColor( bgcolor );
 				}
+				bgcolor = parser.getAttribValue("textcolor");
+				if ( bgcolor != "" ) {
+					patview_cursor_text_color_ = NColor( bgcolor );
+				}
 				bgcolor = parser.getAttribValue("sel_bgcolor");
 				if ( bgcolor != "" ) {
 					patview_sel_cursor_bg_color_ = NColor( bgcolor );
@@ -148,6 +168,10 @@ namespace psycle {
 				if ( bgcolor != "" ) {
 					patview_beat_text_color_ = NColor( bgcolor );
 				}
+				bgcolor = parser.getAttribValue("sel_textcolor");
+				if ( bgcolor != "" ) {
+					patview_sel_beat_text_color_ = NColor( bgcolor );
+				}
 			} else
 			if ( tagName == "lines" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
@@ -162,6 +186,10 @@ namespace psycle {
 				if ( bgcolor != "" ) {
 					patview_text_color_ = NColor( bgcolor );
 				}
+				bgcolor = parser.getAttribValue("sel_textcolor");
+				if ( bgcolor != "" ) {
+					patview_sel_text_color_ = NColor( bgcolor );
+				}
 			} else
 			if ( tagName == "playbar" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
@@ -173,10 +201,20 @@ namespace psycle {
 					patview_sel_playbar_bg_color_ = NColor( bgcolor );
 				}
 			} else
+			if ( tagName == "smalltrackseparator" && parsePatView ) {
+				std::string bgcolor = parser.getAttribValue("bgcolor");
+				if ( bgcolor != "" ) {
+					patview_track_small_sep_color_ = NColor( bgcolor );
+				}
+			} else
 			if ( tagName == "bigtrackseparator" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
 					patview_track_big_sep_color_ = NColor( bgcolor );
+				}
+				bgcolor = parser.getAttribValue("width");
+				if ( bgcolor != "" ) {
+					patview_track_big_sep_width_ = str<int>( bgcolor );
 				}
 			} else
 			if ( tagName == "lineseparator" && parsePatView ) {
@@ -202,6 +240,16 @@ namespace psycle {
 				else
 					patview_col_sep_enabled_ = 0;
 			}
+			if ( tagName == "trackident" && parsePatView ) {
+				std::string leftIdent = parser.getAttribValue("left");
+				if ( leftIdent != "") {
+					patview_track_left_ident_ = str<int>( leftIdent );
+				}
+				std::string rightIdent = parser.getAttribValue("right");
+				if ( rightIdent != "") {
+					patview_track_right_ident_ = str<int>( rightIdent );
+				}
+			}
 		}
 
 		// Patternview color`s
@@ -209,6 +257,10 @@ namespace psycle {
 		const NColor & SkinReader::patview_cursor_bg_color( ) const
 		{
 			return patview_cursor_bg_color_;
+		}
+
+		const NColor & SkinReader::patview_cursor_text_color() const {
+			return patview_cursor_text_color_;
 		}
 
 		const NColor & SkinReader::patview_bar_bg_color() const {
@@ -223,6 +275,10 @@ namespace psycle {
 			return patview_beat_text_color_;
 		}
 
+		const NColor & SkinReader::patview_sel_beat_text_color() const {
+			return patview_sel_beat_text_color_;
+		}
+
 		const NColor & SkinReader::patview_bg_color() const {
 			return patview_bg_color_;
 		}
@@ -233,6 +289,10 @@ namespace psycle {
 
 		const NColor & SkinReader::patview_track_big_sep_color() const {
 			return patview_track_big_sep_color_;
+		}
+
+		const NColor & SkinReader::patview_track_small_sep_color() const {
+			return patview_track_small_sep_color_;
 		}
 
 		const NColor & SkinReader::patview_line_sep_color() const {
@@ -253,6 +313,18 @@ namespace psycle {
 
 		const NColor & SkinReader::patview_text_color() const {
 			return patview_text_color_;
+		}
+
+		const NColor & SkinReader::patview_sel_text_color() const {
+			return patview_sel_text_color_;
+		}
+
+		int SkinReader::patview_track_left_ident() const {
+			return patview_track_left_ident_;
+		}
+
+		int SkinReader::patview_track_right_ident() const {
+			return patview_track_right_ident_;
 		}
 
 		// with selection
@@ -278,6 +350,9 @@ namespace psycle {
 			return patview_sel_playbar_bg_color_;
 		}
 
+		int SkinReader::patview_track_big_sep_width() const {
+			return patview_track_big_sep_width_;
+		}
 
  }
 }

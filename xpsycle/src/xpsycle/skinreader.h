@@ -54,13 +54,18 @@ namespace psycle {
 			// patternview settings
 			
 			const NColor & patview_cursor_bg_color() const;
+			const NColor & patview_cursor_text_color() const;
 			const NColor & patview_bar_bg_color() const;
 			const NColor & patview_beat_bg_color() const;
+			const NColor & patview_sel_beat_text_color() const;
 			const NColor & patview_beat_text_color() const;
 			const NColor & patview_bg_color() const;
 			const NColor & patview_text_color() const;
+			const NColor & patview_sel_text_color() const;
 			const NColor & patview_playbar_bg_color() const;
 			const NColor & patview_track_big_sep_color() const;
+			const NColor & patview_track_small_sep_color() const;
+			int patview_track_big_sep_width() const;
 			const NColor & patview_line_sep_color() const;
 			bool patview_line_sep_enabled() const;
 			const NColor & patview_col_sep_color() const;
@@ -71,8 +76,10 @@ namespace psycle {
 			const NColor & patview_sel_beat_bg_color() const;
 			const NColor & patview_sel_bg_color() const;
 			const NColor & patview_sel_playbar_bg_color() const;
-			
 
+			int patview_track_left_ident() const;
+			int patview_track_right_ident() const;
+			
 		private:
 
 			void onTagParse(const NXmlParser & parser, const std::string & tagName);
@@ -81,22 +88,30 @@ namespace psycle {
 
 			// patternview stuff
 			NColor patview_cursor_bg_color_;
+			NColor patview_cursor_text_color_;
 			NColor patview_bar_bg_color_;
 			NColor patview_beat_bg_color_;
 			NColor patview_bg_color_;
 			NColor patview_text_color_;
+			NColor patview_sel_text_color_;
 			NColor patview_beat_text_color_;
 			NColor patview_playbar_bg_color_;
 			NColor patview_track_big_sep_color_;
+			NColor patview_track_small_sep_color_;
 			NColor patview_line_sep_color_;
 			bool patview_line_sep_enabled_;
 			NColor patview_col_sep_color_;
 			bool patview_col_sep_enabled_;
 
+			int patview_track_left_ident_;
+			int patview_track_right_ident_;
+			int patview_track_big_sep_width_;
+
 			NColor patview_sel_cursor_bg_color_;
 			NColor patview_sel_bar_bg_color_;
 			NColor patview_sel_beat_bg_color_;
 			NColor patview_sel_bg_color_;
+			NColor patview_sel_beat_text_color_;
 			NColor patview_sel_playbar_bg_color_;
 
 		};
