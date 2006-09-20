@@ -181,6 +181,7 @@ private:
     void onViewMenuStatusbar(NButtonEvent* ev);
 
 		void onConfigMenuAudio(NButtonEvent* ev);
+		void onConfigMenuSkin(NButtonEvent* ev);
 
     void onHelpMenuAbout(NButtonEvent* ev);
     void onHelpMenuGreeting(NButtonEvent* ev);
