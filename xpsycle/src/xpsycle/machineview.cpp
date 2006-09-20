@@ -308,9 +308,21 @@ void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
   update();		 
   machineDeleted.emit(index); 
 }
+
+void MachineView::updateSkin( )
+{
+  for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+    MachineGUI* machineGUI = *it;
+    machineGUI->updateSkin();
+  }
+
+	repaint();
+}
  
 }
 }
+
+
 
 
 

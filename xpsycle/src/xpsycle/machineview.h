@@ -92,6 +92,8 @@ public:
 
     Machine* selMachine();
 
+		void updateSkin();
+
 private:
 
     Song* _pSong;

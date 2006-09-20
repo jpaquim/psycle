@@ -153,6 +153,20 @@ void MachineGUI::resize( )
     }
   }
 }
+
+void MachineGUI::setCoordInfo( const MachineCoordInfo &  coords ) {
+  coords_ = coords;
+}
+
+
+const MachineCoordInfo & MachineGUI::coords() const {
+	return coords_;
+}
+
+void MachineGUI::updateSkin() {
+    // virtual call only for subclasses
+}
+
 // end of Machine GUI class
 
 
@@ -171,16 +185,17 @@ MasterGUI::~ MasterGUI( )
 
 void MasterGUI::setSkin( )
 {
-  bgCoords.setPosition(0,0,148,48);
+	setCoordInfo( SkinReader::Instance()->machineview_master_coords() );
+
   setTransparent(true);
-  setHeight(bgCoords.height() + 2*ident());
-  setWidth(bgCoords.width()   + 2*ident() );
+  setHeight( coords().bgCoords.height() + 2*ident() );
+  setWidth( coords().bgCoords.width()   + 2*ident() );
   setBackground(NColor(0,0,200));
 
-  muteCoords.setPosition(0,145,15,14);
+  /*muteCoords.setPosition(0,145,15,14);
   dMuteCoords.setPosition(11,5,15,14);
   soloCoords.setPosition(15,145,15,14);
-  dSoloCoords.setPosition(26,5,15,14);
+  dSoloCoords.setPosition(26,5,15,14);*/
 }
 
 void MasterGUI::paint( NGraphics * g )
@@ -193,13 +208,14 @@ void MasterGUI::paint( NGraphics * g )
   g->setTranslation(xTrans + ident(), yTrans+ ident());
 
 
-  g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), Global::configuration().icons().machine_skin(), bgCoords.left(), bgCoords.top());
+  g->putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().bgCoords.left(), coords().bgCoords.top());
 
+/*
   if (pMac()->_mute)
-    g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), Global::configuration().icons().machine_skin(), muteCoords.left(), muteCoords.top());
+    g->putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), Global::configuration().icons().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
 
   if ( pMac()->song()->machineSoloed == pMac()->_macIndex)
-    g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
+    g->putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), Global::configuration().icons().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top());*/
 
   // reset translation to original
   g->setTranslation( xTrans, yTrans );
@@ -208,8 +224,8 @@ void MasterGUI::paint( NGraphics * g )
 void MasterGUI::onMousePress( int x, int y, int button )
 {
   MachineGUI::onMousePress(x,y,button);
-  if (button==1) {
-      if (dMuteCoords.intersects(x,y)) { // mute or unmute
+  /*if (button==1) {
+      if (coords().dMuteCoords.intersects(x,y)) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
@@ -220,7 +236,7 @@ void MasterGUI::onMousePress( int x, int y, int button )
         }
         repaint();
       } else
-      if (dSoloCoords.intersects(x,y)) { // solo or unsolo
+      if ( coords().dSoloCoords.intersects(x,y)) { // solo or unsolo
         if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
           pMac()->song()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
@@ -247,8 +263,14 @@ void MasterGUI::onMousePress( int x, int y, int button )
         }
       repaint();
     }
-  }
+  }*/
 }
+
+void MasterGUI::updateSkin() {
+    setSkin();
+}
+
+
 // end of MasterGUI class
 
 
@@ -266,7 +288,7 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
   add(frameMachine);
 
   vuPanel_ = new VUPanel(this);
-    vuPanel_->setPosition(dGeneratorVu.left() + ident(),dGeneratorVu.top() + ident(),dGeneratorVu.width(),dGeneratorVu.height());
+    vuPanel_->setPosition(coords().dVu.left() + ident(),coords().dVu.top() + ident(),coords().dVu.width(),coords().dVu.height());
     vuPanel_->setTransparent(false);
   add(vuPanel_);
 }
@@ -284,15 +306,15 @@ void GeneratorGUI::paint( NGraphics * g )
   // move translation to have place for selection border
   g->setTranslation(xTrans + ident(), yTrans+ ident());
 
-  g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), Global::configuration().icons().machine_skin(), bgCoords.left(), bgCoords.top());
-  g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), stringify(pMac()->_macIndex)+":"+pMac()->_editName);
+  g->putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->machines_bitmap() , coords().bgCoords.left(), coords().bgCoords.top());
+  g->drawText(coords().dNameCoords.x(),coords().dNameCoords.y()+g->textAscent(), stringify(pMac()->_macIndex)+":"+pMac()->_editName);
 
 
   if (pMac()->_mute)
-    g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), Global::configuration().icons().machine_skin(), muteCoords.left(), muteCoords.top());
+    g->putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().muteCoords.left(), coords().muteCoords.top());
 
   if (pMac()->song()->machineSoloed == pMac()->_macIndex)
-    g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
+    g->putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().soloCoords.left(), coords().soloCoords.top());
 
   // reset old Translation
   g->setTranslation(xTrans, yTrans );
@@ -300,33 +322,35 @@ void GeneratorGUI::paint( NGraphics * g )
 
 void GeneratorGUI::setSkin( )
 {
-  bgCoords.setPosition(0,47,148,47);
-  dNameCoords.setXY(49,7);
-  muteCoords.setPosition(0,145,15,14);
-  dMuteCoords.setPosition(11,5,15,14);
-  soloCoords.setPosition(15,145,15,14);
-  dSoloCoords.setPosition(26,5,15,14);
+	setCoordInfo( SkinReader::Instance()->machineview_generator_coords() );
 
-  sGeneratorVu0.setPosition(0,141,7,4);
-  sGeneratorVuPeak.setPosition(128,141,2,4);
-  dGeneratorVu.setPosition(10,35,130,4);
-  sGenerator.setPosition(0,47,148,47);
+  //bgCoords.setPosition(0,47,148,47);
+  //dNameCoords.setXY(49,7);
+  //muteCoords.setPosition(0,145,15,14);
+  //dMuteCoords.setPosition(11,5,15,14);
+  //soloCoords.setPosition(15,145,15,14);
+  //dSoloCoords.setPosition(26,5,15,14);
 
-  setHeight(bgCoords.height() + 2*ident() );
-  setWidth(bgCoords.width()   + 2*ident() );
+  //sGeneratorVu0.setPosition(0,141,7,4);
+  //sGeneratorVuPeak.setPosition(128,141,2,4);
+  //dGeneratorVu.setPosition(10,35,130,4);
+  //sGenerator.setPosition(0,47,148,47);
 
-  sGenPan.setPosition(45,145,16,5);
+  setHeight( coords().bgCoords.height() + 2*ident() );
+  setWidth( coords().bgCoords.width()   + 2*ident() );
+
+  //sGenPan.setPosition(45,145,16,5);
 
   setTransparent(true);
 
-  panSlider_->setPosition(45 + ident() ,26 + ident(),91,sGenPan.height());
+  panSlider_->setPosition(45 + ident() ,26 + ident(),91,coords().sPan.height());
   panSlider_->setOrientation(nHorizontal);
   panSlider_->setTrackLine(false);
   panSlider_->setRange(0,127);
   panSlider_->setPos( pMac()->_panning );
   panSlider_->customSliderPaint.connect(this,&GeneratorGUI::customSliderPaint);
-  panSlider_->slider()->setWidth(sGenPan.width());
-  panSlider_->slider()->setHeight(sGenPan.height());
+  panSlider_->slider()->setWidth( coords().sPan.width() );
+  panSlider_->slider()->setHeight( coords().sPan.height() );
 }
 
 void GeneratorGUI::onPosChanged(NSlider* sender )
@@ -340,7 +364,7 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
 {
   MachineGUI::onMousePress(x,y,button);
   if (button==1) {
-      if (dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
+      if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
@@ -351,7 +375,7 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
         }
         repaint();
       } else
-      if (dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
+      if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
         if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
           pMac()->song()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
@@ -438,8 +462,14 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
 
 void GeneratorGUI::customSliderPaint( NSlider * sl, NGraphics * g )
 {
-  g->putPixmap(0,0,sGenPan.width(),sGenPan.height(),Global::configuration().icons().machine_skin(),sGenPan.left(),sGenPan.top());
+  g->putPixmap(0,0,coords().sPan.width(),coords().sPan.height(),SkinReader::Instance()->machines_bitmap(),coords().sPan.left(),coords().sPan.top());
 }
+
+void GeneratorGUI::updateSkin() {
+    setSkin();
+}
+
+
 // end of GeneratorGUI class
 
 
@@ -467,7 +497,7 @@ EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
   add(frameMachine);
 
   vuPanel_ = new VUPanel(this);
-    vuPanel_->setPosition(dGeneratorVu.left() + ident(),dGeneratorVu.top() + ident(),dGeneratorVu.width(),dGeneratorVu.height());
+    vuPanel_->setPosition( coords().dVu.left() + ident(), coords().dVu.top() + ident(), coords().dVu.width(), coords().dVu.height() );
     vuPanel_->setTransparent(false);
   add(vuPanel_);
 }
@@ -485,14 +515,14 @@ void EffektGUI::paint( NGraphics * g )
   // move translation to have place for selection border
   g->setTranslation(xTrans + ident(), yTrans+ ident());
 
-  g->putPixmap(0,0,bgCoords.width(),bgCoords.height(), Global::configuration().icons().machine_skin(), bgCoords.left(), bgCoords.top());
-  g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), pMac()->_editName);
+  g->putPixmap(0,0, coords().bgCoords.width(), coords().bgCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().bgCoords.left(), coords().bgCoords.top() );
+  g->drawText( coords().dNameCoords.x(), coords().dNameCoords.y() + g->textAscent(), pMac()->_editName);
 
   if (pMac()->_mute)
-    g->putPixmap(dMuteCoords.left(),dMuteCoords.top(),muteCoords.width(),muteCoords.height(), Global::configuration().icons().machine_skin(), muteCoords.left(), muteCoords.top());
+    g->putPixmap( coords().dMuteCoords.left(), coords().dMuteCoords.top(), coords().muteCoords.width(), coords().muteCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().muteCoords.left(), coords().muteCoords.top());
 
   if (pMac()->song()->machineSoloed == pMac()->_macIndex)
-    g->putPixmap(dSoloCoords.left(),dSoloCoords.top(),soloCoords.width(),soloCoords.height(), Global::configuration().icons().machine_skin(), soloCoords.left(), soloCoords.top());
+    g->putPixmap( coords().dSoloCoords.left(), coords().dSoloCoords.top(), coords(). soloCoords.width(), coords().soloCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().soloCoords.left(), coords().soloCoords.top() );
 
   // move translation to original
   g->setTranslation(xTrans, yTrans);
@@ -500,32 +530,21 @@ void EffektGUI::paint( NGraphics * g )
 
 void EffektGUI::setSkin( )
 {
-  bgCoords.setPosition(0,94,148,47);
-  dNameCoords.setXY(49,7);
-  sEffectPan.setPosition(45,145,16,5);
 
-  muteCoords.setPosition(0,145,15,14);
-  dMuteCoords.setPosition(11,5,15,14);
-  soloCoords.setPosition(15,145,15,14);
-  dSoloCoords.setPosition(26,5,15,14);
+	setCoordInfo( SkinReader::Instance()->machineview_generator_coords() );
 
-  setHeight(bgCoords.height() + 2*ident() );
-  setWidth(bgCoords.width()   + 2*ident() );
+  setHeight( coords().bgCoords.height() + 2*ident() );
+  setWidth(  coords().bgCoords.width()   + 2*ident() );
   setTransparent(true);
 
-  panSlider_->setPosition(46+ident() ,26+ident(),91,sEffectPan.height());
+  panSlider_->setPosition(46+ident() ,26+ident(),91, coords().sPan.height());
   panSlider_->setOrientation(nHorizontal);
   panSlider_->setTrackLine(false);
   panSlider_->setRange(0,127);
   panSlider_->setPos( pMac()->_panning );
   panSlider_->customSliderPaint.connect(this,&EffektGUI::customSliderPaint);
-  panSlider_->slider()->setWidth(sEffectPan.width());
-  panSlider_->slider()->setHeight(sEffectPan.height());
-
-  sGeneratorVu0.setPosition(0,141,7,4);
-  sGeneratorVuPeak.setPosition(128,141,2,4);
-  dGeneratorVu.setPosition(10,35,130,4);
-  sGenerator.setPosition(0,47,148,47);
+  panSlider_->slider()->setWidth( coords().sPan.width());
+  panSlider_->slider()->setHeight( coords().sPan.height());
 }
 
 
@@ -538,14 +557,14 @@ void EffektGUI::onPosChanged( NSlider* sender )
 
 void EffektGUI::customSliderPaint( NSlider * sl, NGraphics * g )
 {
-  g->putPixmap(0,0,sEffectPan.width(),sEffectPan.height(),Global::configuration().icons().machine_skin(),sEffectPan.left(),sEffectPan.top());
+  g->putPixmap(0,0, coords().sPan.width(), coords().sPan.height(), SkinReader::Instance()->machines_bitmap(), coords().sPan.left(), coords().sPan.top() );
 }
 
 void EffektGUI::onMousePress( int x, int y, int button )
 {
   MachineGUI::onMousePress(x,y,button);
   if (button==1) {
-      if (dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
+      if ( coords().dMuteCoords.intersects(x-ident(),y-ident()) ) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
           pMac()->_volumeCounter=0.0f;
@@ -556,7 +575,7 @@ void EffektGUI::onMousePress( int x, int y, int button )
         }
         repaint();
       } else
-      if (dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
+      if ( coords().dSoloCoords.intersects(x-ident(),y-ident()) ) { // solo or unsolo
         if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
           pMac()->song()->machineSoloed = -1;
           for ( int i=0;i<MAX_MACHINES;i++ ) {
@@ -590,6 +609,11 @@ void EffektGUI::repaintVUMeter( )
 {
   vuPanel_->repaint();
 }
+
+void EffektGUI::updateSkin() {
+    setSkin();
+}
+
 
 void EffektGUI::VUPanel::paint( NGraphics * g )
 {

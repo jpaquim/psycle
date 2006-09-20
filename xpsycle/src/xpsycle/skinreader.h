@@ -33,6 +33,7 @@
 #include <ngrs/nxmlparser.h>
 #include <ngrs/ncolor.h>
 #include <ngrs/nbitmap.h>
+#include <ngrs/npixmap.h>
 
 
 namespace psycle { 
@@ -52,6 +53,24 @@ namespace psycle {
 			NPoint dg0XCoords;
 		};
 
+		class MachineCoordInfo {
+		public:
+			NRect bgCoords;
+			NRect sPan;
+			NPoint dNameCoords;
+
+			NRect muteCoords;
+			NRect soloCoords;
+			NRect dSoloCoords;
+			NRect dMuteCoords;
+			NRect dPan;
+			NRect dByPass;
+
+			NRect sVuPeak;
+			NRect sVu0;
+			NRect dVu;
+
+		};
 
 
 		class SkinReader : public NObject {
@@ -106,6 +125,15 @@ namespace psycle {
 			int patview_track_right_ident() const;
 
 			NBitmap & patview_header_bitmap();
+
+			NPixmap & machines_bitmap();
+
+			// machineview settings
+
+			const MachineCoordInfo & machineview_master_coords() const;
+			const MachineCoordInfo & machineview_effect_coords() const;
+			const MachineCoordInfo & machineview_generator_coords() const;
+
 			
 		private:
 
@@ -113,6 +141,10 @@ namespace psycle {
 
 			bool parsePatView;
 			bool parsePatHeader;
+			bool parseMachineView;
+			bool parseMacMaster;
+			bool parseMacEffect;
+			bool parseMacGenerator;
 
 			NBitmap extractAndLoadBitmap( const std::string & zip_path );
 
@@ -149,10 +181,18 @@ namespace psycle {
 			NColor patview_sel_beat_text_color_;
 			NColor patview_sel_playbar_bg_color_;
 
+
+			// machine_view stuff
+
+			MachineCoordInfo machineview_master_coords_;
+			MachineCoordInfo machineview_effect_coords_;
+			MachineCoordInfo machineview_generator_coords_;
+
 			// default Bitmaps
 			DefaultBitmaps defaultBitmaps;
 
 			NBitmap patview_header_bitmap_;
+			NPixmap machines_bitmap_;
 
 			// our zipreader handle
 			zipreader *z;

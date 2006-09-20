@@ -663,9 +663,10 @@ void MainWindow::initToolBar( )
 
 			if ( selectedChildView_ ) {
 				selectedChildView_->patternView()->updateSkin();
+				selectedChildView_->machineView()->updateSkin();
 			}			
 
-			resize();
+			pane()->resize();
 			pane()->repaint();	
  		}
 
