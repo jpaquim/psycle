@@ -190,15 +190,14 @@ void NGraphics::drawText( int x, int y, const std::string & text )
 
 void NGraphics::drawText(int x, int y, const std::string & text, const NColor & color ) {
 	if (!fntStruct.antialias)  {
-    if (!( color == oldColor)) {
-       if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
+     if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
                   else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
-    }
+    
     if (dblBuffer_)
        XDrawString(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
     else
        XDrawString(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
-    setForeground(old);
+    //setForeground(old);
  } else
  {
     fFtColor.color.red   = color.red() * ( 0xFFFF/255);

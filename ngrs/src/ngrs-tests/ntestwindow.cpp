@@ -78,7 +78,10 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-  testEdit();
+  NLabel* label = new NLabel("hallo");
+
+    label->setFont(NFont("Arial",8,nMedium));
+  pane()->add( label , nAlTop);
 
 /*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();
