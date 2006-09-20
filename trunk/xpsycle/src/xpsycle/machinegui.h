@@ -20,6 +20,8 @@
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
+#include "skinreader.h"
+
 #include <ngrs/npanel.h>
 
 class NLine;
@@ -82,6 +84,11 @@ public:
 
 		std::vector<LineAttachment> attachedLines;
 
+		void setCoordInfo( const MachineCoordInfo &  coords );
+		const MachineCoordInfo & coords() const;
+
+		virtual void updateSkin();
+
 private:
 
     NBorder* myBorder_;
@@ -93,6 +100,8 @@ private:
     NLine* line;
 
     bool selected_;
+
+		MachineCoordInfo coords_;
 };
 
 
@@ -109,14 +118,16 @@ public:
 
     virtual void paint(NGraphics* g);
 
+		virtual void updateSkin();
+
 private:
 
     MasterDlg* masterDlg;
-    NRect bgCoords;
+/*    NRect bgCoords;
     NRect muteCoords;
     NRect soloCoords;
     NRect dSoloCoords;
-    NRect dMuteCoords;
+    NRect dMuteCoords;*/
 
     void setSkin();
 };
@@ -160,12 +171,14 @@ public:
 
     virtual void onKeyPress( const NKeyEvent & event);
 
+		virtual void updateSkin();
+
 private:
 
     NSlider* panSlider_;
     VUPanel* vuPanel_;
 
-    NRect bgCoords;
+    /*NRect bgCoords;
     NRect muteCoords;
     NRect soloCoords;
     NRect dSoloCoords;
@@ -177,7 +190,7 @@ private:
     NRect dGeneratorVu;
     NRect sGenerator;
 
-    NRect sGenPan;
+    NRect sGenPan;*/
 
     void customSliderPaint(NSlider* sl, NGraphics* g);
 
@@ -224,14 +237,16 @@ public:
 
 		virtual void onKeyPress( const NKeyEvent & event );
 
+		virtual void updateSkin();
+
 private:
 
-    NRect bgCoords;
-    NRect sEffectPan;
-    NPoint dNameCoords;
+    //NRect bgCoords;
+    //NRect sEffectPan;
+    //NPoint dNameCoords;
     NSlider* panSlider_;
 
-    NRect muteCoords;
+    /*NRect muteCoords;
     NRect soloCoords;
     NRect dSoloCoords;
     NRect dMuteCoords;
@@ -239,7 +254,7 @@ private:
     NRect sGeneratorVuPeak;
     NRect sGeneratorVu0;
     NRect dGeneratorVu;
-    NRect sGenerator;
+    NRect sGenerator;*/
 
 
     VUPanel* vuPanel_;
