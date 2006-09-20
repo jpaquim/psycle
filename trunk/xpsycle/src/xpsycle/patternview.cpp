@@ -137,7 +137,9 @@ PatternView::PatternView( Song* song )
     drawGroup->add( subGroup, nAlClient );
 	add(drawGroup, nAlClient);
 	
-  setFont(NFont("System",8,nMedium | nStraight ));
+  drawArea->setFont(NFont("8x13bold",8,nMedium | nStraight ));
+  lineNumber_->setFont(NFont("8x13bold",8,nMedium | nStraight ));
+	tweakGUI->setFont(NFont("8x13bold",8,nMedium | nStraight ));
   editPosition_ = prevEditPosition_ = playPos_  = outtrack = 0;
   editOctave_ = 4;
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
@@ -146,6 +148,8 @@ PatternView::PatternView( Song* song )
   selectedMacIdx_ = 255;
 
 	updateSkin();
+	drawArea->alignTracks();
+	tweakGUI->alignTracks();
 }
 
 PatternView::~PatternView()
@@ -167,8 +171,12 @@ void PatternView::updateSkin() {
 	drawArea->setLineGridEnabled(SkinReader::Instance()->patview_line_sep_enabled());
 	drawArea->setColGridEnabled(SkinReader::Instance()->patview_col_sep_enabled());
 	drawArea->setSeparatorColor(SkinReader::Instance()->patview_col_sep_color());
+	drawArea->setSmallTrackSeparatorColor(SkinReader::Instance()->patview_track_small_sep_color());
 	drawArea->setTextColor(SkinReader::Instance()->patview_text_color());
 	drawArea->setBeatTextColor(SkinReader::Instance()->patview_beat_text_color());
+	drawArea->setTrackLeftIdent( SkinReader::Instance()->patview_track_left_ident() );
+	drawArea->setTrackRightIdent( SkinReader::Instance()->patview_track_right_ident() );
+  drawArea->setBigTrackSeparatorWidth( SkinReader::Instance()->patview_track_big_sep_width() );
 
 	tweakGUI->setSelectionColor( SkinReader::Instance()->patview_sel_bg_color() );
 	tweakGUI->setCursorColor( SkinReader::Instance()->patview_cursor_bg_color() );
@@ -185,6 +193,10 @@ void PatternView::updateSkin() {
 	tweakGUI->setSeparatorColor(SkinReader::Instance()->patview_col_sep_color());
 	tweakGUI->setTextColor( SkinReader::Instance()->patview_text_color() );
 	tweakGUI->setBeatTextColor(SkinReader::Instance()->patview_beat_text_color());
+	tweakGUI->setTrackLeftIdent( SkinReader::Instance()->patview_track_left_ident() );
+	tweakGUI->setTrackRightIdent( SkinReader::Instance()->patview_track_right_ident() );
+	tweakGUI->setBigTrackSeparatorWidth( SkinReader::Instance()->patview_track_big_sep_width() );
+	tweakGUI->setSmallTrackSeparatorColor(SkinReader::Instance()->patview_track_small_sep_color());
 
 	lineNumber_->setBackground ( SkinReader::Instance()->patview_bg_color() );
   lineNumber_->setTextColor( SkinReader::Instance()->patview_text_color() );
@@ -409,7 +421,7 @@ int PatternView::trackNumber( ) const
 
 int PatternView::rowHeight( ) const
 {
-  return 12;
+  return 13;
 }
 
 int PatternView::colWidth() const {
@@ -795,10 +807,13 @@ int PatternView::Header::skinColWidth( )
           }
           if ( pView->pattern()->barStart(position, signature) ) {
             std::string caption = stringify(signature.numerator())+"/"+stringify(signature.denominator());
-            g->drawText(0,i*pView->rowHeight()+pView->rowHeight()-1 - dy(),caption, textColor() );
+						// vcenter text
+						int yp = (pView->rowHeight() - g->textHeight()) / 2  + g->textAscent();
+            g->drawText(0,i*pView->rowHeight()+ yp - dy(),caption, textColor() );
           }
         }
-        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+pView->rowHeight()-1-dy(),text, textColor() );
+        int yp = (pView->rowHeight() - g->textHeight()) / 2  + g->textAscent();
+        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+yp-dy(),text, textColor() );
       }
   }
 
@@ -1141,7 +1156,9 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatt
 	addEvent( ColumnEvent::hex4 );
 	// end of multi paraCmd
 
-  setDefaultVisibleEvents( 5 );
+	setName("mainview");
+
+  setDefaultVisibleEvents( 6 );
 	setTrackNumber( 64 );
 
   setTransparent(false);
@@ -1239,26 +1256,41 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
     int trackWidth = xEndByTrack( endTrack ) - dx();
     int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
+		drawSelBg(g,selection());
+
     for (int y = startLine; y <= endLine; y++) {
       float position = y / (float) beatZoom();
-      if (!(y == pView->playPos()) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
+      if (!(y == pView->playPos()) ) {
       if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
+
               g->setForeground( barColor() );
               g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
               g->setForeground(Global::pConfig()->pvc_rowbeat);
+
+							if ( y >= selection().top() && y < selection().bottom()) {
+							int left  = xOffByTrack( selection().left() );
+							int right = xOffByTrack( selection().right() );
+							g->setForeground(SkinReader::Instance()->patview_sel_bar_bg_color());
+							g->fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
+						}
+
           } else {
 						g->setForeground( beatColor() );
             g->fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
+
+						if ( y >= selection().top() && y < selection().bottom()) {
+							int left  = xOffByTrack( selection().left() );
+							int right = xOffByTrack( selection().right() );
+							g->setForeground(SkinReader::Instance()->patview_sel_beat_bg_color());
+							g->fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
+						}
           }
         }
-      } else  {
-        g->setForeground( playBarColor() );
-        g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
       }
     }
 
-		drawSelBg(g,selection());		
+		
 		drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
     drawTrackGrid(g, startLine, endLine, startTrack, endTrack);	
 		drawPattern(g, startLine, endLine, startTrack, endTrack);
@@ -1266,6 +1298,8 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 		
   }
 }
+
+
 
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
@@ -1293,13 +1327,25 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 			if (y != lastLine) {
 				NColor tColor = textColor();
 
+				bool onBeat = false;
+				bool onBar  = false;
       	if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(it->first, signature) )) {
-              //tColor = g->setForeground( barColor() );              
+              //tColor = g->setForeground( barColor() );
           } else {
+							onBeat = true;
 							tColor = beatTextColor();
           }
 				}
+
+				if ((y == pView->playPos()) ) {
+					int trackWidth = xEndByTrack( endTrack ) - dx();
+					g->setForeground( playBarColor() );
+        	g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
+				}
+
+				NColor stdColor = tColor;
+				NColor crColor = SkinReader::Instance()->patview_cursor_text_color();
 
 				PatternLine::iterator eventIt = line->lower_bound(startTrack);
 				PatternEvent emptyEvent;
@@ -1317,6 +1363,15 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 						}
 					} else event = &emptyEvent;
 
+				
+					if ( x >= selection().left() && x < selection().right() &&
+				  		 y >= selection().top() && y < selection().bottom() ) {
+							if ( !onBeat ) 
+							  tColor = SkinReader::Instance()->patview_sel_text_color();
+							else 
+								tColor = SkinReader::Instance()->patview_sel_beat_text_color();
+					}	else tColor = stdColor;
+  
 					drawData( g, x, y, 0, event->note() , tColor );
 					if (event->instrument() != 255) drawData( g, x, y, 1, event->instrument(), tColor );
 					if (event->machine() != 255) drawData( g, x, y, 2, event->machine(), tColor );

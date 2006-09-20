@@ -58,9 +58,44 @@ template<class T> inline T str_hex(const std::string &  value) {
 }
 
 
+void add_font_path( char * path ) {
+  int i;
+  int npaths;
+  char ** fontpath;
+  char ** new_fontpath;
+
+  fontpath = XGetFontPath( NApp::system().dpy(), &npaths );    
+  if ( fontpath != NULL ) {
+    /* check if path is already present */
+    for ( i = 0; i < npaths; i++ )
+      if ( strncmp( path, fontpath[i], strlen(path) ) == 0 ) {
+			XFreeFontPath(fontpath);
+			return;
+      }
+    new_fontpath = (char **) malloc( sizeof(char *)*( npaths + 1 ));
+    memcpy( new_fontpath, fontpath, npaths*sizeof(char *));
+    new_fontpath[npaths] = path;
+    XSetFontPath( NApp::system().dpy(), new_fontpath, npaths+1 );
+    XFreeFontPath(fontpath);
+    free(new_fontpath);
+  }
+}
+
+
+
+
 MainWindow::MainWindow()
   : NWindow()
 {
+	
+//	add_font_path("/home/natti/xpsycle/fonts");
+
+  int npaths_return;
+  char** path = XGetFontPath( NApp::system().dpy(), &npaths_return);
+
+	for ( int i = 0; i < npaths_return; i++ ) {
+		std::cout << path[i] << std::endl;
+	}
 
   SkinReader::Instance()->setDefaults();
 
