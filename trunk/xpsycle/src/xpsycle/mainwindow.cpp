@@ -329,6 +329,7 @@ void MainWindow::initMenu( )
       configurationMenu_->add(new NMenuItem("Loop Playback"));
       configurationMenu_->add(new NMenuSeperator());
       configurationMenu_->add(new NMenuItem("Audio Settings"))->click.connect(this,&MainWindow::onConfigMenuAudio);
+			configurationMenu_->add(new NMenuItem("Load Skin"))->click.connect(this,&MainWindow::onConfigMenuSkin);
     menuBar_->add(configurationMenu_);
 
     // Creates the performance menu
@@ -649,6 +650,28 @@ void MainWindow::initToolBar( )
 
   toolBarPanel_->resize();
 }
+
+  void MainWindow::onConfigMenuSkin(NButtonEvent* ev) {
+		// add and create the temporay fileDialog
+  	NFileDialog* openDialog = new NFileDialog();
+    	openDialog->addFilter("*.zip [xpsy skin format]","!S*.zip");
+  	add( openDialog );
+
+  	if ( openDialog->execute() ) {
+     	std::string fileName = openDialog->fileName();
+			SkinReader::Instance()->loadSkin( fileName );
+
+			if ( selectedChildView_ ) {
+				selectedChildView_->patternView()->updateSkin();
+			}			
+
+			resize();
+			pane()->repaint();	
+ 		}
+
+		// remove the temp Dialog
+		removeChild( openDialog );
+	}
 
 	void MainWindow::onInstrumentCbx( NItemEvent * ev )
 	{
