@@ -90,16 +90,17 @@ MainWindow::MainWindow()
 	
 //	add_font_path("/home/natti/xpsycle/fonts");
 
-  int npaths_return;
+  /*int npaths_return;
   char** path = XGetFontPath( NApp::system().dpy(), &npaths_return);
 
 	for ( int i = 0; i < npaths_return; i++ ) {
 		std::cout << path[i] << std::endl;
-	}
+	}*/
 
-  SkinReader::Instance()->setDefaults();
+  //SkinReader::Instance()->loadSkin( "/home/natti/psycle_skin.zip" );
+	SkinReader::Instance()->setDefaults();
 
-  setTitle ("] Psycle Modular Music Creation Studio[ ( X alpha ) ");
+  setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
 
   setPosition(0,0,1024,768);
 	count = 0;

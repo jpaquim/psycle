@@ -24,12 +24,35 @@
 @author Stefan Nattkemper
 */
 
+#include "defaultbitmaps.h"
+#include "zipreader.h"
+
+#include <ngrs/nrect.h>
+#include <ngrs/npoint.h>
 #include <ngrs/nobject.h>
 #include <ngrs/nxmlparser.h>
 #include <ngrs/ncolor.h>
+#include <ngrs/nbitmap.h>
+
 
 namespace psycle { 
 	namespace host {
+
+		class HeaderCoordInfo {
+		public:
+			NRect bgCoords;
+			NRect noCoords;
+			NRect sRecCoords;
+			NPoint dRecCoords;
+			NRect sMuteCoords;
+			NPoint dMuteCoords;
+			NRect sSoloCoords;
+			NPoint dSoloCoords;
+			NPoint dgX0Coords;
+			NPoint dg0XCoords;
+		};
+
+
 
 		class SkinReader : public NObject {
 		// Singleton Pattern
@@ -46,13 +69,15 @@ namespace psycle {
 					static SkinReader s;
  					return &s; 
 			}
-		// Singleton pattern end
+			// Singleton pattern end
 
 			bool loadSkin( const std::string & fileName );
 			void setDefaults();
 
 			// patternview settings
-			
+		
+			const HeaderCoordInfo & headerCoordInfo() const;
+	
 			const NColor & patview_cursor_bg_color() const;
 			const NColor & patview_cursor_text_color() const;
 			const NColor & patview_bar_bg_color() const;
@@ -79,14 +104,24 @@ namespace psycle {
 
 			int patview_track_left_ident() const;
 			int patview_track_right_ident() const;
+
+			NBitmap & patview_header_bitmap();
 			
 		private:
 
 			void onTagParse(const NXmlParser & parser, const std::string & tagName);
 
 			bool parsePatView;
+			bool parsePatHeader;
+
+			NBitmap extractAndLoadBitmap( const std::string & zip_path );
 
 			// patternview stuff
+
+			HeaderCoordInfo headerCoords_;
+			// transforms a "00:00:00:00" str into a nrect "00" any int value
+			NRect SkinReader::getCoords( const std::string & coord ) const;
+
 			NColor patview_cursor_bg_color_;
 			NColor patview_cursor_text_color_;
 			NColor patview_bar_bg_color_;
@@ -113,6 +148,14 @@ namespace psycle {
 			NColor patview_sel_bg_color_;
 			NColor patview_sel_beat_text_color_;
 			NColor patview_sel_playbar_bg_color_;
+
+			// default Bitmaps
+			DefaultBitmaps defaultBitmaps;
+
+			NBitmap patview_header_bitmap_;
+
+			// our zipreader handle
+			zipreader *z;
 
 		};
 	}

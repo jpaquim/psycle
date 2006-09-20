@@ -25,7 +25,6 @@
 #include "player.h"
 #include "machine.h"
 #include "defaultbitmaps.h"
-#include "skinreader.h"
 #include "zoombar.h"
 #include <ngrs/napp.h>
 #include <ngrs/nalignlayout.h>
@@ -86,7 +85,7 @@ PatternView::PatternView( Song* song )
   // create the left linenumber panel
 	NPanel* linePanel = new NPanel();
     linePanel->setLayout( NAlignLayout() );
-    NPanel* lineHeaderLabel = new NPanel();
+    lineHeaderLabel = new NPanel();
 		linePanel->add( lineHeaderLabel, nAlTop );
   	linePanel->add( lineNumber_ = new LineNumber(this), nAlClient);
   add( linePanel, nAlLeft );
@@ -148,8 +147,6 @@ PatternView::PatternView( Song* song )
   selectedMacIdx_ = 255;
 
 	updateSkin();
-	drawArea->alignTracks();
-	tweakGUI->alignTracks();
 }
 
 PatternView::~PatternView()
@@ -157,6 +154,8 @@ PatternView::~PatternView()
 }
 
 void PatternView::updateSkin() {
+
+	header->setHeaderCoordInfo( SkinReader::Instance()->headerCoordInfo() );
 
   drawArea->setSelectionColor( SkinReader::Instance()->patview_sel_bg_color() );
 	drawArea->setCursorColor( SkinReader::Instance()->patview_cursor_bg_color() );
@@ -200,6 +199,15 @@ void PatternView::updateSkin() {
 
 	lineNumber_->setBackground ( SkinReader::Instance()->patview_bg_color() );
   lineNumber_->setTextColor( SkinReader::Instance()->patview_text_color() );
+
+	header->setBackground( SkinReader::Instance()->patview_bg_color()  );
+
+	drawArea->alignTracks();
+	tweakGUI->alignTracks();
+	tweakHeader->setPreferredSize( 20, header->preferredHeight() );
+	lineHeaderLabel->setPreferredSize( 20, header->preferredHeight() );
+	lineHeaderLabel->setBackground( SkinReader::Instance()->patview_bg_color() );
+	lineHeaderLabel->setTransparent( false );
 }
 
 void PatternView::setFocus() {
@@ -514,12 +522,23 @@ const std::map<int, TrackGeometry> & PatternView::trackGeometrics() const {
 /// End of PatternView main Class
 
 
+
+
+
+
+
+
+
+
+///
+///
 /// The Header Panel Class
+///
+///
 PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , NPanel()
 {
-  setSkin();
-  setHeight(bgCoords.height());
-  skinColWidth_ = bgCoords.width();
+  setHeight( coords_.bgCoords.height() );
+  skinColWidth_ = coords_.bgCoords.width();
   setBackground(Global::pConfig()->pvc_row);
   setTransparent(false);
 }
@@ -528,23 +547,9 @@ PatternView::Header::~ Header( )
 {
 }
 
-void PatternView::Header::setSkin( )
-{
-  bgCoords.setPosition(0,0,109,18);
-  noCoords.setPosition(0,18,7,12);
-  sRecCoords.setPosition(70,18,11,11);
-  dRecCoords.setXY(52,3);
-  sMuteCoords.setPosition(81,18,11,11);
-  dMuteCoords.setXY(75,3);
-  sSoloCoords.setPosition(92,18,11,11);
-  dSoloCoords.setXY(97,3);
-  dgX0Coords.setXY(24,3);
-  dg0XCoords.setXY(31,3);
-}
-
 void PatternView::Header::paint( NGraphics * g )
 {
-  NBitmap & bitmap = Global::pConfig()->icons().pattern_header_skin();
+  NBitmap & bitmap = SkinReader::Instance()->patview_header_bitmap();
 	NBitmap & patNav = Global::pConfig()->icons().patNav();
 
   int startTrack = pView->drawArea->findTrackByScreenX( scrollDx() );
@@ -561,32 +566,32 @@ void PatternView::Header::paint( NGraphics * g )
     const int track0X = it->first % 10;
     int xOff = trackGeometry.left();
     if (xOff - scrollDx() > spacingWidth() ) break;
-    int center =  ( trackGeometry.width() - patNav.width() - skinColWidth()) / 2;
-		if ( center > 0 ) {
-    int xOffc = xOff + patNav.width() + center;
-    g->putBitmap(xOffc,0,std::min((int)bgCoords.width(),trackGeometry.width()) ,bgCoords.height(), bitmap, 
-                  bgCoords.left(), bgCoords.top());
-    g->putBitmap(xOffc+dgX0Coords.x(),0+dgX0Coords.y(),noCoords.width(),noCoords.height(), bitmap,
-                  trackX0*noCoords.width(), noCoords.top());
-    g->putBitmap(xOffc+dg0XCoords.x(),0+dg0XCoords.y(),noCoords.width(),noCoords.height(), bitmap,
-                  track0X*noCoords.width(), noCoords.top());
+    int center =  ( trackGeometry.width() - patNav.width() - skinColWidth()) / 2;		
+		if ( center > -patNav.width() ) {
+    int xOffc = xOff + patNav.width()  + center;
+    g->putBitmap(xOffc,0,std::min((int) coords_.bgCoords.width(),trackGeometry.width()) ,coords_.bgCoords.height(), bitmap, 
+                  coords_.bgCoords.left(), coords_.bgCoords.top());
+    g->putBitmap(xOffc+coords_.dgX0Coords.x(),0+coords_.dgX0Coords.y(),coords_.noCoords.width(),coords_.noCoords.height(), bitmap,
+                  trackX0*coords_.noCoords.width(), coords_.noCoords.top());
+    g->putBitmap(xOffc+coords_.dg0XCoords.x(),0+coords_.dg0XCoords.y(),coords_.noCoords.width(),coords_.noCoords.height(), bitmap,
+                  track0X*coords_.noCoords.width(), coords_.noCoords.top());
 
     // blit the mute LED
     if (  pView->pSong()->_trackMuted[it->first]) {
-        g->putBitmap(xOffc+dMuteCoords.x(),0+dMuteCoords.y(),sMuteCoords.width(),sMuteCoords.height(), bitmap,
-                  sMuteCoords.left(), sMuteCoords.top());
+        g->putBitmap(xOffc+coords_.dMuteCoords.x(),0+coords_.dMuteCoords.y(),coords_.sMuteCoords.width(),coords_.sMuteCoords.height(), bitmap,
+                  coords_.sMuteCoords.left(), coords_.sMuteCoords.top());
     }
 
     // blit the solo LED
     if ( pView->pSong()->_trackSoloed == it->first) {
-        g->putBitmap(xOffc+dSoloCoords.x(),0+dSoloCoords.y(),sSoloCoords.width(),sSoloCoords.height(), bitmap,
-                  sSoloCoords.left(), sSoloCoords.top());
+        g->putBitmap(xOffc+coords_.dSoloCoords.x(),0+coords_.dSoloCoords.y(),coords_.sSoloCoords.width(),coords_.sSoloCoords.height(), bitmap,
+                  coords_.sSoloCoords.left(), coords_.sSoloCoords.top());
     }
 
     // blit the record LED
     if ( pView->pSong()->_trackArmed[it->first]) {
-        g->putBitmap(xOffc+dRecCoords.x(),0+dRecCoords.y(),sRecCoords.width(),sRecCoords.height(), bitmap,
-                  sRecCoords.left(), sRecCoords.top());
+        g->putBitmap(xOffc+coords_.dRecCoords.x(),0+coords_.dRecCoords.y(),coords_.sRecCoords.width(),coords_.sRecCoords.height(), bitmap,
+                  coords_.sRecCoords.left(), coords_.sRecCoords.top());
     }
 		}
 		g->putBitmap(xOff, 0,patNav.width(),patNav.height(), patNav, 
@@ -615,7 +620,7 @@ void PatternView::Header::onMousePress( int x, int y, int button )
 			NRect xCol( navOff.x() +20, navOff.y(), 10, patNav.height() );
 
       // the rect area of the solo led
-      NRect solo(off.x() + dSoloCoords.x(), off.y() + dSoloCoords.y(), sSoloCoords.width(), sSoloCoords.height());
+      NRect solo(off.x() + coords_.dSoloCoords.x(), off.y() + coords_.dSoloCoords.y(), coords_.sSoloCoords.width(), coords_.sSoloCoords.height());
 
 			std::map<int, TrackGeometry>::const_iterator it;
 			it = pView->trackGeometrics().lower_bound( track );
@@ -644,14 +649,14 @@ void PatternView::Header::onMousePress( int x, int y, int button )
           onSoloLedClick(track);
       } else {
         // the rect area of the solo led
-        NRect mute(off.x() + dMuteCoords.x(), off.y() + dMuteCoords.y(), sMuteCoords.width(), sMuteCoords.height());
+        NRect mute(off.x() + coords_.dMuteCoords.x(), off.y() + coords_.dMuteCoords.y(), coords_.sMuteCoords.width(), coords_.sMuteCoords.height());
         // now check point intersection for solo
         if (mute.intersects(x,y)) {
             onMuteLedClick(track);
         } else
         {
             // the rect area of the record led
-            NRect record(off.x() + dRecCoords.x(), off.y() + dRecCoords.y(), sRecCoords.width(), sRecCoords.height());
+            NRect record(off.x() + coords_.dRecCoords.x(), off.y() + coords_.dRecCoords.y(), coords_.sRecCoords.width(), coords_.sRecCoords.height());
             // now check point intersection for solo
             if (record.intersects(x,y)) {
               onRecLedClick(track);
@@ -708,6 +713,12 @@ int PatternView::Header::preferredWidth( )
 int PatternView::Header::skinColWidth( )
 {
   return skinColWidth_;
+}
+
+void PatternView::Header::setHeaderCoordInfo( const HeaderCoordInfo & info ) {
+	coords_ = info;
+	setHeight( coords_.bgCoords.height() );
+  skinColWidth_ = coords_.bgCoords.width();
 }
 
 /// End of Header Class
@@ -1133,6 +1144,15 @@ int PatternView::TweakGUI::doSel(const PatCursor & selCursor) {
 	
   return dir;
 }
+
+/// end of tweak GUI Class
+
+
+
+
+
+
+
 
 
 ///
@@ -1683,7 +1703,8 @@ void PatternView::PatternDraw::checkLeftScroll( const PatCursor & cursor ) {
 void PatternView::PatternDraw::checkRightScroll( const PatCursor & cursor ) {
 	//check for scroll
 	if ( xOffByTrack(std::max( cursor.track()+1, 0)) - dx() > clientWidth() ) {
-		pView->hBar->setPos( xOffByTrack(std::min( cursor.track()+1 , trackNumber())) - clientWidth() );
+    
+		pView->hBar->setPos( xEndByTrack(std::min( cursor.track()+1 , trackNumber())) - clientWidth() );
 	}
 }
 
@@ -1694,6 +1715,7 @@ int PatternView::PatternDraw::doSel(const PatCursor & selCursor) {
 	pView->checkUpScroll( selCursor );
 	checkLeftScroll( selCursor );
   checkRightScroll( selCursor );
+  std::cout << "here" << std::endl;
 	
   return dir;
 }

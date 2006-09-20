@@ -27,15 +27,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-template<class T> inline T str(const std::string &  value) {
-   T result;
-
-   std::stringstream str;
-   str << value;
-   str >> result;
-
-   return result;
-}
 
 
 namespace psycle { 
@@ -56,8 +47,9 @@ namespace psycle {
 		{
 		}
 
-
 		void SkinReader::setDefaults() {
+			z = 0;
+
 			std::string mem;			
 
 			mem +="<psyskin>";
@@ -75,6 +67,18 @@ namespace psycle {
 			mem +="<lineseparator enable='0' bgcolor='145:147:147'/>";
 			mem +="<colseparator enable='0' bgcolor='145:147:147'/>";
 			mem +="<trackident left ='2' right='2'/>";
+			mem +="<header src='/bitmaps/alk_orange_header_small.xpm'>";
+			mem +="<background_source coord='0:0:109:18'/>";
+			mem +="<number_0_source coord='0:18:7:12'/>";
+			mem +="<record_on_source coord='70:18:11:11'/>";
+			mem +="<mute_on_source coord='81:18:11:11'/>";
+			mem +="<solo_on_source coord='92:18:11:11'/>";
+			mem +="<digit_x0_dest coord='24:3'/>";
+			mem +="<digit_0x_dest coord='31:3'/>";
+			mem +="<record_on_dest coord='52:3'/>";
+			mem +="<mute_on_dest coord='75:3'/>";
+			mem +="<solo_on_dest coord='97:3'/>";
+			mem +="</header>";
 			mem +="</patternview>";
 			mem +="</psyskin>";
 
@@ -84,47 +88,159 @@ namespace psycle {
 			NXmlParser parser;
 			parser.tagParse.connect( this, &SkinReader::onTagParse );
 			parser.parseString( mem );
-		
 		}
 		
 		bool SkinReader::loadSkin( const std::string & fileName )
 		{
-		/*	// open the zip file
-			zipreader *z;
+		 // open the zip file
+			z = 0;
 			zipreader_file *f;
 			int fd = open( fileName.c_str(), O_RDONLY );
 			z = zipreader_open( fd );
 
+			if ( z) std::cout << "opened skin file :" << fileName << std::endl;
+
 			// extract it to a temp file			
-			int outFd = open(std::string("psyskintemp.xml").c_str(), O_RDWR|O_CREAT, 0666);
-			f = zipreader_seek(z, "xml/skin.xml");
+			int outFd = open(std::string("/home/natti/psyskintemp.xml").c_str(), O_RDWR|O_CREAT, 0666);
+			f = zipreader_seek(z, "psycle_skin/xml/main.xml");
 
 			if (!zipreader_extract(f, outFd )) {
+				std::cout << "error at extracting" << std::endl;
 				zipreader_close( z );	
 				close( outFd );
 				close( fd );
 				return false;
 			}			
+
 			close( outFd );			
-			zipreader_close( z );
-			close( fd );*/
 
 			// now start the xml parser
 
 			parsePatView = false;
+			parsePatHeader = false;
 
 			NXmlParser parser;
 			parser.tagParse.connect( this, &SkinReader::onTagParse );
 			parser.parseFile("/home/natti/psyskintemp.xml");
+
+			zipreader_close( z );
+			close( fd );
+
 			return true;
 		}
 
+
+		NRect SkinReader::getCoords( const std::string & coord ) const
+		{
+			int left = 0; 
+			int top = 0;
+			int width = 0;
+			int height = 0;
+			unsigned int i = 0;
+			int start = 0;
+			std::string substr;
+			int c = 0;
+			do {
+				i = coord.find(':', i);
+				if (i != std::string::npos) {
+					substr = coord.substr(start,i-start);
+					i+=1;
+					start = i;
+				} else substr = coord.substr(start);
+				std::stringstream str; str << substr; int value = 0; str >> value;
+				if (c==0) left  = value;
+				if (c==1) top   = value;
+				if (c==2) width = value;
+				if (c==3) height = value;
+				c++;
+			} while (i != std::string::npos);
+
+  		return NRect( left, top, width, height );
+		}
+
+		NBitmap SkinReader::extractAndLoadBitmap( const std::string & zip_path ) {
+			
+			std::cout << "extracting bitmap" << std::endl;
+			// extract bitmap to a temp file			
+			std::string fileName = NFile::extractFileNameFromPath( zip_path );
+
+			std::string bitmapPath = zip_path;
+			std::cout << "try to read bitmap with path :" << bitmapPath;
+
+			int outFd = open(std::string( ("temp")+fileName).c_str(), O_RDWR|O_CREAT, 0666);
+			zipreader_file *f = zipreader_seek(z, bitmapPath.c_str() );
+
+			if (!zipreader_extract(f, outFd )) {
+				std::cout << "bitmap path in skin zip not found" << std::endl;
+				close( outFd );
+				return NBitmap();
+			}			
+			close( outFd );			
+
+			NBitmap bitmap;
+			bitmap.loadFromFile( std::string("temp")+fileName );
+			return bitmap;
+		}
 
 		void SkinReader::onTagParse( const NXmlParser & parser, const std::string & tagName )
 		{
 			if ( tagName == "patternview" ) {
 				parsePatView = true;
 			} else 
+			if ( tagName == "header" && parsePatView ) {
+				parsePatHeader = true;
+				std::string src = parser.getAttribValue("src");
+				if (src != "")	{
+					patview_header_bitmap_ = extractAndLoadBitmap( src );
+				}
+			} else 
+			if ( tagName == "background_source" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				headerCoords_.bgCoords = getCoords( coord );
+				std::cout << "hre" << headerCoords_.bgCoords.height() << std::endl;
+			} else
+			if ( tagName == "number_0_source" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				headerCoords_.noCoords = getCoords( coord );
+			} else
+			if ( tagName == "record_on_source" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				headerCoords_.sRecCoords = getCoords( coord );
+			} else
+			if ( tagName == "mute_on_source" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				headerCoords_.sMuteCoords = getCoords( coord );
+			} else
+			if ( tagName == "solo_on_source" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				headerCoords_.sSoloCoords = getCoords( coord );
+			} else
+			if ( tagName == "digit_x0_dest" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				NRect rect = getCoords( coord );
+				headerCoords_.dgX0Coords = NPoint( rect.left(), rect.top() );
+			} else
+			if ( tagName == "digit_0x_dest" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				NRect rect = getCoords( coord );
+				headerCoords_.dg0XCoords = NPoint( rect.left(), rect.top() );
+			} else
+			if ( tagName == "record_on_dest" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				NRect rect = getCoords( coord );
+				headerCoords_.dRecCoords = NPoint( rect.left(), rect.top() );
+			} else
+			if ( tagName == "mute_on_dest" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				NRect rect = getCoords( coord );
+				headerCoords_.dMuteCoords = NPoint( rect.left(), rect.top() );
+			} else
+			if ( tagName == "solo_on_dest" && parsePatHeader ) {
+				std::string coord = parser.getAttribValue("coord");
+				NRect rect = getCoords( coord );
+				headerCoords_.dSoloCoords = NPoint( rect.left(), rect.top() );
+			} else
+
 			if ( tagName == "selection" && parsePatView ) {
 				std::string selcolor = parser.getAttribValue("bgcolor");
 				if ( selcolor!= "") {
@@ -252,6 +368,13 @@ namespace psycle {
 			}
 		}
 
+
+		// Patternview
+
+		const HeaderCoordInfo & SkinReader::headerCoordInfo() const {
+				return headerCoords_;
+		}
+
 		// Patternview color`s
 		
 		const NColor & SkinReader::patview_cursor_bg_color( ) const
@@ -352,6 +475,13 @@ namespace psycle {
 
 		int SkinReader::patview_track_big_sep_width() const {
 			return patview_track_big_sep_width_;
+		}
+
+		NBitmap & SkinReader::patview_header_bitmap() {
+			if ( patview_header_bitmap_.empty() )
+				return defaultBitmaps.pattern_header_skin();
+			else
+				return patview_header_bitmap_;
 		}
 
  }

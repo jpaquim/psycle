@@ -24,6 +24,7 @@
 #include "song.h"
 #include "singlepattern.h"
 #include "custompatternview.h"
+#include "skinreader.h"
 #include <ngrs/npage.h>
 #include <ngrs/npopupmenu.h>
 #include <ngrs/nscrollbar.h>
@@ -46,6 +47,8 @@ namespace psycle { namespace host {
 
 class Song;
 
+
+
 class PatternView : public NPanel
 {
     class Header: public NPanel {
@@ -55,25 +58,16 @@ class PatternView : public NPanel
 
       virtual void paint(NGraphics* g);
 
-      void setSkin();
-
-      NRect bgCoords;
-      NRect noCoords;
-      NRect sRecCoords;
-      NPoint dRecCoords;
-      NRect sMuteCoords;
-      NPoint dMuteCoords;
-      NRect sSoloCoords;
-      NPoint dSoloCoords;
-      NPoint dgX0Coords;
-      NPoint dg0XCoords;
-
+			void setHeaderCoordInfo( const HeaderCoordInfo & info );
+  
       virtual void onMousePress(int x, int y, int button);
       virtual int preferredWidth();
 
       int skinColWidth();
 
     private:
+
+			HeaderCoordInfo coords_;
 
       int skinColWidth_;
       PatternView* pView;
@@ -339,6 +333,7 @@ private:
   NComboBox* trackCombo_;
   NSplitBar* splitBar;
   NPanel* tweakGroup;
+	NPanel* lineHeaderLabel;
 
   void enterNote( const PatCursor & cursor, int note );
 
