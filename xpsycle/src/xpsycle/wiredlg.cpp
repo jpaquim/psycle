@@ -113,8 +113,12 @@ void WireDlg::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
 }
 
 void WireDlg::onDeleteBtn( NButtonEvent * ev )
-{
+{	
   deleteMe.emit(this);
+	_pSrcMachine = 0;
+  _pDstMachine = 0;
+  ///\todo for scopes we need some mutex for the buffer
+	///\todo scopes disabled
 }
 
 Machine * WireDlg::pSrcMachine( )

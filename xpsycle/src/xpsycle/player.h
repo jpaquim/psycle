@@ -113,6 +113,9 @@ namespace psycle
 
 			double PlayPos() const { return timeInfo_.playBeatPos(); }
 
+			void lock();
+			void unlock();
+
 		public:
 
 			/// used by the plugins to indicate that they need redraw.
@@ -160,6 +163,9 @@ namespace psycle
 			short _linejump;
 			short _loop_count;
 			short _loop_line;
+
+			bool lock_;
+			bool inWork_;
 		///\}
 		};
 	}

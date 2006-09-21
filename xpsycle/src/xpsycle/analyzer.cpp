@@ -20,6 +20,9 @@
 #include "analyzer.h"
 #include <ngrs/nwindow.h>
 
+///\todo for scopes we need some mutex for the buffer
+///\todo scopes disabled
+
 namespace psycle { namespace host {
 
 
@@ -94,8 +97,14 @@ void Analyzer::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
   invol = val;
   mult = 1.0f;
 
-  _pSrcMachine->_pScopeBufferL = pSamplesL;
-  _pSrcMachine->_pScopeBufferR = pSamplesR;
+  //_pSrcMachine->_pScopeBufferL = pSamplesL;
+  //_pSrcMachine->_pScopeBufferR = pSamplesR;
+}
+
+void psycle::host::Analyzer::clearMachineCallBack( )
+{
+	//_pSrcMachine->_pScopeBufferL = 0;
+  //_pSrcMachine->_pScopeBufferR = 0;
 }
 
 void Analyzer::onTimer( )
@@ -192,4 +201,6 @@ void Analyzer::onTimer( )
 }
 
 }}
+
+
 
