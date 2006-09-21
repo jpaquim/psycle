@@ -134,6 +134,7 @@ void NApp::eventLoop( )
        }
        c+=10;
     }
+
     while (XPending(system().dpy())) {
      	XNextEvent(system().dpy(), &event);
        system().setKeyState(event.xkey.state);
