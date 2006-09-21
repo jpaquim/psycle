@@ -139,7 +139,10 @@ PatternView::PatternView( Song* song )
   drawArea->setFont(NFont("8x13bold",8,nMedium | nStraight ));
   lineNumber_->setFont(NFont("8x13bold",8,nMedium | nStraight ));
 	tweakGUI->setFont(NFont("8x13bold",8,nMedium | nStraight ));
-  editPosition_ = prevEditPosition_ = playPos_  = outtrack = 0;
+  editPosition_ = 0;
+	prevEditPosition_ = 0;
+	playPos_  = 0;
+	outtrack = 0;
   editOctave_ = 4;
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
 
@@ -900,7 +903,7 @@ void PatternView::TweakGUI::customPaint(NGraphics* g, int startLine, int endLine
 
     for (int y = startLine; y <= endLine; y++) {
       float position = y / (float) beatZoom();
-      if (!(y == pView->playPos()) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
+      //if (!(y == pView->playPos() || !Player::Instance()->_playing) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
       if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
               g->setForeground( barColor() );
@@ -910,10 +913,10 @@ void PatternView::TweakGUI::customPaint(NGraphics* g, int startLine, int endLine
             g->fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
           }
         }
-      } else  {
-        g->setForeground( playBarColor() );
-        g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
-      }
+      //} else  {
+        //g->setForeground( playBarColor() );
+        //g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
+      //} ///\todo add
     }
 
 		drawSelBg(g,selection());
@@ -1248,7 +1251,7 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 
     for (int y = startLine; y <= endLine; y++) {
       float position = y / (float) beatZoom();
-      if (!(y == pView->playPos()) ) {
+      if (!(y == pView->playPos()) || !Player::Instance()->_playing ) {
       if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
 
@@ -1326,7 +1329,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
           }
 				}
 
-				if ((y == pView->playPos()) ) {
+				if ((y == pView->playPos() && Player::Instance()->_playing ) ) {
 					int trackWidth = xEndByTrack( endTrack ) - dx();
 					g->setForeground( playBarColor() );
         	g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
@@ -2192,6 +2195,29 @@ const PatternViewColorInfo & PatternView::colorInfo() const {
 }
 
 
+void PatternView::onTick( double sequenceStart ) {
+	if (pattern_) {
+		int liney = d2i ( (Player::Instance()->PlayPos() - sequenceStart) * pattern_->beatZoom());
+		if (liney != playPos_ ) {			
+			int oldPlayPos = playPos_;
+			playPos_ = liney;
+			int startTrack = drawArea->findTrackByScreenX( drawArea->dx() );
+			int endTrack = drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
+			window()->repaint( drawArea , drawArea->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ));	
+			window()->repaint( drawArea , drawArea->repaintTrackArea( liney,liney, startTrack, endTrack ));
+		}
+	}
+}
+
+void PatternView::onStartPlayBar() {
+	playPos_ = 0;
+}
+
+void PatternView::onEndPlayBar() {
+	playPos_ = -1;
+}
+
+
 }}
 
 void psycle::host::PatternView::setActiveMachineIdx( int idx )
@@ -2235,3 +2261,5 @@ void psycle::host::PatternView::PatternDraw::onTagParse( const NXmlParser & pars
 		pasteBuffer[lastXmlLineBeatPos][trackNumber]=data;
 	}
 }
+
+

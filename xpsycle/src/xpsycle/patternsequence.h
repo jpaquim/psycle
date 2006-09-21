@@ -161,8 +161,12 @@ namespace psycle
 			void removeLine(SequenceLine* line);
 			void removeAll();
 
+			// heart of patternsequence
 			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
 
+			// playpos info
+
+			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
 
 			PatternData* patternData();
 			const PatternData & patternData() const;

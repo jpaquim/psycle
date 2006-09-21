@@ -25,6 +25,8 @@
 #include "audiodriver.h"
 #include <pthread.h>
 #include <exception>
+#include <unistd.h>
+
 namespace psycle
 {
 	namespace host

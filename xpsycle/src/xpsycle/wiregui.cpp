@@ -19,10 +19,10 @@
   ***************************************************************************/
 #include "wiregui.h"
 #include "global.h"
+#include "skinreader.h"
 #include "configuration.h"
 #include <cmath>
 #include <cstdio>
-#include <skinreader.h>
 
 namespace psycle { namespace host {
 
