@@ -53,10 +53,9 @@ MachineView::~MachineView()
 
 void MachineView::init( )
 {
-  scrollArea_->setBackground(NColor(150,150,180));
   scrollArea_->setTransparent(false);
-
   selectedMachine_ = 0;
+	updateSkin();
 }
 
 
@@ -132,6 +131,7 @@ void MachineView::createGUIMachines( )
                 MachineGUI* to = findByMachine(pout);
                 if (to != 0) {
                   MachineWireGUI* line = new MachineWireGUI();
+									wireGUIs.push_back( line );
                   line->setPoints(NPoint(10,10),NPoint(100,100));
                   scrollArea_->insert(line,0);
                   from->attachLine(line,0);
@@ -147,6 +147,7 @@ void MachineView::createGUIMachines( )
 
 void MachineView::update( )
 {
+	wireGUIs.clear();
   machineGUIs.clear();
   scrollArea_->removeChilds();
   createGUIMachines();
@@ -193,6 +194,7 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev)
       line->setMoveable(NMoveable());
       line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
       line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
+			wireGUIs.push_back(line);
       found = true;
       repaint(); 
       break;
@@ -234,12 +236,17 @@ void MachineView::onWireDelete( WireDlg * dlg )
   dlg->line()->setVisible(false);
   NApp::flushEventQueue();
   if (window()!=0) window()->checkForRemove(0);
+	std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
+	it = find( wireGUIs.begin(), wireGUIs.end(), dlg->line() );
+	if ( it != wireGUIs.end() ) wireGUIs.erase(it);	
+
   scrollArea_->removeChild(dlg->line());
   repaint();
 }
 
 void MachineView::removeMachines( )
 {
+  wireGUIs.clear();
   scrollArea_->removeChilds();
 }
 
@@ -311,6 +318,8 @@ void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
 
 void MachineView::updateSkin( )
 {
+  setColorInfo( SkinReader::Instance()->machineview_color_info() );
+
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
     machineGUI->updateSkin();
@@ -318,12 +327,16 @@ void MachineView::updateSkin( )
 
 	repaint();
 }
+
+void MachineView::setColorInfo( const MachineViewColorInfo & info ) {
+	colorInfo_ = info;
+
+	scrollArea_->setBackground ( colorInfo_.pane_bg_color );
+}
+
+const MachineViewColorInfo & MachineView::colorInfo() const {
+	return colorInfo_;
+}
  
 }
 }
-
-
-
-
-
-

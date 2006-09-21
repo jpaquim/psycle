@@ -155,59 +155,27 @@ PatternView::~PatternView()
 
 void PatternView::updateSkin() {
 
+	setColorInfo ( SkinReader::Instance()->patternview_color_info() );
 	header->setHeaderCoordInfo( SkinReader::Instance()->headerCoordInfo() );
 
-  drawArea->setSelectionColor( SkinReader::Instance()->patview_sel_bg_color() );
-	drawArea->setCursorColor( SkinReader::Instance()->patview_cursor_bg_color() );
-	drawArea->setBarColor( SkinReader::Instance()->patview_bar_bg_color() );
-	drawArea->setBeatColor( SkinReader::Instance()->patview_beat_bg_color() );
-	drawArea->setBackground( SkinReader::Instance()->patview_bg_color() );
-	drawArea->setPlayBarColor( SkinReader::Instance()->patview_playbar_bg_color() );
-	drawArea->setBigTrackSeparatorColor(
-     SkinReader::Instance()->patview_track_big_sep_color()
-  );
-	drawArea->setLineSeparatorColor(SkinReader::Instance()->patview_line_sep_color());
 	drawArea->setLineGridEnabled(SkinReader::Instance()->patview_line_sep_enabled());
 	drawArea->setColGridEnabled(SkinReader::Instance()->patview_col_sep_enabled());
-	drawArea->setSeparatorColor(SkinReader::Instance()->patview_col_sep_color());
-	drawArea->setSmallTrackSeparatorColor(SkinReader::Instance()->patview_track_small_sep_color());
-	drawArea->setTextColor(SkinReader::Instance()->patview_text_color());
-	drawArea->setBeatTextColor(SkinReader::Instance()->patview_beat_text_color());
+
 	drawArea->setTrackLeftIdent( SkinReader::Instance()->patview_track_left_ident() );
 	drawArea->setTrackRightIdent( SkinReader::Instance()->patview_track_right_ident() );
   drawArea->setBigTrackSeparatorWidth( SkinReader::Instance()->patview_track_big_sep_width() );
 
-	tweakGUI->setSelectionColor( SkinReader::Instance()->patview_sel_bg_color() );
-	tweakGUI->setCursorColor( SkinReader::Instance()->patview_cursor_bg_color() );
-	tweakGUI->setBarColor( SkinReader::Instance()->patview_bar_bg_color() );
-	tweakGUI->setBeatColor( SkinReader::Instance()->patview_beat_bg_color() );
-	tweakGUI->setBackground( SkinReader::Instance()->patview_bg_color() );
-	tweakGUI->setPlayBarColor( SkinReader::Instance()->patview_playbar_bg_color() );
-	tweakGUI->setBigTrackSeparatorColor(
-     SkinReader::Instance()->patview_track_big_sep_color()
-  );
-	tweakGUI->setLineSeparatorColor(SkinReader::Instance()->patview_line_sep_color());
 	tweakGUI->setLineGridEnabled(SkinReader::Instance()->patview_line_sep_enabled());
 	tweakGUI->setColGridEnabled(SkinReader::Instance()->patview_col_sep_enabled());
-	tweakGUI->setSeparatorColor(SkinReader::Instance()->patview_col_sep_color());
-	tweakGUI->setTextColor( SkinReader::Instance()->patview_text_color() );
-	tweakGUI->setBeatTextColor(SkinReader::Instance()->patview_beat_text_color());
+
 	tweakGUI->setTrackLeftIdent( SkinReader::Instance()->patview_track_left_ident() );
 	tweakGUI->setTrackRightIdent( SkinReader::Instance()->patview_track_right_ident() );
 	tweakGUI->setBigTrackSeparatorWidth( SkinReader::Instance()->patview_track_big_sep_width() );
-	tweakGUI->setSmallTrackSeparatorColor(SkinReader::Instance()->patview_track_small_sep_color());
-
-	lineNumber_->setBackground ( SkinReader::Instance()->patview_bg_color() );
-  lineNumber_->setTextColor( SkinReader::Instance()->patview_text_color() );
-
-	header->setBackground( SkinReader::Instance()->patview_bg_color()  );
 
 	drawArea->alignTracks();
 	tweakGUI->alignTracks();
 	tweakHeader->setPreferredSize( 20, header->preferredHeight() );
 	lineHeaderLabel->setPreferredSize( 20, header->preferredHeight() );
-	lineHeaderLabel->setBackground( SkinReader::Instance()->patview_bg_color() );
-	lineHeaderLabel->setTransparent( false );
 }
 
 void PatternView::setFocus() {
@@ -1291,7 +1259,7 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 							if ( y >= selection().top() && y < selection().bottom()) {
 							int left  = xOffByTrack( selection().left() );
 							int right = xOffByTrack( selection().right() );
-							g->setForeground(SkinReader::Instance()->patview_sel_bar_bg_color());
+							g->setForeground( pView->colorInfo().sel_bar_bg_color );
 							g->fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
 						}
 
@@ -1302,7 +1270,7 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 						if ( y >= selection().top() && y < selection().bottom()) {
 							int left  = xOffByTrack( selection().left() );
 							int right = xOffByTrack( selection().right() );
-							g->setForeground(SkinReader::Instance()->patview_sel_beat_bg_color());
+							g->setForeground( pView->colorInfo().sel_beat_bg_color );
 							g->fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
 						}
           }
@@ -1365,7 +1333,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 				}
 
 				NColor stdColor = tColor;
-				NColor crColor = SkinReader::Instance()->patview_cursor_text_color();
+				NColor crColor = pView->colorInfo().cursor_text_color;
 
 				PatternLine::iterator eventIt = line->lower_bound(startTrack);
 				PatternEvent emptyEvent;
@@ -1387,9 +1355,9 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 					if ( x >= selection().left() && x < selection().right() &&
 				  		 y >= selection().top() && y < selection().bottom() ) {
 							if ( !onBeat ) 
-							  tColor = SkinReader::Instance()->patview_sel_text_color();
+							  tColor = pView->colorInfo().sel_text_color;
 							else 
-								tColor = SkinReader::Instance()->patview_sel_beat_text_color();
+								tColor = pView->colorInfo().sel_beat_text_color;
 					}	else tColor = stdColor;
   
 					drawData( g, x, y, 0, event->note() , tColor );
@@ -2177,6 +2145,53 @@ void PatternView::onTrackChange( NItemEvent * ev )
   //}
   repaint();
 }
+
+void PatternView::setColorInfo( const PatternViewColorInfo & info ) {
+	colorInfo_ = info;
+
+	drawArea->setSelectionColor( colorInfo_.sel_bg_color );
+	drawArea->setCursorColor( colorInfo_.cursor_bg_color );
+	drawArea->setBarColor( colorInfo_.bar_bg_color );
+	drawArea->setBeatColor( colorInfo_.beat_bg_color );
+	drawArea->setBackground( colorInfo_.bg_color );
+	drawArea->setPlayBarColor( colorInfo_.playbar_bg_color  );
+	drawArea->setBigTrackSeparatorColor( colorInfo_.track_big_sep_color );
+	drawArea->setLineSeparatorColor( colorInfo_.line_sep_color );
+	
+	drawArea->setSeparatorColor(colorInfo_.col_sep_color );
+	drawArea->setSmallTrackSeparatorColor(colorInfo_.track_small_sep_color );
+	drawArea->setTextColor(colorInfo_.text_color );
+	drawArea->setBeatTextColor(colorInfo_.beat_text_color );
+	
+	tweakGUI->setSelectionColor( colorInfo_.sel_bg_color  );
+	tweakGUI->setCursorColor( colorInfo_.cursor_bg_color  );
+	tweakGUI->setBarColor( colorInfo_.bar_bg_color  );
+	tweakGUI->setBeatColor( colorInfo_.beat_bg_color  );
+	tweakGUI->setBackground( colorInfo_.bg_color  );
+	tweakGUI->setPlayBarColor( colorInfo_.playbar_bg_color );
+	tweakGUI->setBigTrackSeparatorColor( colorInfo_.track_big_sep_color );
+	tweakGUI->setLineSeparatorColor(colorInfo_.line_sep_color );
+	
+	tweakGUI->setSeparatorColor(colorInfo_.col_sep_color );
+	tweakGUI->setTextColor( colorInfo_.text_color );
+	tweakGUI->setBeatTextColor(colorInfo_.beat_text_color );
+	tweakGUI->setSmallTrackSeparatorColor(colorInfo_.track_small_sep_color );
+
+	lineNumber_->setBackground ( colorInfo_.bg_color );
+  lineNumber_->setTextColor( colorInfo_.text_color );
+
+	header->setBackground( colorInfo_.bg_color   );
+
+	lineHeaderLabel->setBackground( colorInfo_.bg_color );
+	lineHeaderLabel->setTransparent( false );
+
+}
+
+const PatternViewColorInfo & PatternView::colorInfo() const {
+	return colorInfo_;
+}
+
+
 }}
 
 void psycle::host::PatternView::setActiveMachineIdx( int idx )

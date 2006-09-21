@@ -302,6 +302,9 @@ public:
 		void updateRange();
 		void updateSkin();
 
+		void setColorInfo( const PatternViewColorInfo & info );
+		const PatternViewColorInfo & colorInfo() const;
+
 private:
 
   Song* _pSong;
@@ -334,6 +337,8 @@ private:
   NSplitBar* splitBar;
   NPanel* tweakGroup;
 	NPanel* lineHeaderLabel;
+
+	PatternViewColorInfo colorInfo_;
 
   void enterNote( const PatCursor & cursor, int note );
 

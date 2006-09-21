@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "skinreader.h"
 #include "sequencergui.h"
 #include "sequencerbeatchangelineal.h"
 #include "singlepattern.h"
@@ -116,6 +117,7 @@ SequencerGUI::Area::Area( SequencerGUI* seqGui )
   sView = seqGui;
   
   vLine_ = new NLine();
+		vLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
     vLine_->setVisible( false );
   add( vLine_ );
 }
@@ -139,7 +141,7 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
 
   for (int i = start ; i <= end ; i++) {
      if ( sView->beatPxLength() > 3 || (sView->beatPxLength() <= 3 && (!( i %16)))  ) {
-       g->setForeground(NColor(220,220,220));
+       g->setForeground( SkinReader::Instance()->sequencerview_info().pane_grid_color );
        g->drawLine(i* sView->beatPxLength(),-scrollDy(),d2i(i*sView->beatPxLength()),clientHeight()+scrollDy());
      }
   }
@@ -186,6 +188,7 @@ int SequencerGUI::Area::preferredWidth( ) const
 void SequencerGUI::Area::removeChilds() {
   NPanel::removeChilds();
   vLine_ = new NLine();
+		vLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
     vLine_->setVisible(false);
   add(vLine_);  
 }
@@ -634,6 +637,8 @@ SequencerGUI::SequencerGUI()
   selectedLine_ = 0;
 
   patternSequence_ = 0;
+
+	updateSkin();
 }
 
 
@@ -1002,6 +1007,16 @@ void SequencerGUI::onAddLoop(NButtonEvent* ev) {
 	beatLineal_->repaint();
 }
 
+
+void SequencerGUI::updateSkin() {
+	scrollArea()->setBackground( SkinReader::Instance()->sequencerview_info().pane_bg_color );
+	NFont font_ = scrollArea()->font();
+	font_.setTextColor( SkinReader::Instance()->sequencerview_info().pane_text_color );
+	scrollArea()->setFont( font_ );
+
+	if ( scrollArea_->vLine() ) scrollArea_->vLine()->setForeground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
+
+}
 
 /// loop item class
 

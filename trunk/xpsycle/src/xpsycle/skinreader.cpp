@@ -52,6 +52,10 @@ namespace psycle {
 			mem +="<psyskin>";
 			mem +="<info name='natti' year='2006' copyright='none' />";
 
+			mem +="<sequencerview>";
+			mem +="<pane bgcolor='34:32:35' textcolor='199:199:199' gridcolor='50:51:49' movelinecolor='239:175:140'/>";
+			mem +="</sequencerview>";
+
 			mem +="<patternview>";
 
 			mem +="<cursor bgcolor='179:217:34' textcolor='0:0:0' />";
@@ -77,8 +81,11 @@ namespace psycle {
 			mem +="<solo_on_dest coord='97:3'/>";
 			mem +="</header>";
 			mem +="</patternview>";
+
 			mem +="<machineview>";
-			mem +="<machine>";
+			mem +="<pane bgcolor='34:32:35' />";
+			mem +="<wire bgcolor='70:71:69' arrow_color='50:100:230' arrow_border_color='70:71:69' />";
+			mem +="<machine sel_border_color='199:199:199' >";
 			mem +="<master>";
 			mem +="<background_source coord='0:0:148:48' />";
 			mem +="</master>";
@@ -119,6 +126,7 @@ namespace psycle {
 			patview_track_left_ident_ = 0;
 			patview_track_right_ident_ = 0;
 
+			parseSequencerView = false;
 			parsePatView = false;
 			parsePatHeader = false;
 			parseMachineView = false;
@@ -157,6 +165,7 @@ namespace psycle {
 
 			// now start the xml parser
 
+			parseSequencerView = false;
 			parsePatView = false;
 			parsePatHeader = false;
 			parseMachineView = false;
@@ -230,14 +239,63 @@ namespace psycle {
 		void SkinReader::onTagParse( const NXmlParser & parser, const std::string & tagName )
 		{
 			if ( tagName == "patternview" ) {
+				parseSequencerView = false;
 				parsePatView = true;
 				parseMachineView = false;
 			} else 
 			if ( tagName == "machineview" ) {
+				parseSequencerView = false;
 				parsePatView = false;
 				parseMachineView = true;
 			} else
+			if ( tagName == "sequencerview" ) {
+				parseSequencerView = true;
+				parsePatView = false;
+				parseMachineView = false;
+			} else 
+			if ( tagName == "pane" && parseSequencerView ) {
+				std::string attrib = parser.getAttribValue("bgcolor");
+				if ( attrib != "" ) {
+					sequencerview_info_.pane_bg_color = NColor( attrib );
+				}
+				attrib = parser.getAttribValue("textcolor");
+				if ( attrib != "" ) {
+					sequencerview_info_.pane_text_color = NColor( attrib );
+				}
+				attrib = parser.getAttribValue("gridcolor");
+				if ( attrib != "" ) {
+					sequencerview_info_.pane_grid_color = NColor( attrib );
+				}
+				attrib = parser.getAttribValue("movelinecolor");
+				if ( attrib != "" ) {
+					sequencerview_info_.pane_move_line_color = NColor( attrib );
+				}
+			}
+			if ( tagName == "pane" && parseMachineView ) {
+				std::string bgcolor = parser.getAttribValue("bgcolor");
+				if ( bgcolor != "" ) {
+					machineview_color_info_.pane_bg_color = NColor( bgcolor );
+				}
+			} else
+			if ( tagName == "wire" && parseMachineView) {
+				std::string bgcolor = parser.getAttribValue("bgcolor");
+				if ( bgcolor != "" ) {
+					machineview_color_info_.wire_bg_color = NColor( bgcolor );
+				}
+				bgcolor = parser.getAttribValue("arrow_color");
+				if ( bgcolor != "" ) {
+					machineview_color_info_.wire_poly_color = NColor( bgcolor );
+				}
+				bgcolor = parser.getAttribValue("arrow_border_color");
+				if ( bgcolor != "" ) {
+					machineview_color_info_.wire_arrow_border_color = NColor( bgcolor );
+				}
+			} else
 			if ( tagName == "machine" ) {
+				std::string bgcolor = parser.getAttribValue("sel_border_color");
+				if ( bgcolor != "" ) {
+					machineview_color_info_.sel_border_color = NColor( bgcolor );
+				}
 				std::string src = parser.getAttribValue("src");
 				if (src != "")	{
 					
@@ -414,89 +472,89 @@ namespace psycle {
 			if ( tagName == "selection" && parsePatView ) {
 				std::string selcolor = parser.getAttribValue("bgcolor");
 				if ( selcolor!= "") {
-					patview_sel_bg_color_ = NColor( selcolor );
+					patternview_color_info_.sel_bg_color = NColor( selcolor );
 				}
 			} else
 			if ( tagName == "cursor" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_cursor_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.cursor_bg_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("textcolor");
 				if ( bgcolor != "" ) {
-					patview_cursor_text_color_ = NColor( bgcolor );
+					patternview_color_info_.cursor_text_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("sel_bgcolor");
 				if ( bgcolor != "" ) {
-					patview_sel_cursor_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.sel_cursor_bg_color = NColor( bgcolor );
 				}
 			} else
 			if ( tagName == "bar" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_bar_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.bar_bg_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("sel_bgcolor");
 				if ( bgcolor != "" ) {
-					patview_sel_bar_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.sel_bar_bg_color = NColor( bgcolor );
 				}
 			} else
 			if ( tagName == "beat" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_beat_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.beat_bg_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("sel_bgcolor");
 				if ( bgcolor != "" ) {
-					patview_sel_beat_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.sel_beat_bg_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("textcolor");
 				if ( bgcolor != "" ) {
-					patview_beat_text_color_ = NColor( bgcolor );
+					patternview_color_info_.beat_text_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("sel_textcolor");
 				if ( bgcolor != "" ) {
-					patview_sel_beat_text_color_ = NColor( bgcolor );
+					patternview_color_info_.sel_beat_text_color = NColor( bgcolor );
 				}
 			} else
 			if ( tagName == "lines" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.bg_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("sel_bgcolor");
 				if ( bgcolor != "" ) {
-					patview_sel_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.sel_bg_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("textcolor");
 				if ( bgcolor != "" ) {
-					patview_text_color_ = NColor( bgcolor );
+					patternview_color_info_.text_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("sel_textcolor");
 				if ( bgcolor != "" ) {
-					patview_sel_text_color_ = NColor( bgcolor );
+					patternview_color_info_.sel_text_color = NColor( bgcolor );
 				}
 			} else
 			if ( tagName == "playbar" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_playbar_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.playbar_bg_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("sel_bgcolor");
 				if ( bgcolor != "" ) {
-					patview_sel_playbar_bg_color_ = NColor( bgcolor );
+					patternview_color_info_.sel_playbar_bg_color = NColor( bgcolor );
 				}
 			} else
 			if ( tagName == "smalltrackseparator" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_track_small_sep_color_ = NColor( bgcolor );
+					patternview_color_info_.track_small_sep_color = NColor( bgcolor );
 				}
 			} else
 			if ( tagName == "bigtrackseparator" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_track_big_sep_color_ = NColor( bgcolor );
+					patternview_color_info_.track_big_sep_color = NColor( bgcolor );
 				}
 				bgcolor = parser.getAttribValue("width");
 				if ( bgcolor != "" ) {
@@ -506,7 +564,7 @@ namespace psycle {
 			if ( tagName == "lineseparator" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_line_sep_color_ = NColor( bgcolor );
+					patternview_color_info_.line_sep_color = NColor( bgcolor );
 				}
 
 				std::string enable = parser.getAttribValue("enable");
@@ -518,7 +576,7 @@ namespace psycle {
 			if ( tagName == "colseparator" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
 				if ( bgcolor != "" ) {
-					patview_col_sep_color_ = NColor( bgcolor );
+					patternview_color_info_.col_sep_color = NColor( bgcolor );
 				}
 				std::string enable = parser.getAttribValue("enable");
 				if ( enable == "1" ) 
@@ -545,56 +603,13 @@ namespace psycle {
 				return headerCoords_;
 		}
 
-		// Patternview color`s
-		
-		const NColor & SkinReader::patview_cursor_bg_color( ) const
-		{
-			return patview_cursor_bg_color_;
-		}
+		// PatternView color info
 
-		const NColor & SkinReader::patview_cursor_text_color() const {
-			return patview_cursor_text_color_;
-		}
+		const PatternViewColorInfo & SkinReader::patternview_color_info() const {
+			return patternview_color_info_;
+		}		
 
-		const NColor & SkinReader::patview_bar_bg_color() const {
-			return patview_bar_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_beat_bg_color() const {
-			return patview_beat_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_beat_text_color() const {
-			return patview_beat_text_color_;
-		}
-
-		const NColor & SkinReader::patview_sel_beat_text_color() const {
-			return patview_sel_beat_text_color_;
-		}
-
-		const NColor & SkinReader::patview_bg_color() const {
-			return patview_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_playbar_bg_color() const {
-			return patview_playbar_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_track_big_sep_color() const {
-			return patview_track_big_sep_color_;
-		}
-
-		const NColor & SkinReader::patview_track_small_sep_color() const {
-			return patview_track_small_sep_color_;
-		}
-
-		const NColor & SkinReader::patview_line_sep_color() const {
-			return patview_line_sep_color_;
-		}
-
-		const NColor & SkinReader::patview_col_sep_color() const {
-			return patview_col_sep_color_;
-		}
+		// PatternView value settings
 
 		bool SkinReader::patview_line_sep_enabled() const {
 			return patview_line_sep_enabled_;
@@ -602,14 +617,6 @@ namespace psycle {
 
 		bool SkinReader::patview_col_sep_enabled() const {
 			return patview_col_sep_enabled_;
-		}
-
-		const NColor & SkinReader::patview_text_color() const {
-			return patview_text_color_;
-		}
-
-		const NColor & SkinReader::patview_sel_text_color() const {
-			return patview_sel_text_color_;
 		}
 
 		int SkinReader::patview_track_left_ident() const {
@@ -620,32 +627,11 @@ namespace psycle {
 			return patview_track_right_ident_;
 		}
 
-		// with selection
-
-		const NColor & SkinReader::patview_sel_cursor_bg_color( ) const
-		{
-			return patview_sel_cursor_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_sel_bar_bg_color() const {
-			return patview_sel_bar_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_sel_beat_bg_color() const {
-			return patview_sel_beat_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_sel_bg_color() const {
-			return patview_sel_bg_color_;
-		}
-
-		const NColor & SkinReader::patview_sel_playbar_bg_color() const {
-			return patview_sel_playbar_bg_color_;
-		}
-
 		int SkinReader::patview_track_big_sep_width() const {
 			return patview_track_big_sep_width_;
 		}
+
+		// PatternView bitmap
 
 		NBitmap & SkinReader::patview_header_bitmap() {
 			if ( patview_header_bitmap_.empty() )
@@ -654,13 +640,16 @@ namespace psycle {
 				return patview_header_bitmap_;
 		}
 
+
+		// Machineview skin informations
+
 		NPixmap & SkinReader::machines_bitmap() {
 			if ( machines_bitmap_.empty() )
 				return defaultBitmaps.machine_skin();
 			else
 				return machines_bitmap_;
 		}
-
+		
 		const MachineCoordInfo & SkinReader::machineview_master_coords() const {
 			return machineview_master_coords_;
 		}
@@ -671,6 +660,17 @@ namespace psycle {
 
 		const MachineCoordInfo & SkinReader::machineview_generator_coords() const {
 			return machineview_generator_coords_;
+		}
+
+		const MachineViewColorInfo & SkinReader::machineview_color_info() const {
+			return machineview_color_info_;
+		}
+
+
+		// sequencerview
+
+		const SequencerViewInfo & SkinReader::sequencerview_info() const {
+			return sequencerview_info_;
 		}
 
  }

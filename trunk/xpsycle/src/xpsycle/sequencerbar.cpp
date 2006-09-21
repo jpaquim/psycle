@@ -25,6 +25,7 @@
 #include "defaultbitmaps.h"
 #include "player.h"
 #include "sequencergui.h"
+#include "skinreader.h"
 
 #include <ngrs/nlabel.h>
 #include <ngrs/nitem.h>
@@ -148,6 +149,11 @@ SequencerBar::~SequencerBar()
 {
 }
 
+
+void SequencerBar::setSkin( )
+{  
+}
+
 void SequencerBar::init( )
 {  
   DefaultBitmaps & icons = Global::pConfig()->icons();
@@ -163,6 +169,8 @@ void SequencerBar::init( )
 
   setLayout(NAlignLayout());
   setWidth(90);
+
+	setSkin();
 
   NFlipBox* flipBox = new NFlipBox();
     NFrameBorder fr;
@@ -295,7 +303,7 @@ void SequencerBar::onRecordTweakChange( NButtonEvent * ev )
 void SequencerBar::onNewCategory( NButtonEvent * ev )
 {
   PatternCategory* category = seqGui->patternSequence()-> patternData()->createNewCategory("category");
-	category->setColor(0x0000FF);
+	category->setColor(0xFF0000);
 
   CategoryTreeNode* node = new CategoryTreeNode(category);
   node->setExpanded(true);

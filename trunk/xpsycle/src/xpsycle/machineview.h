@@ -22,6 +22,8 @@
 
 #include "wiregui.h"
 #include "wiredlg.h"
+#include "skinreader.h"
+
 #include <ngrs/npage.h>
 #include <ngrs/nscrollbox.h>
 #include <ngrs/nlabel.h>
@@ -94,6 +96,9 @@ public:
 
 		void updateSkin();
 
+		void setColorInfo( const MachineViewColorInfo & info );
+		const MachineViewColorInfo & colorInfo() const;
+
 private:
 
     Song* _pSong;
@@ -120,11 +125,15 @@ private:
     MachineGUI* findByMachine(Machine* mac);
 
     std::vector<MachineGUI*> machineGUIs;
+		std::vector<MachineWireGUI*> wireGUIs;
+
     void onTweakSlide(int machine, int command, int value);
 
     void onMachineSelected(MachineGUI* gui);
 
 		void onMachineDeleteRequest( MachineGUI* machineGUI );
+
+		MachineViewColorInfo colorInfo_;
 };
 
 }}

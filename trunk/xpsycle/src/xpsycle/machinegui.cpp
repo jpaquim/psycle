@@ -60,6 +60,9 @@ Machine * MachineGUI::pMac( )
 void MachineGUI::paint( NGraphics * g )
 {
   if (selected_) {
+
+			g->setForeground( SkinReader::Instance()->machineview_color_info().sel_border_color );
+
      int cw = clientWidth();
      int ch = clientHeight();
      int size = 10;
@@ -531,7 +534,7 @@ void EffektGUI::paint( NGraphics * g )
 void EffektGUI::setSkin( )
 {
 
-	setCoordInfo( SkinReader::Instance()->machineview_generator_coords() );
+	setCoordInfo( SkinReader::Instance()->machineview_effect_coords() );
 
   setHeight( coords().bgCoords.height() + 2*ident() );
   setWidth(  coords().bgCoords.width()   + 2*ident() );

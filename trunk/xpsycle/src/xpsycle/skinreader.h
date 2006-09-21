@@ -69,7 +69,46 @@ namespace psycle {
 			NRect sVuPeak;
 			NRect sVu0;
 			NRect dVu;
+		};
 
+		class MachineViewColorInfo {
+		public:
+			NColor pane_bg_color;
+			NColor wire_bg_color;
+			NColor wire_poly_color;
+			NColor wire_arrow_border_color;
+			NColor sel_border_color;
+		};
+
+		class PatternViewColorInfo {
+		public:
+			NColor cursor_bg_color;
+			NColor cursor_text_color;
+			NColor bar_bg_color;
+			NColor beat_bg_color;
+			NColor bg_color;
+			NColor text_color;
+			NColor sel_text_color;
+			NColor beat_text_color;
+			NColor playbar_bg_color;
+			NColor track_big_sep_color;
+			NColor track_small_sep_color;
+			NColor line_sep_color;
+			NColor col_sep_color;
+			NColor sel_cursor_bg_color;
+			NColor sel_bar_bg_color;
+			NColor sel_beat_bg_color;
+			NColor sel_bg_color;
+			NColor sel_beat_text_color;
+			NColor sel_playbar_bg_color;
+		};
+
+		class SequencerViewInfo {
+		public:
+			NColor pane_bg_color;
+			NColor pane_text_color;
+			NColor pane_grid_color;
+			NColor pane_move_line_color;
 		};
 
 
@@ -90,55 +129,46 @@ namespace psycle {
 			}
 			// Singleton pattern end
 
+			// loads a skin from a psycle_skin zip archive			
 			bool loadSkin( const std::string & fileName );
+			// sets an internal default skin, that doesn`t require an extra file
 			void setDefaults();
 
 			// patternview settings
 		
+			const PatternViewColorInfo & patternview_color_info() const;			
+
 			const HeaderCoordInfo & headerCoordInfo() const;
-	
-			const NColor & patview_cursor_bg_color() const;
-			const NColor & patview_cursor_text_color() const;
-			const NColor & patview_bar_bg_color() const;
-			const NColor & patview_beat_bg_color() const;
-			const NColor & patview_sel_beat_text_color() const;
-			const NColor & patview_beat_text_color() const;
-			const NColor & patview_bg_color() const;
-			const NColor & patview_text_color() const;
-			const NColor & patview_sel_text_color() const;
-			const NColor & patview_playbar_bg_color() const;
-			const NColor & patview_track_big_sep_color() const;
-			const NColor & patview_track_small_sep_color() const;
+
 			int patview_track_big_sep_width() const;
-			const NColor & patview_line_sep_color() const;
 			bool patview_line_sep_enabled() const;
-			const NColor & patview_col_sep_color() const;
 			bool patview_col_sep_enabled() const;
-
-			const NColor & patview_sel_cursor_bg_color() const;
-			const NColor & patview_sel_bar_bg_color() const;
-			const NColor & patview_sel_beat_bg_color() const;
-			const NColor & patview_sel_bg_color() const;
-			const NColor & patview_sel_playbar_bg_color() const;
-
 			int patview_track_left_ident() const;
 			int patview_track_right_ident() const;
 
 			NBitmap & patview_header_bitmap();
+						
+			// machineview settings
 
 			NPixmap & machines_bitmap();
-
-			// machineview settings
 
 			const MachineCoordInfo & machineview_master_coords() const;
 			const MachineCoordInfo & machineview_effect_coords() const;
 			const MachineCoordInfo & machineview_generator_coords() const;
 
+			const MachineViewColorInfo & machineview_color_info() const;
+
+			// Sequencerview
+
+			const SequencerViewInfo & sequencerview_info() const;
 			
 		private:
 
 			void onTagParse(const NXmlParser & parser, const std::string & tagName);
 
+			// flags for the onTagParse, to know, in which parent tag we are
+
+			bool parseSequencerView;
 			bool parsePatView;
 			bool parsePatHeader;
 			bool parseMachineView;
@@ -146,47 +176,34 @@ namespace psycle {
 			bool parseMacEffect;
 			bool parseMacGenerator;
 
+			// this method extracts a bitmap out of the opened zip file and loads it into a NBitmap
 			NBitmap extractAndLoadBitmap( const std::string & zip_path );
 
 			// patternview stuff
 
+			// coordinates for putImage
 			HeaderCoordInfo headerCoords_;
+
 			// transforms a "00:00:00:00" str into a nrect "00" any int value
 			NRect SkinReader::getCoords( const std::string & coord ) const;
 
-			NColor patview_cursor_bg_color_;
-			NColor patview_cursor_text_color_;
-			NColor patview_bar_bg_color_;
-			NColor patview_beat_bg_color_;
-			NColor patview_bg_color_;
-			NColor patview_text_color_;
-			NColor patview_sel_text_color_;
-			NColor patview_beat_text_color_;
-			NColor patview_playbar_bg_color_;
-			NColor patview_track_big_sep_color_;
-			NColor patview_track_small_sep_color_;
-			NColor patview_line_sep_color_;
 			bool patview_line_sep_enabled_;
-			NColor patview_col_sep_color_;
 			bool patview_col_sep_enabled_;
 
 			int patview_track_left_ident_;
 			int patview_track_right_ident_;
 			int patview_track_big_sep_width_;
-
-			NColor patview_sel_cursor_bg_color_;
-			NColor patview_sel_bar_bg_color_;
-			NColor patview_sel_beat_bg_color_;
-			NColor patview_sel_bg_color_;
-			NColor patview_sel_beat_text_color_;
-			NColor patview_sel_playbar_bg_color_;
-
+			
+			PatternViewColorInfo patternview_color_info_;
 
 			// machine_view stuff
 
 			MachineCoordInfo machineview_master_coords_;
 			MachineCoordInfo machineview_effect_coords_;
-			MachineCoordInfo machineview_generator_coords_;
+			MachineCoordInfo machineview_generator_coords_;		
+
+			MachineViewColorInfo machineview_color_info_;
+
 
 			// default Bitmaps
 			DefaultBitmaps defaultBitmaps;
@@ -196,6 +213,8 @@ namespace psycle {
 
 			// our zipreader handle
 			zipreader *z;
+
+			SequencerViewInfo sequencerview_info_;
 
 		};
 	}
