@@ -305,6 +305,10 @@ public:
 		void setColorInfo( const PatternViewColorInfo & info );
 		const PatternViewColorInfo & colorInfo() const;
 
+		void onTick( double sequenceStart );
+		void onStartPlayBar();
+		void onEndPlayBar();
+
 private:
 
   Song* _pSong;
@@ -364,6 +368,8 @@ private:
 			
 	void checkUpScroll( const PatCursor & cursor );
 	void checkDownScroll( const PatCursor & cursor );
+
+	
 
   
 };

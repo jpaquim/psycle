@@ -62,7 +62,7 @@ namespace psycle {
 			mem +="<bar bgcolor='70:71:69' sel_bgcolor='162:101:68'/>";
 			mem +="<beat bgcolor='50:51:49' sel_bgcolor='142:81:48' textcolor='199:199:199' sel_textcolor='216:154:120'/>";
 			mem +="<lines bgcolor='34:32:35' sel_bgcolor='140:68:41' textcolor='255:255:255' sel_textcolor='239:175:140'/>";
-			mem +="<playbar bgcolor='42:47:39' sel_bgcolor='0:0:200'/>";
+			mem +="<playbar bgcolor='182:121:88' sel_bgcolor='0:0:200'/>";
 			mem +="<bigtrackseparator bgcolor='145:147:147' width='2' />";
 			mem +="<smalltrackseparator bgcolor='105:107:107' />";
 			mem +="<lineseparator enable='0' bgcolor='145:147:147'/>";

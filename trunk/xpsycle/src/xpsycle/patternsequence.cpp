@@ -384,6 +384,35 @@ namespace psycle
 			    seqlineidx++;
 			}
 		}
+
+		bool PatternSequence::getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const {
+			entryStart = 0;
+			PatternLine* searchLine = 0;
+
+		    // Iterate over each timeline of the sequence,
+			for( const_iterator seqIt = begin(); seqIt != end(); ++seqIt )
+			{
+				SequenceLine *pSLine = *seqIt;
+				// locate the "sequenceEntry"s which starts at "start+length"
+				SequenceLine::reverse_iterator sLineIt( pSLine->upper_bound(start + length) );
+				// and iterate backwards to include any other that is inside the range [start,start+length)
+				// (The UI won't allow more than one pattern for the same range in the same timeline, but 
+				// this was left open in the player code)
+				for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt )
+				{
+					// take the pattern,
+
+					SinglePattern* pPat = sLineIt->second->pattern();
+
+					if ( pPat == pattern ) {
+						entryStart = sLineIt->first;
+						return true;
+					}
+				
+				}			    
+			}
+			return false;
+		}
 	
 		double PatternSequence::GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive)
 		{

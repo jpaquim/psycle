@@ -128,13 +128,13 @@ std::cout << "initsongs" << std::endl;
   enableSound();
 std::cout << " updatenewsong" << std::endl;
   updateNewSong();
- 
+
+	
+	timer.setIntervalTime(10);
+  timer.enableTimer(); 
   
-//  updateStatusBar();
 
-  //childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
-
- 
+  timer.timerEvent.connect(this,&MainWindow::onTimer);
 
 }
 
@@ -969,16 +969,23 @@ void MainWindow::onTimer( )
   Song* selectedSong_ = selectedChildView_->song();
 
   if ( Player::Instance()->_playing) {
-    
+    SinglePattern* visiblePattern = selectedChildView_->patternView()->pattern();
+		if ( visiblePattern ) {
+			double entryStart = 0;
+			bool isPlayPattern = selectedSong_->patternSequence()->getPlayInfo( visiblePattern, Player::Instance()->PlayPos() , 4 , entryStart );
+			if ( isPlayPattern ) {
+				selectedChildView_->patternView()->onTick( entryStart );
+			}			
+		}
   }
 
-  vuMeter_->setPegel(selectedSong_->_pMachine[MASTER_INDEX]->_lMax,
+  /*vuMeter_->setPegel(selectedSong_->_pMachine[MASTER_INDEX]->_lMax,
   selectedSong_->_pMachine[MASTER_INDEX]->_rMax );
   vuMeter_->repaint();
   ((Master*)selectedSong_->_pMachine[MASTER_INDEX])->vuupdated = true;
 
   if ( !selectedChildView_ ) return;
-  selectedChildView_->machineView()->updateVUs();
+  selectedChildView_->machineView()->updateVUs();*/
 }
 
 void MainWindow::updateBars( )
