@@ -40,6 +40,8 @@ NRuntime::~NRuntime()
     child->setParent(NULL);
     delete child;
   }
+
+	std::cout << "delete:" << name() << std::endl;
 }
 
 // here you will find all public methods

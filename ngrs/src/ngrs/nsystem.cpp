@@ -165,7 +165,7 @@ void NSystem::initX( )
   {
     std::ostringstream s;
     s << "ngrs: failed to open default display. is the DISPLAY environment variable set to some available display?";
-    std::cerr << s << std::endl;
+    std::cerr << s.str() << std::endl;
     exit(0);
   }
   screen_     = DefaultScreen(dpy_);
