@@ -33,6 +33,8 @@ namespace psycle
 			autoRecord_ = false;
 			driver_ = 0;
 			autoStopMachines = false;
+			lock_ = false;
+			inWork_ = false;
 		}
 
 		Player::~Player()
@@ -256,6 +258,10 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		{
 			if ( !song_ ) return _pBuffer;
 
+			if ( lock_ ) return _pBuffer;
+
+			inWork_ = true;
+
 			// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
 			Master::_pMasterSamples = _pBuffer;
 			double beatLength = numSamples/(double) timeInfo_.samplesPerBeat();
@@ -329,6 +335,8 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 //				playPos+=beatLength;
 //				if (playPos> "signumerator") playPos-=signumerator;
 			}
+
+			inWork_ = false;
 			return _pBuffer;
 		}
 
@@ -464,6 +472,17 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				driver_ = new AudioDriver();
 			}
 				SampleRate(driver_->_samplesPerSec);
+		}
+
+		void psycle::host::Player::lock( )
+		{
+			lock_ = true;
+			while ( inWork_) usleep( 200 );
+		}
+
+		void psycle::host::Player::unlock( )
+		{
+			lock_ = false;
 		}
 
 	} // end of host namespace

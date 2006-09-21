@@ -176,14 +176,18 @@ void MachineView::onNewConnection( MachineGUI * sender )
   line = new MachineWireGUI();
   line->setPoints(NPoint(sender->left()+midW,sender->top()+midH),NPoint(sender->left()+midW,sender->top()+midH));
   scrollArea_->insert(line,0);
+	std::cout << "yup yup the yup" << std::endl;
   line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
+	line->setName("line");
   repaint();
   line->setMoveFocus(0); 
   line->moveEnd.connect(this,&MachineView::onLineMoveEnd);
-}
+	std::cout << "yup2 yup2 the2 yup" << std::endl;
+} 
 
 void MachineView::onLineMoveEnd( const NMoveEvent & ev)
-{	 
+{	
+	std::cout << "yup2 yup2 the2 yup end" << std::endl; 
   bool found = false;
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
@@ -210,7 +214,9 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev)
 
 void MachineView::onWireDelete( WireDlg * dlg )
 {
-  //dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
+	Player::Instance()->lock();
+
+  dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
   Machine* _pSrcMachine = dlg->pSrcMachine();
   Machine* _pDstMachine = dlg->pDstMachine();
 
@@ -231,17 +237,21 @@ void MachineView::onWireDelete( WireDlg * dlg )
 
   from->detachLine(dlg->line());
   to->detachLine(dlg->line());
-
-  dlg->setVisible(false);
+ 
+  /*dlg->setVisible(false);
   dlg->line()->setVisible(false);
   NApp::flushEventQueue();
-  if (window()!=0) window()->checkForRemove(0);
+  if (window()!=0) window()->checkForRemove(0);*/
 	std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
 	it = find( wireGUIs.begin(), wireGUIs.end(), dlg->line() );
 	if ( it != wireGUIs.end() ) wireGUIs.erase(it);	
 
-  scrollArea_->removeChild(dlg->line());
+  scrollArea_->removeChild ( dlg->line() );
+
+	line = 0;
   repaint();
+
+	Player::Instance()->unlock();
 }
 
 void MachineView::removeMachines( )

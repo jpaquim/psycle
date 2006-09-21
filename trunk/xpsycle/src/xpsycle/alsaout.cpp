@@ -137,20 +137,28 @@ int AlsaOut::audioStart(  )
   printf("Stream parameters are %iHz, %s, %i channels\n", rate, snd_pcm_format_name(format), channels);
   printf("Using transfer method: %s\n", "write");
 
+	std::cout << "step1" << std::endl;
+
   if ((err = snd_pcm_open(&handle, device, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
     printf("Playback open error: %s\n", snd_strerror(err));
     return 0;
   }
+
+  std::cout << "step2" << std::endl;
 
   if ((err = set_hwparams(handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
     printf("Setting of hwparams failed: %s\n", snd_strerror(err));
     exit(EXIT_FAILURE);
   }
 
+	std::cout << "step3" << std::endl;
+
   if ((err = set_swparams(handle, swparams)) < 0) {
     printf("Setting of swparams failed: %s\n", snd_strerror(err));
     exit(EXIT_FAILURE);
   }
+
+	std::cout << "step4" << std::endl;
 
   samples = (short int*) malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
   if (samples == NULL) {
@@ -158,17 +166,23 @@ int AlsaOut::audioStart(  )
       exit(EXIT_FAILURE);
   }
 
+	std::cout << "step5" << std::endl;
+
   areas = (snd_pcm_channel_area_t*) calloc(channels, sizeof(snd_pcm_channel_area_t));
   if (areas == NULL) {
       printf("No enough memory\n");
       exit(EXIT_FAILURE);
   }
 
+	std::cout << "step6" << std::endl;
+
   for (chn = 0; chn < channels; chn++) {
     areas[chn].addr = samples;
     areas[chn].first = chn * 16;
     areas[chn].step = channels * 16;
   }
+
+	std::cout << "step7" << std::endl;
 
   if (0 == pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this))
   {	
@@ -217,6 +231,7 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
     snd_pcm_uframes_t size;
     int err, dir;
 
+		std::cout << "step2.1" << std::endl;
     // choose all parameters
     err = snd_pcm_hw_params_any(handle, params);
     if (err < 0) {
@@ -230,19 +245,22 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
                 return err;
         }
     */
-
+		std::cout << "step2.2" << std::endl;
         // set the interleaved read/write format
     err = snd_pcm_hw_params_set_access(handle, params, access);
     if (err < 0) {
                 printf("Access type not available for playback: %s\n", snd_strerror(err));
                 return err;
     }
+		std::cout << "step2.3" << std::endl;
     // set the sample format
     err = snd_pcm_hw_params_set_format(handle, params, format);
     if (err < 0) {
           printf("Sample format not available for playback: %s\n", snd_strerror(err));
           return err;
     }
+
+		std::cout << "step2.4" << std::endl;
     // set the count of channels
     err = snd_pcm_hw_params_set_channels(handle, params, channels);
     if (err < 0) {
@@ -250,40 +268,55 @@ int AlsaOut::set_hwparams(snd_pcm_t *handle,
           return err;
     }
     // set the stream rate
-    rrate = rate;
+		std::cout << "step2.5" << std::endl;
+    rrate = rate;		
     err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
     if (err < 0) {
         printf("Rate %iHz not available for playback: %s\n", rate, snd_strerror(err));
         return err;
     }
+
+		std::cout << "step2.6" << std::endl;
     if (rrate != rate) {
           printf("Rate doesn't match (requested %iHz, get %iHz)\n", rate, err);
           return -EINVAL;
     }
+
+		std::cout << "step2.7" << std::endl;
     // set the buffer time
-    err = snd_pcm_hw_params_set_buffer_time_near(handle, params, &buffer_time, &dir);
+    err = snd_pcm_hw_params_set_buffer_time_near(handle, params, &buffer_time, 0);
     if (err < 0) {
           printf("Unable to set buffer time %i for playback: %s\n", buffer_time, snd_strerror(err));
           return err;
     }
+
+		std::cout << "step2.8" << std::endl;
     err = snd_pcm_hw_params_get_buffer_size(params, &size);
     if (err < 0) {
           printf("Unable to get buffer size for playback: %s\n", snd_strerror(err));
           return err;
     }
+
+		std::cout << "step2.9" << std::endl;
     buffer_size = size;
+		std::cout << "step2.9.1" << std::endl;
     // set the period time
-    err = snd_pcm_hw_params_set_period_time_near(handle, params, &period_time, &dir);
+    err = snd_pcm_hw_params_set_period_time_near(handle, params, &period_time, 0);
     if (err < 0) {
           printf("Unable to set period time %i for playback: %s\n", period_time, snd_strerror(err));
           return err;
     }
-    err = snd_pcm_hw_params_get_period_size(params, &size, &dir);
+
+		std::cout << "step2.10" << std::endl;
+    err = snd_pcm_hw_params_get_period_size(params, &size, 0);
     if (err < 0) {
         printf("Unable to get period size for playback: %s\n", snd_strerror(err));
         return err;
     }
+
+		std::cout << "step2.10" << std::endl;
     period_size = size;
+		std::cout << "step2.10.1" << std::endl;
     // write the parameters to device
     err = snd_pcm_hw_params(handle, params);
     if (err < 0) {

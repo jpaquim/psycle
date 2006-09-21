@@ -45,9 +45,11 @@ public :
     MachineWireGUI() {
       dlg = new WireDlg();
       dlg->setLine(this);
-      add(dlg);
     }
     ~MachineWireGUI() {
+			std::cout << "delete dialog" << std::endl;
+			delete dlg;
+			std::cout << "after delete dialog" << std::endl;
     }
 
     virtual void onMousePress  (int x, int y, int button) {
@@ -134,6 +136,9 @@ private:
 		void onMachineDeleteRequest( MachineGUI* machineGUI );
 
 		MachineViewColorInfo colorInfo_;
+
+		std::vector<WireDlg*> wireDlg;
+
 };
 
 }}

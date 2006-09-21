@@ -46,6 +46,8 @@ public:
 
     void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
 
+		void clearMachineCallBack();
+
     virtual void paint(NGraphics* g);
 
 private:

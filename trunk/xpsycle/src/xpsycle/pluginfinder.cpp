@@ -189,6 +189,7 @@ namespace psycle
 		void PluginFinder::scanLadspa() {
 			///\todo this just uses the first path in getenv
 			const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
+			std::cout << "scanning:" << pcLADSPAPath << std::endl;
 			if ( !pcLADSPAPath) pcLADSPAPath = "/usr/lib/ladspa/";
 			std::string ladspa_path(pcLADSPAPath);
 			int dotpos = ladspa_path.find(':',0);
