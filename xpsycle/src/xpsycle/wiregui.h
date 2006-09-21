@@ -38,7 +38,12 @@ public:
     virtual void paint(NGraphics* g);
     void drawArrow( NGraphics * g );
 
+		void updateSkin();
+
 private:
+
+		NColor polyColor_;
+		NColor borderColor_;
 
     float deltaColR;
     float deltaColG;

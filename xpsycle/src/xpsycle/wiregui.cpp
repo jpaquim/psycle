@@ -22,6 +22,7 @@
 #include "configuration.h"
 #include <cmath>
 #include <cstdio>
+#include <skinreader.h>
 
 namespace psycle { namespace host {
 
@@ -39,16 +40,13 @@ inline double max (X x,Y y) {
 WireGUI::WireGUI()
   : NLine()
 {
-  deltaColR = (Global::pConfig()->mv_polycolour.red() / 510.0) + .45;
-  deltaColG = (Global::pConfig()->mv_polycolour.green() / 510.0) + .45;
-  deltaColB = (Global::pConfig()->mv_polycolour.blue() / 510.0) + .45;
-
   triangle_size_tall = Global::pConfig()->mv_triangle_size+((23*Global::pConfig()->mv_wirewidth)/16);
 
   triangle_size_center = triangle_size_tall/2;
   triangle_size_wide = triangle_size_tall/2;
   triangle_size_indent = triangle_size_tall/6;
 
+	updateSkin();
 }
 
 
@@ -150,8 +148,23 @@ void WireGUI::drawArrow( NGraphics * g )
   g->drawPolygon(&fillPoly[1],3);
   g->drawPolygon(&fillPoly[3], 4);
 
-  g->setForeground(NColor(0, 0, 0));
+  g->setForeground( borderColor_ );
   g->drawPolygon(&pol[1], 4);
 }
 
+void WireGUI::updateSkin( )
+{
+	setForeground( SkinReader::Instance()->machineview_color_info().wire_bg_color );
+
+	polyColor_ = SkinReader::Instance()->machineview_color_info().wire_poly_color;
+
+	deltaColR = ( polyColor_.red()   / 510.0) + .45;
+  deltaColG = ( polyColor_.green() / 510.0) + .45;
+  deltaColB = ( polyColor_.blue()  / 510.0) + .45;
+
+	borderColor_ = SkinReader::Instance()->machineview_color_info().wire_arrow_border_color;
+
+}
+
 }}
+

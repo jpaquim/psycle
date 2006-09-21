@@ -234,6 +234,8 @@ public:
 
     bool gridSnap() const;
 
+		void updateSkin();
+
 private:
 
     AudioDriver* oldDriver;

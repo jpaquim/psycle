@@ -123,6 +123,7 @@ public:
 		void selectNextPattern();
 		void selectPrevPattern();
 
+		void setSkin();
 
 private:
 
