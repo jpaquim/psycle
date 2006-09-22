@@ -25,6 +25,7 @@
 #include "jackout.h"
 #include "gstreamerout.h"
 #include "esoundout.h"
+#include "wavefileout.h"
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
@@ -124,6 +125,10 @@ void Configuration::setSkinDefaults( )
 		driver = new AudioDriver;
 		_pSilentDriver = driver;
 		driverMap_[ driver->info().name() ] = driver;
+
+		driver = new WaveFileOut();
+		driverMap_[ driver->info().name() ] = driver;
+
 		#if !defined XPSYCLE__NO_ALSA
 			driver = new AlsaOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
@@ -143,7 +148,7 @@ void Configuration::setSkinDefaults( )
 			driver = new ESoundOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
-		#endif
+		#endif		
 		/*#if !defined XPSYCLE__NO_NETAUDIO
 			driver = new NetAudioOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;

@@ -35,6 +35,7 @@ namespace psycle
 		{
 			clientName_ = "xpsycle";
 			serverName_ = ""; // maybe not needed
+			running_ = 0;
 		}
 
 		JackOut::~JackOut() {
@@ -69,11 +70,14 @@ namespace psycle
 
 		bool	JackOut::Enable( bool e )
 		{
-			if ( e ) {
-				return registerToJackServer();
-			} else {
-				return jack_client_close (client);
+			if ( e && !running_ ) {
+				running_ = registerToJackServer();
+			} else 
+			if ( running_ ) {
+				jack_client_close (client);
+				running_ = false;
 			}
+			return running_;
 		}
 
 		// Jack special functions

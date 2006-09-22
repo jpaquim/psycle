@@ -22,6 +22,7 @@
 
 #include "singlepattern.h"
 #include "patternsequence.h"
+#include "audiodriver.h"
 #include <ngrs/npanel.h>
 #include <ngrs/nbutton.h>
 #include <ngrs/nline.h>
@@ -46,9 +47,6 @@ namespace psycle {
 class SequencerBeatChangeLineal;
 
 class SequencerGUI;
-class WaveFileOut;
-class AudioDriver;
-
 
 class SequencerLoopItem : public NPanel {
 public:
@@ -238,8 +236,7 @@ public:
 
 private:
 
-    AudioDriver* oldDriver;
-    WaveFileOut* waveOut;
+    AudioDriver oldDriver;
 
     int counter;
     int beatPxLength_;

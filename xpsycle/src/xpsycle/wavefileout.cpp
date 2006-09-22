@@ -37,6 +37,10 @@ namespace psycle
 
 		WaveFileOut::~WaveFileOut()
 		{
+			while ( threadOpen ) {
+				kill_thread = 1;		
+				usleep(200);
+			}
 		}
 
 		WaveFileOut * WaveFileOut::clone( ) const
@@ -57,6 +61,10 @@ namespace psycle
 			_initialized = true;
 		}
 
+		bool WaveFileOut::Initialized(void) {
+			return _initialized;
+		}
+
 		bool WaveFileOut::Enable( bool e )
 		{
 			bool threadStarted = false;
@@ -68,7 +76,9 @@ namespace psycle
 			if (!e && threadOpen) {
 				kill_thread = 1;
 				threadStarted = false;
-				usleep(500); // give thread time to close
+				while ( threadOpen ) {
+					usleep(500); // give thread time to close
+				}
 			}
 			return threadStarted;
 		}
@@ -85,15 +95,14 @@ namespace psycle
 
 			int count = 441;
 
-
 			while(!(kill_thread))
 			{
 				usleep(100); // give cpu time to breath
-
 				float const * input(_pCallback(_callbackContext, count));
 			}
 
 			threadOpen = 0;
+			std::cout << "closing thread" << std::endl;
 			pthread_exit(0);
 		}
 

@@ -447,7 +447,10 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 		void Player::setDriver(  const AudioDriver & driver ) {
 			std::cout << "entering player::setaudio" << std::endl;
-			if ( driver_) delete driver_;
+			if ( driver_) {
+				driver_->Enable( false );
+				delete driver_;
+			}
 			driver_ = driver.clone();
 			std::cout << "cloned driver " << std::endl;
 			if (!driver_->Initialized())

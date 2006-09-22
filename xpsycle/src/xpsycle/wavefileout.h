@@ -47,6 +47,8 @@ namespace psycle
 
 				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 
+				virtual bool Initialized();
+
 				// starts stops file writing
 				virtual bool Enable(bool e);
 
@@ -55,15 +57,14 @@ namespace psycle
 
 				void* _callbackContext; // Player callback
 				AUDIODRIVERWORKFN _pCallback;
-				bool _initialized;
-
-				int iret1;
-				int threadOpen;
-
+				
+				int iret1;				
 				pthread_t threadid;
 
-				int kill_thread;
-
+			  volatile int kill_thread;
+				volatile int threadOpen;
+				bool _initialized;
+				
 				static int audioOutThread(void * ptr);
 
 				void writeBuffer();
