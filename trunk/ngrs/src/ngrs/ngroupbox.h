@@ -32,10 +32,9 @@ class NGroupBox : public NPanel
   class GBorder : public NBorder {
   public:
      GBorder();
-     GBorder(NGroupBox* groupBox);
      ~GBorder();
 
-     void setHeaderText(std::string text);
+     void setHeaderText( const std::string & text );
 
      virtual void paint(NGraphics* g, const NShape & geometry);
 
@@ -43,20 +42,21 @@ class NGroupBox : public NPanel
 
   private:
 
-     NGroupBox* pBox;
      std::string headerText_;
+
   };
 
 public:
     NGroupBox();
+    NGroupBox( const std::string & text);
 
     ~NGroupBox();
 
-    void setHeaderText(std::string text);
+    void setHeaderText( const std::string & text);
 
 private:
 
-   GBorder* gBorder;
+   GBorder gBorder;
 };
 
 #endif
