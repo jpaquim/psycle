@@ -46,10 +46,10 @@ namespace psycle
 
 		private:
 
-			std::string name_;
-			std::string header_;
-			std::string description_;
-			bool show_;
+				std::string name_;
+				std::string header_;
+				std::string description_;
+				bool show_;
 
 		};
 
