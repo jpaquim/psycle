@@ -21,6 +21,11 @@
 #define AUDIOCONFIGDLG_H
 
 #include <ngrs/nwindow.h>
+#include <ngrs/ntabbook.h>
+#include <ngrs/ngroupbox.h>
+#include <ngrs/ncombobox.h>
+#include <ngrs/nnotebook.h>
+#include <ngrs/nedit.h>
 
 /**
 @author Stefan Nattkemper
@@ -34,6 +39,7 @@ namespace psycle {
 	namespace host	{	
 
 		class Configuration;
+		class AudioDriver;
 
 		class AudioConfigDlg : public NWindow {
 		public:
@@ -42,15 +48,51 @@ namespace psycle {
 				~AudioConfigDlg();
 
 				virtual int onClose();
+				virtual void setVisible( bool on );
 
 		private:
 
-				NListBox* driverLbx;
-				Configuration* config_;
-				NObjectInspector* objInspector_;
+				NTabBook* tabBook_;
+				NPanel* audioPage_;
+				NPanel* midiPage_;
 
-				void initDriverBox();
-				void onItemSelected(NItemEvent* ev);
+				NGroupBox* driverBox_;
+				NComboBox* driverCbx_; // contains the drivers
+				NButton* restartBtn_; // re/starts the driver
+
+				NButton* cancelBtn_;
+				NButton* okBtn_;
+
+				NLabel* audioHeaderLbl_;
+				NLabel* audioDescriptionLbl_;
+
+				NNoteBook* noteBook_; // contains different pages for drivers
+				NPanel* jackPage_; // special page for jack
+				NPanel* esdPage_;  // special page for esound
+				NPanel* generalPage_;   // general page for drivers to set bit/rate etc ..
+				NEdit* deviceEdt_;
+				NComboBox* sampleRateCbx_;
+				NComboBox* bitDepthCbx_;
+				NComboBox* channelModeCbx_;
+
+				Configuration* config_;
+				AudioDriver* selectedDriver_;
+
+				void init();
+				void initAudioDriverBox();
+				void initDriverList();
+				void initJackPage();
+				void initEsdPage();
+				void initGeneralPage();
+
+				void updateGeneralPage();
+
+				void onDriverSelected( NItemEvent* ev );
+				void onRestartDriver( NButtonEvent* ev );
+
+				void onOkBtn( NButtonEvent* ev );
+				void onCancelBtn( NButtonEvent* ev );
+
 
 		};
 

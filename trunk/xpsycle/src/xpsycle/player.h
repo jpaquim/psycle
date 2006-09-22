@@ -35,6 +35,7 @@ namespace psycle
 		// Singleton pattern end
 
 			void setDriver(  const AudioDriver & driver );
+			AudioDriver & driver();
 
 			Song inline & song() {
 				return *song_;

@@ -55,7 +55,7 @@ namespace psycle
 
 		AudioDriverInfo NetAudioOut::info( ) const
 		{
-			return AudioDriverInfo("netaudio");
+			return AudioDriverInfo("netaudio","nas sound system driver","not working",false);
 		}
 
 		void NetAudioOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)

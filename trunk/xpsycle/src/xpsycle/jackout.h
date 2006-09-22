@@ -74,8 +74,9 @@ namespace psycle
 			int fillBuffer( jack_nframes_t nframes );
 
 		};
-	}
-}
+
+	} // end of host namespace
+}	// end of psyclename space
 
 #endif // !defined XPSYCLE__NO_JACK
 #endif

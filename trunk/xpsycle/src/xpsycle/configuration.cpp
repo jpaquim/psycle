@@ -320,6 +320,12 @@ void Configuration::onConfigTagParse(const std::string & tagName )
 	} else
   if (tagName == "alsa") {
     device_name = NApp::config()->getAttribValue("device");
+		std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
+		if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
+			AudioDriverSettings settings = it->second->settings();
+			settings.setDeviceName( device_name );
+			it->second->setSettings( settings );
+		}		
   } else
   if (tagName == "audio") {
       std::string enableStr = NApp::config()->getAttribValue("enable");

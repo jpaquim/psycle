@@ -96,7 +96,7 @@ namespace psycle
 			}
 			setBpm( song().bpm() );
 			timeInfo_.setLinesPerBeat( song().LinesPerBeat() );
-			SampleRate( driver_->_samplesPerSec );
+			SampleRate( driver_->settings().samplesPerSec() );
 			if (autoRecord_) stopRecording();
 		}
 
@@ -389,7 +389,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				dither.Process(pR, amount);
 			}
 			int i;
-			switch( driver_->_channelmode )
+			switch( driver_->settings().channelMode() )
 			{
 				case 0: // mono mix
 					for( i = 0; i < amount; i++)
@@ -429,9 +429,9 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			if ( !song_ && !driver_ ) return;
 
 			int channels = 2;
-			if ( driver_->_channelmode != 3 ) channels = 1;
+			if ( driver_->settings().channelMode() != 3 ) channels = 1;
 
-			if(_outputWaveFile.OpenForWrite(fileName().c_str(), driver_->_samplesPerSec, driver_->_bitDepth, channels ) == DDC_SUCCESS)
+			if(_outputWaveFile.OpenForWrite(fileName().c_str(), driver_->settings().samplesPerSec(), driver_->settings().bitDepth(), channels ) == DDC_SUCCESS)
 				recording_ = true;
 			else
 				recording_ = false;
@@ -471,7 +471,11 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				if (driver_) delete driver_;
 				driver_ = new AudioDriver();
 			}
-				SampleRate(driver_->_samplesPerSec);
+				SampleRate(driver_->settings().samplesPerSec());
+		}
+
+		AudioDriver & Player::driver() {
+			return *driver_;
 		}
 
 		void psycle::host::Player::lock( )

@@ -20,68 +20,108 @@
 #ifndef AUDIODRIVER_H
 #define AUDIODRIVER_H
 
-#include <ngrs/nobject.h>
+#include <string>
 
 /**
 @author Stefan
 */
 
-namespace psycle { namespace host {
+namespace psycle 
+{ 
+	namespace host 
+	{
 
-class AudioDriverInfo {
-public:
+		// typedef for work call back
+		typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
 
-		AudioDriverInfo( const std::string & name ) {
-			name_ = name;
-		}
-
-    const std::string & name() {
-			return name_;
-		}
-
-private:
-
-		std::string name_;
+		// class provides some textinfo about the dirver
+		class AudioDriverInfo {
+		public:
+				AudioDriverInfo(	const std::string & name, 
+													const std::string & header,
+													const std::string & description,
+													bool show
+												);
 		
-};
+				const std::string & name();
+				const std::string & header();
+				const std::string & description();
+				bool show() const;
 
-typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
+		private:
 
-class AudioDriver : public NObject {
-public:
-    AudioDriver();
+			std::string name_;
+			std::string header_;
+			std::string description_;
+			bool show_;
 
-    ~AudioDriver();
-
-		virtual AudioDriverInfo info() const;
-
-    virtual void Reset(void) {};
-    virtual bool Enable(bool e) { return false; };
-    virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context) {};
-    virtual void Configure(void) {};
-    virtual bool Initialized(void) { return true; };
-    virtual bool Configured(void) { return true; };
-
-		virtual AudioDriver* clone()  const;
-
-		void setSamplesPerSec( int samples );
-		int samplesPerSec() const;
-
-    void setBitDepth( int depth );
-		int bitDepth() const;
-
-		void setChannelMode( int mode );
-		int channelMode() const;
-
-    int _numBlocks;
-    int _blockSize;
-    int _samplesPerSec;
-    int _channelmode;
-    int _bitDepth;
+		};
 
 
-};
+		// class that holds the info about samplerate depth etc
+		class AudioDriverSettings {
+		public :
 
-}}
+				AudioDriverSettings();
+
+				~AudioDriverSettings();
+
+				void setDeviceName( const std::string & name );
+				const std::string & deviceName() const;
+
+				void setBufferSize( int size );
+				int bufferSize() const;
+
+				void setSamplesPerSec( int samples );
+				int samplesPerSec() const;
+
+				void setChannelMode( int mode );
+				int channelMode() const;
+
+				void setBitDepth( int depth );
+				int bitDepth() const;
+
+		private:
+
+				int bufferSize_;
+	 			int samplesPerSec_;
+				int channelMode_;
+				int bitDepth_;
+
+				std::string deviceName_;
+
+		};
+
+
+		class AudioDriver {
+		public:
+				AudioDriver();
+
+				~AudioDriver();
+
+				// this clones the driver using the copy ctor
+				virtual AudioDriver* clone()  const;
+
+				// this gives you driver information
+				virtual AudioDriverInfo info() const;
+
+				virtual void Reset(void) {};
+				virtual bool Enable(bool e) { return false; };
+				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context) {};
+				virtual void Configure(void) {};
+				virtual bool Initialized(void) { return true; };
+				virtual bool Configured(void) { return true; };
+
+				virtual void setSettings( const AudioDriverSettings & settings );
+				const AudioDriverSettings & settings();
+		
+		private:
+
+				AudioDriverSettings settings_; // holds the sampleRate/ bitRate etc
+
+		};
+
+	} // end of host namespace
+} // end of psycle namespace
 
 #endif

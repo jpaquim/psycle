@@ -59,7 +59,7 @@ namespace psycle
 
 		AudioDriverInfo ESoundOut::info( ) const
 		{
-			return AudioDriverInfo("esd");
+			return AudioDriverInfo("esd","Esound Driver","High Latency Network Driver",true);
 		}
 
 		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)
