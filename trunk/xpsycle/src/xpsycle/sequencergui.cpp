@@ -543,8 +543,6 @@ SequencerGUI::SequencerGUI()
 {
   setLayout( NAlignLayout() );
 
-  waveOut = new WaveFileOut();
-  waveOut->Initialize(Player::Instance()->Work, Player::Instance());
   Player::Instance()->recordStopped.connect(this,&SequencerGUI::onRecordStop);
   Player::Instance()->setFileName("test1.wav");
 
@@ -961,43 +959,61 @@ bool SequencerGUI::gridSnap( ) const
 
 void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
 {
-  /*if (renderBtn->text()=="Stop rendering") {
-    Global::pPlayer()->stopRecording();
-    Global::pConfig()->_pOutputDriver->Enable(false);
+  if (renderBtn->text()=="Stop rendering") {
+    Player::Instance()->stopRecording();
     onRecordStop();
     return;
   }
 
-  // stop player
-  Global::pPlayer()->Stop();
+	AudioDriver* recordDriver = 0;
+
+  	// get recordDriver from Configuration
+
+	std::map<std::string, AudioDriver*> & driverMap =  Global::pConfig()->driverMap();
+	std::map<std::string, AudioDriver*>::iterator it = driverMap.find( "wavefileout" );
+	if ( it != driverMap.end() ) {
+				recordDriver = it->second;
+	} else {
+		return;
+	}
+	
+	// stop player
+  Player::Instance()->Stop();
+
   // disable driver
-  Global::pConfig()->_pOutputDriver->Enable(false);
-  oldDriver = Global::pConfig()->_pOutputDriver;
-  Global::pConfig()->_pOutputDriver = waveOut; // swap driver
+	Player::Instance()->driver().Enable( false );
 
-  // start new driver
-  waveOut->Enable(true);
+	// save oldDriver
+	oldDriver = Player::Instance()->driver();		
 
+	// setRecordDriver to Player
+  
+	Player::Instance()->setDriver( *recordDriver );
+
+	std::cout << "after setting" << std::endl;
+	// change btn text
   renderBtn->setText("Stop rendering");
   toolBar_->resize();
   toolBar_->repaint();
 
-  Global::pPlayer()->setAutoRecording(true);
-  Global::pPlayer()->Start(0);*/
+	std::cout << "recording" << std::endl;
+  Player::Instance()->setAutoRecording(true);
+	std::cout << "start" << std::endl;
+  Player::Instance()->Start(0);
+	std::cout << "done" << std::endl;
 }
 
 void SequencerGUI::onRecordStop( )
 {
-  /*Global::pPlayer()->setAutoRecording(false);
-  Global::pConfig()->_pOutputDriver = oldDriver;
-
-  if (oldDriver) {
-    Global::pConfig()->_pOutputDriver->Enable(true);
-  }
+	std::cout << "record stop" << std::endl;
+	Player::Instance()->setAutoRecording( false );
+	Player::Instance()->setDriver( oldDriver );
 
   renderBtn->setText("Render As Wave");
-  toolBar_->resize();
-  toolBar_->repaint();*/
+	std::cout << "record end" << std::endl;
+ /* toolBar_->resize();
+  toolBar_->repaint();
+	std::cout << "after repaint" << std::endl;*/
 }
 
 void SequencerGUI::onAddLoop(NButtonEvent* ev) {

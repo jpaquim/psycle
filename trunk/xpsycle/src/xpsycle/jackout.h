@@ -57,6 +57,7 @@ namespace psycle
 			bool _initialized;
 			void* _callbackContext;
 			AUDIODRIVERWORKFN _pCallback;
+			bool running_;
 
 			// jack variables
 			jack_port_t *output_port_1;
