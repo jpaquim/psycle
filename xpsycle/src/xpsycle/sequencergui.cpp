@@ -543,7 +543,6 @@ SequencerGUI::SequencerGUI()
 {
   setLayout( NAlignLayout() );
 
-  Player::Instance()->recordStopped.connect(this,&SequencerGUI::onRecordStop);
   Player::Instance()->setFileName("test1.wav");
 
   counter = 0;
@@ -637,6 +636,10 @@ SequencerGUI::SequencerGUI()
   patternSequence_ = 0;
 
 	updateSkin();
+
+	
+	recStatusTimer.setIntervalTime(100);
+  recStatusTimer.timerEvent.connect(this,&SequencerGUI::onRecordingTimer);
 }
 
 
@@ -961,7 +964,7 @@ void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
 {
   if (renderBtn->text()=="Stop rendering") {
     Player::Instance()->stopRecording();
-    onRecordStop();
+    onRecordingTimer();
     return;
   }
 
@@ -990,30 +993,28 @@ void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
   
 	Player::Instance()->setDriver( *recordDriver );
 
-	std::cout << "after setting" << std::endl;
 	// change btn text
   renderBtn->setText("Stop rendering");
   toolBar_->resize();
   toolBar_->repaint();
 
-	std::cout << "recording" << std::endl;
   Player::Instance()->setAutoRecording(true);
-	std::cout << "start" << std::endl;
+	
   Player::Instance()->Start(0);
-	std::cout << "done" << std::endl;
+
+	recStatusTimer.enableTimer();
 }
 
-void SequencerGUI::onRecordStop( )
-{
-	std::cout << "record stop" << std::endl;
-	Player::Instance()->setAutoRecording( false );
-	Player::Instance()->setDriver( oldDriver );
 
-  renderBtn->setText("Render As Wave");
-	std::cout << "record end" << std::endl;
- /* toolBar_->resize();
-  toolBar_->repaint();
-	std::cout << "after repaint" << std::endl;*/
+void SequencerGUI::onRecordingTimer( )
+{
+  if ( !Player::Instance()->recording() ) {
+	  Player::Instance()->setDriver( oldDriver );	
+		renderBtn->setText("Render As Wave");
+		toolBar_->resize();
+  	toolBar_->repaint();
+		recStatusTimer.disableTimer();
+	}
 }
 
 void SequencerGUI::onAddLoop(NButtonEvent* ev) {
@@ -1081,6 +1082,8 @@ void SequencerLoopItem::resize() {
 }
 
 }}
+
+
 
 
 

@@ -54,11 +54,10 @@ namespace psycle
 			void setFileName( const std::string & fileName);
 			const std::string fileName() const;
 
-			sigslot::signal0<> recordStopped;
-
 			void setAutoRecording( bool on );
 			void startRecording( );
 			void stopRecording( );
+			bool recording() const;
 
 			const PlayerTimeInfo & timeInfo() const;
 
