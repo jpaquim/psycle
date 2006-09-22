@@ -256,6 +256,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 		float * Player::Work(int numSamples)
 		{
+
 			if ( !song_ ) return _pBuffer;
 
 			if ( lock_ ) return _pBuffer;
@@ -421,7 +422,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		}
 
 		void Player::setAutoRecording( bool on ) {
-			autoRecord_ = true;
+			autoRecord_ = on;
 		}
 
 		void Player::startRecording( ) {
@@ -440,9 +441,12 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		void Player::stopRecording( ) {
 			if (recording_) {
 				_outputWaveFile.Close();
-				recordStopped.emit();
+				recording_ = false;
 			}
-			recording_ = false;
+		}
+
+		bool Player::recording() const {
+			return recording_;
 		}
 
 		void Player::setDriver(  const AudioDriver & driver ) {

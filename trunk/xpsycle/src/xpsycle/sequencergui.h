@@ -240,6 +240,7 @@ private:
 
     int counter;
     int beatPxLength_;
+		NTimer recStatusTimer;
 
     NCheckBox* snapToGridCheck_;
     SequencerBeatLineal* beatLineal_;
@@ -247,6 +248,7 @@ private:
     SequencerLine* lastLine;
     std::vector<SequencerItem*> selectedItems_;
     PatternSequence* patternSequence_;
+		std::vector<SequencerLine*> lines;
 
     NScrollBar* hBar;
     NScrollBar* vBar;
@@ -275,9 +277,8 @@ private:
     void onVScrollBar( NScrollBar* sender );
 
     void onRenderAsWave(NButtonEvent* ev);
-    void onRecordStop();
+		void onRecordingTimer();
 
-    std::vector<SequencerLine*> lines;
 };
 
 }}

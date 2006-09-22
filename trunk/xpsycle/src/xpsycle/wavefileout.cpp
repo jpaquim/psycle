@@ -26,6 +26,9 @@ namespace psycle
 	namespace host
 	{
 
+		volatile int WaveFileOut::kill_thread = 0;
+		volatile int WaveFileOut::threadOpen = 0;
+
 		WaveFileOut::WaveFileOut()
 			: AudioDriver()
 		{
@@ -77,7 +80,7 @@ namespace psycle
 				kill_thread = 1;
 				threadStarted = false;
 				while ( threadOpen ) {
-					usleep(500); // give thread time to close
+					usleep(10); // give thread time to close
 				}
 			}
 			return threadStarted;
@@ -92,12 +95,11 @@ namespace psycle
 		void WaveFileOut::writeBuffer( )
 		{
 			threadOpen = 1;
-
 			int count = 441;
 
 			while(!(kill_thread))
 			{
-				usleep(100); // give cpu time to breath
+				usleep(50); // give cpu time to breath, and not too much :)
 				float const * input(_pCallback(_callbackContext, count));
 			}
 

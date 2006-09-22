@@ -61,8 +61,8 @@ namespace psycle
 				int iret1;				
 				pthread_t threadid;
 
-			  volatile int kill_thread;
-				volatile int threadOpen;
+			  static volatile int kill_thread;
+				static volatile int threadOpen;
 				bool _initialized;
 				
 				static int audioOutThread(void * ptr);
