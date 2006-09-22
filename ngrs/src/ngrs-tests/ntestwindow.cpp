@@ -62,6 +62,7 @@
 #include <ngrs/nxmlparser.h>
 #include <ngrs/nsplitbar.h>
 #include <ngrs/nscrollbar.h>
+#include <ngrs/ngroupbox.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -78,10 +79,7 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-  NLabel* label = new NLabel("hallo");
-
-    label->setFont(NFont("Arial",8,nMedium));
-  pane()->add( label , nAlTop);
+	testGroupBox();
 
 /*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();
@@ -616,6 +614,19 @@ void NTestWindow::onMousePress( int x, int y, int button )
      line->setMoveable( nMvPolygonPicker );
    pane()->add(line);
   line->setMoveFocus(0);*/
+}
+
+void NTestWindow::testObjectInspector( )
+{
+  NObjectInspector* ins = new NObjectInspector();
+    ins->setControlObject( this );
+  pane()->add( ins, nAlClient );
+}
+
+void NTestWindow::testGroupBox( )
+{
+  NGroupBox* box = new NGroupBox();
+	pane()->add( box, nAlClient );
 }
 
 

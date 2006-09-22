@@ -81,6 +81,7 @@ private:
     void testBorderLayout();
     void testFlowLayout();
     void testFrameBorder();
+		void testGroupBox();
     void testLine();
     void testMenu();
     void testEdit();
@@ -91,6 +92,7 @@ private:
     void testMsgBox();
     void testTimerButton();
     void testScrollBar();
+		void testObjectInspector();
 
     void onOpen(NButtonEvent* ev);
     void onSliderPosChanged(double v);
@@ -102,6 +104,8 @@ private:
 
 		void onSelection();
     void onScrollPosChange( NScrollBar* bar );
+
+
 
     virtual void onMousePress( int x, int y, int button);
 };

@@ -281,8 +281,8 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
     }
   }
 
-  int ymax = 0;
-
+	int ymax = 0;
+	
   // determine, which layout structure is there and compute the preferredHeight of the layout
 
   if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { // 0000
@@ -334,7 +334,7 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
     ymax = std::max( top + bottom + client, std::max( left, right));
   }
 
-  return vgap_ + ymax;
+  return 2 * vgap_ + ymax;
 }
 
 void NAlignLayout::setHgap( int hgap )
