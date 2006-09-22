@@ -37,11 +37,7 @@ namespace psycle
 		// class provides some textinfo about the dirver
 		class AudioDriverInfo {
 		public:
-				AudioDriverInfo(	const std::string & name, 
-													const std::string & header,
-													const std::string & description,
-													bool show
-												);
+				AudioDriverInfo(	const std::string & name, const std::string & header,const std::string & description,bool show );
 		
 				const std::string & name();
 				const std::string & header();
