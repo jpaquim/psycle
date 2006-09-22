@@ -135,7 +135,7 @@ public:
 
     inline int GetSamplesPerSec() const throw()
     {
-      return _pOutputDriver->_samplesPerSec;
+      return _pOutputDriver->settings().samplesPerSec();
     }
 
     class midi_type

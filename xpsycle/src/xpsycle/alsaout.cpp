@@ -39,6 +39,7 @@ AlsaOut::AlsaOut( ) :
     _initialized(false)
 //   , _timerActive(false)
 {
+	setDefault();
 }
 
 AlsaOut::~AlsaOut()
@@ -52,7 +53,7 @@ AlsaOut * AlsaOut::clone( ) const
 
 AudioDriverInfo AlsaOut::info( ) const
 {
-	return AudioDriverInfo("alsa");
+  return AudioDriverInfo("alsa","Alsa Driver","Low Latency audio driver",true);
 }
 
 void AlsaOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
@@ -61,7 +62,6 @@ void AlsaOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
   _callbackContext = context;
   _initialized = true;
   running = false;
-  setDefault();
   audioStart();
 }
 
@@ -95,8 +95,7 @@ void AlsaOut::configure( )
 
 void AlsaOut::setDefault( )
 {
-    device = psycle::host::Global::configuration().device_name.c_str();  // playback device
-    rate = 44100; // stream rate
+		rate = 44100; // stream rate
     format = SND_PCM_FORMAT_S16; // sample format
     channels = 2; // count of channels
     buffer_time = 80000; // ring buffer length in us
@@ -106,6 +105,7 @@ void AlsaOut::setDefault( )
     period_size;
     output = NULL;
 //    AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
+
 }
 
 int AlsaOut::audioStop( )
@@ -133,13 +133,13 @@ int AlsaOut::audioStart(  )
       return 0;
   }
 
-  printf("Playback device is %s\n", device);
+  printf("Playback device is %s\n", settings().deviceName() );
   printf("Stream parameters are %iHz, %s, %i channels\n", rate, snd_pcm_format_name(format), channels);
   printf("Using transfer method: %s\n", "write");
 
 	std::cout << "step1" << std::endl;
 
-  if ((err = snd_pcm_open(&handle, device, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+  if ((err = snd_pcm_open(&handle, settings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
     printf("Playback open error: %s\n", snd_strerror(err));
     return 0;
   }

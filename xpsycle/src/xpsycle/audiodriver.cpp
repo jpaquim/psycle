@@ -21,76 +21,119 @@
 
 #include <ngrs/nproperty.h>
 
-namespace psycle { namespace host {
-
-
-AudioDriver::AudioDriver() : 
-    _samplesPerSec(44100)
-  , _bitDepth(16)
-  , _channelmode(3)
-  , _numBlocks(0)
-  , _blockSize(0)
+namespace psycle
 {
-	properties()->bind("Samples/sec", *this, &AudioDriver::samplesPerSec,  &AudioDriver::setSamplesPerSec);
-	properties()->publish("Samples/sec");
-  properties()->bind("Bitdepth", *this, &AudioDriver::bitDepth,  &AudioDriver::setBitDepth);
-	properties()->publish("Bitdepth");
-	properties()->bind("ChannelMode", *this, &AudioDriver::channelMode,  &AudioDriver::setChannelMode);
-	properties()->publish("ChannelMode");
-}
+	namespace host
+	{
 
-AudioDriver * AudioDriver::clone( ) const
-{
-  return new AudioDriver(*this);
-}
+		AudioDriverInfo::AudioDriverInfo( const std::string & name, 
+										 const std::string & header,
+										 const std::string & description,
+										 bool show ) : 
+					name_( name ), header_( header ), description_( description ), show_( show )
+		{
+		}
 
+		const std::string & AudioDriverInfo::name() {
+			return name_;
+		}
 
-void AudioDriver::setSamplesPerSec( int samples )
-{
-  _samplesPerSec = samples;
-}
+		const std::string & AudioDriverInfo::header() {
+			return header_;
+		}
 
-int AudioDriver::samplesPerSec( ) const
-{
-  return _samplesPerSec;
-}
+		const std::string & AudioDriverInfo::description() {
+			return description_;
+		}
 
-void AudioDriver::setBitDepth( int depth )
-{
-  _bitDepth = depth;
-}
-
-void AudioDriver::setChannelMode( int mode )
-{
-  mode = _channelmode;
-}
-
-int AudioDriver::channelMode( ) const
-{
-  return _channelmode;
-}
-
-int AudioDriver::bitDepth( ) const
-{
-	return _bitDepth;
-}
-
-AudioDriver::~AudioDriver()
-{
-}
-
-AudioDriverInfo AudioDriver::info( ) const
-{
-  return AudioDriverInfo("silent");
-}
-
-}}
+		bool AudioDriverInfo::show() const {
+			return show_;
+		}
 
 
+		///
+		/// audio driver setting class
+		///
+		AudioDriverSettings::AudioDriverSettings() :
+			samplesPerSec_(44100),
+			bitDepth_(16),
+			channelMode_(3),
+			bufferSize_(2048)
+		{
+		}
+
+		AudioDriverSettings::~AudioDriverSettings() {
+		}
+
+		void AudioDriverSettings::setDeviceName( const std::string & name ) {
+			deviceName_ = name;
+		}
+
+		const std::string & AudioDriverSettings::deviceName() const {
+			return deviceName_;
+		}
+
+		void AudioDriverSettings::setBufferSize( int size ) {
+			bufferSize_ = size;
+		}
+
+		int AudioDriverSettings::bufferSize() const {
+			return bufferSize_;
+		}
+
+		void AudioDriverSettings::setSamplesPerSec( int samples ) {
+			samplesPerSec_ = samples;
+		}
+
+		int AudioDriverSettings::samplesPerSec() const {
+			return samplesPerSec_;
+		}
+
+		void AudioDriverSettings::setChannelMode( int mode ) {
+			channelMode_ = mode;
+		}
+
+		int AudioDriverSettings::channelMode() const {
+			return channelMode_;
+		}
+
+		void AudioDriverSettings::setBitDepth( int depth ) {
+			bitDepth_ = depth;
+		}
+
+		int AudioDriverSettings::bitDepth() const {
+			return bitDepth_;
+		}
 
 
+		///
+		/// the AudioDriver main class
+		///
+		AudioDriver::AudioDriver()  
+		{
+		}
 
+		AudioDriver::~AudioDriver()
+		{
+		}
 
+		AudioDriver * AudioDriver::clone( ) const
+		{
+			return new AudioDriver(*this);
+		}
 
+		void AudioDriver::setSettings( const AudioDriverSettings & settings ) {
+			settings_ = settings;
+		}
 
+		const AudioDriverSettings & AudioDriver::settings() {
+			return settings_;
+		}
 
+		AudioDriverInfo AudioDriver::info( ) const
+		{
+			return AudioDriverInfo("silent","NullDriver","no sound output",true);
+		}
+
+	} // end of host namespace
+} // end of psycle namespace

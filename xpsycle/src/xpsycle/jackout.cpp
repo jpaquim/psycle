@@ -43,7 +43,7 @@ namespace psycle
 
 		AudioDriverInfo JackOut::info( ) const
 		{
-			return AudioDriverInfo("jack");
+			return AudioDriverInfo("jack","Jack Audio Connection Kit Driver","Low Latency audio driver",true);
 		}
 		
 		JackOut * JackOut::clone( ) const
@@ -119,8 +119,10 @@ namespace psycle
 				return 0;
  			}
 
-			setSamplesPerSec( jack_get_sample_rate (client) );
-			setBitDepth( 16 ); // hardcoded so far
+			AudioDriverSettings settings_ = settings();
+				settings_.setSamplesPerSec( jack_get_sample_rate (client) );
+				settings_.setBitDepth( 16 ); // hardcoded so far
+			setSettings( settings_ );
 
 			if ((ports = jack_get_ports (client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
 				std::cout << "Cannot find any physical playback ports" << std::endl;
@@ -171,11 +173,8 @@ namespace psycle
 			}
 			return 0;
 		}
-	}
-}
 
-
-
-
+	} // end of host namespace
+}	// end of psycle namespace 
 
 #endif // !defined XPSYCLE__NO_JACK

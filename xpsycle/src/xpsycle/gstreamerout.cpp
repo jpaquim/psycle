@@ -10,7 +10,7 @@ namespace psycle
 
 		AudioDriverInfo GStreamerOut::info( ) const
 		{
-			return AudioDriverInfo("gstreamer");
+			return AudioDriverInfo("gstreamer","GStreamer Driver","Currently not implemented",false);
 		}
 
 		GStreamerOut * GStreamerOut::clone( ) const

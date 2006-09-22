@@ -47,7 +47,7 @@ namespace psycle
 
 		AudioDriverInfo WaveFileOut::info( ) const
 		{
-			return AudioDriverInfo("wavefile");
+			return AudioDriverInfo("wavefileout","Wave to File Driver","Recording a wav to a file",false);
 		}
 
 		void WaveFileOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )

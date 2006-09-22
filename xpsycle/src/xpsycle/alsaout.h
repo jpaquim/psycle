@@ -76,7 +76,6 @@ private:
 
     public :
 
-    const char *device;             // playback device
     unsigned int rate;        // stream rate
     snd_pcm_format_t format;  // sample format
     unsigned int channels;    // count of channels
