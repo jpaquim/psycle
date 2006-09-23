@@ -25,6 +25,8 @@
 #include "jackout.h"
 #include "gstreamerout.h"
 #include "esoundout.h"
+#include "microsoft_direct_sound_out.h"
+#include "netaudioout.h"
 #include "wavefileout.h"
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
@@ -149,11 +151,17 @@ void Configuration::setSkinDefaults( )
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif		
-		/*#if !defined XPSYCLE__NO_NETAUDIO
+		#if !defined XPSYCLE__NO_NETAUDIO
 			driver = new NetAudioOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
-		#endif*/
+		#endif
+		#if !defined XPSYCLE__NO_MICROSOFT_DIRECT_SOUND
+			driver = new MicrosoftDirectSoundOut;
+			std::cout << "registered:" <<  driver->info().name() << std::endl;
+			driverMap_[ driver->info().name() ] = driver;
+		#endif
+
 	}
 
 	setDriverByName("silent");

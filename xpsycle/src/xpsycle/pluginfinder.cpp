@@ -187,6 +187,7 @@ namespace psycle
 		}
 
 		void PluginFinder::scanLadspa() {
+#if !defined XPSYCLE__NO_LADSPA
 			///\todo this just uses the first path in getenv
 			const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
 			std::cout << "scanning:" << pcLADSPAPath << std::endl;
@@ -222,7 +223,8 @@ namespace psycle
 						(*this)[key] = info;
 					}
 				}
-			}			
+			}
+#endif // XPSYCLE__NO_LADSPA
 		}
 
 		void PluginFinder::scanNatives() {

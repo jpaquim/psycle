@@ -18,8 +18,8 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "newmachine.h"
-#include "plugin.h"
-#include "ladspamachine.h"
+//#include "plugin.h"
+//#include "ladspamachine.h"
 #include "configuration.h"
 #include "newmachine.h"
 #include <ngrs/nborderlayout.h>
