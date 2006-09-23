@@ -62,6 +62,8 @@ namespace psycle
 
 				~AudioDriverSettings();
 
+				int GetSampleSize() const { return channelMode_ == 3 ? bitDepth_ / 4 : bitDepth_ / 8; }
+				
 				void setDeviceName( const std::string & name );
 				const std::string & deviceName() const;
 

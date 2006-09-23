@@ -155,18 +155,19 @@ namespace psycle
 						}
 					}
 					break;
-				case MACH_VST:
-        break;
+#if !defined XPSYCLE__NO_LADSPA
 				case MACH_LADSPA:
-				{
+					{
 						LADSPAMachine* plugin = new LADSPAMachine(index,this);
 						machine = plugin;
 						plugin->loadDll(plugin_name, pluginIndex);
-				}
-				break;
+					}
+					break;
+#endif // XPSYCLE__NO_LADSPA
+/*				case MACH_VST:
 				case MACH_VSTFX:
 					{
-/*						vst::plugin * plugin(0);
+						vst::plugin * plugin(0);
 						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
 						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
 						if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
@@ -189,11 +190,14 @@ namespace psycle
 							delete plugin;
 							return false;
 						}
-						break;*/
+						break;
 					}
+*/
 				default:
 //					loggers::warning("failed to create requested machine type");
-					return false;
+//					return false;
+					machine = new Dummy(index, this);
+					break;
 			}
 
 			if(index < 0)
@@ -1016,56 +1020,56 @@ namespace psycle
 			return true;
 		}
 
-void Song::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
-{
-		///\todo reowkr for multitracking
-/*  bool bEditMode = true;
-
-	// UNDO CODE MIDI PATTERN TWEAK
-	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
-	//if(viewMode == VMPattern && bEditMode)
-	{ 
-		// write effect
-		const int ps = playOrder[patternPosition];
-		int line = Global::pPlayer()->_lineCounter;
-		unsigned char * toffset;
-		if (Global::pPlayer()->_playing&&Global::pConfig()->_followSong)
+		void Song::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
 		{
-			if(_trackArmedCount)
-			{
-//				SelectNextTrack();
-			}
-			else if (!Global::pConfig()->_RecordUnarmed)
-			{	
-				return;
-			}
-			toffset = _ptrack(ps,track)+(line*MULTIPLY);
-		}
-		else
-		{
-			toffset = _ptrackline(ps, track, line);
-		}
+				///\todo reowkr for multitracking
+		/*  bool bEditMode = true;
 
-		// build entry
-		PatternEntry *entry = (PatternEntry*) toffset;
-		if (entry->_note >= 120)
-		{
-			if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
-			{
-				//AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-				entry->_mach = machine;
-				entry->_cmd = (value>>8)&255;
-				entry->_parameter = value&255;
-				entry->_inst = command;
-				entry->_note = cdefTweakS;
+			// UNDO CODE MIDI PATTERN TWEAK
+			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+			//if(viewMode == VMPattern && bEditMode)
+			{ 
+				// write effect
+				const int ps = playOrder[patternPosition];
+				int line = Global::pPlayer()->_lineCounter;
+				unsigned char * toffset;
+				if (Global::pPlayer()->_playing&&Global::pConfig()->_followSong)
+				{
+					if(_trackArmedCount)
+					{
+		//				SelectNextTrack();
+					}
+					else if (!Global::pConfig()->_RecordUnarmed)
+					{	
+						return;
+					}
+					toffset = _ptrack(ps,track)+(line*MULTIPLY);
+				}
+				else
+				{
+					toffset = _ptrackline(ps, track, line);
+				}
 
-				//NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-				//Repaint(DMData);
-			}
+				// build entry
+				PatternEntry *entry = (PatternEntry*) toffset;
+				if (entry->_note >= 120)
+				{
+					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+					{
+						//AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						entry->_mach = machine;
+						entry->_cmd = (value>>8)&255;
+						entry->_parameter = value&255;
+						entry->_inst = command;
+						entry->_note = cdefTweakS;
+
+						//NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+						//Repaint(DMData);
+					}
+				}
+			}*/
 		}
-	}*/
-}
 
 		PatternSequence * Song::patternSequence( )
 		{

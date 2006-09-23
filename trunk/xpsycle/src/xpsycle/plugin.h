@@ -40,9 +40,9 @@ class PluginFxCallback : public CFxCallback
     //HWND hWnd;
     inline virtual void MessBox(char* ptxt,char *caption,unsigned int type) { //MessageBox(hWnd,ptxt,caption,type); 
     }
-    inline virtual int GetTickLength() { return Player::Instance()->timeInfo().samplesPerRow(); }
+    inline virtual int GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerRow()); }
     inline virtual int GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
-    inline virtual int GetBPM() { return Player::Instance()->timeInfo().bpm(); }
+    inline virtual int GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
     inline virtual int GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
 };
 
