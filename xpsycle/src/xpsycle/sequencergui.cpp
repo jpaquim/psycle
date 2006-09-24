@@ -242,7 +242,6 @@ SequencerItem::SequencerItem( SequencerGUI* seqGui )
      properties()->bind("transpose", *this, &SequencerItem::transpose, &SequencerItem::setTranspose);
      properties()->publish("transpose");
   }
-
 }
 
 SequencerItem::~ SequencerItem( )
@@ -694,7 +693,7 @@ void SequencerGUI::onInsertTrack( NButtonEvent * ev )
     SequencerLine* line = new SequencerLine( this );
     line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
     lines.push_back(line);
-    line->setSequenceLine( patternSequence_->createNewLine() );
+    line->setSequenceLine( patternSequence_->insertNewLine( selectedLine_->sequenceLine()) );
     line->click.connect(this, &SequencerGUI::onSequencerLineClick);
 
     int index = selectedLine_->zOrder();
@@ -729,7 +728,7 @@ void SequencerGUI::onMoveDownTrack( NButtonEvent * ev )
 {
   if (selectedLine_) {
      int i = selectedLine_->zOrder();
-     if ( i < componentZOrderSize() - 1 ) {
+     if ( i < componentZOrderSize() ) {
        scrollArea_->erase(selectedLine_);
        scrollArea_->insert(selectedLine_,i+1);
        patternSequence_->moveDownLine(selectedLine_->sequenceLine());
@@ -1094,9 +1093,6 @@ void SequencerLoopItem::resize() {
 }
 
 }}
-
-
-
 
 
 
