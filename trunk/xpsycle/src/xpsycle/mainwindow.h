@@ -75,6 +75,8 @@ private:
 
 		NTimer timer; // we poll playpos infos here to avoid thread sync with the audio thread
 
+		bool oldPlayPos_;
+
     void initSongs();
     ChildView* addChildView();
 

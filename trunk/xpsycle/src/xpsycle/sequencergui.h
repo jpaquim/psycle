@@ -190,11 +190,27 @@ class Area : public NPanel {
 		NLine* vLine();
     NLine* vLine() const;
 
+		NLine* pLine(); // playpos line
+    NLine* pLine() const;
+
+    bool lockPlayLine() const;
+
+		virtual void onMove(const NMoveEvent & moveEvent);
+		virtual void onMoveEnd(const NMoveEvent & moveEvent);
+		virtual void onMoveStart(const NMoveEvent & moveEvent);
+
   private:
 
      SequencerGUI* sView;
 
      NLine* vLine_;
+     NLine* pLine_;
+     NLine* playPosLine_;
+
+     double playPos_;
+     double newBeatPos_;
+
+     bool lockPlayLine_;
 
 };
 
@@ -233,6 +249,8 @@ public:
     bool gridSnap() const;
 
 		void updateSkin();
+
+		void updatePlayPos();
 
 private:
 

@@ -53,7 +53,7 @@ namespace psycle {
 			mem +="<info name='natti' year='2006' copyright='none' />";
 
 			mem +="<sequencerview>";
-			mem +="<pane bgcolor='34:32:35' textcolor='199:199:199' gridcolor='50:51:49' movelinecolor='239:175:140'/>";
+			mem +="<pane bgcolor='34:32:35' textcolor='199:199:199' gridcolor='50:51:49' movelinecolor='239:175:140' playlinecolor='199:199:199' />";
 			mem +="</sequencerview>";
 
 			mem +="<patternview>";
@@ -270,6 +270,10 @@ namespace psycle {
 				attrib = parser.getAttribValue("movelinecolor");
 				if ( attrib != "" ) {
 					sequencerview_info_.pane_move_line_color = NColor( attrib );
+				}
+				attrib = parser.getAttribValue("playlinecolor");
+				if ( attrib != "" ) {
+					sequencerview_info_.pane_play_line_color = NColor( attrib );
 				}
 			}
 			if ( tagName == "pane" && parseMachineView ) {
