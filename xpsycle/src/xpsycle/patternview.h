@@ -170,6 +170,9 @@ class PatternView : public NPanel
       void transposeBlock(int trp);
       void scaleBlock(float factor);
 
+			void setSharpMode( bool on );
+			bool sharpMode() const;
+
       virtual void resize();
 
 		protected:
@@ -177,14 +180,16 @@ class PatternView : public NPanel
 			virtual int doSel(const PatCursor & p);
 			virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
+
     private:
 
       NPopupMenu* editPopup_;
       PatDlg* patDlg;
-      PatternView* pView;
-             
+      PatternView* pView;      
+       
       bool isBlockCopied;
       NSize blockLastOrigin;
+			bool sharpMode_;
 
       void clearCursorPos();
 
@@ -388,6 +393,7 @@ private:
   NSplitBar* splitBar;
   NPanel* tweakGroup;
 	NPanel* lineHeaderLabel;
+	NButton* sharpBtn_;
 
 	PatternViewColorInfo colorInfo_;
 
@@ -412,6 +418,7 @@ private:
   void onOctaveChange(NItemEvent* ev);
   void onTrackChange(NItemEvent* ev);
   void onSideChange( NButtonEvent* ev );
+	void onToggleSharpMode(NButtonEvent* ev);
 			
 	void checkUpScroll( const PatCursor & cursor );
 	void checkDownScroll( const PatCursor & cursor );

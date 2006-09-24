@@ -70,8 +70,6 @@ namespace psycle {
 
 			private:
 
-				NXmlParser parser;
-
 				std::fstream _stream;
 				void onDetectFilterTag(const NXmlParser & parser, const std::string & tagName);
 				void onTagParse(const NXmlParser & parser, const std::string & tagName);
@@ -82,6 +80,8 @@ namespace psycle {
 				SequenceLine* lastSeqLine;
 				Machine* lastMachine;
 				float lastPatternPos;
+
+				std::map<int, SinglePattern*> patMap;
 
 				Song* song_;
 

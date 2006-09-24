@@ -572,7 +572,7 @@ namespace psycle {
 
 		}
 
-		void CustomPatternView::drawData(NGraphics* g, int track, int line, int eventnr, int data, const NColor & color ) {
+		void CustomPatternView::drawData(NGraphics* g, int track, int line, int eventnr, int data, bool sharp, const NColor & color ) {
 
 			std::map<int, TrackGeometry>::const_iterator it;
 			it = trackGeometrics().lower_bound( track );
@@ -590,7 +590,7 @@ namespace psycle {
 						drawBlockData( g, xOff + eventOffset(eventnr,0), line, toHex(data,4), color );
 					break;
 					case ColumnEvent::note :					
-						drawStringData( g, xOff + eventOffset(eventnr,0), line, noteToString(data),color );
+						drawStringData( g, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),color );
 					break;
 					default: ;
 				}
@@ -1056,7 +1056,7 @@ namespace psycle {
 			return PatCursor();
 		}
 
-		std::string CustomPatternView::noteToString( int value )
+		std::string CustomPatternView::noteToString( int value, bool sharp )
 		{
 
 			switch (value) {
@@ -1070,6 +1070,7 @@ namespace psycle {
 
 			int octave = value / 12;
 
+			if (sharp)
 			switch (value % 12) {
       	case 0:   return "C-" + stringify(octave); break;
 				case 1:   return "C#" + stringify(octave); break;
@@ -1082,6 +1083,22 @@ namespace psycle {
 				case 8:   return "G#" + stringify(octave); break;
 				case 9:   return "A-" + stringify(octave); break;
 				case 10:  return "A#" + stringify(octave); break;
+				case 11:  return "B-" + stringify(octave); break;
+			}
+
+			if (!sharp)
+			switch (value % 12) {
+      	case 0:   return "C-" + stringify(octave); break;
+				case 1:   return "Db" + stringify(octave); break;
+				case 2:   return "D-" + stringify(octave); break;
+				case 3:   return "Eb" + stringify(octave); break;
+				case 4:   return "E-" + stringify(octave); break;
+				case 5:   return "F-" + stringify(octave); break;
+				case 6:   return "Gb" + stringify(octave); break;
+				case 7:   return "G-" + stringify(octave); break;
+				case 8:   return "Ab" + stringify(octave); break;
+				case 9:   return "A-" + stringify(octave); break;
+				case 10:  return "Bb" + stringify(octave); break;
 				case 11:  return "B-" + stringify(octave); break;
 			}
 			return "err";

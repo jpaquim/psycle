@@ -116,6 +116,9 @@ namespace psycle {
 
 		bool Psy4Filter::load( const std::string & fileName, Song & song )
 		{
+			NXmlParser parser;
+			patMap.clear();
+
 			song.patternSequence()->patternData()->removeAll();
 			song.patternSequence()->removeAll();
 			song.clear();
@@ -282,7 +285,7 @@ namespace psycle {
 				lastPattern->clearBars();
 				lastPattern->setBeatZoom(beatZoom);
 				int pat_id  = str_hex<int> (parser.getAttribValue("id"));
-				lastPattern->setID(pat_id);
+				patMap[pat_id] = lastPattern;
 			} else
 			if (tagName == "patline" && lastPattern) {
 				lastPatternPos = str<float> (parser.getAttribValue("pos"));
@@ -311,11 +314,13 @@ namespace psycle {
 					data.setNote( str_hex<int> (parser.getAttribValue("note")) );
 					data.setParameter( str_hex<int> (parser.getAttribValue("param")) );
 					data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
+					data.setSharp( str_hex<bool> (parser.getAttribValue("sharp")) );
 
 					(*lastPattern)[lastPatternPos][trackNumber]=data;
 			} else
 			if (tagName == "seqline") {
 				lastSeqLine = song_->patternSequence()->createNewLine();
+				std::cout << "create seqline" << std::endl;
 			} else 
 			if (tagName == "seqentry" && lastSeqLine) {
 				double pos =  str<double> (parser.getAttribValue("pos"));
@@ -323,12 +328,16 @@ namespace psycle {
 				float startPos = str<float> (parser.getAttribValue("start"));
 				float endPos = str<float> (parser.getAttribValue("end"));
 				int transpose  = str_hex<int> (parser.getAttribValue("transpose"));
-				SinglePattern* pattern = song_->patternSequence()->patternData()->findById(pat_id);
-				if (pattern) {
-					SequenceEntry* entry = lastSeqLine->createEntry(pattern, pos);
-					entry->setStartPos(startPos);
-					entry->setEndPos(endPos);
-					entry->setTranspose(transpose);
+				std::map<int, SinglePattern*>::iterator it = patMap.begin();
+				it = patMap.find( pat_id );
+				if ( it != patMap.end() ) {
+					SinglePattern* pattern = it->second; 
+					if (pattern) {
+						SequenceEntry* entry = lastSeqLine->createEntry(pattern, pos);
+						entry->setStartPos(startPos);
+						entry->setEndPos(endPos);
+						entry->setTranspose(transpose);
+					}
 				}
 			}
 		}
