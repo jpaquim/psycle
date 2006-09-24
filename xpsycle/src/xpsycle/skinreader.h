@@ -110,6 +110,7 @@ namespace psycle {
 			NColor pane_text_color;
 			NColor pane_grid_color;
 			NColor pane_move_line_color;
+			NColor pane_play_line_color;
 		};
 
 

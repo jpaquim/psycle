@@ -129,7 +129,7 @@ std::cout << "initsongs" << std::endl;
 std::cout << " updatenewsong" << std::endl;
   updateNewSong();
 
-	
+	oldPlayPos_ = 0;
 	timer.setIntervalTime(10);
   timer.enableTimer(); 
   
@@ -971,6 +971,11 @@ void MainWindow::onTimer( )
   if ( Player::Instance()->_playing) {
     SinglePattern* visiblePattern = selectedChildView_->patternView()->pattern();
 		if ( visiblePattern ) {
+			if ( ( Player::Instance()->PlayPos() - oldPlayPos_) != 0.1 ) {
+				oldPlayPos_ = Player::Instance()->PlayPos();
+				selectedChildView_->sequencerView()->updatePlayPos();				
+		  }
+
 			double entryStart = 0;
 			bool isPlayPattern = selectedSong_->patternSequence()->getPlayInfo( visiblePattern, Player::Instance()->PlayPos() , 4 , entryStart );
 			if ( isPlayPattern ) {
