@@ -58,6 +58,7 @@ public:
 
     void draw(NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender);
 
+		signal1<const NMoveEvent &> move;
 		signal1<const NMoveEvent &> moveStart;
     signal1<const NMoveEvent &> moveEnd;
 

@@ -399,7 +399,7 @@ const NMoveable & NVisualComponent::moveable( ) const
 
 void NVisualComponent::onMove( const NMoveEvent & moveEvent )
 {
-
+  move.emit(moveEvent);
 }
 
 void NVisualComponent::repaint(bool swap )
