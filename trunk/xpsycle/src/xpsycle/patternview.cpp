@@ -428,6 +428,11 @@ void PatternView::initToolBar( )
     trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
   toolBar->add(trackCombo_);
 
+  sharpBtn_ = new NButton("#");
+	sharpBtn_->clicked.connect(this,&PatternView::onToggleSharpMode);
+	toolBar->add( sharpBtn_ );
+
+
   sideBox = new NCheckBox("Tweak left/right");
      sideBox->clicked.connect(this,&PatternView::onSideChange);
   toolBar->add(sideBox);
@@ -445,6 +450,14 @@ void PatternView::onAddBar( NButtonEvent * ev )
     resize();
     repaint();
   }
+}
+
+void PatternView::onToggleSharpMode(NButtonEvent* ev) {
+	drawArea->setSharpMode( !drawArea->sharpMode() );
+	if ( drawArea->sharpMode() ) {
+  	sharpBtn_->setText("#");
+	} else
+    sharpBtn_->setText("b");
 }
 
 void PatternView::onDeleteBar(NButtonEvent* ev)
@@ -1156,7 +1169,7 @@ void PatternView::TweakGUI::drawPattern(NGraphics* g, int startLine, int endLine
 					PatternEvent event = eventIt->second;
 					int x = eventIt->first;
 					if (event.command() != 0 || event.parameter() != 0) {
-						drawData( g, x, y, 0, (event.command() << 8) | event.parameter(), textColor() );
+						drawData( g, x, y, 0, (event.command() << 8) | event.parameter(), true, textColor() );
 					}
 					lastLine = y;
 				}
@@ -1241,6 +1254,8 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatt
 	addEvent( ColumnEvent::hex4 );
 	// end of multi paraCmd
 
+	sharpMode_ = true;
+
 	setName("mainview");
 
   setDefaultVisibleEvents( 6 );
@@ -1308,6 +1323,14 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatt
 
 PatternView::PatternDraw::~ PatternDraw( )
 {
+}
+
+void PatternView::PatternDraw::setSharpMode( bool on ) {
+  sharpMode_ = !sharpMode_;
+}
+
+bool PatternView::PatternDraw::sharpMode() const {
+	return sharpMode_;
 }
 
 void PatternView::PatternDraw::resize() {
@@ -1457,12 +1480,12 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 								tColor = pView->colorInfo().sel_beat_text_color;
 					}	else tColor = stdColor;
   
-					drawData( g, x, y, 0, event->note() , tColor );
-					if (event->instrument() != 255) drawData( g, x, y, 1, event->instrument(), tColor );
-					if (event->machine() != 255) drawData( g, x, y, 2, event->machine(), tColor );
-					if (event->volume() != 255) drawData( g, x, y, 3, event->volume(), tColor );
+					drawData( g, x, y, 0, event->note() ,event->isSharp(), tColor );
+					if (event->instrument() != 255) drawData( g, x, y, 1, event->instrument(), 1, tColor );
+					if (event->machine() != 255) drawData( g, x, y, 2, event->machine(), 1, tColor );
+					if (event->volume() != 255) drawData( g, x, y, 3, event->volume(), 1, tColor );
 					if (event->command() != 0 || event->parameter() != 0) {
-						drawData( g, x, y, 4, (event->command() << 8) | event->parameter(), tColor );
+						drawData( g, x, y, 4, (event->command() << 8) | event->parameter(), 1, tColor );
 					}										
 					
 				  PatternEvent::PcmListType & pcList = event->paraCmdList();
@@ -1473,7 +1496,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 					  int command = pc.first;
 					  int parameter = pc.second;
 					  if ( command != 0 || parameter != 0) {
-					    drawData( g, x, y, 5+count, ( command << 8) | parameter , tColor );
+					    drawData( g, x, y, 5+count, ( command << 8) | parameter , 1, tColor );
 					 }
 				 }
 	      }
@@ -1802,6 +1825,7 @@ void PatternView::enterNote( const PatCursor & cursor, int note ) {
    PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
    Machine* tmac = pSong()->_pMachine[ pSong()->seqBus ];
    event.setNote( editOctave() * 12 + note );
+	 event.setSharp( drawArea->sharpMode() );
    if (tmac) event.setMachine( tmac->_macIndex );
    if (tmac && tmac->_type == MACH_SAMPLER ) {
      event.setInstrument( pSong()->instSelected );

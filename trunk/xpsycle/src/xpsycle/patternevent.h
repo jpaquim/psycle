@@ -71,6 +71,9 @@ namespace psycle
 
 			PcmListType & paraCmdList();
 
+			void setSharp( bool on );
+			bool isSharp() const;
+
 		private:
 
 			std::uint8_t _note;
@@ -79,6 +82,7 @@ namespace psycle
 			std::uint8_t _cmd;
 			std::uint8_t _parameter;
 			std::uint8_t _volume;
+			bool _sharp;
 			
 			PcmListType paraCmdList_;
 

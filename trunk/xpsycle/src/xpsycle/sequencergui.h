@@ -270,6 +270,8 @@ private:
     void onDeleteEntry(NButtonEvent* ev);
 		void onAddLoop(NButtonEvent* ev);
 
+		void onRefreshGUI(NButtonEvent* ev);
+
     void onSequencerLineClick(SequencerLine* line);
     void onSequencerItemClick(SequencerItem* item);
     void onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos);

@@ -158,6 +158,7 @@ namespace psycle
 			typedef GlobalMap::iterator GlobalIter;
 
 			SequenceLine* createNewLine();
+			
 			void removeLine(SequenceLine* line);
 			void removeAll();
 

@@ -596,6 +596,11 @@ SequencerGUI::SequencerGUI()
 		toolBar_->add(new NToolBarSeparator());
 
     toolBar_->add( renderBtn = new NButton("Render As Wave"))->clicked.connect(this,&SequencerGUI::onRenderAsWave);
+	
+    btn = new NButton("refresh");
+    btn->setHint("Refresh gui ");
+    toolBar_->add( btn )->clicked.connect(this,&SequencerGUI::onRefreshGUI);
+
 
   add(toolBar_, nAlTop);
 
@@ -910,6 +915,7 @@ void SequencerGUI::update( )
   for ( ; it < patternSequence()->end(); it++) {
     SequenceLine* seqLine = *it;
     SequencerLine* line = new SequencerLine( this );
+		std::cout << "lineitems : " << seqLine->size() << std::endl;
     line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
     lines.push_back(line);
     line->setSequenceLine( seqLine );
@@ -1033,6 +1039,12 @@ void SequencerGUI::updateSkin() {
 
 	if ( scrollArea_->vLine() ) scrollArea_->vLine()->setForeground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
 
+}
+
+void SequencerGUI::onRefreshGUI(NButtonEvent* ev) {
+  update();
+	resize();
+	repaint();
 }
 
 /// loop item class

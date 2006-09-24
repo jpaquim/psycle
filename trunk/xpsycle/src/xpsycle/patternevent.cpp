@@ -33,7 +33,8 @@ namespace psycle
 			_mach(255),
 			_cmd(0),
 			_parameter(0),
-			_volume(255)
+			_volume(255),
+			_sharp(1)
 		{
 			for (int i = 0; i < 10; i++) 
 			paraCmdList_.push_back( PcmType() );
@@ -131,6 +132,14 @@ namespace psycle
 				return false;
 		}
 
+		void PatternEvent::setSharp( bool on ) {
+			_sharp = on;
+		}
+
+		bool PatternEvent::isSharp() const {
+			return _sharp;
+		}
+
 		PatternEvent::PcmListType & PatternEvent::paraCmdList() {
 			return paraCmdList_;
 		}
@@ -140,7 +149,7 @@ namespace psycle
 			std::ostringstream xml;
 			xml << "<patevent track='" << track << std::hex << "' note='" << (int)_note << std::hex << +"' mac='" << (int)_mach << std::hex
 					<< "' inst='" << (int)_inst << std::hex << "' cmd='" << (int)_cmd << std::hex
-					<< "' param='" << (int)_parameter << std::hex << "' />" << std::endl;
+					<< "' param='" << (int)_parameter << std::hex << "' sharp='" << (int) _sharp <<"' />" << std::endl;
 
 			return xml.str();
 		}
