@@ -211,6 +211,7 @@ class Area : public NPanel {
      double newBeatPos_;
 
      bool lockPlayLine_;
+		 bool playing_;
 
 };
 

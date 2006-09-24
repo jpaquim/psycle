@@ -123,7 +123,7 @@ SequencerGUI::Area::Area( SequencerGUI* seqGui )
 
 	pLine_ = new NLine();
 		pLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
-		pLine_->setMoveable( nMvHorizontal );
+		pLine_->setMoveable( nMvHorizontal | nMvParentLimit);
     pLine_->setClippingDistance( 3 );
 		pLine_->moveStart.connect( this, &SequencerGUI::Area::onMoveStart);
     pLine_->moveEnd.connect( this, &SequencerGUI::Area::onMoveEnd);
@@ -218,7 +218,7 @@ void SequencerGUI::Area::removeChilds() {
   pLine_ = new NLine();
 		pLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
     pLine_->setClippingDistance( 3 );
-    pLine_->setMoveable( nMvHorizontal );
+    pLine_->setMoveable( nMvHorizontal | nMvParentLimit );
 		pLine_->moveStart.connect( this, &SequencerGUI::Area::onMoveStart);
     pLine_->moveEnd.connect( this, &SequencerGUI::Area::onMoveEnd);
     pLine_->move.connect( this, &SequencerGUI::Area::onMove);		
@@ -237,7 +237,7 @@ void SequencerGUI::Area::resize( )
       xp = std::max(visualChild->preferredWidth(), xp);
 		 if ( visualChild == pLine() ) {
 			if ( sView && sView->patternSequence() ) {
-				int xPos =  std::min( sView->patternSequence()->tickLength()* sView->beatPxLength(), Player::Instance()->PlayPos());
+				int xPos =  std::min( d2i(sView->beatPxLength() * sView->patternSequence()->tickLength()), d2i(Player::Instance()->PlayPos() * sView->beatPxLength()) );
 				std::cout << Player::Instance()->PlayPos() << std::endl;
 				pLine_->setPoints( NPoint( xPos,0 ), NPoint( xPos, clientHeight() ) );
 			}
@@ -265,13 +265,14 @@ void SequencerGUI::Area::onMove(const NMoveEvent & moveEvent) {
 
 void SequencerGUI::Area::onMoveEnd(const NMoveEvent & moveEvent) {
   Player::Instance()->Stop();
-	Player::Instance()->Start( newBeatPos_ );
+	if ( playing_ ) Player::Instance()->Start( newBeatPos_ );
   std::cout << "new beatpos is" << newBeatPos_ << std::endl;
   lockPlayLine_ = false;
 }
 
 void SequencerGUI::Area::onMoveStart(const NMoveEvent & moveEvent) {
   lockPlayLine_ = true;
+	playing_ = Player::Instance()->_playing;
   newBeatPos_ = pLine_->left() / (double) sView->beatPxLength();
 }
 
@@ -1106,7 +1107,7 @@ void SequencerGUI::onRefreshGUI(NButtonEvent* ev) {
 
 void SequencerGUI::updatePlayPos() {
 	if ( patternSequence() && scrollArea() && !scrollArea()->lockPlayLine() ) {
-	 int xPos =  std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->PlayPos());
+	 int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->PlayPos() * beatPxLength()));
    scrollArea()->pLine()->setPoints( NPoint( xPos,0 ), NPoint( xPos, clientHeight() ) );
    scrollArea()->pLine()->repaint();
 	}

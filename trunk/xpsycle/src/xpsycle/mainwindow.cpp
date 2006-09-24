@@ -969,13 +969,13 @@ void MainWindow::onTimer( )
   Song* selectedSong_ = selectedChildView_->song();
 
   if ( Player::Instance()->_playing) {
-    SinglePattern* visiblePattern = selectedChildView_->patternView()->pattern();
-		if ( visiblePattern ) {
-			if ( ( Player::Instance()->PlayPos() - oldPlayPos_) != 0.1 ) {
-				oldPlayPos_ = Player::Instance()->PlayPos();
+		if ( ( std::abs(Player::Instance()->PlayPos() - oldPlayPos_)) > 0.1 ) {
 				selectedChildView_->sequencerView()->updatePlayPos();				
-		  }
+		}
+		oldPlayPos_ = Player::Instance()->PlayPos();
 
+    SinglePattern* visiblePattern = selectedChildView_->patternView()->pattern();
+		if ( visiblePattern ) {			
 			double entryStart = 0;
 			bool isPlayPattern = selectedSong_->patternSequence()->getPlayInfo( visiblePattern, Player::Instance()->PlayPos() , 4 , entryStart );
 			if ( isPlayPattern ) {
