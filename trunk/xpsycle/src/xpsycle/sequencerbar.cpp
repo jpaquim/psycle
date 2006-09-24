@@ -325,7 +325,8 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
      std::map<NTreeNode*, PatternCategory*>::iterator itr = categoryMap.find(node);
      if(itr != categoryMap.end()) {
         PatternCategory* cat = itr->second;
-        SinglePattern* pattern = cat->createNewPattern("Pattern" + stringify(counter) );
+        SinglePattern* pattern = cat->createNewPattern("Pattern");
+				pattern->setName("Pattern"+ stringify(pattern->id()) );
         PatternItem* item = new PatternItem( pattern, pattern->name() );
         node->addEntry(item);
         patternMap[item] = pattern;

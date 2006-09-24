@@ -312,6 +312,16 @@ namespace psycle
 			return line;
 		}
 
+		SequenceLine* PatternSequence::insertNewLine( SequenceLine* selectedLine ) {
+			SequenceLine* line = 0;
+			iterator it = find(begin(), end(), selectedLine);
+			if ( it != end() ) {
+				line = new SequenceLine(this);
+				insert( it,  line);
+			}
+			return line;
+		}
+
 		void PatternSequence::removeLine( SequenceLine * line )
 		{
 			iterator it = find(begin(), end(), line);
@@ -505,17 +515,30 @@ namespace psycle
 		}
 
 		void PatternSequence::moveUpLine(SequenceLine* line) {
-			iterator it = find( begin(), end(), line);
-			iterator it2 = it++;
-			std::swap(it,it2);
+		iterator it = find( begin(), end(), line);
+			if ( it != begin() ) {
+				it--;
+				SequenceLine* swapLine = *it;
+				it++;
+				erase( it );      
+				//a std::vector isnt iterator safe so search again
+				iterator it = find( begin(), end(), swapLine);		
+				insert( it, line );
+			}
 		}
 
 		void PatternSequence::moveDownLine(SequenceLine* line) {
 			iterator it = find( begin(), end(), line);
-			if ( it != end() ) {
-				iterator it = find( begin(), end(), line);
-				iterator it2 = it--;
-				std::swap(it,it2);
+			if ( it != end() ) {			
+				it++;
+				if ( it != end() ) {
+					SequenceLine* swapLine = *it;
+					it--;
+					erase( it );
+					iterator it = find( begin(), end(), swapLine);
+					it++;
+					insert( it, line );				
+				}
 			}
 		}
 
