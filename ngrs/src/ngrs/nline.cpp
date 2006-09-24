@@ -58,5 +58,7 @@ const NPoint & NLine::p2( ) const
   return lineShape->p2();
 }
 
-
+void NLine::setClippingDistance( int distance ) {
+ lineShape->setClippingDistance( distance );
+}
 

@@ -39,6 +39,8 @@ public:
     const NPoint & p1() const;
     const NPoint & p2() const;
 
+    void setClippingDistance( int distance );
+
 private:
 
    NLineShape* lineShape;
