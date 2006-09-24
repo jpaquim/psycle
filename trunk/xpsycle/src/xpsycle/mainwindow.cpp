@@ -1167,6 +1167,9 @@ void MainWindow::onRenderAsWave( NButtonEvent * ev )
 
 void MainWindow::onEditUndo( NButtonEvent * ev )
 {
+  if ( !selectedChildView_ ) return;
+
+	selectedChildView_->patternView()->doUndo();
 }
 
 void MainWindow::onEditRedo( NButtonEvent * ev )

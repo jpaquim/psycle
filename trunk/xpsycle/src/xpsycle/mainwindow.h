@@ -249,7 +249,6 @@ private:
 
     void updateNewSong();
 
-
 };
 
 }}
