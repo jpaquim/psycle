@@ -2274,6 +2274,7 @@ void PatternView::onTrackChange( NItemEvent * ev )
 void PatternView::setColorInfo( const PatternViewColorInfo & info ) {
 	colorInfo_ = info;
 
+	drawArea->setRestAreaColor( colorInfo_.restarea_bg_color );
 	drawArea->setSelectionColor( colorInfo_.sel_bg_color );
 	drawArea->setCursorColor( colorInfo_.cursor_bg_color );
 	drawArea->setBarColor( colorInfo_.bar_bg_color );
@@ -2288,6 +2289,7 @@ void PatternView::setColorInfo( const PatternViewColorInfo & info ) {
 	drawArea->setTextColor(colorInfo_.text_color );
 	drawArea->setBeatTextColor(colorInfo_.beat_text_color );
 	
+	tweakGUI->setRestAreaColor( colorInfo_.restarea_bg_color );
 	tweakGUI->setSelectionColor( colorInfo_.sel_bg_color  );
 	tweakGUI->setCursorColor( colorInfo_.cursor_bg_color  );
 	tweakGUI->setBarColor( colorInfo_.bar_bg_color  );

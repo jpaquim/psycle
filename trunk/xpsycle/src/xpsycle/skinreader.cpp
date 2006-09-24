@@ -59,6 +59,7 @@ namespace psycle {
 			mem +="<patternview>";
 
 			mem +="<cursor bgcolor='179:217:34' textcolor='0:0:0' />";
+			mem +="<restarea bgcolor='24:22:25' />";
 			mem +="<bar bgcolor='70:71:69' sel_bgcolor='162:101:68'/>";
 			mem +="<beat bgcolor='50:51:49' sel_bgcolor='142:81:48' textcolor='199:199:199' sel_textcolor='216:154:120'/>";
 			mem +="<lines bgcolor='34:32:35' sel_bgcolor='140:68:41' textcolor='255:255:255' sel_textcolor='239:175:140'/>";
@@ -150,7 +151,7 @@ namespace psycle {
 			if ( z) std::cout << "opened skin file :" << fileName << std::endl;
 
 			// extract it to a temp file			
-			int outFd = open(std::string("/home/natti/psyskintemp.xml").c_str(), O_RDWR|O_CREAT, 0666);
+			int outFd = open( NFile::replaceTilde("~/psyskintemp.xml").c_str(), O_RDWR|O_CREAT, 0666);
 			f = zipreader_seek(z, "psycle_skin/xml/main.xml");
 
 			if (!zipreader_extract(f, outFd )) {
@@ -175,7 +176,7 @@ namespace psycle {
 
 			NXmlParser parser;
 			parser.tagParse.connect( this, &SkinReader::onTagParse );
-			parser.parseFile("/home/natti/psyskintemp.xml");
+			parser.parseFile(NFile::replaceTilde("~/psyskintemp.xml"));
 
 			zipreader_close( z );
 			close( fd );
@@ -498,6 +499,13 @@ namespace psycle {
 				if ( bgcolor != "" ) {
 					patternview_color_info_.sel_bar_bg_color = NColor( bgcolor );
 				}
+			} else
+			if ( tagName == "restarea" && parsePatView ) {
+				std::string bgcolor = parser.getAttribValue("bgcolor");
+				if ( bgcolor != "" ) {
+					patternview_color_info_.restarea_bg_color = NColor( bgcolor );
+				}
+
 			} else
 			if ( tagName == "beat" && parsePatView ) {
 				std::string bgcolor = parser.getAttribValue("bgcolor");
