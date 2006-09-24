@@ -67,7 +67,7 @@ namespace psycle
 		public:
 			SinglePattern();
 
-			~SinglePattern();
+			virtual ~SinglePattern();
 
 			void setID(int id);
 			int id() const;

@@ -56,6 +56,99 @@ template<class T> inline T str_hex(const std::string &  value) {
 }
 
 
+/// a undo pattern class, that holds the infos of the last operation change
+UndoPattern::UndoPattern() {
+
+}
+
+UndoPattern::UndoPattern( int patternId, const NSize & changedBlock, const PatCursor & cursor ) {
+	changedBlock_ = changedBlock;
+	patternId_ = patternId;
+  cursor_ = cursor;
+}
+
+UndoPattern:: ~UndoPattern() {
+
+}
+
+int UndoPattern::patternId() {
+  return patternId_;
+}
+
+const NSize & UndoPattern::changedBlock() const {
+	return changedBlock_;
+}
+
+const PatCursor & UndoPattern::oldCursor() {
+  return cursor_;
+}
+
+
+// the PatternUndoManager
+
+PatternUndoManager::PatternUndoManager( ) {
+  pattern_ = 0;
+	pSong_ = 0;
+}
+
+PatternUndoManager::~PatternUndoManager() {
+
+}
+
+void PatternUndoManager::setSong( Song* pSong  ) {
+  pSong_ = pSong;
+}
+
+void PatternUndoManager::setPattern( SinglePattern* pattern ) {
+	pattern_ = pattern;
+}
+
+
+void PatternUndoManager::addUndo( const NSize & block, const PatCursor & cursor ) {
+	if ( pattern_ ) {
+		// create a undoPattern
+		UndoPattern dstPattern( pattern_->id() , block, cursor );
+		SinglePattern srcPattern = pattern_->block( block.left(), block.right(), block.top(), block.bottom() );
+		dstPattern.copyBlock( 0,0, srcPattern, block.right() - block.left(), srcPattern.beats() );
+		push_back( dstPattern );
+	}	
+}
+
+void PatternUndoManager::addUndo( const PatCursor & cursor ) {
+	addUndo ( NSize( cursor.track(), cursor.line(), cursor.track()+1, cursor.line()+1), cursor );
+}
+
+void PatternUndoManager::doUndo() {
+	if ( size() > 0) {
+		PatternUndoManager::iterator it = end()-1;
+
+		UndoPattern * lastUndoPattern = 0;
+
+		for ( ; ; it--) {
+			lastUndoPattern = & *it;
+			if ( lastUndoPattern->patternId() == pattern_->id() ) {
+				break;
+			}
+			if ( it == begin() ) {
+				it = end();
+				break;
+			}
+		}
+		
+		if ( it != end() ) {
+      SinglePattern* pattern = pSong_->patternSequence()->patternData()->findById( pattern_->id() );
+			if ( pattern ) {
+		  	NSize changedBlock = lastUndoPattern->changedBlock();
+		  	pattern->copyBlock( changedBlock.left(), changedBlock.top(), *lastUndoPattern, changedBlock.right() - changedBlock.left(), lastUndoPattern->beats() );
+				erase( it );		
+			} else {
+				// pattern was deleted
+			}
+		}
+	}
+}
+
+
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
 PatternView::PatternView( Song* song )
   : NPanel()
@@ -148,6 +241,7 @@ PatternView::PatternView( Song* song )
 
   moveCursorWhenPaste_ = false;  
   selectedMacIdx_ = 255;
+	undoManager_.setSong( song );
 
 	updateSkin();
 }
@@ -1519,17 +1613,29 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
       clearCursorPos();
       moveCursor(0,1); 
 			pView->checkDownScroll( cursor() );
+			return;
 		default: ;
 	}
 				
+	if (NApp::system().keyState() & ControlMask) {
+		switch ( event.scancode() ) {
+			case 'z' :
+				pView->doUndo();
+				return;
+			break;
+		}
+	}
+	
 
 	if ( cursor().eventNr() == 0 ) {
 		// a note event
 		int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
 		if ( note == cdefKeyStop ) {
+			pView->undoManager().addUndo( cursor() );
 			pView->noteOffAny( cursor() );
 		} else
 		if (note >=0 && note < 120) {
+			pView->undoManager().addUndo( cursor() );
 			pView->enterNote( cursor(), note );
 			moveCursor(0,1);
 			pView->checkDownScroll( cursor() );
@@ -1745,13 +1851,14 @@ void PatternView::PatternDraw::copyBlock( bool cutit )
 	NApp::system().clipBoard().setAsText( xml );
 
 	if (cutit) {
+		pView->undoManager().addUndo( NSize( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
 		pView->pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
 		pView->repaint();
 	}
 }
 
 void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
-{
+{	
   deleteBlock();
   repaint();
 }
@@ -1943,6 +2050,8 @@ void PatternView::PatternDraw::transposeBlock(int trp)
 	double top = selection().top() / (double)pView->beatZoom();
 	double bottom = selection().bottom() / (double)pView->beatZoom();
 
+	pView->undoManager().addUndo( NSize( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
+
 	pView->pattern()->transposeBlock(left, right, top, bottom, trp);
 
 	window()->repaint(this,repaintTrackArea(selection().top(),selection().bottom(),left,right));
@@ -2016,6 +2125,8 @@ void PatternView::PatternDraw::deleteBlock( )
     int left = selection().left();
     double top = selection().top() / (double) pView->beatZoom();
     double bottom = selection().bottom() / (double) pView->beatZoom();
+
+		pView->undoManager().addUndo( NSize( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
 
     pView->pattern()->deleteBlock(left, right, top, bottom);
     repaint();
@@ -2102,9 +2213,20 @@ int PatternView::beatZoom( ) const
      return 4;
 }
 
+void PatternView::doUndo() {
+
+	if ( undoManager_.size() > 0 ) {
+		UndoPattern & lastPattern = undoManager_.back();
+		drawArea->setCursor( lastPattern.oldCursor() );
+    undoManager_.doUndo();
+		drawArea->repaint();
+	}
+}
+
 void PatternView::setPattern( SinglePattern * pattern )
 {
-  pattern_ = pattern;  
+  pattern_ = pattern;
+	undoManager_.setPattern( pattern );
   resize();
 }
 
@@ -2217,6 +2339,9 @@ void PatternView::onEndPlayBar() {
 	playPos_ = -1;
 }
 
+PatternUndoManager & PatternView::undoManager() {
+	return undoManager_;
+}
 
 }}
 

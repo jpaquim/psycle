@@ -47,11 +47,53 @@ namespace psycle { namespace host {
 
 class Song;
 
+class UndoPattern : public SinglePattern {
+public  :
+
+	UndoPattern();
+	UndoPattern( int patternId, const NSize & changedBlock, const PatCursor & cursor  );
+
+	~UndoPattern();
+
+	const NSize & changedBlock() const;
+	const PatCursor & oldCursor();
+
+	int patternId();
+
+	private :
+
+		NSize changedBlock_;
+		int patternId_;
+		PatCursor cursor_;
+
+};
+
+class PatternUndoManager : public std::vector<UndoPattern> {
+public :
+
+	PatternUndoManager( );
+	~PatternUndoManager();
+
+	void setSong( Song* pSong  );
+	void setPattern( SinglePattern* pattern );
+	void addUndo( const NSize & block, const PatCursor & cursor );
+	void addUndo( const PatCursor & cursor );
+
+  void doUndo();
+
+private:
+
+	SinglePattern* pattern_;
+	Song* pSong_;
+
+};
 
 
 class PatternView : public NPanel
 {
-    class Header: public NPanel {
+	public:
+
+		class Header: public NPanel {
     public:
       Header(PatternView* pPatternView);
       ~Header();
@@ -309,11 +351,16 @@ public:
 		void onStartPlayBar();
 		void onEndPlayBar();
 
+		PatternUndoManager & undoManager();
+
+		void doUndo();
+
 private:
 
   Song* _pSong;
   SinglePattern* pattern_;
   NXmlParser xmlParser;
+	PatternUndoManager undoManager_;
 
   int editPosition_, prevEditPosition_;
   int playPos_;
