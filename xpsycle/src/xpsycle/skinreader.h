@@ -101,6 +101,7 @@ namespace psycle {
 			NColor sel_bg_color;
 			NColor sel_beat_text_color;
 			NColor sel_playbar_bg_color;
+			NColor restarea_bg_color;
 		};
 
 		class SequencerViewInfo {

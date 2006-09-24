@@ -313,6 +313,14 @@ namespace psycle {
 			cursorColor_ = cursorColor;
 		}
 
+		void CustomPatternView::setRestAreaColor( const NColor & color ) {
+			restAreaColor_ = color;
+		}
+
+		const NColor & CustomPatternView::restArea() const {
+			return restAreaColor_;
+		}
+
 		const NColor & CustomPatternView::cursorColor() const {
 			return cursorColor_;
 		}
@@ -453,7 +461,7 @@ namespace psycle {
 		}
 
 		void CustomPatternView::drawRestArea(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
-			g->setForeground(NColor(0,0,80));
+			g->setForeground( restAreaColor_ );
 			int endTop     = lineNumber() * rowHeight() - dy();
 			int endHeight  = std::max(0, clientHeight() - endTop);
 			g->fillRect(0,endTop,clientWidth(),endHeight);

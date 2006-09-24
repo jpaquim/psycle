@@ -136,6 +136,8 @@ namespace psycle {
 					void setLineSeparatorColor( const NColor & color );
 					const NColor & lineSeparatorColor() const;
 
+					void setRestAreaColor( const NColor & color );
+					const NColor & restArea() const;
 
 					void setBigTrackSeparatorColor( const NColor & selColor );
 					const NColor & bigTrackSeparatorColor() const;
@@ -292,6 +294,7 @@ namespace psycle {
 					NColor lineSepColor_;
 					NColor textColor_;
 					NColor beatTextColor_;
+					NColor restAreaColor_;
 
 					bool lineGridEnabled_;
 					bool colGridEnabled_;
