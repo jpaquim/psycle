@@ -263,7 +263,7 @@ namespace psycle
 						}
 						break;
 					}
-					int blockSize = blockSize1 / settings().GetSampleSize();
+					int blockSize = blockSize1 / settings().sampleSize();
 					int* pBlock = pBlock1;
 					while(blockSize > 0)
 					{
@@ -277,7 +277,7 @@ namespace psycle
 						pBlock += blockSize;
 						blockSize -= blockSize;
 					}
-					blockSize = blockSize2 / settings().GetSampleSize();
+					blockSize = blockSize2 / settings().sampleSize();
 					pBlock = pBlock2;
 					while(blockSize > 0)
 					{

@@ -93,6 +93,10 @@ namespace psycle {
 				void onOkBtn( NButtonEvent* ev );
 				void onCancelBtn( NButtonEvent* ev );
 
+				void onChannelCbx( NItemEvent* ev );
+				void onSampleRateCbx( NItemEvent* ev );
+				void onDepthCbx( NItemEvent* ev );
+
 
 		};
 
