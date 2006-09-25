@@ -140,7 +140,7 @@ VirtualPattern* ChildView::virtualPattern()
 void ChildView::play( )
 {
   patternView_->setPrevEditPosition(patternView_->editPosition());
-  Player::Instance()->Start(0.0);
+  Player::Instance()->Start( Player::Instance()->PlayPos() );
 }
 
 
