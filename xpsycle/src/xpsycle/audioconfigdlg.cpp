@@ -161,12 +161,15 @@ namespace psycle {
 					deviceEdt_ = new NEdit();
 						deviceEdt_->setPreferredSize(150,15);
 					sampleRateCbx_ = new NComboBox();
+						sampleRateCbx_->itemSelected.connect( this, &AudioConfigDlg::onSampleRateCbx );
 						sampleRateCbx_->add( new NItem("44100"));
 					bitDepthCbx_ = new NComboBox();
+						bitDepthCbx_->itemSelected.connect( this, &AudioConfigDlg::onDepthCbx );
 						bitDepthCbx_->add( new NItem("16") );
 					channelModeCbx_ = new NComboBox();
 						channelModeCbx_->add( new NItem("mono" ) );
 						channelModeCbx_->add( new NItem("stereo") );
+						channelModeCbx_->itemSelected.connect( this, &AudioConfigDlg::onChannelCbx );
 
 					table->add( deviceEdt_, NAlignConstraint(nAlLeft,1,0),true);
 					table->add( sampleRateCbx_, NAlignConstraint(nAlLeft,1,2),true);
@@ -304,6 +307,20 @@ namespace psycle {
   		return nHideWindow;
 		}
 
+		void AudioConfigDlg::onChannelCbx( NItemEvent * ev )
+		{
+		}
+
+		void AudioConfigDlg::onSampleRateCbx( NItemEvent * ev )
+		{
+		}
+
+		void AudioConfigDlg::onDepthCbx( NItemEvent * ev )
+		{
+		}
+
 	}
 }
+
+
 
