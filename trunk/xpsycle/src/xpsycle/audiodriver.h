@@ -34,14 +34,19 @@ namespace psycle
 		// typedef for work call back
 		typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
 
-		// class provides some textinfo about the dirver
+		// class that provides some textinfo about the dirver
 		class AudioDriverInfo {
 		public:
 				AudioDriverInfo( const std::string & name, const std::string & header, const std::string & description, bool show );
 		
+				// the driver name, used e.g in the configuration for the driver map
+				// as convention, please use only lower case names here
 				const std::string & name();
+				// a short textual description
 				const std::string & header();
+				// a more deeper explanation
 				const std::string & description();
+				// gives the audio dialog a hint, to show this driver, or not
 				bool show() const;
 
 		private:
@@ -57,27 +62,31 @@ namespace psycle
 		// class that holds the info about samplerate depth etc
 		class AudioDriverSettings {
 		public :
-
+				
 				AudioDriverSettings();
 
 				~AudioDriverSettings();
 
-				int GetSampleSize() const { return channelMode_ == 3 ? bitDepth_ / 4 : bitDepth_ / 8; }
-				
+				// some drivers require a device name like alsa
 				void setDeviceName( const std::string & name );
 				const std::string & deviceName() const;
 
 				void setBufferSize( int size );
 				int bufferSize() const;
 
+				// not all values possible maybe we should add a enum type here ..
 				void setSamplesPerSec( int samples );
 				int samplesPerSec() const;
 
+				// channel mode 3 == stereo, 1 == mono left, 2 == mono right, 0 = mono both channels
 				void setChannelMode( int mode );
 				int channelMode() const;
 
+				// bit depth values 8 16 24 
 				void setBitDepth( int depth );
 				int bitDepth() const;
+
+				int sampleSize() const;
 
 		private:
 
@@ -93,6 +102,7 @@ namespace psycle
 
 		class AudioDriver {
 		public:
+
 				AudioDriver();
 
 				~AudioDriver();
@@ -103,15 +113,21 @@ namespace psycle
 				// this gives you driver information
 				virtual AudioDriverInfo info() const;
 
+				// here you can set the settings of the driver, like samplerate depth etc
+				virtual void setSettings( const AudioDriverSettings & settings );
+				// here you get the special audio driver settings
+				// in case of some drivers like  e.g jack you must prepare, that a driver can set itself
+				const AudioDriverSettings & settings() const;
+
+
 				virtual void Reset(void) {};
+				// enable will start the driver and the calling for the work player function
 				virtual bool Enable(bool e) { return false; };
+				// initialize has nth with the driver todo, it sets only the ptr for a later player work call
 				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context) {};
 				virtual void Configure(void) {};
 				virtual bool Initialized(void) { return true; };
 				virtual bool Configured(void) { return true; };
-
-				virtual void setSettings( const AudioDriverSettings & settings );
-				const AudioDriverSettings & settings();
 		
 		private:
 
