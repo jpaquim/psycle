@@ -259,6 +259,8 @@ private:
 
     int counter;
     int beatPxLength_;
+		double oldPlayPos_;
+		
 		NTimer recStatusTimer;
 
     NCheckBox* snapToGridCheck_;

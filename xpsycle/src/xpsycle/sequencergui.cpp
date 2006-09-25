@@ -597,6 +597,7 @@ SequencerGUI::SequencerGUI()
 	scrollArea_ = 0;
   setLayout( NAlignLayout() );
 	patternSequence_ = 0;
+  oldPlayPos_ = 0;
 
   Player::Instance()->setFileName("test1.wav");
 
@@ -1108,8 +1109,12 @@ void SequencerGUI::onRefreshGUI(NButtonEvent* ev) {
 void SequencerGUI::updatePlayPos() {
 	if ( patternSequence() && scrollArea() && !scrollArea()->lockPlayLine() ) {
 	 int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->PlayPos() * beatPxLength()));
-   scrollArea()->pLine()->setPoints( NPoint( xPos,0 ), NPoint( xPos, clientHeight() ) );
-   scrollArea()->pLine()->repaint();
+	 int oxPos = d2i(std::min(patternSequence()->tickLength()* beatPxLength(), oldPlayPos_ * beatPxLength()));
+   if (oxPos != xPos) {
+     scrollArea()->pLine()->setPoints( NPoint( xPos,0 ), NPoint( xPos, clientHeight() ) );
+     scrollArea()->pLine()->repaint();
+	 }
+   oldPlayPos_ = Player::Instance()->PlayPos();
 	}
 }
 
