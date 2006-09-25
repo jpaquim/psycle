@@ -105,6 +105,10 @@ namespace psycle
 			return bitDepth_;
 		}
 
+		int AudioDriverSettings::sampleSize() const {
+		  return ( channelMode_ == 3 ) ? bitDepth_ / 4 : bitDepth_ / 8;
+		}
+
 
 		///
 		/// the AudioDriver main class
@@ -126,7 +130,7 @@ namespace psycle
 			settings_ = settings;
 		}
 
-		const AudioDriverSettings & AudioDriver::settings() {
+		const AudioDriverSettings & AudioDriver::settings() const {
 			return settings_;
 		}
 
