@@ -463,7 +463,7 @@ namespace psycle
 						unsigned char entry[5] ;
 						std::memcpy( &entry, pSource, 5);
 						PatternEvent event = convertEntry(entry);
-						if (!event.isEmpty()) {
+						if (!event.empty()) {
 							float position = y / (float) song.m_LinesPerBeat;
 							if (event.note() == cdefTweakM) {
 							 (*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;

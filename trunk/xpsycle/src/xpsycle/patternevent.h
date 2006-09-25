@@ -40,7 +40,6 @@ namespace psycle
 			typedef std::pair<std::uint8_t,std::uint8_t> PcmType;
 
 			PatternEvent();
-			PatternEvent(const PatternEntry & entry); // for compatible file load
 
 			~PatternEvent();
 
@@ -62,10 +61,7 @@ namespace psycle
 			void setVolume(std::uint8_t parameter);
 			std::uint8_t volume() const;
 
-			PatternEntry* entry();
-			PatternEntry* entry() const;
-
-			bool isEmpty() const;
+			bool empty() const;
 
 			std::string toXml(int track) const;
 

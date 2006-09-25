@@ -39,19 +39,7 @@ namespace psycle
 			for (int i = 0; i < 10; i++) 
 			paraCmdList_.push_back( PcmType() );
 		}
-
-		PatternEvent::PatternEvent( const PatternEntry & entry ) :
-			_note( entry._note ),
-			_inst( entry._inst ),
-			_mach( entry._mach ),
-			_cmd(  entry._cmd  ),
-			_parameter( entry._parameter ),
-			_volume( 255 )
-		{
-			for (int i = 0; i < 10; i++) 
-			paraCmdList_.push_back( PcmType() );
-		}
-
+	
 		PatternEvent::~PatternEvent()
 		{
 		}
@@ -114,24 +102,6 @@ namespace psycle
 			return _volume;
 		}
 
-		PatternEntry * PatternEvent::entry( )
-		{
-			return (psycle::host::PatternEntry*) this;
-		}
-
-		psycle::host::PatternEntry * PatternEvent::entry( ) const
-		{
-			return (psycle::host::PatternEntry*) this;
-		}
-
-		bool PatternEvent::isEmpty( ) const
-		{
-			if (_note == 255 && _inst == 255 && _mach == 255 && _cmd == 0 && _parameter == 0)
-				return true;
-			else
-				return false;
-		}
-
 		void PatternEvent::setSharp( bool on ) {
 			_sharp = on;
 		}
@@ -152,6 +122,14 @@ namespace psycle
 					<< "' param='" << (int)_parameter << std::hex << "' sharp='" << (int) _sharp <<"' />" << std::endl;
 
 			return xml.str();
+		}
+
+		bool PatternEvent::empty( ) const
+		{
+			if (_note == 255 && _inst == 255 && _mach == 255 && _cmd == 0 && _parameter == 0)
+				return true;
+			else
+				return false;
 		}
 
 	} // end of host namespace
