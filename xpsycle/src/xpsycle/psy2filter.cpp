@@ -212,7 +212,7 @@ namespace psycle
 						unsigned char entry[5];
 						file->Read(entry);
 						PatternEvent event = convertEntry(entry);
-						if (!event.isEmpty()) {
+						if (!event.empty()) {
 							float position = y / (float) song.m_LinesPerBeat;
 							(*pat)[position][x] = event;
 						}
