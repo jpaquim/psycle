@@ -19,9 +19,11 @@
  ***************************************************************************/
 #include "singlepattern.h"
 #include "patterndata.h"
+#include "psyfilter.h"
 #include <sstream>
 #include <iostream>
 #include <cmath>
+
 
 namespace psycle
 {
@@ -361,7 +363,7 @@ namespace psycle
 		std::string SinglePattern::toXml( ) const
 		{
 			std::ostringstream xml;
-			xml << "<pattern name='" << name() << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
+			xml << "<pattern name='" << PsyFilter::replaceIllegalXmlChr(name()) << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
 			std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
 			for ( ; it < timeSignatures_.end(); it++) {
 				const TimeSignature & sign = *it;

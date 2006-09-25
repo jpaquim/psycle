@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patterndata.h"
+#include "psyfilter.h"
 #include <algorithm>
 #include <sstream>
 
@@ -114,7 +115,7 @@ namespace psycle
 		std::string PatternCategory::toXml( ) const
 		{
 			std::ostringstream xml;
-			xml << "<category name='" << name() << "'>" << std::endl;
+			xml << "<category name='" << PsyFilter::replaceIllegalXmlChr( name() ) << "'>" << std::endl;
 			for ( const_iterator it = begin(); it < end(); it++) {
 				SinglePattern* pattern = *it;
 				xml << pattern->toXml();

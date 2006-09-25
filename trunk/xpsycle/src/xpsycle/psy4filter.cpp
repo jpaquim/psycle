@@ -324,7 +324,7 @@ namespace psycle {
 			} else 
 			if (tagName == "seqentry" && lastSeqLine) {
 				double pos =  str<double> (parser.getAttribValue("pos"));
-				int pat_id  = str_hex<int> (parser.getAttribValue("patid"));
+				int pat_id  = str<int> (parser.getAttribValue("patid"));
 				float startPos = str<float> (parser.getAttribValue("start"));
 				float endPos = str<float> (parser.getAttribValue("end"));
 				int transpose  = str_hex<int> (parser.getAttribValue("transpose"));
@@ -363,9 +363,9 @@ namespace psycle {
 			std::ostringstream xml;
 			xml << "<psy4>" << std::endl;
 			xml << "<info>" << std::endl;
-			xml << "<name   text='" << song.name()    << "' />" << std::endl;
-			xml << "<author text='" << song.author()  << "' />" << std::endl;;
-			xml << "<coment text='" << song.comment() << "' />" << std::endl;;
+			xml << "<name   text='" << replaceIllegalXmlChr( song.name() ) << "' />" << std::endl;
+			xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
+			xml << "<coment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 			xml << "</info>" << std::endl;
 			xml << song.patternSequence().patternData().toXml();
 			xml << song.patternSequence().toXml();
