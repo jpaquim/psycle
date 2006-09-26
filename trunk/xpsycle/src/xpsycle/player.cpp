@@ -79,6 +79,10 @@ namespace psycle
 			timeInfo_.setLinesPerBeat( song().LinesPerBeat() );
 		}
 
+		void Player::setPlayPos( double pos ) {
+			timeInfo_.setPlayBeatPos( pos );
+		}
+
 		void Player::Stop(void)
 		{
       if ( !song_  && driver_ ) return;
