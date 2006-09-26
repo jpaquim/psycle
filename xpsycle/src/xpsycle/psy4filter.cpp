@@ -288,7 +288,9 @@ namespace psycle {
 			} else
 			if (tagName == "category") {
 				std::string catName = parser.getAttribValue("name");
+				std::string attrib = parser.getAttribValue("color");
 				lastCategory = song_->patternSequence()->patternData()->createNewCategory(catName);
+				lastCategory->setColor( str<long>( attrib ) );
 			} else
 			if (tagName == "pattern" && lastCategory) {
 				std::string patName = parser.getAttribValue("name");
