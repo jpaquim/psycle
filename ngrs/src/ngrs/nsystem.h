@@ -76,6 +76,7 @@ class NSystem{
     Window registerWindow(Window parent);
     void destroyWindow(Window win);
     void setWindowPosition(Window win, int left, int top, int width, int height);
+    void setWindowSize(Window win, int width, int height);
     void setWindowMinimumSize(Window win, int minWidth, int minHeight);
     void setWindowGrab(Window win,bool on);
     void unmapWindow(Window win);

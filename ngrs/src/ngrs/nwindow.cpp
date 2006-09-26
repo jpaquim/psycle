@@ -678,7 +678,7 @@ void NWindow::setPositionToScreenTop(int height)
 
 void NWindow::setSize( int width, int height )
 {
-  setPosition(left(),top(),width,height);
+  NApp::system().setWindowSize(win(), width,height);
 }
 
 const NRect & NWindow::userGeometry( ) const

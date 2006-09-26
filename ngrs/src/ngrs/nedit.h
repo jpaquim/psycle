@@ -21,8 +21,10 @@
 #define NEDIT_H
 
 #include "npanel.h"
-#include <string>
 #include "nfontmetrics.h"
+#include "nregexp.h"
+#include <string>
+
 
 /**
 @author Stefan
@@ -41,6 +43,8 @@ public:
     void setText(const std::string & text);
     const std::string & text() const;
 		std::string selText() const;
+
+		void setInputPolicy( const std::string & regexp );
 
     virtual void paint(NGraphics* g);
     virtual void onKeyPress(const NKeyEvent & keyevent);
@@ -65,6 +69,8 @@ public:
     sigslot::signal1<const NKeyEvent &> keyPress;
 
 private:
+
+		NRegExp regExp_;
 
     bool autoSize_, readOnly_;
     int valign_, halign_;
