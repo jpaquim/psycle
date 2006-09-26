@@ -274,9 +274,21 @@ namespace psycle {
 
 		void Psy4Filter::onTagParse(const NXmlParser & parser, const std::string & tagName )
 		{
+			if ( tagName =="name" ) {
+				std::string attrib = parser.getAttribValue( "text" );
+				song_->setName( attrib );
+			} else
+			if ( tagName =="author" ) {
+				std::string attrib = parser.getAttribValue( "text" );
+				song_->setAuthor( attrib );
+			} else
+			if ( tagName =="comment" ) {
+				std::string attrib = parser.getAttribValue( "text" );
+				song_->setComment( attrib );
+			} else
 			if (tagName == "category") {
-				std::string catName = parser.getAttribValue(tagName);
-				lastCategory = song_->patternSequence()->patternData()->createNewCategory("name");
+				std::string catName = parser.getAttribValue("name");
+				lastCategory = song_->patternSequence()->patternData()->createNewCategory(catName);
 			} else
 			if (tagName == "pattern" && lastCategory) {
 				std::string patName = parser.getAttribValue("name");
@@ -365,7 +377,7 @@ namespace psycle {
 			xml << "<info>" << std::endl;
 			xml << "<name   text='" << replaceIllegalXmlChr( song.name() ) << "' />" << std::endl;
 			xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
-			xml << "<coment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
+			xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 			xml << "</info>" << std::endl;
 			xml << song.patternSequence().patternData().toXml();
 			xml << song.patternSequence().toXml();
