@@ -1986,7 +1986,7 @@ void PatternView::updatePlayBar(bool followSong)
 void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine)
 {
     // stop any notes with the same value
-    //StopNote(note,bTranspose,pMachine);
+    StopNote(note,bTranspose,pMachine);
 
     if(note<0) return;
 
@@ -2054,11 +2054,11 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
           }
           outtrack = i;
         }// else  {
-          // outtrack=0;
-        // }
+        //   outtrack=0;
+        //}
         // this should check to see if a note is playing on that track
         if (notetrack[outtrack] < 120) {
-            //StopNote(notetrack[outtrack], bTranspose, pMachine);
+            StopNote(notetrack[outtrack], bTranspose, pMachine);
         }
 
         // play
