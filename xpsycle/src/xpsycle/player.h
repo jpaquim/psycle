@@ -111,6 +111,7 @@ namespace psycle
 		//private:
 			static float * Work(void* context, int& nsamples);
 
+			void setPlayPos( double pos );
 			double PlayPos() const { return timeInfo_.playBeatPos(); }
 
 			void lock();

@@ -135,6 +135,7 @@ SequencerGUI::Area::Area( SequencerGUI* seqGui )
 		pLine_->moveStart.connect( this, &SequencerGUI::Area::onMoveStart);
     pLine_->moveEnd.connect( this, &SequencerGUI::Area::onMoveEnd);
     pLine_->move.connect( this, &SequencerGUI::Area::onMove);		
+		pLine_->setCursor( nCrVSplit );
   add( pLine_ );
 
 	playPos_ = 0;
@@ -233,6 +234,7 @@ void SequencerGUI::Area::removeChilds() {
     pLine_->moveEnd.connect( this, &SequencerGUI::Area::onMoveEnd);
     pLine_->move.connect( this, &SequencerGUI::Area::onMove);		
 		pLine_->setWidth(1);
+		pLine_->setCursor( nCrVSplit );
   add(pLine_);
 }
 
@@ -274,9 +276,9 @@ void SequencerGUI::Area::onMove(const NMoveEvent & moveEvent) {
 	newBeatPos_ = pLine_->left() / (double) sView->beatPxLength();
 }
 
-void SequencerGUI::Area::onMoveEnd(const NMoveEvent & moveEvent) {
+void SequencerGUI::Area::onMoveEnd( const NMoveEvent & moveEvent ) {
   Player::Instance()->Stop();
-	if ( playing_ ) Player::Instance()->Start( newBeatPos_ );
+	Player::Instance()->setPlayPos( newBeatPos_ );
   lockPlayLine_ = false;
 }
 
