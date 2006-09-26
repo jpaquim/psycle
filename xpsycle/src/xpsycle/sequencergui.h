@@ -26,6 +26,7 @@
 #include <ngrs/npanel.h>
 #include <ngrs/nbutton.h>
 #include <ngrs/nline.h>
+#include <ngrs/nhint.h>
 #include <list>
 
 /**
@@ -100,6 +101,8 @@ class SequencerItem : public NPanel {
        void setTranspose( int offset );
        int transpose() const;
 
+       NHint* hint();
+
 
       private:
 
@@ -110,6 +113,8 @@ class SequencerItem : public NPanel {
 
         NRegion entriesInRegion();
         NRegion oldDrag;
+
+				NHint* hint_;
 
         int oldLeft;
 
@@ -187,11 +192,11 @@ class Area : public NPanel {
 
 		virtual void removeChilds();
 
-		NLine* vLine();
-    NLine* vLine() const;
+		NPanel* vLine();
+    NPanel* vLine() const;
 
-		NLine* pLine(); // playpos line
-    NLine* pLine() const;
+		NPanel* pLine(); // playpos line
+    NPanel* pLine() const;
 
     bool lockPlayLine() const;
 
@@ -203,9 +208,8 @@ class Area : public NPanel {
 
      SequencerGUI* sView;
 
-     NLine* vLine_;
-     NLine* pLine_;
-     NLine* playPosLine_;
+     NPanel* vLine_;
+     NPanel* pLine_; // playPosLine
 
      double playPos_;
      double newBeatPos_;

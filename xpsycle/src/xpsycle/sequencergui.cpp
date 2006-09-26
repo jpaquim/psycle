@@ -104,6 +104,10 @@ int SequencerGUI::SequencerBeatLineal::preferredHeight( ) const
   return metrics.textHeight() + 10;
 }
 
+// end of beat ruler
+
+
+
 
 
 // this is the sequencer Area
@@ -116,15 +120,18 @@ SequencerGUI::Area::Area( SequencerGUI* seqGui )
 
   sView = seqGui;
   
-  vLine_ = new NLine();
-		vLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
+  vLine_ = new NPanel();
+		vLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
+		vLine_->setTransparent(false);
+		vLine_->setWidth(1);
     vLine_->setVisible( false );
   add( vLine_ );
 
-	pLine_ = new NLine();
-		pLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
+	pLine_ = new NPanel();
+		pLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
+		pLine_->setTransparent(false);
 		pLine_->setMoveable( nMvHorizontal | nMvParentLimit);
-    pLine_->setClippingDistance( 3 );
+    pLine_->setWidth(1);
 		pLine_->moveStart.connect( this, &SequencerGUI::Area::onMoveStart);
     pLine_->moveEnd.connect( this, &SequencerGUI::Area::onMoveEnd);
     pLine_->move.connect( this, &SequencerGUI::Area::onMove);		
@@ -162,19 +169,19 @@ void SequencerGUI::Area::drawTimeGrid( NGraphics * g )
   }
 }
 
-NLine* SequencerGUI::Area::vLine() {
+NPanel* SequencerGUI::Area::vLine() {
   return vLine_;
 }
 
-NLine* SequencerGUI::Area::vLine() const {
+NPanel* SequencerGUI::Area::vLine() const {
   return vLine_;
 }
 
-NLine* SequencerGUI::Area::pLine() {
+NPanel* SequencerGUI::Area::pLine() {
 	return pLine_;
 }
 
-NLine* SequencerGUI::Area::pLine() const {
+NPanel* SequencerGUI::Area::pLine() const {
   return pLine_;
 }
 
@@ -210,18 +217,22 @@ int SequencerGUI::Area::preferredWidth( ) const
 
 void SequencerGUI::Area::removeChilds() {
   NPanel::removeChilds();
-  vLine_ = new NLine();
-		vLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
+  vLine_ = new NPanel();
+		vLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
+		vLine_->setTransparent( false );
     vLine_->setVisible(false);
+		vLine_->setWidth(1);
   add(vLine_);
 
-  pLine_ = new NLine();
-		pLine_->setForeground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
-    pLine_->setClippingDistance( 3 );
+  pLine_ = new NPanel();
+		pLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
+		pLine_->setTransparent(false);
+    pLine_->setWidth(1);
     pLine_->setMoveable( nMvHorizontal | nMvParentLimit );
 		pLine_->moveStart.connect( this, &SequencerGUI::Area::onMoveStart);
     pLine_->moveEnd.connect( this, &SequencerGUI::Area::onMoveEnd);
     pLine_->move.connect( this, &SequencerGUI::Area::onMove);		
+		pLine_->setWidth(1);
   add(pLine_);
 }
 
@@ -238,8 +249,8 @@ void SequencerGUI::Area::resize( )
 		 if ( visualChild == pLine() ) {
 			if ( sView && sView->patternSequence() ) {
 				int xPos =  std::min( d2i(sView->beatPxLength() * sView->patternSequence()->tickLength()), d2i(Player::Instance()->PlayPos() * sView->beatPxLength()) );
-				std::cout << Player::Instance()->PlayPos() << std::endl;
-				pLine_->setPoints( NPoint( xPos,0 ), NPoint( xPos, clientHeight() ) );
+				
+				pLine_->setPosition(  xPos, scrollDy(), 1, clientHeight() );
 			}
 		 }
   }
@@ -266,7 +277,6 @@ void SequencerGUI::Area::onMove(const NMoveEvent & moveEvent) {
 void SequencerGUI::Area::onMoveEnd(const NMoveEvent & moveEvent) {
   Player::Instance()->Stop();
 	if ( playing_ ) Player::Instance()->Start( newBeatPos_ );
-  std::cout << "new beatpos is" << newBeatPos_ << std::endl;
   lockPlayLine_ = false;
 }
 
@@ -275,11 +285,17 @@ void SequencerGUI::Area::onMoveStart(const NMoveEvent & moveEvent) {
 	playing_ = Player::Instance()->_playing;
   newBeatPos_ = pLine_->left() / (double) sView->beatPxLength();
 }
+/// end of Area class
 
-// end of Area class
 
 
-// this is the gui class of one pattern entry
+
+
+
+
+///
+/// this is the gui class of one pattern entry
+///
 SequencerItem::SequencerItem( SequencerGUI* seqGui )
 {
   setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvLeftLimit));
@@ -296,10 +312,18 @@ SequencerItem::SequencerItem( SequencerGUI* seqGui )
      properties()->bind("transpose", *this, &SequencerItem::transpose, &SequencerItem::setTranspose);
      properties()->publish("transpose");
   }
+
+	hint_ = new NHint();
+	hint_->setText("beat: ");
+	add( hint_ );
 }
 
 SequencerItem::~ SequencerItem( )
 {
+}
+
+NHint* SequencerItem::hint() {
+  return hint_;
 }
 
 void SequencerItem::setSequenceEntry( SequenceEntry * sequenceEntry )
@@ -365,10 +389,16 @@ void SequencerItem::onMoveStart( const NMoveEvent & moveEvent )
   oldDrag = entriesInRegion();
   oldLeft = left();  
 
-  NLine* line = sView->scrollArea()->vLine();
-    line->setPoints( NPoint( left(), sView->scrollArea()->scrollDy() ), NPoint( left(), sView->scrollArea()->clientHeight() + sView->scrollArea()->scrollDy() ) );
+  NPanel* line = sView->scrollArea()->vLine();
+    line->setPosition( left(), sView->scrollArea()->scrollDy(), 1, sView->scrollArea()->clientHeight() );
     line->setVisible(true);
   line->repaint();
+
+  /*if (hint_ && !hint_->mapped()) {
+     hint_->setPosition(window()->left()+ absoluteLeft() + (int) ((3*spacingWidth())/4), window()->top()+absoluteTop() + spacingHeight(),100,100);
+     hint_->pack();
+     hint_->setVisible(true);
+  }*/
 }
 
 void SequencerItem::onMove( const NMoveEvent & moveEvent )
@@ -394,13 +424,13 @@ void SequencerItem::onMove( const NMoveEvent & moveEvent )
   }
   sView->resize();
 
-  NLine* line = sView->scrollArea()->vLine();
+  NPanel* line = sView->scrollArea()->vLine();
   
 
   NRegion newDrag = entriesInRegion();
   NRegion repaintArea = newDrag | oldDrag | line->absoluteGeometry();
 
-  line->setPoints( NPoint( left(), sView->scrollArea()->scrollDy() ), NPoint( left(), sView->scrollArea()->clientHeight() + sView->scrollArea()->scrollDy() ) );
+	line->setPosition( left(), sView->scrollArea()->scrollDy(), 1, sView->scrollArea()->clientHeight() );
 
   repaintArea |= line->absoluteGeometry();
 
@@ -408,15 +438,22 @@ void SequencerItem::onMove( const NMoveEvent & moveEvent )
 
   oldDrag = newDrag;
 
-  
+	//hint_->setText("beat: "+ stringify( sequenceEntry()->tickPosition()  ));
+	//hint_->pack();
+	//hint_->pane()->repaint();
+
+  //hint_->setPosition(window()->left()+ absoluteLeft() + (int) ((3*spacingWidth())/4), window()->top()+absoluteTop() + spacingHeight(),hint_->width(),hint_->height());
+
     
 }
 
 void SequencerItem::onMoveEnd( const NMoveEvent & moveEvent )
 {
-  NLine* line = sView->scrollArea()->vLine();
+  NPanel* line = sView->scrollArea()->vLine();
   line->setVisible( false );
-  line->repaint();
+  sView->scrollArea()->repaint();
+
+  hint_->setVisible(false);
 }
 
 void SequencerItem::onMousePress( int x, int y, int button )
@@ -1111,8 +1148,9 @@ void SequencerGUI::updatePlayPos() {
 	 int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->PlayPos() * beatPxLength()));
 	 int oxPos = d2i(std::min(patternSequence()->tickLength()* beatPxLength(), oldPlayPos_ * beatPxLength()));
    if (oxPos != xPos) {
-     scrollArea()->pLine()->setPoints( NPoint( xPos,0 ), NPoint( xPos, clientHeight() ) );
-     scrollArea()->pLine()->repaint();
+     scrollArea()->pLine()->setPosition( xPos, scrollArea()->scrollDy(),1,scrollArea()->clientHeight());
+     window()->repaint( scrollArea(), NRect( scrollArea()->absoluteLeft() + oxPos, scrollArea()->absoluteTop(), 1, scrollArea()->clientHeight() ) );
+		 scrollArea()->pLine()->repaint();
 	 }
    oldPlayPos_ = Player::Instance()->PlayPos();
 	}
