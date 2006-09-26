@@ -379,9 +379,50 @@ void NSystem::setWindowPosition(Window win, int left, int top, int width, int he
     unsigned int value = CWX | CWY | CWWidth | CWHeight ;
     XConfigureWindow(dpy(),win,value,&wc);
   } else {
-      XWindowChanges wc;
+
+		XSizeHints *size_hints = XAllocSizeHints();
+    size_hints->flags = PPosition ;
+    size_hints->x=left;
+    size_hints->y=top;
+    size_hints->min_width = 10;
+    size_hints->min_height = 10;
+    XSetNormalHints(dpy(),win,size_hints);
+    XFree(size_hints);
+
+    XWindowChanges wc;
     wc.x=left;
     wc.y=top;
+    wc.width=width;
+    wc.height=height;
+    unsigned int value = CWX | CWY | CWWidth | CWHeight;
+    XConfigureWindow(dpy(),win,value,&wc);
+  }
+  XSync(dpy(),false);
+}
+
+void NSystem::setWindowSize( Window win, int width, int height )
+{
+   if (width  <= 0) width  = 1;
+  if (height <= 0) height = 1;
+
+  XWindowAttributes attrib;
+  XGetWindowAttributes( dpy(), win, &attrib );
+
+  if (width!=attrib.width || height!=attrib.height) {
+    XSizeHints *size_hints = XAllocSizeHints();
+    size_hints->flags = PPosition ;
+    size_hints->min_width = 10;
+    size_hints->min_height = 10;
+    XSetNormalHints(dpy(),win,size_hints);
+    XFree(size_hints);
+
+    XWindowChanges wc;
+    wc.width=width;
+    wc.height=height;	
+    unsigned int value = CWWidth | CWHeight ;
+    XConfigureWindow(dpy(),win,value,&wc);
+  } else {
+      XWindowChanges wc;
     wc.width=width;
     wc.height=height;
     unsigned int value = CWX | CWY;
@@ -660,5 +701,7 @@ const NClipBoard & NSystem::clipBoard( ) const
 {
   return clipBoard_;
 }
+
+
 
 

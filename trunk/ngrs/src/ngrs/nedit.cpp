@@ -397,5 +397,10 @@ std::string NEdit::selText() const {
   return midText;
 }
 
+void NEdit::setInputPolicy( const std::string & regexp )
+{
+
+}
+
 
 
