@@ -597,6 +597,16 @@ namespace psycle {
 			}
 		}
 
+		void CustomPatternView::drawString(NGraphics* g, int track, int line, int eventnr, const std::string & data , const NColor & color) {
+			std::map<int, TrackGeometry>::const_iterator it;
+			it = trackGeometrics().lower_bound( track );
+			if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
+
+			int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
+
+			drawStringData( g, xOff + eventOffset(eventnr,0), line, data, color );
+		}
+
 		void CustomPatternView::drawBlockData( NGraphics * g, int xOff, int line, const std::string & text, const NColor & color)
 		{					
 			int yp = ( rowHeight() - g->textHeight()) / 2  + g->textAscent();
