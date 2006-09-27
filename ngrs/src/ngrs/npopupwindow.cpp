@@ -36,7 +36,7 @@ NPopupWindow::~NPopupWindow()
 void NPopupWindow::onMessage( NEvent * ev )
 {
   if (ev->text() == "ngrs_global_hide") {
-     setVisible(false);
+		NApp::unmapPopupWindows();
   }
 }
 

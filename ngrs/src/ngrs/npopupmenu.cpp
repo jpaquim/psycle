@@ -68,11 +68,13 @@ void NPopupMenu::onMessage( NEvent * ev )
   if (ev->text() == "ngrs_menu_item_click") {
      NEvent ev1(this,"ngrs_menu_item_click");
      sendMessage(&ev1);
+		 checkForRemove(0);
      setVisible(false);
   } else
   if (ev->text() == "ngrs_global_hide") {
      NEvent ev1(this,"ngrs_menu_item_click");
      sendMessage(&ev1);
+     checkForRemove(0);
      setVisible(false);
   } else
   if (ev->text() == "ngrs_menu_item_enter") {
