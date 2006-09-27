@@ -37,6 +37,7 @@ NMenu::NMenu( const std::string & text ) : NCustomButton(text)
 void NMenu::init( )
 {
   popupMenu_ = new NPopupMenu();
+	popupMenu_->setName("popup_menu");
   NCustomButton::add(popupMenu_);
 
   popupMenu_->addMessageListener(this);

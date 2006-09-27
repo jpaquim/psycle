@@ -58,7 +58,6 @@ NWindow::NWindow()
 
 NWindow::~NWindow()
 {
-  std::cout << "deleting" << name() << std::endl;
   if (mapped()) NApp::system().unmapWindow(win_);
   delete graphics_;
   NApp::removeWindow(win_);
@@ -690,19 +689,19 @@ void NWindow::checkGeometry( )
 {
   // works only with mapped windows
   if (userPos.left() != left() || userPos.top() != top() ) {
-      std::cout << "userleft:" << userPos.left() << std::endl;
-      std::cout << "usertop:" << userPos.top() << std::endl;
+      //std::cout << "userleft:" << userPos.left() << std::endl;
+      //std::cout << "usertop:" << userPos.top() << std::endl;
       XMoveWindow(NApp::system().dpy(), win(), userPos.left(), userPos.top() );
-      std::cout << "wmleft:" << left() << std::endl;
-      std::cout << "wmtop:" <<  top() << std::endl;
+      //std::cout << "wmleft:" << left() << std::endl;
+      //std::cout << "wmtop:" <<  top() << std::endl;
   }
 
   if (userPos.width() != width() || userPos.height() != height() ) {
-     std::cout << userPos.width() << std::endl;
-     std::cout << userPos.height() << std::endl;
+     //std::cout << userPos.width() << std::endl;
+     //std::cout << userPos.height() << std::endl;
      XResizeWindow(NApp::system().dpy(), win(), userPos.width(), userPos.height());
-     std::cout << width() << std::endl;
-     std::cout << height() << std::endl;
+     //std::cout << width() << std::endl;
+     //std::cout << height() << std::endl;
   }
 }
 

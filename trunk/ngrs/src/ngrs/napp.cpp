@@ -247,6 +247,7 @@ int NApp::processEvent( NWindow * win, XEvent * event )
     }
     break;
     case ButtonPress: {
+				bool autoUnmap_ = false;
         vector<NWindow*>::iterator itr;
         for (itr = popups_.begin(); itr < popups_.end(); itr++) {
            NWindow* popup = *itr;
@@ -254,11 +255,15 @@ int NApp::processEvent( NWindow * win, XEvent * event )
               popupUnmapped_ = true;
               NEvent ev(win,"ngrs_global_hide");
               popup->onMessage(&ev);
+							autoUnmap_ = true;
            }
         }
         Time time = event->xbutton.time;
         if ( time - lastBtnPressTime < 300 ) win->onMouseDoublePress(event->xbutton.x,event->xbutton.y,event->xbutton.button);
         win->onMousePress(event->xbutton.x,event->xbutton.y,event->xbutton.button);
+				if (autoUnmap_) {
+					win->checkForRemove(0);
+				}
         lastBtnPressTime = time;
         popupUnmapped_ = false;
       }
@@ -393,6 +398,7 @@ void NApp::unmapPopupWindows( )
     if (popup->visible()) {
       popupUnmapped_ = true;
       popup->setVisible(false);
+			popup->checkForRemove(0);
     }
   }
 }
