@@ -208,6 +208,8 @@ namespace psycle {
 					std::string noteToString( int value, bool sharp );
 
 					void drawData(NGraphics* g, int track, int line, int eventnr, int data , bool sharp, const NColor & color);
+					// bypass column type
+					void drawString(NGraphics* g, int track, int line, int eventnr, const std::string & data , const NColor & color);
 
 					const PatCursor & cursor() const;
 					void setCursor( const PatCursor & cursor );

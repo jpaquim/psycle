@@ -1486,7 +1486,9 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 					if (event->volume() != 255) drawData( g, x, y, 3, event->volume(), 1, tColor );
 					if (event->command() != 0 || event->parameter() != 0) {
 						drawData( g, x, y, 4, (event->command() << 8) | event->parameter(), 1, tColor );
-					}										
+					}	else {
+						drawString( g, x, y, 4, "....", tColor );
+					}									
 					
 				  PatternEvent::PcmListType & pcList = event->paraCmdList();
 				  PatternEvent::PcmListType::iterator it = pcList.begin();
