@@ -81,34 +81,7 @@ void Configuration::setSkinDefaults( )
   vu1.setHCOLORREF(0x0080FF80);
   vu2.setHCOLORREF(0x00403731);
   vu3.setHCOLORREF(0x00262bd7);
-  pvc_separator.setHCOLORREF(0x00400000);
-  pvc_separator2.setHCOLORREF(0x00800000);
-  pvc_background.setHCOLORREF(0x0099766C);
-  pvc_background2.setHCOLORREF(0x00AA786C);
-  pvc_row4beat.setHCOLORREF(0x00AF958B);
-  pvc_row4beat2.setHCOLORREF(0x00AF958B);
-  pvc_rowbeat.setHCOLORREF(0x00C0ACA5);
-  pvc_rowbeat2.setHCOLORREF(0x00C0ACA5);
-  pvc_row.setHCOLORREF(0x00D0C4BF);
-  pvc_row2.setHCOLORREF(0x00D0C4BF);
-  pvc_font.setHCOLORREF(0x00000000);
-  pvc_font2.setHCOLORREF(0x00000000);
-  pvc_fontPlay.setHCOLORREF(0x00ffffff);
-  pvc_fontPlay2.setHCOLORREF(0x00ffffff);
-  pvc_fontCur.setHCOLORREF(0x00ffffff);
-  pvc_fontCur2.setHCOLORREF(0x00ffffff);
-  pvc_fontSel.setHCOLORREF(0x00ffffff);
-  pvc_fontSel2.setHCOLORREF(0x00ffffff);
-  pvc_selection.setHCOLORREF(0x00e00000);
-  pvc_selection2.setHCOLORREF(0x00ff5050);
-  pvc_playbar.setHCOLORREF(0x0080FF00);
-  pvc_playbar2.setHCOLORREF(0x0080FF00);
-  pvc_cursor.setHCOLORREF(0x000000e0);
-  pvc_cursor2.setHCOLORREF(0x000000e0);
-
-  // wire arrow
-  mv_polycolour.setHCOLORREF(0x00ffffff);
-
+  
   machineGUITopColor.setHCOLORREF(0x00D2C2BD);
   machineGUIFontTopColor.setHCOLORREF(0x00000000);
   machineGUIBottomColor.setHCOLORREF(0x009C796D);
@@ -191,8 +164,6 @@ void Configuration::setSkinDefaults( )
     << "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
   #endif
 
-  mv_wirewidth = 1;
-  mv_triangle_size = 22;
 }
 
 void Configuration::setDriverByName( const std::string & driverName )

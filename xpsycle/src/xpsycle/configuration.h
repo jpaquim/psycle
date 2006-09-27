@@ -65,31 +65,6 @@ public:
     NColor vu2;
     NColor vu3;
 
-    NColor pvc_separator;
-    NColor pvc_separator2;
-    NColor pvc_background;
-    NColor pvc_background2;
-    NColor pvc_row4beat;
-    NColor pvc_row4beat2;
-    NColor pvc_rowbeat;
-    NColor pvc_rowbeat2;
-    NColor pvc_row;
-    NColor pvc_row2;
-    NColor pvc_font;
-    NColor pvc_font2;
-    NColor pvc_fontPlay;
-    NColor pvc_fontPlay2;
-    NColor pvc_fontCur;
-    NColor pvc_fontCur2;
-    NColor pvc_fontSel;
-    NColor pvc_fontSel2;
-    NColor pvc_selection;
-    NColor pvc_selection2;
-    NColor pvc_playbar;
-    NColor pvc_playbar2;
-    NColor pvc_cursor;
-    NColor pvc_cursor2;
-
     NColor machineGUITopColor;
     NColor machineGUIFontTopColor;
     NColor machineGUIBottomColor;
@@ -102,11 +77,6 @@ public:
 
     NColor machineGUITitleColor;
     NColor machineGUITitleFontColor;
-
-    NColor mv_polycolour;
-
-    int  mv_wirewidth;
-    int mv_triangle_size;
 
     int pattern_font_x;
     int pattern_font_y;
@@ -133,10 +103,6 @@ public:
     bool _RecordTweaks;
     bool _RecordUnarmed;
 
-    inline int GetSamplesPerSec() const throw()
-    {
-      return _pOutputDriver->settings().samplesPerSec();
-    }
 
     class midi_type
     {

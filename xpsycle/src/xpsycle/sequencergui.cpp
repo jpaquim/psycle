@@ -114,7 +114,7 @@ int SequencerGUI::SequencerBeatLineal::preferredHeight( ) const
 
 SequencerGUI::Area::Area( SequencerGUI* seqGui )
 {
-  setBackground(Global::pConfig()->pvc_row);
+
   setTransparent(false);
   lockPlayLine_ = false;
 
