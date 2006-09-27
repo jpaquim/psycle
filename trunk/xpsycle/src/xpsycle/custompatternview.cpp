@@ -585,11 +585,26 @@ namespace psycle {
 				switch ( event.type() ) {
 					case ColumnEvent::hex2 :
 						drawBlockData( g, xOff + eventOffset(eventnr,0), line, toHex(data,2), color );
+						// check if cursor is on event and draw digit in cursortextColor
+						if ( cursor().track() == track && cursor().line() == line && 
+					  cursor().eventNr() == eventnr && cursor().col() < 2 ) {
+							drawBlockData( g, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth() , line, toHex(data,2).substr(cursor().col(),1) ,cursorTextColor_ );
+						}
 					break;
 					case ColumnEvent::hex4 :
 						drawBlockData( g, xOff + eventOffset(eventnr,0), line, toHex(data,4), color );
+						// check if cursor is on event and draw digit in cursortextColor
+						if ( cursor().track() == track && cursor().line() == line && 
+					  cursor().eventNr() == eventnr && cursor().col() < 4 ) {
+							drawBlockData( g, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth(), line, toHex(data,4).substr(cursor().col(),1) ,cursorTextColor_ );
+						}
+						
 					break;
 					case ColumnEvent::note :					
+					  if ( cursor().track() == track && cursor().line() == line && 
+					  cursor().eventNr() == eventnr ) {
+							drawStringData( g, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor_ );
+						} else
 						drawStringData( g, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),color );
 					break;
 					default: ;
