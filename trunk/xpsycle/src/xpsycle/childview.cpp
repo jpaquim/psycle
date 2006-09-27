@@ -57,9 +57,7 @@ ChildView::ChildView()
     machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
 
   patternView_ = new PatternView( _pSong );
-    sequencerBar_->setPatternView( patternView() );
-    patternView_->setForeground(Global::pConfig()->pvc_background);
-    patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
+	sequencerBar_->setPatternView( patternView() );
 
   sequencerView_ = new SequencerGUI();
   sequencerBar_->setSequenceGUI( sequencerView() ) ;

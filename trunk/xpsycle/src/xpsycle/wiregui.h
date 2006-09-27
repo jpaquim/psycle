@@ -26,36 +26,39 @@
 @author Stefan
 */
 
-namespace psycle { namespace host {
+namespace psycle 
+{ 
+	namespace host
+	{
 
-class WireGUI : public NLine
-{
-public:
-    WireGUI();
+		class WireGUI : public NLine
+		{
+		public:
+				WireGUI();
 
-    ~WireGUI();
+				~WireGUI();
 
-    virtual void paint(NGraphics* g);
-    void drawArrow( NGraphics * g );
+				virtual void paint(NGraphics* g);
+			
+				void updateSkin();
 
-		void updateSkin();
+		private:
 
-private:
+				NColor polyColor_;
+				NColor borderColor_;
 
-		NColor polyColor_;
-		NColor borderColor_;
+				float deltaColR;
+				float deltaColG;
+				float deltaColB;
 
-    float deltaColR;
-    float deltaColG;
-    float deltaColB;
+				double triangle_size_center ;
+				double triangle_size_tall;
+				double triangle_size_wide;
+				double triangle_size_indent;
 
-    double triangle_size_center ;
-    double triangle_size_tall;
-    double triangle_size_wide;
-    double triangle_size_indent;
+				void drawArrow( NGraphics * g );
 
-
-};
-
-}}
+		};
+	}
+}
 #endif

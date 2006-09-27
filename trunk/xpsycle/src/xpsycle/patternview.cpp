@@ -619,7 +619,6 @@ PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) 
 {
   setHeight( coords_.bgCoords.height() );
   skinColWidth_ = coords_.bgCoords.width();
-  setBackground(Global::pConfig()->pvc_row);
   setTransparent(false);
 }
 
@@ -993,7 +992,6 @@ PatternView::TweakGUI::TweakGUI( PatternView* pPatternView)
 	setDefaultVisibleEvents( 1 );
   setMinimumWidth(1);
   setTransparent(false);
-  setBackground(Global::pConfig()->pvc_row);
   setTrackNumber( 16 );
 }
 
@@ -1004,8 +1002,6 @@ PatternView::TweakGUI::~TweakGUI() {
 void PatternView::TweakGUI::customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
   if (pView->pattern()) {
     TimeSignature signature;
-
-    g->setForeground(Global::pConfig()->pvc_rowbeat);
 
     int trackWidth = ((endTrack+1) * colWidth()) - dx();
     int lineHeight = ((endLine +1) * rowHeight()) - dy();
@@ -1264,7 +1260,6 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : CustomPatt
 	setTrackNumber( 64 );
 
   setTransparent(false);
-  setBackground(Global::pConfig()->pvc_row);
 
   pView = pPatternView;
   editPopup_ = new NPopupMenu();
@@ -1361,8 +1356,6 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
   if (pView->pattern()) {
     TimeSignature signature;
 
-    g->setForeground(Global::pConfig()->pvc_rowbeat);
-
     int trackWidth = xEndByTrack( endTrack ) - dx();
     int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
@@ -1376,7 +1369,6 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 
               g->setForeground( barColor() );
               g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
-              g->setForeground(Global::pConfig()->pvc_rowbeat);
 
 							if ( y >= selection().top() && y < selection().bottom()) {
 							int left  = xOffByTrack( selection().left() );
