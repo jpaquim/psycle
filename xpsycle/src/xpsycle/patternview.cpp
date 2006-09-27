@@ -578,6 +578,8 @@ NScrollBar * PatternView::hScrBar( )
 void PatternView::setEditOctave( int octave )
 {
   editOctave_ = octave;
+	octaveCombo_->setIndex( octave );
+	octaveCombo_->repaint();
 }
 
 int PatternView::editOctave( ) const
@@ -1651,6 +1653,18 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		}
 	}
 	
+	if ( NApp::system().keyState() & ControlMask ) {
+    switch ( event.scancode() ) {
+			case '+':
+				pView->setEditOctave( std::min(pView->editOctave() + 1, 8) );
+				return;
+			break;
+			case '#':
+				pView->setEditOctave( std::max(pView->editOctave() - 1, 0) );
+				return;
+			break;
+		}
+	}
 
 	if ( cursor().eventNr() == 0 ) {
 		// a note event
