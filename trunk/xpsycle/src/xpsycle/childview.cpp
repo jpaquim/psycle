@@ -140,7 +140,7 @@ VirtualPattern* ChildView::virtualPattern()
 void ChildView::play( )
 {
   patternView_->setPrevEditPosition(patternView_->editPosition());
-  Player::Instance()->Start( Player::Instance()->PlayPos() );
+  Player::Instance()->start( Player::Instance()->playPos() );
 }
 
 
@@ -151,7 +151,7 @@ void ChildView::playFromStart()
     //bScrollDetatch=false;
   }
   patternView_->setPrevEditPosition(patternView_->editPosition());
-  Player::Instance()->Start(0.0);
+  Player::Instance()->start(0.0);
   //pParentMain->StatusBarIdle();
 }
 

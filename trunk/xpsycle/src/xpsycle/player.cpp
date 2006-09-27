@@ -1,14 +1,32 @@
 ///\file
-///\brief implementation file for psycle::host::Player. based on psycle revision 2689
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
+///\brief implementation file for psycle::host::Player
+
+/***************************************************************************
+  *   Copyright (C) 2006 by Stefan   *
+  *   natti@linux   *
+  *                                                                         *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation; either version 2 of the License, or     *
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  *   This program is distributed in the hope that it will be useful,       *
+  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+  *   GNU General Public License for more details.                          *
+  *                                                                         *
+  *   You should have received a copy of the GNU General Public License     *
+  *   along with this program; if not, write to the                         *
+  *   Free Software Foundation, Inc.,                                       *
+  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+  ***************************************************************************/
+
 #include "player.h"
 #include "song.h"
 #include "machine.h"
 #include "internal_machines.h"
-#include "plugin_interface.h"
-//#include "MidiInput.h"
 #include "inputhandler.h"
+
 namespace psycle
 {
 	namespace host
@@ -18,15 +36,8 @@ namespace psycle
 		:
 			song_(0),
 			_playing(false),
-			_playBlock(false),
 			Tweaker(false),
-			_samplesRemaining(0),
-			_lineCounter(0),
-			_loopSong(true),
-			_patternjump(-1),
-			_linejump(-1),
-			_loop_count(0),
-			_loop_line(0)
+			_samplesRemaining(0)
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 			_doDither = false;
@@ -58,21 +69,15 @@ namespace psycle
 		}
 
 
-		void Player::Start(double pos)
+		void Player::start( double pos )
 		{
       if ( !song_ && !driver_ ) return;
-			Stop(); // This causes all machines to reset, and samplesperRow to init.
+			stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
 
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
-			_lineChanged = true;
-			_lineCounter = 0; //line;
-			_SPRChanged = false;
-			_playTime = 0;
-			_playTimem = 0;
-			_loop_count =0;
-			_loop_line = 0;
+			//_SPRChanged = false;
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			timeInfo_.setPlayBeatPos( pos );
@@ -83,13 +88,17 @@ namespace psycle
 			timeInfo_.setPlayBeatPos( pos );
 		}
 
-		void Player::Stop(void)
+		double Player::playPos() const { 
+			return timeInfo_.playBeatPos();
+		}
+
+		void Player::stop( )
 		{
       if ( !song_  && driver_ ) return;
 
 			// Stop song enviroment
 			_playing = false;
-			_playBlock = false;
+//			_playBlock = false;
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
 				if(song()._pMachine[i])
@@ -102,6 +111,10 @@ namespace psycle
 			timeInfo_.setLinesPerBeat( song().LinesPerBeat() );
 			SampleRate( driver_->settings().samplesPerSec() );
 			if (autoRecord_) stopRecording();
+		}
+
+		bool Player::playing() const {
+			return _playing;
 		}
 
 		void Player::SampleRate(const int sampleRate)

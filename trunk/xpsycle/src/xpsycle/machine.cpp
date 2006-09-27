@@ -863,7 +863,7 @@ int Machine::GenerateAudio( int numsamples )
 	//position [0.0-1.0] inside the current beat.
 	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 	//position [0.0-linesperbeat] converted to "Tick()" lines
-	const double positionInLines = positionInBeat*Player::Instance()->LinesPerBeat();
+	const double positionInLines = positionInBeat*Player::Instance()->timeInfo().linesPerBeat();
 	//position in samples of the next "Tick()" Line
 	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow();
 	//Next event, initialized to "out of scope".

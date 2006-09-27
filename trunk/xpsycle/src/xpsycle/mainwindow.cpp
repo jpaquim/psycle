@@ -206,7 +206,7 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
      bool update = false;
      ChildView* view = it->second;
      if (view == selectedChildView_) {
-       Player::Instance()->Stop();
+       Player::Instance()->stop();
        Player::Instance()->song(0);       
        selectedChildView_ = 0;
        update = true;
@@ -239,7 +239,7 @@ void MainWindow::onTabChange( NButtonEvent * ev )
   if ( it != songTabMap.end() ) {
     ChildView* view = it->second;
     std::cout << view->song()->name() << std::endl;
-		Player::Instance()->Stop();
+		Player::Instance()->stop();
     Player::Instance()->song( view->song() );
     selectedChildView_ = view;
     updateNewSong();
@@ -742,7 +742,7 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
      // pane()->repaint();
      if ( fileName != "" ) {
 			 // stop player
-			 Player::Instance()->Stop();
+			 Player::Instance()->stop();
        songpDlg_->setVisible(false);
 			 // disable audio driver
 			 //Global::configuration()._pOutputDriver->Enable(false);
@@ -810,9 +810,8 @@ void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_
 
 void MainWindow::onBarStop(NButtonEvent* ev)
 {
-  bool pl = Player::Instance()->_playing;
-  bool blk = Player::Instance()->_playBlock;
-  Player::Instance()->Stop();
+  bool pl = Player::Instance()->playing();
+  Player::Instance()->stop();
 }
 
 void MainWindow::closePsycle()
@@ -918,7 +917,7 @@ void MainWindow::setAppSongBpm(int x)
 
     int bpm = 0;
     if ( x != 0 ) {
-      if ( Player::Instance()->_playing )  {
+      if ( Player::Instance()->playing() )  {
         selectedSong_->setBpm(  Player::Instance()->timeInfo().bpm()+x);
       } else selectedSong_->setBpm(selectedSong_->bpm()+x);
        Player::Instance()->setBpm( (int) selectedSong_->bpm() );
@@ -968,13 +967,13 @@ void MainWindow::onTimer( )
   if ( !selectedChildView_ ) return;
   Song* selectedSong_ = selectedChildView_->song();
 
-  if ( Player::Instance()->_playing) {
+  if ( Player::Instance()->playing() ) {
 		selectedChildView_->sequencerView()->updatePlayPos();				
 		
     SinglePattern* visiblePattern = selectedChildView_->patternView()->pattern();
 		if ( visiblePattern ) {			
 			double entryStart = 0;
-			bool isPlayPattern = selectedSong_->patternSequence()->getPlayInfo( visiblePattern, Player::Instance()->PlayPos() , 4 , entryStart );
+			bool isPlayPattern = selectedSong_->patternSequence()->getPlayInfo( visiblePattern, Player::Instance()->playPos() , 4 , entryStart );
 			if ( isPlayPattern ) {
 				selectedChildView_->patternView()->onTick( entryStart );
 			}			

@@ -1045,10 +1045,10 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 
 		switch ( event.scancode() ) {		
 		case ' ':
-			if (Player::Instance()->_playing) {
-				Player::Instance()->Stop();
+			if (Player::Instance()->playing() ) {
+				Player::Instance()->stop();
 			} else {
-				Player::Instance()->Start(0);
+				Player::Instance()->start();
 			}
 		break;
 		case XK_Page_Up:
@@ -1370,7 +1370,7 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 
     for (int y = startLine; y <= endLine; y++) {
       float position = y / (float) beatZoom();
-      if (!(y == pView->playPos()) || !Player::Instance()->_playing ) {
+      if (!(y == pView->playPos()) || !Player::Instance()->playing() ) {
       if ( !(y % beatZoom())) {
           if ((pView->pattern()->barStart(position, signature) )) {
 
@@ -1448,7 +1448,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
           }
 				}
 
-				if ((y == pView->playPos() && Player::Instance()->_playing ) ) {
+				if ((y == pView->playPos() && Player::Instance()->playing() ) ) {
 					int trackWidth = xEndByTrack( endTrack ) - dx();
 					g->setForeground( playBarColor() );
         	g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
@@ -1566,10 +1566,10 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 
 	switch ( event.scancode() ) {		
 		case ' ':
-			if (Player::Instance()->_playing) {
-				Player::Instance()->Stop();
+			if (Player::Instance()->playing() ) {
+				Player::Instance()->stop();
 			} else {
-				Player::Instance()->Start(0);
+				Player::Instance()->start(0);
 			}
 		break;
 		case XK_Page_Up:
@@ -2361,7 +2361,7 @@ const PatternViewColorInfo & PatternView::colorInfo() const {
 
 void PatternView::onTick( double sequenceStart ) {
 	if (pattern_) {
-		int liney = d2i ( (Player::Instance()->PlayPos() - sequenceStart) * pattern_->beatZoom());
+		int liney = d2i ( (Player::Instance()->playPos() - sequenceStart) * pattern_->beatZoom());
 		if (liney != playPos_ ) {			
 			int oldPlayPos = playPos_;
 			playPos_ = liney;

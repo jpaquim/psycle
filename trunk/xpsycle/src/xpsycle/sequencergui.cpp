@@ -250,7 +250,7 @@ void SequencerGUI::Area::resize( )
       xp = std::max(visualChild->preferredWidth(), xp);
 		 if ( visualChild == pLine() ) {
 			if ( sView && sView->patternSequence() ) {
-				int xPos =  std::min( d2i(sView->beatPxLength() * sView->patternSequence()->tickLength()), d2i(Player::Instance()->PlayPos() * sView->beatPxLength()) );
+				int xPos =  std::min( d2i(sView->beatPxLength() * sView->patternSequence()->tickLength()), d2i(Player::Instance()->playPos() * sView->beatPxLength()) );
 				
 				pLine_->setPosition(  xPos, scrollDy(), 1, clientHeight() );
 			}
@@ -277,14 +277,14 @@ void SequencerGUI::Area::onMove(const NMoveEvent & moveEvent) {
 }
 
 void SequencerGUI::Area::onMoveEnd( const NMoveEvent & moveEvent ) {
-  Player::Instance()->Stop();
+  Player::Instance()->stop();
 	Player::Instance()->setPlayPos( newBeatPos_ );
   lockPlayLine_ = false;
 }
 
 void SequencerGUI::Area::onMoveStart(const NMoveEvent & moveEvent) {
   lockPlayLine_ = true;
-	playing_ = Player::Instance()->_playing;
+	playing_ = Player::Instance()->playing();
   newBeatPos_ = pLine_->left() / (double) sView->beatPxLength();
 }
 /// end of Area class
@@ -1083,7 +1083,7 @@ void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
 	}
 	
 	// stop player
-  Player::Instance()->Stop();
+  Player::Instance()->stop();
 
   // disable driver
 	Player::Instance()->driver().Enable( false );
@@ -1102,7 +1102,7 @@ void SequencerGUI::onRenderAsWave( NButtonEvent * ev )
 
   Player::Instance()->setAutoRecording(true);
 	
-  Player::Instance()->Start(0);
+  Player::Instance()->start();
 
 	recStatusTimer.enableTimer();
 }
@@ -1147,14 +1147,14 @@ void SequencerGUI::onRefreshGUI(NButtonEvent* ev) {
 
 void SequencerGUI::updatePlayPos() {
 	if ( patternSequence() && scrollArea() && !scrollArea()->lockPlayLine() ) {
-	 int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->PlayPos() * beatPxLength()));
+	 int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->playPos() * beatPxLength()));
 	 int oxPos = d2i(std::min(patternSequence()->tickLength()* beatPxLength(), oldPlayPos_ * beatPxLength()));
    if (oxPos != xPos) {
      scrollArea()->pLine()->setPosition( xPos, scrollArea()->scrollDy(),1,scrollArea()->clientHeight());
      window()->repaint( scrollArea(), NRect( scrollArea()->absoluteLeft() + oxPos, scrollArea()->absoluteTop(), 1, scrollArea()->clientHeight() ) );
 		 scrollArea()->pLine()->repaint();
 	 }
-   oldPlayPos_ = Player::Instance()->PlayPos();
+   oldPlayPos_ = Player::Instance()->playPos();
 	}
 }
 
