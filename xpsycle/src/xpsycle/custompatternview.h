@@ -297,6 +297,7 @@ namespace psycle {
 					NColor textColor_;
 					NColor beatTextColor_;
 					NColor restAreaColor_;
+					NColor cursorTextColor_;
 
 					bool lineGridEnabled_;
 					bool colGridEnabled_;
@@ -313,6 +314,7 @@ namespace psycle {
 
 					void drawStringData(NGraphics* g, int xOff, int line, const std::string & text , const NColor & color);
 
+
 					int eventOffset( int eventnr, int col ) const;
 					int eventWidth( int eventnr ) const;
 					int eventColWidth( int eventnr ) const;
@@ -325,6 +327,7 @@ namespace psycle {
 					int trackRightIdent_;
 
 					std::string defaultNoteStr_;
+
 
 		};
 	}
