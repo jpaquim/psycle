@@ -137,10 +137,3 @@ long NColor::hColorRef( ) const
 {
   return (b << 16) | (g << 8) | r;
 }
-
-
-
-
-
-
-

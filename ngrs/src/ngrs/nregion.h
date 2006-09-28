@@ -39,7 +39,7 @@ public:
     void shrink( int dx, int dy );
     void move( int dx, int dy );
     void setRect( const NRect & rect );
-    void setPolygon( XPoint*  pts, int size );
+    void setPolygon( NPoint*  pts, int size );
     bool isEmpty() const;
     const NRect & rectClipBox() const;
     bool intersects( int x, int y ) const;
@@ -55,26 +55,31 @@ public:
 
 
       // warning: this pointer can change
-    inline Region xRegion() const throw() { return region_; }
+    #ifdef __unix__
+    inline Region xRegion() const  { return region_; }
+
 
     // implicit conversion to X const Region.
-    inline operator const Region () const throw() { return region_; }
+    inline operator const Region () const  { return region_; }
 
     // implicit conversion to X Region.
-    inline operator Region () throw() { return region_; }
-
+    inline operator Region ()  { return region_; }
+    #endif
 
 private:
 
-
+    #ifdef __unix__
     Region region_;
+    #endif
     mutable NRect clipBox;
     mutable bool update;
 };
 
 inline NRegion & NRegion::operator &= ( const NRegion & that )
 {
+  #ifdef __unix__
   XIntersectRegion(*this, that, *this);
+  #endif
   return *this;
 }
 
@@ -87,7 +92,9 @@ inline NRegion operator & ( const NRegion & lhs, const NRegion & rhs )
 
 inline NRegion & NRegion::operator |= ( const NRegion & that )
 {
+  #ifdef __unix__
   XUnionRegion( *this, that, *this );
+  #endif
   return *this;
 }
 
@@ -100,7 +107,9 @@ inline NRegion operator | ( const NRegion & lhs, const NRegion & rhs )
 
 inline NRegion & NRegion::operator -= ( const NRegion & that )
 {
+  #ifdef __unix__
   XSubtractRegion( *this, that, *this );
+  #endif
   return *this;
 }
 
@@ -113,7 +122,9 @@ inline NRegion operator - ( const NRegion & lhs, const NRegion & rhs )
 
 inline NRegion & NRegion::operator ^= ( const NRegion & that )
 {
+  #ifdef __unix__
   XXorRegion( *this, that, *this );
+  #endif
   return *this;
 }
 

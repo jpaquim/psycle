@@ -5,6 +5,8 @@
 #ifndef __MWM_H__
 #define __MWM_H__
 
+#ifdef __unix__
+
 #include <X11/X.h>
 
 typedef struct
@@ -47,3 +49,5 @@ typedef struct
 #define MWM_TEAROFF_WINDOW      (1L<<0)
 
 #endif /* __MWM_H__ */
+
+#endif

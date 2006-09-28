@@ -28,18 +28,27 @@
 #include "mwm.h"
 #include "ncrdefine.h"
 
-#include <X11/Xlib.h>
-#include <X11/Xft/Xft.h>
-#include <X11/cursorfont.h>
-#include <X11/keysym.h>
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/cursorfont.h>
+#ifdef __unix__
+  #include <X11/Xlib.h>
+  #include <X11/Xft/Xft.h>
+  #include <X11/cursorfont.h>
+  #include <X11/keysym.h>
+  #include <X11/Xutil.h>
+  #include <X11/Xatom.h>
+  #include <X11/cursorfont.h>
+#else
+  #include <windows.h>
+#endif
 
 /**
 @author Stefan
 */
 
+#ifdef __unix__
+typedef Window WinHandle;
+#else
+typedef HWND WinHandle;
+#endif
 
 class NAtoms;
 class NWindow;
@@ -60,43 +69,52 @@ class NSystem{
 			}
 		// Singleton pattern end
 
+    WinHandle rootWindow() const;
+
+    #ifdef __unix__
     Display* dpy() const;
+    Visual *visual() const;
+    Colormap colormap() const;
+    #endif
     int depth() const;
     int pixelSize( int depth ) const;
     int screen() const;
-    Window rootWindow() const;
-    Visual *visual() const;
-    Colormap colormap() const;
+
+
+
     int screenWidth() const;
     int screenHeight() const;
 
     int keyState() const;
     void setKeyState(int keyState);
 
-    Window registerWindow(Window parent);
-    void destroyWindow(Window win);
-    void setWindowPosition(Window win, int left, int top, int width, int height);
-    void setWindowSize(Window win, int width, int height);
-    void setWindowMinimumSize(Window win, int minWidth, int minHeight);
-    void setWindowGrab(Window win,bool on);
-    void unmapWindow(Window win);
-    void mapWindow(Window win);
+    WinHandle registerWindow(WinHandle parent);
+    void destroyWindow(WinHandle win);
+    void setWindowPosition(WinHandle win, int left, int top, int width, int height);
+    void setWindowSize(WinHandle win, int width, int height);
+    void setWindowMinimumSize(WinHandle win, int minWidth, int minHeight);
+    void setWindowGrab(WinHandle win,bool on);
+    void unmapWindow(WinHandle win);
+    void mapWindow(WinHandle win);
     void flush();
-    void setWindowDecoration(Window win, bool on);
-    void setStayAbove(Window win);
-    bool isWindowMapped(Window win);
+    void setWindowDecoration(WinHandle win, bool on);
+    void setStayAbove(WinHandle win);
+    bool isWindowMapped(WinHandle win);
     NFontStructure getXFontValues(const NFont & nFnt);
-    int windowLeft(Window win);
-    int windowTop(Window win);
+    int windowLeft(WinHandle win);
+    int windowTop(WinHandle win);
     unsigned long getXColorValue(int r, int g, int b);
 
     bool isTrueColor();
     bool propertysActive();
 
-    MWMHints getMotifHints(Window win) const;
-    void setMotifModalMode(Window win);
-    void setMotifHints( Window win , MWMHints hints);
-    void setModalMode(Window win);
+    #ifdef __unix__
+    MWMHints getMotifHints(WinHandle win) const;
+    void setMotifModalMode(WinHandle win);
+    void setMotifHints( WinHandle win , MWMHints hints);
+    #endif
+    
+    void setModalMode(WinHandle win);
     void setFocus( NWindow* window );
 
     const NAtoms & atoms() const;
@@ -123,24 +141,30 @@ private:
     typedef ngrs::color_converter<8, unsigned long int> color_converter;
     color_converter color_converter_;
 
+    WinHandle rootWindow_;
+    #ifdef __unix__
     Display* dpy_;
-    Window rootWindow_;
     Visual *visual_;
     Colormap colormap_;
+    #endif
 
     std::map<NFont,NFontStructure>  xfntCache;
     std::map<NFont,NFontStructure>  xftfntCache;
     std::map<unsigned long,unsigned long> colorCache;
+    #ifdef __unix__
     std::map<int, Cursor> cursorMap;
+    #endif
 
     void initX();
     void matchVisual();
     std::string getFontPattern(const NFont & font);
+    #ifdef __unix
     static bool isWellFormedFont(std::string name);
     static bool isScalableFont(std::string name);
     static std::string fontPattern(const NFont & font);
     static char ** getFontList(Display* dpy, std::string pattern, int* count);
     static std::string getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size);
+    #endif
 
     void initCursorMap();
 

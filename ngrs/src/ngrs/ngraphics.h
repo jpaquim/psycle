@@ -40,7 +40,7 @@ const int nBltStretch = 1;
 
 class NGraphics{
 public:
-    NGraphics(Window winID);
+    NGraphics(WinHandle winID);
 
     ~NGraphics();
 
@@ -91,8 +91,8 @@ public:
     int textAscent();
     int textDescent();
 
-    void drawPolygon(XPoint* pts, int n);
-    void fillPolygon(XPoint* pts, int n);
+    void drawPolygon(NPoint* pts, int n);
+    void fillPolygon(NPoint* pts, int n);
 
     void fillTranslucent(int x, int y, int width, int height, NColor color, int percent);
 
@@ -103,9 +103,11 @@ public:
 
     void setDoubleBuffer(bool on);
 
+    #ifdef __unix__
     Pixmap dbPixmap();
     GC dbGC();
     GC gc();
+    #endif
 
 
     void copyArea(int src_x,int src_y,unsigned width,unsigned height,int dest_x,int dest_y, bool dblBuffer_ = true);
@@ -128,11 +130,13 @@ private:
    int dblWidth_;
    int dblHeight_;
 
-   Window win;
+   WinHandle win;
+   #ifdef __unix__
    GC gc_;      // GC from Window
    GC gcp;     // GC from Pixmap for double buffering
 
    Pixmap doubleBufferPixmap_;
+   #endif
 
    void createDblBufferHandles();
    void destroyDblBufferHandles();
@@ -140,9 +144,11 @@ private:
    void drawXftString(int x, int y, const char* s);
 
    NFontStructure fntStruct;
+   #ifdef __unix__
    XftColor fFtColor;
    XftDraw* drawDbl;
    XftDraw* drawWin;
+   #endif
 
    NRegion region_;
 

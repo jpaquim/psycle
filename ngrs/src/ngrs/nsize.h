@@ -21,7 +21,6 @@
 #define NSIZE_H
 
 #include "ncolor.h"
-#include "nfont.h"
 #include "nsize.h"
 
 

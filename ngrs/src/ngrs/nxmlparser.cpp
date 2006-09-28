@@ -19,10 +19,12 @@
  ***************************************************************************/
 #include "nxmlparser.h"
 #include <iostream>
+#ifdef __unix__
 #include <xercesc/parsers/SAXParser.hpp>
 #include <xercesc/sax2/Attributes.hpp>
 #include <xercesc/framework/MemBufInputSource.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
+
 
 XERCES_CPP_NAMESPACE_USE;
 
@@ -160,7 +162,7 @@ void SAX2Handler::fatalError(const SAXParseException& exception)
          << " at line: " << exception.getLineNumber()
          << std::endl;
 }
-
+#endif
 
 
 NXmlParser::NXmlParser()
@@ -175,6 +177,7 @@ NXmlParser::~NXmlParser()
 
 void NXmlParser::parseFile( const std::string & fileName )
 {
+  #ifdef __unix__
   attrs = 0;
 
   try {
@@ -215,10 +218,12 @@ void NXmlParser::parseFile( const std::string & fileName )
   delete parser;
   delete defaultHandler;
   XMLPlatformUtils::Terminate();
+  #endif
 }
 
 std::string NXmlParser::getAttribValue( const std::string & name ) const
 {
+  #ifdef __unix__
    std::string erg;
        try {
        XMLCh* str = XMLString::transcode(name.c_str());
@@ -302,4 +307,5 @@ int NXmlParser::parseString( const std::string & text )
         return 4;
    else
         return 0;
+  #endif
 }

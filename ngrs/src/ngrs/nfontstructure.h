@@ -20,8 +20,10 @@
 #ifndef NFONTSTRUCTURE_H
 #define NFONTSTRUCTURE_H
 
-#include <X11/Xlib.h>
-#include <X11/Xft/Xft.h>
+#ifdef __unix__
+ #include <X11/Xlib.h>
+ #include <X11/Xft/Xft.h>
+#endif
 #include "ncolor.h"
 
 
@@ -35,9 +37,11 @@ public:
 
      ~NFontStructure();
 
-
-    XFontStruct* xFnt;
-    XftFont*  xftFnt;
+    #ifdef __unix__
+     XFontStruct* xFnt;
+     XftFont*  xftFnt;
+    #endif
+    
     NColor textColor;
     bool antialias;
 

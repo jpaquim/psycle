@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "natoms.h"
 
+#ifdef __unix__
+
 NAtoms::NAtoms(Display* dpy)
 {
   wm_delete_window_ = XInternAtom(dpy, "WM_DELETE_WINDOW\0", False);;
@@ -77,3 +79,4 @@ Atom NAtoms::targets( ) const
   return targets_;
 }
 
+#endif

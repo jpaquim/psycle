@@ -23,13 +23,14 @@
 #include "sigslot.h"
 #include <string>
 
+#ifdef __unix__
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 #include <xercesc/sax2/DefaultHandler.hpp>
 #include <xercesc/util/XMLString.hpp>
 
-
+#endif
 /**
 @author Stefan Nattkemper
 */
@@ -46,8 +47,9 @@ public:
     int parseString( const std::string & text );
     std::string getAttribValue(const std::string & name) const;
 
+    #ifdef __unix__
     const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
-
+    #endif
 
 
 };

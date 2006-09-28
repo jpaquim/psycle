@@ -21,12 +21,15 @@
 
 NRegion::NRegion()
 {
+  #ifdef __unix__
   region_ = XCreateRegion();
+  #endif
   update = true;
 }
 
 NRegion::NRegion( const NRect & rect )
 {
+  #ifdef __unix__
   region_ = XCreateRegion();
   XRectangle rectangle;
   rectangle.x= (short) rect.left();
@@ -34,16 +37,20 @@ NRegion::NRegion( const NRect & rect )
   rectangle.width=(unsigned short)  rect.width();
   rectangle.height=(unsigned short) rect.height();
   XUnionRectWithRegion( &rectangle, region_, region_ );
+  #endif
   update = true;
 }
 
 NRegion::~NRegion()
 {
+  #ifdef __unix__
   XDestroyRegion( region_ );
+  #endif
 }
 
 void NRegion::setRect( const NRect & rect )
 {
+  #ifdef __unix__
   XDestroyRegion(region_);
   region_ = XCreateRegion();
   XRectangle rectangle;
@@ -52,31 +59,43 @@ void NRegion::setRect( const NRect & rect )
   rectangle.width=(unsigned short)  rect.width();
   rectangle.height=(unsigned short) rect.height();
   XUnionRectWithRegion( &rectangle, region_, region_ );
+  #endif
   update = true;
 }
 
 
 // shouldnt be XPoint
-void NRegion::setPolygon( XPoint*  pts , int size )
+void NRegion::setPolygon( NPoint*  pts , int size )
 {
+  #ifdef __unix__
   XDestroyRegion( region_ );
-  region_ = XPolygonRegion( pts, size, WindingRule );
+  XPoint pt[size];
+  for (int i = 0; i< size; i++) {
+    pt[i].x = pts[i].x();
+    pt[i].y = pts[i].y();
+  }
+  region_ = XPolygonRegion( pt, size, WindingRule );
+  #endif
   update = true;
 }
 
 
 NRegion::NRegion( const NRegion & src )
 {
+  #ifdef __unix__
   region_ = XCreateRegion();
   XUnionRegion( region_, src.xRegion(), region_ );
+  #endif
   update = true;
 }
 
 const NRegion & NRegion::operator =( const NRegion & rhs )
 {
+  #ifdef __unix__
   XDestroyRegion( region_);
   region_ = XCreateRegion();
   XUnionRegion( region_, rhs.xRegion(), region_ );
+  #endif
   update = true;
   return *this;
 }
@@ -84,27 +103,39 @@ const NRegion & NRegion::operator =( const NRegion & rhs )
 
 bool NRegion::isEmpty( ) const
 {
+  #ifdef __unix__
   return XEmptyRegion( region_ );
+  #else
+  ;
+  #endif
 }
 
 void NRegion::move( int dx, int dy )
 {
+  #ifdef __unix__
   XOffsetRegion( region_, dx, dy );
+  #endif
   update = true;
 }
 
 void NRegion::shrink( int dx, int dy )
 {
+  #ifdef __unix__
   XShrinkRegion( region_, dx, dy );
+  #else
+  ;
+  #endif
   update = true;
 }
 
 const NRect & NRegion::rectClipBox( ) const
 {
   if ( update ) {
+    #ifdef __unix__
     XRectangle r;
     XClipBox( region_, &r  );
     clipBox.setPosition( r.x, r.y, r.width, r.height );
+    #endif
     update = false;
   }
   return clipBox;
@@ -112,5 +143,7 @@ const NRect & NRegion::rectClipBox( ) const
 
 bool NRegion::intersects( int x, int y ) const
 {
+  #ifdef __unix__
   return XPointInRegion( region_, x, y );
+  #endif
 }

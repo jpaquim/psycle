@@ -40,10 +40,12 @@ public:
     int width()  const;
     int height() const;
 
+    #ifdef __unix__
     Pixmap X11Pixmap() const;
     Pixmap X11ShapePixmap() const;
+    #endif
 
-    Window owner() const;
+    WinHandle owner() const;
 
     void loadFromFile( const std::string & filename );
     void createFromXpmData(const char** data);
@@ -55,10 +57,12 @@ private:
 
     int width_, height_;
 
+    #ifdef __unix__
     Pixmap pixmap_;
     Pixmap shapepixmap_;
+    #endif
 
-    Window owner_;
+    WinHandle owner_;
 };
 
 #endif

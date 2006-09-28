@@ -92,6 +92,7 @@ void NListBox::add( NCustomItem * component )
 
 void NListBox::onItemPress( NButtonEvent * ev)
 {
+  #ifdef __unix__
   if (ev->button() == 1) {
     NVisualComponent* item = static_cast<NVisualComponent*>(ev->sender());
 
@@ -104,6 +105,7 @@ void NListBox::onItemPress( NButtonEvent * ev)
   } else {
       // todo add mousewheel code
   }
+  #endif
 }
 
 void NListBox::onItemSelected( NCustomItem * item )

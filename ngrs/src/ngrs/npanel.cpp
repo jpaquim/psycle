@@ -22,7 +22,7 @@
 
 NPanel::NPanel()
  : NVisualComponent()
-{
+{  
   rectShape = new NRectShape();
   setGeometry( rectShape );
   setTransparent(false);

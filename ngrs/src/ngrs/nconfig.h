@@ -26,18 +26,20 @@
 
 #include "nskin.h"
 #include <map>
+#ifdef __unix__
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 #include <xercesc/sax2/DefaultHandler.hpp>
 #include <xercesc/util/XMLString.hpp>
+#endif
 #include "nobject.h"
 
 class NBorder;
 
-
+#ifdef __unix__
 class XERCES_CPP_NAMESPACE_QUALIFIER Attributes;
-
+#endif
 
 class NConfig : public NObject {
 
@@ -60,7 +62,9 @@ public:
 
     signal1<const std::string &> tagParse;
 
+    #ifdef __unix__
     const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
+    #endif
 
 private:
 

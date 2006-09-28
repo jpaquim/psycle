@@ -46,7 +46,9 @@ public:
 
 private:
 
+  #ifdef __unix__
     XRectangle rectangle;
+  #endif
 };
 
 #endif

@@ -50,16 +50,20 @@ public:
 
     void setDepth(int depth);
 
+    #ifdef __unix__
     XImage* X11data() const;
-    XImage* X11ClpData() const;
+    XImage* X11ClpData() const;    
 
     void setX11Data(XImage* ximage, XImage* clp_);
+    #endif
 
     void loadFromFile(const std::string & filename);
     void createFromXpmData(const char** data);
 
+    #ifdef __unix__
 		// this really should be a cloned NBItmap then.
 		XImage* cloneXImage( XImage* src_xi );
+    #endif
 
     bool empty() const;
 
@@ -70,10 +74,12 @@ private:
     int height_;
     pRGBA data_;
 
+    #ifdef __unix__
     XImage* xi;
     XImage* clp;
+    #endif
 
-		void deleteBitmapData();
+	void deleteBitmapData();
 
 		
 };

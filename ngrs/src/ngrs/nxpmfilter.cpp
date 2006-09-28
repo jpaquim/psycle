@@ -33,6 +33,7 @@ NXPMFilter::~NXPMFilter()
 
 NBitmap NXPMFilter::loadFromFile( const std::string & filename )
 {
+  #ifdef __unix__
   XpmColorSymbol cs[256];
   XpmAttributes attr;
   attr.valuemask = XpmCloseness;
@@ -55,8 +56,9 @@ NBitmap NXPMFilter::loadFromFile( const std::string & filename )
   if (err == XpmSuccess) {
      bitmap.setX11Data(xi,clp);
   } else throw "couldn`t open file";
-
+  
   return bitmap;
+  #endif
 }
 
 

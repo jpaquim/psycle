@@ -29,7 +29,9 @@ using namespace std;
 NSystem::NSystem()
 {
   initX();
+  #ifdef __unix__
   atoms_ = new NAtoms( dpy() );
+  #endif
   cursorId_ = nCrDefault;
   initCursorMap();
 }
@@ -37,6 +39,7 @@ NSystem::NSystem()
 
 NSystem::~NSystem()
 {
+  #ifdef __unix__
   delete atoms_;
 	std::cout << "deleting cursor" << std::endl;
   std::map<int,Cursor>::iterator it = cursorMap.begin();
@@ -46,14 +49,17 @@ NSystem::~NSystem()
       XFreeCursor( dpy(), it->second );  
     }
   }
+  #endif
 }
 
 // here you will find all public methods
 
+#ifdef __unix__
 Display* NSystem::dpy( ) const
 {
    return dpy_;
 }
+#endif
 
 int NSystem::depth( ) const
 {
@@ -65,11 +71,12 @@ int NSystem::screen( ) const
   return screen_;
 }
 
-Window NSystem::rootWindow( ) const
+WinHandle NSystem::rootWindow( ) const
 {
     return rootWindow_;
 }
 
+#ifdef __unix__
 Visual * NSystem::visual( ) const
 {
   return visual_;
@@ -79,6 +86,8 @@ Colormap NSystem::colormap( ) const
 {
   return colormap_;
 }
+
+#endif
 
 int NSystem::keyState( ) const
 {
@@ -92,13 +101,16 @@ void NSystem::setKeyState( int keyState )
 
 void NSystem::setCursor( int crIdentifier , NWindow* win) {  
   if ( crIdentifier != cursorId_ && win && win->win() ) {
+    #ifdef __unix__   
     std::map<int,Cursor>::iterator it = cursorMap.find( crIdentifier );
     if ( it != cursorMap.end() ) {
       XDefineCursor( dpy(), win->win(), it->second);
       XFlush( dpy() );
     }
+    #endif
     cursorId_ = crIdentifier;
   }
+  
 }
 
 int NSystem::cursor() const {
@@ -106,18 +118,18 @@ int NSystem::cursor() const {
 }
 
 void NSystem::initCursorMap() {
-
+ #ifdef __unix__
   cursorMap[ nCrDefault   ] = XCreateFontCursor( dpy(), XC_top_left_arrow );
-	cursorMap[ nCrNone      ] = None;
-	cursorMap[ nCrArrow     ] = XCreateFontCursor( dpy(), XC_top_left_arrow );
-	cursorMap[ nCrCross     ] = XCreateFontCursor( dpy(), XC_cross );
-	cursorMap[ nCrIBeam     ] = XCreateFontCursor( dpy(), XC_xterm );
-	cursorMap[ nCrSize      ] = XCreateFontCursor( dpy(), XC_fleur );
-	cursorMap[ nCrSizeNESW  ] = XCreateFontCursor( dpy(), XC_top_right_corner );
-	cursorMap[ nCrSizeNS    ] = XCreateFontCursor( dpy(), XC_double_arrow );
-	cursorMap[ nCrSizeNWSE  ] = XCreateFontCursor( dpy(), XC_bottom_right_corner );
-	cursorMap[ nCrSizeWE    ] = XCreateFontCursor( dpy(), XC_sb_up_arrow);
-	cursorMap[ nCrUpArrow   ] = XCreateFontCursor( dpy(), XC_sb_up_arrow);
+  cursorMap[ nCrNone      ] = None;
+  cursorMap[ nCrArrow     ] = XCreateFontCursor( dpy(), XC_top_left_arrow );
+  cursorMap[ nCrCross     ] = XCreateFontCursor( dpy(), XC_cross );
+  cursorMap[ nCrIBeam     ] = XCreateFontCursor( dpy(), XC_xterm );
+  cursorMap[ nCrSize      ] = XCreateFontCursor( dpy(), XC_fleur );
+  cursorMap[ nCrSizeNESW  ] = XCreateFontCursor( dpy(), XC_top_right_corner );
+  cursorMap[ nCrSizeNS    ] = XCreateFontCursor( dpy(), XC_double_arrow );
+  cursorMap[ nCrSizeNWSE  ] = XCreateFontCursor( dpy(), XC_bottom_right_corner );
+  cursorMap[ nCrSizeWE    ] = XCreateFontCursor( dpy(), XC_sb_up_arrow);
+  cursorMap[ nCrUpArrow   ] = XCreateFontCursor( dpy(), XC_sb_up_arrow);
   cursorMap[ nCrHourGlass ] = XCreateFontCursor( dpy(), XC_watch );
   cursorMap[ nCrDrag      ] = XCreateFontCursor( dpy(), XC_X_cursor );  
   cursorMap[ nCrNoDrop    ] = XCreateFontCursor( dpy(), XC_X_cursor);
@@ -127,11 +139,13 @@ void NSystem::initCursorMap() {
   cursorMap[ nCrNo        ] = XCreateFontCursor( dpy(), XC_X_cursor );
   cursorMap[ nCrAppStart  ] = XCreateFontCursor( dpy(), XC_watch );
   cursorMap[ nCrHandPoint ] = XCreateFontCursor( dpy(), XC_hand1 );
+  #endif
 }
 
-Window NSystem::registerWindow(Window parent )
+WinHandle NSystem::registerWindow(WinHandle parent )
 {
-  Window win_ = 0;
+  WinHandle win_ = 0;
+  #ifdef __unix__
 
   XSetWindowAttributes  attr;
   attr.win_gravity = StaticGravity;
@@ -151,6 +165,8 @@ Window NSystem::registerWindow(Window parent )
   Atom windowClose = atoms().wm_delete_window();
   XSetWMProtocols(dpy(), win_, &windowClose , 1);
 
+  #endif
+
   return win_;
 }
 
@@ -158,6 +174,7 @@ Window NSystem::registerWindow(Window parent )
 
 void NSystem::initX( )
 {
+  #ifdef __unix__
   XInitThreads();
 
   dpy_        = XOpenDisplay(NULL);
@@ -175,13 +192,16 @@ void NSystem::initX( )
   depth_      = DefaultDepth(dpy_, screen_);
 
   matchVisual();
+  #endif
 
   keyState_ = 0;
 }
 
 void NSystem::flush( )
 {
+  #ifdef __unix__
   XFlush(dpy());
+  #endif
 }
 
 NFontStructure NSystem::getXFontValues( const NFont & nFnt )
@@ -190,6 +210,7 @@ NFontStructure NSystem::getXFontValues( const NFont & nFnt )
  NFontStructure cacheFnt;
  std::map<NFont, NFontStructure>::iterator itr;
 
+ #ifdef __unix__
  if (nFnt.antialias() ) {
 
    if ( (itr = xftfntCache.find(nFnt)) == xftfntCache.end())
@@ -225,6 +246,7 @@ NFontStructure NSystem::getXFontValues( const NFont & nFnt )
      fnt =  itr->second;
    }
  }
+ #endif
  fnt.textColor = nFnt.textColor();
  return fnt;
 }
@@ -232,6 +254,7 @@ NFontStructure NSystem::getXFontValues( const NFont & nFnt )
 string NSystem::getFontPattern( const NFont & font )
 {
   string xfntname = "";
+  #ifdef __unix__
   if (isWellFormedFont(font.fontString())) return font.fontString();
   else {
 		// first search alias
@@ -262,9 +285,11 @@ string NSystem::getFontPattern( const NFont & font )
        XFreeFontNames(myFonts);
     }
   }
+  #endif
   return xfntname;
 }
 
+#ifdef __unix__
 bool NSystem::isWellFormedFont(string name)
 {
  string::size_type pos = 0;
@@ -302,6 +327,7 @@ string NSystem::fontPattern(const NFont & font) {
   return string("-*-")+font.name()+string("-")+styleString+string("-")+italicString+string("-*-*-0-0-*-*-*-0-*-*");
 
 }
+
 
 string NSystem::getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size)
 {
@@ -353,8 +379,11 @@ char ** NSystem::getFontList(Display* dpy, string pattern, int* count)
    return XListFonts(dpy, pattern.c_str(), 32767, count);
 }
 
-void NSystem::setWindowPosition(Window win, int left, int top, int width, int height )
+#endif
+
+void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int height )
 {
+  #ifdef __unix__
   if (width  <= 0) width  = 1;
   if (height <= 0) height = 1;
 
@@ -398,11 +427,13 @@ void NSystem::setWindowPosition(Window win, int left, int top, int width, int he
     XConfigureWindow(dpy(),win,value,&wc);
   }
   XSync(dpy(),false);
+  #endif
 }
 
-void NSystem::setWindowSize( Window win, int width, int height )
+void NSystem::setWindowSize( WinHandle win, int width, int height )
 {
-   if (width  <= 0) width  = 1;
+  #ifdef __unix__
+  if (width  <= 0) width  = 1;
   if (height <= 0) height = 1;
 
   XWindowAttributes attrib;
@@ -429,21 +460,26 @@ void NSystem::setWindowSize( Window win, int width, int height )
     XConfigureWindow(dpy(),win,value,&wc);
   }
   XSync(dpy(),false);
+  #endif
 }
 
-void NSystem::setWindowMinimumSize( Window win, int minWidth, int minHeight )
+void NSystem::setWindowMinimumSize( WinHandle win, int minWidth, int minHeight )
 {
+  #ifdef __unix__
   XSizeHints *size_hints = XAllocSizeHints();
     size_hints->flags = PMinSize;
     size_hints->min_width  = minWidth;
     size_hints->min_height = minHeight;
     XSetNormalHints(dpy(),win,size_hints);
   XFree(size_hints);
+  #endif
 }
 
-void NSystem::destroyWindow( Window win )
+void NSystem::destroyWindow( WinHandle win )
 {
+  #ifdef __unix__
   XDestroyWindow(dpy(), win);
+  #endif
 }
 
 int NSystem::pixelSize( int depth ) const
@@ -466,59 +502,72 @@ int NSystem::pixelSize( int depth ) const
   return pixelsize;
 }
 
-void NSystem::setWindowDecoration( Window win, bool on )
+void NSystem::setWindowDecoration( WinHandle win, bool on )
 {
+  #ifdef __unix__
   XSetWindowAttributes attribs;
   int vmask = CWOverrideRedirect;
   attribs.override_redirect = !on;
   XChangeWindowAttributes(dpy(), win, vmask, &attribs);
+  #endif
   
 }
 
-void NSystem::unmapWindow( Window  win )
+void NSystem::unmapWindow( WinHandle  win )
 {
+  #ifdef __unix__
   if (isWindowMapped(win)) {
   // XEvent ev;
 
    XUnmapWindow(dpy(), win);//, DefaultScreen(dpy()));
 
   }
+  #endif
 }
 
-void NSystem::mapWindow( Window  win )
+void NSystem::mapWindow( WinHandle  win )
 {
+  #ifdef __unix__
   XMapWindow(dpy(), win);
+  #endif
 }
 
-bool NSystem::isWindowMapped( Window win )
+bool NSystem::isWindowMapped( WinHandle win )
 {
+  #ifdef __unix__
   XWindowAttributes attr;
   XGetWindowAttributes( dpy(), win, &attr );
   return !(attr.map_state == IsUnmapped);
+  #endif
 }
 
-int NSystem::windowLeft( Window win )
+int NSystem::windowLeft( WinHandle win )
 {
+  #ifdef __unix__
   XWindowAttributes actual;
   XGetWindowAttributes(dpy(), win, &actual);
   Window cr; 
   int X,Y; 
   XTranslateCoordinates(dpy(), win, actual.root,0, 0, &X, &Y, &cr);
   return X;
+  #endif
 }
 
-int NSystem::windowTop( Window win )
+int NSystem::windowTop( WinHandle win )
 {
+  #ifdef __unix__
   XWindowAttributes actual;
   XGetWindowAttributes(dpy(), win, &actual);
   Window cr;
   int X,Y;
   XTranslateCoordinates(dpy(), win, actual.root,0, 0, &X, &Y, &cr);
   return Y;
+  #endif
 }
 
-void NSystem::setWindowGrab( Window win, bool on )
+void NSystem::setWindowGrab( WinHandle win, bool on )
 {
+  #ifdef __unix__
   if (win!=0) {
     if (on) {
     XGrabPointer(dpy(), win, true,
@@ -533,20 +582,26 @@ void NSystem::setWindowGrab( Window win, bool on )
       XFlush(dpy());
    }
   }
+  #endif
 }
 
 int NSystem::screenWidth( ) const
 {
+  #ifdef __unix__
   return DisplayWidth(dpy(),screen());
+  #endif
 }
 
 int NSystem::screenHeight( ) const
 {
+  #ifdef __unix__
   return DisplayHeight(dpy(),screen());
+  #endif
 }
 
-void NSystem::setStayAbove( Window win )
+void NSystem::setStayAbove( WinHandle win )
 {
+  #ifdef __unix__
   Atom atom = XInternAtom(dpy(),"ATOM",0);
   Atom _net_wm_state_above = XInternAtom(dpy(), "_NET_WM_STATE_ABOVE", 0);
   Atom data[1];
@@ -554,6 +609,7 @@ void NSystem::setStayAbove( Window win )
   XChangeProperty(dpy(), win, _net_wm_state_above,atom, 32,PropModeReplace,
                    (const unsigned char*) &data, 1);
   XSync(dpy(),true);
+  #endif
 }
 
 unsigned long NSystem::getXColorValue(int r, int g, int b )
@@ -562,6 +618,7 @@ unsigned long NSystem::getXColorValue(int r, int g, int b )
    return color_converter_(r, g, b);
  }
 
+ #ifdef __unix__
  unsigned long key = (r << 16) | (g << 8) | (b);
  unsigned long value = 0;
  std::map<unsigned long, unsigned long>::iterator itr;
@@ -575,10 +632,12 @@ unsigned long NSystem::getXColorValue(int r, int g, int b )
   colorCache[key]= value = BlackPixel(dpy(), 0)^near_color.pixel;
  } else value = itr->second;
  return value;
+ #endif
 }
 
 void NSystem::matchVisual( )
 {
+  #ifdef __unix__
   isTrueColor_ = false;
 
   int visualsMatched;       // Number of visuals that match
@@ -618,6 +677,7 @@ void NSystem::matchVisual( )
   }
 
   XFree(visualList);
+  #endif
 }
 
 bool NSystem::isTrueColor()
@@ -630,6 +690,7 @@ bool NSystem::propertysActive( )
   return true;
 }
 
+#ifdef __unix__
 MWMHints NSystem::getMotifHints( Window win ) const
 {
    MWMHints hint;
@@ -668,9 +729,11 @@ void NSystem::setMotifModalMode(Window win)
   hints.flags |= MWM_HINTS_INPUT_MODE;
   setMotifHints(win,hints);
 }
+#endif
 
-void NSystem::setModalMode( Window win )
+void NSystem::setModalMode( WinHandle win )
 {
+  #ifdef __unix__
   setMotifModalMode(win);
   Atom data[3];
   data[0] = atoms().net_wm_state_modal();
@@ -678,18 +741,23 @@ void NSystem::setModalMode( Window win )
   data[2] = atoms().net_wm_state_stays_on_top();
 
   XChangeProperty(dpy_, win, atoms().net_wm_state(), XA_ATOM, 32, PropModeReplace, (unsigned char *) data, 3);
+  #endif
 }
 
+#ifdef __unix__
 const NAtoms & NSystem::atoms( ) const
 {
   return *atoms_;
 }
+#endif
 
 void NSystem::setFocus( NWindow* window )
 {
+  #ifdef __unix__
   if ( window->mapped() ) {
      XSetInputFocus(dpy(), window->win(), RevertToParent, CurrentTime);
   }
+  #endif
 }
 
 NClipBoard & NSystem::clipBoard( )

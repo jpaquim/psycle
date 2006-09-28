@@ -20,6 +20,8 @@
 #ifndef NATOMS_H
 #define NATOMS_H
 
+#ifdef __unix__
+
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
@@ -57,4 +59,5 @@ private:
 
 };
 
+#endif // unix endif
 #endif

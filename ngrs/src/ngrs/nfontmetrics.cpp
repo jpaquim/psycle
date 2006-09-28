@@ -39,6 +39,7 @@ NFontMetrics::~NFontMetrics()
 
 int NFontMetrics::textWidth( const string & text )
 {
+    #ifdef __unix__
    const char* s = text.c_str();
    if (!fntStruct.antialias) {
      return XTextWidth(fntStruct.xFnt,s,strlen(s));
@@ -49,10 +50,12 @@ int NFontMetrics::textWidth( const string & text )
      ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
     return info.xOff;
    }
+   #endif
 }
 
 int NFontMetrics::textHeight( )
 {
+   #ifdef __unix__
  if (!fntStruct.antialias)
  {
    return (fntStruct.xFnt->max_bounds.ascent+ fntStruct.xFnt->max_bounds.descent);
@@ -61,10 +64,13 @@ int NFontMetrics::textHeight( )
   int d = fntStruct.xftFnt->descent;
   return a + d;
 }
+
+#endif
 }
 
 int NFontMetrics::textAscent( )
 {
+  #ifdef __unix__
   if (!fntStruct.antialias)
   {
     return (fntStruct.xFnt->max_bounds.ascent);
@@ -72,10 +78,12 @@ int NFontMetrics::textAscent( )
    int a = fntStruct.xftFnt->ascent;
    return a;
   }
+  #endif
 }
 
 int NFontMetrics::textDescent( )
 {
+ #ifdef __unix__
  if (!fntStruct.antialias)
  {
    return (fntStruct.xFnt->max_bounds.descent);
@@ -83,6 +91,7 @@ int NFontMetrics::textDescent( )
   int d = fntStruct.xftFnt->descent;
   return d;
  }
+ #endif
 }
 
 void NFontMetrics::setFont( const NFont & font )
