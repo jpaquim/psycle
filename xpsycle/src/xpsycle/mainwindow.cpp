@@ -1350,33 +1350,33 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 {
   if ( selectedChildView_ ) {
 		switch (event.scancode() ) {
-			case XK_F2 :
+			case NK_F2 :
 				selectedChildView_->showMachineView();
 			break;
-			case XK_F3 :
+			case NK_F3 :
 				selectedChildView_->showPatternView();
 			break;
-			case XK_F4 :
+			case NK_F4 :
 				selectedChildView_->showWaveView();
 			break;
-			case XK_F5 :
+			case NK_F5 :
 				selectedChildView_->showSequencerView();
 			break;
-			case XK_F7 :
+			case NK_F7 :
 				selectedChildView_->play();
 			break;
-			case XK_F9 : {
+			case NK_F9 : {
 				 selectedChildView_->showMachineView();
          NButtonEvent btnEvent( this, 0,0,1, "");
 				 onNewMachine( &btnEvent );
         }
 			break;
-			case XK_Up :
+			case NK_Up :
 				if (NApp::system().keyState() & ControlMask) {
 					selectedChildView_->sequencerBar()->selectPrevPattern();
 				}
 			break;
-			case XK_Down :
+			case NK_Down :
 				if (NApp::system().keyState() & ControlMask) {
 					selectedChildView_->sequencerBar()->selectNextPattern();
 				}
