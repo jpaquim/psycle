@@ -759,11 +759,11 @@ namespace psycle {
 
 			// navigation
 			switch (event.scancode()) {
-				case XK_Page_Up:
+				case NK_Page_Up:
 				break;
-				case XK_Page_Down:				
+				case NK_Page_Down:				
 				break;
-				case XK_Home : 
+				case NK_Home : 
 				{
 					PatCursor oldCursor = cursor();
 					cursor_.setLine( 0 );
@@ -771,7 +771,7 @@ namespace psycle {
           repaintCursorPos( cursor() ); 
         }
 				break;
-				case XK_End:
+				case NK_End:
 				{
 					PatCursor oldCursor = cursor();
 					cursor_.setLine( lineNumber() -1 );
@@ -779,7 +779,7 @@ namespace psycle {
           repaintCursorPos( cursor() ); 
         }
 				break;
-				case XK_Tab  :
+				case NK_Tab  :
 					if ( cursor().track()+1 < trackNumber() ) {
 						PatCursor oldCursor = cursor();
 						setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
@@ -787,7 +787,7 @@ namespace psycle {
 						repaintCursorPos( cursor() ); 
 					}
 				break;
-				case XK_ISO_Left_Tab:
+				case XK_ISO_Left_Tab: // todo ngrs nk code
 					if ( cursor().track() > 0 ) {
 						PatCursor oldCursor = cursor();
 						setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );
@@ -795,19 +795,19 @@ namespace psycle {
 						repaintCursorPos( cursor() ); 
 					}
 				break;
-				case XK_Left :
+				case NK_Left :
             moveCursor(-1,0);
 				break;
-				case XK_Right:
+				case NK_Right:
 						moveCursor(1,0);
 				break;
-				case XK_Up:
+				case NK_Up:
 					if ( cursor().line() - patternStep() >= 0 )
 						moveCursor(0, -patternStep() );
 					else
 						moveCursor(0, -cursor().line() );
 				break;
-				case XK_Down:
+				case NK_Down:
 					if ( cursor().line()+patternStep() < lineNumber() )
 					  moveCursor( 0, patternStep() );
 					else

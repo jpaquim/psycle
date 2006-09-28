@@ -1047,7 +1047,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 				Player::Instance()->start();
 			}
 		break;
-		case XK_Page_Up:
+		case NK_Page_Up:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()-1; y >= 0; y--) {
@@ -1060,7 +1060,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			}
     }
 		break;
-		case XK_Page_Down:
+		case NK_Page_Down:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()+1; y < lineNumber(); y++) {
@@ -1073,39 +1073,39 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			}
 		}
 		break;
-		case XK_Left :
+		case NK_Left :
 			checkLeftScroll( cursor() );
       return;
 		break;
-		case XK_Right:
+		case NK_Right:
 			checkRightScroll( cursor() );
 			return;
 		break;
-    case XK_Down:
+    case NK_Down:
 			pView->checkDownScroll( cursor() );
       return;
     break;
-    case XK_Up:
+    case NK_Up:
 			pView->checkUpScroll( cursor() );
       return;
     break;
-		case XK_End:
+		case NK_End:
       pView->checkDownScroll( cursor() );
       return;
     break;
-    case XK_Home:
+    case NK_Home:
       pView->checkUpScroll( cursor() );
       return;
     break;
-		case XK_Tab:
+		case NK_Tab:
 			checkRightScroll( cursor() );
 			return;
 		break;
-		case XK_ISO_Left_Tab:
+		case XK_ISO_Left_Tab: // todo ngrs eydef code
 			checkLeftScroll( cursor() );
       return;
 		break;
-		case XK_BackSpace:
+		case NK_BackSpace:
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
 			}
@@ -1113,7 +1113,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			pView->checkUpScroll( cursor() );
 			return;
 		break;
-    case XK_Delete:
+    case NK_Delete:
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
 			}
@@ -1564,7 +1564,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				Player::Instance()->start(0);
 			}
 		break;
-		case XK_Page_Up:
+		case NK_Page_Up:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()-1; y >= 0; y--) {
@@ -1577,7 +1577,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			}
     }
 		break;
-		case XK_Page_Down:
+		case NK_Page_Down:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()+1; y < lineNumber(); y++) {
@@ -1590,45 +1590,45 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			}
 		}
 		break;
-		case XK_Left :
+		case NK_Left :
 			checkLeftScroll( cursor() );
       return;
 		break;
-		case XK_Right:
+		case NK_Right:
 			checkRightScroll( cursor() );
 			return;
 		break;
-    case XK_Down:
+    case NK_Down:
 			pView->checkDownScroll( cursor() );
       return;
     break;
-    case XK_Up:
+    case NK_Up:
 			pView->checkUpScroll( cursor() );
       return;
     break;
-		case XK_End:
+		case NK_End:
       pView->checkDownScroll( cursor() );
       return;
     break;
-    case XK_Home:
+    case NK_Home:
       pView->checkUpScroll( cursor() );
       return;
     break;
-		case XK_Tab:
+		case NK_Tab:
 			checkRightScroll( cursor() );
 			return;
 		break;
-		case XK_ISO_Left_Tab:
+		case XK_ISO_Left_Tab: // todo ngrs 
 			checkLeftScroll( cursor() );
       return;
 		break;
-		case XK_BackSpace:
+		case NK_BackSpace:
 			clearCursorPos();
 			moveCursor(0,-1); 
 			pView->checkUpScroll( cursor() );
 			return;
 		break;
-    case XK_Delete:
+    case NK_Delete:
       clearCursorPos();
       moveCursor(0,1); 
 			pView->checkDownScroll( cursor() );

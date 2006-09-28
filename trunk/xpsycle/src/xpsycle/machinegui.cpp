@@ -737,12 +737,12 @@ void GeneratorGUI::onTweakSlide( int machine, int command, int value )
 
 void psycle::host::GeneratorGUI::onKeyPress( const NKeyEvent & event )
 {
-  if ( event.scancode() == XK_Delete ) 
+  if ( event.scancode() == NK_Delete ) 
     deleteRequest.emit(this);
 }
 
 void psycle::host::EffektGUI::onKeyPress( const NKeyEvent & event )
 {
-  if ( event.scancode() == XK_Delete ) 
+  if ( event.scancode() == NK_Delete ) 
     deleteRequest.emit(this);
 }
