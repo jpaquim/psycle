@@ -322,13 +322,12 @@ int NMemo::TextArea::findVerticalStart() const
 
 void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
 {
-  #ifdef __unix__
   if ( !readOnly() ) {
   // dereference to the actual selected Line
   Line & line = *lineIndexItr;
 
   switch ( keyEvent.scancode() ) {
-    case XK_Up:
+    case NK_Up:
        if (!line.setPosLineUp(xupdownpos) && lineIndexItr != lines.begin() ) {
           Line & oldLine = *lineIndexItr;
           lineIndexItr--;
@@ -339,7 +338,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
          line.repaint();
        }
     break;
-    case XK_Down:
+    case NK_Down:
         if (!line.setPosLineDown(xupdownpos) && lineIndexItr != lines.end() -1) {
           Line & oldLine = *lineIndexItr;
           lineIndexItr++;
@@ -348,7 +347,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
           window()->repaint(this,NRegion(oldLine.repaintLineArea()) | NRegion(line.repaintLineArea()),true);
        } else line.repaint();
     break;
-    case XK_Left:
+    case NK_Left:
       if (line.pos() == 0) {
          if (lineIndexItr > lines.begin()) {
             lineIndexItr--;
@@ -363,7 +362,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
         line.repaint();
       }
     break;
-    case XK_Right:
+    case NK_Right:
       if (line.pos() == line.text().length()) {
         lineIndexItr++;
         if (lineIndexItr != lines.end()) {
@@ -379,17 +378,17 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
         line.repaint();
       }
     break;
-    case XK_Home:
+    case NK_Home:
        line.setPosStart();
        xupdownpos = line.screenPos().x();
        repaint();
     break;
-    case XK_End:
+    case NK_End:
        line.setPosEnd();
        xupdownpos = line.screenPos().x();
        repaint();
     break;
-    case XK_BackSpace:
+    case NK_BackSpace:
       if (line.pos() == 0) {
         if (lineIndexItr > lines.begin()) {
           std::string tmp = line.text();
@@ -413,7 +412,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
        xupdownpos = line.screenPos().x();
       }
     break;
-    case XK_Return: {
+    case NK_Return: {
        insertLine(line.deleteFromPos());
        xupdownpos = 0;
        repaint();
@@ -434,7 +433,6 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
        }
   }
   }
-  #endif
 }
 
 void NMemo::TextArea::onMousePress( int x, int y, int button )
