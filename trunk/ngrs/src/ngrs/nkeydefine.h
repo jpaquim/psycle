@@ -31,7 +31,7 @@ const unsigned int NK_Scroll_Lock = XK_Scroll_Lock;
 const unsigned int NK_Escape = XK_Escape;
 const unsigned int NK_Delete = XK_Escape;
 
-/* Cursor control & motion */
+// Cursor control & motion
 
 const unsigned int NK_Home = XK_Home;
 const unsigned int NK_Left = XK_Left;
@@ -45,6 +45,34 @@ const unsigned int NK_Page_Down = XK_Page_Down;
 const unsigned int NK_End = XK_End;
 const unsigned int NK_Begin = XK_Begin;
 
+
+// Auxilliary Functions
+
+const unsigned int NK_F1 = XK_F1;
+const unsigned int NK_F2 = XK_F2;
+const unsigned int NK_F3 = XK_F3;
+const unsigned int NK_F4 = XK_F4;
+const unsigned int NK_F5 = XK_F5;
+const unsigned int NK_F6 = XK_F6;
+const unsigned int NK_F7 = XK_F7;
+const unsigned int NK_F8 = XK_F8;
+const unsigned int NK_F9 = XK_F9;
+const unsigned int NK_F10 = XK_F10;
+const unsigned int NK_F11 = XK_F11;
+const unsigned int NK_F12 = XK_F12;
+const unsigned int NK_F13 = XK_F13;
+const unsigned int NK_F14 = XK_F14;
+const unsigned int NK_F15 = XK_F15;
+const unsigned int NK_F16 = XK_F16;
+const unsigned int NK_F17 = XK_F17;
+const unsigned int NK_F18 = XK_F18;
+const unsigned int NK_F19 = XK_F19;
+const unsigned int NK_F20 = XK_F20;
+const unsigned int NK_F21 = XK_F21;
+const unsigned int NK_F22 = XK_F22;
+const unsigned int NK_F23 = XK_F23;
+const unsigned int NK_F24 = XK_F24;
+
 #else
 
 const unsigned int NK_BackSpace	= VK_BACK;
@@ -56,7 +84,7 @@ const unsigned int NK_Scroll_Lock = VK_SCROLL;
 const unsigned int NK_Escape = VK_ESCAPE;
 const unsigned int NK_Delete = VK_DELETE;
 
-/* Cursor control & motion */
+// Cursor control & motion
 
 const unsigned int NK_Home = VK_HOME;
 const unsigned int NK_Left = VK_LEFT;
@@ -69,5 +97,33 @@ const unsigned int NK_Next = VK_NEXT;
 const unsigned int NK_Page_Down = VK_NEXT;
 const unsigned int NK_End = VK_END;
 const unsigned int NK_Begin = VK_HOME;
+
+// Auxilliary Functions
+
+const unsigned int NK_F1 = VK_F1;
+const unsigned int NK_F2 = VK_F2;
+const unsigned int NK_F3 = VK_F3;
+const unsigned int NK_F4 = VK_F4;
+const unsigned int NK_F5 = VK_F5;
+const unsigned int NK_F6 = VK_F6;
+const unsigned int NK_F7 = VK_F7;
+const unsigned int NK_F8 = VK_F8;
+const unsigned int NK_F9 = VK_F9;
+const unsigned int NK_F10 = VK_F10;
+const unsigned int NK_F11 = VK_F11;
+const unsigned int NK_F12 = VK_F12;
+const unsigned int NK_F13 = VK_F13;
+const unsigned int NK_F14 = VK_F14;
+const unsigned int NK_F15 = VK_F15;
+const unsigned int NK_F16 = VK_F16;
+const unsigned int NK_F17 = VK_F17;
+const unsigned int NK_F18 = VK_F18;
+const unsigned int NK_F19 = VK_F19;
+const unsigned int NK_F20 = VK_F20;
+const unsigned int NK_F21 = VK_F21;
+const unsigned int NK_F22 = VK_F22;
+const unsigned int NK_F23 = VK_F23;
+const unsigned int NK_F24 = VK_F24;
+
 
 #endif
