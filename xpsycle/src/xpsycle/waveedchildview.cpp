@@ -477,10 +477,13 @@ namespace psycle { namespace host {
 
 		g->setForeground(clrBlack);		
 		
-		XPoint points[3];
-		points[0].x = left+5;		points[0].y = top+height-6;
-		points[1].x = left+width-2;	points[1].y = top+1;
-		points[2].x = left+5;		points[2].y = top+1;
+		NPoint points[3];
+		points[0].setX( left+5 );		
+    points[0].setY( top+height-6 );
+		points[1].setX( left+width-2);	
+    points[1].setY( top+1 );
+		points[2].setX( left+5);		
+    points[2].setY( top+1 );
 		g->fillPolygon(points, 3);
 		
 	}

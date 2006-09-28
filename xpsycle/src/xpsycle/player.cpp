@@ -77,7 +77,7 @@ namespace psycle
 
 			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
-			//_SPRChanged = false;
+			
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			timeInfo_.setPlayBeatPos( pos );
@@ -98,7 +98,6 @@ namespace psycle
 
 			// Stop song enviroment
 			_playing = false;
-//			_playBlock = false;
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
 				if(song()._pMachine[i])
