@@ -24,9 +24,16 @@
 #include "nkeyaccelerator.h"
 #include "nxpmfilter.h"
 #include <sys/time.h>
+#ifdef __unix__
 #include <sys/select.h>
+#endif
 #include <unistd.h>
 
+#ifdef __unix__
+typedef XEvent WEvent;
+#else
+typedef int WEvent;
+#endif
 
 class NSystem;
 class NWindow;
@@ -48,9 +55,9 @@ public:
    void run();
    static void runModal(NWindow* modalWin);
    void setMainWindow(NWindow* window);
-   static void addWindow(Window handle, NWindow* window);
+   static void addWindow(WinHandle handle, NWindow* window);
    static void addKeyAccelerator(const NKeyAccelerator & accelerator, NObject* notify);
-   static void removeWindow( Window handle );
+   static void removeWindow( WinHandle handle );
    static NSystem & system();
    static void doRepaint(NWindow* win);
 
@@ -83,18 +90,19 @@ private:
 
    NSplashScreen* splashScreen_;
    static char buffer[40];
+   #ifdef __unix__
    static KeySym mykeysym;
    static XComposeStatus compose;
-
    static Time lastBtnPressTime;
+   #endif
 
-   static std::map<Window,NWindow*> winMap;
+   static std::map<WinHandle,NWindow*> winMap;
    static NWindow* mainWin_;
 
    void eventLoop();
    static void modalEventLoop(NWindow* modalWin);
 
-   static int processEvent(NWindow* win, XEvent* event);
+   static int processEvent(NWindow* win, WEvent* event);
 
    static std::vector<NWindow*> repaintWin_;
    static std::vector<NVisualComponent*> scrollControl_;
@@ -108,8 +116,9 @@ private:
    static void callRemovePipe( );
 
    NXPMFilter* xpmFilter_;
-
+   #ifdef __unix__
    pthread_mutex_t m_Mutex;
+   #endif
    static bool in_thread_;
 
 };

@@ -20,6 +20,7 @@
 #ifndef NPEN_H
 #define NPEN_H
 
+#ifdef __unix__
 #include <X11/Xlib.h>
 
 enum LineStyle {nLineSolid          = LineSolid,
@@ -56,6 +57,45 @@ enum LogicStyle { nClear        = GXclear,
                   nXorInverted  = GXorInverted,
                   nNand         = GXnand,
                   nSet          = GXset };
+
+#else
+enum LineStyle {nLineSolid          = 0,
+                nLineOnOffDash      = 1,
+                nLineLineDoubleDash = 2 };
+
+
+enum CapStyle  {nCapNotLast     =  0,
+                nCapButt        =  1,
+                nCapRound       =  2,
+                nCapProjecting  =  3};
+
+enum JoinStyle { nJoinMiter = 0,
+                 nJoinRound = 1,
+                 nJoinBevel = 2 };
+
+enum FillStyle { nFillSolid          = 0,
+                 nFillTiled          = 1,
+                 nFillStippled       = 2,
+                 nFillOpaqueStippled = 3 };
+
+enum LogicStyle { nClear        = 0,
+                  nAnd          = 1,
+                  nAndReverse   = 2,
+                  nCopy         = 3,
+                  nAndInverted  = 4,
+                  nNoop         = 5,
+                  nXor          = 6,
+                  nOr           = 7,
+                  nNor          = 8,
+                  nEquiv        = 9,
+                  nInvert       = 10,
+                  nOrReverse    = 11,
+                  nCopyInverted = 12,
+                  nXorInverted  = 13,
+                  nNand         = 14,
+                  nSet          = 15 };
+
+#endif
 
 /**
 @author Stefan Nattkemper

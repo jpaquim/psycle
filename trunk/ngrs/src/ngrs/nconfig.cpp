@@ -23,13 +23,16 @@
 #include "nframeborder.h"
 #include "nfile.h"
 #include <iostream>
+#ifdef __unix__
 #include <xercesc/sax2/Attributes.hpp>
 
 
 XERCES_CPP_NAMESPACE_USE;
+#endif
 
 using namespace std;
 
+#ifdef __unix__
 class MySAX2Handler : public DefaultHandler {
 
 public:
@@ -287,7 +290,7 @@ void MySAX2Handler::fatalError(const SAXParseException& exception)
          << endl;
     cout << "ngrs: configuration: using defaults instead" << endl;
 }
-
+#endif
 
 /* XPM */
 const char * hbar_xpm[] = {
@@ -350,7 +353,9 @@ const char * arrow_test_xpm[] = {
 
 NConfig::NConfig()
 {
+  #ifdef __unix__
   attrs = 0;
+  #endif
   std::string oldDir = NFile::workingDir();
   NFile::cdHome();
 //  loadXmlConfig(".ngrs.xml");
@@ -487,7 +492,8 @@ NSkin NConfig::skin( const std::string & identifier )
 
 void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )
 {
-  attrs = 0;
+  #ifdef __unix__
+  attrs = 0;  
 
   try {
     XMLPlatformUtils::Initialize();
@@ -536,6 +542,7 @@ void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )
   delete parser;
   delete defaultHandler;
   XMLPlatformUtils::Terminate();
+  #endif
 }
 
 NSkin* NConfig::findSkin( const std::string & id )
@@ -562,6 +569,7 @@ std::string NConfig::findPath( const std::string & id )
 
 std::string NConfig::getAttribValue( const std::string & name )
 {
+   #ifdef __unix__
    std::string erg;
        try {
        XMLCh* str = XMLString::transcode(name.c_str());
@@ -575,4 +583,5 @@ std::string NConfig::getAttribValue( const std::string & name )
            return "";
        }
       return erg;
+  #endif
 }

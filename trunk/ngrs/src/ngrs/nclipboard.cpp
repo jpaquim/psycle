@@ -60,7 +60,7 @@ NClipBoard::~NClipBoard()
 void NClipBoard::setAsText( const std::string & text )
 {
   data_.clear();
-  data_.setFormat( CF_TEXT );
+  data_.setFormat( 1 );
 
   std::string::const_iterator it = text.begin();
   for ( ; it != text.end(); it++) {
@@ -73,7 +73,7 @@ void NClipBoard::setAsText( const std::string & text )
 std::string NClipBoard::asText( ) const
 {
   std::string text = "";
-  if (data_.format() == CF_TEXT) {
+  if (data_.format() == 1) {
      text = std::string( (const char*) &data_[1] );
   }
 

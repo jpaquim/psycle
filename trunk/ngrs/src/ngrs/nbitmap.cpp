@@ -22,33 +22,48 @@
 #include "nfile.h"
 
 NBitmap::NBitmap()
- : NObject(), depth_(24),width_(0),height_(0), data_(0), xi(0), clp(0)
+ : NObject(), depth_(24),width_(0),height_(0), data_(0)
+ #ifdef __unix__
+ ,xi(0), clp(0)
+ #endif
 {
 
 }
 
-NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(0),height_(0),data_(0),xi(0), clp(0)
+NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(0),height_(0),data_(0)
+#ifdef __unix__
+,xi(0), clp(0)
+#endif
 {
   loadFromFile(filename);
 }
 
-NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_(0),data_(0),xi(0), clp(0)
+NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_(0),data_(0)
+#ifdef __unix__
+,xi(0), clp(0)
+#endif
 {
+  #ifdef __unix__
   createFromXpmData(data);
+  #endif
 }
 
 
 NBitmap::~NBitmap()
 {
-	if (xi)
+  #ifdef __unix__
+  if (xi)
 		XDestroyImage(xi);
   if (clp)
 		XDestroyImage(clp);
+  #endif
 }
 
 unsigned char const * NBitmap::dataPtr( ) const
 {
+  #ifdef __unix__
   return (unsigned char*) xi->data;
+  #endif
 }
 
 void NBitmap::setDepth( int depth )
@@ -58,17 +73,23 @@ void NBitmap::setDepth( int depth )
 
 int NBitmap::depth( ) const
 {
+  #ifdef __unix__
   return (xi != 0) ? xi->depth : 0;
+  #endif
 }
 
 int NBitmap::width( ) const
 {
+  #ifdef __unix__
   return (xi != 0) ? xi->width : 0;
+  #endif
 }
 
 int NBitmap::height( ) const
 {
+  #ifdef __unix__
   return (xi != 0) ? xi->height : 0;
+  #endif
 }
 
 int NBitmap::pixelsize( ) const
@@ -91,13 +112,19 @@ int NBitmap::pixelsize( ) const
   return pixelsize_;
 }
 
+#ifdef __unix__
 XImage * NBitmap::X11data( ) const
 {
   return xi;
 }
+#endif
 
-NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(0),xi(0),clp(0)
+NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(0)
+#ifdef __unix__
+,xi(0),clp(0)
+#endif
 {
+    #ifdef __unix__
 	if (rhs.X11data() == 0) {
 		// empty Bitmap
 		// do just nothing
@@ -111,20 +138,24 @@ NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(
 	} else {
 		clp = cloneXImage( rhs.X11ClpData() );
 	}
-
+ #endif
 }
 
+
+#ifdef __unix__
 void NBitmap::setX11Data( XImage * ximage, XImage* clp_ )
 {
   xi = ximage;
   clp = clp_;
   //data_ = (unsigned char*) xi->data;
 }
+#endif
 
 const NBitmap & NBitmap::operator =( const NBitmap & rhs )
-{
+{      
 	deleteBitmapData();
 
+    #ifdef __unix__
 	if (rhs.X11data() == 0) {
 		// empty Bitmap
 		// do just nothing
@@ -138,7 +169,8 @@ const NBitmap & NBitmap::operator =( const NBitmap & rhs )
 	} else {
 		clp = cloneXImage( rhs.X11ClpData() );
 	}
-	
+
+  #endif	
   return *this;
 }
 
@@ -148,8 +180,10 @@ void NBitmap::loadFromFile( const std::string & filename )
 
   try {
     NBitmap bmp1 = NApp::filter.at(0)->loadFromFile(NFile::replaceTilde(filename));
+    #ifdef __unix__
     xi  = cloneXImage( bmp1.X11data() );
     clp = cloneXImage( bmp1.X11ClpData() );
+    #endif
   } catch (const char* e) {
      throw "couldn`t open file";
   }
@@ -159,7 +193,7 @@ void NBitmap::loadFromFile( const std::string & filename )
 void NBitmap::createFromXpmData(const char** data)
 {
 	deleteBitmapData();
-
+  #ifdef __unix__
   XpmColorSymbol cs[256];
   XpmAttributes attr;
   attr.valuemask = XpmCloseness;
@@ -172,13 +206,17 @@ void NBitmap::createFromXpmData(const char** data)
   if (err == XpmSuccess) {
      xi = xi1;
   }
+  #endif
 }
 
+#ifdef __unix__
 XImage * NBitmap::X11ClpData( ) const
 {
   return clp;
 }
+#endif
 
+#ifdef __unix__
 XImage * NBitmap::cloneXImage( XImage * src_xi )
 {
   if ( src_xi ) {
@@ -203,9 +241,11 @@ XImage * NBitmap::cloneXImage( XImage * src_xi )
 
   return 0;
 }
+#endif
 
 void NBitmap::deleteBitmapData( )
 {
+  #ifdef __unix__
   if (xi) {
 		// destroys the image
 		XDestroyImage(xi);
@@ -217,9 +257,14 @@ void NBitmap::deleteBitmapData( )
 		XDestroyImage(clp);
 		clp = 0;
 	}
+	#endif
 }
 
 bool NBitmap::empty() const {
+  #ifdef __unix__
   return !(xi || clp);
+  #else
+  return true;
+  #endif
 }
 

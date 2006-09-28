@@ -69,7 +69,7 @@ public:
     virtual void setFocus(class NVisualComponent* comp);
     void setGrabEvents(bool on);
 
-    Window win() const;
+    WinHandle win() const;
     NPanel* pane();
     NGraphics* graphics();
     NGraphics* graphics(NVisualComponent* comp);
@@ -144,7 +144,7 @@ private:
 
    NRegion oldDrag;
 
-   Window win_;
+   WinHandle win_;
    NPanel* pane_;
    NGraphics* graphics_;
    NVisualComponent* dragBase_;

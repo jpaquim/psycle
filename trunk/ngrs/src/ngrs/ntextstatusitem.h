@@ -20,7 +20,7 @@
 #ifndef NTEXTSTATUSITEM_H
 #define NTEXTSTATUSITEM_H
 
-#include "ngrs/ncustomstatusitem.h"
+#include "ncustomstatusitem.h"
 
 class NLabel;
 

@@ -87,6 +87,7 @@ void NPopupMenu::onMessage( NEvent * ev )
 
 void NPopupMenu::onKeyPress( const NKeyEvent & event )
 {
+  #ifdef __unix__
     switch (event.scancode()) {
       case XK_Return : {
         if ( lastOverItem ) {
@@ -157,6 +158,7 @@ void NPopupMenu::onKeyPress( const NKeyEvent & event )
       }
       break;
   }
+  #endif
 }
 
 void NPopupMenu::removeChilds( )

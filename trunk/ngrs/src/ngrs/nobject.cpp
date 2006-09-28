@@ -17,9 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "napp.h"
 #include "nobject.h"
 #include "nevent.h"
-#include "napp.h"
 #include "nsystem.h"
 #include "nproperty.h"
 

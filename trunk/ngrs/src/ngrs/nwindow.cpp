@@ -31,17 +31,19 @@ bool NWindow::paintFlag = true;
 
 NWindow::NWindow()
  : NVisual()
-{
+{  
   changeState_ = true;
   dblBuffer_ = true;
   win_ = NApp::system().registerWindow(NApp::system().rootWindow());
   userPos.setPosition(0,0,200,200);
   NApp::addWindow(win_, this);
-  pane_ = new NPanel();
-    pane_->setLayout(NAlignLayout());
+  pane_ = new NPanel();  
+    pane_->setLayout(NAlignLayout());    
     pane_->skin_ = NApp::config()->skin("pane");
     pane_->setName("window_pane");
+    
   add(pane_);
+  
   graphics_ = new NGraphics(win_);
   dragBase_ = 0;
   dragRectPoint = 0;
@@ -72,6 +74,7 @@ void NWindow::setVisible( bool on )
       pane_->resize();
       repaint(pane(),NRect(0,0,width(),height()));
       if (modal_) {
+         #ifdef __unix__
          NApp::system().setModalMode( win() );
          //NApp::system().setStayAbove(win());
          NApp::system().setWindowPosition(win(), userPos.left(),userPos.top(),userPos.width(),userPos.height());
@@ -79,13 +82,16 @@ void NWindow::setVisible( bool on )
          XMapWindow(NApp::system().dpy(),win_);
          checkGeometry();
          NApp::runModal(this);
+         #endif
       } else {
+        #ifdef __unix__
         XSync(NApp::system().dpy(),false);
         NApp::system().setWindowPosition(win(), userPos.left(),userPos.top(),userPos.width(),userPos.height());
         NApp::system().setWindowMinimumSize(win(),minimumWidth(), minimumHeight());
         XMapWindow(NApp::system().dpy(),win_);
         checkGeometry();
         XSync(NApp::system().dpy(),false);
+        #endif
       }
   } else if (mapped()) {
      if (lastOver_!=0) {
@@ -93,14 +99,16 @@ void NWindow::setVisible( bool on )
         lastOver_ = 0;
         dragBase_ = 0;
      }
+     #ifdef __unix__
      XSync(NApp::system().dpy(),false);
      NApp::system().unmapWindow(win_);
      XSync(NApp::system().dpy(),false);
      graphics_->setVisible(on);
+     #endif
   }
 }
 
-Window NWindow::win( ) const
+WinHandle NWindow::win( ) const
 {
   return win_;
 }
@@ -140,16 +148,20 @@ NGraphics * NWindow::graphics( )
 
 int NWindow::width( ) const
 {
+  #ifdef __unix__
   XWindowAttributes attr;
   XGetWindowAttributes( NApp::system().dpy(), win_, &attr );
   return attr.width;
+  #endif
 }
 
 int NWindow::height( ) const
 {
+  #ifdef __unix__
   XWindowAttributes attr;
   XGetWindowAttributes( NApp::system().dpy(), win_, &attr );
   return attr.height;
+  #endif
 }
 
 void NWindow::onMousePress( int x, int y, int button )
@@ -316,7 +328,9 @@ void NWindow::endDrag( NVisualComponent *, int x, int y )
 void NWindow::setTitle( std::string title )
 {
   title_ = title;
+  #ifdef __unix__
   XSetStandardProperties(NApp::system().dpy(), win_, title.c_str(), title.c_str(), 0, NULL, 0, NULL);	
+  #endif  
 }
 
 std::string NWindow::title( )
@@ -687,6 +701,7 @@ const NRect & NWindow::userGeometry( ) const
 
 void NWindow::checkGeometry( )
 {
+  #ifdef __unix__
   // works only with mapped windows
   if (userPos.left() != left() || userPos.top() != top() ) {
       //std::cout << "userleft:" << userPos.left() << std::endl;
@@ -703,6 +718,7 @@ void NWindow::checkGeometry( )
      //std::cout << width() << std::endl;
      //std::cout << height() << std::endl;
   }
+  #endif
 }
 
 void NWindow::setMinimumWidth( int minWidth )
@@ -719,8 +735,10 @@ void NWindow::setMinimumHeight( int minHeight )
 
 void NWindow::requestSelection( )
 {
+   #ifdef __unix__
   XConvertSelection( NApp::system().dpy(), NApp::system().atoms().primary_sel(), NApp::system().atoms().targets(), NApp::system().atoms().primary_sel(), win(), CurrentTime);
 	XFlush(NApp::system().dpy());
+  #endif
 }
 
 void NWindow::onSelection( )

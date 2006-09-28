@@ -21,23 +21,27 @@
 #include "napp.h"
 #include "nvisualcomponent.h"
 
-NGraphics::NGraphics(Window winID)
+NGraphics::NGraphics(WinHandle winID)
 {
   dx_=dy_=0;
   dblWidth_ = 0; dblHeight_ = 0;
   dblBuffer_=false;
+  #ifdef __unix__
   fFtColor.color.red   = 0x0000;
   fFtColor.color.green = 0x0000;
   fFtColor.color.blue  = 0x0000;
   fFtColor.color.alpha = 0xFFFF; // Alpha blending
+  #endif
   win = winID;
 
+  #ifdef __unix__
   gc_     = XCreateGC(NApp::system().dpy(),winID,0,0);
   drawWin = XftDrawCreate(NApp::system().dpy(), win, NApp::system().visual(),NApp::system().colormap());
   
   doubleBufferPixmap_=0;
   gcp = 0;
   drawDbl = 0;
+  #endif
 
 
   visible_ = false;
@@ -50,7 +54,9 @@ NGraphics::NGraphics(Window winID)
 
 NGraphics::~NGraphics()
 {
+  #ifdef __unix__
   XftDrawDestroy(drawWin);
+  #endif
   if (dblBuffer_) {
      destroyDblBufferHandles();
   }
@@ -59,13 +65,22 @@ NGraphics::~NGraphics()
 void NGraphics::fillRect( int x, int y, int width, int height )
 {
   if (dblBuffer_)
+     #ifdef __unix__
      XFillRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
+     #else
+     ;
+     #endif
   else
+     #ifdef __unix__
      XFillRectangle(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
+     #else
+     ;
+     #endif
 }
 
 void NGraphics::createDblBufferHandles( )
 {
+  #ifdef __unix__
   XWindowAttributes attr;
   XGetWindowAttributes( NApp::system().dpy(), win, &attr );
 
@@ -83,15 +98,17 @@ void NGraphics::createDblBufferHandles( )
     drawDbl = 0;
     XSetForeground( NApp::system().dpy(), gc_, oldColor.colorValue() );
   }
-
+  #endif
 }
 
 void NGraphics::destroyDblBufferHandles( )
-{
+{     
   if (dblBuffer_) {
+    #ifdef __unix__
     XFreeGC(NApp::system().dpy(), gcp);
     XFreePixmap(NApp::system().dpy(), doubleBufferPixmap_);
     XftDrawDestroy(drawDbl);
+    #endif
   }
 }
 
@@ -111,7 +128,9 @@ void NGraphics::resize(int width, int height )
 
 void NGraphics::copyDblBuffer( const NRect & repaintArea )
 {
+  #ifdef __unix__
    XCopyArea(NApp::system().dpy(), doubleBufferPixmap_, win, gc_,repaintArea.left(), repaintArea.top(),repaintArea.width(), repaintArea.height(),repaintArea.left(), repaintArea.top());
+  #endif   
 }
 
 void NGraphics::swap(const NRect & repaintArea )
@@ -131,15 +150,18 @@ long NGraphics::yTranslation( )
 
 void NGraphics::setForeground( const NColor & color )
 {
+  #ifdef __unix__
   if (!(oldColor == color)) {
     if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
                else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
     oldColor.setRGB(color.red(),color.green(),color.blue());
   }
+  #endif
 }
 
 void NGraphics::setFont( const NFont & font )
 {
+  #ifdef __unix__
   fntStruct = font.systemFont();
   if (!fntStruct.antialias) {
     if (dblBuffer_)
@@ -147,18 +169,22 @@ void NGraphics::setFont( const NFont & font )
     else
        XSetFont(NApp::system().dpy(),gc_,fntStruct.xFnt->fid);
   }
+  #endif
 }
 
 void NGraphics::drawXftString( int x, int y, const char * s )
 {
+  #ifdef __unix__
    if (dblBuffer_)
       XftDrawString8(drawDbl, &fFtColor, fntStruct.xftFnt , x, y,reinterpret_cast<const FcChar8 *>(s), strlen(s));
    else
      XftDrawString8(drawWin, &fFtColor, fntStruct.xftFnt , x, y,reinterpret_cast<const FcChar8 *>(s), strlen(s));
+   #endif     
 }
 
 void NGraphics::drawText( int x, int y, const std::string & text )
 {
+  #ifdef __unix__
  // if (!fntStruct.font.transparent()) {
  //  NColor old = lastUsed;
    //setForeground(fntStruct.font.bgColor());
@@ -186,9 +212,11 @@ void NGraphics::drawText( int x, int y, const std::string & text )
     fFtColor.color.blue  = color.blue() * ( 0xFFFF/255);
     drawXftString(x+dx_,y+dy_,text.c_str());
   }
+  #endif
 }
 
 void NGraphics::drawText(int x, int y, const std::string & text, const NColor & color ) {
+   #ifdef __unix__
 	if (!fntStruct.antialias)  {
      if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
                   else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
@@ -205,14 +233,23 @@ void NGraphics::drawText(int x, int y, const std::string & text, const NColor & 
     fFtColor.color.blue  = color.blue() * ( 0xFFFF/255);
     drawXftString(x+dx_,y+dy_,text.c_str());
   }
+  #endif
 }
 
 void NGraphics::drawRect( int x, int y, int width, int height )
 {
   if (dblBuffer_)
+    #ifdef __unix__
     XDrawRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
+    #else
+    ;
+    #endif
   else
+    #ifdef __unix__
     XDrawRectangle(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
+    #else
+    ;
+    #endif
 }
 
 void NGraphics::drawRect( const NRect & rect )
@@ -223,38 +260,48 @@ void NGraphics::drawRect( const NRect & rect )
 void NGraphics::drawLine( long x, long y, long x1, long y1 )
 {
   if (dblBuffer_)
+     #ifdef __unix__
      XDrawLine(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
+     #else
+     ;
+     #endif
   else
+     #ifdef __unix__
      XDrawLine(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,x1+dx_,y1+dy_);
+     #else
+     ;
+     #endif
 }
 
-void NGraphics::drawPolygon( XPoint* pts , int n )
+void NGraphics::drawPolygon( NPoint* pts , int n )
 {
   int p2x = 0;
   int p2y = 0;
   for (int i = 0; i < n; i++) {
-      int p1x = pts[i].x;
-      int p1y = pts[i].y;
+      int p1x = pts[i].x();
+      int p1y = pts[i].y();
       if (i<n-1)  {
-        p2x = pts[i+1].x; 
-        p2y = pts[i+1].y;
-      } else { p2x = pts[0].x; p2y = pts[0].y; }
+        p2x = pts[i+1].x(); 
+        p2y = pts[i+1].y();
+      } else { p2x = pts[0].x(); p2y = pts[0].y(); }
       drawLine(p1x,p1y,p2x,p2y);
     }
 }
 
-void NGraphics::fillPolygon( XPoint * pts, int n )
+void NGraphics::fillPolygon( NPoint * pts, int n )
 {
-   XPoint pt[n];
+  #ifdef __unix__
+  XPoint pt[n];
 
   for (int i = 0; i< n; i++) {
-    pt[i].x = pts[i].x +  dx_;
-    pt[i].y = pts[i].y +  dy_;
+    pt[i].x = pts[i].x() +  dx_;
+    pt[i].y = pts[i].y() +  dy_;
   }
   if (dblBuffer_)
      XFillPolygon(NApp::system().dpy(),doubleBufferPixmap_,gcp,pt,n,Complex,CoordModeOrigin);
   else
      XFillPolygon(NApp::system().dpy(),win,gc_,pt,n,Complex,CoordModeOrigin);
+  #endif
 }
 
 NRegion NGraphics::region( )
@@ -269,6 +316,7 @@ void NGraphics::setRegion( const NRegion & region )
 
 void NGraphics::setClipping( const NRegion & region )
 {
+  #ifdef __unix__
   if (dblBuffer_) {
     XSetRegion(NApp::system().dpy(), gcp,region.xRegion());
     XftDrawSetClip(drawDbl,region.xRegion());
@@ -277,10 +325,12 @@ void NGraphics::setClipping( const NRegion & region )
     XSetRegion(NApp::system().dpy(), gc_,region.xRegion());
     XftDrawSetClip(drawWin,region.xRegion());
   }
+  #endif
 }
 
 void NGraphics::fillTranslucent( int x, int y, int width, int height, NColor color, int percent )
 {
+  #ifdef __unix__
   XImage* xi = XGetImage(NApp::system().dpy(),doubleBufferPixmap_,x+dx_,y+dy_,width,height,AllPlanes,ZPixmap);
   unsigned char* data = (unsigned char*) xi->data;
   int pixelsize = NApp::system().pixelSize( NApp::system().depth() );
@@ -297,10 +347,12 @@ void NGraphics::fillTranslucent( int x, int y, int width, int height, NColor col
     }
   XPutImage(NApp::system().dpy(),doubleBufferPixmap_,gcp,xi,0,0,x+dx_,y+dy_,xi->width,xi->height);
   XDestroyImage(xi);
+  #endif
 }
 
 int NGraphics::textWidth( const std::string & text ) const
 {
+   #ifdef __unix__
    const char* s = text.c_str();
    if (!fntStruct.antialias) {
      return XTextWidth(fntStruct.xFnt,s,strlen(s));
@@ -311,10 +363,12 @@ int NGraphics::textWidth( const std::string & text ) const
      ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
     return info.xOff;
    }
+   #endif
 }
 
 int NGraphics::textHeight()
 {
+ #ifdef __unix__
  if (!fntStruct.antialias)
  {
    return (fntStruct.xFnt->max_bounds.ascent+ fntStruct.xFnt->max_bounds.descent);
@@ -323,10 +377,12 @@ int NGraphics::textHeight()
   int d = fntStruct.xftFnt->descent;
   return a + d + 1;
 }
+ #endif
 }
 
 int NGraphics::textAscent( )
-{
+{ 
+  #ifdef __unix__
   if (!fntStruct.antialias)
   {
     return (fntStruct.xFnt->max_bounds.ascent);
@@ -334,18 +390,22 @@ int NGraphics::textAscent( )
    int a = fntStruct.xftFnt->ascent;
    return a;
   }
+  #endif
 }
 
 int NGraphics::textDescent( )
 {
+ #ifdef __unix__
  if (!fntStruct.antialias)
    return (fntStruct.xFnt->max_bounds.descent);
  else 
    return fntStruct.xftFnt->descent;
+ #endif
 }
 
 
 void NGraphics::putStretchBitmap(int x, int y, const NBitmap & bitmap, int width, int height ) {
+   #ifdef __unix__
    if (bitmap.X11data() != 0) {
 
       if (dblBuffer_) {
@@ -397,10 +457,12 @@ void NGraphics::putStretchBitmap(int x, int y, const NBitmap & bitmap, int width
               }
 						} 
           }              
+  #endif
 }
 
 void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
 {
+  #ifdef __unix__
   if (bitmap.X11data() != 0) {
 
       if (dblBuffer_) {
@@ -429,12 +491,13 @@ void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
             XPutImage(NApp::system().dpy(), win, gc_,bitmap.X11data(),
                 0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
   }
-
+  #endif
 }
 
 
 void NGraphics::putBitmap( int destX, int destY, int width, int height, const NBitmap & bitmap, int srcX, int srcY )
 {
+  #ifdef __unix__
    if (bitmap.X11data() != 0) {
 
       if (dblBuffer_)
@@ -444,7 +507,7 @@ void NGraphics::putBitmap( int destX, int destY, int width, int height, const NB
             XPutImage(NApp::system().dpy(), win, gc_,bitmap.X11data(),
                 srcX, srcY, destX+dx_,destY+dy_, width,height);
   }
-
+  #endif
 }
 
 void NGraphics::setDoubleBuffer( bool on )
@@ -458,10 +521,12 @@ void NGraphics::setDoubleBuffer( bool on )
   }
 }
 
+#ifdef __unix__
 Pixmap NGraphics::dbPixmap( )
 {
   return doubleBufferPixmap_;
 }
+
 
 GC NGraphics::dbGC( )
 {
@@ -473,9 +538,11 @@ GC NGraphics::gc( )
   return gc_;
 }
 
+#endif
 
 void NGraphics::copyArea(int src_x,int src_y,unsigned width,unsigned height,int dest_x,int dest_y, bool dblBuffer_)
 {
+    #ifdef __unix__
     if (width != 0 && height != 0) {
       if (dblBuffer_)
            XCopyArea(NApp::system().dpy(),/*win,win,gc_*/doubleBufferPixmap_,doubleBufferPixmap_,gcp,
@@ -483,6 +550,7 @@ void NGraphics::copyArea(int src_x,int src_y,unsigned width,unsigned height,int 
            XCopyArea(NApp::system().dpy(),win,win,gc_,
                   src_x, src_y, width, height, dest_x, dest_y);
     }
+    #endif
 }
 
 
@@ -591,9 +659,17 @@ void NGraphics::drawRoundRect (int x, int y, int width, int height, int arcWidth
 void NGraphics::drawArc( int x, int y, int width, int height, int angle1, int angle2 )
 {
   if (dblBuffer_)
+     #ifdef __unix__
      XDrawArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
+     #else
+     ;
+     #endif     
   else
+     #ifdef __unix__
      XDrawArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
+     #else
+     ;
+     #endif
 }
 
 void NGraphics::fillRect( const NRect & rect )
@@ -652,9 +728,17 @@ void NGraphics::fillRoundRect( int x, int y, int width, int height, int arcWidth
 void NGraphics::fillArc( int x, int y, int width, int height, int angle1, int angle2 )
 {
    if (dblBuffer_)
+     #ifdef __unix__
      XFillArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
+     #else
+     ;
+     #endif                                                                                                        
   else
+     #ifdef __unix__
      XFillArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
+     #else
+     ;
+     #endif
 }
 
 void NGraphics::fillRoundGradient( int x, int y, int width, int height, const NColor & start, const NColor & end, int direction, int arcWidth, int arcHeight )
@@ -804,6 +888,7 @@ void NGraphics::fillRoundGradient( int x, int y, int width, int height, const NC
 
 int NGraphics::textWidth( const NFntString & text ) const
 {
+   #ifdef __unix__
    NFontStructure newFntStruct = fntStruct;
    int pos = 0; int w = 0;
    std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
@@ -836,10 +921,12 @@ int NGraphics::textWidth( const NFntString & text ) const
      }
 
    return w;
+   #endif
 }
 
 void NGraphics::drawText( int x, int y, const NFntString & text )
 {
+  #ifdef __unix__
   int pos = 0; 
   int w = 0;
    std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
@@ -853,6 +940,7 @@ void NGraphics::drawText( int x, int y, const NFntString & text )
      fntIt++;
    }
    drawText(x+w,y,text.textsubstr(pos));
+   #endif
 }
 
 
@@ -923,6 +1011,7 @@ void NGraphics::setVisible( bool on )
 
 void NGraphics::putPixmap( int destX, int destY, int width, int height, NPixmap & pixmap, int srcX, int srcY )
 {
+  #ifdef __unix__
   if (pixmap.X11Pixmap() != 0) {
 
       if (dblBuffer_)
@@ -932,7 +1021,7 @@ void NGraphics::putPixmap( int destX, int destY, int width, int height, NPixmap 
             XCopyArea(NApp::system().dpy(),  pixmap.X11Pixmap(), win ,gc_,
                 srcX, srcY, width, height, destX+dx_,destY+dy_);
   }
-
+  #endif
 }
 
 // sets and gets the pen (line style etc ..)
@@ -940,7 +1029,7 @@ void NGraphics::putPixmap( int destX, int destY, int width, int height, NPixmap 
 void NGraphics::setPen( const NPen & pen )
 {
   pen_ = pen;
-
+  #ifdef __unix__
   if (dblBuffer_) {
     XSetLineAttributes(NApp::system().dpy(), gcp , pen.lineWidth(), (int) pen. lineStyle(), pen.capStyle(), pen.joinStyle() );
     XSetFillStyle(NApp::system().dpy(), gcp, pen.fillStyle() );
@@ -950,6 +1039,7 @@ void NGraphics::setPen( const NPen & pen )
     XSetFillStyle(NApp::system().dpy(), gc() , pen.fillStyle() );
     XSetFunction(NApp::system().dpy(), gc() , pen.function() );
   }
+  #endif
 }
 
 const NPen & NGraphics::pen( ) const

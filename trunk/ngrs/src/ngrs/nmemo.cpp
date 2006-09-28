@@ -322,6 +322,7 @@ int NMemo::TextArea::findVerticalStart() const
 
 void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
 {
+  #ifdef __unix__
   if ( !readOnly() ) {
   // dereference to the actual selected Line
   Line & line = *lineIndexItr;
@@ -433,6 +434,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
        }
   }
   }
+  #endif
 }
 
 void NMemo::TextArea::onMousePress( int x, int y, int button )

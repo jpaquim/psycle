@@ -79,7 +79,7 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-	testMenu();
+//	testMenu();
 
 /*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();

@@ -33,7 +33,7 @@ std::vector<NRuntime*> NApp::removePipe;
 
 using namespace std;
 
-map<Window,NWindow*> NApp::winMap;
+map<WinHandle,NWindow*> NApp::winMap;
 std::vector<NWindow*> NApp::repaintWin_;
 std::vector<NWindow*> NApp::popups_;
 std::map<NKeyAccelerator, NObject*> NApp::keyAccelerator_;
@@ -42,9 +42,11 @@ bool NApp::in_thread_ = false;
 std::vector<NImgFilter*> NApp::filter;
 
 char NApp::buffer[40];
+#ifdef __unix__
 KeySym NApp::mykeysym;
 XComposeStatus NApp::compose;
 Time NApp::lastBtnPressTime;
+#endif
 
 NWindow* NApp::lastOverWin_;
 NWindow* NApp::mainWin_;
@@ -55,7 +57,9 @@ NWindow* NApp::mainWin_;
 NApp::NApp()
 {
   mainWin_ = 0;
+  #ifdef __unix__
   lastBtnPressTime = 0;
+  #endif
   lastOverWin_ = 0;
   xpmFilter_ = new NXPMFilter();
   filter.push_back(xpmFilter_);
@@ -92,14 +96,14 @@ NSystem & NApp::system( )
 
 void NApp::eventLoop( )
 {
-	
+  #ifdef __unix__
 
 
   if (mainWin_!=0) {
        mainWin_->setVisible(true);
   }
   system().flush();
-  XEvent event;
+  WEvent event;
   int n = 0;
   int fd = ConnectionNumber(system().dpy());
   fd_set readfds;
@@ -168,11 +172,13 @@ void NApp::eventLoop( )
     }
     callRemovePipe();
   }
+  #endif
 }
 
 void NApp::modalEventLoop(NWindow* modalWin )
 {
-  XEvent event;
+  #ifdef __unix__
+  WEvent event;
   int n;
   int fd = ConnectionNumber(system().dpy());
   fd_set readfds;
@@ -223,13 +229,15 @@ void NApp::modalEventLoop(NWindow* modalWin )
      }
      NApp::callRemovePipe();
   }
+  #endif
 }
 
 
 
-int NApp::processEvent( NWindow * win, XEvent * event )
+int NApp::processEvent( NWindow * win, WEvent * event )
 {
   int exitloop = 0;
+  #ifdef __unix__
   switch (event->type) {
     case Expose:
         if (win->doubleBuffered()) win->graphics()->swap(NRect(event->xexpose.x,event->xexpose.y,event->xexpose.width,event->xexpose.height)); else
@@ -316,17 +324,18 @@ int NApp::processEvent( NWindow * win, XEvent * event )
 
     default : ;
   }
+  #endif
   return exitloop;
 }
 
-void NApp::addWindow( Window handle, NWindow * window )
+void NApp::addWindow( WinHandle handle, NWindow * window )
 {
   winMap[handle]=window;
 }
 
-void NApp::removeWindow( Window handle )
+void NApp::removeWindow( WinHandle handle )
 {
- std::map<Window,NWindow*>::iterator itr;
+ std::map<WinHandle, NWindow*>::iterator itr;
  if ( (itr = winMap.find(handle)) == winMap.end())
  {
    // not my windows
@@ -360,6 +369,7 @@ NObject * NApp::findAcceleratorNotifier(const NKeyAccelerator & acc )
 
 NWindow * NApp::mouseOverWindow( )
 {
+  #ifdef __unix__
   Window root_win,child_win;
   int x_win; int y_win; unsigned int mask;
   if (  XQueryPointer(system().dpy(),system().rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask)
@@ -370,6 +380,7 @@ NWindow * NApp::mouseOverWindow( )
     else
      return itr->second;
   } else return 0;
+  #endif
 }
 
 void NApp::registerPopupWindow( NWindow * win )
@@ -424,7 +435,8 @@ void NApp::flushEventQueue( )
 
 void NApp::clearEventQueue( )
 {
-  XEvent event;
+  #ifdef __unix__
+  WEvent event;
   int exitLoop;
   while (XPending(system().dpy())) {
      XNextEvent(system().dpy(), &event);
@@ -456,6 +468,7 @@ void NApp::clearEventQueue( )
           }
           repaintWin_.clear();
        }
+  #endif
 }
 
 

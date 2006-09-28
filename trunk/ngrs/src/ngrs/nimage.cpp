@@ -72,6 +72,7 @@ void NImage::paint( NGraphics * g )
   NBitmap* pBmp = 0;
   if (pBitmap_ == 0) pBmp =  &bitmap24bpp_; else pBmp = pBitmap_;
 
+  #ifdef __unix__
   if (pBmp->X11data()!=0) {
 
     switch (halign_) {
@@ -87,6 +88,7 @@ void NImage::paint( NGraphics * g )
 
     g->putBitmap(xp,yp,*pBmp);
   }
+  #endif
 }
 
 void NImage::loadFromFile( std::string filename )
@@ -119,6 +121,7 @@ void NImage::setHAlign( int align )
 
 void NImage::createFromXpmData(const char** data)
 {
+  #ifdef __unix__
   XpmColorSymbol cs[256];
   XpmAttributes attr;
   attr.valuemask = XpmCloseness;
@@ -127,6 +130,7 @@ void NImage::createFromXpmData(const char** data)
   attr.color_key = XPM_GRAY;
 
 	bitmap24bpp_.createFromXpmData(data);
+  #endif
 }
 
 void NImage::setBitmap( const NBitmap & bitmap )

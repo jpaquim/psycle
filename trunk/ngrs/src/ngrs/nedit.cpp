@@ -231,6 +231,8 @@ unsigned int NEdit::pos( ) const
 
 void NEdit::onKeyPress( const NKeyEvent & keyEvent )
 {
+ ///\todo wrap XK_CODES for windows
+ #ifdef __unix__
  if (!readOnly_) {
  int keyCode = keyEvent.scancode();
  switch (keyCode) {
@@ -337,6 +339,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
  //emitActions();
   keyPress.emit(keyEvent);
  }
+ #endif
 }
 
 void NEdit::onExit()

@@ -996,7 +996,7 @@ bool NVisualComponent::tabStop() const {
 }
 
 void NVisualComponent::onKeyPress(const NKeyEvent & event) {
-
+  #ifdef __unix__
   if ( parent() ) {
     switch ( event.scancode() ) {
       case XK_Tab :
@@ -1041,6 +1041,7 @@ void NVisualComponent::onKeyPress(const NKeyEvent & event) {
 			}
     }
   }*/
+  #endif
 }
 
 void NVisualComponent::tabRight() {

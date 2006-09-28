@@ -20,6 +20,10 @@
 #ifndef NPOINT_H
 #define NPOINT_H
 
+#ifdef __unix__
+  #include <X11/Xlib.h>
+#endif
+
 /**
 @author Stefan
 */
@@ -36,6 +40,17 @@ public:
 
     int x() const;
     int y() const;
+
+		#ifdef __unix__
+
+    // implicit conversion to X const XPoint.
+    inline operator const XPoint () const { XPoint pts; pts.x = x_; pts.y = y_; return pts; }
+
+    // implicit conversion to X Region.
+    inline operator XPoint ()  { XPoint pts; pts.x = x_; pts.y = y_; return pts; }
+
+
+		#endif
 
 private:
 

@@ -89,15 +89,15 @@ void NLineShape::calculateRectArea( )
    int dy = (int) (-cos*distance_);
 
 
-   XPoint  pts[4];
-   pts[0].x = p1_.x()+dx;
-   pts[0].y = p1_.y()-dy;
-   pts[1].x = p2_.x()+dx;
-   pts[1].y = p2_.y()-dy;
-   pts[2].x = p2_.x()-dx;
-   pts[2].y = p2_.y()+dy;
-   pts[3].x = p1_.x()-dx;
-   pts[3].y = p1_.y()+dy;
+   NPoint  pts[4];
+   pts[0].setX ( p1_.x() + dx );
+   pts[0].setY ( p1_.y() - dy );
+   pts[1].setX ( p2_.x() + dx );
+   pts[1].setY ( p2_.y() - dy );
+   pts[2].setX ( p2_.x() - dx );
+   pts[2].setY ( p2_.y() + dy );
+   pts[3].setX ( p1_.x() - dx );
+   pts[3].setY ( p1_.y() + dy );
 
    NRegion region;
    region.setPolygon(pts,4);
@@ -193,15 +193,15 @@ NRegion NLineShape::lineToRegion( )
    int dy = (int) ( -cos*distance_);
 
  
-   XPoint  pts[4];
-   pts[0].x = p1_.x()+dx;
-   pts[0].y = p1_.y()-dy;
-   pts[1].x = p2_.x()+dx;
-   pts[1].y = p2_.y()-dy;
-   pts[2].x = p2_.x()-dx;
-   pts[2].y = p2_.y()+dy;
-   pts[3].x = p1_.x()-dx;
-   pts[3].y = p1_.y()+dy;
+   NPoint  pts[4];
+   pts[0].setX ( p1_.x() + dx );
+   pts[0].setY ( p1_.y() - dy );
+   pts[1].setX ( p2_.x() + dx );
+   pts[1].setY ( p2_.y() - dy );
+   pts[2].setX ( p2_.x() - dx );
+   pts[2].setY ( p2_.y() + dy );
+   pts[3].setX ( p1_.x() - dx );
+   pts[3].setY ( p1_.y() + dy );
 
    NRegion region;
    region.setPolygon(pts,4);
