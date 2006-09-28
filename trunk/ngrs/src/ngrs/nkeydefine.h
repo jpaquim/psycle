@@ -45,6 +45,18 @@ const unsigned int NK_Page_Down = XK_Page_Down;
 const unsigned int NK_End = XK_End;
 const unsigned int NK_Begin = XK_Begin;
 
+/* Misc Functions */
+
+const unsigned int NK_Select = XK_Select;
+const unsigned int NK_Print = XK_Print;
+const unsigned int NK_Execute = XK_Execute;
+const unsigned int NK_Insert = XK_Insert;
+const unsigned int NK_Menu = XK_Menu;
+const unsigned int NK_Cancel = XK_Cancel;
+const unsigned int NK_Help = XK_Help;
+const unsigned int NK_Break = XK_Break;
+const unsigned int NK_Num_Lock = XK_Num_Lock;
+
 
 // Auxilliary Functions
 
@@ -97,6 +109,19 @@ const unsigned int NK_Next = VK_NEXT;
 const unsigned int NK_Page_Down = VK_NEXT;
 const unsigned int NK_End = VK_END;
 const unsigned int NK_Begin = VK_HOME;
+
+
+/* Misc Functions */
+
+const unsigned int NK_Select = VK_SELECT;
+const unsigned int NK_Print = VK_PRINT;
+const unsigned int NK_Execute = VK_EXECUTE;
+const unsigned int NK_Insert = VK_INSERT;
+const unsigned int NK_Menu = VK_MENU;
+const unsigned int NK_Cancel = VK_CANCEL;
+const unsigned int NK_Help = VK_HELP;
+const unsigned int NK_Break = VK_CANCEL;
+const unsigned int NK_Num_Lock = VK_NUMLOCK;
 
 // Auxilliary Functions
 
