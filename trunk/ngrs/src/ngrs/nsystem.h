@@ -27,18 +27,19 @@
 #include "nclipboard.h"
 #include "mwm.h"
 #include "ncrdefine.h"
+#include "nkeydefine.h"
 
 #ifdef __unix__
   #include <X11/Xlib.h>
   #include <X11/Xft/Xft.h>
   #include <X11/cursorfont.h>
-  #include <X11/keysym.h>
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
   #include <X11/cursorfont.h>
 #else
   #include <windows.h>
 #endif
+
 
 /**
 @author Stefan

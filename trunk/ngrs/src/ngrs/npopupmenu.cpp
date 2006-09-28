@@ -87,9 +87,8 @@ void NPopupMenu::onMessage( NEvent * ev )
 
 void NPopupMenu::onKeyPress( const NKeyEvent & event )
 {
-  #ifdef __unix__
     switch (event.scancode()) {
-      case XK_Return : {
+      case NK_Return : {
         if ( lastOverItem ) {
           NEvent ev1(this,"ngrs_menu_item_click");
           sendMessage(&ev1);
@@ -97,17 +96,17 @@ void NPopupMenu::onKeyPress( const NKeyEvent & event )
         }
       }
       break;
-      case XK_Left : {
+      case NK_Left : {
         NEvent ev(this, "ngrs_menu_key_left");
         sendMessage(&ev);
       }
       break;
-      case XK_Right : {
+      case NK_Right : {
         NEvent ev(this, "ngrs_menu_key_right");
         sendMessage(&ev);
       }
       break;
-      case XK_Up : {
+      case NK_Up : {
          if ( !lastOverItem && items.size() > 0 ) {
           lastOverItem = items.back();
           NEvent ev1(this, "ngrs_menu_item_do_enter");
@@ -132,7 +131,7 @@ void NPopupMenu::onKeyPress( const NKeyEvent & event )
         }
       }
       break;
-      case XK_Down : {
+      case NK_Down : {
          if ( !lastOverItem && items.size() > 0 ) {
           lastOverItem = *items.begin();
           NEvent ev1(this, "ngrs_menu_item_do_enter");
@@ -158,7 +157,6 @@ void NPopupMenu::onKeyPress( const NKeyEvent & event )
       }
       break;
   }
-  #endif
 }
 
 void NPopupMenu::removeChilds( )

@@ -231,12 +231,10 @@ unsigned int NEdit::pos( ) const
 
 void NEdit::onKeyPress( const NKeyEvent & keyEvent )
 {
- ///\todo wrap XK_CODES for windows
- #ifdef __unix__
  if (!readOnly_) {
  int keyCode = keyEvent.scancode();
  switch (keyCode) {
-    case XK_Left:
+    case NK_Left:
                   if ( pos_>0) {
                     pos_--;
                     if (NApp::system().keyState() & ShiftMask) {
@@ -251,7 +249,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                   }
                   repaint();
                 break;
-    case XK_Right:
+    case NK_Right:
                   if (pos_< text_.length()) {
                     pos_++;
                       if (NApp::system().keyState() & ShiftMask) {
@@ -267,7 +265,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                     repaint();
                   }
                  break;
-    case XK_BackSpace:
+    case NK_BackSpace:
                  if (pos_>0) {
                     if (selStartIdx_!=selEndIdx_) {
                        int s = min(selStartIdx_,selEndIdx_);
@@ -292,7 +290,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                     }
                  }
                  break;
-    case XK_Home:
+    case NK_Home:
                  if (pos_>0) {
                     if (NApp::system().keyState() & ShiftMask) {
                       selEndIdx_   = pos_;
@@ -303,16 +301,16 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                     repaint();
                  }
                 break;
-    case XK_End:
+    case NK_End:
                 if (pos_<text_.length()) {
                    pos_=text_.length();
                    repaint();
                 }
                 break;
-    case XK_Return:
+    case NK_Return:
 
     break;
-    case XK_Delete:
+    case NK_Delete:
                 if (pos_<text_.length()) {
                    //bool flag = true;
                    //if (pattern_!=NULL) pattern_->accept(text_.c_str(),text_.length());
@@ -339,7 +337,6 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
  //emitActions();
   keyPress.emit(keyEvent);
  }
- #endif
 }
 
 void NEdit::onExit()

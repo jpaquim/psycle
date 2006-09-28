@@ -87,6 +87,9 @@ const unsigned int NK_F24 = XK_F24;
 
 #else
 
+#pragma once
+#include <windows.h>
+
 const unsigned int NK_BackSpace	= VK_BACK;
 const unsigned int NK_Tab = VK_TAB;
 const unsigned int NK_Clear = VK_CLEAR;
