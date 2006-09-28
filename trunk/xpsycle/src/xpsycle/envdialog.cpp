@@ -429,7 +429,7 @@ void EnvDialog::EnvPanel::paint(NGraphics *g)
 	int CH=clientHeight();
 //	int CW=512;
 
-	XPoint pol[5];
+	NPoint pol[5];
 
 	//dc.FillSolidRect(0,0,494,CH+1,0x4422CC);
 	g->setForeground(NColor(0,0,0));
@@ -439,20 +439,20 @@ void EnvDialog::EnvPanel::paint(NGraphics *g)
 
 	g->setForeground(NColor(0x4a, 0x81, 0xbb));
 
-	pol[0].x=0;
-	pol[0].y=CH;
+	pol[0].setX( 0  );
+	pol[0].setY( CH );
 
-	pol[1].x=AX;
-	pol[1].y=0;
+	pol[1].setX( AX );
+	pol[1].setY( 0 );
 	
-	pol[2].x=AX+BX;
-	pol[2].y=CH-CX;
+	pol[2].setX( AX+BX );
+	pol[2].setY( CH-CX );
 	
-	pol[3].x=AX+BX;
-	pol[3].y=CH-CX;
+	pol[3].setX( AX+BX );
+	pol[3].setY( CH-CX );
 	
-	pol[4].x=AX+BX+DX;
-	pol[4].y=CH;
+	pol[4].setX( AX+BX+DX );
+	pol[4].setY( CH );
 	
 	//CBrush newBrush(RGB(255, 128, 64));
 	//dc.SelectObject(&newBrush);		

@@ -106,35 +106,35 @@ namespace psycle {
 									(int) max(0, min(255, btcol * deltaColB)));
 
 			NColor polyInnardsColor((int) ( 192 * deltaColR ), (int) (192 * deltaColG) , (int) (192 * deltaColB) );
-			XPoint pol[5];
+			NPoint pol[5];
 
-			pol[0].x = middleX -  (int) (cos    * triangle_size_center);
-			pol[0].y = middleY -  (int) (sin    * triangle_size_center);
-			pol[1].x = pol[0].x + (int) (cos    * triangle_size_tall);
-			pol[1].y = pol[0].y + (int) (sin    * triangle_size_tall);
-			pol[2].x = pol[0].x - (int) (sin    * triangle_size_wide);
-			pol[2].y = pol[0].y + (int) (cos    * triangle_size_wide);
-			pol[3].x = pol[0].x + (int) (cos    * triangle_size_indent);
-			pol[3].y = pol[0].y + (int) (sin    * triangle_size_indent);
-			pol[4].x = pol[0].x + (int) (sin    * triangle_size_wide);
-			pol[4].y = pol[0].y - (int) (cos    * triangle_size_wide);
+			pol[0].setX( middleX -  (int) (cos    * triangle_size_center) );
+			pol[0].setY( middleY -  (int) (sin    * triangle_size_center) );
+			pol[1].setX( pol[0].x() + (int) (cos    * triangle_size_tall) );
+			pol[1].setY( pol[0].y() + (int) (sin    * triangle_size_tall) );
+			pol[2].setX( pol[0].x() - (int) (sin    * triangle_size_wide) );
+			pol[2].setY( pol[0].y() + (int) (cos    * triangle_size_wide) );
+			pol[3].setX( pol[0].x() + (int) (cos    * triangle_size_indent) );
+			pol[3].setY( pol[0].y() + (int) (sin    * triangle_size_indent) );
+			pol[4].setX( pol[0].x() + (int) (sin    * triangle_size_wide) );
+			pol[4].setY( pol[0].y() - (int) (cos    * triangle_size_wide) );
 
-			XPoint fillPoly[7];
+			NPoint fillPoly[7];
 
-			fillPoly[2].x = pol[0].x + (int) (2* cos * triangle_size_indent);
-			fillPoly[2].y = pol[0].y + (int) (2* sin * triangle_size_indent);
-			fillPoly[6].x = fillPoly[2].x;
-			fillPoly[6].y = fillPoly[2].y;
-			fillPoly[1].x = pol[1].x;
-			fillPoly[1].y = pol[1].y;
-			fillPoly[0].x = pol[2].x;
-			fillPoly[0].y = pol[2].y;
-			fillPoly[5].x = pol[2].x;
-			fillPoly[5].y = pol[2].y;
-			fillPoly[4].x = pol[3].x;
-			fillPoly[4].y = pol[3].y;
-			fillPoly[3].x = pol[4].x;
-			fillPoly[3].y = pol[4].y;
+			fillPoly[2].setX( pol[0].x() + (int) (2* cos * triangle_size_indent) );
+			fillPoly[2].setY( pol[0].y() + (int) (2* sin * triangle_size_indent) );
+			fillPoly[6].setX( fillPoly[2].x() );
+			fillPoly[6].setY( fillPoly[2].y() );
+			fillPoly[1].setX( pol[1].x() );
+			fillPoly[1].setY( pol[1].y() );
+			fillPoly[0].setX( pol[2].x() );
+			fillPoly[0].setY( pol[2].y() );
+			fillPoly[5].setX( pol[2].x() );
+			fillPoly[5].setY( pol[2].y() );
+			fillPoly[4].setX( pol[3].x() );
+			fillPoly[4].setY( pol[3].y() );
+			fillPoly[3].setX( pol[4].x() );
+			fillPoly[3].setY( pol[4].y() );
 
 			g->setForeground(rtBrush);
 			g->fillPolygon(fillPoly,3);

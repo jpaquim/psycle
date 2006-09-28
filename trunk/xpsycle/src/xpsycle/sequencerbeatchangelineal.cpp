@@ -82,14 +82,14 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::paint( NGraphics * g )
   int cw = clientWidth();
   int ch = clientHeight();
 
-  XPoint pts[3];
+  NPoint pts[3];
 
-  pts[0].x = cw / 2;
-  pts[0].y = 0;
-  pts[1].x = (cw + tWidth) / 2;
-  pts[1].y = tHeight;
-  pts[2].x = (cw - tWidth) / 2;
-  pts[2].y = tHeight;
+  pts[0].setX( cw / 2 );
+  pts[0].setY( 0 );
+  pts[1].setX( (cw + tWidth) / 2 );
+  pts[1].setY( tHeight );
+  pts[2].setX( (cw - tWidth) / 2 );
+  pts[2].setY( tHeight );
 
   g->setForeground( NColor(0,255,0) );
   g->fillPolygon(pts, 3);

@@ -101,13 +101,13 @@ void CategoryItem::paint( NGraphics * g )
 
   int cw = clientWidth();
 
-  XPoint pts[3];
-  pts[0].x = cw-6;
-  pts[0].y = 0;
-  pts[1].x = cw-1;
-  pts[1].y = 0;
-  pts[2].x = cw-1;
-  pts[2].y = 6;
+  NPoint pts[3];
+  pts[0].setX( cw-6 );
+  pts[0].setY( 0 );
+  pts[1].setX( cw-1 );
+  pts[1].setY( 0 );
+  pts[2].setX( cw-1 );
+  pts[2].setY( 6 );
 
   g->fillPolygon(pts,3);
 }
