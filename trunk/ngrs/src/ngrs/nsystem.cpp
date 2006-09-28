@@ -165,6 +165,32 @@ WinHandle NSystem::registerWindow(WinHandle parent )
   Atom windowClose = atoms().wm_delete_window();
   XSetWMProtocols(dpy(), win_, &windowClose , 1);
 
+	#else
+
+		/*WNDCLASSEX wc;
+
+    wc.cbSize        = sizeof(WNDCLASSEX);
+    wc.style         = 0;
+    wc.lpfnWndProc   = WndProc;
+    wc.cbClsExtra    = 0;
+    wc.cbWndExtra    = 0;
+    wc.hInstance     = hInstance;
+    wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+    wc.lpszMenuName  = NULL;
+    wc.lpszClassName = g_szClassName;
+    wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+
+    if(!RegisterClassEx(&wc))
+    {
+        MessageBox(NULL, "Window Registration Failed!", "Error!",
+            MB_ICONEXCLAMATION | MB_OK);
+        return 0;
+    }*/
+
+
+
   #endif
 
   return win_;
