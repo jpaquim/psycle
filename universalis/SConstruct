@@ -7,7 +7,7 @@
 # init
 
 import packageneric.generic
-packageneric = packageneric.generic.packageneric()
+packageneric = packageneric.generic.packageneric(name = 'psycle')
 
 # source package
 
@@ -17,101 +17,84 @@ source_package = packageneric.source_package(
 	name = 'universalis',
 	version = packageneric.version(0, 0),
 	description = 'universalis platform abstraction layer library',
-	long_description =
-'''\
+	long_description = """\
 universalis is a library which abstracts the few platform specificities
 which are not handled by the boost and glibmm libraries themselves.
 Those abstractions of platforms specificities can be categorized into:
  - tweaks for conformance with the C++ standard library
  - widespread compiler extensions to the C++ standard
  - widespread operating system features
- - widespread CPU features'''
+ - widespread CPU features"""
 )
 
 # external packages
 
 diversalis = packageneric.external_package(
 	pkg_config = 'diversalis >= 0',
-	debian = 'lib-diversalis-0-dev (>= 0)'
+	distribution_packages = {'debian': 'lib-diversalis-0-dev (>= 0)'},
+	url = 'http://psycle.sourceforge.net'
 )
 
 glibmm = packageneric.external_package(
 	pkg_config = 'glibmm-2.4 >= 2.4 gthread-2.0 >= 2.10',
-	debian = 'libglibmm-2.4-dev (>= 2.4)',
-)
-
-# boost base
-class boost_version:
-	wanted = '1.33'
-	wanted_raw = 103300
-	def __str__(self):
-		return 'boost version >= ' + boost_version.wanted
-	def __call__(self):
-		return boost.try_run(
-			'boost version',
-			'''
-				#include <boost/version.hpp>
-				#include <iostream>
-				int main() { return !(BOOST_VERSION >= %i); }
-			\n''' % boost_version.wanted_raw
-		)[0]
-boost = packageneric.external_package(
-	debian = 'libboost-dev (>= ' + boost_version.wanted + ')',
-	frees = [boost_version()]
+	distribution_packages = {'debian': 'libglibmm-2.4-dev (>= 2.4)'},
+	url = 'http://freedesktops.org'
 )
 
 # boost	libraries
+class boost_version:
+	wanted = '1.33'
+	wanted_raw = 103300
 boost_libraries = packageneric.external_package(
-	debian = 'libboost-thread-dev (>= ' + boost_version.wanted + '), libboost-filesystem-dev (>= ' + boost_version.wanted + ')',
-	depends = [boost],
 	builds = [
-		['boost_thread', 'boost/thread/thread.hpp', 'boost::thread::thread thread;'],
-		['boost_filesystem', 'boost/filesystem/path.hpp', 'boost::filesystem::path path;']
-	]
+		['boost version >= %s' % boost_version.wanted, [],
+			"""\
+			#include <boost/version.hpp>
+			#if BOOST_VERSION < %i
+				#error
+			#endif
+			int main() { return 0; }
+			\n""" % boost_version.wanted_raw
+		],
+		['boost thread', ['boost_thread'],
+			"""\
+			#include <boost/thread/thread.hpp>
+			int main() { boost::thread::thread thread; return 0; }
+			\n"""
+		],
+		['boost filesystem', ['boost_filesystem'],
+			"""\
+			#include <boost/filesystem/path.hpp>
+			int main() { boost::filesystem::path path; return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libboost-dev (>= ' + boost_version.wanted + '), libboost-thread-dev (>= ' + boost_version.wanted + '), libboost-filesystem-dev (>= ' + boost_version.wanted + ')'},
+	url = 'http://boost.org'
 )
 
 # modules
 
 universalis = packageneric.module(
 	source_package = source_package,
-	name = 'lib-universalis-' + str(source_package.version().major()),
+	name = 'universalis-' + str(source_package.version().major()),
 	version = source_package.version(),
 	description = source_package.description(),
-	depends = [glibmm, boost_libraries],
-	build_depends = [diversalis]
+	depends = [diversalis, glibmm, boost_libraries]
 )
-import os.path
-if False:
-	universalis_sources = packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp')
-	universalis.add_sources(universalis_sources)
-	universalis_headers = packageneric.find('src', 'universalis', '*.hpp')
-	universalis_sources.append(universalis_headers)
-	source_package.add_files(universalis_sources)
-else:
-	universalis.add_sources(packageneric.find('.', os.path.join('src', 'universalis'), '*.cpp'))
-	universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
-universalis.add_include_path('src')
-if universalis.name() in BUILD_TARGETS:
-	universalis.show()
-	universalis_library = universalis.targets()
+universalis.add_sources(packageneric.find('src', 'universalis', '*.cpp'))
+universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
+universalis.add_build_include_path('src')
+universalis.add_uninstalled_include_path('src')
 
 # pkg-config packages
 
 universalis_package = packageneric.pkg_config_package(
-	name = 'universalis-' + str(source_package.version().major()),
+	name = 'universalis-' + str(universalis.version().major()),
 	version = universalis.version(),
 	description = universalis.description(),
 	modules = [universalis]
 )
-if True: #universalis_package.name() + '.pc' in BUILD_TARGETS:
-	packageneric.information('======== ' + universalis_package.name() + '.pc ========')
-	print universalis_package.pc()
-
-# install
-if False:
-	packageneric.install('lib', universalis.targets())
-	packageneric.install('include', universalis_headers)
-	packageneric.install('pkg-config', universalis_package.targets())
 
 # debian
 
@@ -147,12 +130,5 @@ debian = packageneric.debian(
 	maintainer = bohan,
 	binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
 )
-if 'debian/control' in BUILD_TARGETS:
-	packageneric.information('======== debian/control ========')
-	#debian_control = packageneric.environment().Value(debian.control())
-	print debian.control()
 
-import SCons.Builder
-class DebianControlBuilder(SCons.Builder.BuilderBase):
-	def __init__(self):
-		SCons.Builder.__init__(self)
+packageneric()
