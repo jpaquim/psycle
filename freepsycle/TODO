@@ -1,10 +1,12 @@
 # This is a sorted list, top priority at the top!
 
 *	generic::port::connect move to generic::base::port
+	-> iirc it's done
 
 *	generic::wrappers::node find port by name functions
 
 *	om-synth at savannah
+	-> ok checked.
 
 *	make psycleMFC's src/psycle/plugin.hpp more readable by
 	defining the nested classes outside their enclosing class,
@@ -21,7 +23,9 @@
 	I've tested it on gcc, i hope msvc7.1 won't choke on it.
 	-- bohan
 
+*	X server dpi, again.
+
+*	try to use liboil for optimizations.
+
 *	Remember to update the TODO file.
 	-- bohan
-
-*	X server dpi, again.
