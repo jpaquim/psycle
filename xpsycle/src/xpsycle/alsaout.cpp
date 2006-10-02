@@ -133,7 +133,7 @@ int AlsaOut::audioStart(  )
       return 0;
   }
 
-  printf("Playback device is %s\n", settings().deviceName() );
+  printf("Playback device is %s\n", settings().deviceName().c_str() );
   printf("Stream parameters are %iHz, %s, %i channels\n", rate, snd_pcm_format_name(format), channels);
   printf("Using transfer method: %s\n", "write");
 
