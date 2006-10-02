@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env sh
 
 main()
 {
@@ -13,4 +13,4 @@ main()
 	done
 } &&
 
-main "$0"
+main "$@"
