@@ -132,3 +132,6 @@ debian = packageneric.debian(
 )
 
 packageneric()
+
+#import packageneric.generic.find
+#packageneric.generic.find.print_all_nodes('.')
