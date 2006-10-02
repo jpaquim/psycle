@@ -187,7 +187,7 @@ namespace psycle {
 			HeaderCoordInfo headerCoords_;
 
 			// transforms a "00:00:00:00" str into a nrect "00" any int value
-			NRect SkinReader::getCoords( const std::string & coord ) const;
+			NRect getCoords( const std::string & coord ) const;
 
 			bool patview_line_sep_enabled_;
 			bool patview_col_sep_enabled_;
