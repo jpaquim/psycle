@@ -1,0 +1,240 @@
+#! /usr/bin/env scons
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006 johan boule <bohan@jabber.org>
+# copyright 2006 psycledelics http://psycle.pastnotecut.org
+
+# init
+
+import packageneric.generic
+packageneric = packageneric.generic.packageneric(name = 'ngrs')
+
+# source package
+
+prodos = packageneric.person('Stefan NattKemper', 'natti__@user.sourceforge.net')
+bohan = packageneric.person('Johan Boule', 'bohan.debian@retropaganda.info')
+
+source_package = packageneric.source_package(
+	name = 'ngrs',
+	version = packageneric.version(0, 0),
+	description = 'ngrs graphic toolkit library',
+	long_description = """\
+ngrs is a graphic toolkit library ...
+This library is used by xpsycle."""
+)
+
+# external packages
+
+m = packageneric.external_package(
+	builds = [
+		['m', ['m'],
+			"""\
+			#include <cmath>
+			int main()
+			{
+				float f(std::sin(0.0f));
+				double d(std::sin(0.0));
+				return 0;
+			}
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libc6-dev (>= 0)'},
+	url = 'http://google.ch iso c++'
+)
+
+dl = packageneric.external_package(
+	builds = [
+		['dl', ['dl'],
+			"""\
+			#include <dlfcn.h>
+			int main()
+			{
+				void * lib(dlopen("lib", RTLD_LAZY));
+				void * sym(dlsym(lib, "sym"));
+				char * error(dlerror());
+				int result(dlclose(lib));
+				return 0;
+			}
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libc6-dev (>= 0)'},
+	url = 'http://google.ch posix 1003.1-2003'
+)
+
+pthread = packageneric.external_package(
+	builds = [
+		['pthread', [],
+			"""\
+			#include <pthread.h>
+			int main()
+			{
+				pthread_t self(pthread_self());
+				return 0;
+			}
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libc6-dev (>= 0)'},
+	url = 'http://google.ch posix 1003.1-2003'
+)
+
+x = packageneric.external_package(
+	builds = [
+		['x', ['X11'],
+			"""\
+			#include <X11/Xlib.h>
+			int main()
+			{
+				Display * display(XOpenDisplay(0));
+				XCloseDisplay(display);
+				return 0;
+			}
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libx11-dev (>= 0)'},
+	url = 'http://x.org'
+)
+
+xfixes = packageneric.external_package(
+	depends = [x],
+	# debian has a pkg-config file for it, but it's not sure for other distributions
+	#pkg_config = 'xfixes >= 0',
+	builds = [
+		['xfixes', ['Xfixes'],
+			"""\
+			#include <X11/Xlib.h>
+			#include <X11/extensions/Xfixes.h>
+			// do something with it for more complete check
+			int main() { return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libxfixes-dev (>= 0)'},
+	url = 'http://x.org'
+)
+
+xpm = packageneric.external_package(
+	depends = [x],
+	# debian has a pkg-config file for it, but it's not sure for other distributions
+	#pkg_config = 'xpm >= 0',
+	builds = [
+		['xpm', ['Xpm'],
+			"""\
+			#include <X11/xpm.h>
+			// do something with it for more complete check
+			int main() { return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libxpm-dev (>= 0)'},
+	url = 'http://x.org'
+)
+
+xcursor = packageneric.external_package(
+	depends = [x],
+	# debian has a pkg-config file for it, but it's not sure for other distributions
+	#pkg_config = 'xcursor >= 0',
+	builds = [
+		['xcursor', ['Xcursor'],
+			"""\
+			#include <X11/Xlib.h>
+			#include <X11/Xcursor/Xcursor.h>
+			// do something with it for more complete check
+			int main() { return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libxcursor-dev (>= 0)'},
+	url = 'http://x.org'
+)
+
+xft = packageneric.external_package(
+	pkg_config = 'xft >= 0',
+	distribution_packages = {'debian': 'libxft2-dev (>= 0), libfontconfig1-dev (>= 2.3.1)'},
+	url = 'http://x.org'
+)
+
+freetype = packageneric.external_package(
+	pkg_config = 'freetype2 >= 0',
+	distribution_packages = {'debian': 'libfreetype6-dev (>= 0)'},
+	url = 'http://google.ch ...'
+)
+
+xerces = packageneric.external_package(
+	builds = [
+		['xerces', ['xerces-c'],
+			"""\
+			#include <xercesc/sax/Parser.hpp>
+			// do something with it for more complete check
+			int main() { return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {'debian': 'libxerces27-dev (>= 0) | libxerces26-dev (>= 0)'},
+	url = 'http://apache.org'
+)
+
+# modules
+
+ngrs = packageneric.module(
+	source_package = source_package,
+	name = 'ngrs-' + str(source_package.version().major()),
+	version = source_package.version(),
+	description = source_package.description(),
+	depends = [m, dl, pthread, x, xfixes, xpm, xcursor, xft, freetype, xerces]
+)
+ngrs.add_sources(packageneric.find('src', 'ngrs', '*.cpp'))
+ngrs.add_headers(packageneric.find('src', 'ngrs', '*.hpp'))
+ngrs.add_headers(packageneric.find('src', 'ngrs', '*.h'))
+ngrs.add_build_include_path('src')
+ngrs.add_uninstalled_include_path('src')
+
+# pkg-config packages
+
+ngrs_package = packageneric.pkg_config_package(
+	name = 'ngrs-' + str(ngrs.version().major()),
+	version = ngrs.version(),
+	description = ngrs.description(),
+	modules = [ngrs]
+)
+
+# debian
+
+ngrs_runtime = packageneric.debian_package(
+	name = 'lib-ngrs-' + str(source_package.version().major()),
+	section = 'libs',
+	description = ngrs_package.description(),
+	long_description = 'This package contains the runtime library.'
+)
+#ngrs_runtime.add_files(ngrs_package.binaries())
+
+ngrs_dev = packageneric.debian_package(
+	name = ngrs_runtime.name() + '-dev',
+	section = 'libdevel',
+	description = ngrs_package.description(),
+	long_description = 'This package contains the development files.',
+)
+ngrs_dev.add_depend(ngrs_runtime)
+ngrs_dev.add_build_depends(ngrs_package.build_depends())
+#ngrs_dev.add_files(ngrs_package.headers())
+#ngrs_dev.add_files(ngrs_package.pkg_config())
+
+ngrs_doc = packageneric.debian_package(
+	name = ngrs_runtime.name() + '-doc',
+	section = 'doc',
+	architecture = 'all',
+	description = ngrs_package.description(),
+	long_description = 'This package contains the documentation.'
+)
+
+debian = packageneric.debian(
+	source_package = source_package,
+	maintainer = prodos,
+	uploaders = [prodos, bohan],
+	binary_packages = [ngrs_runtime, ngrs_dev, ngrs_doc],
+)
+
+packageneric(ngrs_package, debian)
