@@ -7,7 +7,7 @@
 # init
 
 import packageneric.generic
-packageneric = packageneric.generic.packageneric()
+packageneric = packageneric.generic.packageneric('psycle')
 
 # source package
 
@@ -17,8 +17,7 @@ source_package = packageneric.source_package(
 	name = 'diversalis',
 	version = packageneric.version(0, 0),
 	description = 'diversalis preprocessor definitions describing the platform',
-	long_description =
-'''\
+	long_description = """\
 diversalis is a set of preprocessor definitions which describe the platform.
 Platform specificities can be categorized into:
  - conformance with the C++ standard library
@@ -26,7 +25,7 @@ Platform specificities can be categorized into:
  - operating system features
  - CPU features
 
-There is no runtime package.'''
+There is no runtime package."""
 )
 
 # pkg-config packages
@@ -36,9 +35,6 @@ diversalis_package = packageneric.pkg_config_package(
 	version = source_package.version(),
 	description = source_package.description()
 )
-if True: #diversalis_package.name() + '.pc' in BUILD_TARGETS:
-	packageneric.information('======== ' + diversalis_package.name() + '.pc ========')
-	print diversalis_package.pc()
 
 # debian
 
@@ -66,7 +62,5 @@ debian = packageneric.debian(
 	section = 'libdevel',
 	binary_packages = [diversalis_dev, diversalis_doc],
 )
-if 'debian/control' in BUILD_TARGETS:
-	packageneric.information('======== debian/control ========')
-	#debian_control = packageneric.environment().Value(debian.control())
-	print debian.control()
+
+packageneric(diversalis_package, debian)

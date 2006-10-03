@@ -131,7 +131,7 @@ debian = packageneric.debian(
 	binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
 )
 
-packageneric()
+packageneric(universalis_package, debian)
 
 #import packageneric.generic.find
 #packageneric.generic.find.print_all_nodes('.')
