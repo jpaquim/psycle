@@ -28,6 +28,11 @@ Platform specificities can be categorized into:
 There is no runtime package."""
 )
 
+# external packages
+
+cstdint = packageneric.external_package(
+)
+
 # pkg-config packages
 
 diversalis_package = packageneric.pkg_config_package(
@@ -35,6 +40,7 @@ diversalis_package = packageneric.pkg_config_package(
 	version = source_package.version(),
 	description = source_package.description()
 )
+diversalis_package.add_include_path('src', uninstalled = True)
 
 # debian
 
