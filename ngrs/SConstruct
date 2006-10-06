@@ -25,6 +25,66 @@ This library is used by xpsycle."""
 
 # external packages
 
+stdcxx = packageneric.external_package(
+	builds = [
+		['stdc++', [],
+			"""\
+			#if !defined __cplusplus
+				#error not a c++ compiler
+			#endif
+			#if !defined __STDC__
+				#error no standard library
+			#endif
+			int main() { return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {
+		'debian': 'libstdc++-dev (>= 0)',
+		'cygwin': 'gcc-g++-3.4.4-1'
+	},
+	url = 'http://google.ch iso c++'
+)
+
+stdint = packageneric.external_package(
+	builds = [
+		['stdint', [],
+			"""\
+			#include <stdint.h>
+			int main() { return 0; }
+			\n"""
+		],
+		['inttypes', [],
+			"""\
+			#include <inttypes.h>
+			int main() { return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {
+		'debian': 'libc-dev (>= 0)',
+		'cygwin': 'cygwin-1.5.19-4'
+	},
+	url = 'http://google.ch iso c++'
+)
+
+cstdint = packageneric.external_package(
+	depends = [stdcxx, stdint],
+	builds = [
+		['cstdint', [],
+			"""\
+			#include <cstdint>
+			int main() { return 0; }
+			\n"""
+		]
+	],
+	distribution_packages = {
+		'debian': 'libstdc++-dev (>= 0)',
+		'cygwin': 'gcc-g++-3.4.4-1'
+	},
+	url = 'http://google.ch iso c++'
+)
+
 m = packageneric.external_package(
 	builds = [
 		['m', ['m'],
@@ -39,7 +99,10 @@ m = packageneric.external_package(
 			\n"""
 		]
 	],
-	distribution_packages = {'debian': 'libc6-dev (>= 0)'},
+	distribution_packages = {
+		'debian': 'libc-dev (>= 0)',
+		'cygwin': 'cygwin-1.5.19-4'
+	},
 	url = 'http://google.ch iso c++'
 )
 
@@ -59,7 +122,7 @@ dl = packageneric.external_package(
 			\n"""
 		]
 	],
-	distribution_packages = {'debian': 'libc6-dev (>= 0)'},
+	distribution_packages = {'debian': 'libc-dev (>= 0)'},
 	url = 'http://google.ch posix 1003.1-2003'
 )
 
@@ -76,7 +139,7 @@ pthread = packageneric.external_package(
 			\n"""
 		]
 	],
-	distribution_packages = {'debian': 'libc6-dev (>= 0)'},
+	distribution_packages = {'debian': 'libc-dev (>= 0)'},
 	url = 'http://google.ch posix 1003.1-2003'
 )
 
@@ -184,13 +247,12 @@ ngrs = packageneric.module(
 	name = 'ngrs-' + str(source_package.version().major()),
 	version = source_package.version(),
 	description = source_package.description(),
-	depends = [m, dl, pthread, x, xfixes, xpm, xcursor, xft, freetype, xerces]
+	depends = [stdcxx, m, dl, pthread, x, xfixes, xpm, xcursor, xft, freetype, xerces]
 )
 ngrs.add_sources(packageneric.find('src', 'ngrs', '*.cpp'))
 ngrs.add_headers(packageneric.find('src', 'ngrs', '*.hpp'))
 ngrs.add_headers(packageneric.find('src', 'ngrs', '*.h'))
-ngrs.add_build_include_path('src')
-ngrs.add_uninstalled_include_path('src')
+ngrs.add_include_path('src', build = True, uninstalled = True)
 
 # pkg-config packages
 
