@@ -6,6 +6,8 @@
 
 # init
 
+SConscript('../diversalis/SConstruct')
+
 import packageneric.generic
 packageneric = packageneric.generic.packageneric(name = 'psycle')
 
@@ -30,14 +32,17 @@ Those abstractions of platforms specificities can be categorized into:
 # external packages
 
 diversalis = packageneric.external_package(
-	pkg_config = 'diversalis >= 0',
+	pkg_config = 'diversalis-0 >= 0',
 	distribution_packages = {'debian': 'lib-diversalis-0-dev (>= 0)'},
 	url = 'http://psycle.sourceforge.net'
 )
 
 glibmm = packageneric.external_package(
-	pkg_config = 'glibmm-2.4 >= 2.4 gthread-2.0 >= 2.10',
-	distribution_packages = {'debian': 'libglibmm-2.4-dev (>= 2.4)'},
+	pkg_config = 'glibmm-2.4 >= 2.4 gmodule-2.0 >= 2.10 gthread-2.0 >= 2.10',
+	distribution_packages = {
+		'debian': 'libglibmm-2.4-dev (>= 2.4)',
+		'cygwin': 'glib2-devel-2.6.6-2' # mm
+	},
 	url = 'http://freedesktops.org'
 )
 
@@ -69,7 +74,10 @@ boost_libraries = packageneric.external_package(
 			\n"""
 		]
 	],
-	distribution_packages = {'debian': 'libboost-dev (>= ' + boost_version.wanted + '), libboost-thread-dev (>= ' + boost_version.wanted + '), libboost-filesystem-dev (>= ' + boost_version.wanted + ')'},
+	distribution_packages = {
+		'debian': 'libboost-dev (>= ' + boost_version.wanted + '), libboost-thread-dev (>= ' + boost_version.wanted + '), libboost-filesystem-dev (>= ' + boost_version.wanted + ')',
+		'cygwin': 'boost-devel-1.33.1-2'
+	},
 	url = 'http://boost.org'
 )
 
@@ -84,8 +92,7 @@ universalis = packageneric.module(
 )
 universalis.add_sources(packageneric.find('src', 'universalis', '*.cpp'))
 universalis.add_headers(packageneric.find('src', 'universalis', '*.hpp'))
-universalis.add_build_include_path('src')
-universalis.add_uninstalled_include_path('src')
+universalis.add_include_path('src', build = True, uninstalled = True)
 
 # pkg-config packages
 
