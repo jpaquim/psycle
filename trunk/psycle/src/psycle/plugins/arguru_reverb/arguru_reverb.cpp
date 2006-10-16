@@ -110,9 +110,9 @@ CMachineParameter const *pParameters[] =
 
 };
 
-#pragma pack(1)		
-
-#pragma pack()
+//#pragma pack(1)		
+//
+//#pragma pack()
 
 CMachineInfo const MacInfo = 
 {
@@ -222,7 +222,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	--psamplesleft;
 	--psamplesright;
 
-	int na=Vals[7];
+	int const na=Vals[7];
 
 	do
 	{
