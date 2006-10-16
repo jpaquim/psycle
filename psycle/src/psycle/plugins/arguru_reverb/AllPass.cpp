@@ -23,10 +23,11 @@ CAllPass::~CAllPass() throw()
 
 void CAllPass::Initialize(int time, int stph)
 {
-	l_Counter=MAX_ALLPASS_DELAY-4;
-	r_Counter=MAX_ALLPASS_DELAY-4;
-	l_delayedCounter=l_Counter-time;
-	r_delayedCounter=r_Counter-(time+stph);
+	Counter=MAX_ALLPASS_DELAY-4;
+	//l_Counter=MAX_ALLPASS_DELAY-4;
+	//r_Counter=MAX_ALLPASS_DELAY-4;
+	l_delayedCounter=Counter-time;
+	r_delayedCounter=l_delayedCounter-stph;
 	
 	if(l_delayedCounter<0)l_delayedCounter=0;
 	if(r_delayedCounter<0)r_delayedCounter=0;
