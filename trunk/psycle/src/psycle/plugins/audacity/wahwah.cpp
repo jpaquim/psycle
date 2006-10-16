@@ -24,10 +24,12 @@
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cstring>
-#include <math.h>
+#include <cmath>
 
 #define lfoskipsamples 30
+#ifndef M_PI
 #define M_PI 3.14159265359f
+#endif
 #define NUMPARAMETERS 5
 
 CMachineParameter const paraLFOFreq = 
@@ -125,7 +127,7 @@ public:
 private:
 	float phase;
 	float lfoskip;
-	unsigned long skipcount;
+	unsigned int skipcount;
 	float xn1_l, xn2_l, yn1_l, yn2_l;
 	float xn1_r, xn2_r, yn1_r, yn2_r;
 	float b0_l, b1_l, b2_l, a0_l, a1_l, a2_l;
@@ -203,11 +205,11 @@ void mi::ParameterTweak(int par, int val)
 	Vals[par]=val;
 	switch(par)
 	{
-		case 0: freq = float(val * .1f); lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate(); break;
-		case 1: phase = float(val  * 0.0055555555555555555555555555555556f * M_PI); break;
-		case 2: depth = float(val * .01f);  break;
-		case 3: res = float(val * .1f);  break;
-		case 4: freqofs = float(val * .01f); break;
+		case 0: freq = float(val) * .1f; lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate(); break;
+		case 1: phase = float(val)  * (0.0055555555555555555555555555555556f * M_PI); break;
+		case 2: depth = float(val) * .01f;  break;
+		case 3: res = 1.f / ( float(val) * .2f);  break;
+		case 4: freqofs = float(val) * .01f; break;
 		default:
 			 break;
 	}
@@ -227,42 +229,46 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			float in_r = *psamplesright * 0.000030517578125f; 
 
 			if ((skipcount++) % lfoskipsamples == 0) {
-				frequency = (1 + cos(skipcount * lfoskip + phase)) * .5f; // Left channel
-				frequency = frequency * depth * (1 - freqofs) + freqofs;
-				frequency = exp((frequency - 1) * 6);
+				frequency = (1.f + cos(float(skipcount) * lfoskip + phase)) * .5f; // Left channel
+				frequency = frequency * depth * (1.f - freqofs) + freqofs;
+				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
 				sn = sin(omega);
 				cs = cos(omega);
-				alpha = sn / (2 * res);
-				b0_l = (1 - cs) * .5f;
-				b1_l = 1 - cs;
-				b2_l = (1 - cs) * .5f;
-				a0_l = 1 + alpha;
-				a1_l = -2 * cs;
-				a2_l = 1 - alpha;
+				alpha = sn * res;
+				//b0_l = (1 - cs) * .5f;
+				b1_l = 1.f - cs;
+				b2_l = b0_l = b1_l * .5f;
+				a0_l = 1.f + alpha;
+				a1_l = -2.f * cs;
+				a2_l = 1.f - alpha;
 				
-				frequency = (1 + cos(skipcount * lfoskip + phase + M_PI)) * .5f; // Right channel
-				frequency = frequency * depth * (1 - freqofs) + freqofs;
-				frequency = exp((frequency - 1) * 6);
+				frequency = (1.f + cos(float(skipcount) * lfoskip + phase + M_PI)) * .5f; // Right channel
+				frequency = frequency * depth * (1.f - freqofs) + freqofs;
+				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
 				sn = sin(omega);
 				cs = cos(omega);
-				alpha = sn / (2 * res);
-				b0_r = (1 - cs) * .5f;
-				b1_r = 1 - cs;
-				b2_r = (1 - cs) * .5f;
-				a0_r = 1 + alpha;
-				a1_r = -2 * cs;
-				a2_r = 1 - alpha;
+				alpha = sn * res;
+				//b0_r = (1 - cs) * .5f;
+				b1_r = 1.f - cs;
+				b2_r = b0_r = b1_r * .5f;
+				a0_r = 1.f + alpha;
+				a1_r = -2.f * cs;
+				a2_r = 1.f - alpha;
 			};
-			float out_l = (b0_l * in_l + b1_l * xn1_l + b2_l * xn2_l - a1_l * yn1_l - a2_l * yn2_l) / a0_l;
+
+			float recip = 1 / (a0_l * a0_r);
+
+
+			float out_l = (b0_l * in_l + b1_l * xn1_l + b2_l * xn2_l - a1_l * yn1_l - a2_l * yn2_l) * a0_r* recip; // /a0_l;
 
 			xn2_l = xn1_l;
 			xn1_l = in_l;
 			yn2_l = yn1_l;
 			yn1_l = out_l+anti_denormal;
 
-			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) / a0_r;
+			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) * a0_l* recip; // / a0_r;
 
 			xn2_r = xn1_r;
 			xn1_r = in_r;
@@ -272,17 +278,17 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 			// Prevents clipping
 
-			if (out_l < -1.0) 
-				out_l = float(-1.0);
-			else if (out_l > 1.0)
-				out_l = float(1.0);                   
+			if (out_l < -1.f) 
+				out_l = -1.f;
+			else if (out_l > 1.f)
+				out_l = 1.f;                   
 			
 			*psamplesleft = out_l * 32767.0f;  // Amplify
 			
-			if (out_r < -1.0) 
-				out_r = float(-1.0);
-			else if (out_r > 1.0)
-				out_r = float(1.0); 
+			if (out_r < -1.f) 
+				out_r = -1.f;
+			else if (out_r > 1.f)
+				out_r = 1.f; 
 
 			*psamplesright = out_r * 32767.0f; // Amplify
 
