@@ -856,7 +856,6 @@ void SequencerGUI::onNewPattern( NButtonEvent * ev )
   counter++;
 }
 
-
 void SequencerGUI::onSequencerLineClick( SequencerLine * line )
 {
   selectedLine_ = line;
@@ -1138,6 +1137,7 @@ void SequencerGUI::updateSkin() {
   if ( scrollArea_->pLine() ) scrollArea_->pLine()->setForeground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
 
 }
+
 
 void SequencerGUI::onRefreshGUI(NButtonEvent* ev) {
   update();
