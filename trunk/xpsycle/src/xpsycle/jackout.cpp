@@ -106,7 +106,7 @@ namespace psycle
 
 			 // display the current sample rate. 
 
-			std::cout << "engine sample rate: %"  << jack_get_sample_rate (client) << std::endl;
+			std::cout << "engine sample rate: "  << jack_get_sample_rate (client) << std::endl;
 
 			// create output port
 

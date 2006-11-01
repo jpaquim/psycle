@@ -118,7 +118,12 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
       int ns = numSamples;
       int us = startSample;
+	if (!_mute) {
+		if((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
+
                   proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
+		  }
+	}
 /*
   if (!_mute) {
     if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
@@ -623,8 +628,10 @@ bool Plugin::SetParameter(int numparam,int value)
 						}
 						catch(std::exception const &)
 						{
+							delete pData;
 							return false;
 						}
+						delete pData;
 						return true;
 					}
 				}
