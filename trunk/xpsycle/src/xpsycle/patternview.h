@@ -94,178 +94,180 @@ class PatternView : public NPanel
 	public:
 
 		class Header: public NPanel {
-    public:
-      Header(PatternView* pPatternView);
-      ~Header();
+            public:
+              Header(PatternView* pPatternView);
+              ~Header();
 
-      virtual void paint(NGraphics* g);
+              virtual void paint(NGraphics* g);
 
-			void setHeaderCoordInfo( const HeaderCoordInfo & info );
-  
-      virtual void onMousePress(int x, int y, int button);
-      virtual int preferredWidth();
+                    void setHeaderCoordInfo( const HeaderCoordInfo & info );
+          
+              virtual void onMousePress(int x, int y, int button);
+              virtual int preferredWidth();
 
-      int skinColWidth();
+              int skinColWidth();
 
-    private:
+            private:
 
-			HeaderCoordInfo coords_;
+                    HeaderCoordInfo coords_;
 
-      int skinColWidth_;
-      PatternView* pView;
+              int skinColWidth_;
+              PatternView* pView;
 
-      void onSoloLedClick(int track);
-      void onMuteLedClick(int track);
-      void onRecLedClick(int track);
+              void onSoloLedClick(int track);
+              void onMuteLedClick(int track);
+              void onRecLedClick(int track);
 
-    };
+        };
 
 
-    class LineNumber : public NPanel {
-    public:
-      LineNumber(PatternView* pPatternView);
-      ~LineNumber();
+        class LineNumber : public NPanel {
+            public:
+              LineNumber(PatternView* pPatternView);
+              ~LineNumber();
 
-      virtual void paint(NGraphics* g);
+              virtual void paint(NGraphics* g);
 
-      void setDy(int dy);
-      int dy() const;
+              void setDy(int dy);
+              int dy() const;
 
-      void setTextColor( const NColor& textColor );
-			const NColor & textColor() const;
+              void setTextColor( const NColor& textColor );
+                    const NColor & textColor() const;
 
-			virtual int preferredWidth() const;
+                    virtual int preferredWidth() const;
 
-    private:
-      PatternView* pView;
-      int dy_;
+            private:
+              PatternView* pView;
+              int dy_;
 
-			NColor textColor_;
-    };
+                    NColor textColor_;
+        };
 		
 
 
-    class PatternDraw : public CustomPatternView {
-    public:
+        class PatternDraw : public CustomPatternView {
+            public:
 
-      PatternDraw(PatternView* pPatternView);
-      ~PatternDraw();
+              PatternDraw(PatternView* pPatternView);
+              ~PatternDraw();
 
-			virtual int colWidth() const;
-			virtual int rowHeight() const;
-			virtual int lineNumber() const;
-			virtual int beatZoom() const;
+                    virtual int colWidth() const;
+                    virtual int rowHeight() const;
+                    virtual int lineNumber() const;
+                    virtual int beatZoom() const;
 
-      virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
-      
-      virtual void onMousePress(int x, int y, int button);
-      virtual void onMousePressed(int x, int y, int button);
-      virtual void onMouseOver	(int x, int y);
-      virtual void onKeyPress(const NKeyEvent & event);
-      virtual void onKeyRelease(const NKeyEvent & event);
+              virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+              
+              virtual void onMousePress(int x, int y, int button);
+              virtual void onMousePressed(int x, int y, int button);
+              virtual void onMouseOver	(int x, int y);
+              virtual void onKeyPress(const NKeyEvent & event);
+              virtual void onKeyRelease(const NKeyEvent & event);
 
-      void copyBlock(bool cutit);
-      void pasteBlock(int tx,int lx,bool mix,bool save = true);
-      void deleteBlock();
-      void transposeBlock(int trp);
-      void scaleBlock(float factor);
+              void copyBlock(bool cutit);
+              void pasteBlock(int tx,int lx,bool mix,bool save = true);
+              void deleteBlock();
+              void transposeBlock(int trp);
+              void scaleBlock(float factor);
 
-			void setSharpMode( bool on );
-			bool sharpMode() const;
+                    void setSharpMode( bool on );
+                    bool sharpMode() const;
 
-      virtual void resize();
+              virtual void resize();
 
-		protected:
+                protected:
 
-			virtual int doSel(const PatCursor & p);
-			virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+                    virtual int doSel(const PatCursor & p);
+                    virtual void selectAll(const PatCursor & cursor);
+                    virtual void selectColumn(const PatCursor & cursor);
+                    virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
 
-    private:
+            private:
 
-      NPopupMenu* editPopup_;
-      PatDlg* patDlg;
-      PatternView* pView;      
-       
-      bool isBlockCopied;
-      NSize blockLastOrigin;
-			bool sharpMode_;
+              NPopupMenu* editPopup_;
+              PatDlg* patDlg;
+              PatternView* pView;      
+               
+              bool isBlockCopied;
+              NSize blockLastOrigin;
+                    bool sharpMode_;
 
-      void clearCursorPos();
+              void clearCursorPos();
 
-      void onPopupBlockCopy(NButtonEvent* ev);
-      void onPopupBlockCut(NButtonEvent* ev);
-      void onPopupBlockPaste(NButtonEvent* ev);
-      void onPopupBlockDelete(NButtonEvent* ev);
-      void onPopupBlockMixPaste(NButtonEvent* ev);
-      void onPopupTranspose1(NButtonEvent* ev);
-      void onPopupTranspose12(NButtonEvent* ev);
-      void onPopupTranspose_1(NButtonEvent* ev);
-      void onPopupTranspose_12(NButtonEvent* ev);
-      void onPopupPattern(NButtonEvent* ev);
+              void onPopupBlockCopy(NButtonEvent* ev);
+              void onPopupBlockCut(NButtonEvent* ev);
+              void onPopupBlockPaste(NButtonEvent* ev);
+              void onPopupBlockDelete(NButtonEvent* ev);
+              void onPopupBlockMixPaste(NButtonEvent* ev);
+              void onPopupTranspose1(NButtonEvent* ev);
+              void onPopupTranspose12(NButtonEvent* ev);
+              void onPopupTranspose_1(NButtonEvent* ev);
+              void onPopupTranspose_12(NButtonEvent* ev);
+              void onPopupPattern(NButtonEvent* ev);
 
-			SinglePattern pasteBuffer;
-      void onTagParse( const NXmlParser & parser, const std::string & tagName );
-      float lastXmlLineBeatPos;
-			int xmlTracks;
-			float xmlBeats;
+                    SinglePattern pasteBuffer;
+              void onTagParse( const NXmlParser & parser, const std::string & tagName );
+              float lastXmlLineBeatPos;
+                    int xmlTracks;
+                    float xmlBeats;
 
-      void checkLeftScroll( const PatCursor & cursor );
-			void checkRightScroll( const PatCursor & cursor );
+              void checkLeftScroll( const PatCursor & cursor );
+                    void checkRightScroll( const PatCursor & cursor );
 
-    };
+        };
 
-    class TweakHeader : public NPanel {
+        class TweakHeader : public NPanel {
 			public:
 
 				TweakHeader(  PatternView* pPatternView );
 
 				~TweakHeader();
 
-        virtual int preferredWidth();
-        virtual void paint( NGraphics* g );
+                virtual int preferredWidth();
+                virtual void paint( NGraphics* g );
 
-        int skinColWidth() const;
+                int skinColWidth() const;
 
-      private:
+              private:
 
-        NRect bgCoords;
-        NRect noCoords;
+                NRect bgCoords;
+                NRect noCoords;
 
-        PatternView* pView;
+                PatternView* pView;
 
 		};
 
 
-    class TweakGUI : public CustomPatternView {
-		public:
-				TweakGUI( PatternView* pPatternView);
+        class TweakGUI : public CustomPatternView {
+            public:
+                    TweakGUI( PatternView* pPatternView);
 
-				~TweakGUI();			
+                    ~TweakGUI();			
 
-				virtual int colWidth() const;
-        virtual int rowHeight() const;
-        virtual int lineNumber() const;
-        virtual int trackNumber() const;
-        virtual int beatZoom() const;
+                    virtual int colWidth() const;
+            virtual int rowHeight() const;
+            virtual int lineNumber() const;
+            virtual int trackNumber() const;
+            virtual int beatZoom() const;
 
-        virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+            virtual void customPaint(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
-				virtual void onKeyPress(const NKeyEvent & event);        
+                    virtual void onKeyPress(const NKeyEvent & event);        
 
-        virtual void resize();
+            virtual void resize();
 
-    protected:
+            protected:
 
-        virtual int doSel(const PatCursor & p);
-        void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+                virtual int doSel(const PatCursor & p);
+                void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
-    private:
+            private:
 
-        PatternView* pView;
+                PatternView* pView;
 
-        void checkLeftScroll( const PatCursor & cursor );
-			  void checkRightScroll( const PatCursor & cursor );
+                void checkLeftScroll( const PatCursor & cursor );
+                      void checkRightScroll( const PatCursor & cursor );
 
 		};
 

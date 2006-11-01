@@ -238,6 +238,9 @@ private:
     void onNewMachineDialogAdded(Machine* mac);
 
     void onGeneratorCbx(NItemEvent* ev);
+    void onNewIndexGeneratorCbx();
+    void changeGeneratorCbxViaKey(int dir); 
+    void changeInstrumentCbxViaKey(int dir);
 
     void onSequencerEntryClick( SequencerItem* item);
 

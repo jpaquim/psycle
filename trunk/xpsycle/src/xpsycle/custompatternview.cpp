@@ -767,9 +767,9 @@ namespace psycle {
 				{
 					PatCursor oldCursor = cursor();
 					cursor_.setLine( 0 );
-          repaintCursorPos( oldCursor );
-          repaintCursorPos( cursor() ); 
-        }
+                    repaintCursorPos( oldCursor );
+                    repaintCursorPos( cursor() ); 
+                }
 				break;
 				case NK_End:
 				{
@@ -795,23 +795,37 @@ namespace psycle {
 						repaintCursorPos( cursor() ); 
 					}
 				break;
+                // NGM: why are these keys repeated in here and patternview.cpp?
 				case NK_Left :
-            moveCursor(-1,0);
+                    // Don't move cursor if ctrl is held down.
+                    // (if ctrl is down the user wants to do something other than move)
+                    if (!(NApp::system().keyState() & ControlMask)) {
+                        moveCursor(-1,0);
+                    }
 				break;
 				case NK_Right:
+                    // Don't move cursor if ctrl is held down.
+                    if (!(NApp::system().keyState() & ControlMask)) {
 						moveCursor(1,0);
+                    }
 				break;
 				case NK_Up:
-					if ( cursor().line() - patternStep() >= 0 )
-						moveCursor(0, -patternStep() );
-					else
-						moveCursor(0, -cursor().line() );
+                    // Don't move cursor if ctrl is held down.
+                    if (!(NApp::system().keyState() & ControlMask)) {
+                        if ( cursor().line() - patternStep() >= 0 )
+                            moveCursor(0, -patternStep() );
+                        else
+                            moveCursor(0, -cursor().line() );
+                    }
 				break;
 				case NK_Down:
-					if ( cursor().line()+patternStep() < lineNumber() )
-					  moveCursor( 0, patternStep() );
-					else
-						moveCursor( 0, lineNumber()-1 - cursor().line() );
+                    // Don't move cursor if ctrl is held down.
+                    if (!(NApp::system().keyState() & ControlMask)) {
+                        if ( cursor().line()+patternStep() < lineNumber() )
+                          moveCursor( 0, patternStep() );
+                        else
+                            moveCursor( 0, lineNumber()-1 - cursor().line() );
+                    }
 				break;
 			}
 
@@ -1001,6 +1015,44 @@ namespace psycle {
 			doDrag_ = false;
 			doSelect_ = false;
 		}
+
+        void CustomPatternView::selectAll(const PatCursor & cursor) {
+            std::cout << "select all" << std::endl;
+			doSelect_=true;
+            selection_.setLeft(0); 
+            // FIXME: selects but doesn't repaint properly, not sure why...
+            // (compare with .setRight(trackNumber()-1), repaints fine)
+            selection_.setRight(trackNumber()); 
+            selection_.setTop(0);
+            selection_.setBottom(lineNumber());
+
+			if (oldSelection_ != selection_) {
+				// these is totally unoptimized todo repaint only new area
+				NSize clipBox = selection_.clipBox(oldSelection_);
+				NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
+				window()->repaint(this,r);
+				oldSelection_ = selection_;
+			}
+              selCursor_ = cursor;
+        }
+
+        void CustomPatternView::selectColumn(const PatCursor & cursor) {
+            std::cout << "select Column" << std::endl;
+			doSelect_=true;
+            selection_.setLeft(cursor.track()); 
+            selection_.setRight(cursor.track()+1); 
+            selection_.setTop(0);
+            selection_.setBottom(lineNumber());
+
+			if (oldSelection_ != selection_) {
+				// these is totally unoptimized todo repaint only new area
+				NSize clipBox = selection_.clipBox(oldSelection_);
+				NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
+				window()->repaint(this,r);
+				oldSelection_ = selection_;
+			}
+              selCursor_ = cursor;
+        }
 
 		int CustomPatternView::doSel(const PatCursor & p )
 		{

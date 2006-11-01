@@ -243,6 +243,8 @@ namespace psycle {
 					virtual void startSel(const PatCursor & p);
 					virtual int doSel(const PatCursor & p);
 					virtual void endSel();
+					virtual void selectAll(const PatCursor & p);
+					virtual void selectColumn(const PatCursor & p);
 
 					virtual int noteCellWidth() const;
 					virtual int cellWidth() const;

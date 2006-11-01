@@ -687,11 +687,12 @@ void MachineGUI::detachLine( NLine * line )
 
 void MachineGUI::onMouseDoublePress( int x, int y, int button )
 {
-
+	std::cout << "machinegui" << std::endl;
 }
 
 void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
 {
+	std::cout << "generatorgui" << std::endl;
   if (button==1) {
       frameMachine->setVisible(true);
   }
@@ -699,6 +700,7 @@ void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
 
 void MasterGUI::onMouseDoublePress( int x, int y, int button )
 {
+	std::cout << "mastergui" << std::endl;
   if (button==1) {
     masterDlg->setVisible(true);
   }
@@ -706,6 +708,7 @@ void MasterGUI::onMouseDoublePress( int x, int y, int button )
 
 void EffektGUI::onMouseDoublePress( int x, int y, int button )
 {
+	std::cout << "effectgui" << std::endl;
   if (button==1) {
     frameMachine->setVisible(true); 
   }

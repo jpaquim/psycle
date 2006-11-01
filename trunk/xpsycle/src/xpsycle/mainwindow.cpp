@@ -1321,23 +1321,61 @@ void MainWindow::onNewMachineDialogAdded( Machine * mac )
   genCombo_->repaint();
 }
 
-void MainWindow::onGeneratorCbx( NItemEvent * ev )
+// New index selected by a mouse click.
+void MainWindow::onGeneratorCbx(NItemEvent * ev )
 {
-  if ( !selectedChildView_ ) return;
-  Song* selectedSong_ = selectedChildView_->song();
+    onNewIndexGeneratorCbx();
+}
 
-  std::string text = genCombo_->text();
-  if (text.length() > 2) {
-     std::string hexNumber = text.substr(0,2);
-     std::stringstream hexStream(hexNumber); 
-     int hex = -1;
-     hexStream >> std::hex >> hex;
-     if (hex != -1) {
+void MainWindow::changeGeneratorCbxViaKey(int dir) {
+    int old_index = genCombo_->selIndex();
+    int new_index = 0;
+    // 0 = prev gen, 1 = next gen.
+    if (dir == 0) {
+        new_index = std::max(old_index - 1, 0);
+    } else if (dir == 1) {
+        new_index = old_index + 1;
+    }
+    genCombo_->setIndex(new_index);
+    genCombo_->repaint();
+
+    onNewIndexGeneratorCbx();
+}
+
+void MainWindow::changeInstrumentCbxViaKey(int dir) {
+    int old_index = insCombo_->selIndex();
+    int new_index = 0;
+    if (dir == 0) {
+        new_index = std::max(old_index - 1, 0);
+    } else if (dir == 1) {
+        new_index = old_index + 1;
+    }
+    insCombo_->setIndex(new_index);
+    insCombo_->repaint();
+    selectedChildView_->song()->instSelected=   new_index;
+    selectedChildView_->song()->auxcolSelected= new_index;
+    selectedChildView_->waveEditor()->Notify();
+}
+
+// Call when a new index has been selected in
+// the generator combo box.
+void MainWindow::onNewIndexGeneratorCbx() {
+    if ( !selectedChildView_ ) return;
+    Song* selectedSong_ = selectedChildView_->song();
+
+    std::string text = genCombo_->text();
+    if (text.length() > 2) {
+        std::string hexNumber = text.substr(0,2);
+        std::stringstream hexStream(hexNumber); 
+        int hex = -1;
+        hexStream >> std::hex >> hex;
+        if (hex != -1) {
          selectedSong_->seqBus = hex;
          selectedChildView_->machineView()->setSelectedMachine( selectedSong_->_pMachine[hex] );
-     }
-  }
+        }
+    }
 }
+
 
 void MainWindow::onSequencerEntryClick( SequencerItem * item )
 {
@@ -1362,8 +1400,14 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 			case NK_F5 :
 				selectedChildView_->showSequencerView();
 			break;
+			case NK_F6 :
+				selectedChildView_->playFromStart();
+			break;
 			case NK_F7 :
 				selectedChildView_->play();
+			break;
+			case NK_F8 :
+				selectedChildView_->stop();
 			break;
 			case NK_F9 : {
 				 selectedChildView_->showMachineView();
@@ -1371,7 +1415,7 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 				 onNewMachine( &btnEvent );
         }
 			break;
-			case NK_Up :
+/*			case NK_Up :
 				if (NApp::system().keyState() & ControlMask) {
 					selectedChildView_->sequencerBar()->selectPrevPattern();
 				}
@@ -1380,7 +1424,28 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 				if (NApp::system().keyState() & ControlMask) {
 					selectedChildView_->sequencerBar()->selectNextPattern();
 				}
+			break;*/
+            // FIXME: next four keys should not be hard-coded
+			case NK_Up: // current_instrument+1
+				if (NApp::system().keyState() & ControlMask) {
+                    changeInstrumentCbxViaKey(1);
+				}
 			break;
+			case NK_Down: // current_instrument-1
+				if (NApp::system().keyState() & ControlMask) {
+                    changeInstrumentCbxViaKey(0);
+				}
+			break;
+			case NK_Left: // current_machine-1
+				if (NApp::system().keyState() & ControlMask) {
+                    changeGeneratorCbxViaKey(0);
+				}
+			break;
+			case NK_Right: // current_machine+1
+				if (NApp::system().keyState() & ControlMask) {
+                    changeGeneratorCbxViaKey(1);
+                }
+            break;
 		}
 	}
 

@@ -70,6 +70,7 @@ public:
 
     void play();
     void playFromStart();
+    void stop();
 
     NTimer timer;
 

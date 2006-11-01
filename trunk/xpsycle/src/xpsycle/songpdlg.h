@@ -52,11 +52,13 @@ private:
     NEdit* songCredits_;
     NMemo* songComments_;
     NButton* okBtn_;
+    NButton* cnclBtn_;
 
     Song* pSong_;
 
     void init();
     void onOkBtn(NButtonEvent* ev);
+    void onCancelBtn(NButtonEvent* ev);
 };
 
 }}

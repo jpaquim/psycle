@@ -1037,9 +1037,9 @@ void PatternView::TweakGUI::resize() {
 }
 
 void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
-   CustomPatternView::onKeyPress( event );
+	CustomPatternView::onKeyPress( event );
 
-		switch ( event.scancode() ) {		
+	switch ( event.scancode() ) {		
 		case ' ':
 			if (Player::Instance()->playing() ) {
 				Player::Instance()->stop();
@@ -1599,8 +1599,13 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			return;
 		break;
     case NK_Down:
-			pView->checkDownScroll( cursor() );
-      return;
+            if (NApp::system().keyState() & ControlMask) {
+            std::cout << "1" << std::endl;
+            } else {
+            std::cout << "2" << std::endl;
+                pView->checkDownScroll( cursor() );
+            }
+//      return;
     break;
     case NK_Up:
 			pView->checkUpScroll( cursor() );
@@ -1637,21 +1642,44 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	}
 				
 	if (NApp::system().keyState() & ControlMask) {
-		switch ( event.scancode() ) {
-			case 'z' :
+		int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(1,event.scancode()));
+		switch (key) {
+			case cdefUndo:
+                std::cout << "key: edit undo" << std::endl;
 				pView->doUndo();
 				return;
 			break;
-		}
-	}
-	
-	if ( NApp::system().keyState() & ControlMask ) {
-    switch ( event.scancode() ) {
-			case '+':
+            case cdefSelectAll:
+                std::cout << "key: block select all" << std::endl;
+                selectAll(cursor());
+            break;
+            case cdefSelectCol:
+                std::cout << "key: block select column" << std::endl;
+                selectColumn(cursor());
+            break;
+			case cdefBlockCopy: 
+                std::cout << "key: block copy" << std::endl;
+                copyBlock(false);
+				return;
+			break;
+			case cdefBlockPaste: 
+                  std::cout << "key: block paste" << std::endl;
+                  pasteBlock( cursor().track(), cursor().line(), false);
+
+                  if (pView->moveCursorWhenPaste()) {
+                /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
+                          pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
+                       } else
+                       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
+                  }
+                  pView->repaint();
+				return;
+			break;
+			case cdefOctaveDn:
 				pView->setEditOctave( std::min(pView->editOctave() + 1, 8) );
 				return;
 			break;
-			case '#':
+			case cdefOctaveUp:
 				pView->setEditOctave( std::max(pView->editOctave() - 1, 0) );
 				return;
 			break;
@@ -1660,6 +1688,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 
 	if ( cursor().eventNr() == 0 ) {
 		// a note event
+        std::cout << "event #0 - note event" << std::endl;
 		int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
 		if ( note == cdefKeyStop ) {
 			pView->undoManager().addUndo( cursor() );
@@ -1675,43 +1704,54 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	if ( isHex(event.scancode()) ) {
 		if ( cursor().eventNr() == 1 ) {
 			// inst select
+            // i.e. a key is pressed in the instrument column.
+            std::cout << "eventnr 1 - inst select" << std::endl;
+
+            // Add the new data...
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
 			unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.instrument(), cursor().col() );
 			patEvent.setInstrument( newByte );
 			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-      if (cursor().col() == 0)
-			 moveCursor(1,0);			
-      else
-       moveCursor(-1,1);
-       pView->checkDownScroll( cursor() );
+            // ...and move the cursor.
+            if (cursor().col() == 0) {
+                moveCursor(1,0);			
+            } else {
+                moveCursor(-1,1);
+                pView->checkDownScroll( cursor() );
+            }
 		} else 
 		if ( cursor().eventNr() == 2) {
 			// mac select
+            // i.e. a key is pressed in the machine column.
+            std::cout << "event nr 2 - mach select" << std::endl;
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
 			unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.machine(), cursor().col() );
 			patEvent.setMachine( newByte );
 			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-      if (cursor().col() == 0)
-			 moveCursor(1,0);			
-      else
-       moveCursor(-1,1);
-			 pView->checkDownScroll( cursor() );
+            if (cursor().col() == 0) {
+               moveCursor(1,0);			
+            } else {
+               moveCursor(-1,1);
+               pView->checkDownScroll( cursor() );
+            }
 		} else
-		
 		if ( cursor().eventNr() == 3) {
 			// mac select
+            std::cout << "event nr 3 - mach select" << std::endl;
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
 			unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.volume(), cursor().col() );
 			patEvent.setVolume( newByte );
 			pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-      if (cursor().col() == 0)
-			 moveCursor(1,0);			
-      else
-       moveCursor(-1,1);
-			 pView->checkDownScroll( cursor() );
+            if (cursor().col() == 0) {
+                 moveCursor(1,0);			
+            } else {
+                 moveCursor(-1,1);
+            }
+            pView->checkDownScroll( cursor() );
 		} else
 		if ( cursor().eventNr() >= 4) {
 			// comand or parameter
+            std::cout << "event nr >=4 - command or parameter" << std::endl;
 			PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
 			if (cursor().col() < 2 ) {
 				int cmdValue;
@@ -1729,7 +1769,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 					pc.first = newByte;					
 				}
 				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-        moveCursor(1,0);
+                moveCursor(1,0);
 			}
 			else {
 				int paraValue;
@@ -1747,11 +1787,12 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 					pc.second = newByte;					
 				}
 				pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-        if (cursor().col() < 3)
+                if (cursor().col() < 3) {
 					moveCursor(1,0);			
-				else
+                } else {
 					moveCursor(-3,1);
-				pView->checkDownScroll( cursor() );
+                    pView->checkDownScroll( cursor() );
+                }
 			}			
 		}
 	}
@@ -1816,6 +1857,14 @@ void PatternView::PatternDraw::checkRightScroll( const PatCursor & cursor ) {
 	}
 }
 
+void PatternView::PatternDraw::selectAll(const PatCursor & cursor) {
+        CustomPatternView::selectAll(cursor);
+}
+
+void PatternView::PatternDraw::selectColumn(const PatCursor & cursor) {
+        CustomPatternView::selectColumn(cursor);
+}
+
 int PatternView::PatternDraw::doSel(const PatCursor & selCursor) {
   int dir = CustomPatternView::doSel( selCursor );
 
@@ -1829,18 +1878,18 @@ int PatternView::PatternDraw::doSel(const PatCursor & selCursor) {
 }
 
 void PatternView::enterNote( const PatCursor & cursor, int note ) {
- if ( pattern() ) {
-   PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
-   Machine* tmac = pSong()->_pMachine[ pSong()->seqBus ];
-   event.setNote( editOctave() * 12 + note );
-	 event.setSharp( drawArea->sharpMode() );
-   if (tmac) event.setMachine( tmac->_macIndex );
-   if (tmac && tmac->_type == MACH_SAMPLER ) {
-     event.setInstrument( pSong()->instSelected );
-	 }
-   pattern()->setEvent( cursor.line(), cursor.track(), event );
-   if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);   
- }
+   if ( pattern() ) {
+       PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+       Machine* tmac = pSong()->_pMachine[ pSong()->seqBus ];
+       event.setNote( editOctave() * 12 + note );
+	   event.setSharp( drawArea->sharpMode() );
+       if (tmac) event.setMachine( tmac->_macIndex );
+       if (tmac && tmac->_type == MACH_SAMPLER ) {
+         event.setInstrument( pSong()->instSelected );
+       }
+       pattern()->setEvent( cursor.line(), cursor.track(), event );
+       if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);   
+   }
 }
 
 void PatternView::repaintLineNumber( int startLine, int endLine ) {

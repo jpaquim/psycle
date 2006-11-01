@@ -153,6 +153,12 @@ void ChildView::playFromStart()
   //pParentMain->StatusBarIdle();
 }
 
+void ChildView::stop( )
+{
+  Player::Instance()->stop();
+}
+
+
 
 MachineView * ChildView::machineView( )
 {

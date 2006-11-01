@@ -57,13 +57,17 @@ void SongpDlg::init( )
   NLabel* songCommentsLb_ = new NLabel("Song comments");
   pane()->add(songCommentsLb_,nAlTop);
 
-  NPanel* okPanel = new NPanel();
-    okPanel->setLayout(NAlignLayout(5,5));
+  NPanel* buttonPanel = new NPanel();
+    buttonPanel->setLayout(NAlignLayout(5,5));
+    cnclBtn_ = new NButton("Cancel");
+    cnclBtn_->setFlat(false);
+    cnclBtn_->clicked.connect(this,&SongpDlg::onCancelBtn);
     okBtn_ = new NButton("OK");
     okBtn_->setFlat(false);
     okBtn_->clicked.connect(this,&SongpDlg::onOkBtn);
-    okPanel->add(okBtn_, nAlRight);
-  pane()->add(okPanel,nAlBottom);
+    buttonPanel->add(okBtn_, nAlRight);
+    buttonPanel->add(cnclBtn_, nAlRight);
+  pane()->add(buttonPanel,nAlBottom);
 
   songComments_ = new NMemo();
     songComments_->setPreferredSize(200,200);
@@ -99,6 +103,11 @@ void SongpDlg::onOkBtn( NButtonEvent * ev )
    pSong_->setComment( songComments_->text() );
    setVisible(false);
   }
+}
+
+void SongpDlg::onCancelBtn( NButtonEvent * ev )
+{
+   setVisible(false);
 }
 
 }}
