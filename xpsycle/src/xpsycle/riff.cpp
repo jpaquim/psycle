@@ -1,7 +1,7 @@
 /**
-	file
+	\file
 	implementation file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
-	verbatim
+	\verbatim
 		==========================================================================
 
 			ExtRiff.cpp  -  Don Cross, April 1993.

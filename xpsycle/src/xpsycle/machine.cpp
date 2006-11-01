@@ -611,7 +611,8 @@ namespace psycle
 			switch (type)
 			{
 			case MACH_MASTER:
-				if ( !fullopen ) pMachine = new Dummy(index, pSong);
+				if (pSong->_pMachine[MASTER_INDEX]) pMachine = pSong->_pMachine[MASTER_INDEX];
+				else if ( !fullopen ) pMachine = new Dummy(index, pSong);
 				else pMachine = new Master(index, pSong);
 				break;
 			case MACH_SAMPLER:

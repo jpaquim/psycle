@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::Player
 
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan Nattkemper, Josep Maria Antolín Segura, D.W. Aley			
+  *   Copyright (C) 2006 by Stefan Nattkemper, Josep Maria Antolin Segura, D.W. Aley			
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -25,7 +25,7 @@
 #include "song.h"
 #include "machine.h"
 #include "internal_machines.h"
-#include "inputhandler.h"
+//#include "inputhandler.h"
 
 namespace psycle
 {
@@ -42,6 +42,7 @@ namespace psycle
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 			_doDither = false;
 			autoRecord_ = false;
+			recording_ = false;
 			driver_ = 0;
 			autoStopMachines = false;
 			lock_ = false;
@@ -71,6 +72,7 @@ namespace psycle
 
 		void Player::start( double pos )
 		{
+			///\todo : && or || ??
       if ( !song_ && !driver_ ) return;
 			stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
@@ -94,6 +96,7 @@ namespace psycle
 
 		void Player::stop( )
 		{
+			///\todo: && or || ??
       if ( !song_  && driver_ ) return;
 
 			// Stop song enviroment

@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cctype>
 
+#include "convert_internal_machines.h"
 
 namespace psycle
 {
@@ -108,8 +109,9 @@ namespace psycle
 			LoadINSD(&file,song);
 			LoadWAVD(&file,song);
 			PreLoadVSTs(&file,song);
-			LoadMACD(&file,song);
-			TidyUp(&file,song);
+			convert_internal_machines::Converter converter;
+			LoadMACD(&file,song,&converter);
+			TidyUp(&file,song,&converter);
 			return true;
 		}
 
@@ -387,7 +389,7 @@ namespace psycle
 			}
 			return true;
 		}
-		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song)
+		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter)
 		{
 			std::int32_t i;
 			file->Read(_machineActive);
@@ -409,8 +411,8 @@ namespace psycle
 
 					file->Read(type);
 
-					if(converter.plugin_names().exists(type))
-						pMac[i] = &converter.redirect(i, type, *file,song);
+					if(converter->plugin_names().exists(type))
+						pMac[i] = &converter->redirect(i, type, *file,song);
 					else switch (type)
 					{
 					case MACH_PLUGIN:
@@ -652,7 +654,7 @@ namespace psycle
 			
 			return true;
 		}
-		bool Psy2Filter::TidyUp(RiffFile*file,Song&song)
+		bool Psy2Filter::TidyUp(RiffFile*file,Song&song,convert_internal_machines::Converter* converter)
 		{
 			std::int32_t i;
 			// Clean "pars" array.
@@ -944,7 +946,7 @@ namespace psycle
 			}
 		
 		// Reparse any pattern for converted machines.
-			converter.retweak(song);
+			converter->retweak(song);
 			song.seqBus=0;
 			return true;
 		}

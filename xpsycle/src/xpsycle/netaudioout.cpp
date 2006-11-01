@@ -151,10 +151,13 @@ namespace psycle
 
 			// 3) Put the elements in the flow, prepared to work.
 			AuStatus  status = AuBadValue;
-			_samplesPerSec=48000;
-			AuMakeElementImportClient(&nas_elements[0], _samplesPerSec, toNasFormat(), 2, AuTrue,
+			AudioDriverSettings sets;
+			sets = settings();
+			sets.setSamplesPerSec(48000);
+			setSettings(sets);
+			AuMakeElementImportClient(&nas_elements[0], settings().samplesPerSec(), toNasFormat(), 2, AuTrue,
 				latency_, latency_/ 2, 0, NULL);
-			AuMakeElementExportDevice(&nas_elements[1], 0, device_, _samplesPerSec,
+			AuMakeElementExportDevice(&nas_elements[1], 0, device_, settings().samplesPerSec(),
 				AuUnlimitedSamples, 0, NULL);
 			AuSetElements(aud_, flow_, AuTrue, 2, nas_elements, NULL);
 //			if (status != AuSuccess) {
@@ -304,8 +307,8 @@ namespace psycle
 		int NetAudioOut::latencyInBytes()
 		{
 			int bytes(latency_);
-			if ( channelMode() == 3) bytes*=2;
-			bytes*=(bitDepth()/8);
+			if ( settings().channelMode() == 3) bytes*=2;
+			bytes*=(settings().bitDepth()/8);
 			return bytes;
 		}
 		char *NetAudioOut::nas_error(AuServer* aud,AuStatus status)

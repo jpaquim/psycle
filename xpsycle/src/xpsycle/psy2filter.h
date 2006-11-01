@@ -21,7 +21,6 @@
 #define PSY2FILTER_H
 
 #include "psyfilter.h"
-#include "convert_internal_machines.h"
 
 /**
 @author Stefan Nattkemper
@@ -33,6 +32,10 @@ namespace psycle
 	{
 
 		class RiffFile;
+		namespace convert_internal_machines
+		{
+			class Converter;
+		}
 
 
 		class Psy2Filter : public PsyFilter
@@ -65,7 +68,6 @@ namespace psycle
 			}
 			// Singleton pattern end
 	
-	
 			protected:
 
 				virtual bool testFormat(const std::string & fileName);
@@ -78,8 +80,8 @@ namespace psycle
 				virtual bool LoadINSD(RiffFile* file,Song& song);
 				virtual bool LoadWAVD(RiffFile* file,Song& song);
 				virtual bool PreLoadVSTs(RiffFile* file,Song& song);
-				virtual bool LoadMACD(RiffFile* file,Song& song);
-				virtual bool TidyUp(RiffFile* file,Song &song);
+				virtual bool LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter);
+				virtual bool TidyUp(RiffFile* file,Song &song,convert_internal_machines::Converter* converter);
 	
 
 		protected:
@@ -102,16 +104,13 @@ namespace psycle
 				unsigned char busEffect[64];
 				VSTLoader vstL[256];
 
-			convert_internal_machines::Converter converter;
-
 				void preparePatternSequence(Song & song);
 				PatternEvent convertEntry( unsigned char * data ) const;
 	
-		// TODO: add member variables...
 	
-};
+		};
 
-}
+	}
 }
 
 #endif	//_PSY2FILTER_H_
