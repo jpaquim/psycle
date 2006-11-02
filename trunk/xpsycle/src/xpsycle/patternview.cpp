@@ -1553,7 +1553,7 @@ void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 {
-  if ( !pView->pattern() ) return;
+	if ( !pView->pattern() ) return;
 	CustomPatternView::onKeyPress( event );
 
 	switch ( event.scancode() ) {		
@@ -1574,8 +1574,8 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 					pView->checkUpScroll( cursor() );
 					break;
 				}
-			}
-    }
+                        }
+                }
 		break;
 		case NK_Page_Down:
 		{
@@ -1592,21 +1592,19 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		break;
 		case NK_Left :
 			checkLeftScroll( cursor() );
-      return;
+                        return;
 		break;
 		case NK_Right:
 			checkRightScroll( cursor() );
 			return;
 		break;
-    case NK_Down:
-            if (NApp::system().keyState() & ControlMask) {
-            std::cout << "1" << std::endl;
-            } else {
-            std::cout << "2" << std::endl;
-                pView->checkDownScroll( cursor() );
-            }
-//      return;
-    break;
+                case NK_Down:
+                        if (NApp::system().keyState() & ControlMask) {
+                        } else {
+                                pView->checkDownScroll( cursor() );
+                        }
+                        return;
+                break;
     case NK_Up:
 			pView->checkUpScroll( cursor() );
       return;
@@ -1687,19 +1685,22 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	}
 
 	if ( cursor().eventNr() == 0 ) {
-		// a note event
-        std::cout << "event #0 - note event" << std::endl;
-		int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
-		if ( note == cdefKeyStop ) {
-			pView->undoManager().addUndo( cursor() );
-			pView->noteOffAny( cursor() );
-		} else
-		if (note >=0 && note < 120) {
-			pView->undoManager().addUndo( cursor() );
-			pView->enterNote( cursor(), note );
-			moveCursor(0,1);
-			pView->checkDownScroll( cursor() );
-		}
+        // A note event.
+                if (!(NApp::system().keyState() & ControlMask)) {
+                // We don't want a note to fire if ctrl is held down.
+                        std::cout << "event #0 - note event" << std::endl;
+                        int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
+                        if ( note == cdefKeyStop ) {
+                                pView->undoManager().addUndo( cursor() );
+                                pView->noteOffAny( cursor() );
+                        } else
+                        if (note >=0 && note < 120) {
+                                pView->undoManager().addUndo( cursor() );
+                                pView->enterNote( cursor(), note );
+                                moveCursor(0,1);
+                                pView->checkDownScroll( cursor() );
+                        }
+                }
 	} else
 	if ( isHex(event.scancode()) ) {
 		if ( cursor().eventNr() == 1 ) {
