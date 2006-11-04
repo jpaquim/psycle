@@ -43,7 +43,7 @@ namespace psycle {
 			type_ = type;
 		}
 
-    ColumnEvent::~ColumnEvent() {
+                ColumnEvent::~ColumnEvent() {
 		}
 
 		int ColumnEvent::type() const {
@@ -746,16 +746,103 @@ namespace psycle {
 		}
 
 		void CustomPatternView::onKeyPress(const NKeyEvent & event) {
-			if (doDrag() != (NApp::system().keyState() & ShiftMask) &&
-                     !(NApp::system().keyState() & ControlMask)) {
+                        // Shift+Arrowkeys used for selecting blocks of pattern.
+                        // FIXME: should only occur if set in options.
+                        // FIXME: works, but could probably be refactored...
+                        if (NApp::system().keyState() & ShiftMask) {
+                                switch ( event.scancode() ) {		
+                                case NK_Up:
+                                {
+                                        // if currently shift selecting...
+                                        if (doShiftSelect_) {
+                                                PatCursor crs = cursor();
+                                                // if above row is not already selected then select it...
+                                                if (!rowAlreadySelected(crs.line())) {
+                                                        // don't set selection out of bounds of grid...
+                                                        selection_.setTop(std::max(selection_.top()-1, 0));
+                                                        selection_.setBottom(selection_.bottom());
+                                                } else { // else if it is selected, deselect it...
+                                                        selection_.setTop(selection_.top());
+                                                        selection_.setBottom(selection_.bottom()-1);
+                                                }
+                                                selection_.setLeft(selection_.left()); // left&right stay the same.
+                                                selection_.setRight(selection_.right());
+                          
+                                                oldSelection_ = selection_;
+                                                std::cout << "shift up" << std::endl;
+                                        } else {
+                                        // start a shift select.
+                                                PatCursor crs = cursor();
+                                                selStartPoint_ = crs;
+                                                selCursor_ = crs;
+                                                doShiftSelect_ = true;
+                                                // don't overshoot the boundary.
+                                                selection_.setTop(std::max(0,crs.line()-1));
+                                                selection_.setBottom(crs.line()+1);
+                                                selection_.setLeft(crs.track());
+                                                selection_.setRight(crs.track()+1);
+                                        }
+                                }
+                                break;
+                                case NK_Down:
+                                        std::cout << "shift down" << std::endl;
+                                        // if currently shift selecting...
+                                        if (doShiftSelect_) {
+                                                PatCursor crs = cursor();
+                                                // if row beneath is not selected...
+                                                if (!rowAlreadySelected(crs.line()+1)) {
+                                                        // select row beneath.
+                                                        selection_.setTop(selection_.top());
+                                                        // don't over shoot boundary of grid...
+                                                        selection_.setBottom(std::min(selection_.bottom()+1,lineNumber()));
+                                                } else { // row beneath is selected...
+                                                        // deselect row beneath.
+                                                        selection_.setTop(selection_.top()+1);
+                                                        selection_.setBottom(selection_.bottom());
+                                                }
+                                                selection_.setLeft(selection_.left()); // left&right stay the same.
+                                                selection_.setRight(selection_.right());
+                          
+                                                oldSelection_ = selection_;
+                                        } else {
+                                        // start a shift select.
+                                                PatCursor crs = cursor();
+                                                selStartPoint_ = crs;
+                                                selCursor_ = crs;
+                                                doShiftSelect_ = true;
+                                                selection_.setTop(crs.line());
+                                                // don't over shoot the boundary.
+                                                selection_.setBottom(std::min(lineNumber(),crs.line()+2));
+                                                selection_.setLeft(crs.track());
+                                                selection_.setRight(crs.track()+1);
+                                        }
+                                break;
+                                case NK_Left:
+                                        std::cout << "shift left" << std::endl;
+                                break;
+                                case NK_Right:
+                                        std::cout << "shift right" << std::endl;
+                                break;
+                        }
+			if (oldSelection_ != selection_) {
+				// these is totally unoptimized todo repaint only new area
+				NSize clipBox = selection_.clipBox(oldSelection_);
+				NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
+				window()->repaint(this,r);
+				oldSelection_ = selection_;
+			}
+        }
+
+			/*if (doDrag() != (NApp::system().keyState() & ShiftMask) &&
+                            !(NApp::system().keyState() & ControlMask)) {
 				if (!doDrag()) {
 					clearOldSelection();
 					startSel( cursor() );
 					selCursor_ = cursor();
 					selCursor_.setEventNr(0);
 					selCursor_.setCol(0);
-      	}
-			}
+                                }
+			}*/
 
 			// navigation
 			switch (event.scancode()) {
@@ -775,8 +862,8 @@ namespace psycle {
 				{
 					PatCursor oldCursor = cursor();
 					cursor_.setLine( lineNumber() -1 );
-          repaintCursorPos(oldCursor);
-          repaintCursorPos( cursor() ); 
+                                          repaintCursorPos(oldCursor);
+                                          repaintCursorPos( cursor() ); 
         }
 				break;
 				case NK_Tab  :
@@ -797,39 +884,63 @@ namespace psycle {
 				break;
                 // NGM: why are these keys repeated in here and patternview.cpp?
 				case NK_Left :
-                    // Don't move cursor if ctrl is held down.
-                    // (if ctrl is down the user wants to do something other than move)
-                    if (!(NApp::system().keyState() & ControlMask)) {
-                        moveCursor(-1,0);
-                    }
+                                    // Don't move cursor if ctrl is held down.
+                                    // (if ctrl is down the user wants to do something other than move)
+                                    if (!(NApp::system().keyState() & ControlMask)) {
+                                            moveCursor(-1,0);
+                                            // Clear selection if neither ctrl or shift is held.
+                                            if (!(NApp::system().keyState() & ShiftMask)) {
+                                                    clearOldSelection();              
+                                            }
+                                    }
 				break;
 				case NK_Right:
-                    // Don't move cursor if ctrl is held down.
-                    if (!(NApp::system().keyState() & ControlMask)) {
-						moveCursor(1,0);
-                    }
+                                    // Don't move cursor if ctrl is held down.
+                                    if (!(NApp::system().keyState() & ControlMask)) {
+                                                                moveCursor(1,0);
+                                            // Clear selection if neither ctrl or shift is held.
+                                            if (!(NApp::system().keyState() & ShiftMask)) {
+                                                    clearOldSelection();              
+                                            }
+                                    }
 				break;
 				case NK_Up:
-                    // Don't move cursor if ctrl is held down.
-                    if (!(NApp::system().keyState() & ControlMask)) {
-                        if ( cursor().line() - patternStep() >= 0 )
-                            moveCursor(0, -patternStep() );
-                        else
-                            moveCursor(0, -cursor().line() );
-                    }
+                                    // Don't move cursor if ctrl is held down.
+                                    if (!(NApp::system().keyState() & ControlMask)) {
+                                        if ( cursor().line() - patternStep() >= 0 )
+                                            moveCursor(0, -patternStep() );
+                                        else
+                                            moveCursor(0, -cursor().line() );
+                                            // Clear selection if neither ctrl or shift is held.
+                                            if (!(NApp::system().keyState() & ShiftMask)) {
+                                                    clearOldSelection();              
+                                            }
+                                    }
 				break;
 				case NK_Down:
-                    // Don't move cursor if ctrl is held down.
-                    if (!(NApp::system().keyState() & ControlMask)) {
-                        if ( cursor().line()+patternStep() < lineNumber() )
-                          moveCursor( 0, patternStep() );
-                        else
-                            moveCursor( 0, lineNumber()-1 - cursor().line() );
-                    }
+                                    // Don't move cursor if ctrl is held down.
+                                    if (!(NApp::system().keyState() & ControlMask)) {
+                                        if ( cursor().line()+patternStep() < lineNumber() )
+                                          moveCursor( 0, patternStep() );
+                                        else
+                                            moveCursor( 0, lineNumber()-1 - cursor().line() );
+                                            // Clear selection if neither ctrl or shift is held.
+                                            if (!(NApp::system().keyState() & ShiftMask)) {
+                                                    clearOldSelection();              
+                                            }
+                                    }
 				break;
 			}
 
 		}
+
+                bool CustomPatternView::rowAlreadySelected(int rowNumber) {
+                        if (rowNumber > selection_.top() && rowNumber < selection_.bottom()) {
+                                return true;
+                        } else {
+                                return false;
+                        }
+                }
 
 		int CustomPatternView::moveCursor( int dx, int dy) {
 			// dx -1 left hex digit move
@@ -984,11 +1095,16 @@ namespace psycle {
 			return doDrag_;
 		}
 
+		bool CustomPatternView::doShiftSelect() const {
+			return doShiftSelect_;
+		}
+
 		void CustomPatternView::clearOldSelection( )
 		{
 			NSize oldSel = selection_;  
   		selection_.setSize(0,0,0,0);
   		repaintBlock( oldSel );
+                        doShiftSelect_ = false;
 		}
 
 		const NSize & CustomPatternView::selection() const {

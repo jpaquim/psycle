@@ -58,23 +58,23 @@ namespace psycle {
 			// creates the cancel and the ok button at the bottom of the window
 			NPanel* btnPanel = new NPanel();
 				btnPanel->setLayout( NAlignLayout(5,5) );
-				okBtn_ = new NButton( " Ok " );
+				/*okBtn_ = new NButton( " Ok " );
 					okBtn_->setFlat(false);
 					okBtn_->clicked.connect( this, &AudioConfigDlg::onOkBtn );
-				btnPanel->add( okBtn_, nAlRight );
-				cancelBtn_ = new NButton( "Cancel" );
-					cancelBtn_->setFlat(false);
-					cancelBtn_->clicked.connect( this, &AudioConfigDlg::onCancelBtn );
-				btnPanel->add( cancelBtn_, nAlRight );				
+				btnPanel->add( okBtn_, nAlRight );*/
+				closeBtn_ = new NButton( "Close" );
+					closeBtn_->setFlat(false);
+					closeBtn_->clicked.connect( this, &AudioConfigDlg::onCloseBtn );
+				btnPanel->add( closeBtn_, nAlRight );				
 			pane()->add( btnPanel, nAlBottom );
 
 			// creates a TabBook with an audio system and MIDI tab
 			tabBook_ = new NTabBook();
 				audioPage_ = new NPanel();
 					audioPage_->setLayout( NAlignLayout( 5, 5 ) );
-				tabBook_->addPage( audioPage_, "Audio System" );
 				midiPage_  = new NPanel();
 					midiPage_->setLayout( NAlignLayout() );
+				tabBook_->addPage( audioPage_, "Audio System" );
 				tabBook_->addPage( midiPage_, "Midi System" );
 			pane()->add(tabBook_, nAlClient);
 			
@@ -275,10 +275,10 @@ namespace psycle {
 		}
 
 		void AudioConfigDlg::onOkBtn( NButtonEvent* ev ) {
-
+                        
 		}
 
-		void AudioConfigDlg::onCancelBtn( NButtonEvent* ev ) {
+		void AudioConfigDlg::onCloseBtn( NButtonEvent* ev ) {
 			onClose();
 		}
 
@@ -304,7 +304,7 @@ namespace psycle {
 		int AudioConfigDlg::onClose( )
 		{
 			setVisible(false);
-  		return nHideWindow;
+                        return nHideWindow;
 		}
 
 		void AudioConfigDlg::onChannelCbx( NItemEvent * ev )
