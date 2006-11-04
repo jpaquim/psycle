@@ -67,26 +67,30 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 
 <key id='key_stop' keychar='1' />
 
+<!-- patternview misc key options -->
+
+<key id='key_stop' keychar='1' />
+<key id='current_octave-1' mod="ctrl" keychar='+' />
+<key id='current_octave+1' mod="ctrl" keychar='#' />
+
 <!-- patternview block key options -->
 
-<key id='block_copy' ctrl='1' keychar='c' />
-<key id='block_cut' ctrl='1' keychar='x' />
-<key id='block_delete' ctrl='1' keychar='y' />
-<key id='block_double' ctrl='1' keychar='d' />
-<key id='block_halve' ctrl='1' keychar='h' />
-<key id='block_interpolate' ctrl='1' keychar='i' />
-<key id='block_mix' ctrl='1' keychar='m' />
-<key id='block_paste' ctrl='1' keychar='v' />
-<key id='block_select_all' ctrl='1' keychar='a' />
-<key id='block_select_bar' ctrl='1' keychar='e' />
-<key id='block_select_column' ctrl='1' keychar='r' />
-<key id='block_set_instrument' ctrl='1' keychar='t' />
-<key id='block_set_machine' ctrl='1' keychar='g' />
-<key id='block_start' ctrl='1' keychar='b' />
-<key id='block_start' ctrl='1' keychar='k' />
-<key id='block_unmark' ctrl='1' keychar='u' />
-
-
+<key id='block_copy' mod='ctrl' keychar='c' />
+<key id='block_cut' mod='ctrl' keychar='x' />
+<key id='block_delete' mod='ctrl' keychar='y' />
+<key id='block_double' mod='ctrl' keychar='d' />
+<key id='block_halve' mod='ctrl' keychar='h' />
+<key id='block_interpolate' mod='ctrl' keychar='i' />
+<key id='block_mix' mod='ctrl' keychar='m' />
+<key id='block_paste' mod='ctrl' keychar='v' />
+<key id='block_select_all' mod='ctrl' keychar='a' />
+<key id='block_select_bar' mod='ctrl' keychar='e' />
+<key id='block_select_column' mod='ctrl' keychar='r' />
+<key id='block_set_instrument' mod='ctrl' keychar='t' />
+<key id='block_set_machine' mod='ctrl' keychar='g' />
+<key id='block_start' mod='ctrl' keychar='b' />
+<key id='block_start' mod='ctrl' keychar='k' />
+<key id='block_unmark' mod='ctrl' keychar='u' />
 
 </xpsycle>
 
