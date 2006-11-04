@@ -45,11 +45,14 @@ void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
   keyMap[key] = keyEnumCode;
 }
 
-Key::Key( int c, int k )
+Key::Key( std::string mod, int k )
 {
   scancode = k;
 ///\todo: this needs to be reworked, first fix xml parser to user ControlMask instead of 0/1. Later on, think about ShiftMask or others..
-  if (c ) ctrl = ControlMask; else ctrl = 0;
+// NOTE: ControlMask comes direct from Xlib.
+  if (mod == "ctrl") ctrl = ControlMask; 
+  else if (mod == "shift") ctrl = ShiftMask; 
+  else ctrl = 0;
 }
 
 }

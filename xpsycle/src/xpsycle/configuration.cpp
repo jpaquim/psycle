@@ -323,9 +323,9 @@ void Configuration::onConfigTagParse(const std::string & tagName )
   } else
   if (tagName == "key") {
       std::string id         = NApp::config()->getAttribValue("id");
-      std::string ctrlStr    = NApp::config()->getAttribValue("ctrl");
-      int ctrl = 0;
-      if (ctrlStr!="")  ctrl = str<int>(ctrlStr);
+      std::string modStr    = NApp::config()->getAttribValue("mod");
+      std::string ctrl = "none";
+      if (modStr!="")  ctrl = modStr;
       int keyCode = 0;
       std::string keyCodeStr = NApp::config()->getAttribValue("keycode");
       if (keyCodeStr!="") keyCode = str<int>(keyCodeStr);

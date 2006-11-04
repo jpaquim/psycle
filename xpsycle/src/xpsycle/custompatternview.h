@@ -121,6 +121,7 @@ namespace psycle {
 
 					virtual int rowHeight() const;
 					virtual int lineNumber() const;
+                                        virtual bool rowAlreadySelected(int rowNumber); 
 
 					void setTrackNumber( int number );
 					virtual int trackNumber() const;
@@ -252,6 +253,7 @@ namespace psycle {
 					const PatCursor & selStartPoint() const;
 					bool doSelect() const;
 					bool doDrag() const;
+					bool doShiftSelect() const;
 
 					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 					
@@ -276,7 +278,7 @@ namespace psycle {
 					// selection variables
 					bool doDrag_;
 					bool doSelect_;
-					bool doShiftSel_;
+					bool doShiftSelect_;
 					NSize selection_;
 					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
 					PatCursor selStartPoint_;				

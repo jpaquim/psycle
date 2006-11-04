@@ -61,6 +61,7 @@ namespace psycle {
 				NButton* restartBtn_; // re/starts the driver
 
 				NButton* cancelBtn_;
+				NButton* closeBtn_;
 				NButton* okBtn_;
 
 				NLabel* audioHeaderLbl_;
@@ -92,6 +93,7 @@ namespace psycle {
 
 				void onOkBtn( NButtonEvent* ev );
 				void onCancelBtn( NButtonEvent* ev );
+				void onCloseBtn( NButtonEvent* ev );
 
 				void onChannelCbx( NItemEvent* ev );
 				void onSampleRateCbx( NItemEvent* ev );

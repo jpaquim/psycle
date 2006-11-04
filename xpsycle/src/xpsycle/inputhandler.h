@@ -426,7 +426,7 @@ class Key {
 public:
 
     Key() : ctrl(0), scancode(0) {}
-    Key(int c, int k);
+    Key(std::string mod, int k);
 
     bool operator<(const Key & key) const {
       long key1 = ctrl | scancode<<8;

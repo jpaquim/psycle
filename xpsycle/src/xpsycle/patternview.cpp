@@ -1639,8 +1639,9 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		default: ;
 	}
 				
+        
 	if (NApp::system().keyState() & ControlMask) {
-		int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(1,event.scancode()));
+		int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key("ctrl",event.scancode()));
 		switch (key) {
 			case cdefUndo:
                 std::cout << "key: edit undo" << std::endl;
@@ -1689,7 +1690,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                 if (!(NApp::system().keyState() & ControlMask)) {
                 // We don't want a note to fire if ctrl is held down.
                         std::cout << "event #0 - note event" << std::endl;
-                        int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
+                        int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key("none",event.scancode()));
                         if ( note == cdefKeyStop ) {
                                 pView->undoManager().addUndo( cursor() );
                                 pView->noteOffAny( cursor() );
@@ -2181,7 +2182,7 @@ void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
 	if ( !pView->pattern() ) return;
 
   if ( cursor().eventNr() == 0 ) {
-    int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(0,event.scancode()));
+    int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key("none",event.scancode()));
     pView->StopNote( outnote );
   }
 }
