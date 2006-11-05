@@ -121,7 +121,8 @@ namespace psycle {
 
 					virtual int rowHeight() const;
 					virtual int lineNumber() const;
-                                        virtual bool rowAlreadySelected(int rowNumber); 
+                                        virtual bool lineAlreadySelected(int lineNumber); 
+                                        virtual bool trackAlreadySelected(int trackNumber); 
 
 					void setTrackNumber( int number );
 					virtual int trackNumber() const;
