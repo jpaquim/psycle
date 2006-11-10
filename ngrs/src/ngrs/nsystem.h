@@ -159,7 +159,7 @@ private:
     void initX();
     void matchVisual();
     std::string getFontPattern(const NFont & font);
-    #ifdef __unix
+    #ifdef __unix__
     static bool isWellFormedFont(std::string name);
     static bool isScalableFont(std::string name);
     static std::string fontPattern(const NFont & font);

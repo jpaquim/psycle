@@ -26,6 +26,7 @@
 #include "machine.h"
 #include "internal_machines.h"
 //#include "inputhandler.h"
+#include <unistd.h> // for OpenBSD usleep()
 
 namespace psycle
 {
