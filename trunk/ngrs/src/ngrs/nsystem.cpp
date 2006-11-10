@@ -277,7 +277,7 @@ NFontStructure NSystem::getXFontValues( const NFont & nFnt )
  return fnt;
 }
 
-string NSystem::getFontPattern( const NFont & font )
+std::string NSystem::getFontPattern( const NFont & font )
 {
   string xfntname = "";
   #ifdef __unix__
@@ -316,7 +316,7 @@ string NSystem::getFontPattern( const NFont & font )
 }
 
 #ifdef __unix__
-bool NSystem::isWellFormedFont(string name)
+bool NSystem::isWellFormedFont(std::string name)
 {
  string::size_type pos = 0;
  int field = 0;
@@ -324,7 +324,7 @@ bool NSystem::isWellFormedFont(string name)
  return (field == 14) ? 1 : 0;
 }
 
-bool NSystem::isScalableFont(string name)
+bool NSystem::isScalableFont(std::string name)
 {
  const char* name_ = name.c_str();
     int i, field;
@@ -341,7 +341,7 @@ bool NSystem::isScalableFont(string name)
     else return true;
 }
 
-string NSystem::fontPattern(const NFont & font) {
+std::string NSystem::fontPattern(const NFont & font) {
 
   string styleString  = "*";
   string italicString = "r";
@@ -355,7 +355,7 @@ string NSystem::fontPattern(const NFont & font) {
 }
 
 
-string NSystem::getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size)
+std::string NSystem::getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size)
 {
     int i,j, field;
     char newname[500];    /* big enough for a long font name */
