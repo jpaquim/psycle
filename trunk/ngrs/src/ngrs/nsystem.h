@@ -76,6 +76,8 @@ class NSystem{
     Display* dpy() const;
     Visual *visual() const;
     Colormap colormap() const;
+    #else
+    HINSTANCE hInst() const;
     #endif
     int depth() const;
     int pixelSize( int depth ) const;
