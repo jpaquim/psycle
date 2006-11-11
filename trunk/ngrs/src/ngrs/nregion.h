@@ -26,6 +26,12 @@
 /**
 @author Stefan Nattkemper
 */
+
+#ifdef __unix__
+#else
+typedef HRGN Region;
+#endif
+
 class NRegion{
 public:
     NRegion();
@@ -55,22 +61,19 @@ public:
 
 
       // warning: this pointer can change
-    #ifdef __unix__
-    inline Region xRegion() const  { return region_; }
 
+    inline Region sRegion() const  { return region_; }
 
     // implicit conversion to X const Region.
     inline operator const Region () const  { return region_; }
 
     // implicit conversion to X Region.
     inline operator Region ()  { return region_; }
-    #endif
+
 
 private:
 
-    #ifdef __unix__
     Region region_;
-    #endif
     mutable NRect clipBox;
     mutable bool update;
 };
@@ -79,6 +82,8 @@ inline NRegion & NRegion::operator &= ( const NRegion & that )
 {
   #ifdef __unix__
   XIntersectRegion(*this, that, *this);
+  #else
+  CombineRgn(*this, that, *this, RGN_AND);
   #endif
   return *this;
 }
@@ -94,6 +99,8 @@ inline NRegion & NRegion::operator |= ( const NRegion & that )
 {
   #ifdef __unix__
   XUnionRegion( *this, that, *this );
+  #else
+  CombineRgn( *this, that, *this, RGN_OR);
   #endif
   return *this;
 }
@@ -109,6 +116,8 @@ inline NRegion & NRegion::operator -= ( const NRegion & that )
 {
   #ifdef __unix__
   XSubtractRegion( *this, that, *this );
+  #else
+  CombineRgn( *this, that, *this, RGN_DIFF);
   #endif
   return *this;
 }
@@ -124,6 +133,8 @@ inline NRegion & NRegion::operator ^= ( const NRegion & that )
 {
   #ifdef __unix__
   XXorRegion( *this, that, *this );
+  #else
+  CombineRgn( *this, that, *this, RGN_XOR);
   #endif
   return *this;
 }

@@ -32,7 +32,12 @@
 #ifdef __unix__
 typedef XEvent WEvent;
 #else
-typedef int WEvent;
+struct WEvent {
+  HWND hwnd;
+  UINT msg;
+  WPARAM wParam;
+  LPARAM lParam;            
+};
 #endif
 
 class NSystem;
