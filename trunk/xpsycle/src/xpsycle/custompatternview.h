@@ -205,6 +205,7 @@ namespace psycle {
 
 					const NSize & selection() const;
 					void clearOldSelection();
+					void repaintSelection();
 
 					void addEvent( const ColumnEvent & event );
 					std::string noteToString( int value, bool sharp );
