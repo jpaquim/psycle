@@ -137,9 +137,11 @@ void NWindow::repaint( NVisualComponent * sender, const NRegion & repaintArea, b
 
     if (pane_->width() !=width() || pane_->height() !=height())
       pane_->setPosition(0,0,width(),height());
-    graphics_->setRegion(repaintArea);
-    pane_->draw(graphics_,repaintArea,sender);
-    if (dblBuffer_ && swap) graphics()->swap(repaintArea.rectClipBox());
+      graphics_->setRegion(repaintArea);
+      HDC dc = graphics_->gc();
+
+      pane_->draw(graphics_,repaintArea,sender);
+//    if (dblBuffer_ && swap) graphics()->swap(repaintArea.rectClipBox());
   }
 }
 
@@ -155,6 +157,10 @@ int NWindow::width( ) const
   XWindowAttributes attr;
   XGetWindowAttributes( NApp::system().dpy(), win_, &attr );
   return attr.width;
+  #else
+  RECT r;
+  GetWindowRect( win_, &r );
+  return ( r.right - r.left );
   #endif
 }
 
@@ -164,6 +170,10 @@ int NWindow::height( ) const
   XWindowAttributes attr;
   XGetWindowAttributes( NApp::system().dpy(), win_, &attr );
   return attr.height;
+  #else
+  RECT r;
+  GetWindowRect( win_, &r );
+  return ( r.bottom - r.top );
   #endif
 }
 

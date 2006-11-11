@@ -244,16 +244,31 @@ void NApp::modalEventLoop(NWindow* modalWin )
 #else
 
 LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-  switch( msg )
+
+  std::map< WinHandle, NWindow* >::iterator itr;  
+
+  if ( (itr = winMap.find( hwnd )) == winMap.end() )
   {
-    case WM_CLOSE:
-    break;
-    case WM_DESTROY:
-    break;
-    default:
-      return DefWindowProc( hwnd, msg, wParam, lParam );            
-  }        
-  return 0;
+      std::cout << "not me" << std::endl;
+    // not my windows
+  } else {
+    NWindow* window = itr->second;
+    window->setExitLoop(0);
+//    if (window == modalWin || window->isChildOf(modalWin) ||
+//        event.type == Expose) {
+  
+    WEvent event;
+    
+    event.hwnd   = hwnd;
+    event.msg    = msg;
+    event.wParam = wParam; 
+    event.lParam = lParam;
+    
+    int erg = processEvent(window, & event);
+    return erg;
+  }
+
+  return DefWindowProc( hwnd, msg, wParam, lParam);
 }
 
 #endif
@@ -349,8 +364,28 @@ int NApp::processEvent( NWindow * win, WEvent * event )
 
     default : ;
   }
-  #endif
   return exitloop;
+  #else
+  HDC hdc;
+  PAINTSTRUCT ps;
+  switch (event->msg) {
+    case WM_PAINT:
+    win->graphics()->resize(win->width(),win->height());
+    win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
+    break;
+    case WM_CLOSE:
+      exitloop = win->onClose();
+      if ( exitloop == nDestroyWindow )
+        DestroyWindow( event->hwnd );
+    break;
+    case WM_DESTROY:
+      PostQuitMessage(0);
+    break;
+    default:
+      return DefWindowProc( event->hwnd, event->msg, event->wParam, event->lParam);
+  }
+  return 0;
+  #endif
 }
 
 void NApp::addWindow( WinHandle handle, NWindow * window )

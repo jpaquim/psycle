@@ -103,6 +103,7 @@ void NLabel::paint( NGraphics * g )
         default:
         ;
       }
+
       g->drawText(xp_, yp_, substr);
 
       if (mnemonic_!='\0') {

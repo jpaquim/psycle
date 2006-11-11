@@ -41,6 +41,8 @@ NGraphics::NGraphics(WinHandle winID)
   doubleBufferPixmap_=0;
   gcp = 0;
   drawDbl = 0;
+  #else
+  gc_ = GetDC( win );
   #endif
 
 
@@ -56,6 +58,8 @@ NGraphics::~NGraphics()
 {
   #ifdef __unix__
   XftDrawDestroy(drawWin);
+  #else
+  ReleaseDC( win , gc_ );
   #endif
   if (dblBuffer_) {
      destroyDblBufferHandles();
@@ -212,6 +216,8 @@ void NGraphics::drawText( int x, int y, const std::string & text )
     fFtColor.color.blue  = color.blue() * ( 0xFFFF/255);
     drawXftString(x+dx_,y+dy_,text.c_str());
   }
+  #else
+  TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );
   #endif
 }
 
@@ -231,8 +237,10 @@ void NGraphics::drawText(int x, int y, const std::string & text, const NColor & 
     fFtColor.color.red   = color.red() * ( 0xFFFF/255);
     fFtColor.color.green = color.green() * ( 0xFFFF/255);
     fFtColor.color.blue  = color.blue() * ( 0xFFFF/255);
-    drawXftString(x+dx_,y+dy_,text.c_str());
+    drawXftString( x+dx_, y+dy_, text.c_str() );
   }
+  #else
+  TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );
   #endif
 }
 
@@ -242,7 +250,7 @@ void NGraphics::drawRect( int x, int y, int width, int height )
     #ifdef __unix__
     XDrawRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
     #else
-    ;
+    Rectangle( gc_, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
     #endif
   else
     #ifdef __unix__
@@ -363,6 +371,9 @@ int NGraphics::textWidth( const std::string & text ) const
      ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
     return info.xOff;
    }
+   #else 
+   /// todo 
+   return text.length() * 10;
    #endif
 }
 
@@ -377,6 +388,9 @@ int NGraphics::textHeight()
   int d = fntStruct.xftFnt->descent;
   return a + d + 1;
 }
+ #else
+    /// todo 
+ return 10;
  #endif
 }
 
@@ -390,6 +404,9 @@ int NGraphics::textAscent( )
    int a = fntStruct.xftFnt->ascent;
    return a;
   }
+  #else
+     /// todo 
+  return 10;
   #endif
 }
 
@@ -400,6 +417,9 @@ int NGraphics::textDescent( )
    return (fntStruct.xFnt->max_bounds.descent);
  else 
    return fntStruct.xftFnt->descent;
+ #else
+    /// todo 
+ return 10;
  #endif
 }
 
@@ -526,7 +546,7 @@ Pixmap NGraphics::dbPixmap( )
 {
   return doubleBufferPixmap_;
 }
-
+#endif
 
 GC NGraphics::dbGC( )
 {
@@ -537,8 +557,6 @@ GC NGraphics::gc( )
 {
   return gc_;
 }
-
-#endif
 
 void NGraphics::copyArea(int src_x,int src_y,unsigned width,unsigned height,int dest_x,int dest_y, bool dblBuffer_)
 {

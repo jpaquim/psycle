@@ -35,6 +35,11 @@
 @author Stefan
 */
 
+#ifdef __unix__
+#else
+  typedef HDC GC;
+#endif
+
 const int nBltNormal = 0;
 const int nBltStretch = 1;
 
@@ -105,10 +110,10 @@ public:
 
     #ifdef __unix__
     Pixmap dbPixmap();
-    GC dbGC();
-    GC gc();
     #endif
 
+    GC dbGC();
+    GC gc();
 
     void copyArea(int src_x,int src_y,unsigned width,unsigned height,int dest_x,int dest_y, bool dblBuffer_ = true);
 
@@ -131,10 +136,10 @@ private:
    int dblHeight_;
 
    WinHandle win;
-   #ifdef __unix__
    GC gc_;      // GC from Window
    GC gcp;     // GC from Pixmap for double buffering
-
+   
+   #ifdef __unix__
    Pixmap doubleBufferPixmap_;
    #endif
 
