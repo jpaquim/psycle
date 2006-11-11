@@ -450,11 +450,11 @@ namespace psycle {
 
 			NPoint lineArea = linesFromRepaint(g->repaintArea());
 			int startLine = lineArea.x();
-    	int endLine   = lineArea.y();
+                        int endLine   = lineArea.y();
 
-    	NPoint trackArea = tracksFromRepaint(g->repaintArea());
-    	int startTrack = trackArea.x();
-    	int endTrack   = trackArea.y();
+                        NPoint trackArea = tracksFromRepaint(g->repaintArea());
+                        int startTrack = trackArea.x();
+                        int endTrack   = trackArea.y();
 
 			customPaint(g, startLine, endLine, startTrack, endTrack);
 				
@@ -751,13 +751,13 @@ namespace psycle {
                         // FIXME: works, but could probably be refactored...
                         if (NApp::system().keyState() & ShiftMask) {
                                 oldSelection_ = selection_;
+                                PatCursor crs = cursor();
                                 switch (event.scancode()) {		
                                         case NK_Up:
                                         {
                                                 std::cout << "shift up" << std::endl;
                                                 // if currently shift selecting...
                                                 if (doShiftSelect_) {
-                                                        PatCursor crs = cursor();
                                                         // if above line is not already selected then select it...
                                                         if (!lineAlreadySelected(crs.line())) {
                                                                 // don't set selection out of bounds of grid...
@@ -772,7 +772,6 @@ namespace psycle {
                                   
                                                 } else {
                                                 // start a shift select.
-                                                        PatCursor crs = cursor();
                                                         selStartPoint_ = crs;
                                                         selCursor_ = crs;
                                                         doShiftSelect_ = true;
@@ -788,7 +787,6 @@ namespace psycle {
                                                 std::cout << "shift down" << std::endl;
                                                 // if currently shift selecting...
                                                 if (doShiftSelect_) {
-                                                        PatCursor crs = cursor();
                                                         // if line beneath is not selected...
                                                         if (!lineAlreadySelected(crs.line()+1)) {
                                                                 // select line beneath.
@@ -805,7 +803,6 @@ namespace psycle {
                                   
                                                 } else {
                                                 // start a shift select.
-                                                        PatCursor crs = cursor();
                                                         selStartPoint_ = crs;
                                                         selCursor_ = crs;
                                                         doShiftSelect_ = true;
@@ -819,7 +816,6 @@ namespace psycle {
                                         case NK_Left:
                                         {
                                                 std::cout << "shift left" << std::endl;
-                                                PatCursor crs = cursor();
                                                 // if currently shift selecting...
                                                 if (doShiftSelect_) {
                                                         // if track to left is not selected...
@@ -856,7 +852,6 @@ namespace psycle {
                                         case NK_Right:
                                         {
                                                 std::cout << "shift right" << std::endl;
-                                                PatCursor crs = cursor();
                                                 // if currently shift selecting...
                                                 if (doShiftSelect_) {
                                                         // if track to right is not selected...
@@ -891,11 +886,7 @@ namespace psycle {
                                         break;
                                 }
                                 if (oldSelection_ != selection_) {
-                                        // these is totally unoptimized todo repaint only new area
-                                        NSize clipBox = selection_.clipBox(oldSelection_);
-                                        NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
-                                        window()->repaint(this,r);
-                                        oldSelection_ = selection_;
+                                        repaintSelection();
                                 }
                         }
 
@@ -999,6 +990,14 @@ namespace psycle {
 			}
 
 		}
+
+                void CustomPatternView::repaintSelection() {
+                        // these is totally unoptimized todo repaint only new area
+                        NSize clipBox = selection_.clipBox(oldSelection_);
+                        NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
+                        window()->repaint(this,r);
+                        oldSelection_ = selection_;
+                }
 
                 bool CustomPatternView::lineAlreadySelected(int lineNumber) {
                         if (lineNumber > selection_.top() && lineNumber < selection_.bottom()) {
@@ -1216,14 +1215,11 @@ namespace psycle {
             selection_.setTop(0);
             selection_.setBottom(lineNumber());
 
-			if (oldSelection_ != selection_) {
-				// these is totally unoptimized todo repaint only new area
-				NSize clipBox = selection_.clipBox(oldSelection_);
-				NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
-				window()->repaint(this,r);
-				oldSelection_ = selection_;
-			}
-              selCursor_ = cursor;
+                if (oldSelection_ != selection_) {
+                        repaintSelection();
+                }
+
+            selCursor_ = cursor;
         }
 
         void CustomPatternView::selectColumn(const PatCursor & cursor) {
@@ -1234,14 +1230,11 @@ namespace psycle {
             selection_.setTop(0);
             selection_.setBottom(lineNumber());
 
-			if (oldSelection_ != selection_) {
-				// these is totally unoptimized todo repaint only new area
-				NSize clipBox = selection_.clipBox(oldSelection_);
-				NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
-				window()->repaint(this,r);
-				oldSelection_ = selection_;
-			}
-              selCursor_ = cursor;
+                if (oldSelection_ != selection_) {
+                        repaintSelection();
+                }
+
+            selCursor_ = cursor;
         }
 
 		int CustomPatternView::doSel(const PatCursor & p )
@@ -1276,14 +1269,10 @@ namespace psycle {
 				dir |= south;
 			}
 
-			if (oldSelection_ != selection_) {
-				// these is totally unoptimized todo repaint only new area
-				NSize clipBox = selection_.clipBox(oldSelection_);
-				NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
-				window()->repaint(this,r);
-				oldSelection_ = selection_;
-			}
-      selCursor_ = p;
+                        if (oldSelection_ != selection_) {
+                                repaintSelection();
+                        }
+                        selCursor_ = p;
 			return dir;
 		}
 
@@ -1339,7 +1328,7 @@ namespace psycle {
 
 			if (sharp)
 			switch (value % 12) {
-      	case 0:   return "C-" + stringify(octave); break;
+                                case 0:   return "C-" + stringify(octave); break;
 				case 1:   return "C#" + stringify(octave); break;
 				case 2:   return "D-" + stringify(octave); break;
 				case 3:   return "D#" + stringify(octave); break;
@@ -1355,7 +1344,7 @@ namespace psycle {
 
 			if (!sharp)
 			switch (value % 12) {
-      	case 0:   return "C-" + stringify(octave); break;
+                                case 0:   return "C-" + stringify(octave); break;
 				case 1:   return "Db" + stringify(octave); break;
 				case 2:   return "D-" + stringify(octave); break;
 				case 3:   return "Eb" + stringify(octave); break;
