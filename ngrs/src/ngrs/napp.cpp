@@ -96,12 +96,10 @@ NSystem & NApp::system( )
 
 void NApp::eventLoop( )
 {
-  #ifdef __unix__
-
-
   if (mainWin_!=0) {
        mainWin_->setVisible(true);
   }
+  #ifdef __unix__
   system().flush();
   WEvent event;
   int n = 0;
@@ -172,6 +170,16 @@ void NApp::eventLoop( )
     }
     callRemovePipe();
   }
+  #else
+  
+  MSG Msg;
+  // The Message Loop
+  
+  while ( GetMessage( & Msg, NULL, 0,0) > 0 )
+  {
+    TranslateMessage(&Msg);
+    DispatchMessage(&Msg);      
+  }
   #endif
 }
 
@@ -232,6 +240,23 @@ void NApp::modalEventLoop(NWindow* modalWin )
   #endif
 }
 
+#ifdef __unix__
+#else
+
+LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+  switch( msg )
+  {
+    case WM_CLOSE:
+    break;
+    case WM_DESTROY:
+    break;
+    default:
+      return DefWindowProc( hwnd, msg, wParam, lParam );            
+  }        
+  return 0;
+}
+
+#endif
 
 
 int NApp::processEvent( NWindow * win, WEvent * event )

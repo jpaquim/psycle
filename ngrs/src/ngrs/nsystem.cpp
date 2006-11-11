@@ -59,6 +59,11 @@ Display* NSystem::dpy( ) const
 {
    return dpy_;
 }
+#else
+HINSTANCE NSystem::hInst() const {
+ return GetModuleHandle( 0 );         
+}
+
 #endif
 
 int NSystem::depth( ) const
@@ -165,21 +170,22 @@ WinHandle NSystem::registerWindow(WinHandle parent )
   Atom windowClose = atoms().wm_delete_window();
   XSetWMProtocols(dpy(), win_, &windowClose , 1);
 
-	#else
+  #else
 
-		/*WNDCLASSEX wc;
+    WNDCLASSEX wc;
 
+    // Step 1 : registering the Window Class    
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
-    wc.lpfnWndProc   = WndProc;
+    wc.lpfnWndProc   = NApp::WndProc;
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
-    wc.hInstance     = hInstance;
+    wc.hInstance     = hInst();
     wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
     wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
     wc.lpszMenuName  = NULL;
-    wc.lpszClassName = g_szClassName;
+    wc.lpszClassName = "myWindowClass";
     wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
 
     if(!RegisterClassEx(&wc))
@@ -187,9 +193,21 @@ WinHandle NSystem::registerWindow(WinHandle parent )
         MessageBox(NULL, "Window Registration Failed!", "Error!",
             MB_ICONEXCLAMATION | MB_OK);
         return 0;
-    }*/
+    }
 
-
+    // Step2 : Creating the Window
+    win_ = CreateWindowEx(
+         WS_EX_CLIENTEDGE,
+         "myWindowClass",
+         "title of window",
+         WS_OVERLAPPEDWINDOW,
+         CW_USEDEFAULT, CW_USEDEFAULT, 240, 120,
+         NULL, NULL, hInst(), NULL);
+    
+    if ( win_ == 0 )
+    {
+      MessageBox( NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK );     
+    }
 
   #endif
 

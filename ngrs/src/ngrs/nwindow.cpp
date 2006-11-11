@@ -91,6 +91,9 @@ void NWindow::setVisible( bool on )
         XMapWindow(NApp::system().dpy(),win_);
         checkGeometry();
         XSync(NApp::system().dpy(),false);
+        #else
+        ShowWindow( win(), 1 );
+        UpdateWindow( win() );
         #endif
       }
   } else if (mapped()) {
@@ -330,7 +333,9 @@ void NWindow::setTitle( std::string title )
   title_ = title;
   #ifdef __unix__
   XSetStandardProperties(NApp::system().dpy(), win_, title.c_str(), title.c_str(), 0, NULL, 0, NULL);	
-  #endif  
+  #else
+  SetWindowText( win_, title.c_str() );
+  #endif    
 }
 
 std::string NWindow::title( )

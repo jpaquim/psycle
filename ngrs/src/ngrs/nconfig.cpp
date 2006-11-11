@@ -355,11 +355,16 @@ NConfig::NConfig()
 {
   #ifdef __unix__
   attrs = 0;
-  #endif
   std::string oldDir = NFile::workingDir();
   NFile::cdHome();
 //  loadXmlConfig(".ngrs.xml");
   NFile::cd(oldDir);
+  #else
+  
+  /// todo
+  /// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/creating_and_using_a_temporary_file.asp
+  
+  #endif
 }
 
 

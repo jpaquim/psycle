@@ -83,6 +83,11 @@ public:
    static void leaveThread();
 
    static NWindow* lastOverWin_;
+   
+   #ifdef __unix__
+   #else
+   static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+   #endif
 
 private:
 
