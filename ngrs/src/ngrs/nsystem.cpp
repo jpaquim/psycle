@@ -41,13 +41,19 @@ NSystem::~NSystem()
 {
   #ifdef __unix__
   delete atoms_;
-	std::cout << "deleting cursor" << std::endl;
+  std::cout << "deleting cursor" << std::endl;
   std::map<int,Cursor>::iterator it = cursorMap.begin();
   for ( ; it != cursorMap.end(); it++ ) {
     {
 	    if (it->second != None )
       XFreeCursor( dpy(), it->second );  
     }
+  }
+  #else
+  std::map<NFont,NFontStructure>::iterator it = xftfntCache.begin();
+  for ( ; it != xftfntCache.end(); it++ ) {
+      NFontStructure fnt = it->second;
+      DeleteObject( fnt.hFnt );
   }
   #endif
 }
@@ -248,7 +254,7 @@ void NSystem::flush( )
   #endif
 }
 
-NFontStructure NSystem::getXFontValues( const NFont & nFnt )
+NFontStructure NSystem::getFontValues( const NFont & nFnt )
 {
  NFontStructure fnt;
  NFontStructure cacheFnt;
@@ -290,7 +296,32 @@ NFontStructure NSystem::getXFontValues( const NFont & nFnt )
      fnt =  itr->second;
    }
  }
+ #else
+
+   if ( (itr = xftfntCache.find(nFnt)) == xftfntCache.end())
+   {
+    HDC hdc = GetDC(NULL);
+    long lfHeight = -MulDiv( nFnt.size(), GetDeviceCaps(hdc, LOGPIXELSY), 72);
+    ReleaseDC(NULL, hdc);   
+        
+     cacheFnt.hFnt = CreateFont(
+          lfHeight, 0, 0, 0, 0, 
+          TRUE, 0, 0, 0, 0, 0, 0, 0, 
+          nFnt.name().c_str()
+     );
+          
+     if ( !cacheFnt.hFnt ) {
+        HFONT hGuiFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+        cacheFnt.hFnt = hGuiFont;
+        fnt = cacheFnt;
+     } else {
+       xftfntCache[nFnt]=fnt=cacheFnt;
+     }
+   } else {
+     fnt =  itr->second;
+   } 
  #endif
+
  fnt.textColor = nFnt.textColor();
  return fnt;
 }

@@ -153,6 +153,8 @@ private:
    XftColor fFtColor;
    XftDraw* drawDbl;
    XftDraw* drawWin;
+   #else
+   HBRUSH brush;
    #endif
 
    NRegion region_;

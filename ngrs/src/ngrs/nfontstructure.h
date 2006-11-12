@@ -23,6 +23,8 @@
 #ifdef __unix__
  #include <X11/Xlib.h>
  #include <X11/Xft/Xft.h>
+#else
+#include <windows.h>
 #endif
 #include "ncolor.h"
 
@@ -40,6 +42,8 @@ public:
     #ifdef __unix__
      XFontStruct* xFnt;
      XftFont*  xftFnt;
+    #else
+     HFONT hFnt; 
     #endif
     
     NColor textColor;
