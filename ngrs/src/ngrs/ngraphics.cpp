@@ -33,6 +33,7 @@ NGraphics::NGraphics(WinHandle winID)
   fFtColor.color.alpha = 0xFFFF; // Alpha blending
   #else
   brush = CreateSolidBrush(RGB(0,0,0));
+  hPen  = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
   #endif
   win = winID;
 
@@ -63,6 +64,7 @@ NGraphics::~NGraphics()
   #else  
   ReleaseDC( win , gc_ );
   DeleteObject( brush );
+  DeleteObject( hPen );
   #endif
   if (dblBuffer_) {
      destroyDblBufferHandles();
@@ -172,6 +174,10 @@ void NGraphics::setForeground( const NColor & color )
     DeleteObject( brush );
     brush =  CreateSolidBrush(RGB(color.red(), color.green(), color.blue() ));
     SelectObject( gc_, brush );
+    
+    DeleteObject( hPen );
+    hPen = CreatePen(PS_SOLID, 1, RGB( color.red(), color.green(), color.blue()));
+    SelectObject( gc_, hPen );
     #endif               
     oldColor.setRGB(color.red(),color.green(),color.blue());
   }
@@ -284,12 +290,14 @@ void NGraphics::drawRect( const NRect & rect )
 
 void NGraphics::drawLine( long x, long y, long x1, long y1 )
 {
-  if (dblBuffer_)
+  if (dblBuffer_) {
      #ifdef __unix__
      XDrawLine(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
      #else
-     ;
+     MoveToEx( gc_, x + dx_, y + dy_, NULL);
+     LineTo( gc_, x1 + dx_, x1 + dy_);
      #endif
+  }
   else
      #ifdef __unix__
      XDrawLine(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,x1+dx_,y1+dy_);
