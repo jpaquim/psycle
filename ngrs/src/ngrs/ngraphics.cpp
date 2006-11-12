@@ -169,9 +169,9 @@ void NGraphics::setForeground( const NColor & color )
     if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
                else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
     #else
-//    DeleteObject( brush );
-//    brush =  CreateSolidBrush(RGB(color.red(), color.green(), color.blue() ));
-//    SelectObject( gc_, brush );
+    DeleteObject( brush );
+    brush =  CreateSolidBrush(RGB(color.red(), color.green(), color.blue() ));
+    SelectObject( gc_, brush );
     #endif               
     oldColor.setRGB(color.red(),color.green(),color.blue());
   }
@@ -233,7 +233,7 @@ void NGraphics::drawText( int x, int y, const std::string & text )
     fFtColor.color.blue  = color.blue() * ( 0xFFFF/255);
     drawXftString(x+dx_,y+dy_,text.c_str());
   }
-  #else
+  #else    
   TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );
   #endif
 }
