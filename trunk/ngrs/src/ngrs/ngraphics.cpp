@@ -31,6 +31,8 @@ NGraphics::NGraphics(WinHandle winID)
   fFtColor.color.green = 0x0000;
   fFtColor.color.blue  = 0x0000;
   fFtColor.color.alpha = 0xFFFF; // Alpha blending
+  #else
+  brush = CreateSolidBrush(RGB(0,0,0));
   #endif
   win = winID;
 
@@ -58,8 +60,9 @@ NGraphics::~NGraphics()
 {
   #ifdef __unix__
   XftDrawDestroy(drawWin);
-  #else
+  #else  
   ReleaseDC( win , gc_ );
+  DeleteObject( brush );
   #endif
   if (dblBuffer_) {
      destroyDblBufferHandles();
@@ -72,7 +75,14 @@ void NGraphics::fillRect( int x, int y, int width, int height )
      #ifdef __unix__
      XFillRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
      #else
-     ;
+     {
+       RECT rect;
+       rect.left   = x + dx_;
+       rect.top    = y + dy_;
+       rect.right  = rect.left + width;
+       rect.bottom = rect.top  + height;
+       FillRect( gc_, &rect, brush);
+     }
      #endif
   else
      #ifdef __unix__
@@ -154,25 +164,32 @@ long NGraphics::yTranslation( )
 
 void NGraphics::setForeground( const NColor & color )
 {
-  #ifdef __unix__
   if (!(oldColor == color)) {
+    #ifdef __unix__                 
     if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
                else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
+    #else
+//    DeleteObject( brush );
+//    brush =  CreateSolidBrush(RGB(color.red(), color.green(), color.blue() ));
+//    SelectObject( gc_, brush );
+    #endif               
     oldColor.setRGB(color.red(),color.green(),color.blue());
   }
-  #endif
+
 }
 
 void NGraphics::setFont( const NFont & font )
 {
+  fntStruct = font.systemFont();   
   #ifdef __unix__
-  fntStruct = font.systemFont();
   if (!fntStruct.antialias) {
     if (dblBuffer_)
        XSetFont(NApp::system().dpy(),gcp,fntStruct.xFnt->fid);
     else
        XSetFont(NApp::system().dpy(),gc_,fntStruct.xFnt->fid);
   }
+  #else
+  SelectObject( gc_, fntStruct.hFnt );  
   #endif
 }
 
@@ -372,8 +389,15 @@ int NGraphics::textWidth( const std::string & text ) const
     return info.xOff;
    }
    #else 
-   /// todo 
-   return text.length() * 10;
+   SIZE size;
+   GetTextExtentPoint32(
+    gc_,           // handle to DC
+    text.c_str(),  // text string
+    text.length(), // characters in string
+    &size          // string size
+   );
+
+   return size.cx;
    #endif
 }
 
@@ -387,10 +411,16 @@ int NGraphics::textHeight()
   int a = fntStruct.xftFnt->ascent;
   int d = fntStruct.xftFnt->descent;
   return a + d + 1;
-}
+ }
  #else
-    /// todo 
- return 10;
+ TEXTMETRIC metrics;
+ 
+ GetTextMetrics(
+   gc_,   // handle to DC
+   &metrics   // text metrics
+ );  
+    
+ return metrics.tmHeight; 
  #endif
 }
 
@@ -405,8 +435,14 @@ int NGraphics::textAscent( )
    return a;
   }
   #else
-     /// todo 
-  return 10;
+  TEXTMETRIC metrics;
+ 
+  GetTextMetrics(
+   gc_,   // handle to DC
+   &metrics   // text metrics
+  );  
+    
+  return metrics.tmAscent; 
   #endif
 }
 
@@ -418,8 +454,14 @@ int NGraphics::textDescent( )
  else 
    return fntStruct.xftFnt->descent;
  #else
-    /// todo 
- return 10;
+ TEXTMETRIC metrics;
+ 
+ GetTextMetrics(
+   gc_,      // handle to DC
+   &metrics  // text metrics
+ );  
+    
+ return metrics.tmDescent; 
  #endif
 }
 

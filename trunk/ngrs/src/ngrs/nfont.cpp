@@ -25,12 +25,12 @@ using namespace std;
 
 NFont::NFont() : name_("9x15"),size_(10),style_(nMedium | nStraight)
 {
-  systemFnt = NApp::system().getXFontValues(*this);
+  systemFnt = NApp::system().getFontValues(*this);
 }
 
 NFont::NFont( std::string name, int size,int style ) : name_(name),size_(size),style_(style)
 {
-  systemFnt = NApp::system().getXFontValues(*this);
+  systemFnt = NApp::system().getFontValues(*this);
 }
 
 NFont::~NFont()
@@ -43,19 +43,19 @@ NFont::~NFont()
 void NFont::setName( string name )
 {
   name_ = name;
-  systemFnt = NApp::system().getXFontValues(*this);
+  systemFnt = NApp::system().getFontValues(*this);
 }
 
 void NFont::setSize( int size )
 {
   size_ = size;
-  systemFnt = NApp::system().getXFontValues(*this);
+  systemFnt = NApp::system().getFontValues(*this);
 }
 
 void NFont::setStyle( int style )
 {
   style_ = style;
-  systemFnt = NApp::system().getXFontValues(*this);
+  systemFnt = NApp::system().getFontValues(*this);
 }
 
 // getter

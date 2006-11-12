@@ -24,7 +24,7 @@ using namespace std;
 
 NFontMetrics::NFontMetrics( )
 {
-  fntStruct = NApp::system().getXFontValues(NFont());
+  fntStruct = NApp::system().getFontValues(NFont());
 }
 
 NFontMetrics::NFontMetrics(const NFont & font)
@@ -55,17 +55,25 @@ int NFontMetrics::textWidth( const string & text )
 
 int NFontMetrics::textHeight( )
 {
-   #ifdef __unix__
- if (!fntStruct.antialias)
- {
-   return (fntStruct.xFnt->max_bounds.ascent+ fntStruct.xFnt->max_bounds.descent);
- } else {
-  int a = fntStruct.xftFnt->ascent;
-  int d = fntStruct.xftFnt->descent;
-  return a + d;
-}
-
-#endif
+  #ifdef __unix__
+  if (!fntStruct.antialias)
+  {
+    return (fntStruct.xFnt->max_bounds.ascent+ fntStruct.xFnt->max_bounds.descent);
+  } else {
+   int a = fntStruct.xftFnt->ascent;
+   int d = fntStruct.xftFnt->descent;
+   return a + d;
+  }
+  #else
+  TEXTMETRIC metrics;
+  HDC dc = GetDC( NULL );
+  GetTextMetrics(
+    dc ,      // handle to DC
+    &metrics  // text metrics
+  );  
+  ReleaseDC( NULL , dc );
+  return metrics.tmHeight;
+  #endif
 }
 
 int NFontMetrics::textAscent( )
@@ -78,6 +86,15 @@ int NFontMetrics::textAscent( )
    int a = fntStruct.xftFnt->ascent;
    return a;
   }
+  #else
+  TEXTMETRIC metrics;
+  HDC dc = GetDC(NULL); 
+  GetTextMetrics(
+    dc,       // handle to DC
+    &metrics  // text metrics
+  );  
+  ReleaseDC( NULL , dc );
+  return metrics.tmAscent;
   #endif
 }
 
@@ -91,6 +108,15 @@ int NFontMetrics::textDescent( )
   int d = fntStruct.xftFnt->descent;
   return d;
  }
+ #else
+ TEXTMETRIC metrics;
+ HDC dc = GetDC(NULL);
+ GetTextMetrics(
+    dc,       // handle to DC
+    &metrics  // text metrics
+ );  
+ ReleaseDC( NULL , dc );
+ return metrics.tmDescent;
  #endif
 }
 
@@ -98,6 +124,3 @@ void NFontMetrics::setFont( const NFont & font )
 {
   fntStruct = font.systemFont();
 }
-
-
-

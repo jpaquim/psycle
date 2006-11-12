@@ -103,7 +103,7 @@ class NSystem{
     void setWindowDecoration(WinHandle win, bool on);
     void setStayAbove(WinHandle win);
     bool isWindowMapped(WinHandle win);
-    NFontStructure getXFontValues(const NFont & nFnt);
+    NFontStructure getFontValues(const NFont & nFnt);
     int windowLeft(WinHandle win);
     int windowTop(WinHandle win);
     unsigned long getXColorValue(int r, int g, int b);
