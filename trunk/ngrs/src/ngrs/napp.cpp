@@ -370,8 +370,14 @@ int NApp::processEvent( NWindow * win, WEvent * event )
   PAINTSTRUCT ps;
   switch (event->msg) {
     case WM_PAINT:
+
+
+    hdc = BeginPaint( win->win(), &ps);     
+    
     win->graphics()->resize(win->width(),win->height());
     win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
+    
+    EndPaint( win->win(), &ps);
     break;
     case WM_CLOSE:
       exitloop = win->onClose();
