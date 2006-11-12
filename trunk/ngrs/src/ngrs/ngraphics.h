@@ -155,6 +155,7 @@ private:
    XftDraw* drawWin;
    #else
    HBRUSH brush;
+   HPEN hPen;
    #endif
 
    NRegion region_;
