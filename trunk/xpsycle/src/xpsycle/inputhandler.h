@@ -434,10 +434,10 @@ public:
       return key1 < key2;
     };
 
+    unsigned int scancode;
 private:
 
     unsigned int ctrl;
-    unsigned int scancode;
 
 };
 

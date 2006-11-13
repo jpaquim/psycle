@@ -36,15 +36,12 @@ Configuration & Global::configuration() {
   return *pConfig();
 }
 
+Global::Global() { }
 
-Global::Global()
-{
+Global::~Global() { }
 
-}
-
-
-Global::~Global()
-{
+void Global::log(std::string message) {
+        std::cout << message << std::endl;
 }
 
 }

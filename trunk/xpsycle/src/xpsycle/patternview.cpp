@@ -1039,7 +1039,8 @@ void PatternView::TweakGUI::resize() {
 void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 	CustomPatternView::onKeyPress( event );
 
-	switch ( event.scancode() ) {		
+        int pressedKey = event.scancode();
+	switch ( pressedKey ) {		
 		case ' ':
 			if (Player::Instance()->playing() ) {
 				Player::Instance()->stop();
@@ -1073,7 +1074,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			}
 		}
 		break;
-		case NK_Left :
+		case cdefNavLeft:
 			checkLeftScroll( cursor() );
       return;
 		break;
@@ -1556,7 +1557,15 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	if ( !pView->pattern() ) return;
 	CustomPatternView::onKeyPress( event );
 
-	switch ( event.scancode() ) {		
+        int pressedKey = event.scancode();
+        std::string mod = "none";
+        if ((NApp::system().keyState() & ControlMask)) {
+               mod = "ctrl"; 
+        } else if ((NApp::system().keyState() & ShiftMask)) {
+               mod = "shift";
+        }
+        int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+	switch (key) {		
 		case ' ':
 			if (Player::Instance()->playing() ) {
 				Player::Instance()->stop();
@@ -1590,33 +1599,30 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			}
 		}
 		break;
-		case NK_Left :
+		case cdefNavLeft:
 			checkLeftScroll( cursor() );
                         return;
 		break;
-		case NK_Right:
+		case cdefNavRight:
 			checkRightScroll( cursor() );
 			return;
 		break;
-                case NK_Down:
-                        if (NApp::system().keyState() & ControlMask) {
-                        } else {
-                                pView->checkDownScroll( cursor() );
-                        }
+                case cdefNavDn:
+                        pView->checkDownScroll( cursor() );
                         return;
                 break;
-    case NK_Up:
+                case cdefNavUp:
 			pView->checkUpScroll( cursor() );
-      return;
-    break;
+                return;
+                break;
 		case NK_End:
-      pView->checkDownScroll( cursor() );
-      return;
-    break;
-    case NK_Home:
-      pView->checkUpScroll( cursor() );
-      return;
-    break;
+                        pView->checkDownScroll( cursor() );
+                        return;
+                break;
+                case NK_Home:
+                        pView->checkUpScroll( cursor() );
+                        return;
+                break;
 		case NK_Tab:
 			checkRightScroll( cursor() );
 			return;
@@ -1640,11 +1646,9 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	}
 				
         
-	if (NApp::system().keyState() & ControlMask) {
-		int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key("ctrl",event.scancode()));
 		switch (key) {
 			case cdefUndo:
-                std::cout << "key: edit undo" << std::endl;
+                                std::cout << "key: edit undo" << std::endl;
 				pView->doUndo();
 				return;
 			break;
@@ -1683,7 +1687,6 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				return;
 			break;
 		}
-	}
 
 	if ( cursor().eventNr() == 0 ) {
         // A note event.
