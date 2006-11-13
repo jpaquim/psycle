@@ -205,6 +205,10 @@ namespace psycle {
       
       cdefSelectAll,
       cdefSelectCol,
+      cdefSelectUp,
+      cdefSelectDn,
+      cdefSelectLeft,
+      cdefSelectRight,
 
       cdefEditQuantizeDec,
       cdefEditQuantizeInc,

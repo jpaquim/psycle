@@ -760,11 +760,10 @@ namespace psycle {
                         // Shift+Arrowkeys used for selecting blocks of pattern.
                         // FIXME: should only occur if set in options.
                         // FIXME: works, but could probably be refactored...
-                        if (NApp::system().keyState() & ShiftMask) {
                                 oldSelection_ = selection_;
                                 PatCursor crs = cursor();
-                                switch (event.scancode()) {		
-                                        case NK_Up:
+                                switch (key) {		
+                                        case cdefSelectUp:
                                         {
                                                 std::cout << "shift up" << std::endl;
                                                 // if currently shift selecting...
@@ -792,9 +791,10 @@ namespace psycle {
                                                         selection_.setLeft(crs.track());
                                                         selection_.setRight(crs.track()+1);
                                                 }
+                                                moveCursor(0,-1);
                                         }
                                         break;
-                                        case NK_Down:
+                                        case cdefSelectDn:
                                                 std::cout << "shift down" << std::endl;
                                                 // if currently shift selecting...
                                                 if (doShiftSelect_) {
@@ -823,8 +823,9 @@ namespace psycle {
                                                         selection_.setLeft(crs.track());
                                                         selection_.setRight(crs.track()+1);
                                                 }
+                                                moveCursor(0,1);
                                         break;
-                                        case NK_Left:
+                                        case cdefSelectLeft:
                                         {
                                                 std::cout << "shift left" << std::endl;
                                                 // if currently shift selecting...
@@ -860,7 +861,7 @@ namespace psycle {
                                                 repaintCursorPos(cursor()); 
                                         }
                                         break;
-                                        case NK_Right:
+                                        case cdefSelectRight:
                                         {
                                                 std::cout << "shift right" << std::endl;
                                                 // if currently shift selecting...
@@ -899,7 +900,6 @@ namespace psycle {
                                 if (oldSelection_ != selection_) {
                                         repaintSelection();
                                 }
-                        }
 
 			/*if (doDrag() != (NApp::system().keyState() & ShiftMask) &&
                             !(NApp::system().keyState() & ControlMask)) {

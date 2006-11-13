@@ -97,6 +97,10 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 <key id='block_select_all' mod='ctrl' keychar='a' />
 <key id='block_select_bar' mod='ctrl' keychar='e' />
 <key id='block_select_column' mod='ctrl' keychar='r' />
+<key id='block_select_up' mod='shift' keychar='NK_Up' />
+<key id='block_select_down' mod='shift' keychar='NK_Down' />
+<key id='block_select_left' mod='shift' keychar='NK_Left' />
+<key id='block_select_right' mod='shift' keychar='NK_Right' />
 <key id='block_set_instrument' mod='ctrl' keychar='t' />
 <key id='block_set_machine' mod='ctrl' keychar='g' />
 <key id='block_start' mod='ctrl' keychar='b' />

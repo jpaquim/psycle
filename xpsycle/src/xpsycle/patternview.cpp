@@ -1636,6 +1636,22 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			checkLeftScroll( cursor() );
                         return;
 		break;
+		case cdefSelectLeft:
+			checkLeftScroll( cursor() );
+                        return;
+		break;
+		case cdefSelectRight:
+			checkRightScroll( cursor() );
+			return;
+		break;
+		case cdefSelectUp:
+			pView->checkUpScroll( cursor() );
+			return;
+		break;
+		case cdefSelectDn:
+			pView->checkDownScroll( cursor() );
+			return;
+		break;
 		case cdefRowClear:
 			clearCursorPos();
 			moveCursor(0,-1); 
