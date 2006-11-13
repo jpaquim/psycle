@@ -66,12 +66,12 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 <!-- patternview misc key options -->
 
 <key id='key_stop' keychar='1' />
-
-<!-- patternview misc key options -->
-
-<key id='key_stop' keychar='1' />
 <key id='current_octave-1' mod="ctrl" keychar='+' />
 <key id='current_octave+1' mod="ctrl" keychar='#' />
+<key id='nav_left' keychar='NK_Left' />
+<key id='nav_right' keychar='NK_Right' />
+<key id='nav_up' keychar='NK_Up' />
+<key id='nav_down' keychar='NK_Down' />
 
 <!-- patternview block key options -->
 
