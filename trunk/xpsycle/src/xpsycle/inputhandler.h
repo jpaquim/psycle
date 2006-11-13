@@ -145,6 +145,7 @@ namespace psycle {
       cdefEditMachine,
       cdefEditPattern,
       cdefEditInstr,
+      cdefEditSequence,
       cdefAddMachine,
 
       cdefPatternInc,
@@ -404,6 +405,7 @@ namespace psycle {
 
         case cdefEditMachine:	return "Screen of Machines";
         case cdefEditPattern:	return "Screen of Patterns";
+        case cdefEditSequence:	return "Screen of Sequencing";
         case cdefEditInstr:		return "Edit Instrument";
         case cdefAddMachine:		return "Add New Machine";
         case cdefMaxPattern:		return "Maximise Pattern View";

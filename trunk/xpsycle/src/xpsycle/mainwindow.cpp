@@ -1387,29 +1387,38 @@ void MainWindow::onSequencerEntryClick( SequencerItem * item )
 void MainWindow::onKeyPress( const NKeyEvent & event )
 {
   if ( selectedChildView_ ) {
-		switch (event.scancode() ) {
-			case NK_F2 :
+                // Find out which command the keypress correlates to. 
+                std::string mod = "none";
+                if ((NApp::system().keyState() & ControlMask)) {
+                       mod = "ctrl"; 
+                } else if ((NApp::system().keyState() & ShiftMask)) {
+                       mod = "shift";
+                }
+                int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+                switch (key)
+                {
+			case cdefEditMachine:
 				selectedChildView_->showMachineView();
 			break;
-			case NK_F3 :
+			case cdefEditPattern:
 				selectedChildView_->showPatternView();
 			break;
-			case NK_F4 :
+			case cdefEditInstr:
 				selectedChildView_->showWaveView();
 			break;
-			case NK_F5 :
+			case cdefEditSequence:
 				selectedChildView_->showSequencerView();
 			break;
-			case NK_F6 :
+			case cdefPlayStart:
 				selectedChildView_->playFromStart();
 			break;
-			case NK_F7 :
+			case cdefPlaySong:
 				selectedChildView_->play();
 			break;
-			case NK_F8 :
+			case cdefPlayStop:
 				selectedChildView_->stop();
 			break;
-			case NK_F9 : {
+			case cdefAddMachine: {
 				 selectedChildView_->showMachineView();
                                  NButtonEvent btnEvent( this, 0,0,1, "");
 				 onNewMachine( &btnEvent );
@@ -1425,17 +1434,6 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 					selectedChildView_->sequencerBar()->selectNextPattern();
 				}
 			break;*/
-                }
-                // Find out which command the keypress correlates to. 
-                std::string mod = "none";
-                if ((NApp::system().keyState() & ControlMask)) {
-                       mod = "ctrl"; 
-                } else if ((NApp::system().keyState() & ShiftMask)) {
-                       mod = "shift";
-                }
-                int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
-                switch (key)
-                {
 			case cdefInstrDec: // current_instrument-1
                                 changeInstrumentCbxViaKey(0);
 			break;
