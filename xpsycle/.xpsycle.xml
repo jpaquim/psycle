@@ -26,6 +26,22 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 
 <!-- keyHandler configuration -->
 
+<!-- general keys -->
+
+<key id='current_machine-1' mod='ctrl' keychar='NK_Left' />
+<key id='current_machine+1' mod='ctrl' keychar='NK_Right' />
+<key id='current_instrument-1' mod='ctrl' keychar='NK_Up' />
+<key id='current_instrument+1' mod='ctrl' keychar='NK_Down' />
+
+<key id='screen_machines' keychar='F2' />
+<key id='screen_patterns' keychar='F3' />
+<key id='edit_instrument' keychar='F4' />
+<key id='screen_sequencer' keychar='F5' />
+<key id='play_song_start' keychar='F6' />
+<key id='play_song_normal' keychar='F7' />
+<key id='stop_playback' keychar='F8' />
+<key id='add_new_machine' keychar='F9' />
+
 <!-- patternview octave 0  -->
 
 <key id='oct_C_0' keychar='y'/>

@@ -345,7 +345,16 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         if (keyCharStr == "NK_Delete") { keyCode = NK_Delete; }
         if (keyCharStr == "NK_Insert") { keyCode = NK_Insert; }
         if (keyCharStr == "NK_BackSpace") { keyCode = NK_BackSpace; }
-      }
+        if (keyCharStr == "F1") { keyCode = NK_F1; }
+        if (keyCharStr == "F2") { keyCode = NK_F2; }
+        if (keyCharStr == "F3") { keyCode = NK_F3; }
+        if (keyCharStr == "F4") { keyCode = NK_F4; }
+        if (keyCharStr == "F5") { keyCode = NK_F5; }
+        if (keyCharStr == "F6") { keyCode = NK_F6; }
+        if (keyCharStr == "F7") { keyCode = NK_F7; }
+        if (keyCharStr == "F8") { keyCode = NK_F8; }
+        if (keyCharStr == "F9") { keyCode = NK_F9; }
+      } 
       if (id == "add_new_machine") {
         inputHandler.changeKeyCode(cdefAddMachine,Key(ctrl,keyCode));
       } else
@@ -654,10 +663,13 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
       } else
       if (id == "screen_machines") {
-        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
+        inputHandler.changeKeyCode(cdefEditMachine,Key(ctrl,keyCode));
       } else
       if (id == "screen_patterns") {
-        //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
+        inputHandler.changeKeyCode(cdefEditPattern,Key(ctrl,keyCode));
+      } else
+      if (id == "screen_sequencer") {
+        inputHandler.changeKeyCode(cdefEditSequence,Key(ctrl,keyCode));
       } else
       if (id == "select_mac_in_cursor") {
         //inputHandler.changeKeyCode(cdefKeyStopAny,Key(ctrl,keyCode));
