@@ -385,6 +385,18 @@ void Configuration::onConfigTagParse(const std::string & tagName )
       if (id == "block_select_column") {
         inputHandler.changeKeyCode(cdefSelectCol,Key(ctrl,keyCode));
       } else
+      if (id == "block_select_up") {
+        inputHandler.changeKeyCode(cdefSelectUp,Key(ctrl,keyCode));
+      } else
+      if (id == "block_select_down") {
+        inputHandler.changeKeyCode(cdefSelectDn,Key(ctrl,keyCode));
+      } else
+      if (id == "block_select_left") {
+        inputHandler.changeKeyCode(cdefSelectLeft,Key(ctrl,keyCode));
+      } else
+      if (id == "block_select_right") {
+        inputHandler.changeKeyCode(cdefSelectRight,Key(ctrl,keyCode));
+      } else
       if (id == "block_set_instrument") {
         inputHandler.changeKeyCode(cdefBlockSetInstr,Key(ctrl,keyCode));
       } else
