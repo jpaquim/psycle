@@ -68,10 +68,21 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 <key id='key_stop' keychar='1' />
 <key id='current_octave-1' mod="ctrl" keychar='+' />
 <key id='current_octave+1' mod="ctrl" keychar='#' />
+
+<!-- patternview navigation key options -->
 <key id='nav_left' keychar='NK_Left' />
 <key id='nav_right' keychar='NK_Right' />
 <key id='nav_up' keychar='NK_Up' />
 <key id='nav_down' keychar='NK_Down' />
+<key id='nav_up_16' keychar='NK_Page_Up' />
+<key id='nav_down_16' keychar='NK_Down_Up' />
+<key id='nav_top' keychar='NK_Home' />
+<key id='nav_bottom' keychar='NK_End' />
+<key id='next_column' keychar='NK_Tab' />
+<key id='prev_column' keychar='XK_ISO_Left_Tab' />
+<key id='delete_row' keychar='NK_Delete' />
+<key id='insert_row' keychar='NK_Insert' />
+<key id='clear_row' keychar='NK_BackSpace' />
 
 <!-- patternview block key options -->
 

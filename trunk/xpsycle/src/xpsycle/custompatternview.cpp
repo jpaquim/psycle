@@ -748,10 +748,7 @@ namespace psycle {
 		}
 
 		void CustomPatternView::onKeyPress(const NKeyEvent & event) {
-                        // Shift+Arrowkeys used for selecting blocks of pattern.
-                        // FIXME: should only occur if set in options.
-                        // FIXME: works, but could probably be refactored...
-                        int pressedKey = event.scancode();
+                        // Find out which command the keypress correlates to. 
                         std::string mod = "none";
                         if ((NApp::system().keyState() & ControlMask)) {
                                mod = "ctrl"; 
@@ -759,11 +756,14 @@ namespace psycle {
                                mod = "shift";
                         }
                         int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
-                        std::cout << "code: " << key << std::endl;
+
+                        // Shift+Arrowkeys used for selecting blocks of pattern.
+                        // FIXME: should only occur if set in options.
+                        // FIXME: works, but could probably be refactored...
                         if (NApp::system().keyState() & ShiftMask) {
                                 oldSelection_ = selection_;
                                 PatCursor crs = cursor();
-                                switch (pressedKey) {		
+                                switch (event.scancode()) {		
                                         case NK_Up:
                                         {
                                                 std::cout << "shift up" << std::endl;
@@ -914,27 +914,27 @@ namespace psycle {
 
 			// navigation
 			switch (key) {
-				case NK_Page_Up:
+				case cdefNavPageUp:
 				break;
-				case NK_Page_Down:				
+				case cdefNavPageDn:				
 				break;
-				case NK_Home : 
+				case cdefNavTop: 
 				{
 					PatCursor oldCursor = cursor();
 					cursor_.setLine( 0 );
                                     repaintCursorPos( oldCursor );
                                     repaintCursorPos( cursor() ); 
-                }
+                                }
 				break;
-				case NK_End:
+				case cdefNavBottom:
 				{
 					PatCursor oldCursor = cursor();
 					cursor_.setLine( lineNumber() -1 );
                                           repaintCursorPos(oldCursor);
                                           repaintCursorPos( cursor() ); 
-        }
+                                }
 				break;
-				case NK_Tab  :
+				case cdefColumnNext:
 					if ( cursor().track()+1 < trackNumber() ) {
 						PatCursor oldCursor = cursor();
 						setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
@@ -942,7 +942,7 @@ namespace psycle {
 						repaintCursorPos( cursor() ); 
 					}
 				break;
-				case XK_ISO_Left_Tab: // todo ngrs nk code
+				case cdefColumnPrev: // todo ngrs nk code
 					if ( cursor().track() > 0 ) {
 						PatCursor oldCursor = cursor();
 						setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );

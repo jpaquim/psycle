@@ -1039,8 +1039,14 @@ void PatternView::TweakGUI::resize() {
 void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 	CustomPatternView::onKeyPress( event );
 
-        int pressedKey = event.scancode();
-	switch ( pressedKey ) {		
+        std::string mod = "none";
+        if ((NApp::system().keyState() & ControlMask)) {
+               mod = "ctrl"; 
+        } else if ((NApp::system().keyState() & ShiftMask)) {
+               mod = "shift";
+        }
+        int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+	switch (key) {		
 		case ' ':
 			if (Player::Instance()->playing() ) {
 				Player::Instance()->stop();
@@ -1048,7 +1054,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 				Player::Instance()->start();
 			}
 		break;
-		case NK_Page_Up:
+		case cdefNavPageUp:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()-1; y >= 0; y--) {
@@ -1061,7 +1067,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			}
     }
 		break;
-		case NK_Page_Down:
+		case cdefNavPageDn:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()+1; y < lineNumber(); y++) {
@@ -1076,37 +1082,37 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 		break;
 		case cdefNavLeft:
 			checkLeftScroll( cursor() );
-      return;
+                        return;
 		break;
-		case NK_Right:
+		case cdefNavRight:
 			checkRightScroll( cursor() );
 			return;
 		break;
-    case NK_Down:
+                case cdefNavDn:
 			pView->checkDownScroll( cursor() );
-      return;
-    break;
-    case NK_Up:
+                        return;
+                break;
+                case cdefNavUp:
 			pView->checkUpScroll( cursor() );
-      return;
-    break;
-		case NK_End:
-      pView->checkDownScroll( cursor() );
-      return;
-    break;
-    case NK_Home:
-      pView->checkUpScroll( cursor() );
-      return;
-    break;
-		case NK_Tab:
+                        return;
+                break;
+		case cdefNavBottom:
+                        pView->checkDownScroll( cursor() );
+                        return;
+                break;
+                case cdefNavTop:
+                        pView->checkUpScroll( cursor() );
+                        return;
+                break;
+		case cdefColumnNext:
 			checkRightScroll( cursor() );
 			return;
 		break;
-		case XK_ISO_Left_Tab: // todo ngrs eydef code
+		case cdefColumnPrev: // todo ngrs eydef code
 			checkLeftScroll( cursor() );
-      return;
+                        return;
 		break;
-		case NK_BackSpace:
+		case cdefRowClear:
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
 			}
@@ -1114,7 +1120,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			pView->checkUpScroll( cursor() );
 			return;
 		break;
-    case NK_Delete:
+                case cdefRowDelete:
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
 			}
@@ -1557,7 +1563,6 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	if ( !pView->pattern() ) return;
 	CustomPatternView::onKeyPress( event );
 
-        int pressedKey = event.scancode();
         std::string mod = "none";
         if ((NApp::system().keyState() & ControlMask)) {
                mod = "ctrl"; 
@@ -1573,7 +1578,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				Player::Instance()->start(0);
 			}
 		break;
-		case NK_Page_Up:
+		case cdefNavPageUp:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()-1; y >= 0; y--) {
@@ -1586,7 +1591,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                         }
                 }
 		break;
-		case NK_Page_Down:
+		case cdefNavPageDn:
 		{
 			TimeSignature signature;
 			for (int y = cursor().line()+1; y < lineNumber(); y++) {
@@ -1613,35 +1618,36 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                 break;
                 case cdefNavUp:
 			pView->checkUpScroll( cursor() );
-                return;
+                        return;
                 break;
-		case NK_End:
+		case cdefNavBottom:
                         pView->checkDownScroll( cursor() );
                         return;
                 break;
-                case NK_Home:
+                case cdefNavTop:
                         pView->checkUpScroll( cursor() );
                         return;
                 break;
-		case NK_Tab:
+		case cdefColumnNext:
 			checkRightScroll( cursor() );
 			return;
 		break;
-		case XK_ISO_Left_Tab: // todo ngrs 
+		case cdefColumnPrev: // todo ngrs 
 			checkLeftScroll( cursor() );
-      return;
+                        return;
 		break;
-		case NK_BackSpace:
+		case cdefRowClear:
 			clearCursorPos();
 			moveCursor(0,-1); 
 			pView->checkUpScroll( cursor() );
 			return;
 		break;
-    case NK_Delete:
-      clearCursorPos();
-      moveCursor(0,1); 
-			pView->checkDownScroll( cursor() );
-			return;
+                case cdefRowDelete:
+                        clearCursorPos();
+                        moveCursor(0,1); 
+                        pView->checkDownScroll( cursor() );
+                        return;
+                break;
 		default: ;
 	}
 				
@@ -1652,30 +1658,30 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				pView->doUndo();
 				return;
 			break;
-            case cdefSelectAll:
-                std::cout << "key: block select all" << std::endl;
-                selectAll(cursor());
-            break;
-            case cdefSelectCol:
-                std::cout << "key: block select column" << std::endl;
-                selectColumn(cursor());
-            break;
+                        case cdefSelectAll:
+                                std::cout << "key: block select all" << std::endl;
+                                selectAll(cursor());
+                        break;
+                        case cdefSelectCol:
+                                std::cout << "key: block select column" << std::endl;
+                                selectColumn(cursor());
+                        break;
 			case cdefBlockCopy: 
-                std::cout << "key: block copy" << std::endl;
-                copyBlock(false);
+                                std::cout << "key: block copy" << std::endl;
+                                copyBlock(false);
 				return;
 			break;
 			case cdefBlockPaste: 
-                  std::cout << "key: block paste" << std::endl;
-                  pasteBlock( cursor().track(), cursor().line(), false);
+                                  std::cout << "key: block paste" << std::endl;
+                                  pasteBlock( cursor().track(), cursor().line(), false);
 
-                  if (pView->moveCursorWhenPaste()) {
-                /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
-                          pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
-                       } else
-                       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
-                  }
-                  pView->repaint();
+                                  if (pView->moveCursorWhenPaste()) {
+                                /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
+                                          pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
+                                       } else
+                                       pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
+                                  }
+                                  pView->repaint();
 				return;
 			break;
 			case cdefOctaveDn:

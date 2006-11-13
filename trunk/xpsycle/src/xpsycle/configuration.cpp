@@ -336,6 +336,15 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         if (keyCharStr == "NK_Right") { keyCode = NK_Right; }
         if (keyCharStr == "NK_Up") { keyCode = NK_Up; }
         if (keyCharStr == "NK_Down") { keyCode = NK_Down; }
+        if (keyCharStr == "NK_Page_Up") { keyCode = NK_Page_Up; }
+        if (keyCharStr == "NK_Page_Down") { keyCode = NK_Page_Down; }
+        if (keyCharStr == "NK_Home") { keyCode = NK_Home; }
+        if (keyCharStr == "NK_End") { keyCode = NK_End; }
+        if (keyCharStr == "NK_Tab") { keyCode = NK_Tab; }
+        if (keyCharStr == "XK_ISO_Left_Tab") { keyCode = XK_ISO_Left_Tab; }
+        if (keyCharStr == "NK_Delete") { keyCode = NK_Delete; }
+        if (keyCharStr == "NK_Insert") { keyCode = NK_Insert; }
+        if (keyCharStr == "NK_BackSpace") { keyCode = NK_BackSpace; }
       }
       if (id == "add_new_machine") {
         inputHandler.changeKeyCode(cdefAddMachine,Key(ctrl,keyCode));
@@ -465,11 +474,7 @@ void Configuration::onConfigTagParse(const std::string & tagName )
             inputHandler.changeKeyCode(cdefKeyB_0,Key(ctrl,keyCode));
         }  else // and now the all again for octave 2
         if (id == "oct_C_1") {
-        std::cout << "c1 before: " << cdefKeyC_1 << std::endl;
             inputHandler.changeKeyCode(cdefKeyC_1,Key(ctrl,keyCode));
-        std::cout << "id: " << id << std::endl;
-        std::cout << "key code: " << keyCode << std::endl;
-        std::cout << "c1 after: " << cdefKeyC_1 << std::endl;
         } else
         if (id == "oct_CS1") {
             inputHandler.changeKeyCode(cdefKeyCS1,Key(ctrl,keyCode));
@@ -559,11 +564,7 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         inputHandler.changeKeyCode(cdefNavPageDn,Key(ctrl,keyCode));
       } else
       if (id == "nav_left") {
-        std::cout << "cdefNavLeft before: " << cdefNavLeft << std::endl;
         inputHandler.changeKeyCode(cdefNavLeft,Key(ctrl,keyCode));
-        std::cout << "id: " << id << std::endl;
-        std::cout << "key code: " << keyCode << std::endl;
-        std::cout << "cdefNavLeft after: " << cdefNavLeft << std::endl;
       } else
       if (id == "nav_right") {
         inputHandler.changeKeyCode(cdefNavRight,Key(ctrl,keyCode));
