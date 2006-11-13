@@ -23,6 +23,9 @@
 #include <ngrs/npanel.h>
 #include <ngrs/npoint3d.h>
 
+#include "inputhandler.h"
+#include "global.h"
+
 /**
 @author Stefan Nattkemper
 */
@@ -183,7 +186,7 @@ namespace psycle {
 					void setBigTrackSeparatorWidth( int ident );
 					int bigTrackSeparatorWidth() const;
 
-      		void setDx(int dx);
+                                        void setDx(int dx);
 					int dx() const;
 					void setDy(int dy);
 					int dy() const;
@@ -274,6 +277,7 @@ namespace psycle {
 
 			private:
 
+                                        InputHandler inputHandler;
 					int dx_, dy_;
 					int trackNumber_;
 

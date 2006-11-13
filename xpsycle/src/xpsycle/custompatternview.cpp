@@ -17,6 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "configuration.h"
+#include "global.h"
 #include "custompatternview.h"
 #include "inputhandler.h"
 
@@ -749,10 +751,19 @@ namespace psycle {
                         // Shift+Arrowkeys used for selecting blocks of pattern.
                         // FIXME: should only occur if set in options.
                         // FIXME: works, but could probably be refactored...
+                        int pressedKey = event.scancode();
+                        std::string mod = "none";
+                        if ((NApp::system().keyState() & ControlMask)) {
+                               mod = "ctrl"; 
+                        } else if ((NApp::system().keyState() & ShiftMask)) {
+                               mod = "shift";
+                        }
+                        int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+                        std::cout << "code: " << key << std::endl;
                         if (NApp::system().keyState() & ShiftMask) {
                                 oldSelection_ = selection_;
                                 PatCursor crs = cursor();
-                                switch (event.scancode()) {		
+                                switch (pressedKey) {		
                                         case NK_Up:
                                         {
                                                 std::cout << "shift up" << std::endl;
@@ -902,7 +913,7 @@ namespace psycle {
 			}*/
 
 			// navigation
-			switch (event.scancode()) {
+			switch (key) {
 				case NK_Page_Up:
 				break;
 				case NK_Page_Down:				
@@ -940,52 +951,33 @@ namespace psycle {
 					}
 				break;
                 // NGM: why are these keys repeated in here and patternview.cpp?
-				case NK_Left :
-                                    // Don't move cursor if ctrl is held down.
-                                    // (if ctrl is down the user wants to do something other than move)
-                                    if (!(NApp::system().keyState() & ControlMask)) {
+				case cdefNavLeft:
+                                        Global::log("nav left");
                                             moveCursor(-1,0);
-                                            // Clear selection if neither ctrl or shift is held.
-                                            if (!(NApp::system().keyState() & ShiftMask)) {
-                                                    clearOldSelection();              
-                                            }
-                                    }
+                                            clearOldSelection();              
 				break;
-				case NK_Right:
-                                    // Don't move cursor if ctrl is held down.
-                                    if (!(NApp::system().keyState() & ControlMask)) {
-                                                                moveCursor(1,0);
-                                            // Clear selection if neither ctrl or shift is held.
-                                            if (!(NApp::system().keyState() & ShiftMask)) {
-                                                    clearOldSelection();              
-                                            }
-                                    }
+				case cdefNavRight:
+                                {
+                                        Global::log("nav right");
+                                        moveCursor(1,0);
+                                            clearOldSelection();              
+                                }
 				break;
-				case NK_Up:
-                                    // Don't move cursor if ctrl is held down.
-                                    if (!(NApp::system().keyState() & ControlMask)) {
-                                        if ( cursor().line() - patternStep() >= 0 )
+				case cdefNavUp:
+                                        if ( cursor().line() - patternStep() >= 0 ) {
                                             moveCursor(0, -patternStep() );
-                                        else
+                                        } else {
                                             moveCursor(0, -cursor().line() );
-                                            // Clear selection if neither ctrl or shift is held.
-                                            if (!(NApp::system().keyState() & ShiftMask)) {
-                                                    clearOldSelection();              
-                                            }
-                                    }
+                                        }
+                                    clearOldSelection();              
 				break;
-				case NK_Down:
-                                    // Don't move cursor if ctrl is held down.
-                                    if (!(NApp::system().keyState() & ControlMask)) {
-                                        if ( cursor().line()+patternStep() < lineNumber() )
+				case cdefNavDn:
+                                        if ( cursor().line()+patternStep() < lineNumber() ) {
                                           moveCursor( 0, patternStep() );
-                                        else
+                                        } else {
                                             moveCursor( 0, lineNumber()-1 - cursor().line() );
-                                            // Clear selection if neither ctrl or shift is held.
-                                            if (!(NApp::system().keyState() & ShiftMask)) {
-                                                    clearOldSelection();              
-                                            }
-                                    }
+                                        }
+                                        clearOldSelection();              
 				break;
 			}
 
