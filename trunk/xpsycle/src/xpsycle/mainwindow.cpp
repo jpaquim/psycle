@@ -1411,9 +1411,9 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 			break;
 			case NK_F9 : {
 				 selectedChildView_->showMachineView();
-         NButtonEvent btnEvent( this, 0,0,1, "");
+                                 NButtonEvent btnEvent( this, 0,0,1, "");
 				 onNewMachine( &btnEvent );
-        }
+                        }
 			break;
 /*			case NK_Up :
 				if (NApp::system().keyState() & ControlMask) {
@@ -1425,27 +1425,29 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 					selectedChildView_->sequencerBar()->selectNextPattern();
 				}
 			break;*/
-            // FIXME: next four keys should not be hard-coded
-			case NK_Up: // current_instrument+1
-				if (NApp::system().keyState() & ControlMask) {
-                    changeInstrumentCbxViaKey(1);
-				}
-			break;
-			case NK_Down: // current_instrument-1
-				if (NApp::system().keyState() & ControlMask) {
-                    changeInstrumentCbxViaKey(0);
-				}
-			break;
-			case NK_Left: // current_machine-1
-				if (NApp::system().keyState() & ControlMask) {
-                    changeGeneratorCbxViaKey(0);
-				}
-			break;
-			case NK_Right: // current_machine+1
-				if (NApp::system().keyState() & ControlMask) {
-                    changeGeneratorCbxViaKey(1);
                 }
-            break;
+                // Find out which command the keypress correlates to. 
+                std::string mod = "none";
+                if ((NApp::system().keyState() & ControlMask)) {
+                       mod = "ctrl"; 
+                } else if ((NApp::system().keyState() & ShiftMask)) {
+                       mod = "shift";
+                }
+                int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+                switch (key)
+                {
+			case cdefInstrDec: // current_instrument-1
+                                changeInstrumentCbxViaKey(0);
+			break;
+			case cdefInstrInc: // current_instrument+1
+                                changeInstrumentCbxViaKey(1);
+			break;
+			case cdefMachineDec: // current_machine-1
+                                changeGeneratorCbxViaKey(0);
+			break;
+			case cdefMachineInc: // current_machine+1
+                                changeGeneratorCbxViaKey(1);
+                        break;
 		}
 	}
 
