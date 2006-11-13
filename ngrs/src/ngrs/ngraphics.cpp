@@ -240,6 +240,8 @@ void NGraphics::drawText( int x, int y, const std::string & text )
     drawXftString(x+dx_,y+dy_,text.c_str());
   }
   #else    
+  SetBkMode( gc_, TRANSPARENT );
+  SetTextAlign( gc_, TA_BASELINE );
   TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );
   #endif
 }
@@ -295,7 +297,7 @@ void NGraphics::drawLine( long x, long y, long x1, long y1 )
      XDrawLine(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
      #else
      MoveToEx( gc_, x + dx_, y + dy_, NULL);
-     LineTo( gc_, x1 + dx_, x1 + dy_);
+     LineTo( gc_, x1 + dx_, y1 + dy_);
      #endif
   }
   else

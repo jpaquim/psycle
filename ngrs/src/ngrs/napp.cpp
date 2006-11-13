@@ -294,27 +294,8 @@ int NApp::processEvent( NWindow * win, WEvent * event )
        }
     }
     break;
-    case ButtonPress: {
-				bool autoUnmap_ = false;
-        vector<NWindow*>::iterator itr;
-        for (itr = popups_.begin(); itr < popups_.end(); itr++) {
-           NWindow* popup = *itr;
-           if (popup->visible() && (popup != win || ((popup == win && !mouseOverWindow()))) ) {
-              popupUnmapped_ = true;
-              NEvent ev(win,"ngrs_global_hide");
-              popup->onMessage(&ev);
-							autoUnmap_ = true;
-           }
-        }
-        Time time = event->xbutton.time;
-        if ( time - lastBtnPressTime < 300 ) win->onMouseDoublePress(event->xbutton.x,event->xbutton.y,event->xbutton.button);
-        win->onMousePress(event->xbutton.x,event->xbutton.y,event->xbutton.button);
-				if (autoUnmap_) {
-					win->checkForRemove(0);
-				}
-        lastBtnPressTime = time;
-        popupUnmapped_ = false;
-      }
+    case ButtonPress: 
+         buttonPress( win, event, event->xbutton.button );
     break;
 		case SelectionNotify:
 			if( event->xselection.property != None)
@@ -370,14 +351,10 @@ int NApp::processEvent( NWindow * win, WEvent * event )
   PAINTSTRUCT ps;
   switch (event->msg) {
     case WM_PAINT:
-
-
-    hdc = BeginPaint( win->win(), &ps);     
-    
-    win->graphics()->resize(win->width(),win->height());
-    win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
-    
-    EndPaint( win->win(), &ps);
+      hdc = BeginPaint( win->win(), &ps);     
+          win->graphics()->resize(win->width(),win->height());
+          win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));    
+      EndPaint( win->win(), &ps);
     break;
     case WM_CLOSE:
       exitloop = win->onClose();
@@ -387,12 +364,67 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     case WM_DESTROY:
       PostQuitMessage(0);
     break;
+    case WM_MOUSEMOVE:
+      if (lastOverWin_!=0 && win!=lastOverWin_ ) lastOverWin_->onMouseExit();
+      win->onMouseOver( LOWORD( event->lParam ), HIWORD( event->lParam ) );
+      lastOverWin_ = win;
+    break;
+    case WM_LBUTTONDOWN:
+      buttonPress( win, event, 1 );         
+    break;
+    case WM_RBUTTONDOWN:
+      buttonPress( win, event, 2 );                  
+    break;
+    case WM_LBUTTONUP:
+      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );
+    break;
+    case WM_RBUTTONUP:
+      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 2 );
+    break;    
+    case WM_KEYDOWN :
+      buffer[0] = event->wParam & 255 ;
+      buffer[1] = 0;
+      win->onKeyPress(NKeyEvent(0,buffer, event->wParam & 255 ));         
+    break;
+    case WM_KEYUP :
+      buffer[0] = event->wParam & 255 ;
+      buffer[1] = 0;
+      win->onKeyRelease(NKeyEvent(0,buffer,event->wParam & 255));
+    break;
     default:
       return DefWindowProc( event->hwnd, event->msg, event->wParam, event->lParam);
   }
   return 0;
   #endif
 }
+
+void NApp::buttonPress( NWindow* win, WEvent* event, int button )
+{
+  bool autoUnmap_ = false;
+  vector<NWindow*>::iterator itr;
+  for (itr = popups_.begin(); itr < popups_.end(); itr++) {
+    NWindow* popup = *itr;
+    if (popup->visible() && (popup != win || ((popup == win && !mouseOverWindow()))) ) {
+      popupUnmapped_ = true;
+      NEvent ev(win,"ngrs_global_hide");
+      popup->onMessage(&ev);
+      autoUnmap_ = true;
+    }
+  }
+  #ifdef __unix__
+  Time time = event->xbutton.time;
+  if ( time - lastBtnPressTime < 300 ) win->onMouseDoublePress(event->xbutton.x,event->xbutton.y,event->xbutton.button);
+  win->onMousePress(event->xbutton.x,event->xbutton.y,event->xbutton.button);
+  lastBtnPressTime = time;
+  #else
+  win->onMousePress( LOWORD( event->lParam ), HIWORD( event->lParam ), button);
+  #endif
+  if (autoUnmap_) {
+    win->checkForRemove(0);
+  }
+
+  popupUnmapped_ = false;
+}       
 
 void NApp::addWindow( WinHandle handle, NWindow * window )
 {

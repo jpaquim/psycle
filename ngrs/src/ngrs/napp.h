@@ -130,6 +130,9 @@ private:
    pthread_mutex_t m_Mutex;
    #endif
    static bool in_thread_;
+   
+   static void buttonPress( NWindow* win, WEvent* event, int button );
+
 
 };
 
