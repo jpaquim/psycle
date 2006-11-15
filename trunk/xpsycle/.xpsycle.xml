@@ -91,7 +91,7 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 <key id='nav_up' keychar='NK_Up' />
 <key id='nav_down' keychar='NK_Down' />
 <key id='nav_up_16' keychar='NK_Page_Up' />
-<key id='nav_down_16' keychar='NK_Down_Up' />
+<key id='nav_down_16' keychar='NK_Page_Down' />
 <key id='nav_top' keychar='NK_Home' />
 <key id='nav_bottom' keychar='NK_End' />
 <key id='next_column' keychar='NK_Tab' />
