@@ -50,6 +50,28 @@ int NFontMetrics::textWidth( const string & text )
      ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
     return info.xOff;
    }
+   #else
+
+   HDC dc = GetDC( NULL );
+   SelectObject( dc, fntStruct.hFnt );  
+
+   
+   SIZE size;
+   GetTextExtentPoint32(
+    dc,            // handle to DC
+    text.c_str(),  // text string
+    text.length(), // characters in string
+    &size          // string size
+   );
+
+//   ostringstream str;
+   
+//   str << size.cx;
+//   std::string sz = str.str();
+
+//   MessageBox(NULL, sz.c_str(), TEXT(""), MB_OK);
+
+   return size.cx;
    #endif
 }
 
@@ -67,6 +89,7 @@ int NFontMetrics::textHeight( )
   #else
   TEXTMETRIC metrics;
   HDC dc = GetDC( NULL );
+  SelectObject( dc, fntStruct.hFnt );  
   GetTextMetrics(
     dc ,      // handle to DC
     &metrics  // text metrics
@@ -89,6 +112,7 @@ int NFontMetrics::textAscent( )
   #else
   TEXTMETRIC metrics;
   HDC dc = GetDC(NULL); 
+  SelectObject( dc, fntStruct.hFnt );  
   GetTextMetrics(
     dc,       // handle to DC
     &metrics  // text metrics
@@ -111,6 +135,7 @@ int NFontMetrics::textDescent( )
  #else
  TEXTMETRIC metrics;
  HDC dc = GetDC(NULL);
+ SelectObject( dc, fntStruct.hFnt );  
  GetTextMetrics(
     dc,       // handle to DC
     &metrics  // text metrics

@@ -347,6 +347,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
   }
   return exitloop;
   #else
+//  system().setKeyState( NK_ShiftMask);
   HDC hdc;
   PAINTSTRUCT ps;
   switch (event->msg) {
@@ -387,6 +388,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
       win->onKeyPress(NKeyEvent(0,buffer, event->wParam & 255 ));         
     break;
     case WM_KEYUP :
+         
       buffer[0] = event->wParam & 255 ;
       buffer[1] = 0;
       win->onKeyRelease(NKeyEvent(0,buffer,event->wParam & 255));

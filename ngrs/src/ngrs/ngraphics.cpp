@@ -20,6 +20,15 @@
 #include "ngraphics.h"
 #include "napp.h"
 #include "nvisualcomponent.h"
+#include <cmath>
+
+#ifdef __unix__
+#else
+
+#define PI 3.14159265358979
+#define XAngleToRadians(a) ((double)(a) / 64 * PI / 180);
+
+#endif
 
 NGraphics::NGraphics(WinHandle winID)
 {
@@ -726,14 +735,43 @@ void NGraphics::drawRoundRect (int x, int y, int width, int height, int arcWidth
         }
 }
 
+static double fTwoPi = 2.0 * 3.14; 
+
 void NGraphics::drawArc( int x, int y, int width, int height, int angle1, int angle2 )
 {
-  if (dblBuffer_)
+  if (dblBuffer_) {
      #ifdef __unix__
      XDrawArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
      #else
-     ;
+     
+     //
+     // Convert the X arc description to a Win32 arc description.
+     //
+
+     int xr, yr, xstart, ystart, xend, yend;
+     double radian_start, radian_end, radian_tmp;
+
+     xr = (width % 2) ? (width / 2) : ((width - 1) / 2);
+     yr = (height % 2) ? (height / 2) : ((height - 1) / 2);
+
+     radian_start = XAngleToRadians(angle1);
+     radian_end = XAngleToRadians(angle1+angle2);
+     if( angle2 < 0 ) {
+	   radian_tmp = radian_start;
+	   radian_start = radian_end;
+	   radian_end = radian_tmp;
+     }
+
+     xstart = x + (int) ((double)xr * (1+cos(radian_start)));
+     ystart = y + (int) ((double)yr * (1-sin(radian_start)));
+     xend = x + (int) ((double)xr * (1+cos(radian_end)));
+     yend = y + (int) ((double)yr * (1-sin(radian_end)));     
+     
+     // Draw the arc
+     Arc( gc_, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, xstart, ystart, xend, yend);
+          
      #endif     
+     }
   else
      #ifdef __unix__
      XDrawArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
