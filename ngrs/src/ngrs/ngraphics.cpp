@@ -55,6 +55,8 @@ NGraphics::NGraphics(WinHandle winID)
   drawDbl = 0;
   #else
   gc_ = GetDC( win );
+  doubleBufferBitmap_=0;
+  gcp = 0;
   #endif
 
 
@@ -92,7 +94,7 @@ void NGraphics::fillRect( int x, int y, int width, int height )
        rect.top    = y + dy_;
        rect.right  = rect.left + width;
        rect.bottom = rect.top  + height;
-       FillRect( gc_, &rect, brush);
+       FillRect( gcp, &rect, brush);
      }
      #endif
   else
@@ -123,6 +125,19 @@ void NGraphics::createDblBufferHandles( )
     drawDbl = 0;
     XSetForeground( NApp::system().dpy(), gc_, oldColor.colorValue() );
   }
+  #else
+  if (dblBuffer_) {
+    RECT r;
+    GetWindowRect( win, &r );
+
+    gcp = CreateCompatibleDC( gc_ );
+    doubleBufferBitmap_ = CreateCompatibleBitmap( gc_, r.right - r.left, r.bottom - r.top);
+    SelectObject( gcp, doubleBufferBitmap_ );
+    
+  } else {
+    doubleBufferBitmap_ = 0;
+    gcp = 0;
+  }
   #endif
 }
 
@@ -133,6 +148,10 @@ void NGraphics::destroyDblBufferHandles( )
     XFreeGC(NApp::system().dpy(), gcp);
     XFreePixmap(NApp::system().dpy(), doubleBufferPixmap_);
     XftDrawDestroy(drawDbl);
+    #else
+    // Clean up - only need to do this one time as well
+    DeleteDC( gcp);
+    DeleteObject( doubleBufferBitmap_ );
     #endif
   }
 }
@@ -155,7 +174,10 @@ void NGraphics::copyDblBuffer( const NRect & repaintArea )
 {
   #ifdef __unix__
    XCopyArea(NApp::system().dpy(), doubleBufferPixmap_, win, gc_,repaintArea.left(), repaintArea.top(),repaintArea.width(), repaintArea.height(),repaintArea.left(), repaintArea.top());
-  #endif   
+  #else
+  // blit the gcp to gc_
+  BitBlt( gc_, repaintArea.left(), repaintArea.top(), repaintArea.width(), repaintArea.height(), gcp, repaintArea.left(), repaintArea.top(), SRCCOPY);
+  #endif     
 }
 
 void NGraphics::swap(const NRect & repaintArea )
@@ -182,11 +204,11 @@ void NGraphics::setForeground( const NColor & color )
     #else
     DeleteObject( brush );
     brush =  CreateSolidBrush(RGB(color.red(), color.green(), color.blue() ));
-    SelectObject( gc_, brush );
+    SelectObject( gcp, brush );
     
     DeleteObject( hPen );
     hPen = CreatePen(PS_SOLID, 1, RGB( color.red(), color.green(), color.blue()));
-    SelectObject( gc_, hPen );
+    SelectObject( gcp, hPen );
     #endif               
     oldColor.setRGB(color.red(),color.green(),color.blue());
   }
@@ -204,7 +226,7 @@ void NGraphics::setFont( const NFont & font )
        XSetFont(NApp::system().dpy(),gc_,fntStruct.xFnt->fid);
   }
   #else
-  SelectObject( gc_, fntStruct.hFnt );  
+  SelectObject( gcp, fntStruct.hFnt );  
   #endif
 }
 
@@ -249,9 +271,9 @@ void NGraphics::drawText( int x, int y, const std::string & text )
     drawXftString(x+dx_,y+dy_,text.c_str());
   }
   #else    
-  SetBkMode( gc_, TRANSPARENT );
-  SetTextAlign( gc_, TA_BASELINE );
-  TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );
+  SetBkMode( gcp, TRANSPARENT );
+  SetTextAlign( gcp, TA_BASELINE );
+  TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
   #endif
 }
 
@@ -274,7 +296,7 @@ void NGraphics::drawText(int x, int y, const std::string & text, const NColor & 
     drawXftString( x+dx_, y+dy_, text.c_str() );
   }
   #else
-  TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );
+  TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
   #endif
 }
 
@@ -284,7 +306,7 @@ void NGraphics::drawRect( int x, int y, int width, int height )
     #ifdef __unix__
     XDrawRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
     #else
-    Rectangle( gc_, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
+    Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
     #endif
   else
     #ifdef __unix__
@@ -305,8 +327,8 @@ void NGraphics::drawLine( long x, long y, long x1, long y1 )
      #ifdef __unix__
      XDrawLine(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
      #else
-     MoveToEx( gc_, x + dx_, y + dy_, NULL);
-     LineTo( gc_, x1 + dx_, y1 + dy_);
+     MoveToEx( gcp, x + dx_, y + dy_, NULL);
+     LineTo( gcp, x1 + dx_, y1 + dy_);
      #endif
   }
   else
@@ -410,7 +432,7 @@ int NGraphics::textWidth( const std::string & text ) const
    #else 
    SIZE size;
    GetTextExtentPoint32(
-    gc_,           // handle to DC
+    gcp,           // handle to DC
     text.c_str(),  // text string
     text.length(), // characters in string
     &size          // string size
@@ -435,7 +457,7 @@ int NGraphics::textHeight()
  TEXTMETRIC metrics;
  
  GetTextMetrics(
-   gc_,   // handle to DC
+   gcp,   // handle to DC
    &metrics   // text metrics
  );  
     
@@ -457,7 +479,7 @@ int NGraphics::textAscent( )
   TEXTMETRIC metrics;
  
   GetTextMetrics(
-   gc_,   // handle to DC
+   gcp,   // handle to DC
    &metrics   // text metrics
   );  
     
@@ -476,7 +498,7 @@ int NGraphics::textDescent( )
  TEXTMETRIC metrics;
  
  GetTextMetrics(
-   gc_,      // handle to DC
+   gcp,      // handle to DC
    &metrics  // text metrics
  );  
     
@@ -768,7 +790,7 @@ void NGraphics::drawArc( int x, int y, int width, int height, int angle1, int an
      yend = y + (int) ((double)yr * (1-sin(radian_end)));     
      
      // Draw the arc
-     Arc( gc_, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, xstart, ystart, xend, yend);
+     Arc( gcp, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, xstart, ystart, xend, yend);
           
      #endif     
      }
