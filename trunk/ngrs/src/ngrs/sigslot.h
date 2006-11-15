@@ -97,8 +97,11 @@
 #	ifdef _SIGSLOT_SINGLE_THREADED
 #		define SIGSLOT_DEFAULT_MT_POLICY single_threaded
 #	else
-//#		define SIGSLOT_DEFAULT_MT_POLICY multi_threaded_local
-#		define SIGSLOT_DEFAULT_MT_POLICY multi_threaded_global
+#		ifdef SIGSLOT_LOCAL
+#			define SIGSLOT_DEFAULT_MT_POLICY multi_threaded_local
+#		else
+#			define SIGSLOT_DEFAULT_MT_POLICY multi_threaded_global
+#		endif
 #	endif
 #endif
 
