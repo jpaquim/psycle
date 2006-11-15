@@ -141,6 +141,8 @@ private:
    
    #ifdef __unix__
    Pixmap doubleBufferPixmap_;
+   #else
+   HBITMAP doubleBufferBitmap_;
    #endif
 
    void createDblBufferHandles();
