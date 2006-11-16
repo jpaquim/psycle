@@ -31,7 +31,28 @@ NSystem::NSystem()
   initX();
   #ifdef __unix__
   atoms_ = new NAtoms( dpy() );
+  #else
+  // Step 1 : registering the Window Class    
+  wc.cbSize        = sizeof(WNDCLASSEX);
+  wc.style         = 0;
+  wc.lpfnWndProc   = NApp::WndProc;
+  wc.cbClsExtra    = 0;
+  wc.cbWndExtra    = 0;
+  wc.hInstance     = hInst();
+  wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+  wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+  wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+  wc.lpszMenuName  = NULL;
+  wc.lpszClassName = "myWindowClass";
+  wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+
+  if(!RegisterClassEx(&wc))
+  {
+    MessageBox(NULL, "Window Registration Failed!", "Error!",
+    MB_ICONEXCLAMATION | MB_OK);
+  }
   #endif
+  
   cursorId_ = nCrDefault;
   initCursorMap();
 }
@@ -178,28 +199,6 @@ WinHandle NSystem::registerWindow(WinHandle parent )
 
   #else
 
-    WNDCLASSEX wc;
-
-    // Step 1 : registering the Window Class    
-    wc.cbSize        = sizeof(WNDCLASSEX);
-    wc.style         = 0;
-    wc.lpfnWndProc   = NApp::WndProc;
-    wc.cbClsExtra    = 0;
-    wc.cbWndExtra    = 0;
-    wc.hInstance     = hInst();
-    wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
-    wc.lpszMenuName  = NULL;
-    wc.lpszClassName = "myWindowClass";
-    wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
-
-    if(!RegisterClassEx(&wc))
-    {
-        MessageBox(NULL, "Window Registration Failed!", "Error!",
-            MB_ICONEXCLAMATION | MB_OK);
-        return 0;
-    }
 
     // Step2 : Creating the Window
     win_ = CreateWindowEx(
@@ -502,6 +501,9 @@ void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int
     XConfigureWindow(dpy(),win,value,&wc);
   }
   XSync(dpy(),false);
+  #else
+  SetWindowPos( win, 0, left, top, width, height,
+                       SWP_SHOWWINDOW | SWP_NOACTIVATE );
   #endif
 }
 
@@ -584,6 +586,16 @@ void NSystem::setWindowDecoration( WinHandle win, bool on )
   int vmask = CWOverrideRedirect;
   attribs.override_redirect = !on;
   XChangeWindowAttributes(dpy(), win, vmask, &attribs);
+  #else
+  if ( !on ) {
+    SetWindowLongPtr(      
+      win,
+      GWL_STYLE,
+      WS_POPUP
+    );
+    SetWindowPos( win, 0, 0,0,100,100,
+    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
+  }   
   #endif
   
 }
@@ -625,6 +637,10 @@ int NSystem::windowLeft( WinHandle win )
   int X,Y; 
   XTranslateCoordinates(dpy(), win, actual.root,0, 0, &X, &Y, &cr);
   return X;
+  #else
+  RECT r;
+  GetWindowRect( win, &r );
+  return r.left;
   #endif
 }
 
@@ -637,6 +653,10 @@ int NSystem::windowTop( WinHandle win )
   int X,Y;
   XTranslateCoordinates(dpy(), win, actual.root,0, 0, &X, &Y, &cr);
   return Y;
+  #else
+  RECT r;
+  GetWindowRect( win, &r );
+  return r.top;
   #endif
 }
 

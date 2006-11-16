@@ -149,6 +149,8 @@ private:
     Display* dpy_;
     Visual *visual_;
     Colormap colormap_;
+    #else
+    WNDCLASSEX wc;
     #endif
 
     std::map<NFont,NFontStructure>  xfntCache;
