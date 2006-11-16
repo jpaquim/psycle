@@ -384,12 +384,12 @@ void NGraphics::setClipping( const NRegion & region )
 {
   #ifdef __unix__
   if (dblBuffer_) {
-    XSetRegion(NApp::system().dpy(), gcp,region.xRegion());
-    XftDrawSetClip(drawDbl,region.xRegion());
+    XSetRegion(NApp::system().dpy(), gcp,region.sRegion());
+    XftDrawSetClip(drawDbl,region.sRegion());
   }
   else {
-    XSetRegion(NApp::system().dpy(), gc_,region.xRegion());
-    XftDrawSetClip(drawWin,region.xRegion());
+    XSetRegion(NApp::system().dpy(), gc_,region.sRegion());
+    XftDrawSetClip(drawWin,region.sRegion());
   }
   #endif
 }
