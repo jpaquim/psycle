@@ -29,7 +29,7 @@ const unsigned int NK_Return = XK_Return;
 const unsigned int NK_Pause = XK_Pause;
 const unsigned int NK_Scroll_Lock = XK_Scroll_Lock;
 const unsigned int NK_Escape = XK_Escape;
-const unsigned int NK_Delete = XK_Escape;
+const unsigned int NK_Delete = XK_Delete;
 
 // Cursor control & motion
 
