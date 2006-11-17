@@ -138,8 +138,6 @@ void NWindow::repaint( NVisualComponent * sender, const NRegion & repaintArea, b
     if (pane_->width() !=width() || pane_->height() !=height())
       pane_->setPosition(0,0,width(),height());
       graphics_->setRegion(repaintArea);
-      HDC dc = graphics_->gc();
-
       pane_->draw(graphics_,repaintArea,sender);
       if (dblBuffer_ && swap) graphics()->swap(repaintArea.rectClipBox());
   }
