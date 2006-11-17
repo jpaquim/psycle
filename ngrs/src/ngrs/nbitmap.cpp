@@ -20,6 +20,11 @@
 #include "nbitmap.h"
 #include "napp.h"
 #include "nfile.h"
+#ifdef __unix__
+#else
+#include <map>
+#endif
+
 
 NBitmap::NBitmap()
  : NObject(), depth_(24),width_(0),height_(0), data_(0)
@@ -206,6 +211,59 @@ void NBitmap::createFromXpmData(const char** data)
   if (err == XpmSuccess) {
      xi = xi1;
   }
+  #else
+  
+  // code from ngrs0.8 .. needs rewrite
+/*  const char* picInfo = data[0];  
+  std::vector<int> breakList;
+  int size = strlen(picInfo);
+  
+  for (int i = 0; i < size; i++) {    
+    if (picInfo[i]==' ') {
+      breakList.push_back(i);
+    }  
+  }
+  if (picInfo[size-1]!=' ') breakList.push_back(size);
+
+  std::vector<int>::iterator it = breakList.begin();
+  
+  char numBuf[20]; 
+  int prevP = 0;
+  int point = *it;
+
+  int xwidth_ = 0;
+  int xheight_ = 0;   
+
+  memcpy(numBuf,picInfo+prevP,point-prevP); numBuf[point]='\0'; prevP = point; it++; point = *it;
+  int width   = xwidth_ = atoi(numBuf); 
+  memcpy(numBuf,picInfo+prevP,point-prevP); numBuf[point-prevP]='\0'; prevP = point; it++; point = *it;
+  int height  = xheight_ = atoi(numBuf); 
+  memcpy(numBuf,picInfo+prevP,point-prevP); numBuf[point-prevP]='\0'; prevP = point; it++; point = *it;
+  int ncolors = atoi(numBuf); 
+  memcpy(numBuf,picInfo+prevP,point-prevP); numBuf[point-prevP]='\0'; 
+  int ncpp     = atoi(numBuf); 
+  int flagPos  = ncpp+1;
+  int colorPos = ncpp+4;
+    
+  std::map<std::string,long> colorTable;
+  
+  for (int i = 0; i< ncolors; i++) {
+    const char* colorLine = data[i+1];
+    char key[20];   strncpy(key,colorLine,ncpp); key[ncpp]='\0';
+    char value[20]; strncpy(value,colorLine+colorPos,6); value[6]='\0';    
+    char red[3];   sprintf(red,"%.2s\n",value);  
+    char green[3]; sprintf(green,"%.2s\n",value+2);
+    char blue[3];  sprintf(blue,"%.2s\n",value+4);    
+    int r = strtol( red, (char **)NULL, 16 );
+    int g = strtol( green, (char **)NULL, 16 );
+    int b = strtol( blue, (char **)NULL, 16 );
+    long int color = ((r<<16) | (g<<8) | b);
+    colorTable[std::string(key)] = color;    
+  }*/
+  // end of ugly code
+  
+//  bmp = CreateBitmap( xwidth_, xheight_, 
+  
   #endif
 }
 

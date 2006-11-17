@@ -77,6 +77,8 @@ private:
     #ifdef __unix__
     XImage* xi;
     XImage* clp;
+    #else
+    HBITMAP bmp;
     #endif
 
 	void deleteBitmapData();
