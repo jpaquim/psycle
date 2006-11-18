@@ -125,10 +125,10 @@ namespace psycle {
 					virtual int rowHeight() const;
 					virtual int lineNumber() const;
                                         virtual bool lineAlreadySelected(int lineNumber); 
-                                        virtual bool trackAlreadySelected(int trackNumber); 
 
 					void setTrackNumber( int number );
 					virtual int trackNumber() const;
+                                        virtual bool trackAlreadySelected(int trackNumber); 
 					
 					virtual int beatZoom() const;
 
@@ -209,6 +209,7 @@ namespace psycle {
 					const NSize & selection() const;
 					void clearOldSelection();
 					void repaintSelection();
+                                        void updateSelectionPositions(int leftPos, int rightPos, int topPos, int bottomPos); 
 					void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
 
 					void addEvent( const ColumnEvent & event );
@@ -259,7 +260,7 @@ namespace psycle {
 					const PatCursor & selStartPoint() const;
 					bool doSelect() const;
 					bool doDrag() const;
-					bool doShiftSelect() const;
+					bool doingKeybasedSelect() const;
 
 					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 					
@@ -285,7 +286,7 @@ namespace psycle {
 					// selection variables
 					bool doDrag_;
 					bool doSelect_;
-					bool doShiftSelect_;
+					bool doingKeybasedSelect_;
 					NSize selection_;
 					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
 					PatCursor selStartPoint_;				
