@@ -214,7 +214,6 @@ namespace psycle {
 			return 100;
 		}
 
-
 		void CustomPatternView::setTrackNumber( int number ) {
 			for ( int newTrack = trackNumber_; newTrack < number; newTrack++ ) {
 				TrackGeometry trackGeometry(this);
@@ -757,178 +756,166 @@ namespace psycle {
                         }
                         int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
 
-                        // Shift+Arrowkeys used for selecting blocks of pattern.
-                        // FIXME: should only occur if set in options.
-                        // FIXME: works, but could probably be refactored...
+                        // Keybased block selection commands.
                         if (key == cdefSelectUp || key == cdefSelectDn || 
                             key == cdefSelectLeft || key == cdefSelectRight ||
                             key == cdefSelectTop || key == cdefSelectBottom) {
                                 oldSelection_ = selection_;
                                 PatCursor crs = cursor();
+                                int newLeft, newRight, newTop, newBottom;
+                                int newCursorTrack = cursor().track();
+                                int newCursorLine = cursor().line();
+                                int newCursorCol = cursor().col();
                                 switch (key) {		
                                         case cdefSelectUp:
                                         {
-                                                std::cout << "shift up" << std::endl;
-                                                // if currently shift selecting...
-                                                if (doShiftSelect_) {
+                                                if (doingKeybasedSelect()) {
                                                         // if above line is not already selected then select it...
                                                         if (!lineAlreadySelected(crs.line())) {
                                                                 // don't set selection out of bounds of grid...
-                                                                selection_.setTop(std::max(selection_.top()-1, 0));
-                                                                selection_.setBottom(selection_.bottom());
+                                                                newTop = std::max(oldSelection_.top()-1, 0);
+                                                                newBottom = oldSelection_.bottom();
                                                         } else { // else if it is selected, deselect it...
-                                                                selection_.setTop(selection_.top());
-                                                                selection_.setBottom(selection_.bottom()-1);
+                                                                newTop = oldSelection_.top();
+                                                                newBottom = oldSelection_.bottom()-1;
                                                         }
-                                                        selection_.setLeft(selection_.left()); // left&right stay the same.
-                                                        selection_.setRight(selection_.right());
-                                  
+                                                        newLeft = oldSelection_.left(); // left&right stay the same.
+                                                        newRight = oldSelection_.right();
+                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(), crs.track()+1,
                                                                                std::max(0,crs.line()-1),
                                                                                crs.line()+1);
                                                 }
-                                                moveCursor(0,-1);
+                                                newCursorLine = std::max(0,cursor().line() - 1);
                                         }
                                         break;
                                         case cdefSelectDn:
-                                                std::cout << "shift down" << std::endl;
-                                                // if currently shift selecting...
-                                                if (doShiftSelect_) {
+                                                if (doingKeybasedSelect()) {
                                                         // if line beneath is not selected...
                                                         if (!lineAlreadySelected(crs.line()+1)) {
                                                                 // select line beneath.
-                                                                selection_.setTop(selection_.top());
-                                                                // don't over shoot boundary of grid...
-                                                                selection_.setBottom(std::min(selection_.bottom()+1,lineNumber()));
+                                                                newTop = oldSelection_.top();
+                                                                newBottom = std::min(oldSelection_.bottom()+1,lineNumber());
                                                         } else { // line beneath is selected...
                                                                 // deselect line beneath.
-                                                                selection_.setTop(selection_.top()+1);
-                                                                selection_.setBottom(selection_.bottom());
+                                                                newTop = oldSelection_.top()+1;
+                                                                newBottom = oldSelection_.bottom();
                                                         }
-                                                        selection_.setLeft(selection_.left()); // left&right stay the same.
-                                                        selection_.setRight(selection_.right());
+                                                        newLeft = oldSelection_.left(); // left&right stay the same.
+                                                        newRight = oldSelection_.right();
+                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
                                   
                                                 } else {
                                                         startKeybasedSelection(crs.track(), crs.track()+1,
                                                                                crs.line(),
                                                                                std::min(lineNumber(),crs.line()+2));
                                                 }
-                                                moveCursor(0,1);
+                                                newCursorLine = std::min(lineNumber()-1,cursor().line() + 1);
                                         break;
                                         case cdefSelectLeft:
                                         {
-                                                std::cout << "shift left" << std::endl;
-                                                // if currently shift selecting...
-                                                if (doShiftSelect_) {
+                                                if (doingKeybasedSelect()) {
                                                         // if track to left is not selected...
                                                         if (!trackAlreadySelected(crs.track()-1)) {
                                                                 // select track to left.
-                                                                // don't over shoot boundary of grid...
-                                                                selection_.setLeft(std::max(0,selection_.left()-1));
-                                                                selection_.setRight(selection_.right());
+                                                                newLeft = std::max(0,oldSelection_.left()-1);
+                                                                newRight = oldSelection_.right();
                                                         } else { // track to left is selected...
                                                                 // deselect current track.
-                                                                selection_.setLeft(selection_.left());
-                                                                selection_.setRight(selection_.right()-1);
+                                                                newLeft = oldSelection_.left();
+                                                                newRight = oldSelection_.right()-1;
                                                         }
-                                                        selection_.setTop(selection_.top()); // top&bottom stay the same.
-                                                        selection_.setBottom(selection_.bottom());
+                                                        newTop = oldSelection_.top(); // top&bottom stay the same.
+                                                        newBottom = oldSelection_.bottom();
+                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
 
                                                 } else { // start a keyboard-based selection. 
                                                         startKeybasedSelection(std::max(0,crs.track()-1),
                                                                                crs.track()+1,
                                                                                crs.line(), crs.line()+1);
                                                 }
-                                                setCursor(PatCursor(std::max(0,cursor().track()-1), cursor().line(),0,0 ));
-                                                cursor_.setCol(cursor_.col()+1);
-                                                repaintCursorPos(crs);
-                                                repaintCursorPos(cursor()); 
+                                                newCursorTrack = std::max(0,cursor().track()-1);
+                                                newCursorLine = cursor().line(); 
+                                        //        newCursorCol = cursor().col()+1;
                                         }
                                         break;
                                         case cdefSelectRight:
                                         {
-                                                std::cout << "shift right" << std::endl;
-                                                // if currently shift selecting...
-                                                if (doShiftSelect_) {
+                                                if (doingKeybasedSelect()) {
                                                         // if track to right is not selected...
                                                         if (!trackAlreadySelected(crs.track()+1)) {
                                                                 // select track to right.
-                                                                selection_.setLeft(selection_.left());
-                                                                // don't over shoot boundary of grid...
-                                                                selection_.setRight(std::min(selection_.right()+1, trackNumber()));
+                                                                newLeft = oldSelection_.left();
+                                                                newRight = std::min(oldSelection_.right()+1, trackNumber());
                                                         } else { // track to right is selected...
                                                                 // deselect current track.
-                                                                selection_.setLeft(selection_.left()+1);
-                                                                selection_.setRight(selection_.right());
+                                                                newLeft = oldSelection_.left()+1;
+                                                                newRight = oldSelection_.right();
                                                         }
-                                                        selection_.setTop(selection_.top()); // top&bottom stay the same.
-                                                        selection_.setBottom(selection_.bottom());
-
+                                                        newTop = oldSelection_.top(); // top&bottom stay the same.
+                                                        newBottom = oldSelection_.bottom();
+                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(), 
                                                                                std::min(trackNumber(),crs.track()+2),
                                                                                crs.line(), crs.line()+1);
                                                 }
-                                                setCursor( PatCursor(std::min(trackNumber()-1,cursor().track()+1), cursor().line(),0,0 ) );
-                                                repaintCursorPos(crs);
-                                                repaintCursorPos(cursor()); 
+                                                newCursorTrack = std::min(trackNumber()-1,cursor().track()+1);
+                                                newCursorLine = cursor().line(); 
                                         }
                                         break;
                                         case cdefSelectTop:
                                         {
-                                                std::cout << "select top" << std::endl;
-                                                // if currently selecting with keys...
-                                                if (doShiftSelect_) {
+                                                if (doingKeybasedSelect()) {
                                                         // select all the way to the top. 
                                                         // if line above is not selected...
                                                         if (!lineAlreadySelected(crs.line()-1)) {
                                                                 // bottom stays as it is.
-                                                                selection_.setBottom(selection_.bottom());
+                                                                newBottom = oldSelection_.bottom();
                                                         } else { // line above is selected.
-                                                                // set bottom to current selection top.
-                                                                selection_.setBottom(selection_.top()+1);
+                                                                // set bottom to old selection top.
+                                                                newBottom = oldSelection_.top()+1;
                                                         }
-                                                        selection_.setTop(0); // top also goes to top.
-                                                        selection_.setLeft(selection_.left()); // left&right stay the same.
-                                                        selection_.setRight(selection_.right());
-
+                                                        newTop = 0; // top also goes to top.
+                                                        newLeft = oldSelection_.left(); // left&right stay the same.
+                                                        newRight = oldSelection_.right();
+                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(),crs.track()+1,
                                                                                0, crs.line()+1);
                                                 }
-                                                setCursor( PatCursor(cursor().track(), 0,0,0 ) );
-                                                repaintCursorPos(crs);
-                                                repaintCursorPos(cursor()); 
+                                                newCursorTrack = cursor().track();
+                                                newCursorLine = 0;
                                         }
                                         break;
                                         case cdefSelectBottom:
                                         {
-                                                std::cout << "select bottom" << std::endl;
-                                                // if currently selecting with keys...
-                                                if (doShiftSelect_) {
+                                                if (doingKeybasedSelect()) {
                                                         // if line below is not selected...
                                                         if (!lineAlreadySelected(crs.line()+1)) {
                                                                 // top stays the same.
-                                                                selection_.setTop(selection_.top());
+                                                                newTop = oldSelection_.top();
                                                         } else { // line below is selected.
-                                                                // top becomes current bottom.
-                                                                selection_.setTop(selection_.bottom()-1);
+                                                                // top becomes old bottom.
+                                                                newTop = oldSelection_.bottom()-1;
                                                         }
-                                                        selection_.setBottom(lineNumber());
-                                                        selection_.setLeft(selection_.left()); // left&right stay the same.
-                                                        selection_.setRight(selection_.right());
-
+                                                        newBottom = lineNumber();
+                                                        newLeft = oldSelection_.left(); // left&right stay the same.
+                                                        newRight = oldSelection_.right();
+                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(), crs.track()+1,
                                                                                crs.line(), lineNumber());
                                                 }
-                                                setCursor( PatCursor(cursor().track(), lineNumber()-1,0,0 ) );
-                                                repaintCursorPos(crs);
-                                                repaintCursorPos(cursor()); 
+                                                newCursorTrack = cursor().track();
+                                                newCursorLine = lineNumber()-1;
                                         }
                                         break;
                                 }
+                                repaintCursorPos(crs);
+                                repaintCursorPos(cursor()); 
+                                setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
                                 if (oldSelection_ != selection_) {
                                         repaintSelection();
                                 }
@@ -1023,7 +1010,11 @@ namespace psycle {
                         PatCursor crs = cursor();
                         selStartPoint_ = crs;
                         selCursor_ = crs;
-                        doShiftSelect_ = true;
+                        doingKeybasedSelect_ = true;
+                        updateSelectionPositions(leftPos, rightPos, topPos, bottomPos);
+                }
+
+                void CustomPatternView::updateSelectionPositions(int leftPos, int rightPos, int topPos, int bottomPos) {
                         selection_.setLeft(leftPos);
                         selection_.setRight(rightPos);
                         selection_.setTop(topPos);
@@ -1207,16 +1198,16 @@ namespace psycle {
 			return doDrag_;
 		}
 
-		bool CustomPatternView::doShiftSelect() const {
-			return doShiftSelect_;
+		bool CustomPatternView::doingKeybasedSelect() const {
+			return doingKeybasedSelect_;
 		}
 
 		void CustomPatternView::clearOldSelection( )
 		{
 			NSize oldSel = selection_;  
-  		selection_.setSize(0,0,0,0);
-  		repaintBlock( oldSel );
-                        doShiftSelect_ = false;
+                        selection_.setSize(0,0,0,0);
+                        repaintBlock( oldSel );
+                        doingKeybasedSelect_ = false;
 		}
 
 		const NSize & CustomPatternView::selection() const {
