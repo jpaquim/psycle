@@ -81,6 +81,7 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 
 <!-- patternview misc key options -->
 
+<key id='edit_toggle' mod='ctrl' keychar=' ' />
 <key id='key_stop' keychar='1' />
 <key id='current_octave-1' mod="ctrl" keychar='+' />
 <key id='current_octave+1' mod="ctrl" keychar='#' />
@@ -117,6 +118,8 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 <key id='block_select_down' mod='shift' keychar='NK_Down' />
 <key id='block_select_left' mod='shift' keychar='NK_Left' />
 <key id='block_select_right' mod='shift' keychar='NK_Right' />
+<key id='block_select_top' mod='shift' keychar='NK_Home' />
+<key id='block_select_bottom' mod='shift' keychar='NK_End' />
 <key id='block_set_instrument' mod='ctrl' keychar='t' />
 <key id='block_set_machine' mod='ctrl' keychar='g' />
 <key id='block_start' mod='ctrl' keychar='b' />
