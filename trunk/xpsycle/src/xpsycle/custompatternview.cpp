@@ -784,15 +784,9 @@ namespace psycle {
                                                         selection_.setRight(selection_.right());
                                   
                                                 } else {
-                                                // start a shift select.
-                                                        selStartPoint_ = crs;
-                                                        selCursor_ = crs;
-                                                        doShiftSelect_ = true;
-                                                        // don't overshoot the boundary.
-                                                        selection_.setTop(std::max(0,crs.line()-1));
-                                                        selection_.setBottom(crs.line()+1);
-                                                        selection_.setLeft(crs.track());
-                                                        selection_.setRight(crs.track()+1);
+                                                        startKeybasedSelection(crs.track(), crs.track()+1,
+                                                                               std::max(0,crs.line()-1),
+                                                                               crs.line()+1);
                                                 }
                                                 moveCursor(0,-1);
                                         }
@@ -816,15 +810,9 @@ namespace psycle {
                                                         selection_.setRight(selection_.right());
                                   
                                                 } else {
-                                                // start a shift select.
-                                                        selStartPoint_ = crs;
-                                                        selCursor_ = crs;
-                                                        doShiftSelect_ = true;
-                                                        selection_.setTop(crs.line());
-                                                        // don't over shoot the boundary.
-                                                        selection_.setBottom(std::min(lineNumber(),crs.line()+2));
-                                                        selection_.setLeft(crs.track());
-                                                        selection_.setRight(crs.track()+1);
+                                                        startKeybasedSelection(crs.track(), crs.track()+1,
+                                                                               crs.line(),
+                                                                               std::min(lineNumber(),crs.line()+2));
                                                 }
                                                 moveCursor(0,1);
                                         break;
@@ -847,16 +835,10 @@ namespace psycle {
                                                         selection_.setTop(selection_.top()); // top&bottom stay the same.
                                                         selection_.setBottom(selection_.bottom());
 
-                                                } else {
-                                                // start a shift select.
-                                                        selStartPoint_ = crs;
-                                                        selCursor_ = crs;
-                                                        doShiftSelect_ = true;
-                                                        selection_.setTop(crs.line());
-                                                        selection_.setBottom(crs.line()+1);
-                                                        // don't over shoot the boundary.
-                                                        selection_.setLeft(std::max(0,crs.track()-1));
-                                                        selection_.setRight(crs.track()+1);
+                                                } else { // start a keyboard-based selection. 
+                                                        startKeybasedSelection(std::max(0,crs.track()-1),
+                                                                               crs.track()+1,
+                                                                               crs.line(), crs.line()+1);
                                                 }
                                                 setCursor(PatCursor(std::max(0,cursor().track()-1), cursor().line(),0,0 ));
                                                 cursor_.setCol(cursor_.col()+1);
@@ -884,15 +866,9 @@ namespace psycle {
                                                         selection_.setBottom(selection_.bottom());
 
                                                 } else {
-                                                // start a shift select.
-                                                        selStartPoint_ = crs;
-                                                        selCursor_ = crs;
-                                                        doShiftSelect_ = true;
-                                                        selection_.setTop(crs.line());
-                                                        selection_.setBottom(crs.line()+1);
-                                                        selection_.setLeft(crs.track());
-                                                        // don't over shoot the boundary.
-                                                        selection_.setRight(std::min(trackNumber(),crs.track()+2));
+                                                        startKeybasedSelection(crs.track(), 
+                                                                               std::min(trackNumber(),crs.track()+2),
+                                                                               crs.line(), crs.line()+1);
                                                 }
                                                 setCursor( PatCursor(std::min(trackNumber()-1,cursor().track()+1), cursor().line(),0,0 ) );
                                                 repaintCursorPos(crs);
@@ -917,14 +893,9 @@ namespace psycle {
                                                         selection_.setLeft(selection_.left()); // left&right stay the same.
                                                         selection_.setRight(selection_.right());
 
-                                                } else { // start a shift select.
-                                                        selStartPoint_ = crs;
-                                                        selCursor_ = crs;
-                                                        doShiftSelect_ = true;
-                                                        selection_.setTop(0);
-                                                        selection_.setBottom(crs.line()+1);
-                                                        selection_.setLeft(crs.track());
-                                                        selection_.setRight(crs.track()+1);
+                                                } else {
+                                                        startKeybasedSelection(crs.track(),crs.track()+1,
+                                                                               0, crs.line()+1);
                                                 }
                                                 setCursor( PatCursor(cursor().track(), 0,0,0 ) );
                                                 repaintCursorPos(crs);
@@ -948,14 +919,9 @@ namespace psycle {
                                                         selection_.setLeft(selection_.left()); // left&right stay the same.
                                                         selection_.setRight(selection_.right());
 
-                                                } else { // start a shift select.
-                                                        selStartPoint_ = crs;
-                                                        selCursor_ = crs;
-                                                        doShiftSelect_ = true;
-                                                        selection_.setTop(crs.line());
-                                                        selection_.setBottom(lineNumber());
-                                                        selection_.setLeft(crs.track());
-                                                        selection_.setRight(crs.track()+1);
+                                                } else {
+                                                        startKeybasedSelection(crs.track(), crs.track()+1,
+                                                                               crs.line(), lineNumber());
                                                 }
                                                 setCursor( PatCursor(cursor().track(), lineNumber()-1,0,0 ) );
                                                 repaintCursorPos(crs);
@@ -1051,6 +1017,18 @@ namespace psycle {
 			}
 
 		}
+
+                // Start a new block selection using the keyboard.
+                void CustomPatternView::startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos) {
+                        PatCursor crs = cursor();
+                        selStartPoint_ = crs;
+                        selCursor_ = crs;
+                        doShiftSelect_ = true;
+                        selection_.setLeft(leftPos);
+                        selection_.setRight(rightPos);
+                        selection_.setTop(topPos);
+                        selection_.setBottom(bottomPos);
+                }
 
                 void CustomPatternView::repaintSelection() {
                         // these is totally unoptimized todo repaint only new area

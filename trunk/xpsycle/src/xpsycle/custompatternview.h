@@ -209,6 +209,7 @@ namespace psycle {
 					const NSize & selection() const;
 					void clearOldSelection();
 					void repaintSelection();
+					void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
 
 					void addEvent( const ColumnEvent & event );
 					std::string noteToString( int value, bool sharp );
