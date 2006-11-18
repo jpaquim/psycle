@@ -1056,6 +1056,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 		break;
 		case cdefNavPageUp:
 		{
+                        std::cout << "tweak pg up" << std::endl;
 			TimeSignature signature;
 			for (int y = cursor().line()-1; y >= 0; y--) {
 				float position = y / (float) beatZoom();
@@ -1065,10 +1066,11 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 					break;
 				}
 			}
-    }
+                }
 		break;
 		case cdefNavPageDn:
 		{
+                        std::cout << "tweak pg dn" << std::endl;
 			TimeSignature signature;
 			for (int y = cursor().line()+1; y < lineNumber(); y++) {
 				float position = y / (float) beatZoom();
@@ -1113,6 +1115,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
                         return;
 		break;
 		case cdefRowClear:
+                        std::cout << "tweak row clear" << std::endl;
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
 			}
@@ -1121,6 +1124,7 @@ void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 			return;
 		break;
                 case cdefRowDelete:
+                        std::cout << "tweak row delete" << std::endl;
 			if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
 					pView->pattern()->clearTweakTrack( cursor().line(), cursor().track() );
 			}
@@ -1569,9 +1573,10 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
         } else if ((NApp::system().keyState() & ShiftMask)) {
                mod = "shift";
         }
-        int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
-	switch (key) {		
-		case ' ':
+        int command = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+	switch (command) {		
+		case cdefEditToggle:
+                        // FIXME: needs to toggle edit mode...
 			if (Player::Instance()->playing() ) {
 				Player::Instance()->stop();
 			} else {
@@ -1580,6 +1585,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		break;
 		case cdefNavPageUp:
 		{
+                        std::cout << "nav page up" << std::endl;
 			TimeSignature signature;
 			for (int y = cursor().line()-1; y >= 0; y--) {
 				float position = y / (float) beatZoom();
@@ -1593,6 +1599,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 		break;
 		case cdefNavPageDn:
 		{
+                        std::cout << "nav page dn" << std::endl;
 			TimeSignature signature;
 			for (int y = cursor().line()+1; y < lineNumber(); y++) {
 				float position = y / (float) beatZoom();
@@ -1648,27 +1655,39 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			pView->checkUpScroll( cursor() );
 			return;
 		break;
+		case cdefSelectTop:
+			pView->checkUpScroll( cursor() );
+			return;
+		break;
 		case cdefSelectDn:
 			pView->checkDownScroll( cursor() );
 			return;
 		break;
-		case cdefRowClear:
-			clearCursorPos();
-			moveCursor(0,-1); 
-			pView->checkUpScroll( cursor() );
+		case cdefSelectBottom:
+			pView->checkDownScroll( cursor() );
 			return;
 		break;
                 case cdefRowDelete:
+                        std::cout << "pattern delete row" << std::endl;
                         clearCursorPos();
                         moveCursor(0,1); 
                         pView->checkDownScroll( cursor() );
                         return;
                 break;
+		case cdefRowClear:
+                        std::cout << "pattern clear row" << std::endl;
+			clearCursorPos();
+			moveCursor(0,-1); 
+			pView->checkUpScroll( cursor() );
+		break;
+                case cdefRowInsert:
+                        std::cout << "pattern insert row" << std::endl;
+                        return;
+                break;
 		default: ;
 	}
-				
         
-		switch (key) {
+		switch (command) {
 			case cdefUndo:
                                 std::cout << "key: edit undo" << std::endl;
 				pView->doUndo();

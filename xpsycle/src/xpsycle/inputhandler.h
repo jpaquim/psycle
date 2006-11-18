@@ -210,6 +210,8 @@ namespace psycle {
       cdefSelectDn,
       cdefSelectLeft,
       cdefSelectRight,
+      cdefSelectTop,
+      cdefSelectBottom,
 
       cdefEditQuantizeDec,
       cdefEditQuantizeInc,

@@ -1415,6 +1415,8 @@ void MainWindow::onKeyPress( const NKeyEvent & event )
 			case cdefPlaySong:
 				selectedChildView_->play();
 			break;
+			case cdefPlayFromPos:
+			break;
 			case cdefPlayStop:
 				selectedChildView_->stop();
 			break;
