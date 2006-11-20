@@ -25,7 +25,9 @@
 
 NObject::NObject() : properties_(NApp::system().propertysActive() ? new NPropertyMap() : 0)
 {
-	if (properties_) properties_->bind("name", *this, &NObject::name, &NObject::setName);
+  // segfaults under windows                    
+  // if (properties_) properties_->bind("name", *this, &NObject::name, &NObject::setName);
+  // segfault!	
 }
 
 NObject::~NObject()

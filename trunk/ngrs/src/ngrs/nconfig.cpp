@@ -492,6 +492,7 @@ NSkin NConfig::skin( const std::string & identifier )
     skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(220,220,220),2,nVertical,90,4,4);
     skin.setTransparent(false);
   }
+
   return skin;
 }
 
@@ -588,5 +589,7 @@ std::string NConfig::getAttribValue( const std::string & name )
            return "";
        }
       return erg;
+  #else
+  return "";
   #endif
 }

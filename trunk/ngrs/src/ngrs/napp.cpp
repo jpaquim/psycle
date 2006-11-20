@@ -382,16 +382,34 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     case WM_RBUTTONUP:
       win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 2 );
     break;    
-    case WM_KEYDOWN :
-      buffer[0] = event->wParam & 255 ;
-      buffer[1] = 0;
-      win->onKeyPress(NKeyEvent(0,buffer, event->wParam & 255 ));         
-    break;
-    case WM_KEYUP :
+    case WM_KEYDOWN : {
+         BYTE keyboardState[256];
+         GetKeyboardState( keyboardState );
+         int vkey = event->wParam;
+         if ( vkey != VK_SHIFT ) {
+           WORD wordchar;
+           int retv = ToAscii( vkey, MapVirtualKey( vkey, 0 ), keyboardState, & wordchar, 0 );
+           char theChar = wordchar & 0xff;
+           buffer[0] = wordchar & 0xff ;
+           buffer[1] = 0;
+         } else buffer[0] = '\0';
+         win->onKeyPress(NKeyEvent(0,buffer, event->wParam & 255 ));         
          
-      buffer[0] = event->wParam & 255 ;
-      buffer[1] = 0;
-      win->onKeyRelease(NKeyEvent(0,buffer,event->wParam & 255));
+    }
+    break;
+    case WM_KEYUP : {
+       BYTE keyboardState[256];
+       GetKeyboardState( keyboardState );
+       int vkey = event->wParam;
+       if ( vkey != VK_SHIFT ) {
+       WORD wordchar;
+         int retv = ToAscii( vkey, MapVirtualKey( vkey, 0 ), keyboardState, & wordchar, 0 );
+         char theChar = wordchar & 0xff;
+         buffer[0] = wordchar & 0xff ;
+         buffer[1] = 0;
+       } else buffer[0] = '\0';
+       win->onKeyRelease(NKeyEvent(0,buffer, event->wParam & 255 ));         
+}   
     break;
     default:
       return DefWindowProc( event->hwnd, event->msg, event->wParam, event->lParam);

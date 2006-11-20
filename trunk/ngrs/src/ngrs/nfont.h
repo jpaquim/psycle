@@ -35,15 +35,15 @@ enum NFontStyleEnum { nBold=1,nMedium=2, nItalic=4, nStraight=8, nAntiAlias=16};
 class NFont{
 public:
     NFont();
-    NFont( std::string name, int size=10,int style=nMedium | nStraight | nAntiAlias);
+    NFont( const std::string & name, int size=10, int style=nMedium | nStraight | nAntiAlias);
 
     ~NFont();
 
-    void setName(std::string name);
-    void setSize(int size);
-    void setStyle(int style);
+    void setName( const std::string & name);
+    void setSize( int size );
+    void setStyle( int style );
 
-    std::string name() const;
+    const std::string & name() const;
     int size() const;
     int style() const;
     bool antialias() const;

@@ -50,7 +50,7 @@ void NLabel::init( )
   wbreak_ = false;
 
   // runtime
-  if (properties()) properties()->bind("text", *this, &NLabel::text, &NLabel::setText);
+  //if (properties()) properties()->bind("text", *this, &NLabel::text, &NLabel::setText);
 }
 
 
