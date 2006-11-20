@@ -117,7 +117,7 @@ NSkin::~ NSkin( )
 
 void NSkin::setBorder( const NBorder & border )
 {
-	if (border_) delete border_;
+  if (border_) delete border_;
   border_ = border.clone();
 }
 

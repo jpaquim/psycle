@@ -303,11 +303,16 @@ NFontStructure NSystem::getFontValues( const NFont & nFnt )
     long lfHeight = -MulDiv( nFnt.size(), GetDeviceCaps(hdc, LOGPIXELSY), 72);
     ReleaseDC(NULL, hdc);   
         
-     cacheFnt.hFnt = CreateFont(
-          lfHeight, 0, 0, 0, 0, 
-          TRUE, 0, 0, 0, 0, 0, 0, 0, 
-          nFnt.name().c_str()
-     );
+    int fnWeight = 0;
+    if ( nFnt.style() & nMedium ) fnWeight = FW_MEDIUM;
+      else    
+    if ( nFnt.style() & nBold ) fnWeight = FW_BOLD; 
+        
+    cacheFnt.hFnt = CreateFont(
+         lfHeight, 0, 0, 0, fnWeight,
+         nFnt.style() & nItalic , 0, 0, 0, 0, 0, 0, 0, 
+         nFnt.name().c_str()
+    );
           
      if ( !cacheFnt.hFnt ) {
         HFONT hGuiFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
@@ -502,8 +507,8 @@ void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int
   }
   XSync(dpy(),false);
   #else
-  SetWindowPos( win, 0, left, top, width, height,
-                       SWP_SHOWWINDOW | SWP_NOACTIVATE );
+//  SetWindowPos( win, 0, left, top, width, height,
+//                       SWP_SHOWWINDOW | SWP_NOACTIVATE );
   #endif
 }
 
@@ -588,13 +593,13 @@ void NSystem::setWindowDecoration( WinHandle win, bool on )
   XChangeWindowAttributes(dpy(), win, vmask, &attribs);
   #else
   if ( !on ) {
-    SetWindowLongPtr(      
+/*    SetWindowLongPtr(      
       win,
       GWL_STYLE,
       WS_POPUP
     );
     SetWindowPos( win, 0, 0,0,100,100,
-    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
+    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );*/
   }   
   #endif
   
@@ -709,11 +714,10 @@ void NSystem::setStayAbove( WinHandle win )
 
 unsigned long NSystem::getXColorValue(int r, int g, int b )
 {
+ #ifdef __unix__
  if (isTrueColor()) {
    return color_converter_(r, g, b);
  }
-
- #ifdef __unix__
  unsigned long key = (r << 16) | (g << 8) | (b);
  unsigned long value = 0;
  std::map<unsigned long, unsigned long>::iterator itr;
@@ -727,6 +731,8 @@ unsigned long NSystem::getXColorValue(int r, int g, int b )
   colorCache[key]= value = BlackPixel(dpy(), 0)^near_color.pixel;
  } else value = itr->second;
  return value;
+ #else
+ return (r << 16) | (g << 8) | (b);
  #endif
 }
 

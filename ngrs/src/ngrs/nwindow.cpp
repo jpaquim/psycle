@@ -37,13 +37,16 @@ NWindow::NWindow()
   win_ = NApp::system().registerWindow(NApp::system().rootWindow());
   userPos.setPosition(0,0,200,200);
   NApp::addWindow(win_, this);
+
   pane_ = new NPanel();  
-    pane_->setLayout(NAlignLayout());    
-    pane_->skin_ = NApp::config()->skin("pane");
-    pane_->setName("window_pane");
-    
+    NSkin test = NApp::config()->skin("pane");
+    pane_->setLayout( NAlignLayout() );
+    pane_->skin_.setBackground(NColor(200,200,200));
+    pane_->skin_.setTransparent(false);
+//    NSkin test = NApp::config()->skin("pane");
+  //  pane_->setName("window_pane");
   add(pane_);
-  
+
   graphics_ = new NGraphics(win_);
   dragBase_ = 0;
   dragRectPoint = 0;

@@ -22,13 +22,18 @@
 
 using namespace std;
 
-
-NFont::NFont() : name_("9x15"),size_(10),style_(nMedium | nStraight)
+NFont::NFont() : 
+               #ifdef __unix__
+               name_("9x15"),
+               #else
+               name_("Arial"),               
+               #endif
+               size_(10),style_(nMedium | nStraight)
 {
   systemFnt = NApp::system().getFontValues(*this);
 }
 
-NFont::NFont( std::string name, int size,int style ) : name_(name),size_(size),style_(style)
+NFont::NFont( const std::string & name, int size,int style ) : name_(name),size_(size),style_(style)
 {
   systemFnt = NApp::system().getFontValues(*this);
 }
@@ -40,7 +45,7 @@ NFont::~NFont()
 
 // setter
 
-void NFont::setName( string name )
+void NFont::setName( const string & name )
 {
   name_ = name;
   systemFnt = NApp::system().getFontValues(*this);
@@ -60,7 +65,7 @@ void NFont::setStyle( int style )
 
 // getter
 
-std::string NFont::name( ) const
+const std::string & NFont::name( ) const
 {
   return name_;
 }

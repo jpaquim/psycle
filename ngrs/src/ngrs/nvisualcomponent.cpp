@@ -30,7 +30,7 @@ NIsVisualComponent* NVisualComponent::isVisualComponent = new NIsVisualComponent
 NVisualComponent::NVisualComponent()
  : NVisual(), clipping_(1), events_(1), scrollDx_(0), scrollDy_(0), layout_(0), win_(0), clSzPolicy(0), ownerSizeSet_(0), ownerPreferredWidth_(0), ownerPreferredHeight_(0), enabled_(1), tabStop_(0), focusEnabled_(1)
 {
-  if (properties()) properties()->bind("align", *this, &NVisualComponent::align, &NVisualComponent::setAlign);
+ // if (properties()) properties()->bind("align", *this, &NVisualComponent::align, &NVisualComponent::setAlign);
 
   ///\ todo ask bohan why this not works
  // if (properties()) properties()->bind<NVisualComponent,NColor,NColor >(std::string("background"), *this, &NVisualComponent::foreground, &NVisualComponent::setForeground);

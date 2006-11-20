@@ -25,7 +25,7 @@
 NVisual::NVisual()
  : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10), cursorId_( nCrDefault )
 {
-    if (properties()) properties()->bind("left", *this, &NVisual::left, &NVisual::setLeft);
+   // if (properties()) properties()->bind("left", *this, &NVisual::left, &NVisual::setLeft);
 
 }
 
