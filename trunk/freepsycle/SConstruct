@@ -1,1 +1,30 @@
 #! /usr/bin/env scons
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006 johan boule <bohan@jabber.org>
+# copyright 2006 psycledelics http://psycle.pastnotecut.org
+
+# project
+
+from packageneric.generic.scons.project import project
+project = project(name = 'psycle')
+
+# authors/maintainers/uploaders
+
+from packageneric.generic.scons.person import person
+bohan = person('Johan Boule', 'bohan.debian.psycle@retropaganda.info')
+
+# source package
+
+from packageneric.generic.scons.source_package import source_package
+from packageneric.generic.scons.version import version
+source_package = source_package(project,
+	name = 'psycle',
+	version = version(0, 0),
+	description = 'psycle ...',
+	long_description = """\
+psycle is  a ..."""
+)
+
+import sys
+sys.exit(0) # work in progress

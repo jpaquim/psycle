@@ -4,19 +4,24 @@
 # copyright 2006 johan boule <bohan@jabber.org>
 # copyright 2006 psycledelics http://psycle.pastnotecut.org
 
-# init
+# project
 
-import packageneric.generic
-packageneric = packageneric.generic.packageneric(name = 'ngrs')
+from packageneric.generic.scons.project import project
+project = project(name = 'ngrs')
+
+# authors/maintainers/uploaders
+
+from packageneric.generic.scons.person import person
+prodos = person('Stefan NattKemper', 'natti__@user.sourceforge.net')
+bohan = person('Johan Boule', 'bohan.packageneric@retropaganda.info')
 
 # source package
 
-prodos = packageneric.person('Stefan NattKemper', 'natti__@user.sourceforge.net')
-bohan = packageneric.person('Johan Boule', 'bohan.debian@retropaganda.info')
-
-source_package = packageneric.source_package(
+from packageneric.generic.scons.source_package import source_package
+from packageneric.generic.scons.version import version
+source_package = source_package(project,
 	name = 'ngrs',
-	version = packageneric.version(0, 0),
+	version = version(0, 0),
 	description = 'ngrs graphic toolkit library',
 	long_description = """\
 ngrs is a graphic toolkit library ...
@@ -25,216 +30,134 @@ This library is used by xpsycle."""
 
 # external packages
 
-stdcxx = packageneric.external_package(
-	builds = [
-		['stdc++', [],
-			"""\
-			#if !defined __cplusplus
-				#error not a c++ compiler
-			#endif
-			#if !defined __STDC__
-				#error no standard library
-			#endif
-			int main() { return 0; }
-			\n"""
-		]
-	],
-	distribution_packages = {
-		'debian': 'libstdc++-dev (>= 0)',
-		'cygwin': 'gcc-g++-3.4.4-1'
-	},
-	url = 'http://google.ch iso c++'
-)
+from packageneric.generic.scons.check.external_package import external_package as external_package_check
+from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
 
-stdint = packageneric.external_package(
-	builds = [
-		['stdint', [],
-			"""\
-			#include <stdint.h>
-			int main() { return 0; }
-			\n"""
-		],
-		['inttypes', [],
-			"""\
-			#include <inttypes.h>
-			int main() { return 0; }
-			\n"""
-		]
-	],
-	distribution_packages = {
-		'debian': 'libc-dev (>= 0)',
-		'cygwin': 'cygwin-1.5.19-4'
-	},
-	url = 'http://google.ch iso c++'
-)
+from packageneric.pool.stdcxx import stdcxx
+stdcxx = stdcxx(project)
 
-cstdint = packageneric.external_package(
-	depends = [stdcxx, stdint],
-	builds = [
-		['cstdint', [],
-			"""\
-			#include <cstdint>
-			int main() { return 0; }
-			\n"""
-		]
-	],
-	distribution_packages = {
-		'debian': 'libstdc++-dev (>= 0)',
-		'cygwin': 'gcc-g++-3.4.4-1'
-	},
-	url = 'http://google.ch iso c++'
-)
+from packageneric.pool.dlfcn import dlfcn
+dlfcn = dlfcn(project)
 
-m = packageneric.external_package(
-	builds = [
-		['m', ['m'],
+pthread = external_package_check(project, name = 'pthread',
+	dependencies = [
+		cxx_build_check(project, name = 'pthread', libraries = ['pthread'], source_text = \
 			"""\
-			#include <cmath>
-			int main()
-			{
-				float f(std::sin(0.0f));
-				double d(std::sin(0.0));
-				return 0;
-			}
-			\n"""
-		]
-	],
-	distribution_packages = {
-		'debian': 'libc-dev (>= 0)',
-		'cygwin': 'cygwin-1.5.19-4'
-	},
-	url = 'http://google.ch iso c++'
-)
-
-dl = packageneric.external_package(
-	builds = [
-		['dl', ['dl'],
-			"""\
-			#include <dlfcn.h>
-			int main()
-			{
-				void * lib(dlopen("lib", RTLD_LAZY));
-				void * sym(dlsym(lib, "sym"));
-				char * error(dlerror());
-				int result(dlclose(lib));
-				return 0;
-			}
-			\n"""
-		]
+				#include <pthread.h>
+				void pthread()
+				{
+					pthread_t self(pthread_self());
+				}
+			"""
+		)
 	],
 	distribution_packages = {'debian': 'libc-dev (>= 0)'},
 	url = 'http://google.ch posix 1003.1-2003'
 )
 
-pthread = packageneric.external_package(
-	builds = [
-		['pthread', [],
+x = external_package_check(project, name = 'x',
+	dependencies = [
+		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
+		#pkg_config_check(project, name = 'x11 >= 0')
+		cxx_build_check(project, name = 'x', libraries = ['X11'], source_text = \
 			"""\
-			#include <pthread.h>
-			int main()
-			{
-				pthread_t self(pthread_self());
-				return 0;
-			}
-			\n"""
-		]
-	],
-	distribution_packages = {'debian': 'libc-dev (>= 0)'},
-	url = 'http://google.ch posix 1003.1-2003'
-)
-
-x = packageneric.external_package(
-	builds = [
-		['x', ['X11'],
-			"""\
-			#include <X11/Xlib.h>
-			int main()
-			{
-				Display * display(XOpenDisplay(0));
-				XCloseDisplay(display);
-				return 0;
-			}
-			\n"""
-		]
+				#include <X11/Xlib.h>
+				void x()
+				{
+					Display * display(XOpenDisplay(0));
+					XCloseDisplay(display);
+				}
+			"""
+		)
 	],
 	distribution_packages = {'debian': 'libx11-dev (>= 0)'},
 	url = 'http://x.org'
 )
 
-xfixes = packageneric.external_package(
-	depends = [x],
-	# debian has a pkg-config file for it, but it's not sure for other distributions
-	#pkg_config = 'xfixes >= 0',
-	builds = [
-		['xfixes', ['Xfixes'],
+xfixes = external_package_check(project, name = 'xfixes',
+	dependencies = [
+		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
+		#pkg_config_check(project, name = 'xfixes >= 0')
+		cxx_build_check(project, name = 'xfixes', dependencies = [x], libraries = ['Xfixes'], source_text = \
 			"""\
-			#include <X11/Xlib.h>
-			#include <X11/extensions/Xfixes.h>
-			// do something with it for more complete check
-			int main() { return 0; }
-			\n"""
-		]
+				#include <X11/Xlib.h>
+				#include <X11/extensions/Xfixes.h>
+				void xfixes()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
 	],
 	distribution_packages = {'debian': 'libxfixes-dev (>= 0)'},
 	url = 'http://x.org'
 )
 
-xpm = packageneric.external_package(
-	depends = [x],
-	# debian has a pkg-config file for it, but it's not sure for other distributions
-	#pkg_config = 'xpm >= 0',
-	builds = [
-		['xpm', ['Xpm'],
+xpm = external_package_check(project, name = 'xpm',
+	dependencies = [
+		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
+		#pkg_config_check(project, name = 'xpm >= 0')
+		cxx_build_check(project, name = 'xpm', dependencies = [x], libraries = ['Xpm'], source_text = \
 			"""\
-			#include <X11/xpm.h>
-			// do something with it for more complete check
-			int main() { return 0; }
-			\n"""
-		]
+				#include <X11/xpm.h>
+				void xpm()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
 	],
 	distribution_packages = {'debian': 'libxpm-dev (>= 0)'},
 	url = 'http://x.org'
 )
 
-xcursor = packageneric.external_package(
-	depends = [x],
-	# debian has a pkg-config file for it, but it's not sure for other distributions
-	#pkg_config = 'xcursor >= 0',
-	builds = [
-		['xcursor', ['Xcursor'],
+xcursor = external_package_check(project, name = 'xcursor',
+	dependencies = [
+		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
+		#pkg_config_check(project, name = 'xcursor >= 0')
+		cxx_build_check(project, name = 'xcursor', dependencies = [x], libraries = ['Xcursor'], source_text = \
 			"""\
-			#include <X11/Xlib.h>
-			#include <X11/Xcursor/Xcursor.h>
-			// do something with it for more complete check
-			int main() { return 0; }
-			\n"""
-		]
+				#include <X11/Xlib.h>
+				#include <X11/Xcursor/Xcursor.h>
+				void xcursor()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
 	],
 	distribution_packages = {'debian': 'libxcursor-dev (>= 0)'},
 	url = 'http://x.org'
 )
 
-xft = packageneric.external_package(
-	pkg_config = 'xft >= 0',
+xft = external_package_check(project, name = 'xft',
+	dependencies = [
+		pkg_config_check(project, name = 'xft >= 0')
+	],
 	distribution_packages = {'debian': 'libxft2-dev (>= 0), libfontconfig1-dev (>= 2.3.1)'},
 	url = 'http://x.org'
 )
 
-freetype = packageneric.external_package(
-	pkg_config = 'freetype2 >= 0',
+freetype = external_package_check(project, name = 'freetype',
+	dependencies = [
+		pkg_config_check(project, name = 'freetype2 >= 0')
+	],
 	distribution_packages = {'debian': 'libfreetype6-dev (>= 0)'},
 	url = 'http://google.ch ...'
 )
 
-xerces = packageneric.external_package(
-	builds = [
-		['xerces', ['xerces-c'],
+xerces = external_package_check(project, name = 'xerces',
+	dependencies = [
+		cxx_build_check(project, name = 'xerces', libraries = ['xerces-c'], source_text = \
 			"""\
-			#include <xercesc/sax/Parser.hpp>
-			// do something with it for more complete check
-			int main() { return 0; }
-			\n"""
-		]
+				#include <xercesc/sax/Parser.hpp>
+				void xerces()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
 	],
 	distribution_packages = {'debian': 'libxerces27-dev (>= 0) | libxerces26-dev (>= 0)'},
 	url = 'http://apache.org'
@@ -242,61 +165,72 @@ xerces = packageneric.external_package(
 
 # modules
 
-ngrs = packageneric.module(
-	source_package = source_package,
+from packageneric.generic.scons.module import module
+ngrs_module = module(source_package,
 	name = 'ngrs-' + str(source_package.version().major()),
 	version = source_package.version(),
 	description = source_package.description(),
-	depends = [stdcxx, m, dl, pthread, x, xfixes, xpm, xcursor, xft, freetype, xerces]
-)
-ngrs.add_sources(packageneric.find('src', 'ngrs', '*.cpp'))
-ngrs.add_headers(packageneric.find('src', 'ngrs', '*.hpp'))
-ngrs.add_headers(packageneric.find('src', 'ngrs', '*.h'))
-ngrs.add_include_path('src', build = True, uninstalled = True)
-
-# pkg-config packages
-
-ngrs_package = packageneric.pkg_config_package(
-	name = 'ngrs-' + str(ngrs.version().major()),
-	version = ngrs.version(),
-	description = ngrs.description(),
-	modules = [ngrs]
+	dependencies = [stdcxx, dlfcn, pthread, x, xfixes, xpm, xcursor, xft, freetype, xerces]
 )
 
-# debian
+from packageneric.generic.scons.find import find
+ngrs_module.add_sources(find(project, 'src', 'ngrs', '*.cpp'))
+ngrs_module.add_headers(find(project, 'src', 'ngrs', '*.hpp'))
+ngrs_module.add_headers(find(project, 'src', 'ngrs', '*.h'))
 
-ngrs_runtime = packageneric.debian_package(
-	name = 'lib-ngrs-' + str(source_package.version().major()),
-	section = 'libs',
-	description = ngrs_package.description(),
-	long_description = 'This package contains the runtime library.'
-)
-#ngrs_runtime.add_files(ngrs_package.binaries())
+for context in ngrs_module.contexes().build(), ngrs_module.contexes().client().uninstalled(): context.compilers().cxx().paths().add(['src'])
 
-ngrs_dev = packageneric.debian_package(
-	name = ngrs_runtime.name() + '-dev',
-	section = 'libdevel',
-	description = ngrs_package.description(),
-	long_description = 'This package contains the development files.',
-)
-ngrs_dev.add_depend(ngrs_runtime)
-ngrs_dev.add_build_depends(ngrs_package.build_depends())
-#ngrs_dev.add_files(ngrs_package.headers())
-#ngrs_dev.add_files(ngrs_package.pkg_config())
+if False:
+	# pkg-config packages
 
-ngrs_doc = packageneric.debian_package(
-	name = ngrs_runtime.name() + '-doc',
-	section = 'doc',
-	architecture = 'all',
-	description = ngrs_package.description(),
-	long_description = 'This package contains the documentation.'
-)
+	from packageneric.generic.scons.pkg_config_package import pkg_config_package
+	ngrs_package = pkg_config_package(project,
+		name = 'ngrs-' + str(ngrs.version().major()),
+		version = ngrs.version(),
+		description = ngrs.description(),
+		modules = [ngrs_module]
+	)
 
-debian = packageneric.debian(
-	source_package = source_package,
-	maintainer = prodos,
-	uploaders = [prodos, bohan],
-	binary_packages = [ngrs_runtime, ngrs_dev, ngrs_doc],
-)
+	# debian
 
-packageneric(ngrs_package, debian)
+	from packageneric.generic.scons.debian_package import debian_package
+
+	ngrs_runtime = debian_package(project,
+		name = 'lib-ngrs-' + str(source_package.version().major()),
+		section = 'libs',
+		description = ngrs_package.description(),
+		long_description = 'This package contains the runtime library.'
+	)
+	#ngrs_runtime.add_files(ngrs_package.binaries())
+
+	class ngrs_dev(debian_package):
+		def __init__(self):
+			debian_package.__init__(self, project,
+				name = ngrs_runtime.name() + '-dev',
+				section = 'libdevel',
+				description = ngrs_package.description(),
+				long_description = 'This package contains the development files.',
+			)
+		def dynamic_dependencies(self):
+			self.add_depend(ngrs_runtime)
+			self.add_build_depends(ngrs_package.build_depends())
+	ngrs_dev = ngrs_dev()
+	#ngrs_dev.add_files(ngrs_package.headers())
+	#ngrs_dev.add_files(ngrs_package.pkg_config())
+
+	ngrs_doc = debian_package(project,
+		name = ngrs_runtime.name() + '-doc',
+		section = 'doc',
+		architecture = 'all',
+		description = ngrs_package.description(),
+		long_description = 'This package contains the documentation.'
+	)
+
+	from packageneric.generic.scons.debian import debian
+	debian = debian(source_package,
+		maintainer = prodos,
+		uploaders = [prodos, bohan],
+		binary_packages = [ngrs_runtime, ngrs_dev, ngrs_doc],
+	)
+
+project(ngrs_module)
