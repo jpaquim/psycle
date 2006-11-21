@@ -22,7 +22,7 @@
 NDialog::NDialog()
  : NWindow()
 {
-   // setModal(true);
+   setModal(true);
    do_execute = false;
 }
 
