@@ -1,5 +1,7 @@
 # This is a sorted list, top priority at the top!
 
+*	have a look at gnulib
+
 *	ms (microsoft):
 	ms: gthread-2.0.lib
 	ms: DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__VERSION
