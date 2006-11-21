@@ -28,6 +28,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef __unix__
+#else
+#include <windows.h>
+#include <winreg.h>
+#endif
 
 using namespace std;
 
@@ -91,10 +96,71 @@ std::vector< std::string > NFile::fileList( const std::string & path )
 }
 
 
+#ifdef __unix__
+#else
+struct REGINFO
+{
+  LONG lMessage;
+  DWORD dwType;
+  DWORD dwSize;
+} m_Info;
+#endif
+
+std::string NFile::home() {
+ #ifdef __unix__
+
+ char home[8000]; 
+ strncpy(home,getenv("HOME"),7999);
+ return home;
+ 
+ #else            
+ HKEY hKeyRoot = HKEY_CURRENT_USER;
+ LPCTSTR pszPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
+ 
+ HKEY m_hKey = NULL;
+ LONG ReturnValue = RegOpenKeyEx (hKeyRoot, pszPath, 0L,
+		KEY_ALL_ACCESS, &m_hKey);
+		
+ if(ReturnValue == ERROR_SUCCESS)
+ {
+
+    LPCTSTR pszKey = "Personal";
+    std::string sVal;
+        
+	DWORD dwType;
+	DWORD dwSize = 200;
+	char  szString[255];
+
+	LONG lReturn = RegQueryValueEx (m_hKey, (LPSTR) pszKey, NULL,
+		&dwType, (BYTE *) szString, &dwSize);
+
+	m_Info.lMessage = lReturn;
+	m_Info.dwType = dwType;
+	m_Info.dwSize = dwSize;
+
+	if(lReturn == ERROR_SUCCESS)
+	{
+	  sVal = szString;
+	}
+ 
+   if (m_hKey)
+   {
+     RegCloseKey (m_hKey);
+     m_hKey = NULL;
+   }
+   return sVal;
+ }    
+ #endif
+}            
+
 void NFile::cdHome() {
+ #ifdef __unix__
  char home[8000]; 
  strncpy(home,getenv("HOME"),7999);
  chdir(home); 
+ #else
+ chdir( home().c_str() );
+ #endif
 }
 
 void NFile::cd( const std::string & path )
@@ -176,7 +242,7 @@ std::string NFile::replaceTilde( std::string const & path )
 {
   std::string nvr(path);
   if(!path.length() || path[0] != '~') return nvr;
-  nvr.replace(0, 1, std::getenv("HOME"));
+  nvr.replace( 0, 1, home().c_str() );
   return nvr;
 }
 
