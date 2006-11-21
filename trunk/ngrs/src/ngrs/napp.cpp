@@ -284,9 +284,9 @@ int NApp::processEvent( NWindow * win, WEvent * event )
         doRepaint(win);
     break;
     break;
-		case MapNotify:
-			doRepaint(win);
-		break;
+	case MapNotify:
+		doRepaint(win);
+	break;
     case ConfigureNotify:{
 			while (XCheckTypedWindowEvent( NApp::system().dpy(), win->win() , ConfigureNotify, event));
        if (event->xconfigure.width - 2*event->xconfigure.border_width != win->graphics()->dblWidth() || event->xconfigure.height != win->graphics()->dblHeight()  ) {
@@ -393,8 +393,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
            buffer[0] = wordchar & 0xff ;
            buffer[1] = 0;
          } else buffer[0] = '\0';
-         win->onKeyPress(NKeyEvent(0,buffer, event->wParam & 255 ));         
-         
+         win->onKeyPress(NKeyEvent(0,buffer, event->wParam & 255 ));                  
     }
     break;
     case WM_KEYUP : {
@@ -409,7 +408,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
          buffer[1] = 0;
        } else buffer[0] = '\0';
        win->onKeyRelease(NKeyEvent(0,buffer, event->wParam & 255 ));         
-}   
+    }   
     break;
     default:
       return DefWindowProc( event->hwnd, event->msg, event->wParam, event->lParam);

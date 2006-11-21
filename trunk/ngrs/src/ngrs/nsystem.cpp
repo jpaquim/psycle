@@ -507,8 +507,7 @@ void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int
   }
   XSync(dpy(),false);
   #else
-//  SetWindowPos( win, 0, left, top, width, height,
-//                       SWP_SHOWWINDOW | SWP_NOACTIVATE );
+  MoveWindow( win, left, top, width, height, true );
   #endif
 }
 
@@ -593,13 +592,11 @@ void NSystem::setWindowDecoration( WinHandle win, bool on )
   XChangeWindowAttributes(dpy(), win, vmask, &attribs);
   #else
   if ( !on ) {
-/*    SetWindowLongPtr(      
+    SetWindowLongPtr(      
       win,
       GWL_STYLE,
       WS_POPUP
     );
-    SetWindowPos( win, 0, 0,0,100,100,
-    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );*/
   }   
   #endif
   
@@ -607,20 +604,23 @@ void NSystem::setWindowDecoration( WinHandle win, bool on )
 
 void NSystem::unmapWindow( WinHandle  win )
 {
-  #ifdef __unix__
   if (isWindowMapped(win)) {
-  // XEvent ev;
-
+   #ifdef __unix__
    XUnmapWindow(dpy(), win);//, DefaultScreen(dpy()));
-
+   #else
+   ShowWindow( win, SW_HIDE );
+   UpdateWindow( win );
+   #endif
   }
-  #endif
 }
 
 void NSystem::mapWindow( WinHandle  win )
 {
   #ifdef __unix__
   XMapWindow(dpy(), win);
+  #else
+  ShowWindow( win, 1 );
+  UpdateWindow( win );
   #endif
 }
 
@@ -630,6 +630,8 @@ bool NSystem::isWindowMapped( WinHandle win )
   XWindowAttributes attr;
   XGetWindowAttributes( dpy(), win, &attr );
   return !(attr.map_state == IsUnmapped);
+  #else
+  return IsWindowVisible( win ) ;
   #endif
 }
 

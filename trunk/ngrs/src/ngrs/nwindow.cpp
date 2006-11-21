@@ -110,6 +110,10 @@ void NWindow::setVisible( bool on )
      NApp::system().unmapWindow(win_);
      XSync(NApp::system().dpy(),false);
      graphics_->setVisible(on);
+     #else
+     ShowWindow( win_, SW_HIDE );
+     UpdateWindow( win_ );
+     graphics_->setVisible( on );
      #endif
   }
 }
