@@ -333,8 +333,8 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
         PatternItem* item = new PatternItem( pattern, pattern->name() );
         item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
         node->addEntry(item);
-        patternBox_->setSelectedItem( node, item );
         patternMap[item] = pattern;
+        patternBox_->setSelectedItem( node, item );
         patternBox_->resize();
         patternBox_->repaint();
         counter++;
