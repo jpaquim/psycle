@@ -20,6 +20,7 @@
 #include "machinegui.h"
 #include "machine.h"
 #include "framemachine.h"
+#include "machinepropertiesdlg.h"
 #include "masterdlg.h"
 #include "global.h"
 #include "configuration.h"
@@ -294,6 +295,9 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
     vuPanel_->setPosition(coords().dVu.left() + ident(),coords().dVu.top() + ident(),coords().dVu.width(),coords().dVu.height());
     vuPanel_->setTransparent(false);
   add(vuPanel_);
+
+  propertiesDlg_ = new PropertiesDlg(mac);
+  add(propertiesDlg_);
 }
 
 GeneratorGUI::~ GeneratorGUI( )
@@ -366,7 +370,7 @@ void GeneratorGUI::onPosChanged(NSlider* sender )
 void GeneratorGUI::onMousePress( int x, int y, int button )
 {
   MachineGUI::onMousePress(x,y,button);
-  if (button==1) {
+  if (button==1) { // left-click
       if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
         pMac()->_mute = !pMac()->_mute;
         if (pMac()->_mute) {
@@ -461,7 +465,6 @@ void GeneratorGUI::VUPanel::paint( NGraphics * g )
       }
 */
 }
-
 
 void GeneratorGUI::customSliderPaint( NSlider * sl, NGraphics * g )
 {
@@ -668,8 +671,12 @@ void EffektGUI::VUPanel::paint( NGraphics * g )
 
 void MachineGUI::onMousePress( int x, int y, int button )
 {
-  if (button==3) newConnection.emit(this);
-  if (button==1) selected.emit(this);
+  if ((button==1 && NApp::system().keyState() & ShiftMask) || button==3) {
+  // shift+left-click or right-click.
+    newConnection.emit(this);
+  } else if (button==1) { // left-click (w/ no shift)
+    selected.emit(this);
+  }
 }
 
 void MachineGUI::detachLine( NLine * line )
@@ -695,6 +702,9 @@ void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
 	std::cout << "generatorgui" << std::endl;
   if (button==1) {
       frameMachine->setVisible(true);
+  } else if (button==3) {
+        std::cout << "generator properties" << std::endl;
+        propertiesDlg_->setVisible(true);
   }
 }
 

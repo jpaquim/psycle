@@ -348,7 +348,7 @@ void SequencerBar::onDeletePattern( NButtonEvent* ev ) {
   {
      SinglePattern* pattern = itr->second;
      patternMap.erase(itr);
-		 patternBox_->removeItem( item );
+        patternBox_->removeItem( item );
      patternBox_->resize();
      patternBox_->repaint();
 

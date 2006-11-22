@@ -31,6 +31,7 @@ namespace psycle { namespace host {
 
 class Machine;
 class FrameMachine;
+class PropertiesDlg;
 class MasterDlg;
 
 
@@ -150,16 +151,16 @@ public:
 
       private:
 
-				GeneratorGUI* pGui_;
+        GeneratorGUI* pGui_;
 
     };
-
 
     GeneratorGUI(Machine* mac);
 
     ~GeneratorGUI();
 
     FrameMachine* frameMachine;
+    PropertiesDlg* propertiesDlg_;
 
     virtual void onMousePress(int x, int y, int button);
 
