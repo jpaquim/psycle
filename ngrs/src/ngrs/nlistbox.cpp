@@ -92,11 +92,14 @@ void NListBox::add( NCustomItem * component )
 
 void NListBox::onItemPress( NButtonEvent * ev)
 {
-  #ifdef __unix__
   if (ev->button() == 1) {
     NVisualComponent* item = static_cast<NVisualComponent*>(ev->sender());
 
-    if (!multiSelect_ || !(NApp::system().keyState() & ControlMask)) deSelectItems();
+    if ( !multiSelect_ 
+      #ifdef __unix__
+         || !(NApp::system().keyState() & ControlMask)
+      #endif   
+        ) deSelectItems();
 
     item->setSkin(itemBg);
     item->repaint();
@@ -105,7 +108,6 @@ void NListBox::onItemPress( NButtonEvent * ev)
   } else {
       // todo add mousewheel code
   }
-  #endif
 }
 
 void NListBox::onItemSelected( NCustomItem * item )
@@ -198,7 +200,7 @@ void NListBox::selClear( )
 NCustomItem * NListBox::itemAt( unsigned int index )
 {
   if (index >= 0 && index < listBoxPane_->visualComponents().size())
-    return (NCustomItem*) listBoxPane_->visualComponents().at(index);
+    return static_cast<NCustomItem*> (listBoxPane_->visualComponents().at(index));
   else
     return 0;
 }
@@ -226,11 +228,3 @@ void NListBox::resize( )
     verBar()->setSmallChange( item->height() );
   }
 }
-
-
-
-
-
-
-
-

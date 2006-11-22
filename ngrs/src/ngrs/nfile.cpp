@@ -95,24 +95,11 @@ std::vector< std::string > NFile::fileList( const std::string & path )
  return destination;
 }
 
-
-#ifdef __unix__
-#else
-struct REGINFO
-{
-  LONG lMessage;
-  DWORD dwType;
-  DWORD dwSize;
-} m_Info;
-#endif
-
 std::string NFile::home() {
  #ifdef __unix__
-
  char home[8000]; 
  strncpy(home,getenv("HOME"),7999);
  return home;
- 
  #else            
  HKEY hKeyRoot = HKEY_CURRENT_USER;
  LPCTSTR pszPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
@@ -123,25 +110,20 @@ std::string NFile::home() {
 		
  if(ReturnValue == ERROR_SUCCESS)
  {
-
-    LPCTSTR pszKey = "Personal";
-    std::string sVal;
+   LPCTSTR pszKey = "Personal";
+   std::string sVal;
         
-	DWORD dwType;
-	DWORD dwSize = 200;
-	char  szString[255];
+   DWORD dwType;
+   DWORD dwSize = 200;
+   char  szString[255];
 
-	LONG lReturn = RegQueryValueEx (m_hKey, (LPSTR) pszKey, NULL,
+   LONG lReturn = RegQueryValueEx (m_hKey, (LPSTR) pszKey, NULL,
 		&dwType, (BYTE *) szString, &dwSize);
 
-	m_Info.lMessage = lReturn;
-	m_Info.dwType = dwType;
-	m_Info.dwSize = dwSize;
-
-	if(lReturn == ERROR_SUCCESS)
-	{
-	  sVal = szString;
-	}
+   if(lReturn == ERROR_SUCCESS)
+   {
+    sVal = szString;
+   }
  
    if (m_hKey)
    {

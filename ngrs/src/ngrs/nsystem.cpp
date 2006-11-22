@@ -872,7 +872,3 @@ const NClipBoard & NSystem::clipBoard( ) const
 {
   return clipBoard_;
 }
-
-
-
-
