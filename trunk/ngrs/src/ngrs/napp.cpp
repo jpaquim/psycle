@@ -237,7 +237,19 @@ void NApp::modalEventLoop(NWindow* modalWin )
      }
      NApp::callRemovePipe();
   }
+  #else
+  
+  MSG Msg;
+  // The Message Loop
+  
+  while ( GetMessage( & Msg, NULL, 0,0) > 0 )
+  {
+    TranslateMessage(&Msg);
+    DispatchMessage(&Msg);      
+    NApp::callRemovePipe();
+  }
   #endif
+
 }
 
 #ifdef __unix__

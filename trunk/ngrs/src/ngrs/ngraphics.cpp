@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
- *   natti@linux   *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper                         *
+ *   Made in Germany                                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -42,6 +42,10 @@ NGraphics::NGraphics(WinHandle winID)
   fFtColor.color.alpha = 0xFFFF; // Alpha blending
   #else
   brush = CreateSolidBrush(RGB(0,0,0));
+  // Set brush to hollow
+  LOGBRUSH logbrush;
+  logbrush.lbStyle = BS_HOLLOW;
+  hollow = CreateBrushIndirect(&logbrush);
   hPen  = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
   #endif
   win = winID;
@@ -75,6 +79,7 @@ NGraphics::~NGraphics()
   #else  
   ReleaseDC( win , gc_ );
   DeleteObject( brush );
+  DeleteObject( hollow );
   DeleteObject( hPen );
   #endif
   if (dblBuffer_) {
@@ -86,7 +91,7 @@ void NGraphics::fillRect( int x, int y, int width, int height )
 {
   if (dblBuffer_)
      #ifdef __unix__
-     XFillRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
+     XFillRectangle( NApp::system().dpy(), doubleBufferPixmap_, gcp, x+dx_, y+dy_, width, height );
      #else
      {
        RECT rect;
@@ -99,9 +104,16 @@ void NGraphics::fillRect( int x, int y, int width, int height )
      #endif
   else
      #ifdef __unix__
-     XFillRectangle(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
+     XFillRectangle( NApp::system().dpy(), win, gc_, x+dx_, y+dy_, width, height);
      #else
-     ;
+     {
+       RECT rect;
+       rect.left   = x + dx_;
+       rect.top    = y + dy_;
+       rect.right  = rect.left + width;
+       rect.bottom = rect.top  + height;
+       FillRect( gc_, &rect, brush );
+     }
      #endif
 }
 
@@ -180,9 +192,9 @@ void NGraphics::copyDblBuffer( const NRect & repaintArea )
   #endif     
 }
 
-void NGraphics::swap(const NRect & repaintArea )
+void NGraphics::swap( const NRect & repaintArea )
 {
-  if (dblBuffer_) copyDblBuffer(repaintArea);
+  if ( dblBuffer_ ) copyDblBuffer( repaintArea );
 }
 
 long NGraphics::xTranslation( )
@@ -204,29 +216,38 @@ void NGraphics::setForeground( const NColor & color )
     #else
     DeleteObject( brush );
     brush =  CreateSolidBrush(RGB(color.red(), color.green(), color.blue() ));
-    SelectObject( gcp, brush );
+    if ( dblBuffer_ )
+       SelectObject( gcp, brush );
+    else
+       SelectObject( gc_, brush );
     
     DeleteObject( hPen );
     hPen = CreatePen(PS_SOLID, 1, RGB( color.red(), color.green(), color.blue()));
-    SelectObject( gcp, hPen );
+    
+    if ( dblBuffer_ )
+      SelectObject( gcp, hPen );
+    else
+      SelectObject( gc_, hPen );
     #endif               
     oldColor.setRGB(color.red(),color.green(),color.blue());
   }
-
 }
 
 void NGraphics::setFont( const NFont & font )
 {
   fntStruct = font.systemFont();   
   #ifdef __unix__
-  if (!fntStruct.antialias) {
-    if (dblBuffer_)
-       XSetFont(NApp::system().dpy(),gcp,fntStruct.xFnt->fid);
+  if ( !fntStruct.antialias ) {
+    if ( dblBuffer_ )
+       XSetFont( NApp::system().dpy(), gcp, fntStruct.xFnt->fid );
     else
-       XSetFont(NApp::system().dpy(),gc_,fntStruct.xFnt->fid);
+       XSetFont( NApp::system().dpy(), gc_, fntStruct.xFnt->fid );
   }
   #else
-  SelectObject( gcp, fntStruct.hFnt );  
+  if ( dblBuffer_ )
+    SelectObject( gcp, fntStruct.hFnt ); 
+  else
+    SelectObject( gc_, fntStruct.hFnt ); 
   #endif
 }
 
@@ -237,7 +258,7 @@ void NGraphics::drawXftString( int x, int y, const char * s )
       XftDrawString8(drawDbl, &fFtColor, fntStruct.xftFnt , x, y,reinterpret_cast<const FcChar8 *>(s), strlen(s));
    else
      XftDrawString8(drawWin, &fFtColor, fntStruct.xftFnt , x, y,reinterpret_cast<const FcChar8 *>(s), strlen(s));
-   #endif     
+  #endif
 }
 
 void NGraphics::drawText( int x, int y, const std::string & text )
@@ -271,9 +292,15 @@ void NGraphics::drawText( int x, int y, const std::string & text )
     drawXftString(x+dx_,y+dy_,text.c_str());
   }
   #else    
-  SetBkMode( gcp, TRANSPARENT );
-  SetTextAlign( gcp, TA_BASELINE );
-  TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
+  if ( dblBuffer_ ) {
+    SetBkMode( gcp, TRANSPARENT );
+    SetTextAlign( gcp, TA_BASELINE );
+    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
+  } else {
+     SetBkMode( gc_, TRANSPARENT );
+     SetTextAlign( gc_, TA_BASELINE );
+     TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );      
+  }
   #endif
 }
 
@@ -296,24 +323,39 @@ void NGraphics::drawText(int x, int y, const std::string & text, const NColor & 
     drawXftString( x+dx_, y+dy_, text.c_str() );
   }
   #else
-  TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
+  if (dblBuffer_) {
+    SetBkMode( gcp, TRANSPARENT );
+    SetTextAlign( gcp, TA_BASELINE );
+    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
+  } else {
+    SetBkMode( gc_, TRANSPARENT );
+    SetTextAlign( gc_, TA_BASELINE );
+    TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );    
+  }
   #endif
 }
 
 void NGraphics::drawRect( int x, int y, int width, int height )
 {
-  if (dblBuffer_)
+  if (dblBuffer_) {
     #ifdef __unix__
     XDrawRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
     #else
+    HBRUSH holdbrush = (HBRUSH) SelectObject( gcp, hollow );
     Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
+    SelectObject( gcp, holdbrush );
     #endif
+  }  
   else
+  {
     #ifdef __unix__
     XDrawRectangle(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
     #else
-    ;
+    HBRUSH holdbrush = (HBRUSH) SelectObject( gc_, hollow );
+    Rectangle( gc_, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
+    SelectObject( gc_, holdbrush );
     #endif
+  }  
 }
 
 void NGraphics::drawRect( const NRect & rect )
@@ -323,20 +365,24 @@ void NGraphics::drawRect( const NRect & rect )
 
 void NGraphics::drawLine( long x, long y, long x1, long y1 )
 {
-  if (dblBuffer_) {
-     #ifdef __unix__
-     XDrawLine(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
-     #else
-     MoveToEx( gcp, x + dx_, y + dy_, NULL);
-     LineTo( gcp, x1 + dx_, y1 + dy_);
-     #endif
+  if ( dblBuffer_ ) 
+  {
+    #ifdef __unix__
+    XDrawLine(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
+    #else
+    MoveToEx( gcp, x + dx_, y + dy_, NULL);
+    LineTo( gcp, x1 + dx_, y1 + dy_);
+    #endif
   }
   else
-     #ifdef __unix__
-     XDrawLine(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,x1+dx_,y1+dy_);
-     #else
-     ;
-     #endif
+  {
+    #ifdef __unix__
+    XDrawLine(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,x1+dx_,y1+dy_);
+    #else 
+    MoveToEx( gc_, x + dx_, y + dy_, NULL);
+    LineTo( gc_, x1 + dx_, y1 + dy_);
+    #endif
+  }   
 }
 
 void NGraphics::drawPolygon( NPoint* pts , int n )
@@ -706,7 +752,9 @@ int NGraphics::dblHeight( ) const
 }
 
 
-void NGraphics::drawRoundRect (int x, int y, int width, int height, int arcWidth, int arcHeight) {
+void NGraphics::drawRoundRect( int x, int y, int width, int height, int arcWidth, int arcHeight ) {
+
+ #ifdef __unix__
 
  int nx = x;
  int ny = y;
@@ -755,6 +803,18 @@ void NGraphics::drawRoundRect (int x, int y, int width, int height, int arcWidth
                         drawArc(nx, ny, nw, nh, 0, 23040);
                 }
         }
+  #else
+  
+  if ( dblBuffer_ ) {
+    HBRUSH holdbrush = (HBRUSH) SelectObject( gcp, hollow );
+    RoundRect( gcp, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, arcWidth, arcHeight );
+    SelectObject( gcp, holdbrush );
+  } else {
+    HBRUSH holdbrush = (HBRUSH) SelectObject( gcp, hollow );   
+    RoundRect( gc_, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, arcWidth, arcHeight );
+    SelectObject( gc_, holdbrush );    
+  }
+  #endif        
 }
 
 static double fTwoPi = 2.0 * 3.14; 

@@ -23,9 +23,8 @@ NCustomItem::NCustomItem()
  : NPanel()
 {
   obj_ = 0;
-	value_ = 0;
+  value_ = 0;
 }
-
 
 NCustomItem::~NCustomItem()
 {
@@ -62,5 +61,3 @@ bool NCustomItem::operator <( const NCustomItem & rhs ) const
 void NCustomItem::setText( const std::string & text )
 {
 }
-
-
