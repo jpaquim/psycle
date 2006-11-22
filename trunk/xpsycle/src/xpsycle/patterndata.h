@@ -74,6 +74,7 @@ namespace psycle
 			PatternCategory* createNewCategory(const std::string & name);
 			void removeSinglePattern(SinglePattern* pattern);
 			void removeAll();
+                        void resetToDefault();
 
 			SinglePattern* findById(int id);
 

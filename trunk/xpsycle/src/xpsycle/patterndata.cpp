@@ -165,6 +165,16 @@ namespace psycle
 			clear();
 		}
 
+                void PatternData::resetToDefault()
+                {
+                        removeAll();
+//                        PatternCategory * PatternData::createNewCategory( const std::string & name );
+ //                       SinglePattern* PatternCategory::createNewPattern( const std::string & name );
+                        PatternCategory* cat = createNewCategory( "default" );
+                        cat->createNewPattern( "pattern0" );
+
+                }
+
 		SinglePattern * PatternData::findById( int id )
 		{
 			iterator it = begin();
