@@ -95,9 +95,8 @@ void NCustomTreeView::setSelectedItem( NTreeNode* node, NCustomItem* item ) {
 
   selectedItem_ = item;
 
-  // check later if we should emit this signal
-  // NItemEvent ev(sender,sender->text());
-  // itemSelected.emit(&ev);          
+  NItemEvent ev(item,item->text());
+  itemSelected.emit(&ev);          
 }     
 
 NTreeNode * NCustomTreeView::selectedTreeNode( )
@@ -125,4 +124,9 @@ void NCustomTreeView::removeItem( NCustomItem * item )
 	  if ( window() ) window()->checkForRemove( item );
 	  NApp::addRemovePipe(item);
   }
+}
+
+void NCustomTreeView::onItemDblClick( NButtonEvent* ev ) {
+  //NItemEvent ev( sender, sender->text() );
+  //itemDblClick.emit( ev );        
 }
