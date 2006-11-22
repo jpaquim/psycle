@@ -42,6 +42,7 @@ public:
     void addNode( NTreeNode* node);
 
     signal1<NItemEvent*> itemSelected;
+    signal1<NItemEvent*> itemDblClick;
 
     NTreeNode* selectedTreeNode();
     NCustomItem* selectedItem();
@@ -62,6 +63,7 @@ private:
     NSkin itemFg;
 
     void onSelectedItem(NTreeNode* node, NCustomItem* sender);
+    void onItemDblClick( NButtonEvent* ev );
 
 };
 
