@@ -263,6 +263,7 @@ void SequencerBar::update()
   catItems.clear();
   patternMap.clear();
 
+  bool isFirst = true;
   std::vector<PatternCategory*>::iterator it = seqGui->patternSequence()->patternData()->begin();
   for ( ; it < seqGui->patternSequence()->patternData()->end(); ++it) {
     PatternCategory* category = *it;
@@ -280,6 +281,10 @@ void SequencerBar::update()
        item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
        node->addEntry(item);
        patternMap[item] = pattern;
+       if (isFirst) { 
+         patternBox_->setSelectedItem( node, item ); 
+         isFirst = false; 
+       }
     }
   }
   resize();
