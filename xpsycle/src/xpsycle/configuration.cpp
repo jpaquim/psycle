@@ -452,9 +452,6 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         inputHandler.changeKeyCode(cdefPatternDec,Key(mod,keyCode));
       } else
       if (id == "delete_row") {
-std::cout << "cdefRowDelete: " << cdefRowDelete << std::endl;
-std::cout << "keycode: " << keyCode << std::endl;
-std::cout << "NK_Delete: " << NK_Delete << std::endl;
         inputHandler.changeKeyCode(cdefRowDelete,Key(mod,keyCode));
       } else
       if (id == "edit_instrument") {
@@ -640,6 +637,12 @@ std::cout << "NK_Delete: " << NK_Delete << std::endl;
       } else
       if (id == "pattern_track_solo") {
         inputHandler.changeKeyCode(cdefPatternTrackSolo,Key(mod,keyCode));
+      } else
+      if (id == "patternstep_dec") {
+        inputHandler.changeKeyCode(cdefPatternstepDec,Key(mod,keyCode));
+      } else
+      if (id == "patternstep_inc") {
+        inputHandler.changeKeyCode(cdefPatternstepInc,Key(mod,keyCode));
       } else
       if (id == "play_current_note") {
         inputHandler.changeKeyCode(cdefPlayFromPos,Key(mod,keyCode));

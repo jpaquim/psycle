@@ -1727,6 +1727,12 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 				pView->setEditOctave( std::max(pView->editOctave() - 1, 0) );
 				return;
 			break;
+                        case cdefPatternstepDec:
+				pView->setPatternStep(std::max(1, pView->patternStep()-1));
+                        break;
+                        case cdefPatternstepInc:
+				pView->setPatternStep(std::min(16, pView->patternStep()+1));
+                        break;
 		}
 
 	if ( cursor().eventNr() == 0 ) {
@@ -2267,6 +2273,8 @@ void PatternView::deleteBlock( )
 void PatternView::setPatternStep( int step )
 {
   drawArea->setPatternStep( step );
+  patternCombo_->setIndex(step-1);
+  patternCombo_->repaint();
 }
 
 int PatternView::patternStep() const {

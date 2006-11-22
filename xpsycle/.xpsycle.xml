@@ -85,6 +85,8 @@ src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />
 <key id='key_stop' keychar='1' />
 <key id='current_octave-1' mod="ctrl" keychar='+' />
 <key id='current_octave+1' mod="ctrl" keychar='#' />
+<key id='patternstep_dec' keychar='[' />
+<key id='patternstep_inc' keychar=']' />
 
 <!-- patternview navigation key options -->
 <key id='nav_left' keychar='NK_Left' />

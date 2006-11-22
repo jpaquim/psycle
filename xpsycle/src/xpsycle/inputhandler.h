@@ -127,6 +127,8 @@ namespace psycle {
 
       cdefMachineDec,
       cdefMachineInc,
+      cdefPatternstepDec,
+      cdefPatternstepInc,
 
       cdefInstrDec,
       cdefInstrInc,
