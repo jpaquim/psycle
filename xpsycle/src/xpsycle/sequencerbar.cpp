@@ -26,6 +26,7 @@
 #include "player.h"
 #include "sequencergui.h"
 #include "skinreader.h"
+#include "childview.h"
 
 #include <ngrs/nlabel.h>
 #include <ngrs/nitem.h>
@@ -276,6 +277,7 @@ void SequencerBar::update()
     for ( ; patIt < category->end(); patIt++) {
        SinglePattern* pattern = *patIt;
        PatternItem* item = new PatternItem( pattern, pattern->name() );
+       item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
        node->addEntry(item);
        patternMap[item] = pattern;
     }
@@ -328,6 +330,7 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
         SinglePattern* pattern = cat->createNewPattern("Pattern");
 				pattern->setName("Pattern"+ stringify(pattern->id()) );
         PatternItem* item = new PatternItem( pattern, pattern->name() );
+        item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
         node->addEntry(item);
         patternMap[item] = pattern;
         patternBox_->resize();
@@ -391,7 +394,21 @@ void SequencerBar::selectPrevPattern() {
 
 void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 {
-  NCustomItem* item = patternBox_->selectedItem();
+        NCustomItem* item = patternBox_->selectedItem();
+        switchPatternViewPattern(item);
+}
+
+void psycle::host::SequencerBar::onPatternItemDblClick( NButtonEvent * ev )
+{
+        if (ev->button() == 1) { // if left-click
+                NCustomItem* item = patternBox_->selectedItem();
+                childView_->showPatternView();
+                switchPatternViewPattern(item);
+        }
+}
+
+void psycle::host::SequencerBar::switchPatternViewPattern(NCustomItem* item)
+{
 
   std::vector<CategoryItem*>::iterator it = find(catItems.begin(),catItems.end(),item);
   if ( it != catItems.end() )  propertyBox_->setCategoryItem(*it);
@@ -436,6 +453,11 @@ void psycle::host::SequencerBar::setEntry( NObject * obj )
   entryBox_->setControlObject(obj);
   entryBox_->resize();
   repaint();
+}
+
+void psycle::host::SequencerBar::setChildView(ChildView* view)
+{
+        childView_ = view;
 }
 
 

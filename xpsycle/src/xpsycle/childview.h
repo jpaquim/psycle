@@ -37,6 +37,7 @@ namespace psycle {
 class WaveEdFrame;
 class SequencerGUI;
 class VirtualPattern;
+class SequencerBar;
 
 /**
 @author Stefan

@@ -44,6 +44,7 @@ ChildView::ChildView()
   setLayout( NAlignLayout() );
 
   add(sequencerBar_ = new SequencerBar(), nAlLeft);
+  sequencerBar_->setChildView(this);
 
   tabBook_ = new NTabBook();
   add(tabBook_, nAlClient);

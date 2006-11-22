@@ -22,6 +22,7 @@
 
 #include "patternsequence.h"
 #include "patternboxproperties.h"
+#include "childview.h"
 
 #include <map>
 #include <ngrs/npanel.h>
@@ -119,6 +120,7 @@ public:
     void onSelChangeSeqList(NItemEvent* sender);
 
     void setEntry(NObject* obj);
+    void setChildView(class ChildView* view);
 
 		void selectNextPattern();
 		void selectPrevPattern();
@@ -129,6 +131,7 @@ private:
 
     SequencerGUI* seqGui;
     PatternView* patView;
+    ChildView* childView_;
 
     void init();
 
@@ -151,7 +154,9 @@ private:
     void onDeletePattern( NButtonEvent* ev );
 
     void onItemSelected(NItemEvent* ev);
+    void onPatternItemDblClick(NButtonEvent * ev);
     void onPatternAdd(NButtonEvent* ev);
+    void switchPatternViewPattern(NCustomItem* item);
 
     void onMoveCursorPaste(NButtonEvent* ev);
     void onRecordTweakChange(NButtonEvent* ev);
