@@ -315,6 +315,7 @@ void SequencerBar::onNewCategory( NButtonEvent * ev )
   node->setHeader(catItem);
 
   patternBox_->addNode(node);
+  patternBox_->setSelectedItem( node, catItem );
   patternBox_->resize();
   patternBox_->repaint();
 }
@@ -332,6 +333,7 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
         PatternItem* item = new PatternItem( pattern, pattern->name() );
         item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
         node->addEntry(item);
+        patternBox_->setSelectedItem( node, item );
         patternMap[item] = pattern;
         patternBox_->resize();
         patternBox_->repaint();
@@ -400,7 +402,7 @@ void psycle::host::SequencerBar::onItemSelected( NItemEvent * ev )
 
 void psycle::host::SequencerBar::onPatternItemDblClick( NButtonEvent * ev )
 {
-        if (ev->button() == 1) { // if left-click
+        if (ev->button() == 1) { // if left double-click
                 NCustomItem* item = patternBox_->selectedItem();
                 childView_->showPatternView();
                 switchPatternViewPattern(item);
