@@ -20,7 +20,7 @@
 #include "machinegui.h"
 #include "machine.h"
 #include "framemachine.h"
-#include "machinepropertiesdlg.h"
+//#include "machinepropertiesdlg.h"
 #include "masterdlg.h"
 #include "global.h"
 #include "configuration.h"
@@ -296,8 +296,8 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
     vuPanel_->setTransparent(false);
   add(vuPanel_);
 
-  propertiesDlg_ = new PropertiesDlg(mac);
-  add(propertiesDlg_);
+  //propertiesDlg_ = new PropertiesDlg(mac);
+  //add(propertiesDlg_);
 }
 
 GeneratorGUI::~ GeneratorGUI( )
@@ -702,10 +702,11 @@ void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
 	std::cout << "generatorgui" << std::endl;
   if (button==1) {
       frameMachine->setVisible(true);
-  } else if (button==3) {
+      }
+/*  } else if (button==3) {
         std::cout << "generator properties" << std::endl;
         propertiesDlg_->setVisible(true);
-  }
+  }*/
 }
 
 void MasterGUI::onMouseDoublePress( int x, int y, int button )
