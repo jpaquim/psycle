@@ -179,7 +179,6 @@ class PatternView : public NPanel
 
                     virtual int doSel(const PatCursor & p);
                     virtual void selectAll(const PatCursor & cursor);
-                    virtual void selectColumn(const PatCursor & cursor);
                     virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
 
 
