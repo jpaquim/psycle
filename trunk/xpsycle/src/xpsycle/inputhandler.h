@@ -167,6 +167,8 @@ namespace psycle {
       cdefNavPageDn,	///< pgdn
       cdefNavTop,		///< home
       cdefNavBottom,	///< end
+      cdefNavFirstTrack,
+      cdefNavLastTrack,
 
       cdefSelectMachine,	///< Enter
       cdefUndo,
