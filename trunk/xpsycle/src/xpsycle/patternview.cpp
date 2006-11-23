@@ -1697,10 +1697,6 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                                 std::cout << "key: block select all" << std::endl;
                                 selectAll(cursor());
                         break;
-                        case cdefSelectCol:
-                                std::cout << "key: block select column" << std::endl;
-                                selectColumn(cursor());
-                        break;
 			case cdefBlockCopy: 
                                 std::cout << "key: block copy" << std::endl;
                                 copyBlock(false);
@@ -1911,10 +1907,6 @@ void PatternView::PatternDraw::checkRightScroll( const PatCursor & cursor ) {
 
 void PatternView::PatternDraw::selectAll(const PatCursor & cursor) {
         CustomPatternView::selectAll(cursor);
-}
-
-void PatternView::PatternDraw::selectColumn(const PatCursor & cursor) {
-        CustomPatternView::selectColumn(cursor);
 }
 
 int PatternView::PatternDraw::doSel(const PatCursor & selCursor) {

@@ -759,7 +759,8 @@ namespace psycle {
                         // Keybased block selection commands.
                         if (key == cdefSelectUp || key == cdefSelectDn || 
                             key == cdefSelectLeft || key == cdefSelectRight ||
-                            key == cdefSelectTop || key == cdefSelectBottom) {
+                            key == cdefSelectTop || key == cdefSelectBottom ||
+                            key == cdefSelectCol) {
                                 oldSelection_ = selection_;
                                 PatCursor crs = cursor();
                                 int newLeft, newRight, newTop, newBottom;
@@ -911,6 +912,9 @@ namespace psycle {
                                                 newCursorTrack = cursor().track();
                                                 newCursorLine = lineNumber()-1;
                                         }
+                                        break;
+                                        case cdefSelectCol:
+                                                selectColumn(cursor());
                                         break;
                                 }
                                 repaintCursorPos(crs);
@@ -1254,17 +1258,7 @@ namespace psycle {
 
         void CustomPatternView::selectColumn(const PatCursor & cursor) {
             std::cout << "select Column" << std::endl;
-			doSelect_=true;
-            selection_.setLeft(cursor.track()); 
-            selection_.setRight(cursor.track()+1); 
-            selection_.setTop(0);
-            selection_.setBottom(lineNumber());
-
-                if (oldSelection_ != selection_) {
-                        repaintSelection();
-                }
-
-            selCursor_ = cursor;
+            startKeybasedSelection(cursor.track(), cursor.track()+1, 0, lineNumber());
         }
 
 		int CustomPatternView::doSel(const PatCursor & p )
