@@ -30,14 +30,17 @@ NBitmap::NBitmap()
  : NObject(), depth_(24),width_(0),height_(0), data_(0)
  #ifdef __unix__
  ,xi(0), clp(0)
+ #else
+ , hBmp(0), memDC_(0)
  #endif
 {
-
 }
 
 NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(0),height_(0),data_(0)
 #ifdef __unix__
 ,xi(0), clp(0)
+#else
+,hBmp(0),  memDC_(0)
 #endif
 {
   loadFromFile(filename);
@@ -46,6 +49,8 @@ NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(
 NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_(0),data_(0)
 #ifdef __unix__
 ,xi(0), clp(0)
+#else
+,hBmp(0), memDC_(0)
 #endif
 {
   #ifdef __unix__
@@ -61,6 +66,13 @@ NBitmap::~NBitmap()
 		XDestroyImage(xi);
   if (clp)
 		XDestroyImage(clp);
+  #else
+  if ( hBmp ) {
+
+  }
+  if ( memDC_ ) {
+    DeleteDC( memDC_ );
+  }
   #endif
 }
 
@@ -88,6 +100,11 @@ int NBitmap::width( ) const
   #ifdef __unix__
   return (xi != 0) ? xi->width : 0;
   #else
+  if ( hBmp ) {
+    BITMAP bitmap;       
+    GetObject( hBmp, sizeof(BITMAP), (LPSTR)&bitmap);
+    return bitmap.bmWidth;
+  }  
   return 0;
   #endif
 }
@@ -97,6 +114,11 @@ int NBitmap::height( ) const
   #ifdef __unix__
   return (xi != 0) ? xi->height : 0;
   #else
+  if ( hBmp ) {
+    BITMAP bitmap;       
+    GetObject( hBmp, sizeof(BITMAP), (LPSTR)&bitmap);
+    return bitmap.bmHeight;
+  }  
   return 0;
   #endif
 }
@@ -147,7 +169,15 @@ NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(
 	} else {
 		clp = cloneXImage( rhs.X11ClpData() );
 	}
- #endif
+  #else
+  if ( rhs.hdata() ) {
+    memDC_ = CreateCompatibleDC( rhs.memDC() );
+    hBmp = CreateCompatibleBitmap( rhs.memDC(), rhs.width(), rhs.height() );
+    SelectObject( memDC_, hBmp );
+    BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), rhs.memDC(), 0, 0, SRCCOPY);
+  }  	
+  #endif
+  
 }
 
 
@@ -178,7 +208,13 @@ const NBitmap & NBitmap::operator =( const NBitmap & rhs )
 	} else {
 		clp = cloneXImage( rhs.X11ClpData() );
 	}
-
+  #else
+  if ( rhs.hdata() ) {
+    memDC_ = CreateCompatibleDC( rhs.memDC() );
+    hBmp = CreateCompatibleBitmap( rhs.memDC(), rhs.width(), rhs.height() );
+    SelectObject( memDC_, hBmp );
+    BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), rhs.memDC(), 0, 0, SRCCOPY);
+  }  	
   #endif	
   return *this;
 }
@@ -217,8 +253,9 @@ void NBitmap::createFromXpmData(const char** data)
   }
   #else
   
+
   // code from ngrs0.8 .. needs rewrite
-/*  const char* picInfo = data[0];  
+  const char* picInfo = data[0];  
   std::vector<int> breakList;
   int size = strlen(picInfo);
   
@@ -253,21 +290,46 @@ void NBitmap::createFromXpmData(const char** data)
   
   for (int i = 0; i< ncolors; i++) {
     const char* colorLine = data[i+1];
+
     char key[20];   strncpy(key,colorLine,ncpp); key[ncpp]='\0';
-    char value[20]; strncpy(value,colorLine+colorPos,6); value[6]='\0';    
-    char red[3];   sprintf(red,"%.2s\n",value);  
-    char green[3]; sprintf(green,"%.2s\n",value+2);
-    char blue[3];  sprintf(blue,"%.2s\n",value+4);    
-    int r = strtol( red, (char **)NULL, 16 );
-    int g = strtol( green, (char **)NULL, 16 );
-    int b = strtol( blue, (char **)NULL, 16 );
-    long int color = ((r<<16) | (g<<8) | b);
+    std::string value = std::string(colorLine).substr(4);//colorLine+colorPos;
+    long int color  = 0;
+    if ( value.find("None")  != std::string::npos ) color =  ((255<<16) | (255<<8) | 255); else
+    if ( value.find("black") != std::string::npos ) color =  0; else
+    {
+      std::string vstr = std::string(value).substr(1);  
+      char red[3];   sprintf(red,"%.2s\n",value.c_str());  
+      char green[3]; sprintf(green,"%.2s\n",value.c_str()+2);
+      char blue[3];  sprintf(blue,"%.2s\n",value.c_str()+4);    
+      int r = strtol( red, (char **)NULL, 16 );
+      int g = strtol( green, (char **)NULL, 16 );
+      int b = strtol( blue, (char **)NULL, 16 );
+      color = ((b<<16) | (g<<8) | r);
+    }
     colorTable[std::string(key)] = color;    
-  }*/
-  // end of ugly code
+  }
+  // end of ngrs0.8 code
   
-//  bmp = CreateBitmap( xwidth_, xheight_, 
+  HDC dc = GetDC( NULL );
+
+  memDC_ = CreateCompatibleDC( dc );
+  hBmp = CreateCompatibleBitmap( dc, xwidth_, xheight_ );
+  SelectObject( memDC_, hBmp );
   
+  
+  for (int y=0; y<height; y++) {  
+     const char* scanLine = data[1+ncolors+y];
+     for (int x=0; x<width; x++) {
+        long colorValue = 0;
+        char pixel[20]; memcpy(pixel,scanLine+x*ncpp,ncpp); pixel[ncpp]='\0';
+        std::map<std::string,long>::iterator itr;
+        if ( (itr = colorTable.find(std::string(pixel))) != colorTable.end()) colorValue = itr->second; else colorValue = 200;
+        int r; int b; int g;
+        r = colorValue & 0x0000FF; g = (colorValue & 0x00FF00)>>8; b = (colorValue & 0xFF0000)>>16;        
+        SetPixel( memDC_, x, y,  colorValue );//(b << 16) | (g << 8) | r );
+     }
+  }
+    
   #endif
 }
 
@@ -276,6 +338,15 @@ XImage * NBitmap::X11ClpData( ) const
 {
   return clp;
 }
+#else
+HBITMAP NBitmap::hdata() const {
+  return hBmp;       
+}        
+
+HDC NBitmap::memDC() const {
+  return memDC_;    
+}
+
 #endif
 
 #ifdef __unix__

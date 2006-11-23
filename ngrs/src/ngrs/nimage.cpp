@@ -73,8 +73,11 @@ void NImage::paint( NGraphics * g )
   if (pBitmap_ == 0) pBmp =  &bitmap24bpp_; else pBmp = pBitmap_;
 
   #ifdef __unix__
-  if (pBmp->X11data()!=0) {
-
+  if ( pBmp->X11data() )
+  #else
+  if ( pBmp->hdata() )
+  #endif
+  {
     switch (halign_) {
       case nAlCenter :
         xp =(int) d2i((spacingWidth() - pBmp->width()) / 2.0f);
@@ -88,10 +91,10 @@ void NImage::paint( NGraphics * g )
 
     g->putBitmap(xp,yp,*pBmp);
   }
-  #endif
+
 }
 
-void NImage::loadFromFile( std::string filename )
+void NImage::loadFromFile( const std::string & filename )
 {
   bitmap24bpp_ = NApp::filter.at(0)->loadFromFile(filename);
   setHeight(bitmap24bpp_.height());

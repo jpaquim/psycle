@@ -654,6 +654,11 @@ void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
             XPutImage(NApp::system().dpy(), win, gc_,bitmap.X11data(),
                 0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
   }
+  #else
+  
+  if ( bitmap.hdata() ) {
+    BitBlt( gcp, x+dx_, y+dy_, bitmap.width(), bitmap.height(), bitmap.memDC(), 0,0, SRCCOPY);
+  }  
   #endif
 }
 

@@ -38,7 +38,7 @@ public:
 
     virtual void paint(NGraphics* g);
 
-    void loadFromFile(std::string filename);
+    void loadFromFile( const std::string & filename);
     void createFromXpmData(const char** data);
 
     void setBitmap(const NBitmap & bitmap);

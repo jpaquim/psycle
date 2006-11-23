@@ -55,6 +55,9 @@ public:
     XImage* X11ClpData() const;    
 
     void setX11Data(XImage* ximage, XImage* clp_);
+    #else
+    HBITMAP hdata() const;
+    HDC memDC() const;
     #endif
 
     void loadFromFile(const std::string & filename);
@@ -78,7 +81,8 @@ private:
     XImage* xi;
     XImage* clp;
     #else
-    HBITMAP bmp;
+    HBITMAP hBmp;
+    HDC memDC_;
     #endif
 
 	void deleteBitmapData();
