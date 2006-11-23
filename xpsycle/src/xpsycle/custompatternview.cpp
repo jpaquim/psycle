@@ -968,6 +968,22 @@ namespace psycle {
 						repaintCursorPos( cursor() ); 
 					}
 				break;
+                                case cdefNavFirstTrack:
+                                {
+                                        PatCursor oldCursor = cursor();
+                                        cursor_.setTrack(0);
+                                        repaintCursorPos(oldCursor);
+                                        repaintCursorPos( cursor() ); 
+                                }
+                                break;
+                                case cdefNavLastTrack:
+                                {
+                                        PatCursor oldCursor = cursor();
+                                        cursor_.setTrack(trackNumber()-1);
+                                        repaintCursorPos(oldCursor);
+                                        repaintCursorPos( cursor() ); 
+                                }
+                                break;
 				case cdefColumnPrev: // todo ngrs nk code
 					if ( cursor().track() > 0 ) {
 						PatCursor oldCursor = cursor();
@@ -976,15 +992,12 @@ namespace psycle {
 						repaintCursorPos( cursor() ); 
 					}
 				break;
-                // NGM: why are these keys repeated in here and patternview.cpp?
 				case cdefNavLeft:
-                                        Global::log("nav left");
                                             moveCursor(-1,0);
                                             clearOldSelection();              
 				break;
 				case cdefNavRight:
                                 {
-                                        Global::log("nav right");
                                         moveCursor(1,0);
                                             clearOldSelection();              
                                 }

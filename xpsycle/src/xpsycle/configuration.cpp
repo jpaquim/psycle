@@ -608,6 +608,12 @@ void Configuration::onConfigTagParse(const std::string & tagName )
       if (id == "nav_up_16") {
         inputHandler.changeKeyCode(cdefNavPageUp,Key(mod,keyCode));
       } else
+      if (id == "nav_firsttrack") {
+        inputHandler.changeKeyCode(cdefNavFirstTrack,Key(mod,keyCode));
+      } else
+      if (id == "nav_lasttrack") {
+        inputHandler.changeKeyCode(cdefNavLastTrack,Key(mod,keyCode));
+      } else
       if (id == "next_column") {
         inputHandler.changeKeyCode(cdefColumnNext,Key(mod,keyCode));
       } else

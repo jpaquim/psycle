@@ -1639,6 +1639,12 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 			checkRightScroll( cursor() );
 			return;
 		break;
+                case cdefNavFirstTrack:
+			checkLeftScroll( cursor() );
+                break;
+                case cdefNavLastTrack:
+			checkRightScroll( cursor() );
+                break;
 		case cdefColumnPrev: // todo ngrs 
 			checkLeftScroll( cursor() );
                         return;
@@ -1900,8 +1906,7 @@ void PatternView::PatternDraw::checkLeftScroll( const PatCursor & cursor ) {
 void PatternView::PatternDraw::checkRightScroll( const PatCursor & cursor ) {
 	//check for scroll
 	if ( xOffByTrack(std::max( cursor.track()+1, 0)) - dx() > clientWidth() ) {
-    
-		pView->hBar->setPos( xEndByTrack(std::min( cursor.track()+1 , trackNumber())) - clientWidth() );
+		pView->hBar->setPos( xEndByTrack(std::min( cursor.track()+1 , trackNumber()-1)) - clientWidth() );
 	}
 }
 
