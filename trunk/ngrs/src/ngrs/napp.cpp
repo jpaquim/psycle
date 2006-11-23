@@ -48,6 +48,7 @@ XComposeStatus NApp::compose;
 Time NApp::lastBtnPressTime;
 #endif
 
+NWindow* NApp::modalWin_ = false;
 NWindow* NApp::lastOverWin_;
 NWindow* NApp::mainWin_;
 
@@ -96,6 +97,9 @@ NSystem & NApp::system( )
 
 void NApp::eventLoop( )
 {
+
+  modalWin_ = 0;
+     
   if (mainWin_!=0) {
        mainWin_->setVisible(true);
   }
@@ -238,16 +242,28 @@ void NApp::modalEventLoop(NWindow* modalWin )
      NApp::callRemovePipe();
   }
   #else
+
+  NWindow* oldModal = modalWin_;
+  
+  modalWin_ = modalWin;
+
+//  static HWND hwndOwner;
+//  hwndOwner = GetWindow( modalWin->win(), GW_OWNER);
+//  EnableWindow( hwndOwner, FALSE );          
   
   MSG Msg;
-  // The Message Loop
-  
+  // The Message Loop  
+
   while ( GetMessage( & Msg, NULL, 0,0) > 0 )
   {
     TranslateMessage(&Msg);
     DispatchMessage(&Msg);      
-    NApp::callRemovePipe();
-  }
+  }  
+
+//  EnableWindow( hwndOwner, TRUE );
+//  SetFocus( hwndOwner );
+
+  modalWin_ = oldModal;
   #endif
 
 }
@@ -264,11 +280,10 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
       std::cout << "not me" << std::endl;
     // not my windows
   } else {
+                               
     NWindow* window = itr->second;
     window->setExitLoop(0);
-//    if (window == modalWin || window->isChildOf(modalWin) ||
-//        event.type == Expose) {
-  
+
     WEvent event;
     
     event.hwnd   = hwnd;
@@ -276,7 +291,17 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     event.wParam = wParam; 
     event.lParam = lParam;
     
-    int erg = processEvent(window, & event);
+    int erg = 0;
+    
+    
+/*    if ( modalWin_ ) {
+      if (window == modalWin_ || window->isChildOf(modalWin_) ||
+        event.msg == WM_PAINT ) {
+        return processEvent(window, & event);
+      } else return 0;
+    } else*/
+    erg = processEvent(window, & event);
+        
     return erg;
   }
 

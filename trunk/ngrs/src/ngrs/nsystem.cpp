@@ -507,7 +507,7 @@ void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int
   }
   XSync(dpy(),false);
   #else
-  MoveWindow( win, left, top, width, height, true );
+  MoveWindow( win, left, top , width, height, true );
   #endif
 }
 
@@ -647,7 +647,7 @@ int NSystem::windowLeft( WinHandle win )
   #else
   RECT r;
   GetWindowRect( win, &r );
-  return r.left;
+  return r.left + GetSystemMetrics( SM_CXSIZEFRAME );
   #endif
 }
 
@@ -663,7 +663,7 @@ int NSystem::windowTop( WinHandle win )
   #else
   RECT r;
   GetWindowRect( win, &r );
-  return r.top;
+  return r.top + GetSystemMetrics( SM_CYSIZEFRAME ) + GetSystemMetrics( SM_CYCAPTION );
   #endif
 }
 
@@ -691,6 +691,8 @@ int NSystem::screenWidth( ) const
 {
   #ifdef __unix__
   return DisplayWidth(dpy(),screen());
+  #else
+  return GetSystemMetrics( SM_CXFULLSCREEN );
   #endif
 }
 
@@ -698,6 +700,8 @@ int NSystem::screenHeight( ) const
 {
   #ifdef __unix__
   return DisplayHeight(dpy(),screen());
+  #else
+  return GetSystemMetrics( SM_CYFULLSCREEN );
   #endif
 }
 

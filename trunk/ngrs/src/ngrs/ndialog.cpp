@@ -26,7 +26,6 @@ NDialog::NDialog()
    do_execute = false;
 }
 
-
 NDialog::~NDialog()
 {
 }
@@ -60,6 +59,3 @@ void NDialog::setVisible( bool on )
   }
   NWindow::setVisible(on);
 }
-
-
-

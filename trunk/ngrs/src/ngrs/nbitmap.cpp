@@ -79,7 +79,7 @@ void NBitmap::setDepth( int depth )
 int NBitmap::depth( ) const
 {
   #ifdef __unix__
-  return (xi != 0) ? xi->depth : 0;
+  return (xi != 0) ? xi->depth : 0;  
   #endif
 }
 
@@ -87,6 +87,8 @@ int NBitmap::width( ) const
 {
   #ifdef __unix__
   return (xi != 0) ? xi->width : 0;
+  #else
+  return 0;
   #endif
 }
 
@@ -94,6 +96,8 @@ int NBitmap::height( ) const
 {
   #ifdef __unix__
   return (xi != 0) ? xi->height : 0;
+  #else
+  return 0;
   #endif
 }
 
