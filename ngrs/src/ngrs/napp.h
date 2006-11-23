@@ -105,6 +105,7 @@ private:
    static XComposeStatus compose;
    static Time lastBtnPressTime;
    #endif
+   static NWindow* modalWin_;
 
    static std::map<WinHandle,NWindow*> winMap;
    static NWindow* mainWin_;

@@ -170,8 +170,8 @@ void NGraphics::destroyDblBufferHandles( )
 
 void NGraphics::setTranslation( long dx, long dy )
 {
-  dx_=dx;
-  dy_=dy;
+  dx_ = dx;
+  dy_ = dy;
 }
 
 void NGraphics::resize(int width, int height )
@@ -404,15 +404,25 @@ void NGraphics::fillPolygon( NPoint * pts, int n )
 {
   #ifdef __unix__
   XPoint pt[n];
+  #else
+  POINT pt[n];
+  #endif
 
   for (int i = 0; i< n; i++) {
     pt[i].x = pts[i].x() +  dx_;
     pt[i].y = pts[i].y() +  dy_;
   }
+  
+  #ifdef __unix__
   if (dblBuffer_)
      XFillPolygon(NApp::system().dpy(),doubleBufferPixmap_,gcp,pt,n,Complex,CoordModeOrigin);
   else
      XFillPolygon(NApp::system().dpy(),win,gc_,pt,n,Complex,CoordModeOrigin);
+  #else   
+  if (dblBuffer_)
+    Polygon( gcp, pt, n );
+  else
+    Polygon( gc_, pt, n );
   #endif
 }
 
@@ -437,6 +447,11 @@ void NGraphics::setClipping( const NRegion & region )
     XSetRegion(NApp::system().dpy(), gc_,region.sRegion());
     XftDrawSetClip(drawWin,region.sRegion());
   }
+  #else
+  if ( dblBuffer_ )
+    SelectClipRgn( gcp, region );
+  else  
+    SelectClipRgn( gc_, region );
   #endif
 }
 
@@ -476,14 +491,13 @@ int NGraphics::textWidth( const std::string & text ) const
     return info.xOff;
    }
    #else 
-   SIZE size;
-   GetTextExtentPoint32(
-    gcp,           // handle to DC
-    text.c_str(),  // text string
-    text.length(), // characters in string
-    &size          // string size
-   );
 
+   SIZE size;
+   if ( dblBuffer_ )
+     GetTextExtentPoint32( gcp, text.c_str(), text.length(), &size);
+   else  
+     GetTextExtentPoint32( gc_, text.c_str(), text.length(), &size);
+     
    return size.cx;
    #endif
 }
@@ -501,12 +515,12 @@ int NGraphics::textHeight()
  }
  #else
  TEXTMETRIC metrics;
- 
- GetTextMetrics(
-   gcp,   // handle to DC
-   &metrics   // text metrics
- );  
-    
+
+ if (dblBuffer_)
+   GetTextMetrics( gcp, &metrics );
+ else    
+   GetTextMetrics( gc_, &metrics );
+
  return metrics.tmHeight; 
  #endif
 }
@@ -524,10 +538,10 @@ int NGraphics::textAscent( )
   #else
   TEXTMETRIC metrics;
  
-  GetTextMetrics(
-   gcp,   // handle to DC
-   &metrics   // text metrics
-  );  
+  if (dblBuffer_)
+    GetTextMetrics( gcp, &metrics );
+  else    
+    GetTextMetrics( gc_, &metrics );
     
   return metrics.tmAscent; 
   #endif
@@ -543,11 +557,11 @@ int NGraphics::textDescent( )
  #else
  TEXTMETRIC metrics;
  
- GetTextMetrics(
-   gcp,      // handle to DC
-   &metrics  // text metrics
- );  
-    
+ if (dblBuffer_)
+   GetTextMetrics( gcp, &metrics );
+ else    
+   GetTextMetrics( gc_, &metrics );
+
  return metrics.tmDescent; 
  #endif
 }
@@ -567,9 +581,9 @@ void NGraphics::putStretchBitmap(int x, int y, const NBitmap & bitmap, int width
 						}
 
             // get the original data
-						unsigned char* originalData = (unsigned char*) bitmap.X11data();
+			unsigned char* originalData = (unsigned char*) bitmap.X11data();
             // calculate the xtretch / ystretch
-  					double xstretch = 1; // (double)bitmap.width() / width;
+			double xstretch = 1; // (double)bitmap.width() / width;
             double ystretch = 1; //(double)bitmap.height() / height;
 
             // we have 24 bpp resolution
@@ -727,7 +741,6 @@ void NGraphics::fillGradient(int x, int y, int width, int height, const NColor &
       setForeground(NColor((int) (r1 + i*dr),(int) (g1 + i*dg), (int) (b1 + i*db)));
       fillRect(x,y+i,width,1);
     }
-
 }
 
 
@@ -1116,7 +1129,6 @@ int NGraphics::textWidth( const NFntString & text ) const
 
 void NGraphics::drawText( int x, int y, const NFntString & text )
 {
-  #ifdef __unix__
   int pos = 0; 
   int w = 0;
    std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
@@ -1130,11 +1142,10 @@ void NGraphics::drawText( int x, int y, const NFntString & text )
      fntIt++;
    }
    drawText(x+w,y,text.textsubstr(pos));
-   #endif
 }
 
 
-int NGraphics::findWidthMax(long width, const std::string & data, bool wbreak) const
+int NGraphics::findWidthMax( long width, const std::string & data, bool wbreak ) const
 {
   int Low = 0; int High = data.length();  int Mid=High;
   while( Low <= High ) {

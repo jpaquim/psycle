@@ -85,6 +85,14 @@ void NWindow::setVisible( bool on )
          XMapWindow(NApp::system().dpy(),win_);
          checkGeometry();
          NApp::runModal(this);
+         #else
+/*         NApp::system().setModalMode( win() );
+         NApp::system().setWindowPosition(win(), userPos.left(),userPos.top(),userPos.width(),userPos.height());
+         NApp::system().setWindowMinimumSize(win(),minimumWidth(), minimumHeight());*/
+         ShowWindow( win(), 1 );
+         UpdateWindow( win() );
+//         checkGeometry();
+         NApp::runModal(this);
          #endif
       } else {
         #ifdef __unix__
@@ -164,7 +172,7 @@ int NWindow::width( ) const
   return attr.width;
   #else
   RECT r;
-  GetWindowRect( win_, &r );
+  GetClientRect( win_, &r );
   return ( r.right - r.left );
   #endif
 }
@@ -177,7 +185,7 @@ int NWindow::height( ) const
   return attr.height;
   #else
   RECT r;
-  GetWindowRect( win_, &r );
+  GetClientRect( win_, &r );
   return ( r.bottom - r.top );
   #endif
 }

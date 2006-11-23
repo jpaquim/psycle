@@ -46,7 +46,3 @@ extern "C" NObject* createPanel() {
 extern "C" void destroyPanel(NObject* p) {
     delete p;
 }
-
-
-
-
