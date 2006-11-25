@@ -151,7 +151,7 @@ void FrameMachine::initParameterGUI( )
     knobPanel->setLayout(gridLayout);
   pane()->add(knobPanel,nAlClient);
 
-  NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
+  NFont font("6x13",6,nMedium | nStraight | nAntiAlias);
     font.setTextColor(Global::pConfig()->machineGUITopColor);
   knobPanel->setFont(font);
 
@@ -199,7 +199,7 @@ Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), f
   c++;
   add( label = new NLabel());
   add( vLabel = new NLabel()); // the label that shows the value in %
-  NFont font = NFont("Suse sans",6,nMedium | nStraight | nAntiAlias);
+  NFont font = NFont("6x13",6,nMedium | nStraight | nAntiAlias);
   font.setTextColor(Global::pConfig()->machineGUIFontBottomColor);
   vLabel->setFont(font);
   tvalue =stringify(value_)+"%";
@@ -280,7 +280,7 @@ Header::Header( ) : Cell()
   label = new NLabel();
     label->setTransparent(false);
     label->setBackground(Global::pConfig()->machineGUITitleColor);
-    NFont font = NFont("Suse sans",6,nMedium | nStraight | nAntiAlias);
+    NFont font = NFont("6x13",6,nMedium | nStraight | nAntiAlias);
     font.setTextColor(Global::pConfig()->machineGUITitleFontColor);
     label->setFont(font);
   add(label);
