@@ -35,6 +35,7 @@
 #include <ngrs/ngroupbox.h>
 #include <ngrs/nitem.h>
 #include <ngrs/ntreenode.h>
+#include <ngrs/npopupmenu.h>
 
 class NObjectInspector;
 
@@ -151,6 +152,7 @@ private:
 
     void onNewCategory( NButtonEvent * ev );
     void onNewPattern( NButtonEvent* ev );
+    void onClonePattern( NButtonEvent* ev );
     void onDeletePattern( NButtonEvent* ev );
 
     void onItemSelected(NItemEvent* ev);

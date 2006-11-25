@@ -136,8 +136,6 @@ void PatternItem::setText( const std::string & text )
   NItem::setText(text);
 }
 
-
-
 SequencerBar::SequencerBar()
   : NPanel()
 {
@@ -193,8 +191,9 @@ void SequencerBar::init( )
       img->setSharedBitmap(&icons.delPattern());
       img->setPreferredSize(25,25);
       NButton* delPatBtn = new NButton(img);
-        delPatBtn->setHint("Delete Category");
+        delPatBtn->setHint("Delete Pattern");
       patToolBar->add( delPatBtn )->clicked.connect(this,&SequencerBar::onDeletePattern);
+      patToolBar->add( new NButton("cln"))->clicked.connect(this,&SequencerBar::onClonePattern);
 
 
       patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
@@ -347,30 +346,51 @@ void SequencerBar::onNewPattern( NButtonEvent * ev )
   }
 }
 
-void SequencerBar::onDeletePattern( NButtonEvent* ev ) {
+void SequencerBar::onClonePattern( NButtonEvent * ev )
+{
   NCustomItem* item = patternBox_->selectedItem();
   std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
 
   if(itr!=patternMap.end())
   {
+     NTreeNode* node = patternBox_->selectedTreeNode();
      SinglePattern* pattern = itr->second;
-     patternMap.erase(itr);
-        patternBox_->removeItem( item );
+     SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, pattern->name()+"clone" );
+     PatternItem* item = new PatternItem( clonedPat, clonedPat->name() );
+     item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
+     node->addEntry(item);
+     patternMap[item] = clonedPat;
+     patternBox_->setSelectedItem( node, item );
      patternBox_->resize();
      patternBox_->repaint();
-
-     seqGui->removePattern(pattern);
-     seqGui->repaint();
-
-     if (patView) {
-       if (patView->pattern() == pattern) {
-         patView->setPattern(0);
-         patView->repaint();
-       }
-     }
-
-     seqGui->patternSequence()->removeSinglePattern(pattern);
   }
+
+}
+
+void SequencerBar::onDeletePattern( NButtonEvent* ev ) {
+        NCustomItem* item = patternBox_->selectedItem();
+        std::map<NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+
+        if(itr!=patternMap.end())
+        {
+           SinglePattern* pattern = itr->second;
+           patternMap.erase(itr);
+              patternBox_->removeItem( item );
+           patternBox_->resize();
+           patternBox_->repaint();
+
+           seqGui->removePattern(pattern);
+           seqGui->repaint();
+
+           if (patView) {
+             if (patView->pattern() == pattern) {
+               patView->setPattern(0);
+               patView->repaint();
+             }
+           }
+
+           seqGui->patternSequence()->removeSinglePattern(pattern);
+        }
 }
 
 void SequencerBar::selectNextPattern() {
