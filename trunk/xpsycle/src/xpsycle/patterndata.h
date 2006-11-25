@@ -42,6 +42,7 @@ namespace psycle
 			const std::string & name() const;
 
 			SinglePattern* createNewPattern(const std::string & name);
+                        SinglePattern* clonePattern( const SinglePattern & src, const std::string & name);
 			bool removePattern(SinglePattern* pattern);
 
 			void setColor(long color);
