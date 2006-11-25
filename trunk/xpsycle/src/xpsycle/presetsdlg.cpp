@@ -63,6 +63,7 @@ bool Preset::loadFromFile( RiffFile* f )
       f->Read(temp);
       data_.push_back(temp);
     }
+    return 1;
 }
 
 const std::string & Preset::name( ) const
