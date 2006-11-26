@@ -497,10 +497,8 @@ void NWindow::pack( )
 		int windowBorderWidth = 2;
 		int windowBorderHeight = 2;
 
-    int pW = std::max( pane()->layout()->preferredWidth(pane()) +
-                       pane()->spacing().left() + pane()->spacing().right() + windowBorderWidth ,10);
-    int pH = std::max( pane()->layout()->preferredHeight(pane()) +
-                       pane()->spacing().top() + pane()->spacing().bottom() + windowBorderHeight
+    int pW = std::max( pane()->preferredWidth() + windowBorderWidth ,10);
+    int pH = std::max( pane()->preferredHeight() + windowBorderHeight
                        ,10);
      setPosition(left(),top(),pW,pH);
      setMinimumWidth(pW);
