@@ -116,14 +116,16 @@ private:
 	void onLADSPAItemSelected(NItemEvent* ev);	
 
   void onOkBtn(NButtonEvent* sender);
+  void onItemDblClick(NButtonEvent* sender);
+  void createNewMachine();
   void onCancelBtn(NButtonEvent* sender);
 
 	std::map< NCustomItem*, PluginFinderKey > pluginIdentify_;
 
 	void setPlugin( NCustomItem* item );
 
-  void onEffectTabChange( NButtonEvent* ev );
   void onGeneratorTabChange( NButtonEvent* ev );
+  void onEffectTabChange( NButtonEvent* ev );
   void onLADSPATabChange( NButtonEvent* ev );
   void onInternalTabChange( NButtonEvent* ev );
 
