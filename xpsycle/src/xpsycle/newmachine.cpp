@@ -101,6 +101,7 @@ NewMachine::NewMachine( )
 							PluginInfo info = it->second;
 							if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_GENERATOR ) {
 								NItem* item = new NItem( info.name() );
+                                                                item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
 								item->setIntValue( key.index() );
 								generatorfBox_->add( item );
 								pluginIdentify_[item] = key;
@@ -119,6 +120,7 @@ NewMachine::NewMachine( )
         PluginInfo info = it->second;
         if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_FX ) {
          NItem* item = new NItem( info.name() );
+         item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
          effectfBox_->add( item );
          pluginIdentify_[item] = key;
         }					
@@ -126,10 +128,12 @@ NewMachine::NewMachine( )
     effectPage->add( effectfBox_ , nAlClient);
 
 
-    tabBook_->addPage(effectPage,"Effects");
     tabBook_->addPage(generatorPage,"Generators");
+    tabBook_->addPage(effectPage,"Effects");
     NListBox* internalPage_ = new NListBox();
-        internalPage_->add(new NItem("Sampler"));
+    NItem* item = new NItem("Sampler");
+    item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
+        internalPage_->add(item);
         internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
 	  
@@ -144,7 +148,8 @@ NewMachine::NewMachine( )
 					PluginInfo info = it->second;
 					if ( info.type() == MACH_LADSPA ) {
 						NItem* item = new NItem( info.name() );
-						item->setIntValue( key.index() );
+                                                item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
+					 	item->setIntValue( key.index() );
 						ladspaBox_->add( item );
 						pluginIdentify_[item] = key;
 					}					
@@ -164,7 +169,7 @@ NewMachine::NewMachine( )
     tab->click.connect(this,&NewMachine::onLADSPATabChange);
 
 
-  tabBook_->setActivePage(1);
+  tabBook_->setActivePage(0); // generator page.
 }
 
 
@@ -180,6 +185,16 @@ int NewMachine::onClose( )
 }
 
 void NewMachine::onOkBtn( NButtonEvent * sender )
+{
+  createNewMachine();
+}
+
+void NewMachine::onItemDblClick( NButtonEvent * sender )
+{
+  createNewMachine();
+}
+
+void NewMachine::createNewMachine()
 {
   do_Execute = true;
   setVisible(false);
