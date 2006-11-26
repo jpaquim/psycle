@@ -1133,7 +1133,7 @@ void MainWindow::onNewMachine( NButtonEvent * ev )
    if (newMachineDlg_->execute()) {
       if (newMachineDlg_->outBus()) {
           // Generator selected
-          int x = 10; int y = 10;
+          int x = ev->x(); int y = ev->y(); // x&y tell where to place the new machine--get from mouse.
           int fb = selectedChildView_->song()->GetFreeBus();
           if (newMachineDlg_->selectedType() == MACH_SAMPLER) {
             selectedChildView_->song()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
