@@ -524,7 +524,7 @@ Preset FrameMachine::knobsPreset( )
 
 void FrameMachine::setVisible( bool on ) {
   if ( on ) {
-    setPosition(20,20, knobPanel->preferredWidth(), knobPanel->preferredHeight() ); );
+    setPosition(20,20, knobPanel->preferredWidth(), knobPanel->preferredHeight() );
   }    
   std::cout << knobPanel->preferredWidth() << std::endl;
   NWindow::setVisible( on );
