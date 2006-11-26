@@ -183,6 +183,16 @@ void NApp::eventLoop( )
   {
     TranslateMessage(&Msg);
     DispatchMessage(&Msg);      
+    
+    // select timeout
+    if (repaintWin_.size()!=0) {
+      for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
+        NWindow* win = *it;
+        win->graphics()->resize(win->width(),win->height());
+        win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
+      }
+      repaintWin_.clear();
+    }
   }
   #endif
 }
@@ -258,6 +268,16 @@ void NApp::modalEventLoop(NWindow* modalWin )
   {
     TranslateMessage(&Msg);
     DispatchMessage(&Msg);      
+    
+    // select timeout
+    if (repaintWin_.size()!=0) {
+      for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
+        NWindow* win = *it;
+        win->graphics()->resize(win->width(),win->height());
+        win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
+      }
+      repaintWin_.clear();
+    }
   }  
 
 //  EnableWindow( hwndOwner, TRUE );
@@ -390,9 +410,14 @@ int NApp::processEvent( NWindow * win, WEvent * event )
   switch (event->msg) {
     case WM_PAINT:
       hdc = BeginPaint( win->win(), &ps);     
-          win->graphics()->resize(win->width(),win->height());
-          win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));    
+        if (win->doubleBuffered()) win->graphics()->swap(NRect(0,0,win->width(),win->height())); else
+        doRepaint(win);
+//          win->graphics()->resize(win->width(),win->height());
+//          win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));    
       EndPaint( win->win(), &ps);
+    break;
+    case WM_SIZE:
+      doRepaint(win);         
     break;
     case WM_CLOSE:
       exitloop = win->onClose();

@@ -237,11 +237,14 @@ std::string NXmlParser::getAttribValue( const std::string & name ) const
            return "";
        }
       return erg;
+  #else
+  return "";    
+  #endif      
 }
 
 int NXmlParser::parseString( const std::string & text )
 {
-
+  #ifdef __unix__
   try {
     XMLPlatformUtils::Initialize();
   }
@@ -307,5 +310,7 @@ int NXmlParser::parseString( const std::string & text )
         return 4;
    else
         return 0;
+  #else
+    return 0;        
   #endif
 }

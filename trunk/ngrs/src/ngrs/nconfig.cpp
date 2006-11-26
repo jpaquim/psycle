@@ -428,6 +428,10 @@ NSkin NConfig::skin( const std::string & identifier )
     skin.setBackground(NColor(240,240,240));
     skin.useParentBackground(false);
     skin.setTransparent(false);
+    NFrameBorder fr;
+    fr.setSpacing(NSize(2,2,2,2));
+    fr.setColor( NColor(210,210,210) );
+    skin.setBorder(fr);
   } else
   if (identifier == "sbar_pane") {
     skin.setBackground(NColor(230,230,230));

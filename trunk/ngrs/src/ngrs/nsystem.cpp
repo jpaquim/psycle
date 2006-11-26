@@ -79,8 +79,6 @@ NSystem::~NSystem()
   #endif
 }
 
-// here you will find all public methods
-
 #ifdef __unix__
 Display* NSystem::dpy( ) const
 {
@@ -202,7 +200,7 @@ WinHandle NSystem::registerWindow(WinHandle parent )
 
     // Step2 : Creating the Window
     win_ = CreateWindowEx(
-         WS_EX_CLIENTEDGE,
+         0,
          "myWindowClass",
          "title of window",
          WS_OVERLAPPEDWINDOW,
