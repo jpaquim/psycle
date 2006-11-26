@@ -32,6 +32,8 @@
 #include <ngrs/nslider.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/ngridlayout.h>
+#include <ngrs/ntablelayout.h>
+#include <ngrs/nalignconstraint.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -88,8 +90,8 @@ int FrameMachine::onClose( )
 
 void FrameMachine::init( )
 {
-  NMenuBar* bar = new NMenuBar();
-    pane()->add(bar);
+//  NMenuBar* bar = new NMenuBar();
+//    pane()->add(bar);
 /*  NMenu* aboutMenu = new NMenu("About",'a',"Help,|,About this machine");
     aboutMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
   bar->add(aboutMenu);
@@ -128,6 +130,7 @@ void FrameMachine::init( )
     prsPanel = new NTogglePanel();
       NFlowLayout fl(nAlLeft,5,5);
         fl.setLineBreak(false);
+      prs->setPreferredSize( 200, 20 );
       prsPanel->setLayout(fl);
     prs->add(prsPanel, nAlClient);
   pane()->add(prs, nAlBottom);
@@ -145,16 +148,19 @@ void FrameMachine::initParameterGUI( )
   int rows = numParameters/cols;
 
   knobPanel = new NPanel();
-    NGridLayout gridLayout;
-      gridLayout.setRows(rows);
-      gridLayout.setColumns(cols);
-    knobPanel->setLayout(gridLayout);
-  pane()->add(knobPanel,nAlClient);
+    NTableLayout tableLayout;
+      tableLayout.setRows( rows );
+      tableLayout.setColumns( cols );
+    knobPanel->setLayout( tableLayout );
+  pane()->add( knobPanel, nAlClient );
 
   NFont font("6x13",6,nMedium | nStraight | nAntiAlias);
     font.setTextColor(Global::pConfig()->machineGUITopColor);
   knobPanel->setFont(font);
 
+  int x = 0;
+  int y = 0;
+  
   for (int c=0; c<numParameters; c++) {
       int min_v,max_v,val_v;
       int newC = format(c,cols,rows);
@@ -165,7 +171,7 @@ void FrameMachine::initParameterGUI( )
         char parName[64];
         pMachine_->GetParamName(newC,parName);
         cell->setText(parName);
-        knobPanel->add(cell);
+        knobPanel->add( cell, NAlignConstraint( nAlLeft, x, y ), true );
       } else {
         Knob* cell = new Knob(newC);
         cell->valueChanged.connect(this,&FrameMachine::onKnobValueChange);
@@ -181,11 +187,15 @@ void FrameMachine::initParameterGUI( )
         cell->setRange(min_v,max_v);
 		  std::string valuestring(buffer);
         cell->setValueAsText(valuestring);
-        knobPanel->add(cell);
+        knobPanel->add( cell, NAlignConstraint( nAlLeft, x, y ), true );
+      }
+      x++;
+      if ( !(x % cols) ) {
+        x = 0;
+        y++;
       }
   }
   updateValues();
-  pack();
 }
 
 // Knob class
@@ -512,6 +522,13 @@ Preset FrameMachine::knobsPreset( )
   return prs;
 }
 
+void FrameMachine::setVisible( bool on ) {
+  if ( on ) {
+    setPosition(20,20, knobPanel->preferredWidth(), knobPanel->preferredHeight() ); );
+  }    
+  std::cout << knobPanel->preferredWidth() << std::endl;
+  NWindow::setVisible( on );
+}
 
 
 }

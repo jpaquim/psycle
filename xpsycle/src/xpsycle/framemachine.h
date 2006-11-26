@@ -148,6 +148,7 @@ public:
     ~FrameMachine();
 
     virtual int onClose();
+    virtual void setVisible( bool on );
 
     Machine* pMac();
     void updateValues();
