@@ -469,11 +469,13 @@ void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int
 
   if (width!=attrib.width || height!=attrib.height) {
     XSizeHints *size_hints = XAllocSizeHints();
-    size_hints->flags = PPosition ;
+    size_hints->flags = PPosition | PBaseSize;
     size_hints->x=left;
     size_hints->y=top;
     size_hints->min_width = 10;
     size_hints->min_height = 10;
+    size_hints->base_width = width;
+    size_hints->base_height = height;
     XSetNormalHints(dpy(),win,size_hints);
     XFree(size_hints);
 
@@ -486,12 +488,14 @@ void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int
     XConfigureWindow(dpy(),win,value,&wc);
   } else {
 
-		XSizeHints *size_hints = XAllocSizeHints();
-    size_hints->flags = PPosition ;
+    XSizeHints *size_hints = XAllocSizeHints();
+    size_hints->flags = PPosition | PBaseSize;
     size_hints->x=left;
     size_hints->y=top;
     size_hints->min_width = 10;
     size_hints->min_height = 10;
+    size_hints->base_width = width;
+    size_hints->base_height = height;
     XSetNormalHints(dpy(),win,size_hints);
     XFree(size_hints);
 

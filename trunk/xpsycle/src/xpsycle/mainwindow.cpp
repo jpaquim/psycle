@@ -1386,6 +1386,7 @@ void MainWindow::onSequencerEntryClick( SequencerItem * item )
 
 void MainWindow::onKeyPress( const NKeyEvent & event )
 {
+  std::cout << event.shift() << std::endl;
   if ( selectedChildView_ ) {
                 // Find out which command the keypress correlates to. 
                 std::string mod = "none";
