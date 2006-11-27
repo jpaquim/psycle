@@ -21,19 +21,34 @@
 #define MACPROP_H
 
 #include <ngrs/nwindow.h>
+#include <ngrs/nedit.h>
+#include "machinegui.h"
 
 /**
 @author Stefan
 */
+namespace psycle {
+namespace host {
+
 class MacProp : public NWindow
 {
 public:
-    MacProp();
+    MacProp(MachineGUI* mGUI);
 
     ~MacProp();
 
     virtual int onClose();
+    virtual void setVisible(bool on);
+
+private:
+
+    MachineGUI* pMGUI_;
+    NEdit* nameEdit_;
+
+    void init();
+    void onOKBtn(NButtonEvent *ev);
 
 };
+}}
 
 #endif
