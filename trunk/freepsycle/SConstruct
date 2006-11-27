@@ -4,6 +4,10 @@
 # copyright 2006 johan boule <bohan@jabber.org>
 # copyright 2006 psycledelics http://psycle.pastnotecut.org
 
+# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+import sys, os, os.path
+sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+
 # project
 
 from packageneric.generic.scons.project import project

@@ -1,0 +1,176 @@
+#! /usr/bin/env scons
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006 johan boule <bohan@jabber.org>
+# copyright 2006 psycledelics http://psycle.pastnotecut.org
+
+# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+import sys, os, os.path
+sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+
+# project
+
+from packageneric.generic.scons.project import project
+project = project(name = 'xpsycle')
+
+# authors/maintainers/uploaders
+
+from packageneric.generic.scons.person import person
+prodos = person('Stefan NattKemper', 'natti__@user.sourceforge.net')
+bohan = person('Johan Boule', 'bohan.packageneric@retropaganda.info')
+
+# source package
+
+from packageneric.generic.scons.source_package import source_package
+from packageneric.generic.scons.version import version
+source_package = source_package(project,
+	name = 'xpsycle',
+	version = version(0, 0),
+	description = 'ngrs graphic toolkit library',
+	long_description = """\
+psycle is a modular music creation studio ...
+"""
+)
+
+# external packages
+
+from packageneric.generic.scons.check.external_package import external_package as external_package_check
+from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
+
+import os.path
+ngrs = os.path.join('..', 'ngrs', 'SConstruct') # todo SConscript
+if os.path.exists(ngrs): ngrs = SConscript(ngrs).local_package()
+else:
+	ngrs = external_package_check(project, name = 'ngrs',
+		dependencies = [
+			pkg_config_check(project, name = 'ngrs-0 >= 0')
+		],
+		distribution_packages = {'debian': 'lib-ngrs-0-dev (>= 0)'},
+		url = 'http://psycle.sourceforge.net'
+	)
+
+netaudio = external_package_check(project, name = 'network audio system',
+	dependencies = [
+		cxx_build_check(project, name = 'netaudio', libraries = ['audio'], source_text = \
+			"""\
+				#include <audio/audiolib.h>
+				void netaudio()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
+	],
+	distribution_packages = {'debian': 'libaudio-dev (>= 0)'},
+	url = 'http://google.ch "network audio system" nas'
+)
+
+esound = external_package_check(project, name = 'esound',
+	dependencies = [
+		pkg_config_check(project, name = 'esound >= 0')
+	],
+	distribution_packages = {'debian': 'libesd0-dev (>= 0)'},
+	url = 'http://google.ch esound' # todo check the url
+)
+
+jack = external_package_check(project, name = 'jack',
+	dependencies = [
+		pkg_config_check(project, name = 'jack >= 0')
+	],
+	distribution_packages = {'debian': 'libjack-dev (>= 0)'},
+	url = 'http://jackaudio.net' # todo check this url
+)
+
+alsa = external_package_check(project, name = 'alsa',
+	dependencies = [
+		pkg_config_check(project, name = 'alsa >= 0')
+	],
+	distribution_packages = {'debian': 'libasound-dev (>= 0)'},
+	url = 'http://alsa.org' # todo check this url
+)
+
+microsoft_direct_sound = external_package_check(project, name = 'microsoft direct sound',
+	dependencies = [
+		cxx_build_check(project, name = 'microsoft direct sound', libraries = ['dsound'], source_text = \
+			"""\
+				#include <dsound.h>
+				void microsoft_direct_sound()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
+	],
+	distribution_packages = {'microsoft': 'direct sound'},
+	url = 'http://msdn.microsoft.com'
+)
+
+# modules
+
+from packageneric.generic.scons.module import module
+class xpsycle_module(module):
+	def __init__(self):
+		module.__init__(self, source_package,
+			name = 'xpsycle-' + str(source_package.version().major()),
+			version = source_package.version(),
+			description = source_package.description(),
+			dependencies = [ngrs],
+			target_type = module.target_types.program
+		)
+		self.dynamic_dependencies()
+		
+	def dynamic_dependencies(self):
+		if False and netaudio.result(): self.add_dependencies([netaudio]) # todo remove the 'False and' when netaudio suport is finished
+		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_NETAUDIO': 1})
+		
+		if esound.result(): self.add_dependencies([esound])
+		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_ESOUND': 1})
+
+		if jack.result(): self.add_dependencies([jack])
+		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_JACK': 1})
+		
+		if alsa.result(): self.add_dependencies([alsa])
+		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_ALSA': 1})
+		
+		if microsoft_direct_sound.result(): self.add_dependencies([microsoft_direct_sound])
+		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_MICROSOFT_DIRECT_SOUND': 1})
+
+xpsycle_module = xpsycle_module()
+
+from packageneric.generic.scons.find import find
+xpsycle_module.add_sources(find(project, 'src', 'xpsycle', '*.cpp'))
+xpsycle_module.add_headers(find(project, 'src', 'xpsycle', '*.hpp'))
+xpsycle_module.add_headers(find(project, 'src', 'xpsycle', '*.h'))
+
+for context in xpsycle_module.contexes().build(), xpsycle_module.contexes().client().uninstalled(): context.compilers().cxx().paths().add(['src'])
+
+if False:
+	# debian
+
+	from packageneric.generic.scons.debian_package import debian_package
+
+	xpsycle_runtime = debian_package(project,
+		name = 'xpsycle-' + str(source_package.version().major()),
+		section = 'audio',
+		description = xpsycle_module.description(),
+		long_description = 'This package contains the runtime program.'
+	)
+	#ngrs_runtime.add_files(ngrs_package.binaries())
+
+	xpsycle_doc = debian_package(project,
+		name = xpsycle_runtime.name() + '-doc',
+		section = 'doc',
+		architecture = 'all',
+		description = xpsycle_module.description(),
+		long_description = 'This package contains the documentation.'
+	)
+
+	from packageneric.generic.scons.debian import debian
+	debian = debian(source_package,
+		maintainer = prodos,
+		uploaders = [prodos, bohan],
+		binary_packages = [xpsycle_runtime, xpsycle_doc],
+	)
+
+project(xpsycle_module)
