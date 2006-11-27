@@ -4,6 +4,10 @@
 # copyright 2006 johan boule <bohan@jabber.org>
 # copyright 2006 psycledelics http://psycle.pastnotecut.org
 
+# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+import sys, os, os.path
+sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+
 # project
 
 from packageneric.generic.scons.project import project
@@ -31,9 +35,6 @@ Those abstractions of platforms specificities can be categorized into:
  - widespread operating system features
  - widespread CPU features"""
 )
-
-import sys
-sys.exit(0) # work in progress
 
 # external packages
 
@@ -75,68 +76,71 @@ glibmm = external_package_check(project, name = 'glibmm',
 # modules
 
 from packageneric.generic.scons.module import module
-universalis = module(source_package,
+universalis_module = module(source_package,
 	name = 'universalis-' + str(source_package.version().major()),
 	version = source_package.version(),
 	description = source_package.description(),
-	depends = [diversalis, glibmm, boost]
+	dependencies = [diversalis, glibmm, boost]
 )
 
 from packageneric.generic.scons.find import find
-universalis.add_sources(find(packageneric, 'src', 'universalis', '*.cpp'))
-universalis.add_headers(find(packageneric, 'src', 'universalis', '*.hpp'))
+universalis_module.add_sources(find(project, 'src', 'universalis', '*.cpp'))
+universalis_module.add_headers(find(project, 'src', 'universalis', '*.hpp'))
 
-universalis.add_include_path('src', build = True, uninstalled = True)
+for context in universalis_module.contexes().build(), universalis_module.contexes().client().uninstalled(): context.compilers().cxx().paths().add(['src'])
 
 # pkg-config packages
 
 from packageneric.generic.scons.pkg_config_package import pkg_config_package
 universalis_package = pkg_config_package(project,
-	name = 'universalis-' + str(universalis.version().major()),
-	version = universalis.version(),
-	description = universalis.description(),
-	modules = [universalis]
+	name = 'universalis-' + str(universalis_module.version().major()),
+	version = universalis_module.version(),
+	description = universalis_module.description(),
+	modules = [universalis_module]
 )
 
-# debian
+if False:
+	# debian
 
-from packageneric.generic.scons.debian_package import debian_package
+	from packageneric.generic.scons.debian_package import debian_package
 
-universalis_runtime = debian_package(project,
-	name = 'lib-universalis-' + str(source_package.version().major()),
-	section = 'libs',
-	description = universalis_package.description(),
-	long_description = 'This package contains the runtime library.'
-)
-#universalis_runtime.add_files(universalis_package.binaries())
+	universalis_runtime = debian_package(project,
+		name = 'lib-universalis-' + str(source_package.version().major()),
+		section = 'libs',
+		description = universalis_package.description(),
+		long_description = 'This package contains the runtime library.'
+	)
+	#universalis_runtime.add_files(universalis_package.binaries())
 
-class universalis_dev(debian_package):
-	def __init__(self):
-		debian_package.__init__(self, project,
-			name = universalis_runtime.name() + '-dev',
-			section = 'libdevel',
-			description = universalis_package.description(),
-			long_description = 'This package contains the development files.',
-		)
-	def dynamirc_dependencies(self):
-		self.add_depend(universalis_runtime)
-		self.add_build_depends(universalis_package.build_depends())
-universalis_dev = universalis_dev()
-#universalis_dev.add_files(universalis_package.headers())
-#universalis_dev.add_files(universalis_package.pkg_config())
+	class universalis_dev(debian_package):
+		def __init__(self):
+			debian_package.__init__(self, project,
+				name = universalis_runtime.name() + '-dev',
+				section = 'libdevel',
+				description = universalis_package.description(),
+				long_description = 'This package contains the development files.',
+			)
+		def dynamirc_dependencies(self):
+			self.add_depend(universalis_runtime)
+			self.add_build_depends(universalis_package.build_depends())
+	universalis_dev = universalis_dev()
+	#universalis_dev.add_files(universalis_package.headers())
+	#universalis_dev.add_files(universalis_package.pkg_config())
 
-universalis_doc = debian_package(project,
-	name = universalis_runtime.name() + '-doc',
-	section = 'doc',
-	architecture = 'all',
-	description = universalis_package.description(),
-	long_description = 'This package contains the documentation.'
-)
+	universalis_doc = debian_package(project,
+		name = universalis_runtime.name() + '-doc',
+		section = 'doc',
+		architecture = 'all',
+		description = universalis_package.description(),
+		long_description = 'This package contains the documentation.'
+	)
 
-from packageneric.generic.scons.debian import debian
-debian = debian(source_package,
-	maintainer = bohan,
-	binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
-)
+	from packageneric.generic.scons.debian import debian
+	debian = debian(source_package,
+		maintainer = bohan,
+		binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
+	)
 
 project(universalis_package)
+
+Return('universalis_package')
