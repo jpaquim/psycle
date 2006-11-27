@@ -371,11 +371,14 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     case KeyPress:
             {
              char keys[32];
-	         XQueryKeymap( NApp::system().dpy(), keys );
+             XQueryKeymap( NApp::system().dpy(), keys );
 	         
-	         /*long keycode= XK_Shift
-	 		 long keydown;
-					keydown = (keys[keycode/8] & 1<<(keycode%8) );*/
+             long keycode= XK_Shift_L;                 
+             int sState = nsNone;               
+             if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
+             keycode = XK_Control_L;
+             if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;
+                 
                                     
               XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
@@ -385,23 +388,28 @@ int NApp::processEvent( NWindow * win, WEvent * event )
                         acellNotify->onKeyAcceleratorNotify(NKeyAccelerator(NApp::system().keyState(),mykeysym));
                     }
                   }
-                  win->onKeyPress(NKeyEvent(0,buffer,mykeysym));
-              } else win->onKeyPress(NKeyEvent(0,buffer,mykeysym));
+                  win->onKeyPress(NKeyEvent(0,buffer,mykeysym,sState));
+              } else win->onKeyPress(NKeyEvent(0,buffer,mykeysym,sState));
             }
           break;
         case KeyRelease:
             {
               char keys[32];
-              XQueryKeymap( NApp::system().dpy(), keys);                        
-                        
-                        
+              XQueryKeymap( NApp::system().dpy(), keys);            
+              
+             long keycode= XK_Shift_L;                 
+             int sState = nsNone;               
+             if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
+             keycode = XK_Control_L;
+             if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;            
+                                                
               XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
 
                   }
-                  win->onKeyRelease(NKeyEvent(0,buffer,mykeysym));
-              } else win->onKeyRelease(NKeyEvent(0,buffer,mykeysym));
+                  win->onKeyRelease(NKeyEvent(0,buffer,mykeysym, sState));
+              } else win->onKeyRelease(NKeyEvent(0,buffer,mykeysym, sState));
             }
           break;
 
