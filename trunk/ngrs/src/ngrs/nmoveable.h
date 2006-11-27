@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
- *   natti@linux   *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper   *
+ *   Germany  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,22 +20,34 @@
 #ifndef NMOVEABLE_H
 #define NMOVEABLE_H
 
-enum NMoveType{ nMvHorizontal = 1, nMvVertical = 2, nMvParentLimit = 4, nMvTopLimit = 128, nMvLeftLimit = 256, nMvRectPicker = 8, nMvPolygonPicker = 16, nMvBorder=32, nMvNoneRepaint = 64, nMvLeftBorder = 256, nMvRightBorder = 512};
-
 /**
 @author Stefan Nattkemper
 */
-class NMoveable{
+
+enum NMoveType{ nMvHorizontal    = 1, 
+                nMvVertical      = 2, 
+                nMvParentLimit   = 4, 
+                nMvRectPicker    = 8, 
+                nMvPolygonPicker = 16, 
+                nMvBorder        = 32, 
+                nMvNoneRepaint   = 64, 
+                nMvTopLimit      = 128, 
+                nMvLeftLimit     = 256, 
+                nMvLeftBorder    = 512, 
+                nMvRightBorder   = 1024, 
+                nMvDrag          = 2048 };
+
+class NMoveable {
 public:
     NMoveable();
-    NMoveable(int style);
+    NMoveable( int style );
 
     ~NMoveable();
 
     int style() const;
-    void setStyle(int style);
-    void addStyle(int style);
-    void removeStyle(int style);
+    void setStyle( int style );
+    void addStyle( int style );
+    void removeStyle( int style );
 
 private:
 
