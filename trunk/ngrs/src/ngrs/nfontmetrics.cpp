@@ -39,7 +39,7 @@ NFontMetrics::~NFontMetrics()
 
 int NFontMetrics::textWidth( const string & text )
 {
-    #ifdef __unix__
+   #ifdef __unix__
    const char* s = text.c_str();
    if (!fntStruct.antialias) {
      return XTextWidth(fntStruct.xFnt,s,strlen(s));
@@ -55,7 +55,6 @@ int NFontMetrics::textWidth( const string & text )
    HDC dc = GetDC( NULL );
    SelectObject( dc, fntStruct.hFnt );  
 
-   
    SIZE size;
    GetTextExtentPoint32(
     dc,            // handle to DC
@@ -64,14 +63,10 @@ int NFontMetrics::textWidth( const string & text )
     &size          // string size
    );
 
-//   ostringstream str;
-   
-//   str << size.cx;
-//   std::string sz = str.str();
-
-//   MessageBox(NULL, sz.c_str(), TEXT(""), MB_OK);
+   ReleaseDC ( NULL, dc );
 
    return size.cx;
+   
    #endif
 }
 
