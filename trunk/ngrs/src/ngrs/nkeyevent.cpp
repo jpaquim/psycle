@@ -20,11 +20,12 @@
 #include "nkeyevent.h"
 #include "nobject.h"
 
-NKeyEvent::NKeyEvent(NObject* sender, std::string buffer, int scancode )
+NKeyEvent::NKeyEvent(NObject* sender, std::string buffer, int scancode, int shift )
 {
   buffer_   = buffer;
   scancode_ = scancode;
-  sender_ = sender;
+  sender_   = sender;
+  shift_    = shift; 
 }
 
 
@@ -47,4 +48,7 @@ NObject * NKeyEvent::sender( ) const
   return sender_;
 }
 
-
+int NKeyEvent::shift() const
+{
+  return shift_;
+}

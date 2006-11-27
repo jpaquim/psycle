@@ -370,6 +370,13 @@ int NApp::processEvent( NWindow * win, WEvent * event )
          break;
     case KeyPress:
             {
+             char keys[32];
+	         XQueryKeymap( NApp::system().dpy(), keys );
+	         
+	         /*long keycode= XK_Shift
+	 		 long keydown;
+					keydown = (keys[keycode/8] & 1<<(keycode%8) );*/
+                                    
               XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
@@ -384,6 +391,10 @@ int NApp::processEvent( NWindow * win, WEvent * event )
           break;
         case KeyRelease:
             {
+              char keys[32];
+              XQueryKeymap( NApp::system().dpy(), keys);                        
+                        
+                        
               XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
@@ -447,6 +458,11 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     case WM_KEYDOWN : {
          BYTE keyboardState[256];
          GetKeyboardState( keyboardState );
+                  
+         int sState = nsNone;  
+         if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
+         if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;
+
          int vkey = event->wParam;
          if ( vkey != VK_SHIFT ) {
            WORD wordchar;
@@ -455,12 +471,18 @@ int NApp::processEvent( NWindow * win, WEvent * event )
            buffer[0] = wordchar & 0xff ;
            buffer[1] = 0;
          } else buffer[0] = '\0';
-         win->onKeyPress(NKeyEvent(0,buffer, event->wParam & 255 ));                  
+
+         win->onKeyPress( NKeyEvent( 0, buffer, event->wParam & 255, sState ));
     }
     break;
     case WM_KEYUP : {
        BYTE keyboardState[256];
        GetKeyboardState( keyboardState );
+       
+       int sState = nsNone;  
+       if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
+       if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;
+
        int vkey = event->wParam;
        if ( vkey != VK_SHIFT ) {
        WORD wordchar;
@@ -469,7 +491,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
          buffer[0] = wordchar & 0xff ;
          buffer[1] = 0;
        } else buffer[0] = '\0';
-       win->onKeyRelease(NKeyEvent(0,buffer, event->wParam & 255 ));         
+       win->onKeyRelease(NKeyEvent(0,buffer, event->wParam & 255, sState ));         
     }   
     break;
     default:

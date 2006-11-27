@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
- *   natti@linux   *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper   *
+ *   Germany   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,21 +25,32 @@
 /**
 @author Stefan
 */
+
+// special keys that can be used in combination with a 'normal' key.
+enum NShiftState {
+  nsNone  = 0,   
+  nsShift = 1,  // Shift key pressed
+  nsAlt   = 2,  // Alt key pressed
+  nsCtrl  = 4,  // Ctrl key pressed 
+};	
+
 class NKeyEvent{
 public:
-    NKeyEvent(class NObject* sender, std::string buffer, int scancode);
+    NKeyEvent(class NObject* sender, std::string buffer, int scancode, int shift = nsNone );
 
     ~NKeyEvent();
 
     std::string buffer() const;
     int scancode() const;
     NObject* sender() const;
+    int shift() const;
 
 private:
 
    std::string buffer_;
    int scancode_;
    NObject* sender_;
+   int shift_;
 
 };
 
