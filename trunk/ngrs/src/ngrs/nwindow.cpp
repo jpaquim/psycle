@@ -670,7 +670,10 @@ void NWindow::onMouseDoublePress( int x, int y, int button )
 {
   graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
-  if (obj) obj->onMouseDoublePress(x - obj->absoluteSpacingLeft(), y - obj->absoluteSpacingTop(), button);
+  if (obj) {
+    dragBase_ = 0;             
+    obj->onMouseDoublePress(x - obj->absoluteSpacingLeft(), y - obj->absoluteSpacingTop(), button);
+  }    
 }
 
 NVisualComponent* NWindow::selectedBase( ) const
