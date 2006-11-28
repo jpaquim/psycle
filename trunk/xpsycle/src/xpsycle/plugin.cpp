@@ -21,11 +21,12 @@
 #include "configuration.h"
 //#include "inputhandler.h"
 //#include <ngrs/nfile.h>
+#ifdef __unix__
 #include <dlfcn.h>
+#endif
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-//#include <inttypes.h>
 #include <algorithm>
 #include <cctype>
 
@@ -56,18 +57,31 @@ Plugin::~ Plugin( ) throw()
 {
 }
 
-bool Plugin::Instance(const std::string & file_name)
+bool Plugin::Instance( const std::string & file_name )
 {
    try {
    std::cout << file_name << std::endl;
-  _dll = dlopen(file_name.c_str(), RTLD_LAZY);
+   #ifdef __unix__
+   _dll = dlopen(file_name.c_str(), RTLD_LAZY);
+   #else
+   #endif
     if (!_dll) {
+        #ifdef __unix__
         std::cerr << "Cannot load library: " << dlerror() << '\n';
+        #else
+        #endif
         return false;
     } else {
-      GETINFO GetInfo  = (GETINFO) dlsym(_dll, "GetInfo");
+      GETINFO GetInfo  = 0;
+      #ifdef __unix__
+      GetInfo = (GETINFO) dlsym(_dll, "GetInfo");
+      #else
+      #endif
       if (!GetInfo) {
+        #ifdef __unix__
         std::cerr << "Cannot load symbols: " << dlerror() << '\n';
+        #else
+        #endif
         return false;
       } else {
         _pInfo = GetInfo();
@@ -85,9 +99,16 @@ bool Plugin::Instance(const std::string & file_name)
       _editName = buf;
       _psAuthor = _pInfo->Author;
       _psName = _pInfo->Name;
-      CREATEMACHINE GetInterface = (CREATEMACHINE) dlsym(_dll, "CreateMachine");
+      CREATEMACHINE GetInterface = 0;
+      #ifdef __unix__
+      GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
+      #else
+      #endif
       if(!GetInterface) {
+          #ifdef __unix__
           std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+          #else
+          #endif
           return false;
       } else {
           proxy()(GetInterface());
