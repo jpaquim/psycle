@@ -237,8 +237,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
     case NK_Left:
                   if ( pos_>0) {
                     pos_--;
-                    #ifdef __unix__
-                    if (NApp::system().keyState() & ShiftMask) {
+                    if ( keyEvent.shift() & nsShift ) {
                        if (selStartIdx_==selEndIdx_) {
                           selStartIdx_ = pos_;
                           selEndIdx_ = pos_+1;
@@ -247,15 +246,13 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                           selStartIdx_ = pos_;
                        }
                     } else selStartIdx_ = selEndIdx_ = pos_;
-                    #endif
                   }
                   repaint();
                 break;
     case NK_Right:
                   if (pos_< text_.length()) {
                     pos_++;
-                    #ifdef __unix__
-                      if (NApp::system().keyState() & ShiftMask) {
+                      if ( keyEvent.shift() & nsShift ) {
                         if (selStartIdx_==selEndIdx_) {
                           selEndIdx_ = pos_;
                           selStartIdx_ = pos_-1;
@@ -265,7 +262,6 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                        }
                     } else
                         selStartIdx_ = selEndIdx_ = pos_;
-                    #endif    
                     repaint();
                   }
                  break;
@@ -296,13 +292,11 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                  break;
     case NK_Home:
                  if (pos_>0) {
-                    #ifdef __unix__
-                    if (NApp::system().keyState() & ShiftMask) {
+                    if ( keyEvent.shift() & nsShift ) {
                       selEndIdx_   = pos_;
                       selStartIdx_ = 0;
                     }
-                    #endif
-                     pos_=0;
+                    pos_=0;
                     dx=0;
                     repaint();
                  }
@@ -407,6 +401,3 @@ void NEdit::setInputPolicy( const std::string & regexp )
 {
 
 }
-
-
-
