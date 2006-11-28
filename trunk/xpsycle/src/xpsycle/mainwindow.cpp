@@ -89,7 +89,7 @@ void add_font_path( char * path ) {
 MainWindow::MainWindow()
   : NWindow()
 {
-	
+
 //	add_font_path("/home/natti/xpsycle/fonts");
 
   /*int npaths_return;
@@ -111,8 +111,10 @@ MainWindow::MainWindow()
   initMenu();
   std::cout << "initbars"<<std::endl;
   initBars();
+
   std::cout << "initdialogs" <<std::endl;
   initDialogs();
+
   std::cout << "book" << std::endl;
   book = new NTabBook();
     book->setTabBarVisible( false );
@@ -123,12 +125,13 @@ MainWindow::MainWindow()
   add(newMachineDlg_);
 std::cout << "audioconfig" << std::endl;
 	audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
-	add( audioConfigDlg );
+	add( audioConfigDlg );	
 std::cout << "initsongs" << std::endl;
   initSongs();
   std::cout << "enablesound" << std::endl;
   enableSound();
 std::cout << " updatenewsong" << std::endl;
+
   updateNewSong();
 
 	oldPlayPos_ = 0;
