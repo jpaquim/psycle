@@ -88,8 +88,10 @@ class NSystem{
     int screenWidth() const;
     int screenHeight() const;
 
-    int keyState() const;
-    void setKeyState(int keyState);
+    int keyState() const; // obsolote wil be removed
+    void setKeyState(int keyState); // will be removed
+    
+    int keyState( int vkey ) const; // 0 up : 1 down 2 : toggled
 
     WinHandle registerWindow(WinHandle parent);
     void destroyWindow(WinHandle win);
