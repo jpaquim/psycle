@@ -56,7 +56,11 @@ Configuration::Configuration()
   setSkinDefaults();
   defaultPatLines = 64;
   loadConfig();
+  #ifdef __unix__
   bitmaps_ = new DefaultBitmaps(this);
+  #else
+  bitmaps_ = new DefaultBitmaps();
+  #endif  
   _RecordTweaks = false;
   _RecordUnarmed = true;
 }
