@@ -20,6 +20,12 @@
 #ifndef NTHREAD_H
 #define NTHREAD_H
 
+#ifdef __unix__
+#include <pthread.h>
+#else
+
+#endif
+
 class NThread {
 public:
           

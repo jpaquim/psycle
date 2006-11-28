@@ -7,6 +7,12 @@
 #include "dsp.h"
 #include "cstdint.h"
 
+#ifdef __unix__
+#else
+  #include <windows.h>
+  #pragma once
+#endif
+
 namespace psycle
 {
 	namespace host

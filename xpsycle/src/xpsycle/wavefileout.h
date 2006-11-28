@@ -58,8 +58,10 @@ namespace psycle
 				void* _callbackContext; // Player callback
 				AUDIODRIVERWORKFN _pCallback;
 				
+				#ifdef __unix__
 				int iret1;				
 				pthread_t threadid;
+				#endif
 
 			  static volatile int kill_thread;
 				static volatile int threadOpen;

@@ -154,6 +154,7 @@ namespace psycle
 						}
 					}
 					break;
+#ifdef __unix__					
 #if !defined XPSYCLE__NO_LADSPA
 				case MACH_LADSPA:
 					{
@@ -163,6 +164,7 @@ namespace psycle
 					}
 					break;
 #endif // XPSYCLE__NO_LADSPA
+#endif
 /*				case MACH_VST:
 				case MACH_VSTFX:
 					{

@@ -53,7 +53,9 @@ class AboutDlg;
 class VuMeter;
 class InstrumentEditor;
 class InfoDlg;
+#ifdef __unix__
 class WaveSaveDlg;
+#endif
 class SequencerItem;
 class NewMachine;
 class AudioConfigDlg;
@@ -116,7 +118,9 @@ private:
     GreetDlg* greetDlg;
     InfoDlg*  infoDlg;
     NFileDialog* wavRecFileDlg;
+    #ifdef __unix__
     WaveSaveDlg* wavSaveDlg;
+    #endif
     NewMachine* newMachineDlg_;
 
     VuMeter* vuMeter_;

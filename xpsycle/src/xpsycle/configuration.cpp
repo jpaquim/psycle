@@ -21,6 +21,7 @@
 #include "configuration.h"
 #include "song.h"
 #include "global.h"
+#ifdef __unix__
 #include "alsaout.h"
 #include "jackout.h"
 #include "gstreamerout.h"
@@ -28,6 +29,7 @@
 //#include "microsoft_direct_sound_out.h"
 //#include "netaudioout.h"
 #include "wavefileout.h"
+#endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
 #include <ngrs/napp.h>
@@ -102,6 +104,8 @@ void Configuration::setSkinDefaults( )
 		_pSilentDriver = driver;
 		driverMap_[ driver->info().name() ] = driver;
 
+
+        #ifdef __unix__
 		driver = new WaveFileOut();
 		driverMap_[ driver->info().name() ] = driver;
 
@@ -125,6 +129,8 @@ void Configuration::setSkinDefaults( )
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif		
+		
+		#endif
 /*		#if !defined XPSYCLE__NO_NETAUDIO
 			driver = new NetAudioOut;
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
@@ -354,7 +360,9 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         if (keyCharStr == "NK_Home") { keyCode = NK_Home; }
         if (keyCharStr == "NK_End") { keyCode = NK_End; }
         if (keyCharStr == "NK_Tab") { keyCode = NK_Tab; }
+        #ifdef __unix__
         if (keyCharStr == "XK_ISO_Left_Tab") { keyCode = XK_ISO_Left_Tab; }
+        #endif
         if (keyCharStr == "NK_Insert") { keyCode = NK_Insert; }
         if (keyCharStr == "NK_BackSpace") { keyCode = NK_BackSpace; }
         if (keyCharStr == "NK_Delete") { std::cout << NK_Delete << std::endl; keyCode = NK_Delete; }

@@ -20,6 +20,8 @@
 #ifndef LADSPAMACHINE_H
 #define LADSPAMACHINE_H
 
+#ifdef __unix__
+
 #if defined XPSYCLE__CONFIGURATION
         #include <xpsycle/ladspa_conditional_build.h>
 #endif
@@ -120,4 +122,5 @@ namespace psycle {
 }
 
 #endif // !defined XPSYCLE__NO_LADSPA
+#endif
 #endif

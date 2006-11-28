@@ -109,8 +109,10 @@ private:
     void saveWav(std::string file, int bits, int rate, int channelmode);
 
     static int audioOutThread(void * ptr);
-    int iret1;
+    #ifdef __unix__
+    int iret1;    
     pthread_t threadid;
+    #endif
 
     void initVars();
 

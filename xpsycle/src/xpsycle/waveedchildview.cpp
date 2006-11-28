@@ -25,7 +25,9 @@
 #include "waveedmixdlg.h"
 #include "waveedchildview.h"
 #include "waveedxfadedlg.h"
+#ifdef __unix__
 #include <X11/cursorfont.h>
+#endif
 #include <ngrs/nwindow.h>
 #include <ngrs/ngraphics.h>
 #include <ngrs/napp.h>
@@ -654,7 +656,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 //		SetCapture();
 		if(wView_->wdWave)
 		{
-			if (   NApp::system().keyState() & ControlMask )
+			if (   NApp::system().shiftState() & nsCtrl )
 			{
 //				pParent->m_wndView.AddMacViewUndo();
 				wView_->pSong->IsInvalided(true);
@@ -742,7 +744,9 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 
 					}
 				}
+				#ifdef __unix__
 				XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
+                #endif				
 				repaint();
 				wView_->UpdateStatusBar();
 			}
@@ -754,7 +758,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 		if(wView_->wdWave)
 		{
 
-			if ( NApp::system().keyState() & ControlMask )
+			if ( NApp::system().shiftState() & nsCtrl )
 			{
 //				pParent->m_wndView.AddMacViewUndo();
 				wView_->pSong->IsInvalided(true);
@@ -917,9 +921,17 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 						(	abs ( x - int((  wView_->wdLoopS-wView_->diStart )			* dispRatio ))  < 10		||
 							abs ( x - int((  wView_->wdLoopE-wView_->diStart )			* dispRatio ))  < 10) )
 					)
+					#ifdef __unix__
 					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
+                    #else	
+                    ;
+                    #endif				
 				else
+				    #ifdef __unix__
 					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_xterm));
+					#else
+					;
+                    #endif					
 			}
 			else if (wView_->wdLength!=0)					//mouse is over header
 			{
@@ -929,9 +941,17 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 						(	abs ( x - int(  wView_-> blStart			* dispRatio ))	< 10 ||
 							abs ( x - int((  wView_->blStart+wView_->blLength)	* dispRatio ))	< 10 )
 					)
+					#ifdef __unix__
 					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
+					#else
+					;
+					#endif
 				else
+					#ifdef __unix__
 					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_xterm));
+                    #else
+                    ;
+                    #endif					
 			}
 		}
 		
@@ -2229,7 +2249,9 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 	void WaveEdChildView::WavePanel::onMouseExit()
   {
 		// reset mousearrow
+		#ifdef __unix__
 		XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_left_ptr));
+        #endif		
   }
 
 }}

@@ -31,7 +31,9 @@ class NFileDialog;
 namespace psycle { namespace host {
 
 class WaveEdChildView;
+#ifdef __unix__
 class WaveSaveDlg;
+#endif
 class InstrumentEditor;
 class Song;
 
