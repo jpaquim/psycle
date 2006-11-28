@@ -136,10 +136,35 @@ int NSystem::keyState( int vkey ) const {
     else
        return 0;   
   #else
-     return GetKeyState( vkey );
+     return GetKeyState( vkey ) & 0x80;
   #endif
 }
 
+std::map<int,int> NSystem::keyboardState() const {
+  std::map<int,int> states;
+  // 0 up : 1 down 2 : toggled
+  #ifdef __unix__
+  char keys[32];
+  XQueryKeymap( NApp::system().dpy(), keys );	     
+    
+  for (int keycode = 0; keycode < 256; keycode++ ) {
+    states[ XKeycodeToKeysym( dpy(), keycode, 0 ) ] = (keys[keycode/8] & 1<<(keycode%8) ) ;
+  }
+  #else
+  BYTE keyboardState[256];
+  GetKeyboardState( keyboardState );
+  
+  for ( int keycode = 0 ; keycode < 255; keycode++ ) {
+    if ( keyboardState[ keycode ] & 0x80 )
+      states[ keycode ] = 1;
+    else  
+      states[ keycode ] = 0;
+  }
+  #endif                  
+  return states;
+}
+
+                  
 void NSystem::setKeyState( int keyState )
 {
   keyState_ = keyState;
