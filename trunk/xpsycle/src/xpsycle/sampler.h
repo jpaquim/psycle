@@ -29,6 +29,8 @@ namespace psycle
 		#define SAMPLER_CMD_EXT_NOTEDELAY	0xd0
 
 		// ms typedefs
+		
+		#ifdef __unix__
 
 		typedef unsigned long ULONG;
 		typedef long long LONGLONG;
@@ -57,6 +59,8 @@ namespace psycle
 		ULONGLONG QuadPart;
 		} ULARGE_INTEGER, 
 		*PULARGE_INTEGER;
+		
+		#endif
 
 		typedef enum
 		{
