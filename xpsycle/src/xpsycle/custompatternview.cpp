@@ -1109,7 +1109,7 @@ namespace psycle {
 		}
 
 		void CustomPatternView::onKeyRelease(const NKeyEvent & event) {
-			if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) {
+			if ( event.shift() & nsShift ) {
 				endSel();
 			}
 		}
