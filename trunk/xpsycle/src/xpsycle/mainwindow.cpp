@@ -59,14 +59,14 @@ template<class T> inline T str_hex(const std::string &  value) {
 
 
 void add_font_path( char * path ) {
-  int i;
+/*  int i;
   int npaths;
   char ** fontpath;
   char ** new_fontpath;
 
   fontpath = XGetFontPath( NApp::system().dpy(), &npaths );    
   if ( fontpath != NULL ) {
-    /* check if path is already present */
+    // check if path is already present
     for ( i = 0; i < npaths; i++ )
       if ( strncmp( path, fontpath[i], strlen(path) ) == 0 ) {
 			XFreeFontPath(fontpath);
@@ -78,7 +78,7 @@ void add_font_path( char * path ) {
     XSetFontPath( NApp::system().dpy(), new_fontpath, npaths+1 );
     XFreeFontPath(fontpath);
     free(new_fontpath);
-  }
+  }*/
 }
 
 
