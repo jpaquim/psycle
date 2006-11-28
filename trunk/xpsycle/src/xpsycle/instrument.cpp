@@ -5,11 +5,10 @@
 #include "instrument.h"
 #include "datacompression.h"
 #include "filter.h"
+#include "cstdint.h"
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-//#include <operating_system/logger.hpp>
-#include <cstdint>
 
 template<class T> inline std::string toHex(T value , int nums = 8) {
 

@@ -10,7 +10,6 @@
 #include "datacompression.h"
 #include "riff.h"
 #include "ladspamachine.h"
-#include <cstdint>
 #include <cassert>
 #include <sstream>
 

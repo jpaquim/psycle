@@ -1,9 +1,9 @@
 ///\interface psycle::host::RiffFile
 #pragma once
 //#include <psycle/host/detail/project.hpp>
+#include "cstdint.h"
 #include <cstdio>
 #include <cstddef>
-#include <cstdint>
 #include <string>
 #include <iostream>
 #include <fstream>

@@ -5,7 +5,7 @@
 #include "instrument.h"
 #include "filter.h"
 #include "dsp.h"
-#include <cstdint>
+#include "cstdint.h"
 
 namespace psycle
 {
