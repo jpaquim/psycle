@@ -372,15 +372,14 @@ int NApp::processEvent( NWindow * win, WEvent * event )
             {
              char keys[32];
              XQueryKeymap( NApp::system().dpy(), keys );
-	         
-             long keycode= XK_Shift_L;                 
-             int sState = nsNone;               
+	     
+	     int sState = nsNone;    
+             long keycode= XKeysymToKeycode( NApp::system().dpy(), XK_Shift_L);
              if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
-             keycode = XK_Control_L;
+             keycode = XKeysymToKeycode( NApp::system().dpy(), XK_Control_L);
              if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;
                  
-                                    
-              XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
+             XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
                     NObject* acellNotify = findAcceleratorNotifier(NKeyAccelerator(NApp::system().keyState(),mykeysym));
@@ -397,11 +396,11 @@ int NApp::processEvent( NWindow * win, WEvent * event )
               char keys[32];
               XQueryKeymap( NApp::system().dpy(), keys);            
               
-             long keycode= XK_Shift_L;                 
-             int sState = nsNone;               
+             int sState = nsNone;    
+             long keycode= XKeysymToKeycode( NApp::system().dpy(), XK_Shift_L);
              if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
-             keycode = XK_Control_L;
-             if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;            
+             keycode = XKeysymToKeycode( NApp::system().dpy(), XK_Control_L);
+             if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;                           
                                                 
               XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
