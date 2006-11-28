@@ -192,17 +192,22 @@ void NSystem::setKeyState( int keyState )
 }
 
 void NSystem::setCursor( int crIdentifier , NWindow* win) {  
+  #ifdef __unix__      
   if ( crIdentifier != cursorId_ && win && win->win() ) {
-    #ifdef __unix__   
     std::map<int,Cursor>::iterator it = cursorMap.find( crIdentifier );
     if ( it != cursorMap.end() ) {
       XDefineCursor( dpy(), win->win(), it->second);
       XFlush( dpy() );
     }
-    #endif
     cursorId_ = crIdentifier;
   }
-  
+  #else  
+  cursorId_ = crIdentifier;
+  std::map<int,HCURSOR>::iterator it = cursorMap.find( crIdentifier );
+    if ( it != cursorMap.end() ) {
+      SetCursor( it->second );   
+    }
+  #endif  
 }
 
 int NSystem::cursor() const {
@@ -231,6 +236,28 @@ void NSystem::initCursorMap() {
   cursorMap[ nCrNo        ] = XCreateFontCursor( dpy(), XC_X_cursor );
   cursorMap[ nCrAppStart  ] = XCreateFontCursor( dpy(), XC_watch );
   cursorMap[ nCrHandPoint ] = XCreateFontCursor( dpy(), XC_hand1 );
+  #else
+  cursorMap[ nCrDefault   ] = LoadCursor( NULL, IDC_ARROW );
+  cursorMap[ nCrNone      ] = 0;//None;
+  cursorMap[ nCrArrow     ] = LoadCursor( NULL, IDC_ARROW );
+  cursorMap[ nCrCross     ] = LoadCursor( NULL, IDC_CROSS );
+  cursorMap[ nCrIBeam     ] = LoadCursor( NULL, IDC_IBEAM );
+  cursorMap[ nCrSize      ] = LoadCursor( NULL, IDC_SIZEALL );
+  cursorMap[ nCrSizeNESW  ] = LoadCursor( NULL, IDC_SIZENESW );
+  cursorMap[ nCrSizeNS    ] = LoadCursor( NULL, IDC_SIZENS );
+  cursorMap[ nCrSizeNWSE  ] = LoadCursor( NULL, IDC_SIZENWSE );
+  cursorMap[ nCrSizeWE    ] = LoadCursor( NULL, IDC_SIZEWE );
+  cursorMap[ nCrUpArrow   ] = LoadCursor( NULL, IDC_UPARROW );
+  cursorMap[ nCrHourGlass ] = LoadCursor( NULL, IDC_WAIT );
+//  cursorMap[ nCrDrag      ] = LoadCursor( NULL,
+//  cursorMap[ nCrNoDrop    ] = LoadCursor( NULL,
+  cursorMap[ nCrHSplit    ] = LoadCursor( NULL, IDC_SIZENS );
+  cursorMap[ nCrVSplit    ] = LoadCursor( NULL, IDC_SIZEWE );
+//  cursorMap[ nCrMultiDrag ] = LoadCursor( NULL,
+  cursorMap[ nCrNo        ] = LoadCursor( NULL, IDC_NO );
+  cursorMap[ nCrAppStart  ] = LoadCursor( NULL, IDC_APPSTARTING );
+  cursorMap[ nCrHandPoint ] = LoadCursor( NULL, IDC_HAND );
+
   #endif
 }
 

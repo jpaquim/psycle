@@ -162,6 +162,8 @@ private:
     std::map<unsigned long,unsigned long> colorCache;
     #ifdef __unix__
     std::map<int, Cursor> cursorMap;
+    #else
+    std::map<int, HCURSOR> cursorMap;    
     #endif
 
     void initX();

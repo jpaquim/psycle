@@ -482,6 +482,10 @@ int NApp::processEvent( NWindow * win, WEvent * event )
          win->onKeyPress( NKeyEvent( 0, buffer, event->wParam & 255, sState ));
     }
     break;
+    case WM_SETCURSOR:
+       NApp::system().setCursor(  NApp::system().cursor() , win );
+       return TRUE;
+    break;
     case WM_KEYUP : {
        BYTE keyboardState[256];
        GetKeyboardState( keyboardState );
