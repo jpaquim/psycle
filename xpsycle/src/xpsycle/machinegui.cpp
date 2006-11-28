@@ -62,7 +62,7 @@ void MachineGUI::paint( NGraphics * g )
 {
   if (selected_) {
 
-			g->setForeground( SkinReader::Instance()->machineview_color_info().sel_border_color );
+    g->setForeground( SkinReader::Instance()->machineview_color_info().sel_border_color );
 
      int cw = clientWidth();
      int ch = clientHeight();
@@ -674,7 +674,8 @@ void EffektGUI::VUPanel::paint( NGraphics * g )
 
 void MachineGUI::onMousePress( int x, int y, int button )
 {
-  if ((button==1 && NApp::system().keyState() & ShiftMask) || button==3) {
+  int shift = NApp::system().shiftState();
+  if ((button==1 && ( shift & nsShift) ) || button==3) {
   // shift+left-click or right-click.
     newConnection.emit(this);
   } else if (button==1) { // left-click (w/ no shift)
