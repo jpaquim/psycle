@@ -124,6 +124,22 @@ int NSystem::keyState( ) const
   return keyState_;
 }
 
+int NSystem::keyState( int vkey ) const {
+  // 0 up : 1 down 2 : toggled
+  #ifdef __unix__
+    char keys[32];
+    XQueryKeymap( NApp::system().dpy(), keys );	     
+
+    long keycode = XKeysymToKeycode( dpy(), vkey );
+    if ( (keys[keycode/8] & 1<<(keycode%8) ) ) 
+       return 1;
+    else
+       return 0;   
+  #else
+     return GetKeyState( vkey );
+  #endif
+}
+
 void NSystem::setKeyState( int keyState )
 {
   keyState_ = keyState;
