@@ -91,6 +91,7 @@ class NSystem{
     int keyState() const; // obsolote wil be removed
     void setKeyState(int keyState); // will be removed
     
+    int shiftState() const;
     int keyState( int vkey ) const; // 0 up : 1 down 2 : toggled
     std::map<int,int> keyboardState() const;
 

@@ -124,6 +124,27 @@ int NSystem::keyState( ) const
   return keyState_;
 }
 
+
+int NSystem::shiftState() const {
+  int sState = nsNone;  
+  #ifdef __unix__
+  char keys[32];
+  XQueryKeymap( dpy(), keys );
+	     
+  long keycode= XKeysymToKeycode( NApp::system().dpy(), XK_Shift_L);
+  if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
+  keycode = XKeysymToKeycode( NApp::system().dpy(), XK_Control_L);
+  if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;
+  #else  
+  BYTE keyboardState[256];
+  GetKeyboardState( keyboardState );
+
+  if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
+  if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;  
+  #endif  
+  return sState;   
+}    
+
 int NSystem::keyState( int vkey ) const {
   // 0 up : 1 down 2 : toggled
   #ifdef __unix__
