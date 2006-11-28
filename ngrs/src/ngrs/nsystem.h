@@ -92,6 +92,7 @@ class NSystem{
     void setKeyState(int keyState); // will be removed
     
     int keyState( int vkey ) const; // 0 up : 1 down 2 : toggled
+    std::map<int,int> keyboardState() const;
 
     WinHandle registerWindow(WinHandle parent);
     void destroyWindow(WinHandle win);

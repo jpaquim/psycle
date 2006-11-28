@@ -373,7 +373,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
              char keys[32];
              XQueryKeymap( NApp::system().dpy(), keys );
 	     
-	     int sState = nsNone;    
+	         int sState = nsNone;    
              long keycode= XKeysymToKeycode( NApp::system().dpy(), XK_Shift_L);
              if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
              keycode = XKeysymToKeycode( NApp::system().dpy(), XK_Control_L);
