@@ -19,9 +19,11 @@
  ***************************************************************************/
 #include "psy4filter.h"
 #include "fileio.h"
+#ifdef __unix__
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -73,6 +75,7 @@ namespace psycle {
 
 		bool Psy4Filter::testFormat( const std::string & fileName )
 		{
+            #ifdef __unix__ 
 			zipreader *z;
 			zipreader_file *f;
 			int fd = open( fileName.c_str(), O_RDONLY );
@@ -107,6 +110,9 @@ namespace psycle {
 			parser.parseFile("psytemp.xml");
 			std::cout << "format is " << isPsy4 << std::endl;
 			return isPsy4;
+			#else
+			return false;
+			#endif
 		}
 
 		void Psy4Filter::onDetectFilterTag( const NXmlParser & parser, const std::string & tagName )
@@ -116,6 +122,7 @@ namespace psycle {
 
 		bool Psy4Filter::load( const std::string & fileName, Song & song )
 		{
+          #ifdef __unix__
 			NXmlParser parser;
 			patMap.clear();
 
@@ -270,6 +277,9 @@ namespace psycle {
 			}
 
 			return isPsy4;
+			#else
+			return false;
+			#endif
 		}
 
 		void Psy4Filter::onTagParse(const NXmlParser & parser, const std::string & tagName )
@@ -358,6 +368,7 @@ namespace psycle {
 
 		bool Psy4Filter::save( const std::string & file_Name, const Song & song )
 		{
+            #ifdef __unix__ 
 			std::string fileName = NFile::extractFileNameFromPath(file_Name);
 
 			bool autosave = false;
@@ -447,7 +458,7 @@ namespace psycle {
 			 if( std::remove("psycle_tmp.bin") == -1 )
     			std::cerr << "Error deleting temp file" << std::endl;
   
-     
+            #endif
 			return true;
 		}
 

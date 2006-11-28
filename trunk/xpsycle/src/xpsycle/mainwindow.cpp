@@ -29,7 +29,9 @@
 #include "internal_machines.h"
 #include "waveedframe.h"
 #include "sequencergui.h"
+#ifdef __unix__
 #include "wavesavedlg.h"
+#endif
 #include "newmachine.h"
 #include "audioconfigdlg.h"
 #include "skinreader.h"
@@ -363,7 +365,9 @@ void MainWindow::initDialogs( )
   add(wavRecFileDlg);
   // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
   add( infoDlg =  new InfoDlg() );
+  #ifdef __unix__
   add( wavSaveDlg = new WaveSaveDlg() );
+  #endif
 }
 
 // events from menuItems
@@ -1161,9 +1165,11 @@ void MainWindow::onNewMachine( NButtonEvent * ev )
 
 void MainWindow::onRenderAsWave( NButtonEvent * ev )
 {
+  #ifdef __unix__
   if (wavSaveDlg->execute()) {
 
   }
+  #endif
 }
 
 void MainWindow::onEditUndo( NButtonEvent * ev )

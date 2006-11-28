@@ -25,7 +25,9 @@
 */
 
 #include "defaultbitmaps.h"
+#ifdef __unix__
 #include "zipreader.h"
+#endif
 
 #include <ngrs/nrect.h>
 #include <ngrs/npoint.h>
@@ -214,7 +216,9 @@ namespace psycle {
 			NPixmap machines_bitmap_;
 
 			// our zipreader handle
+			#ifdef __unix__
 			zipreader *z;
+			#endif
 
 			SequencerViewInfo sequencerview_info_;
 

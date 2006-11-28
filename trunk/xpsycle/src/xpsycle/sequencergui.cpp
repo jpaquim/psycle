@@ -869,7 +869,7 @@ void SequencerGUI::onSequencerItemClick( SequencerItem * item )
   it = find( selectedItems_.begin(), selectedItems_.end(), item);
 
   if (it == selectedItems_.end()) {
-    if (NApp::system().keyState() & ControlMask) {
+    if ( NApp::system().shiftState() & nsCtrl ) {
       selectedItems_.push_back(item);
       item->setSelected(true);
       item->repaint();
