@@ -437,19 +437,27 @@ namespace psycle {
 class Key {
 public:
 
-    Key() : ctrl(0), scancode(0) {}
-    Key(std::string mod, int k);
+    Key() : shift_( 0 ), vkey_( 0 ) {}
+    Key( int shift, int key );
 
     bool operator<(const Key & key) const {
-      long key1 = ctrl | scancode<<8;
-      long key2 = key.ctrl | key.scancode <<8;
+      long key1 = shift()     | vkey() << 8;
+      long key2 = key.shift() | key.vkey() <<8;
       return key1 < key2;
     };
 
-    unsigned int scancode;
-private:
+    int vkey() const {
+      return vkey_;
+    }
 
-    unsigned int ctrl;
+    int shift() const {
+      return shift_;
+    }
+        
+private:
+    
+    int shift_;
+    int vkey_;
 
 };
 

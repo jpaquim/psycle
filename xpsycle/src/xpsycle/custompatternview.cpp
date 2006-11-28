@@ -746,15 +746,8 @@ namespace psycle {
   		}
 		}
 
-		void CustomPatternView::onKeyPress(const NKeyEvent & event) {
-                        // Find out which command the keypress correlates to. 
-                        std::string mod = "none";
-                        if ((NApp::system().keyState() & ControlMask)) {
-                               mod = "ctrl"; 
-                        } else if ((NApp::system().keyState() & ShiftMask)) {
-                               mod = "shift";
-                        }
-                        int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+		void CustomPatternView::onKeyPress(const NKeyEvent & event) {							
+                        int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key( event.shift(),event.scancode()));
 
                         // Keybased block selection commands.
                         if (key == cdefSelectUp || key == cdefSelectDn || 

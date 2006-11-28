@@ -1386,20 +1386,8 @@ void MainWindow::onSequencerEntryClick( SequencerItem * item )
 
 void MainWindow::onKeyPress( const NKeyEvent & event )
 {
-//  std::cout << event.shift() << std::endl;
-  if ( event.shift() & nsShift ) std::cout << "shift pressed" << std::endl;
-  if ( event.shift() & nsCtrl  ) std::cout << "ctrl pressed" << std::endl;
-  
-    
   if ( selectedChildView_ ) {
-                // Find out which command the keypress correlates to. 
-                std::string mod = "none";
-                if ((NApp::system().keyState() & ControlMask)) {
-                       mod = "ctrl"; 
-                } else if ((NApp::system().keyState() & ShiftMask)) {
-                       mod = "shift";
-                }
-                int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(mod,event.scancode()));
+                int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(event.shift(),event.scancode()));
                 switch (key)
                 {
 			case cdefEditMachine:
