@@ -8,8 +8,8 @@
 #include "constants.h"
 #include "fileio.h"
 #include "playertimeinfo.h"
+#include "cstdint.h"
 #include <stdexcept>
-#include <cstdint>
 #include <vector>
 #include <deque>
 #include <cassert>

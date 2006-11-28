@@ -21,7 +21,7 @@
 #define PATTERNEVENT_H
 
 #include "pattern.h"
-#include <cstdint>
+#include "cstdint.h"
 #include <vector>
 
 /**

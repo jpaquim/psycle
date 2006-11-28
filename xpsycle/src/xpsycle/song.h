@@ -7,7 +7,7 @@
 #include "machine.h"
 #include "constants.h" 
 #include "fileio.h"
-#include <cstdint>
+#include "cstdint.h"
 #include <ngrs/sigslot.h>
 #include "patterndata.h"
 #include "patternsequence.h"

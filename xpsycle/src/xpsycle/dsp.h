@@ -3,7 +3,7 @@
 #pragma once
 #include <cmath>
 #include "helpers.h"
-#include <cstdint>
+#include "cstdint.h"
 namespace psycle
 {
 	namespace host
