@@ -508,7 +508,9 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		void psycle::host::Player::lock( )
 		{
 			lock_ = true;
+			#ifdef __unix__
 			while ( inWork_) usleep( 200 );
+			#endif
 		}
 
 		void psycle::host::Player::unlock( )
