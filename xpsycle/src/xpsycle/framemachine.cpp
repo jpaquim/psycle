@@ -315,15 +315,18 @@ void Knob::onMousePress( int x, int y, int button )
 void Knob::onMouseOver( int x, int y )
 {
   if (istweak) {
-      if (( ultrafinetweak && !(NApp::system().keyState() & ShiftMask )) || //shift-key has been left.
-          ( !ultrafinetweak && (NApp::system().keyState() & ShiftMask))) //shift-key has just been pressed
+
+      int shift = NApp::system().shiftState();
+      
+      if (( ultrafinetweak && !( shift & nsShift )) || //shift-key has been left.
+          ( !ultrafinetweak && ( shift & nsShift ))) //shift-key has just been pressed
       {
          sourcepoint=y;
         ultrafinetweak=!ultrafinetweak;
 		  tweakbase = value_;
       }
-      else if (( finetweak && !(NApp::system().keyState() & ControlMask )) || //control-key has been left.
-      ( !finetweak && (NApp::system().keyState() & ControlMask))) //control-key has just been pressed
+      else if (( finetweak && !( shift & nsCtrl )) || //control-key has been left.
+      ( !finetweak && ( shift & nsCtrl ))) //control-key has just been pressed
       {
         sourcepoint = y;
         finetweak=!finetweak;
