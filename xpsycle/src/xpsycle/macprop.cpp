@@ -54,9 +54,11 @@ void MacProp::init( )
       buttonPnl->setLayout(NAlignLayout(5,5));
               NButton* deleteBtn = new NButton("Delete Machine");
                       deleteBtn->setFlat(false);
+                      deleteBtn->clicked.connect(this,&MacProp::onDeleteBtn);
               buttonPnl->add(deleteBtn,nAlTop);
               NButton* cloneBtn = new NButton("Clone Machine");
                       cloneBtn->setFlat(false);
+                      cloneBtn->clicked.connect(this,&MacProp::onCloneBtn);
               buttonPnl->add(cloneBtn,nAlTop);
       NButton* okBtn = new NButton("OK");
               okBtn->setFlat(false);
@@ -73,6 +75,15 @@ void MacProp::onOKBtn(NButtonEvent *ev)
       pMGUI_->pMac()->SetEditName(nameEdit_->text());
       pMGUI_->repaint();
       onClose();
+}
+
+void MacProp::onCloneBtn(NButtonEvent *ev)
+{
+}
+
+void MacProp::onDeleteBtn(NButtonEvent *ev)
+{
+        pMGUI_->deleteRequest.emit(pMGUI_);
 }
 
 void MacProp::setVisible(bool on)

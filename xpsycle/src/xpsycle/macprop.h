@@ -47,6 +47,8 @@ private:
 
     void init();
     void onOKBtn(NButtonEvent *ev);
+    void onCloneBtn(NButtonEvent *ev);
+    void onDeleteBtn(NButtonEvent *ev);
 
 };
 }}
