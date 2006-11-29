@@ -304,7 +304,7 @@ void NBitmap::createFromXpmData(const char** data)
       int r = strtol( red, (char **)NULL, 16 );
       int g = strtol( green, (char **)NULL, 16 );
       int b = strtol( blue, (char **)NULL, 16 );
-      color = ((b<<16) | (g<<8) | r);
+      color = ((r<<16) | (g<<8) | b);
     }
     colorTable[std::string(key)] = color;    
   }
