@@ -683,11 +683,20 @@ void NSystem::setWindowDecoration( WinHandle win, bool on )
   XChangeWindowAttributes(dpy(), win, vmask, &attribs);
   #else
   if ( !on ) {
+              
     SetWindowLongPtr(      
       win,
       GWL_STYLE,
       WS_POPUP
     );
+
+    SetWindowLongPtr(      
+      win,
+      GWL_EXSTYLE,
+      WS_EX_TOOLWINDOW | WS_EX_TOPMOST 
+    );    
+        
+
   }   
   #endif
   
