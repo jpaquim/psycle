@@ -726,6 +726,8 @@ bool NSystem::isWindowMapped( WinHandle win )
   #endif
 }
 
+
+
 int NSystem::windowLeft( WinHandle win )
 {
   #ifdef __unix__
@@ -738,7 +740,11 @@ int NSystem::windowLeft( WinHandle win )
   #else
   RECT r;
   GetWindowRect( win, &r );
-  return r.left + GetSystemMetrics( SM_CXSIZEFRAME );
+  RECT rc;
+  rc.top = rc.bottom = rc.left = rc.right = 0;
+  AdjustWindowRectEx( &rc, GetWindowLongW( win, GWL_STYLE ) & ~(WS_HSCROLL|WS_VSCROLL),
+                        FALSE, GetWindowLongW( win, GWL_EXSTYLE ) );
+  return r.left - rc.left;
   #endif
 }
 
@@ -754,7 +760,11 @@ int NSystem::windowTop( WinHandle win )
   #else
   RECT r;
   GetWindowRect( win, &r );
-  return r.top + GetSystemMetrics( SM_CYSIZEFRAME ) + GetSystemMetrics( SM_CYCAPTION );
+  RECT rc;
+  rc.top = rc.bottom = rc.left = rc.right = 0;
+  AdjustWindowRectEx( &rc, GetWindowLongW( win, GWL_STYLE ) & ~(WS_HSCROLL|WS_VSCROLL),
+                        FALSE, GetWindowLongW( win, GWL_EXSTYLE ) );
+  return r.top - rc.top;
   #endif
 }
 
