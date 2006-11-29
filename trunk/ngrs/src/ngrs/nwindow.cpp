@@ -103,8 +103,19 @@ void NWindow::setVisible( bool on )
         checkGeometry();
         XSync(NApp::system().dpy(),false);
         #else
-        ShowWindow( win(), 1 );
-        UpdateWindow( win() );
+        
+        long style =  GetWindowLongPtr(      
+          win(),
+          GWL_STYLE
+        );    
+        
+        if ( style & WS_POPUP ) {
+          ShowWindow( win(), SW_SHOWNA );
+          UpdateWindow( win() );
+        } else {
+          ShowWindow( win(), 1);
+          UpdateWindow( win() );
+        }  
         #endif
       }
   } else if (mapped()) {
