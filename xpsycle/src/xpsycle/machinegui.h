@@ -21,6 +21,7 @@
 #define MACHINEGUI_H
 
 #include "skinreader.h"
+#include "macpropdlg.h"
 
 #include <ngrs/npanel.h>
 
@@ -31,7 +32,7 @@ namespace psycle { namespace host {
 
 class Machine;
 class FrameMachine;
-class MacProp;
+class MacPropDlg;
 class MasterDlg;
 
 
@@ -48,7 +49,7 @@ class MachineGUI : public NPanel
         NLine* line;
         int point;
 
-				MachineGUI* in;
+        MachineGUI* in;
 
   };
 
@@ -57,7 +58,7 @@ public:
 
     ~MachineGUI();
 
-		signal1<MachineGUI*> deleteRequest;
+        signal1<MachineGUI*> deleteRequest;
 
     Machine* pMac();
     void attachLine(NLine* line, int point);
@@ -89,6 +90,10 @@ public:
 		const MachineCoordInfo & coords() const;
 
 		virtual void updateSkin();
+    virtual MacPropDlg* propsDlg();
+    virtual void showPropsDlg();
+    void onUpdateMachinePropertiesSignal(Machine* machine);
+    void onDeleteMachineSignal();
 
 private:
 
@@ -98,6 +103,7 @@ private:
     NRegion linesRegion();
 
     Machine* mac_;
+    MacPropDlg* propsDlg_;
     NLine* line;
 
     bool selected_;
@@ -119,7 +125,8 @@ public:
 
     virtual void paint(NGraphics* g);
 
-		virtual void updateSkin();
+    virtual void updateSkin();
+    virtual void showPropsDlg() {}; // override--we don't to see a master props dlg (atm)
 
 private:
 
@@ -160,7 +167,6 @@ public:
     ~GeneratorGUI();
 
     FrameMachine* frameMachine;
-    MacProp* propsDlg_;
 
     virtual void onMousePress(int x, int y, int button);
 

@@ -17,12 +17,13 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef MACPROP_H
-#define MACPROP_H
+#ifndef MACPROPDLG_H
+#define MACPROPDLG_H
 
 #include <ngrs/nwindow.h>
 #include <ngrs/nedit.h>
 #include "machinegui.h"
+#include "machine.h"
 
 /**
 @author Stefan
@@ -30,19 +31,21 @@
 namespace psycle {
 namespace host {
 
-class MacProp : public NWindow
+class MacPropDlg : public NWindow
 {
 public:
-    MacProp(MachineGUI* mGUI);
+    MacPropDlg(Machine *machine);
 
-    ~MacProp();
+    ~MacPropDlg();
 
     virtual int onClose();
     virtual void setVisible(bool on);
+    signal1<Machine*> updateMachineProperties;
+    signal0<> deleteMachine;
 
 private:
 
-    MachineGUI* pMGUI_;
+    Machine* pMach_;
     NEdit* nameEdit_;
 
     void init();
