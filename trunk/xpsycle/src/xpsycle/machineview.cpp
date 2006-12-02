@@ -69,7 +69,8 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
           macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
           macGui->selected.connect(this,&MachineView::onMachineSelected);
-					macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
+        macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
+        macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
         }
@@ -81,6 +82,7 @@ void MachineView::onCreateMachine( Machine * mac )
           macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
           macGui->selected.connect(this,&MachineView::onMachineSelected);
           macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
+        macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
         scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
       }
@@ -167,7 +169,6 @@ MachineGUI * MachineView::findByMachine( Machine * mac )
 
 void MachineView::onNewConnection( MachineGUI * sender )
 {
-  std::cout << "yuppy" << std::endl;
   startGUI = sender;
 
   int midW = sender->clientWidth()  / 2;
@@ -198,7 +199,7 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev)
       line->setMoveable(NMoveable());
       line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
       line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-			wireGUIs.push_back(line);
+      wireGUIs.push_back(line);
       found = true;
       repaint(); 
       break;
@@ -314,6 +315,12 @@ void MachineView::setSelectedMachine( Machine* mac)
        break;
     }
   }
+}
+
+void MachineView::onUpdateMachinePropertiesSignal(Machine *machine)
+{
+  int index = machine->_macIndex;
+  machineNameChanged.emit(index); 
 }
 
 void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )

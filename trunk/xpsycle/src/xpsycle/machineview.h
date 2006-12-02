@@ -47,9 +47,9 @@ public :
       dlg->setLine(this);
     }
     ~MachineWireGUI() {
-			std::cout << "delete dialog" << std::endl;
-			delete dlg;
-			std::cout << "after delete dialog" << std::endl;
+        std::cout << "delete dialog" << std::endl;
+        delete dlg;
+        std::cout << "after delete dialog" << std::endl;
     }
 
     virtual void onMousePress  (int x, int y, int button) {
@@ -93,6 +93,7 @@ public:
     signal3<Machine*, int, int> machineMoved;
     signal3<int,int,int> patternTweakSlide;
     signal1<int> machineDeleted;
+    signal1<int> machineNameChanged;
 
     Machine* selMachine();
 
@@ -127,13 +128,14 @@ private:
     MachineGUI* findByMachine(Machine* mac);
 
     std::vector<MachineGUI*> machineGUIs;
-		std::vector<MachineWireGUI*> wireGUIs;
+    std::vector<MachineWireGUI*> wireGUIs;
 
     void onTweakSlide(int machine, int command, int value);
 
     void onMachineSelected(MachineGUI* gui);
 
 		void onMachineDeleteRequest( MachineGUI* machineGUI );
+		void onUpdateMachinePropertiesSignal(Machine* machine);
 
 		MachineViewColorInfo colorInfo_;
 

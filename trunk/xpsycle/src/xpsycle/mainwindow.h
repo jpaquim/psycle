@@ -209,6 +209,7 @@ private:
     void onRecordNotesMode(NButtonEvent* ev);
 
 		void onMachineDeleted( int machineIndex );
+		void onMachineNameChanged( int machineIndex );
 
     void setAppSongBpm(int x);
 

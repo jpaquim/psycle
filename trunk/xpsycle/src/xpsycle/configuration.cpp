@@ -369,7 +369,7 @@ void Configuration::onConfigTagParse(const std::string & tagName )
         #endif
         if (keyCharStr == "NK_Insert") { keyCode = NK_Insert; }
         if (keyCharStr == "NK_BackSpace") { keyCode = NK_BackSpace; }
-        if (keyCharStr == "NK_Delete") { std::cout << NK_Delete << std::endl; keyCode = NK_Delete; }
+        if (keyCharStr == "NK_Delete") { keyCode = NK_Delete; }
         if (keyCharStr == "F1") { keyCode = NK_F1; }
         if (keyCharStr == "F2") { keyCode = NK_F2; }
         if (keyCharStr == "F3") { keyCode = NK_F3; }

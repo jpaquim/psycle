@@ -20,7 +20,7 @@
 #include "machinegui.h"
 #include "machine.h"
 #include "framemachine.h"
-#include "macprop.h"
+#include "macpropdlg.h"
 #include "masterdlg.h"
 #include "global.h"
 #include "configuration.h"
@@ -45,6 +45,11 @@ MachineGUI::MachineGUI(Machine* mac)
   setPosition(mac->_x,mac_->_y,200+2*ident(),30+2*ident());
 
   setFont(NFont("Suse sans",6, nMedium | nStraight | nAntiAlias));
+
+  propsDlg_ = new MacPropDlg(pMac());
+  propsDlg_->updateMachineProperties.connect(this,&MachineGUI::onUpdateMachinePropertiesSignal);
+  propsDlg_->deleteMachine.connect(this,&MachineGUI::onDeleteMachineSignal);
+  add(propsDlg_);
 }
 
 
@@ -56,6 +61,11 @@ MachineGUI::~MachineGUI()
 Machine * MachineGUI::pMac( )
 {
   return mac_;
+}
+
+MacPropDlg * MachineGUI::propsDlg( )
+{
+  return propsDlg_;
 }
 
 void MachineGUI::paint( NGraphics * g )
@@ -296,8 +306,6 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
     vuPanel_->setTransparent(false);
   add(vuPanel_);
 
-  propsDlg_ = new MacProp(this);
-  add(propsDlg_);
 }
 
 GeneratorGUI::~ GeneratorGUI( )
@@ -409,9 +417,6 @@ void GeneratorGUI::onMousePress( int x, int y, int button )
         }
       repaint();
     }
-  } else if (button==2) { // right-click
-        std::cout << "generator properties" << std::endl;
-        propsDlg_->setVisible(true);
   }
 }
 
@@ -680,7 +685,18 @@ void MachineGUI::onMousePress( int x, int y, int button )
     newConnection.emit(this);
   } else if (button==1) { // left-click (w/ no shift)
     selected.emit(this);
+  } else if (button==2) {
+      showPropsDlg();
   }
+}
+
+void MachineGUI::onDeleteMachineSignal() {
+    deleteRequest.emit(this);
+}
+
+void MachineGUI::showPropsDlg()
+{
+        propsDlg_->setVisible(true); 
 }
 
 void MachineGUI::detachLine( NLine * line )
@@ -748,6 +764,9 @@ void GeneratorGUI::onTweakSlide( int machine, int command, int value )
 }
 }
 
+void psycle::host::MachineGUI::onUpdateMachinePropertiesSignal(Machine* machine) {
+    repaint(this);
+}
 
 void psycle::host::GeneratorGUI::onKeyPress( const NKeyEvent & event )
 {

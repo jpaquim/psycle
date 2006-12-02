@@ -169,7 +169,8 @@ ChildView* MainWindow::addChildView()
     childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
     childView_->machineViewDblClick.connect(this,&MainWindow::onNewMachine);
 		childView_->waveEditor()->updateInstrumentCbx.connect(this,&MainWindow::onUpdateInstrumentCbx);
-		childView_->machineView()->machineDeleted.connect(this,&MainWindow::onMachineDeleted);
+    childView_->machineView()->machineDeleted.connect(this,&MainWindow::onMachineDeleted);
+    childView_->machineView()->machineNameChanged.connect(this, &MainWindow::onMachineNameChanged);
   book->addPage( childView_, childView_->song()->name() + stringify( count ) );
   book->setActivePage( childView_ );
 
@@ -1484,6 +1485,12 @@ void psycle::host::MainWindow::onUpdateInstrumentCbx( int index , bool update )
 		insCombo_->repaint();
   }
 	
+}
+
+void psycle::host::MainWindow::onMachineNameChanged( int machineIndex )
+{
+  updateComboGen();
+  genCombo_->repaint();
 }
 
 void psycle::host::MainWindow::onMachineDeleted( int machineIndex )
