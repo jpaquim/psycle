@@ -18,6 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nthread.h"
+#include <algorithm>
+
+std::vector<NThread*> NThread::threadList;
 
 NThread::NThread() : terminated_(1) {
                    
@@ -29,21 +32,77 @@ NThread::~NThread() {
 
 
 void NThread::execute() {
-        
+  // override this virtual method
+  // called by the OS Thread
 }        
 
-void NThread::resume() {
-  terminated_ = 0;     
+void NThread::start() {
+  if ( terminated_ )
+    terminated_ = !createOSThread();    
 }     
      
-void NThread::suspend() {
-     
-}     
-
 void NThread::terminate() {
   terminated_ = true;     
 }     
 
 bool NThread::terminated() const {
   return terminated_;    
+}     
+
+// static callBack
+
+void* NThread::callBack( void* ptr ) {
+   std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), static_cast<NThread*> (ptr) );
+   if ( itr != threadList.end() ) {
+     NThread* thread = *itr;
+     thread->execute();     
+     thread->killOSThread();
+   }
+}      
+
+// creates an OS Thread
+
+bool NThread::createOSThread() {
+  
+  addThreadToList( this );
+       
+  #ifdef __unix__
+  if ( 0 == pthread_create( &threadid, NULL, (void*(*)(void*))NThread::callBack, (void*) this) ) ) {
+    // sth went wrong
+    removeThreadFromList( this );   
+    return false;
+  }    
+  else
+    return true;
+  #else
+    // todo win32 thread create
+    // not yet implemented
+    removeThreadFromList( this );
+    return false;
+  #endif
+}
+
+void NThread::killOSThread() {
+  #ifdef __unix__
+  pthread_exit( 0 ); // kills thread;
+  #else
+  #endif
+}
+
+void NThread::addThreadToList( NThread* thread ) {
+  std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), this );
+  if ( itr != threadList.end() ) {
+    // todo : enter critical section
+    threadList.push_back( this );    
+    // todo : end of critical section  
+  }  
+}     
+
+void NThread::removeThreadFromList( NThread* thread ) {     
+   std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), thread );
+   if ( itr != threadList.end() ) {
+     // todo critical section begin
+     threadList.erase( itr );
+     // todo critical section end
+   }      
 }     

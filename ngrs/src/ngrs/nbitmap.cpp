@@ -289,11 +289,15 @@ void NBitmap::createFromXpmData(const char** data)
   std::map<std::string,long> colorTable;
   
   for (int i = 0; i< ncolors; i++) {
-    const char* colorLine = data[i+1];
-
-    char key[20];   strncpy(key,colorLine,ncpp); key[ncpp]='\0';
-    std::string value = std::string(colorLine).substr(4);//colorLine+colorPos;
-    long int color  = 0;
+    std::string colorLine( data[i+1] );  
+    std::string key   = colorLine.substr(0,ncpp);
+    std::string value;
+    if ( ncpp + 4 < colorLine.length() ) 
+      value = std::string(colorLine).substr(4+ncpp);
+    else
+      value = "None";
+        
+    long int color  = 255;
     if ( value.find("None")  != std::string::npos ) color =  ((255<<16) | (255<<8) | 255); else
     if ( value.find("black") != std::string::npos ) color =  0; else
     {
@@ -304,7 +308,8 @@ void NBitmap::createFromXpmData(const char** data)
       int r = strtol( red, (char **)NULL, 16 );
       int g = strtol( green, (char **)NULL, 16 );
       int b = strtol( blue, (char **)NULL, 16 );
-      color = ((r<<16) | (g<<8) | b);
+      
+      color = (b << 16) | (g << 8) | r;
     }
     colorTable[std::string(key)] = color;    
   }
@@ -315,18 +320,18 @@ void NBitmap::createFromXpmData(const char** data)
   memDC_ = CreateCompatibleDC( dc );
   hBmp = CreateCompatibleBitmap( dc, xwidth_, xheight_ );
   SelectObject( memDC_, hBmp );
-  
-  
+    
   for (int y=0; y<height; y++) {  
      const char* scanLine = data[1+ncolors+y];
      for (int x=0; x<width; x++) {
         long colorValue = 0;
         char pixel[20]; memcpy(pixel,scanLine+x*ncpp,ncpp); pixel[ncpp]='\0';
         std::map<std::string,long>::iterator itr;
-        if ( (itr = colorTable.find(std::string(pixel))) != colorTable.end()) colorValue = itr->second; else colorValue = 200;
-        int r; int b; int g;
-        r = colorValue & 0x0000FF; g = (colorValue & 0x00FF00)>>8; b = (colorValue & 0xFF0000)>>16;        
-        SetPixel( memDC_, x, y,  colorValue );//(b << 16) | (g << 8) | r );
+        if ( (itr = colorTable.find(std::string(pixel))) != colorTable.end()) 
+          colorValue = itr->second; 
+        else 
+          colorValue = 200;
+        SetPixel( memDC_, x, y,  colorValue );
      }
   }
     

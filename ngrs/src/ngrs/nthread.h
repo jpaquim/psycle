@@ -20,6 +20,8 @@
 #ifndef NTHREAD_H
 #define NTHREAD_H
 
+#include <vector>
+
 #ifdef __unix__
 #include <pthread.h>
 #else
@@ -31,30 +33,47 @@ public:
           
    NThread();
    
-   ~NThread();
+   virtual ~NThread();
    
    // this ask's the system to start the thread
-   void resume();   
+   void start();   
    
-   void suspend();
-
-   // this sets terminated to true
+   // this sets terminated to true and kills the OS thread
    void terminate();
    
    // use this method in execute, to end your thread while loop
    bool terminated() const;
-
+   
+   
 protected:
           
    // override here your special implementation 
    // do not try to start the thread here
    // start the thread with resume.
-   virtual void execute();   
+   virtual void execute();
    
 private:
         
    bool terminated_;           
-                                   
+
+   static void* callBack( void* ptr ); 
+   
+   // pthread posix
+   
+   #ifdef __unix__
+   int iret1;
+   pthread_t threadid;
+   #else
+        
+   #endif
+   
+   static std::vector<NThread*> threadList;
+   
+   bool createOSThread();
+   void killOSThread();
+
+   void addThreadToList( NThread* thread );
+   void removeThreadFromList( NThread* thread );
 };
 
 #endif
