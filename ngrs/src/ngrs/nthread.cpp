@@ -67,7 +67,7 @@ bool NThread::createOSThread() {
   addThreadToList( this );
        
   #ifdef __unix__
-  if ( 0 == pthread_create( &threadid, NULL, (void*(*)(void*))NThread::callBack, (void*) this) ) ) {
+  if ( 0 == pthread_create( &threadid, NULL, (void*(*)(void*))NThread::callBack, (void*) this)  ) {
     // sth went wrong
     removeThreadFromList( this );   
     return false;
