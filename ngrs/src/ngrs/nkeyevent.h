@@ -28,10 +28,13 @@
 
 // special keys that can be used in combination with a 'normal' key.
 enum NShiftState {
-  nsNone  = 0,   
-  nsShift = 1,  // Shift key pressed
-  nsAlt   = 2,  // Alt key pressed
-  nsCtrl  = 4,  // Ctrl key pressed 
+  nsNone   = 0,   
+  nsShift  = 1,  // Shift key pressed
+  nsAlt    = 2,  // Alt key pressed
+  nsCtrl   = 4,  // Ctrl key pressed 
+  nsLeft   = 8,  // Left mouse button pressed
+  nsRight  = 16, // Right mouse button pressed
+  nsMiddle = 32  // Middle mouse button pressed
 };	
 
 class NKeyEvent{

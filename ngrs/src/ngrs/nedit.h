@@ -52,7 +52,9 @@ public:
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
 
-		virtual void onMousePress( int x, int y, int button );
+    virtual void onMousePress( int x, int y, int button );
+    virtual void onMouseOver( int x, int y );
+    virtual void onMousePressed( int x, int y, int button );
 
     virtual void onEnter();
     virtual void onExit();
@@ -70,14 +72,16 @@ public:
 
 private:
 
-		NRegExp regExp_;
+    NRegExp regExp_;
 
     bool autoSize_, readOnly_;
     int valign_, halign_;
     int dx;
     unsigned int pos_;
-    int selStartIdx_;
-    int selEndIdx_;
+
+    unsigned int selStartIdx_;
+    unsigned int selEndIdx_;
+    unsigned int selStartPos_;
 
     std::string text_;
     NFontMetrics metrics;
@@ -85,9 +89,13 @@ private:
     NPoint getScreenPos(NGraphics* g, const std::string & text );
     int computeDx( NGraphics* g, const std::string & text );
     void drawCursor(NGraphics* g, const std::string & text );
-		int findWidthMax(long width, const NFntString & data ) const;
+    int findWidthMax(long width, const NFntString & data ) const;
 
     void init();
+    
+    void startSel();
+    void computeSel();
+    void endSel();
 
 };
 

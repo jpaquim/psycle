@@ -117,7 +117,7 @@ void NFileListBox::update( )
           NItem* item = new NItem();
             item->setText(entry);
             NImage* icon = new NImage();
-               icon->setBitmap(sharedDirIcon_);
+               icon->setSharedBitmap(&sharedDirIcon_);
             item->add(icon);
             item->mousePress.connect(this,&NFileListBox::onDirItemSelected);
           add (item, false);

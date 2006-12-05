@@ -135,12 +135,26 @@ int NSystem::shiftState() const {
   if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
   keycode = XKeysymToKeycode( NApp::system().dpy(), XK_Control_L);
   if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;
+  
+  Window root_win,child_win;
+  int x_win; int y_win; unsigned int mask;
+  if (XQueryPointer( dpy(), rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask)
+  ) {
+    if ( mask & Button1Mask ) sState | = nsLeft;                     
+    if ( mask & Button2Mask ) sState | = nsRight;
+    if ( mask & Button2Mask ) sState | = nsMiddle;          
+  }                     
+  
   #else  
   BYTE keyboardState[256];
   GetKeyboardState( keyboardState );
 
   if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
   if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;  
+  if ( ( keyboardState[ VK_LBUTTON ] & 0x80 ) == 0x80 ) sState |= nsLeft;  
+  if ( ( keyboardState[ VK_RBUTTON ] & 0x80 ) == 0x80 ) sState |= nsRight;  
+  if ( ( keyboardState[ VK_MBUTTON ] & 0x80 ) == 0x80 ) sState |= nsMiddle;  
+
   #endif  
   return sState;   
 }    

@@ -88,7 +88,7 @@ void NEdit::paint( NGraphics * g )
 		int xoff = screenPos.x();
 		g->drawText(  xoff , screenPos.y() , startText );
 		xoff+= g->textWidth( startText );
-    NColor oldColor = foreground();
+        NColor oldColor = foreground();
 		g->setForeground( NColor(0,0,255));
 		g->fillRect( xoff, 0, g->textWidth( midText ), clientHeight() );
 		setForeground( oldColor );
@@ -130,7 +130,7 @@ int NEdit::computeDx( NGraphics* g, const std::string & text )
 	else
     w = g->textWidth(text.substr(0,pos()+1));
 
-  switch (halign_) {
+    switch (halign_) {
       case nAlLeft:
           if (screenPos.x()+w >= spacingWidth()) {
 						dx = w - spacingWidth(); 
@@ -317,7 +317,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                    //if (flag) {
                     int count = 1;
                     if (selStartIdx_!=selEndIdx_) {
-                       count = abs(selEndIdx_ - selStartIdx_);
+                       count = abs( (int) (selEndIdx_ - selStartIdx_) );
                        pos_ = min(selStartIdx_,selEndIdx_);
                        selStartIdx_ =selEndIdx_ = 0;
                     //}
@@ -362,12 +362,33 @@ void NEdit::setReadOnly( bool on )
 void NEdit::onMousePress( int x, int y, int button ) {
   NPanel::onMousePress( x, y, button );  
 
-	NFntString myText;
+  NFntString myText;
   myText.setText( text_ );
   int newPos = findWidthMax( x + dx, myText );
   pos_ = newPos;
+  startSel();
+  computeSel();
   repaint();
 }
+
+void NEdit::onMouseOver( int x, int y ) {
+  NPanel::onMouseOver( x, y );
+  int shiftState = NApp::system().shiftState();
+  
+  if ( shiftState & nsLeft ) {
+    NFntString myText;
+    myText.setText( text_ );
+
+    pos_ = findWidthMax( x + dx, myText );   
+    computeSel();
+    repaint();
+  }       
+}
+
+void NEdit::onMousePressed( int x, int y, int button ) {
+  NPanel::onMousePressed( x, y, button ); 
+  endSel();    
+}     
 
 int NEdit::findWidthMax(long width, const NFntString & data ) const
 {
@@ -401,3 +422,15 @@ void NEdit::setInputPolicy( const std::string & regexp )
 {
 
 }
+
+void NEdit::startSel( ) {
+  selStartPos_ = pos_;
+}
+     
+void NEdit::computeSel( ) {
+  selStartIdx_ = std::min( pos_, selStartPos_ );
+  selEndIdx_   = std::max( pos_, selStartPos_ );
+}
+     
+void NEdit::endSel() {   
+}     
