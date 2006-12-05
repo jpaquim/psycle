@@ -31,9 +31,13 @@ NBitmap::NBitmap()
  #ifdef __unix__
  ,xi(0), clp(0)
  #else
- , hBmp(0), memDC_(0)
+ , hBmp(0), cBmp(0), memDC_(0)
  #endif
 {
+  #ifdef __unix__
+  #else
+  clpColor = 0;
+  #endif       
 }
 
 NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(0),height_(0),data_(0)
@@ -43,6 +47,10 @@ NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(
 ,hBmp(0),  memDC_(0)
 #endif
 {
+  #ifdef __unix__
+  #else
+  clpColor = 0;
+  #endif       
   loadFromFile(filename);
 }
 
@@ -54,8 +62,10 @@ NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_
 #endif
 {
   #ifdef __unix__
+  #else
+  clpColor = 0;
+  #endif             
   createFromXpmData(data);
-  #endif
 }
 
 
@@ -175,6 +185,10 @@ NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(
     hBmp = CreateCompatibleBitmap( rhs.memDC(), rhs.width(), rhs.height() );
     SelectObject( memDC_, hBmp );
     BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), rhs.memDC(), 0, 0, SRCCOPY);
+
+    if ( rhs.cdata() ) {
+      cBmp = createClipMask( hBmp, clpColor );
+    }
   }  	
   #endif
   
@@ -214,6 +228,11 @@ const NBitmap & NBitmap::operator =( const NBitmap & rhs )
     hBmp = CreateCompatibleBitmap( rhs.memDC(), rhs.width(), rhs.height() );
     SelectObject( memDC_, hBmp );
     BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), rhs.memDC(), 0, 0, SRCCOPY);
+    
+    if ( rhs.cdata() ) {
+      cBmp = createClipMask( hBmp, clpColor );
+    }
+
   }  	
   #endif	
   return *this;
@@ -287,31 +306,66 @@ void NBitmap::createFromXpmData(const char** data)
   int colorPos = ncpp+4;
     
   std::map<std::string,long> colorTable;
+  bool trans = false;
+  std::string transKey;
+  srand( time( NULL ) );
   
   for (int i = 0; i< ncolors; i++) {
     std::string colorLine( data[i+1] );  
     std::string key   = colorLine.substr(0,ncpp);
     std::string value;
-    if ( ncpp + 4 < colorLine.length() ) 
-      value = std::string(colorLine).substr(4+ncpp);
+    if ( ncpp + 3 < colorLine.length() ) 
+      value = std::string(colorLine).substr(3+ncpp);
     else
       value = "None";
-        
     long int color  = 255;
-    if ( value.find("None")  != std::string::npos ) color =  ((255<<16) | (255<<8) | 255); else
-    if ( value.find("black") != std::string::npos ) color =  0; else
+    if ( value.find("None")  != std::string::npos ) {
+      color =  clpColor; 
+      trans = true;
+      colorTable[std::string(key)] = color;
+      transKey = std::string(key);
+    } else 
     {
-      std::string vstr = std::string(value).substr(1);  
-      char red[3];   sprintf(red,"%.2s\n",value.c_str());  
-      char green[3]; sprintf(green,"%.2s\n",value.c_str()+2);
-      char blue[3];  sprintf(blue,"%.2s\n",value.c_str()+4);    
-      int r = strtol( red, (char **)NULL, 16 );
-      int g = strtol( green, (char **)NULL, 16 );
-      int b = strtol( blue, (char **)NULL, 16 );
+      if ( value.find("black") != std::string::npos ) color =  0; else
+      {
+        std::string vstr = std::string(value).substr(1);  
+        char red[3];   sprintf(red,"%.2s\n",vstr.c_str());  
+        char green[3]; sprintf(green,"%.2s\n",vstr.c_str()+2);
+        char blue[3];  sprintf(blue,"%.2s\n",vstr.c_str()+4);    
+        int r = strtol( red, (char **)NULL, 16 );
+        int g = strtol( green, (char **)NULL, 16 );
+        int b = strtol( blue, (char **)NULL, 16 );
       
-      color = (b << 16) | (g << 8) | r;
+        color = (b << 16) | (g << 8) | r;
+      }
+    
+      colorTable[std::string(key)] = color;
+      
+      if ( trans ) {
+       // check if new clp Color is needed
+       if ( clpColor == color ) {
+         // create new random clp color
+/*
+         clpColor = (int) ( rand() * 2147483647 );
+         bool generateClpAgain;
+         do {
+           generateClpAgain = false;  
+           std::map<std::string,long>::iterator it = colorTable.begin();
+           for ( ; it != colorTable.end(); it++ ) {
+             long c = it->second;
+             if ( c == clpColor ) {
+               generateClpAgain = true;
+               break;
+             }                  
+           }
+           if ( !generateClpAgain ) {                
+             colorTable[ transKey ] = clpColor;
+           }                
+         } while ( generateClpAgain );*/
+       }     
+      }     
     }
-    colorTable[std::string(key)] = color;    
+    
   }
   // end of ngrs0.8 code
   
@@ -321,9 +375,9 @@ void NBitmap::createFromXpmData(const char** data)
   hBmp = CreateCompatibleBitmap( dc, xwidth_, xheight_ );
   SelectObject( memDC_, hBmp );
     
-  for (int y=0; y<height; y++) {  
+  for ( int y=0; y < height; y++ ) {  
      const char* scanLine = data[1+ncolors+y];
-     for (int x=0; x<width; x++) {
+     for ( int x=0; x < width; x++ ) {
         long colorValue = 0;
         char pixel[20]; memcpy(pixel,scanLine+x*ncpp,ncpp); pixel[ncpp]='\0';
         std::map<std::string,long>::iterator itr;
@@ -334,6 +388,10 @@ void NBitmap::createFromXpmData(const char** data)
         SetPixel( memDC_, x, y,  colorValue );
      }
   }
+  
+  if ( trans ) {  
+    cBmp = createClipMask( hBmp, clpColor );
+  } 
     
   #endif
 }
@@ -346,6 +404,10 @@ XImage * NBitmap::X11ClpData( ) const
 #else
 HBITMAP NBitmap::hdata() const {
   return hBmp;       
+}        
+
+HBITMAP NBitmap::cdata() const {
+  return cBmp;        
 }        
 
 HDC NBitmap::memDC() const {
@@ -406,3 +468,51 @@ bool NBitmap::empty() const {
   #endif
 }
 
+
+#ifdef __unix__
+#else
+
+HBITMAP NBitmap::createClipMask(HBITMAP hbmColour, COLORREF crTransparent)
+{
+    HDC hdcMem, hdcMem2;
+    HBITMAP hbmMask;
+    BITMAP bm;
+
+    // Create monochrome (1 bit) mask bitmap.  
+
+    GetObject(hbmColour, sizeof(BITMAP), &bm);
+    hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+
+    // Get some HDCs that are compatible with the display driver
+
+    hdcMem = CreateCompatibleDC(0);
+    hdcMem2 = CreateCompatibleDC(0);
+
+    SelectObject(hdcMem, hbmColour);
+    SelectObject(hdcMem2, hbmMask);
+
+    // Set the background colour of the colour image to the colour
+    // you want to be transparent.
+    SetBkColor(hdcMem, crTransparent);
+
+    // Copy the bits from the colour image to the B+W mask... everything
+    // with the background colour ends up white while everythig else ends up
+    // black...Just what we wanted.
+
+    BitBlt(hdcMem2, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+
+    // Take our new mask and use it to turn the transparent colour in our
+    // original colour image to black so the transparency effect will
+    // work right.
+    BitBlt(hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem2, 0, 0, SRCINVERT);
+
+    // Clean up.
+
+    DeleteDC(hdcMem);
+    DeleteDC(hdcMem2);
+
+    return hbmMask;
+}
+
+
+#endif

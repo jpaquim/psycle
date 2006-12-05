@@ -57,6 +57,7 @@ public:
     void setX11Data(XImage* ximage, XImage* clp_);
     #else
     HBITMAP hdata() const;
+    HBITMAP cdata() const;
     HDC memDC() const;
     #endif
 
@@ -82,11 +83,13 @@ private:
     XImage* clp;
     #else
     HBITMAP hBmp;
-    HDC memDC_;
+    HBITMAP cBmp; // clipMask
+    HDC memDC_;    
+    HBITMAP createClipMask(HBITMAP hbmColour, COLORREF crTransparent);
+    COLORREF clpColor;
     #endif
 
 	void deleteBitmapData();
-
 		
 };
 

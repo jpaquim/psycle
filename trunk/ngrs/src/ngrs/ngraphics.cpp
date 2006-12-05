@@ -21,6 +21,7 @@
 #include "napp.h"
 #include "nvisualcomponent.h"
 #include <cmath>
+#include <iostream>
 
 #ifdef __unix__
 #else
@@ -655,7 +656,23 @@ void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
                 0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
   }
   #else
+
+/*  std::ostringstream s;
+  s << (int) bitmap.cdata();
+  std::string text = s.str();
+
+    MessageBox(NULL, text.c_str(), "Error!",
+    MB_ICONEXCLAMATION | MB_OK);(*/
+
+  if ( bitmap.cdata() ) {  
+    // bitmap is transparent      
   
+    SelectObject( bitmap.memDC(), bitmap.cdata() );
+    BitBlt( gcp, x+dx_, y+dy_, bitmap.width(), bitmap.height(), bitmap.memDC(), 0, 0, SRCAND);
+
+    SelectObject( bitmap.memDC(), bitmap.hdata() );
+    BitBlt( gcp, x+dx_, y+dy_, bitmap.width(), bitmap.height(), bitmap.memDC(), 0, 0, SRCPAINT);
+  } else
   if ( bitmap.hdata() ) {
     BitBlt( gcp, x+dx_, y+dy_, bitmap.width(), bitmap.height(), bitmap.memDC(), 0,0, SRCCOPY);
   }  
