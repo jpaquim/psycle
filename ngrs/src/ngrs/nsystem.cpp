@@ -138,11 +138,11 @@ int NSystem::shiftState() const {
   
   Window root_win,child_win;
   int x_win; int y_win; unsigned int mask;
-  if (XQueryPointer( dpy(), rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask)
-  ) {
-    if ( mask & Button1Mask ) sState | = nsLeft;                     
-    if ( mask & Button2Mask ) sState | = nsRight;
-    if ( mask & Button2Mask ) sState | = nsMiddle;          
+  if (XQueryPointer( dpy(), rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask) )
+  {
+    if ( mask & Button1Mask ) sState |= nsLeft;                     
+    if ( mask & Button2Mask ) sState |= nsRight;
+    if ( mask & Button2Mask ) sState |= nsMiddle;          
   }                     
   
   #else  
