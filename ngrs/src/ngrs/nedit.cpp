@@ -234,21 +234,18 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
  if (!readOnly_) {
  int keyCode = keyEvent.scancode();
  switch (keyCode) {
+    case NK_Shift: 
+         exit( 0 );
+    break;
     case NK_Left:
-                  if ( pos_>0) {
-                    pos_--;
-                    if ( keyEvent.shift() & nsShift ) {
-                       if (selStartIdx_==selEndIdx_) {
-                          selStartIdx_ = pos_;
-                          selEndIdx_ = pos_+1;
-                       } else 
-                       if (selStartIdx_ < selEndIdx_) {
-                          selStartIdx_ = pos_;
-                       }
-                    } else selStartIdx_ = selEndIdx_ = pos_;
-                  }
-                  repaint();
-                break;
+    if ( pos_>0) {
+        pos_--;
+        if ( keyEvent.shift() & nsShift ) {
+        computeSel();   
+      }
+      repaint();
+    } 
+    break;
     case NK_Right:
                   if (pos_< text_.length()) {
                     pos_++;
@@ -362,11 +359,17 @@ void NEdit::setReadOnly( bool on )
 void NEdit::onMousePress( int x, int y, int button ) {
   NPanel::onMousePress( x, y, button );  
 
+  int shiftState = NApp::system().shiftState();
+
   NFntString myText;
   myText.setText( text_ );
   int newPos = findWidthMax( x + dx, myText );
   pos_ = newPos;
-  startSel();
+  
+  if ( !( shiftState & nsShift ) ) {
+    startSel();       
+  }     
+
   computeSel();
   repaint();
 }
