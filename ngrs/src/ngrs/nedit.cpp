@@ -234,34 +234,27 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
  if (!readOnly_) {
  int keyCode = keyEvent.scancode();
  switch (keyCode) {
-    case NK_Shift: 
-         exit( 0 );
-    break;
+    case NK_Shift:
+      if ( selStartIdx_ == selEndIdx_ ) startSel();   
+    break;         
     case NK_Left:
-    if ( pos_>0) {
+      if ( pos_>0) {
         pos_--;
         if ( keyEvent.shift() & nsShift ) {
-        computeSel();   
-      }
-      repaint();
-    } 
+          computeSel();   
+        }
+        repaint();
+      } 
     break;
     case NK_Right:
-                  if (pos_< text_.length()) {
-                    pos_++;
-                      if ( keyEvent.shift() & nsShift ) {
-                        if (selStartIdx_==selEndIdx_) {
-                          selEndIdx_ = pos_;
-                          selStartIdx_ = pos_-1;
-                       } else
-                       if (selStartIdx_ < selEndIdx_) {
-                          selEndIdx_ = pos_;
-                       }
-                    } else
-                        selStartIdx_ = selEndIdx_ = pos_;
-                    repaint();
-                  }
-                 break;
+      if (pos_< text_.length()) {
+        pos_++;
+        if ( keyEvent.shift() & nsShift ) {
+          computeSel();   
+        }
+        repaint();
+       }
+    break;
     case NK_BackSpace:
                  if (pos_>0) {
                     if (selStartIdx_!=selEndIdx_) {
@@ -324,12 +317,19 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                    }
                 }
                 break;
-    default:
-      if (keyEvent.buffer()!="") {
+    default: {            
+      if (keyEvent.buffer()!="" ) {
+        if ( selStartIdx_ != selEndIdx_ ) {
+           int count = selEndIdx_ - selStartIdx_;
+           pos_ = std::min( selStartIdx_, selEndIdx_ );
+           selStartIdx_ =selEndIdx_ = 0;
+           text_.erase( pos_, count ); 
+        }     
         text_.insert(pos_,keyEvent.buffer());
         pos_++;
         repaint();
       }
+}  
  }
  //emitActions();
   keyPress.emit(keyEvent);
