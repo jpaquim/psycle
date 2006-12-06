@@ -22,6 +22,8 @@
 
 #include <X11/keysym.h>
 
+const unsigned int NK_Shift = XK_Shift_L;
+
 const unsigned int NK_BackSpace	= XK_BackSpace;
 const unsigned int NK_Tab = XK_Tab;
 const unsigned int NK_Clear = XK_Clear;
