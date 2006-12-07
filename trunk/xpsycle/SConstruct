@@ -39,14 +39,19 @@ from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config
 from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
 
 import os.path
-ngrs = os.path.join('..', 'ngrs', 'SConstruct') # todo SConscript
-if os.path.exists(ngrs): ngrs = SConscript(ngrs).local_package()
+ngrs = os.path.join('..', 'ngrs', 'SConstruct')
+if os.path.exists(ngrs): ngrs = project.subscript(ngrs).local_package()
 else:
 	ngrs = external_package_check(project, name = 'ngrs',
 		dependencies = [
 			pkg_config_check(project, name = 'ngrs-0 >= 0')
 		],
-		distribution_packages = {'debian': 'lib-ngrs-0-dev (>= 0)'},
+		distribution_packages = {
+			'debian and ubuntu': 'lib-ngrs-0-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
 		url = 'http://psycle.sourceforge.net'
 	)
 
@@ -62,7 +67,12 @@ netaudio = external_package_check(project, name = 'network audio system',
 			"""
 		)
 	],
-	distribution_packages = {'debian': 'libaudio-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libaudio-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://google.ch "network audio system" nas'
 )
 
@@ -70,7 +80,12 @@ esound = external_package_check(project, name = 'esound',
 	dependencies = [
 		pkg_config_check(project, name = 'esound >= 0')
 	],
-	distribution_packages = {'debian': 'libesd0-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libesd0-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://google.ch esound' # todo check the url
 )
 
@@ -78,7 +93,12 @@ jack = external_package_check(project, name = 'jack',
 	dependencies = [
 		pkg_config_check(project, name = 'jack >= 0')
 	],
-	distribution_packages = {'debian': 'libjack-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libjack-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://jackaudio.net' # todo check this url
 )
 
@@ -86,7 +106,12 @@ alsa = external_package_check(project, name = 'alsa',
 	dependencies = [
 		pkg_config_check(project, name = 'alsa >= 0')
 	],
-	distribution_packages = {'debian': 'libasound-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libasound-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://alsa.org' # todo check this url
 )
 
@@ -106,6 +131,23 @@ microsoft_direct_sound = external_package_check(project, name = 'microsoft direc
 	url = 'http://msdn.microsoft.com'
 )
 
+# todo or not todo, asio is not "designed" to be (re)distributed
+steinberg_asio = external_package_check(project, name = 'steinberg asio',
+	dependencies = [
+		cxx_build_check(project, name = 'steinberg asio', libraries = ['asio-is-not-even-a-library'], source_text = \
+			"""\
+				#include <a-bunch-of-fucked-up-headers-and-even-source-files>
+				void steinberg_asio()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
+	],
+	distribution_packages = {'microsoft': 'steinberg asio'},
+	url = 'http://steinberg.com'
+)
+
 # modules
 
 from packageneric.generic.scons.module import module
@@ -121,20 +163,29 @@ class xpsycle_module(module):
 		self.dynamic_dependencies()
 		
 	def dynamic_dependencies(self):
-		if False and netaudio.result(): self.add_dependencies([netaudio]) # todo remove the 'False and' when netaudio suport is finished
+		if netaudio.result() and False: self.add_dependencies([netaudio]) # todo remove the 'and False' when netaudio suport is finished
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_NETAUDIO': 1})
+		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'netaudio_conditional_build.h.in'
 		
 		if esound.result(): self.add_dependencies([esound])
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_ESOUND': 1})
+		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'esound_conditional_build.h.in'
 
 		if jack.result(): self.add_dependencies([jack])
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_JACK': 1})
+		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'jack_conditional_build.h.in'
 		
 		if alsa.result(): self.add_dependencies([alsa])
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_ALSA': 1})
+		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'alsa_conditional_build.h.in'
 		
 		if microsoft_direct_sound.result(): self.add_dependencies([microsoft_direct_sound])
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_MICROSOFT_DIRECT_SOUND': 1})
+		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'microsoft_direct_sound_conditional_build.h.in'
+
+		if steinberg_asio.result(): self.add_dependencies([steinberg_asio])
+		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_STEINBERG_ASIO': 1})
+		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'steinberg_asio_conditional_build.h.in'
 
 xpsycle_module = xpsycle_module()
 
@@ -143,7 +194,7 @@ xpsycle_module.add_sources(find(project, 'src', 'xpsycle', '*.cpp'))
 xpsycle_module.add_headers(find(project, 'src', 'xpsycle', '*.hpp'))
 xpsycle_module.add_headers(find(project, 'src', 'xpsycle', '*.h'))
 
-for context in xpsycle_module.contexes().build(), xpsycle_module.contexes().client().uninstalled(): context.compilers().cxx().paths().add(['src'])
+xpsycle_module.contexes().source().compilers().cxx().paths().add(['src'])
 
 if False:
 	# debian

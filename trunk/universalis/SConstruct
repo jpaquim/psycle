@@ -43,13 +43,18 @@ from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config
 
 import os.path
 diversalis = os.path.join('..', 'diversalis', 'SConstruct') # todo SConscript
-if os.path.exists(diversalis): diversalis = SConscript(diversalis).local_package()
+if os.path.exists(diversalis): diversalis = project.subscript(diversalis).local_package()
 else:
 	diversalis = external_package_check(project, name = 'diversalis',
 		dependencies = [
 			pkg_config_check(project, name = 'diversalis-0 >= 0')
 		],
-		distribution_packages = {'debian': 'lib-diversalis-0-dev (>= 0)'},
+		distribution_packages = {
+			'debian and ubuntu': 'lib-diversalis-0-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
 		url = 'http://psycle.sourceforge.net'
 	)
 
@@ -67,7 +72,9 @@ glibmm = external_package_check(project, name = 'glibmm',
 		pkg_config_check(project, name = 'glibmm-2.4 >= 2.4 gmodule-2.0 >= 2.0 gthread-2.0 >= 2.0')
 	],
 	distribution_packages = {
-		'debian': 'libglibmm-2.4-dev (>= 2.4)',
+		'debian and ubuntu': 'libglibmm-2.4-dev (>= 2.4)',
+		'gentoo': '...',
+		'fedora': '...',
 		'cygwin': 'glib2-devel-2.6.6-2' # mm!
 	},
 	url = 'http://freedesktops.org'
@@ -87,7 +94,7 @@ from packageneric.generic.scons.find import find
 universalis_module.add_sources(find(project, 'src', 'universalis', '*.cpp'))
 universalis_module.add_headers(find(project, 'src', 'universalis', '*.hpp'))
 
-for context in universalis_module.contexes().build(), universalis_module.contexes().client().uninstalled(): context.compilers().cxx().paths().add(['src'])
+universalis_module.contexes().source().compilers().cxx().paths().add(['src'])
 
 # pkg-config packages
 

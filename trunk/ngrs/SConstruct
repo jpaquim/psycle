@@ -56,8 +56,27 @@ pthread = external_package_check(project, name = 'pthread',
 			"""
 		)
 	],
-	distribution_packages = {'debian': 'libc-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libc-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://google.ch posix 1003.1-2003'
+)
+
+freetype = external_package_check(project, name = 'freetype',
+	dependencies = [
+		pkg_config_check(project, name = 'freetype2 >= 0') # note: brings the z lib
+	],
+	distribution_packages = {
+		'debian': 'libfreetype6-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...',
+		'microsoft': '... (have a look at http://gimp.org)'
+	},
+	url = 'http://google.ch ...'
 )
 
 x = external_package_check(project, name = 'x',
@@ -75,7 +94,12 @@ x = external_package_check(project, name = 'x',
 			"""
 		)
 	],
-	distribution_packages = {'debian': 'libx11-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libx11-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://x.org'
 )
 
@@ -94,7 +118,12 @@ xfixes = external_package_check(project, name = 'xfixes',
 			"""
 		)
 	],
-	distribution_packages = {'debian': 'libxfixes-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libxfixes-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://x.org'
 )
 
@@ -112,7 +141,12 @@ xpm = external_package_check(project, name = 'xpm',
 			"""
 		)
 	],
-	distribution_packages = {'debian': 'libxpm-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libxpm-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://x.org'
 )
 
@@ -131,7 +165,12 @@ xcursor = external_package_check(project, name = 'xcursor',
 			"""
 		)
 	],
-	distribution_packages = {'debian': 'libxcursor-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libxcursor-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://x.org'
 )
 
@@ -139,16 +178,13 @@ xft = external_package_check(project, name = 'xft',
 	dependencies = [
 		pkg_config_check(project, name = 'xft >= 0')
 	],
-	distribution_packages = {'debian': 'libxft2-dev (>= 0), libfontconfig1-dev (>= 2.3.1)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libxft2-dev (>= 0), libfontconfig1-dev (>= 2.3.1)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://x.org'
-)
-
-freetype = external_package_check(project, name = 'freetype',
-	dependencies = [
-		pkg_config_check(project, name = 'freetype2 >= 0')
-	],
-	distribution_packages = {'debian': 'libfreetype6-dev (>= 0)'},
-	url = 'http://google.ch ...'
 )
 
 xerces = external_package_check(project, name = 'xerces',
@@ -163,26 +199,67 @@ xerces = external_package_check(project, name = 'xerces',
 			"""
 		)
 	],
-	distribution_packages = {'debian': 'libxerces27-dev (>= 0) | libxerces26-dev (>= 0)'},
+	distribution_packages = {
+		'debian and ubuntu': 'libxerces27-dev (>= 0) | libxerces26-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
 	url = 'http://apache.org'
 )
 
 # modules
 
 from packageneric.generic.scons.module import module
-ngrs_module = module(source_package,
-	name = 'ngrs-' + str(source_package.version().major()),
-	version = source_package.version(),
-	description = source_package.description(),
-	dependencies = [stdcxx, dlfcn, pthread, x, xfixes, xpm, xcursor, xft, freetype, xerces]
-)
+
+class ngrs_module(module):
+	def __init__(self):
+		module.__init__(self, source_package,
+			name = 'ngrs-' + str(source_package.version().major()),
+			version = source_package.version(),
+			description = source_package.description(),
+			dependencies = [stdcxx, xerces]
+		)
+
+	def dynamic_dependencies(self):
+		# todo here we should check whether we have dlfcn, pthread and the X window libraries (and related),
+		# if not and if the host operating system is microsoft's, this shouldn't be a fatal error
+		# (once ngrs supports that os too, that is).
+		# remove the ' or True' when ready
+		
+		if dlfcn.result() or True: self.add_dependency(dlfcn)
+		else: pass # todo for other systems
+
+		if pthread.result() or True: self.add_dependency(pthread)
+		else: pass # todo for other systems
+
+		if freetype.result() or True: self.add_dependency(freetype)
+		else: pass # todo work around?
+
+		if x.result() or True:
+			self.add_dependency(x)
+			
+			if xfixes.result() or True: self.add_dependency(xfixes)
+			else: pass # todo work around?
+
+			if xpm.result() or True: self.add_dependency(xpm)
+			else: pass # todo work around?
+
+			if xcursor.result() or True: self.add_dependency(xcursor)
+			else: pass # todo work around?
+
+			if xft.result() or True: self.add_dependency(xft)
+			else: pass # todo work around?
+		else: pass # todo for other systems
+
+ngrs_module = ngrs_module()
 
 from packageneric.generic.scons.find import find
 ngrs_module.add_sources(find(project, 'src', 'ngrs', '*.cpp'))
 ngrs_module.add_headers(find(project, 'src', 'ngrs', '*.hpp'))
 ngrs_module.add_headers(find(project, 'src', 'ngrs', '*.h'))
 
-for context in ngrs_module.contexes().build(), ngrs_module.contexes().client().uninstalled(): context.compilers().cxx().paths().add(['src'])
+ngrs_module.contexes().source().compilers().cxx().paths().add(['src'])
 
 # pkg-config packages
 
