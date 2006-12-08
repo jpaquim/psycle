@@ -237,47 +237,8 @@ void MasterGUI::paint( NGraphics * g )
 
 void MasterGUI::onMousePress( int x, int y, int button )
 {
-  MachineGUI::onMousePress(x,y,button);
-  /*if (button==1) {
-      if (coords().dMuteCoords.intersects(x,y)) { // mute or unmute
-        pMac()->_mute = !pMac()->_mute;
-        if (pMac()->_mute) {
-          pMac()->_volumeCounter=0.0f;
-          pMac()->_volumeDisplay=0;
-          if ( pMac()->song()->machineSoloed == pMac()->_macIndex ) {
-            pMac()->song()->machineSoloed = -1;
-          }
-        }
-        repaint();
-      } else
-      if ( coords().dSoloCoords.intersects(x,y)) { // solo or unsolo
-        if (pMac()->song()->machineSoloed == pMac()->_macIndex ) {
-          pMac()->song()->machineSoloed = -1;
-          for ( int i=0;i<MAX_MACHINES;i++ ) {
-            if ( pMac()->song()->_pMachine[i] ) {
-              if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-                pMac()->song()->_pMachine[i]->_mute = false;
-              }
-            }
-          }
-        } else {
-          for ( int i=0;i<MAX_MACHINES;i++ ) {
-          if ( pMac()->song()->_pMachine[i] )
-          {
-            if (( pMac()->song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != pMac()->_macIndex))
-            {
-                pMac()->song()->_pMachine[i]->_mute = true;
-                pMac()->song()->_pMachine[i]->_volumeCounter=0.0f;
-                pMac()->song()->_pMachine[i]->_volumeDisplay=0;
-              }
-            }
-          }
-          pMac()->_mute = false;
-          pMac()->song()->machineSoloed = pMac()->_macIndex;
-        }
-      repaint();
-    }
-  }*/
+// empty; ther master gui doesn't do anything with a single
+// mouse press other than move around.
 }
 
 void MasterGUI::updateSkin() {
