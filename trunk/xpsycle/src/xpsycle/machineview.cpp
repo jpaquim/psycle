@@ -166,7 +166,9 @@ MachineGUI * MachineView::findByMachine( Machine * mac )
   return 0;
 }
 
-
+/**
+ * Called when starting a new connection from a machine.
+ */
 void MachineView::onNewConnection( MachineGUI * sender )
 {
   startGUI = sender;
@@ -174,43 +176,100 @@ void MachineView::onNewConnection( MachineGUI * sender )
   int midW = sender->clientWidth()  / 2;
   int midH = sender->clientHeight() / 2;
 
-  line = new MachineWireGUI();
-  line->setPoints(NPoint(sender->left()+midW,sender->top()+midH),NPoint(sender->left()+midW,sender->top()+midH));
-  scrollArea_->insert(line,0);
-	std::cout << "yup yup the yup" << std::endl;
-  line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
-	line->setName("line");
+  MachineWireGUI* newline = new MachineWireGUI();
+  newline->setPoints(NPoint(sender->left()+midW,sender->top()+midH),NPoint(sender->left()+midW,sender->top()+midH));
+  scrollArea_->insert(newline,0);
+  newline->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
+  newline->setName("line");
   repaint();
-  line->setMoveFocus(0); 
-  line->moveEnd.connect(this,&MachineView::onLineMoveEnd);
-	std::cout << "yup2 yup2 the2 yup" << std::endl;
+  newline->setMoveFocus(0); 
+  newline->wireMoveEnd.connect(this,&MachineView::onLineMoveEnd);
 } 
 
-void MachineView::onLineMoveEnd( const NMoveEvent & ev)
+/**
+ * Triggered when the user starts rewiring a connection.
+ */
+void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline)
+{
+  startGUI = this->findByMachine(theline->dialog()->pSrcMachine());
+  
+  int midW = startGUI->clientWidth()  / 2;
+  int midH = startGUI->clientHeight() / 2;
+  theline->setPoints(NPoint(startGUI->left()+midW,startGUI->top()+midH),NPoint(startGUI->left()+midW,startGUI->top()+midH));
+  theline->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
+  repaint();
+  theline->setMoveFocus(0); 
+  theline->setRewiring(true);
+}
+
+/**
+ * Triggered when the user stops dragging a machine connection
+ * (be it a new connection or a rewiring.)
+ */
+void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
 {	
-	std::cout << "yup2 yup2 the2 yup end" << std::endl; 
-  bool found = false;
-  for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
-    MachineGUI* machineGUI = *it;
-    if (machineGUI->clipBox().intersects(line->left()+ev.x(),line->top()+ev.y())) {
-      _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
-      startGUI->attachLine(line,0);
-      machineGUI->attachLine(line,1);
-      line->setMoveable(NMoveable());
-      line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
-      line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-      wireGUIs.push_back(line);
-      found = true;
-      repaint(); 
-      break;
-    } 
+  if (!theline->isBeingRewired()) {
+          bool found = false;
+          for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+            MachineGUI* machineGUI = *it;
+            if (machineGUI->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())) {
+              _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
+              startGUI->attachLine(theline,0);
+              machineGUI->attachLine(theline,1);
+              theline->setMoveable(NMoveable());
+              theline->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
+              theline->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
+              wireGUIs.push_back(theline);
+              found = true;
+              repaint(); 
+              theline->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
+              break;
+            } 
+          }
+          if (!found) {
+                theline->dialog()->setName("wiredlg");
+            scrollArea_->removeChild(theline);
+            line = 0;
+            repaint();
+          } else {
+                theline->setMoveable( NMoveable() ); 
+          }
+  } else { // rewiring
+        std::cout << "rewiring" << std::endl;
+          MachineGUI* oldDestGUI = this->findByMachine(theline->dialog()->pDstMachine());
+          bool found = false;
+          for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+            MachineGUI* machineGUI = *it;
+            if (machineGUI->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())) {
+        	std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
+        	it = find( wireGUIs.begin(), wireGUIs.end(), theline );
+        	if ( it != wireGUIs.end() ) wireGUIs.erase(it);	
+              // Update the GUI.
+              oldDestGUI->detachLine(theline);
+              machineGUI->attachLine(theline,1);
+              theline->setMoveable(NMoveable());
+              theline->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
+              wireGUIs.push_back(theline);
+
+              Machine* srcMac = startGUI->pMac();
+              Machine* dstMac = machineGUI->pMac();
+              int wireIndex = srcMac->FindOutputWire(oldDestGUI->pMac()->_macIndex);
+              // Update the connections in the song.
+              _pSong->ChangeWireDestMac(srcMac->_macIndex, dstMac->_macIndex, wireIndex);
+                 
+             
+              found = true;
+              repaint(); 
+              theline->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
+              break;
+            } 
+          }
+          if (!found) {
+              // reattach end of wire to where it was previously.
+              oldDestGUI->attachLine(theline,1);
+              repaint();
+          } 
   }
-  if (!found) {
-		line->dialog()->setName("wiredlg");
-    scrollArea_->removeChild(line);
-    repaint();
-  } else 
-		line->setMoveable( NMoveable() ); 
 }
 
 void MachineView::onWireDelete( WireDlg * dlg )
@@ -250,9 +309,11 @@ void MachineView::onWireDelete( WireDlg * dlg )
   scrollArea_->removeChild ( dlg->line() );
 
 	line = 0;
+std::cout << "before repaint.." << std::endl;
   repaint();
-
+std::cout << "after repaint.." << std::endl;
 	Player::Instance()->unlock();
+std::cout << "after unlock.." << std::endl;
 }
 
 void MachineView::removeMachines( )
