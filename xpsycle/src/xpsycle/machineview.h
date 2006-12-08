@@ -45,6 +45,7 @@ public :
     MachineWireGUI() {
       dlg = new WireDlg();
       dlg->setLine(this);
+      rewiring = false;
     }
     ~MachineWireGUI() {
         std::cout << "delete dialog" << std::endl;
@@ -54,18 +55,29 @@ public :
 
     virtual void onMousePress  (int x, int y, int button) {
       if(button==3)
-        dlg->setVisible(true);
+        rewireBegin.emit(this);
     }
     virtual void onMouseDoublePress (int x, int y, int button) {
       if(button==1)
         dlg->setVisible(true);
     }
+
+    virtual void onMoveEnd (const NMoveEvent & ev ) {
+        wireMoveEnd.emit(this, ev); // override onMoveEnd because we want to send 
+                                    // the wire in the signal too.
+    }
    
     WireDlg* dialog() { return dlg;}
+    void setRewiring(bool trueorfalse) { rewiring = trueorfalse; };
+    bool isBeingRewired() { return rewiring; };
+
+    signal1<MachineWireGUI*> rewireBegin;
+    signal2<MachineWireGUI*, const NMoveEvent &> wireMoveEnd;
 
 private:
 
   WireDlg* dlg;
+  bool rewiring; // A flag to determine whether line is currently being rewired or not.
 
 };
 
@@ -108,6 +120,7 @@ private:
     MachineGUI* selectedMachine_;
 
     MachineWireGUI* line;
+    MachineWireGUI* rewireLine;
     MachineGUI* startGUI;
 
 
@@ -119,7 +132,8 @@ private:
     void onDestroyMachine(Machine* mac);
 
     void onNewConnection(MachineGUI* sender);
-    void onLineMoveEnd( const NMoveEvent & event);
+    void onLineRewireBeginSignal(MachineWireGUI* line);
+    void onLineMoveEnd(MachineWireGUI*, const NMoveEvent & event);
 
     void onWireDelete(WireDlg* dlg);
 
