@@ -21,11 +21,11 @@
 /* XPM */
 const char * group_xpm[] = {
 "15 15 10 1",
-" 	c None",
+" 	c #000000",
 ".	c #020204",
 "+	c #826E54",
 "@	c #9A8A76",
-"#	c #AD9E89",
+"#	c #FFFFFF",
 "$	c #BAAE98",
 "%	c #E0D9CF",
 "&	c #D2CAC0",
