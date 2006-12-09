@@ -624,7 +624,8 @@ void NGraphics::putStretchBitmap(int x, int y, const NBitmap & bitmap, int width
   #endif
 }
 
-
+#ifdef __unix__
+#else
 void TransparentBlt(HDC hdcDest,
                     int nXDest,
                     int nYDest,
@@ -746,6 +747,8 @@ void DrawTransparentBitmap(
     DeleteDC(hdcSave);
     DeleteDC(hdcTemp);
 }
+#endif
+
 void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
 {
   #ifdef __unix__
