@@ -390,7 +390,7 @@ void NBitmap::createFromXpmData(const char** data)
   }
   
   if ( trans ) {  
-    cBmp = createClipMask( hBmp, clpColor );
+    cBmp = createClipMask( hBmp, 0 );//clpColor );
   } 
     
   #endif
@@ -472,8 +472,61 @@ bool NBitmap::empty() const {
 #ifdef __unix__
 #else
 
+
+
+HBITMAP NBitmap::createClipMask(HBITMAP hBmpSrc, COLORREF clTransparent)
+{
+   HBITMAP   hBmpMask, hBmpOldMask, hBmpOldSrc;
+   BITMAP    bm;
+   HDC       hdcMask = CreateCompatibleDC( memDC() );
+   HDC       hdcSrc = CreateCompatibleDC( memDC() );
+   COLORREF  clPrev;
+
+   if(!hBmpSrc)
+      return NULL;
+
+   // Create mask bitmap
+   GetObject(hBmpSrc, sizeof(BITMAP), &bm);
+   hBmpMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+
+   // Select bitmaps into DCs
+   hBmpOldMask = (HBITMAP)SelectObject(hdcMask, hBmpMask);
+   hBmpOldSrc = (HBITMAP)SelectObject(hdcSrc, hBmpSrc);
+
+   // Blit source dc into mask dc
+   clPrev = SetBkColor(hdcSrc, clTransparent);
+   BitBlt(hdcMask, 0, 0, bm.bmWidth, bm.bmHeight, hdcSrc, 0, 0, SRCCOPY);
+   SetBkColor(hdcSrc, clPrev);
+
+   // Clean up
+   SelectObject(hdcMask, hBmpOldMask);
+   SelectObject(hdcSrc, hBmpOldSrc);
+   DeleteObject(hdcMask);
+   DeleteObject(hdcSrc);
+
+   return hBmpMask;
+} 
+
+
+
+
+/*
 HBITMAP NBitmap::createClipMask(HBITMAP hbmColour, COLORREF crTransparent)
 {
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     HDC hdcMem, hdcMem2;
     HBITMAP hbmMask;
     BITMAP bm;
@@ -513,6 +566,6 @@ HBITMAP NBitmap::createClipMask(HBITMAP hbmColour, COLORREF crTransparent)
 
     return hbmMask;
 }
-
+*/
 
 #endif

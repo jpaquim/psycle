@@ -483,8 +483,10 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     }
     break;
     case WM_SETCURSOR:
-       NApp::system().setCursor(  NApp::system().cursor() , win );
-       return TRUE;
+       if ( LOWORD( event->lParam ) == HTCLIENT ) {  
+         NApp::system().setCursor(  NApp::system().cursor() , win );
+         return TRUE;
+       }
     break;
     case WM_KEYUP : {
        BYTE keyboardState[256];
@@ -508,7 +510,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     default:
       return DefWindowProc( event->hwnd, event->msg, event->wParam, event->lParam);
   }
-  return 0;
+  return DefWindowProc( event->hwnd, event->msg, event->wParam, event->lParam);
   #endif
 }
 
