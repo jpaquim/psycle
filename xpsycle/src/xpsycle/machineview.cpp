@@ -195,7 +195,6 @@ void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline, int rewireTyp
   MachineGUI *dstGui = this->findByMachine(theline->dialog()->pDstMachine());
   
   theline->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
-  repaint();
   theline->setMoveFocus(0); 
   if (rewireType & nsCtrl) {
           int midW = dstGui->clientWidth()  / 2;
@@ -208,6 +207,7 @@ void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline, int rewireTyp
         theline->setPoints(NPoint(startGUI->left()+midW,startGUI->top()+midH),NPoint(startGUI->left()+midW,startGUI->top()+midH));
         theline->setRewiring(1); // dstRewire 
   }
+  repaint();
 }
 
 /**
