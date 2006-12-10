@@ -22,6 +22,7 @@
 
 #include "analyzer.h"
 #include "machine.h"
+#include "wiregui.h"
 #include <ngrs/nwindow.h>
 #include <ngrs/nbutton.h>
 #include <ngrs/nslider.h>
@@ -51,8 +52,8 @@ public:
     Machine* pSrcMachine();
     Machine* pDstMachine();
 
-    void setLine(NLine* line);
-    NLine* line();
+    void setLine(WireGUI* line);
+    WireGUI* line();
 
 		virtual void setVisible( bool on);
 
@@ -71,7 +72,7 @@ private:
     Machine* _pSrcMachine;
     Machine* _pDstMachine;
 
-    NLine* line_;
+    WireGUI* line_;
 
 		void onVolPosChanged( NSlider* slider );
 

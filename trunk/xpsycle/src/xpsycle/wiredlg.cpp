@@ -131,12 +131,12 @@ Machine * WireDlg::pDstMachine( )
   return _pDstMachine;
 }
 
-void WireDlg::setLine( NLine * line )
+void WireDlg::setLine( WireGUI * line )
 {
   line_ = line;
 }
 
-NLine * WireDlg::line( )
+WireGUI * WireDlg::line( )
 {
   return line_;
 }
