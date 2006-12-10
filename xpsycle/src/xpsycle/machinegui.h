@@ -22,6 +22,7 @@
 
 #include "skinreader.h"
 #include "macpropdlg.h"
+#include "wiregui.h"
 
 #include <ngrs/npanel.h>
 
@@ -44,9 +45,9 @@ class MachineGUI : public NPanel
 {
   class LineAttachment {
     public:
-        LineAttachment(NLine* l, int p) : line(l),point(p) {}
+        LineAttachment(WireGUI* l, int p) : line(l),point(p) {}
 
-        NLine* line;
+        WireGUI* line;
         int point;
 
         MachineGUI* in;
@@ -61,8 +62,8 @@ public:
         signal1<MachineGUI*> deleteRequest;
 
     Machine* pMac();
-    void attachLine(NLine* line, int point);
-    void detachLine(NLine* line);
+    void attachLine(WireGUI* line, int point);
+    void detachLine(WireGUI* line);
 
     signal1<MachineGUI*> newConnection;
     signal3<Machine*,int,int> moved;

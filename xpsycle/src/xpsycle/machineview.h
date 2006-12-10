@@ -24,6 +24,7 @@
 #include "wiredlg.h"
 #include "skinreader.h"
 
+#include <ngrs/napp.h>
 #include <ngrs/npage.h>
 #include <ngrs/nscrollbox.h>
 #include <ngrs/nlabel.h>
@@ -45,7 +46,7 @@ public :
     MachineWireGUI() {
       dlg = new WireDlg();
       dlg->setLine(this);
-      rewiring = false;
+      rewiring_ = 0; // not rewiring
     }
     ~MachineWireGUI() {
         std::cout << "delete dialog" << std::endl;
@@ -54,8 +55,10 @@ public :
     }
 
     virtual void onMousePress  (int x, int y, int button) {
-      if(button==3)
-        rewireBegin.emit(this);
+      if(button==3) {
+        int modifier = NApp::system().shiftState();
+        rewireBegin.emit(this,modifier);
+      }
     }
     virtual void onMouseDoublePress (int x, int y, int button) {
       if(button==1)
@@ -68,16 +71,16 @@ public :
     }
    
     WireDlg* dialog() { return dlg;}
-    void setRewiring(bool trueorfalse) { rewiring = trueorfalse; };
-    bool isBeingRewired() { return rewiring; };
+    void setRewiring(int rewireState) { rewiring_ = rewireState; };
+    int rewiring() { return rewiring_; };
 
-    signal1<MachineWireGUI*> rewireBegin;
+    signal2<MachineWireGUI*, int> rewireBegin;
     signal2<MachineWireGUI*, const NMoveEvent &> wireMoveEnd;
 
 private:
 
   WireDlg* dlg;
-  bool rewiring; // A flag to determine whether line is currently being rewired or not.
+  int rewiring_; // A flag to determine rewire state (0=none,1=dstRewire,2=srcRewire)
 
 };
 
@@ -132,7 +135,7 @@ private:
     void onDestroyMachine(Machine* mac);
 
     void onNewConnection(MachineGUI* sender);
-    void onLineRewireBeginSignal(MachineWireGUI* line);
+    void onLineRewireBeginSignal(MachineWireGUI* line, int rewireType);
     void onLineMoveEnd(MachineWireGUI*, const NMoveEvent & event);
 
     void onWireDelete(WireDlg* dlg);

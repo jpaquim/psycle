@@ -38,8 +38,12 @@ namespace psycle {
 
 
 		WireGUI::WireGUI()
-			: NLine()
+			: NVisualComponent()
 		{
+                        elbowShape = new NElbowLineShape();
+                        elbowShape->setClippingDistance(30);
+                        setGeometry(elbowShape);  
+
 			triangle_size_tall = 22+((23*2)/16);
 
 			triangle_size_center = triangle_size_tall/2;
@@ -52,14 +56,38 @@ namespace psycle {
 
 		WireGUI::~WireGUI()
 		{
+                        delete elbowShape;
 		}
+
+                const NPoint & WireGUI::p1( ) const {
+                  return elbowShape->p1();
+                }
+
+                const NPoint & WireGUI::p2( ) const
+                {
+                  return elbowShape->p2();
+                }
+
+                void WireGUI::setPoints( const NPoint & p1, const NPoint & p2 )
+                {
+                  elbowShape->setPoints(p1,p2);
+                }
+
 
 		void WireGUI::paint( NGraphics * g )
 		{
 			NPen pen;
 			pen.setLineWidth(2);
 			g->setPen(pen);
-			NLine::paint(g);
+                        g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
+                                g->drawLine(elbowShape->p1().x(),  elbowShape->p1().y(), 
+                                               elbowShape->p4().x(), elbowShape->p4().y());
+                                               g->drawLine(elbowShape->p4().x(),  elbowShape->p4().y(), 
+               elbowShape->p5().x(), elbowShape->p5().y());
+               g->drawLine(elbowShape->p5().x(),  elbowShape->p5().y(), 
+               elbowShape->p2().x(), elbowShape->p2().y());
+                        g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
+
 			g->resetPen();
 
 			g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
@@ -71,8 +99,8 @@ namespace psycle {
 		{
 			// Spaces between the end and startPoint of the Line
 
-			double  ankathede    = (p1().x() - p2().x());
-			double  gegenkathede = (p1().y() - p2().y());
+			double  ankathede    = (elbowShape->p4().x() - elbowShape->p5().x());
+			double  gegenkathede = (elbowShape->p4().y() - elbowShape->p5().y());
 			double  hypetenuse   = std::sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
 
 

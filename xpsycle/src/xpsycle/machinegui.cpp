@@ -97,7 +97,7 @@ void MachineGUI::setSelected( bool on )
   selected_ = on;
 }
 
-void MachineGUI::attachLine( NLine * line, int point )
+void MachineGUI::attachLine( WireGUI * line, int point )
 {
   attachedLines.push_back(LineAttachment(line,point));
   int midW = clientWidth()  / 2;
@@ -660,7 +660,7 @@ void MachineGUI::showPropsDlg()
         propsDlg_->setVisible(true); 
 }
 
-void MachineGUI::detachLine( NLine * line )
+void MachineGUI::detachLine( WireGUI * line )
 {
   std::vector<LineAttachment>::iterator it = attachedLines.begin();
   for (;it <  attachedLines.end(); it++) {

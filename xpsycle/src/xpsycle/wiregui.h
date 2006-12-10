@@ -21,6 +21,7 @@
 #define WIREGUI_H
 
 #include <ngrs/nline.h>
+#include "nelbowlineshape.h"
 
 /**
 @author Stefan
@@ -31,12 +32,17 @@ namespace psycle
 	namespace host
 	{
 
-		class WireGUI : public NLine
+		class WireGUI : public NVisualComponent
 		{
 		public:
 				WireGUI();
 
 				~WireGUI();
+
+                                const NPoint & p1() const;
+                                const NPoint & p2() const;
+
+                                void setPoints( const NPoint & p1, const NPoint & p2 );
 
 				virtual void paint(NGraphics* g);
 			
@@ -44,6 +50,7 @@ namespace psycle
 
 		private:
 
+                                NElbowLineShape* elbowShape;
 				NColor polyColor_;
 				NColor borderColor_;
 
