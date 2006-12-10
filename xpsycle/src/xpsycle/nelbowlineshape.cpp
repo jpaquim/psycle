@@ -181,7 +181,12 @@ void NElbowLineShape::setPicker( int index, int x, int y )
 
 NRegion NElbowLineShape::lineToRegion( )
 {
-   return NRegion( rectArea() );
+  int d = distance_;
+  NRect r1( p4().x() - d, p4().y() - d, 2*d, p2().y() - p4().y() + d  );
+  NRect r2( p4().x() - d, p4().y() - d, p5().x() - p4().x() + 2 *d, 2 * d  );
+  NRect r3( p5().x() - d, p5().y() - d, 2*d, p5().y() - p1().y() + d );
+  NRegion region = NRegion( r1 ) | NRegion( r2 ) | NRegion ( r3 );
+  return region;
 }
 
 void NElbowLineShape::setClippingDistance( int d )
