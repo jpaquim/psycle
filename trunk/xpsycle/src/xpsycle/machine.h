@@ -447,6 +447,7 @@ namespace psycle
 					virtual void InitWireVolume(type_type, Wire::id_type, float value);
 					virtual Wire::id_type FindInputWire(id_type);
 					virtual Wire::id_type FindOutputWire(id_type);
+					bool AcceptsConnections();
 			///\}
 
 			///\name multichannel

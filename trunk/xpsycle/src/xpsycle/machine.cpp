@@ -409,6 +409,15 @@ namespace psycle
 			return Wire::id_type(-1);
 		}
 
+                bool Machine::AcceptsConnections()
+                {
+                        if (_mode == MACHMODE_FX || _mode == MACHMODE_MASTER) {
+                                return true;
+                        } else {
+                                return false;  
+                        }
+                }
+
 		bool Machine::SetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float value)
 		{
 			// Get reference to the destination machine
