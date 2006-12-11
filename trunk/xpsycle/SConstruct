@@ -160,32 +160,40 @@ class xpsycle_module(module):
 			dependencies = [ngrs],
 			target_type = module.target_types.program
 		)
-		self.dynamic_dependencies()
 		
 	def dynamic_dependencies(self):
-		if netaudio.result() and False: self.add_dependencies([netaudio]) # todo remove the 'and False' when netaudio suport is finished
+		got_audio = False # flag indicating whether we have found at least one audio output lib
+		
+		if netaudio.result() and False: self.add_dependencies([netaudio]) ; got_audio = True # todo remove the 'and False' when netaudio suport is finished
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_NETAUDIO': 1})
 		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'netaudio_conditional_build.h.in'
 		
-		if esound.result(): self.add_dependencies([esound])
+		if esound.result(): self.add_dependencies([esound]) ; got_audio = True
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_ESOUND': 1})
 		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'esound_conditional_build.h.in'
 
-		if jack.result(): self.add_dependencies([jack])
+		if jack.result(): self.add_dependencies([jack]) ; got_audio = True
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_JACK': 1})
 		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'jack_conditional_build.h.in'
 		
-		if alsa.result(): self.add_dependencies([alsa])
+		if alsa.result(): self.add_dependencies([alsa]) ; got_audio = True
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_ALSA': 1})
 		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'alsa_conditional_build.h.in'
 		
-		if microsoft_direct_sound.result(): self.add_dependencies([microsoft_direct_sound])
+		if microsoft_direct_sound.result(): self.add_dependencies([microsoft_direct_sound]) ; got_audio = True
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_MICROSOFT_DIRECT_SOUND': 1})
 		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'microsoft_direct_sound_conditional_build.h.in'
 
-		if steinberg_asio.result(): self.add_dependencies([steinberg_asio])
+		if steinberg_asio.result(): self.add_dependencies([steinberg_asio]) ; got_audio = True
 		else: self.contexes().build().compilers().cxx().defines().add({'XPSYCLE__NO_STEINBERG_ASIO': 1})
 		#self.contexes().build().compilers().cxx().defines().substituted_file(os.path.join('src', 'xpsycle', 'steinberg_asio_conditional_build.h.in'
+		
+		if not got_audio:
+			self.project().warning(
+				'None of the supported audio output libraries was found!\n' +
+				'You ought to install at least one of the following packages:\n' +
+				''.join([str(package) for package in netaudio, esound, jack, alsa, microsoft_direct_sound, steinberg_asio])
+			)
 
 xpsycle_module = xpsycle_module()
 
