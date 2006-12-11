@@ -224,7 +224,7 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
             MachineGUI* machineGUI = *it;
             if (machineGUI->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())
                 && machineGUI->pMac()->AcceptsConnections()) {
-              found = true;
+                      found = true;
                       _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
                       startGUI->attachLine(theline,0);
                       machineGUI->attachLine(theline,1);
@@ -283,13 +283,14 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
               repaint();
           } 
   } else if (theline->rewiring() == 2) { // rewiring src of existing connection
+    std::cout << "src rewire" << std::endl;
           MachineGUI* oldSrcGui = this->findByMachine(theline->dialog()->pSrcMachine());
           MachineGUI* dstGui = this->findByMachine(theline->dialog()->pDstMachine());
           bool found = false;
           for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
             MachineGUI* newSrcGui = *it;
             if (newSrcGui->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())
-                && newSrcGui->pMac()->AcceptsConnections()) {
+                && newSrcGui->pMac()->EmitsConnections()) {
               found = true;
               Machine* srcMac = newSrcGui->pMac();
               Machine* dstMac = dstGui->pMac();
@@ -302,6 +303,7 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
               // Update the GUI.
               oldSrcGui->detachLine(theline);
               newSrcGui->attachLine(theline,0);
+              dstGui->attachLine(theline,1);
               theline->setMoveable(NMoveable());
               theline->dialog()->setMachines(srcMac,dstMac);
               theline->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
