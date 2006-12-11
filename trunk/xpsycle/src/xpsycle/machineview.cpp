@@ -207,12 +207,9 @@ void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline, int rewireTyp
         theline->setPoints(NPoint(startGUI->left()+midW,startGUI->top()+midH),NPoint(startGUI->left()+midW,startGUI->top()+midH));
         theline->setRewiring(1); // dstRewire 
   }
-<<<<<<< .mine
 
   repaint();
-=======
-  repaint();
->>>>>>> .r3575
+
 }
 
 /**
