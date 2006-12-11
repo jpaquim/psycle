@@ -79,29 +79,45 @@ freetype = external_package_check(project, name = 'freetype',
 	url = 'http://google.ch ...'
 )
 
-x = external_package_check(project, name = 'x',
-	dependencies = [
+class x(external_package_check):
+	def __init__(self):
+		external_package_check.__init__(self, project, name = 'x',
+			dependencies = [],
+			distribution_packages = {
+				'debian and ubuntu': 'libx11-dev (>= 0)',
+				'gentoo': '...',
+				'fedora': '...',
+				'cygwin': '...'
+			},
+			url = 'http://x.org'
+		)
+	def dynamic_dependencies(self):
 		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
 		#pkg_config_check(project, name = 'x11 >= 0')
-		cxx_build_check(project, name = 'x', libraries = ['X11'], source_text = \
-			"""\
-				#include <X11/Xlib.h>
-				void x()
-				{
-					Display * display(XOpenDisplay(0));
-					XCloseDisplay(display);
-				}
-			"""
-		)
-	],
-	distribution_packages = {
-		'debian and ubuntu': 'libx11-dev (>= 0)',
-		'gentoo': '...',
-		'fedora': '...',
-		'cygwin': '...'
-	},
-	url = 'http://x.org'
-)
+		class x_build_check(cxx_build_check):
+			def __init__(self, fucked_up_path = False):
+				if fucked_up_path:
+					name = 'x with fucked up path'
+					cxx_compiler_paths = ['/usr/X11R6/include']
+					library_paths = ['/usr/X11R6/lib']
+				else:
+					name = 'x'
+					cxx_compiler_paths = []
+					library_paths = []
+				cxx_build_check.__init__(self, project, name = name, libraries = ['X11'], cxx_compiler_paths = cxx_compiler_paths, library_paths = library_paths, source_text = \
+					"""\
+						#include <X11/Xlib.h>
+						void x()
+						{
+							Display * display(XOpenDisplay(0));
+							XCloseDisplay(display);
+						}
+					"""
+				)
+		x = x_build_check()
+		if not x.result(): x = x_build_check(fucked_up_path = True)
+		self.add_dependency(x)
+x = x()
 
 xfixes = external_package_check(project, name = 'xfixes',
 	dependencies = [
