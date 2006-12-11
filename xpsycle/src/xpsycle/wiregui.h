@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -20,18 +20,19 @@
 #ifndef WIREGUI_H
 #define WIREGUI_H
 
-#include <ngrs/nline.h>
-#include "nelbowlineshape.h"
+#include <ngrs/nvisualcomponent.h>
 
 /**
 @author Stefan
 */
 
+class BendedLineShape;
+
 namespace psycle 
 { 
 	namespace host
 	{
-
+		
 		class WireGUI : public NVisualComponent
 		{
 		public:
@@ -50,7 +51,7 @@ namespace psycle
 
 		private:
 
-                                NElbowLineShape* elbowShape;
+                                BendedLineShape* elbowShape;
 				NColor polyColor_;
 				NColor borderColor_;
 

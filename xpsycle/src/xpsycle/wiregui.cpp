@@ -19,6 +19,7 @@
   ***************************************************************************/
 #include "wiregui.h"
 #include "skinreader.h"
+#include "bendedlineshape.h"
 #include <cmath>
 #include <cstdio>
 
@@ -40,9 +41,9 @@ namespace psycle {
 		WireGUI::WireGUI()
 			: NVisualComponent()
 		{
-                        elbowShape = new NElbowLineShape();
-                        elbowShape->setClippingDistance(30);
-                        setGeometry(elbowShape);  
+                        lineShape = new BendedLineShape();
+                        lineShape->setClippingDistance(30);
+                        setGeometry( lineShape );  
 
 			triangle_size_tall = 22+((23*2)/16);
 
@@ -56,7 +57,7 @@ namespace psycle {
 
 		WireGUI::~WireGUI()
 		{
-                        delete elbowShape;
+                        delete lineShape;
 		}
 
                 const NPoint & WireGUI::p1( ) const {
@@ -80,17 +81,10 @@ namespace psycle {
 			pen.setLineWidth(2);
 			g->setPen(pen);
                         g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
-                                g->drawLine(elbowShape->p1().x(),  elbowShape->p1().y(), 
-                                               elbowShape->p4().x(), elbowShape->p4().y());
-                                               g->drawLine(elbowShape->p4().x(),  elbowShape->p4().y(), 
-               elbowShape->p5().x(), elbowShape->p5().y());
-               g->drawLine(elbowShape->p5().x(),  elbowShape->p5().y(), 
-               elbowShape->p2().x(), elbowShape->p2().y());
-                        g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
-
+                        g->drawLine( lineShape->p1().x(), lineShape->p1().y(), lineShape->p4().x(), lineShape->p4().y() );
+			g->drawLine( lineShape->p4().x(), lineShape->p4().y(), lineShape->p5().x(), lineShape->p5().y() );
+			g->drawLine( lineShape->p5().x(), lineShape->p5().y(), lineShape->p2().x(), lineShape->p2().y() );
 			g->resetPen();
-
-			g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
 			drawArrow(g);
 			g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
 		}
