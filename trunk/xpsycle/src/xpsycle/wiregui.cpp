@@ -42,7 +42,7 @@ namespace psycle {
 			: NVisualComponent()
 		{
                         lineShape = new BendedLineShape();
-                        lineShape->setClippingDistance(30);
+                        lineShape->setClippingDistance(12);
                         setGeometry( lineShape );  
 
 			triangle_size_tall = 22+((23*2)/16);
@@ -81,9 +81,9 @@ namespace psycle {
 			pen.setLineWidth(2);
 			g->setPen(pen);
                         g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
-                        g->drawLine( lineShape->p1().x(), lineShape->p1().y(), lineShape->p4().x(), lineShape->p4().y() );
-			g->drawLine( lineShape->p4().x(), lineShape->p4().y(), lineShape->p5().x(), lineShape->p5().y() );
-			g->drawLine( lineShape->p5().x(), lineShape->p5().y(), lineShape->p2().x(), lineShape->p2().y() );
+                        g->drawLine( lineShape->p1().x(), lineShape->p1().y(), lineShape->p5().x(), lineShape->p5().y() );
+			g->drawLine( lineShape->p5().x(), lineShape->p5().y(), lineShape->p4().x(), lineShape->p4().y() );
+			g->drawLine( lineShape->p4().x(), lineShape->p4().y(), lineShape->p2().x(), lineShape->p2().y() );
 			g->resetPen();
 			drawArrow(g);
 			g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
@@ -93,16 +93,16 @@ namespace psycle {
 		{
 			// Spaces between the end and startPoint of the Line
 
-			double  ankathede    = (lineShape->p4().x() - lineShape->p5().x());
-			double  gegenkathede = (lineShape->p4().y() - lineShape->p5().y());
+			double  ankathede    = (lineShape->p5().x() - lineShape->p4().x());
+			double  gegenkathede = (lineShape->p5().y() - lineShape->p4().y());
 			double  hypetenuse   = std::sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
 
 
 			double cos = ankathede / hypetenuse;
 			double sin = gegenkathede / hypetenuse;
 
-			int middleX = (p1().x() + p2().x()) / 2;
-			int middleY = (p1().y() + p2().y()) / 2;
+			int middleX = ( p1().x() + p2().x() ) / 2;
+			int middleY = ( p1().y() + p2().y() ) / 2;
 
 			double slope = atan2(sin, cos);
 			int rtcol = 140+abs((int)(slope*32));

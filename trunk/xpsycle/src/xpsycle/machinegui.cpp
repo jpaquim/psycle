@@ -641,12 +641,12 @@ void EffektGUI::VUPanel::paint( NGraphics * g )
 void MachineGUI::onMousePress( int x, int y, int button )
 {
   int shift = NApp::system().shiftState();
-  if ((button==1 && ( shift & nsShift) ) || button==3) {
+  if ( (shift & nsShift & nsLeft) || button == 3 ) {
   // shift+left-click or right-click.
     newConnection.emit(this);
-  } else if (button==1) { // left-click (w/ no shift)
+  } else if ( shift & nsLeft ) { // left-click (w/ no shift)
     selected.emit(this);
-  } else if (button==2) {
+  } else if ( button == 2) {
       showPropsDlg();
   }
 }
@@ -657,7 +657,7 @@ void MachineGUI::onDeleteMachineSignal() {
 
 void MachineGUI::showPropsDlg()
 {
-        propsDlg_->setVisible(true); 
+  propsDlg_->setVisible(true); 
 }
 
 void MachineGUI::detachLine( WireGUI * line )
@@ -675,29 +675,22 @@ void MachineGUI::detachLine( WireGUI * line )
 
 void MachineGUI::onMouseDoublePress( int x, int y, int button )
 {
-	std::cout << "machinegui" << std::endl;
 }
 
-void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
-{
-	std::cout << "generatorgui" << std::endl;
+void GeneratorGUI::onMouseDoublePress( int x, int y, int button ) {
   if (button==1) {
       frameMachine->setVisible(true);
       }
 }
 
-void MasterGUI::onMouseDoublePress( int x, int y, int button )
-{
-	std::cout << "mastergui" << std::endl;
-  if (button==1) {
+void MasterGUI::onMouseDoublePress( int x, int y, int button ) {
+  if ( button==1 ) {
     masterDlg->setVisible(true);
   }
 }
 
-void EffektGUI::onMouseDoublePress( int x, int y, int button )
-{
-	std::cout << "effectgui" << std::endl;
-  if (button==1) {
+void EffektGUI::onMouseDoublePress( int x, int y, int button ) {
+  if ( button==1 ) {
     frameMachine->setVisible(true); 
   }
 }

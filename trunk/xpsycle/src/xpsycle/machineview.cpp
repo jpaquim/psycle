@@ -190,7 +190,7 @@ void MachineView::onNewConnection( MachineGUI * sender )
  * Triggered when the user starts rewiring a connection.
  */
 void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline, int rewireType)
-{
+{  
   startGUI = this->findByMachine(theline->dialog()->pSrcMachine());
   MachineGUI *dstGui = this->findByMachine(theline->dialog()->pDstMachine());
   
@@ -207,7 +207,12 @@ void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline, int rewireTyp
         theline->setPoints(NPoint(startGUI->left()+midW,startGUI->top()+midH),NPoint(startGUI->left()+midW,startGUI->top()+midH));
         theline->setRewiring(1); // dstRewire 
   }
+<<<<<<< .mine
+
   repaint();
+=======
+  repaint();
+>>>>>>> .r3575
 }
 
 /**

@@ -78,8 +78,8 @@ void BendedLineShape::resize( int width, int height )
 
 void BendedLineShape::calculateRectArea( )
 {
-   NShape::setPosition ( std::min( p1_.x(), p2_.x() ),  std::min( p1_.y(), 
-               p2_.y() ),  std::abs( p1_.x() - p2_.x() ),   std::abs( p1_.y() - 
+   NShape::setPosition ( std::min( p1_.x(), p2_.x() ) - distance_,  std::min( p1_.y(), 
+               p2_.y() ),  std::abs( p1_.x() - p2_.x() ) + 2*distance_,   std::abs( p1_.y() - 
                p2_.y() ) );
 }
 
@@ -139,24 +139,18 @@ NPoint BendedLineShape::p3() const
 
 NPoint BendedLineShape::p4() const 
 {
-  return NPoint ( p1().x(), p3().y() );
+  return NPoint ( p2_.x() , p3().y() );
 }
 
 NPoint BendedLineShape::p5() const 
 {
-  return NPoint ( p2().x(), p3().y() );
+  return NPoint ( p1_.x(), p3().y() );
 }
 
-void BendedLineShape::setPoints( NPoint p1, NPoint p2 )
+void BendedLineShape::setPoints( const NPoint & p1, const NPoint & p2 )
 {
   p1_ = p1;
   p2_ = p2;
-/*  p3_.setX( (p1.x(), p2.x()) / 2 );
-  p3_.setY( (p1.y(), p2.y()) / 2 );
-  p4_.setX( p2.x() );
-  p4_.setY( p3_.y() );
-  p5_.setX( p1.x() );
-  p5_.setY( p3_.y() );*/
   calculateRectArea();
 }
 
@@ -179,13 +173,15 @@ void BendedLineShape::setPicker( int index, int x, int y )
   }
 }
 
+
 NRegion BendedLineShape::lineToRegion( )
 {
   int d = distance_;
-  NRect r1( p4().x() - d, p4().y() - d, 2*d, p2().y() - p4().y() + d  );
-  NRect r2( p4().x() - d, p4().y() - d, p5().x() - p4().x() + 2 *d, 2 * d  );
-  NRect r3( p5().x() - d, p5().y() - d, 2*d, p5().y() - p1().y() + d );
-  NRegion region = NRegion( r1 ) | NRegion( r2 ) | NRegion ( r3 );
+  NRect r1( p2().x() - d, std::min( p2().y(), p3().y() ), 2*d, std::abs( p2().y() - p3().y() ) );
+  NRect r2( std::min( p1().x(), p2().x() ) - d, p3().y() - d, std::abs( p1().x() - p2().x() ) + 2*d, 2*d );
+  NRect r3( p1().x() - d, std::min( p1().y(), p3().y() ), 2*d, std::abs( p1().y() - p3().y() ) );
+  
+  NRegion region = NRegion( r2 ) | NRegion( r1 ) | NRegion ( r3 );
   return region;
 }
 

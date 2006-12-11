@@ -49,7 +49,7 @@ public:
     NPoint p4() const;
     NPoint p5() const;
 
-    void setPoints(NPoint p1, NPoint p2 );
+    void setPoints( const NPoint & p1, const NPoint & p2 );
     void setClippingDistance(int d);
 
     virtual int overPicker(int x, int y);
