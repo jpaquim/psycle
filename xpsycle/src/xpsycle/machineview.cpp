@@ -61,7 +61,7 @@ void MachineView::init( )
 
 void MachineView::onCreateMachine( Machine * mac )
 {
-  switch (mac->_mode)
+  switch (mac->mode())
   {		
       case MACHMODE_GENERATOR: {
         MachineGUI* macGui = new GeneratorGUI(mac);
@@ -222,18 +222,19 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
           bool found = false;
           for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
             MachineGUI* machineGUI = *it;
-            if (machineGUI->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())) {
+            if (machineGUI->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())
+                && machineGUI->pMac()->AcceptsConnections()) {
               found = true;
-              _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
-              startGUI->attachLine(theline,0);
-              machineGUI->attachLine(theline,1);
-              theline->setMoveable(NMoveable());
-              theline->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
-              theline->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-              theline->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
-              wireGUIs.push_back(theline);
-              repaint(); 
-              break;
+                      _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
+                      startGUI->attachLine(theline,0);
+                      machineGUI->attachLine(theline,1);
+                      theline->setMoveable(NMoveable());
+                      theline->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
+                      theline->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
+                      theline->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
+                      wireGUIs.push_back(theline);
+                      repaint(); 
+                      break;
             } 
           }
           if (!found) {
@@ -248,7 +249,8 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
           bool found = false;
           for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
             MachineGUI* newDestGui = *it;
-            if (newDestGui->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())) {
+            if (newDestGui->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())
+                && newDestGui->pMac()->AcceptsConnections()) {
               found = true;
               Machine* srcMac = startGUI->pMac();
               Machine* dstMac = newDestGui->pMac();
@@ -286,7 +288,8 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
           bool found = false;
           for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
             MachineGUI* newSrcGui = *it;
-            if (newSrcGui->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())) {
+            if (newSrcGui->clipBox().intersects(theline->left()+ev.x(),theline->top()+ev.y())
+                && newSrcGui->pMac()->AcceptsConnections()) {
               found = true;
               Machine* srcMac = newSrcGui->pMac();
               Machine* dstMac = dstGui->pMac();
