@@ -51,7 +51,7 @@ namespace psycle
 
 		private:
 
-                                BendedLineShape* elbowShape;
+                                BendedLineShape* lineShape;
 				NColor polyColor_;
 				NColor borderColor_;
 

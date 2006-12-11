@@ -61,17 +61,17 @@ namespace psycle {
 		}
 
                 const NPoint & WireGUI::p1( ) const {
-                  return elbowShape->p1();
+                  return lineShape->p1();
                 }
 
                 const NPoint & WireGUI::p2( ) const
                 {
-                  return elbowShape->p2();
+                  return lineShape->p2();
                 }
 
                 void WireGUI::setPoints( const NPoint & p1, const NPoint & p2 )
                 {
-                  elbowShape->setPoints(p1,p2);
+                  lineShape->setPoints(p1,p2);
                 }
 
 
@@ -93,8 +93,8 @@ namespace psycle {
 		{
 			// Spaces between the end and startPoint of the Line
 
-			double  ankathede    = (elbowShape->p4().x() - elbowShape->p5().x());
-			double  gegenkathede = (elbowShape->p4().y() - elbowShape->p5().y());
+			double  ankathede    = (lineShape->p4().x() - lineShape->p5().x());
+			double  gegenkathede = (lineShape->p4().y() - lineShape->p5().y());
 			double  hypetenuse   = std::sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
 
 
