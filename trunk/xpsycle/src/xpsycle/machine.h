@@ -448,6 +448,7 @@ namespace psycle
 					virtual Wire::id_type FindInputWire(id_type);
 					virtual Wire::id_type FindOutputWire(id_type);
 					bool AcceptsConnections();
+					bool EmitsConnections();
 			///\}
 
 			///\name multichannel
