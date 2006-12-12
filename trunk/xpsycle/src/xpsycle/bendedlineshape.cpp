@@ -154,6 +154,10 @@ void BendedLineShape::setPoints( const NPoint & p1, const NPoint & p2 )
   calculateRectArea();
 }
 
+void BendedLineShape::addBend( const NPoint & pts ) {
+  bendPts_.push_back( pts );
+}
+
 int BendedLineShape::overPicker( int x, int y )
 {
   if (NRect(p1_.x()-pickWidth_/2,p1_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 0;

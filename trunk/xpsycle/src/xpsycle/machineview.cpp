@@ -27,7 +27,53 @@
 #include <ngrs/nalignlayout.h>
 #include <ngrs/napp.h>
 
-namespace psycle { namespace host {
+namespace psycle { 
+  namespace host 
+  {
+  
+    // MachineWireGui
+    
+    MachineWireGUI:: MachineWireGUI() {
+      dlg = new WireDlg();
+        dlg->setLine(this);
+      add( dlg );
+      wireState_ = WIRESTATE_NEWCONNECTION;
+                       
+      menu_ = new NPopupMenu();
+      add( menu_ );                             
+    }
+    
+    MachineWireGUI::~MachineWireGUI() {
+    }
+
+    void MachineWireGUI::onMousePress  (int x, int y, int button) {
+      rewireBegin.emit( this, NApp::system().shiftState() );
+    }
+     
+                                   
+    void MachineWireGUI::onMouseDoublePress (int x, int y, int button) {
+        if ( button==1 )
+          dlg->setVisible(true);
+        }
+                    
+    void MachineWireGUI::onMoveEnd( const NMoveEvent & ev ) {
+        wireMoveEnd.emit(this, ev); // override onMoveEnd because we want to se
+                                                                    // the wire in the signal too.
+    }
+  
+    WireDlg* MachineWireGUI::dialog() { 
+      return dlg;
+    }
+    
+    void MachineWireGUI::setWireState( WireState newState ) { 
+      wireState_ = newState; 
+    };
+
+    WireState MachineWireGUI::wireState() const
+    { 
+       return wireState_;
+    };
+                                                                                  
 
 MachineView::MachineView( Song* song )
   : NPanel()

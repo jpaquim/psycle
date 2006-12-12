@@ -50,6 +50,7 @@ public:
     NPoint p5() const;
 
     void setPoints( const NPoint & p1, const NPoint & p2 );
+    void addBend( const NPoint & bendPt );
     void setClippingDistance(int d);
 
     virtual int overPicker(int x, int y);
@@ -67,6 +68,8 @@ private:
    NPoint p3_;
    NPoint p4_;
    NPoint p5_;
+   
+   std::vector<NPoint> bendPts_;
 
    void resize(int width, int height);
    void calculateRectArea();
