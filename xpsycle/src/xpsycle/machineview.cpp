@@ -200,12 +200,12 @@ void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline, int rewireTyp
           int midW = dstGui->clientWidth()  / 2;
           int midH = dstGui->clientHeight() / 2;
         theline->setPoints(NPoint(dstGui->left()+midW,dstGui->top()+midH),NPoint(dstGui->left()+midW,dstGui->top()+midH));
-        theline->setRewiring(2); // srcRewire
+        theline->setWireState(WIRESTATE_REWIRING_SRC);
   } else {
           int midW = startGUI->clientWidth()  / 2;
           int midH = startGUI->clientHeight() / 2;
         theline->setPoints(NPoint(startGUI->left()+midW,startGUI->top()+midH),NPoint(startGUI->left()+midW,startGUI->top()+midH));
-        theline->setRewiring(1); // dstRewire 
+        theline->setWireState(WIRESTATE_REWIRING_DST); 
   }
 
   repaint();
@@ -218,7 +218,10 @@ void MachineView::onLineRewireBeginSignal(MachineWireGUI *theline, int rewireTyp
  */
 void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
 {	
-  if (theline->rewiring() == 0) { // new connection
+  switch (theline->wireState())
+  {
+        case WIRESTATE_NEWCONNECTION:
+        {
           bool found = false;
           for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
             MachineGUI* machineGUI = *it;
@@ -244,7 +247,10 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
           } else {
                 theline->setMoveable( NMoveable() ); 
           }
-  } else if (theline->rewiring() == 1) { // rewiring dest of existing connection
+        }
+        break;
+        case WIRESTATE_REWIRING_DST: 
+        {
           MachineGUI* oldDestGUI = this->findByMachine(theline->dialog()->pDstMachine());
           bool found = false;
           for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
@@ -266,7 +272,7 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
               theline->setMoveable(NMoveable());
               theline->dialog()->setMachines(srcMac,dstMac);
               theline->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
-              theline->setRewiring(0);
+              theline->setWireState(WIRESTATE_WIRED);
               wireGUIs.push_back(theline);
 
               // Update the connections in the song.
@@ -282,8 +288,10 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
               oldDestGUI->attachLine(theline,1);
               repaint();
           } 
-  } else if (theline->rewiring() == 2) { // rewiring src of existing connection
-    std::cout << "src rewire" << std::endl;
+        }
+        break;
+        case WIRESTATE_REWIRING_SRC:
+        {
           MachineGUI* oldSrcGui = this->findByMachine(theline->dialog()->pSrcMachine());
           MachineGUI* dstGui = this->findByMachine(theline->dialog()->pDstMachine());
           bool found = false;
@@ -307,7 +315,7 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
               theline->setMoveable(NMoveable());
               theline->dialog()->setMachines(srcMac,dstMac);
               theline->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
-              theline->setRewiring(0);
+              theline->setWireState(WIRESTATE_WIRED);
               wireGUIs.push_back(theline);
 
               // Update the connections in the song.
@@ -323,6 +331,8 @@ void MachineView::onLineMoveEnd(MachineWireGUI *theline, const NMoveEvent & ev)
               oldSrcGui->attachLine(theline,1);
               repaint();
           } 
+        }
+        break;
   }
 }
 

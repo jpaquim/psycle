@@ -40,13 +40,21 @@ class Song;
 @author Stefan
 */
 
+enum WireState
+{
+        WIRESTATE_WIRED = 0,
+        WIRESTATE_NEWCONNECTION = 1,
+        WIRESTATE_REWIRING_DST = 2,
+        WIRESTATE_REWIRING_SRC = 3
+};
+typedef WireState wire_state;
 
 class MachineWireGUI : public WireGUI {
 public :
     MachineWireGUI() {
       dlg = new WireDlg();
       dlg->setLine(this);
-      rewiring_ = 0; // not rewiring
+      wireState_ = WIRESTATE_NEWCONNECTION; 
     }
     ~MachineWireGUI() {
         std::cout << "delete dialog" << std::endl;
@@ -71,8 +79,8 @@ public :
     }
    
     WireDlg* dialog() { return dlg;}
-    void setRewiring(int rewireState) { rewiring_ = rewireState; };
-    int rewiring() { return rewiring_; };
+    void setWireState(wire_state newState) { wireState_ = newState; };
+    wire_state wireState() { return wireState_; };
 
     signal2<MachineWireGUI*, int> rewireBegin;
     signal2<MachineWireGUI*, const NMoveEvent &> wireMoveEnd;
@@ -80,7 +88,7 @@ public :
 private:
 
   WireDlg* dlg;
-  int rewiring_; // A flag to determine rewire state (0=none,1=dstRewire,2=srcRewire)
+  wire_state wireState_; 
 
 };
 
