@@ -139,6 +139,9 @@ void MachineView::createGUIMachines( )
                   from->attachLine(line,0);
                   to->attachLine(line,1);
                   line->dialog()->setMachines(tmac,pout);
+                  line->setWireState(WIRESTATE_WIRED);
+                  line->wireMoveEnd.connect(this,&MachineView::onLineMoveEnd);
+                  line->rewireBegin.connect(this,&MachineView::onLineRewireBeginSignal);
                   line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
                 }
               }
