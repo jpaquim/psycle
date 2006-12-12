@@ -26,6 +26,47 @@ namespace psycle {
 //////// The bitmaps
 
 /* XPM */
+const char * pattern_new_xpm[] = {
+"23 23 13 1",
+" 	c #C0C0C0",
+".	c None",
+"+	c #000000",
+"@	c #E9EBD7",
+"#	c #40494A",
+"$	c #C09235",
+"%	c #00FF00",
+"&	c #686C69",
+"*	c #A3A49B",
+"=	c #DDD6A8",
+"-	c #B9BF97",
+";	c #FF0000",
+">	c #FFFF00",
+"                .......",
+" ++++++++++++++ .......",
+" +@@#$#@@@$ %&+ .......",
+" +@ $$$       + .......",
+" +  #&#     **+ .......",
+" ++++++++++++++ .......",
+" +========----+ .......",
+" +-- -.................",
+" +====..+++++..+++.....",
+" +- =-..+;;;+++;;;+....",
+" +****++++;;;++;;++++..",
+" +====++++;;;;;;;++;+..",
+" +-- -+;;;;>>;;>;;;;+..",
+" +====+;;;;;>>>>;;;++..",
+" +++++++;;;;>>.>;;+....",
+"      .+++;;>>>>;;++...",
+"      .+;;;;>>>>>;;;+..",
+"......+;;;;;>;;;>;;;+..",
+"......+;;+;;;;;;;;;;+..",
+"......++++;;;++;;++++..",
+"........+;;;++;;;++....",
+"........++++..++++.....",
+"......................."};
+
+
+/* XPM */
 const char * nav_xpm[] = {
 "33 18 63 1",
 " 	c None",
@@ -18333,6 +18374,7 @@ DefaultBitmaps::DefaultBitmaps()
   moveUpTrack_.createFromXpmData(move_track_up_xpm);
   tweakHeader_.createFromXpmData(tweak_header_xpm);
   patNav_.createFromXpmData( nav_xpm );
+  pattern_new_.createFromXpmData( pattern_new_xpm );
 }
 
 DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
@@ -18347,7 +18389,8 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
   moveDownTrack_.createFromXpmData(move_track_down_xpm);
   moveUpTrack_.createFromXpmData(move_track_up_xpm);
   tweakHeader_.createFromXpmData(tweak_header_xpm);
-	patNav_.createFromXpmData( nav_xpm );
+  patNav_.createFromXpmData( nav_xpm );
+  pattern_new_.createFromXpmData( pattern_new_xpm );
 
 
   try {
@@ -18871,6 +18914,10 @@ NBitmap & DefaultBitmaps::tweakHeader() {
 
 NBitmap & DefaultBitmaps::patNav() {
   return patNav_;
+}
+
+NBitmap & DefaultBitmaps::pattern_new() {
+  return pattern_new_;
 }
 
 }

@@ -60,6 +60,7 @@ public:
     NBitmap & openeditor();
     NBitmap & open();
     NBitmap & pattern_header_skin();
+    NBitmap & pattern_new();
     NBitmap & patterns();
     NBitmap & delPattern();
     NBitmap & playselpattern();
@@ -118,6 +119,7 @@ private:
     NBitmap open_;
     NBitmap pattern_header_skin_;
     NBitmap patterns_;
+    NBitmap pattern_new_;
     NBitmap playselpattern_;
     NBitmap playstart_;
     NBitmap play_;
@@ -145,7 +147,7 @@ private:
     NBitmap moveDownTrack_;
     NBitmap moveUpTrack_;
     NBitmap tweakHeader_;
-		NBitmap patNav_;
+    NBitmap patNav_;
 };
 
 }

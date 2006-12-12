@@ -186,7 +186,10 @@ void SequencerBar::init( )
       NButton* newCatBtn = new NButton(img);
         newCatBtn->setHint("New Category");
       patToolBar->add( newCatBtn )->clicked.connect(this,&SequencerBar::onNewCategory);
-      patToolBar->add( new NButton("New Pattern"))->clicked.connect(this,&SequencerBar::onNewPattern);
+      img = new NImage();
+      img->setSharedBitmap( &icons.pattern_new() );
+      NButton* newPatBtn = new NButton( img );
+      patToolBar->add( newPatBtn )->clicked.connect(this,&SequencerBar::onNewPattern);
       img = new NImage();
       img->setSharedBitmap(&icons.delPattern());
       img->setPreferredSize(25,25);
