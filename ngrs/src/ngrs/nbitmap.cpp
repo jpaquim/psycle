@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,7 +31,7 @@ NBitmap::NBitmap()
  #ifdef __unix__
  ,xi(0), clp(0)
  #else
- , hBmp(0), cBmp(0), memDC_(0)
+ , hBmp(0), cBmp(0)
  #endif
 {
   #ifdef __unix__
@@ -44,7 +44,7 @@ NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(
 #ifdef __unix__
 ,xi(0), clp(0)
 #else
-,hBmp(0),  memDC_(0)
+,hBmp(0), cBmp(0)
 #endif
 {
   #ifdef __unix__
@@ -58,7 +58,7 @@ NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_
 #ifdef __unix__
 ,xi(0), clp(0)
 #else
-,hBmp(0), memDC_(0)
+,hBmp(0), cBmp(0)
 #endif
 {
   #ifdef __unix__
@@ -80,8 +80,8 @@ NBitmap::~NBitmap()
   if ( hBmp ) {
 
   }
-  if ( memDC_ ) {
-    DeleteDC( memDC_ );
+  if ( cBmp ) {
+
   }
   #endif
 }
@@ -181,15 +181,39 @@ NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(
 	}
   #else
   if ( rhs.hdata() ) {
-    memDC_ = CreateCompatibleDC( rhs.memDC() );
-    hBmp = CreateCompatibleBitmap( rhs.memDC(), rhs.width(), rhs.height() );
+    HDC dc = GetDC( NULL );   
+    // dest bitmap
+    HDC memDC_ = CreateCompatibleDC( dc );
+    hBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
     SelectObject( memDC_, hBmp );
-    BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), rhs.memDC(), 0, 0, SRCCOPY);
+    // src bitmap
+    HDC srcDC_ = CreateCompatibleDC( dc );
+    SelectObject( srcDC_, rhs.hdata() );
+    
+    BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
 
-    if ( rhs.cdata() ) {
-      cBmp = createClipMask( hBmp, clpColor );
-    }
+    ReleaseDC( NULL, dc );
+    DeleteDC( memDC_ );
+    DeleteDC( srcDC_ );
+   
   }  	
+  
+  if ( rhs.cdata() ) {
+      HDC dc = GetDC( NULL );         
+      HDC memDC_ = CreateCompatibleDC( dc );
+      cBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
+      SelectObject( memDC_, cBmp );
+      // src bitmap
+      HDC srcDC_ = CreateCompatibleDC( dc );
+      SelectObject( srcDC_, rhs.cdata() );
+    
+      BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
+
+      ReleaseDC( NULL, dc );
+      DeleteDC( memDC_ );
+      DeleteDC( srcDC_ );
+      
+  }
   #endif
   
 }
@@ -224,16 +248,40 @@ const NBitmap & NBitmap::operator =( const NBitmap & rhs )
 	}
   #else
   if ( rhs.hdata() ) {
-    memDC_ = CreateCompatibleDC( rhs.memDC() );
-    hBmp = CreateCompatibleBitmap( rhs.memDC(), rhs.width(), rhs.height() );
+    HDC dc = GetDC( NULL );
+    // dest bitmap
+    HDC memDC_ = CreateCompatibleDC( dc );
+    hBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
     SelectObject( memDC_, hBmp );
-    BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), rhs.memDC(), 0, 0, SRCCOPY);
+    // src bitmap
+    HDC srcDC_ = CreateCompatibleDC( dc );
+    SelectObject( srcDC_, rhs.hdata() );
+    
+      BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
+
+      ReleaseDC( NULL, dc );
+      DeleteDC( memDC_ );
+      DeleteDC( srcDC_ );
+
+    }
     
     if ( rhs.cdata() ) {
-      cBmp = createClipMask( hBmp, clpColor );
-    }
+      HDC dc = GetDC( NULL );         
+      HDC memDC_ = CreateCompatibleDC( dc );
+      cBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
+      SelectObject( memDC_, cBmp );
+      // src bitmap
+      HDC srcDC_ = CreateCompatibleDC( dc );
+      SelectObject( srcDC_, rhs.cdata() );
+    
+      BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
 
-  }  	
+      ReleaseDC( NULL, dc );
+      DeleteDC( memDC_ );
+      DeleteDC( srcDC_ );
+      
+  }
+
   #endif	
   return *this;
 }
@@ -256,7 +304,7 @@ void NBitmap::loadFromFile( const std::string & filename )
 
 void NBitmap::createFromXpmData(const char** data)
 {
-	deleteBitmapData();
+  deleteBitmapData();
   #ifdef __unix__
   XpmColorSymbol cs[256];
   XpmAttributes attr;
@@ -272,7 +320,7 @@ void NBitmap::createFromXpmData(const char** data)
   }
   #else
   
-
+  clpColor = 02;
   // code from ngrs0.8 .. needs rewrite
   const char* picInfo = data[0];  
   std::vector<int> breakList;
@@ -345,7 +393,7 @@ void NBitmap::createFromXpmData(const char** data)
        // check if new clp Color is needed
        if ( clpColor == color ) {
          // create new random clp color
-/*
+
          clpColor = (int) ( rand() * 2147483647 );
          bool generateClpAgain;
          do {
@@ -361,7 +409,7 @@ void NBitmap::createFromXpmData(const char** data)
            if ( !generateClpAgain ) {                
              colorTable[ transKey ] = clpColor;
            }                
-         } while ( generateClpAgain );*/
+         } while ( generateClpAgain );
        }     
       }     
     }
@@ -370,8 +418,8 @@ void NBitmap::createFromXpmData(const char** data)
   // end of ngrs0.8 code
   
   HDC dc = GetDC( NULL );
-
-  memDC_ = CreateCompatibleDC( dc );
+  HDC memDC_ = CreateCompatibleDC( dc );
+  
   hBmp = CreateCompatibleBitmap( dc, xwidth_, xheight_ );
   SelectObject( memDC_, hBmp );
     
@@ -389,8 +437,11 @@ void NBitmap::createFromXpmData(const char** data)
      }
   }
   
+  ReleaseDC( NULL, dc );
+  DeleteDC( memDC_ );
+  
   if ( trans ) {  
-    cBmp = createClipMask( hBmp, 0 );//clpColor );
+    cBmp = createClipMask( hBmp, clpColor );
   } 
     
   #endif
@@ -409,10 +460,6 @@ HBITMAP NBitmap::hdata() const {
 HBITMAP NBitmap::cdata() const {
   return cBmp;        
 }        
-
-HDC NBitmap::memDC() const {
-  return memDC_;    
-}
 
 #endif
 
@@ -474,62 +521,11 @@ bool NBitmap::empty() const {
 
 
 
-HBITMAP NBitmap::createClipMask(HBITMAP hBmpSrc, COLORREF clTransparent)
-{
-   HBITMAP   hBmpMask, hBmpOldMask, hBmpOldSrc;
-   BITMAP    bm;
-   HDC       hdcMask = CreateCompatibleDC( memDC() );
-   HDC       hdcSrc = CreateCompatibleDC( memDC() );
-   COLORREF  clPrev;
-
-   if(!hBmpSrc)
-      return NULL;
-
-   // Create mask bitmap
-   GetObject(hBmpSrc, sizeof(BITMAP), &bm);
-   hBmpMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
-
-   // Select bitmaps into DCs
-   hBmpOldMask = (HBITMAP)SelectObject(hdcMask, hBmpMask);
-   hBmpOldSrc = (HBITMAP)SelectObject(hdcSrc, hBmpSrc);
-
-   // Blit source dc into mask dc
-   clPrev = SetBkColor(hdcSrc, clTransparent);
-   BitBlt(hdcMask, 0, 0, bm.bmWidth, bm.bmHeight, hdcSrc, 0, 0, SRCCOPY);
-   SetBkColor(hdcSrc, clPrev);
-
-   // Clean up
-   SelectObject(hdcMask, hBmpOldMask);
-   SelectObject(hdcSrc, hBmpOldSrc);
-   DeleteObject(hdcMask);
-   DeleteObject(hdcSrc);
-
-   return hBmpMask;
-} 
-
-
-
-
-/*
 HBITMAP NBitmap::createClipMask(HBITMAP hbmColour, COLORREF crTransparent)
 {
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    HDC hdcMem, hdcMem2;
-    HBITMAP hbmMask;
-    BITMAP bm;
+   HDC hdcMem, hdcMem2;
+   HBITMAP hbmMask;
+  BITMAP bm;
 
     // Create monochrome (1 bit) mask bitmap.  
 
@@ -565,7 +561,8 @@ HBITMAP NBitmap::createClipMask(HBITMAP hbmColour, COLORREF crTransparent)
     DeleteDC(hdcMem2);
 
     return hbmMask;
-}
-*/
+} 
+
+
 
 #endif

@@ -40,7 +40,7 @@ const char * arrow_up_xpm[] = {
 const char * arrow_down_xpm[] = {
 "12 6 2 1",
 " 	c None",
-".	c black",
+".	c #010000",
 "            ",
 "  .......   ",
 "   .....    ",
