@@ -28,6 +28,7 @@
 #include <ngrs/npage.h>
 #include <ngrs/nscrollbox.h>
 #include <ngrs/nlabel.h>
+#include <ngrs/npopupmenu.h>
 
 namespace psycle { namespace host {
 
@@ -47,48 +48,31 @@ enum WireState
         WIRESTATE_REWIRING_DST = 2,
         WIRESTATE_REWIRING_SRC = 3
 };
-typedef WireState wire_state;
+
 
 class MachineWireGUI : public WireGUI {
 public :
-    MachineWireGUI() {
-      dlg = new WireDlg();
-      dlg->setLine(this);
-      wireState_ = WIRESTATE_NEWCONNECTION; 
-    }
-    ~MachineWireGUI() {
-        std::cout << "delete dialog" << std::endl;
-        delete dlg;
-        std::cout << "after delete dialog" << std::endl;
-    }
 
-    virtual void onMousePress  (int x, int y, int button) {
-      if(button==3) {
-        int modifier = NApp::system().shiftState();
-        rewireBegin.emit(this,modifier);
-      }
-    }
-    virtual void onMouseDoublePress (int x, int y, int button) {
-      if(button==1)
-        dlg->setVisible(true);
-    }
-
-    virtual void onMoveEnd (const NMoveEvent & ev ) {
-        wireMoveEnd.emit(this, ev); // override onMoveEnd because we want to send 
-                                    // the wire in the signal too.
-    }
+    MachineWireGUI();
+    
+    ~MachineWireGUI();
+    
+    virtual void onMousePress  (int x, int y, int button);
+    virtual void onMouseDoublePress (int x, int y, int button);
+    virtual void onMoveEnd (const NMoveEvent & ev );
    
-    WireDlg* dialog() { return dlg;}
-    void setWireState(wire_state newState) { wireState_ = newState; };
-    wire_state wireState() { return wireState_; };
-
+    WireDlg* dialog();
+    void setWireState(WireState newState);
+    WireState wireState() const;    
+    
     signal2<MachineWireGUI*, int> rewireBegin;
     signal2<MachineWireGUI*, const NMoveEvent &> wireMoveEnd;
 
 private:
 
   WireDlg* dlg;
-  wire_state wireState_; 
+  WireState wireState_; 
+  NPopupMenu* menu_;
 
 };
 
