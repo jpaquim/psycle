@@ -58,7 +58,6 @@ public:
     #else
     HBITMAP hdata() const;
     HBITMAP cdata() const;
-    HDC memDC() const;
     #endif
 
     void loadFromFile(const std::string & filename);
@@ -84,7 +83,7 @@ private:
     #else
     HBITMAP hBmp;
     HBITMAP cBmp; // clipMask
-    HDC memDC_;    
+ 
     HBITMAP createClipMask(HBITMAP hbmColour, COLORREF crTransparent);
     COLORREF clpColor;
     #endif
