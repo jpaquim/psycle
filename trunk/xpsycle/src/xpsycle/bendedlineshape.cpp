@@ -78,9 +78,32 @@ void BendedLineShape::resize( int width, int height )
 
 void BendedLineShape::calculateRectArea( )
 {
-   NShape::setPosition ( std::min( p1_.x(), p2_.x() ) - distance_,  std::min( p1_.y(), 
-               p2_.y() ),  std::abs( p1_.x() - p2_.x() ) + 2*distance_,   std::abs( p1_.y() - 
-               p2_.y() ) );
+  double  ankathede    = (p1().x() - p2().x());
+  double  gegenkathede = (p1().y() - p2().y());
+  double  hypetenuse   = sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
+      
+  double cos = ankathede    / hypetenuse;
+  double sin = gegenkathede / hypetenuse;
+            
+  int dx = (int) (-sin*distance_);
+  int dy = (int) (-cos*distance_);
+                  
+                  
+  NPoint  pts[4];
+  pts[0].setX ( p1_.x() + dx );
+  pts[0].setY ( p1_.y() - dy );
+  pts[1].setX ( p2_.x() + dx );
+  pts[1].setY ( p2_.y() - dy );
+  pts[2].setX ( p2_.x() - dx );
+  pts[2].setY ( p2_.y() + dy );
+  pts[3].setX ( p1_.x() - dx );
+  pts[3].setY ( p1_.y() + dy );
+           
+  NRegion region;
+  region.setPolygon(pts,4);
+                                                   
+  NRect r = region.rectClipBox();
+  NShape::setPosition( r.left(), r.top(), r.width(), r.height() );                                                         
 }
 
 void BendedLineShape::move( int dx, int dy )
@@ -158,10 +181,22 @@ void BendedLineShape::addBend( const NPoint & pts ) {
   bendPts_.push_back( pts );
 }
 
+const std::vector<NPoint> & BendedLineShape::bendPts() const {
+  return bendPts_;
+}
+
 int BendedLineShape::overPicker( int x, int y )
 {
   if (NRect(p1_.x()-pickWidth_/2,p1_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 0;
   if (NRect(p2_.x()-pickWidth_/2,p2_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 1;
+  
+  std::vector<NPoint>::const_iterator it = bendPts().begin();
+  int i = 2;
+  for ( ; it < bendPts().end(); it++, i++ ) {
+    NPoint pt = *it;
+    if (NRect(pt.x()-pickWidth_/2,pt.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return i;
+  }
+  
   return -1;
 }
 
@@ -174,19 +209,87 @@ void BendedLineShape::setPicker( int index, int x, int y )
   if (index == 1) {
       p2_ = NPoint(x,y);
       calculateRectArea();
+  } else
+  if ( bendPts_.size() > index - 2 ) {
+    NPoint & pt = bendPts_.at( index - 2);
+    pt.setXY ( x ,y );
   }
 }
 
 
 NRegion BendedLineShape::lineToRegion( )
 {
-  int d = distance_;
-  NRect r1( p2().x() - d, std::min( p2().y(), p3().y() ), 2*d, std::abs( p2().y() - p3().y() ) );
-  NRect r2( std::min( p1().x(), p2().x() ) - d, p3().y() - d, std::abs( p1().x() - p2().x() ) + 2*d, 2*d );
-  NRect r3( p1().x() - d, std::min( p1().y(), p3().y() ), 2*d, std::abs( p1().y() - p3().y() ) );
+//
+//  int d = distance_;
+//  NRect r1( p2().x() - d, std::min( p2().y(), p3().y() ), 2*d, std::abs( p2().y() - p3().y() ) );
+//  NRect r2( std::min( p1().x(), p2().x() ) - d, p3().y() - d, std::abs( p1().x() - p2().x() ) + 2*d, 2*d );
+//  NRect r3( p1().x() - d, std::min( p1().y(), p3().y() ), 2*d, std::abs( p1().y() - p3().y() ) );
   
-  NRegion region = NRegion( r2 ) | NRegion( r1 ) | NRegion ( r3 );
-  return region;
+//  NRegion region = NRegion( r2 ) | NRegion( r1 ) | NRegion ( r3 );
+//  return region;
+
+  NRegion region;
+
+  NPoint startPt = p1();
+  std::vector<NPoint>::const_iterator it = bendPts().begin();
+  for ( ; it < bendPts().end(); it++ ) {
+    NPoint pt = *it;
+                                                                                                                                                                               
+    double  ankathede    = ( startPt.x() - pt.x() );
+    double  gegenkathede = ( startPt.y() - pt.y() );
+    double  hypetenuse   = sqrt( ankathede*ankathede + gegenkathede*gegenkathede );
+         
+    double cos = ankathede    / hypetenuse;
+    double sin = gegenkathede / hypetenuse;
+               
+    int dx = (int) ( -sin*distance_);
+    int dy = (int) ( -cos*distance_);
+                                          
+    NPoint  pts[4];
+    pts[0].setX ( startPt.x() + dx );
+    pts[0].setY ( startPt.y() - dy );
+    pts[1].setX ( pt.x() + dx );
+    pts[1].setY ( pt.y() - dy );
+    pts[2].setX ( pt.x() - dx );
+    pts[2].setY ( pt.y() + dy );
+    pts[3].setX ( startPt.x() - dx );
+    pts[3].setY ( startPt.y() + dy );
+                                      
+    NRegion r;
+    r.setPolygon(pts,4);
+     
+    region |= r;
+    startPt = pt;
+  }
+
+  NPoint pt = p2();
+  
+  double  ankathede    = ( startPt.x() - pt.x() );
+  double  gegenkathede = ( startPt.y() - pt.y() );
+  double  hypetenuse   = sqrt( ankathede*ankathede + gegenkathede*gegenkathede );
+         
+  double cos = ankathede    / hypetenuse;
+  double sin = gegenkathede / hypetenuse;
+               
+  int dx = (int) ( -sin*distance_);
+  int dy = (int) ( -cos*distance_);
+                                          
+  NPoint  pts[4];
+  pts[0].setX ( startPt.x() + dx );
+  pts[0].setY ( startPt.y() - dy );
+  pts[1].setX ( pt.x() + dx );
+  pts[1].setY ( pt.y() - dy );
+  pts[2].setX ( pt.x() - dx );
+  pts[2].setY ( pt.y() + dy );
+  pts[3].setX ( startPt.x() - dx );
+  pts[3].setY ( startPt.y() + dy );
+                                      
+  NRegion r;
+  r.setPolygon(pts,4);
+
+  region |= r;
+  
+  return region;                                                         
 }
 
 void BendedLineShape::setClippingDistance( int d )
