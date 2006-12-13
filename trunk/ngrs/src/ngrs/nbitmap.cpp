@@ -77,12 +77,10 @@ NBitmap::~NBitmap()
   if (clp)
 		XDestroyImage(clp);
   #else
-  if ( hBmp ) {
-
-  }
-  if ( cBmp ) {
-
-  }
+  if ( hBmp )
+    DeleteObject( hBmp );
+  if ( cBmp )
+    DeleteObject( cBmp );
   #endif
 }
 

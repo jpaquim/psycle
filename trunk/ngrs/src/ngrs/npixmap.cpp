@@ -17,20 +17,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+ 
+#ifdef __unix__ 
+ 
 #include "npixmap.h"
 #include "napp.h"
 #include "nfile.h"
 #include "nwindow.h"
-#ifdef __unix__
 #include <X11/xpm.h>
-#endif
 
 NPixmap::NPixmap( )
 {
-  #ifdef __unix__
   pixmap_ = 0;
   shapepixmap_ = 0;
-  #endif
   height_ = width_ = 0;
   owner_ = NApp::system().rootWindow();
 }
@@ -49,14 +48,12 @@ NPixmap::NPixmap(NWindow* win)
 
 NPixmap::~NPixmap()
 {
-  #ifdef __unix__
   if (pixmap_) {
      XFreePixmap(NApp::system().dpy(), pixmap_);
   }
   if (shapepixmap_) {
      XFreePixmap(NApp::system().dpy(), shapepixmap_);
   }
-  #endif
 }
 
 int NPixmap::width( ) const
@@ -69,9 +66,9 @@ int NPixmap::height( ) const
   return height_;
 }
 
+
 void NPixmap::loadFromFile( const std::string & filename )
 {
-  #ifdef __unix__
   XpmColorSymbol cs[256];
   XpmAttributes attr;
   attr.valuemask = XpmCloseness;
@@ -89,10 +86,8 @@ void NPixmap::loadFromFile( const std::string & filename )
   width_  = attr.width;
   height_ = attr.height;
   
-  #endif
 }
 
-#ifdef __unix__
 Pixmap NPixmap::X11Pixmap( ) const
 {
   return pixmap_;
@@ -102,7 +97,6 @@ Pixmap NPixmap::X11ShapePixmap( ) const
 {
   return shapepixmap_;
 }
-#endif
 
 WinHandle NPixmap::owner( ) const
 {
@@ -111,7 +105,6 @@ WinHandle NPixmap::owner( ) const
 
 void NPixmap::createFromXpmData( const char ** data )
 {
-  #ifdef __unix__
   XpmColorSymbol cs[256];
   XpmAttributes attr;
   attr.valuemask = XpmCloseness;
@@ -126,14 +119,11 @@ void NPixmap::createFromXpmData( const char ** data )
 
   width_  = attr.width;
   height_ = attr.height;
-  #endif
 }
 
 bool NPixmap::empty( ) const
 {
-  #ifdef __unix__
   return !( pixmap_ || shapepixmap_ );
-  #else
-  return false;
-  #endif
 }
+
+#endif
