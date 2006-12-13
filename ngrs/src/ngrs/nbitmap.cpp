@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan Nattkemper  *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,79 +27,57 @@
 
 
 NBitmap::NBitmap()
- : NObject(), depth_(24),width_(0),height_(0), data_(0)
- #ifdef __unix__
- ,xi(0), clp(0)
- #else
- , hBmp(0), cBmp(0)
- #endif
+ : NObject(), sysData_(0), clpData_(0), clpColor_(0)
 {
-  #ifdef __unix__
-  #else
-  clpColor = 0;
-  #endif       
 }
 
-NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(0),height_(0),data_(0)
-#ifdef __unix__
-,xi(0), clp(0)
-#else
-,hBmp(0), cBmp(0)
-#endif
+NBitmap::NBitmap( const std::string & filename ) : NObject(), sysData_(0), clpData_(0), clpColor_(0)
 {
-  #ifdef __unix__
-  #else
-  clpColor = 0;
-  #endif       
   loadFromFile(filename);
 }
 
-NBitmap::NBitmap( const char ** data ) : NObject(), depth_(24),width_(0),height_(0),data_(0)
-#ifdef __unix__
-,xi(0), clp(0)
-#else
-,hBmp(0), cBmp(0)
-#endif
+NBitmap::NBitmap( const char ** data ) : NObject(), sysData_(0), clpData_(0), clpColor_(0)
 {
-  #ifdef __unix__
-  #else
-  clpColor = 0;
-  #endif             
   createFromXpmData(data);
 }
 
 
+NBitmap::NBitmap( const NBitmap & rhs ) : NObject(), sysData_(0), clpData_(0), clpColor_(0)
+{
+  if ( rhs.sysData() ) {
+    sysData_ = cloneSysImage( rhs.sysData() );
+  }
+
+  if ( rhs.clpData() ) {
+    clpData_ = cloneSysImage( rhs.clpData() );
+  }
+}
+
+const NBitmap & NBitmap::operator =( const NBitmap & rhs ) {
+  deleteBitmapData();    
+  
+  if ( rhs.sysData() )
+		sysData_ = cloneSysImage( rhs.sysData() );
+		
+  if ( rhs.clpData() )
+		clpData_ = cloneSysImage( rhs.clpData() );      
+		
+  return *this;		
+}      
+
+
 NBitmap::~NBitmap()
 {
-  #ifdef __unix__
-  if (xi)
-		XDestroyImage(xi);
-  if (clp)
-		XDestroyImage(clp);
-  #else
-  if ( hBmp )
-    DeleteObject( hBmp );
-  if ( cBmp )
-    DeleteObject( cBmp );
-  #endif
+  deleteBitmapData();                   
 }
 
-unsigned char const * NBitmap::dataPtr( ) const
-{
-  #ifdef __unix__
-  return (unsigned char*) xi->data;
-  #endif
-}
-
-void NBitmap::setDepth( int depth )
-{
-  depth_ = depth;
-}
 
 int NBitmap::depth( ) const
 {
   #ifdef __unix__
   return (xi != 0) ? xi->depth : 0;  
+  #else
+  return 24;
   #endif
 }
 
@@ -108,9 +86,9 @@ int NBitmap::width( ) const
   #ifdef __unix__
   return (xi != 0) ? xi->width : 0;
   #else
-  if ( hBmp ) {
+  if ( sysData_ ) {
     BITMAP bitmap;       
-    GetObject( hBmp, sizeof(BITMAP), (LPSTR)&bitmap);
+    GetObject( sysData_, sizeof(BITMAP), (LPSTR)&bitmap );
     return bitmap.bmWidth;
   }  
   return 0;
@@ -122,9 +100,9 @@ int NBitmap::height( ) const
   #ifdef __unix__
   return (xi != 0) ? xi->height : 0;
   #else
-  if ( hBmp ) {
+  if ( sysData_ ) {
     BITMAP bitmap;       
-    GetObject( hBmp, sizeof(BITMAP), (LPSTR)&bitmap);
+    GetObject( sysData_, sizeof(BITMAP), (LPSTR)&bitmap );
     return bitmap.bmHeight;
   }  
   return 0;
@@ -134,7 +112,7 @@ int NBitmap::height( ) const
 int NBitmap::pixelsize( ) const
 {
  int pixelsize_;
- switch(depth())
+ switch( depth() )
       {
       case 8:
         pixelsize_=1;
@@ -151,138 +129,22 @@ int NBitmap::pixelsize( ) const
   return pixelsize_;
 }
 
-#ifdef __unix__
-XImage * NBitmap::X11data( ) const
+
+NSysImage NBitmap::sysData( ) const
 {
-  return xi;
+  return sysData_;
 }
-#endif
 
-NBitmap::NBitmap( const NBitmap & rhs ) : depth_(24),width_(0),height_(0),data_(0)
-#ifdef __unix__
-,xi(0),clp(0)
-#endif
+NSysImage NBitmap::clpData( ) const
 {
-    #ifdef __unix__
-	if (rhs.X11data() == 0) {
-		// empty Bitmap
-		// do just nothing
-	} else {
-		xi = cloneXImage( rhs.X11data() );
-	}
-
-	if (rhs.X11ClpData() == 0) {
-		// empty Bitmap
-		// do just nothing
-	} else {
-		clp = cloneXImage( rhs.X11ClpData() );
-	}
-  #else
-  if ( rhs.hdata() ) {
-    HDC dc = GetDC( NULL );   
-    // dest bitmap
-    HDC memDC_ = CreateCompatibleDC( dc );
-    hBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
-    SelectObject( memDC_, hBmp );
-    // src bitmap
-    HDC srcDC_ = CreateCompatibleDC( dc );
-    SelectObject( srcDC_, rhs.hdata() );
-    
-    BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
-
-    ReleaseDC( NULL, dc );
-    DeleteDC( memDC_ );
-    DeleteDC( srcDC_ );
-   
-  }  	
-  
-  if ( rhs.cdata() ) {
-      HDC dc = GetDC( NULL );         
-      HDC memDC_ = CreateCompatibleDC( dc );
-      cBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
-      SelectObject( memDC_, cBmp );
-      // src bitmap
-      HDC srcDC_ = CreateCompatibleDC( dc );
-      SelectObject( srcDC_, rhs.cdata() );
-    
-      BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
-
-      ReleaseDC( NULL, dc );
-      DeleteDC( memDC_ );
-      DeleteDC( srcDC_ );
-      
-  }
-  #endif
-  
+  return clpData_;
 }
 
 
-#ifdef __unix__
-void NBitmap::setX11Data( XImage * ximage, XImage* clp_ )
-{
-  xi = ximage;
-  clp = clp_;
-  //data_ = (unsigned char*) xi->data;
-}
-#endif
-
-const NBitmap & NBitmap::operator =( const NBitmap & rhs )
-{      
-	deleteBitmapData();
-
-    #ifdef __unix__
-	if (rhs.X11data() == 0) {
-		// empty Bitmap
-		// do just nothing
-	} else {
-		xi = cloneXImage( rhs.X11data() );
-	}
-
-	if (rhs.X11ClpData() == 0) {
-		// empty Bitmap
-		// do just nothing
-	} else {
-		clp = cloneXImage( rhs.X11ClpData() );
-	}
-  #else
-  if ( rhs.hdata() ) {
-    HDC dc = GetDC( NULL );
-    // dest bitmap
-    HDC memDC_ = CreateCompatibleDC( dc );
-    hBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
-    SelectObject( memDC_, hBmp );
-    // src bitmap
-    HDC srcDC_ = CreateCompatibleDC( dc );
-    SelectObject( srcDC_, rhs.hdata() );
-    
-      BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
-
-      ReleaseDC( NULL, dc );
-      DeleteDC( memDC_ );
-      DeleteDC( srcDC_ );
-
-    }
-    
-    if ( rhs.cdata() ) {
-      HDC dc = GetDC( NULL );         
-      HDC memDC_ = CreateCompatibleDC( dc );
-      cBmp = CreateCompatibleBitmap( memDC_, rhs.width(), rhs.height() );
-      SelectObject( memDC_, cBmp );
-      // src bitmap
-      HDC srcDC_ = CreateCompatibleDC( dc );
-      SelectObject( srcDC_, rhs.cdata() );
-    
-      BitBlt( memDC_, 0,0, rhs.width(), rhs.height(), srcDC_, 0, 0, SRCCOPY);
-
-      ReleaseDC( NULL, dc );
-      DeleteDC( memDC_ );
-      DeleteDC( srcDC_ );
-      
-  }
-
-  #endif	
-  return *this;
-}
+void NBitmap::setSysImgData( NSysImage data, NSysImage clp ) {
+   sysData_ = data;
+   clpData_ = clp;
+}  
 
 void NBitmap::loadFromFile( const std::string & filename )
 {
@@ -290,10 +152,9 @@ void NBitmap::loadFromFile( const std::string & filename )
 
   try {
     NBitmap bmp1 = NApp::filter.at(0)->loadFromFile(NFile::replaceTilde(filename));
-    #ifdef __unix__
-    xi  = cloneXImage( bmp1.X11data() );
-    clp = cloneXImage( bmp1.X11ClpData() );
-    #endif
+
+    sysData_ = cloneSysImage( bmp1.sysData() );
+    clpData_ = cloneSysImage( bmp1.clpData() );
   } catch (const char* e) {
      throw "couldn`t open file";
   }
@@ -318,7 +179,7 @@ void NBitmap::createFromXpmData(const char** data)
   }
   #else
   
-  clpColor = 02;
+  clpColor_ = 02;
   // code from ngrs0.8 .. needs rewrite
   const char* picInfo = data[0];  
   std::vector<int> breakList;
@@ -366,7 +227,7 @@ void NBitmap::createFromXpmData(const char** data)
       value = "None";
     long int color  = 255;
     if ( value.find("None")  != std::string::npos ) {
-      color =  clpColor; 
+      color =  clpColor_; 
       trans = true;
       colorTable[std::string(key)] = color;
       transKey = std::string(key);
@@ -389,23 +250,23 @@ void NBitmap::createFromXpmData(const char** data)
       
       if ( trans ) {
        // check if new clp Color is needed
-       if ( clpColor == color ) {
+       if ( clpColor_ == color ) {
          // create new random clp color
 
-         clpColor = (int) ( rand() * 2147483647 );
          bool generateClpAgain;
          do {
            generateClpAgain = false;  
+           clpColor_ = (int) ( rand() * 2147483647 );
            std::map<std::string,long>::iterator it = colorTable.begin();
            for ( ; it != colorTable.end(); it++ ) {
              long c = it->second;
-             if ( c == clpColor ) {
+             if ( c == clpColor_ ) {
                generateClpAgain = true;
                break;
              }                  
            }
            if ( !generateClpAgain ) {                
-             colorTable[ transKey ] = clpColor;
+             colorTable[ transKey ] = clpColor_;
            }                
          } while ( generateClpAgain );
        }     
@@ -418,8 +279,8 @@ void NBitmap::createFromXpmData(const char** data)
   HDC dc = GetDC( NULL );
   HDC memDC_ = CreateCompatibleDC( dc );
   
-  hBmp = CreateCompatibleBitmap( dc, xwidth_, xheight_ );
-  SelectObject( memDC_, hBmp );
+  sysData_ = CreateCompatibleBitmap( dc, xwidth_, xheight_ );
+  SelectObject( memDC_, sysData_ );
     
   for ( int y=0; y < height; y++ ) {  
      const char* scanLine = data[1+ncolors+y];
@@ -439,128 +300,130 @@ void NBitmap::createFromXpmData(const char** data)
   DeleteDC( memDC_ );
   
   if ( trans ) {  
-    cBmp = createClipMask( hBmp, clpColor );
+    clpData_ = createClipMask( sysData_ , clpColor_ );
   } 
     
   #endif
 }
 
-#ifdef __unix__
-XImage * NBitmap::X11ClpData( ) const
+
+NSysImage NBitmap::cloneSysImage( NSysImage src_img )
 {
-  return clp;
-}
-#else
-HBITMAP NBitmap::hdata() const {
-  return hBmp;       
-}        
-
-HBITMAP NBitmap::cdata() const {
-  return cBmp;        
-}        
-
-#endif
-
-#ifdef __unix__
-XImage * NBitmap::cloneXImage( XImage * src_xi )
-{
-  if ( src_xi ) {
-		int width  = src_xi->width;
-		int height = src_xi->height;
-		int depth  = src_xi->depth;
-		int pad    = src_xi->bitmap_pad;
-		int bytes_per_line = src_xi->bytes_per_line;
+  if ( src_img ) {
+       #ifdef __unix__
+		int width  = src_img->width;
+		int height = src_img->height;
+		int depth  = src_img->depth;
+		int pad    = src_img->bitmap_pad;
+		int bytes_per_line = src_img->bytes_per_line;
 
 		int pixelsize = NApp::system().pixelSize( depth );
 
-		unsigned char* src_data = reinterpret_cast<unsigned char*> (src_xi->data);
+		unsigned char* src_data = reinterpret_cast<unsigned char*> (src_img->data);
 		unsigned char* dst_data = 0;
 
 		dst_data = reinterpret_cast<unsigned char*> ( malloc( bytes_per_line * height ) );
 		memcpy( dst_data, src_data, bytes_per_line * height );				
 
-  	XImage* dst_xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), depth, ZPixmap,0,(char*) dst_data , width, height, pad , bytes_per_line );
+  	    XImage* dst_xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), depth, ZPixmap,0,(char*) dst_data , width, height, pad , bytes_per_line );
 
 		return dst_xi;
+		#else
+		
+        BITMAP bitmap;       
+        GetObject( src_img, sizeof(BITMAP), (LPSTR)&bitmap );
+        int width  = bitmap.bmWidth;
+        int height = bitmap.bmHeight;
+		
+	    HDC dc = GetDC( NULL );   
+        // dest bitmap
+        HDC memDC_ = CreateCompatibleDC( dc );
+        NSysImage hBmp = CreateCompatibleBitmap( memDC_, width, height );
+        SelectObject( memDC_, hBmp );
+        // src bitmap
+        HDC srcDC_ = CreateCompatibleDC( dc );
+        SelectObject( srcDC_, src_img );
+    
+        BitBlt( memDC_, 0,0, width, height, srcDC_, 0, 0, SRCCOPY);
+
+        ReleaseDC( NULL, dc );
+        DeleteDC( memDC_ );
+        DeleteDC( srcDC_ );
+
+        return hBmp;
+		#endif
 	}
 
   return 0;
 }
-#endif
+
 
 void NBitmap::deleteBitmapData( )
 {
+  if ( sysData_ ) {
   #ifdef __unix__
-  if (xi) {
-		// destroys the image
-		XDestroyImage(xi);
-		xi = 0;
-	}
-
-	if (clp) {
-		// destroys the transparent image mask
-		XDestroyImage(clp);
-		clp = 0;
-	}
-	#endif
+    XDestroyImage( sysData_ );
+  #else 
+    DeleteObject( sysData_ );
+  #endif
+    sysData_ = 0;			
+  }		
+  if ( clpData_ ) {
+  #ifdef __unix__
+    XDestroyImage( clpData_ );
+  #else 
+    DeleteObject( clpData_ );
+  #endif	     
+    clpData_  = 0;
+  }     
 }
 
 bool NBitmap::empty() const {
-  #ifdef __unix__
-  return !(xi || clp);
-  #else
-  return true;
-  #endif
+  return !( sysData_ || clpData_ );
 }
-
 
 #ifdef __unix__
 #else
 
-
-
 HBITMAP NBitmap::createClipMask(HBITMAP hbmColour, COLORREF crTransparent)
 {
-   HDC hdcMem, hdcMem2;
-   HBITMAP hbmMask;
+  HDC hdcMem, hdcMem2;
+  HBITMAP hbmMask;
   BITMAP bm;
 
-    // Create monochrome (1 bit) mask bitmap.  
+  // Create monochrome (1 bit) mask bitmap.  
 
-    GetObject(hbmColour, sizeof(BITMAP), &bm);
-    hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+  GetObject(hbmColour, sizeof(BITMAP), &bm);
+  hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
 
-    // Get some HDCs that are compatible with the display driver
+  // Get some HDCs that are compatible with the display driver
 
-    hdcMem = CreateCompatibleDC(0);
-    hdcMem2 = CreateCompatibleDC(0);
+  hdcMem = CreateCompatibleDC(0);
+  hdcMem2 = CreateCompatibleDC(0);
 
-    SelectObject(hdcMem, hbmColour);
-    SelectObject(hdcMem2, hbmMask);
+  SelectObject(hdcMem, hbmColour);
+  SelectObject(hdcMem2, hbmMask);
 
-    // Set the background colour of the colour image to the colour
-    // you want to be transparent.
-    SetBkColor(hdcMem, crTransparent);
+  // Set the background colour of the colour image to the colour
+  // you want to be transparent.
+  SetBkColor(hdcMem, crTransparent);
 
-    // Copy the bits from the colour image to the B+W mask... everything
-    // with the background colour ends up white while everythig else ends up
-    // black...Just what we wanted.
+  // Copy the bits from the colour image to the B+W mask... everything
+  // with the background colour ends up white while everythig else ends up
+  // black...Just what we wanted.
 
-    BitBlt(hdcMem2, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+  BitBlt(hdcMem2, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
 
-    // Take our new mask and use it to turn the transparent colour in our
-    // original colour image to black so the transparency effect will
-    // work right.
-    BitBlt(hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem2, 0, 0, SRCINVERT);
+  // Take our new mask and use it to turn the transparent colour in our
+  // original colour image to black so the transparency effect will
+  // work right.
+  BitBlt(hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem2, 0, 0, SRCINVERT);
 
-    // Clean up.
+  // Clean up.
 
-    DeleteDC(hdcMem);
-    DeleteDC(hdcMem2);
+  DeleteDC(hdcMem);
+  DeleteDC(hdcMem2);
 
-    return hbmMask;
+  return hbmMask;
 } 
-
-
-
 #endif

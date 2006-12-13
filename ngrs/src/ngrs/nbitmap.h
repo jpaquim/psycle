@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,21 +27,23 @@
 @author Stefan
 */
 
-typedef unsigned char* pRGBA;
+#ifdef __unix__
+typedef XImage* NSysImage;
+#else
+typedef HBITMAP NSysImage;
+#endif
 
 class NBitmap : public NObject
 {
 public:
     NBitmap();
-    NBitmap(const std::string & filename);
-    NBitmap(const NBitmap & rhs);
-    NBitmap(const char** data);
+    NBitmap( const std::string & filename );
+    NBitmap( const NBitmap & rhs );
+    NBitmap( const char** data );
 
-    const NBitmap & operator= (const NBitmap & rhs);
+    const NBitmap & operator= ( const NBitmap & rhs );
 
     ~NBitmap();
-
-    unsigned char const * dataPtr() const;
 
     int depth()     const;
     int pixelsize() const;
@@ -50,42 +52,31 @@ public:
 
     void setDepth(int depth);
 
-    #ifdef __unix__
-    XImage* X11data() const;
-    XImage* X11ClpData() const;    
+    NSysImage sysData() const;
+    NSysImage clpData() const; 
 
-    void setX11Data(XImage* ximage, XImage* clp_);
-    #else
-    HBITMAP hdata() const;
-    HBITMAP cdata() const;
-    #endif
+    void loadFromFile( const std::string & filename );
+    void createFromXpmData( const char** data );
 
-    void loadFromFile(const std::string & filename);
-    void createFromXpmData(const char** data);
 
-    #ifdef __unix__
-		// this really should be a cloned NBItmap then.
-		XImage* cloneXImage( XImage* src_xi );
-    #endif
+    NSysImage cloneSysImage( NSysImage src_img );
 
     bool empty() const;
+    
+    void setSysImgData( NSysImage data, NSysImage clp );
 
 private:
 
     int depth_;
-    int width_;
-    int height_;
-    pRGBA data_;
 
+    NSysImage sysData_;
+    NSysImage clpData_;
+
+    long clpColor_;
+        
     #ifdef __unix__
-    XImage* xi;
-    XImage* clp;
-    #else
-    HBITMAP hBmp;
-    HBITMAP cBmp; // clipMask
- 
+    #else 
     HBITMAP createClipMask(HBITMAP hbmColour, COLORREF crTransparent);
-    COLORREF clpColor;
     #endif
 
 	void deleteBitmapData();
