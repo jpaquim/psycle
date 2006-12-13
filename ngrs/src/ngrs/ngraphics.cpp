@@ -700,7 +700,22 @@ void NGraphics::putBitmap( int destX, int destY, int width, int height, const NB
       else
             XPutImage(NApp::system().dpy(), win, gc_,bitmap.X11data(),
                 srcX, srcY, destX+dx_,destY+dy_, width,height);
+                
   }
+  #else
+  
+  if ( bitmap.hdata() ) {    
+
+    HDC hdcMem = CreateCompatibleDC( gcp );
+    HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.hdata() );
+
+    BitBlt( gcp, srcX+dx_, srcY+dy_, bitmap.width(), bitmap.height(), hdcMem , destX, destY, SRCCOPY);
+
+    SelectObject(hdcMem, hbmOld);
+    DeleteDC(hdcMem);
+
+  } 
+  
   #endif
 }
 
@@ -1253,6 +1268,8 @@ void NGraphics::putPixmap( int destX, int destY, int width, int height, NPixmap 
             XCopyArea(NApp::system().dpy(),  pixmap.X11Pixmap(), win ,gc_,
                 srcX, srcY, width, height, destX+dx_,destY+dy_);
   }
+  #else
+  putBitmap( destX, destY, width, height, ( NBitmap & ) pixmap, srcX, srcY )  ;
   #endif
 }
 

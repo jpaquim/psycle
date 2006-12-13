@@ -23,6 +23,14 @@
 #include "nobject.h"
 #include "nsystem.h"
 
+#ifdef __unix__
+#else
+#include "nbitmap.h"
+typedef NBitmap NPixmap;
+#endif
+
+#ifdef __unix__
+
 class NWindow;
 
 /**
@@ -40,10 +48,9 @@ public:
     int width()  const;
     int height() const;
 
-    #ifdef __unix__
+
     Pixmap X11Pixmap() const;
     Pixmap X11ShapePixmap() const;
-    #endif
 
     WinHandle owner() const;
 
@@ -57,12 +64,10 @@ private:
 
     int width_, height_;
 
-    #ifdef __unix__
     Pixmap pixmap_;
     Pixmap shapepixmap_;
-    #endif
 
     WinHandle owner_;
 };
-
+#endif
 #endif
