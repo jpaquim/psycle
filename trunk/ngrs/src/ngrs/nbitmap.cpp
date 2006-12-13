@@ -75,7 +75,7 @@ NBitmap::~NBitmap()
 int NBitmap::depth( ) const
 {
   #ifdef __unix__
-  return (xi != 0) ? xi->depth : 0;  
+  return ( sysData_) ? sysData_->depth : 0;  
   #else
   return 24;
   #endif
@@ -84,7 +84,7 @@ int NBitmap::depth( ) const
 int NBitmap::width( ) const
 {
   #ifdef __unix__
-  return (xi != 0) ? xi->width : 0;
+  return ( sysData_ ) ? sysData_->width : 0;
   #else
   if ( sysData_ ) {
     BITMAP bitmap;       
@@ -98,7 +98,7 @@ int NBitmap::width( ) const
 int NBitmap::height( ) const
 {
   #ifdef __unix__
-  return (xi != 0) ? xi->height : 0;
+  return ( sysData_ ) ? sysData_->height : 0;
   #else
   if ( sysData_ ) {
     BITMAP bitmap;       
@@ -173,9 +173,9 @@ void NBitmap::createFromXpmData(const char** data)
   attr.color_key = XPM_GRAY;
 
   XImage* xi1;
-  int err = XpmCreateImageFromData(NApp::system().dpy(),(char**)(data),&xi1,&clp,0);
+  int err = XpmCreateImageFromData(NApp::system().dpy(),(char**)(data),&xi1,&clpData_,0);
   if (err == XpmSuccess) {
-     xi = xi1;
+     sysData_ = xi1;
   }
   #else
   
