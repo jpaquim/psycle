@@ -630,12 +630,12 @@ void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
   if (bitmap.X11data() != 0) {
 
       if (dblBuffer_) {
-            if (bitmap.X11ClpData()==0) {
-               XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.X11data(),0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
+            if (bitmap.clpData()==0) {
+               XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.sysData(),0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
             } else
            {
              // transparent bitmap;
-             XImage* clp = bitmap.X11ClpData();
+             XImage* clp = bitmap.clpData();
              Pixmap pix;
              pix = XCreatePixmap(NApp::system().dpy(), doubleBufferPixmap_, clp->width, clp->height, clp->depth);
 
@@ -645,36 +645,36 @@ void NGraphics::putBitmap( int x, int y, const NBitmap & bitmap )
              XSetClipMask(NApp::system().dpy(), gcp, pix);
              XSetClipOrigin(NApp::system().dpy(), gcp, x+dx_, y+dy_);
 						 // todo valgrind check error on some images
-             XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp, bitmap.X11data(), 0, 0, x+dx_, y+dy_, bitmap.width(), bitmap.height() );
+             XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp, bitmap.sysData(), 0, 0, x+dx_, y+dy_, bitmap.width(), bitmap.height() );
 						 // valgrind check error end
              XSetClipMask(NApp::system().dpy(), gcp, None);
              XFreeGC(NApp::system().dpy(), gc1);
              XFreePixmap(NApp::system().dpy(), pix);
            }}
       else
-            XPutImage(NApp::system().dpy(), win, gc_,bitmap.X11data(),
+            XPutImage(NApp::system().dpy(), win, gc_,bitmap.sysData(),
                 0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
   }
   #else
 
-  if ( bitmap.cdata() ) {  
+  if ( bitmap.clpData() ) {  
     // bitmap is transparent      
     HDC hdcMem = CreateCompatibleDC( gcp );
-    HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.cdata() );
+    HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.clpData() );
 
-    SelectObject( hdcMem, bitmap.cdata() );
+    SelectObject( hdcMem, bitmap.clpData() );
     BitBlt( gcp, x+dx_, y+dy_, bitmap.width(), bitmap.height(), hdcMem , 0,0, SRCAND);    
-    SelectObject( hdcMem, bitmap.hdata() );
+    SelectObject( hdcMem, bitmap.sysData() );
     BitBlt( gcp, x+dx_, y+dy_, bitmap.width(), bitmap.height(), hdcMem , 0,0, SRCPAINT);
 
     SelectObject(hdcMem, hbmOld);
     DeleteDC(hdcMem);
 
   } else
-  if ( bitmap.hdata() ) {    
+  if ( bitmap.sysData() ) {    
 
     HDC hdcMem = CreateCompatibleDC( gcp );
-    HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.hdata() );
+    HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.sysData() );
 
     BitBlt( gcp, x+dx_, y+dy_, bitmap.width(), bitmap.height(), hdcMem , 0,0, SRCCOPY);
 
@@ -695,19 +695,19 @@ void NGraphics::putBitmap( int destX, int destY, int width, int height, const NB
    if (bitmap.X11data() != 0) {
 
       if (dblBuffer_)
-            XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.X11data(),
+            XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.sysData(),
                 srcX, srcY, destX+dx_,destY+dy_, width,height);
       else
-            XPutImage(NApp::system().dpy(), win, gc_,bitmap.X11data(),
+            XPutImage(NApp::system().dpy(), win, gc_,bitmap.sysData(),
                 srcX, srcY, destX+dx_,destY+dy_, width,height);
                 
   }
   #else
   
-  if ( bitmap.hdata() ) {    
+  if ( bitmap.sysData() ) {    
 
     HDC hdcMem = CreateCompatibleDC( gcp );
-    HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.hdata() );
+    HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.sysData() );
 
     BitBlt( gcp, srcX+dx_, srcY+dy_, bitmap.width(), bitmap.height(), hdcMem , destX, destY, SRCCOPY);
 

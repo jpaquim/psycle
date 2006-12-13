@@ -72,11 +72,7 @@ void NImage::paint( NGraphics * g )
   NBitmap* pBmp = 0;
   if (pBitmap_ == 0) pBmp =  &bitmap24bpp_; else pBmp = pBitmap_;
 
-  #ifdef __unix__
-  if ( pBmp->X11data() )
-  #else
-  if ( pBmp->hdata() )
-  #endif
+  if ( pBmp->sysData() )
   {
     switch (halign_) {
       case nAlCenter :

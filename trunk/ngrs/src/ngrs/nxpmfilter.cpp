@@ -54,7 +54,7 @@ NBitmap NXPMFilter::loadFromFile( const std::string & filename )
 
   NBitmap bitmap;
   if (err == XpmSuccess) {
-     bitmap.setX11Data(xi,clp);
+     bitmap.setSysImgData( xi, clp );
   } else throw "couldn`t open file";
   
   return bitmap;
