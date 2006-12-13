@@ -59,6 +59,7 @@ namespace psycle {
 		{
                         delete lineShape;
 		}
+				
 
                 const NPoint & WireGUI::p1( ) const {
                   return lineShape->p1();
@@ -68,6 +69,10 @@ namespace psycle {
                 {
                   return lineShape->p2();
                 }
+                
+		void WireGUI::addBend( const NPoint & pt ) {
+		  lineShape->addBend( pt );		
+		}                
 
                 void WireGUI::setPoints( const NPoint & p1, const NPoint & p2 )
                 {
@@ -80,10 +85,21 @@ namespace psycle {
 			NPen pen;
 			pen.setLineWidth(2);
 			g->setPen(pen);
-                        g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
-                        g->drawLine( lineShape->p1().x(), lineShape->p1().y(), lineShape->p5().x(), lineShape->p5().y() );
-			g->drawLine( lineShape->p5().x(), lineShape->p5().y(), lineShape->p4().x(), lineShape->p4().y() );
-			g->drawLine( lineShape->p4().x(), lineShape->p4().y(), lineShape->p2().x(), lineShape->p2().y() );
+                        g->setTranslation( g->xTranslation()-left(), g->yTranslation()-top() );
+                        
+                        NPoint startPt = lineShape->p1();
+                        
+                        std::vector<NPoint>::const_iterator it = lineShape->bendPts().begin();
+                        for ( ; it < lineShape->bendPts().end(); it++ ) {
+                          NPoint pt = *it;
+                          g->drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() ); 
+                          startPt = pt;                         
+                        }
+                                                                        
+                        g->drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
+                        
+// 			g->drawLine( lineShape->p5().x(), lineShape->p5().y(), lineShape->p4().x(), lineShape->p4().y() );
+//                      g->drawLine( lineShape->p4().x(), lineShape->p4().y(), lineShape->p2().x(), lineShape->p2().y() );
 			g->resetPen();
 			drawArrow(g);
 			g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
@@ -93,8 +109,8 @@ namespace psycle {
 		{
 			// Spaces between the end and startPoint of the Line
 
-			double  ankathede    = (lineShape->p5().x() - lineShape->p4().x());
-			double  gegenkathede = (lineShape->p5().y() - lineShape->p4().y());
+			double  ankathede    = (lineShape->p1().x() - lineShape->p2().x());
+			double  gegenkathede = (lineShape->p1().y() - lineShape->p2().y());
 			double  hypetenuse   = std::sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
 
 

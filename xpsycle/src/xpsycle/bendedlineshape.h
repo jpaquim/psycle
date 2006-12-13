@@ -52,6 +52,8 @@ public:
     void setPoints( const NPoint & p1, const NPoint & p2 );
     void addBend( const NPoint & bendPt );
     void setClippingDistance(int d);
+    
+    const std::vector<NPoint> & bendPts() const;
 
     virtual int overPicker(int x, int y);
     virtual void setPicker(int index, int x, int y);

@@ -44,6 +44,7 @@ namespace psycle
                                 const NPoint & p2() const;
 
                                 void setPoints( const NPoint & p1, const NPoint & p2 );
+                                void addBend( const NPoint & pts );
 
 				virtual void paint(NGraphics* g);
 			

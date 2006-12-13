@@ -41,15 +41,6 @@ class Song;
 @author Stefan
 */
 
-enum WireState
-{
-        WIRESTATE_WIRED = 0,
-        WIRESTATE_NEWCONNECTION = 1,
-        WIRESTATE_REWIRING_DST = 2,
-        WIRESTATE_REWIRING_SRC = 3
-};
-
-
 class MachineWireGUI : public WireGUI {
 public :
 
@@ -59,20 +50,18 @@ public :
     
     virtual void onMousePress  (int x, int y, int button);
     virtual void onMouseDoublePress (int x, int y, int button);
-    virtual void onMoveEnd (const NMoveEvent & ev );
    
     WireDlg* dialog();
-    void setWireState(WireState newState);
-    WireState wireState() const;    
-    
-    signal2<MachineWireGUI*, int> rewireBegin;
-    signal2<MachineWireGUI*, const NMoveEvent &> wireMoveEnd;
 
 private:
 
   WireDlg* dlg;
-  WireState wireState_; 
+
   NPopupMenu* menu_;
+  NPoint newBendPos_;
+  
+  void initPopupMenu( );
+  void onAddBend( NButtonEvent* ev );
 
 };
 
@@ -104,10 +93,9 @@ public:
 
     Machine* selMachine();
 
-		void updateSkin();
-
-		void setColorInfo( const MachineViewColorInfo & info );
-		const MachineViewColorInfo & colorInfo() const;
+    void updateSkin();
+    void setColorInfo( const MachineViewColorInfo & info );
+    const MachineViewColorInfo & colorInfo() const;
 
 private:
 
@@ -123,15 +111,13 @@ private:
     NPanel* scrollArea_;
     NScrollBox* scrollBox_;
 
-    void onCreateMachine(Machine* mac);
-    void onDestroyMachine(Machine* mac);
+    void onCreateMachine( Machine* mac );
+    void onDestroyMachine( Machine* mac );
 
-    void onNewConnection(MachineGUI* sender);
-    void onLineRewireBeginSignal(MachineWireGUI* line, int rewireType);
-    void onLineMoveEnd(MachineWireGUI*, const NMoveEvent & event);
+    void onNewConnection( MachineGUI* sender );
+    void onLineMoveEnd( const NMoveEvent & event);
 
     void onWireDelete(WireDlg* dlg);
-
     void onMoveMachine(Machine* mac, int x, int y);
 
     MachineGUI* findByMachine(Machine* mac);
@@ -143,12 +129,12 @@ private:
 
     void onMachineSelected(MachineGUI* gui);
 
-		void onMachineDeleteRequest( MachineGUI* machineGUI );
-		void onUpdateMachinePropertiesSignal(Machine* machine);
+    void onMachineDeleteRequest( MachineGUI* machineGUI );
+    void onUpdateMachinePropertiesSignal(Machine* machine);
 
-		MachineViewColorInfo colorInfo_;
+    MachineViewColorInfo colorInfo_;
 
-		std::vector<WireDlg*> wireDlg;
+    std::vector<WireDlg*> wireDlg;
 
 };
 
