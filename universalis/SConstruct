@@ -148,6 +148,6 @@ if False:
 		binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
 	)
 
-project(universalis_package)
+project([universalis_package])
 
 Return('universalis_package')

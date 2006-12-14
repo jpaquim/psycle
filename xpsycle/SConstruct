@@ -38,7 +38,6 @@ from packageneric.generic.scons.check.external_package import external_package a
 from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
 from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
 
-import os.path
 ngrs = os.path.join('..', 'ngrs', 'SConstruct')
 if os.path.exists(ngrs): ngrs = project.subscript(ngrs).local_package()
 else:
@@ -232,4 +231,8 @@ if False:
 		binary_packages = [xpsycle_runtime, xpsycle_doc],
 	)
 
-project(xpsycle_module)
+plugin_modules = os.path.join('..', 'xpsycle.plugins', 'SConstruct')
+if os.path.exists(plugin_modules): plugin_modules = project.subscript(plugin_modules)
+else: plugin_modules = []
+
+project([xpsycle_module] + plugin_modules)

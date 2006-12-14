@@ -81,6 +81,6 @@ if False:
 		binary_packages = [diversalis_dev, diversalis_doc],
 	)
 
-project(diversalis_package)
+project([diversalis_package])
 
 Return('diversalis_package')
