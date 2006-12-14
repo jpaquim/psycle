@@ -29,7 +29,7 @@ std::string NXmlAttributes::value( const std::string & name ) const {
 void NXmlAttributes::parseHeader( const std::string & text ) {
   unsigned int pos = text.find( " ", 0 );
   tagName_ = text.substr( 0, pos );
-  while ( (pos = getNextAttribute( text, pos  ) ) != std::string::npos );
+  while ( (pos = getNextAttribute( text, pos+1  ) ) != std::string::npos );
 }
 
 unsigned int NXmlAttributes::getNextAttribute( const std::string & text,  unsigned int pos ) {
@@ -62,6 +62,7 @@ unsigned int NXmlAttributes::getNextAttribute( const std::string & text,  unsign
     }        
   }    
   
+  if ( start_idx == std::string::npos )  return std::string::npos;
   
   std::string prefix  = text.substr( start_idx, mid_idx - start_idx );
   if  ( end_idx >= text.length() || midstart_idx >= text.length() ) return std::string::npos;
