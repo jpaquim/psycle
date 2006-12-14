@@ -18,9 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "skinreader.h"
-#ifdef __unix__
 #include "zipreader.h"
-#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -36,10 +34,8 @@ namespace psycle {
 
 
 		SkinReader::SkinReader()
-		{
-            #ifdef __unix__                    
+		{                
 			z = 0;
-			#endif
 		}
 
 
@@ -49,9 +45,7 @@ namespace psycle {
 
 		void SkinReader::setDefaults() {
 			// skin default for memparse
-			#ifdef __unix__
 			z = 0;
-			#endif
 
 			std::string mem;			
 
@@ -149,7 +143,6 @@ namespace psycle {
 		bool SkinReader::loadSkin( const std::string & fileName )
 		{
 		 // open the zip file
-		 #ifdef __unix__
 			z = 0;
 			zipreader_file *f;
 			int fd = open( fileName.c_str(), O_RDONLY );
@@ -189,9 +182,6 @@ namespace psycle {
 			close( fd );
 
 			return true;
-			#else
-			return false;
-			#endif
 		}
 
 
@@ -224,7 +214,6 @@ namespace psycle {
 		}
 
 		NBitmap SkinReader::extractAndLoadBitmap( const std::string & zip_path ) {
-			#ifdef __unix__
 			std::cout << "extracting bitmap" << std::endl;
 			// extract bitmap to a temp file			
 			std::string fileName = NFile::extractFileNameFromPath( zip_path );
@@ -245,9 +234,6 @@ namespace psycle {
 			NBitmap bitmap;
 			bitmap.loadFromFile( std::string("temp")+fileName );
 			return bitmap;
-			#else
-			return NBitmap();
-			#endif
 		}
 
 		void SkinReader::onTagParse( const NXmlParser & parser, const std::string & tagName )
@@ -317,7 +303,7 @@ namespace psycle {
 				std::string src = parser.getAttribValue("src");
 				if (src != "")	{
 					
-#ifdef __unix__
+
 					///\ todo ngrs: npixmap conversion to nbitmap ... using instead extractAndLoadBitmap then ..
 					///\ todo machines_bitmap_.loadFromFile = extractAndLoadBitmap( src );
 
@@ -341,7 +327,7 @@ namespace psycle {
 
 						machines_bitmap_.loadFromFile( std::string("temp")+fileName );
 					}
-#endif
+
 				}
 			} else
 			if ( tagName == "master" ) {
