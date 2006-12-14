@@ -96,6 +96,8 @@ public:
     void updateSkin();
     void setColorInfo( const MachineViewColorInfo & info );
     const MachineViewColorInfo & colorInfo() const;
+    
+    virtual void onMousePress( int x, int y, int button );
 
 private:
 
@@ -105,6 +107,7 @@ private:
     MachineWireGUI* line;
     MachineWireGUI* rewireLine;
     MachineGUI* startGUI;
+    WireGUI* selectedWire_;
 
 
     void init();
@@ -118,6 +121,7 @@ private:
     void onLineMoveEnd( const NMoveEvent & event);
 
     void onWireDelete(WireDlg* dlg);
+    void onWireSelected( NButtonEvent* ev );
     void onMoveMachine(Machine* mac, int x, int y);
 
     MachineGUI* findByMachine(Machine* mac);

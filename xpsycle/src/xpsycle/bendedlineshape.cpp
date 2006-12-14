@@ -115,9 +115,15 @@ void BendedLineShape::move( int dx, int dy )
 
 void BendedLineShape::drawPicker( NGraphics * g )
 {
-  g->setForeground(NColor(0,0,0));
+  g->setForeground(NColor(100,100,100));
   g->fillRect(p1_.x()- pickWidth_/2,p1_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   g->fillRect(p2_.x()- pickWidth_/2,p2_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
+  
+  std::vector<NPoint>::const_iterator it = bendPts().begin();
+  for ( ; it < bendPts().end(); it++ ) {
+    NPoint pt = *it;
+    g->fillRect(pt.x()- pickWidth_/2, pt.y() - pickHeight_/2, pickWidth_, pickHeight_ );
+  }
 }
 
 void BendedLineShape::setLeft( int left )

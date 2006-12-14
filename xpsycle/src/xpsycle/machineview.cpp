@@ -61,6 +61,8 @@ namespace psycle {
     }
 
     void MachineWireGUI::onMousePress( int x, int y, int button ) {
+
+      WireGUI::onMousePress( x, y, button );
       
       int shift = NApp::system().shiftState();      
       if ( shift &  nsRight ) {
@@ -68,7 +70,7 @@ namespace psycle {
         menu_->setPosition( x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(), 100,100);
         menu_->setVisible( true ); 
       } else {
-       setMoveable( NMoveable( nMvPolygonPicker ) );
+        setMoveable( NMoveable( nMvPolygonPicker ) );        
       }            
     }
      
@@ -110,7 +112,8 @@ void MachineView::init( )
 {
   scrollArea_->setTransparent(false);
   selectedMachine_ = 0;
-	updateSkin();
+  selectedWire_ = 0;
+  updateSkin();
 }
 
 
@@ -239,6 +242,8 @@ void MachineView::onNewConnection( MachineGUI * sender )
 
 void MachineView::onLineMoveEnd( const NMoveEvent & ev )
 {	
+  if ( !line ) return;
+  
   bool found = false;
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
@@ -259,8 +264,12 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev )
     line->dialog()->setName("wiredlg");
     scrollArea_->removeChild(line);
     repaint();
-  } else
-  line->setMoveable( NMoveable() );
+  } else {
+    line->setMoveable( NMoveable() );
+    line->mousePress.connect( this, &MachineView::onWireSelected );
+  }
+  
+  line = 0;
 }
 
 void MachineView::onWireDelete( WireDlg * dlg )
@@ -295,8 +304,10 @@ void MachineView::onWireDelete( WireDlg * dlg )
   if (window()!=0) window()->checkForRemove(0);*/
   std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
   it = find( wireGUIs.begin(), wireGUIs.end(), dlg->line() );
-  if ( it != wireGUIs.end() ) wireGUIs.erase(it);	
-
+  if ( it != wireGUIs.end() ) {
+    wireGUIs.erase(it);	
+    if ( selectedWire_ == *it ) selectedWire_ = 0;
+  }  
   scrollArea_->removeChild ( dlg->line() );
 
   line = 0;
@@ -402,6 +413,24 @@ void MachineView::setColorInfo( const MachineViewColorInfo & info ) {
 
 const MachineViewColorInfo & MachineView::colorInfo() const {
 	return colorInfo_;
+}
+
+void MachineView::onWireSelected( NButtonEvent* ev ) {
+  std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
+  it = find( wireGUIs.begin(), wireGUIs.end(), ev->sender() );
+  if ( it != wireGUIs.end() ) {
+    std::cout << "selwire" << std::endl;
+    selectedWire_ = *it;
+  }
+}
+
+void MachineView::onMousePress( int x, int y, int button ) {
+  NPanel::onMousePress( x, y, button );  
+  if ( selectedWire_ ) {
+    selectedWire_->setMoveable( NMoveable() );
+    selectedWire_->repaint();
+    selectedWire_ = 0;
+  }  
 }
  
 }
