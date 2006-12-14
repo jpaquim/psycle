@@ -22,6 +22,7 @@
 
 #include "sigslot.h"
 #include <string>
+#include "nxmlattributes.h"
 
 #ifdef __unix__
 #include <xercesc/util/PlatformUtils.hpp>
@@ -50,7 +51,13 @@ public:
     #ifdef __unix__
     const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
     #endif
-
+    
+    virtual void onTagParse( const std::string & tagName );
+    
+private:
+                     
+    NXmlAttributes attribs;
+    NXmlPos getNextTag( int pos, const std::string & text ) const;    
 
 };
 
