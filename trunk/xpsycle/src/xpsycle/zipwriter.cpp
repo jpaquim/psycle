@@ -257,7 +257,9 @@ int zipwriter_finish(zipwriter *d)
 	free(d->compressor_state[0]);
 	free(d);
 	if (err) return 0;
+	#ifdef __unix__
 	if (fsync(fd) == -1) return 0;
+	#endif
 	if (close(fd) == -1) return 0;
 	return 1;
 }
