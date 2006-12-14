@@ -225,20 +225,19 @@ std::string NXmlParser::getAttribValue( const std::string & name ) const
 {
   #ifdef __unix__
    std::string erg;
-       try {
+   try {
        XMLCh* str = XMLString::transcode(name.c_str());
        const XMLCh* strCh = attrs->getValue(str);
        char* id = XMLString::transcode(strCh);
        erg = std::string(id);
        XMLString::release(&id);
        XMLString::release(&str);
-       } catch (std::exception e)
-       {
+   } catch (std::exception e) {
            return "";
-       }
-      return erg;
-  #else
-  return "";    
+   }
+   return erg;
+  #else  
+  return attribs.value( name );    
   #endif      
 }
 
@@ -311,6 +310,54 @@ int NXmlParser::parseString( const std::string & text )
    else
         return 0;
   #else
-    return 0;        
+  
+  NXmlPos xml_pos;
+  xml_pos.err = 0;
+  unsigned int pos = 0;
+
+  while( !xml_pos.err ) {
+    xml_pos = getNextTag( pos, text );
+    if ( xml_pos.err == 0 && xml_pos.type == 0) {
+      attribs.reset( text.substr( xml_pos.pos, xml_pos.len ) );       
+      onTagParse( attribs.tagName() );
+    }
+    pos = xml_pos.pos + xml_pos.len + 1;
+  }
+  
+  return 0;        
   #endif
 }
+
+
+NXmlPos NXmlParser::getNextTag( int pos,  const std::string & text ) const {
+        
+  NXmlPos xml_pos;
+  xml_pos.err  = 1;
+  xml_pos.type = 0;
+        
+  unsigned int next_pos = text.find( "<", pos );
+  
+  if ( next_pos + 1 < text.length() ) {   
+    if ( text[next_pos+1] == '/' ) {
+     xml_pos.type = 1;
+    }
+  }
+  
+  if ( next_pos != std::string::npos ) {
+    unsigned int tag_end = text.find( ">", next_pos );
+    if ( tag_end != std::string::npos ) {
+      xml_pos.pos = next_pos + 1;
+      xml_pos.len = tag_end - next_pos - 1 ;         
+      xml_pos.err = 0;
+    } else
+    xml_pos.err = 1;        
+  } else {
+   xml_pos.err = 1;      
+  }         
+  
+  return xml_pos;
+}         
+
+void NXmlParser::onTagParse( const std::string & tagName ) {
+  tagParse.emit( *this, tagName );
+}     
