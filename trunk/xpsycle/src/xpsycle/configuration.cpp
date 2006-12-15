@@ -32,8 +32,6 @@
 #endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
-#include <ngrs/napp.h>
-#include <ngrs/nconfig.h>
 #include <ngrs/nfile.h>
 #include <ngrs/nkeyevent.h>
 #include <sys/stat.h>
@@ -53,6 +51,7 @@ Configuration::Configuration()
   #if !defined XPSYCLE__CONFIGURATION
   std::cout << "xpsycle: warning: built without configuration" << std::endl;
   #endif
+  setXmlDefaults();
   setSkinDefaults();
   defaultPatLines = 64;
   loadConfig();
@@ -70,6 +69,138 @@ Configuration::~Configuration()
 {
   delete bitmaps_;
 }
+
+void Configuration::setXmlDefaults() {     
+  std::string xml_mem_;   
+     
+  xml_mem_ =  " <!-- xpsycle configuration file --> ";
+  xml_mem_ += " <xpsycle> ";
+  
+/*  xml_mem_ += " <!-- help configuration -->";
+//  xml_mem_ += " <path id='hlpdir' src='~/xpsycle/doc/' />";
+
+  xml_mem_ += " <!-- audio configuration -->";
+
+  xml_mem_ += " <audio enable='0' />";
+//  xml_mem_ += " <driver name='alsa' />";
+
+  xml_mem_ += " <!-- gui configuration -->";
+
+//  xml_mem_ += " <path id='icondir' src='~/xpsycle/icons/' />";
+//  xml_mem_ += " <path id='plugindir'";
+//  xml_mem_ += " src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />";
+//  xml_mem_ += " <path id='prsdir' src='~/.xpsycle/prs/'></path>";
+
+  xml_mem_ += " <!-- keyHandler configuration -->";
+  xml_mem_ += " <!-- general keys -->";*/
+
+  xml_mem_ += " <key id='current_machine-1' mod='ctrl' keychar='NK_Left' />";
+  xml_mem_ += " <key id='current_machine+1' mod='ctrl' keychar='NK_Right' />";
+  xml_mem_ += " <key id='current_instrument-1' mod='ctrl' keychar='NK_Up' />";
+  xml_mem_ += " <key id='current_instrument+1' mod='ctrl' keychar='NK_Down' />";
+
+  xml_mem_ += " <key id='screen_machines' keychar='F2' />";
+  xml_mem_ += " <key id='screen_patterns' keychar='F3' />";
+  xml_mem_ += " <key id='edit_instrument' keychar='F4' />";
+  xml_mem_ += " <key id='screen_sequencer' keychar='F5' />";
+  xml_mem_ += " <key id='play_song_start' keychar='F6' />";
+  xml_mem_ += " <key id='play_song_normal' keychar='F7' />";
+  xml_mem_ += " <key id='stop_playback' keychar='F8' />";
+  xml_mem_ += " <key id='add_new_machine' keychar='F9' />";
+
+  xml_mem_ += " <!-- patternview octave 0  -->";
+
+  xml_mem_ += " <key id='oct_C_0' keychar='y'/>";
+  xml_mem_ += " <key id='oct_CS0' keychar='s'/>";
+  xml_mem_ += " <key id='oct_D_0' keychar='x'/>";
+  xml_mem_ += " <key id='oct_DS0' keychar='d'/>";
+  xml_mem_ += " <key id='oct_E_0' keychar='c'/>";
+  xml_mem_ += " <key id='oct_F_0' keychar='v'/>";
+  xml_mem_ += " <key id='oct_FS0' keychar='g'/>";
+  xml_mem_ += " <key id='oct_G_0' keychar='b'/>";
+  xml_mem_ += " <key id='oct_GS0' keychar='h'/>";
+  xml_mem_ += " <key id='oct_A_0' keychar='n'/>";
+  xml_mem_ += " <key id='oct_AS0' keychar='j'/>";
+  xml_mem_ += " <key id='oct_B_0' keychar='m'/>";
+
+  xml_mem_ += " <!-- patternview octave 1  -->";
+
+  xml_mem_ += " <key id='oct_C_1' keychar='q'/>";
+  xml_mem_ += " <key id='oct_CS1' keychar='2'/>";
+  xml_mem_ += " <key id='oct_D_1' keychar='w'/>";
+  xml_mem_ += " <key id='oct_DS1' keychar='3'/>";
+  xml_mem_ += " <key id='oct_E_1' keychar='e'/>";
+  xml_mem_ += " <key id='oct_F_1' keychar='r'/>";
+  xml_mem_ += " <key id='oct_FS1' keychar='5'/>";
+  xml_mem_ += " <key id='oct_G_1' keychar='t'/>";
+  xml_mem_ += " <key id='oct_GS1' keychar='6'/>";
+  xml_mem_ += " <key id='oct_A_1' keychar='z'/>";
+  xml_mem_ += " <key id='oct_AS1' keychar='7'/>";
+  xml_mem_ += " <key id='oct_B_1' keychar='u'/>";
+
+  xml_mem_ += " <!-- patternview octave 2  -->";
+
+  xml_mem_ += " <key id='oct_C_2' keychar='i' />";
+  xml_mem_ += " <key id='oct_CS2' keychar='9' />";
+  xml_mem_ += " <key id='oct_D_2' keychar='o' />";
+  xml_mem_ += " <key id='oct_DS2' keychar='0' />";
+
+  xml_mem_ += " <!-- patternview misc key options -->";
+
+  xml_mem_ += " <key id='edit_toggle' mod='ctrl' keychar=' ' />";
+  xml_mem_ += " <key id='key_stop' keychar='1' />";
+  xml_mem_ += " <key id='current_octave-1' mod='ctrl' keychar='+' />";
+  xml_mem_ += " <key id='current_octave+1' mod='ctrl' keychar='#' />";
+  xml_mem_ += " <key id='patternstep_dec' keychar='[' />";
+  xml_mem_ += " <key id='patternstep_inc' keychar=']' />";
+
+  xml_mem_ += " <!-- patternview navigation key options -->";
+  xml_mem_ += " <key id='nav_left' keychar='NK_Left' />";
+  xml_mem_ += " <key id='nav_right' keychar='NK_Right' />";
+  xml_mem_ += " <key id='nav_up' keychar='NK_Up' />";
+  xml_mem_ += " <key id='nav_down' keychar='NK_Down' />";
+  xml_mem_ += " <key id='nav_up_16' keychar='NK_Page_Up' />";
+  xml_mem_ += " <key id='nav_down_16' keychar='NK_Page_Down' />";
+  xml_mem_ += " <key id='nav_top' keychar='NK_Home' />";
+  xml_mem_ += " <key id='nav_bottom' keychar='NK_End' />";
+  xml_mem_ += " <key id='next_column' keychar='NK_Tab' />";
+  xml_mem_ += " <key id='prev_column' keychar='XK_ISO_Left_Tab' />";
+  xml_mem_ += " <key id='delete_row' keychar='NK_Delete' />";
+  xml_mem_ += " <key id='insert_row' keychar='NK_Insert' />";
+  xml_mem_ += " <key id='clear_row' keychar='NK_BackSpace' />";
+
+  xml_mem_ += " <!-- patternview block key options -->";
+
+  xml_mem_ += " <key id='block_copy' mod='ctrl' keychar='c' />";
+  xml_mem_ += " <key id='block_cut' mod='ctrl' keychar='x' />";
+  xml_mem_ += " <key id='block_delete' mod='ctrl' keychar='y' />";
+  xml_mem_ += " <key id='block_double' mod='ctrl' keychar='d' />";
+  xml_mem_ += " <key id='block_halve' mod='ctrl' keychar='h' />";
+  xml_mem_ += " <key id='block_interpolate' mod='ctrl' keychar='i' />";
+  xml_mem_ += " <key id='block_mix' mod='ctrl' keychar='m' />";
+  xml_mem_ += " <key id='block_paste' mod='ctrl' keychar='v' />";
+  xml_mem_ += " <key id='block_select_all' mod='ctrl' keychar='a' />";
+  xml_mem_ += " <key id='block_select_bar' mod='ctrl' keychar='e' />";
+  xml_mem_ += " <key id='block_select_column' mod='ctrl' keychar='r' />";
+  xml_mem_ += " <key id='block_select_up' mod='shift' keychar='NK_Up' />";
+  xml_mem_ += " <key id='block_select_down' mod='shift' keychar='NK_Down' />";
+  xml_mem_ += " <key id='block_select_left' mod='shift' keychar='NK_Left' />";
+  xml_mem_ += " <key id='block_select_right' mod='shift' keychar='NK_Right' />";
+  xml_mem_ += " <key id='block_select_top' mod='shift' keychar='NK_Home' />";
+  xml_mem_ += " <key id='block_select_bottom' mod='shift' keychar='NK_End' />";
+  xml_mem_ += " <key id='block_set_instrument' mod='ctrl' keychar='t' />";
+  xml_mem_ += " <key id='block_set_machine' mod='ctrl' keychar='g' />";
+  xml_mem_ += " <key id='block_start' mod='ctrl' keychar='b' />";
+  xml_mem_ += " <key id='block_start' mod='ctrl' keychar='k' />";
+  xml_mem_ += " <key id='block_unmark' mod='ctrl' keychar='u' />";
+
+  xml_mem_ += " </xpsycle> ";
+
+  NXmlParser parser;
+  parser.tagParse.connect(this,&Configuration::onConfigTagParse);
+  parser.parseString ( xml_mem_ );
+    
+}     
 
 void Configuration::setSkinDefaults( )
 {
@@ -196,8 +327,6 @@ void Configuration::setDriverByName( const std::string & driverName )
 
 void Configuration::loadConfig()
 {
-  NApp::config()->tagParse.connect(this,&Configuration::onConfigTagParse);
-
   // system-wide
 
   // environment
@@ -245,6 +374,9 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
     std::cout << "xpsycle: configuration: attempting to load file: " << path << std::endl;
   #endif
 
+  NXmlParser parser;   
+  parser.tagParse.connect(this,&Configuration::onConfigTagParse);
+
   // check whether the file is readable
   if(!NFile::fileIsReadable(path))
   {
@@ -256,7 +388,7 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
   // parse the file
   try
   {
-    NApp::config()->loadXmlConfig(path, /* throw_allowed */ true);
+    parser.parseFile( path );
   }
   catch(std::exception const & e)
   {
@@ -274,29 +406,8 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
         "the settings might have been only partially loaded";
       throw std::runtime_error(s.str());
     }
-    // the parser defaults to empty strings on missing values
-  // so we make sure not to override previous settings with empty strings
-  {
-    std::string const s(NFile::replaceTilde(NApp::config()->findPath("icondir")));
-    if(s.length()) iconPath = s;
-  }
-
-  {
-    std::string const s(NFile::replaceTilde(NApp::config()->findPath("plugindir")));
-    if(s.length()) pluginPath = s;
-  }
-
-  {
-    std::string const s(NFile::replaceTilde(NApp::config()->findPath("prsdir")));
-    if(s.length()) prsPath = s;
-  }
-
-  {
-    std::string const s(NFile::replaceTilde(NApp::config()->findPath("hlpdir")));
-    if(s.length()) hlpPath = s;
-  }
-
-  #if !defined NDEBUG
+ 
+ #if !defined NDEBUG
   std::cout
     << "xpsycle: configuration: after loading file: " << path << "\n"
     << "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
@@ -308,13 +419,22 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
 	doEnableSound = true;
 }
 
-void Configuration::onConfigTagParse(const std::string & tagName )
+void Configuration::onConfigTagParse( const NXmlParser & parser, const std::string & tagName )
 {
-	if (tagName == "driver" && doEnableSound) {		
-			setDriverByName(NApp::config()->getAttribValue("name"));
+ if ( tagName == "path" ) {
+  std::string id  = parser.getAttribValue("id"); 
+  std::string src = parser.getAttribValue("src");
+
+   if ( id == "icondir" )   iconPath   = src;  else  
+   if ( id == "plugindir" ) pluginPath = src;  else
+   if ( id == "prsdir" )    prsPath    = src;  else
+   if ( id == "hlpdir" )    hlpPath    = src;
+ } else
+ if (tagName == "driver" && doEnableSound) {		
+			setDriverByName( parser.getAttribValue("name"));
 	} else
   if (tagName == "alsa") {
-    device_name = NApp::config()->getAttribValue("device");
+    device_name = parser.getAttribValue("device");
 		std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 		if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
 			AudioDriverSettings settings = it->second->settings();
@@ -323,22 +443,22 @@ void Configuration::onConfigTagParse(const std::string & tagName )
 		}		
   } else
   if (tagName == "audio") {
-      std::string enableStr = NApp::config()->getAttribValue("enable");
+      std::string enableStr = parser.getAttribValue("enable");
       int enable = 0;
       if (enableStr != "") enable = str<int>(enableStr);
       enableSound = enable;
       if (enable == 0) {
-				setDriverByName("silent");
-				doEnableSound = false;
+		setDriverByName("silent");
+		doEnableSound = false;
       } else doEnableSound = true;
   } else
   if (tagName == "key") {
   
       // the keycode id 
-      std::string id         = NApp::config()->getAttribValue("id");
+      std::string id         = parser.getAttribValue("id");
 
       // define special chars pressed in addition to this key function
-      std::string modInput    = NApp::config()->getAttribValue("mod");
+      std::string modInput    = parser.getAttribValue("mod");
       int shift = nsNone;
       if (modInput == "ctrl")  {
         shift = nsCtrl;   
@@ -349,9 +469,9 @@ void Configuration::onConfigTagParse(const std::string & tagName )
 
       // the keycode      
       int keyCode = 0;
-      std::string keyCodeStr = NApp::config()->getAttribValue("keycode");
+      std::string keyCodeStr = parser.getAttribValue("keycode");
       if (keyCodeStr!="") keyCode = str<int>(keyCodeStr);
-        std::string keyCharStr = NApp::config()->getAttribValue("keychar");
+        std::string keyCharStr = parser.getAttribValue("keychar");
         
       if (keyCharStr!="") {
         keyCode = keyCharStr[0];

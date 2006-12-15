@@ -25,6 +25,7 @@
 #include "defaultbitmaps.h"
 #include <ngrs/ncolor.h>
 #include <ngrs/nobject.h>
+#include <ngrs/nxmlparser.h>
 #include <vector>
 #include <string>
 #include <exception>
@@ -42,22 +43,16 @@ public:
 
     ~Configuration();
 
-public:
     void loadConfig();
-private:
-    void loadConfig(std::string const & path) throw(std::exception);
-
-public:
 
     DefaultBitmaps & icons();
 
-		void setDriverByName( const std::string & driverName );
+    void setDriverByName( const std::string & driverName );
     
     std::string iconPath;
     std::string pluginPath;
     std::string prsPath;
     std::string hlpPath;
-
 
     InputHandler inputHandler;
 
@@ -205,20 +200,24 @@ public:
 
 		
 
-private:
-
-    DefaultBitmaps* bitmaps_;
-
-    void setSkinDefaults();
-    void onConfigTagParse(const std::string & tagName);
-
-		std::map<std::string, AudioDriver*> driverMap_;
 
 public:
 
 		std::map<std::string, AudioDriver*> & driverMap() {
 			return driverMap_;
 		}
+		
+private:
+
+    DefaultBitmaps* bitmaps_;
+
+    void setSkinDefaults();
+    void setXmlDefaults();
+    void onConfigTagParse( const NXmlParser & parser, const std::string & tagName );
+    void loadConfig(std::string const & path) throw(std::exception);
+	
+    // a map, that holds available drivers ..
+	std::map<std::string, AudioDriver*> driverMap_;
 
 };
 
