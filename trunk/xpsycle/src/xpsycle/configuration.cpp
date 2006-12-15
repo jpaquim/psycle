@@ -29,6 +29,8 @@
 //#include "microsoft_direct_sound_out.h"
 //#include "netaudioout.h"
 #include "wavefileout.h"
+#else
+#include "mswaveout.h"
 #endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
@@ -264,7 +266,11 @@ void Configuration::setSkinDefaults( )
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		#endif		
-		
+
+        #else
+			driver = new MsWaveOut();
+			std::cout << "registered:" <<  driver->info().name() << std::endl;
+			driverMap_[ driver->info().name() ] = driver;
 		#endif
 /*		#if !defined XPSYCLE__NO_NETAUDIO
 			driver = new NetAudioOut;

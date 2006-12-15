@@ -58,7 +58,8 @@ namespace psycle
 			samplesPerSec_(44100),
 			bitDepth_(16),
 			channelMode_(3),
-			bufferSize_(2048)
+			bufferSize_(2048),
+			blockSize_(4096)
 		{
 		}
 
@@ -108,6 +109,14 @@ namespace psycle
 		int AudioDriverSettings::sampleSize() const {
 		  return ( channelMode_ == 3 ) ? bitDepth_ / 4 : bitDepth_ / 8;
 		}
+		
+		void AudioDriverSettings::setBlockSize( int blockSize ) {
+          blockSize_ = blockSize;   
+        }     
+        
+        int AudioDriverSettings::blockSize() const {
+            return blockSize_;
+        }
 
 
 		///

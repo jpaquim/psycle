@@ -87,6 +87,9 @@ namespace psycle
 				int bitDepth() const;
 
 				int sampleSize() const;
+				
+				void setBlockSize( int blockSize );
+				int blockSize() const;
 
 		private:
 
@@ -94,6 +97,7 @@ namespace psycle
 	 			int samplesPerSec_;
 				int channelMode_;
 				int bitDepth_;
+				int blockSize_;
 
 				std::string deviceName_;
 
