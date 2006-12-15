@@ -151,9 +151,9 @@ int NSystem::shiftState() const {
 
   if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
   if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;  
-  if ( ( keyboardState[ VK_LBUTTON ] & 0x80 ) == 0x80 ) sState |= nsLeft;  
-  if ( ( keyboardState[ VK_RBUTTON ] & 0x80 ) == 0x80 ) sState |= nsRight;  
-  if ( ( keyboardState[ VK_MBUTTON ] & 0x80 ) == 0x80 ) sState |= nsMiddle;  
+  if ( ( keyboardState[ VK_LBUTTON ] & 0x80 ) ) sState |= nsLeft;  
+  if ( ( keyboardState[ VK_RBUTTON ] & 0x80 ) ) sState |= nsRight;  
+  if ( ( keyboardState[ VK_MBUTTON ] & 0x80 ) ) sState |= nsMiddle;  
 
   #endif  
   return sState;   

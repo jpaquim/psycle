@@ -51,6 +51,7 @@ Time NApp::lastBtnPressTime;
 NWindow* NApp::modalWin_ = false;
 NWindow* NApp::lastOverWin_;
 NWindow* NApp::mainWin_;
+int NApp::modalExitLoop_ = 0;
 
 
 
@@ -264,24 +265,26 @@ void NApp::modalEventLoop(NWindow* modalWin )
   MSG Msg;
   // The Message Loop  
 
-  while ( GetMessage( & Msg, NULL, 0,0) > 0 )
-  {
+  modalExitLoop_ = 0;
+
+  while ( !modalExitLoop_ && GetMessage( & Msg, NULL, 0,0) > 0 )
+  {                
     TranslateMessage(&Msg);
     DispatchMessage(&Msg);      
-    
+        
     // select timeout
     if (repaintWin_.size()!=0) {
       for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
         NWindow* win = *it;
         win->graphics()->resize(win->width(),win->height());
-        win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
+        win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));       
       }
       repaintWin_.clear();
     }
   }  
 
-//  EnableWindow( hwndOwner, TRUE );
-//  SetFocus( hwndOwner );
+  //  EnableWindow( hwndOwner, TRUE );
+  //  SetFocus( hwndOwner );
 
   modalWin_ = oldModal;
   #endif
@@ -314,13 +317,18 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     int erg = 0;
     
     
-/*    if ( modalWin_ ) {
-      if (window == modalWin_ || window->isChildOf(modalWin_) ||
+     if (window == modalWin_ || window->isChildOf(modalWin_) ||
         event.msg == WM_PAINT ) {
-        return processEvent(window, & event);
-      } else return 0;
-    } else*/
-    erg = processEvent(window, & event);
+        if ( event.msg == WM_CLOSE ) {
+           modalExitLoop_ = 1;          
+        }
+        erg = processEvent(window, & event);
+      }
+    else
+      erg = processEvent(window, & event);
+
+
+   if ( window->exitLoop() == nDestroyWindow ) modalExitLoop_ = 1;
         
     return erg;
   }
@@ -454,13 +462,19 @@ int NApp::processEvent( NWindow * win, WEvent * event )
       buttonPress( win, event, 1 );         
     break;
     case WM_RBUTTONDOWN:
-      buttonPress( win, event, 2 );                  
+      buttonPress( win, event, 3 );                  
+    break;
+    case WM_LBUTTONDBLCLK:
+      win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );         
+    break;     
+    case WM_RBUTTONDBLCLK:
+      win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 2 );   
     break;
     case WM_LBUTTONUP:
       win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );
     break;
     case WM_RBUTTONUP:
-      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 2 );
+      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );
     break;    
     case WM_KEYDOWN : {
          BYTE keyboardState[256];

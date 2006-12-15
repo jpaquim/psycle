@@ -134,6 +134,7 @@ private:
    
    static void buttonPress( NWindow* win, WEvent* event, int button );
 
+   static int modalExitLoop_;
 
 };
 
