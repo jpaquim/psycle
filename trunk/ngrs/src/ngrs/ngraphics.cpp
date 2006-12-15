@@ -343,7 +343,7 @@ void NGraphics::drawRect( int x, int y, int width, int height )
     XDrawRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
     #else
     HBRUSH holdbrush = (HBRUSH) SelectObject( gcp, hollow );
-    Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
+    Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width + 1, y + dy_ +height + 1);
     SelectObject( gcp, holdbrush );
     #endif
   }  
@@ -709,7 +709,7 @@ void NGraphics::putBitmap( int destX, int destY, int width, int height, const NB
     HDC hdcMem = CreateCompatibleDC( gcp );
     HBITMAP hbmOld = (HBITMAP) SelectObject(hdcMem, bitmap.sysData() );
 
-    BitBlt( gcp, srcX+dx_, srcY+dy_, bitmap.width(), bitmap.height(), hdcMem , destX, destY, SRCCOPY);
+    BitBlt( gcp, destX+dx_, destY+dy_, width, height, hdcMem , srcX, srcY, SRCCOPY);
 
     SelectObject(hdcMem, hbmOld);
     DeleteDC(hdcMem);
@@ -717,6 +717,28 @@ void NGraphics::putBitmap( int destX, int destY, int width, int height, const NB
   } 
   
   #endif
+}
+
+void NGraphics::copyArea(int src_x,int src_y,unsigned width,unsigned height,int dest_x,int dest_y, bool dblBuffer_)
+{
+    #ifdef __unix__
+    if (width != 0 && height != 0) {
+      if (dblBuffer_)
+           XCopyArea(NApp::system().dpy(),/*win,win,gc_*/doubleBufferPixmap_,doubleBufferPixmap_,gcp,
+                  src_x, src_y, width, height, dest_x, dest_y); else
+           XCopyArea(NApp::system().dpy(),win,win,gc_,
+                  src_x, src_y, width, height, dest_x, dest_y);
+    }
+    #else
+    
+    if (width != 0 && height != 0) {
+       if (dblBuffer_)
+         BitBlt( gcp, dest_x+dx_, dest_y+dy_, width, height, gcp , src_x, src_y, SRCCOPY);      
+       else
+         BitBlt( gc_, dest_x+dx_, dest_y+dy_, width, height, gc_ , src_x, src_y, SRCCOPY);
+    }          
+
+    #endif
 }
 
 void NGraphics::setDoubleBuffer( bool on )
@@ -745,19 +767,6 @@ GC NGraphics::dbGC( )
 GC NGraphics::gc( )
 {
   return gc_;
-}
-
-void NGraphics::copyArea(int src_x,int src_y,unsigned width,unsigned height,int dest_x,int dest_y, bool dblBuffer_)
-{
-    #ifdef __unix__
-    if (width != 0 && height != 0) {
-      if (dblBuffer_)
-           XCopyArea(NApp::system().dpy(),/*win,win,gc_*/doubleBufferPixmap_,doubleBufferPixmap_,gcp,
-                  src_x, src_y, width, height, dest_x, dest_y); else
-           XCopyArea(NApp::system().dpy(),win,win,gc_,
-                  src_x, src_y, width, height, dest_x, dest_y);
-    }
-    #endif
 }
 
 
