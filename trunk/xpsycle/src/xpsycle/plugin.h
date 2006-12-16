@@ -62,7 +62,10 @@ class Proxy
 public:
     Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 
-    ~Proxy() throw() { (*this)(0);}
+    ~Proxy() throw () { 
+      // (*this)(0);  ///\todo this segfaults under windows .. investigate 
+    }
+    
     inline const bool operator()() const throw();
     inline void operator()(CMachineInterface * plugin) throw(); //exceptions::function_error);
     inline void Init() throw(); //std::exceptions::function_error);
@@ -102,8 +105,8 @@ public:
     virtual void Tick( );
     virtual void Tick(int channel, const PatternEvent & pEntry );
     virtual void Stop();
-    inline virtual std::string GetDllName() const throw() { return _psDllName.c_str(); }
-    virtual std::string GetName() const { return (char *)_psName.c_str(); };
+    inline virtual std::string GetDllName() const throw() { return _psDllName; }
+    virtual std::string GetName() const { return _psName; };
 
     virtual int GetNumParams() { return GetInfo()->numParameters; };
     virtual int GetNumCols() { return GetInfo()->numCols; };

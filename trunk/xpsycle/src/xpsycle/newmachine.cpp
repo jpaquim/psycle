@@ -105,7 +105,7 @@ NewMachine::NewMachine( )
 								item->setIntValue( key.index() );
 								generatorfBox_->add( item );
 								pluginIdentify_[item] = key;
-							}					
+							}
 						}
         generatorPage->add(generatorfBox_);
 
@@ -114,7 +114,8 @@ NewMachine::NewMachine( )
       effectfBox_ = new NListBox();
       effectfBox_->setAlign(nAlClient);
       effectfBox_->itemSelected.connect(this,&NewMachine::onEffectItemSelected);
-			it = finder.begin();
+
+      it = finder.begin();
       for ( ; it != finder.end(); it++ ) {
         PluginFinderKey key = it->first;
         PluginInfo info = it->second;
@@ -142,6 +143,7 @@ NewMachine::NewMachine( )
 			ladspaPage->setLayout(NAlignLayout());
         ladspaBox_ = new NListBox();
         ladspaBox_->itemSelected.connect(this,&NewMachine::onLADSPAItemSelected);
+
 				it = finder.begin();
 				for ( ; it != finder.end(); it++ ) {
 					PluginFinderKey key = it->first;
@@ -153,7 +155,7 @@ NewMachine::NewMachine( )
 						ladspaBox_->add( item );
 						pluginIdentify_[item] = key;
 					}					
-				}			
+				}
       ladspaPage->add(ladspaBox_, nAlClient);
 	tabBook_->addPage(ladspaPage,"ladspaPage");
 

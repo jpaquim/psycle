@@ -171,18 +171,25 @@ namespace psycle
 		PluginFinder::~PluginFinder()
 		{
 		}
-
-
+		
+        std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::begin() {
+          return map_.begin();
+        }         
+        
+        std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::end() {
+          return map_.end();
+        }         
+        
 		PluginInfo PluginFinder::info( const PluginFinderKey & key ) const {
-			PluginFinder::const_iterator it = find( key );
-			if ( it != end() ) 
+			std::map< PluginFinderKey, PluginInfo >::const_iterator it = map_.find( key );
+			if ( it != map_.end() ) 
 				return it->second;
 			else
 				return PluginInfo();
 		}
 
 		void PluginFinder::scanAll() {
-			scanNatives();
+            scanNatives();
 			scanLadspa();		
 		}
 
@@ -221,7 +228,7 @@ namespace psycle
 						info.setName( psDescriptor->Name );
 						info.setLibName( fileName );
 						PluginFinderKey key(fileName, lPluginIndex );
-						(*this)[key] = info;
+						map_[key] = info;
 					}
 				}
 			}
@@ -242,18 +249,18 @@ namespace psycle
 				std::string fileName = *it;
 				Plugin plugin(0, 0 );
 				if ( plugin.LoadDll( fileName ) ) {
-						PluginInfo info;
-						info.setType( MACH_PLUGIN );
-						info.setName( plugin.GetName() );
-						info.setMode( plugin.mode() );
-						info.setLibName( plugin.GetDllName() );
-						std::ostringstream o;
-						std::string version = "";
-    				if (!(o << plugin.GetInfo()->Version )) version = o.str();
-						info.setVersion( version );
-						info.setAuthor( plugin.GetInfo()->Author );
-						PluginFinderKey key( plugin.GetDllName(), 0 );
-						(*this)[key] = info;
+                   PluginInfo info;
+                   info.setType( MACH_PLUGIN );
+                   info.setName( plugin.GetName() );
+                   info.setMode( plugin.mode() );
+                   info.setLibName( plugin.GetDllName() );
+                   std::ostringstream o;
+                   std::string version;
+			       if (!(o << plugin.GetInfo()->Version )) version = o.str();
+                   info.setVersion( version );
+                   info.setAuthor( plugin.GetInfo()->Author );				
+                   PluginFinderKey key( plugin.GetDllName(), 0 );
+                   map_[key] = info;               
 				}
 			}
 		}

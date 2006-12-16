@@ -110,7 +110,7 @@ namespace psycle
 		};
 
 
-		class PluginFinder : public std::map< PluginFinderKey, PluginInfo > {
+		class PluginFinder  {
 		public:
 			PluginFinder();
 
@@ -119,8 +119,13 @@ namespace psycle
 			void scanAll();
 
 			PluginInfo info( const PluginFinderKey & key ) const;
+			
+			std::map< PluginFinderKey, PluginInfo >::const_iterator begin();
+			std::map< PluginFinderKey, PluginInfo >::const_iterator end();
 
 		private:
+
+            std::map< PluginFinderKey, PluginInfo > map_;
 
 			void scanLadspa();
 			void scanNatives();

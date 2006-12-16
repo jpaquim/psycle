@@ -130,28 +130,9 @@ namespace psycle
 					break;
 				case MACH_PLUGIN:
 					{
-						Plugin & plugin(*new Plugin(index,this));
-						machine = &plugin;
-//						if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
-						{
-							//delete &plugin;
-//							return false;
-						}
-						try
-						{
-							plugin.LoadDll(plugin_name);
-						}
-						catch(std::exception const & e)
-						{
-//							loggers::exception(e.what());
-							delete &plugin;
-							return false;
-						}
-						catch(...)
-						{
-							delete &plugin;
-							return false;
-						}
+                       Plugin* plugin = new Plugin( index, this );
+                       plugin->LoadDll( plugin_name );
+                       machine = plugin;
 					}
 					break;
 #ifdef __unix__					
@@ -212,7 +193,7 @@ namespace psycle
 			}
 
 			if(_pMachine[index]) DestroyMachine(index);
-			
+
 			///\todo init problem
 			{
 				if(machine->_type == MACH_VSTFX || machine->_type == MACH_VST )
@@ -223,12 +204,12 @@ namespace psycle
 				}
 				else machine->Init();
 			}
-
 			machine->SetPosX(x);
 			machine->SetPosY(y);
 
 			// Finally, activate the machine
 			_pMachine[index] = machine;
+			
 			return true;
 		}
 

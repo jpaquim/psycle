@@ -250,7 +250,7 @@ namespace psycle
 			}
 		}
 
-		Machine::~Machine() throw()
+		Machine::~Machine() throw ()
 		{
 			zapArray(_pSamplesL);
 			zapArray(_pSamplesR);
