@@ -28,6 +28,11 @@
 
 #include <zlib.h>
 
+#ifdef __unix__
+#else
+#include "windows.h"
+#endif
+
 static void _zw_tail(zipwriter *d);
 static void _zw_eodr(zipwriter *d, unsigned char *ptr);
 static void _zw_write(zipwriter *d, const void *buf, size_t len);
@@ -259,6 +264,8 @@ int zipwriter_finish(zipwriter *d)
 	if (err) return 0;
 	#ifdef __unix__
 	if (fsync(fd) == -1) return 0;
+	#else
+	if (_commit(fd) == -1) return 0;
 	#endif
 	if (close(fd) == -1) return 0;
 	return 1;

@@ -281,12 +281,14 @@ void NApp::modalEventLoop(NWindow* modalWin )
       }
       repaintWin_.clear();
     }
+    NApp::callRemovePipe();
   }  
 
   //  EnableWindow( hwndOwner, TRUE );
   //  SetFocus( hwndOwner );
 
   modalWin_ = oldModal;
+
   #endif
 
 }

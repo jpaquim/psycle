@@ -40,11 +40,11 @@ namespace psycle
 
 				~WireGUI();
 
-                                const NPoint & p1() const;
-                                const NPoint & p2() const;
+                const NPoint & p1() const;
+                const NPoint & p2() const;
 
-                                void setPoints( const NPoint & p1, const NPoint & p2 );
-                                void addBend( const NPoint & pts );
+                void setPoints( const NPoint & p1, const NPoint & p2 );
+                void addBend( const NPoint & pts );
 
 				virtual void paint(NGraphics* g);
 			
@@ -52,7 +52,8 @@ namespace psycle
 
 		private:
 
-                                BendedLineShape* lineShape;
+                BendedLineShape* lineShape;
+                
 				NColor polyColor_;
 				NColor borderColor_;
 

@@ -41,9 +41,9 @@ namespace psycle {
 		WireGUI::WireGUI()
 			: NVisualComponent()
 		{
-                        lineShape = new BendedLineShape();
-                        lineShape->setClippingDistance(12);
-                        setGeometry( lineShape );  
+            lineShape = new BendedLineShape();
+            lineShape->setClippingDistance(12);
+            setGeometry( lineShape );  
 
 			triangle_size_tall = 22+((23*2)/16);
 
@@ -51,55 +51,53 @@ namespace psycle {
 			triangle_size_wide = triangle_size_tall/2;
 			triangle_size_indent = triangle_size_tall/6;
 
-			updateSkin();
+			updateSkin();			
 		}
 
 
 		WireGUI::~WireGUI()
 		{
-                        delete lineShape;
+         delete lineShape;
 		}
 				
 
-                const NPoint & WireGUI::p1( ) const {
-                  return lineShape->p1();
-                }
+        const NPoint & WireGUI::p1( ) const {
+          return lineShape->p1();
+        }
 
-                const NPoint & WireGUI::p2( ) const
-                {
-                  return lineShape->p2();
-                }
+        const NPoint & WireGUI::p2( ) const
+        {
+          return lineShape->p2();
+        }
                 
 		void WireGUI::addBend( const NPoint & pt ) {
 		  lineShape->addBend( pt );		
 		}                
 
-                void WireGUI::setPoints( const NPoint & p1, const NPoint & p2 )
-                {
-                  lineShape->setPoints(p1,p2);
-                }
-
+        void WireGUI::setPoints( const NPoint & p1, const NPoint & p2 )
+        {
+          lineShape->setPoints(p1,p2);
+        }
 
 		void WireGUI::paint( NGraphics * g )
 		{
 			NPen pen;
 			pen.setLineWidth(2);
 			g->setPen(pen);
-                        g->setTranslation( g->xTranslation()-left(), g->yTranslation()-top() );
+
+            g->setTranslation( g->xTranslation()-left(), g->yTranslation()-top() );
+                       
+            NPoint startPt = lineShape->p1();
                         
-                        NPoint startPt = lineShape->p1();
-                        
-                        std::vector<NPoint>::const_iterator it = lineShape->bendPts().begin();
-                        for ( ; it < lineShape->bendPts().end(); it++ ) {
-                          NPoint pt = *it;
-                          g->drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() ); 
-                          startPt = pt;                         
-                        }
+            std::vector<NPoint>::const_iterator it = lineShape->bendPts().begin();
+            for ( ; it < lineShape->bendPts().end(); it++ ) {
+              NPoint pt = *it;
+              g->drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() ); 
+              startPt = pt;                         
+            }
                                                                         
-                        g->drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
+            g->drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
                         
-// 			g->drawLine( lineShape->p5().x(), lineShape->p5().y(), lineShape->p4().x(), lineShape->p4().y() );
-//                      g->drawLine( lineShape->p4().x(), lineShape->p4().y(), lineShape->p2().x(), lineShape->p2().y() );
 			g->resetPen();
 			drawArrow(g);
 			g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());

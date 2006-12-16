@@ -57,7 +57,10 @@ namespace psycle {
     }
 
     void MachineWireGUI::onAddBend( NButtonEvent* ev ) {
-       addBend( newBendPos_ );    
+       addBend( newBendPos_ );
+       repaint();
+       bendAdded.emit( this );
+       setMoveable( NMoveable( nMvPolygonPicker ) );
     }
 
     void MachineWireGUI::onMousePress( int x, int y, int button ) {
@@ -66,12 +69,14 @@ namespace psycle {
       
       int shift = NApp::system().shiftState();      
       if ( shift &  nsRight ) {
-        newBendPos_.setXY( x, y );
+
+        newBendPos_.setXY( left() + x, top() + y );
+
         menu_->setPosition( x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(), 100,100);
         menu_->setVisible( true ); 
-      } else {
-        setMoveable( NMoveable( nMvPolygonPicker ) );        
-      }            
+      }
+      setMoveable( NMoveable( nMvPolygonPicker ) );        
+      repaint();        
     }
      
                                    
@@ -97,6 +102,7 @@ MachineView::MachineView( Song* song )
     scrollArea_ = new NPanel();
       scrollArea_->setLayout(NAutoScrollLayout());
       scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
+      scrollArea_->mousePress.connect( this, &MachineView::onViewMousePress);
     scrollBox_->setScrollPane(scrollArea_);
   add(scrollBox_, nAlClient);
 
@@ -251,7 +257,6 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev )
       _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
       startGUI->attachLine(line,0);
       machineGUI->attachLine(line,1);
-      line->setMoveable(NMoveable());
       line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
       line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
       wireGUIs.push_back(line);
@@ -265,8 +270,8 @@ void MachineView::onLineMoveEnd( const NMoveEvent & ev )
     scrollArea_->removeChild(line);
     repaint();
   } else {
-    line->setMoveable( NMoveable() );
     line->mousePress.connect( this, &MachineView::onWireSelected );
+    line->bendAdded.connect( this, &MachineView::onBendAdded );
   }
   
   line = 0;
@@ -319,6 +324,33 @@ void MachineView::removeMachines( )
 {
   wireGUIs.clear();
   scrollArea_->removeChilds();
+}
+
+void MachineView::onBendAdded( WireGUI* wire ) {
+  setSelectedWire( wire );
+}
+
+void MachineView::setSelectedWire( NObject * wire ) {
+
+  // unselect old wire
+  
+  if ( selectedWire_ ) {
+//     selectedWire_->setMoveable( NMoveable() );
+     selectedWire_->repaint();
+     selectedWire_ = 0;              
+  }
+
+  // try to find wire
+  
+  std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
+  it = find( wireGUIs.begin(), wireGUIs.end(), wire );
+  if ( it != wireGUIs.end() ) {
+    // wire found
+    selectedWire_ = *it;
+    selectedWire_->setMoveable( NMoveable( nMvPolygonPicker ) );
+    selectedWire_->repaint();
+  }
+  
 }
 
 NPanel * MachineView::scrollArea( )
@@ -385,9 +417,9 @@ void MachineView::onUpdateMachinePropertiesSignal(Machine *machine)
 
 void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
 {
-		// todo remove machine
+  // todo remove machine
   int index = machineGUI->pMac()->_macIndex;
-	_pSong->DestroyMachine( index );
+  _pSong->DestroyMachine( index );
   selectedMachine_ = 0;
   update();		 
   machineDeleted.emit(index); 
@@ -396,13 +428,13 @@ void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
 void MachineView::updateSkin( )
 {
   setColorInfo( SkinReader::Instance()->machineview_color_info() );
-
+  
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
     machineGUI->updateSkin();
   }
-
-	repaint();
+  
+  repaint();
 }
 
 void MachineView::setColorInfo( const MachineViewColorInfo & info ) {
@@ -416,21 +448,12 @@ const MachineViewColorInfo & MachineView::colorInfo() const {
 }
 
 void MachineView::onWireSelected( NButtonEvent* ev ) {
-  std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
-  it = find( wireGUIs.begin(), wireGUIs.end(), ev->sender() );
-  if ( it != wireGUIs.end() ) {
-    std::cout << "selwire" << std::endl;
-    selectedWire_ = *it;
-  }
+  setSelectedWire( ev->sender() );
+  repaint();
 }
 
-void MachineView::onMousePress( int x, int y, int button ) {
-  NPanel::onMousePress( x, y, button );  
-  if ( selectedWire_ ) {
-    selectedWire_->setMoveable( NMoveable() );
-    selectedWire_->repaint();
-    selectedWire_ = 0;
-  }  
+void MachineView::onViewMousePress( NButtonEvent* ev ) {
+  setSelectedWire( 0 );
 }
  
 }

@@ -48,10 +48,13 @@ public :
     
     ~MachineWireGUI();
     
+    signal1<WireGUI*> bendAdded;
+    
     virtual void onMousePress  (int x, int y, int button);
     virtual void onMouseDoublePress (int x, int y, int button);
    
     WireDlg* dialog();
+        
 
 private:
 
@@ -96,8 +99,7 @@ public:
     void updateSkin();
     void setColorInfo( const MachineViewColorInfo & info );
     const MachineViewColorInfo & colorInfo() const;
-    
-    virtual void onMousePress( int x, int y, int button );
+
 
 private:
 
@@ -130,7 +132,6 @@ private:
     std::vector<MachineWireGUI*> wireGUIs;
 
     void onTweakSlide(int machine, int command, int value);
-
     void onMachineSelected(MachineGUI* gui);
 
     void onMachineDeleteRequest( MachineGUI* machineGUI );
@@ -139,7 +140,10 @@ private:
     MachineViewColorInfo colorInfo_;
 
     std::vector<WireDlg*> wireDlg;
-
+    
+    void onBendAdded( WireGUI* gui );
+    void setSelectedWire( NObject* wire );
+    void onViewMousePress( NButtonEvent* ev );
 };
 
 }}
