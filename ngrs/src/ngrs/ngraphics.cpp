@@ -887,47 +887,86 @@ void NGraphics::drawRoundRect( int x, int y, int width, int height, int arcWidth
 
 static double fTwoPi = 2.0 * 3.14; 
 
-void NGraphics::drawArc( int x, int y, int width, int height, int angle1, int angle2 )
+
+#ifdef __unix__
+#else
+void NGraphics::drawArcX( int x, int y, int width, int height, int start, int extent, bool fill ) {
+  
+  int clockwise = (extent < 0); /* non-zero if clockwise */
+  int xstart, ystart, xend, yend;
+  double radian_start, radian_end, xr, yr;
+
+  //
+  // Compute the absolute starting and ending angles in normalized radians.
+  // Swap the start and end if drawing clockwise.
+  //
+
+  start = start % (64*360);
+  if (start < 0) {
+    start += (64*360);
+  }
+  extent = (start+extent) % (64*360);
+  if (extent < 0) {
+    extent += (64*360);
+  }
+  if (clockwise) {
+    int tmp = start;
+    start = extent;
+    extent = tmp;
+  }
+  radian_start = XAngleToRadians(start);
+  radian_end = XAngleToRadians(extent);
+
+  //
+  // Now compute points on the radial lines that define the starting and
+  // ending angles.  Be sure to take into account that the y-coordinate
+  // system is inverted.
+  //
+
+   xr = x + width / 2.0;
+   yr = y + height / 2.0;
+   xstart = (int)((xr + cos(radian_start)*width/2.0) + 0.5);
+   ystart = (int)((yr + sin(-radian_start)*height/2.0) + 0.5);
+     
+   xend = (int)((xr + cos(radian_end)*width/2.0) + 0.5);
+   yend = (int)((yr + sin(-radian_end)*height/2.0) + 0.5);
+
+   if ( !fill ) {
+     if ( dblBuffer_ )
+       Arc( gcp, x , y  , x + width +1, y + height+1, xstart, ystart, xend, yend );
+     else
+       Arc( gc_, x , y  , x + width +1, y + height+1, xstart, ystart, xend, yend );     
+   } else {
+     if ( dblBuffer_ )
+       Chord( gcp, x, y, x+width+1, y+height+1, xstart, ystart, xend, yend);
+     else
+       Chord( gc_, x, y, x+width+1, y+height+1, xstart, ystart, xend, yend);
+   }    
+}
+#endif
+
+void NGraphics::drawArc( int x, int y, int width, int height, int start, int extent )
 {
-  if (dblBuffer_) {
-     #ifdef __unix__
-     XDrawArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
-     #else
-     
-     //
-     // Convert the X arc description to a Win32 arc description.
-     //
-
-     int xr, yr, xstart, ystart, xend, yend;
-     double radian_start, radian_end, radian_tmp;
-
-     xr = (width % 2) ? (width / 2) : ((width - 1) / 2);
-     yr = (height % 2) ? (height / 2) : ((height - 1) / 2);
-
-     radian_start = XAngleToRadians(angle1);
-     radian_end = XAngleToRadians(angle1+angle2);
-     if( angle2 < 0 ) {
-	   radian_tmp = radian_start;
-	   radian_start = radian_end;
-	   radian_end = radian_tmp;
-     }
-
-     xstart = x + (int) ((double)xr * (1+cos(radian_start)));
-     ystart = y + (int) ((double)yr * (1-sin(radian_start)));
-     xend = x + (int) ((double)xr * (1+cos(radian_end)));
-     yend = y + (int) ((double)yr * (1-sin(radian_end)));     
-     
-     // Draw the arc
-     Arc( gcp, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, xstart, ystart, xend, yend);
-          
-     #endif     
-     }
+  #ifdef __unix__
+  if (dblBuffer_)
+    XDrawArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
   else
-     #ifdef __unix__
-     XDrawArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
-     #else
-     ;
-     #endif
+    XDrawArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,start,extent);
+  #else
+  drawArcX( x +dx_, y+ dy_, width, height, start, extent , 0 );
+  #endif     
+}
+
+void NGraphics::fillArc( int x, int y, int width, int height, int angle1, int angle2 )
+{
+  #ifdef __unix__   
+  if (dblBuffer_)
+     XFillArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
+  else
+     XFillArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
+  #else
+  drawArcX( x + dx_, y + dy_, width, height, angle1, angle2, 1 );
+  #endif
 }
 
 void NGraphics::fillRect( const NRect & rect )
@@ -981,22 +1020,6 @@ void NGraphics::fillRoundRect( int x, int y, int width, int height, int arcWidth
                         fillArc(nx, ny, nw, nh, 0, 23040);
                 }
         }
-}
-
-void NGraphics::fillArc( int x, int y, int width, int height, int angle1, int angle2 )
-{
-   if (dblBuffer_)
-     #ifdef __unix__
-     XFillArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
-     #else
-     ;
-     #endif                                                                                                        
-  else
-     #ifdef __unix__
-     XFillArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
-     #else
-     ;
-     #endif
 }
 
 void NGraphics::fillRoundGradient( int x, int y, int width, int height, const NColor & start, const NColor & end, int direction, int arcWidth, int arcHeight )
@@ -1297,6 +1320,24 @@ void NGraphics::setPen( const NPen & pen )
     XSetFillStyle(NApp::system().dpy(), gc() , pen.fillStyle() );
     XSetFunction(NApp::system().dpy(), gc() , pen.function() );
   }
+  #else
+
+  LOGPEN logPen;
+  
+  if ( dblBuffer_ ) {
+    GetObject( hPen, sizeof(logPen), &logPen );
+    logPen.lopnWidth.x = pen.lineWidth();
+    DeleteObject( hPen ) ;
+    hPen = CreatePenIndirect(&logPen);
+	SelectObject( gcp, hPen );
+  } else {
+    GetObject( hPen, sizeof(logPen), &logPen );
+    logPen.lopnWidth.x = pen.lineWidth();
+    DeleteObject( hPen ) ;
+    hPen = CreatePenIndirect(&logPen);
+	SelectObject( gc_, hPen );
+  }
+  
   #endif
 }
 

@@ -37,6 +37,8 @@
 
 #ifdef __unix__
 #else
+  #include "nsize.h"
+
   typedef HDC GC;
 #endif
 
@@ -159,7 +161,7 @@ private:
    HBRUSH brush;
    HBRUSH hollow;
    HPEN hPen;
-   
+   void drawArcX( int x, int y, int width, int height, int start, int extent, bool fill );
    #endif
 
    NRegion region_;
