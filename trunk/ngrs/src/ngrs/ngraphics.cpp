@@ -90,31 +90,21 @@ NGraphics::~NGraphics()
 
 void NGraphics::fillRect( int x, int y, int width, int height )
 {
+  // Note : XFillRectangle has the same
+  // width as Rectangle, but XDrawRectangle is one pixel wider
+  // for the same co-ordinates.   
+     
   if (dblBuffer_)
      #ifdef __unix__
      XFillRectangle( NApp::system().dpy(), doubleBufferPixmap_, gcp, x+dx_, y+dy_, width, height );
      #else
-     {
-       RECT rect;
-       rect.left   = x + dx_;
-       rect.top    = y + dy_;
-       rect.right  = rect.left + width;
-       rect.bottom = rect.top  + height;
-       FillRect( gcp, &rect, brush);
-     }
+     Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
      #endif
   else
      #ifdef __unix__
      XFillRectangle( NApp::system().dpy(), win, gc_, x+dx_, y+dy_, width, height);
      #else
-     {
-       RECT rect;
-       rect.left   = x + dx_;
-       rect.top    = y + dy_;
-       rect.right  = rect.left + width;
-       rect.bottom = rect.top  + height;
-       FillRect( gc_, &rect, brush );
-     }
+     Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
      #endif
 }
 
@@ -338,6 +328,10 @@ void NGraphics::drawText(int x, int y, const std::string & text, const NColor & 
 
 void NGraphics::drawRect( int x, int y, int width, int height )
 {
+  // Note : XFillRectangle has the same
+  // width as Rectangle, but XDrawRectangle is one pixel wider
+  // for the same co-ordinates.   
+  
   if (dblBuffer_) {
     #ifdef __unix__
     XDrawRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
@@ -353,7 +347,7 @@ void NGraphics::drawRect( int x, int y, int width, int height )
     XDrawRectangle(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
     #else
     HBRUSH holdbrush = (HBRUSH) SelectObject( gc_, hollow );
-    Rectangle( gc_, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
+    Rectangle( gc_, x + dx_,y + dy_, x + dx_ + width + 1, y + dy_ + height + 1);
     SelectObject( gc_, holdbrush );
     #endif
   }  

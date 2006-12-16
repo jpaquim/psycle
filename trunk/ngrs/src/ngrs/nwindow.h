@@ -79,8 +79,10 @@ public:
     int width()  const;
     int height() const;
 
-    virtual void setTitle(std::string title);
+    virtual void setTitle(const std::string & title);
     std::string title();
+    
+    void setTitleBitmap( const NBitmap & bmp );
 
     virtual int onClose();
 
