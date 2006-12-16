@@ -390,7 +390,9 @@ int NApp::processEvent( NWindow * win, WEvent * event )
              if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;
                  
              XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
-              if (buffer!=NULL) {
+             XConvertCase(mykeysym, &lower_return, &upper_return );
+             mykeysym = upper_return;
+             if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
                     NObject* acellNotify = findAcceleratorNotifier(NKeyAccelerator(NApp::system().keyState(),mykeysym));
                     if (acellNotify!=0) {
@@ -413,9 +415,12 @@ int NApp::processEvent( NWindow * win, WEvent * event )
              if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;                           
                                                 
               XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
+              KeySym lower_return;
+              KeySym upper_return;
+              XConvertCase(mykeysym, &lower_return, &upper_return );
+              mykeysym = upper_return;
               if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
-
                   }
                   win->onKeyRelease(NKeyEvent(0,buffer,mykeysym, sState));
               } else win->onKeyRelease(NKeyEvent(0,buffer,mykeysym, sState));

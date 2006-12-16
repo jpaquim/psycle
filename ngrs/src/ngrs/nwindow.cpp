@@ -362,7 +362,7 @@ void NWindow::endDrag( NVisualComponent *, int x, int y )
    dragBase_ = NULL;
 }
 
-void NWindow::setTitle( std::string title )
+void NWindow::setTitle( const std::string & title )
 {
   title_ = title;
   #ifdef __unix__
@@ -371,6 +371,13 @@ void NWindow::setTitle( std::string title )
   SetWindowText( win_, title.c_str() );
   #endif    
 }
+
+void NWindow::setTitleBitmap( const NBitmap & bmp ) {
+  // small icon size
+  #ifdef WIN32 
+  #else
+  #endif        
+}     
 
 std::string NWindow::title( )
 {
