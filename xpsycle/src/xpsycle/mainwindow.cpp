@@ -105,41 +105,31 @@ MainWindow::MainWindow()
   setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
 
   setPosition(0,0,1024,768);
-	count = 0;
+  count = 0;
 
-  std::cout<< "initmenu" <<std::endl;
   initMenu();
-  std::cout << "initbars"<<std::endl;
   initBars();
-
-  std::cout << "initdialogs" <<std::endl;
   initDialogs();
 
-  std::cout << "book" << std::endl;
   book = new NTabBook();
     book->setTabBarVisible( false );
   pane()->add(book,nAlClient);
 
-  std::cout << "newmachine" << std::endl;
+  
   newMachineDlg_ = new NewMachine( );
   add(newMachineDlg_);
-std::cout << "audioconfig" << std::endl;
-	audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
-	add( audioConfigDlg );	
-std::cout << "initsongs" << std::endl;
-  initSongs();
-  std::cout << "enablesound" << std::endl;
-  enableSound();
-std::cout << " updatenewsong" << std::endl;
 
+  audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
+  add( audioConfigDlg );	
+
+  initSongs();
+  enableSound();
   updateNewSong();
 
-	oldPlayPos_ = 0;
-	timer.setIntervalTime(10);
-  timer.enableTimer(); 
-  
-
+  oldPlayPos_ = 0;
+  timer.setIntervalTime(10);
   timer.timerEvent.connect(this,&MainWindow::onTimer);
+  timer.enableTimer(); 
 
 }
 
@@ -1151,19 +1141,19 @@ void MainWindow::onNewMachine( NButtonEvent * ev )
             selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->machineView()->repaint();
           } else 
-					if (newMachineDlg_->selectedType() == MACH_PLUGIN)
-					{
+		 if (newMachineDlg_->selectedType() == MACH_PLUGIN)
+		 {
             selectedChildView_->song()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg_->getDllName(),fb);
             selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->machineView()->repaint();
           } else 
-					if (newMachineDlg_->selectedType() == MACH_LADSPA){
-						selectedChildView_->song()->CreateMachine(MACH_LADSPA, x, y, newMachineDlg_->getDllName(),fb, newMachineDlg_->pluginIndex());
+		 if (newMachineDlg_->selectedType() == MACH_LADSPA){
+            selectedChildView_->song()->CreateMachine(MACH_LADSPA, x, y, newMachineDlg_->getDllName(),fb, newMachineDlg_->pluginIndex());
             selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->machineView()->repaint();
-					}
+          }
       }
     }
   }

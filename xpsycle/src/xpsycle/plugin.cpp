@@ -23,6 +23,8 @@
 //#include <ngrs/nfile.h>
 #ifdef __unix__
 #include <dlfcn.h>
+#else
+#include <windows.h>
 #endif
 #include <iostream>
 #include <fstream>
@@ -44,10 +46,7 @@ Plugin::Plugin(Machine::id_type id , Song* song)
 			:
 				Machine(MACH_PLUGIN, MACHMODE_FX, id, song),
 				_dll(0),
-				proxy_(*this),
-				_psAuthor(""),
-				_psDllName(""),
-				_psName("")
+				proxy_(*this)
 			{
 				_audiorange=32768.0f;
 				_editName = "native plugin";
@@ -55,17 +54,28 @@ Plugin::Plugin(Machine::id_type id , Song* song)
 
 Plugin::~ Plugin( ) throw()
 {
+   #ifdef __unix__
+   #else
+   if  ( _dll ) {
+       ::FreeLibrary( (HINSTANCE) _dll ) ;
+   }
+   #endif          
 }
 
 bool Plugin::Instance( const std::string & file_name )
-{
+{      
    try {
-   std::cout << file_name << std::endl;
    #ifdef __unix__
    _dll = dlopen(file_name.c_str(), RTLD_LAZY);
    #else
+    if ( file_name.find(".dll") == std::string::npos) return false;
+   // Set error mode to disable system error pop-ups (for LoadLibrary)
+   UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+   _dll = LoadLibrary( file_name.c_str() );
+   // Restore previous error mode
+   SetErrorMode( uOldErrorMode );
    #endif
-    if (!_dll) {
+   if (!_dll) {
         #ifdef __unix__
         std::cerr << "Cannot load library: " << dlerror() << '\n';
         #else
@@ -74,8 +84,9 @@ bool Plugin::Instance( const std::string & file_name )
     } else {
       GETINFO GetInfo  = 0;
       #ifdef __unix__
-      GetInfo = (GETINFO) dlsym(_dll, "GetInfo");
+      GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
       #else
+      GetInfo = (GETINFO) GetProcAddress( (HINSTANCE)_dll, "GetInfo" );
       #endif
       if (!GetInfo) {
         #ifdef __unix__
@@ -103,6 +114,7 @@ bool Plugin::Instance( const std::string & file_name )
       #ifdef __unix__
       GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
       #else
+      GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)_dll, "CreateMachine" );
       #endif
       if(!GetInterface) {
           #ifdef __unix__
@@ -111,6 +123,7 @@ bool Plugin::Instance( const std::string & file_name )
           #endif
           return false;
       } else {
+
           proxy()(GetInterface());
       }
     }
@@ -125,6 +138,7 @@ bool Plugin::Instance( const std::string & file_name )
 void Plugin::Init( )
 {
   Machine::Init();
+  
   if(proxy()())
   {
     proxy().Init();
@@ -502,6 +516,7 @@ struct ToLower
 
 bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cause we modify it
 {
+  #ifdef __unix__        
   std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
   if (psFileName.find(".so")== std::string::npos) {
     _psDllName = psFileName;
@@ -529,7 +544,10 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
 
       psFileName = Global::pConfig()->pluginPath + psFileName;
   }
-
+  #else
+  _psDllName = psFileName;
+  psFileName = Global::pConfig()->pluginPath + psFileName;
+  #endif   
   return Instance(psFileName);
 }
 

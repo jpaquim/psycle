@@ -45,6 +45,7 @@ int f2i(double q) { return ((int)q)&2047; }
 
 int main(int argc, char *argv[])
 {
+      
     NApp app;
 
     Global gl;
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
 
     NWindow* mainWin = new MainWindow();
     app.setMainWindow(mainWin);
+        
     app.run();
 
     return EXIT_SUCCESS;

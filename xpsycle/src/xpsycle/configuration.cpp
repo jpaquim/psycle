@@ -299,7 +299,13 @@ void Configuration::setSkinDefaults( )
 	// so, we can only assume everything is at a fixed place, like under the user home dir
 	hlpPath = NFile::replaceTilde("~/xpsycle/doc/");
 	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
+    #ifdef __unix__
 	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
+	#else
+	pluginPath = NFile::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
+	#endif
+	
+	
 	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
   #endif
 
