@@ -34,7 +34,7 @@ NSystem::NSystem()
   #else
   // Step 1 : registering the Window Class    
   wc.cbSize        = sizeof(WNDCLASSEX);
-  wc.style         = 0;
+  wc.style         = CS_DBLCLKS;
   wc.lpfnWndProc   = NApp::WndProc;
   wc.cbClsExtra    = 0;
   wc.cbWndExtra    = 0;

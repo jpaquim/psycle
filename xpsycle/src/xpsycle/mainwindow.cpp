@@ -424,7 +424,7 @@ void MainWindow::initToolBar( )
 
   // creates the newfile button
   img = new NImage();
-    img->setBitmap( icons.newfile() );
+    img->setSharedBitmap(&icons.newfile());
     img->setPreferredSize(25,25);
   NButton* newBtn = new NButton(img);
       newBtn->setHint("New song");

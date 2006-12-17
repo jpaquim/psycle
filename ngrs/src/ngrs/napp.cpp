@@ -270,8 +270,9 @@ void NApp::modalEventLoop(NWindow* modalWin )
   while ( !modalExitLoop_ && GetMessage( & Msg, NULL, 0,0) > 0 )
   {                
     TranslateMessage(&Msg);
-    DispatchMessage(&Msg);      
-        
+    DispatchMessage(&Msg);    
+    
+    
     // select timeout
     if (repaintWin_.size()!=0) {
       for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
@@ -478,7 +479,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
       win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );         
     break;     
     case WM_RBUTTONDBLCLK:
-      win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 2 );   
+      win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );   
     break;
     case WM_LBUTTONUP:
       win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );
