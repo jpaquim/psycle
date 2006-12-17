@@ -194,7 +194,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		/// Final Loop. Read new line for notes to send to the Machines
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
-			PatternLine::iterator trackItr = line.tweaks().begin();
+			std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
 			for ( ; trackItr != line.tweaks().end() ; ++trackItr) {
 					PatternEvent entry = trackItr->second;
 					int track = trackItr->first;
@@ -206,8 +206,8 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					}
 			}
 
-			trackItr = line.begin();
-			for ( ; trackItr != line.end() ; ++trackItr) {
+			trackItr = line.notes().begin();
+			for ( ; trackItr != line.notes().end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
 				if(( !song()._trackMuted[track]) && (entry.note() < notecommands::tweak || entry.note() == 255)) // Is it not muted and is a note?

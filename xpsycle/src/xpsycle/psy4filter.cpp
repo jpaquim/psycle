@@ -330,7 +330,7 @@ namespace psycle {
 					data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
 					data.setSharp( str_hex<bool> (parser.getAttribValue("sharp")) );
 
-					(*lastPattern)[lastPatternPos][trackNumber]=data;
+					(*lastPattern)[lastPatternPos].notes()[trackNumber]=data;
 			} else
 			if (tagName == "seqline") {
 				lastSeqLine = song_->patternSequence()->createNewLine();

@@ -1167,7 +1167,7 @@ void PatternView::TweakGUI::drawPattern(NGraphics* g, int startLine, int endLine
 			int y = d2i (it->first * pView->pattern_->beatZoom());
 			if (y > endLine) break;
 			if (y != lastLine) {
-				PatternLine::iterator eventIt = line.tweaks().lower_bound(startTrack);
+				std::map<int, PatternEvent>::iterator eventIt = line.tweaks().lower_bound(startTrack);
 				for(; eventIt != line.tweaks().end() && eventIt->first <= endTrack; ++eventIt) {
 					PatternEvent event = eventIt->second;
 					int x = eventIt->first;
@@ -1454,13 +1454,13 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 				NColor stdColor = tColor;
 				NColor crColor = pView->colorInfo().cursor_text_color;
 
-				PatternLine::iterator eventIt = line->lower_bound(startTrack);
+				std::map<int, PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
 				PatternEvent emptyEvent;
 				PatternEvent* event;
 
 				for ( int x = startTrack; x <= endTrack; x++ ) {
 				
-					if ( eventIt != line->end() && eventIt->first <= endTrack ) {
+					if ( eventIt != line->notes().end() && eventIt->first <= endTrack ) {
 						int trackx = eventIt->first;
 						if ( x == trackx) {
 						  event = &eventIt->second;
@@ -2505,7 +2505,7 @@ void psycle::host::PatternView::PatternDraw::onTagParse( const NXmlParser & pars
 		data.setParameter( str_hex<int> (parser.getAttribValue("param")) );
 		data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
 
-		pasteBuffer[lastXmlLineBeatPos][trackNumber]=data;
+		pasteBuffer[lastXmlLineBeatPos].notes()[trackNumber]=data;
 	}
 }
 

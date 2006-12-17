@@ -32,7 +32,7 @@ namespace psycle
 	namespace host
 	{
 
-		class PatternLine : public std::map<int, PatternEvent>  {
+		class PatternLine {
 		public:
 			PatternLine();
 			~PatternLine();
@@ -42,7 +42,11 @@ namespace psycle
 
 			std::string toXml( float pos ) const;
 
+			std::map<int, PatternEvent> & notes();
+			const std::map<int, PatternEvent> & notes() const;
+
 			std::map<int, PatternEvent> & tweaks();
+			const std::map<int, PatternEvent> & tweaks() const;
 
 			virtual bool empty() const;
 
@@ -50,6 +54,7 @@ namespace psycle
 
 			int sequencerTrack_;
 
+            std::map<int, PatternEvent>  noteMap;
 			std::map<int, PatternEvent> tweakMap;
 
 		};

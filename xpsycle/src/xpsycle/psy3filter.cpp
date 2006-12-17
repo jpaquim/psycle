@@ -468,7 +468,7 @@ namespace psycle
 							if (event.note() == cdefTweakM) {
 							 (*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 							} else
-							(*pat)[position][x] = event;
+							(*pat)[position].notes()[x] = event;
 						}
 						pSource += EVENT_SIZE;
 					}

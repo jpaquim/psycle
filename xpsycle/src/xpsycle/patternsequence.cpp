@@ -377,13 +377,13 @@ namespace psycle
 						{
 						PatternLine *thisline= &(patIt->second);
 						PatternLine tmpline;
-						PatternLine::iterator lineIt = thisline->begin();
+						std::map<int, PatternEvent>::iterator lineIt = thisline->notes().begin();
 						// Since the player needs to differentiate between tracks of different SequenceEntrys, 
 						// we generate a temporary PatternLine with a special column value.
-						for( ;lineIt != thisline->end() ;lineIt++)
+						for( ;lineIt != thisline->notes().end() ;lineIt++)
 						{
-							tmpline[lineIt->first]=lineIt->second;
-							tmpline[lineIt->first].setNote(tmpline[lineIt->first].note()+sLineIt->second->transpose() );
+							tmpline.notes()[lineIt->first]=lineIt->second;
+							tmpline.notes()[lineIt->first].setNote(tmpline.notes()[lineIt->first].note()+sLineIt->second->transpose() );
 						}
 						
 						// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.

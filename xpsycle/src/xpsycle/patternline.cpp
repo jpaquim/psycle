@@ -39,7 +39,7 @@ namespace psycle
 		{
 			std::ostringstream xml;
 			xml << "<patline pos='" << pos << "'>" << std::endl;
-			for ( const_iterator it = begin() ; it != end() ; it++ ) {
+			for ( std::map<int, PatternEvent>::const_iterator it = noteMap.begin() ; it != noteMap.end() ; it++ ) {
 				int trackNumber = it->first;
 				const PatternEvent & event = it->second;
 				xml << event.toXml( trackNumber );
@@ -58,13 +58,28 @@ namespace psycle
 			 return sequencerTrack_;
 		}
 
-		std::map< int, PatternEvent > & PatternLine::tweaks( )
+		std::map< int, PatternEvent > & PatternLine::notes( )
+		{
+			return noteMap;
+		}						
+		
+		const std::map< int, PatternEvent > & PatternLine::notes( ) const
+		{
+			return noteMap;
+		}						
+
+        std::map< int, PatternEvent > & PatternLine::tweaks( )
+		{
+			return tweakMap;
+		}
+
+        const std::map< int, PatternEvent > & PatternLine::tweaks( ) const
 		{
 			return tweakMap;
 		}
 
 		bool PatternLine::empty() const {
-			return ( std::map<int,PatternEvent>::empty() && tweakMap.empty() );
+			return ( noteMap.empty() && tweakMap.empty() );
 		}
 
 	}
