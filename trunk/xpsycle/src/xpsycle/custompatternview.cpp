@@ -427,7 +427,7 @@ namespace psycle {
 			patternStep_ = step;
 		}
 
-    int CustomPatternView::patternStep() const {
+		int CustomPatternView::patternStep() const {
 			return patternStep_;
 		}
 
@@ -490,13 +490,13 @@ namespace psycle {
 			if ( lineGridEnabled() ) {
 				g->setForeground( lineSeparatorColor() );
 				for (int y = startLine; y <= endLine; y++)
-      		g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
+					g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
 			}
 
 			g->setForeground( bigTrackSeparatorColor() );
 			it = trackGeometrics().lower_bound( startTrack );
 			for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) //  oolIdent px space at begin of trackCol{
-      	g->fillRect( it->second.left() - dx(),0,colIdent,lineHeight);
+				g->fillRect( it->second.left() - dx(),0,colIdent,lineHeight);
 
 			g->setForeground( background() );
 			it = trackGeometrics().lower_bound( startTrack );
@@ -512,7 +512,7 @@ namespace psycle {
 			for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) // track small separators
 				g->drawLine( it->second.left()-dx(),0, it->second.left()-dx(),lineHeight);
 
-    	g->setForeground( foreground() );
+			g->setForeground( foreground() );
 
 		}
 
@@ -544,7 +544,7 @@ namespace psycle {
 		}
 
 		void CustomPatternView::drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
-      if ( events_.size() == 0 || !colGridEnabled() ) return;
+			if ( events_.size() == 0 || !colGridEnabled() ) return;
 
 			g->setForeground( separatorColor() );
 			int lineHeight = ((endLine +1) * rowHeight()) - dy();
@@ -559,7 +559,7 @@ namespace psycle {
 				int eventCount = 0;
 				for ( ; it < events_.end()-1 && eventCount < trackGeometry.visibleColumns() ; it++, eventCount++ ) {
 					ColumnEvent & event = *it;
-        	switch ( event.type() ) {
+					switch ( event.type() ) {
 						case ColumnEvent::hex2 : col+= 2*cellWidth(); 	break;
 						case ColumnEvent::hex4 : col+= 4*cellWidth(); 	break;
 						case ColumnEvent::note : col+= noteCellWidth(); break;
@@ -725,28 +725,29 @@ namespace psycle {
 
 		void CustomPatternView::onMousePress(int x, int y, int button) {
 			if ( button == 1) {
-    		clearOldSelection();
-    		PatCursor p = intersectCell(x,y);
-    		startSel(p);
-  		}
+				clearOldSelection();
+				PatCursor p = intersectCell(x,y);
+				startSel(p);
+			}
 		}
 
 		void CustomPatternView::onMousePressed(int x, int y, int button) {
 			if (button == 1) {
 				endSel(); 
-    		if ( !doSelect() ) cursor_ = intersectCell(x,y);
-    		repaint();    
+				if ( !doSelect() ) cursor_ = intersectCell(x,y);
+				repaint();    
 			}
 		}
 
-		void CustomPatternView::onMouseOver	(int x, int y) {
+		void CustomPatternView::onMouseOver( int x, int y ) {
 			if (doDrag_) {
-    		PatCursor p = intersectCell(x,y);
-    		doSel(p);
-  		}
+    				PatCursor p = intersectCell(x,y);
+    				doSel(p);
+    			}
 		}
 
-		void CustomPatternView::onKeyPress(const NKeyEvent & event) {							
+		void CustomPatternView::onKeyPress( const NKeyEvent & event ) {
+				
                         int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key( event.shift(),event.scancode()));
 
                         // Keybased block selection commands.
