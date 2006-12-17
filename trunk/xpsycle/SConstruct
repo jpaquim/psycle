@@ -231,8 +231,9 @@ if False:
 		binary_packages = [xpsycle_runtime, xpsycle_doc],
 	)
 
-plugin_modules = os.path.join('..', 'xpsycle.plugins', 'SConstruct')
-if os.path.exists(plugin_modules): plugin_modules = project.subscript(plugin_modules)
-else: plugin_modules = []
+plugin_modules = []
+#plugin_modules = os.path.join('..', 'xpsycle.plugins', 'SConstruct')
+#if os.path.exists(plugin_modules): plugin_modules = project.subscript(plugin_modules)
+#else: plugin_modules = []
 
 project([xpsycle_module] + plugin_modules)
