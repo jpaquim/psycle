@@ -458,11 +458,19 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     break;
     case WM_CLOSE:
       exitloop = win->onClose();
-      if ( exitloop == nDestroyWindow )
-        DestroyWindow( event->hwnd );
+      if ( exitloop != nDestroyWindow ) return 0; 
+      DestroyWindow( event->hwnd );  
     break;
-    case WM_DESTROY:
-      PostQuitMessage(0);
+    case WM_DESTROY:   
+      if ( win == mainWin_  )
+        PostQuitMessage(0);
+      else
+      {
+        if ( win->exitLoop() == nDestroyWindow ) {
+            delete win;
+            lastOverWin_ = 0;
+        }                 
+      }              
     break;
     case WM_MOUSEMOVE:
       if (lastOverWin_!=0 && win!=lastOverWin_ ) lastOverWin_->onMouseExit();
