@@ -286,12 +286,10 @@ void PatternView::onZoomHBarPosChanged(ZoomBar* zoomBar, double newPos) {
 
 void PatternView::onHScrollBar( NScrollBar * sender )
 {
-  double pos = sender->pos();
-
-  int newPos = drawArea->xOffByTrack( drawArea->findTrackByScreenX( pos ) );
+  int newPos = drawArea->xOffByTrack( drawArea->findTrackByScreenX( static_cast<int>( sender->pos() ) ) );
 
   if (newPos != drawArea->dx()) {
-    header->setScrollDx(newPos);
+    header->setScrollDx( newPos );
     header->repaint();
 
     int diffX  = newPos - drawArea->dx();
@@ -308,11 +306,10 @@ void PatternView::onHScrollBar( NScrollBar * sender )
 
 void PatternView::onHTweakScrollBar( NScrollBar * sender )
 {
-  double pos = sender->pos();
-  int newPos = (pos / tweakGUI->colWidth()) * tweakGUI->colWidth();
+  int newPos = static_cast<int>( ( sender->pos() / tweakGUI->colWidth()) * tweakGUI->colWidth() );
 
   if (newPos != tweakGUI->dx()) {
-    tweakHeader->setScrollDx(newPos);
+    tweakHeader->setScrollDx( newPos );
     tweakHeader->repaint();
 
     int diffX  = newPos - tweakGUI->dx();
@@ -330,9 +327,8 @@ void PatternView::onHTweakScrollBar( NScrollBar * sender )
 
 void PatternView::onVScrollBar( NScrollBar * sender )
 {
-  double pos = sender->pos();
-  if (pos >= 0) {
-  int newPos = (pos / rowHeight()) * rowHeight();
+  if ( sender->pos() >= 0) {
+  int newPos = static_cast<int> ( (sender->pos() / rowHeight() ) * rowHeight() );
 
   if (newPos != drawArea->dy()) {
     int diffY  = newPos - lineNumber_->dy();
@@ -535,7 +531,7 @@ int PatternView::tweakHeaderWidth( ) const
 
 int PatternView::lineNumber( ) const
 {
-  return ( pattern_) ? pattern_->beatZoom() * pattern_->beats() : 0;  
+  return ( pattern_) ? static_cast<int> ( pattern_->beatZoom() * pattern_->beats() ) : 0;  
 }
 
 int PatternView::playPos( ) const
@@ -2312,7 +2308,7 @@ void PatternView::PatternDraw::scaleBlock(float factor )
 	double top = selection().top() / (double)pView->beatZoom();
 	double bottom = selection().bottom() / (double)pView->beatZoom();
 	pView->pattern()->scaleBlock(left, right, top, bottom, factor);
-	window()->repaint(this,repaintTrackArea(selection().top(),selection().bottom()*std::max(factor,1.0f),left,right));
+	window()->repaint(this,repaintTrackArea(selection().top(),static_cast<int>( selection().bottom()*std::max(factor,1.0f) ),left,right));
 	pView->pattern()->clearEmptyLines();
 }
 

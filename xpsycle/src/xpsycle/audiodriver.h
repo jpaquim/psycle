@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
+  *   Copyright (C) 2006 by Stefan Nattkemper  *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -109,7 +109,7 @@ namespace psycle
 
 				AudioDriver();
 
-				~AudioDriver();
+				virtual ~AudioDriver();
 
 				// this clones the driver using the copy ctor
 				virtual AudioDriver* clone()  const;

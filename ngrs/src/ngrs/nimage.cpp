@@ -120,16 +120,7 @@ void NImage::setHAlign( int align )
 
 void NImage::createFromXpmData(const char** data)
 {
-  #ifdef __unix__
-  XpmColorSymbol cs[256];
-  XpmAttributes attr;
-  attr.valuemask = XpmCloseness;
-  attr.colorsymbols = cs;
-  attr.numsymbols = 256;
-  attr.color_key = XPM_GRAY;
-
-	bitmap24bpp_.createFromXpmData(data);
-  #endif
+  bitmap24bpp_.createFromXpmData(data);  
 }
 
 void NImage::setBitmap( const NBitmap & bitmap )
@@ -146,8 +137,3 @@ void NImage::setSharedBitmap( NBitmap * bitmap )
 {
   pBitmap_ = bitmap;
 }
-
-
-
-
-
