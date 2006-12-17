@@ -49,18 +49,21 @@ NBitmap::NBitmap( const NBitmap & rhs ) : NObject(), sysData_(0), clpData_(0), c
   }
 
   if ( rhs.clpData() ) {
-    clpData_ = cloneSysImage( rhs.clpData() );
+//    clpData_ = cloneSysImage( rhs.clpData() );
+    clpData_ = 0;
   }
 }
 
 const NBitmap & NBitmap::operator =( const NBitmap & rhs ) {
   deleteBitmapData();    
   
-  if ( rhs.sysData() )
-		sysData_ = cloneSysImage( rhs.sysData() );
+  if ( rhs.sysData() ) {
+    sysData_ = cloneSysImage( rhs.sysData() );
+  }		
 		
-  if ( rhs.clpData() )
-		clpData_ = cloneSysImage( rhs.clpData() );      
+  if ( rhs.clpData() ) {       
+    clpData_ = cloneSysImage( rhs.clpData() );      
+  }		
 		
   return *this;		
 }      
@@ -329,28 +332,8 @@ NSysImage NBitmap::cloneSysImage( NSysImage src_img )
 
 		return dst_xi;
 		#else
-		
-        BITMAP bitmap;       
-        GetObject( src_img, sizeof(BITMAP), (LPSTR)&bitmap );
-        int width  = bitmap.bmWidth;
-        int height = bitmap.bmHeight;
-		
-	    HDC dc = GetDC( NULL );   
-        // dest bitmap
-        HDC memDC_ = CreateCompatibleDC( dc );
-        NSysImage hBmp = CreateCompatibleBitmap( memDC_, width, height );
-        SelectObject( memDC_, hBmp );
-        // src bitmap
-        HDC srcDC_ = CreateCompatibleDC( dc );
-        SelectObject( srcDC_, src_img );
-    
-        BitBlt( memDC_, 0,0, width, height, srcDC_, 0, 0, SRCCOPY);
-
-        ReleaseDC( NULL, dc );
-        DeleteDC( memDC_ );
-        DeleteDC( srcDC_ );
-
-        return hBmp;
+        HBITMAP dest_img = (HBITMAP) CopyImage( src_img, IMAGE_BITMAP, 0, 0 , LR_COPYRETURNORG );
+        return dest_img;
 		#endif
 	}
 
