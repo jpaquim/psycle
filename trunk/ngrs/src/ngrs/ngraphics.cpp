@@ -286,10 +286,13 @@ void NGraphics::drawText( int x, int y, const std::string & text )
   if ( dblBuffer_ ) {
     SetBkMode( gcp, TRANSPARENT );
     SetTextAlign( gcp, TA_BASELINE );
-    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
+    SetTextColor( gcp, fntStruct.textColor.hColorRef() );
+    
+    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );    
   } else {
      SetBkMode( gc_, TRANSPARENT );
      SetTextAlign( gc_, TA_BASELINE );
+     SetTextColor( gc_, fntStruct.textColor.hColorRef() );
      TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );      
   }
   #endif
@@ -317,10 +320,12 @@ void NGraphics::drawText(int x, int y, const std::string & text, const NColor & 
   if (dblBuffer_) {
     SetBkMode( gcp, TRANSPARENT );
     SetTextAlign( gcp, TA_BASELINE );
+    SetTextColor( gcp, color.hColorRef() );
     TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
   } else {
     SetBkMode( gc_, TRANSPARENT );
     SetTextAlign( gc_, TA_BASELINE );
+    SetTextColor( gc_, color.hColorRef() );
     TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );    
   }
   #endif

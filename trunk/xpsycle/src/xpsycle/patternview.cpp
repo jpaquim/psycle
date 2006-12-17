@@ -897,8 +897,8 @@ void PatternView::Header::setHeaderCoordInfo( const HeaderCoordInfo & info ) {
           }
           if ( pView->pattern()->barStart(position, signature) ) {
             std::string caption = stringify(signature.numerator())+"/"+stringify(signature.denominator());
-						// vcenter text
-						int yp = (pView->rowHeight() - g->textHeight()) / 2  + g->textAscent();
+			// vcenter text
+			int yp = (pView->rowHeight() - g->textHeight()) / 2  + g->textAscent();
             g->drawText(0,i*pView->rowHeight()+ yp - dy(),caption, textColor() );
           }
         }
