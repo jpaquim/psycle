@@ -5,8 +5,6 @@
 *	ms (microsoft):
 	ms: gthread-2.0.lib
 	ms: DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__VERSION
-	ms: --without-nested-source-packages PACKAGENERIC__EXTERNAL_PATH__INCLUDES
 	ms: universalis::operating_system::terminal updates from psyclemfc
 	ms: vcproj pre_compiled_headers
-	ms: */detail/project.private.hpp #if defined HAVE_CONFIG_H #include "configuration.private.hpp" (<>?) PACKAGENERIC__CONFIGURATION__OPTION__ENABLE__PRE_COMPILED_HEADERS
 	-- bohan (sorry, it's cryptic)
