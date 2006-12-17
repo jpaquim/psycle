@@ -238,15 +238,15 @@ namespace psycle
 					PatternLine & line = rLineIt->second;
 					double newpos = top + (rLineIt->first-top) * factor;
 			
-					for( PatternLine::iterator entryIt = line.lower_bound(left)
-					   ; entryIt != line.end() && entryIt->first < right
+					for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
+					   ; entryIt != line.notes().end() && entryIt->first < right
 					   ; )
 					{
 						if( newpos < beats() )
 						{
-							(*this)[newpos][entryIt->first] = entryIt->second;
+							(*this)[newpos].notes()[entryIt->first] = entryIt->second;
 						} 
-						line.erase(entryIt++);
+						line.notes().erase(entryIt++);
 					}
 				}
 			}
@@ -260,15 +260,15 @@ namespace psycle
 					PatternLine & line = lineIt->second;
 					double newpos = top + (lineIt->first-top) * factor;
 					
-					for( PatternLine::iterator entryIt = line.lower_bound(left)
-					   ; entryIt != line.end() && entryIt->first < right
+					for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
+					   ; entryIt != line.notes().end() && entryIt->first < right
 					   ; )
 					{
 						if( newpos < beats() )
 						{
-							(*this)[newpos][entryIt->first] = entryIt->second;
+							(*this)[newpos].notes()[entryIt->first] = entryIt->second;
 						}
-						line.erase(entryIt++);
+						line.notes().erase(entryIt++);
 					}
 				}
 			}
@@ -281,8 +281,8 @@ namespace psycle
 			   ; ++lineIt )
 			{
 				PatternLine & line = lineIt->second;
-				for( PatternLine::iterator entryIt = line.lower_bound(left)
-				   ; entryIt != line.end() && entryIt->first < right
+				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
+				   ; entryIt != line.notes().end() && entryIt->first < right
 				   ; ++entryIt)
 				{
 					PatternEvent & entry = entryIt->second;
@@ -304,11 +304,11 @@ namespace psycle
 			   ; ++lineIt )
 			{
 				PatternLine & line = lineIt->second;
-				for( PatternLine::iterator entryIt = line.lower_bound(left)
-				   ; entryIt != line.end() && entryIt->first < right
+				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
+				   ; entryIt != line.notes().end() && entryIt->first < right
 				   ; )
 				{
-					line.erase(entryIt++);
+					line.notes().erase(entryIt++);
 				}
 			}
 			clearEmptyLines();
@@ -327,8 +327,8 @@ namespace psycle
 			iterator it = find_nearest(linenr);
 			PatternLine & line = it->second;
 			if ( it == end() ) return;
-			line.erase(tracknr);
-			if ( line.empty() ) erase(it);
+			line.notes().erase(tracknr);
+			if ( line.notes().empty() ) erase(it);
 		}
 
 		void SinglePattern::clearTweakTrack( int linenr , int tracknr ) {
@@ -450,17 +450,17 @@ namespace psycle
 			iterator it = find_nearest( line );
 			if ( it != end())
 			{
-				it->second[track] = event;
+				it->second.notes()[track] = event;
 			} else {
 				float position = line / (float) beatZoom();
-				(*this)[position][track] = event;
+				(*this)[position].notes()[track] = event;
 			}
 		}
 
 		PatternEvent SinglePattern::event( int line, int track ) {
 			iterator it = find_nearest( line );
 			if ( it != end())
-				return it->second[track];
+				return it->second.notes()[track];
 			else
 				return PatternEvent();
 		}
@@ -504,11 +504,11 @@ namespace psycle
 				int y = (int) ( lineIt->first * beatZoom() + 0.5 );
 				if ( y >= bottom ) break;
 		
-				for( PatternLine::iterator entryIt = line.lower_bound( left )
-	          ; entryIt != line.end() && entryIt->first < right
+				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound( left )
+	          ; entryIt != line.notes().end() && entryIt->first < right
 	          ; ++entryIt)
 				{
-    	      newLine.insert(PatternLine::value_type( entryIt->first-left, entryIt->second));
+    	      newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
   	  	}   
 				newPattern.insert( SinglePattern::value_type( lineIt->first-topBeat, newLine ) );
 			}
@@ -522,11 +522,11 @@ namespace psycle
 					; lineIt != pattern.end() && lineIt->first < maxBeats; ++lineIt )
 			{
 				const PatternLine & line = lineIt->second;
-				for( PatternLine::const_iterator entryIt = line.begin()
-	          ; entryIt != line.end() && entryIt->first <= tracks
+				for( std::map<int, PatternEvent>::const_iterator entryIt = line.notes().begin()
+	          ; entryIt != line.notes().end() && entryIt->first <= tracks
 	          ; entryIt++ )
 				{
-				(*this)[pasteStartPos+lineIt->first][left+entryIt->first]=entryIt->second;
+				(*this)[pasteStartPos+lineIt->first].notes()[left+entryIt->first]=entryIt->second;
 				}
 			}
 		}
@@ -537,11 +537,11 @@ namespace psycle
 					; lineIt != pattern.end() && lineIt->first < maxBeats; ++lineIt )
 			{
 				const PatternLine & line = lineIt->second;
-				for( PatternLine::const_iterator entryIt = line.begin()
-	          ; entryIt != line.end() && entryIt->first <= tracks
+				for( std::map<int, PatternEvent>::const_iterator entryIt = line.notes().begin()
+	          ; entryIt != line.notes().end() && entryIt->first <= tracks
 	          ; entryIt++ )
 				{
-				(*this)[pasteStartPos+lineIt->first][left+entryIt->first]=entryIt->second;
+				(*this)[pasteStartPos+lineIt->first].notes()[left+entryIt->first]=entryIt->second;
 				}
 			}
 		}
@@ -561,13 +561,13 @@ namespace psycle
 				int y = (int) ( lineIt->first * beatZoom() + 0.5 );
 				if ( y >= bottom ) break;
 		
-				for( PatternLine::iterator entryIt = line.lower_bound( left )
-	          ; entryIt != line.end() && entryIt->first < right
+				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound( left )
+	          ; entryIt != line.notes().end() && entryIt->first < right
 	          ; )
 				{
-    	      line.erase(entryIt++);
-  	  	}   
-				if (line.size() == 0) 
+    	                line.notes().erase(entryIt++);
+                }   
+				if (line.notes().size() == 0) 
 					erase(lineIt++);
 				else 
 					++lineIt;

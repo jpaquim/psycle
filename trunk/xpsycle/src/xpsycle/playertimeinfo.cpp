@@ -118,14 +118,5 @@ namespace psycle
 		}
 
 	} // end of hostnamespace
-}
-
-
-
-
-
-
-
-
-
- // end of psycle namespace
+} // end of psycle namespace
+ 

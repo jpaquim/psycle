@@ -222,7 +222,7 @@ namespace psycle
 						PatternEvent event = convertEntry(entry);
 						if (!event.empty()) {
 							float position = y / (float) song.m_LinesPerBeat;
-							(*pat)[position][x] = event;
+							(*pat)[position].notes()[x] = event;
 						}
 					}
 					file->Skip((PSY2_MAX_TRACKS-song.tracks())*EVENT_SIZE);
