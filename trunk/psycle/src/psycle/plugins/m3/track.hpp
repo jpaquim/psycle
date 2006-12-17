@@ -1,9 +1,8 @@
 #pragma once
 #include <psycle/plugin_interface.hpp>
 // Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
-#include <stdlib.h>
-#include <crtdbg.h>
-#include <math.h>
+#include <cstdlib>
+#include <cmath>
 
 // CTrack Declaration file (M3Track.h)
 
@@ -77,7 +76,7 @@ public:
         void Init();
         void Work(float *psamples, int numsamples);
         inline float Osc();
-        inline float CTrack::Filter( float x);
+        inline float Filter( float x);
         inline float VCA();
         void NewPhases();
         int MSToSamples(double const ms);

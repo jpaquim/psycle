@@ -9,8 +9,8 @@
 #pragma once
 
 #include "Globals.h"
-#include "..\DspLib\Dsp.h"
-#include "..\DspLib\DspAlgs.h"
+#include "../DspLib/Dsp.h"
+#include "../DspLib/DspAlgs.h"
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -16,7 +16,7 @@
 //============================================================================
 //	Voice globals
 //============================================================================
-typedef struct globals_t
+struct GLOBALS
 {
 	//
 	//	This should always be here
@@ -30,7 +30,7 @@ typedef struct globals_t
 	float	vib_speed;
 	float	vib_delay;
 	float	schoolness;
-} GLOBALS;
+};
 //============================================================================
 //	CVoice class
 //============================================================================
@@ -89,7 +89,7 @@ public:
 	//	IsFinished
 	//	returns true if voice is done playing
 	//------------------------------------------------------------------------
-	__forceinline bool IsActive()
+	inline bool IsActive()
 	{
 		return vca.IsActive();
 	}
@@ -97,7 +97,7 @@ public:
 	//	GlobalTick
 	//	Method to handle parameter inertia and suchs things
 	//------------------------------------------------------------------------
-	__forceinline static void GlobalTick()
+	inline static void GlobalTick()
 	{
 	}
 	//------------------------------------------------------------------------
@@ -105,7 +105,7 @@ public:
 	//	Method to handle voice specific things as LFO and envelopes
 	//	* tips, dont handle amplitude envelopes or lfo's here
 	//------------------------------------------------------------------------
-	__forceinline void VoiceTick()
+	inline void VoiceTick()
 	{
 		//
 		//	Slide control
@@ -147,7 +147,7 @@ public:
 	//	Work
 	//	all sound generation is done here
 	//------------------------------------------------------------------------
-	__forceinline void Work(float *left, float *right, int samps)
+	inline void Work(float *left, float *right, int samps)
 	{
 		float out = 0.0f;
 		float stringInput = plucker;

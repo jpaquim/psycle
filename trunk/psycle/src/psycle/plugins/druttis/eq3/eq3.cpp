@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-#include "..\Dsp\Biquad.h"
+#include "../dsp/Biquad.h"
 //////////////////////////////////////////////////////////////////////
 //
 //	Machine Defs
@@ -217,12 +217,12 @@ void InitFilter(Biquad *b, int type, int gain, int freq, int sr, float bw)
 //
 //////////////////////////////////////////////////////////////////////
 unsigned long randSeed = 22222; 
-__forceinline unsigned long GetRandomNumber()
+inline unsigned long GetRandomNumber()
 { 
 	randSeed = (randSeed * 196314165) + 907633515; 
 	return randSeed; 
 }
-__forceinline double GetRandomSignal()
+inline double GetRandomSignal()
 {
 	return (float) ((int) GetRandomNumber()  & 0xffff) * 0.000030517578125 - 1.0;
 }

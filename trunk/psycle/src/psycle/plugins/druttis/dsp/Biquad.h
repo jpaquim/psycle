@@ -83,7 +83,7 @@ public :
 	//	Next
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline float Next(float in)
+	inline float Next(float in)
 	{
 		double out = c0 * (double) in + c1 * x1 + c2 * x2 - c3 * y1 - c4 * y2;
 		x2 = x1;

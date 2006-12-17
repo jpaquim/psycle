@@ -25,7 +25,7 @@ public:
 		lastOutput = 0.0f;
 	}
 
-	__forceinline float Tick(float sample)
+	inline float Tick(float sample)
 	{
 		lastOutput = sample * (sample * sample - (float) 1.0f);
 		if (lastOutput > 1.0f)

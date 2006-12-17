@@ -82,13 +82,13 @@ CMachineParameter const *pParameters[] =
 	&paraDiff,
 };
 
-int const pFreq 0
-int const pDry 1
-int const pRefresh 2
-int const pMode 3
-int const pAmount 4
-int const pDiff 5
-int const numVals 6
+int const pFreq = 0;
+int const pDry = 1;
+int const pRefresh = 2;
+int const pMode = 3;
+int const pAmount = 4;
+int const pDiff = 5;
+int const numVals = 6;
 
 CMachineInfo const bexphase_info = 
 {

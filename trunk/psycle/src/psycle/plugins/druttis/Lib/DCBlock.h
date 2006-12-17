@@ -28,7 +28,7 @@ public:
 		last_output = 0.0f;
 	}
 
-	__forceinline float Tick(float sample)
+	inline float Tick(float sample)
 	{
 		output = sample - input + 0.99f * output;
 		input = sample;

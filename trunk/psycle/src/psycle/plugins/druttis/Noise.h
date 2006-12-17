@@ -17,7 +17,7 @@ public:
 	{
 	}
 
-	__forceinline float Tick()
+	inline float Tick()
 	{
 		last_output = (float) rand() * scale - 1.0f;
 		return last_output;

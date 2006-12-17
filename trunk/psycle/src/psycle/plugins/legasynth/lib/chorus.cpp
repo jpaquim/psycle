@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
 #include "chorus.h"
-#include <math.h>
+#include <cmath>
 
 Chorus::Chorus(){
 

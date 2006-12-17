@@ -56,11 +56,7 @@ public:
 
 		static const Information information(
 			Information::Types::effect
-#ifndef NDEBUG
-			, "dw eq (debug build)"
-#else
 			, "dw eq"
-#endif
 			, "eq"
 			, "dw"
 			, 3
@@ -125,6 +121,8 @@ public:
 		band3.SetMode(dwfilter::eq_parametric);
 		band4.SetMode(dwfilter::eq_hishelf);
 	}
+
+	~dw_eq() throw() {}
 
 	virtual void process(Sample l[], Sample r[], int samples, int);
 	virtual void parameter(const int &);

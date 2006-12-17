@@ -52,7 +52,7 @@ public:
 	//	Init
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Init()
+	inline void Init()
 	{
 		SetDelay(0.0f);
 		Reset();
@@ -62,7 +62,7 @@ public:
 	//	Reset
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		_z = 0.0f;
 	}
@@ -71,7 +71,7 @@ public:
 	//	GetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetDelay()
+	inline float GetDelay()
 	{
 		return _delay;
 	}
@@ -80,7 +80,7 @@ public:
 	//	SetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetDelay(float delay)
+	inline void SetDelay(float delay)
 	{
 		if (delay < 0.0f)
 			delay = 0.0f;
@@ -94,7 +94,7 @@ public:
 	//	GetSample
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSample(float in)
+	inline float GetSample(float in)
 	{
 		float y = _z - in * _a;
 		_z = y * _a + in;

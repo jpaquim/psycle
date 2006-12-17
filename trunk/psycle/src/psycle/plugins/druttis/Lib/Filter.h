@@ -15,7 +15,7 @@ protected:
 public:
 	Filter();
 	virtual ~Filter();
-	__forceinline float lastOutput()
+	inline float lastOutput()
 	{
 		return lastOutput;
 	}

@@ -2,12 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_)
-#define AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 #include "filter.h"
 
 typedef unsigned char byte;
@@ -2505,9 +2500,3 @@ inline float CSynthTrack::GetSample()
 #endif
 	return 0;
 }
-
-
-
-
-
-#endif // !defined(AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_)

@@ -21,24 +21,13 @@ v0.01b
  */
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cmath>
 
 #include "filter.h"
 
-//#define SUE
-
-#ifdef SUE
-#ifndef LIGHT
-#define PLUGIN_NAME "Pooplog Delay 0.04b - _sue_ version"
-#define MAX_BUF 1024*1024*2
-#else
-#define PLUGIN_NAME "Pooplog Delay Light 0.04b - _sue_ version"
-#define MAX_BUF 1024*1024*1
-#endif
-#else
 #ifndef LIGHT
 #define MAX_BUF 1024*1024*4
 #define PLUGIN_NAME "Pooplog Delay 0.04b"
@@ -46,19 +35,22 @@ v0.01b
 #define MAX_BUF 1024*1024*2
 #define PLUGIN_NAME "Pooplog Delay Light 0.04b"
 #endif
-#endif
 
-inline int f2i(float flt) 
+inline int f2i(float flt)
 { 
-  int i; 
-  static const double half = 0.5f; 
-  _asm 
-  { 
-     fld flt 
-     fsub half 
-     fistp i 
-  } 
-  return i;
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
 }
 
 #define SYNTH_REMAP_0 24

@@ -1,6 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-
+#include <cmath>
 
 #ifndef M_PI
  #define M_PI 3.14159265358979323846
@@ -129,13 +129,13 @@ void mi::Init()
 	for(int i=0;i<=MAPSIZE;++i)
 	{
 		j = i / (float)MAPSIZE;
-		highCurve[i] = sqrt((float)(-j*j + 2*j));		//sqrt is ambiguous without the cast
+		highCurve[i] = std::sqrt((-j*j + 2*j));
 		lowCurve[MAPSIZE - i] = 1.0f - highCurve[i];
 	}
 	for(int i=0;i<=MAPSIZE/2;++i)
 	{
 		j = i / (float)(MAPSIZE / 2);
-		inCurve[i] = sqrt((float)(-j*j + 2*j)) / 2.0f;
+		inCurve[i] = std::sqrt((-j*j + 2*j)) / 2.0f;
 		inCurve[MAPSIZE + 1 - i]	= 1.0f - inCurve[i];
 		outCurve[MAPSIZE/2-i]	= .5f - inCurve[i]; 
 		outCurve[MAPSIZE/2+i+1]	= .5f + inCurve[i];
@@ -344,7 +344,7 @@ void mi::fillLfo()
 
 	if(Vals[prm_gravity]!=100 && Vals[prm_waveform]!=lfo_square)  //we -could- do all this with 0 gravity or a square wave, it just wouldn't change anything..
 	{
-		ylop=abs(Vals[prm_gravity]-100) / 100.0f;		// for weighted average of linear value and curved value
+		ylop=std::fabs(Vals[prm_gravity]-100) / 100.0f;		// for weighted average of linear value and curved value
 
 		for(int i=0;i<LFO_SIZE;++i)
 		{

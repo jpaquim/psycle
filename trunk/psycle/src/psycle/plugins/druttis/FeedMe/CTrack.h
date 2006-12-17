@@ -25,7 +25,7 @@
 //============================================================================
 //	CTrack globals
 //============================================================================
-typedef struct trackdata_t
+struct TRACKDATA
 {
 	//	Just some info
 	int		samplingrate;
@@ -54,7 +54,7 @@ typedef struct trackdata_t
 	float	inertia;
 	int		note_cut;
 	int		sync_mode;
-} TRACKDATA;
+};
 //============================================================================
 //	CTrack class
 //============================================================================
@@ -122,7 +122,7 @@ public:
 	//------------------------------------------------------------------------
 	//	GetSampleExp with overtones and feedback
 	//------------------------------------------------------------------------
-	static __forceinline float GetSample(float* wavetable, int type, float* buf, float fb, float time)
+	static inline float GetSample(float* wavetable, int type, float* buf, float fb, float time)
 	{
 		register float out = 0.0f;
 		register float tmp;
@@ -184,14 +184,14 @@ public:
 	//------------------------------------------------------------------------
 	//	IsFinished
 	//------------------------------------------------------------------------
-	__forceinline bool IsFinished()
+	inline bool IsFinished()
 	{
 		return vca_env.IsFinished();
 	}
 	//============================================================================
 	//	Work
 	//============================================================================
-	__forceinline void Work(float *psamplesleft, float *psamplesright, int numsamples)
+	inline void Work(float *psamplesleft, float *psamplesright, int numsamples)
 	{
 		//
 		//

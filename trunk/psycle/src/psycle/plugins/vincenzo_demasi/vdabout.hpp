@@ -37,6 +37,6 @@
          "\n"\
          "Vincenzo Demasi for Psycle. E-Mail: <v.demasi@tiscali.it>"
 
-#define VDABOUTCAPTION(str) "--==<§> "##str##" <§>==--"
+#define VDABOUTCAPTION(str) "--==<§> " str " <§>==--"
 
 #define VDABOUTYPE    0

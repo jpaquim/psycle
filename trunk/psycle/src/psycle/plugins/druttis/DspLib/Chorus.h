@@ -52,7 +52,7 @@ public:
 		delete[] inputs;
 	}
 
-	__forceinline void Init(int maxDelay)
+	inline void Init(int maxDelay)
 	{
 		mask = v2m(maxDelay);
 		delete[] inputs;
@@ -61,7 +61,7 @@ public:
 		Reset();
 	}
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		zm = 0.0f;
 		for (int i = mask; i >= 0; i--)
@@ -79,7 +79,7 @@ public:
 		fb = value;
 	}
 
-	__forceinline void SetDelay(float delay)
+	inline void SetDelay(float delay)
 	{
 		float tmp = (float) inpos - delay;
 		outpos = f2i(tmp);
@@ -87,7 +87,7 @@ public:
 		outpos &= mask;
 	}
 	
-	__forceinline float Tick(float in)
+	inline float Tick(float in)
 	{
 		inputs[inpos++] = in - zm * fb;
 		inpos &= mask;

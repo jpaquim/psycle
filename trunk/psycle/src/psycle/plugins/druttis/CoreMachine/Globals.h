@@ -14,7 +14,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-typedef struct globals_t
+struct GLOBALS
 {
 	int		samplingrate;	// Computed with oversampling factor
 	int		ticklength;		// Computed with oversampling factor
@@ -22,4 +22,4 @@ typedef struct globals_t
 	/* User fields here */
 	float	wtbl[4096];
 
-} GLOBALS;
+};

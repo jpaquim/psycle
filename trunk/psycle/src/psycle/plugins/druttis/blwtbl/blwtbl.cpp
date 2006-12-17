@@ -6,7 +6,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include <packageneric/pre-compiled.private.hpp>
-#define BLWTBL__SOURCE
+#define DRUTTIS__BAND_LIMITED_WAVES_TABLES__SOURCE
 #include "blwtbl.h"
 //////////////////////////////////////////////////////////////////////
 //
@@ -583,13 +583,15 @@ bool UpdateWaveforms(int sr)
 #elif defined DIVERSALIS__COMPILER__GNU
 	namespace init
 	{
-		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__HIDDEN
+		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN;
+		void constructor()
 		{
 			InitWaveforms();
 			UpdateWaveforms(44100);
 		}
 		
-		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__HIDDEN
+		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN;
+		void destructor()
 		{
 			CleanupWaveforms();
 		}

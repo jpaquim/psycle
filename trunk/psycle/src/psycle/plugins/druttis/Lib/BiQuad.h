@@ -32,7 +32,7 @@ public:
 	//------------------------------------------------------------------------
 	//	tick
 	//------------------------------------------------------------------------
-	__forceinline float Tick(float sample)
+	inline float Tick(float sample)
 	{
 		static float temp;
 		//

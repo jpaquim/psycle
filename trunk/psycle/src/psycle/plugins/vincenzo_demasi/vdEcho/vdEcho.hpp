@@ -20,7 +20,7 @@
 #pragma once
 
 #include <psycle/plugin_interface.hpp>
-#include "..\vdabout.hpp"
+#include "../vdabout.hpp"
 #include "combfilter.hpp"
 
 #define LDELAY    0

@@ -23,7 +23,7 @@ afloat;
 //	SetAFloat
 //============================================================================
 
-__forceinline void SetAFloat(afloat *afloat, float value)
+inline void SetAFloat(afloat *afloat, float value)
 {
 	afloat->source = afloat->current;
 	afloat->target = value;
@@ -33,7 +33,7 @@ __forceinline void SetAFloat(afloat *afloat, float value)
 //	AnimateAFloat
 //============================================================================
 
-__forceinline void AnimateAFloat(afloat* p, float fac)
+inline void AnimateAFloat(afloat* p, float fac)
 {
 	if (fac == 0.0f)
 		p->current = p->target;

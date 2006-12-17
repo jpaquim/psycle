@@ -13,19 +13,19 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include <universalis/compiler.hpp>
-#ifdef BLWTBL__SOURCE
-#define BLWTBL__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
+#ifdef DRUTTIS__BAND_LIMITED_WAVES_TABLES__SOURCE
+#define DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
 #else
-#define BLWTBL__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT
+#define DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT
 #endif
 //////////////////////////////////////////////////////////////////////
 //
 //	DLL - Functions
 //
 //////////////////////////////////////////////////////////////////////
-BLWTBL__DYNAMIC_LINK bool EnableWaveform(int index);
-BLWTBL__DYNAMIC_LINK bool DisableWaveform(int index);
-BLWTBL__DYNAMIC_LINK bool GetWaveform(int wavenum, WAVEFORM *pwave);
-BLWTBL__DYNAMIC_LINK bool UpdateWaveforms(int samplingrate);
-BLWTBL__DYNAMIC_LINK float* GetFMTable();
-BLWTBL__DYNAMIC_LINK float* GetPMTable();
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool EnableWaveform(int index);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool DisableWaveform(int index);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool GetWaveform(int wavenum, WAVEFORM *pwave);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool UpdateWaveforms(int samplingrate);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK float* GetFMTable();
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK float* GetPMTable();

@@ -1,3 +1,17 @@
+
+
+
+/*
+		[bohan] i disabled this file because it does not compile.
+*/
+#if 0
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////
 //
 //	Osc.cpp
@@ -24,3 +38,5 @@ Osc::Osc()
 Osc::~Osc()
 {
 }
+
+#endif

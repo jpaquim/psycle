@@ -72,7 +72,7 @@ public:
 	//	Returns true if voice is idle
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline bool IsIdle()
+	inline bool IsIdle()
 	{
 		return m_vca.IsIdle();
 	}
@@ -81,9 +81,9 @@ public:
 	//	FillEnv
 	//
 	//////////////////////////////////////////////////////////////////
-	void FillEnv(register float *pout, Envelope *penv, register float *pamount, int nsamples)
+	void FillEnv(float *pout, Envelope *penv, float *pamount, int nsamples)
 	{
-		register int amt;
+		int amt;
 		--pout;
 		--pamount;
 		do
@@ -290,7 +290,7 @@ public:
 	//	Work
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline void Work(float *pout, int numsamples)
+	inline void Work(float *pout, int numsamples)
 	{
 		//////////////////////////////////////////////////////////////
 		//	Some needed vars

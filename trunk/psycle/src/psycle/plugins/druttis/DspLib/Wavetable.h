@@ -72,7 +72,7 @@ public:
 	//	GetLength
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline int GetLength()
+	inline int GetLength()
 	{
 		return _length;
 	}
@@ -81,7 +81,7 @@ public:
 	//	GetSamples
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float *GetSamples()
+	inline float *GetSamples()
 	{
 		return _pSamples;
 	}
@@ -90,7 +90,7 @@ public:
 	//	SetSamples	( Length must be 2^n. 1, 2, ... , 256, 512, etc. )
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetSamples(float *pSamples, int length)
+	inline void SetSamples(float *pSamples, int length)
 	{
 		_pSamples = pSamples;
 		_length = length;
@@ -101,7 +101,7 @@ public:
 	//	ClipPhase
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float ClipPhase(float phase)
+	inline float ClipPhase(float phase)
 	{
 		return fand(phase, _mask);
 	}
@@ -110,7 +110,7 @@ public:
 	//	GetSample
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSampleN(float phase)
+	inline float GetSampleN(float phase)
 	{
 		return get_sample_n(_pSamples, phase, _mask);
 	}
@@ -119,7 +119,7 @@ public:
 	//	GetLinear
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSampleL(float phase)
+	inline float GetSampleL(float phase)
 	{
 		return get_sample_l(_pSamples, phase, _mask);
 	}

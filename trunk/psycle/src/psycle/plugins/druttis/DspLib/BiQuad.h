@@ -53,7 +53,7 @@ public:
 	//	Init
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Init()
+	inline void Init()
 	{
 		LowPass
 		SetDelay(0.0f);
@@ -64,7 +64,7 @@ public:
 	//	Reset
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		_z = 0.0f;
 	}
@@ -73,7 +73,7 @@ public:
 	//	GetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetDelay()
+	inline float GetDelay()
 	{
 		return _delay;
 	}
@@ -82,7 +82,7 @@ public:
 	//	SetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetDelay(float freq, float res)
+	inline void SetDelay(float freq, float res)
 	{
 		c = 1.0f / tan(
 		_delay = delay;
@@ -93,7 +93,7 @@ public:
 	//	GetSample
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSample(float in)
+	inline float GetSample(float in)
 	{
 		float out = a1 * in + a2 * inputs[0] + a3 * inputs[1] - b1 * outputs[0] - b2 * outputs[1];
 		inputs[1] = inputs[0];

@@ -58,7 +58,7 @@ public:
 	//	Init
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Init()
+	inline void Init()
 	{
 		SetCoeff(0.0f);
 		Reset();
@@ -68,7 +68,7 @@ public:
 	//	Reset
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		_x0 = 0.0f;
 		_x1 = 0.0f;
@@ -82,7 +82,7 @@ public:
 	//	GetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetCoeff()
+	inline float GetCoeff()
 	{
 		return _a;
 	}
@@ -91,7 +91,7 @@ public:
 	//	SetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetCoeff(float a)
+	inline void SetCoeff(float a)
 	{
 		_a = a;
 	}
@@ -100,7 +100,7 @@ public:
 	//	GetSample
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSample(float in)
+	inline float GetSample(float in)
 	{
 		_x2 = _x1;
 		_x1 = _x0;
@@ -159,7 +159,7 @@ public:
 	//	Init
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Init()
+	inline void Init()
 	{
 		SetCoeffs(NULL, 0);
 		Reset();
@@ -169,7 +169,7 @@ public:
 	//	Reset
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		for (int i = 0; i < nalps; i++)
 		{
@@ -181,7 +181,7 @@ public:
 	//	SetCoeffs
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetCoeffs(float* coeffs, int ncoeffs)
+	inline void SetCoeffs(float* coeffs, int ncoeffs)
 	{
 		nalps = ncoeffs;
 
@@ -195,7 +195,7 @@ public:
 	//	GetSample
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSample(float in)
+	inline float GetSample(float in)
 	{
 		float out = in;
 
@@ -255,7 +255,7 @@ public:
 	//	Init
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Init()
+	inline void Init()
 	{
 		a.Init();
 		b.Init();
@@ -267,7 +267,7 @@ public:
 	//	Reset
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		a.Reset();
 		b.Reset();
@@ -278,7 +278,7 @@ public:
 	//	SetCoeffs
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetOrder(int order, bool steep)
+	inline void SetOrder(int order, bool steep)
 	{
 		if (steep==true)
 		{
@@ -500,7 +500,7 @@ public:
 	//	GetSample
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSample(float in)
+	inline float GetSample(float in)
 	{
 		float out = (a.GetSample(in) + old_out) * 0.5f;
 		old_out = b.GetSample(in);

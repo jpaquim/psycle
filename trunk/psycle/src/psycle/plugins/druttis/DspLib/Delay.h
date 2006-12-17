@@ -58,7 +58,7 @@ public:
 	//	Init
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Init(int maxDelay)
+	inline void Init(int maxDelay)
 	{
 		_mask = v2m(maxDelay);
 		delete _pSamples;
@@ -72,7 +72,7 @@ public:
 	//	Reset
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		for (int i = _mask; i >= 0; i--)
 			_pSamples[i] = 0.0f;
@@ -82,7 +82,7 @@ public:
 	//	GetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetDelay()
+	inline float GetDelay()
 	{
 		return _delay;
 	}
@@ -91,7 +91,7 @@ public:
 	//	SetDelay
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetDelay(float delay)
+	inline void SetDelay(float delay)
 	{
 /*		if (delay < 0.0f)
 			delay = 0.0f;
@@ -108,7 +108,7 @@ public:
 	//	GetSampleN
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSampleN(float in)
+	inline float GetSampleN(float in)
 	{
 		_pSamples[_ipos++] = in;
 		_ipos &= _mask;
@@ -121,7 +121,7 @@ public:
 	//	GetSampleL
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSampleL(float in)
+	inline float GetSampleL(float in)
 	{
 		_pSamples[_ipos++] = in;
 		_ipos &= _mask;
@@ -134,7 +134,7 @@ public:
 	//	GetLastL
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetLastL()
+	inline float GetLastL()
 	{
 		float out = _pSamples[_opos];
 		return out + _frac * (_pSamples[(_opos + 1) & _mask] - out);

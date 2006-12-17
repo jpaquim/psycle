@@ -37,7 +37,7 @@ void generate_wave(float *psamples, int nsamples, float *pcoeffs, int ncoeffs);
 //
 //////////////////////////////////////////////////////////////////////
 
-__forceinline void downsample(float *in, float *out, int nsamples, int levels, float *sinc)
+inline void downsample(float *in, float *out, int nsamples, int levels, float *sinc)
 {
 	int count;
 	float tmp;
@@ -71,7 +71,7 @@ __forceinline void downsample(float *in, float *out, int nsamples, int levels, f
 //
 //////////////////////////////////////////////////////////////////////
 
-__forceinline int v2m(int v)
+inline int v2m(int v)
 {
 	int m = 0;
 	while (m < v)
@@ -85,7 +85,7 @@ __forceinline int v2m(int v)
 //
 //////////////////////////////////////////////////////////////////////
 
-__forceinline float get_freq(float note, int size, int samplerate)
+inline float get_freq(float note, int size, int samplerate)
 {
 	return (float) size * 440.0f * (float) pow(2.0, (note - 69.0) / 12.0) / (float) samplerate;
 }
@@ -100,11 +100,12 @@ __forceinline float get_freq(float note, int size, int samplerate)
 //	truncated - 1, (f2i(-1.25) = -2 etc...)
 //
 //////////////////////////////////////////////////////////////////////
+
 extern unsigned short cwTrunc;
 
-#pragma warning( disable : 4035 )
-__forceinline int f__2i(float x)
-{
+inline int f__2i(float x)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
 	__asm
 	{
 		FLD		DWORD PTR [x]
@@ -113,16 +114,20 @@ __forceinline int f__2i(float x)
 		NOP
 		MOV		EAX, DWORD PTR [x]
 	}
-};
-#pragma warning( default : 4035 )
+	#else
+		return static_cast<int>(x - 0.5f);
+	#endif
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 //	floor2int : fast floor thing
 //
 //////////////////////////////////////////////////////////////////////
-#pragma warning( disable : 4035 )
-__forceinline int f2i(float x)
-{
+
+inline int f2i(float x)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
 	__asm
 	{
 		FLD		DWORD PTR [x]
@@ -136,8 +141,11 @@ __forceinline int f2i(float x)
 		ADD		EDX, 7FFFFFFFH
 		SBB		EAX, 0
 	}
-};
-#pragma warning( default : 4035 )
+	#else
+		return std::floor(x);
+	#endif
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 //	fand
@@ -148,7 +156,7 @@ __forceinline int f2i(float x)
 //
 //////////////////////////////////////////////////////////////////////
 
-__forceinline float fand(float phase, int mask)
+inline float fand(float phase, int mask)
 {
 	int pos = f2i(phase);
 	float frac = phase - (float) pos;
@@ -163,7 +171,7 @@ __forceinline float fand(float phase, int mask)
 //
 //////////////////////////////////////////////////////////////////////
 
-__forceinline float get_sample_n(float *samples, float phase, int mask)
+inline float get_sample_n(float *samples, float phase, int mask)
 {
 	return samples[f2i(phase) & mask];
 }
@@ -176,7 +184,7 @@ __forceinline float get_sample_n(float *samples, float phase, int mask)
 //
 //////////////////////////////////////////////////////////////////////
 
-__forceinline float get_sample_l(float *samples, float phase, int mask)
+inline float get_sample_l(float *samples, float phase, int mask)
 {
 	int pos = f2i(phase);
 	float frac = phase - (float) pos;

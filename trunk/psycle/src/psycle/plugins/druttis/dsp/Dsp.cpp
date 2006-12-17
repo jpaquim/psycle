@@ -30,7 +30,7 @@ double fitmp;
 //	InitializeDSP
 //
 //////////////////////////////////////////////////////////////////////
-void __cdecl InitializeDSP()
+void InitializeDSP()
 {
 	//
 	//	Setup table for pow2
@@ -48,7 +48,7 @@ void __cdecl InitializeDSP()
 //	DestroyDSP
 //
 //////////////////////////////////////////////////////////////////////
-void __cdecl DestroyDSP()
+void DestroyDSP()
 {
 }
 //////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ void __cdecl DestroyDSP()
 //	Fill
 //
 //////////////////////////////////////////////////////////////////////
-void __fastcall Fill(float *pbuf, float value, int nsamples)
+void Fill(float *pbuf, float value, int nsamples)
 {
 	--pbuf;
 	do
@@ -70,7 +70,7 @@ void __fastcall Fill(float *pbuf, float value, int nsamples)
 //	Copy
 //
 //////////////////////////////////////////////////////////////////////
-void __fastcall Copy(float *pbuf1, float *pbuf2, int nsamples)
+void Copy(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;
@@ -85,7 +85,7 @@ void __fastcall Copy(float *pbuf1, float *pbuf2, int nsamples)
 //	Add
 //
 //////////////////////////////////////////////////////////////////////
-void __fastcall Add(float *pbuf1, float *pbuf2, int nsamples)
+void Add(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;
@@ -100,7 +100,7 @@ void __fastcall Add(float *pbuf1, float *pbuf2, int nsamples)
 //	Sub
 //
 //////////////////////////////////////////////////////////////////////
-void __fastcall Sub(float *pbuf1, float *pbuf2, int nsamples)
+void Sub(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;
@@ -115,7 +115,7 @@ void __fastcall Sub(float *pbuf1, float *pbuf2, int nsamples)
 //	Mul
 //
 //////////////////////////////////////////////////////////////////////
-void __fastcall Mul(float *pbuf1, float *pbuf2, int nsamples)
+void Mul(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;

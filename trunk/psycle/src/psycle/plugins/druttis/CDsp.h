@@ -7,10 +7,6 @@
 #pragma once
 #include <cmath>
 //=============================================================================
-//	Get rid of (Warning, method does not return a god damn value)
-//=============================================================================
-#pragma warning ( disable : 4035 )
-//=============================================================================
 //	Constants
 //=============================================================================
 const double PI2 = 6.28318530717958647693;
@@ -22,13 +18,13 @@ const double PI2 = 6.28318530717958647693;
 //	Filter things
 //=============================================================================
 #pragma pack (1)
-typedef struct filter_t
+struct FILTER
 {
 	float	fa;
 	float	fb;
 	float	buf0;
 	float	buf1;
-} FILTER;
+};
 #pragma pack ( )
 //=============================================================================
 //	The class!
@@ -43,14 +39,14 @@ public:
 	//------------------------------------------------------------------------
 	//	GetFreq
 	//------------------------------------------------------------------------
-	static __forceinline float GetFreq(float note, int factor, int samplerate)
+	static inline float GetFreq(float note, int factor, int samplerate)
 	{
 		return (float) factor * 440.0f * (float) pow(2.0, (note - 69.0) / 12.0) / (float) samplerate;
 	}
 	//------------------------------------------------------------------------
 	//	Fill : a[0-n] = v
 	//------------------------------------------------------------------------
-	static __forceinline void Fill(float *a, float v, int n)
+	static inline void Fill(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -60,7 +56,7 @@ public:
 	//------------------------------------------------------------------------
 	//	Add : a[0-n] = a[0-n] + b[0-n]
 	//------------------------------------------------------------------------
-	static __forceinline void Add(float *a, float *b, int n)
+	static inline void Add(float *a, float *b, int n)
 	{
 		--a;
 		--b;
@@ -71,7 +67,7 @@ public:
 	//------------------------------------------------------------------------
 	//	Sub : a[0-n] = a[0-n] - b[0-n]
 	//------------------------------------------------------------------------
-	static __forceinline void Sub(float *a, float *b, int n)
+	static inline void Sub(float *a, float *b, int n)
 	{
 		--a;
 		--b;
@@ -82,7 +78,7 @@ public:
 	//------------------------------------------------------------------------
 	//	Mul : a[0-n] = a[0-n] * b[0-n]
 	//------------------------------------------------------------------------
-	static __forceinline void Mul(float *a, float *b, int n)
+	static inline void Mul(float *a, float *b, int n)
 	{
 		--a;
 		--b;
@@ -93,7 +89,7 @@ public:
 	//------------------------------------------------------------------------
 	//	Add : a[0-n] = a[0-n] + v
 	//------------------------------------------------------------------------
-	static __forceinline void Add(float *a, float v, int n)
+	static inline void Add(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -103,7 +99,7 @@ public:
 	//------------------------------------------------------------------------
 	//	Sub : a[0-n] = a[0-n] - v
 	//------------------------------------------------------------------------
-	static __forceinline void Sub(float *a, float v, int n)
+	static inline void Sub(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -113,7 +109,7 @@ public:
 	//------------------------------------------------------------------------
 	//	Mul : a[0-n] = a[0-n] * v
 	//------------------------------------------------------------------------
-	static __forceinline void Mul(float *a, float v, int n)
+	static inline void Mul(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -123,14 +119,14 @@ public:
 	//------------------------------------------------------------------------
 	//	LPFilter12 (Lowpass 12 db)
 	//------------------------------------------------------------------------
-	static __forceinline float LPFilter12(FILTER *f, float in)
+	static inline float LPFilter12(FILTER *f, float in)
 	{
 		f->buf0 = f->buf0 + f->fa * (in - f->buf0 + f->fb * (f->buf0 - f->buf1));
 		f->buf1 = f->buf1 + f->fa * (f->buf0 - f->buf1);
 		return f->buf1;
 	}
 
-	static __forceinline void LPFilter12(FILTER *f, float *in, int nsamples)
+	static inline void LPFilter12(FILTER *f, float *in, int nsamples)
 	{
 		--in;
 		do {
@@ -142,7 +138,7 @@ public:
 	//------------------------------------------------------------------------
 	//	LPFilter24 (Lowpass 24 db)
 	//------------------------------------------------------------------------
-	static __forceinline float LPFilter24(FILTER *f, float in)
+	static inline float LPFilter24(FILTER *f, float in)
 	{
 		f->buf0 = f->buf0 + f->fa * (in - f->buf0 + f->fb * (f->buf0 - f->buf1));
 		f->buf1 = f->buf1 + f->fa * (f->buf0 - f->buf1);
@@ -151,7 +147,7 @@ public:
 		return f->buf1;
 	}
 
-	static __forceinline void LPFilter24(FILTER *f, float *in, int nsamples)
+	static inline void LPFilter24(FILTER *f, float *in, int nsamples)
 	{
 		--in;
 		do {
@@ -166,7 +162,7 @@ public:
 	//------------------------------------------------------------------------
 	//	LPFilter36 (Lowpass 36 db)
 	//------------------------------------------------------------------------
-	static __forceinline float LPFilter36(FILTER *f, float in)
+	static inline float LPFilter36(FILTER *f, float in)
 	{
 		f->buf0 = f->buf0 + f->fa * (in - f->buf0 + f->fb * (f->buf0 - f->buf1));
 		f->buf1 = f->buf1 + f->fa * (f->buf0 - f->buf1);
@@ -177,7 +173,7 @@ public:
 		return f->buf1;
 	}
 
-	static __forceinline void LPFilter36(FILTER *f, float *in, int nsamples)
+	static inline void LPFilter36(FILTER *f, float *in, int nsamples)
 	{
 		--in;
 		do {
@@ -195,14 +191,14 @@ public:
 	//------------------------------------------------------------------------
 	//	HPFilter (Highpass 12 db)
 	//------------------------------------------------------------------------
-	static __forceinline float HPFilter12(FILTER *f, float in)
+	static inline float HPFilter12(FILTER *f, float in)
 	{
 		f->buf0 = f->buf0 + f->fa * (in - f->buf0 + f->fb * (f->buf0 - f->buf1));
 		f->buf1 = f->buf1 + f->fa * (f->buf0 - f->buf1);
 		return in - f->buf1;
 	}
 
-	static __forceinline void HPFilter12(FILTER *f, float *in, int nsamples)
+	static inline void HPFilter12(FILTER *f, float *in, int nsamples)
 	{
 		--in;
 		do {
@@ -214,7 +210,7 @@ public:
 	//------------------------------------------------------------------------
 	//	HPFilter (Highpass 24 db)
 	//------------------------------------------------------------------------
-	static __forceinline float HPFilter24(FILTER *f, float in)
+	static inline float HPFilter24(FILTER *f, float in)
 	{
 		f->buf0 = f->buf0 + f->fa * (in - f->buf0 + f->fb * (f->buf0 - f->buf1));
 		f->buf1 = f->buf1 + f->fa * (f->buf0 - f->buf1);
@@ -224,7 +220,7 @@ public:
 		return in - f->buf1;
 	}
 
-	static __forceinline void HPFilter24(FILTER *f, float *in, int nsamples)
+	static inline void HPFilter24(FILTER *f, float *in, int nsamples)
 	{
 		--in;
 		do {
@@ -237,7 +233,7 @@ public:
 		} while (--nsamples);
 	}
 
-	static __forceinline void InitFilter(FILTER *f, float freq, float res)
+	static inline void InitFilter(FILTER *f, float freq, float res)
 	{
 		f->fa = freq;
 		if (f->fa < 0.01f)
@@ -247,14 +243,14 @@ public:
 		f->fb = res + res / (1.0f - f->fa);
 	}
 
-	static __forceinline unsigned long GetRandomNumber()
+	static inline unsigned long GetRandomNumber()
 	{ 
 		static unsigned long randSeed = 22222; 
 		randSeed = (randSeed * 196314165) + 907633515; 
 		return randSeed; 
 	}
 
-	static __forceinline float GetRandomSignal()
+	static inline float GetRandomSignal()
 	{
 		return (float) ((int) GetRandomNumber()  & 0xffff) * 0.000030517578125f - 1.0f;
 	}

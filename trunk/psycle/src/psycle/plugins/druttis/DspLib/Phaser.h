@@ -74,7 +74,7 @@ public:
 		ndepth = 1.0f - value;
 	}
 
-	__forceinline void SetDelay(float value)
+	inline void SetDelay(float value)
 	{
 		if (value < 0.0f)
 			value = 0.0f;
@@ -83,7 +83,7 @@ public:
 		a = (1.0f - value) / (1.0f + value);
 	}
 
-	__forceinline float Tick(float in)
+	inline float Tick(float in)
 	{
 		float y;
 		float out = in + zm0 * fb;

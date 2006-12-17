@@ -33,14 +33,14 @@ public:
 	//------------------------------------------------------------------------
 	//	GetLastOutput
 	//------------------------------------------------------------------------
-	__forceinline float GetLastOutput()
+	inline float GetLastOutput()
 	{
 		return lastOutput;
 	}
 	//------------------------------------------------------------------------
 	//	Tick
 	//------------------------------------------------------------------------
-	__forceinline float Tick(float sample)
+	inline float Tick(float sample)
 	{
 		outputs[0] = (sgain * sample) + (poleCoeff * outputs[0]);
 		lastOutput = outputs[0];
