@@ -112,39 +112,39 @@ void Configuration::setXmlDefaults() {
 
   xml_mem_ += " <!-- patternview octave 0  -->";
 
-  xml_mem_ += " <key id='oct_C_0' keychar='y'/>";
-  xml_mem_ += " <key id='oct_CS0' keychar='s'/>";
-  xml_mem_ += " <key id='oct_D_0' keychar='x'/>";
-  xml_mem_ += " <key id='oct_DS0' keychar='d'/>";
-  xml_mem_ += " <key id='oct_E_0' keychar='c'/>";
-  xml_mem_ += " <key id='oct_F_0' keychar='v'/>";
-  xml_mem_ += " <key id='oct_FS0' keychar='g'/>";
-  xml_mem_ += " <key id='oct_G_0' keychar='b'/>";
-  xml_mem_ += " <key id='oct_GS0' keychar='h'/>";
-  xml_mem_ += " <key id='oct_A_0' keychar='n'/>";
-  xml_mem_ += " <key id='oct_AS0' keychar='j'/>";
-  xml_mem_ += " <key id='oct_B_0' keychar='m'/>";
+  xml_mem_ += " <key id='oct_C_0' keychar='Y'/>";
+  xml_mem_ += " <key id='oct_CS0' keychar='S'/>";
+  xml_mem_ += " <key id='oct_D_0' keychar='X'/>";
+  xml_mem_ += " <key id='oct_DS0' keychar='D'/>";
+  xml_mem_ += " <key id='oct_E_0' keychar='C'/>";
+  xml_mem_ += " <key id='oct_F_0' keychar='V'/>";
+  xml_mem_ += " <key id='oct_FS0' keychar='G'/>";
+  xml_mem_ += " <key id='oct_G_0' keychar='B'/>";
+  xml_mem_ += " <key id='oct_GS0' keychar='H'/>";
+  xml_mem_ += " <key id='oct_A_0' keychar='N'/>";
+  xml_mem_ += " <key id='oct_AS0' keychar='J'/>";
+  xml_mem_ += " <key id='oct_B_0' keychar='M'/>";
 
   xml_mem_ += " <!-- patternview octave 1  -->";
 
-  xml_mem_ += " <key id='oct_C_1' keychar='q'/>";
+  xml_mem_ += " <key id='oct_C_1' keychar='Q'/>";
   xml_mem_ += " <key id='oct_CS1' keychar='2'/>";
-  xml_mem_ += " <key id='oct_D_1' keychar='w'/>";
+  xml_mem_ += " <key id='oct_D_1' keychar='W'/>";
   xml_mem_ += " <key id='oct_DS1' keychar='3'/>";
-  xml_mem_ += " <key id='oct_E_1' keychar='e'/>";
-  xml_mem_ += " <key id='oct_F_1' keychar='r'/>";
+  xml_mem_ += " <key id='oct_E_1' keychar='E'/>";
+  xml_mem_ += " <key id='oct_F_1' keychar='R'/>";
   xml_mem_ += " <key id='oct_FS1' keychar='5'/>";
-  xml_mem_ += " <key id='oct_G_1' keychar='t'/>";
+  xml_mem_ += " <key id='oct_G_1' keychar='T'/>";
   xml_mem_ += " <key id='oct_GS1' keychar='6'/>";
-  xml_mem_ += " <key id='oct_A_1' keychar='z'/>";
+  xml_mem_ += " <key id='oct_A_1' keychar='Z'/>";
   xml_mem_ += " <key id='oct_AS1' keychar='7'/>";
-  xml_mem_ += " <key id='oct_B_1' keychar='u'/>";
+  xml_mem_ += " <key id='oct_B_1' keychar='U'/>";
 
   xml_mem_ += " <!-- patternview octave 2  -->";
 
-  xml_mem_ += " <key id='oct_C_2' keychar='i' />";
+  xml_mem_ += " <key id='oct_C_2' keychar='I' />";
   xml_mem_ += " <key id='oct_CS2' keychar='9' />";
-  xml_mem_ += " <key id='oct_D_2' keychar='o' />";
+  xml_mem_ += " <key id='oct_D_2' keychar='O' />";
   xml_mem_ += " <key id='oct_DS2' keychar='0' />";
 
   xml_mem_ += " <!-- patternview misc key options -->";
@@ -173,28 +173,28 @@ void Configuration::setXmlDefaults() {
 
   xml_mem_ += " <!-- patternview block key options -->";
 
-  xml_mem_ += " <key id='block_copy' mod='ctrl' keychar='c' />";
-  xml_mem_ += " <key id='block_cut' mod='ctrl' keychar='x' />";
-  xml_mem_ += " <key id='block_delete' mod='ctrl' keychar='y' />";
-  xml_mem_ += " <key id='block_double' mod='ctrl' keychar='d' />";
-  xml_mem_ += " <key id='block_halve' mod='ctrl' keychar='h' />";
-  xml_mem_ += " <key id='block_interpolate' mod='ctrl' keychar='i' />";
-  xml_mem_ += " <key id='block_mix' mod='ctrl' keychar='m' />";
-  xml_mem_ += " <key id='block_paste' mod='ctrl' keychar='v' />";
-  xml_mem_ += " <key id='block_select_all' mod='ctrl' keychar='a' />";
-  xml_mem_ += " <key id='block_select_bar' mod='ctrl' keychar='e' />";
-  xml_mem_ += " <key id='block_select_column' mod='ctrl' keychar='r' />";
+  xml_mem_ += " <key id='block_copy' mod='ctrl' keychar='C' />";
+  xml_mem_ += " <key id='block_cut' mod='ctrl' keychar='X' />";
+  xml_mem_ += " <key id='block_delete' mod='ctrl' keychar='Y' />";
+  xml_mem_ += " <key id='block_double' mod='ctrl' keychar='D' />";
+  xml_mem_ += " <key id='block_halve' mod='ctrl' keychar='H' />";
+  xml_mem_ += " <key id='block_interpolate' mod='ctrl' keychar='I' />";
+  xml_mem_ += " <key id='block_mix' mod='ctrl' keychar='M' />";
+  xml_mem_ += " <key id='block_paste' mod='ctrl' keychar='V' />";
+  xml_mem_ += " <key id='block_select_all' mod='ctrl' keychar='A' />";
+  xml_mem_ += " <key id='block_select_bar' mod='ctrl' keychar='E' />";
+  xml_mem_ += " <key id='block_select_column' mod='ctrl' keychar='R' />";
   xml_mem_ += " <key id='block_select_up' mod='shift' keychar='NK_Up' />";
   xml_mem_ += " <key id='block_select_down' mod='shift' keychar='NK_Down' />";
   xml_mem_ += " <key id='block_select_left' mod='shift' keychar='NK_Left' />";
   xml_mem_ += " <key id='block_select_right' mod='shift' keychar='NK_Right' />";
   xml_mem_ += " <key id='block_select_top' mod='shift' keychar='NK_Home' />";
   xml_mem_ += " <key id='block_select_bottom' mod='shift' keychar='NK_End' />";
-  xml_mem_ += " <key id='block_set_instrument' mod='ctrl' keychar='t' />";
-  xml_mem_ += " <key id='block_set_machine' mod='ctrl' keychar='g' />";
-  xml_mem_ += " <key id='block_start' mod='ctrl' keychar='b' />";
-  xml_mem_ += " <key id='block_start' mod='ctrl' keychar='k' />";
-  xml_mem_ += " <key id='block_unmark' mod='ctrl' keychar='u' />";
+  xml_mem_ += " <key id='block_set_instrument' mod='ctrl' keychar='T' />";
+  xml_mem_ += " <key id='block_set_machine' mod='ctrl' keychar='G' />";
+  xml_mem_ += " <key id='block_start' mod='ctrl' keychar='B' />";
+  xml_mem_ += " <key id='block_start' mod='ctrl' keychar='K' />";
+  xml_mem_ += " <key id='block_unmark' mod='ctrl' keychar='U' />";
 
   xml_mem_ += " </xpsycle> ";
 
