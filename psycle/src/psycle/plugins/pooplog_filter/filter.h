@@ -2,13 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_FILTER_H__29F337AA_DD24_4733_B417_2CEBE59DF85B__INCLUDED_)
-#define AFX_FILTER_H__29F337AA_DD24_4733_B417_2CEBE59DF85B__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-#include <math.h>
+#include <cmath>
 
 typedef float SIG;
 #define TWOPI_F (2.0f*3.141592665f)
@@ -584,7 +579,3 @@ protected:
 	float sr;
 	float denormal;
 };
-
-
-
-#endif // !defined(AFX_FILTER_H__29F337AA_DD24_4733_B417_2CEBE59DF85B__INCLUDED_)

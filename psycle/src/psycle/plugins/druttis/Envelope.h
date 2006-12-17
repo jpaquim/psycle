@@ -64,62 +64,62 @@ public:
 	//////////////////////////////////////////////////////////////////
 	//	Get / Set Methods
 	//////////////////////////////////////////////////////////////////
-	__forceinline int GetDelay()
+	inline int GetDelay()
 	{
 		return m_delay;
 	}
 
-	__forceinline void SetDelay(int delay)
+	inline void SetDelay(int delay)
 	{
 		m_delay = delay;
 	}
 
-	__forceinline int GetAttack()
+	inline int GetAttack()
 	{
 		return m_attack;
 	}
 
-	__forceinline void SetAttack(int attack)
+	inline void SetAttack(int attack)
 	{
 		m_attack = attack;
 	}
 
-	__forceinline int GetDecay()
+	inline int GetDecay()
 	{
 		return m_decay;
 	}
 
-	__forceinline void SetDecay(int decay)
+	inline void SetDecay(int decay)
 	{
 		m_decay = decay;
 	}
 
-	__forceinline float GetSustain()
+	inline float GetSustain()
 	{
 		return m_sustain;
 	}
 
-	__forceinline void SetSustain(float sustain)
+	inline void SetSustain(float sustain)
 	{
 		m_sustain = sustain;
 	}
 
-	__forceinline int getLength()
+	inline int getLength()
 	{
 		return m_length;
 	}
 
-	__forceinline void SetLength(int length)
+	inline void SetLength(int length)
 	{
 		m_length = length;
 	}
 
-	__forceinline int GetRelease()
+	inline int GetRelease()
 	{
 		return m_release;
 	}
 
-	__forceinline void SetRelease(int release)
+	inline void SetRelease(int release)
 	{
 		m_release = release;
 	}
@@ -127,7 +127,7 @@ public:
 	//	Reset
 	//	Resets envelope.
 	//////////////////////////////////////////////////////////////////
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		m_state = ENVELOPE_IDLE;
 		m_ticks = ENVELOPE_MAXTICKS;
@@ -139,7 +139,7 @@ public:
 	//	Next
 	//	Returns next envelope value.
 	//////////////////////////////////////////////////////////////////
-	__forceinline float Next()
+	inline float Next()
 	{
 		m_ticks -= m_decr;
 		m_value += m_coeff;
@@ -150,7 +150,7 @@ public:
 	//	Starts the envelope from first possible state.
 	//	* To restart the envelope, first call Reset()
 	//////////////////////////////////////////////////////////////////
-	__forceinline void Start()
+	inline void Start()
 	{
 		if (m_delay > 0)
 		{
@@ -223,7 +223,7 @@ public:
 	//	Stop
 	//	Stops the envelope by setting state ENVELOPE_RELEASE
 	//////////////////////////////////////////////////////////////////
-	__forceinline void Stop()
+	inline void Stop()
 	{
 		if ((m_state != ENVELOPE_IDLE) && (m_state != ENVELOPE_RELEASE))
 		{
@@ -249,7 +249,7 @@ public:
 	//	Clips number of samples to render.
 	//	Also maintains the whole envelope run.
 	//////////////////////////////////////////////////////////////////
-	__forceinline int Clip(int nsamples)
+	inline int Clip(int nsamples)
 	{
 		if (m_ticks <= 0)
 		{
@@ -390,7 +390,7 @@ public:
 	//////////////////////////////////////////////////////////////////
 	//	IsIdle
 	//////////////////////////////////////////////////////////////////
-	__forceinline bool IsIdle()
+	inline bool IsIdle()
 	{
 		return m_state == ENVELOPE_IDLE;
 	}
@@ -398,7 +398,7 @@ public:
 	//	Render
 	//	Renders a buffer with an amount of samples
 	//////////////////////////////////////////////////////////////////
-	__forceinline void Render(float *pbuf, int nsamples)
+	inline void Render(float *pbuf, int nsamples)
 	{
 		--pbuf;
 		int amt;

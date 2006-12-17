@@ -37,10 +37,10 @@ v0.01b
  */
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-#include <string.h>
-#include <stdlib.h>
-//#include <assert.h>
-//#include <math.h>
+#include <cstring>
+#include <cstdlib>
+//#include <cassert>
+//#include <cmath>
 
 
 #define PLUGIN_NAME "Pooplog Scratch Master 0.06b"
@@ -51,19 +51,22 @@ v0.01b
 #define SPEED_ONE 1024.0f
 #define MAX_BUF 1024*1024*4
 
-inline int f2i(float flt) 
+inline int f2i(float flt)
 { 
-  int i; 
-  static const double half = 0.5f; 
-  _asm 
-  { 
-     fld flt 
-     fsub half 
-     fistp i 
-  } 
-  return i;
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
 }
-
 
 #define NUM_BUFF 89
 const static float buffindex[NUM_BUFF]={
@@ -294,7 +297,7 @@ public:
 	virtual void ParameterTweak(int par, int val);
 
 private:
-	void mi::RebuildBuffers();
+	void RebuildBuffers();
 
 	float InGain;
 	float *pBufferL;

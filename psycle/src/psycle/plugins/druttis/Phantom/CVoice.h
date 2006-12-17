@@ -30,7 +30,7 @@ extern double coeff[5][11];
 //	Voice globals
 //============================================================================
 
-typedef struct globals_t
+struct GLOBALS
 {
 	//
 	//	This should always be here
@@ -62,7 +62,7 @@ typedef struct globals_t
 	float		filter_amount;
 	float		buf[1024];
 
-} GLOBALS;
+};
 //============================================================================
 //	CVoice class
 //============================================================================
@@ -120,7 +120,7 @@ public:
 	//	returns true if voice is done playing
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline bool IsActive()
+	inline bool IsActive()
 	{
 		return !vca.IsFinished();
 	}
@@ -130,7 +130,7 @@ public:
 	//	Method to handle parameter inertia and suchs things
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline static void GlobalTick()
+	inline static void GlobalTick()
 	{
 	}
 
@@ -140,7 +140,7 @@ public:
 	//	* tips, dont handle amplitude envelopes or lfo's here
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void VoiceTick()
+	inline void VoiceTick()
 	{
 		//------------------------------------------------------------
 		//	Setup filter
@@ -167,7 +167,7 @@ public:
 	//	Formant filter
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float formant_filter(double *memory, float in, int vnum)
+	inline float formant_filter(double *memory, float in, int vnum)
 	{
 		float ret = (float) (
 			coeff[vnum][0] * in +
@@ -199,7 +199,7 @@ public:
 	//
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline void generate_osc(int i, int nsamples)
+	inline void generate_osc(int i, int nsamples)
 	{
 		float *pbuf = globals->buf;
 		--pbuf;
@@ -232,7 +232,7 @@ public:
 	//	all sound generation is done here
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Work(float *psamplesleft, float *psamplesright, int numsamples)
+	inline void Work(float *psamplesleft, float *psamplesright, int numsamples)
 	{
 		register float out;
 		//

@@ -32,14 +32,14 @@ public:
 	//------------------------------------------------------------------------
 	//	GetLastOutput
 	//------------------------------------------------------------------------
-	__forceinline float GetLastOutput()
+	inline float GetLastOutput()
 	{
 		return lastOutput;
 	}
 	//------------------------------------------------------------------------
 	//	Tick
 	//------------------------------------------------------------------------
-	__forceinline float Tick(float sample)
+	inline float Tick(float sample)
 	{
 		float temp;
 		inputs[inPoint++] = sample;

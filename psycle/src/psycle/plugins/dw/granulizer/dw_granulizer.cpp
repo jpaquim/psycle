@@ -1,6 +1,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-
+#include <vector>
+#include <cmath>
 
 //////////////////////////////////////////////////////////////////////
 // dw granulizer plugin
@@ -282,7 +283,7 @@ public:
 	virtual void ParameterTweak(int par, int val);
 
 	//stolen
-	static float SplineInterpolate(float zero, float minusone, float minustwo, unsigned __int32 res);
+	static float SplineInterpolate(float zero, float minusone, float minustwo, unsigned int res);
 
 	int _resolution;
 	static float aTable[CUBIC_RESOLUTION];
@@ -1042,7 +1043,7 @@ double mi::LFORandom(int lfonum)
 }
 
 
-float mi::SplineInterpolate(float zero, float minusone, float minustwo, unsigned __int32 res)
+float mi::SplineInterpolate(float zero, float minusone, float minustwo, unsigned int res)
 {
 	float yo, y0,y1, y2;
 	res = res >> 21;

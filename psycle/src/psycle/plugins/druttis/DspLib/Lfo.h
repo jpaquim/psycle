@@ -37,12 +37,12 @@ public:
 	void Init();
 	void Reset();
 
-	__forceinline void SetWaveformSamples(float *samples, int length)
+	inline void SetWaveformSamples(float *samples, int length)
 	{
 		_waveform.SetSamples(samples, length);
 	}
 
-	__forceinline void SetIncrement(float increment)
+	inline void SetIncrement(float increment)
 	{
 		_increment = increment;
 	}
@@ -51,7 +51,7 @@ public:
 	//	GetSample
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSample(float in)
+	inline float GetSample(float in)
 	{
 		float out = _waveform.GetSample(_buf, _phase + in, 255);
 		_phase = _waveform.ClipPhase(_phase + _increment);

@@ -48,6 +48,7 @@
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 
 #include "maEqualizer.h"
 
@@ -1161,8 +1162,8 @@ void mi::calc_coeffs()
 void mi::clean_history()
 {
 	/* Zero the history arrays */
-	memset(data_history, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
-	memset(data_history2, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
+	std::memset(data_history, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
+	std::memset(data_history2, 0, sizeof(sXYData) * EQ_MAX_BANDS * EQ_CHANNELS);
 	/* this is only needed if we use fpu code and there's no other place for
 	the moment to init the dither array*/
 	for (int n = 0; n < MAX_BUFFER_LENGTH; n++) {

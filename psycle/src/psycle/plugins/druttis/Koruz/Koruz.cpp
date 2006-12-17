@@ -9,10 +9,10 @@
 #include <psycle/plugin_interface.hpp>
 #include <memory.h>
 #include <math.h>
-#include "..\CDsp.h"
-#include "..\DspLib\Chorus.h"
-#include "..\DspLib\Delay.h"
-#include "..\DspLib\Phaser.h"
+#include "../CDsp.h"
+#include "../DspLib/Chorus.h"
+#include "../DspLib/Delay.h"
+#include "../DspLib/Phaser.h"
 //============================================================================
 //	Defines
 //============================================================================

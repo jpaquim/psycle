@@ -18,7 +18,7 @@
 //	Convert ms to samples
 //
 //////////////////////////////////////////////////////////////////////
-__forceinline int millis2samples(int ms, int sr)
+inline int millis2samples(int ms, int sr)
 {
 	return ms * sr / 1000;
 }

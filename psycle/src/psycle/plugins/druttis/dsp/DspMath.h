@@ -38,33 +38,21 @@ extern unsigned short cwTrunc;
 extern const double fimagic;
 extern const double fihalf;
 extern double fitmp;
-#pragma warning( disable : 4035 )
-__forceinline int f2i(double x)
+
+inline int f2i(double x)
 {
 	fitmp = x - fihalf + fimagic;
 	return *(int *) &fitmp;
-//	__asm MOV EAX, DWORD PTR [fitmp]
-//	const double magic = 6755399441055744.0;
-//	register double tmp = (x - 0.5) + magic;
-//	return *(int*) &tmp;
-/*	__asm
-	{
-		FLD		DWORD PTR [x]
-		FLDCW	WORD PTR [cwTrunc]
-		FISTP	DWORD PTR [x]
-		NOP
-		MOV		EAX, DWORD PTR [x]
-	} */
-};
-#pragma warning( default : 4035 )
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 //	floor2int : fast floor thing
 //
 //////////////////////////////////////////////////////////////////////
-#pragma warning( disable : 4035 )
-__forceinline int floor2i(float x)
+inline int floor2i(float x)
 {
+	#if defined _MSC_VER && defined _M_IX86
 	__asm
 	{
 		FLD		DWORD PTR [x]
@@ -76,16 +64,18 @@ __forceinline int floor2i(float x)
 		POP		EAX
 		POP		EDX
 		ADD		EDX, 7FFFFFFFH
-		SBB		EAX, 0
+		SBB		EAX, 0 // [bohan] does the compiler understand that, since there no return statement? ... this code might be what's making druttis plugins behave weirdly when built with msvc 8
 	}
-};
-#pragma warning( default : 4035 )
+	#else
+		return std::floor(x);
+	#endif
+}
 //////////////////////////////////////////////////////////////////////
 //
 //	fand : like fmod(x, m - 1) but faster and handles neg. x
 //
 //////////////////////////////////////////////////////////////////////
-__forceinline float fand(float val, int mask)
+inline float fand(float val, int mask)
 {
 	const int index = floor2i(val);
 	return (float) (index & mask) + (val - (float) index);
@@ -96,8 +86,9 @@ __forceinline float fand(float val, int mask)
 //
 //////////////////////////////////////////////////////////////////////
 #pragma warning( disable : 4035 )
-__forceinline float fastexp(double x)
+inline float fastexp(double x)
 {
+	#if defined _MSC_VER && defined _M_IX86
 	__asm
 	{
         FLDL2E
@@ -135,6 +126,9 @@ my_overflow:
         ADD     ESP,16
 my_end:
 	}
+	#else
+		return std::exp(x);
+	#endif
 }
 #pragma warning( default : 4035 )
 //////////////////////////////////////////////////////////////////////
@@ -142,7 +136,7 @@ my_end:
 //	fastpow2 : fast, using lookup table, handles negative exponents
 //
 //////////////////////////////////////////////////////////////////////
-__forceinline float fastpow2(float x)
+inline float fastpow2(float x)
 {
 	long *px = (long*) &x;
 	const long  lx = floor2i(x);
@@ -156,7 +150,7 @@ __forceinline float fastpow2(float x)
 //	Converts milliseconds to samples
 //
 //////////////////////////////////////////////////////////////////////
-__forceinline int millis2samples(int ms, int samplerate)
+inline int millis2samples(int ms, int samplerate)
 {
 	return ms * samplerate / 1000;
 }
@@ -165,7 +159,7 @@ __forceinline int millis2samples(int ms, int samplerate)
 //	Converts a note to a phase increment
 //
 //////////////////////////////////////////////////////////////////////
-__forceinline float note2incr(int size, float note, int samplerate)
+inline float note2incr(int size, float note, int samplerate)
 {
 	return (float) size * 440.0f * (float) pow(2.0, (note - 69.0) / 12.0) / (float) samplerate;
 }
@@ -174,7 +168,7 @@ __forceinline float note2incr(int size, float note, int samplerate)
 //	Get random number
 //
 //////////////////////////////////////////////////////////////////////
-__forceinline unsigned long rnd_number()
+inline unsigned long rnd_number()
 { 
 	static unsigned long randSeed = 22222; 
 	randSeed = (randSeed * 196314165) + 907633515; 
@@ -185,7 +179,7 @@ __forceinline unsigned long rnd_number()
 //	Get random signal
 //
 //////////////////////////////////////////////////////////////////////
-__forceinline float rnd_signal()
+inline float rnd_signal()
 {
 	return (float) ((int) rnd_number()  & 0xffff) * 0.000030517578125f - 1.0f;
 }

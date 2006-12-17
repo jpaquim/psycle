@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "..\MachineInterface.h"
-#include "..\CDsp.h"
+#include "../MachineInterface.h"
+#include "../CDsp.h"
 
 #ifdef __GENERATOR__
 #include "Track.h"

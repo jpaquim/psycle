@@ -63,7 +63,7 @@ public:
 	//	Reset
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		SetPhase(0.0f);
 	}
@@ -72,7 +72,7 @@ public:
 	//	GetWavetableLength
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline int GetWavetableLength()
+	inline int GetWavetableLength()
 	{
 		return _wavetable.GetLength();
 	}
@@ -81,7 +81,7 @@ public:
 	//	GetWavetableSamples
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float *GetWavetableSamples()
+	inline float *GetWavetableSamples()
 	{
 		return _wavetable.GetSamples();
 	}
@@ -90,7 +90,7 @@ public:
 	//	SetSamples
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void SetWavetableSamples(float *pSamples, int length)
+	inline void SetWavetableSamples(float *pSamples, int length)
 	{
 		_wavetable.SetSamples(pSamples, length);
 	}
@@ -99,7 +99,7 @@ public:
 	//	GetPhase
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetPhase()
+	inline float GetPhase()
 	{
 		return _phase;
 	}
@@ -108,7 +108,7 @@ public:
 	//	SetPhase
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float SetPhase(float phase)
+	inline float SetPhase(float phase)
 	{
 		_phase = phase;
 	}
@@ -117,7 +117,7 @@ public:
 	//	GetIncrement
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetIncrement()
+	inline float GetIncrement()
 	{
 		return _increment;
 	}
@@ -126,7 +126,7 @@ public:
 	//	SetIncrement
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float SetIncrement(float increment)
+	inline float SetIncrement(float increment)
 	{
 		_increment = increment;
 	}
@@ -135,7 +135,7 @@ public:
 	//	ClipPhase (call this about each 32.rd sample for speed)
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline void ClipPhase()
+	inline void ClipPhase()
 	{
 		_phase = _wavetable.ClipPhase(_phase);
 	}
@@ -144,7 +144,7 @@ public:
 	//	GetSampleN (no interpollation)
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSampleN(float fm)
+	inline float GetSampleN(float fm)
 	{
 		float out = _wavetable.GetSample(_phase + fm);
 		_phase = _phase + _increment;
@@ -155,7 +155,7 @@ public:
 	//	GetSampleL (linear interpollation)
 	//////////////////////////////////////////////////////////////////
 
-	__forceinline float GetSampleL(float fm)
+	inline float GetSampleL(float fm)
 	{
 		float out = _wavetable.GetLinear(_phase + fm);
 		_phase = _phase + _increment;

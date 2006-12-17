@@ -24,7 +24,7 @@ public:
 	//	Fill : a[0-n] = v
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Fill(float *a, float v, int n)
+	static inline void Fill(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -36,7 +36,7 @@ public:
 	//	Addm : a[0-n] += b[0-n]
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Addm(float *a, float *b, int n)
+	static inline void Addm(float *a, float *b, int n)
 	{
 		--a;
 		--b;
@@ -49,7 +49,7 @@ public:
 	//	Subm : a[0-n] -= b[0-n]
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Subm(float *a, float *b, int n)
+	static inline void Subm(float *a, float *b, int n)
 	{
 		--a;
 		--b;
@@ -62,7 +62,7 @@ public:
 	//	Mulm : a[0-n] *= b[0-n]
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Mulm(float *a, float *b, int n)
+	static inline void Mulm(float *a, float *b, int n)
 	{
 		--a;
 		--b;
@@ -75,7 +75,7 @@ public:
 	//	Addm : a[0-n] += v
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Addm(float *a, float v, int n)
+	static inline void Addm(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -87,7 +87,7 @@ public:
 	//	Subm : a[0-n] -= v
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Subm(float *a, float v, int n)
+	static inline void Subm(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -99,7 +99,7 @@ public:
 	//	Mulm : a[0-n] *= v
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Mulm(float *a, float v, int n)
+	static inline void Mulm(float *a, float v, int n)
 	{
 		--a;
 		do {
@@ -111,7 +111,7 @@ public:
 	//	Adds : a[0-n] += c[0-n], b[0-n] += c[0-n]
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Adds(float *a, float *b, float *c, int n)
+	static inline void Adds(float *a, float *b, float *c, int n)
 	{
 		--a;
 		--b;
@@ -126,7 +126,7 @@ public:
 	//	Subs : a[0-n] -= c[0-n], b[0-n] -= c[0-n]
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Subs(float *a, float *b, float *c, int n)
+	static inline void Subs(float *a, float *b, float *c, int n)
 	{
 		--a;
 		--b;
@@ -141,7 +141,7 @@ public:
 	//	Muls : a[0-n] *= c[0-n], b[0-n] *= c[0-n]
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Muls(float *a, float *b, float *c, int n)
+	static inline void Muls(float *a, float *b, float *c, int n)
 	{
 		--a;
 		--b;
@@ -156,7 +156,7 @@ public:
 	//	Adds : a[0-n] += v, b[0-n] += v
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Adds(float *a, float *b, float v, int n)
+	static inline void Adds(float *a, float *b, float v, int n)
 	{
 		--a;
 		--b;
@@ -170,7 +170,7 @@ public:
 	//	Subs : a[0-n] -= v, b[0-n] -= v
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Subs(float *a, float *b, float v, int n)
+	static inline void Subs(float *a, float *b, float v, int n)
 	{
 		--a;
 		--b;
@@ -184,7 +184,7 @@ public:
 	//	Muls : a[0-n] -= v, b[0-n] -= v
 	//////////////////////////////////////////////////////////////////
 
-	static __forceinline void Muls(float *a, float *b, float v, int n)
+	static inline void Muls(float *a, float *b, float v, int n)
 	{
 		--a;
 		--b;

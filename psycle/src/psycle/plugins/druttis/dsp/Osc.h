@@ -1,3 +1,17 @@
+
+
+
+/*
+		[bohan] i disabled this file because it does not compile.
+*/
+#if 0
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////
 //
 //	Osc.h
@@ -33,24 +47,24 @@ public:
 	//	SetFreq
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline void SetFreq(float freq)
+	inline void SetFreq(float freq)
 	{
 		m_incr.SetTarget(m_wave.Get()->freq2incr);
 	}
-	__forceinline void SetNote(float note)
+	inline void SetNote(float note)
 	{
 		SetFreq(440.0f * (float) pow(2.0, ((double) note - 69.0) / 12.0));
 	}
-	__forceinline void SlideFrom(Inertia *pincr)
+	inline void SlideFrom(Inertia *pincr)
 	{
 		m_incr.SetTarget(pincr->GetValue());
 		m_incr.Reset();
 	}
-	__forceinline void SetLength(int length)
+	inline void SetLength(int length)
 	{
 		m_incr.SetLength(length);
 	}
-	__forceinline float GetValue()
+	inline float GetValue()
 	{
 		return m_incr.GetValue();
 	}
@@ -59,7 +73,7 @@ public:
 	//	Stop
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline void Stop()
+	inline void Stop()
 	{
 		m_incr.Stop();
 	}
@@ -68,7 +82,7 @@ public:
 	//	Reset
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		m_incr.Reset();
 	}
@@ -77,7 +91,7 @@ public:
 	//	Clip
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline int Clip(int nsamples)
+	inline int Clip(int nsamples)
 	{
 		return m_incr.Clip(nsamples);
 	}
@@ -86,7 +100,7 @@ public:
 	//	Next
 	//
 	//////////////////////////////////////////////////////////////////
-	__forceinline float Next(float fm, float pm)
+	inline float Next(float fm, float pm)
 	{
 		WAVEFORM *pwave = m_wave.Get();
 		float amp = pamptable[pwave->preverse[f2i(m_incr.GetValue() * pwave->incr2freq) & 0xffff]];
@@ -97,3 +111,5 @@ public:
 		return out;
 	}
 };
+
+#endif

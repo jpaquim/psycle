@@ -1,6 +1,6 @@
 #pragma once
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 /* Simple implementation of Biquad filters -- Tom St Denis
  *

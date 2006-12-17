@@ -73,7 +73,7 @@ public:
 	void SetLength(int length);
 	int GetRelease();
 	void SetRelease(int release);
-	__forceinline float GetValue()
+	inline float GetValue()
 	{
 		return m_value;
 	}
@@ -83,7 +83,7 @@ public:
 	//
 	//////////////////////////////////////////////////////////////////
 	//	Inline
-	__forceinline void Reset()
+	inline void Reset()
 	{
 		m_state = ENVELOPE_IDLE;
 		m_ticks = ENVELOPE_MAXTICKS;
@@ -95,14 +95,14 @@ public:
 	void Start();
 	void Stop();
 	//	Inline
-	__forceinline bool IsIdle()
+	inline bool IsIdle()
 	{
 		return (m_state == ENVELOPE_IDLE);
 	}
 	//	Normal
 	int Clip(int nsamples);
 	//	Inline
-	__forceinline float Next()
+	inline float Next()
 	{
 		m_ticks -= m_decr;
 		m_value += m_coeff;

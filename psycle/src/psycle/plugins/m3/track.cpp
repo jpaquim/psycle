@@ -1,5 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "track.hpp"
+#include <cassert>
 
 // CTrack Definition file (M3Track.cpp)
 
@@ -184,7 +185,7 @@ void CTrack::Tick( tvals const &tv)
 			RandomWaveSub = true;
 		else
 		{
-			_ASSERT(tv.SubOscWave < 4 );
+			assert(tv.SubOscWave < 4);
 			pwavetabsub = WaveTable[tv.SubOscWave];
 			RandomWaveSub = false;
 		}
@@ -241,7 +242,7 @@ void CTrack::Tick( tvals const &tv)
 		{	RandomWave1 = true;	}
 		else 
 		{
-			_ASSERT(tv.Wave1 < 4 );
+			assert(tv.Wave1 < 4 );
 			pwavetab1 =  WaveTable[tv.Wave1];
 		}
 
@@ -259,7 +260,7 @@ void CTrack::Tick( tvals const &tv)
 		{	RandomWave2 = true;	}
 		else 
 		{	
-			_ASSERT(tv.Wave2 < 4 );
+			assert(tv.Wave2 < 4 );
 			pwavetab2 =  WaveTable[tv.Wave2];
 		}
 
@@ -411,7 +412,7 @@ void CTrack::Tick( tvals const &tv)
 		else
 		{	LFO1Noise = false;
 		}
-		_ASSERT(tv.LFO1Wave < 5);
+		assert(tv.LFO1Wave < 5);
 		pwavetabLFO1 = WaveTable[tv.LFO1Wave];
 	}
 
@@ -498,7 +499,7 @@ void CTrack::Tick( tvals const &tv)
 		else
 		{	LFO2Noise = false;
 		}
-		_ASSERT(tv.LFO2Wave < 5);
+		assert(tv.LFO2Wave < 5);
 		pwavetabLFO2 = WaveTable[tv.LFO2Wave];
 	}
 

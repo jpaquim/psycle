@@ -7,9 +7,9 @@
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-#include <memory.h>
-#include <math.h>
-#include "..\Dsp\Inertia.h"
+#include <cstring>
+#include <cmath>
+#include "../dsp/Inertia.h"
 
 //============================================================================
 //	Defines
@@ -317,23 +317,21 @@ CMachineParameter const *pParams[] =
 	&paramFFreq16
 };
 
-typedef struct element_t
+struct ELEM
 {
 	short	level;
 	short	attack;
 	short	pan;
 	short	ffreq;
-}
-ELEM;
+};
 
-typedef struct program_t
+struct PROG
 {
 	short	length;	// 0x00ff = length, 0xff00 = last used program nr
 	short	speed;
 	short	ftype;
 	ELEM	elems[NUM_STEPS];
-}
-PROG;
+};
 
 //============================================================================
 //	Machine info

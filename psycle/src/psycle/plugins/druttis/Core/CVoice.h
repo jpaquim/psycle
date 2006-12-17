@@ -6,13 +6,13 @@
 //
 //============================================================================
 #pragma once
-#include <math.h>
-#include "..\CDsp.h"
-#include "..\wtfmlib.h"
+#include <cmath>
+#include "../CDsp.h"
+#include "../wtfmlib.h"
 //============================================================================
 //	Voice globals
 //============================================================================
-typedef struct globals_t
+struct GLOBALS
 {
 	//
 	//	This should always be here
@@ -20,7 +20,7 @@ typedef struct globals_t
 	//
 	//	Declare your global synth variables here
 
-} GLOBALS;
+};
 //============================================================================
 //	CVoice class
 //============================================================================
@@ -52,7 +52,7 @@ public:
 	//	IsFinished
 	//	returns true if voice is done playing
 	//------------------------------------------------------------------------
-	__forceinline bool IsActive()
+	inline bool IsActive()
 	{
 		return active;
 	}
@@ -60,7 +60,7 @@ public:
 	//	GlobalTick
 	//	Method to handle parameter inertia and suchs things
 	//------------------------------------------------------------------------
-	__forceinline static void GlobalTick()
+	inline static void GlobalTick()
 	{
 	}
 	//------------------------------------------------------------------------
@@ -68,14 +68,14 @@ public:
 	//	Method to handle voice specific things as LFO and envelopes
 	//	* tips, dont handle amplitude envelopes or lfo's here
 	//------------------------------------------------------------------------
-	__forceinline void VoiceTick()
+	inline void VoiceTick()
 	{
 	}
 	//------------------------------------------------------------------------
 	//	Work
 	//	all sound generation is done here
 	//------------------------------------------------------------------------
-	__forceinline void Work(float *psamplesleft, float *psamplesright, int numsamples)
+	inline void Work(float *psamplesleft, float *psamplesright, int numsamples)
 	{
 		float out;
 		do {
