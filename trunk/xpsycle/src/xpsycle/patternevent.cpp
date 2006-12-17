@@ -126,10 +126,7 @@ namespace psycle
 
 		bool PatternEvent::empty( ) const
 		{
-			if (_note == 255 && _inst == 255 && _mach == 255 && _cmd == 0 && _parameter == 0)
-				return true;
-			else
-				return false;
+			return (_note == 255 && _inst == 255 && _mach == 255 && _cmd == 0 && _parameter == 0);
 		}
 
 	} // end of host namespace
