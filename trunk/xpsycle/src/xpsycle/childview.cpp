@@ -26,7 +26,6 @@
 #include "sequencerbar.h"
 #include "virtualpattern.h"
 #include <ngrs/napp.h>
-#include <inttypes.h>
 #include <ngrs/ndockpanel.h>
 #include <ngrs/nsplitbar.h>
 
