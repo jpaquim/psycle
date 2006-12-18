@@ -58,6 +58,8 @@ NBitmap NXPMFilter::loadFromFile( const std::string & filename )
   } else throw "couldn`t open file";
   
   return bitmap;
+  #else
+  return NBitmap();
   #endif
 }
 

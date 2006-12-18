@@ -25,6 +25,11 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 
 NMemo::NMemo()
  : NTextBase()

@@ -83,8 +83,8 @@ void NColorChooser::onMousePress( int x, int y, int button )
      int col = d2i(x / chooseSize);
      int row = d2i(y / chooseSize);
 
-     int index = col*row + col;
-     if (index < colorMap.size()) {
+     unsigned int index = col*row + col;
+     if ( index < colorMap.size() ) {
        selectedColor_ = colorMap.at(index);
        colorSelected.emit(selectedColor_);
      }

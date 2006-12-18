@@ -20,6 +20,11 @@
 #include "nspinbutton.h"
 #include "nbutton.h"
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 /* XPM */
 const char * arrow_inc_xpm[] = {
 "12 6 2 1",

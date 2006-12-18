@@ -22,6 +22,7 @@
 #include "nfile.h"
 #ifdef __unix__
 #else
+#include <time.h>
 #include <map>
 #endif
 

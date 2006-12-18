@@ -17,8 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 #include "nalignlayout.h"
 #include "nvisualcomponent.h"
+#include <algorithm>
+
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
 
 NAlignLayout::NAlignLayout()
  : NLayout()

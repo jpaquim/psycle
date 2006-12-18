@@ -26,6 +26,11 @@
 #include "nalignlayout.h"
 //#include <X11/extensions/Xinerama.h>
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 NIsWindow* NWindow::isWindow = new NIsWindow();
 bool NWindow::paintFlag = true;
 

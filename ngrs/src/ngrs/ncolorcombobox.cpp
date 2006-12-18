@@ -22,6 +22,7 @@
 #include "nedit.h"
 #include "napp.h"
 #include "nitemevent.h"
+#include <algorithm>
 
 NColorComboBox::NColorComboBox()
  : NComboBox()

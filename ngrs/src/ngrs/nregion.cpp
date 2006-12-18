@@ -79,10 +79,10 @@ void NRegion::setPolygon( NPoint*  pts , int size )
 {
   #ifdef __unix__
   XDestroyRegion( region_ );
-  XPoint pt[size];
+  XPoint* pt = new XPoint[size];
   #else
   DeleteObject( region_ );
-  POINT pt[size];
+  POINT* pt = new POINT[size];
   #endif
   
   for (int i = 0; i< size; i++) {
@@ -95,6 +95,7 @@ void NRegion::setPolygon( NPoint*  pts , int size )
   region_ = CreatePolygonRgn( pt, size, WINDING );
   #endif    
   update = true;
+  delete[] pt;
 }
 
 

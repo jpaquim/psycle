@@ -82,7 +82,7 @@ int NFont::style( ) const
 
 bool NFont::antialias( ) const
 {
-  return style_ & nAntiAlias;
+  return static_cast<bool>( style_ & nAntiAlias );
 }
 
 std::string NFont::fontString( ) const

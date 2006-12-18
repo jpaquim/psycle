@@ -23,6 +23,11 @@
 #include "napp.h"
 #include "nconfig.h"
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 
 /* XPM */
 const char * arrow_up_xpm[] = {
@@ -341,7 +346,6 @@ void NScrollBar::onIncBtnClick( NButtonEvent * ev )
   setPos ( std::min( max_, pos_ + smallChange_) );
   scroll.emit( this );
 }
-
 
 void NScrollBar::onScrollAreaClick( NButtonEvent * ev )
 {

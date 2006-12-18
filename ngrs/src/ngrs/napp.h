@@ -23,11 +23,12 @@
 #include <map>
 #include "nkeyaccelerator.h"
 #include "nxpmfilter.h"
-#include <sys/time.h>
+
 #ifdef __unix__
+#include <sys/time.h>
 #include <sys/select.h>
-#endif
 #include <unistd.h>
+#endif
 
 #ifdef __unix__
 typedef XEvent WEvent;

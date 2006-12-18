@@ -152,3 +152,4 @@ public:
   #define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport)
   #define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
 #endif
+

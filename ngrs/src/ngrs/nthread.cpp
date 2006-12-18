@@ -58,6 +58,8 @@ void* NThread::callBack( void* ptr ) {
      thread->execute();     
      thread->killOSThread();
    }
+
+   return 0;
 }      
 
 // creates an OS Thread

@@ -37,7 +37,7 @@ void NFlowLayout::init( )
   baseLine_ = nAlBottom;
 }
 
-NFlowLayout * NFlowLayout::NFlowLayout::clone( ) const
+NFlowLayout * NFlowLayout::clone( ) const
 {
   return new NFlowLayout(*this);
 }

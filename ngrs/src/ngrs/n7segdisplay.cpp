@@ -48,7 +48,7 @@ void N7SegDisplay::setNumber( int number )
   for (int i=0; i<1000; i++) digit[i]=-1;
 
   if (number==0) digit[0]=0; else {
-    int n;
+    int n = 1;
     for(int i = 0, n = 1; n <= number; ++i, n *= 10) digit[i] = (number / n) % 10;
   }
 
