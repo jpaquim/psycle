@@ -23,6 +23,7 @@
 #include "nframeborder.h"
 #include "nlistlayout.h"
 #include <iostream>
+#include <algorithm>
 
 NPopupMenu::NPopupMenu()
  : NPopupWindow(), lastOverItem(0)

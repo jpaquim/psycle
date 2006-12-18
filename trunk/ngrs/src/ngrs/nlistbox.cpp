@@ -23,6 +23,7 @@
 #include "nconfig.h"
 #include "ntablelayout.h"
 #include "nscrollbar.h"
+#include <algorithm>
 
 NListBox::NListBox()
  : NScrollBox()

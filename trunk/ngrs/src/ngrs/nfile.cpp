@@ -23,15 +23,20 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <algorithm>
 
 #ifdef __unix__
+#include <sys/types.h>
+#include <unistd.h>
 #else
 #include <windows.h>
 #include <winreg.h>
+#endif
+
+#ifdef  _MSC_VER
+#include <direct.h> /* Visual C++ */
+#else
+#include <dirent.h>
 #endif
 
 using namespace std;
@@ -60,6 +65,9 @@ std::string NFile::readFile( const std::string & filename )
 std::vector< std::string > NFile::fileList( const std::string & path )
 {
   std::vector<std::string> destination;
+
+  #ifdef __unix__
+  
   DIR *dhandle;
   struct dirent *drecord;
   struct stat sbuf;
@@ -91,6 +99,21 @@ std::vector< std::string > NFile::fileList( const std::string & path )
  }
  putchar('\n');
  closedir(dhandle);
+ #else
+  WIN32_FIND_DATA dir;
+  HANDLE fhandle;
+  char directory[256];
+  // unsecure, better if there snprintf
+  sprintf(directory,"%s\\*.*",path.c_str());
+  // Handle to directory
+  if ((fhandle=FindFirstFile(directory,&dir)) !=
+                             INVALID_HANDLE_VALUE) {
+    do {  // readout directory
+      destination.push_back( dir.cFileName );      
+    } while(FindNextFile(fhandle,&dir));
+  }
+  FindClose(fhandle);
+ #endif
  sort(destination.begin(),destination.end());
  return destination;
 }
@@ -141,7 +164,7 @@ void NFile::cdHome() {
  strncpy(home,getenv("HOME"),7999);
  chdir(home); 
  #else
- chdir( home().c_str() );
+ cd( home() );
  #endif
 }
 
@@ -184,7 +207,8 @@ std::vector< std::string > NFile::parentDirList( const std::string & path ) {
 
 std::vector< std::string > NFile::dirList( const std::string & path )
 {
-   std::vector<std::string> destination;
+  std::vector<std::string> destination;
+  #ifdef __unix__  
   DIR *dhandle;
   struct dirent *drecord;
   struct stat sbuf;
@@ -216,6 +240,7 @@ std::vector< std::string > NFile::dirList( const std::string & path )
  }
  putchar('\n');
  closedir(dhandle);
+ #endif
  sort(destination.begin(),destination.end());
  return destination;
 }

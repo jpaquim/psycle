@@ -21,6 +21,12 @@
 #include "nbevelborder.h"
 #include "napp.h"
 #include "nconfig.h"
+#include <algorithm>
+
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
 
 NSplitBar::NSplitBar()
  : NPanel()

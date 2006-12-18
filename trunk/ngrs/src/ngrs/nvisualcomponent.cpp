@@ -22,6 +22,7 @@
 #include "napp.h"
 #include "nconfig.h"
 #include "nproperty.h"
+#include <algorithm>
 
 using namespace std;
 

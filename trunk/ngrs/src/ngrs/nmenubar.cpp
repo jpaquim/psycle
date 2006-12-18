@@ -22,6 +22,7 @@
 #include "nconfig.h"
 #include "nflowlayout.h"
 #include "nmenu.h"
+#include <algorithm>
 
 
 NMenuBar::NMenuBar()

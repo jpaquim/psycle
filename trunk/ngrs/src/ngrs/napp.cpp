@@ -25,6 +25,7 @@
 #include "nwindow.h"
 #include "ntimer.h"
 #include "ndockpanel.h"
+#include <algorithm>
 
 
 NConfig* NApp::config_ = 0;
@@ -503,7 +504,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
          if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
          if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;
 
-         int vkey = event->wParam;
+         WPARAM vkey = event->wParam;
          if ( vkey != VK_SHIFT ) {
            WORD wordchar;
            int retv = ToAscii( vkey, MapVirtualKey( vkey, 0 ), keyboardState, & wordchar, 0 );
@@ -627,6 +628,8 @@ NWindow * NApp::mouseOverWindow( )
     else
      return itr->second;
   } else return 0;
+  #else
+  return 0;
   #endif
 }
 

@@ -20,6 +20,11 @@
 #include "ntablelayout.h"
 #include "nvisualcomponent.h"
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 NTableLayout::NTableLayout()
  : NLayout(), cols_(1), rows_(1),hgap_(0),vgap_(0),minCellWidth_(20),minCellHeight_(20)
 
@@ -219,7 +224,7 @@ int NTableLayout::colWidthBetween( int colStart, int colEnd ) const
 
 int NTableLayout::findVerticalStart( long comparator , NVisualComponent* owner)
 {
-
+  return 0;
 }
 
 void NTableLayout::setHGap( int hgap )

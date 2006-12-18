@@ -18,6 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nnotebook.h"
+#include <algorithm>
+
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
 
 NNoteBook::NNoteBook()
  :  NPanel(), visiblePage_(0)

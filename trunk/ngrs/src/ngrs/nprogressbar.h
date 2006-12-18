@@ -23,6 +23,11 @@
 #include "npanel.h"
 #include "ngradient.h"
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 class NLabel;
 
 /**

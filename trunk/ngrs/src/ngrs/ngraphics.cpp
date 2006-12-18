@@ -403,9 +403,9 @@ void NGraphics::drawPolygon( NPoint* pts , int n )
 void NGraphics::fillPolygon( NPoint * pts, int n )
 {
   #ifdef __unix__
-  XPoint pt[n];
+  XPoint* pt = new XPoint[n];
   #else
-  POINT pt[n];
+  POINT* pt = new POINT[n];
   #endif
 
   for (int i = 0; i< n; i++) {
@@ -424,6 +424,8 @@ void NGraphics::fillPolygon( NPoint * pts, int n )
   else
     Polygon( gc_, pt, n );
   #endif
+
+  delete[] pt;
 }
 
 NRegion NGraphics::region( )
@@ -1201,6 +1203,9 @@ int NGraphics::textWidth( const NFntString & text ) const
      }
 
    return w;
+   #else
+   ///\todo port
+   return 0;
    #endif
 }
 

@@ -123,7 +123,6 @@ bool Plugin::Instance( const std::string & file_name )
           #endif
           return false;
       } else {
-
           proxy()(GetInterface());
       }
     }
@@ -141,11 +140,11 @@ void Plugin::Init( )
   
   if(proxy()())
   {
-    proxy().Init();
-    for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
-    {
-      proxy().ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
-    }
+ //   proxy().Init();
+//    for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
+//    {
+//      proxy().ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
+//    }
   }
 }
 

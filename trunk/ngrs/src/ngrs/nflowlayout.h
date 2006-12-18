@@ -35,7 +35,7 @@ public:
     NFlowLayout();
     NFlowLayout(int align);
     NFlowLayout(int align, int hgap, int vgap, int baseLine = nAlCenter);
-    NFlowLayout * clone( ) const;
+    virtual NFlowLayout * clone( ) const;
 
     ~NFlowLayout();
 
