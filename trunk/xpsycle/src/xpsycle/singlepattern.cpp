@@ -24,6 +24,10 @@
 #include <iostream>
 #include <cmath>
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
 
 namespace psycle
 {

@@ -33,17 +33,22 @@ EventDriver::~EventDriver()
 {
 }
 
-bool EventDriver::Open()
-{
+bool EventDriver::Open() {
+	return false;
 }
 /// 
-bool EventDriver::Sync(int sampleoffset, int buffersize)
-{}
+bool EventDriver::Sync(int sampleoffset, int buffersize) {
+	return false;
+}
 /// 
 void EventDriver::ReSync(){}
 /// 
-bool EventDriver::Close( ){}
+bool EventDriver::Close( ){
+	return false;
+}
 /// 
-bool EventDriver::Active(){}
+bool EventDriver::Active(){
+	return false;
+}
 //}
 //}

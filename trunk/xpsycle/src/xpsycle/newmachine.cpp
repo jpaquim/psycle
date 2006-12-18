@@ -181,9 +181,10 @@ NewMachine::~NewMachine()
 
 int NewMachine::onClose( )
 {
-	do_Execute = false;
+  do_Execute = false;
   setVisible(false);
   setExitLoop(nDestroyWindow);
+  return nDestroyWindow;
 }
 
 void NewMachine::onOkBtn( NButtonEvent * sender )

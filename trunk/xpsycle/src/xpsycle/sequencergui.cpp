@@ -42,6 +42,12 @@
 #include <ngrs/nedit.h>
 #include <ngrs/nsplitbar.h>
 
+#include <algorithm>
+
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
 
 namespace psycle {
 	namespace host {

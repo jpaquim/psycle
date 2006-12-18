@@ -23,7 +23,10 @@
 #include "audiodriver.h"
 #include "riff.h"
 #include <ngrs/sigslot.h>
+
+#ifdef __unix__
 #include <unistd.h>
+#endif
 
 namespace psycle
 {

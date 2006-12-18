@@ -1061,7 +1061,7 @@ namespace psycle {
                         }
                 }
 
-		int CustomPatternView::moveCursor( int dx, int dy) {
+		void CustomPatternView::moveCursor( int dx, int dy) {
 			// dx -1 left hex digit move
 			// dx +1 rigth hex digit move
 			// dy in lines

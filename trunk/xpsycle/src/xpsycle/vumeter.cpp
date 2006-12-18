@@ -23,6 +23,11 @@
 #include "machine.h"
 #include <cmath>
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 namespace psycle { namespace host {
 
 VuMeter::VuMeter()

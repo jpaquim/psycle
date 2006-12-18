@@ -74,6 +74,7 @@ int zipfilestreambuf::overflow( int c ) // used for output buffer only
 
 int zipfilestreambuf::underflow( ) // used for input buffer only
 {
+	return 0;
 }
 
 int zipfilestreambuf::sync( )
@@ -125,9 +126,9 @@ zipfilestreambase::~ zipfilestreambase( )
 
 
 
-zipwriterfilestream zipwriterfilestream( zipwriter * z )
+/*zipwriterfilestream zipwriterfilestream( zipwriter * z )
 {
-}
+}*/
 
 zipwriterfilestream::~ zipwriterfilestream( )
 {

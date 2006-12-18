@@ -70,6 +70,8 @@ float CValueMapper::fMap_255_1[257] =
       94.53125, 94.921875, 95.3125, 95.703125, 96.09375, 96.484375, 96.875, 97.265625, 97.65625, 98.046875, 98.4375, 98.828125, 
       99.21875, 99.609375, 100};
 
+
+	/*
 void hexstring_to_vector(std::string const & string, std::vector<unsigned char> & vector)
 			{
 				vector.reserve(string.length());
@@ -113,3 +115,4 @@ void hexstring_to_vector(std::string const & string, std::vector<unsigned char> 
 		template void hexstring_to_integer<  signed long long int>(std::string const &,   signed long long int &);
 		template void hexstring_to_integer<unsigned long long int>(std::string const &, unsigned long long int &);
 
+*/

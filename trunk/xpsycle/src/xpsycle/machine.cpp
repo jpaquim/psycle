@@ -16,6 +16,11 @@
 #include "plugin.h" //<psycle/host/engine/plugin.hpp>
 //#include <psycle/host/engine/VSTHost.hpp>
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 namespace psycle
 {
 	namespace host

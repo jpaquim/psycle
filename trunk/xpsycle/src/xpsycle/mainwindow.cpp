@@ -994,6 +994,7 @@ void MainWindow::updateBars( )
 int MainWindow::close( )
 {
   closePsycle();
+  return nDestroyWindow;
 }
 
 void MainWindow::onMachineView(NButtonEvent* ev) {

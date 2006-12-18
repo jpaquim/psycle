@@ -22,7 +22,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
@@ -31,6 +30,15 @@
 #ifdef __unix__
 #else
 #include "windows.h"
+#endif
+
+#ifdef __unix__
+      #include <unistd.h>
+      #include <sys/stat.h>
+      #include <sys/types.h>
+#elif __MSDOS__ || __WIN32__ || _MSC_VER
+      #include <io.h>
+      #include <sys\stat.h>
 #endif
 
 static void _zw_tail(zipwriter *d);

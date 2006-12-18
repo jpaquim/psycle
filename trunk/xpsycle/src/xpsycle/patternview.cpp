@@ -42,6 +42,11 @@
 #include <ngrs/nsplitbar.h>
 #include <ngrs/ncheckbox.h>
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 namespace psycle { namespace host {
 
 

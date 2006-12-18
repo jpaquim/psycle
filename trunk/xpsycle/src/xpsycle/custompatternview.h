@@ -124,11 +124,11 @@ namespace psycle {
 
 					virtual int rowHeight() const;
 					virtual int lineNumber() const;
-                                        virtual bool lineAlreadySelected(int lineNumber); 
+                    virtual bool lineAlreadySelected(int lineNumber); 
 
 					void setTrackNumber( int number );
 					virtual int trackNumber() const;
-                                        virtual bool trackAlreadySelected(int trackNumber); 
+                    virtual bool trackAlreadySelected(int trackNumber); 
 					
 					virtual int beatZoom() const;
 
@@ -203,13 +203,13 @@ namespace psycle {
 					void repaintCursorPos( const PatCursor & cursor );
 					void repaintBlock( const NSize & block );
 					NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
-      		NPoint linesFromRepaint(const NRegion & repaintArea) const;
-      		NPoint tracksFromRepaint(const NRegion & repaintArea) const;
+      				NPoint linesFromRepaint(const NRegion & repaintArea) const;
+      				NPoint tracksFromRepaint(const NRegion & repaintArea) const;
 
 					const NSize & selection() const;
 					void clearOldSelection();
 					void repaintSelection();
-                                        void updateSelectionPositions(int leftPos, int rightPos, int topPos, int bottomPos); 
+                    void updateSelectionPositions(int leftPos, int rightPos, int topPos, int bottomPos); 
 					void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
 
 					void addEvent( const ColumnEvent & event );
@@ -222,7 +222,7 @@ namespace psycle {
 					const PatCursor & cursor() const;
 					void setCursor( const PatCursor & cursor );
 
-					int moveCursor( int dx, int dy ); // dx is one hex digit
+					void moveCursor( int dx, int dy ); // dx is one hex digit
 
 					unsigned char convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const;
 					bool isHex( int scanCode );

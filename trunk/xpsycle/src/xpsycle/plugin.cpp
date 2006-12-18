@@ -158,6 +158,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
                   proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
 		  }
 	}
+	return numSamples;
 /*
   if (!_mute) {
     if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
