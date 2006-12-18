@@ -189,7 +189,7 @@ namespace psycle
 		}
 
 		void PluginFinder::scanAll() {
-        //    scanNatives();
+			scanNatives();
 			scanLadspa();		
 		}
 

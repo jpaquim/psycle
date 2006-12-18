@@ -140,11 +140,11 @@ void Plugin::Init( )
   
   if(proxy()())
   {
- //   proxy().Init();
-//    for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
-//    {
-//      proxy().ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
-//    }
+    proxy().Init();
+    for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
+    {
+      proxy().ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
+    }
   }
 }
 
