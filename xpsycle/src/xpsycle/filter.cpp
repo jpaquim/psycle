@@ -5,6 +5,12 @@
 #include "player.h"
 #include "filter.h"
 #include "global.h"
+
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 namespace psycle
 {
 	namespace host
