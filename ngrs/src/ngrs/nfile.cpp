@@ -27,6 +27,7 @@
 
 #ifdef __unix__
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #else
 #include <windows.h>

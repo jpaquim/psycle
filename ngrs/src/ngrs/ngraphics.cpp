@@ -950,9 +950,9 @@ void NGraphics::drawArc( int x, int y, int width, int height, int start, int ext
 {
   #ifdef __unix__
   if (dblBuffer_)
-    XDrawArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
+    XDrawArc( NApp::system().dpy(), doubleBufferPixmap_, gcp, x+dx_, y+dy_, width, height, start, extent );
   else
-    XDrawArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,start,extent);
+    XDrawArc( NApp::system().dpy(), win, gc_, x+dx_, y+dy_, width, height, start, extent );
   #else
   drawArcX( x +dx_, y+ dy_, width, height, start, extent , 0 );
   #endif     
