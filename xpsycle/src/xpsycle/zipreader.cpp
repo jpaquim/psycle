@@ -23,7 +23,19 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
+#ifdef __unix__
+      #include <unistd.h>
+      #include <sys/stat.h>
+      #include <sys/types.h>
+#elif __MSDOS__ || __WIN32__ || _MSC_VER
+      #include <io.h>
+      #include <sys\stat.h>	  
+#endif
+
+#ifdef _MSC_VER
+#define strcasecmp stricmp 
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -237,7 +249,7 @@ zipreader_file *zipreader_seek(zipreader *z, const char *filename)
 {
 	if (!z) return 0;
 	while (z->_fnp < z->files) {
-		if (strcasecmp((char*)z->file[z->_fnp].filename_ptr, filename) == 0) {
+		if ( strcasecmp((char*)z->file[z->_fnp].filename_ptr, filename) == 0) {
 			return _zw_finish_seek(&z->file[z->_fnp]);
 		}
 		z->_fnp++;

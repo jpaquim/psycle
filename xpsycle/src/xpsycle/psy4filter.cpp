@@ -22,7 +22,16 @@
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
-#include <unistd.h>
+
+#ifdef __unix__
+      #include <unistd.h>
+      #include <sys/stat.h>
+      #include <sys/types.h>
+#elif __MSDOS__ || __WIN32__ || _MSC_VER
+      #include <io.h>
+      #include <sys\stat.h>
+#endif
+
 #include <fcntl.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -557,6 +566,7 @@ namespace psycle {
 
 		bool Psy4Filter::saveWAVEv0( RiffFile * file, const Song & song, int index )
 		{
+			return false;
 		}
 
 	}

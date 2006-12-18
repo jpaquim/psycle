@@ -41,7 +41,7 @@ namespace psycle
 		WaveFileOut::~WaveFileOut()
 		{
 			while ( threadOpen ) {
-				kill_thread = 1;		
+				kill_thread = 1;						
 				usleep(200);
 			}
 		}

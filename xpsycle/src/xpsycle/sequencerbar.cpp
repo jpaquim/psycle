@@ -40,6 +40,8 @@
 #include <ngrs/nobjectinspector.h>
 #include <ngrs/nproperty.h>
 
+#include <algorithm>
+
 
 namespace psycle { namespace host {
 

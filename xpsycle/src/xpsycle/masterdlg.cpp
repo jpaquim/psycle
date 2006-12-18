@@ -23,6 +23,7 @@
 #include "configuration.h"
 #include "machine.h"
 #include "dsp.h"
+#include <algorithm>
 
 namespace psycle { namespace host {
 

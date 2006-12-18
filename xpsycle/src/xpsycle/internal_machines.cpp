@@ -40,6 +40,7 @@ namespace psycle {
 //			cost = cpu::cycles() - cost;
 //			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
+			return numSamples;
 		}
 
 		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -470,6 +471,7 @@ namespace psycle {
 //			wire_cpu_cost(wire_cpu_cost() + cost);
 
 			_worked = true;
+			return numSamples;
 		}
 
 		void Mixer::FxSend(int numSamples )

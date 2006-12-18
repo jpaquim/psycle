@@ -22,6 +22,11 @@
 #include <sstream>
 #include <algorithm>
 
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 namespace psycle
 {
 	namespace host

@@ -27,6 +27,7 @@
 #include <ngrs/nalignlayout.h>
 #include <ngrs/napp.h>
 #include <ngrs/nmenuitem.h>
+#include <algorithm>
 
 namespace psycle { 
   namespace host 

@@ -151,6 +151,7 @@ namespace psycle
 			}
 //			_event.SetEvent();
 //			TerminateThread ::_endthread();
+			return 0;
 		}
 
 		bool MsWaveOut::Stop()
