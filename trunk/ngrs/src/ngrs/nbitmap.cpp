@@ -24,8 +24,17 @@
 #else
 #include <time.h>
 #include <map>
+
+
 #endif
 
+template<class T> inline T str2hex( const std::string &  value, int pos ) {	
+	T result;	
+	std::stringstream str;
+	str << value.substr( pos, 2 );
+	str >> std::hex >> result;
+	return result;
+}
 
 NBitmap::NBitmap()
  : NObject(), sysData_(0), clpData_(0), clpColor_(0)
@@ -42,7 +51,6 @@ NBitmap::NBitmap( const char ** data ) : NObject(), sysData_(0), clpData_(0), cl
   createFromXpmData(data);
 }
 
-
 NBitmap::NBitmap( const NBitmap & rhs ) : NObject(), sysData_(0), clpData_(0), clpColor_(0)
 {
   if ( rhs.sysData() ) {
@@ -50,7 +58,7 @@ NBitmap::NBitmap( const NBitmap & rhs ) : NObject(), sysData_(0), clpData_(0), c
   }
 
   if ( rhs.clpData() ) {
-//    clpData_ = cloneSysImage( rhs.clpData() );
+    clpData_ = cloneSysImage( rhs.clpData() );
     clpData_ = 0;
   }
 }
@@ -74,7 +82,6 @@ NBitmap::~NBitmap()
 {
   deleteBitmapData();                   
 }
-
 
 int NBitmap::depth( ) const
 {
@@ -226,58 +233,55 @@ void NBitmap::createFromXpmData(const char** data)
     std::string key   = colorLine.substr(0,ncpp);
     std::string value;
     if ( ncpp + 3 < colorLine.length() ) 
-      value = std::string(colorLine).substr(3+ncpp);
+      value = colorLine.substr(3+ncpp);
     else
       value = "None";
+
     long int color  = 255;
-    if ( value.find("None")  != std::string::npos ) {
+    
+	if ( value.find("None")  != std::string::npos ) {
       color =  clpColor_; 
       trans = true;
-      colorTable[std::string(key)] = color;
-      transKey = std::string(key);
-    } else 
-    {
-      if ( value.find("black") != std::string::npos ) color =  0; else
-      {
-        std::string vstr = std::string(value).substr(1);  
-        char red[3];   sprintf(red,"%.2s\n",vstr.c_str());  
-        char green[3]; sprintf(green,"%.2s\n",vstr.c_str()+2);
-        char blue[3];  sprintf(blue,"%.2s\n",vstr.c_str()+4);    
-        int r = strtol( red, (char **)NULL, 16 );
-        int g = strtol( green, (char **)NULL, 16 );
-        int b = strtol( blue, (char **)NULL, 16 );
+      colorTable[ key ] = color;
+      transKey = key;
+	} else {
+		if ( value.find("black") != std::string::npos ) {
+			color =  0; 
+		} else {
+  			// convert #rrggbb xpm color string to r,g,b int values 
+			int r = str2hex<int>( value, 1 );
+			int g = str2hex<int>( value, 3 );
+			int b = str2hex<int>( value, 5 );
       
-        color = (b << 16) | (g << 8) | r;
-      }
-    
-      colorTable[std::string(key)] = color;
-      
-      if ( trans ) {
-       // check if new clp Color is needed
-       if ( clpColor_ == color ) {
-         // create new random clp color
+			color = (b << 16) | (g << 8) | r;
+		}        
+		colorTable[key] = color;
+	
+		if ( trans ) {
+		// check if new clp Color is needed
+			if ( clpColor_ == color ) {
+			// create new random clp color
 
-         bool generateClpAgain;
-         do {
-           generateClpAgain = false;  
-           clpColor_ = (int) ( rand() * 2147483647 );
-           std::map<std::string,long>::iterator it = colorTable.begin();
-           for ( ; it != colorTable.end(); it++ ) {
-             long c = it->second;
-             if ( c == clpColor_ ) {
-               generateClpAgain = true;
-               break;
-             }                  
-           }
-           if ( !generateClpAgain ) {                
-             colorTable[ transKey ] = clpColor_;
-           }                
-         } while ( generateClpAgain );
-       }     
+			bool generateClpAgain;
+			do {
+				generateClpAgain = false;  
+				clpColor_ = (int) ( rand() * 2147483647 );
+				std::map<std::string,long>::iterator it = colorTable.begin();
+				for ( ; it != colorTable.end(); it++ ) {
+					long c = it->second;
+					if ( c == clpColor_ ) {
+					generateClpAgain = true;
+					break;
+				}                  
+			}
+			if ( !generateClpAgain ) {                
+				colorTable[ transKey ] = clpColor_;
+			}                
+		} while ( generateClpAgain );
       }     
-    }
-    
-  }
+    }     
+   }
+  } 
   // end of ngrs0.8 code
   
   HDC dc = GetDC( NULL );
