@@ -30,7 +30,7 @@
 //#include "netaudioout.h"
 #include "wavefileout.h"
 #else
-#include "mswaveout.h"
+//#include "mswaveout.h"
 #endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
@@ -268,9 +268,9 @@ void Configuration::setSkinDefaults( )
 		#endif		
 
         #else
-			driver = new MsWaveOut();
+			/*driver = new MsWaveOut();
 			std::cout << "registered:" <<  driver->info().name() << std::endl;
-			driverMap_[ driver->info().name() ] = driver;
+			driverMap_[ driver->info().name() ] = driver;*/
 		#endif
 /*		#if !defined XPSYCLE__NO_NETAUDIO
 			driver = new NetAudioOut;

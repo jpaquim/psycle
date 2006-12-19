@@ -248,28 +248,27 @@ NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long a
   g->setTranslation(g->xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g->yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
 
   if (!region.isEmpty() && region.intersects(absX,absY) && events()) {
-       g->setRegion(region);
-       if (visualComponents_.size()>0)
-         for( vector<NVisualComponent*>::iterator itr = visualComponents_.end()-1; itr >= visualComponents_.begin(); itr--) {
-            NVisualComponent* visualChild = *itr;
-            if (visualChild->visible()) {
-              NVisualComponent* found = visualChild->overObject(g,absX, absY);
-              if (found!=NULL) {
-                     g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-                    g->setRegion(oldRegion);
-                   return found;
-             }
-            }
-          }
-           g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-          g->setRegion(oldRegion);
-
-         return this;
+    g->setRegion(region);       
+	vector<NVisualComponent*>::reverse_iterator rev_it = visualComponents_.rbegin();
+	for ( ; rev_it < visualComponents_.rend(); ++rev_it ) {
+		NVisualComponent* visualChild = *rev_it;
+        if (visualChild->visible()) {
+          NVisualComponent* found = visualChild->overObject(g,absX, absY);
+          if ( found ) {
+             g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
+             g->setRegion(oldRegion);
+             return found;
+           }
+         }
+     }
+     g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
+     g->setRegion(oldRegion);
+	 return this;
   }
-    g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
+  g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
   g->setRegion(oldRegion);
 
-  return NULL;
+  return 0;
 }
 
 int NVisualComponent::spacingWidth( ) const

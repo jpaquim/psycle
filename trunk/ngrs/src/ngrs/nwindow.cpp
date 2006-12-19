@@ -252,13 +252,11 @@ void NWindow::onMousePressed( int x, int y, int button )
 void NWindow::onMouseOver( int x, int y )
 {
   graphics_->setRegion(NRect(0,0,width(),height()));
-  if (dragBase_!=NULL) {
-    NApp::mouseOverWindow();
+  if (dragBase_!=NULL) {    
     if (dragBase_->moveable().style()!=0) doDrag(dragBase_,x,y);
     dragBase_->onMouseOver( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop());
   } else 
-	if (mousePressBase_!=NULL) {
-    NApp::mouseOverWindow();
+	if (mousePressBase_!=NULL) {   
     mousePressBase_->onMouseOver( x - mousePressBase_->absoluteSpacingLeft(), y - mousePressBase_->absoluteSpacingTop());
 	} else
   {

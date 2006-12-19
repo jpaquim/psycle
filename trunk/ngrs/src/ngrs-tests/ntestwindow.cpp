@@ -79,7 +79,7 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
 
-//	testMenu();
+	testEdit();
 
 /*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();
@@ -88,10 +88,11 @@ NTestWindow::NTestWindow()
    spl->setOrientation( nHorizontal );
    pane()->add( spl, nAlTop);
 
-	NButton* btn = new NButton("hint test");
-		btn->setHint("Save as audio File");
-		btn->clicked.connect(this, &NTestWindow::onBtnClick);
-	pane()->add( btn, nAlTop);*/
+   */
+//	NButton* btn = new NButton("hint test");
+		//btn->setHint("Save as audio File");
+		//btn->clicked.connect(this, &NTestWindow::onBtnClick);
+//	pane()->add( btn, nAlTop);
 
 
  /* NSlider* slider = new NSlider();
@@ -267,9 +268,9 @@ void NTestWindow::onSliderPosChanged( double v )
 {
   int dy = (int) ( ((scrollWin->pane()->clientHeight() - pane()->clientHeight()) / ((double) slider->clientHeight())) * v);
 
-  XMoveResizeWindow (NApp::system().dpy(),
-                          scrollWin->win(),
-                          0,-dy, 900, 2000);
+  //XMoveResizeWindow (NApp::system().dpy(),
+                          //scrollWin->win(),
+                          //0,-dy, 900, 2000);
   //printf("%f\n",v); fflush(stdout);
   //scrollWin->setLeft((int) v);
 }
@@ -570,7 +571,7 @@ void NTestWindow::onDelete( NButtonEvent * ev )
 
 void NTestWindow::onSelection( )
 {
-  Atom actual_type;
+  /*Atom actual_type;
   int actual_format;
   unsigned long nitems;
   unsigned long bytes_after;
@@ -597,7 +598,7 @@ void NTestWindow::onSelection( )
 
    //Dump the binary data
     std::cout.write((char*)ret, nitems * actual_format/8);
-    std::cerr << std::endl;
+    std::cerr << std::endl;*/
 }
 
 void NTestWindow::onScrollPosChange( NScrollBar * bar )
