@@ -78,9 +78,10 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-   // testMenu();
+  testMenu();
+  testListBox();
    // testEdit();
-	testMemo();
+//	testMemo();
 
 /*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();
@@ -90,10 +91,10 @@ NTestWindow::NTestWindow()
    pane()->add( spl, nAlTop);
 
    */
-//	NButton* btn = new NButton("hint test");
-		//btn->setHint("Save as audio File");
-		//btn->clicked.connect(this, &NTestWindow::onBtnClick);
-//	pane()->add( btn, nAlTop);
+	NButton* btn = new NButton("hint test");
+	 btn->setHint("Save as audio File");
+	 btn->clicked.connect(this, &NTestWindow::onBtnClick);
+	pane()->add( btn, nAlTop);
 
 
  /* NSlider* slider = new NSlider();
@@ -211,7 +212,7 @@ NTestWindow::NTestWindow()
     box->setPosition(10,40,100,20);
   pane()->add(box);*/
 
-  /*NCustomTreeView* view = new NCustomTreeView();
+  NCustomTreeView* view = new NCustomTreeView();
 
   NTreeNode* node1 = new NTreeNode();
   view->addNode(node1);
@@ -278,7 +279,10 @@ void NTestWindow::onSliderPosChanged( double v )
 
 void NTestWindow::onOpen( NButtonEvent * ev )
 {
-  testMsgBox();
+	if ( fDialog->execute() ) {
+		
+	};
+  //testMsgBox();
 }
 
 void NTestWindow::testBorderLayout( )
@@ -352,8 +356,6 @@ void NTestWindow::testMenu( )
      //item->setEnable(false);
   menu1->add(item);
 
-  std::cout << item->captionLbl_->font().textColor().red() << std::endl;
-  item->captionLbl_->setName("menu_lbl2");
 
   /*NMenuItem* item1 = new NMenuItem("close");
   menu1->add(item1);
