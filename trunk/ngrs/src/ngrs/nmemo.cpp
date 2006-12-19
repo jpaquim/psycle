@@ -260,8 +260,7 @@ void NMemo::TextArea::deleteLine( )
 {
   Line & oldLine = *lineIndexItr;
   moveLines(lineIndexItr,lines.end(), -oldLine.height() );
-  lines.erase(lineIndexItr);
-  lineIndexItr--;
+  lines.erase( lineIndexItr-- );  
 }
 
 void NMemo::TextArea::moveLines( std::vector< Line >::iterator from, std::vector< Line >::iterator to, int dy )
