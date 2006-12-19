@@ -301,11 +301,10 @@ void NApp::modalEventLoop(NWindow* modalWin )
 LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
   std::map< WinHandle, NWindow* >::iterator itr;  
-
   if ( (itr = winMap.find( hwnd )) == winMap.end() )
   {
-      std::cout << "not me" << std::endl;
-    // not my windows
+	// not my windows
+	return DefWindowProc( hwnd, msg, wParam, lParam);
   } else {
                                
     NWindow* window = itr->second;

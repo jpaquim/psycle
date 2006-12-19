@@ -21,6 +21,8 @@
 
 using namespace std;
 
+
+
 NFlowLayout::NFlowLayout()
  : NLayout()
 {
@@ -114,11 +116,14 @@ void NFlowLayout::align( NVisualComponent * parent )
       xp = xp - visualChild->preferredWidth() - hgap_;
       if (xp<0) {
         xp = parent->clientWidth();
-        std::vector<NVisualComponent*>::const_iterator itrH = itr; itrH--;
-        for (;itrH >= start ; itrH--) {
+        std::vector<NVisualComponent*>::const_iterator itrH = itr;		
+		if ( itrH > parent->visualComponents().begin() ) itrH--; 
+		while ( itrH >= start ) {
           NVisualComponent* visual = *itrH;
           xp = xp - visual->preferredWidth() - hgap_;
           visual->setPosition(xp,yp+ymax-visual->preferredHeight(),visual->preferredWidth(),visual->preferredHeight());
+		  if ( itrH == start ) break;
+		  itrH--;
         }
         xp   = parent->clientWidth() - visualChild->preferredWidth() - hgap_;
         ymax = visualChild->preferredHeight();
@@ -129,11 +134,14 @@ void NFlowLayout::align( NVisualComponent * parent )
     }
     if (start!=itr) {
       xp = parent->clientWidth();
-      std::vector<NVisualComponent*>::const_iterator itrH = itr; itrH--;
-      for (;itrH >= start ; itrH--) {
+      std::vector<NVisualComponent*>::const_iterator itrH = itr; 
+	  if ( itrH > parent->visualComponents().begin() ) itrH--;
+      while ( itrH >= start ) {
          NVisualComponent* visual = *itrH;
          xp = xp - visual->preferredWidth() - hgap_;
          visual->setPosition(xp,yp+ymax-visual->preferredHeight(),visual->preferredWidth(),visual->preferredHeight());
+		 if ( itrH == parent->visualComponents().begin() ) break;
+		 itrH--;
       }
     }
   }
