@@ -78,8 +78,9 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-
-	testEdit();
+   // testMenu();
+   // testEdit();
+	testMemo();
 
 /*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();
