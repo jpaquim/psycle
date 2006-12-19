@@ -275,9 +275,7 @@ void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )
    int compWidth  = comp->spacingWidth();
    int compHeight = comp->spacingHeight();
 
-   if (dy<0) dy = 0;
-
-   NRect repaintArea();
+   if (dy<0) dy = 0; 
 
    NWindow* win = comp->window();
    NGraphics* g = win->graphics();
