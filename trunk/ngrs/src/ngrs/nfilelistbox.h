@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan Nattkemper  *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,12 +24,10 @@
 #include "nfile.h"
 #include "nregexp.h"
 
-const int nFiles = 1;
-const int nDirs  = 2;
-
 /**
 @author Stefan
 */
+
 class NFileListBox : public NListBox
 {
 public:
@@ -37,42 +35,39 @@ public:
 
     ~NFileListBox();
 
-    void setDirectory(const std::string & directory);
+    void setDirectory( const std::string & directory );
     const std::string & directory() const;
 
     void update();
 
-    virtual void onItemSelected(NCustomItem * item);
+    virtual void onItemSelected( NCustomItem * item );
 
-    std::string fileName();
+    const std::string & fileName() const;
 
-    void setMode(int mode);
+    void setMode( int mode );
 
-    bool isDirItem();
+    bool isDirItem() const;
 
-    void setActiveFilter(const std::string & name);
-    void addFilter(const std::string & name ,const std::string & regexp);
+    void setActiveFilter( const std::string & name );
+    void addFilter( const std::string & name, const std::string & regexp );
 
-    void setShowHiddenFiles(bool on);
+    void setShowHiddenFiles( bool on );
 
 
 private:
 
     bool isDirItem_;
     bool showHiddenFiles_;
-
-    int mode_;
-    NFile fSystem;
+    int mode_;    
     std::string fName_;
     NBitmap sharedDirIcon_;
-
-    void onDirItemSelected(NButtonEvent* ev);
-    void onFileItemSelected(NButtonEvent* ev);
-
     NRegExp* activeFilter;
     std::map<std::string,NRegExp*> filterMap;
-
     std::string dir_;
+
+    void onDirItemSelected( NButtonEvent* ev );
+    void onFileItemSelected( NButtonEvent* ev );
+
 };
 
 #endif

@@ -89,13 +89,12 @@ const std::string & NFileListBox::directory( ) const
 void NFileListBox::update( )
 {
   std::string oldDir = NFile::workingDir();
-
   removeChilds();
-
   std::vector<std::string> list;
-  if (mode_ & nFiles) {
-      list = fSystem.fileList( directory() );
-      for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
+
+  if ( mode_ & nFiles ) {
+	  list = NFile::fileList( directory(), nFiles );
+      for ( std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++ ) {
         std::string entry = *it;
 
         if (activeFilter==0  || (activeFilter && activeFilter->accept(entry)))
@@ -109,9 +108,9 @@ void NFileListBox::update( )
         }
       }
   }
-  if (mode_ & nDirs) {
-      std::vector<std::string> list = fSystem.dirList( directory() );
-      for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
+  if ( mode_ & nDirs ) {
+	  std::vector<std::string> list = NFile::fileList( directory(), nDirs );
+      for ( std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++ ) {
         std::string entry = *it;
         if ((showHiddenFiles_) || (!showHiddenFiles_ && entry!="" && ((entry[0]!='.') || entry.find("..")==0))) {
           NItem* item = new NItem();
@@ -136,7 +135,7 @@ void NFileListBox::onItemSelected( NCustomItem * item )
   NListBox::onItemSelected(item);
 }
 
-std::string NFileListBox::fileName( )
+const std::string & NFileListBox::fileName( ) const
 {
   return fName_;
 }
@@ -146,7 +145,7 @@ void NFileListBox::setMode( int mode )
   mode_ = mode;
 }
 
-bool NFileListBox::isDirItem( )
+bool NFileListBox::isDirItem( ) const
 {
   return isDirItem_;
 }

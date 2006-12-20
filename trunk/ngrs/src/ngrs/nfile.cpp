@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -63,12 +63,13 @@ std::string NFile::readFile( const std::string & filename )
   return buf.str();
 }
 
-std::vector< std::string > NFile::fileList( const std::string & path )
+std::vector< std::string > NFile::fileList( const std::string & path, int fMode )
 {
-  std::vector<std::string> destination;
+  std::string saveCurrentDir = workingDir();
 
+  std::vector<std::string> destination;
   #ifdef __unix__
-  
+
   DIR *dhandle;
   struct dirent *drecord;
   struct stat sbuf;
@@ -87,17 +88,20 @@ std::vector< std::string > NFile::fileList( const std::string & path )
    return destination;
  }
  
- while( (drecord = readdir(dhandle)) != NULL)
+ while( (drecord = readdir(dhandle)) != NULL )
  {
-  stat(drecord->d_name,&sbuf);
-  if(S_ISDIR(sbuf.st_mode))
-  {
-    // dirs not handled here 
-  } else
- {
-   destination.push_back(std::string(drecord->d_name));
- }
- }
+   stat(drecord->d_name,&sbuf);
+   if ( S_ISDIR(sbuf.st_mode) && (fMode & nDirs) )
+   {
+     // dir handled here
+	 destination.push_back(std::string(drecord->d_name));
+   } 
+   if (fMode & nFiles)
+   {
+    // files handled here
+    destination.push_back(std::string(drecord->d_name));
+   }
+ } 
  putchar('\n');
  closedir(dhandle);
  #else
@@ -107,15 +111,22 @@ std::vector< std::string > NFile::fileList( const std::string & path )
   // unsecure, better if there snprintf
   sprintf(directory,"%s\\*.*",path.c_str());
   // Handle to directory
-  if ((fhandle=FindFirstFile(directory,&dir)) !=
-                             INVALID_HANDLE_VALUE) {
+  if ((fhandle=FindFirstFile(directory,&dir)) != INVALID_HANDLE_VALUE) {
     do {  // readout directory
-      destination.push_back( dir.cFileName );      
-    } while(FindNextFile(fhandle,&dir));
+		if (			
+			( ( fMode & nDirs ) && ( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
+			|| 
+			( ( fMode & nFiles ) && !( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) 
+			)
+		{
+          destination.push_back( dir.cFileName );
+		}
+	} while(FindNextFile(fhandle,&dir));
   }
   FindClose(fhandle);
  #endif
  sort(destination.begin(),destination.end());
+ cd ( saveCurrentDir );
  return destination;
 }
 
@@ -159,20 +170,13 @@ std::string NFile::home() {
  #endif
 }            
 
-void NFile::cdHome() {
- #ifdef __unix__
- char home[8000]; 
- strncpy(home,getenv("HOME"),7999);
- chdir(home); 
- #else
+void NFile::cdHome() { 
  cd( home() );
- #endif
 }
 
 void NFile::cd( const std::string & path )
 {
- //string p = replaceTilde(path);
- chdir(path.c_str());
+ chdir( path.c_str() );
 }
 
 
@@ -193,57 +197,6 @@ std::string NFile::parentWorkingDir( )
   string parentDir = workingDir();
   cd(oldDir);
   return parentDir;
-}
-
-
-std::vector< std::string > NFile::parentDirList( const std::string & path ) {
-   std::string oldDir = workingDir();
-   cd("..");
-   string parentDir = workingDir();
-   cd(oldDir);
-   return dirList(parentDir);
-}
-
-
-
-std::vector< std::string > NFile::dirList( const std::string & path )
-{
-  std::vector<std::string> destination;
-  #ifdef __unix__  
-  DIR *dhandle;
-  struct dirent *drecord;
-  struct stat sbuf;
-  int x;
-
-  dhandle = opendir(path.c_str());
-  if(dhandle == NULL)
-  {
-    //printf("Error opening directory '%s'\n",path);
-    return destination;
-  }
-  x = chdir(path.c_str());
- if( x != 0)
- {
-   //printf("Error changing to '%s'\n",path);
-   return destination;
- }
- 
- while( (drecord = readdir(dhandle)) != NULL)
- {
-  stat(drecord->d_name,&sbuf);
-  if(S_ISDIR(sbuf.st_mode))
-  {
-    destination.push_back(std::string(drecord->d_name));
-  } else
-  {
-    // files not handled here 
-  }
- }
- putchar('\n');
- closedir(dhandle);
- #endif
- sort(destination.begin(),destination.end());
- return destination;
 }
 
 std::string NFile::replaceTilde( std::string const & path )
