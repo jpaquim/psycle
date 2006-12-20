@@ -3,8 +3,8 @@
 
 ///\file
 ///\brief \implementation psycle::plugins::bipolar_filter
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "bipolar_filter.hpp"
 namespace psycle

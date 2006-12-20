@@ -3,8 +3,8 @@
 
 ///\file
 ///\brief \implementation psycle::front_ends::gui::graph
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "graph.hpp"
 #include "lock.hpp"

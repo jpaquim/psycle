@@ -3,8 +3,8 @@
 // copyright 2004-2006 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation psycle::engine::event
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "event.hpp"
 namespace psycle

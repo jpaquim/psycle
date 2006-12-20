@@ -3,8 +3,8 @@
 
 ///\file
 ///\implementation psycle::front_ends::gui::main
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "main.hpp"
 #include "lock.hpp"

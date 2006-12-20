@@ -3,8 +3,8 @@
 // copyright 2000-2006 psycledelics http://psycle.sourceforge.net
 
 ///\implementation psycle::engine::port
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "port.hpp"
 #include "graph.hpp"

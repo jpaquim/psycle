@@ -3,8 +3,8 @@
 // copyright 2004-2006 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation psycle::host::schedulers::single_threaded
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "single_threaded.hpp"
 #include <universalis/processor/exception.hpp>

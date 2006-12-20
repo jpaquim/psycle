@@ -3,8 +3,8 @@
 
 ///\file
 ///\brief \implementation psycle::plugins::additioner
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "additioner.hpp"
 namespace psycle
