@@ -30,7 +30,7 @@ double fitmp;
 //	InitializeDSP
 //
 //////////////////////////////////////////////////////////////////////
-void InitializeDSP()
+void DRUTTIS__DSP__CALLING_CONVENTION__C InitializeDSP()
 {
 	//
 	//	Setup table for pow2
@@ -48,7 +48,7 @@ void InitializeDSP()
 //	DestroyDSP
 //
 //////////////////////////////////////////////////////////////////////
-void DestroyDSP()
+void DRUTTIS__DSP__CALLING_CONVENTION__C DestroyDSP()
 {
 }
 //////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ void DestroyDSP()
 //	Fill
 //
 //////////////////////////////////////////////////////////////////////
-void Fill(float *pbuf, float value, int nsamples)
+void DRUTTIS__DSP__CALLING_CONVENTION__FAST Fill(float *pbuf, float value, int nsamples)
 {
 	--pbuf;
 	do
@@ -70,7 +70,7 @@ void Fill(float *pbuf, float value, int nsamples)
 //	Copy
 //
 //////////////////////////////////////////////////////////////////////
-void Copy(float *pbuf1, float *pbuf2, int nsamples)
+void DRUTTIS__DSP__CALLING_CONVENTION__FAST Copy(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;
@@ -85,7 +85,7 @@ void Copy(float *pbuf1, float *pbuf2, int nsamples)
 //	Add
 //
 //////////////////////////////////////////////////////////////////////
-void Add(float *pbuf1, float *pbuf2, int nsamples)
+void DRUTTIS__DSP__CALLING_CONVENTION__FAST Add(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;
@@ -100,7 +100,7 @@ void Add(float *pbuf1, float *pbuf2, int nsamples)
 //	Sub
 //
 //////////////////////////////////////////////////////////////////////
-void Sub(float *pbuf1, float *pbuf2, int nsamples)
+void DRUTTIS__DSP__CALLING_CONVENTION__FAST Sub(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;
@@ -115,7 +115,7 @@ void Sub(float *pbuf1, float *pbuf2, int nsamples)
 //	Mul
 //
 //////////////////////////////////////////////////////////////////////
-void Mul(float *pbuf1, float *pbuf2, int nsamples)
+void DRUTTIS__DSP__CALLING_CONVENTION__FAST Mul(float *pbuf1, float *pbuf2, int nsamples)
 {
 	--pbuf1;
 	--pbuf2;

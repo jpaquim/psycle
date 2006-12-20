@@ -6,7 +6,13 @@
 /// numeric types
 #pragma once
 #include <universalis/detail/project.hpp>
+
+///\todo use DIVERSALIS__SIZEOF___CHAR for size in bits
+
 #if defined DIVERSALIS__HAVE_INTTYPES_H
+//	#include <inttype.h>
+//	#include <stdint.h>
+//	#include <cstdint>
 	#include <boost/cstdint.hpp>
 #endif
 namespace universalis
@@ -62,29 +68,29 @@ namespace universalis
 					/// unsigned 8-bit integral number
 					typedef unsigned          char uint8;
 				#elif defined DIVERSALIS__SIZEOF
-					#if DIVERSALIS__SIZEOF_LONG_DOUBLE >= 10
+					#if DIVERSALIS__SIZEOF__LONG_DOUBLE >= 10
 						typedef long double float80;
-					#elif DIVERSALIS__SIZEOF_DOUBLE >= 10
+					#elif DIVERSALIS__SIZEOF__DOUBLE >= 10
 						typedef      double float80;
-					#elif DIVERSALIS__SIZEOF_FLOAT >= 10
+					#elif DIVERSALIS__SIZEOF__FLOAT >= 10
 						typedef       float float80;
 					#else
 						#error "No >=80-bit floating point number."
 					#endif
-					#if DIVERSALIS__SIZEOF_LONG_DOUBLE == 8
+					#if DIVERSALIS__SIZEOF__LONG_DOUBLE == 8
 						typedef long double float64;
-					#elif DIVERSALIS__SIZEOF_DOUBLE == 8
+					#elif DIVERSALIS__SIZEOF__DOUBLE == 8
 						typedef      double float64;
-					#elif DIVERSALIS__SIZEOF_FLOAT == 8
+					#elif DIVERSALIS__SIZEOF__FLOAT == 8
 						typedef       float float64;
 					#else
 						#error "No 64-bit floating point number."
 					#endif
-					#if DIVERSALIS__SIZEOF_LONG_DOUBLE == 4
+					#if DIVERSALIS__SIZEOF__LONG_DOUBLE == 4
 						typedef long double float32;
-					#elif DIVERSALIS__SIZEOF_DOUBLE == 4
+					#elif DIVERSALIS__SIZEOF__DOUBLE == 4
 						typedef      double float32;
-					#elif DIVERSALIS__SIZEOF_FLOAT == 4
+					#elif DIVERSALIS__SIZEOF__FLOAT == 4
 						typedef       float float32;
 					#else
 						#error "No 32-bit floating point number."
@@ -100,73 +106,73 @@ namespace universalis
 						typedef boost::uint8_t  uint8;
 						typedef boost:: int8_t  sint8;
 					#else
-						#if DIVERSALIS__SIZEOF_LONG_LONG_INT == 8
+						#if DIVERSALIS__SIZEOF__LONG_LONG_INT == 8
 							typedef   signed long long int sint64;
 							typedef unsigned long long int uint64;
-						#elif DIVERSALIS__SIZEOF_LONG_INT == 8
+						#elif DIVERSALIS__SIZEOF__LONG_INT == 8
 							typedef   signed long      int sint64;
 							typedef unsigned long      int uint64;
-						#elif DIVERSALIS__SIZEOF_INT == 8
+						#elif DIVERSALIS__SIZEOF__INT == 8
 							typedef   signed           int sint64;
 							typedef unsigned           int uint64;
-						#elif DIVERSALIS__SIZEOF_SHORT_INT == 8
+						#elif DIVERSALIS__SIZEOF__SHORT_INT == 8
 							typedef   signed short     int sint64;
 							typedef unsigned short     int uint64;
-						#elif DIVERSALIS__SIZEOF_CHAR == 8
+						#elif DIVERSALIS__SIZEOF__CHAR == 8
 							typedef   signed          char sint64;
 							typedef unsigned          char uint64;
 						#else
 							#error "No 64-bit integral number."
 						#endif
-						#if DIVERSALIS__SIZEOF_LONG_LONG_INT == 4
+						#if DIVERSALIS__SIZEOF__LONG_LONG_INT == 4
 							typedef   signed long long int sint32;
 							typedef unsigned long long int uint32;
-						#elif DIVERSALIS__SIZEOF_LONG_INT == 4
+						#elif DIVERSALIS__SIZEOF__LONG_INT == 4
 							typedef   signed long      int sint32;
 							typedef unsigned long      int uint32;
-						#elif DIVERSALIS__SIZEOF_INT == 4
+						#elif DIVERSALIS__SIZEOF__INT == 4
 							typedef   signed           int sint32;
 							typedef unsigned           int uint32;
-						#elif DIVERSALIS__SIZEOF_SHORT_INT == 4
+						#elif DIVERSALIS__SIZEOF__SHORT_INT == 4
 							typedef   signed short     int sint32;
 							typedef unsigned short     int uint32;
-						#elif DIVERSALIS__SIZEOF_CHAR == 4
+						#elif DIVERSALIS__SIZEOF__CHAR == 4
 							typedef   signed          char sint32;
 							typedef unsigned          char uint32;
 						#else
 							#error "No 32-bit integral number."
 						#endif
-						#if DIVERSALIS__SIZEOF_LONG_LONG_INT == 2
+						#if DIVERSALIS__SIZEOF__LONG_LONG_INT == 2
 							typedef   signed long long int sint16;
 							typedef unsigned long long int uint16;
-						#elif DIVERSALIS__SIZEOF_LONG_INT == 2
+						#elif DIVERSALIS__SIZEOF__LONG_INT == 2
 							typedef   signed long      int sint16;
 							typedef unsigned long      int uint16;
-						#elif DIVERSALIS__SIZEOF_INT == 2
+						#elif DIVERSALIS__SIZEOF__INT == 2
 							typedef   signed           int sint16;
 							typedef unsigned           int uint16;
-						#elif DIVERSALIS__SIZEOF_SHORT_INT == 2
+						#elif DIVERSALIS__SIZEOF__SHORT_INT == 2
 							typedef   signed short     int sint16;
 							typedef unsigned short     int uint16;
-						#elif DIVERSALIS__SIZEOF_CHAR == 2
+						#elif DIVERSALIS__SIZEOF__CHAR == 2
 							typedef   signed          char sint16;
 							typedef unsigned          char uint16;
 						#else
 							#error "No 16-bit integral number."
 						#endif
-						#if DIVERSALIS__SIZEOF_LONG_LONG_INT == 1
+						#if DIVERSALIS__SIZEOF__LONG_LONG_INT == 1
 							typedef   signed long long int sint8;
 							typedef unsigned long long int uint8;
-						#elif DIVERSALIS__SIZEOF_LONG_INT == 1
+						#elif DIVERSALIS__SIZEOF__LONG_INT == 1
 							typedef   signed long      int sint8;
 							typedef unsigned long      int uint8;
-						#elif DIVERSALIS__SIZEOF_INT == 1
+						#elif DIVERSALIS__SIZEOF__INT == 1
 							typedef   signed           int sint8;
 							typedef unsigned           int uint8;
-						#elif DIVERSALIS__SIZEOF_SHORT_INT == 1
+						#elif DIVERSALIS__SIZEOF__SHORT_INT == 1
 							typedef   signed short     int sint8;
 							typedef unsigned short     int uint8;
-						#elif DIVERSALIS__SIZEOF_CHAR == 1
+						#elif DIVERSALIS__SIZEOF__CHAR == 1
 							typedef   signed          char sint8;
 							typedef unsigned          char uint8;
 						#else
@@ -186,6 +192,19 @@ namespace universalis
 					typedef unsigned __int16 uint16;
 					typedef   signed __int8  sint8;
 					typedef unsigned __int8  uint8;
+				#elif defined DIVERSALIS__HAVE_INTTYPES_H
+					typedef long double float80;
+					typedef      double float64;
+					typedef       float float32;
+
+					typedef boost::int64_t  sint64; 
+					typedef boost::uint64_t uint64;
+					typedef boost::int32_t  sint32;
+					typedef boost::uint32_t uint32;
+					typedef boost::int16_t  sint16;
+					typedef boost::uint16_t uint16;
+					typedef boost::int8_t   sint8;
+					typedef boost::uint8_t  uint8;
 				#else
 					#error "No explicitly sized types."
 				#endif
