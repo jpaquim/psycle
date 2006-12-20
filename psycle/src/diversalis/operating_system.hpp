@@ -54,14 +54,16 @@
 			#define DIVERSALIS__OPERATING_SYSTEM__CYGWIN
 			#undef DIVERSALIS__OPERATING_SYSTEM__CYGWIN // was just defined to insert documentation.
 
-			/// microsoft's windows, autodetected via _WIN32 and _WIN64 (and __MINGW32__).
+			/// microsoft's windows, autodetected via _WIN64 and _WIN32 (and __MINGW32__).
 			///
+			/// ?.? is vista\n
 			/// ?.? is longhorn\n
 			/// ?.? is 2003\n
 			/// 5.1 is xp\n
 			/// 5.0 is 2000\n
-			/// 4.1 is 1998\n
-			/// 4.0 is 1995\n
+			/// 4.1 is 1998 nt or msdos!\n
+			/// 4.0 is 1995 nt or msdos!\n
+			/// 3.5 is nt\n
 			///
 			/// note: on cygwin, DIVERSALIS__OPERATING_SYSTEM__MICROSOFT is not defined, as it's considered to be in the unix family.
 			#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
@@ -146,7 +148,7 @@
 		// *bsd
 		////////
 
-		#elif defined __FreeBSD__
+		#elif defined __FreeBSD__ // todo netbsd and openbsd
 			#define DIVERSALIS__OPERATING_SYSTEM
 			#define DIVERSALIS__OPERATING_SYSTEM__UNIX
 			#define DIVERSALIS__OPERATING_SYSTEM__BSD
@@ -187,11 +189,29 @@
 			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR 0
 			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH 0
 
+		////////
+		// msys
+		////////
+
+		#elif defined __MSYS__
+			#define DIVERSALIS__OPERATING_SYSTEM
+			#define DIVERSALIS__OPERATING_SYSTEM__UNIX
+			#define DIVERSALIS__OPERATING_SYSTEM__MSYS
+
+		////////
+		// uwin
+		////////
+
+		#elif defined _UWIN
+			#define DIVERSALIS__OPERATING_SYSTEM
+			#define DIVERSALIS__OPERATING_SYSTEM__UNIX
+			#define DIVERSALIS__OPERATING_SYSTEM__UWIN
+
 		///////////////////////
 		// microsoft's windows
 		///////////////////////
 
-		#elif defined __MINGW32__ || defined _WIN32 || defined _WIN64
+		#elif defined _WIN64 || defined _WIN32 || defined __MINGW32__ // note: _WIN32 is defined too on mingw (cygwin's gcc -mno-cygwin)
 			#if defined _WIN64
 				#error "These sources have never been tested on the 64-bit version of microsoft's operating system ; nevertheless, you may edit the file where this error is triggered to force compilation and test if it works, or else, as a last resort, you may enable the 32-bit compatibility mode (WOW library)."
 			#endif
