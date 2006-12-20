@@ -27,9 +27,8 @@ source_package = source_package(project,
 	name = 'xpsycle',
 	version = version(0, 0),
 	description = 'ngrs graphic toolkit library',
-	long_description = """\
-psycle is a modular music creation studio ...
-"""
+	long_description = \
+		"psycle is a modular music creation studio ..."
 )
 
 # external packages
