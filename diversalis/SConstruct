@@ -46,6 +46,8 @@ diversalis_package = pkg_config_package(project,
 	description = source_package.description()
 )
 diversalis_package.uninstalled_env().compilers().cxx().paths().add(['src'])
+diversalis_package.uninstalled_env().compilers().cxx().defines().add({'DIVERSALIS__HAVE_INTTYPES_H': 1}) # temporary
+diversalis_package.installed_env().compilers().cxx().defines().add({'DIVERSALIS__HAVE_INTTYPES_H': 1}) # temporay
 
 if False:
 	# debian
