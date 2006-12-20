@@ -22,7 +22,7 @@
 
 #include "audiodriver.h"
 
-#ifdef __unix__
+#if defined __unix__ && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
 #else
 
 #include "windows.h"

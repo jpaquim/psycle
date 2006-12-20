@@ -17,9 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#if defined _WIN64 || defined _WIN32 || defined __CYGWIN__ || defined __MSYS__ || defined _UWIN
+
 #include "mswaveout.h"
 #include "cstdint.h"
-
 
 namespace psycle
 {
@@ -394,3 +396,5 @@ namespace psycle
 
 	}
 }
+
+#endif // windows platform
