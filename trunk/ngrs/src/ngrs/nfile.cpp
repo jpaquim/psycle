@@ -103,7 +103,7 @@ std::vector< std::string > NFile::fileList( const std::string & path )
  #else
   WIN32_FIND_DATA dir;
   HANDLE fhandle;
-  char directory[256];
+  char directory[8196];
   // unsecure, better if there snprintf
   sprintf(directory,"%s\\*.*",path.c_str());
   // Handle to directory
