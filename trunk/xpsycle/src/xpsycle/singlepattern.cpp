@@ -318,13 +318,8 @@ namespace psycle
 			clearEmptyLines();
 		}
 
-		bool SinglePattern::lineIsEmpty( int linenr ) const {
-			const_iterator it = find_nearest(linenr);
-			const PatternLine & line = it->second;
-			if ( it == end() ) 
-				return true;
-			else
-				return false;
+		bool SinglePattern::lineIsEmpty( int linenr ) const {			
+			return ( find_nearest(linenr) == end() );
 		}
 
 		void SinglePattern::clearTrack( int linenr , int tracknr ) {

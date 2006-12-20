@@ -102,6 +102,9 @@ namespace psycle
 			void Error(const char msg[]);
 			
 			HANDLE hThread_;
+
+			void quantizeWithDither(float *pin, int *piout, int c);
+			void quantize(float *pin, int *piout, int c);
 			
 		};
 	}

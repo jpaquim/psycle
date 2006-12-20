@@ -18,12 +18,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "mswaveout.h"
+#include "cstdint.h"
+
 
 namespace psycle
 {
 	namespace host
 	{
-                            
+        int const SHORT_MIN = -32768;
+		int const SHORT_MAX =  32767;
+
+
         AudioDriverInfo MsWaveOut::info( ) const
         {
             return AudioDriverInfo("mswaveout","Microsoft WaveOut Driver","Microsoft standard output driver",true);
@@ -91,8 +96,8 @@ namespace psycle
 
 			WAVEFORMATEX format;
 			format.wFormatTag = WAVE_FORMAT_PCM;
-			format.wBitsPerSample = 16;//_bitDepth;
-			format.nSamplesPerSec = settings().samplesPerSec();// _samplesPerSec;
+			format.wBitsPerSample = settings().bitDepth();
+			format.nSamplesPerSec = settings().samplesPerSec();
 			format.cbSize = 0;
 			format.nChannels = 2;
 
@@ -132,7 +137,7 @@ namespace psycle
 
 			_stopPolling = false;
 
-            DWORD WINAPI dwThreadId = 0;
+            DWORD WINAPI dwThreadId;
             ::CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
 			_running = true;
 
@@ -222,10 +227,10 @@ namespace psycle
 				{
 					int n = bs;
 					float * pBuf = _pCallback(_callbackContext, n);
-					if(_dither) ;
-                     // QuantizeWithDither(pBuf, pOut, n); 
-                    else 
-                     // Quantize(pBuf, pOut, n); ;
+				//	if(_dither)
+                //      quantizeWithDither(pBuf, pOut, n); 
+                //    else 
+                      quantize(pBuf, pOut, n);
 					pOut += n;
 					bs -= n;
 				}
@@ -312,5 +317,80 @@ namespace psycle
 		{
 			return e ? Start() : Stop();
 		}
+
+
+		void MsWaveOut::quantizeWithDither(float *pin, int *piout, int c)
+		{
+			///\todo sizeof *piout has to be 32-bit
+
+	/*		double const d2i = (1.5 * (1 << 26) * (1 << 26));
+			
+			do
+			{
+				double res = ((double)pin[1] + frand()) + d2i;
+
+				int r = *(int *)&res;
+
+				if (r < SHORT_MIN)
+				{
+					r = SHORT_MIN;
+				}
+				else if (r > SHORT_MAX)
+				{
+					r = SHORT_MAX;
+				}
+
+				res = ((double)pin[0] + frand()) + d2i;
+
+				int l = *(int *)&res;
+
+				if (l < SHORT_MIN)
+				{
+					l = SHORT_MIN;
+				}
+				else if (l > SHORT_MAX)
+				{
+					l = SHORT_MAX;
+				}
+
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
+				pin += 2;
+			}
+			while(--c);*/
+		}
+
+		void MsWaveOut::quantize(float *pin, int *piout, int c)
+		{
+			do
+			{
+				int r = static_cast<int>( (pin[1]) );
+
+				if (r < SHORT_MIN)
+				{
+					r = SHORT_MIN;
+				}
+				else if (r > SHORT_MAX)
+				{
+					r = SHORT_MAX;
+				}
+
+				int l = static_cast<int>( (pin[0]) );
+
+				if (l < SHORT_MIN)
+				{
+					l = SHORT_MIN;
+				}
+				else if (l > SHORT_MAX)
+				{
+					l = SHORT_MAX;
+				}
+
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
+				pin += 2;
+			}
+			while(--c);
+		}
+	
+
 	}
 }
