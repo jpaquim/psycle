@@ -26,6 +26,10 @@
 /**
 @author Stefan
 */
+
+const int nFiles = 1;
+const int nDirs  = 2;
+
 class NFile{
 public:
     NFile();
@@ -33,9 +37,7 @@ public:
     ~NFile();
 
     static std::string readFile(const std::string & filename);
-    static std::vector<std::string> fileList(const std::string & path);
-    static std::vector<std::string> dirList(const std::string & path);
-    static std::vector<std::string> parentDirList(const std::string & path);
+    static std::vector<std::string> fileList( const std::string & path, int fMode = nFiles | nDirs );   
     static std::string workingDir();
     static bool fileIsReadable(const std::string & file);
     static std::string parentWorkingDir();
