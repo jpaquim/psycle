@@ -2,8 +2,8 @@
 // Copyright © 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
 
 ///\implementation psycle::host::scheduler
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "scheduler.hpp"
 namespace psycle

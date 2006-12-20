@@ -3,8 +3,8 @@
 
 ///\file
 ///\brief \implementation psycle::plugins::outputs::direct_sound
-#include PACKAGENERIC__PRE_COMPILED
-#include PACKAGENERIC
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "direct_sound.hpp"
 #include <psycle/stream/formats/riff_wave/format.hpp>

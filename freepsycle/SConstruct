@@ -10,8 +10,10 @@ sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of t
 
 # project
 
+name = 'freepsycle' # this is the unique place where the name is defined. it is cascaded everywhere else.
+
 from packageneric.generic.scons.project import project
-project = project(name = 'psycle')
+project = project(name)
 
 # authors/maintainers/uploaders
 
@@ -23,12 +25,132 @@ bohan = person('Johan Boule', 'bohan.debian.psycle@retropaganda.info')
 from packageneric.generic.scons.source_package import source_package
 from packageneric.generic.scons.version import version
 source_package = source_package(project,
-	name = 'psycle',
+	name = project.name(),
 	version = version(0, 0),
-	description = 'psycle ...',
-	long_description = """\
-psycle is  a ..."""
+	description = '%(name)s ...' % {'name': project.name()},
+	long_description = \
+		"%(name)s is  a ..." % {'name': project.name()}
 )
 
-import sys
-sys.exit(0) # work in progress
+# external packages
+
+from packageneric.generic.scons.check.external_package import external_package as external_package_check
+from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
+
+universalis = os.path.join('..', 'universalis', 'SConstruct')
+if os.path.exists(universalis): universalis = project.subscript(universalis).local_package()
+else:
+	universalis = external_package_check(project, name = 'universalis',
+		dependencies = [
+			pkg_config_check(project, name = 'universalis-0 >= 0')
+		],
+		distribution_packages = {
+			'debian and ubuntu': 'lib-universalis-0-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
+		url = 'http://psycle.sourceforge.net'
+	)
+
+# modules and pkg-config packages
+
+from packageneric.generic.scons.module import module
+from packageneric.generic.scons.pkg_config_package import pkg_config_package
+from packageneric.generic.scons.find import find
+
+modules = []
+pkg_config_packages = []
+
+class uniform_module(module):
+	def __init__(self, name, *args, **kw):
+		module.__init__(self, source_package,
+			name = source_package.name() + '-' + name + '-' + str(source_package.version().major()),
+			version = source_package.version(),
+			*args, **kw
+		)
+		self.contexes().source().compilers().cxx().paths().add(['src'])
+		self.add_sources(find(project, 'src', os.path.join('psycle', name), '*.cpp'))
+		self.add_headers(find(project, 'src', os.path.join('psycle', name), '*.hpp'))
+		modules.append(self)
+		self.pkg_config_package()
+	
+	def pkg_config_package(self):
+		try: return self._pkg_config_package
+		except AttributeError:
+			self._pkg_config_package = pkg_config_package(project,
+				name = self.name(),
+				version = self.version(),
+				description = self.description(),
+				modules = [self]
+			)
+			pkg_config_packages.append(self._pkg_config_package)
+			return self._pkg_config_package
+	
+	def as_dependency(self): return self.pkg_config_package().local_package()
+
+# engine
+engine_module = uniform_module(
+	name = 'engine',
+	description = 'audio engine',
+	dependencies = [universalis]
+)
+
+# host
+host_module = uniform_module(
+	name = 'host',
+	description = 'plugin host',
+	dependencies = [engine_module.as_dependency()]
+)
+
+# stream
+stream_module = uniform_module(
+	name = 'stream',
+	description = 'stream format handling',
+	dependencies = [universalis]
+)
+
+if False:
+	# debian
+
+	from packageneric.generic.scons.debian_package import debian_package
+
+	engine_runtime = debian_package(project,
+		name = 'lib-' + name + '-engine-' + str(source_package.version().major()),
+		section = 'libs',
+		description = engine_package.description(),
+		long_description = 'This package contains the runtime library.'
+	)
+	#universalis_runtime.add_files(engine_package.binaries())
+
+	class engine_dev(debian_package):
+		def __init__(self):
+			debian_package.__init__(self, project,
+				name = engine_runtime.name() + '-dev',
+				section = 'libdevel',
+				description = engine_package.description(),
+				long_description = 'This package contains the development files.',
+			)
+		def dynamirc_dependencies(self):
+			self.add_depend(engine_runtime)
+			self.add_build_depends(engine_package.build_depends())
+	engine_dev = engine_dev()
+	#engine_dev.add_files(engine_package.headers())
+	#engine_dev.add_files(engine_package.pkg_config())
+
+	engine_doc = debian_package(project,
+		name = engine_runtime.name() + '-doc',
+		section = 'doc',
+		architecture = 'all',
+		description = engine_package.description(),
+		long_description = 'This package contains the documentation.'
+	)
+
+	from packageneric.generic.scons.debian import debian
+	debian = debian(source_package,
+		maintainer = bohan,
+		binary_packages = [engine_runtime, engine_dev, engine_doc],
+	)
+
+project(pkg_config_packages)
