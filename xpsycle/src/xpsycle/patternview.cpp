@@ -1411,11 +1411,13 @@ void PatternView::PatternDraw::customPaint(NGraphics* g, int startLine, int endL
 
 void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
 {
+	// do we have a pattern ?
 	if ( pView->pattern() ) {
 		drawCellBg( g, cursor()  );
 
+		// find start iterator
 		SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
-    TimeSignature signature;
+		TimeSignature signature;
 
 		int lastLine = -1;
 		PatternLine* line;
@@ -1437,29 +1439,29 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 
 				bool onBeat = false;
 				bool onBar  = false;
-      	if ( !(y % beatZoom())) {
-          if ((pView->pattern()->barStart(it->first, signature) )) {
-              //tColor = g->setForeground( barColor() );
-          } else {
-							onBeat = true;
-							tColor = beatTextColor();
-          }
+      			if ( !(y % beatZoom())) {
+				if (  it != pView->pattern_->end() && pView->pattern()->barStart(it->first, signature) ) {
+					tColor = barColor();
+				} else {
+					onBeat = true;
+					tColor = beatTextColor();
 				}
+			}
 
-				if ((y == pView->playPos() && Player::Instance()->playing() ) ) {
-					int trackWidth = xEndByTrack( endTrack ) - dx();
-					g->setForeground( playBarColor() );
-        	g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
-				}
+			if ((y == pView->playPos() && Player::Instance()->playing() ) ) {
+				int trackWidth = xEndByTrack( endTrack ) - dx();
+				g->setForeground( playBarColor() );
+        		g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
+			}
 
-				NColor stdColor = tColor;
-				NColor crColor = pView->colorInfo().cursor_text_color;
+			NColor stdColor = tColor;
+			NColor crColor = pView->colorInfo().cursor_text_color;
 
-				std::map<int, PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
-				PatternEvent emptyEvent;
-				PatternEvent* event;
+			std::map<int, PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
+			PatternEvent emptyEvent;
+			PatternEvent* event;
 
-				for ( int x = startTrack; x <= endTrack; x++ ) {
+			for ( int x = startTrack; x <= endTrack; x++ ) {
 				
 					if ( eventIt != line->notes().end() && eventIt->first <= endTrack ) {
 						int trackx = eventIt->first;
