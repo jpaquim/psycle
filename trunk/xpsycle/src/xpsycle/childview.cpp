@@ -51,7 +51,7 @@ ChildView::ChildView()
   tabBook_->setTabBarAlign(nAlBottom);
   setAlign(nAlClient);
 
-  machineView_ = new MachineView( _pSong );
+  machineView_ = new MachineView( *_pSong );
     machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
     machineView_->selected.connect(this,&ChildView::onMachineSelected);
     machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
