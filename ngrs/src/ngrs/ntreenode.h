@@ -46,6 +46,8 @@ public:
 
     NCustomItem* headerItem();
 
+	virtual void paint( NGraphics* g );
+
 private:
 
     NPanel* entries_;

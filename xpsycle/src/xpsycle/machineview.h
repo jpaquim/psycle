@@ -21,10 +21,8 @@
 #define MACHINEVIEW_H
 
 #include "wiregui.h"
-#include "wiredlg.h"
 #include "skinreader.h"
 
-#include <ngrs/napp.h>
 #include <ngrs/npage.h>
 #include <ngrs/nscrollbox.h>
 #include <ngrs/nlabel.h>
@@ -40,35 +38,6 @@ class Song;
 /**
 @author Stefan
 */
-
-class MachineWireGUI : public WireGUI {
-public :
-
-    MachineWireGUI();
-    
-    ~MachineWireGUI();
-    
-    signal1<WireGUI*> bendAdded;
-    
-    virtual void onMousePress  (int x, int y, int button);
-    virtual void onMouseDoublePress (int x, int y, int button);
-   
-    WireDlg* dialog();
-        
-
-private:
-
-  WireDlg* dlg;
-
-  NPopupMenu* menu_;
-  NPoint newBendPos_;
-  
-  void initPopupMenu( );
-  void onAddBend( NButtonEvent* ev );
-
-};
-
-
 
 class MachineView : public NPanel
 {
@@ -103,18 +72,18 @@ public:
 
 private:
 
+	NPanel* scrollArea_;
+    NScrollBox* scrollBox_;
+
     Song* _pSong;
+
+	MachineGUI* startGUI;
     MachineGUI* selectedMachine_;
 
-    MachineWireGUI* line;
-    MachineWireGUI* rewireLine;
-    MachineGUI* startGUI;
+    WireGUI* line;
     WireGUI* selectedWire_;
-
-
+       
     void init();
-    NPanel* scrollArea_;
-    NScrollBox* scrollBox_;
 
     void onCreateMachine( Machine* mac );
     void onDestroyMachine( Machine* mac );
@@ -129,7 +98,7 @@ private:
     MachineGUI* findByMachine(Machine* mac);
 
     std::vector<MachineGUI*> machineGUIs;
-    std::vector<MachineWireGUI*> wireGUIs;
+    std::vector<WireGUI*> wireGUIs;
 
     void onTweakSlide(int machine, int command, int value);
     void onMachineSelected(MachineGUI* gui);

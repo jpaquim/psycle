@@ -59,9 +59,13 @@ enum LogicStyle { nClear        = GXclear,
                   nSet          = GXset };
 
 #else
-enum LineStyle {nLineSolid          = 0,
-                nLineOnOffDash      = 1,
-                nLineLineDoubleDash = 2 };
+#include <windows.h>
+
+enum LineStyle {
+	             nLineSolid          = PS_SOLID,     // The pen is solid
+                 nLineOnOffDash      = PS_DOT,       // The pen is dashed
+                 nLineLineDoubleDash = PS_DASHDOTDOT // The pen has dashes and double dots
+               };
 
 
 enum CapStyle  {nCapNotLast     =  0,

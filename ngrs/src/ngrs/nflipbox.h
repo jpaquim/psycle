@@ -24,6 +24,12 @@
 
 class NFlipBar;
 
+// style flags
+
+const int nFlipBoxNone    = 0;
+const int nFlipBoxTwister = 1;
+const int nFlipBoxLine    = 2;
+
 /**
 @author Stefan Nattkemper
 */
@@ -36,19 +42,26 @@ public:
 
     NPanel* pane();
     NPanel* header();
+	
+    void setExpanded( bool on );
+    bool expanded() const;
 
-    void setExpanded(bool on);
+	void setStyle( int style );
+	int style() const;
 
     int flipperWidth() const;
 
     virtual int preferredHeight() const;
+    virtual void paint( NGraphics* g );
 
 private:
 
+   int style_;
    NFlipBar* flipBar_;
    NPanel*   pane_;
 
-   void onFlipChange(NFlipBar* sender);
+   void onFlipChange( NFlipBar* sender );
+
 };
 
 #endif

@@ -58,6 +58,8 @@ const char * expand_xpm[] = {
 
 NFlipBar::NFlipper::NFlipper( NFlipBar * flipBar ) : expanded_(false), flipBar_(flipBar)
 {
+  setLayout( NAlignLayout() );
+
   expandBmp.createFromXpmData(expand_xpm);
   expandedBmp.createFromXpmData(expanded_xpm);
 
@@ -65,7 +67,7 @@ NFlipBar::NFlipper::NFlipper( NFlipBar * flipBar ) : expanded_(false), flipBar_(
     expandImg_->setVAlign(nAlCenter);
     expandImg_->setHAlign(nAlCenter);
     expandImg_->setSharedBitmap(&expandBmp);
-  add(expandImg_);
+  add(expandImg_, nAlClient);
 }
 
 NFlipBar::NFlipper::~ NFlipper( )
@@ -132,17 +134,21 @@ NPanel* NFlipBar::header()
   return header_;
 }
 
-bool NFlipBar::expanded( ) const
-{
-   return flipper_->expanded_;
-}
-
 int NFlipBar::flipperWidth( ) const
 {
   return flipper_->preferredWidth();
 }
 
+int  NFlipBar::flipperHeight() const {
+  return flipper_->preferredHeight();
+}
+
 void NFlipBar::setExpanded( bool on )
 {
   flipper_->setExpanded(on);
+}
+
+bool NFlipBar::expanded( ) const
+{
+   return flipper_->expanded_;
 }

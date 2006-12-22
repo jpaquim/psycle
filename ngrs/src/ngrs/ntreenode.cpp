@@ -67,7 +67,7 @@ void NTreeNode::setHeader( NCustomItem * entry )
 void NTreeNode::onItemPress( NButtonEvent * ev )
 {
   if (ev->button() == 1) {
-    NCustomItem* item = static_cast<NCustomItem*>(ev->sender());
+    NCustomItem* item = static_cast<NCustomItem*>( ev->sender() );
     itemSelected.emit(this, item);
   }
 }
@@ -77,15 +77,13 @@ NCustomItem * NTreeNode::headerItem( )
   return headerItem_;
 }
 
+void NTreeNode::paint( NGraphics* g ) {
+    
+  NVisualComponent* last = dynamic_cast<NVisualComponent*>( parent() )->visualComponents().back();
+  if ( this != last )
+    setStyle( nFlipBoxLine );
+  else
+	setStyle( 0 );
 
-
-
-
-
-
-
-
-
-
-
-
+  NFlipBox::paint( g );
+}

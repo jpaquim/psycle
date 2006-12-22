@@ -20,6 +20,10 @@
 #include "wiregui.h"
 #include "skinreader.h"
 #include "bendedlineshape.h"
+#include "wiredlg.h"
+#include <ngrs/npopupmenu.h>
+#include <ngrs/nmenuitem.h>
+#include <ngrs/napp.h>
 #include <cmath>
 #include <cstdio>
 
@@ -56,7 +60,13 @@ namespace psycle {
 			triangle_size_wide = triangle_size_tall/2;
 			triangle_size_indent = triangle_size_tall/6;
 
-			updateSkin();			
+			updateSkin();		
+
+			dlg = new WireDlg();
+				dlg->setLine(this);
+			add( dlg );
+
+			initPopupMenu();
 		}
 
 
@@ -204,6 +214,48 @@ namespace psycle {
 			deltaColB = ( polyColor_.blue()  / 510.0) + .45;
 
 			borderColor_ = SkinReader::Instance()->machineview_color_info().wire_arrow_border_color;
+		}
+
+
+		void WireGUI::initPopupMenu() {
+			menu_ = new NPopupMenu();
+			NMenuItem* item;
+			item = new NMenuItem("add Bend");
+			item->click.connect(this,&WireGUI::onAddBend);
+			menu_->add( item );
+			item = new NMenuItem("remove Connection");
+			menu_->add( item );
+			add( menu_ );                                 
+		}
+
+		void WireGUI::onAddBend( NButtonEvent* ev ) {
+			addBend( newBendPos_ );
+			repaint();
+			bendAdded.emit( this );
+			setMoveable( NMoveable( nMvPolygonPicker ) );
+		}
+
+		void WireGUI::onMousePress( int x, int y, int button ) {
+      		int shift = NApp::system().shiftState();      
+			if ( shift &  nsRight ) {
+
+				newBendPos_.setXY( left() + x, top() + y );
+
+				menu_->setPosition( x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(), 100,100);
+				menu_->setVisible( true ); 
+			}
+			setMoveable( NMoveable( nMvPolygonPicker ) );        
+			repaint();        
+		}
+                                        
+		void WireGUI::onMouseDoublePress (int x, int y, int button) {
+			if ( button==1 ) {
+				dlg->setVisible(true);
+			}
+		}
+                      
+		WireDlg* WireGUI::dialog() { 
+			return dlg;
 		}
 
 	} // end of host namespace

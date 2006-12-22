@@ -598,6 +598,8 @@ void Plugin::GetParamName(int numparam, char * name)
         catch(const std::exception &)
         {
         }
+		catch (...) {
+		}
       }
       else std::strcpy(parval,"Out of Range");
     }

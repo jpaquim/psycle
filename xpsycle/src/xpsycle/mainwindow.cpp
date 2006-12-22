@@ -144,8 +144,6 @@ void MainWindow::enableSound( )
 	Player::Instance()->setDriver( *pOut );  
 }
 
-
-
 void MainWindow::initSongs( )
 {
   selectedChildView_ = addChildView();

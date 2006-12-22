@@ -37,13 +37,14 @@ class NFlipBar : public NPanel
 
        friend class NFlipBar;
 
-       NFlipper(NFlipBar* flipBar);
+       NFlipper( NFlipBar* flipBar );
 
-       ~NFlipper();
+       ~NFlipper( );
 
-       void setExpanded(bool on);
+       void setExpanded( bool on );
+	   bool expanded( ) const;
 
-       virtual void onMousePress(int x, int y, int button);
+       virtual void onMousePress( int x, int y, int button );
 
        virtual int preferredWidth() const;
        virtual int preferredHeight() const;
@@ -75,6 +76,7 @@ public:
     NPanel* header();
 
     int flipperWidth() const;
+	int flipperHeight() const;
 
 private:
 

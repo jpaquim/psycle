@@ -81,3 +81,33 @@ void NFlipBox::setExpanded( bool on )
 {
   flipBar_->setExpanded(on);
 }
+
+bool NFlipBox::expanded() const {
+	return flipBar_->expanded();
+}
+
+void NFlipBox::setStyle( int style ) {
+  style_ = style; 
+}
+
+int NFlipBox::style() const {
+  return style_;
+}
+
+void NFlipBox::paint( NGraphics* g ) {
+
+  if ( style() & nFlipBoxLine ) {
+
+	  NPen oldPen = g->pen();
+	  g->setForeground( NColor( 200, 200, 200 ) );
+	  NPen pen;
+	  pen.setLineStyle( nLineOnOffDash );
+	  g->setPen( pen );	  
+	  int xoff = flipBar_->flipperWidth() / 2;
+	 
+	  g->drawLine( xoff, flipBar_->header()->height() / 2, xoff, height() );	  
+      g->drawLine( xoff, flipBar_->header()->height() / 2, flipBar_->header()->left(), flipBar_->header()->height() / 2 );
+
+      g->setPen( oldPen );
+  }
+}

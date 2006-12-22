@@ -92,7 +92,8 @@ private:
     void testMsgBox();
     void testTimerButton();
     void testScrollBar();
-		void testObjectInspector();
+	void testObjectInspector();
+	void testCustomTreeView();
 
     void onOpen(NButtonEvent* ev);
     void onSliderPosChanged(double v);
