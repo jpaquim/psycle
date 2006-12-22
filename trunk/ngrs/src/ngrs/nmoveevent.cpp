@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005,2006 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,11 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nmoveevent.h"
+#include "nobject.h"
 
-NMoveEvent::NMoveEvent( int x, int y ) : x_(x), y_(y)
+NMoveEvent::NMoveEvent( NObject* sender, int x, int y, int picker ) : sender_(sender), x_(x), y_(y), picker_(picker)
 {
 }
-
 
 NMoveEvent::~NMoveEvent()
 {
@@ -38,4 +38,10 @@ int NMoveEvent::y( ) const
   return y_;
 }
 
+int NMoveEvent::picker() const {
+  return picker_;
+}
 
+NObject* NMoveEvent::sender() const {
+  return sender_;
+}

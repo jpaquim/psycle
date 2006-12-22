@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,20 +23,26 @@
 /**
 @author Stefan
 */
+
+class NObject;
+
 class NMoveEvent{
 public:
-    NMoveEvent( int x, int y );
+    NMoveEvent( NObject* sender, int x, int y, int picker );
 
     ~NMoveEvent();
 
-		int x() const;
-		int y() const;
+    int x() const; // the x coord of the mouse relative to the container top
+    int y() const; // the y coord of the mouse relative to the container top
+    int picker() const; // the picker index, no picker = -1
+	NObject* sender() const; // pointer to the sender of this event
 
 private:
 
+    NObject* sender_;
     int x_;
-		int y_;
-
+    int y_;
+	int picker_;
 
 };
 
