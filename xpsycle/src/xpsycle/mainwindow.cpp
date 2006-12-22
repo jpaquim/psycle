@@ -1136,20 +1136,20 @@ void MainWindow::onNewMachine( NButtonEvent * ev )
           int fb = selectedChildView_->song()->GetFreeBus();
           if (newMachineDlg_->selectedType() == MACH_SAMPLER) {
             selectedChildView_->song()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
-            selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
+            selectedChildView_->machineView()->addMachine( *selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->machineView()->repaint();
           } else 
 		 if (newMachineDlg_->selectedType() == MACH_PLUGIN)
 		 {
             selectedChildView_->song()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg_->getDllName(),fb);
-            selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
+            selectedChildView_->machineView()->addMachine( *selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->machineView()->repaint();
           } else 
 		 if (newMachineDlg_->selectedType() == MACH_LADSPA){
             selectedChildView_->song()->CreateMachine(MACH_LADSPA, x, y, newMachineDlg_->getDllName(),fb, newMachineDlg_->pluginIndex());
-            selectedChildView_->machineView()->addMachine( selectedChildView_->song()->_pMachine[fb]);
+            selectedChildView_->machineView()->addMachine( *selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
             selectedChildView_->machineView()->repaint();
           }

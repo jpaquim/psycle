@@ -62,50 +62,38 @@ namespace psycle {
 		}
 
 
-		void MachineView::onCreateMachine( Machine * mac )
+		void MachineView::onCreateMachine( Machine & mac )
 		{
-			switch (mac->mode())
-			{		
-			case MACHMODE_GENERATOR: {
-				MachineGUI* macGui = new GeneratorGUI(mac);
+			MachineGUI* macGui = 0;
+			switch ( mac.mode() ) {							
+				case MACHMODE_GENERATOR:
+					macGui = new GeneratorGUI( &mac );
+				break;
+				case MACHMODE_FX:
+					macGui = new EffektGUI( &mac );
+				break;
+				case MACHMODE_MASTER: {
+					macGui = new MasterGUI( &mac );
+				break;
+				default:
+					macGui = 0;
+				}
+			}
+			if ( macGui ) {
 				macGui->moved.connect(this,&MachineView::onMoveMachine);
 				macGui->newConnection.connect(this,&MachineView::onNewConnection);
 				macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
 				macGui->selected.connect(this,&MachineView::onMachineSelected);
-				macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
-				macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
-				scrollArea_->add(macGui);
-				machineGUIs.push_back(macGui);
-									 }
-									 break;
-			case MACHMODE_FX: {
-				MachineGUI* macGui = new EffektGUI(mac);
-				macGui->moved.connect(this,&MachineView::onMoveMachine);
-				macGui->newConnection.connect(this,&MachineView::onNewConnection);
-				macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
-				macGui->selected.connect(this,&MachineView::onMachineSelected);
 				macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
 				macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
 				scrollArea_->add(macGui);
 				machineGUIs.push_back(macGui);
-							  }
-							  break;
-			case MACHMODE_MASTER: {
-				MachineGUI* macGui = new MasterGUI(mac);
-				macGui->newConnection.connect(this,&MachineView::onNewConnection);
-				macGui->moved.connect(this,&MachineView::onMoveMachine);
-				macGui->selected.connect(this,&MachineView::onMachineSelected);
-				macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
-				scrollArea_->add(macGui);
-				machineGUIs.push_back(macGui);
-								  }
-								  break;
 			}
 		}
 
-		void MachineView::addMachine( Machine * mac )
+		void MachineView::addMachine( Machine & mac )
 		{
-			onCreateMachine(mac);
+			onCreateMachine( mac );
 		}
 
 		void MachineView::createGUIMachines( )
@@ -114,7 +102,7 @@ namespace psycle {
 			for(int c=0;c<MAX_MACHINES;c++)
 			{
 				Machine* mac = _pSong->_pMachine[c];
-				if (mac) { onCreateMachine(mac); }
+				if (mac) { onCreateMachine( *mac ); }
 			}
 
 			// add Wires
