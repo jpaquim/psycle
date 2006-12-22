@@ -50,7 +50,7 @@ namespace psycle {
 			void setSelectedMachine( Machine* mac);
 
 			void createGUIMachines();
-			void addMachine(Machine* mac);
+			void addMachine( Machine & mac );
 			void removeMachines();
 
 			void update();
@@ -90,7 +90,7 @@ namespace psycle {
 
 			void init();
 
-			void onCreateMachine( Machine* mac );
+			void onCreateMachine( Machine & mac );
 			void onNewConnection( MachineGUI* sender );
 
 			void onLineMoveStart( const NMoveEvent & event );
