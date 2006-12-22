@@ -1331,12 +1331,14 @@ void NGraphics::setPen( const NPen & pen )
   if ( dblBuffer_ ) {
     GetObject( hPen, sizeof(logPen), &logPen );
     logPen.lopnWidth.x = pen.lineWidth();
+	logPen.lopnStyle = pen.lineStyle();
     DeleteObject( hPen ) ;
     hPen = CreatePenIndirect(&logPen);
 	SelectObject( gcp, hPen );
   } else {
     GetObject( hPen, sizeof(logPen), &logPen );
     logPen.lopnWidth.x = pen.lineWidth();
+	logPen.lopnStyle = pen.lineStyle();
     DeleteObject( hPen ) ;
     hPen = CreatePenIndirect(&logPen);
 	SelectObject( gc_, hPen );

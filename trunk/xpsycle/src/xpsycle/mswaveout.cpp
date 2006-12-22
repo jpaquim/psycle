@@ -22,6 +22,9 @@
 
 #include "mswaveout.h"
 #include "cstdint.h"
+#include "helpers.h"
+#include <iostream>
+
 
 namespace psycle
 {
@@ -102,6 +105,12 @@ namespace psycle
 			format.nSamplesPerSec = settings().samplesPerSec();
 			format.cbSize = 0;
 			format.nChannels = 2;
+ 
+			_deviceID=0;
+			_numBlocks = 7;
+			_pollSleep = 20;
+			_dither = 0;
+
 
 			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
@@ -267,13 +276,13 @@ namespace psycle
 			// Default configuration
 			bool saveatend(false);
 			
-			setSettings( AudioDriverSettings() );	
-			
-            _deviceID=0;
-			_numBlocks = 7;
-			_pollSleep = 20;
-			_dither = 0;
-
+			setSettings( AudioDriverSettings() );				
+   		 
+   			_deviceID=0;
+   			_numBlocks = 7;
+  
+   			_pollSleep = 20;
+   			_dither = 0;
 			_configured = true;
 
 		}
@@ -365,8 +374,8 @@ namespace psycle
 		{
 			do
 			{
-				int r = static_cast<int>( (pin[1]) );
-
+				int r = f2i( (pin[1]) );
+				
 				if (r < SHORT_MIN)
 				{
 					r = SHORT_MIN;
@@ -376,7 +385,7 @@ namespace psycle
 					r = SHORT_MAX;
 				}
 
-				int l = static_cast<int>( (pin[0]) );
+				int l = f2i( (pin[0]) );
 
 				if (l < SHORT_MIN)
 				{

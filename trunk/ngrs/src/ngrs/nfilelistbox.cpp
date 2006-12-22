@@ -187,7 +187,3 @@ void NFileListBox::setShowHiddenFiles( bool on )
   showHiddenFiles_ = on;
   setDirectory(dir_);
 }
-
-
-
-

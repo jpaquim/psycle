@@ -78,8 +78,9 @@ const char * a_xpm[] = {
 NTestWindow::NTestWindow()
  : NWindow()
 {
-  testMenu();
-  testListBox();
+  testCustomTreeView();
+  //testMenu();
+  //testListBox();
    // testEdit();
 //	testMemo();
 
@@ -91,10 +92,10 @@ NTestWindow::NTestWindow()
    pane()->add( spl, nAlTop);
 
    */
-	NButton* btn = new NButton("hint test");
+/*	NButton* btn = new NButton("hint test");
 	 btn->setHint("Save as audio File");
 	 btn->clicked.connect(this, &NTestWindow::onBtnClick);
-	pane()->add( btn, nAlTop);
+	pane()->add( btn, nAlTop);*/
 
 
  /* NSlider* slider = new NSlider();
@@ -212,32 +213,7 @@ NTestWindow::NTestWindow()
     box->setPosition(10,40,100,20);
   pane()->add(box);*/
 
-  NCustomTreeView* view = new NCustomTreeView();
-
-  NTreeNode* node1 = new NTreeNode();
-  view->addNode(node1);
-
-  node1->setHeader(new NItem("Header1"));
-
-  for (int i = 0; i < 10; i++) {
-     node1->addEntry(new NItem("entry"+stringify(i)));
-  }
-
-  NTreeNode* node2 = new NTreeNode();
-  view->addNode(node2);
-
-  node2->setHeader(new NItem("Header2"));
-
-  for (int i = 0; i < 10; i++) {
-     node2->addEntry(new NItem("entryB"+stringify(i)));
-  }
-
-  itemD = new NItem("delme");
-  node2->addEntry(itemD);
-
-  pane()->add(view);
-
-  view->setPosition(10,50,200,200);
+  
 
 
   /*NLabel* lb = new NLabel("Hallo");
@@ -633,4 +609,25 @@ void NTestWindow::testGroupBox( )
 	pane()->add( box, nAlClient );
 }
 
+void NTestWindow::testCustomTreeView() {	
+  // this creates a customtreeview
+  NCustomTreeView* view = new NCustomTreeView();
 
+  NTreeNode* node1 = new NTreeNode();
+    node1->setHeader(new NItem("Header1"));
+	for (int i = 0; i < 10; i++) {
+     node1->addEntry(new NItem("entry"+stringify(i)));
+    }
+  view->addNode(node1);
+    
+  NTreeNode* node2 = new NTreeNode();
+    node2->setHeader( new NItem("Header2") );
+	for (int i = 0; i < 10; i++) {
+     node2->addEntry( new NItem("entryB"+stringify(i) ) );
+    }
+	itemD = new NItem("delme");
+    node2->addEntry(itemD);
+  view->addNode(node2);
+    
+  pane()->add( view, nAlClient );  
+}

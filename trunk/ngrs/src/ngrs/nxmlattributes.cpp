@@ -68,10 +68,7 @@ unsigned int NXmlAttributes::getNextAttribute( const std::string & text,  unsign
   if  ( end_idx >= text.length() || midstart_idx >= text.length() ) return std::string::npos;
   std::string postfix = text.substr( midstart_idx + 1, end_idx - midstart_idx -1 );
   
-  attrib_[ prefix ] = postfix;
-  
-  std::cout << prefix  << std::endl;
-  std::cout << postfix << std::endl;
+  attrib_[ prefix ] = postfix;   
   
   return end_idx;
   

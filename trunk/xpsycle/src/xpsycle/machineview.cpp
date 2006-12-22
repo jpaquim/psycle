@@ -23,75 +23,16 @@
 #include "machinegui.h"
 #include "global.h"
 #include "plugin.h"
+#include "wiredlg.h"
 #include <ngrs/nautoscrolllayout.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/napp.h>
-#include <ngrs/nmenuitem.h>
 #include <algorithm>
 
 namespace psycle { 
   namespace host 
   {
-  
-    // MachineWireGui
-    
-    MachineWireGUI:: MachineWireGUI() {
-      dlg = new WireDlg();
-        dlg->setLine(this);
-      add( dlg );
-                       
-      initPopupMenu();
-    }
-    
-    MachineWireGUI::~MachineWireGUI() {
-    }
-
-    void MachineWireGUI::initPopupMenu() {
-      menu_ = new NPopupMenu();
-        NMenuItem* item;
-        item = new NMenuItem("add Bend");
-        item->click.connect(this,&MachineWireGUI::onAddBend);
-        menu_->add( item );
-        item = new NMenuItem("remove Connection");
-        menu_->add( item );
-      add( menu_ );                                 
-    }
-
-    void MachineWireGUI::onAddBend( NButtonEvent* ev ) {
-       addBend( newBendPos_ );
-       repaint();
-       bendAdded.emit( this );
-       setMoveable( NMoveable( nMvPolygonPicker ) );
-    }
-
-    void MachineWireGUI::onMousePress( int x, int y, int button ) {
-
-      WireGUI::onMousePress( x, y, button );
-      
-      int shift = NApp::system().shiftState();      
-      if ( shift &  nsRight ) {
-
-        newBendPos_.setXY( left() + x, top() + y );
-
-        menu_->setPosition( x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(), 100,100);
-        menu_->setVisible( true ); 
-      }
-      setMoveable( NMoveable( nMvPolygonPicker ) );        
-      repaint();        
-    }
-     
-                                   
-    void MachineWireGUI::onMouseDoublePress (int x, int y, int button) {
-        if ( button==1 )
-          dlg->setVisible(true);
-        }
-                      
-    WireDlg* MachineWireGUI::dialog() { 
-      return dlg;
-    }
-    
-
-                                                                                
+                                                                                  
 MachineView::MachineView( Song* song )
   : NPanel()
 {
@@ -197,8 +138,8 @@ void MachineView::createGUIMachines( )
                 Machine* pout = _pSong->_pMachine[tmac->_outputMachines[w]];
                 MachineGUI* to = findByMachine(pout);
                 if (to != 0) {
-                  MachineWireGUI* line = new MachineWireGUI();
-									wireGUIs.push_back( line );
+                  WireGUI* line = new WireGUI();
+				  wireGUIs.push_back( line );
                   line->setPoints(NPoint(10,10),NPoint(100,100));
                   scrollArea_->insert(line,0);
                   from->attachLine(line,0);
@@ -238,7 +179,7 @@ void MachineView::onNewConnection( MachineGUI * sender )
   int midW = sender->clientWidth()  / 2;
   int midH = sender->clientHeight() / 2;
 
-  line = new MachineWireGUI();
+  line = new WireGUI();
   line->setPoints(NPoint(sender->left()+midW,sender->top()+midH),NPoint(sender->left()+midW,sender->top()+midH));
   scrollArea_->insert( line,0 );
   line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
@@ -304,11 +245,7 @@ void MachineView::onWireDelete( WireDlg * dlg )
   from->detachLine(dlg->line());
   to->detachLine(dlg->line());
  
-  /*dlg->setVisible(false);
-  dlg->line()->setVisible(false);
-  NApp::flushEventQueue();
-  if (window()!=0) window()->checkForRemove(0);*/
-  std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
+  std::vector<WireGUI*>::iterator it = wireGUIs.begin();
   it = find( wireGUIs.begin(), wireGUIs.end(), dlg->line() );
   if ( it != wireGUIs.end() ) {
     wireGUIs.erase(it);	
@@ -343,7 +280,7 @@ void MachineView::setSelectedWire( NObject * wire ) {
 
   // try to find wire
   
-  std::vector<MachineWireGUI*>::iterator it = wireGUIs.begin();
+  std::vector<WireGUI*>::iterator it = wireGUIs.begin();
   it = find( wireGUIs.begin(), wireGUIs.end(), wire );
   if ( it != wireGUIs.end() ) {
     // wire found

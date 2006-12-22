@@ -27,18 +27,23 @@
 */
 
 class BendedLineShape;
+class NPopupMenu;
 
 namespace psycle 
 { 
 	namespace host
 	{
 		
+		class WireDlg;
+
 		class WireGUI : public NVisualComponent
 		{
 		public:
 				WireGUI();
 
 				~WireGUI();
+
+				signal1<WireGUI*> bendAdded;
 
                 const NPoint & p1() const;
                 const NPoint & p2() const;
@@ -50,12 +55,22 @@ namespace psycle
 			
 				void updateSkin();
 
+				virtual void onMousePress  (int x, int y, int button);
+				virtual void onMouseDoublePress (int x, int y, int button);
+   
+				WireDlg* dialog();
+        
 		private:
 
                 BendedLineShape* lineShape;
+
+				NPopupMenu* menu_;
+				NPoint newBendPos_;
                 
 				NColor polyColor_;
 				NColor borderColor_;
+
+				WireDlg* dlg;
 
 				float deltaColR;
 				float deltaColG;
@@ -65,8 +80,11 @@ namespace psycle
 				double triangle_size_tall;
 				double triangle_size_wide;
 				double triangle_size_indent;
-
+				
 				void drawArrow( NGraphics * g );
+				void initPopupMenu( );
+
+				void onAddBend( NButtonEvent* ev );  
 
 		};
 	}
