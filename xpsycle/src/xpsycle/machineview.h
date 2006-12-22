@@ -89,8 +89,10 @@ private:
     void onDestroyMachine( Machine* mac );
 
     void onNewConnection( MachineGUI* sender );
-    void onLineMoveEnd( const NMoveEvent & event);
 
+	void onLineMoveStart( const NMoveEvent & event );
+    void onLineMoveEnd( const NMoveEvent & event );
+	
     void onWireDelete(WireDlg* dlg);
     void onWireSelected( NButtonEvent* ev );
     void onMoveMachine(Machine* mac, int x, int y);
@@ -113,6 +115,8 @@ private:
     void onBendAdded( WireGUI* gui );
     void setSelectedWire( NObject* wire );
     void onViewMousePress( NButtonEvent* ev );
+
+	void rewire( WireGUI* line, MachineGUI* src, MachineGUI* dst );
 };
 
 }}

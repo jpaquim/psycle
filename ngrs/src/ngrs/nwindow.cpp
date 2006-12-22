@@ -274,8 +274,6 @@ void NWindow::initDrag( NVisualComponent * dragBase, int x, int y )
 {
   oldDrag = dragBase->geometry()->region();
 
-  dragBase_->onMoveStart(NMoveEvent(x - dragBase_->absoluteSpacingLeft() +
-        dragBase_->scrollDx(), y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy()));
   dragX = x;
   dragY = y;
   dragRectPoint = 0;
@@ -293,6 +291,13 @@ void NWindow::initDrag( NVisualComponent * dragBase, int x, int y )
 	} 
 
   dragPoint = dragBase->overPickPoint(x,y);
+
+  dragBase_->onMoveStart( NMoveEvent(
+    dragBase_,
+    x - dragBase_->absoluteSpacingLeft() + dragBase_->scrollDx(),
+    y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy(),
+    dragPoint
+  ));
 }
 
 void NWindow::doDrag( NVisualComponent *, int x, int y )
@@ -344,8 +349,8 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
              dragBase->setTop(dragBaseParent->spacingHeight()-dragBase_->height());
          } else dragBase_->setTop(newTop);
     } else vary=0;
-    dragBase->onMove( NMoveEvent(x - dragBase_->absoluteSpacingLeft() +
-        dragBase_->scrollDx(), y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy()) );
+    dragBase->onMove( NMoveEvent(dragBase_, x - dragBase_->absoluteSpacingLeft() +
+        dragBase_->scrollDx(), y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy(), dragPoint ));
     if (!(dragBase_->moveable().style() & nMvNoneRepaint)) {
        NRegion newDrag = dragBase->geometry()->region();
        NRegion repaintArea = newDrag | oldDrag;
@@ -360,8 +365,8 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
 
 void NWindow::endDrag( NVisualComponent *, int x, int y )
 {
-   if (dragBase_!=0) dragBase_->onMoveEnd( NMoveEvent(x - dragBase_->absoluteSpacingLeft() +
-        dragBase_->scrollDx(), y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy()));
+   if (dragBase_!=0) dragBase_->onMoveEnd( NMoveEvent(dragBase_, x - dragBase_->absoluteSpacingLeft() +
+        dragBase_->scrollDx(), y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy(), dragPoint ));
    dragBase_ = NULL;
 }
 
@@ -664,8 +669,9 @@ void NWindow::setMoveFocus( NVisualComponent * moveable, int pickPoint )
   int x = moveable->absoluteLeft();
   int y = moveable->absoluteTop();
 
-  dragBase_->onMoveStart( NMoveEvent(x - dragBase_->absoluteSpacingLeft() +
-        dragBase_->scrollDx(), y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy()));
+  dragBase_->onMoveStart( NMoveEvent(dragBase_, x - dragBase_->absoluteSpacingLeft() +
+  dragBase_->scrollDx(), y - dragBase_->absoluteSpacingTop() + dragBase_->scrollDy(), pickPoint));
+
   dragX = x;
   dragY = y;
   dragRectPoint = 0;

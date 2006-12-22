@@ -237,12 +237,21 @@ namespace psycle {
 
 		void WireGUI::onMousePress( int x, int y, int button ) {
       		int shift = NApp::system().shiftState();      
-			if ( shift &  nsRight ) {
-
+			if ( (shift &  nsRight) && !(shift & nsCtrl) ) {
+				// display right click popup menu
 				newBendPos_.setXY( left() + x, top() + y );
 
 				menu_->setPosition( x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(), 100,100);
 				menu_->setVisible( true ); 
+			} else
+			if ( (shift &  nsRight) && (shift & nsCtrl) ) {
+				// start here rewire 
+				int distToSquareP1 = ( left() + x - p1().x() )*( left() + x - p1().x() ) + ( top() + y - p1().y() )*( top() + y - p1().y() );
+				int distToSquareP2 = ( left() + x - p2().x() )*( left() + x - p2().x() ) + ( top() + y - p2().y() )*( top() + y - p2().y() );
+				if ( distToSquareP1 < distToSquareP2 )
+                  setMoveFocus(0);
+				else
+				  setMoveFocus(1);				
 			}
 			setMoveable( NMoveable( nMvPolygonPicker ) );        
 			repaint();        
@@ -254,7 +263,7 @@ namespace psycle {
 			}
 		}
                       
-		WireDlg* WireGUI::dialog() { 
+		WireDlg* WireGUI::dialog() {
 			return dlg;
 		}
 

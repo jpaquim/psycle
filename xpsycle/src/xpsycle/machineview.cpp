@@ -184,39 +184,99 @@ void MachineView::onNewConnection( MachineGUI * sender )
   scrollArea_->insert( line,0 );
   line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
   repaint();
-  line->setMoveFocus(0); 	 
+  line->setMoveFocus(0);
   line->moveEnd.connect(this,&MachineView::onLineMoveEnd);
+  line->moveStart.connect(this,&MachineView::onLineMoveStart);  
 } 
+
+void MachineView::onLineMoveStart( const NMoveEvent & ev ) {
+	// pickindex = 0 : rewire
+	if ( ev.picker() == 0 || ev.picker() == 1 ) {
+	
+	}
+}
 
 void MachineView::onLineMoveEnd( const NMoveEvent & ev )
 {	
   if ( !line ) return;
-  
-  bool found = false;
+
+  // search for a machine gui, the mouse is over.
+  MachineGUI* connectToMachineGUI = 0;
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
     if (machineGUI->clipBox().intersects(line->left()+ev.x(),line->top()+ev.y())) {
-      _pSong->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
-      startGUI->attachLine(line,0);
-      machineGUI->attachLine(line,1);
-      line->dialog()->setMachines(startGUI->pMac(),machineGUI->pMac());
-      line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-      wireGUIs.push_back(line);
-      found = true;
-      repaint();
-      break;
-    } 
+		connectToMachineGUI = machineGUI;
+		break;
+	}
   }
-  if (!found) {
-    line->dialog()->setName("wiredlg");
-    scrollArea_->removeChild(line);
-    repaint();
-  } else {
+
+  std::vector<WireGUI*>::iterator it = find( wireGUIs.begin(), wireGUIs.end(), ev.sender() );  
+  if (  it != wireGUIs.end() && connectToMachineGUI ) {
+    // found an old line and rewire it here
+    WireGUI* oldLine = *it;
+    if ( ev.picker() == 0 ) {
+	  MachineGUI* oldSrcGUI = findByMachine( oldLine->dialog()->pSrcMachine() );
+	  rewire( oldLine, oldSrcGUI, connectToMachineGUI );
+    } else
+    if ( ev.picker() == 1 ) {
+	  MachineGUI* oldDstGUI = findByMachine( oldLine->dialog()->pDstMachine() );
+	  rewire( oldLine, connectToMachineGUI, oldDstGUI );
+    } 
+  } else  
+  if ( connectToMachineGUI ) {
+	// a new line has been added.
+    _pSong->InsertConnection(startGUI->pMac()->_macIndex , connectToMachineGUI->pMac()->_macIndex, 1.0f);
+    startGUI->attachLine( line, 0 );
+    connectToMachineGUI->attachLine(line,1);
+    line->dialog()->setMachines( startGUI->pMac(), connectToMachineGUI->pMac() );
+    line->dialog()->deleteMe.connect( this, &MachineView::onWireDelete );	
     line->mousePress.connect( this, &MachineView::onWireSelected );
     line->bendAdded.connect( this, &MachineView::onBendAdded );
+    wireGUIs.push_back( line );
+  } else 
+  if ( it == wireGUIs.end() ) {
+	scrollArea_->removeChild( line );
+    line = 0;    
+  } else {
+	// nth has change, but reset the line points to state before drag
+    findByMachine( line->dialog()->pSrcMachine() )->attachLine( line, 0);
+    findByMachine( line->dialog()->pDstMachine() )->attachLine( line, 1);
   }
-  
-  line = 0;
+  repaint();
+}
+
+void MachineView::rewire( WireGUI* line, MachineGUI* src, MachineGUI* dst ) {
+  if ( line ) {
+    // mapped engine machines
+    Machine* macSrc = line->dialog()->pSrcMachine();
+    Machine* macDst = line->dialog()->pDstMachine();
+    // find old attachments to Machine GUI`s
+    MachineGUI* oldSrcGUI = findByMachine( macSrc );
+    MachineGUI* oldDstGUI = findByMachine( macDst );
+	// detach the GUI wire
+	oldDstGUI->detachLine( line );
+	oldSrcGUI->detachLine( line ); 
+
+	// detach the Engine wire	
+	Player::Instance()->lock();	
+    int wireIndex    = macDst->FindOutputWire( macDst->_macIndex );
+    int dstWireIndex = macDst->FindInputWire( macSrc->_macIndex );
+    macSrc->_connection[wireIndex] = false;
+    macSrc->_outputMachines[wireIndex] = -1;
+    macSrc->_connectedOutputs--;
+
+    macDst->_inputCon[dstWireIndex] = false;
+    macDst->_inputMachines[dstWireIndex]=-1;
+    macDst->_connectedInputs--;    
+	Player::Instance()->unlock();
+	// attach GUI wire
+	src->attachLine( line, 0 );
+	dst->attachLine( line, 1 );
+	// insert in Engine
+	_pSong->InsertConnection( macSrc->_macIndex , macDst->_macIndex, 1.0f);
+	// reset wire dialog to new machines
+    line->dialog()->setMachines( src->pMac(), dst->pMac() );                
+  }
 }
 
 void MachineView::onWireDelete( WireDlg * dlg )
@@ -393,6 +453,7 @@ void MachineView::onWireSelected( NButtonEvent* ev ) {
 void MachineView::onViewMousePress( NButtonEvent* ev ) {
   setSelectedWire( 0 );
 }
- 
+
+
 }
 }

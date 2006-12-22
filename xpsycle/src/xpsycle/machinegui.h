@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
+  *   Copyright (C) 2006 by Stefan Nattkemper   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -40,6 +40,7 @@ class MasterDlg;
 /**
 @author Stefan
 */
+
 
 class MachineGUI : public NPanel
 {
