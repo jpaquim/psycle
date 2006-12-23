@@ -64,7 +64,6 @@ namespace psycle {
 
 		void MachineView::onCreateMachine( Machine & mac )
 		{
-<<<<<<< .mine
 			MachineGUI* macGui = 0;
 			switch ( mac.mode() ) {							
 				case MACHMODE_GENERATOR:
@@ -81,24 +80,6 @@ namespace psycle {
 				}
 			}
 			if ( macGui ) {
-=======
-			MachineGUI* macGui = 0;
-			switch ( mac.mode() ) {							
-				case MACHMODE_GENERATOR:
-					macGui = new GeneratorGUI( &mac );
-				break;
-				case MACHMODE_FX:
-					macGui = new EffektGUI( &mac );
-				break;
-				case MACHMODE_MASTER: {
-					macGui = new MasterGUI( &mac );
-				break;
-				default:
-					macGui = 0;
-				}
-			}
-			if ( macGui ) {
->>>>>>> .r3654
 				macGui->moved.connect(this,&MachineView::onMoveMachine);
 				macGui->newConnection.connect(this,&MachineView::onNewConnection);
 				macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
