@@ -227,20 +227,7 @@ void Configuration::setXmlDefaults() {
 
 void Configuration::setSkinDefaults( )
 {
-  enableSound_ = 0;
-    
-  machineGUITopColor.setHCOLORREF(0x00D2C2BD);
-  machineGUIFontTopColor.setHCOLORREF(0x00000000);
-  machineGUIBottomColor.setHCOLORREF(0x009C796D);
-  machineGUIFontBottomColor.setHCOLORREF(0x00FFFFFF);
-
-  machineGUIHTopColor.setHCOLORREF(0x00BC94A9);//highlighted param colours
-  machineGUIHFontTopColor.setHCOLORREF(0x00000000);
-  machineGUIHBottomColor.setHCOLORREF(0x008B5A72);
-  machineGUIHFontBottomColor.setHCOLORREF(0x0044EEFF);
-
-  machineGUITitleColor.setHCOLORREF(0x00000000);
-  machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
+  enableSound_ = 0;      
 
 	{	
 		AudioDriver* driver = 0;

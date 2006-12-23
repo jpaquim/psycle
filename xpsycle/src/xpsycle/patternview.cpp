@@ -2101,21 +2101,21 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
       entry.setInstrument( pSong()->auxcolSelected );
       entry.setMachine( pSong()->seqBus );	// Not really needed.
 
-      if(velocity != 127 && Global::pConfig()->midi().velocity().record())
-      {
-          int par = Global::pConfig()->midi().velocity().from() + (Global::pConfig()->midi().velocity().to() - Global::pConfig()->midi().velocity().from()) * velocity / 127;
-          if (par > 255) par = 255; else if (par < 0) par = 0;
-          switch(Global::pConfig()->midi().velocity().type())
-          {
-            case 0:
-              entry.setCommand( Global::pConfig()->midi().velocity().command() );
-              entry.setParameter( par );
-            break;
-            case 3:
-              entry.setInstrument( par );
-            break;
-          }
-      } else
+//   if ( velocity != 127 ) //&& Global::pConfig()->midi().velocity().record())
+//      {
+//          int par = Global::pConfig()->midi().velocity().from() + (Global::pConfig()->midi().velocity().to() - Global::pConfig()->midi().velocity().from()) * velocity / 127;
+//          if (par > 255) par = 255; else if (par < 0) par = 0;
+//          switch(Global::pConfig()->midi().velocity().type())
+//          {
+//            case 0:
+//              entry.setCommand( Global::pConfig()->midi().velocity().command() );
+//			  entry.setParameter( par );
+//            break;
+//            case 3:
+//              entry.setInstrument( par );
+//            break;
+//      }
+//    } else
       {
           entry.setCommand( 0 );
           entry.setParameter( 0 );

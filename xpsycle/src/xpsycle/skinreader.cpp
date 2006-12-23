@@ -43,6 +43,22 @@ namespace psycle {
 		SkinReader::SkinReader()
 		{                
 			z = 0;
+			///\ todo stuff not setted so far by xml
+						
+			framemachine_info_.machineGUITopColor.setHCOLORREF(0x00D2C2BD);
+			framemachine_info_.machineGUIFontTopColor.setHCOLORREF(0x00000000);
+			framemachine_info_.machineGUIBottomColor.setHCOLORREF(0x009C796D);
+			framemachine_info_.machineGUIFontBottomColor.setHCOLORREF(0x00FFFFFF);
+
+			//highlighted param colours
+			framemachine_info_.machineGUIHTopColor.setHCOLORREF(0x00BC94A9);
+			framemachine_info_.machineGUIHFontTopColor.setHCOLORREF(0x00000000);
+			framemachine_info_.machineGUIHBottomColor.setHCOLORREF(0x008B5A72);
+			framemachine_info_.machineGUIHFontBottomColor.setHCOLORREF(0x0044EEFF);
+
+			framemachine_info_.machineGUITitleColor.setHCOLORREF(0x00000000);
+			framemachine_info_.machineGUITitleFontColor.setHCOLORREF(0x00FFFFFF);
+
 		}
 
 
@@ -157,6 +173,8 @@ namespace psycle {
 			NXmlParser parser;
 			parser.tagParse.connect( this, &SkinReader::onTagParse );
 			parser.parseString( mem );
+
+
 		}
 		
 		bool SkinReader::loadSkin( const std::string & fileName )
@@ -664,8 +682,10 @@ namespace psycle {
 		// PatternView bitmap
 
 		NBitmap & SkinReader::patview_header_bitmap() {
+			///\todo rework needed .. should be handled from DefaultBitmaps .. 
+
 			if ( patview_header_bitmap_.empty() )
-				return defaultBitmaps.pattern_header_skin();
+				return defaultBitmaps_.pattern_header_skin();
 			else
 				return patview_header_bitmap_;
 		}
@@ -674,8 +694,9 @@ namespace psycle {
 		// Machineview skin informations
 
 		NPixmap & SkinReader::machines_bitmap() {
+			///\todo rework needed .. should be handled from DefaultBitmaps .. 
 			if ( machines_bitmap_.empty() )
-				return defaultBitmaps.machine_skin();
+				return defaultBitmaps_.machine_skin();
 			else
 				return machines_bitmap_;
 		}
@@ -703,5 +724,16 @@ namespace psycle {
 			return sequencerview_info_;
 		}
 
+		// framemachine
+
+		const FrameMachineInfo & SkinReader::framemachine_info() const {
+			return framemachine_info_;
+		}
+
+		// the bitmaps
+
+		DefaultBitmaps & SkinReader::defaultBitmaps() {
+			return defaultBitmaps_;
+		}
  }
 }
