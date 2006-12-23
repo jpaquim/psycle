@@ -25,8 +25,6 @@
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include <ngrs/nframeborder.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nline.h>
 #include <ngrs/nwindow.h>
 #include <ngrs/nslider.h>
 
@@ -34,11 +32,12 @@ namespace psycle {
 	namespace host {
 
 
+		// MachineGUI abstract class
+
 		MachineGUI::MachineGUI( Machine & mac )
 			: NPanel()
 		{
 			selected_ = 0;
-			line = 0;
 			mac_ = & mac;
 			setMoveable(NMoveable(nMvHorizontal | nMvVertical | nMvNoneRepaint | nMvTopLimit | nMvLeftLimit));
 			setPosition( mac._x, mac._y, 200+2*ident(), 30+2*ident() );
@@ -46,8 +45,8 @@ namespace psycle {
 			setFont(NFont("Suse sans",6, nMedium | nStraight | nAntiAlias));
 
 			propsDlg_ = new MacPropDlg( mac_ );
-			propsDlg_->updateMachineProperties.connect(this,&MachineGUI::onUpdateMachinePropertiesSignal);
-			propsDlg_->deleteMachine.connect(this,&MachineGUI::onDeleteMachineSignal);
+				propsDlg_->updateMachineProperties.connect(this,&MachineGUI::onUpdateMachinePropertiesSignal);
+				propsDlg_->deleteMachine.connect(this,&MachineGUI::onDeleteMachineSignal);
 			add(propsDlg_);
 		}
 
@@ -102,18 +101,18 @@ namespace psycle {
 			int midW = clientWidth()  / 2;
 			int midH = clientHeight() / 2;
 			if (point == 1) {
-				line->setPoints(NPoint(left()+midW,top()+midH),line->p2());
+				line->setPoints( NPoint(left()+midW, top()+midH), line->p2() );
 			} else {
-				line->setPoints(line->p1(),NPoint(left()+midW,top()+midH));
+				line->setPoints( line->p1(), NPoint(left()+midW, top()+midH) );
 			}
 
 		}
 
-		NRegion MachineGUI::linesRegion( )
+		NRegion MachineGUI::linesRegion( ) const
 		{
-			NRegion region(geometry()->rectArea());
+			NRegion region( geometry()->rectArea() );
 
-			for (std::vector<LineAttachment>::iterator itr = attachedLines.begin(); itr < attachedLines.end(); itr++) {
+			for (std::vector<LineAttachment>::const_iterator itr = attachedLines.begin(); itr < attachedLines.end(); itr++) {
 				LineAttachment lineAttach = *itr;
 				region |= lineAttach.line()->geometry()->region();
 			}
@@ -145,7 +144,7 @@ namespace psycle {
 			moved.emit( &mac(), mac()._x, mac()._y );
 		}
 
-		int MachineGUI::ident( )
+		int MachineGUI::ident( ) const
 		{
 			// this is the ident for selection border
 			return 5;
@@ -175,6 +174,59 @@ namespace psycle {
 
 		void MachineGUI::updateSkin() {
 			// virtual call only for subclasses
+		}
+
+		void MachineGUI::onMousePress( int x, int y, int button )
+		{
+			int shift = NApp::system().shiftState();
+			if ( (shift & nsShift & nsLeft) || button == 3 ) {
+				// shift+left-click or right-click.
+				newConnection.emit(this);
+			} else if ( shift & nsLeft ) { // left-click (w/ no shift)
+				selected.emit(this);
+			} else if ( button == 2) {
+				showPropsDlg();
+			}
+		}
+
+		void MachineGUI::onDeleteMachineSignal() {
+			deleteRequest.emit(this);
+		}
+
+		void MachineGUI::showPropsDlg()
+		{
+			propsDlg_->setVisible(true); 
+		}
+
+		void MachineGUI::detachLine( WireGUI * line )
+		{
+			std::vector<LineAttachment>::iterator it = attachedLines.begin();
+
+			for (;it <  attachedLines.end(); it++) {
+				LineAttachment lineAttachment = *it;
+
+				if (lineAttachment.line() == line) {
+					attachedLines.erase(it); 
+					break;
+				}
+			}
+		}
+
+		void MachineGUI::onMouseDoublePress( int x, int y, int button )
+		{
+		}
+
+		void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
+		{
+			((NVisualComponent*) parent())->resize();
+		}
+
+		void MachineGUI::repaintVUMeter( )
+		{
+		}
+
+		void MachineGUI::onUpdateMachinePropertiesSignal(Machine* machine) {
+			repaint( this );
 		}
 
 		// end of Machine GUI class
@@ -234,14 +286,19 @@ namespace psycle {
 
 		void MasterGUI::updateSkin() {
 			setSkin();
+		} 
+
+		void MasterGUI::onMouseDoublePress( int x, int y, int button ) {
+			if ( button==1 ) {
+				masterDlg->setVisible(true);
+			}
 		}
-
-
 		// end of MasterGUI class
 
 
-
-
+		//
+		// start of GeneratorGUI class
+		//
 		GeneratorGUI::GeneratorGUI( Machine & mac ) : MachineGUI( mac )
 		{
 			panSlider_ = new NSlider();
@@ -419,22 +476,30 @@ namespace psycle {
 			setSkin();
 		}
 
+		void GeneratorGUI::onTweakSlide( int machine, int command, int value )
+		{
+			patternTweakSlide.emit(machine,command,value);
+		}
 
+		void GeneratorGUI::onKeyPress( const NKeyEvent & event )
+		{
+			if ( event.scancode() == NK_Delete ) 
+				deleteRequest.emit( this );
+		}
+
+		void GeneratorGUI::onMouseDoublePress( int x, int y, int button ) {
+			if (button==1) {
+				frameMachine->setVisible(true);
+			}
+		}
 		// end of GeneratorGUI class
 
 
 
 
-
-
-
-
-
-
-
-
+		//
 		// the Effekt Gui class
-
+		//
 		EffektGUI::EffektGUI( Machine & mac ) : MachineGUI( mac )
 		{
 			panSlider_ = new NSlider( );
@@ -611,91 +676,15 @@ namespace psycle {
 			*/
 		}
 
-		void MachineGUI::onMousePress( int x, int y, int button )
-		{
-			int shift = NApp::system().shiftState();
-			if ( (shift & nsShift & nsLeft) || button == 3 ) {
-				// shift+left-click or right-click.
-				newConnection.emit(this);
-			} else if ( shift & nsLeft ) { // left-click (w/ no shift)
-				selected.emit(this);
-			} else if ( button == 2) {
-				showPropsDlg();
-			}
-		}
-
-		void MachineGUI::onDeleteMachineSignal() {
-			deleteRequest.emit(this);
-		}
-
-		void MachineGUI::showPropsDlg()
-		{
-			propsDlg_->setVisible(true); 
-		}
-
-		void MachineGUI::detachLine( WireGUI * line )
-		{
-			std::vector<LineAttachment>::iterator it = attachedLines.begin();
-
-			for (;it <  attachedLines.end(); it++) {
-				LineAttachment lineAttachment = *it;
-
-				if (lineAttachment.line() == line) {
-					attachedLines.erase(it); 
-					break;
-				}
-			}
-		}
-
-		void MachineGUI::onMouseDoublePress( int x, int y, int button )
-		{
-		}
-
-		void GeneratorGUI::onMouseDoublePress( int x, int y, int button ) {
-			if (button==1) {
-				frameMachine->setVisible(true);
-			}
-		}
-
-		void MasterGUI::onMouseDoublePress( int x, int y, int button ) {
-			if ( button==1 ) {
-				masterDlg->setVisible(true);
-			}
-		}
-
 		void EffektGUI::onMouseDoublePress( int x, int y, int button ) {
 			if ( button==1 ) {
 				frameMachine->setVisible(true); 
 			}
 		}
 
-		void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
-		{
-			((NVisualComponent*) parent())->resize();
-		}
-
-		void MachineGUI::repaintVUMeter( )
-		{
-		}
-
 		void EffektGUI::onTweakSlide( int machine, int command, int value )
 		{
 			patternTweakSlide.emit(machine,command,value);
-		}
-
-		void GeneratorGUI::onTweakSlide( int machine, int command, int value )
-		{
-			patternTweakSlide.emit(machine,command,value);
-		}
-
-		void MachineGUI::onUpdateMachinePropertiesSignal(Machine* machine) {
-			repaint( this );
-		}
-
-		void GeneratorGUI::onKeyPress( const NKeyEvent & event )
-		{
-			if ( event.scancode() == NK_Delete ) 
-				deleteRequest.emit( this );
 		}
 
 		void EffektGUI::onKeyPress( const NKeyEvent & event )
@@ -704,6 +693,8 @@ namespace psycle {
 				deleteRequest.emit( this );
 			}
 		}
+		// end of EffektGUI class
+
 
 
 	} // end of host namespace

@@ -21,7 +21,6 @@
 #include "song.h"
 #include "machine.h"
 #include "machinegui.h"
-#include "global.h"
 #include "plugin.h"
 #include "wiredlg.h"
 #include <ngrs/nautoscrolllayout.h>
