@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan Nattkemper   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+*   Copyright (C) 2006 by Stefan Nattkemper   *
+*   natti@linux   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
@@ -29,62 +29,73 @@
 class NLine;
 class NSlider;
 
-namespace psycle { namespace host {
+namespace psycle {
+	namespace host {
 
-class Machine;
-class FrameMachine;
-class MacPropDlg;
-class MasterDlg;
+	class Machine;
+	class FrameMachine;
+	class MacPropDlg;
+	class MasterDlg;
 
+	/**
+	@author Stefan Nattkemper
+	*/
 
-/**
-@author Stefan
-*/
+	class MachineGUI : public NPanel
+	{
+		class LineAttachment {
+		public:
+			
+			LineAttachment( WireGUI* line, int pt ) 
+				: point_( pt ), line_( line ) {
+			}
 
+			int point() {
+				return point_;
+			}
 
-class MachineGUI : public NPanel
-{
-  class LineAttachment {
-    public:
-        LineAttachment(WireGUI* l, int p) : line(l),point(p) {}
+			WireGUI* line() {
+				return line_;
+			}			
 
-        WireGUI* line;
-        int point;
+		private:
 
-        MachineGUI* in;
+			int point_;
+			WireGUI* line_;
 
-  };
+		};
 
-public:
-    MachineGUI(Machine* mac);
+	public:
+		MachineGUI( Machine & mac );
 
-    ~MachineGUI();
+		~MachineGUI();
 
-        signal1<MachineGUI*> deleteRequest;
+		signal1<MachineGUI*> deleteRequest;
 
-    Machine* pMac();
-    void attachLine(WireGUI* line, int point);
-    void detachLine(WireGUI* line);
+		Machine & mac();
 
-    signal1<MachineGUI*> newConnection;
-    signal3<Machine*,int,int> moved;
-    signal3<int,int,int> patternTweakSlide;
-    signal1<MachineGUI*> selected;
+		void attachLine( WireGUI* line, int point );
+		void detachLine( WireGUI* line );
 
-    int ident();
+		signal1<MachineGUI*> newConnection;
+		signal3<Machine*,int,int> moved;
+		signal3<int,int,int> patternTweakSlide;
+		signal1<MachineGUI*> selected;
 
-    virtual void onMouseDoublePress(int x, int y, int button);
-    virtual void onMousePress(int x, int y, int button);
-    virtual void onMoveStart(const NMoveEvent & moveEvent);
-    virtual void onMove(const NMoveEvent & moveEvent);
-    virtual void onMoveEnd(const NMoveEvent & moveEvent);
-    virtual void resize();
+		int ident();
 
-    virtual void paint(NGraphics* g);
+		virtual void onMouseDoublePress(int x, int y, int button);
+		virtual void onMousePress(int x, int y, int button);
+		virtual void onMoveStart(const NMoveEvent & moveEvent);
+		virtual void onMove(const NMoveEvent & moveEvent);
+		virtual void onMoveEnd(const NMoveEvent & moveEvent);
+		virtual void resize();
 
-    virtual void repaintVUMeter();
+		virtual void paint(NGraphics* g);
 
-    void setSelected(bool on);
+		virtual void repaintVUMeter();
+
+		void setSelected(bool on);
 
 		std::vector<LineAttachment> attachedLines;
 
@@ -92,188 +103,153 @@ public:
 		const MachineCoordInfo & coords() const;
 
 		virtual void updateSkin();
-    virtual MacPropDlg* propsDlg();
-    virtual void showPropsDlg();
-    void onUpdateMachinePropertiesSignal(Machine* machine);
-    void onDeleteMachineSignal();
+		virtual MacPropDlg* propsDlg();
+		virtual void showPropsDlg();
+		void onUpdateMachinePropertiesSignal(Machine* machine);
+		void onDeleteMachineSignal();
 
-private:
+	private:
 
-    NBorder* myBorder_;
+		NBorder* myBorder_;
 
-    NRegion oldDrag;
-    NRegion linesRegion();
+		NRegion oldDrag;
+		NRegion linesRegion();
 
-    Machine* mac_;
-    MacPropDlg* propsDlg_;
-    NLine* line;
+		Machine* mac_;
+		MacPropDlg* propsDlg_;
+		NLine* line;
 
-    bool selected_;
+		bool selected_;
 
 		MachineCoordInfo coords_;
-};
+	};
 
 
-class MasterGUI : public MachineGUI
-{
-public:
-    MasterGUI(Machine* mac);
+	class MasterGUI : public MachineGUI
+	{
+	public:
+		MasterGUI( Machine & mac );
 
-    ~MasterGUI();
-
-
-    virtual void onMousePress(int x, int y, int button);
-    virtual void onMouseDoublePress(int x, int y, int button);
-
-    virtual void paint(NGraphics* g);
-
-    virtual void updateSkin();
-    virtual void showPropsDlg() {}; // override--we don't to see a master props dlg (atm)
-
-private:
-
-    MasterDlg* masterDlg;
-/*    NRect bgCoords;
-    NRect muteCoords;
-    NRect soloCoords;
-    NRect dSoloCoords;
-    NRect dMuteCoords;*/
-
-    void setSkin();
-};
+		~MasterGUI();
 
 
-class GeneratorGUI : public MachineGUI
-{
-public:
+		virtual void onMousePress(int x, int y, int button);
+		virtual void onMouseDoublePress(int x, int y, int button);
 
-    class VUPanel : public NPanel {
+		virtual void paint(NGraphics* g);
 
-      friend class GeneratorGUI;
+		virtual void updateSkin();
+		virtual void showPropsDlg() {}; // override--we don't to see a master props dlg (atm)
 
-      public:
-          VUPanel(GeneratorGUI* pGui) {
-            pGui_ = pGui;
-          };
+	private:
 
-        virtual void paint(NGraphics* g);
+		MasterDlg* masterDlg;
 
-      private:
+		void setSkin();
+	};
 
-        GeneratorGUI* pGui_;
 
-    };
+	class GeneratorGUI : public MachineGUI
+	{
+	public:
 
-    GeneratorGUI(Machine* mac);
+		class VUPanel : public NPanel {
 
-    ~GeneratorGUI();
+			friend class GeneratorGUI;
 
-    FrameMachine* frameMachine;
+		public:
+			VUPanel(GeneratorGUI* pGui) {
+				pGui_ = pGui;
+			};
 
-    virtual void onMousePress(int x, int y, int button);
+			virtual void paint(NGraphics* g);
 
-    virtual void repaintVUMeter();
+		private:
 
-    virtual void onMouseDoublePress(int x, int y, int button);
+			GeneratorGUI* pGui_;
 
-    virtual void paint(NGraphics* g);
+		};
 
-    virtual void onKeyPress( const NKeyEvent & event);
+		GeneratorGUI( Machine & mac );
+
+		~GeneratorGUI();
+
+		FrameMachine* frameMachine;
+
+		virtual void onMousePress( int x, int y, int button );
+
+		virtual void repaintVUMeter();
+
+		virtual void onMouseDoublePress( int x, int y, int button );
+
+		virtual void paint( NGraphics* g );
+
+		virtual void onKeyPress( const NKeyEvent & event);
 
 		virtual void updateSkin();
 
-private:
+	private:
 
-    NSlider* panSlider_;
-    VUPanel* vuPanel_;
+		NSlider* panSlider_;
+		VUPanel* vuPanel_;
 
-    /*NRect bgCoords;
-    NRect muteCoords;
-    NRect soloCoords;
-    NRect dSoloCoords;
-    NRect dMuteCoords;
-    NPoint dNameCoords;
+		void customSliderPaint(NSlider* sl, NGraphics* g);
 
-    NRect sGeneratorVuPeak;
-    NRect sGeneratorVu0;
-    NRect dGeneratorVu;
-    NRect sGenerator;
-
-    NRect sGenPan;*/
-
-    void customSliderPaint(NSlider* sl, NGraphics* g);
-
-    void setSkin();
-    void onPosChanged( NSlider* sender );
-    void onTweakSlide( int machine, int command, int value );
-};
+		void setSkin();
+		void onPosChanged( NSlider* sender );
+		void onTweakSlide( int machine, int command, int value );
+	};
 
 
-class EffektGUI : public MachineGUI
-{
-public:
+	class EffektGUI : public MachineGUI
+	{
+	public:
 
-    class VUPanel : public NPanel {
+		class VUPanel : public NPanel {
 
-      friend class EffectGUI;
+			friend class EffectGUI;
 
-      public:
-          VUPanel(EffektGUI* pGui) {
-            pGui_ = pGui;
-          };
+		public:
+			VUPanel(EffektGUI* pGui) {
+				pGui_ = pGui;
+			};
 
-        virtual void paint(NGraphics* g);
+			virtual void paint(NGraphics* g);
 
-      private:
+		private:
 
-        EffektGUI* pGui_;
+			EffektGUI* pGui_;
 
-    };
+		};
 
 
-    EffektGUI(Machine* mac);
+		EffektGUI( Machine & mac );
 
-    ~EffektGUI();
+		~EffektGUI();
 
-    FrameMachine* frameMachine;
+		FrameMachine* frameMachine;
 
-    virtual void onMousePress(int x, int y, int button);
-    virtual void onMouseDoublePress(int x, int y, int button);
+		virtual void onMousePress(int x, int y, int button);
+		virtual void onMouseDoublePress(int x, int y, int button);
 
-    virtual void paint(NGraphics* g);
+		virtual void paint(NGraphics* g);
 
-    virtual void repaintVUMeter();
+		virtual void repaintVUMeter();
 
 		virtual void onKeyPress( const NKeyEvent & event );
 
 		virtual void updateSkin();
 
-private:
+	private:
 
-    //NRect bgCoords;
-    //NRect sEffectPan;
-    //NPoint dNameCoords;
-    NSlider* panSlider_;
+		NSlider* panSlider_;
+		VUPanel* vuPanel_;
 
-    /*NRect muteCoords;
-    NRect soloCoords;
-    NRect dSoloCoords;
-    NRect dMuteCoords;
-
-    NRect sGeneratorVuPeak;
-    NRect sGeneratorVu0;
-    NRect dGeneratorVu;
-    NRect sGenerator;*/
-
-
-    VUPanel* vuPanel_;
-
-    void customSliderPaint(NSlider* sl, NGraphics* g);
-
-    void setSkin();
-    void onPosChanged( NSlider* sender );
-    void onTweakSlide( int machine, int command, int value );
-};
+		void setSkin();
+		void customSliderPaint(NSlider* sl, NGraphics* g);    
+		void onPosChanged( NSlider* sender );
+		void onTweakSlide( int machine, int command, int value );
+	};
 
 }
 }

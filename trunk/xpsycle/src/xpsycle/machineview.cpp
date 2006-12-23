@@ -64,6 +64,24 @@ namespace psycle {
 
 		void MachineView::onCreateMachine( Machine & mac )
 		{
+<<<<<<< .mine
+			MachineGUI* macGui = 0;
+			switch ( mac.mode() ) {							
+				case MACHMODE_GENERATOR:
+					macGui = new GeneratorGUI( mac );
+				break;
+				case MACHMODE_FX:
+					macGui = new EffektGUI( mac );
+				break;
+				case MACHMODE_MASTER: {
+					macGui = new MasterGUI( mac );
+				break;
+				default:
+					macGui = 0;
+				}
+			}
+			if ( macGui ) {
+=======
 			MachineGUI* macGui = 0;
 			switch ( mac.mode() ) {							
 				case MACHMODE_GENERATOR:
@@ -80,6 +98,7 @@ namespace psycle {
 				}
 			}
 			if ( macGui ) {
+>>>>>>> .r3654
 				macGui->moved.connect(this,&MachineView::onMoveMachine);
 				macGui->newConnection.connect(this,&MachineView::onNewConnection);
 				macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
@@ -146,7 +165,7 @@ namespace psycle {
 		{
 			for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
 				MachineGUI* machineGUI = *it;
-				if (machineGUI->pMac() == mac) return machineGUI;
+				if ( &machineGUI->mac() == mac ) return machineGUI;
 			}
 			return 0;
 		}
@@ -204,10 +223,10 @@ namespace psycle {
 			} else  
 				if ( connectToMachineGUI ) {
 					// a new line has been added.
-					_pSong->InsertConnection(startGUI->pMac()->_macIndex , connectToMachineGUI->pMac()->_macIndex, 1.0f);
+					_pSong->InsertConnection( startGUI->mac()._macIndex , connectToMachineGUI->mac()._macIndex, 1.0f );
 					startGUI->attachLine( line, 0 );
 					connectToMachineGUI->attachLine(line,1);
-					line->dialog()->setMachines( startGUI->pMac(), connectToMachineGUI->pMac() );
+					line->dialog()->setMachines( &startGUI->mac(), &connectToMachineGUI->mac() );
 					line->dialog()->deleteMe.connect( this, &MachineView::onWireDelete );	
 					line->mousePress.connect( this, &MachineView::onWireSelected );
 					line->bendAdded.connect( this, &MachineView::onBendAdded );
@@ -254,7 +273,7 @@ namespace psycle {
 				// insert in Engine
 				_pSong->InsertConnection( macSrc->_macIndex , macDst->_macIndex, 1.0f);
 				// reset wire dialog to new machines
-				line->dialog()->setMachines( src->pMac(), dst->pMac() );                
+				line->dialog()->setMachines( &src->mac(), &dst->mac() );  
 			}
 		}
 
@@ -350,8 +369,8 @@ namespace psycle {
 
 		Machine * MachineView::selMachine( )
 		{
-			if (selectedMachine_)
-				return selectedMachine_->pMac();
+			if ( selectedMachine_ )
+				return &selectedMachine_->mac();
 			else
 				return 0;
 		}
@@ -371,16 +390,16 @@ namespace psycle {
 				selectedMachine_ = gui;
 				gui->setSelected(true);
 				gui->repaint();
-				selected.emit(gui->pMac()); 
+				selected.emit( &gui->mac() ); 
 			} 
 		}
 
-		void MachineView::setSelectedMachine( Machine* mac)
+		void MachineView::setSelectedMachine( Machine* mac )
 		{
-			for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
+			for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin(); it < machineGUIs.end(); it++ ) {
 				MachineGUI* machineGUI = *it;
-				if ( machineGUI->pMac() == mac) {
-					onMachineSelected(machineGUI);
+				if ( &machineGUI->mac() == mac ) {
+					onMachineSelected( machineGUI );
 					break;
 				}
 			}
@@ -395,7 +414,7 @@ namespace psycle {
 		void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
 		{
 			// todo remove machine
-			int index = machineGUI->pMac()->_macIndex;
+			int index = machineGUI->mac()._macIndex;
 			_pSong->DestroyMachine( index );
 			selectedMachine_ = 0;
 			update();		 
