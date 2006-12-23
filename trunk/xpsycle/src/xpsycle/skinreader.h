@@ -113,9 +113,26 @@ namespace psycle {
 		};
 
 		class VuMeterInfo {
+		public:
 			NColor vu1;
 			NColor vu2;
 			NColor vu3;
+		};
+
+		class FrameMachineInfo {
+		public:
+			NColor machineGUITopColor;
+			NColor machineGUIFontTopColor;
+			NColor machineGUIBottomColor;
+			NColor machineGUIFontBottomColor;
+
+			NColor machineGUIHTopColor;
+			NColor machineGUIHFontTopColor;
+			NColor machineGUIHBottomColor;
+			NColor machineGUIHFontBottomColor;
+
+			NColor machineGUITitleColor;
+			NColor machineGUITitleFontColor;
 		};
 
 		class SkinReader : public NObject {
@@ -168,6 +185,14 @@ namespace psycle {
 
 			const SequencerViewInfo & sequencerview_info() const;
 
+			// FrameMachine
+
+			const FrameMachineInfo & framemachine_info() const;
+
+			// bitmaps
+
+			DefaultBitmaps & defaultBitmaps();
+
 		private:
 
 			void onTagParse(const NXmlParser & parser, const std::string & tagName);
@@ -211,8 +236,12 @@ namespace psycle {
 			MachineViewColorInfo machineview_color_info_;
 
 
+			// FrameMachine stuff
+
+			FrameMachineInfo framemachine_info_;
+
 			// default Bitmaps
-			DefaultBitmaps defaultBitmaps;
+			DefaultBitmaps defaultBitmaps_;
 
 			NBitmap patview_header_bitmap_;
 			NPixmap machines_bitmap_;
