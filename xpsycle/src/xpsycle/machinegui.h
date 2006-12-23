@@ -217,24 +217,19 @@ namespace psycle {
 			EffektGUI( Machine & mac );
 
 			~EffektGUI();
-
-			FrameMachine* frameMachine;
-
+			
 			virtual void onMousePress(int x, int y, int button);
 			virtual void onMouseDoublePress(int x, int y, int button);
-
 			virtual void paint(NGraphics* g);
-
 			virtual void repaintVUMeter();
-
 			virtual void onKeyPress( const NKeyEvent & event );
-
 			virtual void updateSkin();
 
 		private:
 
 			NSlider* panSlider_;
 			VUPanel* vuPanel_;
+			FrameMachine* frameMachine;
 
 			void setSkin();
 			void customSliderPaint(NSlider* sl, NGraphics* g);    
