@@ -753,7 +753,7 @@ namespace psycle {
 
 		void CustomPatternView::onKeyPress( const NKeyEvent & event ) {
 				
-                        int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key( event.shift(),event.scancode()));
+                        int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( event.shift(),event.scancode()));
 
                         // Keybased block selection commands.
                         if (key == cdefSelectUp || key == cdefSelectDn || 

@@ -1040,7 +1040,7 @@ void PatternView::TweakGUI::resize() {
 void PatternView::TweakGUI::onKeyPress(const NKeyEvent & event) {
 	CustomPatternView::onKeyPress( event );
 
-        int key = Global::pConfig()->inputHandler.getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
+    int key = Global::pConfig()->inputHandler().getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
 	switch (key) {		
 		case ' ':
 			if (Player::Instance()->playing() ) {
@@ -1564,7 +1564,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 	if ( !pView->pattern() ) return;
 	CustomPatternView::onKeyPress( event );
 	
-        int command = Global::pConfig()->inputHandler.getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
+        int command = Global::pConfig()->inputHandler().getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
 	switch (command) {		
 		case cdefEditToggle:
                         // FIXME: needs to toggle edit mode...
@@ -1733,7 +1733,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
                 if (!( event.shift() & nsCtrl )) {
                 // We don't want a note to fire if ctrl is held down.
                         std::cout << "event #0 - note event" << std::endl;
-                        int note = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(nsNone,event.scancode()));
+                        int note = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(nsNone,event.scancode()));
                         if ( note == cdefKeyStop ) {
                                 pView->undoManager().addUndo( cursor() );
                                 pView->noteOffAny( cursor() );
@@ -2220,7 +2220,7 @@ void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
 	if ( !pView->pattern() ) return;
 
   if ( cursor().eventNr() == 0 ) {
-    int outnote = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(nsNone,event.scancode()));
+    int outnote = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(nsNone,event.scancode()));
     pView->StopNote( outnote );
   }
 }

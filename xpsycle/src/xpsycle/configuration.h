@@ -50,23 +50,15 @@ public:
 
     void setDriverByName( const std::string & driverName );        
 
-    InputHandler inputHandler;
-   
-
+    ///\ todo private access
     bool _followSong;
-
     int defaultPatLines;
-
     AudioDriver* _pOutputDriver;
 	AudioDriver* _pSilentDriver;
-
-    // sound stuff
-   
-
-	bool doEnableSound;
-
+	///\ todo put this in player ..
     bool _RecordTweaks;
     bool _RecordUnarmed;
+	///\end todo
 
 
 	std::map<std::string, AudioDriver*> & driverMap() {
@@ -82,13 +74,17 @@ public:
 
 	bool enableSound() const;
 
+	InputHandler & inputHandler();
+
 private:
 
+	InputHandler inputHandler_;
     DefaultBitmaps* bitmaps_;
 
 	 // a map, that holds available drivers ..
 	std::map<std::string, AudioDriver*> driverMap_;
 	bool enableSound_;
+	bool doEnableSound;
 
 	std::string iconPath_;
     std::string pluginPath_;

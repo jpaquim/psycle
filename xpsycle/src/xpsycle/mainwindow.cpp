@@ -1388,7 +1388,7 @@ void MainWindow::onSequencerEntryClick( SequencerItem * item )
 void MainWindow::onKeyPress( const NKeyEvent & event )
 {
   if ( selectedChildView_ ) {
-                int key = Global::pConfig()->inputHandler.getEnumCodeByKey(Key(event.shift(),event.scancode()));
+                int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
                 switch (key)
                 {
 			case cdefEditMachine:
