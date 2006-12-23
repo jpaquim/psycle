@@ -72,6 +72,27 @@ Configuration::~Configuration()
   delete bitmaps_;
 }
 
+const std::string & Configuration::iconPath() const {
+	return iconPath_;
+}
+
+const std::string & Configuration::pluginPath() const {
+	return pluginPath_;
+}
+
+const std::string & Configuration::prsPath() const {
+	return prsPath_;
+}
+
+const std::string & Configuration::hlpPath() const {
+	return hlpPath_;
+}
+
+
+bool Configuration::enableSound() const {
+	return enableSound_;
+}
+
 void Configuration::setXmlDefaults() {     
   std::string xml_mem_;   
      
@@ -206,22 +227,8 @@ void Configuration::setXmlDefaults() {
 
 void Configuration::setSkinDefaults( )
 {
-  _centerCursor = false;
-  enableSound = 0;
-  device_name = "default";
-
-  _linenumbers       = true;
-  _linenumbersHex    = false;
-  _linenumbersCursor = true;
-  pv_timesig = 4;
-
-  pattern_font_x = 9;
-  pattern_font_y = 11;
-
-  vu1.setHCOLORREF(0x0080FF80);
-  vu2.setHCOLORREF(0x00403731);
-  vu3.setHCOLORREF(0x00262bd7);
-  
+  enableSound_ = 0;
+    
   machineGUITopColor.setHCOLORREF(0x00D2C2BD);
   machineGUIFontTopColor.setHCOLORREF(0x00000000);
   machineGUIBottomColor.setHCOLORREF(0x009C796D);
@@ -286,36 +293,36 @@ void Configuration::setSkinDefaults( )
 	}
 
 	setDriverByName("silent");
-	enableSound = false;
+	enableSound_ = false;
 
   #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/install_paths.h>
-	hlpPath = XPSYCLE__INSTALL_PATHS__DOC "/";
-	iconPath = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
-	pluginPath = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
-	prsPath = XPSYCLE__INSTALL_PATHS__PRESETS "/";
+	hlpPath_ = XPSYCLE__INSTALL_PATHS__DOC "/";
+	iconPath_ = XPSYCLE__INSTALL_PATHS__PIXMAPS "/";
+	pluginPath_ = XPSYCLE__INSTALL_PATHS__PLUGINS "/";
+	prsPath_ = XPSYCLE__INSTALL_PATHS__PRESETS "/";
   #else
 	// we don't have any information about the installation paths,
 	// so, we can only assume everything is at a fixed place, like under the user home dir
-	hlpPath = NFile::replaceTilde("~/xpsycle/doc/");
-	iconPath = NFile::replaceTilde("~/xpsycle/pixmaps/");
+	hlpPath_ = NFile::replaceTilde("~/xpsycle/doc/");
+	iconPath_ = NFile::replaceTilde("~/xpsycle/pixmaps/");
     #ifdef __unix__
-	pluginPath = NFile::replaceTilde("~/xpsycle/plugins/");
+	pluginPath_ = NFile::replaceTilde("~/xpsycle/plugins/");
 	#else
-	pluginPath = NFile::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
+	pluginPath_ = NFile::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
 	#endif
 	
 	
-	prsPath =  NFile::replaceTilde("~/xpsycle/prs/");
+	prsPath_ =  NFile::replaceTilde("~/xpsycle/prs/");
   #endif
 
   #if !defined NDEBUG
   std::cout
     << "xpsycle: configuration: initial defaults:\n"
-    << "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
-    << "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
-    << "xpsycle: configuration: preset dir: " << prsPath << "\n"
-    << "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
+    << "xpsycle: configuration: pixmap dir: " << iconPath_ << "\n"
+    << "xpsycle: configuration: plugin dir: " << pluginPath_ << "\n"
+    << "xpsycle: configuration: preset dir: " << prsPath_ << "\n"
+    << "xpsycle: configuration: doc    dir: " << hlpPath_ << "\n";
   #endif
 
 }
@@ -380,7 +387,8 @@ void Configuration::loadConfig()
    }
 }
 
-void Configuration::loadConfig(std::string const & path) throw(std::exception)
+void Configuration::loadConfig( const std::string & path )
+	throw( std::exception )
 {
   #if !defined NDEBUG
     std::cout << "xpsycle: configuration: attempting to load file: " << path << std::endl;
@@ -422,10 +430,10 @@ void Configuration::loadConfig(std::string const & path) throw(std::exception)
  #if !defined NDEBUG
   std::cout
     << "xpsycle: configuration: after loading file: " << path << "\n"
-    << "xpsycle: configuration: pixmap dir: " << iconPath << "\n"
-    << "xpsycle: configuration: plugin dir: " << pluginPath << "\n"
-    << "xpsycle: configuration: preset dir: " << prsPath << "\n"
-    << "xpsycle: configuration: doc    dir: " << hlpPath << "\n";
+    << "xpsycle: configuration: pixmap dir: " << iconPath_ << "\n"
+    << "xpsycle: configuration: plugin dir: " << pluginPath_ << "\n"
+    << "xpsycle: configuration: preset dir: " << prsPath_ << "\n"
+    << "xpsycle: configuration: doc    dir: " << hlpPath_ << "\n";
   #endif
 
 	doEnableSound = true;
@@ -437,20 +445,20 @@ void Configuration::onConfigTagParse( const NXmlParser & parser, const std::stri
   std::string id  = parser.getAttribValue("id"); 
   std::string src = parser.getAttribValue("src");
 
-   if ( id == "icondir" )   iconPath   = src;  else  
-   if ( id == "plugindir" ) pluginPath = src;  else
-   if ( id == "prsdir" )    prsPath    = src;  else
-   if ( id == "hlpdir" )    hlpPath    = src;
+   if ( id == "icondir" )   iconPath_   = src;  else  
+   if ( id == "plugindir" ) pluginPath_ = src;  else
+   if ( id == "prsdir" )    prsPath_    = src;  else
+   if ( id == "hlpdir" )    hlpPath_    = src;
  } else
  if (tagName == "driver" && doEnableSound) {		
 			setDriverByName( parser.getAttribValue("name"));
 	} else
   if (tagName == "alsa") {
-    device_name = parser.getAttribValue("device");
+	  std::string deviceName = parser.getAttribValue("device");
 		std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 		if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
 			AudioDriverSettings settings = it->second->settings();
-			settings.setDeviceName( device_name );
+			settings.setDeviceName( deviceName );
 			it->second->setSettings( settings );
 		}		
   } else
@@ -458,7 +466,7 @@ void Configuration::onConfigTagParse( const NXmlParser & parser, const std::stri
       std::string enableStr = parser.getAttribValue("enable");
       int enable = 0;
       if (enableStr != "") enable = str<int>(enableStr);
-      enableSound = enable;
+      enableSound_ = enable;
       if (enable == 0) {
 		setDriverByName("silent");
 		doEnableSound = false;

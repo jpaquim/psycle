@@ -524,7 +524,7 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
     std::string withoutSuffix = psFileName.substr(0,i);
     std::string soName = withoutSuffix + ".so";
     psFileName = "lib-xpsycle.plugin."+soName;
-    psFileName = Global::pConfig()->pluginPath + psFileName;
+    psFileName = Global::pConfig()->pluginPath() + psFileName;
     int pos;
     while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
   } else {
@@ -542,11 +542,11 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
           }
       } else _psDllName = psFileName;
 
-      psFileName = Global::pConfig()->pluginPath + psFileName;
+      psFileName = Global::pConfig()->pluginPath() + psFileName;
   }
   #else
   _psDllName = psFileName;
-  psFileName = Global::pConfig()->pluginPath + psFileName;
+  psFileName = Global::pConfig()->pluginPath() + psFileName;
   #endif   
   return Instance(psFileName);
 }

@@ -1101,27 +1101,27 @@ void MainWindow::onHelpMenuGreeting( NButtonEvent * ev )
 
 void MainWindow::onHelpMenuReadme( NButtonEvent * ev )
 {
-  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"readme.txt");
+  infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "readme.txt" );
   infoDlg->setVisible(true);
 
 }
 
 void MainWindow::onHelpMenuWhatsNew( NButtonEvent * ev )
 {
-  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"keys.txt");
-  infoDlg->setVisible(true);
+  infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "keys.txt" );
+  infoDlg->setVisible( true );
 }
 
 void MainWindow::onHelpMenuTweaking( NButtonEvent * ev )
 {
-  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"tweaking.txt");
-  infoDlg->setVisible(true);
+  infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "tweaking.txt" );
+  infoDlg->setVisible( true );
 }
 
 void MainWindow::onHelpMenuKeys( NButtonEvent * ev )
 {
-  infoDlg->loadFromFile(Global::pConfig()->hlpPath+"whatsnew.txt");
-  infoDlg->setVisible(true);
+  infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "whatsnew.txt" );
+  infoDlg->setVisible( true );
 }
 
 void MainWindow::onNewMachine( NButtonEvent * ev )

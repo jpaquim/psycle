@@ -51,6 +51,18 @@ namespace psycle {
 		}
 
 		void SkinReader::setDefaults() {
+
+			///\ todo
+
+			// this values are from the configuration and needs
+			// to be integrated here
+			
+			//vu1.setHCOLORREF(0x0080FF80);
+			//vu2.setHCOLORREF(0x00403731);
+			//vu3.setHCOLORREF(0x00262bd7);
+
+			///\ todo end
+
 			// skin default for memparse
 			z = 0;
 
