@@ -441,7 +441,7 @@ void FrameMachine::loadPresets() {
 
   try {
       RiffFile f;
-      if (!f.Open(Global::pConfig()->prsPath+filename)) throw "couldn`t open file";
+      if ( !f.Open(Global::pConfig()->prsPath() +filename) ) throw "couldn`t open file";
 
       int numpresets;
       f.Read(numpresets);

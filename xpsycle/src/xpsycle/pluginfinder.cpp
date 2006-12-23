@@ -238,7 +238,7 @@ namespace psycle
 
 		void PluginFinder::scanNatives() {
 
-			std::string psycle_path = Global::pConfig()->pluginPath;
+			std::string psycle_path = Global::pConfig()->pluginPath();
 
 			std::vector<std::string> fileList;
 			fileList = NFile::fileList( psycle_path );

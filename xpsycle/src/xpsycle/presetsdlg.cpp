@@ -151,9 +151,9 @@ void PresetsDlg::loadPresets( )
   }
 
   try {
-      std::cout << Global::pConfig()->prsPath+filename << std::endl;
+      std::cout << Global::pConfig()->prsPath() + filename << std::endl;
       RiffFile f;
-      if (!f.Open(Global::pConfig()->prsPath+filename)) {
+      if (!f.Open( Global::pConfig()->prsPath() + filename )) {
         throw "couldn`t open file";
       }
       int numpresets;

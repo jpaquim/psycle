@@ -39,6 +39,7 @@ namespace psycle {
 
 class Configuration : public NObject {
 public:
+
     Configuration();
 
     ~Configuration();
@@ -47,18 +48,13 @@ public:
 
     DefaultBitmaps & icons();
 
-    void setDriverByName( const std::string & driverName );
-    
-    std::string iconPath;
-    std::string pluginPath;
-    std::string prsPath;
-    std::string hlpPath;
+    void setDriverByName( const std::string & driverName );        
 
     InputHandler inputHandler;
 
-    NColor vu1;
-    NColor vu2;
-    NColor vu3;
+//    NColor vu1;
+//    NColor vu2;
+//    NColor vu3;
 
     NColor machineGUITopColor;
     NColor machineGUIFontTopColor;
@@ -73,27 +69,17 @@ public:
     NColor machineGUITitleColor;
     NColor machineGUITitleFontColor;
 
-    int pattern_font_x;
-    int pattern_font_y;
-
-    bool _linenumbers;
-    bool _linenumbersHex;
-    bool _linenumbersCursor;
     bool _followSong;
 
     int defaultPatLines;
-    int pv_timesig;
-
-    bool _centerCursor;
 
     AudioDriver* _pOutputDriver;
-		AudioDriver* _pSilentDriver;
+	AudioDriver* _pSilentDriver;
 
     // sound stuff
-    bool enableSound;
-    std::string device_name;
+   
 
-		bool doEnableSound;
+	bool doEnableSound;
 
     bool _RecordTweaks;
     bool _RecordUnarmed;
@@ -206,19 +192,34 @@ public:
 		std::map<std::string, AudioDriver*> & driverMap() {
 			return driverMap_;
 		}
-		
+	
+ // path 
+
+	const std::string & iconPath() const;
+    const std::string & pluginPath() const;
+    const std::string & prsPath() const;
+    const std::string & hlpPath() const;
+
+	bool enableSound() const;
+
 private:
 
     DefaultBitmaps* bitmaps_;
 
+	 // a map, that holds available drivers ..
+	std::map<std::string, AudioDriver*> driverMap_;
+	bool enableSound_;
+
+	std::string iconPath_;
+    std::string pluginPath_;
+    std::string prsPath_;
+    std::string hlpPath_;
+
     void setSkinDefaults();
     void setXmlDefaults();
     void onConfigTagParse( const NXmlParser & parser, const std::string & tagName );
-    void loadConfig(std::string const & path) throw(std::exception);
+    void loadConfig( const std::string & path ) throw(std::exception);
 	
-    // a map, that holds available drivers ..
-	std::map<std::string, AudioDriver*> driverMap_;
-
 };
 
 }

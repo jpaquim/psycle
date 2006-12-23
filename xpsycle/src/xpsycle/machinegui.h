@@ -66,7 +66,7 @@ namespace psycle {
 		public:
 			MachineGUI( Machine & mac );
 
-			~MachineGUI();
+			virtual ~MachineGUI() = 0;
 
 			signal1<MachineGUI*> deleteRequest;
 

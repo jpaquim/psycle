@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+*   Copyright (C) 2006 by Stefan Nattkemper   *
+*   natti@linux   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef SKINREADER_H
 #define SKINREADER_H
 
@@ -112,21 +112,26 @@ namespace psycle {
 			NColor pane_play_line_color;
 		};
 
+		class VuMeterInfo {
+			NColor vu1;
+			NColor vu2;
+			NColor vu3;
+		};
 
 		class SkinReader : public NObject {
-		// Singleton Pattern
+			// Singleton Pattern
 		private:
-	  	SkinReader();          
-  		~SkinReader();
+			SkinReader();          
+			~SkinReader();
 			SkinReader( SkinReader const & );
-  		SkinReader& operator=(SkinReader const&);
+			SkinReader& operator=(SkinReader const&);
 
 		public:
 
 			static SkinReader* Instance() {
-					// use single threaded only
-					static SkinReader s;
- 					return &s; 
+				// use single threaded only
+				static SkinReader s;
+				return &s; 
 			}
 			// Singleton pattern end
 
@@ -136,7 +141,7 @@ namespace psycle {
 			void setDefaults();
 
 			// patternview settings
-		
+
 			const PatternViewColorInfo & patternview_color_info() const;			
 
 			const HeaderCoordInfo & headerCoordInfo() const;
@@ -148,7 +153,7 @@ namespace psycle {
 			int patview_track_right_ident() const;
 
 			NBitmap & patview_header_bitmap();
-						
+
 			// machineview settings
 
 			NPixmap & machines_bitmap();
@@ -162,7 +167,7 @@ namespace psycle {
 			// Sequencerview
 
 			const SequencerViewInfo & sequencerview_info() const;
-			
+
 		private:
 
 			void onTagParse(const NXmlParser & parser, const std::string & tagName);
@@ -194,7 +199,7 @@ namespace psycle {
 			int patview_track_left_ident_;
 			int patview_track_right_ident_;
 			int patview_track_big_sep_width_;
-			
+
 			PatternViewColorInfo patternview_color_info_;
 
 			// machine_view stuff
