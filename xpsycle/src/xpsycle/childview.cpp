@@ -145,7 +145,7 @@ void ChildView::play( )
 
 void ChildView::playFromStart()
 {
-  if (Global::pConfig()->_followSong)
+  //if (Global::pConfig()->_followSong)
   {
     //bScrollDetatch=false;
   }

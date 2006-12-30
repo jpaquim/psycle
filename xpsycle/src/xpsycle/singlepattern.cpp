@@ -145,7 +145,7 @@ namespace psycle
 
 		const TimeSignature & SinglePattern::playPosTimeSignature(double pos) const
 		{
-				int bts = 0;
+				double bts = 0;
 				std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
 				for (; it < timeSignatures_.end(); it++)
 				{

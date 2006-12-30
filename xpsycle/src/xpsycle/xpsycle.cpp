@@ -22,14 +22,14 @@
 #include <ngrs/napp.h>
 #include <ngrs/nwindow.h>
 
-int main(int argc, char *argv[])
+int main( int argc, char *argv[] )
 {    
     NApp app;
 
-    NWindow* mainWin = new psycle::host::MainWindow();
-    app.setMainWindow(mainWin);
+    NWindow* mainWin = new psycle::host::MainWindow( );
+    app.setMainWindow( mainWin );
         
-    app.run();
+    app.run( );
 
     return EXIT_SUCCESS;
 }

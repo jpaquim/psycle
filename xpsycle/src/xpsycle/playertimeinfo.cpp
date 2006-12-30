@@ -73,14 +73,14 @@ namespace psycle
 			return lpb_;
 		}
 
-		void PlayerTimeInfo::setBpm( float bpm )
+		void PlayerTimeInfo::setBpm( double bpm )
 		{
 			bpm_ = bpm;
 			recalcSPB();
 			recalcSPR();
 		}
 
-		float PlayerTimeInfo::bpm( ) const
+		double PlayerTimeInfo::bpm( ) const
 		{
 			return bpm_;			
 		}

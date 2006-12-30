@@ -61,6 +61,7 @@ public:
    void run();
    static void runModal(NWindow* modalWin);
    void setMainWindow(NWindow* window);
+   static NWindow* mainWindow();
    static void addWindow(WinHandle handle, NWindow* window);
    static void addKeyAccelerator(const NKeyAccelerator & accelerator, NObject* notify);
    static void removeWindow( WinHandle handle );

@@ -37,10 +37,11 @@ public:
 
     ~NFontMetrics();
 
-    int  textWidth(const std::string & text);
-    int  textHeight();
-    int  textAscent();
-    int  textDescent();
+    int maxCharWidth() const;
+    int textWidth(const std::string & text) const;
+    int textHeight() const;
+    int textAscent() const;
+    int textDescent() const;
 
     void setFont(const NFont & font);
 

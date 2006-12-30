@@ -88,10 +88,10 @@ void MasterDlg::setVisible( bool on )
   for (std::vector<Slider*>::iterator it = sliders.begin(); it < sliders.end(); it++) {
     Slider* sl = *it;
 
-    if (index == 0) {
+    if ( index == 0 ) {
       float db = dsp::dB(pMaster->_outDry/256.0f);
       sl->setPos(208-(int)((db+40.0f)*4.0f));
-      sl->led()->setNumber(sl->pos());
+      sl->led()->setNumber( static_cast<int>( sl->pos() ) );
       sl->led()->repaint();
       sl->repaint();
     } else {
@@ -99,7 +99,7 @@ void MasterDlg::setVisible( bool on )
         float val;
         pMaster->GetWireVolume(index-1,val);
         sl->setPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-        sl->led()->setNumber(sl->pos());
+        sl->led()->setNumber( static_cast<int>( sl->pos() ) );
         sl->led()->repaint();
         sl->repaint();
       } else {
@@ -121,16 +121,16 @@ void MasterDlg::onSliderPosChanged( NSlider * sender  )
       Slider* slider = *it;
       if (slider->led()) {
         if (slider->index() > 0) {
-          float db = ((208- sender->pos() )/4.0f)-40.0f;
+          float db = ((208 - sender->pos() )/4.0f)-40.0f;
           pMaster->SetWireVolume(slider->index()-1,dsp::dB2Amp(db));
-          slider->led()->setNumber(db);
+          slider->led()->setNumber( static_cast<int>( db ) );
           slider->led()->repaint();
         } else {
           // slidermaster
 
             float db = ((208- sender->pos() )/4.0f)-40.0f;
             pMaster->_outDry = int(dsp::dB2Amp(db)*256.0f);
-            slider->led()->setNumber(db);
+            slider->led()->setNumber( static_cast<int>( db ) );
             slider->led()->repaint();
         }
       }

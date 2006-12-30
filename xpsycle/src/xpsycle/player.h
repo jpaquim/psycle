@@ -38,14 +38,15 @@ namespace psycle
 		class Player
 		{
 		// Singleton Pattern
-		private:
-	  	Player();          
-  		~Player();
-			Player( Player const & );
-  		Player& operator=(Player const&);
+         private:
+                Player();          
+  		        ~Player();
+		
+                Player( Player const & );
+  		        Player& operator=(Player const&);
 
-		public:
-			static Player* Instance() {
+            public:
+                static Player* Instance() {
 					// note keep sure a player instance is created from the gui
 					// before starting audiothread
 					// or use single threaded only
@@ -93,8 +94,8 @@ namespace psycle
 
 			const PlayerTimeInfo & timeInfo() const;
 
-			void setBpm( int bpm );
-			float bpm() const;
+			void setBpm( double bpm );
+			double bpm() const;
 
 			void SampleRate(const int sampleRate);
 

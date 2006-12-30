@@ -124,6 +124,7 @@ namespace psycle {
 								to->attachLine(line,1);
 								line->dialog()->setMachines(tmac,pout);
 								line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
+								line->removeMe.connect( this, &MachineView::onWireGUIDelete );
 							}
 						}
 					}
@@ -210,6 +211,7 @@ namespace psycle {
 					line->dialog()->deleteMe.connect( this, &MachineView::onWireDelete );	
 					line->mousePress.connect( this, &MachineView::onWireSelected );
 					line->bendAdded.connect( this, &MachineView::onBendAdded );
+					line->removeMe.connect( this, &MachineView::onWireGUIDelete );
 					wireGUIs.push_back( line );
 				} else 
 					if ( it == wireGUIs.end() ) {
@@ -257,6 +259,10 @@ namespace psycle {
 			}
 		}
 
+
+        void MachineView::onWireGUIDelete( WireGUI * line ) {
+          onWireDelete( line->dialog() );
+        }
 		void MachineView::onWireDelete( WireDlg * dlg )
 		{
 			Player::Instance()->lock();

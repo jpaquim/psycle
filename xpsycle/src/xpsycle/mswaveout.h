@@ -32,6 +32,8 @@ namespace psycle
 {
 	namespace host
 	{                          
+            
+        ///\todo  this driver is only making strange noise
               
 		/// output device interface implemented by mme.
 		class MsWaveOut : public AudioDriver

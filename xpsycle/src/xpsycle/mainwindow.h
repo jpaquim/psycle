@@ -138,7 +138,7 @@ private:
 
     NComboBox* insCombo_;
 
-		AudioConfigDlg* audioConfigDlg;
+    AudioConfigDlg* audioConfigDlg;
 
     int count;
 
@@ -188,8 +188,8 @@ private:
     void onViewMenuSequencerbar(NButtonEvent* ev);
     void onViewMenuStatusbar(NButtonEvent* ev);
 
-		void onConfigMenuAudio(NButtonEvent* ev);
-		void onConfigMenuSkin(NButtonEvent* ev);
+    void onConfigMenuAudio(NButtonEvent* ev);
+    void onConfigMenuSkin(NButtonEvent* ev);
 
     void onHelpMenuAbout(NButtonEvent* ev);
     void onHelpMenuGreeting(NButtonEvent* ev);
@@ -208,17 +208,17 @@ private:
     void onRecordWav(NButtonEvent* ev);
     void onRecordNotesMode(NButtonEvent* ev);
 
-		void onMachineDeleted( int machineIndex );
-		void onMachineNameChanged( int machineIndex );
+    void onMachineDeleted( int machineIndex );
+    void onMachineNameChanged( int machineIndex );
 
-    void setAppSongBpm(int x);
+    void setAppSongBpm( double x );
 
     void onBpmIncOne(NButtonEvent* ev);
     void onBpmAddTen(NButtonEvent* ev);
     void onBpmDecOne(NButtonEvent* ev);
     void onBpmDecTen(NButtonEvent* ev);
 
-		void onUpdateInstrumentCbx( int index , bool update );
+    void onUpdateInstrumentCbx( int index , bool update );
     void onInstrumentCbx(NItemEvent* ev);
 		void updateComboIns(bool updatelist);
 

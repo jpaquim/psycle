@@ -85,8 +85,8 @@ namespace psycle {
           return lineShape->p2();
         }
                 
-		void WireGUI::addBend( const NPoint & pt ) {
-		  lineShape->addBend( pt );		
+		void WireGUI::insertBend( const NPoint & pt ) {
+		  lineShape->insertBend( pt );		
 		}                
 
         void WireGUI::setPoints( const NPoint & p1, const NPoint & p2 )
@@ -101,40 +101,48 @@ namespace psycle {
 			g->setPen(pen);
 
             g->setTranslation( g->xTranslation()-left(), g->yTranslation()-top() );
-                       
-            NPoint startPt = lineShape->p1();
-                        
+              
+            // draw the bended lines           
+            NPoint startPt = lineShape->p1();                        
             std::vector<NPoint>::const_iterator it = lineShape->bendPts().begin();
             for ( ; it < lineShape->bendPts().end(); it++ ) {
               NPoint pt = *it;
-              g->drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() ); 
+              g->drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() );              
               startPt = pt;                         
-            }
-                                                                        
+            }                                                                                    
             g->drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
-                        
-			g->resetPen();
-			drawArrow(g);
+            
+            // draw the arrows with resetted pen ( normal line width )
+            g->resetPen();
+            startPt = lineShape->p1();                        
+            it = lineShape->bendPts().begin();
+            for ( ; it < lineShape->bendPts().end(); it++ ) {
+              NPoint pt = *it;
+              drawArrow( g, startPt, pt );             
+              startPt = pt;                         
+            }                                                                           		
+			drawArrow( g, startPt, lineShape->p2() );
+
 			g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
 		}
 
-		void WireGUI::drawArrow( NGraphics * g )
+		void WireGUI::drawArrow( NGraphics * g , const NPoint & p1, const NPoint & p2 )
 		{
 			// Spaces between the end and startPoint of the Line
 
-			double  ankathede    = (lineShape->p1().x() - lineShape->p2().x());
-			double  gegenkathede = (lineShape->p1().y() - lineShape->p2().y());
+			double  ankathede    = ( p1.x() - p2.x() );
+			double  gegenkathede = ( p1.y() - p2.y() );
 			double  hypetenuse   = std::sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
 
 
 			double cos = ankathede / hypetenuse;
 			double sin = gegenkathede / hypetenuse;
 
-			int middleX = ( p1().x() + p2().x() ) / 2;
-			int middleY = ( p1().y() + p2().y() ) / 2;
+			int middleX = ( p1.x() + p2.x() ) / 2;
+			int middleY = ( p1.y() + p2.y() ) / 2;
 
-			double slope = atan2(sin, cos);
-			int rtcol = 140+abs((int)(slope*32));
+			double slope = atan2( sin, cos );
+			int rtcol = 140 + abs( static_cast<int>( slope * 32 ) );
 
 			double altslope=slope;
 			if(altslope<-1.05)  altslope -= 2 * (altslope + 1.05);
@@ -224,16 +232,21 @@ namespace psycle {
 			item->click.connect(this,&WireGUI::onAddBend);
 			menu_->add( item );
 			item = new NMenuItem("remove Connection");
+			item->click.connect(this,&WireGUI::onRemoveMe);
 			menu_->add( item );
 			add( menu_ );                                 
 		}
 
 		void WireGUI::onAddBend( NButtonEvent* ev ) {
-			addBend( newBendPos_ );
+			insertBend( newBendPos_ );
 			repaint();
 			bendAdded.emit( this );
 			setMoveable( NMoveable( nMvPolygonPicker ) );
 		}
+		
+		void WireGUI::onRemoveMe( NButtonEvent* ev ) {
+            removeMe.emit( this );
+        }
 
 		void WireGUI::onMousePress( int x, int y, int button ) {
       		int shift = NApp::system().shiftState();      

@@ -168,17 +168,13 @@ void NVisualComponent::onEnter() {
 
 void NVisualComponent::drawChildren( NGraphics * g, const NRegion & repaintArea , NVisualComponent* sender )
 {
-  if (layout_ == 0) {
-    std::vector<NRuntime*>::iterator itr = components.begin();
-    for (;itr < components.end(); itr++) {
-      NRuntime* child = *itr;
-      if (child->visit(isVisualComponent)) {
-       // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
-        NVisualComponent* visualChild = (NVisualComponent*) child;
-        visualChild->draw(g,repaintArea,sender);
-      }
-    }
-  } else layout_->drawComponents(this,g,repaintArea,sender);
+  if ( layout_ == 0 ) {
+    std::vector< NVisualComponent* >::const_iterator itr = visualComponents().begin();
+    for ( ;itr < visualComponents().end(); itr++ )
+      (*itr)->draw( g, repaintArea, sender );
+  } 
+  else 
+    layout_->drawComponents( this, g, repaintArea, sender );
 }
 
 bool NVisualComponent::visit( NVisitor * v )
@@ -246,29 +242,37 @@ NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long a
   region = oldRegion & region;            // intersection
 
   g->setTranslation(g->xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g->yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
-
-  if (!region.isEmpty() && region.intersects(absX,absY) && events()) {
+  NVisualComponent* found = 0;
+  
+  if ( !region.isEmpty() && region.intersects( absX, absY ) && events() ) {
     g->setRegion(region);       
-	vector<NVisualComponent*>::reverse_iterator rev_it = visualComponents_.rbegin();
-	for ( ; rev_it < visualComponents_.rend(); ++rev_it ) {
-		NVisualComponent* visualChild = *rev_it;
-        if (visualChild->visible()) {
-          NVisualComponent* found = visualChild->overObject(g,absX, absY);
-          if ( found ) {
-             g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-             g->setRegion(oldRegion);
-             return found;
-           }
-         }
-     }
-     g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-     g->setRegion(oldRegion);
-	 return this;
-  }
+	found = checkChildrenEvent( g, absX, absY );
+    if (!found) found = this;   
+  }    
+  
   g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
   g->setRegion(oldRegion);
 
-  return 0;
+  return found;
+}
+
+// default order and event check
+// overridden e.g in ntoolbar
+NVisualComponent* NVisualComponent::checkChildrenEvent( NGraphics* g, int absX, int absY ) {
+  NVisualComponent* found = 0;
+  std::vector<NVisualComponent*>::const_reverse_iterator rev_it = visualComponents().rbegin();
+  for ( ; rev_it != visualComponents().rend(); ++rev_it ) {
+      found = checkChildEvent( *rev_it, g, absX, absY );
+      if ( found ) break;
+  } 
+  return found;
+}     
+
+NVisualComponent* NVisualComponent::checkChildEvent( NVisualComponent* child, NGraphics* g, int absX, int absY  ) {                
+  if ( child->visible() )
+    return child->overObject( g, absX, absY );
+  else       
+    return 0;          
 }
 
 int NVisualComponent::spacingWidth( ) const

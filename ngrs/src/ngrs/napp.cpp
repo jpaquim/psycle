@@ -90,6 +90,10 @@ void NApp::setMainWindow( NWindow* window )
   mainWin_ = window; 
 }
 
+NWindow* NApp::mainWindow() {
+  return mainWin_;
+}
+
 NSystem & NApp::system( )
 {
   return *NSystem::Instance();

@@ -134,7 +134,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i, TriggerDelay[i] );
-									TriggerDelayCounter[i] = (RetriggerRate[i]*timeInfo.samplesPerRow())/256;
+									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerRow())/256 );
 								}
 								else
 								{
@@ -147,7 +147,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i, TriggerDelay[i] );
-									TriggerDelayCounter[i] = (RetriggerRate[i]*timeInfo.samplesPerRow())/256;
+									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerRow())/256 );
 									int parameter = TriggerDelay[i].parameter() & 0x0f;
 									if (parameter < 9)
 									{
@@ -468,7 +468,7 @@ namespace psycle
 				case SAMPLER_CMD_EXTENDED:
 					if ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
-						pVoice->_triggerNoteOff = (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f);
+						pVoice->_triggerNoteOff = static_cast<int>( (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f) );
 					}
 					else if (((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry.parameter() & 0x0f) == 0 ))
 					{
@@ -619,7 +619,7 @@ namespace psycle
 				pVoice->_envelope._sustain = (float)song()->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
 				if (( pEntry.command() == SAMPLER_CMD_EXTENDED) && ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
-					pVoice->_triggerNoteDelay = (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f);
+					pVoice->_triggerNoteDelay = static_cast<int>( (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f) );
 					pVoice->_envelope._stage = ENV_OFF;
 				}
 				else
@@ -627,7 +627,7 @@ namespace psycle
 					if (pEntry.command() == SAMPLER_CMD_RETRIG && (pEntry.parameter() & 0x0f) > 0)
 					{
 						pVoice->effretTicks=(pEntry.parameter() & 0x0f); // number of Ticks.
-						pVoice->effVal= (timeInfo.samplesPerRow()/(pVoice->effretTicks+1));
+						pVoice->effVal= static_cast<int>( (timeInfo.samplesPerRow()/(pVoice->effretTicks+1)) );
 						
 						int volmod = (pEntry.parameter() & 0xf0)>>4; // Volume modifier.
 						switch (volmod) 

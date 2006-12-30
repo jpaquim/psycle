@@ -35,18 +35,18 @@ namespace psycle {
 
 		class ColumnEvent {			
 			public:
-
-				ColumnEvent( int type );
+                enum ColType { hex2 = 0, hex4 = 1, note = 2 };
+				
+                ColumnEvent( ColType type );
+                
 				~ColumnEvent();
-
-				enum colType { hex2 = 0, hex4 = 1, note = 2 };
-
-				int type() const;
+				
+				ColType type() const;
 				int cols() const;
 
 			private:
 				
-				int type_;
+				ColType type_;
 		};
 
 		class PatCursor {
@@ -58,13 +58,13 @@ namespace psycle {
 
 			void setPosition( int track, int line, int eventNr, int col );
 
-			void setTrack( int x);
+			void setTrack( int x );
 			int track() const;
-			void setLine( int y);
+			void setLine( int y );
 			int line() const;
 			void setEventNr( int event );
 			int eventNr() const;
-			void setCol( int col);
+			void setCol( int col );
 			int col() const;
 
 		private:
@@ -83,7 +83,7 @@ namespace psycle {
 
 			TrackGeometry();
 
-			TrackGeometry( CustomPatternView* patternView );
+			TrackGeometry( CustomPatternView & patternView );
 
 			~TrackGeometry();
 

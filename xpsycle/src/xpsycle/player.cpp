@@ -25,7 +25,6 @@
 #include "song.h"
 #include "machine.h"
 #include "internal_machines.h"
-//#include "inputhandler.h"
 
 #ifdef __unix__
 #include <unistd.h> // for OpenBSD usleep()
@@ -68,12 +67,12 @@ namespace psycle
 			return timeInfo_;
 		}
 
-		void Player::setBpm( int bpm )
+		void Player::setBpm( double bpm )
 		{
 			timeInfo_.setBpm( bpm );
 		}
 
-		float Player::bpm( ) const
+		double Player::bpm( ) const
 		{
 			return timeInfo_.bpm();
 		}
@@ -145,10 +144,10 @@ namespace psycle
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
 			Machine::id_type mIndex;
-			switch (event.type())
+			switch ( event.type() )
 			{
 			case GlobalEvent::BPM_CHANGE:
-				setBpm (event.parameter() );
+				setBpm ( event.parameter() );
 std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new bpm: "<<event.parameter() <<std::endl;
 				break;
 			case GlobalEvent::JUMP_TO:
@@ -177,7 +176,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			case GlobalEvent::SET_VOLUME:
 				if(event.target() == 255)
 				{
-					((Master*)(song()._pMachine[MASTER_INDEX]))->_outDry = event.parameter();
+					((Master*)(song()._pMachine[MASTER_INDEX]))->_outDry = static_cast<int>( event.parameter() );
 				}
 				else 
 				{
@@ -185,13 +184,13 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					if(mIndex < MAX_MACHINES)
 					{
 						Wire::id_type wire( event.target2() );
-						if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1(event.parameter()));
+						if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1( static_cast<int>( event.parameter() )));
 					}
 				}
 			case GlobalEvent::SET_PANNING:
 				mIndex = event.target();
 				if(mIndex < MAX_MACHINES)
-					if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetPan( event.parameter() );
+					if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetPan( static_cast<int>( event.parameter() ) );
 				break;
 
 			default:
@@ -235,7 +234,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 								{
 									// delay
 									pMachine->TriggerDelay[track] = entry;
-									pMachine->TriggerDelayCounter[track] = ((entry.parameter()+1)*timeInfo_.samplesPerRow())/256;
+									pMachine->TriggerDelayCounter[track] = static_cast<int>( ((entry.parameter()+1)*timeInfo_.samplesPerRow())/256 );
 								}
 								else if(entry.command() == PatternCmd::RETRIGGER)
 								{
@@ -260,7 +259,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 										pMachine->TriggerDelay[track] = entry;
 										pMachine->ArpeggioCount[track] = 1;
 									}
-									pMachine->RetriggerRate[track] = timeInfo_.samplesPerRow()* timeInfo_.linesPerBeat() / 24;
+									pMachine->RetriggerRate[track] = static_cast<int>( timeInfo_.samplesPerRow()* timeInfo_.linesPerBeat() / 24 );
 								}
 								else
 								{
@@ -274,7 +273,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					}
 				}
 			}
-			_samplesRemaining = timeInfo_.samplesPerRow();
+			_samplesRemaining = static_cast<int>( timeInfo_.samplesPerRow() );
 		}
 
 		float * Player::Work(void* context, int & numSamples)
@@ -324,7 +323,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					if(globals.empty())
 						chunkSampleSize = numSamples - processedSamples;
 					else
-						chunkSampleSize = chunkBeatSize * timeInfo_.samplesPerBeat();
+						chunkSampleSize = static_cast<int>( chunkBeatSize * timeInfo_.samplesPerBeat() );
 
 					//get all patternlines occuring before the next global event, execute them, and process
 					events.clear();

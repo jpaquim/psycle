@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan Nattkemper  *
+ *   Copyright (C) 2005, 2006 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,6 +23,7 @@
 #include "ntogglepanel.h"
 
 class NButton;
+class NPopupWindow;
 
 /**
 @author Stefan Nattkemper
@@ -31,20 +32,36 @@ class NButton;
 class NToolBar : public NTogglePanel
 {
 public:
+       
     NToolBar();
 
     ~NToolBar();
 
-    virtual void paint(NGraphics* g);
-    virtual void add(NRuntime* component);
-    virtual NButton* add(NButton*  button);
-    virtual void add(NVisualComponent* comp);
+    virtual void paint( NGraphics* g );
+    virtual void add( NRuntime* component );
+    virtual NButton* add( NButton*  button );
+    virtual void add( NVisualComponent* comp );
+    
+    virtual void resize();
 
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
+
+
+protected:
+          
+   virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
+   virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
 
 private:
 
-    NButton* btn;
+    NButton* moreBtn_;
     NPanel* spacer_;
+    NPopupWindow* popup_;
+    
+    void doAlign();
+    void onMoreBtnClicked( NButtonEvent* ev );
+    
 };
 
 #endif

@@ -545,10 +545,10 @@ void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
 
   SequencerItem* item = new SequencerItem(sView);
     item->click.connect(this,&SequencerGUI::SequencerLine::onSequencerItemClick);
-    item->setPosition(d2i(sView->beatPxLength() * endTick),5,pattern->beats() * sView->beatPxLength() ,20);
-    item->setSequenceEntry(sequenceLine()->createEntry(pattern, endTick));
-    items.push_back(item);
-  add(item);
+    item->setPosition(d2i(sView->beatPxLength() * endTick),5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
+    item->setSequenceEntry( sequenceLine()->createEntry(pattern, endTick) );
+    items.push_back( item );
+  add( item );
 
 }
 
@@ -595,7 +595,7 @@ void SequencerGUI::SequencerLine::resize( )
     double tickPosition = item->sequenceEntry()->tickPosition();
     SinglePattern* pattern = item->sequenceEntry()->pattern();
 
-    item->setPosition(d2i(sView->beatPxLength() * tickPosition),5, (item->endOffset()-item->start()) * sView->beatPxLength(),20);
+    item->setPosition(d2i(sView->beatPxLength() * tickPosition),5, static_cast<int>( (item->endOffset()-item->start()) * sView->beatPxLength() ),20);
   }
 }
  

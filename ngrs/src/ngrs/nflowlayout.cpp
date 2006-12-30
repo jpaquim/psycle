@@ -21,14 +21,28 @@
 
 using namespace std;
 
+NFlowLayout::NFlowLayout( )
+ : NLayout( )
+{
+  init( );
+}
 
+NFlowLayout::NFlowLayout( int align ) 
+ : NLayout( )
+{
+  init( );
+  setAlign( align );
+}
 
-NFlowLayout::NFlowLayout()
+NFlowLayout::NFlowLayout( int align, int hgap, int vgap, int baseLine ) 
  : NLayout()
 {
   init();
+  align_ = align;
+  hgap_ = hgap;
+  vgap_ = vgap;
+  baseLine_ = nAlCenter;
 }
-
 
 void NFlowLayout::init( )
 {
@@ -246,13 +260,6 @@ void NFlowLayout::setAlign( int align )
   align_ = align;
 }
 
-
-NFlowLayout::NFlowLayout( int align )
-{
-  init();
-  setAlign(align);
-}
-
 void NFlowLayout::setHgap( int hgap )
 {
   hgap_ = hgap;
@@ -303,14 +310,7 @@ void NFlowLayout::drawComponents( NVisualComponent * target, NGraphics* g, const
   } else NLayout::drawComponents(target,g,repaintArea,sender);
 }
 
-NFlowLayout::NFlowLayout( int align, int hgap, int vgap, int baseLine  ) : NLayout()
-{
-  init();
-  align_ = align;
-  hgap_ = hgap;
-  vgap_ = vgap;
-  baseLine_ = nAlCenter;
-}
+
 
 void NFlowLayout::setBaseLine( int line )
 {

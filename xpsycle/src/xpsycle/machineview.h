@@ -96,6 +96,7 @@ namespace psycle {
 			void onLineMoveStart( const NMoveEvent & event );
 			void onLineMoveEnd( const NMoveEvent & event );
 
+            void onWireGUIDelete( WireGUI * line );
 			void onWireDelete(WireDlg* dlg);
 			void onWireSelected( NButtonEvent* ev );
 			void onMoveMachine(Machine* mac, int x, int y);

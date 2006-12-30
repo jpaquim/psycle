@@ -50,8 +50,8 @@ namespace psycle
 
 				/// the current beats per minute at which to play the song.
 				/// can be changed from the song itself using commands.
-				void setBpm( float bpm );
-				float bpm() const;
+				void setBpm( double bpm );
+				double bpm() const;
 
 				void setSampleRate( int rate );
 				int sampleRate( ) const;
@@ -65,7 +65,7 @@ namespace psycle
 				double playBeatPos_;
 				int samplePos_;
 				int lpb_;
-				float bpm_;
+				double bpm_;
 				int sampleRate_;
 				float samplesPerBeat_;
 				float samplesPerRow_;

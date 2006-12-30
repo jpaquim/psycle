@@ -183,8 +183,28 @@ void BendedLineShape::setPoints( const NPoint & p1, const NPoint & p2 )
   calculateRectArea();
 }
 
-void BendedLineShape::addBend( const NPoint & pts ) {
-  bendPts_.push_back( pts );
+void BendedLineShape::insertBend( const NPoint & pt ) {
+  if ( bendPts_.size() == 0) {        
+    bendPts_.push_back( pt );
+  } else {             
+    int dist =  ( left() + pt.x() - p1().x() )*( left() + pt.x() - p1().x() ) + ( top() + pt.y() - p1().y() )*( top() + pt.y() - p1().y() );
+    std::vector<NPoint>::iterator insIt = bendPts_.begin();
+    std::vector<NPoint>::iterator it = bendPts_.begin();
+    for ( ; it < bendPts_.end(); it++ ) {
+      const NPoint & p = *it;
+      int newDist =  ( left() + pt.x() - p.x() )*( left() + pt.x() - p.x() ) + ( top() + pt.y() - p.y() )*( top() + pt.y() - p.y() );
+      if ( newDist < dist ) insIt = it;
+      dist = newDist;
+    }
+    int newDist =  ( left() + pt.x() - p2().x() )*( left() + pt.x() - p2().x() ) + ( top() + pt.y() - p2().y() )*( top() + pt.y() - p2().y() );
+    if ( newDist < dist ) insIt = bendPts_.end();
+    
+    if ( insIt != bendPts_.end() ) {
+         bendPts_.insert( insIt, pt );
+    } else {
+      bendPts_.push_back( pt );
+    }    
+  }    
 }
 
 const std::vector<NPoint> & BendedLineShape::bendPts() const {

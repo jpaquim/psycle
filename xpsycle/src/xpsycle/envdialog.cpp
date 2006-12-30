@@ -283,19 +283,19 @@ void EnvDialog::onEnvSliderMoved( NSlider *slider )
 	{
 		if(slider==m_a_attack_slider)	//amp attack
 		{
-			pSong->_pInstrument[si]->ENV_AT = pos;
+			pSong->_pInstrument[si]->ENV_AT = static_cast<int>( pos );
 			m_a_a_label->setText(buffer.str());
 			m_a_a_label->repaint();
 		}
 		else if(slider==m_a_decay_slider)
 		{
-			pSong->_pInstrument[si]->ENV_DT = pos;
-			m_a_d_label->setText(buffer.str());
+			pSong->_pInstrument[si]->ENV_DT = static_cast<int>( pos );
+			m_a_d_label->setText( buffer.str() );
 			m_a_d_label->repaint();
 		}
 		else if(slider==m_a_release_slider)
 		{
-			pSong->_pInstrument[si]->ENV_RT = pos;
+			pSong->_pInstrument[si]->ENV_RT = static_cast<int>( pos );
 			m_a_r_label->setText(buffer.str());
 			m_a_r_label->repaint();
 		}
@@ -311,19 +311,19 @@ void EnvDialog::onEnvSliderMoved( NSlider *slider )
 	{
 		if(slider==m_f_attack_slider)	//amp attack
 		{
-			pSong->_pInstrument[si]->ENV_F_AT = pos;
+			pSong->_pInstrument[si]->ENV_F_AT = static_cast<int>( pos );
 			m_f_a_label->setText(buffer.str());
 			m_f_a_label->repaint();
 		}
 		else if(slider==m_f_decay_slider)
 		{
-			pSong->_pInstrument[si]->ENV_F_DT = pos;
-			m_f_d_label->setText(buffer.str());
+			pSong->_pInstrument[si]->ENV_F_DT = static_cast<int>( pos );
+			m_f_d_label->setText( buffer.str() );
 			m_f_d_label->repaint();
 		}
 		else if(slider==m_f_release_slider)
 		{
-			pSong->_pInstrument[si]->ENV_F_RT = pos;
+			pSong->_pInstrument[si]->ENV_F_RT = static_cast<int>( pos );
 			m_f_r_label->setText(buffer.str());
 			m_f_r_label->repaint();
 		}
@@ -348,7 +348,7 @@ void EnvDialog::onSustainSliderMoved( NSlider *slider )
 	if(slider==m_a_sustain_slider)
 	{
 		buffer << (int)(pos) << "%";
-		pSong->_pInstrument[si]->ENV_SL = pos;
+		pSong->_pInstrument[si]->ENV_SL = static_cast<int>( pos );
 		m_a_s_label->setText(buffer.str());
 		m_a_s_label->repaint();
 		// Update ADSR
@@ -362,7 +362,7 @@ void EnvDialog::onSustainSliderMoved( NSlider *slider )
 	else	//filter sustain
 	{
 		buffer << (int)(pos*0.78125) << "%";	//filt sustain ranges from 0 to 128
-		pSong->_pInstrument[si]->ENV_F_SL = pos;
+		pSong->_pInstrument[si]->ENV_F_SL = static_cast<int>( pos );
 		m_f_s_label->setText(buffer.str());
 		m_f_s_label->repaint();
 		// Update filter ADSR
@@ -394,7 +394,7 @@ void EnvDialog::onQSliderMoved( NSlider *slider )
   double pos = slider->pos();
 	int si=pSong->instSelected;
 
-	pSong->_pInstrument[si]->ENV_F_RQ = pos;
+	pSong->_pInstrument[si]->ENV_F_RQ = static_cast<int>( pos );
 
 	std::ostringstream buffer;
 	buffer << (int)(pos*0.78740) << "%";
@@ -411,7 +411,7 @@ void EnvDialog::onEnvAmtSliderMoved( NSlider *slider )
 {
   double pos = slider->pos();
 	int si=pSong->instSelected;
-	pSong->_pInstrument[si]->ENV_F_EA = pos-128;
+	pSong->_pInstrument[si]->ENV_F_EA = static_cast<int>( pos ) - 128;
 	std::ostringstream buffer;
 	buffer<<(int)(pos*0.78125);
 	m_envelope_label->setText(buffer.str());
