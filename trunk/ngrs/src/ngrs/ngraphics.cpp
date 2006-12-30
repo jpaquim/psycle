@@ -212,8 +212,10 @@ void NGraphics::setForeground( const NColor & color )
     else
        SelectObject( gc_, brush );
     
+    LOGPEN logPen;
+    GetObject( hPen, sizeof(logPen), &logPen );
     DeleteObject( hPen );
-    hPen = CreatePen(PS_SOLID, 1, RGB( color.red(), color.green(), color.blue()));
+    hPen = CreatePen( logPen.lopnStyle, logPen.lopnWidth.x, RGB( color.red(), color.green(), color.blue()));
     
     if ( dblBuffer_ )
       SelectObject( gcp, hPen );

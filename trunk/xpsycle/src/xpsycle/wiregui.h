@@ -44,12 +44,13 @@ namespace psycle
 				~WireGUI();
 
 				signal1<WireGUI*> bendAdded;
+				signal1<WireGUI*> removeMe;
 
                 const NPoint & p1() const;
                 const NPoint & p2() const;
 
                 void setPoints( const NPoint & p1, const NPoint & p2 );
-                void addBend( const NPoint & pts );
+                void insertBend( const NPoint & pts );
 
 				virtual void paint(NGraphics* g);
 			
@@ -81,10 +82,11 @@ namespace psycle
 				double triangle_size_wide;
 				double triangle_size_indent;
 				
-				void drawArrow( NGraphics * g );
+				void drawArrow( NGraphics * g, const NPoint & p1, const NPoint & p2 );
 				void initPopupMenu( );
 
-				void onAddBend( NButtonEvent* ev );  
+				void onAddBend( NButtonEvent* ev );
+                void onRemoveMe ( NButtonEvent* ev ); 
 
 		};
 	}

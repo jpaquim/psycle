@@ -51,8 +51,7 @@ namespace psycle {
 			void setDriverByName( const std::string & driverName );        
 
 			///\ todo private access
-			bool _followSong;
-			int defaultPatLines;
+		
 			AudioDriver* _pOutputDriver;
 			AudioDriver* _pSilentDriver;
 			///\ todo put this in player ..

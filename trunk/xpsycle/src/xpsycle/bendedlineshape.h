@@ -50,7 +50,7 @@ public:
     NPoint p5() const;
 
     void setPoints( const NPoint & p1, const NPoint & p2 );
-    void addBend( const NPoint & bendPt );
+    void insertBend( const NPoint & bendPt );
     void setClippingDistance(int d);
     
     const std::vector<NPoint> & bendPts() const;
@@ -80,7 +80,7 @@ private:
    int pickWidth_ ;
    int pickHeight_;
 
-   NRegion lineToRegion();
+   NRegion lineToRegion();   
 
    int distance_;
 

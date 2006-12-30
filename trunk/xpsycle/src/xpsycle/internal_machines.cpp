@@ -811,12 +811,13 @@ namespace psycle {
 				macOutput[i]=-1;
 				paramOutput[i]=-1;
 				level[i]=100;
-				phase[i]=MAX_PHASE/2.0f;
-				prevVal[i]=centerVal[i]=0.0;
+				phase[i]= static_cast<int>( MAX_PHASE / 2.0f );
+				prevVal[i]   = 0;
+                centerVal[i] = 0;
 			}
-			lfoPos=0.0;
-			lSpeed=MAX_SPEED/10;
-			waveform=lfo_types::sine;
+			lfoPos = 0.0;
+			lSpeed= MAX_SPEED / 10;
+			waveform = lfo_types::sine;
 			FillTable();
 		}
 

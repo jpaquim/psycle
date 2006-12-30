@@ -22,15 +22,16 @@
 #include "song.h"
 #include "global.h"
 #ifdef __unix__
-#include "alsaout.h"
-#include "jackout.h"
-#include "gstreamerout.h"
-#include "esoundout.h"
+  #include "alsaout.h"
+  #include "jackout.h"
+  #include "gstreamerout.h"
+  #include "esoundout.h"
 //#include "microsoft_direct_sound_out.h"
 //#include "netaudioout.h"
-#include "wavefileout.h"
+  #include "wavefileout.h" ///\ todo pthread wrapper
 #else
-#include "mswaveout.h"
+  #include "mswaveout.h"
+  #include "msdirectsound.h"
 #endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
@@ -55,7 +56,6 @@ namespace psycle {
 #endif
 			setXmlDefaults();
 			setSkinDefaults();
-			defaultPatLines = 64;
 			loadConfig();
 #ifdef __unix__
 			bitmaps_ = new DefaultBitmaps(this);
@@ -263,6 +263,10 @@ namespace psycle {
 
 #else
 				driver = new MsWaveOut();
+				std::cout << "registered:" <<  driver->info().name() << std::endl;
+				driverMap_[ driver->info().name() ] = driver;
+				
+				driver = new MsDirectSound();
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 #endif

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
+ *   Copyright (C) 2006 by Stefan Nattkemper and others  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -148,7 +148,7 @@ namespace psycle
 
 			_stopPolling = false;
 
-            DWORD WINAPI dwThreadId;
+            DWORD dwThreadId;
             ::CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
 			_running = true;
 

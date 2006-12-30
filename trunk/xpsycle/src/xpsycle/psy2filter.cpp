@@ -149,7 +149,7 @@ namespace psycle
 				// Shouldn't happen but has happened.
 				song.m_LinesPerBeat = 4;
 			}
-			else song.m_LinesPerBeat = 44100 * 15 * 4 / (tmp * song.bpm());
+			else song.m_LinesPerBeat = static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) );
 
 			file->Read(oct);
 			song.currentOctave = oct;

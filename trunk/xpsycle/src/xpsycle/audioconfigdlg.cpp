@@ -297,6 +297,8 @@ namespace psycle {
 						break;
 					}
 				}
+				pack();
+				setPositionToScreenCenter();
 			}
 			NWindow::setVisible(on);
 		}
@@ -304,7 +306,7 @@ namespace psycle {
 		int AudioConfigDlg::onClose( )
 		{
 			setVisible(false);
-                        return nHideWindow;
+            return nHideWindow;
 		}
 
 		void AudioConfigDlg::onChannelCbx( NItemEvent * ev )

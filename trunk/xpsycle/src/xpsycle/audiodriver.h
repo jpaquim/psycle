@@ -26,6 +26,8 @@
 @author Stefan
 */
 
+///\todo write a c api interface for building driver plugins
+
 namespace psycle 
 { 
 	namespace host 
@@ -92,11 +94,11 @@ namespace psycle
 				int blockSize() const;
 
 		private:
-
-				int bufferSize_;
+			
 	 			int samplesPerSec_;
-				int channelMode_;
-				int bitDepth_;
+	 			int bitDepth_;
+				int channelMode_;				
+				int bufferSize_;
 				int blockSize_;
 
 				std::string deviceName_;

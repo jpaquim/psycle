@@ -56,10 +56,10 @@ public:
 
     ~NVisualComponent();
 
-    void draw(NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender);
+    virtual void draw( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
 
-		signal1<const NMoveEvent &> move;
-		signal1<const NMoveEvent &> moveStart;
+    signal1<const NMoveEvent &> move;
+    signal1<const NMoveEvent &> moveStart;
     signal1<const NMoveEvent &> moveEnd;
 
     virtual bool visit(NVisitor* v);
@@ -207,8 +207,8 @@ public:
     virtual void setFocus();
     virtual bool focus() const;
 
-		void enableFocus( bool on );
-		bool focusEnabled() const;
+    void enableFocus( bool on );
+    bool focusEnabled() const;
 
     void setTabOrder( int index );
     int tabOrder() const;
@@ -218,6 +218,16 @@ public:
 
     virtual void onExit();
     virtual void onEnter();
+    
+protected:
+          
+   virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
+   // this checks in reverse containerorder the mouse over events
+   // override it to use a different order
+   virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
+
+   NVisualComponent* checkChildEvent( NVisualComponent* child, NGraphics* g, int absX, int absY );
+   
 
 private:
 
@@ -226,8 +236,7 @@ private:
    std::vector<NVisualComponent*> visualComponents_;
 
    bool clipping_;
-   bool events_;
-   void drawChildren(NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender);
+   bool events_;   
 
    int scrollDx_, scrollDy_;
 

@@ -37,7 +37,7 @@ NFontMetrics::~NFontMetrics()
 {
 }
 
-int NFontMetrics::textWidth( const string & text )
+int NFontMetrics::textWidth( const string & text ) const
 {
    #ifdef __unix__
    const char* s = text.c_str();
@@ -70,7 +70,7 @@ int NFontMetrics::textWidth( const string & text )
    #endif
 }
 
-int NFontMetrics::textHeight( )
+int NFontMetrics::textHeight( ) const
 {
   #ifdef __unix__
   if (!fntStruct.antialias)
@@ -94,7 +94,7 @@ int NFontMetrics::textHeight( )
   #endif
 }
 
-int NFontMetrics::textAscent( )
+int NFontMetrics::textAscent( ) const
 {
   #ifdef __unix__
   if (!fntStruct.antialias)
@@ -117,7 +117,7 @@ int NFontMetrics::textAscent( )
   #endif
 }
 
-int NFontMetrics::textDescent( )
+int NFontMetrics::textDescent( ) const
 {
  #ifdef __unix__
  if (!fntStruct.antialias)
@@ -143,4 +143,21 @@ int NFontMetrics::textDescent( )
 void NFontMetrics::setFont( const NFont & font )
 {
   fntStruct = font.systemFont();
+}
+
+int NFontMetrics::maxCharWidth() const {
+  #ifdef __unix__
+  ///\todo needs to be implement
+  return 10;
+  #else
+  TEXTMETRIC metrics;
+  HDC dc = GetDC(NULL); 
+  SelectObject( dc, fntStruct.hFnt );  
+  GetTextMetrics(
+    dc,       // handle to DC
+    &metrics  // text metrics
+  );  
+  ReleaseDC( NULL , dc );
+  return metrics.tmMaxCharWidth;;
+  #endif
 }

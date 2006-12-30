@@ -385,7 +385,8 @@ NSkin NConfig::skin( const std::string & identifier )
     skin.setTransparent(false);
   } else
   if (identifier == "toolbar") {
-      NBevelBorder border(nLowered,nRaised);
+      NBevelBorder border( nNone, nRaised );
+        border.setSpacing( NSize( 0, 2, 0, 2 ) );
       skin.setBorder(border);
   } else
   if (identifier == "filedlgpane") {

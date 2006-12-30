@@ -235,10 +235,10 @@ namespace psycle { namespace host {
 		//for now..
 		statusText->setText("Ready");
 	}
-	void WaveEdChildView::onHScroll( NScrollBar *sender )
+	void WaveEdChildView::onHScroll( NScrollBar* sender )
 	{  
-		diStart = sender->pos();
-		if(diStart>wdLength-diLength) diStart = wdLength-diLength;
+		diStart = static_cast<int>( sender->pos() );
+		if( diStart > wdLength-diLength ) diStart = wdLength - diLength;
 		RefreshDisplayData();
 		repaint();			
 	}
@@ -1221,7 +1221,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 		if(SilenceDlg->execute())
 		{
 			//todo!
-			unsigned long timeInSamps = 44100 * SilenceDlg->timeInSecs;
+			unsigned long timeInSamps = static_cast< unsigned long >( 44100 * SilenceDlg->timeInSecs );
 			if(!wdWave)
 			{
 				pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
@@ -1576,9 +1576,9 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 			unsigned long destFadeIn(0);	
 
 			if(MixDlg->bFadeIn) //todo!@
-				fadeInSamps = 44100 * MixDlg->fadeInTime;
+				fadeInSamps = static_cast< unsigned long >( 44100 * MixDlg->fadeInTime );
 			if(MixDlg->bFadeOut) //todo!#
-				fadeOutSamps= 44100 * MixDlg->fadeOutTime;
+				fadeOutSamps = static_cast< unsigned long >( 44100 * MixDlg->fadeOutTime );
 
 			pSong->IsInvalided(true);
 
@@ -2214,7 +2214,7 @@ void WaveEdChildView::WavePanel::onMousePress(int x, int y, int button)
 
 		for(int i(0);i<length;++i)
 		{
-			int value = *(data+i) * (startVol+i*slope);
+			int value = static_cast<int>( *(data+i) * (startVol+i*slope) );
 			if(value>32767) value=32767;
 			else if(value<-32768) value = -32768;
 			*(data+i) = static_cast<short>(value);

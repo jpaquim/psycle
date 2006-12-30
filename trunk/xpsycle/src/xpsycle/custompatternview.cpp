@@ -46,29 +46,41 @@ namespace psycle {
 		}
 
 
-		ColumnEvent::ColumnEvent( int type ) {
+		ColumnEvent::ColumnEvent( ColumnEvent::ColType type ) {
 			type_ = type;
 		}
 
-                ColumnEvent::~ColumnEvent() {
+            ColumnEvent::~ColumnEvent() {
 		}
 
-		int ColumnEvent::type() const {
+		 ColumnEvent::ColType ColumnEvent::type() const {
 			return type_;
 		}
 
 		int ColumnEvent::cols() const {
 			int cols_ = 1;
 			switch ( type_ ) {
-				case ColumnEvent::hex2 : cols_ = 2; break;
-				case ColumnEvent::hex4 : cols_ = 4; break;
-				case ColumnEvent::note : cols_ = 1; break;
+				case ColumnEvent::hex2 : 
+                     cols_ = 2; 
+                break;
+				case ColumnEvent::hex4 : 
+                     cols_ = 4; 
+                break;
+				case ColumnEvent::note : 
+                     cols_ = 1; 
+                break;
 				default: ;
 			}
 			return cols_;
-		}
+		}		
+        // end of ColumnEvent
 
 
+
+
+        //
+        // start of PatCursor class
+        //
 		PatCursor::PatCursor() :
 			track_(0), 
 			line_(0), 
@@ -139,8 +151,8 @@ namespace psycle {
 
 		}
 
-		TrackGeometry::TrackGeometry( CustomPatternView* patternView ) :
-			pView( patternView ),
+		TrackGeometry::TrackGeometry( CustomPatternView & patternView ) :
+			pView( &patternView ),
 			left_(0),
 			width_(0),
 			visibleColumns_(0),
@@ -183,12 +195,12 @@ namespace psycle {
 
 
 		CustomPatternView::CustomPatternView()
-			 : NPanel(), doDrag_(0),doSelect_(0)
+			 : NPanel(), doDrag_(0), doSelect_(0)
 		{
 			init();
 		}
 
-		CustomPatternView::~CustomPatternView()
+		CustomPatternView::~CustomPatternView( )
 		{
 		}
 
@@ -209,7 +221,7 @@ namespace psycle {
 			trackMinWidth_ = 20;
 			lineGridEnabled_ = true;
 			colGridEnabled_ = true;
-			textColor_ = NColor(0,0,0);
+			textColor_ = NColor( 0, 0, 0 );
 			defaultNoteStr_ = "---";
 			trackLeftIdent_ = 10;
 			trackRightIdent_ = 20;
@@ -221,7 +233,7 @@ namespace psycle {
 
 		void CustomPatternView::setTrackNumber( int number ) {
 			for ( int newTrack = trackNumber_; newTrack < number; newTrack++ ) {
-				TrackGeometry trackGeometry(this);
+				TrackGeometry trackGeometry( *this );
 				trackGeometry.setVisibleColumns( defaultSize_ );
 				 trackGeometryMap[ newTrack ] = trackGeometry;
 			}
@@ -244,13 +256,13 @@ namespace psycle {
 		{
 			std::vector<ColumnEvent>::const_iterator it = events_.begin();
 			int offset = 0;
-			for ( ; it < events_.end(); it++) {
+			for ( ; it < events_.end(); it++ ) {
 				const ColumnEvent & event = *it;
 
 				switch ( event.type() ) {
 					case ColumnEvent::hex2 : offset+= 2*cellWidth(); 	break;
 					case ColumnEvent::hex4 : offset+= 4*cellWidth(); 	break;
-					case ColumnEvent::note : offset+= noteCellWidth(); break;
+					case ColumnEvent::note : offset+= noteCellWidth();  break;
 					default: ;
 				}
 			}
@@ -517,18 +529,17 @@ namespace psycle {
 			for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) // track small separators
 				g->drawLine( it->second.left()-dx(),0, it->second.left()-dx(),lineHeight);
 
-			g->setForeground( foreground() );
+			g->setForeground( foreground( ) );
 
 		}
 
-		int CustomPatternView::noteCellWidth() const {
-			NFontMetrics metrics(font());
-			int width = metrics.textWidth("---");
-			return width;
+		int CustomPatternView::noteCellWidth( ) const {            	
+			return cellWidth() * 3;
 		}
 
-		int CustomPatternView::cellWidth() const {
-			return 9;
+		int CustomPatternView::cellWidth( ) const {
+			NFontMetrics metrics( font( ) );
+			return metrics.maxCharWidth( );
 		}
 
 

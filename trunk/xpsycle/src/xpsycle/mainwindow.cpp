@@ -46,6 +46,7 @@
 #include <ngrs/ntextstatusitem.h>
 #include <ngrs/nfiledialog.h>
 #include <ngrs/nsystem.h>
+#include <ngrs/ntoolbarpanel.h>
 
 namespace psycle { namespace host {
 
@@ -229,11 +230,10 @@ void MainWindow::onCloseSongTabPressed( NButtonEvent* ev ) {
 
 void MainWindow::onTabChange( NButtonEvent * ev )
 {
- std::map<NObject*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
+  std::map<NObject*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
   if ( it != songTabMap.end() ) {
     ChildView* view = it->second;
-    std::cout << view->song()->name() << std::endl;
-		Player::Instance()->stop();
+    Player::Instance()->stop();
     Player::Instance()->song( view->song() );
     selectedChildView_ = view;
     updateNewSong();
@@ -374,9 +374,7 @@ void MainWindow::showSongpDlg( NButtonEvent* ev )
 
 void MainWindow::initBars( )
 {
-  toolBarPanel_ = new NPanel();
-    toolBarPanel_->setLayout(NFlowLayout(nAlLeft,0,2));
-    toolBarPanel_->setWidth(500);
+  toolBarPanel_ = new NToolBarPanel();    
   pane()->add(toolBarPanel_, nAlTop);
 
   initToolBar();
@@ -905,30 +903,28 @@ void MainWindow::onBpmDecTen(NButtonEvent* ev)
   setAppSongBpm(-10);
 }
 
-void MainWindow::setAppSongBpm(int x)
+void MainWindow::setAppSongBpm( double  x )
 {
   if ( !selectedChildView_ ) return;
 
   Song* selectedSong_ = selectedChildView_->song();
 
-    int bpm = 0;
+    double bpm = 0;
     if ( x != 0 ) {
       if ( Player::Instance()->playing() )  {
-        selectedSong_->setBpm(  Player::Instance()->timeInfo().bpm()+x);
-      } else selectedSong_->setBpm(selectedSong_->bpm()+x);
+        selectedSong_->setBpm(  Player::Instance()->timeInfo().bpm() +x );
+      } else selectedSong_->setBpm( selectedSong_->bpm() + x );
        Player::Instance()->setBpm( (int) selectedSong_->bpm() );
       bpm = selectedSong_->bpm();
     }
     else bpm =  Player::Instance()->bpm();
 
     bpmDisplay_->setNumber( (int)  Player::Instance()->bpm() );
-
     bpmDisplay_->repaint();
 }
 
 void MainWindow::onRecordWav( NButtonEvent * ev )
 {
-
 }
 
 void MainWindow::onMachineSelected( Machine* mac ) {

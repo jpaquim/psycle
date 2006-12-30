@@ -889,7 +889,7 @@ int Machine::GenerateAudio( int numsamples )
 	//position [0.0-linesperbeat] converted to "Tick()" lines
 	const double positionInLines = positionInBeat*Player::Instance()->timeInfo().linesPerBeat();
 	//position in samples of the next "Tick()" Line
-	int nextLineInSamples = (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow();
+	int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow() );
 	//Next event, initialized to "out of scope".
 	int nextevent = numsamples+1;
 	int previousline = nextLineInSamples;
@@ -899,7 +899,7 @@ int Machine::GenerateAudio( int numsamples )
 	if (!workEvents.empty())
 	{
 		WorkEvent & workEvent = workEvents.front();
-		nextevent = workEvent.beatOffset() * timeInfo.samplesPerBeat();
+		nextevent = static_cast<int>( workEvent.beatOffset() * timeInfo.samplesPerBeat() );
 		// correcting rounding errors.
 		if ( nextevent == nextLineInSamples+1 ) nextLineInSamples = nextevent;
 	}
@@ -911,13 +911,13 @@ int Machine::GenerateAudio( int numsamples )
 		{
 			Tick( );
 			previousline = nextLineInSamples;
-			nextLineInSamples+= timeInfo.samplesPerRow(); 
+			nextLineInSamples += static_cast<int>( timeInfo.samplesPerRow() ); 
 		}
 
 		
 		while ( processedsamples == nextevent  )
 		{
-			if (!workEvents.empty()) {
+			if ( !workEvents.empty() ) {
 				WorkEvent & workEvent = *workEvents.begin();
 				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
 				colsIt = playCol.find(workEvent.track());
@@ -928,7 +928,7 @@ int Machine::GenerateAudio( int numsamples )
 				{
 					WorkEvent & workEvent1 = *workEvents.begin();
 				//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
-					nextevent = workEvent1.beatOffset() * timeInfo.samplesPerBeat();
+					nextevent = static_cast<int>( workEvent1.beatOffset() * timeInfo.samplesPerBeat() );
 				} else nextevent = numsamples+1;
 			} else nextevent = numsamples+1;
 		} 
