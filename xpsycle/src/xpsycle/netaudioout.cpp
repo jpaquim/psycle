@@ -21,13 +21,12 @@
 #endif
 #if !defined XPSYCLE__NO_NETAUDIO
 #include "netaudioout.h"
-#include "cstdint.h"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <cassert>
 #include <cerrno>
-
+#include "cstdint.h"
 namespace psycle
 {
 	namespace host

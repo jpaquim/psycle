@@ -589,7 +589,7 @@ void MainWindow::initToolBar( )
 
     psycleControlBar_->add(new NLabel("VU"));
     NPanel* vuPanel = new NPanel();
-    vuPanel->setPosition(0,0,225,10);
+    vuPanel->setPreferredSize( 225, 10 );
         vuMeter_ = new VuMeter();
         vuPanel->add(vuMeter_);
         vuMeter_->setPosition(0,0,225,10);
@@ -605,8 +605,7 @@ void MainWindow::initToolBar( )
   psycleToolBar_ = new NToolBar();
       psycleToolBar_->add(new NToolBarSeparator());
       genCombo_ = new NComboBox();
-        genCombo_->setWidth(158);
-        genCombo_->setHeight(20);
+        genCombo_->setPreferredSize( 158, 20 );
         genCombo_->setIndex(0);
         genCombo_->enableFocus(false);
         genCombo_->itemSelected.connect(this,&MainWindow::onGeneratorCbx);
@@ -625,8 +624,7 @@ void MainWindow::initToolBar( )
       psycleToolBar_->add(new NButton("Gear Rack"));
 
 			insCombo_ = new NComboBox();
-				insCombo_->setWidth(158);
-				insCombo_->setHeight(20);
+				insCombo_->setPreferredSize( 158, 20 );
 				insCombo_->enableFocus(false);
 				insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
 				for (int i=0;i<PREV_WAV_INS;i++)
