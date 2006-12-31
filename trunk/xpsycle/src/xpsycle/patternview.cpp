@@ -265,7 +265,7 @@ void PatternView::updateSkin() {
 
 	drawArea->setTrackLeftIdent( SkinReader::Instance()->patview_track_left_ident() );
 	drawArea->setTrackRightIdent( SkinReader::Instance()->patview_track_right_ident() );
-  drawArea->setBigTrackSeparatorWidth( SkinReader::Instance()->patview_track_big_sep_width() );
+    drawArea->setBigTrackSeparatorWidth( SkinReader::Instance()->patview_track_big_sep_width() );
 
 	tweakGUI->setLineGridEnabled(SkinReader::Instance()->patview_line_sep_enabled());
 	tweakGUI->setColGridEnabled(SkinReader::Instance()->patview_col_sep_enabled());
@@ -386,9 +386,9 @@ void PatternView::initToolBar( )
   meterCbx = new NComboBox();
     meterCbx->add(new NItem("4/4"));
     meterCbx->add(new NItem("3/4"));
-    meterCbx->setPreferredSize(50,15);
+    meterCbx->setPreferredSize( 50, 15 );
     meterCbx->setIndex(0);
-		meterCbx->enableFocus(false);
+    meterCbx->enableFocus(false);
   toolBar->add(meterCbx);
   NButton* btn = toolBar->add(new NButton("add Bar"));
   btn->clicked.connect(this,&PatternView::onAddBar);
@@ -399,11 +399,10 @@ void PatternView::initToolBar( )
   toolBar->add(new NLabel("Pattern Step"));
   patternCombo_ = new NComboBox();
     for (int i = 1; i <=16; i++) 
-      patternCombo_->add(new NItem(stringify(i)));
-    patternCombo_->setIndex(0);
+      patternCombo_->add( new NItem( stringify(i) ) );
+    patternCombo_->setIndex( 0 );
     patternCombo_->itemSelected.connect(this,&PatternView::onPatternStepChange);
-    patternCombo_->setWidth(40);
-    patternCombo_->setHeight(20);
+    patternCombo_->setPreferredSize( 40, 20 );
     patternCombo_->enableFocus(false);
   toolBar->add(patternCombo_);
 
@@ -411,8 +410,7 @@ void PatternView::initToolBar( )
   octaveCombo_ = new NComboBox();
     for (int i=0; i<9; i++) octaveCombo_->add(new NItem(stringify(i)));
     octaveCombo_->itemSelected.connect(this,&PatternView::onOctaveChange);
-    octaveCombo_->setWidth(40);
-    octaveCombo_->setHeight(20);
+    octaveCombo_->setPreferredSize( 40, 20 );
     octaveCombo_->setIndex(4);
     octaveCombo_->enableFocus(false);
     setEditOctave(4);
@@ -420,10 +418,9 @@ void PatternView::initToolBar( )
 
   toolBar->add(new NLabel("Tracks"));
   trackCombo_ = new NComboBox();
-    trackCombo_->setWidth(40);
-    trackCombo_->setHeight(20);
+    trackCombo_->setPreferredSize( 40, 20 );
     trackCombo_->itemSelected.connect(this,&PatternView::onTrackChange);
-    for(int i=4;i<=MAX_TRACKS;i++) {
+    for( int i=4; i<=MAX_TRACKS; i++ ) {
       trackCombo_->add(new NItem(stringify(i)));
     }
     trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
