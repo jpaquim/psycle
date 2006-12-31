@@ -477,9 +477,11 @@ int NApp::processEvent( NWindow * win, WEvent * event )
       }              
     break;
     case WM_MOUSEMOVE:
+    {           
       if (lastOverWin_!=0 && win!=lastOverWin_ ) lastOverWin_->onMouseExit();
       win->onMouseOver( LOWORD( event->lParam ), HIWORD( event->lParam ) );
       lastOverWin_ = win;
+    }
     break;
     case WM_LBUTTONDOWN:
       buttonPress( win, event, 1 );         

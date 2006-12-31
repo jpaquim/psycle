@@ -58,10 +58,7 @@ NToolBar::NToolBar()
     moreBtn_->clicked.connect( this, &NToolBar::onMoreBtnClicked );
   add( moreBtn_ );
   
-  popup_ = new NPopupWindow();
-    NLabel* lb = new NLabel("sorry, not implemented yet");
-      lb->setWordWrap( true );
-    popup_->pane()->add( lb, nAlTop );
+  popup_ = new NPopupWindow();   
   add( popup_ );
 
   skin_ = NApp::config()->skin("toolbar");
@@ -95,8 +92,6 @@ void NToolBar::add( NVisualComponent * comp )
 }
 
 void NToolBar::doAlign() {
-  
-  std::vector<NVisualComponent*>::const_iterator itr   = visualComponents().begin();
 
   int hgap_ = 3;
   int vgap_ = 0;
@@ -105,21 +100,39 @@ void NToolBar::doAlign() {
   int yp = vgap_;
   int ymax = 2*vgap_;
   bool moreFlag = false;
+  
+  std::vector<NVisualComponent*> swapVisuals;
+  std::vector<NVisualComponent*>::iterator itr; 
+  for ( itr = popup_->pane()->begin(); itr != popup_->pane()->end(); itr++ ) {
+    swapVisuals.push_back( *itr );
+  }
+  
+  popup_->pane()->erase( popup_->pane()->begin(), popup_->pane()->end() );
+     
+  for ( itr = swapVisuals.begin(); itr != swapVisuals.end(); itr++ ) {
+    add( *itr ); 
+  }
+  swapVisuals.clear();
 
-  for ( ; itr < visualComponents().end(); itr++) {
+  std::vector<NVisualComponent*>::iterator moreItr = end();
+  for ( itr = begin(); itr < end(); itr++ ) {
     NVisualComponent* visualChild = *itr;
     if ( visualChild->visible() && visualChild != moreBtn_ ) {   
       if (xp + visualChild->preferredWidth() <= clientWidth() ) 
       {
-          visualChild->setPosition(xp,yp,visualChild->preferredWidth(),visualChild->preferredHeight());
+          visualChild->setPosition( xp, yp, visualChild->preferredWidth(), visualChild->preferredHeight() );
           xp = xp + visualChild->preferredWidth() + hgap_;
-          if (ymax<visualChild->preferredHeight()) ymax = visualChild->preferredHeight();
+          if ( ymax < visualChild->preferredHeight() ) ymax = visualChild->preferredHeight();
       } else
-      moreFlag = true;      
+      {       
+        moreItr = itr;
+        moreFlag = true;
+        break;
+      }
     }      
   }
 
-  for ( itr = visualComponents().begin(); itr < visualComponents().end() ; itr++ ) {
+  for ( itr = begin(); itr < end() ; itr++ ) {
     NVisualComponent* visual = *itr;
     if ( visual-> visible() ) {    
       visual->setTop( yp + ( ymax - visual->preferredHeight() ) / 2 );    
@@ -131,6 +144,17 @@ void NToolBar::doAlign() {
     moreBtn_->setWidth( moreBtn_->preferredWidth() );
     moreBtn_->setHeight( moreBtn_->preferredHeight() );
     moreBtn_->setVisible( true );
+      
+    for ( itr = moreItr; itr != end(); itr++ ) {
+       swapVisuals.push_back( *itr );
+    }
+    erase( moreItr, end() );
+    
+    popup_->pane()->erase( popup_->pane()->begin(), popup_->pane()->end() );
+    for ( itr = swapVisuals.begin(); itr != swapVisuals.end(); itr++ ) {
+      popup_->pane()->add( *itr, nAlTop );
+    }
+    
   } else 
   moreBtn_->setVisible( false );
 }     
@@ -149,11 +173,18 @@ int NToolBar::preferredWidth( ) const
   std::vector<NVisualComponent*>::const_iterator itr   = visualComponents().begin();  
   for ( ; itr < visualComponents().end(); itr++) {
     NVisualComponent* visualChild = *itr;
+    if ( visualChild->visible() ) {      
+      xp = xp + visualChild->preferredWidth() + hgap_;         
+    }
+  }
+ 
+  itr   = popup_->pane()->visualComponents().begin();
+  for ( ; itr < popup_->pane()->visualComponents().end(); itr++) {
+    NVisualComponent* visualChild = *itr;
     if ( visualChild->visible() )
-//    if ((xp + visualChild->preferredWidth() + hgap_ <= parent->clientWidth()) || (!lineBrk_) ) 
-      {         
-          xp = xp + visualChild->preferredWidth() + hgap_;         
-      }
+    {         
+      xp = xp + visualChild->preferredWidth() + hgap_;         
+    }
   }
  
   return xp + spacing().left() + spacing().right() + borderLeft() + borderRight();

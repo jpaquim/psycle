@@ -191,10 +191,13 @@ public:
 
     virtual void removeChilds();
     virtual void removeChild( NVisualComponent * child );
+    std::vector<NVisualComponent*>::iterator erase(std::vector<NVisualComponent*>::iterator first, std::vector<NVisualComponent*>::iterator last);
     virtual void erase(NVisualComponent* child);
     virtual void erase();
 
     const std::vector<NVisualComponent*> & visualComponents() const;
+    std::vector<NVisualComponent*>::iterator end();
+    std::vector<NVisualComponent*>::iterator begin();
 
     virtual void setPreferredSize(int width, int height);
 
