@@ -92,7 +92,6 @@ void NToolBar::add( NVisualComponent * comp )
 }
 
 void NToolBar::doAlign( ) {
-
   int hgap_ = 3;
   int vgap_ = 0;
   
@@ -103,18 +102,20 @@ void NToolBar::doAlign( ) {
   
   std::vector<NVisualComponent*> swapVisuals;
   std::vector<NVisualComponent*>::iterator itr; 
+  int i = 0;
   for ( itr = popup_->pane()->vcBegin(); itr != popup_->pane()->vcEnd(); itr++ ) {
     swapVisuals.push_back( *itr );
+    i++;
   }
   
-  popup_->pane()->erase( popup_->pane()->vcBegin(), popup_->pane()->vcEnd() );
+  popup_->pane()->eraseAll();
      
   for ( itr = swapVisuals.begin(); itr != swapVisuals.end(); itr++ ) {
     (*itr)->setAlign( nAlLeft );
     add( *itr );
   }
   swapVisuals.clear();
-
+  
   std::vector<NVisualComponent*>::iterator moreItr = vcEnd();
   for ( itr = vcBegin(); itr < vcEnd(); itr++ ) {
     NVisualComponent* visualChild = *itr;
@@ -131,7 +132,7 @@ void NToolBar::doAlign( ) {
         break;
       }
     }      
-  }
+  }  
 
   for ( itr = vcBegin(); itr < vcEnd() ; itr++ ) {
     NVisualComponent* visual = *itr;
@@ -149,15 +150,18 @@ void NToolBar::doAlign( ) {
     for ( itr = moreItr; itr != vcEnd(); itr++ ) {
        swapVisuals.push_back( *itr );
     }
-    erase( moreItr, vcEnd() );
     
-    popup_->pane()->erase( popup_->pane()->vcBegin(), popup_->pane()->vcEnd() );
+    if ( moreItr != vcEnd() )
+      erase( moreItr, vcEnd() );
+    
+    popup_->pane()->eraseAll();
     for ( itr = swapVisuals.begin(); itr != swapVisuals.end(); itr++ ) {
       popup_->pane()->add( *itr, nAlTop );
     }
-    
+   
   } else 
   moreBtn_->setVisible( false );
+  
 }     
 
 void NToolBar::resize( )
@@ -169,7 +173,7 @@ void NToolBar::resize( )
 int NToolBar::preferredWidth( ) const
 {
   int hgap_ = 3;
-  int xp = hgap_;
+  int xp = hgap_ + ident_;
 
   std::vector<NVisualComponent*>::const_iterator itr   = visualComponents().begin();  
   for ( ; itr < visualComponents().end(); itr++) {

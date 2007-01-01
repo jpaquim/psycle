@@ -194,6 +194,7 @@ public:
     std::vector<NVisualComponent*>::iterator erase(std::vector<NVisualComponent*>::iterator first, std::vector<NVisualComponent*>::iterator last);
     virtual void erase(NVisualComponent* child);
     virtual void erase();
+    virtual void eraseAll();
 
     const std::vector<NVisualComponent*> & visualComponents() const;
 

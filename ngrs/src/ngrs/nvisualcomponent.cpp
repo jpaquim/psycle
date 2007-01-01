@@ -783,8 +783,11 @@ void NVisualComponent::erase( NVisualComponent * child )
 }
 
 std::vector<NVisualComponent*>::iterator NVisualComponent::erase( std::vector<NVisualComponent*>::iterator first, std::vector<NVisualComponent*>::iterator last) {
+                                                                                                                           
    std::vector<NRuntime*>::iterator start_itr = find( components.begin(), components.end(), *first );
-   std::vector<NRuntime*>::iterator end_itr   = find( components.begin(), components.end(), *last  );
+   std::vector<NRuntime*>::iterator end_itr   = find( components.begin(), components.end(), *last  );      
+
+   if ( start_itr == components.end() ) return visualComponents_.end();
    components.erase( start_itr, end_itr );
    
    std::vector<NVisualComponent*>::iterator it = first;
@@ -799,6 +802,25 @@ std::vector<NVisualComponent*>::iterator NVisualComponent::erase( std::vector<NV
    if ( window() ) window()->checkForRemove(0);
 
    return it;
+}
+
+void NVisualComponent::eraseAll() {
+  std::vector<NRuntime*>::iterator it = components.begin();
+  for ( ; it < components.end(); it ++ ) {
+    (*it)->setParent( 0 );
+  }
+  components.clear();
+  
+  std::vector<NVisualComponent*>::iterator vit = vcBegin();
+  if ( layout_ )
+    for ( ; vit < vcEnd(); vit ++ ) {
+      layout_->remove( *vit );
+    }  
+    
+  visualComponents_.clear();  
+    
+  if ( layout_ ) layout_->align( this );
+  if ( window() ) window()->checkForRemove(0);
 }
 
 std::vector<NVisualComponent*>::iterator NVisualComponent::vcBegin() {
