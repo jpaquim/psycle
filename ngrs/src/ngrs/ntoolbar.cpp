@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006 by Stefan Nattkemper   *
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -47,12 +47,9 @@ const char * icon_more_xpm[] = {
 
 NToolBar::NToolBar()
  : NTogglePanel()
-{
-  spacer_ = new NPanel();
-    spacer_->setWidth(5);
-    spacer_->setTransparent(true);
-  add(spacer_);
-  
+{ 
+  ident_ = 5;  // space between toolbar start and first component              
+                 
   NBitmap bmp( icon_more_xpm );
   NImage * img = new NImage( bmp );
   img->setPreferredSize( bmp.width() + 5, bmp.height() + 5 );  
@@ -99,18 +96,18 @@ void NToolBar::doAlign( ) {
   int hgap_ = 3;
   int vgap_ = 0;
   
-  int xp = hgap_;
+  int xp = hgap_ + ident_;
   int yp = vgap_;
   int ymax = 2*vgap_;
   bool moreFlag = false;
   
   std::vector<NVisualComponent*> swapVisuals;
   std::vector<NVisualComponent*>::iterator itr; 
-  for ( itr = popup_->pane()->begin(); itr != popup_->pane()->end(); itr++ ) {
+  for ( itr = popup_->pane()->vcBegin(); itr != popup_->pane()->vcEnd(); itr++ ) {
     swapVisuals.push_back( *itr );
   }
   
-  popup_->pane()->erase( popup_->pane()->begin(), popup_->pane()->end() );
+  popup_->pane()->erase( popup_->pane()->vcBegin(), popup_->pane()->vcEnd() );
      
   for ( itr = swapVisuals.begin(); itr != swapVisuals.end(); itr++ ) {
     (*itr)->setAlign( nAlLeft );
@@ -118,8 +115,8 @@ void NToolBar::doAlign( ) {
   }
   swapVisuals.clear();
 
-  std::vector<NVisualComponent*>::iterator moreItr = end();
-  for ( itr = begin(); itr < end(); itr++ ) {
+  std::vector<NVisualComponent*>::iterator moreItr = vcEnd();
+  for ( itr = vcBegin(); itr < vcEnd(); itr++ ) {
     NVisualComponent* visualChild = *itr;
     if ( visualChild->visible() && visualChild != moreBtn_ ) {   
       if (xp + visualChild->preferredWidth() <= clientWidth() ) 
@@ -136,7 +133,7 @@ void NToolBar::doAlign( ) {
     }      
   }
 
-  for ( itr = begin(); itr < end() ; itr++ ) {
+  for ( itr = vcBegin(); itr < vcEnd() ; itr++ ) {
     NVisualComponent* visual = *itr;
     if ( visual-> visible() ) {    
       visual->setTop( yp + ( ymax - visual->preferredHeight() ) / 2 );    
@@ -149,12 +146,12 @@ void NToolBar::doAlign( ) {
     moreBtn_->setHeight( moreBtn_->preferredHeight() );
     moreBtn_->setVisible( true );
       
-    for ( itr = moreItr; itr != end(); itr++ ) {
+    for ( itr = moreItr; itr != vcEnd(); itr++ ) {
        swapVisuals.push_back( *itr );
     }
-    erase( moreItr, end() );
+    erase( moreItr, vcEnd() );
     
-    popup_->pane()->erase( popup_->pane()->begin(), popup_->pane()->end() );
+    popup_->pane()->erase( popup_->pane()->vcBegin(), popup_->pane()->vcEnd() );
     for ( itr = swapVisuals.begin(); itr != swapVisuals.end(); itr++ ) {
       popup_->pane()->add( *itr, nAlTop );
     }

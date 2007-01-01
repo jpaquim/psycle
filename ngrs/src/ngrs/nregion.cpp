@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
- *   Made in Germany, France                                               *
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper                   *
+ *   Made in Germany                                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
