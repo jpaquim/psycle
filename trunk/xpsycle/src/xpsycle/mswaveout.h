@@ -27,84 +27,75 @@
 
 #include "windows.h"
 
-
 namespace psycle
 {
 	namespace host
-	{                          
+	{                                      
             
-        ///\todo  this driver is only making strange noise
-              
-		/// output device interface implemented by mme.
+        ///\ todo work in progress
+        ///\ status working, restarting etc not working
+        ///\ todo : freeing and configure    
+            
+            
+        #define BLOCK_SIZE  4096
+        #define BLOCK_COUNT 7    
+        
 		class MsWaveOut : public AudioDriver
 		{
 		public:
                   
 			MsWaveOut();
 			
-			virtual ~MsWaveOut();
+            ~MsWaveOut();
 			
 			virtual MsWaveOut* clone()  const;   // Uses the copy constructor
 			
-			virtual AudioDriverInfo info() const;
-			
+			virtual AudioDriverInfo info() const;			
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-			virtual void Reset();
-			virtual bool Enable( bool e );
-	  	    virtual bool Initialized();
-			virtual bool Configured();
-			
-			virtual int GetWritePos();
-			virtual int GetPlayPos();
-			int virtual GetMaxLatencyInSamples();
-            // { return GetSampleSize() * _blockSize * _numBlocks; }
-			virtual void Configure();
-
+            bool Initialized( );
+			virtual bool Enable( bool e );	
+            
 		private:
-			static AudioDriverInfo _info;
-
-			int _deviceID;
-			HWAVEOUT _handle;
-
-			bool _initialized;
-
-			void ReadConfig();
-			bool _configured;
-			void WriteConfig();
-
-			bool Start();
-			bool _running;
-			bool Stop();
-
+			
+			char buffer[1024];   // intermediate buffer for reading
+			
+			// pointers for work callback
 			AUDIODRIVERWORKFN _pCallback;
 			void* _callbackContext;
-			static DWORD WINAPI PollerThread(void *pWaveOut);
-			int _pollSleep;
-			bool _stopPolling;
-
-			int const static MAX_WAVEOUT_BLOCKS = 8;
-			int _numBlocks;
-			int _currentBlock;
-			class CBlock
-			{
-				public:
-					HANDLE Handle;
-					unsigned char *pData;
-					WAVEHDR *pHeader;
-					HANDLE HeaderHandle;
-					bool Prepared;
-			};
-			CBlock _blocks[MAX_WAVEOUT_BLOCKS];
-
-			void DoBlocks();
-			int _writePos;
-
-			int _dither;
-
-			void Error(const char msg[]);
+			bool _initialized;
 			
-			HANDLE hThread_;
+			// mme variables
+			HWAVEOUT hWaveOut;   // device handle
+            static CRITICAL_SECTION waveCriticalSection;
+            static WAVEHDR*         waveBlocks; // array of header structure, 
+                                                // that points to a block buffer
+            static volatile int     waveFreeBlockCount;
+            static int              waveCurrentBlock;
+            
+            // mme functions
+                        
+            // waveOut interface notifies about device is opened, closed, 
+            // and what we handle here, when a block finishes.
+            static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
+            static WAVEHDR* allocateBlocks(int size, int count);
+            static void freeBlocks( WAVEHDR* blockArray );
+            
+            // writes a intermediate buffer into a ring buffer to the sound card
+            void writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size );
+            
+            // thread , the writeAudio loop is in
+            // note : waveOutproc is a different, thread, too, but we cant
+            // use all winapi calls there we need due to restrictions of the winapi
+            HANDLE hThread_;
+            static DWORD WINAPI audioOutThread( void *pWaveOut );
+            static bool _running; // check, if thread loop should be left
+            void fillBuffer();
+            
+            bool _dither;
 
+			bool start();
+			bool stop();
+			
 			void quantizeWithDither(float *pin, int *piout, int c);
 			void quantize(float *pin, int *piout, int c);
 			

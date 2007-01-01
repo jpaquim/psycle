@@ -33,6 +33,8 @@
 #include <cctype>
 
 
+// win32 note : mingw cannot load our shipped 1.8.2 binary plugins due c++ this and std calling convention
+
 namespace psycle {
   namespace host {
 

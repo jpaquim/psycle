@@ -808,6 +808,15 @@ void NSystem::setWindowGrab( WinHandle win, bool on )
       XFlush(dpy());
    }
   }
+  #else
+  if ( on ) {
+    //SetCapture( win );
+    std::cout << "window grab on" << std::endl;
+  }
+  else {
+   // ReleaseCapture( );
+    std::cout << "window grab off" << std::endl;
+  } 
   #endif
 }
 

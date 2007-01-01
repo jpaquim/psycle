@@ -24,7 +24,7 @@ NToolBarSeparator::NToolBarSeparator()
  : NPanel()
 {
   setTransparent(false);
-  setAlign(nAlHeight);
+  setAlign( nAlLeft );
 }
 
 
@@ -34,20 +34,28 @@ NToolBarSeparator::~NToolBarSeparator()
 
 void NToolBarSeparator::paint( NGraphics * g )
 {
-  g->setForeground(NColor(background().red() - 40,background().green() - 40, background().blue()-40));
-  g->drawLine(0,0,0,clientHeight());
-  g->setForeground(NColor(background().red() + 40,background().green() + 40, background().blue()+40));
-  g->drawLine(1,0,1,clientHeight());
+  if ( align() == nAlTop ) {
+    g->setForeground( NColor( background().red() - 40, background().green() - 40, background().blue()-40));
+    g->drawLine( 0, 0, clientWidth(), 0 );
+    g->setForeground( NColor( background().red() + 40, background().green() + 40, background().blue()+40));
+    g->drawLine( 0, 1, clientWidth(), 1 );   
+  } else 
+  {
+    g->setForeground( NColor( background().red() - 40, background().green() - 40, background().blue()-40));
+    g->drawLine(0,0,0,clientHeight());
+    g->setForeground(NColor( background().red() + 40, background().green() + 40, background().blue()+40));
+    g->drawLine( 1, 0, 1, clientHeight() );
+  } 
 }
 
 int NToolBarSeparator::preferredWidth( ) const
 {
-  return 3;
+  return ( align() == nAlTop ) ?  15 : 3;
 }
 
 int NToolBarSeparator::preferredHeight( ) const
 {
-  return 15;
+  return ( align() == nAlTop ) ? 3 : 15;
 }
 
 

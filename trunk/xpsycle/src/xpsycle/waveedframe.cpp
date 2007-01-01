@@ -145,7 +145,7 @@ namespace psycle { namespace host {
 	toolBar->add(newBtn)->clicked.connect(this,&WaveEdFrame::onPlayFromStart);
 
 	img = new NImage();
-	img->setSharedBitmap(&icons.play_flat());
+	img->setSharedBitmap(&icons.playstart() );// play_flat());
 	img->setPreferredSize(25,25);
 	newBtn = new NButton(img);
 	newBtn->setHint("Play from Cursor");
