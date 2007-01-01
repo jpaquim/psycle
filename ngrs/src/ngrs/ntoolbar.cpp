@@ -24,6 +24,8 @@
 #include "nbutton.h"
 #include "npopupmenu.h"
 #include "nlabel.h"
+#include "napp.h"
+#include "nconfig.h"
 
 /* XPM */
 const char * icon_more_xpm[] = {
@@ -58,7 +60,8 @@ NToolBar::NToolBar()
     moreBtn_->clicked.connect( this, &NToolBar::onMoreBtnClicked );
   add( moreBtn_ );
   
-  popup_ = new NPopupWindow();   
+  popup_ = new NPopupWindow();
+    popup_->pane()->setSkin( NApp::config()->skin("popup_menu_bg") );
   add( popup_ );
 
   skin_ = NApp::config()->skin("toolbar");
@@ -88,10 +91,10 @@ NButton* NToolBar::add( NButton * button )
 
 void NToolBar::add( NVisualComponent * comp )
 {
-  NPanel::add(comp);
+  NPanel::add( comp );
 }
 
-void NToolBar::doAlign() {
+void NToolBar::doAlign( ) {
 
   int hgap_ = 3;
   int vgap_ = 0;
@@ -110,7 +113,8 @@ void NToolBar::doAlign() {
   popup_->pane()->erase( popup_->pane()->begin(), popup_->pane()->end() );
      
   for ( itr = swapVisuals.begin(); itr != swapVisuals.end(); itr++ ) {
-    add( *itr ); 
+    (*itr)->setAlign( nAlLeft );
+    add( *itr );
   }
   swapVisuals.clear();
 

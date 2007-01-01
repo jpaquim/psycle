@@ -484,9 +484,11 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     }
     break;
     case WM_LBUTTONDOWN:
+     // SetCapture( win->win() );
       buttonPress( win, event, 1 );         
     break;
     case WM_RBUTTONDOWN:
+      //SetCapture( win->win() );
       buttonPress( win, event, 3 );                  
     break;
     case WM_LBUTTONDBLCLK:
@@ -497,9 +499,11 @@ int NApp::processEvent( NWindow * win, WEvent * event )
     break;
     case WM_LBUTTONUP:
       win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );
+      //ReleaseCapture();
     break;
     case WM_RBUTTONUP:
       win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );
+     // ReleaseCapture();
     break;    
     case WM_KEYDOWN : {
          BYTE keyboardState[256];
