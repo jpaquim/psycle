@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper <natti@linux>                 *
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper <natti@linux>                 *
  *   Copyright (C) 2006 by Johan Boule <bohan@jabber.org>                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,3 +20,5 @@
 #include "nproperty.h"
 
 // everything is template code in the header file
+
+//\ todo rewrite this ..

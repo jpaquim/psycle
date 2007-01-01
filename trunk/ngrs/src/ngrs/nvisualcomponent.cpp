@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -801,11 +801,11 @@ std::vector<NVisualComponent*>::iterator NVisualComponent::erase( std::vector<NV
    return it;
 }
 
-std::vector<NVisualComponent*>::iterator NVisualComponent::begin() {
+std::vector<NVisualComponent*>::iterator NVisualComponent::vcBegin() {
    return visualComponents_.begin();                                        
 }  
 
-std::vector<NVisualComponent*>::iterator NVisualComponent::end() {
+std::vector<NVisualComponent*>::iterator NVisualComponent::vcEnd() {
    return visualComponents_.end();                                        
 }                                                                  
 

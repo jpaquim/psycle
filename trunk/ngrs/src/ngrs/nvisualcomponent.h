@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -196,8 +196,9 @@ public:
     virtual void erase();
 
     const std::vector<NVisualComponent*> & visualComponents() const;
-    std::vector<NVisualComponent*>::iterator end();
-    std::vector<NVisualComponent*>::iterator begin();
+
+    std::vector<NVisualComponent*>::iterator vcEnd();
+    std::vector<NVisualComponent*>::iterator vcBegin();
 
     virtual void setPreferredSize(int width, int height);
 

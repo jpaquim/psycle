@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006 by Stefan Nattkemper  *
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -55,8 +55,9 @@ protected:
 
 private:
 
+    int ident_;
+
     NButton* moreBtn_;
-    NPanel* spacer_;
     NPopupWindow* popup_;
     
     void doAlign();
