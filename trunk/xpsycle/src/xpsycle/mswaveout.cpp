@@ -201,9 +201,8 @@ namespace psycle
           // the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio
           InitializeCriticalSection( &waveCriticalSection );
           int bufSize = 1024 / 2;
-          std::int16_t buf[bufSize];
-          int newCount = bufSize / 2;
-          srand( time(NULL)  );
+          std::int16_t buf[1024 / 2];
+          int newCount = bufSize / 2;        
           while ( _running ) {
               float const * input(_pCallback(_callbackContext, newCount));              
               for (int i = 0; i < bufSize; i++) {
@@ -217,6 +216,7 @@ namespace psycle
            SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
            MsWaveOut * pThis = reinterpret_cast<MsWaveOut*>( pWaveOut ) ;
            pThis->fillBuffer();
+		   return 0;
         }
 
 		bool MsWaveOut::start()

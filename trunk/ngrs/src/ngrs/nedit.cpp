@@ -261,13 +261,14 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
        }
     break;
     case NK_BackSpace:
-                 if (pos_>0) {
-                    if (selStartIdx_!=selEndIdx_) {
-                       int s = min(selStartIdx_,selEndIdx_);
-                       int e = max(selStartIdx_,selEndIdx_);
-                       text_.erase(s,e-s);
-                       pos_=s;
-                       selStartIdx_=selEndIdx_=0;
+                 if ( pos_ > 0 ) {
+                    if ( selStartIdx_ != selEndIdx_ ) {
+                       int s = min( selStartIdx_, selEndIdx_ );
+                       int e = max( selStartIdx_, selEndIdx_ );
+                       text_.erase( s, e-s );
+                       pos_=  s;
+                       selStartIdx_= 0;
+					   selEndIdx_  = 0;
                        repaint();
                     } else {
 /*                      bool flag = true;
@@ -311,10 +312,11 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                    //if (pattern_!=NULL) pattern_->accept(text_.c_str(),text_.length());
                    //if (flag) {
                     int count = 1;
-                    if (selStartIdx_!=selEndIdx_) {
+                    if ( selStartIdx_ != selEndIdx_ ) {
                        count = abs( (int) (selEndIdx_ - selStartIdx_) );
                        pos_ = min(selStartIdx_,selEndIdx_);
-                       selStartIdx_ =selEndIdx_ = 0;
+                       selStartIdx_ = 0;
+					   selEndIdx_   = 0;
                     //}
                     text_.erase(pos_,count);
                     //textChanged.emit(this);
@@ -327,7 +329,8 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
         if ( selStartIdx_ != selEndIdx_ ) {
            int count = selEndIdx_ - selStartIdx_;
            pos_ = std::min( selStartIdx_, selEndIdx_ );
-           selStartIdx_ =selEndIdx_ = 0;
+           selStartIdx_ = 0;
+		   selEndIdx_   = 0;
            text_.erase( pos_, count ); 
         }     
         text_.insert(pos_,keyEvent.buffer());
