@@ -31,7 +31,7 @@
   #include "wavefileout.h" ///\ todo pthread wrapper
 #else
   #include "mswaveout.h"
-  #include "msdirectsound.h"
+  //#include "msdirectsound.h"
 #endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
@@ -266,9 +266,9 @@ namespace psycle {
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 				
-				driver = new MsDirectSound();
+/*				driver = new MsDirectSound();
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
+				driverMap_[ driver->info().name() ] = driver;*/
 #endif
 				/*		#if !defined XPSYCLE__NO_NETAUDIO
 				driver = new NetAudioOut;

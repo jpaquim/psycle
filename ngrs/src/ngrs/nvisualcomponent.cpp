@@ -782,10 +782,15 @@ void NVisualComponent::erase( NVisualComponent * child )
   }
 }
 
-std::vector<NVisualComponent*>::iterator NVisualComponent::erase( std::vector<NVisualComponent*>::iterator first, std::vector<NVisualComponent*>::iterator last) {
-                                                                                                                           
+std::vector<NVisualComponent*>::iterator NVisualComponent::erase( std::vector<NVisualComponent*>::iterator first, std::vector<NVisualComponent*>::iterator last) { 
+   if ( first == vcEnd() ) return vcEnd();
+
    std::vector<NRuntime*>::iterator start_itr = find( components.begin(), components.end(), *first );
-   std::vector<NRuntime*>::iterator end_itr   = find( components.begin(), components.end(), *last  );      
+   std::vector<NRuntime*>::iterator end_itr;
+   if ( last != vcEnd() )
+     end_itr = find( components.begin(), components.end(), *last  );      
+   else
+     end_itr = components.end();
 
    if ( start_itr == components.end() ) return visualComponents_.end();
    components.erase( start_itr, end_itr );
