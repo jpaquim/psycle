@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
-// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
 ///\brief project-wide operating system specific tweaks.
@@ -153,9 +153,6 @@
 			#define DIVERSALIS__OPERATING_SYSTEM__UNIX
 			#define DIVERSALIS__OPERATING_SYSTEM__BSD
 			#define DIVERSALIS__OPERATING_SYSTEM__BSD__FREE
-			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR 0
-			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR 0
-			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH 0
 
 		////////////////////////
 		// darwin/apple's macos
@@ -176,6 +173,24 @@
 			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__MAJOR 10
 			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__MINOR 3
 			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__PATCH 3
+
+		////////////
+		// sgi irix
+		////////////
+
+		#elif defined __sgi
+			#define DIVERSALIS__OPERATING_SYSTEM
+			#define DIVERSALIS__OPERATING_SYSTEM__UNIX
+			#define DIVERSALIS__OPERATING_SYSTEM__IRIX
+
+		////////
+		// hpux
+		////////
+
+		#elif defined __hpux
+			#define DIVERSALIS__OPERATING_SYSTEM
+			#define DIVERSALIS__OPERATING_SYSTEM__UNIX
+			#define DIVERSALIS__OPERATING_SYSTEM__HPUX
 
 		//////////
 		// cygwin
@@ -211,10 +226,7 @@
 		// microsoft's windows
 		///////////////////////
 
-		#elif defined _WIN64 || defined _WIN32 || defined __MINGW32__ // note: _WIN32 is defined too on mingw (cygwin's gcc -mno-cygwin)
-			#if defined _WIN64
-				#error "These sources have never been tested on the 64-bit version of microsoft's operating system ; nevertheless, you may edit the file where this error is triggered to force compilation and test if it works, or else, as a last resort, you may enable the 32-bit compatibility mode (WOW library)."
-			#endif
+		#elif defined _WIN64 || defined _WIN32 || defined __MINGW32__ // note: _WIN32 is defined too on mingw (and cygwin's gcc -mno-cygwin)
 			#define DIVERSALIS__OPERATING_SYSTEM
 			#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			#if defined _WINDOWS_ || defined WINVER || defined _WIN32_WINDOWS || defined _WIN32_WINNT || defined _WIN32_IE

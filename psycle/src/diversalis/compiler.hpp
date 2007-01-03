@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
-// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
 ///\brief project-wide compiler-specific tweaks.
@@ -182,6 +182,12 @@
 		// microsoft's compiler
 		////////////////////////
 
+		// TODO:
+		// these things are mostly bogus. 1200 means version 12.0 of the compiler. The 
+		// artificial versions assigned to them only refer to the versions of some IDE
+		// these compilers have been shipped with, and even that is not all of it. Some
+		// were shipped with freely downloadable SDKs, others as crosscompilers in eVC.
+		// IOW, you can't use these 'versions' in any sensible way. Sorry.
 		#elif defined _MSC_VER
 			#define DIVERSALIS__COMPILER
 			#define DIVERSALIS__COMPILER__MICROSOFT
