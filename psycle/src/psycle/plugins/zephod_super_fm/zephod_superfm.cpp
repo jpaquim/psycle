@@ -43,8 +43,6 @@
 #define WF_SET		0
 #define WF_ADD		1
 
-#define F_PI (3.14159f)
-
 #define ENV_ATT 1
 #define ENV_DEC 2
 #define ENV_SUS 3
@@ -434,8 +432,8 @@ float CTrack::Osc(float phi)
 {
 	switch(pmi->wave)
 	{
-		case 0:	return (float) sin(phi*2*PI)*32768 ;break;
-		case 1:	if (sin(phi*2*PI)>0) return 32768 ; else return -32768 ;break;
+		case 0:	return (float) sin(phi*2*psycle::plugin_interface::pi)*32768 ;break;
+		case 1:	if (sin(phi*2*psycle::plugin_interface::pi)>0) return 32768 ; else return -32768 ;break;
 		case 2: return (float) (phi-0.5)* 32768 ;break;
 		case 3: return (float) (0.5-phi)* 32768 ;break;
 		default:return 0;break;
@@ -446,8 +444,8 @@ float CTrack::ModOsc(float phi)
 {
 	switch(pmi->ModWave)
 	{
-		case 0: return (float) sin(phi*2*PI);
-		case 1:	if (sin(phi*2*PI)>0) return 1; else return -1;break;
+		case 0: return (float) sin(phi*2*psycle::plugin_interface::pi);
+		case 1:	if (sin(phi*2*psycle::plugin_interface::pi)>0) return 1; else return -1;break;
 		case 2: return (float) (phi-0.5);break;
 		case 3: return (float) (0.5-phi);break;
 		default:return 0;

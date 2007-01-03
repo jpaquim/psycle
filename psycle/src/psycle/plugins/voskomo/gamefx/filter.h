@@ -3,8 +3,8 @@
 #include <psycle/plugin_interface.hpp>
 
 typedef float SIG;
-#define TWOPI_F (2.0f*3.141592665f)
-//static const double PI=4*atan(1.0);
+double const two_pi = 2 * psycle::plugin_interface::pi;
+#define two_pi (2.0f*3.141592665f)
 
 class CBiquad
 {
@@ -49,7 +49,7 @@ public:
 	void SetLowShelf(float fc, float q, float v, float esr)
 	{
 		float sq = (float)sqrt(2.0*(double)v);
-		float omega = TWOPI_F*fc/esr;
+		float omega = two_pi*fc/esr;
 		float k = (float) tan((double)omega*0.5);
 		float kk = k*k;
 		float vkk = v*kk;
@@ -63,8 +63,8 @@ public:
 	void SetHighShelf(float fc, float q, float v, float esr)
 	{
 		float sq = (float)sqrt(2.0*(double)v);
-		float omega = TWOPI_F*fc/esr;
-		float k = (float) tan((PI - (double)omega)*0.5);
+		float omega = two_pi*fc/esr;
+		float k = (float) tan((psycle::plugin_interface::pi - (double)omega)*0.5);
 		float kk = k*k;
 		float vkk = v*kk;
 		float oda0 = 1.0f/( 1.0f + k/q +kk);
@@ -76,7 +76,7 @@ public:
 	}
 	void SetParametricEQ(float fc, float q, float v, float esr, float gain=1.0f)
 	{
-		float omega = TWOPI_F*fc/esr;
+		float omega = two_pi*fc/esr;
 		float k = (float) tan((double)omega*0.5);
 		float kk = k*k;
 		float vk = v*k;
@@ -116,7 +116,7 @@ public:
 	}
 	void SetBandpass(float dCutoff, float dBandwith, float dSampleRate)
 	{
-		float b=(float)(2.0*PI*dBandwith/dSampleRate);
+		float b=(float)(2.0*psycle::plugin_interface::pi*dBandwith/dSampleRate);
 		float a=(float)(PreWarp2(dCutoff, dSampleRate));
 		SetBilinear(0, b*a, 0, 1, b*a, a*a);
 	}

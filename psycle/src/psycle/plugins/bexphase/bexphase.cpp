@@ -9,7 +9,7 @@ const int fftlen = 2048;
 const int iir = 6;
 const int inbuflen = fftlen * iir * 2;
 float optimal[iir+1] = { 0, 0.50f, 0.40f, 0.32f, 0.30f, 0.28f, 0.24f };
-const double BexPI = PI / 2;
+const double BexPI = psycle::plugin_interface::pi / 2;
 
 CMachineParameter const paraFreq = 
 { 
