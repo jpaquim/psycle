@@ -1,9 +1,10 @@
 #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/microsoft_direct_sound_conditional_build.h>
 #endif
-#if !defined XPSYCLE__NO_MICROSOFT_DIRECT_SOUND
+#if !defined XPSYCLE__NO_MICROSOFT_DIRECT_SOUND && 0
 #include "microsoft_direct_sound_out.h"
-#include "cstdint"
+#include "cstdint.h"
+#include <iostream>
 namespace psycle
 {
 	namespace host
@@ -167,7 +168,13 @@ namespace psycle
 //			CSingleLock lock(&_lock, true);
 			if(!_threadRunning) return true;
 			_playing = false;
-			while (_threadRunning) { usleep(100); }
+			while (_threadRunning) {
+				#if defined __unix__
+					usleep(100);
+				#else
+					Sleep(1);
+				#endif
+			}
 //			CSingleLock event(&_event, true);
 			// Once we get here, the PollerThread should have stopped
 			_pBuffer->Stop();
@@ -187,8 +194,11 @@ namespace psycle
 			while(pThis->_playing)
 			{
 				pThis->DoBlocks();
-				usleep(500);
-//				::Sleep(1);
+				#if defined __unix__
+					usleep(500);
+				#else
+					Sleep(1);
+				#endif
 			}
 //			_event.SetEvent();
 //			::_endthread();
