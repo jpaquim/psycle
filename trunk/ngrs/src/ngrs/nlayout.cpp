@@ -30,15 +30,9 @@ NLayout::~NLayout()
 {
 }
 
-void NLayout::testRef( NVisualComponent & forward ) {
-
-}
-
 void NLayout::align( NVisualComponent * parent )
 {
 }
-
-
 
 void NLayout::setParent( NVisualComponent * parent )
 {
@@ -49,8 +43,6 @@ class NVisualComponent * NLayout::parent( ) const
 {
   return parent_;
 }
-
-
 
 void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRegion & repaintArea , NVisualComponent* sender)
 {
@@ -76,10 +68,4 @@ void NLayout::remove( class NVisualComponent * comp )
 void NLayout::removeAll( )
 {
 }
-
-
-
-
-
-
 
