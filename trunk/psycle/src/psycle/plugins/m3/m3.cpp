@@ -688,7 +688,7 @@ void mi::SetNoValue(tvals &tv)
 void mi::ComputeCoefs( float *coefs, int freq, int r, int t)
 {
 
-    float omega = 2*PI*Cutoff(freq)/pCB->GetSamplingRate();
+    float omega = 2*psycle::plugin_interface::pi*Cutoff(freq)/pCB->GetSamplingRate();
     float sn = sin( omega);
     float cs = cos( omega);
     float alpha;

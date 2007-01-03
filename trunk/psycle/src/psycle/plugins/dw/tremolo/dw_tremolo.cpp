@@ -344,7 +344,7 @@ void mi::fillLfo()
 
 	if(Vals[prm_gravity]!=100 && Vals[prm_waveform]!=lfo_square)  //we -could- do all this with 0 gravity or a square wave, it just wouldn't change anything..
 	{
-		ylop=std::fabs(Vals[prm_gravity]-100) / 100.0f;		// for weighted average of linear value and curved value
+		ylop=std::fabs(Vals[prm_gravity]-100.0f) / 100.0f;		// for weighted average of linear value and curved value
 
 		for(int i=0;i<LFO_SIZE;++i)
 		{
