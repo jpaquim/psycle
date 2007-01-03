@@ -27,6 +27,7 @@
 #include <sstream>
 #include <cassert>
 #include <cerrno>
+#include "cstdint.h"
 
 namespace psycle
 {
