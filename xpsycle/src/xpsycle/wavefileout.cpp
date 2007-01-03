@@ -42,7 +42,11 @@ namespace psycle
 		{
 			while ( threadOpen ) {
 				kill_thread = 1;						
-				usleep(200);
+				#if defined __unix__
+					usleep(200);
+				#else
+					Sleep(1);
+				#endif
 			}
 		}
 
@@ -73,14 +77,22 @@ namespace psycle
 			bool threadStarted = false;
 			if (e && !threadOpen) {
 					kill_thread = 0;
-					pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
+					#if defined __unix__
+						pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
+					#else
+						// todo i'm too fed up of this to write code here. -- bohan
+					#endif
 					threadStarted = true;
 			} else
 			if (!e && threadOpen) {
 				kill_thread = 1;
 				threadStarted = false;
 				while ( threadOpen ) {
-					usleep(10); // give thread time to close
+					#if defined __unix__
+						usleep(10); // give thread time to close
+					#else
+						Sleep(1);
+					#endif
 				}
 			}
 			return threadStarted;
@@ -99,13 +111,21 @@ namespace psycle
 
 			while(!(kill_thread))
 			{
-				usleep(50); // give cpu time to breath, and not too much :)
+				#if defined __unix__
+					usleep(50); // give cpu time to breath, and not too much :)
+				#else
+					Sleep(1);
+				#endif
 				float const * input(_pCallback(_callbackContext, count));
 			}
 
 			threadOpen = 0;
 			std::cout << "closing thread" << std::endl;
-			pthread_exit(0);
+			#if defined __unix__
+				pthread_exit(0);
+			#else
+				// todo i'm too fed up of this to write code here. -- bohan
+			#endif
 		}
 
 
