@@ -28,18 +28,14 @@
 #include <zlib.h>
 
 #ifdef __unix__
-#else
-#include "windows.h"
+	#include <unistd.h>
+	#include <sys/types.h>
+#elif defined _WIN64 || defined _WIN32
+	#include <windows.h>
+	#include <io.h>
 #endif
 
-#ifdef __unix__
-      #include <unistd.h>
-      #include <sys/stat.h>
-      #include <sys/types.h>
-#elif __MSDOS__ || __WIN32__ || _MSC_VER
-      #include <io.h>
-      #include <sys\stat.h>
-#endif
+#include <sys/stat.h>
 
 static void _zw_tail(zipwriter *d);
 static void _zw_eodr(zipwriter *d, unsigned char *ptr);
