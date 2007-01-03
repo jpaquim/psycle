@@ -10,7 +10,8 @@
 #ifdef __unix__
 #else
   #include <windows.h>
-  #pragma once
+  #undef min
+  #undef max
 #endif
 
 namespace psycle
