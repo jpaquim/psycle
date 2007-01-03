@@ -5,7 +5,9 @@
 #if !defined XPSYCLE__NO_MICROSOFT_DIRECT_SOUND
 #include "audiodriver.h"
 #include <dsound.h>
-#include <pthread.h>
+#if defined __unix__
+	#include <pthread.h>
+#endif
 namespace psycle
 	{
 		namespace host
