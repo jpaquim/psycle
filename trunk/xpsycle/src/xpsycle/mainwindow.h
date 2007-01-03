@@ -72,6 +72,8 @@ public:
     ~MainWindow();
 
 		virtual void onKeyPress( const NKeyEvent & event);
+		
+		void testRefForward( GreetDlg & forward );
 
 private:
 

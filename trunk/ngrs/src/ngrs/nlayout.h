@@ -55,6 +55,8 @@ public:
     virtual void insert(class NVisualComponent* comp, int index);
     virtual void remove(class NVisualComponent* comp);
     virtual void removeAll();
+    
+    virtual void testRef( class NVisualComponent & forward );
 
 private:
 

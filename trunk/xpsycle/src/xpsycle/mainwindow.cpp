@@ -409,6 +409,10 @@ void MainWindow::initBars( )
   pane()->add(statusBar_,nAlBottom);
 }
 
+void MainWindow::testRefForward( GreetDlg & forward ) {
+
+}
+
 void MainWindow::initToolBar( )
 {
   DefaultBitmaps & icons = Global::pConfig()->icons();

@@ -30,6 +30,10 @@ NLayout::~NLayout()
 {
 }
 
+void NLayout::testRef( NVisualComponent & forward ) {
+
+}
+
 void NLayout::align( NVisualComponent * parent )
 {
 }
