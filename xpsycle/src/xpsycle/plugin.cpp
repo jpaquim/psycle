@@ -25,6 +25,8 @@
 #include <dlfcn.h>
 #else
 #include <windows.h>
+#undef min
+#undef max
 #endif
 #include <iostream>
 #include <fstream>
