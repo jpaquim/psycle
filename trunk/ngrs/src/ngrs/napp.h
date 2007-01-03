@@ -115,7 +115,11 @@ private:
    void eventLoop();
    static void modalEventLoop(NWindow* modalWin);
 
-   static int processEvent(NWindow* win, WEvent* event);
+   #ifdef __unix__
+   static unsigned int processEvent( NWindow* win, WEvent* event);
+   #else
+   static LRESULT processEvent( NWindow* win, WEvent* event);
+   #endif
 
    static std::vector<NWindow*> repaintWin_;
    static std::vector<NVisualComponent*> scrollControl_;

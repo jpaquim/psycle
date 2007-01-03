@@ -321,22 +321,17 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     event.wParam = wParam; 
     event.lParam = lParam;
     
-    int erg = 0;
+    LRESULT erg = 0;
     
     
-     if (window == modalWin_ || window->isChildOf(modalWin_) ||
+    if (window == modalWin_ || window->isChildOf(modalWin_) ||
         event.msg == WM_PAINT ) {
         if ( event.msg == WM_CLOSE ) {
            modalExitLoop_ = 1;          
         }
         erg = processEvent(window, & event);
-      }
-    else
-      erg = processEvent(window, & event);
-
-
-   if ( window->exitLoop() == nDestroyWindow ) modalExitLoop_ = 1;
-        
+    } else erg = processEvent( window, & event );
+    if ( window->exitLoop() == nDestroyWindow ) modalExitLoop_ = 1;        
     return erg;
   }
 
@@ -346,7 +341,11 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 #endif
 
 
-int NApp::processEvent( NWindow * win, WEvent * event )
+#ifdef __unix__
+  unsigned int NApp::processEvent( NWindow * win, WEvent * event )
+#else
+  LRESULT NApp::processEvent( NWindow * win, WEvent * event )
+#endif
 {
   int exitloop = 0;
   #ifdef __unix__
@@ -513,7 +512,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
          if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
          if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;
 
-         WPARAM vkey = event->wParam;
+         UINT vkey = static_cast<UINT>( event->wParam );
          if ( vkey != VK_SHIFT ) {
            WORD wordchar;
            int retv = ToAscii( vkey, MapVirtualKey( vkey, 0 ), keyboardState, & wordchar, 0 );
@@ -522,7 +521,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
            buffer[1] = 0;
          } else buffer[0] = '\0';
 
-         win->onKeyPress( NKeyEvent( 0, buffer, event->wParam & 255, sState ));
+         win->onKeyPress( NKeyEvent( 0, buffer, static_cast<int>( event->wParam & 255 ), sState ));
     }
     break;
     case WM_SETCURSOR:
@@ -539,7 +538,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
        if ( ( keyboardState[ VK_SHIFT ] & 0x80 ) == 0x80 )   sState |= nsShift;
        if ( ( keyboardState[ VK_CONTROL ] & 0x80 ) == 0x80 ) sState |= nsCtrl;
 
-       int vkey = event->wParam;
+       UINT vkey = static_cast<UINT>( event->wParam );
        if ( vkey != VK_SHIFT ) {
        WORD wordchar;
          int retv = ToAscii( vkey, MapVirtualKey( vkey, 0 ), keyboardState, & wordchar, 0 );
@@ -547,7 +546,7 @@ int NApp::processEvent( NWindow * win, WEvent * event )
          buffer[0] = wordchar & 0xff ;
          buffer[1] = 0;
        } else buffer[0] = '\0';
-       win->onKeyRelease(NKeyEvent(0,buffer, event->wParam & 255, sState ));         
+       win->onKeyRelease(NKeyEvent(0,buffer, static_cast<UINT>( event->wParam & 255 ), sState ));         
     }   
     break;
     default:

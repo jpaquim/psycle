@@ -193,21 +193,21 @@ void NBitmap::createFromXpmData(const char** data)
   clpColor_ = 02;
   // code from ngrs0.8 .. needs rewrite
   const char* picInfo = data[0];  
-  std::vector<int> breakList;
-  int size = strlen(picInfo);
+  std::vector< size_t > breakList;
+  size_t size = strlen(picInfo);
   
-  for (int i = 0; i < size; i++) {    
-    if (picInfo[i]==' ') {
-      breakList.push_back(i);
+  for ( size_t i = 0; i < size; i++) {    
+    if ( picInfo[i]==' ' ) {
+      breakList.push_back( i );
     }  
   }
-  if (picInfo[size-1]!=' ') breakList.push_back(size);
+  if ( picInfo[ size-1 ] != ' ' ) breakList.push_back( size );
 
-  std::vector<int>::iterator it = breakList.begin();
+  std::vector<size_t>::iterator it = breakList.begin();
   
   char numBuf[20]; 
-  int prevP = 0;
-  int point = *it;
+  size_t prevP = 0;
+  size_t point = *it;
 
   int xwidth_ = 0;
   int xheight_ = 0;   
@@ -218,15 +218,15 @@ void NBitmap::createFromXpmData(const char** data)
   int height  = xheight_ = atoi(numBuf); 
   memcpy(numBuf,picInfo+prevP,point-prevP); numBuf[point-prevP]='\0'; prevP = point; it++; point = *it;
   int ncolors = atoi(numBuf); 
-  memcpy(numBuf,picInfo+prevP,point-prevP); numBuf[point-prevP]='\0'; 
-  int ncpp     = atoi(numBuf); 
+  memcpy(numBuf,picInfo+prevP,point-prevP); numBuf[point-prevP]='\0';
+  unsigned int ncpp     = atoi( numBuf ); 
   int flagPos  = ncpp+1;
   int colorPos = ncpp+4;
     
   std::map<std::string,long> colorTable;
   bool trans = false;
   std::string transKey;
-  srand( time( NULL ) );
+  srand( static_cast< unsigned int >(time( NULL )) );
   
   for (int i = 0; i< ncolors; i++) {
     std::string colorLine( data[i+1] );  
