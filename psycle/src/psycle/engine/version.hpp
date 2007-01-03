@@ -22,7 +22,7 @@
 #define PSYCLE__ENGINE__TAR_NAME "psycle"
 #define PSYCLE__ENGINE__NAME "Psycle Modular Music Creation Studio"
 #define PSYCLE__ENGINE__BRANCH "psycledelics"
-#define PSYCLE__ENGINE__COPYRIGHT "copyright 2000-2006 psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net) ; see the AUTHORS file"
+#define PSYCLE__ENGINE__COPYRIGHT "copyright 2000-2007 psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net) ; see the AUTHORS file"
 #define PSYCLE__ENGINE__LICENSE "none, public domain"
 #define PSYCLE__ENGINE__VERSION__MAJOR 1
 #define PSYCLE__ENGINE__VERSION__MINOR 9
