@@ -24,6 +24,7 @@
 #if !defined XPSYCLE__NO_LADSPA
 
 #include "player.h"
+#ifdef __unix__
 #include <dlfcn.h>
 #include "dsp.h"
 
@@ -484,4 +485,5 @@ namespace psycle {
 		}
 	}
 }
+#endif
 #endif // !defined XPSYCLE__NO_LADSPA
