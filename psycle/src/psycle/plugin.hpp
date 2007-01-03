@@ -1,3 +1,7 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2003-2007 johan boule <bohan@jabber.org>
+// copyright 2003-2007 psycledelics http://psycle.pastnotecut.org
+
 /// \file
 /// \brief yet another psycle plugin interface api by bohan
 /// This one is more object-oriented than the original plugin_interface.hpp one.
@@ -412,6 +416,7 @@ namespace psycle
 		}; // class Plugin
 
 		/// call this from your plugin's source file to export the necessary function from the dynamically linked library.
+		/// spelling INSTANCIATOR -> INSTANTIATOR
 		#define PSYCLE__PLUGIN__INSTANCIATOR(typename) \
 			extern "C" \
 			{ \
