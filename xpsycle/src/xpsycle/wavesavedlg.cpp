@@ -297,7 +297,13 @@ void WaveSaveDlg::onCloseBtn( NButtonEvent * ev )
      {
        current = 256;
        kill_thread=1;
-       usleep(100);
+       #ifdef __unix__
+         usleep(100);
+       #elif defined _WIN64 || defined _WIN32
+         Sleep(1);
+       #else
+         #error system not supported
+       #endif
      }
   }
   else if (threadopen <= 0) {
