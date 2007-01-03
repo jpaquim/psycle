@@ -638,8 +638,18 @@ NWindow * NApp::mouseOverWindow( )
      return itr->second;
   } else return 0;
   #else
-  return 0;
+    POINT point;
+	GetCursorPos( &point );
+    WinHandle childWin = WindowFromPoint(point);
+	if ( childWin ) {
+		std::map< WinHandle, NWindow* >::iterator itr;
+		if ( (itr = winMap.find( childWin ) ) == winMap.end( ) )
+			return 0;
+		else
+			return itr->second;
+	}    
   #endif
+  return 0;
 }
 
 void NApp::registerPopupWindow( NWindow * win )
