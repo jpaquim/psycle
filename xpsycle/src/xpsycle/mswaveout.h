@@ -25,7 +25,10 @@
 #if defined __unix__ && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
 #else
 
-#include "windows.h"
+#include <windows.h>
+#include <mmsystem.h>
+#undef min
+#undef max
 
 namespace psycle
 {
