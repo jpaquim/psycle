@@ -878,11 +878,11 @@ void NGraphics::drawRoundRect( int x, int y, int width, int height, int arcWidth
   
   if ( dblBuffer_ ) {
     HBRUSH holdbrush = (HBRUSH) SelectObject( gcp, hollow );
-    RoundRect( gcp, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, arcWidth, arcHeight );
+    RoundRect( gcp, x + dx_, y + dy_ , x + dx_ + width + 1 , y + dy_ + height + 1, arcWidth, arcHeight );
     SelectObject( gcp, holdbrush );
   } else {
     HBRUSH holdbrush = (HBRUSH) SelectObject( gcp, hollow );   
-    RoundRect( gc_, x + dx_, y + dy_ , x + dx_ + width, y + dy_ + height, arcWidth, arcHeight );
+    RoundRect( gc_, x + dx_, y + dy_ , x + dx_ + width + 1, y + dy_ + height + 1, arcWidth, arcHeight );
     SelectObject( gc_, holdbrush );    
   }
   #endif        
