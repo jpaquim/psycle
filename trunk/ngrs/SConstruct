@@ -1,8 +1,8 @@
 #! /usr/bin/env scons
 
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2006 johan boule <bohan@jabber.org>
-# copyright 2006 psycledelics http://psycle.pastnotecut.org
+# copyright 2006-2007 johan boule <bohan@jabber.org>
+# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
 import sys, os, os.path
@@ -26,11 +26,10 @@ from packageneric.generic.scons.version import version
 source_package = source_package(project,
 	name = 'ngrs',
 	version = version(0, 0),
-	description = 'ngrs graphic toolkit library',
-	long_description = """\
-ngrs is a graphic toolkit library ...
-This library is used by xpsycle."""
+	description_file = 'README'
 )
+
+source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
 
 # external packages
 
@@ -44,52 +43,34 @@ stdcxx = stdcxx(project)
 from packageneric.pool.dlfcn import dlfcn
 dlfcn = dlfcn(project)
 
-pthread = external_package_check(project, name = 'pthread',
-	dependencies = [
-		cxx_build_check(project, name = 'pthread', libraries = ['pthread'], source_text = \
-			"""\
-				#include <pthread.h>
-				void pthread()
-				{
-					pthread_t self(pthread_self());
-				}
-			"""
-		)
-	],
-	distribution_packages = {
-		'debian and ubuntu': 'libc-dev (>= 0)',
-		'gentoo': '...',
-		'fedora': '...',
-		'cygwin': '...'
-	},
-	url = 'http://google.ch posix 1003.1-2003'
-)
+from packageneric.pool.pthread import pthread
+pthread = pthread(project)
 
 freetype = external_package_check(project, name = 'freetype',
-	dependencies = [
-		pkg_config_check(project, name = 'freetype2 >= 0') # note: brings the z lib
-	],
+	url = 'http://google.ch ...',
 	distribution_packages = {
-		'debian': 'libfreetype6-dev (>= 0)',
+		'debian': 'libfreetype6-dev (>= 2.1.9)',
 		'gentoo': '...',
 		'fedora': '...',
-		'cygwin': '...',
+		'cygwin': 'libfreetype2-devel (>= 2.1.9)',
 		'microsoft': '... (have a look at http://gimp.org)'
 	},
-	url = 'http://google.ch ...'
+	dependencies = [
+		pkg_config_check(project, name = 'freetype2 >= 9.7.0') # note: brings the z lib
+	]
 )
 
 class x(external_package_check):
 	def __init__(self):
 		external_package_check.__init__(self, project, name = 'x',
-			dependencies = [],
+			url = 'http://x.org',
 			distribution_packages = {
 				'debian and ubuntu': 'libx11-dev (>= 0)',
 				'gentoo': '...',
 				'fedora': '...',
-				'cygwin': '...'
+				'cygwin': 'xorg-x11-devel (6.8.2.0)'
 			},
-			url = 'http://x.org'
+			dependencies = []
 		)
 	def dynamic_dependencies(self):
 		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
@@ -120,9 +101,16 @@ class x(external_package_check):
 x = x()
 
 xfixes = external_package_check(project, name = 'xfixes',
+	url = 'http://x.org',
+	distribution_packages = {
+		'debian and ubuntu': 'libxfixes-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': 'xorg-x11-devel (6.8.2.0)'
+	},
 	dependencies = [
-		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
-		#pkg_config_check(project, name = 'xfixes >= 0')
+		# debian and cygwin have a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
+		#pkg_config_check(project, name = 'xfixes >= 3.0.0')
 		cxx_build_check(project, name = 'xfixes', dependencies = [x], libraries = ['Xfixes'], source_text = \
 			"""\
 				#include <X11/Xlib.h>
@@ -133,17 +121,17 @@ xfixes = external_package_check(project, name = 'xfixes',
 				}
 			"""
 		)
-	],
-	distribution_packages = {
-		'debian and ubuntu': 'libxfixes-dev (>= 0)',
-		'gentoo': '...',
-		'fedora': '...',
-		'cygwin': '...'
-	},
-	url = 'http://x.org'
+	]
 )
 
 xpm = external_package_check(project, name = 'xpm',
+	url = 'http://x.org',
+	distribution_packages = {
+		'debian and ubuntu': 'libxpm-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': 'xorg-x11-devel (6.8.2.0)'
+	},
 	dependencies = [
 		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
 		#pkg_config_check(project, name = 'xpm >= 0')
@@ -156,20 +144,20 @@ xpm = external_package_check(project, name = 'xpm',
 				}
 			"""
 		)
-	],
-	distribution_packages = {
-		'debian and ubuntu': 'libxpm-dev (>= 0)',
-		'gentoo': '...',
-		'fedora': '...',
-		'cygwin': '...'
-	},
-	url = 'http://x.org'
+	]
 )
 
 xcursor = external_package_check(project, name = 'xcursor',
+	url = 'http://x.org',
+	distribution_packages = {
+		'debian and ubuntu': 'libxcursor-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': 'xorg-x11-devel (6.8.2.0)'
+	},
 	dependencies = [
-		# debian has a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
-		#pkg_config_check(project, name = 'xcursor >= 0')
+		# debian and cygwin have a pkg-config file for it, but it's not sure for other distributions. todo use pkg-config with a build check as fallback
+		#pkg_config_check(project, name = 'xcursor >= 1.1.2')
 		cxx_build_check(project, name = 'xcursor', dependencies = [x], libraries = ['Xcursor'], source_text = \
 			"""\
 				#include <X11/Xlib.h>
@@ -180,30 +168,30 @@ xcursor = external_package_check(project, name = 'xcursor',
 				}
 			"""
 		)
-	],
-	distribution_packages = {
-		'debian and ubuntu': 'libxcursor-dev (>= 0)',
-		'gentoo': '...',
-		'fedora': '...',
-		'cygwin': '...'
-	},
-	url = 'http://x.org'
+	]
 )
 
 xft = external_package_check(project, name = 'xft',
-	dependencies = [
-		pkg_config_check(project, name = 'xft >= 0')
-	],
+	url = 'http://x.org',
 	distribution_packages = {
 		'debian and ubuntu': 'libxft2-dev (>= 0), libfontconfig1-dev (>= 2.3.1)',
 		'gentoo': '...',
 		'fedora': '...',
-		'cygwin': '...'
+		'cygwin': 'libXft-devel (>= 2.1.6-1)'
 	},
-	url = 'http://x.org'
+	dependencies = [
+		pkg_config_check(project, name = 'xft >= 2.1.6')
+	]
 )
 
 xerces = external_package_check(project, name = 'xerces',
+	url = 'http://apache.org',
+	distribution_packages = {
+		'debian and ubuntu': 'libxerces27-dev (>= 0) | libxerces26-dev (>= 0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': 'xerces-c-devel (>= 2.5.0)'
+	},
 	dependencies = [
 		cxx_build_check(project, name = 'xerces', libraries = ['xerces-c'], source_text = \
 			"""\
@@ -214,14 +202,45 @@ xerces = external_package_check(project, name = 'xerces',
 				}
 			"""
 		)
-	],
-	distribution_packages = {
-		'debian and ubuntu': 'libxerces27-dev (>= 0) | libxerces26-dev (>= 0)',
-		'gentoo': '...',
-		'fedora': '...',
-		'cygwin': '...'
-	},
-	url = 'http://apache.org'
+	]
+)
+
+microsoft_windows = external_package_check(project, name = 'microsoft windows api',
+	url = 'http://msdn.microsoft.com',
+	distribution_packages = {'microsoft (maybe windows updates?)': 'windows platform sdk'},
+	dependencies = [
+		cxx_build_check(project, name = 'microsoft windows api', libraries = [], source_text = \
+			"""\
+				#if !defined _WIN64 && !defined _WIN32
+					#error Bill Gates: No such fool or dictatory
+				#endif
+				#if !defined _WIN64
+					#define WINVER 0x510
+					#define _WIN32_WINDOWS WINVER
+					#define _WIN32_NT WINVER
+					#define _WIN32_IE 0x600
+					//#define WIN32_LEAN_AND_MEAN
+					//#define WIN32_EXTRA_LEAN
+				#endif
+				//#define VC_EXTRA_LEAN
+				#define NOMINMAX
+				#include <windows.h>
+				#if !defined _WINDOWS_ && !defined __GNUG__ // hmm, mingw's header is bizarre
+					#error bad windows header
+				#endif
+				#if defined min || defined max
+					#error bad windows header: clash with standard library
+				#endif
+				void microsoft_windows()
+				{
+					// todo do something with it for a complete check
+					#if 0 // <wincon.h>
+						GetConsoleWindow();
+					#endif
+				}
+			"""
+		)
+	]
 )
 
 # modules
@@ -234,48 +253,19 @@ class ngrs_module(module):
 			name = 'ngrs-' + str(source_package.version().major()),
 			version = source_package.version(),
 			description = source_package.description(),
-			dependencies = [stdcxx, xerces]
+			dependencies = [stdcxx]
 		)
 
 	def dynamic_dependencies(self):
-		# todo here we should check whether we have dlfcn, pthread and the X window libraries (and related),
-		# if not and if the host operating system is microsoft's, this shouldn't be a fatal error
-		# (once ngrs supports that os too, that is).
-		# remove the ' or True' when ready
+		if microsoft_windows.result(): self.add_dependency(microsoft_windows)
+		else: self.add_dependencies([dlfcn, pthread, freetype, x, xfixes, xpm, xcursor, xft])
+		if xerces.result(): self.add_dependency(xerces) # todo prodos, in which cases is it needed?
 		
-		if dlfcn.result() or True: self.add_dependency(dlfcn)
-		else: pass # todo for other systems
-
-		if pthread.result() or True: self.add_dependency(pthread)
-		else: pass # todo for other systems
-
-		if freetype.result() or True: self.add_dependency(freetype)
-		else: pass # todo work around?
-
-		if x.result() or True:
-			self.add_dependency(x)
-			
-			if xfixes.result() or True: self.add_dependency(xfixes)
-			else: pass # todo work around?
-
-			if xpm.result() or True: self.add_dependency(xpm)
-			else: pass # todo work around?
-
-			if xcursor.result() or True: self.add_dependency(xcursor)
-			else: pass # todo work around?
-
-			if xft.result() or True: self.add_dependency(xft)
-			else: pass # todo work around?
-		else: pass # todo for other systems
-
+		from packageneric.generic.scons.find import find
+		self.add_sources(find(self.project(), 'src', [os.path.join('ngrs', '*.' + extension) for extension in ('cpp', 'c')]))
+		self.add_headers(find(self.project(), 'src', [os.path.join('ngrs', '*.' + extension) for extension in ('hpp', 'h')]))
+		self.contexes().source().compilers().cxx().paths().add(['src'])
 ngrs_module = ngrs_module()
-
-from packageneric.generic.scons.find import find
-ngrs_module.add_sources(find(project, 'src', 'ngrs', '*.cpp'))
-ngrs_module.add_headers(find(project, 'src', 'ngrs', '*.hpp'))
-ngrs_module.add_headers(find(project, 'src', 'ngrs', '*.h'))
-
-ngrs_module.contexes().source().compilers().cxx().paths().add(['src'])
 
 # pkg-config packages
 
