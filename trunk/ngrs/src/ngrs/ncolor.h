@@ -31,33 +31,32 @@
 class NColor{
 public:
     NColor();
-    NColor(int red, int green, int blue);
-    NColor(long hcolorref );
-    NColor(const std:: string & rgbStr);
+    NColor( unsigned int red, unsigned int green, unsigned int blue );
+    NColor( long hcolorref );
+    NColor( const std:: string & rgbStr );
 
     ~NColor();
 
-    int red() const;
-    int green() const;
-    int blue() const;
+    unsigned int red() const;
+    unsigned int green() const;
+    unsigned int blue() const;
 
-    void setRGB(int red, int green, int bblue);
-    void setHCOLORREF(long int hcolorref);
-    void setRGB(const std::string & rgbStr);
+    void setRGB( unsigned int red, unsigned int green, unsigned int bblue );
+    void setHCOLORREF( long hcolorref );
+    void setRGB( const std::string & rgbStr );
 
     unsigned long colorValue() const;
     long hColorRef() const;
 
-    bool operator==(const NColor & color) const;
-    const NColor operator-(const NColor & rhs ) {
-       return NColor(red() - rhs.red(), green()- rhs.green(), blue() - rhs.blue());
+    bool operator==( const NColor & color ) const;
+    const NColor operator-( const NColor & rhs ) {
+       return NColor( red() - rhs.red(), green()- rhs.green(), blue() - rhs.blue() );
     }
-    bool operator<(const NColor & cl) const;
+    bool operator<( const NColor & rhs ) const;
 
 private:
 
-  int r,g,b;
-
+  unsigned int r,g,b;
   unsigned long value;
 
 };

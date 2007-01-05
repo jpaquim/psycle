@@ -19,26 +19,25 @@
  ***************************************************************************/
 #include "ncolor.h"
 #include "napp.h"
+#include <algorithm>
 
-using namespace std;
 
-
-NColor::NColor() : r(0),g(0),b(0)
+NColor::NColor() : r( 0 ), g( 0 ), b( 0 )
 {
-  value = NApp::system().getXColorValue(r,g,b);
+  value = NApp::system().getXColorValue( r, g, b );
 }
 
-NColor::NColor(int red,int green,int blue) : r(red), g(green), b(blue)
+NColor::NColor( unsigned int red, unsigned int green, unsigned int blue ) 
+: r( red < 256   ? red : 0 ), 
+  g( green < 256 ? green : 0 ),
+  b( blue < 256  ? blue : 0 )
+{  
+  value = NApp::system().getXColorValue( r, g, b );
+}
+
+NColor::NColor( const std::string & rgbStr )
 {
-  if (r  < 0)  r  = 0;
-  if (b  < 0)  b = 0;
-  if (g  < 0 ) g = 0;
-
-  if (r  > 255)  r = 255;
-  if (b  > 255)  b = 255;
-  if (g  > 255 ) g = 255;
-
-  value = NApp::system().getXColorValue(r,g,b);
+  setRGB( rgbStr );
 }
 
 NColor::NColor( long hcolorref )
@@ -46,24 +45,24 @@ NColor::NColor( long hcolorref )
   b = (hcolorref>>16) & 0xff;
   g = (hcolorref>>8 ) & 0xff;
   r = (hcolorref    ) & 0xff;
-  value = NApp::system().getXColorValue(r,g,b);
+  value = NApp::system().getXColorValue( r, g, b );
 }
 
 NColor::~NColor()
 {
 }
 
-int NColor::red( ) const
+unsigned int NColor::red( ) const
 {
   return r;
 }
 
-int NColor::green( ) const
+unsigned int NColor::green( ) const
 {
   return g;
 }
 
-int NColor::blue( ) const
+unsigned int NColor::blue( ) const
 {
   return b;
 }
@@ -78,62 +77,32 @@ bool NColor::operator ==( const NColor & color ) const
   return ( (color.blue() == blue()) && (color.red() == red()) && (color.green() == green()) );
 }
 
-void NColor::setRGB( int red, int green, int blue )
+bool NColor::operator <( const NColor & rhs ) const
 {
-  r = red;
-  g = green;
-  b = blue;
-  value = NApp::system().getXColorValue(r,g,b);
+  return ( r | g<<8 | b<<16 )  <  ( rhs.red() | rhs.green()<<8 | rhs.blue()<<16 );
 }
 
-bool NColor::operator <( const NColor & cl ) const
-{
-  long key1 = r | g<<8 | b<<16;
-  long key2 = cl.red() | cl.green()<<8 | cl.blue()<<16;
-  return key1 < key2;
+void NColor::setRGB( unsigned int red, unsigned int green, unsigned int blue )
+{  
+  value = NApp::system().getXColorValue( r = red, g = green, b = blue );
 }
 
 void NColor::setRGB( const std::string & rgbStr )
 {
-  int r = 0; 
-  int g = 0;
-  int b = 0;
-
-  unsigned int i = 0;
-  int start = 0;
-  std::string substr;
-  int c = 0;
-  do {
-    i = rgbStr.find(':', i);
-    if (i != std::string::npos) {
-       substr = rgbStr.substr(start,i-start);
-       i+=1;
-       start = i;
-    } else substr = rgbStr.substr(start);
-      std::stringstream str; str << substr; int value = 0; str >> value;
-      if (c==0) r = value;
-      if (c==1) g = value;
-      if (c==2) b = value;
-    c++;
-  } while (i != std::string::npos);
-
-  setRGB(r,g,b);
-}
-
-NColor::NColor( const std::string & rgbStr )
-{
-  setRGB(rgbStr);
+  std::string tok = rgbStr;
+  replace( tok.begin(), tok.end(), ':', ' ' ); 
+  std::istringstream( tok ) >> r >> g >> b;
 }
 
 void NColor::setHCOLORREF( long int hcolorref )
 {
-  b = (hcolorref>>16) & 0xff;
-  g = (hcolorref>>8 ) & 0xff;
-  r = (hcolorref    ) & 0xff;
+  b = ( hcolorref>>16 ) & 0xff;
+  g = ( hcolorref>>8  ) & 0xff;
+  r = ( hcolorref     ) & 0xff;
   value = NApp::system().getXColorValue(r,g,b);
 }
 
 long NColor::hColorRef( ) const
 {
-  return (b << 16) | (g << 8) | r;
+  return ( b << 16 ) | ( g << 8 ) | r;
 }
