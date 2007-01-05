@@ -24,6 +24,7 @@
 #include "nwindow.h"
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 #ifdef _MSC_VER
 #undef min 
@@ -169,17 +170,17 @@ void NMemo::TextArea::setText( const std::string & text )
   lines.clear();
 
   std::string substr;
-  unsigned int start = 0;
-  unsigned int i = 0;
+  std::string::size_type start = 0;
+  std::string::size_type i = 0;
   do {
     i = text.find("\n", i);
-    if (i != std::string::npos) {
+    if ( i != std::string::npos ) {
        i+=1;
-       substr = text.substr(start,i-start-1);
+       substr = text.substr( start, i-start-1 );
        start = i;
-    } else substr = text.substr(start);
-     appendLine(substr);
-  } while (i != std::string::npos);
+    } else substr = text.substr( start );
+     appendLine( substr );
+  } while ( i != std::string::npos );
 
   if (lines.size() == 0) clear();
 
@@ -276,8 +277,8 @@ void NMemo::TextArea::moveLines( std::vector< Line >::iterator from, std::vector
 
 void NMemo::TextArea::paint( NGraphics * g )
 {
-  int start = findVerticalStart();
-  std::vector<Line>::iterator it = lines.begin() + start;
+  std::vector<Line>::iterator it = lower_bound( lines.begin(), lines.end(), scrollDy() );
+  
   for (; it < lines.end(); it++) {
      Line & line = *it;
      line.drawText(g);
@@ -297,31 +298,6 @@ void NMemo::TextArea::drawCursor( NGraphics* g, int x, int y )
   g->setForeground(font().textColor());
   g->drawLine( x , y - g->textAscent() , x , y );
   g->setForeground(oldColor);
-}
-
-int NMemo::TextArea::findVerticalStart() const
-{
-  int Low = 0; int High = lines.size()-1;  int Mid=High; int w=0;
-
-  while( Low <= High ) {
-    Mid = ( Low + High ) / 2;
-    const Line & line = lines.at(Mid);
-
-    if(  line.top() - scrollDy() < 0 ) {
-                   if (line.top()+line.height() > scrollDy() ) {
-                     return Mid;
-                   }
-                   Low = Mid + 1;
-                   }  else 
-                   {
-                     if (line.top()+line.height() < scrollDy() ) {
-                     return Mid;
-                   }
-                   High = Mid - 1;
-                 }
-  }
-  if (Mid<0) return 0;
-  return Mid;
 }
 
 void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
@@ -400,7 +376,7 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
           Line & line = *lineIndexItr;
           line.setPosEnd();
           xupdownpos = line.screenPos().x();
-          line.insert(line.pos(),tmp);
+          line.insert( line.pos(), tmp );
           repaint();
         }
       } else {
@@ -442,9 +418,8 @@ void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
 void NMemo::TextArea::onMousePress( int x, int y, int button )
 {
   if ( button == 1 && !readOnly() ) {
-    int start = findVerticalStart();
-    std::vector<Line>::iterator it = lines.begin() + start;
-    for ( ; it < lines.end(); it++) {
+    std::vector<Line>::iterator it = lower_bound( lines.begin( ), lines.end( ), scrollDy() );
+    for ( ; it < lines.end( ); it++ ) {
       Line & line = *it;
       if (y>= line.top()  && y < line.top() + line.height()) {
          // line found
@@ -462,8 +437,7 @@ void NMemo::TextArea::onMousePress( int x, int y, int button )
 int NMemo::TextArea::preferredWidth( ) const
 {
   int maxWidth = 0;
-  int start = findVerticalStart();
-  std::vector<Line>::const_iterator it = lines.begin() + start;
+  std::vector<Line>::const_iterator it = lower_bound( lines.begin( ), lines.end( ), scrollDy() );
   for ( ; it < lines.end(); it++) {
     const Line & line = *it;
     maxWidth = std::max(maxWidth, line.width());
@@ -506,6 +480,16 @@ NMemo::TextArea::Line::Line( TextArea* area ) : pArea(area), top_(0), pos_(0), h
 
 NMemo::TextArea::Line::~ Line( )
 {
+}
+
+bool NMemo::TextArea::Line::operator <( const NMemo::TextArea::Line & rhs ) const
+{
+  return top() < rhs.top();
+}
+
+bool NMemo::TextArea::Line::operator <( int rhsTop ) const
+{
+  return top() + height() < rhsTop;
 }
 
 void NMemo::TextArea::Line::setText( const std::string & text )
@@ -575,7 +559,7 @@ void NMemo::TextArea::Line::setPosStart( )
   pos_ = 0;
 }
 
-unsigned int NMemo::TextArea::Line::pos( ) const
+std::string::size_type NMemo::TextArea::Line::pos( ) const
 {
   return pos_;
 }
@@ -590,10 +574,10 @@ NPoint3D NMemo::TextArea::Line::screenPos( ) const
     position.setZ( 0 );
   } else {
     int yp = top() + metrics.textAscent();
-    int pos = 0;
+    std::string::size_type pos = 0;
     int z = 0;
-    for (std::vector<int>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
-      int lineEnd = *it;
+    for (std::vector<std::string::size_type>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+      std::string::size_type lineEnd = *it;
       if (pos_ < lineEnd) {
          position.setX( metrics.textWidth( text_.substr(pos, pos_-pos)) );
          position.setY(yp);
@@ -617,11 +601,11 @@ void NMemo::TextArea::Line::setPosToScreenPos( int x, int y )
   if ( pArea->wordWrap() ) {
     NFontMetrics metrics(pArea->font());
     int yp = top();
-    int pos = 0;
+    std::string::size_type pos = 0;
 
-    for (std::vector<int>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
-      int lineEnd = *it;
-      if (y >= yp && y < yp + metrics.textHeight()) {
+    for ( std::vector<std::string::size_type>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+      std::string::size_type lineEnd = *it;
+      if ( y >= yp  &&  y < yp + metrics.textHeight( ) ) {
         // right line
         pos_ = pos + findWidthMax(x,text_.substr(pos,lineEnd-pos),false);
         if (pos_ > text_.length()) pos_ = text_.length();
@@ -687,8 +671,8 @@ void NMemo::TextArea::Line::computeBreakPoints( )
   int yp =  0;
   pos = 0;
   NFontMetrics metrics(pArea->font());
-  for (std::vector<int>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
-    int lineEnd = *it;
+  for (std::vector<std::string::size_type>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+    std::string::size_type lineEnd = *it;
     yp+=metrics.textHeight();
   }
   yp+=metrics.textHeight();
@@ -730,10 +714,10 @@ void NMemo::TextArea::Line::drawText( NGraphics * g )
   } else
   {
     int yp = top() + g->textAscent();
-    int pos = 0;
+    std::string::size_type pos = 0;
 
-    for (std::vector<int>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
-      int lineEnd = *it;
+    for (std::vector<std::string::size_type>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+      std::string::size_type lineEnd = *it;
       g->drawText( 0, yp, text_.substr(pos,lineEnd-pos));
       yp+=g->textHeight();
       pos = lineEnd;
@@ -742,7 +726,7 @@ void NMemo::TextArea::Line::drawText( NGraphics * g )
   }
 }
 
-void NMemo::TextArea::Line::insert( unsigned int pos , const std::string & text )
+void NMemo::TextArea::Line::insert( std::string::size_type pos , const std::string & text )
 {
   text_.insert(pos_,text);
   if (pArea->wordWrap()) {
