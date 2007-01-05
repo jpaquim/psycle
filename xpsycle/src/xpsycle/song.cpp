@@ -135,17 +135,24 @@ namespace psycle
                        machine = plugin;
 					}
 					break;
-#ifdef __unix__					
-#if !defined XPSYCLE__NO_LADSPA
 				case MACH_LADSPA:
 					{
 						LADSPAMachine* plugin = new LADSPAMachine(index,this);
 						machine = plugin;
-						plugin->loadDll(plugin_name, pluginIndex);
+						const char* pcLADSPAPath;
+						pcLADSPAPath = std::getenv("LADSPA_PATH");
+						if ( !pcLADSPAPath) {
+						#ifdef __unix__
+						pcLADSPAPath = "/usr/lib/ladspa/";
+						#else
+						pcLADSPAPath = "C:\\Programme\\Audacity\\Plug-Ins\\";
+						#endif
+						}
+						std::string path;
+						if ( pcLADSPAPath ) path = pcLADSPAPath;
+						plugin->loadDll( path + plugin_name, pluginIndex);
 					}
 					break;
-#endif // XPSYCLE__NO_LADSPA
-#endif
 /*				case MACH_VST:
 				case MACH_VSTFX:
 					{

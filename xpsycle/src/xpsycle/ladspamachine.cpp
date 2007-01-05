@@ -18,15 +18,19 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ladspamachine.h"
-#if defined XPSYCLE__CONFIGURATION
-        #include <xpsycle/ladspa_conditional_build.h>
-#endif
-#if !defined XPSYCLE__NO_LADSPA
-
 #include "player.h"
-#ifdef __unix__
-#include <dlfcn.h>
 #include "dsp.h"
+
+#ifdef __unix__
+	#include <dlfcn.h>
+#else
+	#include <windows.h>	
+#endif
+
+#ifdef _MSC_VER
+	#undef min 
+	#undef max	
+#endif
 
 namespace psycle {
 	namespace host {
@@ -60,7 +64,7 @@ namespace psycle {
 				if ( LADSPA_IS_HINT_LOGARITHMIC(hint.HintDescriptor) ){
 					logaritmic_ = true;
 //					rangeMultiplier_ =   9 / (maxVal_ - minVal_);
-					rangeMultiplier_ =   (exp(1)-1) / (maxVal_ - minVal_);				
+					rangeMultiplier_ =   (exp(1.0)-1) / (maxVal_ - minVal_);				
 				}
 				else if ( LADSPA_IS_HINT_INTEGER(hint.HintDescriptor) ){
 					integer_ = true;
@@ -178,7 +182,14 @@ namespace psycle {
 				pluginHandle=0;
 				psDescriptor=0;
 			 }
-			if ( libHandle_ ) dlclose(libHandle_);
+			if ( libHandle_ ) {
+				#ifdef __unix__
+				dlclose(libHandle_);
+				#else
+				::FreeLibrary( static_cast<HINSTANCE> ( libHandle_ ) ) ;
+				#endif
+
+			}
 			delete[] pOutSamplesL;
 			delete[] pOutSamplesR;
 		}
@@ -197,17 +208,33 @@ namespace psycle {
 			size_t iFilenameLength;
 			void * pvResult(NULL);
 			std::cout << filename_ << std::endl;
+			#ifdef __unix__
 			if (filename_.compare(filename_.length()-3,3,".so"))
 				filename_.append(".so");
+			#else
+			if (filename_.compare(filename_.length()-3,3,".dll"))
+				filename_.append(".dll");
+			#endif
 			std::cout << filename_ << std::endl;
 			
+			#ifdef __unix__
 			if (filename_.c_str()[0] == '/') {
+			#else
+			if (filename_.c_str()[0] == '\\') {
+			#endif
 					/* The filename is absolute. Assume the user knows what he/she is
 						   doing and simply dlopen() it. */
+				#ifdef __unix__
 				pvResult = dlopen(filename_.c_str(), iFlag);
+				#else
+				// Set error mode to disable system error pop-ups (for LoadLibrary)
+				UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+				pvResult = LoadLibrary( filename_.c_str() );
+				// Restore previous error mode
+				SetErrorMode( uOldErrorMode );
+				#endif
 				if (pvResult != NULL)
-				  return pvResult;
-		
+				  return pvResult;		
 			}
 			else {
 				/* If the filename is not absolute then we wish to check along the
@@ -217,7 +244,13 @@ namespace psycle {
 				   to search. */
 		
 			  pcLADSPAPath = std::getenv("LADSPA_PATH");
-			  if ( !pcLADSPAPath) pcLADSPAPath = "/usr/lib/ladspa/";
+			  if ( !pcLADSPAPath) {
+				#ifdef __unix__
+				pcLADSPAPath = "/usr/lib/ladspa/";
+				#else
+				pcLADSPAPath = "C:\\Programme\\Audacity\\Plug-Ins\\";
+				#endif
+			  }
 			  std::string directory(pcLADSPAPath);
 			  int dotindex(0),dotpos(0),prevdotpos(0);
 		
@@ -225,13 +258,26 @@ namespace psycle {
 			  dotpos = directory.find(':',dotindex++);
 			  do{
 				std::string fullname = directory.substr(prevdotpos,dotpos);
+				#ifdef __unix__
 				if (fullname.c_str()[fullname.length()-1] != '/' )
 				   fullname.append("/");
+				#else
+				if (fullname.c_str()[fullname.length()-1] != '\\' )
+				   fullname.append("\\");
+				#endif
 				fullname.append(filename_);
-							std::cout << fullname << std::endl;
+				std::cout << fullname << std::endl;
 		
-				pvResult = dlopen(fullname.c_str(), iFlag);
-				
+				#ifdef __unix__
+				pvResult = dlopen(fullname_.c_str(), iFlag);
+				#else
+				// Set error mode to disable system error pop-ups (for LoadLibrary)
+				UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+				pvResult = LoadLibrary( fullname.c_str() );
+				// Restore previous error mode
+				SetErrorMode( uOldErrorMode );
+				#endif
+
 				if (pvResult != NULL)
 				  return pvResult;
 				prevdotpos = dotpos;            	
@@ -242,28 +288,57 @@ namespace psycle {
 			/* If nothing has worked, then at least we can make sure we set the
 			   correct error message - and this should correspond to a call to
 			   dlopen() with the actual filename requested. */
-			return dlopen(pcFilename, iFlag);
+
+			#ifdef __unix__
+			pvResult = dlopen( pcFilename, iFlag);
+			#else
+			// Set error mode to disable system error pop-ups (for LoadLibrary)
+			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+			pvResult = LoadLibrary( pcFilename );
+			// Restore previous error mode
+			SetErrorMode( uOldErrorMode );
+			#endif
+			return pvResult;
 		}
 		
 		
 		bool LADSPAMachine::loadDll( const std::string & fileName, int pluginIndex )
 		{	
-			  // Step one: Open the shared library.
+			// Step one: Open the shared library.
+			#ifdef __unix__
 			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
 			if ( !libHandle_ ) {
 				std::cerr << "Cannot load library: " << dlerror() << std::endl;
 				return false;
 			}
+			#else
+			// Set error mode to disable system error pop-ups (for LoadLibrary)
+			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+			libHandle_ = LoadLibrary( fileName.c_str() );
+			// Restore previous error mode
+			SetErrorMode( uOldErrorMode );
+			#endif
+
 			std::cout << "step two" << std::endl;
 			// Step two: Get the entry function.
+			#ifdef __unix__
 			LADSPA_Descriptor_Function pfDescriptorFunction =
 				 (LADSPA_Descriptor_Function)dlsym( libHandle_, "ladspa_descriptor");
+			#else			
+			LADSPA_Descriptor_Function pfDescriptorFunction =
+				 (LADSPA_Descriptor_Function)GetProcAddress(  static_cast<HINSTANCE>( libHandle_ ), "ladspa_descriptor" );
+			#endif
 		
 			if (!pfDescriptorFunction) {
 				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
 				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
-				std::cerr << dlerror() << std::endl;
-				dlclose(libHandle_); libHandle_=0;
+				#ifdef __unix__
+				std::cerr << dlerror() << std::endl;				
+				dlclose( libHandle_ ); 
+				#else
+				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
+				#endif
+				libHandle_=0;
 				return false;
 			}
 			/*Step three: Get the descriptor of the selected plugin (a shared library can have
@@ -272,7 +347,12 @@ namespace psycle {
 			psDescriptor = pfDescriptorFunction(pluginIndex);
 			if (psDescriptor == NULL) {
 				std::cerr <<  "Unable to find the selected plugin  in the library file" << std::endl;
-				dlclose(libHandle_); libHandle_=0;
+				#ifdef __unix__
+				dlclose(libHandle_);
+				#else
+				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
+				#endif
+				libHandle_=0;
 				return false;       
 			}
 			// Step four: Create (instantiate) the plugin, so that we can use it.
@@ -298,21 +378,44 @@ namespace psycle {
 		
 		LADSPA_Descriptor_Function LADSPAMachine::loadDescriptorFunction( const std::string & fileName ) {
 			// Step one: Open the shared library.
+			#ifdef __unix__
 			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
+			#else
+			// Set error mode to disable system error pop-ups (for LoadLibrary)
+			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+			libHandle_ = LoadLibrary( fileName.c_str() );
+			// Restore previous error mode
+			SetErrorMode( uOldErrorMode );
+			#endif
 			if ( !libHandle_ ) {
-				std::cerr << "Cannot load library: " << dlerror() << std::endl;
+				std::cerr << "Cannot load library: "
+					#ifdef __unix__
+					  <<  dlerror() 
+					#endif
+					<< std::endl;
 				return 0;
 			}
 			std::cout << "step two" << std::endl;
 			// Step two: Get the entry function.
 			LADSPA_Descriptor_Function pfDescriptorFunction =
-				 (LADSPA_Descriptor_Function)dlsym( libHandle_, "ladspa_descriptor");
+				 (LADSPA_Descriptor_Function)
+				#ifdef __unix__				 
+				 dlsym(  libHandle_, "ladspa_descriptor");
+				#else
+				 GetProcAddress( static_cast<HINSTANCE>( libHandle_), "ladspa_descriptor");
+				#endif
+				
 		
 			if (!pfDescriptorFunction) {
 				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
 				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+				#ifdef __unix__
 				std::cerr << dlerror() << std::endl;
-				dlclose(libHandle_); libHandle_=0;
+				dlclose(libHandle_);
+				#else
+				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
+				#endif
+				libHandle_=0;
 				return 0;
 			}
 		
@@ -485,5 +588,5 @@ namespace psycle {
 		}
 	}
 }
-#endif
-#endif // !defined XPSYCLE__NO_LADSPA
+
+

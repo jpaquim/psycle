@@ -275,7 +275,7 @@ namespace psycle
 			{
 				float y0,y1;
 				y0 = *pData;
-				y1 =(offset+1 == length)?0:*(pData+1);
+				y1 = ( offset+1 == length )?0:*(pData+1);
 				return (y0+(y1-y0)*_lTable[res>>21]);
 			}
 			/// interpolation work function which does spline interpolation.

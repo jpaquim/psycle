@@ -29,8 +29,8 @@
 #include <map>
 
 struct NXmlPos {
-  unsigned int pos;
-  unsigned int len;
+  std::string::size_type pos;
+  std::string::size_type len;
   int err;
   int type;     
 };    
@@ -56,7 +56,7 @@ class NXmlAttributes
 	    std::map< std::string, std::string > attrib_;
             
         void parseHeader( const std::string & text );    	
-        unsigned int getNextAttribute( const std::string & text,  unsigned int pos );
+        std::string::size_type getNextAttribute( const std::string & text, std::string::size_type pos );
 	
 };
 
