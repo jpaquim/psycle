@@ -22,6 +22,7 @@
 
 #include "ntextbase.h"
 #include "npoint3d.h"
+#include <algorithm>
 /**
 @author Stefan Nattkemper
 */
@@ -31,16 +32,16 @@ class NMemo : public NTextBase
 {
    class TextArea : public NPanel {
      class Line {
-       public :
+       public :		
 
           Line();
-          Line(TextArea* area);
+          Line( TextArea* area );
           ~Line();
 
-          void setText( const std::string & text );
+		  void setText( const std::string & text );
           const std::string & text() const;
-          void insert(unsigned int pos, const std::string & text);
-          void erase(unsigned int count);
+          void insert( std::string::size_type pos, const std::string & text );
+          void erase( unsigned int count );
 
           void setTop( int top );
           void move(int dy);
@@ -53,7 +54,7 @@ class NMemo : public NTextBase
           void setPosEnd();
           void setPosStart();
 
-          unsigned int pos() const;
+          std::string::size_type pos() const;
 
           NPoint3D screenPos() const;
           void setPosToScreenPos(int x, int y);
@@ -69,27 +70,34 @@ class NMemo : public NTextBase
 
           void computeBreakPoints();
 
-          void drawText(NGraphics *g);
+          void drawText( NGraphics *g );
           void repaint();
           NRect repaintLineArea() const;
+		  
+		  bool operator<( const Line  & rhs ) const;
+		  // needed for visual c++ express 2005 to avoid error c2784
+		  friend bool operator<( int top, const Line& r)
+          { return top < r.top(); }
+          // end of bugfix
+		  bool operator<( int rhsTop ) const;
 
        private:
 
           TextArea* pArea;
           std::string text_;
           int top_;
-          unsigned int pos_;
-          int height_;
+		  int height_;
+		  std::string::size_type pos_;
+          
+          int findWidthMax( long width, const std::string & data, bool wbreak );
 
-          int findWidthMax(long width, const std::string & data, bool wbreak);
-
-          std::vector<int> breakPoints;
+          std::vector<std::string::size_type> breakPoints;
 
      };
 
      public:
        TextArea();
-       TextArea(NMemo* memo);
+       TextArea( NMemo* memo );
 
        ~TextArea();
 
@@ -130,13 +138,12 @@ class NMemo : public NTextBase
       std::vector<Line> lines;
 
       void init();
-      void drawCursor( NGraphics* g , int x, int y );
-      int findVerticalStart() const;
+      void drawCursor( NGraphics* g, int x, int y );
 
-      void insertLine(const std::string & text);
+      void insertLine( const std::string & text );
       void deleteLine();
 
-      void moveLines(std::vector<Line>::iterator from, std::vector<Line>::iterator to, int dy);
+      void moveLines( std::vector<Line>::iterator from, std::vector<Line>::iterator to, int dy );
 
 
    };
@@ -146,21 +153,21 @@ public:
 
     ~NMemo();
 
-    virtual std::string text() const;
-    void setText(const std::string & text);
+    virtual std::string text( ) const;
+    void setText( const std::string & text );
 
-    void loadFromFile(const std::string & fileName);
-    void saveToFile(const std::string & fileName);
+    void loadFromFile( const std::string & fileName );
+    void saveToFile( const std::string & fileName );
 
-    void setWordWrap(bool on);
+    void setWordWrap( bool on );
     bool wordWrap() const;
 
-    void setReadOnly(bool on);
-    bool readOnly() const;
+    void setReadOnly( bool on );
+    bool readOnly( ) const;
 
-    void clear();
+    void clear( );
 
-    virtual void resize();
+    virtual void resize( );
 
 private:
 
