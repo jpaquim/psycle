@@ -35,8 +35,8 @@ public:
 
     ~NVisual();
 
-    virtual void setVisible(bool on);
-    int visible();
+    virtual void setVisible( bool on );
+    bool visible() const;
 
     virtual void setPosition(int x, int y, int width, int height);
     virtual void setPreferredSize(int width, int height);

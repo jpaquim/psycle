@@ -39,7 +39,7 @@ void NVisual::setVisible( bool on )
   visible_ = on;
 }
 
-int NVisual::visible( )
+bool NVisual::visible( ) const
 {
   return visible_;
 }

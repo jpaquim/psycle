@@ -69,7 +69,7 @@ int NGridLayout::preferredWidth( const NVisualComponent * target ) const
 
 int NGridLayout::preferredHeight( const NVisualComponent * target ) const
 {
-  return vgap_ + ((findMaxRowHeight() + vgap_) * (parent()->visualComponents().size()) / (cols_));
+  return vgap_ + ((findMaxRowHeight() + vgap_) * (static_cast<int>( parent()->visualComponents().size( ) )) / (cols_));
 }
 
 

@@ -183,6 +183,6 @@ bool NRegion::intersects( int x, int y ) const
   #ifdef __unix__
   return XPointInRegion( region_, x, y );
   #else
-  return PtInRegion( region_, x, y );
+  return PtInRegion( region_, x, y ) != 0;
   #endif
 }

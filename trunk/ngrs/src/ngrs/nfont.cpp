@@ -82,12 +82,12 @@ int NFont::style( ) const
 
 bool NFont::antialias( ) const
 {
-  return static_cast<bool>( style_ & nAntiAlias );
+  return ( style_ & nAntiAlias ) != 0;
 }
 
 std::string NFont::fontString( ) const
 {
-   string styleString  = "*";
+  string styleString  = "*";
   string italicString = "i";
   if (style_ &  nBold)   styleString  = "bold"; else
   if (style_ & nMedium)  styleString  = "medium";

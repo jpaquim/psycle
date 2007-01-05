@@ -1227,32 +1227,7 @@ void NGraphics::drawText( int x, int y, const NFntString & text )
    drawText( x+w, y, text.textsubstr( pos ) );
 }
 
-
-int NGraphics::findWidthMax( long width, const std::string & data, bool wbreak ) const
-{
-  int Low = 0; int High = data.length();  int Mid=High;
-  while( Low <= High ) {
-    Mid = ( Low + High ) / 2;
-    std::string s     = data.substr(0,Mid);
-    std::string snext;
-    if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
-    int w     = textWidth(s);
-    if(  w < width  ) {
-                        int wnext = textWidth(snext);
-                        if (wnext  >= width ) break;
-                        Low = Mid + 1;
-                      } else
-                      {
-                        High = Mid - 1;
-                      }
-  }
-  if (!wbreak || data.substr(0,Mid).find(" ")==std::string::npos || Mid == 0 || Mid>=data.length()) return Mid; else
-  {
-    int p = data.rfind(" ",Mid);
-    if (p!=std::string::npos ) return p+1;
-  }
-  return Mid;
-}
+/*
 
 int NGraphics::findWidthMax(long width, const NFntString & data, bool wbreak) const
 {
@@ -1279,7 +1254,7 @@ int NGraphics::findWidthMax(long width, const NFntString & data, bool wbreak) co
   }
   return Mid;
 
-}
+}*/
 
 void NGraphics::setVisible( bool on )
 {
