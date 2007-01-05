@@ -42,9 +42,9 @@ public:
 
     void setText(const std::string & text);
     const std::string & text() const;
-		std::string selText() const;
+	std::string selText() const;
 
-		void setInputPolicy( const std::string & regexp );
+	void setInputPolicy( const std::string & regexp );
 
     virtual void paint(NGraphics* g);
     virtual void onKeyPress(const NKeyEvent & keyevent);
@@ -77,6 +77,7 @@ private:
     bool autoSize_, readOnly_;
     int valign_, halign_;
     int dx;
+
     std::string::size_type pos_;
 
     std::string::size_type selStartIdx_;
@@ -84,12 +85,10 @@ private:
     std::string::size_type selStartPos_;
 
     std::string text_;
-    NFontMetrics metrics;
 
     NPoint getScreenPos(NGraphics* g, const std::string & text );
     int computeDx( NGraphics* g, const std::string & text );
     void drawCursor(NGraphics* g, const std::string & text );
-    std::string::size_type findWidthMax( long width, const NFntString & data ) const;
 
     void init();
     

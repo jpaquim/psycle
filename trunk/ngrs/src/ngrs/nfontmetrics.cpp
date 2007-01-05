@@ -161,3 +161,21 @@ int NFontMetrics::maxCharWidth() const {
   return metrics.tmMaxCharWidth;;
   #endif
 }
+
+std::string::size_type NFontMetrics::findWidthMax( long width, const std::string & data ) const
+{
+  std::string::size_type low  = 0;
+  std::string::size_type high = data.length();
+  
+  while( low < high ) {
+    std::string::size_type mid = low + ( high - low ) / 2; 
+    if(  textWidth( data.substr( 0, mid ) ) < width  ) {						 
+                        low = mid + 1; 
+                      } else
+                      {
+                        high = mid;
+                      }
+  }  
+
+  return low;
+}

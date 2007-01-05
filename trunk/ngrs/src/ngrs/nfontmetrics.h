@@ -35,7 +35,9 @@ public:
     NFontMetrics();
     NFontMetrics(const NFont & font);
 
-    ~NFontMetrics();
+	~NFontMetrics();
+
+	void setFont(const NFont & font);
 
     int maxCharWidth() const;
     int textWidth( const std::string & text ) const;
@@ -43,7 +45,7 @@ public:
     int textAscent() const;
     int textDescent() const;
 
-    void setFont(const NFont & font);
+	std::string::size_type findWidthMax( long width, const std::string & data ) const;
 
 private:
 
