@@ -290,12 +290,12 @@ void NGraphics::drawText( int x, int y, const std::string & text )
     SetTextAlign( gcp, TA_BASELINE );
     SetTextColor( gcp, fntStruct.textColor.hColorRef() );
     
-    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );    
+    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), static_cast<int>( text.length() ) );    
   } else {
      SetBkMode( gc_, TRANSPARENT );
      SetTextAlign( gc_, TA_BASELINE );
      SetTextColor( gc_, fntStruct.textColor.hColorRef() );
-     TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );      
+     TextOut( gc_, x + dx_, y+ dy_, text.c_str(), static_cast<int>( text.length() ) );      
   }
   #endif
 }
@@ -323,12 +323,12 @@ void NGraphics::drawText(int x, int y, const std::string & text, const NColor & 
     SetBkMode( gcp, TRANSPARENT );
     SetTextAlign( gcp, TA_BASELINE );
     SetTextColor( gcp, color.hColorRef() );
-    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), text.length() );
+    TextOut( gcp, x + dx_, y+ dy_, text.c_str(), static_cast<int>( text.length() ) );
   } else {
     SetBkMode( gc_, TRANSPARENT );
     SetTextAlign( gc_, TA_BASELINE );
     SetTextColor( gc_, color.hColorRef() );
-    TextOut( gc_, x + dx_, y+ dy_, text.c_str(), text.length() );    
+    TextOut( gc_, x + dx_, y+ dy_, text.c_str(), static_cast<int>( text.length() ) );
   }
   #endif
 }
@@ -498,9 +498,9 @@ int NGraphics::textWidth( const std::string & text ) const
 
    SIZE size;
    if ( dblBuffer_ )
-     GetTextExtentPoint32( gcp, text.c_str(), text.length(), &size);
+     GetTextExtentPoint32( gcp, text.c_str(), static_cast<int>( text.length() ), &size);
    else  
-     GetTextExtentPoint32( gc_, text.c_str(), text.length(), &size);
+     GetTextExtentPoint32( gc_, text.c_str(), static_cast<int>( text.length() ), &size);
      
    return size.cx;
    #endif
@@ -1213,19 +1213,18 @@ int NGraphics::textWidth( const NFntString & text ) const
 
 void NGraphics::drawText( int x, int y, const NFntString & text )
 {
-  int pos = 0; 
+  std::string::size_type pos = 0; 
   int w = 0;
    std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
-   for (std::vector<int>::const_iterator it = text.positions().begin(); it < text.positions().end(); it++) {
-     int old = pos;
+   for ( std::vector<std::string::size_type>::const_iterator it = text.positions().begin(); it < text.positions().end(); it++) {
+     std::string::size_type old = pos;
      pos = *it;
-     drawText(x+w,y,text.textsubstr(old,pos-old));
-     w += textWidth(text.textsubstr(old,pos-old));
-     NFont fnt = *fntIt;
-     setFont(fnt);
+     drawText( x+w, y, text.textsubstr( old, pos - old ));
+     w += textWidth(text.textsubstr( old, pos-old ));
+     setFont( *fntIt );
      fntIt++;
    }
-   drawText(x+w,y,text.textsubstr(pos));
+   drawText( x+w, y, text.textsubstr( pos ) );
 }
 
 
@@ -1275,8 +1274,8 @@ int NGraphics::findWidthMax(long width, const NFntString & data, bool wbreak) co
   }
   if (!wbreak || data.textsubstr(0,Mid).find(" ")==std::string::npos || Mid == 0 || Mid>=data.length()) return Mid; else
   {
-    int p = data.rfind(" ",Mid);
-    if (p!=std::string::npos ) return p+1;
+	std::string::size_type p = data.rfind(" ",Mid);
+    if ( p != std::string::npos ) return p+1;
   }
   return Mid;
 

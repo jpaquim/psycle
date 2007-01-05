@@ -59,7 +59,7 @@ int NFontMetrics::textWidth( const string & text ) const
    GetTextExtentPoint32(
     dc,            // handle to DC
     text.c_str(),  // text string
-    text.length(), // characters in string
+    static_cast<int>( text.length() ), // characters in string
     &size          // string size
    );
 

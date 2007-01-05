@@ -21,7 +21,7 @@
 #include "nlabel.h"
 #include "nbevelborder.h"
 #include "ngradient.h"
-#include "nproperty.h"
+//#include "nproperty.h"
 
 NCustomButton::NCustomButton()
  : NPanel()

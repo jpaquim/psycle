@@ -263,12 +263,12 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
     case NK_BackSpace:
                  if ( pos_ > 0 ) {
                     if ( selStartIdx_ != selEndIdx_ ) {
-                       int s = min( selStartIdx_, selEndIdx_ );
-                       int e = max( selStartIdx_, selEndIdx_ );
+                       std::string::size_type s = min( selStartIdx_, selEndIdx_ );
+                       std::string::size_type e = max( selStartIdx_, selEndIdx_ );
                        text_.erase( s, e-s );
-                       pos_=  s;
-                       selStartIdx_= 0;
-					   selEndIdx_  = 0;
+                       pos_ =  s;
+                       selStartIdx_ = 0;
+					   selEndIdx_   = 0;
                        repaint();
                     } else {
 /*                      bool flag = true;
@@ -327,7 +327,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
     default: {            
       if (keyEvent.buffer()!="" ) {
         if ( selStartIdx_ != selEndIdx_ ) {
-           int count = selEndIdx_ - selStartIdx_;
+           std::string::size_type count = selEndIdx_ - selStartIdx_;
            pos_ = std::min( selStartIdx_, selEndIdx_ );
            selStartIdx_ = 0;
 		   selEndIdx_   = 0;

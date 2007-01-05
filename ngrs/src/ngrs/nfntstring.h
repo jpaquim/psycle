@@ -34,27 +34,27 @@ class NFntString : public std::string {
 public:
     NFntString();
 
-    ~NFntString();
+    ~NFntString(); ///\todo stl inheritance virtual dtor stuff rework needed
 
-    void setText(const std::string & text);
-    void append(const std::string & text);
-    void append(const NFntString & text);
+    void setText( const std::string & text );
+    void append( const std::string & text );
+    void append( const NFntString & text );
 
-    NFntString substr(int pos, int size) const;
-    NFntString substr(int last) const;
+    NFntString substr( std::string::size_type pos, std::string::size_type size ) const;
+    NFntString substr( std::string::size_type last ) const;
 
-    std::string textsubstr(int pos, int size) const;
-    std::string textsubstr(int last) const;
+    std::string textsubstr( std::string::size_type pos, std::string::size_type size ) const;
+    std::string textsubstr( std::string::size_type last) const;
 
-    void setFont(const NFont & font);
+    void setFont( const NFont & font );
 
-    const std::vector<int> & positions() const;
-    const std::vector<NFont> & fonts() const;
+    const std::vector< std::string::size_type > & positions( ) const;
+    const std::vector< NFont > & fonts() const;
 
 private:
 
-   std::vector<int>   positions_;
-   std::vector<NFont> fonts_;
+	std::vector< std::string::size_type > positions_;
+    std::vector< NFont > fonts_;
 
 };
 

@@ -66,7 +66,7 @@ public:
     int hAlign() const;
 
     void setPos(unsigned int pos);
-    unsigned int pos() const;
+	std::string::size_type pos() const;
 
     sigslot::signal1<const NKeyEvent &> keyPress;
 
@@ -77,11 +77,11 @@ private:
     bool autoSize_, readOnly_;
     int valign_, halign_;
     int dx;
-    unsigned int pos_;
+    std::string::size_type pos_;
 
-    unsigned int selStartIdx_;
-    unsigned int selEndIdx_;
-    unsigned int selStartPos_;
+    std::string::size_type selStartIdx_;
+    std::string::size_type selEndIdx_;
+    std::string::size_type selStartPos_;
 
     std::string text_;
     NFontMetrics metrics;
