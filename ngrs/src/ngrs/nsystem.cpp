@@ -745,7 +745,7 @@ bool NSystem::isWindowMapped( WinHandle win )
   XGetWindowAttributes( dpy(), win, &attr );
   return !(attr.map_state == IsUnmapped);
   #else
-  return IsWindowVisible( win ) ;
+  return IsWindowVisible( win ) != 0 ;
   #endif
 }
 

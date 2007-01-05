@@ -84,16 +84,16 @@ public:
     void swap(const NRect & repaintArea);
     long xTranslation();
     long yTranslation();
-    void setForeground(const NColor & color);
+    void setForeground( const NColor & color );
 
-    void setFont(const NFont & font);
-    void drawText(int x, int y, const std::string & text);
-		void drawText(int x, int y, const std::string & text, const NColor & color);
-    void drawText(int x, int y, const NFntString & text);
-    int textWidth(const std::string & text) const;
+    void setFont( const NFont & font );
+    void drawText( int x, int y, const std::string & text );
+	void drawText( int x, int y, const std::string & text, const NColor & color );
+    void drawText( int x, int y, const NFntString & text );
+
+	int textWidth(const std::string & text) const;
     int textWidth( const NFntString & text ) const;
-    int findWidthMax(long width, const std::string & data, bool wbreak) const;
-    int findWidthMax(long width, const NFntString & data, bool wbreak) const;
+
     int textHeight();
     int textAscent();
     int textDescent();

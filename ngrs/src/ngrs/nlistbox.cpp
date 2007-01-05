@@ -73,14 +73,14 @@ void NListBox::insert( NCustomItem * component, int index , bool align )
 {
   listBoxPane_->insert(component,index);
 
-  if (index <= items_.size())
-    items_.insert(items_.begin()+index,component);
+  if ( index <= items_.size() )
+    items_.insert( items_.begin() + index, component );
   else
-    items_.push_back(component);
+    items_.push_back( component );
 
   component->mousePress.connect(this,&NListBox::onItemPress);
   component->setTransparent(true);
-  if (align) listBoxPane_->resize();
+  if ( align ) listBoxPane_->resize();
 }
 
 

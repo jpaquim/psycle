@@ -335,7 +335,7 @@ NXmlPos NXmlParser::getNextTag( int pos,  const std::string & text ) const {
   xml_pos.err  = 1;
   xml_pos.type = 0;
         
-  unsigned int next_pos = text.find( "<", pos );
+  std::string::size_type next_pos = text.find( "<", pos );
   
   if ( next_pos + 1 < text.length() ) {   
     if ( text[next_pos+1] == '/' ) {
@@ -344,7 +344,7 @@ NXmlPos NXmlParser::getNextTag( int pos,  const std::string & text ) const {
   }
   
   if ( next_pos != std::string::npos ) {
-    unsigned int tag_end = text.find( ">", next_pos );
+    std::string::size_type tag_end = text.find( ">", next_pos );
     if ( tag_end != std::string::npos ) {
       xml_pos.pos = next_pos + 1;
       xml_pos.len = tag_end - next_pos - 1 ;         

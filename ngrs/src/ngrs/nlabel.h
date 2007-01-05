@@ -33,7 +33,7 @@ class NLabel : public NVisualComponent
 {
 public:
     NLabel();
-    NLabel(std::string text);
+    NLabel( const std::string & text );
 
     ~NLabel();
 
@@ -69,9 +69,9 @@ private:
    NBitmap rotateBmp;
    std::string text_;
    NFontMetrics metrics;
-	 NRectShape* rectShape;
+   NRectShape* rectShape;
 
-   std::vector<int> breakPoints;
+   std::vector<std::string::size_type> breakPoints;
 
    void init();
    char mnemonic_;
