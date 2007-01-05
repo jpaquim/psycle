@@ -27,9 +27,6 @@
 #endif
 
 
-using namespace std;
-
-
 NEdit::NEdit()
  : NPanel(), autoSize_(0),readOnly_(0),valign_(nAlCenter),halign_(nAlLeft),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
 {
@@ -58,7 +55,6 @@ extern "C" void destroyEdit(NObject* p) {
 
 void NEdit::init( )
 {
-  metrics.setFont(font());
   skin_ = NApp::config()->skin("edit");
 
   valign_ = nAlCenter;
@@ -163,7 +159,6 @@ int NEdit::preferredHeight( ) const
   if (ownerSize()) return NPanel::preferredHeight();
 
   NFontMetrics metrics( font() );
-  metrics.setFont(font());
   return metrics.textHeight() + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
 }
 
@@ -172,8 +167,7 @@ int NEdit::preferredWidth( ) const
 {
   if (ownerSize()) return NPanel::preferredWidth();
 
-  NFontMetrics metrics;
-  metrics.setFont(font());
+  NFontMetrics metrics( font() );
   return metrics.textWidth(text_) + spacing().left()+spacing().right()+borderLeft()+borderRight();
 }
 
@@ -262,11 +256,9 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
     break;
     case NK_BackSpace:
                  if ( pos_ > 0 ) {
-                    if ( selStartIdx_ != selEndIdx_ ) {
-                       std::string::size_type s = min( selStartIdx_, selEndIdx_ );
-                       std::string::size_type e = max( selStartIdx_, selEndIdx_ );
-                       text_.erase( s, e-s );
-                       pos_ =  s;
+                    if ( selStartIdx_ < selEndIdx_ ) {
+                       text_.erase( selStartIdx_, selEndIdx_ - selStartIdx_ );
+                       pos_ =  selStartIdx_;
                        selStartIdx_ = 0;
 					   selEndIdx_   = 0;
                        repaint();
@@ -307,21 +299,16 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
 
     break;
     case NK_Delete:
-                if (pos_<text_.length()) {
-                   //bool flag = true;
-                   //if (pattern_!=NULL) pattern_->accept(text_.c_str(),text_.length());
-                   //if (flag) {
-                    int count = 1;
-                    if ( selStartIdx_ != selEndIdx_ ) {
-                       count = abs( (int) (selEndIdx_ - selStartIdx_) );
-                       pos_ = min(selStartIdx_,selEndIdx_);
+               if ( pos_ < text_.length() ) {
+					std::string::size_type count = 1;
+                    if ( selStartIdx_ < selEndIdx_ ) {
+                       count = selEndIdx_ - selStartIdx_;
+					   pos_  = selStartIdx_;
                        selStartIdx_ = 0;
 					   selEndIdx_   = 0;
-                    //}
-                    text_.erase(pos_,count);
-                    //textChanged.emit(this);
+					}
+                    text_.erase( pos_, count );
                     repaint();
-                   }
                 }
                 break;
     default: {            
@@ -366,14 +353,13 @@ void NEdit::setReadOnly( bool on )
 
 void NEdit::onMousePress( int x, int y, int button ) {
   NPanel::onMousePress( x, y, button );  
-
-  int shiftState = NApp::system().shiftState();
-
+  
   NFntString myText;
   myText.setText( text_ );
-  pos_ = findWidthMax( x + dx, myText );
+  NFontMetrics metrics( font( ) );
+  pos_ = metrics.findWidthMax( x + dx, myText );
   
-  if ( !( shiftState & nsShift ) ) {
+  if ( !( NApp::system().shiftState() & nsShift ) ) {
     startSel();       
   }     
 
@@ -388,8 +374,8 @@ void NEdit::onMouseOver( int x, int y ) {
   if ( shiftState & nsLeft ) {
     NFntString myText;
     myText.setText( text_ );
-
-    pos_ = findWidthMax( x + dx, myText );   
+    NFontMetrics metrics( font( ) );
+    pos_ = metrics.findWidthMax( x + dx, myText );   
     computeSel();
     repaint();
   }       
@@ -400,35 +386,13 @@ void NEdit::onMousePressed( int x, int y, int button ) {
   endSel();    
 }
 
-std::string::size_type NEdit::findWidthMax(long width, const NFntString & data ) const
-{
-  NFontMetrics metrics( font() );
-
-  std::string::size_type low  = 0;
-  std::string::size_type high = data.length();
-  
-  while( low < high ) {
-    std::string::size_type mid = low + ( high - low ) / 2; 
-    int w = metrics.textWidth( data.substr( 0, mid ) );
-    if(  w < width  ) {						 
-                        low = mid + 1; 
-                      } else
-                      {
-                        high = mid;
-                      }
-  }  
-
-  return low;
-}
-
 std::string NEdit::selText() const {
-  std::string midText   = text_.substr(selStartIdx_, selEndIdx_-selStartIdx_);
+  std::string midText   = text_.substr( selStartIdx_, selEndIdx_ - selStartIdx_ );
   return midText;
 }
 
 void NEdit::setInputPolicy( const std::string & regexp )
 {
-
 }
 
 void NEdit::startSel( ) {
