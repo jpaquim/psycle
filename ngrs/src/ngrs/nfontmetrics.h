@@ -38,7 +38,7 @@ public:
     ~NFontMetrics();
 
     int maxCharWidth() const;
-    int textWidth(const std::string & text) const;
+    int textWidth( const std::string & text ) const;
     int textHeight() const;
     int textAscent() const;
     int textDescent() const;

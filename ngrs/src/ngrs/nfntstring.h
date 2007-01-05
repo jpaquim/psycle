@@ -50,7 +50,7 @@ public:
 
     const std::vector< std::string::size_type > & positions( ) const;
     const std::vector< NFont > & fonts() const;
-
+	
 private:
 
 	std::vector< std::string::size_type > positions_;

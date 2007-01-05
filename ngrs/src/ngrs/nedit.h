@@ -89,7 +89,7 @@ private:
     NPoint getScreenPos(NGraphics* g, const std::string & text );
     int computeDx( NGraphics* g, const std::string & text );
     void drawCursor(NGraphics* g, const std::string & text );
-    int findWidthMax(long width, const NFntString & data ) const;
+    std::string::size_type findWidthMax( long width, const NFntString & data ) const;
 
     void init();
     
