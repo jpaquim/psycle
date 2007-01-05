@@ -70,12 +70,13 @@ NLabel::~NLabel()
 
 void NLabel::paint( NGraphics * g )
 {
-  int i = 0;
-  int start = 0;
+  std::string::size_type i     = 0;
+  std::string::size_type start = 0;
+
   int yp_ = g->textAscent() ;
 
   do {
-    i = text_.find("\n", i);
+    i = text_.find( "\n", i);
     string substr;
     if (i != -1) {
        substr = text_.substr(start,i-start);
@@ -103,15 +104,15 @@ void NLabel::paint( NGraphics * g )
         ;
       }
 
-      g->drawText(xp_, yp_, substr);
+      g->drawText( xp_, yp_, substr);
 
       if (mnemonic_!='\0') {
-        std::string::size_type pos = substr.find((char) ((int)mnemonic_-32) );
-        if (pos==std::string::npos) pos =  substr.find(mnemonic_);
+        std::string::size_type pos = substr.find( static_cast<char>( mnemonic_- 32) );
+        if (pos==std::string::npos) pos =  substr.find( mnemonic_ );
         if (pos!=std::string::npos) {
-           int w  = g->textWidth(substr.substr(0,pos));
-           int w1 = g->textWidth(substr.substr(0,pos+1));
-           g->drawLine(w,yp_+2,w1,yp_+2);
+           int w  = g->textWidth( substr.substr( 0, pos) );
+           int w1 = g->textWidth( substr.substr( 0, pos+1) );
+           g->drawLine( w, yp_+2, w1, yp_+2 );
         }
       }
       yp_ = yp_ + g->textHeight();
@@ -179,8 +180,8 @@ int NLabel::preferredHeight( ) const
 int NLabel::preferredWidth( ) const
 {
   NFontMetrics metrics(font());
-  unsigned int i = 0;
-  int start = 0;
+  std::string::size_type i = 0;
+  std::string::size_type start = 0;
 
   string substr;
   int xmax = 0;

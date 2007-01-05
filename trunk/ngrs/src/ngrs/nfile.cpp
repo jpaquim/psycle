@@ -167,6 +167,7 @@ std::string NFile::home() {
    }
    return sVal;
  }    
+ return "";
  #endif
 }            
 
@@ -237,10 +238,10 @@ std::string NFile::env( const std::string & envName )
 
 std::string NFile::extractFileNameFromPath(const std::string & fileName) {
   std::string fileWithoutPathName = "";
+  
+  std::string::size_type i = fileName.rfind("/");
 
-  int i = fileName.rfind("/");
-
-  if (i != std::string::npos  &&  i != fileName.length() - 1 ) {
+  if ( i != std::string::npos  &&  i != fileName.length() - 1 ) {
      fileWithoutPathName = fileName.substr(i+1);
   }
 
@@ -252,9 +253,9 @@ std::string NFile::replaceIllegalXmlChr( const std::string & text, bool strict )
 	std::string xml = text;
 
 // replace ampersand
-			unsigned int search_pos = 0;
-			while ( ( search_pos = xml.find("&", search_pos) ) != std::string::npos )
-			xml.replace(search_pos++, 1, "&amp;" );
+		std::string::size_type search_pos = 0;
+		while ( ( search_pos = xml.find("&", search_pos) ) != std::string::npos )
+		xml.replace(search_pos++, 1, "&amp;" );
 
 			// replace less than
   		while ( ( search_pos = xml.find("<") ) != std::string::npos )
