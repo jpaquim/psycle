@@ -47,19 +47,19 @@ std::string NXmlAttributes::value( const std::string & name ) const {
 }  
 
 void NXmlAttributes::parseHeader( const std::string & text ) {
-  unsigned int pos = text.find( " ", 0 );
+  std::string::size_type pos = text.find( " ", 0 );
   tagName_ = text.substr( 0, pos );
   while ( (pos = getNextAttribute( text, pos+1  ) ) != std::string::npos );
 }
 
-unsigned int NXmlAttributes::getNextAttribute( const std::string & text,  unsigned int pos ) {
+std::string::size_type NXmlAttributes::getNextAttribute( const std::string & text,  unsigned int pos ) {
 
   if ( pos >= text.length() ) return std::string::npos;          
 
-  int start_idx = std::string::npos;
-  int mid_idx   = std::string::npos;
-  int midstart_idx = std::string::npos;
-  int end_idx   = std::string::npos;
+  std::string::size_type start_idx = std::string::npos;
+  std::string::size_type mid_idx   = std::string::npos;
+  std::string::size_type midstart_idx = std::string::npos;
+  std::string::size_type end_idx   = std::string::npos;
   
   std::string::const_iterator it = text.begin() + pos;
   for ( ; it < text.end(); it++, pos++ ) {

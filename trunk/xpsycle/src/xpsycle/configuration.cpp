@@ -88,7 +88,6 @@ namespace psycle {
 			return hlpPath_;
 		}
 
-
 		bool Configuration::enableSound() const {
 			return enableSound_;
 		}

@@ -24,16 +24,17 @@
 #ifdef __unix__
 #include <dlfcn.h>
 #else
-#include <windows.h>
-#undef min
-#undef max
+ #include <windows.h>
+ #ifdef _MSC_VER
+	#undef min 
+	#undef max
+  #endif
 #endif
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <algorithm>
 #include <cctype>
-
 
 // win32 note : mingw cannot load our shipped 1.8.2 binary plugins due c++ this and std calling convention
 
@@ -90,7 +91,7 @@ bool Plugin::Instance( const std::string & file_name )
       #ifdef __unix__
       GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
       #else
-      GetInfo = (GETINFO) GetProcAddress( (HINSTANCE)_dll, "GetInfo" );
+      GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
       #endif
       if (!GetInfo) {
         #ifdef __unix__

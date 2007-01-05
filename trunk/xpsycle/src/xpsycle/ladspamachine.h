@@ -20,16 +20,9 @@
 #ifndef LADSPAMACHINE_H
 #define LADSPAMACHINE_H
 
-#ifdef __unix__
-
-#if defined XPSYCLE__CONFIGURATION
-        #include <xpsycle/ladspa_conditional_build.h>
-#endif
-#if !defined XPSYCLE__NO_LADSPA
-
-
 #include "machine.h"
-#include <ladspa.h>
+#include "ladspa.h"
+
 /**
 @author Stefan Nattkemper
 */
@@ -121,6 +114,4 @@ namespace psycle {
 	}
 }
 
-#endif // !defined XPSYCLE__NO_LADSPA
-#endif
 #endif

@@ -194,17 +194,22 @@ namespace psycle
 		}
 
 		void PluginFinder::scanLadspa() {
-#ifdef __unix__             
-#if !defined XPSYCLE__NO_LADSPA
 			///\todo this just uses the first path in getenv
-			const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
-			std::cout << "scanning:" << pcLADSPAPath << std::endl;
-			if ( !pcLADSPAPath) pcLADSPAPath = "/usr/lib/ladspa/";
+			const char* pcLADSPAPath;
+			pcLADSPAPath = std::getenv("LADSPA_PATH");
+			if ( !pcLADSPAPath) {
+				#ifdef __unix__
+				pcLADSPAPath = "/usr/lib/ladspa/";
+				#else
+				pcLADSPAPath = "C:\\Programme\\Audacity\\Plug-Ins\\";
+				#endif
+			}
 			std::string ladspa_path(pcLADSPAPath);
-			int dotpos = ladspa_path.find(':',0);
-			if (dotpos != ladspa_path.npos) ladspa_path = ladspa_path.substr(0,dotpos);
-			
-
+			#ifdef __unix__
+			std::string::size_type dotpos = ladspa_path.find(':',0);
+			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
+			#else
+			#endif
 			const LADSPA_Descriptor * psDescriptor;
 			LADSPA_Descriptor_Function pfDescriptorFunction;
 			unsigned long lPluginIndex;
@@ -216,7 +221,12 @@ namespace psycle
 			for ( ; it < fileList.end(); it++ ) {
 				std::string fileName = *it;
 				LADSPAMachine plugin(0, 0 );
+				#ifdef __unix__
 				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path+ "/" +fileName);
+				#else
+				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path+ "\\" +fileName);
+				#endif
+
 				if (pfDescriptorFunction) {
 					for (lPluginIndex = 0;; lPluginIndex++) {
 						psDescriptor = pfDescriptorFunction(lPluginIndex);
@@ -232,8 +242,6 @@ namespace psycle
 					}
 				}
 			}
-#endif // XPSYCLE__NO_LADSPA
-#endif
 		}
 
 		void PluginFinder::scanNatives() {
