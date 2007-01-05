@@ -325,10 +325,10 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                 }
                 break;
     default: {            
-      if (keyEvent.buffer()!="" ) {
+      if ( keyEvent.buffer() != "" ) {
         if ( selStartIdx_ != selEndIdx_ ) {
            std::string::size_type count = selEndIdx_ - selStartIdx_;
-           pos_ = std::min( selStartIdx_, selEndIdx_ );
+           pos_ = selStartIdx_;
            selStartIdx_ = 0;
 		   selEndIdx_   = 0;
            text_.erase( pos_, count ); 
@@ -371,8 +371,7 @@ void NEdit::onMousePress( int x, int y, int button ) {
 
   NFntString myText;
   myText.setText( text_ );
-  int newPos = findWidthMax( x + dx, myText );
-  pos_ = newPos;
+  pos_ = findWidthMax( x + dx, myText );
   
   if ( !( shiftState & nsShift ) ) {
     startSel();       
@@ -399,29 +398,27 @@ void NEdit::onMouseOver( int x, int y ) {
 void NEdit::onMousePressed( int x, int y, int button ) {
   NPanel::onMousePressed( x, y, button ); 
   endSel();    
-}     
+}
 
-int NEdit::findWidthMax(long width, const NFntString & data ) const
+std::string::size_type NEdit::findWidthMax(long width, const NFntString & data ) const
 {
-  NFontMetrics metrics(font());
-  int Low = 0; int High = data.length();  int Mid=High;
-  while( Low <= High ) {
-    Mid = ( Low + High ) / 2;
-    NFntString s     = data.substr(0,Mid);
-    NFntString snext;
-    if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
-    int w     = metrics.textWidth(s);
-    if(  w < width  ) {
-                        int wnext = metrics.textWidth(snext);
-                        if (wnext  >= width ) break;
-                        Low = Mid + 1; 
+  NFontMetrics metrics( font() );
+
+  std::string::size_type low  = 0;
+  std::string::size_type high = data.length();
+  
+  while( low < high ) {
+    std::string::size_type mid = low + ( high - low ) / 2; 
+    int w = metrics.textWidth( data.substr( 0, mid ) );
+    if(  w < width  ) {						 
+                        low = mid + 1; 
                       } else
                       {
-                        High = Mid - 1;
+                        high = mid;
                       }
   }  
-  return Mid;
 
+  return low;
 }
 
 std::string NEdit::selText() const {
