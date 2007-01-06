@@ -483,11 +483,11 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     }
     break;
     case WM_LBUTTONDOWN:
-     // SetCapture( win->win() );
+      SetCapture( win->win() );
       buttonPress( win, event, 1 );         
     break;
     case WM_RBUTTONDOWN:
-      //SetCapture( win->win() );
+      SetCapture( win->win() );
       buttonPress( win, event, 3 );                  
     break;
     case WM_LBUTTONDBLCLK:
@@ -497,12 +497,12 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
       win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );   
     break;
     case WM_LBUTTONUP:
-      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );
-      //ReleaseCapture();
+	  ReleaseCapture();
+      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );      
     break;
     case WM_RBUTTONUP:
-      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );
-     // ReleaseCapture();
+	  ReleaseCapture();
+      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );      
     break;    
     case WM_KEYDOWN : {
          BYTE keyboardState[256];

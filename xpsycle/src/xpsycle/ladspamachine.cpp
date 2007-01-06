@@ -269,7 +269,7 @@ namespace psycle {
 				std::cout << fullname << std::endl;
 		
 				#ifdef __unix__
-				pvResult = dlopen(fullname_.c_str(), iFlag);
+				pvResult = dlopen(fullname.c_str(), iFlag);
 				#else
 				// Set error mode to disable system error pop-ups (for LoadLibrary)
 				UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
