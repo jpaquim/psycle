@@ -92,6 +92,7 @@ void NColor::setRGB( const std::string & rgbStr )
   std::string tok = rgbStr;
   replace( tok.begin(), tok.end(), ':', ' ' ); 
   std::istringstream( tok ) >> r >> g >> b;
+  value = NApp::system().getXColorValue( r, g, b );
 }
 
 void NColor::setHCOLORREF( long int hcolorref )
