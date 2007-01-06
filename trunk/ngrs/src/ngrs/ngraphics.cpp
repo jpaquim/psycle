@@ -1176,12 +1176,11 @@ int NGraphics::textWidth( const NFntString & text ) const
    NFontStructure newFntStruct = fntStruct;
    int pos = 0; int w = 0;
    std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
-   for (std::vector<int>::const_iterator it = text.positions().begin(); it < text.positions().end(); it++) {
-     int old = pos;
+   for (std::vector<std::string::size_type>::const_iterator it = text.positions().begin(); it < text.positions().end(); it++) {
+     std::string::size_type old = pos;
      pos = *it;
-
-     const char* s = text.textsubstr(old,pos-old).c_str();
-     if (!newFntStruct.antialias)
+     const char* s = text.textsubstr( old, pos-old ).c_str();
+     if ( !newFntStruct.antialias )
        w+=XTextWidth(newFntStruct.xFnt,s,strlen(s));
      else {
        XGlyphInfo info;
