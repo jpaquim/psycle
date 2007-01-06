@@ -403,7 +403,7 @@ void NScrollBar::setPos( double pos )
   sliderArea_->repaint();
   updateControl();
 
-	change.emit(this );  
+  change.emit(this );  
 }
 
 double NScrollBar::pos() const {

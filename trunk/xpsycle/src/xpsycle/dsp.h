@@ -275,7 +275,7 @@ namespace psycle
 			{
 				float y0,y1;
 				y0 = *pData;
-				y1 = ( offset+1 == length )?0:*(pData+1);
+				y1 = static_cast<float>( ( offset+1 == length )?0:*(pData+1) );
 				return (y0+(y1-y0)*_lTable[res>>21]);
 			}
 			/// interpolation work function which does spline interpolation.
@@ -284,10 +284,10 @@ namespace psycle
 				float yo, y0,y1, y2;
 				res = res >> 21;
 			
-				yo=(offset==0)?0:*(pData-1);
+				yo = static_cast<float>( (offset==0)?0:*(pData-1) );
 				y0=*(pData);
-				y1=(offset+1 == length)?0:*(pData+1);
-				y2=(offset+2 == length)?0:*(pData+2);
+				y1= static_cast<float>( (offset+1 == length)?0:*(pData+1) );
+				y2= static_cast<float>( (offset+2 == length)?0:*(pData+2) );
 				return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
 			}
 			

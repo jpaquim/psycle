@@ -478,7 +478,7 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     case WM_MOUSEMOVE:
     {           
       if (lastOverWin_!=0 && win!=lastOverWin_ ) lastOverWin_->onMouseExit();
-      win->onMouseOver( LOWORD( event->lParam ), HIWORD( event->lParam ) );
+      win->onMouseOver( static_cast<SHORT>( LOWORD( event->lParam ) ), static_cast<SHORT>( HIWORD( event->lParam ) ) );
       lastOverWin_ = win;
     }
     break;
@@ -491,7 +491,7 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
       buttonPress( win, event, 3 );                  
     break;
     case WM_LBUTTONDBLCLK:
-      win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );         
+      win->onMouseDoublePress( static_cast<SHORT>( LOWORD( event->lParam ) ), static_cast<SHORT>( HIWORD( event->lParam ) ), 1 );         
     break;     
     case WM_RBUTTONDBLCLK:
       win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );   
@@ -575,7 +575,7 @@ void NApp::buttonPress( NWindow* win, WEvent* event, int button )
   win->onMousePress(event->xbutton.x,event->xbutton.y,event->xbutton.button);
   lastBtnPressTime = time;
   #else
-  win->onMousePress( LOWORD( event->lParam ), HIWORD( event->lParam ), button);
+  win->onMousePress( static_cast<SHORT>( LOWORD( event->lParam ) ), static_cast<SHORT>( HIWORD( event->lParam ) ), button);
   #endif
   if (autoUnmap_) {
     win->checkForRemove(0);

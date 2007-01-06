@@ -537,7 +537,7 @@ namespace psycle {
 		
 		void LADSPAMachine::SaveDllName(RiffFile * pFile) 
 		{
-			int extpos=0;
+			std::string::size_type extpos=0;
 			std::string withoutSuffix;
 			if ( (extpos= libName_.find(".so"))!= std::string::npos) {
 				withoutSuffix = libName_.substr(0,extpos);
