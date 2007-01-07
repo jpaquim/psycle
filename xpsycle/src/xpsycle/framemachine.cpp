@@ -66,9 +66,7 @@ namespace psycle {
 		// base class for cells
 
 		Cell::Cell() {
-			NFrameBorder border;
-			border.setSpacing( NSize(1,1,1,1) );
-			setBorder( border );
+			
 		}
 
 		Cell::~Cell() {
@@ -99,6 +97,7 @@ namespace psycle {
 
 		// class for a knob
 		Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), finetweak(1), ultrafinetweak(0), sourcepoint(0)  {
+			setSpacing( NSize( 0,0,1,0 ));			
 			param_ = param;  
 			add( label = new NLabel());
 			add( vLabel = new NLabel()); // the label that shows the value in %
@@ -158,13 +157,13 @@ namespace psycle {
 		int Knob::preferredHeight( ) const
 		{
 			NFontMetrics metrics(font());
-			return std::max(2*metrics.textHeight(),K_YSIZE) + borderTop() + borderBottom();
+			return std::max(2*metrics.textHeight(),K_YSIZE) + borderTop() + borderBottom() + spacing().top() + spacing().bottom();
 		}
 
 		int Knob::preferredWidth( ) const
 		{
 			NFontMetrics mtr(font());
-			return K_XSIZE + std::max(mtr.textWidth(vLabel->text()),mtr.textWidth(label->text())) + 10 + borderRight() + borderLeft();
+			return K_XSIZE + std::max(mtr.textWidth(vLabel->text()),mtr.textWidth(label->text())) + 10 + borderRight() + borderLeft() + spacing().left() + spacing().right();
 		}		
 
 		void Knob::setValueAsText( const std::string & text )
@@ -239,6 +238,11 @@ namespace psycle {
 		// Header Label class
 		Header::Header( ) : Cell()
 		{
+			NFrameBorder border;
+				border.setSpacing( NSize(2,2,2,2) );
+				border.setOval();
+			setBorder( border );
+
 			label = new NLabel();
 			label->setTransparent(false);
 			label->setBackground( SkinReader::Instance()->framemachine_info().machineGUITitleColor );
