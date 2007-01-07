@@ -227,8 +227,13 @@ namespace psycle
 			std::vector<std::string>::iterator it = fileList.begin();
 			for ( ; it < fileList.end(); it++ ) {
 				std::string fileName = *it;
-				LADSPAMachine plugin(0, 0 );
+				#ifdef __unix__
+				// problem of so.0.0.x .. .so all three times todo
+				#else
+				if ( fileName.find( ".dll" ) == std::string::npos ) continue;
+				#endif
 
+				LADSPAMachine plugin(0, 0 );
 				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + NFile::slash() + fileName );
 
 				if (pfDescriptorFunction) {
@@ -259,21 +264,27 @@ namespace psycle
 
 			for ( ; it < fileList.end(); it++ ) {
 				std::string fileName = *it;
+				#ifdef __unix__
+				// problem of so.0.0.x .. .so all three times todo
+				#else
+					if ( fileName.find( ".dll" ) == std::string::npos ) continue;
+				#endif
+
 				Plugin plugin(0, 0 );
 				if ( plugin.LoadDll( fileName ) ) {
-                   PluginInfo info;
-                   info.setType( MACH_PLUGIN );
-                   info.setName( plugin.GetName() );
-                   info.setMode( plugin.mode() );
-                   info.setLibName( plugin.GetDllName() );
-                   std::ostringstream o;
-                   std::string version;
-			       if (!(o << plugin.GetInfo()->Version )) version = o.str();
-                   info.setVersion( version );
-                   info.setAuthor( plugin.GetInfo()->Author );			
-				   ///\todo .. path should here stored and not evaluated in plugin
-                   PluginFinderKey key( plugin.GetDllName(), fileName );
-                   map_[key] = info;               
+				PluginInfo info;
+				info.setType( MACH_PLUGIN );
+				info.setName( plugin.GetName() );
+				info.setMode( plugin.mode() );
+				info.setLibName( plugin.GetDllName() );
+				std::ostringstream o;
+				std::string version;
+				if (!(o << plugin.GetInfo()->Version )) version = o.str();
+				info.setVersion( version );
+				info.setAuthor( plugin.GetInfo()->Author );			
+				///\todo .. path should here stored and not evaluated in plugin
+				PluginFinderKey key( plugin.GetDllName(), fileName );
+				map_[key] = info;               
 				}
 			}
 		}
