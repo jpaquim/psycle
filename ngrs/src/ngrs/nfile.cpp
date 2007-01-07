@@ -136,11 +136,16 @@ std::string NFile::home() {
  strncpy(home,getenv("HOME"),7999);
  return home;
  #else            
+ // first check homepath
+ const char* homepath = getenv("HOMEPATH");
+ if ( homepath ) return std::string( homepath );
+
+
  HKEY hKeyRoot = HKEY_CURRENT_USER;
  LPCTSTR pszPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
  
  HKEY m_hKey = NULL;
- LONG ReturnValue = RegOpenKeyEx (hKeyRoot, pszPath, 0L,
+ LONG ReturnValue =  RegOpenKeyEx (hKeyRoot, pszPath, 0L,
 		KEY_ALL_ACCESS, &m_hKey);
 		
  if(ReturnValue == ERROR_SUCCESS)
