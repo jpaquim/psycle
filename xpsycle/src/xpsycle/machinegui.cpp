@@ -531,7 +531,7 @@ namespace psycle {
 			g->setTranslation(xTrans + ident(), yTrans+ ident());
 
 			g->putPixmap(0,0, coords().bgCoords.width(), coords().bgCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().bgCoords.left(), coords().bgCoords.top() );
-			//  g->drawText( coords().dNameCoords.x(), coords().dNameCoords.y() + g->textAscent(), mac()._editName);
+		    g->drawText( coords().dNameCoords.x(), coords().dNameCoords.y() + g->textAscent(), mac()._editName);
 
 			if (mac()._mute)
 				g->putPixmap( coords().dMuteCoords.left(), coords().dMuteCoords.top(), coords().muteCoords.width(), coords().muteCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().muteCoords.left(), coords().muteCoords.top());
