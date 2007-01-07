@@ -63,6 +63,203 @@ namespace psycle {
 		{
 		}
 
+		// base class for cells
+
+		Cell::Cell() {
+			NFrameBorder border;
+			border.setSpacing( NSize(1,1,1,1) );
+			setBorder( border );
+		}
+
+		Cell::~Cell() {
+		}
+
+
+		void Cell::paint( NGraphics * g )
+		{
+			int CW = clientWidth();
+			int CH = clientHeight();
+
+			g->setForeground( SkinReader::Instance()->framemachine_info().machineGUITopColor );
+			g->fillRect(0,0,CW, CH / 2);
+			g->setForeground( SkinReader::Instance()->framemachine_info().machineGUIBottomColor );
+			g->fillRect(0,CH/2,CW, CH / 2);
+		}
+
+		int Cell::preferredWidth() const {
+			return 100 + borderLeft() + borderRight();
+		}
+
+		int Cell::preferredHeight() const {
+			return K_YSIZE + borderTop() + borderBottom() ;
+		}
+
+		// end of Cell class
+
+
+		// class for a knob
+		Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), finetweak(1), ultrafinetweak(0), sourcepoint(0)  {
+			param_ = param;  
+			add( label = new NLabel());
+			add( vLabel = new NLabel()); // the label that shows the value in %
+			NFont font = NFont("6x13",6,nMedium | nStraight | nAntiAlias);
+			font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUIFontBottomColor );
+			vLabel->setFont(font);
+			tvalue =stringify(value_)+"%";
+			setValueAsText(tvalue);
+			font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUIFontTopColor );
+			label->setFont(font);
+		}
+
+		void Knob::setValue( int value )
+		{
+			value_ = value;
+			if (tvalue=="") { 
+				tvalue = stringify(value_)+"%";
+				setValueAsText(tvalue);
+			}
+		}
+
+		void Knob::setRange( int min, int max )
+		{
+			min_range = min;
+			max_range = max;
+		}
+
+		void Knob::paint( NGraphics * g )
+		{
+			Cell::paint(g);
+
+			int amp = max_range - min_range;
+			int rel = value_ - min_range;
+
+			if (amp > 0) {
+				int frame = (K_NUMFRAMES*rel)/amp;
+				int xn = frame*K_XSIZE;
+				int CH = clientHeight();
+
+				g->putBitmap(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE, SkinReader::Instance()->defaultBitmaps().tbmainknob(), xn,0);
+			}
+		}
+
+		void Knob::setText( const std::string & text )
+		{
+			label->setText(text);
+		}
+
+		void Knob::resize( )
+		{
+			int CH = clientHeight();
+
+			label->setPosition(K_XSIZE+5,0,clientWidth()-K_XSIZE-5,CH/2);
+			vLabel->setPosition(K_XSIZE+5,CH/2,clientWidth()-K_XSIZE-5,CH/2);
+		}
+
+		int Knob::preferredHeight( ) const
+		{
+			NFontMetrics metrics(font());
+			return std::max(2*metrics.textHeight(),K_YSIZE) + borderTop() + borderBottom();
+		}
+
+		int Knob::preferredWidth( ) const
+		{
+			NFontMetrics mtr(font());
+			return K_XSIZE + std::max(mtr.textWidth(vLabel->text()),mtr.textWidth(label->text())) + 10 + borderRight() + borderLeft();
+		}		
+
+		void Knob::setValueAsText( const std::string & text )
+		{
+			std::string bla = text;
+			tvalue = bla;
+			tvalue = text;
+			vLabel->setText(tvalue);
+		}
+
+		void Knob::onMousePress( int x, int y, int button )
+		{
+			int CH = clientHeight();
+			if (NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y)) {
+				istweak = true;
+				sourcepoint = y;
+				tweakbase = value_;
+			}
+		}
+
+		void Knob::onMouseOver( int x, int y )
+		{
+			if (istweak) {
+
+				int shift = NApp::system().shiftState();
+
+				if (( ultrafinetweak && !( shift & nsShift )) || //shift-key has been left.
+					( !ultrafinetweak && ( shift & nsShift ))) //shift-key has just been pressed
+				{
+					sourcepoint=y;
+					ultrafinetweak=!ultrafinetweak;
+					tweakbase = value_;
+				}
+				else if (( finetweak && !( shift & nsCtrl )) || //control-key has been left.
+					( !finetweak && ( shift & nsCtrl ))) //control-key has just been pressed
+				{
+					sourcepoint = y;
+					finetweak=!finetweak;
+					tweakbase=value_;
+				}
+
+				int maxval = max_range;
+				int minval = min_range;
+
+				int screenh = NApp::system().screenHeight();
+				double freak = 0.5;
+				if ( ultrafinetweak ) freak = 0.5f;
+				else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
+				else if (maxval-minval < screenh*2/3) freak = (maxval-minval)/float(screenh/3);
+				else freak = (maxval-minval)/float(screenh*3/5);
+
+				if (finetweak) freak/=5;
+
+				double nv = (double)(sourcepoint - y)*freak + (double)tweakbase;
+				if (nv < minval) nv = minval;
+				if (nv > maxval) nv = maxval;
+
+				value_ = (int) nv;
+				valueChanged.emit(this,(int) nv, param_);
+			}
+		}
+
+		void Knob::onMousePressed( int x, int y, int button )
+		{
+			istweak = false;
+		}
+		// end of Knob class
+
+
+
+
+		// Header Label class
+		Header::Header( ) : Cell()
+		{
+			label = new NLabel();
+			label->setTransparent(false);
+			label->setBackground( SkinReader::Instance()->framemachine_info().machineGUITitleColor );
+			NFont font = NFont("6x13",6,nMedium | nStraight | nAntiAlias);
+			font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUITitleFontColor );
+			label->setFont( font );
+			add(label);
+		}
+
+		void Header::setText( const std::string & text ) {
+			label->setText( text );
+		}
+
+		void Header::resize() {
+			int ch = clientHeight();
+			int lh = label->preferredHeight();
+			label->setPosition(0,(ch - lh) / 2,clientWidth(),lh);
+		}
+		// end of Header label class
+
+
 		FrameMachine::FrameMachine(Machine* pMachine)
 			: NWindow()
 		{
@@ -154,7 +351,6 @@ namespace psycle {
 				}
 			}
 			if ( rows*cols < numParameters) rows++; // check if all the parameters are visible.
-			// 
 
 			knobPanel = new NPanel();
 			NTableLayout tableLayout;
@@ -176,23 +372,23 @@ namespace psycle {
 				if ( knobIdx < numParameters ) {
 					pMachine_->GetParamRange( knobIdx,min_v,max_v);
 					bool bDrawKnob = (min_v==max_v)?false:true;
-			
+
 					if (!bDrawKnob) {
 						Header* cell = new Header();
-							headerMap[ knobIdx ] = cell;
-							char parName[64];
-							pMachine_->GetParamName(knobIdx,parName);
-							cell->setText(parName);
+						headerMap[ knobIdx ] = cell;
+						char parName[64];
+						pMachine_->GetParamName(knobIdx,parName);
+						cell->setText(parName);
 						knobPanel->add( cell, NAlignConstraint( nAlLeft, x, y ), true );
 					} else if ( knobIdx < numParameters ) {
 						Knob* knob = new Knob( knobIdx );
-							char parName[64];
-							pMachine_->GetParamName( knobIdx, parName );
-							char buffer[128];
-							pMachine_->GetParamValue( knobIdx, buffer );
-							knob->setText(parName);
-							knobMap[ knobIdx ] = knob;
-							knob->valueChanged.connect(this,&FrameMachine::onKnobValueChange);												
+						char parName[64];
+						pMachine_->GetParamName( knobIdx, parName );
+						char buffer[128];
+						pMachine_->GetParamValue( knobIdx, buffer );
+						knob->setText(parName);
+						knobMap[ knobIdx ] = knob;
+						knob->valueChanged.connect(this,&FrameMachine::onKnobValueChange);												
 						knobPanel->add( knob, NAlignConstraint( nAlLeft, x, y ), true );
 					}					
 				} else {
@@ -210,161 +406,7 @@ namespace psycle {
 
 		// Knob class
 
-		Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), finetweak(1), ultrafinetweak(0), sourcepoint(0)  {
-			param_ = param;  
-			add( label = new NLabel());
-			add( vLabel = new NLabel()); // the label that shows the value in %
-			NFont font = NFont("6x13",6,nMedium | nStraight | nAntiAlias);
-			font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUIFontBottomColor );
-			vLabel->setFont(font);
-			tvalue =stringify(value_)+"%";
-			setValueAsText(tvalue);
-			font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUIFontTopColor );
-			label->setFont(font);
-		}
 
-		void Knob::setValue( int value )
-		{
-			value_ = value;
-			if (tvalue=="") { 
-				tvalue = stringify(value_)+"%";
-				setValueAsText(tvalue);
-			}
-		}
-
-		void Knob::setRange( int min, int max )
-		{
-			min_range = min;
-			max_range = max;
-		}
-
-		void Knob::paint( NGraphics * g )
-		{
-			Cell::paint(g);
-
-			int amp = max_range - min_range;
-			int rel = value_ - min_range;
-
-			if (amp > 0) {
-				int frame = (K_NUMFRAMES*rel)/amp;
-				int xn = frame*K_XSIZE;
-				int CH = clientHeight();
-
-				g->putBitmap(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE, SkinReader::Instance()->defaultBitmaps().tbmainknob(), xn,0);
-			}
-		}
-
-		void Knob::setText( const std::string & text )
-		{
-			label->setText(text);
-		}
-
-		void Knob::resize( )
-		{
-			int CH = clientHeight();
-
-			label->setPosition(K_XSIZE+5,0,clientWidth()-K_XSIZE-5,CH/2);
-			vLabel->setPosition(K_XSIZE+5,CH/2,clientWidth()-K_XSIZE-5,CH/2);
-		}
-
-		int Knob::preferredHeight( ) const
-		{
-			NFontMetrics metrics(font());
-			return std::max(2*metrics.textHeight(),K_YSIZE);
-		}
-
-		int Knob::preferredWidth( ) const
-		{
-			NFontMetrics mtr(font());
-			return K_XSIZE + std::max(mtr.textWidth(vLabel->text()),mtr.textWidth(label->text())) + 10;
-		}
-
-		void Cell::paint( NGraphics * g )
-		{
-			int CW = clientWidth();
-			int CH = clientHeight();
-
-			g->setForeground( SkinReader::Instance()->framemachine_info().machineGUITopColor );
-			g->fillRect(0,0,CW, CH / 2);
-			g->setForeground( SkinReader::Instance()->framemachine_info().machineGUIBottomColor );
-			g->fillRect(0,CH/2,CW, CH / 2);
-		}
-
-		Header::Header( ) : Cell()
-		{
-			label = new NLabel();
-			label->setTransparent(false);
-			label->setBackground( SkinReader::Instance()->framemachine_info().machineGUITitleColor );
-			NFont font = NFont("6x13",6,nMedium | nStraight | nAntiAlias);
-			font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUITitleFontColor );
-			label->setFont( font );
-			add(label);
-		}
-
-		void Knob::setValueAsText( const std::string & text )
-		{
-			std::string bla = text;
-			tvalue = bla;
-			tvalue = text;
-			vLabel->setText(tvalue);
-		}
-
-		void Knob::onMousePress( int x, int y, int button )
-		{
-			int CH = clientHeight();
-			if (NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y)) {
-				istweak = true;
-				sourcepoint = y;
-				tweakbase = value_;
-			}
-		}
-
-		void Knob::onMouseOver( int x, int y )
-		{
-			if (istweak) {
-
-				int shift = NApp::system().shiftState();
-
-				if (( ultrafinetweak && !( shift & nsShift )) || //shift-key has been left.
-					( !ultrafinetweak && ( shift & nsShift ))) //shift-key has just been pressed
-				{
-					sourcepoint=y;
-					ultrafinetweak=!ultrafinetweak;
-					tweakbase = value_;
-				}
-				else if (( finetweak && !( shift & nsCtrl )) || //control-key has been left.
-					( !finetweak && ( shift & nsCtrl ))) //control-key has just been pressed
-				{
-					sourcepoint = y;
-					finetweak=!finetweak;
-					tweakbase=value_;
-				}
-
-				int maxval = max_range;
-				int minval = min_range;
-
-				int screenh = NApp::system().screenHeight();
-				double freak = 0.5;
-				if ( ultrafinetweak ) freak = 0.5f;
-				else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
-				else if (maxval-minval < screenh*2/3) freak = (maxval-minval)/float(screenh/3);
-				else freak = (maxval-minval)/float(screenh*3/5);
-
-				if (finetweak) freak/=5;
-
-				double nv = (double)(sourcepoint - y)*freak + (double)tweakbase;
-				if (nv < minval) nv = minval;
-				if (nv > maxval) nv = maxval;
-
-				value_ = (int) nv;
-				valueChanged.emit(this,(int) nv, param_);
-			}
-		}
-
-		void Knob::onMousePressed( int x, int y, int button )
-		{
-			istweak = false;
-		}
 
 		void FrameMachine::onKnobValueChange( Knob* sender,int value , int param )
 		{
@@ -523,7 +565,7 @@ namespace psycle {
 
 		void FrameMachine::setVisible( bool on ) {
 			if ( on ) {
-				setPosition(20,20, knobPanel->preferredWidth(), knobPanel->preferredHeight() );
+				setPosition(20,20, pane()->preferredWidth(), knobPanel->preferredHeight() + prsPanel->preferredHeight() );
 			}    
 			NWindow::setVisible( on );
 		}

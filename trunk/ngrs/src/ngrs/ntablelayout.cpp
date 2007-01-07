@@ -127,12 +127,12 @@ void NTableLayout::removeAll( )
 
 void NTableLayout::setRows( int number )
 {
-  cols_ = number;
+  rows_ = number;
 }
 
 void NTableLayout::setColumns( int number )
 {
-  rows_ = number;
+  cols_ = number;
 }
 
 NTableLayout::Row::Row( )
