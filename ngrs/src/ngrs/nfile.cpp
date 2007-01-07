@@ -239,7 +239,11 @@ std::string NFile::env( const std::string & envName )
 std::string NFile::extractFileNameFromPath(const std::string & fileName) {
   std::string fileWithoutPathName = "";
   
+  #ifdef __unix__
   std::string::size_type i = fileName.rfind("/");
+  #else
+  std::string::size_type i = fileName.rfind("\\");
+  #endif
 
   if ( i != std::string::npos  &&  i != fileName.length() - 1 ) {
      fileWithoutPathName = fileName.substr(i+1);
@@ -273,4 +277,12 @@ std::string NFile::replaceIllegalXmlChr( const std::string & text, bool strict )
 				xml.replace(search_pos, 1, "&quot;" );
 			}
 			return xml;
+}
+
+std::string NFile::slash() {
+  #ifdef __unix__
+  return "/";
+  #else
+  return "\\";
+  #endif
 }

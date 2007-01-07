@@ -75,7 +75,6 @@ namespace psycle
 			return author_;
 		}
 
-
 		void PluginInfo::setDesc( const std::string & desc ) {
 			desc_ = desc;
 		}
@@ -133,38 +132,55 @@ namespace psycle
 		}
 
 
+
+
 		PluginFinderKey::PluginFinderKey( ) : index_(0) {
 
 		}
 
-		PluginFinderKey::PluginFinderKey( const std::string & name, int index ) :
-			name_( name ),
-			index_( index) 
+		PluginFinderKey::PluginFinderKey( const std::string & name, const std::string & dllPath, int index ) :
+			name_( name ),			
+			dllPath_( dllPath ),
+			index_( index )
 		{
 		}
 
 		PluginFinderKey::~PluginFinderKey() {
 		}
 
+		PluginFinderKey PluginFinderKey::internalSampler() {
+			return PluginFinderKey("Psycle Internal Sampler", "none", 0 );
+		}
+
 		bool PluginFinderKey::operator<(const PluginFinderKey & key) const {
-			if ( name() != key.name() ) return name() < key.name();
+			if ( dllPath() != key.dllPath() )
+				return dllPath() < key.dllPath();
+			if ( name() != key.name() ) 
+				return name() < key.name();
 			return index() < key.index();	
 		}		
+
+		bool PluginFinderKey::operator ==( const PluginFinderKey & rhs ) const {
+			return dllPath() == rhs.dllPath() && name()	== rhs.name() && index() == rhs.index();
+		}
 
 
 		const std::string & PluginFinderKey::name() const {
 			return name_;
+		}
+		
+		const std::string & PluginFinderKey::dllPath() const {
+			return dllPath_;
 		}
 
 		int PluginFinderKey::index() const {
 			return index_;
 		}
 
-
-
-
-		PluginFinder::PluginFinder()
+		PluginFinder::PluginFinder( const Configuration & conf ) 
+			:	conf_( conf )
 		{
+			scanAll();
 		}
 
 
@@ -172,11 +188,11 @@ namespace psycle
 		{
 		}
 		
-        std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::begin() {
+        std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::begin() const {
           return map_.begin();
         }         
         
-        std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::end() {
+        std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::end() const {
           return map_.end();
         }         
         
@@ -195,16 +211,7 @@ namespace psycle
 
 		void PluginFinder::scanLadspa() {
 			///\todo this just uses the first path in getenv
-			const char* pcLADSPAPath;
-			pcLADSPAPath = std::getenv("LADSPA_PATH");
-			if ( !pcLADSPAPath) {
-				#ifdef __unix__
-				pcLADSPAPath = "/usr/lib/ladspa/";
-				#else
-				pcLADSPAPath = "I:\\Archivos de programa\\Multimedia\\Audacity\\Plug-Ins";
-				#endif
-			}
-			std::string ladspa_path(pcLADSPAPath);
+			std::string ladspa_path = conf_.ladspaPath() ;			
 			#ifdef __unix__
 			std::string::size_type dotpos = ladspa_path.find(':',0);
 			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
@@ -221,11 +228,8 @@ namespace psycle
 			for ( ; it < fileList.end(); it++ ) {
 				std::string fileName = *it;
 				LADSPAMachine plugin(0, 0 );
-				#ifdef __unix__
-				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path+ "/" +fileName);
-				#else
-				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path+ "\\" +fileName);
-				#endif
+
+				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + NFile::slash() + fileName );
 
 				if (pfDescriptorFunction) {
 					for (lPluginIndex = 0;; lPluginIndex++) {
@@ -237,7 +241,7 @@ namespace psycle
 						info.setType( MACH_LADSPA );
 						info.setName( psDescriptor->Name );
 						info.setLibName( fileName );
-						PluginFinderKey key(fileName, lPluginIndex );
+						PluginFinderKey key(fileName, ladspa_path + NFile::slash() + fileName, lPluginIndex );
 						map_[key] = info;
 					}
 				}
@@ -266,8 +270,9 @@ namespace psycle
                    std::string version;
 			       if (!(o << plugin.GetInfo()->Version )) version = o.str();
                    info.setVersion( version );
-                   info.setAuthor( plugin.GetInfo()->Author );				
-                   PluginFinderKey key( plugin.GetDllName(), 0 );
+                   info.setAuthor( plugin.GetInfo()->Author );			
+				   ///\todo .. path should here stored and not evaluated in plugin
+                   PluginFinderKey key( plugin.GetDllName(), fileName );
                    map_[key] = info;               
 				}
 			}

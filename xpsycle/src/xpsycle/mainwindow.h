@@ -23,6 +23,7 @@
 #include "songpdlg.h"
 #include "childview.h"
 #include "sequencerbar.h"
+#include "pluginfinder.h"
 #include <ngrs/nwindow.h>
 #include <ngrs/nmenubar.h>
 #include <ngrs/nmenu.h>
@@ -75,9 +76,10 @@ public:
 
 private:
 
-		NTimer timer; // we poll playpos infos here to avoid thread sync with the audio thread
+	NTimer timer; // we poll playpos infos here to avoid thread sync with the audio thread
 
-		bool oldPlayPos_;
+	bool oldPlayPos_;
+	PluginFinder pluginFinder_; // needs ctor_init_list
 
     void initSongs();
     ChildView* addChildView();

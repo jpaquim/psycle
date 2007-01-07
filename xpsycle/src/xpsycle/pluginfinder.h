@@ -32,6 +32,7 @@ namespace psycle
 {
 	namespace host
 	{
+		class Configuration;
 
 		class PluginInfo
 		{
@@ -94,17 +95,22 @@ namespace psycle
 		public:
 
 				PluginFinderKey( );
-				PluginFinderKey( const std::string & name, int index = 0);
+				PluginFinderKey( const std::string & name, const std::string & dllPath, int index = 0 );
 				~PluginFinderKey();
 
-				const std::string & name() const;
+				static PluginFinderKey PluginFinderKey::internalSampler();
+
+				const std::string & name() const;				
+				const std::string & dllPath() const;
 				int index() const;
 
 				bool operator<(const PluginFinderKey & key) const;
+				bool operator ==( const PluginFinderKey & rhs ) const;
 
 		private:
 
-				std::string name_;
+				std::string name_;				
+				std::string dllPath_;
 				int index_;
 
 		};
@@ -112,7 +118,7 @@ namespace psycle
 
 		class PluginFinder  {
 		public:
-			PluginFinder();
+			PluginFinder( const Configuration & conf );
 
 			~PluginFinder();
 
@@ -120,11 +126,12 @@ namespace psycle
 
 			PluginInfo info( const PluginFinderKey & key ) const;
 			
-			std::map< PluginFinderKey, PluginInfo >::const_iterator begin();
-			std::map< PluginFinderKey, PluginInfo >::const_iterator end();
+			std::map< PluginFinderKey, PluginInfo >::const_iterator begin() const;
+			std::map< PluginFinderKey, PluginInfo >::const_iterator end() const;
 
 		private:
 
+			const Configuration & conf_;
             std::map< PluginFinderKey, PluginInfo > map_;
 
 			void scanLadspa();

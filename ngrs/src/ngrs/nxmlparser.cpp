@@ -18,7 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nxmlparser.h"
+#include "nfile.h"
 #include <iostream>
+
 #ifdef __unix__
 #include <xercesc/parsers/SAXParser.hpp>
 #include <xercesc/sax2/Attributes.hpp>
@@ -217,7 +219,16 @@ void NXmlParser::parseFile( const std::string & fileName )
 
   delete parser;
   delete defaultHandler;
-  XMLPlatformUtils::Terminate();
+  XMLPlatformUtils::Terminate();  
+  #else
+  ///\ todo parse it as stream
+  if ( NFile::fileIsReadable( fileName ) ) {
+	  std::string memparse = NFile::readFile( fileName );
+	  parseString( memparse );
+  } else {
+	  std::cout << "ngrs_runtime_xml_err:  file is not readable: \n"
+                 << fileName << "\n";
+  }
   #endif
 }
 

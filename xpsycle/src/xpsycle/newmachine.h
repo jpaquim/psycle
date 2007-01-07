@@ -20,19 +20,19 @@
 #ifndef NEWMACHINE_H
 #define NEWMACHINE_H
 
-#include <ngrs/nwindow.h>
+#include "pluginfinder.h"
+#include <ngrs/ndialog.h>
 #include <ngrs/ntabbook.h>
 #include <ngrs/nfilelistbox.h>
 #include <ngrs/ngroupbox.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nbevelborder.h>
-#include "machine.h"
-#include "pluginfinder.h"
 
 namespace psycle {
 namespace host {
 
 class Song;
+
 
 class InfoLine : public NPanel {
 public:
@@ -68,70 +68,59 @@ private:
 };
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
-class NewMachine : public NWindow
+
+class NewMachine : public NDialog
 {
 public:
-    NewMachine( );
+	NewMachine( const PluginFinder & finder );
 
     ~NewMachine();
 
-    virtual int onClose();
+	const PluginFinderKey & pluginKey() const;
 
-    bool execute();
-
-    std::string getDllName();
-    bool outBus();
-
-		Machine::id_type selectedType() const;
-		int pluginIndex() const;
+	virtual int onClose();
 
 private:
 
-  std::string dllName_;
+	std::string dllName_;
 
-  bool do_Execute;
+	PluginFinderKey selectedKey_;
+	const PluginFinder &  finder_;
 
-	PluginFinder finder;
+	InfoLine* name;
+	InfoLine* libName;
+	InfoLine* description;
+	InfoLine* apiVersion;
+	NGroupBox* macProperty;
 
-	Machine::id_type id_;
-  int pluginIndex_;
+	NTabBook* tabBook_;
 
-  InfoLine* name;
-  InfoLine* libName;
-  InfoLine* description;
-  InfoLine* apiVersion;
-  NGroupBox* macProperty;
-
-  NTabBook* tabBook_;
-
-  NListBox* generatorfBox_;
-  NListBox* effectfBox_;
+	NListBox* generatorfBox_;
+	NListBox* effectfBox_;
 	NListBox* ladspaBox_;
 
-  void onGeneratorItemSelected(NItemEvent* ev);
+	void onGeneratorItemSelected(NItemEvent* ev);
 	void onEffectItemSelected(NItemEvent* ev);
-  void onInternalItemSelected(NItemEvent* ev);
+	void onInternalItemSelected(NItemEvent* ev);
 	void onLADSPAItemSelected(NItemEvent* ev);	
 
-  void onOkBtn(NButtonEvent* sender);
-  void onItemDblClick(NButtonEvent* sender);
-  void createNewMachine();
-  void onCancelBtn(NButtonEvent* sender);
+	void onOkBtn(NButtonEvent* sender);
+	void onItemDblClick(NButtonEvent* sender);	
+	void onCancelBtn(NButtonEvent* sender);
 
 	std::map< NCustomItem*, PluginFinderKey > pluginIdentify_;
 
 	void setPlugin( NCustomItem* item );
-
-  void onGeneratorTabChange( NButtonEvent* ev );
-  void onEffectTabChange( NButtonEvent* ev );
-  void onLADSPATabChange( NButtonEvent* ev );
-  void onInternalTabChange( NButtonEvent* ev );
+	void onGeneratorTabChange( NButtonEvent* ev );
+	void onEffectTabChange( NButtonEvent* ev );
+	void onLADSPATabChange( NButtonEvent* ev );
+	void onInternalTabChange( NButtonEvent* ev );
 
 };
 
-}
-}
+} // end of host namespace
+} // end of psycle namespace
 
 #endif

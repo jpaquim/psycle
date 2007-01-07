@@ -18,9 +18,8 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "newmachine.h"
-//#include "plugin.h"
-//#include "ladspamachine.h"
 #include "configuration.h"
+#include "global.h"
 #include "newmachine.h"
 #include <ngrs/nborderlayout.h>
 #include <ngrs/nalignlayout.h>
@@ -33,20 +32,14 @@
 namespace psycle {
 	namespace host {
 
-NewMachine::NewMachine( )
-  : NWindow()
+NewMachine::NewMachine( const PluginFinder & finder )
+: NDialog(), finder_( finder )
 {
-	id_ = MACH_UNDEFINED;
-	pluginIndex_ = 0;
-
-	setTitle("Add New Machine");
-
+  setTitle("Add New Machine");
+  
   setPosition(100,100,700,500);
 
   pane()->setLayout( NAlignLayout(10,5) );
-
-  setModal(true);
-  do_Execute = false;
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
@@ -85,9 +78,6 @@ NewMachine::NewMachine( )
     properties->resize();
   pane()->add(properties, nAlRight);
 
-
-  finder.scanAll();
-
   tabBook_ = new NTabBook();
     tabBook_->setAlign(nAlClient);
     NPanel* generatorPage = new NPanel();
@@ -95,18 +85,18 @@ NewMachine::NewMachine( )
           generatorfBox_ = new NListBox();
             generatorfBox_->setAlign(nAlClient);
             generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
-						std::map< PluginFinderKey, PluginInfo >::const_iterator it = finder.begin();
-						for ( ; it != finder.end(); it++ ) {
-							PluginFinderKey key = it->first;
-							PluginInfo info = it->second;
-							if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_GENERATOR ) {
-								NItem* item = new NItem( info.name() );
-                                                                item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
-								item->setIntValue( key.index() );
-								generatorfBox_->add( item );
-								pluginIdentify_[item] = key;
-							}
-						}
+				std::map< PluginFinderKey, PluginInfo >::const_iterator it = finder.begin();
+				for ( ; it != finder.end(); it++ ) {
+					const PluginFinderKey & key = it->first;
+					const PluginInfo & info = it->second;
+					if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_GENERATOR ) {
+						NItem* item = new NItem( info.name() );
+							item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
+							item->setIntValue( key.index() );
+						generatorfBox_->add( item );
+						pluginIdentify_[item] = key;
+				}
+		}
         generatorPage->add(generatorfBox_);
 
     NPanel* effectPage = new NPanel();
@@ -117,8 +107,8 @@ NewMachine::NewMachine( )
 
       it = finder.begin();
       for ( ; it != finder.end(); it++ ) {
-        PluginFinderKey key = it->first;
-        PluginInfo info = it->second;
+        const PluginFinderKey & key = it->first;
+        const PluginInfo & info = it->second;
         if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_FX ) {
          NItem* item = new NItem( info.name() );
          item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
@@ -146,8 +136,8 @@ NewMachine::NewMachine( )
 
 				it = finder.begin();
 				for ( ; it != finder.end(); it++ ) {
-					PluginFinderKey key = it->first;
-					PluginInfo info = it->second;
+					const PluginFinderKey & key = it->first;
+					const PluginInfo & info = it->second;
 					if ( info.type() == MACH_LADSPA ) {
 						NItem* item = new NItem( info.name() );
                                                 item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
@@ -168,7 +158,7 @@ NewMachine::NewMachine( )
   //tab = tabBook_->tab( internalPage );
   //  tab->click.connect(this,&NewMachine::onInternalTabChange);
   tab = tabBook_->tab( ladspaPage );
-    tab->click.connect(this,&NewMachine::onLADSPATabChange);
+	tab->click.connect(this,&NewMachine::onLADSPATabChange);
 
 
   tabBook_->setActivePage(0); // generator page.
@@ -181,7 +171,6 @@ NewMachine::~NewMachine()
 
 int NewMachine::onClose( )
 {
-  do_Execute = false;
   setVisible(false);
   setExitLoop(nDestroyWindow);
   return nDestroyWindow;
@@ -189,51 +178,24 @@ int NewMachine::onClose( )
 
 void NewMachine::onOkBtn( NButtonEvent * sender )
 {
-  createNewMachine();
+  doClose( true );
 }
 
 void NewMachine::onItemDblClick( NButtonEvent * sender )
 {
-  createNewMachine();
-}
-
-void NewMachine::createNewMachine()
-{
-  do_Execute = true;
-  setVisible(false);
-  setExitLoop(nDestroyWindow);
+  doClose( true );
 }
 
 void NewMachine::onCancelBtn( NButtonEvent * sender )
 {
-  do_Execute = false;
-  setVisible(false);
-  setExitLoop(nDestroyWindow);
-}
-
-bool NewMachine::execute( )
-{
-  setVisible(true);
-  return do_Execute;
-}
-
-std::string NewMachine::getDllName( )
-{
-  return dllName_;
-}
-
-bool NewMachine::outBus( )
-{
-  return true;   // true = Generator, false = Effect
+  doClose( false );
 }
 
 void NewMachine::onInternalItemSelected( NItemEvent * ev )
 {
   if (ev->text() == "Sampler") {
-		id_ = MACH_SAMPLER;
-	} else {
-
-	}
+    selectedKey_ = PluginFinderKey::internalSampler();
+  }
 }
 
 void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
@@ -254,32 +216,23 @@ void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
 
 void NewMachine::setPlugin( NCustomItem* item ) {
     std::map< NCustomItem*, PluginFinderKey >::iterator it;		
-		it = pluginIdentify_.find( item );
+	it = pluginIdentify_.find( item );
 
     if ( it != pluginIdentify_.end() ) {
+		const PluginInfo & info = finder_.info( it->second );
+		const PluginFinderKey & key = it->second;
 
-			PluginInfo info = finder.info( it->second );
-			const PluginFinderKey & key = it->second;
-
-			name->setText( info.name() );
+		name->setText( info.name() );
     	dllName_ = info.libName();
-      libName->setText( dllName_ );
-      description->setText( "Psycle Instrument by "+ info.author() );
-      apiVersion->setText( info.version() ); 
-			id_ = info.type();
-      pluginIndex_ = key.index();
-		  
+		libName->setText( dllName_ );
+		description->setText( "Psycle Instrument by "+ info.author() );
+		apiVersion->setText( info.version() ); 
+
+		selectedKey_ = key;
     }
-		pane()->resize();
+
+	pane()->resize();
     pane()->repaint();
-}
-
-Machine::id_type NewMachine::selectedType() const {
-	return id_;
-}
-
-int NewMachine::pluginIndex() const {
-  return pluginIndex_;
 }
 
 void NewMachine::onEffectTabChange( NButtonEvent * ev )
@@ -302,7 +255,10 @@ void NewMachine::onLADSPATabChange( NButtonEvent * ev )
 
 void NewMachine::onInternalTabChange( NButtonEvent * ev )
 {
-  
+}
+
+const PluginFinderKey & NewMachine::pluginKey() const {
+	return selectedKey_;
 }
 
 }
