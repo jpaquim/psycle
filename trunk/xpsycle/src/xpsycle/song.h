@@ -16,6 +16,10 @@ namespace psycle
 {
 	namespace host
 	{
+
+		class PluginFinder;
+		class PluginFinderKey;
+
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines 
 		///and their initial parameters and coordinates, wavetables
@@ -74,7 +78,18 @@ namespace psycle
 			///\name machines
 			///\{
 				public:
-					/// creates a new machine in this song.
+
+					// creates a new machine in this song
+					// requirements : PluginFinder 
+					//				  PluginFinderKey
+					// return values:
+					//		succes  : machine ptr
+					//		failure : 0
+					// future  : iterator of machine (stl)container or at failure end()
+
+					Machine* createMachine( const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
+
+					/// creates a new machine in this song. .. deprecated
 					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy", int pluginIndex = 0) throw(std::exception)
 					{
 						Machine::id_type const array_index(GetFreeMachine());

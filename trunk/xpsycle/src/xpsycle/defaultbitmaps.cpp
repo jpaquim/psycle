@@ -6475,7 +6475,8 @@ const char * wood_xpm[] = {
 "5u	c #8B3419",
 "6u	c #90361C",
 "7u	c #7E240A",
-"  . + + @ # $ % & * = + - ; > , ' ) ! ~ { ] ^ / ( _ : < [ } | 1 2 3 4 5 6 7 8 9 0 a a b c d e f g h i j k l m n o p q r s t u v w x y y y z A B C D E F G D C C & H I J & K K L M N N O P Q R N ",
+"  . + + @ # $ % & * = + - ; > , ' )"
+"! ~ { ] ^ / ( _ : < [ } | 1 2 3 4 5 6 7 8 9 0 a a b c d e f g h i j k l m n o p q r s t u v w x y y y z A B C D E F G D C C & H I J & K K L M N N O P Q R N ",
 "S T U V S W X X Y Z `  ...+.@.#.$.%.&.*.=.-.;.>.,.,.'.).!.~.{.].^./.5 (._.:.<.[.}.|.|.1.2.3.4.5.6.7.8.9.0.a.b.c.d.e.f.g.h.i.j.k.l.m.n.m.o.o.p.q.r.s.t.t.u.v.r.r.l w.x.y.z.z.A.B.C.D.E.F.G.D.H.I.",
 "J.J.J.J.K.J.L.M.N.O.O.P.Q.R.R.S.T.U.V.W.X.Y.Z.`. +.+++@+#+$+%+&+*+=+e -+;+>+,+'+)+!+~+{+]+^+/+(+_+:+<+[+}+|+1+2+3+4+5+6+7+8+9+0+a+b+c+b+a+d+e+f+f+g+h+i+j+f+f+j+k+l+m+n+k+k+n+o+p+q+5.r+s+t+t+t+",
 "u+u+v+v+w+x+y+z+A+B+B+C+D+E+E+F+^ G+H+I+J+K+L+M+N+!+O+P+Q+O+b R+S+T+U+s+V+W+X+Y+Z+c `+ @.@+@@@@@#@$@%@&@*@=@-@;@>@,@'@)@!@~@{@]@^@/@g.g.(@!.!.!._@:@<@[@}@:@o+o+|@|@|@1@2@3@4@5@6@7@8@7@6@7@9@0@",

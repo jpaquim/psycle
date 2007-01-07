@@ -68,6 +68,7 @@ namespace psycle {
 
 			const std::string & iconPath() const;
 			const std::string & pluginPath() const;
+			const std::string & ladspaPath() const;
 			const std::string & prsPath() const;
 			const std::string & hlpPath() const;
 
@@ -89,6 +90,7 @@ namespace psycle {
 			std::string pluginPath_;
 			std::string prsPath_;
 			std::string hlpPath_;
+			std::string ladspaPath_;
 
 			void setSkinDefaults();
 			void setXmlDefaults();

@@ -88,20 +88,10 @@ void add_font_path( char * path ) {
 
 
 MainWindow::MainWindow()
-  : NWindow()
+	: NWindow(), pluginFinder_( *Global::pConfig() )
 {
-
-//	add_font_path("/home/natti/xpsycle/fonts");
-
-  /*int npaths_return;
-  char** path = XGetFontPath( NApp::system().dpy(), &npaths_return);
-
-	for ( int i = 0; i < npaths_return; i++ ) {
-		std::cout << path[i] << std::endl;
-	}*/
-
   //SkinReader::Instance()->loadSkin( "/home/natti/psycle_skin.zip" );
-	SkinReader::Instance()->setDefaults();
+  SkinReader::Instance()->setDefaults();
 
   setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
 
@@ -117,7 +107,7 @@ MainWindow::MainWindow()
   pane()->add(book,nAlClient);
 
   
-  newMachineDlg_ = new NewMachine( );
+  newMachineDlg_ = new NewMachine( pluginFinder_ );
   add(newMachineDlg_);
 
   audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
@@ -1124,30 +1114,20 @@ void MainWindow::onNewMachine( NButtonEvent * ev )
 
   if (ev->button()==1) {
    if (newMachineDlg_->execute()) {
-      if (newMachineDlg_->outBus()) {
-          // Generator selected
-          int x = ev->x(); int y = ev->y(); // x&y tell where to place the new machine--get from mouse.
-          int fb = selectedChildView_->song()->GetFreeBus();
-          if (newMachineDlg_->selectedType() == MACH_SAMPLER) {
-            selectedChildView_->song()->CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);
-            selectedChildView_->machineView()->addMachine( *selectedChildView_->song()->_pMachine[fb]);
-            selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
-            selectedChildView_->machineView()->repaint();
-          } else 
-		 if (newMachineDlg_->selectedType() == MACH_PLUGIN)
-		 {
-            selectedChildView_->song()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg_->getDllName(),fb);
-            selectedChildView_->machineView()->addMachine( *selectedChildView_->song()->_pMachine[fb]);
-            selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
-            selectedChildView_->machineView()->repaint();
-          } else 
-		 if (newMachineDlg_->selectedType() == MACH_LADSPA){
-            selectedChildView_->song()->CreateMachine(MACH_LADSPA, x, y, newMachineDlg_->getDllName(),fb, newMachineDlg_->pluginIndex());
-            selectedChildView_->machineView()->addMachine( *selectedChildView_->song()->_pMachine[fb]);
-            selectedChildView_->newMachineAdded.emit( selectedChildView_->song()->_pMachine[fb]);
-            selectedChildView_->machineView()->repaint();
-          }
-      }
+	  
+	  PluginFinderKey key = newMachineDlg_->pluginKey();
+	  
+	  // search for an unused machine slot
+	  int fb = selectedChildView_->song()->GetFreeBus();
+	 
+	  // create machine, tell where to place the new machine--get from mouse.	  
+	  Machine* mac = selectedChildView_->song()->createMachine( pluginFinder_, key, ev->x(), ev->y() );
+	  if ( mac ) {
+        selectedChildView_->machineView()->addMachine( *mac );
+        selectedChildView_->newMachineAdded.emit( mac );
+        selectedChildView_->machineView()->repaint();
+	  }
+
     }
   }
 }

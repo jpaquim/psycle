@@ -10,6 +10,7 @@
 #include "datacompression.h"
 #include "riff.h"
 #include "ladspamachine.h"
+#include "pluginfinder.h"
 #include <cassert>
 #include <sstream>
 
@@ -96,6 +97,32 @@ namespace psycle
 			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
 		}
 
+
+		Machine * Song::createMachine( const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
+			int fb = GetFreeBus();
+			if ( key == PluginFinderKey::internalSampler() ) {
+				// create internal Sampler
+				CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);  
+			} else 
+			if ( finder.info( key ).type() == MACH_PLUGIN ) 
+			{
+				// create native Plugin
+				CreateMachine( MACH_PLUGIN, x, y, key.dllPath(), fb );
+			} else
+			if ( finder.info( key ).type() == MACH_LADSPA ){
+				// create ladspa plugin
+				LADSPAMachine* plugin = new LADSPAMachine( fb, this );
+				if  ( plugin->loadDll( key.dllPath(), key.index() ) ) {
+				  plugin->SetPosX( x );
+				  plugin->SetPosY( y );
+				  if( _pMachine[fb] )  DestroyMachine( fb );
+				  _pMachine[ fb ] = plugin;
+				} else {				 
+				  delete plugin;
+				}
+			}
+			return _pMachine[fb];
+		}
 
 		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index, int pluginIndex)
 		{

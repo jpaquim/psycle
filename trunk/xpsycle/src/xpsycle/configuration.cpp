@@ -22,16 +22,16 @@
 #include "song.h"
 #include "global.h"
 #ifdef __unix__
-  #include "alsaout.h"
-  #include "jackout.h"
-  #include "gstreamerout.h"
-  #include "esoundout.h"
+#include "alsaout.h"
+#include "jackout.h"
+#include "gstreamerout.h"
+#include "esoundout.h"
 //#include "microsoft_direct_sound_out.h"
 //#include "netaudioout.h"
-  #include "wavefileout.h" ///\ todo pthread wrapper
+#include "wavefileout.h" ///\ todo pthread wrapper
 #else
-  #include "mswaveout.h"
-  //#include "msdirectsound.h"
+#include "mswaveout.h"
+//#include "msdirectsound.h"
 #endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
@@ -51,17 +51,17 @@ namespace psycle {
 
 		Configuration::Configuration()
 		{
-#if !defined XPSYCLE__CONFIGURATION
+			#if !defined XPSYCLE__CONFIGURATION
 			std::cout << "xpsycle: warning: built without configuration" << std::endl;
-#endif
+			#endif
 			setXmlDefaults();
 			setSkinDefaults();
 			loadConfig();
-#ifdef __unix__
+			#ifdef __unix__
 			bitmaps_ = new DefaultBitmaps(this);
-#else
+			#else
 			bitmaps_ = new DefaultBitmaps();
-#endif  
+			#endif  
 			_RecordTweaks = false;
 			_RecordUnarmed = true;
 		}
@@ -88,6 +88,10 @@ namespace psycle {
 			return hlpPath_;
 		}
 
+		const std::string & Configuration::ladspaPath() const {
+			return ladspaPath_;
+		}
+
 		bool Configuration::enableSound() const {
 			return enableSound_;
 		}
@@ -100,8 +104,8 @@ namespace psycle {
 			xml_mem_ += " <path id='plugindir'";
 			xml_mem_ += " src='c:\\Programme\\Psycle\\PsyclePlugins' />";
 
-//			xml_mem_ += " <audio enable='1' />";
-//			xml_mem_ += " <driver name='mswaveout' />"; 
+			//			xml_mem_ += " <audio enable='1' />";
+			//			xml_mem_ += " <driver name='mswaveout' />"; 
 
 			/*  xml_mem_ += " <!-- help configuration -->";
 			//  xml_mem_ += " <path id='hlpdir' src='~/xpsycle/doc/' />";
@@ -112,7 +116,7 @@ namespace psycle {
 			xml_mem_ += " <!-- gui configuration -->";
 
 			//  xml_mem_ += " <path id='icondir' src='~/xpsycle/icons/' />";
-			
+
 			//  xml_mem_ += " <path id='prsdir' src='~/.xpsycle/prs/'></path>";
 
 			xml_mem_ += " <!-- keyHandler configuration -->";
@@ -220,6 +224,16 @@ namespace psycle {
 
 			xml_mem_ += " </xpsycle> ";
 
+			const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
+			if ( !pcLADSPAPath) {
+				#ifdef __unix__
+				pcLADSPAPath = "/usr/lib/ladspa/";
+				#else
+				pcLADSPAPath = "I:\\Archivos de programa\\Multimedia\\Audacity\\Plug-Ins";
+				#endif
+			}
+			ladspaPath_ = pcLADSPAPath;
+
 			NXmlParser parser;
 			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
 			parser.parseString ( xml_mem_ );
@@ -266,8 +280,8 @@ namespace psycle {
 				driver = new MsWaveOut();
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
-				
-/*				driver = new MsDirectSound();
+
+				/*				driver = new MsDirectSound();
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;*/
 #endif
@@ -305,17 +319,18 @@ namespace psycle {
 #endif
 
 
-			prsPath_ =  NFile::replaceTilde("~/xpsycle/prs/");
+			prsPath_ =  NFile::replaceTilde("~" + NFile::slash() + "xpsycle" + NFile::slash() +"prs" + NFile::slash() );
 #endif
 
-#if !defined NDEBUG
+			#if !defined NDEBUG
 			std::cout
 				<< "xpsycle: configuration: initial defaults:\n"
 				<< "xpsycle: configuration: pixmap dir: " << iconPath_ << "\n"
 				<< "xpsycle: configuration: plugin dir: " << pluginPath_ << "\n"
 				<< "xpsycle: configuration: preset dir: " << prsPath_ << "\n"
-				<< "xpsycle: configuration: doc    dir: " << hlpPath_ << "\n";
-#endif
+				<< "xpsycle: configuration: doc    dir: " << hlpPath_ << "\n"
+				<< "xpsycle: configuration: ladspa dir: " << ladspaPath_ << "\n";
+			#endif
 
 		}
 
@@ -355,10 +370,10 @@ namespace psycle {
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 				}
 			} else {
-				path=NFile::replaceTilde("~/.xpsycle.xml");
+				path=NFile::replaceTilde("~" + NFile::slash() + ".xpsycle.xml");
 				if (path.length()!=0) {
 					try {
-						loadConfig(NFile::replaceTilde("~/.xpsycle.xml"));
+						loadConfig( NFile::replaceTilde( "~" + NFile::slash() + ".xpsycle.xml") );
 					}
 					catch(std::exception const & e) {
 						std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
@@ -425,7 +440,8 @@ namespace psycle {
 				<< "xpsycle: configuration: pixmap dir: " << iconPath_ << "\n"
 				<< "xpsycle: configuration: plugin dir: " << pluginPath_ << "\n"
 				<< "xpsycle: configuration: preset dir: " << prsPath_ << "\n"
-				<< "xpsycle: configuration: doc    dir: " << hlpPath_ << "\n";
+				<< "xpsycle: configuration: doc    dir: " << hlpPath_ << "\n"
+				<< "xpsycle: configuration: ladspa dir: " << ladspaPath_ << "\n";
 #endif
 
 			doEnableSound = true;
@@ -440,7 +456,8 @@ namespace psycle {
 				if ( id == "icondir" )   iconPath_   = src;  else  
 					if ( id == "plugindir" ) pluginPath_ = src;  else
 						if ( id == "prsdir" )    prsPath_    = src;  else
-							if ( id == "hlpdir" )    hlpPath_    = src;
+							if ( id == "hlpdir" )    hlpPath_    = src;  else
+								if ( id == "ladspadir" ) ladspaPath_ = src;
 			} else
 				if (tagName == "driver" && doEnableSound) {		
 					setDriverByName( parser.getAttribValue("name"));
