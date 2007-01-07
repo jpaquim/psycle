@@ -154,6 +154,8 @@ namespace psycle {
 		private:
 
 			std::map<NButton*,Preset> presetMap;
+			std::map<int, Knob*>   knobMap;
+			std::map<int, Header*> headerMap;
 
 			Machine* pMachine_;
 			NPanel* knobPanel;
