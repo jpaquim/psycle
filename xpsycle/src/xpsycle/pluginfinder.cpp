@@ -201,7 +201,7 @@ namespace psycle
 				#ifdef __unix__
 				pcLADSPAPath = "/usr/lib/ladspa/";
 				#else
-				pcLADSPAPath = "C:\\Programme\\Audacity\\Plug-Ins\\";
+				pcLADSPAPath = "I:\\Archivos de programa\\Multimedia\\Audacity\\Plug-Ins";
 				#endif
 			}
 			std::string ladspa_path(pcLADSPAPath);

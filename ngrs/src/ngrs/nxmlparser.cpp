@@ -313,7 +313,7 @@ int NXmlParser::parseString( const std::string & text )
   
   NXmlPos xml_pos;
   xml_pos.err = 0;
-  unsigned int pos = 0;
+  std::string::size_type pos = 0;
 
   while( !xml_pos.err ) {
     xml_pos = getNextTag( pos, text );
