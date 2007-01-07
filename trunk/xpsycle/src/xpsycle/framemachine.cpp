@@ -135,6 +135,7 @@ namespace psycle {
 
 		inline int format(int c, int maxcols, int maxrows) {
 			return (c / maxcols) + ( (c%maxcols)*maxrows);
+
 		}
 
 		void FrameMachine::initParameterGUI( )
@@ -142,6 +143,18 @@ namespace psycle {
 			int numParameters = pMachine_->GetNumParams();
 			int cols = pMachine_->GetNumCols();
 			int rows = numParameters/cols;
+			// Various checks for "non-standard" windows ( lots of parameters, or "odd" parameter numbers)
+			if (rows>24)	// check for "too big" windows
+			{
+				rows=24;
+				cols=numParameters/24;
+				if (cols*24 != numParameters)
+				{
+					cols++;
+				}
+			}
+			if ( rows*cols < numParameters) rows++; // check if all the parameters are visible.
+			// 
 
 			knobPanel = new NPanel();
 			NTableLayout tableLayout;
@@ -157,38 +170,39 @@ namespace psycle {
 			int x = 0;
 			int y = 0;
 
-			for (int c=0; c<numParameters; c++) {
-				int min_v,max_v,val_v;
-				int newC = format(c,cols,rows);
-				pMachine_->GetParamRange(newC,min_v,max_v);
-				bool bDrawKnob = (min_v==max_v)?false:true;
-				if (!bDrawKnob) {
-					Header* cell = new Header();
-					char parName[64];
-					pMachine_->GetParamName(newC,parName);
-					cell->setText(parName);
-					knobPanel->add( cell, NAlignConstraint( nAlLeft, x, y ), true );
+			for (int knobIdx =0; knobIdx < cols*rows; knobIdx++) {
+				int min_v,max_v;
+
+				if ( knobIdx < numParameters ) {
+					pMachine_->GetParamRange( knobIdx,min_v,max_v);
+					bool bDrawKnob = (min_v==max_v)?false:true;
+			
+					if (!bDrawKnob) {
+						Header* cell = new Header();
+							headerMap[ knobIdx ] = cell;
+							char parName[64];
+							pMachine_->GetParamName(knobIdx,parName);
+							cell->setText(parName);
+						knobPanel->add( cell, NAlignConstraint( nAlLeft, x, y ), true );
+					} else if ( knobIdx < numParameters ) {
+						Knob* knob = new Knob( knobIdx );
+							char parName[64];
+							pMachine_->GetParamName( knobIdx, parName );
+							char buffer[128];
+							pMachine_->GetParamValue( knobIdx, buffer );
+							knob->setText(parName);
+							knobMap[ knobIdx ] = knob;
+							knob->valueChanged.connect(this,&FrameMachine::onKnobValueChange);												
+						knobPanel->add( knob, NAlignConstraint( nAlLeft, x, y ), true );
+					}					
 				} else {
-					Knob* cell = new Knob(newC);
-					cell->valueChanged.connect(this,&FrameMachine::onKnobValueChange);
-					char parName[64];
-					pMachine_->GetParamName(newC,parName);
-					char buffer[128];
-					pMachine_->GetParamValue(newC,buffer);
-					cell->setText(parName);
-					int val_v = pMachine_->GetParamValue(newC);
-					cell->setValue(val_v);
-					int min_v; int max_v;
-					pMachine_->GetParamRange(newC,min_v,max_v);
-					cell->setRange(min_v,max_v);
-					std::string valuestring(buffer);
-					cell->setValueAsText(valuestring);
-					knobPanel->add( cell, NAlignConstraint( nAlLeft, x, y ), true );
+					// knob hole
+					knobPanel->add( new Cell(), NAlignConstraint( nAlLeft, x, y ), true );
 				}
-				x++;
-				if ( !(x % cols) ) {
-					x = 0;
-					y++;
+				y++;
+				if ( !(y % rows) ) {
+					y = 0;
+					x++;
 				}
 			}
 			updateValues();
@@ -289,6 +303,8 @@ namespace psycle {
 
 		void Knob::setValueAsText( const std::string & text )
 		{
+			std::string bla = text;
+			tvalue = bla;
 			tvalue = text;
 			vLabel->setText(tvalue);
 		}
@@ -384,32 +400,20 @@ namespace psycle {
 		}
 
 		void FrameMachine::updateValues( )
-		{
-			int numParameters = pMachine_->GetNumParams();
-			int cols = pMachine_->GetNumCols();
-			int rows = numParameters/cols;
-
-
-			for (int c=0; c<numParameters; c++) {
-				int min_v,max_v,val_v;
-				int newC = format(c,cols,rows);
-				pMachine_->GetParamRange(newC,min_v,max_v);
-
-
-				bool bDrawKnob = (min_v==max_v)?false:true;
-				if (!bDrawKnob) {
-				} else {
-					Knob* cell = (Knob*) knobPanel->visualComponents().at(c);
-					char buffer[128];
-					pMachine_->GetParamValue(newC,buffer);
-					int val_v = pMachine_->GetParamValue(newC);
-					cell->setValue(val_v);
-					int min_v; int max_v;
-					pMachine_->GetParamRange(newC,min_v,max_v);
-					cell->setRange(min_v,max_v);
-					std::string valuestring(buffer);
-					cell->setValueAsText(valuestring);
-				}
+		{			
+			std::map<int, Knob*>::iterator it = knobMap.begin();
+			for ( ; it != knobMap.end(); it++ ) {	
+				int knobIdx = it->first;
+				int min_v,max_v;
+				pMachine_->GetParamRange( knobIdx, min_v, max_v);
+				Knob* cell = it->second;
+				char buffer[128];
+				pMachine_->GetParamValue( knobIdx, buffer );
+				int val_v = pMachine_->GetParamValue( knobIdx );
+				cell->setValue(val_v);
+				cell->setRange(min_v,max_v);
+				std::string valuestring(buffer);
+				cell->setValueAsText(valuestring);				
 			}
 
 			knobPanel->repaint();
