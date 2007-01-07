@@ -78,12 +78,13 @@ NCustomItem * NTreeNode::headerItem( )
 }
 
 void NTreeNode::paint( NGraphics* g ) {
-    
+  /*
   NVisualComponent* last = dynamic_cast<NVisualComponent*>( parent() )->visualComponents().back();
   if ( this != last )
     setStyle( nFlipBoxLine );
   else
 	setStyle( 0 );
+  */
 
   NFlipBox::paint( g );
 }

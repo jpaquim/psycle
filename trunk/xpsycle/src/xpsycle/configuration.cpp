@@ -97,20 +97,22 @@ namespace psycle {
 
 			xml_mem_ =  " <!-- xpsycle configuration file --> ";
 			xml_mem_ += " <xpsycle> ";
+			xml_mem_ += " <path id='plugindir'";
+			xml_mem_ += " src='c:\\Programme\\Psycle\\PsyclePlugins' />";
+
+//			xml_mem_ += " <audio enable='1' />";
+//			xml_mem_ += " <driver name='mswaveout' />"; 
 
 			/*  xml_mem_ += " <!-- help configuration -->";
 			//  xml_mem_ += " <path id='hlpdir' src='~/xpsycle/doc/' />";
 
 			xml_mem_ += " <!-- audio configuration -->";
 
-			xml_mem_ += " <audio enable='0' />";
-			//  xml_mem_ += " <driver name='alsa' />";
 
 			xml_mem_ += " <!-- gui configuration -->";
 
 			//  xml_mem_ += " <path id='icondir' src='~/xpsycle/icons/' />";
-			//  xml_mem_ += " <path id='plugindir'";
-			//  xml_mem_ += " src='/tmp/bohan/xpsycle.plugins-1.9.8/++packageneric/install/lib/' />";
+			
 			//  xml_mem_ += " <path id='prsdir' src='~/.xpsycle/prs/'></path>";
 
 			xml_mem_ += " <!-- keyHandler configuration -->";
