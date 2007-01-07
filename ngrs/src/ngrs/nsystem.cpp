@@ -612,7 +612,12 @@ void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int
   }
   XSync(dpy(),false);
   #else
-  MoveWindow( win, left, top , width, height, true );
+
+  RECT rc;
+  rc.top = rc.bottom = rc.left = rc.right = 0;
+  AdjustWindowRectEx( &rc, GetWindowLongW( win, GWL_STYLE ) & ~(WS_HSCROLL|WS_VSCROLL),
+                        FALSE, GetWindowLongW( win, GWL_EXSTYLE ) );
+  MoveWindow( win, left, top , width - rc.left + rc.right , height - rc.top + rc.bottom, true );
   #endif
 }
 

@@ -53,21 +53,15 @@ namespace psycle {
 
 		class Cell : public NPanel {
 		public:
-			Cell() {
-				setBorder(NFrameBorder());
-			}
+			Cell();
+
+			~Cell();
 
 			virtual void paint(NGraphics* g);
 
-			virtual ~Cell() {}
+			virtual int preferredWidth() const;
+			virtual int preferredHeight() const;
 
-			virtual int preferredWidth() const {
-				return 100;
-			}
-
-			virtual int preferredHeight() const {
-				return K_YSIZE;
-			}
 		};
 
 		class Knob: public Cell {
@@ -121,20 +115,14 @@ namespace psycle {
 		public:
 			Header();
 
-			void setText(const std::string & text) {
-				label->setText(text);
-			}
+			void setText(const std::string & text);
 
-			virtual void resize() {
-				int ch = clientHeight();
-				int lh = label->preferredHeight();
-				label->setPosition(0,(ch - lh) / 2,clientWidth(),lh);
-			}
+			virtual void resize();
 
 		private:
-
 			NLabel* label;
 		};
+
 
 		class FrameMachine : public NWindow
 		{
