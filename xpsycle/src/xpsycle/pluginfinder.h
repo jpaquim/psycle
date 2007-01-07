@@ -98,7 +98,7 @@ namespace psycle
 				PluginFinderKey( const std::string & name, const std::string & dllPath, int index = 0 );
 				~PluginFinderKey();
 
-				static PluginFinderKey PluginFinderKey::internalSampler();
+				static PluginFinderKey internalSampler();
 
 				const std::string & name() const;				
 				const std::string & dllPath() const;
