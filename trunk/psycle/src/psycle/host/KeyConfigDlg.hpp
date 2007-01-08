@@ -50,7 +50,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			BOOL bInit;
 			long m_prvIdx;
 			void UpdateHotKey();	
-			void SaveHotKey(long idx,WORD & key,WORD & mods);
+			void SaveHotKey(long idx,WORD new_key,WORD new_mods);
 			void FindKey(long idx,WORD & key,WORD & mods);
 			CmdDef FindCmd(long idx);
 			// Generated message map functions

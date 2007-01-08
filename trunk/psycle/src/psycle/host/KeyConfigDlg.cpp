@@ -160,12 +160,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		/// update key on show
 		void CKeyConfigDlg::OnSelchangeCmdlist() 
 		{	
-			
 			WORD key = 0;
 			WORD mods = 0;	
 			
 			// save key settings for key we've just moved from
-			FindKey(m_prvIdx,key,mods);
+			m_hotkey0.GetHotKey(key,mods);
 			SaveHotKey(m_prvIdx,key,mods);
 			key=0;
 			mods=0;
@@ -175,36 +174,36 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_hotkey0.SetHotKey(key,mods);
 		}
 
-		void CKeyConfigDlg::SaveHotKey(long idx,WORD&key,WORD&mods)
+		void CKeyConfigDlg::SaveHotKey(long idx,WORD new_key,WORD new_mods)
 		{
-			// what key is selected in the hotkey?
-			WORD hotkey_key = 0;
-			WORD hotkey_mods = 0;
-			m_hotkey0.GetHotKey(hotkey_key,hotkey_mods);
+			WORD old_key = 0;
+			WORD old_mods = 0;
 
-			// nothing selected? abort
-			if(!hotkey_key)
+			// do we have a new key?
+			if(!new_key)
 				return;		
 
+			// Locate the current values
+			FindKey(idx,old_key,old_mods);
 			// same as previous? do nothing
-			if(hotkey_key==key && hotkey_mods==mods)
+			if(old_key==new_key && old_mods==new_mods)
 				return;
 			UINT nMod=0;
-			if(hotkey_mods&HOTKEYF_SHIFT)
+			if(new_mods&HOTKEYF_SHIFT)
 				nMod|=MOD_S;
-			if(hotkey_mods&HOTKEYF_CONTROL)
+			if(new_mods&HOTKEYF_CONTROL)
 				nMod|=MOD_C;	
-			if(hotkey_mods&HOTKEYF_EXT)
+			if(new_mods&HOTKEYF_EXT)
 				nMod|=MOD_E;
 
 			// what command is selected?
 			CmdDef cmd = FindCmd(idx);
 
-			m_lstCmds.SetItemData(idx,nMod*256+hotkey_key);
+			m_lstCmds.SetItemData(idx,nMod*256+new_key);
 			
 			// save key definition
 			if(cmd.IsValid())
-				UIGlobal::pInputHandler->SetCmd(cmd,hotkey_key,nMod);
+				UIGlobal::pInputHandler->SetCmd(cmd,new_key,nMod);
 		}
 
 		void CKeyConfigDlg::FindKey(long idx,WORD&key,WORD&mods)
@@ -228,24 +227,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		CmdDef CKeyConfigDlg::FindCmd(long idx)
 		{	
+			CmdDef cmd;
+			// sanity check
+			if(idx<0) 
+				return cmd;				
+
 			// init
 			InputHandler* pinp = UIGlobal::pInputHandler;
 			int j = m_lstCmds.GetItemData(idx)/256;
 			int i = m_lstCmds.GetItemData(idx)%256;
+
+			if ( i != 0 || j != 0)
 			CmdDef cmd = pinp->cmdLUT[j][i];
+			else
+			{
+				// get command string
+				CString cmdDesc;
+				m_lstCmds.GetText(idx,cmdDesc);
 
-
-/*			// sanity check
-			if(idx<0) 
-				return cmd;				
-
-			// get command string
-			CString cmdDesc;
-			m_lstCmds.GetText(idx,cmdDesc);
-
-			// convert string to cmd
-			cmd = UIGlobal::pInputHandler->StringToCmd(cmdDesc);
-*/
+				// convert string to cmd
+				cmd = UIGlobal::pInputHandler->StringToCmd(cmdDesc);
+			}
 			return cmd;
 		}
 
@@ -436,6 +438,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			WORD mods = 0;
 			UIGlobal::pInputHandler->BuildCmdLUT();
 			FillCmdList();
+			m_prvIdx = 0;
 			m_lstCmds.SetCurSel(0);
 			FindKey(0,key,mods);
 			m_hotkey0.SetHotKey(key,mods);
