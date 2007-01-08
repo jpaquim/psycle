@@ -128,22 +128,6 @@ tested and categorized and sorted
 Machines
 ========
 
-**	flanger: <bohan> there's a bug in the current source code of the flanger plugin (the bug is not present in the distributed binary).
-*	flanger: <bohan> <[JAZ]> Flanger Machine could become unstable and use all the CPU avaiable when the feedback was higher than 50% and the input sound stopped.
-		<bohan> i wonder if that bug is back in the plugin... there's no denormal check.
-+	flanger: <bohan> add interpolation to the flanger plugin.
-
-**	cyanphase vibrasynth has an access violation bug
-	[ I need source to fix]
-**	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
-**	JMDrum is buggy (Crashes after changing settings sometimes)
-**                <lobyaway> ah, it bugs if i hold down a note while editing (to fill the pattern with notes)
-**	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
-**	routing in pooplog synths for vcf->od modes only works when both vcfs are active?
-**  clicking in pooplog synths when vca sustain is off
-**  pooplog delay panning knobs fuck with my brain because they work counter-intuitively
-!	James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
-+	pooplog synths don't have gain lfo phase cmd?
 +	alk/[JAZ] Add Osci/etc from wire dialog to Master Dialog.
 +	<pooplog> it would be nice to have an internal wavein machine to get live input
 		<Druttis> Yes
@@ -498,43 +482,3 @@ Documentation
 =============
 
 * decompile and remove psycle.chm from the svn and replace with sources
-
-################################################################################################################################################################################################
-################################################################################################################################################################################################
-################################################################################################################################################################################################
-Possible Features For Psycle 2
-###############################
-
-====================
-Editing Capabilities
-====================
-	* Multi pattern Sequencing
-	* Multiple Editors (Not only tracker view)
-	* Parameter Automation  ( Envelopes for Parameters )
-	* Velocity/Panning/other_weird column to pattern data
-	* Appregiator: One "template" note, notes "produced" by the appregiator in a different colour.
-	* "zip"-able columns.
-	* Global track? (for bpm, global volume...)
-	? Notes of current selected machine marked with a different colour
-	? Maybe notes/etc, of muted machines shown in grey
-	? Time signatures
-
-========
-Machines
-========
-
-	* Multiple Inputs/Outputs
-	* MIDI generator - instead of generating audio, generates MIDI out - sync could be an issue.
-	* Sequencers: Posibility to control more than one machine at the same time
-	* Compressor/limiter
-	* Flanger/Chorus
-
-=============
-Audio/Control
-=============
-
-	* audio record support (Like, from microphone)
-	* "MIDI Controlling <-> Machine <-> Machine" Interface = MIDI mapping
-	  (allow to map midi commands to change different parameters)
-
-	* Ogg/Winamp Plugin export?
