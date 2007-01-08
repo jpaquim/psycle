@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2006 johan boule <bohan@jabber.org>
-// copyright 2004-2006 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation universalis::operating_system::dynamic_link::resolver
 #include <packageneric/pre-compiled.private.hpp>
@@ -53,7 +53,8 @@ namespace universalis
 						( \
 							defined DIVERSALIS__OPERATING_SYSTEM__LINUX || \
 							defined DIVERSALIS__OPERATING_SYSTEM__APPLE || \
-							defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT \
+							defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT || \
+							defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN \
 						) \
 					)
 						//"lib" +
@@ -67,10 +68,10 @@ namespace universalis
 								//".bundle" // lib-foo.bundle
 								// actually, libtool names bundles with the usual .so extension.
 								".so" // lib-foo.so
-							#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+							#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT || defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN
 								"-" + version_string.str() + ".dll" // lib-foo-0.dll
 								// [bohan] it is only necessary to append the .dll suffix when the given name itself contains a dot,
-								// [bohan] otherwize, we do not need to explicitely tell the suffix.
+								// [bohan] otherwise, we do not need to explicitly tell the suffix.
 							#else
 								#error bogus preprocessor conditions
 							#endif

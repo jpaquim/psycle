@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
-// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
-// Copyright (C) 2005 Leonard Ritter <paniq@paniq.org>
+// copyright 2004-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 2005-2006 Leonard Ritter <paniq@paniq.org>
 
 ///\file
 ///\see http://www.opengroup.org/platform/single_unix_specification/uploads/40/6355/n1093.pdf
@@ -53,17 +53,20 @@
 			return result;
 		}
 
-		int inline vswprintf_s(wchar_t * restrict destination, size_t max_length, wchar_t const * restrict format, va_list values) throw(runtime_error)
-		{
-			///\todo there might be a bug to sumit to the w-api people about the following
-			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-				int const result(vswprintf(destination, format, values));
-			#else
-				int const result(vswprintf(destination, max_length, format, values));
-			#endif
-			if(result < 0 || static_cast<size_t>(result) > max_length) throw runtime_error("buffer overflow");
-			return result;
-		}
+		///\todo there might be a bug to submit to the w-api people about the following
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__COMPILER__GNU
+			int inline vswprintf_s(wchar_t * restrict destination, size_t max_length, wchar_t const * restrict format, va_list values) throw(runtime_error)
+			{
+				///\todo there might be a bug to submit to the w-api people about the following
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					int const result(vswprintf(destination, format, values));
+				#else
+					int const result(vswprintf(destination, max_length, format, values));
+				#endif
+				if(result < 0 || static_cast<size_t>(result) > max_length) throw runtime_error("buffer overflow");
+				return result;
+			}
+		#endif
 
 		char inline * strcpy_s(char * restrict destination, size_t max_length, char const * restrict source) throw(runtime_error)
 		{
@@ -74,6 +77,9 @@
 	}
 	using std::freopen_s;
 	using std::vsprintf_s;
-	using std::vswprintf_s;
+	///\todo there might be a bug to submit to the w-api people about the following
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__COMPILER__GNU
+		using std::vswprintf_s;
+	#endif
 	using std::strcpy_s;
 #endif

@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
-// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
 #pragma once
@@ -88,5 +88,5 @@
 		// using the /Wd4652 command line option to cl, or
 		// in the project settings under C++ / Advanced / Disable Specific Warnings.
 	#pragma warning(disable:4651) // '/DXXX' specified for pre-compiled header but not for current compilation
-		// beware with this ... it is disabled because of /D_WINDLL ... otherwize it could be relevant
+		// beware with this ... it is disabled because of /D_WINDLL ... otherwise it could be relevant
 #endif
