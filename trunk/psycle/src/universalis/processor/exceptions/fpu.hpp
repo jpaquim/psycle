@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2006 psycledelics http://psycle.pastnotecut.org : Johan Boule
+// copyright 2000-2007 psycledelics http://psycle.pastnotecut.org : johan boule
 
 ///\file
 ///\interface universalis::processor::exceptions::fpu
@@ -21,7 +21,7 @@ namespace universalis
 					public:
 						void static inline clear() throw()
 						{
-							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 								::_clearfp();
 							#else
 								///\todo
@@ -70,7 +70,7 @@ namespace universalis
 							public:
 								bool inline denormal() const throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_DENORMAL);
 									#else
 										return true; ///\todo
@@ -78,7 +78,7 @@ namespace universalis
 								}
 								void inline denormal(bool b) throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_DENORMAL, b);
 									#else
 										///\todo
@@ -86,7 +86,7 @@ namespace universalis
 								}
 								bool inline inexact() const throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_INEXACT);
 									#else
 										return true; ///\todo
@@ -94,7 +94,7 @@ namespace universalis
 								}
 								void inline inexact(bool b) throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_INEXACT, b);
 									#else
 										///\todo
@@ -102,7 +102,7 @@ namespace universalis
 								}
 								bool inline divide_by_0() const throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_ZERODIVIDE);
 									#else
 										return true; ///\todo
@@ -110,7 +110,7 @@ namespace universalis
 								}
 								void inline divide_by_0(bool b) throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_ZERODIVIDE, b);
 									#else
 										///\todo
@@ -118,7 +118,7 @@ namespace universalis
 								}
 								bool inline overflow() const throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_OVERFLOW);
 									#else
 										return true; ///\todo
@@ -126,7 +126,7 @@ namespace universalis
 								}
 								void inline overflow(bool b) throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_OVERFLOW, b);
 									#else
 										///\todo
@@ -134,7 +134,7 @@ namespace universalis
 								}
 								bool inline underflow() const throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_UNDERFLOW);
 									#else
 										return true; ///\todo
@@ -142,7 +142,7 @@ namespace universalis
 								}
 								void inline underflow(bool b) throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_UNDERFLOW, b);
 									#else
 										///\todo
@@ -150,7 +150,7 @@ namespace universalis
 								}
 								bool inline invalid() const throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_INVALID);
 									#else
 										return true; ///\todo
@@ -158,7 +158,7 @@ namespace universalis
 								}
 								void inline invalid(bool b) throw()
 								{
-									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_INVALID, b);
 									#else
 										///\todo
@@ -168,7 +168,7 @@ namespace universalis
 
 						type static inline current() throw()
 						{
-							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 								return ::_control87(0, 0);
 							#else
 								return type(); ///\todo
@@ -176,7 +176,7 @@ namespace universalis
 						}
 
 						inline mask(type const & mask)
-							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 							:
 								save
 								(
@@ -199,7 +199,7 @@ namespace universalis
 
 						inline ~mask() throw()
 						{
-							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 								::_control87(save, ~type());
 							#else
 								///\todo
