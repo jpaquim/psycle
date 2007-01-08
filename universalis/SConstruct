@@ -1,8 +1,8 @@
 #! /usr/bin/env scons
 
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2006 johan boule <bohan@jabber.org>
-# copyright 2006 psycledelics http://psycle.pastnotecut.org
+# copyright 2006-2007 johan boule <bohan@jabber.org>
+# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
 import sys, os, os.path
@@ -16,25 +16,20 @@ project = project(name = 'universalis')
 # authors/maintainers/uploaders
 
 from packageneric.generic.scons.person import person
-bohan = person('Johan Boule', 'bohan.debian.universalis@retropaganda.info')
+bohan = person('johan boule', 'bohan.debian.universalis@retropaganda.info')
 
 # source package
 
 from packageneric.generic.scons.source_package import source_package
 from packageneric.generic.scons.version import version
+
 source_package = source_package(project,
 	name = 'universalis',
 	version = version(0, 0),
-	description = 'universalis platform abstraction layer library',
-	long_description = """\
-universalis is a library which abstracts the few platform specificities
-which are not handled by the boost and glibmm libraries themselves.
-Those abstractions of platforms specificities can be categorized into:
- - tweaks for conformance with the C++ standard library
- - widespread compiler extensions to the C++ standard
- - widespread operating system features
- - widespread CPU features"""
+	description_file = 'README'
 )
+
+source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
 
 # external packages
 
@@ -46,55 +41,64 @@ diversalis = os.path.join('..', 'diversalis', 'SConstruct')
 if os.path.exists(diversalis): diversalis = project.subscript(diversalis).local_package()
 else:
 	diversalis = external_package_check(project, name = 'diversalis',
-		dependencies = [
-			pkg_config_check(project, name = 'diversalis-0 >= 0')
-		],
+		url = 'http://psycle.sourceforge.net',
 		distribution_packages = {
 			'debian and ubuntu': 'lib-diversalis-0-dev (>= 0)',
 			'gentoo': '...',
 			'fedora': '...',
 			'cygwin': '...'
 		},
-		url = 'http://psycle.sourceforge.net'
+		dependencies = [
+			pkg_config_check(project, name = 'diversalis-0 >= 0')
+		]
 	)
 
-from packageneric.pool.stdcxx import stdcxx
-stdcxx = stdcxx(project)
-
-from packageneric.pool.dlfcn import dlfcn
-dlfcn = dlfcn(project)
-
 from packageneric.pool.boost import boost
-boost = boost(project, 103300, ['thread', 'filesystem'])
-
-glibmm = external_package_check(project, name = 'glibmm',
-	dependencies = [
-		pkg_config_check(project, name = 'glibmm-2.4 >= 2.4 gmodule-2.0 >= 2.0 gthread-2.0 >= 2.0')
-	],
-	distribution_packages = {
-		'debian and ubuntu': 'libglibmm-2.4-dev (>= 2.4)',
-		'gentoo': '...',
-		'fedora': '...',
-		'cygwin': 'glib2-devel-2.6.6-2' # mm!
-	},
-	url = 'http://freedesktops.org'
-)
+boost = boost(project, 103300, ['signals', 'thread', 'filesystem'])
 
 # modules
 
 from packageneric.generic.scons.module import module
-universalis_module = module(source_package,
-	name = 'universalis-' + str(source_package.version().major()),
-	version = source_package.version(),
-	description = source_package.description(),
-	dependencies = [diversalis, glibmm, boost]
-)
 
-from packageneric.generic.scons.find import find
-universalis_module.add_sources(find(project, 'src', 'universalis', '*.cpp'))
-universalis_module.add_headers(find(project, 'src', 'universalis', '*.hpp'))
+class universalis_module(module):
+	def __init__(self):
+		module.__init__(self, source_package,
+			name = 'universalis-' + str(source_package.version().major()),
+			version = source_package.version(),
+			description = source_package.description(),
+			dependencies = [diversalis, boost]
+	)
 
-universalis_module.contexes().source().compilers().cxx().paths().add(['src'])
+	def dynamic_dependencies(self):
+		quaquaversalis = True
+
+		glibmm = external_package_check(self.project(), name = 'glibmm',
+			url = 'http://freedesktops.org',
+			distribution_packages = {
+				'debian and ubuntu': 'libglibmm-2.4-dev (>= 2.4)',
+				'gentoo': '...',
+				'fedora': '...',
+				'cygwin': 'glib2-devel-2.6.6-2' # mm!
+			},
+			dependencies = [
+				pkg_config_check(self.project(), name = 'glibmm-2.4 >= 2.4 gmodule-2.0 >= 2.0 gthread-2.0 >= 2.0')
+			]
+		)
+		if glibmm.result(): self.add_dependency(glibmm)
+		else: quaquaversalis = False
+		
+		from packageneric.pool.dlfcn import dlfcn
+		dlfcn = dlfcn(self.project())
+		if dlfcn.result(): self.add_dependency(dlfcn)
+		else: quaquaversalis = False
+		
+		if not quaquaversalis: self.contexes().build().compilers().cxx().defines().add({'UNIVERSALIS__QUAQUAVERSALIS': None})
+		
+		from packageneric.generic.scons.find import find
+		self.add_sources(find(self.project(), 'src', [os.path.join('universalis', '*.cpp')]))
+		self.add_headers(find(self.project(), 'src', [os.path.join('universalis', '*.hpp')]))
+		self.contexes().source().compilers().cxx().paths().add(['src'])
+universalis_module = universalis_module()
 
 # pkg-config packages
 
