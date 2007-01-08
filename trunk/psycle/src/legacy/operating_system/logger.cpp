@@ -41,9 +41,15 @@ namespace operating_system
 		close();
 
 		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			// nothing to do when the operating system is not microsoft's
+			// we do nothing when the operating system is not microsoft's
 		#else
 		{
+			////////////// WARNING ////////////
+			// this is a simplified version of the current code in <universalis/operating_system/terminal.cpp>
+			// According to the documentation found on the net, this simple way of doing is not enough.
+			// especially the c++ iostream are not resynchronized with the underlying io layers.
+			//////////////////////////////////
+			
 			::HANDLE output_handle(0);
 			if(!AllocConsole() || !(output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE))) {
 				std::ostringstream s;
@@ -92,10 +98,11 @@ namespace operating_system
 
 	void console::log(int level, const std::string & string)
 	{
+		//boost::mutex::scoped_lock lock(mutex_); // avoids multiple threads to intermix the output
 		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			// ansi terminal
 			int const static color [] = {0, 2, 6, 1, 5, 3, 4, 7};
-			std::cout << "\033[1;3" << color[level % sizeof color] << "m" << string << "\033[0m\n";
+			std::cout << /* no \e ? */ "\033[1;3" << color[level % sizeof color] << "m" << string << "\033[0m\n";
 		#else
 			// uncompatible ms terminal
 			if(!got_a_console_window_) return;
@@ -122,21 +129,22 @@ namespace operating_system
 				default:
 					attributes |= 0;
 			}
+			std::size_t const length(string.length());
 			::DWORD length(string.length());
 			::SetConsoleTextAttribute(output_handle, attributes);
-			::WriteConsole(output_handle, string.c_str(), length, &length, 0);
-			// <bohan> "reset" the attributes before new line because otherwize we have
+			::WriteConsole(output_handle, string.c_str(), static_cast< ::DWORD >(length), &length_written, 0);
+			// <bohan> "reset" the attributes before new line because otherwise we have
 			// <bohan> the cells of the whole next line set with attributes, up to the rightmost column.
 			// <bohan> i haven't checked, but it is possible that this only happens when the buffer scrolls due to the new line.
 			::SetConsoleTextAttribute(output_handle, base_attributes);
-			::WriteConsole(output_handle, "\n", 1, &length, 0);
+			::WriteConsole(output_handle, "\n", 1, &length_written, 0);
 			// beep on problems
 			switch(level)
 			{
 				case ::psycle::host::loggers::levels::warning:
 				case ::psycle::host::loggers::levels::exception:
 				case ::psycle::host::loggers::levels::crash:
-					::WriteConsole(output_handle, "\a", 1, &length, 0);
+					::WriteConsole(output_handle, "\a", 1, &length_written, 0);
 			}
 		#endif
 	}

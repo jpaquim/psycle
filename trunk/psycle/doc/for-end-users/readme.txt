@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.8  -----------
+				------------------------------- 1.9  -----------
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -28,7 +28,7 @@ Here some facts about Psycle:
 - 64Tracks Pattern Editor
 - Internal Stereo Sampler unit, that supports high quality
   stereo .wav files and .iff samples as well (more formats will eventually come)
-- 20+ Native Plugins (Generators & effects), with open API for third party plugins.
+- 60+ Native Plugins (Generators & effects), with opensource code, and open API for third-party plugins.
 - VST + VSTi Host (still limited but most plugins will work fine)
 - Internal .wav output
 - Configurable Keyboard Layout
@@ -37,13 +37,16 @@ Here some facts about Psycle:
 
 and much much more...
 
-If you need help starting with Psycle, please, check the "Docs" section at
-Psycledelics site (official Psycle Users Site) (See the links at the bottom of this document)
-
-
 Note:
 Psycle supports VST1.0 and VST2.0 plugins, but not completely (Some plugins will not work)
 Plans for supporting DXi are there, but it's not a primary work.
+
+If you need help starting with Psycle, you can find a tutorial on our wiki site:
+
+	http://psycle.sourceforge.net/wiki
+	
+For a reference documentation, please read the help file "psycle.chm".
+Also don't hesitate to ask for help in the Psycledelics community (See the links at the bottom of this document).
 
 --------------------------------------------------------------------------------------------
 2. OpenSource Notes:
@@ -102,7 +105,7 @@ Psycle 1: (The only active one right now)
 
 
 For up to date information, don't forget to visit the Developement forums on Psycledelics
-site.
+site. For further info, read the HACKING file.
 
 --------------------------------------------------------------------------------------------
 4. Psycledelics' Community:
