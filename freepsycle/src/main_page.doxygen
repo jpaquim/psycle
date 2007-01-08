@@ -87,20 +87,15 @@
 /**	\page tasks Tasks
 	\verbatim
 	
-		alk:
-			currently studying too hard
-
 		bohan:
 			- packageneric
 			- universalis
+			- diversalis
 			- psycle::engine
 			- psycle::host
 			- psycle::plugins
 			- psycle::front_ends::gui
 			- psycle::front_ends::text
-		
-		erodix:
-			- psycle::plugins::output::jack jack output plugin
 			
 	
 	\endverbatim
