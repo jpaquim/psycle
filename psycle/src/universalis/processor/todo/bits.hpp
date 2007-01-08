@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2006 psycledelics http://psycle.pastnotecut.org : Johan Boule
+// copyright 2000-2007 psycledelics http://psycle.pastnotecut.org : johan boule
 
 ///\file
 ///\brief explicitly sized, crossplatform (processor endianess independant) serializable types for numbers.
@@ -59,11 +59,11 @@ namespace processor
 			std::ostream & ostream_;
 		};
 
-		/// crossplatform (processor endianess independant) serializable 80-bit ieee floating point number.
+		/// crossplatform (processor endianess independant) serializable 80-bit ieee-754 floating point number.
 		typedef serializable<processor::float80> float80;
-		/// crossplatform (processor endianess independant) serializable 64-bit ieee floating point number.
+		/// crossplatform (processor endianess independant) serializable 64-bit ieee-754 floating point number.
 		typedef serializable<processor::float64> float64;
-		/// crossplatform (processor endianess independant) serializable 32-bit ieee floating point number.
+		/// crossplatform (processor endianess independant) serializable 32-bit ieee-754 floating point number.
 		typedef serializable<processor::float32> float32;
 		/// crossplatform (processor endianess independant) serializable unsigned 64-bit integer number.
 		typedef serializable<processor::uint64> uint64;

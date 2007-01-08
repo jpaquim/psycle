@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2006 johan boule <bohan@jabber.org>
-// copyright 2004-2006 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation universalis::operating_system::loggers
 #include <packageneric/pre-compiled.private.hpp>
@@ -15,9 +15,11 @@
 	#include <windows.h>
 	#include <wincon.h>
 	#include <iostream>
-	#include <cstdio> // std::freopen
-	#include <io.h> // _open_osfhandle
-	#include <fcntl.h> // _O_TEXT for _open_osfhandle
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#include <cstdio> // std::freopen
+		#include <io.h> // _open_osfhandle
+		#include <fcntl.h> // _O_TEXT for _open_osfhandle
+	#endif
 	#include <sstream>
 	#include <limits>
 	#include <cassert>
@@ -32,7 +34,9 @@ namespace universalis
 					allocated_(false)
 			#endif
 		{
-			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				// we do nothing when the operating system is not microsoft's
+			#else
 				// ok, the following code looks completly weird,
 				// but that's actually the "simplest" way one can allocate a "console" in a gui application the microsoft way.
 				try
@@ -108,6 +112,7 @@ namespace universalis
 						// standard output file stream
 						if(operating_system_output)
 						{
+							#if defined DIVERSALIS__COMPILER__MICROSOFT
 							int file_descriptor(::_open_osfhandle(/* microsoft messed the type definition of handles, we *must* hard cast! */ reinterpret_cast<intptr_t>(operating_system_output), _O_TEXT /* opens file in text (translated) mode */));
 							if(file_descriptor == -1)
 							{
@@ -132,11 +137,15 @@ namespace universalis
 									s << "could not set a buffer for the standard output file stream at the runtime layer: " << standard_library::exceptions::code_description();
 									throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 							}
+							#else
+								// todo
+							#endif
 						}
 		
 						// standard error file stream
 						if(operating_system_error)
 						{
+							#if defined DIVERSALIS__COMPILER__MICROSOFT
 							int file_descriptor(::_open_osfhandle(/* microsoft messed the type definition of handles, we *must* hard cast! */ reinterpret_cast<intptr_t>(operating_system_error), _O_TEXT /* opens file in text (translated) mode */));
 							if(file_descriptor == -1)
 							{
@@ -158,11 +167,15 @@ namespace universalis
 									s << "could not set a buffer for the standard error file stream at the runtime layer: " << standard_library::exceptions::code_description();
 									throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 							}
+							#else
+								// todo
+							#endif
 						}
 		
 						// standard input file stream
 						if(operating_system_input)
 						{
+							#if defined DIVERSALIS__COMPILER__MICROSOFT
 							int file_descriptor(::_open_osfhandle(/* microsoft messed the type definition of handles, we *must* hard cast! */ reinterpret_cast<intptr_t>(operating_system_input), _O_TEXT /* opens file in text (translated) mode */));
 							if(file_descriptor == -1)
 							{
@@ -184,6 +197,9 @@ namespace universalis
 									s << "could not set a buffer for the standard input file stream at the runtime layer: " << standard_library::exceptions::code_description();
 									throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 							}
+							#else
+								// todo
+							#endif
 						}
 
 						/////////////////////////////////////////////////////////////////////////
@@ -239,7 +255,11 @@ namespace universalis
 				}
 				catch(std::exception const & e)
 				{
+					#if defined DIVERSALIS__COMPILER__MICROSOFT
 					std::freopen("conout$", "w", stdout);
+					#else
+						// todo
+					#endif
 					std::ios::sync_with_stdio(); // makes cout, wcout, cin, wcin, wcerr, cerr, wclog and clog point to console as well
 
 					std::ostringstream types; types << compiler::typenameof(*this) << ", threw " << compiler::typenameof(e);
@@ -273,9 +293,12 @@ namespace universalis
 
 		void terminal::output(const int & logger_level, const std::string & string)
 		{
-			boost::mutex::scoped_lock lock(mutex_); // scope outside the try-catch statement so that it is freed in all cases if something goes wrong.
+			boost::mutex::scoped_lock lock(mutex_);
 			#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 				std::cout << "\e[1m" << "logger: " << logger_level << string;
+				// ansi terminal
+				int const static color [] = {0, 2, 6, 1, 5, 3, 4, 7};
+				std::cout << /* no \e ? */ "\033[1;3" << color[logger_level % sizeof color] << "m" << string << "\033[0m\n";
 			#else
 				::HANDLE output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE);
 				if(!output_handle)
@@ -295,6 +318,9 @@ namespace universalis
 				case loggers::levels::information:
 					attributes |= FOREGROUND_GREEN;
 					break;
+				case loggers::levels::warning:
+					attributes |= FOREGROUND_RED | FOREGROUND_GREEN;
+					break;
 				case loggers::levels::exception:
 					attributes |= FOREGROUND_RED;
 					break;
@@ -311,11 +337,11 @@ namespace universalis
 				#pragma push_macro("max")
 				#undef min
 				#undef max
-					assert(length <= std::numeric_limits< ::DWORD>::max());
+					assert(length <= std::numeric_limits< ::DWORD >::max());
 				#pragma pop_macro("min")
 				#pragma pop_macro("max")
 				::DWORD length_written;
-				::WriteConsole(output_handle, string.c_str(), static_cast< ::DWORD>(length), &length_written, 0);
+				::WriteConsole(output_handle, string.c_str(), static_cast< ::DWORD >(length), &length_written, 0);
 				assert(length_written == length);
 				// [bohan] "reset" the attributes before new line because otherwize we have
 				// [bohan] the cells of the whole next line set with attributes, up to the rightmost column.
@@ -323,6 +349,14 @@ namespace universalis
 				attributes = base_attributes;
 				::WriteConsole(output_handle, "\n", 1, &length_written, 0);
 				assert(length_written = 1);
+				// beep on problems
+				switch(logger_level)
+				{
+					case loggers::levels::warning:
+					case loggers::levels::exception:
+					case loggers::levels::crash:
+						::WriteConsole(output_handle, "\a", 1, &length_written, 0);
+				}
 			#endif
 		}
 	}

@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2006 johan boule <bohan@jabber.org>
-// copyright 2004-2006 psycledelics http://psycle.sourceforge.net
-// copyright 2004 Boaz Harrosh: original idea for property emulation submited to wine: http://www.winehq.org/hypermail/wine-devel/2004/03/0180.html.
+// copyright 2004-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.sourceforge.net
+// copyright 2004-2007 Boaz Harrosh: original idea for property emulation submited to wine: http://www.winehq.org/hypermail/wine-devel/2004/03/0180.html.
 
 ///\file
 #pragma once
