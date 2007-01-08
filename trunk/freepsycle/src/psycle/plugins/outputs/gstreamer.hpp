@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2006 johan boule <bohan@jabber.org>
-// copyright 2004-2006 psycle development team http://psycle.sourceforge.net
+// copyright 2004-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net
 
 ///\interface psycle::plugins::outputs::gstreamer
 #pragma once
