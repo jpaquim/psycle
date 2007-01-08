@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
-// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
 #pragma once
@@ -34,7 +34,7 @@
 		#pragma optimize("y", off) // generates frame pointers on the program stack
 		#pragma optimize("g", on) // global optimization
 			// [bohan] note: there is a bug in msvc 6 concerning global optimization ... disable it locally where necessary
-			// [bohan] it hopefully generates a warning->error, otherwize, we would have a runtime bug
+			// [bohan] it hopefully generates a warning->error, otherwise, we would have a runtime bug
 			// [bohan] warning C4702: unreachable code
 			// [bohan] error C2220: warning treated as error - no object file generated
 			// [bohan] this bug was with msvc 6. it seems to have been fixed with msvc 7.1,

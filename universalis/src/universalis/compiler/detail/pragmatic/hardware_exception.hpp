@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
-// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
 ///\brief hardware exception handling
@@ -56,7 +56,7 @@
 			// [bohan] problems appears when using synchronous exception handling model...
 			// [bohan] on msvc 6, i had to use asynchronous exception handling
 			// [bohan] this is still not fixed in msvc 7.1 (it's only fixed with global optimization).
-			// [bohan] it hopefully generates a warning->error, otherwize, we would have a runtime bug
+			// [bohan] it hopefully generates a warning->error, otherwise, we would have a runtime bug
 			// [bohan] warning C4702: unreachable code
 			// [bohan] error C2220: warning treated as error - no object file generated
 			// [bohan] as of 2003-12-11 i decided not to make the compile treat the warning as an error...
