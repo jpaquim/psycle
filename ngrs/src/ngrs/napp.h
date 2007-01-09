@@ -130,7 +130,7 @@ private:
    static std::vector<NWindow*> popups_;
 
    static std::vector<NRuntime*> removePipe;
-   static void callRemovePipe( );
+   static void callRemovePipe( const std::string & sender );
 
    NXPMFilter* xpmFilter_;
    #ifdef __unix__

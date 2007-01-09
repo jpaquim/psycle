@@ -18,10 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ncustomcombobox.h"
+#include "napp.h"
+#include "nconfig.h"
+#include "nskin.h"
+
 
 NCustomComboBox::NCustomComboBox()
  : NPanel()
 {
+	setSkin( NApp::config()->skin( "ccbx" ) );
 }
 
 

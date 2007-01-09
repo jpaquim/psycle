@@ -25,12 +25,9 @@ NPanel::NPanel()
 {  
   rectShape = new NRectShape();
   setGeometry( rectShape );
-  setTransparent(false);
   geometry()->setPosition(0,0,10,10);
-  setBackground(NColor(200,200,200));
-  setTransparent(true);
+  setTransparent( true );
 }
-
 
 NPanel::~NPanel()
 {

@@ -25,8 +25,10 @@
 NProgressBar::NProgressBar()
  : NPanel(), progress_(50) , min_(0),max_(100), step_(10), orientation_(nVertical)
 {
-  setBorder(NFrameBorder());
-    border()->setSpacing(NSize(0,0,0,0));
+  NFrameBorder fr;
+    fr.setSpacing( NSize(0,0,0,0) );
+  setBorder( fr );
+    
 
   progressGradient_ = new NGradient();
   add(progressGradient_);

@@ -53,8 +53,14 @@ public:
    const NColor & disabledTextColor() const;
 
    const NColor & transColor() const;
+   
    void setFont(const NFont & font);
    const NFont & font() const;
+
+   void setTextColor( const NColor & color );
+   const NColor & textColor() const;
+   bool overrideFontColor() const;
+
    void setSpacing(const NSize & size);
    const NSize & spacing() const;
    void setBitmap(const NBitmap & bitmap, int bitmapBgStyle);
@@ -122,6 +128,11 @@ public:
 
       // color that will be used as foreground, when a component is disabled
       NColor disabledTextColor_;
+
+	  // to overide textColor textColor
+
+	  NColor textColor_;
+	  bool overrideFontColor_;
 };
 
 #endif

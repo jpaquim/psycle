@@ -653,7 +653,8 @@ void MainWindow::initToolBar( )
  		}
 
 		// remove the temp Dialog
-		removeChild( openDialog );
+		erase( openDialog );
+		NApp::addRemovePipe( openDialog );
 	}
 
 	void MainWindow::onInstrumentCbx( NItemEvent * ev )
@@ -750,7 +751,8 @@ void MainWindow::onFileOpen( NButtonEvent * ev )
   }
 
   // remove the "Open"-FileDialog
-  removeChild( openDialog);
+  erase( openDialog );
+  NApp::addRemovePipe( openDialog );
 }
 
 void MainWindow::onFileSave( NButtonEvent * ev )
@@ -775,7 +777,8 @@ void MainWindow::onFileSaveAs( NButtonEvent * ev )
   //childView_->onFileSaveSong(0);  
   //progressBar_->setVisible(false);
   
-  removeChild( saveDialog );
+  erase( saveDialog );
+  NApp::addRemovePipe( saveDialog );
 }
 
 void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_t & b , const std::string & t)

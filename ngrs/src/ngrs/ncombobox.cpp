@@ -42,7 +42,7 @@ const char * arrow_down1_xpm[] = {
 "            "};
 
 NComboBox::NComboBox()
- : NPanel()
+ : NCustomComboBox()
 {
   init();
 }
@@ -50,7 +50,6 @@ NComboBox::NComboBox()
 
 NComboBox::~NComboBox()
 {
-  delete border();
 }
 
 void NComboBox::init( )
@@ -61,10 +60,16 @@ void NComboBox::init( )
 
   edit_    = new NEdit();
   NPanel::add(edit_);
-  downBtn_ = new NButton(downImg,12,6);
+  downBtn_ = new NButton( downImg, 12, 6 );
     downBtn_->setWidth(15);
     downBtn_->setFlat(false);
     downBtn_->click.connect(this,&NComboBox::onDownBtnClicked);
+	downBtn_->setSkin( 
+	  NApp::config()->skin( "ccbx_btn_up" ),
+      NApp::config()->skin( "ccbx_btn_down" ),
+	  NApp::config()->skin( "ccbx_btn_over" ),
+	  NApp::config()->skin( "ccbx_btn_flat" )	
+	);
   NPanel::add(downBtn_);
 
   popup = new NPopupWindow();

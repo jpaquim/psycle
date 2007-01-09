@@ -34,6 +34,7 @@
 #include <ngrs/ntablelayout.h>
 #include <ngrs/nalignconstraint.h>
 
+
 #ifdef _MSC_VER
 #undef min 
 #undef max

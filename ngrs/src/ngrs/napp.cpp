@@ -198,7 +198,8 @@ void NApp::eventLoop( )
         win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
       }
       repaintWin_.clear();
-    }
+    }	
+	callRemovePipe( "main loop " );
   }
   #endif
 }
@@ -287,7 +288,7 @@ void NApp::modalEventLoop(NWindow* modalWin )
       }
       repaintWin_.clear();
     }
-    NApp::callRemovePipe();
+    NApp::callRemovePipe( "modal loop" );
   }  
 
   //  EnableWindow( hwndOwner, TRUE );
@@ -309,8 +310,8 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
   {
 	// not my windows
 	return DefWindowProc( hwnd, msg, wParam, lParam);
-  } else {
-                               
+  } else {    
+
     NWindow* window = itr->second;
     window->setExitLoop(0);
 
@@ -496,9 +497,9 @@ LRESULT CALLBACK NApp::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     case WM_RBUTTONDBLCLK:
       win->onMouseDoublePress( LOWORD( event->lParam ), HIWORD( event->lParam ), 3 );   
     break;
-    case WM_LBUTTONUP:
+    case WM_LBUTTONUP:	  
 	  ReleaseCapture();
-      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );      
+      win->onMousePressed( LOWORD( event->lParam ), HIWORD( event->lParam ), 1 );     
     break;
     case WM_RBUTTONUP:
 	  ReleaseCapture();
@@ -747,15 +748,17 @@ NConfig* NApp::config( )
 
 void NApp::addRemovePipe( NRuntime * component )
 {
-  removePipe.push_back(component);
+  std::vector<NRuntime*>::iterator it = find( removePipe.begin(), removePipe.end(), component );
+  if ( it == removePipe.end() )
+    removePipe.push_back(component);
 }
 
-void NApp::callRemovePipe( )
+void NApp::callRemovePipe( const std::string & sender )
 {
- for (std::vector<NRuntime*>::iterator iter = removePipe.begin(); iter<removePipe.end(); iter++) {
-  lastOverWin_ = 0;  
-  NRuntime* component = *iter;
-    delete component;
+ for (std::vector<NRuntime*>::iterator iter = removePipe.begin(); iter<removePipe.end(); iter++) {   
+   lastOverWin_ = 0;  
+   NRuntime* component = *iter;
+   delete component;
  } 
  removePipe.clear();
 }

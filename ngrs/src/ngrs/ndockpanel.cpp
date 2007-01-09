@@ -75,31 +75,30 @@ NDockPanel::NDockPanel( NVisualComponent * clientComponent )
 void NDockPanel::init( )
 {
   // an alignLayout for top : dochBar and client the pane
-  setLayout(NAlignLayout());
+  setLayout( NAlignLayout() );
 
   // create header with the button to dock and undock the pane
 
   dockBar_ = new NPanel();
-    dockBar_->setLayout( NFlowLayout(nAlRight,0,0));
+    dockBar_->setLayout( NFlowLayout( nAlRight,0 , 0) );
     // create the dockBar icon bitmaps
-    dockBmp.createFromXpmData(windock_xpm);
-    undockBmp.createFromXpmData(winundock_xpm);
-    dockImg = new NImage();
-      dockImg->setSharedBitmap(&undockBmp);
-      dockImg->setPreferredSize(20,10);
-    NButton* unCoupleBtn = new NButton(dockImg);
-      unCoupleBtn->clicked.connect(this,&NDockPanel::onUndockWindow);
-    dockBar_->add(unCoupleBtn);
-    dockBar_->setBackground(NColor(210,210,210));
-    dockBar_->setTransparent(false);
-  add(dockBar_,nAlTop);
+    dockBmp.createFromXpmData( windock_xpm );
+    undockBmp.createFromXpmData( winundock_xpm );
+    dockImg = new NImage( );
+      dockImg->setSharedBitmap( &undockBmp );
+      dockImg->setPreferredSize( 20, 10 );
+    NButton* unCoupleBtn = new NButton( dockImg );
+      unCoupleBtn->clicked.connect( this, &NDockPanel::onUndockWindow );
+    dockBar_->add( unCoupleBtn );
+	dockBar_->setSkin( NApp::config()->skin("dockbar_bg") );
+  add( dockBar_, nAlTop );
 
   // create the pane
 
   area_ = new NPanel();
     // set as area btw pane default NAlignLayout
-    area_->setLayout( NAlignLayout());
-  add(area_,nAlClient);
+    area_->setLayout( NAlignLayout( ) );
+  add( area_, nAlClient );
 
   // start state = docked
   undockedWindow = 0;
@@ -171,11 +170,4 @@ void NDockPanel::dockWindow( )
   window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
   window()->checkForRemove(0);
 }
-
-
-
-
-
-
-
 

@@ -23,7 +23,7 @@
 #include "nsystem.h"
 #include "nproperty.h"
 
-NObject::NObject() : properties_(NApp::system().propertysActive() ? new NPropertyMap() : 0)
+NObject::NObject() : properties_(0) //NApp::system().propertysActive() ? new NPropertyMap() : 0)
 {
   // segfaults under windows                    
   // if (properties_) properties_->bind("name", *this, &NObject::name, &NObject::setName);

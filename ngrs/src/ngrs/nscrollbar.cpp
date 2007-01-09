@@ -145,19 +145,37 @@ void NScrollBar::init( )
   add(incBtn);
   add(decBtn);
 
+  incBtn->setSkin( 
+	  NApp::config()->skin( "scb_btn_up" ),
+      NApp::config()->skin( "scb_btn_down" ),
+	  NApp::config()->skin( "scb_btn_over" ),
+	  NApp::config()->skin( "scb_btn_flat" )	
+  );
+
+  decBtn->setSkin( 
+	  NApp::config()->skin( "scb_btn_up" ),
+      NApp::config()->skin( "scb_btn_down" ),
+	  NApp::config()->skin( "scb_btn_over" ),
+	  NApp::config()->skin( "scb_btn_flat" )	
+  );
+
   sliderArea_ = new NPanel();
     sliderArea_->skin_ = NApp::config()->skin("sbar_pane");
     sliderArea_->mousePress.connect(this,&NScrollBar::onScrollAreaClick);
+	sliderArea_->setTransparent( false );
   add(sliderArea_);
 
- vSlSkin = NApp::config()->skin("sbar_vsl");
- hSlSkin = NApp::config()->skin("sbar_hsl");
-
-  slider_ = new Slider(this);
-     slider_->setSkin(vSlSkin);
+  slider_ = new NButton();
+  slider_->setSkin(
+	NApp::config()->skin("scb_btn_up_vsl"),
+	NApp::config()->skin("scb_btn_down_vsl"),
+	NApp::config()->skin("scb_btn_over_vsl"),
+	NApp::config()->skin("scb_btn_up_vsl")
+  );
   sliderArea_->add(slider_);
 
   slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit));
+  slider_->move.connect( this, &NScrollBar::onSliderMove );
 }
 
 // class factories
@@ -196,9 +214,13 @@ void NScrollBar::setOrientation( int orientation )
 {
   orientation_ = orientation;
   if (orientation_==nHorizontal) {
-     sliderArea_->setGradientOrientation(nVertical);
-     slider_->setWidth(20);
-     slider_->setSkin(hSlSkin);
+	 slider_->setWidth(20);
+     slider_->setSkin(
+		NApp::config()->skin("scb_btn_up_hsl"),
+		NApp::config()->skin("scb_btn_down_hsl"),
+		NApp::config()->skin("scb_btn_over_hsl"),
+		NApp::config()->skin("scb_btn_up_vsl")
+     );
      scrollPolicy_ = nDx;
      inc->setBitmap(right);
      dec->setBitmap(left);
@@ -206,8 +228,12 @@ void NScrollBar::setOrientation( int orientation )
   else
    {
      slider_->setHeight(20);
-     slider_->setSkin(vSlSkin);
-     sliderArea_->setGradientOrientation(nHorizontal);
+	 slider_->setSkin(
+		NApp::config()->skin("scb_btn_up_vsl"),
+		NApp::config()->skin("scb_btn_down_vsl"),
+		NApp::config()->skin("scb_btn_over_vsl"),
+		NApp::config()->skin("scb_btn_up_vsl")
+     );
      scrollPolicy_ = nDy;
    }
   resize();
@@ -224,7 +250,7 @@ void NScrollBar::setControl( NVisualComponent * control , int scrollPolicy)
   scrollPolicy_ = scrollPolicy;
 }
 
-void NScrollBar::onSliderMove( )
+void NScrollBar::onSliderMove( const NMoveEvent & ev )
 {
   double range_ = max_ - min_;
 
@@ -250,20 +276,6 @@ void NScrollBar::onSliderMove( )
   updateControl();
   change.emit( this );
   scroll.emit( this );
-}
-
-NScrollBar::Slider::Slider( NScrollBar * sl )
-{
-  sl_ = sl;
-}
-
-NScrollBar::Slider::~ Slider( )
-{
-}
-
-void NScrollBar::Slider::onMove( const NMoveEvent & moveEvent )
-{
-  sl_->onSliderMove();
 }
 
 void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )

@@ -157,10 +157,12 @@ const char * up_nav[] = {
 NFileDialog::NFileDialog()
  : NDialog()
 {
+  setName("fdlg");
+
   mode_ = nLoad;
 
-	setMinimumHeight(400);
-	setMinimumWidth(300);
+  setMinimumHeight(400);
+  setMinimumWidth(300);
 
   pane()->setLayout(NAlignLayout(5,5));
 
@@ -301,6 +303,7 @@ extern "C" void destroyFileDialog(NObject* p) {
 
 NFileDialog::~NFileDialog()
 {
+	std::cout << "delete fdialog" << std::endl;
 }
 
 void NFileDialog::onItemSelected( NItemEvent * ev )
@@ -417,8 +420,8 @@ void NFileDialog::setVisible( bool on )
     pdBox_->update();
     dBox_->update();
   } else {
-    fBox_->removeChilds();
-    dBox_->removeChilds();
+    //fBox_->removeChilds();
+    //dBox_->removeChilds();
   }
   NDialog::setVisible(on);
 }

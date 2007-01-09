@@ -34,6 +34,7 @@ NSkin::NSkin( )
   border_ = 0;
   arcWidth_ = arcHeight_ = 10;
   disabledTextColor_.setRGB(180,180,180);
+  overrideFontColor_ = false;
 }
 
 NSkin::NSkin( const NSkin & src )
@@ -69,6 +70,9 @@ NSkin::NSkin( const NSkin & src )
   arcHeight_       = src.gradientArcHeight();
 
   disabledTextColor_ = src.disabledTextColor();
+
+  textColor_ = src.textColor();
+  overrideFontColor_ = src.overrideFontColor();
 }
 
 const NSkin & NSkin::operator =( const NSkin & rhs )
@@ -86,6 +90,8 @@ const NSkin & NSkin::operator =( const NSkin & rhs )
   font_ = rhs.font();
   spacing_ = rhs.spacing();
   bitmap_ = rhs.bitmap();
+  textColor_ = rhs.textColor();
+  overrideFontColor_ = rhs.overrideFontColor();
 
   useParentBgColor_ = rhs.parentBackground();
   useParentFgColor_ = rhs.parentForeground();
@@ -112,12 +118,14 @@ const NSkin & NSkin::operator =( const NSkin & rhs )
 
 NSkin::~ NSkin( )
 {
-  if (border_) delete border_;
+  if (border_) 
+	  delete border_;
 }
 
 void NSkin::setBorder( const NBorder & border )
 {
-  if (border_) delete border_;
+  if (border_) 
+	  delete border_;
   border_ = border.clone();
 }
 
@@ -166,6 +174,19 @@ void NSkin::setFont( const NFont & font )
 const NFont & NSkin::font( ) const
 {
   return font_;
+}
+
+void NSkin::setTextColor( const NColor & color ) {
+  textColor_ = color;
+  overrideFontColor_ = true;
+}
+
+const NColor & NSkin::textColor() const {
+  return textColor_;
+}
+
+bool NSkin::overrideFontColor() const {
+  return overrideFontColor_;
 }
 
 void NSkin::setSpacing( const NSize & size )

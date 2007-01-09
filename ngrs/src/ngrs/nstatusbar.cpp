@@ -20,6 +20,8 @@
 #include "nstatusbar.h"
 #include "nalignlayout.h"
 #include "ncustomstatusitem.h"
+#include "napp.h"
+#include "nconfig.h"
 
 
 NStatusBar::NStatusBar()
@@ -27,6 +29,8 @@ NStatusBar::NStatusBar()
 {
   setLayout(NAlignLayout());
   setAlign(nAlBottom);
+
+  setSkin( NApp::config()->skin("stat_bar_bg") );
 }
 
 
