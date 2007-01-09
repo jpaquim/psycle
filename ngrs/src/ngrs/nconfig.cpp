@@ -523,13 +523,13 @@ NSkin NConfig::skin( const std::string & identifier )
   if (identifier == "btnflat") {
   } else
   if (identifier == "tabup") {
-     newSkin.setGradient(NColor(230,230,230),NColor(240,240,240),NColor(200,200,200),1,nVertical,10,5,5);
+     newSkin.setGradient(  NColor(255,255,255),NColor(243,243,239),NColor(214,208,192),2,nVertical,10,5,5);
 	 newSkin.setTransparent( false );
   } else
   if (identifier == "tabnone") {
      //fnt.setTextColor(NColor(100,100,100));
-//     skin.setFont(fnt);
-     newSkin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),1,nVertical,10,5,5);
+//     skin.setFont(fnt);NColor(236,233,216)
+     newSkin.setGradient( NColor(255,255,255),NColor(243,243,239),NColor(236,233,216),1,nVertical,10,5,5);
 	 newSkin.setTransparent( false );
   } else
   if (identifier == "ccbx") {
