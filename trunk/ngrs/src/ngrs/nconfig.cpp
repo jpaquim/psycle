@@ -374,131 +374,220 @@ NConfig::~NConfig()
 
 NSkin NConfig::skin( const std::string & identifier )
 {
-  NSkin skin;
+  NSkin newSkin;
   NSkin* xmlSkin = 0;
   if (identifier == "") return NSkin(); else
   if ( (xmlSkin = findSkin(identifier)) && (xmlSkin!=0)) {
-    skin = *xmlSkin;
+    newSkin = *xmlSkin;
   } else // default skins if xml not found
   if (identifier == "edit") {
-    skin.setGradient(NColor(230,230,230),NColor(250,250,250),NColor(240,240,240),1,nVertical,10,4,4);
-    skin.setTransparent(false);
+    newSkin.setBackground( NColor( 255, 255, 255 ) );
+	newSkin.useParentBackground(false);
+	newSkin.setTransparent(false);
   } else
   if (identifier == "toolbar") {
       NBevelBorder border( nNone, nRaised );
         border.setSpacing( NSize( 0, 2, 0, 2 ) );
-      skin.setBorder(border);
+      newSkin.setBorder(border);
   } else
   if (identifier == "filedlgpane") {
-    skin.setBackground(NColor(200,200,200));
-    skin.useParentBackground(false);
-    skin.setTransparent(false);
+    newSkin.setBackground(NColor(236,233,216));
+    newSkin.useParentBackground(false);
+    newSkin.setTransparent(false);
   } else
   if (identifier == "pane") {    
-    skin.setBackground(NColor(200,200,200));
-    skin.useParentBackground(false);
-    skin.setTransparent(false);
+    newSkin.setBackground(NColor(236,233,216));
+    newSkin.useParentBackground(false);
+    newSkin.setTransparent(false);
   }
   if (identifier == "lbitemsel") {
-    skin.setBackground(NColor(68,123,205));
-    skin.useParentBackground(false);
-    skin.setTransparent(false);
+    newSkin.setBackground(NColor( 49, 106, 197));
+    newSkin.useParentBackground( false );
+    newSkin.setTransparent( false );
+	newSkin.setTextColor( NColor(255, 255, 255) );
   } else
   if (identifier == "splitbar") {
      NFrameBorder fr(true,3,3);
      fr.setSpacing(NSize(0,0,0,0));
-     skin.setBorder(fr);
-     skin.setGradient(NColor(200,200,200),NColor(220,220,220),NColor(220,220,220),2,nVertical,50,3,3);
-
+     newSkin.setBorder(fr);
+     newSkin.setGradient(NColor(200,200,200),NColor(220,220,220),NColor(220,220,220),2,nVertical,50,3,3);
   } else
   if (identifier == "mitemiconbg") {
-    skin.setBackground(NColor(220,220,220));
-    skin.useParentBackground(false);
-    skin.setTransparent(false);
+    newSkin.setGradient( NColor(252,251,248), NColor(228,224,214), NColor(199,199,177),1,nHorizontal,50,3,3);
+    newSkin.useParentBackground(false);
+    newSkin.setTransparent(false);
   } else
   if (identifier == "mitemover") {
-     NFrameBorder fr(true,4,4);
-     fr.setSpacing(NSize(0,0,0,0));
-     skin.setBorder(fr);
-     skin.setGradient(NColor(89,153,235),NColor(68,123,205),NColor(88,143,225),2,nVertical,10,4,4);
-     skin.setTransparent(false);
+     newSkin.setBackground( NColor( 193, 210, 238 ) );     
+	 newSkin.setTransparent( false );
+	 newSkin.useParentBackground(false);
+	 newSkin.setSpacing( NSize(0,0,0,0) );
+     NFrameBorder fr;
+       fr.setSpacing(NSize(0,0,0,0));
+	   fr.setColor( NColor( 49, 106, 197 ) );
+     newSkin.setBorder(fr);
   } else
   if (identifier == "mitemnone") {
   } else
   if (identifier == "popup_menu_bg") {
-    skin.setBackground(NColor(240,240,240));
-    skin.useParentBackground(false);
-    skin.setTransparent(false);
+    newSkin.setBackground(NColor( 252, 252, 249 ));
+    newSkin.useParentBackground(false);
+    newSkin.setTransparent(false);
     NFrameBorder fr;
     fr.setSpacing(NSize(2,2,2,2));
     fr.setColor( NColor(210,210,210) );
-    skin.setBorder(fr);
+    newSkin.setBorder(fr);
   } else
   if (identifier == "sbar_pane") {
-    skin.setBackground(NColor(230,230,230));
-    skin.useParentBackground(false);
-    skin.setTransparent(false);
+    newSkin.setBackground( NColor( 244, 243, 238 ) );
+    newSkin.useParentBackground(false);
+    newSkin.setTransparent(false);
   } else
   if (identifier == "mbtnover") {
-     skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),2,nVertical,10,5,5);
-     NFrameBorder fr(true,5,5);
-     fr.setSpacing(NSize(0,0,0,0));
-     skin.setBorder(fr);
+     newSkin.setBackground( NColor( 193, 210, 238 ) );     
+	 newSkin.setTransparent( false );
+	 newSkin.useParentBackground(false);
+     NFrameBorder fr;
+       fr.setSpacing(NSize(0,0,0,0));
+	   fr.setColor( NColor( 49, 106, 197 ) );
+     newSkin.setBorder(fr);
   } else
   if (identifier == "mbtnnone") {
   } else
   if (identifier == "mbar") {
-     skin.setGradient(NColor(230,230,230),NColor(250,250,250),NColor(240,240,240),2,nVertical,10,4,4);
-     skin.setTransparent(false);
+    newSkin.setGradient( NColor(240,239,229), NColor(238,235,217), NColor(205,202,187),1,nVertical,87,3,3);
+    newSkin.useParentBackground(false);
+    newSkin.setTransparent(false);
   } else
   if (identifier == "clbox") {
   } else
-  if (identifier == "btnup") {
-     skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(180,180,180),2,nVertical,10,5,5);
+  if ( identifier == "scb_btn_up" ) {
+	 newSkin.setGradient(NColor(242,254,255),NColor(220,237,253),NColor(185,221,251),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
-     skin.setBorder(fr);
+	 fr.setColor (NColor( 255, 255, 255 ) );
+     newSkin.setBorder(fr);
+  } else
+  if ( identifier == "scb_btn_down" ) {
+	  return skin("ccbx_btn_down");
+  } else
+  if ( identifier == "ccbx_btn_down" ) {
+	 newSkin.setGradient(NColor(117,158,252),NColor(154,175,241),NColor(196,212,234),2,nVertical,20,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor( NColor( 189, 206, 247 ) );
+     newSkin.setBorder(fr);
+  } else
+  if ( identifier == "ccbx_btn_up" ) {
+	 newSkin.setGradient(NColor(216,227,252),NColor(202,216,253),NColor(173,201,249),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor( NColor( 189, 206, 247 ) );
+     newSkin.setBorder(fr);
+  } else
+  if ( identifier == "ccbx_btn_over" ) {
+	 newSkin.setGradient(NColor(242,254,255),NColor(220,237,253),NColor(185,221,251),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor( NColor( 141, 169, 225 ) );
+     newSkin.setBorder(fr);
+  } else
+  if (identifier == "btnup") {
+     newSkin.setGradient(NColor(255,255,255),NColor(243,243,239),NColor(214,208,192),2,nVertical,50,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor( NColor( 0, 60, 116 ) );
+     newSkin.setBorder(fr);
   } else 
   if (identifier == "btnover") {
-     skin.setGradient(NColor(250,250,250),NColor(255,255,255),NColor(210,210,210),2,nVertical,10,5,5);
-     NFrameBorder fr(true,5,5);
-     fr.setSpacing(NSize(0,0,0,0));
-     skin.setBorder(fr);
+	 newSkin.setBackground( NColor( 193, 210, 238 ) );     
+	 newSkin.setTransparent( false );
+	 newSkin.useParentBackground(false);
+     NFrameBorder fr;
+       fr.setSpacing(NSize(0,0,0,0));
+	   fr.setColor( NColor( 49, 106, 197 ) );
+     newSkin.setBorder(fr);
   } else 
   if (identifier == "btndown") {
-     skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),2,nVertical,10,5,5);
+     newSkin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );	 
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
-     skin.setBorder(fr);
+     newSkin.setBorder(fr);
   } else
   if (identifier == "btnflat") {
   } else
   if (identifier == "tabup") {
-     skin.setGradient(NColor(230,230,230),NColor(240,240,240),NColor(200,200,200),1,nVertical,10,5,5);
+     newSkin.setGradient(NColor(230,230,230),NColor(240,240,240),NColor(200,200,200),1,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
   } else
   if (identifier == "tabnone") {
      //fnt.setTextColor(NColor(100,100,100));
 //     skin.setFont(fnt);
-     skin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),1,nVertical,10,5,5);
+     newSkin.setGradient(NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),1,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
   } else
-  if (identifier == "sbar_vsl") {
-  /*  NBitmap bmp;
-    bmp.createFromXpmData(vknob_xpm);
-    skin.setBitmap(bmp,2);*/
-    skin.setBorder(NFrameBorder(true,4,4));
-    skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(220,220,220),2,nHorizontal,90,4,4);
-    skin.setTransparent(false);
+  if (identifier == "ccbx") {
+	NFrameBorder fr;
+		fr.setColor( NColor(127, 157, 185) );
+		fr.setSpacing( NSize( 2,2,2,2 ) );
+	newSkin.setBorder( fr ); 
   } else
-  if (identifier == "sbar_hsl") {
-    /*NBitmap bmp;
-    bmp.createFromXpmData(hbar_xpm);
-    skin.setBitmap(bmp,2);*/
-    skin.setBorder(NFrameBorder(true,4,4));
-    skin.setGradient(NColor(240,240,240),NColor(250,250,250),NColor(220,220,220),2,nVertical,90,4,4);
-    skin.setTransparent(false);
+  if (identifier == "scb_btn_over_vsl") {
+	 newSkin.setGradient(NColor(242,254,255),NColor(220,237,253),NColor(185,221,251),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor (NColor( 49, 106, 197 ) );
+     newSkin.setBorder(fr);
+  } else
+  if (identifier == "scb_btn_down_vsl") {
+	 newSkin.setGradient(NColor(242,254,255),NColor(220,237,253),NColor(185,221,251),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor (NColor( 49, 106, 197 ) );
+     newSkin.setBorder(fr);
+  } else
+  if (identifier == "scb_btn_up_vsl") {
+	 newSkin.setGradient(NColor(242,254,255),NColor(220,237,253),NColor(185,221,251),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor (NColor( 255, 255, 255 ) );
+     newSkin.setBorder(fr);
+  } else
+  if (identifier == "scb_btn_up_hsl") {
+	 return skin( "scb_btn_up_vsl" );
+  } else
+  if (identifier == "scb_btn_down_hsl") {
+	 return skin( "scb_btn_down_vsl" );
+  } else
+  if (identifier == "scb_btn_over_hsl") {
+	 return skin( "scb_btn_over_vsl" );
+  } else
+  if (identifier == "stat_bar_bg") {
+	newSkin.setGradient( NColor(169,167,153), NColor(238,235,217), NColor(223,220,203),1,nVertical,18,3,3);
+    newSkin.useParentBackground(false);
+    newSkin.setTransparent(false);	  
+  } else
+  if ( identifier == "tool_sep" ) {
+	  newSkin.setForeground( NColor( 197, 194, 184 ) );
+	  newSkin.useParentForeground( false );
+	  newSkin.setTransparent( false );
+  } else
+  if ( identifier == "dockbar_bg" ) {
+	  newSkin.setBackground( NColor( 204, 199, 186 ) );
+	  newSkin.useParentBackground( false );
+	  newSkin.setTransparent( false );
   }
 
-  return skin;
+  return newSkin;
 }
 
 void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )

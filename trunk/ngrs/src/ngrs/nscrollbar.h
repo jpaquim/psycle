@@ -29,40 +29,25 @@ enum NScrollPolicyType{ nDx = 1, nDy = 2 };
 @author Stefan
 */
 
-class NScrollBar : public NPanel
-{
-  class Slider : public NPanel {
-  public:
-      Slider(NScrollBar* sl);
-      ~Slider();
-
-      virtual void onMove(const NMoveEvent & moveEvent);
-
-  private:
-
-      NScrollBar* sl_;
-      NBorder* bd_;
-  };
-
-
+class NScrollBar : public NPanel {
 public:
-   NScrollBar();
-   NScrollBar(int orientation);
+   NScrollBar( );
+   NScrollBar( int orientation );
 
-   ~NScrollBar();
+   ~NScrollBar( );
 
    signal1<NScrollBar*> change;
    signal1<NScrollBar*> scroll;
 
    virtual void resize();
 
-   void setOrientation(int orientation);
-   int orientation() const;
+   void setOrientation( int orientation );
+   int orientation( ) const;
 
-   void setPos(double value);
-   double pos() const;
+   void setPos( double value );
+   double pos( ) const;
 
-   void setRange(double min, double max);
+   void setRange( double min, double max );
    double range() const;
 
    void setLargeChange( double step );
@@ -71,10 +56,10 @@ public:
    void setSmallChange(double step);
    double smallChange() const;
 
-   void setControl(NVisualComponent* control, int scrollPolicy);
-   void onSliderMove();
+   void setControl( NVisualComponent* control, int scrollPolicy );
 
-   
+   void onSliderMove( const NMoveEvent & ev );
+
 private:
 
    NImage* inc;
@@ -84,10 +69,6 @@ private:
    NBitmap down;
    NBitmap left;
    NBitmap right;
-
-
-   NSkin vSlSkin;
-   NSkin hSlSkin;
 
    int orientation_;
    int scrollPolicy_;
@@ -100,7 +81,8 @@ private:
 
    NButton* incBtn;
    NButton* decBtn;
-   Slider* slider_;
+   NButton* slider_;
+
    NPanel* sliderArea_;
    NVisualComponent* control_;
 

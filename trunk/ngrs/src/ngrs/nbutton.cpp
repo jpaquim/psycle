@@ -88,6 +88,16 @@ extern "C" void destroyButton(NObject* p) {
     delete p;
 }
 
+
+void NButton::setSkin( const NSkin & up, const NSkin & down, const NSkin & over, const NSkin & flat ) {
+  btnUp_   = up;
+  btnDown_ = down;
+  btnOver_ = over;
+  btnFlat_ = flat;
+
+  setFlat( flat_ );
+}
+
 void NButton::resize( )
 {
   NCustomButton::resize();
@@ -116,8 +126,8 @@ void NButton::onMouseExit( )
 {
   if (!down()) {
      if (flat_) {
-        setSkin(btnFlat_);
-     } else setSkin(btnUp_);
+		 NCustomButton::setSkin(btnFlat_);
+     } else NCustomButton::setSkin(btnUp_);
   }
   repaint();
   if (hint!=0 && hint->mapped()) hint->setVisible(false);
@@ -125,7 +135,7 @@ void NButton::onMouseExit( )
 
 void NButton::onMouseEnter( )
 {
-  if (!down()) setSkin(btnOver_);
+  if (!down()) NCustomButton::setSkin(btnOver_);
   repaint();
   if (hint!=0 && !hint->mapped()) {
      hint->setPosition(window()->left()+ absoluteLeft() + (int) ((3*spacingWidth())/4), window()->top()+absoluteTop() + spacingHeight(),100,100);
@@ -137,19 +147,22 @@ void NButton::onMouseEnter( )
 void NButton::setFlat( bool on )
 {
   flat_ = on;
-  if (flat_) setSkin(btnFlat_); else setSkin(btnUp_);
+  if (flat_) 
+	  NCustomButton::setSkin( btnFlat_ ); 
+  else 
+	  NCustomButton::setSkin( btnUp_ );
 }
 
 void NButton::init( )
 {
   flat_ = true;
 
-  btnUp_ = NApp::config()->skin("btnup");
+  btnUp_   = NApp::config()->skin("btnup");
   btnOver_ = NApp::config()->skin("btnover");
   btnDown_ = NApp::config()->skin("btndown");
   btnFlat_ = NApp::config()->skin("btnflat");
 
-  setSkin(btnFlat_);
+  NCustomButton::setSkin( btnFlat_ );
 
   hint = 0;
 
@@ -169,10 +182,10 @@ void NButton::setDown( bool on )
   NCustomButton::setDown(on);
 
   if (down()) {
-    setSkin(btnDown_);
+    NCustomButton::setSkin(btnDown_);
     repaint();
   } else {
-    setSkin(btnUp_);
+    NCustomButton::setSkin(btnUp_);
     repaint();
   }
 }
@@ -202,7 +215,7 @@ void NButton::onMousePress( int x, int y, int button )
 {
   NCustomButton::onMousePress(x, y, button);
 
-  if (repeatMode_ ) {
+  if ( repeatMode_ ) {
     if (!startLatencyTimer.enabled() ) {
         button_ = button;
         startLatencyTimer.enableTimer();
@@ -214,7 +227,7 @@ void NButton::onMousePressed( int x, int y, int button )
 {
   NCustomButton::onMousePressed(x, y, button);
 
-  if (repeatMode_) {
+  if ( repeatMode_ ) {
     repeatTimer.disableTimer();
     startLatencyTimer.disableTimer();
   }

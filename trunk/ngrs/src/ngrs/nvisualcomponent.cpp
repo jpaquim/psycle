@@ -69,7 +69,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     int gTx = g->xTranslation();          // store old graphics translation
     int gTy = g->yTranslation();
 
-    if (!transparent() && (translucent() ==100) && NWindow::paintFlag) {
+    if (!transparent() && (translucent() ==100) && NWindow::paintFlag && !skin_.gradientStyle() ) {
       g->setForeground(background());
       geometry()->fill(g,repaintArea);
       //std::cout << "j:" << name() << std::endl;
@@ -77,12 +77,12 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     if (transparent() && (translucent()<100))
          g->fillTranslucent(left(),top(),width(),height(),skin_.transColor(), translucent());
 
-    if (skin_.gradientStyle() == 1 && NWindow::paintFlag) {
+    if (!transparent() && skin_.gradientStyle() == 1 && NWindow::paintFlag) {
          g->fillGradient(left(),top(),spacingWidth(),spacingHeight(),
             skin_.gradientStartColor(),skin_.gradientMidColor(),skin_.gradientEndColor(),
             skin_.gradientOrientation(),skin_.gradientPercent());
     } else
-    if (skin_.gradientStyle() == 2 && NWindow::paintFlag) {
+    if (!transparent() && skin_.gradientStyle() == 2 && NWindow::paintFlag) {
          g->fillRoundGradient(left(),top(),spacingWidth(),spacingHeight(),
             skin_.gradientStartColor(),skin_.gradientMidColor(),skin_.gradientEndColor(),
             skin_.gradientOrientation(),skin_.gradientStyle(),skin_.gradientArcWidth(),skin_.gradientArcHeight() );
@@ -135,13 +135,30 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
         }
     }
 
+	NFont* oldFont = 0;
+	bool oldUseParentFont;
+
+	if ( skin_.overrideFontColor() ) {
+		NFont fnt = font();
+		oldUseParentFont = skin_.parentFont();
+		oldFont = new NFont( fnt );
+		fnt.setTextColor( skin_.textColor() );
+		setFont( fnt );
+	}
+
     if (NWindow::paintFlag) {
-      g->setForeground(foreground());
-      g->setFont(font());
+      g->setForeground(foreground());	
+	  g->setFont( font() );
       paint(g);
     }
+	
+    drawChildren( g, repaintArea, sender);   // the container children will be drawn	
 
-    drawChildren(g,repaintArea,sender);   // the container children will be drawn
+	if ( oldFont ) {
+      setFont( *oldFont );
+	  skin_.useParentFont( oldUseParentFont );
+	  delete oldFont;
+	}
 
     g->setTranslation(gTx,gTy);           // set back to old translation
     if ((skin_.border()!=0)) {
@@ -748,8 +765,6 @@ void NVisualComponent::removeChilds( )
 
 void NVisualComponent::removeChild( NVisualComponent * child )
 {
-  std::cout << "remove child" << std::endl;
-
   std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
   components.erase(itr);
   child->setParent(0);

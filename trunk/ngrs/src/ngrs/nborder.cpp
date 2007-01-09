@@ -38,7 +38,7 @@ void NBorder::setSpacing( NSize size )
   sizing_ = size;
 }
 
-const NSize & NBorder::spacing( )
+const NSize & NBorder::spacing( ) const
 {
   return sizing_;
 }

@@ -34,12 +34,12 @@ public:
 
     virtual ~NBorder();
 
-    virtual void paint(NGraphics* g, const NShape & geometry);
-    void setSpacing(NSize size);
+    virtual void paint( NGraphics* g, const NShape & geometry );
+    void setSpacing( NSize size );
 
-    const NSize & spacing();
+    const NSize & spacing() const;
 
-    void setColor(const NColor & color);
+    void setColor( const NColor & color );
     const NColor & color();
 
     virtual NBorder* clone()  const = 0;   // Uses the copy constructor

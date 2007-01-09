@@ -20,7 +20,7 @@
 #ifndef NCOMBOBOX_H
 #define NCOMBOBOX_H
 
-#include "npanel.h"
+#include "ncustomcombobox.h"
 
 class NCustomItem;
 class NButton;
@@ -33,7 +33,7 @@ class NPopupWindow;
 @author Stefan
 */
 
-class NComboBox : public NPanel
+class NComboBox : public NCustomComboBox
 {
 public:
     NComboBox();

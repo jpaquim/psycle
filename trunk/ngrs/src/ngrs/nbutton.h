@@ -63,6 +63,8 @@ public:
     void setRepeatMode( bool on);
     void setRepeatPolicy( int interval, int startLatency = 100 );
 
+	void setSkin( const NSkin & up, const NSkin & down, const NSkin & over, const NSkin & flat );
+
 private:
 
     bool flat_;

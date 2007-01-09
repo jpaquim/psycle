@@ -138,7 +138,10 @@ std::string NFile::home() {
  #else            
  // first check homepath
  const char* homepath = getenv("HOMEPATH");
- if ( homepath ) return std::string( homepath );
+ if ( homepath ) {
+	 std::cout << "the homepath is " << std::string( homepath ) << std::endl;
+	 return std::string( homepath );
+ }
 
 
  HKEY hKeyRoot = HKEY_CURRENT_USER;

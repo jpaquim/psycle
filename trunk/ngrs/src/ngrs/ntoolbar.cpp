@@ -71,8 +71,6 @@ NToolBar::~NToolBar()
 
 void NToolBar::paint( NGraphics * g )
 {
-  //g->fillGradient( 0, 0, 5, clientHeight(), NColor( background().red() + 50, background().green() + 50, background().blue() +50 ), NColor(background().red() + 20,background().green() + 20, background().blue()+20),nVertical );
-  g->fillGradient( 0, 0, 4, clientHeight(),NColor( background().red() + 20, background().green() + 20, background().blue() +20 ), NColor(background().red() - 40,background().green() - 40, background().blue()-40),nVertical);
 }
 
 void NToolBar::add( NRuntime * component )

@@ -44,12 +44,8 @@ NWindow::NWindow()
   NApp::addWindow(win_, this);
 
   pane_ = new NPanel();  
-    NSkin test = NApp::config()->skin("pane");
-    pane_->setLayout( NAlignLayout() );
-    pane_->skin_.setBackground(NColor(200,200,200));
-    pane_->skin_.setTransparent(false);
-//    NSkin test = NApp::config()->skin("pane");
-  //  pane_->setName("window_pane");
+	pane_->setSkin( NApp::config()->skin("pane") );
+    pane_->setLayout( NAlignLayout() );    
   add(pane_);
 
   graphics_ = new NGraphics(win_);
