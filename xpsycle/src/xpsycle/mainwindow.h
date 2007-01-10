@@ -111,6 +111,7 @@ private:
     NMenu* viewMenu_;
     NMenu* configurationMenu_;
     NMenu* performanceMenu_;
+	NMenu* communityMenu_;
     NMenu* helpMenu_;
 
     NMenuItem* noneFileItem;
