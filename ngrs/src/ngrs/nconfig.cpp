@@ -461,8 +461,16 @@ NSkin NConfig::skin( const std::string & identifier )
   } else
   if (identifier == "clbox") {
   } else
-  if ( identifier == "scb_btn_up" ) {
+  if ( identifier == "scb_btn_over" ) {
 	 newSkin.setGradient(NColor(242,254,255),NColor(220,237,253),NColor(185,221,251),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor (NColor( 49, 106, 197 ) );
+     newSkin.setBorder(fr);
+  } else
+  if ( identifier == "scb_btn_up" ) {
+	 newSkin.setGradient(NColor(173,201,249),NColor(220,237,253),NColor(173,201,249),2,nVertical,10,5,5);
 	 newSkin.setTransparent( false );
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
@@ -555,7 +563,7 @@ NSkin NConfig::skin( const std::string & identifier )
      newSkin.setBorder(fr);
   } else
   if (identifier == "scb_btn_up_vsl") {
-	 newSkin.setGradient(NColor(242,254,255),NColor(220,237,253),NColor(185,221,251),2,nVertical,10,5,5);
+	 newSkin.setGradient(NColor(173,201,249),NColor(220,237,253),NColor(173,201,249),2,nHorizontal,10,5,5);
 	 newSkin.setTransparent( false );
      NFrameBorder fr(true,5,5);
      fr.setSpacing(NSize(0,0,0,0));
@@ -563,7 +571,12 @@ NSkin NConfig::skin( const std::string & identifier )
      newSkin.setBorder(fr);
   } else
   if (identifier == "scb_btn_up_hsl") {
-	 return skin( "scb_btn_up_vsl" );
+	 newSkin.setGradient(NColor(173,201,249),NColor(220,237,253),NColor(173,201,249),2,nVertical,10,5,5);
+	 newSkin.setTransparent( false );
+     NFrameBorder fr(true,5,5);
+     fr.setSpacing(NSize(0,0,0,0));
+	 fr.setColor (NColor( 255, 255, 255 ) );
+     newSkin.setBorder(fr);
   } else
   if (identifier == "scb_btn_down_hsl") {
 	 return skin( "scb_btn_down_vsl" );
