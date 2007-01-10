@@ -236,7 +236,7 @@ druttis_dsp_class_package = pkg_config_package(project,
 	name = 'druttis-dsp-class-' + str(druttis_dsp_class_module.version().major()),
 	version = druttis_dsp_class_module.version(),
 	description = druttis_dsp_class_module.description(),
-	modules = [druttis_dsp_module]
+	modules = [druttis_dsp_class_module]
 )
 druttis_dsp_class = druttis_dsp_class_package.local_package()
 
