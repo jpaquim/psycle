@@ -61,41 +61,16 @@ template<class T> inline T str_hex(const std::string &  value) {
 }
 
 
-void add_font_path( char * path ) {
-/*  int i;
-  int npaths;
-  char ** fontpath;
-  char ** new_fontpath;
-
-  fontpath = XGetFontPath( NApp::system().dpy(), &npaths );    
-  if ( fontpath != NULL ) {
-    // check if path is already present
-    for ( i = 0; i < npaths; i++ )
-      if ( strncmp( path, fontpath[i], strlen(path) ) == 0 ) {
-			XFreeFontPath(fontpath);
-			return;
-      }
-    new_fontpath = (char **) malloc( sizeof(char *)*( npaths + 1 ));
-    memcpy( new_fontpath, fontpath, npaths*sizeof(char *));
-    new_fontpath[npaths] = path;
-    XSetFontPath( NApp::system().dpy(), new_fontpath, npaths+1 );
-    XFreeFontPath(fontpath);
-    free(new_fontpath);
-  }*/
-}
-
-
-
-
 MainWindow::MainWindow()
 	: NWindow(), pluginFinder_( *Global::pConfig() )
-{
+{  
   //SkinReader::Instance()->loadSkin( "/home/natti/psycle_skin.zip" );
   SkinReader::Instance()->setDefaults();
 
   setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
 
-  setPosition(0,0,1024,768);
+  setPosition(0,0,1000,600);
+  setPositionToScreenCenter();
   count = 0;
 
   initMenu();
@@ -106,6 +81,38 @@ MainWindow::MainWindow()
     book->setTabBarVisible( false );
   pane()->add(book,nAlClient);
 
+
+  NImage* img;
+  
+  NPanel* test = new NPanel();
+  test->setLayout( NAlignLayout() );
+    img = new NImage( Global::pConfig()->icons().logoSmall()  );
+    img->setVAlign( nAlCenter );
+    test->add( img , nAlTop );
+
+
+	NGroupBox* gBox = new NGroupBox();
+	  gBox->setLayout( NAlignLayout() );
+	  gBox->setHeaderText("Recent Songs");
+	  NPanel* recentSongOptionPanel = new NPanel();
+	    recentSongOptionPanel->setLayout( NAlignLayout() ) ;
+		recentSongOptionPanel->add( new NLabel("open"), nAlTop);
+		recentSongOptionPanel->add( new NLabel("new"), nAlTop);
+	  gBox->add( recentSongOptionPanel, nAlBottom );
+	  NListBox* recentSongListBox = new NListBox();	  
+	    recentSongListBox->scrollPane()->setSkin( pane()->skin_);
+	    recentSongListBox->setPreferredSize(250,300);
+	  gBox->add( recentSongListBox, nAlClient );
+	test->add( gBox,nAlLeft );
+
+	NGroupBox* gBox1 = new NGroupBox("Psycledelics Community : Psycle XI");
+	  gBox1->setLayout( NAlignLayout() );
+	  NLabel* lb = new NLabel("10, Wed, Startpage meets Tip of the Day Dialog in the afternoon");
+	  lb->setWordWrap(true);
+	  gBox1->add( lb, nAlTop);
+	test->add( gBox1,nAlClient );
+  
+  book->addPage( test, "Start Page" );
   
   newMachineDlg_ = new NewMachine( pluginFinder_ );
   add(newMachineDlg_);
@@ -113,9 +120,9 @@ MainWindow::MainWindow()
   audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
   add( audioConfigDlg );	
 
-  initSongs();
+  //initSongs();
   enableSound();
-  updateNewSong();
+  //updateNewSong();
 
   oldPlayPos_ = 0;
   timer.setIntervalTime(10);
@@ -168,7 +175,7 @@ ChildView* MainWindow::addChildView()
 
   songpDlg_->setSong( childView_->song() );
 
-  if (songMap.size() > 1) book->setTabBarVisible(true);
+  if (songMap.size() > 0) book->setTabBarVisible(true);
 
   Player::Instance()->song( childView_->song() );
 
@@ -363,7 +370,7 @@ void MainWindow::showSongpDlg( NButtonEvent* ev )
 }
 
 void MainWindow::initBars( )
-{
+{    
   toolBarPanel_ = new NToolBarPanel();    
   pane()->add(toolBarPanel_, nAlTop);
 
@@ -403,10 +410,12 @@ void MainWindow::initToolBar( )
 {
   DefaultBitmaps & icons = Global::pConfig()->icons();
 
+  NImage* img;
+
   toolBar1_ = new NToolBar();
   toolBarPanel_->add(toolBar1_);
 
-  NImage* img;
+  
 
   // creates the newfile button
   img = new NImage();
