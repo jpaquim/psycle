@@ -219,7 +219,7 @@ void NScrollBar::setOrientation( int orientation )
 		NApp::config()->skin("scb_btn_up_hsl"),
 		NApp::config()->skin("scb_btn_down_hsl"),
 		NApp::config()->skin("scb_btn_over_hsl"),
-		NApp::config()->skin("scb_btn_up_vsl")
+		NApp::config()->skin("scb_btn_up_hsl")
      );
      scrollPolicy_ = nDx;
      inc->setBitmap(right);
