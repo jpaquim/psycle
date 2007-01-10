@@ -329,6 +329,22 @@ void MainWindow::initMenu( )
       performanceMenu_->add(new NMenuItem("MDI Monitor"));
     menuBar_->add(performanceMenu_);
 
+	communityMenu_ = new NMenu("Community");
+	  NMenuItem* comSearchItem = new NMenuItem("Community Search");	  
+	  communityMenu_->add( new NMenuItem("Ask a Question") );
+	  communityMenu_->add( new NMenuItem("Sent Feedback" ) );
+	  communityMenu_->add( new NMenuSeperator() );
+	  communityMenu_->add( new NMenuItem("Psycledelics Center") );
+	  communityMenu_->add( new NMenuSeperator() );
+	  communityMenu_->add( comSearchItem );
+	    NMenu* comSearch = new NMenu();
+	      comSearch->add( new NMenuItem("Songs") );
+		  comSearch->add( new NMenuItem("Presets") );
+		  comSearch->add( new NMenuItem("Skins") );
+		  comSearch->add( new NMenuItem("Samples") );
+	    comSearchItem->add( comSearch );	
+	menuBar_->add( communityMenu_ );
+
     // Creates the help menu
     helpMenu_ = new NMenu("Help");
       helpMenu_->add(new NMenuItem("About"))->click.connect(this,&MainWindow::onHelpMenuAbout);
