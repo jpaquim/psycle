@@ -199,7 +199,7 @@ void NApp::eventLoop( )
       }
       repaintWin_.clear();
     }	
-	callRemovePipe( "main loop " );
+	callRemovePipe( );
   }
   #endif
 }
@@ -288,7 +288,7 @@ void NApp::modalEventLoop(NWindow* modalWin )
       }
       repaintWin_.clear();
     }
-    NApp::callRemovePipe( "modal loop" );
+    NApp::callRemovePipe( );
   }  
 
   //  EnableWindow( hwndOwner, TRUE );
@@ -753,7 +753,7 @@ void NApp::addRemovePipe( NRuntime * component )
     removePipe.push_back(component);
 }
 
-void NApp::callRemovePipe( const std::string & sender )
+void NApp::callRemovePipe(  )
 {
  for (std::vector<NRuntime*>::iterator iter = removePipe.begin(); iter<removePipe.end(); iter++) {   
    lastOverWin_ = 0;  
