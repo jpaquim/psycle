@@ -35,6 +35,7 @@
 #include <ngrs/n7segdisplay.h>
 #include <ngrs/nframeborder.h>
 #include <ngrs/ntoolbar.h>
+#include <ngrs/ntoolbarseparator.h>
 #include <ngrs/ngridlayout.h>
 #include <ngrs/ntreenode.h>
 #include <ngrs/nobjectinspector.h>
@@ -188,9 +189,11 @@ void SequencerBar::init( )
       NButton* newCatBtn = new NButton(img);
         newCatBtn->setHint("New Category");
       patToolBar->add( newCatBtn )->clicked.connect(this,&SequencerBar::onNewCategory);
+      patToolBar->add(new NToolBarSeparator());
       img = new NImage();
       img->setSharedBitmap( &icons.pattern_new() );
       NButton* newPatBtn = new NButton( img );
+        newPatBtn->setHint("New Pattern");
       patToolBar->add( newPatBtn )->clicked.connect(this,&SequencerBar::onNewPattern);
       img = new NImage();
       img->setSharedBitmap(&icons.delPattern());
@@ -198,10 +201,14 @@ void SequencerBar::init( )
       NButton* delPatBtn = new NButton(img);
         delPatBtn->setHint("Delete Pattern");
       patToolBar->add( delPatBtn )->clicked.connect(this,&SequencerBar::onDeletePattern);
-      patToolBar->add( new NButton("cln"))->clicked.connect(this,&SequencerBar::onClonePattern);
+      NButton* clnPatBtn = new NButton("Cln");
+        clnPatBtn->setHint("Clone Pattern");
+      patToolBar->add( clnPatBtn)->clicked.connect(this,&SequencerBar::onClonePattern);
 
 
-      patToolBar->add( new NButton("Add"))->clicked.connect(this,&SequencerBar::onPatternAdd);
+      NButton* addPatBtn = new NButton("Add");
+        addPatBtn->setHint("Add Pattern To Sequencer");
+      patToolBar->add( addPatBtn )->clicked.connect(this,&SequencerBar::onPatternAdd);
     patternPanel->add(patToolBar, nAlTop);
 
     patternBox_ = new NCustomTreeView();
