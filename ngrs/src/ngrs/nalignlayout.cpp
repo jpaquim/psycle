@@ -56,7 +56,9 @@ void NAlignLayout::align( NVisualComponent * parent )
   NVisualComponent* lastLeft   = 0;
   NVisualComponent* lastRight  = 0;
   NVisualComponent* lastBottom = 0;
-  std::vector<NVisualComponent*>::const_iterator itr = components.begin();
+  NVisualComponent* alClientVc = 0;
+
+  std::vector<NVisualComponent*>::const_iterator itr = components.begin();  
 
   for (;itr < components.end(); itr++) {
      NVisualComponent* visualChild = *itr;
@@ -107,19 +109,24 @@ void NAlignLayout::align( NVisualComponent * parent )
                 }
                 break;
            case nAlClient : {
-                 int leftOff = (lastLeft == 0) ? hgap_ : lastLeft->left() + lastLeft->width() + hgap_ ;
-                 int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
-                 int bottomOff  = (lastBottom == 0) ? vgap_ : parent->clientHeight() - lastBottom->top() + vgap_ ;
-                 int rightOff  = (lastRight == 0) ? hgap_ : parent->clientWidth() - (lastRight->left() - hgap_);
-                 maxX_ = visualChild->preferredWidth()  + leftOff;
-                 maxY_ = visualChild->preferredHeight() + topOff + bottomOff;
-                 visualChild->setPosition(leftOff,topOff,parent->clientWidth() - leftOff-rightOff,parent->clientHeight() - topOff - bottomOff);
+			     alClientVc = visualChild;
                 }
                 break;
            default : ;
        }
      }
-    }
+   }
+  
+  if ( alClientVc ) {
+    int leftOff = (lastLeft == 0) ? hgap_ : lastLeft->left() + lastLeft->width() + hgap_ ;
+    int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
+    int bottomOff  = (lastBottom == 0) ? vgap_ : parent->clientHeight() - lastBottom->top() + vgap_ ;
+    int rightOff  = (lastRight == 0) ? hgap_ : parent->clientWidth() - (lastRight->left() - hgap_);
+    maxX_ = alClientVc->preferredWidth()  + leftOff;
+    maxY_ = alClientVc->preferredHeight() + topOff + bottomOff;
+    alClientVc->setPosition(leftOff,topOff,parent->clientWidth() - leftOff-rightOff,parent->clientHeight() - topOff - bottomOff);
+  }
+
 }
 
 int NAlignLayout::preferredWidth( const NVisualComponent * target ) const

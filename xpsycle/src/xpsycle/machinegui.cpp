@@ -130,12 +130,14 @@ namespace psycle {
 			NRegion newDrag = linesRegion();
 			NRegion repaintArea = newDrag | oldDrag;
 
-			int parentAbsLeft = ((NVisualComponent*) parent())->absoluteLeft() - ((NVisualComponent*) parent())->scrollDx();
-			int parentAbsTop  = ((NVisualComponent*) parent())->absoluteTop() - ((NVisualComponent*) parent())->scrollDy();;
+			NVisualComponent* parentVc =  dynamic_cast<NVisualComponent*>( parent() );
 
-			repaintArea.move(parentAbsLeft, parentAbsTop);
+			int parentAbsLeft = parentVc->absoluteLeft() - parentVc->scrollDx();
+			int parentAbsTop  = parentVc->absoluteTop() - parentVc->scrollDy();;
 
-			window()->repaint((NVisualComponent*) parent(),repaintArea);
+			repaintArea.move( parentAbsLeft, parentAbsTop );
+
+			window()->repaint( parentVc, repaintArea );
 
 			oldDrag = newDrag;
 
@@ -143,7 +145,8 @@ namespace psycle {
 			mac()._y = top();
 
 			if ( window()->statusModel() ) {
-				window()->statusModel()->setText( stringify( left() ) +","+ stringify( top() ) );
+				std::string msg =  mac()._editName + "("+ stringify(left()) + ","+ stringify(top())+ ")";
+				window()->statusModel()->setText( msg );
 			}
 
 			moved.emit( &mac(), mac()._x, mac()._y );

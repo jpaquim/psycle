@@ -23,7 +23,7 @@
 #include "ncustomstatusitem.h"
 #include "napp.h"
 #include "nconfig.h"
-#include "nlabel.h"
+#include "ntextstatusitem.h"
 
 
 NStatusBar::NStatusBar()
@@ -34,8 +34,7 @@ NStatusBar::NStatusBar()
 
   setSkin( NApp::config()->skin("stat_bar_bg") );
 
-  statusLabel_ = new NLabel();
-  NPanel::add( statusLabel_ );
+  add(  new NTextStatusItem(), nAlClient );
 }
 
 
@@ -45,17 +44,18 @@ NStatusBar::~NStatusBar()
 
 void NStatusBar::add( NCustomStatusItem * component )
 {
-  NPanel::add(component,nAlRight);
+  add( component, nAlRight );
 }
 
 void NStatusBar::add( NCustomStatusItem * component, int align )
 {
   NPanel::add(component,align);
+  statusItems_.push_back( component );
 }
 
 void NStatusBar::add( NVisualComponent * component, int align )
 {
-  NPanel::add(component,align);
+  NPanel::add( component, align );
 }
 
 void NStatusBar::setModel( NCustomStatusModel & model ) {
@@ -67,11 +67,12 @@ NCustomStatusModel* NStatusBar::model() const {
   return statusModel_;
 }
 
-void NStatusBar::resize() {
-  statusLabel_->setPosition( 0, 0 ,clientWidth(), clientHeight() );
-}
-
-void NStatusBar::onModelDataChange( const NCustomStatusModel & sender ) {
-	statusLabel_->setText( sender.text() );
-	statusLabel_->repaint();
+void NStatusBar::onModelDataChange( const NCustomStatusModel & sender, unsigned int index ) {
+  std::vector<NCustomStatusItem*>::iterator it = statusItems_.begin();
+  for ( ; it < statusItems_.end(); it++ ) {
+	if ( index == (*it)->modelIndex() ) {
+	  (*it)->setText( sender.text( index ) );
+      (*it)->repaint();
+	}
+  } 
 }

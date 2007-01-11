@@ -28,9 +28,21 @@
 class NCustomStatusItem : public NPanel
 {
 public:
-    NCustomStatusItem();
+
+	NCustomStatusItem();
+
+    NCustomStatusItem( unsigned int modelIndex );
 
     ~NCustomStatusItem();
+
+	virtual void setText( const std::string & text ) = 0;
+
+	void setModelIndex( unsigned int modelIndex );
+	unsigned int modelIndex() const;
+
+private:
+
+	unsigned int modelIndex_;
 
 };
 

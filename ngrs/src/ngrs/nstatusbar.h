@@ -23,7 +23,7 @@
 #include "npanel.h"
 
 class NCustomStatusItem;
-class NLabel;
+class NTextStatusItem;
 class NCustomStatusModel;
 
 /**
@@ -44,17 +44,15 @@ public:
     virtual void add(NCustomStatusItem* component, int align);
 	virtual void add(NVisualComponent* component, int align);
 
-	virtual void resize();
-
 	void setModel( NCustomStatusModel & model );
 	NCustomStatusModel* model() const;
 
 private:
 
-	NLabel* statusLabel_;
 	NCustomStatusModel* statusModel_;
+	std::vector<NCustomStatusItem*> statusItems_;
 
-	void onModelDataChange( const NCustomStatusModel & sender );
+	void onModelDataChange( const NCustomStatusModel & sender, unsigned int index );
 
 };
 

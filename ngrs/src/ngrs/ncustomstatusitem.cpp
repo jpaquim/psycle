@@ -19,9 +19,15 @@
  ***************************************************************************/
 #include "ncustomstatusitem.h"
 
-NCustomStatusItem::NCustomStatusItem()
- : NPanel()
-{
+// default ctor
+NCustomStatusItem::NCustomStatusItem( )
+ : NPanel(), modelIndex_( 0 )
+{	 
+}
+
+NCustomStatusItem::NCustomStatusItem( unsigned int modelIndex )
+ : NPanel(), modelIndex_( modelIndex )
+{	 
 }
 
 
@@ -29,4 +35,10 @@ NCustomStatusItem::~NCustomStatusItem()
 {
 }
 
+void NCustomStatusItem::setModelIndex( unsigned int modelIndex ) {
+  modelIndex_ = modelIndex;
+}
 
+unsigned int NCustomStatusItem::modelIndex() const {
+  return modelIndex_;
+}

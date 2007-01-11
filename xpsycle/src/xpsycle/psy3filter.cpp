@@ -193,7 +193,7 @@ namespace psycle
 				--chunkcount;
 			}
 
-			progress.emit(4,16384,"");
+			song.progress.emit(4,16384,"");
 
 			//\todo: Move this to something like "song.validate()" 
 
@@ -264,7 +264,7 @@ namespace psycle
 				}
 			}
 
-			progress.emit(5,0,"");
+			song.progress.emit(5,0,"");
 			if(chunkcount)
 			{
 				std::ostringstream s;

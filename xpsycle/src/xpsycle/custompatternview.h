@@ -326,6 +326,7 @@ namespace psycle {
 
 					void drawStringData(NGraphics* g, int xOff, int line, const std::string & text , const NColor & color);
 
+					void updateStatusBar();
 
 					int eventOffset( int eventnr, int col ) const;
 					int eventWidth( int eventnr ) const;

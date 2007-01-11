@@ -25,11 +25,15 @@ NStatusModel::NStatusModel() {
 NStatusModel::~NStatusModel() {
 }
 
-void NStatusModel::setText( const std::string & text ) {
-	text_ = text;
-	changed.emit( *this );
+void NStatusModel::setText( const std::string & text, unsigned int index ) {
+	textMap[index] = text;
+	changed.emit( *this, index );
 }
 
-std::string NStatusModel::text() const {
-   return text_;
+std::string NStatusModel::text( unsigned int index ) const {
+   std::map<unsigned int, std::string>::const_iterator it = textMap.find( index );
+   if ( it != textMap.end() ) {
+	   return it->second;
+   }
+   return "";
 }
