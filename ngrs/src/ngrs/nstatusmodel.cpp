@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper  *
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,61 +17,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nstatusbar.h"
 #include "nstatusmodel.h"
-#include "nalignlayout.h"
-#include "ncustomstatusitem.h"
-#include "napp.h"
-#include "nconfig.h"
-#include "nlabel.h"
 
-
-NStatusBar::NStatusBar()
- : NPanel(), statusModel_(0)
-{
-  setLayout( NAlignLayout() );
-  setAlign( nAlBottom );
-
-  setSkin( NApp::config()->skin("stat_bar_bg") );
-
-  statusLabel_ = new NLabel();
-  NPanel::add( statusLabel_ );
+NStatusModel::NStatusModel() {
 }
 
-
-NStatusBar::~NStatusBar()
-{
+NStatusModel::~NStatusModel() {
 }
 
-void NStatusBar::add( NCustomStatusItem * component )
-{
-  NPanel::add(component,nAlRight);
+void NStatusModel::setText( const std::string & text ) {
+	text_ = text;
+	changed.emit( *this );
 }
 
-void NStatusBar::add( NCustomStatusItem * component, int align )
-{
-  NPanel::add(component,align);
-}
-
-void NStatusBar::add( NVisualComponent * component, int align )
-{
-  NPanel::add(component,align);
-}
-
-void NStatusBar::setModel( NCustomStatusModel & model ) {
-  statusModel_ = &model;
-  statusModel_->changed.connect( this, &NStatusBar::onModelDataChange );
-}
-
-NCustomStatusModel* NStatusBar::model() const {
-  return statusModel_;
-}
-
-void NStatusBar::resize() {
-  statusLabel_->setPosition( 0, 0 ,clientWidth(), clientHeight() );
-}
-
-void NStatusBar::onModelDataChange( const NCustomStatusModel & sender ) {
-	statusLabel_->setText( sender.text() );
-	statusLabel_->repaint();
+std::string NStatusModel::text() const {
+   return text_;
 }

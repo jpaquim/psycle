@@ -393,6 +393,10 @@ void MainWindow::initBars( )
   initToolBar();
 
   statusBar_ = new NStatusBar();
+    
+  statusBar_->setModel( statusBarData );
+  setStatusModel( statusBarData );
+
     progressBar_ = new NProgressBar();
         progressBar_->setValue(0);
         progressBar_->setMax(16385);
