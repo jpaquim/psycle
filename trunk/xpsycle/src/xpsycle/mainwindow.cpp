@@ -60,17 +60,38 @@ template<class T> inline T str_hex(const std::string &  value) {
    return result;
 }
 
+// progressbar subclassing
+
+ProgressStatusItem::ProgressStatusItem() {
+  setLayout( NAlignLayout() );
+  progressBar_ = new NProgressBar();
+	progressBar_->setValue(0);
+	progressBar_->setMax(16385);
+	progressBar_->setPreferredSize(200,10);
+  add( progressBar_, nAlClient );
+}
+
+ProgressStatusItem::~ProgressStatusItem() {
+}
+
+void ProgressStatusItem::setText( const std::string & text ) {
+  int value;
+  if ( std::istringstream( text ) >> value ) {
+    progressBar_->setValue( value );
+  }
+}
+
+// progressbar subclassing end
 
 MainWindow::MainWindow()
 	: NWindow(), pluginFinder_( *Global::pConfig() )
-{  
-  //SkinReader::Instance()->loadSkin( "/home/natti/psycle_skin.zip" );
-  SkinReader::Instance()->setDefaults();
-
+{ 
   setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
+  
+  setPosition( 10, 10, 800, 600);
 
-  setPosition(0,0,1000,600);
-  setPositionToScreenCenter();
+  SkinReader::Instance()->setDefaults();
+  
   count = 0;
 
   initMenu();
@@ -81,7 +102,29 @@ MainWindow::MainWindow()
     book->setTabBarVisible( false );
   pane()->add(book,nAlClient);
 
+  initStartPage();
+    
+  newMachineDlg_ = new NewMachine( pluginFinder_ );
+  add(newMachineDlg_);
 
+  audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
+  add( audioConfigDlg );	
+
+  selectedChildView_ = 0;
+  enableSound();
+
+  oldPlayPos_ = 0;
+  timer.setIntervalTime(10);
+  timer.timerEvent.connect(this,&MainWindow::onTimer);
+  timer.enableTimer();
+
+}
+
+MainWindow::~MainWindow()
+{
+}
+
+void MainWindow::initStartPage() {
   NImage* img;
   
   NPanel* test = new NPanel();
@@ -113,38 +156,13 @@ MainWindow::MainWindow()
 	test->add( gBox1,nAlClient );
   
   book->addPage( test, "Start Page" );
-  
-  newMachineDlg_ = new NewMachine( pluginFinder_ );
-  add(newMachineDlg_);
-
-  audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
-  add( audioConfigDlg );	
-
-  //initSongs();
-  enableSound();
-  //updateNewSong();
-
-  oldPlayPos_ = 0;
-  timer.setIntervalTime(10);
-  timer.timerEvent.connect(this,&MainWindow::onTimer);
-  timer.enableTimer(); 
-
 }
 
-
-MainWindow::~MainWindow()
-{
-}
 
 void MainWindow::enableSound( )
 {
   AudioDriver* pOut = Global::pConfig()->_pOutputDriver;
 	Player::Instance()->setDriver( *pOut );  
-}
-
-void MainWindow::initSongs( )
-{
-  selectedChildView_ = addChildView();
 }
 
 ChildView* MainWindow::addChildView()
@@ -329,6 +347,7 @@ void MainWindow::initMenu( )
       performanceMenu_->add(new NMenuItem("MDI Monitor"));
     menuBar_->add(performanceMenu_);
 
+	// Creates the community menu
 	communityMenu_ = new NMenu("Community");
 	  NMenuItem* comSearchItem = new NMenuItem("Community Search");	  
 	  communityMenu_->add( new NMenuItem("Ask a Question") );
@@ -387,56 +406,38 @@ void MainWindow::showSongpDlg( NButtonEvent* ev )
 
 void MainWindow::initBars( )
 {    
-  toolBarPanel_ = new NToolBarPanel();    
-  pane()->add(toolBarPanel_, nAlTop);
-
   initToolBar();
+  initStatusBar();
+}
 
-  statusBar_ = new NStatusBar();
-    
-  statusBar_->setModel( statusBarData );
+void MainWindow::initStatusBar() {
   setStatusModel( statusBarData );
-
-    progressBar_ = new NProgressBar();
-        progressBar_->setValue(0);
-        progressBar_->setMax(16385);
-        progressBar_->setWidth(200);
-        progressBar_->setHeight(25);
-        progressBar_->setVisible(false);
-      //  Global::pSong()->progress.connect(this,&MainWindow::onSongLoadProgress);
-    statusBar_->add(progressBar_,nAlLeft);
-    macPosStatusItem = new NTextStatusItem();
-    statusBar_->add(macPosStatusItem,nAlLeft);
-    //childView_->machineView()->machineMoved.connect(this,&MainWindow::onMachineMoved);
-
-    /*editModeStatusItem = new NTextStatusItem();
-    statusBar_->add(editModeStatusItem);
-    octStatusItem      = new NTextStatusItem();
-    statusBar_->add(octStatusItem);
-    playTimeStatusItem = new NTextStatusItem();
-    statusBar_->add(playTimeStatusItem);*/
-    linePosStatusItem  = new NTextStatusItem();
-      //childView_->patternView()->lineChanged.connect(this,&MainWindow::onLineChanged);
-    statusBar_->add(linePosStatusItem);
-    seqPatStatusItem   = new NTextStatusItem();
-    statusBar_->add(seqPatStatusItem);
-    seqPosStatusItem   = new NTextStatusItem();
-    statusBar_->add(seqPosStatusItem);
-
-  pane()->add(statusBar_,nAlBottom);
+  statusBar_ = new NStatusBar();    
+    ProgressStatusItem* progressBar_ = new ProgressStatusItem();
+	    progressBar_->setModelIndex( 1 );
+    statusBar_->add( progressBar_, nAlLeft );	    
+	for ( unsigned int i = 5; i >= 2; i-- )
+	  statusBar_->add( new NTextStatusItem(i) );    
+	statusBar_->setModel( statusBarData );
+    statusBarData.setText( "Ready", 0 );
+	statusBarData.setText( "Ln 0", 2 );
+	statusBarData.setText( "Tr 0", 3 );
+	statusBarData.setText( "Play 00:00:00:00", 4 );
+  pane()->add( statusBar_, nAlBottom );
 }
 
 void MainWindow::initToolBar( )
 {
+  toolBarPanel_ = new NToolBarPanel();    
+  pane()->add(toolBarPanel_, nAlTop);
+
   DefaultBitmaps & icons = Global::pConfig()->icons();
 
   NImage* img;
 
   toolBar1_ = new NToolBar();
   toolBarPanel_->add(toolBar1_);
-
   
-
   // creates the newfile button
   img = new NImage();
     img->setSharedBitmap(&icons.newfile());
@@ -741,40 +742,46 @@ void MainWindow::onFileNew( NButtonEvent * ev )
 }
 
 void MainWindow::onFileOpen( NButtonEvent * ev )
-{
+{	
   // add and create the temporay fileDialog
   NFileDialog* openDialog = new NFileDialog();
     openDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
   add( openDialog );
 
   if ( openDialog->execute() ) {
+	 
+	 statusBarData.setText("searching for \"" + openDialog->fileName() + "\"");
      std::string fileName = openDialog->fileName();
      //  progressBar_->setVisible(true);
      //pane()->resize();
      // pane()->repaint();
      if ( fileName != "" ) {
-			 // stop player
-			 Player::Instance()->stop();
+	   // stop player
+	   Player::Instance()->stop();
        songpDlg_->setVisible(false);
-			 // disable audio driver
-			 //Global::configuration()._pOutputDriver->Enable(false);
-		   // add a new Song tab
+	   // disable audio driver
+	   //Global::configuration()._pOutputDriver->Enable(false);
+	   // add a new Song tab
        ChildView* newView = addChildView();  
+	   newView->song()->progress.connect(this,&MainWindow::onSongLoadProgress);
        // load the song
-			 newView->song()->load(fileName);
+	   statusBarData.setText("loading \"" + openDialog->fileName() + "\"" );
+	   newView->song()->load(fileName);
        // update gui to new song
+	   newView->song()->progress.disconnect_all();
        newView->update();
        updateNewSong();
        pane()->resize();
        pane()->repaint();
-			 // enable audio driver
-			 //Global::configuration()._pOutputDriver->Enable(true);
+	   // enable audio driver
+	   //Global::configuration()._pOutputDriver->Enable(true);
        // update file recent open sub menu
        if (noFileWasYetLoaded) {
          recentFileMenu_->removeChilds();
          noFileWasYetLoaded = false;
        }
        recentFileMenu_->add(new NMenuItem(fileName));
+	   statusBarData.setText("loaded \"" + openDialog->fileName() + "\"");
      }
      //progressBar_->setVisible(false);
   }
@@ -813,12 +820,12 @@ void MainWindow::onFileSaveAs( NButtonEvent * ev )
 void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_t & b , const std::string & t)
 {
   if (a == 4) {
-    progressBar_->setValue(b);
+	  std::cout << "progress" << std::endl;
+	statusBarData.setText( stringify( (int) b), 1 );
     NApp::flushEventQueue();
   } else
   if (a == 2) {
-    progressBar_->setText(t);
-    progressBar_->repaint();
+    statusBarData.setText( t );
   }
 }
 
@@ -1258,38 +1265,6 @@ void MainWindow::onEditSeqCopy( NButtonEvent * ev )
 void MainWindow::onEditSeqCut( NButtonEvent * ev )
 {
 }
-
-
-void MainWindow::onMachineMoved( Machine * mac, int x, int y )
-{
-  macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(x) +","+ stringify(y));
-  statusBar_->resize();
-  statusBar_->repaint();
-}
-
-
-void MainWindow::onLineChanged(int line) {
-  linePosStatusItem->setText("Line: "+stringify(line));
-  statusBar_->resize();
-  statusBar_->repaint();
-}
-
-void MainWindow::updateStatusBar( )
-{
-  if ( !selectedChildView_ ) return;  
-
-  Machine* mac = selectedChildView_->machineView()->selMachine();
-  if (mac) {
-    macPosStatusItem->setText(stringify(mac->_macIndex)+":"+mac->_editName+" "+stringify(mac->_x) +","+ stringify(mac->_y));
-  }
-/*  seqPosStatusItem->setText("Pos: "+stringify(sequencerBar_->seqList()->selIndex()));
-  seqPatStatusItem->setText("Pat: "+sequencerBar_->patternPos());
-  linePosStatusItem->setText("Line: "+stringify(childView_->patternView()->cursor().y()));*/
-
-  statusBar_->resize();
-  statusBar_->repaint();
-}
-
 
 void MainWindow::onFileExit( NButtonEvent * ev )
 {

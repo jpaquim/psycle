@@ -32,6 +32,7 @@ class NTextStatusItem : public NCustomStatusItem
 {
 public:
     NTextStatusItem();
+	NTextStatusItem( unsigned int modelIndex );
     NTextStatusItem(const std::string & text);
 
     ~NTextStatusItem();

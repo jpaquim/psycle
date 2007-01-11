@@ -41,6 +41,7 @@
 #include <ngrs/n7segdisplay.h>
 #include <ngrs/ntabbook.h>
 #include <ngrs/nstatusmodel.h>
+#include <ngrs/ncustomstatusitem.h>
 
 
 class NStatusBar;
@@ -66,6 +67,23 @@ class AudioConfigDlg;
 /**
 @author Stefan
 */
+
+class ProgressStatusItem : public NCustomStatusItem {
+public:
+
+   ProgressStatusItem();
+   ~ProgressStatusItem();
+
+	virtual void setText( const std::string & text );
+
+
+private:
+
+	NProgressBar* progressBar_;
+
+};
+
+
 class MainWindow : public NWindow
 {
 public:
@@ -84,11 +102,8 @@ private:
 	bool oldPlayPos_;
 	PluginFinder pluginFinder_; // needs ctor_init_list
 
-    void initSongs();
     ChildView* addChildView();
-
     ChildView* selectedChildView_;
-
 
     bool noFileWasYetLoaded;
 
@@ -103,7 +118,7 @@ private:
     NToolBar* psycleControlBar_;
       NSlider*   masterSlider_;
     NStatusBar* statusBar_;
-      NProgressBar* progressBar_;
+    ProgressStatusItem* progressBar_;
 
 		NToolBar* playBar;
 
@@ -131,14 +146,6 @@ private:
 
     VuMeter* vuMeter_;
 
-    NTextStatusItem* macPosStatusItem;
-    NTextStatusItem* seqPosStatusItem;
-    NTextStatusItem* seqPatStatusItem;
-    NTextStatusItem* linePosStatusItem;
-    NTextStatusItem* playTimeStatusItem;
-    NTextStatusItem* octStatusItem;
-    NTextStatusItem* editModeStatusItem;
-
     NPanel* page;
     NTabBook* book;
 
@@ -152,7 +159,9 @@ private:
     void initDialogs();
     void initBars();
     void initToolBar();
+	void initStatusBar();
     void initMachineView();
+	void initStartPage();
 
     void updateBars();
 
@@ -240,11 +249,7 @@ private:
 
     int close();
 
-    void onMachineMoved(Machine* mac , int x, int y);
-    void onLineChanged(int line);
     void onSeqAdded(SinglePattern* pattern);
-
-    void updateStatusBar();
 
     void onNewMachineDialogAdded(Machine* mac);
 

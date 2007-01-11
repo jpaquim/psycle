@@ -24,6 +24,7 @@
 
 #include <ngrs/nwindow.h>
 #include <ngrs/nfontmetrics.h>
+#include <ngrs/nstatusmodel.h>
 #include <iostream>
 #include <iomanip>
 
@@ -194,6 +195,7 @@ namespace psycle {
 		}
 
 
+		// start of CustomPatternView
 		CustomPatternView::CustomPatternView()
 			 : NPanel(), doDrag_(0), doSelect_(0)
 		{
@@ -434,6 +436,7 @@ namespace psycle {
 
 		void CustomPatternView::setCursor( const PatCursor & cursor ) {
 			cursor_ = cursor;
+			updateStatusBar();
 		}
 
 		const PatCursor & CustomPatternView::cursor() const {
@@ -1003,30 +1006,28 @@ namespace psycle {
 					}
 				break;
 				case cdefNavLeft:
-                                            moveCursor(-1,0);
-                                            clearOldSelection();              
+					moveCursor(-1,0);
+					clearOldSelection();              
 				break;
 				case cdefNavRight:
-                                {
-                                        moveCursor(1,0);
-                                            clearOldSelection();              
-                                }
+                    moveCursor(1,0);
+					clearOldSelection();                    
 				break;
 				case cdefNavUp:
-                                        if ( cursor().line() - patternStep() >= 0 ) {
-                                            moveCursor(0, -patternStep() );
-                                        } else {
-                                            moveCursor(0, -cursor().line() );
-                                        }
-                                    clearOldSelection();              
+					if ( cursor().line() - patternStep() >= 0 ) {
+						moveCursor(0, -patternStep() );
+                    } else {
+						moveCursor(0, -cursor().line() );
+					}
+					clearOldSelection();
 				break;
 				case cdefNavDn:
-                                        if ( cursor().line()+patternStep() < lineNumber() ) {
-                                          moveCursor( 0, patternStep() );
-                                        } else {
-                                            moveCursor( 0, lineNumber()-1 - cursor().line() );
-                                        }
-                                        clearOldSelection();              
+					if ( cursor().line()+patternStep() < lineNumber() ) {
+						moveCursor( 0, patternStep() );
+					} else {
+						moveCursor( 0, lineNumber()-1 - cursor().line() );
+					}
+					clearOldSelection();
 				break;
 			}
 
@@ -1122,7 +1123,8 @@ namespace psycle {
 				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
 			} else if (dy!=0) {
 				window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
-			}		
+			}
+			updateStatusBar();
 		}
 
 		void CustomPatternView::onKeyRelease(const NKeyEvent & event) {
@@ -1486,6 +1488,13 @@ namespace psycle {
 		void CustomPatternView::setTrackMinWidth( int size ) {
 			trackMinWidth_ = size;
 			alignTracks();
+		}
+
+		void CustomPatternView::updateStatusBar() {
+			if ( window()->statusModel() ) {
+			  window()->statusModel()->setText( "Ln " + stringify( cursor().col() )  , 2 );
+			  window()->statusModel()->setText( "Tr " + stringify( cursor().line() ) , 3 );
+			}
 		}
 
 	} // end of host namespace

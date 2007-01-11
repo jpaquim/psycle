@@ -22,6 +22,7 @@
 
 #include "sigslot.h"
 #include <string>
+#include <map>
 
 // abstract interface for a statusbar textinfo model
 
@@ -34,10 +35,10 @@ public:
 	virtual ~NCustomStatusModel() = 0 {
 	}
 
-	virtual void setText( const std::string & text ) = 0;
-	virtual std::string text() const = 0;
+	virtual void setText( const std::string & text, unsigned int index = 0 ) = 0;
+	virtual std::string text( unsigned int index = 0 ) const = 0;
 
-	sigslot::signal1<const NCustomStatusModel&> changed;
+	sigslot::signal2<const NCustomStatusModel&, unsigned int > changed;
 
 };
 
@@ -48,12 +49,12 @@ public:
 
     ~NStatusModel();
 
-	virtual void setText( const std::string & text );
-    virtual std::string text() const;
+	virtual void setText( const std::string & text, unsigned int index = 0 );
+    virtual std::string text( unsigned int index = 0) const;
 
 private:
 
-	std::string text_;
+	std::map<unsigned int,std::string> textMap;
 
 };
 

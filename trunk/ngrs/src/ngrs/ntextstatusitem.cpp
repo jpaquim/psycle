@@ -27,6 +27,13 @@ NTextStatusItem::NTextStatusItem()
   init();
 }
 
+NTextStatusItem::NTextStatusItem( unsigned int modelIndex )
+ : NCustomStatusItem( modelIndex )
+{
+  init();
+}
+
+
 NTextStatusItem::NTextStatusItem( const std::string & text )
 {
   init();
@@ -69,9 +76,3 @@ void NTextStatusItem::resize( )
 {
   label_->setPosition(0,0,spacingWidth(), spacingHeight());
 }
-
-
-
-
-
-
