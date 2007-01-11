@@ -24,6 +24,7 @@
 #include "nconfig.h"
 #include "ndockpanel.h"
 #include "nalignlayout.h"
+#include "nstatusmodel.h"
 //#include <X11/extensions/Xinerama.h>
 
 #ifdef _MSC_VER
@@ -35,7 +36,7 @@ NIsWindow* NWindow::isWindow = new NIsWindow();
 bool NWindow::paintFlag = true;
 
 NWindow::NWindow()
- : NVisual()
+ : NVisual(), statusModel_(0)
 {  
   changeState_ = true;
   dblBuffer_ = true;
@@ -797,9 +798,10 @@ void NWindow::onSelection( )
 {
 }
 
+void NWindow::setStatusModel( NCustomStatusModel & model ) {
+	statusModel_ = &model;
+}
 
-
-
-
-
-
+NCustomStatusModel* NWindow::statusModel() const {
+  return statusModel_;
+}

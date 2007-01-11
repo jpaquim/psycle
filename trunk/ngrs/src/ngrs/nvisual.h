@@ -28,6 +28,7 @@
 /**
 @author Stefan
 */
+
 class NVisual : public NRuntime
 {
 public:

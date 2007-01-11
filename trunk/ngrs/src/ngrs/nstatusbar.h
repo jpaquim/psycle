@@ -23,20 +23,38 @@
 #include "npanel.h"
 
 class NCustomStatusItem;
+class NLabel;
+class NCustomStatusModel;
 
 /**
 @author Stefan Nattkemper
 */
+
+// view for a ncustomstatus based data model
+
 class NStatusBar : public NPanel
 {
 public:
+
     NStatusBar();
 
     ~NStatusBar();
 
     virtual void add(NCustomStatusItem* component);
     virtual void add(NCustomStatusItem* component, int align);
-		virtual void add(NVisualComponent* component, int align);
+	virtual void add(NVisualComponent* component, int align);
+
+	virtual void resize();
+
+	void setModel( NCustomStatusModel & model );
+	NCustomStatusModel* model() const;
+
+private:
+
+	NLabel* statusLabel_;
+	NCustomStatusModel* statusModel_;
+
+	void onModelDataChange( const NCustomStatusModel & sender );
 
 };
 

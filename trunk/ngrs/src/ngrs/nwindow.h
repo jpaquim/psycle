@@ -31,10 +31,12 @@ const int nDockWindow     = 3;
 
 
 class NDockPanel;
+class NCustomStatusModel;
 
 /**
 @author Stefan
 */
+
 class NWindow : public NVisual
 {
 public:
@@ -130,9 +132,13 @@ public:
     virtual void setMinimumWidth (int minWidth);
     virtual void setMinimumHeight(int minHeight);
 
-		void requestSelection();
-		virtual void onSelection();
+	void requestSelection();
+	virtual void onSelection();
 
+	
+	void setStatusModel( NCustomStatusModel & model );
+	NCustomStatusModel* statusModel() const;
+	
 
 private:
 
@@ -156,7 +162,7 @@ private:
    int dragX,dragY,dragOldX,dragOldY;
    NSize dragOffset;
    std::string title_;
-   NVisualComponent* lastOver_;
+   NVisualComponent* lastOver_;   
 
    void initDrag(NVisualComponent*, int x, int y);
    void doDrag(NVisualComponent*, int x, int y);
@@ -175,6 +181,8 @@ private:
    NRect userPos;
 
    void checkGeometry();
+
+   NCustomStatusModel* statusModel_;
 };
 
 #endif

@@ -17,61 +17,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "nstatusbar.h"
-#include "nstatusmodel.h"
-#include "nalignlayout.h"
-#include "ncustomstatusitem.h"
-#include "napp.h"
-#include "nconfig.h"
-#include "nlabel.h"
+#ifndef NSTATUSMODEL_H
+#define NSTATUSMODEL_H
+
+#include "sigslot.h"
+#include <string>
+
+// abstract interface for a statusbar textinfo model
+
+class NCustomStatusModel {
+public:
+	
+	NCustomStatusModel() {
+	};
+
+	virtual ~NCustomStatusModel() = 0 {
+	}
+
+	virtual void setText( const std::string & text ) = 0;
+	virtual std::string text() const = 0;
+
+	sigslot::signal1<const NCustomStatusModel&> changed;
+
+};
+
+class NStatusModel :  public NCustomStatusModel {
+public:
+
+    NStatusModel();
+
+    ~NStatusModel();
+
+	virtual void setText( const std::string & text );
+    virtual std::string text() const;
+
+private:
+
+	std::string text_;
+
+};
 
 
-NStatusBar::NStatusBar()
- : NPanel(), statusModel_(0)
-{
-  setLayout( NAlignLayout() );
-  setAlign( nAlBottom );
-
-  setSkin( NApp::config()->skin("stat_bar_bg") );
-
-  statusLabel_ = new NLabel();
-  NPanel::add( statusLabel_ );
-}
-
-
-NStatusBar::~NStatusBar()
-{
-}
-
-void NStatusBar::add( NCustomStatusItem * component )
-{
-  NPanel::add(component,nAlRight);
-}
-
-void NStatusBar::add( NCustomStatusItem * component, int align )
-{
-  NPanel::add(component,align);
-}
-
-void NStatusBar::add( NVisualComponent * component, int align )
-{
-  NPanel::add(component,align);
-}
-
-void NStatusBar::setModel( NCustomStatusModel & model ) {
-  statusModel_ = &model;
-  statusModel_->changed.connect( this, &NStatusBar::onModelDataChange );
-}
-
-NCustomStatusModel* NStatusBar::model() const {
-  return statusModel_;
-}
-
-void NStatusBar::resize() {
-  statusLabel_->setPosition( 0, 0 ,clientWidth(), clientHeight() );
-}
-
-void NStatusBar::onModelDataChange( const NCustomStatusModel & sender ) {
-	statusLabel_->setText( sender.text() );
-	statusLabel_->repaint();
-}
+#endif

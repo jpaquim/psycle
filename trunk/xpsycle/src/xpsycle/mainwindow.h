@@ -40,6 +40,7 @@
 #include <ngrs/nfiledialog.h>
 #include <ngrs/n7segdisplay.h>
 #include <ngrs/ntabbook.h>
+#include <ngrs/nstatusmodel.h>
 
 
 class NStatusBar;
@@ -77,6 +78,8 @@ public:
 private:
 
 	NTimer timer; // we poll playpos infos here to avoid thread sync with the audio thread
+
+	NStatusModel statusBarData; // statusBar data for the mainWindow statusbar;
 
 	bool oldPlayPos_;
 	PluginFinder pluginFinder_; // needs ctor_init_list

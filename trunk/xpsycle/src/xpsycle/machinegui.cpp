@@ -27,6 +27,7 @@
 #include <ngrs/nframeborder.h>
 #include <ngrs/nwindow.h>
 #include <ngrs/nslider.h>
+#include <ngrs/nstatusmodel.h>
 
 namespace psycle {
 	namespace host {
@@ -140,6 +141,10 @@ namespace psycle {
 
 			mac()._x = left();
 			mac()._y = top();
+
+			if ( window()->statusModel() ) {
+				window()->statusModel()->setText( stringify( left() ) +","+ stringify( top() ) );
+			}
 
 			moved.emit( &mac(), mac()._x, mac()._y );
 		}
