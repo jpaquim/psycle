@@ -32,7 +32,7 @@ public:
 	NCustomStatusModel() {
 	};
 
-	virtual ~NCustomStatusModel() = 0;
+	virtual ~NCustomStatusModel();
 
 	virtual void setText( const std::string & text, unsigned int index = 0 ) = 0;
 	virtual std::string text( unsigned int index = 0 ) const = 0;
@@ -41,8 +41,6 @@ public:
 
 };
 
-NCustomStatusModel::~NCustomStatusModel() {
-}
 
 class NStatusModel :  public NCustomStatusModel {
 public:
