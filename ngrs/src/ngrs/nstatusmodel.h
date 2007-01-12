@@ -32,8 +32,7 @@ public:
 	NCustomStatusModel() {
 	};
 
-	virtual ~NCustomStatusModel() = 0 {
-	}
+	virtual ~NCustomStatusModel() = 0;
 
 	virtual void setText( const std::string & text, unsigned int index = 0 ) = 0;
 	virtual std::string text( unsigned int index = 0 ) const = 0;
@@ -41,6 +40,9 @@ public:
 	sigslot::signal2<const NCustomStatusModel&, unsigned int > changed;
 
 };
+
+NCustomStatusModel::~NCustomStatusModel() {
+}
 
 class NStatusModel :  public NCustomStatusModel {
 public:
@@ -57,6 +59,5 @@ private:
 	std::map<unsigned int,std::string> textMap;
 
 };
-
 
 #endif
