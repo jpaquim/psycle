@@ -20,6 +20,11 @@
 #include "nstatusmodel.h"
 
 
+NCustomStatusModel::~NCustomStatusModel() 
+{
+}
+
+
 NStatusModel::NStatusModel() {
 }
 
