@@ -27,9 +27,10 @@ source_package = source_package(project,
 	name = 'xpsycle',
 	version = version(0, 0),
 	#description_file = 'README',
-	description = 'modular music creation studio'
-	long_description = \
-		"psycle is a modular music creation studio ..."
+	description = 'modular music creation studio',
+	long_description = """\
+psycle is a modular music creation studio ...
+"""
 )
 
 source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
@@ -153,7 +154,7 @@ microsoft_direct_sound = external_package_check(project, name = 'microsoft direc
 
 microsoft_mme = external_package_check(project, name = 'microsoft mme',
 	url = 'http://msdn.microsoft.com',
-	distribution_packages = {'microsoft (maybe windows updates?): 'multimedia extension'},
+	distribution_packages = {'microsoft (maybe windows updates?)': 'multimedia extension'},
 	dependencies = [
 		cxx_build_check(project, name = 'microsoft mme', libraries = ['mmsystem'], source_text = \
 			"""\
@@ -186,7 +187,6 @@ steinberg_asio = external_package_check(project, name = 'steinberg asio',
 
 ladspa = external_package_check(project, name = 'ladspa',
 	url = 'http://ladspa.org or http://linuxaudio.org ?',
-	distribution_packages = {'microsoft': 'steinberg asio'},
 	distribution_packages = {
 		'debian and ubuntu': 'ladspa-dev (>= 1.1) | ladspa-sdk-dev (>= 1.1) | ladspa-sdk (>= 1.1)',
 		'gentoo': '...',

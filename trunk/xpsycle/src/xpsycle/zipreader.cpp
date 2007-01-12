@@ -25,21 +25,31 @@
 #include <fcntl.h>
 #ifdef __unix__
       #include <unistd.h>
-      #include <sys/stat.h>
       #include <sys/types.h>
-#elif __MSDOS__ || __WIN32__ || _MSC_VER
+#elif defined _WIN64 || defined _WIN32 || defined __MSDOS__
       #include <io.h>
-      #include <sys\stat.h>	  
 #endif
-
-#ifdef _MSC_VER
-#define strcasecmp stricmp 
-#endif
+#include <sys/stat.h>
 
 #include <stdlib.h>
 #include <string.h>
 
 #include <zlib.h>
+
+// case-insensitive string comparison function
+// todo: strcasecmp is not part of the iso std lib
+#if defined _MSC_VER
+	#define strcasecmp stricmp 
+#elif defined __GNUC__
+	#if defined __CYGWIN__ && defined __STRICT_ANSI__
+		// copied from cygwin's <string.h> header
+		_BEGIN_STD_C
+		int _EXFUN(strcasecmp,(const char *, const char *));
+		_END_STD_C
+	#else
+		// todo check the implementation on other systems
+	#endif
+#endif
 
 static int _load(int fd, char *buf, size_t bufsize)
 {
