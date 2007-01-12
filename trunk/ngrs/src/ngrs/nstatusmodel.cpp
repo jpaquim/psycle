@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "nstatusmodel.h"
 
+
 NStatusModel::NStatusModel() {
 }
 
