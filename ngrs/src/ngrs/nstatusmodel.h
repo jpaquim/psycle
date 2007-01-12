@@ -29,8 +29,7 @@
 class NCustomStatusModel {
 public:
 	
-	NCustomStatusModel() {
-	};
+	NCustomStatusModel() {}
 
 	virtual ~NCustomStatusModel();
 
