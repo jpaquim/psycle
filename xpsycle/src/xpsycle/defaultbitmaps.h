@@ -91,7 +91,10 @@ public:
     NBitmap & new_category();
     NBitmap & moveDownTrack();
     NBitmap & moveUpTrack();
-		NBitmap & patNav();
+	NBitmap & patNav();
+	NBitmap & logoLeft();
+	NBitmap & logoMid();
+	NBitmap & logoRight();
 
 private:
 
@@ -150,6 +153,10 @@ private:
     NBitmap tweakHeader_;
     NBitmap patNav_;
 	NBitmap logoSmall_;
+	NBitmap logoLeft_;
+	NBitmap logoMid_;
+	NBitmap logoRight_;
+		
 };
 
 }

@@ -44,7 +44,7 @@ public:
 
     sigslot::signal2< const NXmlParser &, const std::string & > tagParse;
 
-    void parseFile(const std::string & fileName);
+    int parseFile( const std::string & fileName );
     int parseString( const std::string & text );
     std::string getAttribValue(const std::string & name) const;
 
