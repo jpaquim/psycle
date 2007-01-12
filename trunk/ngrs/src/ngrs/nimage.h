@@ -27,12 +27,15 @@
 /**
 @author Stefan
 */
+
+const int nAlWallPaper = 10;
+
 class NImage : public NPanel
 {
 public:
     NImage();
-    NImage(const std::string & fileName);
-    NImage(const NBitmap & bitmap);
+    NImage( const std::string & fileName );
+    NImage( const NBitmap & bitmap );
 
     ~NImage();
 
@@ -45,8 +48,11 @@ public:
 
     void setSharedBitmap(NBitmap* bitmap);
 
-    virtual void setHAlign(int align);
-    virtual void setVAlign(int align);
+    void setHAlign( int align );
+	int hAlign() const;
+
+    void setVAlign( int align );
+	int vAlign() const;
 
     virtual int preferredWidth()  const;
     virtual int preferredHeight() const;

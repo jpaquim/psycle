@@ -21,97 +21,39 @@
 #include "nconfig.h"
 #include "nbevelborder.h"
 #include "nframeborder.h"
+#include "nxmlparser.h"
 #include "nfile.h"
 #include <iostream>
-#ifdef __unix__
-#include <xercesc/sax2/Attributes.hpp>
-
-
-XERCES_CPP_NAMESPACE_USE;
-#endif
 
 using namespace std;
 
-#ifdef __unix__
-class MySAX2Handler : public DefaultHandler {
 
-public:
-    void startElement(
-        const   XMLCh* const    uri,
-        const   XMLCh* const    localname,
-        const   XMLCh* const    qname,
-        const   Attributes&     attrs
-    );
+NColor NConfig::attrsToColor( const NXmlParser & parser ) {
+  std::string rStr = parser.getAttribValue( "r" );
+  std::string gStr = parser.getAttribValue( "g" );
+  std::string bStr = parser.getAttribValue( "b" );
 
-    void fatalError(const SAXParseException&);
+  std::stringstream str1; str1 << rStr; int r = 0; str1 >> r;
+  std::stringstream str2; str2 << gStr; int g = 0; str2 >> g;
+  std::stringstream str3; str3 << bStr; int b = 0; str3 >> b;
 
-    void setCfg(NConfig* cfg) { pCfg = cfg;};
-
-    std::string getValue(const std::string & name, const Attributes& attrs) {
-       std::string erg;
-       try {
-         XMLCh* str = XMLString::transcode(name.c_str());
-         const XMLCh* strCh = attrs.getValue(str);
-         char* id = XMLString::transcode(strCh);
-         erg = std::string(id);
-         XMLString::release(&id);
-         XMLString::release(&str);
-       } catch (std::exception e) {
-           return "";
-        }
-      return erg;
-    }
-
-    NColor attrsToColor(const Attributes& attrs) {
-       std::string rStr = getValue("r",attrs);
-       std::string gStr = getValue("g",attrs);
-       std::string bStr = getValue("b",attrs);
-
-       std::stringstream str1; str1 << rStr; int r = 0; str1 >> r;
-       std::stringstream str2; str2 << gStr; int g = 0; str2 >> g;
-       std::stringstream str3; str3 << bStr; int b = 0; str3 >> b;
-
-       return NColor(r,g,b);
-    }
-
-private:
-
-    std::string lastId;
-    NConfig* pCfg;
-
-};
+  return NColor( r, g, b );
+}
 
 
 
-void MySAX2Handler::startElement(const   XMLCh* const    uri,
-                            const   XMLCh* const    localname,
-                            const   XMLCh* const    qname,
-                            const   Attributes&     attrs)
-{
-    char* message = XMLString::transcode(localname);
-    //cout << "I saw element: "<< message << endl;
-    std::string tagName = std::string(message);
-
-    pCfg->tagParse.emit(tagName);
-    pCfg->attrs = &attrs;
-
-    if (tagName == "path") {
-      std::string id   = getValue("id",attrs);
-      std::string path = getValue("src",attrs);
-      pCfg->pathMap[id]=path;
-    }
-
-    if (tagName == "vcskin") {
+void NConfig::onTagParse( const NXmlParser & parser, const std::string & tagName ) {    
+    if ( tagName == "vcskin" ) {
         NSkin skin;
-        std::string id      = getValue("id",attrs);
+        std::string id = parser.getAttribValue( "id" );
         lastId = id;
-        pCfg->skinMap[id] = skin;
+        skinMap[id] = skin;
     } else
     if (tagName == "bitmap") {
-      NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
-         std::string src = getValue("src",attrs);
-         std::string styleStr = getValue("style",attrs);
+      NSkin* skin = findSkin(lastId);
+      if ( skin ) {
+         std::string src = parser.getAttribValue("src");
+         std::string styleStr = parser.getAttribValue("style");
          std::stringstream str; str << styleStr;
          int style  = 0;
          str >> style;
@@ -120,11 +62,11 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
       }
     } else
     if (tagName == "font") {
-      NSkin* skin = pCfg->findSkin(lastId);
+      NSkin* skin = findSkin(lastId);
       if (skin != 0) {
-         std::string name = getValue("name",attrs);
-         std::string size = getValue("size",attrs);
-         std::string color = getValue("color",attrs);
+         std::string name = parser.getAttribValue("name");
+         std::string size = parser.getAttribValue("size");
+         std::string color = parser.getAttribValue("color");
          std::stringstream str; str << size; int sz = 0; str >> sz;
          NFont font(name,sz,nMedium | nAntiAlias);
          font.setTextColor(NColor(color));
@@ -132,12 +74,12 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
       }
     } else
     if (tagName == "frmborder") {
-     NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
+     NSkin* skin = findSkin(lastId);
+      if ( skin ) {
          NFrameBorder fr;
          fr.setSpacing(NSize(0,0,0,0));
 
-         std::string styleStr = getValue("style",attrs);
+         std::string styleStr = parser.getAttribValue("style");
          if (styleStr != "") {
            std::stringstream str; str << styleStr;
            int style  = 0;
@@ -145,18 +87,17 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
            fr.setOval(style);
          }
 
+         std::string lcount  = parser.getAttribValue("lines");
 
-         std::string lcount  = getValue("lines",attrs);
+         std::string arcw    = parser.getAttribValue("arcw");
+         std::string arch    = parser.getAttribValue("arch");
 
-         std::string arcw    = getValue("arcw",attrs);
-         std::string arch    = getValue("arch",attrs);
-
-         if (lcount!="") {
+         if ( lcount!="" ) {
             int lines = str<int>(lcount);
-            std::string dwidth    = getValue("linedistw",attrs);
+            std::string dwidth    = parser.getAttribValue("linedistw");
             int dw = 0;
             if (dwidth!="")  dw = str<int>(dwidth);
-             std::string dheight  = getValue("linedistw",attrs);
+             std::string dheight  = parser.getAttribValue("linedistw");
             int dh = 0;
             if (dheight!="") dh = str<int>(dheight);
             fr.setOval(lines,dw,dh);
@@ -169,28 +110,30 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
            fr.setOval(fr.oval(),arcH,arcW);
          }
 
-         skin->setBorder(fr);
+         skin->setBorder( fr );
       }
     } else
     if (tagName == "bvlborder") {
-     NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
+     NSkin* skin = findSkin(lastId);
+      if ( skin ) {
          NBevelBorder br;
          br.setSpacing(NSize(0,0,0,0));
 
          int outerStyle = nNone;
 
-         std::string styleStr = getValue("outer",attrs);
+         std::string styleStr = parser.getAttribValue("outer");
          if (styleStr != "") {
-           if (styleStr == "raised")  outerStyle = nRaised; else
+           if (styleStr == "raised")  outerStyle = nRaised; 
+		      else
            if (styleStr == "lowered") outerStyle = nLowered;
          }
 
          int innerStyle = nNone;
 
-         styleStr = getValue("inner",attrs);
+         styleStr = parser.getAttribValue("inner");
          if (styleStr != "") {
-           if (styleStr == "raised")  innerStyle = nRaised; else
+           if (styleStr == "raised")  innerStyle = nRaised; 
+		      else
            if (styleStr == "lowered") innerStyle = nLowered;
          }
 
@@ -198,43 +141,43 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          skin->setBorder(br);
        }
     } else
-    if (tagName == "bgcolor") {
-      NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
-         skin->setBackground(attrsToColor(attrs));
-         skin->useParentBackground(false);
-         skin->setTransparent(false);
+    if ( tagName == "bgcolor" ) {
+      NSkin* skin = findSkin(lastId);
+      if ( skin ) {
+         skin->setBackground( attrsToColor( parser ) );
+         skin->useParentBackground( false );
+         skin->setTransparent( false );
       }
     } else
     if (tagName == "fgcolor") {
-      NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
-         skin->setForeground(attrsToColor(attrs));
+      NSkin* skin = findSkin( lastId );
+      if ( skin ) {
+         skin->setForeground( attrsToColor( parser ));
          skin->useParentForeground(false);
       }
     } else
     if (tagName == "translucent") {
-      NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
-         std::string color = getValue("color",attrs);
-         std::string percentStr = getValue("percent",attrs);
+      NSkin* skin = findSkin( lastId );
+      if ( skin ) {
+         std::string color = parser.getAttribValue( "color" );
+         std::string percentStr = parser.getAttribValue("percent");
          std::stringstream str; str << percentStr;
          int percent  = 0;
          str >> percent;
-         skin->setTranslucent(NColor(color),percent);
+         skin->setTranslucent( NColor( color ), percent );
       }
     } else
     if (tagName == "gradient") {
-      NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
-         std::string start = getValue("start",attrs);
-         std::string mid = getValue("mid",attrs);
-         std::string end = getValue("end",attrs);
-         std::string styleStr   = getValue("style",attrs);
-         std::string percentStr = getValue("percent",attrs);
-         std::string direction  = getValue("dir",attrs);
-         std::string arcw  = getValue("arcw",attrs);
-         std::string arch  = getValue("arch",attrs);
+      NSkin* skin = findSkin(lastId);
+      if ( skin ) {
+         std::string start = parser.getAttribValue( "start" );
+         std::string mid = parser.getAttribValue( "mid" );
+         std::string end = parser.getAttribValue( "end" );
+         std::string styleStr   = parser.getAttribValue( "style" );
+         std::string percentStr = parser.getAttribValue( "percent" );
+         std::string direction  = parser.getAttribValue( "dir" );
+         std::string arcw  = parser.getAttribValue( "arcw" );
+         std::string arch  = parser.getAttribValue( "arch" );
          std::stringstream str; str << styleStr;
          int style  = 0;
          str >> style;
@@ -249,24 +192,22 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
            str3 << arcw;
            str3 >> arcWidth;
          }
-
          int arcHeight = 0;
          if (arch!="") {
            std::stringstream str3;
            str3 << arch;
            str3 >> arcHeight;
          }
-
-         skin->setGradient(NColor(start),NColor(mid),NColor(end),style,(direction=="hor") ? nHorizontal : nVertical,percent,arcWidth,arcHeight);
+         skin->setGradient( NColor(start), NColor(mid), NColor(end),style,(direction=="hor") ? nHorizontal : nVertical,percent,arcWidth,arcHeight);
       }
     } else
     if (tagName == "spacing") {
-      NSkin* skin = pCfg->findSkin(lastId);
-      if (skin != 0) {
-         std::string l = getValue("left",attrs);
-         std::string t = getValue("top",attrs);
-         std::string r = getValue("right",attrs);
-         std::string b = getValue("bottom",attrs);
+      NSkin* skin = findSkin( lastId );
+      if ( skin ) {
+         std::string l = parser.getAttribValue( "left" );
+         std::string t = parser.getAttribValue( "top" );
+         std::string r = parser.getAttribValue( "right" );
+		 std::string b = parser.getAttribValue( "bottom" );
          std::stringstream str; str << l; int left = 0; str >> left;
          std::stringstream str1; str1 << t; int top  = 0; str1 >> top;
          std::stringstream str2; str2 << r; int right  = 0; str1 >> right;
@@ -275,22 +216,7 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          skin->setSpacing(NSize(left,top,right,bottom));
       }
     }
-    /*if (tagName!="ngrs") {
-        NSkin skin;
-        pCfg->skinMap[tagName] = skin;
-    }*/
-    XMLString::release(&message);
 }
-
-void MySAX2Handler::fatalError(const SAXParseException& exception)
-{
-    char* message = XMLString::transcode(exception.getMessage());
-    cout << "ngrs: configuration: xml error: " << message
-         << " at line: " << exception.getLineNumber()
-         << endl;
-    cout << "ngrs: configuration: using defaults instead" << endl;
-}
-#endif
 
 /* XPM */
 const char * hbar_xpm[] = {
@@ -374,6 +300,7 @@ NConfig::~NConfig()
 
 NSkin NConfig::skin( const std::string & identifier )
 {
+  ///\ todo write a mem parse xml file
   NSkin newSkin;
   NSkin* xmlSkin = 0;
   if (identifier == "") return NSkin(); else
@@ -603,59 +530,11 @@ NSkin NConfig::skin( const std::string & identifier )
   return newSkin;
 }
 
-void NConfig::loadXmlConfig(const std::string & configName, bool throw_allowed )
+int NConfig::loadXmlConfig( const std::string & configName )
 {
-  #ifdef __unix__
-  attrs = 0;  
-
-  try {
-    XMLPlatformUtils::Initialize();
-  }
-  catch (const XMLException&) {
-    if(throw_allowed) throw;
-    else return; // ahem...
-  }
-
-  SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
-
-  MySAX2Handler* defaultHandler = new MySAX2Handler();
-  defaultHandler->setCfg(this);
-  parser->setContentHandler(defaultHandler);
-  parser->setErrorHandler(defaultHandler);
-  try {
-    parser->parse(configName.c_str());
-  }
-        catch (const XMLException& toCatch) {
-            char* message = XMLString::transcode(toCatch.getMessage());
-            cout << "ngrs: configuration: error: Exception message is: \n"
-                 << message << "\n";
-            XMLString::release(&message);
-            if(throw_allowed) throw;
-            //else return -1;
-        }
-        catch (const SAXParseException& toCatch) {
-            char* message = XMLString::transcode(toCatch.getMessage());
-            cout << "ngrs: configuration: error: Exception message is: \n"
-                 << message << "\n";
-            XMLString::release(&message);
-            if(throw_allowed) throw;
-            //else return -1;
-        }
-   catch (...) {
-       if(throw_allowed)
-       {
-           delete parser;
-           delete defaultHandler;
-           XMLPlatformUtils::Terminate();
-           throw;
-       }
-       else std::cerr << "ngrs: configuration: error: Unexpected Exception" << std::endl;
-   }
-
-  delete parser;
-  delete defaultHandler;
-  XMLPlatformUtils::Terminate();
-  #endif
+  NXmlParser parser;
+  parser.tagParse.connect( this, &NConfig::onTagParse );
+  return parser.parseFile( configName.c_str() );
 }
 
 NSkin* NConfig::findSkin( const std::string & id )
@@ -667,36 +546,4 @@ NSkin* NConfig::findSkin( const std::string & id )
   } else {
     return &itr->second;
   }
-}
-
-std::string NConfig::findPath( const std::string & id )
-{
-  std::map<std::string, std::string>::iterator itr;
-  if ( (itr = pathMap.find(id)) == pathMap.end() )
-  {
-      return "";
-  } else {
-    return itr->second;
-  }
-}
-
-std::string NConfig::getAttribValue( const std::string & name )
-{
-   #ifdef __unix__
-   std::string erg;
-       try {
-       XMLCh* str = XMLString::transcode(name.c_str());
-       const XMLCh* strCh = attrs->getValue(str);
-       char* id = XMLString::transcode(strCh);
-       erg = std::string(id);
-       XMLString::release(&id);
-       XMLString::release(&str);
-       } catch (std::exception e)
-       {
-           return "";
-       }
-      return erg;
-  #else
-  return "";
-  #endif
 }

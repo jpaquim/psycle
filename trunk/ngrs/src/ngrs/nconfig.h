@@ -25,21 +25,13 @@
 */
 
 #include "nskin.h"
-#include <map>
-#ifdef __unix__
-#include <xercesc/util/PlatformUtils.hpp>
-#include <xercesc/sax2/SAX2XMLReader.hpp>
-#include <xercesc/sax2/XMLReaderFactory.hpp>
-#include <xercesc/sax2/DefaultHandler.hpp>
-#include <xercesc/util/XMLString.hpp>
-#endif
 #include "nobject.h"
+#include <map>
+
 
 class NBorder;
+class NXmlParser;
 
-#ifdef __unix__
-class XERCES_CPP_NAMESPACE_QUALIFIER Attributes;
-#endif
 
 class NConfig : public NObject {
 
@@ -48,26 +40,18 @@ public:
 
     ~NConfig();
 
-    NSkin skin(const std::string & identifier);
-
-    void loadXmlConfig(const std::string & configName, bool throw_allowed = false);
-
-    std::map<std::string, NSkin> skinMap;
-    std::map<std::string, std::string> pathMap;
-
-    std::string findPath(const std::string & id);
-    NSkin* findSkin(const std::string & id);
-
-    std::string getAttribValue(const std::string & name);
-
-    signal1<const std::string &> tagParse;
-
-    #ifdef __unix__
-    const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
-    #endif
-
+    NSkin skin( const std::string & identifier );
+    
 private:
 
+	std::string lastId;
+
+	std::map<std::string, NSkin> skinMap;
+    NSkin* findSkin( const std::string & id );
+	NColor attrsToColor( const NXmlParser & parser );
+    
+	int loadXmlConfig( const std::string & configName );
+	void onTagParse( const NXmlParser & parser, const std::string & tagName );
 
 };
 

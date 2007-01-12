@@ -74,43 +74,59 @@ void NImage::paint( NGraphics * g )
 
   if ( pBmp->sysData() )
   {
-    switch (halign_) {
+	if ( halign_ == nAlWallPaper && valign_ == nAlWallPaper ) {	  
+      for (int yp = 0; yp < spacingHeight(); yp += pBmp->height() ) {
+        for (int xp = 0; xp < spacingWidth(); xp += pBmp->width() ) {
+          g->putBitmap( xp, yp, *pBmp );
+        }
+      }
+	  return;
+	}
+
+    switch ( halign_ ) {
       case nAlCenter :
         xp =(int) d2i((spacingWidth() - pBmp->width()) / 2.0f);
       break;
     }
-    switch (valign_) {
+
+    switch ( valign_ ) {
       case nAlCenter :
         yp = (int) d2i((spacingHeight() - pBmp->height()) / 2.0f);
       break;
     }
 
-    g->putBitmap(xp,yp,*pBmp);
-  }
+	if ( halign_ == nAlWallPaper ) {
+	  for (int xp = 0; xp < spacingWidth(); xp += pBmp->width() ) {
+        g->putBitmap( xp, yp, *pBmp );
+      }
+	} else
+	  if ( valign_ == nAlWallPaper ) {
+      for (int yp = 0; yp < spacingHeight(); yp += pBmp->height() ) {
+          g->putBitmap( left()+xp, top()+yp, *pBmp );
+      }
+	} else
+		g->putBitmap( xp, yp, *pBmp );	  
+	}
 
-}
+  }
 
 void NImage::loadFromFile( const std::string & filename )
 {
-  bitmap24bpp_ = NApp::filter.at(0)->loadFromFile(filename);
-  setHeight(bitmap24bpp_.height());
-  setWidth(bitmap24bpp_.width());
+  bitmap24bpp_ = NApp::filter.at( 0 )->loadFromFile( filename );
+  setHeight( bitmap24bpp_.height() );
+  setWidth( bitmap24bpp_.width() );
 }
 
 int NImage::preferredWidth( ) const
 {
   if (ownerSize()) return NVisualComponent::preferredWidth();
-
-  if (pBitmap_!=0) return pBitmap_->width()+1;
-  return bitmap24bpp_.width()+1;
+  return pBitmap_ ? pBitmap_->width()+1 : bitmap24bpp_.width()+1;
 }
 
 int NImage::preferredHeight( ) const
 {
   if (ownerSize()) return NVisualComponent::preferredHeight();
-
-  if (pBitmap_!=0) return pBitmap_->height()+1;
-  return bitmap24bpp_.height()+1;
+  return pBitmap_ ? pBitmap_->height()+1 : bitmap24bpp_.height()+1;
 }
 
 void NImage::setHAlign( int align )
@@ -118,14 +134,8 @@ void NImage::setHAlign( int align )
   halign_ = align;
 }
 
-void NImage::createFromXpmData(const char** data)
-{
-  bitmap24bpp_.createFromXpmData(data);  
-}
-
-void NImage::setBitmap( const NBitmap & bitmap )
-{
-  bitmap24bpp_ = bitmap;
+int NImage::hAlign() const {
+  return halign_;
 }
 
 void NImage::setVAlign( int align )
@@ -133,7 +143,21 @@ void NImage::setVAlign( int align )
   valign_ = align;
 }
 
-void NImage::setSharedBitmap( NBitmap * bitmap )
+int NImage::vAlign() const {
+  return valign_;
+}
+
+void NImage::createFromXpmData( const char** data )
+{
+  bitmap24bpp_.createFromXpmData(data);  
+}
+
+void NImage::setBitmap( const NBitmap& bitmap )
+{
+  bitmap24bpp_ = bitmap;
+}
+
+void NImage::setSharedBitmap( NBitmap* bitmap )
 {
   pBitmap_ = bitmap;
 }

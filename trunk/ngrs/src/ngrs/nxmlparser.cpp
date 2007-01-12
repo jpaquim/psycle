@@ -177,9 +177,10 @@ NXmlParser::~NXmlParser()
 }
 
 
-void NXmlParser::parseFile( const std::string & fileName )
+int NXmlParser::parseFile( const std::string & fileName )
 {
   #ifdef __unix__
+  int err = 0;
   attrs = 0;
 
   try {
@@ -190,6 +191,7 @@ void NXmlParser::parseFile( const std::string & fileName )
      std::cout << "xml parse error: Exception message is: \n"
                  << message << "\n";
      XMLString::release(&message);
+	 err = 1;
   }
 
   SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
@@ -206,28 +208,33 @@ void NXmlParser::parseFile( const std::string & fileName )
      std::cout << "xml parse error: Exception message is: \n"
                  << message << "\n";
      XMLString::release(&message);
+	 err = 1;
    }
    catch (const SAXParseException& toCatch) {
      char* message = XMLString::transcode(toCatch.getMessage());
      std::cout << "xml parse error: Exception message is: \n"
                  << message << "\n";
      XMLString::release(&message);
+	 err = 1;
    }
    catch (...) {
      std::cerr << "Xml Parser Unexpected Exception" << std::endl;
+	 err = 1;
    }
 
   delete parser;
   delete defaultHandler;
   XMLPlatformUtils::Terminate();  
+  return err;
   #else
-  ///\ todo parse it as stream
   if ( NFile::fileIsReadable( fileName ) ) {
 	  std::string memparse = NFile::readFile( fileName );
 	  parseString( memparse );
+	  return 1;
   } else {
 	  std::cout << "ngrs_runtime_xml_err:  file is not readable: \n"
                  << fileName << "\n";
+	  return 0;
   }
   #endif
 }

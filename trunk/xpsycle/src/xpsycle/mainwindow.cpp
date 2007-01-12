@@ -88,7 +88,7 @@ MainWindow::MainWindow()
 { 
   setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
   
-  setPosition( 10, 10, 800, 600);
+  setPosition( 10, 10, 800, 600 );
 
   SkinReader::Instance()->setDefaults();
   
@@ -128,11 +128,21 @@ void MainWindow::initStartPage() {
   NImage* img;
   
   NPanel* test = new NPanel();
-  test->setLayout( NAlignLayout() );
-    img = new NImage( Global::pConfig()->icons().logoSmall()  );
-    img->setVAlign( nAlCenter );
-    test->add( img , nAlTop );
-
+    test->setLayout( NAlignLayout() );
+	NPanel* logoPnl = new NPanel();
+	  logoPnl->setLayout( NAlignLayout() );
+	  logoPnl->setSpacing( NSize( 10,5,10,5 ) );
+	  img = new NImage( Global::pConfig()->icons().logoRight()  );
+	     img->setVAlign( nAlCenter );
+	  logoPnl->add( img , nAlRight );
+	  img = new NImage( Global::pConfig()->icons().logoLeft()  );
+	     img->setVAlign( nAlCenter );
+	  logoPnl->add( img , nAlLeft );
+	  img = new NImage( Global::pConfig()->icons().logoMid()  );
+	     img->setVAlign( nAlCenter );
+		 img->setHAlign( nAlWallPaper );
+	  logoPnl->add( img , nAlClient );
+	test->add( logoPnl, nAlTop );
 
 	NGroupBox* gBox = new NGroupBox();
 	  gBox->setLayout( NAlignLayout() );
