@@ -795,7 +795,7 @@ namespace psycle {
                                                         }
                                                         newLeft = oldSelection_.left(); // left&right stay the same.
                                                         newRight = oldSelection_.right();
-                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
+                                                        selection_.setSize(newLeft,newTop,newRight,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(), crs.track()+1,
                                                                                std::max(0,crs.line()-1),
@@ -818,7 +818,7 @@ namespace psycle {
                                                         }
                                                         newLeft = oldSelection_.left(); // left&right stay the same.
                                                         newRight = oldSelection_.right();
-                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
+                                                        selection_.setSize(newLeft,newTop,newRight,newBottom); 
                                   
                                                 } else {
                                                         startKeybasedSelection(crs.track(), crs.track()+1,
@@ -842,7 +842,7 @@ namespace psycle {
                                                         }
                                                         newTop = oldSelection_.top(); // top&bottom stay the same.
                                                         newBottom = oldSelection_.bottom();
-                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
+                                                        selection_.setSize(newLeft,newTop,newRight,newBottom); 
 
                                                 } else { // start a keyboard-based selection. 
                                                         startKeybasedSelection(std::max(0,crs.track()-1),
@@ -869,7 +869,7 @@ namespace psycle {
                                                         }
                                                         newTop = oldSelection_.top(); // top&bottom stay the same.
                                                         newBottom = oldSelection_.bottom();
-                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
+                                                        selection_.setSize(newLeft,newTop,newRight,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(), 
                                                                                std::min(trackNumber(),crs.track()+2),
@@ -894,7 +894,7 @@ namespace psycle {
                                                         newTop = 0; // top also goes to top.
                                                         newLeft = oldSelection_.left(); // left&right stay the same.
                                                         newRight = oldSelection_.right();
-                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
+                                                        selection_.setSize(newLeft,newTop,newRight,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(),crs.track()+1,
                                                                                0, crs.line()+1);
@@ -917,7 +917,7 @@ namespace psycle {
                                                         newBottom = lineNumber();
                                                         newLeft = oldSelection_.left(); // left&right stay the same.
                                                         newRight = oldSelection_.right();
-                                                        updateSelectionPositions(newLeft,newRight,newTop,newBottom); 
+                                                        selection_.setSize(newLeft,newTop,newRight,newBottom); 
                                                 } else {
                                                         startKeybasedSelection(crs.track(), crs.track()+1,
                                                                                crs.line(), lineNumber());
@@ -1039,14 +1039,7 @@ namespace psycle {
                         selStartPoint_ = crs;
                         selCursor_ = crs;
                         doingKeybasedSelect_ = true;
-                        updateSelectionPositions(leftPos, rightPos, topPos, bottomPos);
-                }
-
-                void CustomPatternView::updateSelectionPositions(int leftPos, int rightPos, int topPos, int bottomPos) {
-                        selection_.setLeft(leftPos);
-                        selection_.setRight(rightPos);
-                        selection_.setTop(topPos);
-                        selection_.setBottom(bottomPos);
+                        selection_.setSize(leftPos, topPos, rightPos, bottomPos);
                 }
 
                 void CustomPatternView::repaintSelection() {
@@ -1168,11 +1161,11 @@ namespace psycle {
 
 		NRect CustomPatternView::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {
 			int top    = startLine    * rowHeight()  + absoluteTop()  - dy_;
-  		int bottom = (endLine+1)  * rowHeight()  + absoluteTop()  - dy_;
-  		int left   = xOffByTrack( startTrack)  + absoluteLeft() - dx_;
-  		int right  = xEndByTrack( endTrack  )  + absoluteLeft() - dx_;
+                        int bottom = (endLine+1)  * rowHeight()  + absoluteTop()  - dy_;
+                        int left   = xOffByTrack( startTrack)  + absoluteLeft() - dx_;
+                        int right  = xEndByTrack( endTrack  )  + absoluteLeft() - dx_;
 
-  		return NRect(left,top,right - left,bottom - top);
+                        return NRect(left,top,right - left,bottom - top);
 		}
 
 		NPoint CustomPatternView::linesFromRepaint(const NRegion & repaintArea) const {
@@ -1266,17 +1259,14 @@ namespace psycle {
 
         void CustomPatternView::selectAll(const PatCursor & cursor) {
             std::cout << "select all" << std::endl;
-			doSelect_=true;
-            selection_.setLeft(0); 
+            doingKeybasedSelect_=true;
             // FIXME: selects but doesn't repaint properly, not sure why...
-            // (compare with .setRight(trackNumber()-1), repaints fine)
-            selection_.setRight(trackNumber()); 
-            selection_.setTop(0);
-            selection_.setBottom(lineNumber());
+            // (compare with trackNumber()-1, repaints fine)
+            selection_.setSize(0,0,trackNumber(),lineNumber());
 
-                if (oldSelection_ != selection_) {
+//                if (oldSelection_ != selection_) {
                         repaintSelection();
-                }
+//                }
 
             selCursor_ = cursor;
         }
