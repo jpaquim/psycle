@@ -279,18 +279,10 @@ const char * arrow_test_xpm[] = {
 
 NConfig::NConfig()
 {
-  #ifdef __unix__
-  attrs = 0;
   std::string oldDir = NFile::workingDir();
   NFile::cdHome();
-//  loadXmlConfig(".ngrs.xml");
+  loadXmlConfig(".ngrs.xml");
   NFile::cd(oldDir);
-  #else
-  
-  /// todo
-  /// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/creating_and_using_a_temporary_file.asp
-  
-  #endif
 }
 
 
