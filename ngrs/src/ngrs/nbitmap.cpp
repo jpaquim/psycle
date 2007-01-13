@@ -415,6 +415,6 @@ namespace ngrs {
     return hbmMask;
   } 
 
-}
-
 #endif
+
+}
