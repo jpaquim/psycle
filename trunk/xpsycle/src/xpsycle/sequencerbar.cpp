@@ -485,9 +485,9 @@ namespace psycle {
 
     void SequencerBar::setEntry( ngrs::NObject* obj )
     {
-      entryBox_->setControlObject(obj);
+      /*entryBox_->setControlObject(obj);
       entryBox_->resize();
-      repaint();
+      repaint();*/
     }
 
     void SequencerBar::setChildView( ChildView* view )
