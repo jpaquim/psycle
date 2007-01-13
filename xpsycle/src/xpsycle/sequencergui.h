@@ -78,7 +78,7 @@ namespace psycle {
       SequencerItem( SequencerGUI* seqGui );
       ~SequencerItem();
 
-      signal1<SequencerItem*> click;
+      sigslot::signal1<SequencerItem*> click;
 
       virtual void paint( ngrs::NGraphics* g);
       virtual void onMousePress(int x, int y, int button);
@@ -132,8 +132,8 @@ namespace psycle {
         SequencerLine( SequencerGUI* seqGui );
         ~SequencerLine();
 
-        signal1<SequencerLine*> click;
-        signal1<SequencerItem*> itemClick;
+        sigslot::signal1<SequencerLine*> click;
+        sigslot::signal1<SequencerItem*> itemClick;
 
         virtual void paint( ngrs::NGraphics* g );
         virtual void onMousePress( int x, int y, int button );
@@ -228,7 +228,7 @@ namespace psycle {
 
       ~SequencerGUI();
 
-      signal1<SequencerItem*> entryClick;
+      sigslot::signal1<SequencerItem*> entryClick;
 
       void setPatternSequence( PatternSequence* sequence );
       PatternSequence* patternSequence();

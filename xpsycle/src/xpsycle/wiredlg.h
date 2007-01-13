@@ -46,7 +46,7 @@ namespace psycle {
 
       void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
 
-      signal1<WireDlg*> deleteMe;
+      sigslot::signal1<WireDlg*> deleteMe;
 
       virtual int onClose();
 

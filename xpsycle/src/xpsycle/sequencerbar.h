@@ -112,7 +112,7 @@ namespace psycle {
 
       ~SequencerBar();
 
-      signal1<SinglePattern*> removed;
+      sigslot::signal1<SinglePattern*> removed;
 
       void setSequenceGUI( SequencerGUI* sequenceGUI );
       void setPatternView( PatternView* patternView );

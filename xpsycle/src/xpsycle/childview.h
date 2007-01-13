@@ -56,9 +56,9 @@ namespace psycle {
       void onPatternView(NObject* sender);
 
       // connect to signals
-      signal1<Machine*> newMachineAdded;
-      signal1<Machine*> machineSelected;
-      signal1<ngrs::NButtonEvent*> machineViewDblClick;
+      sigslot::signal1<Machine*> newMachineAdded;
+      sigslot::signal1<Machine*> machineSelected;
+      sigslot::signal1<ngrs::NButtonEvent*> machineViewDblClick;
 
       PatternView* patternView();
       MachineView* machineView();

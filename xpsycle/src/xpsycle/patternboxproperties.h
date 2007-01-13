@@ -47,8 +47,8 @@ namespace psycle {
       void setName( const std::string & name );
       const std::string & name() const;
 
-      signal1<const std::string &> nameChanged;
-      signal1<const ngrs::NColor &> colorChanged;
+      sigslot::signal1<const std::string &> nameChanged;
+      sigslot::signal1<const ngrs::NColor &> colorChanged;
 
       void setCategoryItem( CategoryItem* cat );
 

@@ -72,7 +72,7 @@ namespace psycle {
 
       Knob(int param);
 
-      signal3<Knob*,int,int> valueChanged;
+      sigslot::signal3<Knob*,int,int> valueChanged;
 
       void setValue(int value);
       void setValueAsText(const std::string & text);
@@ -140,7 +140,7 @@ namespace psycle {
       Machine* pMac();
       void updateValues();
 
-      signal3<int,int,int> patternTweakSlide;
+      sigslot::signal3<int,int,int> patternTweakSlide;
 
     private:
 

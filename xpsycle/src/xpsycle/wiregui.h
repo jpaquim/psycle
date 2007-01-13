@@ -46,8 +46,8 @@ namespace psycle
 
 				~WireGUI();
 
-				signal1<WireGUI*> bendAdded;
-				signal1<WireGUI*> removeMe;
+                sigslot::signal1<WireGUI*> bendAdded;
+                sigslot::signal1<WireGUI*> removeMe;
 
                 const ngrs::NPoint & p1() const;
                 const ngrs::NPoint & p2() const;

@@ -70,17 +70,17 @@ namespace psycle {
 
       virtual ~MachineGUI() = 0;
 
-      signal1<MachineGUI*> deleteRequest;
+      sigslot::signal1<MachineGUI*> deleteRequest;
 
       Machine & mac();
 
       void attachLine( WireGUI* line, int point );
       void detachLine( WireGUI* line );
 
-      signal1<MachineGUI*> newConnection;
-      signal3<Machine*,int,int> moved;
-      signal3<int,int,int> patternTweakSlide;
-      signal1<MachineGUI*> selected;
+      sigslot::signal1<MachineGUI*> newConnection;
+      sigslot::signal3<Machine*,int,int> moved;
+      sigslot::signal3<int,int,int> patternTweakSlide;
+      sigslot::signal1<MachineGUI*> selected;
 
       int ident() const;
 
