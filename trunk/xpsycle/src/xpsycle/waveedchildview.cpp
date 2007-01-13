@@ -745,7 +745,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 					}
 				}
 				#ifdef __unix__
-				XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
+                XDefineCursor( ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_right_side));
                 #endif				
 				repaint();
 				wView_->UpdateStatusBar();
@@ -922,13 +922,13 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 							abs ( x - int((  wView_->wdLoopE-wView_->diStart )			* dispRatio ))  < 10) )
 					)
 					#ifdef __unix__
-					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
+                    XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_right_side));
                     #else	
                     ;
                     #endif				
 				else
 				    #ifdef __unix__
-					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_xterm));
+                  XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_xterm));
 					#else
 					;
                     #endif					
@@ -942,13 +942,13 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 							abs ( x - int((  wView_->blStart+wView_->blLength)	* dispRatio ))	< 10 )
 					)
 					#ifdef __unix__
-					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_right_side));
+                    XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_right_side));
 					#else
 					;
 					#endif
 				else
 					#ifdef __unix__
-					XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_xterm));
+                  XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_xterm));
                     #else
                     ;
                     #endif					
@@ -2250,7 +2250,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
   {
 		// reset mousearrow
 		#ifdef __unix__
-		XDefineCursor(NApp::system().dpy(),window()->win(),XCreateFontCursor(NApp::system().dpy(),XC_left_ptr));
+    XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_left_ptr));
         #endif		
   }
 
