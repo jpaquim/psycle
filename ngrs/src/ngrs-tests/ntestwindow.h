@@ -32,7 +32,6 @@
 #include <ngrs/nimage.h>
 #include <ngrs/nslider.h>
 #include <ngrs/nnotebook.h>
-#include <ngrs/npage.h>
 #include <ngrs/ntabbook.h>
 #include <ngrs/ncheckbox.h>
 #include <ngrs/nfilelistbox.h>
@@ -42,12 +41,12 @@
 @author Stefan
 */
 
-class Tpnl : public NPanel {
+class Tpnl : public ngrs::NPanel {
 
-   virtual void paint(NGraphics* g) {
-      NFntString str;
+   virtual void paint( ngrs::NGraphics* g ) {
+      ngrs::NFntString str;
       str.setText("Hallo");
-      str.setFont(NFont("Suse Sans",8,nMedium | nStraight | nAntiAlias));
+      str.setFont( ngrs::NFont("Suse Sans",8,ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
       str.append("Hier");
       g->drawText(10,10,str.substr(5,1));
    }
@@ -55,7 +54,7 @@ class Tpnl : public NPanel {
 };
 
 
-class NTestWindow : public NWindow
+class NTestWindow : public ngrs::NWindow
 {
 public:
     NTestWindow();
@@ -66,13 +65,13 @@ private:
 
     int counter; // this is for timer button test;
 
-    NProgressBar* pBar;
-    NSlider* slider;
-    NWindow* scrollWin;
-    NFileListBox* fileBox;
-    NFileDialog* fDialog;
-    NLabel* info;
-    NCustomItem* itemD;
+    ngrs::NProgressBar* pBar;
+    ngrs::NSlider* slider;
+    ngrs::NWindow* scrollWin;
+    ngrs::NFileListBox* fileBox;
+    ngrs::NFileDialog* fDialog;
+    ngrs::NLabel* info;
+    ngrs::NCustomItem* itemD;
 
     void testListBox();
     void testComboBox();
@@ -81,7 +80,7 @@ private:
     void testBorderLayout();
     void testFlowLayout();
     void testFrameBorder();
-		void testGroupBox();
+	void testGroupBox();
     void testLine();
     void testMenu();
     void testEdit();
@@ -95,16 +94,16 @@ private:
 	void testObjectInspector();
 	void testCustomTreeView();
 
-    void onOpen(NButtonEvent* ev);
+    void onOpen(ngrs::NButtonEvent* ev);
     void onSliderPosChanged(double v);
-    void onQuit(NObject* sender);
-    void onBtnClick(NButtonEvent* ev);
+    void onQuit(ngrs::NObject* sender);
+    void onBtnClick(ngrs::NButtonEvent* ev);
 
-    void onColorSelected(const NColor & color);
-    void onDelete(NButtonEvent* ev);
+    void onColorSelected(const ngrs::NColor & color);
+    void onDelete(ngrs::NButtonEvent* ev);
 
-		void onSelection();
-    void onScrollPosChange( NScrollBar* bar );
+    void onSelection();
+    void onScrollPosChange( ngrs::NScrollBar* bar );
 
 
 
