@@ -20,143 +20,137 @@
 #include "nslider.h"
 #include "nframeborder.h"
 
-NSlider::NSlider()
- : NPanel(), trackLine_(true), pos_(0) , min_(0), max_(100), orientation_(nVertical)
-{
-  slider_ = new Slider(this);
-  add(slider_);
-  slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit));
-  setTransparent(true);
-}
+namespace ngrs {
 
-
-NSlider::~NSlider()
-{
-}
-
-void NSlider::resize( )
-{
-  if (orientation_ == nVertical) {
-    if (clientWidth() > 0) slider_->setWidth(clientWidth());
-    updateSlider();
-  } else {
-    slider_->setHeight(clientHeight());
-    updateSlider();
+  NSlider::NSlider()
+    : NPanel(), trackLine_(true), pos_(0) , min_(0), max_(100), orientation_(nVertical)
+  {
+    slider_ = new Slider(this);
+    add(slider_);
+    slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit));
+    setTransparent(true);
   }
-}
 
-NSlider::Slider::Slider( NSlider* sl)
-{
-  setTransparent(false);
-  setBorder(NFrameBorder());
-  sl_ = sl;
-}
 
-NSlider::Slider::~ Slider( )
-{
-}
-
-void NSlider::Slider::paint( NGraphics * g )
-{
-  sl_->customSliderPaint.emit(sl_,g);
-}
-
-void NSlider::Slider::onMove( const NMoveEvent & moveEvent )
-{
-  sl_->onSliderMove();
-}
-
-void NSlider::onSliderMove( )
-{
-   double range = max_ - min_;
-
-   if ( range != 0 ) {
-     switch (orientation_) {
-       case nVertical :
-          pos_ = ( range / (clientHeight()- slider_->height()) ) * slider_->top();
-       break;
-       default :
-          pos_ = ( range / (clientWidth() - slider_->width())  ) * slider_->left();
-     }
-
-    change.emit( this );
+  NSlider::~NSlider()
+  {
   }
-}
 
-void NSlider::setOrientation( int orientation )
-{
-  orientation_ = orientation;
-  slider_->setMoveable(NMoveable(nMvHorizontal + nMvParentLimit));
-  slider_->setWidth(10);
-  slider_->setHeight(5);
-  slider_->setLeft(0);
-  resize();
-}
-
-int NSlider::orientation( ) const
-{
-  return orientation_;
-}
-
-void NSlider::paint( NGraphics * g )
-{
-  if (trackLine_) {
-    g->setForeground(NColor(230,230,230));
+  void NSlider::resize( )
+  {
     if (orientation_ == nVertical) {
-     int d = 2;
-     g->drawRect(clientWidth()/2 - d,0,2*d,clientHeight());
+      if (clientWidth() > 0) slider_->setWidth(clientWidth());
+      updateSlider();
     } else {
-     int d = 2;
-     g->drawRect(0,clientHeight()/2 - d,clientWidth()-1,2*d);
-   }
+      slider_->setHeight(clientHeight());
+      updateSlider();
+    }
   }
+
+  NSlider::Slider::Slider( NSlider* sl)
+  {
+    setTransparent(false);
+    setBorder(NFrameBorder());
+    sl_ = sl;
+  }
+
+  NSlider::Slider::~ Slider( )
+  {
+  }
+
+  void NSlider::Slider::paint( NGraphics * g )
+  {
+    sl_->customSliderPaint.emit(sl_,g);
+  }
+
+  void NSlider::Slider::onMove( const NMoveEvent & moveEvent )
+  {
+    sl_->onSliderMove();
+  }
+
+  void NSlider::onSliderMove( )
+  {
+    double range = max_ - min_;
+
+    if ( range != 0 ) {
+      switch (orientation_) {
+       case nVertical :
+         pos_ = ( range / (clientHeight()- slider_->height()) ) * slider_->top();
+         break;
+       default :
+         pos_ = ( range / (clientWidth() - slider_->width())  ) * slider_->left();
+      }
+
+      change.emit( this );
+    }
+  }
+
+  void NSlider::setOrientation( int orientation )
+  {
+    orientation_ = orientation;
+    slider_->setMoveable(NMoveable(nMvHorizontal + nMvParentLimit));
+    slider_->setWidth(10);
+    slider_->setHeight(5);
+    slider_->setLeft(0);
+    resize();
+  }
+
+  int NSlider::orientation( ) const
+  {
+    return orientation_;
+  }
+
+  void NSlider::paint( NGraphics * g )
+  {
+    if (trackLine_) {
+      g->setForeground(NColor(230,230,230));
+      if (orientation_ == nVertical) {
+        int d = 2;
+        g->drawRect(clientWidth()/2 - d,0,2*d,clientHeight());
+      } else {
+        int d = 2;
+        g->drawRect(0,clientHeight()/2 - d,clientWidth()-1,2*d);
+      }
+    }
+  }
+
+  void NSlider::setTrackLine( bool on )
+  {
+    trackLine_ = on;
+  }
+
+  void NSlider::setRange( double min, double max )
+  {
+    min = min_; max_ = max;
+  }
+
+  void NSlider::setPos( double pos )
+  {
+    pos_ = pos;
+    updateSlider(); 
+    change.emit( this );  
+  }
+
+  void NSlider::updateSlider()
+  {
+    double range = max_ - min_;
+
+    if (range == 0) return;
+
+    if (orientation_ == nVertical)
+      slider_->setTop(  (int) (pos_  / ((range / (clientHeight()- slider_->height()))) ));
+    else 
+      slider_->setLeft( (int) (pos_  / ((range / (clientWidth() - slider_->width()))) ));
+  }
+
+  double NSlider::pos( ) const
+  {
+    return pos_;
+  }
+
+  NPanel * NSlider::slider( )
+  {
+    return slider_;
+  }
+
 }
-
-void NSlider::setTrackLine( bool on )
-{
-  trackLine_ = on;
-}
-
-void NSlider::setRange( double min, double max )
-{
-  min = min_; max_ = max;
-}
-
-void NSlider::setPos( double pos )
-{
-  pos_ = pos;
-  updateSlider(); 
-	change.emit( this );  
-}
-
-void NSlider::updateSlider()
-{
-  double range = max_ - min_;
-
-  if (range == 0) return;
-
-  if (orientation_ == nVertical)
-     slider_->setTop(  (int) (pos_  / ((range / (clientHeight()- slider_->height()))) ));
-  else 
-     slider_->setLeft( (int) (pos_  / ((range / (clientWidth() - slider_->width()))) ));
-}
-
-double NSlider::pos( ) const
-{
-  return pos_;
-}
-
-NPanel * NSlider::slider( )
-{
-  return slider_;
-}
-
-
-
-
-
-
-
-
-
-

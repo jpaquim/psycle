@@ -26,9 +26,12 @@
 /**
 @author Stefan
 */
-class NListLayout : public NLayout
-{
-public:
+
+namespace ngrs {
+
+  class NListLayout : public NLayout
+  {
+  public:
     NListLayout();
     virtual NListLayout* clone()  const;   // Uses the copy constructor
 
@@ -44,7 +47,7 @@ public:
     void setAlign(int align);
 
 
-private:
+  private:
 
     int align_;
     int findVerticalStart( long comparator , NVisualComponent* owner);
@@ -52,6 +55,8 @@ private:
 
     std::vector<NVisualComponent*> comps;
 
-};
+  };
+
+}
 
 #endif

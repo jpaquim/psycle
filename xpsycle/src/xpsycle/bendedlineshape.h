@@ -25,64 +25,62 @@
 /**
 @author Stefan
 */
-class BendedLineShape : public NShape
+class BendedLineShape : public ngrs::NShape
 {
 public:
-    BendedLineShape();
+  BendedLineShape();
 
-    ~BendedLineShape();
+  ~BendedLineShape();
 
-    virtual BendedLineShape* clone() const;   // Uses the copy constructor
+  virtual BendedLineShape* clone() const;   // Uses the copy constructor
 
-    virtual void setPosition(int left, int top, int width, int height);
-    virtual void setLeft(int left);
-    virtual void setTop(int top);
-    virtual void setWidth(int width);
-    virtual void setHeight(int height);
-    virtual NPoint pickerAt(int i);
-    virtual int pickerSize();
-    virtual void drawPicker(NGraphics* g);
+  virtual void setPosition( int left, int top, int width, int height );
+  virtual void setLeft( int left );
+  virtual void setTop( int top );
+  virtual void setWidth( int width );
+  virtual void setHeight( int height );
+  virtual ngrs::NPoint pickerAt( int i );
+  virtual int pickerSize();
+  virtual void drawPicker( ngrs::NGraphics* g );
 
-    const NPoint & p1() const;
-    const NPoint & p2() const;
-    NPoint p3() const;
-    NPoint p4() const;
-    NPoint p5() const;
+  const ngrs::NPoint & p1() const;
+  const ngrs::NPoint & p2() const;
+  ngrs::NPoint p3() const;
+  ngrs::NPoint p4() const;
+  ngrs::NPoint p5() const;
 
-    void setPoints( const NPoint & p1, const NPoint & p2 );
-    void insertBend( const NPoint & bendPt );
-    void setClippingDistance(int d);
-    
-    const std::vector<NPoint> & bendPts() const;
+  void setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
+  void insertBend( const ngrs::NPoint & bendPt );
+  void setClippingDistance( int d );
 
-    virtual int overPicker(int x, int y);
-    virtual void setPicker(int index, int x, int y);
+  const std::vector<ngrs::NPoint> & bendPts() const;
 
-    virtual NRegion region();
-    virtual NRegion spacingRegion(const NSize & spacing);
+  virtual int overPicker( int x, int y );
+  virtual void setPicker( int index, int x, int y );
 
-    int d2i(double d);
+  virtual ngrs::NRegion region();
+  virtual ngrs::NRegion spacingRegion( const ngrs::NSize & spacing );
+
+  int d2i( double d );
 
 private:
 
-   NPoint p1_;
-   NPoint p2_;
-   NPoint p3_;
-   NPoint p4_;
-   NPoint p5_;
-   
-   std::vector<NPoint> bendPts_;
+  ngrs::NPoint p1_;
+  ngrs::NPoint p2_;
+  ngrs::NPoint p3_;
+  ngrs::NPoint p4_;
+  ngrs::NPoint p5_;
 
-   void resize(int width, int height);
-   void calculateRectArea();
-   void move(int dx, int dy);
+  std::vector< ngrs::NPoint > bendPts_;
 
-   int pickWidth_ ;
-   int pickHeight_;
+  int pickWidth_ ;
+  int pickHeight_;
+  int distance_;
 
-   NRegion lineToRegion();   
-
-   int distance_;
+  ngrs::NRegion lineToRegion();
+  void resize( int width, int height );
+  void calculateRectArea();
+  void move( int dx, int dy );
 
 };
 

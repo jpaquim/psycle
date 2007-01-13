@@ -25,18 +25,22 @@
 /**
 @author Stefan
 */
-class NIsWindow : public NVisitor
-{
-public:
+namespace ngrs {
+
+  class NIsWindow : public NVisitor
+  {
+  public:
     NIsWindow();
 
     ~NIsWindow();
 
-   virtual bool visit_window(class NWindow*);
-   virtual bool visit_window(class NVisualComponent*);
-   virtual bool visit_visualcomponent(class NVisualComponent*);
+    virtual bool visit_window(class NWindow*);
+    virtual bool visit_window(class NVisualComponent*);
+    virtual bool visit_visualcomponent(class NVisualComponent*);
 
 
-};
+  };
+
+}
 
 #endif

@@ -19,12 +19,15 @@
  ***************************************************************************/
 #include "nfontstructure.h"
 
-NFontStructure::NFontStructure()
-{
+namespace ngrs {
+
+  NFontStructure::NFontStructure()
+  {
+  }
+
+
+  NFontStructure::~NFontStructure()
+  {
+  }
+
 }
-
-
-NFontStructure::~NFontStructure()
-{
-}
-

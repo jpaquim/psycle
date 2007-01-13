@@ -25,15 +25,20 @@
 /**
 @author Stefan Nattkemper
 */
-class NTextBase : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NTextBase : public NPanel
+  {
+  public:
     NTextBase();
 
     ~NTextBase();
 
     virtual std::string text() const = 0;
 
-};
+  };
+
+}
 
 #endif

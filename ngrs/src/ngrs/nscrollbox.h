@@ -22,18 +22,20 @@
 
 #include "npanel.h"
 
-const int nAlwaysVisible = 1;
-const int nNoneVisible   = 2;
-
 /**
 @author Stefan
 */
 
-class NScrollBar;
+namespace ngrs {
 
-class NScrollBox : public NPanel
-{
-public:
+  class NScrollBar;
+
+  const int nAlwaysVisible = 1;
+  const int nNoneVisible   = 2;
+
+  class NScrollBox : public NPanel
+  {
+  public:
     NScrollBox();
 
     ~NScrollBox();
@@ -47,16 +49,18 @@ public:
     NScrollBar* horBar();
     NScrollBar* verBar();
 
-private:
+  private:
 
-   NScrollBar* horBar_;
-   NScrollBar* verBar_;
-   NVisualComponent* scrollPane_;
+    NScrollBar* horBar_;
+    NScrollBar* verBar_;
+    NVisualComponent* scrollPane_;
 
-   void init();
-   void onVPosChange( NScrollBar* sender );
-   void onHPosChange( NScrollBar* sender );
+    void init();
+    void onVPosChange( NScrollBar* sender );
+    void onHPosChange( NScrollBar* sender );
 
-};
+  };
+
+}
 
 #endif

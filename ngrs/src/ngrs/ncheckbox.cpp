@@ -21,136 +21,128 @@
 #include "nlabel.h"
 #include "nalignlayout.h"
 
-NCheckBox::NCheckBox()
- : NPanel()
-{
-  init();
-}
+namespace ngrs {
+
+  NCheckBox::NCheckBox()
+    : NPanel()
+  {
+    init();
+  }
 
 
-NCheckBox::NCheckBox( const std::string & text ) : NPanel()
-{
-  init();
-  label_->setText(text);
-}
+  NCheckBox::NCheckBox( const std::string & text ) : NPanel()
+  {
+    init();
+    label_->setText(text);
+  }
 
-void NCheckBox::init( )
-{
-  label_ = new NLabel();
-  add(label_);
+  void NCheckBox::init( )
+  {
+    label_ = new NLabel();
+    add(label_);
 
-  dx=dy=10;
-  setWidth(100);
-  setHeight(20);
-  checked_=false;
-}
+    dx=dy=10;
+    setWidth(100);
+    setHeight(20);
+    checked_=false;
+  }
 
 
-NCheckBox::~NCheckBox()
-{
+  NCheckBox::~NCheckBox()
+  {
+  }
+
+  void NCheckBox::paint( NGraphics * g )
+  {
+    dx = 5;
+    dy = 3;
+    g->setForeground(NColor(255,255,255));
+    g->fillRect(0+dx,0+dy,10,10);
+    g->setForeground(NColor(0,0,0));
+    g->drawRect(0+dx,0+dy,10,10);
+
+    if (checked_) drawCheck(g);
+  }
+
+  void NCheckBox::onMousePress( int x, int y, int button )
+  {
+    checked_ = !checked_;
+    repaint();
+  }
+
+  void NCheckBox::drawCheck(NGraphics* g)
+  {
+    dx = 5;
+    dy = 3; // (spacingHeight()-10)/2;
+
+    g->setForeground(NColor(0,0,0));
+    g->drawLine(dx+1,dy+1,dx+9,dy+9);
+    g->drawLine(dx+1,dy+9,dx+9,dy+1);
+
+  }
+
+
+  void NCheckBox::setCheck( bool on )
+  {
+    checked_ = on;
+  }
+
+  bool NCheckBox::checked( ) const
+  {
+    return checked_;
+  }
+
+  void NCheckBox::setText( const std::string & text )
+  {
+    label_->setText(text);
+  }
+
+  const std::string &  NCheckBox::text( ) const
+  {
+    return label_->text();
+  }
+
+  int NCheckBox::preferredWidth( ) const
+  {
+    if (ownerSize()) return NVisualComponent::preferredWidth();
+    return 20 + label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
+  }
+
+  int NCheckBox::preferredHeight( ) const
+  {
+    if (ownerSize()) return NVisualComponent::preferredHeight();
+
+    return label_->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+  }
+
+  void NCheckBox::resize( )
+  {
+    label_->setPosition(20,0,spacingWidth()-20,spacingHeight());
+  }
+
+  void NCheckBox::onMousePressed( int x, int y, int button )
+  {
+    NButtonEvent ev(this,x,y,button);
+    clicked.emit(&ev);
+  }
+
+  void NCheckBox::setWordWrap( bool on )
+  {
+    label_->setWordWrap(on);
+  }
+
+  bool NCheckBox::wordWrap( ) const
+  {
+    return label_->wordWrap();
+  }
+
 }
 
 // class factories
-
-extern "C" NObject* createCheckBox() {
-    return new NCheckBox();
+extern "C" ngrs::NObject* createCheckBox() {
+  return new ngrs::NCheckBox();
 }
 
-extern "C" void destroyCheckBox(NObject* p) {
-    delete p;
+extern "C" void destroyCheckBox( ngrs::NObject* p ) {
+  delete p;
 }
-
-
-void NCheckBox::paint( NGraphics * g )
-{
-  dx = 5;
-  dy = 3;
-  g->setForeground(NColor(255,255,255));
-  g->fillRect(0+dx,0+dy,10,10);
-  g->setForeground(NColor(0,0,0));
-  g->drawRect(0+dx,0+dy,10,10);
-
-  if (checked_) drawCheck(g);
-}
-
-void NCheckBox::onMousePress( int x, int y, int button )
-{
-  checked_ = !checked_;
-  repaint();
-}
-
-void NCheckBox::drawCheck(NGraphics* g)
-{
-  dx = 5;
-  dy = 3; // (spacingHeight()-10)/2;
-
-  g->setForeground(NColor(0,0,0));
-  g->drawLine(dx+1,dy+1,dx+9,dy+9);
-  g->drawLine(dx+1,dy+9,dx+9,dy+1);
-
-}
-
-
-void NCheckBox::setCheck( bool on )
-{
-  checked_ = on;
-}
-
-bool NCheckBox::checked( ) const
-{
-  return checked_;
-}
-
-void NCheckBox::setText( const std::string & text )
-{
-  label_->setText(text);
-}
-
-const std::string &  NCheckBox::text( ) const
-{
-  return label_->text();
-}
-
-int NCheckBox::preferredWidth( ) const
-{
-  if (ownerSize()) return NVisualComponent::preferredWidth();
-  return 20 + label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
-}
-
-int NCheckBox::preferredHeight( ) const
-{
-  if (ownerSize()) return NVisualComponent::preferredHeight();
-
-  return label_->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
-}
-
-void NCheckBox::resize( )
-{
-  label_->setPosition(20,0,spacingWidth()-20,spacingHeight());
-}
-
-void NCheckBox::onMousePressed( int x, int y, int button )
-{
-  NButtonEvent ev(this,x,y,button);
-  clicked.emit(&ev);
-}
-
-void NCheckBox::setWordWrap( bool on )
-{
-  label_->setWordWrap(on);
-}
-
-bool NCheckBox::wordWrap( ) const
-{
-  return label_->wordWrap();
-}
-
-
-
-
-
-
-
-
-
-

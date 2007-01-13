@@ -21,58 +21,62 @@
 #include "nlabel.h"
 #include "nbevelborder.h"
 
-NTextStatusItem::NTextStatusItem()
- : NCustomStatusItem()
-{
-  init();
-}
+namespace ngrs {
 
-NTextStatusItem::NTextStatusItem( unsigned int modelIndex )
- : NCustomStatusItem( modelIndex )
-{
-  init();
-}
+  NTextStatusItem::NTextStatusItem()
+    : NCustomStatusItem()
+  {
+    init();
+  }
+
+  NTextStatusItem::NTextStatusItem( unsigned int modelIndex )
+    : NCustomStatusItem( modelIndex )
+  {
+    init();
+  }
 
 
-NTextStatusItem::NTextStatusItem( const std::string & text )
-{
-  init();
-  label_->setText(text);
-}
+  NTextStatusItem::NTextStatusItem( const std::string & text )
+  {
+    init();
+    label_->setText(text);
+  }
 
-void NTextStatusItem::init( )
-{
-  label_ = new NLabel();
-  add(label_);
-  label_->setBorder(NBevelBorder(nRaised,nLowered));
-  label_->setSpacing(NSize(2,2,2,2));
-}
+  void NTextStatusItem::init( )
+  {
+    label_ = new NLabel();
+    add(label_);
+    label_->setBorder(NBevelBorder(nRaised,nLowered));
+    label_->setSpacing(NSize(2,2,2,2));
+  }
 
-NTextStatusItem::~NTextStatusItem()
-{
-}
+  NTextStatusItem::~NTextStatusItem()
+  {
+  }
 
-void NTextStatusItem::setText( const std::string & text )
-{
-  label_->setText(text);
-}
+  void NTextStatusItem::setText( const std::string & text )
+  {
+    label_->setText(text);
+  }
 
-const std::string & NTextStatusItem::text( ) const
-{
-  return label_->text();
-}
+  const std::string & NTextStatusItem::text( ) const
+  {
+    return label_->text();
+  }
 
-int NTextStatusItem::preferredWidth( ) const
-{
-  return label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
-}
+  int NTextStatusItem::preferredWidth( ) const
+  {
+    return label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
+  }
 
-int NTextStatusItem::preferredHeight( ) const
-{
-  return label_->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
-}
+  int NTextStatusItem::preferredHeight( ) const
+  {
+    return label_->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+  }
 
-void NTextStatusItem::resize( )
-{
-  label_->setPosition(0,0,spacingWidth(), spacingHeight());
+  void NTextStatusItem::resize( )
+  {
+    label_->setPosition(0,0,spacingWidth(), spacingHeight());
+  }
+
 }

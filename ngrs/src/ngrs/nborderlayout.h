@@ -25,9 +25,12 @@
 /**
 @author Stefan
 */
-class NBorderLayout : public NLayout
-{
-public:
+
+namespace ngrs {
+
+  class NBorderLayout : public NLayout
+  {
+  public:
     NBorderLayout();
     virtual NBorderLayout* clone()  const;   // Uses the copy constructor
 
@@ -39,11 +42,13 @@ public:
     virtual int preferredHeight(const NVisualComponent* target) const;
 
 
-private:
+  private:
 
     int maxX_;
     int maxY_;
 
-};
+  };
+
+}
 
 #endif

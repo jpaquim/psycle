@@ -30,29 +30,29 @@
 namespace psycle { namespace host {
 
 PatternBoxProperties::PatternBoxProperties()
- : NFlipBox()
+ : ngrs::NFlipBox()
 {
-  NFrameBorder fr;
+  ngrs::NFrameBorder fr;
   setBorder(fr);
 
-  header()->add(new NLabel("Pattern Properties"), nAlClient);
+  header()->add(new ngrs::NLabel("Pattern Properties"), ngrs::nAlClient);
 
-  NPanel* table = new NPanel();
-    NTableLayout tableLayout(2,2);
+  ngrs::NPanel* table = new ngrs::NPanel();
+    ngrs::NTableLayout tableLayout(2,2);
     tableLayout.setVGap(5);
     tableLayout.setHGap(5);
     table->setLayout( tableLayout );
-    table->add(new NLabel("Name"), NAlignConstraint(nAlLeft,0,0),true);
-    categoryEdt = new NEdit();
+    table->add(new ngrs::NLabel("Name"), ngrs::NAlignConstraint(ngrs::nAlLeft,0,0),true);
+    categoryEdt = new ngrs::NEdit();
        categoryEdt->setPreferredSize(150,15);
        categoryEdt->keyPress.connect(this, &PatternBoxProperties::onKeyPress);
-    table->add(categoryEdt, NAlignConstraint(nAlLeft,1,0),true);
-    table->add(new NLabel("Color"), NAlignConstraint(nAlLeft,0,1),true);
-    clBox = new NColorComboBox();
+    table->add(categoryEdt, ngrs::NAlignConstraint(ngrs::nAlLeft,1,0),true);
+    table->add(new ngrs::NLabel("Color"), ngrs::NAlignConstraint(ngrs::nAlLeft,0,1),true);
+    clBox = new ngrs::NColorComboBox();
       clBox->colorSelected.connect(this,&PatternBoxProperties::onColorChange);
       clBox->setPreferredSize(50,15);
-    table->add(clBox, NAlignConstraint(nAlLeft,1,1),true);
-  pane()->add(table, nAlClient);
+    table->add(clBox, ngrs::NAlignConstraint(ngrs::nAlLeft,1,1),true);
+  pane()->add(table, ngrs::nAlClient);
 
   cat_ = 0;
 }
@@ -73,12 +73,12 @@ const std::string & PatternBoxProperties::name( ) const
   return categoryEdt->name();
 }
 
-void PatternBoxProperties::onKeyPress( const NKeyEvent & )
+void PatternBoxProperties::onKeyPress( const ngrs::NKeyEvent & )
 {
   nameChanged.emit(categoryEdt->text());
 }
 
-void PatternBoxProperties::onColorChange( const NColor & color )
+void PatternBoxProperties::onColorChange( const ngrs::NColor & color )
 {
   if (cat_ != 0) {
      int r = color.red();

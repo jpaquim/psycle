@@ -22,230 +22,234 @@
 #include "napp.h"
 #include "nsystem.h"
 
-NVisual::NVisual()
- : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10), cursorId_( nCrDefault )
-{
-   // if (properties()) properties()->bind("left", *this, &NVisual::left, &NVisual::setLeft);
+namespace ngrs {
 
-}
+  NVisual::NVisual()
+    : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10), cursorId_( nCrDefault )
+  {
+    // if (properties()) properties()->bind("left", *this, &NVisual::left, &NVisual::setLeft);
 
-
-NVisual::~NVisual()
-{
-}
-
-void NVisual::setVisible( bool on )
-{
-  visible_ = on;
-}
-
-bool NVisual::visible( ) const
-{
-  return visible_;
-}
-
-void NVisual::setCursor( int crIdentifier ) {
-  cursorId_ = crIdentifier;
-}
-
-int NVisual::cursor() const {
-  return cursorId_;
-}
-
-void NVisual::onMousePress( int x, int y, int button )
-{
-  NButtonEvent ev(this,x,y,button);
-  mousePress.emit(&ev);
-}
-
-void NVisual::onMousePressed( int x, int y, int button )
-{
-  NButtonEvent ev(this,x,y,button);
-  mousePressed.emit(&ev);
-}
-
-void NVisual::onMouseDoublePress( int x, int y, int button )
-{
-  NButtonEvent ev(this,x,y,button);
-  mouseDoublePress.emit(&ev);
-}
-
-void NVisual::setPosition( int x, int y, int width, int height )
-{
-  if (geometry_!=0) {
-     geometry_->setPosition(x,y,width,height);
-     resize();
   }
-}
 
-void NVisual::setPosition( const NRect & pos )
-{
-  setPosition(pos.left(),pos.top(),pos.width(),pos.height());
-}
 
-NShape * NVisual::geometry( )
-{
-  return geometry_;
-}
-
-void NVisual::setGeometry( NShape * geometry )
-{
-  geometry_ = geometry;
-}
-
-int NVisual::top( ) const
-{
-  return geometry_->rectArea().top();
-}
-
-int NVisual::left( ) const
-{
-  return geometry_->rectArea().left();
-}
-
-void NVisual::resize( )
-{
-}
-
-int NVisual::preferredWidth( ) const
-{
-  return width();
-}
-
-int NVisual::preferredHeight( ) const
-{
-  return height();
-}
-
-int NVisual::minimumHeight( ) const
-{
-  return minHeight_;
-}
-
-int NVisual::minimumWidth( ) const
-{
-  return minWidth_;
-}
-
-void NVisual::onMouseOver( int x, int y )
-{
-}
-
-int NVisual::absoluteLeft( ) const
-{
-  return 0;
-}
-
-int NVisual::absoluteTop( ) const
-{
-  return 0;
-}
-
-int NVisual::width( ) const
-{
-  return geometry_->width();
-}
-
-int NVisual::height( ) const
-{
-  return geometry_->height();
-}
-
-void NVisual::setTop( int top )
-{
-   if (geometry_!=0) {
-     geometry_->setTop(top);
-     resize();
+  NVisual::~NVisual()
+  {
   }
-}
 
-void NVisual::setWidth( int width )
-{
-   if (geometry_!=0) {
-     geometry_->setWidth( (width < minWidth_) ? minWidth_ : width);
-     resize();
+  void NVisual::setVisible( bool on )
+  {
+    visible_ = on;
   }
-}
 
-void NVisual::setHeight( int height )
-{
-  if (geometry_!=0) {
-     geometry_->setHeight(height);
-     resize();
+  bool NVisual::visible( ) const
+  {
+    return visible_;
   }
-}
 
-void NVisual::setLeft( int left )
-{
-  if (geometry_!=0) {
-     geometry_->setLeft(left);
-     resize();
+  void NVisual::setCursor( int crIdentifier ) {
+    cursorId_ = crIdentifier;
   }
-}
 
-void NVisual::onMouseExit( )
-{
-  NEvent ev(this);
-  mouseExit.emit(&ev);
-}
+  int NVisual::cursor() const {
+    return cursorId_;
+  }
 
-void NVisual::onMouseEnter( )
-{
-  NEvent ev(this);
-  mouseEnter.emit(&ev);
-}
+  void NVisual::onMousePress( int x, int y, int button )
+  {
+    NButtonEvent ev(this,x,y,button);
+    mousePress.emit(&ev);
+  }
 
-void NVisual::onKeyPress( const NKeyEvent & event )
-{
-}
+  void NVisual::onMousePressed( int x, int y, int button )
+  {
+    NButtonEvent ev(this,x,y,button);
+    mousePressed.emit(&ev);
+  }
 
-void NVisual::setMinimumWidth( int minWidth )
-{
-  minWidth_ = minWidth;
-}
+  void NVisual::onMouseDoublePress( int x, int y, int button )
+  {
+    NButtonEvent ev(this,x,y,button);
+    mouseDoublePress.emit(&ev);
+  }
 
-void NVisual::setMinimumHeight( int minHeight )
-{
-  minHeight_ = minHeight;
-}
+  void NVisual::setPosition( int x, int y, int width, int height )
+  {
+    if (geometry_!=0) {
+      geometry_->setPosition(x,y,width,height);
+      resize();
+    }
+  }
 
-NRect NVisual::clipBox( ) const
-{
-  NRect clip(left(),top(),width(),height());
-  return clip;
-}
+  void NVisual::setPosition( const NRect & pos )
+  {
+    setPosition(pos.left(),pos.top(),pos.width(),pos.height());
+  }
 
-NShape * NVisual::geometry( ) const
-{
-  return geometry_;
-}
+  NShape * NVisual::geometry( )
+  {
+    return geometry_;
+  }
 
-void NVisual::setPreferredSize( int width, int height )
-{
+  void NVisual::setGeometry( NShape * geometry )
+  {
+    geometry_ = geometry;
+  }
 
-}
+  int NVisual::top( ) const
+  {
+    return geometry_->rectArea().top();
+  }
 
-void NVisual::setFocus( )
-{
-}
+  int NVisual::left( ) const
+  {
+    return geometry_->rectArea().left();
+  }
 
-bool NVisual::focus( ) const
-{
-  return true;
-}
+  void NVisual::resize( )
+  {
+  }
 
-void NVisual::onEnter( )
-{
-}
+  int NVisual::preferredWidth( ) const
+  {
+    return width();
+  }
 
-void NVisual::onExit( )
-{
-}
+  int NVisual::preferredHeight( ) const
+  {
+    return height();
+  }
 
-void NVisual::onKeyRelease( const NKeyEvent & event )
-{
-}
+  int NVisual::minimumHeight( ) const
+  {
+    return minHeight_;
+  }
 
-void NVisual::setSize( int width, int height )
-{
+  int NVisual::minimumWidth( ) const
+  {
+    return minWidth_;
+  }
+
+  void NVisual::onMouseOver( int x, int y )
+  {
+  }
+
+  int NVisual::absoluteLeft( ) const
+  {
+    return 0;
+  }
+
+  int NVisual::absoluteTop( ) const
+  {
+    return 0;
+  }
+
+  int NVisual::width( ) const
+  {
+    return geometry_->width();
+  }
+
+  int NVisual::height( ) const
+  {
+    return geometry_->height();
+  }
+
+  void NVisual::setTop( int top )
+  {
+    if (geometry_!=0) {
+      geometry_->setTop(top);
+      resize();
+    }
+  }
+
+  void NVisual::setWidth( int width )
+  {
+    if (geometry_!=0) {
+      geometry_->setWidth( (width < minWidth_) ? minWidth_ : width);
+      resize();
+    }
+  }
+
+  void NVisual::setHeight( int height )
+  {
+    if (geometry_!=0) {
+      geometry_->setHeight(height);
+      resize();
+    }
+  }
+
+  void NVisual::setLeft( int left )
+  {
+    if (geometry_!=0) {
+      geometry_->setLeft(left);
+      resize();
+    }
+  }
+
+  void NVisual::onMouseExit( )
+  {
+    NEvent ev(this);
+    mouseExit.emit(&ev);
+  }
+
+  void NVisual::onMouseEnter( )
+  {
+    NEvent ev(this);
+    mouseEnter.emit(&ev);
+  }
+
+  void NVisual::onKeyPress( const NKeyEvent & event )
+  {
+  }
+
+  void NVisual::setMinimumWidth( int minWidth )
+  {
+    minWidth_ = minWidth;
+  }
+
+  void NVisual::setMinimumHeight( int minHeight )
+  {
+    minHeight_ = minHeight;
+  }
+
+  NRect NVisual::clipBox( ) const
+  {
+    NRect clip(left(),top(),width(),height());
+    return clip;
+  }
+
+  NShape * NVisual::geometry( ) const
+  {
+    return geometry_;
+  }
+
+  void NVisual::setPreferredSize( int width, int height )
+  {
+
+  }
+
+  void NVisual::setFocus( )
+  {
+  }
+
+  bool NVisual::focus( ) const
+  {
+    return true;
+  }
+
+  void NVisual::onEnter( )
+  {
+  }
+
+  void NVisual::onExit( )
+  {
+  }
+
+  void NVisual::onKeyRelease( const NKeyEvent & event )
+  {
+  }
+
+  void NVisual::setSize( int width, int height )
+  {
+  }
+
 }

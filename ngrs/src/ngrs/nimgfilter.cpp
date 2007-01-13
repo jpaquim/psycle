@@ -19,14 +19,16 @@
  ***************************************************************************/
 #include "nimgfilter.h"
 
-NImgFilter::NImgFilter()
- : NObject()
-{
+namespace ngrs {
+
+  NImgFilter::NImgFilter()
+    : NObject()
+  {
+  }
+
+
+  NImgFilter::~NImgFilter()
+  {
+  }
+
 }
-
-
-NImgFilter::~NImgFilter()
-{
-}
-
-

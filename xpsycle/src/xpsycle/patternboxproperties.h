@@ -22,43 +22,49 @@
 
 #include <ngrs/nflipbox.h>
 
-class NColorComboBox;
-class NEdit;
-
-namespace psycle { namespace host {
-
-class CategoryItem;
 
 /**
 @author Stefan Nattkemper
 */
-class PatternBoxProperties : public NFlipBox
-{
-public:
-    PatternBoxProperties();
 
-    ~PatternBoxProperties();
+namespace ngrs {
+  class NColorComboBox;
+  class NEdit;
+}
 
-    void setName(const std::string & name);
-    const std::string & name() const;
+namespace psycle { 
+  namespace host {
 
-    signal1<const std::string &> nameChanged;
-    signal1<const NColor &> colorChanged;
+    class CategoryItem;
 
-    void setCategoryItem(CategoryItem* cat);
+    class PatternBoxProperties : public ngrs::NFlipBox
+    {
+    public:
+      PatternBoxProperties();
 
-private:
+      ~PatternBoxProperties();
 
-    CategoryItem* cat_;
+      void setName( const std::string & name );
+      const std::string & name() const;
 
-    NColorComboBox* clBox;
-    NEdit* categoryEdt;
+      signal1<const std::string &> nameChanged;
+      signal1<const ngrs::NColor &> colorChanged;
 
-    void onKeyPress(const NKeyEvent &);
-    void onColorChange(const NColor & color);
+      void setCategoryItem( CategoryItem* cat );
 
-};
+    private:
 
-}}
+      CategoryItem* cat_;
+
+      ngrs::NColorComboBox* clBox;
+      ngrs::NEdit* categoryEdt;
+
+      void onKeyPress( const ngrs::NKeyEvent& );
+      void onColorChange( const ngrs::NColor& color );
+
+    };
+
+  }
+}
 
 #endif

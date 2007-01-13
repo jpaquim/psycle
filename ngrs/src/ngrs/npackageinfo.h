@@ -27,8 +27,11 @@
 /**
 @author Stefan Nattkemper
 */
-class NPackageInfo{
-public:
+
+namespace ngrs {
+
+  class NPackageInfo{
+  public:
     NPackageInfo();
 
     ~NPackageInfo();
@@ -38,16 +41,17 @@ public:
     std::vector<std::string> categories() const;
     std::vector<std::string> factoryNamesByCategory(const std::string & categoryName) const;
 
-private:
+  private:
 
     std::map<std::string, std::vector<std::string> > packageMap;
 
     std::string packageName;
-};
+  };
 
-// the types of the class factories
-typedef NPackageInfo* create_p();
-typedef void destroy_p(NPackageInfo*);
+  // the types of the class factories
+  typedef NPackageInfo* create_p();
+  typedef void destroy_p(NPackageInfo*);
 
+}
 
 #endif

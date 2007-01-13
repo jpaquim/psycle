@@ -25,54 +25,57 @@
 #include "nconfig.h"
 #include "ntextstatusitem.h"
 
+namespace ngrs {
 
-NStatusBar::NStatusBar()
- : NPanel(), statusModel_(0)
-{
-  setLayout( NAlignLayout() );
-  setAlign( nAlBottom );
+  NStatusBar::NStatusBar()
+    : NPanel(), statusModel_(0)
+  {
+    setLayout( NAlignLayout() );
+    setAlign( nAlBottom );
 
-  setSkin( NApp::config()->skin("stat_bar_bg") );
+    setSkin( NApp::config()->skin("stat_bar_bg") );
 
-  add(  new NTextStatusItem(), nAlClient );
-}
+    add(  new NTextStatusItem(), nAlClient );
+  }
 
 
-NStatusBar::~NStatusBar()
-{
-}
+  NStatusBar::~NStatusBar()
+  {
+  }
 
-void NStatusBar::add( NCustomStatusItem * component )
-{
-  add( component, nAlRight );
-}
+  void NStatusBar::add( NCustomStatusItem * component )
+  {
+    add( component, nAlRight );
+  }
 
-void NStatusBar::add( NCustomStatusItem * component, int align )
-{
-  NPanel::add(component,align);
-  statusItems_.push_back( component );
-}
+  void NStatusBar::add( NCustomStatusItem * component, int align )
+  {
+    NPanel::add(component,align);
+    statusItems_.push_back( component );
+  }
 
-void NStatusBar::add( NVisualComponent * component, int align )
-{
-  NPanel::add( component, align );
-}
+  void NStatusBar::add( NVisualComponent * component, int align )
+  {
+    NPanel::add( component, align );
+  }
 
-void NStatusBar::setModel( NCustomStatusModel & model ) {
-  statusModel_ = &model;
-  statusModel_->changed.connect( this, &NStatusBar::onModelDataChange );
-}
+  void NStatusBar::setModel( NCustomStatusModel & model ) {
+    statusModel_ = &model;
+    statusModel_->changed.connect( this, &NStatusBar::onModelDataChange );
+  }
 
-NCustomStatusModel* NStatusBar::model() const {
-  return statusModel_;
-}
+  NCustomStatusModel* NStatusBar::model() const {
+    return statusModel_;
+  }
 
-void NStatusBar::onModelDataChange( const NCustomStatusModel & sender, unsigned int index ) {
-  std::vector<NCustomStatusItem*>::iterator it = statusItems_.begin();
-  for ( ; it < statusItems_.end(); it++ ) {
-	if ( index == (*it)->modelIndex() ) {
-	  (*it)->setText( sender.text( index ) );
-      (*it)->repaint();
-	}
-  } 
+  void NStatusBar::onModelDataChange( const NCustomStatusModel & sender, unsigned int index ) {
+    std::vector<NCustomStatusItem*>::iterator it = statusItems_.begin();
+    for ( ; it < statusItems_.end(); it++ ) {
+      if ( index == (*it)->modelIndex() ) {
+        (*it)->setText( sender.text( index ) );
+        (*it)->repaint();
+      }
+    } 
+  }
+
 }

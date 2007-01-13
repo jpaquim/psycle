@@ -19,122 +19,119 @@
  ***************************************************************************/
 #include "nshape.h"
 
-NShape::NShape()
-{
+namespace ngrs {
+
+  NShape::NShape()
+  {
+  }
+
+  NShape::~NShape()
+  {
+  }
+
+  void NShape::setPosition( int left, int top, int width, int height )
+  {
+    rectArea_.setPosition(left,top,width,height);
+  }
+
+  const NRect & NShape::rectArea( ) const
+  {
+    return rectArea_;
+  }
+
+  void NShape::fill( NGraphics * g, const NRegion & repaintArea )
+  {
+  }
+
+  int NShape::top( ) const
+  {
+    return rectArea().top();
+  }
+
+  int NShape::left( ) const
+  {
+    return rectArea().left();
+  }
+
+  int NShape::width( ) const
+  {
+    return rectArea().width();
+  }
+
+  int NShape::height( ) const
+  {
+    return rectArea().height();
+  }
+
+  void NShape::setTop( int top )
+  {
+    rectArea_.setTop(top);
+  }
+
+  void NShape::setWidth( int width )
+  {
+    rectArea_.setWidth(width);
+  }
+
+  void NShape::setHeight( int height )
+  {
+    rectArea_.setHeight(height);
+  }
+
+  void NShape::setLeft( int left )
+  {
+    rectArea_.setLeft(left);
+  }
+
+  NPoint NShape::pickerAt( int i )
+  {
+    return NPoint(-1,-1);
+  }
+
+  int NShape::pickerSize( )
+  {
+    return 0;
+  }
+
+  void NShape::drawPicker( NGraphics * g )
+  {
+  }
+
+  void NShape::drawRectPicker( NGraphics * g )
+  {
+    int pickWidth  = 4;
+    int pickHeight = 4;
+
+    //if (((NWindow*)ownerWindow())->selected()!=this) g->setForeground(NColor::gray); else
+    g->setForeground(NColor(0,0,0));
+    /*if (moveable()->topLeft())   */  g->fillRect(left(),top(),pickWidth,pickHeight);
+    /*if (moveable()->topRight())  */  g->fillRect(left()+width()-pickWidth,top(),pickWidth,pickHeight);
+    /*if (moveable()->bottomLeft())*/  g->fillRect(left(),top()+height()-pickHeight,pickWidth,pickHeight);
+    /*if (moveable()->bottomRight())*/ g->fillRect(left()+width()-pickWidth,top()+height()-pickHeight,pickWidth,pickHeight);
+    /*if (moveable()->midLeft())*/     g->fillRect(left(),top()+height() / 2 - pickHeight / 2,pickWidth,pickHeight);
+    /*if (moveable()->midRight())*/    g->fillRect(left()+width()-pickWidth,top()+ height() / 2 - pickHeight / 2,pickWidth,pickHeight);
+    /*if (moveable()->topMid())*/      g->fillRect(left()+width() / 2 - pickWidth / 2 ,top(),pickWidth,pickHeight);
+    /*if (moveable()->bottomMid())*/   g->fillRect(left()+width() / 2 - pickWidth / 2 ,top()+height()-pickHeight,pickWidth,pickHeight);
+  }
+
+  int NShape::overPicker( int x, int y )
+  {
+    return -1;
+  }
+
+
+  void NShape::setPicker( int index, int x, int y )
+  {
+  }
+
+  NRegion NShape::region( )
+  {
+    return NRegion();
+  }
+
+  NRegion NShape::spacingRegion(const NSize & spacing )
+  {
+    return NRegion();
+  }
 
 }
-
-
-NShape::~NShape()
-{
-}
-
-void NShape::setPosition( int left, int top, int width, int height )
-{
-  rectArea_.setPosition(left,top,width,height);
-}
-
-const NRect & NShape::rectArea( ) const
-{
-  return rectArea_;
-}
-
-void NShape::fill( NGraphics * g, const NRegion & repaintArea )
-{
-}
-
-int NShape::top( ) const
-{
-  return rectArea().top();
-}
-
-int NShape::left( ) const
-{
-  return rectArea().left();
-}
-
-int NShape::width( ) const
-{
-  return rectArea().width();
-}
-
-int NShape::height( ) const
-{
-  return rectArea().height();
-}
-
-void NShape::setTop( int top )
-{
-  rectArea_.setTop(top);
-}
-
-void NShape::setWidth( int width )
-{
-  rectArea_.setWidth(width);
-}
-
-void NShape::setHeight( int height )
-{
-  rectArea_.setHeight(height);
-}
-
-void NShape::setLeft( int left )
-{
-  rectArea_.setLeft(left);
-}
-
-NPoint NShape::pickerAt( int i )
-{
-  return NPoint(-1,-1);
-}
-
-int NShape::pickerSize( )
-{
-  return 0;
-}
-
-void NShape::drawPicker( NGraphics * g )
-{
-}
-
-void NShape::drawRectPicker( NGraphics * g )
-{
- int pickWidth  = 4;
- int pickHeight = 4;
-
- //if (((NWindow*)ownerWindow())->selected()!=this) g->setForeground(NColor::gray); else
-                                    g->setForeground(NColor(0,0,0));
- /*if (moveable()->topLeft())   */  g->fillRect(left(),top(),pickWidth,pickHeight);
- /*if (moveable()->topRight())  */  g->fillRect(left()+width()-pickWidth,top(),pickWidth,pickHeight);
- /*if (moveable()->bottomLeft())*/  g->fillRect(left(),top()+height()-pickHeight,pickWidth,pickHeight);
- /*if (moveable()->bottomRight())*/ g->fillRect(left()+width()-pickWidth,top()+height()-pickHeight,pickWidth,pickHeight);
- /*if (moveable()->midLeft())*/     g->fillRect(left(),top()+height() / 2 - pickHeight / 2,pickWidth,pickHeight);
- /*if (moveable()->midRight())*/    g->fillRect(left()+width()-pickWidth,top()+ height() / 2 - pickHeight / 2,pickWidth,pickHeight);
- /*if (moveable()->topMid())*/      g->fillRect(left()+width() / 2 - pickWidth / 2 ,top(),pickWidth,pickHeight);
- /*if (moveable()->bottomMid())*/   g->fillRect(left()+width() / 2 - pickWidth / 2 ,top()+height()-pickHeight,pickWidth,pickHeight);
-}
-
-int NShape::overPicker( int x, int y )
-{
-  return -1;
-}
-
-
-void NShape::setPicker( int index, int x, int y )
-{
-}
-
-NRegion NShape::region( )
-{
-  return NRegion();
-}
-
-NRegion NShape::spacingRegion(const NSize & spacing )
-{
-  return NRegion();
-}
-
-
-
-
-

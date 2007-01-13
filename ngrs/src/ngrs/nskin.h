@@ -30,109 +30,113 @@
 #include "nborder.h"
 #include "nbitmap.h"
 
-const int nVertical   = 16;
-const int nHorizontal = 32;
+namespace ngrs {
 
-class NSkin {
-public:
+  const int nVertical   = 16;
+  const int nHorizontal = 32;
 
-   NSkin();
-   ~NSkin();
+  class NSkin {
+  public:
 
-   NSkin(const NSkin & src);
-   const NSkin & operator= (const NSkin & rhs);
+    NSkin();
+    ~NSkin();
 
-   void setBorder(const NBorder & border);
-   NBorder* border() const;
-   void setBackground(const NColor & bgColor);
-   const NColor & background() const;
-   void setForeground(const NColor & fgColor);
-   const NColor & foreground() const;
-   void setTranslucent(const NColor & transColor, int percent);
-   void setDisabledTextColor(const NColor & color);
-   const NColor & disabledTextColor() const;
+    NSkin(const NSkin & src);
+    const NSkin & operator= (const NSkin & rhs);
 
-   const NColor & transColor() const;
-   
-   void setFont(const NFont & font);
-   const NFont & font() const;
+    void setBorder(const NBorder & border);
+    NBorder* border() const;
+    void setBackground(const NColor & bgColor);
+    const NColor & background() const;
+    void setForeground(const NColor & fgColor);
+    const NColor & foreground() const;
+    void setTranslucent(const NColor & transColor, int percent);
+    void setDisabledTextColor(const NColor & color);
+    const NColor & disabledTextColor() const;
 
-   void setTextColor( const NColor & color );
-   const NColor & textColor() const;
-   bool overrideFontColor() const;
+    const NColor & transColor() const;
 
-   void setSpacing(const NSize & size);
-   const NSize & spacing() const;
-   void setBitmap(const NBitmap & bitmap, int bitmapBgStyle);
-   const NBitmap & bitmap() const;
-   int bitmapBgStyle() const;
+    void setFont(const NFont & font);
+    const NFont & font() const;
 
-   void useParentBackground(bool on);
-   bool parentBackground() const;
-   void useParentForeground(bool on);
-   bool parentForeground() const;
-   void useParentFont(bool on);
-   bool parentFont() const;
-   void setTransparent(bool on);
-   bool transparent() const;
-   int translucent() const;
+    void setTextColor( const NColor & color );
+    const NColor & textColor() const;
+    bool overrideFontColor() const;
 
-   void setGradient(const NColor & start, const NColor & mid, const NColor & end, int gradientStyle, int gradientOrientation, int percent, int arcWidth, int arcHeight);
-   const NColor & gradientStartColor() const;
-   const NColor & gradientMidColor() const;
-   const NColor & gradientEndColor() const;
-   int gradientPercent() const;
-   int gradientStyle() const;
-   int gradientOrientation() const;
-   int gradientArcWidth() const;
-   int gradientArcHeight() const;
+    void setSpacing(const NSize & size);
+    const NSize & spacing() const;
+    void setBitmap(const NBitmap & bitmap, int bitmapBgStyle);
+    const NBitmap & bitmap() const;
+    int bitmapBgStyle() const;
 
-   void setGradientStyle(int style);
-   void setGradientPercent(int percent);
-   void setGradientOrientation(int orientation);
+    void useParentBackground(bool on);
+    bool parentBackground() const;
+    void useParentForeground(bool on);
+    bool parentForeground() const;
+    void useParentFont(bool on);
+    bool parentFont() const;
+    void setTransparent(bool on);
+    bool transparent() const;
+    int translucent() const;
 
-   private:
+    void setGradient(const NColor & start, const NColor & mid, const NColor & end, int gradientStyle, int gradientOrientation, int percent, int arcWidth, int arcHeight);
+    const NColor & gradientStartColor() const;
+    const NColor & gradientMidColor() const;
+    const NColor & gradientEndColor() const;
+    int gradientPercent() const;
+    int gradientStyle() const;
+    int gradientOrientation() const;
+    int gradientArcWidth() const;
+    int gradientArcHeight() const;
 
-      // gradient style information
-      NColor gradStartColor_;
-      NColor gradMidColor_;
-      NColor gradEndColor_;
-      int gradientPercent_, gradientStyle_, gradientOrientation_;
-      int arcWidth_;
-      int arcHeight_;
+    void setGradientStyle(int style);
+    void setGradientPercent(int percent);
+    void setGradientOrientation(int orientation);
 
-      // fore- and bgcolor style
-      NColor bgColor_;
-      NColor fgColor_;
-      bool transparent_;
-      bool useParentBgColor_;
-      bool useParentFgColor_;
+  private:
 
-      // translucent Background style
-      NColor transColor_;  // the transparent color mix
-      int translucent_;    // the percent of translucent visibility
+    // gradient style information
+    NColor gradStartColor_;
+    NColor gradMidColor_;
+    NColor gradEndColor_;
+    int gradientPercent_, gradientStyle_, gradientOrientation_;
+    int arcWidth_;
+    int arcHeight_;
 
-      // the Bitmap background style
-      NBitmap bitmap_;
-      int bitmapBgStyle_;
+    // fore- and bgcolor style
+    NColor bgColor_;
+    NColor fgColor_;
+    bool transparent_;
+    bool useParentBgColor_;
+    bool useParentFgColor_;
 
-      // the Font style
-      NFont  font_;
-      bool useParentFont_;
+    // translucent Background style
+    NColor transColor_;  // the transparent color mix
+    int translucent_;    // the percent of translucent visibility
 
-      // the border style
-      NBorder* border_;
+    // the Bitmap background style
+    NBitmap bitmap_;
+    int bitmapBgStyle_;
 
-      // the spacing indent
-      NSize  spacing_;
+    // the Font style
+    NFont  font_;
+    bool useParentFont_;
 
-      // color that will be used as foreground, when a component is disabled
-      NColor disabledTextColor_;
+    // the border style
+    NBorder* border_;
 
-	  // to overide textColor textColor
+    // the spacing indent
+    NSize  spacing_;
 
-	  NColor textColor_;
-	  bool overrideFontColor_;
-};
+    // color that will be used as foreground, when a component is disabled
+    NColor disabledTextColor_;
+
+    // to overide textColor textColor
+
+    NColor textColor_;
+    bool overrideFontColor_;
+  };
+
+}
 
 #endif

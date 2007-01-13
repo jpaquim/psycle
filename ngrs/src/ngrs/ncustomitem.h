@@ -26,9 +26,12 @@
 /**
 @author Stefan
 */
-class NCustomItem : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NCustomItem : public NPanel
+  {
+  public:
     NCustomItem();
 
     ~NCustomItem();
@@ -39,16 +42,18 @@ public:
     void setObject( NObject* obj);
     NObject* object();
 
-		void setIntValue( int value );
-		int intValue() const;
+    void setIntValue( int value );
+    int intValue() const;
 
-   bool operator<(const NCustomItem & rhs) const;
+    bool operator<(const NCustomItem & rhs) const;
 
-private:
+  private:
 
-   NObject* obj_;
-   int value_;
+    NObject* obj_;
+    int value_;
 
-};
+  };
+
+}
 
 #endif

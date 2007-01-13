@@ -40,102 +40,102 @@ namespace psycle {
 
 		class HeaderCoordInfo {
 		public:
-			NRect bgCoords;
-			NRect noCoords;
-			NRect sRecCoords;
-			NPoint dRecCoords;
-			NRect sMuteCoords;
-			NPoint dMuteCoords;
-			NRect sSoloCoords;
-			NPoint dSoloCoords;
-			NPoint dgX0Coords;
-			NPoint dg0XCoords;
+			ngrs::NRect bgCoords;
+			ngrs::NRect noCoords;
+			ngrs::NRect sRecCoords;
+			ngrs::NPoint dRecCoords;
+			ngrs::NRect sMuteCoords;
+			ngrs::NPoint dMuteCoords;
+			ngrs::NRect sSoloCoords;
+			ngrs::NPoint dSoloCoords;
+			ngrs::NPoint dgX0Coords;
+			ngrs::NPoint dg0XCoords;
 		};
 
 		class MachineCoordInfo {
 		public:
-			NRect bgCoords;
-			NRect sPan;
-			NPoint dNameCoords;
+			ngrs::NRect bgCoords;
+			ngrs::NRect sPan;
+			ngrs::NPoint dNameCoords;
 
-			NRect muteCoords;
-			NRect soloCoords;
-			NRect dSoloCoords;
-			NRect dMuteCoords;
-			NRect dPan;
-			NRect dByPass;
+			ngrs::NRect muteCoords;
+			ngrs::NRect soloCoords;
+			ngrs::NRect dSoloCoords;
+			ngrs::NRect dMuteCoords;
+			ngrs::NRect dPan;
+			ngrs::NRect dByPass;
 
-			NRect sVuPeak;
-			NRect sVu0;
-			NRect dVu;
+			ngrs::NRect sVuPeak;
+			ngrs::NRect sVu0;
+			ngrs::NRect dVu;
 		};
 
 		class MachineViewColorInfo {
 		public:
-			NColor pane_bg_color;
-			NColor wire_bg_color;
-			NColor wire_poly_color;
-			NColor wire_arrow_border_color;
-			NColor sel_border_color;
+			ngrs::NColor pane_bg_color;
+			ngrs::NColor wire_bg_color;
+			ngrs::NColor wire_poly_color;
+			ngrs::NColor wire_arrow_border_color;
+			ngrs::NColor sel_border_color;
 		};
 
 		class PatternViewColorInfo {
 		public:
-			NColor cursor_bg_color;
-			NColor cursor_text_color;
-			NColor bar_bg_color;
-			NColor beat_bg_color;
-			NColor bg_color;
-			NColor text_color;
-			NColor sel_text_color;
-			NColor beat_text_color;
-			NColor playbar_bg_color;
-			NColor track_big_sep_color;
-			NColor track_small_sep_color;
-			NColor line_sep_color;
-			NColor col_sep_color;
-			NColor sel_cursor_bg_color;
-			NColor sel_bar_bg_color;
-			NColor sel_beat_bg_color;
-			NColor sel_bg_color;
-			NColor sel_beat_text_color;
-			NColor sel_playbar_bg_color;
-			NColor restarea_bg_color;
+			ngrs::NColor cursor_bg_color;
+			ngrs::NColor cursor_text_color;
+			ngrs::NColor bar_bg_color;
+			ngrs::NColor beat_bg_color;
+			ngrs::NColor bg_color;
+			ngrs::NColor text_color;
+			ngrs::NColor sel_text_color;
+			ngrs::NColor beat_text_color;
+			ngrs::NColor playbar_bg_color;
+			ngrs::NColor track_big_sep_color;
+			ngrs::NColor track_small_sep_color;
+			ngrs::NColor line_sep_color;
+			ngrs::NColor col_sep_color;
+			ngrs::NColor sel_cursor_bg_color;
+			ngrs::NColor sel_bar_bg_color;
+			ngrs::NColor sel_beat_bg_color;
+			ngrs::NColor sel_bg_color;
+			ngrs::NColor sel_beat_text_color;
+			ngrs::NColor sel_playbar_bg_color;
+			ngrs::NColor restarea_bg_color;
 		};
 
 		class SequencerViewInfo {
 		public:
-			NColor pane_bg_color;
-			NColor pane_text_color;
-			NColor pane_grid_color;
-			NColor pane_move_line_color;
-			NColor pane_play_line_color;
+			ngrs::NColor pane_bg_color;
+			ngrs::NColor pane_text_color;
+			ngrs::NColor pane_grid_color;
+			ngrs::NColor pane_move_line_color;
+			ngrs::NColor pane_play_line_color;
 		};
 
 		class VuMeterInfo {
 		public:
-			NColor vu1;
-			NColor vu2;
-			NColor vu3;
+			ngrs::NColor vu1;
+			ngrs::NColor vu2;
+			ngrs::NColor vu3;
 		};
 
 		class FrameMachineInfo {
 		public:
-			NColor machineGUITopColor;
-			NColor machineGUIFontTopColor;
-			NColor machineGUIBottomColor;
-			NColor machineGUIFontBottomColor;
+			ngrs::NColor machineGUITopColor;
+			ngrs::NColor machineGUIFontTopColor;
+			ngrs::NColor machineGUIBottomColor;
+			ngrs::NColor machineGUIFontBottomColor;
 
-			NColor machineGUIHTopColor;
-			NColor machineGUIHFontTopColor;
-			NColor machineGUIHBottomColor;
-			NColor machineGUIHFontBottomColor;
+			ngrs::NColor machineGUIHTopColor;
+			ngrs::NColor machineGUIHFontTopColor;
+			ngrs::NColor machineGUIHBottomColor;
+			ngrs::NColor machineGUIHFontBottomColor;
 
-			NColor machineGUITitleColor;
-			NColor machineGUITitleFontColor;
+			ngrs::NColor machineGUITitleColor;
+			ngrs::NColor machineGUITitleFontColor;
 		};
 
-		class SkinReader : public NObject {
+		class SkinReader : public ngrs::NObject {
 			// Singleton Pattern
 		private:
 			SkinReader();          
@@ -169,11 +169,11 @@ namespace psycle {
 			int patview_track_left_ident() const;
 			int patview_track_right_ident() const;
 
-			NBitmap & patview_header_bitmap();
+			ngrs::NBitmap & patview_header_bitmap();
 
 			// machineview settings
 
-			NPixmap & machines_bitmap();
+			ngrs::NPixmap & machines_bitmap();
 
 			const MachineCoordInfo & machineview_master_coords() const;
 			const MachineCoordInfo & machineview_effect_coords() const;
@@ -195,7 +195,7 @@ namespace psycle {
 
 		private:
 
-			void onTagParse(const NXmlParser & parser, const std::string & tagName);
+			void onTagParse(const ngrs::NXmlParser & parser, const std::string & tagName);
 
 			// flags for the onTagParse, to know, in which parent tag we are
 
@@ -207,8 +207,8 @@ namespace psycle {
 			bool parseMacEffect;
 			bool parseMacGenerator;
 
-			// this method extracts a bitmap out of the opened zip file and loads it into a NBitmap
-			NBitmap extractAndLoadBitmap( const std::string & zip_path );
+			// this method extracts a bitmap out of the opened zip file and loads it into a ngrs::NBitmap
+			ngrs::NBitmap extractAndLoadBitmap( const std::string & zip_path );
 
 			// patternview stuff
 
@@ -216,7 +216,7 @@ namespace psycle {
 			HeaderCoordInfo headerCoords_;
 
 			// transforms a "00:00:00:00" str into a nrect "00" any int value
-			NRect getCoords( const std::string & coord ) const;
+			ngrs::NRect getCoords( const std::string & coord ) const;
 
 			bool patview_line_sep_enabled_;
 			bool patview_col_sep_enabled_;
@@ -243,8 +243,8 @@ namespace psycle {
 			// default Bitmaps
 			DefaultBitmaps defaultBitmaps_;
 
-			NBitmap patview_header_bitmap_;
-			NPixmap machines_bitmap_;
+			ngrs::NBitmap patview_header_bitmap_;
+			ngrs::NPixmap machines_bitmap_;
 
 			// our zipreader handle
 			zipreader *z;

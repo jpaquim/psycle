@@ -26,10 +26,12 @@
 
 #include <string>
 
-class NObject;
+namespace ngrs {
 
-class NEvent{
-public:
+  class NObject;
+
+  class NEvent{
+  public:
     NEvent(NObject* sender, const std::string & text = "");
 
     virtual ~NEvent();
@@ -37,11 +39,13 @@ public:
     NObject* sender();
     std::string text();
 
-private:
+  private:
 
-   NObject* sender_;
-   std::string text_;
+    NObject* sender_;
+    std::string text_;
 
-};
+  };
+
+}
 
 #endif

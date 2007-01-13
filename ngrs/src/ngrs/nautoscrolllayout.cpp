@@ -19,51 +19,51 @@
  ***************************************************************************/
 #include "nautoscrolllayout.h"
 
-NAutoScrollLayout::NAutoScrollLayout()
- : NLayout()
-{
-  maxY_ = maxY_ = 0;
-}
+namespace ngrs {
 
-NLayout * NAutoScrollLayout::clone( ) const
-{
-  return new NAutoScrollLayout(*this);
-}
+  NAutoScrollLayout::NAutoScrollLayout()
+    : NLayout()
+  {
+    maxY_ = maxY_ = 0;
+  }
 
-NAutoScrollLayout::~NAutoScrollLayout()
-{
-}
+  NLayout * NAutoScrollLayout::clone( ) const
+  {
+    return new NAutoScrollLayout(*this);
+  }
 
-void NAutoScrollLayout::align( NVisualComponent * parent )
-{
-  maxX_ = 0;
-  maxY_ = 0;
-  std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
+  NAutoScrollLayout::~NAutoScrollLayout()
+  {
+  }
 
-  for (;itr < parent->visualComponents().end(); itr++) {
-    NVisualComponent* visualChild = *itr;
-       if (visualChild->visible()) {
+  void NAutoScrollLayout::align( NVisualComponent * parent )
+  {
+    maxX_ = 0;
+    maxY_ = 0;
+    std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
+
+    for (;itr < parent->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      if (visualChild->visible()) {
         if (visualChild->width()+visualChild->left() > maxX_) {
-           maxX_ = visualChild->width()+visualChild->left();
+          maxX_ = visualChild->width()+visualChild->left();
         }
         if (visualChild->height()+visualChild->top() > maxY_) {
-           maxY_ = visualChild->height()+visualChild->top();
+          maxY_ = visualChild->height()+visualChild->top();
         }
-       }
+      }
+    }
+
   }
-  
+
+  int NAutoScrollLayout::preferredWidth( const NVisualComponent * target ) const
+  {
+    return maxX_;
+  }
+
+  int NAutoScrollLayout::preferredHeight( const NVisualComponent * target ) const
+  {
+    return maxY_;
+  }
+
 }
-
-int NAutoScrollLayout::preferredWidth( const NVisualComponent * target ) const
-{
-  return maxX_;
-}
-
-int NAutoScrollLayout::preferredHeight( const NVisualComponent * target ) const
-{
-  return maxY_;
-}
-
-
-
-

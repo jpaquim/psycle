@@ -26,9 +26,12 @@
 /**
 @author Stefan
 */
-class NCustomMenuItem : public NCustomItem
-{
-public:
+
+namespace ngrs {
+
+  class NCustomMenuItem : public NCustomItem
+  {
+  public:
     NCustomMenuItem();
 
     ~NCustomMenuItem();
@@ -48,12 +51,14 @@ public:
 
     virtual void setFont(const NFont & font);
 
-private:
+  private:
 
     NSkin itemNone;
     NSkin itemOver;
 
 
-};
+  };
+
+}
 
 #endif

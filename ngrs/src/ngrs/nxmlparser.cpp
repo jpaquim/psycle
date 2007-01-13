@@ -167,215 +167,219 @@ void SAX2Handler::fatalError(const SAXParseException& exception)
 #endif
 
 
-NXmlParser::NXmlParser()
-{
-}
+namespace ngrs {
 
-
-NXmlParser::~NXmlParser()
-{
-}
-
-
-int NXmlParser::parseFile( const std::string & fileName )
-{
-  #ifdef __unix__
-  int err = 0;
-  attrs = 0;
-
-  try {
-    XMLPlatformUtils::Initialize();
-  }
-  catch (const XMLException& toCatch) {
-     char* message = XMLString::transcode(toCatch.getMessage());
-     std::cout << "xml parse error: Exception message is: \n"
-                 << message << "\n";
-     XMLString::release(&message);
-	 err = 1;
-  }
-
-  SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
-
-  SAX2Handler* defaultHandler = new SAX2Handler();
-  defaultHandler->setParser(this);
-  parser->setContentHandler(defaultHandler);
-  parser->setErrorHandler(defaultHandler);
-  try {
-    parser->parse(fileName.c_str());
-  }
-  catch (const XMLException& toCatch) {
-     char* message = XMLString::transcode(toCatch.getMessage());
-     std::cout << "xml parse error: Exception message is: \n"
-                 << message << "\n";
-     XMLString::release(&message);
-	 err = 1;
-   }
-   catch (const SAXParseException& toCatch) {
-     char* message = XMLString::transcode(toCatch.getMessage());
-     std::cout << "xml parse error: Exception message is: \n"
-                 << message << "\n";
-     XMLString::release(&message);
-	 err = 1;
-   }
-   catch (...) {
-     std::cerr << "Xml Parser Unexpected Exception" << std::endl;
-	 err = 1;
-   }
-
-  delete parser;
-  delete defaultHandler;
-  XMLPlatformUtils::Terminate();  
-  return err;
-  #else
-  if ( NFile::fileIsReadable( fileName ) ) {
-	  std::string memparse = NFile::readFile( fileName );
-	  parseString( memparse );
-	  return 1;
-  } else {
-	  std::cout << "ngrs_runtime_xml_err:  file is not readable: \n"
-                 << fileName << "\n";
-	  return 0;
-  }
-  #endif
-}
-
-std::string NXmlParser::getAttribValue( const std::string & name ) const
-{
-  #ifdef __unix__
-   std::string erg;
-   try {
-       XMLCh* str = XMLString::transcode(name.c_str());
-       const XMLCh* strCh = attrs->getValue(str);
-       char* id = XMLString::transcode(strCh);
-       erg = std::string(id);
-       XMLString::release(&id);
-       XMLString::release(&str);
-   } catch (std::exception e) {
-           return "";
-   }
-   return erg;
-  #else  
-  return attribs.value( name );    
-  #endif      
-}
-
-int NXmlParser::parseString( const std::string & text )
-{
-  #ifdef __unix__
-  try {
-    XMLPlatformUtils::Initialize();
-  }
-  catch (const XMLException& toCatch) {
-     char* message = XMLString::transcode(toCatch.getMessage());
-     std::cout << "xml parse error: Exception message is: \n"
-                 << message << "\n";
-     XMLString::release(&message);
+  NXmlParser::NXmlParser()
+  {
   }
 
 
-  SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
-  SAX2Handler defaultHandler;
-  defaultHandler.setParser(this);
-  parser->setContentHandler(&defaultHandler);
-  parser->setErrorHandler(&defaultHandler);
+  NXmlParser::~NXmlParser()
+  {
+  }
 
-  const char* gMemBufId = "textparse";
 
-  MemBufInputSource* memBufIS = new MemBufInputSource
-  (
-        (const XMLByte*)text.c_str()
-        , strlen(text.c_str())
-        , gMemBufId
-        , false
-  );
+  int NXmlParser::parseFile( const std::string & fileName )
+  {
+#ifdef __unix__
+    int err = 0;
+    attrs = 0;
 
-  std::cout << "hejdslkj" << std::endl;
+    try {
+      XMLPlatformUtils::Initialize();
+    }
+    catch (const XMLException& toCatch) {
+      char* message = XMLString::transcode(toCatch.getMessage());
+      std::cout << "xml parse error: Exception message is: \n"
+        << message << "\n";
+      XMLString::release(&message);
+      err = 1;
+    }
 
-  int errorCount = 0;
-  int errorCode = 0;
-  try
+    SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+
+    SAX2Handler* defaultHandler = new SAX2Handler();
+    defaultHandler->setParser(this);
+    parser->setContentHandler(defaultHandler);
+    parser->setErrorHandler(defaultHandler);
+    try {
+      parser->parse(fileName.c_str());
+    }
+    catch (const XMLException& toCatch) {
+      char* message = XMLString::transcode(toCatch.getMessage());
+      std::cout << "xml parse error: Exception message is: \n"
+        << message << "\n";
+      XMLString::release(&message);
+      err = 1;
+    }
+    catch (const SAXParseException& toCatch) {
+      char* message = XMLString::transcode(toCatch.getMessage());
+      std::cout << "xml parse error: Exception message is: \n"
+        << message << "\n";
+      XMLString::release(&message);
+      err = 1;
+    }
+    catch (...) {
+      std::cerr << "Xml Parser Unexpected Exception" << std::endl;
+      err = 1;
+    }
+
+    delete parser;
+    delete defaultHandler;
+    XMLPlatformUtils::Terminate();  
+    return err;
+#else
+    if ( NFile::fileIsReadable( fileName ) ) {
+      std::string memparse = NFile::readFile( fileName );
+      parseString( memparse );
+      return 1;
+    } else {
+      std::cout << "ngrs_runtime_xml_err:  file is not readable: \n"
+        << fileName << "\n";
+      return 0;
+    }
+#endif
+  }
+
+  std::string NXmlParser::getAttribValue( const std::string & name ) const
+  {
+#ifdef __unix__
+    std::string erg;
+    try {
+      XMLCh* str = XMLString::transcode(name.c_str());
+      const XMLCh* strCh = attrs->getValue(str);
+      char* id = XMLString::transcode(strCh);
+      erg = std::string(id);
+      XMLString::release(&id);
+      XMLString::release(&str);
+    } catch (std::exception e) {
+      return "";
+    }
+    return erg;
+#else  
+    return attribs.value( name );    
+#endif      
+  }
+
+  int NXmlParser::parseString( const std::string & text )
+  {
+#ifdef __unix__
+    try {
+      XMLPlatformUtils::Initialize();
+    }
+    catch (const XMLException& toCatch) {
+      char* message = XMLString::transcode(toCatch.getMessage());
+      std::cout << "xml parse error: Exception message is: \n"
+        << message << "\n";
+      XMLString::release(&message);
+    }
+
+
+    SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+    SAX2Handler defaultHandler;
+    defaultHandler.setParser(this);
+    parser->setContentHandler(&defaultHandler);
+    parser->setErrorHandler(&defaultHandler);
+
+    const char* gMemBufId = "textparse";
+
+    MemBufInputSource* memBufIS = new MemBufInputSource
+      (
+      (const XMLByte*)text.c_str()
+      , strlen(text.c_str())
+      , gMemBufId
+      , false
+      );
+
+    std::cout << "hejdslkj" << std::endl;
+
+    int errorCount = 0;
+    int errorCode = 0;
+    try
     {
-        parser->parse(*memBufIS);
-        const unsigned long endMillis = XMLPlatformUtils::getCurrentMillis();
-        errorCount = parser->getErrorCount();
+      parser->parse(*memBufIS);
+      const unsigned long endMillis = XMLPlatformUtils::getCurrentMillis();
+      errorCount = parser->getErrorCount();
     }
     catch (const OutOfMemoryException&)
     {
-        XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
-        errorCode = 5;
+      XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
+      errorCode = 5;
     }
     catch (const XMLException& e)
     {
-        XERCES_STD_QUALIFIER cerr << "\nError during parsing memory stream:\n"
-             << "Exception message is:  \n"
-             << StrX(e.getMessage()) << "\n" << XERCES_STD_QUALIFIER endl;
-        errorCode = 4;
+      XERCES_STD_QUALIFIER cerr << "\nError during parsing memory stream:\n"
+        << "Exception message is:  \n"
+        << StrX(e.getMessage()) << "\n" << XERCES_STD_QUALIFIER endl;
+      errorCode = 4;
     }
     if(errorCode) {
-        XMLPlatformUtils::Terminate();
-        return errorCode;
+      XMLPlatformUtils::Terminate();
+      return errorCode;
     }
 
-   delete parser;
+    delete parser;
 
-   delete memBufIS;
+    delete memBufIS;
 
-   // And call the termination method
-   XMLPlatformUtils::Terminate();
+    // And call the termination method
+    XMLPlatformUtils::Terminate();
 
-   if (errorCount > 0)
-        return 4;
-   else
-        return 0;
-  #else
-  
-  NXmlPos xml_pos;
-  xml_pos.err = 0;
-  std::string::size_type pos = 0;
+    if (errorCount > 0)
+      return 4;
+    else
+      return 0;
+#else
 
-  while( !xml_pos.err ) {
-    xml_pos = getNextTag( pos, text );
-    if ( xml_pos.err == 0 && xml_pos.type == 0) {
-      attribs.reset( text.substr( xml_pos.pos, xml_pos.len ) );       
-      onTagParse( attribs.tagName() );
+    NXmlPos xml_pos;
+    xml_pos.err = 0;
+    std::string::size_type pos = 0;
+
+    while( !xml_pos.err ) {
+      xml_pos = getNextTag( pos, text );
+      if ( xml_pos.err == 0 && xml_pos.type == 0) {
+        attribs.reset( text.substr( xml_pos.pos, xml_pos.len ) );       
+        onTagParse( attribs.tagName() );
+      }
+      pos = xml_pos.pos + xml_pos.len + 1;
     }
-    pos = xml_pos.pos + xml_pos.len + 1;
+
+    return 0;        
+#endif
   }
-  
-  return 0;        
-  #endif
-}
 
 
-NXmlPos NXmlParser::getNextTag( int pos,  const std::string & text ) const {
-        
-  NXmlPos xml_pos;
-  xml_pos.err  = 1;
-  xml_pos.type = 0;
-        
-  std::string::size_type next_pos = text.find( "<", pos );
-  
-  if ( next_pos + 1 < text.length() ) {   
-    if ( text[next_pos+1] == '/' ) {
-     xml_pos.type = 1;
+  NXmlPos NXmlParser::getNextTag( int pos,  const std::string & text ) const {
+
+    NXmlPos xml_pos;
+    xml_pos.err  = 1;
+    xml_pos.type = 0;
+
+    std::string::size_type next_pos = text.find( "<", pos );
+
+    if ( next_pos + 1 < text.length() ) {   
+      if ( text[next_pos+1] == '/' ) {
+        xml_pos.type = 1;
+      }
     }
-  }
-  
-  if ( next_pos != std::string::npos ) {
-    std::string::size_type tag_end = text.find( ">", next_pos );
-    if ( tag_end != std::string::npos ) {
-      xml_pos.pos = next_pos + 1;
-      xml_pos.len = tag_end - next_pos - 1 ;         
-      xml_pos.err = 0;
-    } else
-    xml_pos.err = 1;        
-  } else {
-   xml_pos.err = 1;      
+
+    if ( next_pos != std::string::npos ) {
+      std::string::size_type tag_end = text.find( ">", next_pos );
+      if ( tag_end != std::string::npos ) {
+        xml_pos.pos = next_pos + 1;
+        xml_pos.len = tag_end - next_pos - 1 ;         
+        xml_pos.err = 0;
+      } else
+        xml_pos.err = 1;        
+    } else {
+      xml_pos.err = 1;      
+    }         
+
+    return xml_pos;
   }         
-  
-  return xml_pos;
-}         
 
-void NXmlParser::onTagParse( const std::string & tagName ) {
-  tagParse.emit( *this, tagName );
-}     
+  void NXmlParser::onTagParse( const std::string & tagName ) {
+    tagParse.emit( *this, tagName );
+  }     
+
+}

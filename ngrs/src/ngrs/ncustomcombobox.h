@@ -25,13 +25,18 @@
 /**
 @author Stefan Nattkemper
 */
-class NCustomComboBox : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NCustomComboBox : public NPanel
+  {
+  public:
     NCustomComboBox();
 
     ~NCustomComboBox();
 
-};
+  };
+
+}
 
 #endif

@@ -23,110 +23,112 @@
 #include "ntextbase.h"
 #include "npoint3d.h"
 #include <algorithm>
+
 /**
 @author Stefan Nattkemper
 */
 
+namespace ngrs {
 
-class NMemo : public NTextBase
-{
-   class TextArea : public NPanel {
-     class Line {
-       public :		
+  class NMemo : public NTextBase
+  {
+    class TextArea : public NPanel {
+      class Line {
+      public :		
 
-          Line();
-          Line( TextArea* area );
-          ~Line();
+        Line();
+        Line( TextArea* area );
+        ~Line();
 
-		  void setText( const std::string & text );
-          const std::string & text() const;
-          void insert( std::string::size_type pos, const std::string & text );
-          void erase( unsigned int count );
+        void setText( const std::string & text );
+        const std::string & text() const;
+        void insert( std::string::size_type pos, const std::string & text );
+        void erase( unsigned int count );
 
-          void setTop( int top );
-          void move(int dy);
-          int top() const;
-          int height() const;
+        void setTop( int top );
+        void move(int dy);
+        int top() const;
+        int height() const;
 
-          void incPos();
-          void decPos();
-          void setPos( unsigned int pos );
-          void setPosEnd();
-          void setPosStart();
+        void incPos();
+        void decPos();
+        void setPos( unsigned int pos );
+        void setPosEnd();
+        void setPosStart();
 
-          std::string::size_type pos() const;
+        std::string::size_type pos() const;
 
-          NPoint3D screenPos() const;
-          void setPosToScreenPos(int x, int y);
-          bool setPosLineUp(int x);
-          bool setPosLineDown(int x);
+        NPoint3D screenPos() const;
+        void setPosToScreenPos(int x, int y);
+        bool setPosLineUp(int x);
+        bool setPosLineDown(int x);
 
-          int width() const;
+        int width() const;
 
-          std::string strFromPos() const;
-          std::string deleteFromPos();
-          std::string strToPos() const;
-          std::string deleteToPos();
+        std::string strFromPos() const;
+        std::string deleteFromPos();
+        std::string strToPos() const;
+        std::string deleteToPos();
 
-          void computeBreakPoints();
+        void computeBreakPoints();
 
-          void drawText( NGraphics *g );
-          void repaint();
-          NRect repaintLineArea() const;
-		  
-		  bool operator<( const Line  & rhs ) const;
-		  // needed for visual c++ express 2005 to avoid error c2784
-		  friend bool operator<( int top, const Line& r)
-          { return top < r.top(); }
-          // end of bugfix
-		  bool operator<( int rhsTop ) const;
+        void drawText( NGraphics *g );
+        void repaint();
+        NRect repaintLineArea() const;
 
-       private:
+        bool operator<( const Line  & rhs ) const;
+        // needed for visual c++ express 2005 to avoid error c2784
+        friend bool operator<( int top, const Line& r)
+        { return top < r.top(); }
+        // end of bugfix
+        bool operator<( int rhsTop ) const;
 
-          TextArea* pArea;
-          std::string text_;
-          int top_;
-		  int height_;
-		  std::string::size_type pos_;
-          
-          int findWidthMax( long width, const std::string & data, bool wbreak );
+      private:
 
-          std::vector<std::string::size_type> breakPoints;
+        TextArea* pArea;
+        std::string text_;
+        int top_;
+        int height_;
+        std::string::size_type pos_;
 
-     };
+        int findWidthMax( long width, const std::string & data, bool wbreak );
 
-     public:
-       TextArea();
-       TextArea( NMemo* memo );
+        std::vector<std::string::size_type> breakPoints;
 
-       ~TextArea();
+      };
 
-       void setText(const std::string & text);
-       std::string text() const;
+    public:
+      TextArea();
+      TextArea( NMemo* memo );
 
-       virtual void paint(NGraphics* g);
-       virtual void onKeyPress(const NKeyEvent & keyEvent);
-       virtual void onMousePress(int x, int y, int button);
+      ~TextArea();
 
-       void setWordWrap(bool on);
-       bool wordWrap() const;
+      void setText(const std::string & text);
+      std::string text() const;
 
-       void setReadOnly(bool on);
-       bool readOnly() const;
+      virtual void paint(NGraphics* g);
+      virtual void onKeyPress(const NKeyEvent & keyEvent);
+      virtual void onMousePress(int x, int y, int button);
 
-       void appendLine(const std::string & text);
-       void clear();
+      void setWordWrap(bool on);
+      bool wordWrap() const;
 
-       void loadFromFile(const std::string & fileName);
+      void setReadOnly(bool on);
+      bool readOnly() const;
 
-       NRect selection() const;
+      void appendLine(const std::string & text);
+      void clear();
 
-       virtual int preferredWidth() const;
-       virtual int preferredHeight() const;
+      void loadFromFile(const std::string & fileName);
 
-       virtual void resize();
+      NRect selection() const;
 
-     private:
+      virtual int preferredWidth() const;
+      virtual int preferredHeight() const;
+
+      virtual void resize();
+
+    private:
 
       NMemo* pMemo;
       bool wordWrap_;
@@ -146,9 +148,9 @@ class NMemo : public NTextBase
       void moveLines( std::vector<Line>::iterator from, std::vector<Line>::iterator to, int dy );
 
 
-   };
+    };
 
-public:
+  public:
     NMemo();
 
     ~NMemo();
@@ -169,12 +171,14 @@ public:
 
     virtual void resize( );
 
-private:
+  private:
 
     TextArea* textArea;
     class NScrollBar* vBar;
     class NScrollBar* hBar;
 
-};
+  };
+
+}
 
 #endif

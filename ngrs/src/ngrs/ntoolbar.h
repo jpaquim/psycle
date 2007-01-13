@@ -22,17 +22,19 @@
 
 #include "ntogglepanel.h"
 
-class NButton;
-class NPopupWindow;
-
 /**
 @author Stefan Nattkemper
 */
 
-class NToolBar : public NTogglePanel
-{
-public:
-       
+namespace ngrs {
+
+  class NButton;
+  class NPopupWindow;
+
+  class NToolBar : public NTogglePanel
+  {
+  public:
+
     NToolBar();
 
     ~NToolBar();
@@ -41,28 +43,30 @@ public:
     virtual void add( NRuntime* component );
     virtual NButton* add( NButton*  button );
     virtual void add( NVisualComponent* comp );
-    
+
     virtual void resize();
 
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
 
 
-protected:
-          
-   virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
-   virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
+  protected:
 
-private:
+    virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
+    virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
+
+  private:
 
     int ident_;
 
     NButton* moreBtn_;
     NPopupWindow* popup_;
-    
+
     void doAlign();
     void onMoreBtnClicked( NButtonEvent* ev );
-    
-};
+
+  };
+
+}
 
 #endif

@@ -19,37 +19,40 @@
  ***************************************************************************/
 #include "nborder.h"
 
-NBorder::NBorder()
-{
-  color_ = NColor(150,150,150);
+namespace ngrs {
+
+  NBorder::NBorder()
+  {
+    color_ = NColor(150,150,150);
+  }
+
+
+  NBorder::~NBorder()
+  {
+  }
+
+  void NBorder::paint( NGraphics * g, const NShape & geometry )
+  {
+  }
+
+  void NBorder::setSpacing( NSize size )
+  {
+    sizing_ = size;
+  }
+
+  const NSize & NBorder::spacing( ) const
+  {
+    return sizing_;
+  }
+
+  void NBorder::setColor( const NColor & color )
+  {
+    color_ = color;
+  }
+
+  const NColor & NBorder::color( )
+  {
+    return color_;
+  }
+
 }
-
-
-NBorder::~NBorder()
-{
-}
-
-void NBorder::paint( NGraphics * g, const NShape & geometry )
-{
-}
-
-void NBorder::setSpacing( NSize size )
-{
-  sizing_ = size;
-}
-
-const NSize & NBorder::spacing( ) const
-{
-  return sizing_;
-}
-
-void NBorder::setColor( const NColor & color )
-{
-  color_ = color;
-}
-
-const NColor & NBorder::color( )
-{
-  return color_;
-}
-

@@ -19,36 +19,38 @@
  ***************************************************************************/
 #include "nkeyaccelerator.h"
 
-NKeyAccelerator::NKeyAccelerator( int keyMask, char key)
-{
-  keyMask_ = keyMask;
-  key_ = key;
+namespace ngrs {
+
+  NKeyAccelerator::NKeyAccelerator( int keyMask, char key)
+  {
+    keyMask_ = keyMask;
+    key_ = key;
+  }
+
+  NKeyAccelerator::~NKeyAccelerator()
+  {
+  }
+
+  NKeyAccelerator::NKeyAccelerator( )
+  {
+    keyMask_ = key_ = 0;
+  }
+
+  bool NKeyAccelerator::operator <( const NKeyAccelerator & a ) const
+  {
+    int comp1 = key_    | (keyMask_    << 8);
+    int comp2 = a.key() | (a.keyMask() << 8);
+    return comp1 < comp2;
+  }
+
+  char NKeyAccelerator::key( ) const
+  {
+    return key_;
+  }
+
+  char NKeyAccelerator::keyMask( ) const
+  {
+    return keyMask_;
+  }
+
 }
-
-NKeyAccelerator::~NKeyAccelerator()
-{
-}
-
-NKeyAccelerator::NKeyAccelerator( )
-{
-  keyMask_ = key_ = 0;
-}
-
-bool NKeyAccelerator::operator <( const NKeyAccelerator & a ) const
-{
-  int comp1 = key_    | (keyMask_    << 8);
-  int comp2 = a.key() | (a.keyMask() << 8);
-  return comp1 < comp2;
-}
-
-char NKeyAccelerator::key( ) const
-{
-  return key_;
-}
-
-char NKeyAccelerator::keyMask( ) const
-{
-  return keyMask_;
-}
-
-

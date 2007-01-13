@@ -34,18 +34,18 @@ namespace psycle
 		{
 			setTitle("Insert Silence");
 
-			NPanel* table = new NPanel();
-				NTableLayout tableLayout(2,3);
+			ngrs::NPanel* table = new ngrs::NPanel();
+				ngrs::NTableLayout tableLayout(2,3);
 				tableLayout.setVGap(5);
 				tableLayout.setHGap(5);
 				table->setLayout(tableLayout);
-				m_atStart = new NCheckBox("At start");
-				m_atEnd = new NCheckBox("At end");
-				m_atCursor = new NCheckBox("At cursor");
+				m_atStart = new ngrs::NCheckBox("At start");
+				m_atEnd = new ngrs::NCheckBox("At end");
+				m_atCursor = new ngrs::NCheckBox("At cursor");
 			
-			table->add(m_atStart, NAlignConstraint(nAlLeft,1,0),true);
-			table->add(m_atEnd , NAlignConstraint(nAlLeft,1,1),true);
-			table->add(m_atCursor, NAlignConstraint(nAlLeft,1,2),true);
+			table->add(m_atStart, ngrs::NAlignConstraint(ngrs::nAlLeft,1,0),true);
+			table->add(m_atEnd , ngrs::NAlignConstraint(ngrs::nAlLeft,1,1),true);
+			table->add(m_atCursor, ngrs::NAlignConstraint(ngrs::nAlLeft,1,2),true);
 			
 			m_atStart->clicked.connect(this, &WaveEdInsertSilenceDialog::onInsStartClicked);
 			m_atEnd->clicked.connect(this, &WaveEdInsertSilenceDialog::onInsEndClicked);
@@ -55,32 +55,32 @@ namespace psycle
 			m_atEnd->setCheck(false);
 			m_atCursor->setCheck(false);
 
-			m_time = new NEdit;
-			table->add(m_time,NAlignConstraint(nAlLeft,0,1),true);
+			m_time = new ngrs::NEdit;
+			table->add(m_time,ngrs::NAlignConstraint(ngrs::nAlLeft,0,1),true);
 			m_time->setText("0.000");
-			NPanel* okPanel = new NPanel();
-			okPanel->setLayout(NAlignLayout(5,5));
+			ngrs::NPanel* okPanel = new ngrs::NPanel();
+			okPanel->setLayout(ngrs::NAlignLayout(5,5));
 			{
-				NButton *btn = new NButton("Cancel", false);
+				ngrs::NButton *btn = new ngrs::NButton("Cancel", false);
 				btn->clicked.connect(this, &WaveEdInsertSilenceDialog::onCancelClicked);
-				okPanel->add(btn,nAlRight);
+				okPanel->add(btn,ngrs::nAlRight);
 			}
 			{
-				NButton *btn = new NButton("Ok", false);
+				ngrs::NButton *btn = new ngrs::NButton("Ok", false);
 				btn->clicked.connect(this, &WaveEdInsertSilenceDialog::onOkClicked);
-				okPanel->add(btn,nAlRight);
+				okPanel->add(btn,ngrs::nAlRight);
 			}
 
-			pane()->add(okPanel,nAlBottom);
+			pane()->add(okPanel,ngrs::nAlBottom);
 			{
-				NLabel *lbl = new NLabel("Insert (in secs):");
-				table->add(lbl,NAlignConstraint(nAlLeft,0,0),true);
+				ngrs::NLabel *lbl = new ngrs::NLabel("Insert (in secs):");
+				table->add(lbl,ngrs::NAlignConstraint(ngrs::nAlLeft,0,0),true);
 			}
-			pane()->add(table,nAlClient);
+			pane()->add(table,ngrs::nAlClient);
 			pack();
 		}
 
-		void WaveEdInsertSilenceDialog::onInsStartClicked( NButtonEvent* ev)
+		void WaveEdInsertSilenceDialog::onInsStartClicked( ngrs::NButtonEvent* ev)
 		{
 			m_atStart->setCheck(true);
 			m_atEnd->setCheck(false);
@@ -89,7 +89,7 @@ namespace psycle
 			m_atEnd->repaint();
 			m_atCursor->repaint();
 		}
-		void WaveEdInsertSilenceDialog::onInsEndClicked( NButtonEvent* ev)
+		void WaveEdInsertSilenceDialog::onInsEndClicked( ngrs::NButtonEvent* ev)
 		{
 			m_atStart->setCheck(false);
 			m_atEnd->setCheck(true);
@@ -98,7 +98,7 @@ namespace psycle
 			m_atEnd->repaint();
 			m_atCursor->repaint();
 		}
-		void WaveEdInsertSilenceDialog::onInsCursorClicked( NButtonEvent* ev)
+		void WaveEdInsertSilenceDialog::onInsCursorClicked( ngrs::NButtonEvent* ev)
 		{
 			m_atStart->setCheck(false);
 			m_atEnd->setCheck(false);
@@ -107,7 +107,7 @@ namespace psycle
 			m_atEnd->repaint();
 			m_atCursor->repaint();
 		}
-		void WaveEdInsertSilenceDialog::onOkClicked( NButtonEvent* ev) 
+		void WaveEdInsertSilenceDialog::onOkClicked( ngrs::NButtonEvent* ev) 
 		{
 			std::string temp;
 			temp = 	m_time->text();
@@ -124,7 +124,7 @@ namespace psycle
 			doClose(true);
 		}
 
-		void WaveEdInsertSilenceDialog::onCancelClicked( NButtonEvent* ev) 
+		void WaveEdInsertSilenceDialog::onCancelClicked( ngrs::NButtonEvent* ev) 
 		{
 			doClose(false);
 		}

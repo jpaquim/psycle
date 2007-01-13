@@ -19,45 +19,49 @@
  ***************************************************************************/
 #include "ncustomitem.h"
 
-NCustomItem::NCustomItem()
- : NPanel()
-{
-  obj_ = 0;
-  value_ = 0;
-}
+namespace ngrs {
 
-NCustomItem::~NCustomItem()
-{
-}
+  NCustomItem::NCustomItem()
+    : NPanel()
+  {
+    obj_ = 0;
+    value_ = 0;
+  }
 
-std::string NCustomItem::text( ) const
-{
-  return "";
-}
+  NCustomItem::~NCustomItem()
+  {
+  }
 
-void NCustomItem::setObject( NObject * obj )
-{
-  obj_ = obj;
-}
+  std::string NCustomItem::text( ) const
+  {
+    return "";
+  }
 
-NObject * NCustomItem::object( )
-{
-  return obj_;
-}
+  void NCustomItem::setObject( NObject * obj )
+  {
+    obj_ = obj;
+  }
 
-void NCustomItem::setIntValue( int value ) {
-  value_ = value;
-}
+  NObject * NCustomItem::object( )
+  {
+    return obj_;
+  }
 
-int NCustomItem::intValue() const {
-  return value_;
-}
+  void NCustomItem::setIntValue( int value ) {
+    value_ = value;
+  }
 
-bool NCustomItem::operator <( const NCustomItem & rhs ) const
-{
-  return (this < &rhs);
-}
+  int NCustomItem::intValue() const {
+    return value_;
+  }
 
-void NCustomItem::setText( const std::string & text )
-{
+  bool NCustomItem::operator <( const NCustomItem & rhs ) const
+  {
+    return (this < &rhs);
+  }
+
+  void NCustomItem::setText( const std::string & text )
+  {
+  }
+
 }

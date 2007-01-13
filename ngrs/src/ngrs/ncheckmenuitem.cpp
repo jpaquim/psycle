@@ -26,69 +26,69 @@
 #include "ncheckbox.h"
 #include "nbutton.h"
 
-NCheckMenuItem::NCheckMenuItem()
- : NCustomMenuItem()
-{
-  init();
-}
+namespace ngrs {
 
-NCheckMenuItem::NCheckMenuItem( const std::string & text )
-{
-  init();
-  captionLbl_->setText(text);
-}
+  NCheckMenuItem::NCheckMenuItem()
+    : NCustomMenuItem()
+  {
+    init();
+  }
 
-void NCheckMenuItem::init( )
-{
-  setLayout(NAlignLayout());
+  NCheckMenuItem::NCheckMenuItem( const std::string & text )
+  {
+    init();
+    captionLbl_->setText(text);
+  }
 
-  checkBox_ = new NCheckBox();
-     checkBox_->setPreferredSize(25,25);
-     checkBox_->setCheck(true);
-     checkBox_->setSkin(NApp::config()->skin("mitemiconbg"));
-     checkBox_->setEvents(false);
-  add(checkBox_, nAlLeft);
+  void NCheckMenuItem::init( )
+  {
+    setLayout(NAlignLayout());
 
-  captionLbl_ = new NLabel();
-     captionLbl_->setSpacing(4,0,0,0);
+    checkBox_ = new NCheckBox();
+    checkBox_->setPreferredSize(25,25);
+    checkBox_->setCheck(true);
+    checkBox_->setSkin(NApp::config()->skin("mitemiconbg"));
+    checkBox_->setEvents(false);
+    add(checkBox_, nAlLeft);
+
+    captionLbl_ = new NLabel();
+    captionLbl_->setSpacing(4,0,0,0);
     captionLbl_->setVAlign(nAlCenter);
-  add(captionLbl_, nAlClient);
+    add(captionLbl_, nAlClient);
+  }
+
+
+
+  NCheckMenuItem::~NCheckMenuItem()
+  {
+  }
+
+  void NCheckMenuItem::onMousePress( int x, int y, int button )
+  {
+    NCustomMenuItem::onMousePress(x,y,button);
+    checkBox_->setCheck(!checkBox_->checked());
+  }
+
+  void NCheckMenuItem::onMouseEnter( )
+  {
+    checkBox_->setTransparent(true);
+    NCustomMenuItem::onMouseEnter();
+  }
+
+  void NCheckMenuItem::onMouseExit( )
+  {
+    checkBox_->setTransparent(false);
+    NCustomMenuItem::onMouseExit();
+  }
+
+  void NCheckMenuItem::setCheck( bool on )
+  {
+    checkBox_->setCheck(on);
+  }
+
+  bool NCheckMenuItem::checked( ) const
+  {
+    return checkBox_->checked();
+  }
+
 }
-
-
-
-NCheckMenuItem::~NCheckMenuItem()
-{
-}
-
-void NCheckMenuItem::onMousePress( int x, int y, int button )
-{
-  NCustomMenuItem::onMousePress(x,y,button);
-  checkBox_->setCheck(!checkBox_->checked());
-}
-
-void NCheckMenuItem::onMouseEnter( )
-{
-  checkBox_->setTransparent(true);
-  NCustomMenuItem::onMouseEnter();
-}
-
-void NCheckMenuItem::onMouseExit( )
-{
-  checkBox_->setTransparent(false);
-  NCustomMenuItem::onMouseExit();
-}
-
-void NCheckMenuItem::setCheck( bool on )
-{
-   checkBox_->setCheck(on);
-}
-
-bool NCheckMenuItem::checked( ) const
-{
-  return checkBox_->checked();
-}
-
-
-
-

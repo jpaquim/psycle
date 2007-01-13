@@ -25,8 +25,11 @@
 /**
 @author Stefan
 */
-class NRect{
-public:
+
+namespace ngrs {
+
+  class NRect{
+  public:
     NRect();
     NRect(long int left, long int top, long int width, long int height);
 
@@ -53,12 +56,14 @@ public:
     bool operator==(const NRect & rhs) const;
     bool operator!=(const NRect & rhs) const;
 
-private:
+  private:
 
     long int left_;
     long int top_;
     long int width_;
     long int height_;
-};
+  };
+
+}
 
 #endif

@@ -28,9 +28,11 @@
 @author Stefan
 */
 
-class NFileListBox : public NListBox
-{
-public:
+namespace ngrs {
+
+  class NFileListBox : public NListBox
+  {
+  public:
     NFileListBox();
 
     ~NFileListBox();
@@ -54,7 +56,7 @@ public:
     void setShowHiddenFiles( bool on );
 
 
-private:
+  private:
 
     bool isDirItem_;
     bool showHiddenFiles_;
@@ -68,6 +70,8 @@ private:
     void onDirItemSelected( NButtonEvent* ev );
     void onFileItemSelected( NButtonEvent* ev );
 
-};
+  };
+
+}
 
 #endif

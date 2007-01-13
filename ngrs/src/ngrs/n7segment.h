@@ -25,9 +25,12 @@
 /**
 @author Stefan Nattkemper
 */
-class N7Segment : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class N7Segment : public NPanel
+  {
+  public:
     N7Segment();
 
     ~N7Segment();
@@ -41,7 +44,7 @@ public:
 
     void setColors(const NColor & on, const NColor & off);
 
-private:
+  private:
 
     NColor onColor;
     NColor offColor;
@@ -51,6 +54,8 @@ private:
     void drawVerticalSegment(NGraphics*g,int x, int y, int x1, int y1, bool on);
     void drawHorizontalSegment(NGraphics*g,int x, int y, int x1, int y1,bool on);
 
-};
+  };
+
+}
 
 #endif

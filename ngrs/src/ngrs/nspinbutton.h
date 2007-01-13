@@ -22,16 +22,18 @@
 
 #include "npanel.h"
 
-class NButton;
-class NImage;
-
 /**
 @author Stefan Nattkemper
 */
 
-class NSpinButton : public NPanel
-{
-public:
+namespace ngrs {
+
+  class NButton;
+  class NImage;
+
+  class NSpinButton : public NPanel
+  {
+  public:
     NSpinButton();
 
     ~NSpinButton();
@@ -44,7 +46,7 @@ public:
     signal1<NButtonEvent*> incClick;
     signal1<NButtonEvent*> decClick;
 
-private:
+  private:
 
     NButton* incBtn_;
     NButton* decBtn_;
@@ -58,6 +60,8 @@ private:
     void onIncBtnClick(NButtonEvent* ev);
     void onDecBtnClick(NButtonEvent* ev);
 
-};
+  };
+
+}
 
 #endif

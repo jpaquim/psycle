@@ -19,16 +19,16 @@
  ***************************************************************************/
 #include "nscrollevent.h"
 
-NScrollEvent::NScrollEvent()
-{
+namespace ngrs {
+
+  NScrollEvent::NScrollEvent()
+  {
+
+  }
+
+
+  NScrollEvent::~NScrollEvent()
+  {
+  }
 
 }
-
-
-NScrollEvent::~NScrollEvent()
-{
-}
-
-
-
-

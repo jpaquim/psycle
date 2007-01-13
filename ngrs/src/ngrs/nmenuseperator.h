@@ -25,9 +25,12 @@
 /**
 @author Stefan
 */
-class NMenuSeperator : public NCustomMenuItem
-{
-public:
+
+namespace ngrs {
+
+  class NMenuSeperator : public NCustomMenuItem
+  {
+  public:
     NMenuSeperator();
 
     ~NMenuSeperator();
@@ -35,6 +38,8 @@ public:
     virtual void paint(NGraphics* g);
 
     virtual int preferredHeight() const;
-};
+  };
+
+}
 
 #endif

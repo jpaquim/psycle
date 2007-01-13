@@ -27,26 +27,26 @@
 namespace psycle { namespace host {
 
 PatDlg::PatDlg()
-  : NWindow()
+  : ngrs::NWindow()
 {
   setPosition(0,0,200,100);
   setTitle("Pattern Beats");
 
   lineNumber_ = 0;
-  lineNumEdit_ = new NSpinEdit();
+  lineNumEdit_ = new ngrs::NSpinEdit();
     lineNumEdit_->setPosition(10,10,100,lineNumEdit_->preferredHeight());
     lineNumEdit_->decClick.connect(this,&PatDlg::onDecBtnClick);
     lineNumEdit_->incClick.connect(this,&PatDlg::onIncBtnClick);
   pane()->add(lineNumEdit_);
 
-  NPanel* bPnl = new NPanel();
-    bPnl->setAlign(nAlBottom);
-    bPnl->setLayout(NFlowLayout(nAlRight));
-    NButton* okBtn = new NButton("Change");
+  ngrs::NPanel* bPnl = new ngrs::NPanel();
+    bPnl->setAlign(ngrs::nAlBottom);
+    bPnl->setLayout( ngrs::NFlowLayout(ngrs::nAlRight) );
+    ngrs::NButton* okBtn = new ngrs::NButton("Change");
       okBtn->clicked.connect(this,&PatDlg::onOkBtn);
       okBtn->setFlat(false);
     bPnl->add(okBtn);
-    NButton* cancelBtn = new NButton("Cancel");
+    ngrs::NButton* cancelBtn = new ngrs::NButton("Cancel");
       cancelBtn->clicked.connect(this,&PatDlg::onCancelBtn);
       cancelBtn->setFlat(false);
     bPnl->add(cancelBtn);
@@ -67,7 +67,7 @@ int PatDlg::onClose( )
   str >> lineNumber_;
 
   setVisible(false);
-  return nHideWindow;
+  return ngrs::nHideWindow;
 }
 
 int PatDlg::lineNumber( )
@@ -82,7 +82,7 @@ bool PatDlg::execute( )
 }
 
 
-void PatDlg::onOkBtn( NButtonEvent * sender )
+void PatDlg::onOkBtn( ngrs::NButtonEvent * sender )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();
@@ -90,14 +90,14 @@ void PatDlg::onOkBtn( NButtonEvent * sender )
 
   do_Execute = true;
   setVisible(false);
-  setExitLoop(nDestroyWindow);
+  setExitLoop( ngrs::nDestroyWindow );
 }
 
-void PatDlg::onCancelBtn( NButtonEvent * sender )
+void PatDlg::onCancelBtn( ngrs::NButtonEvent* sender )
 {
   do_Execute = false;
-  setVisible(false);
-  setExitLoop(nDestroyWindow);
+  setVisible( false );
+  setExitLoop( ngrs::nDestroyWindow );
 }
 
 void PatDlg::setLineNumber(int lineNumber )
@@ -112,7 +112,7 @@ bool PatDlg::adaptSize() {
   return false;
 }
 
-void PatDlg::onIncBtnClick( NButtonEvent * ev )
+void PatDlg::onIncBtnClick( ngrs::NButtonEvent * ev )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();
@@ -122,7 +122,7 @@ void PatDlg::onIncBtnClick( NButtonEvent * ev )
   lineNumEdit_->repaint();
 }
 
-void PatDlg::onDecBtnClick( NButtonEvent * ev )
+void PatDlg::onDecBtnClick( ngrs::NButtonEvent * ev )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();

@@ -41,7 +41,7 @@ namespace psycle {
 		class Configuration;
 		class AudioDriver;
 
-		class AudioConfigDlg : public NWindow {
+        class AudioConfigDlg : public ngrs::NWindow {
 		public:
 				AudioConfigDlg( Configuration* cfg );
 
@@ -52,29 +52,29 @@ namespace psycle {
 
 		private:
 
-				NTabBook* tabBook_;
-				NPanel* audioPage_;
-				NPanel* midiPage_;
+                ngrs::NTabBook* tabBook_;
+                ngrs::NPanel* audioPage_;
+                ngrs::NPanel* midiPage_;
 
-				NGroupBox* driverBox_;
-				NComboBox* driverCbx_; // contains the drivers
-				NButton* restartBtn_; // re/starts the driver
+                ngrs::NGroupBox* driverBox_;
+                ngrs::NComboBox* driverCbx_; // contains the drivers
+                ngrs::NButton* restartBtn_; // re/starts the driver
 
-				NButton* cancelBtn_;
-				NButton* closeBtn_;
-				NButton* okBtn_;
+                ngrs::NButton* cancelBtn_;
+                ngrs::NButton* closeBtn_;
+                ngrs::NButton* okBtn_;
 
-				NLabel* audioHeaderLbl_;
-				NLabel* audioDescriptionLbl_;
+				ngrs::NLabel* audioHeaderLbl_;
+				ngrs::NLabel* audioDescriptionLbl_;
 
-				NNoteBook* noteBook_; // contains different pages for drivers
-				NPanel* jackPage_; // special page for jack
-				NPanel* esdPage_;  // special page for esound
-				NPanel* generalPage_;   // general page for drivers to set bit/rate etc ..
-				NEdit* deviceEdt_;
-				NComboBox* sampleRateCbx_;
-				NComboBox* bitDepthCbx_;
-				NComboBox* channelModeCbx_;
+				ngrs::NNoteBook* noteBook_; // contains different pages for drivers
+				ngrs::NPanel* jackPage_; // special page for jack
+				ngrs::NPanel* esdPage_;  // special page for esound
+				ngrs::NPanel* generalPage_;   // general page for drivers to set bit/rate etc ..
+				ngrs::NEdit* deviceEdt_;
+				ngrs::NComboBox* sampleRateCbx_;
+				ngrs::NComboBox* bitDepthCbx_;
+				ngrs::NComboBox* channelModeCbx_;
 
 				Configuration* config_;
 				AudioDriver* selectedDriver_;
@@ -88,16 +88,16 @@ namespace psycle {
 
 				void updateGeneralPage();
 
-				void onDriverSelected( NItemEvent* ev );
-				void onRestartDriver( NButtonEvent* ev );
+				void onDriverSelected( ngrs::NItemEvent* ev );
+				void onRestartDriver( ngrs::NButtonEvent* ev );
 
-				void onOkBtn( NButtonEvent* ev );
-				void onCancelBtn( NButtonEvent* ev );
-				void onCloseBtn( NButtonEvent* ev );
+				void onOkBtn( ngrs::NButtonEvent* ev );
+				void onCancelBtn( ngrs::NButtonEvent* ev );
+				void onCloseBtn( ngrs::NButtonEvent* ev );
 
-				void onChannelCbx( NItemEvent* ev );
-				void onSampleRateCbx( NItemEvent* ev );
-				void onDepthCbx( NItemEvent* ev );
+				void onChannelCbx( ngrs::NItemEvent* ev );
+				void onSampleRateCbx( ngrs::NItemEvent* ev );
+				void onDepthCbx( ngrs::NItemEvent* ev );
 
 
 		};

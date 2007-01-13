@@ -20,312 +20,316 @@
 
 #include "nskin.h"
 
-NSkin::NSkin( )
-{
-  transparent_ = true;
-  useParentBgColor_ = true;
-  useParentFgColor_ = true;
-  useParentFont_    = true;
-  bitmapBgStyle_ = 0;
-  translucent_ = 100;
-  gradientStyle_ = 0;
-  gradientOrientation_ = nHorizontal;
-  gradientPercent_ = 50;
-  border_ = 0;
-  arcWidth_ = arcHeight_ = 10;
-  disabledTextColor_.setRGB(180,180,180);
-  overrideFontColor_ = false;
-}
+namespace ngrs {
 
-NSkin::NSkin( const NSkin & src )
-{
-  if (src.border())
-    border_ = src.border()->clone();
-  else
+  NSkin::NSkin( )
+  {
+    transparent_ = true;
+    useParentBgColor_ = true;
+    useParentFgColor_ = true;
+    useParentFont_    = true;
+    bitmapBgStyle_ = 0;
+    translucent_ = 100;
+    gradientStyle_ = 0;
+    gradientOrientation_ = nHorizontal;
+    gradientPercent_ = 50;
     border_ = 0;
+    arcWidth_ = arcHeight_ = 10;
+    disabledTextColor_.setRGB(180,180,180);
+    overrideFontColor_ = false;
+  }
 
-  bgColor_ = src.background();
-  fgColor_ = src.foreground();
-  transColor_ = src.transColor();
-  font_ = src.font();
-  spacing_ = src.spacing();
-  bitmap_ = src.bitmap();
+  NSkin::NSkin( const NSkin & src )
+  {
+    if (src.border())
+      border_ = src.border()->clone();
+    else
+      border_ = 0;
 
-  useParentBgColor_ = src.parentBackground();
-  useParentFgColor_ = src.parentForeground();
-  useParentFont_    = src.parentFont();
-  transparent_      = src.transparent();
-  translucent_      = src.translucent();
+    bgColor_ = src.background();
+    fgColor_ = src.foreground();
+    transColor_ = src.transColor();
+    font_ = src.font();
+    spacing_ = src.spacing();
+    bitmap_ = src.bitmap();
 
-  gradStartColor_   = src.gradientStartColor();
-  gradMidColor_     = src.gradientMidColor();
-  gradEndColor_     = src.gradientEndColor();
+    useParentBgColor_ = src.parentBackground();
+    useParentFgColor_ = src.parentForeground();
+    useParentFont_    = src.parentFont();
+    transparent_      = src.transparent();
+    translucent_      = src.translucent();
 
-  gradientPercent_     = src.gradientPercent();
-  gradientStyle_       = src.gradientStyle();
-  gradientOrientation_ = src.gradientOrientation();
+    gradStartColor_   = src.gradientStartColor();
+    gradMidColor_     = src.gradientMidColor();
+    gradEndColor_     = src.gradientEndColor();
 
-  bitmapBgStyle_   = src.bitmapBgStyle();
-  arcWidth_        = src.gradientArcWidth();
-  arcHeight_       = src.gradientArcHeight();
+    gradientPercent_     = src.gradientPercent();
+    gradientStyle_       = src.gradientStyle();
+    gradientOrientation_ = src.gradientOrientation();
 
-  disabledTextColor_ = src.disabledTextColor();
+    bitmapBgStyle_   = src.bitmapBgStyle();
+    arcWidth_        = src.gradientArcWidth();
+    arcHeight_       = src.gradientArcHeight();
 
-  textColor_ = src.textColor();
-  overrideFontColor_ = src.overrideFontColor();
-}
+    disabledTextColor_ = src.disabledTextColor();
 
-const NSkin & NSkin::operator =( const NSkin & rhs )
-{
-  if (border_) delete border_;
+    textColor_ = src.textColor();
+    overrideFontColor_ = src.overrideFontColor();
+  }
 
-  if (rhs.border())
-    border_ = rhs.border()->clone();
-  else
-    border_ = 0;
+  const NSkin & NSkin::operator =( const NSkin & rhs )
+  {
+    if (border_) delete border_;
 
-  bgColor_ = rhs.background();
-  fgColor_ = rhs.foreground();
-  transColor_ = rhs.transColor();
-  font_ = rhs.font();
-  spacing_ = rhs.spacing();
-  bitmap_ = rhs.bitmap();
-  textColor_ = rhs.textColor();
-  overrideFontColor_ = rhs.overrideFontColor();
+    if (rhs.border())
+      border_ = rhs.border()->clone();
+    else
+      border_ = 0;
 
-  useParentBgColor_ = rhs.parentBackground();
-  useParentFgColor_ = rhs.parentForeground();
-  useParentFont_    = rhs.parentFont();
-  transparent_      = rhs.transparent();
-  translucent_      = rhs.translucent();
+    bgColor_ = rhs.background();
+    fgColor_ = rhs.foreground();
+    transColor_ = rhs.transColor();
+    font_ = rhs.font();
+    spacing_ = rhs.spacing();
+    bitmap_ = rhs.bitmap();
+    textColor_ = rhs.textColor();
+    overrideFontColor_ = rhs.overrideFontColor();
 
-  gradStartColor_   = rhs.gradientStartColor();
-  gradMidColor_     = rhs.gradientMidColor();
-  gradEndColor_     = rhs.gradientEndColor();
+    useParentBgColor_ = rhs.parentBackground();
+    useParentFgColor_ = rhs.parentForeground();
+    useParentFont_    = rhs.parentFont();
+    transparent_      = rhs.transparent();
+    translucent_      = rhs.translucent();
 
-  gradientPercent_     = rhs.gradientPercent();
-  gradientStyle_       = rhs.gradientStyle();
-  gradientOrientation_ = rhs.gradientOrientation();
+    gradStartColor_   = rhs.gradientStartColor();
+    gradMidColor_     = rhs.gradientMidColor();
+    gradEndColor_     = rhs.gradientEndColor();
 
-  bitmapBgStyle_   = rhs.bitmapBgStyle();
-  arcWidth_        = rhs.gradientArcWidth();
-  arcHeight_       = rhs.gradientArcHeight();
+    gradientPercent_     = rhs.gradientPercent();
+    gradientStyle_       = rhs.gradientStyle();
+    gradientOrientation_ = rhs.gradientOrientation();
 
-  disabledTextColor_ = rhs.disabledTextColor();
+    bitmapBgStyle_   = rhs.bitmapBgStyle();
+    arcWidth_        = rhs.gradientArcWidth();
+    arcHeight_       = rhs.gradientArcHeight();
 
-  return *this;
-}
+    disabledTextColor_ = rhs.disabledTextColor();
 
-NSkin::~ NSkin( )
-{
-  if (border_) 
-	  delete border_;
-}
+    return *this;
+  }
 
-void NSkin::setBorder( const NBorder & border )
-{
-  if (border_) 
-	  delete border_;
-  border_ = border.clone();
-}
+  NSkin::~ NSkin( )
+  {
+    if (border_) 
+      delete border_;
+  }
 
-NBorder * NSkin::border( ) const
-{
-  return border_;
-}
+  void NSkin::setBorder( const NBorder & border )
+  {
+    if (border_) 
+      delete border_;
+    border_ = border.clone();
+  }
 
-void NSkin::setBackground( const NColor & bgColor )
-{
-  bgColor_ = bgColor;
-}
+  NBorder * NSkin::border( ) const
+  {
+    return border_;
+  }
 
-const NColor & NSkin::background( ) const
-{
-  return bgColor_;
-}
+  void NSkin::setBackground( const NColor & bgColor )
+  {
+    bgColor_ = bgColor;
+  }
 
-void NSkin::setForeground( const NColor & fgColor )
-{
-  fgColor_ = fgColor;
-}
+  const NColor & NSkin::background( ) const
+  {
+    return bgColor_;
+  }
 
-const NColor & NSkin::foreground( ) const
-{
-  return fgColor_;
-}
+  void NSkin::setForeground( const NColor & fgColor )
+  {
+    fgColor_ = fgColor;
+  }
 
-void NSkin::setTranslucent( const NColor & transColor,  int percent )
-{
-  transColor_ = transColor;
-  translucent_ = percent;
-}
+  const NColor & NSkin::foreground( ) const
+  {
+    return fgColor_;
+  }
 
-const NColor & NSkin::transColor( ) const
-{
-  return transColor_;
-}
+  void NSkin::setTranslucent( const NColor & transColor,  int percent )
+  {
+    transColor_ = transColor;
+    translucent_ = percent;
+  }
 
-void NSkin::setFont( const NFont & font )
-{
-  font_ = font;
-  useParentFont_ = false;
-}
+  const NColor & NSkin::transColor( ) const
+  {
+    return transColor_;
+  }
 
-const NFont & NSkin::font( ) const
-{
-  return font_;
-}
+  void NSkin::setFont( const NFont & font )
+  {
+    font_ = font;
+    useParentFont_ = false;
+  }
 
-void NSkin::setTextColor( const NColor & color ) {
-  textColor_ = color;
-  overrideFontColor_ = true;
-}
+  const NFont & NSkin::font( ) const
+  {
+    return font_;
+  }
 
-const NColor & NSkin::textColor() const {
-  return textColor_;
-}
+  void NSkin::setTextColor( const NColor & color ) {
+    textColor_ = color;
+    overrideFontColor_ = true;
+  }
 
-bool NSkin::overrideFontColor() const {
-  return overrideFontColor_;
-}
+  const NColor & NSkin::textColor() const {
+    return textColor_;
+  }
 
-void NSkin::setSpacing( const NSize & size )
-{
-  spacing_ = size;
-}
+  bool NSkin::overrideFontColor() const {
+    return overrideFontColor_;
+  }
 
-const NSize & NSkin::spacing( ) const
-{
-  return spacing_;
-}
+  void NSkin::setSpacing( const NSize & size )
+  {
+    spacing_ = size;
+  }
 
-void NSkin::setBitmap( const NBitmap & bitmap , int bitmapBgStyle)
-{
-  bitmap_ = bitmap;
-  bitmapBgStyle_ = bitmapBgStyle;
-}
+  const NSize & NSkin::spacing( ) const
+  {
+    return spacing_;
+  }
 
-const NBitmap & NSkin::bitmap( ) const
-{
-  return bitmap_;
-}
+  void NSkin::setBitmap( const NBitmap & bitmap , int bitmapBgStyle)
+  {
+    bitmap_ = bitmap;
+    bitmapBgStyle_ = bitmapBgStyle;
+  }
 
-void NSkin::useParentBackground( bool on )
-{
-  useParentBgColor_ = on;
-}
+  const NBitmap & NSkin::bitmap( ) const
+  {
+    return bitmap_;
+  }
 
-bool NSkin::parentBackground( ) const
-{
-  return useParentBgColor_;
-}
+  void NSkin::useParentBackground( bool on )
+  {
+    useParentBgColor_ = on;
+  }
 
-void NSkin::useParentForeground( bool on )
-{
-  useParentFgColor_ = on;
-}
+  bool NSkin::parentBackground( ) const
+  {
+    return useParentBgColor_;
+  }
 
-bool NSkin::parentForeground( ) const
-{
-  return useParentFgColor_;
-}
+  void NSkin::useParentForeground( bool on )
+  {
+    useParentFgColor_ = on;
+  }
 
-void NSkin::useParentFont( bool on )
-{
-  useParentFont_ = on;
-}
+  bool NSkin::parentForeground( ) const
+  {
+    return useParentFgColor_;
+  }
 
-bool NSkin::parentFont( ) const
-{
-  return useParentFont_;
-}
+  void NSkin::useParentFont( bool on )
+  {
+    useParentFont_ = on;
+  }
 
-void NSkin::setTransparent( bool on )
-{
-  transparent_ = on;
-}
+  bool NSkin::parentFont( ) const
+  {
+    return useParentFont_;
+  }
 
-bool NSkin::transparent( ) const
-{
-  return transparent_;
-}
+  void NSkin::setTransparent( bool on )
+  {
+    transparent_ = on;
+  }
 
-void NSkin::setGradient(const NColor & start, const NColor & mid, const NColor & end, int gradientStyle, int gradientOrientation, int percent, int arcWidth, int arcHeight )
-{
-  gradStartColor_  = start;
-  gradMidColor_    = mid;
-  gradEndColor_    = end;
-  gradientPercent_ = percent;
-  gradientStyle_   = gradientStyle;
-  gradientOrientation_ = gradientOrientation;
-  arcWidth_ = arcWidth;
-  arcHeight_ = arcHeight;
-}
+  bool NSkin::transparent( ) const
+  {
+    return transparent_;
+  }
 
-int NSkin::gradientStyle( ) const
-{
-  return gradientStyle_;
-}
+  void NSkin::setGradient(const NColor & start, const NColor & mid, const NColor & end, int gradientStyle, int gradientOrientation, int percent, int arcWidth, int arcHeight )
+  {
+    gradStartColor_  = start;
+    gradMidColor_    = mid;
+    gradEndColor_    = end;
+    gradientPercent_ = percent;
+    gradientStyle_   = gradientStyle;
+    gradientOrientation_ = gradientOrientation;
+    arcWidth_ = arcWidth;
+    arcHeight_ = arcHeight;
+  }
 
-int NSkin::gradientOrientation( ) const
-{
-  return gradientOrientation_;
-}
+  int NSkin::gradientStyle( ) const
+  {
+    return gradientStyle_;
+  }
 
-int NSkin::bitmapBgStyle( ) const
-{
-  return bitmapBgStyle_;
-}
+  int NSkin::gradientOrientation( ) const
+  {
+    return gradientOrientation_;
+  }
 
-const NColor & NSkin::gradientStartColor( ) const
-{
-  return gradStartColor_;
-}
+  int NSkin::bitmapBgStyle( ) const
+  {
+    return bitmapBgStyle_;
+  }
 
-const NColor & NSkin::gradientMidColor( ) const
-{
-  return gradMidColor_;
-}
+  const NColor & NSkin::gradientStartColor( ) const
+  {
+    return gradStartColor_;
+  }
 
-const NColor & NSkin::gradientEndColor() const {
-  return gradEndColor_;
-}
+  const NColor & NSkin::gradientMidColor( ) const
+  {
+    return gradMidColor_;
+  }
 
-int NSkin::gradientPercent( ) const
-{
-  return gradientPercent_;
-}
+  const NColor & NSkin::gradientEndColor() const {
+    return gradEndColor_;
+  }
 
-int NSkin::gradientArcWidth() const {
-  return arcWidth_;
-}
+  int NSkin::gradientPercent( ) const
+  {
+    return gradientPercent_;
+  }
 
-int NSkin::gradientArcHeight() const {
-  return arcHeight_;
-}
+  int NSkin::gradientArcWidth() const {
+    return arcWidth_;
+  }
 
-void NSkin::setGradientStyle(int style) {
-  gradientStyle_ = style;
-}
+  int NSkin::gradientArcHeight() const {
+    return arcHeight_;
+  }
 
-void NSkin::setGradientPercent(int percent) {
-  gradientPercent_ = percent;
-}
+  void NSkin::setGradientStyle(int style) {
+    gradientStyle_ = style;
+  }
 
-void NSkin::setGradientOrientation(int orientation) {
-  gradientOrientation_ = orientation;
-}
+  void NSkin::setGradientPercent(int percent) {
+    gradientPercent_ = percent;
+  }
 
-int NSkin::translucent() const {
-  return translucent_;
-}
+  void NSkin::setGradientOrientation(int orientation) {
+    gradientOrientation_ = orientation;
+  }
 
-void NSkin::setDisabledTextColor( const NColor & color )
-{
-  disabledTextColor_ = color;
-}
+  int NSkin::translucent() const {
+    return translucent_;
+  }
 
-const NColor & NSkin::disabledTextColor( ) const
-{
-  return disabledTextColor_;
+  void NSkin::setDisabledTextColor( const NColor & color )
+  {
+    disabledTextColor_ = color;
+  }
+
+  const NColor & NSkin::disabledTextColor( ) const
+  {
+    return disabledTextColor_;
+  }
+
 }

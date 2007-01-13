@@ -27,106 +27,109 @@
 #include "nconfig.h"
 #include "nwindow.h"
 
+namespace ngrs {
 
-NCustomTreeView::NCustomTreeView()
- : NPanel()
-{
-  setLayout( NAlignLayout() );
+  NCustomTreeView::NCustomTreeView()
+    : NPanel()
+  {
+    setLayout( NAlignLayout() );
 
-  scrollBox_ = new NScrollBox();
+    scrollBox_ = new NScrollBox();
     scrollArea_ = new NPanel();
-      scrollArea_->setLayout( NAlignLayout() );
-      scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
-      scrollArea_->setBackground(NColor(255,255,255));
-      scrollArea_->setTransparent(false);
+    scrollArea_->setLayout( NAlignLayout() );
+    scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
+    scrollArea_->setBackground(NColor(255,255,255));
+    scrollArea_->setTransparent(false);
     scrollBox_->setScrollPane(scrollArea_);
-  add(scrollBox_, nAlClient);
+    add(scrollBox_, nAlClient);
 
-  selectedItem_ = 0;
-  selectedTreeNode_ = 0;
+    selectedItem_ = 0;
+    selectedTreeNode_ = 0;
 
-  itemBg = NApp::config()->skin("lbitemsel");
-  itemFg = NApp::config()->skin("lbitemnone");
+    itemBg = NApp::config()->skin("lbitemsel");
+    itemFg = NApp::config()->skin("lbitemnone");
 
-}
-
-
-NCustomTreeView::~NCustomTreeView()
-{
-}
-
-
-void NCustomTreeView::addNode( NTreeNode * node )
-{
-  scrollArea_->add( node, nAlTop );
-  node->itemSelected.connect(this,&NCustomTreeView::onSelectedItem);
-}
-
-void NCustomTreeView::onSelectedItem(NTreeNode* node, NCustomItem * sender )
-{
-  selectedTreeNode_ = node;
-
-  sender->setSkin(itemBg);
-  sender->repaint();
-
-
-  if (selectedItem_ && sender!=selectedItem_ ) {
-    selectedItem_->setSkin(itemFg);
-    selectedItem_->repaint();
   }
 
-  selectedItem_ = sender;
 
-  NItemEvent ev(sender,sender->text());
-  itemSelected.emit(&ev);
-}
-
-void NCustomTreeView::setSelectedItem( NTreeNode* node, NCustomItem* item ) {
-  selectedTreeNode_ = node;
-
-  item->setSkin(itemBg);
-  item->repaint();
-
-
-  if (selectedItem_ && item!=selectedItem_ ) {
-    selectedItem_->setSkin(itemFg);
-    selectedItem_->repaint();
+  NCustomTreeView::~NCustomTreeView()
+  {
   }
 
-  selectedItem_ = item;
 
-  NItemEvent ev(item,item->text());
-  itemSelected.emit(&ev);          
-}     
-
-NTreeNode * NCustomTreeView::selectedTreeNode( )
-{
-  return selectedTreeNode_;
-}
-
-NCustomItem * NCustomTreeView::selectedItem( )
-{
-  return selectedItem_;
-}
-
-void NCustomTreeView::removeChilds( )
-{
-  scrollArea_->removeChilds();
-  selectedItem_ = 0;
-  selectedTreeNode_ = 0;
-}
-
-void NCustomTreeView::removeItem( NCustomItem * item )
-{
-  if ( item && item->isChildOf( this ) ) {
-    if ( item == selectedItem_ ) selectedItem_ = 0;
-	  item->erase();
-	  if ( window() ) window()->checkForRemove( item );
-	  NApp::addRemovePipe(item);
+  void NCustomTreeView::addNode( NTreeNode * node )
+  {
+    scrollArea_->add( node, nAlTop );
+    node->itemSelected.connect(this,&NCustomTreeView::onSelectedItem);
   }
-}
 
-void NCustomTreeView::onItemDblClick( NButtonEvent* ev ) {
-  //NItemEvent ev( sender, sender->text() );
-  //itemDblClick.emit( ev );        
+  void NCustomTreeView::onSelectedItem(NTreeNode* node, NCustomItem * sender )
+  {
+    selectedTreeNode_ = node;
+
+    sender->setSkin(itemBg);
+    sender->repaint();
+
+
+    if (selectedItem_ && sender!=selectedItem_ ) {
+      selectedItem_->setSkin(itemFg);
+      selectedItem_->repaint();
+    }
+
+    selectedItem_ = sender;
+
+    NItemEvent ev(sender,sender->text());
+    itemSelected.emit(&ev);
+  }
+
+  void NCustomTreeView::setSelectedItem( NTreeNode* node, NCustomItem* item ) {
+    selectedTreeNode_ = node;
+
+    item->setSkin(itemBg);
+    item->repaint();
+
+
+    if (selectedItem_ && item!=selectedItem_ ) {
+      selectedItem_->setSkin(itemFg);
+      selectedItem_->repaint();
+    }
+
+    selectedItem_ = item;
+
+    NItemEvent ev(item,item->text());
+    itemSelected.emit(&ev);          
+  }     
+
+  NTreeNode * NCustomTreeView::selectedTreeNode( )
+  {
+    return selectedTreeNode_;
+  }
+
+  NCustomItem * NCustomTreeView::selectedItem( )
+  {
+    return selectedItem_;
+  }
+
+  void NCustomTreeView::removeChilds( )
+  {
+    scrollArea_->removeChilds();
+    selectedItem_ = 0;
+    selectedTreeNode_ = 0;
+  }
+
+  void NCustomTreeView::removeItem( NCustomItem * item )
+  {
+    if ( item && item->isChildOf( this ) ) {
+      if ( item == selectedItem_ ) selectedItem_ = 0;
+      item->erase();
+      if ( window() ) window()->checkForRemove( item );
+      NApp::addRemovePipe(item);
+    }
+  }
+
+  void NCustomTreeView::onItemDblClick( NButtonEvent* ev ) {
+    //NItemEvent ev( sender, sender->text() );
+    //itemDblClick.emit( ev );        
+  }
+
 }

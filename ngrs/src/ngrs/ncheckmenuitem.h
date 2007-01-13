@@ -23,36 +23,40 @@
 #include "ncustommenuitem.h"
 
 
-class NCheckBox;
-class NLabel;
+namespace ngrs {
 
-/**
-@author Stefan Nattkemper
-*/
+  class NCheckBox;
+  class NLabel;
+
+  /**
+  @author Stefan Nattkemper
+  */
 
 
-class NCheckMenuItem : public NCustomMenuItem
-{
-public:
+  class NCheckMenuItem : public NCustomMenuItem
+  {
+  public:
     NCheckMenuItem();
     NCheckMenuItem(const std::string & text);
 
     ~NCheckMenuItem();
 
-   void setCheck(bool on);
-   bool checked() const;
+    void setCheck(bool on);
+    bool checked() const;
 
-   virtual void onMousePress(int x, int y, int button);
+    virtual void onMousePress(int x, int y, int button);
 
-   virtual void onMouseEnter();
-   virtual void onMouseExit();
+    virtual void onMouseEnter();
+    virtual void onMouseExit();
 
-private:
+  private:
 
     NLabel* captionLbl_;
     NCheckBox* checkBox_;
 
     void init();
-};
+  };
+
+}
 
 #endif

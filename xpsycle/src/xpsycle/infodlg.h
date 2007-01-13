@@ -29,7 +29,7 @@
 
 namespace psycle { namespace host {
 
-class InfoDlg : public NWindow
+class InfoDlg : public ngrs::NWindow
 {
 public:
     InfoDlg();
@@ -42,7 +42,7 @@ public:
 
 private:
 
-    NMemo* memo;
+    ngrs::NMemo* memo;
 
 };
 

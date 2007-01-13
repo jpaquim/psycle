@@ -25,9 +25,12 @@
 /**
 @author Stefan
 */
-class NGradient : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NGradient : public NPanel
+  {
+  public:
     NGradient();
 
     ~NGradient();
@@ -44,19 +47,21 @@ public:
 
     void paint(NGraphics* g);
 
-private:
+  private:
 
-   bool active_;
-   bool horizontal_;
-   double percent_;
-   int middle_;
+    bool active_;
+    bool horizontal_;
+    double percent_;
+    int middle_;
 
-   NColor color_1;
-   NColor color_2;
-   NColor color_3;
+    NColor color_1;
+    NColor color_2;
+    NColor color_3;
 
-   void do_gradient(NGraphics* g);
+    void do_gradient(NGraphics* g);
 
-};
+  };
+
+}
 
 #endif

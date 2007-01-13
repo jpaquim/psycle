@@ -25,9 +25,12 @@
 /**
 @author Stefan
 */
-class NGridLayout : public NLayout
-{
-public:
+
+namespace ngrs {
+
+  class NGridLayout : public NLayout
+  {
+  public:
     NGridLayout();
     NGridLayout(int cols, int rows);
     virtual NGridLayout* clone()  const;   // Uses the copy constructor
@@ -45,7 +48,7 @@ public:
     virtual int preferredWidth(const NVisualComponent* target) const;
     virtual int preferredHeight(const NVisualComponent* target) const;
 
-private:
+  private:
 
     int cols_;
     int rows_;
@@ -55,6 +58,8 @@ private:
     int findMaxColWidth() const;
     int findMaxRowHeight() const;
 
-};
+  };
+
+}
 
 #endif

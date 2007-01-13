@@ -20,109 +20,108 @@
 #include "ngridlayout.h"
 #include "nvisualcomponent.h"
 
-NGridLayout::NGridLayout( ) : cols_(1),rows_(1), hgap_(0), vgap_(0)
-{
-}
+namespace ngrs {
 
-NGridLayout::NGridLayout(int cols, int rows)
- : NLayout(), cols_(cols),rows_(rows), hgap_(0), vgap_(0)
-{
-}
+  NGridLayout::NGridLayout( ) : cols_(1),rows_(1), hgap_(0), vgap_(0)
+  {
+  }
 
-NGridLayout * NGridLayout::clone( ) const
-{
-  return new NGridLayout(*this);
-}
+  NGridLayout::NGridLayout(int cols, int rows)
+    : NLayout(), cols_(cols),rows_(rows), hgap_(0), vgap_(0)
+  {
+  }
 
-NGridLayout::~NGridLayout()
-{
-}
+  NGridLayout * NGridLayout::clone( ) const
+  {
+    return new NGridLayout(*this);
+  }
 
-void NGridLayout::align( NVisualComponent * parent )
-{
-  int maxX = findMaxColWidth();
-  int maxY = findMaxRowHeight();
+  NGridLayout::~NGridLayout()
+  {
+  }
 
-  std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
-  int x = 0;
-  int y = 0;
-  for (;itr < parent->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     if (visualChild->visible()) {
+  void NGridLayout::align( NVisualComponent * parent )
+  {
+    int maxX = findMaxColWidth();
+    int maxY = findMaxRowHeight();
+
+    std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
+    int x = 0;
+    int y = 0;
+    for (;itr < parent->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      if (visualChild->visible()) {
         visualChild->setLeft(hgap_ + x*hgap_ + x*maxX);
         visualChild->setTop (vgap_ + y*vgap_ + y*maxY);
         visualChild->setWidth(maxX);
         visualChild->setHeight(maxY);
         x++;
         if (x % cols_ == 0) {
-           x = 0;
-           y++;
+          x = 0;
+          y++;
         }
+      }
     }
   }
-}
 
-int NGridLayout::preferredWidth( const NVisualComponent * target ) const
-{
-  return hgap_ + (findMaxColWidth() + hgap_) * cols_;
-}
+  int NGridLayout::preferredWidth( const NVisualComponent * target ) const
+  {
+    return hgap_ + (findMaxColWidth() + hgap_) * cols_;
+  }
 
-int NGridLayout::preferredHeight( const NVisualComponent * target ) const
-{
-  return vgap_ + ((findMaxRowHeight() + vgap_) * (static_cast<int>( parent()->visualComponents().size( ) )) / (cols_));
-}
+  int NGridLayout::preferredHeight( const NVisualComponent * target ) const
+  {
+    return vgap_ + ((findMaxRowHeight() + vgap_) * (static_cast<int>( parent()->visualComponents().size( ) )) / (cols_));
+  }
 
 
-// private stuff
+  // private stuff
 
-int NGridLayout::findMaxColWidth( ) const
-{
-  int maxX = 0;
-  std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
-  for (;itr < parent()->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     if (visualChild->visible()) {
+  int NGridLayout::findMaxColWidth( ) const
+  {
+    int maxX = 0;
+    std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
+    for (;itr < parent()->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      if (visualChild->visible()) {
         if (visualChild->preferredWidth() > maxX) maxX = visualChild->preferredWidth();
+      }
     }
+    return maxX;
   }
-  return maxX;
-}
 
-int NGridLayout::findMaxRowHeight( ) const
-{
-  int maxY = 0;
-  std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
+  int NGridLayout::findMaxRowHeight( ) const
+  {
+    int maxY = 0;
+    std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
 
-  for (;itr < parent()->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     if (visualChild->visible()) {
-      if (visualChild->preferredHeight() > maxY) maxY = visualChild->preferredHeight();
+    for (;itr < parent()->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      if (visualChild->visible()) {
+        if (visualChild->preferredHeight() > maxY) maxY = visualChild->preferredHeight();
+      }
     }
+    return maxY;
   }
-  return maxY;
+
+  void NGridLayout::setRows( int number )
+  {
+    rows_ = number;
+  }
+
+  void NGridLayout::setColumns( int number )
+  {
+    cols_ = number;
+  }
+
+  void NGridLayout::setHgap( int hgap )
+  {
+    hgap_ = hgap;
+  }
+
+  void NGridLayout::setVgap( int vgap )
+  {
+    vgap_ = vgap;
+  }
+
 }
-
-void NGridLayout::setRows( int number )
-{
-  rows_ = number;
-}
-
-void NGridLayout::setColumns( int number )
-{
-  cols_ = number;
-}
-
-void NGridLayout::setHgap( int hgap )
-{
-  hgap_ = hgap;
-}
-
-void NGridLayout::setVgap( int vgap )
-{
-  vgap_ = vgap;
-}
-
-
-
-
-

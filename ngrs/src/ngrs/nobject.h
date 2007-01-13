@@ -25,18 +25,19 @@
 #include <string>
 #include <vector>
 
+namespace ngrs {
 
-class NEvent;
-class NPropertyMap;
+  class NEvent;
+  class NPropertyMap;
 
-using namespace sigslot;
+  using namespace sigslot;
 
 
-/**
-@author Stefan
-*/
-class NObject : public sigslot::has_slots<> {
-public:
+  /**
+  @author Stefan
+  */
+  class NObject : public sigslot::has_slots<> {
+  public:
     NObject();
 
     ~NObject();
@@ -52,18 +53,20 @@ public:
 
     NPropertyMap* properties() const;
 
-private:
+  private:
 
-   std::string name_;
-   std::vector<NObject*> msgListener;
+    std::string name_;
+    std::vector<NObject*> msgListener;
 
-   NPropertyMap* properties_;
-   void getNameProperty(std::string const & name);
+    NPropertyMap* properties_;
+    void getNameProperty(std::string const & name);
 
-};
+  };
 
-// the types of the class factories
-typedef NObject* create_t();
-typedef void destroy_t(NObject*);
+  // the types of the class factories
+  typedef NObject* create_t();
+  typedef void destroy_t(NObject*);
+
+}
 
 #endif

@@ -26,7 +26,7 @@
 namespace psycle { namespace host {
 
 WireDlg::WireDlg()
-  : NWindow()
+  : ngrs::NWindow()
 {
   setTitle("Wire Connection");
 
@@ -35,49 +35,49 @@ WireDlg::WireDlg()
 
   
 
-  NPanel* btnPnl = new NPanel();
-    btnPnl->setLayout( NAlignLayout() );
-    /*modeBtn = new NButton("Scope Mode");
+  ngrs::NPanel* btnPnl = new ngrs::NPanel();
+    btnPnl->setLayout( ngrs::NAlignLayout() );
+    /*modeBtn = new ngrs::NButton("Scope Mode");
       modeBtn->setFlat(false);
     btnPnl->add(modeBtn);
-    NPanel* sliderPnl = new NPanel();
-      sliderPnl->setLayout( NAlignLayout() );
-      holdBtn = new NButton("Hold");
+    ngrs::NPanel* sliderPnl = new ngrs::NPanel();
+      sliderPnl->setLayout( ngrs::NAlignLayout() );
+      holdBtn = new ngrs::NButton("Hold");
         holdBtn->setFlat(false);
-      sliderPnl->add(holdBtn,nAlRight);
+      sliderPnl->add(holdBtn,ngrs::nAlRight);
 
-      slider = new NSlider();
-        slider->setOrientation(nHorizontal);
+      slider = new ngrs::NSlider();
+        slider->setOrientation(ngrs::nHorizontal);
         slider->setPreferredSize(200,20);
-      sliderPnl->add(slider,nAlTop);
-      slider2 = new NSlider();
-        slider2->setOrientation(nHorizontal);
+      sliderPnl->add(slider,ngrs::nAlTop);
+      slider2 = new ngrs::NSlider();
+        slider2->setOrientation(ngrs::nHorizontal);
         slider2->setPreferredSize(200,20);
-      sliderPnl->add(slider2,nAlTop);
+      sliderPnl->add(slider2,ngrs::nAlTop);
     btnPnl->add(sliderPnl);
-    delBtn = new NButton("Delete Connection");
+    delBtn = new ngrs::NButton("Delete Connection");
       delBtn->clicked.connect(this,&WireDlg::onDeleteBtn);
       delBtn->setFlat(false);
     btnPnl->add(delBtn);*/
-    delBtn = new NButton("Delete Connection");
+    delBtn = new ngrs::NButton("Delete Connection");
       delBtn->clicked.connect(this,&WireDlg::onDeleteBtn);
       delBtn->setFlat(false);
-    btnPnl->add(delBtn, nAlTop);
+    btnPnl->add(delBtn, ngrs::nAlTop);
 
-  pane()->add(btnPnl,nAlBottom);
+  pane()->add(btnPnl,ngrs::nAlBottom);
 
   
-  NPanel* volPanel = new NPanel();
-   volPanel->setLayout ( NAlignLayout() );
-    volSlider = new NSlider();
+  ngrs::NPanel* volPanel = new ngrs::NPanel();
+   volPanel->setLayout ( ngrs::NAlignLayout() );
+    volSlider = new ngrs::NSlider();
       volSlider->setRange( 0, 256*4 );
       volSlider->setPreferredSize( 20, 200 );
       volSlider->change.connect(this, &WireDlg::onVolPosChanged);
-    volPanel->add( volSlider, nAlClient );
-  pane()->add( volPanel, nAlRight );
+    volPanel->add( volSlider, ngrs::nAlClient );
+  pane()->add( volPanel, ngrs::nAlRight );
 
   analyzer = new Analyzer();
-  pane()->add( analyzer, nAlClient);
+  pane()->add( analyzer, ngrs::nAlClient);
 
   setPosition(10,10,300,300);
 }
@@ -95,13 +95,13 @@ void psycle::host::WireDlg::setVisible( bool on )
 	  int t = (int)std::sqrt( val *16384*4*4);
     volSlider->setPos( 254 * 4 - t );
   }
-  NWindow::setVisible( on );
+  ngrs::NWindow::setVisible( on );
 }
 
 int WireDlg::onClose( )
 {
-  setVisible(false);
-  return nHideWindow;
+  setVisible( false );
+  return ngrs::nHideWindow;
 }
 
 void WireDlg::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
@@ -112,7 +112,7 @@ void WireDlg::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
 
 }
 
-void WireDlg::onDeleteBtn( NButtonEvent * ev )
+void WireDlg::onDeleteBtn( ngrs::NButtonEvent * ev )
 {	
   deleteMe.emit(this);
 	_pSrcMachine = 0;
@@ -141,7 +141,7 @@ WireGUI * WireDlg::line( )
   return line_;
 }
 
-void WireDlg::onVolPosChanged( NSlider * slider )
+void WireDlg::onVolPosChanged( ngrs::NSlider * slider )
 {
 	if ( pDstMachine() && pSrcMachine() && wireIdx() != -1 ) {
 		const float curvol = ((256*4-slider->pos())*(256*4-slider->pos()))/(16384.0f*4*4);

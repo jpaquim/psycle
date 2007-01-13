@@ -22,19 +22,21 @@
 
 #include "npanel.h"
 
-class NCustomStatusItem;
-class NTextStatusItem;
-class NCustomStatusModel;
+namespace ngrs {
 
-/**
-@author Stefan Nattkemper
-*/
+  class NCustomStatusItem;
+  class NTextStatusItem;
+  class NCustomStatusModel;
 
-// view for a ncustomstatus based data model
+  /**
+  @author Stefan Nattkemper
+  */
 
-class NStatusBar : public NPanel
-{
-public:
+  // view for a ncustomstatus based data model
+
+  class NStatusBar : public NPanel
+  {
+  public:
 
     NStatusBar();
 
@@ -42,18 +44,20 @@ public:
 
     virtual void add(NCustomStatusItem* component);
     virtual void add(NCustomStatusItem* component, int align);
-	virtual void add(NVisualComponent* component, int align);
+    virtual void add(NVisualComponent* component, int align);
 
-	void setModel( NCustomStatusModel & model );
-	NCustomStatusModel* model() const;
+    void setModel( NCustomStatusModel & model );
+    NCustomStatusModel* model() const;
 
-private:
+  private:
 
-	NCustomStatusModel* statusModel_;
-	std::vector<NCustomStatusItem*> statusItems_;
+    NCustomStatusModel* statusModel_;
+    std::vector<NCustomStatusItem*> statusItems_;
 
-	void onModelDataChange( const NCustomStatusModel & sender, unsigned int index );
+    void onModelDataChange( const NCustomStatusModel & sender, unsigned int index );
 
-};
+  };
+
+}
 
 #endif

@@ -26,10 +26,11 @@
 @author Stefan Nattkemper
 */
 
+namespace ngrs {
 
-class NColorComboBox : public NComboBox
-{
-public:
+  class NColorComboBox : public NComboBox
+  {
+  public:
     NColorComboBox();
 
     ~NColorComboBox();
@@ -43,12 +44,14 @@ public:
     virtual void removeChild( NVisualComponent * child );
     virtual void erase(NVisualComponent* child);
 
-private:
+  private:
 
     void init();
 
     std::vector<class NColorItem*> items;
 
-};
+  };
+
+}
 
 #endif

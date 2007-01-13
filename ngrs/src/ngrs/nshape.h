@@ -29,8 +29,11 @@
 /**
 @author Stefan
 */
-class NShape{
-public:
+
+namespace ngrs {
+
+  class NShape{
+  public:
     NShape();
 
     virtual ~NShape();
@@ -59,15 +62,14 @@ public:
     virtual NRegion region();
     virtual NRegion spacingRegion(const NSize & spacing);
 
-		virtual NShape* clone()  const = 0;   // Uses the copy constructor
+    virtual NShape* clone()  const = 0;   // Uses the copy constructor
 
-
-private:
+  private:
 
     NRect rectArea_;
 
+  };
 
-
-};
+}
 
 #endif

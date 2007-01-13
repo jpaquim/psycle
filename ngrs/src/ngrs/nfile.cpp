@@ -42,255 +42,259 @@
 
 using namespace std;
 
-NFile::NFile()
-{
-}
+namespace ngrs {
 
-
-NFile::~NFile()
-{
-}
-
-std::string NFile::readFile( const std::string & filename )
-{
-  std::stringstream buf;
-  std::ifstream file(filename.c_str());
-  if (!file) {
-    std::cerr << "\nFile not open!\n" << std::ends;
-    return "";
-  }
-  buf << file.rdbuf();
-  return buf.str();
-}
-
-std::vector< std::string > NFile::fileList( const std::string & path, int fMode )
-{
-  std::string saveCurrentDir = workingDir();
-
-  std::vector<std::string> destination;
-  #ifdef __unix__
-
-  DIR *dhandle;
-  struct dirent *drecord;
-  struct stat sbuf;
-  int x;
-
-  dhandle = opendir(path.c_str());
-  if(dhandle == NULL)
+  NFile::NFile()
   {
-    //printf("Error opening directory '%s'\n",path);
+  }
+
+
+  NFile::~NFile()
+  {
+  }
+
+  std::string NFile::readFile( const std::string & filename )
+  {
+    std::stringstream buf;
+    std::ifstream file(filename.c_str());
+    if (!file) {
+      std::cerr << "\nFile not open!\n" << std::ends;
+      return "";
+    }
+    buf << file.rdbuf();
+    return buf.str();
+  }
+
+  std::vector< std::string > NFile::fileList( const std::string & path, int fMode )
+  {
+    std::string saveCurrentDir = workingDir();
+
+    std::vector<std::string> destination;
+#ifdef __unix__
+
+    DIR *dhandle;
+    struct dirent *drecord;
+    struct stat sbuf;
+    int x;
+
+    dhandle = opendir(path.c_str());
+    if(dhandle == NULL)
+    {
+      //printf("Error opening directory '%s'\n",path);
+      return destination;
+    }
+    x = chdir(path.c_str());
+    if( x != 0)
+    {
+      //printf("Error changing to '%s'\n",path);
+      return destination;
+    }
+
+    while( (drecord = readdir(dhandle)) != NULL )
+    {
+      stat(drecord->d_name,&sbuf);
+      if ( S_ISDIR(sbuf.st_mode) && (fMode & nDirs) )
+      {
+        // dir handled here
+        destination.push_back(std::string(drecord->d_name));
+      } 
+      if (fMode & nFiles)
+      {
+        // files handled here
+        destination.push_back(std::string(drecord->d_name));
+      }
+    } 
+    putchar('\n');
+    closedir(dhandle);
+#else
+    WIN32_FIND_DATA dir;
+    HANDLE fhandle;
+    char directory[8196];
+    // unsecure, better if there snprintf
+    sprintf(directory,"%s\\*.*",path.c_str());
+    // Handle to directory
+    if ((fhandle=FindFirstFile(directory,&dir)) != INVALID_HANDLE_VALUE) {
+      do {  // readout directory
+        if (			
+          ( ( fMode & nDirs ) && ( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
+          || 
+          ( ( fMode & nFiles ) && !( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) 
+          )
+        {
+          destination.push_back( dir.cFileName );
+        }
+      } while(FindNextFile(fhandle,&dir));
+    }
+    FindClose(fhandle);
+#endif
+    sort(destination.begin(),destination.end());
+    cd ( saveCurrentDir );
     return destination;
   }
-  x = chdir(path.c_str());
- if( x != 0)
- {
-   //printf("Error changing to '%s'\n",path);
-   return destination;
- }
- 
- while( (drecord = readdir(dhandle)) != NULL )
- {
-   stat(drecord->d_name,&sbuf);
-   if ( S_ISDIR(sbuf.st_mode) && (fMode & nDirs) )
-   {
-     // dir handled here
-	 destination.push_back(std::string(drecord->d_name));
-   } 
-   if (fMode & nFiles)
-   {
-    // files handled here
-    destination.push_back(std::string(drecord->d_name));
-   }
- } 
- putchar('\n');
- closedir(dhandle);
- #else
-  WIN32_FIND_DATA dir;
-  HANDLE fhandle;
-  char directory[8196];
-  // unsecure, better if there snprintf
-  sprintf(directory,"%s\\*.*",path.c_str());
-  // Handle to directory
-  if ((fhandle=FindFirstFile(directory,&dir)) != INVALID_HANDLE_VALUE) {
-    do {  // readout directory
-		if (			
-			( ( fMode & nDirs ) && ( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
-			|| 
-			( ( fMode & nFiles ) && !( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) 
-			)
-		{
-          destination.push_back( dir.cFileName );
-		}
-	} while(FindNextFile(fhandle,&dir));
-  }
-  FindClose(fhandle);
- #endif
- sort(destination.begin(),destination.end());
- cd ( saveCurrentDir );
- return destination;
-}
 
-std::string NFile::home() {
- #ifdef __unix__
- char home[8000]; 
- strncpy(home,getenv("HOME"),7999);
- return home;
- #else            
- // first check homepath
- const char* homepath = getenv("HOMEPATH");
- if ( homepath ) {
-	 std::cout << "the homepath is " << std::string( homepath ) << std::endl;
-	 return std::string( homepath );
- }
+  std::string NFile::home() {
+#ifdef __unix__
+    char home[8000]; 
+    strncpy(home,getenv("HOME"),7999);
+    return home;
+#else            
+    // first check homepath
+    const char* homepath = getenv("HOMEPATH");
+    if ( homepath ) {
+      std::cout << "the homepath is " << std::string( homepath ) << std::endl;
+      return std::string( homepath );
+    }
 
 
- HKEY hKeyRoot = HKEY_CURRENT_USER;
- LPCTSTR pszPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
- 
- HKEY m_hKey = NULL;
- LONG ReturnValue =  RegOpenKeyEx (hKeyRoot, pszPath, 0L,
-		KEY_ALL_ACCESS, &m_hKey);
-		
- if(ReturnValue == ERROR_SUCCESS)
- {
-   LPCTSTR pszKey = "Personal";
-   std::string sVal;
-        
-   DWORD dwType;
-   DWORD dwSize = 200;
-   char  szString[255];
+    HKEY hKeyRoot = HKEY_CURRENT_USER;
+    LPCTSTR pszPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
 
-   LONG lReturn = RegQueryValueEx (m_hKey, (LPSTR) pszKey, NULL,
-		&dwType, (BYTE *) szString, &dwSize);
+    HKEY m_hKey = NULL;
+    LONG ReturnValue =  RegOpenKeyEx (hKeyRoot, pszPath, 0L,
+      KEY_ALL_ACCESS, &m_hKey);
 
-   if(lReturn == ERROR_SUCCESS)
-   {
-    sVal = szString;
-   }
- 
-   if (m_hKey)
-   {
-     RegCloseKey (m_hKey);
-     m_hKey = NULL;
-   }
-   return sVal;
- }    
- return "";
- #endif
-}            
+    if(ReturnValue == ERROR_SUCCESS)
+    {
+      LPCTSTR pszKey = "Personal";
+      std::string sVal;
 
-void NFile::cdHome() { 
- cd( home() );
-}
+      DWORD dwType;
+      DWORD dwSize = 200;
+      char  szString[255];
 
-void NFile::cd( const std::string & path )
-{
- chdir( path.c_str() );
-}
+      LONG lReturn = RegQueryValueEx (m_hKey, (LPSTR) pszKey, NULL,
+        &dwType, (BYTE *) szString, &dwSize);
 
-
-std::string NFile::workingDir( )
-{
-  char puffer[8000];
-  if(getcwd(puffer,sizeof(puffer)) == NULL)
+      if(lReturn == ERROR_SUCCESS)
       {
-         return "";
+        sVal = szString;
       }
-  return std::string(puffer);
-}
 
-std::string NFile::parentWorkingDir( )
-{
-  string oldDir = workingDir();
-  cd("..");
-  string parentDir = workingDir();
-  cd(oldDir);
-  return parentDir;
-}
+      if (m_hKey)
+      {
+        RegCloseKey (m_hKey);
+        m_hKey = NULL;
+      }
+      return sVal;
+    }    
+    return "";
+#endif
+  }            
 
-std::string NFile::replaceTilde( std::string const & path )
-{
-  std::string nvr(path);
-  if(!path.length() || path[0] != '~') return nvr;
-  nvr.replace( 0, 1, home().c_str() );
-  return nvr;
-}
+  void NFile::cdHome() { 
+    cd( home() );
+  }
 
-bool NFile::fileIsReadable( const std::string & file )
-{
-   std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
-   if (!_stream.is_open ()) return false;
-   return true;
-}
+  void NFile::cd( const std::string & path )
+  {
+    chdir( path.c_str() );
+  }
 
-std::string NFile::env( const std::string & envName )
-{
-  #if 1
+
+  std::string NFile::workingDir( )
+  {
+    char puffer[8000];
+    if(getcwd(puffer,sizeof(puffer)) == NULL)
+    {
+      return "";
+    }
+    return std::string(puffer);
+  }
+
+  std::string NFile::parentWorkingDir( )
+  {
+    string oldDir = workingDir();
+    cd("..");
+    string parentDir = workingDir();
+    cd(oldDir);
+    return parentDir;
+  }
+
+  std::string NFile::replaceTilde( std::string const & path )
+  {
+    std::string nvr(path);
+    if(!path.length() || path[0] != '~') return nvr;
+    nvr.replace( 0, 1, home().c_str() );
+    return nvr;
+  }
+
+  bool NFile::fileIsReadable( const std::string & file )
+  {
+    std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
+    if (!_stream.is_open ()) return false;
+    return true;
+  }
+
+  std::string NFile::env( const std::string & envName )
+  {
+#if 1
     char env[8000];
     strncpy(env,getenv(envName.c_str()),7999);
     return std::string(env);
-  #else // no length limit
+#else // no length limit
     char const * const value(std::getenv(envName.c_str()));
     if(!value)
     {
-    	std::string nvr;
-    	return nvr;
+      std::string nvr;
+      return nvr;
     }
     else
     {
-    	std::string nvr(value);
-    	return nvr;
+      std::string nvr(value);
+      return nvr;
     }
-  #endif
-}
-
-std::string NFile::extractFileNameFromPath(const std::string & fileName) {
-  std::string fileWithoutPathName = "";
-  
-  #ifdef __unix__
-  std::string::size_type i = fileName.rfind("/");
-  #else
-  std::string::size_type i = fileName.rfind("\\");
-  #endif
-
-  if ( i != std::string::npos  &&  i != fileName.length() - 1 ) {
-     fileWithoutPathName = fileName.substr(i+1);
+#endif
   }
 
-  return fileWithoutPathName;
-}
+  std::string NFile::extractFileNameFromPath(const std::string & fileName) {
+    std::string fileWithoutPathName = "";
 
-std::string NFile::replaceIllegalXmlChr( const std::string & text, bool strict )
-{
-	std::string xml = text;
+#ifdef __unix__
+    std::string::size_type i = fileName.rfind("/");
+#else
+    std::string::size_type i = fileName.rfind("\\");
+#endif
 
-// replace ampersand
-		std::string::size_type search_pos = 0;
-		while ( ( search_pos = xml.find("&", search_pos) ) != std::string::npos )
-		xml.replace(search_pos++, 1, "&amp;" );
+    if ( i != std::string::npos  &&  i != fileName.length() - 1 ) {
+      fileWithoutPathName = fileName.substr(i+1);
+    }
 
-			// replace less than
-  		while ( ( search_pos = xml.find("<") ) != std::string::npos )
-			xml.replace(search_pos, 1, "&lt;" );
-				
-			if ( strict ) {
-				// replace greater than
-				while ( ( search_pos = xml.find(">") ) != std::string::npos )
-				xml.replace(search_pos, 1, "&gt;" );
-				// replace apostrophe
-				while ( ( search_pos = xml.find("'") ) != std::string::npos )
-				xml.replace(search_pos, 1, "&apos;" );
-				// replace quotation mark
-				while ( ( search_pos = xml.find("\"") ) != std::string::npos ) 
-				xml.replace(search_pos, 1, "&quot;" );
-			}
-			return xml;
-}
+    return fileWithoutPathName;
+  }
 
-std::string NFile::slash() {
-  #ifdef __unix__
-  return "/";
-  #else
-  return "\\";
-  #endif
+  std::string NFile::replaceIllegalXmlChr( const std::string & text, bool strict )
+  {
+    std::string xml = text;
+
+    // replace ampersand
+    std::string::size_type search_pos = 0;
+    while ( ( search_pos = xml.find("&", search_pos) ) != std::string::npos )
+      xml.replace(search_pos++, 1, "&amp;" );
+
+    // replace less than
+    while ( ( search_pos = xml.find("<") ) != std::string::npos )
+      xml.replace(search_pos, 1, "&lt;" );
+
+    if ( strict ) {
+      // replace greater than
+      while ( ( search_pos = xml.find(">") ) != std::string::npos )
+        xml.replace(search_pos, 1, "&gt;" );
+      // replace apostrophe
+      while ( ( search_pos = xml.find("'") ) != std::string::npos )
+        xml.replace(search_pos, 1, "&apos;" );
+      // replace quotation mark
+      while ( ( search_pos = xml.find("\"") ) != std::string::npos ) 
+        xml.replace(search_pos, 1, "&quot;" );
+    }
+    return xml;
+  }
+
+  std::string NFile::slash() {
+#ifdef __unix__
+    return "/";
+#else
+    return "\\";
+#endif
+  }
+
 }

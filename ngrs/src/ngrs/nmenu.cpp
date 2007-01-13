@@ -23,6 +23,8 @@
 #include "nconfig.h"
 #include "npopupmenu.h"
 
+namespace ngrs {
+
 NMenu::NMenu()
  : NCustomButton()
 {
@@ -137,7 +139,4 @@ void NMenu::removeChilds( )
   popupMenu_->removeChilds();
 }
 
-
-
-
-
+}

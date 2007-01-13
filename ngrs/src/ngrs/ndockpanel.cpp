@@ -27,147 +27,152 @@
 #include "nconfig.h"
 #include "npoint.h"
 
-/* XPM */
-const char * winundock_xpm[] = {
-"16 10 2 1",
-" 	c None",
-".	c #003063",
-"................",
-".              .",
-"................",
-".              .",
-".          ... .",
-".           .. .",
-".          . . .",
-".         .    .",
-".              .",
-"................"};
+namespace ngrs {
+
+  /* XPM */
+  const char * winundock_xpm[] = {
+    "16 10 2 1",
+    " 	c None",
+    ".	c #003063",
+    "................",
+    ".              .",
+    "................",
+    ".              .",
+    ".          ... .",
+    ".           .. .",
+    ".          . . .",
+    ".         .    .",
+    ".              .",
+    "................"
+  };
 
 
-const char * windock_xpm[] = {
-"16 10 2 1",
-" 	c None",
-".	c #003063",
-"................",
-".              .",
-"................",
-".              .",
-".            . .",
-".         . .  .",
-".         ..   .",
-".         ...  .",
-".              .",
-"................"};
+  const char * windock_xpm[] = {
+    "16 10 2 1",
+    " 	c None",
+    ".	c #003063",
+    "................",
+    ".              .",
+    "................",
+    ".              .",
+    ".            . .",
+    ".         . .  .",
+    ".         ..   .",
+    ".         ...  .",
+    ".              .",
+    "................"
+  };
 
 
-NDockPanel::NDockPanel()
- : NPanel()
-{
-  init();
-}
+  NDockPanel::NDockPanel()
+    : NPanel()
+  {
+    init();
+  }
 
-NDockPanel::NDockPanel( NVisualComponent * clientComponent )
-{
-  init();
-  pane()->add(clientComponent, nAlClient);
-}
+  NDockPanel::NDockPanel( NVisualComponent * clientComponent )
+  {
+    init();
+    pane()->add(clientComponent, nAlClient);
+  }
 
-void NDockPanel::init( )
-{
-  // an alignLayout for top : dochBar and client the pane
-  setLayout( NAlignLayout() );
+  void NDockPanel::init( )
+  {
+    // an alignLayout for top : dochBar and client the pane
+    setLayout( NAlignLayout() );
 
-  // create header with the button to dock and undock the pane
+    // create header with the button to dock and undock the pane
 
-  dockBar_ = new NPanel();
+    dockBar_ = new NPanel();
     dockBar_->setLayout( NFlowLayout( nAlRight,0 , 0) );
     // create the dockBar icon bitmaps
     dockBmp.createFromXpmData( windock_xpm );
     undockBmp.createFromXpmData( winundock_xpm );
     dockImg = new NImage( );
-      dockImg->setSharedBitmap( &undockBmp );
-      dockImg->setPreferredSize( 20, 10 );
+    dockImg->setSharedBitmap( &undockBmp );
+    dockImg->setPreferredSize( 20, 10 );
     NButton* unCoupleBtn = new NButton( dockImg );
-      unCoupleBtn->clicked.connect( this, &NDockPanel::onUndockWindow );
+    unCoupleBtn->clicked.connect( this, &NDockPanel::onUndockWindow );
     dockBar_->add( unCoupleBtn );
-	dockBar_->setSkin( NApp::config()->skin("dockbar_bg") );
-  add( dockBar_, nAlTop );
+    dockBar_->setSkin( NApp::config()->skin("dockbar_bg") );
+    add( dockBar_, nAlTop );
 
-  // create the pane
+    // create the pane
 
-  area_ = new NPanel();
+    area_ = new NPanel();
     // set as area btw pane default NAlignLayout
     area_->setLayout( NAlignLayout( ) );
-  add( area_, nAlClient );
+    add( area_, nAlClient );
 
-  // start state = docked
-  undockedWindow = 0;
-}
+    // start state = docked
+    undockedWindow = 0;
+  }
 
-NDockPanel::~NDockPanel()
-{
-}
-
-
-NPanel * NDockPanel::pane( )
-{
-  return area_;
-}
+  NDockPanel::~NDockPanel()
+  {
+  }
 
 
+  NPanel * NDockPanel::pane( )
+  {
+    return area_;
+  }
 
-void NDockPanel::onUndockWindow( NButtonEvent * ev )
-{
-  if (undockedWindow!=0) {
+
+
+  void NDockPanel::onUndockWindow( NButtonEvent * ev )
+  {
+    if (undockedWindow!=0) {
+      dockWindow();
+      NApp::addRemovePipe(undockedWindow);
+      undockedWindow=0;
+    } else {
+
+      add ( undockedWindow = new NWindow() );
+      undockedWindow->setDock(this);
+      NPoint newWinSize(area_->width(),area_->height() + dockBar_->height());
+
+      erase(area_);
+      erase(dockBar_);
+
+      undockedWindow->pane()->add(dockBar_,nAlTop);
+      undockedWindow->pane()->add(area_,nAlClient);
+
+      dockImg->setSharedBitmap(&dockBmp);
+
+      undockedWindow->setPosition(0,0,newWinSize.x(),newWinSize.y());
+      undockedWindow->setVisible(true);
+
+      window()->resize();
+      window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
+      window()->checkForRemove(0);
+    }
+  }
+
+  void NDockPanel::onDockWindow( )
+  {
     dockWindow();
-    NApp::addRemovePipe(undockedWindow);
-    undockedWindow=0;
-  } else {
+    delete undockedWindow;
+    undockedWindow = 0;
+  }
 
-    add ( undockedWindow = new NWindow() );
-    undockedWindow->setDock(this);
-    NPoint newWinSize(area_->width(),area_->height() + dockBar_->height());
 
-    erase(area_);
-    erase(dockBar_);
+  void NDockPanel::dockWindow( )
+  {
+    undockedWindow->setVisible(false);
+    NApp::lastOverWin_ = 0;
 
-    undockedWindow->pane()->add(dockBar_,nAlTop);
-    undockedWindow->pane()->add(area_,nAlClient);
+    undockedWindow->pane()->erase(dockBar_);
+    undockedWindow->pane()->erase(area_);
 
-    dockImg->setSharedBitmap(&dockBmp);
+    NPanel::add(dockBar_,nAlTop);
+    NPanel::add(area_,nAlClient);
 
-    undockedWindow->setPosition(0,0,newWinSize.x(),newWinSize.y());
-    undockedWindow->setVisible(true);
+    dockImg->setSharedBitmap(&undockBmp);
 
     window()->resize();
     window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
     window()->checkForRemove(0);
   }
+
 }
-
-void NDockPanel::onDockWindow( )
-{
-  dockWindow();
-  delete undockedWindow;
-  undockedWindow = 0;
-}
-
-
-void NDockPanel::dockWindow( )
-{
-  undockedWindow->setVisible(false);
-  NApp::lastOverWin_ = 0;
-
-  undockedWindow->pane()->erase(dockBar_);
-  undockedWindow->pane()->erase(area_);
-
-  NPanel::add(dockBar_,nAlTop);
-  NPanel::add(area_,nAlClient);
-
-  dockImg->setSharedBitmap(&undockBmp);
-
-  window()->resize();
-  window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
-  window()->checkForRemove(0);
-}
-

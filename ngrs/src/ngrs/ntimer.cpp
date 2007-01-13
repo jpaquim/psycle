@@ -22,74 +22,78 @@
 
 using namespace std;
 
-vector<NTimer*> NTimer::timerList;
+namespace ngrs {
 
-NTimer::NTimer()
-{
- ms_=1000;
- enabled_ = false;
- count_=0;
-}
+  vector<NTimer*> NTimer::timerList;
 
-
-NTimer::~NTimer()
-{
- vector<NTimer*>::iterator it = find(timerList.begin(),timerList.end(),this);
- if (it!=timerList.end()) timerList.erase(it);
-}
-
-void NTimer::enableTimer( )
-{
- timerList.push_back(this);
- enabled_ = true;
-}
-
-void NTimer::disableTimer( )
-{
- vector<NTimer*>::iterator it = find(timerList.begin(),timerList.end(),this);
- if (it!=timerList.end()) timerList.erase(it);
- enabled_ = false;
-}
-
-void NTimer::setIntervalTime( int ms )
-{
- ms_=ms;
- count_=ms;
-}
-
-int NTimer::intervalTime( ) const
-{
- return ms_;
-}
+  NTimer::NTimer()
+  {
+    ms_=1000;
+    enabled_ = false;
+    count_=0;
+  }
 
 
-void NTimer::selectTimeOut( int us )
-{
- for( vector<NTimer*>::iterator itr = timerList.begin(); itr < timerList.end(); itr++) {
-    NTimer* ti = *itr;
-    if (ti->count()==0) { 
+  NTimer::~NTimer()
+  {
+    vector<NTimer*>::iterator it = find(timerList.begin(),timerList.end(),this);
+    if (it!=timerList.end()) timerList.erase(it);
+  }
+
+  void NTimer::enableTimer( )
+  {
+    timerList.push_back(this);
+    enabled_ = true;
+  }
+
+  void NTimer::disableTimer( )
+  {
+    vector<NTimer*>::iterator it = find(timerList.begin(),timerList.end(),this);
+    if (it!=timerList.end()) timerList.erase(it);
+    enabled_ = false;
+  }
+
+  void NTimer::setIntervalTime( int ms )
+  {
+    ms_=ms;
+    count_=ms;
+  }
+
+  int NTimer::intervalTime( ) const
+  {
+    return ms_;
+  }
+
+
+  void NTimer::selectTimeOut( int us )
+  {
+    for( vector<NTimer*>::iterator itr = timerList.begin(); itr < timerList.end(); itr++) {
+      NTimer* ti = *itr;
+      if (ti->count()==0) { 
         ti->setCount(ti->intervalTime()); 
         ti->timerEvent.emit();
         ti->onTimerEvent();
-    } else ti->setCount(ti->count()-1);
+      } else ti->setCount(ti->count()-1);
+    }
   }
-}
 
-void NTimer::setCount( int c )
-{
-  count_ = c;
-}
+  void NTimer::setCount( int c )
+  {
+    count_ = c;
+  }
 
-int NTimer::count( )
-{
-  return count_;
-}
+  int NTimer::count( )
+  {
+    return count_;
+  }
 
-void NTimer::onTimerEvent( )
-{
-}
+  void NTimer::onTimerEvent( )
+  {
+  }
 
-bool NTimer::enabled( ) const
-{
-  return enabled_;
+  bool NTimer::enabled( ) const
+  {
+    return enabled_;
+  }
+
 }

@@ -19,43 +19,47 @@
  ***************************************************************************/
 #include "ndialog.h"
 
-NDialog::NDialog()
- : NWindow()
-{
-   setModal(true);
-   do_execute = false;
-}
+namespace ngrs {
 
-NDialog::~NDialog()
-{
-}
-
-int NDialog::execute( )
-{
-  setPositionToScreenCenter();
-  setVisible(true);
-  return do_execute;
-}
-
-int NDialog::onClose()
-{
-  do_execute = false;
-  setVisible(false);
-  setExitLoop(nDestroyWindow);
-  return nDestroyWindow;
-}
-
-void NDialog::doClose( int flag )
-{
-  do_execute = flag;
-  setVisible(false);
-  setExitLoop(nDestroyWindow);
-}
-
-void NDialog::setVisible( bool on )
-{
-  if (on) {
-    setPositionToScreenCenter();
+  NDialog::NDialog()
+    : NWindow()
+  {
+    setModal(true);
+    do_execute = false;
   }
-  NWindow::setVisible(on);
+
+  NDialog::~NDialog()
+  {
+  }
+
+  int NDialog::execute( )
+  {
+    setPositionToScreenCenter();
+    setVisible(true);
+    return do_execute;
+  }
+
+  int NDialog::onClose()
+  {
+    do_execute = false;
+    setVisible(false);
+    setExitLoop(nDestroyWindow);
+    return nDestroyWindow;
+  }
+
+  void NDialog::doClose( int flag )
+  {
+    do_execute = flag;
+    setVisible(false);
+    setExitLoop(nDestroyWindow);
+  }
+
+  void NDialog::setVisible( bool on )
+  {
+    if (on) {
+      setPositionToScreenCenter();
+    }
+    NWindow::setVisible(on);
+  }
+
 }

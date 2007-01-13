@@ -27,13 +27,15 @@
 @author Stefan Nattkemper
 */
 
+namespace ngrs {
+
 #ifdef __unix__
 #else
-typedef HRGN Region;
+  typedef HRGN Region;
 #endif
 
-class NRegion{
-public:
+  class NRegion{
+  public:
     NRegion();
     NRegion( const NRect & rect );
 
@@ -60,7 +62,7 @@ public:
     inline NRegion & operator ^= ( const NRegion & ); // symetric difference
 
 
-      // warning: this pointer can change
+    // warning: this pointer can change
 
     inline Region sRegion() const  { return region_; }
 
@@ -71,79 +73,81 @@ public:
     inline operator Region ()  { return region_; }
 
 
-private:
+  private:
 
     Region region_;
     mutable NRect clipBox;
     mutable bool update;
-};
+  };
 
-inline NRegion & NRegion::operator &= ( const NRegion & that )
-{
-  #ifdef __unix__
-  XIntersectRegion(*this, that, *this);
-  #else
-  CombineRgn(*this, that, *this, RGN_AND);
-  #endif
-  return *this;
-}
+  inline NRegion & NRegion::operator &= ( const NRegion & that )
+  {
+#ifdef __unix__
+    XIntersectRegion(*this, that, *this);
+#else
+    CombineRgn(*this, that, *this, RGN_AND);
+#endif
+    return *this;
+  }
 
-inline NRegion operator & ( const NRegion & lhs, const NRegion & rhs )
-{
-  NRegion nrv( lhs );
-  nrv &= rhs;
-  return nrv;
-}
+  inline NRegion operator & ( const NRegion & lhs, const NRegion & rhs )
+  {
+    NRegion nrv( lhs );
+    nrv &= rhs;
+    return nrv;
+  }
 
-inline NRegion & NRegion::operator |= ( const NRegion & that )
-{
-  #ifdef __unix__
-  XUnionRegion( *this, that, *this );
-  #else
-  CombineRgn( *this, that, *this, RGN_OR);
-  #endif
-  return *this;
-}
+  inline NRegion & NRegion::operator |= ( const NRegion & that )
+  {
+#ifdef __unix__
+    XUnionRegion( *this, that, *this );
+#else
+    CombineRgn( *this, that, *this, RGN_OR);
+#endif
+    return *this;
+  }
 
-inline NRegion operator | ( const NRegion & lhs, const NRegion & rhs )
-{
-  NRegion nrv( lhs );
-  nrv |= rhs;
-  return nrv;
-}
+  inline NRegion operator | ( const NRegion & lhs, const NRegion & rhs )
+  {
+    NRegion nrv( lhs );
+    nrv |= rhs;
+    return nrv;
+  }
 
-inline NRegion & NRegion::operator -= ( const NRegion & that )
-{
-  #ifdef __unix__
-  XSubtractRegion( *this, that, *this );
-  #else
-  CombineRgn( *this, that, *this, RGN_DIFF);
-  #endif
-  return *this;
-}
+  inline NRegion & NRegion::operator -= ( const NRegion & that )
+  {
+#ifdef __unix__
+    XSubtractRegion( *this, that, *this );
+#else
+    CombineRgn( *this, that, *this, RGN_DIFF);
+#endif
+    return *this;
+  }
 
-inline NRegion operator - ( const NRegion & lhs, const NRegion & rhs )
-{
-  NRegion nrv( lhs );
-  nrv -= rhs;
-  return nrv;
-}
+  inline NRegion operator - ( const NRegion & lhs, const NRegion & rhs )
+  {
+    NRegion nrv( lhs );
+    nrv -= rhs;
+    return nrv;
+  }
 
-inline NRegion & NRegion::operator ^= ( const NRegion & that )
-{
-  #ifdef __unix__
-  XXorRegion( *this, that, *this );
-  #else
-  CombineRgn( *this, that, *this, RGN_XOR);
-  #endif
-  return *this;
-}
+  inline NRegion & NRegion::operator ^= ( const NRegion & that )
+  {
+#ifdef __unix__
+    XXorRegion( *this, that, *this );
+#else
+    CombineRgn( *this, that, *this, RGN_XOR);
+#endif
+    return *this;
+  }
 
-inline NRegion operator ^ ( const NRegion & lhs , const NRegion & rhs )
-{
-  NRegion nrv( lhs );
-  nrv ^= rhs;
-  return nrv;
+  inline NRegion operator ^ ( const NRegion & lhs , const NRegion & rhs )
+  {
+    NRegion nrv( lhs );
+    nrv ^= rhs;
+    return nrv;
+  }
+
 }
 
 #endif

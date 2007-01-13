@@ -22,36 +22,38 @@
 #include "napp.h"
 #include "nconfig.h"
 
-NToolBarSeparator::NToolBarSeparator()
- : NPanel()
-{
-  setSkin( NApp::config()->skin("tool_sep") );
-  setAlign( nAlLeft );
-}
+namespace ngrs {
 
-
-NToolBarSeparator::~NToolBarSeparator()
-{
-}
-
-void NToolBarSeparator::paint( NGraphics * g )
-{
-  if ( align() == nAlTop ) {
-    g->drawLine( 0, 1, clientWidth(), 1 );   
-  } else 
+  NToolBarSeparator::NToolBarSeparator()
+    : NPanel()
   {
-    g->drawLine( 1, 0, 1, clientHeight() );
-  } 
+    setSkin( NApp::config()->skin("tool_sep") );
+    setAlign( nAlLeft );
+  }
+
+
+  NToolBarSeparator::~NToolBarSeparator()
+  {
+  }
+
+  void NToolBarSeparator::paint( NGraphics * g )
+  {
+    if ( align() == nAlTop ) {
+      g->drawLine( 0, 1, clientWidth(), 1 );   
+    } else 
+    {
+      g->drawLine( 1, 0, 1, clientHeight() );
+    } 
+  }
+
+  int NToolBarSeparator::preferredWidth( ) const
+  {
+    return ( align() == nAlTop ) ?  15 : 3;
+  }
+
+  int NToolBarSeparator::preferredHeight( ) const
+  {
+    return ( align() == nAlTop ) ? 3 : 15;
+  }
+
 }
-
-int NToolBarSeparator::preferredWidth( ) const
-{
-  return ( align() == nAlTop ) ?  15 : 3;
-}
-
-int NToolBarSeparator::preferredHeight( ) const
-{
-  return ( align() == nAlTop ) ? 3 : 15;
-}
-
-

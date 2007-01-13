@@ -36,14 +36,14 @@ namespace psycle {
 		// MachineGUI abstract class
 
 		MachineGUI::MachineGUI( Machine & mac )
-			: NPanel()
+			: ngrs::NPanel()
 		{
 			selected_ = 0;
 			mac_ = & mac;
-			setMoveable(NMoveable(nMvHorizontal | nMvVertical | nMvNoneRepaint | nMvTopLimit | nMvLeftLimit));
+			setMoveable( ngrs::NMoveable(ngrs::nMvHorizontal | ngrs::nMvVertical | ngrs::nMvNoneRepaint | ngrs::nMvTopLimit | ngrs::nMvLeftLimit));
 			setPosition( mac._x, mac._y, 200+2*ident(), 30+2*ident() );
 
-			setFont(NFont("Suse sans",6, nMedium | nStraight | nAntiAlias));
+			setFont( ngrs::NFont("Suse sans",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
 
 			propsDlg_ = new MacPropDlg( mac_ );
 				propsDlg_->updateMachineProperties.connect(this,&MachineGUI::onUpdateMachinePropertiesSignal);
@@ -67,7 +67,7 @@ namespace psycle {
 			return propsDlg_;
 		}
 
-		void MachineGUI::paint( NGraphics * g )
+		void MachineGUI::paint( ngrs::NGraphics * g )
 		{
 			if (selected_) {
 
@@ -102,16 +102,16 @@ namespace psycle {
 			int midW = clientWidth()  / 2;
 			int midH = clientHeight() / 2;
 			if (point == 1) {
-				line->setPoints( NPoint(left()+midW, top()+midH), line->p2() );
+				line->setPoints( ngrs::NPoint(left()+midW, top()+midH), line->p2() );
 			} else {
-				line->setPoints( line->p1(), NPoint(left()+midW, top()+midH) );
+				line->setPoints( line->p1(), ngrs::NPoint(left()+midW, top()+midH) );
 			}
 
 		}
 
-		NRegion MachineGUI::linesRegion( ) const
+		ngrs::NRegion MachineGUI::linesRegion( ) const
 		{
-			NRegion region( geometry()->rectArea() );
+			ngrs::NRegion region( geometry()->rectArea() );
 
 			for (std::vector<LineAttachment>::const_iterator itr = attachedLines.begin(); itr < attachedLines.end(); itr++) {
 				LineAttachment lineAttach = *itr;
@@ -120,17 +120,17 @@ namespace psycle {
 			return region;
 		}
 
-		void MachineGUI::onMoveStart( const NMoveEvent & moveEvent )
+		void MachineGUI::onMoveStart( const ngrs::NMoveEvent & moveEvent )
 		{
 			oldDrag = linesRegion();
 		}
 
-		void MachineGUI::onMove( const NMoveEvent & moveEvent )
+		void MachineGUI::onMove( const ngrs::NMoveEvent & moveEvent )
 		{
-			NRegion newDrag = linesRegion();
-			NRegion repaintArea = newDrag | oldDrag;
+			ngrs::NRegion newDrag = linesRegion();
+			ngrs::NRegion repaintArea = newDrag | oldDrag;
 
-			NVisualComponent* parentVc =  dynamic_cast<NVisualComponent*>( parent() );
+			ngrs::NVisualComponent* parentVc =  dynamic_cast<ngrs::NVisualComponent*>( parent() );
 
 			int parentAbsLeft = parentVc->absoluteLeft() - parentVc->scrollDx();
 			int parentAbsTop  = parentVc->absoluteTop() - parentVc->scrollDy();;
@@ -165,9 +165,9 @@ namespace psycle {
 				int midW = clientWidth() / 2;
 				int midH = clientHeight() / 2;
 				if ( lineAttach.point() == 1 ) {
-					lineAttach.line()->setPoints( NPoint( left() + midW, top() + midH ), lineAttach.line()->p2() );
+					lineAttach.line()->setPoints( ngrs::NPoint( left() + midW, top() + midH ), lineAttach.line()->p2() );
 				} else {
-					lineAttach.line()->setPoints( lineAttach.line()->p1(), NPoint( left() + midW, top() + midH ) );
+					lineAttach.line()->setPoints( lineAttach.line()->p1(), ngrs::NPoint( left() + midW, top() + midH ) );
 				}
 			}
 		}
@@ -186,11 +186,11 @@ namespace psycle {
 
 		void MachineGUI::onMousePress( int x, int y, int button )
 		{
-			int shift = NApp::system().shiftState();
-			if ( (shift & nsShift & nsLeft) || button == 3 ) {
+			int shift = ngrs::NApp::system().shiftState();
+			if ( (shift & ngrs::nsShift & ngrs::nsLeft) || button == 3 ) {
 				// shift+left-click or right-click.
 				newConnection.emit(this);
-			} else if ( shift & nsLeft ) { // left-click (w/ no shift)
+			} else if ( shift & ngrs::nsLeft ) { // left-click (w/ no shift)
 				selected.emit(this);
 			} else if ( button == 2) {
 				showPropsDlg();
@@ -214,7 +214,7 @@ namespace psycle {
 				LineAttachment lineAttachment = *it;
 
 				if (lineAttachment.line() == line) {
-					attachedLines.erase(it); 
+					attachedLines.erase( it ); 
 					break;
 				}
 			}
@@ -224,7 +224,7 @@ namespace psycle {
 		{
 		}
 
-		void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
+		void MachineGUI::onMoveEnd( const ngrs::NMoveEvent& moveEvent )
 		{
 			((NVisualComponent*) parent())->resize();
 		}
@@ -233,7 +233,7 @@ namespace psycle {
 		{
 		}
 
-		void MachineGUI::onUpdateMachinePropertiesSignal(Machine* machine) {
+		void MachineGUI::onUpdateMachinePropertiesSignal( Machine* machine ) {
 			repaint( this );
 		}
 
@@ -242,11 +242,11 @@ namespace psycle {
 
 
 		// the MasterGUI class
-		MasterGUI::MasterGUI( Machine & mac ) : MachineGUI( mac )
+		MasterGUI::MasterGUI( Machine& mac ) : MachineGUI( mac )
 		{
 			setSkin();
 			masterDlg = new MasterDlg( &mac );
-			setBackground( NColor( 0, 0, 200 ) );
+			setBackground( ngrs::NColor( 0, 0, 200 ) );
 		}
 
 		MasterGUI::~ MasterGUI( )
@@ -257,13 +257,13 @@ namespace psycle {
 		{
 			setCoordInfo( SkinReader::Instance()->machineview_master_coords() );
 
-			setTransparent(true);
+			setTransparent( true );
 			setHeight( coords().bgCoords.height() + 2*ident() );
 			setWidth( coords().bgCoords.width()   + 2*ident() );
-			setBackground(NColor(0,0,200));
+			setBackground( ngrs::NColor( 0, 0, 200) );
 		}
 
-		void MasterGUI::paint( NGraphics * g )
+		void MasterGUI::paint( ngrs::NGraphics* g )
 		{
 			MachineGUI::paint(g);
 			// save old translation pos from the grpahics handler
@@ -307,9 +307,9 @@ namespace psycle {
 		//
 		// start of GeneratorGUI class
 		//
-		GeneratorGUI::GeneratorGUI( Machine & mac ) : MachineGUI( mac )
+		GeneratorGUI::GeneratorGUI( Machine& mac ) : MachineGUI( mac )
 		{
-			panSlider_ = new NSlider();
+			panSlider_ = new ngrs::NSlider();
 			panSlider_->change.connect(this,&GeneratorGUI::onPosChanged);
 			add(panSlider_);
 
@@ -329,7 +329,7 @@ namespace psycle {
 		{
 		}
 
-		void GeneratorGUI::paint( NGraphics * g )
+		void GeneratorGUI::paint( ngrs::NGraphics* g )
 		{
 			MachineGUI::paint(g);
 			// save old translation pos from the grpahics handler
@@ -362,7 +362,7 @@ namespace psycle {
 			setTransparent(true);
 
 			panSlider_->setPosition(45 + ident() ,26 + ident(),91,coords().sPan.height());
-			panSlider_->setOrientation(nHorizontal);
+			panSlider_->setOrientation(ngrs::nHorizontal);
 			panSlider_->setTrackLine(false);
 			panSlider_->setRange(0,127);
 			panSlider_->setPos( mac()._panning );
@@ -371,7 +371,7 @@ namespace psycle {
 			panSlider_->slider()->setHeight( coords().sPan.height() );
 		}
 
-		void GeneratorGUI::onPosChanged(NSlider* sender )
+		void GeneratorGUI::onPosChanged( ngrs::NSlider* sender )
 		{
 		  mac().SetPan( (int) panSlider_->pos());		
 		}
@@ -426,7 +426,7 @@ namespace psycle {
 			vuPanel_->repaint();
 		}
 
-		void GeneratorGUI::VUPanel::paint( NGraphics * g )
+		void GeneratorGUI::VUPanel::paint( ngrs::NGraphics * g )
 		{
 			/*int vol = pGui_->mac()._volumeDisplay;
 			int max = pGui_->mac()._volumeMaxDisplay;
@@ -475,7 +475,7 @@ namespace psycle {
 			*/
 		}
 
-		void GeneratorGUI::customSliderPaint( NSlider * sl, NGraphics * g )
+		void GeneratorGUI::customSliderPaint( ngrs::NSlider * sl, ngrs::NGraphics * g )
 		{
 			g->putPixmap(0,0,coords().sPan.width(),coords().sPan.height(),SkinReader::Instance()->machines_bitmap(),coords().sPan.left(),coords().sPan.top());
 		}
@@ -489,9 +489,9 @@ namespace psycle {
 			patternTweakSlide.emit(machine,command,value);
 		}
 
-		void GeneratorGUI::onKeyPress( const NKeyEvent & event )
+		void GeneratorGUI::onKeyPress( const ngrs::NKeyEvent & event )
 		{
-			if ( event.scancode() == NK_Delete ) 
+			if ( event.scancode() == ngrs::NK_Delete ) 
 				deleteRequest.emit( this );
 		}
 
@@ -510,7 +510,7 @@ namespace psycle {
 		//
 		EffektGUI::EffektGUI( Machine & mac ) : MachineGUI( mac )
 		{
-			panSlider_ = new NSlider( );
+			panSlider_ = new ngrs::NSlider( );
 			panSlider_->change.connect( this, &EffektGUI::onPosChanged );
 			add(panSlider_);
 
@@ -529,7 +529,7 @@ namespace psycle {
 		{
 		}
 
-		void EffektGUI::paint( NGraphics * g )
+		void EffektGUI::paint( ngrs::NGraphics * g )
 		{
 			MachineGUI::paint(g);
 			// save old translation pos from the grpahics handler
@@ -561,7 +561,7 @@ namespace psycle {
 			setTransparent(true);
 
 			panSlider_->setPosition(46+ident() ,26+ident(),91, coords().sPan.height());
-			panSlider_->setOrientation(nHorizontal);
+			panSlider_->setOrientation(ngrs::nHorizontal);
 			panSlider_->setTrackLine(false);
 			panSlider_->setRange(0,127);
 			panSlider_->setPos( mac()._panning );
@@ -571,12 +571,12 @@ namespace psycle {
 		}
 
 
-		void EffektGUI::onPosChanged( NSlider* sender )
+		void EffektGUI::onPosChanged( ngrs::NSlider* sender )
 		{
 		  mac().SetPan( (int) panSlider_->pos());
 		}
 
-		void EffektGUI::customSliderPaint( NSlider * sl, NGraphics * g )
+		void EffektGUI::customSliderPaint( ngrs::NSlider * sl, ngrs::NGraphics * g )
 		{
 			g->putPixmap(0,0, coords().sPan.width(), coords().sPan.height(), SkinReader::Instance()->machines_bitmap(), coords().sPan.left(), coords().sPan.top() );
 		}
@@ -636,7 +636,7 @@ namespace psycle {
 		}
 
 
-		void EffektGUI::VUPanel::paint( NGraphics * g )
+		void EffektGUI::VUPanel::paint( ngrs::NGraphics * g )
 		{
 			/*int vol = pGui_->mac()._volumeDisplay;
 			int max = pGui_->mac()._volumeMaxDisplay;
@@ -695,9 +695,9 @@ namespace psycle {
 			patternTweakSlide.emit(machine,command,value);
 		}
 
-		void EffektGUI::onKeyPress( const NKeyEvent & event )
+		void EffektGUI::onKeyPress( const ngrs::NKeyEvent & event )
 		{
-			if ( event.scancode() == NK_Delete ) {
+			if ( event.scancode() == ngrs::NK_Delete ) {
 				deleteRequest.emit( this );
 			}
 		}

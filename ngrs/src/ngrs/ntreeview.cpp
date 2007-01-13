@@ -22,23 +22,25 @@
 #include "nalignlayout.h"
 #include "nframeborder.h"
 
-NTreeView::NTreeView()
- : NPanel()
-{
-  setLayout(NAlignLayout());
-  setBorder(NFrameBorder());
-  add( rootNode_ = new NTreeNode(), nAlTop );
+namespace ngrs {
+
+  NTreeView::NTreeView()
+    : NPanel()
+  {
+    setLayout(NAlignLayout());
+    setBorder(NFrameBorder());
+    add( rootNode_ = new NTreeNode(), nAlTop );
+
+  }
+
+
+  NTreeView::~NTreeView()
+  {
+  }
+
+  NTreeNode * NTreeView::rootNode( )
+  {
+    return rootNode_;
+  }
 
 }
-
-
-NTreeView::~NTreeView()
-{
-}
-
-NTreeNode * NTreeView::rootNode( )
-{
-   return rootNode_;
-}
-
-

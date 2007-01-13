@@ -23,214 +23,218 @@
 
 using namespace std;
 
-NRegExp::NRegExp()
-{
-}
+namespace ngrs {
+
+  NRegExp::NRegExp()
+  {
+  }
 
 
-NRegExp::~NRegExp()
-{ 
-  for (vector<NState*>::iterator it = deleteList.begin(); it < deleteList.end(); it++)
-     delete *it;
+  NRegExp::~NRegExp()
+  { 
+    for (vector<NState*>::iterator it = deleteList.begin(); it < deleteList.end(); it++)
+      delete *it;
 
-}
+  }
 
-void NRegExp::setRegExp( const std::string & regExp )
-{
-  // replace predefined
+  void NRegExp::setRegExp( const std::string & regExp )
+  {
+    // replace predefined
 
-  string reg="";
+    string reg="";
 
-  bool set = false;
+    bool set = false;
 
-  for (string::const_iterator it = regExp.begin(); it < regExp.end(); it++ ) {
-    char c = *it; 
-    if (c!='!') {
+    for (string::const_iterator it = regExp.begin(); it < regExp.end(); it++ ) {
+      char c = *it; 
+      if (c!='!') {
         if (set) {
           if (c=='S') reg.push_back('\1'); else
-          if (c=='A') reg.push_back('\2'); else
-          if (c=='N') reg.push_back('\3');
+            if (c=='A') reg.push_back('\2'); else
+              if (c=='N') reg.push_back('\3');
           set=false;
         } else
-        reg.push_back(c);
+          reg.push_back(c);
+      }
+      else set=true;
     }
-    else set=true;
-  }
 
-  // build op stack
+    // build op stack
 
-  string cExpr=""; 
-  int z=0; 
-  bool flag = false; 
-  bool sigma = false;
+    string cExpr=""; 
+    int z=0; 
+    bool flag = false; 
+    bool sigma = false;
 
-  for (string::iterator it = reg.begin(); it < reg.end(); it++ ) {
-    char c = *it;
-    if (!sigma && (c==nRegCloseParanthesis || c==nRegStar)) flag = true;
-    if (inSigma(c) || sigma) {
-                      if (sigma) cExpr.push_back(c); else 
-                       {
-                        if (flag) {
-                          z=0; flag=false;
-                          cExpr.push_back(nRegConcat);
-                        }
-                        z++;
-                        if (z==2) {
-                         cExpr.push_back(nRegConcat);
-                         z=1;
-                        }
-                        cExpr.push_back(c);
-                        }
-    } else  {
-       z=0;
-       if (flag && c==nRegOpenParanthesis) {
-        cExpr.push_back(nRegConcat);
-       }
-       if (flag && c==nRegStar) {
-          z=1;
-       }
-       flag=false;
-       cExpr.push_back(c);
-    }
-    if (c=='\'') sigma = !sigma;
-  }
-
-  // insert concat symbols
-
-  string postfix = "";
-  sigma = false;
-  for (string::iterator it = cExpr.begin(); it < cExpr.end(); it++ ) {
-    char c = *it;
-    if (inSigma(c) || sigma) postfix.push_back(c); else {
-      if (opStack.empty()) { opStack.push(c);
-            if (c=='(') postfix.push_back('{');
-        } else {
-        if (c=='(') {
-	  opStack.push('(');
-	  postfix.push_back('{');
-	} else
-        if (c==')') {
-          while (opStack.top()!='(') {
-            postfix.push_back(opStack.top());
-            opStack.pop();
+    for (string::iterator it = reg.begin(); it < reg.end(); it++ ) {
+      char c = *it;
+      if (!sigma && (c==nRegCloseParanthesis || c==nRegStar)) flag = true;
+      if (inSigma(c) || sigma) {
+        if (sigma) cExpr.push_back(c); else 
+        {
+          if (flag) {
+            z=0; flag=false;
+            cExpr.push_back(nRegConcat);
           }
-          opStack.pop();
-	  postfix.push_back(nRegPlaceHolderEnd);
-        } else
-        if (priority(c)>=priority(opStack.top())) {
-          postfix.push_back(opStack.top());
-          opStack.pop();
-          opStack.push(c);
+          z++;
+          if (z==2) {
+            cExpr.push_back(nRegConcat);
+            z=1;
+          }
+          cExpr.push_back(c);
+        }
+      } else  {
+        z=0;
+        if (flag && c==nRegOpenParanthesis) {
+          cExpr.push_back(nRegConcat);
+        }
+        if (flag && c==nRegStar) {
+          z=1;
+        }
+        flag=false;
+        cExpr.push_back(c);
+      }
+      if (c=='\'') sigma = !sigma;
+    }
+
+    // insert concat symbols
+
+    string postfix = "";
+    sigma = false;
+    for (string::iterator it = cExpr.begin(); it < cExpr.end(); it++ ) {
+      char c = *it;
+      if (inSigma(c) || sigma) postfix.push_back(c); else {
+        if (opStack.empty()) { opStack.push(c);
+        if (c=='(') postfix.push_back('{');
         } else {
-          opStack.push(c);
+          if (c=='(') {
+            opStack.push('(');
+            postfix.push_back('{');
+          } else
+            if (c==')') {
+              while (opStack.top()!='(') {
+                postfix.push_back(opStack.top());
+                opStack.pop();
+              }
+              opStack.pop();
+              postfix.push_back(nRegPlaceHolderEnd);
+            } else
+              if (priority(c)>=priority(opStack.top())) {
+                postfix.push_back(opStack.top());
+                opStack.pop();
+                opStack.push(c);
+              } else {
+                opStack.push(c);
+              }
+        }
+      }
+      if (c=='\'') sigma = !sigma;
+    }
+    while (!opStack.empty()) {
+      char c = opStack.top();
+      postfix.push_back(c);
+      opStack.pop();
+    }
+
+    reg = postfix;
+
+
+    // build nfa
+
+    sigma = false;
+    bool writeInPlaceHolder =false;
+    for (string::iterator it = reg.begin(); it < reg.end(); it++ ) {
+      char c = *it;
+      if (c==nRegPlaceHolderBegin) writeInPlaceHolder=true; else  if (c==nRegPlaceHolderEnd) writeInPlaceHolder=false;
+      if (c=='\'') sigma = !sigma; else {
+        if (inSigma(c) || sigma) {
+          NNfa* na = new NNfa();
+          addChar(c,na);
+          nfaStack.push(na);
+        } else {
+          if (c==nRegConcat) {
+            NNfa* nfa1 = nfaStack.top(); nfaStack.pop();
+            NNfa* nfa2 = nfaStack.top(); nfaStack.pop();
+            nfa2->concat(nfa1);
+            delete nfa1;
+            nfaStack.push(nfa2);
+          } else
+            if (c==nRegUnion) {
+              NNfa* nfa1 = nfaStack.top(); nfaStack.pop();
+              NNfa* nfa2 = nfaStack.top(); nfaStack.pop();
+              unite(nfa2,nfa1);
+              delete nfa1;
+              nfaStack.push(nfa2);
+            } else
+              if (c==nRegStar) {
+                NNfa* nfa1 = nfaStack.top(); nfaStack.pop();
+                nfa1->star();
+                nfaStack.push(nfa1);
+              }
         }
       }
     }
-    if (c=='\'') sigma = !sigma;
-  }
-  while (!opStack.empty()) {
-     char c = opStack.top();
-     postfix.push_back(c);
-     opStack.pop();
   }
 
-  reg = postfix;
+  bool NRegExp::inSigma( char c )
+  {
+    if (c == nRegPlaceHolderBegin || c==nRegPlaceHolderEnd || c==nRegConcat || c==nRegUnion || c==nRegStar || c==nRegOpenParanthesis || c==nRegCloseParanthesis) return false; else   
+      return true;
+  }
 
+  int NRegExp::priority( char op )
+  {
+    if (op==nRegConcat) return 1;
+    if (op=='+')  return 2;
+    if (op=='(') return 10;
+    if (op==')') return 10;
+    return 0;
+  }
 
-  // build nfa
+  void NRegExp::addChar( char c, NNfa * nfa )
+  {
+    NState* q0 = new NState();
+    NState* q1 = new NState();
 
-  sigma = false;
-  bool writeInPlaceHolder =false;
-  for (string::iterator it = reg.begin(); it < reg.end(); it++ ) {
-    char c = *it;
-    if (c==nRegPlaceHolderBegin) writeInPlaceHolder=true; else  if (c==nRegPlaceHolderEnd) writeInPlaceHolder=false;
-    if (c=='\'') sigma = !sigma; else {
-    if (inSigma(c) || sigma) {
-       NNfa* na = new NNfa();
-       addChar(c,na);
-       nfaStack.push(na);
-    } else {
-      if (c==nRegConcat) {
-        NNfa* nfa1 = nfaStack.top(); nfaStack.pop();
-        NNfa* nfa2 = nfaStack.top(); nfaStack.pop();
-        nfa2->concat(nfa1);
-        delete nfa1;
-        nfaStack.push(nfa2);
-      } else
-      if (c==nRegUnion) {
-        NNfa* nfa1 = nfaStack.top(); nfaStack.pop();
-        NNfa* nfa2 = nfaStack.top(); nfaStack.pop();
-        unite(nfa2,nfa1);
-        delete nfa1;
-        nfaStack.push(nfa2);
-      } else
-      if (c==nRegStar) {
-        NNfa* nfa1 = nfaStack.top(); nfaStack.pop();
-        nfa1->star();
-        nfaStack.push(nfa1);
-      }
+    nfa->setS0(q0);
+    q0->addFollowState(c,q1);
+    nfa->addA(q1);
+
+    deleteList.push_back(q0);
+    deleteList.push_back(q1);
+  }
+
+  void NRegExp::unite( NNfa * nfa1, NNfa * nfa2 )
+  {
+    NState* e1 = new NState();
+    NState* e2 = new NState();
+
+    e1->addEpsilon(nfa1->startState());
+    e1->addEpsilon(nfa2->startState());
+
+    for (vector<NState*>::iterator it = nfa1->acceptStates().begin(); it < nfa1->acceptStates().end(); it++) {
+      NState* state = *it;
+      state->addEpsilon(e2);
     }
-  }
-  }
-}
 
-bool NRegExp::inSigma( char c )
-{
-  if (c == nRegPlaceHolderBegin || c==nRegPlaceHolderEnd || c==nRegConcat || c==nRegUnion || c==nRegStar || c==nRegOpenParanthesis || c==nRegCloseParanthesis) return false; else   
-  return true;
-}
+    nfa1->acceptStates().clear();
+    nfa1->addA(e2);
 
-int NRegExp::priority( char op )
-{
-  if (op==nRegConcat) return 1;
-  if (op=='+')  return 2;
-  if (op=='(') return 10;
-  if (op==')') return 10;
-  return 0;
-}
+    for (vector<NState*>::iterator it = nfa2->acceptStates().begin(); it < nfa2->acceptStates().end(); it++) {
+      NState* state = *it;
+      state->addEpsilon(e2);
+    }
 
-void NRegExp::addChar( char c, NNfa * nfa )
-{
-  NState* q0 = new NState();
-  NState* q1 = new NState();
+    nfa1->setS0(e1);
 
-  nfa->setS0(q0);
-  q0->addFollowState(c,q1);
-  nfa->addA(q1);
-
-  deleteList.push_back(q0);
-  deleteList.push_back(q1);
-}
-
-void NRegExp::unite( NNfa * nfa1, NNfa * nfa2 )
-{
-  NState* e1 = new NState();
-  NState* e2 = new NState();
-
-  e1->addEpsilon(nfa1->startState());
-  e1->addEpsilon(nfa2->startState());
-
-  for (vector<NState*>::iterator it = nfa1->acceptStates().begin(); it < nfa1->acceptStates().end(); it++) {
-   NState* state = *it;
-   state->addEpsilon(e2);
+    deleteList.push_back(e1);
+    deleteList.push_back(e2);
   }
 
-  nfa1->acceptStates().clear();
-  nfa1->addA(e2);
-
-  for (vector<NState*>::iterator it = nfa2->acceptStates().begin(); it < nfa2->acceptStates().end(); it++) {
-   NState* state = *it;
-   state->addEpsilon(e2);
+  bool NRegExp::accept( const std::string & input )
+  {
+    NNfa* nfa = nfaStack.top();
+    return nfa->accept(input);
   }
 
-  nfa1->setS0(e1);
-
-  deleteList.push_back(e1);
-  deleteList.push_back(e2);
-}
-
-bool NRegExp::accept( const std::string & input )
-{
-  NNfa* nfa = nfaStack.top();
-  return nfa->accept(input);
 }

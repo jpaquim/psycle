@@ -20,28 +20,32 @@
 #include "nmoveevent.h"
 #include "nobject.h"
 
-NMoveEvent::NMoveEvent( NObject* sender, int x, int y, int picker ) : sender_(sender), x_(x), y_(y), picker_(picker)
-{
-}
+namespace ngrs {
 
-NMoveEvent::~NMoveEvent()
-{
-}
+  NMoveEvent::NMoveEvent( NObject* sender, int x, int y, int picker ) : sender_(sender), x_(x), y_(y), picker_(picker)
+  {
+  }
 
-int NMoveEvent::x( ) const
-{
-  return x_;
-}
+  NMoveEvent::~NMoveEvent()
+  {
+  }
 
-int NMoveEvent::y( ) const
-{
-  return y_;
-}
+  int NMoveEvent::x( ) const
+  {
+    return x_;
+  }
 
-int NMoveEvent::picker() const {
-  return picker_;
-}
+  int NMoveEvent::y( ) const
+  {
+    return y_;
+  }
 
-NObject* NMoveEvent::sender() const {
-  return sender_;
+  int NMoveEvent::picker() const {
+    return picker_;
+  }
+
+  NObject* NMoveEvent::sender() const {
+    return sender_;
+  }
+
 }

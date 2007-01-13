@@ -234,7 +234,7 @@ namespace psycle {
 			}
 			ladspaPath_ = pcLADSPAPath;
 
-			NXmlParser parser;
+			ngrs::NXmlParser parser;
 			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
 			parser.parseString ( xml_mem_ );
 
@@ -310,16 +310,16 @@ namespace psycle {
 #else
 			// we don't have any information about the installation paths,
 			// so, we can only assume everything is at a fixed place, like under the user home dir
-			hlpPath_ = NFile::replaceTilde("~/xpsycle/doc/");
-			iconPath_ = NFile::replaceTilde("~/xpsycle/pixmaps/");
+			hlpPath_ = ngrs::NFile::replaceTilde("~/xpsycle/doc/");
+			iconPath_ = ngrs::NFile::replaceTilde("~/xpsycle/pixmaps/");
 #ifdef __unix__
-			pluginPath_ = NFile::replaceTilde("~/xpsycle/plugins/");
+			pluginPath_ = ngrs::NFile::replaceTilde("~/xpsycle/plugins/");
 #else
-			pluginPath_ = NFile::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
+			pluginPath_ = ngrs::NFile::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
 #endif
 
 
-			prsPath_ =  NFile::replaceTilde("~" + NFile::slash() + "xpsycle" + NFile::slash() +"prs" + NFile::slash() );
+			prsPath_ =  ngrs::NFile::replaceTilde("~" + ngrs::NFile::slash() + "xpsycle" + ngrs::NFile::slash() +"prs" + ngrs::NFile::slash() );
 #endif
 
 			#if !defined NDEBUG
@@ -370,12 +370,12 @@ namespace psycle {
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 				}
 			} else {
-				path=NFile::replaceTilde("~" + NFile::slash() + ".xpsycle.xml");
-				if (path.length()!=0) {
+              path = ngrs::NFile::replaceTilde("~" + ngrs::NFile::slash() + ".xpsycle.xml");
+			  if (path.length()!=0) {
 					try {
-						loadConfig( NFile::replaceTilde( "~" + NFile::slash() + ".xpsycle.xml") );
+                      loadConfig( ngrs::NFile::replaceTilde( "~" + ngrs::NFile::slash() + ".xpsycle.xml") );
 					}
-					catch(std::exception const & e) {
+					catch( std::exception const & e ) {
 						std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 					}
 				} else {
@@ -395,17 +395,16 @@ namespace psycle {
 		}
 
 		void Configuration::loadConfig( const std::string & path )
-			throw( std::exception )
 		{
 #if !defined NDEBUG
 			std::cout << "xpsycle: configuration: attempting to load file: " << path << std::endl;
 #endif
 
-			NXmlParser parser;   
+            ngrs::NXmlParser parser;   
 			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
 
 			// check whether the file is readable
-			if(!NFile::fileIsReadable(path))
+            if( !ngrs::NFile::fileIsReadable( path ) )
 			{
 				std::ostringstream s;
 				s << "cannot read file: " << path;
@@ -417,7 +416,7 @@ namespace psycle {
 			{
 				parser.parseFile( path );
 			}
-			catch(std::exception const & e)
+			catch( std::exception const & e )
 			{
 				std::ostringstream s;
 				s <<
@@ -447,17 +446,21 @@ namespace psycle {
 			doEnableSound = true;
 		}
 
-		void Configuration::onConfigTagParse( const NXmlParser & parser, const std::string & tagName )
+		void Configuration::onConfigTagParse( const ngrs::NXmlParser & parser, const std::string & tagName )
 		{
 			if ( tagName == "path" ) {
 				std::string id  = parser.getAttribValue("id"); 
 				std::string src = parser.getAttribValue("src");
 
-				if ( id == "icondir" )   iconPath_   = src;  else  
-					if ( id == "plugindir" ) pluginPath_ = src;  else
-						if ( id == "prsdir" )    prsPath_    = src;  else
-							if ( id == "hlpdir" )    hlpPath_    = src;  else
-								if ( id == "ladspadir" ) ladspaPath_ = src;
+				if ( id == "icondir" )   iconPath_   = src;
+                  else  
+				if ( id == "plugindir" ) pluginPath_ = src;
+                  else
+				if ( id == "prsdir" )    prsPath_    = src;
+                  else
+				if ( id == "hlpdir" )    hlpPath_    = src; 
+                  else
+				if ( id == "ladspadir" ) ladspaPath_ = src;
 			} else
 				if (tagName == "driver" && doEnableSound) {		
 					setDriverByName( parser.getAttribValue("name"));
@@ -474,10 +477,10 @@ namespace psycle {
 						if (tagName == "audio") {
 							std::string enableStr = parser.getAttribValue("enable");
 							int enable = 0;
-							if (enableStr != "") enable = str<int>(enableStr);
+                            if ( enableStr != "" ) enable = ngrs::str<int>(enableStr);
 							enableSound_ = enable;
 							if (enable == 0) {
-								setDriverByName("silent");
+								setDriverByName( "silent" );
 								doEnableSound = false;
 							} else doEnableSound = true;
 						} else
@@ -488,51 +491,51 @@ namespace psycle {
 
 								// define special chars pressed in addition to this key function
 								std::string modInput    = parser.getAttribValue("mod");
-								int shift = nsNone;
+                                int shift = ngrs::nsNone;
 								if (modInput == "ctrl")  {
-									shift = nsCtrl;   
+                                  shift = ngrs::nsCtrl;   
 								} else
-									if (modInput == "shift") {
-										shift = nsShift;      
-									}
+								if (modInput == "shift") {
+                                  shift = ngrs::nsShift;      
+								}
 
-									// the keycode      
-									int keyCode = 0;
-									std::string keyCodeStr = parser.getAttribValue("keycode");
-									if (keyCodeStr!="") keyCode = str<int>(keyCodeStr);
-									std::string keyCharStr = parser.getAttribValue("keychar");
+								// the keycode      
+								int keyCode = 0;
+								std::string keyCodeStr = parser.getAttribValue("keycode");
+								if (keyCodeStr!="") keyCode = ngrs::str<int>(keyCodeStr);
+								std::string keyCharStr = parser.getAttribValue("keychar");
 
-									if (keyCharStr!="") {
-										keyCode = keyCharStr[0];
-										if (keyCharStr == "NK_Left") { keyCode = NK_Left; }
-										if (keyCharStr == "NK_Right") { keyCode = NK_Right; }
-										if (keyCharStr == "NK_Up") { keyCode = NK_Up; }
-										if (keyCharStr == "NK_Down") { keyCode = NK_Down; }
-										if (keyCharStr == "NK_Page_Up") { keyCode = NK_Page_Up; }
-										if (keyCharStr == "NK_Page_Down") { keyCode = NK_Page_Down; }
-										if (keyCharStr == "NK_Home") { keyCode = NK_Home; }
-										if (keyCharStr == "NK_End") { keyCode = NK_End; }
-										if (keyCharStr == "NK_Tab") { keyCode = NK_Tab; }
+								if (keyCharStr!="") {
+									keyCode = keyCharStr[0];
+									if ( keyCharStr == "NK_Left" )    keyCode = ngrs::NK_Left; else
+									if ( keyCharStr == "NK_Right")    keyCode = ngrs::NK_Right; else
+									if ( keyCharStr == "NK_Up" )       keyCode = ngrs::NK_Up; else
+									if ( keyCharStr == "NK_Down" )     keyCode = ngrs::NK_Down; else
+									if ( keyCharStr == "NK_Page_Up" )  keyCode = ngrs::NK_Page_Up; else
+									if ( keyCharStr == "NK_Page_Down" ) keyCode = ngrs::NK_Page_Down; else
+									if ( keyCharStr == "NK_Home" )      keyCode = ngrs::NK_Home; else
+									if ( keyCharStr == "NK_End" )       keyCode = ngrs::NK_End; else
+									if ( keyCharStr == "NK_Tab" )       keyCode = ngrs::NK_Tab; else
 #ifdef __unix__
-										if (keyCharStr == "XK_ISO_Left_Tab") { keyCode = XK_ISO_Left_Tab; }
+									if ( keyCharStr == "XK_ISO_Left_Tab" ) keyCode = XK_ISO_Left_Tab; else
 #endif
-										if (keyCharStr == "NK_Insert") { keyCode = NK_Insert; }
-										if (keyCharStr == "NK_BackSpace") { keyCode = NK_BackSpace; }
-										if (keyCharStr == "NK_Delete") { keyCode = NK_Delete; }
-										if (keyCharStr == "F1") { keyCode = NK_F1; }
-										if (keyCharStr == "F2") { keyCode = NK_F2; }
-										if (keyCharStr == "F3") { keyCode = NK_F3; }
-										if (keyCharStr == "F4") { keyCode = NK_F4; }
-										if (keyCharStr == "F5") { keyCode = NK_F5; }
-										if (keyCharStr == "F6") { keyCode = NK_F6; }
-										if (keyCharStr == "F7") { keyCode = NK_F7; }
-										if (keyCharStr == "F8") { keyCode = NK_F8; }
-										if (keyCharStr == "F9") { keyCode = NK_F9; }
-									} 
-									if (id == "add_new_machine") {
-										inputHandler_.changeKeyCode(cdefAddMachine,Key(shift,keyCode));
-									} else
-										if (id == "block_copy") {
+									if ( keyCharStr == "NK_Insert" ) keyCode = ngrs::NK_Insert; else
+									if ( keyCharStr == "NK_BackSpace" ) keyCode = ngrs::NK_BackSpace; else
+									if ( keyCharStr == "NK_Delete" ) keyCode = ngrs::NK_Delete; else
+									if ( keyCharStr == "F1") keyCode = ngrs::NK_F1; else
+									if ( keyCharStr == "F2") keyCode = ngrs::NK_F2; else
+									if ( keyCharStr == "F3") keyCode = ngrs::NK_F3; else
+									if ( keyCharStr == "F4") keyCode = ngrs::NK_F4; else
+									if ( keyCharStr == "F5") keyCode = ngrs::NK_F5; else
+									if ( keyCharStr == "F6") keyCode = ngrs::NK_F6; else
+									if ( keyCharStr == "F7") keyCode = ngrs::NK_F7; else
+									if (keyCharStr == "F8") keyCode = ngrs::NK_F8; else
+									if (keyCharStr == "F9") keyCode = ngrs::NK_F9;
+                                }
+  if (id == "add_new_machine") {
+	inputHandler_.changeKeyCode(cdefAddMachine,Key(shift,keyCode));
+  } else
+if (id == "block_copy") {
 											inputHandler_.changeKeyCode(cdefBlockCopy,Key(shift,keyCode));
 										} else
 											if (id == "block_cut") {

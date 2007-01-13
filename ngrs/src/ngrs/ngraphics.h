@@ -29,24 +29,27 @@
 #include "nregion.h"
 #include "npixmap.h"
 #include "npen.h"
-
+#ifdef __unix__
+#else
+  #include "nsize.h"
+#endif
 
 /**
 @author Stefan
 */
 
+namespace ngrs {
+
 #ifdef __unix__
 #else
-  #include "nsize.h"
-
   typedef HDC GC;
 #endif
 
-const int nBltNormal = 0;
-const int nBltStretch = 1;
+  const int nBltNormal = 0;
+  const int nBltStretch = 1;
 
-class NGraphics{
-public:
+  class NGraphics{
+  public:
     NGraphics(WinHandle winID);
 
     ~NGraphics();
@@ -88,10 +91,10 @@ public:
 
     void setFont( const NFont & font );
     void drawText( int x, int y, const std::string & text );
-	void drawText( int x, int y, const std::string & text, const NColor & color );
+    void drawText( int x, int y, const std::string & text, const NColor & color );
     void drawText( int x, int y, const NFntString & text );
 
-	int textWidth(const std::string & text) const;
+    int textWidth(const std::string & text) const;
     int textWidth( const NFntString & text ) const;
 
     int textHeight();
@@ -110,9 +113,9 @@ public:
 
     void setDoubleBuffer(bool on);
 
-    #ifdef __unix__
+#ifdef __unix__
     Pixmap dbPixmap();
-    #endif
+#endif
 
     GC dbGC();
     GC gc();
@@ -124,51 +127,53 @@ public:
 
     void setVisible(bool on);
 
-private:
+  private:
 
-   NColor old;
-   NRegion repaintArea_;
-   NColor oldColor;
-   NFont fnt;
-   long dx_;
-   long dy_;
-   bool dblBuffer_;
+    NColor old;
+    NRegion repaintArea_;
+    NColor oldColor;
+    NFont fnt;
+    long dx_;
+    long dy_;
+    bool dblBuffer_;
 
-   int dblWidth_;
-   int dblHeight_;
+    int dblWidth_;
+    int dblHeight_;
 
-   WinHandle win;
-   GC gc_;      // GC from Window
-   GC gcp;     // GC from Pixmap for double buffering
-   
-   #ifdef __unix__
-   Pixmap doubleBufferPixmap_;
-   #else
-   HBITMAP doubleBufferBitmap_;
-   #endif
+    WinHandle win;
+    GC gc_;      // GC from Window
+    GC gcp;     // GC from Pixmap for double buffering
 
-   void createDblBufferHandles();
-   void destroyDblBufferHandles();
-   void copyDblBuffer(const NRect &  repaintArea);
-   void drawXftString(int x, int y, const char* s);
+#ifdef __unix__
+    Pixmap doubleBufferPixmap_;
+#else
+    HBITMAP doubleBufferBitmap_;
+#endif
 
-   NFontStructure fntStruct;
-   #ifdef __unix__
-   XftColor fFtColor;
-   XftDraw* drawDbl;
-   XftDraw* drawWin;
-   #else
-   HBRUSH brush;
-   HBRUSH hollow;
-   HPEN hPen;
-   void drawArcX( int x, int y, int width, int height, int start, int extent, bool fill );
-   #endif
+    void createDblBufferHandles();
+    void destroyDblBufferHandles();
+    void copyDblBuffer(const NRect &  repaintArea);
+    void drawXftString(int x, int y, const char* s);
 
-   NRegion region_;
+    NFontStructure fntStruct;
+#ifdef __unix__
+    XftColor fFtColor;
+    XftDraw* drawDbl;
+    XftDraw* drawWin;
+#else
+    HBRUSH brush;
+    HBRUSH hollow;
+    HPEN hPen;
+    void drawArcX( int x, int y, int width, int height, int start, int extent, bool fill );
+#endif
 
-   NPen pen_;
+    NRegion region_;
 
-   bool visible_;
-};
+    NPen pen_;
+
+    bool visible_;
+  };
+
+ }
 
 #endif

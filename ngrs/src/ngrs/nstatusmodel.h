@@ -24,37 +24,42 @@
 #include <string>
 #include <map>
 
-// abstract interface for a statusbar textinfo model
 
-class NCustomStatusModel {
-public:
-	
-	NCustomStatusModel() {}
+namespace ngrs {
 
-	virtual ~NCustomStatusModel();
+  // abstract interface for a statusbar textinfo model
 
-	virtual void setText( const std::string & text, unsigned int index = 0 ) = 0;
-	virtual std::string text( unsigned int index = 0 ) const = 0;
+  class NCustomStatusModel {
+  public:
 
-	sigslot::signal2<const NCustomStatusModel&, unsigned int > changed;
+    NCustomStatusModel();
 
-};
+    virtual ~NCustomStatusModel();
+
+    virtual void setText( const std::string & text, unsigned int index = 0 ) = 0;
+    virtual std::string text( unsigned int index = 0 ) const = 0;
+
+    sigslot::signal2<const NCustomStatusModel&, unsigned int > changed;
+
+  };
 
 
-class NStatusModel :  public NCustomStatusModel {
-public:
+  class NStatusModel :  public NCustomStatusModel {
+  public:
 
     NStatusModel();
 
     ~NStatusModel();
 
-	virtual void setText( const std::string & text, unsigned int index = 0 );
+    virtual void setText( const std::string & text, unsigned int index = 0 );
     virtual std::string text( unsigned int index = 0) const;
 
-private:
+  private:
 
-	std::map<unsigned int,std::string> textMap;
+    std::map<unsigned int,std::string> textMap;
 
-};
+  };
+
+}
 
 #endif

@@ -25,7 +25,7 @@
 namespace psycle { namespace host {
 
 SongpDlg::SongpDlg( ) 
-  : NWindow(), pSong_(0)
+  : ngrs::NWindow(), pSong_(0)
 {
   init();
 }
@@ -44,35 +44,35 @@ void SongpDlg::init( )
 {
   setTitle("Song properties");
 
-  pane()->setLayout(NAlignLayout(5,5));
+  pane()->setLayout( ngrs::NAlignLayout( 5, 5) );
 
-  NLabel* songTitleLb_ = new NLabel("Song Title");
-  pane()->add(songTitleLb_,nAlTop);
-  songTitle_    = new NEdit();
-    pane()->add(songTitle_, nAlTop);
-  NLabel* songCreditsLb_ = new NLabel("Song Credits");
-  pane()->add(songCreditsLb_,nAlTop);
-    songCredits_  = new NEdit();
-  pane()->add(songCredits_, nAlTop);
-  NLabel* songCommentsLb_ = new NLabel("Song comments");
-  pane()->add(songCommentsLb_,nAlTop);
+  ngrs::NLabel* songTitleLb_ = new ngrs::NLabel("Song Title");
+  pane()->add(songTitleLb_,ngrs::nAlTop);
+  songTitle_    = new ngrs::NEdit();
+    pane()->add(songTitle_, ngrs::nAlTop);
+  ngrs::NLabel* songCreditsLb_ = new ngrs::NLabel("Song Credits");
+  pane()->add(songCreditsLb_,ngrs::nAlTop);
+    songCredits_  = new ngrs::NEdit();
+  pane()->add(songCredits_, ngrs::nAlTop);
+  ngrs::NLabel* songCommentsLb_ = new ngrs::NLabel("Song comments");
+  pane()->add(songCommentsLb_,ngrs::nAlTop);
 
-  NPanel* buttonPanel = new NPanel();
-    buttonPanel->setLayout(NAlignLayout(5,5));
-    cnclBtn_ = new NButton("Cancel");
+  ngrs::NPanel* buttonPanel = new ngrs::NPanel();
+    buttonPanel->setLayout( ngrs::NAlignLayout( 5, 5) );
+    cnclBtn_ = new ngrs::NButton("Cancel");
     cnclBtn_->setFlat(false);
     cnclBtn_->clicked.connect(this,&SongpDlg::onCancelBtn);
-    okBtn_ = new NButton("OK");
+    okBtn_ = new ngrs::NButton("OK");
     okBtn_->setFlat(false);
     okBtn_->clicked.connect(this,&SongpDlg::onOkBtn);
-    buttonPanel->add(okBtn_, nAlRight);
-    buttonPanel->add(cnclBtn_, nAlRight);
-  pane()->add(buttonPanel,nAlBottom);
+    buttonPanel->add(okBtn_, ngrs::nAlRight);
+    buttonPanel->add(cnclBtn_, ngrs::nAlRight);
+  pane()->add(buttonPanel,ngrs::nAlBottom);
 
-  songComments_ = new NMemo();
+  songComments_ = new ngrs::NMemo();
     songComments_->setPreferredSize(200,200);
     songComments_->setWordWrap(true);
-  pane()->add(songComments_, nAlClient);
+  pane()->add(songComments_, ngrs::nAlClient);
 
   pack();
 
@@ -81,7 +81,7 @@ void SongpDlg::init( )
 int SongpDlg::onClose( )
 {
   setVisible(false);
-  return nHideWindow;
+  return ngrs::nHideWindow;
 }
 
 void SongpDlg::setVisible( bool on )
@@ -92,10 +92,10 @@ void SongpDlg::setVisible( bool on )
       songComments_->setText(pSong_->comment() );
       setPositionToScreenCenter();
   }
-  NWindow::setVisible(on);
+  ngrs::NWindow::setVisible(on);
 }
 
-void SongpDlg::onOkBtn( NButtonEvent * ev )
+void SongpDlg::onOkBtn( ngrs::NButtonEvent * ev )
 {
   if (pSong_) {
    pSong_->setName( songTitle_->text() );
@@ -105,12 +105,10 @@ void SongpDlg::onOkBtn( NButtonEvent * ev )
   }
 }
 
-void SongpDlg::onCancelBtn( NButtonEvent * ev )
+void SongpDlg::onCancelBtn( ngrs::NButtonEvent * ev )
 {
    setVisible(false);
 }
 
-}}
-
- // end of psycle::host namespace
-
+}
+}

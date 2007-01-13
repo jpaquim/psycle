@@ -25,14 +25,19 @@ Visitor interface für sicheres casten
 
 @author Stefan
 */
-class NVisitor{
-public:
-   NVisitor();
 
-   virtual ~NVisitor();
+namespace ngrs {
 
-   virtual bool visit_window(class NWindow*)=0;
-   virtual bool visit_visualcomponent(class NVisualComponent*)=0;
-};
+  class NVisitor{
+  public:
+    NVisitor();
+
+    virtual ~NVisitor();
+
+    virtual bool visit_window(class NWindow*)=0;
+    virtual bool visit_visualcomponent(class NVisualComponent*)=0;
+  };
+
+}
 
 #endif

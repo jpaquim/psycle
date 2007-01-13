@@ -30,48 +30,48 @@
 */
 
 namespace psycle {
-namespace host {
+  namespace host {
 
+    const int MAX_SCOPE_BANDS = 128;
+    const int SCOPE_BUF_SIZE  = 4096;
+    const int SCOPE_SPEC_SAMPLES = 256;
 
-const int MAX_SCOPE_BANDS = 128;
-const int SCOPE_BUF_SIZE  = 4096;
-const int SCOPE_SPEC_SAMPLES = 256;
+    class Analyzer : public ngrs::NPanel
+    {
+    public:
+      Analyzer();
 
-class Analyzer : public NPanel
-{
-public:
-    Analyzer();
+      ~Analyzer();
 
-    ~Analyzer();
+      void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
 
-    void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
+      void clearMachineCallBack();
 
-		void clearMachineCallBack();
+      virtual void paint( ngrs::NGraphics* g );
 
-    virtual void paint(NGraphics* g);
+    private:
 
-private:
+      ngrs::NTimer timer;
 
-    NTimer timer;
+      int mode_;
+      float invol;
+      float mult;
 
-    int mode_;
-    float invol;
-    float mult;
+      Machine* _pSrcMachine;
+      Machine* _pDstMachine;
+      int _dstWireIndex;
+      int isrcMac;
+      float peakL,peakR;
+      float peak2L,peak2R;
+      int peakLifeL,peakLifeR;
 
-    Machine* _pSrcMachine;
-    Machine* _pDstMachine;
-    int _dstWireIndex;
-    int isrcMac;
-    float peakL,peakR;
-    float peak2L,peak2R;
-    int peakLifeL,peakLifeR;
+      float pSamplesL[SCOPE_BUF_SIZE];
+      float pSamplesR[SCOPE_BUF_SIZE];
 
-    float pSamplesL[SCOPE_BUF_SIZE];
-    float pSamplesR[SCOPE_BUF_SIZE];
+      void onTimer();
 
-    void onTimer();
+    };
 
-};
-
-}}
+  }
+}
 #endif

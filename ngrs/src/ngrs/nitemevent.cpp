@@ -20,20 +20,22 @@
 #include "nitemevent.h"
 #include "ncustomitem.h"
 
-NItemEvent::NItemEvent(NCustomItem* sender, const std::string & text)
- : NEvent(sender,text)
-{
-  item_ = sender;
+namespace ngrs {
+
+  NItemEvent::NItemEvent(NCustomItem* sender, const std::string & text)
+    : NEvent(sender,text)
+  {
+    item_ = sender;
+  }
+
+
+  NItemEvent::~NItemEvent()
+  {
+  }
+
+  NCustomItem * NItemEvent::item( )
+  {
+    return item_;
+  }
+
 }
-
-
-NItemEvent::~NItemEvent()
-{
-}
-
-NCustomItem * NItemEvent::item( )
-{
-  return item_;
-}
-
-

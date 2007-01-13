@@ -19,14 +19,16 @@
  ***************************************************************************/
 #include "ntextbase.h"
 
-NTextBase::NTextBase()
- : NPanel()
-{
+namespace ngrs {
+
+  NTextBase::NTextBase()
+    : NPanel()
+  {
+  }
+
+
+  NTextBase::~NTextBase()
+  {
+  }
+
 }
-
-
-NTextBase::~NTextBase()
-{
-}
-
-

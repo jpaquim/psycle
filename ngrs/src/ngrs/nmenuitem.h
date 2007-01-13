@@ -22,19 +22,20 @@
 
 #include "ncustommenuitem.h"
 
-class NLabel;
-class NMenu;
-class NImage;
-
 
 /**
-@author Stefan
+ @author Stefan
 */
 
+namespace ngrs {
 
-class NMenuItem : public NCustomMenuItem
-{
-public:
+  class NLabel;
+  class NMenu;
+  class NImage;
+
+  class NMenuItem : public NCustomMenuItem
+  {
+  public:
     NMenuItem();
     NMenuItem(const std::string & text);
     NMenuItem(const std::string & text, const NBitmap & icon);
@@ -48,16 +49,18 @@ public:
 
     NLabel* captionLbl_;
 
-private:
+  private:
 
     NMenu* menu_;
 
-    
+
     NImage* iconImg_;
     NImage* subMenuImg_;
 
     void init();
 
-};
+  };
+
+}
 
 #endif

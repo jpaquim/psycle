@@ -20,9 +20,11 @@
 #include "npackageinfo.h"
 #include <iostream>
 
-NPackageInfo::NPackageInfo()
-{
-  std::vector<std::string> standards;
+namespace ngrs {
+
+  NPackageInfo::NPackageInfo()
+  {
+    std::vector<std::string> standards;
     standards.push_back("Label");
     standards.push_back("Edit");
     standards.push_back("Button");
@@ -33,54 +35,56 @@ NPackageInfo::NPackageInfo()
     standards.push_back("ListBox");
     standards.push_back("TogglePanel");
     standards.push_back("Panel");
-  packageMap[std::string("Standard")] = standards;
+    packageMap[std::string("Standard")] = standards;
 
-  std::vector<std::string> additional;
+    std::vector<std::string> additional;
     additional.push_back("Image");
-  packageMap[std::string("Additional")] = additional;
+    packageMap[std::string("Additional")] = additional;
 
-  std::vector<std::string> dialogs;
+    std::vector<std::string> dialogs;
     dialogs.push_back("FileDialog");
-  packageMap[std::string("Dialogs")] = dialogs;
+    packageMap[std::string("Dialogs")] = dialogs;
 
-  packageName = "ngrs_pkg";
+    packageName = "ngrs_pkg";
+  }
+
+
+  NPackageInfo::~NPackageInfo()
+  {
+  }
+
+  std::vector< std::string > NPackageInfo::categories( ) const
+  {
+
+    std::vector<std::string> stringList;
+
+    for (std::map<std::string , std::vector<std::string> >::const_iterator i(packageMap.begin()) ; i != packageMap.end() ; ++i) stringList.push_back(i->first);
+
+    return stringList;
+  }
+
+  std::vector< std::string > NPackageInfo::factoryNamesByCategory( const std::string & categoryName ) const
+  {
+    std::map<std::string , std::vector<std::string> >::const_iterator itr = packageMap.begin();
+
+    if ( (itr = packageMap.find(categoryName)) == packageMap.end() )
+      return std::vector<std::string>(); // empty list
+    else
+      return itr->second;
+  }
+
+  std::string NPackageInfo::name( ) const
+  {
+    return packageName;
+  }
+
 }
 
 
-NPackageInfo::~NPackageInfo()
-{
+extern "C" ngrs::NPackageInfo* createPackageInfo() {
+  return new ngrs::NPackageInfo();
 }
 
-extern "C" NPackageInfo* createPackageInfo() {
-    return new NPackageInfo();
+extern "C" void destroyNPackageInfo( ngrs::NPackageInfo* p ) {
+  delete p;
 }
-
-extern "C" void destroyNPackageInfo(NPackageInfo* p) {
-    delete p;
-}
-
-std::vector< std::string > NPackageInfo::categories( ) const
-{
-
-  std::vector<std::string> stringList;
-
-  for (std::map<std::string , std::vector<std::string> >::const_iterator i(packageMap.begin()) ; i != packageMap.end() ; ++i) stringList.push_back(i->first);
-
-  return stringList;
-}
-
-std::vector< std::string > NPackageInfo::factoryNamesByCategory( const std::string & categoryName ) const
-{
-  std::map<std::string , std::vector<std::string> >::const_iterator itr = packageMap.begin();
-
-  if ( (itr = packageMap.find(categoryName)) == packageMap.end() )
-    return std::vector<std::string>(); // empty list
-  else
-    return itr->second;
-}
-
-std::string NPackageInfo::name( ) const
-{
-  return packageName;
-}
-

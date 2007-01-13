@@ -20,140 +20,140 @@
 #include "nborderlayout.h"
 #include "nvisualcomponent.h"
 
-NBorderLayout::NBorderLayout()
- : NLayout()
-{
-}
+namespace ngrs {
+
+  NBorderLayout::NBorderLayout()
+    : NLayout()
+  {
+  }
 
 
-NBorderLayout::~NBorderLayout()
-{
-}
+  NBorderLayout::~NBorderLayout()
+  {
+  }
 
-NBorderLayout * NBorderLayout::clone( ) const
-{
-  return new NBorderLayout(*this);
-}
+  NBorderLayout * NBorderLayout::clone( ) const
+  {
+    return new NBorderLayout(*this);
+  }
 
-void NBorderLayout::align( NVisualComponent * parent )
-{
-  NVisualComponent* lastTop    = 0;
-  NVisualComponent* lastLeft   = 0;
-  NVisualComponent* lastRight  = 0;
-  NVisualComponent* lastBottom = 0;
-  NVisualComponent* lastClient = 0;
+  void NBorderLayout::align( NVisualComponent * parent )
+  {
+    NVisualComponent* lastTop    = 0;
+    NVisualComponent* lastLeft   = 0;
+    NVisualComponent* lastRight  = 0;
+    NVisualComponent* lastBottom = 0;
+    NVisualComponent* lastClient = 0;
 
-  std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
+    std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
 
-  for (;itr < parent->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     switch (visualChild->align()) {
+    for (;itr < parent->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      switch (visualChild->align()) {
        case nAlTop    : lastTop    = visualChild;  break;
        case nAlLeft   : lastLeft   = visualChild;  break;
        case nAlRight  : lastRight  = visualChild;  break;
        case nAlBottom : lastBottom = visualChild;  break;
        case nAlClient : lastClient = visualChild;  break;
       }
-  }
+    }
 
 
-  if (lastTop != 0) {
-    lastTop->setWidth(parent->clientWidth());
-    lastTop->setTop(0);
-    lastTop->setLeft(0);
-    lastTop->setHeight(lastTop->preferredHeight());
-  }
-  if (lastBottom != 0) {
-    lastBottom->setWidth(parent->width());
-    int pH = lastBottom->preferredHeight();
-    lastBottom->setTop(parent->clientHeight()-pH);
-    lastBottom->setLeft(0);
-    lastBottom->setHeight(pH);
-  }
-  if (lastLeft != 0) {
-     lastLeft->setTop( (lastTop!=0) ? lastTop->height() : 0);
-     lastLeft->setLeft(0);
-     int tOff = ((lastTop    !=0) ? lastTop->preferredHeight() : 0);
-     int bOff = ((lastBottom !=0) ? lastBottom->preferredHeight() : 0);
-     lastLeft->setHeight(parent->clientHeight() - tOff -bOff);
-     lastLeft->setWidth(lastLeft->preferredWidth());
+    if (lastTop != 0) {
+      lastTop->setWidth(parent->clientWidth());
+      lastTop->setTop(0);
+      lastTop->setLeft(0);
+      lastTop->setHeight(lastTop->preferredHeight());
+    }
+    if (lastBottom != 0) {
+      lastBottom->setWidth(parent->width());
+      int pH = lastBottom->preferredHeight();
+      lastBottom->setTop(parent->clientHeight()-pH);
+      lastBottom->setLeft(0);
+      lastBottom->setHeight(pH);
+    }
+    if (lastLeft != 0) {
+      lastLeft->setTop( (lastTop!=0) ? lastTop->height() : 0);
+      lastLeft->setLeft(0);
+      int tOff = ((lastTop    !=0) ? lastTop->preferredHeight() : 0);
+      int bOff = ((lastBottom !=0) ? lastBottom->preferredHeight() : 0);
+      lastLeft->setHeight(parent->clientHeight() - tOff -bOff);
+      lastLeft->setWidth(lastLeft->preferredWidth());
+    }
+
+    if (lastRight != 0) {
+      lastRight->setTop( (lastTop!=0) ? lastTop->height() : 0);
+      int tOff = ((lastTop    !=0) ? lastTop->preferredHeight() : 0);
+      int bOff = ((lastBottom !=0) ? lastBottom->preferredHeight() : 0);
+      lastRight->setHeight(parent->clientHeight() - tOff -bOff);
+      int pW = lastRight->preferredWidth();
+      lastRight->setLeft(parent->clientWidth() - pW);
+      lastRight->setWidth(pW);
+    }
+
+    if (lastClient != 0) {
+      int tOff = ((lastTop    !=0) ? lastTop->preferredHeight() : 0);
+      int bOff = ((lastBottom !=0) ? lastBottom->preferredHeight() : 0);
+      int rOff = ((lastRight  !=0) ? lastRight->preferredWidth() : 0);
+      int lOff = ((lastLeft   !=0) ? lastLeft->preferredWidth()  : 0);
+
+      lastClient->setLeft( lOff );
+      lastClient->setTop(  tOff );
+      lastClient->setWidth( parent->clientWidth()  - rOff - lOff);
+      lastClient->setHeight(parent->clientHeight() - tOff - bOff );
+    }
+
   }
 
-  if (lastRight != 0) {
-     lastRight->setTop( (lastTop!=0) ? lastTop->height() : 0);
-     int tOff = ((lastTop    !=0) ? lastTop->preferredHeight() : 0);
-     int bOff = ((lastBottom !=0) ? lastBottom->preferredHeight() : 0);
-     lastRight->setHeight(parent->clientHeight() - tOff -bOff);
-     int pW = lastRight->preferredWidth();
-     lastRight->setLeft(parent->clientWidth() - pW);
-     lastRight->setWidth(pW);
+  int NBorderLayout::preferredWidth( const NVisualComponent * target ) const
+  {
+    NVisualComponent* lastLeft   = 0;
+    NVisualComponent* lastRight  = 0;
+    NVisualComponent* lastClient = 0;
+
+    std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
+
+    for (;itr < parent()->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      switch (visualChild->align()) {
+       case nAlLeft   : lastLeft   = visualChild;  break;
+       case nAlRight  : lastRight  = visualChild;  break;
+       case nAlClient : lastClient = visualChild;  break;
+      }
+    }
+
+
+    int rOff = ((lastRight  !=0) ? lastRight->preferredWidth()   : 0);
+    int lOff = ((lastLeft   !=0) ? lastLeft  ->preferredWidth()  : 0);
+    int cOff = ((lastClient !=0) ? lastClient->preferredWidth()  : 0);
+
+    std::cout << rOff + lOff + cOff << "," << lOff << "," << rOff << "," << cOff << std::endl;
+
+    return rOff + lOff + cOff;
   }
 
-  if (lastClient != 0) {
-    int tOff = ((lastTop    !=0) ? lastTop->preferredHeight() : 0);
+  int NBorderLayout::preferredHeight( const NVisualComponent * target ) const
+  {
+    NVisualComponent* lastTop    = 0;
+    NVisualComponent* lastBottom = 0;
+    NVisualComponent* lastClient = 0;
+
+    std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
+
+    for (;itr < parent()->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      switch (visualChild->align()) {
+       case nAlTop    : lastTop    = visualChild;  break;
+       case nAlBottom : lastBottom = visualChild;  break;
+       case nAlClient : lastClient = visualChild;  break;
+      }
+    }
+
+    int tOff = ((lastTop    !=0) ? lastTop->preferredHeight()    : 0);
     int bOff = ((lastBottom !=0) ? lastBottom->preferredHeight() : 0);
-    int rOff = ((lastRight  !=0) ? lastRight->preferredWidth() : 0);
-    int lOff = ((lastLeft   !=0) ? lastLeft->preferredWidth()  : 0);
+    int cOff = ((lastClient !=0) ? lastClient->preferredHeight() : 0);
 
-    lastClient->setLeft( lOff );
-    lastClient->setTop(  tOff );
-    lastClient->setWidth( parent->clientWidth()  - rOff - lOff);
-    lastClient->setHeight(parent->clientHeight() - tOff - bOff );
-   }
-
-}
-
-int NBorderLayout::preferredWidth( const NVisualComponent * target ) const
-{
-  NVisualComponent* lastLeft   = 0;
-  NVisualComponent* lastRight  = 0;
-  NVisualComponent* lastClient = 0;
-
-  std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
-
-  for (;itr < parent()->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     switch (visualChild->align()) {
-       case nAlLeft   : lastLeft   = visualChild;  break;
-       case nAlRight  : lastRight  = visualChild;  break;
-       case nAlClient : lastClient = visualChild;  break;
-      }
+    return tOff + bOff + cOff;
   }
 
-
- int rOff = ((lastRight  !=0) ? lastRight->preferredWidth()   : 0);
- int lOff = ((lastLeft   !=0) ? lastLeft  ->preferredWidth()  : 0);
- int cOff = ((lastClient !=0) ? lastClient->preferredWidth()  : 0);
-  
- std::cout << rOff + lOff + cOff << "," << lOff << "," << rOff << "," << cOff << std::endl;
-
- return rOff + lOff + cOff;
 }
-
-int NBorderLayout::preferredHeight( const NVisualComponent * target ) const
-{
-  NVisualComponent* lastTop    = 0;
-  NVisualComponent* lastBottom = 0;
-  NVisualComponent* lastClient = 0;
-
-  std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
-
-  for (;itr < parent()->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     switch (visualChild->align()) {
-       case nAlTop    : lastTop    = visualChild;  break;
-       case nAlBottom : lastBottom = visualChild;  break;
-       case nAlClient : lastClient = visualChild;  break;
-      }
-  }
-
- int tOff = ((lastTop    !=0) ? lastTop->preferredHeight()    : 0);
- int bOff = ((lastBottom !=0) ? lastBottom->preferredHeight() : 0);
- int cOff = ((lastClient !=0) ? lastClient->preferredHeight() : 0);
-
- return tOff + bOff + cOff;
-}
-
-
-
-

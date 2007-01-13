@@ -34,24 +34,26 @@
 #include "nskin.h"
 #include "nalignconstraint.h"
 
-class NWindow;
+namespace ngrs {
 
-const int nCrossCorner       = 9;
-const int nUpperLeftCorner   = 1;
-const int nUpperMiddleCorner = 2;
-const int nUpperRightCorner  = 3;
-const int nRightMiddleCorner = 4;
-const int nLowerRightCorner  = 5;
-const int nLowerMiddleCorner = 6;
-const int nLowerLeftCorner   = 7;
-const int nLeftMiddleCorner  = 8;
+  class NWindow;
 
-/**
-@author Stefan
-*/
-class NVisualComponent : public NVisual
-{
-public:
+  const int nCrossCorner       = 9;
+  const int nUpperLeftCorner   = 1;
+  const int nUpperMiddleCorner = 2;
+  const int nUpperRightCorner  = 3;
+  const int nRightMiddleCorner = 4;
+  const int nLowerRightCorner  = 5;
+  const int nLowerMiddleCorner = 6;
+  const int nLowerLeftCorner   = 7;
+  const int nLeftMiddleCorner  = 8;
+
+  /**
+  @author Stefan
+  */
+  class NVisualComponent : public NVisual
+  {
+  public:
     NVisualComponent();
 
     ~NVisualComponent();
@@ -223,53 +225,55 @@ public:
 
     virtual void onExit();
     virtual void onEnter();
-    
-protected:
-          
-   virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
-   // this checks in reverse containerorder the mouse over events
-   // override it to use a different order
-   virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
 
-   NVisualComponent* checkChildEvent( NVisualComponent* child, NGraphics* g, int absX, int absY );
-   
+  protected:
 
-private:
+    virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
+    // this checks in reverse containerorder the mouse over events
+    // override it to use a different order
+    virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
 
-   std::vector<NVisualComponent*> tabOrder_;
+    NVisualComponent* checkChildEvent( NVisualComponent* child, NGraphics* g, int absX, int absY );
 
-   std::vector<NVisualComponent*> visualComponents_;
 
-   bool clipping_;
-   bool events_;   
+  private:
 
-   int scrollDx_, scrollDy_;
+    std::vector<NVisualComponent*> tabOrder_;
 
-   NLayout* layout_;
+    std::vector<NVisualComponent*> visualComponents_;
 
-   NMoveable moveable_;
-   class NWindow* win_;
+    bool clipping_;
+    bool events_;   
 
-   std::string alignStr_;
+    int scrollDx_, scrollDy_;
 
-   int clSzPolicy;
+    NLayout* layout_;
 
-   bool ownerSizeSet_;
-   int ownerPreferredWidth_;
-   int ownerPreferredHeight_;
+    NMoveable moveable_;
+    class NWindow* win_;
 
-   NAlignConstraint alignConstraint_;
+    std::string alignStr_;
 
-   bool enabled_;
+    int clSzPolicy;
 
-   NFont oldFont;
-   bool disableParentFont_;
+    bool ownerSizeSet_;
+    int ownerPreferredWidth_;
+    int ownerPreferredHeight_;
 
-   bool tabStop_;
-   bool focusEnabled_;
+    NAlignConstraint alignConstraint_;
 
-   void tabRight();
-   void tabLeft();
-};
+    bool enabled_;
+
+    NFont oldFont;
+    bool disableParentFont_;
+
+    bool tabStop_;
+    bool focusEnabled_;
+
+    void tabRight();
+    void tabLeft();
+  };
+
+}
 
 #endif

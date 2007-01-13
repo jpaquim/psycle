@@ -25,89 +25,91 @@
 #undef max
 #endif
 
-/* XPM */
-const char * arrow_inc_xpm[] = {
-"12 6 2 1",
-" 	c None",
-".	c black",
-"            ",
-"     .      ",
-"    ...     ",
-"   .....    ",
-"  .......   ",
-"            "};
+namespace ngrs {
 
-/* XPM */
-const char * arrow_dec_xpm[] = {
-"12 6 2 1",
-" 	c None",
-".	c black",
-"            ",
-"  .......   ",
-"   .....    ",
-"    ...     ",
-"     .      ",
-"            "};
+  /* XPM */
+  const char * arrow_inc_xpm[] = {
+    "12 6 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "     .      ",
+    "    ...     ",
+    "   .....    ",
+    "  .......   ",
+    "            "}
+  ;
+
+  /* XPM */
+  const char * arrow_dec_xpm[] = {
+    "12 6 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "  .......   ",
+    "   .....    ",
+    "    ...     ",
+    "     .      ",
+    "            "}
+  ;
+
+  NSpinButton::NSpinButton()
+    : NPanel()
+  {
+    incImg_    = new NImage();
+    decImg_    = new NImage();
+
+    incBit_.createFromXpmData(arrow_inc_xpm);
+    decBit_.createFromXpmData(arrow_dec_xpm);
+
+    incImg_->setBitmap(incBit_);
+    decImg_->setBitmap(decBit_);
+
+    add( decBtn_   = new NButton(decImg_) );
+    add( incBtn_   = new NButton(incImg_) );
+
+    decBtn_->setFlat(false);
+    incBtn_->setFlat(false);
+
+    decBtn_->click.connect(this,&NSpinButton::onDecBtnClick);
+    incBtn_->click.connect(this,&NSpinButton::onIncBtnClick);
+
+    decBtn_->setRepeatMode(true);
+    incBtn_->setRepeatMode(true);
+  }
 
 
+  NSpinButton::~NSpinButton()
+  {
+  }
 
-NSpinButton::NSpinButton()
- : NPanel()
-{
-  incImg_    = new NImage();
-  decImg_    = new NImage();
+  void NSpinButton::resize( )
+  {
+    int cw = clientWidth();
+    int ch = clientHeight();
 
-  incBit_.createFromXpmData(arrow_inc_xpm);
-  decBit_.createFromXpmData(arrow_dec_xpm);
+    decBtn_->setPosition(0,ch/2,cw,ch/2);
+    incBtn_->setPosition(0,0,cw,ch/2);
+  }
 
-  incImg_->setBitmap(incBit_);
-  decImg_->setBitmap(decBit_);
+  int NSpinButton::preferredWidth( ) const
+  {
+    return std::max(decBtn_->preferredWidth(),incBtn_->preferredWidth()) + spacing().left() + spacing().right() ;
+  }
 
-  add( decBtn_   = new NButton(decImg_) );
-  add( incBtn_   = new NButton(incImg_) );
+  int NSpinButton::preferredHeight( ) const
+  {
+    return decBtn_->preferredHeight(),incBtn_->preferredHeight() + spacing().top() + spacing().bottom() + 5;
+  }
 
-  decBtn_->setFlat(false);
-  incBtn_->setFlat(false);
+  void NSpinButton::onIncBtnClick( NButtonEvent * ev )
+  {
+    incClick.emit(ev);
+  }
 
-  decBtn_->click.connect(this,&NSpinButton::onDecBtnClick);
-  incBtn_->click.connect(this,&NSpinButton::onIncBtnClick);
+  void NSpinButton::onDecBtnClick( NButtonEvent * ev )
+  {
+    decClick.emit(ev);
+  }
 
-  decBtn_->setRepeatMode(true);
-  incBtn_->setRepeatMode(true);
 }
-
-
-NSpinButton::~NSpinButton()
-{
-}
-
-void NSpinButton::resize( )
-{
-  int cw = clientWidth();
-  int ch = clientHeight();
-
-  decBtn_->setPosition(0,ch/2,cw,ch/2);
-  incBtn_->setPosition(0,0,cw,ch/2);
-}
-
-int NSpinButton::preferredWidth( ) const
-{
-  return std::max(decBtn_->preferredWidth(),incBtn_->preferredWidth()) + spacing().left() + spacing().right() ;
-}
-
-int NSpinButton::preferredHeight( ) const
-{
-  return decBtn_->preferredHeight(),incBtn_->preferredHeight() + spacing().top() + spacing().bottom() + 5;
-}
-
-void NSpinButton::onIncBtnClick( NButtonEvent * ev )
-{
-  incClick.emit(ev);
-}
-
-void NSpinButton::onDecBtnClick( NButtonEvent * ev )
-{
-  decClick.emit(ev);
-}
-
-

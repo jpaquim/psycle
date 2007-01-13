@@ -27,14 +27,16 @@
 @author Stefan Nattkemper
 */
 
-class NTreeNode;
-class NScrollBox;
-class NCustomItem;
+namespace ngrs {
+
+  class NTreeNode;
+  class NScrollBox;
+  class NCustomItem;
 
 
-class NCustomTreeView : public NPanel
-{
-public:
+  class NCustomTreeView : public NPanel
+  {
+  public:
     NCustomTreeView();
 
     ~NCustomTreeView();
@@ -48,11 +50,11 @@ public:
     NCustomItem* selectedItem();
 
     virtual void removeChilds();
-	void removeItem( NCustomItem* item );
-	
-	void setSelectedItem( NTreeNode* node, NCustomItem* item );
+    void removeItem( NCustomItem* item );
 
-private:
+    void setSelectedItem( NTreeNode* node, NCustomItem* item );
+
+  private:
 
     NScrollBox* scrollBox_;
     NPanel* scrollArea_;
@@ -65,6 +67,8 @@ private:
     void onSelectedItem(NTreeNode* node, NCustomItem* sender);
     void onItemDblClick( NButtonEvent* ev );
 
-};
+  };
+
+}
 
 #endif

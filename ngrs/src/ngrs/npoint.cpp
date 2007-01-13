@@ -19,40 +19,44 @@
  ***************************************************************************/
 #include "npoint.h"
 
-NPoint::NPoint() : x_(0), y_(0) {}
+namespace ngrs {
 
-NPoint::NPoint( int x, int y ) : x_(x),y_(y) {}
+  NPoint::NPoint() : x_(0), y_(0) 
+  {
+  }
 
-NPoint::~NPoint()
-{
+  NPoint::NPoint( int x, int y ) : x_(x),y_(y) 
+  {
+  }
+
+  NPoint::~NPoint()
+  {
+  }
+
+  void NPoint::setX( int x )
+  {
+    x_ = x;
+  }
+
+  void NPoint::setY( int y )
+  {
+    y_ = y;
+  }
+
+  int NPoint::x( ) const
+  {
+    return x_;
+  }
+
+  int NPoint::y( ) const
+  {
+    return y_;
+  }
+
+  void NPoint::setXY( int x, int y )
+  {
+    x_ = x;
+    y_ = y;
+  }
+
 }
-
-void NPoint::setX( int x )
-{
-  x_ = x;
-}
-
-void NPoint::setY( int y )
-{
-  y_ = y;
-}
-
-int NPoint::x( ) const
-{
-  return x_;
-}
-
-int NPoint::y( ) const
-{
-  return y_;
-}
-
-void NPoint::setXY( int x, int y )
-{
-  x_ = x;
-  y_ = y;
-}
-
-
-
-

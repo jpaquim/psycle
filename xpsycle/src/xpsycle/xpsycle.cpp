@@ -24,9 +24,9 @@
 
 int main( int argc, char *argv[] )
 {    	
-    NApp app;
+    ngrs::NApp app;
 
-    NWindow* mainWin = new psycle::host::MainWindow( );
+    ngrs::NWindow* mainWin = new psycle::host::MainWindow( );
     app.setMainWindow( mainWin );
         
     app.run( );

@@ -25,9 +25,12 @@
 /**
 @author Stefan
 */
-class NDialog : public NWindow
-{
-public:
+
+namespace ngrs {
+
+  class NDialog : public NWindow
+  {
+  public:
     NDialog();
 
     ~NDialog();
@@ -39,10 +42,12 @@ public:
 
     virtual void setVisible( bool on );
 
-private:
+  private:
 
     int do_execute;
 
-};
+  };
+
+}
 
 #endif

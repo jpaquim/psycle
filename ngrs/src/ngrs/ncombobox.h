@@ -22,20 +22,22 @@
 
 #include "ncustomcombobox.h"
 
-class NCustomItem;
-class NButton;
-class NEdit;
-class NListBox;
-class NItemEvent;
-class NPopupWindow;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
+  class NCustomItem;
+  class NButton;
+  class NEdit;
+  class NListBox;
+  class NItemEvent;
+  class NPopupWindow;
 
-class NComboBox : public NCustomComboBox
-{
-public:
+  /**
+  @author Stefan
+  */
+
+  class NComboBox : public NCustomComboBox
+  {
+  public:
     NComboBox();
 
     ~NComboBox();
@@ -59,24 +61,26 @@ public:
 
     virtual void onItemClicked(NItemEvent * ev);
 
-protected:
+  protected:
 
-   NEdit* edit();
+    NEdit* edit();
 
-private:
+  private:
 
-   NBitmap down;
+    NBitmap down;
 
-   NEdit*   edit_;
-   NButton* downBtn_;
+    NEdit*   edit_;
+    NButton* downBtn_;
 
-   NListBox* lbox;
-   NPopupWindow*  popup;
+    NListBox* lbox;
+    NPopupWindow*  popup;
 
-   void init();
+    void init();
 
-   void onDownBtnClicked(NButtonEvent * ev);
+    void onDownBtnClicked(NButtonEvent * ev);
 
-};
+  };
+
+}
 
 #endif

@@ -30,91 +30,87 @@
 #include <ngrs/ntabbook.h>
 
 
-namespace psycle {
-	namespace host {
-
-
-class WaveEdFrame;
-class SequencerGUI;
-class VirtualPattern;
-class SequencerBar;
-
 /**
-@author Stefan
+  @author Stefan
 */
 
+namespace psycle {
+  namespace host {
 
-class ChildView : public NPanel
-{
-public:
-    ChildView( );
+    class WaveEdFrame;
+    class SequencerGUI;
+    class VirtualPattern;
+    class SequencerBar;
 
-    ~ChildView();
 
-    Song* song();
+    class ChildView : public ngrs::NPanel {
+    public:
+      ChildView( );
 
-    void setTitleBarText( );
-    
-    void onPatternView(NObject* sender);
+      ~ChildView();
 
-    // connect to signals
-    signal1<Machine*> newMachineAdded;
-    signal1<Machine*> machineSelected;
-    signal1<NButtonEvent*> machineViewDblClick;
+      Song* song();
 
-    PatternView* patternView();
-    MachineView* machineView();
-    SequencerBar* sequencerBar();
-    WaveEdFrame* waveEditor();
-    SequencerGUI* sequencerView();
-    VirtualPattern* virtualPattern();
+      void setTitleBarText( );
 
-    void play();
-    void playFromStart();
-    void stop();
+      void onPatternView(NObject* sender);
 
-    NTimer timer;
+      // connect to signals
+      signal1<Machine*> newMachineAdded;
+      signal1<Machine*> machineSelected;
+      signal1<ngrs::NButtonEvent*> machineViewDblClick;
 
-    void onMachineViewDblClick(NButtonEvent* ev);
+      PatternView* patternView();
+      MachineView* machineView();
+      SequencerBar* sequencerBar();
+      WaveEdFrame* waveEditor();
+      SequencerGUI* sequencerView();
+      VirtualPattern* virtualPattern();
 
-		void showMachineView();
-		void showPatternView();
-    void showWaveView();
-    void showSequencerView();
+      void play();
+      void playFromStart();
+      void stop();
 
-		void update();
+      ngrs::NTimer timer;
 
-private:
+      void onMachineViewDblClick( ngrs::NButtonEvent* ev );
 
-    Song* _pSong;
+      void showMachineView();
+      void showPatternView();
+      void showWaveView();
+      void showSequencerView();
 
-    NTabBook* tabBook_;
+      void update();
 
-//    NFileDialog* getSaveFileName_;
+    private:
 
-    SequencerBar* sequencerBar_;
-    MachineView* machineView_;
-    PatternView* patternView_;
-    SequencerGUI* sequencerView_;
-    VirtualPattern* virtualPattern_;
+      Song* _pSong;
 
-    NDockPanel* macDock;
-    NDockPanel* patDock;
-		NDockPanel* seqDock;
+      ngrs::NTabBook* tabBook_;
 
-    WaveEdFrame* waveEd_;
+      // ngrs::NFileDialog* getSaveFileName_;
 
-    std::string OnFileLoadSongNamed(const std::string & fName, int fType);
+      SequencerBar* sequencerBar_;
+      MachineView* machineView_;
+      PatternView* patternView_;
+      SequencerGUI* sequencerView_;
+      VirtualPattern* virtualPattern_;
 
-    void onTimer();
-    void onTweakSlide(int machine, int command, int value);
+      ngrs::NDockPanel* macDock;
+      ngrs::NDockPanel* patDock;
+      ngrs::NDockPanel* seqDock;
 
-    void onMachineSelected( Machine* mac );
-    void onTabChange(NButtonEvent* ev);
+      WaveEdFrame* waveEd_;
 
-};
+      void onTimer();
+      void onTweakSlide( int machine, int command, int value );
 
-}
+      void onMachineSelected( Machine* mac );
+      void onTabChange( ngrs::NButtonEvent* ev );
+
+    };
+
+  }
 }
 
 #endif

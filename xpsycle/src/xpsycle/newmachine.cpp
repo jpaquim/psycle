@@ -33,38 +33,38 @@ namespace psycle {
 	namespace host {
 
 NewMachine::NewMachine( const PluginFinder & finder )
-: NDialog(), finder_( finder )
+: ngrs::NDialog(), finder_( finder )
 {
   setTitle("Add New Machine");
   
   setPosition(100,100,700,500);
 
-  pane()->setLayout( NAlignLayout(10,5) );
+  pane()->setLayout( ngrs::NAlignLayout(10,5) );
 
-  NPanel* bPnl = new NPanel();
-    bPnl->setAlign(nAlBottom);
-    bPnl->setLayout( NAlignLayout(5,10) );
-    NButton* okBtn = new NButton("Open");
+  ngrs::NPanel* bPnl = new ngrs::NPanel();
+    bPnl->setAlign(ngrs::nAlBottom);
+    bPnl->setLayout( ngrs::NAlignLayout(5,10) );
+    ngrs::NButton* okBtn = new ngrs::NButton("Open");
       okBtn->clicked.connect(this,&NewMachine::onOkBtn);
       okBtn->setFlat(false);
-    bPnl->add(okBtn, nAlRight );
-    NButton* cancelBtn = new NButton("Cancel");
+    bPnl->add(okBtn, ngrs::nAlRight );
+    ngrs::NButton* cancelBtn = new ngrs::NButton("Cancel");
       cancelBtn->clicked.connect(this,&NewMachine::onCancelBtn);
       cancelBtn->setFlat(false);
-    bPnl->add(cancelBtn, nAlRight);
-  pane()->add(bPnl, nAlBottom);
+    bPnl->add(cancelBtn, ngrs::nAlRight);
+  pane()->add(bPnl, ngrs::nAlBottom);
 
-  NPanel* properties = new NPanel();
-		properties->setBorder ( NFrameBorder( true,5,5 ) );
+  ngrs::NPanel* properties = new ngrs::NPanel();
+		properties->setBorder ( ngrs::NFrameBorder( true,5,5 ) );
     properties->setPreferredSize(240,100);
-    properties->setAlign(nAlRight);
-    properties->setLayout(NAlignLayout(5,5));
-    macProperty = new NGroupBox();
-      macProperty->setAlign(nAlTop);
+    properties->setAlign(ngrs::nAlRight);
+    properties->setLayout( ngrs::NAlignLayout(5,5) );
+    macProperty = new ngrs::NGroupBox();
+      macProperty->setAlign(ngrs::nAlTop);
       macProperty->setHeaderText("Machine Properties");
       macProperty->setWidth(200);
       macProperty->setHeight(300);
-      macProperty->setLayout(NListLayout());
+      macProperty->setLayout(ngrs::NListLayout());
       name = new InfoLine("Name");
       macProperty->add(name);
       description = new InfoLine("Description");
@@ -76,21 +76,21 @@ NewMachine::NewMachine( const PluginFinder & finder )
       macProperty->resize();
     properties->add(macProperty);
     properties->resize();
-  pane()->add(properties, nAlRight);
+  pane()->add(properties, ngrs::nAlRight);
 
-  tabBook_ = new NTabBook();
-    tabBook_->setAlign(nAlClient);
-    NPanel* generatorPage = new NPanel();
-        generatorPage->setLayout(NAlignLayout());
-          generatorfBox_ = new NListBox();
-            generatorfBox_->setAlign(nAlClient);
+  tabBook_ = new ngrs::NTabBook();
+    tabBook_->setAlign(ngrs::nAlClient);
+    ngrs::NPanel* generatorPage = new ngrs::NPanel();
+        generatorPage->setLayout(ngrs::NAlignLayout());
+          generatorfBox_ = new ngrs::NListBox();
+            generatorfBox_->setAlign(ngrs::nAlClient);
             generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
 				std::map< PluginFinderKey, PluginInfo >::const_iterator it = finder.begin();
 				for ( ; it != finder.end(); it++ ) {
 					const PluginFinderKey & key = it->first;
 					const PluginInfo & info = it->second;
 					if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_GENERATOR ) {
-						NItem* item = new NItem( info.name() );
+						ngrs::NItem* item = new ngrs::NItem( info.name() );
 							item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
 							item->setIntValue( key.index() );
 						generatorfBox_->add( item );
@@ -99,10 +99,10 @@ NewMachine::NewMachine( const PluginFinder & finder )
 		}
         generatorPage->add(generatorfBox_);
 
-    NPanel* effectPage = new NPanel();
-      effectPage->setLayout ( NAlignLayout() );
-      effectfBox_ = new NListBox();
-      effectfBox_->setAlign(nAlClient);
+    ngrs::NPanel* effectPage = new ngrs::NPanel();
+      effectPage->setLayout ( ngrs::NAlignLayout() );
+      effectfBox_ = new ngrs::NListBox();
+      effectfBox_->setAlign(ngrs::nAlClient);
       effectfBox_->itemSelected.connect(this,&NewMachine::onEffectItemSelected);
 
       it = finder.begin();
@@ -110,28 +110,28 @@ NewMachine::NewMachine( const PluginFinder & finder )
         const PluginFinderKey & key = it->first;
         const PluginInfo & info = it->second;
         if ( info.type() == MACH_PLUGIN && info.mode() == MACHMODE_FX ) {
-         NItem* item = new NItem( info.name() );
+         ngrs::NItem* item = new ngrs::NItem( info.name() );
          item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
          effectfBox_->add( item );
          pluginIdentify_[item] = key;
         }					
       }
-    effectPage->add( effectfBox_ , nAlClient);
+    effectPage->add( effectfBox_ , ngrs::nAlClient);
 
 
     tabBook_->addPage(generatorPage,"Generators");
     tabBook_->addPage(effectPage,"Effects");
-    NListBox* internalPage_ = new NListBox();
-    NItem* item = new NItem("Sampler");
+    ngrs::NListBox* internalPage_ = new ngrs::NListBox();
+    ngrs::NItem* item = new ngrs::NItem("Sampler");
     item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
         internalPage_->add(item);
         internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
     tabBook_->addPage(internalPage_,"Internal");
 	  
   	
-		NPanel* ladspaPage = new NPanel();
-			ladspaPage->setLayout(NAlignLayout());
-        ladspaBox_ = new NListBox();
+		ngrs::NPanel* ladspaPage = new ngrs::NPanel();
+			ladspaPage->setLayout(ngrs::NAlignLayout());
+        ladspaBox_ = new ngrs::NListBox();
         ladspaBox_->itemSelected.connect(this,&NewMachine::onLADSPAItemSelected);
 
 				it = finder.begin();
@@ -139,19 +139,19 @@ NewMachine::NewMachine( const PluginFinder & finder )
 					const PluginFinderKey & key = it->first;
 					const PluginInfo & info = it->second;
 					if ( info.type() == MACH_LADSPA ) {
-						NItem* item = new NItem( info.name() );
+						ngrs::NItem* item = new ngrs::NItem( info.name() );
                                                 item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
 					 	item->setIntValue( key.index() );
 						ladspaBox_->add( item );
 						pluginIdentify_[item] = key;
 					}					
 				}
-      ladspaPage->add(ladspaBox_, nAlClient);
+      ladspaPage->add(ladspaBox_, ngrs::nAlClient);
 	tabBook_->addPage(ladspaPage,"ladspaPage");
 
   pane()->add(tabBook_);
 
-  NTab* tab = tabBook_->tab( effectPage );
+  ngrs::NTab* tab = tabBook_->tab( effectPage );
     tab->click.connect(this,&NewMachine::onEffectTabChange);
   tab = tabBook_->tab( generatorPage );
     tab->click.connect(this,&NewMachine::onGeneratorTabChange);
@@ -172,50 +172,50 @@ NewMachine::~NewMachine()
 int NewMachine::onClose( )
 {
   setVisible(false);
-  setExitLoop(nDestroyWindow);
-  return nDestroyWindow;
+  setExitLoop( ngrs::nDestroyWindow );
+  return ngrs::nDestroyWindow;
 }
 
-void NewMachine::onOkBtn( NButtonEvent * sender )
+void NewMachine::onOkBtn( ngrs::NButtonEvent * sender )
 {
   doClose( true );
 }
 
-void NewMachine::onItemDblClick( NButtonEvent * sender )
+void NewMachine::onItemDblClick( ngrs::NButtonEvent * sender )
 {
   doClose( true );
 }
 
-void NewMachine::onCancelBtn( NButtonEvent * sender )
+void NewMachine::onCancelBtn( ngrs::NButtonEvent * sender )
 {
   doClose( false );
 }
 
-void NewMachine::onInternalItemSelected( NItemEvent * ev )
+void NewMachine::onInternalItemSelected( ngrs::NItemEvent * ev )
 {
   if (ev->text() == "Sampler") {
     selectedKey_ = PluginFinderKey::internalSampler();
   }
 }
 
-void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
+void NewMachine::onGeneratorItemSelected( ngrs::NItemEvent* ev )
 {
-  NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
+  ngrs::NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
   setPlugin ( item );
 }
 
-void NewMachine::onEffectItemSelected(NItemEvent* ev) {
-	  NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
-    setPlugin( item );
+void NewMachine::onEffectItemSelected( ngrs::NItemEvent* ev ) {
+  ngrs::NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
+  setPlugin( item );
 }
 
-void NewMachine::onLADSPAItemSelected(NItemEvent* ev) {
-   NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
+void NewMachine::onLADSPAItemSelected( ngrs::NItemEvent* ev ) {
+   ngrs::NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
    setPlugin( item );
 }
 
-void NewMachine::setPlugin( NCustomItem* item ) {
-    std::map< NCustomItem*, PluginFinderKey >::iterator it;		
+void NewMachine::setPlugin( ngrs::NCustomItem* item ) {
+    std::map< ngrs::NCustomItem*, PluginFinderKey >::iterator it;		
 	it = pluginIdentify_.find( item );
 
     if ( it != pluginIdentify_.end() ) {
@@ -235,25 +235,25 @@ void NewMachine::setPlugin( NCustomItem* item ) {
     pane()->repaint();
 }
 
-void NewMachine::onEffectTabChange( NButtonEvent * ev )
+void NewMachine::onEffectTabChange( ngrs::NButtonEvent * ev )
 {
-  NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
+  ngrs::NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
   if  (item) setPlugin ( item );
 }
 
-void NewMachine::onGeneratorTabChange( NButtonEvent * ev )
+void NewMachine::onGeneratorTabChange( ngrs::NButtonEvent * ev )
 {
-  NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
+  ngrs::NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
   if  (item) setPlugin ( item );
 }
 
-void NewMachine::onLADSPATabChange( NButtonEvent * ev )
+void NewMachine::onLADSPATabChange( ngrs::NButtonEvent * ev )
 {
- NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
+ ngrs::NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
   if  (item) setPlugin ( item );
 }
 
-void NewMachine::onInternalTabChange( NButtonEvent * ev )
+void NewMachine::onInternalTabChange( ngrs::NButtonEvent * ev )
 {
 }
 

@@ -35,70 +35,70 @@
 */
 
 namespace psycle {
-	namespace host {
+  namespace host {
 
-		class Configuration : public NObject {
-		public:
+    class Configuration : public ngrs::NObject {
+    public:
 
-			Configuration();
+      Configuration();
 
-			~Configuration();
+      ~Configuration();
 
-			void loadConfig();
+      void loadConfig();
 
-			DefaultBitmaps & icons();
+      DefaultBitmaps & icons();
 
-			void setDriverByName( const std::string & driverName );        
+      void setDriverByName( const std::string & driverName );        
 
-			///\ todo private access
-		
-			AudioDriver* _pOutputDriver;
-			AudioDriver* _pSilentDriver;
-			///\ todo put this in player ..
-			bool _RecordTweaks;
-			bool _RecordUnarmed;
-			///\end todo
+      ///\ todo private access
+
+      AudioDriver* _pOutputDriver;
+      AudioDriver* _pSilentDriver;
+      ///\ todo put this in player ..
+      bool _RecordTweaks;
+      bool _RecordUnarmed;
+      ///\end todo
 
 
-			std::map<std::string, AudioDriver*> & driverMap() {
-				return driverMap_;
-			}
+      std::map<std::string, AudioDriver*> & driverMap() {
+        return driverMap_;
+      }
 
-			// path 
+      // path 
 
-			const std::string & iconPath() const;
-			const std::string & pluginPath() const;
-			const std::string & ladspaPath() const;
-			const std::string & prsPath() const;
-			const std::string & hlpPath() const;
+      const std::string & iconPath() const;
+      const std::string & pluginPath() const;
+      const std::string & ladspaPath() const;
+      const std::string & prsPath() const;
+      const std::string & hlpPath() const;
 
-			bool enableSound() const;
+      bool enableSound() const;
 
-			InputHandler & inputHandler();
+      InputHandler & inputHandler();
 
-		private:
+    private:
 
-			InputHandler inputHandler_;
-			DefaultBitmaps* bitmaps_;
+      InputHandler inputHandler_;
+      DefaultBitmaps* bitmaps_;
 
-			// a map, that holds available drivers ..
-			std::map<std::string, AudioDriver*> driverMap_;
-			bool enableSound_;
-			bool doEnableSound;
+      // a map, that holds available drivers ..
+      std::map<std::string, AudioDriver*> driverMap_;
+      bool enableSound_;
+      bool doEnableSound;
 
-			std::string iconPath_;
-			std::string pluginPath_;
-			std::string prsPath_;
-			std::string hlpPath_;
-			std::string ladspaPath_;
+      std::string iconPath_;
+      std::string pluginPath_;
+      std::string prsPath_;
+      std::string hlpPath_;
+      std::string ladspaPath_;
 
-			void setSkinDefaults();
-			void setXmlDefaults();
-			void onConfigTagParse( const NXmlParser & parser, const std::string & tagName );
-			void loadConfig( const std::string & path ) throw(std::exception);
+      void setSkinDefaults();
+      void setXmlDefaults();
+      void onConfigTagParse( const ngrs::NXmlParser & parser, const std::string & tagName );
+      void loadConfig( const std::string & path );
 
-		};
+    };
 
-	}
+  }
 }
 #endif

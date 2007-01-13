@@ -23,82 +23,86 @@
 #include "nbutton.h"
 #include "nbevelborder.h"
 
-enum NScrollPolicyType{ nDx = 1, nDy = 2 };
-
 /**
 @author Stefan
 */
 
-class NScrollBar : public NPanel {
-public:
-   NScrollBar( );
-   NScrollBar( int orientation );
+namespace ngrs {
 
-   ~NScrollBar( );
+  enum NScrollPolicyType{ nDx = 1, nDy = 2 };
 
-   signal1<NScrollBar*> change;
-   signal1<NScrollBar*> scroll;
+  class NScrollBar : public NPanel {
+  public:
+    NScrollBar( );
+    NScrollBar( int orientation );
 
-   virtual void resize();
+    ~NScrollBar( );
 
-   void setOrientation( int orientation );
-   int orientation( ) const;
+    signal1<NScrollBar*> change;
+    signal1<NScrollBar*> scroll;
 
-   void setPos( double value );
-   double pos( ) const;
+    virtual void resize();
 
-   void setRange( double min, double max );
-   double range() const;
+    void setOrientation( int orientation );
+    int orientation( ) const;
 
-   void setLargeChange( double step );
-   double largeChange() const;
+    void setPos( double value );
+    double pos( ) const;
 
-   void setSmallChange(double step);
-   double smallChange() const;
+    void setRange( double min, double max );
+    double range() const;
 
-   void setControl( NVisualComponent* control, int scrollPolicy );
+    void setLargeChange( double step );
+    double largeChange() const;
 
-   void onSliderMove( const NMoveEvent & ev );
+    void setSmallChange(double step);
+    double smallChange() const;
 
-private:
+    void setControl( NVisualComponent* control, int scrollPolicy );
 
-   NImage* inc;
-   NImage* dec;
+    void onSliderMove( const NMoveEvent & ev );
 
-   NBitmap up;
-   NBitmap down;
-   NBitmap left;
-   NBitmap right;
+  private:
 
-   int orientation_;
-   int scrollPolicy_;
-   
-   double pos_;
-   double min_, max_;
-   double smallChange_;
-   double largeChange_;
+    NImage* inc;
+    NImage* dec;
+
+    NBitmap up;
+    NBitmap down;
+    NBitmap left;
+    NBitmap right;
+
+    int orientation_;
+    int scrollPolicy_;
+
+    double pos_;
+    double min_, max_;
+    double smallChange_;
+    double largeChange_;
 
 
-   NButton* incBtn;
-   NButton* decBtn;
-   NButton* slider_;
+    NButton* incBtn;
+    NButton* decBtn;
+    NButton* slider_;
 
-   NPanel* sliderArea_;
-   NVisualComponent* control_;
+    NPanel* sliderArea_;
+    NVisualComponent* control_;
 
-   void init();
+    void init();
 
-   void scrollComponent(NVisualComponent* control, int dx, int dy);
+    void scrollComponent(NVisualComponent* control, int dx, int dy);
 
-   void onDecBtnClick(NButtonEvent* ev);
-   void onIncBtnClick(NButtonEvent* ev);
+    void onDecBtnClick(NButtonEvent* ev);
+    void onIncBtnClick(NButtonEvent* ev);
 
-   void onScrollAreaClick(NButtonEvent* ev);
+    void onScrollAreaClick(NButtonEvent* ev);
 
-   void updateSlider();
-   void updateControl();
-   void updateControlRange();
+    void updateSlider();
+    void updateControl();
+    void updateControlRange();
 
-};
+  };
+
+}
 
 #endif

@@ -30,7 +30,7 @@
 namespace psycle {
 	namespace host {
 
-		class VirtualPatternSequenceHeader : NPanel {
+		class VirtualPatternSequenceHeader : ngrs::NPanel {
 
 			VirtualPatternSequenceHeader();
 
@@ -38,7 +38,7 @@ namespace psycle {
 
 		};
 
-		class VirtualPattern : public NPanel {
+		class VirtualPattern : public ngrs::NPanel {
 		public:
 				VirtualPattern();
 

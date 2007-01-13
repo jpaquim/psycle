@@ -24,72 +24,70 @@
 #include "nitemevent.h"
 #include <algorithm>
 
-NColorComboBox::NColorComboBox()
- : NComboBox()
-{
-  init();
-}
+namespace ngrs {
 
-
-NColorComboBox::~NColorComboBox()
-{
-}
-
-void NColorComboBox::init( )
-{
-  add( new NColorItem( NColor(0,0,0), "black" ) );
-  add( new NColorItem( NColor(0,0,255), "blue" ) );
-  add( new NColorItem( NColor(0,255,0), "green" ) );
-  add( new NColorItem( NColor(255,0,0), "red" ) );
-
-  setIndex(0);
-
-  NSkin skin;
-  skin.setTransparent(false);
-  skin.setBackground(NColor(255,255,255));
-  edit()->setSkin(skin);
-  edit()->setBackground( NColor(0,0,0) );
-}
-
-void NColorComboBox::onItemClicked( NItemEvent * ev )
-{
-  NApp::unmapPopupWindows();
-  std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), ev->sender());
-  if (it != items.end()) {
-     NColorItem* item = *it;
-     edit()->setBackground( item->color() );
-     edit()->repaint();
-     colorSelected.emit(item->color());
+  NColorComboBox::NColorComboBox()
+    : NComboBox()
+  {
+    init();
   }
+
+  NColorComboBox::~NColorComboBox()
+  {
+  }
+
+  void NColorComboBox::init( )
+  {
+    add( new NColorItem( NColor(0,0,0), "black" ) );
+    add( new NColorItem( NColor(0,0,255), "blue" ) );
+    add( new NColorItem( NColor(0,255,0), "green" ) );
+    add( new NColorItem( NColor(255,0,0), "red" ) );
+
+    setIndex(0);
+
+    NSkin skin;
+    skin.setTransparent(false);
+    skin.setBackground(NColor(255,255,255));
+    edit()->setSkin(skin);
+    edit()->setBackground( NColor(0,0,0) );
+  }
+
+  void NColorComboBox::onItemClicked( NItemEvent * ev )
+  {
+    NApp::unmapPopupWindows();
+    std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), ev->sender());
+    if (it != items.end()) {
+      NColorItem* item = *it;
+      edit()->setBackground( item->color() );
+      edit()->repaint();
+      colorSelected.emit(item->color());
+    }
+  }
+
+  void NColorComboBox::add( NColorItem * item )
+  {
+    NComboBox::add(item);
+    items.push_back(item);
+  }
+
+  void NColorComboBox::removeChilds( )
+  {
+    items.clear();
+    NComboBox::removeChilds();
+  }
+
+  void NColorComboBox::removeChild( NVisualComponent * child )
+  {
+    std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), child);
+    if (it != items.end()) items.erase(it);
+    NComboBox::removeChild(child);
+  }
+
+  void NColorComboBox::erase( NVisualComponent * child )
+  {
+    std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), child);
+    if (it != items.end()) items.erase(it);
+    NComboBox::erase(child);
+  }
+
 }
-
-void NColorComboBox::add( NColorItem * item )
-{
-  NComboBox::add(item);
-  items.push_back(item);
-}
-
-void NColorComboBox::removeChilds( )
-{
-  items.clear();
-  NComboBox::removeChilds();
-}
-
-void NColorComboBox::removeChild( NVisualComponent * child )
-{
-  std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), child);
-  if (it != items.end()) items.erase(it);
-  NComboBox::removeChild(child);
-}
-
-void NColorComboBox::erase( NVisualComponent * child )
-{
-  std::vector<NColorItem*>::iterator it = find(items.begin(), items.end(), child);
-  if (it != items.end()) items.erase(it);
-  NComboBox::erase(child);
-}
-
-
-
-
-

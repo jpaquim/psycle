@@ -19,17 +19,18 @@
  ***************************************************************************/
 #ifndef NOBJECTINSPECTOR_H
 #define NOBJECTINSPECTOR_H
-
 #include "ntable.h"
 
-class NEdit;
+namespace ngrs {
 
-/**
-@author Stefan Nattkemper
-*/
-class NObjectInspector : public NTable
-{
-public:
+  class NEdit;
+
+  /**
+  @author Stefan Nattkemper
+  */
+  class NObjectInspector : public NTable
+  {
+  public:
     NObjectInspector();
 
     ~NObjectInspector();
@@ -39,18 +40,20 @@ public:
     void setControlObject(NObject* obj);
     NObject* controlObject();
 
-private:
+  private:
 
-   NObject* obj_;
+    NObject* obj_;
 
-   void updateView();
+    void updateView();
 
-   void onStringEdit(const NKeyEvent & event);
-   void onFloatEdit(const NKeyEvent & event);
-   void onIntEdit(const NKeyEvent & event);
+    void onStringEdit(const NKeyEvent & event);
+    void onFloatEdit(const NKeyEvent & event);
+    void onIntEdit(const NKeyEvent & event);
 
-   std::vector<NEdit*> edits;
+    std::vector<NEdit*> edits;
 
-};
+  };
+
+}
 
 #endif

@@ -21,58 +21,59 @@
 
 using namespace std;
 
-NState::NState()
-{
-}
+namespace ngrs {
 
-
-NState::~NState()
-{
-}
-
-const std::vector< NState* > & NState::T( const char input )
-{
-  std::map<char, vector<NState*> >::iterator itr;
-
-  if ( (itr = TMap.find('\1')) != TMap.end()) return itr->second;  else
-  if ( (((((unsigned char)input >64) && ((unsigned char) input <90))) || (((unsigned char) input > 96) && ((unsigned char) input < 123)))  &&
-     (itr = TMap.find('\2')) != TMap.end()) return itr->second; else  
-  if ( (((unsigned char) input > 47) && (unsigned char) input < 58 ) && (itr = TMap.find('\3')) != TMap.end()) return itr->second;  else                   
-  if ( (itr = TMap.find(input)) != TMap.end()) return itr->second; 
-   else return ndef;
-}
-
-void NState::setSequence( const char label, const std::vector< NState* > & sequence )
-{
-  TMap[label] = sequence;
-}
-
-void NState::addFollowState( const char label, NState * state )
-{
-  std::map<char,std::vector<NState*> >::iterator itr;
-  if ( (itr = TMap.find(label)) != TMap.end() ) {
-     itr->second.push_back(state);
-  } else 
+  NState::NState()
   {
-    vector<NState*> states;
-    states.push_back(state);
-    TMap[label] = states;
   }
+
+  NState::~NState()
+  {
+  }
+
+  const std::vector< NState* > & NState::T( const char input )
+  {
+    std::map<char, vector<NState*> >::iterator itr;
+
+    if ( (itr = TMap.find('\1')) != TMap.end()) return itr->second;  else
+      if ( (((((unsigned char)input >64) && ((unsigned char) input <90))) || (((unsigned char) input > 96) && ((unsigned char) input < 123)))  &&
+        (itr = TMap.find('\2')) != TMap.end()) return itr->second; else  
+        if ( (((unsigned char) input > 47) && (unsigned char) input < 58 ) && (itr = TMap.find('\3')) != TMap.end()) return itr->second;  else                   
+          if ( (itr = TMap.find(input)) != TMap.end()) return itr->second; 
+          else return ndef;
+  }
+
+  void NState::setSequence( const char label, const std::vector< NState* > & sequence )
+  {
+    TMap[label] = sequence;
+  }
+
+  void NState::addFollowState( const char label, NState * state )
+  {
+    std::map<char,std::vector<NState*> >::iterator itr;
+    if ( (itr = TMap.find(label)) != TMap.end() ) {
+      itr->second.push_back(state);
+    } else 
+    {
+      vector<NState*> states;
+      states.push_back(state);
+      TMap[label] = states;
+    }
+  }
+
+  void NState::setEpsilon( const std::vector< NState * > & sequence )
+  {
+    epsilonSequence = sequence;
+  }
+
+  void NState::addEpsilon( NState * state )
+  {
+    epsilonSequence.push_back(state);
+  }
+
+  const std::vector< NState * > & NState::E( )
+  {
+    return epsilonSequence;
+  }
+
 }
-
-void NState::setEpsilon( const std::vector< NState * > & sequence )
-{
-  epsilonSequence = sequence;
-}
-
-void NState::addEpsilon( NState * state )
-{
-  epsilonSequence.push_back(state);
-}
-
-const std::vector< NState * > & NState::E( )
-{
-  return epsilonSequence;
-}
-
-

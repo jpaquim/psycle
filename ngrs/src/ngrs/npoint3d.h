@@ -23,8 +23,11 @@
 /**
 @author Stefan
 */
-class NPoint3D{
-public:
+
+namespace ngrs {
+
+  class NPoint3D{
+  public:
     NPoint3D();
     NPoint3D(int x, int y, int z);
 
@@ -39,11 +42,12 @@ public:
     int y() const;
     int z() const;
 
-private:
+  private:
 
     int x_, y_ , z_;
 
-};
+  };
 
+}
 
 #endif

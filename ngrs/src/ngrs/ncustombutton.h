@@ -22,61 +22,65 @@
 
 #include "npanel.h"
 
-class NLabel;
-class NBevelBorder;
-class NGradient;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
-class NCustomButton : public NPanel
-{
-public:
-   NCustomButton();
-   NCustomButton(const std::string & text);
+  class NLabel;
+  class NBevelBorder;
+  class NGradient;
 
-   ~NCustomButton();
+  /**
+  @author Stefan
+  */
+  class NCustomButton : public NPanel
+  {
+  public:
+    NCustomButton();
+    NCustomButton(const std::string & text);
 
-   void setText(const std::string & text);
-   const std::string & text() const;
+    ~NCustomButton();
 
-   void setTextHAlign(int align);
-   void setTextVAlign(int align);
+    void setText(const std::string & text);
+    const std::string & text() const;
 
-   virtual void setMnemonic(char c);
-   char mnemonic();
+    void setTextHAlign(int align);
+    void setTextVAlign(int align);
 
-   virtual void resize();
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
+    virtual void setMnemonic(char c);
+    char mnemonic();
 
-   virtual void onMousePress (int x, int y, int button);
-   virtual void onMousePressed (int x, int y, int button);
+    virtual void resize();
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
-   signal1<NButtonEvent*> click;
-   signal1<NButtonEvent*> clicked;
+    virtual void onMousePress (int x, int y, int button);
+    virtual void onMousePressed (int x, int y, int button);
 
-   void setToggle(bool on);
-   bool toggle() const;
-   bool down() const;
+    signal1<NButtonEvent*> click;
+    signal1<NButtonEvent*> clicked;
 
-   virtual void setDown(bool on);
-   virtual void onMessage(NEvent* ev);
+    void setToggle(bool on);
+    bool toggle() const;
+    bool down() const;
 
-protected:
+    virtual void setDown(bool on);
+    virtual void onMessage(NEvent* ev);
 
-   NLabel* label();
-   NLabel* label() const;
+  protected:
 
-private:
+    NLabel* label();
+    NLabel* label() const;
 
-   NLabel* label_;
+  private:
 
-   void init();
+    NLabel* label_;
 
-   bool down_;
-   bool toggle_;
+    void init();
 
-};
+    bool down_;
+    bool toggle_;
+
+  };
+
+}
 
 #endif

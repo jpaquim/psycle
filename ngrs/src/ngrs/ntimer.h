@@ -27,9 +27,11 @@
 @author Stefan Nattkemper
 */
 
-class NTimer : public NObject
-{
-public:
+namespace ngrs {
+
+  class NTimer : public NObject
+  {
+  public:
     NTimer();
 
     ~NTimer();
@@ -49,12 +51,14 @@ public:
 
     virtual void onTimerEvent();
 
-private:
+  private:
 
     int ms_;
     bool enabled_;
     int count_;
 
-};
+  };
+
+}
 
 #endif

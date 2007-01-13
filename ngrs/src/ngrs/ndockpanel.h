@@ -22,14 +22,15 @@
 
 #include "npanel.h"
 
-class NImage;
+namespace ngrs {
+  class NImage;
 
-/**
-@author Stefan Nattkemper
-*/
-class NDockPanel : public NPanel
-{
-public:
+  /**
+  @author Stefan Nattkemper
+  */
+  class NDockPanel : public NPanel
+  {
+  public:
     NDockPanel();
     NDockPanel(NVisualComponent* clientComponent);
 
@@ -39,7 +40,7 @@ public:
 
     void onDockWindow();
 
-private:
+  private:
 
     NBitmap undockBmp;
     NBitmap dockBmp;
@@ -54,6 +55,7 @@ private:
 
     void onUndockWindow(NButtonEvent* ev);
     void dockWindow();
-};
+  };
+}
 
 #endif

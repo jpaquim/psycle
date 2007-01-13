@@ -27,7 +27,10 @@
 */
 
 class BendedLineShape;
-class NPopupMenu;
+
+namespace ngrs {
+  class NPopupMenu;
+}
 
 namespace psycle 
 { 
@@ -36,7 +39,7 @@ namespace psycle
 		
 		class WireDlg;
 
-		class WireGUI : public NVisualComponent
+		class WireGUI : public ngrs::NVisualComponent
 		{
 		public:
 				WireGUI();
@@ -46,18 +49,18 @@ namespace psycle
 				signal1<WireGUI*> bendAdded;
 				signal1<WireGUI*> removeMe;
 
-                const NPoint & p1() const;
-                const NPoint & p2() const;
+                const ngrs::NPoint & p1() const;
+                const ngrs::NPoint & p2() const;
 
-                void setPoints( const NPoint & p1, const NPoint & p2 );
-                void insertBend( const NPoint & pts );
+                void setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
+                void insertBend( const ngrs::NPoint & pts );
 
-				virtual void paint(NGraphics* g);
+				virtual void paint( ngrs::NGraphics* g );
 			
 				void updateSkin();
 
-				virtual void onMousePress  (int x, int y, int button);
-				virtual void onMouseDoublePress (int x, int y, int button);
+				virtual void onMousePress( int x, int y, int button );
+				virtual void onMouseDoublePress( int x, int y, int button );
    
 				WireDlg* dialog();
         
@@ -65,11 +68,11 @@ namespace psycle
 
                 BendedLineShape* lineShape;
 
-				NPopupMenu* menu_;
-				NPoint newBendPos_;
+				ngrs::NPopupMenu* menu_;
+				ngrs::NPoint newBendPos_;
                 
-				NColor polyColor_;
-				NColor borderColor_;
+				ngrs::NColor polyColor_;
+				ngrs::NColor borderColor_;
 
 				WireDlg* dlg;
 
@@ -82,11 +85,11 @@ namespace psycle
 				double triangle_size_wide;
 				double triangle_size_indent;
 				
-				void drawArrow( NGraphics * g, const NPoint & p1, const NPoint & p2 );
+				void drawArrow( ngrs::NGraphics * g, const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
 				void initPopupMenu( );
 
-				void onAddBend( NButtonEvent* ev );
-                void onRemoveMe ( NButtonEvent* ev ); 
+				void onAddBend( ngrs::NButtonEvent* ev );
+                void onRemoveMe ( ngrs::NButtonEvent* ev ); 
 
 		};
 	}

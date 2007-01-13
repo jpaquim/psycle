@@ -28,14 +28,16 @@
 #undef max
 #endif
 
-class NLabel;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
-class NProgressBar : public NPanel
-{
-public:
+  class NLabel;
+
+  /**
+  @author Stefan
+  */
+  class NProgressBar : public NPanel
+  {
+  public:
     NProgressBar();
 
     ~NProgressBar();
@@ -57,17 +59,19 @@ public:
 
     void setOrientation(int orientation);
 
-private:
+  private:
 
-   NBorder* border_;
-   NLabel* label_;
+    NBorder* border_;
+    NLabel* label_;
 
-   int progress_;
-   int min_,max_,step_;
-   int orientation_;
+    int progress_;
+    int min_,max_,step_;
+    int orientation_;
 
-   NGradient* progressGradient_;
+    NGradient* progressGradient_;
 
-};
+  };
+
+}
 
 #endif

@@ -25,9 +25,12 @@
 /**
 @author Stefan Nattkemper
 */
-class NRadioButton : public NCustomButton
-{
-public:
+
+namespace ngrs {
+
+  class NRadioButton : public NCustomButton
+  {
+  public:
     NRadioButton();
 
     ~NRadioButton();
@@ -41,6 +44,8 @@ public:
 
     virtual void setDown(bool on);
 
-};
+  };
+
+}
 
 #endif

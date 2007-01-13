@@ -19,25 +19,28 @@
  ***************************************************************************/
 #include "nmenuseperator.h"
 
-NMenuSeperator::NMenuSeperator()
- : NCustomMenuItem()
-{
+namespace ngrs {
+
+  NMenuSeperator::NMenuSeperator()
+    : NCustomMenuItem()
+  {
+  }
+
+
+  NMenuSeperator::~NMenuSeperator()
+  {
+  }
+
+  void NMenuSeperator::paint( NGraphics * g )
+  {
+    g->setForeground(NColor(220,220,220));
+    g->drawLine(0,clientHeight()/2,clientWidth(),clientHeight()/2);
+  }
+
+  int NMenuSeperator::preferredHeight( ) const
+  {
+    return 2;
+  }
+
 }
-
-
-NMenuSeperator::~NMenuSeperator()
-{
-}
-
-void NMenuSeperator::paint( NGraphics * g )
-{
-  g->setForeground(NColor(220,220,220));
-  g->drawLine(0,clientHeight()/2,clientWidth(),clientHeight()/2);
-}
-
-int NMenuSeperator::preferredHeight( ) const
-{
-  return 2;
-}
-
 

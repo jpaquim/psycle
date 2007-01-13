@@ -29,35 +29,40 @@
 /**
 @author Stefan Nattkemper
 */
-class NAtoms {
-public:
+
+namespace {
+
+  class NAtoms {
+  public:
     NAtoms(Display* dpy);
 
     ~NAtoms();
 
-	 Atom wm_delete_window() const;
-   Atom wm_motif_hint() const;
-   Atom net_wm_state() const;
-   Atom net_wm_state_above() const;
-   Atom net_wm_state_stays_on_top() const;
-   Atom net_wm_state_modal() const;
+    Atom wm_delete_window() const;
+    Atom wm_motif_hint() const;
+    Atom net_wm_state() const;
+    Atom net_wm_state_above() const;
+    Atom net_wm_state_stays_on_top() const;
+    Atom net_wm_state_modal() const;
 
-   Atom primary_sel() const;
-   Atom targets() const;
+    Atom primary_sel() const;
+    Atom targets() const;
 
-private:
+  private:
 
-   Atom wm_delete_window_;
-   Atom wm_motif_hint_;
-   Atom net_wm_state_;
-   Atom net_wm_state_above_;
-   Atom net_wm_state_stays_on_top_;
-   Atom net_wm_state_modal_;
+    Atom wm_delete_window_;
+    Atom wm_motif_hint_;
+    Atom net_wm_state_;
+    Atom net_wm_state_above_;
+    Atom net_wm_state_stays_on_top_;
+    Atom net_wm_state_modal_;
 
-   Atom primary_sel_;
-   Atom targets_;
+    Atom primary_sel_;
+    Atom targets_;
 
-};
+  };
+
+}
 
 #endif // unix endif
 #endif

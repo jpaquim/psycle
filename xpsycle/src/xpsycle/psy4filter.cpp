@@ -110,7 +110,7 @@ namespace psycle {
 			zipreader_close( z );
 			close( fd );
 
-			NXmlParser parser;
+			ngrs::NXmlParser parser;
 			isPsy4 = false;
 			parser.tagParse.connect(this,&Psy4Filter::onDetectFilterTag);
 			parser.parseFile("psytemp.xml");
@@ -118,14 +118,14 @@ namespace psycle {
 			return isPsy4;		
 		}
 
-		void Psy4Filter::onDetectFilterTag( const NXmlParser & parser, const std::string & tagName )
+		void Psy4Filter::onDetectFilterTag( const ngrs::NXmlParser & parser, const std::string & tagName )
 		{
 			if (tagName == "psy4") isPsy4 = true;
 		}
 
 		bool Psy4Filter::load( const std::string & fileName, Song & song )
 		{
-			NXmlParser parser;
+			ngrs::NXmlParser parser;
 			patMap.clear();
 
 			song.patternSequence()->patternData()->removeAll();
@@ -281,7 +281,7 @@ namespace psycle {
 			return isPsy4;
 		}
 
-		void Psy4Filter::onTagParse(const NXmlParser & parser, const std::string & tagName )
+		void Psy4Filter::onTagParse( const ngrs::NXmlParser& parser, const std::string& tagName )
 		{
 			if ( tagName =="name" ) {
 				std::string attrib = parser.getAttribValue( "text" );
@@ -367,7 +367,7 @@ namespace psycle {
 
 		bool Psy4Filter::save( const std::string & file_Name, const Song & song )
 		{
-			std::string fileName = NFile::extractFileNameFromPath(file_Name);
+			std::string fileName = ngrs::NFile::extractFileNameFromPath(file_Name);
 
 			bool autosave = false;
 			//\todo:

@@ -28,32 +28,34 @@
 #include "nobject.h"
 #include <map>
 
+namespace ngrs {
 
-class NBorder;
-class NXmlParser;
+  class NBorder;
+  class NXmlParser;
 
 
-class NConfig : public NObject {
+  class NConfig : public NObject {
 
-public:
+  public:
     NConfig();
 
     ~NConfig();
 
     NSkin skin( const std::string & identifier );
-    
-private:
 
-	std::string lastId;
+  private:
 
-	std::map<std::string, NSkin> skinMap;
+    std::string lastId;
+
+    std::map<std::string, NSkin> skinMap;
     NSkin* findSkin( const std::string & id );
-	NColor attrsToColor( const NXmlParser & parser );
-    
-	int loadXmlConfig( const std::string & configName );
-	void onTagParse( const NXmlParser & parser, const std::string & tagName );
+    NColor attrsToColor( const NXmlParser & parser );
 
-};
+    int loadXmlConfig( const std::string & configName );
+    void onTagParse( const NXmlParser & parser, const std::string & tagName );
 
+  };
+
+}
 
 #endif

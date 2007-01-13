@@ -24,21 +24,23 @@
 @author Stefan Nattkemper
 */
 
-enum NMoveType{ nMvHorizontal    = 1, 
-                nMvVertical      = 2, 
-                nMvParentLimit   = 4, 
-                nMvRectPicker    = 8, 
-                nMvPolygonPicker = 16, 
-                nMvBorder        = 32, 
-                nMvNoneRepaint   = 64, 
-                nMvTopLimit      = 128, 
-                nMvLeftLimit     = 256, 
-                nMvLeftBorder    = 512, 
-                nMvRightBorder   = 1024, 
-                nMvDrag          = 2048 };
+namespace ngrs {
 
-class NMoveable {
-public:
+  enum NMoveType{ nMvHorizontal    = 1, 
+    nMvVertical      = 2, 
+    nMvParentLimit   = 4, 
+    nMvRectPicker    = 8, 
+    nMvPolygonPicker = 16, 
+    nMvBorder        = 32, 
+    nMvNoneRepaint   = 64, 
+    nMvTopLimit      = 128, 
+    nMvLeftLimit     = 256, 
+    nMvLeftBorder    = 512, 
+    nMvRightBorder   = 1024, 
+    nMvDrag          = 2048 };
+
+  class NMoveable {
+  public:
     NMoveable();
     NMoveable( int style );
 
@@ -49,10 +51,12 @@ public:
     void addStyle( int style );
     void removeStyle( int style );
 
-private:
+  private:
 
-   int style_;
+    int style_;
 
-};
+  };
+
+}
 
 #endif

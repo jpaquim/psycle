@@ -25,93 +25,95 @@
 #undef max
 #endif
 
-NNoteBook::NNoteBook()
- :  NPanel(), visiblePage_(0)
-{
-  setTransparent(true);
-}
+namespace ngrs {
 
-
-NNoteBook::~NNoteBook()
-{
-}
-
-void NNoteBook::add( NVisualComponent * page )
-{
-  NPanel::add(page);
-  if (visiblePage_!=0) {
-    visiblePage_->setVisible(false);
+  NNoteBook::NNoteBook()
+    :  NPanel(), visiblePage_(0)
+  {
+    setTransparent(true);
   }
-  visiblePage_ = page;
-  page->setVisible(true);
-}
 
-void NNoteBook::resize( )
-{
-  if (visiblePage_!=0) {
-    visiblePage_->setPosition(0,0,clientWidth(),clientHeight());
+
+  NNoteBook::~NNoteBook()
+  {
   }
-}
 
-void NNoteBook::setActivePage( NVisualComponent * page )
-{
-  if (page != 0) {
-    std::vector<NVisualComponent*>::const_iterator it = find(visualComponents().begin(), visualComponents().end(), page);
-    if (it == visualComponents().end()) {
-    // That page is not in this container
-    } else
-    {
-      if (visiblePage_) {
+  void NNoteBook::add( NVisualComponent * page )
+  {
+    NPanel::add(page);
+    if (visiblePage_!=0) {
+      visiblePage_->setVisible(false);
+    }
+    visiblePage_ = page;
+    page->setVisible(true);
+  }
+
+  void NNoteBook::resize( )
+  {
+    if (visiblePage_!=0) {
+      visiblePage_->setPosition(0,0,clientWidth(),clientHeight());
+    }
+  }
+
+  void NNoteBook::setActivePage( NVisualComponent * page )
+  {
+    if (page != 0) {
+      std::vector<NVisualComponent*>::const_iterator it = find(visualComponents().begin(), visualComponents().end(), page);
+      if (it == visualComponents().end()) {
+        // That page is not in this container
+      } else
+      {
+        if (visiblePage_) {
+          visiblePage_->setVisible(false);
+        }
+        visiblePage_ = *it;
+        page->setVisible(true);
+        resize();
+      }
+    }
+  }
+
+  void NNoteBook::setActivePage( unsigned int index )
+  {
+    if (index < visualComponents().size() && index >= 0) {
+      if (visiblePage_!=0) {
         visiblePage_->setVisible(false);
       }
-      visiblePage_ = *it;
-      page->setVisible(true);
+      visiblePage_ = visualComponents().at(index);
+      visiblePage_->setVisible(true);
       resize();
     }
   }
-}
 
-void NNoteBook::setActivePage( unsigned int index )
-{
-  if (index < visualComponents().size() && index >= 0) {
-     if (visiblePage_!=0) {
-        visiblePage_->setVisible(false);
-      }
-     visiblePage_ = visualComponents().at(index);
-     visiblePage_->setVisible(true);
-     resize();
+  int NNoteBook::preferredWidth( ) const
+  {
+    if (visiblePage_) {
+      return std::max(1,visiblePage_->preferredWidth());
+    } else return 10;
   }
+
+  int NNoteBook::preferredHeight( ) const
+  {
+    if (visiblePage_) {
+      return std::max(1,visiblePage_->preferredHeight());
+    } else return 10;
+  }
+
+  void NNoteBook::removeChild( NVisualComponent * child )
+  {
+    if ( child == visiblePage_ ) visiblePage_ = 0;
+    NPanel::removeChild( child ) ;
+  }
+
+  void NNoteBook::removeChilds( )
+  {
+    visiblePage_ = 0;
+    NPanel::removeChilds();
+  }
+
+  NVisualComponent * NNoteBook::activePage( )
+  {
+    return visiblePage_;
+  }
+
 }
-
-int NNoteBook::preferredWidth( ) const
-{
-  if (visiblePage_) {
-        return std::max(1,visiblePage_->preferredWidth());
-  } else return 10;
-}
-
-int NNoteBook::preferredHeight( ) const
-{
-  if (visiblePage_) {
-        return std::max(1,visiblePage_->preferredHeight());
-  } else return 10;
-}
-
-void NNoteBook::removeChild( NVisualComponent * child )
-{
-  if ( child == visiblePage_ ) visiblePage_ = 0;
-  NPanel::removeChild( child ) ;
-}
-
-void NNoteBook::removeChilds( )
-{
-  visiblePage_ = 0;
-  NPanel::removeChilds();
-}
-
-NVisualComponent * NNoteBook::activePage( )
-{
-  return visiblePage_;
-}
-
-

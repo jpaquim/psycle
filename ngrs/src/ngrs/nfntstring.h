@@ -30,8 +30,10 @@
 @author Stefan Nattkemper
 */
 
-class NFntString : public std::string {
-public:
+namespace ngrs {
+
+  class NFntString : public std::string {
+  public:
     NFntString();
 
     ~NFntString(); ///\todo stl inheritance virtual dtor stuff rework needed
@@ -50,12 +52,14 @@ public:
 
     const std::vector< std::string::size_type > & positions( ) const;
     const std::vector< NFont > & fonts() const;
-	
-private:
 
-	std::vector< std::string::size_type > positions_;
+  private:
+
+    std::vector< std::string::size_type > positions_;
     std::vector< NFont > fonts_;
 
-};
+  };
+
+}
 
 #endif

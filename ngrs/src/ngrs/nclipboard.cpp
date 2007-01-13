@@ -19,63 +19,67 @@
  ***************************************************************************/
 #include "nclipboard.h"
 
-// clipboard data class
+namespace ngrs {
 
-NClipBoard::ClipBoardData::ClipBoardData( )
-{
-}
+  // clipboard data class
 
-NClipBoard::ClipBoardData::~ ClipBoardData( )
-{
-}
-
-void NClipBoard::ClipBoardData::setFormat( unsigned char format )
-{
-  if ( size() == 0 ) {
-    push_back(format);
-  } else {
-    (*this)[0] = format;
-  }
-}
-
-unsigned char NClipBoard::ClipBoardData::format( ) const
-{
-  if ( size() == 0 )
-    return 0;
-  else
-    return *begin();
-}
-
-// start clipboard
-
-NClipBoard::NClipBoard()
-{
-}
-
-
-NClipBoard::~NClipBoard()
-{
-}
-
-void NClipBoard::setAsText( const std::string & text )
-{
-  data_.clear();
-  data_.setFormat( 1 );
-
-  std::string::const_iterator it = text.begin();
-  for ( ; it != text.end(); it++) {
-    data_.push_back(*it);
+  NClipBoard::ClipBoardData::ClipBoardData( )
+  {
   }
 
-  data_.push_back(0);
-}
-
-std::string NClipBoard::asText( ) const
-{
-  std::string text = "";
-  if (data_.format() == 1) {
-     text = std::string( (const char*) &data_[1] );
+  NClipBoard::ClipBoardData::~ ClipBoardData( )
+  {
   }
 
-  return text;
+  void NClipBoard::ClipBoardData::setFormat( unsigned char format )
+  {
+    if ( size() == 0 ) {
+      push_back(format);
+    } else {
+      (*this)[0] = format;
+    }
+  }
+
+  unsigned char NClipBoard::ClipBoardData::format( ) const
+  {
+    if ( size() == 0 )
+      return 0;
+    else
+      return *begin();
+  }
+
+  // start clipboard
+
+  NClipBoard::NClipBoard()
+  {
+  }
+
+
+  NClipBoard::~NClipBoard()
+  {
+  }
+
+  void NClipBoard::setAsText( const std::string & text )
+  {
+    data_.clear();
+    data_.setFormat( 1 );
+
+    std::string::const_iterator it = text.begin();
+    for ( ; it != text.end(); it++) {
+      data_.push_back(*it);
+    }
+
+    data_.push_back(0);
+  }
+
+  std::string NClipBoard::asText( ) const
+  {
+    std::string text = "";
+    if (data_.format() == 1) {
+      text = std::string( (const char*) &data_[1] );
+    }
+
+    return text;
+  }
+
 }

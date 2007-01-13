@@ -35,7 +35,7 @@ namespace psycle {
 	namespace host	{	
 
 		AudioConfigDlg::AudioConfigDlg( Configuration* cfg )
-		  : NWindow( ),
+		  : ngrs::NWindow( ),
 				config_(cfg)
 		{
 			setTitle("Audio settings");
@@ -56,27 +56,27 @@ namespace psycle {
 			selectedDriver_ = 0;
 
 			// creates the cancel and the ok button at the bottom of the window
-			NPanel* btnPanel = new NPanel();
-				btnPanel->setLayout( NAlignLayout(5,5) );
+            ngrs::NPanel* btnPanel = new ngrs::NPanel();
+               btnPanel->setLayout( ngrs::NAlignLayout(5,5) );
 				/*okBtn_ = new NButton( " Ok " );
 					okBtn_->setFlat(false);
 					okBtn_->clicked.connect( this, &AudioConfigDlg::onOkBtn );
-				btnPanel->add( okBtn_, nAlRight );*/
-				closeBtn_ = new NButton( "Close" );
+				btnPanel->add( okBtn_, ngrs::nAlRight );*/
+                closeBtn_ = new ngrs::NButton( "Close" );
 					closeBtn_->setFlat(false);
 					closeBtn_->clicked.connect( this, &AudioConfigDlg::onCloseBtn );
-				btnPanel->add( closeBtn_, nAlRight );				
-			pane()->add( btnPanel, nAlBottom );
+				btnPanel->add( closeBtn_, ngrs::nAlRight );				
+                pane()->add( btnPanel, ngrs::nAlBottom );
 
 			// creates a TabBook with an audio system and MIDI tab
-			tabBook_ = new NTabBook();
-				audioPage_ = new NPanel();
-					audioPage_->setLayout( NAlignLayout( 5, 5 ) );
-				midiPage_  = new NPanel();
-					midiPage_->setLayout( NAlignLayout() );
+			tabBook_ = new ngrs::NTabBook();
+            audioPage_ = new ngrs::NPanel();
+            audioPage_->setLayout( ngrs::NAlignLayout( 5, 5 ) );
+            midiPage_  = new ngrs::NPanel();
+            midiPage_->setLayout( ngrs::NAlignLayout() );
 				tabBook_->addPage( audioPage_, "Audio System" );
 				tabBook_->addPage( midiPage_, "Midi System" );
-			pane()->add(tabBook_, nAlClient);
+			pane()->add(tabBook_, ngrs::nAlClient);
 			
 			initAudioDriverBox();
 
@@ -85,37 +85,37 @@ namespace psycle {
 
 		void AudioConfigDlg::initAudioDriverBox( )
 		{
-			driverBox_ = new NGroupBox("Audio Driver");
-				driverBox_->setLayout( NAlignLayout() );
-			audioPage_->add( driverBox_, nAlClient );
+          driverBox_ = new ngrs::NGroupBox("Audio Driver");
+				driverBox_->setLayout( ngrs::NAlignLayout() );
+			audioPage_->add( driverBox_, ngrs::nAlClient );
 
-			NPanel* infoPanel = new NPanel();
+            ngrs::NPanel* infoPanel = new ngrs::NPanel();
 				infoPanel->setPreferredSize(200,100);
-				infoPanel->setBorder( NFrameBorder( 1, 5, 5 ) );
+				infoPanel->setBorder( ngrs::NFrameBorder( 1, 5, 5 ) );
 				infoPanel->setSpacing(10,10,10,10);
-				infoPanel->setLayout( NAlignLayout() );
-				audioHeaderLbl_ = new	NLabel( );
+				infoPanel->setLayout( ngrs::NAlignLayout() );
+                audioHeaderLbl_ = new	ngrs::NLabel( );
 					audioHeaderLbl_->setWordWrap(true);
-				infoPanel->add( audioHeaderLbl_, nAlTop );
-				audioDescriptionLbl_ = new NLabel( );
+				infoPanel->add( audioHeaderLbl_, ngrs::nAlTop );
+				audioDescriptionLbl_ = new ngrs::NLabel( );
 					audioDescriptionLbl_->setWordWrap(true);
-				infoPanel->add( audioDescriptionLbl_, nAlTop );
-			driverBox_->add( infoPanel, nAlRight );
+				infoPanel->add( audioDescriptionLbl_, ngrs::nAlTop );
+			driverBox_->add( infoPanel, ngrs::nAlRight );
 
-			NPanel* driverSelectPanel = new NPanel();
-				driverSelectPanel->setLayout( NAlignLayout( 5, 5 ) );
-				driverCbx_ = new NComboBox();
+			ngrs::NPanel* driverSelectPanel = new ngrs::NPanel();
+				driverSelectPanel->setLayout( ngrs::NAlignLayout( 5, 5 ) );
+				driverCbx_ = new ngrs::NComboBox();
 				driverCbx_->setWidth(100);
 				driverCbx_->itemSelected.connect( this, &AudioConfigDlg::onDriverSelected );
-				driverSelectPanel->add ( driverCbx_, nAlLeft );			
-				restartBtn_ = new NButton("Restart Driver");
+				driverSelectPanel->add ( driverCbx_, ngrs::nAlLeft );			
+				restartBtn_ = new ngrs::NButton("Restart Driver");
 					restartBtn_->clicked.connect( this, &AudioConfigDlg::onRestartDriver );
 					restartBtn_->setFlat( false );
-				driverSelectPanel->add( restartBtn_, nAlLeft );
-			driverBox_->add( driverSelectPanel, nAlTop );
+				driverSelectPanel->add( restartBtn_, ngrs::nAlLeft );
+			driverBox_->add( driverSelectPanel, ngrs::nAlTop );
 
-			noteBook_ = new NNoteBook();
-			driverBox_->add( noteBook_, nAlClient );
+			noteBook_ = new ngrs::NNoteBook();
+			driverBox_->add( noteBook_, ngrs::nAlClient );
 
 			initJackPage();
 			initEsdPage();
@@ -126,57 +126,57 @@ namespace psycle {
 
 		void AudioConfigDlg::initJackPage( )
 		{
-			jackPage_ = new NPanel();
-				jackPage_->setLayout( NAlignLayout() );
-				NLabel* label = new NLabel("No Settings here");
-				jackPage_->add( label, nAlTop );
+			jackPage_ = new ngrs::NPanel();
+				jackPage_->setLayout( ngrs::NAlignLayout() );
+				ngrs::NLabel* label = new ngrs::NLabel("No Settings here");
+				jackPage_->add( label, ngrs::nAlTop );
 			noteBook_->add( jackPage_ );			
 		}
 
 		void AudioConfigDlg::initEsdPage( )
 		{
-			esdPage_ = new NPanel();
-				esdPage_->setLayout( NAlignLayout() );
-				NLabel* label = new NLabel("No Settings here");
-				esdPage_->add( label, nAlTop );
+			esdPage_ = new ngrs::NPanel();
+				esdPage_->setLayout( ngrs::NAlignLayout() );
+				ngrs::NLabel* label = new ngrs::NLabel("No Settings here");
+				esdPage_->add( label, ngrs::nAlTop );
 			noteBook_->add( esdPage_ );
 		}
 
 		void AudioConfigDlg::initGeneralPage( )
 		{
-			generalPage_ = new NPanel();
-				generalPage_->setLayout( NAlignLayout() );
-				NPanel* table = new NPanel();
-					NTableLayout tableLayout(2,3);
+			generalPage_ = new ngrs::NPanel();
+				generalPage_->setLayout( ngrs::NAlignLayout() );
+				ngrs::NPanel* table = new ngrs::NPanel();
+					ngrs::NTableLayout tableLayout(2,3);
 					tableLayout.setVGap(5);
 					tableLayout.setHGap(5);
-					table->setLayout(tableLayout);
+					table->setLayout( tableLayout );
 			
-					table->add(new NLabel("Device") , NAlignConstraint(nAlLeft,0,0),true);
-					table->add(new NLabel("Buffer size"), NAlignConstraint(nAlLeft,0,1),true);
-					table->add(new NLabel("Sample rate"), NAlignConstraint(nAlLeft,0,2),true);
-					table->add(new NLabel("Bit depth"), NAlignConstraint(nAlLeft,0,3),true);
-					table->add(new NLabel("Channel mode"), NAlignConstraint(nAlLeft,0,4),true);
+					table->add(new ngrs::NLabel("Device") , ngrs::NAlignConstraint( ngrs::nAlLeft, 0, 0 ),true);
+					table->add(new ngrs::NLabel("Buffer size"), ngrs::NAlignConstraint( ngrs::nAlLeft, 0, 1),true);
+					table->add(new ngrs::NLabel("Sample rate"), ngrs::NAlignConstraint( ngrs::nAlLeft, 0, 2),true);
+					table->add(new ngrs::NLabel("Bit depth"), ngrs::NAlignConstraint( ngrs::nAlLeft, 0, 3),true);
+					table->add(new ngrs::NLabel("Channel mode"), ngrs::NAlignConstraint( ngrs::nAlLeft, 0, 4),true);
 
-					deviceEdt_ = new NEdit();
-						deviceEdt_->setPreferredSize(150,15);
-					sampleRateCbx_ = new NComboBox();
+					deviceEdt_ = new ngrs::NEdit();
+						deviceEdt_->setPreferredSize( 150, 15 );
+					sampleRateCbx_ = new ngrs::NComboBox();
 						sampleRateCbx_->itemSelected.connect( this, &AudioConfigDlg::onSampleRateCbx );
-						sampleRateCbx_->add( new NItem("44100"));
-					bitDepthCbx_ = new NComboBox();
+						sampleRateCbx_->add( new ngrs::NItem("44100"));
+					bitDepthCbx_ = new ngrs::NComboBox();
 						bitDepthCbx_->itemSelected.connect( this, &AudioConfigDlg::onDepthCbx );
-						bitDepthCbx_->add( new NItem("16") );
-					channelModeCbx_ = new NComboBox();
-						channelModeCbx_->add( new NItem("mono" ) );
-						channelModeCbx_->add( new NItem("stereo") );
+						bitDepthCbx_->add( new ngrs::NItem("16") );
+					channelModeCbx_ = new ngrs::NComboBox();
+						channelModeCbx_->add( new ngrs::NItem("mono" ) );
+						channelModeCbx_->add( new ngrs::NItem("stereo") );
 						channelModeCbx_->itemSelected.connect( this, &AudioConfigDlg::onChannelCbx );
 
-					table->add( deviceEdt_, NAlignConstraint(nAlLeft,1,0),true);
-					table->add( sampleRateCbx_, NAlignConstraint(nAlLeft,1,2),true);
-					table->add( bitDepthCbx_, NAlignConstraint(nAlLeft,1,3),true);
-					table->add( channelModeCbx_, NAlignConstraint(nAlLeft,1,4),true);
+					table->add( deviceEdt_, ngrs::NAlignConstraint( ngrs::nAlLeft, 1, 0 ), true);
+					table->add( sampleRateCbx_, ngrs::NAlignConstraint( ngrs::nAlLeft, 1, 2), true);
+					table->add( bitDepthCbx_, ngrs::NAlignConstraint( ngrs::nAlLeft, 1, 3), true);
+					table->add( channelModeCbx_, ngrs::NAlignConstraint( ngrs::nAlLeft,1,4), true);
 
-				generalPage_->add( table, nAlClient );
+				generalPage_->add( table, ngrs::nAlClient );
 			noteBook_->add( generalPage_ );
 		}
 
@@ -186,11 +186,11 @@ namespace psycle {
 			std::map<std::string, AudioDriver*>::iterator it = driverMap.begin();
 			for ( ; it != driverMap.end(); it++ ) {
 				std::string driverName = it->first;
-				driverCbx_->add( new NItem( driverName ) );
+				driverCbx_->add( new ngrs::NItem( driverName ) );
 			}
 		}
 
-		void AudioConfigDlg::onDriverSelected( NItemEvent * ev )
+		void AudioConfigDlg::onDriverSelected( ngrs::NItemEvent * ev )
 		{
 			std::map<std::string, AudioDriver*> & driverMap =  config_->driverMap();
 			std::map<std::string, AudioDriver*>::iterator it = driverMap.find( ev->text() );
@@ -224,7 +224,6 @@ namespace psycle {
 				AudioDriverSettings settings = selectedDriver_->settings();
 
 				// now write the information to the gui
-				std::cout << settings.deviceName() << std::endl;
 				deviceEdt_->setText( settings.deviceName() );
 
 				switch ( settings.samplesPerSec() ) {
@@ -264,7 +263,7 @@ namespace psycle {
 			}
 		}
 
-		void AudioConfigDlg::onRestartDriver( NButtonEvent * ev )
+        void AudioConfigDlg::onRestartDriver( ngrs::NButtonEvent * ev )
 		{		
 			if ( selectedDriver_ ) {
 				// disable old driver
@@ -274,11 +273,11 @@ namespace psycle {
 			}
 		}
 
-		void AudioConfigDlg::onOkBtn( NButtonEvent* ev ) {
+		void AudioConfigDlg::onOkBtn( ngrs::NButtonEvent* ev ) {
                         
 		}
 
-		void AudioConfigDlg::onCloseBtn( NButtonEvent* ev ) {
+        void AudioConfigDlg::onCloseBtn( ngrs::NButtonEvent* ev ) {
 			onClose();
 		}
 
@@ -286,13 +285,13 @@ namespace psycle {
 		void AudioConfigDlg::setVisible( bool on ) {
 			if (on) {
 				AudioDriverInfo driverInfo = Player::Instance()->driver().info();
-				std::vector<NCustomItem*>::iterator it = driverCbx_->items().begin();
+				std::vector<ngrs::NCustomItem*>::iterator it = driverCbx_->items().begin();
 				int idx = 0;
 				for ( ; it < driverCbx_->items().end(); it++, idx++ ) {
-					NCustomItem* item = *it;
+                  ngrs::NCustomItem* item = *it;
 					if ( item->text() == driverInfo.name() ) {
 						driverCbx_->setIndex( idx );
-						NItemEvent ev(item,item->text());
+                        ngrs::NItemEvent ev(item,item->text());
 						onDriverSelected( &ev );
 						break;
 					}
@@ -306,18 +305,18 @@ namespace psycle {
 		int AudioConfigDlg::onClose( )
 		{
 			setVisible(false);
-            return nHideWindow;
+            return ngrs::nHideWindow;
 		}
 
-		void AudioConfigDlg::onChannelCbx( NItemEvent * ev )
+		void AudioConfigDlg::onChannelCbx( ngrs::NItemEvent * ev )
 		{
 		}
 
-		void AudioConfigDlg::onSampleRateCbx( NItemEvent * ev )
+		void AudioConfigDlg::onSampleRateCbx( ngrs::NItemEvent * ev )
 		{
 		}
 
-		void AudioConfigDlg::onDepthCbx( NItemEvent * ev )
+		void AudioConfigDlg::onDepthCbx( ngrs::NItemEvent * ev )
 		{
 		}
 

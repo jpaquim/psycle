@@ -19,27 +19,34 @@
  ***************************************************************************/
 #include "nstatusmodel.h"
 
+namespace ngrs {
 
-NCustomStatusModel::~NCustomStatusModel() 
-{
-}
+  NCustomStatusModel::NCustomStatusModel() 
+  {
+  }
+
+  NCustomStatusModel::~NCustomStatusModel() 
+  {
+  }
 
 
-NStatusModel::NStatusModel() {
-}
+  NStatusModel::NStatusModel() {
+  }
 
-NStatusModel::~NStatusModel() {
-}
+  NStatusModel::~NStatusModel() {
+  }
 
-void NStatusModel::setText( const std::string & text, unsigned int index ) {
-	textMap[index] = text;
-	changed.emit( *this, index );
-}
+  void NStatusModel::setText( const std::string & text, unsigned int index ) {
+    textMap[index] = text;
+    changed.emit( *this, index );
+  }
 
-std::string NStatusModel::text( unsigned int index ) const {
-   std::map<unsigned int, std::string>::const_iterator it = textMap.find( index );
-   if ( it != textMap.end() ) {
-	   return it->second;
-   }
-   return "";
+  std::string NStatusModel::text( unsigned int index ) const {
+    std::map<unsigned int, std::string>::const_iterator it = textMap.find( index );
+    if ( it != textMap.end() ) {
+      return it->second;
+    }
+    return "";
+  }
+
 }

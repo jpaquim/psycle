@@ -19,26 +19,30 @@
  ***************************************************************************/
 #include "ncustomstatusitem.h"
 
-// default ctor
-NCustomStatusItem::NCustomStatusItem( )
- : NPanel(), modelIndex_( 0 )
-{	 
-}
+namespace ngrs {
 
-NCustomStatusItem::NCustomStatusItem( unsigned int modelIndex )
- : NPanel(), modelIndex_( modelIndex )
-{	 
-}
+  // default ctor
+  NCustomStatusItem::NCustomStatusItem( )
+    : NPanel(), modelIndex_( 0 )
+  {	 
+  }
+
+  NCustomStatusItem::NCustomStatusItem( unsigned int modelIndex )
+    : NPanel(), modelIndex_( modelIndex )
+  {	 
+  }
 
 
-NCustomStatusItem::~NCustomStatusItem()
-{
-}
+  NCustomStatusItem::~NCustomStatusItem()
+  {
+  }
 
-void NCustomStatusItem::setModelIndex( unsigned int modelIndex ) {
-  modelIndex_ = modelIndex;
-}
+  void NCustomStatusItem::setModelIndex( unsigned int modelIndex ) {
+    modelIndex_ = modelIndex;
+  }
 
-unsigned int NCustomStatusItem::modelIndex() const {
-  return modelIndex_;
+  unsigned int NCustomStatusItem::modelIndex() const {
+    return modelIndex_;
+  }
+
 }

@@ -48,7 +48,7 @@ namespace psycle {
 
 
 		WireGUI::WireGUI()
-			: NVisualComponent()
+			: ngrs::NVisualComponent()
 		{
             lineShape = new BendedLineShape();
             lineShape->setClippingDistance(12);
@@ -76,37 +76,37 @@ namespace psycle {
 		}
 				
 
-        const NPoint & WireGUI::p1( ) const {
+        const ngrs::NPoint & WireGUI::p1( ) const {
           return lineShape->p1();
         }
 
-        const NPoint & WireGUI::p2( ) const
+        const ngrs::NPoint & WireGUI::p2( ) const
         {
           return lineShape->p2();
         }
                 
-		void WireGUI::insertBend( const NPoint & pt ) {
+		void WireGUI::insertBend( const ngrs::NPoint & pt ) {
 		  lineShape->insertBend( pt );		
 		}                
 
-        void WireGUI::setPoints( const NPoint & p1, const NPoint & p2 )
+        void WireGUI::setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 )
         {
           lineShape->setPoints(p1,p2);
         }
 
-		void WireGUI::paint( NGraphics * g )
+		void WireGUI::paint( ngrs::NGraphics * g )
 		{
-			NPen pen;
+			ngrs::NPen pen;
 			pen.setLineWidth(2);
 			g->setPen(pen);
 
             g->setTranslation( g->xTranslation()-left(), g->yTranslation()-top() );
               
             // draw the bended lines           
-            NPoint startPt = lineShape->p1();                        
-            std::vector<NPoint>::const_iterator it = lineShape->bendPts().begin();
+            ngrs::NPoint startPt = lineShape->p1();                        
+            std::vector<ngrs::NPoint>::const_iterator it = lineShape->bendPts().begin();
             for ( ; it < lineShape->bendPts().end(); it++ ) {
-              NPoint pt = *it;
+              ngrs::NPoint pt = *it;
               g->drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() );              
               startPt = pt;                         
             }                                                                                    
@@ -117,16 +117,16 @@ namespace psycle {
             startPt = lineShape->p1();                        
             it = lineShape->bendPts().begin();
             for ( ; it < lineShape->bendPts().end(); it++ ) {
-              NPoint pt = *it;
+              ngrs::NPoint pt = *it;
               drawArrow( g, startPt, pt );             
               startPt = pt;                         
             }                                                                           		
 			drawArrow( g, startPt, lineShape->p2() );
 
-			g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
+			g->setTranslation( g->xTranslation()+left(), g->yTranslation()+top() );
 		}
 
-		void WireGUI::drawArrow( NGraphics * g , const NPoint & p1, const NPoint & p2 )
+		void WireGUI::drawArrow( ngrs::NGraphics * g , const ngrs::NPoint& p1, const ngrs::NPoint& p2 )
 		{
 			// Spaces between the end and startPoint of the Line
 
@@ -154,18 +154,18 @@ namespace psycle {
 			int btcol = 240 - abs((int)((altslope-0.79) * 32));
 
 
-			NColor rtBrush((int) max(0, min(255, rtcol * deltaColR)),
+			ngrs::NColor rtBrush((int) max(0, min(255, rtcol * deltaColR)),
 										(int) max(0, min(255, rtcol * deltaColG)),
 										(int) max(0, min(255, rtcol * deltaColB)));
-			NColor ltBrush( (int) max(0, min(255, ltcol * deltaColR)),
+			ngrs::NColor ltBrush( (int) max(0, min(255, ltcol * deltaColR)),
 									(int) max(0, min(255, ltcol * deltaColG)),
 									(int) max(0, min(255, ltcol * deltaColB)));
-			NColor btBrush( (int) max(0, min(255, btcol * deltaColR)),
+			ngrs::NColor btBrush( (int) max(0, min(255, btcol * deltaColR)),
 									(int) max(0, min(255, btcol * deltaColG)),
 									(int) max(0, min(255, btcol * deltaColB)));
 
-			NColor polyInnardsColor((int) ( 192 * deltaColR ), (int) (192 * deltaColG) , (int) (192 * deltaColB) );
-			NPoint pol[5];
+			ngrs::NColor polyInnardsColor((int) ( 192 * deltaColR ), (int) (192 * deltaColG) , (int) (192 * deltaColB) );
+			ngrs::NPoint pol[5];
 
 			pol[0].setX( middleX -  (int) (cos    * triangle_size_center) );
 			pol[0].setY( middleY -  (int) (sin    * triangle_size_center) );
@@ -178,7 +178,7 @@ namespace psycle {
 			pol[4].setX( pol[0].x() + (int) (sin    * triangle_size_wide) );
 			pol[4].setY( pol[0].y() - (int) (cos    * triangle_size_wide) );
 
-			NPoint fillPoly[7];
+			ngrs::NPoint fillPoly[7];
 
 			fillPoly[2].setX( pol[0].x() + (int) (2* cos * triangle_size_indent) );
 			fillPoly[2].setY( pol[0].y() + (int) (2* sin * triangle_size_indent) );
@@ -226,38 +226,38 @@ namespace psycle {
 
 
 		void WireGUI::initPopupMenu() {
-			menu_ = new NPopupMenu();
-			NMenuItem* item;
-			item = new NMenuItem("add Bend");
+			menu_ = new ngrs::NPopupMenu();
+			ngrs::NMenuItem* item;
+			item = new ngrs::NMenuItem("add Bend");
 			item->click.connect(this,&WireGUI::onAddBend);
 			menu_->add( item );
-			item = new NMenuItem("remove Connection");
+			item = new ngrs::NMenuItem("remove Connection");
 			item->click.connect(this,&WireGUI::onRemoveMe);
 			menu_->add( item );
 			add( menu_ );                                 
 		}
 
-		void WireGUI::onAddBend( NButtonEvent* ev ) {
+		void WireGUI::onAddBend( ngrs::NButtonEvent* ev ) {
 			insertBend( newBendPos_ );
 			repaint();
 			bendAdded.emit( this );
-			setMoveable( NMoveable( nMvPolygonPicker ) );
+			setMoveable( ngrs::NMoveable( ngrs::nMvPolygonPicker ) );
 		}
 		
-		void WireGUI::onRemoveMe( NButtonEvent* ev ) {
+		void WireGUI::onRemoveMe( ngrs::NButtonEvent* ev ) {
             removeMe.emit( this );
         }
 
 		void WireGUI::onMousePress( int x, int y, int button ) {
-      		int shift = NApp::system().shiftState();      
-			if ( (shift &  nsRight) && !(shift & nsCtrl) ) {
+      		int shift = ngrs::NApp::system().shiftState();      
+			if ( (shift &  ngrs::nsRight) && !(shift & ngrs::nsCtrl) ) {
 				// display right click popup menu
 				newBendPos_.setXY( left() + x, top() + y );
 
 				menu_->setPosition( x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(), 100,100);
 				menu_->setVisible( true ); 
 			} else
-			if ( (shift &  nsRight) && (shift & nsCtrl) ) {
+			if ( (shift &  ngrs::nsRight) && (shift & ngrs::nsCtrl) ) {
 				// start here rewire 
 				int distToSquareP1 = ( left() + x - p1().x() )*( left() + x - p1().x() ) + ( top() + y - p1().y() )*( top() + y - p1().y() );
 				int distToSquareP2 = ( left() + x - p2().x() )*( left() + x - p2().x() ) + ( top() + y - p2().y() )*( top() + y - p2().y() );
@@ -266,7 +266,7 @@ namespace psycle {
 				else
 				  setMoveFocus(1);				
 			}
-			setMoveable( NMoveable( nMvPolygonPicker ) );        
+			setMoveable( ngrs::NMoveable( ngrs::nMvPolygonPicker ) );        
 			repaint();        
 		}
                                         

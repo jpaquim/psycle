@@ -25,9 +25,12 @@
 /**
 @author Stefan
 */
-class NRectShape : public NShape
-{
-public:
+
+namespace ngrs {
+
+  class NRectShape : public NShape
+  {
+  public:
     NRectShape();
 
     ~NRectShape();
@@ -41,14 +44,16 @@ public:
     virtual NRegion region();
     virtual NRegion spacingRegion(const NSize & spacing);
 
-		virtual NRectShape* clone() const;   // Uses the copy constructor
+    virtual NRectShape* clone() const;   // Uses the copy constructor
 
 
-private:
+  private:
 
-  #ifdef __unix__
+#ifdef __unix__
     XRectangle rectangle;
-  #endif
-};
+#endif
+  };
+
+}
 
 #endif

@@ -23,8 +23,11 @@
 /**
 @author Stefan Nattkemper
 */
-class NAlignConstraint{
-public:
+
+namespace ngrs {
+
+  class NAlignConstraint{
+  public:
     NAlignConstraint();
     NAlignConstraint(int align, int col, int row);
 
@@ -37,10 +40,12 @@ public:
     int col()  const;
     int row() const;
 
-private:
+  private:
 
     int align_ , col_, row_;
 
-};
+  };
+
+}
 
 #endif

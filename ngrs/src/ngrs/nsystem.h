@@ -40,45 +40,46 @@
   #include <windows.h>
 #endif
 
-
 /**
 @author Stefan
 */
 
+namespace ngrs {
+
 #ifdef __unix__
-typedef Window WinHandle;
+  typedef Window WinHandle;
 #else
-typedef HWND WinHandle;
+  typedef HWND WinHandle;
 #endif
 
-class NAtoms;
-class NWindow;
+  class NAtoms;
+  class NWindow;
 
-class NSystem{
+  class NSystem{
     // Singleton Pattern
-    private:
-      NSystem();
-      ~NSystem();
-			NSystem( NSystem const & );
-  		NSystem& operator=(NSystem const&);
+  private:
+    NSystem();
+    ~NSystem();
+    NSystem( NSystem const & );
+    NSystem& operator=(NSystem const&);
 
-		public:
-			static NSystem* Instance() {
-					//use only single threaded!
-					static NSystem s;
- 					return &s; 
-			}
-		// Singleton pattern end
+  public:
+    static NSystem* Instance() {
+      //use only single threaded!
+      static NSystem s;
+      return &s; 
+    }
+    // Singleton pattern end
 
     WinHandle rootWindow() const;
 
-    #ifdef __unix__
+#ifdef __unix__
     Display* dpy() const;
     Visual *visual() const;
     Colormap colormap() const;
-    #else
+#else
     HINSTANCE hInst() const;
-    #endif
+#endif
     int depth() const;
     int pixelSize( int depth ) const;
     int screen() const;
@@ -90,7 +91,7 @@ class NSystem{
 
     int keyState() const; // obsolote wil be removed
     void setKeyState(int keyState); // will be removed
-    
+
     int shiftState() const;
     int keyState( int vkey ) const; // 0 up : 1 down 2 : toggled
     std::map<int,int> keyboardState() const;
@@ -115,12 +116,12 @@ class NSystem{
     bool isTrueColor();
     bool propertysActive();
 
-    #ifdef __unix__
+#ifdef __unix__
     MWMHints getMotifHints(WinHandle win) const;
     void setMotifModalMode(WinHandle win);
     void setMotifHints( WinHandle win , MWMHints hints);
-    #endif
-    
+#endif
+
     void setModalMode(WinHandle win);
     void setFocus( NWindow* window );
 
@@ -129,10 +130,10 @@ class NSystem{
     NClipBoard & clipBoard();
     const NClipBoard & clipBoard() const;
 
-		void setCursor( int crIdentifier, NWindow* win );
+    void setCursor( int crIdentifier, NWindow* win );
     int cursor() const;
 
-private:
+  private:
 
     NAtoms* atoms_;
 
@@ -143,43 +144,45 @@ private:
     int keyState_;
     int cursorId_;
 
-    
+
 
     typedef ngrs::color_converter<8, unsigned long int> color_converter;
     color_converter color_converter_;
 
     WinHandle rootWindow_;
-    #ifdef __unix__
+#ifdef __unix__
     Display* dpy_;
     Visual *visual_;
     Colormap colormap_;
-    #else
+#else
     WNDCLASSEX wc;
-    #endif
+#endif
 
     std::map<NFont,NFontStructure>  xfntCache;
     std::map<NFont,NFontStructure>  xftfntCache;
     std::map<unsigned long,unsigned long> colorCache;
-    #ifdef __unix__
+#ifdef __unix__
     std::map<int, Cursor> cursorMap;
-    #else
+#else
     std::map<int, HCURSOR> cursorMap;    
-    #endif
+#endif
 
     void initX();
     void matchVisual();
     std::string getFontPattern(const NFont & font);
-    #ifdef __unix__
+#ifdef __unix__
     static bool isWellFormedFont(std::string name);
     static bool isScalableFont(std::string name);
     static std::string fontPattern(const NFont & font);
     static char ** getFontList(Display* dpy, std::string pattern, int* count);
     static std::string getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size);
-    #endif
+#endif
 
     void initCursorMap();
 
     NClipBoard clipBoard_;
-};
+  };
+
+}
 
 #endif

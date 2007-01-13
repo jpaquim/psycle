@@ -27,105 +27,110 @@
 #include "nconfig.h"
 #include "npopupmenu.h"
 
-/* XPM */
-const char * submenu_arrow_right_xpm[] = {
-"12 12 2 1",
-" 	c None",
-".	c black",
-"            ",
-"            ",
-"    .       ",
-"    ..      ",
-"    ...     ",
-"    ....    ",
-"    ...     ",
-"    ..      ",
-"    .       ",
-"            ",
-"            ",
-"            "};
+
+namespace ngrs {
+
+  /* XPM */
+  const char * submenu_arrow_right_xpm[] = {
+    "12 12 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "            ",
+    "    .       ",
+    "    ..      ",
+    "    ...     ",
+    "    ....    ",
+    "    ...     ",
+    "    ..      ",
+    "    .       ",
+    "            ",
+    "            ",
+    "            "
+  };
 
 
-NMenuItem::NMenuItem()
- : NCustomMenuItem()
-{
-  init();
-}
+  NMenuItem::NMenuItem()
+    : NCustomMenuItem()
+  {
+    init();
+  }
 
-NMenuItem::NMenuItem( const std::string & text )
-{
-  init();
-  captionLbl_->setText(text);
-}
+  NMenuItem::NMenuItem( const std::string & text )
+  {
+    init();
+    captionLbl_->setText(text);
+  }
 
-NMenuItem::NMenuItem( const std::string & text, const NBitmap & icon )
-{
-  init();
-  captionLbl_->setText(text);
-  iconImg_->setBitmap(icon);
-}
+  NMenuItem::NMenuItem( const std::string & text, const NBitmap & icon )
+  {
+    init();
+    captionLbl_->setText(text);
+    iconImg_->setBitmap(icon);
+  }
 
-void NMenuItem::init( )
-{
-  setLayout(NAlignLayout());
+  void NMenuItem::init( )
+  {
+    setLayout(NAlignLayout());
 
-  iconImg_ = new NImage();
+    iconImg_ = new NImage();
     iconImg_->setPreferredSize(25,25);
     iconImg_->setVAlign(nAlCenter);
     iconImg_->setHAlign(nAlCenter);
     iconImg_->setSkin(NApp::config()->skin("mitemiconbg"));
-  NCustomMenuItem::add(iconImg_, nAlLeft);
+    NCustomMenuItem::add(iconImg_, nAlLeft);
 
-  subMenuImg_ = new NImage();
+    subMenuImg_ = new NImage();
     subMenuImg_->setPreferredSize(25,25);
-  NCustomMenuItem::add(subMenuImg_, nAlRight);
+    NCustomMenuItem::add(subMenuImg_, nAlRight);
 
-  captionLbl_ = new NLabel();
+    captionLbl_ = new NLabel();
     captionLbl_->setSpacing(4,0,0,0);
     captionLbl_->setVAlign(nAlCenter);
-  NCustomMenuItem::add(captionLbl_, nAlClient);
+    NCustomMenuItem::add(captionLbl_, nAlClient);
 
-  menu_ = 0;
-}
-
-NMenuItem::~NMenuItem()
-{
-}
-
-void NMenuItem::onMouseEnter( )
-{
-  iconImg_->setTransparent(true);
-  NCustomMenuItem::onMouseEnter();
-
-  if (menu_ && !menu_->mapped()) {
-     menu_->popupMenu()->setPosition(window()->left()+window()->width(), window()->top()+absoluteTop(),100,100);
-     menu_->popupMenu()->setVisible(true);
+    menu_ = 0;
   }
-}
 
-void NMenuItem::onMouseExit( )
-{
-  if (menu_!=0 && (NApp::mouseOverWindow() == menu_->popupMenu())) {
-
-  } else {
-
-    iconImg_->setTransparent(false);
-    NCustomMenuItem::onMouseExit();
-
-     if (menu_!=0 && menu_->popupMenu()->mapped()) menu_->popupMenu()->setVisible(false);
-
+  NMenuItem::~NMenuItem()
+  {
   }
-}
 
-void NMenuItem::add( NMenu * menu )
-{
-  menu_ = menu;
-  if (menu_) {
-    subMenuImg_->setBitmap(NBitmap(submenu_arrow_right_xpm));
-    subMenuImg_->setVAlign(nAlCenter);
-    subMenuImg_->setHAlign(nAlCenter);
-  } else {
-    subMenuImg_->setBitmap(NBitmap());
+  void NMenuItem::onMouseEnter( )
+  {
+    iconImg_->setTransparent(true);
+    NCustomMenuItem::onMouseEnter();
+
+    if (menu_ && !menu_->mapped()) {
+      menu_->popupMenu()->setPosition(window()->left()+window()->width(), window()->top()+absoluteTop(),100,100);
+      menu_->popupMenu()->setVisible(true);
+    }
   }
-}
 
+  void NMenuItem::onMouseExit( )
+  {
+    if (menu_!=0 && (NApp::mouseOverWindow() == menu_->popupMenu())) {
+
+    } else {
+
+      iconImg_->setTransparent(false);
+      NCustomMenuItem::onMouseExit();
+
+      if (menu_!=0 && menu_->popupMenu()->mapped()) menu_->popupMenu()->setVisible(false);
+
+    }
+  }
+
+  void NMenuItem::add( NMenu * menu )
+  {
+    menu_ = menu;
+    if (menu_) {
+      subMenuImg_->setBitmap(NBitmap(submenu_arrow_right_xpm));
+      subMenuImg_->setVAlign(nAlCenter);
+      subMenuImg_->setHAlign(nAlCenter);
+    } else {
+      subMenuImg_->setBitmap(NBitmap());
+    }
+  }
+
+}

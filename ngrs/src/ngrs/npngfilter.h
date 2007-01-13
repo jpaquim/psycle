@@ -26,15 +26,20 @@
 /**
 @author Stefan
 */
-class NPngFilter : public NImgFilter
-{
-public:
+
+namespace ngrs {
+
+  class NPngFilter : public NImgFilter
+  {
+  public:
     NPngFilter();
 
     ~NPngFilter();
 
     NBitmap loadFromFile(std::string filename);
 
-};
+  };
+
+}
 
 #endif

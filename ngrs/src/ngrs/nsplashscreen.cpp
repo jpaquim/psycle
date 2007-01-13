@@ -21,29 +21,28 @@
 #include "nframeborder.h"
 #include "nimage.h"
 
-NSplashScreen::NSplashScreen()
- : NWindow()
-{
-   setDecoration(false);
-   pane()->setBorder(NFrameBorder());
-   setPositionToScreenCenter();
+namespace ngrs {
+
+  NSplashScreen::NSplashScreen()
+    : NWindow()
+  {
+    setDecoration(false);
+    pane()->setBorder(NFrameBorder());
+    setPositionToScreenCenter();
+  }
+
+  NSplashScreen::~NSplashScreen()
+  {
+  }
+
+  void NSplashScreen::loadImageFromFile( const std::string & fileName )
+  {
+    NImage* img = new NImage();
+    img->loadFromFile(fileName);
+    setPosition(0, 0, img->width(), img->height());
+    setPositionToScreenCenter();
+    img->setAlign(nAlClient);
+    pane()->add(img);
+  }
+
 }
-
-
-NSplashScreen::~NSplashScreen()
-{
-}
-
-
-
-void NSplashScreen::loadImageFromFile( const std::string & fileName )
-{
-  NImage* img = new NImage();
-  img->loadFromFile(fileName);
-  setPosition(0, 0, img->width(), img->height());
-  setPositionToScreenCenter();
-  img->setAlign(nAlClient);
-  pane()->add(img);
-}
-
-

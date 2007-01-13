@@ -28,29 +28,27 @@
 #endif
 #include "ncolor.h"
 
+namespace ngrs {
 
-/**
-*/
+  class NFontStructure{
+  public:
 
-class NFontStructure{
-public:
+    NFontStructure();
 
-     NFontStructure();
+    ~NFontStructure();
 
-     ~NFontStructure();
+#ifdef __unix__
+    XFontStruct* xFnt;
+    XftFont*  xftFnt;
+#else
+    HFONT hFnt; 
+#endif
 
-    #ifdef __unix__
-     XFontStruct* xFnt;
-     XftFont*  xftFnt;
-    #else
-     HFONT hFnt; 
-    #endif
-    
     NColor textColor;
     bool antialias;
 
+  };
 
-
-};
+}
 
 #endif

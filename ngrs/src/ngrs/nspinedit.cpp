@@ -19,64 +19,68 @@
  ***************************************************************************/
 #include "nspinedit.h"
 
-NSpinEdit::NSpinEdit()
- : NPanel()
-{
-  add( edit_ = new NEdit() );
-  add( spinBtn_  = new NSpinButton() );
+namespace ngrs {
 
-  spinBtn_->decClick.connect(this,&NSpinEdit::onDecBtnClick);
-  spinBtn_->incClick.connect(this,&NSpinEdit::onIncBtnClick);
-}
+  NSpinEdit::NSpinEdit()
+    : NPanel()
+  {
+    add( edit_ = new NEdit() );
+    add( spinBtn_  = new NSpinButton() );
 
-
-NSpinEdit::~NSpinEdit()
-{
-}
-
-void NSpinEdit::resize( )
-{
-  int cw = clientWidth();
-  int ch = clientHeight();
-
-  int prefBtnW = spinBtn_->preferredWidth();
-
-  edit_->setPosition(0,0,cw-prefBtnW,ch);
-  spinBtn_->setPosition(cw-prefBtnW,0,prefBtnW,ch);
-}
-
-void NSpinEdit::setText( const std::string & text )
-{
-  edit_->setText(text);
-}
-
-std::string NSpinEdit::text( ) const
-{
-  return edit_->text();
-}
-
-void NSpinEdit::onIncBtnClick( NButtonEvent * ev )
-{
-  incClick.emit(ev);
-}
-
-void NSpinEdit::onDecBtnClick( NButtonEvent * ev )
-{
-  decClick.emit(ev);
-}
+    spinBtn_->decClick.connect(this,&NSpinEdit::onDecBtnClick);
+    spinBtn_->incClick.connect(this,&NSpinEdit::onIncBtnClick);
+  }
 
 
-int NSpinEdit::preferredHeight( ) const
-{
-  NFontMetrics metrics;
-  metrics.setFont(font());
-  return metrics.textHeight();// + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
-}
+  NSpinEdit::~NSpinEdit()
+  {
+  }
+
+  void NSpinEdit::resize( )
+  {
+    int cw = clientWidth();
+    int ch = clientHeight();
+
+    int prefBtnW = spinBtn_->preferredWidth();
+
+    edit_->setPosition(0,0,cw-prefBtnW,ch);
+    spinBtn_->setPosition(cw-prefBtnW,0,prefBtnW,ch);
+  }
+
+  void NSpinEdit::setText( const std::string & text )
+  {
+    edit_->setText(text);
+  }
+
+  std::string NSpinEdit::text( ) const
+  {
+    return edit_->text();
+  }
+
+  void NSpinEdit::onIncBtnClick( NButtonEvent * ev )
+  {
+    incClick.emit(ev);
+  }
+
+  void NSpinEdit::onDecBtnClick( NButtonEvent * ev )
+  {
+    decClick.emit(ev);
+  }
 
 
-int NSpinEdit::preferredWidth( ) const
-{ 
-  NFontMetrics metrics;
-  metrics.setFont(font());
-  return width() + spinBtn_->preferredWidth();
+  int NSpinEdit::preferredHeight( ) const
+  {
+    NFontMetrics metrics;
+    metrics.setFont(font());
+    return metrics.textHeight();// + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
+  }
+
+
+  int NSpinEdit::preferredWidth( ) const
+  { 
+    NFontMetrics metrics;
+    metrics.setFont(font());
+    return width() + spinBtn_->preferredWidth();
+  }
+
 }

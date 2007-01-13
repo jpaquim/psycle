@@ -23,68 +23,70 @@
 #include "nlabel.h"
 #include "ncustomitem.h"
 
+namespace ngrs {
 
+  NTreeNode::NTreeNode()
+    : NFlipBox()
+  {
+    entries_ = new NPanel();
+    entries_->setLayout( NAlignLayout() );
+    entries_->setSpacing(flipperWidth(),0,0,0);
+    pane()->add(entries_, nAlTop);
 
-NTreeNode::NTreeNode()
- : NFlipBox()
-{
-  entries_ = new NPanel();
-     entries_->setLayout( NAlignLayout() );
-     entries_->setSpacing(flipperWidth(),0,0,0);
-  pane()->add(entries_, nAlTop);
-
-  subNodes = new NPanel();
+    subNodes = new NPanel();
     subNodes->setLayout( NAlignLayout() );
-  pane()->add(subNodes, nAlTop);
+    pane()->add(subNodes, nAlTop);
 
-  headerItem_ = 0;
-}
-
-NTreeNode::~NTreeNode()
-{
-}
-
-void NTreeNode::addNode( NTreeNode * node )
-{
-  subNodes->add(node, nAlTop);
-}
-
-void NTreeNode::addEntry( NCustomItem * entry )
-{
-  entries_->add(entry, nAlTop);
-  entry->mousePress.connect(this,&NTreeNode::onItemPress);
-  entry->setTransparent(true);
-}
-
-void NTreeNode::setHeader( NCustomItem * entry )
-{
-  headerItem_ = entry;
-  header()->add(entry, nAlClient);
-  entry->mousePress.connect(this,&NTreeNode::onItemPress);
-  entry->setTransparent(true);
-}
-
-void NTreeNode::onItemPress( NButtonEvent * ev )
-{
-  if (ev->button() == 1) {
-    NCustomItem* item = static_cast<NCustomItem*>( ev->sender() );
-    itemSelected.emit(this, item);
+    headerItem_ = 0;
   }
-}
 
-NCustomItem * NTreeNode::headerItem( )
-{
-  return headerItem_;
-}
+  NTreeNode::~NTreeNode()
+  {
+  }
 
-void NTreeNode::paint( NGraphics* g ) {
-  /*
-  NVisualComponent* last = dynamic_cast<NVisualComponent*>( parent() )->visualComponents().back();
-  if ( this != last )
+  void NTreeNode::addNode( NTreeNode * node )
+  {
+    subNodes->add(node, nAlTop);
+  }
+
+  void NTreeNode::addEntry( NCustomItem * entry )
+  {
+    entries_->add(entry, nAlTop);
+    entry->mousePress.connect(this,&NTreeNode::onItemPress);
+    entry->setTransparent(true);
+  }
+
+  void NTreeNode::setHeader( NCustomItem * entry )
+  {
+    headerItem_ = entry;
+    header()->add(entry, nAlClient);
+    entry->mousePress.connect(this,&NTreeNode::onItemPress);
+    entry->setTransparent(true);
+  }
+
+  void NTreeNode::onItemPress( NButtonEvent * ev )
+  {
+    if (ev->button() == 1) {
+      NCustomItem* item = static_cast<NCustomItem*>( ev->sender() );
+      itemSelected.emit(this, item);
+    }
+  }
+
+  NCustomItem * NTreeNode::headerItem( )
+  {
+    return headerItem_;
+  }
+
+  void NTreeNode::paint( NGraphics* g ) {
+    /*
+    NVisualComponent* last = dynamic_cast<NVisualComponent*>( parent() )->visualComponents().back();
+    if ( this != last )
     setStyle( nFlipBoxLine );
-  else
-	setStyle( 0 );
-  */
+    else
+    setStyle( 0 );
+    */
 
-  NFlipBox::paint( g );
+    NFlipBox::paint( g );
+  }
+
 }

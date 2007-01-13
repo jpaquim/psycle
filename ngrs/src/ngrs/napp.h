@@ -30,118 +30,122 @@
 #include <unistd.h>
 #endif
 
+namespace ngrs {
+
 #ifdef __unix__
-typedef XEvent WEvent;
+  typedef XEvent WEvent;
 #else
-struct WEvent {
-  HWND hwnd;
-  UINT msg;
-  WPARAM wParam;
-  LPARAM lParam;            
-};
+  struct WEvent {
+    HWND hwnd;
+    UINT msg;
+    WPARAM wParam;
+    LPARAM lParam;            
+  };
 #endif
 
-class NSystem;
-class NWindow;
-class NConfig;
-class NSplashScreen;
-class NVisualComponent;
+  class NSystem;
+  class NWindow;
+  class NConfig;
+  class NSplashScreen;
+  class NVisualComponent;
 
-/**
-beinhaltet u.a die Eventloop 
+  /**
+  beinhaltet u.a die Eventloop 
 
-@author Stefan
-*/
-class NApp{
-public:
+  @author Stefan
+  */
+  class NApp{
+  public:
     NApp();
 
     ~NApp();
 
-   void run();
-   static void runModal(NWindow* modalWin);
-   void setMainWindow(NWindow* window);
-   static NWindow* mainWindow();
-   static void addWindow(WinHandle handle, NWindow* window);
-   static void addKeyAccelerator(const NKeyAccelerator & accelerator, NObject* notify);
-   static void removeWindow( WinHandle handle );
-   static NSystem & system();
-   static void doRepaint(NWindow* win);
+    void run();
+    static void runModal(NWindow* modalWin);
+    void setMainWindow(NWindow* window);
+    static NWindow* mainWindow();
+    static void addWindow(WinHandle handle, NWindow* window);
+    static void addKeyAccelerator(const NKeyAccelerator & accelerator, NObject* notify);
+    static void removeWindow( WinHandle handle );
+    static NSystem & system();
+    static void doRepaint(NWindow* win);
 
-   static NWindow* mouseOverWindow();
-   static void registerPopupWindow(NWindow* win);
-   static void unregisterPopupWindow(NWindow* win);
-   static void unmapPopupWindows();
+    static NWindow* mouseOverWindow();
+    static void registerPopupWindow(NWindow* win);
+    static void unregisterPopupWindow(NWindow* win);
+    static void unmapPopupWindows();
 
-   static bool popupUnmapped_;
+    static bool popupUnmapped_;
 
-   static std::vector<NImgFilter*> filter;
+    static std::vector<NImgFilter*> filter;
 
-   void setSplashScreen(NSplashScreen * splashScreen);
+    void setSplashScreen(NSplashScreen * splashScreen);
 
-   static void clearEventQueue();
-   static void flushEventQueue();
+    static void clearEventQueue();
+    static void flushEventQueue();
 
-   static NConfig * config();
+    static NConfig * config();
 
-   static void addRemovePipe(NRuntime* component);
+    static void addRemovePipe(NRuntime* component);
 
-   static void enterThread();
-   static void leaveThread();
+    static void enterThread();
+    static void leaveThread();
 
-   static NWindow* lastOverWin_;
-   
-   #ifdef __unix__
-   #else
-   static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-   #endif
+    static NWindow* lastOverWin_;
 
-private:
+#ifdef __unix__
+#else
+    static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
 
-   static NConfig* config_;
+  private:
 
-   NSplashScreen* splashScreen_;
-   static char buffer[40];
-   #ifdef __unix__
-   static KeySym mykeysym;
-   static XComposeStatus compose;
-   static Time lastBtnPressTime;
-   #endif
-   static NWindow* modalWin_;
+    static NConfig* config_;
 
-   static std::map<WinHandle,NWindow*> winMap;
-   static NWindow* mainWin_;
+    NSplashScreen* splashScreen_;
+    static char buffer[40];
+#ifdef __unix__
+    static KeySym mykeysym;
+    static XComposeStatus compose;
+    static Time lastBtnPressTime;
+#endif
+    static NWindow* modalWin_;
 
-   void eventLoop();
-   static void modalEventLoop(NWindow* modalWin);
+    static std::map<WinHandle,NWindow*> winMap;
+    static NWindow* mainWin_;
 
-   #ifdef __unix__
-   static unsigned int processEvent( NWindow* win, WEvent* event);
-   #else
-   static LRESULT processEvent( NWindow* win, WEvent* event);
-   #endif
+    void eventLoop();
+    static void modalEventLoop(NWindow* modalWin);
 
-   static std::vector<NWindow*> repaintWin_;
-   static std::vector<NVisualComponent*> scrollControl_;
+#ifdef __unix__
+    static unsigned int processEvent( NWindow* win, WEvent* event);
+#else
+    static LRESULT processEvent( NWindow* win, WEvent* event);
+#endif
 
-   static std::map<NKeyAccelerator, NObject*> keyAccelerator_;
+    static std::vector<NWindow*> repaintWin_;
+    static std::vector<NVisualComponent*> scrollControl_;
 
-   static NObject* findAcceleratorNotifier(const NKeyAccelerator & acc);
-   static std::vector<NWindow*> popups_;
+    static std::map<NKeyAccelerator, NObject*> keyAccelerator_;
 
-   static std::vector<NRuntime*> removePipe;
-   static void callRemovePipe( );
+    static NObject* findAcceleratorNotifier(const NKeyAccelerator & acc);
+    static std::vector<NWindow*> popups_;
 
-   NXPMFilter* xpmFilter_;
-   #ifdef __unix__
-   pthread_mutex_t m_Mutex;
-   #endif
-   static bool in_thread_;
-   
-   static void buttonPress( NWindow* win, WEvent* event, int button );
+    static std::vector<NRuntime*> removePipe;
+    static void callRemovePipe( );
 
-   static int modalExitLoop_;
+    NXPMFilter* xpmFilter_;
+#ifdef __unix__
+    pthread_mutex_t m_Mutex;
+#endif
+    static bool in_thread_;
 
-};
+    static void buttonPress( NWindow* win, WEvent* event, int button );
+
+    static int modalExitLoop_;
+
+  };
+
+}
 
 #endif

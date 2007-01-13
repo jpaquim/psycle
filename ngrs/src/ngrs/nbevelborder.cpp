@@ -20,64 +20,66 @@
 
 #include "nbevelborder.h"
 
-NBevelBorder::NBevelBorder()
- : NBorder()
-{
-  innerStyle_=nRaised;
-  outerStyle_=nLowered;
-  oval_=false;
-  mapStyle();
-}
+namespace ngrs {
 
-NBevelBorder::NBevelBorder( int outerStyle, int innerStyle ) : NBorder()
-{
-  innerStyle_=innerStyle;
-  outerStyle_=outerStyle;
-  oval_=false;
-  mapStyle();
-}
-
-
-NBevelBorder::~NBevelBorder()
-{
-}
-
-void NBevelBorder::paint( NGraphics* g, const NShape & geometry)
-{ 
-  g->setForeground(NColor(200,200,200));
-
-  int x      = geometry.left();
-  int y      = geometry.top();
-  int width  = geometry.width();
-  int height = geometry.height();
-
-  g->setTranslation(g->xTranslation()+x,g->yTranslation()+y);
-  drawRectBorder(g,width,height);
-  g->setTranslation(g->xTranslation()-x,g->yTranslation()-y);
-}
-
-
-void NBevelBorder::drawRectBorder(NGraphics* g, int width, int height) 
-{
-  int sz = 2;
-
-  switch (style_)
+  NBevelBorder::NBevelBorder()
+    : NBorder()
   {
-    case 1: // bevelOuter raised , inner lowered
-     g->setForeground(NColor(230,230,230));
-     g->drawLine(0,0,width-1,0);
-     g->drawLine(0,0,0,height-1);
-     g->setForeground(NColor(150,150,150));
-     g->drawLine(0,height-1,width-1,height-1);
-     g->drawLine(width-1,0,width-1,height-1);
+    innerStyle_=nRaised;
+    outerStyle_=nLowered;
+    oval_=false;
+    mapStyle();
+  }
 
-     g->setForeground(NColor(150,150,150));
-     g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
-     g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
-     g->setForeground(NColor(230,230,230));
-     g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
-     g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
-    break;
+  NBevelBorder::NBevelBorder( int outerStyle, int innerStyle ) : NBorder()
+  {
+    innerStyle_=innerStyle;
+    outerStyle_=outerStyle;
+    oval_=false;
+    mapStyle();
+  }
+
+
+  NBevelBorder::~NBevelBorder()
+  {
+  }
+
+  void NBevelBorder::paint( NGraphics* g, const NShape & geometry)
+  { 
+    g->setForeground(NColor(200,200,200));
+
+    int x      = geometry.left();
+    int y      = geometry.top();
+    int width  = geometry.width();
+    int height = geometry.height();
+
+    g->setTranslation(g->xTranslation()+x,g->yTranslation()+y);
+    drawRectBorder(g,width,height);
+    g->setTranslation(g->xTranslation()-x,g->yTranslation()-y);
+  }
+
+
+  void NBevelBorder::drawRectBorder(NGraphics* g, int width, int height) 
+  {
+    int sz = 2;
+
+    switch (style_)
+    {
+    case 1: // bevelOuter raised , inner lowered
+      g->setForeground(NColor(230,230,230));
+      g->drawLine(0,0,width-1,0);
+      g->drawLine(0,0,0,height-1);
+      g->setForeground(NColor(150,150,150));
+      g->drawLine(0,height-1,width-1,height-1);
+      g->drawLine(width-1,0,width-1,height-1);
+
+      g->setForeground(NColor(150,150,150));
+      g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
+      g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
+      g->setForeground(NColor(230,230,230));
+      g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
+      g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
+      break;
     case 2: // bevelOuter lowerd , inner raised
       g->setForeground(NColor(150,150,150));
       g->drawLine(0,0,width-1,0);
@@ -94,7 +96,7 @@ void NBevelBorder::drawRectBorder(NGraphics* g, int width, int height)
 
       g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
       g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
-    break;
+      break;
     case 6:
       g->setForeground(NColor(230,230,230));
       g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
@@ -103,66 +105,74 @@ void NBevelBorder::drawRectBorder(NGraphics* g, int width, int height)
       g->setForeground(NColor(150,150,150));
       g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
       g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
-    break;
+      break;
     case 7:
-     g->setForeground(NColor(150,150,150));
-     g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
-     g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
+      g->setForeground(NColor(150,150,150));
+      g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
+      g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
 
-     g->setForeground(NColor(230,230,230));
-     g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
-     g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
-    break;
+      g->setForeground(NColor(230,230,230));
+      g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
+      g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
+      break;
     default :;
+    }
   }
-}
 
 
 
-void NBevelBorder::setInnerStyle( int style )
-{
-  innerStyle_ = style;
-  mapStyle();  
-}
+  void NBevelBorder::setInnerStyle( int style )
+  {
+    innerStyle_ = style;
+    mapStyle();  
+  }
 
-void NBevelBorder::setOuterStyle( int style )
-{
-  outerStyle_ = style;
-  mapStyle();  
-}
+  void NBevelBorder::setOuterStyle( int style )
+  {
+    outerStyle_ = style;
+    mapStyle();  
+  }
 
-int NBevelBorder::innerStyle( )
-{
-  return innerStyle_;
-}
+  int NBevelBorder::innerStyle( )
+  {
+    return innerStyle_;
+  }
 
-int NBevelBorder::outerStyle( )
-{
-  return outerStyle_;
-}
+  int NBevelBorder::outerStyle( )
+  {
+    return outerStyle_;
+  }
 
-void NBevelBorder::mapStyle( )
-{
-  if (innerStyle_==nNone    && outerStyle_==nNone)  style_=0; else
-  if (outerStyle_==nRaised  && innerStyle_==nLowered) style_=1; else 
-  if (outerStyle_==nLowered  && innerStyle_==nRaised) style_=2; else
-  if (outerStyle_==nRaised  && innerStyle_==nNone)  style_=5; else
-  if (outerStyle_==nLowered && innerStyle_==nNone)  style_=4; else
-  if (outerStyle_==nNone && innerStyle_==nRaised) style_=6; else
-  if (outerStyle_==nNone && innerStyle_==nLowered) style_=7;
-}
+  void NBevelBorder::mapStyle( )
+  {
+    if (innerStyle_==nNone    && outerStyle_==nNone)  style_=0; 
+      else
+    if (outerStyle_==nRaised  && innerStyle_==nLowered) style_=1;
+      else 
+    if (outerStyle_==nLowered  && innerStyle_==nRaised) style_=2;
+      else
+    if (outerStyle_==nRaised  && innerStyle_==nNone)  style_=5;
+      else
+    if (outerStyle_==nLowered && innerStyle_==nNone)  style_=4;
+      else
+    if (outerStyle_==nNone && innerStyle_==nRaised) style_=6;
+      else
+    if (outerStyle_==nNone && innerStyle_==nLowered) style_=7;
+  }
 
-void NBevelBorder::setStyle( int outerStyle, int innerStyle, int size )
-{
-  innerStyle_ = innerStyle;
-  outerStyle_ = outerStyle;
-  mapStyle();
-//  size_ = size;
-}
+  void NBevelBorder::setStyle( int outerStyle, int innerStyle, int size )
+  {
+    innerStyle_ = innerStyle;
+    outerStyle_ = outerStyle;
+    mapStyle();
+    //  size_ = size;
+  }
 
-// usage of Covariant Return Types, a feature that was not originally part of c++. If your //compiler complains at the declaration of NBevelBorder* clone() const, you have an old compiler and you'll have to change the return type to NBorder*.
+  // usage of Covariant Return Types, a feature that was not originally part of c++. If your //compiler complains at the declaration of NBevelBorder* clone() const, you have an old compiler and you'll have to change the return type to NBorder*.
 
-NBevelBorder * NBevelBorder::clone( ) const
-{
-  return new NBevelBorder(*this);
+  NBevelBorder * NBevelBorder::clone( ) const
+  {
+    return new NBevelBorder(*this);
+  }
+
 }

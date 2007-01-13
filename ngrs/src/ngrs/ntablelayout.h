@@ -26,29 +26,32 @@
 /**
 @author Stefan Nattkemper
 */
-class NTableLayout : public NLayout
-{
-  class Row {
-     public :
-       Row();
-       Row(int col, class NVisualComponent* comp);
-       ~Row();
 
-       int rowMaxHeight() const;
-       int defaultRowHeight() const;
+namespace ngrs {
 
-       NVisualComponent* colAt(int index);
+  class NTableLayout : public NLayout
+  {
+    class Row {
+    public :
+      Row();
+      Row(int col, class NVisualComponent* comp);
+      ~Row();
 
-       void add(int col, class NVisualComponent* comp);
+      int rowMaxHeight() const;
+      int defaultRowHeight() const;
 
-       std::map<int, class NVisualComponent*> colMap;
+      NVisualComponent* colAt(int index);
 
-     private:
+      void add(int col, class NVisualComponent* comp);
 
-  };
+      std::map<int, class NVisualComponent*> colMap;
+
+    private:
+
+    };
 
 
-public:
+  public:
     NTableLayout();
     NTableLayout(int cols, int rows);
 
@@ -78,7 +81,7 @@ public:
     virtual void remove(class NVisualComponent* comp);
     virtual void removeAll();
 
-private:
+  private:
 
     int cols_;
     int rows_;
@@ -96,6 +99,8 @@ private:
     mutable std::map<int,int> colMaxWidthCache;
 
     int findVerticalStart( long comparator , class NVisualComponent* owner);
-};
+  };
+
+}
 
 #endif

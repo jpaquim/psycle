@@ -23,148 +23,149 @@
 #include "ngradient.h"
 //#include "nproperty.h"
 
-NCustomButton::NCustomButton()
- : NPanel()
-{
-  init();
-}
+namespace ngrs {
 
-NCustomButton::NCustomButton( const std::string & text ) : NPanel()
-{
-  init();
-  label_->setText(text);
-}
+  NCustomButton::NCustomButton()
+    : NPanel()
+  {
+    init();
+  }
 
-void NCustomButton::init( )
-{
-  toggle_ = down_ = false;
+  NCustomButton::NCustomButton( const std::string & text ) : NPanel()
+  {
+    init();
+    label_->setText(text);
+  }
 
-  setTransparent(false);
+  void NCustomButton::init( )
+  {
+    toggle_ = down_ = false;
 
-  label_ = new NLabel();
+    setTransparent(false);
+
+    label_ = new NLabel();
     label_->setSpacing(4,2,4,2);
     label_->setHAlign(nAlCenter);
     label_->setVAlign(nAlCenter);
     label_->setEvents(false);
-  add(label_);
+    add(label_);
 
-  resize();
+    resize();
 
     // runtime
-//  if (properties()) properties()->registrate<std::string>("text", *this, &NCustomButton::text, &NCustomButton::setText);
-}
-
-NCustomButton::~NCustomButton()
-{
-
-}
-
-
-void NCustomButton::setText( const std::string & text )
-{
-  label_->setText(text);
-}
-
-
-void NCustomButton::resize( )
-{
-  label_->setPosition(0,0,spacingWidth(),spacingHeight());
-}
-
-int NCustomButton::preferredWidth( ) const
-{
-  return label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
-}
-
-int NCustomButton::preferredHeight( ) const
-{
-  return label_->preferredHeight() + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
-}
-
-void NCustomButton::onMousePress( int x, int y, int button )
-{
-  setDown(!down_);
-  NButtonEvent ev(this,x,y,button,"btnpress");
-  click.emit(&ev);
-  sendMessage(&ev);
-}
-
-void NCustomButton::onMousePressed( int x, int y, int button )
-{
-  NPanel::onMousePressed(x,y,button);
-  if (!toggle_) {
-    setDown(false);
+    //  if (properties()) properties()->registrate<std::string>("text", *this, &NCustomButton::text, &NCustomButton::setText);
   }
-  if (NRect(0,0,width(),height()).intersects(x,y)) {
-    NButtonEvent ev(this,x,y,button,"btnpressed");
-    clicked.emit(&ev);
+
+  NCustomButton::~NCustomButton()
+  {
+
+  }
+
+
+  void NCustomButton::setText( const std::string & text )
+  {
+    label_->setText(text);
+  }
+
+
+  void NCustomButton::resize( )
+  {
+    label_->setPosition(0,0,spacingWidth(),spacingHeight());
+  }
+
+  int NCustomButton::preferredWidth( ) const
+  {
+    return label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
+  }
+
+  int NCustomButton::preferredHeight( ) const
+  {
+    return label_->preferredHeight() + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
+  }
+
+  void NCustomButton::onMousePress( int x, int y, int button )
+  {
+    setDown(!down_);
+    NButtonEvent ev(this,x,y,button,"btnpress");
+    click.emit(&ev);
     sendMessage(&ev);
   }
-}
 
-
-const std::string & NCustomButton::text( ) const
-{
-  return label_->text();
-}
-
-char NCustomButton::mnemonic( )
-{
-  return label_->mnemonic();
-}
-
-void NCustomButton::setMnemonic(char c )
-{
-  label_->setMnemonic(c);
-}
-
-
-bool NCustomButton::toggle( ) const
-{
-  return toggle_;
-}
-
-bool NCustomButton::down( ) const
-{
-  return down_;
-}
-
-void NCustomButton::setToggle( bool on )
-{
-  toggle_ = on;
-}
-
-void NCustomButton::setDown( bool on )
-{
-  down_ = on;
-}
-
-void NCustomButton::onMessage( NEvent * ev )
-{
-  if (toggle() && ev->text() == "toggle:'up'") {
-    setDown(false);
+  void NCustomButton::onMousePressed( int x, int y, int button )
+  {
+    NPanel::onMousePressed(x,y,button);
+    if (!toggle_) {
+      setDown(false);
+    }
+    if (NRect(0,0,width(),height()).intersects(x,y)) {
+      NButtonEvent ev(this,x,y,button,"btnpressed");
+      clicked.emit(&ev);
+      sendMessage(&ev);
+    }
   }
+
+
+  const std::string & NCustomButton::text( ) const
+  {
+    return label_->text();
+  }
+
+  char NCustomButton::mnemonic( )
+  {
+    return label_->mnemonic();
+  }
+
+  void NCustomButton::setMnemonic(char c )
+  {
+    label_->setMnemonic(c);
+  }
+
+
+  bool NCustomButton::toggle( ) const
+  {
+    return toggle_;
+  }
+
+  bool NCustomButton::down( ) const
+  {
+    return down_;
+  }
+
+  void NCustomButton::setToggle( bool on )
+  {
+    toggle_ = on;
+  }
+
+  void NCustomButton::setDown( bool on )
+  {
+    down_ = on;
+  }
+
+  void NCustomButton::onMessage( NEvent * ev )
+  {
+    if (toggle() && ev->text() == "toggle:'up'") {
+      setDown(false);
+    }
+  }
+
+  void NCustomButton::setTextHAlign( int align )
+  {
+    label_->setHAlign(align);
+  }
+
+  void NCustomButton::setTextVAlign( int align )
+  {
+    label_->setVAlign(align);
+  }
+
+  NLabel * NCustomButton::label( )
+  {
+    return label_;
+  }
+
+  NLabel * NCustomButton::label( ) const
+  {
+    return label_;
+  }
+
 }
-
-void NCustomButton::setTextHAlign( int align )
-{
-  label_->setHAlign(align);
-}
-
-void NCustomButton::setTextVAlign( int align )
-{
-  label_->setVAlign(align);
-}
-
-NLabel * NCustomButton::label( )
-{
-  return label_;
-}
-
-NLabel * NCustomButton::label( ) const
-{
-  return label_;
-}
-
-
-

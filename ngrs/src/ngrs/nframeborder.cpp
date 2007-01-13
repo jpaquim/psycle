@@ -19,96 +19,95 @@
  ***************************************************************************/
 #include "nframeborder.h"
 
+namespace ngrs {
 
-NFrameBorder::NFrameBorder()
- : NBorder()
-{
-  setSpacing(NSize(1,1,1,1));
-  lcount_ = 1;
-  dx_ = 2; dy_ = 2;
-  arcWidth_  = 5;
-  arcHeight_ = 5;
-  oval_ = false;
-}
-
-NFrameBorder::NFrameBorder( bool oval, int arcWidth, int arcHeight )
-{
-  setSpacing(NSize(1,1,1,1));
-  lcount_ = 1;
-  dx_ = 2; dy_ = 2;
-  arcWidth_  = arcWidth;
-  arcHeight_ = arcHeight;
-  oval_ = oval;
-}
-
-NFrameBorder::~NFrameBorder()
-{
-}
-
-void NFrameBorder::paint( NGraphics * g, const NShape & geometry )
-{
-  g->setForeground(color());
-  NRect r = geometry.rectArea();
-  for (int i = 0; i < lcount_; i++) {
-    if (oval_) 
-      g->drawRoundRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_),arcWidth_,arcHeight_);
-    else
-      g->drawRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_));
+  NFrameBorder::NFrameBorder()
+    : NBorder()
+  {
+    setSpacing(NSize(1,1,1,1));
+    lcount_ = 1;
+    dx_ = 2; dy_ = 2;
+    arcWidth_  = 5;
+    arcHeight_ = 5;
+    oval_ = false;
   }
+
+  NFrameBorder::NFrameBorder( bool oval, int arcWidth, int arcHeight )
+  {
+    setSpacing(NSize(1,1,1,1));
+    lcount_ = 1;
+    dx_ = 2; dy_ = 2;
+    arcWidth_  = arcWidth;
+    arcHeight_ = arcHeight;
+    oval_ = oval;
+  }
+
+  NFrameBorder::~NFrameBorder()
+  {
+  }
+
+  void NFrameBorder::paint( NGraphics * g, const NShape & geometry )
+  {
+    g->setForeground(color());
+    NRect r = geometry.rectArea();
+    for (int i = 0; i < lcount_; i++) {
+      if (oval_) 
+        g->drawRoundRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_),arcWidth_,arcHeight_);
+      else
+        g->drawRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_));
+    }
+  }
+
+  void NFrameBorder::setOval( bool on, int arcWidth, int arcHeight )
+  {
+    oval_ = on;
+    arcWidth_  = arcWidth;
+    arcHeight_ = arcHeight;
+  }
+
+  void NFrameBorder::setLineCount( int count, int dWidth, int dHeight )
+  {
+    dx_ = dWidth;
+    dy_ = dHeight;
+    lcount_ = count;
+    setSpacing(NSize( lcount_*dx_,lcount_*dy_,lcount_*dx_,lcount_*dy_));
+  }
+
+  bool NFrameBorder::oval( ) const
+  {
+    return oval_;
+  }
+
+  int NFrameBorder::arcWidth( ) const
+  {
+    return arcWidth_;
+  }
+
+  int NFrameBorder::arcHeight( ) const
+  {
+    return arcHeight_;
+  }
+
+  int NFrameBorder::lineCount( ) const
+  {
+    return lcount_;
+  }
+
+  int NFrameBorder::dWidth( ) const
+  {
+    return dx_;
+  }
+
+  int NFrameBorder::dHeight( ) const
+  {
+    return dy_;
+  }
+
+  // usage of Covariant Return Types, a feature that was not originally part of c++. If your //compiler complains at the declaration of NFrameBorder* clone() const, you have an old compiler and you'll have to change the return type to NBorder*.
+
+  NFrameBorder * NFrameBorder::clone( ) const
+  {
+    return new NFrameBorder(*this);
+  }
+
 }
-
-void NFrameBorder::setOval( bool on, int arcWidth, int arcHeight )
-{
-  oval_ = on;
-  arcWidth_  = arcWidth;
-  arcHeight_ = arcHeight;
-}
-
-void NFrameBorder::setLineCount( int count, int dWidth, int dHeight )
-{
-  dx_ = dWidth;
-  dy_ = dHeight;
-  lcount_ = count;
-  setSpacing(NSize( lcount_*dx_,lcount_*dy_,lcount_*dx_,lcount_*dy_));
-}
-
-bool NFrameBorder::oval( ) const
-{
-  return oval_;
-}
-
-int NFrameBorder::arcWidth( ) const
-{
-  return arcWidth_;
-}
-
-int NFrameBorder::arcHeight( ) const
-{
-  return arcHeight_;
-}
-
-int NFrameBorder::lineCount( ) const
-{
-  return lcount_;
-}
-
-int NFrameBorder::dWidth( ) const
-{
-  return dx_;
-}
-
-int NFrameBorder::dHeight( ) const
-{
-  return dy_;
-}
-
-// usage of Covariant Return Types, a feature that was not originally part of c++. If your //compiler complains at the declaration of NFrameBorder* clone() const, you have an old compiler and you'll have to change the return type to NBorder*.
-
-NFrameBorder * NFrameBorder::clone( ) const
-{
-  return new NFrameBorder(*this);
-}
-
-
-
-

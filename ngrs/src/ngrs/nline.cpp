@@ -20,45 +20,48 @@
 #include "nline.h"
 #include <cmath>
 
-NLine::NLine()
- : NVisualComponent()
-{
-  lineShape = new NLineShape();
-	lineShape->setClippingDistance(30);
-  setGeometry(lineShape);  
+namespace ngrs {
+
+  NLine::NLine()
+    : NVisualComponent()
+  {
+    lineShape = new NLineShape();
+    lineShape->setClippingDistance(30);
+    setGeometry(lineShape);  
+  }
+
+
+  NLine::~NLine()
+  {
+    delete lineShape;
+  }
+
+  void NLine::paint( NGraphics * g )
+  {
+    g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
+    g->drawLine(lineShape->p1().x(),  lineShape->p1().y(), lineShape->p2().x(), lineShape->p2().y());
+    g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
+  }
+
+  void NLine::setPoints( const NPoint & p1, const NPoint & p2 )
+  {
+    lineShape->setPoints(p1,p2);
+  }
+
+
+
+  const NPoint & NLine::p1( ) const
+  {
+    return lineShape->p1();
+  }
+
+  const NPoint & NLine::p2( ) const
+  {
+    return lineShape->p2();
+  }
+
+  void NLine::setClippingDistance( int distance ) {
+    lineShape->setClippingDistance( distance );
+  }
+
 }
-
-
-NLine::~NLine()
-{
-  delete lineShape;
-}
-
-void NLine::paint( NGraphics * g )
-{
-  g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
-  g->drawLine(lineShape->p1().x(),  lineShape->p1().y(), lineShape->p2().x(), lineShape->p2().y());
-  g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
-}
-
-void NLine::setPoints( const NPoint & p1, const NPoint & p2 )
-{
-  lineShape->setPoints(p1,p2);
-}
-
-
-
-const NPoint & NLine::p1( ) const
-{
-  return lineShape->p1();
-}
-
-const NPoint & NLine::p2( ) const
-{
-  return lineShape->p2();
-}
-
-void NLine::setClippingDistance( int distance ) {
- lineShape->setClippingDistance( distance );
-}
-

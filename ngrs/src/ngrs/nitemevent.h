@@ -22,23 +22,27 @@
 
 #include "nevent.h"
 
-class NCustomItem;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
-class NItemEvent : public NEvent
-{
-public:
+  class NCustomItem;
+
+  /**
+  @author Stefan
+  */
+  class NItemEvent : public NEvent
+  {
+  public:
     NItemEvent(NCustomItem* sender, const std::string & text);
 
     ~NItemEvent();
 
     NCustomItem* item();
 
-private:
+  private:
 
     NCustomItem* item_;
-};
+  };
+
+}
 
 #endif

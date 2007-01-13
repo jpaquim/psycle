@@ -26,15 +26,20 @@
 /**
 @author Stefan
 */
-class NImgFilter : public NObject
-{
-public:
+
+namespace ngrs {
+
+  class NImgFilter : public NObject
+  {
+  public:
     NImgFilter();
 
     virtual ~NImgFilter();
 
     virtual NBitmap loadFromFile(const std::string & filename) = 0;
 
-};
+  };
+
+}
 
 #endif

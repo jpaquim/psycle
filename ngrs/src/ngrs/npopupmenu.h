@@ -23,13 +23,15 @@
 #include "npopupwindow.h"
 #include "nmenuseperator.h"
 
-
 /**
 @author Stefan
 */
-class NPopupMenu : public NPopupWindow
-{
-public:
+
+namespace ngrs {
+
+  class NPopupMenu : public NPopupWindow
+  {
+  public:
     NPopupMenu();
 
     ~NPopupMenu();
@@ -44,11 +46,13 @@ public:
     virtual void removeChilds();
 
 
-private:
+  private:
 
-   std::vector<class NCustomItem*> items;
-   class NObject* lastOverItem;
+    std::vector<class NCustomItem*> items;
+    class NObject* lastOverItem;
 
-};
+  };
+
+}
 
 #endif

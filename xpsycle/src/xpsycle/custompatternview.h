@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+*   Copyright (C) 2006 by Stefan Nattkemper   *
+*   natti@linux   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef CUSTOMPATTERNVIEW_H
 #define CUSTOMPATTERNVIEW_H
 
@@ -31,318 +31,312 @@
 */
 
 namespace psycle {
-	namespace host	{	
+  namespace host	{	
 
-		class ColumnEvent {			
-			public:
-                enum ColType { hex2 = 0, hex4 = 1, note = 2 };
-				
-                ColumnEvent( ColType type );
-                
-				~ColumnEvent();
-				
-				ColType type() const;
-				int cols() const;
+    class ColumnEvent {			
+    public:
+      enum ColType { hex2 = 0, hex4 = 1, note = 2 };
 
-			private:
-				
-				ColType type_;
-		};
+      ColumnEvent( ColType type );
 
-		class PatCursor {
-		public:
+      ~ColumnEvent();
 
-			PatCursor();
-			PatCursor( int track, int line, int eventNr, int col );
-			~PatCursor();
+      ColType type() const;
+      int cols() const;
 
-			void setPosition( int track, int line, int eventNr, int col );
+    private:
 
-			void setTrack( int x );
-			int track() const;
-			void setLine( int y );
-			int line() const;
-			void setEventNr( int event );
-			int eventNr() const;
-			void setCol( int col );
-			int col() const;
+      ColType type_;
+    };
 
-		private:
+    class PatCursor {
+    public:
+      PatCursor();
+      PatCursor( int track, int line, int eventNr, int col );
+      ~PatCursor();
 
-			int track_;
-			int line_;
-			int eventNr_;
-			int col_;
-			
-		};
+      void setPosition( int track, int line, int eventNr, int col );
 
-		class CustomPatternView;
+      void setTrack( int x );
+      int track() const;
+      void setLine( int y );
+      int line() const;
+      void setEventNr( int event );
+      int eventNr() const;
+      void setCol( int col );
+      int col() const;
 
-		class TrackGeometry {
-		public:			
+    private:
 
-			TrackGeometry();
+      int track_;
+      int line_;
+      int eventNr_;
+      int col_;
 
-			TrackGeometry( CustomPatternView & patternView );
+    };
 
-			~TrackGeometry();
+    class CustomPatternView;
 
-			void setLeft( int left );
-			int left() const;
+    class TrackGeometry {
+    public:			
+      TrackGeometry();
 
-			void setWidth( int width );
-			int width() const;			
+      TrackGeometry( CustomPatternView & patternView );
 
-			void setVisibleColumns( int cols );
-			int visibleColumns() const;
+      ~TrackGeometry();
 
-			void setVisible( bool on);
-			bool visible() const;
+      void setLeft( int left );
+      int left() const;
 
-		private:
+      void setWidth( int width );
+      int width() const;			
 
-			CustomPatternView* pView;
-			int left_;
-			int width_;
-			int visibleColumns_;
-			int visible_;
+      void setVisibleColumns( int cols );
+      int visibleColumns() const;
 
-		};
+      void setVisible( bool on);
+      bool visible() const;
 
-		class CustomPatternView : public NPanel
-		{
-			public:
+    private:
 
-					CustomPatternView();
+      CustomPatternView* pView;
+      int left_;
+      int width_;
+      int visibleColumns_;
+      bool visible_;
 
-					~CustomPatternView();
+    };
 
-					enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
+    class CustomPatternView : public ngrs::NPanel {
+    public:
+      CustomPatternView();
 
-					virtual int colWidth() const;
-					virtual int visibleColWidth( int maxEvents ) const;
+      ~CustomPatternView();
 
-					virtual int rowHeight() const;
-					virtual int lineNumber() const;
-                    virtual bool lineAlreadySelected(int lineNumber); 
+      enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
 
-					void setTrackNumber( int number );
-					virtual int trackNumber() const;
-                    virtual bool trackAlreadySelected(int trackNumber); 
-					
-					virtual int beatZoom() const;
+      virtual int colWidth() const;
+      virtual int visibleColWidth( int maxEvents ) const;
 
-					void setPatternStep( int step );
-					int patternStep() const;
+      virtual int rowHeight() const;
+      virtual int lineNumber() const;
+      virtual bool lineAlreadySelected(int lineNumber); 
 
-					void setSeparatorColor( const NColor & color );
-					const NColor & separatorColor() const;
+      void setTrackNumber( int number );
+      virtual int trackNumber() const;
+      virtual bool trackAlreadySelected(int trackNumber); 
 
-					void setLineSeparatorColor( const NColor & color );
-					const NColor & lineSeparatorColor() const;
+      virtual int beatZoom() const;
 
-					void setRestAreaColor( const NColor & color );
-					const NColor & restArea() const;
+      void setPatternStep( int step );
+      int patternStep() const;
 
-					void setBigTrackSeparatorColor( const NColor & selColor );
-					const NColor & bigTrackSeparatorColor() const;
+      void setSeparatorColor( const ngrs::NColor & color );
+      const ngrs::NColor & separatorColor() const;
 
-					void setSmallTrackSeparatorColor( const NColor & color );
-					const NColor & smallTrackSeparatorColor() const;
+      void setLineSeparatorColor( const ngrs::NColor & color );
+      const ngrs::NColor & lineSeparatorColor() const;
 
-					void setSelectionColor( const NColor & selColor );
-					const NColor & selectionColor() const;
+      void setRestAreaColor( const ngrs::NColor & color );
+      const ngrs::NColor & restArea() const;
 
-					void setCursorColor( const NColor & cursorColor );
-					const NColor & cursorColor() const;
+      void setBigTrackSeparatorColor( const ngrs::NColor & selColor );
+      const ngrs::NColor & bigTrackSeparatorColor() const;
 
-					void setBarColor( const NColor & barColor );
-					const NColor & barColor() const;
+      void setSmallTrackSeparatorColor( const ngrs::NColor & color );
+      const ngrs::NColor & smallTrackSeparatorColor() const;
 
-					void setBeatColor( const NColor & beatColor );
-					const NColor & beatColor() const;
+      void setSelectionColor( const ngrs::NColor & selColor );
+      const ngrs::NColor & selectionColor() const;
 
-					void setPlayBarColor( const NColor & playBarColor );
-					const NColor & playBarColor() const;
+      void setCursorColor( const ngrs::NColor & cursorColor );
+      const ngrs::NColor & cursorColor() const;
 
-					void setLineGridEnabled( bool on );
-					bool lineGridEnabled() const;
+      void setBarColor( const ngrs::NColor & barColor );
+      const ngrs::NColor & barColor() const;
 
-					void setColGridEnabled( bool on );
-					bool colGridEnabled() const;
+      void setBeatColor( const ngrs::NColor & beatColor );
+      const ngrs::NColor & beatColor() const;
 
-					void setBeatTextColor( const NColor & color );
-					const NColor & beatTextColor();
+      void setPlayBarColor( const ngrs::NColor & playBarColor );
+      const ngrs::NColor & playBarColor() const;
 
-					void setTextColor( const NColor & color);
-					const NColor & textColor() const;
+      void setLineGridEnabled( bool on );
+      bool lineGridEnabled() const;
 
-					void setTrackLeftIdent( int ident );
-					int trackLeftIdent() const;
+      void setColGridEnabled( bool on );
+      bool colGridEnabled() const;
 
-					void setTrackRightIdent( int ident );
-					int trackRightIdent() const;
+      void setBeatTextColor( const ngrs::NColor & color );
+      const ngrs::NColor & beatTextColor();
 
-					void setBigTrackSeparatorWidth( int ident );
-					int bigTrackSeparatorWidth() const;
+      void setTextColor( const ngrs::NColor & color);
+      const ngrs::NColor & textColor() const;
 
-                                        void setDx(int dx);
-					int dx() const;
-					void setDy(int dy);
-					int dy() const;
+      void setTrackLeftIdent( int ident );
+      int trackLeftIdent() const;
 
-					virtual void paint(NGraphics* g);
+      void setTrackRightIdent( int ident );
+      int trackRightIdent() const;
 
-					virtual void onMousePress(int x, int y, int button);
-					virtual void onMousePressed(int x, int y, int button);
-					virtual void onMouseOver	(int x, int y);
+      void setBigTrackSeparatorWidth( int ident );
+      int bigTrackSeparatorWidth() const;
 
-					virtual void onKeyPress(const NKeyEvent & event);
-					virtual void onKeyRelease(const NKeyEvent & event);
+      void setDx(int dx);
+      int dx() const;
+      void setDy(int dy);
+      int dy() const;
 
-					void repaintCursorPos( const PatCursor & cursor );
-					void repaintBlock( const NSize & block );
-					NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
-      				NPoint linesFromRepaint(const NRegion & repaintArea) const;
-      				NPoint tracksFromRepaint(const NRegion & repaintArea) const;
+      virtual void paint( ngrs::NGraphics* g );
 
-					const NSize & selection() const;
-					void clearOldSelection();
-					void repaintSelection();
-					void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
+      virtual void onMousePress( int x, int y, int button );
+      virtual void onMousePressed( int x, int y, int button );
+      virtual void onMouseOver( int x, int y );
 
-					void addEvent( const ColumnEvent & event );
-					std::string noteToString( int value, bool sharp );
+      virtual void onKeyPress( const ngrs::NKeyEvent & event );
+      virtual void onKeyRelease( const ngrs::NKeyEvent & event );
 
-					void drawData(NGraphics* g, int track, int line, int eventnr, int data , bool sharp, const NColor & color);
-					// bypass column type
-					void drawString(NGraphics* g, int track, int line, int eventnr, const std::string & data , const NColor & color);
+      void repaintCursorPos( const PatCursor & cursor );
+      void repaintBlock( const ngrs::NSize & block );
+      ngrs::NRect repaintTrackArea( int startLine, int endLine, int startTrack, int endTrack ) const;
+      ngrs::NPoint linesFromRepaint( const ngrs::NRegion & repaintArea) const;
+      ngrs::NPoint tracksFromRepaint( const ngrs::NRegion & repaintArea) const;
 
-					const PatCursor & cursor() const;
-					void setCursor( const PatCursor & cursor );
+      const ngrs::NSize & selection() const;
+      void clearOldSelection();
+      void repaintSelection();
+      void startKeybasedSelection( int leftPos, int rightPos, int topPos, int bottomPos );
 
-					void moveCursor( int dx, int dy ); // dx is one hex digit
+      void addEvent( const ColumnEvent & event );
+      std::string noteToString( int value, bool sharp );
 
-					unsigned char convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const;
-					bool isHex( int scanCode );
+      void drawData( ngrs::NGraphics* g, int track, int line, int eventnr, int data , bool sharp, const ngrs::NColor & color );
+      // bypass column type
+      void drawString( ngrs::NGraphics* g, int track, int line, int eventnr, const std::string & data , const ngrs::NColor & color );
 
-					int tracksWidth() const;
+      const PatCursor & cursor() const;
+      void setCursor( const PatCursor & cursor );
 
-					const std::map<int, TrackGeometry> & trackGeometrics() const;
+      void moveCursor( int dx, int dy ); // dx is one hex digit
 
-					int findTrackByScreenX( int x ) const;
-					int xOffByTrack( int track ) const;
-					int xEndByTrack( int track ) const;
-					int trackWidth( int track ) const;
+      unsigned char convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const;
+      bool isHex( int scanCode );
 
-					void setVisibleEvents( int track , int eventCount );
-					int visibleEvents( int track ) const;
+      int tracksWidth() const;
 
-					void setDefaultVisibleEvents( int defaultSize );
-					void setTrackMinWidth( int size );
+      const std::map<int, TrackGeometry> & trackGeometrics() const;
 
-					void alignTracks();
+      int findTrackByScreenX( int x ) const;
+      int xOffByTrack( int track ) const;
+      int xEndByTrack( int track ) const;
+      int trackWidth( int track ) const;
 
-			protected:
+      void setVisibleEvents( int track , int eventCount );
+      int visibleEvents( int track ) const;
 
-					virtual PatCursor intersectCell(int x, int y);
-					const PatCursor & selCursor() const;
-					virtual void startSel(const PatCursor & p);
-					virtual int doSel(const PatCursor & p);
-					virtual void endSel();
-					virtual void selectAll(const PatCursor & p);
-					virtual void selectColumn(const PatCursor & p);
+      void setDefaultVisibleEvents( int defaultSize );
+      void setTrackMinWidth( int size );
 
-					virtual int noteCellWidth() const;
-					virtual int cellWidth() const;
+      void alignTracks();
 
-					const PatCursor & selStartPoint() const;
-					bool doSelect() const;
-					bool doDrag() const;
-					bool doingKeybasedSelect() const;
+    protected:
 
-					virtual void customPaint( NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
-					
-					virtual void drawTrackGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
+      virtual PatCursor intersectCell( int x, int y );
+      const PatCursor & selCursor() const;
+      virtual void startSel( const PatCursor & p );
+      virtual int doSel( const PatCursor & p );
+      virtual void endSel();
+      virtual void selectAll( const PatCursor & p );
+      virtual void selectColumn( const PatCursor & p );
 
-					virtual void drawColumnGrid(NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
+      virtual int noteCellWidth() const;
+      virtual int cellWidth() const;
 
-					virtual void drawPattern(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+      const PatCursor & selStartPoint() const;
+      bool doSelect() const;
+      bool doDrag() const;
+      bool doingKeybasedSelect() const;
 
-					virtual void drawRestArea(NGraphics* g, int startLine, int endLine, int startTrack, int endTrack);
+      virtual void customPaint( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 
-					virtual void drawSelBg( NGraphics* g, const NSize & selArea );
+      virtual void drawTrackGrid( ngrs::NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
 
-					virtual void drawCellBg(NGraphics* g, const PatCursor & cursor );
+      virtual void drawColumnGrid( ngrs::NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
 
+      virtual void drawPattern( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 
-			private:
+      virtual void drawRestArea( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
 
-                                        InputHandler inputHandler;
-					int dx_, dy_;
-					int trackNumber_;
+      virtual void drawSelBg( ngrs::NGraphics* g, const ngrs::NSize & selArea );
 
-					// selection variables
-					bool doDrag_;
-					bool doSelect_;
-					bool doingKeybasedSelect_;
-					NSize selection_;
-					NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
-					PatCursor selStartPoint_;				
+      virtual void drawCellBg( ngrs::NGraphics* g, const PatCursor & cursor );
 
-					int defaultSize_;
 
-					//cursor
-					PatCursor cursor_;
-					PatCursor selCursor_; // for keyboard drag
+    private:
 
-					NColor separatorColor_;
-					NColor selectionColor_;
-					NColor cursorColor_;
-					NColor barColor_;
-					NColor beatColor_;
-					NColor playBarColor_;
-					NColor bigTrackSeparatorColor_;
-					NColor smallTrackSeparatorColor_;
-					NColor lineSepColor_;
-					NColor textColor_;
-					NColor beatTextColor_;
-					NColor restAreaColor_;
-					NColor cursorTextColor_;
+      InputHandler inputHandler;
+      int dx_, dy_;
+      int trackNumber_;
 
-					bool lineGridEnabled_;
-					bool colGridEnabled_;
+      // selection variables
+      bool doDrag_;
+      bool doSelect_;
+      bool doingKeybasedSelect_;
+      ngrs::NSize selection_;
+      ngrs::NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
+      PatCursor selStartPoint_;				
 
-					int patternStep_;
+      int defaultSize_;
 
-					int colIdent;
-					
-					void init();
+      //cursor
+      PatCursor cursor_;
+      PatCursor selCursor_; // for keyboard drag
 
-					std::vector<ColumnEvent> events_;
+      ngrs::NColor separatorColor_;
+      ngrs::NColor selectionColor_;
+      ngrs::NColor cursorColor_;
+      ngrs::NColor barColor_;
+      ngrs::NColor beatColor_;
+      ngrs::NColor playBarColor_;
+      ngrs::NColor bigTrackSeparatorColor_;
+      ngrs::NColor smallTrackSeparatorColor_;
+      ngrs::NColor lineSepColor_;
+      ngrs::NColor textColor_;
+      ngrs::NColor beatTextColor_;
+      ngrs::NColor restAreaColor_;
+      ngrs::NColor cursorTextColor_;
 
-					void drawBlockData( NGraphics * g, int xOff, int line, const std::string & text, const NColor & color );
+      bool lineGridEnabled_;
+      bool colGridEnabled_;
 
-					void drawStringData(NGraphics* g, int xOff, int line, const std::string & text , const NColor & color);
+      int patternStep_;
+      int colIdent;
 
-					void updateStatusBar();
+      void init();
 
-					int eventOffset( int eventnr, int col ) const;
-					int eventWidth( int eventnr ) const;
-					int eventColWidth( int eventnr ) const;
+      std::vector<ColumnEvent> events_;
 
-					std::map<int, TrackGeometry> trackGeometryMap;
-					
+      void drawBlockData( ngrs::NGraphics* g, int xOff, int line, const std::string & text, const ngrs::NColor & color );
 
-					int trackMinWidth_;
-					int trackLeftIdent_;
-					int trackRightIdent_;
+      void drawStringData( ngrs::NGraphics* g, int xOff, int line, const std::string & text , const ngrs::NColor & color);
 
-					std::string defaultNoteStr_;
+      void updateStatusBar();
 
+      int eventOffset( int eventnr, int col ) const;
+      int eventWidth( int eventnr ) const;
+      int eventColWidth( int eventnr ) const;
 
-		};
-	}
+      std::map<int, TrackGeometry> trackGeometryMap;
+
+
+      int trackMinWidth_;
+      int trackLeftIdent_;
+      int trackRightIdent_;
+
+      std::string defaultNoteStr_;
+    };
+
+  }
 }
 
 #endif

@@ -21,270 +21,271 @@
 #include "nproperty.h"
 #include "nrectshape.h"
 
-NLabel::NLabel()
- : NVisualComponent()
-{
-  init();
-}
+namespace ngrs {
 
-NLabel::NLabel( const std::string & text )
-{
-  init();
-  text_ = text;
-}
+  NLabel::NLabel()
+    : NVisualComponent()
+  {
+    init();
+  }
 
-void NLabel::init( )
-{
-  rectShape = new NRectShape();
-  setGeometry( rectShape );
-  geometry()->setPosition(0,0,10,10);
-  metrics.setFont(font());
-  mnemonic_ = '\0';
-  halign_=nAlLeft;
-  valign_=nAlTop;
-  orientation_ = nHorizontal;
-  setEvents(false);
-  wbreak_ = false;
+  NLabel::NLabel( const std::string & text )
+  {
+    init();
+    text_ = text;
+  }
 
-  // runtime
-  //if (properties()) properties()->bind("text", *this, &NLabel::text, &NLabel::setText);
-}
+  void NLabel::init( )
+  {
+    rectShape = new NRectShape();
+    setGeometry( rectShape );
+    geometry()->setPosition(0,0,10,10);
+    metrics.setFont(font());
+    mnemonic_ = '\0';
+    halign_=nAlLeft;
+    valign_=nAlTop;
+    orientation_ = nHorizontal;
+    setEvents(false);
+    wbreak_ = false;
 
+    // runtime
+    //if (properties()) properties()->bind("text", *this, &NLabel::text, &NLabel::setText);
+  }
 
-// the class factories
+  NLabel::~NLabel()
+  {
+    delete rectShape;
+  }
 
-extern "C" NObject* createLabel() {
-    return new NLabel();
-}
+  void NLabel::paint( NGraphics * g )
+  {
+    std::string::size_type i     = 0;
+    std::string::size_type start = 0;
 
-extern "C" void destroyLabel(NObject* p) {
-    delete p;
-}
+    int yp_ = g->textAscent() ;
 
-NLabel::~NLabel()
-{
-  delete rectShape;
-}
+    do {
+      i = text_.find( "\n", i);
+      std::string substr;
+      if (i != -1) {
+        substr = text_.substr(start,i-start);
+        start = i+1;
+        i+=1;
+      } else substr = text_.substr(start);
 
-void NLabel::paint( NGraphics * g )
-{
-  std::string::size_type i     = 0;
-  std::string::size_type start = 0;
+      if (!wbreak_) {
 
-  int yp_ = g->textAscent() ;
+        int xp_ = 0;
 
-  do {
-    i = text_.find( "\n", i);
-	std::string substr;
-    if (i != -1) {
-       substr = text_.substr(start,i-start);
-       start = i+1;
-       i+=1;
-    } else substr = text_.substr(start);
-
-    if (!wbreak_) {
-
-      int xp_ = 0;
-
-      switch (halign_) {
+        switch (halign_) {
         case nAlCenter : xp_ = (clientWidth() - g->textWidth(substr)) / 2;
-        break;
+          break;
         default:
-        ;
-      }
-			
-      switch (valign_) {				
-        case nAlCenter : yp_ = (clientHeight() - g->textHeight()) / 2  + g->textAscent();
-        break;
-        case nAlBottom : yp_ = clientHeight() - g->textDescent();
-        break;
-        default:
-        ;
-      }
-
-      g->drawText( xp_, yp_, substr);
-
-      if (mnemonic_!='\0') {
-        std::string::size_type pos = substr.find( static_cast<char>( mnemonic_- 32) );
-        if ( pos==std::string::npos ) pos =  substr.find( mnemonic_ );
-        if ( pos!=std::string::npos ) {
-           int w  = g->textWidth( substr.substr( 0, pos) );
-           int w1 = g->textWidth( substr.substr( 0, pos+1) );
-           g->drawLine( w, yp_+2, w1, yp_+2 );
+          ;
         }
-      }
-      yp_ = yp_ + g->textHeight();
-    } else {  // multiline wordbreak;
-       int xp = 0;
-       int yp = g->textAscent();
 
-       std::string::size_type pos = 0;
+        switch (valign_) {				
+        case nAlCenter : yp_ = (clientHeight() - g->textHeight()) / 2  + g->textAscent();
+          break;
+        case nAlBottom : yp_ = clientHeight() - g->textDescent();
+          break;
+        default:
+          ;
+        }
 
-       for (std::vector<std::string::size_type>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+        g->drawText( xp_, yp_, substr);
+
+        if (mnemonic_!='\0') {
+          std::string::size_type pos = substr.find( static_cast<char>( mnemonic_- 32) );
+          if ( pos==std::string::npos ) pos =  substr.find( mnemonic_ );
+          if ( pos!=std::string::npos ) {
+            int w  = g->textWidth( substr.substr( 0, pos) );
+            int w1 = g->textWidth( substr.substr( 0, pos+1) );
+            g->drawLine( w, yp_+2, w1, yp_+2 );
+          }
+        }
+        yp_ = yp_ + g->textHeight();
+      } else {  // multiline wordbreak;
+        int xp = 0;
+        int yp = g->textAscent();
+
+        std::string::size_type pos = 0;
+
+        for (std::vector<std::string::size_type>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
           std::string::size_type lineEnd = *it;
           g->drawText( xp, yp, text_.substr( pos, lineEnd - pos) );
           yp+=g->textHeight();
           pos = lineEnd;
-       }
-       g->drawText(xp,yp,text_.substr(pos));
-    }
+        }
+        g->drawText(xp,yp,text_.substr(pos));
+      }
 
-  } while ( i != std::string::npos );
-}
-
-void NLabel::setText( const std::string & text )
-{
-  text_ = text;
-  if (orientation_ == nVertical) {
-      // todo not implemented yet
+    } while ( i != std::string::npos );
   }
-}
 
-const std::string & NLabel::text( ) const
-{
-  return text_;
-}
+  void NLabel::setText( const std::string & text )
+  {
+    text_ = text;
+    if (orientation_ == nVertical) {
+      // todo not implemented yet
+    }
+  }
+
+  const std::string & NLabel::text( ) const
+  {
+    return text_;
+  }
 
 
-int NLabel::preferredHeight( ) const
-{
-  if (!wbreak_) {
+  int NLabel::preferredHeight( ) const
+  {
+    if (!wbreak_) {
+      NFontMetrics metrics(font());
+      std::string::size_type i = 0;
+      int yp_ = metrics.textHeight() ;
+      do {
+        i = text_.find("\n", i);
+        if ( i != -1 ) {
+          i += 1;
+          yp_ = yp_ + metrics.textHeight();
+        }
+      } while ( i != std::string::npos );
+      return yp_ + spacing().top() + spacing().bottom() + borderTop() + borderBottom();
+    } else {
+      int yp =  0;
+      std::string::size_type pos = 0;
+
+      NFontMetrics metrics(font());
+
+      for (std::vector<std::string::size_type>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+        std::string::size_type lineEnd = *it;
+        yp+=metrics.textHeight();
+      }
+      yp += metrics.textHeight();
+      return yp + spacing().top() + spacing().bottom() + borderTop() + borderBottom();
+    }
+  }
+
+  int NLabel::preferredWidth( ) const
+  {
     NFontMetrics metrics(font());
-	std::string::size_type i = 0;
-    int yp_ = metrics.textHeight() ;
+    std::string::size_type i = 0;
+    std::string::size_type start = 0;
+
+    std::string substr;
+    int xmax = 0;
     do {
       i = text_.find("\n", i);
-      if ( i != -1 ) {
-        i += 1;
-        yp_ = yp_ + metrics.textHeight();
-      }
-	} while ( i != std::string::npos );
-    return yp_ + spacing().top() + spacing().bottom() + borderTop() + borderBottom();
-  } else {
-     int yp =  0;
-     std::string::size_type pos = 0;
+      if ( i != std::string::npos ) {
+        i +=1 ;
+        substr = text_.substr( start, i-start-1 );
+        start = i;
+      } else substr = text_.substr( start );
+      if ( metrics.textWidth( substr ) > xmax) xmax = metrics.textWidth( substr );
+    } while ( i != std::string::npos );
 
-     NFontMetrics metrics(font());
-
-     for (std::vector<std::string::size_type>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
-       std::string::size_type lineEnd = *it;
-       yp+=metrics.textHeight();
-     }
-     yp += metrics.textHeight();
-     return yp + spacing().top() + spacing().bottom() + borderTop() + borderBottom();
+    return xmax + spacing().left() + spacing().right() + borderLeft() + borderRight();
   }
-}
 
-int NLabel::preferredWidth( ) const
-{
-  NFontMetrics metrics(font());
-  std::string::size_type i = 0;
-  std::string::size_type start = 0;
-
-  std::string substr;
-  int xmax = 0;
-  do {
-    i = text_.find("\n", i);
-    if ( i != std::string::npos ) {
-       i +=1 ;
-       substr = text_.substr( start, i-start-1 );
-       start = i;
-    } else substr = text_.substr( start );
-     if ( metrics.textWidth( substr ) > xmax) xmax = metrics.textWidth( substr );
-  } while ( i != std::string::npos );
-
-  return xmax + spacing().left() + spacing().right() + borderLeft() + borderRight();
-}
-
-void NLabel::setMnemonic( char c )
-{
-  mnemonic_ = c;
-}
-
-char NLabel::mnemonic() const {
-  return mnemonic_;
-}
-
-void NLabel::setVAlign( int align )
-{
-  valign_ = align;
-}
-
-void NLabel::setHAlign( int align )
-{
-  halign_ = align;
-}
-
-int NLabel::vAlign( ) const
-{
-  return valign_;
-}
-
-int NLabel::hAlign( ) const
-{
-  return halign_;
-}
-
-void NLabel::setTextOrientation( int orientation )
-{
-  orientation_ = orientation;
-}
-
-void NLabel::computeBreakPoints( )
-{
-  breakPoints.clear();  // clear old breakpoints
-
-  std::string part = text_;
-
-  std::string::size_type last = 0;
-  std::string::size_type pos  = 0;
-  while ( ( pos = findWidthMax(spacingWidth(),part,true)) < part.length() && (pos!=0) ) {
-     part = part.substr(pos);
-     last  += pos;
-     breakPoints.push_back(last);
-  }
-}
-
-int NLabel::findWidthMax(long width, const std::string & data, bool wbreak)
-{
-  NFontMetrics metrics(font());
-
-  int Low = 0; int High = data.length();  int Mid=High;
-  while( Low <= High ) {
-    Mid = ( Low + High ) / 2;
-    std::string s     = data.substr(0,Mid);
-    std::string snext;
-    if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
-    int w     = metrics.textWidth(s);
-    if(  w < width  ) {
-                        int wnext = metrics.textWidth(snext);
-                        if (wnext  >= width ) break;
-                        Low = Mid + 1;
-                      } else
-                      {
-                        High = Mid - 1;
-                      }
-  }
-  if (!wbreak || data.substr(0,Mid).find(" ") == std::string::npos || Mid == 0 || Mid>=data.length()) return Mid; else
+  void NLabel::setMnemonic( char c )
   {
-	std::string::size_type p = data.rfind( " ", Mid );
-    if ( p != std::string::npos ) return p + 1;
+    mnemonic_ = c;
   }
-  return Mid;
+
+  char NLabel::mnemonic() const {
+    return mnemonic_;
+  }
+
+  void NLabel::setVAlign( int align )
+  {
+    valign_ = align;
+  }
+
+  void NLabel::setHAlign( int align )
+  {
+    halign_ = align;
+  }
+
+  int NLabel::vAlign( ) const
+  {
+    return valign_;
+  }
+
+  int NLabel::hAlign( ) const
+  {
+    return halign_;
+  }
+
+  void NLabel::setTextOrientation( int orientation )
+  {
+    orientation_ = orientation;
+  }
+
+  void NLabel::computeBreakPoints( )
+  {
+    breakPoints.clear();  // clear old breakpoints
+
+    std::string part = text_;
+
+    std::string::size_type last = 0;
+    std::string::size_type pos  = 0;
+    while ( ( pos = findWidthMax(spacingWidth(),part,true)) < part.length() && (pos!=0) ) {
+      part = part.substr(pos);
+      last  += pos;
+      breakPoints.push_back(last);
+    }
+  }
+
+  int NLabel::findWidthMax(long width, const std::string & data, bool wbreak)
+  {
+    NFontMetrics metrics(font());
+
+    int Low = 0; int High = data.length();  int Mid=High;
+    while( Low <= High ) {
+      Mid = ( Low + High ) / 2;
+      std::string s     = data.substr(0,Mid);
+      std::string snext;
+      if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
+      int w     = metrics.textWidth(s);
+      if(  w < width  ) {
+        int wnext = metrics.textWidth(snext);
+        if (wnext  >= width ) break;
+        Low = Mid + 1;
+      } else
+      {
+        High = Mid - 1;
+      }
+    }
+    if (!wbreak || data.substr(0,Mid).find(" ") == std::string::npos || Mid == 0 || Mid>=data.length()) return Mid; else
+    {
+      std::string::size_type p = data.rfind( " ", Mid );
+      if ( p != std::string::npos ) return p + 1;
+    }
+    return Mid;
+  }
+
+  void NLabel::resize( )
+  {
+    if (wbreak_) computeBreakPoints();
+  }
+
+  void NLabel::setWordWrap( bool on )
+  {
+    wbreak_ = on;
+  }
+
+  bool NLabel::wordWrap( ) const
+  {
+    return wbreak_;
+  }
+
 }
 
-void NLabel::resize( )
-{
-  if (wbreak_) computeBreakPoints();
+// the class factories
+extern "C" ngrs::NObject* createLabel() {
+  return new ngrs::NLabel();
 }
 
-void NLabel::setWordWrap( bool on )
-{
-  wbreak_ = on;
+extern "C" void destroyLabel( ngrs::NObject* p ) {
+  delete p;
 }
-
-bool NLabel::wordWrap( ) const
-{
-  return wbreak_;
-}
-

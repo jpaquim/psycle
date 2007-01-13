@@ -24,16 +24,17 @@
 #include "nnotebook.h"
 #include "ntabbar.h"
 
-
-
-class NTabBar;
-
 /**
 @author Stefan
 */
-class NTabBook : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NTabBar;
+
+  class NTabBook : public NPanel
+  {
+  public:
     NTabBook();
 
     ~NTabBook();
@@ -53,11 +54,13 @@ public:
 
     NTab* tab( NVisualComponent* page );
 
-private:
+  private:
 
-   NTabBar* tabBar_;
-   NNoteBook* book_;
+    NTabBar* tabBar_;
+    NNoteBook* book_;
 
-};
+  };
+
+}
 
 #endif

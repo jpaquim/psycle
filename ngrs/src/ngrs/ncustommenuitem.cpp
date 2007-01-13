@@ -22,75 +22,77 @@
 #include "nconfig.h"
 #include "nmenu.h"
 
+namespace ngrs {
 
+  NCustomMenuItem::NCustomMenuItem()
+    : NCustomItem()
+  {
+    itemNone = NApp::config()->skin("mitemnone");
+    itemOver = NApp::config()->skin("mitemover");
 
-NCustomMenuItem::NCustomMenuItem()
- : NCustomItem()
-{
-  itemNone = NApp::config()->skin("mitemnone");
-  itemOver = NApp::config()->skin("mitemover");
-
-  setSkin(itemNone);
-}
-
-
-NCustomMenuItem::~NCustomMenuItem()
-{
-}
-
-void NCustomMenuItem::add( NMenu * menu )
-{
-
-}
-
-void NCustomMenuItem::add( NRuntime * comp )
-{
-  NCustomItem::add(comp);
-}
-
-void NCustomMenuItem::add( NVisualComponent * comp, int align )
-{
-  NCustomItem::add(comp, align);
-}
-
-void NCustomMenuItem::onMouseEnter( )
-{
-  setSkin(itemOver);
-  repaint();
-
-  NEvent ev(this,"ngrs_menu_item_enter");
-  sendMessage(&ev);
-}
-
-void NCustomMenuItem::onMouseExit( )
-{
-  setSkin(itemNone);
-  repaint();
-
-  NEvent ev(this,"ngrs_menu_item_exit");
-  sendMessage(&ev);
-}
-
-void NCustomMenuItem::onMousePress( int x, int y, int button )
-{
-  NButtonEvent ev(this,x,y,button,"ngrs_menu_item_click");
-  sendMessage(&ev);
-
-  click.emit(&ev);
-}
-
-void NCustomMenuItem::onMessage( NEvent * ev )
-{
-  if (ev->text() == "ngrs_menu_item_do_enter") {
-    onMouseEnter();
-  } else
-  if (ev->text() == "ngrs_menu_item_do_exit") {
-    onMouseExit();
+    setSkin(itemNone);
   }
-}
 
-void NCustomMenuItem::setFont( const NFont & font )
-{
-  itemNone.setFont(font);
-  itemOver.setFont(font);
+
+  NCustomMenuItem::~NCustomMenuItem()
+  {
+  }
+
+  void NCustomMenuItem::add( NMenu * menu )
+  {
+
+  }
+
+  void NCustomMenuItem::add( NRuntime * comp )
+  {
+    NCustomItem::add(comp);
+  }
+
+  void NCustomMenuItem::add( NVisualComponent * comp, int align )
+  {
+    NCustomItem::add(comp, align);
+  }
+
+  void NCustomMenuItem::onMouseEnter( )
+  {
+    setSkin(itemOver);
+    repaint();
+
+    NEvent ev(this,"ngrs_menu_item_enter");
+    sendMessage(&ev);
+  }
+
+  void NCustomMenuItem::onMouseExit( )
+  {
+    setSkin(itemNone);
+    repaint();
+
+    NEvent ev(this,"ngrs_menu_item_exit");
+    sendMessage(&ev);
+  }
+
+  void NCustomMenuItem::onMousePress( int x, int y, int button )
+  {
+    NButtonEvent ev(this,x,y,button,"ngrs_menu_item_click");
+    sendMessage(&ev);
+
+    click.emit(&ev);
+  }
+
+  void NCustomMenuItem::onMessage( NEvent * ev )
+  {
+    if (ev->text() == "ngrs_menu_item_do_enter") {
+      onMouseEnter();
+    } else
+      if (ev->text() == "ngrs_menu_item_do_exit") {
+        onMouseExit();
+      }
+  }
+
+  void NCustomMenuItem::setFont( const NFont & font )
+  {
+    itemNone.setFont(font);
+    itemOver.setFont(font);
+  }
+
 }

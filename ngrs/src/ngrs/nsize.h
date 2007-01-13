@@ -23,13 +23,15 @@
 #include "ncolor.h"
 #include "nsize.h"
 
-
 /**
 @author Stefan
 */
-class NSize{
 
-public:
+namespace ngrs {
+
+  class NSize{
+
+  public:
 
     NSize();
     NSize(int left, int top, int right, int bottom);
@@ -63,7 +65,7 @@ public:
 
     std::string toString();
 
-private:
+  private:
 
     int left_;
     int top_;
@@ -71,6 +73,8 @@ private:
     int bottom_;
 
     std::string stringify( int x );
-};
+  };
+
+}
 
 #endif

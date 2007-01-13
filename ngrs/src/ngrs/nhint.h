@@ -26,22 +26,26 @@
 @author Stefan Nattkemper
 */
 
-class NLabel;
+namespace ngrs {
 
-class NHint : public NWindow
-{
-public:
+  class NLabel;
+
+  class NHint : public NWindow
+  {
+  public:
     NHint();
 
     ~NHint();
 
-		virtual void setText( const std::string & text);
-		const std::string & text() const;
+    virtual void setText( const std::string & text);
+    const std::string & text() const;
 
-private:
+  private:
 
-		NLabel* label_;
+    NLabel* label_;
 
-};
+  };
+
+}
 
 #endif

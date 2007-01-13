@@ -26,40 +26,45 @@
 /**
 @author Stefan
 */
-class NFrameBorder : public NBorder
-{
-public:
-   NFrameBorder();
-   NFrameBorder(bool oval, int arcWidth, int arcHeight);
+
+namespace ngrs {
+
+  class NFrameBorder : public NBorder
+  {
+  public:
+    NFrameBorder();
+    NFrameBorder(bool oval, int arcWidth, int arcHeight);
 
     ~NFrameBorder();
 
-   void setLineCount(int count, int dWidth = 3, int dHeight = 3);
-   void setOval(bool on = true, int arcWidth = 5, int arcHeight = 5);
-   bool oval() const;
+    void setLineCount(int count, int dWidth = 3, int dHeight = 3);
+    void setOval(bool on = true, int arcWidth = 5, int arcHeight = 5);
+    bool oval() const;
 
-   int lineCount() const;
+    int lineCount() const;
 
-   int arcWidth() const;
-   int arcHeight() const;
+    int arcWidth() const;
+    int arcHeight() const;
 
-   int dWidth() const;
-   int dHeight() const;
+    int dWidth() const;
+    int dHeight() const;
 
-   virtual void paint(NGraphics* g, const NShape & geometry);
+    virtual void paint(NGraphics* g, const NShape & geometry);
 
-   virtual NFrameBorder* clone()  const;   // Uses the copy constructor
+    virtual NFrameBorder* clone()  const;   // Uses the copy constructor
 
-private:
+  private:
 
-   int lcount_;  // number of frame lines
-   int dx_;      // dx space between lines
-   int dy_;      // dy space between lines
+    int lcount_;  // number of frame lines
+    int dx_;      // dx space between lines
+    int dy_;      // dy space between lines
 
-   int arcWidth_;
-   int arcHeight_;
+    int arcWidth_;
+    int arcHeight_;
 
-   bool oval_;
-};
+    bool oval_;
+  };
+
+}
 
 #endif

@@ -24,10 +24,12 @@
 @author Stefan
 */
 
-class NObject;
+namespace ngrs {
 
-class NMoveEvent{
-public:
+  class NObject;
+
+  class NMoveEvent{
+  public:
     NMoveEvent( NObject* sender, int x, int y, int picker );
 
     ~NMoveEvent();
@@ -35,15 +37,17 @@ public:
     int x() const; // the x coord of the mouse relative to the container top
     int y() const; // the y coord of the mouse relative to the container top
     int picker() const; // the picker index, no picker = -1
-	NObject* sender() const; // pointer to the sender of this event
+    NObject* sender() const; // pointer to the sender of this event
 
-private:
+  private:
 
     NObject* sender_;
     int x_;
     int y_;
-	int picker_;
+    int picker_;
 
-};
+  };
+
+}
 
 #endif

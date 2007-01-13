@@ -31,9 +31,9 @@ class Machine;
 @author Stefan
 */
 
-class MasterDlg : public NWindow
+class MasterDlg : public ngrs::NWindow
 {
-      class Led : public NPanel {
+      class Led : public ngrs::NPanel {
       public :
 
         Led();
@@ -41,23 +41,23 @@ class MasterDlg : public NWindow
         void setNumber(int number);
         int number();
 
-        virtual void paint(NGraphics* g);
+        virtual void paint( ngrs::NGraphics* g );
 
       private:
 
         int number_;
 
-        static NBitmap numberBitmap;
+        static ngrs::NBitmap numberBitmap;
         static int c;
 
     };
 
 
 
-    class Slider : public NSlider {
+    class Slider : public ngrs::NSlider {
       public:
 
-        Slider() : NSlider(), index_(-1), led_(0) {}
+        Slider() : ngrs::NSlider(), index_(-1), led_(0) {}
 
         void setIndex(int index) { index_ = index; }
         int index() { return index_; }
@@ -88,7 +88,7 @@ private:
     Machine* pMaster;
 
     void init();
-    void onSliderPosChanged( NSlider* sender );
+    void onSliderPosChanged( ngrs::NSlider* sender );
 };
 
 }}

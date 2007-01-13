@@ -28,8 +28,11 @@
 /**
 @author Stefan
 */
-class NBorder{
-public:
+
+namespace ngrs {
+
+  class NBorder{
+  public:
     NBorder();
 
     virtual ~NBorder();
@@ -44,11 +47,13 @@ public:
 
     virtual NBorder* clone()  const = 0;   // Uses the copy constructor
 
-private:
+  private:
 
-   NColor color_;
-   NSize sizing_;
+    NColor color_;
+    NSize sizing_;
 
-};
+  };
+
+}
 
 #endif

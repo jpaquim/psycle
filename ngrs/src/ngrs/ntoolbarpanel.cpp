@@ -20,22 +20,26 @@
 #include "ntoolbarpanel.h"
 #include "nflowlayout.h"
 
-NToolBarPanel::NToolBarPanel() {
-  setLayout( NFlowLayout( nAlLeft,0 , 0) );
-}
+namespace ngrs {
 
-NToolBarPanel::~NToolBarPanel() {
-                                
-}
+  NToolBarPanel::NToolBarPanel() {
+    setLayout( NFlowLayout( nAlLeft,0 , 0) );
+  }
 
-void NToolBarPanel::resize() {
-   NPanel::resize();
-   std::vector< NVisualComponent* >::const_iterator it = visualComponents().begin();
-   for ( ; it < visualComponents().end(); it++ ) {
-     NVisualComponent* visual = *it;
-     int right = visual->left() + visual->preferredWidth();
-     if ( right > clientWidth() ) {
-       visual->setWidth( clientWidth() - left() );
-     }       
-   }
-}        
+  NToolBarPanel::~NToolBarPanel() {
+
+  }
+
+  void NToolBarPanel::resize() {
+    NPanel::resize();
+    std::vector< NVisualComponent* >::const_iterator it = visualComponents().begin();
+    for ( ; it < visualComponents().end(); it++ ) {
+      NVisualComponent* visual = *it;
+      int right = visual->left() + visual->preferredWidth();
+      if ( right > clientWidth() ) {
+        visual->setWidth( clientWidth() - left() );
+      }       
+    }
+  }        
+
+}

@@ -27,11 +27,13 @@
 @author Stefan
 */
 
-const int nFiles = 1;
-const int nDirs  = 2;
+namespace ngrs {
 
-class NFile{
-public:
+  const int nFiles = 1;
+  const int nDirs  = 2;
+
+  class NFile{
+  public:
     NFile();
 
     ~NFile();
@@ -47,17 +49,19 @@ public:
     static std::string replaceTilde(const std::string & path);
     static std::string env(const std::string & envName);
     static std::string extractFileNameFromPath(const std::string & fileName);
-	static std::string slash();
+    static std::string slash();
 
-		// replaces entitys`s for xml writing
-		// There are 5 predefined entity references in XML:
- 		// &lt; 	< 	less than 
-		// &gt; 	> 	greater than
+    // replaces entitys`s for xml writing
+    // There are 5 predefined entity references in XML:
+    // &lt; 	< 	less than 
+    // &gt; 	> 	greater than
     // &amp; 	& 	ampersand 
     // &apos; 	' 	apostrophe
     // &quot; 	" 	quotation mark
     // Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true  replaces all.
-		static std::string replaceIllegalXmlChr( const std::string & text, bool strict = true );
-};
+    static std::string replaceIllegalXmlChr( const std::string & text, bool strict = true );
+  };
+
+}
 
 #endif

@@ -25,21 +25,26 @@
 /**
 @author Stefan
 */
-class NButtonEvent : public NEvent
-{
-public:
+
+namespace ngrs {
+
+  class NButtonEvent : public NEvent
+  {
+  public:
     NButtonEvent(NObject* sender, int x, int y, int button, const std::string & text = "");
 
     ~NButtonEvent();
 
-   int x();
-   int y();
-   int button();
+    int x();
+    int y();
+    int button();
 
-private:
+  private:
 
-   int x_, y_, button_;
+    int x_, y_, button_;
 
-};
+  };
+
+}
 
 #endif

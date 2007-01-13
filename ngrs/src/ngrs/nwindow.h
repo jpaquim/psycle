@@ -25,21 +25,22 @@
 #include "niswindow.h"
 #include "nregion.h"
 
-const int nDestroyWindow  = 1;
-const int nHideWindow     = 2;
-const int nDockWindow     = 3;
-
-
-class NDockPanel;
-class NCustomStatusModel;
-
 /**
 @author Stefan
 */
 
-class NWindow : public NVisual
-{
-public:
+namespace ngrs {
+  
+  const int nDestroyWindow  = 1;
+  const int nHideWindow     = 2;
+  const int nDockWindow     = 3;
+
+  class NDockPanel;
+  class NCustomStatusModel;
+
+  class NWindow : public NVisual
+  {
+  public:
     NWindow();
     NWindow(const NWindow & topWindow);
 
@@ -83,7 +84,7 @@ public:
 
     virtual void setTitle(const std::string & title);
     std::string title();
-    
+
     void setTitleBitmap( const NBitmap & bmp );
 
     virtual int onClose();
@@ -132,57 +133,59 @@ public:
     virtual void setMinimumWidth (int minWidth);
     virtual void setMinimumHeight(int minHeight);
 
-	void requestSelection();
-	virtual void onSelection();
-
-	
-	void setStatusModel( NCustomStatusModel & model );
-	NCustomStatusModel* statusModel() const;
-	
-
-private:
-
-   bool modal_;
-   bool changeState_;
-   bool dblBuffer_;
-
-   int dragRectPoint;
-   int dragPoint;
-   int exitLoop_;
-
-   NRegion oldDrag;
-
-   WinHandle win_;
-   NPanel* pane_;
-   NGraphics* graphics_;
-   NVisualComponent* dragBase_;
-   NVisualComponent* selectedBase_;
-   NVisualComponent* mousePressBase_;
-	 NVisualComponent* oldFocus_;
-   int dragX,dragY,dragOldX,dragOldY;
-   NSize dragOffset;
-   std::string title_;
-   NVisualComponent* lastOver_;   
-
-   void initDrag(NVisualComponent*, int x, int y);
-   void doDrag(NVisualComponent*, int x, int y);
-   void endDrag(NVisualComponent*, int x, int y);
-
-   void dragRectPicker(NVisualComponent* dragBase, int x, int y, int varx, int vary);
-
-   int oldWidth;
-   int oldHeight;
-
-   NDockPanel* dock_;
+    void requestSelection();
+    virtual void onSelection();
 
 
-   // user wanted size and position
+    void setStatusModel( NCustomStatusModel & model );
+    NCustomStatusModel* statusModel() const;
 
-   NRect userPos;
 
-   void checkGeometry();
+  private:
 
-   NCustomStatusModel* statusModel_;
-};
+    bool modal_;
+    bool changeState_;
+    bool dblBuffer_;
+
+    int dragRectPoint;
+    int dragPoint;
+    int exitLoop_;
+
+    NRegion oldDrag;
+
+    WinHandle win_;
+    NPanel* pane_;
+    NGraphics* graphics_;
+    NVisualComponent* dragBase_;
+    NVisualComponent* selectedBase_;
+    NVisualComponent* mousePressBase_;
+    NVisualComponent* oldFocus_;
+    int dragX,dragY,dragOldX,dragOldY;
+    NSize dragOffset;
+    std::string title_;
+    NVisualComponent* lastOver_;   
+
+    void initDrag(NVisualComponent*, int x, int y);
+    void doDrag(NVisualComponent*, int x, int y);
+    void endDrag(NVisualComponent*, int x, int y);
+
+    void dragRectPicker(NVisualComponent* dragBase, int x, int y, int varx, int vary);
+
+    int oldWidth;
+    int oldHeight;
+
+    NDockPanel* dock_;
+
+
+    // user wanted size and position
+
+    NRect userPos;
+
+    void checkGeometry();
+
+    NCustomStatusModel* statusModel_;
+  };
+
+}
 
 #endif

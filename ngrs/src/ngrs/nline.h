@@ -26,9 +26,12 @@
 /**
 @author Stefan
 */
-class NLine : public NVisualComponent
-{
-public:
+
+namespace ngrs {
+
+  class NLine : public NVisualComponent
+  {
+  public:
     NLine();
 
     ~NLine();
@@ -41,10 +44,12 @@ public:
 
     void setClippingDistance( int distance );
 
-private:
+  private:
 
-   NLineShape* lineShape;
+    NLineShape* lineShape;
 
-};
+  };
+
+}
 
 #endif

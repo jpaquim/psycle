@@ -33,17 +33,17 @@ namespace psycle {
 	{
 
 		MachineView::MachineView( Song & song ) 
-			: NPanel(), _pSong( &song )
+			: ngrs::NPanel(), _pSong( &song )
 		{
-			setLayout( NAlignLayout() );
+			setLayout( ngrs::NAlignLayout() );
 
-			scrollBox_ = new NScrollBox();
-			scrollArea_ = new NPanel();
-			scrollArea_->setLayout( NAutoScrollLayout() );
-			scrollArea_->setClientSizePolicy( nVertical | nHorizontal );
+			scrollBox_ = new ngrs::NScrollBox();
+			scrollArea_ = new ngrs::NPanel();
+			scrollArea_->setLayout( ngrs::NAutoScrollLayout() );
+			scrollArea_->setClientSizePolicy( ngrs::nVertical | ngrs::nHorizontal );
 			scrollArea_->mousePress.connect( this, &MachineView::onViewMousePress );
 			scrollBox_->setScrollPane( scrollArea_ );
-			add( scrollBox_, nAlClient );
+			add( scrollBox_, ngrs::nAlClient );
 
 			init();
 		}
@@ -61,7 +61,7 @@ namespace psycle {
 		}
 
 
-		void MachineView::onCreateMachine( Machine & mac )
+		void MachineView::onCreateMachine( Machine& mac )
 		{
 			MachineGUI* macGui = 0;
 			switch ( mac.mode() ) {							
@@ -90,7 +90,7 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::addMachine( Machine & mac )
+		void MachineView::addMachine( Machine& mac )
 		{
 			onCreateMachine( mac );
 		}
@@ -101,7 +101,9 @@ namespace psycle {
 			for(int c=0;c<MAX_MACHINES;c++)
 			{
 				Machine* mac = _pSong->_pMachine[c];
-				if (mac) { onCreateMachine( *mac ); }
+				if (mac) { 
+                  onCreateMachine( *mac ); 
+                }
 			}
 
 			// add Wires
@@ -118,7 +120,7 @@ namespace psycle {
 							if (to != 0) {
 								WireGUI* line = new WireGUI();
 								wireGUIs.push_back( line );
-								line->setPoints(NPoint(10,10),NPoint(100,100));
+								line->setPoints(ngrs::NPoint(10,10),ngrs::NPoint(100,100));
 								scrollArea_->insert(line,0);
 								from->attachLine(line,0);
 								to->attachLine(line,1);
@@ -159,23 +161,23 @@ namespace psycle {
 			int midH = sender->clientHeight() / 2;
 
 			line = new WireGUI();
-			line->setPoints(NPoint(sender->left()+midW,sender->top()+midH),NPoint(sender->left()+midW,sender->top()+midH));
+			line->setPoints(ngrs::NPoint(sender->left()+midW,sender->top()+midH),ngrs::NPoint(sender->left()+midW,sender->top()+midH));
 			scrollArea_->insert( line,0 );
-			line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
+			line->setMoveable(ngrs::NMoveable(ngrs::nMvVertical | ngrs::nMvHorizontal | ngrs::nMvPolygonPicker));
 			repaint();
 			line->setMoveFocus(0);
 			line->moveEnd.connect(this,&MachineView::onLineMoveEnd);
 			line->moveStart.connect(this,&MachineView::onLineMoveStart);  
 		} 
 
-		void MachineView::onLineMoveStart( const NMoveEvent & ev ) {
+		void MachineView::onLineMoveStart( const ngrs::NMoveEvent& ev ) {
 			// pickindex = 0 : rewire
 			if ( ev.picker() == 0 || ev.picker() == 1 ) {
 
 			}
 		}
 
-		void MachineView::onLineMoveEnd( const NMoveEvent & ev )
+		void MachineView::onLineMoveEnd( const ngrs::NMoveEvent& ev )
 		{	
 			if ( !line ) return;
 
@@ -312,12 +314,12 @@ namespace psycle {
 			setSelectedWire( wire );
 		}
 
-		void MachineView::setSelectedWire( NObject * wire ) {
+		void MachineView::setSelectedWire( ngrs::NObject * wire ) {
 
 			// unselect old wire
 
 			if ( selectedWire_ ) {
-				//     selectedWire_->setMoveable( NMoveable() );
+				//     selectedWire_->setMoveable( ngrs::NMoveable() );
 				selectedWire_->repaint();
 				selectedWire_ = 0;              
 			}
@@ -329,13 +331,13 @@ namespace psycle {
 			if ( it != wireGUIs.end() ) {
 				// wire found
 				selectedWire_ = *it;
-				selectedWire_->setMoveable( NMoveable( nMvPolygonPicker ) );
+				selectedWire_->setMoveable( ngrs::NMoveable( ngrs::nMvPolygonPicker ) );
 				selectedWire_->repaint();
 			}
 
 		}
 
-		NPanel * MachineView::scrollArea( )
+		ngrs::NPanel * MachineView::scrollArea( )
 		{
 			return scrollArea_;
 		}
@@ -429,12 +431,12 @@ namespace psycle {
 			return colorInfo_;
 		}
 
-		void MachineView::onWireSelected( NButtonEvent* ev ) {
+		void MachineView::onWireSelected( ngrs::NButtonEvent* ev ) {
 			setSelectedWire( ev->sender() );
 			repaint();
 		}
 
-		void MachineView::onViewMousePress( NButtonEvent* ev ) {
+		void MachineView::onViewMousePress( ngrs::NButtonEvent* ev ) {
 			setSelectedWire( 0 );
 		}
 

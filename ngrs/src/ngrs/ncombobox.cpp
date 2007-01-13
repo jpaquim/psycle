@@ -30,145 +30,146 @@
 #include "nframeborder.h"
 #include "npopupwindow.h"
 
-const char * arrow_down1_xpm[] = {
-"12 6 2 1",
-" 	c None",
-".	c black",
-"            ",
-"  .......   ",
-"   .....    ",
-"    ...     ",
-"     .      ",
-"            "};
+namespace ngrs {
 
-NComboBox::NComboBox()
- : NCustomComboBox()
-{
-  init();
-}
+  const char * arrow_down1_xpm[] = {
+    "12 6 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "  .......   ",
+    "   .....    ",
+    "    ...     ",
+    "     .      ",
+    "            "
+  };
 
+  NComboBox::NComboBox()
+    : NCustomComboBox()
+  {
+    init();
+  }
 
-NComboBox::~NComboBox()
-{
-}
+  NComboBox::~NComboBox()
+  {
+  }
 
-void NComboBox::init( )
-{
-  down.createFromXpmData(arrow_down1_xpm);
-  NImage* downImg = new NImage();
-  downImg->setBitmap(down);
+  void NComboBox::init( )
+  {
+    down.createFromXpmData(arrow_down1_xpm);
+    NImage* downImg = new NImage();
+    downImg->setBitmap(down);
 
-  edit_    = new NEdit();
-  NPanel::add(edit_);
-  downBtn_ = new NButton( downImg, 12, 6 );
+    edit_    = new NEdit();
+    NPanel::add(edit_);
+    downBtn_ = new NButton( downImg, 12, 6 );
     downBtn_->setWidth(15);
     downBtn_->setFlat(false);
     downBtn_->click.connect(this,&NComboBox::onDownBtnClicked);
-	downBtn_->setSkin( 
-	  NApp::config()->skin( "ccbx_btn_up" ),
+    downBtn_->setSkin( 
+      NApp::config()->skin( "ccbx_btn_up" ),
       NApp::config()->skin( "ccbx_btn_down" ),
-	  NApp::config()->skin( "ccbx_btn_over" ),
-	  NApp::config()->skin( "ccbx_btn_flat" )	
-	);
-  NPanel::add(downBtn_);
+      NApp::config()->skin( "ccbx_btn_over" ),
+      NApp::config()->skin( "ccbx_btn_flat" )	
+      );
+    NPanel::add(downBtn_);
 
-  popup = new NPopupWindow();
-  NPanel::add(popup);
+    popup = new NPopupWindow();
+    NPanel::add(popup);
 
-  lbox = new NListBox();
+    lbox = new NListBox();
     lbox->setAlign(nAlClient);
     lbox->skin_ = NApp::config()->skin("clbox");
     lbox->itemSelected.connect(this,&NComboBox::onItemClicked);
-  popup->pane()->add(lbox);
+    popup->pane()->add(lbox);
+  }
+
+  void NComboBox::resize( )
+  {
+    downBtn_->setPosition(clientWidth()-downBtn_->width(),0,downBtn_->width(),clientHeight());
+    edit_->setPosition(0,0,clientWidth()-downBtn_->width(),clientHeight());
+  }
+
+  int NComboBox::preferredHeight( ) const
+  {
+    return edit_->preferredHeight() + spacing().top()+ spacing().bottom() + borderTop()+ borderBottom();
+  }
+
+  void NComboBox::onDownBtnClicked( NButtonEvent* ev )
+  {
+    if (!NApp::popupUnmapped_) {
+      NWindow* win = window();
+      popup->setPosition(win->left()+absoluteLeft(), win->top()+absoluteTop()+height(),width(),100);
+      popup->setVisible(true);
+    }
+  }
+
+  void NComboBox::add( NCustomItem * item )
+  {
+    lbox->add(item);
+  }
+
+  void NComboBox::removeChilds( )
+  {
+    lbox->removeChilds();
+    edit_->setText("");
+  }
+
+  void NComboBox::onItemClicked( NItemEvent * ev)
+  {
+    NApp::unmapPopupWindows();
+    edit_->setText(ev->item()->text());
+    edit_->repaint();
+    itemSelected.emit(ev);
+  }
+
+  void NComboBox::setIndex( int i )
+  {
+    lbox->setIndex(i);
+    NCustomItem* item = lbox->itemAt(i);
+    if (item!=0) {
+      edit_->setText(item->text());
+    }
+  }
+
+  int NComboBox::itemCount( )
+  {
+    return lbox->itemCount();
+  }
+
+  int NComboBox::selIndex( ) const
+  {
+    return lbox->selIndex();
+  }
+
+  const std::string & NComboBox::text( ) const
+  {
+    return edit_->text();
+  }
+
+  NEdit * NComboBox::edit( )
+  {
+    return edit_;
+  }
+
+  std::vector< NCustomItem * > & NComboBox::items( )
+  {
+    return lbox->items();
+  }
+
+  NCustomItem * NComboBox::itemAt( unsigned int index )
+  {
+    return lbox->itemAt( index );
+  }
+
 }
 
 // the class factories
 
-extern "C" NObject* createComboBox() {
-    return new NComboBox();
+extern "C" ngrs::NObject* createComboBox() {
+  return new ngrs::NComboBox();
 }
 
-extern "C" void destroyComboBox(NObject* p) {
-    delete p;
+extern "C" void destroyComboBox( ngrs::NObject* p ) {
+  delete p;
 }
-
-
-void NComboBox::resize( )
-{
-  downBtn_->setPosition(clientWidth()-downBtn_->width(),0,downBtn_->width(),clientHeight());
-  edit_->setPosition(0,0,clientWidth()-downBtn_->width(),clientHeight());
-}
-
-int NComboBox::preferredHeight( ) const
-{
-  return edit_->preferredHeight() + spacing().top()+ spacing().bottom() + borderTop()+ borderBottom();
-}
-
-void NComboBox::onDownBtnClicked( NButtonEvent* ev )
-{
-  if (!NApp::popupUnmapped_) {
-     NWindow* win = window();
-     popup->setPosition(win->left()+absoluteLeft(), win->top()+absoluteTop()+height(),width(),100);
-     popup->setVisible(true);
-  }
-}
-
-void NComboBox::add( NCustomItem * item )
-{
-  lbox->add(item);
-}
-
-void NComboBox::removeChilds( )
-{
-  lbox->removeChilds();
-  edit_->setText("");
-}
-
-void NComboBox::onItemClicked( NItemEvent * ev)
-{
-  NApp::unmapPopupWindows();
-  edit_->setText(ev->item()->text());
-  edit_->repaint();
-  itemSelected.emit(ev);
-}
-
-void NComboBox::setIndex( int i )
-{
-  lbox->setIndex(i);
-  NCustomItem* item = lbox->itemAt(i);
-  if (item!=0) {
-    edit_->setText(item->text());
-  }
-}
-
-int NComboBox::itemCount( )
-{
-  return lbox->itemCount();
-}
-
-int NComboBox::selIndex( ) const
-{
-  return lbox->selIndex();
-}
-
-const std::string & NComboBox::text( ) const
-{
-  return edit_->text();
-}
-
-NEdit * NComboBox::edit( )
-{
-  return edit_;
-}
-
-std::vector< NCustomItem * > & NComboBox::items( )
-{
-  return lbox->items();
-}
-
-NCustomItem * NComboBox::itemAt( unsigned int index )
-{
-  return lbox->itemAt( index );
-}
-
-

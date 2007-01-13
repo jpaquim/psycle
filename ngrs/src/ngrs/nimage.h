@@ -28,11 +28,13 @@
 @author Stefan
 */
 
-const int nAlWallPaper = 10;
+namespace ngrs {
 
-class NImage : public NPanel
-{
-public:
+  const int nAlWallPaper = 10;
+
+  class NImage : public NPanel
+  {
+  public:
     NImage();
     NImage( const std::string & fileName );
     NImage( const NBitmap & bitmap );
@@ -49,16 +51,16 @@ public:
     void setSharedBitmap(NBitmap* bitmap);
 
     void setHAlign( int align );
-	int hAlign() const;
+    int hAlign() const;
 
     void setVAlign( int align );
-	int vAlign() const;
+    int vAlign() const;
 
     virtual int preferredWidth()  const;
     virtual int preferredHeight() const;
 
 
-private:
+  private:
 
     NBitmap bitmap24bpp_;
     NBitmap* pBitmap_;
@@ -66,6 +68,8 @@ private:
     int halign_;
     int valign_;
 
-};
+  };
+
+}
 
 #endif
