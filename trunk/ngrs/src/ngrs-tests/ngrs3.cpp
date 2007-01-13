@@ -35,10 +35,10 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-  NApp app;
+  ngrs::NApp app;
 
-  NWindow* myMainWindow = new NTestWindow();
-  app.setMainWindow(myMainWindow);
+  ngrs::NWindow* myMainWindow = new NTestWindow();
+  app.setMainWindow( myMainWindow );
   app.run();
 
   return EXIT_SUCCESS;

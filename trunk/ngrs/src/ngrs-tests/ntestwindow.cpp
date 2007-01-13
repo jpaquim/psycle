@@ -75,8 +75,10 @@ const char * a_xpm[] = {
 "     .      ",
 "            "};
 
+using namespace ngrs;
+
 NTestWindow::NTestWindow()
- : NWindow()
+: NWindow()
 {
   testCustomTreeView();
   //testMenu();
