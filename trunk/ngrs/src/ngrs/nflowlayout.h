@@ -24,14 +24,16 @@
 #include "nvisualcomponent.h"
 #include "nvisualcomponent.h"
 
-const int nAlHeight = 10;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
-class NFlowLayout : public NLayout
-{
-public:
+  const int nAlHeight = 10;
+
+  /**
+  @author Stefan
+  */
+  class NFlowLayout : public NLayout
+  {
+  public:
     NFlowLayout();
     NFlowLayout(int align);
     NFlowLayout(int align, int hgap, int vgap, int baseLine = nAlCenter);
@@ -56,17 +58,19 @@ public:
 
     virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRegion & repaintArea,NVisualComponent* sender);
 
-private:
+  private:
 
-   int maxX, maxY;
-   int align_;
-   int hgap_,vgap_;
-   int baseLine_;
+    int maxX, maxY;
+    int align_;
+    int hgap_,vgap_;
+    int baseLine_;
 
-   bool lineBrk_;
+    bool lineBrk_;
 
-   void init();
+    void init();
 
-};
+  };
+
+}
 
 #endif

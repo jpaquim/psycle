@@ -25,9 +25,12 @@
 /**
 @author Stefan Nattkemper
 */
-class NTable : public NScrollBox
-{
-public:
+
+namespace ngrs {
+
+  class NTable : public NScrollBox
+  {
+  public:
     NTable();
 
     ~NTable();
@@ -36,10 +39,12 @@ public:
 
     virtual void removeChilds();
 
-private:
+  private:
 
-   NPanel* tablePane;
+    NPanel* tablePane;
 
-};
+  };
+
+}
 
 #endif

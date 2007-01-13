@@ -22,22 +22,24 @@
 
 #include "ndialog.h"
 
-class NButton;
-class NLabel;
-class NImage;
-
 
 /**
 @author Stefan Nattkemper
 */
 
-const int nMsgCancelBtn = 0;
-const int nMsgOkBtn = 1;
-const int nMsgUseBtn = 2;
+namespace ngrs {
 
-class NMessageBox : public NDialog
-{
-public:
+  class NButton;
+  class NLabel;
+  class NImage;
+
+  const int nMsgCancelBtn = 0;
+  const int nMsgOkBtn = 1;
+  const int nMsgUseBtn = 2;
+
+  class NMessageBox : public NDialog
+  {
+  public:
     NMessageBox();
     NMessageBox(const std::string & msgText);
 
@@ -53,7 +55,7 @@ public:
 
     virtual void setVisible(bool on);
 
-private:
+  private:
 
     NButton* okBtn;
     NButton* cancelBtn;
@@ -66,6 +68,8 @@ private:
     void onBtnPress(NButtonEvent* ev);
 
     void init();
-};
+  };
+
+}
 
 #endif

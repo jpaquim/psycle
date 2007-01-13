@@ -27,22 +27,24 @@
 @author Stefan Nattkemper
 */
 
-class NClipBoard{
+namespace ngrs {
 
-class ClipBoardData : public std::vector<unsigned char> {
+  class NClipBoard{
 
-public :
+    class ClipBoardData : public std::vector<unsigned char> {
 
-  ClipBoardData();
-  ~ClipBoardData();
+    public :
 
-  void setFormat( unsigned char format);
-  unsigned char format( ) const;
+      ClipBoardData();
+      ~ClipBoardData();
 
-};
+      void setFormat( unsigned char format);
+      unsigned char format( ) const;
+
+    };
 
 
-public:
+  public:
     NClipBoard();
 
     ~NClipBoard();
@@ -50,10 +52,12 @@ public:
     void setAsText( const std::string & text );
     std::string asText() const;
 
-private:
+  private:
 
     ClipBoardData data_;
 
-};
+  };
+
+}
 
 #endif

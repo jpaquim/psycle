@@ -22,17 +22,19 @@
 
 #include "nborder.h"
 
-const int nRaised  = 0;
-const int nLowered   = 1;
-const int nNone      =3;
+namespace ngrs {
+
+  const int nRaised  = 0;
+  const int nLowered   = 1;
+  const int nNone      =3;
 
 
-/**
-@author Stefan
-*/
-class NBevelBorder : public NBorder
-{
-public:
+  /**
+  @author Stefan
+  */
+  class NBevelBorder : public NBorder
+  {
+  public:
     NBevelBorder();
     NBevelBorder(int outerStyle, int innerStyle);
 
@@ -49,7 +51,7 @@ public:
 
     virtual NBevelBorder* clone()  const;   // Uses the copy constructor
 
-private:
+  private:
 
     int style_;
     int innerStyle_;
@@ -60,6 +62,8 @@ private:
     void drawRectBorder(NGraphics* g, int width, int height);
 
 
-};
+  };
+
+}
 
 #endif

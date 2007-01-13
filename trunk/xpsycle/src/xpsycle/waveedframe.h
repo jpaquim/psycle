@@ -1,115 +1,113 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+*   Copyright (C) 2006 by Stefan   *
+*   natti@linux   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
 #include <ngrs/ndockpanel.h>
 #include <ngrs/nxmlparser.h>
 
-class NMenu;
-class NMenuBar;
-class NToolBar;
-class NComboBox;
-class NItemEvent;
-class NFileDialog;
+namespace ngrs {
+  class NMenu;
+  class NMenuBar;
+  class NToolBar;
+  class NComboBox;
+  class NItemEvent;
+  class NFileDialog;
+}
 
-namespace psycle { namespace host {
+namespace psycle { 
+  namespace host {
 
-class WaveEdChildView;
-#ifdef __unix__
-class WaveSaveDlg;
-#endif
-class InstrumentEditor;
-class Song;
-
-
-/// wave editor frame window.
-class WaveEdFrame : public NDockPanel
-{
+    class WaveEdChildView;
+    class InstrumentEditor;
+    class Song;
 
 
-public:
-	WaveEdFrame( Song* song );
-	virtual ~WaveEdFrame() throw();
-	Song* pSong();
-	//virtual void setVisible(bool on);
-	//virtual int onClose();
+    /// wave editor frame window.
+    class WaveEdFrame : public ngrs::NDockPanel {
+    public:
 
-public:
-	void Notify(void);
+      WaveEdFrame( Song* song );
 
-	signal2<int,bool> updateInstrumentCbx;
-	
-	NMenuBar *menuBar;
-	NMenu *processMenu;
-	NMenu *editMenu;
-	NMenu *viewMenu;
-	NMenu *convertMenu;
-	
-	
-private:
+      ~WaveEdFrame();
 
-	Song* _pSong;
+      Song* pSong();
 
-	void InitStatusBar();
-	void InitMenus();
-	void InitToolBar();
- 
-	NToolBar *toolBar;
-	NComboBox* auxSelectCombo_;
-	WaveEdChildView *wavView;
-	NFileDialog* wavSaveFileDlg;
-	InstrumentEditor* instrumentEditor;
+    public:
+      void Notify(void);
 
-	int wsInstrument;
-	
-	void onPlay(NButtonEvent *ev);
-	void onRelease(NButtonEvent *ev);
-	void onPlayFromStart(NButtonEvent *ev);
-	void onStop(NButtonEvent *ev);
-	void onFastForward(NButtonEvent *ev);
-	void onRewind(NButtonEvent *ev);
-	void PlayFrom(unsigned long startpos);
-	void Stop();
+      signal2<int,bool> updateInstrumentCbx;
 
-	void onLoadWave(NButtonEvent* ev);
-	void onSaveWave(NButtonEvent* ev);
-	void onEditInstrument(NButtonEvent* ev);
-	void onEditWave(NButtonEvent* ev);
+      ngrs::NMenuBar *menuBar;
+      ngrs::NMenu *processMenu;
+      ngrs::NMenu *editMenu;
+      ngrs::NMenu *viewMenu;
+      ngrs::NMenu *convertMenu;
 
-  void onSlotCopy(NButtonEvent* ev);
-  void onSlotPaste(NButtonEvent* ev);
+    private:
 
-	void onDecInsBtn(NButtonEvent* ev);
-	void onIncInsBtn(NButtonEvent* ev);
+      Song* _pSong;
 
-	bool mySel_;
-	int leftSize;
-	int rightSize;
-	bool onWaveLeft;
-	unsigned char* pDataLeft;
-	unsigned char* pDataRight;
+      void InitStatusBar();
+      void InitMenus();
+      void InitToolBar();
 
-	int data_pos;
-	
-	void onTagParse( const NXmlParser & parser, const std::string & tagName );
-	
+      ngrs::NToolBar *toolBar;
+      ngrs::NComboBox* auxSelectCombo_;
+      WaveEdChildView *wavView;
+      ngrs::NFileDialog* wavSaveFileDlg;
+      InstrumentEditor* instrumentEditor;
 
-};
+      int wsInstrument;
 
-}}
+      void onPlay( ngrs::NButtonEvent *ev );
+      void onRelease( ngrs::NButtonEvent *ev );
+      void onPlayFromStart( ngrs::NButtonEvent *ev );
+      void onStop( ngrs::NButtonEvent *ev );
+      void onFastForward( ngrs::NButtonEvent *ev );
+      void onRewind( ngrs::NButtonEvent *ev );
+      void PlayFrom( unsigned long startpos );
+      void Stop();
+
+      void onLoadWave( ngrs::NButtonEvent* ev );
+      void onSaveWave( ngrs::NButtonEvent* ev );
+      void onEditInstrument( ngrs::NButtonEvent* ev );
+      void onEditWave( ngrs::NButtonEvent* ev );
+
+      void onSlotCopy( ngrs::NButtonEvent* ev );
+      void onSlotPaste( ngrs::NButtonEvent* ev );
+
+      void onDecInsBtn( ngrs::NButtonEvent* ev );
+      void onIncInsBtn( ngrs::NButtonEvent* ev );
+
+      bool mySel_;
+      int leftSize;
+      int rightSize;
+      bool onWaveLeft;
+      unsigned char* pDataLeft;
+      unsigned char* pDataRight;
+
+      int data_pos;
+
+      void onTagParse( const ngrs::NXmlParser& parser, const std::string& tagName );
+
+
+    };
+
+  }
+}

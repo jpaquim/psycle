@@ -20,28 +20,30 @@
 #include "ntable.h"
 #include "ntablelayout.h"
 
-NTable::NTable()
- : NScrollBox()
-{
-  tablePane = new NPanel();
+namespace ngrs {
+
+  NTable::NTable()
+    : NScrollBox()
+  {
+    tablePane = new NPanel();
     tablePane->setLayout(NTableLayout(10,10));
     tablePane->setClientSizePolicy(nVertical | nHorizontal);
-  setScrollPane(tablePane);
+    setScrollPane(tablePane);
+  }
+
+
+  NTable::~NTable()
+  {
+  }
+
+  void NTable::add( NVisualComponent * comp, int col, int row,  bool update )
+  {
+    tablePane->add(comp,NAlignConstraint(nAlLeft,col,row),update);
+  }
+
+  void NTable::removeChilds( )
+  {
+    tablePane->removeChilds();
+  }
+
 }
-
-
-NTable::~NTable()
-{
-}
-
-void NTable::add( NVisualComponent * comp, int col, int row,  bool update )
-{
-  tablePane->add(comp,NAlignConstraint(nAlLeft,col,row),update);
-}
-
-void NTable::removeChilds( )
-{
-  tablePane->removeChilds();
-}
-
-

@@ -25,9 +25,12 @@
 /**
 @author Stefan Nattkemper
 */
-class NColorItem : public NCustomItem
-{
-public:
+
+namespace ngrs {
+
+  class NColorItem : public NCustomItem
+  {
+  public:
     NColorItem();
     NColorItem( const NColor & color, const std::string & text);
 
@@ -40,11 +43,13 @@ public:
 
     virtual int preferredHeight() const;
 
-private:
+  private:
 
-   NColor color_;
-   std::string text_;
+    NColor color_;
+    std::string text_;
 
-};
+  };
+
+}
 
 #endif

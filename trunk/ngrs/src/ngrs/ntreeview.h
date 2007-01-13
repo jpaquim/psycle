@@ -22,27 +22,30 @@
 
 #include "npanel.h"
 
-class NTreeNode;
-
 /**
 @author Stefan Nattkemper
 */
 
-class NTreeNode;
+namespace ngrs {
 
-class NTreeView : public NPanel
-{
-public:
+  class NTreeNode;
+  class NTreeNode;
+
+  class NTreeView : public NPanel
+  {
+  public:
     NTreeView();
 
     ~NTreeView();
 
     NTreeNode* rootNode();
 
-private:
+  private:
 
     NTreeNode* rootNode_;
 
-};
+  };
+
+}
 
 #endif

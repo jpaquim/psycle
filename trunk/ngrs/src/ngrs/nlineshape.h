@@ -25,14 +25,17 @@
 /**
 @author Stefan
 */
-class NLineShape : public NShape
-{
-public:
+
+namespace ngrs {
+
+  class NLineShape : public NShape
+  {
+  public:
     NLineShape();
 
     ~NLineShape();
 
-		virtual NLineShape* clone() const;   // Uses the copy constructor
+    virtual NLineShape* clone() const;   // Uses the copy constructor
 
     virtual void setPosition(int left, int top, int width, int height);
     virtual void setLeft(int left);
@@ -57,22 +60,24 @@ public:
 
     int d2i(double d);
 
-private:
+  private:
 
-   NPoint p1_;
-   NPoint p2_;
+    NPoint p1_;
+    NPoint p2_;
 
-   void resize(int width, int height);
-   void calculateRectArea();
-   void move(int dx, int dy);
+    void resize(int width, int height);
+    void calculateRectArea();
+    void move(int dx, int dy);
 
-   int pickWidth_ ;
-   int pickHeight_;
+    int pickWidth_ ;
+    int pickHeight_;
 
-   NRegion lineToRegion();
+    NRegion lineToRegion();
 
-   int distance_;
+    int distance_;
 
-};
+  };
+
+}
 
 #endif

@@ -22,160 +22,164 @@
 
 using namespace std;
 
-NFontMetrics::NFontMetrics( )
-{
-  fntStruct = NApp::system().getFontValues(NFont());
-}
+namespace ngrs {
 
-NFontMetrics::NFontMetrics(const NFont & font)
-{
-  fntStruct = font.systemFont();
-}
-
-
-NFontMetrics::~NFontMetrics()
-{
-}
-
-int NFontMetrics::textWidth( const string & text ) const
-{
-   #ifdef __unix__
-   const char* s = text.c_str();
-   if (!fntStruct.antialias) {
-     return XTextWidth(fntStruct.xFnt,s,strlen(s));
-   } else
-   {
-    XGlyphInfo info;
-    XftTextExtents8(NApp::system().dpy(),fntStruct.xftFnt
-     ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
-    return info.xOff;
-   }
-   #else
-
-   HDC dc = GetDC( NULL );
-   SelectObject( dc, fntStruct.hFnt );  
-
-   SIZE size;
-   GetTextExtentPoint32(
-    dc,            // handle to DC
-    text.c_str(),  // text string
-    static_cast<int>( text.length() ), // characters in string
-    &size          // string size
-   );
-
-   ReleaseDC ( NULL, dc );
-
-   return size.cx;
-   
-   #endif
-}
-
-int NFontMetrics::textHeight( ) const
-{
-  #ifdef __unix__
-  if (!fntStruct.antialias)
+  NFontMetrics::NFontMetrics( )
   {
-    return (fntStruct.xFnt->max_bounds.ascent+ fntStruct.xFnt->max_bounds.descent);
-  } else {
-   int a = fntStruct.xftFnt->ascent;
-   int d = fntStruct.xftFnt->descent;
-   return a + d;
+    fntStruct = NApp::system().getFontValues(NFont());
   }
-  #else
-  TEXTMETRIC metrics;
-  HDC dc = GetDC( NULL );
-  SelectObject( dc, fntStruct.hFnt );  
-  GetTextMetrics(
-    dc ,      // handle to DC
-    &metrics  // text metrics
-  );  
-  ReleaseDC( NULL , dc );
-  return metrics.tmHeight;
-  #endif
-}
 
-int NFontMetrics::textAscent( ) const
-{
-  #ifdef __unix__
-  if (!fntStruct.antialias)
+  NFontMetrics::NFontMetrics(const NFont & font)
   {
-    return (fntStruct.xFnt->max_bounds.ascent);
-  } else {
-   int a = fntStruct.xftFnt->ascent;
-   return a;
+    fntStruct = font.systemFont();
   }
-  #else
-  TEXTMETRIC metrics;
-  HDC dc = GetDC(NULL); 
-  SelectObject( dc, fntStruct.hFnt );  
-  GetTextMetrics(
-    dc,       // handle to DC
-    &metrics  // text metrics
-  );  
-  ReleaseDC( NULL , dc );
-  return metrics.tmAscent;
-  #endif
-}
 
-int NFontMetrics::textDescent( ) const
-{
- #ifdef __unix__
- if (!fntStruct.antialias)
- {
-   return (fntStruct.xFnt->max_bounds.descent);
- } else {
-  int d = fntStruct.xftFnt->descent;
-  return d;
- }
- #else
- TEXTMETRIC metrics;
- HDC dc = GetDC(NULL);
- SelectObject( dc, fntStruct.hFnt );  
- GetTextMetrics(
-    dc,       // handle to DC
-    &metrics  // text metrics
- );  
- ReleaseDC( NULL , dc );
- return metrics.tmDescent;
- #endif
-}
 
-void NFontMetrics::setFont( const NFont & font )
-{
-  fntStruct = font.systemFont();
-}
+  NFontMetrics::~NFontMetrics()
+  {
+  }
 
-int NFontMetrics::maxCharWidth() const {
-  #ifdef __unix__
-  ///\todo needs to be implement
-  return 10;
-  #else
-  TEXTMETRIC metrics;
-  HDC dc = GetDC(NULL); 
-  SelectObject( dc, fntStruct.hFnt );  
-  GetTextMetrics(
-    dc,       // handle to DC
-    &metrics  // text metrics
-  );  
-  ReleaseDC( NULL , dc );
-  return metrics.tmMaxCharWidth;;
-  #endif
-}
+  int NFontMetrics::textWidth( const string & text ) const
+  {
+#ifdef __unix__
+    const char* s = text.c_str();
+    if (!fntStruct.antialias) {
+      return XTextWidth(fntStruct.xFnt,s,strlen(s));
+    } else
+    {
+      XGlyphInfo info;
+      XftTextExtents8(NApp::system().dpy(),fntStruct.xftFnt
+        ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
+      return info.xOff;
+    }
+#else
 
-std::string::size_type NFontMetrics::findWidthMax( long width, const std::string & data ) const
-{
-  std::string::size_type low  = 0;
-  std::string::size_type high = data.length();
-  
-  while( low < high ) {
-    std::string::size_type mid = low + ( high - low ) / 2; 
-    if(  textWidth( data.substr( 0, mid ) ) < width  ) {						 
-                        low = mid + 1; 
-                      } else
-                      {
-                        high = mid;
-                      }
-  }  
+    HDC dc = GetDC( NULL );
+    SelectObject( dc, fntStruct.hFnt );  
 
-  return low;
+    SIZE size;
+    GetTextExtentPoint32(
+      dc,            // handle to DC
+      text.c_str(),  // text string
+      static_cast<int>( text.length() ), // characters in string
+      &size          // string size
+      );
+
+    ReleaseDC ( NULL, dc );
+
+    return size.cx;
+
+#endif
+  }
+
+  int NFontMetrics::textHeight( ) const
+  {
+#ifdef __unix__
+    if (!fntStruct.antialias)
+    {
+      return (fntStruct.xFnt->max_bounds.ascent+ fntStruct.xFnt->max_bounds.descent);
+    } else {
+      int a = fntStruct.xftFnt->ascent;
+      int d = fntStruct.xftFnt->descent;
+      return a + d;
+    }
+#else
+    TEXTMETRIC metrics;
+    HDC dc = GetDC( NULL );
+    SelectObject( dc, fntStruct.hFnt );  
+    GetTextMetrics(
+      dc ,      // handle to DC
+      &metrics  // text metrics
+      );  
+    ReleaseDC( NULL , dc );
+    return metrics.tmHeight;
+#endif
+  }
+
+  int NFontMetrics::textAscent( ) const
+  {
+#ifdef __unix__
+    if (!fntStruct.antialias)
+    {
+      return (fntStruct.xFnt->max_bounds.ascent);
+    } else {
+      int a = fntStruct.xftFnt->ascent;
+      return a;
+    }
+#else
+    TEXTMETRIC metrics;
+    HDC dc = GetDC(NULL); 
+    SelectObject( dc, fntStruct.hFnt );  
+    GetTextMetrics(
+      dc,       // handle to DC
+      &metrics  // text metrics
+      );  
+    ReleaseDC( NULL , dc );
+    return metrics.tmAscent;
+#endif
+  }
+
+  int NFontMetrics::textDescent( ) const
+  {
+#ifdef __unix__
+    if (!fntStruct.antialias)
+    {
+      return (fntStruct.xFnt->max_bounds.descent);
+    } else {
+      int d = fntStruct.xftFnt->descent;
+      return d;
+    }
+#else
+    TEXTMETRIC metrics;
+    HDC dc = GetDC(NULL);
+    SelectObject( dc, fntStruct.hFnt );  
+    GetTextMetrics(
+      dc,       // handle to DC
+      &metrics  // text metrics
+      );  
+    ReleaseDC( NULL , dc );
+    return metrics.tmDescent;
+#endif
+  }
+
+  void NFontMetrics::setFont( const NFont & font )
+  {
+    fntStruct = font.systemFont();
+  }
+
+  int NFontMetrics::maxCharWidth() const {
+#ifdef __unix__
+    ///\todo needs to be implement
+    return 10;
+#else
+    TEXTMETRIC metrics;
+    HDC dc = GetDC(NULL); 
+    SelectObject( dc, fntStruct.hFnt );  
+    GetTextMetrics(
+      dc,       // handle to DC
+      &metrics  // text metrics
+      );  
+    ReleaseDC( NULL , dc );
+    return metrics.tmMaxCharWidth;;
+#endif
+  }
+
+  std::string::size_type NFontMetrics::findWidthMax( long width, const std::string & data ) const
+  {
+    std::string::size_type low  = 0;
+    std::string::size_type high = data.length();
+
+    while( low < high ) {
+      std::string::size_type mid = low + ( high - low ) / 2; 
+      if(  textWidth( data.substr( 0, mid ) ) < width  ) {						 
+        low = mid + 1; 
+      } else
+      {
+        high = mid;
+      }
+    }  
+
+    return low;
+  }
+
 }

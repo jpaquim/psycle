@@ -29,7 +29,7 @@ namespace psycle {
 		@author Stefan Nattkemper
 		*/
 
-		class VuMeter : public NPanel
+		class VuMeter : public ngrs::NPanel
 		{
 		public:
 			VuMeter();
@@ -38,7 +38,7 @@ namespace psycle {
 
 			void setPegel( float l, float r );
 
-			virtual void paint( NGraphics* g );
+			virtual void paint( ngrs::NGraphics* g );
 
 		private:
 

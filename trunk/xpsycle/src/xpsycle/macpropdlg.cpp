@@ -30,7 +30,7 @@ namespace psycle {
 namespace host {
 
 MacPropDlg::MacPropDlg(Machine* machine)
-  : NWindow()
+  : ngrs::NWindow()
 {
   pMach_ = machine;
   setPosition(0,0,260,260);
@@ -43,41 +43,41 @@ MacPropDlg::~MacPropDlg() { }
 void MacPropDlg::init( )
 {
       setTitle(pMach_->GetEditName() + " Properties");
-      NLabel* machNameLbl = new NLabel("Name:");
-      nameEdit_ = new NEdit();
-      nameEdit_->setText(pMach_->GetEditName());
-      NPanel* buttonPnl = new NPanel();
-      buttonPnl->setLayout(NAlignLayout(5,5));
-              NButton* deleteBtn = new NButton("Delete Machine");
+      ngrs::NLabel* machNameLbl = new ngrs::NLabel("Name:");
+      nameEdit_ = new ngrs::NEdit();
+      nameEdit_->setText( pMach_->GetEditName() );
+      ngrs::NPanel* buttonPnl = new ngrs::NPanel();
+      buttonPnl->setLayout( ngrs::NAlignLayout( 5, 5) );
+              ngrs::NButton* deleteBtn = new ngrs::NButton("Delete Machine");
                       deleteBtn->setFlat(false);
                       deleteBtn->clicked.connect(this,&MacPropDlg::onDeleteBtn);
-              buttonPnl->add(deleteBtn,nAlTop);
-              NButton* cloneBtn = new NButton("Clone Machine");
+              buttonPnl->add(deleteBtn,ngrs::nAlTop);
+              ngrs::NButton* cloneBtn = new ngrs::NButton("Clone Machine");
                       cloneBtn->setFlat(false);
                       cloneBtn->clicked.connect(this,&MacPropDlg::onCloneBtn);
-              buttonPnl->add(cloneBtn,nAlTop);
-      NButton* okBtn = new NButton("OK");
-              okBtn->setFlat(false);
-              okBtn->clicked.connect(this,&MacPropDlg::onOKBtn);
+              buttonPnl->add(cloneBtn,ngrs::nAlTop);
+      ngrs::NButton* okBtn = new ngrs::NButton("OK");
+              okBtn->setFlat( false );
+              okBtn->clicked.connect( this, &MacPropDlg::onOKBtn );
 
-      pane()->add(machNameLbl,nAlTop);
-      pane()->add(nameEdit_,nAlTop);
-      pane()->add(buttonPnl,nAlTop);
-      pane()->add(okBtn,nAlBottom);
+      pane()->add( machNameLbl, ngrs::nAlTop );
+      pane()->add( nameEdit_, ngrs::nAlTop );
+      pane()->add( buttonPnl, ngrs::nAlTop );
+      pane()->add( okBtn, ngrs::nAlBottom );
 }
 
-void MacPropDlg::onOKBtn(NButtonEvent *ev)
+void MacPropDlg::onOKBtn( ngrs::NButtonEvent *ev )
 {
       pMach_->SetEditName(nameEdit_->text()); // good design to set this here?
       updateMachineProperties.emit(pMach_);
       onClose();
 }
 
-void MacPropDlg::onCloneBtn(NButtonEvent *ev)
+void MacPropDlg::onCloneBtn( ngrs::NButtonEvent *ev )
 {
 }
 
-void MacPropDlg::onDeleteBtn(NButtonEvent *ev)
+void MacPropDlg::onDeleteBtn( ngrs::NButtonEvent *ev )
 {
         deleteMachine.emit();
 }
@@ -87,13 +87,13 @@ void MacPropDlg::setVisible(bool on)
         if (on) {
                 setTitle(pMach_->GetEditName() + " Properties");
         }
-        NWindow::setVisible(on);
+        ngrs::NWindow::setVisible(on);
 }
 
 int MacPropDlg::onClose( )
 {
   setVisible(false);
-  return nHideWindow;
+  return ngrs::nHideWindow;
 }
 
 

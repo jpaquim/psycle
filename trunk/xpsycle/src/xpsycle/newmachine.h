@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+*   Copyright (C) 2006 by Stefan   *
+*   natti@linux   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef NEWMACHINE_H
 #define NEWMACHINE_H
 
@@ -29,98 +29,101 @@
 #include <ngrs/nbevelborder.h>
 
 namespace psycle {
-namespace host {
+  namespace host {
 
-class Song;
+    class Song;
 
+    class InfoLine : public ngrs::NPanel {
+    public:
+      InfoLine( const std::string& info ) {
+        add( infoLb = new ngrs::NLabel(info) );
+        add( textLb = new ngrs::NLabel() );
+        textLb->setWordWrap( true );
+        textLb->setBorder( ngrs::NBevelBorder( ngrs::nNone, ngrs::nLowered ) );
+      }
 
-class InfoLine : public NPanel {
-public:
+      ~InfoLine() {
+      }
 
-    InfoLine(const std::string & info) {
-      add( infoLb = new NLabel(info) );
-      add( textLb = new NLabel() );
-      textLb->setWordWrap(true);
-      textLb->setBorder(NBevelBorder(nNone,nLowered));
-    }
+      void setText( const std::string& info ) { 
+        textLb->setText(info);
+      }
 
-    ~InfoLine() {
-    }
+      virtual int preferredWidth () const { 
+        return 200;
+      }
 
-    void setText(const std::string & info) { textLb->setText(info);}
+      virtual int preferredHeight() const {
+        return textLb->preferredHeight();
+      }
 
-    virtual int preferredWidth () const { return 200;}
-    virtual int preferredHeight() const {
-      return textLb->preferredHeight();
-    }
+      virtual void resize() {
+        infoLb->setPosition( 0, 0, 100, clientHeight() );
+        textLb->setSpacing( 2, 2, 2, 2 );
+        textLb->setPosition( 100, 0, clientWidth()-100, clientHeight() );
+      }
 
-    virtual void resize() {
-      infoLb->setPosition(0,0,100,clientHeight());
-      textLb->setSpacing(2,2,2,2);
-      textLb->setPosition(100,0,clientWidth()-100,clientHeight());
-    }
+    private:
 
-private:
+      ngrs::NLabel* infoLb;
+      ngrs::NLabel* textLb;
 
-    NLabel* infoLb;
-    NLabel* textLb;
+    };
 
-};
+    /**
+    @author Stefan Nattkemper
+    */
 
-/**
-@author Stefan Nattkemper
-*/
+    class NewMachine : public ngrs::NDialog
+    {
+    public:
+      NewMachine( const PluginFinder& finder );
 
-class NewMachine : public NDialog
-{
-public:
-	NewMachine( const PluginFinder & finder );
+      ~NewMachine();
 
-    ~NewMachine();
+      const PluginFinderKey& pluginKey() const;
 
-	const PluginFinderKey & pluginKey() const;
+      virtual int onClose();
 
-	virtual int onClose();
+    private:
 
-private:
+      std::string dllName_;
 
-	std::string dllName_;
+      PluginFinderKey selectedKey_;
+      const PluginFinder& finder_;
 
-	PluginFinderKey selectedKey_;
-	const PluginFinder &  finder_;
+      InfoLine* name;
+      InfoLine* libName;
+      InfoLine* description;
+      InfoLine* apiVersion;
+      ngrs::NGroupBox* macProperty;
 
-	InfoLine* name;
-	InfoLine* libName;
-	InfoLine* description;
-	InfoLine* apiVersion;
-	NGroupBox* macProperty;
+      ngrs::NTabBook* tabBook_;
 
-	NTabBook* tabBook_;
+      ngrs::NListBox* generatorfBox_;
+      ngrs::NListBox* effectfBox_;
+      ngrs::NListBox* ladspaBox_;
 
-	NListBox* generatorfBox_;
-	NListBox* effectfBox_;
-	NListBox* ladspaBox_;
+      void onGeneratorItemSelected( ngrs::NItemEvent* ev );
+      void onEffectItemSelected( ngrs::NItemEvent* ev );
+      void onInternalItemSelected( ngrs::NItemEvent* ev );
+      void onLADSPAItemSelected( ngrs::NItemEvent* ev );
 
-	void onGeneratorItemSelected(NItemEvent* ev);
-	void onEffectItemSelected(NItemEvent* ev);
-	void onInternalItemSelected(NItemEvent* ev);
-	void onLADSPAItemSelected(NItemEvent* ev);	
+      void onOkBtn( ngrs::NButtonEvent* sender );
+      void onItemDblClick( ngrs::NButtonEvent* sender );	
+      void onCancelBtn( ngrs::NButtonEvent* sender );
 
-	void onOkBtn(NButtonEvent* sender);
-	void onItemDblClick(NButtonEvent* sender);	
-	void onCancelBtn(NButtonEvent* sender);
+      std::map< ngrs::NCustomItem*, PluginFinderKey > pluginIdentify_;
 
-	std::map< NCustomItem*, PluginFinderKey > pluginIdentify_;
+      void setPlugin( ngrs::NCustomItem* item );
+      void onGeneratorTabChange( ngrs::NButtonEvent* ev );
+      void onEffectTabChange( ngrs::NButtonEvent* ev );
+      void onLADSPATabChange( ngrs::NButtonEvent* ev );
+      void onInternalTabChange( ngrs::NButtonEvent* ev );
 
-	void setPlugin( NCustomItem* item );
-	void onGeneratorTabChange( NButtonEvent* ev );
-	void onEffectTabChange( NButtonEvent* ev );
-	void onLADSPATabChange( NButtonEvent* ev );
-	void onInternalTabChange( NButtonEvent* ev );
+    };
 
-};
-
-} // end of host namespace
+  } // end of host namespace
 } // end of psycle namespace
 
 #endif

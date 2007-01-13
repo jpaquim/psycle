@@ -30,50 +30,50 @@ namespace psycle
 	namespace host
 	{
 		WaveEdAmplifyDialog::WaveEdAmplifyDialog()
-			: NDialog()
+			: ngrs::NDialog()
 		{
 			setTitle("Amplify Dialog");
-			NPanel* sliderPanel = new NPanel();
-			sliderPanel->setLayout(NAlignLayout(5,5));
-			m_slider = new NSlider;
+			ngrs::NPanel* sliderPanel = new ngrs::NPanel();
+			sliderPanel->setLayout( ngrs::NAlignLayout(5,5) );
+			m_slider = new ngrs::NSlider;
 			m_slider->setPreferredSize(250,15);
-			m_dbedit = new NEdit;
+			m_dbedit = new ngrs::NEdit;
 			m_dbedit->setPreferredSize(50,20);
 			{
-				NLabel *lbl = new NLabel("db");
-				sliderPanel->add(lbl,nAlRight);
+				ngrs::NLabel *lbl = new ngrs::NLabel("db");
+				sliderPanel->add(lbl,ngrs::nAlRight);
 			}
-			sliderPanel->add(m_dbedit,nAlRight);
-			sliderPanel->add(m_slider,nAlClient);
+			sliderPanel->add(m_dbedit,ngrs::nAlRight);
+			sliderPanel->add(m_slider,ngrs::nAlClient);
 
-			NPanel* okPanel = new NPanel();
-			okPanel->setLayout(NAlignLayout(5,5));
+			ngrs::NPanel* okPanel = new ngrs::NPanel();
+			okPanel->setLayout( ngrs::NAlignLayout( 5, 5) );
 			{
-				NButton *btn = new NButton("OK", false);
+				ngrs::NButton *btn = new ngrs::NButton("OK", false);
 				btn->clicked.connect(this, &WaveEdAmplifyDialog::onOkClicked);
-				okPanel->add(btn,nAlRight);
+				okPanel->add(btn,ngrs::nAlRight);
 			}
 			{
-				NButton *btn = new NButton("Cancel", false);
+				ngrs::NButton *btn = new ngrs::NButton("Cancel", false);
 				btn->clicked.connect(this, &WaveEdAmplifyDialog::onCancelClicked);
-				okPanel->add(btn,nAlRight);
+				okPanel->add(btn,ngrs::nAlRight);
 			}
-			pane()->add(okPanel,nAlBottom);
+			pane()->add( okPanel, ngrs::nAlBottom );
 			{
-				NLabel *lbl = new NLabel("Adjust volume:");
-				pane()->add(lbl,nAlTop);
+				ngrs::NLabel *lbl = new ngrs::NLabel("Adjust volume:");
+				pane()->add( lbl, ngrs::nAlTop );
 			}
 			
 
-			m_slider->setOrientation(nHorizontal);
-			pane()->add(sliderPanel,nAlTop);
-			m_slider->change.connect(this, &WaveEdAmplifyDialog::onSliderPosChanged);
-			m_slider->setRange(0, 14400); 	// Don't use (-,+) range. It fucks up with the "0"
-			m_slider->setPos(9600);
+			m_slider->setOrientation( ngrs::nHorizontal );
+			pane()->add( sliderPanel, ngrs::nAlTop );
+			m_slider->change.connect( this, &WaveEdAmplifyDialog::onSliderPosChanged );
+			m_slider->setRange( 0, 14400 ); 	// Don't use (-,+) range. It fucks up with the "0"
+			m_slider->setPos( 9600 );
 			pack();
 		}
 
-		void WaveEdAmplifyDialog::onSliderPosChanged(NSlider* slider) 
+		void WaveEdAmplifyDialog::onSliderPosChanged( ngrs::NSlider* slider )
 		{
       double pos = slider->pos();
 			float db =  (float) (pos-9600)*0.01f;
@@ -87,9 +87,8 @@ namespace psycle
 			m_dbedit->repaint();
 		}
 
-		void WaveEdAmplifyDialog::onOkClicked(NButtonEvent* ev) 
+		void WaveEdAmplifyDialog::onOkClicked( ngrs::NButtonEvent* ev )
 		{
-			
 			std::string db_t = m_dbedit->text();
 			db_i = (int)(100*atof(db_t.c_str()));
 			if(db_i)
@@ -98,10 +97,11 @@ namespace psycle
 				doClose(false);
 		}
 
-		void WaveEdAmplifyDialog::onCancelClicked(NButtonEvent* ev) 
+		void WaveEdAmplifyDialog::onCancelClicked( ngrs::NButtonEvent* ev ) 
 		{
 			db_i = 0;
 			doClose(false);
 		}
 
-}}
+}
+}

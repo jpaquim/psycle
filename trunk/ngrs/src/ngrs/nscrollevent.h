@@ -23,16 +23,18 @@
 /**
 @author Stefan
 */
-class NScrollEvent{
-public:
+
+namespace ngrs {
+
+  class NScrollEvent{
+  public:
+
     NScrollEvent();
 
     ~NScrollEvent();
 
+  };
 
-private:
-
-
-};
+}
 
 #endif

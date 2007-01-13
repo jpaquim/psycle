@@ -32,20 +32,20 @@ namespace psycle
 	namespace host
 	{
 		WaveEdMixDialog::WaveEdMixDialog()
-			: NDialog()
+			: ngrs::NDialog()
 		{
 			setTitle("Mix");
 			setPosition(0,0,306,158);
 			setPositionToScreenCenter();
 						
-			m_srcVol = new NSlider();
-			m_destVol = new NSlider();
-			m_bFadeIn = new NCheckBox("Fade In to Mix");
-			m_bFadeOut = new NCheckBox("Fade Out of Mix");
-			m_fadeInTime = new NEdit();
-			m_fadeOutTime = new NEdit();
-			m_destVolText = new NLabel();
-			m_srcVolText = new NLabel();
+			m_srcVol = new ngrs::NSlider();
+			m_destVol = new ngrs::NSlider();
+			m_bFadeIn = new ngrs::NCheckBox("Fade In to Mix");
+			m_bFadeOut = new ngrs::NCheckBox("Fade Out of Mix");
+			m_fadeInTime = new ngrs::NEdit();
+			m_fadeOutTime = new ngrs::NEdit();
+			m_destVolText = new ngrs::NLabel();
+			m_srcVolText = new ngrs::NLabel();
 			m_srcVol->setPosition(33,41,18,68);
 			m_destVol->setPosition(108,41,18,68);
 			m_bFadeIn->setPosition(159,68,140,14);
@@ -64,26 +64,26 @@ namespace psycle
 			pane()->add(m_srcVolText);
 
 			{
-				NButton * btn = new NButton("Ok", false);
+				ngrs::NButton * btn = new ngrs::NButton("Ok", false);
 				pane()->add(btn);
 				btn->setPosition(242,7,55,16);
 				btn->clicked.connect(this, &WaveEdMixDialog::onOkClicked);
 			}
 			{
-				NButton * btn = new NButton("Cancel", false);
+				ngrs::NButton * btn = new ngrs::NButton("Cancel", false);
 				pane()->add(btn);
 				btn->setPosition(242,28,55,16);
 				btn->clicked.connect(this, &WaveEdMixDialog::onCancelClicked);
 			}
-			//these don't appear to do anything yet, but should be uncommented once NGroupBox is working..
+			//these don't appear to do anything yet, but should be uncommented once ngrs::NGroupBox is working..
 /*			{
-				NGroupBox * grp = new NGroupBox();
+				NGroupBox * grp = new ngrs::NGroupBox();
 				grp->setHeaderText("Wave");
 				pane()->add(grp);
 				grp->setPosition(91,24,60,127);
 			}
 			{
-				NGroupBox * grp = new NGroupBox();
+				NGroupBox * grp = new ngrs::NGroupBox();
 				grp->setHeaderText("Clipboard");
 				pane()->add(grp);
 				grp->setPosition(16,24,60,127);
@@ -111,7 +111,7 @@ namespace psycle
 			srcVol=destVol=fadeInTime=fadeOutTime=0;
 		}
 		
-		void WaveEdMixDialog::onOkClicked(NButtonEvent* ev) 
+		void WaveEdMixDialog::onOkClicked( ngrs::NButtonEvent* ev ) 
 		{
 			std::string temp;
 			srcVol	= (2000-m_srcVol->pos())/1000.0f;
@@ -129,13 +129,13 @@ namespace psycle
 			doClose(true);
 		}
 
-		void WaveEdMixDialog::onCancelClicked(NButtonEvent* ev) 
+		void WaveEdMixDialog::onCancelClicked( ngrs::NButtonEvent* ev ) 
 		{
 			doClose(false);
 		}
 
 
-		void WaveEdMixDialog::onDestSliderMoved( NSlider *slider )
+		void WaveEdMixDialog::onDestSliderMoved( ngrs::NSlider *slider )
 		{     
 			std::ostringstream temp;
 			temp.setf(std::ios::fixed);
@@ -151,7 +151,7 @@ namespace psycle
 			m_destVolText->repaint();
 		}
 
-		void WaveEdMixDialog::onSrcSliderMoved( NSlider *slider )
+		void WaveEdMixDialog::onSrcSliderMoved( ngrs::NSlider *slider )
 		{
 			std::ostringstream temp;
 			temp.setf(std::ios::fixed);
@@ -167,12 +167,12 @@ namespace psycle
 			m_srcVolText->repaint();
 		}
 
-		void WaveEdMixDialog::OnBnClickedFadeoutcheck( NButtonEvent* ev )
+		void WaveEdMixDialog::OnBnClickedFadeoutcheck( ngrs::NButtonEvent* ev )
 		{
 			m_fadeOutTime->setEnable(m_bFadeOut->checked());
 		}
 
-		void WaveEdMixDialog::OnBnClickedFadeincheck(NButtonEvent* ev)
+		void WaveEdMixDialog::OnBnClickedFadeincheck( ngrs::NButtonEvent* ev )
 		{
 			m_fadeInTime->setEnable(m_bFadeIn->checked());
 		}

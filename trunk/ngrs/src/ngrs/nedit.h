@@ -29,9 +29,12 @@
 /**
 @author Stefan
 */
-class NEdit : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NEdit : public NPanel
+  {
+  public:
     NEdit();
     NEdit(const std::string & text);
 
@@ -42,9 +45,9 @@ public:
 
     void setText(const std::string & text);
     const std::string & text() const;
-	std::string selText() const;
+    std::string selText() const;
 
-	void setInputPolicy( const std::string & regexp );
+    void setInputPolicy( const std::string & regexp );
 
     virtual void paint(NGraphics* g);
     virtual void onKeyPress(const NKeyEvent & keyevent);
@@ -66,11 +69,11 @@ public:
     int hAlign() const;
 
     void setPos(unsigned int pos);
-	std::string::size_type pos() const;
+    std::string::size_type pos() const;
 
     sigslot::signal1<const NKeyEvent &> keyPress;
 
-private:
+  private:
 
     NRegExp regExp_;
 
@@ -91,11 +94,13 @@ private:
     void drawCursor(NGraphics* g, const std::string & text );
 
     void init();
-    
+
     void startSel();
     void computeSel();
     void endSel();
 
-};
+  };
+
+}
 
 #endif

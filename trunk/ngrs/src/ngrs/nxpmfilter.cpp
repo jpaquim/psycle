@@ -21,46 +21,48 @@
 #include "napp.h"
 #include "nfile.h"
 
-NXPMFilter::NXPMFilter()
- : NImgFilter()
-{
-}
+namespace ngrs {
 
-
-NXPMFilter::~NXPMFilter()
-{
-}
-
-NBitmap NXPMFilter::loadFromFile( const std::string & filename )
-{
-  #ifdef __unix__
-  XpmColorSymbol cs[256];
-  XpmAttributes attr;
-  attr.valuemask = XpmCloseness;
-  attr.colorsymbols = cs;
-  attr.numsymbols = 256;
-  attr.color_key = XPM_GRAY;
-
-  XImage* xi;
-  XImage* clp;
-  int err = XpmReadFileToImage(NApp::system().dpy(),(char*) NFile::replaceTilde(filename).c_str(),&xi,&clp,0);
-
- /* for (int j = 0; j< xi->height; j++)
-  for (int i = 0; i< xi->width; i++) {
-    printf("%d",xi->data[i*j]);
+  NXPMFilter::NXPMFilter()
+    : NImgFilter()
+  {
   }
-  printf("\n");
-  exit(0);*/
 
-  NBitmap bitmap;
-  if (err == XpmSuccess) {
-     bitmap.setSysImgData( xi, clp );
-  } else throw "couldn`t open file";
-  
-  return bitmap;
-  #else
-  return NBitmap();
-  #endif
+
+  NXPMFilter::~NXPMFilter()
+  {
+  }
+
+  NBitmap NXPMFilter::loadFromFile( const std::string & filename )
+  {
+#ifdef __unix__
+    XpmColorSymbol cs[256];
+    XpmAttributes attr;
+    attr.valuemask = XpmCloseness;
+    attr.colorsymbols = cs;
+    attr.numsymbols = 256;
+    attr.color_key = XPM_GRAY;
+
+    XImage* xi;
+    XImage* clp;
+    int err = XpmReadFileToImage(NApp::system().dpy(),(char*) NFile::replaceTilde(filename).c_str(),&xi,&clp,0);
+
+    /* for (int j = 0; j< xi->height; j++)
+    for (int i = 0; i< xi->width; i++) {
+    printf("%d",xi->data[i*j]);
+    }
+    printf("\n");
+    exit(0);*/
+
+    NBitmap bitmap;
+    if (err == XpmSuccess) {
+      bitmap.setSysImgData( xi, clp );
+    } else throw "couldn`t open file";
+
+    return bitmap;
+#else
+    return NBitmap();
+#endif
+  }
+
 }
-
-

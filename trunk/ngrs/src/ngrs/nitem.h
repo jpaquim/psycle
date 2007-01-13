@@ -23,39 +23,43 @@
 #include "ncustomitem.h"
 #include "nimage.h"
 
-class NLabel;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
+  class NLabel;
 
-class NItem : public NCustomItem
-{
-public:
-   NItem();
-   NItem(const std::string & text);
+  /**
+  @author Stefan
+  */
 
-   ~NItem();
+  class NItem : public NCustomItem
+  {
+  public:
+    NItem();
+    NItem(const std::string & text);
 
-   void setText(const std::string & text);
+    ~NItem();
 
-   virtual std::string text() const;
+    void setText(const std::string & text);
 
-   virtual void resize();
+    virtual std::string text() const;
 
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
+    virtual void resize();
 
-   virtual void add(NImage* icon);
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
-private:
+    virtual void add(NImage* icon);
 
-   int iconWidth_;
+  private:
 
-   NLabel* label_;
-   NImage* icon_;
+    int iconWidth_;
 
-   void init();
-};
+    NLabel* label_;
+    NImage* icon_;
+
+    void init();
+  };
+
+}
 
 #endif

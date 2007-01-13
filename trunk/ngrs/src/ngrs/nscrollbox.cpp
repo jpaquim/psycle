@@ -20,78 +20,80 @@
 #include "nscrollbox.h"
 #include "nscrollbar.h"
 
-NScrollBox::NScrollBox()
- : NPanel()
-{
-  init();
-}
+namespace ngrs {
+
+  NScrollBox::NScrollBox()
+    : NPanel()
+  {
+    init();
+  }
 
 
-NScrollBox::~NScrollBox()
-{
-}
+  NScrollBox::~NScrollBox()
+  {
+  }
 
-void NScrollBox::init( )
-{
-  horBar_ = new NScrollBar();
+  void NScrollBox::init( )
+  {
+    horBar_ = new NScrollBar();
     horBar_->setOrientation(nHorizontal);
     horBar_->change.connect(this,&NScrollBox::onHPosChange);
-  add( horBar_ );
-  verBar_ = new NScrollBar();
+    add( horBar_ );
+    verBar_ = new NScrollBar();
     verBar_->setOrientation(nVertical);
     verBar_->change.connect(this,&NScrollBox::onVPosChange);
-  add( verBar_ );
-  scrollPane_ = 0;
-}
+    add( verBar_ );
+    scrollPane_ = 0;
+  }
 
-void NScrollBox::resize( )
-{
-  horBar_->setPosition(0,clientHeight()-15,clientWidth(),15);
-  int horOff = 0;
-  if (horBar_->visible()) horOff = 15;
-  verBar_->setPosition(clientWidth()-15,0,15,clientHeight()-horOff);
-  if (scrollPane_!=0) scrollPane_->setPosition(0,0,clientWidth()-15, clientHeight()-horOff);
-}
+  void NScrollBox::resize( )
+  {
+    horBar_->setPosition(0,clientHeight()-15,clientWidth(),15);
+    int horOff = 0;
+    if (horBar_->visible()) horOff = 15;
+    verBar_->setPosition(clientWidth()-15,0,15,clientHeight()-horOff);
+    if (scrollPane_!=0) scrollPane_->setPosition(0,0,clientWidth()-15, clientHeight()-horOff);
+  }
 
-void NScrollBox::setScrollPane( NVisualComponent * scrollPane )
-{
-  add(scrollPane);
-  scrollPane_ = scrollPane;
+  void NScrollBox::setScrollPane( NVisualComponent * scrollPane )
+  {
+    add(scrollPane);
+    scrollPane_ = scrollPane;
     verBar_->setControl( scrollPane_, nDy );
     horBar_->setControl( scrollPane_, nDx );
-  resize();
-}
-
-NVisualComponent * NScrollBox::scrollPane( )
-{
-  return scrollPane_;
-}
-
-void NScrollBox::setHScrollBarPolicy( int policy )
-{
-  if ( policy & nNoneVisible ) {
-    horBar_->setVisible(false);
+    resize();
   }
+
+  NVisualComponent * NScrollBox::scrollPane( )
+  {
+    return scrollPane_;
+  }
+
+  void NScrollBox::setHScrollBarPolicy( int policy )
+  {
+    if ( policy & nNoneVisible ) {
+      horBar_->setVisible(false);
+    }
+  }
+
+  void NScrollBox::onVPosChange( NScrollBar * sender )
+  {
+
+  }
+
+  void NScrollBox::onHPosChange( NScrollBar * sender )
+  {
+
+  }
+
+  NScrollBar * NScrollBox::horBar( )
+  {
+    return horBar_;
+  }
+
+  NScrollBar * NScrollBox::verBar( )
+  {
+    return verBar_;
+  }
+
 }
-
-void NScrollBox::onVPosChange( NScrollBar * sender )
-{
-
-}
-
-void NScrollBox::onHPosChange( NScrollBar * sender )
-{
-
-}
-
-NScrollBar * NScrollBox::horBar( )
-{
-  return horBar_;
-}
-
-NScrollBar * NScrollBox::verBar( )
-{
-  return verBar_;
-}
-
-

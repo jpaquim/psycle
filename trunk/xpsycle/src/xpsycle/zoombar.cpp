@@ -399,7 +399,7 @@ const char * sl_xpm[] = {
 
 
 ZoomBar::ZoomBar()
- : NPanel()
+ : ngrs::NPanel()
 {
   init();
 }
@@ -410,39 +410,39 @@ ZoomBar::~ZoomBar()
 
 void ZoomBar::init( )
 {
-  orientation_ = nHorizontal;
+  orientation_ = ngrs::nHorizontal;
   increment_ = 1;
 
-  setLayout( NAlignLayout() );
+  setLayout( ngrs::NAlignLayout() );
 
   zoomInBpm.createFromXpmData(zoomin_xpm);
   zoomOutBpm.createFromXpmData(zoomout_xpm);
   sliderBpm.createFromXpmData(sl_xpm);
 
-  NImage* img = new NImage(zoomOutBpm);
+  ngrs::NImage* img = new ngrs::NImage(zoomOutBpm);
 
-  decBtn = new NButton(img);
+  decBtn = new ngrs::NButton(img);
     decBtn->setFlat(false);
     decBtn->setPreferredSize(20,15);
     decBtn->setFlat(true);
     decBtn->clicked.connect( this, &ZoomBar::onDecButton );
-  add(decBtn, nAlLeft);
+  add(decBtn, ngrs::nAlLeft);
 
-  img = new NImage(zoomInBpm);
+  img = new ngrs::NImage(zoomInBpm);
 
-  incBtn = new NButton(img);
+  incBtn = new ngrs::NButton(img);
     incBtn->setFlat(false);
     incBtn->setPreferredSize(20,15);
     incBtn->setFlat(true);
     incBtn->clicked.connect( this, &ZoomBar::onIncButton );
-  add(incBtn, nAlRight);
+  add(incBtn, ngrs::nAlRight);
 
-  zoomSlider = new NSlider();
-    zoomSlider->setOrientation(nHorizontal);
+  zoomSlider = new ngrs::NSlider();
+    zoomSlider->setOrientation(ngrs::nHorizontal);
     zoomSlider->setPreferredSize(120,15);
     zoomSlider->change.connect(this, &ZoomBar::onPosChanged);
     zoomSlider->customSliderPaint.connect(this,&ZoomBar::customSliderPaint);
-  add(zoomSlider, nAlClient);
+  add(zoomSlider, ngrs::nAlClient);
 }
 
 void ZoomBar::setOrientation( int orientation )
@@ -455,7 +455,7 @@ int ZoomBar::orientation( ) const
   return orientation_;
 }
 
-void ZoomBar::onPosChanged( NSlider * slider )
+void ZoomBar::onPosChanged( ngrs::NSlider * slider )
 {
   posChanged.emit(this, slider->pos() );
 }
@@ -475,17 +475,17 @@ double ZoomBar::pos( ) const
   return zoomSlider->pos();
 }
 
-void ZoomBar::customSliderPaint( NSlider * sl, NGraphics * g )
+void ZoomBar::customSliderPaint( ngrs::NSlider * sl, ngrs::NGraphics * g )
 {
   g->putBitmap(0,0,sliderBpm.width(),sliderBpm.height(),sliderBpm,0,0);
 }
 
-void ZoomBar::onIncButton( NButtonEvent * ev )
+void ZoomBar::onIncButton( ngrs::NButtonEvent * ev )
 {
   zoomSlider->setPos( zoomSlider->pos() + increment_ );
 }
 
-void ZoomBar::onDecButton( NButtonEvent * ev )
+void ZoomBar::onDecButton( ngrs::NButtonEvent * ev )
 {
   zoomSlider->setPos(zoomSlider->pos() - increment_);
 }

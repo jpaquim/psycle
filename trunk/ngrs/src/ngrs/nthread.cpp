@@ -20,91 +20,95 @@
 #include "nthread.h"
 #include <algorithm>
 
-std::vector<NThread*> NThread::threadList;
+namespace ngrs {
 
-NThread::NThread() : terminated_(1) {
-                   
-}                   
-   
-NThread::~NThread() {
-                    
-}                    
+  std::vector<NThread*> NThread::threadList;
+
+  NThread::NThread() : terminated_(1) {
+
+  }                   
+
+  NThread::~NThread() {
+
+  }                    
 
 
-void NThread::execute() {
-  // override this virtual method
-  // called by the OS Thread
-}        
+  void NThread::execute() {
+    // override this virtual method
+    // called by the OS Thread
+  }        
 
-void NThread::start() {
-  if ( terminated_ )
-    terminated_ = !createOSThread();    
-}     
-     
-void NThread::terminate() {
-  terminated_ = true;     
-}     
+  void NThread::start() {
+    if ( terminated_ )
+      terminated_ = !createOSThread();    
+  }     
 
-bool NThread::terminated() const {
-  return terminated_;    
-}     
+  void NThread::terminate() {
+    terminated_ = true;     
+  }     
 
-// static callBack
+  bool NThread::terminated() const {
+    return terminated_;    
+  }     
 
-void* NThread::callBack( void* ptr ) {
-   std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), static_cast<NThread*> (ptr) );
-   if ( itr != threadList.end() ) {
-     NThread* thread = *itr;
-     thread->execute();     
-     thread->killOSThread();
-   }
+  // static callBack
 
-   return 0;
-}      
+  void* NThread::callBack( void* ptr ) {
+    std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), static_cast<NThread*> (ptr) );
+    if ( itr != threadList.end() ) {
+      NThread* thread = *itr;
+      thread->execute();     
+      thread->killOSThread();
+    }
 
-// creates an OS Thread
+    return 0;
+  }      
 
-bool NThread::createOSThread() {
-  
-  addThreadToList( this );
-       
-  #ifdef __unix__
-  if ( 0 == pthread_create( &threadid, NULL, (void*(*)(void*))NThread::callBack, (void*) this)  ) {
-    // sth went wrong
-    removeThreadFromList( this );   
-    return false;
-  }    
-  else
-    return true;
-  #else
+  // creates an OS Thread
+
+  bool NThread::createOSThread() {
+
+    addThreadToList( this );
+
+#ifdef __unix__
+    if ( 0 == pthread_create( &threadid, NULL, (void*(*)(void*))NThread::callBack, (void*) this)  ) {
+      // sth went wrong
+      removeThreadFromList( this );   
+      return false;
+    }    
+    else
+      return true;
+#else
     // todo win32 thread create
     // not yet implemented
     removeThreadFromList( this );
     return false;
-  #endif
+#endif
+  }
+
+  void NThread::killOSThread() {
+#ifdef __unix__
+    pthread_exit( 0 ); // kills thread;
+#else
+#endif
+  }
+
+  void NThread::addThreadToList( NThread* thread ) {
+    std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), this );
+    if ( itr != threadList.end() ) {
+      // todo : enter critical section
+      threadList.push_back( this );    
+      // todo : end of critical section  
+    }  
+  }     
+
+  void NThread::removeThreadFromList( NThread* thread ) {     
+    std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), thread );
+    if ( itr != threadList.end() ) {
+      // todo critical section begin
+      threadList.erase( itr );
+      // todo critical section end
+    }      
+  }     
+
 }
-
-void NThread::killOSThread() {
-  #ifdef __unix__
-  pthread_exit( 0 ); // kills thread;
-  #else
-  #endif
-}
-
-void NThread::addThreadToList( NThread* thread ) {
-  std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), this );
-  if ( itr != threadList.end() ) {
-    // todo : enter critical section
-    threadList.push_back( this );    
-    // todo : end of critical section  
-  }  
-}     
-
-void NThread::removeThreadFromList( NThread* thread ) {     
-   std::vector<NThread*>::iterator itr = find( threadList.begin(), threadList.end(), thread );
-   if ( itr != threadList.end() ) {
-     // todo critical section begin
-     threadList.erase( itr );
-     // todo critical section end
-   }      
-}     

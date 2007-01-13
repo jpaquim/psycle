@@ -19,38 +19,40 @@
  ***************************************************************************/
 #include "nmoveable.h"
 
-NMoveable::NMoveable()
-{
-  style_ = 0;
+namespace ngrs {
+
+  NMoveable::NMoveable() : style_(0)
+  {
+
+  }
+
+  NMoveable::NMoveable( int style )
+  {
+    setStyle(style);
+  }
+
+  NMoveable::~NMoveable()
+  {
+  }
+
+  int NMoveable::style( ) const
+  {
+    return style_;
+  }
+
+  void NMoveable::setStyle( int style )
+  {
+    style_ = style;
+  }
+
+  void NMoveable::addStyle( int style )
+  {
+    style_ = style_ | style ;
+  }
+
+  void NMoveable::removeStyle( int style )
+  {
+    style_ = style_ - style ;
+  }
+
 }
-
-NMoveable::NMoveable( int style )
-{
-  setStyle(style);
-}
-
-NMoveable::~NMoveable()
-{
-}
-
-int NMoveable::style( ) const
-{
-  return style_;
-}
-
-void NMoveable::setStyle( int style )
-{
-  style_ = style;
-}
-
-void NMoveable::addStyle( int style )
-{
-  style_ = style_ | style ;
-}
-
-void NMoveable::removeStyle( int style )
-{
-  style_ = style_ - style ;
-}
-
-

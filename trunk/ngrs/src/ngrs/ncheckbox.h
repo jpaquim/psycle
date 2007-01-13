@@ -23,51 +23,56 @@
 #include "npanel.h"
 #include "nfontmetrics.h"
 
-class NLabel;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
-class NCheckBox : public NPanel
-{
-public:
+  class NLabel;
+
+  /**
+  @author Stefan
+  */
+
+  class NCheckBox : public NPanel
+  {
+  public:
     NCheckBox();
     NCheckBox(const std::string & text);
 
     ~NCheckBox();
 
-   void setText(const std::string & text);
-   const std::string & text() const;
+    void setText(const std::string & text);
+    const std::string & text() const;
 
-   virtual void paint(NGraphics* g);
+    virtual void paint(NGraphics* g);
 
-   virtual void onMousePress(int x, int y, int button);
-   virtual void onMousePressed (int x, int y, int button);
+    virtual void onMousePress(int x, int y, int button);
+    virtual void onMousePressed (int x, int y, int button);
 
-   void setCheck(bool on);
-   bool checked() const;
+    void setCheck(bool on);
+    bool checked() const;
 
-   void setWordWrap(bool on);
-   bool wordWrap() const;
+    void setWordWrap(bool on);
+    bool wordWrap() const;
 
 
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
-   virtual void resize();
+    virtual void resize();
 
-   signal1<NButtonEvent*> clicked;
+    signal1<NButtonEvent*> clicked;
 
-private:
+  private:
 
-   NLabel* label_;
-   int dx,dy;
-   std::string text_;
-   bool checked_;
-   NFontMetrics metrics;
+    NLabel* label_;
+    int dx,dy;
+    std::string text_;
+    bool checked_;
+    NFontMetrics metrics;
 
-   void init();
-   void drawCheck(NGraphics* g);
-};
+    void init();
+    void drawCheck(NGraphics* g);
+  };
+
+}
 
 #endif

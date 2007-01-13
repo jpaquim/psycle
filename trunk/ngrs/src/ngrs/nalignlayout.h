@@ -27,9 +27,11 @@
 @author Stefan
 */
 
-class NAlignLayout : public NLayout
-{
-public:
+namespace ngrs {
+
+  class NAlignLayout : public NLayout
+  {
+  public:
     NAlignLayout();
     NAlignLayout(int hgap, int vgap);
     virtual NAlignLayout* clone()  const;   // Uses the copy constructor
@@ -48,7 +50,7 @@ public:
     virtual void removeAll();
 
 
-private:
+  private:
 
     int maxX_;
     int maxY_;
@@ -57,6 +59,8 @@ private:
 
     std::vector<NVisualComponent*> components;
 
-};
+  };
+
+}
 
 #endif

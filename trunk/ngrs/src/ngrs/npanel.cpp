@@ -20,26 +20,29 @@
 #include "npanel.h"
 #include "nrectshape.h"
 
-NPanel::NPanel()
- : NVisualComponent()
-{  
-  rectShape = new NRectShape();
-  setGeometry( rectShape );
-  geometry()->setPosition(0,0,10,10);
-  setTransparent( true );
+namespace ngrs {
+
+  NPanel::NPanel()
+    : NVisualComponent()
+  {  
+    rectShape = new NRectShape();
+    setGeometry( rectShape );
+    geometry()->setPosition(0,0,10,10);
+    setTransparent( true );
+  }
+
+  NPanel::~NPanel()
+  {
+    delete rectShape;
+  }
+
 }
 
-NPanel::~NPanel()
-{
-  delete rectShape;
+// class factories
+extern "C" ngrs::NObject* createPanel() {
+  return new ngrs::NPanel();
 }
 
-// the class factories
-
-extern "C" NObject* createPanel() {
-    return new NPanel();
-}
-
-extern "C" void destroyPanel(NObject* p) {
+extern "C" void destroyPanel( ngrs::NObject* p) {
     delete p;
 }

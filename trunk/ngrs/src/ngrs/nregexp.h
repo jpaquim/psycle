@@ -24,25 +24,27 @@
 #include <vector>
 #include <string>
 
-class NNfa;
-class NState;
+namespace ngrs {
 
-const char nRegUnion  = '+';
-const char nRegConcat = '_';
-const char nRegStar   = '*';
-const char nRegOpenParanthesis  = '(';
-const char nRegCloseParanthesis = ')';
-const char nRegNumber = 'N';
-const char nRegAlphabet = 'A';
-const char nRegSigma = 'S';
-const char nRegPlaceHolderBegin = '{';
-const char nRegPlaceHolderEnd = '}';
+  class NNfa;
+  class NState;
 
-/**
-@author Stefan Nattkemper
-*/
-class NRegExp{
-public:
+  const char nRegUnion  = '+';
+  const char nRegConcat = '_';
+  const char nRegStar   = '*';
+  const char nRegOpenParanthesis  = '(';
+  const char nRegCloseParanthesis = ')';
+  const char nRegNumber = 'N';
+  const char nRegAlphabet = 'A';
+  const char nRegSigma = 'S';
+  const char nRegPlaceHolderBegin = '{';
+  const char nRegPlaceHolderEnd = '}';
+
+  /**
+  @author Stefan Nattkemper
+  */
+  class NRegExp{
+  public:
     NRegExp();
 
     ~NRegExp();
@@ -50,18 +52,20 @@ public:
     void setRegExp(const std::string & regExp);
     bool accept( const std::string & input );
 
-private:
+  private:
 
-   bool inSigma(char c);
-   int priority(char op);
+    bool inSigma(char c);
+    int priority(char op);
 
-   std::stack<char>  opStack;
-   std::stack<NNfa*> nfaStack;
+    std::stack<char>  opStack;
+    std::stack<NNfa*> nfaStack;
 
-   void addChar(char c, NNfa * nfa);
-   void unite(NNfa* nfa1, NNfa* nfa2);
+    void addChar(char c, NNfa * nfa);
+    void unite(NNfa* nfa1, NNfa* nfa2);
 
-   std::vector<NState*> deleteList;
-};
+    std::vector<NState*> deleteList;
+  };
+
+}
 
 #endif

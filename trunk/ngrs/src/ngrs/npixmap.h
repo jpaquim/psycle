@@ -23,22 +23,24 @@
 #include "nobject.h"
 #include "nsystem.h"
 
+namespace ngrs {
+
 #ifdef __unix__
 #else
 #include "nbitmap.h"
-typedef NBitmap NPixmap;
+  typedef NBitmap NPixmap;
 #endif
 
 #ifdef __unix__
 
-class NWindow;
+  class NWindow;
 
-/**
-@author Stefan Nattkemper
-*/
-class NPixmap : public NObject
-{
-public:
+  /**
+  @author Stefan Nattkemper
+  */
+  class NPixmap : public NObject
+  {
+  public:
 
     NPixmap();
     NPixmap(NWindow* win);
@@ -60,7 +62,7 @@ public:
     bool empty() const;
 
 
-private:
+  private:
 
     int width_, height_;
 
@@ -68,6 +70,10 @@ private:
     Pixmap shapepixmap_;
 
     WinHandle owner_;
-};
+  };
+
 #endif
+
+}
+
 #endif

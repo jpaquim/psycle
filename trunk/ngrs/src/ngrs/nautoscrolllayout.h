@@ -26,9 +26,12 @@
 /**
 @author Stefan
 */
-class NAutoScrollLayout : public NLayout
-{
-public:
+
+namespace ngrs {
+
+  class NAutoScrollLayout : public NLayout
+  {
+  public:
     NAutoScrollLayout();
     virtual NLayout* clone()  const;   // Uses the copy constructor
 
@@ -40,10 +43,12 @@ public:
 
 
 
-private:
+  private:
 
     int maxX_, maxY_;
 
-};
+  };
+
+}
 
 #endif

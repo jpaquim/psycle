@@ -19,24 +19,25 @@
  ***************************************************************************/
 #include "nevent.h"
 
-NEvent::NEvent(NObject* sender, const std::string & text) : sender_(sender), text_(text)
-{
+namespace ngrs {
+
+  NEvent::NEvent(NObject* sender, const std::string & text) : sender_(sender), text_(text)
+  {
+  }
+
+
+  NEvent::~NEvent()
+  {
+  }
+
+  NObject * NEvent::sender( )
+  {
+    return sender_;
+  }
+
+  std::string NEvent::text( )
+  {
+    return text_;
+  }
+
 }
-
-
-NEvent::~NEvent()
-{
-}
-
-NObject * NEvent::sender( )
-{
-  return sender_;
-}
-
-std::string NEvent::text( )
-{
-  return text_;
-}
-
-
-

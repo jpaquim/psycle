@@ -20,52 +20,52 @@
 #include "ncoloritem.h"
 #include "nfontmetrics.h"
 
-NColorItem::NColorItem()
- : NCustomItem()
-{
+namespace ngrs {
+
+  NColorItem::NColorItem()
+    : NCustomItem()
+  {
+  }
+
+  NColorItem::NColorItem( const NColor & color, const std::string & text )
+    : NCustomItem(), color_(color), text_(text)
+  {
+  }
+
+  NColorItem::~NColorItem()
+  {
+  }
+
+  void NColorItem::paint( NGraphics * g )
+  {
+    int cw = clientWidth();
+    int ch = clientHeight();
+    int ident = 4;
+
+    g->setForeground(color_);
+    g->fillRect(ident,ident,20,ch-2*ident);
+
+    g->setForeground(NColor(220,220,220));
+    g->drawRect(ident,ident,20,ch-2*ident);
+
+    int yp = (clientHeight() + g->textHeight() /2 ) / 2;
+    g->drawText(2*ident+20,yp , text_);
+  }
+
+  void NColorItem::setColor( const NColor & color )
+  {
+    color_ = color;
+  }
+
+  const NColor & NColorItem::color( ) const
+  {
+    return color_;
+  }
+
+  int NColorItem::preferredHeight( ) const
+  {
+    NFontMetrics metrics( font() );
+    return metrics.textHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+  }
+
 }
-
-NColorItem::NColorItem( const NColor & color, const std::string & text )
- : NCustomItem(), color_(color), text_(text)
-{
-}
-
-NColorItem::~NColorItem()
-{
-}
-
-void NColorItem::paint( NGraphics * g )
-{
-  int cw = clientWidth();
-  int ch = clientHeight();
-  int ident = 4;
-
-  g->setForeground(color_);
-  g->fillRect(ident,ident,20,ch-2*ident);
-
-  g->setForeground(NColor(220,220,220));
-  g->drawRect(ident,ident,20,ch-2*ident);
-
-  int yp = (clientHeight() + g->textHeight() /2 ) / 2;
-  g->drawText(2*ident+20,yp , text_);
-}
-
-void NColorItem::setColor( const NColor & color )
-{
-  color_ = color;
-}
-
-const NColor & NColorItem::color( ) const
-{
-  return color_;
-}
-
-int NColorItem::preferredHeight( ) const
-{
-  NFontMetrics metrics( font() );
-  return metrics.textHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
-}
-
-
-
-

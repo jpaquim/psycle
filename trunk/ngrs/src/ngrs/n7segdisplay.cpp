@@ -21,69 +21,71 @@
 #include "nflowlayout.h"
 #include "n7segment.h"
 
-N7SegDisplay::N7SegDisplay( )
-{
-  segCount=4;
-  initSegDisplay();
-}
+namespace ngrs {
 
-
-N7SegDisplay::N7SegDisplay(int segmentCount)
- : NPanel()
-{
-  segCount=segmentCount;
-  initSegDisplay();
-}
-
-
-N7SegDisplay::~N7SegDisplay()
-{
-
-}
-
-void N7SegDisplay::setNumber( int number )
-{
-  int digit[1000];
-
-  for (int i=0; i<1000; i++) digit[i]=-1;
-
-  if (number==0) digit[0]=0; else {
-    int n = 1;
-    for(int i = 0, n = 1; n <= number; ++i, n *= 10) digit[i] = (number / n) % 10;
-  }
-
-  int i = 0;
-  for (std::vector<N7Segment*>::iterator it =  segs.begin(); it < segs.end(); it++)
+  N7SegDisplay::N7SegDisplay( )
   {
-    N7Segment* segment = *it;
-    segment->resetSeg();
-    segment->setNumber( digit[segs.size()-i-1] );
-    i++;
+    segCount=4;
+    initSegDisplay();
   }
-}
 
-void N7SegDisplay::initSegDisplay( )
-{
- setLayout(NFlowLayout(nAlLeft,0,0));
 
- for (int i=0; i<segCount; i++) {
-   N7Segment* seg = new N7Segment();
-   add(seg);
-   segs.push_back(seg);
- }
-
- setWidth (preferredWidth());
- setHeight(preferredHeight());
-}
-
-void N7SegDisplay::setColors(const NColor & bg, const NColor & on, const NColor & off )
-{
-  for (std::vector<N7Segment*>::iterator it =  segs.begin(); it < segs.end(); it++)
+  N7SegDisplay::N7SegDisplay(int segmentCount)
+    : NPanel()
   {
-    N7Segment* segment = *it;
-    segment->setColors(on,off);
-    segment->setBackground(bg);
+    segCount=segmentCount;
+    initSegDisplay();
   }
+
+
+  N7SegDisplay::~N7SegDisplay()
+  {
+
+  }
+
+  void N7SegDisplay::setNumber( int number )
+  {
+    int digit[1000];
+
+    for (int i=0; i<1000; i++) digit[i]=-1;
+
+    if (number==0) digit[0]=0; else {
+      int n = 1;
+      for(int i = 0, n = 1; n <= number; ++i, n *= 10) digit[i] = (number / n) % 10;
+    }
+
+    int i = 0;
+    for (std::vector<N7Segment*>::iterator it =  segs.begin(); it < segs.end(); it++)
+    {
+      N7Segment* segment = *it;
+      segment->resetSeg();
+      segment->setNumber( digit[segs.size()-i-1] );
+      i++;
+    }
+  }
+
+  void N7SegDisplay::initSegDisplay( )
+  {
+    setLayout(NFlowLayout(nAlLeft,0,0));
+
+    for (int i=0; i<segCount; i++) {
+      N7Segment* seg = new N7Segment();
+      add(seg);
+      segs.push_back(seg);
+    }
+
+    setWidth (preferredWidth());
+    setHeight(preferredHeight());
+  }
+
+  void N7SegDisplay::setColors(const NColor & bg, const NColor & on, const NColor & off )
+  {
+    for (std::vector<N7Segment*>::iterator it =  segs.begin(); it < segs.end(); it++)
+    {
+      N7Segment* segment = *it;
+      segment->setColors(on,off);
+      segment->setBackground(bg);
+    }
+  }
+
 }
-
-

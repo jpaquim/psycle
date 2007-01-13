@@ -27,12 +27,13 @@
 @author Stefan Nattkemper
 */
 
-class NButton;
-class NSlider;
-class NImage;
+namespace ngrs {
+  class NButton;
+  class NSlider;
+  class NImage;
+}
 
-class ZoomBar : public NPanel
-{
+class ZoomBar : public ngrs::NPanel{
 public:
     ZoomBar();
 
@@ -43,30 +44,30 @@ public:
     void setOrientation(int orientation);
     int orientation() const;
 
-    void setRange(double min, double max);
-    void setPos(double pos);
+    void setRange( double min, double max );
+    void setPos( double pos );
     double pos() const;
 
-    void customSliderPaint(NSlider* sl, NGraphics* g);
+    void customSliderPaint( ngrs::NSlider* sl, ngrs::NGraphics* g );
 
 private:
 
    int orientation_;
-	 int increment_;
+   int increment_;
 
-   NButton* decBtn;
-   NButton* incBtn;
-   NSlider* zoomSlider;
+   ngrs::NButton* decBtn;
+   ngrs::NButton* incBtn;
+   ngrs::NSlider* zoomSlider;
 
-   NBitmap zoomOutBpm;
-   NBitmap zoomInBpm;
-   NBitmap sliderBpm;
+   ngrs::NBitmap zoomOutBpm;
+   ngrs::NBitmap zoomInBpm;
+   ngrs::NBitmap sliderBpm;
 
    void init();
 
-   void onPosChanged( NSlider* slider );
-   void onIncButton( NButtonEvent* ev );
-   void onDecButton( NButtonEvent* ev );
+   void onPosChanged( ngrs::NSlider* slider );
+   void onIncButton( ngrs::NButtonEvent* ev );
+   void onDecButton( ngrs::NButtonEvent* ev );
 };
 
 #endif

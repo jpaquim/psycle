@@ -24,13 +24,14 @@
 #include <map>
 #include <vector>
 
-
-
 /**
 @author Stefan
 */
-class NState{
-public:
+
+namespace ngrs {
+
+  class NState{
+  public:
     NState();
 
     ~NState();
@@ -43,12 +44,14 @@ public:
     void setEpsilon(const std::vector<NState*> & sequence);
     void addEpsilon(NState* state);
 
-private:
+  private:
 
-   std::vector<NState*> ndef;
-   std::vector<NState*> epsilonSequence;
-   std::map<char,std::vector<NState*> > TMap;
+    std::vector<NState*> ndef;
+    std::vector<NState*> epsilonSequence;
+    std::map<char,std::vector<NState*> > TMap;
 
-};
+  };
+
+}
 
 #endif

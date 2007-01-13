@@ -19,77 +19,81 @@
  ***************************************************************************/
 #include "npen.h"
 
-NPen::NPen()
-{
-  lineWidth_ = 1;
-  lineStyle_ = nLineSolid;
-  capStyle_  = nCapButt;
-  joinStyle_ = nJoinMiter;
-  fillStyle_ = nFillSolid;
-  function_  = nCopy;
-}
+namespace ngrs {
+
+  NPen::NPen()
+  {
+    lineWidth_ = 1;
+    lineStyle_ = nLineSolid;
+    capStyle_  = nCapButt;
+    joinStyle_ = nJoinMiter;
+    fillStyle_ = nFillSolid;
+    function_  = nCopy;
+  }
 
 
-NPen::~NPen()
-{
-}
+  NPen::~NPen()
+  {
+  }
 
-void NPen::setLineWidth( int width )
-{
-  lineWidth_ = width;
-}
+  void NPen::setLineWidth( int width )
+  {
+    lineWidth_ = width;
+  }
 
-int NPen::lineWidth( ) const
-{
-  return lineWidth_;
-}
+  int NPen::lineWidth( ) const
+  {
+    return lineWidth_;
+  }
 
-void NPen::setLineStyle( LineStyle style )
-{
-  lineStyle_ = style;
-}
+  void NPen::setLineStyle( LineStyle style )
+  {
+    lineStyle_ = style;
+  }
 
-LineStyle NPen::lineStyle( ) const
-{
-  return lineStyle_;
-}
+  LineStyle NPen::lineStyle( ) const
+  {
+    return lineStyle_;
+  }
 
-void NPen::setCapStyle( CapStyle style )
-{
-  capStyle_ = style;
-}
+  void NPen::setCapStyle( CapStyle style )
+  {
+    capStyle_ = style;
+  }
 
-CapStyle NPen::capStyle( ) const
-{
-  return capStyle_;
-}
+  CapStyle NPen::capStyle( ) const
+  {
+    return capStyle_;
+  }
 
-void NPen::setJoinStyle( JoinStyle style )
-{
-  joinStyle_ = style;
-}
+  void NPen::setJoinStyle( JoinStyle style )
+  {
+    joinStyle_ = style;
+  }
 
-JoinStyle NPen::joinStyle( ) const
-{
-  return joinStyle_;
-}
+  JoinStyle NPen::joinStyle( ) const
+  {
+    return joinStyle_;
+  }
 
-void NPen::setFillStyle( FillStyle style )
-{
-  fillStyle_ = style;
-}
+  void NPen::setFillStyle( FillStyle style )
+  {
+    fillStyle_ = style;
+  }
 
-FillStyle NPen::fillStyle( ) const
-{
-  return fillStyle_;
-}
+  FillStyle NPen::fillStyle( ) const
+  {
+    return fillStyle_;
+  }
 
-void NPen::setFunction( int function )
-{
-  function_ = function;
-}
+  void NPen::setFunction( int function )
+  {
+    function_ = function;
+  }
 
-int NPen::function( ) const
-{
-  return function_;
+  int NPen::function( ) const
+  {
+    return function_;
+  }
+
 }

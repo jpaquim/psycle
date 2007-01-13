@@ -25,15 +25,20 @@
 /**
 @author Stefan Nattkemper
 */
-class NPopupWindow : public NWindow
-{
-public:
+
+namespace ngrs {
+
+  class NPopupWindow : public NWindow
+  {
+  public:
     NPopupWindow();
 
     ~NPopupWindow();
 
     virtual void onMessage(NEvent * ev);
 
-};
+  };
+
+}
 
 #endif

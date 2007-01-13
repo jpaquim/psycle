@@ -26,42 +26,46 @@
 #include "ntogglepanel.h"
 #include "nflowlayout.h"
 
-class NNotebook;
-class NFlowLayout;
-
 /**
 @author Stefan
 */
 
-class NTabBar : public NTogglePanel
-{
-public:
+namespace ngrs {
+
+  class NNotebook;
+  class NFlowLayout;
+
+  class NTabBar : public NTogglePanel
+  {
+  public:
     NTabBar();
 
     ~NTabBar();
 
-   void addTab(NTab* tab, NVisualComponent* page);
-   void setNoteBook(NNoteBook* noteBook);
-   NCustomButton* tab(NVisualComponent* page);
+    void addTab(NTab* tab, NVisualComponent* page);
+    void setNoteBook(NNoteBook* noteBook);
+    NCustomButton* tab(NVisualComponent* page);
 
-   void setOrientation(int orientation);
-   void setActiveTab(NVisualComponent* page);
-   void setActiveTab(unsigned int index);
+    void setOrientation(int orientation);
+    void setActiveTab(NVisualComponent* page);
+    void setActiveTab(unsigned int index);
 
-   virtual void removeChild( NVisualComponent * child );
+    virtual void removeChild( NVisualComponent * child );
 
 
-private:
+  private:
 
-   NFlowLayout fl;
+    NFlowLayout fl;
 
-   int orientation_;
+    int orientation_;
 
-   std::map< NObject*, NVisualComponent* > pageMap_;
-   NNoteBook* noteBook_;
+    std::map< NObject*, NVisualComponent* > pageMap_;
+    NNoteBook* noteBook_;
 
-   void onTabClick(NButtonEvent* sender);
+    void onTabClick(NButtonEvent* sender);
 
-};
+  };
+
+}
 
 #endif

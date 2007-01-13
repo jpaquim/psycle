@@ -31,7 +31,7 @@
 namespace psycle {
 namespace host {
 
-class MacPropDlg : public NWindow
+class MacPropDlg : public ngrs::NWindow
 {
 public:
     MacPropDlg(Machine *machine);
@@ -46,12 +46,12 @@ public:
 private:
 
     Machine* pMach_;
-    NEdit* nameEdit_;
+    ngrs::NEdit* nameEdit_;
 
     void init();
-    void onOKBtn(NButtonEvent *ev);
-    void onCloneBtn(NButtonEvent *ev);
-    void onDeleteBtn(NButtonEvent *ev);
+    void onOKBtn( ngrs::NButtonEvent *ev );
+    void onCloneBtn( ngrs::NButtonEvent *ev );
+    void onDeleteBtn( ngrs::NButtonEvent *ev );
 
 };
 }}

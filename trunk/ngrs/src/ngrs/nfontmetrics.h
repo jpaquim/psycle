@@ -30,14 +30,17 @@
 /**
 @author Stefan Nattkemper
 */
-class NFontMetrics{
-public:
+
+namespace ngrs {
+
+  class NFontMetrics{
+  public:
     NFontMetrics();
     NFontMetrics(const NFont & font);
 
-	~NFontMetrics();
+    ~NFontMetrics();
 
-	void setFont(const NFont & font);
+    void setFont(const NFont & font);
 
     int maxCharWidth() const;
     int textWidth( const std::string & text ) const;
@@ -45,11 +48,13 @@ public:
     int textAscent() const;
     int textDescent() const;
 
-	std::string::size_type findWidthMax( long width, const std::string & data ) const;
+    std::string::size_type findWidthMax( long width, const std::string & data ) const;
 
-private:
+  private:
 
     NFontStructure fntStruct;
-};
+  };
+
+}
 
 #endif

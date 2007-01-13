@@ -20,79 +20,81 @@
 #include "nrect.h"
 #include <algorithm>
 
-NRect::NRect() : left_(0), top_(0), width_(0), height_(0)
-{}
+namespace ngrs {
 
-NRect::NRect(long left,long top,long width,long height): left_(left),top_(top),width_(width),height_(height)
-{}
+  NRect::NRect() : left_(0), top_(0), width_(0), height_(0)
+  {}
 
-NRect::~NRect()
-{
-}
+  NRect::NRect(long left,long top,long width,long height): left_(left),top_(top),width_(width),height_(height)
+  {}
 
-void NRect::setPosition(long left,long top,long width, long height )
-{
-  left_    = left;
-  top_     = top;
-  width_   = width;
-  height_  = height;
-}
+  NRect::~NRect()
+  {
+  }
 
-long int NRect::left( ) const
-{
-  return left_;
-}
+  void NRect::setPosition(long left,long top,long width, long height )
+  {
+    left_    = left;
+    top_     = top;
+    width_   = width;
+    height_  = height;
+  }
 
-long int NRect::top( ) const
-{
-  return top_;
-}
+  long int NRect::left( ) const
+  {
+    return left_;
+  }
 
-long int NRect::width( ) const
-{
-  return width_;
-}
+  long int NRect::top( ) const
+  {
+    return top_;
+  }
 
-long int NRect::height( ) const
-{
-  return height_;
-}
+  long int NRect::width( ) const
+  {
+    return width_;
+  }
 
-bool NRect::hasIntersection( const NRect & r2) const
-{
-  return (r2.left() < left_ + width_) && (r2.top() < top_ + height_) &&
-                (r2.left() + r2.width() > left_) && (r2.top() + r2.height() > top_);
-}
+  long int NRect::height( ) const
+  {
+    return height_;
+  }
 
-void NRect::setTop( long top )
-{
-  top_ = top;
-}
+  bool NRect::hasIntersection( const NRect & r2) const
+  {
+    return (r2.left() < left_ + width_) && (r2.top() < top_ + height_) &&
+      (r2.left() + r2.width() > left_) && (r2.top() + r2.height() > top_);
+  }
 
-void NRect::setWidth( long width )
-{
-  width_ = width;
-}
+  void NRect::setTop( long top )
+  {
+    top_ = top;
+  }
 
-void NRect::setHeight( long height )
-{
-  height_ = height;
-}
+  void NRect::setWidth( long width )
+  {
+    width_ = width;
+  }
 
-void NRect::setLeft( long left )
-{
-  left_ = left;
-}
+  void NRect::setHeight( long height )
+  {
+    height_ = height;
+  }
 
-bool NRect::intersects( const NPoint & p ) const
-{
-  if ((left() <= p.x()) && (width()+ left() >= p.x()) && (top()  <= p.y())
-                        && (height()+top()  >= p.y())) return true; else return false;
-}
+  void NRect::setLeft( long left )
+  {
+    left_ = left;
+  }
+
+  bool NRect::intersects( const NPoint & p ) const
+  {
+    if ((left() <= p.x()) && (width()+ left() >= p.x()) && (top()  <= p.y())
+      && (height()+top()  >= p.y())) return true; else return false;
+  }
 
 
-void NRect::intersects( const NRect & r2, NRect & result ) const
-{
+  void NRect::intersects( const NRect & r2, NRect & result ) const
+  {
     int ymin = std::max(top(),  r2.top());
     int ymax = std::min(top() + height(), r2.top() + r2.height());
     if (ymin > ymax) {
@@ -105,25 +107,25 @@ void NRect::intersects( const NRect & r2, NRect & result ) const
     }
     // there is an intersection which is the rectangle  { xmin, ymin, xmax, ymax } 
     result.setPosition(xmin,ymin,xmax-xmin,ymax-ymin);
-}
+  }
 
-bool NRect::operator ==( const NRect & rhs ) const
-{
-  return (rhs.top()==top() && rhs.left()==left() && rhs.width()==width() && rhs.height() == height());
-}
+  bool NRect::operator ==( const NRect & rhs ) const
+  {
+    return (rhs.top()==top() && rhs.left()==left() && rhs.width()==width() && rhs.height() == height());
+  }
 
-bool NRect::operator !=( const NRect & rhs ) const
-{
- return !(*this == rhs);
-}
+  bool NRect::operator !=( const NRect & rhs ) const
+  {
+    return !(*this == rhs);
+  }
 
-bool NRect::intersects( long x, long y ) const
-{
-   if ((left() <= x) && (width()+ left() >= x) && (top()  <= y)
-                        && (height()+top()  >= y))
+  bool NRect::intersects( long x, long y ) const
+  {
+    if ((left() <= x) && (width()+ left() >= x) && (top()  <= y)
+      && (height()+top()  >= y))
       return true;
-   else 
+    else 
       return false;
+  }
+
 }
-
-

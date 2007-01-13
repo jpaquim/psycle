@@ -22,8 +22,10 @@
 
 #include <ngrs/nwindow.h>
 
-class NButton;
-class NSpinEdit;
+namespace ngrs {
+  class NButton;
+  class NSpinEdit;
+}
 
 namespace psycle { 
 	namespace host 
@@ -33,14 +35,14 @@ namespace psycle {
 @author Stefan
 */
 
-class PatDlg : public NWindow
+class PatDlg : public ngrs::NWindow
 {
 public:
     PatDlg();
 
     ~PatDlg();
 
-    void setLineNumber(int lineNumber);
+    void setLineNumber( int lineNumber );
     int lineNumber();
 
     bool adaptSize();
@@ -53,16 +55,17 @@ private:
     int lineNumber_;
     bool do_Execute;
 
-    NSpinEdit* lineNumEdit_;
+    ngrs::NSpinEdit* lineNumEdit_;
 
-    void onOkBtn(NButtonEvent* sender);
-    void onCancelBtn(NButtonEvent* sender);
+    void onOkBtn( ngrs::NButtonEvent* sender );
+    void onCancelBtn( ngrs::NButtonEvent* sender );
 
-    void onIncBtnClick(NButtonEvent* ev);
-    void onDecBtnClick(NButtonEvent* ev);
+    void onIncBtnClick( ngrs::NButtonEvent* ev );
+    void onDecBtnClick( ngrs::NButtonEvent* ev );
 
 };
 
-}}
+}
+}
 
 #endif

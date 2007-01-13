@@ -32,7 +32,7 @@ namespace psycle {
 	{
 
 		VuMeter::VuMeter()
-			: NPanel(), l_(1), r_(1), vuprevL_(0), vuprevR_(0)
+			: ngrs::NPanel(), l_(1), r_(1), vuprevL_(0), vuprevR_(0)
 		{
 			setTransparent(false);
 		}
@@ -41,7 +41,7 @@ namespace psycle {
 		{
 		}
 
-		void VuMeter::paint( NGraphics * g )
+		void VuMeter::paint( ngrs::NGraphics * g )
 		{
 			/*bool clip = ((Master*)Global::pSong()->_pMachine[MASTER_INDEX])->_clip;
 

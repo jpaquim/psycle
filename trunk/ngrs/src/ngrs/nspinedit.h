@@ -27,9 +27,12 @@
 /**
 @author Stefan Nattkemper
 */
-class NSpinEdit : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NSpinEdit : public NPanel
+  {
+  public:
     NSpinEdit();
 
     ~NSpinEdit();
@@ -45,7 +48,7 @@ public:
     int preferredWidth( ) const;
     int preferredHeight( ) const;
 
-private:
+  private:
 
     NSpinButton* spinBtn_ ;
     NEdit*       edit_;
@@ -53,6 +56,8 @@ private:
     void onIncBtnClick(NButtonEvent* ev);
     void onDecBtnClick(NButtonEvent* ev);
 
-};
+  };
+
+}
 
 #endif

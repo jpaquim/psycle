@@ -29,9 +29,11 @@
 @author Stefan
 */
 
-class NVisual : public NRuntime
-{
-public:
+namespace ngrs {
+
+  class NVisual : public NRuntime
+  {
+  public:
     NVisual();
 
     ~NVisual();
@@ -102,13 +104,16 @@ public:
     virtual NRect clipBox() const;
 
 
-private:
+  private:
 
     NShape* geometry_;
     bool visible_;
     int minWidth_, minHeight_;
     int cursorId_;
 
-};
+  };
+
+}
+
 
 #endif

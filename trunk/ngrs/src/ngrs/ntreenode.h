@@ -26,13 +26,15 @@
 @author Stefan Nattkemper
 */
 
-class NCustomItem;
+namespace ngrs {
 
-class NTreeNode : public NFlipBox
-{
+  class NCustomItem;
+
+  class NTreeNode : public NFlipBox
+  {
 
 
-public:
+  public:
     NTreeNode();
 
     ~NTreeNode();
@@ -46,17 +48,19 @@ public:
 
     NCustomItem* headerItem();
 
-	virtual void paint( NGraphics* g );
+    virtual void paint( NGraphics* g );
 
-private:
+  private:
 
     NPanel* entries_;
     NPanel* subNodes;
 
-   NCustomItem* headerItem_;
+    NCustomItem* headerItem_;
 
     void onItemPress(NButtonEvent * ev);
 
-};
+  };
+
+}
 
 #endif

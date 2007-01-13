@@ -23,14 +23,15 @@
 #include "nstate.h"
 #include <vector>
 
+namespace ngrs {
 
-class NState;
+  class NState;
 
-/**
-@author Stefan
-*/
-class NNfa{
-public:
+  /**
+  @author Stefan
+  */
+  class NNfa{
+  public:
     NNfa();
 
     ~NNfa();
@@ -49,7 +50,7 @@ public:
     void concat( NNfa * nfa );
     void star();
 
-private:
+  private:
 
     std::vector<NState*> closure;
     std::vector<NState*> followStates;
@@ -68,6 +69,8 @@ private:
     std::vector<NState*> runningStates;
     std::vector<NState*> A;
 
-};
+  };
+
+}
 
 #endif

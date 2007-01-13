@@ -20,52 +20,55 @@
 #include "nlayout.h"
 #include "nvisualcomponent.h"
 
-NLayout::NLayout()
-{
-  parent_ = 0;
-}
+namespace ngrs {
 
-
-NLayout::~NLayout()
-{
-}
-
-void NLayout::align( NVisualComponent * parent )
-{
-}
-
-void NLayout::setParent( NVisualComponent * parent )
-{
-  parent_ = parent;
-}
-
-class NVisualComponent * NLayout::parent( ) const
-{
-  return parent_;
-}
-
-void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRegion & repaintArea , NVisualComponent* sender)
-{
-  std::vector<NVisualComponent*>::const_iterator itr = target->visualComponents().begin();
-  for (;itr < target->visualComponents().end(); itr++) {
-     NVisualComponent* visualChild = *itr;
-     visualChild->draw(g,repaintArea,sender);
+  NLayout::NLayout()
+  {
+    parent_ = 0;
   }
-}
 
-void NLayout::insert( class NVisualComponent * comp, int index )
-{
-}
 
-void NLayout::add( class NVisualComponent * comp )
-{
-}
+  NLayout::~NLayout()
+  {
+  }
 
-void NLayout::remove( class NVisualComponent * comp )
-{
-}
+  void NLayout::align( NVisualComponent * parent )
+  {
+  }
 
-void NLayout::removeAll( )
-{
-}
+  void NLayout::setParent( NVisualComponent * parent )
+  {
+    parent_ = parent;
+  }
 
+  class NVisualComponent * NLayout::parent( ) const
+  {
+    return parent_;
+  }
+
+  void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRegion & repaintArea , NVisualComponent* sender)
+  {
+    std::vector<NVisualComponent*>::const_iterator itr = target->visualComponents().begin();
+    for (;itr < target->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      visualChild->draw(g,repaintArea,sender);
+    }
+  }
+
+  void NLayout::insert( class NVisualComponent * comp, int index )
+  {
+  }
+
+  void NLayout::add( class NVisualComponent * comp )
+  {
+  }
+
+  void NLayout::remove( class NVisualComponent * comp )
+  {
+  }
+
+  void NLayout::removeAll( )
+  {
+  }
+
+}

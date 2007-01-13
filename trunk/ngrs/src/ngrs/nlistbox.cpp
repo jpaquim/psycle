@@ -25,207 +25,210 @@
 #include "nscrollbar.h"
 #include <algorithm>
 
-NListBox::NListBox()
- : NScrollBox()
-{
-  listBoxPane_ = new NPanel();
-  listBoxPane_->setBackground(NColor(255,255,255));
-  listBoxPane_->setTransparent(false);
-  setScrollPane(listBoxPane_);
+namespace ngrs {
 
-  listBoxPane_->setLayout(NListLayout());
-  listBoxPane_->setClientSizePolicy(nVertical + nHorizontal);
+  NListBox::NListBox()
+    : NScrollBox()
+  {
+    listBoxPane_ = new NPanel();
+    listBoxPane_->setBackground(NColor(255,255,255));
+    listBoxPane_->setTransparent(false);
+    setScrollPane(listBoxPane_);
 
-  multiSelect_ = false;
+    listBoxPane_->setLayout(NListLayout());
+    listBoxPane_->setClientSizePolicy(nVertical + nHorizontal);
 
-  setHScrollBarPolicy(nNoneVisible);
+    multiSelect_ = false;
 
-  itemBg = NApp::config()->skin("lbitemsel");
-  itemFg = NApp::config()->skin("lbitemnone");
-}
+    setHScrollBarPolicy(nNoneVisible);
 
-
-NListBox::~NListBox()
-{
-}
-
-// the class factories
-
-extern "C" NObject* createListBox() {
-    return new NListBox();
-}
-
-extern "C" void destroyListBox(NObject* p) {
-    delete p;
-}
+    itemBg = NApp::config()->skin("lbitemsel");
+    itemFg = NApp::config()->skin("lbitemnone");
+  }
 
 
-void NListBox::add( NCustomItem * component , bool align)
-{
-  listBoxPane_->add( component,nAlCenter, false);
-  component->mousePress.connect(this,&NListBox::onItemPress);
-  component->setTransparent(true);
-  items_.push_back(component);
-  if (align) listBoxPane_->resize();
-}
+  NListBox::~NListBox()
+  {
+  }
 
-void NListBox::insert( NCustomItem * component, int index , bool align )
-{
-  listBoxPane_->insert(component,index);
+  void NListBox::add( NCustomItem * component , bool align)
+  {
+    listBoxPane_->add( component,nAlCenter, false);
+    component->mousePress.connect(this,&NListBox::onItemPress);
+    component->setTransparent(true);
+    items_.push_back(component);
+    if (align) listBoxPane_->resize();
+  }
 
-  if ( index <= items_.size() )
-    items_.insert( items_.begin() + index, component );
-  else
-    items_.push_back( component );
+  void NListBox::insert( NCustomItem * component, int index , bool align )
+  {
+    listBoxPane_->insert(component,index);
 
-  component->mousePress.connect(this,&NListBox::onItemPress);
-  component->setTransparent(true);
-  if ( align ) listBoxPane_->resize();
-}
+    if ( index <= items_.size() )
+      items_.insert( items_.begin() + index, component );
+    else
+      items_.push_back( component );
+
+    component->mousePress.connect(this,&NListBox::onItemPress);
+    component->setTransparent(true);
+    if ( align ) listBoxPane_->resize();
+  }
 
 
-void NListBox::add( NCustomItem * component )
-{
-  add(component,true);
-  component->mousePress.connect(this,&NListBox::onItemPress);
-  component->setTransparent(true);
-}
+  void NListBox::add( NCustomItem * component )
+  {
+    add(component,true);
+    component->mousePress.connect(this,&NListBox::onItemPress);
+    component->setTransparent(true);
+  }
 
-void NListBox::onItemPress( NButtonEvent * ev)
-{
-  if (ev->button() == 1) {
-    NVisualComponent* item = static_cast<NVisualComponent*>(ev->sender());
+  void NListBox::onItemPress( NButtonEvent * ev)
+  {
+    if (ev->button() == 1) {
+      NVisualComponent* item = static_cast<NVisualComponent*>(ev->sender());
 
-    if ( !multiSelect_ 
-      #ifdef __unix__
-         || !(NApp::system().keyState() & ControlMask)
-      #endif   
+      if ( !multiSelect_ 
+#ifdef __unix__
+        || !(NApp::system().keyState() & ControlMask)
+#endif   
         ) deSelectItems();
 
-    item->setSkin(itemBg);
-    item->repaint();
+      item->setSkin(itemBg);
+      item->repaint();
 
-    onItemSelected((NCustomItem*) (ev->sender()));
-  } else {
+      onItemSelected((NCustomItem*) (ev->sender()));
+    } else {
       // todo add mousewheel code
+    }
   }
-}
 
-void NListBox::onItemSelected( NCustomItem * item )
-{
-  if (!multiSelect_) deSelectItems();
-  selItems_.push_back(item);
-  NItemEvent ev(item,item->text());
-  itemSelected.emit(&ev);
-}
-
-void NListBox::removeChilds( )
-{
-  items_.clear();
-  selItems_.clear();
-  listBoxPane_->removeChilds();
-  listBoxPane_->setScrollDx(0);
-  listBoxPane_->setScrollDy(0);
-}
-
-void NListBox::removeChild( NCustomItem * item )
-{
-  std::vector<NCustomItem*>::iterator it = find( items_.begin(), items_.end(), item );
-  if ( it != items_.end() ) items_.erase(it);
-
-  it = find( selItems_.begin(), selItems_.end(), item );
-  if ( it != selItems_.end() ) selItems_.erase(it);
-
-  listBoxPane_->removeChild(item);
-}
-
-void NListBox::deSelectItems( )
-{
-  for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
-    NCustomItem* item = *it;
-    item->setSkin(itemFg);
-    item->repaint();
+  void NListBox::onItemSelected( NCustomItem * item )
+  {
+    if (!multiSelect_) deSelectItems();
+    selItems_.push_back(item);
+    NItemEvent ev(item,item->text());
+    itemSelected.emit(&ev);
   }
-  selItems_.clear();
-}
 
-int NListBox::itemCount( )
-{
-  return listBoxPane_->visualComponents().size();
-}
+  void NListBox::removeChilds( )
+  {
+    items_.clear();
+    selItems_.clear();
+    listBoxPane_->removeChilds();
+    listBoxPane_->setScrollDx(0);
+    listBoxPane_->setScrollDy(0);
+  }
 
-int NListBox::selIndex( ) const
-{
-  int c = 0;
-  if (selItems_.size()==0) return -1;
-  for (std::vector<NVisualComponent*>::const_iterator it = listBoxPane_->visualComponents().begin(); it < listBoxPane_->visualComponents().end(); it++) {
-     if (*it == selItems_.at(0)) {
+  void NListBox::removeChild( NCustomItem * item )
+  {
+    std::vector<NCustomItem*>::iterator it = find( items_.begin(), items_.end(), item );
+    if ( it != items_.end() ) items_.erase(it);
+
+    it = find( selItems_.begin(), selItems_.end(), item );
+    if ( it != selItems_.end() ) selItems_.erase(it);
+
+    listBoxPane_->removeChild(item);
+  }
+
+  void NListBox::deSelectItems( )
+  {
+    for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
+      NCustomItem* item = *it;
+      item->setSkin(itemFg);
+      item->repaint();
+    }
+    selItems_.clear();
+  }
+
+  int NListBox::itemCount( )
+  {
+    return listBoxPane_->visualComponents().size();
+  }
+
+  int NListBox::selIndex( ) const
+  {
+    int c = 0;
+    if (selItems_.size()==0) return -1;
+    for (std::vector<NVisualComponent*>::const_iterator it = listBoxPane_->visualComponents().begin(); it < listBoxPane_->visualComponents().end(); it++) {
+      if (*it == selItems_.at(0)) {
         return c;
-     }
-     c++;
+      }
+      c++;
+    }
+    return -1;
   }
-  return -1;
-}
 
-std::vector< int > NListBox::selIndexList( )
-{
-  std::vector<int> indexList;
-  for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
-     NCustomItem* item = *it;
-     indexList.push_back(item->zOrder());
+  std::vector< int > NListBox::selIndexList( )
+  {
+    std::vector<int> indexList;
+    for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
+      NCustomItem* item = *it;
+      indexList.push_back(item->zOrder());
+    }
+    return indexList;
   }
-  return indexList;
-}
 
-void NListBox::setIndex( unsigned int i )
-{
-  if (!multiSelect_) deSelectItems();
-  if (i>=0 && i < listBoxPane_->visualComponents().size()) {
-     NCustomItem* item = (NCustomItem*) listBoxPane_->componentByZOrder(i); ///todo avoid cast
-     selItems_.push_back(item);
-     item->setSkin(itemBg);
-     item->repaint();
+  void NListBox::setIndex( unsigned int i )
+  {
+    if (!multiSelect_) deSelectItems();
+    if (i>=0 && i < listBoxPane_->visualComponents().size()) {
+      NCustomItem* item = (NCustomItem*) listBoxPane_->componentByZOrder(i); ///todo avoid cast
+      selItems_.push_back(item);
+      item->setSkin(itemBg);
+      item->repaint();
+    }
   }
-}
 
-void NListBox::setMultiSelect( bool on )
-{
-  multiSelect_ = on;
-}
-
-void NListBox::selClear( )
-{
-  deSelectItems();
-}
-
-NCustomItem * NListBox::itemAt( unsigned int index )
-{
-  if (index >= 0 && index < listBoxPane_->visualComponents().size())
-    return static_cast<NCustomItem*> (listBoxPane_->visualComponents().at(index));
-  else
-    return 0;
-}
-
-void NListBox::setOrientation( int orientation )
-{
-  if (orientation == nHorizontal) {
-    setHScrollBarPolicy(nAlwaysVisible);
+  void NListBox::setMultiSelect( bool on )
+  {
+    multiSelect_ = on;
   }
-}
 
-std::vector< NCustomItem * > & NListBox::items( )
-{
-  return items_;
-}
-
-void NListBox::resize( )
-{
-  NScrollBox::resize();
-  if ( items_.size() > 0 ) {
-    NCustomItem* item = *(items_.begin());
-    horBar()->setLargeChange( item->height() );
-    horBar()->setSmallChange( item->height() );
-    verBar()->setLargeChange( item->height() );
-    verBar()->setSmallChange( item->height() );
+  void NListBox::selClear( )
+  {
+    deSelectItems();
   }
+
+  NCustomItem * NListBox::itemAt( unsigned int index )
+  {
+    if (index >= 0 && index < listBoxPane_->visualComponents().size())
+      return static_cast<NCustomItem*> (listBoxPane_->visualComponents().at(index));
+    else
+      return 0;
+  }
+
+  void NListBox::setOrientation( int orientation )
+  {
+    if (orientation == nHorizontal) {
+      setHScrollBarPolicy(nAlwaysVisible);
+    }
+  }
+
+  std::vector< NCustomItem * > & NListBox::items( )
+  {
+    return items_;
+  }
+
+  void NListBox::resize( )
+  {
+    NScrollBox::resize();
+    if ( items_.size() > 0 ) {
+      NCustomItem* item = *(items_.begin());
+      horBar()->setLargeChange( item->height() );
+      horBar()->setSmallChange( item->height() );
+      verBar()->setLargeChange( item->height() );
+      verBar()->setSmallChange( item->height() );
+    }
+  }
+
+}
+
+
+// the class factories
+extern "C" ngrs::NObject* createListBox() {
+  return new ngrs::NListBox();
+}
+
+extern "C" void destroyListBox( ngrs::NObject* p ) {
+  delete p;
 }

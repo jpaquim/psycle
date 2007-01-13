@@ -27,225 +27,219 @@
 #include "nproperty.h"
 #include "nhint.h"
 
-using namespace std;
+namespace ngrs {
 
-NButton::NButton( ) : NCustomButton(), flat_(1), icon_(0)
-{
-  init();
-}
-
-NButton::NButton( const std::string & text ) : NCustomButton(text), flat_(1), icon_(0)
-{
-  init();
-}
-
-NButton::~ NButton( )
-{
-}
-
-
-NButton::NButton( const std::string & text, int minWidth, int minHeight ) : NCustomButton(text), flat_(1), icon_(0)
-{
-  setMinimumWidth(minWidth);
-  //setMinimumHeight(minHeight);
-  init();
-}
-
-NButton::NButton( const std::string & text, bool flat ) : NCustomButton(text), icon_(0)
-{
-  init();
-  setFlat(flat);
-}
-
-NButton::NButton( NImage * icon )
-{
-  icon_ = icon;
-  icon_->setHAlign(nAlCenter);
-  icon_->setVAlign(nAlCenter);
-  setPreferredSize(icon->preferredWidth(),icon->preferredHeight());
-  add(icon);
-  init();
-}
-
-
-NButton::NButton( NImage * icon , int minWidth, int minHeight) : NCustomButton(), flat_(1)
-{
-  icon_ = icon;
-  icon_->setHAlign(nAlCenter);
-  icon_->setVAlign(nAlCenter);
-  setMinimumWidth(minWidth);
-  add(icon);
-  init();
-}
-
-// class factories
-
-extern "C" NObject* createButton() {
-    return new NButton();
-}
-
-extern "C" void destroyButton(NObject* p) {
-    delete p;
-}
-
-
-void NButton::setSkin( const NSkin & up, const NSkin & down, const NSkin & over, const NSkin & flat ) {
-  btnUp_   = up;
-  btnDown_ = down;
-  btnOver_ = over;
-  btnFlat_ = flat;
-
-  setFlat( flat_ );
-}
-
-void NButton::resize( )
-{
-  NCustomButton::resize();
-  if (icon_!=0) {
-    icon_->setPosition(0,0,spacingWidth(),spacingHeight());//clientHeight(),clientWidth());
+  NButton::NButton( ) : NCustomButton(), flat_(1), icon_(0)
+  {
+    init();
   }
-}
 
-int NButton::preferredWidth( ) const
-{
-  if (ownerSize()) return NVisualComponent::preferredWidth();
-
-  if (icon_==0) return NCustomButton::preferredWidth();
-  return icon_->preferredWidth() + spacing().left() + spacing().right();
-}
-
-int NButton::preferredHeight( ) const
-{
-  if (ownerSize()) return NVisualComponent::preferredHeight();
-
-  if (icon_==0) return NCustomButton::preferredHeight();
-  return icon_->preferredHeight() + spacing().top() + spacing().bottom();
-}
-
-void NButton::onMouseExit( )
-{
-  if (!down()) {
-     if (flat_) {
-		 NCustomButton::setSkin(btnFlat_);
-     } else NCustomButton::setSkin(btnUp_);
+  NButton::NButton( const std::string & text ) : NCustomButton(text), flat_(1), icon_(0)
+  {
+    init();
   }
-  repaint();
-  if (hint!=0 && hint->mapped()) hint->setVisible(false);
-}
 
-void NButton::onMouseEnter( )
-{
-  if (!down()) NCustomButton::setSkin(btnOver_);
-  repaint();
-  if (hint!=0 && !hint->mapped()) {
-     hint->setPosition(window()->left()+ absoluteLeft() + (int) ((3*spacingWidth())/4), window()->top()+absoluteTop() + spacingHeight(),100,100);
-     hint->pack();
-     hint->setVisible(true);
+  NButton::~ NButton( )
+  {
   }
-}
 
-void NButton::setFlat( bool on )
-{
-  flat_ = on;
-  if (flat_) 
-	  NCustomButton::setSkin( btnFlat_ ); 
-  else 
-	  NCustomButton::setSkin( btnUp_ );
-}
 
-void NButton::init( )
-{
-  flat_ = true;
-
-  btnUp_   = NApp::config()->skin("btnup");
-  btnOver_ = NApp::config()->skin("btnover");
-  btnDown_ = NApp::config()->skin("btndown");
-  btnFlat_ = NApp::config()->skin("btnflat");
-
-  NCustomButton::setSkin( btnFlat_ );
-
-  hint = 0;
-
-  // inits the repeat Mode for the button .. at default off
-  repeatMode_ = false;
-  button_ = 1;
-  repeatTimer.setIntervalTime(50);
-  repeatTimer.timerEvent.connect(this,&NButton::onRepeatTimer);
-  startLatencyTimer.setIntervalTime(100);
-  startLatencyTimer.timerEvent.connect(this,&NButton::onStartTimer);
-
-  setTabStop(true);
-}
-
-void NButton::setDown( bool on )
-{
-  NCustomButton::setDown(on);
-
-  if (down()) {
-    NCustomButton::setSkin(btnDown_);
-    repaint();
-  } else {
-    NCustomButton::setSkin(btnUp_);
-    repaint();
+  NButton::NButton( const std::string & text, int minWidth, int minHeight ) : NCustomButton(text), flat_(1), icon_(0)
+  {
+    setMinimumWidth(minWidth);
+    //setMinimumHeight(minHeight);
+    init();
   }
-}
 
-void NButton::setHint( const std::string & text )
-{
-  if (hint==0) {
-     hint = new NHint();
-       hint->setText( text );
-     add(hint);
-  } else
-  hint->setText(text);
-}
+  NButton::NButton( const std::string & text, bool flat ) : NCustomButton(text), icon_(0)
+  {
+    init();
+    setFlat(flat);
+  }
 
-void NButton::setRepeatMode( bool on )
-{
-  repeatMode_ = on;
-}
+  NButton::NButton( NImage * icon )
+  {
+    icon_ = icon;
+    icon_->setHAlign(nAlCenter);
+    icon_->setVAlign(nAlCenter);
+    setPreferredSize(icon->preferredWidth(),icon->preferredHeight());
+    add(icon);
+    init();
+  }
 
-void NButton::setRepeatPolicy( int interval, int startLatency )
-{
-  repeatTimer.setIntervalTime(interval);
-  startLatencyTimer.setIntervalTime(startLatency);
-}
 
-void NButton::onMousePress( int x, int y, int button )
-{
-  NCustomButton::onMousePress(x, y, button);
+  NButton::NButton( NImage * icon , int minWidth, int minHeight) : NCustomButton(), flat_(1)
+  {
+    icon_ = icon;
+    icon_->setHAlign(nAlCenter);
+    icon_->setVAlign(nAlCenter);
+    setMinimumWidth(minWidth);
+    add(icon);
+    init();
+  }
 
-  if ( repeatMode_ ) {
-    if (!startLatencyTimer.enabled() ) {
-        button_ = button;
-        startLatencyTimer.enableTimer();
+  void NButton::setSkin( const NSkin & up, const NSkin & down, const NSkin & over, const NSkin & flat ) {
+    btnUp_   = up;
+    btnDown_ = down;
+    btnOver_ = over;
+    btnFlat_ = flat;
+
+    setFlat( flat_ );
+  }
+
+  void NButton::resize( )
+  {
+    NCustomButton::resize();
+    if (icon_!=0) {
+      icon_->setPosition(0,0,spacingWidth(),spacingHeight());//clientHeight(),clientWidth());
     }
   }
-}
 
-void NButton::onMousePressed( int x, int y, int button )
-{
-  NCustomButton::onMousePressed(x, y, button);
+  int NButton::preferredWidth( ) const
+  {
+    if (ownerSize()) return NVisualComponent::preferredWidth();
 
-  if ( repeatMode_ ) {
-    repeatTimer.disableTimer();
-    startLatencyTimer.disableTimer();
+    if (icon_==0) return NCustomButton::preferredWidth();
+    return icon_->preferredWidth() + spacing().left() + spacing().right();
   }
+
+  int NButton::preferredHeight( ) const
+  {
+    if (ownerSize()) return NVisualComponent::preferredHeight();
+
+    if (icon_==0) return NCustomButton::preferredHeight();
+    return icon_->preferredHeight() + spacing().top() + spacing().bottom();
+  }
+
+  void NButton::onMouseExit( )
+  {
+    if (!down()) {
+      if (flat_) {
+        NCustomButton::setSkin(btnFlat_);
+      } else NCustomButton::setSkin(btnUp_);
+    }
+    repaint();
+    if (hint!=0 && hint->mapped()) hint->setVisible(false);
+  }
+
+  void NButton::onMouseEnter( )
+  {
+    if (!down()) NCustomButton::setSkin(btnOver_);
+    repaint();
+    if (hint!=0 && !hint->mapped()) {
+      hint->setPosition(window()->left()+ absoluteLeft() + (int) ((3*spacingWidth())/4), window()->top()+absoluteTop() + spacingHeight(),100,100);
+      hint->pack();
+      hint->setVisible(true);
+    }
+  }
+
+  void NButton::setFlat( bool on )
+  {
+    flat_ = on;
+    if (flat_) 
+      NCustomButton::setSkin( btnFlat_ ); 
+    else 
+      NCustomButton::setSkin( btnUp_ );
+  }
+
+  void NButton::init( )
+  {
+    flat_ = true;
+
+    btnUp_   = NApp::config()->skin("btnup");
+    btnOver_ = NApp::config()->skin("btnover");
+    btnDown_ = NApp::config()->skin("btndown");
+    btnFlat_ = NApp::config()->skin("btnflat");
+
+    NCustomButton::setSkin( btnFlat_ );
+
+    hint = 0;
+
+    // inits the repeat Mode for the button .. at default off
+    repeatMode_ = false;
+    button_ = 1;
+    repeatTimer.setIntervalTime(50);
+    repeatTimer.timerEvent.connect(this,&NButton::onRepeatTimer);
+    startLatencyTimer.setIntervalTime(100);
+    startLatencyTimer.timerEvent.connect(this,&NButton::onStartTimer);
+
+    setTabStop(true);
+  }
+
+  void NButton::setDown( bool on )
+  {
+    NCustomButton::setDown(on);
+
+    if (down()) {
+      NCustomButton::setSkin(btnDown_);
+      repaint();
+    } else {
+      NCustomButton::setSkin(btnUp_);
+      repaint();
+    }
+  }
+
+  void NButton::setHint( const std::string & text )
+  {
+    if (hint==0) {
+      hint = new NHint();
+      hint->setText( text );
+      add(hint);
+    } else
+      hint->setText(text);
+  }
+
+  void NButton::setRepeatMode( bool on )
+  {
+    repeatMode_ = on;
+  }
+
+  void NButton::setRepeatPolicy( int interval, int startLatency )
+  {
+    repeatTimer.setIntervalTime(interval);
+    startLatencyTimer.setIntervalTime(startLatency);
+  }
+
+  void NButton::onMousePress( int x, int y, int button )
+  {
+    NCustomButton::onMousePress(x, y, button);
+
+    if ( repeatMode_ ) {
+      if (!startLatencyTimer.enabled() ) {
+        button_ = button;
+        startLatencyTimer.enableTimer();
+      }
+    }
+  }
+
+  void NButton::onMousePressed( int x, int y, int button )
+  {
+    NCustomButton::onMousePressed(x, y, button);
+
+    if ( repeatMode_ ) {
+      repeatTimer.disableTimer();
+      startLatencyTimer.disableTimer();
+    }
+  }
+
+  void NButton::onStartTimer( )
+  {
+    startLatencyTimer.disableTimer();
+    repeatTimer.enableTimer();
+  }
+
+  void NButton::onRepeatTimer( )
+  {
+    NCustomButton::onMousePress(0,0,button_);
+  }
+
 }
 
-void NButton::onStartTimer( )
-{
-  startLatencyTimer.disableTimer();
-  repeatTimer.enableTimer();
+ // class factories
+extern "C" ngrs::NObject* createButton() {
+  return new ngrs::NButton();
 }
 
-void NButton::onRepeatTimer( )
-{
-  NCustomButton::onMousePress(0,0,button_);
+extern "C" void destroyButton( ngrs::NObject* p ) {
+ delete p;
 }
-
-
-
-
-
-

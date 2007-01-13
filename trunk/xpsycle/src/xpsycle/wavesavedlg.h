@@ -17,8 +17,11 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
+#ifdef djaskljasdklasdj
+
 #ifndef WAVESAVEDLG_H
 #define WAVESAVEDLG_H
+
 
 #include "song.h"
 #include <ngrs/ndialog.h>
@@ -143,4 +146,5 @@ private:
 
 }}
 
+#endif
 #endif

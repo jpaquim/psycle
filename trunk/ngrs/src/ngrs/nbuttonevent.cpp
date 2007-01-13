@@ -19,30 +19,30 @@
  ***************************************************************************/
 #include "nbuttonevent.h"
 
+namespace ngrs {
 
-NButtonEvent::NButtonEvent( NObject * sender, int x, int y, int button, const std::string & text ) : NEvent(sender,text), x_(x),y_(y),button_(button)
-{
+  NButtonEvent::NButtonEvent( NObject * sender, int x, int y, int button, const std::string & text ) : NEvent(sender,text), x_(x),y_(y),button_(button)
+  {
+  }
+
+
+  NButtonEvent::~NButtonEvent()
+  {
+  }
+
+  int NButtonEvent::x( )
+  {
+    return x_;
+  }
+
+  int NButtonEvent::y( )
+  {
+    return y_;
+  }
+
+  int NButtonEvent::button( )
+  {
+    return button_;
+  }
+
 }
-
-
-NButtonEvent::~NButtonEvent()
-{
-}
-
-int NButtonEvent::x( )
-{
-  return x_;
-}
-
-int NButtonEvent::y( )
-{
-  return y_;
-}
-
-int NButtonEvent::button( )
-{
-  return button_;
-}
-
-
-

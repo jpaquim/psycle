@@ -25,25 +25,30 @@
 /**
 @author Stefan Nattkemper
 */
-class NCustomStatusItem : public NPanel
-{
-public:
 
-	NCustomStatusItem();
+namespace ngrs {
+
+  class NCustomStatusItem : public NPanel
+  {
+  public:
+
+    NCustomStatusItem();
 
     NCustomStatusItem( unsigned int modelIndex );
 
     ~NCustomStatusItem();
 
-	virtual void setText( const std::string & text ) = 0;
+    virtual void setText( const std::string & text ) = 0;
 
-	void setModelIndex( unsigned int modelIndex );
-	unsigned int modelIndex() const;
+    void setModelIndex( unsigned int modelIndex );
+    unsigned int modelIndex() const;
 
-private:
+  private:
 
-	unsigned int modelIndex_;
+    unsigned int modelIndex_;
 
-};
+  };
+
+}
 
 #endif

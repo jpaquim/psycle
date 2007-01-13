@@ -25,15 +25,17 @@
 #include "nbevelborder.h"
 #include "ntimer.h"
 
-class NWindow;
-class NHint;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
-class NButton : public NCustomButton
-{
-public:
+  class NWindow;
+  class NHint;
+
+  /**
+  @author Stefan
+  */
+  class NButton : public NCustomButton
+  {
+  public:
     NButton();
     NButton(NImage* icon,int minWidth, int minHeight);
     NButton(NImage* icon);
@@ -63,9 +65,9 @@ public:
     void setRepeatMode( bool on);
     void setRepeatPolicy( int interval, int startLatency = 100 );
 
-	void setSkin( const NSkin & up, const NSkin & down, const NSkin & over, const NSkin & flat );
+    void setSkin( const NSkin & up, const NSkin & down, const NSkin & over, const NSkin & flat );
 
-private:
+  private:
 
     bool flat_;
 
@@ -88,6 +90,8 @@ private:
 
     void onStartTimer();
     void onRepeatTimer();
-};
+  };
+
+}
 
 #endif

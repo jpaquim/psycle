@@ -26,9 +26,12 @@
 /**
 @author Stefan
 */
-class NTab : public NCustomButton
-{
-public:
+
+namespace ngrs {
+
+  class NTab : public NCustomButton
+  {
+  public:
     NTab();
     NTab(const std::string & text);
 
@@ -43,7 +46,7 @@ public:
 
     NPopupMenu* popupMenu();
 
-private:
+  private:
 
     NSkin noneSk;
     NSkin downSk;
@@ -54,6 +57,8 @@ private:
 
     void init();
 
-};
+  };
+
+}
 
 #endif

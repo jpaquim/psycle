@@ -19,13 +19,15 @@
  ***************************************************************************/
 #include "nvisitor.h"
 
-NVisitor::NVisitor()
-{
+namespace ngrs {
+
+  NVisitor::NVisitor()
+  {
+  }
+
+
+  NVisitor::~NVisitor()
+  {
+  }
+
 }
-
-
-NVisitor::~NVisitor()
-{
-}
-
-

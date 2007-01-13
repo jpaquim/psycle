@@ -22,16 +22,17 @@
 #include "nconfig.h"
 #include "nskin.h"
 
+namespace ngrs {
 
-NCustomComboBox::NCustomComboBox()
- : NPanel()
-{
-	setSkin( NApp::config()->skin( "ccbx" ) );
+  NCustomComboBox::NCustomComboBox()
+    : NPanel()
+  {
+    setSkin( NApp::config()->skin( "ccbx" ) );
+  }
+
+
+  NCustomComboBox::~NCustomComboBox()
+  {
+  }
+
 }
-
-
-NCustomComboBox::~NCustomComboBox()
-{
-}
-
-

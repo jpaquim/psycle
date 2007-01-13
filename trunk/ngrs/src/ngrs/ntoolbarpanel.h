@@ -22,15 +22,19 @@
 
 #include "npanel.h"
 
-class NToolBarPanel : public NPanel {
-public:
-        
-   NToolBarPanel();     
-   
-   ~NToolBarPanel();
-   
-   virtual void resize();
-         
-};   
+namespace ngrs {
+
+  class NToolBarPanel : public NPanel {
+  public:
+
+    NToolBarPanel();     
+
+    ~NToolBarPanel();
+
+    virtual void resize();
+
+  };   
+
+}
 
 #endif

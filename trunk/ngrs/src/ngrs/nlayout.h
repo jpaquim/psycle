@@ -23,20 +23,22 @@
 #include "ngraphics.h"
 #include "nregion.h"
 
-const short nAlNone   = 0;
-const short nAlLeft   = 1;
-const short nAlTop    = 2;
-const short nAlRight  = 3;
-const short nAlBottom = 4;
-const short nAlClient = 5;
-const short nAlCenter = 6;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
+  const short nAlNone   = 0;
+  const short nAlLeft   = 1;
+  const short nAlTop    = 2;
+  const short nAlRight  = 3;
+  const short nAlBottom = 4;
+  const short nAlClient = 5;
+  const short nAlCenter = 6;
 
-class NLayout{
-public:
+  /**
+  @author Stefan
+  */
+
+  class NLayout{
+  public:
     NLayout();
     virtual NLayout* clone()  const = 0;   // Uses the copy constructor
 
@@ -56,11 +58,12 @@ public:
     virtual void remove(class NVisualComponent* comp);
     virtual void removeAll();   
 
-private:
+  private:
 
-   class NVisualComponent* parent_;
+    class NVisualComponent* parent_;
 
 
-};
+  };
+}
 
 #endif

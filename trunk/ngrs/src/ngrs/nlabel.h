@@ -24,60 +24,64 @@
 #include <string>
 #include "nfontmetrics.h"
 
-class NRectShape;
+namespace ngrs {
 
-/**
-@author Stefan
-*/
-class NLabel : public NVisualComponent
-{
-public:
+  class NRectShape;
+
+  /**
+  @author Stefan
+  */
+  class NLabel : public NVisualComponent
+  {
+  public:
     NLabel();
     NLabel( const std::string & text );
 
     ~NLabel();
 
-   virtual void paint(NGraphics* g);
-   void setText(const std::string & text);
-   const std::string & text() const;
+    virtual void paint(NGraphics* g);
+    void setText(const std::string & text);
+    const std::string & text() const;
 
-   void setMnemonic(char c);
-   char mnemonic() const;
+    void setMnemonic(char c);
+    char mnemonic() const;
 
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
-   void setVAlign(int align);
-   int vAlign() const;
-   void setHAlign(int align);
-   int hAlign() const;
+    void setVAlign(int align);
+    int vAlign() const;
+    void setHAlign(int align);
+    int hAlign() const;
 
-   void setTextOrientation(int orientation);
+    void setTextOrientation(int orientation);
 
-   void resize();
+    void resize();
 
-   void setWordWrap(bool on);
-   bool wordWrap() const;
+    void setWordWrap(bool on);
+    bool wordWrap() const;
 
-private:
+  private:
 
-   int valign_, halign_;
-   int orientation_;
+    int valign_, halign_;
+    int orientation_;
 
-   bool wbreak_;
+    bool wbreak_;
 
-   NBitmap rotateBmp;
-   std::string text_;
-   NFontMetrics metrics;
-   NRectShape* rectShape;
+    NBitmap rotateBmp;
+    std::string text_;
+    NFontMetrics metrics;
+    NRectShape* rectShape;
 
-   std::vector<std::string::size_type> breakPoints;
+    std::vector<std::string::size_type> breakPoints;
 
-   void init();
-   char mnemonic_;
+    void init();
+    char mnemonic_;
 
-   void computeBreakPoints();
-   int findWidthMax(long width, const std::string & data, bool wbreak);
-};
+    void computeBreakPoints();
+    int findWidthMax(long width, const std::string & data, bool wbreak);
+  };
+
+}
 
 #endif

@@ -19,44 +19,44 @@
  ***************************************************************************/
 #include "nalignconstraint.h"
 
-NAlignConstraint::NAlignConstraint() : align_(0), col_(0), row_(0)
-{
+namespace ngrs {
+
+  NAlignConstraint::NAlignConstraint() : align_(0), col_(0), row_(0)
+  {
+  }
+
+  NAlignConstraint::NAlignConstraint( int align, int col, int row ) : align_(align), col_(col), row_(row)
+  {
+  }
+
+  NAlignConstraint::~NAlignConstraint()
+  {
+  }
+
+  void NAlignConstraint::setAlign( int align )
+  {
+    align_ = align;
+  }
+
+  int NAlignConstraint::align( ) const
+  {
+    return align_;
+  }
+
+  void NAlignConstraint::setPosition( int col, int row )
+  {
+    col_ = col;
+    row_ = row;
+  }
+
+  int NAlignConstraint::col( ) const
+  {
+    return col_;
+  }
+
+  int NAlignConstraint::row( ) const
+  {
+    return row_;
+  }
+
 }
-
-NAlignConstraint::NAlignConstraint( int align, int col, int row ) : align_(align), col_(col), row_(row)
-{
-}
-
-NAlignConstraint::~NAlignConstraint()
-{
-}
-
-void NAlignConstraint::setAlign( int align )
-{
-  align_ = align;
-}
-
-int NAlignConstraint::align( ) const
-{
-  return align_;
-}
-
-void NAlignConstraint::setPosition( int col, int row )
-{
-  col_ = col;
-  row_ = row;
-}
-
-int NAlignConstraint::col( ) const
-{
-  return col_;
-}
-
-int NAlignConstraint::row( ) const
-{
-  return row_;
-}
-
-
-
-

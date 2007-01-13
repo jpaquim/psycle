@@ -23,9 +23,12 @@
 /**
 @author Stefan
 */
-class NKeyAccelerator
-{
-public:
+
+namespace ngrs {
+
+  class NKeyAccelerator
+  {
+  public:
     NKeyAccelerator();
     NKeyAccelerator(int keyMask, char key);
 
@@ -36,11 +39,13 @@ public:
 
     bool operator<(const NKeyAccelerator &a) const;
 
-private:
+  private:
 
-   int keyMask_, key_;
+    int keyMask_, key_;
 
 
-};
+  };
+
+}
 
 #endif

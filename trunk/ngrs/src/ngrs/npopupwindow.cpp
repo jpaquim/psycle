@@ -20,24 +20,26 @@
 #include "npopupwindow.h"
 #include "napp.h"
 
-NPopupWindow::NPopupWindow()
- : NWindow()
-{
-  setDecoration(false);
-  NApp::registerPopupWindow(this);
-}
+namespace ngrs {
 
-
-NPopupWindow::~NPopupWindow()
-{
-  NApp::unregisterPopupWindow(this);
-}
-
-void NPopupWindow::onMessage( NEvent * ev )
-{
-  if (ev->text() == "ngrs_global_hide") {
-		NApp::unmapPopupWindows();
+  NPopupWindow::NPopupWindow()
+    : NWindow()
+  {
+    setDecoration(false);
+    NApp::registerPopupWindow(this);
   }
+
+
+  NPopupWindow::~NPopupWindow()
+  {
+    NApp::unregisterPopupWindow(this);
+  }
+
+  void NPopupWindow::onMessage( NEvent * ev )
+  {
+    if (ev->text() == "ngrs_global_hide") {
+      NApp::unmapPopupWindows();
+    }
+  }
+
 }
-
-

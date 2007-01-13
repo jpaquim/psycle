@@ -21,33 +21,35 @@
 #include "nlabel.h"
 #include "nframeborder.h"
 
-NHint::NHint()
- : NWindow()
-{
-  setDecoration(false);
+namespace ngrs {
 
-  pane()->setBorder(NFrameBorder());
+  NHint::NHint()
+    : NWindow()
+  {
+    setDecoration(false);
 
-  label_ = new NLabel();
-	label_->setSpacing(NSize(2,2,2,2));
-	pane()->add(label_, nAlClient);
+    pane()->setBorder(NFrameBorder());
 
-  pane()->setBackground(NColor(0xFF,0xFF,0xD0));
+    label_ = new NLabel();
+    label_->setSpacing(NSize(2,2,2,2));
+    pane()->add(label_, nAlClient);
+
+    pane()->setBackground(NColor(0xFF,0xFF,0xD0));
+  }
+
+
+  NHint::~NHint()
+  {
+  }
+
+  void NHint::setText( const std::string & text )
+  {
+    label_->setText( text );
+  }
+
+  const std::string & NHint::text( ) const
+  {
+    return label_->text();
+  }
+
 }
-
-
-NHint::~NHint()
-{
-}
-
-void NHint::setText( const std::string & text )
-{
-  label_->setText( text );
-}
-
-const std::string & NHint::text( ) const
-{
-  return label_->text();
-}
-
-

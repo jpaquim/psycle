@@ -17,6 +17,9 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
+
+#ifdef sdfjkgfsdjhgsdfjh
+
 #include "wavesavedlg.h"
 #include "global.h"
 #include "player.h"
@@ -42,10 +45,11 @@
 #include <ngrs/nbevelborder.h>
 #include <ngrs/nitemevent.h>
 
-namespace psycle { namespace host {
+namespace psycle { 
+  namespace host {
 
 WaveSaveDlg::WaveSaveDlg()
-  : NDialog()
+  : ngrs::NDialog()
 {
   autostop = playblock = loopsong = saving = 0;
   rate = -1;
@@ -60,10 +64,10 @@ WaveSaveDlg::WaveSaveDlg()
   setTitle("Render as Wav File");
   setSize(400,600);
 
-  fileDlg = new NFileDialog();
+  fileDlg = new ngrs::NFileDialog();
   add(fileDlg);
 
-  pane()->setLayout(NAlignLayout(5,5));
+  pane()->setLayout(ngrs::NAlignLayout(5,5));
 
   NPanel* pathPanel = new NPanel();
     pathPanel->setLayout(NAlignLayout(5,10));
@@ -834,3 +838,5 @@ void WaveSaveDlg::onSequencerRBtn( NButtonEvent * ev )
 }
 
 }}
+
+#endif

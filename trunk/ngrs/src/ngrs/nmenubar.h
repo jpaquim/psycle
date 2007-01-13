@@ -22,15 +22,17 @@
 
 #include "npanel.h"
 
-class NMenu;
+namespace ngrs {
 
+  /**
+  @author Stefan
+  */
 
-/**
-@author Stefan
-*/
-class NMenuBar : public NPanel
-{
-public:
+  class NMenu;
+
+  class NMenuBar : public NPanel
+  {
+  public:
 
     NMenuBar();
 
@@ -41,13 +43,15 @@ public:
 
     virtual void removeChilds();
 
-private:
+  private:
 
     bool isMenuMapped_;
     NMenu* lastMenuOver;
 
     std::vector<NObject*> menus;
 
-};
+  };
+
+}
 
 #endif

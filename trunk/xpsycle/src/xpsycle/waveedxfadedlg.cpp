@@ -37,14 +37,14 @@ namespace psycle
 			setPosition(0,0,357,161);
 			setPositionToScreenCenter();
 						
-			m_srcStartVol = new NSlider();
-			m_srcEndVol = new NSlider();
-			m_destStartVol = new NSlider();
-			m_destEndVol = new NSlider();
-			m_srcStartVolText = new NLabel();
-			m_srcEndVolText = new NLabel();
-			m_destStartVolText = new NLabel();
-			m_destEndVolText = new NLabel();
+			m_srcStartVol = new ngrs::NSlider();
+			m_srcEndVol = new ngrs::NSlider();
+			m_destStartVol = new ngrs::NSlider();
+			m_destEndVol = new ngrs::NSlider();
+			m_srcStartVolText = new ngrs::NLabel();
+			m_srcEndVolText = new ngrs::NLabel();
+			m_destStartVolText = new ngrs::NLabel();
+			m_destEndVolText = new ngrs::NLabel();
 
 			m_srcStartVol->setPosition(33, 47, 19, 69);
 			m_srcEndVol->setPosition(90,47,19,69);
@@ -65,26 +65,26 @@ namespace psycle
 			pane()->add(m_srcEndVolText);
 
 			{
-				NButton * btn = new NButton("Ok", false);
+				ngrs::NButton * btn = new ngrs::NButton("Ok", false);
 				pane()->add(btn);
 				btn->setPosition(288,7,60,16);
 				btn->clicked.connect(this, &WaveEdCrossfadeDialog::onOkClicked);
 			}
 			{
-				NButton * btn = new NButton("Cancel", false);
+				ngrs::NButton * btn = new ngrs::NButton("Cancel", false);
 				pane()->add(btn);
 				btn->setPosition(288,23,60,16);
 				btn->clicked.connect(this, &WaveEdCrossfadeDialog::onCancelClicked);
 			}
-			//these don't appear to do anything yet, but should be uncommented once NGroupBox is working..
+			//these don't appear to do anything yet, but should be uncommented once ngrs::NGroupBox is working..
 /*			{
-				NGroupBox * grp = new NGroupBox();
+				NGroupBox * grp = new ngrs::NGroupBox();
 				grp->setHeaderText("Wave");
 				pane()->add(grp);
 				grp->setPosition(160,17,110,125);
 			}
 			{
-				NGroupBox * grp = new NGroupBox();
+				NGroupBox * grp = new ngrs::NGroupBox();
 				grp->setHeaderText("Clipboard");
 				pane()->add(grp);
 				grp->setPosition(16,17,110,125);
@@ -108,7 +108,7 @@ namespace psycle
 		}
 
 
-		void WaveEdCrossfadeDialog::onOkClicked(NButtonEvent* ev) 
+		void WaveEdCrossfadeDialog::onOkClicked( ngrs::NButtonEvent* ev ) 
 		{
 			srcStartVol		= (2000-m_srcStartVol->pos())	/ 1000.0f;
 			srcEndVol		= (2000-m_srcEndVol->pos())	/ 1000.0f;
@@ -117,13 +117,13 @@ namespace psycle
 			doClose(true);
 		}
 
-		void WaveEdCrossfadeDialog::onCancelClicked(NButtonEvent* ev)
+		void WaveEdCrossfadeDialog::onCancelClicked( ngrs::NButtonEvent* ev )
 		{
 			doClose(false);
 		}
 
 
-		void WaveEdCrossfadeDialog::onSliderMoved( NSlider* slider )
+		void WaveEdCrossfadeDialog::onSliderMoved( ngrs::NSlider* slider )
 		{
 			float vol;
 			std::ostringstream temp;

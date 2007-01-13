@@ -20,53 +20,55 @@
 #include "nradiobutton.h"
 #include "nlabel.h"
 
-NRadioButton::NRadioButton()
- : NCustomButton()
-{
-  label()->setHAlign(nAlLeft);
-  label()->setVAlign(nAlTop);
+namespace ngrs {
 
-  setToggle(true);
-}
+  NRadioButton::NRadioButton()
+    : NCustomButton()
+  {
+    label()->setHAlign(nAlLeft);
+    label()->setVAlign(nAlTop);
 
-
-NRadioButton::~NRadioButton()
-{
-}
-
-void NRadioButton::paint( NGraphics * g )
-{
-  g->setForeground(NColor(255,255,255));
-  g->fillArc(2,2,10,10,0,64*360);
-  g->setForeground(NColor(0,0,0));
-  g->drawArc(2,2,10,10,0,64*360);
-  if ( down() ) {
-    g->fillArc(4,4,6,6,0,64*360);
+    setToggle(true);
   }
+
+
+  NRadioButton::~NRadioButton()
+  {
+  }
+
+  void NRadioButton::paint( NGraphics * g )
+  {
+    g->setForeground(NColor(255,255,255));
+    g->fillArc(2,2,10,10,0,64*360);
+    g->setForeground(NColor(0,0,0));
+    g->drawArc(2,2,10,10,0,64*360);
+    if ( down() ) {
+      g->fillArc(4,4,6,6,0,64*360);
+    }
+  }
+
+  void NRadioButton::resize( )
+  {
+    label()->setPosition(20,0,spacingWidth()-20,spacingHeight());
+  }
+
+  int NRadioButton::preferredWidth( ) const
+  {
+    if (ownerSize()) return NVisualComponent::preferredWidth();
+    return 20 + label()->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
+  }
+
+  int NRadioButton::preferredHeight( ) const
+  {
+    if (ownerSize()) return NVisualComponent::preferredHeight();
+
+    return label()->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+  }
+
+  void NRadioButton::setDown( bool on )
+  {
+    NCustomButton::setDown(on);
+    repaint();
+  }
+
 }
-
-void NRadioButton::resize( )
-{
-  label()->setPosition(20,0,spacingWidth()-20,spacingHeight());
-}
-
-int NRadioButton::preferredWidth( ) const
-{
-  if (ownerSize()) return NVisualComponent::preferredWidth();
-  return 20 + label()->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
-}
-
-int NRadioButton::preferredHeight( ) const
-{
-  if (ownerSize()) return NVisualComponent::preferredHeight();
-
-  return label()->preferredHeight() + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
-}
-
-void NRadioButton::setDown( bool on )
-{
-  NCustomButton::setDown(on);
-  repaint();
-}
-
-

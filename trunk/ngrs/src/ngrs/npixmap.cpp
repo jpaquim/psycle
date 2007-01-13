@@ -26,104 +26,108 @@
 #include "nwindow.h"
 #include <X11/xpm.h>
 
-NPixmap::NPixmap( )
-{
-  pixmap_ = 0;
-  shapepixmap_ = 0;
-  height_ = width_ = 0;
-  owner_ = NApp::system().rootWindow();
-}
+namespace ngrs {
 
-NPixmap::NPixmap(NWindow* win)
- : NObject()
-{
-  #ifdef __unix__
-  pixmap_ = 0;
-  shapepixmap_ = 0;
-  #endif
-  height_ = width_ = 0;
-  owner_ = win->win();
-}
-
-
-NPixmap::~NPixmap()
-{
-  if (pixmap_) {
-     XFreePixmap(NApp::system().dpy(), pixmap_);
+  NPixmap::NPixmap( )
+  {
+    pixmap_ = 0;
+    shapepixmap_ = 0;
+    height_ = width_ = 0;
+    owner_ = NApp::system().rootWindow();
   }
-  if (shapepixmap_) {
-     XFreePixmap(NApp::system().dpy(), shapepixmap_);
+
+  NPixmap::NPixmap(NWindow* win)
+    : NObject()
+  {
+#ifdef __unix__
+    pixmap_ = 0;
+    shapepixmap_ = 0;
+#endif
+    height_ = width_ = 0;
+    owner_ = win->win();
   }
-}
-
-int NPixmap::width( ) const
-{
-  return width_;
-}
-
-int NPixmap::height( ) const
-{
-  return height_;
-}
 
 
-void NPixmap::loadFromFile( const std::string & filename )
-{
-  XpmColorSymbol cs[256];
-  XpmAttributes attr;
-  attr.valuemask = XpmCloseness;
-  attr.colorsymbols = cs;
-  attr.numsymbols = 256;
-  attr.color_key = XPM_GRAY;
+  NPixmap::~NPixmap()
+  {
+    if (pixmap_) {
+      XFreePixmap(NApp::system().dpy(), pixmap_);
+    }
+    if (shapepixmap_) {
+      XFreePixmap(NApp::system().dpy(), shapepixmap_);
+    }
+  }
+
+  int NPixmap::width( ) const
+  {
+    return width_;
+  }
+
+  int NPixmap::height( ) const
+  {
+    return height_;
+  }
 
 
-  int err = XpmReadFileToPixmap(NApp::system().dpy(), owner_,
-                                (char*) (NFile::replaceTilde(filename).c_str()),
-                                &pixmap_,&shapepixmap_,&attr);
-
-  if (err != XpmSuccess) throw "couldn`t open file";
-
-  width_  = attr.width;
-  height_ = attr.height;
-  
-}
-
-Pixmap NPixmap::X11Pixmap( ) const
-{
-  return pixmap_;
-}
-
-Pixmap NPixmap::X11ShapePixmap( ) const
-{
-  return shapepixmap_;
-}
-
-WinHandle NPixmap::owner( ) const
-{
-  return owner_;
-}
-
-void NPixmap::createFromXpmData( const char ** data )
-{
-  XpmColorSymbol cs[256];
-  XpmAttributes attr;
-  attr.valuemask = XpmCloseness;
-  attr.colorsymbols = cs;
-  attr.numsymbols = 256;
-  attr.color_key = XPM_GRAY;
+  void NPixmap::loadFromFile( const std::string & filename )
+  {
+    XpmColorSymbol cs[256];
+    XpmAttributes attr;
+    attr.valuemask = XpmCloseness;
+    attr.colorsymbols = cs;
+    attr.numsymbols = 256;
+    attr.color_key = XPM_GRAY;
 
 
-  int err = XpmCreatePixmapFromData(NApp::system().dpy(), owner_,
-                                   (char**)data,
-                                &pixmap_,&shapepixmap_,&attr);
+    int err = XpmReadFileToPixmap(NApp::system().dpy(), owner_,
+      (char*) (NFile::replaceTilde(filename).c_str()),
+      &pixmap_,&shapepixmap_,&attr);
 
-  width_  = attr.width;
-  height_ = attr.height;
-}
+    if (err != XpmSuccess) throw "couldn`t open file";
 
-bool NPixmap::empty( ) const
-{
-  return !( pixmap_ || shapepixmap_ );
+    width_  = attr.width;
+    height_ = attr.height;
+
+  }
+
+  Pixmap NPixmap::X11Pixmap( ) const
+  {
+    return pixmap_;
+  }
+
+  Pixmap NPixmap::X11ShapePixmap( ) const
+  {
+    return shapepixmap_;
+  }
+
+  WinHandle NPixmap::owner( ) const
+  {
+    return owner_;
+  }
+
+  void NPixmap::createFromXpmData( const char ** data )
+  {
+    XpmColorSymbol cs[256];
+    XpmAttributes attr;
+    attr.valuemask = XpmCloseness;
+    attr.colorsymbols = cs;
+    attr.numsymbols = 256;
+    attr.color_key = XPM_GRAY;
+
+
+    int err = XpmCreatePixmapFromData(NApp::system().dpy(), owner_,
+      (char**)data,
+      &pixmap_,&shapepixmap_,&attr);
+
+    width_  = attr.width;
+    height_ = attr.height;
+  }
+
+  bool NPixmap::empty( ) const
+  {
+    return !( pixmap_ || shapepixmap_ );
+  }
+
 }
 
 #endif

@@ -29,15 +29,20 @@
 /**
 @author Stefan
 */
-class NXPMFilter : public NImgFilter
-{
-public:
+
+namespace ngrs {
+
+  class NXPMFilter : public NImgFilter
+  {
+  public:
     NXPMFilter();
 
     ~NXPMFilter();
 
     NBitmap loadFromFile(const std::string & filename);
 
-};
+  };
+
+}
 
 #endif

@@ -24,108 +24,107 @@
 #include "nlabel.h"
 #include "nimage.h"
 
-NMessageBox::NMessageBox()
- : NDialog()
-{
-  init();
-}
+namespace ngrs {
 
-NMessageBox::NMessageBox( const std::string & msgText )
-{
-  init();
-  textLbl->setText(msgText);
-}
+  NMessageBox::NMessageBox()
+    : NDialog()
+  {
+    init();
+  }
+
+  NMessageBox::NMessageBox( const std::string & msgText )
+  {
+    init();
+    textLbl->setText(msgText);
+  }
 
 
-void NMessageBox::init( )
-{
-  setTitle("Message");
+  void NMessageBox::init( )
+  {
+    setTitle("Message");
 
-  iconImg = new NImage();
-  pane()->add(iconImg, nAlLeft);
+    iconImg = new NImage();
+    pane()->add(iconImg, nAlLeft);
 
-  NPanel* btnPnl = new NPanel();
+    NPanel* btnPnl = new NPanel();
     btnPnl->setLayout(NAlignLayout(5,5));
     okBtn = new NButton("ok");
-      okBtn->setFlat(false);
-      okBtn->clicked.connect(this,&NMessageBox::onBtnPress);
+    okBtn->setFlat(false);
+    okBtn->clicked.connect(this,&NMessageBox::onBtnPress);
     btnPnl->add(okBtn,nAlRight);
     useBtn = new NButton("use");
-      useBtn->setFlat(false);
-      useBtn->clicked.connect(this,&NMessageBox::onBtnPress);
+    useBtn->setFlat(false);
+    useBtn->clicked.connect(this,&NMessageBox::onBtnPress);
     btnPnl->add(useBtn,nAlRight);
     cancelBtn = new NButton("cancel");
-      cancelBtn->setFlat(false);
-      cancelBtn->clicked.connect(this,&NMessageBox::onBtnPress);
+    cancelBtn->setFlat(false);
+    cancelBtn->clicked.connect(this,&NMessageBox::onBtnPress);
     btnPnl->add(cancelBtn,nAlRight);
-  pane()->add(btnPnl,nAlBottom);
+    pane()->add(btnPnl,nAlBottom);
 
-  textLbl = new NLabel();
-  pane()->add(textLbl,nAlTop);
+    textLbl = new NLabel();
+    pane()->add(textLbl,nAlTop);
 
-}
+  }
 
 
-NMessageBox::~NMessageBox()
-{
-}
+  NMessageBox::~NMessageBox()
+  {
+  }
 
-void NMessageBox::setButtons( int btnMask )
-{
-  okBtn->setVisible(false);
-  useBtn->setVisible(false);
-  cancelBtn->setVisible(false);
+  void NMessageBox::setButtons( int btnMask )
+  {
+    okBtn->setVisible(false);
+    useBtn->setVisible(false);
+    cancelBtn->setVisible(false);
 
-  switch (btnMask) {
+    switch (btnMask) {
     case nMsgOkBtn :
-       okBtn->setVisible(true);
-    break;
+      okBtn->setVisible(true);
+      break;
     case nMsgCancelBtn :
-       cancelBtn->setVisible(true);
-    break;
+      cancelBtn->setVisible(true);
+      break;
     case nMsgUseBtn :
-       useBtn->setVisible(true);
-    break;
+      useBtn->setVisible(true);
+      break;
+    }
   }
-}
 
-void NMessageBox::setButtonText( const std::string & ok, const std::string & use, const std::string & cancel )
-{
-  okBtn->setText(ok);
-  cancelBtn->setText(cancel);
-  useBtn->setText(use);
-}
-
-void NMessageBox::setText( const std::string & msgText )
-{
-  textLbl->setText(msgText);
-}
-
-void NMessageBox::onBtnPress( NButtonEvent * ev )
-{
-  if (ev->sender()==okBtn) {
-     doClose(nMsgOkBtn);
-  } else
-  if (ev->sender()==useBtn) {
-     doClose(nMsgUseBtn);
-  } else
-  if (ev->sender()==cancelBtn) {
-    doClose(nMsgCancelBtn);
+  void NMessageBox::setButtonText( const std::string & ok, const std::string & use, const std::string & cancel )
+  {
+    okBtn->setText(ok);
+    cancelBtn->setText(cancel);
+    useBtn->setText(use);
   }
+
+  void NMessageBox::setText( const std::string & msgText )
+  {
+    textLbl->setText(msgText);
+  }
+
+  void NMessageBox::onBtnPress( NButtonEvent * ev )
+  {
+    if (ev->sender()==okBtn) {
+      doClose(nMsgOkBtn);
+    } else
+      if (ev->sender()==useBtn) {
+        doClose(nMsgUseBtn);
+      } else
+        if (ev->sender()==cancelBtn) {
+          doClose(nMsgCancelBtn);
+        }
+  }
+
+  void NMessageBox::setVisible( bool on )
+  {
+    if (on) pack();
+    NDialog::setVisible(on);
+  }
+
+  NImage * NMessageBox::icon( )
+  {
+    return iconImg;
+  }
+
 }
-
-void NMessageBox::setVisible( bool on )
-{
-  if (on) pack();
-  NDialog::setVisible(on);
-}
-
-NImage * NMessageBox::icon( )
-{
-  return iconImg;
-}
-
-
-
-
-

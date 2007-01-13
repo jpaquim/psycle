@@ -26,27 +26,30 @@
 /**
 @author Stefan
 */
-class NGroupBox : public NPanel
-{
 
-  class GBorder : public NBorder {
+namespace ngrs {
+
+  class NGroupBox : public NPanel
+  {
+
+    class GBorder : public NBorder {
+    public:
+      GBorder();
+      ~GBorder();
+
+      void setHeaderText( const std::string & text );
+
+      virtual void paint(NGraphics* g, const NShape & geometry);
+
+      virtual NBorder* clone() const;
+
+    private:
+
+      std::string headerText_;
+
+    };
+
   public:
-     GBorder();
-     ~GBorder();
-
-     void setHeaderText( const std::string & text );
-
-     virtual void paint(NGraphics* g, const NShape & geometry);
-
-     virtual NBorder* clone() const;
-
-  private:
-
-     std::string headerText_;
-
-  };
-
-public:
     NGroupBox();
     NGroupBox( const std::string & text);
 
@@ -54,9 +57,11 @@ public:
 
     void setHeaderText( const std::string & text);
 
-private:
+  private:
 
-   GBorder gBorder;
-};
+    GBorder gBorder;
+  };
+
+}
 
 #endif

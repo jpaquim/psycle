@@ -22,149 +22,151 @@
 
 using namespace std;
 
-NRuntime::NRuntime()
- : NObject()
-{
-  parent_ = 0;
-}
+namespace ngrs {
 
-
-NRuntime::~NRuntime()
-{
-  if (parent()!=NULL) {
-    vector<NRuntime*>::iterator it = find(parent()->components.begin(),parent()->components.end(),this);
-    if (it!=parent()->components.end()) parent()->components.erase(it);
+  NRuntime::NRuntime()
+    : NObject()
+  {
+    parent_ = 0;
   }
 
-  for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
-    NRuntime* child = *it;
-    child->setParent(NULL);
-    delete child;
+
+  NRuntime::~NRuntime()
+  {
+    if (parent()!=NULL) {
+      vector<NRuntime*>::iterator it = find(parent()->components.begin(),parent()->components.end(),this);
+      if (it!=parent()->components.end()) parent()->components.erase(it);
+    }
+
+    for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
+      NRuntime* child = *it;
+      child->setParent(NULL);
+      delete child;
+    }
+
+    std::cout << "delete:" << name() << std::endl;
   }
 
-	std::cout << "delete:" << name() << std::endl;
-}
+  // here you will find all public methods
 
-// here you will find all public methods
-
-void NRuntime::add( NRuntime * component )
-{
-  if (component == this) {
-    std::cerr << "Runtime Error: not possible to add circular components" << std::endl;
-    return;
+  void NRuntime::add( NRuntime * component )
+  {
+    if (component == this) {
+      std::cerr << "Runtime Error: not possible to add circular components" << std::endl;
+      return;
+    }
+    components.push_back(component);
+    component->setParent(this);
   }
-  components.push_back(component);
-  component->setParent(this);
-}
 
-NRuntime * NRuntime::parent( )
-{
-  return parent_;
-}
+  NRuntime * NRuntime::parent( )
+  {
+    return parent_;
+  }
 
-void NRuntime::setParent( NRuntime * parent )
-{
-  parent_ = parent;
-}
+  void NRuntime::setParent( NRuntime * parent )
+  {
+    parent_ = parent;
+  }
 
-bool NRuntime::visit( NVisitor * v )
-{
-  return false;
-}
+  bool NRuntime::visit( NVisitor * v )
+  {
+    return false;
+  }
 
-std::string NRuntime::stringify( double x )
-{
+  std::string NRuntime::stringify( double x )
+  {
     std::ostringstream o;
     if (!(o << x))
       return "error"; else
-    return o.str();
-}
+      return o.str();
+  }
 
-std::string NRuntime::stringify( int x )
-{
-     std::ostringstream o;
+  std::string NRuntime::stringify( int x )
+  {
+    std::ostringstream o;
     if (!(o << x))
       return "error"; else
-    return o.str();
-}
-
-string NRuntime::trim(string str)
-{
-  string::size_type pos = str.find_last_not_of(' ');
-  if(pos != string::npos) {
-    str.erase(pos + 1);
-    pos = str.find_first_not_of(' ');
-    if(pos != string::npos) str.erase(0, pos);
+      return o.str();
   }
-  else str.erase(str.begin(), str.end());
-  return str;
-}
 
-int NRuntime::componentSize( )
-{
-  return components.size();
-}
-
-void NRuntime::insert( NRuntime * component, int index )
-{
-  components.insert(components.begin()+index,component);
-  component->setParent(this);
-}
-
-void NRuntime::removeChilds( )
-{
-  for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
-   NRuntime* child = *it;
-   child->setParent(NULL);
-   delete child;
-  }
-  components.clear();
-}
-
-void NRuntime::removeChild( NRuntime * child )
-{
-  child->setParent(NULL);
-  std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
-  components.erase(itr);
-  delete child;
-}
-
-NRuntime * NRuntime::parent( ) const
-{
-  return parent_;
-}
-
-int NRuntime::d2i(double d) const
- {
-   return (int) ( d<0?d-.5:d+.5);
- }
-
-void NRuntime::erase( NRuntime * child )
-{
- child->setParent(NULL);
-  std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
-  components.erase(itr);
-}
-
-void NRuntime::onMessage( NEvent * event )
-{
-  for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
-   NRuntime* child = *it;
-   child->onMessage(event);
-  }
-}
-
-bool NRuntime::isChildOf( NRuntime * comp ) const
-{
-  if (this == comp) return true; else
+  string NRuntime::trim(string str)
   {
-     if (parent() != 0) return parent()->isChildOf(comp); else return false;
+    string::size_type pos = str.find_last_not_of(' ');
+    if(pos != string::npos) {
+      str.erase(pos + 1);
+      pos = str.find_first_not_of(' ');
+      if(pos != string::npos) str.erase(0, pos);
+    }
+    else str.erase(str.begin(), str.end());
+    return str;
   }
+
+  int NRuntime::componentSize( )
+  {
+    return components.size();
+  }
+
+  void NRuntime::insert( NRuntime * component, int index )
+  {
+    components.insert(components.begin()+index,component);
+    component->setParent(this);
+  }
+
+  void NRuntime::removeChilds( )
+  {
+    for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
+      NRuntime* child = *it;
+      child->setParent(NULL);
+      delete child;
+    }
+    components.clear();
+  }
+
+  void NRuntime::removeChild( NRuntime * child )
+  {
+    child->setParent(NULL);
+    std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
+    components.erase(itr);
+    delete child;
+  }
+
+  NRuntime * NRuntime::parent( ) const
+  {
+    return parent_;
+  }
+
+  int NRuntime::d2i(double d) const
+  {
+    return (int) ( d<0?d-.5:d+.5);
+  }
+
+  void NRuntime::erase( NRuntime * child )
+  {
+    child->setParent(NULL);
+    std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
+    components.erase(itr);
+  }
+
+  void NRuntime::onMessage( NEvent * event )
+  {
+    for (vector<NRuntime*>::iterator it = components.begin(); it < components.end(); it++) {
+      NRuntime* child = *it;
+      child->onMessage(event);
+    }
+  }
+
+  bool NRuntime::isChildOf( NRuntime * comp ) const
+  {
+    if (this == comp) return true; else
+    {
+      if (parent() != 0) return parent()->isChildOf(comp); else return false;
+    }
+  }
+
+  void NRuntime::erase( )
+  {
+    if (parent()) parent()->erase(this);
+  }
+
 }
-
-void NRuntime::erase( )
-{
-  if (parent()) parent()->erase(this);
-}
-
-

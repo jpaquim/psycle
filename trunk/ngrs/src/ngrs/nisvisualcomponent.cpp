@@ -21,30 +21,33 @@
 #include "nvisualcomponent.h"
 #include "nwindow.h"
 
-NIsVisualComponent::NIsVisualComponent()
- : NVisitor()
-{
+namespace ngrs {
+
+  NIsVisualComponent::NIsVisualComponent()
+    : NVisitor()
+  {
+  }
+
+
+  NIsVisualComponent::~NIsVisualComponent()
+  {
+  }
+
+  bool NIsVisualComponent::visit_visualcomponent( NVisualComponent * vComp )
+  {
+    return true;
+  }
+
+
+  bool NIsVisualComponent::visit_window( NWindow * )
+  {
+    return false;
+  }
+
+  bool NIsVisualComponent::visit_visualcomponent( NWindow * )
+  {
+    return false;
+  }
+
 }
-
-
-NIsVisualComponent::~NIsVisualComponent()
-{
-}
-
-bool NIsVisualComponent::visit_visualcomponent( NVisualComponent * vComp )
-{
-  return true;
-}
-
-
-bool NIsVisualComponent::visit_window( NWindow * )
-{
-  return false;
-}
-
-bool NIsVisualComponent::visit_visualcomponent( NWindow * )
-{
-  return false;
-}
-
 

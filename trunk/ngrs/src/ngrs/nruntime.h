@@ -25,62 +25,62 @@
 #include <iostream>
 #include <sstream>
 
-class NVisitor;
-
-
-template<class T> inline T str(const std::string &  value) {
-   T result;
-
-   std::stringstream str;
-   str << value;
-   str >> result;
-
-   return result;
-}
-
-
 /**
 @author Stefan
 */
-class NObject;
 
-class NRuntime : public NObject
-{
-public:
+namespace ngrs {
+
+  class NVisitor;
+  class NObject;
+
+  template<class T> inline T str(const std::string &  value) {
+    T result;
+    std::stringstream str;
+    str << value;
+    str >> result;
+    return result;
+  }
+
+  class NRuntime : public NObject
+  {
+  public:
     NRuntime();
 
-   virtual ~NRuntime();
+    virtual ~NRuntime();
 
-   std::vector<NRuntime*> components;
+    std::vector<NRuntime*> components;
 
-   void add(NRuntime* component);
-   void insert(NRuntime* component, int index);
-   virtual void removeChild(NRuntime* child);
-   virtual void removeChilds();
-   virtual void erase(NRuntime* child);
-   virtual void erase();
+    void add(NRuntime* component);
+    void insert(NRuntime* component, int index);
+    virtual void removeChild(NRuntime* child);
+    virtual void removeChilds();
+    virtual void erase(NRuntime* child);
+    virtual void erase();
 
-   void setParent(NRuntime* parent);
-   NRuntime* parent();
-   NRuntime* parent() const;
+    void setParent(NRuntime* parent);
+    NRuntime* parent();
+    NRuntime* parent() const;
 
-   virtual bool visit(NVisitor* v);
-   virtual void onMessage( NEvent * event );
+    virtual bool visit(NVisitor* v);
+    virtual void onMessage( NEvent * event );
 
-   static std::string stringify(double x);
-   static std::string stringify(int x);
-   static std::string trim(std::string str);
+    static std::string stringify(double x);
+    static std::string stringify(int x);
+    static std::string trim(std::string str);
 
-   int componentSize();
+    int componentSize();
 
-   int d2i(double d) const;
+    int d2i(double d) const;
 
-   bool isChildOf(NRuntime* comp) const;
+    bool isChildOf(NRuntime* comp) const;
 
-private:
+  private:
 
-   NRuntime* parent_;
+    NRuntime* parent_;
 
-};
+  };
+
+}
 
 #endif

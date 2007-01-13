@@ -27,151 +27,154 @@
 #include <ngrs/ndialog.h>
 
 
-class NTogglePanel;
-class NButton;
-class NSlider;
+/**
+  @author Stefan Nattkemper
+*/
+
+namespace ngrs {
+  class NTogglePanel;
+  class NButton;
+  class NSlider;
+}
 
 namespace psycle {
-	namespace host {
+  namespace host {
 
-		class Machine;
+    class Machine;
 
-		const int K_XSIZE = 28;
-		const int K_YSIZE = 28;
-		const int K_NUMFRAMES = 63;
-		const int W_ROWWIDTH = 150;
-
-		/**
-		@author Stefan Nattkemper
-		*/
-
-		class NewNameDlg : public NDialog {
-		public:
-			NewNameDlg();
-			~NewNameDlg();
-		};
-
-		class Cell : public NPanel {
-		public:
-			Cell();
-
-			~Cell();
-
-			virtual void paint(NGraphics* g);
-
-			virtual int preferredWidth() const;
-			virtual int preferredHeight() const;
-
-		};
-
-		class Knob: public Cell {
-		public:
-
-			Knob(int param);
-
-			signal3<Knob*,int,int> valueChanged;
-
-			void setValue(int value);
-			void setValueAsText(const std::string & text);
-
-			void setRange(int min, int max);
-			void setText(const std::string & text);
-
-			virtual void onMousePress(int x, int y, int button);
-			virtual void onMouseOver(int x, int y);
-			virtual void onMousePressed(int x, int y, int button);
-
-			virtual void paint(NGraphics* g);
-			virtual void resize();
-
-			virtual int preferredWidth() const;
-			virtual int preferredHeight() const;
+    const int K_XSIZE = 28;
+    const int K_YSIZE = 28;
+    const int K_NUMFRAMES = 63;
+    const int W_ROWWIDTH = 150;
 
 
-		private:
+    class NewNameDlg : public ngrs::NDialog {
+    public:
+      NewNameDlg();
+      ~NewNameDlg();
+    };
 
-			int param_;
-			int max_range;
-			int min_range;
-			int value_;
-			std::string tvalue;
+    class Cell : public ngrs::NPanel {
+    public:
+      Cell();
 
-			bool istweak;
-			bool finetweak;
-			bool ultrafinetweak;
+      ~Cell();
 
-			//  y position of the mouse when starting a mousedrag (knob tweak)
-			int sourcepoint;
-			//  value of the knob in that position
-			int tweakbase;
+      virtual void paint( ngrs::NGraphics* g );
 
-			NLabel* label;
-			NLabel* vLabel;
+      virtual int preferredWidth() const;
+      virtual int preferredHeight() const;
 
-		};
+    };
 
+    class Knob: public Cell {
+    public:
 
-		class Header: public Cell {
-		public:
-			Header();
+      Knob(int param);
 
-			void setText(const std::string & text);
+      signal3<Knob*,int,int> valueChanged;
 
-			virtual void resize();
+      void setValue(int value);
+      void setValueAsText(const std::string & text);
 
-		private:
-			NLabel* label;
-		};
+      void setRange(int min, int max);
+      void setText( const std::string& text );
 
+      virtual void onMousePress( int x, int y, int button );
+      virtual void onMouseOver( int x, int y);
+      virtual void onMousePressed( int x, int y, int button );
 
-		class FrameMachine : public NWindow
-		{
-		public:
-			FrameMachine(Machine* pMachine);
+      virtual void paint( ngrs::NGraphics* g );
+      virtual void resize();
 
-			~FrameMachine();
-
-			virtual int onClose();
-			virtual void setVisible( bool on );
-
-			Machine* pMac();
-			void updateValues();
-
-			signal3<int,int,int> patternTweakSlide;
-
-		private:
-
-			std::map<NButton*,Preset> presetMap;
-			std::map<int, Knob*>   knobMap;
-			std::map<int, Header*> headerMap;
-
-			Machine* pMachine_;
-			NPanel* knobPanel;
-			NTogglePanel* prsPanel;
-			NButton* defaultPrsBtn;
-			NSlider* prsBtnSlider;
-
-			Preset knobsPreset();
-
-			void onItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
-			void init();
-			void initParameterGUI();
-
-			void onPrsClick(NButtonEvent* ev);
-
-			void onKnobValueChange(Knob* sender, int value, int param);
-
-			void onLeftBtn(NButtonEvent* ev);
-			void onRightBtn(NButtonEvent* ev);
-
-			void loadPresets();
-			void onAddPrs(NButtonEvent* ev);
-			void onLoadPrs(NButtonEvent* ev);
+      virtual int preferredWidth() const;
+      virtual int preferredHeight() const;
 
 
-		};
+    private:
 
-	}
+      int param_;
+      int max_range;
+      int min_range;
+      int value_;
+      std::string tvalue;
+
+      bool istweak;
+      bool finetweak;
+      bool ultrafinetweak;
+
+      //  y position of the mouse when starting a mousedrag (knob tweak)
+      int sourcepoint;
+      //  value of the knob in that position
+      int tweakbase;
+
+      ngrs::NLabel* label;
+      ngrs::NLabel* vLabel;
+
+    };
+
+
+    class Header: public Cell {
+    public:
+      Header();
+
+      void setText( const std::string& text );
+
+      virtual void resize();
+
+    private:
+      ngrs::NLabel* label;
+    };
+
+
+    class FrameMachine : public ngrs::NWindow
+    {
+    public:
+      FrameMachine( Machine* pMachine );
+
+      ~FrameMachine();
+
+      virtual int onClose();
+      virtual void setVisible( bool on );
+
+      Machine* pMac();
+      void updateValues();
+
+      signal3<int,int,int> patternTweakSlide;
+
+    private:
+
+      std::map< ngrs::NButton*, Preset > presetMap;
+      std::map<int, Knob*>   knobMap;
+      std::map<int, Header*> headerMap;
+
+      Machine* pMachine_;
+      ngrs::NPanel* knobPanel;
+      ngrs::NTogglePanel* prsPanel;
+      ngrs::NButton* defaultPrsBtn;
+      ngrs::NSlider* prsBtnSlider;
+
+      Preset knobsPreset();
+
+      void onItemClicked( ngrs::NEvent* menuEv, ngrs::NButtonEvent* itemEv );
+      void init();
+      void initParameterGUI();
+
+      void onPrsClick( ngrs::NButtonEvent* ev );
+
+      void onKnobValueChange( Knob* sender, int value, int param );
+
+      void onLeftBtn( ngrs::NButtonEvent* ev );
+      void onRightBtn( ngrs::NButtonEvent* ev );
+
+      void loadPresets();
+      void onAddPrs( ngrs::NButtonEvent* ev );
+      void onLoadPrs( ngrs::NButtonEvent* ev );
+
+
+    };
+
+  }
 }
 
 #endif

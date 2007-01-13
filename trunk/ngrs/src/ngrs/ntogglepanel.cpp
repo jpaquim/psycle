@@ -20,113 +20,115 @@
 #include "ntogglepanel.h"
 #include "ncustombutton.h"
 
+namespace ngrs {
 
-NTogglePanel::NTogglePanel()
- : NPanel()
-{
-  selectedComp_ = 0;
-}
-
-
-NTogglePanel::~NTogglePanel()
-{
-}
-
-// the class factories
-
-extern "C" NObject* createTogglePanel() {
-    return new NTogglePanel();
-}
-
-extern "C" void destroyTogglePanel(NObject* p) {
-    delete p;
-}
-
-
-void NTogglePanel::add( NCustomButton * toggleComponent )
-{
-  if (toggleComponent->toggle()) {
-    toggleComponent->click.connect(this,&NTogglePanel::onClick);
-    if (visualComponents().size()==0) {
-      toggleComponent->setDown(true);
-      selectedComp_ = toggleComponent;
-    }
-    else 
-      toggleComponent->setDown(false);
-  }
-  NPanel::add(toggleComponent);
-}
-
-void NTogglePanel::add( NVisualComponent * component, int align )
-{
-   NPanel::add(component,align);
-}
-
-void NTogglePanel::add( NCustomButton * component, int align )
-{
-  component->setAlign(align);
-  add(component);
-}
-
-void NTogglePanel::add( NCustomButton * component, const NAlignConstraint & align )
-{
-  component->setAlignConstraint(align);
-  add(component);
-}
-
-void NTogglePanel::add( NVisualComponent * component, const NAlignConstraint & align )
-{
-  NPanel::add(component,align,true);
-}
-
-void NTogglePanel::onClick( NButtonEvent * ev )
-{
-  for (std::vector<NVisualComponent*>::const_iterator it=visualComponents().begin(); it<visualComponents().end(); it++) {
-    NVisualComponent* msgClient = *it;
-    if (msgClient != ev->sender()) {
-      NEvent toggleEvent(ev->sender(),"toggle:'up'");
-      msgClient->onMessage(&toggleEvent);
-    } else {
-       selectedComp_ = *it;
-       click.emit(ev);
-    }
-  }
-  resize();
-  repaint();
-}
-
-void NTogglePanel::setDown( NCustomButton * btn )
-{
-  for (std::vector<NRuntime*>::iterator it=components.begin(); it<components.end(); it++) {
-    NRuntime* msgClient = *it;
-    if (msgClient != btn) {
-      NEvent toggleEvent(btn,"toggle:'up'");
-      msgClient->onMessage(&toggleEvent);
-    } else {
-       btn->setDown(true);
-    }
-  }
-  resize();
-  repaint();
-}
-
-
-NVisualComponent * NTogglePanel::selectedComponent( )
-{
-  return selectedComp_;
-}
-
-void NTogglePanel::removeChild( NVisualComponent * child )
-{
-  if (child == selectedComp_) {
+  NTogglePanel::NTogglePanel()
+    : NPanel()
+  {
     selectedComp_ = 0;
   }
 
-  NPanel::removeChild( child );
+
+  NTogglePanel::~NTogglePanel()
+  {
+  }
+
+  void NTogglePanel::add( NCustomButton * toggleComponent )
+  {
+    if (toggleComponent->toggle()) {
+      toggleComponent->click.connect(this,&NTogglePanel::onClick);
+      if (visualComponents().size()==0) {
+        toggleComponent->setDown(true);
+        selectedComp_ = toggleComponent;
+      }
+      else 
+        toggleComponent->setDown(false);
+    }
+    NPanel::add(toggleComponent);
+  }
+
+  void NTogglePanel::add( NVisualComponent * component, int align )
+  {
+    NPanel::add(component,align);
+  }
+
+  void NTogglePanel::add( NCustomButton * component, int align )
+  {
+    component->setAlign(align);
+    add(component);
+  }
+
+  void NTogglePanel::add( NCustomButton * component, const NAlignConstraint & align )
+  {
+    component->setAlignConstraint(align);
+    add(component);
+  }
+
+  void NTogglePanel::add( NVisualComponent * component, const NAlignConstraint & align )
+  {
+    NPanel::add(component,align,true);
+  }
+
+  void NTogglePanel::onClick( NButtonEvent * ev )
+  {
+    for (std::vector<NVisualComponent*>::const_iterator it=visualComponents().begin(); it<visualComponents().end(); it++) {
+      NVisualComponent* msgClient = *it;
+      if (msgClient != ev->sender()) {
+        NEvent toggleEvent(ev->sender(),"toggle:'up'");
+        msgClient->onMessage(&toggleEvent);
+      } else {
+        selectedComp_ = *it;
+        click.emit(ev);
+      }
+    }
+    resize();
+    repaint();
+  }
+
+  void NTogglePanel::setDown( NCustomButton * btn )
+  {
+    for (std::vector<NRuntime*>::iterator it=components.begin(); it<components.end(); it++) {
+      NRuntime* msgClient = *it;
+      if (msgClient != btn) {
+        NEvent toggleEvent(btn,"toggle:'up'");
+        msgClient->onMessage(&toggleEvent);
+      } else {
+        btn->setDown(true);
+      }
+    }
+    resize();
+    repaint();
+  }
+
+
+  NVisualComponent * NTogglePanel::selectedComponent( )
+  {
+    return selectedComp_;
+  }
+
+  void NTogglePanel::removeChild( NVisualComponent * child )
+  {
+    if (child == selectedComp_) {
+      selectedComp_ = 0;
+    }
+
+    NPanel::removeChild( child );
+  }
+
+  void NTogglePanel::removeChilds( )
+  {
+    selectedComp_ = 0;
+    NPanel::removeChilds();
+  }
+
 }
 
-void NTogglePanel::removeChilds( )
-{
-  selectedComp_ = 0;
-  NPanel::removeChilds();
+
+// the class factories
+extern "C" ngrs::NObject* createTogglePanel() {
+  return new ngrs::NTogglePanel();
+}
+
+extern "C" void destroyTogglePanel( ngrs::NObject* p) {
+  delete p;
 }

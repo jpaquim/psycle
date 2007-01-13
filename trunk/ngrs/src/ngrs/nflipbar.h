@@ -26,44 +26,46 @@
 @author Stefan Nattkemper
 */
 
-class NImage;
-class NBitmap;
+namespace ngrs {
 
-class NFlipBar : public NPanel
-{
+  class NImage;
+  class NBitmap;
 
-  class NFlipper : public NPanel {
+  class NFlipBar : public NPanel
+  {
+
+    class NFlipper : public NPanel {
     public:
 
-       friend class NFlipBar;
+      friend class NFlipBar;
 
-       NFlipper( NFlipBar* flipBar );
+      NFlipper( NFlipBar* flipBar );
 
-       ~NFlipper( );
+      ~NFlipper( );
 
-       void setExpanded( bool on );
-	   bool expanded( ) const;
+      void setExpanded( bool on );
+      bool expanded( ) const;
 
-       virtual void onMousePress( int x, int y, int button );
+      virtual void onMousePress( int x, int y, int button );
 
-       virtual int preferredWidth() const;
-       virtual int preferredHeight() const;
+      virtual int preferredWidth() const;
+      virtual int preferredHeight() const;
 
     private:
 
-       bool expanded_;
+      bool expanded_;
 
-       NImage* expandImg_;
+      NImage* expandImg_;
 
-       NBitmap expandBmp;
-       NBitmap expandedBmp;
+      NBitmap expandBmp;
+      NBitmap expandedBmp;
 
-       NFlipBar* flipBar_;
+      NFlipBar* flipBar_;
 
 
-  };
+    };
 
-public:
+  public:
     NFlipBar();
 
     ~NFlipBar();
@@ -76,15 +78,17 @@ public:
     NPanel* header();
 
     int flipperWidth() const;
-	int flipperHeight() const;
+    int flipperHeight() const;
 
-private:
+  private:
 
     NFlipper* flipper_;
     NPanel* header_;
 
     void onFlipClick();
 
-};
+  };
+
+}
 
 #endif

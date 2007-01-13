@@ -22,37 +22,38 @@
 
 #include "ncustombutton.h"
 
-
-class NPopupMenu;
-class NCustomMenuItem;
-
 /**
 @author Stefan
 */
 
-class NMenu : public NCustomButton
-{
-public:
-   NMenu();
-   NMenu(const std::string & text);
+namespace ngrs {
 
-   ~NMenu();
+  class NPopupMenu;
+  class NCustomMenuItem;
 
-   bool mapped() const;
+  class NMenu : public NCustomButton
+  {
+  public:
+    NMenu();
+    NMenu(const std::string & text);
 
-   NPopupMenu* popupMenu();
+    ~NMenu();
 
-   virtual NCustomMenuItem* add(NCustomMenuItem* item);
+    bool mapped() const;
 
-   virtual void onMouseEnter();
-   virtual void onMouseExit();
-   virtual void onMousePress( int x, int y, int button );
+    NPopupMenu* popupMenu();
 
-   virtual void onMessage(NEvent* ev);
+    virtual NCustomMenuItem* add(NCustomMenuItem* item);
 
-   virtual void removeChilds();
+    virtual void onMouseEnter();
+    virtual void onMouseExit();
+    virtual void onMousePress( int x, int y, int button );
 
-private:
+    virtual void onMessage(NEvent* ev);
+
+    virtual void removeChilds();
+
+  private:
 
     friend class NMenuBar;
 
@@ -64,6 +65,7 @@ private:
 
     void init();
 
-};
+  };
+}
 
 #endif

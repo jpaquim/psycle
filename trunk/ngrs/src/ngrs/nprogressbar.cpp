@@ -21,112 +21,107 @@
 #include "nframeborder.h"
 #include "nlabel.h"
 
+namespace ngrs {
 
-NProgressBar::NProgressBar()
- : NPanel(), progress_(50) , min_(0),max_(100), step_(10), orientation_(nVertical)
-{
-  NFrameBorder fr;
+  NProgressBar::NProgressBar()
+    : NPanel(), progress_(50) , min_(0),max_(100), step_(10), orientation_(nVertical)
+  {
+    NFrameBorder fr;
     fr.setSpacing( NSize(0,0,0,0) );
-  setBorder( fr );
-    
-
-  progressGradient_ = new NGradient();
-  add(progressGradient_);
-  progressGradient_->setColor_1(NColor(200,200,205));
-  progressGradient_->setColor_2(NColor(230,230,255));
-  progressGradient_->setColor_3(NColor(200,200,205));
-
-  label_ = new NLabel();
-  label_->setHAlign(nAlCenter);
-  add(label_);
-  label_->setEvents(false);
-}
+    setBorder( fr );
 
 
-NProgressBar::~NProgressBar()
-{
+    progressGradient_ = new NGradient();
+    add(progressGradient_);
+    progressGradient_->setColor_1(NColor(200,200,205));
+    progressGradient_->setColor_2(NColor(230,230,255));
+    progressGradient_->setColor_3(NColor(200,200,205));
 
-}
-
-
-void NProgressBar::setText( const std::string & text )
-{
-  label_->setText(text);
-}
-
-std::string NProgressBar::text( )
-{
-  return label_->text();
-}
-
-void NProgressBar::resize( )
-{ 
-  if (orientation_ == nVertical) {
-    int progressWidth = (int) ((progress_ / 100.0f) * clientWidth());
-    progressGradient_->setPosition(0,0,progressWidth,clientHeight());
-  } else {
-    int progressHeight = (int) ((progress_ / 100.0f) * clientHeight());
-    progressGradient_->setPosition(0,progressHeight,clientWidth(),clientHeight()-progressHeight);
+    label_ = new NLabel();
+    label_->setHAlign(nAlCenter);
+    add(label_);
+    label_->setEvents(false);
   }
-  label_->setPosition(0,0,spacingWidth(),spacingHeight());
+
+
+  NProgressBar::~NProgressBar()
+  {
+
+  }
+
+
+  void NProgressBar::setText( const std::string & text )
+  {
+    label_->setText(text);
+  }
+
+  std::string NProgressBar::text( )
+  {
+    return label_->text();
+  }
+
+  void NProgressBar::resize( )
+  { 
+    if (orientation_ == nVertical) {
+      int progressWidth = (int) ((progress_ / 100.0f) * clientWidth());
+      progressGradient_->setPosition(0,0,progressWidth,clientHeight());
+    } else {
+      int progressHeight = (int) ((progress_ / 100.0f) * clientHeight());
+      progressGradient_->setPosition(0,progressHeight,clientWidth(),clientHeight()-progressHeight);
+    }
+    label_->setPosition(0,0,spacingWidth(),spacingHeight());
+  }
+
+  void NProgressBar::setMin( int min )
+  {
+    min_ = min;
+  }
+
+  int NProgressBar::min( ) const
+  {
+    return min_;
+  }
+
+  void NProgressBar::setMax( int max )
+  {
+    max_ = max;
+  }
+
+  int NProgressBar::max( ) const
+  {
+    return max_;
+  }
+
+  void NProgressBar::setStep( int step )
+  {
+    step_ = step;
+  }
+
+  int NProgressBar::step( ) const
+  {
+    return step_;
+  }
+
+  void NProgressBar::setValue( int value )
+  {
+    progress_ = (int) (( value / ((double) (max_-min_))) * 100);
+    resize();
+  }
+
+  int NProgressBar::value( ) const
+  {
+    return (int) ((progress_ * (max_-min_)) / 100.0f);
+  }
+
+  void NProgressBar::setOrientation( int orientation )
+  {
+    orientation_ = orientation;
+  }
+
+  void NProgressBar::setRange( int min, int max )
+  {
+    min_ = min;
+    max_ = max;
+  }
+
 }
-
-void NProgressBar::setMin( int min )
-{
-  min_ = min;
-}
-
-int NProgressBar::min( ) const
-{
-  return min_;
-}
-
-void NProgressBar::setMax( int max )
-{
-  max_ = max;
-}
-
-int NProgressBar::max( ) const
-{
-  return max_;
-}
-
-void NProgressBar::setStep( int step )
-{
-  step_ = step;
-}
-
-int NProgressBar::step( ) const
-{
-  return step_;
-}
-
-void NProgressBar::setValue( int value )
-{
-  progress_ = (int) (( value / ((double) (max_-min_))) * 100);
-  resize();
-}
-
-int NProgressBar::value( ) const
-{
-  return (int) ((progress_ * (max_-min_)) / 100.0f);
-}
-
-void NProgressBar::setOrientation( int orientation )
-{
-  orientation_ = orientation;
-}
-
-void NProgressBar::setRange( int min, int max )
-{
-  min_ = min;
-  max_ = max;
-}
-
-
-
-
-
-
-
-

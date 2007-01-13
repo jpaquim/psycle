@@ -28,36 +28,40 @@
 #include <string>
 #include <map>
 
-struct NXmlPos {
-  std::string::size_type pos;
-  std::string::size_type len;
-  int err;
-  int type;     
-};    
- 
-class NXmlAttributes
-{
-	public:
+namespace ngrs {
 
-		NXmlAttributes( );
+  struct NXmlPos {
+    std::string::size_type pos;
+    std::string::size_type len;
+    int err;
+    int type;     
+  };    
 
-		NXmlAttributes( const std::string & tag_header );
+  class NXmlAttributes
+  {
+  public:
 
-		~NXmlAttributes();
-		
-		void reset( const std::string & tag_header );
-		std::string value( const std::string & name ) const;
-		
-		const std::string & tagName() const;
-		
-	private:
-            
-        std::string tagName_;    
-	    std::map< std::string, std::string > attrib_;
-            
-        void parseHeader( const std::string & text );    	
-        std::string::size_type getNextAttribute( const std::string & text, std::string::size_type pos );
-	
-};
+    NXmlAttributes( );
+
+    NXmlAttributes( const std::string & tag_header );
+
+    ~NXmlAttributes();
+
+    void reset( const std::string & tag_header );
+    std::string value( const std::string & name ) const;
+
+    const std::string & tagName() const;
+
+  private:
+
+    std::string tagName_;    
+    std::map< std::string, std::string > attrib_;
+
+    void parseHeader( const std::string & text );    	
+    std::string::size_type getNextAttribute( const std::string & text, std::string::size_type pos );
+
+  };
+
+}
 
 #endif // NXMLATTRIBUTES_H

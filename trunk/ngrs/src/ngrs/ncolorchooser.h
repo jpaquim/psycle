@@ -25,9 +25,12 @@
 /**
 @author Stefan Nattkemper
 */
-class NColorChooser : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NColorChooser : public NPanel
+  {
+  public:
     NColorChooser();
 
     ~NColorChooser();
@@ -43,7 +46,7 @@ public:
 
     const NColor & selectedColor() const;
 
-private:
+  private:
 
     int cols;
     int chooseSize;
@@ -53,6 +56,8 @@ private:
 
     void initColorMap();
 
-};
+  };
+
+}
 
 #endif

@@ -22,14 +22,17 @@
 
 #include "npanel.h"
 
-class NCustomButton;
-
 /**
 @author Stefan
 */
-class NTogglePanel : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NCustomButton;
+
+  class NTogglePanel : public NPanel
+  {
+  public:
     NTogglePanel();
 
     ~NTogglePanel();
@@ -49,11 +52,13 @@ public:
 
     signal1<NButtonEvent*> click;
 
-private:
+  private:
 
-   void onClick(NButtonEvent* ev);
+    void onClick(NButtonEvent* ev);
 
-   NVisualComponent* selectedComp_;
-};
+    NVisualComponent* selectedComp_;
+  };
+
+}
 
 #endif

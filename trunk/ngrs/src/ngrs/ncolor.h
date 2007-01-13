@@ -28,8 +28,11 @@
 /**
 @author Stefan
 */
-class NColor{
-public:
+
+namespace ngrs {
+
+  class NColor{
+  public:
     NColor();
     NColor( unsigned int red, unsigned int green, unsigned int blue );
     NColor( long hcolorref );
@@ -50,15 +53,17 @@ public:
 
     bool operator==( const NColor & color ) const;
     const NColor operator-( const NColor & rhs ) {
-       return NColor( red() - rhs.red(), green()- rhs.green(), blue() - rhs.blue() );
+      return NColor( red() - rhs.red(), green()- rhs.green(), blue() - rhs.blue() );
     }
     bool operator<( const NColor & rhs ) const;
 
-private:
+  private:
 
-  unsigned int r,g,b;
-  unsigned long value;
+    unsigned int r,g,b;
+    unsigned long value;
 
-};
+  };
+
+}
 
 #endif

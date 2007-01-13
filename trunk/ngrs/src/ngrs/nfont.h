@@ -30,10 +30,12 @@
 @author Stefan
 */
 
-enum NFontStyleEnum { nBold=1,nMedium=2, nItalic=4, nStraight=8, nAntiAlias=16};
+namespace ngrs {
 
-class NFont{
-public:
+  enum NFontStyleEnum { nBold=1,nMedium=2, nItalic=4, nStraight=8, nAntiAlias=16};
+
+  class NFont{
+  public:
     NFont();
     NFont( const std::string & name, int size=10, int style=nMedium | nStraight | nAntiAlias);
 
@@ -58,7 +60,7 @@ public:
 
 
 
-private:
+  private:
 
     std::string name_;
     int size_, style_;
@@ -66,6 +68,8 @@ private:
 
     NFontStructure systemFnt;
 
-};
+  };
+
+}
 
 #endif

@@ -22,94 +22,96 @@
 
 using namespace std;
 
-NFont::NFont() : 
-               #ifdef __unix__
-               name_("9x15"),
-               #else
-               name_("Arial"),               
-               #endif
-               size_(10),style_(nMedium | nStraight)
-{
-  systemFnt = NApp::system().getFontValues(*this);
-}
+namespace ngrs {
 
-NFont::NFont( const std::string & name, int size,int style ) : name_(name),size_(size),style_(style)
-{
-  systemFnt = NApp::system().getFontValues(*this);
-}
+  NFont::NFont() : 
+#ifdef __unix__
+  name_("9x15"),
+#else
+  name_("Arial"),               
+#endif
+  size_(10),style_(nMedium | nStraight)
+  {
+    systemFnt = NApp::system().getFontValues(*this);
+  }
 
-NFont::~NFont()
-{
-  
-}
+  NFont::NFont( const std::string & name, int size,int style ) : name_(name),size_(size),style_(style)
+  {
+    systemFnt = NApp::system().getFontValues(*this);
+  }
 
-// setter
+  NFont::~NFont()
+  {
 
-void NFont::setName( const string & name )
-{
-  name_ = name;
-  systemFnt = NApp::system().getFontValues(*this);
-}
+  }
 
-void NFont::setSize( int size )
-{
-  size_ = size;
-  systemFnt = NApp::system().getFontValues(*this);
-}
+  // setter
 
-void NFont::setStyle( int style )
-{
-  style_ = style;
-  systemFnt = NApp::system().getFontValues(*this);
-}
+  void NFont::setName( const string & name )
+  {
+    name_ = name;
+    systemFnt = NApp::system().getFontValues(*this);
+  }
 
-// getter
+  void NFont::setSize( int size )
+  {
+    size_ = size;
+    systemFnt = NApp::system().getFontValues(*this);
+  }
 
-const std::string & NFont::name( ) const
-{
-  return name_;
-}
+  void NFont::setStyle( int style )
+  {
+    style_ = style;
+    systemFnt = NApp::system().getFontValues(*this);
+  }
 
-int NFont::size( ) const
-{
-  return size_;
-}
+  // getter
 
-int NFont::style( ) const
-{
-  return style_;
-}
+  const std::string & NFont::name( ) const
+  {
+    return name_;
+  }
 
-bool NFont::antialias( ) const
-{
-  return ( style_ & nAntiAlias ) != 0;
-}
+  int NFont::size( ) const
+  {
+    return size_;
+  }
 
-std::string NFont::fontString( ) const
-{
-  string styleString  = "*";
-  string italicString = "i";
-  if (style_ &  nBold)   styleString  = "bold"; else
-  if (style_ & nMedium)  styleString  = "medium";
-  if (style_ & nItalic)  italicString = "r";
-  string alias = "";
-  if (antialias()) alias = ":antialias"; else alias=":nonantialias";
+  int NFont::style( ) const
+  {
+    return style_;
+  }
 
-  std::ostringstream o;
-  o << name_ << ":" << size_ << ":" << styleString << ":" << italicString << ":" << alias;
+  bool NFont::antialias( ) const
+  {
+    return ( style_ & nAntiAlias ) != 0;
+  }
 
-  return o.str();
-}
+  std::string NFont::fontString( ) const
+  {
+    string styleString  = "*";
+    string italicString = "i";
+    if (style_ &  nBold)   styleString  = "bold"; else
+      if (style_ & nMedium)  styleString  = "medium";
+    if (style_ & nItalic)  italicString = "r";
+    string alias = "";
+    if (antialias()) alias = ":antialias"; else alias=":nonantialias";
 
+    std::ostringstream o;
+    o << name_ << ":" << size_ << ":" << styleString << ":" << italicString << ":" << alias;
 
-bool NFont::operator ==( const NFont & fnt ) const
-{
-  return (fnt.name()==name() && fnt.size() == size() && fnt.style()==style());
-}
+    return o.str();
+  }
 
 
-bool NFont::operator <( const NFont & fnt ) const
-{
+  bool NFont::operator ==( const NFont & fnt ) const
+  {
+    return (fnt.name()==name() && fnt.size() == size() && fnt.style()==style());
+  }
+
+
+  bool NFont::operator <( const NFont & fnt ) const
+  {
     if (name_ < fnt.name()) return true;
     if (name_ > fnt.name()) return false;
     if (size_< fnt.size())  return true;
@@ -118,24 +120,22 @@ bool NFont::operator <( const NFont & fnt ) const
     if (textColor_ < fnt.textColor()) return true;
 
     return false;
+  }
+
+  const NFontStructure & NFont::systemFont( ) const
+  {
+    return systemFnt;
+  }
+
+  const NColor & NFont::textColor( ) const
+  {
+    return textColor_;
+  }
+
+  void NFont::setTextColor( const NColor & color )
+  {
+    textColor_ = color;
+    systemFnt.textColor = color;
+  }
+
 }
-
-const NFontStructure & NFont::systemFont( ) const
-{
-  return systemFnt;
-}
-
-const NColor & NFont::textColor( ) const
-{
-  return textColor_;
-}
-
-void NFont::setTextColor( const NColor & color )
-{
-  textColor_ = color;
-  systemFnt.textColor = color;
-}
-
-
-
-

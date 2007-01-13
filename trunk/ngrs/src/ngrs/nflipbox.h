@@ -22,46 +22,50 @@
 
 #include "npanel.h"
 
-class NFlipBar;
+namespace ngrs {
 
-// style flags
+  class NFlipBar;
 
-const int nFlipBoxNone    = 0;
-const int nFlipBoxTwister = 1;
-const int nFlipBoxLine    = 2;
+  // style flags
 
-/**
-@author Stefan Nattkemper
-*/
-class NFlipBox : public NPanel
-{
-public:
+  const int nFlipBoxNone    = 0;
+  const int nFlipBoxTwister = 1;
+  const int nFlipBoxLine    = 2;
+
+  /**
+  @author Stefan Nattkemper
+  */
+  class NFlipBox : public NPanel
+  {
+  public:
     NFlipBox();
 
     ~NFlipBox();
 
     NPanel* pane();
     NPanel* header();
-	
+
     void setExpanded( bool on );
     bool expanded() const;
 
-	void setStyle( int style );
-	int style() const;
+    void setStyle( int style );
+    int style() const;
 
     int flipperWidth() const;
 
     virtual int preferredHeight() const;
     virtual void paint( NGraphics* g );
 
-private:
+  private:
 
-   int style_;
-   NFlipBar* flipBar_;
-   NPanel*   pane_;
+    int style_;
+    NFlipBar* flipBar_;
+    NPanel*   pane_;
 
-   void onFlipChange( NFlipBar* sender );
+    void onFlipChange( NFlipBar* sender );
 
-};
+  };
+
+}
 
 #endif

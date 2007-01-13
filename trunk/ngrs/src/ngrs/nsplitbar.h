@@ -25,9 +25,12 @@
 /**
 @author Stefan Nattkemper
 */
-class NSplitBar : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NSplitBar : public NPanel
+  {
+  public:
     NSplitBar();
     NSplitBar(int orientation);
 
@@ -37,12 +40,13 @@ public:
 
     virtual void onMove(const NMoveEvent & moveEvent);
 
-private:
+  private:
 
-   int orientation_;
+    int orientation_;
+    void init();
 
-   void init();
+  };
 
-};
+}
 
 #endif

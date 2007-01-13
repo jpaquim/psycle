@@ -22,133 +22,139 @@
 #include "nimage.h"
 #include "nbitmap.h"
 
-// flipper
+namespace ngrs {
 
-/* XPM */
-const char * expanded_xpm[] = {
-"12 6 2 1",
-" 	c None",
-".	c black",
-"            ",
-"  .......   ",
-"   .....    ",
-"    ...     ",
-"     .      ",
-"            "};
+  // flipper
 
-/* XPM */
-const char * expand_xpm[] = {
-"12 12 2 1",
-" 	c None",
-".	c black",
-"            ",
-"            ",
-"    .       ",
-"    ..      ",
-"    ...     ",
-"    ....    ",
-"    ...     ",
-"    ..      ",
-"    .       ",
-"            ",
-"            ",
-"            "};
+  /* XPM */
+  const char * expanded_xpm[] = {
+    "12 6 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "  .......   ",
+    "   .....    ",
+    "    ...     ",
+    "     .      ",
+    "            "
+  };
+
+  /* XPM */
+  const char * expand_xpm[] = {
+    "12 12 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "            ",
+    "    .       ",
+    "    ..      ",
+    "    ...     ",
+    "    ....    ",
+    "    ...     ",
+    "    ..      ",
+    "    .       ",
+    "            ",
+    "            ",
+    "            "
+  };
 
 
 
-NFlipBar::NFlipper::NFlipper( NFlipBar * flipBar ) : expanded_(false), flipBar_(flipBar)
-{
-  setLayout( NAlignLayout() );
+  NFlipBar::NFlipper::NFlipper( NFlipBar * flipBar ) : expanded_(false), flipBar_(flipBar)
+  {
+    setLayout( NAlignLayout() );
 
-  expandBmp.createFromXpmData(expand_xpm);
-  expandedBmp.createFromXpmData(expanded_xpm);
+    expandBmp.createFromXpmData(expand_xpm);
+    expandedBmp.createFromXpmData(expanded_xpm);
 
-  expandImg_ = new NImage();
+    expandImg_ = new NImage();
     expandImg_->setVAlign(nAlCenter);
     expandImg_->setHAlign(nAlCenter);
     expandImg_->setSharedBitmap(&expandBmp);
-  add(expandImg_, nAlClient);
-}
+    add(expandImg_, nAlClient);
+  }
 
-NFlipBar::NFlipper::~ NFlipper( )
-{
-}
+  NFlipBar::NFlipper::~ NFlipper( )
+  {
+  }
 
-void NFlipBar::NFlipper::onMousePress( int x, int y, int button )
-{
-  setExpanded(!expanded_);
-  flipBar_->onFlipClick();
-}
+  void NFlipBar::NFlipper::onMousePress( int x, int y, int button )
+  {
+    setExpanded(!expanded_);
+    flipBar_->onFlipClick();
+  }
 
-void NFlipBar::NFlipper::setExpanded( bool on )
-{
-  expanded_ = on;
-  if (expanded_)
-     expandImg_->setSharedBitmap(&expandedBmp);
-  else
-     expandImg_->setSharedBitmap(&expandBmp);
+  void NFlipBar::NFlipper::setExpanded( bool on )
+  {
+    expanded_ = on;
+    if (expanded_)
+      expandImg_->setSharedBitmap(&expandedBmp);
+    else
+      expandImg_->setSharedBitmap(&expandBmp);
 
-}
-
-
-int NFlipBar::NFlipper::preferredWidth( ) const
-{
-  return expandImg_->preferredWidth();
-}
-
-int NFlipBar::NFlipper::preferredHeight( ) const
-{
-  return expandImg_->preferredHeight();
-}
+  }
 
 
-// flipbar
+  int NFlipBar::NFlipper::preferredWidth( ) const
+  {
+    return expandImg_->preferredWidth();
+  }
+
+  int NFlipBar::NFlipper::preferredHeight( ) const
+  {
+    return expandImg_->preferredHeight();
+  }
 
 
-NFlipBar::NFlipBar()
- : NPanel()
-{
-  setLayout( NAlignLayout() );
+  // flipbar
 
-  flipper_ = new NFlipper(this);
-  add(  flipper_, nAlLeft);
 
-  header_ = new NPanel();
+  NFlipBar::NFlipBar()
+    : NPanel()
+  {
+    setLayout( NAlignLayout() );
+
+    flipper_ = new NFlipper(this);
+    add(  flipper_, nAlLeft);
+
+    header_ = new NPanel();
     header_->setLayout( NAlignLayout() );
-  add( header_ , nAlClient);
-}
+    add( header_ , nAlClient);
+  }
 
 
-NFlipBar::~NFlipBar()
-{
-}
+  NFlipBar::~NFlipBar()
+  {
+  }
 
-void NFlipBar::onFlipClick( )
-{
-  change.emit(this);
-  repaint();
-}
+  void NFlipBar::onFlipClick( )
+  {
+    change.emit(this);
+    repaint();
+  }
 
-NPanel* NFlipBar::header()
-{
-  return header_;
-}
+  NPanel* NFlipBar::header()
+  {
+    return header_;
+  }
 
-int NFlipBar::flipperWidth( ) const
-{
-  return flipper_->preferredWidth();
-}
+  int NFlipBar::flipperWidth( ) const
+  {
+    return flipper_->preferredWidth();
+  }
 
-int  NFlipBar::flipperHeight() const {
-  return flipper_->preferredHeight();
-}
+  int  NFlipBar::flipperHeight() const {
+    return flipper_->preferredHeight();
+  }
 
-void NFlipBar::setExpanded( bool on )
-{
-  flipper_->setExpanded(on);
-}
+  void NFlipBar::setExpanded( bool on )
+  {
+    flipper_->setExpanded(on);
+  }
 
-bool NFlipBar::expanded( ) const
-{
-   return flipper_->expanded_;
+  bool NFlipBar::expanded( ) const
+  {
+    return flipper_->expanded_;
+  }
+
 }

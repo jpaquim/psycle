@@ -109,11 +109,11 @@ namespace psycle
 				file.Read(size);
 
 				int fileposition = file.GetPos();
-				progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
+				song.progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
 
 				if(std::strcmp(header,"INFO") == 0)
 				{
-					progress.emit(2,0,"Loading... Song authorship information...");
+					song.progress.emit(2,0,"Loading... Song authorship information...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadINFOv0(&file,song,version&0x00FF);
@@ -122,7 +122,7 @@ namespace psycle
 				}
 				else if(std::strcmp(header,"SNGI")==0)
 				{
-					progress.emit(2,0,"Loading... Song properties information...");
+					song.progress.emit(2,0,"Loading... Song properties information...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadSNGIv0(&file,song,version&0x00FF);
@@ -133,7 +133,7 @@ namespace psycle
 				}
 				else if(std::strcmp(header,"SEQD")==0)
 				{
-					progress.emit(2,0,"Loading... Song sequence...");
+					song.progress.emit(2,0,"Loading... Song sequence...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadSEQDv0(&file,song,version&0x00FF);
@@ -153,7 +153,7 @@ namespace psycle
 				}
 				else if(std::strcmp(header,"MACD") == 0)
 				{
-					progress.emit(2,0,"Loading... Song machines...");
+					song.progress.emit(2,0,"Loading... Song machines...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 							LoadMACDv0(&file,song,version&0x00FF);
@@ -162,7 +162,7 @@ namespace psycle
 				}
 				else if(std::strcmp(header,"INSD") == 0)
 				{
-					progress.emit(2,0,"Loading... Song instruments...");
+					song.progress.emit(2,0,"Loading... Song instruments...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadINSDv0(&file,song,version&0x00FF);
@@ -172,7 +172,7 @@ namespace psycle
 				else
 				{
 //					loggers::warning("foreign chunk found. skipping it.");
-					progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
+					song.progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
 					std::ostringstream s;
 					s << "foreign chunk: version: " << version << ", size: " << size;
 //					loggers::trace(s.str());

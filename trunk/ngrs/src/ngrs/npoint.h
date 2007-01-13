@@ -27,8 +27,11 @@
 /**
 @author Stefan
 */
-class NPoint{
-public:
+
+namespace ngrs {
+
+  class NPoint{
+  public:
     NPoint();
     NPoint(int x, int y);
 
@@ -41,7 +44,7 @@ public:
     int x() const;
     int y() const;
 
-		#ifdef __unix__
+#ifdef __unix__
 
     // implicit conversion to X const XPoint.
     inline operator const XPoint () const { XPoint pts; pts.x = x_; pts.y = y_; return pts; }
@@ -50,12 +53,14 @@ public:
     inline operator XPoint ()  { XPoint pts; pts.x = x_; pts.y = y_; return pts; }
 
 
-		#endif
+#endif
 
-private:
+  private:
 
     int x_, y_;
 
-};
+  };
+
+}
 
 #endif

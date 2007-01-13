@@ -71,8 +71,8 @@ namespace psycle {
 			private:
 
 				std::fstream _stream;
-				void onDetectFilterTag(const NXmlParser & parser, const std::string & tagName);
-				void onTagParse(const NXmlParser & parser, const std::string & tagName);
+				void onDetectFilterTag(const ngrs::NXmlParser & parser, const std::string & tagName);
+				void onTagParse(const ngrs::NXmlParser & parser, const std::string & tagName);
 				bool isPsy4;
 
 				PatternCategory* lastCategory;

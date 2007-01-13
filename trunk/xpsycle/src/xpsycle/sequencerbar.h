@@ -37,140 +37,144 @@
 #include <ngrs/ntreenode.h>
 #include <ngrs/npopupmenu.h>
 
-class NObjectInspector;
-
 /**
 @author Stefan
 */
 
-namespace psycle { namespace host {
+namespace ngrs {
+  class NObjectInspector;
+}
 
-class PatternView;
-class SequencerGUI;
+namespace psycle { 
+  namespace host {
 
-class CategoryTreeNode: public NTreeNode {
-public:
-    CategoryTreeNode(PatternCategory* cat);
-    ~CategoryTreeNode();
+    class PatternView;
+    class SequencerGUI;
 
-    PatternCategory* category();
+    class CategoryTreeNode: public ngrs::NTreeNode {
+    public:
+      CategoryTreeNode( PatternCategory* cat );
+      ~CategoryTreeNode();
 
-private:
+      PatternCategory* category();
 
-    PatternCategory* cat_;
+    private:
 
-};
+      PatternCategory* cat_;
 
-
-class CategoryItem : public NCustomItem {
-public :
-   CategoryItem(PatternCategory* category, const std::string & text);
-   CategoryItem();
-   ~CategoryItem();
-
-   virtual void setText(const std::string & text);
-   virtual std::string text() const;
-
-   virtual void paint( NGraphics* g);
-
-   PatternCategory* category();
-
-private:
-
-   NLabel* label_;
-
-   PatternCategory* category_;
-
-   void init();
-
-};
-
-class PatternItem : public NItem {
-public:
-
-   PatternItem(SinglePattern* pattern, const std::string & text);
-   ~PatternItem();
-
-   virtual void setText(const std::string & text);
-
-private:
-
-   SinglePattern* pattern_;
-
-};
-
-class SequencerBar : public NPanel
-{
+    };
 
 
+    class CategoryItem : public ngrs::NCustomItem {
+    public :
+      CategoryItem(PatternCategory* category, const std::string & text);
+      CategoryItem();
+      ~CategoryItem();
 
-public:
-    SequencerBar();
+      virtual void setText(const std::string & text);
+      virtual std::string text() const;
 
-    ~SequencerBar();
+      virtual void paint( ngrs::NGraphics* g);
 
-    signal1<SinglePattern*> removed;
+      PatternCategory* category();
 
-    void setSequenceGUI(SequencerGUI* sequenceGUI);
-    void setPatternView(PatternView* patternView);
+    private:
 
-    bool followSong() const;
+      ngrs::NLabel* label_;
 
-    void update();
+      PatternCategory* category_;
 
-    void onSelChangeSeqList(NItemEvent* sender);
+      void init();
 
-    void setEntry(NObject* obj);
-    void setChildView(class ChildView* view);
+    };
 
-		void selectNextPattern();
-		void selectPrevPattern();
+    class PatternItem : public ngrs::NItem {
+    public:
 
-		void setSkin();
+      PatternItem(SinglePattern* pattern, const std::string & text);
+      ~PatternItem();
 
-private:
+      virtual void setText(const std::string & text);
 
-    SequencerGUI* seqGui;
-    PatternView* patView;
-    ChildView* childView_;
+    private:
 
-    void init();
+      SinglePattern* pattern_;
 
-    int counter;
+    };
 
-    NCustomTreeView* patternBox_;
-    PatternBoxProperties* propertyBox_;
-    NObjectInspector* entryBox_;
-
-    NCheckBox* follow_;
-    NCheckBox* multichannel_audition_;
-    NCheckBox* record_noteoff_;
-    NCheckBox* record_tweaks_;
-    NCheckBox* notestoeffects_;
-    NCheckBox* movecursorpaste_;
+    class SequencerBar : public ngrs::NPanel
+    {
 
 
-    void onNewCategory( NButtonEvent * ev );
-    void onNewPattern( NButtonEvent* ev );
-    void onClonePattern( NButtonEvent* ev );
-    void onDeletePattern( NButtonEvent* ev );
 
-    void onItemSelected(NItemEvent* ev);
-    void onPatternItemDblClick(NButtonEvent * ev);
-    void onPatternAdd(NButtonEvent* ev);
-    void switchPatternViewPattern(NCustomItem* item);
+    public:
+      SequencerBar();
 
-    void onMoveCursorPaste(NButtonEvent* ev);
-    void onRecordTweakChange(NButtonEvent* ev);
+      ~SequencerBar();
 
-    void onNameChanged(const std::string & name);
+      signal1<SinglePattern*> removed;
 
-    std::map<NTreeNode*, PatternCategory*> categoryMap;
-    std::vector<CategoryItem*> catItems;
+      void setSequenceGUI( SequencerGUI* sequenceGUI );
+      void setPatternView( PatternView* patternView );
 
-    std::map<NCustomItem*, SinglePattern*> patternMap;
+      bool followSong() const;
 
-};
+      void update();
 
-}}
+      void onSelChangeSeqList( ngrs::NItemEvent* sender );
+
+      void setEntry( ngrs::NObject* obj );
+      void setChildView( class ChildView* view );
+
+      void selectNextPattern();
+      void selectPrevPattern();
+
+      void setSkin();
+
+    private:
+
+      SequencerGUI* seqGui;
+      PatternView* patView;
+      ChildView* childView_;
+
+      void init();
+
+      int counter;
+
+      ngrs::NCustomTreeView* patternBox_;
+      PatternBoxProperties* propertyBox_;
+      ngrs::NObjectInspector* entryBox_;
+
+      ngrs::NCheckBox* follow_;
+      ngrs::NCheckBox* multichannel_audition_;
+      ngrs::NCheckBox* record_noteoff_;
+      ngrs::NCheckBox* record_tweaks_;
+      ngrs::NCheckBox* notestoeffects_;
+      ngrs::NCheckBox* movecursorpaste_;
+
+
+      void onNewCategory( ngrs::NButtonEvent * ev );
+      void onNewPattern( ngrs::NButtonEvent* ev );
+      void onClonePattern( ngrs::NButtonEvent* ev );
+      void onDeletePattern( ngrs::NButtonEvent* ev );
+
+      void onItemSelected( ngrs::NItemEvent* ev );
+      void onPatternItemDblClick( ngrs::NButtonEvent * ev );
+      void onPatternAdd( ngrs::NButtonEvent* ev );
+      void switchPatternViewPattern( ngrs::NCustomItem* item );
+
+      void onMoveCursorPaste( ngrs::NButtonEvent* ev );
+      void onRecordTweakChange( ngrs::NButtonEvent* ev );
+
+      void onNameChanged( const std::string & name );
+
+      std::map<ngrs::NTreeNode*, PatternCategory*> categoryMap;
+      std::vector<CategoryItem*> catItems;
+
+      std::map<ngrs::NCustomItem*, SinglePattern*> patternMap;
+
+    };
+
+  }
+}
 #endif

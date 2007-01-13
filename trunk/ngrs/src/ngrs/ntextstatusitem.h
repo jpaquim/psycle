@@ -22,17 +22,19 @@
 
 #include "ncustomstatusitem.h"
 
-class NLabel;
-
 /**
 @author Stefan Nattkemper
 */
 
-class NTextStatusItem : public NCustomStatusItem
-{
-public:
+namespace ngrs {
+
+  class NLabel;
+
+  class NTextStatusItem : public NCustomStatusItem
+  {
+  public:
     NTextStatusItem();
-	NTextStatusItem( unsigned int modelIndex );
+    NTextStatusItem( unsigned int modelIndex );
     NTextStatusItem(const std::string & text);
 
     ~NTextStatusItem();
@@ -45,12 +47,14 @@ public:
 
     virtual void resize();
 
-private:
+  private:
 
     NLabel* label_;
 
     void init();
 
-};
+  };
+
+}
 
 #endif

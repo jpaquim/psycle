@@ -20,67 +20,67 @@
 #include "nitem.h"
 #include "nlabel.h"
 
-NItem::NItem()
- : NCustomItem()
-{
-  init();
+namespace ngrs {
+
+  NItem::NItem()
+    : NCustomItem()
+  {
+    init();
+  }
+
+  NItem::NItem( const std::string & text )
+  {
+    init();
+    label_->setText(text);
+  }
+
+  void NItem::init( )
+  {
+    NCustomItem::add( label_ = new NLabel() );
+    icon_ = 0;
+    iconWidth_ = 20;
+  }
+
+
+  NItem::~NItem()
+  {
+  }
+
+  void NItem::resize( )
+  {
+    if (icon_==0)
+      label_->setPosition(0,0,spacingWidth(),spacingHeight());
+    else {
+      icon_->setPosition(0,0,iconWidth_,spacingHeight());
+      label_->setPosition(iconWidth_,0,spacingWidth()-iconWidth_,spacingHeight());
+    }
+  }
+
+  int NItem::preferredWidth( ) const
+  {
+    return label_->preferredWidth() + ( (icon_ != 0) ? iconWidth_ : 0 );
+  }
+
+  int NItem::preferredHeight( ) const
+  {
+    return label_->preferredHeight();
+  }
+
+  std::string NItem::text( ) const
+  {
+    return label_->text();
+  }
+
+  void NItem::setText( const std::string & text )
+  {
+    label_->setText(text);
+  }
+
+  void NItem::add( NImage * icon )
+  {
+    icon_ = icon;
+    icon_->setVAlign(nAlCenter);
+    NCustomItem::add(icon_);
+  }
+
 }
-
-NItem::NItem( const std::string & text )
-{
-  init();
-  label_->setText(text);
-}
-
-void NItem::init( )
-{
-  NCustomItem::add( label_ = new NLabel() );
-  icon_ = 0;
-  iconWidth_ = 20;
-}
-
-
-NItem::~NItem()
-{
-}
-
-void NItem::resize( )
-{
- if (icon_==0)
-   label_->setPosition(0,0,spacingWidth(),spacingHeight());
- else {
-   icon_->setPosition(0,0,iconWidth_,spacingHeight());
-   label_->setPosition(iconWidth_,0,spacingWidth()-iconWidth_,spacingHeight());
- }
-}
-
-int NItem::preferredWidth( ) const
-{
-  return label_->preferredWidth() + ( (icon_ != 0) ? iconWidth_ : 0 );
-}
-
-int NItem::preferredHeight( ) const
-{
-  return label_->preferredHeight();
-}
-
-std::string NItem::text( ) const
-{
-  return label_->text();
-}
-
-void NItem::setText( const std::string & text )
-{
-  label_->setText(text);
-}
-
-void NItem::add( NImage * icon )
-{
-  icon_ = icon;
-  icon_->setVAlign(nAlCenter);
-  NCustomItem::add(icon_);
-}
-
-
-
-

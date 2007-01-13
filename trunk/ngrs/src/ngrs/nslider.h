@@ -26,22 +26,25 @@
 /**
 @author Stefan
 */
-class NSlider : public NPanel
-{
-  class Slider : public NPanel {
-  public:
+
+namespace ngrs {
+
+  class NSlider : public NPanel
+  {
+    class Slider : public NPanel {
+    public:
       Slider(NSlider* sl);
       ~Slider();
 
       virtual void onMove(const NMoveEvent & moveEvent);
       virtual void paint(NGraphics* g);
 
-  private:
+    private:
 
       NSlider* sl_;
-  };
+    };
 
-public:
+  public:
     NSlider();
 
     ~NSlider();
@@ -63,19 +66,21 @@ public:
 
     NPanel* slider();
 
-private:
+  private:
 
-   bool trackLine_;
+    bool trackLine_;
 
-   double pos_;
-   double min_, max_;
+    double pos_;
+    double min_, max_;
 
-   Slider* slider_;
-   int orientation_;
+    Slider* slider_;
+    int orientation_;
 
-   void updateSlider();
+    void updateSlider();
 
-   void onSliderMove();
-};
+    void onSliderMove();
+  };
+
+}
 
 #endif

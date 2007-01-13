@@ -211,7 +211,7 @@ namespace psycle
 					cpu::cycles_type        cpu_idle_;*/ // How do make cpu on linux ?
 
 				public: ///\todo public->private
-					/// Number of samples processed since all cpu cost counters were reset.
+					/// ngrs::Number of samples processed since all cpu cost counters were reset.
 					/// We accumulate this sample count along with cpu costs until we compute the percentages, for example, every second.
 					unsigned int _sampCount;
 			///\}

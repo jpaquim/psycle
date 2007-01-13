@@ -25,9 +25,12 @@
 /**
 @author Stefan
 */
-class NNoteBook : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NNoteBook : public NPanel
+  {
+  public:
     NNoteBook();
 
     ~NNoteBook();
@@ -47,10 +50,12 @@ public:
     virtual void removeChilds();
 
 
-private:
+  private:
 
     NVisualComponent* visiblePage_;
 
-};
+  };
+
+}
 
 #endif

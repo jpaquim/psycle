@@ -25,65 +25,69 @@
 #include "nflowlayout.h"
 #include "nregexp.h"
 
-const int nSave = 1;
-const int nLoad = 2;
+namespace ngrs {
 
-class NButton;
-class NCheckBox;
-class NLabel;
-class NEdit;
-class NComboBox;
-class NFrameBorder;
+  const int nSave = 1;
+  const int nLoad = 2;
 
-/**
-@author Stefan
-*/
-class NFileDialog : public NDialog
-{
-public:
-   NFileDialog();
+  class NButton;
+  class NCheckBox;
+  class NLabel;
+  class NEdit;
+  class NComboBox;
+  class NFrameBorder;
 
-   ~NFileDialog();
+  /**
+  @author Stefan
+  */
+  class NFileDialog : public NDialog
+  {
+  public:
+    NFileDialog();
 
-   std::string fileName() const;
+    ~NFileDialog();
 
-   void setDirectory(const std::string & dir);
+    std::string fileName() const;
 
-   void addFilter(const std::string & name ,const std::string & regexp);
+    void setDirectory(const std::string & dir);
 
-   void setMode(int mode); // save/load
+    void addFilter(const std::string & name ,const std::string & regexp);
 
-   virtual void setVisible( bool on );
+    void setMode(int mode); // save/load
 
-private:
+    virtual void setVisible( bool on );
 
-   int mode_;
+  private:
 
-   NPanel* toolPanel;
+    int mode_;
 
-   NFileListBox* fBox_;
-   NFileListBox* pdBox_;
-   NFileListBox* dBox_;
-   NEdit* fNameCtrl;
-   NEdit* dNameCtrl;
-   NComboBox* fiNameCtrl;
-   NCheckBox* hBox;
-   NButton* okBtn_;
+    NPanel* toolPanel;
 
-   void onItemSelected(NItemEvent* ev);
-   void onDirItemSelected(NItemEvent* ev);
-   void onParentDirItemSelected(NItemEvent* ev);
+    NFileListBox* fBox_;
+    NFileListBox* pdBox_;
+    NFileListBox* dBox_;
+    NEdit* fNameCtrl;
+    NEdit* dNameCtrl;
+    NComboBox* fiNameCtrl;
+    NCheckBox* hBox;
+    NButton* okBtn_;
 
-   void onOkBtn(NButtonEvent* sender);
-   void onCancelBtn(NButtonEvent* sender);
+    void onItemSelected(NItemEvent* ev);
+    void onDirItemSelected(NItemEvent* ev);
+    void onParentDirItemSelected(NItemEvent* ev);
 
-   void onUpBtnPressed(NButtonEvent* sender);
-   void onLeftBtnPressed(NButtonEvent* sender);
-   void onRightBtnPressed(NButtonEvent* sender);
+    void onOkBtn(NButtonEvent* sender);
+    void onCancelBtn(NButtonEvent* sender);
 
-   void onHiddenCheckBoxClicked(NButtonEvent* ev);
+    void onUpBtnPressed(NButtonEvent* sender);
+    void onLeftBtnPressed(NButtonEvent* sender);
+    void onRightBtnPressed(NButtonEvent* sender);
 
-   std::vector<std::string> history;
-};
+    void onHiddenCheckBoxClicked(NButtonEvent* ev);
+
+    std::vector<std::string> history;
+  };
+
+}
 
 #endif

@@ -19,19 +19,21 @@
  ***************************************************************************/
 #include "npngfilter.h"
 
-NPngFilter::NPngFilter()
- : NImgFilter()
-{
+namespace ngrs {
+
+  NPngFilter::NPngFilter()
+    : NImgFilter()
+  {
+  }
+
+
+  NPngFilter::~NPngFilter()
+  {
+  }
+
+  NBitmap NPngFilter::loadFromFile( std::string filename )
+  {
+    return NBitmap();
+  }
+
 }
-
-
-NPngFilter::~NPngFilter()
-{
-}
-
-NBitmap NPngFilter::loadFromFile( std::string filename )
-{
-  return NBitmap();
-}
-
-

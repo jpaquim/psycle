@@ -22,92 +22,96 @@
 #include "nalignlayout.h"
 #include "nlabel.h"
 
-NFlipBox::NFlipBox()
- : NPanel()
-{
-  setLayout(NAlignLayout());
+namespace ngrs {
 
-  flipBar_ = new NFlipBar();
+  NFlipBox::NFlipBox()
+    : NPanel()
+  {
+    setLayout(NAlignLayout());
+
+    flipBar_ = new NFlipBar();
     flipBar_->change.connect(this,&NFlipBox::onFlipChange);
-  add (flipBar_  , nAlTop);
+    add (flipBar_  , nAlTop);
 
-  pane_ = new NPanel();
+    pane_ = new NPanel();
     pane_->setLayout(NAlignLayout());
-  add( pane_ , nAlClient);
+    add( pane_ , nAlClient);
 
-}
+  }
 
 
-NFlipBox::~NFlipBox()
-{
-}
+  NFlipBox::~NFlipBox()
+  {
+  }
 
-int NFlipBox::preferredHeight( ) const
-{
-   if (flipBar_->expanded())
+  int NFlipBox::preferredHeight( ) const
+  {
+    if (flipBar_->expanded())
       return flipBar_->preferredHeight() + pane_->preferredHeight();
-   else
+    else
       return flipBar_->preferredHeight();
-}
+  }
 
-//int NFlipBox::preferredWidth( ) const
-//{
-//  return flipBar_->preferredWidth() + (!pane_ ? 0 : pane_->preferredWidth());
-//}
+  //int NFlipBox::preferredWidth( ) const
+  //{
+  //  return flipBar_->preferredWidth() + (!pane_ ? 0 : pane_->preferredWidth());
+  //}
 
-void NFlipBox::onFlipChange( NFlipBar * sender )
-{
-  setHeight(preferredHeight());
-  ((NVisualComponent*)parent())->resize();
-  ((NVisualComponent*)parent())->repaint();
-}
+  void NFlipBox::onFlipChange( NFlipBar * sender )
+  {
+    setHeight(preferredHeight());
+    ((NVisualComponent*)parent())->resize();
+    ((NVisualComponent*)parent())->repaint();
+  }
 
-NPanel* NFlipBox::pane()
-{
-  return pane_;
-}
+  NPanel* NFlipBox::pane()
+  {
+    return pane_;
+  }
 
-NPanel * NFlipBox::header( )
-{
-  return flipBar_->header();
-}
+  NPanel * NFlipBox::header( )
+  {
+    return flipBar_->header();
+  }
 
-int NFlipBox::flipperWidth( ) const
-{
-  return flipBar_->flipperWidth();
-}
+  int NFlipBox::flipperWidth( ) const
+  {
+    return flipBar_->flipperWidth();
+  }
 
-void NFlipBox::setExpanded( bool on )
-{
-  flipBar_->setExpanded(on);
-}
+  void NFlipBox::setExpanded( bool on )
+  {
+    flipBar_->setExpanded(on);
+  }
 
-bool NFlipBox::expanded() const {
-	return flipBar_->expanded();
-}
+  bool NFlipBox::expanded() const {
+    return flipBar_->expanded();
+  }
 
-void NFlipBox::setStyle( int style ) {
-  style_ = style; 
-}
+  void NFlipBox::setStyle( int style ) {
+    style_ = style; 
+  }
 
-int NFlipBox::style() const {
-  return style_;
-}
+  int NFlipBox::style() const {
+    return style_;
+  }
 
-void NFlipBox::paint( NGraphics* g ) {
+  void NFlipBox::paint( NGraphics* g ) {
 
-  if ( style() & nFlipBoxLine ) {
+    if ( style() & nFlipBoxLine ) {
 
-	  NPen oldPen = g->pen();
-	  g->setForeground( NColor( 200, 200, 200 ) );
-	  NPen pen;
-	  pen.setLineStyle( nLineOnOffDash );
-	  g->setPen( pen );	  
-	  int xoff = flipBar_->flipperWidth() / 2;
-	 
-	  g->drawLine( xoff, flipBar_->header()->height() / 2, xoff, height() );	  
+      NPen oldPen = g->pen();
+      g->setForeground( NColor( 200, 200, 200 ) );
+      NPen pen;
+      pen.setLineStyle( nLineOnOffDash );
+      g->setPen( pen );	  
+      int xoff = flipBar_->flipperWidth() / 2;
+
+      g->drawLine( xoff, flipBar_->header()->height() / 2, xoff, height() );	  
       g->drawLine( xoff, flipBar_->header()->height() / 2, flipBar_->header()->left(), flipBar_->header()->height() / 2 );
 
       g->setPen( oldPen );
+    }
   }
+
 }

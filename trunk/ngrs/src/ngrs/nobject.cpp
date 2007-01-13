@@ -23,50 +23,54 @@
 #include "nsystem.h"
 #include "nproperty.h"
 
-NObject::NObject() : properties_(0) //NApp::system().propertysActive() ? new NPropertyMap() : 0)
-{
-  // segfaults under windows                    
-  // if (properties_) properties_->bind("name", *this, &NObject::name, &NObject::setName);
-  // segfault!	
-}
+namespace ngrs {
 
-NObject::~NObject()
-{
-  if (properties_) delete properties_;
-}
-
-void NObject::onKeyAcceleratorNotify( NKeyAccelerator acell )
-{
-}
-
-void NObject::setName( const std::string & name )
-{
-  name_ = name;
-}
-
-const std::string & NObject::name( ) const
-{
-  return name_;
-}
-
-void NObject::onMessage( NEvent * event )
-{
-}
-
-void NObject::addMessageListener( NObject * obj )
-{
-  msgListener.push_back(obj);
-}
-
-void NObject::sendMessage( NEvent * ev )
-{
-  for (std::vector<NObject*>::iterator it = msgListener.begin(); it < msgListener.end(); it++) {
-     NObject* obj = *it;
-     obj->onMessage(ev);
+  NObject::NObject() : properties_(0) //NApp::system().propertysActive() ? new NPropertyMap() : 0)
+  {
+    // segfaults under windows                    
+    // if (properties_) properties_->bind("name", *this, &NObject::name, &NObject::setName);
+    // segfault!	
   }
-}
 
-NPropertyMap * NObject::properties( ) const
-{
-  return properties_;
+  NObject::~NObject()
+  {
+    if (properties_) delete properties_;
+  }
+
+  void NObject::onKeyAcceleratorNotify( NKeyAccelerator acell )
+  {
+  }
+
+  void NObject::setName( const std::string & name )
+  {
+    name_ = name;
+  }
+
+  const std::string & NObject::name( ) const
+  {
+    return name_;
+  }
+
+  void NObject::onMessage( NEvent * event )
+  {
+  }
+
+  void NObject::addMessageListener( NObject * obj )
+  {
+    msgListener.push_back(obj);
+  }
+
+  void NObject::sendMessage( NEvent * ev )
+  {
+    for (std::vector<NObject*>::iterator it = msgListener.begin(); it < msgListener.end(); it++) {
+      NObject* obj = *it;
+      obj->onMessage(ev);
+    }
+  }
+
+  NPropertyMap * NObject::properties( ) const
+  {
+    return properties_;
+  }
+
 }

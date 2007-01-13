@@ -28,9 +28,12 @@
 /**
 @author Stefan
 */
-class NListBox : public NScrollBox
-{
-public:
+
+namespace ngrs {
+
+  class NListBox : public NScrollBox
+  {
+  public:
     NListBox();
 
     ~NListBox();
@@ -60,7 +63,7 @@ public:
 
     virtual void resize();
 
-private:
+  private:
 
     NPanel* listBoxPane_;
     bool multiSelect_;
@@ -74,6 +77,8 @@ private:
     void deSelectItems();
 
 
-};
+  };
+
+}
 
 #endif

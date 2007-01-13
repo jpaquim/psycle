@@ -19,81 +19,83 @@
  ***************************************************************************/
 #include "ncolorchooser.h"
 
-NColorChooser::NColorChooser()
- : NPanel()
-{
-  chooseSize = 10;
-  cols = 4;
-  initColorMap();
-}
+namespace ngrs {
+
+  NColorChooser::NColorChooser()
+    : NPanel()
+  {
+    chooseSize = 10;
+    cols = 4;
+    initColorMap();
+  }
 
 
-NColorChooser::~NColorChooser()
-{
-}
+  NColorChooser::~NColorChooser()
+  {
+  }
 
-void NColorChooser::initColorMap( )
-{
-  colorMap.push_back(NColor(0,0,0));
-  colorMap.push_back(NColor(255,255,255));
-  colorMap.push_back(NColor(0,0,255));
-  colorMap.push_back(NColor(0,255,0));
-  colorMap.push_back(NColor(255,0,0));
+  void NColorChooser::initColorMap( )
+  {
+    colorMap.push_back(NColor(0,0,0));
+    colorMap.push_back(NColor(255,255,255));
+    colorMap.push_back(NColor(0,0,255));
+    colorMap.push_back(NColor(0,255,0));
+    colorMap.push_back(NColor(255,0,0));
 
-}
+  }
 
-void NColorChooser::paint( NGraphics * g )
-{
-  std::vector<NColor>::iterator it = colorMap.begin();
+  void NColorChooser::paint( NGraphics * g )
+  {
+    std::vector<NColor>::iterator it = colorMap.begin();
 
-  int colCount = 0;
-  int xp = 0;
-  int yp = 0;
+    int colCount = 0;
+    int xp = 0;
+    int yp = 0;
 
-  for ( ; it < colorMap.end(); it++) {
-    NColor & color = *it;
-    g->setForeground(color);
+    for ( ; it < colorMap.end(); it++) {
+      NColor & color = *it;
+      g->setForeground(color);
 
-    g->fillRect(xp,yp, chooseSize, chooseSize);
+      g->fillRect(xp,yp, chooseSize, chooseSize);
 
-    if (cols == colCount) {
-       xp = 0;
-       colCount = 0;
-       yp+=chooseSize;
-    } else {
-      xp+=chooseSize;
-      colCount++;
+      if (cols == colCount) {
+        xp = 0;
+        colCount = 0;
+        yp+=chooseSize;
+      } else {
+        xp+=chooseSize;
+        colCount++;
+      }
     }
   }
-}
 
-int NColorChooser::preferredWidth( ) const
-{
-  return cols*chooseSize;
-}
-
-int NColorChooser::preferredHeight( ) const
-{
-  return d2i((colorMap.size() / (double) cols) * chooseSize);
-}
-
-void NColorChooser::onMousePress( int x, int y, int button )
-{
-  if (button == 1) {
-     int col = d2i(x / chooseSize);
-     int row = d2i(y / chooseSize);
-
-     unsigned int index = col*row + col;
-     if ( index < colorMap.size() ) {
-       selectedColor_ = colorMap.at(index);
-       colorSelected.emit(selectedColor_);
-     }
+  int NColorChooser::preferredWidth( ) const
+  {
+    return cols*chooseSize;
   }
+
+  int NColorChooser::preferredHeight( ) const
+  {
+    return d2i((colorMap.size() / (double) cols) * chooseSize);
+  }
+
+  void NColorChooser::onMousePress( int x, int y, int button )
+  {
+    if (button == 1) {
+      int col = d2i(x / chooseSize);
+      int row = d2i(y / chooseSize);
+
+      unsigned int index = col*row + col;
+      if ( index < colorMap.size() ) {
+        selectedColor_ = colorMap.at(index);
+        colorSelected.emit(selectedColor_);
+      }
+    }
+  }
+
+  const NColor & NColorChooser::selectedColor( ) const
+  {
+    return selectedColor_;
+  }
+
 }
-
-const NColor & NColorChooser::selectedColor( ) const
-{
-  return selectedColor_;
-}
-
-

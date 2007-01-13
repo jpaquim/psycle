@@ -25,15 +25,20 @@
 /**
 @author Stefan
 */
-class NSplashScreen : public NWindow
-{
-public:
+
+namespace ngrs {
+
+  class NSplashScreen : public NWindow
+  {
+  public:
     NSplashScreen();
 
     ~NSplashScreen();
 
     void loadImageFromFile( const std::string & fileName );
 
-};
+  };
+
+}
 
 #endif

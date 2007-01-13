@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+*   Copyright (C) 2006 by Stefan   *
+*   natti@linux   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef SONGPDLG_H
 #define SONGPDLG_H
 
@@ -25,41 +25,45 @@
 #include <ngrs/nedit.h>
 #include <ngrs/nbutton.h>
 
-class NMemo;
+namespace ngrs {
+  class NMemo;
+}
 
-namespace psycle { namespace host {
+namespace psycle { 
+  namespace host {
 
-class Song;
+    class Song;
 
-/**
-@author Stefan
-*/
-class SongpDlg : public NWindow
-{
-public:
-    SongpDlg( );
+    /**
+    @author Stefan
+    */
+    class SongpDlg : public ngrs::NWindow
+    {
+    public:
+      SongpDlg( );
 
-    ~SongpDlg();
+      ~SongpDlg();
 
-    virtual int onClose();
-    virtual void setVisible(bool on);
+      virtual int onClose();
+      virtual void setVisible( bool on );
 
-		void setSong( Song* pSong );
+      void setSong( Song* pSong );
 
-private:
+    private:
 
-    NEdit* songTitle_;
-    NEdit* songCredits_;
-    NMemo* songComments_;
-    NButton* okBtn_;
-    NButton* cnclBtn_;
+      ngrs::NEdit* songTitle_;
+      ngrs::NEdit* songCredits_;
+      ngrs::NMemo* songComments_;
+      ngrs::NButton* okBtn_;
+      ngrs::NButton* cnclBtn_;
 
-    Song* pSong_;
+      Song* pSong_;
 
-    void init();
-    void onOkBtn(NButtonEvent* ev);
-    void onCancelBtn(NButtonEvent* ev);
-};
+      void init();
+      void onOkBtn( ngrs::NButtonEvent* ev );
+      void onCancelBtn( ngrs::NButtonEvent* ev );
+    };
 
-}}
+  }
+}
 #endif

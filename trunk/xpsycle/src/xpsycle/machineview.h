@@ -22,7 +22,6 @@
 
 #include "wiregui.h"
 #include "skinreader.h"
-#include <ngrs/npage.h>
 #include <ngrs/nscrollbox.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/npopupmenu.h>
@@ -39,7 +38,7 @@ namespace psycle {
 		@author Stefan Nattkemper
 		*/
 
-		class MachineView : public NPanel
+		class MachineView : public ngrs::NPanel
 		{
 		public:
 			
@@ -85,33 +84,33 @@ namespace psycle {
 			WireGUI* line;
 			WireGUI* selectedWire_;
 
-			NPanel* scrollArea_;
-			NScrollBox* scrollBox_;							
+			ngrs::NPanel* scrollArea_;
+            ngrs::NScrollBox* scrollBox_;							
 
 			void init();
 
 			void onCreateMachine( Machine & mac );
 			void onNewConnection( MachineGUI* sender );
 
-			void onLineMoveStart( const NMoveEvent & event );
-			void onLineMoveEnd( const NMoveEvent & event );
+			void onLineMoveStart( const ngrs::NMoveEvent & event );
+			void onLineMoveEnd( const ngrs::NMoveEvent & event );
 
             void onWireGUIDelete( WireGUI * line );
-			void onWireDelete(WireDlg* dlg);
-			void onWireSelected( NButtonEvent* ev );
-			void onMoveMachine(Machine* mac, int x, int y);
+			void onWireDelete( WireDlg* dlg );
+			void onWireSelected( ngrs::NButtonEvent* ev );
+			void onMoveMachine( Machine* mac, int x, int y );
 
-			MachineGUI* findByMachine(Machine* mac);
+			MachineGUI* findByMachine( Machine* mac );
 	
-			void onTweakSlide(int machine, int command, int value);
-			void onMachineSelected(MachineGUI* gui);
+			void onTweakSlide( int machine, int command, int value );
+			void onMachineSelected( MachineGUI* gui );
 
 			void onMachineDeleteRequest( MachineGUI* machineGUI );
-			void onUpdateMachinePropertiesSignal(Machine* machine);
+			void onUpdateMachinePropertiesSignal( Machine* machine );
 
 			void onBendAdded( WireGUI* gui );
-			void setSelectedWire( NObject* wire );
-			void onViewMousePress( NButtonEvent* ev );
+			void setSelectedWire( ngrs::NObject* wire );
+			void onViewMousePress( ngrs::NButtonEvent* ev );
 
 			void rewire( WireGUI* line, MachineGUI* src, MachineGUI* dst );
 		};

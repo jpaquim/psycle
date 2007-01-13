@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+*   Copyright (C) 2006 by Stefan   *
+*   natti@linux   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef WIREDLG_H
 #define WIREDLG_H
 
@@ -33,54 +33,56 @@
 @author Stefan
 */
 
-namespace psycle { namespace host {
+namespace psycle { 
+  namespace host {
 
 
-class WireDlg : public NWindow
-{
-public:
-    WireDlg();
+    class WireDlg : public ngrs::NWindow
+    {
+    public:
+      WireDlg();
 
-    ~WireDlg();
+      ~WireDlg();
 
-    void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
+      void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
 
-    signal1<WireDlg*> deleteMe;
+      signal1<WireDlg*> deleteMe;
 
-    virtual int onClose();
+      virtual int onClose();
 
-    Machine* pSrcMachine();
-    Machine* pDstMachine();
+      Machine* pSrcMachine();
+      Machine* pDstMachine();
 
-    void setLine(WireGUI* line);
-    WireGUI* line();
+      void setLine(WireGUI* line);
+      WireGUI* line();
 
-		virtual void setVisible( bool on);
+      virtual void setVisible( bool on);
 
-private:
+    private:
 
-    Analyzer* analyzer;
+      Analyzer* analyzer;
 
-    NSlider* volSlider;
-    NSlider* slider;
-    NSlider* slider2;
+      ngrs::NSlider* volSlider;
+      ngrs::NSlider* slider;
+      ngrs::NSlider* slider2;
 
-    NButton* delBtn;
-    NButton* modeBtn;
-    NButton* holdBtn;
+      ngrs::NButton* delBtn;
+      ngrs::NButton* modeBtn;
+      ngrs::NButton* holdBtn;
 
-    Machine* _pSrcMachine;
-    Machine* _pDstMachine;
+      Machine* _pSrcMachine;
+      Machine* _pDstMachine;
 
-    WireGUI* line_;
+      WireGUI* line_;
 
-		void onVolPosChanged( NSlider* slider );
+      void onVolPosChanged( ngrs::NSlider* slider );
 
-    void onDeleteBtn(NButtonEvent* ev);
+      void onDeleteBtn( ngrs::NButtonEvent* ev);
 
-		int wireIdx();
-};
+      int wireIdx();
+    };
 
 
-}}
+  }
+}
 #endif

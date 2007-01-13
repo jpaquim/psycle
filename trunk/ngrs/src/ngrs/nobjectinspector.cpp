@@ -24,43 +24,45 @@
 #include "nbevelborder.h"
 #include <algorithm>
 
-NObjectInspector::NObjectInspector()
- : NTable()
-{
-  obj_ = 0;
-}
+namespace ngrs {
+
+  NObjectInspector::NObjectInspector()
+    : NTable()
+  {
+    obj_ = 0;
+  }
 
 
-NObjectInspector::~NObjectInspector()
-{
-}
+  NObjectInspector::~NObjectInspector()
+  {
+  }
 
-void NObjectInspector::setControlObject( NObject * obj )
-{
-  obj_ = obj;
-  updateView();
-}
+  void NObjectInspector::setControlObject( NObject * obj )
+  {
+    obj_ = obj;
+    updateView();
+  }
 
-NObject * NObjectInspector::controlObject( )
-{
-  return obj_;
-}
+  NObject * NObjectInspector::controlObject( )
+  {
+    return obj_;
+  }
 
-void NObjectInspector::updateView( )
-{
-  removeChilds();
-  edits.clear();
+  void NObjectInspector::updateView( )
+  {
+    removeChilds();
+    edits.clear();
 
-  std::vector<std::string> names = obj_->properties()->publishedNames();
+    std::vector<std::string> names = obj_->properties()->publishedNames();
 
-  std::vector<std::string>::iterator it =  names.begin();
-  int y = 0;
-  for (; it < names.end(); it++) {
-    std:: string name = *it;
-    if (obj_->properties()->getType(name)==typeid(std::string)) {
-      NLabel* label = new NLabel(name);
-      add(label,0,y);
-      NEdit* edit = new NEdit();
+    std::vector<std::string>::iterator it =  names.begin();
+    int y = 0;
+    for (; it < names.end(); it++) {
+      std:: string name = *it;
+      if (obj_->properties()->getType(name)==typeid(std::string)) {
+        NLabel* label = new NLabel(name);
+        add(label,0,y);
+        NEdit* edit = new NEdit();
         edit->setSkin(NSkin());
         NBevelBorder bvl(nNone,nLowered);
         bvl.setSpacing(NSize(2,2,2,2));
@@ -68,76 +70,78 @@ void NObjectInspector::updateView( )
         edit->setName(name);
         edit->setPreferredSize(100,15);
         edit->keyPress.connect(this,&NObjectInspector::onStringEdit);
-      add(edit,1,y);
-      edits.push_back(edit);
-      y++;
-    } else
-    if (obj_->properties()->getType(name)==typeid(NColor)) {
+        add(edit,1,y);
+        edits.push_back(edit);
+        y++;
+      } else
+        if (obj_->properties()->getType(name)==typeid(NColor)) {
 
-    } else
-    if (obj_->properties()->getType(name)==typeid(float)) {
-      NLabel* label = new NLabel(name);
-      add(label,0,y);
-       //listBox->add(new NItem(name));
-      NEdit* edit = new NEdit();
-        edit->setSkin(NSkin());
-        NBevelBorder bvl(nNone,nLowered);
-        bvl.setSpacing(NSize(2,2,2,2));
-        edit->setBorder(bvl);
-        edit->setName(name);
-        edit->setPreferredSize(100,15);
-        float value = obj_->properties()->get<float>(name);
-        edit->setText(stringify(value));
-        edit->keyPress.connect(this,&NObjectInspector::onFloatEdit);
-      add(edit,1,y);
-      edits.push_back(edit);
-      y++;
-    } else
-    if (obj_->properties()->getType(name)==typeid(int)) {
-      NLabel* label = new NLabel(name);
-      add(label,0,y);
-      NEdit* edit = new NEdit();
-        edit->setSkin(NSkin());
-        NBevelBorder bvl(nNone,nLowered);
-        bvl.setSpacing(NSize(2,2,2,2));
-        edit->setBorder(bvl);
-        edit->setName(name);
-        edit->setPreferredSize(100,15);
-        int value = obj_->properties()->get<int>(name);
-        edit->setText(stringify(value));
-        edit->keyPress.connect(this,&NObjectInspector::onIntEdit);
-      add(edit,1,y);
-      edits.push_back(edit);
-      y++;
+        } else
+          if (obj_->properties()->getType(name)==typeid(float)) {
+            NLabel* label = new NLabel(name);
+            add(label,0,y);
+            //listBox->add(new NItem(name));
+            NEdit* edit = new NEdit();
+            edit->setSkin(NSkin());
+            NBevelBorder bvl(nNone,nLowered);
+            bvl.setSpacing(NSize(2,2,2,2));
+            edit->setBorder(bvl);
+            edit->setName(name);
+            edit->setPreferredSize(100,15);
+            float value = obj_->properties()->get<float>(name);
+            edit->setText(stringify(value));
+            edit->keyPress.connect(this,&NObjectInspector::onFloatEdit);
+            add(edit,1,y);
+            edits.push_back(edit);
+            y++;
+          } else
+            if (obj_->properties()->getType(name)==typeid(int)) {
+              NLabel* label = new NLabel(name);
+              add(label,0,y);
+              NEdit* edit = new NEdit();
+              edit->setSkin(NSkin());
+              NBevelBorder bvl(nNone,nLowered);
+              bvl.setSpacing(NSize(2,2,2,2));
+              edit->setBorder(bvl);
+              edit->setName(name);
+              edit->setPreferredSize(100,15);
+              int value = obj_->properties()->get<int>(name);
+              edit->setText(stringify(value));
+              edit->keyPress.connect(this,&NObjectInspector::onIntEdit);
+              add(edit,1,y);
+              edits.push_back(edit);
+              y++;
+            }
     }
   }
-}
 
-void NObjectInspector::onStringEdit( const NKeyEvent & event )
-{
-  std::vector<NEdit*>::iterator it = find( edits.begin(), edits.end(), event.sender() );
-  if ( it != edits.end() ) {
-    obj_->properties()->set(event.sender()->name(), (*it)->text() );
-    changed.emit(this);
+  void NObjectInspector::onStringEdit( const NKeyEvent & event )
+  {
+    std::vector<NEdit*>::iterator it = find( edits.begin(), edits.end(), event.sender() );
+    if ( it != edits.end() ) {
+      obj_->properties()->set(event.sender()->name(), (*it)->text() );
+      changed.emit(this);
+    }
   }
-}
 
-void NObjectInspector::onFloatEdit( const NKeyEvent & event )
-{
-  std::vector<NEdit*>::iterator it = find( edits.begin(), edits.end(), event.sender() );
-  if ( it != edits.end() ) {
-    float value = str<float> ( (*it)->text() );
-    obj_->properties()->set(event.sender()->name(), value );
-    changed.emit(this);
+  void NObjectInspector::onFloatEdit( const NKeyEvent & event )
+  {
+    std::vector<NEdit*>::iterator it = find( edits.begin(), edits.end(), event.sender() );
+    if ( it != edits.end() ) {
+      float value = str<float> ( (*it)->text() );
+      obj_->properties()->set(event.sender()->name(), value );
+      changed.emit(this);
+    }
   }
-}
 
-void NObjectInspector::onIntEdit( const NKeyEvent & event )
-{
-  std::vector<NEdit*>::iterator it = find( edits.begin(), edits.end(), event.sender() );
-  if ( it != edits.end() ) {
-    int value = str<int> ( (*it)->text() );
-    obj_->properties()->set(event.sender()->name(), value );
-    changed.emit(this);
+  void NObjectInspector::onIntEdit( const NKeyEvent & event )
+  {
+    std::vector<NEdit*>::iterator it = find( edits.begin(), edits.end(), event.sender() );
+    if ( it != edits.end() ) {
+      int value = str<int> ( (*it)->text() );
+      obj_->properties()->set(event.sender()->name(), value );
+      changed.emit(this);
+    }
   }
+
 }

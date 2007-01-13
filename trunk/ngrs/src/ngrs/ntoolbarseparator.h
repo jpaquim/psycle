@@ -25,19 +25,24 @@
 /**
 @author Stefan
 */
-class NToolBarSeparator : public NPanel
-{
-public:
+
+namespace ngrs {
+
+  class NToolBarSeparator : public NPanel
+  {
+  public:
     NToolBarSeparator();
 
     ~NToolBarSeparator();
 
-   virtual void paint(NGraphics* g);
+    virtual void paint(NGraphics* g);
 
-   virtual int preferredWidth() const;
-   virtual int preferredHeight() const;
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
 
-};
+  };
+
+}
 
 #endif

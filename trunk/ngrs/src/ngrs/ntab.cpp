@@ -22,74 +22,71 @@
 #include "napp.h"
 #include "nconfig.h"
 
-NTab::NTab()
- : NCustomButton()
-{
-  init();
-}
+namespace ngrs {
 
-NTab::NTab( const std::string & text ) : NCustomButton(text)
-{
-  init();
-}
-
-void NTab::init( )
-{
-  setToggle(true);
-
-  downSk = NApp::config()->skin("tabup");
-  noneSk = NApp::config()->skin("tabnone");
-
-  setSkin(noneSk);
-
-  enablePopup_ = false;
-  popupMenu_ = new NPopupMenu();
-  add( popupMenu_ );
-}
-
-NTab::~NTab()
-{
-}
-
-void NTab::setDown( bool on )
-{
-  NCustomButton::setDown(on);
-  if (down()) {
-    setSkin(downSk);
-  } else {
-    setSkin(noneSk);
+  NTab::NTab()
+    : NCustomButton()
+  {
+    init();
   }
-}
 
-int NTab::preferredHeight( ) const
-{
-  return ((down()) ? 5 : 0 ) + NCustomButton::preferredHeight();
-}
+  NTab::NTab( const std::string & text ) : NCustomButton(text)
+  {
+    init();
+  }
 
-void NTab::setEnablePopupMenu( bool on )
-{
-  enablePopup_ = on;
-}
+  void NTab::init( )
+  {
+    setToggle(true);
 
-NPopupMenu * NTab::popupMenu( )
-{
-  return popupMenu_;
-}
+    downSk = NApp::config()->skin("tabup");
+    noneSk = NApp::config()->skin("tabnone");
 
-void NTab::onMousePress( int x, int y, int button )
-{
-  std::cout << "tab pressed " << std::endl;
-  if (enablePopup_ && button == 3) {
+    setSkin(noneSk);
+
+    enablePopup_ = false;
+    popupMenu_ = new NPopupMenu();
+    add( popupMenu_ );
+  }
+
+  NTab::~NTab()
+  {
+  }
+
+  void NTab::setDown( bool on )
+  {
+    NCustomButton::setDown(on);
+    if (down()) {
+      setSkin(downSk);
+    } else {
+      setSkin(noneSk);
+    }
+  }
+
+  int NTab::preferredHeight( ) const
+  {
+    return ((down()) ? 5 : 0 ) + NCustomButton::preferredHeight();
+  }
+
+  void NTab::setEnablePopupMenu( bool on )
+  {
+    enablePopup_ = on;
+  }
+
+  NPopupMenu * NTab::popupMenu( )
+  {
+    return popupMenu_;
+  }
+
+  void NTab::onMousePress( int x, int y, int button )
+  {
+    std::cout << "tab pressed " << std::endl;
+    if (enablePopup_ && button == 3) {
       popupMenu_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
       popupMenu_->setVisible(true);
-  } else
-  if ( !( toggle() && down() ) )
-  NCustomButton::onMousePress( x, y, button );
+    } else
+      if ( !( toggle() && down() ) )
+        NCustomButton::onMousePress( x, y, button );
+  }
+
 }
-
-
-
-
-
-
-

@@ -24,12 +24,12 @@
 namespace psycle { namespace host {
 
 InfoDlg::InfoDlg()
-  : NWindow()
+  : ngrs::NWindow()
 {
-  memo = new NMemo();
+  memo = new ngrs::NMemo();
     memo->setWordWrap(true);
     memo->setReadOnly(true);
-  pane()->add(memo,nAlClient);
+  pane()->add(memo,ngrs::nAlClient);
 
   setSize(500,500);
   setPositionToScreenCenter();
@@ -43,7 +43,7 @@ InfoDlg::~InfoDlg()
 int InfoDlg::onClose( )
 {
   setVisible(false);
-  return nHideWindow;
+  return ngrs::nHideWindow;
 }
 
 void InfoDlg::loadFromFile( const std::string & fileName )

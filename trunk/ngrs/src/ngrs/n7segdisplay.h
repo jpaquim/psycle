@@ -22,14 +22,17 @@
 
 #include "npanel.h"
 
-class N7Segment;
+namespace ngrs {
 
-/**
-@author Stefan Nattkemper
-*/
-class N7SegDisplay : public NPanel
-{
-public:
+  class N7Segment;
+
+  /**
+  @author Stefan Nattkemper
+  */
+
+  class N7SegDisplay : public NPanel
+  {
+  public:
     N7SegDisplay();
     N7SegDisplay(int segmentCount);
 
@@ -38,7 +41,7 @@ public:
     void setNumber(int number);
     void setColors(const NColor & bg ,const NColor & on,const NColor & off);
 
-private:
+  private:
 
     int segCount;
     std::vector<N7Segment*> segs;
@@ -46,6 +49,8 @@ private:
     void initSegDisplay();
 
 
-};
+  };
+
+}
 
 #endif

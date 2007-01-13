@@ -19,112 +19,115 @@
  ***************************************************************************/
 #include "nlistlayout.h"
 
-NListLayout::NListLayout()
- : NLayout()
-{
-  align_ = nAlNone;
-  maxX_ = maxY_ = 0;
-}
+namespace ngrs {
+
+  NListLayout::NListLayout()
+    : NLayout()
+  {
+    align_ = nAlNone;
+    maxX_ = maxY_ = 0;
+  }
 
 
-NListLayout * NListLayout::clone( ) const
-{
-  return new NListLayout(*this);
-}
+  NListLayout * NListLayout::clone( ) const
+  {
+    return new NListLayout(*this);
+  }
 
 
-NListLayout::~NListLayout()
-{
-}
+  NListLayout::~NListLayout()
+  {
+  }
 
-void NListLayout::align( NVisualComponent * parent )
-{
-  maxX_ = maxY_ = 0;
-  std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
-  int yp = 0;
-  for (;itr < parent->visualComponents().end(); itr++) {
-   NVisualComponent* visualChild = *itr;
-   if (visualChild->visible()) {
+  void NListLayout::align( NVisualComponent * parent )
+  {
+    maxX_ = maxY_ = 0;
+    std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
+    int yp = 0;
+    for (;itr < parent->visualComponents().end(); itr++) {
+      NVisualComponent* visualChild = *itr;
+      if (visualChild->visible()) {
         int prefWidth = visualChild->preferredWidth();
         int minWidth = visualChild->minimumWidth();
         int width = (prefWidth < minWidth) ? minWidth : prefWidth; 
         visualChild->setPosition(0,yp,width,visualChild->preferredHeight());
         if (visualChild->align() == nAlCenter) {
-           visualChild->setWidth(parent->spacingWidth());
+          visualChild->setWidth(parent->spacingWidth());
         }
         if (width > maxX_) {
-           maxX_ = width;
+          maxX_ = width;
         }
         yp+= visualChild->preferredHeight();
-   }
+      }
+    }
+    maxY_ = yp;
   }
-  maxY_ = yp;
-}
 
 
-int NListLayout::preferredHeight( const NVisualComponent * target ) const
-{
-  /*if (parent()->componentSize() > 0) {
-      NVisualComponent* child = (NVisualComponent*) parent()->components.back();
-      return child->top()+child->preferredHeight();
-  }*/
-  return maxY_;
-}
+  int NListLayout::preferredHeight( const NVisualComponent * target ) const
+  {
+    /*if (parent()->componentSize() > 0) {
+    NVisualComponent* child = (NVisualComponent*) parent()->components.back();
+    return child->top()+child->preferredHeight();
+    }*/
+    return maxY_;
+  }
 
-int NListLayout::preferredWidth( const NVisualComponent * target ) const
-{
-  return maxX_;
-}
+  int NListLayout::preferredWidth( const NVisualComponent * target ) const
+  {
+    return maxX_;
+  }
 
-void NListLayout::drawComponents( NVisualComponent * target, NGraphics * g, const NRegion & repaintArea,NVisualComponent* sender )
-{
-  int start = findVerticalStart(target->scrollDy(), target);
-  std::vector<NRuntime*>::iterator itr = target->components.begin() + start;
-  for (;itr < target->components.end(); itr++) {
+  void NListLayout::drawComponents( NVisualComponent * target, NGraphics * g, const NRegion & repaintArea,NVisualComponent* sender )
+  {
+    int start = findVerticalStart(target->scrollDy(), target);
+    std::vector<NRuntime*>::iterator itr = target->components.begin() + start;
+    for (;itr < target->components.end(); itr++) {
       NRuntime* child = *itr;
       if (child->visit(NVisualComponent::isVisualComponent)) {
-       // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
+        // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
         NVisualComponent* visualChild = static_cast<NVisualComponent*> (child);
         visualChild->draw(g,repaintArea,sender);
         if (visualChild->top()+visualChild->height()-target->scrollDy()>target->height()) break;
       }
     }
-  //printf("%d\n",c); fflush(stdout);
-}
-
-int NListLayout::findVerticalStart( long comparator , NVisualComponent* owner)
-{
-  int Low = 0; int High = owner->componentSize()-1;  int Mid=High; int w=0;
-  int z=0;
-  NVisualComponent* cont = owner;
-  while( Low <= High ) {
-    z++;
-    Mid = ( Low + High ) / 2;
-    NVisualComponent* b = (NVisualComponent*) owner->components.at(Mid);
-    int absTop = cont->absoluteTop();
-    w=absTop+b->top()-comparator;
-    if(  w < 0 ) {
-                   if (absTop+b->top()+b->height() > comparator ) {
-        //              printf("%d\n",z); fflush(stdout);
-                   return Mid;
-                   }
-                   Low = Mid + 1;
-                 }  else 
-                 {
-                   if (absTop+b->top()+b->height() < comparator ) {
-      //               printf("%d\n",z); fflush(stdout);
-                     return Mid;
-                   }
-                   High = Mid - 1;
-                 }
+    //printf("%d\n",c); fflush(stdout);
   }
+
+  int NListLayout::findVerticalStart( long comparator , NVisualComponent* owner)
+  {
+    int Low = 0; int High = owner->componentSize()-1;  int Mid=High; int w=0;
+    int z=0;
+    NVisualComponent* cont = owner;
+    while( Low <= High ) {
+      z++;
+      Mid = ( Low + High ) / 2;
+      NVisualComponent* b = (NVisualComponent*) owner->components.at(Mid);
+      int absTop = cont->absoluteTop();
+      w=absTop+b->top()-comparator;
+      if(  w < 0 ) {
+        if (absTop+b->top()+b->height() > comparator ) {
+          //              printf("%d\n",z); fflush(stdout);
+          return Mid;
+        }
+        Low = Mid + 1;
+      }  else 
+      {
+        if (absTop+b->top()+b->height() < comparator ) {
+          //               printf("%d\n",z); fflush(stdout);
+          return Mid;
+        }
+        High = Mid - 1;
+      }
+    }
     //printf("%d\n",z); fflush(stdout);
-  if (Mid<0) return 0;
-  return Mid;
-}
+    if (Mid<0) return 0;
+    return Mid;
+  }
 
-void NListLayout::setAlign( int align )
-{
-  align_ = align;
-}
+  void NListLayout::setAlign( int align )
+  {
+    align_ = align;
+  }
 
+}

@@ -22,24 +22,27 @@
 
 #include "nvisualcomponent.h"
 
-
 /**
 @author Stefan
 */
 
-class NRectShape;
+namespace ngrs {
 
-class NPanel : public NVisualComponent
-{
-public:
+  class NRectShape;
+
+  class NPanel : public NVisualComponent
+  {
+  public:
     NPanel();
 
     ~NPanel();
 
-private:
+  private:
 
     NRectShape* rectShape;
 
-};
+  };
+
+}
 
 #endif

@@ -33,9 +33,12 @@ typedef XImage* NSysImage;
 typedef HBITMAP NSysImage;
 #endif
 
-class NBitmap : public NObject
-{
-public:
+
+namespace ngrs {
+
+  class NBitmap : public NObject
+  {
+  public:
     NBitmap();
     NBitmap( const std::string & filename );
     NBitmap( const NBitmap & rhs );
@@ -62,10 +65,10 @@ public:
     NSysImage cloneSysImage( NSysImage src_img );
 
     bool empty() const;
-    
+
     void setSysImgData( NSysImage data, NSysImage clp );
 
-private:
+  private:
 
     int depth_;
 
@@ -73,14 +76,16 @@ private:
     NSysImage clpData_;
 
     long clpColor_;
-        
-    #ifdef __unix__
-    #else 
-    HBITMAP createClipMask(HBITMAP hbmColour, COLORREF crTransparent);
-    #endif
 
-	void deleteBitmapData();
-		
-};
+#ifdef __unix__
+#else 
+    HBITMAP createClipMask(HBITMAP hbmColour, COLORREF crTransparent);
+#endif
+
+    void deleteBitmapData();
+
+  };
+
+}
 
 #endif

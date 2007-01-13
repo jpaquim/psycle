@@ -36,8 +36,10 @@
 @author Stefan Nattkemper
 */
 
-class NXmlParser{
-public:
+namespace ngrs {
+
+  class NXmlParser{
+  public:
     NXmlParser();
 
     ~NXmlParser();
@@ -48,17 +50,19 @@ public:
     int parseString( const std::string & text );
     std::string getAttribValue(const std::string & name) const;
 
-    #ifdef __unix__
+#ifdef __unix__
     const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
-    #endif
-    
+#endif
+
     virtual void onTagParse( const std::string & tagName );
-    
-private:
-                     
+
+  private:
+
     NXmlAttributes attribs;
     NXmlPos getNextTag( int pos, const std::string & text ) const;    
 
-};
+  };
+
+}
 
 #endif
