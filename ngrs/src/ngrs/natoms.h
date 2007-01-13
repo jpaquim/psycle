@@ -30,7 +30,7 @@
 @author Stefan Nattkemper
 */
 
-namespace {
+namespace ngrs {
 
   class NAtoms {
   public:
