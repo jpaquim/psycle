@@ -40,8 +40,8 @@ public:
 
     virtual int onClose();
     virtual void setVisible(bool on);
-    signal1<Machine*> updateMachineProperties;
-    signal0<> deleteMachine;
+    sigslot::signal1<Machine*> updateMachineProperties;
+    sigslot::signal0<> deleteMachine;
 
 private:
 

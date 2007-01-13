@@ -284,7 +284,7 @@ namespace psycle {
 
       Song* pSong();
 
-      signal1<int> lineChanged;
+      sigslot::signal1<int> lineChanged;
 
       void setSeparatorColor( const ngrs::NColor & separatorColor );
       const ngrs::NColor & separatorColor();

@@ -51,7 +51,7 @@ namespace psycle {
     public:
       void Notify(void);
 
-      signal2<int,bool> updateInstrumentCbx;
+      sigslot::signal2<int,bool> updateInstrumentCbx;
 
       ngrs::NMenuBar *menuBar;
       ngrs::NMenu *processMenu;

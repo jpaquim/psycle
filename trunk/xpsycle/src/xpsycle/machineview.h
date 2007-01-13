@@ -57,11 +57,11 @@ namespace psycle {
 
 			NPanel* scrollArea();
 
-			signal1<Machine*> selected;
-			signal3<Machine*, int, int> machineMoved;
-			signal3<int,int,int> patternTweakSlide;
-			signal1<int> machineDeleted;
-			signal1<int> machineNameChanged;
+			sigslot::signal1<Machine*> selected;
+			sigslot::signal3<Machine*, int, int> machineMoved;
+			sigslot::signal3<int,int,int> patternTweakSlide;
+			sigslot::signal1<int> machineDeleted;
+			sigslot::signal1<int> machineNameChanged;
 
 			Machine* selMachine();
 
