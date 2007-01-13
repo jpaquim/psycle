@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "napp.h"
 #include "natoms.h"
+#include "nsystem.h"
 #include "nimage.h"
 #include "nsplashscreen.h"
 #include "nconfig.h"
