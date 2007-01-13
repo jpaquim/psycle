@@ -1180,11 +1180,6 @@ namespace psycle {
 
     void MainWindow::onRenderAsWave( ngrs::NButtonEvent * ev )
     {
-#ifdef __unix__
-      if (wavSaveDlg->execute()) {
-
-      }
-#endif
     }
 
     void MainWindow::onEditUndo( ngrs::NButtonEvent * ev )
