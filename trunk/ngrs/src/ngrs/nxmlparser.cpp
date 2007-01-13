@@ -117,7 +117,7 @@ public:
 
     void fatalError(const SAXParseException&);
 
-    void setParser(NXmlParser* parser) { pParser = parser;};
+    void setParser(ngrs::NXmlParser* parser) { pParser = parser;};
 
     std::string getValue(const std::string & name, const Attributes& attrs) {
        std::string erg;
@@ -136,7 +136,7 @@ public:
 
 private:
 
-    NXmlParser* pParser;
+  ngrs::NXmlParser* pParser;
 
 };
 
