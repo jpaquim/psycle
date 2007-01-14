@@ -112,4 +112,10 @@ namespace ngrs {
     return book_->activePage();
   }
 
+  void NTabBook::setTabBar( NTabBar* bar ) {
+     removeChild( tabBar_ );
+     tabBar_ = bar;
+     tabBar_->setNoteBook(book_);
+  }
+
 }

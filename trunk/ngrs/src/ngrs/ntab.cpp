@@ -42,11 +42,13 @@ namespace ngrs {
     downSk = NApp::config()->skin("tabup");
     noneSk = NApp::config()->skin("tabnone");
 
-    setSkin(noneSk);
+    NCustomButton::setSkin(noneSk);
 
     enablePopup_ = false;
     popupMenu_ = new NPopupMenu();
     add( popupMenu_ );
+
+    heightIdent_ = 5;
   }
 
   NTab::~NTab()
@@ -57,15 +59,15 @@ namespace ngrs {
   {
     NCustomButton::setDown(on);
     if (down()) {
-      setSkin(downSk);
+      NCustomButton::setSkin(downSk);
     } else {
-      setSkin(noneSk);
+      NCustomButton::setSkin(noneSk);
     }
   }
 
   int NTab::preferredHeight( ) const
   {
-    return ((down()) ? 5 : 0 ) + NCustomButton::preferredHeight();
+    return ((down()) ? heightIdent_ : 0 ) + NCustomButton::preferredHeight();
   }
 
   void NTab::setEnablePopupMenu( bool on )
@@ -89,4 +91,15 @@ namespace ngrs {
         NCustomButton::onMousePress( x, y, button );
   }
 
+  void NTab::setSkin( const NSkin & noneSkin, const NSkin & downSkin, int ident ) {
+    noneSk = noneSkin;
+    downSk = downSkin;
+    heightIdent_ = ident;
+    if (down()) {
+      NCustomButton::setSkin( downSk );
+    } else {
+      NCustomButton::setSkin( noneSk );
+    }
+  }
+ 
 }

@@ -54,6 +54,8 @@ namespace ngrs {
 
     NTab* tab( NVisualComponent* page );
 
+    void setTabBar( NTabBar* bar );
+
   private:
 
     NTabBar* tabBar_;
