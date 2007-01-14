@@ -319,15 +319,15 @@ namespace ngrs {
   {
     if ( src_img ) {
 #ifdef __unix__
-      int width  = src_img.width;
-      int height = src_img.height;
-      int depth  = src_img.depth;
-      int pad    = src_img.bitmap_pad;
-      int bytes_per_line = src_img.bytes_per_line;
+      int width  = src_img->width;
+      int height = src_img->height;
+      int depth  = src_img->depth;
+      int pad    = src_img->bitmap_pad;
+      int bytes_per_line = src_img->bytes_per_line;
 
       int pixelsize = NApp::system().pixelSize( depth );
 
-      unsigned char* src_data = reinterpret_cast<unsigned char*> (src_img.data);
+      unsigned char* src_data = reinterpret_cast<unsigned char*> (src_img->data);
       unsigned char* dst_data = 0;
 
       dst_data = reinterpret_cast<unsigned char*> ( malloc( bytes_per_line * height ) );
