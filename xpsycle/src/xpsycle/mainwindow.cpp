@@ -90,6 +90,7 @@ namespace psycle {
       setPosition( 10, 10, 800, 600 );
 
       SkinReader::Instance()->setDefaults();
+      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
       songTabSkinDown.setGradient( 
         ngrs::NColor(255,255,255), // start gradient color
@@ -116,9 +117,67 @@ namespace psycle {
 
       book = new ngrs::NTabBook();    
       pane()->add(book,ngrs::nAlClient);
-
       tabBar_ = new ngrs::NTabBar();
       book->setTabBar( tabBar_ );   
+
+      ngrs::NToolBar* playBar = new ngrs::NToolBar();
+      playBar->setSkin( ngrs::NSkin() );
+      playBar->setSpacing( ngrs::NSize( 5,0,0,0) );
+      ngrs::NImage* img = new ngrs::NImage();
+      img->setSharedBitmap(&icons.playstart());
+      img->setPreferredSize(25,25);
+      barPlayFromStartBtn_ = new ngrs::NButton(img);
+      barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
+      barPlayFromStartBtn_->setHint("Play from start");
+      playBar->add(barPlayFromStartBtn_);
+
+      img = new ngrs::NImage();
+      img->setSharedBitmap(&icons.play());
+      img->setPreferredSize(25,25);
+      ngrs::NButton* playBtn = new ngrs::NButton(img);
+      playBtn->setHint("Play from edit position");
+      playBar->add(playBtn)->clicked.connect(this,&MainWindow::onBarPlay);
+
+      img = new ngrs::NImage();
+      img->setSharedBitmap(&icons.playselpattern());
+      img->setPreferredSize(25,25);
+      playBar->add(new ngrs::NButton(img));
+
+      img = new ngrs::NImage();
+      img->setSharedBitmap(&icons.stop());
+      img->setPreferredSize(25,25);
+      ngrs::NButton* stopBtn_ = new ngrs::NButton(img);
+      stopBtn_->click.connect(this,&MainWindow::onBarStop);
+      stopBtn_->setHint("Stop");
+      playBar->add(stopBtn_);
+
+      img = new ngrs::NImage();
+      img->setSharedBitmap(&icons.autoStop());
+      img->setPreferredSize(25,25);
+      playBar->add(new ngrs::NButton(img));
+
+      playBar->add(new ngrs::NToolBarSeparator());
+
+      img = new ngrs::NImage();
+      img->setSharedBitmap(&icons.recordnotes());
+      img->setPreferredSize(25,25);
+      ngrs::NButton* recNotes = new ngrs::NButton(img);
+      recNotes->setHint("Record Notes Mode");
+      recNotes->clicked.connect(this,&MainWindow::onRecordNotesMode);
+      playBar->add(recNotes);
+
+      ngrs::NToolBar* vuToolBar = new ngrs::NToolBar();
+      vuToolBar->add(new ngrs::NLabel("VU"));
+      ngrs::NPanel* vuPanel = new ngrs::NPanel();
+      vuPanel->setPreferredSize( 225, 10 );
+      vuMeter_ = new VuMeter();
+      vuPanel->add(vuMeter_);
+      vuMeter_->setPosition(0,0,225,10);
+      masterSlider_ = new ngrs::NSlider();
+      masterSlider_->setOrientation(ngrs::nHorizontal);
+      masterSlider_->setPosition(0,10,225,10);
+      vuPanel->add(masterSlider_);
+      vuToolBar->add(vuPanel);      
 
       ngrs::NFlowLayout fl;
       fl.setAlign( ngrs::nAlLeft );
@@ -126,13 +185,11 @@ namespace psycle {
       fl.setVgap( 0 );
       fl.setBaseLine( ngrs::nAlBottom );
       tabBar_->setLayout( fl );
-
-      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
-
+      
       ngrs::NPanel* logoPnl = new ngrs::NPanel();
       logoPnl->setLayout( ngrs::NAlignLayout() );
       logoPnl->setSpacing( ngrs::NSize( 10,5,10,5 ) );
-      ngrs::NImage* img = new ngrs::NImage( icons.logoRight()  );
+      img = new ngrs::NImage( icons.logoRight()  );
       img->setVAlign( ngrs::nAlCenter );
       logoPnl->add( img , ngrs::nAlRight );
       img = new ngrs::NImage( icons.logoLeft() );
@@ -140,7 +197,12 @@ namespace psycle {
       logoPnl->add( img , ngrs::nAlLeft );
       img = new ngrs::NImage( icons.logoMid() );
       img->setLayout( ngrs::NAlignLayout() );
-      img->add( tabBar_, ngrs::nAlBottom );
+      img->add( tabBar_, ngrs::nAlBottom );     
+      img->add( vuToolBar, ngrs::nAlTop );      
+      tabBar_->add( playBar, ngrs::nAlLeft );
+      ngrs::NPanel* spacer = new ngrs::NPanel();
+      spacer->setPreferredSize(20,5);
+      tabBar_->add( spacer, ngrs::nAlLeft );
       img->setVAlign( ngrs::nAlCenter );
       img->setHAlign( ngrs::nAlWallPaper );
       img->setEvents( true );
@@ -162,7 +224,6 @@ namespace psycle {
       timer.setIntervalTime(10);
       timer.timerEvent.connect( this, &MainWindow::onTimer );
       timer.enableTimer();
-
     }
 
     MainWindow::~MainWindow()
@@ -483,7 +544,6 @@ namespace psycle {
       img->setPreferredSize(25,25);
       ngrs::NButton* recWav = new ngrs::NButton(img);
       recWav->setToggle(true);
-      recWav->setFlat(false);
       recWav->setHint("Record to .wav");
       recWav->clicked.connect(this, &MainWindow::onRecordWav);
       toolBar1_->add(recWav);
@@ -500,53 +560,7 @@ namespace psycle {
       img->setPreferredSize(25,25);
       toolBar1_->add(new ngrs::NButton(img));
 
-      toolBar1_->add(new ngrs::NToolBarSeparator());
-
-      img = new ngrs::NImage();
-      img->setSharedBitmap(&icons.recordnotes());
-      img->setPreferredSize(25,25);
-      ngrs::NButton* recNotes = new ngrs::NButton(img);
-      recNotes->setHint("Record Notes Mode");
-      recNotes->clicked.connect(this,&MainWindow::onRecordNotesMode);
-      toolBar1_->add(recNotes);
-
-      toolBar1_->add(new ngrs::NToolBarSeparator());
-
-      img = new ngrs::NImage();
-      img->setSharedBitmap(&icons.playstart());
-      img->setPreferredSize(25,25);
-      barPlayFromStartBtn_ = new ngrs::NButton(img);
-      barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
-      barPlayFromStartBtn_->setHint("Play from start");
-      toolBar1_->add(barPlayFromStartBtn_);
-
-
-      img = new ngrs::NImage();
-      img->setSharedBitmap(&icons.play());
-      img->setPreferredSize(25,25);
-      ngrs::NButton* playBtn = new ngrs::NButton(img);
-      playBtn->setHint("Play from edit position");
-      toolBar1_->add(playBtn)->clicked.connect(this,&MainWindow::onBarPlay);
-
-      img = new ngrs::NImage();
-      img->setSharedBitmap(&icons.playselpattern());
-      img->setPreferredSize(25,25);
-      toolBar1_->add(new ngrs::NButton(img));
-
-      img = new ngrs::NImage();
-      img->setSharedBitmap(&icons.stop());
-      img->setPreferredSize(25,25);
-      ngrs::NButton* stopBtn_ = new ngrs::NButton(img);
-      stopBtn_->click.connect(this,&MainWindow::onBarStop);
-      stopBtn_->setHint("Stop");
-      toolBar1_->add(stopBtn_);
-
-      img = new ngrs::NImage();
-      img->setSharedBitmap(&icons.autoStop());
-      img->setPreferredSize(25,25);
-      toolBar1_->add(new ngrs::NButton(img));
-
-      toolBar1_->add(new ngrs::NToolBarSeparator());
+      toolBar1_->add(new ngrs::NToolBarSeparator());                  
 
       img = new ngrs::NImage();
       img->setSharedBitmap(&icons.newmachine());
@@ -578,6 +592,7 @@ namespace psycle {
 
       toolBar1_->resize();
 
+           
       psycleControlBar_ = new ngrs::NToolBar();
       psycleControlBar_->add(new ngrs::NLabel("Tempo"));
 
@@ -616,20 +631,7 @@ namespace psycle {
       moremoreBmp->clicked.connect(this,&MainWindow::onBpmAddTen);
       psycleControlBar_->add(moremoreBmp);
 
-      psycleControlBar_->add(new ngrs::NLabel("VU"));
-      ngrs::NPanel* vuPanel = new ngrs::NPanel();
-      vuPanel->setPreferredSize( 225, 10 );
-      vuMeter_ = new VuMeter();
-      vuPanel->add(vuMeter_);
-      vuMeter_->setPosition(0,0,225,10);
-
-      masterSlider_ = new ngrs::NSlider();
-      masterSlider_->setOrientation(ngrs::nHorizontal);
-      masterSlider_->setPosition(0,10,225,10);
-      vuPanel->add(masterSlider_);
-      psycleControlBar_->add(vuPanel);
-
-      toolBarPanel_->add(psycleControlBar_);
+      
 
       psycleToolBar_ = new ngrs::NToolBar();
       psycleToolBar_->add(new ngrs::NToolBarSeparator());
