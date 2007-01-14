@@ -43,12 +43,12 @@
 
 class Tpnl : public ngrs::NPanel {
 
-   virtual void paint( ngrs::NGraphics* g ) {
+   virtual void paint( ngrs::NGraphics& g ) {
       ngrs::NFntString str;
       str.setText("Hallo");
       str.setFont( ngrs::NFont("Suse Sans",8,ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
       str.append("Hier");
-      g->drawText(10,10,str.substr(5,1));
+      g.drawText(10,10,str.substr(5,1));
    }
 
 };
