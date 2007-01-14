@@ -46,12 +46,15 @@ namespace ngrs {
 
     NPopupMenu* popupMenu();
 
+    void setSkin( const NSkin & noneSkin, const NSkin & downSkin, int ident = 5 );
+
   private:
 
     NSkin noneSk;
     NSkin downSk;
 
     bool enablePopup_;
+    int heightIdent_;
 
     NPopupMenu* popupMenu_;
 

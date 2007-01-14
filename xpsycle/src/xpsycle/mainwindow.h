@@ -93,6 +93,9 @@ namespace psycle {
 
     private:
 
+      ngrs::NSkin songTabSkinNone;
+      ngrs::NSkin songTabSkinDown;
+
       ngrs::NTimer timer; // we poll playpos infos here to avoid thread sync with the audio thread
 
       ngrs::NStatusModel statusBarData; // statusBar data for the mainWindow statusbar;
@@ -107,6 +110,7 @@ namespace psycle {
 
       SongpDlg* songpDlg_;
       ngrs::NTabBook* tabBook_;
+      ngrs::NTabBar* tabBar_;
 
       ngrs::NPanel* toolBarPanel_;
       ngrs::NButton* barPlayFromStartBtn_;
@@ -156,7 +160,6 @@ namespace psycle {
       void initToolBar();
       void initStatusBar();
       void initMachineView();
-      void initStartPage();
 
       void updateBars();
 

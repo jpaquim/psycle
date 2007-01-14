@@ -87,22 +87,65 @@ namespace psycle {
       : ngrs::NWindow(), pluginFinder_( *Global::pConfig() )
     { 
       setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
-
       setPosition( 10, 10, 800, 600 );
 
       SkinReader::Instance()->setDefaults();
 
+      songTabSkinDown.setGradient( 
+        ngrs::NColor(255,255,255), // start gradient color
+        ngrs::NColor(243,243,239), // mid gradient color
+        ngrs::NColor(236,233,216), // end gradient color
+        1,                         // 1: rect, 2: rounded
+        ngrs::nVertical, 10,5,5
+        );
+      songTabSkinDown.setTransparent( false );
+      songTabSkinNone.setGradient(  
+        ngrs::NColor(255,255,255),
+        ngrs::NColor(243,243,239),
+        ngrs::NColor(214,208,192),
+        1,                         // 1: rect, 2: rounded
+        ngrs::nVertical,10,5,5
+      );
+      songTabSkinNone.setTransparent( false );
+      
       count = 0;
 
       initMenu();
       initBars();
       initDialogs();
 
-      book = new ngrs::NTabBook();
-      book->setTabBarVisible( false );
+      book = new ngrs::NTabBook();    
       pane()->add(book,ngrs::nAlClient);
 
-      initStartPage();
+      tabBar_ = new ngrs::NTabBar();
+      book->setTabBar( tabBar_ );   
+
+      ngrs::NFlowLayout fl;
+      fl.setAlign( ngrs::nAlLeft );
+      fl.setHgap( 2 );
+      fl.setVgap( 0 );
+      fl.setBaseLine( ngrs::nAlBottom );
+      tabBar_->setLayout( fl );
+
+      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
+
+      ngrs::NPanel* logoPnl = new ngrs::NPanel();
+      logoPnl->setLayout( ngrs::NAlignLayout() );
+      logoPnl->setSpacing( ngrs::NSize( 10,5,10,5 ) );
+      ngrs::NImage* img = new ngrs::NImage( icons.logoRight()  );
+      img->setVAlign( ngrs::nAlCenter );
+      logoPnl->add( img , ngrs::nAlRight );
+      img = new ngrs::NImage( icons.logoLeft() );
+      img->setVAlign( ngrs::nAlCenter );
+      logoPnl->add( img , ngrs::nAlLeft );
+      img = new ngrs::NImage( icons.logoMid() );
+      img->setLayout( ngrs::NAlignLayout() );
+      img->add( tabBar_, ngrs::nAlBottom );
+      img->setVAlign( ngrs::nAlCenter );
+      img->setHAlign( ngrs::nAlWallPaper );
+      img->setEvents( true );
+      logoPnl->add( img , ngrs::nAlClient );
+      pane()->add( logoPnl, ngrs::nAlTop );
 
       newMachineDlg_ = new NewMachine( pluginFinder_ );
       add(newMachineDlg_);
@@ -110,12 +153,14 @@ namespace psycle {
       audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
       add( audioConfigDlg );	
 
-      selectedChildView_ = 0;
+      selectedChildView_ = addChildView();
+      updateNewSong();
+
       enableSound();
 
       oldPlayPos_ = 0;
       timer.setIntervalTime(10);
-      timer.timerEvent.connect(this,&MainWindow::onTimer);
+      timer.timerEvent.connect( this, &MainWindow::onTimer );
       timer.enableTimer();
 
     }
@@ -123,52 +168,7 @@ namespace psycle {
     MainWindow::~MainWindow()
     {
     }
-
-    void MainWindow::initStartPage() {
-      ngrs::NImage* img;
-      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
-      ngrs::NPanel* test = new ngrs::NPanel();
-      test->setLayout( ngrs::NAlignLayout() );
-      ngrs::NPanel* logoPnl = new ngrs::NPanel();
-      logoPnl->setLayout( ngrs::NAlignLayout() );
-      logoPnl->setSpacing( ngrs::NSize( 10,5,10,5 ) );
-      img = new ngrs::NImage( icons.logoRight()  );
-      img->setVAlign( ngrs::nAlCenter );
-      logoPnl->add( img , ngrs::nAlRight );
-      img = new ngrs::NImage( icons.logoLeft()  );
-      img->setVAlign( ngrs::nAlCenter );
-      logoPnl->add( img , ngrs::nAlLeft );
-      img = new ngrs::NImage( icons.logoMid()  );
-      img->setVAlign( ngrs::nAlCenter );
-      img->setHAlign( ngrs::nAlWallPaper );
-      logoPnl->add( img , ngrs::nAlClient );
-      test->add( logoPnl, ngrs::nAlTop );
-
-      ngrs::NGroupBox* gBox = new ngrs::NGroupBox();
-      gBox->setLayout( ngrs::NAlignLayout() );
-      gBox->setHeaderText("Recent Songs");
-      ngrs::NPanel* recentSongOptionPanel = new ngrs::NPanel();
-      recentSongOptionPanel->setLayout( ngrs::NAlignLayout() ) ;
-      recentSongOptionPanel->add( new ngrs::NLabel("open"), ngrs::nAlTop);
-      recentSongOptionPanel->add( new ngrs::NLabel("new"), ngrs::nAlTop);
-      gBox->add( recentSongOptionPanel, ngrs::nAlBottom );
-      ngrs::NListBox* recentSongListBox = new ngrs::NListBox();	  
-      recentSongListBox->scrollPane()->setSkin( pane()->skin_);
-      recentSongListBox->setPreferredSize(250,300);
-      gBox->add( recentSongListBox, ngrs::nAlClient );
-      test->add( gBox, ngrs::nAlLeft );
-
-      ngrs::NGroupBox* gBox1 = new ngrs::NGroupBox("Psycledelics Community : Psycle XI");
-      gBox1->setLayout( ngrs::NAlignLayout() );
-      ngrs::NLabel* lb = new ngrs::NLabel("10, Wed, Startpage meets Tip of the Day Dialog in the afternoon");
-      lb->setWordWrap( true );
-      gBox1->add( lb, ngrs::nAlTop);
-      test->add( gBox1,ngrs::nAlClient );
-
-      book->addPage( test, "Start Page" );
-    }
-
-
+    
     void MainWindow::enableSound( )
     {
       AudioDriver* pOut = Global::pConfig()->_pOutputDriver;
@@ -185,12 +185,14 @@ namespace psycle {
       childView_->waveEditor()->updateInstrumentCbx.connect(this,&MainWindow::onUpdateInstrumentCbx);
       childView_->machineView()->machineDeleted.connect(this,&MainWindow::onMachineDeleted);
       childView_->machineView()->machineNameChanged.connect(this, &MainWindow::onMachineNameChanged);
-      book->addPage( childView_, childView_->song()->name() + stringify( count ) );
+      book->addPage( childView_, childView_->song()->name() + stringify( count ) );      
+      ngrs::NTab* tab = book->tab( childView_ );
+      tab->setSkin( songTabSkinNone, songTabSkinDown, 0 );
       book->setActivePage( childView_ );
 
       count++;
 
-      ngrs::NTab* tab = book->tab( childView_ );
+      
       tab->click.connect(this,&MainWindow::onTabChange);
       tab->setEnablePopupMenu(true);
       ngrs::NPopupMenu* menu = tab->popupMenu();
