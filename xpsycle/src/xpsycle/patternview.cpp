@@ -625,14 +625,16 @@ namespace psycle {
     {
     }
 
-    void PatternView::Header::paint( ngrs::NGraphics * g )
+    void PatternView::Header::paint( ngrs::Graphics& g )
     {
-      ngrs::NBitmap & bitmap = SkinReader::Instance()->patview_header_bitmap();
-      ngrs::NBitmap & patNav = Global::pConfig()->icons().patNav();
+      DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
+
+      ngrs::NBitmap & bitmap = icons.pattern_header_skin();
+      ngrs::NBitmap & patNav = icons.patNav();
 
       int startTrack = pView->drawArea->findTrackByScreenX( scrollDx() );
 
-      g->setForeground(pView->separatorColor());
+      g.setForeground(pView->separatorColor());
 
       std::map<int, TrackGeometry>::const_iterator it;
       it = pView->trackGeometrics().lower_bound( startTrack );
@@ -647,40 +649,41 @@ namespace psycle {
         int center =  ( trackGeometry.width() - patNav.width() - skinColWidth()) / 2;		
         if ( center > -patNav.width() ) {
           int xOffc = xOff + patNav.width()  + center;
-          g->putBitmap(xOffc,0,std::min((int) coords_.bgCoords.width(),trackGeometry.width()) ,coords_.bgCoords.height(), bitmap, 
+          g.putBitmap(xOffc,0,std::min((int) coords_.bgCoords.width(),trackGeometry.width()) ,coords_.bgCoords.height(), bitmap, 
             coords_.bgCoords.left(), coords_.bgCoords.top());
-          g->putBitmap(xOffc+coords_.dgX0Coords.x(),0+coords_.dgX0Coords.y(),coords_.noCoords.width(),coords_.noCoords.height(), bitmap,
+          g.putBitmap(xOffc+coords_.dgX0Coords.x(),0+coords_.dgX0Coords.y(),coords_.noCoords.width(),coords_.noCoords.height(), bitmap,
             trackX0*coords_.noCoords.width(), coords_.noCoords.top());
-          g->putBitmap(xOffc+coords_.dg0XCoords.x(),0+coords_.dg0XCoords.y(),coords_.noCoords.width(),coords_.noCoords.height(), bitmap,
+          g.putBitmap(xOffc+coords_.dg0XCoords.x(),0+coords_.dg0XCoords.y(),coords_.noCoords.width(),coords_.noCoords.height(), bitmap,
             track0X*coords_.noCoords.width(), coords_.noCoords.top());
 
           // blit the mute LED
           if (  pView->pSong()->_trackMuted[it->first]) {
-            g->putBitmap(xOffc+coords_.dMuteCoords.x(),0+coords_.dMuteCoords.y(),coords_.sMuteCoords.width(),coords_.sMuteCoords.height(), bitmap,
+            g.putBitmap(xOffc+coords_.dMuteCoords.x(),0+coords_.dMuteCoords.y(),coords_.sMuteCoords.width(),coords_.sMuteCoords.height(), bitmap,
               coords_.sMuteCoords.left(), coords_.sMuteCoords.top());
           }
 
           // blit the solo LED
           if ( pView->pSong()->_trackSoloed == it->first) {
-            g->putBitmap(xOffc+coords_.dSoloCoords.x(),0+coords_.dSoloCoords.y(),coords_.sSoloCoords.width(),coords_.sSoloCoords.height(), bitmap,
+            g.putBitmap(xOffc+coords_.dSoloCoords.x(),0+coords_.dSoloCoords.y(),coords_.sSoloCoords.width(),coords_.sSoloCoords.height(), bitmap,
               coords_.sSoloCoords.left(), coords_.sSoloCoords.top());
           }
 
           // blit the record LED
           if ( pView->pSong()->_trackArmed[it->first]) {
-            g->putBitmap(xOffc+coords_.dRecCoords.x(),0+coords_.dRecCoords.y(),coords_.sRecCoords.width(),coords_.sRecCoords.height(), bitmap,
+            g.putBitmap(xOffc+coords_.dRecCoords.x(),0+coords_.dRecCoords.y(),coords_.sRecCoords.width(),coords_.sRecCoords.height(), bitmap,
               coords_.sRecCoords.left(), coords_.sRecCoords.top());
           }
         }
-        g->putBitmap(xOff, 0,patNav.width(),patNav.height(), patNav, 
+        g.putBitmap(xOff, 0,patNav.width(),patNav.height(), patNav, 
           0, 0);
 
-        if (it->first!=0) g->drawLine( xOff, 0, xOff, clientHeight()); // col seperator
+        if (it->first!=0) g.drawLine( xOff, 0, xOff, clientHeight()); // col seperator
       }
     }
 
     void PatternView::Header::onMousePress( int x, int y, int button )
     {
+      DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
       // check if left mouse button pressed
       if (button == 1)
       {
@@ -688,7 +691,7 @@ namespace psycle {
         int track = pView->drawArea->findTrackByScreenX( x );
 
         // find out the start offset of the header bitmap
-        ngrs::NBitmap & patNav = Global::pConfig()->icons().patNav();
+        ngrs::NBitmap & patNav = icons.patNav();
         ngrs::NPoint off( patNav.width()+ pView->drawArea->xOffByTrack( track ) + (pView->drawArea->trackWidth( track ) - patNav.width() - skinColWidth()) / 2,0);
         // find out the start offset of the nav buttons
         ngrs::NPoint navOff( pView->drawArea->xOffByTrack( track ),0); 
@@ -825,11 +828,11 @@ namespace psycle {
       return textColor_;
     }
 
-    void PatternView::LineNumber::paint( ngrs::NGraphics * g )
+    void PatternView::LineNumber::paint( ngrs::Graphics& g )
     {
       TimeSignature signature;
 
-      ngrs::NRect repaintRect = g->repaintArea().rectClipBox();
+      ngrs::NRect repaintRect = g.repaintArea().rectClipBox();
       int absTop  = absoluteTop();
       int ch      = clientHeight();
       // the start for whole repaint
@@ -849,16 +852,16 @@ namespace psycle {
       int endLine   = end;
 
       for (int i = startLine; i <= endLine; i++)
-        g->drawLine(0,(i+1)*pView->rowHeight() - dy() -1,
+        g.drawLine(0,(i+1)*pView->rowHeight() - dy() -1,
         clientWidth(),(i+1)*pView->rowHeight() -1 - dy() );
 
-      g->setForeground(pView->separatorColor());
-      g->drawLine(0,0,0,clientHeight() );
+      g.setForeground(pView->separatorColor());
+      g.drawLine(0,0,0,clientHeight() );
 
       for (int i = startLine; i <= endLine; i++) {
         //if (i+startLine == pView->cursor().line()) {
-        //  g->setForeground(Global::pConfig()->pvc_cursor);
-        //  g->fillRect(0,i*pView->rowHeight()+pView->headerHeight(),clientWidth()-1,pView->rowHeight());
+        //  g.setForeground(Global::pConfig()->pvc_cursor);
+        //  g.fillRect(0,i*pView->rowHeight()+pView->headerHeight(),clientWidth()-1,pView->rowHeight());
         //}
         std::string text = stringify( i );
         if ( pView->pattern() ) {
@@ -882,27 +885,27 @@ namespace psycle {
             }
             // check if line is on beatzoom raster else draw arrow up or down hint
             if ( std::abs(it->first - position) > 0.001) {
-              int xOff = clientWidth()-g->textWidth(text)- 10 ;
+              int xOff = clientWidth()-g.textWidth(text)- 10 ;
               int yOff = i*pView->rowHeight()+pView->rowHeight() -1 - 3 -dy();
-              g->drawLine( xOff , yOff+1, xOff, yOff - pView->rowHeight() + 5);
+              g.drawLine( xOff , yOff+1, xOff, yOff - pView->rowHeight() + 5);
               if (it->first < position) {
-                g->drawLine( xOff , yOff - pView->rowHeight() + 5, xOff-3, yOff - pView->rowHeight() + 8);
-                g->drawLine( xOff , yOff - pView->rowHeight() + 5, xOff+4, yOff - pView->rowHeight() + 9);
+                g.drawLine( xOff , yOff - pView->rowHeight() + 5, xOff-3, yOff - pView->rowHeight() + 8);
+                g.drawLine( xOff , yOff - pView->rowHeight() + 5, xOff+4, yOff - pView->rowHeight() + 9);
               } else {
-                g->drawLine( xOff , yOff +1, xOff-3, yOff - 2);
-                g->drawLine(  xOff , yOff +1, xOff+4, yOff - 3);
+                g.drawLine( xOff , yOff +1, xOff-3, yOff - 2);
+                g.drawLine(  xOff , yOff +1, xOff+4, yOff - 3);
               }
             }
           }
           if ( pView->pattern()->barStart(position, signature) ) {
             std::string caption = stringify(signature.numerator())+"/"+stringify(signature.denominator());
             // vcenter text
-            int yp = (pView->rowHeight() - g->textHeight()) / 2  + g->textAscent();
-            g->drawText(0,i*pView->rowHeight()+ yp - dy(),caption, textColor() );
+            int yp = (pView->rowHeight() - g.textHeight()) / 2  + g.textAscent();
+            g.drawText(0,i*pView->rowHeight()+ yp - dy(),caption, textColor() );
           }
         }
-        int yp = (pView->rowHeight() - g->textHeight()) / 2  + g->textAscent();
-        g->drawText(clientWidth()-g->textWidth(text)-3,i*pView->rowHeight()+yp-dy(),text, textColor() );
+        int yp = (pView->rowHeight() - g.textHeight()) / 2  + g.textAscent();
+        g.drawText(clientWidth()-g.textWidth(text)-3,i*pView->rowHeight()+yp-dy(),text, textColor() );
       }
     }
 
@@ -936,14 +939,15 @@ namespace psycle {
       return bgCoords.width();
     }
 
-    void PatternView::TweakHeader::paint( ngrs::NGraphics* g ) {
+    void PatternView::TweakHeader::paint( ngrs::Graphics& g ) {
 
-      ngrs::NBitmap & bitmap = Global::pConfig()->icons().tweakHeader();
+      DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
+      ngrs::NBitmap & bitmap = icons.tweakHeader();
 
       int startTrack = scrollDx() / pView->tweakColWidth();
       int trackCount = spacingWidth() / pView->tweakColWidth();
 
-      g->setForeground(pView->separatorColor());
+      g.setForeground(pView->separatorColor());
       for (int i = startTrack; i <= std::min(startTrack + trackCount ,pView->trackNumber() - 1); i++) {
         int parameterIndex = 0;
         int machineIndex   = 0xFF;    
@@ -961,20 +965,20 @@ namespace psycle {
         int xOff = i* pView->tweakColWidth();
         int center = ( pView->tweakColWidth() - skinColWidth() ) / 2;
         xOff += center;
-        g->putBitmap(xOff,0,bgCoords.width(),bgCoords.height(), bitmap, 
+        g.putBitmap(xOff,0,bgCoords.width(),bgCoords.height(), bitmap, 
           bgCoords.left(), bgCoords.top());
 
-        g->putBitmap(xOff+14,3,noCoords.width(),noCoords.height(), bitmap,
+        g.putBitmap(xOff+14,3,noCoords.width(),noCoords.height(), bitmap,
           digit1_X0*noCoords.width(), noCoords.top());
-        g->putBitmap(xOff+22,3,noCoords.width(),noCoords.height(), bitmap,
+        g.putBitmap(xOff+22,3,noCoords.width(),noCoords.height(), bitmap,
           digit1_0X*noCoords.width(), noCoords.top());  
 
-        g->putBitmap(xOff+23 + 14,3,noCoords.width(),noCoords.height(), bitmap,
+        g.putBitmap(xOff+23 + 14,3,noCoords.width(),noCoords.height(), bitmap,
           digit2_X0*noCoords.width(), noCoords.top());
-        g->putBitmap(xOff+23 + 22,3,noCoords.width(),noCoords.height(), bitmap,
+        g.putBitmap(xOff+23 + 22,3,noCoords.width(),noCoords.height(), bitmap,
           digit2_0X*noCoords.width(), noCoords.top());  
 
-        if (i!=0) g->drawLine(i*pView->tweakColWidth(),0,i*pView->tweakColWidth(),clientWidth()); // col seperator
+        if (i!=0) g.drawLine(i*pView->tweakColWidth(),0,i*pView->tweakColWidth(),clientWidth()); // col seperator
       }
 
     }
@@ -998,7 +1002,7 @@ namespace psycle {
 
     }
 
-    void PatternView::TweakGUI::customPaint( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
+    void PatternView::TweakGUI::customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack) {
       if (pView->pattern()) {
         TimeSignature signature;
 
@@ -1010,16 +1014,16 @@ namespace psycle {
           //if (!(y == pView->playPos() || !Player::Instance()->_playing) /*|| pView->editPosition() != Global::pPlayer()->_playPosition*/) {
           if ( !(y % beatZoom())) {
             if ((pView->pattern()->barStart(position, signature) )) {
-              g->setForeground( barColor() );
-              g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
+              g.setForeground( barColor() );
+              g.fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
             } else {
-              g->setForeground( beatColor() );
-              g->fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
+              g.setForeground( beatColor() );
+              g.fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
             }
           }
           //} else  {
-          //g->setForeground( playBarColor() );
-          //g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
+          //g.setForeground( playBarColor() );
+          //g.fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
           //} ///\todo add
         }
 
@@ -1154,7 +1158,7 @@ namespace psycle {
 
     }
 
-    void PatternView::TweakGUI::drawPattern( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack) {
+    void PatternView::TweakGUI::drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack) {
       if ( pView->pattern() ) {
         drawCellBg( g, cursor() );
 
@@ -1355,7 +1359,7 @@ namespace psycle {
       return pView->beatZoom();
     }
 
-    void PatternView::PatternDraw::customPaint( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack)
+    void PatternView::PatternDraw::customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack)
     {
       if (pView->pattern()) {
         TimeSignature signature;
@@ -1371,25 +1375,25 @@ namespace psycle {
             if ( !(y % beatZoom())) {
               if ((pView->pattern()->barStart(position, signature) )) {
 
-                g->setForeground( barColor() );
-                g->fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
+                g.setForeground( barColor() );
+                g.fillRect(0, y*rowHeight() - dy(),trackWidth, rowHeight());
 
                 if ( y >= selection().top() && y < selection().bottom()) {
                   int left  = xOffByTrack( selection().left() );
                   int right = xOffByTrack( selection().right() );
-                  g->setForeground( pView->colorInfo().sel_bar_bg_color );
-                  g->fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
+                  g.setForeground( pView->colorInfo().sel_bar_bg_color );
+                  g.fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
                 }
 
               } else {
-                g->setForeground( beatColor() );
-                g->fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
+                g.setForeground( beatColor() );
+                g.fillRect(0, y* rowHeight() - dy(),trackWidth, rowHeight());
 
                 if ( y >= selection().top() && y < selection().bottom()) {
                   int left  = xOffByTrack( selection().left() );
                   int right = xOffByTrack( selection().right() );
-                  g->setForeground( pView->colorInfo().sel_beat_bg_color );
-                  g->fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
+                  g.setForeground( pView->colorInfo().sel_beat_bg_color );
+                  g.fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
                 }
               }
             }
@@ -1407,7 +1411,7 @@ namespace psycle {
 
 
 
-    void PatternView::PatternDraw::drawPattern( ngrs::NGraphics * g, int startLine, int endLine, int startTrack, int endTrack )
+    void PatternView::PatternDraw::drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack )
     {
       // do we have a pattern ?
       if ( pView->pattern() ) {
@@ -1448,8 +1452,8 @@ namespace psycle {
 
             if ((y == pView->playPos() && Player::Instance()->playing() ) ) {
               int trackWidth = xEndByTrack( endTrack ) - dx();
-              g->setForeground( playBarColor() );
-              g->fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
+              g.setForeground( playBarColor() );
+              g.fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
             }
 
             ngrs::NColor stdColor = tColor;

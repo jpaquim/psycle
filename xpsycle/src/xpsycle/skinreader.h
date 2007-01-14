@@ -169,11 +169,7 @@ namespace psycle {
 			int patview_track_left_ident() const;
 			int patview_track_right_ident() const;
 
-			ngrs::NBitmap & patview_header_bitmap();
-
 			// machineview settings
-
-			ngrs::NPixmap & machines_bitmap();
 
 			const MachineCoordInfo & machineview_master_coords() const;
 			const MachineCoordInfo & machineview_effect_coords() const;
@@ -191,7 +187,7 @@ namespace psycle {
 
 			// bitmaps
 
-			DefaultBitmaps & defaultBitmaps();
+			DefaultBitmaps & bitmaps();
 
 		private:
 
@@ -242,9 +238,6 @@ namespace psycle {
 
 			// default Bitmaps
 			DefaultBitmaps defaultBitmaps_;
-
-			ngrs::NBitmap patview_header_bitmap_;
-			ngrs::NPixmap machines_bitmap_;
 
 			// our zipreader handle
 			zipreader *z;

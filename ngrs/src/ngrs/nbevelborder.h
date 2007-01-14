@@ -40,7 +40,7 @@ namespace ngrs {
 
     ~NBevelBorder();
 
-    virtual void paint(NGraphics* g, const NShape & geometry);
+    virtual void paint(Graphics& g, const NShape & geometry);
 
     void setInnerStyle(int style);
     void setOuterStyle(int style);
@@ -59,7 +59,7 @@ namespace ngrs {
     bool oval_;
 
     void mapStyle();
-    void drawRectBorder(NGraphics* g, int width, int height);
+    void drawRectBorder(Graphics& g, int width, int height);
 
 
   };

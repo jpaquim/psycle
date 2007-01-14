@@ -44,76 +44,76 @@ namespace ngrs {
   {
   }
 
-  void NBevelBorder::paint( NGraphics* g, const NShape & geometry)
+  void NBevelBorder::paint( Graphics& g, const NShape & geometry)
   { 
-    g->setForeground(NColor(200,200,200));
+    g.setForeground(NColor(200,200,200));
 
     int x      = geometry.left();
     int y      = geometry.top();
     int width  = geometry.width();
     int height = geometry.height();
 
-    g->setTranslation(g->xTranslation()+x,g->yTranslation()+y);
+    g.setTranslation(g.xTranslation()+x,g.yTranslation()+y);
     drawRectBorder(g,width,height);
-    g->setTranslation(g->xTranslation()-x,g->yTranslation()-y);
+    g.setTranslation(g.xTranslation()-x,g.yTranslation()-y);
   }
 
 
-  void NBevelBorder::drawRectBorder(NGraphics* g, int width, int height) 
+  void NBevelBorder::drawRectBorder(Graphics& g, int width, int height) 
   {
     int sz = 2;
 
     switch (style_)
     {
     case 1: // bevelOuter raised , inner lowered
-      g->setForeground(NColor(230,230,230));
-      g->drawLine(0,0,width-1,0);
-      g->drawLine(0,0,0,height-1);
-      g->setForeground(NColor(150,150,150));
-      g->drawLine(0,height-1,width-1,height-1);
-      g->drawLine(width-1,0,width-1,height-1);
+      g.setForeground(NColor(230,230,230));
+      g.drawLine(0,0,width-1,0);
+      g.drawLine(0,0,0,height-1);
+      g.setForeground(NColor(150,150,150));
+      g.drawLine(0,height-1,width-1,height-1);
+      g.drawLine(width-1,0,width-1,height-1);
 
-      g->setForeground(NColor(150,150,150));
-      g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
-      g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
-      g->setForeground(NColor(230,230,230));
-      g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
-      g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
+      g.setForeground(NColor(150,150,150));
+      g.drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
+      g.drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
+      g.setForeground(NColor(230,230,230));
+      g.drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
+      g.drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
       break;
     case 2: // bevelOuter lowerd , inner raised
-      g->setForeground(NColor(150,150,150));
-      g->drawLine(0,0,width-1,0);
-      g->drawLine(0,0,0,height-1);
-      g->setForeground(NColor(230,230,230));
+      g.setForeground(NColor(150,150,150));
+      g.drawLine(0,0,width-1,0);
+      g.drawLine(0,0,0,height-1);
+      g.setForeground(NColor(230,230,230));
 
-      g->drawLine(0,height-1,width-1,height-1);
-      g->drawLine(width-1,0,width-1,height-1);
+      g.drawLine(0,height-1,width-1,height-1);
+      g.drawLine(width-1,0,width-1,height-1);
 
-      g->setForeground(NColor(230,230,230));
-      g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
-      g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
-      g->setForeground(NColor(150,150,150));
+      g.setForeground(NColor(230,230,230));
+      g.drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
+      g.drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
+      g.setForeground(NColor(150,150,150));
 
-      g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
-      g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
+      g.drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
+      g.drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
       break;
     case 6:
-      g->setForeground(NColor(230,230,230));
-      g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
-      g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
+      g.setForeground(NColor(230,230,230));
+      g.drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
+      g.drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
 
-      g->setForeground(NColor(150,150,150));
-      g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
-      g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
+      g.setForeground(NColor(150,150,150));
+      g.drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
+      g.drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
       break;
     case 7:
-      g->setForeground(NColor(150,150,150));
-      g->drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
-      g->drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
+      g.setForeground(NColor(150,150,150));
+      g.drawLine(sz-1,sz-1,width-1-sz+1,sz-1);
+      g.drawLine(sz-1,sz-1,sz-1,height-1-sz+1);
 
-      g->setForeground(NColor(230,230,230));
-      g->drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
-      g->drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
+      g.setForeground(NColor(230,230,230));
+      g.drawLine(sz-1,height-1-sz+1,width-1-sz+1,height-1-sz+1);
+      g.drawLine(width-1-sz+1,sz-1,width-1-sz+1,height-1-sz+1);
       break;
     default :;
     }

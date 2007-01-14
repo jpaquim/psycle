@@ -361,7 +361,7 @@ namespace psycle {
 					}	else {
 						close( outFd );			
 
-						machines_bitmap_.loadFromFile( std::string("temp")+fileName );
+						//machines_bitmap_.loadFromFile( std::string("temp")+fileName );
 					}
 
 				}
@@ -460,7 +460,8 @@ namespace psycle {
 				parsePatHeader = true;
 				std::string src = parser.getAttribValue("src");
 				if (src != "")	{
-					patview_header_bitmap_ = extractAndLoadBitmap( src );
+///\ todo set it in defaultbitmap
+//					patview_header_bitmap_ = extractAndLoadBitmap( src );
 				}
 			} else 
 			if ( tagName == "background_source" && parsePatView && parsePatHeader ) {
@@ -677,28 +678,6 @@ namespace psycle {
 		int SkinReader::patview_track_big_sep_width() const {
 			return patview_track_big_sep_width_;
 		}
-
-		// PatternView bitmap
-
-		ngrs::NBitmap & SkinReader::patview_header_bitmap() {
-			///\todo rework needed .. should be handled from DefaultBitmaps .. 
-
-			if ( patview_header_bitmap_.empty() )
-				return defaultBitmaps_.pattern_header_skin();
-			else
-				return patview_header_bitmap_;
-		}
-
-
-		// Machineview skin informations
-
-		ngrs::NPixmap & SkinReader::machines_bitmap() {
-			///\todo rework needed .. should be handled from DefaultBitmaps .. 
-			if ( machines_bitmap_.empty() )
-				return defaultBitmaps_.machine_skin();
-			else
-				return machines_bitmap_;
-		}
 		
 		const MachineCoordInfo & SkinReader::machineview_master_coords() const {
 			return machineview_master_coords_;
@@ -731,7 +710,7 @@ namespace psycle {
 
 		// the bitmaps
 
-		DefaultBitmaps & SkinReader::defaultBitmaps() {
+		DefaultBitmaps & SkinReader::bitmaps() {
 			return defaultBitmaps_;
 		}
  }

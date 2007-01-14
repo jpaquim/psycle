@@ -48,7 +48,7 @@ namespace ngrs {
 
     NCustomItem* headerItem();
 
-    virtual void paint( NGraphics* g );
+    virtual void paint( Graphics& g );
 
   private:
 

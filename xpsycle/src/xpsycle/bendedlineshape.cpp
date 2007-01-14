@@ -113,16 +113,16 @@ void BendedLineShape::move( int dx, int dy )
   calculateRectArea();
 }
 
-void BendedLineShape::drawPicker( ngrs::NGraphics * g )
+void BendedLineShape::drawPicker( ngrs::Graphics& g )
 {
-  g->setForeground( ngrs::NColor( 100, 100, 100) );
-  g->fillRect(p1_.x()- pickWidth_/2,p1_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
-  g->fillRect(p2_.x()- pickWidth_/2,p2_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
+  g.setForeground( ngrs::NColor( 100, 100, 100) );
+  g.fillRect(p1_.x()- pickWidth_/2,p1_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
+  g.fillRect(p2_.x()- pickWidth_/2,p2_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   
   std::vector<ngrs::NPoint>::const_iterator it = bendPts().begin();
   for ( ; it < bendPts().end(); it++ ) {
     ngrs::NPoint pt = *it;
-    g->fillRect(pt.x()- pickWidth_/2, pt.y() - pickHeight_/2, pickWidth_, pickHeight_ );
+    g.fillRect(pt.x()- pickWidth_/2, pt.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   }
 }
 

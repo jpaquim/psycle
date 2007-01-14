@@ -282,27 +282,27 @@ namespace ngrs {
     if (dy<0) dy = 0; 
 
     NWindow* win = comp->window();
-    NGraphics* g = win->graphics();
+    Graphics& g = win->graphics();
 
     int diffY = (dy - comp->scrollDy());
     if (diffY!=0) {
       comp->setScrollDy(dy);
       if ( abs(diffY) > compHeight) { comp->repaint(); } else {
-        g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
-        g->setClipping(g->region());
+        g.setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+        g.setClipping(g.region());
         if (diffY > 0) {
-          g->copyArea(compLeft  , compTop    + diffY, // src_x, sry_y
+          g.copyArea(compLeft  , compTop    + diffY, // src_x, sry_y
             compWidth , compHeight - diffY, // width, height
             compLeft  , compTop             // destX, destY
             );
-          g->swap(NRect(compLeft,compTop, compWidth, compHeight - diffY));
+          g.swap(NRect(compLeft,compTop, compWidth, compHeight - diffY));
           win->repaint(comp,NRect(compLeft,compTop + compHeight - diffY,compWidth,diffY));
         } else {
-          g->copyArea(compLeft  , compTop, // src_x, sry_y
+          g.copyArea(compLeft  , compTop, // src_x, sry_y
             compWidth , compHeight + diffY, // width, height
             compLeft  , compTop    - diffY             // destX, destY
             );
-          g->swap(NRect(compLeft,compTop - diffY, compWidth, compHeight + diffY));
+          g.swap(NRect(compLeft,compTop - diffY, compWidth, compHeight + diffY));
           win->repaint(comp,NRect(compLeft,compTop,compWidth,-diffY));
         }
       }
@@ -314,21 +314,21 @@ namespace ngrs {
     if (diffX !=0) {
       comp->setScrollDx(dx);
       if ( abs(diffX) > compWidth) { comp->repaint(); } else {
-        g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
-        g->setClipping(g->region());
+        g.setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+        g.setClipping(g.region());
         if (diffX > 0) {
-          g->copyArea(compLeft  + diffX, compTop, // src_x, sry_y
+          g.copyArea(compLeft  + diffX, compTop, // src_x, sry_y
             compWidth - diffX, compHeight, // width, height
             compLeft  , compTop             // destX, destY
             );
-          g->swap(NRect(compLeft,compTop, compWidth - diffX, compHeight));
+          g.swap(NRect(compLeft,compTop, compWidth - diffX, compHeight));
           win->repaint(comp,NRect(compLeft + compWidth - diffX,compTop,diffX,compHeight));
         } else {
-          g->copyArea(compLeft  , compTop, // src_x, sry_y
+          g.copyArea(compLeft  , compTop, // src_x, sry_y
             compWidth + diffX , compHeight, // width, height
             compLeft - diffX  , compTop            // destX, destY
             );
-          g->swap(NRect(compLeft - diffX,compTop, compWidth + diffX, compHeight));
+          g.swap(NRect(compLeft - diffX,compTop, compWidth + diffX, compHeight));
           win->repaint(comp,NRect(compLeft,compTop,-diffX,compHeight));
         }
       }

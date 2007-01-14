@@ -30,12 +30,12 @@ namespace ngrs {
   {
   }
 
-  void NRectShape::fill( NGraphics * g, const NRegion & repaintArea )
+  void NRectShape::fill( Graphics& g, const NRegion & repaintArea )
   {
-    g->fillRect(rectArea().left(),rectArea().top(),rectArea().width(),rectArea().height());
+    g.fillRect(rectArea().left(),rectArea().top(),rectArea().width(),rectArea().height());
   }
 
-  void NRectShape::drawPicker( NGraphics * g )
+  void NRectShape::drawPicker( Graphics& g )
   {
   }
 

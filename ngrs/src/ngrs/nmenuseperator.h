@@ -35,7 +35,7 @@ namespace ngrs {
 
     ~NMenuSeperator();
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
 
     virtual int preferredHeight() const;
   };

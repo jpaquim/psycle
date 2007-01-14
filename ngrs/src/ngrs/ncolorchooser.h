@@ -37,7 +37,7 @@ namespace ngrs {
 
     signal1<const NColor &> colorSelected;
 
-    virtual void paint( NGraphics* g );
+    virtual void paint( Graphics& g );
 
     virtual void onMousePress(int x, int y, int button);
 

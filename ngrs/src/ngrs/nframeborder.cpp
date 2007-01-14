@@ -46,15 +46,15 @@ namespace ngrs {
   {
   }
 
-  void NFrameBorder::paint( NGraphics * g, const NShape & geometry )
+  void NFrameBorder::paint( Graphics& g, const NShape & geometry )
   {
-    g->setForeground(color());
+    g.setForeground(color());
     NRect r = geometry.rectArea();
     for (int i = 0; i < lcount_; i++) {
       if (oval_) 
-        g->drawRoundRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_),arcWidth_,arcHeight_);
+        g.drawRoundRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_),arcWidth_,arcHeight_);
       else
-        g->drawRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_));
+        g.drawRect(r.left()+i*dx_,r.top()+i*dy_,r.width()-1-2*(i*dx_),r.height()-1-2*(i*dy_));
     }
   }
 

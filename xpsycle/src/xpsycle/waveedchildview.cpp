@@ -29,7 +29,7 @@
 #include <X11/cursorfont.h>
 #endif
 #include <ngrs/nwindow.h>
-#include <ngrs/ngraphics.h>
+#include <ngrs/graphics.h>
 #include <ngrs/napp.h>
 #include <ngrs/npopupmenu.h>
 #include <ngrs/nmenu.h>
@@ -255,7 +255,7 @@ namespace psycle { namespace host {
 	}
 
 
-    void WaveEdChildView::WavePanel::paint( ngrs::NGraphics* g )
+    void WaveEdChildView::WavePanel::paint( ngrs::Graphics& g )
     {
 		int wrHeight = 0;
 		int wrHeadHeight=0;
@@ -263,7 +263,7 @@ namespace psycle { namespace host {
 
 		if(wView_->wdWave)
 		{
-			//const ngrs::NRegion invalidRgn = g->repaintArea();
+			//const ngrs::NRegion invalidRgn = g.repaintArea();
 			int const barHeight = 0;	//height of scroll bar and status bar combined
 			
 			int const nHeadHeight=clientHeight()/10;
@@ -288,8 +288,8 @@ namespace psycle { namespace host {
 			float dispRatio = nWidth/(float)wView_->diLength;
 			float headDispRatio = nWidth/(float)wView_->wdLength;
 
-			g->setForeground(wView_->clrBlack);
-			g->fillRect(0, 0, nWidth, clientHeight()-barHeight);
+			g.setForeground(wView_->clrBlack);
+			g.fillRect(0, 0, nWidth, clientHeight()-barHeight);
 
 			if(wView_->blLength)
 			{
@@ -299,8 +299,8 @@ namespace psycle { namespace host {
 	
 				int HeadSelX = int(selx * headDispRatio);
 				int HeadSelX2= int(selx2* headDispRatio);
-				g->setForeground(wView_->clrWhite);
-				g->fillRect(HeadSelX, 0, HeadSelX2-HeadSelX, nHeadHeight);
+				g.setForeground(wView_->clrWhite);
+				g.fillRect(HeadSelX, 0, HeadSelX2-HeadSelX, nHeadHeight);
 	
 				if(selx<wView_->diStart) selx=wView_->diStart;
 				if(selx2>wView_->diStart+wView_->diLength) selx2=wView_->diStart+wView_->diLength;
@@ -309,45 +309,45 @@ namespace psycle { namespace host {
 				{
 					selx = int((selx -wView_->diStart)*dispRatio) ;
 					selx2= int((selx2-wView_->diStart)*dispRatio) ;
-					g->fillRect(selx, nHeadHeight,  selx2-selx, nHeight);
+					g.fillRect(selx, nHeadHeight,  selx2-selx, nHeight);
 	
 				}
 			}
 			// Draw preliminary stuff
-			g->setForeground(wView_->clrMe);
+			g.setForeground(wView_->clrMe);
 			
 			// Left channel 0 amplitude line
-			g->drawLine(0, wrHeight+nHeadHeight,  nWidth, wrHeight+nHeadHeight);
+			g.drawLine(0, wrHeight+nHeadHeight,  nWidth, wrHeight+nHeadHeight);
 			// Left Header 0 amplitude line
-			g->drawLine(0, wrHeadHeight,  nWidth, wrHeadHeight);
+			g.drawLine(0, wrHeadHeight,  nWidth, wrHeadHeight);
 			
 			int const wrHeight_R = my + wrHeight;
 			int const wrHeadHeight_R = myHead + wrHeadHeight;
 			
-			g->setForeground(wView_->clrWhite);
+			g.setForeground(wView_->clrWhite);
 			// Header/Body divider
-			g->drawLine(0, nHeadHeight,  nWidth, nHeadHeight);
+			g.drawLine(0, nHeadHeight,  nWidth, nHeadHeight);
 			if(wView_->wdStereo)
 			{
 				// Stereo channels separator line
-				g->setForeground(wView_->clrLo);
-				g->drawLine(0, my+nHeadHeight,  nWidth, my+nHeadHeight);
+				g.setForeground(wView_->clrLo);
+				g.drawLine(0, my+nHeadHeight,  nWidth, my+nHeadHeight);
 				// Stereo channels Header Separator
-				g->drawLine(0, myHead,  nWidth, myHead);
+				g.drawLine(0, myHead,  nWidth, myHead);
 				
-				g->setForeground(wView_->clrMe);
+				g.setForeground(wView_->clrMe);
 				// Right channel 0 amplitude line
-				g->drawLine(0, wrHeight_R+nHeadHeight,  nWidth, wrHeight_R+nHeadHeight);
+				g.drawLine(0, wrHeight_R+nHeadHeight,  nWidth, wrHeight_R+nHeadHeight);
 				// Right Header 0 amplitude line
-				g->drawLine(0, wrHeadHeight_R,  nWidth, wrHeadHeight_R);
+				g.drawLine(0, wrHeadHeight_R,  nWidth, wrHeadHeight_R);
 			}
 			// Draw samples in channels (Fideloop's)
-			g->setForeground(wView_->clrHi);
+			g.setForeground(wView_->clrHi);
 			for(c = 0; c < nWidth; c++)
 			{
-				g->drawLine(c, wrHeight - wView_->lDisplay.at(c).first  + nHeadHeight,
+				g.drawLine(c, wrHeight - wView_->lDisplay.at(c).first  + nHeadHeight,
 							c, wrHeight - wView_->lDisplay.at(c).second + nHeadHeight);
-				g->drawLine(c, wrHeadHeight - wView_->lHeadDisplay.at(c).first,
+				g.drawLine(c, wrHeadHeight - wView_->lHeadDisplay.at(c).first,
 							c, wrHeadHeight - wView_->lHeadDisplay.at(c).second );
 			}
 			if(wView_->wdStereo)
@@ -355,61 +355,61 @@ namespace psycle { namespace host {
 				//draw right channel wave data
 				for(c = 0; c < nWidth; c++)
 				{
-					g->drawLine(c,wrHeight_R - wView_->rDisplay.at(c).first + nHeadHeight,
+					g.drawLine(c,wrHeight_R - wView_->rDisplay.at(c).first + nHeadHeight,
 								c,wrHeight_R - wView_->rDisplay.at(c).second + nHeadHeight);
-					g->drawLine(c, wrHeadHeight_R-wView_->rHeadDisplay.at(c).first,
+					g.drawLine(c, wrHeadHeight_R-wView_->rHeadDisplay.at(c).first,
 								c, wrHeadHeight_R-wView_->rHeadDisplay.at(c).second );
 				}
 			}
 			//draw loop points
 			if ( wView_->wdLoop )
 			{
-				g->setForeground(wView_->clrLo);
-				g->setFont(*wView_->fntLoop);
+				g.setForeground(wView_->clrLo);
+				g.setFont(*wView_->fntLoop);
 				if ( wView_->wdLoopS >= wView_->diStart && wView_->wdLoopS < wView_->diStart+wView_->diLength)
 				{
 					int ls = int((wView_->wdLoopS-wView_->diStart)*dispRatio);
-					g->drawLine(ls, nHeadHeight,  ls, nHeight+nHeadHeight);
-					int textlen = g->textWidth("Start");
-					g->drawText(ls-textlen/2, nHeadHeight+g->textHeight(), "Start" );
+					g.drawLine(ls, nHeadHeight,  ls, nHeight+nHeadHeight);
+					int textlen = g.textWidth("Start");
+					g.drawText(ls-textlen/2, nHeadHeight+g.textHeight(), "Start" );
 				}
-				g->setForeground(wView_->clrLo);
+				g.setForeground(wView_->clrLo);
 				if ( wView_->wdLoopE >= wView_->diStart && wView_->wdLoopE < wView_->diStart+wView_->diLength)
 				{
 					int le = int((wView_->wdLoopE-wView_->diStart)*dispRatio);
-					g->drawLine(le, nHeadHeight,  le, nHeight+nHeadHeight);
-					int textLen = g->textWidth("End");
-					g->drawText( le - textLen/2, nHeight+nHeadHeight, "End");
+					g.drawLine(le, nHeadHeight,  le, nHeight+nHeadHeight);
+					int textLen = g.textWidth("End");
+					g.drawText( le - textLen/2, nHeight+nHeadHeight, "End");
 				}
 				
 				//draw loop points in header
 				int ls = (int)(wView_->wdLoopS * headDispRatio);
 				int le = (int)(wView_->wdLoopE * headDispRatio);
 
-				g->setForeground(wView_->clrLo);
-				g->drawLine(ls, 0,  ls, nHeadHeight);
-				g->drawLine(le, 0, le, nHeadHeight);
+				g.setForeground(wView_->clrLo);
+				g.drawLine(ls, 0,  ls, nHeadHeight);
+				g.drawLine(le, 0, le, nHeadHeight);
 			}
 
 			//draw screen size on header
-			g->setForeground(wView_->clrWhite);
+			g.setForeground(wView_->clrWhite);
 			int screenx  = int( wView_->diStart           * headDispRatio);
 			int screenx2 = int((wView_->diStart+wView_->diLength) * headDispRatio);
-			g->drawLine(screenx,  0,  				screenx,  nHeadHeight-1);
-			g->drawLine(screenx,  nHeadHeight-1,	screenx2, nHeadHeight-1);
-			g->drawLine(screenx2, nHeadHeight-1,	screenx2, 0);
-			g->drawLine(screenx2, 0,				screenx,  0);
+			g.drawLine(screenx,  0,  				screenx,  nHeadHeight-1);
+			g.drawLine(screenx,  nHeadHeight-1,	screenx2, nHeadHeight-1);
+			g.drawLine(screenx2, nHeadHeight-1,	screenx2, 0);
+			g.drawLine(screenx2, 0,				screenx,  0);
 			
 			if(wView_->cursorBlink	&&	wView_->cursorPos >= wView_->diStart	&&	wView_->cursorPos <= wView_->diStart+wView_->diLength)
 			{
 				int cursorX = int((wView_->cursorPos-wView_->diStart)*dispRatio);
-				g->drawLine(cursorX, nHeadHeight,  cursorX, nHeadHeight+nHeight);
+				g.drawLine(cursorX, nHeadHeight,  cursorX, nHeadHeight+nHeight);
 			}
 		}
 		else
 		{
-			g->setForeground(wView_->clrWhite);
-			g->drawText(4, 4+g->textHeight(), "No Wave Data");
+			g.setForeground(wView_->clrWhite);
+			g.drawText(4, 4+g.textHeight(), "No Wave Data");
 		}
 
 }
@@ -454,7 +454,7 @@ namespace psycle { namespace host {
 		repaint();
 	}
 
-	void WaveEdChildView::VolumeSlider::paint( ngrs::NGraphics *g )
+	void WaveEdChildView::VolumeSlider::paint( ngrs::Graphics&g )
 	{
 		float vol = pSong->waved.GetVolume();
 		ngrs::NColor clrBlue;
@@ -469,15 +469,15 @@ namespace psycle { namespace host {
 		int width = clientWidth();
 		int height = clientHeight();
 		
-		g->setForeground(clrBlack);
-		g->fillRect(left, top, width, height);
+		g.setForeground(clrBlack);
+		g.fillRect(left, top, width, height);
 		
-		g->setForeground(clrGray);
-		g->fillRect(left+7, top+2, width-14, height-4);
-		g->setForeground(clrBlue);
-		g->fillRect(left+7, top+2, int(vol*(width-14)), height-4);
+		g.setForeground(clrGray);
+		g.fillRect(left+7, top+2, width-14, height-4);
+		g.setForeground(clrBlue);
+		g.fillRect(left+7, top+2, int(vol*(width-14)), height-4);
 
-		g->setForeground(clrBlack);		
+		g.setForeground(clrBlack);		
 		
 		ngrs::NPoint points[3];
 		points[0].setX( left+5 );		
@@ -486,7 +486,7 @@ namespace psycle { namespace host {
     points[1].setY( top+1 );
 		points[2].setX( left+5);		
     points[2].setY( top+1 );
-		g->fillPolygon(points, 3);
+		g.fillPolygon(points, 3);
 		
 	}
 

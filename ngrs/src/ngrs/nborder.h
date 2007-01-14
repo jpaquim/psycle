@@ -21,7 +21,7 @@
 #define NBORDER_H
 
 #include "nsize.h"
-#include "ngraphics.h"
+#include "graphics.h"
 #include "nshape.h"
 #include "ncolor.h"
 
@@ -37,7 +37,7 @@ namespace ngrs {
 
     virtual ~NBorder();
 
-    virtual void paint( NGraphics* g, const NShape & geometry );
+    virtual void paint( Graphics& g, const NShape & geometry );
     void setSpacing( NSize size );
 
     const NSize & spacing() const;

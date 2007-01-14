@@ -38,7 +38,7 @@ namespace psycle {
 
 			void setPegel( float l, float r );
 
-			virtual void paint( ngrs::NGraphics* g );
+			virtual void paint( ngrs::Graphics& g );
 
 		private:
 

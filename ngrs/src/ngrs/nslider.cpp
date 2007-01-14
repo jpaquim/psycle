@@ -58,7 +58,7 @@ namespace ngrs {
   {
   }
 
-  void NSlider::Slider::paint( NGraphics * g )
+  void NSlider::Slider::paint( Graphics& g )
   {
     sl_->customSliderPaint.emit(sl_,g);
   }
@@ -100,16 +100,16 @@ namespace ngrs {
     return orientation_;
   }
 
-  void NSlider::paint( NGraphics * g )
+  void NSlider::paint( Graphics& g )
   {
     if (trackLine_) {
-      g->setForeground(NColor(230,230,230));
+      g.setForeground(NColor(230,230,230));
       if (orientation_ == nVertical) {
         int d = 2;
-        g->drawRect(clientWidth()/2 - d,0,2*d,clientHeight());
+        g.drawRect(clientWidth()/2 - d,0,2*d,clientHeight());
       } else {
         int d = 2;
-        g->drawRect(0,clientHeight()/2 - d,clientWidth()-1,2*d);
+        g.drawRect(0,clientHeight()/2 - d,clientWidth()-1,2*d);
       }
     }
   }

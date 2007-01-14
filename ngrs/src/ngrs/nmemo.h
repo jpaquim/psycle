@@ -72,7 +72,7 @@ namespace ngrs {
 
         void computeBreakPoints();
 
-        void drawText( NGraphics *g );
+        void drawText( Graphics&g );
         void repaint();
         NRect repaintLineArea() const;
 
@@ -106,7 +106,7 @@ namespace ngrs {
       void setText(const std::string & text);
       std::string text() const;
 
-      virtual void paint(NGraphics* g);
+      virtual void paint(Graphics& g);
       virtual void onKeyPress(const NKeyEvent & keyEvent);
       virtual void onMousePress(int x, int y, int button);
 
@@ -140,7 +140,7 @@ namespace ngrs {
       std::vector<Line> lines;
 
       void init();
-      void drawCursor( NGraphics* g, int x, int y );
+      void drawCursor( Graphics& g, int x, int y );
 
       void insertLine( const std::string & text );
       void deleteLine();

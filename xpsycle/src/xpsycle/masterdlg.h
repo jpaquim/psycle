@@ -41,7 +41,7 @@ class MasterDlg : public ngrs::NWindow
         void setNumber(int number);
         int number();
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
 
       private:
 

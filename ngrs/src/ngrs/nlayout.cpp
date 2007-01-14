@@ -46,7 +46,7 @@ namespace ngrs {
     return parent_;
   }
 
-  void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRegion & repaintArea , NVisualComponent* sender)
+  void NLayout::drawComponents( NVisualComponent * target, Graphics& g, const NRegion & repaintArea , NVisualComponent* sender)
   {
     std::vector<NVisualComponent*>::const_iterator itr = target->visualComponents().begin();
     for (;itr < target->visualComponents().end(); itr++) {

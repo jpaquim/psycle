@@ -35,7 +35,7 @@ namespace ngrs {
 
     ~N7Segment();
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
 
     void setSeg(bool seg1,bool seg2,bool seg3,bool seg4,bool seg5,bool seg6,bool seg7);
     void resetSeg();
@@ -51,8 +51,8 @@ namespace ngrs {
 
     bool seg1_, seg2_ , seg3_, seg4_, seg5_, seg6_, seg7_;
 
-    void drawVerticalSegment(NGraphics*g,int x, int y, int x1, int y1, bool on);
-    void drawHorizontalSegment(NGraphics*g,int x, int y, int x1, int y1,bool on);
+    void drawVerticalSegment(Graphics&g,int x, int y, int x1, int y1, bool on);
+    void drawHorizontalSegment(Graphics&g,int x, int y, int x1, int y1,bool on);
 
   };
 

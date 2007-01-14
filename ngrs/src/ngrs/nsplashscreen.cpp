@@ -38,11 +38,11 @@ namespace ngrs {
   void NSplashScreen::loadImageFromFile( const std::string & fileName )
   {
     NImage* img = new NImage();
-    img->loadFromFile(fileName);
-    setPosition(0, 0, img->width(), img->height());
+      img->loadFromFile( fileName );      
+    pane()->add( img, nAlClient );
+    
+    setPosition( 0, 0, img->width(), img->height() );
     setPositionToScreenCenter();
-    img->setAlign(nAlClient);
-    pane()->add(img);
   }
 
 }

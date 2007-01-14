@@ -114,11 +114,11 @@ namespace ngrs {
     calculateRectArea();
   }
 
-  void NLineShape::drawPicker( NGraphics * g )
+  void NLineShape::drawPicker( Graphics& g )
   {
-    g->setForeground(NColor(0,0,0));
-    g->fillRect(p1_.x()- pickWidth_/2,p1_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
-    g->fillRect(p2_.x()- pickWidth_/2,p2_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
+    g.setForeground(NColor(0,0,0));
+    g.fillRect(p1_.x()- pickWidth_/2,p1_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
+    g.fillRect(p2_.x()- pickWidth_/2,p2_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   }
 
   void NLineShape::setLeft( int left )

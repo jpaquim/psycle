@@ -60,7 +60,7 @@ namespace psycle {
 
       ~Cell();
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
 
       virtual int preferredWidth() const;
       virtual int preferredHeight() const;
@@ -84,7 +84,7 @@ namespace psycle {
       virtual void onMouseOver( int x, int y);
       virtual void onMousePressed( int x, int y, int button );
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
       virtual void resize();
 
       virtual int preferredWidth() const;

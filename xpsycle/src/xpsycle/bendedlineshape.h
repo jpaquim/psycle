@@ -41,7 +41,7 @@ public:
   virtual void setHeight( int height );
   virtual ngrs::NPoint pickerAt( int i );
   virtual int pickerSize();
-  virtual void drawPicker( ngrs::NGraphics* g );
+  virtual void drawPicker( ngrs::Graphics& g );
 
   const ngrs::NPoint & p1() const;
   const ngrs::NPoint & p2() const;

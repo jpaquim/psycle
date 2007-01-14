@@ -22,13 +22,11 @@
 
 #include "audiodriver.h"
 #include "inputhandler.h"
-#include "defaultbitmaps.h"
-#include <ngrs/ncolor.h>
+
 #include <ngrs/nobject.h>
 #include <ngrs/nxmlparser.h>
 #include <vector>
 #include <string>
-#include <exception>
 
 /**
 @author Stefan
@@ -45,8 +43,6 @@ namespace psycle {
       ~Configuration();
 
       void loadConfig();
-
-      DefaultBitmaps & icons();
 
       void setDriverByName( const std::string & driverName );        
 
@@ -79,7 +75,6 @@ namespace psycle {
     private:
 
       InputHandler inputHandler_;
-      DefaultBitmaps* bitmaps_;
 
       // a map, that holds available drivers ..
       std::map<std::string, AudioDriver*> driverMap_;

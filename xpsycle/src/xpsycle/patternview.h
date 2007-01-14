@@ -101,7 +101,7 @@ namespace psycle {
         Header(PatternView* pPatternView);
         ~Header();
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
 
         void setHeaderCoordInfo( const HeaderCoordInfo & info );
 
@@ -129,7 +129,7 @@ namespace psycle {
         LineNumber( PatternView* pPatternView );
         ~LineNumber();
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
 
         void setDy( int dy );
         int dy() const;
@@ -160,7 +160,7 @@ namespace psycle {
         virtual int lineNumber() const;
         virtual int beatZoom() const;
 
-        virtual void customPaint( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+        virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
         virtual void onMousePress( int x, int y, int button );
         virtual void onMousePressed( int x, int y, int button );
@@ -183,7 +183,7 @@ namespace psycle {
 
         virtual int doSel( const PatCursor & p );
         virtual void selectAll( const PatCursor & cursor );
-        virtual void drawPattern( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+        virtual void drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
 
       private:
@@ -228,7 +228,7 @@ namespace psycle {
         ~TweakHeader();
 
         virtual int preferredWidth();
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
 
         int skinColWidth() const;
 
@@ -254,7 +254,7 @@ namespace psycle {
         virtual int trackNumber() const;
         virtual int beatZoom() const;
 
-        virtual void customPaint( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+        virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
         virtual void onKeyPress( const ngrs::NKeyEvent & event );
 
@@ -263,7 +263,7 @@ namespace psycle {
       protected:
 
         virtual int doSel( const PatCursor & p );
-        void drawPattern( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+        void drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
       private:
 

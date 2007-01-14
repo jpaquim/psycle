@@ -44,48 +44,48 @@ namespace ngrs {
     if (layout_) delete layout_;
   }
 
-  void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisualComponent* sender)
+  void NVisualComponent::draw( Graphics& g, const NRegion & repaintArea , NVisualComponent* sender)
   {
     if (visible()) {
       if (sender == this) NWindow::paintFlag = true;
 
-      NRegion oldRegion = g->region();                   // save old region
+      NRegion oldRegion = g.region();                   // save old region
 
       NRegion region = geometry()->region();             // get component geometry
-      region.move(g->xTranslation(),g->yTranslation());  // move offset left , top
+      region.move(g.xTranslation(),g.yTranslation());  // move offset left , top
 
       region &= oldRegion;   // do intersection
 
       if (!region.isEmpty()) {
 
-        g->resetPen();
+        g.resetPen();
 
-        g->setRepaintArea(repaintArea);  // set repaintArea to graphics
+        g.setRepaintArea(repaintArea);  // set repaintArea to graphics
 
         bool clip_ = !(transparent() && (translucent()==100) && skin_.gradientStyle() == 0 );
 
         if (skin_.bitmapBgStyle()!=0) clip_ = true;
 
-        if (clip_) g->setClipping(region);    //  setClipping
-        g->setRegion(region);
-        int gTx = g->xTranslation();          // store old graphics translation
-        int gTy = g->yTranslation();
+        if (clip_) g.setClipping(region);    //  setClipping
+        g.setRegion(region);
+        int gTx = g.xTranslation();          // store old graphics translation
+        int gTy = g.yTranslation();
 
         if (!transparent() && (translucent() ==100) && NWindow::paintFlag && !skin_.gradientStyle() ) {
-          g->setForeground(background());
+          g.setForeground(background());
           geometry()->fill(g,repaintArea);
           //std::cout << "j:" << name() << std::endl;
         }
         if (transparent() && (translucent()<100))
-          g->fillTranslucent(left(),top(),width(),height(),skin_.transColor(), translucent());
+          g.fillTranslucent(left(),top(),width(),height(),skin_.transColor(), translucent());
 
         if (!transparent() && skin_.gradientStyle() == 1 && NWindow::paintFlag) {
-          g->fillGradient(left(),top(),spacingWidth(),spacingHeight(),
+          g.fillGradient(left(),top(),spacingWidth(),spacingHeight(),
             skin_.gradientStartColor(),skin_.gradientMidColor(),skin_.gradientEndColor(),
             skin_.gradientOrientation(),skin_.gradientPercent());
         } else
           if (!transparent() && skin_.gradientStyle() == 2 && NWindow::paintFlag) {
-            g->fillRoundGradient(left(),top(),spacingWidth(),spacingHeight(),
+            g.fillRoundGradient(left(),top(),spacingWidth(),spacingHeight(),
               skin_.gradientStartColor(),skin_.gradientMidColor(),skin_.gradientEndColor(),
               skin_.gradientOrientation(),skin_.gradientStyle(),skin_.gradientArcWidth(),skin_.gradientArcHeight() );
           }
@@ -95,7 +95,7 @@ namespace ngrs {
             int h = skin_.bitmap().height();
             for (int yp = 0; yp < spacingHeight(); yp+=h) {
               for (int xp = 0; xp < spacingWidth(); xp+=w) {
-                g->putBitmap( left()+xp,top()+yp,w,h,skin_.bitmap(),0,0);
+                g.putBitmap( left()+xp,top()+yp,w,h,skin_.bitmap(),0,0);
               }
             }
           } else
@@ -104,12 +104,12 @@ namespace ngrs {
 
               int xp =(int)  d2i((spacingWidth()  - skin_.bitmap().width())  / 2.0f);
               int yp = (int) d2i((spacingHeight() - skin_.bitmap().height()) / 2.0f);
-              g->putBitmap(left()+xp,top()+yp,skin_.bitmap());
+              g.putBitmap(left()+xp,top()+yp,skin_.bitmap());
             } else
               if (skin_.bitmapBgStyle() == 3 && NWindow::paintFlag) {
                 // stretch      
                 if ( width() && height() ) 
-                  g->putStretchBitmap(left(),top(),skin_.bitmap() , width(), height() );
+                  g.putStretchBitmap(left(),top(),skin_.bitmap() , width(), height() );
               }
 
               if (moveable().style() & nMvRectPicker) geometry()->drawRectPicker(g);
@@ -121,19 +121,19 @@ namespace ngrs {
                 NRegion spacingRegion = geometry()->spacingRegion(NSize(spacing().left()+borderLeft(),spacing().top()+borderTop(),spacing().right()+borderRight(),spacing().bottom()+borderBottom()));
 
 
-                spacingRegion.move(g->xTranslation(),g->yTranslation());
+                spacingRegion.move(g.xTranslation(),g.yTranslation());
                 spacingRegion = region & spacingRegion;
 
-                g->setTranslation(g->xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g->yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
+                g.setTranslation(g.xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g.yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
 
-                g->setClipping(spacingRegion);
-                g->setRegion(spacingRegion);
+                g.setClipping(spacingRegion);
+                g.setRegion(spacingRegion);
 
               } else {
-                g->setTranslation(g->xTranslation()+left()-scrollDx_,g->yTranslation()-scrollDy_+top());
+                g.setTranslation(g.xTranslation()+left()-scrollDx_,g.yTranslation()-scrollDy_+top());
                 if (!clip_) {
-                  g->setRegion(region);
-                  g->setClipping(region);
+                  g.setRegion(region);
+                  g.setClipping(region);
                 }
               }
 
@@ -149,8 +149,8 @@ namespace ngrs {
               }
 
               if (NWindow::paintFlag) {
-                g->setForeground(foreground());	
-                g->setFont( font() );
+                g.setForeground(foreground());	
+                g.setFont( font() );
                 paint(g);
               }
 
@@ -162,16 +162,16 @@ namespace ngrs {
                 delete oldFont;
               }
 
-              g->setTranslation(gTx,gTy);           // set back to old translation
+              g.setTranslation(gTx,gTy);           // set back to old translation
               if ((skin_.border()!=0)) {
-                g->setClipping(region);
+                g.setClipping(region);
                 skin_.border()->paint(g,*geometry());
               }
               if ( focus() ) {
-                //      g->setForeground( NColor (0,0,255) );
-                //      g->drawRect(geometry()->rectArea() );
+                //      g.setForeground( NColor (0,0,255) );
+                //      g.drawRect(geometry()->rectArea() );
               }
-              g->setRegion(oldRegion);              // restore old region
+              g.setRegion(oldRegion);              // restore old region
 
       }
     }
@@ -185,7 +185,7 @@ namespace ngrs {
     repaint();
   }
 
-  void NVisualComponent::drawChildren( NGraphics * g, const NRegion & repaintArea , NVisualComponent* sender )
+  void NVisualComponent::drawChildren( Graphics& g, const NRegion & repaintArea , NVisualComponent* sender )
   {
     if ( layout_ == 0 ) {
       std::vector< NVisualComponent* >::const_iterator itr = visualComponents().begin();
@@ -240,7 +240,7 @@ namespace ngrs {
     skin_.setSpacing(NSize(left,top,right,bottom));
   }
 
-  void NVisualComponent::paint( NGraphics * g )
+  void NVisualComponent::paint( Graphics& g )
   {
 
   }
@@ -253,31 +253,31 @@ namespace ngrs {
     return skin_.font();
   }
 
-  NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long absY )
+  NVisualComponent * NVisualComponent::overObject( Graphics& g, long absX, long absY )
   {
-    NRegion oldRegion = g->region();        // save old region
+    NRegion oldRegion = g.region();        // save old region
     NRegion region = geometry()->region();  // get component geometry
-    region.move(g->xTranslation(),g->yTranslation());
+    region.move(g.xTranslation(),g.yTranslation());
     region = oldRegion & region;            // intersection
 
-    g->setTranslation(g->xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g->yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
+    g.setTranslation(g.xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g.yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
     NVisualComponent* found = 0;
 
     if ( !region.isEmpty() && region.intersects( absX, absY ) && events() ) {
-      g->setRegion(region);       
+      g.setRegion(region);       
       found = checkChildrenEvent( g, absX, absY );
       if (!found) found = this;   
     }    
 
-    g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-    g->setRegion(oldRegion);
+    g.setTranslation(g.xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g.yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
+    g.setRegion(oldRegion);
 
     return found;
   }
 
   // default order and event check
   // overridden e.g in ntoolbar
-  NVisualComponent* NVisualComponent::checkChildrenEvent( NGraphics* g, int absX, int absY ) {
+  NVisualComponent* NVisualComponent::checkChildrenEvent( Graphics& g, int absX, int absY ) {
     NVisualComponent* found = 0;
     std::vector<NVisualComponent*>::const_reverse_iterator rev_it = visualComponents().rbegin();
     for ( ; rev_it != visualComponents().rend(); ++rev_it ) {
@@ -287,7 +287,7 @@ namespace ngrs {
     return found;
   }     
 
-  NVisualComponent* NVisualComponent::checkChildEvent( NVisualComponent* child, NGraphics* g, int absX, int absY  ) {                
+  NVisualComponent* NVisualComponent::checkChildEvent( NVisualComponent* child, Graphics& g, int absX, int absY  ) {                
     if ( child->visible() )
       return child->overObject( g, absX, absY );
     else       
@@ -690,46 +690,46 @@ namespace ngrs {
     NRect rect;
 
     NWindow* win = comp->window();
-    NGraphics* g = win->graphics();
+    Graphics& g = win->graphics();
 
     if (dy !=0) {
       int diffY = dy;
-      g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
-      g->setClipping(g->region());
+      g.setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+      g.setClipping(g.region());
       if (diffY > 0) {
-        g->copyArea(compLeft  , compTop    + diffY, // src_x, sry_y
+        g.copyArea(compLeft  , compTop    + diffY, // src_x, sry_y
           compWidth , compHeight - diffY, // width, height
           compLeft  , compTop             // destX, destY
           );
-        g->swap(NRect(compLeft,compTop, compWidth, compHeight - diffY));
+        g.swap(NRect(compLeft,compTop, compWidth, compHeight - diffY));
         rect = NRect(compLeft,compTop + compHeight - diffY,compWidth,diffY);
       } else {
-        g->copyArea(compLeft  , compTop, // src_x, sry_y
+        g.copyArea(compLeft  , compTop, // src_x, sry_y
           compWidth , compHeight + diffY, // width, height
           compLeft  , compTop    - diffY             // destX, destY
           );
-        g->swap(NRect(compLeft,compTop - diffY, compWidth, compHeight + diffY));
+        g.swap(NRect(compLeft,compTop - diffY, compWidth, compHeight + diffY));
         rect = NRect(compLeft,compTop,compWidth,-diffY);
       }
     }
 
     if (dx !=0) {
       int diffX = dx;
-      g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
-      g->setClipping(g->region());
+      g.setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+      g.setClipping(g.region());
       if (diffX > 0) {
-        g->copyArea(compLeft  + diffX, compTop, // src_x, sry_y
+        g.copyArea(compLeft  + diffX, compTop, // src_x, sry_y
           compWidth - diffX, compHeight, // width, height
           compLeft  , compTop             // destX, destY
           );
-        g->swap(NRect(compLeft,compTop, compWidth - diffX, compHeight));
+        g.swap(NRect(compLeft,compTop, compWidth - diffX, compHeight));
         rect = NRect(compLeft + compWidth - diffX,compTop,diffX,compHeight);
       } else {
-        g->copyArea(compLeft  , compTop, // src_x, sry_y
+        g.copyArea(compLeft  , compTop, // src_x, sry_y
           compWidth + diffX , compHeight, // width, height
           compLeft - diffX  , compTop            // destX, destY
           );
-        g->swap(NRect(compLeft - diffX,compTop, compWidth + diffX, compHeight));
+        g.swap(NRect(compLeft - diffX,compTop, compWidth + diffX, compHeight));
         rect = NRect(compLeft,compTop,-diffX,compHeight);
       }
     }

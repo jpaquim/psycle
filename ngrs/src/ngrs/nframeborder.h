@@ -49,7 +49,7 @@ namespace ngrs {
     int dWidth() const;
     int dHeight() const;
 
-    virtual void paint(NGraphics* g, const NShape & geometry);
+    virtual void paint(Graphics& g, const NShape & geometry);
 
     virtual NFrameBorder* clone()  const;   // Uses the copy constructor
 

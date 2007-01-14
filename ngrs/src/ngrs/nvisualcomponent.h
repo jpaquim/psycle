@@ -21,7 +21,7 @@
 #define NVISUALCOMPONENT_H
 
 #include "nvisual.h"
-#include "ngraphics.h"
+#include "graphics.h"
 #include "nrect.h"
 #include "nisvisualcomponent.h"
 #include "ncolor.h"
@@ -58,7 +58,7 @@ namespace ngrs {
 
     ~NVisualComponent();
 
-    virtual void draw( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
+    virtual void draw( Graphics& g, const NRegion & repaintArea, NVisualComponent* sender );
 
     signal1<const NMoveEvent &> move;
     signal1<const NMoveEvent &> moveStart;
@@ -103,13 +103,13 @@ namespace ngrs {
     int viewWidth() const;
     int viewHeight() const;
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
 
     virtual void setFont(const NFont & font);
     void setParentFont(bool on);
     const NFont & font() const;
 
-    NVisualComponent* overObject(NGraphics* g, long absX, long absY);
+    NVisualComponent* overObject(Graphics& g, long absX, long absY);
     void setBorder(const NBorder & border);
     NBorder* border();
     void setLayout(const NLayout & layout);
@@ -228,12 +228,12 @@ namespace ngrs {
 
   protected:
 
-    virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
+    virtual void drawChildren( Graphics& g, const NRegion & repaintArea, NVisualComponent* sender );
     // this checks in reverse containerorder the mouse over events
     // override it to use a different order
-    virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
+    virtual NVisualComponent* checkChildrenEvent( Graphics& g, int absX, int absY );
 
-    NVisualComponent* checkChildEvent( NVisualComponent* child, NGraphics* g, int absX, int absY );
+    NVisualComponent* checkChildEvent( NVisualComponent* child, Graphics& g, int absX, int absY );
 
 
   private:

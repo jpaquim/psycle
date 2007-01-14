@@ -36,7 +36,7 @@ namespace ngrs {
 
     ~NLine();
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
     void setPoints( const NPoint & p1, const NPoint & p2);
 
     const NPoint & p1() const;

@@ -54,7 +54,7 @@ namespace ngrs {
   {
   }
 
-  void NImage::paint( NGraphics * g )
+  void NImage::paint( Graphics& g )
   {
     int xp = 0;
     int yp = 0;
@@ -67,7 +67,7 @@ namespace ngrs {
       if ( halign_ == nAlWallPaper && valign_ == nAlWallPaper ) {	  
         for (int yp = 0; yp < spacingHeight(); yp += pBmp->height() ) {
           for (int xp = 0; xp < spacingWidth(); xp += pBmp->width() ) {
-            g->putBitmap( xp, yp, *pBmp );
+            g.putBitmap( xp, yp, *pBmp );
           }
         }
         return;
@@ -87,15 +87,15 @@ namespace ngrs {
 
       if ( halign_ == nAlWallPaper ) {
         for (int xp = 0; xp < spacingWidth(); xp += pBmp->width() ) {
-          g->putBitmap( xp, yp, *pBmp );
+          g.putBitmap( xp, yp, *pBmp );
         }
       } else
         if ( valign_ == nAlWallPaper ) {
           for (int yp = 0; yp < spacingHeight(); yp += pBmp->height() ) {
-            g->putBitmap( left()+xp, top()+yp, *pBmp );
+            g.putBitmap( left()+xp, top()+yp, *pBmp );
           }
         } else
-          g->putBitmap( xp, yp, *pBmp );	  
+          g.putBitmap( xp, yp, *pBmp );	  
     }
 
   }

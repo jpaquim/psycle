@@ -67,27 +67,27 @@ namespace psycle {
 			return propsDlg_;
 		}
 
-		void MachineGUI::paint( ngrs::NGraphics * g )
+		void MachineGUI::paint( ngrs::Graphics& g )
 		{
 			if (selected_) {
 
-				g->setForeground( SkinReader::Instance()->machineview_color_info().sel_border_color );
+				g.setForeground( SkinReader::Instance()->machineview_color_info().sel_border_color );
 
 				int cw = clientWidth();
 				int ch = clientHeight();
 				int size = 10;
 				// upper left corner
-				g->drawLine(0,0,size,0);
-				g->drawLine(0,0,0,size);
+				g.drawLine(0,0,size,0);
+				g.drawLine(0,0,0,size);
 				// upper right corner
-				g->drawLine(cw-size,0,cw,0);
-				g->drawLine(cw-1,0,cw-1,size);
+				g.drawLine(cw-size,0,cw,0);
+				g.drawLine(cw-1,0,cw-1,size);
 				// lower left corner
-				g->drawLine(0,ch-size,0,ch-1);
-				g->drawLine(0,ch-1,size,ch-1);
+				g.drawLine(0,ch-size,0,ch-1);
+				g.drawLine(0,ch-1,size,ch-1);
 				// lower right corner
-				g->drawLine(cw-1,ch-size,cw-1,ch);
-				g->drawLine(cw-size,ch-1,cw-1,ch-1);
+				g.drawLine(cw-1,ch-size,cw-1,ch);
+				g.drawLine(cw-size,ch-1,cw-1,ch-1);
 			}
 		}
 
@@ -263,27 +263,27 @@ namespace psycle {
 			setBackground( ngrs::NColor( 0, 0, 200) );
 		}
 
-		void MasterGUI::paint( ngrs::NGraphics* g )
+		void MasterGUI::paint( ngrs::Graphics& g )
 		{
 			MachineGUI::paint(g);
 			// save old translation pos from the grpahics handler
-			long xTrans = g->xTranslation();
-			long yTrans = g->yTranslation();
+			long xTrans = g.xTranslation();
+			long yTrans = g.yTranslation();
 			// move translation to have place for selection border
-			g->setTranslation(xTrans + ident(), yTrans+ ident());
+			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
 
-			g->putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().bgCoords.left(), coords().bgCoords.top());
+            g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
 
 			/*
 			if (mac()._mute)
-			g->putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), Global::configuration().icons().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
+			g.putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), Global::configuration().icons().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
 
 			if ( mac().song()->machineSoloed == mac()._macIndex)
-			g->putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), Global::configuration().icons().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top());*/
+			g.putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), Global::configuration().icons().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top());*/
 
 			// reset translation to original
-			g->setTranslation( xTrans, yTrans );
+			g.setTranslation( xTrans, yTrans );
 		}
 
 		void MasterGUI::onMousePress( int x, int y, int button )
@@ -329,27 +329,27 @@ namespace psycle {
 		{
 		}
 
-		void GeneratorGUI::paint( ngrs::NGraphics* g )
+		void GeneratorGUI::paint( ngrs::Graphics& g )
 		{
 			MachineGUI::paint(g);
 			// save old translation pos from the grpahics handler
-			long xTrans = g->xTranslation();
-			long yTrans = g->yTranslation();
+			long xTrans = g.xTranslation();
+			long yTrans = g.yTranslation();
 			// move translation to have place for selection border
-			g->setTranslation(xTrans + ident(), yTrans+ ident());
+			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
-			g->putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->machines_bitmap() , coords().bgCoords.left(), coords().bgCoords.top());
-			g->drawText(coords().dNameCoords.x(),coords().dNameCoords.y()+g->textAscent(), stringify(mac()._macIndex)+ ":" + mac()._editName );
+			g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
+			g.drawText(coords().dNameCoords.x(),coords().dNameCoords.y()+g.textAscent(), stringify(mac()._macIndex)+ ":" + mac()._editName );
 
 
 			if ( mac()._mute )
-				g->putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().muteCoords.left(), coords().muteCoords.top());
+				g.putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
 
 			if ( mac().song()->machineSoloed == mac()._macIndex )
-				g->putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().soloCoords.left(), coords().soloCoords.top());
+				g.putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top());
 
 			// reset old Translation
-			g->setTranslation( xTrans, yTrans );
+			g.setTranslation( xTrans, yTrans );
 		}
 
 		void GeneratorGUI::setSkin( )
@@ -426,7 +426,7 @@ namespace psycle {
 			vuPanel_->repaint();
 		}
 
-		void GeneratorGUI::VUPanel::paint( ngrs::NGraphics * g )
+		void GeneratorGUI::VUPanel::paint( ngrs::Graphics& g )
 		{
 			/*int vol = pGui_->mac()._volumeDisplay;
 			int max = pGui_->mac()._volumeMaxDisplay;
@@ -450,7 +450,7 @@ namespace psycle {
 			}
 
 			if (max >0 || vol >0)
-			g->putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
+			g.putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
 			Global::configuration().icons().machine_skin(),
 			pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
 			pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
@@ -460,7 +460,7 @@ namespace psycle {
 			if (pGui_->sGeneratorVuPeak.width()) {
 			max /= pGui_->sGeneratorVuPeak.width();// restrict to leds
 			max *= pGui_->sGeneratorVuPeak.width();
-			g->putPixmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
+			g.putPixmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
 			Global::configuration().icons().machine_skin(),
 			pGui_->sGeneratorVuPeak.left(),
 			pGui_->sGeneratorVuPeak.top()
@@ -469,15 +469,15 @@ namespace psycle {
 			}
 
 			if (vol > 0) {
-			g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), Global::configuration().icons().machine_skin(),
+			g.putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), Global::configuration().icons().machine_skin(),
 			pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
 			}
 			*/
 		}
 
-		void GeneratorGUI::customSliderPaint( ngrs::NSlider * sl, ngrs::NGraphics * g )
+		void GeneratorGUI::customSliderPaint( ngrs::NSlider * sl, ngrs::Graphics& g )
 		{
-			g->putPixmap(0,0,coords().sPan.width(),coords().sPan.height(),SkinReader::Instance()->machines_bitmap(),coords().sPan.left(),coords().sPan.top());
+			g.putPixmap(0,0,coords().sPan.width(),coords().sPan.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().sPan.left(),coords().sPan.top());
 		}
 
 		void GeneratorGUI::updateSkin() {
@@ -529,26 +529,26 @@ namespace psycle {
 		{
 		}
 
-		void EffektGUI::paint( ngrs::NGraphics * g )
+		void EffektGUI::paint( ngrs::Graphics& g )
 		{
 			MachineGUI::paint(g);
 			// save old translation pos from the grpahics handler
-			long xTrans = g->xTranslation();
-			long yTrans = g->yTranslation();
+			long xTrans = g.xTranslation();
+			long yTrans = g.yTranslation();
 			// move translation to have place for selection border
-			g->setTranslation(xTrans + ident(), yTrans+ ident());
+			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
-			g->putPixmap(0,0, coords().bgCoords.width(), coords().bgCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().bgCoords.left(), coords().bgCoords.top() );
-		    g->drawText( coords().dNameCoords.x(), coords().dNameCoords.y() + g->textAscent(), mac()._editName);
+			g.putPixmap(0,0, coords().bgCoords.width(), coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top() );
+		    g.drawText( coords().dNameCoords.x(), coords().dNameCoords.y() + g.textAscent(), mac()._editName);
 
 			if (mac()._mute)
-				g->putPixmap( coords().dMuteCoords.left(), coords().dMuteCoords.top(), coords().muteCoords.width(), coords().muteCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().muteCoords.left(), coords().muteCoords.top());
+				g.putPixmap( coords().dMuteCoords.left(), coords().dMuteCoords.top(), coords().muteCoords.width(), coords().muteCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
 
 			if (mac().song()->machineSoloed == mac()._macIndex)
-				g->putPixmap( coords().dSoloCoords.left(), coords().dSoloCoords.top(), coords(). soloCoords.width(), coords().soloCoords.height(), SkinReader::Instance()->machines_bitmap(), coords().soloCoords.left(), coords().soloCoords.top() );
+				g.putPixmap( coords().dSoloCoords.left(), coords().dSoloCoords.top(), coords(). soloCoords.width(), coords().soloCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top() );
 
 			// move translation to original
-			g->setTranslation(xTrans, yTrans);
+			g.setTranslation(xTrans, yTrans);
 		}
 
 		void EffektGUI::setSkin( )
@@ -576,9 +576,9 @@ namespace psycle {
 		  mac().SetPan( (int) panSlider_->pos());
 		}
 
-		void EffektGUI::customSliderPaint( ngrs::NSlider * sl, ngrs::NGraphics * g )
+		void EffektGUI::customSliderPaint( ngrs::NSlider * sl, ngrs::Graphics& g )
 		{
-			g->putPixmap(0,0, coords().sPan.width(), coords().sPan.height(), SkinReader::Instance()->machines_bitmap(), coords().sPan.left(), coords().sPan.top() );
+			g.putPixmap(0,0, coords().sPan.width(), coords().sPan.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().sPan.left(), coords().sPan.top() );
 		}
 
 		void EffektGUI::onMousePress( int x, int y, int button )
@@ -636,7 +636,7 @@ namespace psycle {
 		}
 
 
-		void EffektGUI::VUPanel::paint( ngrs::NGraphics * g )
+		void EffektGUI::VUPanel::paint( ngrs::Graphics& g )
 		{
 			/*int vol = pGui_->mac()._volumeDisplay;
 			int max = pGui_->mac()._volumeMaxDisplay;
@@ -659,7 +659,7 @@ namespace psycle {
 			vol = 0;
 			}
 
-			g->putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
+			g.putPixmap(vol,0,clientWidth()-vol, pGui_->sGeneratorVu0.height(),
 			Global::configuration().icons().machine_skin(),
 			pGui_->sGenerator.left() + pGui_->dGeneratorVu.left() +vol,
 			pGui_->sGenerator.top() + pGui_->dGeneratorVu.top()
@@ -669,7 +669,7 @@ namespace psycle {
 			if (pGui_->sGeneratorVuPeak.width()) {
 			max /= pGui_->sGeneratorVuPeak.width();// restrict to leds
 			max *= pGui_->sGeneratorVuPeak.width();
-			g->putPixmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
+			g.putPixmap(max,0, pGui_->sGeneratorVuPeak.width(), pGui_->sGeneratorVuPeak.height(),
 			Global::configuration().icons().machine_skin(),
 			pGui_->sGeneratorVuPeak.left(),
 			pGui_->sGeneratorVuPeak.top()
@@ -678,7 +678,7 @@ namespace psycle {
 			}
 
 			if (vol > 0) {
-			g->putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), Global::configuration().icons().machine_skin(),
+			g.putPixmap(0,0,vol, pGui_->sGeneratorVu0.height(), Global::configuration().icons().machine_skin(),
 			pGui_->sGeneratorVu0.left(), pGui_->sGeneratorVu0.top()); // leds
 			}
 			*/

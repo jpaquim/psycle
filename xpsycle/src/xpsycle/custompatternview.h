@@ -187,7 +187,7 @@ namespace psycle {
       void setDy(int dy);
       int dy() const;
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
 
       virtual void onMousePress( int x, int y, int button );
       virtual void onMousePressed( int x, int y, int button );
@@ -210,9 +210,9 @@ namespace psycle {
       void addEvent( const ColumnEvent & event );
       std::string noteToString( int value, bool sharp );
 
-      void drawData( ngrs::NGraphics* g, int track, int line, int eventnr, int data , bool sharp, const ngrs::NColor & color );
+      void drawData( ngrs::Graphics& g, int track, int line, int eventnr, int data , bool sharp, const ngrs::NColor & color );
       // bypass column type
-      void drawString( ngrs::NGraphics* g, int track, int line, int eventnr, const std::string & data , const ngrs::NColor & color );
+      void drawString( ngrs::Graphics& g, int track, int line, int eventnr, const std::string & data , const ngrs::NColor & color );
 
       const PatCursor & cursor() const;
       void setCursor( const PatCursor & cursor );
@@ -257,19 +257,19 @@ namespace psycle {
       bool doDrag() const;
       bool doingKeybasedSelect() const;
 
-      virtual void customPaint( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+      virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-      virtual void drawTrackGrid( ngrs::NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
+      virtual void drawTrackGrid( ngrs::Graphics&g, int startLine, int endLine, int startTrack, int endTrack  );
 
-      virtual void drawColumnGrid( ngrs::NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  );
+      virtual void drawColumnGrid( ngrs::Graphics&g, int startLine, int endLine, int startTrack, int endTrack  );
 
-      virtual void drawPattern( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+      virtual void drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-      virtual void drawRestArea( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack );
+      virtual void drawRestArea( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-      virtual void drawSelBg( ngrs::NGraphics* g, const ngrs::NSize & selArea );
+      virtual void drawSelBg( ngrs::Graphics& g, const ngrs::NSize & selArea );
 
-      virtual void drawCellBg( ngrs::NGraphics* g, const PatCursor & cursor );
+      virtual void drawCellBg( ngrs::Graphics& g, const PatCursor & cursor );
 
 
     private:
@@ -316,9 +316,9 @@ namespace psycle {
 
       std::vector<ColumnEvent> events_;
 
-      void drawBlockData( ngrs::NGraphics* g, int xOff, int line, const std::string & text, const ngrs::NColor & color );
+      void drawBlockData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::NColor & color );
 
-      void drawStringData( ngrs::NGraphics* g, int xOff, int line, const std::string & text , const ngrs::NColor & color);
+      void drawStringData( ngrs::Graphics& g, int xOff, int line, const std::string & text , const ngrs::NColor & color);
 
       void updateStatusBar();
 

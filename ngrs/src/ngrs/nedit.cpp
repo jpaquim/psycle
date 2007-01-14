@@ -65,7 +65,7 @@ namespace ngrs {
     return text_;
   }
 
-  void NEdit::paint( NGraphics * g )
+  void NEdit::paint( Graphics& g )
   {
     dx = computeDx(g,text_);
 
@@ -77,35 +77,35 @@ namespace ngrs {
       std::string endText   = text_.substr(selEndIdx_);
 
       int xoff = screenPos.x();
-      g->drawText(  xoff , screenPos.y() , startText );
-      xoff+= g->textWidth( startText );
+      g.drawText(  xoff , screenPos.y() , startText );
+      xoff+= g.textWidth( startText );
       NColor oldColor = foreground();
-      g->setForeground( NColor(0,0,255));
-      g->fillRect( xoff, 0, g->textWidth( midText ), clientHeight() );
+      g.setForeground( NColor(0,0,255));
+      g.fillRect( xoff, 0, g.textWidth( midText ), clientHeight() );
       setForeground( oldColor );
-      g->drawText(  xoff , screenPos.y() , midText );
-      xoff+= g->textWidth( midText );
-      g->drawText(  xoff , screenPos.y() , endText );
+      g.drawText(  xoff , screenPos.y() , midText );
+      xoff+= g.textWidth( midText );
+      g.drawText(  xoff , screenPos.y() , endText );
 
     } else {
-      g->drawText( screenPos.x() , screenPos.y() ,text_);
+      g.drawText( screenPos.x() , screenPos.y() ,text_);
     }
 
     if (focus() && !readOnly_) drawCursor(g,text_);
   }
 
-  void NEdit::drawCursor(NGraphics* g, const std::string & text )
+  void NEdit::drawCursor(Graphics& g, const std::string & text )
   {
     NColor oldColor = foreground();
-    g->setForeground(font().textColor());
+    g.setForeground(font().textColor());
 
     NPoint screenPos = getScreenPos(g, text );
-    int w = g->textWidth(text.substr(0,pos()));
-    g->drawLine(screenPos.x()+w,screenPos.y() + g->textDescent(),screenPos.x()+w,screenPos.y() - g->textAscent());
-    g->setForeground(oldColor);
+    int w = g.textWidth(text.substr(0,pos()));
+    g.drawLine(screenPos.x()+w,screenPos.y() + g.textDescent(),screenPos.x()+w,screenPos.y() - g.textAscent());
+    g.setForeground(oldColor);
   }
 
-  int NEdit::computeDx( NGraphics* g, const std::string & text )
+  int NEdit::computeDx( Graphics& g, const std::string & text )
   {
     if (autoSize_) return 0;
 
@@ -114,12 +114,12 @@ namespace ngrs {
     NPoint screenPos = getScreenPos(g, text );
 
     int w = 0;
-    int wa = g->textWidth(text);
+    int wa = g.textWidth(text);
 
     if ( pos() == text.length() )
-      w  = wa + g->textWidth("A");
+      w  = wa + g.textWidth("A");
     else
-      w = g->textWidth(text.substr(0,pos()+1));
+      w = g.textWidth(text.substr(0,pos()+1));
 
     switch (halign_) {
       case nAlLeft:
@@ -162,21 +162,21 @@ namespace ngrs {
   }
 
 
-  NPoint NEdit::getScreenPos(NGraphics* g, const std::string & text )
+  NPoint NEdit::getScreenPos(Graphics& g, const std::string & text )
   {
     int xp=0;
     int yp=0;
 
-    int h = g->textAscent()+g->textDescent();
+    int h = g.textAscent()+g.textDescent();
 
     switch (valign_) {
-    case nAlCenter : yp = (clientHeight() - g->textHeight()) / 2  + g->textAscent(); break;
+    case nAlCenter : yp = (clientHeight() - g.textHeight()) / 2  + g.textAscent(); break;
     case nAlTop    : yp = h;                  break;
-    case nAlBottom : yp = (int) spacingHeight()- g->textDescent();         break;
+    case nAlBottom : yp = (int) spacingHeight()- g.textDescent();         break;
     default        : yp = h;                  break;
     }
 
-    int w = g->textWidth(text.c_str());
+    int w = g.textWidth(text.c_str());
     switch (halign_) {
     case nAlCenter : xp = d2i((spacingWidth() - w ) / 2.0) - dx;  break;
     case nAlLeft   : xp = -dx;                  break;

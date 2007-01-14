@@ -35,7 +35,7 @@ namespace ngrs {
 
     ~NToolBarSeparator();
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
 
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;

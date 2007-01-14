@@ -21,7 +21,7 @@
 #define NSHAPE_H
 
 #include "nrect.h"
-#include "ngraphics.h"
+#include "graphics.h"
 #include "nsize.h"
 #include "npoint.h"
 #include "nregion.h"
@@ -45,9 +45,9 @@ namespace ngrs {
     virtual void setHeight(int height);
     const NRect & rectArea() const;
 
-    virtual void fill(NGraphics* g, const NRegion & repaintArea);
-    virtual void drawRectPicker(NGraphics* g);
-    virtual void drawPicker(NGraphics* g);
+    virtual void fill(Graphics& g, const NRegion & repaintArea);
+    virtual void drawRectPicker(Graphics& g);
+    virtual void drawPicker(Graphics& g);
     virtual int  overPicker(int x, int y);
 
     int top() const;

@@ -74,8 +74,8 @@ namespace ngrs {
 
     WinHandle win() const;
     NPanel* pane();
-    NGraphics* graphics();
-    NGraphics* graphics(NVisualComponent* comp);
+    Graphics& graphics();
+    Graphics& graphics(NVisualComponent* comp);
 
     void repaint(NVisualComponent* sender, const NRegion & repaintArea, bool swap = true);
 
@@ -130,8 +130,8 @@ namespace ngrs {
 
     const NRect & userGeometry() const;
 
-    virtual void setMinimumWidth (int minWidth);
-    virtual void setMinimumHeight(int minHeight);
+    virtual void setMinimumWidth( int minWidth );
+    virtual void setMinimumHeight( int minHeight );
 
     void requestSelection();
     virtual void onSelection();
@@ -155,7 +155,7 @@ namespace ngrs {
 
     WinHandle win_;
     NPanel* pane_;
-    NGraphics* graphics_;
+    Graphics graphics_;
     NVisualComponent* dragBase_;
     NVisualComponent* selectedBase_;
     NVisualComponent* mousePressBase_;

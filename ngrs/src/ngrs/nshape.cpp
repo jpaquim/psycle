@@ -39,7 +39,7 @@ namespace ngrs {
     return rectArea_;
   }
 
-  void NShape::fill( NGraphics * g, const NRegion & repaintArea )
+  void NShape::fill( Graphics& g, const NRegion & repaintArea )
   {
   }
 
@@ -93,25 +93,25 @@ namespace ngrs {
     return 0;
   }
 
-  void NShape::drawPicker( NGraphics * g )
+  void NShape::drawPicker( Graphics& g )
   {
   }
 
-  void NShape::drawRectPicker( NGraphics * g )
+  void NShape::drawRectPicker( Graphics& g )
   {
     int pickWidth  = 4;
     int pickHeight = 4;
 
-    //if (((NWindow*)ownerWindow())->selected()!=this) g->setForeground(NColor::gray); else
-    g->setForeground(NColor(0,0,0));
-    /*if (moveable()->topLeft())   */  g->fillRect(left(),top(),pickWidth,pickHeight);
-    /*if (moveable()->topRight())  */  g->fillRect(left()+width()-pickWidth,top(),pickWidth,pickHeight);
-    /*if (moveable()->bottomLeft())*/  g->fillRect(left(),top()+height()-pickHeight,pickWidth,pickHeight);
-    /*if (moveable()->bottomRight())*/ g->fillRect(left()+width()-pickWidth,top()+height()-pickHeight,pickWidth,pickHeight);
-    /*if (moveable()->midLeft())*/     g->fillRect(left(),top()+height() / 2 - pickHeight / 2,pickWidth,pickHeight);
-    /*if (moveable()->midRight())*/    g->fillRect(left()+width()-pickWidth,top()+ height() / 2 - pickHeight / 2,pickWidth,pickHeight);
-    /*if (moveable()->topMid())*/      g->fillRect(left()+width() / 2 - pickWidth / 2 ,top(),pickWidth,pickHeight);
-    /*if (moveable()->bottomMid())*/   g->fillRect(left()+width() / 2 - pickWidth / 2 ,top()+height()-pickHeight,pickWidth,pickHeight);
+    //if (((NWindow*)ownerWindow())->selected()!=this) g.setForeground(NColor::gray); else
+    g.setForeground(NColor(0,0,0));
+    /*if (moveable()->topLeft())   */  g.fillRect(left(),top(),pickWidth,pickHeight);
+    /*if (moveable()->topRight())  */  g.fillRect(left()+width()-pickWidth,top(),pickWidth,pickHeight);
+    /*if (moveable()->bottomLeft())*/  g.fillRect(left(),top()+height()-pickHeight,pickWidth,pickHeight);
+    /*if (moveable()->bottomRight())*/ g.fillRect(left()+width()-pickWidth,top()+height()-pickHeight,pickWidth,pickHeight);
+    /*if (moveable()->midLeft())*/     g.fillRect(left(),top()+height() / 2 - pickHeight / 2,pickWidth,pickHeight);
+    /*if (moveable()->midRight())*/    g.fillRect(left()+width()-pickWidth,top()+ height() / 2 - pickHeight / 2,pickWidth,pickHeight);
+    /*if (moveable()->topMid())*/      g.fillRect(left()+width() / 2 - pickWidth / 2 ,top(),pickWidth,pickHeight);
+    /*if (moveable()->bottomMid())*/   g.fillRect(left()+width() / 2 - pickWidth / 2 ,top()+height()-pickHeight,pickWidth,pickHeight);
   }
 
   int NShape::overPicker( int x, int y )

@@ -32,7 +32,7 @@ namespace ngrs {
   class NSlider;
   class NComboBox;
   class NItemEvent;
-  class NGraphics;
+  class Graphics;
 }
 
 namespace psycle { 
@@ -47,7 +47,7 @@ class EnvDialog : public ngrs::NWindow
 	public:
 		EnvPanel() {};
 		~EnvPanel() {};
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
 		void setEnvelope( int attack, int decay, int sustain, int release ) {
 		  m_attack=attack;
 		  m_decay=decay;

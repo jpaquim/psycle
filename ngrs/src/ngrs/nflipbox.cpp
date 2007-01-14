@@ -96,21 +96,21 @@ namespace ngrs {
     return style_;
   }
 
-  void NFlipBox::paint( NGraphics* g ) {
+  void NFlipBox::paint( Graphics& g ) {
 
     if ( style() & nFlipBoxLine ) {
 
-      NPen oldPen = g->pen();
-      g->setForeground( NColor( 200, 200, 200 ) );
+      NPen oldPen = g.pen();
+      g.setForeground( NColor( 200, 200, 200 ) );
       NPen pen;
       pen.setLineStyle( nLineOnOffDash );
-      g->setPen( pen );	  
+      g.setPen( pen );	  
       int xoff = flipBar_->flipperWidth() / 2;
 
-      g->drawLine( xoff, flipBar_->header()->height() / 2, xoff, height() );	  
-      g->drawLine( xoff, flipBar_->header()->height() / 2, flipBar_->header()->left(), flipBar_->header()->height() / 2 );
+      g.drawLine( xoff, flipBar_->header()->height() / 2, xoff, height() );	  
+      g.drawLine( xoff, flipBar_->header()->height() / 2, flipBar_->header()->left(), flipBar_->header()->height() / 2 );
 
-      g->setPen( oldPen );
+      g.setPen( oldPen );
     }
   }
 

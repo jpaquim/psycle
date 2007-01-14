@@ -21,6 +21,7 @@
 #include "song.h"
 #include "riff.h"
 #include "configuration.h"
+#include "skinreader.h"
 #include "waveedframe.h"
 #include "waveedchildview.h"
 #include "defaultbitmaps.h"
@@ -132,7 +133,7 @@ namespace psycle {
 
     void WaveEdFrame::InitToolBar( )
     {
-      DefaultBitmaps & icons = Global::pConfig()->icons();
+      DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
 
       toolBar = new ngrs::NToolBar();
       pane()->add(toolBar, ngrs::nAlTop);

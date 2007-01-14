@@ -467,13 +467,13 @@ namespace psycle {
       return dy_;
     }
 
-    void CustomPatternView::paint( ngrs::NGraphics* g ) {
+    void CustomPatternView::paint( ngrs::Graphics& g ) {
 
-      ngrs::NPoint lineArea = linesFromRepaint(g->repaintArea());
+      ngrs::NPoint lineArea = linesFromRepaint(g.repaintArea());
       int startLine = lineArea.x();
       int endLine   = lineArea.y();
 
-      ngrs::NPoint trackArea = tracksFromRepaint(g->repaintArea());
+      ngrs::NPoint trackArea = tracksFromRepaint(g.repaintArea());
       int startTrack = trackArea.x();
       int endTrack   = trackArea.y();
 
@@ -481,11 +481,11 @@ namespace psycle {
 
     }
 
-    void CustomPatternView::drawRestArea( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack ) {
-      g->setForeground( restAreaColor_ );
+    void CustomPatternView::drawRestArea( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack ) {
+      g.setForeground( restAreaColor_ );
       int endTop     = lineNumber() * rowHeight() - dy();
       int endHeight  = std::max(0, clientHeight() - endTop);
-      g->fillRect(0,endTop,clientWidth(),endHeight);
+      g.fillRect(0,endTop,clientWidth(),endHeight);
 
       std::map<int, TrackGeometry>::const_iterator it;
       it = trackGeometrics().lower_bound( trackNumber()-1 );
@@ -493,10 +493,10 @@ namespace psycle {
       if ( it != trackGeometrics().end() )
         endLeft = it->second.left() + it->second.width() - dx();
       int endWidth = std::max(0, clientWidth() - endLeft);
-      g->fillRect(endLeft,0,endWidth,clientHeight());
+      g.fillRect(endLeft,0,endWidth,clientHeight());
     }
 
-    void CustomPatternView::drawTrackGrid( ngrs::NGraphics*g, int startLine, int endLine, int startTrack, int endTrack  ) {
+    void CustomPatternView::drawTrackGrid( ngrs::Graphics&g, int startLine, int endLine, int startTrack, int endTrack  ) {
       std::map<int, TrackGeometry>::const_iterator it;
       it = trackGeometrics().lower_bound( endTrack );
       int trackWidth = 0;
@@ -507,31 +507,31 @@ namespace psycle {
       int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
       if ( lineGridEnabled() ) {
-        g->setForeground( lineSeparatorColor() );
+        g.setForeground( lineSeparatorColor() );
         for (int y = startLine; y <= endLine; y++)
-          g->drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
+          g.drawLine(0,y* rowHeight() - dy(),trackWidth,y* rowHeight()-dy());
       }
 
-      g->setForeground( bigTrackSeparatorColor() );
+      g.setForeground( bigTrackSeparatorColor() );
       it = trackGeometrics().lower_bound( startTrack );
       for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) //  oolIdent px space at begin of trackCol{
-        g->fillRect( it->second.left() - dx(),0,colIdent,lineHeight);
+        g.fillRect( it->second.left() - dx(),0,colIdent,lineHeight);
 
-      g->setForeground( background() );
+      g.setForeground( background() );
       it = trackGeometrics().lower_bound( startTrack );
       for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) {
         // now refill the left and right ident areas
-        g->fillRect( it->second.left() - dx() + colIdent,0,trackLeftIdent(),lineHeight);
+        g.fillRect( it->second.left() - dx() + colIdent,0,trackLeftIdent(),lineHeight);
         // the right
-        g->fillRect( it->second.left() + std::max( it->second.width(), trackMinWidth_ ) - trackRightIdent() - dx(),0,trackRightIdent(),lineHeight);
+        g.fillRect( it->second.left() + std::max( it->second.width(), trackMinWidth_ ) - trackRightIdent() - dx(),0,trackRightIdent(),lineHeight);
       }
 
-      g->setForeground( smallTrackSeparatorColor() );
+      g.setForeground( smallTrackSeparatorColor() );
       it = trackGeometrics().lower_bound( startTrack );
       for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) // track small separators
-        g->drawLine( it->second.left()-dx(),0, it->second.left()-dx(),lineHeight);
+        g.drawLine( it->second.left()-dx(),0, it->second.left()-dx(),lineHeight);
 
-      g->setForeground( foreground( ) );
+      g.setForeground( foreground( ) );
 
     }
 
@@ -561,10 +561,10 @@ namespace psycle {
       return trackRightIdent_;
     }
 
-    void CustomPatternView::drawColumnGrid( ngrs::NGraphics*g, int startLine, int endLine, int startTrack, int endTrack ) {
+    void CustomPatternView::drawColumnGrid( ngrs::Graphics&g, int startLine, int endLine, int startTrack, int endTrack ) {
       if ( events_.size() == 0 || !colGridEnabled() ) return;
 
-      g->setForeground( separatorColor() );
+      g.setForeground( separatorColor() );
       int lineHeight = ((endLine +1) * rowHeight()) - dy();
 
       std::map<int, TrackGeometry>::const_iterator it;
@@ -582,16 +582,16 @@ namespace psycle {
                         case ColumnEvent::hex4 : col+= 4*cellWidth(); 	break;
                         case ColumnEvent::note : col+= noteCellWidth(); break;
           }
-          g->drawLine(trackGeometry.left()+colIdent+trackLeftIdent()+col-dx(),0,trackGeometry.left()+colIdent+trackLeftIdent()+col-dx(),lineHeight);
+          g.drawLine(trackGeometry.left()+colIdent+trackLeftIdent()+col-dx(),0,trackGeometry.left()+colIdent+trackLeftIdent()+col-dx(),lineHeight);
         }
       }
     }
 
-    void CustomPatternView::drawPattern( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack ) {
+    void CustomPatternView::drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack ) {
 
     }
 
-    void CustomPatternView::drawData( ngrs::NGraphics* g, int track, int line, int eventnr, int data, bool sharp, const ngrs::NColor & color ) {
+    void CustomPatternView::drawData( ngrs::Graphics& g, int track, int line, int eventnr, int data, bool sharp, const ngrs::NColor & color ) {
 
       std::map<int, TrackGeometry>::const_iterator it;
       it = trackGeometrics().lower_bound( track );
@@ -631,7 +631,7 @@ namespace psycle {
       }
     }
 
-    void CustomPatternView::drawString( ngrs::NGraphics* g, int track, int line, int eventnr, const std::string & data , const ngrs::NColor & color ) {
+    void CustomPatternView::drawString( ngrs::Graphics& g, int track, int line, int eventnr, const std::string & data , const ngrs::NColor & color ) {
       std::map<int, TrackGeometry>::const_iterator it;
       it = trackGeometrics().lower_bound( track );
       if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
@@ -641,26 +641,26 @@ namespace psycle {
       drawStringData( g, xOff + eventOffset(eventnr,0), line, data, color );
     }
 
-    void CustomPatternView::drawBlockData( ngrs::NGraphics * g, int xOff, int line, const std::string & text, const ngrs::NColor & color)
+    void CustomPatternView::drawBlockData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::NColor & color)
     {					
-      int yp = ( rowHeight() - g->textHeight()) / 2  + g->textAscent();
+      int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
       int yOff = line  * rowHeight() + yp  - dy();
       int col = 0;
       for (int i = 0; i < text.length(); i++) {
-        g->drawText(xOff + col,yOff,text.substr(i,1), color);
+        g.drawText(xOff + col,yOff,text.substr(i,1), color);
         col += cellWidth();
       }
     }
 
-    void CustomPatternView::drawStringData( ngrs::NGraphics* g, int xOff, int line, const std::string & text, const ngrs::NColor & color )
+    void CustomPatternView::drawStringData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::NColor & color )
     {
-      int yp = ( rowHeight() - g->textHeight()) / 2  + g->textAscent();
+      int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
       int yOff = line  * rowHeight() + yp  - dy();
 
-      g->drawText(xOff,yOff,text, color );
+      g.drawText(xOff,yOff,text, color );
     }
 
-    void CustomPatternView::drawCellBg( ngrs::NGraphics* g, const PatCursor& cursor ) {
+    void CustomPatternView::drawCellBg( ngrs::Graphics& g, const PatCursor& cursor ) {
       std::map<int, TrackGeometry>::const_iterator it;
       it = trackGeometrics().lower_bound( cursor.track() );
       if ( it == trackGeometrics().end() ) return;
@@ -668,8 +668,8 @@ namespace psycle {
       int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
       int yOff = cursor.line()  * rowHeight()  - dy();
       int colOffset = eventOffset( cursor.eventNr(), cursor.col() );
-      g->setForeground( cursorColor_ );
-      g->fillRect( xOff + colOffset, yOff, eventColWidth( cursor.eventNr() ), rowHeight() );
+      g.setForeground( cursorColor_ );
+      g.fillRect( xOff + colOffset, yOff, eventColWidth( cursor.eventNr() ), rowHeight() );
     }
 
     int CustomPatternView::eventOffset( int eventnr, int col ) const {
@@ -722,7 +722,7 @@ namespace psycle {
       return eventColWidth_;
     }
 
-    void CustomPatternView::customPaint( ngrs::NGraphics* g, int startLine, int endLine, int startTrack, int endTrack ) {
+    void CustomPatternView::customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack ) {
       drawTrackGrid(g, startLine, endLine, startTrack, endTrack);			
       drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
       drawPattern(g, startLine, endLine, startTrack, endTrack);
@@ -730,15 +730,15 @@ namespace psycle {
       drawSelBg( g, selection() );
     }
 
-    void CustomPatternView::drawSelBg( ngrs::NGraphics* g, const ngrs::NSize & selArea) {			
+    void CustomPatternView::drawSelBg( ngrs::Graphics& g, const ngrs::NSize & selArea) {			
       int x1Off = xOffByTrack( selArea.left() );
       int y1Off = selArea.top()  * rowHeight() ;
 
       int x2Off = xOffByTrack( selArea.right() );
       int y2Off = selArea.bottom() * rowHeight();
 
-      g->setForeground( selectionColor() );
-      g->fillRect(x1Off - dx(), y1Off -dy(), x2Off-x1Off, y2Off-y1Off);
+      g.setForeground( selectionColor() );
+      g.fillRect(x1Off - dx(), y1Off -dy(), x2Off-x1Off, y2Off-y1Off);
     }
 
     void CustomPatternView::onMousePress( int x, int y, int button ) {

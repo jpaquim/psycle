@@ -38,11 +38,13 @@ namespace ngrs {
   bool NWindow::paintFlag = true;
 
   NWindow::NWindow()
-    : NVisual(), statusModel_(0)
+    : NVisual(), 
+      statusModel_(0), 
+      win_( NApp::system().registerWindow(NApp::system().rootWindow()) ),
+      graphics_( win_ )
   {  
     changeState_ = true;
-    dblBuffer_ = true;
-    win_ = NApp::system().registerWindow(NApp::system().rootWindow());
+    dblBuffer_ = true;    
     userPos.setPosition(0,0,200,200);
     NApp::addWindow(win_, this);
 
@@ -50,8 +52,7 @@ namespace ngrs {
     pane_->setSkin( NApp::config()->skin("pane") );
     pane_->setLayout( NAlignLayout() );    
     add(pane_);
-
-    graphics_ = new NGraphics(win_);
+    
     dragBase_ = 0;
     dragRectPoint = 0;
     setTitle("Window");
@@ -64,11 +65,29 @@ namespace ngrs {
     mousePressBase_ = 0;
   }
 
+  NWindow::NWindow( const NWindow & topWindow ) :
+     NVisual(),
+     win_( NApp::system().registerWindow(NApp::system().rootWindow()) ),
+     graphics_( win_ )
+  {
+    changeState_ = true;
+    dblBuffer_ = true;
+    NApp::addWindow(win_, this);
+    pane_ = new NPanel();
+    pane_->setTransparent(false);
+    add(pane_);
+    pane_->setBackground(NColor(255,255,255));
+    pane_->setLayout(NAlignLayout());
+    dragBase_ = 0;
+    dragRectPoint = 0;
+    setTitle("Window");
+    selectedBase_ = lastOver_ = 0;
+    NVisual::setVisible(false);
+  }
 
   NWindow::~NWindow()
   {
     if (mapped()) NApp::system().unmapWindow(win_);
-    delete graphics_;
     NApp::removeWindow(win_);
     NApp::system().destroyWindow(win_);
   }
@@ -77,9 +96,9 @@ namespace ngrs {
   {
     NVisual::setVisible(on);
     if (on) {
-      graphics_->setVisible(on);
+      graphics_.setVisible(on);
       pane_->resize();
-      repaint(pane(),NRect(0,0,width(),height()));
+      repaint( pane(), NRect( 0, 0, width(), height() ) );
       if (modal_) {
 #ifdef __unix__
         NApp::system().setModalMode( win() );
@@ -132,11 +151,11 @@ namespace ngrs {
       XSync(NApp::system().dpy(),false);
       NApp::system().unmapWindow(win_);
       XSync(NApp::system().dpy(),false);
-      graphics_->setVisible(on);
+      graphics_.setVisible(on);
 #else
       ShowWindow( win_, SW_HIDE );
       UpdateWindow( win_ );
-      graphics_->setVisible( on );
+      graphics_.setVisible( on );
 #endif
     }
   }
@@ -167,14 +186,14 @@ namespace ngrs {
 
       if (pane_->width() !=width() || pane_->height() !=height())
         pane_->setPosition(0,0,width(),height());
-      graphics_->setRegion(repaintArea);
+      graphics_.setRegion(repaintArea);
       pane_->draw(graphics_,repaintArea,sender);
-      if (dblBuffer_ && swap) graphics()->swap(repaintArea.rectClipBox());
+      if (dblBuffer_ && swap) graphics().swap(repaintArea.rectClipBox());
     }
   }
 
 
-  NGraphics * NWindow::graphics( )
+  Graphics& NWindow::graphics( )
   {
     return graphics_;
   }
@@ -211,7 +230,7 @@ namespace ngrs {
     dragBase_ = 0;
     mousePressBase_ = 0;
 
-    graphics_->setRegion(NRect(0,0,width(),height()));
+    graphics_.setRegion(NRect(0,0,width(),height()));
     NVisualComponent* obj = pane()->overObject(graphics(),x,y);
     if (obj!=NULL) {
       // send mousepress
@@ -250,7 +269,7 @@ namespace ngrs {
 
   void NWindow::onMouseOver( int x, int y )
   {
-    graphics_->setRegion(NRect(0,0,width(),height()));
+    graphics_.setRegion(NRect(0,0,width(),height()));
     if (dragBase_!=NULL) {    
       if (dragBase_->moveable().style()!=0) doDrag(dragBase_,x,y);
       dragBase_->onMouseOver( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop());
@@ -559,29 +578,10 @@ namespace ngrs {
     changeState_ = on;
   }
 
-  NWindow::NWindow( const NWindow & topWindow )
-  {
-    changeState_ = true;
-    dblBuffer_ = true;
-    win_ = NApp::system().registerWindow(topWindow.win());
-    NApp::addWindow(win_, this);
-    pane_ = new NPanel();
-    pane_->setTransparent(false);
-    add(pane_);
-    pane_->setBackground(NColor(255,255,255));
-    pane_->setLayout(NAlignLayout());
-    graphics_ = new NGraphics(win_);
-    dragBase_ = 0;
-    dragRectPoint = 0;
-    setTitle("Window");
-    selectedBase_ = lastOver_ = 0;
-    NVisual::setVisible(false);
-  }
-
   void NWindow::setDoubleBuffer( bool on )
   {
     dblBuffer_ = on;
-    graphics_->setDoubleBuffer(on);
+    graphics_.setDoubleBuffer(on);
   }
 
   bool NWindow::doubleBuffered( ) const
@@ -682,19 +682,19 @@ namespace ngrs {
 
   }
 
-  NGraphics * NWindow::graphics( NVisualComponent * comp )
+  Graphics& NWindow::graphics( NVisualComponent * comp )
   {
     NRegion region = comp->geometry()->region();
     region.move(comp->absoluteLeft()-comp->left(),comp->absoluteTop()-comp->top());
-    graphics_->setRegion(region);
-    graphics_->setClipping(region);
-    graphics_->setTranslation(comp->absoluteLeft()-comp->scrollDx(),comp->absoluteTop()-comp->scrollDy());
+    graphics_.setRegion(region);
+    graphics_.setClipping(region);
+    graphics_.setTranslation(comp->absoluteLeft()-comp->scrollDx(),comp->absoluteTop()-comp->scrollDy());
     return graphics_;
   }
 
   void NWindow::onMouseDoublePress( int x, int y, int button )
   {
-    graphics_->setRegion(NRect(0,0,width(),height()));
+    graphics_.setRegion(NRect(0,0,width(),height()));
     NVisualComponent* obj = pane()->overObject(graphics(),x,y);
     if (obj) {
       dragBase_ = 0;             
@@ -727,7 +727,7 @@ namespace ngrs {
     if ( comp ) {
       NVisualComponent* oldFocus = selectedBase_;
       checkForRemove(0);
-      graphics_->setRegion(NRect(0,0,width(),height()));
+      graphics_.setRegion(NRect(0,0,width(),height()));
       selectedBase_ = comp;
       if (oldFocus) oldFocus->onExit();
       selectedBase_->onEnter();

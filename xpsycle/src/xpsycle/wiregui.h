@@ -55,7 +55,7 @@ namespace psycle
                 void setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
                 void insertBend( const ngrs::NPoint & pts );
 
-				virtual void paint( ngrs::NGraphics* g );
+				virtual void paint( ngrs::Graphics& g );
 			
 				void updateSkin();
 
@@ -85,7 +85,7 @@ namespace psycle
 				double triangle_size_wide;
 				double triangle_size_indent;
 				
-				void drawArrow( ngrs::NGraphics * g, const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
+				void drawArrow( ngrs::Graphics& g, const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
 				void initPopupMenu( );
 
 				void onAddBend( ngrs::NButtonEvent* ev );

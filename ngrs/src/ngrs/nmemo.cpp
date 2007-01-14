@@ -276,7 +276,7 @@ namespace ngrs {
 
   // the follwing methods are painting the content
 
-  void NMemo::TextArea::paint( NGraphics * g )
+  void NMemo::TextArea::paint( Graphics& g )
   {
     std::vector<Line>::iterator it = lower_bound( lines.begin(), lines.end(), scrollDy() );
 
@@ -293,12 +293,12 @@ namespace ngrs {
     }
   }
 
-  void NMemo::TextArea::drawCursor( NGraphics* g, int x, int y )
+  void NMemo::TextArea::drawCursor( Graphics& g, int x, int y )
   {
     NColor oldColor = foreground();
-    g->setForeground(font().textColor());
-    g->drawLine( x , y - g->textAscent() , x , y );
-    g->setForeground(oldColor);
+    g.setForeground(font().textColor());
+    g.drawLine( x , y - g.textAscent() , x , y );
+    g.setForeground(oldColor);
   }
 
   void NMemo::TextArea::onKeyPress( const NKeyEvent & keyEvent )
@@ -708,22 +708,22 @@ namespace ngrs {
     return Mid;
   }
 
-  void NMemo::TextArea::Line::drawText( NGraphics * g )
+  void NMemo::TextArea::Line::drawText( Graphics& g )
   {
     if (!pArea->wordWrap()) {
-      g->drawText( 0 , top() + g->textAscent() , text_);
+      g.drawText( 0 , top() + g.textAscent() , text_);
     } else
     {
-      int yp = top() + g->textAscent();
+      int yp = top() + g.textAscent();
       std::string::size_type pos = 0;
 
       for (std::vector<std::string::size_type>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
         std::string::size_type lineEnd = *it;
-        g->drawText( 0, yp, text_.substr(pos,lineEnd-pos));
-        yp+=g->textHeight();
+        g.drawText( 0, yp, text_.substr(pos,lineEnd-pos));
+        yp+=g.textHeight();
         pos = lineEnd;
       }
-      g->drawText( 0, yp, text_.substr(pos) );
+      g.drawText( 0, yp, text_.substr(pos) );
     }
   }
 

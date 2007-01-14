@@ -56,7 +56,7 @@ namespace ngrs {
     int hgap();
     int vgap();
 
-    virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRegion & repaintArea,NVisualComponent* sender);
+    virtual void drawComponents(class NVisualComponent* target, Graphics& g , const NRegion & repaintArea,NVisualComponent* sender);
 
   private:
 

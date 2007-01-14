@@ -41,7 +41,7 @@ namespace ngrs {
 
     ~NImage();
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
 
     void loadFromFile( const std::string & filename);
     void createFromXpmData(const char** data);

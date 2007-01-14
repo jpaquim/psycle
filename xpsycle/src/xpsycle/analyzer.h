@@ -47,7 +47,7 @@ namespace psycle {
 
       void clearMachineCallBack();
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
 
     private:
 

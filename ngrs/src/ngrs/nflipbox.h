@@ -54,7 +54,7 @@ namespace ngrs {
     int flipperWidth() const;
 
     virtual int preferredHeight() const;
-    virtual void paint( NGraphics* g );
+    virtual void paint( Graphics& g );
 
   private:
 

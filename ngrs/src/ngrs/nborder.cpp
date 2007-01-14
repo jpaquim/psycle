@@ -31,7 +31,7 @@ namespace ngrs {
   {
   }
 
-  void NBorder::paint( NGraphics * g, const NShape & geometry )
+  void NBorder::paint( Graphics& g, const NShape & geometry )
   {
   }
 

@@ -94,26 +94,26 @@ namespace psycle {
           lineShape->setPoints(p1,p2);
         }
 
-		void WireGUI::paint( ngrs::NGraphics * g )
+		void WireGUI::paint( ngrs::Graphics& g )
 		{
 			ngrs::NPen pen;
 			pen.setLineWidth(2);
-			g->setPen(pen);
+			g.setPen(pen);
 
-            g->setTranslation( g->xTranslation()-left(), g->yTranslation()-top() );
+            g.setTranslation( g.xTranslation()-left(), g.yTranslation()-top() );
               
             // draw the bended lines           
             ngrs::NPoint startPt = lineShape->p1();                        
             std::vector<ngrs::NPoint>::const_iterator it = lineShape->bendPts().begin();
             for ( ; it < lineShape->bendPts().end(); it++ ) {
               ngrs::NPoint pt = *it;
-              g->drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() );              
+              g.drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() );              
               startPt = pt;                         
             }                                                                                    
-            g->drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
+            g.drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
             
             // draw the arrows with resetted pen ( normal line width )
-            g->resetPen();
+            g.resetPen();
             startPt = lineShape->p1();                        
             it = lineShape->bendPts().begin();
             for ( ; it < lineShape->bendPts().end(); it++ ) {
@@ -123,10 +123,10 @@ namespace psycle {
             }                                                                           		
 			drawArrow( g, startPt, lineShape->p2() );
 
-			g->setTranslation( g->xTranslation()+left(), g->yTranslation()+top() );
+			g.setTranslation( g.xTranslation()+left(), g.yTranslation()+top() );
 		}
 
-		void WireGUI::drawArrow( ngrs::NGraphics * g , const ngrs::NPoint& p1, const ngrs::NPoint& p2 )
+		void WireGUI::drawArrow( ngrs::Graphics& g , const ngrs::NPoint& p1, const ngrs::NPoint& p2 )
 		{
 			// Spaces between the end and startPoint of the Line
 
@@ -195,20 +195,20 @@ namespace psycle {
 			fillPoly[3].setX( pol[4].x() );
 			fillPoly[3].setY( pol[4].y() );
 
-			g->setForeground(rtBrush);
-			g->fillPolygon(fillPoly,3);
-			g->setForeground(ltBrush);
-			g->fillPolygon(&fillPoly[1],3);
-			g->setForeground(btBrush);
-			g->fillPolygon(&fillPoly[3], 4);
+			g.setForeground(rtBrush);
+			g.fillPolygon(fillPoly,3);
+			g.setForeground(ltBrush);
+			g.fillPolygon(&fillPoly[1],3);
+			g.setForeground(btBrush);
+			g.fillPolygon(&fillPoly[3], 4);
 
-			g->setForeground(polyInnardsColor);
-			g->drawPolygon(fillPoly,3);
-			g->drawPolygon(&fillPoly[1],3);
-			g->drawPolygon(&fillPoly[3], 4);
+			g.setForeground(polyInnardsColor);
+			g.drawPolygon(fillPoly,3);
+			g.drawPolygon(&fillPoly[1],3);
+			g.drawPolygon(&fillPoly[3], 4);
 
-			g->setForeground( borderColor_ );
-			g->drawPolygon(&pol[1], 4);
+			g.setForeground( borderColor_ );
+			g.drawPolygon(&pol[1], 4);
 		}
 
 		void WireGUI::updateSkin( )
