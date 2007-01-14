@@ -77,7 +77,7 @@ namespace ngrs {
     return headerItem_;
   }
 
-  void NTreeNode::paint( NGraphics* g ) {
+  void NTreeNode::paint( Graphics& g ) {
     /*
     NVisualComponent* last = dynamic_cast<NVisualComponent*>( parent() )->visualComponents().back();
     if ( this != last )

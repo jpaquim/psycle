@@ -41,6 +41,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <sstream>
+#include <exception>
 
 #if defined XPSYCLE__CONFIGURATION
 #include <xpsycle/install_paths.h>
@@ -56,20 +57,14 @@ namespace psycle {
 			#endif
 			setXmlDefaults();
 			setSkinDefaults();
-			loadConfig();
-			#ifdef __unix__
-			bitmaps_ = new DefaultBitmaps(this);
-			#else
-			bitmaps_ = new DefaultBitmaps();
-			#endif  
+			loadConfig();			
 			_RecordTweaks = false;
 			_RecordUnarmed = true;
 		}
 
 
 		Configuration::~Configuration()
-		{
-			delete bitmaps_;
+		{			
 		}
 
 		const std::string & Configuration::iconPath() const {
@@ -916,12 +911,7 @@ if (id == "block_copy") {
 																																																																																																					}
 							}
 		}
-
-		DefaultBitmaps & Configuration::icons( )
-		{
-			return *bitmaps_;
-		}
-
+		
 		InputHandler & Configuration::inputHandler() {
 			return inputHandler_;
 		}

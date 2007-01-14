@@ -74,15 +74,15 @@ namespace psycle {
     }
 
 
-    void Cell::paint( ngrs::NGraphics * g )
+    void Cell::paint( ngrs::Graphics& g )
     {
       int CW = clientWidth();
       int CH = clientHeight();
 
-      g->setForeground( SkinReader::Instance()->framemachine_info().machineGUITopColor );
-      g->fillRect(0,0,CW, CH / 2);
-      g->setForeground( SkinReader::Instance()->framemachine_info().machineGUIBottomColor );
-      g->fillRect(0,CH/2,CW, CH / 2);
+      g.setForeground( SkinReader::Instance()->framemachine_info().machineGUITopColor );
+      g.fillRect(0,0,CW, CH / 2);
+      g.setForeground( SkinReader::Instance()->framemachine_info().machineGUIBottomColor );
+      g.fillRect(0,CH/2,CW, CH / 2);
     }
 
     int Cell::preferredWidth() const {
@@ -126,7 +126,7 @@ namespace psycle {
       max_range = max;
     }
 
-    void Knob::paint( ngrs::NGraphics * g )
+    void Knob::paint( ngrs::Graphics& g )
     {
       Cell::paint(g);
 
@@ -138,7 +138,7 @@ namespace psycle {
         int xn = frame*K_XSIZE;
         int CH = clientHeight();
 
-        g->putBitmap(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE, SkinReader::Instance()->defaultBitmaps().tbmainknob(), xn,0);
+        g.putBitmap(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE, SkinReader::Instance()->bitmaps().tbmainknob(), xn,0);
       }
     }
 

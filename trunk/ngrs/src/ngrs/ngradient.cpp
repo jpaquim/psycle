@@ -74,7 +74,7 @@ namespace ngrs {
         percent_ = percent / 100.0f;
   }
 
-  void NGradient::do_gradient(NGraphics* g )
+  void NGradient::do_gradient(Graphics& g )
   {
     int middle  = 0;
     int length  = 0;
@@ -91,30 +91,30 @@ namespace ngrs {
 
     // check for repaintArea
     // NRect result;
-    // g->repaintArea().interSects(absoluteSpacingGeometry(),result);
-    // result.setLeft(result.left()-g->xTranslation());  
-    // result.setTop(result.top()-g->yTranslation());
+    // g.repaintArea().interSects(absoluteSpacingGeometry(),result);
+    // result.setLeft(result.left()-g.xTranslation());  
+    // result.setTop(result.top()-g.yTranslation());
 
     // frist part to middle
 
     if (horizontal_)
-      g->fillGradient(0,0,middle,clientHeight(), color_1,color_2,nHorizontal);
+      g.fillGradient(0,0,middle,clientHeight(), color_1,color_2,nHorizontal);
     else 
-      g->fillGradient(0,0,clientWidth(),middle,color_1,color_2,nVertical);
+      g.fillGradient(0,0,clientWidth(),middle,color_1,color_2,nVertical);
 
     // second part from middle to end
 
     if (horizontal_)
-      g->fillGradient(middle,0,clientWidth()-middle,clientHeight(),
+      g.fillGradient(middle,0,clientWidth()-middle,clientHeight(),
       color_1,color_2,nHorizontal);
     else 
-      g->fillGradient(0,middle,clientWidth(),clientHeight()-middle,
+      g.fillGradient(0,middle,clientWidth(),clientHeight()-middle,
       color_1,color_2,nVertical);
 
 
   }
 
-  void NGradient::paint( NGraphics * g )
+  void NGradient::paint( Graphics& g )
   {
     if (active_) do_gradient(g);
   }

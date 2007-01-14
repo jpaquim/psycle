@@ -20,7 +20,6 @@
 #include "sequencerbar.h"
 #include "global.h"
 #include "song.h"
-#include "configuration.h"
 #include "patternview.h"
 #include "defaultbitmaps.h"
 #include "player.h"
@@ -99,10 +98,10 @@ namespace psycle {
       return label_->text();
     }
 
-    void CategoryItem::paint( ngrs::NGraphics * g )
+    void CategoryItem::paint( ngrs::Graphics& g )
     {
-      g->setForeground( ngrs::NColor(category_->color()) );
-      g->drawRect(0,0,clientWidth()-1, clientHeight()-1);
+      g.setForeground( ngrs::NColor(category_->color()) );
+      g.drawRect(0,0,clientWidth()-1, clientHeight()-1);
 
       int cw = clientWidth();
 
@@ -114,7 +113,7 @@ namespace psycle {
       pts[2].setX( cw-1 );
       pts[2].setY( 6 );
 
-      g->fillPolygon(pts,3);
+      g.fillPolygon(pts,3);
     }
 
     PatternCategory * CategoryItem::category( )
@@ -159,7 +158,7 @@ namespace psycle {
 
     void SequencerBar::init( )
     {  
-      DefaultBitmaps & icons = Global::pConfig()->icons();
+      DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
 
       counter = 0;
       seqGui = 0;

@@ -39,7 +39,7 @@ namespace ngrs {
 
     ~NLabel();
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
     void setText(const std::string & text);
     const std::string & text() const;
 

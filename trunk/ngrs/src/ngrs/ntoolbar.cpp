@@ -72,7 +72,7 @@ namespace ngrs {
   {
   }
 
-  void NToolBar::paint( NGraphics * g )
+  void NToolBar::paint( Graphics& g )
   {
   }
 
@@ -212,7 +212,7 @@ namespace ngrs {
     return ymax + spacing().top() + spacing().bottom() + borderTop() + borderBottom();
   }
 
-  void NToolBar::drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender ) {
+  void NToolBar::drawChildren( Graphics& g, const NRegion & repaintArea, NVisualComponent* sender ) {
     int hgap_ = 3;
 
     std::vector< NVisualComponent* >::const_iterator itr = visualComponents().begin();
@@ -227,7 +227,7 @@ namespace ngrs {
     moreBtn_->draw( g, repaintArea, sender );
   }
 
-  NVisualComponent* NToolBar::checkChildrenEvent( NGraphics* g, int absX, int absY ) {
+  NVisualComponent* NToolBar::checkChildrenEvent( Graphics& g, int absX, int absY ) {
     NVisualComponent* found = 0;
 
     // check first moreBtn

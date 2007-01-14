@@ -25,8 +25,10 @@
 #include "global.h"
 #include "player.h"
 #include "wavefileout.h"
-#include "configuration.h"
 #include "defaultbitmaps.h"
+#include "configuration.h"
+
+#include <ngrs/napp.h>
 #include <ngrs/nscrollbar.h>
 #include <ngrs/nalignlayout.h>
 #include <ngrs/nlabel.h>
@@ -65,21 +67,21 @@ namespace psycle {
     {
     }
 
-    void SequencerGUI::SequencerBeatLineal::paint( ngrs::NGraphics * g )
+    void SequencerGUI::SequencerBeatLineal::paint( ngrs::Graphics& g )
     {
       drawLineal( g, 0 );
     }
 
-    void SequencerGUI::SequencerBeatLineal::drawLineal( ngrs::NGraphics* g, int dx )
+    void SequencerGUI::SequencerBeatLineal::drawLineal( ngrs::Graphics& g, int dx )
     {
-      ngrs::NRect area = g->repaintArea().rectClipBox();
+      ngrs::NRect area = g.repaintArea().rectClipBox();
 
       int cw = clientWidth();
       int ch = clientHeight();
 
-      g->setForeground( ngrs::NColor(220,220,220) );
+      g.setForeground( ngrs::NColor(220,220,220) );
 
-      g->drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
+      g.drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
 
       int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
       ///\ todo end seems not valid 
@@ -87,16 +89,16 @@ namespace psycle {
 
       for (int i = start ; i < end ; i++) {
         if (! (i % 16)) {
-          g->setForeground( ngrs::NColor( 180, 180, 180) );
-          g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
+          g.setForeground( ngrs::NColor( 180, 180, 180) );
+          g.drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
           std::string beatLabel = stringify(i/4);
-          int textWidth = g->textWidth(beatLabel);
-          g->drawText(i* sView->beatPxLength() - textWidth / 2, g->textAscent(), beatLabel);
+          int textWidth = g.textWidth(beatLabel);
+          g.drawText(i* sView->beatPxLength() - textWidth / 2, g.textAscent(), beatLabel);
         }
         else {
           if (sView->beatPxLength() > 3) {
-            g->setForeground( ngrs::NColor( 220, 220, 220) );
-            g->drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
+            g.setForeground( ngrs::NColor( 220, 220, 220) );
+            g.drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
           }
         }
       }
@@ -154,23 +156,23 @@ namespace psycle {
       return lockPlayLine_;
     }
 
-    void SequencerGUI::Area::paint( ngrs::NGraphics * g )
+    void SequencerGUI::Area::paint( ngrs::Graphics& g )
     {
       drawTimeGrid(g);
     }
 
 
-    void SequencerGUI::Area::drawTimeGrid( ngrs::NGraphics * g )
+    void SequencerGUI::Area::drawTimeGrid( ngrs::Graphics& g )
     {
-      ngrs::NRect area = g->repaintArea().rectClipBox();
+      ngrs::NRect area = g.repaintArea().rectClipBox();
 
       int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
       int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
 
       for (int i = start ; i <= end ; i++) {
         if ( sView->beatPxLength() > 3 || (sView->beatPxLength() <= 3 && (!( i %16)))  ) {
-          g->setForeground( SkinReader::Instance()->sequencerview_info().pane_grid_color );
-          g->drawLine(i* sView->beatPxLength(),-scrollDy(),d2i(i*sView->beatPxLength()),clientHeight()+scrollDy());
+          g.setForeground( SkinReader::Instance()->sequencerview_info().pane_grid_color );
+          g.drawLine(i* sView->beatPxLength(),-scrollDy(),d2i(i*sView->beatPxLength()),clientHeight()+scrollDy());
         }
       }
     }
@@ -338,26 +340,26 @@ namespace psycle {
       sequenceEntry_ = sequenceEntry;
     }
 
-    void SequencerItem::paint( ngrs::NGraphics * g )
+    void SequencerItem::paint( ngrs::Graphics& g )
     {
       int cw = clientWidth();
       int ch = clientHeight();
 
-      int tw = g->textWidth(sequenceEntry_->pattern()->name());
+      int tw = g.textWidth(sequenceEntry_->pattern()->name());
 
       int xp = (cw - tw) / 2;
-      int yp = (ch + g->textHeight() /2 ) / 2;
+      int yp = (ch + g.textHeight() /2 ) / 2;
 
-      g->setForeground( ngrs::NColor( sequenceEntry_->pattern()->category()->color() ));
-      g->fillRect(0,0, clientWidth(), clientHeight() );
-      g->drawText( xp, yp, sequenceEntry_->pattern()->name());
+      g.setForeground( ngrs::NColor( sequenceEntry_->pattern()->category()->color() ));
+      g.fillRect(0,0, clientWidth(), clientHeight() );
+      g.drawText( xp, yp, sequenceEntry_->pattern()->name());
 
       if (selected_) {
-        g->setForeground( ngrs::NColor( 0,0,255) );
-        g->drawRect(0,0, clientWidth()-1, clientHeight()-1 );
+        g.setForeground( ngrs::NColor( 0,0,255) );
+        g.drawRect(0,0, clientWidth()-1, clientHeight()-1 );
       }  else {
-        g->setForeground( ngrs::NColor( 180,180,180) );
-        g->drawRect(0,0, clientWidth()-1, clientHeight()-1 );
+        g.setForeground( ngrs::NColor( 180,180,180) );
+        g.drawRect(0,0, clientWidth()-1, clientHeight()-1 );
       }
     }
 
@@ -530,11 +532,11 @@ namespace psycle {
     {
     }
 
-    void SequencerGUI::SequencerLine::paint( ngrs::NGraphics * g )
+    void SequencerGUI::SequencerLine::paint( ngrs::Graphics& g )
     {
       if ( sView->selectedLine_ && sView->selectedLine_ == this) {
-        g->setForeground( ngrs::NColor( 0, 0, 255) );
-        g->drawRect(0,0, clientWidth()-1, clientHeight()-1);
+        g.setForeground( ngrs::NColor( 0, 0, 255) );
+        g.drawRect(0,0, clientWidth()-1, clientHeight()-1);
       }
     }
 
@@ -650,7 +652,7 @@ namespace psycle {
 
       scrollArea_ = new Area( this );
 
-      DefaultBitmaps & icons = Global::pConfig()->icons();
+      DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
 
       ngrs::NImage* img;
 
@@ -1179,22 +1181,22 @@ namespace psycle {
     }
 
 
-    void SequencerLoopItem::paint( ngrs::NGraphics * g )
+    void SequencerLoopItem::paint( ngrs::Graphics& g )
     {
       int cw = clientWidth();
       int ch = clientHeight();
-      g->setForeground( ngrs::NColor( 0,0,255));
+      g.setForeground( ngrs::NColor( 0,0,255));
       // left border
-      g->drawLine(0,0,0,ch-1);
+      g.drawLine(0,0,0,ch-1);
       // draw dots left
-      g->fillRect(2,ch / 2 -2,1,1);
-      g->fillRect(2,ch / 2 +2,1,1);
+      g.fillRect(2,ch / 2 -2,1,1);
+      g.fillRect(2,ch / 2 +2,1,1);
       // right border
-      g->drawLine(cw-1,0,cw-1,ch-1);
-      g->drawLine(cw-3,0,cw-3,ch-1);
+      g.drawLine(cw-1,0,cw-1,ch-1);
+      g.drawLine(cw-3,0,cw-3,ch-1);
       // draw dots right
-      g->fillRect(cw-5,ch / 2 -2,1,1);
-      g->fillRect(cw-5,ch / 2 +2,1,1);
+      g.fillRect(cw-5,ch / 2 -2,1,1);
+      g.fillRect(cw-5,ch / 2 +2,1,1);
     }
 
     int SequencerLoopItem::preferredWidth() const {

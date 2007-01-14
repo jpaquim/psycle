@@ -41,7 +41,7 @@ namespace ngrs {
   }
 
 
-  void N7Segment::paint( NGraphics * g )
+  void N7Segment::paint( Graphics& g )
   {
     int borderDistH = height() / 8;
     int middleH     = height() / 2;
@@ -63,26 +63,30 @@ namespace ngrs {
     drawHorizontalSegment(g,borderDistWU+segW,height()-borderDistH-segH,width()-borderDistWO-segW,height()-borderDistH,seg7_);
   }
 
-  void N7Segment::drawVerticalSegment( NGraphics * g, int x , int y ,int  x1 , int y1, bool on )
+  void N7Segment::drawVerticalSegment( Graphics& g, int x , int y ,int  x1 , int y1, bool on )
   {
-    if (on) g->setForeground(onColor);
-    else g->setForeground(offColor);
+    if (on) 
+      g.setForeground( onColor );
+    else 
+      g.setForeground( offColor );
 
     int h  = (y1-y) / 8;
     int sc = (x1-x)/3;
-    for (int i=x; i<x1-sc; i++) {
-      g->drawLine(i,y1-h,sc+i,y+h);
+    for ( int i=x; i<x1-sc; i++ ) {
+      g.drawLine(i,y1-h,sc+i,y+h);
     }
   }
 
-  void N7Segment::drawHorizontalSegment( NGraphics * g, int x, int y, int x1, int y1, bool on )
+  void N7Segment::drawHorizontalSegment( Graphics& g, int x, int y, int x1, int y1, bool on )
   {
-    if (on) g->setForeground(onColor);
-    else g->setForeground(offColor);
+    if (on) 
+      g.setForeground( onColor );
+    else 
+      g.setForeground( offColor );
 
     int w  = (x1-x) / 8;
-    for (int i=x+w; i<x1-w; i++)
-      g->drawLine(i,y1, i,y);
+    for ( int i = x+w; i<x1-w; i++ )
+      g.drawLine( i, y1, i, y );
   }
 
   void N7Segment::setSeg( bool seg1, bool seg2, bool seg3, bool seg4, bool seg5, bool seg6, bool seg7 )

@@ -420,7 +420,7 @@ namespace psycle {
       pane()->resize();
     }
 
-    void EnvDialog::EnvPanel::paint( ngrs::NGraphics *g )
+    void EnvDialog::EnvPanel::paint( ngrs::Graphics&g )
     {
       int AX=(int)(m_attack/420.0f);
       int BX=(int)(m_decay/420.0f);
@@ -433,12 +433,12 @@ namespace psycle {
       ngrs::NPoint pol[5];
 
       //dc.FillSolidRect(0,0,494,CH+1,0x4422CC);
-      g->setForeground( ngrs::NColor( 0, 0, 0) );
-      g->fillRect( 0, 0, clientWidth(), CH );
-      g->setForeground( ngrs::NColor( 50, 50, 50 ) );
-      g->drawRect( 0, 0, clientWidth(), CH );
+      g.setForeground( ngrs::NColor( 0, 0, 0) );
+      g.fillRect( 0, 0, clientWidth(), CH );
+      g.setForeground( ngrs::NColor( 50, 50, 50 ) );
+      g.drawRect( 0, 0, clientWidth(), CH );
 
-      g->setForeground( ngrs::NColor(0x4a, 0x81, 0xbb) );
+      g.setForeground( ngrs::NColor(0x4a, 0x81, 0xbb) );
 
       pol[0].setX( 0  );
       pol[0].setY( CH );
@@ -457,10 +457,10 @@ namespace psycle {
 
       //CBrush newBrush(RGB(255, 128, 64));
       //dc.SelectObject(&newBrush);		
-      g->fillPolygon( pol, 5 );
+      g.fillPolygon( pol, 5 );
 
-      g->setForeground( ngrs::NColor( 0, 0, 0 ) );
-      g->drawLine( AX+BX, CH-CX, AX+BX, CH );
+      g.setForeground( ngrs::NColor( 0, 0, 0 ) );
+      g.drawLine( AX+BX, CH-CX, AX+BX, CH );
 
     }
 

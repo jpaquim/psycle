@@ -42,7 +42,7 @@ namespace ngrs {
     void setText(const std::string & text);
     const std::string & text() const;
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
 
     virtual void onMousePress(int x, int y, int button);
     virtual void onMousePressed (int x, int y, int button);
@@ -70,7 +70,7 @@ namespace ngrs {
     NFontMetrics metrics;
 
     void init();
-    void drawCheck(NGraphics* g);
+    void drawCheck(Graphics& g);
   };
 
 }

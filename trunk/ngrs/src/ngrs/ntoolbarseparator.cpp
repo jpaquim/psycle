@@ -36,13 +36,13 @@ namespace ngrs {
   {
   }
 
-  void NToolBarSeparator::paint( NGraphics * g )
+  void NToolBarSeparator::paint( Graphics& g )
   {
     if ( align() == nAlTop ) {
-      g->drawLine( 0, 1, clientWidth(), 1 );   
+      g.drawLine( 0, 1, clientWidth(), 1 );   
     } else 
     {
-      g->drawLine( 1, 0, 1, clientHeight() );
+      g.drawLine( 1, 0, 1, clientHeight() );
     } 
   }
 

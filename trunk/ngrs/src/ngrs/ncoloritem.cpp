@@ -36,20 +36,20 @@ namespace ngrs {
   {
   }
 
-  void NColorItem::paint( NGraphics * g )
+  void NColorItem::paint( Graphics& g )
   {
     int cw = clientWidth();
     int ch = clientHeight();
     int ident = 4;
 
-    g->setForeground(color_);
-    g->fillRect(ident,ident,20,ch-2*ident);
+    g.setForeground(color_);
+    g.fillRect(ident,ident,20,ch-2*ident);
 
-    g->setForeground(NColor(220,220,220));
-    g->drawRect(ident,ident,20,ch-2*ident);
+    g.setForeground(NColor(220,220,220));
+    g.drawRect(ident,ident,20,ch-2*ident);
 
-    int yp = (clientHeight() + g->textHeight() /2 ) / 2;
-    g->drawText(2*ident+20,yp , text_);
+    int yp = (clientHeight() + g.textHeight() /2 ) / 2;
+    g.drawText(2*ident+20,yp , text_);
   }
 
   void NColorItem::setColor( const NColor & color )

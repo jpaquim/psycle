@@ -41,17 +41,17 @@ namespace psycle {
 		{
 		}
 
-		void VuMeter::paint( ngrs::NGraphics * g )
+		void VuMeter::paint( ngrs::Graphics& g )
 		{
 			/*bool clip = ((Master*)Global::pSong()->_pMachine[MASTER_INDEX])->_clip;
 
 
 			if (clip) {
-			g->setForeground(vu3);
-			g->fillRect(0,0,9,20);
+			g.setForeground(vu3);
+			g.fillRect(0,0,9,20);
 			} else  {
-			g->setForeground(vu2);
-			g->fillRect(0,0,9,20);
+			g.setForeground(vu2);
+			g.fillRect(0,0,9,20);
 			} */
 
 			int log_l=(int) (100*std::log10(l_));
@@ -62,45 +62,45 @@ namespace psycle {
 
 
 			if ( log_r || vuprevR_ ) {
-				//      g->setForeground(vu1);
-				g->fillRect(0,5,log_r,4);
+				//      g.setForeground(vu1);
+				g.fillRect(0,5,log_r,4);
 
 				if ( vuprevR_ > log_r ) {
-					//  g->setForeground(vu3);
-					g->fillRect( log_r, 5, vuprevR_ -log_r, 4 );
-					//        g->setForeground(vu2);
-					g->fillRect( vuprevR_, 5, 225 - vuprevR_, 4 );
+					//  g.setForeground(vu3);
+					g.fillRect( log_r, 5, vuprevR_ -log_r, 4 );
+					//        g.setForeground(vu2);
+					g.fillRect( vuprevR_, 5, 225 - vuprevR_, 4 );
 					vuprevR_ -= 2;
 				} else
 				{
-					//   g->setForeground(vu2);
-					g->fillRect( log_r, 5, 225-log_r, 4 );
+					//   g.setForeground(vu2);
+					g.fillRect( log_r, 5, 225-log_r, 4 );
 					vuprevR_ = log_r;
 				}
 			}
 			else {
-//				g->setForeground( vu2 );
-				g->fillRect( 0, 5, 225, 4 );
+//				g.setForeground( vu2 );
+				g.fillRect( 0, 5, 225, 4 );
 			}
 
 			if ( log_l || vuprevL_ ) {
-//				g->setForeground( vu1 );
-				g->fillRect( 0, 0, log_l, 4 );
+//				g.setForeground( vu1 );
+				g.fillRect( 0, 0, log_l, 4 );
 				if (vuprevL_ > log_l ) {
-					// g->setForeground(vu3);
-					g->fillRect( log_l, 0, vuprevL_ -log_l, 4 );
-					// g->setForeground(vu2);
-					g->fillRect( vuprevL_, 0, 225-vuprevL_ , 4 );
+					// g.setForeground(vu3);
+					g.fillRect( log_l, 0, vuprevL_ -log_l, 4 );
+					// g.setForeground(vu2);
+					g.fillRect( vuprevL_, 0, 225-vuprevL_ , 4 );
 					vuprevL_ -= 2;
 				} else {
-					// g->setForeground(vu2);
-					g->fillRect( log_l, 0, 225-log_l, 4 );
+					// g.setForeground(vu2);
+					g.fillRect( log_l, 0, 225-log_l, 4 );
 					vuprevL_ = log_l;
 				}
 			}
 			else {
-				// g->setForeground(vu2);
-				g->fillRect( 0, 0, 225, 4 );
+				// g.setForeground(vu2);
+				g.fillRect( 0, 0, 225, 4 );
 			}
 		}
 

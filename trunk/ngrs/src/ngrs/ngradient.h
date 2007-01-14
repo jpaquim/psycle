@@ -45,7 +45,7 @@ namespace ngrs {
     void setHorizontal(bool on);
     void setPercent(int percent);
 
-    void paint(NGraphics* g);
+    void paint(Graphics& g);
 
   private:
 
@@ -58,7 +58,7 @@ namespace ngrs {
     NColor color_2;
     NColor color_3;
 
-    void do_gradient(NGraphics* g);
+    void do_gradient(Graphics& g);
 
   };
 

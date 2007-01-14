@@ -44,7 +44,7 @@ namespace ngrs {
     virtual void setHeight(int height);
     virtual NPoint pickerAt(int i);
     virtual int pickerSize();
-    virtual void drawPicker(NGraphics* g);
+    virtual void drawPicker(Graphics& g);
 
     const NPoint & p1();
     const NPoint & p2();

@@ -52,14 +52,14 @@ namespace ngrs {
   {
   }
 
-  void NCheckBox::paint( NGraphics * g )
+  void NCheckBox::paint( Graphics& g )
   {
     dx = 5;
     dy = 3;
-    g->setForeground(NColor(255,255,255));
-    g->fillRect(0+dx,0+dy,10,10);
-    g->setForeground(NColor(0,0,0));
-    g->drawRect(0+dx,0+dy,10,10);
+    g.setForeground(NColor(255,255,255));
+    g.fillRect(0+dx,0+dy,10,10);
+    g.setForeground(NColor(0,0,0));
+    g.drawRect(0+dx,0+dy,10,10);
 
     if (checked_) drawCheck(g);
   }
@@ -70,14 +70,14 @@ namespace ngrs {
     repaint();
   }
 
-  void NCheckBox::drawCheck(NGraphics* g)
+  void NCheckBox::drawCheck(Graphics& g)
   {
     dx = 5;
     dy = 3; // (spacingHeight()-10)/2;
 
-    g->setForeground(NColor(0,0,0));
-    g->drawLine(dx+1,dy+1,dx+9,dy+9);
-    g->drawLine(dx+1,dy+9,dx+9,dy+1);
+    g.setForeground(NColor(0,0,0));
+    g.drawLine(dx+1,dy+1,dx+9,dy+9);
+    g.drawLine(dx+1,dy+9,dx+9,dy+1);
 
   }
 

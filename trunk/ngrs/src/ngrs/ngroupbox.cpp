@@ -46,9 +46,9 @@ namespace ngrs {
   }
 
   // paints the border
-  void NGroupBox::GBorder::paint( NGraphics * g, const NShape & geometry )
+  void NGroupBox::GBorder::paint( Graphics& g, const NShape & geometry )
   {
-    g->setForeground(NColor(130,130,130));
+    g.setForeground(NColor(130,130,130));
     NRect r = geometry.rectArea();
 
     // we need to draw the oval rect manually with arcs, due the text hole
@@ -67,7 +67,7 @@ namespace ngrs {
 
     int leftTextIdent = r.left() + spacing().left() + naw;
 
-    // this code is copied from NGraphics drawRoundRect and modified for the text hole
+    // this code is copied from Graphics drawRoundRect and modified for the text hole
 
     if (nw < 0) { 
       nw = 0 - nw;
@@ -85,36 +85,36 @@ namespace ngrs {
 
     if (nw > naw) {
       if (nh > nah) {
-        g->drawArc(nx, ny, naw, nah, 5760, 5760);
+        g.drawArc(nx, ny, naw, nah, 5760, 5760);
         // make hole for our text
-        g->drawLine( nx + naw2, ny, leftTextIdent, ny );
-        g->drawLine( leftTextIdent + g->textWidth( headerText_), ny, nx + nw - naw2, ny );
+        g.drawLine( nx + naw2, ny, leftTextIdent, ny );
+        g.drawLine( leftTextIdent + g.textWidth( headerText_), ny, nx + nw - naw2, ny );
         // end of modification
-        g->drawArc(nx + nw - naw, ny, naw, nah, 0, 5760);
-        g->drawLine(nx + nw, ny + nah2, nx + nw, ny + nh - nah2);
-        g->drawArc(nx + nw - naw, ny + nh - nah, naw, nah, 17280, 5760);
-        g->drawLine(nx + naw2, ny + nh, nx + nw - naw2, ny + nh);
-        g->drawArc(nx, ny + nh - nah, naw, nah, 11520, 5760);
-        g->drawLine(nx, ny + nah2, nx, ny + nh - nah2);
+        g.drawArc(nx + nw - naw, ny, naw, nah, 0, 5760);
+        g.drawLine(nx + nw, ny + nah2, nx + nw, ny + nh - nah2);
+        g.drawArc(nx + nw - naw, ny + nh - nah, naw, nah, 17280, 5760);
+        g.drawLine(nx + naw2, ny + nh, nx + nw - naw2, ny + nh);
+        g.drawArc(nx, ny + nh - nah, naw, nah, 11520, 5760);
+        g.drawLine(nx, ny + nah2, nx, ny + nh - nah2);
       } else {
-        g->drawArc(nx, ny, naw, nh, 5760, 11520);
-        g->drawLine(nx + naw2, ny, nx + nw - naw2, ny);
-        g->drawArc(nx + nw - naw, ny, naw, nh, 17280, 11520);
-        g->drawLine(nx + naw2, ny + nh, nx + nw - naw2, ny + nh);
+        g.drawArc(nx, ny, naw, nh, 5760, 11520);
+        g.drawLine(nx + naw2, ny, nx + nw - naw2, ny);
+        g.drawArc(nx + nw - naw, ny, naw, nh, 17280, 11520);
+        g.drawLine(nx + naw2, ny + nh, nx + nw - naw2, ny + nh);
       }
     } else {
       if (nh > nah) {
-        g->drawArc(nx, ny, nw, nah, 0, 11520);
-        g->drawLine(nx + nw, ny + nah2, nx + nw, ny + nh - nah2);
-        g->drawArc(nx, ny + nh - nah, nw, nah, 11520, 11520);
-        g->drawLine(nx, ny + nah2, nx, ny + nh - nah2);
+        g.drawArc(nx, ny, nw, nah, 0, 11520);
+        g.drawLine(nx + nw, ny + nah2, nx + nw, ny + nh - nah2);
+        g.drawArc(nx, ny + nh - nah, nw, nah, 11520, 11520);
+        g.drawLine(nx, ny + nah2, nx, ny + nh - nah2);
       } else {
-        g->drawArc(nx, ny, nw, nh, 0, 23040);
+        g.drawArc(nx, ny, nw, nh, 0, 23040);
       }
     }
 
     // finally we draw the text
-    g->drawText( leftTextIdent ,r.top() + g->textAscent(), headerText_ );
+    g.drawText( leftTextIdent ,r.top() + g.textAscent(), headerText_ );
   }
 
   /// end of GroupBox border

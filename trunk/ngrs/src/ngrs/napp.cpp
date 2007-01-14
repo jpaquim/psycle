@@ -141,7 +141,7 @@ namespace ngrs {
           c = 0;
           for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
             NWindow* win = *it;
-            win->graphics()->resize(win->width(),win->height());
+            win->graphics().resize(win->width(),win->height());
             win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
           }
           repaintWin_.clear();
@@ -196,8 +196,8 @@ namespace ngrs {
       if (repaintWin_.size()!=0) {
         for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
           NWindow* win = *it;
-          win->graphics()->resize(win->width(),win->height());
-          win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
+          win->graphics().resize(win->width(),win->height());
+          win->repaint( win->pane(), NRect(0,0,win->width(),win->height()) );
         }
         repaintWin_.clear();
       }	
@@ -229,7 +229,7 @@ namespace ngrs {
         if (repaintWin_.size()!=0) {
           for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
             NWindow* win = *it;
-            win->graphics()->resize(win->width(),win->height());
+            win->graphics().resize(win->width(),win->height());
             win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
           }
           repaintWin_.clear();
@@ -285,8 +285,8 @@ namespace ngrs {
       if (repaintWin_.size()!=0) {
         for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
           NWindow* win = *it;
-          win->graphics()->resize(win->width(),win->height());
-          win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));       
+          win->graphics().resize( win->width(), win->height() );
+          win->repaint( win->pane(), NRect( 0, 0, win->width(), win->height() ) );
         }
         repaintWin_.clear();
       }
@@ -354,7 +354,7 @@ namespace ngrs {
 #ifdef __unix__
     switch (event->type) {
     case Expose:
-      if (win->doubleBuffered()) win->graphics()->swap(NRect(event->xexpose.x,event->xexpose.y,event->xexpose.width,event->xexpose.height)); else
+      if (win->doubleBuffered()) win->graphics().swap(NRect(event->xexpose.x,event->xexpose.y,event->xexpose.width,event->xexpose.height)); else
         doRepaint(win);
       break;
       break;
@@ -363,7 +363,7 @@ namespace ngrs {
       break;
     case ConfigureNotify:{
       while (XCheckTypedWindowEvent( NApp::system().dpy(), win->win() , ConfigureNotify, event));
-      if (event->xconfigure.width - 2*event->xconfigure.border_width != win->graphics()->dblWidth() || event->xconfigure.height != win->graphics()->dblHeight()  ) {
+      if (event->xconfigure.width - 2*event->xconfigure.border_width != win->graphics().dblWidth() || event->xconfigure.height != win->graphics().dblHeight()  ) {
         doRepaint(win);
       }
                          }
@@ -453,9 +453,11 @@ namespace ngrs {
     switch (event->msg) {
     case WM_PAINT:
       hdc = BeginPaint( win->win(), &ps);     
-      if (win->doubleBuffered()) win->graphics()->swap(NRect(0,0,win->width(),win->height())); else
+      if ( win->doubleBuffered() ) 
+        win->graphics().swap( NRect( 0, 0, win->width(), win->height() )); 
+      else
         doRepaint(win);
-      //          win->graphics()->resize(win->width(),win->height());
+      //          win->graphics().resize(win->width(),win->height());
       //          win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));    
       EndPaint( win->win(), &ps);
       break;
@@ -691,9 +693,9 @@ namespace ngrs {
     if (splashScreen_!=0) {
       splashScreen_->setVisible(true);
       NApp::system().mapWindow(splashScreen_->win());
-      splashScreen_->graphics()->resize(splashScreen_->width(),splashScreen_->height());
+      splashScreen_->graphics().resize(splashScreen_->width(),splashScreen_->height());
       splashScreen_->repaint(splashScreen->pane(),NRect(0,0,splashScreen_->width(),splashScreen_->height()));
-      splashScreen_->graphics()->swap(NRect(0,0,splashScreen_->width(),splashScreen_->height()));
+      splashScreen_->graphics().swap(NRect(0,0,splashScreen_->width(),splashScreen_->height()));
     }
   }
 
@@ -734,7 +736,7 @@ namespace ngrs {
     if (repaintWin_.size()!=0) {
       for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
         NWindow* win = *it;
-        win->graphics()->resize(win->width(),win->height());
+        win->graphics().resize(win->width(),win->height());
         win->repaint(win->pane(),NRect(0,0,win->width(),win->height()));
       }
       repaintWin_.clear();
@@ -750,9 +752,7 @@ namespace ngrs {
 
   void NApp::addRemovePipe( NRuntime * component )
   {
-    std::vector<NRuntime*>::iterator it = find( removePipe.begin(), removePipe.end(), component );
-    if ( it == removePipe.end() )
-      removePipe.push_back(component);
+     removePipe.push_back( component );
   }
 
   void NApp::callRemovePipe(  )

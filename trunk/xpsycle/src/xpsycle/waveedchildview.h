@@ -51,7 +51,7 @@ namespace psycle {
       public:
         VolumeSlider(Song* pSong_) { this->setOrientation(ngrs::nHorizontal); pSong = pSong_; }
         ~VolumeSlider() {}
-        virtual void paint( ngrs::NGraphics *g );
+        virtual void paint( ngrs::Graphics&g );
         Song *pSong;
       };
 
@@ -60,7 +60,7 @@ namespace psycle {
       public:
         WavePanel( WaveEdChildView* wView );
         ~WavePanel();
-        virtual void paint( ngrs::NGraphics *g);
+        virtual void paint( ngrs::Graphics&g);
 
         virtual void onMousePress( int x, int y, int button );
         virtual void onMousePressed(int x, int y, int button );

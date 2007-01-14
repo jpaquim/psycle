@@ -36,11 +36,11 @@ namespace ngrs {
     delete lineShape;
   }
 
-  void NLine::paint( NGraphics * g )
+  void NLine::paint( Graphics& g )
   {
-    g->setTranslation(g->xTranslation()-left(),g->yTranslation()-top());
-    g->drawLine(lineShape->p1().x(),  lineShape->p1().y(), lineShape->p2().x(), lineShape->p2().y());
-    g->setTranslation(g->xTranslation()+left(),g->yTranslation()+top());
+    g.setTranslation(g.xTranslation()-left(),g.yTranslation()-top());
+    g.drawLine(lineShape->p1().x(),  lineShape->p1().y(), lineShape->p2().x(), lineShape->p2().y());
+    g.setTranslation(g.xTranslation()+left(),g.yTranslation()+top());
   }
 
   void NLine::setPoints( const NPoint & p1, const NPoint & p2 )

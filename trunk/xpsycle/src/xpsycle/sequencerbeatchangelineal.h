@@ -50,7 +50,7 @@ namespace psycle {
         GlobalEvent* bpmChangeEvent();
 
         virtual void onMove(const ngrs::NMoveEvent & moveEvent);
-        virtual void paint( ngrs::NGraphics* g);
+        virtual void paint( ngrs::Graphics& g);
         virtual int preferredHeight() const;
         virtual void resize();
 
@@ -74,7 +74,7 @@ namespace psycle {
 
       ~SequencerBeatChangeLineal();
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
 
       virtual int preferredHeight() const;
 

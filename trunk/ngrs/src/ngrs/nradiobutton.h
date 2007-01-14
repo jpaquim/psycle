@@ -35,7 +35,7 @@ namespace ngrs {
 
     ~NRadioButton();
 
-    virtual void paint( NGraphics* g );
+    virtual void paint( Graphics& g );
 
     virtual void resize();
 

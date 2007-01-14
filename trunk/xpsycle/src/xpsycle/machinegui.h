@@ -91,7 +91,7 @@ namespace psycle {
       virtual void onMoveEnd( const ngrs::NMoveEvent& moveEvent );
       virtual void resize();
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
 
       virtual void repaintVUMeter();
 
@@ -130,7 +130,7 @@ namespace psycle {
       virtual void onMousePress(int x, int y, int button);
       virtual void onMouseDoublePress(int x, int y, int button);
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
 
       virtual void updateSkin();
       virtual void showPropsDlg() {}; // override--we don't to see a master props dlg (atm)
@@ -156,7 +156,7 @@ namespace psycle {
           pGui_ = pGui;
         };
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
 
       private:
 
@@ -176,7 +176,7 @@ namespace psycle {
 
       virtual void onMouseDoublePress( int x, int y, int button );
 
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
 
       virtual void onKeyPress( const ngrs::NKeyEvent & event);
 
@@ -188,7 +188,7 @@ namespace psycle {
       VUPanel* vuPanel_;
 
       void setSkin();
-      void customSliderPaint( ngrs::NSlider* sl, ngrs::NGraphics* g);		
+      void customSliderPaint( ngrs::NSlider* sl, ngrs::Graphics& g);		
       void onPosChanged( ngrs::NSlider* sender );
       void onTweakSlide( int machine, int command, int value );
     };
@@ -207,7 +207,7 @@ namespace psycle {
           pGui_ = pGui;
         };
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
 
       private:
 
@@ -222,7 +222,7 @@ namespace psycle {
 
       virtual void onMousePress(int x, int y, int button);
       virtual void onMouseDoublePress(int x, int y, int button);
-      virtual void paint( ngrs::NGraphics* g );
+      virtual void paint( ngrs::Graphics& g );
       virtual void repaintVUMeter();
       virtual void onKeyPress( const ngrs::NKeyEvent & event );
       virtual void updateSkin();
@@ -234,7 +234,7 @@ namespace psycle {
       FrameMachine* frameMachine;
 
       void setSkin();
-      void customSliderPaint( ngrs::NSlider* sl, ngrs::NGraphics* g);    
+      void customSliderPaint( ngrs::NSlider* sl, ngrs::Graphics& g);    
       void onPosChanged( ngrs::NSlider* sender );
       void onTweakSlide( int machine, int command, int value );
     };

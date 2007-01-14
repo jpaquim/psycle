@@ -20,7 +20,7 @@
 #ifndef NLAYOUT_H
 #define NLAYOUT_H
 
-#include "ngraphics.h"
+#include "graphics.h"
 #include "nregion.h"
 
 namespace ngrs {
@@ -51,7 +51,7 @@ namespace ngrs {
     void setParent(class NVisualComponent* parent);
     class NVisualComponent* parent() const;
 
-    virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRegion & repaintArea, NVisualComponent* sender);
+    virtual void drawComponents(class NVisualComponent* target, Graphics& g , const NRegion & repaintArea, NVisualComponent* sender);
 
     virtual void add(class NVisualComponent* comp);
     virtual void insert(class NVisualComponent* comp, int index);

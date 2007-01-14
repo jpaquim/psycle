@@ -53,34 +53,34 @@ namespace psycle {
     {
     }
 
-    void Analyzer::paint( ngrs::NGraphics * g )
+    void Analyzer::paint( ngrs::Graphics& g )
     {
       switch (mode_) {
   case 0:
-    g->setForeground( ngrs::NColor(0x60,0x60,0x60));
-    g->fillRect(32+24,32-8,256-32-24-32-24,1);
-    g->drawText(32-1,32-8-6+g->textAscent(),"+6 db" );
-    g->drawText(256-32-22,32-8-6+g->textAscent(),"+6 db" );
+    g.setForeground( ngrs::NColor(0x60,0x60,0x60));
+    g.fillRect(32+24,32-8,256-32-24-32-24,1);
+    g.drawText(32-1,32-8-6+g.textAscent(),"+6 db" );
+    g.drawText(256-32-22,32-8-6+g.textAscent(),"+6 db" );
 
-    g->setForeground( ngrs::NColor(0x60,0x60,0x60));
-    g->fillRect(32+24,32+44,256-32-24-32-24,1);
-    g->drawText(32-1+4,32+44-6+g->textAscent(),"-6 db" );
-    g->drawText(256-32-22,32+44-6+g->textAscent(),"-6 db" );
+    g.setForeground( ngrs::NColor(0x60,0x60,0x60));
+    g.fillRect(32+24,32+44,256-32-24-32-24,1);
+    g.drawText(32-1+4,32+44-6+g.textAscent(),"-6 db" );
+    g.drawText(256-32-22,32+44-6+g.textAscent(),"-6 db" );
 
-    g->setForeground( ngrs::NColor(0x60,0x60,0x60));
-    g->fillRect(32+24,32+44+16,256-32-24-32-24,1);
-    g->drawText(32-1-6+4,32+44+16-6+g->textAscent(),"-12 db" );
-    g->drawText(256-32-22,32+44+16-6+g->textAscent(),"-12 db" );
+    g.setForeground( ngrs::NColor(0x60,0x60,0x60));
+    g.fillRect(32+24,32+44+16,256-32-24-32-24,1);
+    g.drawText(32-1-6+4,32+44+16-6+g.textAscent(),"-12 db" );
+    g.drawText(256-32-22,32+44+16-6+g.textAscent(),"-12 db" );
 
-    g->setForeground( ngrs::NColor( 0x60, 0x60, 0x60) );
-    g->fillRect(32+24,32+44+16+18,256-32-24-32-24,1);
-    g->drawText(32-1-6+4, 32+44+16+18-6+g->textAscent(), "-24db" );
-    g->drawText(256-32-22, 32+44+16+18-6+g->textAscent(), "-24db" );
+    g.setForeground( ngrs::NColor( 0x60, 0x60, 0x60) );
+    g.fillRect(32+24,32+44+16+18,256-32-24-32-24,1);
+    g.drawText(32-1-6+4, 32+44+16+18-6+g.textAscent(), "-24db" );
+    g.drawText(256-32-22, 32+44+16+18-6+g.textAscent(), "-24db" );
 
-    g->setForeground( ngrs::NColor( 0x60, 0x60, 0x60) );
-    g->fillRect(32+24,32+23,256-32-24-32-24,1);
-    g->drawText(32-1+6, 32+23-6+g->textAscent(), "0 db" );
-    g->drawText(256-32-22, 32+23-6+g->textAscent(), "0 db" );
+    g.setForeground( ngrs::NColor( 0x60, 0x60, 0x60) );
+    g.fillRect(32+24,32+23,256-32-24-32-24,1);
+    g.drawText(32-1+6, 32+23-6+g.textAscent(), "0 db" );
+    g.drawText(256-32-22, 32+23-6+g.textAscent(), "0 db" );
     break;
       }
     }
@@ -176,14 +176,14 @@ namespace psycle {
         }
         rect.setHeight(y - rect.top());
 
-        ngrs::NGraphics* g = window()->graphics( this );
+        ngrs::Graphics& g = window()->graphics( this );
 
-        g->setForeground( ngrs::NColor( 0, 0, 0) );
-        g->fillRect( 0, 0, 300, 300 );
+        g.setForeground( ngrs::NColor( 0, 0, 0) );
+        g.fillRect( 0, 0, 300, 300 );
         paint( g );
-        g->setForeground( lbColor );
-        g->fillRect( rect );
-        g->swap( ngrs::NRect( absoluteGeometry() ) );
+        g.setForeground( lbColor );
+        g.fillRect( rect );
+        g.swap( ngrs::NRect( absoluteGeometry() ) );
 
         /*if (peak2L)
         {

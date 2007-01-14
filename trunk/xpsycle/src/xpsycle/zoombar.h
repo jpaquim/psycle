@@ -48,7 +48,7 @@ public:
     void setPos( double pos );
     double pos() const;
 
-    void customSliderPaint( ngrs::NSlider* sl, ngrs::NGraphics* g );
+    void customSliderPaint( ngrs::NSlider* sl, ngrs::Graphics& g );
 
 private:
 

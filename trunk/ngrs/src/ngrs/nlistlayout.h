@@ -42,7 +42,7 @@ namespace ngrs {
     virtual int preferredWidth(const NVisualComponent* target) const;
     virtual int preferredHeight(const NVisualComponent* target) const;
 
-    virtual void drawComponents( NVisualComponent* target, NGraphics* g , const NRegion & repaintArea, NVisualComponent* sender);
+    virtual void drawComponents( NVisualComponent* target, Graphics& g , const NRegion & repaintArea, NVisualComponent* sender);
 
     void setAlign(int align);
 

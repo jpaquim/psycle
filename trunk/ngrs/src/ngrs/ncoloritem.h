@@ -36,7 +36,7 @@ namespace ngrs {
 
     ~NColorItem();
 
-    virtual void paint( NGraphics* g);
+    virtual void paint( Graphics& g);
 
     virtual void setColor(const NColor & color);
     const NColor & color() const;

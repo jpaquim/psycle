@@ -35,8 +35,8 @@ namespace ngrs {
 
     ~NRectShape();
 
-    virtual void fill(NGraphics* g, const NRegion & repaintArea);
-    virtual void drawPicker(NGraphics* g);
+    virtual void fill(Graphics& g, const NRegion & repaintArea);
+    virtual void drawPicker(Graphics& g);
 
     virtual NPoint pickerAt(int i);
     virtual int pickerSize();

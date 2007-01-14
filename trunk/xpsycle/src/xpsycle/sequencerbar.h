@@ -74,7 +74,7 @@ namespace psycle {
       virtual void setText(const std::string & text);
       virtual std::string text() const;
 
-      virtual void paint( ngrs::NGraphics* g);
+      virtual void paint( ngrs::Graphics& g);
 
       PatternCategory* category();
 

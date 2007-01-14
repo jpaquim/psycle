@@ -126,19 +126,19 @@ namespace psycle {
 
     void MainWindow::initStartPage() {
       ngrs::NImage* img;
-
+      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
       ngrs::NPanel* test = new ngrs::NPanel();
       test->setLayout( ngrs::NAlignLayout() );
       ngrs::NPanel* logoPnl = new ngrs::NPanel();
       logoPnl->setLayout( ngrs::NAlignLayout() );
       logoPnl->setSpacing( ngrs::NSize( 10,5,10,5 ) );
-      img = new ngrs::NImage( Global::pConfig()->icons().logoRight()  );
+      img = new ngrs::NImage( icons.logoRight()  );
       img->setVAlign( ngrs::nAlCenter );
       logoPnl->add( img , ngrs::nAlRight );
-      img = new ngrs::NImage( Global::pConfig()->icons().logoLeft()  );
+      img = new ngrs::NImage( icons.logoLeft()  );
       img->setVAlign( ngrs::nAlCenter );
       logoPnl->add( img , ngrs::nAlLeft );
-      img = new ngrs::NImage( Global::pConfig()->icons().logoMid()  );
+      img = new ngrs::NImage( icons.logoMid()  );
       img->setVAlign( ngrs::nAlCenter );
       img->setHAlign( ngrs::nAlWallPaper );
       logoPnl->add( img , ngrs::nAlClient );
@@ -276,7 +276,7 @@ namespace psycle {
       menuBar_ = new ngrs::NMenuBar();
       pane()->add( menuBar_ );
 
-      DefaultBitmaps & icons = Global::pConfig()->icons();
+      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
       // Creates the file menu
       fileMenu_ = new ngrs::NMenu("File");
@@ -438,7 +438,7 @@ namespace psycle {
       toolBarPanel_ = new ngrs::NToolBarPanel();    
       pane()->add(toolBarPanel_, ngrs::nAlTop);
 
-      DefaultBitmaps & icons = Global::pConfig()->icons();
+      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
       ngrs::NImage* img;
 
@@ -1039,27 +1039,25 @@ namespace psycle {
     {
       if ( !selectedChildView_ ) return true;
       Song* selectedSong_ = selectedChildView_->song();
+      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
       ngrs::NMessageBox* box = new ngrs::NMessageBox("Save changes of : "+selectedSong_->fileName+" ?");
       box->setTitle("New Song");
       box->setButtonText("Yes","No","Abort");
-      box->icon()->setSharedBitmap(&Global::pConfig()->icons().alert());
-      box->icon()->setPreferredSize(Global::pConfig()->icons().alert().width(),Global::pConfig()->icons().alert().height());
+      box->icon()->setSharedBitmap( &icons.alert() );
       add(box);
       bool result = false;
-      int choice = box->execute();
-      switch (choice) {
-    case ngrs::nMsgOkBtn :
-      onFileSave(0);
-      result = true;
-      break;
-    case ngrs::nMsgUseBtn:
-      result = true;
-      break;
-    case ngrs::nMsgCancelBtn:
-      result = false;
-      break;
-
+      switch ( box->execute() ) {
+        case ngrs::nMsgOkBtn :
+          onFileSave(0);
+          result = true;
+        break;
+        case ngrs::nMsgUseBtn:
+          result = true;
+        break;
+        case ngrs::nMsgCancelBtn:
+          result = false;
+        break;
       }
       ngrs::NApp::addRemovePipe(box);
       return result;

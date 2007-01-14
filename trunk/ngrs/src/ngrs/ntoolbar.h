@@ -39,7 +39,7 @@ namespace ngrs {
 
     ~NToolBar();
 
-    virtual void paint( NGraphics* g );
+    virtual void paint( Graphics& g );
     virtual void add( NRuntime* component );
     virtual NButton* add( NButton*  button );
     virtual void add( NVisualComponent* comp );
@@ -52,8 +52,8 @@ namespace ngrs {
 
   protected:
 
-    virtual void drawChildren( NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender );
-    virtual NVisualComponent* checkChildrenEvent( NGraphics* g, int absX, int absY );
+    virtual void drawChildren( Graphics& g, const NRegion & repaintArea, NVisualComponent* sender );
+    virtual NVisualComponent* checkChildrenEvent( Graphics& g, int absX, int absY );
 
   private:
 

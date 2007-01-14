@@ -31,10 +31,10 @@ namespace ngrs {
   {
   }
 
-  void NMenuSeperator::paint( NGraphics * g )
+  void NMenuSeperator::paint( Graphics& g )
   {
-    g->setForeground(NColor(220,220,220));
-    g->drawLine(0,clientHeight()/2,clientWidth(),clientHeight()/2);
+    g.setForeground(NColor(220,220,220));
+    g.drawLine(0,clientHeight()/2,clientWidth(),clientHeight()/2);
   }
 
   int NMenuSeperator::preferredHeight( ) const

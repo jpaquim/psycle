@@ -57,12 +57,12 @@ namespace ngrs {
     delete rectShape;
   }
 
-  void NLabel::paint( NGraphics * g )
+  void NLabel::paint( Graphics& g )
   {
     std::string::size_type i     = 0;
     std::string::size_type start = 0;
 
-    int yp_ = g->textAscent() ;
+    int yp_ = g.textAscent() ;
 
     do {
       i = text_.find( "\n", i);
@@ -78,46 +78,46 @@ namespace ngrs {
         int xp_ = 0;
 
         switch (halign_) {
-        case nAlCenter : xp_ = (clientWidth() - g->textWidth(substr)) / 2;
+        case nAlCenter : xp_ = (clientWidth() - g.textWidth(substr)) / 2;
           break;
         default:
           ;
         }
 
         switch (valign_) {				
-        case nAlCenter : yp_ = (clientHeight() - g->textHeight()) / 2  + g->textAscent();
+        case nAlCenter : yp_ = (clientHeight() - g.textHeight()) / 2  + g.textAscent();
           break;
-        case nAlBottom : yp_ = clientHeight() - g->textDescent();
+        case nAlBottom : yp_ = clientHeight() - g.textDescent();
           break;
         default:
           ;
         }
 
-        g->drawText( xp_, yp_, substr);
+        g.drawText( xp_, yp_, substr);
 
         if (mnemonic_!='\0') {
           std::string::size_type pos = substr.find( static_cast<char>( mnemonic_- 32) );
           if ( pos==std::string::npos ) pos =  substr.find( mnemonic_ );
           if ( pos!=std::string::npos ) {
-            int w  = g->textWidth( substr.substr( 0, pos) );
-            int w1 = g->textWidth( substr.substr( 0, pos+1) );
-            g->drawLine( w, yp_+2, w1, yp_+2 );
+            int w  = g.textWidth( substr.substr( 0, pos) );
+            int w1 = g.textWidth( substr.substr( 0, pos+1) );
+            g.drawLine( w, yp_+2, w1, yp_+2 );
           }
         }
-        yp_ = yp_ + g->textHeight();
+        yp_ = yp_ + g.textHeight();
       } else {  // multiline wordbreak;
         int xp = 0;
-        int yp = g->textAscent();
+        int yp = g.textAscent();
 
         std::string::size_type pos = 0;
 
         for (std::vector<std::string::size_type>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
           std::string::size_type lineEnd = *it;
-          g->drawText( xp, yp, text_.substr( pos, lineEnd - pos) );
-          yp+=g->textHeight();
+          g.drawText( xp, yp, text_.substr( pos, lineEnd - pos) );
+          yp+=g.textHeight();
           pos = lineEnd;
         }
-        g->drawText(xp,yp,text_.substr(pos));
+        g.drawText(xp,yp,text_.substr(pos));
       }
 
     } while ( i != std::string::npos );

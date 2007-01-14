@@ -49,7 +49,7 @@ namespace ngrs {
 
     void setInputPolicy( const std::string & regexp );
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
     virtual void onKeyPress(const NKeyEvent & keyevent);
 
     virtual int preferredWidth() const;
@@ -89,9 +89,9 @@ namespace ngrs {
 
     std::string text_;
 
-    NPoint getScreenPos(NGraphics* g, const std::string & text );
-    int computeDx( NGraphics* g, const std::string & text );
-    void drawCursor(NGraphics* g, const std::string & text );
+    NPoint getScreenPos(Graphics& g, const std::string & text );
+    int computeDx( Graphics& g, const std::string & text );
+    void drawCursor(Graphics& g, const std::string & text );
 
     void init();
 

@@ -294,7 +294,7 @@ namespace ngrs {
 
 
 
-  void NFlowLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRegion & repaintArea ,NVisualComponent* sender)
+  void NFlowLayout::drawComponents( NVisualComponent * target, Graphics& g, const NRegion & repaintArea ,NVisualComponent* sender)
   {
     if (!lineBrk_) {
       std::vector<NRuntime*>::iterator itr = target->components.begin();

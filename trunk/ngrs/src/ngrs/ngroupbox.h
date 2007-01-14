@@ -39,7 +39,7 @@ namespace ngrs {
 
       void setHeaderText( const std::string & text );
 
-      virtual void paint(NGraphics* g, const NShape & geometry);
+      virtual void paint(Graphics& g, const NShape & geometry);
 
       virtual NBorder* clone() const;
 

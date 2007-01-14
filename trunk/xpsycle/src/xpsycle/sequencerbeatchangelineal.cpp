@@ -77,7 +77,7 @@ GlobalEvent * SequencerBeatChangeLineal::BeatChangeTriangle::bpmChangeEvent( )
   return bpmChangeEvent_;
 }
 
-void SequencerBeatChangeLineal::BeatChangeTriangle::paint( ngrs::NGraphics * g )
+void SequencerBeatChangeLineal::BeatChangeTriangle::paint( ngrs::Graphics& g )
 {
   int cw = clientWidth();
   int ch = clientHeight();
@@ -91,10 +91,10 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::paint( ngrs::NGraphics * g )
   pts[2].setX( (cw - tWidth) / 2 );
   pts[2].setY( tHeight );
 
-  g->setForeground( ngrs::NColor(0,255,0) );
-  g->fillPolygon(pts, 3);
-  g->setForeground( ngrs::NColor(150,150,150));
-  g->drawPolygon(pts, 3);
+  g.setForeground( ngrs::NColor(0,255,0) );
+  g.fillPolygon(pts, 3);
+  g.setForeground( ngrs::NColor(150,150,150));
+  g.drawPolygon(pts, 3);
 
 }
 
@@ -138,23 +138,23 @@ SequencerBeatChangeLineal::~SequencerBeatChangeLineal()
 {
 }
 
-void SequencerBeatChangeLineal::paint( ngrs::NGraphics * g )
+void SequencerBeatChangeLineal::paint( ngrs::Graphics& g )
 {
-  ngrs::NRect area = g->repaintArea().rectClipBox();
+  ngrs::NRect area = g.repaintArea().rectClipBox();
 
-  g->setForeground( ngrs::NColor(0,0,220) );
+  g.setForeground( ngrs::NColor(0,0,220) );
 
   int cw = clientWidth();
   int ch = clientHeight();
 
   /*std::string timeScaleText = "bpm change";
   int rightIdent = 2;
-  int scaleTextWidth = g->textWidth(timeScaleText) + rightIdent;
-  g->drawText(cw - scaleTextWidth + scrollDx(), 10 + 2 + g->textAscent(), timeScaleText);*/
+  int scaleTextWidth = g.textWidth(timeScaleText) + rightIdent;
+  g.drawText(cw - scaleTextWidth + scrollDx(), 10 + 2 + g.textAscent(), timeScaleText);*/
 
-  g->setForeground( ngrs::NColor( 220, 220, 220) );
+  g.setForeground( ngrs::NColor( 220, 220, 220) );
 
-  g->drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
+  g.drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
 
   int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
   int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
@@ -162,12 +162,12 @@ void SequencerBeatChangeLineal::paint( ngrs::NGraphics * g )
 
   for (int i = start; i < end ; i++) {
      if (! (i % 16)) {
-        g->setForeground( ngrs::NColor( 180, 180, 180) );
-        g->drawLine(i* sView->beatPxLength(),10,d2i(i*sView->beatPxLength()), 0);
+        g.setForeground( ngrs::NColor( 180, 180, 180) );
+        g.drawLine(i* sView->beatPxLength(),10,d2i(i*sView->beatPxLength()), 0);
      }
      else {
-        g->setForeground( ngrs::NColor( 220, 220, 220) );
-        g->drawLine(i* sView->beatPxLength(),10,d2i(i*sView->beatPxLength()), 5);
+        g.setForeground( ngrs::NColor( 220, 220, 220) );
+        g.drawLine(i* sView->beatPxLength(),10,d2i(i*sView->beatPxLength()), 5);
     }
   }
 

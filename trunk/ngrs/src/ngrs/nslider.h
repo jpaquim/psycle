@@ -37,7 +37,7 @@ namespace ngrs {
       ~Slider();
 
       virtual void onMove(const NMoveEvent & moveEvent);
-      virtual void paint(NGraphics* g);
+      virtual void paint(Graphics& g);
 
     private:
 
@@ -50,13 +50,13 @@ namespace ngrs {
     ~NSlider();
 
     sigslot::signal1<NSlider*> change;
-    sigslot::signal2<NSlider*, NGraphics*> customSliderPaint;
+    sigslot::signal2<NSlider*, Graphics&> customSliderPaint;
 
     void resize();
     void setOrientation(int orientation);
     int orientation() const;
 
-    virtual void paint(NGraphics* g);
+    virtual void paint(Graphics& g);
 
     void setTrackLine(bool on);
 

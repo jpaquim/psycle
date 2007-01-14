@@ -20,7 +20,7 @@
 #include "masterdlg.h"
 #include "global.h"
 #include "defaultbitmaps.h"
-#include "configuration.h"
+#include "skinreader.h"
 #include "machine.h"
 #include "dsp.h"
 #include <algorithm>
@@ -33,7 +33,7 @@ namespace psycle {
     {
       pMaster = master;
 
-      const ngrs::NBitmap & bg = Global::pConfig()->icons().masterbk();
+      const ngrs::NBitmap & bg = SkinReader::Instance()->bitmaps().masterbk();
 
       pane()->skin_.setBitmap( bg , 1);
 
@@ -148,10 +148,10 @@ namespace psycle {
       return number_;
     }
 
-    void MasterDlg::Led::paint( ngrs::NGraphics * g )
+    void MasterDlg::Led::paint( ngrs::Graphics& g )
     {
       /// todo replace with bitmap numbers and add in number.xpm a minus
-      g->drawText(0,clientHeight(),stringify(number_));
+      g.drawText(0,clientHeight(),stringify(number_));
     }
 
     MasterDlg::Led::Led( ) : number_(0)

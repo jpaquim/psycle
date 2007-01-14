@@ -475,9 +475,9 @@ double ZoomBar::pos( ) const
   return zoomSlider->pos();
 }
 
-void ZoomBar::customSliderPaint( ngrs::NSlider * sl, ngrs::NGraphics * g )
+void ZoomBar::customSliderPaint( ngrs::NSlider * sl, ngrs::Graphics& g )
 {
-  g->putBitmap(0,0,sliderBpm.width(),sliderBpm.height(),sliderBpm,0,0);
+  g.putBitmap(0,0,sliderBpm.width(),sliderBpm.height(),sliderBpm,0,0);
 }
 
 void ZoomBar::onIncButton( ngrs::NButtonEvent * ev )

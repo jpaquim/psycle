@@ -59,7 +59,7 @@ namespace psycle {
 
       ~SequencerLoopItem();
 
-      virtual void paint( ngrs::NGraphics* g);
+      virtual void paint( ngrs::Graphics& g);
 
       virtual int preferredWidth() const;
       virtual int preferredHeight() const;
@@ -80,7 +80,7 @@ namespace psycle {
 
       sigslot::signal1<SequencerItem*> click;
 
-      virtual void paint( ngrs::NGraphics* g);
+      virtual void paint( ngrs::Graphics& g);
       virtual void onMousePress(int x, int y, int button);
       virtual void resize();
       virtual void onMove(const ngrs::NMoveEvent & moveEvent);
@@ -135,7 +135,7 @@ namespace psycle {
         sigslot::signal1<SequencerLine*> click;
         sigslot::signal1<SequencerItem*> itemClick;
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
         virtual void onMousePress( int x, int y, int button );
         virtual int preferredWidth() const;
         virtual int preferredHeight() const;
@@ -169,14 +169,14 @@ namespace psycle {
         SequencerBeatLineal( SequencerGUI* seqGui );
         ~SequencerBeatLineal();
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
         virtual int preferredHeight() const;
 
       private:
 
         SequencerGUI* sView;
 
-        void drawLineal( ngrs::NGraphics* g, int dx );
+        void drawLineal( ngrs::Graphics& g, int dx );
 
       };
 
@@ -186,9 +186,9 @@ namespace psycle {
         Area( SequencerGUI* seqGui );
         ~Area();
 
-        void drawTimeGrid( ngrs::NGraphics* g );
+        void drawTimeGrid( ngrs::Graphics& g );
 
-        virtual void paint( ngrs::NGraphics* g );
+        virtual void paint( ngrs::Graphics& g );
         virtual int preferredWidth() const;
         virtual int preferredHeight() const;
         virtual void resize();

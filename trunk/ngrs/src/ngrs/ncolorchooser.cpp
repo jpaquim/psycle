@@ -44,7 +44,7 @@ namespace ngrs {
 
   }
 
-  void NColorChooser::paint( NGraphics * g )
+  void NColorChooser::paint( Graphics& g )
   {
     std::vector<NColor>::iterator it = colorMap.begin();
 
@@ -54,9 +54,9 @@ namespace ngrs {
 
     for ( ; it < colorMap.end(); it++) {
       NColor & color = *it;
-      g->setForeground(color);
+      g.setForeground(color);
 
-      g->fillRect(xp,yp, chooseSize, chooseSize);
+      g.fillRect(xp,yp, chooseSize, chooseSize);
 
       if (cols == colCount) {
         xp = 0;
