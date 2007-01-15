@@ -22,7 +22,9 @@
 #include "skinreader.h"
 #include "defaultbitmaps.h"
 #include "configuration.h"
-#include "presetsdlg.h"
+#include "global.h"
+#include "plugin.h"
+
 #include <ngrs/napp.h>
 #include <ngrs/nmenubar.h>
 #include <ngrs/ntogglepanel.h>
@@ -46,7 +48,6 @@ namespace psycle {
 
     NewNameDlg::NewNameDlg( )
     {
-
       ngrs::NPanel* btnPnl = new ngrs::NPanel();
       btnPnl->setLayout( ngrs::NFlowLayout( ngrs::nAlRight, 5, 5) );
       btnPnl->add( new ngrs::NButton("add") );
@@ -64,15 +65,14 @@ namespace psycle {
     {
     }
 
-    // base class for cells
 
+    // base class for cells
     Cell::Cell() {
 
     }
 
     Cell::~Cell() {
     }
-
 
     void Cell::paint( ngrs::Graphics& g )
     {
@@ -92,11 +92,10 @@ namespace psycle {
     int Cell::preferredHeight() const {
       return K_YSIZE + borderTop() + borderBottom() ;
     }
-
     // end of Cell class
 
 
-    // class for a knob
+    // cell subclass for a knob
     Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), finetweak(1), ultrafinetweak(0), sourcepoint(0)  {
       setSpacing( ngrs::NSize( 0,0,1,0 ));			
       param_ = param;  
@@ -288,19 +287,10 @@ namespace psycle {
 
     void FrameMachine::init( )
     {
-      //  NMenuBar* bar = new NMenuBar();
-      //    pane()->add(bar);
-      /*  NMenu* aboutMenu = new NMenu("About",'a',"Help,|,About this machine");
-      aboutMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
-      bar->add(aboutMenu);
-      NMenu* parameterMenu = new NMenu("Parameters",'p',"Reset,Random,Presets");
-      parameterMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
-      bar->add(parameterMenu);*/
-
-      setTitle( stringify(pMachine_->_macIndex)+std::string(" : ")+pMachine_->GetName());
+      setTitle( stringify(pMachine_->_macIndex) + std::string(" : ") + pMachine_->GetName() );
 
       ngrs::NPanel* prs = new ngrs::NPanel();
-      prs->setLayout( ngrs::NAlignLayout());
+      prs->setLayout( ngrs::NAlignLayout() );
       ngrs::NButton* savePrsBtn = new ngrs::NButton("save");
       savePrsBtn->setFlat(false);
       prs->add(savePrsBtn,ngrs::nAlLeft);
@@ -332,12 +322,6 @@ namespace psycle {
       prsPanel->setLayout( fl );
       prs->add( prsPanel, ngrs::nAlClient );
       pane()->add( prs, ngrs::nAlBottom );
-    }
-
-
-    inline int format( int c, int maxcols, int maxrows ) {
-      return ( c / maxcols) + ( ( c % maxcols ) * maxrows );
-
     }
 
     void FrameMachine::initParameterGUI( )
@@ -411,8 +395,6 @@ namespace psycle {
 
     // Knob class
 
-
-
     void FrameMachine::onKnobValueChange( Knob* sender, int value, int param )
     {
       pMachine_->SetParameter( param, value );
@@ -428,17 +410,6 @@ namespace psycle {
       //  {
       //    patternTweakSlide.emit(pMac()->_macIndex, param, value);
       //  }
-    }
-
-
-    void FrameMachine::onItemClicked( ngrs::NEvent * menuEv, ngrs::NButtonEvent * itemEv )
-    {
-      if (itemEv->text() == "Presets") {
-        PresetsDlg* dlg = new PresetsDlg(this);
-        add(dlg);
-        dlg->execute();
-        ngrs::NApp::addRemovePipe(dlg);
-      }
     }
 
     Machine * FrameMachine::pMac( )
@@ -459,17 +430,14 @@ namespace psycle {
         int val_v = pMachine_->GetParamValue( knobIdx );
         cell->setValue(val_v);
         cell->setRange(min_v,max_v);
-        std::string valuestring(buffer);
-        cell->setValueAsText(valuestring);				
+        cell->setValueAsText( buffer );
       }
 
       knobPanel->repaint();
     }
 
-
-
-    void FrameMachine::loadPresets() {
-      std::string filename(pMac()->GetDllName());
+    bool FrameMachine::loadPresets() {
+      std::string filename( pMac()->GetDllName() );
 
       std::string::size_type pos = filename.find('.')  ;
       if ( pos == std::string::npos ) {
@@ -478,49 +446,49 @@ namespace psycle {
         filename = filename.substr(0,pos)+".prs";
       }
 
-      try {
-        RiffFile f;
-        if ( !f.Open(Global::pConfig()->prsPath() +filename) ) throw "couldn`t open file";
+      RiffFile f;      
+      if ( !f.Open(Global::pConfig()->prsPath() +filename) )
+        // couldnt open file
+        return false;
 
-        int numpresets;
-        f.Read( numpresets );
-        int filenumpars;
-        f.Read( filenumpars );
+      int numpresets;
+      f.Read( numpresets );
+      int filenumpars;
+      f.Read( filenumpars );
 
-        if (numpresets >= 0) {
-          // old file format .. do not support so far ..
-        } else {
-          // new file format
-          if ( filenumpars == 1 ) {
-            int filepresetsize;
-            // new preset format version 1
-            // new preset format version 1
+      if (numpresets >= 0) {
+        // old file format .. do not support so far ..
+      } else {
+        // new file format
+        if ( filenumpars == 1 ) {
+          int filepresetsize;
+          // new preset format version 1
+          // new preset format version 1
 
-            int numParameters = ((Plugin*) pMac())->GetInfo()->numParameters;
-            int sizeDataStruct = ((Plugin *) pMac())->proxy().GetDataSize();
+          int numParameters = ((Plugin*) pMac())->GetInfo()->numParameters;
+          int sizeDataStruct = ((Plugin *) pMac())->proxy().GetDataSize();
 
-            int numpresets;
-            f.Read(numpresets);
-            f.Read(filenumpars);
-            f.Read(filepresetsize);
+          int numpresets;
+          f.Read(numpresets);
+          f.Read(filenumpars);
+          f.Read(filepresetsize);
 
-            if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) return;
+          if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) 
+            return false;
 
-            while (!f.Eof() ) {
-              Preset newPreset(numParameters, sizeDataStruct);
-              if (newPreset.loadFromFile(&f)) {
-                ngrs::NButton* prsBtn = new ngrs::NButton(newPreset.name());
-                prsBtn->setFlat(false);
-                prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
-                prsPanel->add(prsBtn);
-                presetMap[prsBtn] = newPreset;
-              }
+          while (!f.Eof() ) {
+            Preset newPreset(numParameters, sizeDataStruct);
+            if ( newPreset.loadFromFile( f )  ) {
+              ngrs::NButton* prsBtn = new ngrs::NButton(newPreset.name());
+              prsBtn->setFlat(false);
+              prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
+              prsPanel->add(prsBtn);
+              presetMap[prsBtn] = newPreset;
             }
           }
         }
-      } catch (const char * e) {
-        // couldn`t open presets
       }
+      return true;
     }
 
     void FrameMachine::onLeftBtn( ngrs::NButtonEvent* ev )
@@ -539,7 +507,7 @@ namespace psycle {
     {
       std::map<ngrs::NButton*,Preset>::iterator itr;
       if ( (itr = presetMap.find((ngrs::NButton*)ev->sender())) != presetMap.end() ) {
-        itr->second.tweakMachine(pMac() );
+        if ( pMac() ) itr->second.tweakMachine( *pMac() );
       }
       updateValues();
     }

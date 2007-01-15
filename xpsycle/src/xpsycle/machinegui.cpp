@@ -24,6 +24,7 @@
 #include "masterdlg.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
+#include "song.h"
 #include <ngrs/nframeborder.h>
 #include <ngrs/nwindow.h>
 #include <ngrs/nslider.h>
