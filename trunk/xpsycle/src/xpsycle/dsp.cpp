@@ -102,7 +102,7 @@ namespace psycle
 				sincTable[0] = 1;	//save the trouble of evaluating 0/0
 				for(int i(1); i<sincSize; ++i)
 				{
-					sincTable[i] = sin(i * pi / (float)SINC_RESOLUTION) / float(i * pi / (float)SINC_RESOLUTION); //equivalent to i * pi * SINC_ZEROS / sincSize
+					sincTable[i] = sin(i * pi / (float)SINC_RESOLUTION) / float(i * pi / (float)SINC_RESOLUTION);
 
 					//todo: decide which window we like best.
 					//also todo: kaiser windows might be our best option, but i have no clue how to calculate one :)

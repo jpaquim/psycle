@@ -317,13 +317,14 @@ namespace psycle
 			{
 				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
 				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
-				if(offset<SINC_ZEROS) leftExtent=offset;
-				if(length-offset<SINC_ZEROS) rightExtent=length-offset;
+				if(offset<SINC_ZEROS) leftExtent=(int)(offset);
+				if(length-offset<SINC_ZEROS) rightExtent=(int)(length-offset);
 				
 				const int sincInc(SINC_RESOLUTION);
 				float newval(0.0);
 
 				newval += sincTable[res] * *(pData);
+				///\todo: Will weight be different than zero using the current code?
 				float sincIndex(sincInc+res);
 				float weight(sincIndex - floor(sincIndex));
 				for(	int i(1);

@@ -288,7 +288,7 @@ namespace ngrs {
     HDC memDC_ = CreateCompatibleDC( dc );
 
     sysData_ = CreateCompatibleBitmap( dc, xwidth_, xheight_ );
-    SelectObject( memDC_, sysData_ );
+    HBITMAP oldBitmap = (HBITMAP)SelectObject( memDC_, sysData_ );
 
     for ( int y=0; y < height; y++ ) {  
       const char* scanLine = data[1+ncolors+y];
@@ -303,7 +303,7 @@ namespace ngrs {
         SetPixel( memDC_, x, y,  colorValue );
       }
     }
-
+	SelectObject( memDC_, oldBitmap );
     ReleaseDC( NULL, dc );
     DeleteDC( memDC_ );
 
@@ -389,8 +389,8 @@ namespace ngrs {
     hdcMem = CreateCompatibleDC(0);
     hdcMem2 = CreateCompatibleDC(0);
 
-    SelectObject(hdcMem, hbmColour);
-    SelectObject(hdcMem2, hbmMask);
+    HBITMAP oldColour = (HBITMAP)SelectObject(hdcMem, hbmColour);
+    HBITMAP oldMask = (HBITMAP)SelectObject(hdcMem2, hbmMask);
 
     // Set the background colour of the colour image to the colour
     // you want to be transparent.
@@ -409,6 +409,8 @@ namespace ngrs {
 
     // Clean up.
 
+	SelectObject(hdcMem, oldColour);
+	SelectObject(hdcMem2, oldMask);
     DeleteDC(hdcMem);
     DeleteDC(hdcMem2);
 

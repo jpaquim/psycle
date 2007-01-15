@@ -191,10 +191,10 @@ namespace psycle {
 				}
 			}
 
-			std::vector<WireGUI*>::iterator it = find( wireGUIs.begin(), wireGUIs.end(), ev.sender() );  
-			if (  it != wireGUIs.end() && connectToMachineGUI ) {
+			std::vector<WireGUI*>::iterator it2 = find( wireGUIs.begin(), wireGUIs.end(), ev.sender() );  
+			if (  it2 != wireGUIs.end() && connectToMachineGUI ) {
 				// found an old line and rewire it here
-				WireGUI* oldLine = *it;
+				WireGUI* oldLine = *it2;
 				if ( ev.picker() == 0 ) {
 					MachineGUI* oldSrcGUI = findByMachine( oldLine->dialog()->pSrcMachine() );
 					rewire( oldLine, oldSrcGUI, connectToMachineGUI );
@@ -216,7 +216,7 @@ namespace psycle {
 					line->removeMe.connect( this, &MachineView::onWireGUIDelete );
 					wireGUIs.push_back( line );
 				} else 
-					if ( it == wireGUIs.end() ) {
+					if ( it2 == wireGUIs.end() ) {
 						scrollArea_->removeChild( line );
 						line = 0;    
 					} else {

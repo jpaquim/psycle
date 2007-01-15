@@ -54,13 +54,13 @@ namespace ngrs {
       for(int i = 0, n = 1; n <= number; ++i, n *= 10) digit[i] = (number / n) % 10;
     }
 
-    int i = 0;
+    int j = 0;
     for (std::vector<N7Segment*>::iterator it =  segs.begin(); it < segs.end(); it++)
     {
       N7Segment* segment = *it;
       segment->resetSeg();
-      segment->setNumber( digit[segs.size()-i-1] );
-      i++;
+      segment->setNumber( digit[segs.size()-j-1] );
+      j++;
     }
   }
 
