@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by Stefan Nattkemper   *
+*   Copyright (C) 2007 by Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,41 +17,40 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PRESETSDLG_H
-#define PRESETSDLG_H
+#ifndef BINREAD_H
+#define BINREAD_H
 
-/**
-  @author Stefan Nattkemper
-*/
-
-#include "binread.h"
-#include <string>
-#include <vector>
+#include <istream>
 
 namespace psycle {
   namespace host {
 
-    class Machine;
-
-    class Preset {
+    class BinRead {      
     public:
 
-      Preset();
+      enum BinPlatform { byte4LE, byte4BE, byte8LE, byte8BE };
 
-      Preset( int numpars, int dataSize );
+      BinRead( std::istream & in );
+      ~BinRead();
 
-      bool read( BinRead & prsIn );
+      unsigned int readUInt4LE();
+      int readInt4LE();
+      void readUIntArray4LE( unsigned int data[], int count );
+      void readIntArray4LE( int data[], int size );
 
-      const std::string& name() const;
+      void read( char * data, std::streamsize const & bytes );
 
-      void tweakMachine( Machine & mac );
+      bool eof() const;
+      bool bad() const;
 
     private:
 
-      std::string name_;
+      int platform;
+      std::istream & in_;
 
-      std::vector<int> params_;
-      std::vector<char> data_;
+      BinPlatform testPlatform();
+      unsigned int swap4( unsigned int value );
+
     };
 
   }

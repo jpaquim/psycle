@@ -24,7 +24,7 @@
 #include "configuration.h"
 #include "global.h"
 #include "plugin.h"
-
+#include "binread.h"
 #include <ngrs/napp.h>
 #include <ngrs/nmenubar.h>
 #include <ngrs/ntogglepanel.h>
@@ -35,6 +35,7 @@
 #include <ngrs/nalignlayout.h>
 #include <ngrs/ntablelayout.h>
 #include <ngrs/nalignconstraint.h>
+#include <fstream>
 
 
 #ifdef _MSC_VER
@@ -446,15 +447,14 @@ namespace psycle {
         filename = filename.substr(0,pos)+".prs";
       }
 
-      RiffFile f;      
-      if ( !f.Open(Global::pConfig()->prsPath() +filename) )
-        // couldnt open file
-        return false;
 
-      int numpresets;
-      f.Read( numpresets );
-      int filenumpars;
-      f.Read( filenumpars );
+      std::ifstream prsIn( std::string(Global::pConfig()->prsPath() + filename).c_str() );
+      if ( !prsIn.is_open() )
+        return false;      
+      BinRead binIn( prsIn );
+
+      int numpresets = binIn.readInt4LE();
+      int filenumpars = binIn.readInt4LE();
 
       if (numpresets >= 0) {
         // old file format .. do not support so far ..
@@ -468,17 +468,16 @@ namespace psycle {
           int numParameters = ((Plugin*) pMac())->GetInfo()->numParameters;
           int sizeDataStruct = ((Plugin *) pMac())->proxy().GetDataSize();
 
-          int numpresets;
-          f.Read(numpresets);
-          f.Read(filenumpars);
-          f.Read(filepresetsize);
+          int numpresets = binIn.readInt4LE();
+          filenumpars = binIn.readInt4LE();
+          filepresetsize = binIn.readInt4LE();
 
           if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) 
             return false;
 
-          while (!f.Eof() ) {
+          while ( !prsIn.eof() ) {
             Preset newPreset(numParameters, sizeDataStruct);
-            if ( newPreset.loadFromFile( f )  ) {
+            if (newPreset.read( binIn )) {
               ngrs::NButton* prsBtn = new ngrs::NButton(newPreset.name());
               prsBtn->setFlat(false);
               prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
