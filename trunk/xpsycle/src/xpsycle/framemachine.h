@@ -20,7 +20,7 @@
 #ifndef FRAMEMACHINE_H
 #define FRAMEMACHINE_H
 
-#include "presetsdlg.h"
+#include "preset.h"
 #include <ngrs/nwindow.h>
 #include <ngrs/nlabel.h>
 #include <ngrs/nframeborder.h>
@@ -127,8 +127,7 @@ namespace psycle {
     };
 
 
-    class FrameMachine : public ngrs::NWindow
-    {
+    class FrameMachine : public ngrs::NWindow {
     public:
       FrameMachine( Machine* pMachine );
 
@@ -145,32 +144,28 @@ namespace psycle {
     private:
 
       std::map< ngrs::NButton*, Preset > presetMap;
-      std::map<int, Knob*>   knobMap;
+      std::map<int, Knob*> knobMap;
       std::map<int, Header*> headerMap;
-
       Machine* pMachine_;
+
       ngrs::NPanel* knobPanel;
       ngrs::NTogglePanel* prsPanel;
       ngrs::NButton* defaultPrsBtn;
       ngrs::NSlider* prsBtnSlider;
-
-      Preset knobsPreset();
-
-      void onItemClicked( ngrs::NEvent* menuEv, ngrs::NButtonEvent* itemEv );
+      
       void init();
       void initParameterGUI();
-
-      void onPrsClick( ngrs::NButtonEvent* ev );
-
+      
       void onKnobValueChange( Knob* sender, int value, int param );
 
-      void onLeftBtn( ngrs::NButtonEvent* ev );
-      void onRightBtn( ngrs::NButtonEvent* ev );
+      bool loadPresets();
+      Preset knobsPreset();
 
-      void loadPresets();
+      void onPrsClick( ngrs::NButtonEvent* ev );
+      void onLeftBtn( ngrs::NButtonEvent* ev );
+      void onRightBtn( ngrs::NButtonEvent* ev );      
       void onAddPrs( ngrs::NButtonEvent* ev );
       void onLoadPrs( ngrs::NButtonEvent* ev );
-
 
     };
 

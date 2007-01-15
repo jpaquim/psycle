@@ -20,26 +20,18 @@
 #ifndef PRESETSDLG_H
 #define PRESETSDLG_H
 
-#include "plugin.h"
-#include <ngrs/ndialog.h>
-
 /**
   @author Stefan Nattkemper
 */
 
-
-namespace ngrs {
-  class NListBox;
-}
+#include <string>
+#include <vector>
 
 namespace psycle {
   namespace host {
 
     class Machine;
-    class DeSerializer;
-    class FrameMachine;
     class RiffFile;
-
 
     class Preset {
     public:
@@ -48,44 +40,18 @@ namespace psycle {
 
       Preset( int numpars, int dataSize );
 
-      bool loadFromFile( RiffFile* f );
+      bool loadFromFile( RiffFile & f );
 
       const std::string& name() const;
 
-      void tweakMachine( Machine* mac );
+      void tweakMachine( Machine & mac );
 
     private:
 
       std::string name_;
 
-      int numpars_;
-      int dataSize_;
-
       std::vector<int> params_;
-      std::vector<byte>  data_;
-
-    };
-
-
-    class PresetsDlg : public ngrs::NDialog
-    {
-    public:
-      PresetsDlg( FrameMachine* mac );
-
-      ~PresetsDlg();
-
-    private:
-
-      ngrs::NListBox* lBox;
-      FrameMachine* fMac;
-
-      void loadPresets();
-      void addPreset( const std::string& name );
-
-      std::map<std::string,Preset> presetMap;
-
-      void onUseClicked( ngrs::NButtonEvent* ev );
-
+      std::vector<char> data_;
     };
 
   }
