@@ -43,14 +43,15 @@ namespace psycle {
        // read the preset name     
       char cbuf[32];
       prsIn.read(cbuf,32);
+      cbuf[31] = '\0';
       name_ = cbuf;
       if ( prsIn.eof() || prsIn.bad() ) return false;
       // load parameter values
-      prsIn.readIntArray4LE( &params_[0], params_.size() );      
+      prsIn.readIntArray4LE( &params_[0], static_cast<std::streamsize>(params_.size()));
       if ( prsIn.eof() || prsIn.bad() ) return false;
       // load special machine data
       if ( data_.size() ) {
-        prsIn.read( &data_[0], data_.size() ); 
+        prsIn.read( &data_[0], static_cast<std::streamsize>(data_.size()) ); 
         if ( prsIn.eof() || prsIn.bad() ) return false;
       }
       return true;
@@ -59,6 +60,10 @@ namespace psycle {
     const std::string & Preset::name( ) const
     {
       return name_;
+    }
+
+    const std::vector<int>& Preset::parameter() const {
+      return params_;
     }
 
     void Preset::tweakMachine( Machine & mac )

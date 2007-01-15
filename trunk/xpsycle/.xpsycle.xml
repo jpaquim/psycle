@@ -13,7 +13,7 @@
 
 <path id='plugindir' src='C:\Programme\Psycle\PsyclePlugins\' />
 <path id='ladspadir' src='C:\Programme\Audacity\Plug-Ins\' />
-<path id='prsdir' src='~/.xpsycle/prs/'></path>
+<path id='prsdir' src='C:\Programme\Psycle\PsyclePlugins\'></path>
 
 <!-- keyHandler configuration -->
 
