@@ -229,9 +229,6 @@
 		#elif defined _WIN64 || defined _WIN32 || defined __MINGW32__ // note: _WIN32 is defined too on mingw (and cygwin's gcc -mno-cygwin)
 			#define DIVERSALIS__OPERATING_SYSTEM
 			#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			#if defined _WINDOWS_ || defined WINVER || defined _WIN32_WINDOWS || defined _WIN32_WINNT || defined _WIN32_IE
-				#error "Please #include <diversalis/operating_system.hpp> before using any mswindows-specific code."
-			#endif
 			//////////////////
 			// WINVER
 			// _WIN32_WINDOWS
@@ -261,19 +258,32 @@
 						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH
 							#define DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH 0
 						#endif
-						#define WINVER \
+						#define DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW \
 							( \
 								DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR * 0x100 + \
 								DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR * 0x10 + \
 								DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH \
 							)
-						#define _WIN32_WINDOWS WINVER
-						#if !defined DIVERSALIS__OPERATING_SYSTEM__BRANCH
+						#if !defined WINVER
+							#define WINVER DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
+						#elif WINVER < DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
+							#error "WINVER too low."
+						#endif
+						#if !defined _WIN32_WINDOWS
+							#define _WIN32_WINDOWS WINVER
+						#elif _WIN32_WINDOWS < DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
+							#error "_WIN32_WINDOWS too low."
+						#endif
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__BRANCH && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 							#define DIVERSALIS__OPERATING_SYSTEM__BRANCH
 							#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
 						#endif
-						#if defined DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
-							#define _WIN32_WINNT WINVER
+						#if 1 || defined DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
+							#if !defined _WIN32_WINNT
+								#define _WIN32_WINNT WINVER
+							#elif _WIN32_WINNT < DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
+								#error "_WIN32_WINNT too low."
+							#endif
 						#endif
 					#endif
 			/////////////////////////////////////////////
@@ -300,12 +310,17 @@
 						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
 							#define DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH 0
 						#endif
-						#define _WIN32_IE \
+						#define DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__WANTED \
 							( \
 								DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR * 0x100 + \
 								DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR * 0x10 + \
 								DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH \
 							)
+						#if !defined _WIN32_IE
+							#define _WIN32_IE DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__WANTED
+						#elif _WIN32_IE < DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__WANTED
+							#error "_WIN32_IE too low."
+						#endif
 					#endif
 
 
