@@ -43,9 +43,11 @@ namespace psycle {
       bool eof() const;
       bool bad() const;
 
+      BinPlatform platform() const;
+
     private:
 
-      int platform;
+      BinPlatform platform_;
       std::istream & in_;
 
       BinPlatform testPlatform();

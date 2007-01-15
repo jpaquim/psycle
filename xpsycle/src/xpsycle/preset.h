@@ -43,6 +43,7 @@ namespace psycle {
       bool read( BinRead & prsIn );
 
       const std::string& name() const;
+      const std::vector<int>& parameter() const;
 
       void tweakMachine( Machine & mac );
 

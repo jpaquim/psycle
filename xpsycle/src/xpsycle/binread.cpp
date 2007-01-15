@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+
 #include "binread.h"
 #include <iostream>
 
@@ -26,8 +27,7 @@ namespace psycle {
     BinRead::BinRead( std::istream & in ) 
       : in_( in  ) 
     {
-      platform = testPlatform();
-      std::cout << "platform" << platform << std::endl;
+      platform_ = testPlatform();
     }
 
     BinRead::~BinRead() {
@@ -48,7 +48,7 @@ namespace psycle {
     unsigned int BinRead::readUInt4LE() {
       unsigned char buf[4];
       in_.read( reinterpret_cast<char*>(&buf), 4 );      
-      switch ( platform ) {
+      switch ( platform_ ) {
         case byte4LE : return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24; 
         break;
         case byte4BE : return buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0 ; 
@@ -120,6 +120,10 @@ namespace psycle {
 
     bool BinRead::bad() const {
       return in_.bad();
+    }
+
+    BinRead::BinPlatform BinRead::platform() const {
+      return platform_;
     }
 
   }
