@@ -55,7 +55,7 @@ namespace ngrs {
 #else
 
     HDC dc = GetDC( NULL );
-    SelectObject( dc, fntStruct.hFnt );  
+    HFONT oldFont = (HFONT)SelectObject( dc, fntStruct.hFnt );  
 
     SIZE size;
     GetTextExtentPoint32(
@@ -64,7 +64,7 @@ namespace ngrs {
       static_cast<int>( text.length() ), // characters in string
       &size          // string size
       );
-
+	SelectObject( dc, oldFont );  
     ReleaseDC ( NULL, dc );
 
     return size.cx;
@@ -86,11 +86,12 @@ namespace ngrs {
 #else
     TEXTMETRIC metrics;
     HDC dc = GetDC( NULL );
-    SelectObject( dc, fntStruct.hFnt );  
+    HFONT oldFont = (HFONT)SelectObject( dc, fntStruct.hFnt );  
     GetTextMetrics(
       dc ,      // handle to DC
       &metrics  // text metrics
-      );  
+      );
+	SelectObject( dc, oldFont );  
     ReleaseDC( NULL , dc );
     return metrics.tmHeight;
 #endif
@@ -109,11 +110,12 @@ namespace ngrs {
 #else
     TEXTMETRIC metrics;
     HDC dc = GetDC(NULL); 
-    SelectObject( dc, fntStruct.hFnt );  
+    HFONT oldFont = (HFONT)SelectObject( dc, fntStruct.hFnt );  
     GetTextMetrics(
       dc,       // handle to DC
       &metrics  // text metrics
       );  
+	SelectObject( dc, oldFont ); 
     ReleaseDC( NULL , dc );
     return metrics.tmAscent;
 #endif
@@ -132,11 +134,12 @@ namespace ngrs {
 #else
     TEXTMETRIC metrics;
     HDC dc = GetDC(NULL);
-    SelectObject( dc, fntStruct.hFnt );  
+    HFONT oldFont = (HFONT)SelectObject( dc, fntStruct.hFnt );  
     GetTextMetrics(
       dc,       // handle to DC
       &metrics  // text metrics
-      );  
+      );
+	SelectObject( dc, oldFont ); 
     ReleaseDC( NULL , dc );
     return metrics.tmDescent;
 #endif
@@ -154,11 +157,12 @@ namespace ngrs {
 #else
     TEXTMETRIC metrics;
     HDC dc = GetDC(NULL); 
-    SelectObject( dc, fntStruct.hFnt );  
+    HFONT oldFont = (HFONT)SelectObject( dc, fntStruct.hFnt );  
     GetTextMetrics(
       dc,       // handle to DC
       &metrics  // text metrics
       );  
+	SelectObject( dc, oldFont );
     ReleaseDC( NULL , dc );
     return metrics.tmMaxCharWidth;;
 #endif
