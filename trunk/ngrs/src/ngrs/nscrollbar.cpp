@@ -455,11 +455,9 @@ namespace ngrs {
       switch ( scrollPolicy_ ) {
       case nDy :
         scrollComponent(control_,control_->scrollDx(), static_cast<int>(pos_) );    
-        control_->repaint();
         break;
       case nDx :
         scrollComponent(control_, static_cast<int>(pos_), control_->scrollDy());
-        control_->repaint();
         break;
       }
     }  

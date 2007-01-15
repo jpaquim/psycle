@@ -1331,7 +1331,7 @@ namespace ngrs {
 
   void Graphics::resetPen( )
   {
-    setPen(NPen());
+    setPen( NPen() );
   }
 
 }
