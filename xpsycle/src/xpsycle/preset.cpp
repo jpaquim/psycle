@@ -20,7 +20,7 @@
 #include "preset.h"
 #include "machine.h"
 #include "plugin.h"
-#include "fileio.h"
+#include "binread.h"
 
 namespace psycle {
   namespace host {
@@ -38,27 +38,21 @@ namespace psycle {
     {
     }
 
-    bool Preset::loadFromFile( RiffFile & f )
-    {
-       // read the preset name
+      bool Preset::read( BinRead & prsIn )
+    { 
+       // read the preset name     
       char cbuf[32];
-      if (!f.ReadChunk(cbuf,sizeof(cbuf))) 
-        return 0;
-      name_ = string(cbuf);
-
+      prsIn.read(cbuf,32);
+      name_ = cbuf;
+      if ( prsIn.eof() || prsIn.bad() ) return false;
       // load parameter values
-      for ( std::vector<int>::iterator it = params_.begin(); it < params_.end(); it++ ) {
-        int & paramValue = *it;
-        if ( !f.Read( paramValue ) ) 
-          return 0;
-      }
-
+      prsIn.readIntArray4LE( &params_[0], params_.size() );      
+      if ( prsIn.eof() || prsIn.bad() ) return false;
       // load special machine data
       if ( data_.size() ) {
-        if (!f.ReadChunk( &data_[0], data_.size() ) ) 
-          return 0;
+        prsIn.read( &data_[0], data_.size() ); 
+        if ( prsIn.eof() || prsIn.bad() ) return false;
       }
-      
       return true;
     }
 
