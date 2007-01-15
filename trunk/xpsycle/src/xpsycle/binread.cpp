@@ -33,6 +33,18 @@ namespace psycle {
     BinRead::~BinRead() {
     }
 
+
+    // disable << shift to big warning
+    #if defined __GNUC__
+    #pragma GCC system_header
+    #elif defined __SUNPRO_CC
+    #pragma disable_warn
+    #elif defined _MSC_VER
+    #pragma warning(push, 1)
+    #pragma warning(disable:4293)
+    #endif 
+
+
     unsigned int BinRead::readUInt4LE() {
       unsigned char buf[4];
       in_.read( reinterpret_cast<char*>(&buf), 4 );      
@@ -41,13 +53,18 @@ namespace psycle {
         break;
         case byte4BE : return buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0 ; 
         break;
-        case byte8LE : return 0; 
-        break; ///\ todo
-        case byte8BE : return 4; 
-        break; ///\ todo
+        case byte8LE : return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24 | buf[4] << 32 | buf[5] << 40 | buf[6] << 48 | buf[7] << 56;
+        break;
+        case byte8BE : return buf[0] << 56 | buf[1] << 48 | buf[2] << 40 | buf[3] << 32 | buf[4] << 24 | buf[5] << 16 | buf[6] << 8 | buf[7];
+        break;
       }
       return 0; // cannot handle platform
     }
+    #if defined __SUNPRO_CC
+    #pragma enable_warn
+    #elif defined _MSC_VER
+    #pragma warning(pop)
+    #endif 
 
     int BinRead::readInt4LE() {
       return static_cast<int>( readUInt4LE() );
