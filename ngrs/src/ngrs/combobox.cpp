@@ -104,7 +104,7 @@ namespace ngrs {
     }
   }
 
-  void ComboBox::add( NCustomItem * item )
+  void ComboBox::add( CustomItem * item )
   {
     lbox->add(item);
   }
@@ -126,7 +126,7 @@ namespace ngrs {
   void ComboBox::setIndex( int i )
   {
     lbox->setIndex(i);
-    NCustomItem* item = lbox->itemAt(i);
+    CustomItem* item = lbox->itemAt(i);
     if (item!=0) {
       edit_->setText(item->text());
     }
@@ -152,12 +152,12 @@ namespace ngrs {
     return edit_;
   }
 
-  std::vector< NCustomItem * > & ComboBox::items( )
+  std::vector< CustomItem * > & ComboBox::items( )
   {
     return lbox->items();
   }
 
-  NCustomItem * ComboBox::itemAt( unsigned int index )
+  CustomItem * ComboBox::itemAt( unsigned int index )
   {
     return lbox->itemAt( index );
   }

@@ -57,7 +57,7 @@ namespace ngrs {
 
 
   FileListBox::FileListBox()
-    :  NListBox()
+    :  ListBox()
   {
     isDirItem_ = false;
     mode_ = nFiles | nDirs;
@@ -132,10 +132,10 @@ namespace ngrs {
   }
 
 
-  void FileListBox::onItemSelected( NCustomItem * item )
+  void FileListBox::onItemSelected( CustomItem * item )
   {
     fName_ = item->text();
-    NListBox::onItemSelected(item);
+    ListBox::onItemSelected(item);
   }
 
   const std::string & FileListBox::fileName( ) const

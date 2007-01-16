@@ -34,7 +34,7 @@ namespace ngrs {
   {
     setLayout( AlignLayout() );
 
-    scrollBox_ = new NScrollBox();
+    scrollBox_ = new ScrollBox();
     scrollArea_ = new Panel();
     scrollArea_->setLayout( AlignLayout() );
     scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
@@ -63,7 +63,7 @@ namespace ngrs {
     node->itemSelected.connect(this,&CustomTreeView::onSelectedItem);
   }
 
-  void CustomTreeView::onSelectedItem(TreeNode* node, NCustomItem * sender )
+  void CustomTreeView::onSelectedItem(TreeNode* node, CustomItem * sender )
   {
     selectedTreeNode_ = node;
 
@@ -82,7 +82,7 @@ namespace ngrs {
     itemSelected.emit(&ev);
   }
 
-  void CustomTreeView::setSelectedItem( TreeNode* node, NCustomItem* item ) {
+  void CustomTreeView::setSelectedItem( TreeNode* node, CustomItem* item ) {
     selectedTreeNode_ = node;
 
     item->setSkin(itemBg);
@@ -105,7 +105,7 @@ namespace ngrs {
     return selectedTreeNode_;
   }
 
-  NCustomItem * CustomTreeView::selectedItem( )
+  CustomItem * CustomTreeView::selectedItem( )
   {
     return selectedItem_;
   }
@@ -117,7 +117,7 @@ namespace ngrs {
     selectedTreeNode_ = 0;
   }
 
-  void CustomTreeView::removeItem( NCustomItem * item )
+  void CustomTreeView::removeItem( CustomItem * item )
   {
     if ( item && item->isChildOf( this ) ) {
       if ( item == selectedItem_ ) selectedItem_ = 0;

@@ -285,10 +285,10 @@ namespace psycle {
 		void AudioConfigDlg::setVisible( bool on ) {
 			if (on) {
 				AudioDriverInfo driverInfo = Player::Instance()->driver().info();
-				std::vector<ngrs::NCustomItem*>::iterator it = driverCbx_->items().begin();
+				std::vector<ngrs::CustomItem*>::iterator it = driverCbx_->items().begin();
 				int idx = 0;
 				for ( ; it < driverCbx_->items().end(); it++, idx++ ) {
-                  ngrs::NCustomItem* item = *it;
+                  ngrs::CustomItem* item = *it;
 					if ( item->text() == driverInfo.name() ) {
 						driverCbx_->setIndex( idx );
                         ngrs::ItemEvent ev(item,item->text());

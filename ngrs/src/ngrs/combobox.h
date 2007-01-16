@@ -24,10 +24,10 @@
 
 namespace ngrs {
 
-  class NCustomItem;
+  class CustomItem;
   class Button;
   class Edit;
-  class NListBox;
+  class ListBox;
   class ItemEvent;
   class PopupWindow;
 
@@ -49,15 +49,15 @@ namespace ngrs {
     virtual void resize();
     virtual int preferredHeight() const;
 
-    virtual void add(NCustomItem* item);
+    virtual void add(CustomItem* item);
     virtual void removeChilds();
 
     void setIndex(int i);
     int selIndex() const;
     int itemCount();
-    NCustomItem* itemAt(unsigned int index);
+    CustomItem* itemAt(unsigned int index);
 
-    std::vector<NCustomItem*> & items();
+    std::vector<CustomItem*> & items();
 
     virtual void onItemClicked(ItemEvent * ev);
 
@@ -72,7 +72,7 @@ namespace ngrs {
     Edit*   edit_;
     Button* downBtn_;
 
-    NListBox* lbox;
+    ListBox* lbox;
     PopupWindow*  popup;
 
     void init();

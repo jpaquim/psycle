@@ -972,12 +972,12 @@ namespace psycle {
       Song* selectedSong_ = selectedChildView_->song();
 
 
-      std::vector< ngrs::NCustomItem * > items = genCombo_->items();
-      std::vector< ngrs::NCustomItem * >::iterator it = items.begin();
+      std::vector< ngrs::CustomItem * > items = genCombo_->items();
+      std::vector< ngrs::CustomItem * >::iterator it = items.begin();
 
       int idx = 0;
       for ( ; it < items.end(); it++) {
-        ngrs::NCustomItem* item = *it;
+        ngrs::CustomItem* item = *it;
         if (item->text().length() > 2) {
           int macIdx = str_hex<int>( item->text().substr(0,2) );
 

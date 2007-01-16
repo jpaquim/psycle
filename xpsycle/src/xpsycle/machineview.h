@@ -85,7 +85,7 @@ namespace psycle {
 			WireGUI* selectedWire_;
 
 			ngrs::Panel* scrollArea_;
-            ngrs::NScrollBox* scrollBox_;							
+            ngrs::ScrollBox* scrollBox_;							
 
 			void init();
 

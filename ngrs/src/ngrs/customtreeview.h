@@ -30,8 +30,8 @@
 namespace ngrs {
 
   class TreeNode;
-  class NScrollBox;
-  class NCustomItem;
+  class ScrollBox;
+  class CustomItem;
 
 
   class CustomTreeView : public Panel
@@ -47,24 +47,24 @@ namespace ngrs {
     signal1<ItemEvent*> itemDblClick;
 
     TreeNode* selectedTreeNode();
-    NCustomItem* selectedItem();
+    CustomItem* selectedItem();
 
     virtual void removeChilds();
-    void removeItem( NCustomItem* item );
+    void removeItem( CustomItem* item );
 
-    void setSelectedItem( TreeNode* node, NCustomItem* item );
+    void setSelectedItem( TreeNode* node, CustomItem* item );
 
   private:
 
-    NScrollBox* scrollBox_;
+    ScrollBox* scrollBox_;
     Panel* scrollArea_;
-    NCustomItem* selectedItem_;
+    CustomItem* selectedItem_;
     TreeNode* selectedTreeNode_;
 
     Skin itemBg;
     Skin itemFg;
 
-    void onSelectedItem(TreeNode* node, NCustomItem* sender);
+    void onSelectedItem(TreeNode* node, CustomItem* sender);
     void onItemDblClick( ButtonEvent* ev );
 
   };

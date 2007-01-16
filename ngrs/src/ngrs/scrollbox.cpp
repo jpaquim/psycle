@@ -22,31 +22,31 @@
 
 namespace ngrs {
 
-  NScrollBox::NScrollBox()
+  ScrollBox::ScrollBox()
     : Panel()
   {
     init();
   }
 
 
-  NScrollBox::~NScrollBox()
+  ScrollBox::~ScrollBox()
   {
   }
 
-  void NScrollBox::init( )
+  void ScrollBox::init( )
   {
     horBar_ = new ScrollBar();
     horBar_->setOrientation(nHorizontal);
-    horBar_->change.connect(this,&NScrollBox::onHPosChange);
+    horBar_->change.connect(this,&ScrollBox::onHPosChange);
     add( horBar_ );
     verBar_ = new ScrollBar();
     verBar_->setOrientation(nVertical);
-    verBar_->change.connect(this,&NScrollBox::onVPosChange);
+    verBar_->change.connect(this,&ScrollBox::onVPosChange);
     add( verBar_ );
     scrollPane_ = 0;
   }
 
-  void NScrollBox::resize( )
+  void ScrollBox::resize( )
   {
     horBar_->setPosition(0,clientHeight()-15,clientWidth(),15);
     int horOff = 0;
@@ -55,7 +55,7 @@ namespace ngrs {
     if (scrollPane_!=0) scrollPane_->setPosition(0,0,clientWidth()-15, clientHeight()-horOff);
   }
 
-  void NScrollBox::setScrollPane( VisualComponent * scrollPane )
+  void ScrollBox::setScrollPane( VisualComponent * scrollPane )
   {
     add(scrollPane);
     scrollPane_ = scrollPane;
@@ -64,34 +64,34 @@ namespace ngrs {
     resize();
   }
 
-  VisualComponent * NScrollBox::scrollPane( )
+  VisualComponent * ScrollBox::scrollPane( )
   {
     return scrollPane_;
   }
 
-  void NScrollBox::setHScrollBarPolicy( int policy )
+  void ScrollBox::setHScrollBarPolicy( int policy )
   {
     if ( policy & nNoneVisible ) {
       horBar_->setVisible(false);
     }
   }
 
-  void NScrollBox::onVPosChange( ScrollBar * sender )
+  void ScrollBox::onVPosChange( ScrollBar * sender )
   {
 
   }
 
-  void NScrollBox::onHPosChange( ScrollBar * sender )
+  void ScrollBox::onHPosChange( ScrollBar * sender )
   {
 
   }
 
-  ScrollBar * NScrollBox::horBar( )
+  ScrollBar* ScrollBox::horBar( )
   {
     return horBar_;
   }
 
-  ScrollBar * NScrollBox::verBar( )
+  ScrollBar* ScrollBox::verBar( )
   {
     return verBar_;
   }

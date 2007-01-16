@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NLISTBOX_H
-#define NLISTBOX_H
+#ifndef LISTBOX_H
+#define LISTBOX_H
 
 #include "scrollbox.h"
 #include "listlayout.h"
@@ -31,22 +31,22 @@
 
 namespace ngrs {
 
-  class NListBox : public NScrollBox
+  class ListBox : public ScrollBox
   {
   public:
-    NListBox();
+    ListBox();
 
-    ~NListBox();
+    ~ListBox();
 
     signal1<ItemEvent*> itemSelected;
 
-    void add(NCustomItem* item);
-    void add(NCustomItem* item, bool align);
-    void insert(NCustomItem* item, int index, bool align = true);
+    void add(CustomItem* item);
+    void add(CustomItem* item, bool align);
+    void insert(CustomItem* item, int index, bool align = true);
 
-    virtual void onItemSelected(NCustomItem * item);
+    virtual void onItemSelected(CustomItem * item);
     virtual void removeChilds();
-    virtual void removeChild(NCustomItem* item);
+    virtual void removeChild(CustomItem* item);
 
     int itemCount();
     void setIndex(unsigned int i);
@@ -55,11 +55,11 @@ namespace ngrs {
     void selClear();
 
     void setMultiSelect(bool on);
-    NCustomItem* itemAt(unsigned int index);
+    CustomItem* itemAt(unsigned int index);
 
     void setOrientation(int orientation);
 
-    std::vector<NCustomItem*> & items();
+    std::vector<CustomItem*> & items();
 
     virtual void resize();
 
@@ -67,8 +67,8 @@ namespace ngrs {
 
     Panel* listBoxPane_;
     bool multiSelect_;
-    std::vector<NCustomItem*> selItems_;
-    std::vector<NCustomItem*> items_;
+    std::vector<CustomItem*> selItems_;
+    std::vector<CustomItem*> items_;
 
     Skin itemBg;
     Skin itemFg;

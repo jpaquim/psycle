@@ -29,7 +29,7 @@
 
 namespace ngrs {
 
-  class CustomMenuItem : public NCustomItem
+  class CustomMenuItem : public CustomItem
   {
   public:
     CustomMenuItem();

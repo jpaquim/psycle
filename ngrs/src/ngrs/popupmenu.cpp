@@ -46,10 +46,10 @@ namespace ngrs {
     Window::setVisible(on);
     setGrabEvents(on);
     if (on) {
-      std::vector<NCustomItem*>::iterator it =items.begin();
+      std::vector<CustomItem*>::iterator it =items.begin();
       lastOverItem = 0;
       for ( ; it < items.end() ; it++ ) {
-        NCustomItem* item = *it;
+        CustomItem* item = *it;
         item->onMouseExit();
       }
     }
@@ -123,7 +123,7 @@ namespace ngrs {
               Event ev2(this, "ngrs_menu_item_do_enter");
               lastOverItem->onMessage(&ev2);
             } else {
-              std::vector<NCustomItem*>::iterator it = find(items.begin(),items.end(),lastOverItem);
+              std::vector<CustomItem*>::iterator it = find(items.begin(),items.end(),lastOverItem);
               it--;
               Event ev1(this, "ngrs_menu_item_do_exit");
               lastOverItem->onMessage(&ev1);
@@ -148,7 +148,7 @@ namespace ngrs {
               Event ev2(this, "ngrs_menu_item_do_enter");
               lastOverItem->onMessage(&ev2);
             } else {
-              std::vector<NCustomItem*>::iterator it = find(items.begin(),items.end(),lastOverItem);
+              std::vector<CustomItem*>::iterator it = find(items.begin(),items.end(),lastOverItem);
               it++;
               Event ev1(this, "ngrs_menu_item_do_exit");
               lastOverItem->onMessage(&ev1);

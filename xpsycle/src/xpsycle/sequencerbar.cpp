@@ -359,8 +359,8 @@ namespace psycle {
 
     void SequencerBar::onClonePattern( ngrs::ButtonEvent * ev )
     {
-      ngrs::NCustomItem* item = patternBox_->selectedItem();
-      std::map<ngrs::NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      ngrs::CustomItem* item = patternBox_->selectedItem();
+      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
 
       if(itr!=patternMap.end())
       {
@@ -379,8 +379,8 @@ namespace psycle {
     }
 
     void SequencerBar::onDeletePattern( ngrs::ButtonEvent* ev ) {
-      ngrs::NCustomItem* item = patternBox_->selectedItem();
-      std::map<ngrs::NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      ngrs::CustomItem* item = patternBox_->selectedItem();
+      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
 
       if( itr!=patternMap.end() )
       {
@@ -405,8 +405,8 @@ namespace psycle {
     }
 
     void SequencerBar::selectNextPattern() {
-      ngrs::NCustomItem* item = patternBox_->selectedItem();
-      std::map< ngrs::NCustomItem*, SinglePattern*>::iterator itr = patternMap.find( item );
+      ngrs::CustomItem* item = patternBox_->selectedItem();
+      std::map< ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find( item );
 
       if ( itr != patternMap.end() ) {
         itr++;
@@ -417,8 +417,8 @@ namespace psycle {
     }
 
     void SequencerBar::selectPrevPattern() {
-      ngrs::NCustomItem* item = patternBox_->selectedItem();
-      std::map<ngrs::NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      ngrs::CustomItem* item = patternBox_->selectedItem();
+      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
 
       if ( itr != patternMap.end() && itr != patternMap.begin() ) {
         itr--;
@@ -429,26 +429,26 @@ namespace psycle {
 
     void SequencerBar::onItemSelected( ngrs::ItemEvent* ev )
     {
-      ngrs::NCustomItem* item = patternBox_->selectedItem();
+      ngrs::CustomItem* item = patternBox_->selectedItem();
       switchPatternViewPattern( item );
     }
 
     void SequencerBar::onPatternItemDblClick( ngrs::ButtonEvent* ev )
     {
       if (ev->button() == 1) { // if left double-click
-        ngrs::NCustomItem* item = patternBox_->selectedItem();
+        ngrs::CustomItem* item = patternBox_->selectedItem();
         childView_->showPatternView();
         switchPatternViewPattern(item);
       }
     }
 
-    void SequencerBar::switchPatternViewPattern( ngrs::NCustomItem* item )
+    void SequencerBar::switchPatternViewPattern( ngrs::CustomItem* item )
     {
       std::vector<CategoryItem*>::iterator it = find(catItems.begin(),catItems.end(),item);
       if ( it != catItems.end() )  propertyBox_->setCategoryItem(*it);
 
       if (item) propertyBox_->setName( item->text() );
-      std::map<ngrs::NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
       if(itr!=patternMap.end()) {
         patView->setPattern(itr->second);
         patView->repaint();
@@ -457,9 +457,9 @@ namespace psycle {
 
     void SequencerBar::onPatternAdd( ngrs::ButtonEvent * ev )
     {
-      ngrs::NCustomItem* item = patternBox_->selectedItem();
+      ngrs::CustomItem* item = patternBox_->selectedItem();
       if (item) {
-        std::map<ngrs::NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+        std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
         if(itr!=patternMap.end())
           seqGui->addPattern(itr->second);
       }
@@ -467,11 +467,11 @@ namespace psycle {
 
     void SequencerBar::onNameChanged( const std::string& name )
     {
-      ngrs::NCustomItem* item = patternBox_->selectedItem();
+      ngrs::CustomItem* item = patternBox_->selectedItem();
       item->setText(name);
       patternBox_->repaint();
 
-      std::map<ngrs::NCustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
       if(itr!=patternMap.end()) {
         std::vector<SequencerItem*> list = seqGui->guiItemsByPattern(itr->second);
         std::vector<SequencerItem*>::iterator it = list.begin();

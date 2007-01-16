@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSCROLLBOX_H
-#define NSCROLLBOX_H
+#ifndef SCROLLBOX_H
+#define SCROLLBOX_H
 
 #include "panel.h"
 
@@ -33,12 +33,12 @@ namespace ngrs {
   const int nAlwaysVisible = 1;
   const int nNoneVisible   = 2;
 
-  class NScrollBox : public Panel
+  class ScrollBox : public Panel
   {
   public:
-    NScrollBox();
+    ScrollBox();
 
-    ~NScrollBox();
+    ~ScrollBox();
 
     virtual void resize();
     void setScrollPane(VisualComponent* scrollPane);

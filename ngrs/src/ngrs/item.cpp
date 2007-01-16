@@ -23,7 +23,7 @@
 namespace ngrs {
 
   Item::Item()
-    : NCustomItem()
+    : CustomItem()
   {
     init();
   }
@@ -36,7 +36,7 @@ namespace ngrs {
 
   void Item::init( )
   {
-    NCustomItem::add( label_ = new Label() );
+    CustomItem::add( label_ = new Label() );
     icon_ = 0;
     iconWidth_ = 20;
   }
@@ -80,7 +80,7 @@ namespace ngrs {
   {
     icon_ = icon;
     icon_->setVAlign(nAlCenter);
-    NCustomItem::add(icon_);
+    CustomItem::add(icon_);
   }
 
 }

@@ -28,7 +28,7 @@
 
 namespace ngrs {
 
-  class ColorItem : public NCustomItem
+  class ColorItem : public CustomItem
   {
   public:
     ColorItem();

@@ -27,8 +27,8 @@
 
 namespace ngrs {
 
-  NListBox::NListBox()
-    : NScrollBox()
+  ListBox::ListBox()
+    : ScrollBox()
   {
     listBoxPane_ = new Panel();
     listBoxPane_->setBackground(Color(255,255,255));
@@ -47,20 +47,20 @@ namespace ngrs {
   }
 
 
-  NListBox::~NListBox()
+  ListBox::~ListBox()
   {
   }
 
-  void NListBox::add( NCustomItem * component , bool align)
+  void ListBox::add( CustomItem * component , bool align)
   {
     listBoxPane_->add( component,nAlCenter, false);
-    component->mousePress.connect(this,&NListBox::onItemPress);
+    component->mousePress.connect(this,&ListBox::onItemPress);
     component->setTransparent(true);
     items_.push_back(component);
     if (align) listBoxPane_->resize();
   }
 
-  void NListBox::insert( NCustomItem * component, int index , bool align )
+  void ListBox::insert( CustomItem * component, int index , bool align )
   {
     listBoxPane_->insert(component,index);
 
@@ -69,20 +69,20 @@ namespace ngrs {
     else
       items_.push_back( component );
 
-    component->mousePress.connect(this,&NListBox::onItemPress);
+    component->mousePress.connect(this,&ListBox::onItemPress);
     component->setTransparent(true);
     if ( align ) listBoxPane_->resize();
   }
 
 
-  void NListBox::add( NCustomItem * component )
+  void ListBox::add( CustomItem * component )
   {
     add(component,true);
-    component->mousePress.connect(this,&NListBox::onItemPress);
+    component->mousePress.connect(this,&ListBox::onItemPress);
     component->setTransparent(true);
   }
 
-  void NListBox::onItemPress( ButtonEvent * ev)
+  void ListBox::onItemPress( ButtonEvent * ev)
   {
     if (ev->button() == 1) {
       VisualComponent* item = static_cast<VisualComponent*>(ev->sender());
@@ -96,13 +96,13 @@ namespace ngrs {
       item->setSkin(itemBg);
       item->repaint();
 
-      onItemSelected((NCustomItem*) (ev->sender()));
+      onItemSelected((CustomItem*) (ev->sender()));
     } else {
       // todo add mousewheel code
     }
   }
 
-  void NListBox::onItemSelected( NCustomItem * item )
+  void ListBox::onItemSelected( CustomItem * item )
   {
     if (!multiSelect_) deSelectItems();
     selItems_.push_back(item);
@@ -110,7 +110,7 @@ namespace ngrs {
     itemSelected.emit(&ev);
   }
 
-  void NListBox::removeChilds( )
+  void ListBox::removeChilds( )
   {
     items_.clear();
     selItems_.clear();
@@ -119,9 +119,9 @@ namespace ngrs {
     listBoxPane_->setScrollDy(0);
   }
 
-  void NListBox::removeChild( NCustomItem * item )
+  void ListBox::removeChild( CustomItem * item )
   {
-    std::vector<NCustomItem*>::iterator it = find( items_.begin(), items_.end(), item );
+    std::vector<CustomItem*>::iterator it = find( items_.begin(), items_.end(), item );
     if ( it != items_.end() ) items_.erase(it);
 
     it = find( selItems_.begin(), selItems_.end(), item );
@@ -130,22 +130,22 @@ namespace ngrs {
     listBoxPane_->removeChild(item);
   }
 
-  void NListBox::deSelectItems( )
+  void ListBox::deSelectItems( )
   {
-    for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
-      NCustomItem* item = *it;
+    for (std::vector<CustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
+      CustomItem* item = *it;
       item->setSkin(itemFg);
       item->repaint();
     }
     selItems_.clear();
   }
 
-  int NListBox::itemCount( )
+  int ListBox::itemCount( )
   {
     return listBoxPane_->visualComponents().size();
   }
 
-  int NListBox::selIndex( ) const
+  int ListBox::selIndex( ) const
   {
     int c = 0;
     if (selItems_.size()==0) return -1;
@@ -158,62 +158,62 @@ namespace ngrs {
     return -1;
   }
 
-  std::vector< int > NListBox::selIndexList( )
+  std::vector< int > ListBox::selIndexList( )
   {
     std::vector<int> indexList;
-    for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
-      NCustomItem* item = *it;
+    for (std::vector<CustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
+      CustomItem* item = *it;
       indexList.push_back(item->zOrder());
     }
     return indexList;
   }
 
-  void NListBox::setIndex( unsigned int i )
+  void ListBox::setIndex( unsigned int i )
   {
     if (!multiSelect_) deSelectItems();
     if (i>=0 && i < listBoxPane_->visualComponents().size()) {
-      NCustomItem* item = (NCustomItem*) listBoxPane_->componentByZOrder(i); ///todo avoid cast
+      CustomItem* item = (CustomItem*) listBoxPane_->componentByZOrder(i); ///todo avoid cast
       selItems_.push_back(item);
       item->setSkin(itemBg);
       item->repaint();
     }
   }
 
-  void NListBox::setMultiSelect( bool on )
+  void ListBox::setMultiSelect( bool on )
   {
     multiSelect_ = on;
   }
 
-  void NListBox::selClear( )
+  void ListBox::selClear( )
   {
     deSelectItems();
   }
 
-  NCustomItem * NListBox::itemAt( unsigned int index )
+  CustomItem * ListBox::itemAt( unsigned int index )
   {
     if (index >= 0 && index < listBoxPane_->visualComponents().size())
-      return static_cast<NCustomItem*> (listBoxPane_->visualComponents().at(index));
+      return static_cast<CustomItem*> (listBoxPane_->visualComponents().at(index));
     else
       return 0;
   }
 
-  void NListBox::setOrientation( int orientation )
+  void ListBox::setOrientation( int orientation )
   {
     if (orientation == nHorizontal) {
       setHScrollBarPolicy(nAlwaysVisible);
     }
   }
 
-  std::vector< NCustomItem * > & NListBox::items( )
+  std::vector< CustomItem * > & ListBox::items( )
   {
     return items_;
   }
 
-  void NListBox::resize( )
+  void ListBox::resize( )
   {
-    NScrollBox::resize();
+    ScrollBox::resize();
     if ( items_.size() > 0 ) {
-      NCustomItem* item = *(items_.begin());
+      CustomItem* item = *(items_.begin());
       horBar()->setLargeChange( item->height() );
       horBar()->setSmallChange( item->height() );
       verBar()->setLargeChange( item->height() );
@@ -226,7 +226,7 @@ namespace ngrs {
 
 // the class factories
 extern "C" ngrs::Object* createListBox() {
-  return new ngrs::NListBox();
+  return new ngrs::ListBox();
 }
 
 extern "C" void destroyListBox( ngrs::Object* p ) {

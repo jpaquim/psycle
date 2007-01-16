@@ -23,7 +23,7 @@
 namespace ngrs {
 
   Table::Table()
-    : NScrollBox()
+    : ScrollBox()
   {
     tablePane = new Panel();
     tablePane->setLayout(TableLayout(10,10));

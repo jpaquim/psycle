@@ -49,14 +49,14 @@ namespace ngrs {
     subNodes->add(node, nAlTop);
   }
 
-  void TreeNode::addEntry( NCustomItem * entry )
+  void TreeNode::addEntry( CustomItem * entry )
   {
     entries_->add(entry, nAlTop);
     entry->mousePress.connect(this,&TreeNode::onItemPress);
     entry->setTransparent(true);
   }
 
-  void TreeNode::setHeader( NCustomItem * entry )
+  void TreeNode::setHeader( CustomItem * entry )
   {
     headerItem_ = entry;
     header()->add(entry, nAlClient);
@@ -67,12 +67,12 @@ namespace ngrs {
   void TreeNode::onItemPress( ButtonEvent * ev )
   {
     if (ev->button() == 1) {
-      NCustomItem* item = static_cast<NCustomItem*>( ev->sender() );
+      CustomItem* item = static_cast<CustomItem*>( ev->sender() );
       itemSelected.emit(this, item);
     }
   }
 
-  NCustomItem * TreeNode::headerItem( )
+  CustomItem * TreeNode::headerItem( )
   {
     return headerItem_;
   }

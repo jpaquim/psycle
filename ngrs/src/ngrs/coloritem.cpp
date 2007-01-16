@@ -23,12 +23,12 @@
 namespace ngrs {
 
   ColorItem::ColorItem()
-    : NCustomItem()
+    : CustomItem()
   {
   }
 
   ColorItem::ColorItem( const Color & color, const std::string & text )
-    : NCustomItem(), color_(color), text_(text)
+    : CustomItem(), color_(color), text_(text)
   {
   }
 

@@ -22,7 +22,7 @@
 
 namespace ngrs {
 
-  ItemEvent::ItemEvent(NCustomItem* sender, const std::string & text)
+  ItemEvent::ItemEvent(CustomItem* sender, const std::string & text)
     : Event(sender,text)
   {
     item_ = sender;
@@ -33,7 +33,7 @@ namespace ngrs {
   {
   }
 
-  NCustomItem * ItemEvent::item( )
+  CustomItem * ItemEvent::item( )
   {
     return item_;
   }
