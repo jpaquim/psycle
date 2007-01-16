@@ -642,7 +642,7 @@ namespace ngrs {
         {
           // transparent bitmap;
           XImage* clp = bitmap.clpData();
-          Pixmap pix;
+          ::Pixmap pix;
           pix = XCreatePixmap(App::system().dpy(), doubleBufferPixmap_, clp->width, clp->height, clp->depth);
 
           GC gc1 = XCreateGC (App::system().dpy(), pix, 0, NULL);
@@ -759,7 +759,7 @@ namespace ngrs {
   }
 
 #ifdef __unix__
-  Pixmap Graphics::dbPixmap( )
+  ::Pixmap Graphics::dbPixmap( )
   {
     return doubleBufferPixmap_;
   }
