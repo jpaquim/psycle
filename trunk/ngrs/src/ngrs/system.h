@@ -48,7 +48,7 @@
 namespace ngrs {
 
 #ifdef __unix__
-  typedef Window WinHandle;
+  typedef ::Window WinHandle;
 #else
   typedef HWND WinHandle;
 #endif
