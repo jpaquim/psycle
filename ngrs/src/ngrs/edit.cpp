@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "edit.h"
 #include "app.h"
+#include "system.h"
 #include "config.h"
 
 #ifdef _MSC_VER
