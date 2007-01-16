@@ -150,7 +150,7 @@ namespace ngrs {
       }
 
       while (XPending(system().dpy())) {
-        XNextEven:t(system().dpy(), &event);
+        XNextEvent(system().dpy(), &event);
         std::map<::Window,Window*>::iterator itr;
         int winId = event.xany.window;
         if ( (itr = winMap.find(winId)) == winMap.end() )
@@ -403,9 +403,9 @@ namespace ngrs {
 
         if (buffer!=NULL) {           
           if (mykeysym<0xF000) {
-            Object* acellNotify = findAcceleratorNotifier(KeyAccelerator(App::system().keyState(),mykeysym));
+            Object* acellNotify = findAcceleratorNotifier(KeyAccelerator(App::system().shiftState(),mykeysym));
             if (acellNotify!=0) {
-              acellNotify->onKeyAcceleratorNotify(KeyAccelerator(App::system().keyState(),mykeysym));
+              acellNotify->onKeyAcceleratorNotify(KeyAccelerator(App::system().shiftState(),mykeysym));
             }
           }
           win->onKeyPress(KeyEvent(0,buffer,mykeysym,sState));
