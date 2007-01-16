@@ -151,7 +151,6 @@ namespace ngrs {
 
       while (XPending(system().dpy())) {
         XNextEvent(system().dpy(), &event);
-        system().setKeyState(event.xkey.state);
         std::map<Window,Window*>::iterator itr;
         int winId = event.xany.window;
         if ( (itr = winMap.find(winId)) == winMap.end() )
@@ -236,8 +235,7 @@ namespace ngrs {
         }
       }
       while (XPending(system().dpy()) && exitLoop==0) {
-        XNextEvent(system().dpy(), &event);
-        system().setKeyState(event.xkey.state);
+        XNextEvent(system().dpy(), &event);        
         std::map<Window,Window*>::iterator itr;
         int winId = event.xany.window;
         if ( (itr = winMap.find(winId)) == winMap.end() )
@@ -714,7 +712,6 @@ namespace ngrs {
     int exitLoop;
     while (XPending(system().dpy())) {
       XNextEvent(system().dpy(), &event);
-      system().setKeyState(event.xkey.state);
       std::map<Window,Window*>::iterator itr;
       int winId = event.xany.window;
       if ( (itr = winMap.find(winId)) == winMap.end() )
