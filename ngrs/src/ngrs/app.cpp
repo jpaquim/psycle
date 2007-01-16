@@ -150,8 +150,8 @@ namespace ngrs {
       }
 
       while (XPending(system().dpy())) {
-        XNextEvent(system().dpy(), &event);
-        std::map<Window,Window*>::iterator itr;
+        XNextEven:t(system().dpy(), &event);
+        std::map<::Window,Window*>::iterator itr;
         int winId = event.xany.window;
         if ( (itr = winMap.find(winId)) == winMap.end() )
         {
@@ -236,7 +236,7 @@ namespace ngrs {
       }
       while (XPending(system().dpy()) && exitLoop==0) {
         XNextEvent(system().dpy(), &event);        
-        std::map<Window,Window*>::iterator itr;
+        std::map<::Window,Window*>::iterator itr;
         int winId = event.xany.window;
         if ( (itr = winMap.find(winId)) == winMap.end() )
         {
@@ -634,7 +634,7 @@ namespace ngrs {
     int x_win; int y_win; unsigned int mask;
     if (  XQueryPointer(system().dpy(),system().rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask)
       ) {
-        std::map<Window,Window*>::iterator itr;
+        std::map<::Window,Window*>::iterator itr;
         if ( (itr = winMap.find(child_win)) == winMap.end() )
           return 0;
         else
@@ -712,7 +712,7 @@ namespace ngrs {
     int exitLoop;
     while (XPending(system().dpy())) {
       XNextEvent(system().dpy(), &event);
-      std::map<Window,Window*>::iterator itr;
+      std::map<::Window,Window*>::iterator itr;
       int winId = event.xany.window;
       if ( (itr = winMap.find(winId)) == winMap.end() )
       {
