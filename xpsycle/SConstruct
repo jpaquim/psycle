@@ -156,8 +156,9 @@ microsoft_mme = external_package_check(project, name = 'microsoft mme',
 	url = 'http://msdn.microsoft.com',
 	distribution_packages = {'microsoft (maybe windows updates?)': 'multimedia extension'},
 	dependencies = [
-		cxx_build_check(project, name = 'microsoft mme', libraries = ['mmsystem'], source_text = \
+		cxx_build_check(project, name = 'microsoft mme', libraries = ['winmm'], source_text = \
 			"""\
+				#include <windows.h>
 				#include <mmsystem.h>
 				void microsoft_mme()
 				{
