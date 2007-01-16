@@ -36,7 +36,7 @@
 #include <ngrs/frameborder.h>
 #include <ngrs/borderlayout.h>
 #include <ngrs/spinbutton.h>
-#include <ngrs/nspiedit.h>
+#include <ngrs/spinedit.h>
 #include <ngrs/segment7.h>
 #include <ngrs/seg7display.h>
 #include <ngrs/dockpanel.h>
