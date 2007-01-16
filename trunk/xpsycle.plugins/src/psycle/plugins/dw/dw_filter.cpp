@@ -106,9 +106,9 @@ bool dwfilter::SetFreq(double _freq)
 			freq = _freq;
 			CoefUpdate();	
 
-			if(abs(dif)>800)			//empty buffers every freq change, and twses crackle..
-				emptybuffers();			//don't empty buffers ever, and large jumps pop.
-			return true;				//this compromise appears to work well enough..
+			if(dif > +800 || dif < -800) // empty buffers every freq change, and twses crackle..
+				emptybuffers();      // don't empty buffers ever, and large jumps pop.
+			return true;                 // this compromise appears to work well enough..
 		}
 	} 
 	return false; 

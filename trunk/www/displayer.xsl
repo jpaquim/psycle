@@ -21,9 +21,6 @@
 				<title><xsl:value-of select='@caption'/></title>
 			</head>
 			<body>
-				<!--div style='background-color: red; color: blue; font-size: 32px ; text-align: center'>
-					<blink>THIS IS AN UGLY AD-LOOKING TEXT TO MAKE YOU FEEL COMFORTABLE</blink>
-				</div-->
 				<xsl:call-template name='caption-root'>
 					<xsl:with-param name='location'>top</xsl:with-param>
 				</xsl:call-template>
@@ -34,13 +31,13 @@
 					<!--hr style='page-break-after: always'/-->
 					<div class='part-root'>
 						<div class='caption'>
-							TOC <!--of <xsl:apply-templates select='@caption'/>-->
+							Table of content <!--of <xsl:apply-templates select='@caption'/>-->
 						</div>
 						<div class='index'>
 							<xsl:apply-templates select='part' mode='index'/>
 						</div>
 						<!--div class='caption'>
-							Content--> <!--of <xsl:apply-templates select='@caption'/>-->
+							Table of Content--> <!--of <xsl:apply-templates select='@caption'/>-->
 							<!--div class='part-body'-->
 								<xsl:apply-templates select='part'/>
 							<!--/div-->

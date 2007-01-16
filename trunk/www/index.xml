@@ -40,8 +40,7 @@
 		The use of Psycle's sources and binaries are currently not restricted by any licence.
 		If the psycledelics community ever decides to use a licence, it will surely be some Free/Libre Software License, like for example the GNU Public Licence, which would strengthen its freedom.
 		<part caption='Binary raw packages'>
-			The builds here are distributed as raw archives (no installer) containing the "doc" dir, and directories containing the binaries themselves,
-			of the psycle host application, and all the open source native plugins.
+			The builds here are distributed as raw archives (no installer). They contain the psycle application, all the open source native plugins, and the documentation.
 			<part caption='Latest Unstable Alpha' anchor='mfc-unstable'>
 				<a href='./packages/microsoft/psycle.mfc.bin.zip'/>
 				(
@@ -82,11 +81,29 @@
 				This is built from the directory <code>tags/psycle-1.7.6.2</code> directry of the subversion repository.
 			</part>
 		</part>
-		<part caption='Sources'>
+	</part>
+	<part caption='Psycle based on Free Software (work in progress)' anchor='free'>
+		The sources are distributed under the <a href='http://fsf.org/licenses/gpl.html'>GNU General Public Licence</a>.
+		<br/>
+		These are <b>work in progress</b>, so do not expect to be able to write songs with these now.
+		<part caption='psycle xi'>
+			Psycle xi runs on both unix-based systems and mswindows.
+			This is the successor of the microsoft-only psycle 1.9, and it adds new features, like an advanced sequencer, that did not exist in psycle 1.9.
+			<br/>
+			Psycle xi is also known as xpsycle. 
+			<br/>
+			Please read the <a href='./wiki/'>wiki</a> for further information.
+		</part>
+		<part caption='freepsycle'>
+			Please read the <a href='./wiki/'>wiki</a>.
+		</part>
+	</part>
+	<part caption='Sources' anchor='sources'>
+		<part caption='Downloading the sources'>
 			To checkout the head of <code>trunk</code> (main branch) of the subversion repository, issue the following command:
 			<div class='indented'>
 				<code>
-					svn checkout https://svn.sourceforge.net:/svnroot/psycle/trunk
+					svn checkout https://svn.sourceforge.net/svnroot/psycle/trunk
 				</code>
 			</div>
 			Later, to update your local copy, you can just do:
@@ -100,380 +117,15 @@
 			Tip:
 			<div class='indented'>
 				You can retrieve a particular revision by checking out the url:
-				<code>https://svn.sourceforge.net:/svnroot/psycle/tags/psycle-x.y.z-stable</code>
+				<code>https://svn.sourceforge.net/svnroot/psycle/tags/psycle-x.y.z-stable</code>
 				<br/>
 				Remember that if you do so, <code>svn update</code> will likely not give you any more changes, apart maybe bugfixes,
 				since stable versions are mostly frozen.
 			</div>
+			Please read the <a href='./wiki/'>wiki</a> for further information.
 		</part>
-		<!--part caption='Documentation of the source code'>
-			<a href='./doxygen.mfc/html/'/>
-			(
-				<i>
-					updated on [!__ date doxygen.mfc __] UTC 2005 June 25 Saturday 01:06:43
-				</i>
-			)
-			<br/>
-			Auto-generated documentation of and from the source code.
-		</part-->
-	</part>
-	<part caption='Psycle based on Free Software (work in progress)' anchor='free'>
-		The sources are distributed under the <a href='http://fsf.org/licenses/gpl.html'>GNU General Public Licence</a>.
-		You can see development progress in the <a href='./packages/changelogs/'>package change logs</a>.
-		<br/>
-		<part caption='xpsycle'>
-			still secret ...
-		</part>
-		<part caption='freepsycle'>
-			<b>
-				Note:
-				<div class='indented'>
-					If you are looking for a usable version of psycle,
-					get Psycle based on Microsoft's Windows&#174;&#8482; MFC&#174;&#8482;,
-					which is the mature version of psycle.
-					<br/>
-					This Psycle based on Free Software is not usable at all currently.
-				</div>
-			</b>
-			Screenshots: <a href='./images/psycle-on-debian.png'/>, <a href='./images/psycle-on-microsoft.png'/>.
-		</part>
-		<part caption='Binary packages'>
-			<part caption='Debian &amp; Ubuntu archive'>
-				There is a Debian archive in the <a href='./debian/'/> directory,
-				which lists both
-				<a href='./debian/dists/unstable/unstable/main/binary-i386/Packages.gz'>binary-i386 packages</a>, and
-				<a href='./debian/dists/source/unstable/main/source/Sources.gz'>source packages</a>.
-				<br/>
-				<b>For the version of psycle</b>, you can choose either <code>unstable</code>, <code>testing</code> or <code>stable</code>.
-				<br/>
-				<b>Note that this is independent from the main debian distribution you use:</b>
-				All packages are built on debian <code>unstable</code>, debian <code>testing</code>, debian <code>stable</code>, ubuntu <code>dapper</code>, ubuntu <code>breezy</code>, etc ...
-				<br/>
-				In the following <b>example</b>, <code>etch/unstable</code> means psycle's <code>unstable</code> version for the debian <code>etch</code> distibution.
-				<br/>
-				To let APT find the archive and look into it for psycle <code>unstable</code> binary packages compiled for the <code>etch</code> debian distribution,
-				add <b>for example (see notes above)</b> following lines to your <code>/etc/apt/sources.list</code>:
-				<div class='indented'>
-					<code>
-						# psycle binary packages
-						<br/>
-						deb http://psycle.sourceforge.net/debian etch/unstable main
-					</code>
-				</div>
-				Then, update you local list of packages:
-				<div class='indented'>
-					<code>
-						apt-get update
-					</code>
-				</div>
-				and do a search for 'psycle' with your favorite package tool, for example:
-				<div class='indented'>
-					<code>
-						apt-cache search psycle
-					</code>
-				</div>
-				or,
-				<div class='indented'>
-					<code>
-						dpkg --list '*psycle*'
-					</code>
-				</div>
-				If you want to install all psycle binary packages,
-				install the <code>psycle</code> package
-				which is a pseudo package with dependencies on all psycle packages:
-				<div class='indented'>
-					<code>
-						apt-get install psycle
-					</code>
-				</div>
-				Note:
-				<div class='indented'>
-					Currently, the archive contains binaries only for the <code>i386</code> architecture.
-					You can easily build the source packages to produce binary packages for your architecture.
-					<br/>
-					For each source package, there are three versions: <code>unstable</code>, <code>testing</code>, <code>stable</code>
-					<br/>
-					To let APT find the source archive and look into it for <code>unstable</code> source packages,
-					add <b>for example (see notes above)</b> following lines to your <code>/etc/apt/sources.list</code>:
-					<div class='indented'>
-						<code>
-							# psycle source packages
-							<br/>
-							deb-src http://psycle.sourceforge.net/debian source/unstable main
-						</code>
-						<br/>
-					</div>
-					Please see the paragraph about how to build psycle below for the next steps.
-				</div>
-			</part>
-			<part caption='Cross-packages'>
-				Note that these are untested. Please instead debootsrap a Debian or Ubuntu system in a chroot.
-				<br/>
-				Linux Standard Base packages: <a href='./packages/linux-standard-base/'/>
-				<br/>
-				Slackware packages: <a href='./packages/slackware/'/>
-				<br/>
-				RPM packages: <a href='./packages/rpm/'/>
-				<br/>
-				Any volunteer for yum and gentoo?
-			</part>
-			<part caption='Microsoft&apos;s Windows&#174;&#8482;'>
-				This is probably the most painful operating system for software distribution,
-				as it doesn't come with any standard system for
-				distributing packages,
-				automatically resolving/downloading their dependencies,
-				and with consistent versions accross all packages installed system-wide,
-				or at least support for multiple versions simultaneously installed.
-				(This operating system is not a distribution, it's both proprietary and anarchic).
-				<br/>
-				This means we have to track all psycle's dependencies and bundle them
-				into a custom, giant, monolithic "package",
-				which is self-contained and not meant to be installed system-wide,
-				but rather, locally in each user's home dir.
-				This makes the "package" very big (it's a mini distro itself),
-				but works around all the defficiencies mentionned above.
-				<br/>				
-				Anyway, here are the available, self-contained, raw "packages":
-				<part caption='Latest'>
-					<a href='./packages/microsoft/psycle.bin.7z'/>
-					(
-						<i>
-							updated on <!-- date bin --> UTC 2005 November 02 Wednesday 12:41:25
-						</i>
-					)
-					<br/>
-					The very latest build. This might be unstable ; use at your own risk.
-				</part>
-			</part>
-		</part>
-		<part caption='Source package'>
-			<part caption='Downloading the standard source tarball package'>
-				<part caption='Using HTTP directly'>
-					For the latest unstable standard source tarball, download one of the unversionned <code>.tar.gz</code> file from the <a href='./packages/standard-source-tarball/'/> directory.
-					(
-						<i>
-							updated on <!-- date source --> UTC 2006 January 03 Tuesday 23:48:51
-						</i>
-					)
-					<br/>
-					or for a particular version, download one of the versionned <code>.tar.gz</code> file from the <a href='./packages/standard-source-tarball/'/> directory.
-				</part>
-				<part caption='Using the Debian/Ubuntu archive and APT'>
-					There is a Debian archive in the <a href='./debian/'/> directory,
-					which lists both
-					<a href='./debian/dists/unstable/unstable/main/binary-i386/Packages.gz'>binary-i386 packages</a>, and
-					<a href='./debian/dists/source/unstable/main/source/Sources.gz'>source packages</a>.
-					<br/>
-					For each source package, there are three versions: <code>unstable</code>, <code>testing</code>, <code>stable</code>
-					<br/>
-					To let APT find the source archive and look into it for <code>unstable</code> source packages,
-					add <b>for example (see notes above)</b> following lines to your <code>/etc/apt/sources.list</code>:
-					<div class='indented'>
-						<code>
-							# psycle source packages
-							<br/>
-							deb-src http://psycle.sourceforge.net/debian source/unstable main
-						</code>
-						<br/>
-					</div>
-					Then, update you local list of packages:
-					<div class='indented'>
-						<code>
-							apt-get update
-						</code>
-					</div>
-					Psycle is currently distributed as several debian binary packages,
-					but all those binary packages are built from a single source package,
-					called <code>psycle</code>.
-					<br/>
-					To download this source package, do:
-					<div class='indented'>
-						<code>
-							cd /tmp
-							<br/>
-							apt-get source psycle
-							<br/>
-							cd psycle-*.*.*
-						</code>
-					</div>
-					Building the source package requires that you have some other packages installed,
-					like a c++ compiler, linker, make, the development files of the libraries psycle depends on, etc.
-					You can tell APT to download and install these dependency packages by issuing the following command:
-					<div class='indented'>
-						<code>
-							apt-get build-dep psycle
-						</code>
-					</div>
-				</part>
-				<part caption='Other package-archiving systems'>
-					Any volunteer?
-				</part>
-				<part caption='GNU-Arch archive' anchor='GNU-Arch'>
-					erm.. please google.
-					<!--
-					There is a GNU-Arch archive in the <a href='./gnu-arch/'/> directory (browse it via <a href='./gnu-arch.archzoom'/>).
-					<br/>
-					(<a href='./gnu-arch.xml'>getting started with GNU-Arch</a>)
-					<br/>
-					In short, once you have installed Tom Lord's implementation of GNU-Arch, aka the tla package,
-					to download the sources, do:
-					<div class='indented'>
-						<code>
-							tla register-archive http://psycle.sourceforge.net/gnu-arch
-							<br/>
-							cd /tmp
-							<br/>
-							tla get psycle@sourceforge.net/psycle__mainline
-							<br/>
-							cd psycle__mainline__*
-							<br/>
-							./packageneric/generic/bin/autotools.bootstrap
-						</code>
-					</div>
-					The last command, <code>./autotools.bootstrap</code> will
-					generate the configure script (amongst other files),
-					which is not included in the archive since it is an autogenerated file.
-					-->
-				</part>
-				<part caption='Subversion repository' anchor='subversion'>
-					erm.. please google.
-				</part>
-			</part>
-			<part caption='Building the source package'>
-				Psycle's source package uses the GNU build system (autoconf, automake, libtool, pkg-config).
-				You don't need to have these tools installed but pkg-config.
-				Also, you will need to have a c++ compiler, linker, make, and the development files of the libraries psycle depends on.
-				<br/>
-				<br/>
-				On debian, you can tell APT to download and install these dependency packages by issuing the following command:
-				<div class='indented'>
-					<code>
-						apt-get build-dep psycle
-					</code>
-				</div>
-				On other systems, to view the dependencies, read the file
-				<a href='./debian/dists/source/unstable/main/source/Sources.gz'/> for the latest unstable version of the source package, or
-				the file <code>psycle_*.*.*.dsc</code> in the <a href='./debian/'/> directory for a particular version of the source package.
-				<br/>
-				<br/>
-				The GNU build system follows the standard two-step build procedure of unices source packages:
-				<ol>
-					<li>
-						<code>configure</code>:
-						detection of system characteristics, and configuration of the build options
-					</li>
-					<li>
-						<code>make</code>:
-						execution of the make files which describe the actual build commands as configured in the previous step
-						(compilation, linking, moving of files to installation destination)
-					</li>
-				</ol>
-				You can also build from within the IDE of your choice.
-				<part caption='Building from a GNU system for the same GNU system' anchor='build'>
-					<div class='indented'>
-						<code>
-							cd psycle-*
-							<br/>
-							mkdir build &amp;&amp; cd build
-							<br/>
-							../configure --prefix=$(pwd)/../psycle-install-dir
-							<br/>
-							make install-strip
-							<br/>
-							cd ../psycle-install-dir
-							<br/>
-							tree
-							<br/>
-							./bin/psycle
-						</code>
-					</div>
-					You can also simply use the script named <code>./packageneric/generic/bin/build</code> which comes with the source package and does
-					the <code>mkdir &amp;&amp; cd</code>, <code>configure</code> and <code>make</code> steps.
-				</part>
-				<part caption='Building for Microsoft&apos;s Windows&#174;&#8482;'>
-					Different possibilities.
-					<part caption='From Microsoft&apos;s Windows&#174;&#8482;' anchor='dev-pack'>
-						To build the source package from and for Microsoft's Windows&#174;&#8482;,
-						<br/>
-						INSTRUCTIONS CURRENTLY REMOVED ...
-						noone is interested in this operating system at the moment,
-						and it's better not putting outdated/broken/untested intructions.
-						(hint, read the source of the page, it's just commented out)
-						<br/>
-						<!--
-						<br/>
-						download and unpack <a href='./packages/microsoft/dev-pack/'/>
-						<br/>
-						( release notes: <a href='./packages/microsoft/dev-pack/release-notes/'/> )
-						<br/>
-						This pack contains everything you need, namely,
-						<a href='http://mingw.org/msys.shtml'>MSys+MSysDTK+MinGW</a> (better alternative is cygwin),
-						the <a href='http://www.pcpm.ucl.ac.be/~gustin/win32_ports/gtkmm.html'>GTKMM library</a>,
-						the <a href='http://ftp.gnome.org/Public/gnome/sources/libgnomecanvas'>GNOME Canvas library</a>,						
-						the <a href='http://boost.org'>Boost libraries</a>, and
-						the <a href='http://eclipse.org'>Eclipse IDE</a>.
-						There is nothing to install, the pack is self contained and work as is.
-						With this pack, you now have a GNU system, so, if you wish, you can go to the section:
-						<a href='#build'>Building from a GNU system for the same GNU system</a>.
-						-->
-					</part>
-					<part caption='Cross-compiling from another GNU system'>
-						From GNU systems (even cygwin, uwin, sfu), you can use the mingw32 tool-chain package to cross-compile
-						and produce binaries relying on msvc's C runtime lib (msvc<b>r</b>71.dll).
-						<br/>
-						INSTRUCTIONS CURRENTLY REMOVED ...
-						noone is interested in this operating system at the moment,
-						and it's better not putting outdated/broken/untested intructions.
-						(hint, read the source of the page, it's just commented out)
-						<br/>
-						<!--
-						Note that the c++ runtime needs to be distributed (either statically compiled or as a shared lib)
-						with the compiled binaries, as mingw doesn't use msvc's c++ runtime lib (msvc<b>p</b>*.dll).
-						<br/>
-						So, once you've installed the mingw32 package, do:
-						<div class='indented'>
-							<code>
-								cd psycle-*
-								<br/>
-								mkdir build &amp;&amp; cd build
-								<br/>
-								../configure __host=<em>i586-mingw32msvc</em> __prefix=/mnt/smbfs/psycle-mswindows-install-dir
-							</code>
-							<br/>
-						</div>
-						Note about <code><em>i586-mingw32msvc</em></code>, this will vary depending on what toolchain you have installed.
-						It could be <code><em>i686-pc-mingw32</em></code>, for example.
-						Do <code>ls /usr/lib/gcc</code> or <code>ls /usr/lib/gcc-lib</code> to view what toolchains you have installed.
-						<div class='indented'>
-							<code>
-								make install-strip
-							</code>
-						</div>
-						... and run it on mswindows:
-						<div class='indented'>
-							<code>
-								ssh mswindows ./psycle-mswindows-install-dir/bin/psycle
-							</code>
-						</div>
-						-->
-					</part>
-				</part>
-			</part>
-		</part>
-		<part caption='Documentation of the source code'>
-			CURRENTLY REMOVED (well just the link) ...
-			doxygen has its bugs, and makes things not clearer than looking at the sources.
-			<br/>
-			<!--
-			<a href='./doxygen/html/'/>
-			(
-				<i>
-					updated on <!__ date doxygen __> UTC 2005 June 25 Saturday 02:01:19
-				</i>
-			)
-			<br/>
-			Auto-generated documentation of and from the source code.
-			-->
+		<part caption='Building the sources'>
+			Please read the <a href='./wiki/'>wiki</a>.
 		</part>
 	</part>
 	<part caption='Satoshi Fujiwara&apos;s tracker (SFTracker) (work in progress)' anchor='sftracker'>
