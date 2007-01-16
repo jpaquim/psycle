@@ -20,7 +20,7 @@
 #include "sequenceritemgui.h"
 #include "sequencergui.h"
 #include "patternsequence.h"
-#include <ngrs/npanel.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nframeborder.h>
+#include <ngrs/panel.h>
+#include <ngrs/label.h>
+#include <ngrs/frameborder.h>
 

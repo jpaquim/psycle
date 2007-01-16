@@ -20,8 +20,8 @@
 #ifndef CUSTOMPATTERNVIEW_H
 #define CUSTOMPATTERNVIEW_H
 
-#include <ngrs/npanel.h>
-#include <ngrs/npoint3d.h>
+#include <ngrs/panel.h>
+#include <ngrs/point3d.h>
 
 #include "inputhandler.h"
 #include "global.h"
@@ -107,7 +107,7 @@ namespace psycle {
 
     };
 
-    class CustomPatternView : public ngrs::NPanel {
+    class CustomPatternView : public ngrs::Panel {
     public:
       CustomPatternView();
 
@@ -131,35 +131,35 @@ namespace psycle {
       void setPatternStep( int step );
       int patternStep() const;
 
-      void setSeparatorColor( const ngrs::NColor & color );
-      const ngrs::NColor & separatorColor() const;
+      void setSeparatorColor( const ngrs::Color & color );
+      const ngrs::Color & separatorColor() const;
 
-      void setLineSeparatorColor( const ngrs::NColor & color );
-      const ngrs::NColor & lineSeparatorColor() const;
+      void setLineSeparatorColor( const ngrs::Color & color );
+      const ngrs::Color & lineSeparatorColor() const;
 
-      void setRestAreaColor( const ngrs::NColor & color );
-      const ngrs::NColor & restArea() const;
+      void setRestAreaColor( const ngrs::Color & color );
+      const ngrs::Color & restArea() const;
 
-      void setBigTrackSeparatorColor( const ngrs::NColor & selColor );
-      const ngrs::NColor & bigTrackSeparatorColor() const;
+      void setBigTrackSeparatorColor( const ngrs::Color & selColor );
+      const ngrs::Color & bigTrackSeparatorColor() const;
 
-      void setSmallTrackSeparatorColor( const ngrs::NColor & color );
-      const ngrs::NColor & smallTrackSeparatorColor() const;
+      void setSmallTrackSeparatorColor( const ngrs::Color & color );
+      const ngrs::Color & smallTrackSeparatorColor() const;
 
-      void setSelectionColor( const ngrs::NColor & selColor );
-      const ngrs::NColor & selectionColor() const;
+      void setSelectionColor( const ngrs::Color & selColor );
+      const ngrs::Color & selectionColor() const;
 
-      void setCursorColor( const ngrs::NColor & cursorColor );
-      const ngrs::NColor & cursorColor() const;
+      void setCursorColor( const ngrs::Color & cursorColor );
+      const ngrs::Color & cursorColor() const;
 
-      void setBarColor( const ngrs::NColor & barColor );
-      const ngrs::NColor & barColor() const;
+      void setBarColor( const ngrs::Color & barColor );
+      const ngrs::Color & barColor() const;
 
-      void setBeatColor( const ngrs::NColor & beatColor );
-      const ngrs::NColor & beatColor() const;
+      void setBeatColor( const ngrs::Color & beatColor );
+      const ngrs::Color & beatColor() const;
 
-      void setPlayBarColor( const ngrs::NColor & playBarColor );
-      const ngrs::NColor & playBarColor() const;
+      void setPlayBarColor( const ngrs::Color & playBarColor );
+      const ngrs::Color & playBarColor() const;
 
       void setLineGridEnabled( bool on );
       bool lineGridEnabled() const;
@@ -167,11 +167,11 @@ namespace psycle {
       void setColGridEnabled( bool on );
       bool colGridEnabled() const;
 
-      void setBeatTextColor( const ngrs::NColor & color );
-      const ngrs::NColor & beatTextColor();
+      void setBeatTextColor( const ngrs::Color & color );
+      const ngrs::Color & beatTextColor();
 
-      void setTextColor( const ngrs::NColor & color);
-      const ngrs::NColor & textColor() const;
+      void setTextColor( const ngrs::Color & color);
+      const ngrs::Color & textColor() const;
 
       void setTrackLeftIdent( int ident );
       int trackLeftIdent() const;
@@ -193,16 +193,16 @@ namespace psycle {
       virtual void onMousePressed( int x, int y, int button );
       virtual void onMouseOver( int x, int y );
 
-      virtual void onKeyPress( const ngrs::NKeyEvent & event );
-      virtual void onKeyRelease( const ngrs::NKeyEvent & event );
+      virtual void onKeyPress( const ngrs::KeyEvent & event );
+      virtual void onKeyRelease( const ngrs::KeyEvent & event );
 
       void repaintCursorPos( const PatCursor & cursor );
-      void repaintBlock( const ngrs::NSize & block );
-      ngrs::NRect repaintTrackArea( int startLine, int endLine, int startTrack, int endTrack ) const;
-      ngrs::NPoint linesFromRepaint( const ngrs::NRegion & repaintArea) const;
-      ngrs::NPoint tracksFromRepaint( const ngrs::NRegion & repaintArea) const;
+      void repaintBlock( const ngrs::Size & block );
+      ngrs::Rect repaintTrackArea( int startLine, int endLine, int startTrack, int endTrack ) const;
+      ngrs::NPoint linesFromRepaint( const ngrs::Region & repaintArea) const;
+      ngrs::NPoint tracksFromRepaint( const ngrs::Region & repaintArea) const;
 
-      const ngrs::NSize & selection() const;
+      const ngrs::Size & selection() const;
       void clearOldSelection();
       void repaintSelection();
       void startKeybasedSelection( int leftPos, int rightPos, int topPos, int bottomPos );
@@ -210,9 +210,9 @@ namespace psycle {
       void addEvent( const ColumnEvent & event );
       std::string noteToString( int value, bool sharp );
 
-      void drawData( ngrs::Graphics& g, int track, int line, int eventnr, int data , bool sharp, const ngrs::NColor & color );
+      void drawData( ngrs::Graphics& g, int track, int line, int eventnr, int data , bool sharp, const ngrs::Color & color );
       // bypass column type
-      void drawString( ngrs::Graphics& g, int track, int line, int eventnr, const std::string & data , const ngrs::NColor & color );
+      void drawString( ngrs::Graphics& g, int track, int line, int eventnr, const std::string & data , const ngrs::Color & color );
 
       const PatCursor & cursor() const;
       void setCursor( const PatCursor & cursor );
@@ -267,7 +267,7 @@ namespace psycle {
 
       virtual void drawRestArea( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-      virtual void drawSelBg( ngrs::Graphics& g, const ngrs::NSize & selArea );
+      virtual void drawSelBg( ngrs::Graphics& g, const ngrs::Size & selArea );
 
       virtual void drawCellBg( ngrs::Graphics& g, const PatCursor & cursor );
 
@@ -282,8 +282,8 @@ namespace psycle {
       bool doDrag_;
       bool doSelect_;
       bool doingKeybasedSelect_;
-      ngrs::NSize selection_;
-      ngrs::NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
+      ngrs::Size selection_;
+      ngrs::Size oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
       PatCursor selStartPoint_;				
 
       int defaultSize_;
@@ -292,19 +292,19 @@ namespace psycle {
       PatCursor cursor_;
       PatCursor selCursor_; // for keyboard drag
 
-      ngrs::NColor separatorColor_;
-      ngrs::NColor selectionColor_;
-      ngrs::NColor cursorColor_;
-      ngrs::NColor barColor_;
-      ngrs::NColor beatColor_;
-      ngrs::NColor playBarColor_;
-      ngrs::NColor bigTrackSeparatorColor_;
-      ngrs::NColor smallTrackSeparatorColor_;
-      ngrs::NColor lineSepColor_;
-      ngrs::NColor textColor_;
-      ngrs::NColor beatTextColor_;
-      ngrs::NColor restAreaColor_;
-      ngrs::NColor cursorTextColor_;
+      ngrs::Color separatorColor_;
+      ngrs::Color selectionColor_;
+      ngrs::Color cursorColor_;
+      ngrs::Color barColor_;
+      ngrs::Color beatColor_;
+      ngrs::Color playBarColor_;
+      ngrs::Color bigTrackSeparatorColor_;
+      ngrs::Color smallTrackSeparatorColor_;
+      ngrs::Color lineSepColor_;
+      ngrs::Color textColor_;
+      ngrs::Color beatTextColor_;
+      ngrs::Color restAreaColor_;
+      ngrs::Color cursorTextColor_;
 
       bool lineGridEnabled_;
       bool colGridEnabled_;
@@ -316,9 +316,9 @@ namespace psycle {
 
       std::vector<ColumnEvent> events_;
 
-      void drawBlockData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::NColor & color );
+      void drawBlockData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::Color & color );
 
-      void drawStringData( ngrs::Graphics& g, int xOff, int line, const std::string & text , const ngrs::NColor & color);
+      void drawStringData( ngrs::Graphics& g, int xOff, int line, const std::string & text , const ngrs::Color & color);
 
       void updateStatusBar();
 

@@ -18,11 +18,11 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <ngrs/ndialog.h>
+#include <ngrs/dialog.h>
 
 namespace ngrs {
-  class NEdit;
-  class NSlider;
+  class Edit;
+  class Slider;
 }
 
 namespace psycle
@@ -30,20 +30,20 @@ namespace psycle
   namespace host
   {
     /// wave amplification dialog window.
-    class WaveEdAmplifyDialog : public ngrs::NDialog
+    class WaveEdAmplifyDialog : public ngrs::Dialog
     {
       // Construction
     public:
       WaveEdAmplifyDialog();
       // Dialog Data
-      ngrs::NEdit *m_dbedit;
-      ngrs::NSlider *m_slider;
+      ngrs::Edit *m_dbedit;
+      ngrs::Slider *m_slider;
 
       int db_i;
     protected:
-      void onOkClicked( ngrs::NButtonEvent* ev );
-      void onCancelClicked( ngrs::NButtonEvent* ev );
-      void onSliderPosChanged( ngrs::NSlider* sender );
+      void onOkClicked( ngrs::ButtonEvent* ev );
+      void onCancelClicked( ngrs::ButtonEvent* ev );
+      void onSliderPosChanged( ngrs::Slider* sender );
     };
   }
 }

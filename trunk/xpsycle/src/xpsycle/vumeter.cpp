@@ -32,7 +32,7 @@ namespace psycle {
 	{
 
 		VuMeter::VuMeter()
-			: ngrs::NPanel(), l_(1), r_(1), vuprevL_(0), vuprevR_(0)
+			: ngrs::Panel(), l_(1), r_(1), vuprevL_(0), vuprevR_(0)
 		{
 			setTransparent(false);
 		}

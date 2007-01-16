@@ -20,18 +20,18 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include "nsystem.h"
-#include "nrect.h"
-#include "ncolor.h"
+#include "system.h"
+#include "rect.h"
+#include "color.h"
 #include <stack>
-#include "nbitmap.h"
-#include "nfntstring.h"
-#include "nregion.h"
-#include "npixmap.h"
-#include "npen.h"
+#include "bitmap.h"
+#include "fntstring.h"
+#include "region.h"
+#include "pixmap.h"
+#include "pen.h"
 #ifdef __unix__
 #else
-  #include "nsize.h"
+  #include "size.h"
 #endif
 
 /**
@@ -54,44 +54,44 @@ namespace ngrs {
 
     ~Graphics();
 
-    void setRepaintArea(const NRegion & rect);
-    const NRegion & repaintArea();
+    void setRepaintArea(const ngrs::Region & rect);
+    const ngrs::Region & repaintArea();
 
-    void setClipping(const NRegion & region);
+    void setClipping(const ngrs::Region & region);
 
-    void setRegion(const NRegion & region);
-    NRegion region();
+    void setRegion(const ngrs::Region & region);
+    ngrs::Region region();
 
-    void setPen(const NPen & pen);
-    const NPen & pen() const;
+    void setPen(const Pen & pen);
+    const Pen & pen() const;
     void resetPen();
 
     void drawLine(long x,long y,long x1, long y1);
     void drawRect( int x, int y, int width, int height );
     void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
-    void drawRect( const NRect & rect );
+    void drawRect( const Rect & rect );
     void drawArc(int x, int y, int width, int height, int angle1, int angle2);
     void fillArc(int x, int y, int width, int height, int angle1, int angle2);
     void fillRect(int x, int y, int width, int height);
     void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
-    void fillRect(const NRect & rect);
-    void fillGradient(int x, int y, int width, int height, const NColor & start, const NColor & end , int direction);
-    void fillGradient(int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end , int direction, int percent);
-    void fillRoundGradient(int x, int y, int width, int height, const NColor & start, const NColor & end , int direction , int arcWidth, int arcHeight);
-    void fillRoundGradient(int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end , int direction , int percent, int arcWidth, int arcHeight);
+    void fillRect(const Rect & rect);
+    void fillGradient(int x, int y, int width, int height, const Color & start, const Color & end , int direction);
+    void fillGradient(int x, int y, int width, int height, const Color & start, const Color & mid, const Color & end , int direction, int percent);
+    void fillRoundGradient(int x, int y, int width, int height, const Color & start, const Color & end , int direction , int arcWidth, int arcHeight);
+    void fillRoundGradient(int x, int y, int width, int height, const Color & start, const Color & mid, const Color & end , int direction , int percent, int arcWidth, int arcHeight);
 
 
 
     void setTranslation( long dx, long dy );
     void resize(int width, int height);
-    void swap(const NRect & repaintArea);
+    void swap( const Rect & repaintArea );
     long xTranslation();
     long yTranslation();
-    void setForeground( const NColor & color );
+    void setForeground( const Color & color );
 
     void setFont( const NFont & font );
     void drawText( int x, int y, const std::string & text );
-    void drawText( int x, int y, const std::string & text, const NColor & color );
+    void drawText( int x, int y, const std::string & text, const Color & color );
     void drawText( int x, int y, const NFntString & text );
 
     int textWidth(const std::string & text) const;
@@ -104,12 +104,12 @@ namespace ngrs {
     void drawPolygon(NPoint* pts, int n);
     void fillPolygon(NPoint* pts, int n);
 
-    void fillTranslucent(int x, int y, int width, int height, NColor color, int percent);
+    void fillTranslucent(int x, int y, int width, int height, Color color, int percent);
 
-    void putBitmap(int x, int y, const NBitmap & bitmap );
-    void putStretchBitmap(int x, int y, const NBitmap & bitmap, int width, int height );
-    void putBitmap(int destX, int destY, int width, int height, const NBitmap & bitmap, int srcX, int srcY );
-    void putPixmap(int destX, int destY, int width, int height, NPixmap & pixmap, int srcX, int srcY );
+    void putBitmap(int x, int y, const Bitmap & bitmap );
+    void putStretchBitmap(int x, int y, const Bitmap & bitmap, int width, int height );
+    void putBitmap(int destX, int destY, int width, int height, const Bitmap & bitmap, int srcX, int srcY );
+    void putPixmap(int destX, int destY, int width, int height, Pixmap & pixmap, int srcX, int srcY );
 
     void setDoubleBuffer(bool on);
 
@@ -129,9 +129,9 @@ namespace ngrs {
 
   private:
 
-    NColor old;
-    NRegion repaintArea_;
-    NColor oldColor;
+    Color old;
+    ngrs::Region repaintArea_;
+    Color oldColor;
     NFont fnt;
     long dx_;
     long dy_;
@@ -152,10 +152,10 @@ namespace ngrs {
 
     void createDblBufferHandles();
     void destroyDblBufferHandles();
-    void copyDblBuffer(const NRect &  repaintArea);
+    void copyDblBuffer(const Rect &  repaintArea);
     void drawXftString(int x, int y, const char* s);
 
-    NFontStructure fntStruct;
+    FontStructure fntStruct;
 #ifdef __unix__
     XftColor fFtColor;
     XftDraw* drawDbl;
@@ -167,9 +167,9 @@ namespace ngrs {
     void drawArcX( int x, int y, int width, int height, int start, int extent, bool fill );
 #endif
 
-    NRegion region_;
+    ngrs::Region region_;
 
-    NPen pen_;
+    Pen pen_;
 
     bool visible_;
   };

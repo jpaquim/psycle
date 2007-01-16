@@ -22,7 +22,7 @@
 #include "plugin.h"
 #include "configuration.h"
 #include "global.h"
-#include <ngrs/nfile.h>
+#include <ngrs/file.h>
 
 namespace psycle
 {
@@ -222,7 +222,7 @@ namespace psycle
 			unsigned long lPluginIndex;
 
 			std::vector<std::string> fileList;
-			fileList = ngrs::NFile::fileList( ladspa_path );
+			fileList = ngrs::File::fileList( ladspa_path );
 
 			std::vector<std::string>::iterator it = fileList.begin();
 			for ( ; it < fileList.end(); it++ ) {
@@ -234,7 +234,7 @@ namespace psycle
 				#endif
 
 				LADSPAMachine plugin(0, 0 );
-				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + ngrs::NFile::slash() + fileName );
+				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + ngrs::File::slash() + fileName );
 
 				if (pfDescriptorFunction) {
 					for (lPluginIndex = 0;; lPluginIndex++) {
@@ -246,7 +246,7 @@ namespace psycle
 						info.setType( MACH_LADSPA );
 						info.setName( psDescriptor->Name );
 						info.setLibName( fileName );
-						PluginFinderKey key(fileName, ladspa_path + ngrs::NFile::slash() + fileName, lPluginIndex );
+						PluginFinderKey key(fileName, ladspa_path + ngrs::File::slash() + fileName, lPluginIndex );
 						map_[key] = info;
 					}
 				}
@@ -258,7 +258,7 @@ namespace psycle
 			std::string psycle_path = Global::pConfig()->pluginPath();
 
 			std::vector<std::string> fileList;
-			fileList = ngrs::NFile::fileList( psycle_path );
+			fileList = ngrs::File::fileList( psycle_path );
 
 			std::vector<std::string>::iterator it = fileList.begin();
 

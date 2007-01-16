@@ -28,17 +28,17 @@
 #ifdef __unix__
 #include <X11/cursorfont.h>
 #endif
-#include <ngrs/nwindow.h>
+#include <ngrs/window.h>
 #include <ngrs/graphics.h>
-#include <ngrs/napp.h>
-#include <ngrs/npopupmenu.h>
-#include <ngrs/nmenu.h>
-#include <ngrs/nitem.h>
-#include <ngrs/nmenuseperator.h>
-#include <ngrs/nscrollbar.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/nstatusbar.h>
-#include <ngrs/ntextstatusitem.h>
+#include <ngrs/app.h>
+#include <ngrs/popupmenu.h>
+#include <ngrs/menu.h>
+#include <ngrs/item.h>
+#include <ngrs/menuseperator.h>
+#include <ngrs/scrollbar.h>
+#include <ngrs/button.h>
+#include <ngrs/statusbar.h>
+#include <ngrs/textstatusitem.h>
 //#include <mmreg.h>
 #include <cmath>
 
@@ -72,7 +72,7 @@ namespace psycle { namespace host {
 //		prevBodyX = prevHeadX = 0;
 		bLButtonDown = false;
 
-		setLayout( ngrs::NAlignLayout() );
+		setLayout( ngrs::AlignLayout() );
 		InitPopupMenu();
 		InitStatusBar();
 		InitZoomBar();
@@ -109,7 +109,7 @@ namespace psycle { namespace host {
 
 	void WaveEdChildView::resize()
 	{
-		NPanel::resize();
+		Panel::resize();
 		RefreshDisplayData(true);
 	}
 	
@@ -117,46 +117,46 @@ namespace psycle { namespace host {
 	{
 		popup = new ngrs::NPopupMenu;
 
-		ngrs::NMenuItem* zoomInItem = new ngrs::NMenuItem("Zoom In");
+		ngrs::MenuItem* zoomInItem = new ngrs::MenuItem("Zoom In");
 		zoomInItem->click.connect(this, &WaveEdChildView::onPopupZoomIn);
 		popup->add(zoomInItem);
 
-		ngrs::NMenuItem* zoomOutItem =new ngrs::NMenuItem("Zoom Out");
+		ngrs::MenuItem* zoomOutItem =new ngrs::MenuItem("Zoom Out");
 		zoomOutItem->click.connect(this, &WaveEdChildView::onPopupZoomOut);
 		popup->add(zoomOutItem);
 		
-		ngrs::NMenuItem* zoomSelItem = new ngrs::NMenuItem("Zoom to Selection");
+		ngrs::MenuItem* zoomSelItem = new ngrs::MenuItem("Zoom to Selection");
 		zoomSelItem->click.connect(this, &WaveEdChildView::onSelectionZoomSel);
 		popup->add(zoomSelItem);
 
-		popup->add( new ngrs::NMenuSeperator );
+		popup->add( new ngrs::MenuSeperator );
 
-		ngrs::NMenuItem* loopStartItem =new ngrs::NMenuItem("Set Loop Start");
+		ngrs::MenuItem* loopStartItem =new ngrs::MenuItem("Set Loop Start");
 		loopStartItem->click.connect(this, &WaveEdChildView::onPopupSetLoopStart);
 		popup->add(loopStartItem);
 		
-		ngrs::NMenuItem* loopEndItem =new ngrs::NMenuItem("Set Loop End");
+		ngrs::MenuItem* loopEndItem =new ngrs::MenuItem("Set Loop End");
 		loopEndItem->click.connect(this, &WaveEdChildView::onPopupSetLoopEnd);
 		popup->add(loopEndItem);
 		
-		ngrs::NMenuItem* loopSelItem =new ngrs::NMenuItem("Set Selection to Loop");
+		ngrs::MenuItem* loopSelItem =new ngrs::MenuItem("Set Selection to Loop");
 		loopSelItem->click.connect(this, &WaveEdChildView::onPopupSelectionToLoop);
 		popup->add(loopSelItem);
 	}
 
 	void WaveEdChildView::InitZoomBar()
 	{
-		zoomBar = new ngrs::NPanel();
-		zoomBar->setLayout( ngrs::NAlignLayout());
+		zoomBar = new ngrs::Panel();
+		zoomBar->setLayout( ngrs::AlignLayout());
 		volSlider = new VolumeSlider(pSong);
 		volSlider->setPreferredSize(75,15);
-		zoomSlider = new ngrs::NSlider();
+		zoomSlider = new ngrs::Slider();
 		zoomSlider->setPreferredSize(100,15);
-		zoomOutButton = new ngrs::NButton("-");//, 15, 15);
+		zoomOutButton = new ngrs::Button("-");//, 15, 15);
 		zoomOutButton->setPreferredSize(15,15);
-		zoomInButton = new ngrs::NButton("+");//, 15, 15);
+		zoomInButton = new ngrs::Button("+");//, 15, 15);
 		zoomInButton->setPreferredSize(15,15);
-		scrollBar = new ngrs::NScrollBar();
+		scrollBar = new ngrs::ScrollBar();
 		
 		scrollBar->setOrientation(ngrs::nHorizontal);
 		scrollBar->setSmallChange(1);
@@ -190,10 +190,10 @@ namespace psycle { namespace host {
 	void WaveEdChildView::InitStatusBar()
 	{
 		statusBar=new ngrs::NStatusBar();
-		lengthText = new ngrs::NTextStatusItem();
-		selText = new ngrs::NTextStatusItem();
-		statusText = new ngrs::NTextStatusItem();
-		modeText = new ngrs::NTextStatusItem();
+		lengthText = new ngrs::TextStatusItem();
+		selText = new ngrs::TextStatusItem();
+		statusText = new ngrs::TextStatusItem();
+		modeText = new ngrs::TextStatusItem();
 		statusBar->add(statusText, ngrs::nAlLeft);
 		statusBar->add(modeText, ngrs::nAlRight);
 		statusBar->add(lengthText, ngrs::nAlRight);
@@ -235,19 +235,19 @@ namespace psycle { namespace host {
 		//for now..
 		statusText->setText("Ready");
 	}
-	void WaveEdChildView::onHScroll( ngrs::NScrollBar* sender )
+	void WaveEdChildView::onHScroll( ngrs::ScrollBar* sender )
 	{  
 		diStart = static_cast<int>( sender->pos() );
 		if( diStart > wdLength-diLength ) diStart = wdLength - diLength;
 		RefreshDisplayData();
 		repaint();			
 	}
-	void WaveEdChildView::onVolSliderScroll( ngrs::NSlider *slider)
+	void WaveEdChildView::onVolSliderScroll( ngrs::Slider *slider)
 	{
 		pSong->waved.SetVolume( slider->pos() / 100.0f);
 		volSlider->repaint();
 	}
-	void WaveEdChildView::onZoomSliderScroll( ngrs::NSlider *slider )
+	void WaveEdChildView::onZoomSliderScroll( ngrs::Slider *slider )
 	{
 		int newzoom = (int) slider->pos();
 		SetSpecificZoom(newzoom);
@@ -263,7 +263,7 @@ namespace psycle { namespace host {
 
 		if(wView_->wdWave)
 		{
-			//const ngrs::NRegion invalidRgn = g.repaintArea();
+			//const ngrs::Region invalidRgn = g.repaintArea();
 			int const barHeight = 0;	//height of scroll bar and status bar combined
 			
 			int const nHeadHeight=clientHeight()/10;
@@ -457,9 +457,9 @@ namespace psycle { namespace host {
 	void WaveEdChildView::VolumeSlider::paint( ngrs::Graphics&g )
 	{
 		float vol = pSong->waved.GetVolume();
-		ngrs::NColor clrBlue;
-		ngrs::NColor clrGray;
-		ngrs::NColor clrBlack;
+		ngrs::Color clrBlue;
+		ngrs::Color clrGray;
+		ngrs::Color clrBlack;
 		clrBlue.setRGB(0, 128, 200);
 		clrGray.setRGB(40, 40, 40);
 		clrBlack.setRGB(0, 0, 0);
@@ -495,7 +495,7 @@ namespace psycle { namespace host {
 
 
 
-	void WaveEdChildView::onSelectionZoomIn( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onSelectionZoomIn( ngrs::ButtonEvent* ev )
 	{
 		if(wdWave && wdLength>8)
 		{
@@ -518,7 +518,7 @@ namespace psycle { namespace host {
 
 	}
 
-	void WaveEdChildView::onPopupZoomIn( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPopupZoomIn( ngrs::ButtonEvent* ev )
 	{
 		int nWidth = clientWidth();
 		unsigned long newCenter = diStart + rbX*diLength/nWidth;
@@ -541,7 +541,7 @@ namespace psycle { namespace host {
 		repaint();
 	}
 
-	void WaveEdChildView::onSelectionZoomOut( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onSelectionZoomOut( ngrs::ButtonEvent* ev )
 	{
 		if(wdWave && diLength<wdLength)
 		{
@@ -562,7 +562,7 @@ namespace psycle { namespace host {
 		}
 	}
 
-	void WaveEdChildView::onPopupZoomOut( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPopupZoomOut( ngrs::ButtonEvent* ev )
 	{
 		int nWidth = clientWidth();
 		unsigned long newCenter = diStart + rbX*diLength/nWidth;
@@ -587,7 +587,7 @@ namespace psycle { namespace host {
 
 
 
-	void WaveEdChildView::onSelectionZoomSel( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onSelectionZoomSel( ngrs::ButtonEvent* ev )
 	{
 		if(blSelection && wdWave)
 		{
@@ -634,7 +634,7 @@ namespace psycle { namespace host {
 		}
 	}
 
-	void WaveEdChildView::onSelectionShowall( ngrs::NButtonEvent* ev ) 
+	void WaveEdChildView::onSelectionShowall( ngrs::ButtonEvent* ev ) 
 	{
 		diStart = 0;
 		diLength = wdLength;
@@ -656,7 +656,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 //		SetCapture();
 		if(wView_->wdWave)
 		{
-			if (   ngrs::NApp::system().shiftState() & ngrs::nsCtrl )
+			if (   ngrs::App::system().shiftState() & ngrs::nsCtrl )
 			{
 //				pParent->m_wndView.AddMacViewUndo();
 				wView_->pSong->IsInvalided(true);
@@ -745,7 +745,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 					}
 				}
 				#ifdef __unix__
-                XDefineCursor( ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_right_side));
+                XDefineCursor( ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
                 #endif				
 				repaint();
 				wView_->UpdateStatusBar();
@@ -758,7 +758,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		if(wView_->wdWave)
 		{
 
-			if ( ngrs::NApp::system().shiftState() & ngrs::nsCtrl )
+			if ( ngrs::App::system().shiftState() & ngrs::nsCtrl )
 			{
 //				pParent->m_wndView.AddMacViewUndo();
 				wView_->pSong->IsInvalided(true);
@@ -922,13 +922,13 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 							abs ( x - int((  wView_->wdLoopE-wView_->diStart )			* dispRatio ))  < 10) )
 					)
 					#ifdef __unix__
-                    XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_right_side));
+                    XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
                     #else	
                     ;
                     #endif				
 				else
 				    #ifdef __unix__
-                  XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_xterm));
+                  XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_xterm));
 					#else
 					;
                     #endif					
@@ -942,13 +942,13 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 							abs ( x - int((  wView_->blStart+wView_->blLength)	* dispRatio ))	< 10 )
 					)
 					#ifdef __unix__
-                    XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_right_side));
+                    XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
 					#else
 					;
 					#endif
 				else
 					#ifdef __unix__
-                  XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_xterm));
+                  XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_xterm));
                     #else
                     ;
                     #endif					
@@ -985,7 +985,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 	//////		Audio processing functions
 
 
-	void WaveEdChildView::onSelectionFadeIn( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onSelectionFadeIn( ngrs::ButtonEvent* ev )
 	{
 		unsigned long startPoint = (blSelection? blStart: 0);
 		unsigned long length = (blSelection? blLength+1: wdLength);
@@ -1004,7 +1004,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 	}
 
 
-	void WaveEdChildView::onSelectionFadeOut( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onSelectionFadeOut( ngrs::ButtonEvent* ev )
 	{
 		unsigned long startPoint = (blSelection? blStart: 0);
 		unsigned long length = (blSelection? blLength+1: wdLength);
@@ -1022,7 +1022,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		}
 	}
 
-	void WaveEdChildView::onSelectionNormalize( ngrs::NButtonEvent* ev ) // (Fideloop's)
+	void WaveEdChildView::onSelectionNormalize( ngrs::ButtonEvent* ev ) // (Fideloop's)
 	{
 		signed short maxL = 0, maxR = 0, absBuf;
 		double ratio = 0;
@@ -1083,7 +1083,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		}
 	}
 
-	void WaveEdChildView::onSelectionRemoveDC( ngrs::NButtonEvent* ev ) // (Fideloop's)
+	void WaveEdChildView::onSelectionRemoveDC( ngrs::ButtonEvent* ev ) // (Fideloop's)
 	{
 		double meanL = 0, meanR = 0;
 		unsigned long c = 0;
@@ -1150,7 +1150,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		}
 	}
 
-	void WaveEdChildView::onSelectionAmplify( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onSelectionAmplify( ngrs::ButtonEvent* ev )
 	{
 		double ratio =1;
 		unsigned long startPoint = (blSelection? blStart: 0);
@@ -1178,7 +1178,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		}
 	}
 
-	void WaveEdChildView::onSelectionReverse( ngrs::NButtonEvent* ev ) 
+	void WaveEdChildView::onSelectionReverse( ngrs::ButtonEvent* ev ) 
 	{
 		short buf = 0;
 		int c, halved = 0;
@@ -1216,7 +1216,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		}
 	}
 
-	void WaveEdChildView::onSelectionInsertSilence( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onSelectionInsertSilence( ngrs::ButtonEvent* ev )
 	{
 		if(SilenceDlg->execute())
 		{
@@ -1294,7 +1294,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		}
 	}
 
-	void WaveEdChildView::onConvertMono( ngrs::NButtonEvent* ev ) 
+	void WaveEdChildView::onConvertMono( ngrs::ButtonEvent* ev ) 
 	{
 		if (wdWave && wdStereo)
 		{
@@ -1323,7 +1323,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 	//////////////////////////////////////////////////////////////////////////
 	//////		Clipboard Functions
 
-	void WaveEdChildView::onEditDelete( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onEditDelete( ngrs::ButtonEvent* ev )
 	{
 		short* pTmp = 0, *pTmpR = 0;
 		long datalen = 0;
@@ -1405,7 +1405,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		}
 	}
 
-	void WaveEdChildView::onEditCopy( ngrs::NButtonEvent* ev ) 
+	void WaveEdChildView::onEditCopy( ngrs::ButtonEvent* ev ) 
 	{
 		if(!wdWave || !blLength) return;
 		cbLeft.resize(blLength+1);
@@ -1421,13 +1421,13 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 
 		}
 
-	void WaveEdChildView::onEditCut( ngrs::NButtonEvent* ev ) 
+	void WaveEdChildView::onEditCut( ngrs::ButtonEvent* ev ) 
 	{
 		onEditCopy( 0 );
 		onEditDelete( 0 );
 	}
 
-	void WaveEdChildView::onEditCrop( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onEditCrop( ngrs::ButtonEvent* ev )
 	{
 		unsigned long blStartTemp = blStart;
 		
@@ -1441,7 +1441,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		onEditDelete( 0 );
 	}
 
-	void WaveEdChildView::onEditPaste( ngrs::NButtonEvent* ev ) 
+	void WaveEdChildView::onEditPaste( ngrs::ButtonEvent* ev ) 
 	{
 		unsigned long c = 0;
 		signed short *pTmp, *pTmpR;
@@ -1512,7 +1512,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		pSong->IsInvalided(false);
 	}
 
-	void WaveEdChildView::onPasteOverwrite( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPasteOverwrite( ngrs::ButtonEvent* ev )
 	{
 //		pParent->m_wndView.AddMacViewUndo();
 		long lDataSamps=cbLeft.size();
@@ -1556,7 +1556,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		pSong->IsInvalided(false);
 	}
 
-	void WaveEdChildView::onPasteMix( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPasteMix( ngrs::ButtonEvent* ev )
 	{
 		unsigned long c = 0;
 		unsigned long startPoint;
@@ -1671,7 +1671,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 
 
 
-	void WaveEdChildView::onPasteCrossfade( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPasteCrossfade( ngrs::ButtonEvent* ev )
 	{
 		if(XFadeDlg->execute())
 		{
@@ -1752,7 +1752,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 
 
 
-	void WaveEdChildView::onEditSelectAll( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onEditSelectAll( ngrs::ButtonEvent* ev )
 	{
 		diStart = 0;
 		blStart = 0;
@@ -1766,13 +1766,13 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 		this->repaint();
 	}
 
-	void WaveEdChildView::onEditSnapToZero( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onEditSnapToZero( ngrs::ButtonEvent* ev )
 	{
 		bSnapToZero=!bSnapToZero;
 	}
 
 
-	void WaveEdChildView::onPopupSetLoopStart( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPopupSetLoopStart( ngrs::ButtonEvent* ev )
 	{
 //		pParent->m_wndView.AddMacViewUndo();
 //		pSong->IsInvalided(true);
@@ -1796,7 +1796,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 //		rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 //		InvalidateRect(&rect, false);
 	}
-	void WaveEdChildView::onPopupSetLoopEnd( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPopupSetLoopEnd( ngrs::ButtonEvent* ev )
 	{
 //		pParent->m_wndView.AddMacViewUndo();
 		pSong->IsInvalided(true);
@@ -1821,7 +1821,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 //		InvalidateRect(&rect, false);
 	}
 
-	void WaveEdChildView::onPopupSelectionToLoop( ngrs::NButtonEvent* ev )
+	void WaveEdChildView::onPopupSelectionToLoop( ngrs::ButtonEvent* ev )
 	{
 		if(!blSelection) return;
 
@@ -2250,7 +2250,7 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
   {
 		// reset mousearrow
 		#ifdef __unix__
-    XDefineCursor(ngrs::NApp::system().dpy(),window()->win(),XCreateFontCursor(ngrs::NApp::system().dpy(),XC_left_ptr));
+    XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_left_ptr));
         #endif		
   }
 

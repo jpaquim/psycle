@@ -25,9 +25,9 @@
 #include "sequencergui.h"
 #include "sequencerbar.h"
 #include "virtualpattern.h"
-#include <ngrs/napp.h>
-#include <ngrs/ndockpanel.h>
-#include <ngrs/nsplitbar.h>
+#include <ngrs/app.h>
+#include <ngrs/dockpanel.h>
+#include <ngrs/splitbar.h>
 
 namespace psycle {
 	namespace host {
@@ -36,16 +36,16 @@ const std::string PSYCLE__VERSION="X";
 
 
 ChildView::ChildView()
-  : ngrs::NPanel()
+  : ngrs::Panel()
 {
   _pSong = new Song();
 
-  setLayout( ngrs::NAlignLayout() );
+  setLayout( ngrs::AlignLayout() );
 
   add(sequencerBar_ = new SequencerBar(), ngrs::nAlLeft);
   sequencerBar_->setChildView(this);
 
-  tabBook_ = new ngrs::NTabBook();
+  tabBook_ = new ngrs::TabBook();
   add(tabBook_, ngrs::nAlClient);
 
   tabBook_->setTabBarAlign(ngrs::nAlBottom);
@@ -67,11 +67,11 @@ ChildView::ChildView()
 	virtualPattern_ = new VirtualPattern();
 
   
-  macDock = new ngrs::NDockPanel(machineView_);
+  macDock = new ngrs::DockPanel(machineView_);
   tabBook_->addPage(macDock,"Machine View");
   ngrs::NTab* tab = tabBook_->tab( macDock );
   tab->click.connect(this,&ChildView::onTabChange);
-  patDock = new ngrs::NDockPanel(patternView_);
+  patDock = new ngrs::DockPanel(patternView_);
   tabBook_->addPage(patDock,"Pattern View");
   tab = tabBook_->tab( patDock );
   tab->click.connect(this,&ChildView::onTabChange);
@@ -79,14 +79,14 @@ ChildView::ChildView()
   tabBook_->addPage(waveEd_,"WaveEditor");
   tab = tabBook_->tab( waveEd_ );
   tab->click.connect(this,&ChildView::onTabChange);
-  ngrs::NPanel* seqGroup = new ngrs::NPanel();
-		seqGroup->setLayout( ngrs::NAlignLayout() );
+  ngrs::Panel* seqGroup = new ngrs::Panel();
+		seqGroup->setLayout( ngrs::AlignLayout() );
     seqGroup->add( virtualPattern_, ngrs::nAlBottom);
-    ngrs::NSplitBar* splitBar = new ngrs::NSplitBar();
+    ngrs::SplitBar* splitBar = new ngrs::SplitBar();
 		splitBar->setOrientation( ngrs::nHorizontal );
     seqGroup->add( splitBar, ngrs::nAlBottom );
     seqGroup->add( sequencerView_, ngrs::nAlClient);
-	seqDock = new ngrs::NDockPanel(seqGroup);
+	seqDock = new ngrs::DockPanel(seqGroup);
   tabBook_->addPage(seqDock,"Sequencer View");
   tab = tabBook_->tab( seqDock );
   tab->click.connect(this,&ChildView::onTabChange);
@@ -121,7 +121,7 @@ void ChildView::setTitleBarText( )
   window()->setTitle(titlename);
 }
 
-void ChildView::onPatternView( ngrs::NObject * sender )
+void ChildView::onPatternView( ngrs::Object * sender )
 {
 
 }
@@ -170,7 +170,7 @@ void ChildView::onMachineSelected( Machine* mac ) {
    machineSelected.emit( mac );
 }
 
-void ChildView::onMachineViewDblClick( ngrs::NButtonEvent * ev )
+void ChildView::onMachineViewDblClick( ngrs::ButtonEvent * ev )
 {
   machineViewDblClick.emit( ev );
 }
@@ -239,7 +239,7 @@ void psycle::host::ChildView::showSequencerView( )
   repaint();
 }
 
-void psycle::host::ChildView::onTabChange( ngrs::NButtonEvent * ev )
+void psycle::host::ChildView::onTabChange( ngrs::ButtonEvent * ev )
 {
   if (tabBook_->activePage() == patDock ) {
     patternView()->setFocus();

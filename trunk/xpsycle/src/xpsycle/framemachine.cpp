@@ -25,16 +25,16 @@
 #include "global.h"
 #include "plugin.h"
 #include "binread.h"
-#include <ngrs/napp.h>
-#include <ngrs/nmenubar.h>
-#include <ngrs/ntogglepanel.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nfiledialog.h>
-#include <ngrs/nslider.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/ntablelayout.h>
-#include <ngrs/nalignconstraint.h>
+#include <ngrs/app.h>
+#include <ngrs/menubar.h>
+#include <ngrs/togglepanel.h>
+#include <ngrs/button.h>
+#include <ngrs/edit.h>
+#include <ngrs/filedialog.h>
+#include <ngrs/slider.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/tablelayout.h>
+#include <ngrs/alignconstraint.h>
 #include <fstream>
 
 
@@ -49,13 +49,13 @@ namespace psycle {
 
     NewNameDlg::NewNameDlg( )
     {
-      ngrs::NPanel* btnPnl = new ngrs::NPanel();
-      btnPnl->setLayout( ngrs::NFlowLayout( ngrs::nAlRight, 5, 5) );
-      btnPnl->add( new ngrs::NButton("add") );
-      btnPnl->add( new ngrs::NButton("cancel") );
+      ngrs::Panel* btnPnl = new ngrs::Panel();
+      btnPnl->setLayout( ngrs::FlowLayout( ngrs::nAlRight, 5, 5) );
+      btnPnl->add( new ngrs::Button("add") );
+      btnPnl->add( new ngrs::Button("cancel") );
       pane()->add( btnPnl, ngrs::nAlBottom );
 
-      ngrs::NEdit* name = new ngrs::NEdit();
+      ngrs::Edit* name = new ngrs::Edit();
       name->setText("userprs");
       pane()->add( name, ngrs::nAlClient );
 
@@ -98,10 +98,10 @@ namespace psycle {
 
     // cell subclass for a knob
     Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), finetweak(1), ultrafinetweak(0), sourcepoint(0)  {
-      setSpacing( ngrs::NSize( 0,0,1,0 ));			
+      setSpacing( ngrs::Size( 0,0,1,0 ));			
       param_ = param;  
-      add( label = new ngrs::NLabel());
-      add( vLabel = new ngrs::NLabel()); // the label that shows the value in %
+      add( label = new ngrs::Label());
+      add( vLabel = new ngrs::Label()); // the label that shows the value in %
       ngrs::NFont font = ngrs::NFont("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
       font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUIFontBottomColor );
       vLabel->setFont(font);
@@ -157,13 +157,13 @@ namespace psycle {
 
     int Knob::preferredHeight( ) const
     {
-      ngrs::NFontMetrics metrics( font() );
+      ngrs::FontMetrics metrics( font() );
       return std::max(2*metrics.textHeight(),K_YSIZE) + borderTop() + borderBottom() + spacing().top() + spacing().bottom();
     }
 
     int Knob::preferredWidth( ) const
     {
-      ngrs::NFontMetrics mtr( font() );
+      ngrs::FontMetrics mtr( font() );
       return K_XSIZE + std::max(mtr.textWidth(vLabel->text()),mtr.textWidth(label->text())) + 10 + borderRight() + borderLeft() + spacing().left() + spacing().right();
     }		
 
@@ -178,7 +178,7 @@ namespace psycle {
     void Knob::onMousePress( int x, int y, int button )
     {
       int CH = clientHeight();
-      if ( ngrs::NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y) ) {
+      if ( ngrs::Rect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y) ) {
         istweak = true;
         sourcepoint = y;
         tweakbase = value_;
@@ -189,7 +189,7 @@ namespace psycle {
     {
       if (istweak) {
 
-        int shift = ngrs::NApp::system().shiftState();
+        int shift = ngrs::App::system().shiftState();
 
         if (( ultrafinetweak && !( shift & ngrs::nsShift )) || //shift-key has been left.
           ( !ultrafinetweak && ( shift & ngrs::nsShift ))) //shift-key has just been pressed
@@ -209,7 +209,7 @@ namespace psycle {
         int maxval = max_range;
         int minval = min_range;
 
-        int screenh = ngrs::NApp::system().screenHeight();
+        int screenh = ngrs::App::system().screenHeight();
         double freak = 0.5;
         if ( ultrafinetweak ) freak = 0.5f;
         else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
@@ -239,12 +239,12 @@ namespace psycle {
     // Header Label class
     Header::Header( ) : Cell()
     {
-      ngrs::NFrameBorder border;
-      border.setSpacing( ngrs::NSize(2,2,2,2) );
+      ngrs::FrameBorder border;
+      border.setSpacing( ngrs::Size(2,2,2,2) );
       border.setOval();
       setBorder( border );
 
-      label = new ngrs::NLabel();
+      label = new ngrs::Label();
       label->setTransparent(false);
       label->setBackground( SkinReader::Instance()->framemachine_info().machineGUITitleColor );
       ngrs::NFont font = ngrs::NFont("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
@@ -266,7 +266,7 @@ namespace psycle {
 
 
     FrameMachine::FrameMachine( Machine* pMachine )
-      : ngrs::NWindow()
+      : ngrs::Window()
     {
       pMachine_ = pMachine;
 
@@ -290,34 +290,34 @@ namespace psycle {
     {
       setTitle( stringify(pMachine_->_macIndex) + std::string(" : ") + pMachine_->GetName() );
 
-      ngrs::NPanel* prs = new ngrs::NPanel();
-      prs->setLayout( ngrs::NAlignLayout() );
-      ngrs::NButton* savePrsBtn = new ngrs::NButton("save");
+      ngrs::Panel* prs = new ngrs::Panel();
+      prs->setLayout( ngrs::AlignLayout() );
+      ngrs::Button* savePrsBtn = new ngrs::Button("save");
       savePrsBtn->setFlat(false);
       prs->add(savePrsBtn,ngrs::nAlLeft);
-      ngrs::NButton* loadPrsBtn = new ngrs::NButton("load");
+      ngrs::Button* loadPrsBtn = new ngrs::Button("load");
       loadPrsBtn->setFlat(false);
       loadPrsBtn->clicked.connect(this,&FrameMachine::onLoadPrs);
       prs->add(loadPrsBtn,ngrs::nAlLeft);
-      ngrs::NButton* addPrsBtn = new ngrs::NButton("add");
+      ngrs::Button* addPrsBtn = new ngrs::Button("add");
       addPrsBtn->setFlat(false);
       addPrsBtn->clicked.connect( this,&FrameMachine::onAddPrs );
       prs->add( addPrsBtn,ngrs::nAlLeft );
-      defaultPrsBtn = new ngrs::NButton("User");
+      defaultPrsBtn = new ngrs::Button("User");
       defaultPrsBtn->setFlat(false);
       prs->add(defaultPrsBtn,ngrs::nAlLeft);
-      ngrs::NButton* rightPrsBtn = new ngrs::NButton(">");
+      ngrs::Button* rightPrsBtn = new ngrs::Button(">");
       rightPrsBtn->setFlat( false );
       rightPrsBtn->click.connect( this,&FrameMachine::onRightBtn );
       rightPrsBtn->setRepeatMode( true );
       prs->add( rightPrsBtn, ngrs::nAlRight );
-      ngrs::NButton* leftPrsBtn = new ngrs::NButton("<");
+      ngrs::Button* leftPrsBtn = new ngrs::Button("<");
       leftPrsBtn->setFlat( false );
       leftPrsBtn->setRepeatMode( true );
       leftPrsBtn->click.connect( this,&FrameMachine::onLeftBtn );
       prs->add( leftPrsBtn, ngrs::nAlRight );
-      prsPanel = new ngrs::NTogglePanel();
-      ngrs::NFlowLayout fl(ngrs::nAlLeft,5,5);
+      prsPanel = new ngrs::TogglePanel();
+      ngrs::FlowLayout fl(ngrs::nAlLeft,5,5);
       fl.setLineBreak( false );
       prs->setPreferredSize( 200, 20 );
       prsPanel->setLayout( fl );
@@ -342,8 +342,8 @@ namespace psycle {
       }
       if ( rows*cols < numParameters) rows++; // check if all the parameters are visible.
 
-      knobPanel = new ngrs::NPanel();
-      ngrs::NTableLayout tableLayout;
+      knobPanel = new ngrs::Panel();
+      ngrs::TableLayout tableLayout;
       tableLayout.setRows( rows );
       tableLayout.setColumns( cols );
       knobPanel->setLayout( tableLayout );
@@ -369,7 +369,7 @@ namespace psycle {
             char parName[64];
             pMachine_->GetParamName(knobIdx,parName);
             cell->setText(parName);
-            knobPanel->add( cell, ngrs::NAlignConstraint( ngrs::nAlLeft, x, y ), true );
+            knobPanel->add( cell, ngrs::AlignConstraint( ngrs::nAlLeft, x, y ), true );
           } else if ( knobIdx < numParameters ) {
             Knob* knob = new Knob( knobIdx );
             char parName[64];
@@ -379,11 +379,11 @@ namespace psycle {
             knob->setText(parName);
             knobMap[ knobIdx ] = knob;
             knob->valueChanged.connect(this,&FrameMachine::onKnobValueChange);												
-            knobPanel->add( knob, ngrs::NAlignConstraint( ngrs::nAlLeft, x, y ), true );
+            knobPanel->add( knob, ngrs::AlignConstraint( ngrs::nAlLeft, x, y ), true );
           }					
         } else {
           // knob hole
-          knobPanel->add( new Cell(), ngrs::NAlignConstraint( ngrs::nAlLeft, x, y ), true );
+          knobPanel->add( new Cell(), ngrs::AlignConstraint( ngrs::nAlLeft, x, y ), true );
         }
         y++;
         if ( !(y % rows) ) {
@@ -478,7 +478,7 @@ namespace psycle {
           while ( !prsIn.eof() ) {
             Preset newPreset(numParameters, sizeDataStruct);
             if (newPreset.read( binIn )) {
-              ngrs::NButton* prsBtn = new ngrs::NButton(newPreset.name());
+              ngrs::Button* prsBtn = new ngrs::Button(newPreset.name());
               prsBtn->setFlat(false);
               prsBtn->clicked.connect(this,&FrameMachine::onPrsClick);
               prsPanel->add(prsBtn);
@@ -490,42 +490,42 @@ namespace psycle {
       return true;
     }
 
-    void FrameMachine::onLeftBtn( ngrs::NButtonEvent* ev )
+    void FrameMachine::onLeftBtn( ngrs::ButtonEvent* ev )
     {
       prsPanel->setScrollDx( std::max(0,prsPanel->scrollDx()-100) );
       prsPanel->repaint();
     }
 
-    void FrameMachine::onRightBtn( ngrs::NButtonEvent* ev )
+    void FrameMachine::onRightBtn( ngrs::ButtonEvent* ev )
     {
       prsPanel->setScrollDx(std::min(prsPanel->preferredWidth() - prsPanel->clientWidth(),prsPanel->scrollDx()+100));
       prsPanel->repaint();
     }
 
-    void FrameMachine::onPrsClick( ngrs::NButtonEvent* ev )
+    void FrameMachine::onPrsClick( ngrs::ButtonEvent* ev )
     {
-      std::map<ngrs::NButton*,Preset>::iterator itr;
-      if ( (itr = presetMap.find((ngrs::NButton*)ev->sender())) != presetMap.end() ) {
+      std::map<ngrs::Button*,Preset>::iterator itr;
+      if ( (itr = presetMap.find((ngrs::Button*)ev->sender())) != presetMap.end() ) {
         if ( pMac() ) itr->second.tweakMachine( *pMac() );
       }
       updateValues();
     }
 
-    void FrameMachine::onAddPrs( ngrs::NButtonEvent* ev )
+    void FrameMachine::onAddPrs( ngrs::ButtonEvent* ev )
     {
       NewNameDlg* dlg = new NewNameDlg();
       add( dlg );
       dlg->execute();
-      ngrs::NApp::addRemovePipe(dlg);
+      ngrs::App::addRemovePipe(dlg);
     }
 
-    void FrameMachine::onLoadPrs( ngrs::NButtonEvent* ev )
+    void FrameMachine::onLoadPrs( ngrs::ButtonEvent* ev )
     {
-      ngrs::NFileDialog* dlg = new ngrs::NFileDialog();
+      ngrs::FileDialog* dlg = new ngrs::FileDialog();
       add(dlg);
       dlg->setPosition( 10, 10, 500, 500);
       dlg->execute();
-      ngrs::NApp::addRemovePipe(dlg);
+      ngrs::App::addRemovePipe(dlg);
     }
 
     Preset FrameMachine::knobsPreset( )
@@ -539,7 +539,7 @@ namespace psycle {
       if ( on ) {
         setPosition(20,20, pane()->preferredWidth(), knobPanel->preferredHeight() + prsPanel->preferredHeight() );
       }    
-      ngrs::NWindow::setVisible( on );
+      ngrs::Window::setVisible( on );
     }
 
 

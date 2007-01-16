@@ -23,10 +23,10 @@
 #include "analyzer.h"
 #include "machine.h"
 #include "wiregui.h"
-#include <ngrs/nwindow.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/nslider.h>
-#include <ngrs/nline.h>
+#include <ngrs/window.h>
+#include <ngrs/button.h>
+#include <ngrs/slider.h>
+#include <ngrs/line.h>
 
 
 /**
@@ -37,7 +37,7 @@ namespace psycle {
   namespace host {
 
 
-    class WireDlg : public ngrs::NWindow
+    class WireDlg : public ngrs::Window
     {
     public:
       WireDlg();
@@ -62,22 +62,22 @@ namespace psycle {
 
       Analyzer* analyzer;
 
-      ngrs::NSlider* volSlider;
-      ngrs::NSlider* slider;
-      ngrs::NSlider* slider2;
+      ngrs::Slider* volSlider;
+      ngrs::Slider* slider;
+      ngrs::Slider* slider2;
 
-      ngrs::NButton* delBtn;
-      ngrs::NButton* modeBtn;
-      ngrs::NButton* holdBtn;
+      ngrs::Button* delBtn;
+      ngrs::Button* modeBtn;
+      ngrs::Button* holdBtn;
 
       Machine* _pSrcMachine;
       Machine* _pDstMachine;
 
       WireGUI* line_;
 
-      void onVolPosChanged( ngrs::NSlider* slider );
+      void onVolPosChanged( ngrs::Slider* slider );
 
-      void onDeleteBtn( ngrs::NButtonEvent* ev);
+      void onDeleteBtn( ngrs::ButtonEvent* ev);
 
       int wireIdx();
     };

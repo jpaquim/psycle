@@ -18,11 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "waveedamplifydlg.h"
-#include <ngrs/nslider.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nlabel.h>
+#include <ngrs/slider.h>
+#include <ngrs/edit.h>
+#include <ngrs/button.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/label.h>
 #include <cstdlib>
 
 namespace psycle
@@ -30,37 +30,37 @@ namespace psycle
 	namespace host
 	{
 		WaveEdAmplifyDialog::WaveEdAmplifyDialog()
-			: ngrs::NDialog()
+			: ngrs::Dialog()
 		{
 			setTitle("Amplify Dialog");
-			ngrs::NPanel* sliderPanel = new ngrs::NPanel();
-			sliderPanel->setLayout( ngrs::NAlignLayout(5,5) );
-			m_slider = new ngrs::NSlider;
+			ngrs::Panel* sliderPanel = new ngrs::Panel();
+			sliderPanel->setLayout( ngrs::AlignLayout(5,5) );
+			m_slider = new ngrs::Slider;
 			m_slider->setPreferredSize(250,15);
-			m_dbedit = new ngrs::NEdit;
+			m_dbedit = new ngrs::Edit;
 			m_dbedit->setPreferredSize(50,20);
 			{
-				ngrs::NLabel *lbl = new ngrs::NLabel("db");
+				ngrs::Label *lbl = new ngrs::Label("db");
 				sliderPanel->add(lbl,ngrs::nAlRight);
 			}
 			sliderPanel->add(m_dbedit,ngrs::nAlRight);
 			sliderPanel->add(m_slider,ngrs::nAlClient);
 
-			ngrs::NPanel* okPanel = new ngrs::NPanel();
-			okPanel->setLayout( ngrs::NAlignLayout( 5, 5) );
+			ngrs::Panel* okPanel = new ngrs::Panel();
+			okPanel->setLayout( ngrs::AlignLayout( 5, 5) );
 			{
-				ngrs::NButton *btn = new ngrs::NButton("OK", false);
+				ngrs::Button *btn = new ngrs::Button("OK", false);
 				btn->clicked.connect(this, &WaveEdAmplifyDialog::onOkClicked);
 				okPanel->add(btn,ngrs::nAlRight);
 			}
 			{
-				ngrs::NButton *btn = new ngrs::NButton("Cancel", false);
+				ngrs::Button *btn = new ngrs::Button("Cancel", false);
 				btn->clicked.connect(this, &WaveEdAmplifyDialog::onCancelClicked);
 				okPanel->add(btn,ngrs::nAlRight);
 			}
 			pane()->add( okPanel, ngrs::nAlBottom );
 			{
-				ngrs::NLabel *lbl = new ngrs::NLabel("Adjust volume:");
+				ngrs::Label *lbl = new ngrs::Label("Adjust volume:");
 				pane()->add( lbl, ngrs::nAlTop );
 			}
 			
@@ -73,7 +73,7 @@ namespace psycle
 			pack();
 		}
 
-		void WaveEdAmplifyDialog::onSliderPosChanged( ngrs::NSlider* slider )
+		void WaveEdAmplifyDialog::onSliderPosChanged( ngrs::Slider* slider )
 		{
       double pos = slider->pos();
 			float db =  (float) (pos-9600)*0.01f;
@@ -87,7 +87,7 @@ namespace psycle
 			m_dbedit->repaint();
 		}
 
-		void WaveEdAmplifyDialog::onOkClicked( ngrs::NButtonEvent* ev )
+		void WaveEdAmplifyDialog::onOkClicked( ngrs::ButtonEvent* ev )
 		{
 			std::string db_t = m_dbedit->text();
 			db_i = (int)(100*atof(db_t.c_str()));
@@ -97,7 +97,7 @@ namespace psycle
 				doClose(false);
 		}
 
-		void WaveEdAmplifyDialog::onCancelClicked( ngrs::NButtonEvent* ev ) 
+		void WaveEdAmplifyDialog::onCancelClicked( ngrs::ButtonEvent* ev ) 
 		{
 			db_i = 0;
 			doClose(false);

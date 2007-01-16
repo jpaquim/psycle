@@ -33,17 +33,17 @@
 #include "audioconfigdlg.h"
 #include "skinreader.h"
 #include <iomanip>
-#include <ngrs/napp.h>
-#include <ngrs/nitem.h>
-#include <ngrs/ncheckmenuitem.h>
-#include <ngrs/nmenuseperator.h>
-#include <ngrs/nmessagebox.h>
-#include <ngrs/nbevelborder.h>
-#include <ngrs/nstatusbar.h>
-#include <ngrs/ntextstatusitem.h>
-#include <ngrs/nfiledialog.h>
-#include <ngrs/nsystem.h>
-#include <ngrs/ntoolbarpanel.h>
+#include <ngrs/app.h>
+#include <ngrs/item.h>
+#include <ngrs/checkmenuitem.h>
+#include <ngrs/menuseperator.h>
+#include <ngrs/messagebox.h>
+#include <ngrs/bevelborder.h>
+#include <ngrs/statusbar.h>
+#include <ngrs/textstatusitem.h>
+#include <ngrs/filedialog.h>
+#include <ngrs/system.h>
+#include <ngrs/toolbarpanel.h>
 
 namespace psycle { 
   namespace host {
@@ -61,8 +61,8 @@ namespace psycle {
     // progressbar subclassing
 
     ProgressStatusItem::ProgressStatusItem() {
-      setLayout( ngrs::NAlignLayout() );
-      progressBar_ = new ngrs::NProgressBar();
+      setLayout( ngrs::AlignLayout() );
+      progressBar_ = new ngrs::ProgressBar();
       progressBar_->setValue(0);
       progressBar_->setMax(16385);
       progressBar_->setPreferredSize(200,10);
@@ -84,7 +84,7 @@ namespace psycle {
     // progressbar subclassing end
 
     MainWindow::MainWindow()
-      : ngrs::NWindow(), pluginFinder_( *Global::pConfig() )
+      : ngrs::Window(), pluginFinder_( *Global::pConfig() )
     { 
       setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
       setPosition( 10, 10, 800, 600 );
@@ -93,17 +93,17 @@ namespace psycle {
       DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
       songTabSkinDown.setGradient( 
-        ngrs::NColor(255,255,255), // start gradient color
-        ngrs::NColor(243,243,239), // mid gradient color
-        ngrs::NColor(236,233,216), // end gradient color
+        ngrs::Color(255,255,255), // start gradient color
+        ngrs::Color(243,243,239), // mid gradient color
+        ngrs::Color(236,233,216), // end gradient color
         1,                         // 1: rect, 2: rounded
         ngrs::nVertical, 10,5,5
         );
       songTabSkinDown.setTransparent( false );
       songTabSkinNone.setGradient(  
-        ngrs::NColor(255,255,255),
-        ngrs::NColor(243,243,239),
-        ngrs::NColor(214,208,192),
+        ngrs::Color(255,255,255),
+        ngrs::Color(243,243,239),
+        ngrs::Color(214,208,192),
         1,                         // 1: rect, 2: rounded
         ngrs::nVertical,10,5,5
       );
@@ -115,92 +115,92 @@ namespace psycle {
       initBars();
       initDialogs();
 
-      book = new ngrs::NTabBook();    
+      book = new ngrs::TabBook();    
       pane()->add(book,ngrs::nAlClient);
-      tabBar_ = new ngrs::NTabBar();
+      tabBar_ = new ngrs::TabBar();
       book->setTabBar( tabBar_ );   
 
-      ngrs::NToolBar* playBar = new ngrs::NToolBar();
-      playBar->setSkin( ngrs::NSkin() );
-      playBar->setSpacing( ngrs::NSize( 5,0,0,0) );
-      ngrs::NImage* img = new ngrs::NImage();
+      ngrs::ToolBar* playBar = new ngrs::ToolBar();
+      playBar->setSkin( ngrs::Skin() );
+      playBar->setSpacing( ngrs::Size( 5,0,0,0) );
+      ngrs::Image* img = new ngrs::Image();
       img->setSharedBitmap(&icons.playstart());
       img->setPreferredSize(25,25);
-      barPlayFromStartBtn_ = new ngrs::NButton(img);
+      barPlayFromStartBtn_ = new ngrs::Button(img);
       barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
       barPlayFromStartBtn_->setHint("Play from start");
       playBar->add(barPlayFromStartBtn_);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.play());
       img->setPreferredSize(25,25);
-      ngrs::NButton* playBtn = new ngrs::NButton(img);
+      ngrs::Button* playBtn = new ngrs::Button(img);
       playBtn->setHint("Play from edit position");
       playBar->add(playBtn)->clicked.connect(this,&MainWindow::onBarPlay);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.playselpattern());
       img->setPreferredSize(25,25);
-      playBar->add(new ngrs::NButton(img));
+      playBar->add(new ngrs::Button(img));
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.stop());
       img->setPreferredSize(25,25);
-      ngrs::NButton* stopBtn_ = new ngrs::NButton(img);
+      ngrs::Button* stopBtn_ = new ngrs::Button(img);
       stopBtn_->click.connect(this,&MainWindow::onBarStop);
       stopBtn_->setHint("Stop");
       playBar->add(stopBtn_);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.autoStop());
       img->setPreferredSize(25,25);
-      playBar->add(new ngrs::NButton(img));
+      playBar->add(new ngrs::Button(img));
 
-      playBar->add(new ngrs::NToolBarSeparator());
+      playBar->add(new ngrs::ToolBarSeparator());
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.recordnotes());
       img->setPreferredSize(25,25);
-      ngrs::NButton* recNotes = new ngrs::NButton(img);
+      ngrs::Button* recNotes = new ngrs::Button(img);
       recNotes->setHint("Record Notes Mode");
       recNotes->clicked.connect(this,&MainWindow::onRecordNotesMode);
       playBar->add(recNotes);
 
-      ngrs::NToolBar* vuToolBar = new ngrs::NToolBar();
-      vuToolBar->add(new ngrs::NLabel("VU"));
-      ngrs::NPanel* vuPanel = new ngrs::NPanel();
+      ngrs::ToolBar* vuToolBar = new ngrs::ToolBar();
+      vuToolBar->add(new ngrs::Label("VU"));
+      ngrs::Panel* vuPanel = new ngrs::Panel();
       vuPanel->setPreferredSize( 225, 10 );
       vuMeter_ = new VuMeter();
       vuPanel->add(vuMeter_);
       vuMeter_->setPosition(0,0,225,10);
-      masterSlider_ = new ngrs::NSlider();
+      masterSlider_ = new ngrs::Slider();
       masterSlider_->setOrientation(ngrs::nHorizontal);
       masterSlider_->setPosition(0,10,225,10);
       vuPanel->add(masterSlider_);
       vuToolBar->add(vuPanel);      
 
-      ngrs::NFlowLayout fl;
+      ngrs::FlowLayout fl;
       fl.setAlign( ngrs::nAlLeft );
       fl.setHgap( 2 );
       fl.setVgap( 0 );
       fl.setBaseLine( ngrs::nAlBottom );
       tabBar_->setLayout( fl );
       
-      ngrs::NPanel* logoPnl = new ngrs::NPanel();
-      logoPnl->setLayout( ngrs::NAlignLayout() );
-      logoPnl->setSpacing( ngrs::NSize( 10,5,10,5 ) );
-      img = new ngrs::NImage( icons.logoRight()  );
+      ngrs::Panel* logoPnl = new ngrs::Panel();
+      logoPnl->setLayout( ngrs::AlignLayout() );
+      logoPnl->setSpacing( ngrs::Size( 10,5,10,5 ) );
+      img = new ngrs::Image( icons.logoRight()  );
       img->setVAlign( ngrs::nAlCenter );
       logoPnl->add( img , ngrs::nAlRight );
-      img = new ngrs::NImage( icons.logoLeft() );
+      img = new ngrs::Image( icons.logoLeft() );
       img->setVAlign( ngrs::nAlCenter );
       logoPnl->add( img , ngrs::nAlLeft );
-      img = new ngrs::NImage( icons.logoMid() );
-      img->setLayout( ngrs::NAlignLayout() );
+      img = new ngrs::Image( icons.logoMid() );
+      img->setLayout( ngrs::AlignLayout() );
       img->add( tabBar_, ngrs::nAlBottom );     
       img->add( vuToolBar, ngrs::nAlTop );      
       tabBar_->add( playBar, ngrs::nAlLeft );
-      ngrs::NPanel* spacer = new ngrs::NPanel();
+      ngrs::Panel* spacer = new ngrs::Panel();
       spacer->setPreferredSize(20,5);
       tabBar_->add( spacer, ngrs::nAlLeft );
       img->setVAlign( ngrs::nAlCenter );
@@ -257,7 +257,7 @@ namespace psycle {
       tab->click.connect(this,&MainWindow::onTabChange);
       tab->setEnablePopupMenu(true);
       ngrs::NPopupMenu* menu = tab->popupMenu();
-      ngrs::NMenuItem* closeSong = new ngrs::NMenuItem("Close");
+      ngrs::MenuItem* closeSong = new ngrs::MenuItem("Close");
       menu->add( closeSong );
       closeSong->click.connect(this,&MainWindow::onCloseSongTabPressed);
 
@@ -275,10 +275,10 @@ namespace psycle {
       return childView_;
     } 
 
-    void MainWindow::onCloseSongTabPressed( ngrs::NButtonEvent* ev ) {
-      std::map<NObject*,ChildView*>::iterator it = songMap.find( ev->sender() ); 
+    void MainWindow::onCloseSongTabPressed( ngrs::ButtonEvent* ev ) {
+      std::map<Object*,ChildView*>::iterator it = songMap.find( ev->sender() ); 
       if ( it != songMap.end() ) {
-        std::map<NObject*,ChildView*>::iterator tabIt = songTabMap.begin();
+        std::map<Object*,ChildView*>::iterator tabIt = songTabMap.begin();
         for ( ; tabIt != songTabMap.end() ; tabIt++ ) {
           if ( tabIt->second == it->second ) {
             songTabMap.erase( tabIt );
@@ -298,7 +298,7 @@ namespace psycle {
         book->removePage(view);
 
         if (update) {
-          std::map<NObject*,ChildView*>::iterator songIt = songTabMap.begin();
+          std::map<Object*,ChildView*>::iterator songIt = songTabMap.begin();
           for ( ; songIt != songTabMap.end() ; songIt++ ) {
             if ( songIt->second == book->activePage() ) {
               selectedChildView_ = songIt->second;         
@@ -316,9 +316,9 @@ namespace psycle {
       }
     }
 
-    void MainWindow::onTabChange( ngrs::NButtonEvent * ev )
+    void MainWindow::onTabChange( ngrs::ButtonEvent * ev )
     {
-      std::map<NObject*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
+      std::map<Object*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
       if ( it != songTabMap.end() ) {
         ChildView* view = it->second;
         Player::Instance()->stop();
@@ -330,122 +330,122 @@ namespace psycle {
     }
 
 
-    void MainWindow::onConfigMenuAudio( ngrs::NButtonEvent* ev ) {
+    void MainWindow::onConfigMenuAudio( ngrs::ButtonEvent* ev ) {
       audioConfigDlg->setVisible( true );
     }
 
     void MainWindow::initMenu( )
     {
-      menuBar_ = new ngrs::NMenuBar();
+      menuBar_ = new ngrs::MenuBar();
       pane()->add( menuBar_ );
 
       DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
       // Creates the file menu
-      fileMenu_ = new ngrs::NMenu("File");
-      fileMenu_->add(new ngrs::NMenuItem("New",icons.newfile() ))->click.connect(this,&MainWindow::onFileNew);
-      fileMenu_->add(new ngrs::NMenuItem("Open",icons.open()))->click.connect(this,&MainWindow::onFileOpen);
-      fileMenu_->add(new ngrs::NMenuItem("Import Module"));
-      fileMenu_->add(new ngrs::NMenuItem("Save",icons.save()));
-      fileMenu_->add(new ngrs::NMenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
-      fileMenu_->add(new ngrs::NMenuItem("Render as Wav"))->click.connect(this,&MainWindow::onRenderAsWave);
-      fileMenu_->add(new ngrs::NMenuSeperator());
-      fileMenu_->add(new ngrs::NMenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
-      fileMenu_->add(new ngrs::NMenuSeperator());
-      fileMenu_->add(new ngrs::NMenuItem("revert to saved"));
-      ngrs::NMenuItem* recentItem = new ngrs::NMenuItem("recent files");
+      fileMenu_ = new ngrs::Menu("File");
+      fileMenu_->add(new ngrs::MenuItem("New",icons.newfile() ))->click.connect(this,&MainWindow::onFileNew);
+      fileMenu_->add(new ngrs::MenuItem("Open",icons.open()))->click.connect(this,&MainWindow::onFileOpen);
+      fileMenu_->add(new ngrs::MenuItem("Import Module"));
+      fileMenu_->add(new ngrs::MenuItem("Save",icons.save()));
+      fileMenu_->add(new ngrs::MenuItem("Save as"))->click.connect(this,&MainWindow::onFileSaveAs);
+      fileMenu_->add(new ngrs::MenuItem("Render as Wav"))->click.connect(this,&MainWindow::onRenderAsWave);
+      fileMenu_->add(new ngrs::MenuSeperator());
+      fileMenu_->add(new ngrs::MenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
+      fileMenu_->add(new ngrs::MenuSeperator());
+      fileMenu_->add(new ngrs::MenuItem("revert to saved"));
+      ngrs::MenuItem* recentItem = new ngrs::MenuItem("recent files");
       fileMenu_->add(recentItem);
-      recentFileMenu_ = new ngrs::NMenu();
+      recentFileMenu_ = new ngrs::Menu();
       recentItem->add(recentFileMenu_);
-      noneFileItem = new ngrs::NMenuItem("none");
+      noneFileItem = new ngrs::MenuItem("none");
       noneFileItem->setEnable(false);
       recentFileMenu_->add(noneFileItem);
       noFileWasYetLoaded = true;
-      fileMenu_->add(new ngrs::NMenuItem("exit"))->click.connect(this,&MainWindow::onFileExit);
+      fileMenu_->add(new ngrs::MenuItem("exit"))->click.connect(this,&MainWindow::onFileExit);
       menuBar_->add(fileMenu_);
 
       // Creates the edit menu
-      editMenu_ = new ngrs::NMenu("Edit");
-      editMenu_->add(new ngrs::NMenuItem("Undo",icons.undo()))->click.connect(this,&MainWindow::onEditUndo);
-      editMenu_->add(new ngrs::NMenuItem("Redo",icons.redo()))->click.connect(this,&MainWindow::onEditRedo);
-      editMenu_->add(new ngrs::NMenuSeperator());
-      editMenu_->add(new ngrs::NMenuItem("Pattern Cut"))->click.connect(this,&MainWindow::onEditPatternCut);
-      editMenu_->add(new ngrs::NMenuItem("Pattern Copy"))->click.connect(this,&MainWindow::onEditPatternCopy);
-      editMenu_->add(new ngrs::NMenuItem("Pattern Paste"))->click.connect(this,&MainWindow::onEditPatternPaste);
-      editMenu_->add(new ngrs::NMenuItem("Pattern Mix"))->click.connect(this,&MainWindow::onEditPatternMix);
-      editMenu_->add(new ngrs::NMenuItem("Pattern Mix Paste"))->click.connect(this,&MainWindow::onEditPatternMixPaste);
-      editMenu_->add(new ngrs::NMenuItem("Pattern Delete"))->click.connect(this,&MainWindow::onEditPatternDelete);
-      editMenu_->add(new ngrs::NMenuSeperator());
-      editMenu_->add(new ngrs::NMenuItem("Block Cut"))->click.connect(this,&MainWindow::onEditBlockCut);
-      editMenu_->add(new ngrs::NMenuItem("Block Copy"))->click.connect(this,&MainWindow::onEditBlockCopy);
-      editMenu_->add(new ngrs::NMenuItem("Block Paste"))->click.connect(this,&MainWindow::onEditBlockPaste);
-      editMenu_->add(new ngrs::NMenuItem("Block Mix Paste"))->click.connect(this,&MainWindow::onEditBlockMixPaste);
-      editMenu_->add(new ngrs::NMenuItem("Block Delete"))->click.connect(this,&MainWindow::onEditBlockDelete);
-      editMenu_->add(new ngrs::NMenuSeperator());
-      editMenu_->add(new ngrs::NMenuItem("Sequence Cut"))->click.connect(this,&MainWindow::onEditSeqCut);
-      editMenu_->add(new ngrs::NMenuItem("Sequence Copy"))->click.connect(this,&MainWindow::onEditSeqCopy);
-      editMenu_->add(new ngrs::NMenuItem("Sequence Delete"))->click.connect(this,&MainWindow::onEditSeqDelete);
+      editMenu_ = new ngrs::Menu("Edit");
+      editMenu_->add(new ngrs::MenuItem("Undo",icons.undo()))->click.connect(this,&MainWindow::onEditUndo);
+      editMenu_->add(new ngrs::MenuItem("Redo",icons.redo()))->click.connect(this,&MainWindow::onEditRedo);
+      editMenu_->add(new ngrs::MenuSeperator());
+      editMenu_->add(new ngrs::MenuItem("Pattern Cut"))->click.connect(this,&MainWindow::onEditPatternCut);
+      editMenu_->add(new ngrs::MenuItem("Pattern Copy"))->click.connect(this,&MainWindow::onEditPatternCopy);
+      editMenu_->add(new ngrs::MenuItem("Pattern Paste"))->click.connect(this,&MainWindow::onEditPatternPaste);
+      editMenu_->add(new ngrs::MenuItem("Pattern Mix"))->click.connect(this,&MainWindow::onEditPatternMix);
+      editMenu_->add(new ngrs::MenuItem("Pattern Mix Paste"))->click.connect(this,&MainWindow::onEditPatternMixPaste);
+      editMenu_->add(new ngrs::MenuItem("Pattern Delete"))->click.connect(this,&MainWindow::onEditPatternDelete);
+      editMenu_->add(new ngrs::MenuSeperator());
+      editMenu_->add(new ngrs::MenuItem("Block Cut"))->click.connect(this,&MainWindow::onEditBlockCut);
+      editMenu_->add(new ngrs::MenuItem("Block Copy"))->click.connect(this,&MainWindow::onEditBlockCopy);
+      editMenu_->add(new ngrs::MenuItem("Block Paste"))->click.connect(this,&MainWindow::onEditBlockPaste);
+      editMenu_->add(new ngrs::MenuItem("Block Mix Paste"))->click.connect(this,&MainWindow::onEditBlockMixPaste);
+      editMenu_->add(new ngrs::MenuItem("Block Delete"))->click.connect(this,&MainWindow::onEditBlockDelete);
+      editMenu_->add(new ngrs::MenuSeperator());
+      editMenu_->add(new ngrs::MenuItem("Sequence Cut"))->click.connect(this,&MainWindow::onEditSeqCut);
+      editMenu_->add(new ngrs::MenuItem("Sequence Copy"))->click.connect(this,&MainWindow::onEditSeqCopy);
+      editMenu_->add(new ngrs::MenuItem("Sequence Delete"))->click.connect(this,&MainWindow::onEditSeqDelete);
       menuBar_->add(editMenu_);
 
       // Creates the view menu
-      viewMenu_ = new ngrs::NMenu("View");
-      viewMenu_->add(new ngrs::NCheckMenuItem("Toolbar"))->click.connect(this,&MainWindow::onViewMenuToolbar);
-      viewMenu_->add(new ngrs::NCheckMenuItem("Machinebar"))->click.connect(this,&MainWindow::onViewMenuMachinebar);
-      viewMenu_->add(new ngrs::NCheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
-      viewMenu_->add(new ngrs::NCheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
-      viewMenu_->add(new ngrs::NMenuSeperator());
-      viewMenu_->add(new ngrs::NMenuItem("PatternEditor",icons.patterns()))->click.connect(this,&MainWindow::onPatternView);
-      viewMenu_->add(new ngrs::NMenuItem("MachineView",icons.machines()))->click.connect(this,&MainWindow::onMachineView);
-      viewMenu_->add(new ngrs::NMenuItem("PatternSequencer",icons.sequencer()))->click.connect(this,&MainWindow::onSequencerView);
-      viewMenu_->add(new ngrs::NMenuSeperator());
-      viewMenu_->add(new ngrs::NMenuItem("Add machine",icons.newmachine()))->click.connect(this,&MainWindow::onNewMachine);
-      viewMenu_->add(new ngrs::NMenuSeperator());
-      //      viewMenu_->add(new ngrs::NMenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
+      viewMenu_ = new ngrs::Menu("View");
+      viewMenu_->add(new ngrs::CheckMenuItem("Toolbar"))->click.connect(this,&MainWindow::onViewMenuToolbar);
+      viewMenu_->add(new ngrs::CheckMenuItem("Machinebar"))->click.connect(this,&MainWindow::onViewMenuMachinebar);
+      viewMenu_->add(new ngrs::CheckMenuItem("Sequencerbar"))->click.connect(this,&MainWindow::onViewMenuSequencerbar);
+      viewMenu_->add(new ngrs::CheckMenuItem("Statusbar"))->click.connect(this,&MainWindow::onViewMenuStatusbar);
+      viewMenu_->add(new ngrs::MenuSeperator());
+      viewMenu_->add(new ngrs::MenuItem("PatternEditor",icons.patterns()))->click.connect(this,&MainWindow::onPatternView);
+      viewMenu_->add(new ngrs::MenuItem("MachineView",icons.machines()))->click.connect(this,&MainWindow::onMachineView);
+      viewMenu_->add(new ngrs::MenuItem("PatternSequencer",icons.sequencer()))->click.connect(this,&MainWindow::onSequencerView);
+      viewMenu_->add(new ngrs::MenuSeperator());
+      viewMenu_->add(new ngrs::MenuItem("Add machine",icons.newmachine()))->click.connect(this,&MainWindow::onNewMachine);
+      viewMenu_->add(new ngrs::MenuSeperator());
+      //      viewMenu_->add(new ngrs::MenuItem("Instrument Editor"))->click.connect(this,&MainWindow::onEditInstrument);
       menuBar_->add(viewMenu_);
 
       // Creates the configuration menu
-      configurationMenu_ = new ngrs::NMenu("Configuration");
-      configurationMenu_->add(new ngrs::NMenuItem("Free Audio"));
-      configurationMenu_->add(new ngrs::NMenuItem("Autostop"));
-      configurationMenu_->add(new ngrs::NMenuSeperator());
-      configurationMenu_->add(new ngrs::NMenuItem("Loop Playback"));
-      configurationMenu_->add(new ngrs::NMenuSeperator());
-      configurationMenu_->add(new ngrs::NMenuItem("Audio Settings"))->click.connect(this,&MainWindow::onConfigMenuAudio);
-      configurationMenu_->add(new ngrs::NMenuItem("Load Skin"))->click.connect(this,&MainWindow::onConfigMenuSkin);
+      configurationMenu_ = new ngrs::Menu("Configuration");
+      configurationMenu_->add(new ngrs::MenuItem("Free Audio"));
+      configurationMenu_->add(new ngrs::MenuItem("Autostop"));
+      configurationMenu_->add(new ngrs::MenuSeperator());
+      configurationMenu_->add(new ngrs::MenuItem("Loop Playback"));
+      configurationMenu_->add(new ngrs::MenuSeperator());
+      configurationMenu_->add(new ngrs::MenuItem("Audio Settings"))->click.connect(this,&MainWindow::onConfigMenuAudio);
+      configurationMenu_->add(new ngrs::MenuItem("Load Skin"))->click.connect(this,&MainWindow::onConfigMenuSkin);
       menuBar_->add(configurationMenu_);
 
       // Creates the performance menu
-      performanceMenu_ = new ngrs::NMenu("Performance");
-      performanceMenu_->add(new ngrs::NMenuItem("CPU Monitor"));
-      performanceMenu_->add(new ngrs::NMenuItem("MDI Monitor"));
+      performanceMenu_ = new ngrs::Menu("Performance");
+      performanceMenu_->add(new ngrs::MenuItem("CPU Monitor"));
+      performanceMenu_->add(new ngrs::MenuItem("MDI Monitor"));
       menuBar_->add(performanceMenu_);
 
       // Creates the community menu
-      communityMenu_ = new ngrs::NMenu("Community");
-      ngrs::NMenuItem* comSearchItem = new ngrs::NMenuItem("Community Search");	  
-      communityMenu_->add( new ngrs::NMenuItem("Ask a Question") );
-      communityMenu_->add( new ngrs::NMenuItem("Sent Feedback" ) );
-      communityMenu_->add( new ngrs::NMenuSeperator() );
-      communityMenu_->add( new ngrs::NMenuItem("Psycledelics Center") );
-      communityMenu_->add( new ngrs::NMenuSeperator() );
+      communityMenu_ = new ngrs::Menu("Community");
+      ngrs::MenuItem* comSearchItem = new ngrs::MenuItem("Community Search");	  
+      communityMenu_->add( new ngrs::MenuItem("Ask a Question") );
+      communityMenu_->add( new ngrs::MenuItem("Sent Feedback" ) );
+      communityMenu_->add( new ngrs::MenuSeperator() );
+      communityMenu_->add( new ngrs::MenuItem("Psycledelics Center") );
+      communityMenu_->add( new ngrs::MenuSeperator() );
       communityMenu_->add( comSearchItem );
-      ngrs::NMenu* comSearch = new ngrs::NMenu();
-      comSearch->add( new ngrs::NMenuItem("Songs") );
-      comSearch->add( new ngrs::NMenuItem("Presets") );
-      comSearch->add( new ngrs::NMenuItem("Skins") );
-      comSearch->add( new ngrs::NMenuItem("Samples") );
+      ngrs::Menu* comSearch = new ngrs::Menu();
+      comSearch->add( new ngrs::MenuItem("Songs") );
+      comSearch->add( new ngrs::MenuItem("Presets") );
+      comSearch->add( new ngrs::MenuItem("Skins") );
+      comSearch->add( new ngrs::MenuItem("Samples") );
       comSearchItem->add( comSearch );	
       menuBar_->add( communityMenu_ );
 
       // Creates the help menu
-      helpMenu_ = new ngrs::NMenu("Help");
-      helpMenu_->add(new ngrs::NMenuItem("About"))->click.connect(this,&MainWindow::onHelpMenuAbout);
-      helpMenu_->add(new ngrs::NMenuItem("Greetings"))->click.connect(this,&MainWindow::onHelpMenuGreeting);
-      helpMenu_->add(new ngrs::NMenuSeperator());
-      helpMenu_->add(new ngrs::NMenuItem("readme"))->click.connect(this,&MainWindow::onHelpMenuReadme);
-      helpMenu_->add(new ngrs::NMenuItem("keys"))->click.connect(this,&MainWindow::onHelpMenuKeys);
-      helpMenu_->add(new ngrs::NMenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
-      helpMenu_->add(new ngrs::NMenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
+      helpMenu_ = new ngrs::Menu("Help");
+      helpMenu_->add(new ngrs::MenuItem("About"))->click.connect(this,&MainWindow::onHelpMenuAbout);
+      helpMenu_->add(new ngrs::MenuItem("Greetings"))->click.connect(this,&MainWindow::onHelpMenuGreeting);
+      helpMenu_->add(new ngrs::MenuSeperator());
+      helpMenu_->add(new ngrs::MenuItem("readme"))->click.connect(this,&MainWindow::onHelpMenuReadme);
+      helpMenu_->add(new ngrs::MenuItem("keys"))->click.connect(this,&MainWindow::onHelpMenuKeys);
+      helpMenu_->add(new ngrs::MenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
+      helpMenu_->add(new ngrs::MenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
       menuBar_->add(helpMenu_);
     }
 
@@ -457,7 +457,7 @@ namespace psycle {
       // creates the greeting dialog, that greets people who help psycle development
       add( greetDlg =  new GreetDlg() );
       // creates the save dialog, that ask where to store wave files, recorded from playing a psy song
-      wavRecFileDlg = new ngrs::NFileDialog();
+      wavRecFileDlg = new ngrs::FileDialog();
       wavRecFileDlg->setMode( ngrs::nSave );
       add( wavRecFileDlg );
       // creates the info dialog, that displays in a memo readme keys tweaking and a whatsnew file
@@ -466,7 +466,7 @@ namespace psycle {
 
     // events from menuItems
 
-    void MainWindow::showSongpDlg( ngrs::NButtonEvent* ev )
+    void MainWindow::showSongpDlg( ngrs::ButtonEvent* ev )
     {
       if ( !selectedChildView_) return;
 
@@ -487,7 +487,7 @@ namespace psycle {
       progressBar_->setModelIndex( 1 );
       statusBar_->add( progressBar_, ngrs::nAlLeft );	    
       for ( unsigned int i = 5; i >= 2; i-- )
-        statusBar_->add( new ngrs::NTextStatusItem(i) );    
+        statusBar_->add( new ngrs::TextStatusItem(i) );    
       statusBar_->setModel( statusBarData );
       statusBarData.setText( "Ready", 0 );
       statusBarData.setText( "Ln 0", 2 );
@@ -498,163 +498,163 @@ namespace psycle {
 
     void MainWindow::initToolBar( )
     {
-      toolBarPanel_ = new ngrs::NToolBarPanel();    
+      toolBarPanel_ = new ngrs::ToolBarPanel();    
       pane()->add(toolBarPanel_, ngrs::nAlTop);
 
       DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
-      ngrs::NImage* img;
+      ngrs::Image* img;
 
-      toolBar1_ = new ngrs::NToolBar();
+      toolBar1_ = new ngrs::ToolBar();
       toolBarPanel_->add(toolBar1_);
 
       // creates the newfile button
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.newfile());
       img->setPreferredSize(25,25);
-      ngrs::NButton* newBtn = new ngrs::NButton(img);
+      ngrs::Button* newBtn = new ngrs::Button(img);
       newBtn->setHint("New song");
       toolBar1_->add(newBtn)->clicked.connect(this,&MainWindow::onFileNew);
 
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.open());
       img->setPreferredSize(25,25);
-      ngrs::NButton* fileOpenBtn = new ngrs::NButton(img);
+      ngrs::Button* fileOpenBtn = new ngrs::Button(img);
       fileOpenBtn->setHint("Song load");
       toolBar1_->add(fileOpenBtn)->clicked.connect(this,&MainWindow::onFileOpen);
 
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.save());
       img->setPreferredSize(25,25);
-      ngrs::NButton* saveBtn = new ngrs::NButton(img);
+      ngrs::Button* saveBtn = new ngrs::Button(img);
       saveBtn->setHint("Save");
       toolBar1_->add(saveBtn)->clicked.connect(this,&MainWindow::onFileSaveAs);;
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.save_audio());
       img->setPreferredSize(25,25);
-      ngrs::NButton* saveAsAudioFileBtn = new ngrs::NButton(img);
+      ngrs::Button* saveAsAudioFileBtn = new ngrs::Button(img);
       saveAsAudioFileBtn->setHint("Save as audio file");
       toolBar1_->add(saveAsAudioFileBtn);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.recordwav());
       img->setPreferredSize(25,25);
-      ngrs::NButton* recWav = new ngrs::NButton(img);
+      ngrs::Button* recWav = new ngrs::Button(img);
       recWav->setToggle(true);
       recWav->setHint("Record to .wav");
       recWav->clicked.connect(this, &MainWindow::onRecordWav);
       toolBar1_->add(recWav);
 
-      toolBar1_->add(new ngrs::NToolBarSeparator());
+      toolBar1_->add(new ngrs::ToolBarSeparator());
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.undo());
       img->setPreferredSize(25,25);
-      toolBar1_->add(new ngrs::NButton(img));
+      toolBar1_->add(new ngrs::Button(img));
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.redo());
       img->setPreferredSize(25,25);
-      toolBar1_->add(new ngrs::NButton(img));
+      toolBar1_->add(new ngrs::Button(img));
 
-      toolBar1_->add(new ngrs::NToolBarSeparator());                  
+      toolBar1_->add(new ngrs::ToolBarSeparator());                  
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.newmachine());
       img->setPreferredSize(25,25);
-      ngrs::NButton* newMacBtn = new ngrs::NButton(img);
+      ngrs::Button* newMacBtn = new ngrs::Button(img);
       newMacBtn->setHint("New Machine");
       toolBar1_->add(newMacBtn);//->clicked.connect(childView_,&ChildView::onMachineViewDblClick);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.openeditor());
       img->setPreferredSize(25,25);
-      /*  ngrs::NButton* editInsBtn = new ngrs::NButton(img);
+      /*  ngrs::Button* editInsBtn = new ngrs::Button(img);
       editInsBtn->setHint("Edit Instrument");
       toolBar1_->add(editInsBtn)->clicked.connect(this,&MainWindow::onEditInstrument);*/
 
-      toolBar1_->add(new ngrs::NToolBarSeparator());
+      toolBar1_->add(new ngrs::ToolBarSeparator());
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.p());
       img->setPreferredSize(25,25);
-      toolBar1_->add(new ngrs::NButton(img));
+      toolBar1_->add(new ngrs::Button(img));
 
-      toolBar1_->add(new ngrs::NToolBarSeparator());
+      toolBar1_->add(new ngrs::ToolBarSeparator());
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.help());
       img->setPreferredSize(25,25);
-      toolBar1_->add(new ngrs::NButton(img));
+      toolBar1_->add(new ngrs::Button(img));
 
       toolBar1_->resize();
 
            
-      psycleControlBar_ = new ngrs::NToolBar();
-      psycleControlBar_->add(new ngrs::NLabel("Tempo"));
+      psycleControlBar_ = new ngrs::ToolBar();
+      psycleControlBar_->add(new ngrs::Label("Tempo"));
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.lessless());
       img->setPreferredSize(25,25);
-      ngrs::NButton* bpmDecBtnTen = new ngrs::NButton(img);
+      ngrs::Button* bpmDecBtnTen = new ngrs::Button(img);
       bpmDecBtnTen->setFlat(false);
       psycleControlBar_->add(bpmDecBtnTen)->clicked.connect(this,&MainWindow::onBpmDecTen);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.less());
       img->setPreferredSize(25,25);
-      ngrs::NButton* bpmDecBtnOne = new ngrs::NButton(img);
+      ngrs::Button* bpmDecBtnOne = new ngrs::Button(img);
       bpmDecBtnOne->setFlat(false);
       psycleControlBar_->add(bpmDecBtnOne)->clicked.connect(this,&MainWindow::onBpmDecOne);
 
-      bpmDisplay_ = new ngrs::N7SegDisplay(3);
-      bpmDisplay_->setColors( ngrs::NColor(250,250,250), ngrs::NColor(100,100,100), ngrs::NColor(230,230,230));
+      bpmDisplay_ = new ngrs::Seg7Display(3);
+      bpmDisplay_->setColors( ngrs::Color(250,250,250), ngrs::Color(100,100,100), ngrs::Color(230,230,230));
       bpmDisplay_->setNumber( 125 );
       psycleControlBar_->add( bpmDisplay_ );
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.more());
       img->setPreferredSize( 25, 25 );
 
-      ngrs::NButton* bpmIncBtnOne = new ngrs::NButton(img);
+      ngrs::Button* bpmIncBtnOne = new ngrs::Button(img);
       bpmIncBtnOne->setFlat(false);
       psycleControlBar_->add(bpmIncBtnOne)->clicked.connect(this,&MainWindow::onBpmIncOne);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.moremore());
       img->setPreferredSize(25,25);
-      ngrs::NButton* moremoreBmp = new ngrs::NButton(img);
+      ngrs::Button* moremoreBmp = new ngrs::Button(img);
       moremoreBmp->setFlat(false);
       moremoreBmp->clicked.connect(this,&MainWindow::onBpmAddTen);
       psycleControlBar_->add(moremoreBmp);
 
       
 
-      psycleToolBar_ = new ngrs::NToolBar();
-      psycleToolBar_->add(new ngrs::NToolBarSeparator());
-      genCombo_ = new ngrs::NComboBox();
+      psycleToolBar_ = new ngrs::ToolBar();
+      psycleToolBar_->add(new ngrs::ToolBarSeparator());
+      genCombo_ = new ngrs::ComboBox();
       genCombo_->setPreferredSize( 158, 20 );
       genCombo_->setIndex(0);
       genCombo_->enableFocus(false);
       genCombo_->itemSelected.connect(this,&MainWindow::onGeneratorCbx);
       psycleToolBar_->add(genCombo_);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.littleleft());
       img->setPreferredSize(25,25);
-      psycleToolBar_->add(new ngrs::NButton(img));
+      psycleToolBar_->add(new ngrs::Button(img));
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.littleright());
       img->setPreferredSize(25,25);
-      psycleToolBar_->add(new ngrs::NButton(img));
+      psycleToolBar_->add(new ngrs::Button(img));
 
-      psycleToolBar_->add(new ngrs::NButton("Gear Rack"));
+      psycleToolBar_->add(new ngrs::Button("Gear Rack"));
 
-      insCombo_ = new ngrs::NComboBox();
+      insCombo_ = new ngrs::ComboBox();
       insCombo_->setPreferredSize( 158, 20 );
       insCombo_->enableFocus(false);
       insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
@@ -664,7 +664,7 @@ namespace psycle {
         buffer.str("");
         buffer << std::setfill('0') << std::hex << std::setw(2);
         buffer << i << ": " << "empty";
-        insCombo_->add(new ngrs::NItem(buffer.str()));
+        insCombo_->add(new ngrs::Item(buffer.str()));
       }
       psycleToolBar_->add(insCombo_);
 
@@ -674,9 +674,9 @@ namespace psycle {
       toolBarPanel_->resize();
     }
 
-    void MainWindow::onConfigMenuSkin( ngrs::NButtonEvent* ev ) {
+    void MainWindow::onConfigMenuSkin( ngrs::ButtonEvent* ev ) {
       // add and create the temporay fileDialog
-      ngrs::NFileDialog* openDialog = new ngrs::NFileDialog();
+      ngrs::FileDialog* openDialog = new ngrs::FileDialog();
       openDialog->addFilter("*.zip [xpsy skin format]","!S*.zip");
       add( openDialog );
 
@@ -695,10 +695,10 @@ namespace psycle {
 
       // remove the temp Dialog
       erase( openDialog );
-      ngrs::NApp::addRemovePipe( openDialog );
+      ngrs::App::addRemovePipe( openDialog );
     }
 
-    void MainWindow::onInstrumentCbx( ngrs::NItemEvent * ev )
+    void MainWindow::onInstrumentCbx( ngrs::ItemEvent * ev )
     {
       if ( !selectedChildView_) return;
 
@@ -733,29 +733,29 @@ namespace psycle {
 
 
 
-    void MainWindow::onBarPlay( ngrs::NButtonEvent * ev )
+    void MainWindow::onBarPlay( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
       selectedChildView_->play();
     }
 
-    void MainWindow::onBarPlayFromStart( ngrs::NButtonEvent * ev )
+    void MainWindow::onBarPlayFromStart( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
       selectedChildView_->playFromStart();
     }
 
-    void MainWindow::onFileNew( ngrs::NButtonEvent * ev )
+    void MainWindow::onFileNew( ngrs::ButtonEvent * ev )
     {
       addChildView();  
       pane()->resize();
       pane()->repaint();
     }
 
-    void MainWindow::onFileOpen( ngrs::NButtonEvent * ev )
+    void MainWindow::onFileOpen( ngrs::ButtonEvent * ev )
     {	
       // add and create the temporay fileDialog
-      ngrs::NFileDialog* openDialog = new ngrs::NFileDialog();
+      ngrs::FileDialog* openDialog = new ngrs::FileDialog();
       openDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
       add( openDialog );
 
@@ -791,7 +791,7 @@ namespace psycle {
             recentFileMenu_->removeChilds();
             noFileWasYetLoaded = false;
           }
-          recentFileMenu_->add(new ngrs::NMenuItem(fileName));
+          recentFileMenu_->add(new ngrs::MenuItem(fileName));
           statusBarData.setText("loaded \"" + openDialog->fileName() + "\"");
         }
         //progressBar_->setVisible(false);
@@ -799,19 +799,19 @@ namespace psycle {
 
       // remove the "Open"-FileDialog
       erase( openDialog );
-      ngrs::NApp::addRemovePipe( openDialog );
+      ngrs::App::addRemovePipe( openDialog );
     }
 
-    void MainWindow::onFileSave( ngrs::NButtonEvent * ev )
+    void MainWindow::onFileSave( ngrs::ButtonEvent * ev )
     {
 
     }
 
-    void MainWindow::onFileSaveAs( ngrs::NButtonEvent * ev )
+    void MainWindow::onFileSaveAs( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
 
-      ngrs::NFileDialog* saveDialog = new ngrs::NFileDialog();
+      ngrs::FileDialog* saveDialog = new ngrs::FileDialog();
       saveDialog->addFilter("*.psy [psy4 song format]","!S*.psy");
       saveDialog->setMode(ngrs::nSave);
       add( saveDialog );
@@ -825,7 +825,7 @@ namespace psycle {
       //progressBar_->setVisible(false);
 
       erase( saveDialog );
-      ngrs::NApp::addRemovePipe( saveDialog );
+      ngrs::App::addRemovePipe( saveDialog );
     }
 
     void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_t & b , const std::string & t)
@@ -833,14 +833,14 @@ namespace psycle {
       if (a == 4) {
         std::cout << "progress" << std::endl;
         statusBarData.setText( stringify( (int) b), 1 );
-        ngrs::NApp::flushEventQueue();
+        ngrs::App::flushEventQueue();
       } else
         if (a == 2) {
           statusBarData.setText( t );
         }
     }
 
-    void MainWindow::onBarStop( ngrs::NButtonEvent* ev )
+    void MainWindow::onBarStop( ngrs::ButtonEvent* ev )
     {
       bool pl = Player::Instance()->playing();
       Player::Instance()->stop();
@@ -873,7 +873,7 @@ namespace psycle {
           buffer.str("");
           buffer << std::setfill('0') << std::hex << std::setw(2);
           buffer << b << ": " << selectedSong_->_pMachine[b]->_editName;
-          genCombo_->add(new ngrs::NItem(buffer.str()));
+          genCombo_->add(new ngrs::Item(buffer.str()));
 
           //cb->SetItemData(cb->GetCount()-1,b);
           if (!found) selected++;
@@ -882,7 +882,7 @@ namespace psycle {
         }
       }
 
-      genCombo_->add(new ngrs::NItem("----------------------------------------------------"));
+      genCombo_->add(new ngrs::Item("----------------------------------------------------"));
       //cb->SetItemData(cb->GetCount()-1,65535);
       if (!found)  {
         selected++;
@@ -895,7 +895,7 @@ namespace psycle {
           buffer.str("");
           buffer << std::setfill('0') << std::hex << std::setw(2);
           buffer << b << ": " << selectedSong_->_pMachine[b]->_editName;
-          genCombo_->add(new ngrs::NItem(buffer.str()));
+          genCombo_->add(new ngrs::Item(buffer.str()));
           //cb->SetItemData(cb->GetCount()-1,b);
           if (!found) selected++;
           if (selectedSong_->seqBus == b) found = true;
@@ -905,7 +905,7 @@ namespace psycle {
 
       if (!filled) {
         genCombo_->removeChilds();
-        genCombo_->add(new ngrs::NItem("No Machines Loaded"));
+        genCombo_->add(new ngrs::Item("No Machines Loaded"));
         selected = 0;
       } else if (!found)  {
         selected=line;
@@ -921,22 +921,22 @@ namespace psycle {
       }
     }
 
-    void MainWindow::onBpmIncOne( ngrs::NButtonEvent* ev )  // OnBpmAddOne
+    void MainWindow::onBpmIncOne( ngrs::ButtonEvent* ev )  // OnBpmAddOne
     {
       setAppSongBpm(1);
     }
 
-    void MainWindow::onBpmAddTen( ngrs::NButtonEvent* ev )
+    void MainWindow::onBpmAddTen( ngrs::ButtonEvent* ev )
     {
       setAppSongBpm(10);
     }
 
-    void MainWindow::onBpmDecOne( ngrs::NButtonEvent* ev )
+    void MainWindow::onBpmDecOne( ngrs::ButtonEvent* ev )
     {
       setAppSongBpm(-1);
     }
 
-    void MainWindow::onBpmDecTen( ngrs::NButtonEvent* ev )
+    void MainWindow::onBpmDecTen( ngrs::ButtonEvent* ev )
     {
       setAppSongBpm(-10);
     }
@@ -961,7 +961,7 @@ namespace psycle {
       bpmDisplay_->repaint();
     }
 
-    void MainWindow::onRecordWav( ngrs::NButtonEvent * ev )
+    void MainWindow::onRecordWav( ngrs::ButtonEvent * ev )
     {
     }
 
@@ -1029,12 +1029,12 @@ namespace psycle {
       return ngrs::nDestroyWindow;
     }
 
-    void MainWindow::onMachineView( ngrs::NButtonEvent* ev ) {
+    void MainWindow::onMachineView( ngrs::ButtonEvent* ev ) {
       if ( !selectedChildView_ ) return;
       selectedChildView_->showMachineView();
     }
 
-    void MainWindow::onPatternView( ngrs::NButtonEvent* ev ) {
+    void MainWindow::onPatternView( ngrs::ButtonEvent* ev ) {
       if ( !selectedChildView_ ) return;
       selectedChildView_->showPatternView();
     }
@@ -1045,7 +1045,7 @@ namespace psycle {
       Song* selectedSong_ = selectedChildView_->song();
       DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
-      ngrs::NMessageBox* box = new ngrs::NMessageBox("Save changes of : "+selectedSong_->fileName+" ?");
+      ngrs::MessageBox* box = new ngrs::MessageBox("Save changes of : "+selectedSong_->fileName+" ?");
       box->setTitle("New Song");
       box->setButtonText("Yes","No","Abort");
       box->icon()->setSharedBitmap( &icons.alert() );
@@ -1063,34 +1063,34 @@ namespace psycle {
           result = false;
         break;
       }
-      ngrs::NApp::addRemovePipe(box);
+      ngrs::App::addRemovePipe(box);
       return result;
     }  
 
     // Sequencer menu events
 
-    void MainWindow::onSequencerView( ngrs::NButtonEvent * ev )
+    void MainWindow::onSequencerView( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
 
       selectedChildView_->showSequencerView();
     }
 
-    void MainWindow::onViewMenuToolbar( ngrs::NButtonEvent * ev )
+    void MainWindow::onViewMenuToolbar( ngrs::ButtonEvent * ev )
     {
       toolBar1_->setVisible(!toolBar1_->visible());
       pane()->resize();
       pane()->repaint();
     }
 
-    void MainWindow::onViewMenuMachinebar( ngrs::NButtonEvent * ev )
+    void MainWindow::onViewMenuMachinebar( ngrs::ButtonEvent * ev )
     {
       psycleToolBar_->setVisible(!psycleToolBar_->visible());
       pane()->resize();
       pane()->repaint();
     }
 
-    void MainWindow::onViewMenuSequencerbar( ngrs::NButtonEvent * ev )
+    void MainWindow::onViewMenuSequencerbar( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
       selectedChildView_->sequencerBar()->setVisible(!selectedChildView_->sequencerBar()->visible() );
@@ -1102,7 +1102,7 @@ namespace psycle {
       //pane()->repaint();
     }
 
-    void MainWindow::onViewMenuStatusbar( ngrs::NButtonEvent * ev )
+    void MainWindow::onViewMenuStatusbar( ngrs::ButtonEvent * ev )
     {
       statusBar_->setVisible(!statusBar_->visible());
       pane()->resize();
@@ -1111,9 +1111,9 @@ namespace psycle {
 
     // Help menu events
 
-    void MainWindow::onHelpMenuAbout( ngrs::NButtonEvent * ev )
+    void MainWindow::onHelpMenuAbout( ngrs::ButtonEvent * ev )
     {
-      ngrs::NMessageBox* about = new ngrs::NMessageBox();
+      ngrs::MessageBox* about = new ngrs::MessageBox();
       about->setTitle("About Psycle(X)");
       about->setText( std::string("Psycle version (X alpha 0.1)\n") +
         std::string("(c) 2006 by Stefan Nattkemper\n") +
@@ -1123,40 +1123,40 @@ namespace psycle {
       about->setButtons( ngrs::nMsgOkBtn );
       add( about );
       about->execute();
-      ngrs::NApp::addRemovePipe(about);
+      ngrs::App::addRemovePipe(about);
     }
 
-    void MainWindow::onHelpMenuGreeting( ngrs::NButtonEvent * ev )
+    void MainWindow::onHelpMenuGreeting( ngrs::ButtonEvent * ev )
     {
       greetDlg->setVisible(true);
     }
 
-    void MainWindow::onHelpMenuReadme( ngrs::NButtonEvent * ev )
+    void MainWindow::onHelpMenuReadme( ngrs::ButtonEvent * ev )
     {
       infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "readme.txt" );
       infoDlg->setVisible(true);
 
     }
 
-    void MainWindow::onHelpMenuWhatsNew( ngrs::NButtonEvent * ev )
+    void MainWindow::onHelpMenuWhatsNew( ngrs::ButtonEvent * ev )
     {
       infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "keys.txt" );
       infoDlg->setVisible( true );
     }
 
-    void MainWindow::onHelpMenuTweaking( ngrs::NButtonEvent * ev )
+    void MainWindow::onHelpMenuTweaking( ngrs::ButtonEvent * ev )
     {
       infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "tweaking.txt" );
       infoDlg->setVisible( true );
     }
 
-    void MainWindow::onHelpMenuKeys( ngrs::NButtonEvent * ev )
+    void MainWindow::onHelpMenuKeys( ngrs::ButtonEvent * ev )
     {
       infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "whatsnew.txt" );
       infoDlg->setVisible( true );
     }
 
-    void MainWindow::onNewMachine( ngrs::NButtonEvent * ev )
+    void MainWindow::onNewMachine( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
 
@@ -1180,104 +1180,104 @@ namespace psycle {
       }
     }
 
-    void MainWindow::onRenderAsWave( ngrs::NButtonEvent * ev )
+    void MainWindow::onRenderAsWave( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditUndo( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditUndo( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
 
       selectedChildView_->patternView()->doUndo();
     }
 
-    void MainWindow::onEditRedo( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditRedo( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditPatternCut( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditPatternCut( ngrs::ButtonEvent * ev )
     {
 
     }
 
-    void MainWindow::onEditPatternCopy( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditPatternCopy( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditPatternPaste( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditPatternPaste( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditPatternMix( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditPatternMix( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditPatternMixPaste( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditPatternMixPaste( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditPatternDelete( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditPatternDelete( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditBlockMixPaste( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditBlockMixPaste( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
 
       //  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().track(), selectedChildView_->patternView()->cursor().line(), true);
     }
 
-    void MainWindow::onEditBlockDelete( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditBlockDelete( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
 
       selectedChildView_->patternView()->deleteBlock();
     }
 
-    void MainWindow::onEditBlockMix( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditBlockMix( ngrs::ButtonEvent * ev )
     {
 
     }
 
-    void MainWindow::onEditBlockPaste( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditBlockPaste( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
 
       //  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().track(), selectedChildView_->patternView()->cursor().line(), false);
     }
 
-    void MainWindow::onEditBlockCopy( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditBlockCopy( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
       selectedChildView_->patternView()->copyBlock(false);
     }
 
-    void MainWindow::onEditBlockCut( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditBlockCut( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
       selectedChildView_->patternView()->copyBlock(true);
     }
 
-    void MainWindow::onEditSeqDelete( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditSeqDelete( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditSeqCopy( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditSeqCopy( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onEditSeqCut( ngrs::NButtonEvent * ev )
+    void MainWindow::onEditSeqCut( ngrs::ButtonEvent * ev )
     {
     }
 
-    void MainWindow::onFileExit( ngrs::NButtonEvent * ev )
+    void MainWindow::onFileExit( ngrs::ButtonEvent * ev )
     {
       if (checkUnsavedSong()) {
         exit(0);
       }
     }
 
-    void MainWindow::onRecordNotesMode( ngrs::NButtonEvent * ev )
+    void MainWindow::onRecordNotesMode( ngrs::ButtonEvent * ev )
     {
       /*bEditMode = true;
       if (sequencerBar_->followSong() && bEditMode)
@@ -1308,7 +1308,7 @@ namespace psycle {
     }
 
     // ngrs::New index selected by a mouse click.
-    void MainWindow::onGeneratorCbx( ngrs::NItemEvent * ev )
+    void MainWindow::onGeneratorCbx( ngrs::ItemEvent * ev )
     {
       onNewIndexGeneratorCbx();
     }
@@ -1370,7 +1370,7 @@ namespace psycle {
       selectedChildView_->sequencerBar()->setEntry(item);
     }
 
-    void MainWindow::onKeyPress( const ngrs::NKeyEvent & event )
+    void MainWindow::onKeyPress( const ngrs::KeyEvent & event )
     {
       if ( selectedChildView_ ) {
         int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
@@ -1401,17 +1401,17 @@ namespace psycle {
           break;
         case cdefAddMachine: {
           selectedChildView_->showMachineView();
-          ngrs::NButtonEvent btnEvent( this, 0,0,1, "");
+          ngrs::ButtonEvent btnEvent( this, 0,0,1, "");
           onNewMachine( &btnEvent );
                              }
                              break;
                              /*			case ngrs::ngrs::NK_Up :
-                             if (NApp::system().keyState() & ControlMask) {
+                             if (App::system().keyState() & ControlMask) {
                              selectedChildView_->sequencerBar()->selectPrevPattern();
                              }
                              break;
                              case ngrs::ngrs::NK_Down :
-                             if (NApp::system().keyState() & ControlMask) {
+                             if (App::system().keyState() & ControlMask) {
                              selectedChildView_->sequencerBar()->selectNextPattern();
                              }
                              break;*/
@@ -1430,7 +1430,7 @@ namespace psycle {
         }
       }
 
-      ngrs::NWindow::onKeyPress( event);
+      ngrs::Window::onKeyPress( event);
     }
 
 

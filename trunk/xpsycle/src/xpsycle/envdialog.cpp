@@ -20,15 +20,15 @@
 #include "envdialog.h"
 #include "song.h"
 #include <iomanip>
-#include <ngrs/nitem.h>
-#include <ngrs/ncombobox.h>
-#include <ngrs/nslider.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nitemevent.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/ntablelayout.h>
-#include <ngrs/nalignconstraint.h>
-#include <ngrs/nbevelborder.h>
+#include <ngrs/item.h>
+#include <ngrs/combobox.h>
+#include <ngrs/slider.h>
+#include <ngrs/label.h>
+#include <ngrs/itemevent.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/tablelayout.h>
+#include <ngrs/alignconstraint.h>
+#include <ngrs/bevelborder.h>
 
 
 namespace psycle { 
@@ -36,40 +36,40 @@ namespace psycle {
 
 
     EnvDialog::EnvDialog(Song* pSong_)
-      : ngrs::NWindow()
+      : ngrs::Window()
     {
       setPosition(10,10,500,600);
       setPositionToScreenCenter();
       setTitle("Envelope Editor");
-      pane()->setLayout( ngrs::NAlignLayout( 5, 5) );
+      pane()->setLayout( ngrs::AlignLayout( 5, 5) );
 
       pSong = pSong_;
 
-      m_filtercombo = new ngrs::NComboBox;
+      m_filtercombo = new ngrs::ComboBox;
 
-      m_envelope_slider	= new ngrs::NSlider;
-      m_q_slider		= new ngrs::NSlider;
-      m_cutoff_slider		= new ngrs::NSlider;
-      m_a_attack_slider	= new ngrs::NSlider;
-      m_a_decay_slider	= new ngrs::NSlider;
-      m_a_sustain_slider	= new ngrs::NSlider;
-      m_a_release_slider	= new ngrs::NSlider;
-      m_f_attack_slider	= new ngrs::NSlider;
-      m_f_decay_slider	= new ngrs::NSlider;
-      m_f_sustain_slider	= new ngrs::NSlider;
-      m_f_release_slider	= new ngrs::NSlider;
+      m_envelope_slider	= new ngrs::Slider;
+      m_q_slider		= new ngrs::Slider;
+      m_cutoff_slider		= new ngrs::Slider;
+      m_a_attack_slider	= new ngrs::Slider;
+      m_a_decay_slider	= new ngrs::Slider;
+      m_a_sustain_slider	= new ngrs::Slider;
+      m_a_release_slider	= new ngrs::Slider;
+      m_f_attack_slider	= new ngrs::Slider;
+      m_f_decay_slider	= new ngrs::Slider;
+      m_f_sustain_slider	= new ngrs::Slider;
+      m_f_release_slider	= new ngrs::Slider;
 
-      m_f_a_label	= new ngrs::NLabel;
-      m_f_d_label	= new ngrs::NLabel;
-      m_f_s_label	= new ngrs::NLabel;
-      m_f_r_label	= new ngrs::NLabel;
-      m_a_a_label	= new ngrs::NLabel;
-      m_a_d_label	= new ngrs::NLabel;
-      m_a_s_label	= new ngrs::NLabel;
-      m_a_r_label	= new ngrs::NLabel;
-      m_envelope_label= new ngrs::NLabel;
-      m_q_label 	= new ngrs::NLabel;
-      m_cutoff_label 	= new ngrs::NLabel;
+      m_f_a_label	= new ngrs::Label;
+      m_f_d_label	= new ngrs::Label;
+      m_f_s_label	= new ngrs::Label;
+      m_f_r_label	= new ngrs::Label;
+      m_a_a_label	= new ngrs::Label;
+      m_a_d_label	= new ngrs::Label;
+      m_a_s_label	= new ngrs::Label;
+      m_a_r_label	= new ngrs::Label;
+      m_envelope_label= new ngrs::Label;
+      m_q_label 	= new ngrs::Label;
+      m_cutoff_label 	= new ngrs::Label;
 
       m_filframe = new EnvPanel;
       m_ampframe = new EnvPanel;
@@ -88,67 +88,67 @@ namespace psycle {
       m_f_sustain_slider->setPreferredSize(300,15);
       m_f_release_slider->setPreferredSize(300,15);
 
-      pane()->add(new ngrs::NLabel("Amplitude"), ngrs::nAlTop);
+      pane()->add(new ngrs::Label("Amplitude"), ngrs::nAlTop);
       pane()->add(m_ampframe, ngrs::nAlTop);
       {
-        ngrs::NPanel* ampEnvPanel = new ngrs::NPanel;
-        ampEnvPanel->setBorder( ngrs::NBevelBorder( ngrs::nNone, ngrs::nLowered ));
-        ngrs::NTableLayout tableLayout(3, 4);
+        ngrs::Panel* ampEnvPanel = new ngrs::Panel;
+        ampEnvPanel->setBorder( ngrs::BevelBorder( ngrs::nNone, ngrs::nLowered ));
+        ngrs::TableLayout tableLayout(3, 4);
         tableLayout.setVGap(5);
         tableLayout.setHGap(5);
         ampEnvPanel->setLayout(tableLayout);
-        ampEnvPanel->add( new ngrs::NLabel("Attack"), ngrs::NAlignConstraint( ngrs::nAlLeft, 0, 0), true);
-        ampEnvPanel->add( m_a_attack_slider, ngrs::NAlignConstraint( ngrs::nAlLeft, 1, 0), true);
-        ampEnvPanel->add( m_a_a_label, ngrs::NAlignConstraint( ngrs::nAlLeft, 2, 0), true);
-        ampEnvPanel->add( new ngrs::NLabel("Decay"), ngrs::NAlignConstraint( ngrs::nAlLeft, 0, 1), true);
-        ampEnvPanel->add( m_a_decay_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 1), true);
-        ampEnvPanel->add( m_a_d_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 1), true);
-        ampEnvPanel->add( new ngrs::NLabel("Sustain"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 2), true);
-        ampEnvPanel->add( m_a_sustain_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 2), true);
-        ampEnvPanel->add( m_a_s_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 2), true);
-        ampEnvPanel->add( new ngrs::NLabel("Release"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 3), true);
-        ampEnvPanel->add( m_a_release_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 3), true);
-        ampEnvPanel->add( m_a_r_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 3), true);
+        ampEnvPanel->add( new ngrs::Label("Attack"), ngrs::AlignConstraint( ngrs::nAlLeft, 0, 0), true);
+        ampEnvPanel->add( m_a_attack_slider, ngrs::AlignConstraint( ngrs::nAlLeft, 1, 0), true);
+        ampEnvPanel->add( m_a_a_label, ngrs::AlignConstraint( ngrs::nAlLeft, 2, 0), true);
+        ampEnvPanel->add( new ngrs::Label("Decay"), ngrs::AlignConstraint( ngrs::nAlLeft, 0, 1), true);
+        ampEnvPanel->add( m_a_decay_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 1), true);
+        ampEnvPanel->add( m_a_d_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 1), true);
+        ampEnvPanel->add( new ngrs::Label("Sustain"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 2), true);
+        ampEnvPanel->add( m_a_sustain_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 2), true);
+        ampEnvPanel->add( m_a_s_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 2), true);
+        ampEnvPanel->add( new ngrs::Label("Release"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 3), true);
+        ampEnvPanel->add( m_a_release_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 3), true);
+        ampEnvPanel->add( m_a_r_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 3), true);
         pane()->add(ampEnvPanel, ngrs::nAlTop);
       }
-      pane()->add(new ngrs::NLabel("Filter"), ngrs::nAlTop);
+      pane()->add(new ngrs::Label("Filter"), ngrs::nAlTop);
       pane()->add(m_filframe, ngrs::nAlTop);
       {
-        ngrs::NPanel* filtEnvPanel = new ngrs::NPanel();
-        filtEnvPanel->setBorder( ngrs::NBevelBorder( ngrs::nNone, ngrs::nLowered) );
-        ngrs::NTableLayout tableLayout( 3, 4 );
+        ngrs::Panel* filtEnvPanel = new ngrs::Panel();
+        filtEnvPanel->setBorder( ngrs::BevelBorder( ngrs::nNone, ngrs::nLowered) );
+        ngrs::TableLayout tableLayout( 3, 4 );
         tableLayout.setVGap( 5 );
         tableLayout.setHGap( 5 );
         filtEnvPanel->setLayout( tableLayout );
-        filtEnvPanel->add( new ngrs::NLabel("Attack"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 0), true);
-        filtEnvPanel->add( m_f_attack_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 0), true);
-        filtEnvPanel->add( m_f_a_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 0), true);
-        filtEnvPanel->add( new ngrs::NLabel("Decay"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 1), true);
-        filtEnvPanel->add( m_f_decay_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 1), true);
-        filtEnvPanel->add( m_f_d_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 1), true);
-        filtEnvPanel->add( new ngrs::NLabel("Sustain"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 2), true);
-        filtEnvPanel->add( m_f_sustain_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 2), true);
-        filtEnvPanel->add( m_f_s_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 2), true);
-        filtEnvPanel->add( new ngrs::NLabel("Release"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 3), true);
-        filtEnvPanel->add( m_f_release_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 3), true);
-        filtEnvPanel->add( m_f_r_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 3), true);
+        filtEnvPanel->add( new ngrs::Label("Attack"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 0), true);
+        filtEnvPanel->add( m_f_attack_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 0), true);
+        filtEnvPanel->add( m_f_a_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 0), true);
+        filtEnvPanel->add( new ngrs::Label("Decay"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 1), true);
+        filtEnvPanel->add( m_f_decay_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 1), true);
+        filtEnvPanel->add( m_f_d_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 1), true);
+        filtEnvPanel->add( new ngrs::Label("Sustain"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 2), true);
+        filtEnvPanel->add( m_f_sustain_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 2), true);
+        filtEnvPanel->add( m_f_s_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 2), true);
+        filtEnvPanel->add( new ngrs::Label("Release"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 3), true);
+        filtEnvPanel->add( m_f_release_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 3), true);
+        filtEnvPanel->add( m_f_r_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 3), true);
         pane()->add( filtEnvPanel, ngrs::nAlTop );
       }
-      pane()->add(new ngrs::NLabel("Filter Parameters"), ngrs::nAlTop);
+      pane()->add(new ngrs::Label("Filter Parameters"), ngrs::nAlTop);
       {
-        ngrs::NPanel* filtParamsPanel = new ngrs::NPanel;
-        filtParamsPanel->setBorder( ngrs::NBevelBorder( ngrs::nNone, ngrs::nLowered ));
-        ngrs::NTableLayout tableLayout(4, 2);
+        ngrs::Panel* filtParamsPanel = new ngrs::Panel;
+        filtParamsPanel->setBorder( ngrs::BevelBorder( ngrs::nNone, ngrs::nLowered ));
+        ngrs::TableLayout tableLayout(4, 2);
         tableLayout.setVGap(5);
         tableLayout.setHGap(5);
         filtParamsPanel->setLayout( tableLayout );
-        filtParamsPanel->add(new ngrs::NLabel("Cutoff"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 0), true);
-        filtParamsPanel->add(m_cutoff_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 0), true);
-        filtParamsPanel->add(m_cutoff_label, ngrs::NAlignConstraint(ngrs::nAlRight, 2, 0), true);
-        filtParamsPanel->add(new ngrs::NLabel("Q"), ngrs::NAlignConstraint(ngrs::nAlLeft, 0, 1), true);
-        filtParamsPanel->add(m_q_slider, ngrs::NAlignConstraint(ngrs::nAlLeft, 1, 1), true);
-        filtParamsPanel->add(m_q_label, ngrs::NAlignConstraint(ngrs::nAlLeft, 2, 1), true);
-        filtParamsPanel->add(m_filtercombo, ngrs::NAlignConstraint(ngrs::nAlRight,3,0), true);
+        filtParamsPanel->add(new ngrs::Label("Cutoff"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 0), true);
+        filtParamsPanel->add(m_cutoff_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 0), true);
+        filtParamsPanel->add(m_cutoff_label, ngrs::AlignConstraint(ngrs::nAlRight, 2, 0), true);
+        filtParamsPanel->add(new ngrs::Label("Q"), ngrs::AlignConstraint(ngrs::nAlLeft, 0, 1), true);
+        filtParamsPanel->add(m_q_slider, ngrs::AlignConstraint(ngrs::nAlLeft, 1, 1), true);
+        filtParamsPanel->add(m_q_label, ngrs::AlignConstraint(ngrs::nAlLeft, 2, 1), true);
+        filtParamsPanel->add(m_filtercombo, ngrs::AlignConstraint(ngrs::nAlRight,3,0), true);
         pane()->add(filtParamsPanel, ngrs::nAlTop);
       }
 
@@ -193,11 +193,11 @@ namespace psycle {
       m_envelope_slider->setOrientation(ngrs::nHorizontal);
       m_envelope_slider->change.connect(this, &EnvDialog::onEnvAmtSliderMoved);
 
-      m_filtercombo->add(new ngrs::NItem("LowPass"));
-      m_filtercombo->add(new ngrs::NItem("HiPass"));
-      m_filtercombo->add(new ngrs::NItem("BandPass"));
-      m_filtercombo->add(new ngrs::NItem("NotchBand"));
-      m_filtercombo->add(new ngrs::NItem("None"));
+      m_filtercombo->add(new ngrs::Item("LowPass"));
+      m_filtercombo->add(new ngrs::Item("HiPass"));
+      m_filtercombo->add(new ngrs::Item("BandPass"));
+      m_filtercombo->add(new ngrs::Item("NotchBand"));
+      m_filtercombo->add(new ngrs::Item("None"));
 
       m_filtercombo->itemSelected.connect(this, &EnvDialog::onFilterModeSelected);
 
@@ -270,7 +270,7 @@ namespace psycle {
       return ngrs::nHideWindow;
     }
 
-    void EnvDialog::onEnvSliderMoved( ngrs::NSlider *slider )
+    void EnvDialog::onEnvSliderMoved( ngrs::Slider *slider )
     {
       double pos = slider->pos();
       int si = pSong->instSelected;
@@ -339,7 +339,7 @@ namespace psycle {
       pane()->resize();
     }
 
-    void EnvDialog::onSustainSliderMoved( ngrs::NSlider *slider )
+    void EnvDialog::onSustainSliderMoved( ngrs::Slider *slider )
     {
       double pos = slider->pos();
       int si=pSong->instSelected;
@@ -377,7 +377,7 @@ namespace psycle {
       pane()->resize();
     }
 
-    void EnvDialog::onCutoffSliderMoved( ngrs::NSlider *slider )
+    void EnvDialog::onCutoffSliderMoved( ngrs::Slider *slider )
     {
       double pos = slider->pos();
       int si=pSong->instSelected;
@@ -390,7 +390,7 @@ namespace psycle {
       pane()->resize();
     }
 
-    void EnvDialog::onQSliderMoved( ngrs::NSlider *slider )
+    void EnvDialog::onQSliderMoved( ngrs::Slider *slider )
     {
       double pos = slider->pos();
       int si=pSong->instSelected;
@@ -403,12 +403,12 @@ namespace psycle {
       m_q_label->repaint();
       pane()->resize();
     }
-    void EnvDialog::onFilterModeSelected( ngrs::NItemEvent *ev )
+    void EnvDialog::onFilterModeSelected( ngrs::ItemEvent *ev )
     {
       int si=pSong->instSelected;
       pSong->_pInstrument[si]->ENV_F_TP = m_filtercombo->selIndex();
     }
-    void EnvDialog::onEnvAmtSliderMoved( ngrs::NSlider *slider )
+    void EnvDialog::onEnvAmtSliderMoved( ngrs::Slider *slider )
     {
       double pos = slider->pos();
       int si=pSong->instSelected;
@@ -433,12 +433,12 @@ namespace psycle {
       ngrs::NPoint pol[5];
 
       //dc.FillSolidRect(0,0,494,CH+1,0x4422CC);
-      g.setForeground( ngrs::NColor( 0, 0, 0) );
+      g.setForeground( ngrs::Color( 0, 0, 0) );
       g.fillRect( 0, 0, clientWidth(), CH );
-      g.setForeground( ngrs::NColor( 50, 50, 50 ) );
+      g.setForeground( ngrs::Color( 50, 50, 50 ) );
       g.drawRect( 0, 0, clientWidth(), CH );
 
-      g.setForeground( ngrs::NColor(0x4a, 0x81, 0xbb) );
+      g.setForeground( ngrs::Color(0x4a, 0x81, 0xbb) );
 
       pol[0].setX( 0  );
       pol[0].setY( CH );
@@ -459,7 +459,7 @@ namespace psycle {
       //dc.SelectObject(&newBrush);		
       g.fillPolygon( pol, 5 );
 
-      g.setForeground( ngrs::NColor( 0, 0, 0 ) );
+      g.setForeground( ngrs::Color( 0, 0, 0 ) );
       g.drawLine( AX+BX, CH-CX, AX+BX, CH );
 
     }

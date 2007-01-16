@@ -35,8 +35,8 @@
 #endif
 //#include "netaudioout.h"
 #include "defaultbitmaps.h"
-#include <ngrs/nfile.h>
-#include <ngrs/nkeyevent.h>
+#include <ngrs/file.h>
+#include <ngrs/keyevent.h>
 #include <sys/stat.h>
 #include <cstdlib>
 #include <stdexcept>
@@ -229,7 +229,7 @@ namespace psycle {
 			}
 			ladspaPath_ = pcLADSPAPath;
 
-			ngrs::NXmlParser parser;
+			ngrs::XmlParser parser;
 			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
 			parser.parseString ( xml_mem_ );
 
@@ -305,16 +305,16 @@ namespace psycle {
 #else
 			// we don't have any information about the installation paths,
 			// so, we can only assume everything is at a fixed place, like under the user home dir
-			hlpPath_ = ngrs::NFile::replaceTilde("~/xpsycle/doc/");
-			iconPath_ = ngrs::NFile::replaceTilde("~/xpsycle/pixmaps/");
+			hlpPath_ = ngrs::File::replaceTilde("~/xpsycle/doc/");
+			iconPath_ = ngrs::File::replaceTilde("~/xpsycle/pixmaps/");
 #ifdef __unix__
-			pluginPath_ = ngrs::NFile::replaceTilde("~/xpsycle/plugins/");
+			pluginPath_ = ngrs::File::replaceTilde("~/xpsycle/plugins/");
 #else
-			pluginPath_ = ngrs::NFile::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
+			pluginPath_ = ngrs::File::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
 #endif
 
 
-			prsPath_ =  ngrs::NFile::replaceTilde("~" + ngrs::NFile::slash() + "xpsycle" + ngrs::NFile::slash() +"prs" + ngrs::NFile::slash() );
+			prsPath_ =  ngrs::File::replaceTilde("~" + ngrs::File::slash() + "xpsycle" + ngrs::File::slash() +"prs" + ngrs::File::slash() );
 #endif
 
 			#if !defined NDEBUG
@@ -365,10 +365,10 @@ namespace psycle {
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 				}
 			} else {
-              path = ngrs::NFile::replaceTilde("~" + ngrs::NFile::slash() + ".xpsycle.xml");
+              path = ngrs::File::replaceTilde("~" + ngrs::File::slash() + ".xpsycle.xml");
 			  if (path.length()!=0) {
 					try {
-                      loadConfig( ngrs::NFile::replaceTilde( "~" + ngrs::NFile::slash() + ".xpsycle.xml") );
+                      loadConfig( ngrs::File::replaceTilde( "~" + ngrs::File::slash() + ".xpsycle.xml") );
 					}
 					catch( std::exception const & e ) {
 						std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
@@ -395,11 +395,11 @@ namespace psycle {
 			std::cout << "xpsycle: configuration: attempting to load file: " << path << std::endl;
 #endif
 
-            ngrs::NXmlParser parser;   
+            ngrs::XmlParser parser;   
 			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
 
 			// check whether the file is readable
-            if( !ngrs::NFile::fileIsReadable( path ) )
+            if( !ngrs::File::fileIsReadable( path ) )
 			{
 				std::ostringstream s;
 				s << "cannot read file: " << path;
@@ -441,7 +441,7 @@ namespace psycle {
 			doEnableSound = true;
 		}
 
-		void Configuration::onConfigTagParse( const ngrs::NXmlParser & parser, const std::string & tagName )
+		void Configuration::onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName )
 		{
 			if ( tagName == "path" ) {
 				std::string id  = parser.getAttribValue("id"); 

@@ -26,13 +26,13 @@
 
 #include "defaultbitmaps.h"
 #include "zipreader.h"
-#include <ngrs/nrect.h>
-#include <ngrs/npoint.h>
-#include <ngrs/nobject.h>
-#include <ngrs/nxmlparser.h>
-#include <ngrs/ncolor.h>
-#include <ngrs/nbitmap.h>
-#include <ngrs/npixmap.h>
+#include <ngrs/rect.h>
+#include <ngrs/point.h>
+#include <ngrs/object.h>
+#include <ngrs/xmlparser.h>
+#include <ngrs/color.h>
+#include <ngrs/bitmap.h>
+#include <ngrs/pixmap.h>
 
 
 namespace psycle { 
@@ -40,13 +40,13 @@ namespace psycle {
 
 		class HeaderCoordInfo {
 		public:
-			ngrs::NRect bgCoords;
-			ngrs::NRect noCoords;
-			ngrs::NRect sRecCoords;
+			ngrs::Rect bgCoords;
+			ngrs::Rect noCoords;
+			ngrs::Rect sRecCoords;
 			ngrs::NPoint dRecCoords;
-			ngrs::NRect sMuteCoords;
+			ngrs::Rect sMuteCoords;
 			ngrs::NPoint dMuteCoords;
-			ngrs::NRect sSoloCoords;
+			ngrs::Rect sSoloCoords;
 			ngrs::NPoint dSoloCoords;
 			ngrs::NPoint dgX0Coords;
 			ngrs::NPoint dg0XCoords;
@@ -54,88 +54,88 @@ namespace psycle {
 
 		class MachineCoordInfo {
 		public:
-			ngrs::NRect bgCoords;
-			ngrs::NRect sPan;
+			ngrs::Rect bgCoords;
+			ngrs::Rect sPan;
 			ngrs::NPoint dNameCoords;
 
-			ngrs::NRect muteCoords;
-			ngrs::NRect soloCoords;
-			ngrs::NRect dSoloCoords;
-			ngrs::NRect dMuteCoords;
-			ngrs::NRect dPan;
-			ngrs::NRect dByPass;
+			ngrs::Rect muteCoords;
+			ngrs::Rect soloCoords;
+			ngrs::Rect dSoloCoords;
+			ngrs::Rect dMuteCoords;
+			ngrs::Rect dPan;
+			ngrs::Rect dByPass;
 
-			ngrs::NRect sVuPeak;
-			ngrs::NRect sVu0;
-			ngrs::NRect dVu;
+			ngrs::Rect sVuPeak;
+			ngrs::Rect sVu0;
+			ngrs::Rect dVu;
 		};
 
 		class MachineViewColorInfo {
 		public:
-			ngrs::NColor pane_bg_color;
-			ngrs::NColor wire_bg_color;
-			ngrs::NColor wire_poly_color;
-			ngrs::NColor wire_arrow_border_color;
-			ngrs::NColor sel_border_color;
+			ngrs::Color pane_bg_color;
+			ngrs::Color wire_bg_color;
+			ngrs::Color wire_poly_color;
+			ngrs::Color wire_arrow_border_color;
+			ngrs::Color sel_border_color;
 		};
 
 		class PatternViewColorInfo {
 		public:
-			ngrs::NColor cursor_bg_color;
-			ngrs::NColor cursor_text_color;
-			ngrs::NColor bar_bg_color;
-			ngrs::NColor beat_bg_color;
-			ngrs::NColor bg_color;
-			ngrs::NColor text_color;
-			ngrs::NColor sel_text_color;
-			ngrs::NColor beat_text_color;
-			ngrs::NColor playbar_bg_color;
-			ngrs::NColor track_big_sep_color;
-			ngrs::NColor track_small_sep_color;
-			ngrs::NColor line_sep_color;
-			ngrs::NColor col_sep_color;
-			ngrs::NColor sel_cursor_bg_color;
-			ngrs::NColor sel_bar_bg_color;
-			ngrs::NColor sel_beat_bg_color;
-			ngrs::NColor sel_bg_color;
-			ngrs::NColor sel_beat_text_color;
-			ngrs::NColor sel_playbar_bg_color;
-			ngrs::NColor restarea_bg_color;
+			ngrs::Color cursor_bg_color;
+			ngrs::Color cursor_text_color;
+			ngrs::Color bar_bg_color;
+			ngrs::Color beat_bg_color;
+			ngrs::Color bg_color;
+			ngrs::Color text_color;
+			ngrs::Color sel_text_color;
+			ngrs::Color beat_text_color;
+			ngrs::Color playbar_bg_color;
+			ngrs::Color track_big_sep_color;
+			ngrs::Color track_small_sep_color;
+			ngrs::Color line_sep_color;
+			ngrs::Color col_sep_color;
+			ngrs::Color sel_cursor_bg_color;
+			ngrs::Color sel_bar_bg_color;
+			ngrs::Color sel_beat_bg_color;
+			ngrs::Color sel_bg_color;
+			ngrs::Color sel_beat_text_color;
+			ngrs::Color sel_playbar_bg_color;
+			ngrs::Color restarea_bg_color;
 		};
 
 		class SequencerViewInfo {
 		public:
-			ngrs::NColor pane_bg_color;
-			ngrs::NColor pane_text_color;
-			ngrs::NColor pane_grid_color;
-			ngrs::NColor pane_move_line_color;
-			ngrs::NColor pane_play_line_color;
+			ngrs::Color pane_bg_color;
+			ngrs::Color pane_text_color;
+			ngrs::Color pane_grid_color;
+			ngrs::Color pane_move_line_color;
+			ngrs::Color pane_play_line_color;
 		};
 
 		class VuMeterInfo {
 		public:
-			ngrs::NColor vu1;
-			ngrs::NColor vu2;
-			ngrs::NColor vu3;
+			ngrs::Color vu1;
+			ngrs::Color vu2;
+			ngrs::Color vu3;
 		};
 
 		class FrameMachineInfo {
 		public:
-			ngrs::NColor machineGUITopColor;
-			ngrs::NColor machineGUIFontTopColor;
-			ngrs::NColor machineGUIBottomColor;
-			ngrs::NColor machineGUIFontBottomColor;
+			ngrs::Color machineGUITopColor;
+			ngrs::Color machineGUIFontTopColor;
+			ngrs::Color machineGUIBottomColor;
+			ngrs::Color machineGUIFontBottomColor;
 
-			ngrs::NColor machineGUIHTopColor;
-			ngrs::NColor machineGUIHFontTopColor;
-			ngrs::NColor machineGUIHBottomColor;
-			ngrs::NColor machineGUIHFontBottomColor;
+			ngrs::Color machineGUIHTopColor;
+			ngrs::Color machineGUIHFontTopColor;
+			ngrs::Color machineGUIHBottomColor;
+			ngrs::Color machineGUIHFontBottomColor;
 
-			ngrs::NColor machineGUITitleColor;
-			ngrs::NColor machineGUITitleFontColor;
+			ngrs::Color machineGUITitleColor;
+			ngrs::Color machineGUITitleFontColor;
 		};
 
-		class SkinReader : public ngrs::NObject {
+		class SkinReader : public ngrs::Object {
 			// Singleton Pattern
 		private:
 			SkinReader();          
@@ -191,7 +191,7 @@ namespace psycle {
 
 		private:
 
-			void onTagParse(const ngrs::NXmlParser & parser, const std::string & tagName);
+			void onTagParse(const ngrs::XmlParser & parser, const std::string & tagName);
 
 			// flags for the onTagParse, to know, in which parent tag we are
 
@@ -203,8 +203,8 @@ namespace psycle {
 			bool parseMacEffect;
 			bool parseMacGenerator;
 
-			// this method extracts a bitmap out of the opened zip file and loads it into a ngrs::NBitmap
-			ngrs::NBitmap extractAndLoadBitmap( const std::string & zip_path );
+			// this method extracts a bitmap out of the opened zip file and loads it into a ngrs::Bitmap
+			ngrs::Bitmap extractAndLoadBitmap( const std::string & zip_path );
 
 			// patternview stuff
 
@@ -212,7 +212,7 @@ namespace psycle {
 			HeaderCoordInfo headerCoords_;
 
 			// transforms a "00:00:00:00" str into a nrect "00" any int value
-			ngrs::NRect getCoords( const std::string & coord ) const;
+			ngrs::Rect getCoords( const std::string & coord ) const;
 
 			bool patview_line_sep_enabled_;
 			bool patview_col_sep_enabled_;

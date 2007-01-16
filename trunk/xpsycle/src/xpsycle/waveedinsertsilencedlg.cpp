@@ -18,13 +18,13 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "waveedinsertsilencedlg.h"
-#include <ngrs/nbutton.h>
-#include <ngrs/ncheckbox.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nalignconstraint.h>
-#include <ngrs/ntablelayout.h>
+#include <ngrs/button.h>
+#include <ngrs/checkbox.h>
+#include <ngrs/edit.h>
+#include <ngrs/label.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/alignconstraint.h>
+#include <ngrs/tablelayout.h>
 
 namespace psycle
 {
@@ -34,8 +34,8 @@ namespace psycle
 		{
 			setTitle("Insert Silence");
 
-			ngrs::NPanel* table = new ngrs::NPanel();
-				ngrs::NTableLayout tableLayout(2,3);
+			ngrs::Panel* table = new ngrs::Panel();
+				ngrs::TableLayout tableLayout(2,3);
 				tableLayout.setVGap(5);
 				tableLayout.setHGap(5);
 				table->setLayout(tableLayout);
@@ -43,9 +43,9 @@ namespace psycle
 				m_atEnd = new ngrs::NCheckBox("At end");
 				m_atCursor = new ngrs::NCheckBox("At cursor");
 			
-			table->add(m_atStart, ngrs::NAlignConstraint(ngrs::nAlLeft,1,0),true);
-			table->add(m_atEnd , ngrs::NAlignConstraint(ngrs::nAlLeft,1,1),true);
-			table->add(m_atCursor, ngrs::NAlignConstraint(ngrs::nAlLeft,1,2),true);
+			table->add(m_atStart, ngrs::AlignConstraint(ngrs::nAlLeft,1,0),true);
+			table->add(m_atEnd , ngrs::AlignConstraint(ngrs::nAlLeft,1,1),true);
+			table->add(m_atCursor, ngrs::AlignConstraint(ngrs::nAlLeft,1,2),true);
 			
 			m_atStart->clicked.connect(this, &WaveEdInsertSilenceDialog::onInsStartClicked);
 			m_atEnd->clicked.connect(this, &WaveEdInsertSilenceDialog::onInsEndClicked);
@@ -55,32 +55,32 @@ namespace psycle
 			m_atEnd->setCheck(false);
 			m_atCursor->setCheck(false);
 
-			m_time = new ngrs::NEdit;
-			table->add(m_time,ngrs::NAlignConstraint(ngrs::nAlLeft,0,1),true);
+			m_time = new ngrs::Edit;
+			table->add(m_time,ngrs::AlignConstraint(ngrs::nAlLeft,0,1),true);
 			m_time->setText("0.000");
-			ngrs::NPanel* okPanel = new ngrs::NPanel();
-			okPanel->setLayout(ngrs::NAlignLayout(5,5));
+			ngrs::Panel* okPanel = new ngrs::Panel();
+			okPanel->setLayout(ngrs::AlignLayout(5,5));
 			{
-				ngrs::NButton *btn = new ngrs::NButton("Cancel", false);
+				ngrs::Button *btn = new ngrs::Button("Cancel", false);
 				btn->clicked.connect(this, &WaveEdInsertSilenceDialog::onCancelClicked);
 				okPanel->add(btn,ngrs::nAlRight);
 			}
 			{
-				ngrs::NButton *btn = new ngrs::NButton("Ok", false);
+				ngrs::Button *btn = new ngrs::Button("Ok", false);
 				btn->clicked.connect(this, &WaveEdInsertSilenceDialog::onOkClicked);
 				okPanel->add(btn,ngrs::nAlRight);
 			}
 
 			pane()->add(okPanel,ngrs::nAlBottom);
 			{
-				ngrs::NLabel *lbl = new ngrs::NLabel("Insert (in secs):");
-				table->add(lbl,ngrs::NAlignConstraint(ngrs::nAlLeft,0,0),true);
+				ngrs::Label *lbl = new ngrs::Label("Insert (in secs):");
+				table->add(lbl,ngrs::AlignConstraint(ngrs::nAlLeft,0,0),true);
 			}
 			pane()->add(table,ngrs::nAlClient);
 			pack();
 		}
 
-		void WaveEdInsertSilenceDialog::onInsStartClicked( ngrs::NButtonEvent* ev)
+		void WaveEdInsertSilenceDialog::onInsStartClicked( ngrs::ButtonEvent* ev)
 		{
 			m_atStart->setCheck(true);
 			m_atEnd->setCheck(false);
@@ -89,7 +89,7 @@ namespace psycle
 			m_atEnd->repaint();
 			m_atCursor->repaint();
 		}
-		void WaveEdInsertSilenceDialog::onInsEndClicked( ngrs::NButtonEvent* ev)
+		void WaveEdInsertSilenceDialog::onInsEndClicked( ngrs::ButtonEvent* ev)
 		{
 			m_atStart->setCheck(false);
 			m_atEnd->setCheck(true);
@@ -98,7 +98,7 @@ namespace psycle
 			m_atEnd->repaint();
 			m_atCursor->repaint();
 		}
-		void WaveEdInsertSilenceDialog::onInsCursorClicked( ngrs::NButtonEvent* ev)
+		void WaveEdInsertSilenceDialog::onInsCursorClicked( ngrs::ButtonEvent* ev)
 		{
 			m_atStart->setCheck(false);
 			m_atEnd->setCheck(false);
@@ -107,7 +107,7 @@ namespace psycle
 			m_atEnd->repaint();
 			m_atCursor->repaint();
 		}
-		void WaveEdInsertSilenceDialog::onOkClicked( ngrs::NButtonEvent* ev) 
+		void WaveEdInsertSilenceDialog::onOkClicked( ngrs::ButtonEvent* ev) 
 		{
 			std::string temp;
 			temp = 	m_time->text();
@@ -124,7 +124,7 @@ namespace psycle
 			doClose(true);
 		}
 
-		void WaveEdInsertSilenceDialog::onCancelClicked( ngrs::NButtonEvent* ev) 
+		void WaveEdInsertSilenceDialog::onCancelClicked( ngrs::ButtonEvent* ev) 
 		{
 			doClose(false);
 		}

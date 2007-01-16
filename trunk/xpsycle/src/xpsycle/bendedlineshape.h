@@ -20,12 +20,12 @@
 #ifndef BENDEDLINESHAPE_H
 #define BENDEDLINESHAPE_H
 
-#include <ngrs/nshape.h>
+#include <ngrs/shape.h>
 
 /**
 @author Stefan
 */
-class BendedLineShape : public ngrs::NShape
+class BendedLineShape : public ngrs::Shape
 {
 public:
   BendedLineShape();
@@ -58,8 +58,8 @@ public:
   virtual int overPicker( int x, int y );
   virtual void setPicker( int index, int x, int y );
 
-  virtual ngrs::NRegion region();
-  virtual ngrs::NRegion spacingRegion( const ngrs::NSize & spacing );
+  virtual ngrs::Region region();
+  virtual ngrs::Region spacingRegion( const ngrs::Size & spacing );
 
   int d2i( double d );
 
@@ -77,7 +77,7 @@ private:
   int pickHeight_;
   int distance_;
 
-  ngrs::NRegion lineToRegion();
+  ngrs::Region lineToRegion();
   void resize( int width, int height );
   void calculateRectArea();
   void move( int dx, int dy );

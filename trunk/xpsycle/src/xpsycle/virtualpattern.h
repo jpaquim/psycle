@@ -20,7 +20,7 @@
 #ifndef VIRTUALPATTERN_H
 #define VIRTUALPATTERN_H
 
-#include <ngrs/npanel.h>
+#include <ngrs/panel.h>
 
 /**
 @author Stefan Nattkemper
@@ -30,7 +30,7 @@
 namespace psycle {
 	namespace host {
 
-		class VirtualPatternSequenceHeader : ngrs::NPanel {
+		class VirtualPatternSequenceHeader : ngrs::Panel {
 
 			VirtualPatternSequenceHeader();
 
@@ -38,7 +38,7 @@ namespace psycle {
 
 		};
 
-		class VirtualPattern : public ngrs::NPanel {
+		class VirtualPattern : public ngrs::Panel {
 		public:
 				VirtualPattern();
 

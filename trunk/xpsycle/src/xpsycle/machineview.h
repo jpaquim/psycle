@@ -22,9 +22,9 @@
 
 #include "wiregui.h"
 #include "skinreader.h"
-#include <ngrs/nscrollbox.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/npopupmenu.h>
+#include <ngrs/scrollbox.h>
+#include <ngrs/label.h>
+#include <ngrs/popupmenu.h>
 
 namespace psycle {
 	namespace host {
@@ -38,7 +38,7 @@ namespace psycle {
 		@author Stefan Nattkemper
 		*/
 
-		class MachineView : public ngrs::NPanel
+		class MachineView : public ngrs::Panel
 		{
 		public:
 			
@@ -55,7 +55,7 @@ namespace psycle {
 			void update();
 			void updateVUs();
 
-			NPanel* scrollArea();
+			Panel* scrollArea();
 
 			sigslot::signal1<Machine*> selected;
 			sigslot::signal3<Machine*, int, int> machineMoved;
@@ -84,7 +84,7 @@ namespace psycle {
 			WireGUI* line;
 			WireGUI* selectedWire_;
 
-			ngrs::NPanel* scrollArea_;
+			ngrs::Panel* scrollArea_;
             ngrs::NScrollBox* scrollBox_;							
 
 			void init();
@@ -92,12 +92,12 @@ namespace psycle {
 			void onCreateMachine( Machine & mac );
 			void onNewConnection( MachineGUI* sender );
 
-			void onLineMoveStart( const ngrs::NMoveEvent & event );
-			void onLineMoveEnd( const ngrs::NMoveEvent & event );
+			void onLineMoveStart( const ngrs::MoveEvent & event );
+			void onLineMoveEnd( const ngrs::MoveEvent & event );
 
             void onWireGUIDelete( WireGUI * line );
 			void onWireDelete( WireDlg* dlg );
-			void onWireSelected( ngrs::NButtonEvent* ev );
+			void onWireSelected( ngrs::ButtonEvent* ev );
 			void onMoveMachine( Machine* mac, int x, int y );
 
 			MachineGUI* findByMachine( Machine* mac );
@@ -109,8 +109,8 @@ namespace psycle {
 			void onUpdateMachinePropertiesSignal( Machine* machine );
 
 			void onBendAdded( WireGUI* gui );
-			void setSelectedWire( ngrs::NObject* wire );
-			void onViewMousePress( ngrs::NButtonEvent* ev );
+			void setSelectedWire( ngrs::Object* wire );
+			void onViewMousePress( ngrs::ButtonEvent* ev );
 
 			void rewire( WireGUI* line, MachineGUI* src, MachineGUI* dst );
 		};

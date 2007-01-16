@@ -17,31 +17,31 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <ngrs/ndialog.h>
+#include <ngrs/dialog.h>
 
 namespace ngrs {
-  class NSlider;
+  class Slider;
   class NCheckBox;
-  class NEdit;
-  class NLabel;
-  class NButtonEvent;
+  class Edit;
+  class Label;
+  class ButtonEvent;
 }
 namespace psycle
 {
   namespace host
   {
-    class WaveEdMixDialog : public ngrs::NDialog
+    class WaveEdMixDialog : public ngrs::Dialog
     {
     public:
       WaveEdMixDialog();
-      ngrs::NSlider		*m_srcVol;
-      ngrs::NSlider		*m_destVol;
+      ngrs::Slider		*m_srcVol;
+      ngrs::Slider		*m_destVol;
       ngrs::NCheckBox	*m_bFadeIn;
       ngrs::NCheckBox	*m_bFadeOut;
-      ngrs::NEdit		*m_fadeInTime;
-      ngrs::NEdit		*m_fadeOutTime;
-      ngrs::NLabel		*m_destVolText;
-      ngrs::NLabel		*m_srcVolText;
+      ngrs::Edit		*m_fadeInTime;
+      ngrs::Edit		*m_fadeOutTime;
+      ngrs::Label		*m_destVolText;
+      ngrs::Label		*m_srcVolText;
     public:
       float srcVol;
       float destVol;
@@ -50,13 +50,13 @@ namespace psycle
       float fadeInTime;
       float fadeOutTime;
     protected:
-      void onOkClicked( ngrs::NButtonEvent *ev );
-      void onCancelClicked( ngrs::NButtonEvent *ev );
+      void onOkClicked( ngrs::ButtonEvent *ev );
+      void onCancelClicked( ngrs::ButtonEvent *ev );
     public:
-      void onDestSliderMoved( ngrs::NSlider* slider );
-      void onSrcSliderMoved( ngrs::NSlider* slider );
-      void OnBnClickedFadeoutcheck( ngrs::NButtonEvent *ev );
-      void OnBnClickedFadeincheck( ngrs::NButtonEvent *ev );
+      void onDestSliderMoved( ngrs::Slider* slider );
+      void onSrcSliderMoved( ngrs::Slider* slider );
+      void OnBnClickedFadeoutcheck( ngrs::ButtonEvent *ev );
+      void OnBnClickedFadeincheck( ngrs::ButtonEvent *ev );
     };
 
   }

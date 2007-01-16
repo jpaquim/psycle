@@ -23,7 +23,7 @@ namespace psycle {
 	namespace host {
 
 
-		VirtualPatternSequenceHeader::VirtualPatternSequenceHeader() : ngrs::NPanel() {
+		VirtualPatternSequenceHeader::VirtualPatternSequenceHeader() : ngrs::Panel() {
 
 		}
 

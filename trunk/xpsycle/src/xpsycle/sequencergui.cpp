@@ -28,21 +28,21 @@
 #include "defaultbitmaps.h"
 #include "configuration.h"
 
-#include <ngrs/napp.h>
-#include <ngrs/nscrollbar.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nframeborder.h>
-#include <ngrs/ntoolbar.h>
-#include <ngrs/ntoolbarseparator.h>
-#include <ngrs/nlistbox.h>
-#include <ngrs/nitem.h>
-#include <ngrs/nwindow.h>
-#include <ngrs/nbevelborder.h>
-#include <ngrs/nproperty.h>
-#include <ngrs/ncheckbox.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nsplitbar.h>
+#include <ngrs/app.h>
+#include <ngrs/scrollbar.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/label.h>
+#include <ngrs/frameborder.h>
+#include <ngrs/toolbar.h>
+#include <ngrs/toolbarseparator.h>
+#include <ngrs/listbox.h>
+#include <ngrs/item.h>
+#include <ngrs/window.h>
+#include <ngrs/bevelborder.h>
+#include <ngrs/property.h>
+#include <ngrs/checkbox.h>
+#include <ngrs/edit.h>
+#include <ngrs/splitbar.h>
 #include <algorithm>
 
 #ifdef _MSC_VER
@@ -59,7 +59,7 @@ namespace psycle {
     SequencerGUI::SequencerBeatLineal::SequencerBeatLineal(SequencerGUI* seqGui )
     {
       sView = seqGui;
-      setBackground( ngrs::NColor( 255, 255, 255) );
+      setBackground( ngrs::Color( 255, 255, 255) );
       setTransparent( false );
     }
 
@@ -74,12 +74,12 @@ namespace psycle {
 
     void SequencerGUI::SequencerBeatLineal::drawLineal( ngrs::Graphics& g, int dx )
     {
-      ngrs::NRect area = g.repaintArea().rectClipBox();
+      ngrs::Rect area = g.repaintArea().rectClipBox();
 
       int cw = clientWidth();
       int ch = clientHeight();
 
-      g.setForeground( ngrs::NColor(220,220,220) );
+      g.setForeground( ngrs::Color(220,220,220) );
 
       g.drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
 
@@ -89,7 +89,7 @@ namespace psycle {
 
       for (int i = start ; i < end ; i++) {
         if (! (i % 16)) {
-          g.setForeground( ngrs::NColor( 180, 180, 180) );
+          g.setForeground( ngrs::Color( 180, 180, 180) );
           g.drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
           std::string beatLabel = stringify(i/4);
           int textWidth = g.textWidth(beatLabel);
@@ -97,7 +97,7 @@ namespace psycle {
         }
         else {
           if (sView->beatPxLength() > 3) {
-            g.setForeground( ngrs::NColor( 220, 220, 220) );
+            g.setForeground( ngrs::Color( 220, 220, 220) );
             g.drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
           }
         }
@@ -106,7 +106,7 @@ namespace psycle {
 
     int SequencerGUI::SequencerBeatLineal::preferredHeight( ) const
     {
-      ngrs::NFontMetrics metrics(font());
+      ngrs::FontMetrics metrics(font());
 
       return metrics.textHeight() + 10;
     }
@@ -127,14 +127,14 @@ namespace psycle {
 
       sView = seqGui;
 
-      vLine_ = new ngrs::NPanel();
+      vLine_ = new ngrs::Panel();
       vLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
       vLine_->setTransparent(false);
       vLine_->setWidth(1);
       vLine_->setVisible( false );
       add( vLine_ );
 
-      pLine_ = new ngrs::NPanel();
+      pLine_ = new ngrs::Panel();
       pLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
       pLine_->setTransparent(false);
       pLine_->setMoveable( ngrs::nMvHorizontal | ngrs::nMvParentLimit);
@@ -164,7 +164,7 @@ namespace psycle {
 
     void SequencerGUI::Area::drawTimeGrid( ngrs::Graphics& g )
     {
-      ngrs::NRect area = g.repaintArea().rectClipBox();
+      ngrs::Rect area = g.repaintArea().rectClipBox();
 
       int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
       int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
@@ -177,30 +177,30 @@ namespace psycle {
       }
     }
 
-    ngrs::NPanel* SequencerGUI::Area::vLine() {
+    ngrs::Panel* SequencerGUI::Area::vLine() {
       return vLine_;
     }
 
-    ngrs::NPanel* SequencerGUI::Area::vLine() const {
+    ngrs::Panel* SequencerGUI::Area::vLine() const {
       return vLine_;
     }
 
-    ngrs::NPanel* SequencerGUI::Area::pLine() {
+    ngrs::Panel* SequencerGUI::Area::pLine() {
       return pLine_;
     }
 
-    ngrs::NPanel* SequencerGUI::Area::pLine() const {
+    ngrs::Panel* SequencerGUI::Area::pLine() const {
       return pLine_;
     }
 
     int SequencerGUI::Area::preferredHeight( ) const
     {
-      std::vector<ngrs::NVisualComponent*>::const_iterator itr = visualComponents().begin();
+      std::vector<ngrs::VisualComponent*>::const_iterator itr = visualComponents().begin();
 
       int yp = 0;
 
       for (;itr < visualComponents().end(); itr++) {
-        ngrs::NVisualComponent* visualChild = *itr;
+        ngrs::VisualComponent* visualChild = *itr;
         if ( visualChild != vLine() && visualChild != pLine() )
           yp += visualChild->preferredHeight();
       }
@@ -210,12 +210,12 @@ namespace psycle {
 
     int SequencerGUI::Area::preferredWidth( ) const
     {
-      std::vector<ngrs::NVisualComponent*>::const_iterator itr = visualComponents().begin();
+      std::vector<ngrs::VisualComponent*>::const_iterator itr = visualComponents().begin();
 
       int xp = 100;
 
       for (;itr < visualComponents().end(); itr++) {
-        ngrs::NVisualComponent* visualChild = *itr;
+        ngrs::VisualComponent* visualChild = *itr;
         if (visualChild != vLine() && visualChild != pLine() )
           xp = std::max(visualChild->preferredWidth(), xp);
       }
@@ -224,15 +224,15 @@ namespace psycle {
     }
 
     void SequencerGUI::Area::removeChilds() {
-      ngrs::NPanel::removeChilds();
-      vLine_ = new ngrs::NPanel();
+      ngrs::Panel::removeChilds();
+      vLine_ = new ngrs::Panel();
       vLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_move_line_color );
       vLine_->setTransparent( false );
       vLine_->setVisible(false);
       vLine_->setWidth(1);
       add(vLine_);
 
-      pLine_ = new ngrs::NPanel();
+      pLine_ = new ngrs::Panel();
       pLine_->setBackground( SkinReader::Instance()->sequencerview_info().pane_play_line_color );
       pLine_->setTransparent(false);
       pLine_->setWidth(1);
@@ -247,12 +247,12 @@ namespace psycle {
 
     void SequencerGUI::Area::resize( )
     {
-      std::vector<ngrs::NVisualComponent*>::const_iterator itr = visualComponents().begin();
+      std::vector<ngrs::VisualComponent*>::const_iterator itr = visualComponents().begin();
 
       int xp = clientWidth();
 
       for (;itr < visualComponents().end(); itr++) {
-        ngrs::NVisualComponent* visualChild = *itr;
+        ngrs::VisualComponent* visualChild = *itr;
         if ( visualChild != vLine() && visualChild != pLine() ) 
           xp = std::max(visualChild->preferredWidth(), xp);
         if ( visualChild == pLine() ) {
@@ -269,7 +269,7 @@ namespace psycle {
       int yp = 0;
 
       for (;itr < visualComponents().end(); itr++) {
-        ngrs::NVisualComponent* visualChild = *itr;
+        ngrs::VisualComponent* visualChild = *itr;
         if ( visualChild != vLine() && visualChild != pLine() ) {
           visualChild->setHeight( visualChild->preferredHeight() );
           visualChild->setWidth(xp);
@@ -279,17 +279,17 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::Area::onMove(const ngrs::NMoveEvent & moveEvent) {
+    void SequencerGUI::Area::onMove(const ngrs::MoveEvent & moveEvent) {
       newBeatPos_ = pLine_->left() / (double) sView->beatPxLength();
     }
 
-    void SequencerGUI::Area::onMoveEnd( const ngrs::NMoveEvent & moveEvent ) {
+    void SequencerGUI::Area::onMoveEnd( const ngrs::MoveEvent & moveEvent ) {
       Player::Instance()->stop();
       Player::Instance()->setPlayPos( newBeatPos_ );
       lockPlayLine_ = false;
     }
 
-    void SequencerGUI::Area::onMoveStart( const ngrs::NMoveEvent & moveEvent ) {
+    void SequencerGUI::Area::onMoveStart( const ngrs::MoveEvent & moveEvent ) {
       lockPlayLine_ = true;
       playing_ = Player::Instance()->playing();
       newBeatPos_ = pLine_->left() / static_cast<double>( sView->beatPxLength() );
@@ -307,7 +307,7 @@ namespace psycle {
     ///
     SequencerItem::SequencerItem( SequencerGUI* seqGui )
     {
-      setMoveable( ngrs::NMoveable( ngrs::nMvHorizontal | ngrs::nMvNoneRepaint | ngrs::nMvLeftLimit));
+      setMoveable( ngrs::Moveable( ngrs::nMvHorizontal | ngrs::nMvNoneRepaint | ngrs::nMvLeftLimit));
 
       setTransparent(false);
       sequenceEntry_ = 0;
@@ -350,15 +350,15 @@ namespace psycle {
       int xp = (cw - tw) / 2;
       int yp = (ch + g.textHeight() /2 ) / 2;
 
-      g.setForeground( ngrs::NColor( sequenceEntry_->pattern()->category()->color() ));
+      g.setForeground( ngrs::Color( sequenceEntry_->pattern()->category()->color() ));
       g.fillRect(0,0, clientWidth(), clientHeight() );
       g.drawText( xp, yp, sequenceEntry_->pattern()->name());
 
       if (selected_) {
-        g.setForeground( ngrs::NColor( 0,0,255) );
+        g.setForeground( ngrs::Color( 0,0,255) );
         g.drawRect(0,0, clientWidth()-1, clientHeight()-1 );
       }  else {
-        g.setForeground( ngrs::NColor( 180,180,180) );
+        g.setForeground( ngrs::Color( 180,180,180) );
         g.drawRect(0,0, clientWidth()-1, clientHeight()-1 );
       }
     }
@@ -375,17 +375,17 @@ namespace psycle {
     }
 
 
-    ngrs::NRegion SequencerItem::entriesInRegion( )
+    ngrs::Region SequencerItem::entriesInRegion( )
     {
       const std::vector<SequencerItem*> & selItems = sView->selectedItems();
 
-      ngrs::NRegion region;
+      ngrs::Region region;
 
       for (std::vector<SequencerItem*>::const_iterator it = selItems.begin(); it < selItems.end(); it++) {
         SequencerItem* item = *it;
-        ngrs::NRegion itemregion = item->geometry()->region();
-        int parentAbsLeft = ((ngrs::NVisualComponent*) item->parent())->absoluteLeft() - ((NVisualComponent*) item->parent())->scrollDx();
-        int parentAbsTop  = ((ngrs::NVisualComponent*) item->parent())->absoluteTop() - ((NVisualComponent*) item->parent())->scrollDy();;
+        ngrs::Region itemregion = item->geometry()->region();
+        int parentAbsLeft = ((ngrs::VisualComponent*) item->parent())->absoluteLeft() - ((VisualComponent*) item->parent())->scrollDx();
+        int parentAbsTop  = ((ngrs::VisualComponent*) item->parent())->absoluteTop() - ((VisualComponent*) item->parent())->scrollDy();;
         itemregion.move(parentAbsLeft, parentAbsTop);
         region = region | itemregion;
       }
@@ -393,12 +393,12 @@ namespace psycle {
       return region;
     }
 
-    void SequencerItem::onMoveStart( const ngrs::NMoveEvent & moveEvent )
+    void SequencerItem::onMoveStart( const ngrs::MoveEvent & moveEvent )
     {
       oldDrag = entriesInRegion();
       oldLeft = left();  
 
-      ngrs::NPanel* line = sView->scrollArea()->vLine();
+      ngrs::Panel* line = sView->scrollArea()->vLine();
       line->setPosition( left(), sView->scrollArea()->scrollDy(), 1, sView->scrollArea()->clientHeight() );
       line->setVisible(true);
       line->repaint();
@@ -410,7 +410,7 @@ namespace psycle {
       }*/
     }
 
-    void SequencerItem::onMove( const ngrs::NMoveEvent & moveEvent )
+    void SequencerItem::onMove( const ngrs::MoveEvent & moveEvent )
     {
       const std::vector<SequencerItem*> & selItems = sView->selectedItems();
 
@@ -433,11 +433,11 @@ namespace psycle {
       }
       sView->resize();
 
-      ngrs::NPanel* line = sView->scrollArea()->vLine();
+      ngrs::Panel* line = sView->scrollArea()->vLine();
 
 
-      ngrs::NRegion newDrag = entriesInRegion();
-      ngrs::NRegion repaintArea = newDrag | oldDrag | line->absoluteGeometry();
+      ngrs::Region newDrag = entriesInRegion();
+      ngrs::Region repaintArea = newDrag | oldDrag | line->absoluteGeometry();
 
       line->setPosition( left(), sView->scrollArea()->scrollDy(), 1, sView->scrollArea()->clientHeight() );
 
@@ -456,9 +456,9 @@ namespace psycle {
 
     }
 
-    void SequencerItem::onMoveEnd( const ngrs::NMoveEvent & moveEvent )
+    void SequencerItem::onMoveEnd( const ngrs::MoveEvent & moveEvent )
     {
-      ngrs::NPanel* line = sView->scrollArea()->vLine();
+      ngrs::Panel* line = sView->scrollArea()->vLine();
       line->setVisible( false );
       sView->scrollArea()->repaint();
 
@@ -525,7 +525,7 @@ namespace psycle {
     SequencerGUI::SequencerLine::SequencerLine( SequencerGUI* seqGui )
     {
       sView = seqGui;
-      setBorder( ngrs::NBevelBorder( ngrs::nNone, ngrs::nLowered ) );
+      setBorder( ngrs::BevelBorder( ngrs::nNone, ngrs::nLowered ) );
     }
 
     SequencerGUI::SequencerLine::~ SequencerLine( )
@@ -535,7 +535,7 @@ namespace psycle {
     void SequencerGUI::SequencerLine::paint( ngrs::Graphics& g )
     {
       if ( sView->selectedLine_ && sView->selectedLine_ == this) {
-        g.setForeground( ngrs::NColor( 0, 0, 255) );
+        g.setForeground( ngrs::Color( 0, 0, 255) );
         g.drawRect(0,0, clientWidth()-1, clientHeight()-1);
       }
     }
@@ -565,11 +565,11 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::SequencerLine::removeChild( ngrs::NVisualComponent * item )
+    void SequencerGUI::SequencerLine::removeChild( ngrs::VisualComponent * item )
     {
       std::list<SequencerItem*>::iterator it = find( items.begin(), items.end(), item );
       if (it != items.end() ) items.erase(it);
-      ngrs::NPanel::removeChild(item);
+      ngrs::Panel::removeChild(item);
     }
 
     void SequencerGUI::SequencerLine::onMousePress( int x, int y, int button )
@@ -638,10 +638,10 @@ namespace psycle {
     // main class
 
     SequencerGUI::SequencerGUI()
-      : ngrs::NPanel()
+      : ngrs::Panel()
     {
       scrollArea_ = 0;
-      setLayout( ngrs::NAlignLayout() );
+      setLayout( ngrs::AlignLayout() );
       patternSequence_ = 0;
       oldPlayPos_ = 0;
 
@@ -654,52 +654,52 @@ namespace psycle {
 
       DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
 
-      ngrs::NImage* img;
+      ngrs::Image* img;
 
-      toolBar_ = new ngrs::NToolBar();
-      img = new ngrs::NImage();
+      toolBar_ = new ngrs::ToolBar();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.addTrack());
       img->setPreferredSize(25,25);
-      ngrs::NButton* btn;
-      btn = new ngrs::NButton(img);
+      ngrs::Button* btn;
+      btn = new ngrs::Button(img);
       btn->setHint("Insert Track ");
       toolBar_->add( btn )->clicked.connect(this,&SequencerGUI::onInsertTrack);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.deleteTrack());
       img->setPreferredSize(25,25);
-      btn = new ngrs::NButton(img);
+      btn = new ngrs::Button(img);
       btn->setHint("Delete Track ");
       toolBar_->add( btn)->clicked.connect(this,&SequencerGUI::onDeleteTrack);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.moveDownTrack());
       img->setPreferredSize(25,25);
-      btn = new ngrs::NButton(img);
+      btn = new ngrs::Button(img);
       btn->setHint("Move Down Track ");
       toolBar_->add( btn)->clicked.connect(this,&SequencerGUI::onMoveDownTrack);
 
-      img = new ngrs::NImage();
+      img = new ngrs::Image();
       img->setSharedBitmap(&icons.moveUpTrack());
       img->setPreferredSize(25,25);
-      btn = new ngrs::NButton(img);
+      btn = new ngrs::Button(img);
       btn->setHint("Move Up Track ");
       toolBar_->add( btn)->clicked.connect(this,&SequencerGUI::onMoveUpTrack);
 
-      toolBar_->add(new ngrs::NToolBarSeparator());
+      toolBar_->add(new ngrs::ToolBarSeparator());
 
-      toolBar_->add( new ngrs::NButton("Add Loop")) ->clicked.connect(this,&SequencerGUI::onAddLoop);
+      toolBar_->add( new ngrs::Button("Add Loop")) ->clicked.connect(this,&SequencerGUI::onAddLoop);
 
-      toolBar_->add( new ngrs::NButton("Delete Entry"))->clicked.connect(this,&SequencerGUI::onDeleteEntry);
+      toolBar_->add( new ngrs::Button("Delete Entry"))->clicked.connect(this,&SequencerGUI::onDeleteEntry);
       snapToGridCheck_ = new ngrs::NCheckBox("Snap to Beat");
       snapToGridCheck_->setCheck(true);
       toolBar_->add( snapToGridCheck_ );
 
-      toolBar_->add(new ngrs::NToolBarSeparator());
+      toolBar_->add(new ngrs::ToolBarSeparator());
 
-      toolBar_->add( renderBtn = new ngrs::NButton("Render As Wave"))->clicked.connect(this,&SequencerGUI::onRenderAsWave);
+      toolBar_->add( renderBtn = new ngrs::Button("Render As Wave"))->clicked.connect(this,&SequencerGUI::onRenderAsWave);
 
-      btn = new ngrs::NButton("refresh");
+      btn = new ngrs::Button("refresh");
       btn->setHint("Refresh gui ");
       toolBar_->add( btn )->clicked.connect(this,&SequencerGUI::onRefreshGUI);
 
@@ -711,14 +711,14 @@ namespace psycle {
 
 
       // create scrollBars
-      ngrs::NPanel* hBarPanel = new ngrs::NPanel();
-      hBarPanel->setLayout( ngrs::NAlignLayout() );
+      ngrs::Panel* hBarPanel = new ngrs::Panel();
+      hBarPanel->setLayout( ngrs::AlignLayout() );
       zoomHBar = new ZoomBar();
       zoomHBar->setRange(2,50);
       zoomHBar->setPos(5);
       zoomHBar->posChanged.connect(this, &SequencerGUI::onZoomHBarPosChanged);
       hBarPanel->add(zoomHBar, ngrs::nAlRight);
-      hBar = new ngrs::NScrollBar();
+      hBar = new ngrs::ScrollBar();
       hBar->setOrientation( ngrs::nHorizontal );
       hBar->setPreferredSize(100,15);
       hBar->change.connect(this,&SequencerGUI::onHScrollBar);
@@ -728,7 +728,7 @@ namespace psycle {
       beatChangeLineal_ = new SequencerBeatChangeLineal(this);
       add( beatChangeLineal_, ngrs::nAlBottom );
 
-      vBar = new ngrs::NScrollBar();
+      vBar = new ngrs::ScrollBar();
       vBar->setWidth(15);
       vBar->setOrientation( ngrs::nVertical );
       vBar->change.connect( this, &SequencerGUI::onVScrollBar );
@@ -786,7 +786,7 @@ namespace psycle {
 
     // track operations
 
-    void SequencerGUI::onInsertTrack( ngrs::NButtonEvent * ev )
+    void SequencerGUI::onInsertTrack( ngrs::ButtonEvent * ev )
     {
       if (lines.size() == 0) {
         addSequencerLine();
@@ -810,7 +810,7 @@ namespace psycle {
         }
     }
 
-    void SequencerGUI::onDeleteTrack( ngrs::NButtonEvent * ev )
+    void SequencerGUI::onDeleteTrack( ngrs::ButtonEvent * ev )
     {
       if (selectedLine_) {
 
@@ -828,7 +828,7 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::onMoveDownTrack( ngrs::NButtonEvent * ev )
+    void SequencerGUI::onMoveDownTrack( ngrs::ButtonEvent * ev )
     {
       if (selectedLine_) {
         int i = selectedLine_->zOrder();
@@ -842,7 +842,7 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::onMoveUpTrack( ngrs::NButtonEvent * ev )
+    void SequencerGUI::onMoveUpTrack( ngrs::ButtonEvent * ev )
     {
       if (selectedLine_) {
         int i = selectedLine_->zOrder();
@@ -856,9 +856,9 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::onNewPattern( ngrs::NButtonEvent * ev )
+    void SequencerGUI::onNewPattern( ngrs::ButtonEvent * ev )
     {
-      patternBox_->add(new ngrs::NItem("Pattern" + stringify(counter) ));
+      patternBox_->add(new ngrs::Item("Pattern" + stringify(counter) ));
       patternBox_->repaint();
       counter++;
     }
@@ -876,7 +876,7 @@ namespace psycle {
       it = find( selectedItems_.begin(), selectedItems_.end(), item);
 
       if (it == selectedItems_.end()) {
-        if ( ngrs::NApp::system().shiftState() & ngrs::nsCtrl ) {
+        if ( ngrs::App::system().shiftState() & ngrs::nsCtrl ) {
           selectedItems_.push_back(item);
           item->setSelected(true);
           item->repaint();
@@ -900,7 +900,7 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::onDeleteEntry( ngrs::NButtonEvent * ev )
+    void SequencerGUI::onDeleteEntry( ngrs::ButtonEvent * ev )
     {
       std::vector<SequencerItem*>::iterator it = selectedItems_.begin();
 
@@ -908,7 +908,7 @@ namespace psycle {
       for ( ; it < selectedItems_.end(); it++) {
         SequencerItem* selectedItem = *it;
         SequenceEntry* entry = selectedItem->sequenceEntry();
-        ngrs::NVisualComponent* parentContainer = (NVisualComponent*) (selectedItem->parent());
+        ngrs::VisualComponent* parentContainer = (VisualComponent*) (selectedItem->parent());
         parentContainer->removeChild(selectedItem);
         entry->track()->removeEntry(entry);
       }
@@ -949,13 +949,13 @@ namespace psycle {
       return list;
     }
 
-    void SequencerGUI::onVScrollBar( ngrs::NScrollBar * sender )
+    void SequencerGUI::onVScrollBar( ngrs::ScrollBar * sender )
     {
       int newPos = static_cast<int>( sender->pos() );
       if (newPos != scrollArea_->scrollDy() && newPos >= 0) {
         int diffY  = newPos - scrollArea_->scrollDy();
         if (diffY < scrollArea_->clientHeight()) {
-          ngrs::NRect rect = scrollArea_->blitMove(0,diffY, scrollArea_->absoluteSpacingGeometry());
+          ngrs::Rect rect = scrollArea_->blitMove(0,diffY, scrollArea_->absoluteSpacingGeometry());
           scrollArea_->setScrollDy(newPos);
           window()->repaint(scrollArea_,rect);
         } else {
@@ -965,7 +965,7 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::onHScrollBar( ngrs::NScrollBar * sender )
+    void SequencerGUI::onHScrollBar( ngrs::ScrollBar * sender )
     {
       int newPos = static_cast<int>( sender->pos() );
       if (newPos != scrollArea_->scrollDx() && newPos >= 0) {
@@ -973,7 +973,7 @@ namespace psycle {
         int diffX  = newPos - scrollArea_->scrollDx();
         if (diffX < scrollArea_->clientWidth()) {
           // scrolls the area
-          ngrs::NRect rect = scrollArea_->blitMove(diffX,0, scrollArea_->absoluteSpacingGeometry());
+          ngrs::Rect rect = scrollArea_->blitMove(diffX,0, scrollArea_->absoluteSpacingGeometry());
           scrollArea_->setScrollDx(newPos);
           window()->repaint(scrollArea_,rect);
 
@@ -1002,7 +1002,7 @@ namespace psycle {
     void SequencerGUI::resize( )
     {
       // calls the AlignLayout
-      ngrs::NPanel::resize();
+      ngrs::Panel::resize();
       // set the ScrollBar`s range new
       hBar->setRange( 0, scrollArea_->preferredWidth()  - scrollArea_->clientWidth()  );
       vBar->setRange( 0, scrollArea_->preferredHeight() - scrollArea_->clientHeight() );
@@ -1068,7 +1068,7 @@ namespace psycle {
       return snapToGridCheck_->checked();
     }
 
-    void SequencerGUI::onRenderAsWave( ngrs::NButtonEvent * ev )
+    void SequencerGUI::onRenderAsWave( ngrs::ButtonEvent * ev )
     {
       if (renderBtn->text()=="Stop rendering") {
         Player::Instance()->stopRecording();
@@ -1125,7 +1125,7 @@ namespace psycle {
       }
     }
 
-    void SequencerGUI::onAddLoop( ngrs::NButtonEvent* ev ) {
+    void SequencerGUI::onAddLoop( ngrs::ButtonEvent* ev ) {
       SequencerLoopItem* item = new SequencerLoopItem(this);
       item->setPosition( 0, beatLineal_->preferredHeight()-10, 100,10);
       beatLineal_->add(item);
@@ -1146,7 +1146,7 @@ namespace psycle {
     }
 
 
-    void SequencerGUI::onRefreshGUI( ngrs::NButtonEvent* ev ) {
+    void SequencerGUI::onRefreshGUI( ngrs::ButtonEvent* ev ) {
       update();
       resize();
       repaint();
@@ -1158,7 +1158,7 @@ namespace psycle {
         int oxPos = d2i(std::min(patternSequence()->tickLength()* beatPxLength(), oldPlayPos_ * beatPxLength()));
         if (oxPos != xPos) {
           scrollArea()->pLine()->setPosition( xPos, scrollArea()->scrollDy(),1,scrollArea()->clientHeight());
-          window()->repaint( scrollArea(), ngrs::NRect( scrollArea()->absoluteLeft() + oxPos, scrollArea()->absoluteTop(), 1, scrollArea()->clientHeight() ) );
+          window()->repaint( scrollArea(), ngrs::Rect( scrollArea()->absoluteLeft() + oxPos, scrollArea()->absoluteTop(), 1, scrollArea()->clientHeight() ) );
           scrollArea()->pLine()->repaint();
         }
         oldPlayPos_ = Player::Instance()->playPos();
@@ -1170,9 +1170,9 @@ namespace psycle {
     SequencerLoopItem::SequencerLoopItem( SequencerGUI * seqGui )
     {
       sView = seqGui;
-      setMoveable( ngrs::NMoveable( ngrs::nMvHorizontal | ngrs::nMvLeftLimit | ngrs::nMvLeftBorder | ngrs::nMvRightBorder) );
+      setMoveable( ngrs::Moveable( ngrs::nMvHorizontal | ngrs::nMvLeftLimit | ngrs::nMvLeftBorder | ngrs::nMvRightBorder) );
 
-      loopEdit = new ngrs::NEdit("01");
+      loopEdit = new ngrs::Edit("01");
       add(loopEdit);
     }
 
@@ -1185,7 +1185,7 @@ namespace psycle {
     {
       int cw = clientWidth();
       int ch = clientHeight();
-      g.setForeground( ngrs::NColor( 0,0,255));
+      g.setForeground( ngrs::Color( 0,0,255));
       // left border
       g.drawLine(0,0,0,ch-1);
       // draw dots left

@@ -19,13 +19,13 @@
   ***************************************************************************/
 #include "songpdlg.h"
 #include "song.h"
-#include <ngrs/nmemo.h>
-#include <ngrs/nalignlayout.h>
+#include <ngrs/memo.h>
+#include <ngrs/alignlayout.h>
 
 namespace psycle { namespace host {
 
 SongpDlg::SongpDlg( ) 
-  : ngrs::NWindow(), pSong_(0)
+  : ngrs::Window(), pSong_(0)
 {
   init();
 }
@@ -44,32 +44,32 @@ void SongpDlg::init( )
 {
   setTitle("Song properties");
 
-  pane()->setLayout( ngrs::NAlignLayout( 5, 5) );
+  pane()->setLayout( ngrs::AlignLayout( 5, 5) );
 
-  ngrs::NLabel* songTitleLb_ = new ngrs::NLabel("Song Title");
+  ngrs::Label* songTitleLb_ = new ngrs::Label("Song Title");
   pane()->add(songTitleLb_,ngrs::nAlTop);
-  songTitle_    = new ngrs::NEdit();
+  songTitle_    = new ngrs::Edit();
     pane()->add(songTitle_, ngrs::nAlTop);
-  ngrs::NLabel* songCreditsLb_ = new ngrs::NLabel("Song Credits");
+  ngrs::Label* songCreditsLb_ = new ngrs::Label("Song Credits");
   pane()->add(songCreditsLb_,ngrs::nAlTop);
-    songCredits_  = new ngrs::NEdit();
+    songCredits_  = new ngrs::Edit();
   pane()->add(songCredits_, ngrs::nAlTop);
-  ngrs::NLabel* songCommentsLb_ = new ngrs::NLabel("Song comments");
+  ngrs::Label* songCommentsLb_ = new ngrs::Label("Song comments");
   pane()->add(songCommentsLb_,ngrs::nAlTop);
 
-  ngrs::NPanel* buttonPanel = new ngrs::NPanel();
-    buttonPanel->setLayout( ngrs::NAlignLayout( 5, 5) );
-    cnclBtn_ = new ngrs::NButton("Cancel");
+  ngrs::Panel* buttonPanel = new ngrs::Panel();
+    buttonPanel->setLayout( ngrs::AlignLayout( 5, 5) );
+    cnclBtn_ = new ngrs::Button("Cancel");
     cnclBtn_->setFlat(false);
     cnclBtn_->clicked.connect(this,&SongpDlg::onCancelBtn);
-    okBtn_ = new ngrs::NButton("OK");
+    okBtn_ = new ngrs::Button("OK");
     okBtn_->setFlat(false);
     okBtn_->clicked.connect(this,&SongpDlg::onOkBtn);
     buttonPanel->add(okBtn_, ngrs::nAlRight);
     buttonPanel->add(cnclBtn_, ngrs::nAlRight);
   pane()->add(buttonPanel,ngrs::nAlBottom);
 
-  songComments_ = new ngrs::NMemo();
+  songComments_ = new ngrs::Memo();
     songComments_->setPreferredSize(200,200);
     songComments_->setWordWrap(true);
   pane()->add(songComments_, ngrs::nAlClient);
@@ -92,10 +92,10 @@ void SongpDlg::setVisible( bool on )
       songComments_->setText(pSong_->comment() );
       setPositionToScreenCenter();
   }
-  ngrs::NWindow::setVisible(on);
+  ngrs::Window::setVisible(on);
 }
 
-void SongpDlg::onOkBtn( ngrs::NButtonEvent * ev )
+void SongpDlg::onOkBtn( ngrs::ButtonEvent * ev )
 {
   if (pSong_) {
    pSong_->setName( songTitle_->text() );
@@ -105,7 +105,7 @@ void SongpDlg::onOkBtn( ngrs::NButtonEvent * ev )
   }
 }
 
-void SongpDlg::onCancelBtn( ngrs::NButtonEvent * ev )
+void SongpDlg::onCancelBtn( ngrs::ButtonEvent * ev )
 {
    setVisible(false);
 }

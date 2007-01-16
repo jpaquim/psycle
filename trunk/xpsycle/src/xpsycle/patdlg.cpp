@@ -19,34 +19,34 @@
   ***************************************************************************/
 #include "patdlg.h"
 #include "constants.h"
-#include <ngrs/nspinedit.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/npanel.h>
-#include <ngrs/nflowlayout.h>
+#include <ngrs/spinedit.h>
+#include <ngrs/button.h>
+#include <ngrs/panel.h>
+#include <ngrs/flowlayout.h>
 
 namespace psycle { namespace host {
 
 PatDlg::PatDlg()
-  : ngrs::NWindow()
+  : ngrs::Window()
 {
   setPosition(0,0,200,100);
   setTitle("Pattern Beats");
 
   lineNumber_ = 0;
-  lineNumEdit_ = new ngrs::NSpinEdit();
+  lineNumEdit_ = new ngrs::SpinEdit();
     lineNumEdit_->setPosition(10,10,100,lineNumEdit_->preferredHeight());
     lineNumEdit_->decClick.connect(this,&PatDlg::onDecBtnClick);
     lineNumEdit_->incClick.connect(this,&PatDlg::onIncBtnClick);
   pane()->add(lineNumEdit_);
 
-  ngrs::NPanel* bPnl = new ngrs::NPanel();
+  ngrs::Panel* bPnl = new ngrs::Panel();
     bPnl->setAlign(ngrs::nAlBottom);
-    bPnl->setLayout( ngrs::NFlowLayout(ngrs::nAlRight) );
-    ngrs::NButton* okBtn = new ngrs::NButton("Change");
+    bPnl->setLayout( ngrs::FlowLayout(ngrs::nAlRight) );
+    ngrs::Button* okBtn = new ngrs::Button("Change");
       okBtn->clicked.connect(this,&PatDlg::onOkBtn);
       okBtn->setFlat(false);
     bPnl->add(okBtn);
-    ngrs::NButton* cancelBtn = new ngrs::NButton("Cancel");
+    ngrs::Button* cancelBtn = new ngrs::Button("Cancel");
       cancelBtn->clicked.connect(this,&PatDlg::onCancelBtn);
       cancelBtn->setFlat(false);
     bPnl->add(cancelBtn);
@@ -82,7 +82,7 @@ bool PatDlg::execute( )
 }
 
 
-void PatDlg::onOkBtn( ngrs::NButtonEvent * sender )
+void PatDlg::onOkBtn( ngrs::ButtonEvent * sender )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();
@@ -93,7 +93,7 @@ void PatDlg::onOkBtn( ngrs::NButtonEvent * sender )
   setExitLoop( ngrs::nDestroyWindow );
 }
 
-void PatDlg::onCancelBtn( ngrs::NButtonEvent* sender )
+void PatDlg::onCancelBtn( ngrs::ButtonEvent* sender )
 {
   do_Execute = false;
   setVisible( false );
@@ -112,7 +112,7 @@ bool PatDlg::adaptSize() {
   return false;
 }
 
-void PatDlg::onIncBtnClick( ngrs::NButtonEvent * ev )
+void PatDlg::onIncBtnClick( ngrs::ButtonEvent * ev )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();
@@ -122,7 +122,7 @@ void PatDlg::onIncBtnClick( ngrs::NButtonEvent * ev )
   lineNumEdit_->repaint();
 }
 
-void PatDlg::onDecBtnClick( ngrs::NButtonEvent * ev )
+void PatDlg::onDecBtnClick( ngrs::ButtonEvent * ev )
 {
   std::stringstream str; 
   str << lineNumEdit_->text();

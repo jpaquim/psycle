@@ -20,18 +20,18 @@
 #ifndef ENVDIALOG_H
 #define ENVDIALOG_H
 
-#include <ngrs/nwindow.h>
-#include <ngrs/npanel.h>
+#include <ngrs/window.h>
+#include <ngrs/panel.h>
 
 /**
 @author Stefan Nattkemper
 */
 
 namespace ngrs {
-  class NLabel;
-  class NSlider;
-  class NComboBox;
-  class NItemEvent;
+  class Label;
+  class Slider;
+  class ComboBox;
+  class ItemEvent;
   class Graphics;
 }
 
@@ -40,9 +40,9 @@ namespace psycle {
 
 class Song;
 
-class EnvDialog : public ngrs::NWindow
+class EnvDialog : public ngrs::Window
 {
-	class EnvPanel : public ngrs::NPanel
+	class EnvPanel : public ngrs::Panel
 	{
 	public:
 		EnvPanel() {};
@@ -69,30 +69,30 @@ public:
 
 	Song* pSong;
 
-    ngrs::NComboBox* m_filtercombo;
-	ngrs::NSlider* m_envelope_slider;
-	ngrs::NSlider* m_q_slider;
-	ngrs::NSlider* m_cutoff_slider;
-	ngrs::NSlider* m_a_attack_slider;
-	ngrs::NSlider* m_a_decay_slider;
-	ngrs::NSlider* m_a_sustain_slider;
-	ngrs::NSlider* m_a_release_slider;
-	ngrs::NSlider* m_f_attack_slider;
-	ngrs::NSlider* m_f_decay_slider;
-	ngrs::NSlider* m_f_sustain_slider;
-	ngrs::NSlider* m_f_release_slider;
+    ngrs::ComboBox* m_filtercombo;
+	ngrs::Slider* m_envelope_slider;
+	ngrs::Slider* m_q_slider;
+	ngrs::Slider* m_cutoff_slider;
+	ngrs::Slider* m_a_attack_slider;
+	ngrs::Slider* m_a_decay_slider;
+	ngrs::Slider* m_a_sustain_slider;
+	ngrs::Slider* m_a_release_slider;
+	ngrs::Slider* m_f_attack_slider;
+	ngrs::Slider* m_f_decay_slider;
+	ngrs::Slider* m_f_sustain_slider;
+	ngrs::Slider* m_f_release_slider;
 
-	ngrs::NLabel* m_a_a_label;
-	ngrs::NLabel* m_a_d_label;
-	ngrs::NLabel* m_a_s_label;
-	ngrs::NLabel* m_a_r_label;
-	ngrs::NLabel* m_f_a_label;
-	ngrs::NLabel* m_f_d_label;
-	ngrs::NLabel* m_f_s_label;
-	ngrs::NLabel* m_f_r_label;
-	ngrs::NLabel* m_envelope_label;
-	ngrs::NLabel* m_q_label;
-	ngrs::NLabel* m_cutoff_label;
+	ngrs::Label* m_a_a_label;
+	ngrs::Label* m_a_d_label;
+	ngrs::Label* m_a_s_label;
+	ngrs::Label* m_a_r_label;
+	ngrs::Label* m_f_a_label;
+	ngrs::Label* m_f_d_label;
+	ngrs::Label* m_f_s_label;
+	ngrs::Label* m_f_r_label;
+	ngrs::Label* m_envelope_label;
+	ngrs::Label* m_q_label;
+	ngrs::Label* m_cutoff_label;
 
 	EnvPanel* m_ampframe;
 	EnvPanel* m_filframe;
@@ -100,13 +100,13 @@ public:
 private:
 	void init();
 
-	void onEnvSliderMoved( ngrs::NSlider* slider );
-	void onSustainSliderMoved( ngrs::NSlider* slider );
+	void onEnvSliderMoved( ngrs::Slider* slider );
+	void onSustainSliderMoved( ngrs::Slider* slider );
 
-	void onCutoffSliderMoved( ngrs::NSlider* slider );
-	void onQSliderMoved( ngrs::NSlider *slider );
-    void onFilterModeSelected( ngrs::NItemEvent* ev );
-	void onEnvAmtSliderMoved( ngrs::NSlider* slider );
+	void onCutoffSliderMoved( ngrs::Slider* slider );
+	void onQSliderMoved( ngrs::Slider *slider );
+    void onFilterModeSelected( ngrs::ItemEvent* ev );
+	void onEnvAmtSliderMoved( ngrs::Slider* slider );
 };
 
 }}

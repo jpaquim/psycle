@@ -20,7 +20,7 @@
 #ifndef WIREGUI_H
 #define WIREGUI_H
 
-#include <ngrs/nvisualcomponent.h>
+#include <ngrs/visualcomponent.h>
 
 /**
 @author Stefan
@@ -39,7 +39,7 @@ namespace psycle
 		
 		class WireDlg;
 
-		class WireGUI : public ngrs::NVisualComponent
+		class WireGUI : public ngrs::VisualComponent
 		{
 		public:
 				WireGUI();
@@ -71,8 +71,8 @@ namespace psycle
 				ngrs::NPopupMenu* menu_;
 				ngrs::NPoint newBendPos_;
                 
-				ngrs::NColor polyColor_;
-				ngrs::NColor borderColor_;
+				ngrs::Color polyColor_;
+				ngrs::Color borderColor_;
 
 				WireDlg* dlg;
 
@@ -88,8 +88,8 @@ namespace psycle
 				void drawArrow( ngrs::Graphics& g, const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
 				void initPopupMenu( );
 
-				void onAddBend( ngrs::NButtonEvent* ev );
-                void onRemoveMe ( ngrs::NButtonEvent* ev ); 
+				void onAddBend( ngrs::ButtonEvent* ev );
+                void onRemoveMe ( ngrs::ButtonEvent* ev ); 
 
 		};
 	}

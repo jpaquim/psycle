@@ -21,8 +21,8 @@
 #define ANALYZER_H
 
 #include "machine.h"
-#include <ngrs/npanel.h>
-#include <ngrs/ntimer.h>
+#include <ngrs/panel.h>
+#include <ngrs/timer.h>
 
 
 /**
@@ -36,7 +36,7 @@ namespace psycle {
     const int SCOPE_BUF_SIZE  = 4096;
     const int SCOPE_SPEC_SAMPLES = 256;
 
-    class Analyzer : public ngrs::NPanel
+    class Analyzer : public ngrs::Panel
     {
     public:
       Analyzer();
@@ -51,7 +51,7 @@ namespace psycle {
 
     private:
 
-      ngrs::NTimer timer;
+      ngrs::Timer timer;
 
       int mode_;
       float invol;

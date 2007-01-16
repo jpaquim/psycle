@@ -20,38 +20,38 @@
 #include "patternboxproperties.h"
 #include "sequencerbar.h"
 #include "patterndata.h"
-#include <ngrs/nframeborder.h>
-#include <ngrs/ntablelayout.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nedit.h>
-#include <ngrs/ncolorcombobox.h>
+#include <ngrs/frameborder.h>
+#include <ngrs/tablelayout.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/label.h>
+#include <ngrs/edit.h>
+#include <ngrs/colorcombobox.h>
 
 namespace psycle { namespace host {
 
 PatternBoxProperties::PatternBoxProperties()
  : ngrs::NFlipBox()
 {
-  ngrs::NFrameBorder fr;
+  ngrs::FrameBorder fr;
   setBorder(fr);
 
-  header()->add(new ngrs::NLabel("Pattern Properties"), ngrs::nAlClient);
+  header()->add(new ngrs::Label("Pattern Properties"), ngrs::nAlClient);
 
-  ngrs::NPanel* table = new ngrs::NPanel();
-    ngrs::NTableLayout tableLayout(2,2);
+  ngrs::Panel* table = new ngrs::Panel();
+    ngrs::TableLayout tableLayout(2,2);
     tableLayout.setVGap(5);
     tableLayout.setHGap(5);
     table->setLayout( tableLayout );
-    table->add(new ngrs::NLabel("Name"), ngrs::NAlignConstraint(ngrs::nAlLeft,0,0),true);
-    categoryEdt = new ngrs::NEdit();
+    table->add(new ngrs::Label("Name"), ngrs::AlignConstraint(ngrs::nAlLeft,0,0),true);
+    categoryEdt = new ngrs::Edit();
        categoryEdt->setPreferredSize(150,15);
        categoryEdt->keyPress.connect(this, &PatternBoxProperties::onKeyPress);
-    table->add(categoryEdt, ngrs::NAlignConstraint(ngrs::nAlLeft,1,0),true);
-    table->add(new ngrs::NLabel("Color"), ngrs::NAlignConstraint(ngrs::nAlLeft,0,1),true);
-    clBox = new ngrs::NColorComboBox();
+    table->add(categoryEdt, ngrs::AlignConstraint(ngrs::nAlLeft,1,0),true);
+    table->add(new ngrs::Label("Color"), ngrs::AlignConstraint(ngrs::nAlLeft,0,1),true);
+    clBox = new ngrs::ColorComboBox();
       clBox->colorSelected.connect(this,&PatternBoxProperties::onColorChange);
       clBox->setPreferredSize(50,15);
-    table->add(clBox, ngrs::NAlignConstraint(ngrs::nAlLeft,1,1),true);
+    table->add(clBox, ngrs::AlignConstraint(ngrs::nAlLeft,1,1),true);
   pane()->add(table, ngrs::nAlClient);
 
   cat_ = 0;
@@ -73,12 +73,12 @@ const std::string & PatternBoxProperties::name( ) const
   return categoryEdt->name();
 }
 
-void PatternBoxProperties::onKeyPress( const ngrs::NKeyEvent & )
+void PatternBoxProperties::onKeyPress( const ngrs::KeyEvent & )
 {
   nameChanged.emit(categoryEdt->text());
 }
 
-void PatternBoxProperties::onColorChange( const ngrs::NColor & color )
+void PatternBoxProperties::onColorChange( const ngrs::Color & color )
 {
   if (cat_ != 0) {
      int r = color.red();

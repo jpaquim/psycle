@@ -25,9 +25,9 @@
 #include "song.h"
 #include "sequencerbar.h"
 #include "global.h"
-#include <ngrs/ntabbook.h>
-#include <ngrs/ntimer.h>
-#include <ngrs/ntabbook.h>
+#include <ngrs/tabbook.h>
+#include <ngrs/timer.h>
+#include <ngrs/tabbook.h>
 
 
 /**
@@ -43,7 +43,7 @@ namespace psycle {
     class SequencerBar;
 
 
-    class ChildView : public ngrs::NPanel {
+    class ChildView : public ngrs::Panel {
     public:
       ChildView( );
 
@@ -53,12 +53,12 @@ namespace psycle {
 
       void setTitleBarText( );
 
-      void onPatternView(NObject* sender);
+      void onPatternView(Object* sender);
 
       // connect to signals
       sigslot::signal1<Machine*> newMachineAdded;
       sigslot::signal1<Machine*> machineSelected;
-      sigslot::signal1<ngrs::NButtonEvent*> machineViewDblClick;
+      sigslot::signal1<ngrs::ButtonEvent*> machineViewDblClick;
 
       PatternView* patternView();
       MachineView* machineView();
@@ -71,9 +71,9 @@ namespace psycle {
       void playFromStart();
       void stop();
 
-      ngrs::NTimer timer;
+      ngrs::Timer timer;
 
-      void onMachineViewDblClick( ngrs::NButtonEvent* ev );
+      void onMachineViewDblClick( ngrs::ButtonEvent* ev );
 
       void showMachineView();
       void showPatternView();
@@ -86,9 +86,9 @@ namespace psycle {
 
       Song* _pSong;
 
-      ngrs::NTabBook* tabBook_;
+      ngrs::TabBook* tabBook_;
 
-      // ngrs::NFileDialog* getSaveFileName_;
+      // ngrs::FileDialog* getSaveFileName_;
 
       SequencerBar* sequencerBar_;
       MachineView* machineView_;
@@ -96,9 +96,9 @@ namespace psycle {
       SequencerGUI* sequencerView_;
       VirtualPattern* virtualPattern_;
 
-      ngrs::NDockPanel* macDock;
-      ngrs::NDockPanel* patDock;
-      ngrs::NDockPanel* seqDock;
+      ngrs::DockPanel* macDock;
+      ngrs::DockPanel* patDock;
+      ngrs::DockPanel* seqDock;
 
       WaveEdFrame* waveEd_;
 
@@ -106,7 +106,7 @@ namespace psycle {
       void onTweakSlide( int machine, int command, int value );
 
       void onMachineSelected( Machine* mac );
-      void onTabChange( ngrs::NButtonEvent* ev );
+      void onTabChange( ngrs::ButtonEvent* ev );
 
     };
 

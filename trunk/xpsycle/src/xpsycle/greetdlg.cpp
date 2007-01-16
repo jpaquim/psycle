@@ -18,20 +18,20 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "greetdlg.h"
-#include <ngrs/nlabel.h>
-#include <ngrs/nmemo.h>
-#include <ngrs/nitem.h>
+#include <ngrs/label.h>
+#include <ngrs/memo.h>
+#include <ngrs/item.h>
 
 namespace psycle { 
   namespace host {
 
     GreetDlg::GreetDlg()
-      : ngrs::NWindow()
+      : ngrs::Window()
     {
-      memo = new ngrs::NMemo();
+      memo = new ngrs::Memo();
       memo->setReadOnly(true);
 
-      ngrs::NLabel* greetings = new ngrs::NLabel();
+      ngrs::Label* greetings = new ngrs::Label();
       greetings->setText("Psyceledics Community, wants to thank the following people for their contributions in the developement of Psycle");
       greetings->setWordWrap(true);
       pane()->add(greetings,ngrs::nAlTop);

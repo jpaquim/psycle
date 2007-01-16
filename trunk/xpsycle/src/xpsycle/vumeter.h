@@ -20,7 +20,7 @@
 #ifndef VUMETER_H
 #define VUMETER_H
 
-#include <ngrs/npanel.h>
+#include <ngrs/panel.h>
 
 namespace psycle {
 	namespace host {
@@ -29,7 +29,7 @@ namespace psycle {
 		@author Stefan Nattkemper
 		*/
 
-		class VuMeter : public ngrs::NPanel
+		class VuMeter : public ngrs::Panel
 		{
 		public:
 			VuMeter();

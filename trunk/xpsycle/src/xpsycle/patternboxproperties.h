@@ -20,7 +20,7 @@
 #ifndef PATTERNBOXPROPERTIES_H
 #define PATTERNBOXPROPERTIES_H
 
-#include <ngrs/nflipbox.h>
+#include <ngrs/flipbox.h>
 
 
 /**
@@ -28,8 +28,8 @@
 */
 
 namespace ngrs {
-  class NColorComboBox;
-  class NEdit;
+  class ColorComboBox;
+  class Edit;
 }
 
 namespace psycle { 
@@ -48,7 +48,7 @@ namespace psycle {
       const std::string & name() const;
 
       sigslot::signal1<const std::string &> nameChanged;
-      sigslot::signal1<const ngrs::NColor &> colorChanged;
+      sigslot::signal1<const ngrs::Color &> colorChanged;
 
       void setCategoryItem( CategoryItem* cat );
 
@@ -56,11 +56,11 @@ namespace psycle {
 
       CategoryItem* cat_;
 
-      ngrs::NColorComboBox* clBox;
-      ngrs::NEdit* categoryEdt;
+      ngrs::ColorComboBox* clBox;
+      ngrs::Edit* categoryEdt;
 
-      void onKeyPress( const ngrs::NKeyEvent& );
-      void onColorChange( const ngrs::NColor& color );
+      void onKeyPress( const ngrs::KeyEvent& );
+      void onColorChange( const ngrs::Color& color );
 
     };
 

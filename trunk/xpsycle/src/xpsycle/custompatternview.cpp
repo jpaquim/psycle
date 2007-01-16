@@ -22,9 +22,9 @@
 #include "custompatternview.h"
 #include "inputhandler.h"
 
-#include <ngrs/nwindow.h>
-#include <ngrs/nfontmetrics.h>
-#include <ngrs/nstatusmodel.h>
+#include <ngrs/window.h>
+#include <ngrs/fontmetrics.h>
+#include <ngrs/statusmodel.h>
 #include <iostream>
 #include <iomanip>
 
@@ -197,7 +197,7 @@ namespace psycle {
 
     // start of CustomPatternView
     CustomPatternView::CustomPatternView()
-      : ngrs::NPanel(), doDrag_(0), doSelect_(0)
+      : ngrs::Panel(), doDrag_(0), doSelect_(0)
     {
       init();
     }
@@ -216,14 +216,14 @@ namespace psycle {
       trackNumber_ = 0;
       defaultSize_ = 0;
       separatorColor_.setHCOLORREF(0x00400000);
-      selectionColor_ = ngrs::NColor(0,0,255);
+      selectionColor_ = ngrs::Color(0,0,255);
       cursorColor_.setHCOLORREF(0x000000e0);
       patternStep_ = 1;
       colIdent = 3;
       trackMinWidth_ = 20;
       lineGridEnabled_ = true;
       colGridEnabled_ = true;
-      textColor_ = ngrs::NColor( 0, 0, 0 );
+      textColor_ = ngrs::Color( 0, 0, 0 );
       defaultNoteStr_ = "---";
       trackLeftIdent_ = 10;
       trackRightIdent_ = 20;
@@ -312,84 +312,84 @@ namespace psycle {
       return 4;
     }
 
-    void CustomPatternView::setSeparatorColor( const ngrs::NColor & color ) {
+    void CustomPatternView::setSeparatorColor( const ngrs::Color & color ) {
       separatorColor_ = color;
     }
 
-    const ngrs::NColor & CustomPatternView::separatorColor() const {
+    const ngrs::Color & CustomPatternView::separatorColor() const {
       return separatorColor_;
     }
 
-    void CustomPatternView::setSelectionColor( const ngrs::NColor & selColor ) {
+    void CustomPatternView::setSelectionColor( const ngrs::Color & selColor ) {
       selectionColor_ = selColor;
     }
 
-    const ngrs::NColor & CustomPatternView::selectionColor() const {
+    const ngrs::Color & CustomPatternView::selectionColor() const {
       return selectionColor_;
     }
 
-    void CustomPatternView::setCursorColor( const ngrs::NColor & cursorColor )
+    void CustomPatternView::setCursorColor( const ngrs::Color & cursorColor )
     {
       cursorColor_ = cursorColor;
     }
 
-    void CustomPatternView::setRestAreaColor( const ngrs::NColor & color ) {
+    void CustomPatternView::setRestAreaColor( const ngrs::Color & color ) {
       restAreaColor_ = color;
     }
 
-    const ngrs::NColor & CustomPatternView::restArea() const {
+    const ngrs::Color & CustomPatternView::restArea() const {
       return restAreaColor_;
     }
 
-    const ngrs::NColor & CustomPatternView::cursorColor() const {
+    const ngrs::Color & CustomPatternView::cursorColor() const {
       return cursorColor_;
     }
 
-    void CustomPatternView::setBarColor( const ngrs::NColor & barColor ) {
+    void CustomPatternView::setBarColor( const ngrs::Color & barColor ) {
       barColor_ = barColor;
     }
 
-    const ngrs::NColor & CustomPatternView::barColor() const {
+    const ngrs::Color & CustomPatternView::barColor() const {
       return barColor_;
     }
 
-    void CustomPatternView::setBeatColor( const ngrs::NColor & beatColor ) {
+    void CustomPatternView::setBeatColor( const ngrs::Color & beatColor ) {
       beatColor_ = beatColor;
     }
 
-    const ngrs::NColor & CustomPatternView::beatColor() const {
+    const ngrs::Color & CustomPatternView::beatColor() const {
       return beatColor_;
     }
 
-    void CustomPatternView::setPlayBarColor( const ngrs::NColor & playBarColor ) {
+    void CustomPatternView::setPlayBarColor( const ngrs::Color & playBarColor ) {
       playBarColor_ = playBarColor;
     }
 
-    const ngrs::NColor & CustomPatternView::playBarColor() const {
+    const ngrs::Color & CustomPatternView::playBarColor() const {
       return playBarColor_;
     }
 
-    void CustomPatternView::setBigTrackSeparatorColor( const ngrs::NColor & color ) {
+    void CustomPatternView::setBigTrackSeparatorColor( const ngrs::Color & color ) {
       bigTrackSeparatorColor_ = color;
     }
 
-    const ngrs::NColor & CustomPatternView::bigTrackSeparatorColor() const {
+    const ngrs::Color & CustomPatternView::bigTrackSeparatorColor() const {
       return bigTrackSeparatorColor_;
     }
 
-    void CustomPatternView::setSmallTrackSeparatorColor( const ngrs::NColor & color ) {
+    void CustomPatternView::setSmallTrackSeparatorColor( const ngrs::Color & color ) {
       smallTrackSeparatorColor_ = color;
     }
 
-    const ngrs::NColor & CustomPatternView::smallTrackSeparatorColor() const {
+    const ngrs::Color & CustomPatternView::smallTrackSeparatorColor() const {
       return smallTrackSeparatorColor_;
     }
 
-    void CustomPatternView::setLineSeparatorColor( const ngrs::NColor & color ) {
+    void CustomPatternView::setLineSeparatorColor( const ngrs::Color & color ) {
       lineSepColor_ = color;
     }
 
-    const ngrs::NColor & CustomPatternView::lineSeparatorColor() const {
+    const ngrs::Color & CustomPatternView::lineSeparatorColor() const {
       return lineSepColor_;
     }
 
@@ -409,19 +409,19 @@ namespace psycle {
       return colGridEnabled_;
     }
 
-    void CustomPatternView::setTextColor( const ngrs::NColor & color ) {
+    void CustomPatternView::setTextColor( const ngrs::Color & color ) {
       textColor_ = color;
     }
 
-    const ngrs::NColor & CustomPatternView::textColor() const {
+    const ngrs::Color & CustomPatternView::textColor() const {
       return textColor_;
     }
 
-    void CustomPatternView::setBeatTextColor( const ngrs::NColor & color ) {
+    void CustomPatternView::setBeatTextColor( const ngrs::Color & color ) {
       beatTextColor_ = color;
     }
 
-    const ngrs::NColor & CustomPatternView::beatTextColor() {
+    const ngrs::Color & CustomPatternView::beatTextColor() {
       return beatTextColor_;
     }
 
@@ -540,7 +540,7 @@ namespace psycle {
     }
 
     int CustomPatternView::cellWidth( ) const {
-      ngrs::NFontMetrics metrics( font( ) );
+      ngrs::FontMetrics metrics( font( ) );
       return metrics.maxCharWidth( );
     }
 
@@ -591,7 +591,7 @@ namespace psycle {
 
     }
 
-    void CustomPatternView::drawData( ngrs::Graphics& g, int track, int line, int eventnr, int data, bool sharp, const ngrs::NColor & color ) {
+    void CustomPatternView::drawData( ngrs::Graphics& g, int track, int line, int eventnr, int data, bool sharp, const ngrs::Color & color ) {
 
       std::map<int, TrackGeometry>::const_iterator it;
       it = trackGeometrics().lower_bound( track );
@@ -631,7 +631,7 @@ namespace psycle {
       }
     }
 
-    void CustomPatternView::drawString( ngrs::Graphics& g, int track, int line, int eventnr, const std::string & data , const ngrs::NColor & color ) {
+    void CustomPatternView::drawString( ngrs::Graphics& g, int track, int line, int eventnr, const std::string & data , const ngrs::Color & color ) {
       std::map<int, TrackGeometry>::const_iterator it;
       it = trackGeometrics().lower_bound( track );
       if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
@@ -641,7 +641,7 @@ namespace psycle {
       drawStringData( g, xOff + eventOffset(eventnr,0), line, data, color );
     }
 
-    void CustomPatternView::drawBlockData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::NColor & color)
+    void CustomPatternView::drawBlockData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::Color & color)
     {					
       int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
       int yOff = line  * rowHeight() + yp  - dy();
@@ -652,7 +652,7 @@ namespace psycle {
       }
     }
 
-    void CustomPatternView::drawStringData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::NColor & color )
+    void CustomPatternView::drawStringData( ngrs::Graphics& g, int xOff, int line, const std::string & text, const ngrs::Color & color )
     {
       int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
       int yOff = line  * rowHeight() + yp  - dy();
@@ -730,7 +730,7 @@ namespace psycle {
       drawSelBg( g, selection() );
     }
 
-    void CustomPatternView::drawSelBg( ngrs::Graphics& g, const ngrs::NSize & selArea) {			
+    void CustomPatternView::drawSelBg( ngrs::Graphics& g, const ngrs::Size & selArea) {			
       int x1Off = xOffByTrack( selArea.left() );
       int y1Off = selArea.top()  * rowHeight() ;
 
@@ -764,7 +764,7 @@ namespace psycle {
       }
     }
 
-    void CustomPatternView::onKeyPress( const ngrs::NKeyEvent & event ) {
+    void CustomPatternView::onKeyPress( const ngrs::KeyEvent & event ) {
 
       int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( event.shift(),event.scancode()));
 
@@ -937,8 +937,8 @@ namespace psycle {
           }
       }
 
-      /*if (doDrag() != (NApp::system().keyState() & ShiftMask) &&
-      !(NApp::system().keyState() & ControlMask)) {
+      /*if (doDrag() != (App::system().keyState() & ShiftMask) &&
+      !(App::system().keyState() & ControlMask)) {
       if (!doDrag()) {
       clearOldSelection();
       startSel( cursor() );
@@ -1043,8 +1043,8 @@ namespace psycle {
 
     void CustomPatternView::repaintSelection() {
       // these is totally unoptimized todo repaint only new area
-      ngrs::NSize clipBox = selection_.clipBox(oldSelection_);
-      ngrs::NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
+      ngrs::Size clipBox = selection_.clipBox(oldSelection_);
+      ngrs::Rect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
       window()->repaint(this,r);
       oldSelection_ = selection_;
     }
@@ -1119,7 +1119,7 @@ namespace psycle {
         updateStatusBar();
     }
 
-    void CustomPatternView::onKeyRelease( const ngrs::NKeyEvent& event ) {
+    void CustomPatternView::onKeyRelease( const ngrs::KeyEvent& event ) {
       if ( event.shift() & ngrs::nsShift ) {
         endSel();
       }
@@ -1152,7 +1152,7 @@ namespace psycle {
       return false;
     }
 
-    void CustomPatternView::repaintBlock( const ngrs::NSize & block ) {
+    void CustomPatternView::repaintBlock( const ngrs::Size & block ) {
       window()->repaint(this,repaintTrackArea(block.top(),block.bottom(),block.left(), block.right()));
     }
 
@@ -1160,17 +1160,17 @@ namespace psycle {
       window()->repaint(this,repaintTrackArea(cursor.line(),cursor.line(),cursor.track(), cursor.track()));
     }
 
-    ngrs::NRect CustomPatternView::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {
+    ngrs::Rect CustomPatternView::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {
       int top    = startLine    * rowHeight()  + absoluteTop()  - dy_;
       int bottom = (endLine+1)  * rowHeight()  + absoluteTop()  - dy_;
       int left   = xOffByTrack( startTrack)  + absoluteLeft() - dx_;
       int right  = xEndByTrack( endTrack  )  + absoluteLeft() - dx_;
 
-      return ngrs::NRect(left,top,right - left,bottom - top);
+      return ngrs::Rect(left,top,right - left,bottom - top);
     }
 
-    ngrs::NPoint CustomPatternView::linesFromRepaint( const ngrs::NRegion& repaintArea ) const {
-      ngrs::NRect repaintRect = repaintArea.rectClipBox();
+    ngrs::NPoint CustomPatternView::linesFromRepaint( const ngrs::Region& repaintArea ) const {
+      ngrs::Rect repaintRect = repaintArea.rectClipBox();
       int absTop  = absoluteTop();
       int ch      = clientHeight();
       // the start for whole repaint
@@ -1188,8 +1188,8 @@ namespace psycle {
       return ngrs::NPoint(start,end);
     }
 
-    ngrs::NPoint CustomPatternView::tracksFromRepaint( const ngrs::NRegion& repaintArea ) const {
-      ngrs::NRect repaintRect = repaintArea.rectClipBox();
+    ngrs::NPoint CustomPatternView::tracksFromRepaint( const ngrs::Region& repaintArea ) const {
+      ngrs::Rect repaintRect = repaintArea.rectClipBox();
 
       int absLeft = absoluteLeft();
       int cw      = clientWidth();
@@ -1227,13 +1227,13 @@ namespace psycle {
 
     void CustomPatternView::clearOldSelection( )
     {
-      ngrs::NSize oldSel = selection_;  
+      ngrs::Size oldSel = selection_;  
       selection_.setSize(0,0,0,0);
       repaintBlock( oldSel );
       doingKeybasedSelect_ = false;
     }
 
-    const ngrs::NSize & CustomPatternView::selection() const {
+    const ngrs::Size & CustomPatternView::selection() const {
       return selection_;
     }
 

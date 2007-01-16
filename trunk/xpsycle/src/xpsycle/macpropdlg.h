@@ -20,8 +20,8 @@
 #ifndef MACPROPDLG_H
 #define MACPROPDLG_H
 
-#include <ngrs/nwindow.h>
-#include <ngrs/nedit.h>
+#include <ngrs/window.h>
+#include <ngrs/edit.h>
 #include "machinegui.h"
 #include "machine.h"
 
@@ -31,7 +31,7 @@
 namespace psycle {
 namespace host {
 
-class MacPropDlg : public ngrs::NWindow
+class MacPropDlg : public ngrs::Window
 {
 public:
     MacPropDlg(Machine *machine);
@@ -46,12 +46,12 @@ public:
 private:
 
     Machine* pMach_;
-    ngrs::NEdit* nameEdit_;
+    ngrs::Edit* nameEdit_;
 
     void init();
-    void onOKBtn( ngrs::NButtonEvent *ev );
-    void onCloneBtn( ngrs::NButtonEvent *ev );
-    void onDeleteBtn( ngrs::NButtonEvent *ev );
+    void onOKBtn( ngrs::ButtonEvent *ev );
+    void onCloneBtn( ngrs::ButtonEvent *ev );
+    void onDeleteBtn( ngrs::ButtonEvent *ev );
 
 };
 }}

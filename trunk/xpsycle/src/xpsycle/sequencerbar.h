@@ -25,24 +25,24 @@
 #include "childview.h"
 
 #include <map>
-#include <ngrs/npanel.h>
-#include <ngrs/ncheckbox.h>
-#include <ngrs/nlistlayout.h>
-#include <ngrs/ncustomtreeview.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nflowlayout.h>
-#include <ngrs/nimage.h>
-#include <ngrs/ngroupbox.h>
-#include <ngrs/nitem.h>
-#include <ngrs/ntreenode.h>
-#include <ngrs/npopupmenu.h>
+#include <ngrs/panel.h>
+#include <ngrs/checkbox.h>
+#include <ngrs/listlayout.h>
+#include <ngrs/customtreeview.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/flowlayout.h>
+#include <ngrs/image.h>
+#include <ngrs/groupbox.h>
+#include <ngrs/item.h>
+#include <ngrs/treenode.h>
+#include <ngrs/popupmenu.h>
 
 /**
 @author Stefan
 */
 
 namespace ngrs {
-  class NObjectInspector;
+  class ObjectInspector;
 }
 
 namespace psycle { 
@@ -51,7 +51,7 @@ namespace psycle {
     class PatternView;
     class SequencerGUI;
 
-    class CategoryTreeNode: public ngrs::NTreeNode {
+    class CategoryTreeNode: public ngrs::TreeNode {
     public:
       CategoryTreeNode( PatternCategory* cat );
       ~CategoryTreeNode();
@@ -80,7 +80,7 @@ namespace psycle {
 
     private:
 
-      ngrs::NLabel* label_;
+      ngrs::Label* label_;
 
       PatternCategory* category_;
 
@@ -88,7 +88,7 @@ namespace psycle {
 
     };
 
-    class PatternItem : public ngrs::NItem {
+    class PatternItem : public ngrs::Item {
     public:
 
       PatternItem(SinglePattern* pattern, const std::string & text);
@@ -102,7 +102,7 @@ namespace psycle {
 
     };
 
-    class SequencerBar : public ngrs::NPanel
+    class SequencerBar : public ngrs::Panel
     {
 
 
@@ -121,9 +121,9 @@ namespace psycle {
 
       void update();
 
-      void onSelChangeSeqList( ngrs::NItemEvent* sender );
+      void onSelChangeSeqList( ngrs::ItemEvent* sender );
 
-      void setEntry( ngrs::NObject* obj );
+      void setEntry( ngrs::Object* obj );
       void setChildView( class ChildView* view );
 
       void selectNextPattern();
@@ -141,9 +141,9 @@ namespace psycle {
 
       int counter;
 
-      ngrs::NCustomTreeView* patternBox_;
+      ngrs::CustomTreeView* patternBox_;
       PatternBoxProperties* propertyBox_;
-      ngrs::NObjectInspector* entryBox_;
+      ngrs::ObjectInspector* entryBox_;
 
       ngrs::NCheckBox* follow_;
       ngrs::NCheckBox* multichannel_audition_;
@@ -153,22 +153,22 @@ namespace psycle {
       ngrs::NCheckBox* movecursorpaste_;
 
 
-      void onNewCategory( ngrs::NButtonEvent * ev );
-      void onNewPattern( ngrs::NButtonEvent* ev );
-      void onClonePattern( ngrs::NButtonEvent* ev );
-      void onDeletePattern( ngrs::NButtonEvent* ev );
+      void onNewCategory( ngrs::ButtonEvent * ev );
+      void onNewPattern( ngrs::ButtonEvent* ev );
+      void onClonePattern( ngrs::ButtonEvent* ev );
+      void onDeletePattern( ngrs::ButtonEvent* ev );
 
-      void onItemSelected( ngrs::NItemEvent* ev );
-      void onPatternItemDblClick( ngrs::NButtonEvent * ev );
-      void onPatternAdd( ngrs::NButtonEvent* ev );
+      void onItemSelected( ngrs::ItemEvent* ev );
+      void onPatternItemDblClick( ngrs::ButtonEvent * ev );
+      void onPatternAdd( ngrs::ButtonEvent* ev );
       void switchPatternViewPattern( ngrs::NCustomItem* item );
 
-      void onMoveCursorPaste( ngrs::NButtonEvent* ev );
-      void onRecordTweakChange( ngrs::NButtonEvent* ev );
+      void onMoveCursorPaste( ngrs::ButtonEvent* ev );
+      void onRecordTweakChange( ngrs::ButtonEvent* ev );
 
       void onNameChanged( const std::string & name );
 
-      std::map<ngrs::NTreeNode*, PatternCategory*> categoryMap;
+      std::map<ngrs::TreeNode*, PatternCategory*> categoryMap;
       std::vector<CategoryItem*> catItems;
 
       std::map<ngrs::NCustomItem*, SinglePattern*> patternMap;

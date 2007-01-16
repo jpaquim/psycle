@@ -20,8 +20,8 @@
 #ifndef INFODLG_H
 #define INFODLG_H
 
-#include <ngrs/nwindow.h>
-#include <ngrs/nmemo.h>
+#include <ngrs/window.h>
+#include <ngrs/memo.h>
 
 /**
 @author Stefan Nattkemper
@@ -29,7 +29,7 @@
 
 namespace psycle { namespace host {
 
-class InfoDlg : public ngrs::NWindow
+class InfoDlg : public ngrs::Window
 {
 public:
     InfoDlg();
@@ -42,7 +42,7 @@ public:
 
 private:
 
-    ngrs::NMemo* memo;
+    ngrs::Memo* memo;
 
 };
 

@@ -29,11 +29,11 @@ namespace psycle {
   namespace host {
 
     MasterDlg::MasterDlg(Machine* master)
-      : ngrs::NWindow()
+      : ngrs::Window()
     {
       pMaster = master;
 
-      const ngrs::NBitmap & bg = SkinReader::Instance()->bitmaps().masterbk();
+      const ngrs::Bitmap & bg = SkinReader::Instance()->bitmaps().masterbk();
 
       pane()->skin_.setBitmap( bg , 1);
 
@@ -112,10 +112,10 @@ namespace psycle {
         }
         index++;
       }
-      ngrs::NWindow::setVisible(on);
+      ngrs::Window::setVisible(on);
     }
 
-    void MasterDlg::onSliderPosChanged( ngrs::NSlider * sender  )
+    void MasterDlg::onSliderPosChanged( ngrs::Slider * sender  )
     {
       std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
       if (it != sliders.end()) {
@@ -157,7 +157,7 @@ namespace psycle {
     MasterDlg::Led::Led( ) : number_(0)
     {
       ngrs::NFont font("Suse sans",6,ngrs::nStraight | ngrs::nMedium | ngrs::nAntiAlias);
-      font.setTextColor( ngrs::NColor( 255, 255, 255) );
+      font.setTextColor( ngrs::Color( 255, 255, 255) );
       setFont(font);
     }
 

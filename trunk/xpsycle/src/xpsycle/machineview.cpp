@@ -23,9 +23,9 @@
 #include "machinegui.h"
 #include "plugin.h"
 #include "wiredlg.h"
-#include <ngrs/nautoscrolllayout.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/napp.h>
+#include <ngrs/autoscrolllayout.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/app.h>
 #include <algorithm>
 
 namespace psycle { 
@@ -33,13 +33,13 @@ namespace psycle {
 	{
 
 		MachineView::MachineView( Song & song ) 
-			: ngrs::NPanel(), _pSong( &song )
+			: ngrs::Panel(), _pSong( &song )
 		{
-			setLayout( ngrs::NAlignLayout() );
+			setLayout( ngrs::AlignLayout() );
 
 			scrollBox_ = new ngrs::NScrollBox();
-			scrollArea_ = new ngrs::NPanel();
-			scrollArea_->setLayout( ngrs::NAutoScrollLayout() );
+			scrollArea_ = new ngrs::Panel();
+			scrollArea_->setLayout( ngrs::AutoScrollLayout() );
 			scrollArea_->setClientSizePolicy( ngrs::nVertical | ngrs::nHorizontal );
 			scrollArea_->mousePress.connect( this, &MachineView::onViewMousePress );
 			scrollBox_->setScrollPane( scrollArea_ );
@@ -163,21 +163,21 @@ namespace psycle {
 			line = new WireGUI();
 			line->setPoints(ngrs::NPoint(sender->left()+midW,sender->top()+midH),ngrs::NPoint(sender->left()+midW,sender->top()+midH));
 			scrollArea_->insert( line,0 );
-			line->setMoveable(ngrs::NMoveable(ngrs::nMvVertical | ngrs::nMvHorizontal | ngrs::nMvPolygonPicker));
+			line->setMoveable(ngrs::Moveable(ngrs::nMvVertical | ngrs::nMvHorizontal | ngrs::nMvPolygonPicker));
 			repaint();
 			line->setMoveFocus(0);
 			line->moveEnd.connect(this,&MachineView::onLineMoveEnd);
 			line->moveStart.connect(this,&MachineView::onLineMoveStart);  
 		} 
 
-		void MachineView::onLineMoveStart( const ngrs::NMoveEvent& ev ) {
+		void MachineView::onLineMoveStart( const ngrs::MoveEvent& ev ) {
 			// pickindex = 0 : rewire
 			if ( ev.picker() == 0 || ev.picker() == 1 ) {
 
 			}
 		}
 
-		void MachineView::onLineMoveEnd( const ngrs::NMoveEvent& ev )
+		void MachineView::onLineMoveEnd( const ngrs::MoveEvent& ev )
 		{	
 			if ( !line ) return;
 
@@ -314,12 +314,12 @@ namespace psycle {
 			setSelectedWire( wire );
 		}
 
-		void MachineView::setSelectedWire( ngrs::NObject * wire ) {
+		void MachineView::setSelectedWire( ngrs::Object * wire ) {
 
 			// unselect old wire
 
 			if ( selectedWire_ ) {
-				//     selectedWire_->setMoveable( ngrs::NMoveable() );
+				//     selectedWire_->setMoveable( ngrs::Moveable() );
 				selectedWire_->repaint();
 				selectedWire_ = 0;              
 			}
@@ -331,13 +331,13 @@ namespace psycle {
 			if ( it != wireGUIs.end() ) {
 				// wire found
 				selectedWire_ = *it;
-				selectedWire_->setMoveable( ngrs::NMoveable( ngrs::nMvPolygonPicker ) );
+				selectedWire_->setMoveable( ngrs::Moveable( ngrs::nMvPolygonPicker ) );
 				selectedWire_->repaint();
 			}
 
 		}
 
-		ngrs::NPanel * MachineView::scrollArea( )
+		ngrs::Panel * MachineView::scrollArea( )
 		{
 			return scrollArea_;
 		}
@@ -431,12 +431,12 @@ namespace psycle {
 			return colorInfo_;
 		}
 
-		void MachineView::onWireSelected( ngrs::NButtonEvent* ev ) {
+		void MachineView::onWireSelected( ngrs::ButtonEvent* ev ) {
 			setSelectedWire( ev->sender() );
 			repaint();
 		}
 
-		void MachineView::onViewMousePress( ngrs::NButtonEvent* ev ) {
+		void MachineView::onViewMousePress( ngrs::ButtonEvent* ev ) {
 			setSelectedWire( 0 );
 		}
 

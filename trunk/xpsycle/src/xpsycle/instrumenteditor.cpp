@@ -21,25 +21,25 @@
 #include "global.h"
 #include "song.h"
 #include "envdialog.h"
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nflowlayout.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nbevelborder.h>
-#include <ngrs/nframeborder.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/nedit.h>
-#include <ngrs/ngroupbox.h>
-#include <ngrs/ncombobox.h>
-#include <ngrs/nitem.h>
-#include <ngrs/nslider.h>
-#include <ngrs/ncheckbox.h>
-#include <ngrs/nitemevent.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/flowlayout.h>
+#include <ngrs/label.h>
+#include <ngrs/bevelborder.h>
+#include <ngrs/frameborder.h>
+#include <ngrs/button.h>
+#include <ngrs/edit.h>
+#include <ngrs/groupbox.h>
+#include <ngrs/combobox.h>
+#include <ngrs/item.h>
+#include <ngrs/slider.h>
+#include <ngrs/checkbox.h>
+#include <ngrs/itemevent.h>
 
 namespace psycle {
 namespace host {
 
 InstrumentEditor::InstrumentEditor( Song * song )
-  : ngrs::NWindow(), _pSong(song)
+  : ngrs::Window(), _pSong(song)
 {
   init();
 }
@@ -53,61 +53,61 @@ void InstrumentEditor::init( )
 {
   setTitle("Instrument Editor");
 
-  ngrs::NBevelBorder bvlBorder( ngrs::nNone, ngrs::nLowered );
-  bvlBorder.setSpacing( ngrs::NSize( 2, 2, 2, 2 ) );
+  ngrs::BevelBorder bvlBorder( ngrs::nNone, ngrs::nLowered );
+  bvlBorder.setSpacing( ngrs::Size( 2, 2, 2, 2 ) );
 
-  ngrs::NPanel* header = new ngrs::NPanel();
+  ngrs::Panel* header = new ngrs::Panel();
     header->setHeight(20);
-    header->setLayout( ngrs::NFlowLayout( ngrs::nAlLeft, 5, 5));
-    header->add(new ngrs::NLabel("Instrument"), ngrs::nAlLeft);
-    instNumberLbl = new ngrs::NLabel("   ");
-	    ngrs::NBevelBorder bvl( ngrs::nNone, ngrs::nLowered );
-		  bvl.setSpacing( ngrs::NSize(2,2,2,2) );
+    header->setLayout( ngrs::FlowLayout( ngrs::nAlLeft, 5, 5));
+    header->add(new ngrs::Label("Instrument"), ngrs::nAlLeft);
+    instNumberLbl = new ngrs::Label("   ");
+	    ngrs::BevelBorder bvl( ngrs::nNone, ngrs::nLowered );
+		  bvl.setSpacing( ngrs::Size(2,2,2,2) );
         instNumberLbl->setBorder( bvl );
     header->add( instNumberLbl, ngrs::nAlLeft );
-    decInstBtn = new ngrs::NButton("<");
+    decInstBtn = new ngrs::Button("<");
       decInstBtn->clicked.connect( this, &InstrumentEditor::onBtnPress );
       decInstBtn->setFlat( false );
     header->add( decInstBtn, ngrs::nAlLeft );
-    incInstBtn = new ngrs::NButton( ">" );
+    incInstBtn = new ngrs::Button( ">" );
       incInstBtn->setFlat( false );
       incInstBtn->clicked.connect( this, &InstrumentEditor::onBtnPress );
     header->add( incInstBtn, ngrs::nAlLeft );
-    instNameEd = new ngrs::NEdit();
+    instNameEd = new ngrs::Edit();
       instNameEd->setWidth( 100 );
       instNameEd->setHeight( instNameEd->preferredHeight() );
     header->add( instNameEd, ngrs::nAlLeft );
-    killBtn = new ngrs::NButton( "Kill..." );
+    killBtn = new ngrs::Button( "Kill..." );
       killBtn->clicked.connect( this, &InstrumentEditor::onBtnPress );
       killBtn->setFlat( false );
     header->add( killBtn, ngrs::nAlLeft );
   pane()->add( header, ngrs::nAlTop );
 
-  ngrs::NGroupBox* properties = new ngrs::NGroupBox();
-      properties->setLayout( ngrs::NAlignLayout(5,5));
+  ngrs::GroupBox* properties = new ngrs::GroupBox();
+      properties->setLayout( ngrs::AlignLayout(5,5));
       properties->setHeaderText("Instrument Properties");
-      ngrs::NPanel* noteActionPnl = new ngrs::NPanel();
-        noteActionPnl->setLayout( ngrs::NFlowLayout( ngrs::nAlLeft, 5, 5) );
-        noteActionPnl->add( new ngrs::NLabel("New Note Action") );
-          newNoteActionCb = new ngrs::NComboBox();
+      ngrs::Panel* noteActionPnl = new ngrs::Panel();
+        noteActionPnl->setLayout( ngrs::FlowLayout( ngrs::nAlLeft, 5, 5) );
+        noteActionPnl->add( new ngrs::Label("New Note Action") );
+          newNoteActionCb = new ngrs::ComboBox();
           newNoteActionCb->setWidth(100);
           newNoteActionCb->setHeight(newNoteActionCb->preferredHeight());
-          newNoteActionCb->add(new ngrs::NItem("Note Cut"));
-          newNoteActionCb->add(new ngrs::NItem("Note Release"));
-          newNoteActionCb->add(new ngrs::NItem("None"));
+          newNoteActionCb->add(new ngrs::Item("Note Cut"));
+          newNoteActionCb->add(new ngrs::Item("Note Release"));
+          newNoteActionCb->add(new ngrs::Item("None"));
           newNoteActionCb->itemSelected.connect(this,&InstrumentEditor::onComboSelected);
         noteActionPnl->add( newNoteActionCb, ngrs::nAlTop );
       properties->add( noteActionPnl, ngrs::nAlTop );
-      ngrs::NPanel* panningPnl = new ngrs::NPanel();
-        panningPnl->setLayout( ngrs::NFlowLayout(ngrs::nAlLeft,5,5) );
-        panningSlider = new ngrs::NSlider();
+      ngrs::Panel* panningPnl = new ngrs::Panel();
+        panningPnl->setLayout( ngrs::FlowLayout(ngrs::nAlLeft,5,5) );
+        panningSlider = new ngrs::Slider();
           panningSlider->setOrientation( ngrs::nHorizontal );
           panningSlider->setWidth( 150 );
           panningSlider->setHeight( 20 );
           panningSlider->setRange( 0, 256 );
           panningSlider->change.connect( this,&InstrumentEditor::onSliderMove );
         panningPnl->add( panningSlider, ngrs::nAlLeft );
-        panningLbl = new ngrs::NLabel("   ");
+        panningLbl = new ngrs::Label("   ");
             panningLbl->setBorder( bvlBorder );
         panningPnl->add( panningLbl, ngrs::nAlLeft );
       properties->add( panningPnl,ngrs::nAlTop );
@@ -121,102 +121,102 @@ void InstrumentEditor::init( )
         rndVCFResoCbx->clicked.connect(this,&InstrumentEditor::onBtnPress);
       properties->add(rndVCFResoCbx,ngrs::nAlTop);
 
-      ngrs::NGroupBox* tempoGrpBox = new ngrs::NGroupBox();
-        tempoGrpBox->setLayout( ngrs::NFlowLayout(ngrs::nAlLeft,5,5) );
+      ngrs::GroupBox* tempoGrpBox = new ngrs::GroupBox();
+        tempoGrpBox->setLayout( ngrs::FlowLayout(ngrs::nAlLeft,5,5) );
         tempoGrpBox->setHeaderText("Tempo Looping Tool");
         playSampleFitCbx = new ngrs::NCheckBox("Play sample to fit");
         tempoGrpBox->add(playSampleFitCbx);
-        patRowEdt = new ngrs::NEdit();
+        patRowEdt = new ngrs::Edit();
             patRowEdt->setWidth(50);
             patRowEdt->setBorder( bvlBorder );
             patRowEdt->keyPress.connect(this,&InstrumentEditor::onPatRowEdit);
         tempoGrpBox->add(patRowEdt,ngrs::nAlLeft);
-        tempoGrpBox->add(new ngrs::NLabel("Pattern rows"),ngrs::nAlLeft);
+        tempoGrpBox->add(new ngrs::Label("Pattern rows"),ngrs::nAlLeft);
       properties->add(tempoGrpBox,ngrs::nAlTop);
 
-      ngrs::NGroupBox* waveLayerGrpBox = new ngrs::NGroupBox();
-        waveLayerGrpBox->setLayout( ngrs::NAlignLayout(5,5) );
+      ngrs::GroupBox* waveLayerGrpBox = new ngrs::GroupBox();
+        waveLayerGrpBox->setLayout( ngrs::AlignLayout(5,5) );
         waveLayerGrpBox->setHeaderText("Instrument Wave Layer");
-        ngrs::NPanel* volumePnl = new ngrs::NPanel();
-        volumePnl->setLayout( ngrs::NFlowLayout(ngrs::nAlLeft,5,5));
-        volumePnl->add(new ngrs::NLabel("Volume"),ngrs::nAlLeft);
-        volumeSlider = new ngrs::NSlider();
+        ngrs::Panel* volumePnl = new ngrs::Panel();
+        volumePnl->setLayout( ngrs::FlowLayout(ngrs::nAlLeft,5,5));
+        volumePnl->add(new ngrs::Label("Volume"),ngrs::nAlLeft);
+        volumeSlider = new ngrs::Slider();
           volumeSlider->setOrientation(ngrs::nHorizontal);
           volumeSlider->setWidth(150);
           volumeSlider->setHeight(20);
           volumeSlider->setRange(0,512);
           volumeSlider->change.connect(this,&InstrumentEditor::onSliderMove);
         volumePnl->add(volumeSlider,ngrs::nAlLeft);
-        volumeLbl = new ngrs::NLabel("   ");
+        volumeLbl = new ngrs::Label("   ");
             volumeLbl->setBorder( bvlBorder );
         volumePnl->add(volumeLbl,ngrs::nAlLeft);
         waveLayerGrpBox->add(volumePnl,ngrs::nAlTop);
-        ngrs::NPanel* fineTunePnl = new ngrs::NPanel();
-        fineTunePnl->setLayout( ngrs::NFlowLayout(ngrs::nAlLeft,5,5) );
-        fineTunePnl->add(new ngrs::NLabel("Finetune"), ngrs::nAlLeft );
-        fineTuneSlider = new ngrs::NSlider();
+        ngrs::Panel* fineTunePnl = new ngrs::Panel();
+        fineTunePnl->setLayout( ngrs::FlowLayout(ngrs::nAlLeft,5,5) );
+        fineTunePnl->add(new ngrs::Label("Finetune"), ngrs::nAlLeft );
+        fineTuneSlider = new ngrs::Slider();
           fineTuneSlider->setOrientation( ngrs::nHorizontal );
           fineTuneSlider->setWidth(150);
           fineTuneSlider->setHeight(20);
           fineTuneSlider->setRange(0,256);
           fineTuneSlider->change.connect(this,&InstrumentEditor::onSliderMove);
         fineTunePnl->add(fineTuneSlider,ngrs::nAlLeft);
-        fineTuneLbl = new ngrs::NLabel("   ");
+        fineTuneLbl = new ngrs::Label("   ");
             fineTuneLbl->setBorder( bvlBorder );
         fineTunePnl->add( fineTuneLbl, ngrs::nAlLeft );
         waveLayerGrpBox->add(fineTunePnl,ngrs::nAlTop);
-        ngrs::NPanel* tunePnl = new ngrs::NPanel();
-            tunePnl->setLayout( ngrs::NFlowLayout(ngrs::nAlLeft,5,5));
-            tunePnl->add(new ngrs::NLabel("Tune"));
-            octDecBtn = new ngrs::NButton("Oct-");
+        ngrs::Panel* tunePnl = new ngrs::Panel();
+            tunePnl->setLayout( ngrs::FlowLayout(ngrs::nAlLeft,5,5));
+            tunePnl->add(new ngrs::Label("Tune"));
+            octDecBtn = new ngrs::Button("Oct-");
               octDecBtn->setFlat(false);
               octDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
             tunePnl->add(octDecBtn);
-            noteDecBtn = new ngrs::NButton("Note-");
+            noteDecBtn = new ngrs::Button("Note-");
               noteDecBtn->setFlat(false);
               noteDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
             tunePnl->add(noteDecBtn);
-            noteIncBtn = new ngrs::NButton("Note+");
+            noteIncBtn = new ngrs::Button("Note+");
               noteIncBtn->setFlat(false);
               noteIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
             tunePnl->add(noteIncBtn);
-            octIncBtn  = new ngrs::NButton("Oct+");
+            octIncBtn  = new ngrs::Button("Oct+");
               octIncBtn->setFlat(false);
               octIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
             tunePnl->add(octIncBtn);
-            octLbl   = new ngrs::NLabel("  ");
+            octLbl   = new ngrs::Label("  ");
               octLbl->setBorder( bvlBorder );
             tunePnl->add( octLbl );
         waveLayerGrpBox->add( tunePnl, ngrs::nAlTop );
-        ngrs::NPanel* loopPnl = new ngrs::NPanel();
-            loopPnl->setLayout( ngrs::NFlowLayout(ngrs::nAlLeft,5,5));
-            loopPnl->add(new ngrs::NLabel("Loop"));
-            ngrs::NButton* offBtn = new ngrs::NButton("Off");
+        ngrs::Panel* loopPnl = new ngrs::Panel();
+            loopPnl->setLayout( ngrs::FlowLayout(ngrs::nAlLeft,5,5));
+            loopPnl->add(new ngrs::Label("Loop"));
+            ngrs::Button* offBtn = new ngrs::Button("Off");
               offBtn->setFlat(false);
             loopPnl->add(offBtn);
-            ngrs::NButton* forwardBtn = new ngrs::NButton("Forward");
+            ngrs::Button* forwardBtn = new ngrs::Button("Forward");
               forwardBtn->setFlat(false);
             loopPnl->add(forwardBtn);
-            loopLbl   = new ngrs::NLabel("  ");
+            loopLbl   = new ngrs::Label("  ");
               loopLbl->setBorder( bvlBorder );
             loopPnl->add(loopLbl);
         waveLayerGrpBox->add(loopPnl,ngrs::nAlTop);
-        ngrs::NPanel* loopAtPnl = new ngrs::NPanel();
-            loopAtPnl->setLayout( ngrs::NFlowLayout(ngrs::nAlLeft,5,5));
-            loopAtPnl->add(new ngrs::NLabel("Loop At"),ngrs::nAlLeft);
-            loopAtFromLbl = new ngrs::NLabel("  ");
+        ngrs::Panel* loopAtPnl = new ngrs::Panel();
+            loopAtPnl->setLayout( ngrs::FlowLayout(ngrs::nAlLeft,5,5));
+            loopAtPnl->add(new ngrs::Label("Loop At"),ngrs::nAlLeft);
+            loopAtFromLbl = new ngrs::Label("  ");
               loopAtFromLbl->setBorder( bvlBorder );
             loopAtPnl->add(loopAtFromLbl,ngrs::nAlLeft);
-            loopAtPnl->add(new ngrs::NLabel("to"),ngrs::nAlLeft);
-            loopAtToLbl   = new ngrs::NLabel("  ");
+            loopAtPnl->add(new ngrs::Label("to"),ngrs::nAlLeft);
+            loopAtToLbl   = new ngrs::Label("  ");
               loopAtToLbl->setBorder( bvlBorder );
             loopAtPnl->add(loopAtToLbl,ngrs::nAlLeft);
-            loopAtPnl->add(new ngrs::NLabel("Length"),ngrs::nAlLeft);
-            lenLbl   = new ngrs::NLabel("  ");
+            loopAtPnl->add(new ngrs::Label("Length"),ngrs::nAlLeft);
+            lenLbl   = new ngrs::Label("  ");
               lenLbl->setBorder( bvlBorder );
             loopAtPnl->add( lenLbl, ngrs::nAlLeft );
         waveLayerGrpBox->add( loopAtPnl, ngrs::nAlTop );
-        ngrs::NButton* amplitudeBtn = new ngrs::NButton("Amplitudes/Filter Envelopes");
+        ngrs::Button* amplitudeBtn = new ngrs::Button("Amplitudes/Filter Envelopes");
           amplitudeBtn->setFlat(false);
           amplitudeBtn->clicked.connect(this,&InstrumentEditor::onShowEnvelopeEditor);
         waveLayerGrpBox->add(amplitudeBtn,ngrs::nAlTop);
@@ -308,7 +308,7 @@ std::string InstrumentEditor::noteToString( int value )
   return "err";
 }
 
-void InstrumentEditor::onBtnPress( ngrs::NButtonEvent * ev )
+void InstrumentEditor::onBtnPress( ngrs::ButtonEvent * ev )
 {
   if (ev->sender() == decInstBtn && instrumentIndex() > 0) {
       setInstrument(instrumentIndex()-1);
@@ -370,13 +370,13 @@ int InstrumentEditor::instrumentIndex( )
     return _pSong->instSelected;
 }
 
-void InstrumentEditor::onComboSelected( ngrs::NItemEvent * ev )
+void InstrumentEditor::onComboSelected( ngrs::ItemEvent * ev )
 {
   if (newNoteActionCb->selIndex()!=-1)
     _pSong->_pInstrument[instrumentIndex()]->_NNA = newNoteActionCb->selIndex();
 }
 
-void InstrumentEditor::onSliderMove( ngrs::NSlider * sender )
+void InstrumentEditor::onSliderMove( ngrs::Slider * sender )
 {
   double pos = sender->pos();
   if (sender == panningSlider) {
@@ -396,12 +396,12 @@ void InstrumentEditor::onSliderMove( ngrs::NSlider * sender )
   }
 }
 
-void InstrumentEditor::onPatRowEdit( const ngrs::NKeyEvent & event )
+void InstrumentEditor::onPatRowEdit( const ngrs::KeyEvent & event )
 {
   _pSong->_pInstrument[instrumentIndex()]->_lines = ngrs::str<int>(patRowEdt->text());
 }
 
-void InstrumentEditor::onShowEnvelopeEditor( ngrs::NButtonEvent * ev )
+void InstrumentEditor::onShowEnvelopeEditor( ngrs::ButtonEvent * ev )
 {
   envelopeEditor->setVisible(true);
 }

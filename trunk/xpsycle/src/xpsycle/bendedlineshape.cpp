@@ -22,7 +22,7 @@
 
 
 BendedLineShape::BendedLineShape()
- : ngrs::NShape()
+ : ngrs::Shape()
 {
   p1_.setXY(0,0);
   p2_.setXY(10,10);
@@ -99,11 +99,11 @@ void BendedLineShape::calculateRectArea( )
   pts[3].setX ( p1_.x() - dx );
   pts[3].setY ( p1_.y() + dy );
            
-  ngrs::NRegion region;
+  ngrs::Region region;
   region.setPolygon(pts,4);
                                                    
-  ngrs::NRect r = region.rectClipBox();
-  ngrs::NShape::setPosition( r.left(), r.top(), r.width(), r.height() );                                                         
+  ngrs::Rect r = region.rectClipBox();
+  ngrs::Shape::setPosition( r.left(), r.top(), r.width(), r.height() );                                                         
 }
 
 void BendedLineShape::move( int dx, int dy )
@@ -115,7 +115,7 @@ void BendedLineShape::move( int dx, int dy )
 
 void BendedLineShape::drawPicker( ngrs::Graphics& g )
 {
-  g.setForeground( ngrs::NColor( 100, 100, 100) );
+  g.setForeground( ngrs::Color( 100, 100, 100) );
   g.fillRect(p1_.x()- pickWidth_/2,p1_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   g.fillRect(p2_.x()- pickWidth_/2,p2_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   
@@ -213,14 +213,14 @@ const std::vector<ngrs::NPoint> & BendedLineShape::bendPts() const {
 
 int BendedLineShape::overPicker( int x, int y )
 {
-  if (ngrs::NRect(p1_.x()-pickWidth_/2,p1_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 0;
-  if (ngrs::NRect(p2_.x()-pickWidth_/2,p2_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 1;
+  if (ngrs::Rect(p1_.x()-pickWidth_/2,p1_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 0;
+  if (ngrs::Rect(p2_.x()-pickWidth_/2,p2_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 1;
   
   std::vector<ngrs::NPoint>::const_iterator it = bendPts().begin();
   int i = 2;
   for ( ; it < bendPts().end(); it++, i++ ) {
     ngrs::NPoint pt = *it;
-    if (ngrs::NRect(pt.x()-pickWidth_/2,pt.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return i;
+    if (ngrs::Rect(pt.x()-pickWidth_/2,pt.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return i;
   }
   
   return -1;
@@ -243,18 +243,18 @@ void BendedLineShape::setPicker( int index, int x, int y )
 }
 
 
-ngrs::NRegion BendedLineShape::lineToRegion( )
+ngrs::Region BendedLineShape::lineToRegion( )
 {
 //
 //  int d = distance_;
-//  ngrs::NRect r1( p2().x() - d, std::min( p2().y(), p3().y() ), 2*d, std::abs( p2().y() - p3().y() ) );
-//  ngrs::NRect r2( std::min( p1().x(), p2().x() ) - d, p3().y() - d, std::abs( p1().x() - p2().x() ) + 2*d, 2*d );
-//  ngrs::NRect r3( p1().x() - d, std::min( p1().y(), p3().y() ), 2*d, std::abs( p1().y() - p3().y() ) );
+//  ngrs::Rect r1( p2().x() - d, std::min( p2().y(), p3().y() ), 2*d, std::abs( p2().y() - p3().y() ) );
+//  ngrs::Rect r2( std::min( p1().x(), p2().x() ) - d, p3().y() - d, std::abs( p1().x() - p2().x() ) + 2*d, 2*d );
+//  ngrs::Rect r3( p1().x() - d, std::min( p1().y(), p3().y() ), 2*d, std::abs( p1().y() - p3().y() ) );
   
-//  ngrs::NRegion region = ngrs::NRegion( r2 ) | ngrs::NRegion( r1 ) | ngrs::NRegion ( r3 );
+//  ngrs::Region region = ngrs::Region( r2 ) | ngrs::Region( r1 ) | ngrs::Region ( r3 );
 //  return region;
 
-  ngrs::NRegion region;
+  ngrs::Region region;
 
   ngrs::NPoint startPt = p1();
   std::vector<ngrs::NPoint>::const_iterator it = bendPts().begin();
@@ -281,7 +281,7 @@ ngrs::NRegion BendedLineShape::lineToRegion( )
     pts[3].setX ( startPt.x() - dx );
     pts[3].setY ( startPt.y() + dy );
                                       
-    ngrs::NRegion r;
+    ngrs::Region r;
     r.setPolygon( pts, 4 );
      
     region |= r;
@@ -310,7 +310,7 @@ ngrs::NRegion BendedLineShape::lineToRegion( )
   pts[3].setX ( startPt.x() - dx );
   pts[3].setY ( startPt.y() + dy );
                                       
-  ngrs::NRegion r;
+  ngrs::Region r;
   r.setPolygon( pts, 4 );
 
   region |= r;
@@ -323,12 +323,12 @@ void BendedLineShape::setClippingDistance( int d )
   distance_ = d;
 }
 
-ngrs::NRegion BendedLineShape::region( )
+ngrs::Region BendedLineShape::region( )
 {
   return lineToRegion();
 }
 
-ngrs::NRegion BendedLineShape::spacingRegion( const ngrs::NSize & spacing )
+ngrs::Region BendedLineShape::spacingRegion( const ngrs::Size & spacing )
 {
   return lineToRegion();
 }
