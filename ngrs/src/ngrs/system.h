@@ -54,7 +54,7 @@ namespace ngrs {
 #endif
 
 #ifdef __unix__
- typedef XRect PlatformRect;
+ typedef XRectangle PlatformRect;
 #else
  typedef RECT PlatformRect;
 #endif
