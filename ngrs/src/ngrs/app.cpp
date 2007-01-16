@@ -630,7 +630,7 @@ namespace ngrs {
   Window * App::mouseOverWindow( )
   {
 #ifdef __unix__
-    Window root_win,child_win;
+    ::Window root_win,child_win;
     int x_win; int y_win; unsigned int mask;
     if (  XQueryPointer(system().dpy(),system().rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask)
       ) {
