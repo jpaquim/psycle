@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSYSTEM_H
-#define NSYSTEM_H
+#ifndef SYSTEM_H
+#define SYSTEM_H
 
 #include <string>
 #include "font.h"
@@ -62,18 +62,18 @@ namespace ngrs {
   class Atoms;
   class Window;
 
-  class NSystem{
+  class System{
     // Singleton Pattern
   private:
-    NSystem();
-    ~NSystem();
-    NSystem( NSystem const & );
-    NSystem& operator=(NSystem const&);
+    System();
+    ~System();
+    System( System const & );
+    System& operator=(System const&);
 
   public:
-    static NSystem* Instance() {
+    static System* Instance() {
       //use only single threaded!
-      static NSystem s;
+      static System s;
       return &s; 
     }
     // Singleton pattern end

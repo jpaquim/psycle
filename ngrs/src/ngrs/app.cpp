@@ -96,9 +96,9 @@ namespace ngrs {
     return mainWin_;
   }
 
-  NSystem & App::system( )
+  System & App::system( )
   {
-    return *NSystem::Instance();
+    return *System::Instance();
   }
 
   // private methods

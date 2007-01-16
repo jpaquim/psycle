@@ -87,7 +87,7 @@ namespace ngrs {
     if (ev->button() == 1) {
       VisualComponent* item = static_cast<VisualComponent*>(ev->sender());
 
-      if ( !multiSelect_ || !(App::system().shiftState & nsCtrl ) 
+      if ( !multiSelect_ || !(App::system().shiftState() & nsCtrl ) ) 
         deSelectItems();
 
       item->setSkin(itemBg);
