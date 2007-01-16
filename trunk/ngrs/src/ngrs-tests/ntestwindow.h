@@ -71,7 +71,7 @@ private:
     ngrs::FileListBox* fileBox;
     ngrs::FileDialog* fDialog;
     ngrs::Label* info;
-    ngrs::NCustomItem* itemD;
+    ngrs::CustomItem* itemD;
 
     void testListBox();
     void testComboBox();

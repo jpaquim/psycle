@@ -25,7 +25,7 @@
 namespace ngrs {
 
   CustomMenuItem::CustomMenuItem()
-    : NCustomItem()
+    : CustomItem()
   {
     itemNone = App::config()->skin("mitemnone");
     itemOver = App::config()->skin("mitemover");
@@ -45,12 +45,12 @@ namespace ngrs {
 
   void CustomMenuItem::add( Runtime * comp )
   {
-    NCustomItem::add(comp);
+    CustomItem::add(comp);
   }
 
   void CustomMenuItem::add( VisualComponent * comp, int align )
   {
-    NCustomItem::add(comp, align);
+    CustomItem::add(comp, align);
   }
 
   void CustomMenuItem::onMouseEnter( )

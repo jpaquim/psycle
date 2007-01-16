@@ -24,7 +24,7 @@
 
 namespace ngrs {
 
-  class NCustomItem;
+  class CustomItem;
 
   /**
   @author Stefan
@@ -32,15 +32,15 @@ namespace ngrs {
   class ItemEvent : public Event
   {
   public:
-    ItemEvent(NCustomItem* sender, const std::string & text);
+    ItemEvent(CustomItem* sender, const std::string & text);
 
     ~ItemEvent();
 
-    NCustomItem* item();
+    CustomItem* item();
 
   private:
 
-    NCustomItem* item_;
+    CustomItem* item_;
   };
 
 }

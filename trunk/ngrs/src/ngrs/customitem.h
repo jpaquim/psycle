@@ -29,12 +29,12 @@
 
 namespace ngrs {
 
-  class NCustomItem : public Panel
+  class CustomItem : public Panel
   {
   public:
-    NCustomItem();
+    CustomItem();
 
-    ~NCustomItem();
+    ~CustomItem();
 
     virtual void setText(const std::string & text);
     virtual std::string text() const;
@@ -45,7 +45,7 @@ namespace ngrs {
     void setIntValue( int value );
     int intValue() const;
 
-    bool operator<(const NCustomItem & rhs) const;
+    bool operator<(const CustomItem & rhs) const;
 
   private:
 

@@ -21,46 +21,46 @@
 
 namespace ngrs {
 
-  NCustomItem::NCustomItem()
+  CustomItem::CustomItem()
     : Panel()
   {
     obj_ = 0;
     value_ = 0;
   }
 
-  NCustomItem::~NCustomItem()
+  CustomItem::~CustomItem()
   {
   }
 
-  std::string NCustomItem::text( ) const
+  std::string CustomItem::text( ) const
   {
     return "";
   }
 
-  void NCustomItem::setObject( Object * obj )
+  void CustomItem::setObject( Object* obj )
   {
     obj_ = obj;
   }
 
-  Object * NCustomItem::object( )
+  Object * CustomItem::object( )
   {
     return obj_;
   }
 
-  void NCustomItem::setIntValue( int value ) {
+  void CustomItem::setIntValue( int value ) {
     value_ = value;
   }
 
-  int NCustomItem::intValue() const {
+  int CustomItem::intValue() const {
     return value_;
   }
 
-  bool NCustomItem::operator <( const NCustomItem & rhs ) const
+  bool CustomItem::operator <( const CustomItem& rhs ) const
   {
     return (this < &rhs);
   }
 
-  void NCustomItem::setText( const std::string & text )
+  void CustomItem::setText( const std::string& text )
   {
   }
 

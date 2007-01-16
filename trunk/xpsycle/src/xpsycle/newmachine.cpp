@@ -82,7 +82,7 @@ NewMachine::NewMachine( const PluginFinder & finder )
     tabBook_->setAlign(ngrs::nAlClient);
     ngrs::Panel* generatorPage = new ngrs::Panel();
         generatorPage->setLayout(ngrs::AlignLayout());
-          generatorfBox_ = new ngrs::NListBox();
+          generatorfBox_ = new ngrs::ListBox();
             generatorfBox_->setAlign(ngrs::nAlClient);
             generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
 				std::map< PluginFinderKey, PluginInfo >::const_iterator it = finder.begin();
@@ -101,7 +101,7 @@ NewMachine::NewMachine( const PluginFinder & finder )
 
     ngrs::Panel* effectPage = new ngrs::Panel();
       effectPage->setLayout ( ngrs::AlignLayout() );
-      effectfBox_ = new ngrs::NListBox();
+      effectfBox_ = new ngrs::ListBox();
       effectfBox_->setAlign(ngrs::nAlClient);
       effectfBox_->itemSelected.connect(this,&NewMachine::onEffectItemSelected);
 
@@ -121,7 +121,7 @@ NewMachine::NewMachine( const PluginFinder & finder )
 
     tabBook_->addPage(generatorPage,"Generators");
     tabBook_->addPage(effectPage,"Effects");
-    ngrs::NListBox* internalPage_ = new ngrs::NListBox();
+    ngrs::ListBox* internalPage_ = new ngrs::ListBox();
     ngrs::Item* item = new ngrs::Item("Sampler");
     item->mouseDoublePress.connect(this,&NewMachine::onItemDblClick);
         internalPage_->add(item);
@@ -131,7 +131,7 @@ NewMachine::NewMachine( const PluginFinder & finder )
   	
 		ngrs::Panel* ladspaPage = new ngrs::Panel();
 			ladspaPage->setLayout(ngrs::AlignLayout());
-        ladspaBox_ = new ngrs::NListBox();
+        ladspaBox_ = new ngrs::ListBox();
         ladspaBox_->itemSelected.connect(this,&NewMachine::onLADSPAItemSelected);
 
 				it = finder.begin();
@@ -200,22 +200,22 @@ void NewMachine::onInternalItemSelected( ngrs::ItemEvent * ev )
 
 void NewMachine::onGeneratorItemSelected( ngrs::ItemEvent* ev )
 {
-  ngrs::NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
+  ngrs::CustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
   setPlugin ( item );
 }
 
 void NewMachine::onEffectItemSelected( ngrs::ItemEvent* ev ) {
-  ngrs::NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
+  ngrs::CustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
   setPlugin( item );
 }
 
 void NewMachine::onLADSPAItemSelected( ngrs::ItemEvent* ev ) {
-   ngrs::NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
+   ngrs::CustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
    setPlugin( item );
 }
 
-void NewMachine::setPlugin( ngrs::NCustomItem* item ) {
-    std::map< ngrs::NCustomItem*, PluginFinderKey >::iterator it;		
+void NewMachine::setPlugin( ngrs::CustomItem* item ) {
+    std::map< ngrs::CustomItem*, PluginFinderKey >::iterator it;		
 	it = pluginIdentify_.find( item );
 
     if ( it != pluginIdentify_.end() ) {
@@ -237,19 +237,19 @@ void NewMachine::setPlugin( ngrs::NCustomItem* item ) {
 
 void NewMachine::onEffectTabChange( ngrs::ButtonEvent * ev )
 {
-  ngrs::NCustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
+  ngrs::CustomItem* item = effectfBox_->itemAt( effectfBox_->selIndex() );
   if  (item) setPlugin ( item );
 }
 
 void NewMachine::onGeneratorTabChange( ngrs::ButtonEvent * ev )
 {
-  ngrs::NCustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
+  ngrs::CustomItem* item = generatorfBox_->itemAt( generatorfBox_->selIndex() );
   if  (item) setPlugin ( item );
 }
 
 void NewMachine::onLADSPATabChange( ngrs::ButtonEvent * ev )
 {
- ngrs::NCustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
+ ngrs::CustomItem* item = ladspaBox_->itemAt( ladspaBox_->selIndex() );
   if  (item) setPlugin ( item );
 }
 

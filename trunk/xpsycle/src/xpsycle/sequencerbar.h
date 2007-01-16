@@ -65,7 +65,7 @@ namespace psycle {
     };
 
 
-    class CategoryItem : public ngrs::NCustomItem {
+    class CategoryItem : public ngrs::CustomItem {
     public :
       CategoryItem(PatternCategory* category, const std::string & text);
       CategoryItem();
@@ -161,7 +161,7 @@ namespace psycle {
       void onItemSelected( ngrs::ItemEvent* ev );
       void onPatternItemDblClick( ngrs::ButtonEvent * ev );
       void onPatternAdd( ngrs::ButtonEvent* ev );
-      void switchPatternViewPattern( ngrs::NCustomItem* item );
+      void switchPatternViewPattern( ngrs::CustomItem* item );
 
       void onMoveCursorPaste( ngrs::ButtonEvent* ev );
       void onRecordTweakChange( ngrs::ButtonEvent* ev );
@@ -171,7 +171,7 @@ namespace psycle {
       std::map<ngrs::TreeNode*, PatternCategory*> categoryMap;
       std::vector<CategoryItem*> catItems;
 
-      std::map<ngrs::NCustomItem*, SinglePattern*> patternMap;
+      std::map<ngrs::CustomItem*, SinglePattern*> patternMap;
 
     };
 

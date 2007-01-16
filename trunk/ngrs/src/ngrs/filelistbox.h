@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NFILELISTBOX_H
-#define NFILELISTBOX_H
+#ifndef FILELISTBOX_H
+#define FILELISTBOX_H
 
 #include "listbox.h"
 #include "file.h"
@@ -30,7 +30,7 @@
 
 namespace ngrs {
 
-  class FileListBox : public NListBox
+  class FileListBox : public ListBox
   {
   public:
     FileListBox();
@@ -42,7 +42,7 @@ namespace ngrs {
 
     void update();
 
-    virtual void onItemSelected( NCustomItem * item );
+    virtual void onItemSelected( CustomItem * item );
 
     const std::string & fileName() const;
 

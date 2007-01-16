@@ -113,9 +113,9 @@ namespace psycle {
       void onItemDblClick( ngrs::ButtonEvent* sender );	
       void onCancelBtn( ngrs::ButtonEvent* sender );
 
-      std::map< ngrs::NCustomItem*, PluginFinderKey > pluginIdentify_;
+      std::map< ngrs::CustomItem*, PluginFinderKey > pluginIdentify_;
 
-      void setPlugin( ngrs::NCustomItem* item );
+      void setPlugin( ngrs::CustomItem* item );
       void onGeneratorTabChange( ngrs::ButtonEvent* ev );
       void onEffectTabChange( ngrs::ButtonEvent* ev );
       void onLADSPATabChange( ngrs::ButtonEvent* ev );

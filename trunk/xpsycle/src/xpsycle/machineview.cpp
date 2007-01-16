@@ -37,7 +37,7 @@ namespace psycle {
 		{
 			setLayout( ngrs::AlignLayout() );
 
-			scrollBox_ = new ngrs::NScrollBox();
+			scrollBox_ = new ngrs::ScrollBox();
 			scrollArea_ = new ngrs::Panel();
 			scrollArea_->setLayout( ngrs::AutoScrollLayout() );
 			scrollArea_->setClientSizePolicy( ngrs::nVertical | ngrs::nHorizontal );

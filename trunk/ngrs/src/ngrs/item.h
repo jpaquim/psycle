@@ -31,7 +31,7 @@ namespace ngrs {
   @author Stefan
   */
 
-  class Item : public NCustomItem
+  class Item : public CustomItem
   {
   public:
     Item();

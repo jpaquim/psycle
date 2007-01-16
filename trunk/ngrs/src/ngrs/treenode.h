@@ -28,7 +28,7 @@
 
 namespace ngrs {
 
-  class NCustomItem;
+  class CustomItem;
 
   class TreeNode : public NFlipBox
   {
@@ -39,14 +39,14 @@ namespace ngrs {
 
     ~TreeNode();
 
-    signal2<TreeNode*, NCustomItem*> itemSelected;
+    signal2<TreeNode*, CustomItem*> itemSelected;
 
-    virtual void setHeader(NCustomItem* entry);
-    virtual void addEntry(NCustomItem* entry);
+    virtual void setHeader(CustomItem* entry);
+    virtual void addEntry(CustomItem* entry);
     virtual void addNode(TreeNode* node);
 
 
-    NCustomItem* headerItem();
+    CustomItem* headerItem();
 
     virtual void paint( Graphics& g );
 
@@ -55,7 +55,7 @@ namespace ngrs {
     Panel* entries_;
     Panel* subNodes;
 
-    NCustomItem* headerItem_;
+    CustomItem* headerItem_;
 
     void onItemPress(ButtonEvent * ev);
 

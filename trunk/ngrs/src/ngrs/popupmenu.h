@@ -48,7 +48,7 @@ namespace ngrs {
 
   private:
 
-    std::vector<class NCustomItem*> items;
+    std::vector<class CustomItem*> items;
     class Object* lastOverItem;
 
   };

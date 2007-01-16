@@ -28,7 +28,7 @@
 
 namespace ngrs {
 
-  class Table : public NScrollBox
+  class Table : public ScrollBox
   {
   public:
     Table();
