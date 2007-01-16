@@ -87,11 +87,8 @@ namespace ngrs {
     if (ev->button() == 1) {
       VisualComponent* item = static_cast<VisualComponent*>(ev->sender());
 
-      if ( !multiSelect_ 
-#ifdef __unix__
-        || !(App::system().keyState() & ControlMask)
-#endif   
-        ) deSelectItems();
+      if ( !multiSelect_ || !(App::system().shiftState & nsCtrl ) 
+        deSelectItems();
 
       item->setSkin(itemBg);
       item->repaint();
