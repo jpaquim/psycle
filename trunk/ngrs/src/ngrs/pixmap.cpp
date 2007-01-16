@@ -90,12 +90,12 @@ namespace ngrs {
 
   }
 
-  Pixmap Pixmap::X11Pixmap( ) const
+  ::Pixmap Pixmap::X11Pixmap( ) const
   {
     return pixmap_;
   }
 
-  Pixmap Pixmap::X11ShapePixmap( ) const
+  ::Pixmap Pixmap::X11ShapePixmap( ) const
   {
     return shapepixmap_;
   }

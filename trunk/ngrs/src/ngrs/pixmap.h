@@ -51,8 +51,8 @@ namespace ngrs {
     int height() const;
 
 
-    Pixmap X11Pixmap() const;
-    Pixmap X11ShapePixmap() const;
+    ::Pixmap X11Pixmap() const;
+    ::Pixmap X11ShapePixmap() const;
 
     WinHandle owner() const;
 
@@ -66,8 +66,8 @@ namespace ngrs {
 
     int width_, height_;
 
-    Pixmap pixmap_;
-    Pixmap shapepixmap_;
+    ::Pixmap pixmap_;
+    ::Pixmap shapepixmap_;
 
     WinHandle owner_;
   };
