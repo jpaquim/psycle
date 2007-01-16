@@ -124,16 +124,16 @@ namespace ngrs {
     int sState = nsNone;  
 #ifdef __unix__
     char keys[32];
-    XQueryKeymap( dpy(), keys );
+    ::XQueryKeymap( dpy(), keys );
 
-    long keycode= XKeysymToKeycode( App::system().dpy(), XK_Shift_L);
+    long keycode= ::XKeysymToKeycode( App::system().dpy(), XK_Shift_L);
     if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsShift;
-    keycode = XKeysymToKeycode( App::system().dpy(), XK_Control_L);
+    keycode = ::XKeysymToKeycode( App::system().dpy(), XK_Control_L);
     if ( (keys[keycode/8] & 1<<(keycode%8) ) )   sState |= nsCtrl;
 
-    Window root_win,child_win;
+    ::Window root_win,child_win;
     int x_win; int y_win; unsigned int mask;
-    if (XQueryPointer( dpy(), rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask) )
+    if (::XQueryPointer( dpy(), rootWindow(),&root_win,&child_win,&x_win,&y_win,&x_win,&y_win,&mask) )
     {
       if ( mask & Button1Mask ) sState |= nsLeft;                     
       if ( mask & Button3Mask ) sState |= nsRight;
@@ -207,7 +207,7 @@ namespace ngrs {
   void NSystem::setCursor( int crIdentifier , Window* win) {  
 #ifdef __unix__      
     if ( crIdentifier != cursorId_ && win && win->win() ) {
-      std::map<int,Cursor>::iterator it = cursorMap.find( crIdentifier );
+      std::map<int,::Cursor>::iterator it = cursorMap.find( crIdentifier );
       if ( it != cursorMap.end() ) {
         XDefineCursor( dpy(), win->win(), it->second);
         XFlush( dpy() );
@@ -216,7 +216,7 @@ namespace ngrs {
     }
 #else  
     cursorId_ = crIdentifier;
-    std::map<int,HCURSOR>::iterator it = cursorMap.find( crIdentifier );
+    std::map<int,::HCURSOR>::iterator it = cursorMap.find( crIdentifier );
     if ( it != cursorMap.end() ) {
       SetCursor( it->second );   
     }
