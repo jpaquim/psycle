@@ -35,7 +35,7 @@ namespace ngrs {
 namespace ngrs {
 
 #ifdef __unix__
-  typedef Region PlatformRegion;
+  typedef ::Region PlatformRegion;
 #else
   typedef HRGN PlatformRegion;
 #endif
