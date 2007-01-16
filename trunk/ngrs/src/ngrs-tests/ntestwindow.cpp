@@ -441,7 +441,7 @@ void NTestWindow::toolBarTest( )
 
 void NTestWindow::testListBox( )
 {
-  NListBox* lbox = new NListBox();
+  ListBox* lbox = new ListBox();
      lbox->setMultiSelect(true);
      lbox->setPosition(10,10,200,200);
      for (int i = 0; i < 10; i++) {

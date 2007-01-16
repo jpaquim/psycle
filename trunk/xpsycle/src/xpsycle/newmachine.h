@@ -100,9 +100,9 @@ namespace psycle {
 
       ngrs::TabBook* tabBook_;
 
-      ngrs::NListBox* generatorfBox_;
-      ngrs::NListBox* effectfBox_;
-      ngrs::NListBox* ladspaBox_;
+      ngrs::ListBox* generatorfBox_;
+      ngrs::ListBox* effectfBox_;
+      ngrs::ListBox* ladspaBox_;
 
       void onGeneratorItemSelected( ngrs::ItemEvent* ev );
       void onEffectItemSelected( ngrs::ItemEvent* ev );

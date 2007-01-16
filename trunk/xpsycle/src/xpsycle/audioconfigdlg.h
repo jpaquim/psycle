@@ -31,7 +31,7 @@
 @author Stefan Nattkemper
 */
 
-class NListBox;
+class ListBox;
 class ObjectInspector;
 class ItemEvent;
 
