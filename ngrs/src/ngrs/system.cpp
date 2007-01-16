@@ -200,7 +200,7 @@ namespace ngrs {
     rect.x, rect.y, rect.width, rect.height
 #else
     rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top
-#endif;
+#endif
     );
   }
 
