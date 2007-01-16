@@ -43,7 +43,7 @@ namespace ngrs {
   };
 #endif
 
-  class NSystem;
+  class System;
   class Window;
   class Config;
   class SplashScreen;
@@ -67,7 +67,7 @@ namespace ngrs {
     static void addWindow(WinHandle handle, Window* window);
     static void addKeyAccelerator(const KeyAccelerator & accelerator, Object* notify);
     static void removeWindow( WinHandle handle );
-    static NSystem & system();
+    static System & system();
     static void doRepaint(Window* win);
 
     static Window* mouseOverWindow();
