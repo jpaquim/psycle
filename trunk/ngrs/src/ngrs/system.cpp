@@ -27,7 +27,7 @@ using namespace std;
 
 namespace ngrs {
 
-  NSystem::NSystem()
+  System::System()
   {
     initX();
 #ifdef __unix__
@@ -59,7 +59,7 @@ namespace ngrs {
   }
 
 
-  NSystem::~NSystem()
+  System::~System()
   {
 #ifdef __unix__
     delete atoms_;
@@ -81,46 +81,46 @@ namespace ngrs {
   }
 
 #ifdef __unix__
-  Display* NSystem::dpy( ) const
+  Display* System::dpy( ) const
   {
     return dpy_;
   }
 #else
-  HINSTANCE NSystem::hInst() const {
+  HINSTANCE System::hInst() const {
     return GetModuleHandle( 0 );         
   }
 
 #endif
 
-  int NSystem::depth( ) const
+  int System::depth( ) const
   {
     return depth_;
   }
 
-  int NSystem::screen( ) const
+  int System::screen( ) const
   {
     return screen_;
   }
 
-  WinHandle NSystem::rootWindow( ) const
+  WinHandle System::rootWindow( ) const
   {
     return rootWindow_;
   }
 
 #ifdef __unix__
-  Visual * NSystem::visual( ) const
+  Visual * System::visual( ) const
   {
     return visual_;
   }
 
-  Colormap NSystem::colormap( ) const
+  Colormap System::colormap( ) const
   {
     return colormap_;
   }
 
 #endif
 
-  int NSystem::shiftState() const {
+  int System::shiftState() const {
     int sState = nsNone;  
 #ifdef __unix__
     char keys[32];
@@ -154,7 +154,7 @@ namespace ngrs {
     return sState;   
   }    
 
-  int NSystem::keyState( int vkey ) const {
+  int System::keyState( int vkey ) const {
     // 0 up : 1 down 2 : toggled
 #ifdef __unix__
     char keys[32];
@@ -170,7 +170,7 @@ namespace ngrs {
 #endif
   }
 
-  std::map<int,int> NSystem::keyboardState() const {
+  std::map<int,int> System::keyboardState() const {
     std::map<int,int> states;
     // 0 up : 1 down 2 : toggled
 #ifdef __unix__
@@ -194,7 +194,7 @@ namespace ngrs {
     return states;
   }
 
- Rect NSystem::convertPlatformRect( PlatformRect & rect ) const {
+ Rect System::convertPlatformRect( PlatformRect & rect ) const {
     return Rect(
 #ifdef __unix__
     rect.x, rect.y, rect.width, rect.height
@@ -204,7 +204,7 @@ namespace ngrs {
     );
   }
 
-  void NSystem::setCursor( int crIdentifier , Window* win) {  
+  void System::setCursor( int crIdentifier , Window* win) {  
 #ifdef __unix__      
     if ( crIdentifier != cursorId_ && win && win->win() ) {
       std::map<int,::Cursor>::iterator it = cursorMap.find( crIdentifier );
@@ -223,11 +223,11 @@ namespace ngrs {
 #endif  
   }
 
-  int NSystem::cursor() const {
+  int System::cursor() const {
     return cursorId_;
   }
 
-  void NSystem::initCursorMap() {
+  void System::initCursorMap() {
 #ifdef __unix__
     cursorMap[ nCrDefault   ] = XCreateFontCursor( dpy(), XC_top_left_arrow );
     cursorMap[ nCrNone      ] = None;
@@ -274,7 +274,7 @@ namespace ngrs {
 #endif
   }
 
-  WinHandle NSystem::registerWindow(WinHandle parent )
+  WinHandle System::registerWindow(WinHandle parent )
   {
     WinHandle win_ = 0;
 #ifdef __unix__
@@ -321,7 +321,7 @@ namespace ngrs {
 
   // and here are the private methods
 
-  void NSystem::initX( )
+  void System::initX( )
   {
 #ifdef __unix__
     XInitThreads();
@@ -345,14 +345,14 @@ namespace ngrs {
   
   }
 
-  void NSystem::flush( )
+  void System::flush( )
   {
 #ifdef __unix__
     XFlush(dpy());
 #endif
   }
 
-  FontStructure NSystem::getFontValues( const NFont & nFnt )
+  FontStructure System::getFontValues( const NFont & nFnt )
   {
     FontStructure fnt;
     FontStructure cacheFnt;
@@ -429,7 +429,7 @@ namespace ngrs {
     return fnt;
   }
 
-  std::string NSystem::getFontPattern( const NFont & font )
+  std::string System::getFontPattern( const NFont & font )
   {
     string xfntname = "";
 #ifdef __unix__
@@ -468,7 +468,7 @@ namespace ngrs {
   }
 
 #ifdef __unix__
-  bool NSystem::isWellFormedFont(std::string name)
+  bool System::isWellFormedFont(std::string name)
   {
     string::size_type pos = 0;
     int field = 0;
@@ -476,7 +476,7 @@ namespace ngrs {
     return (field == 14) ? 1 : 0;
   }
 
-  bool NSystem::isScalableFont(std::string name)
+  bool System::isScalableFont(std::string name)
   {
     const char* name_ = name.c_str();
     int i, field;
@@ -493,7 +493,7 @@ namespace ngrs {
     else return true;
   }
 
-  std::string NSystem::fontPattern(const NFont & font) {
+  std::string System::fontPattern(const NFont & font) {
 
     string styleString  = "*";
     string italicString = "r";
@@ -507,7 +507,7 @@ namespace ngrs {
   }
 
 
-  std::string NSystem::getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size)
+  std::string System::getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size)
   {
     int i,j, field;
     char newname[500];    /* big enough for a long font name */
@@ -552,14 +552,14 @@ namespace ngrs {
     return string(newname);
   }
 
-  char ** NSystem::getFontList(Display* dpy, string pattern, int* count)
+  char ** System::getFontList(Display* dpy, string pattern, int* count)
   {
     return XListFonts(dpy, pattern.c_str(), 32767, count);
   }
 
 #endif
 
-  void NSystem::setWindowPosition(WinHandle win, int left, int top, int width, int height )
+  void System::setWindowPosition(WinHandle win, int left, int top, int width, int height )
   {
 #ifdef __unix__
     if (width  <= 0) width  = 1;
@@ -619,7 +619,7 @@ namespace ngrs {
 #endif
   }
 
-  void NSystem::setWindowSize( WinHandle win, int width, int height )
+  void System::setWindowSize( WinHandle win, int width, int height )
   {
 #ifdef __unix__
     if (width  <= 0) width  = 1;
@@ -652,7 +652,7 @@ namespace ngrs {
 #endif
   }
 
-  void NSystem::setWindowMinimumSize( WinHandle win, int minWidth, int minHeight )
+  void System::setWindowMinimumSize( WinHandle win, int minWidth, int minHeight )
   {
 #ifdef __unix__
     XSizeHints *size_hints = XAllocSizeHints();
@@ -664,14 +664,14 @@ namespace ngrs {
 #endif
   }
 
-  void NSystem::destroyWindow( WinHandle win )
+  void System::destroyWindow( WinHandle win )
   {
 #ifdef __unix__
     XDestroyWindow(dpy(), win);
 #endif
   }
 
-  int NSystem::pixelSize( int depth ) const
+  int System::pixelSize( int depth ) const
   {
     int pixelsize;
     switch( depth )
@@ -691,7 +691,7 @@ namespace ngrs {
     return pixelsize;
   }
 
-  void NSystem::setWindowDecoration( WinHandle win, bool on )
+  void System::setWindowDecoration( WinHandle win, bool on )
   {
 #ifdef __unix__
     XSetWindowAttributes attribs;
@@ -719,7 +719,7 @@ namespace ngrs {
 
   }
 
-  void NSystem::unmapWindow( WinHandle  win )
+  void System::unmapWindow( WinHandle  win )
   {
     if (isWindowMapped(win)) {
 #ifdef __unix__
@@ -731,7 +731,7 @@ namespace ngrs {
     }
   }
 
-  void NSystem::mapWindow( WinHandle  win )
+  void System::mapWindow( WinHandle  win )
   {
 #ifdef __unix__
     XMapWindow(dpy(), win);
@@ -741,7 +741,7 @@ namespace ngrs {
 #endif
   }
 
-  bool NSystem::isWindowMapped( WinHandle win )
+  bool System::isWindowMapped( WinHandle win )
   {
 #ifdef __unix__
     XWindowAttributes attr;
@@ -754,7 +754,7 @@ namespace ngrs {
 
 
 
-  int NSystem::windowLeft( WinHandle win )
+  int System::windowLeft( WinHandle win )
   {
 #ifdef __unix__
     XWindowAttributes actual;
@@ -774,7 +774,7 @@ namespace ngrs {
 #endif
   }
 
-  int NSystem::windowTop( WinHandle win )
+  int System::windowTop( WinHandle win )
   {
 #ifdef __unix__
     XWindowAttributes actual;
@@ -794,7 +794,7 @@ namespace ngrs {
 #endif
   }
 
-  void NSystem::setWindowGrab( WinHandle win, bool on )
+  void System::setWindowGrab( WinHandle win, bool on )
   {
 #ifdef __unix__
     if (win!=0) {
@@ -823,7 +823,7 @@ namespace ngrs {
 #endif
   }
 
-  int NSystem::screenWidth( ) const
+  int System::screenWidth( ) const
   {
 #ifdef __unix__
     return DisplayWidth(dpy(),screen());
@@ -832,7 +832,7 @@ namespace ngrs {
 #endif
   }
 
-  int NSystem::screenHeight( ) const
+  int System::screenHeight( ) const
   {
 #ifdef __unix__
     return DisplayHeight(dpy(),screen());
@@ -841,7 +841,7 @@ namespace ngrs {
 #endif
   }
 
-  void NSystem::setStayAbove( WinHandle win )
+  void System::setStayAbove( WinHandle win )
   {
 #ifdef __unix__
     Atom atom = XInternAtom(dpy(),"ATOM",0);
@@ -854,7 +854,7 @@ namespace ngrs {
 #endif
   }
 
-  unsigned long NSystem::getXColorValue(int r, int g, int b )
+  unsigned long System::getXColorValue(int r, int g, int b )
   {
 #ifdef __unix__
     if (isTrueColor()) {
@@ -878,7 +878,7 @@ namespace ngrs {
 #endif
   }
 
-  void NSystem::matchVisual( )
+  void System::matchVisual( )
   {
 #ifdef __unix__
     isTrueColor_ = false;
@@ -923,18 +923,18 @@ namespace ngrs {
 #endif
   }
 
-  bool NSystem::isTrueColor()
+  bool System::isTrueColor()
   {
     return isTrueColor_;
   }
 
-  bool NSystem::propertysActive( )
+  bool System::propertysActive( )
   {
     return true;
   }
 
 #ifdef __unix__
-  MWMHints NSystem::getMotifHints( Window win ) const
+  MWMHints System::getMotifHints( Window win ) const
   {
     MWMHints hint;
     Atom type;
@@ -955,7 +955,7 @@ namespace ngrs {
     return hint;
   }
 
-  void NSystem::setMotifHints( Window win, MWMHints hints )
+  void System::setMotifHints( Window win, MWMHints hints )
   {
     if (hints.flags != 0l) {
       XChangeProperty(dpy(), win,atoms().wm_motif_hint(), atoms().wm_motif_hint(), 32,
@@ -965,7 +965,7 @@ namespace ngrs {
     }
   }
 
-  void NSystem::setMotifModalMode(Window win)
+  void System::setMotifModalMode(Window win)
   {
     MWMHints hints = getMotifHints(win);
     hints.input_mode = MWM_INPUT_PRIMARY_APPLICATION_MODAL;
@@ -974,7 +974,7 @@ namespace ngrs {
   }
 #endif
 
-  void NSystem::setModalMode( WinHandle win )
+  void System::setModalMode( WinHandle win )
   {
 #ifdef __unix__
     setMotifModalMode(win);
@@ -988,13 +988,13 @@ namespace ngrs {
   }
 
 #ifdef __unix__
-  const Atoms & NSystem::atoms( ) const
+  const Atoms & System::atoms( ) const
   {
     return *atoms_;
   }
 #endif
 
-  void NSystem::setFocus( Window* window )
+  void System::setFocus( Window* window )
   {
 #ifdef __unix__
     if ( window->mapped() ) {
@@ -1003,12 +1003,12 @@ namespace ngrs {
 #endif
   }
 
-  ClipBoard & NSystem::clipBoard( )
+  ClipBoard & System::clipBoard( )
   {
     return clipBoard_;
   }
 
-  const ClipBoard & NSystem::clipBoard( ) const
+  const ClipBoard & System::clipBoard( ) const
   {
     return clipBoard_;
   }

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NAPP_H
-#define NAPP_H
+#ifndef APP_H
+#define APP_H
 
 #include <map>
 #include "keyaccelerator.h"
