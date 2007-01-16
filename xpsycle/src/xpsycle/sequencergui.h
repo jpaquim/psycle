@@ -37,7 +37,7 @@ namespace ngrs {
   class ScrollBar;
   class Label;
   class ToolBar;
-  class NListBox;  
+  class ListBox;  
   class NCheckBox;
   class Line;
   class Edit;
@@ -286,7 +286,7 @@ namespace psycle {
 
       Area* scrollArea_;
       ngrs::ToolBar* toolBar_;
-      ngrs::NListBox* patternBox_;
+      ngrs::ListBox* patternBox_;
 
       void onInsertTrack( ngrs::ButtonEvent* ev );
       void onDeleteTrack( ngrs::ButtonEvent* ev );

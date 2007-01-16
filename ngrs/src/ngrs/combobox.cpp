@@ -77,7 +77,7 @@ namespace ngrs {
     popup = new PopupWindow();
     Panel::add(popup);
 
-    lbox = new NListBox();
+    lbox = new ListBox();
     lbox->setAlign(nAlClient);
     lbox->skin_ = App::config()->skin("clbox");
     lbox->itemSelected.connect(this,&ComboBox::onItemClicked);
