@@ -21,10 +21,10 @@
 #define FRAMEMACHINE_H
 
 #include "preset.h"
-#include <ngrs/nwindow.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nframeborder.h>
-#include <ngrs/ndialog.h>
+#include <ngrs/window.h>
+#include <ngrs/label.h>
+#include <ngrs/frameborder.h>
+#include <ngrs/dialog.h>
 
 
 /**
@@ -32,9 +32,9 @@
 */
 
 namespace ngrs {
-  class NTogglePanel;
-  class NButton;
-  class NSlider;
+  class TogglePanel;
+  class Button;
+  class Slider;
 }
 
 namespace psycle {
@@ -48,13 +48,13 @@ namespace psycle {
     const int W_ROWWIDTH = 150;
 
 
-    class NewNameDlg : public ngrs::NDialog {
+    class NewNameDlg : public ngrs::Dialog {
     public:
       NewNameDlg();
       ~NewNameDlg();
     };
 
-    class Cell : public ngrs::NPanel {
+    class Cell : public ngrs::Panel {
     public:
       Cell();
 
@@ -108,8 +108,8 @@ namespace psycle {
       //  value of the knob in that position
       int tweakbase;
 
-      ngrs::NLabel* label;
-      ngrs::NLabel* vLabel;
+      ngrs::Label* label;
+      ngrs::Label* vLabel;
 
     };
 
@@ -123,11 +123,11 @@ namespace psycle {
       virtual void resize();
 
     private:
-      ngrs::NLabel* label;
+      ngrs::Label* label;
     };
 
 
-    class FrameMachine : public ngrs::NWindow {
+    class FrameMachine : public ngrs::Window {
     public:
       FrameMachine( Machine* pMachine );
 
@@ -143,15 +143,15 @@ namespace psycle {
 
     private:
 
-      std::map< ngrs::NButton*, Preset > presetMap;
+      std::map< ngrs::Button*, Preset > presetMap;
       std::map<int, Knob*> knobMap;
       std::map<int, Header*> headerMap;
       Machine* pMachine_;
 
-      ngrs::NPanel* knobPanel;
-      ngrs::NTogglePanel* prsPanel;
-      ngrs::NButton* defaultPrsBtn;
-      ngrs::NSlider* prsBtnSlider;
+      ngrs::Panel* knobPanel;
+      ngrs::TogglePanel* prsPanel;
+      ngrs::Button* defaultPrsBtn;
+      ngrs::Slider* prsBtnSlider;
       
       void init();
       void initParameterGUI();
@@ -161,11 +161,11 @@ namespace psycle {
       bool loadPresets();
       Preset knobsPreset();
 
-      void onPrsClick( ngrs::NButtonEvent* ev );
-      void onLeftBtn( ngrs::NButtonEvent* ev );
-      void onRightBtn( ngrs::NButtonEvent* ev );      
-      void onAddPrs( ngrs::NButtonEvent* ev );
-      void onLoadPrs( ngrs::NButtonEvent* ev );
+      void onPrsClick( ngrs::ButtonEvent* ev );
+      void onLeftBtn( ngrs::ButtonEvent* ev );
+      void onRightBtn( ngrs::ButtonEvent* ev );      
+      void onAddPrs( ngrs::ButtonEvent* ev );
+      void onLoadPrs( ngrs::ButtonEvent* ev );
 
     };
 

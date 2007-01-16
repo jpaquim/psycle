@@ -19,7 +19,7 @@
   ***************************************************************************/
 #include "audiodriver.h"
 
-#include <ngrs/nproperty.h>
+#include <ngrs/property.h>
 
 namespace psycle
 {

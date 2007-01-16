@@ -17,19 +17,19 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <ngrs/npanel.h>
-#include <ngrs/ncolor.h>
-#include <ngrs/ntimer.h>
-#include <ngrs/nslider.h>
+#include <ngrs/panel.h>
+#include <ngrs/color.h>
+#include <ngrs/timer.h>
+#include <ngrs/slider.h>
 #include <deque>
 
 namespace ngrs {
-  class NWindow;
+  class Window;
   class NPopupMenu;
-  class NScrollBar;
-  class NButton;
+  class ScrollBar;
+  class Button;
   class NStatusBar;
-  class NTextStatusItem;
+  class TextStatusItem;
 }
 
 namespace psycle { 
@@ -42,11 +42,11 @@ namespace psycle {
     class WaveEdCrossfadeDialog;
 
     /// wave editor window.
-    class WaveEdChildView : public ngrs::NPanel
+    class WaveEdChildView : public ngrs::Panel
     {
     public:
 
-      class VolumeSlider : public ngrs::NSlider
+      class VolumeSlider : public ngrs::Slider
       {
       public:
         VolumeSlider(Song* pSong_) { this->setOrientation(ngrs::nHorizontal); pSong = pSong_; }
@@ -55,7 +55,7 @@ namespace psycle {
         Song *pSong;
       };
 
-      class WavePanel : public ngrs::NPanel
+      class WavePanel : public ngrs::Panel
       {
       public:
         WavePanel( WaveEdChildView* wView );
@@ -105,37 +105,37 @@ namespace psycle {
       void onTimer();
 
 
-      void onSelectionZoomIn( ngrs::NButtonEvent* ev );
-      void onSelectionZoomSel( ngrs::NButtonEvent* ev );
-      void onSelectionZoomOut( ngrs::NButtonEvent* ev );
-      void onSelectionFadeIn( ngrs::NButtonEvent* ev );
-      void onSelectionFadeOut( ngrs::NButtonEvent* ev );	
-      void onSelectionNormalize( ngrs::NButtonEvent* ev );
-      void onSelectionRemoveDC( ngrs::NButtonEvent* ev );
-      void onSelectionAmplify( ngrs::NButtonEvent* ev );
-      void onSelectionReverse( ngrs::NButtonEvent* ev );
-      void onSelectionShowall( ngrs::NButtonEvent* ev );
-      void onSelectionInsertSilence( ngrs::NButtonEvent* ev );
-      void onEditCopy( ngrs::NButtonEvent* ev );
-      void onEditCut( ngrs::NButtonEvent* ev );
-      void onEditCrop( ngrs::NButtonEvent* ev );
-      void onEditPaste( ngrs::NButtonEvent* ev );
-      void onEditDelete( ngrs::NButtonEvent* ev );
-      void onConvertMono( ngrs::NButtonEvent* ev );
-      void onEditSelectAll( ngrs::NButtonEvent* ev );
-      void onEditSnapToZero( ngrs::NButtonEvent* ev );
-      void onPasteOverwrite( ngrs::NButtonEvent* ev );
-      void onPasteMix( ngrs::NButtonEvent* ev );
-      void onPasteCrossfade( ngrs::NButtonEvent* ev );
-      void onPopupSetLoopStart( ngrs::NButtonEvent* ev );
-      void onPopupSetLoopEnd( ngrs::NButtonEvent* ev );
-      void onPopupSelectionToLoop( ngrs::NButtonEvent* ev );
-      void onPopupZoomIn( ngrs::NButtonEvent* ev);
-      void onPopupZoomOut( ngrs::NButtonEvent* ev);
+      void onSelectionZoomIn( ngrs::ButtonEvent* ev );
+      void onSelectionZoomSel( ngrs::ButtonEvent* ev );
+      void onSelectionZoomOut( ngrs::ButtonEvent* ev );
+      void onSelectionFadeIn( ngrs::ButtonEvent* ev );
+      void onSelectionFadeOut( ngrs::ButtonEvent* ev );	
+      void onSelectionNormalize( ngrs::ButtonEvent* ev );
+      void onSelectionRemoveDC( ngrs::ButtonEvent* ev );
+      void onSelectionAmplify( ngrs::ButtonEvent* ev );
+      void onSelectionReverse( ngrs::ButtonEvent* ev );
+      void onSelectionShowall( ngrs::ButtonEvent* ev );
+      void onSelectionInsertSilence( ngrs::ButtonEvent* ev );
+      void onEditCopy( ngrs::ButtonEvent* ev );
+      void onEditCut( ngrs::ButtonEvent* ev );
+      void onEditCrop( ngrs::ButtonEvent* ev );
+      void onEditPaste( ngrs::ButtonEvent* ev );
+      void onEditDelete( ngrs::ButtonEvent* ev );
+      void onConvertMono( ngrs::ButtonEvent* ev );
+      void onEditSelectAll( ngrs::ButtonEvent* ev );
+      void onEditSnapToZero( ngrs::ButtonEvent* ev );
+      void onPasteOverwrite( ngrs::ButtonEvent* ev );
+      void onPasteMix( ngrs::ButtonEvent* ev );
+      void onPasteCrossfade( ngrs::ButtonEvent* ev );
+      void onPopupSetLoopStart( ngrs::ButtonEvent* ev );
+      void onPopupSetLoopEnd( ngrs::ButtonEvent* ev );
+      void onPopupSelectionToLoop( ngrs::ButtonEvent* ev );
+      void onPopupZoomIn( ngrs::ButtonEvent* ev);
+      void onPopupZoomOut( ngrs::ButtonEvent* ev);
 
-      void onHScroll( ngrs::NScrollBar *sender );
-      void onVolSliderScroll( ngrs::NSlider *slider );
-      void onZoomSliderScroll( ngrs::NSlider *slider );
+      void onHScroll( ngrs::ScrollBar *sender );
+      void onVolSliderScroll( ngrs::Slider *slider );
+      void onZoomSliderScroll( ngrs::Slider *slider );
 
 
     private:
@@ -147,26 +147,26 @@ namespace psycle {
       WavePanel* waveArea;
       ngrs::NPopupMenu *popup;
 
-      ngrs::NPanel *zoomBar;
-      ngrs::NScrollBar *scrollBar;
+      ngrs::Panel *zoomBar;
+      ngrs::ScrollBar *scrollBar;
       VolumeSlider *volSlider;
-      ngrs::NButton *zoomInButton;
-      ngrs::NButton *zoomOutButton;
-      ngrs::NSlider *zoomSlider;
+      ngrs::Button *zoomInButton;
+      ngrs::Button *zoomOutButton;
+      ngrs::Slider *zoomSlider;
       ngrs::NStatusBar *statusBar;
-      ngrs::NTextStatusItem *lengthText;		//shows length of wave
-      ngrs::NTextStatusItem *selText;			//shows length of selection
-      ngrs::NTextStatusItem *statusText;		//displays editor status
-      ngrs::NTextStatusItem *modeText;			//displays mode
+      ngrs::TextStatusItem *lengthText;		//shows length of wave
+      ngrs::TextStatusItem *selText;			//shows length of selection
+      ngrs::TextStatusItem *statusText;		//displays editor status
+      ngrs::TextStatusItem *modeText;			//displays mode
 
       Song *pSong;
 
-      ngrs::NColor clrLo;
-      ngrs::NColor clrMe;
-      ngrs::NColor clrHi;
-      ngrs::NColor clrBlack;
-      ngrs::NColor clrWhite;
-      ngrs::NTimer timer;
+      ngrs::Color clrLo;
+      ngrs::Color clrMe;
+      ngrs::Color clrHi;
+      ngrs::Color clrBlack;
+      ngrs::Color clrWhite;
+      ngrs::Timer timer;
       ngrs::NFont *fntLoop;
 
       float const static zoomBase;	//base of the logarithmic scale used for zooming with zoom slider

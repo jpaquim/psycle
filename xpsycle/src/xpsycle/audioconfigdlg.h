@@ -20,20 +20,20 @@
 #ifndef AUDIOCONFIGDLG_H
 #define AUDIOCONFIGDLG_H
 
-#include <ngrs/nwindow.h>
-#include <ngrs/ntabbook.h>
-#include <ngrs/ngroupbox.h>
-#include <ngrs/ncombobox.h>
-#include <ngrs/nnotebook.h>
-#include <ngrs/nedit.h>
+#include <ngrs/window.h>
+#include <ngrs/tabbook.h>
+#include <ngrs/groupbox.h>
+#include <ngrs/combobox.h>
+#include <ngrs/notebook.h>
+#include <ngrs/edit.h>
 
 /**
 @author Stefan Nattkemper
 */
 
 class NListBox;
-class NObjectInspector;
-class NItemEvent;
+class ObjectInspector;
+class ItemEvent;
 
 namespace psycle {
 	namespace host	{	
@@ -41,7 +41,7 @@ namespace psycle {
 		class Configuration;
 		class AudioDriver;
 
-        class AudioConfigDlg : public ngrs::NWindow {
+        class AudioConfigDlg : public ngrs::Window {
 		public:
 				AudioConfigDlg( Configuration* cfg );
 
@@ -52,29 +52,29 @@ namespace psycle {
 
 		private:
 
-                ngrs::NTabBook* tabBook_;
-                ngrs::NPanel* audioPage_;
-                ngrs::NPanel* midiPage_;
+                ngrs::TabBook* tabBook_;
+                ngrs::Panel* audioPage_;
+                ngrs::Panel* midiPage_;
 
-                ngrs::NGroupBox* driverBox_;
-                ngrs::NComboBox* driverCbx_; // contains the drivers
-                ngrs::NButton* restartBtn_; // re/starts the driver
+                ngrs::GroupBox* driverBox_;
+                ngrs::ComboBox* driverCbx_; // contains the drivers
+                ngrs::Button* restartBtn_; // re/starts the driver
 
-                ngrs::NButton* cancelBtn_;
-                ngrs::NButton* closeBtn_;
-                ngrs::NButton* okBtn_;
+                ngrs::Button* cancelBtn_;
+                ngrs::Button* closeBtn_;
+                ngrs::Button* okBtn_;
 
-				ngrs::NLabel* audioHeaderLbl_;
-				ngrs::NLabel* audioDescriptionLbl_;
+				ngrs::Label* audioHeaderLbl_;
+				ngrs::Label* audioDescriptionLbl_;
 
-				ngrs::NNoteBook* noteBook_; // contains different pages for drivers
-				ngrs::NPanel* jackPage_; // special page for jack
-				ngrs::NPanel* esdPage_;  // special page for esound
-				ngrs::NPanel* generalPage_;   // general page for drivers to set bit/rate etc ..
-				ngrs::NEdit* deviceEdt_;
-				ngrs::NComboBox* sampleRateCbx_;
-				ngrs::NComboBox* bitDepthCbx_;
-				ngrs::NComboBox* channelModeCbx_;
+				ngrs::NoteBook* noteBook_; // contains different pages for drivers
+				ngrs::Panel* jackPage_; // special page for jack
+				ngrs::Panel* esdPage_;  // special page for esound
+				ngrs::Panel* generalPage_;   // general page for drivers to set bit/rate etc ..
+				ngrs::Edit* deviceEdt_;
+				ngrs::ComboBox* sampleRateCbx_;
+				ngrs::ComboBox* bitDepthCbx_;
+				ngrs::ComboBox* channelModeCbx_;
 
 				Configuration* config_;
 				AudioDriver* selectedDriver_;
@@ -88,16 +88,16 @@ namespace psycle {
 
 				void updateGeneralPage();
 
-				void onDriverSelected( ngrs::NItemEvent* ev );
-				void onRestartDriver( ngrs::NButtonEvent* ev );
+				void onDriverSelected( ngrs::ItemEvent* ev );
+				void onRestartDriver( ngrs::ButtonEvent* ev );
 
-				void onOkBtn( ngrs::NButtonEvent* ev );
-				void onCancelBtn( ngrs::NButtonEvent* ev );
-				void onCloseBtn( ngrs::NButtonEvent* ev );
+				void onOkBtn( ngrs::ButtonEvent* ev );
+				void onCancelBtn( ngrs::ButtonEvent* ev );
+				void onCloseBtn( ngrs::ButtonEvent* ev );
 
-				void onChannelCbx( ngrs::NItemEvent* ev );
-				void onSampleRateCbx( ngrs::NItemEvent* ev );
-				void onDepthCbx( ngrs::NItemEvent* ev );
+				void onChannelCbx( ngrs::ItemEvent* ev );
+				void onSampleRateCbx( ngrs::ItemEvent* ev );
+				void onDepthCbx( ngrs::ItemEvent* ev );
 
 
 		};

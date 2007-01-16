@@ -19,14 +19,14 @@
   ***************************************************************************/
 
 #include "mainwindow.h"
-#include <ngrs/napp.h>
-#include <ngrs/nwindow.h>
+#include <ngrs/app.h>
+#include <ngrs/window.h>
 
 int main( int argc, char *argv[] )
 {    	
-    ngrs::NApp app;
+    ngrs::App app;
 
-    ngrs::NWindow* mainWin = new psycle::host::MainWindow( );
+    ngrs::Window* mainWin = new psycle::host::MainWindow( );
     app.setMainWindow( mainWin );
         
     app.run( );

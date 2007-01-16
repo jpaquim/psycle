@@ -22,7 +22,7 @@
 
 #include <cassert>
 #include <map>
-#include <ngrs/napp.h>
+#include <ngrs/app.h>
 
 namespace psycle {
   namespace host {

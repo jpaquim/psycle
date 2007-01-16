@@ -18,10 +18,10 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "waveedxfadedlg.h"
-#include <ngrs/nslider.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/ngroupbox.h>
+#include <ngrs/slider.h>
+#include <ngrs/button.h>
+#include <ngrs/label.h>
+#include <ngrs/groupbox.h>
 #include <cmath>
 #include <iomanip>
 
@@ -31,20 +31,20 @@ namespace psycle
 	{
 		
 		WaveEdCrossfadeDialog::WaveEdCrossfadeDialog()
-			: NDialog()
+			: Dialog()
 		{
 			setTitle("Crossfade");
 			setPosition(0,0,357,161);
 			setPositionToScreenCenter();
 						
-			m_srcStartVol = new ngrs::NSlider();
-			m_srcEndVol = new ngrs::NSlider();
-			m_destStartVol = new ngrs::NSlider();
-			m_destEndVol = new ngrs::NSlider();
-			m_srcStartVolText = new ngrs::NLabel();
-			m_srcEndVolText = new ngrs::NLabel();
-			m_destStartVolText = new ngrs::NLabel();
-			m_destEndVolText = new ngrs::NLabel();
+			m_srcStartVol = new ngrs::Slider();
+			m_srcEndVol = new ngrs::Slider();
+			m_destStartVol = new ngrs::Slider();
+			m_destEndVol = new ngrs::Slider();
+			m_srcStartVolText = new ngrs::Label();
+			m_srcEndVolText = new ngrs::Label();
+			m_destStartVolText = new ngrs::Label();
+			m_destEndVolText = new ngrs::Label();
 
 			m_srcStartVol->setPosition(33, 47, 19, 69);
 			m_srcEndVol->setPosition(90,47,19,69);
@@ -65,26 +65,26 @@ namespace psycle
 			pane()->add(m_srcEndVolText);
 
 			{
-				ngrs::NButton * btn = new ngrs::NButton("Ok", false);
+				ngrs::Button * btn = new ngrs::Button("Ok", false);
 				pane()->add(btn);
 				btn->setPosition(288,7,60,16);
 				btn->clicked.connect(this, &WaveEdCrossfadeDialog::onOkClicked);
 			}
 			{
-				ngrs::NButton * btn = new ngrs::NButton("Cancel", false);
+				ngrs::Button * btn = new ngrs::Button("Cancel", false);
 				pane()->add(btn);
 				btn->setPosition(288,23,60,16);
 				btn->clicked.connect(this, &WaveEdCrossfadeDialog::onCancelClicked);
 			}
-			//these don't appear to do anything yet, but should be uncommented once ngrs::NGroupBox is working..
+			//these don't appear to do anything yet, but should be uncommented once ngrs::GroupBox is working..
 /*			{
-				NGroupBox * grp = new ngrs::NGroupBox();
+				GroupBox * grp = new ngrs::GroupBox();
 				grp->setHeaderText("Wave");
 				pane()->add(grp);
 				grp->setPosition(160,17,110,125);
 			}
 			{
-				NGroupBox * grp = new ngrs::NGroupBox();
+				GroupBox * grp = new ngrs::GroupBox();
 				grp->setHeaderText("Clipboard");
 				pane()->add(grp);
 				grp->setPosition(16,17,110,125);
@@ -108,7 +108,7 @@ namespace psycle
 		}
 
 
-		void WaveEdCrossfadeDialog::onOkClicked( ngrs::NButtonEvent* ev ) 
+		void WaveEdCrossfadeDialog::onOkClicked( ngrs::ButtonEvent* ev ) 
 		{
 			srcStartVol		= (2000-m_srcStartVol->pos())	/ 1000.0f;
 			srcEndVol		= (2000-m_srcEndVol->pos())	/ 1000.0f;
@@ -117,13 +117,13 @@ namespace psycle
 			doClose(true);
 		}
 
-		void WaveEdCrossfadeDialog::onCancelClicked( ngrs::NButtonEvent* ev )
+		void WaveEdCrossfadeDialog::onCancelClicked( ngrs::ButtonEvent* ev )
 		{
 			doClose(false);
 		}
 
 
-		void WaveEdCrossfadeDialog::onSliderMoved( ngrs::NSlider* slider )
+		void WaveEdCrossfadeDialog::onSliderMoved( ngrs::Slider* slider )
 		{
 			float vol;
 			std::ostringstream temp;

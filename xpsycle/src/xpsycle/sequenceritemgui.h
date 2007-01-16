@@ -20,7 +20,7 @@
 #ifndef SEQUENCERITEMGUI_H
 #define SEQUENCERITEMGUI_H
 
-#include <ngrs/npanel.h>
+#include <ngrs/panel.h>
 
 
 

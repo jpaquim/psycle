@@ -18,12 +18,12 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "waveedmixdlg.h"
-#include <ngrs/nslider.h>
-#include <ngrs/ncheckbox.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/ngroupbox.h>
+#include <ngrs/slider.h>
+#include <ngrs/checkbox.h>
+#include <ngrs/edit.h>
+#include <ngrs/label.h>
+#include <ngrs/button.h>
+#include <ngrs/groupbox.h>
 #include <iomanip>
 #include <cmath>
 
@@ -32,20 +32,20 @@ namespace psycle
 	namespace host
 	{
 		WaveEdMixDialog::WaveEdMixDialog()
-			: ngrs::NDialog()
+			: ngrs::Dialog()
 		{
 			setTitle("Mix");
 			setPosition(0,0,306,158);
 			setPositionToScreenCenter();
 						
-			m_srcVol = new ngrs::NSlider();
-			m_destVol = new ngrs::NSlider();
+			m_srcVol = new ngrs::Slider();
+			m_destVol = new ngrs::Slider();
 			m_bFadeIn = new ngrs::NCheckBox("Fade In to Mix");
 			m_bFadeOut = new ngrs::NCheckBox("Fade Out of Mix");
-			m_fadeInTime = new ngrs::NEdit();
-			m_fadeOutTime = new ngrs::NEdit();
-			m_destVolText = new ngrs::NLabel();
-			m_srcVolText = new ngrs::NLabel();
+			m_fadeInTime = new ngrs::Edit();
+			m_fadeOutTime = new ngrs::Edit();
+			m_destVolText = new ngrs::Label();
+			m_srcVolText = new ngrs::Label();
 			m_srcVol->setPosition(33,41,18,68);
 			m_destVol->setPosition(108,41,18,68);
 			m_bFadeIn->setPosition(159,68,140,14);
@@ -64,26 +64,26 @@ namespace psycle
 			pane()->add(m_srcVolText);
 
 			{
-				ngrs::NButton * btn = new ngrs::NButton("Ok", false);
+				ngrs::Button * btn = new ngrs::Button("Ok", false);
 				pane()->add(btn);
 				btn->setPosition(242,7,55,16);
 				btn->clicked.connect(this, &WaveEdMixDialog::onOkClicked);
 			}
 			{
-				ngrs::NButton * btn = new ngrs::NButton("Cancel", false);
+				ngrs::Button * btn = new ngrs::Button("Cancel", false);
 				pane()->add(btn);
 				btn->setPosition(242,28,55,16);
 				btn->clicked.connect(this, &WaveEdMixDialog::onCancelClicked);
 			}
-			//these don't appear to do anything yet, but should be uncommented once ngrs::NGroupBox is working..
+			//these don't appear to do anything yet, but should be uncommented once ngrs::GroupBox is working..
 /*			{
-				NGroupBox * grp = new ngrs::NGroupBox();
+				GroupBox * grp = new ngrs::GroupBox();
 				grp->setHeaderText("Wave");
 				pane()->add(grp);
 				grp->setPosition(91,24,60,127);
 			}
 			{
-				NGroupBox * grp = new ngrs::NGroupBox();
+				GroupBox * grp = new ngrs::GroupBox();
 				grp->setHeaderText("Clipboard");
 				pane()->add(grp);
 				grp->setPosition(16,24,60,127);
@@ -111,7 +111,7 @@ namespace psycle
 			srcVol=destVol=fadeInTime=fadeOutTime=0;
 		}
 		
-		void WaveEdMixDialog::onOkClicked( ngrs::NButtonEvent* ev ) 
+		void WaveEdMixDialog::onOkClicked( ngrs::ButtonEvent* ev ) 
 		{
 			std::string temp;
 			srcVol	= (2000-m_srcVol->pos())/1000.0f;
@@ -129,13 +129,13 @@ namespace psycle
 			doClose(true);
 		}
 
-		void WaveEdMixDialog::onCancelClicked( ngrs::NButtonEvent* ev ) 
+		void WaveEdMixDialog::onCancelClicked( ngrs::ButtonEvent* ev ) 
 		{
 			doClose(false);
 		}
 
 
-		void WaveEdMixDialog::onDestSliderMoved( ngrs::NSlider *slider )
+		void WaveEdMixDialog::onDestSliderMoved( ngrs::Slider *slider )
 		{     
 			std::ostringstream temp;
 			temp.setf(std::ios::fixed);
@@ -151,7 +151,7 @@ namespace psycle
 			m_destVolText->repaint();
 		}
 
-		void WaveEdMixDialog::onSrcSliderMoved( ngrs::NSlider *slider )
+		void WaveEdMixDialog::onSrcSliderMoved( ngrs::Slider *slider )
 		{
 			std::ostringstream temp;
 			temp.setf(std::ios::fixed);
@@ -167,12 +167,12 @@ namespace psycle
 			m_srcVolText->repaint();
 		}
 
-		void WaveEdMixDialog::OnBnClickedFadeoutcheck( ngrs::NButtonEvent* ev )
+		void WaveEdMixDialog::OnBnClickedFadeoutcheck( ngrs::ButtonEvent* ev )
 		{
 			m_fadeOutTime->setEnable(m_bFadeOut->checked());
 		}
 
-		void WaveEdMixDialog::OnBnClickedFadeincheck( ngrs::NButtonEvent* ev )
+		void WaveEdMixDialog::OnBnClickedFadeincheck( ngrs::ButtonEvent* ev )
 		{
 			m_fadeInTime->setEnable(m_bFadeIn->checked());
 		}

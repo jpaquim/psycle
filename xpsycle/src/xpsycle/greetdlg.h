@@ -20,20 +20,20 @@
 #ifndef GREETDLG_H
 #define GREETDLG_H
 
-#include <ngrs/nwindow.h>
+#include <ngrs/window.h>
 
 /**
 @author Stefan Nattkemper
 */
 
 namespace ngrs {
-  class NMemo;
+  class Memo;
 }
 
 namespace psycle { 
   namespace host {
 
-    class GreetDlg : public ngrs::NWindow {
+    class GreetDlg : public ngrs::Window {
     public:
       GreetDlg();
 
@@ -43,7 +43,7 @@ namespace psycle {
 
     private:
 
-      ngrs::NMemo* memo;
+      ngrs::Memo* memo;
 
       void setGreetz();
     };

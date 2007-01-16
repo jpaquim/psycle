@@ -17,23 +17,23 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <ngrs/ndialog.h>
+#include <ngrs/dialog.h>
 
 namespace ngrs {
-  class NEdit;
+  class Edit;
   class NCheckBox;
-  class NButtonEvent;
+  class ButtonEvent;
 }
 
 namespace psycle
 {
   namespace host
   {
-    class WaveEdInsertSilenceDialog : public ngrs::NDialog
+    class WaveEdInsertSilenceDialog : public ngrs::Dialog
     {
     public:
       WaveEdInsertSilenceDialog();
-      ngrs::NEdit	*m_time;
+      ngrs::Edit	*m_time;
       ngrs::NCheckBox *m_atStart;
       ngrs::NCheckBox *m_atEnd;
       ngrs::NCheckBox *m_atCursor;
@@ -47,11 +47,11 @@ namespace psycle
       float timeInSecs;
       insertPosition insertPos;
     protected:
-      void onOkClicked( ngrs::NButtonEvent* ev );
-      void onCancelClicked( ngrs::NButtonEvent* ev );
-      void onInsStartClicked( ngrs::NButtonEvent* ev );
-      void onInsEndClicked( ngrs::NButtonEvent* ev );
-      void onInsCursorClicked( ngrs::NButtonEvent* ev );
+      void onOkClicked( ngrs::ButtonEvent* ev );
+      void onCancelClicked( ngrs::ButtonEvent* ev );
+      void onInsStartClicked( ngrs::ButtonEvent* ev );
+      void onInsEndClicked( ngrs::ButtonEvent* ev );
+      void onInsCursorClicked( ngrs::ButtonEvent* ev );
     };
 
   }

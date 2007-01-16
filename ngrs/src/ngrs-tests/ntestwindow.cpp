@@ -20,49 +20,49 @@
 
 #include "ntestwindow.h"
 
-#include <ngrs/napp.h>
-#include <ngrs/nsystem.h>
-#include <ngrs/natoms.h>
-#include <ngrs/nautoscrolllayout.h>
-#include <ngrs/nline.h>
-#include <ngrs/ntoolbar.h>
-#include <ngrs/ntoolbarseparator.h>
-#include <ngrs/ncombobox.h>
-#include <ngrs/ngridlayout.h>
-#include <ngrs/ncheckbox.h>
-#include <ngrs/ncheckmenuitem.h>
-#include <ngrs/nitem.h>
-#include <ngrs/ngroupbox.h>
-#include <ngrs/nframeborder.h>
-#include <ngrs/nborderlayout.h>
-#include <ngrs/nspinbutton.h>
-#include <ngrs/nspinedit.h>
-#include <ngrs/n7segment.h>
-#include <ngrs/n7segdisplay.h>
-#include <ngrs/ndockpanel.h>
-#include <ngrs/nsplitbar.h>
-#include <ngrs/nflipbox.h>
-#include <ngrs/ncustomtreeview.h>
-#include <ngrs/ntreenode.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nmessagebox.h>
-#include <ngrs/nmenu.h>
-#include <ngrs/npackageinfo.h>
-#include <ngrs/ntablelayout.h>
-#include <ngrs/ntable.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nmemo.h>
-#include <ngrs/nradiobutton.h>
-#include <ngrs/ntextstatusitem.h>
-#include <ngrs/nstatusbar.h>
-#include <ngrs/ncolorchooser.h>
-#include <ngrs/ncolorcombobox.h>
-#include <ngrs/nobjectinspector.h>
-#include <ngrs/nproperty.h>
-#include <ngrs/nxmlparser.h>
-#include <ngrs/nsplitbar.h>
-#include <ngrs/nscrollbar.h>
-#include <ngrs/ngroupbox.h>
+#include <ngrs/app.h>
+#include <ngrs/system.h>
+#include <ngrs/atoms.h>
+#include <ngrs/autoscrolllayout.h>
+#include <ngrs/line.h>
+#include <ngrs/toolbar.h>
+#include <ngrs/toolbarseparator.h>
+#include <ngrs/combobox.h>
+#include <ngrs/gridlayout.h>
+#include <ngrs/checkbox.h>
+#include <ngrs/checkmenuitem.h>
+#include <ngrs/item.h>
+#include <ngrs/groupbox.h>
+#include <ngrs/frameborder.h>
+#include <ngrs/borderlayout.h>
+#include <ngrs/spinbutton.h>
+#include <ngrs/nspiedit.h>
+#include <ngrs/segment7.h>
+#include <ngrs/seg7display.h>
+#include <ngrs/dockpanel.h>
+#include <ngrs/splitbar.h>
+#include <ngrs/flipbox.h>
+#include <ngrs/customtreeview.h>
+#include <ngrs/treenode.h>
+#include <ngrs/label.h>
+#include <ngrs/messagebox.h>
+#include <ngrs/menu.h>
+#include <ngrs/packageinfo.h>
+#include <ngrs/tablelayout.h>
+#include <ngrs/table.h>
+#include <ngrs/edit.h>
+#include <ngrs/memo.h>
+#include <ngrs/radiobutton.h>
+#include <ngrs/textstatusitem.h>
+#include <ngrs/statusbar.h>
+#include <ngrs/colorchooser.h>
+#include <ngrs/colorcombobox.h>
+#include <ngrs/objectinspector.h>
+#include <ngrs/property.h>
+#include <ngrs/xmlparser.h>
+#include <ngrs/splitbar.h>
+#include <ngrs/scrollbar.h>
+#include <ngrs/groupbox.h>
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -78,7 +78,7 @@ const char * a_xpm[] = {
 using namespace ngrs;
 
 NTestWindow::NTestWindow()
-: NWindow()
+: Window()
 {
   testCustomTreeView();
   //testMenu();
@@ -89,23 +89,23 @@ NTestWindow::NTestWindow()
 /*   std::cout << "testwin-id:" << win() << std::endl;
    testEdit();
 
-   NSplitBar* spl = new NSplitBar();
+   SplitBar* spl = new SplitBar();
    spl->setOrientation( nHorizontal );
    pane()->add( spl, nAlTop);
 
    */
-/*	NButton* btn = new NButton("hint test");
+/*	Button* btn = new Button("hint test");
 	 btn->setHint("Save as audio File");
 	 btn->clicked.connect(this, &NTestWindow::onBtnClick);
 	pane()->add( btn, nAlTop);*/
 
 
- /* NSlider* slider = new NSlider();
+ /* Slider* slider = new Slider();
     slider->setRange(0,100);
     slider->setPosition(10,10,200,200);
   pane()->add(slider);*/
 
-/*   NScrollBar* bar = new NScrollBar();
+/*   ScrollBar* bar = new ScrollBar();
      bar->setPosition(10,10,200,20);
      bar->setOrientation( nHorizontal );
      bar->change.connect( this, &NTestWindow::onScrollPosChange);
@@ -117,21 +117,21 @@ NTestWindow::NTestWindow()
 
   //testComboBox();
 
-/*  NPanel* panel = new NPanel();
+/*  Panel* panel = new Panel();
 		panel->setPosition(10,10,100,20);
-		panel->setBorder( NFrameBorder() );
-		panel->setMoveable( NMoveable( nMvLeftBorder | nMvRightBorder | nMvHorizontal) );
+		panel->setBorder( FrameBorder() );
+		panel->setMoveable( Moveable( nMvLeftBorder | nMvRightBorder | nMvHorizontal) );
 	pane()->add(panel);*/
 
-/*	NEdit* btn = new NEdit("Hgenau");
+/*	Edit* btn = new Edit("Hgenau");
 	btn->setVAlign( nAlCenter );
-	btn->setBackground(NColor(255,255,255));
+	btn->setBackground(Color(255,255,255));
 	btn->setTransparent(false);
 	btn->setFont( NFont("Suse Sans",12,nMedium | nAntiAlias) );
 	pane()->add( btn , nAlTop );
-  NLabel* btn1 = new NLabel("Hgenau");
+  Label* btn1 = new Label("Hgenau");
 	btn1->setVAlign( nAlCenter );
-	btn1->setBackground(NColor(100,255,255));
+	btn1->setBackground(Color(100,255,255));
 	btn1->setTransparent(false);
 	btn1->setFont( NFont("Suse Sans",12,nMedium ) );
 	btn1->setPosition(10,100,200,200);
@@ -142,30 +142,30 @@ NTestWindow::NTestWindow()
 
   setName("testwindow");
 
-  fDialog = new NFileDialog();
+  fDialog = new FileDialog();
      fDialog->setName("fdialog");
   add(fDialog);
 
-  NButton* btn1 = new NButton("open FileDialog");
+  Button* btn1 = new Button("open FileDialog");
   btn1->setPosition(10,10,100,20);
   pane()->add(btn1);
 
   btn1->clicked.connect(this, &NTestWindow::onBtnClick);*/
 
-/*  NXmlParser parser;
+/*  XmlParser parser;
 
   std::string text = "<hallo></hallo>";
 
   parser.parseString(text);
 
-  NApp::system().clipBoard().setAsText("Hallo");
+  App::system().clipBoard().setAsText("Hallo");
 
-  std::cout << NApp::system().clipBoard().asText() << std::endl;
+  std::cout << App::system().clipBoard().asText() << std::endl;
 
   /*
-  NObjectInspector* ins = new NObjectInspector();
+  ObjectInspector* ins = new ObjectInspector();
     ins->setPosition(10,10,200,200);
-    NLabel* lb = new NLabel();
+    Label* lb = new Label();
     lb->properties()->publish("name");
     ins->setControlObject(lb);
 
@@ -175,16 +175,16 @@ NTestWindow::NTestWindow()
   // tabOrderTest
 
   /*for (int i = 0; i < 5 ; i++) {
-    NButton* btn = new NButton("Button"+stringify(i));
+    Button* btn = new Button("Button"+stringify(i));
     btn->setFlat( false );
     btn->setEvents(true);
     pane()->add(  btn , nAlTop );
   }
 
-  NPanel* panel = new NPanel();
-    panel->setLayout( NAlignLayout() );
+  Panel* panel = new Panel();
+    panel->setLayout( AlignLayout() );
     for (int i = 5; i < 10 ; i++) {
-      NButton* btn = new NButton("Button"+stringify(i));
+      Button* btn = new Button("Button"+stringify(i));
       btn->setFlat( false );
       btn->setEvents(true);
       panel->add(  btn , nAlTop );
@@ -192,12 +192,12 @@ NTestWindow::NTestWindow()
   pane()->add(panel, nAlClient);*/
 
   /*
-  NColorComboBox* colorBox = new NColorComboBox();
+  ColorComboBox* colorBox = new ColorComboBox();
      colorBox->setPosition(10,10,100,15);
   pane()->add(colorBox);
   */
 
-  /*NColorChooser* chooser = new NColorChooser();
+  /*ColorChooser* chooser = new ColorChooser();
     chooser->setPosition(0,0,500,500);
     chooser->colorSelected.connect(this, &NTestWindow::onColorSelected);
   pane()->add(chooser);*/
@@ -208,21 +208,21 @@ NTestWindow::NTestWindow()
   //testListBox();
 
   //panel->setPosition(10,10,panel->preferredWidth(),panel->preferredHeight());
-  //panel->setBackground(NColor(250,250,250));
+  //panel->setBackground(Color(250,250,250));
   //std::cout << book->preferredHeight() << std::endl;
 
-  /*NComboBox* box = new NComboBox();
+  /*ComboBox* box = new ComboBox();
     box->setPosition(10,40,100,20);
   pane()->add(box);*/
 
   
 
 
-  /*NLabel* lb = new NLabel("Hallo");
+  /*Label* lb = new Label("Hallo");
     lb->setPosition(10,120,100,120);
   pane()->add(lb);*/
 
-  /*NButton* btn = new NButton("delete");
+  /*Button* btn = new Button("delete");
     btn->setPosition(220,50,100,20);
     btn->setFlat(false);
     btn->clicked.connect(this,&NTestWindow::onDelete);
@@ -239,7 +239,7 @@ NTestWindow::~NTestWindow()
 }
 
 
-void NTestWindow::onQuit( NObject * sender )
+void NTestWindow::onQuit( Object * sender )
 {
   exit(0);
 }
@@ -248,14 +248,14 @@ void NTestWindow::onSliderPosChanged( double v )
 {
   int dy = (int) ( ((scrollWin->pane()->clientHeight() - pane()->clientHeight()) / ((double) slider->clientHeight())) * v);
 
-  //XMoveResizeWindow (NApp::system().dpy(),
+  //XMoveResizeWindow (App::system().dpy(),
                           //scrollWin->win(),
                           //0,-dy, 900, 2000);
   //printf("%f\n",v); fflush(stdout);
   //scrollWin->setLeft((int) v);
 }
 
-void NTestWindow::onOpen( NButtonEvent * ev )
+void NTestWindow::onOpen( ButtonEvent * ev )
 {
 	if ( fDialog->execute() ) {
 		
@@ -265,22 +265,22 @@ void NTestWindow::onOpen( NButtonEvent * ev )
 
 void NTestWindow::testBorderLayout( )
 {
-  pane()->setLayout(NBorderLayout());
+  pane()->setLayout(BorderLayout());
 
-  NButton* button = new NButton("Button 1 (PAGE_START)");
+  Button* button = new Button("Button 1 (PAGE_START)");
   pane()->add(button, nAlTop);
 
-  button = new NButton("Button 2 (CENTER)");
+  button = new Button("Button 2 (CENTER)");
   button->setPreferredSize(10, 10);
   pane()->add(button, nAlClient);
 
-  button = new NButton("Button 3 (LINE_START)");
+  button = new Button("Button 3 (LINE_START)");
   pane()->add(button, nAlLeft);
 
-  button = new NButton("Long-Named Button 4 (PAGE_END)");
+  button = new Button("Long-Named Button 4 (PAGE_END)");
   pane()->add(button, nAlBottom);
 
-  button = new NButton("5 (LINE_END)");
+  button = new Button("5 (LINE_END)");
   pane()->add(button, nAlRight);
 
   pack();
@@ -288,9 +288,9 @@ void NTestWindow::testBorderLayout( )
 
 void NTestWindow::testFrameBorder( )
 {
-  NPanel* pnl = new NPanel();
+  Panel* pnl = new Panel();
     pnl->setPosition(10,10,200,200);
-    NFrameBorder fr;
+    FrameBorder fr;
     fr.setOval();
     pnl->setBorder(fr);
   pane()->add(pnl);
@@ -298,85 +298,85 @@ void NTestWindow::testFrameBorder( )
 
 void NTestWindow::testLine( )
 {
-  NLine* line = new NLine();
+  Line* line = new Line();
     line->setPoints(NPoint(10,10),NPoint(100,100));
-    line->setMoveable(NMoveable());
-    fDialog = new NFileDialog();
+    line->setMoveable(Moveable());
+    fDialog = new FileDialog();
     line->add(fDialog);
   pane()->add(line);
 }
 
 void NTestWindow::testMenu( )
 {
-  fDialog = new NFileDialog();
+  fDialog = new FileDialog();
     fDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
   add(fDialog);
 
- // NWindow* popupMenu_ = new NWindow();
+ // Window* popupMenu_ = new Window();
 
-  //NWindow* win1 = new NWindow();
+  //Window* win1 = new Window();
 
-  NMenuBar* menuBar_ = new NMenuBar();
+  MenuBar* menuBar_ = new MenuBar();
   menuBar_->setName("menuBar_");
   pane()->add(menuBar_);
-  NMenu* menu1 = new NMenu("Bearbeiten");//,'b');
+  Menu* menu1 = new Menu("Bearbeiten");//,'b');
      menu1->setName("m1");
   menuBar_->add(menu1);
-  NMenu* menu2 = new NMenu("File");//,'b');
+  Menu* menu2 = new Menu("File");//,'b');
      menu2->setName("m2");
   menuBar_->add(menu2);
-  NMenu* menu3 = new NMenu("Debug");//,'b');
+  Menu* menu3 = new Menu("Debug");//,'b');
      menu3->setName("m3");
   menuBar_->add(menu3);
 
-  NMenuItem* item = new NMenuItem("Open");
+  MenuItem* item = new MenuItem("Open");
      item->click.connect(this,&NTestWindow::onOpen);
      //item->setEnable(false);
   menu1->add(item);
 
 
-  /*NMenuItem* item1 = new NMenuItem("close");
+  /*MenuItem* item1 = new MenuItem("close");
   menu1->add(item1);
 
-  NMenuItem* item2 = new NMenuItem("crass");
+  MenuItem* item2 = new MenuItem("crass");
   menu1->add(item2);
 
-    NMenuItem* item3 = new NMenuItem("jo");
+    MenuItem* item3 = new MenuItem("jo");
   menu1->add(item3);*/
 
-  /*NPanel* test = test = new NPanel();
+  /*Panel* test = test = new Panel();
     test->skin_.gradientStyle=1;
-    test->skin_.gradStartColor = NColor(200,200,200);
+    test->skin_.gradStartColor = Color(200,200,200);
     test->setHeight(20);
-    test->setLayout(new NFlowLayout(nAlLeft));
+    test->setLayout(new FlowLayout(nAlLeft));
   pane()->add(test, nAlTop);
-  test->add(new NButton("Hallo"));*/
+  test->add(new Button("Hallo"));*/
 
 
 
-  //NMenuItem* item = new NMenuItem("open");
-    //NMenu* menu = new NMenu();
+  //MenuItem* item = new MenuItem("open");
+    //Menu* menu = new Menu();
     //item->add(menu);
 //  menu1->add(item);
 //  item->click.connect(this,&NTestWindow::onOpen);
 
-  NCheckMenuItem* item5 = new NCheckMenuItem("test disabled");
+  CheckMenuItem* item5 = new CheckMenuItem("test disabled");
    item5->setEnable(false);
   menu1->add(item5);
 
-  NMenuItem* item6 = new NMenuItem("subtest");
+  MenuItem* item6 = new MenuItem("subtest");
   menu1->add(item6);
 
-  NMenu* subMenu = new NMenu();
+  Menu* subMenu = new Menu();
   item6->add(subMenu);
 
-  NCheckMenuItem* sub_item = new NCheckMenuItem("test");
+  CheckMenuItem* sub_item = new CheckMenuItem("test");
   subMenu->add(sub_item);
 }
 
 void NTestWindow::testSpinButton( )
 {
-   NSpinButton* btn = new NSpinButton();
+   SpinButton* btn = new SpinButton();
      std::cout << btn->preferredWidth() << std::endl;
      btn->setPosition(10,10,btn->preferredWidth(),btn->preferredHeight());
    pane()->add(btn);
@@ -384,7 +384,7 @@ void NTestWindow::testSpinButton( )
 
 void NTestWindow::testEdit( )
 {
-  NEdit* edit = new NEdit();
+  Edit* edit = new Edit();
     edit->setPosition(10,10,200,20);
   pane()->add(edit);
 
@@ -392,7 +392,7 @@ void NTestWindow::testEdit( )
 
 void NTestWindow::testSpinEdit( )
 {
-  NSpinEdit* edit = new NSpinEdit();
+  SpinEdit* edit = new SpinEdit();
     edit->setPosition(10,10,200,20);
   pane()->add(edit);
 }
@@ -402,16 +402,16 @@ void NTestWindow::toolBarTest( )
 
   std::string iconPath = "~/xpsycle/icons/";
 
-  /*NPanel* toolBarPanel_ = new NPanel();
-  NFlowLayout* fl = new NFlowLayout(nAlLeft,0,0);
+  /*Panel* toolBarPanel_ = new Panel();
+  FlowLayout* fl = new FlowLayout(nAlLeft,0,0);
     toolBarPanel_->setLayout(fl);
     toolBarPanel_->setWidth(500);
     toolBarPanel_->setAlign(nAlTop);*/
 
-  NToolBar* toolBar1_ = new NToolBar();
+  ToolBar* toolBar1_ = new ToolBar();
   pane()->add(toolBar1_,nAlTop); //toolBar1_->add(lb);
 
-    NButton* lb = new NButton("Hallo");
+    Button* lb = new Button("Hallo");
     std::cout << "this" << lb->preferredHeight() << std::endl;
     toolBar1_->add(lb);
     std::cout << "after" << lb->preferredHeight() << std::endl; 
@@ -419,19 +419,19 @@ void NTestWindow::toolBarTest( )
     std::cout << toolBar1_->preferredHeight() << std::endl;
     std::cout << "y" << lb->preferredHeight() << std::endl;
 
-    NImage* img;
-    img = new NImage();
+    Image* img;
+    img = new Image();
     img->loadFromFile(iconPath+ "new.xpm");
     img->setPreferredSize(40,80);
-    toolBar1_->add(new NButton(img));
+    toolBar1_->add(new Button(img));
 
-    img = new NImage();
+    img = new Image();
     img->loadFromFile(iconPath+ "new.xpm");
-    toolBar1_->add(new NButton(img));
+    toolBar1_->add(new Button(img));
 
-    img = new NImage();
+    img = new Image();
     img->loadFromFile(iconPath+ "new.xpm");
-    toolBar1_->add(new NButton(img));
+    toolBar1_->add(new Button(img));
    //toolBarPanel_->add(toolBar1_);
    //toolBar1_->resize();
   
@@ -445,7 +445,7 @@ void NTestWindow::testListBox( )
      lbox->setMultiSelect(true);
      lbox->setPosition(10,10,200,200);
      for (int i = 0; i < 10; i++) {
-        lbox->add(new NItem(stringify(i)));
+        lbox->add(new Item(stringify(i)));
      }
   pane()->add(lbox);
   lbox->resize();
@@ -453,19 +453,19 @@ void NTestWindow::testListBox( )
 
 void NTestWindow::testSegDisplay( )
 {
-  N7SegDisplay* disp = new N7SegDisplay();
+  Seg7Display* disp = new Seg7Display();
    pane()->setPosition(0,0,200,200);
   pane()->add(disp);
 }
 
 void NTestWindow::testTable( )
 {
-  NTable* table = new NTable();
+  Table* table = new Table();
   pane()->add(table,nAlClient);
 
   for (int y = 0; y < 100; y++) {
     for (int x = 0; x < 10; x++) {
-         NEdit* edt = new NEdit(stringify(x)+","+stringify(y));
+         Edit* edt = new Edit(stringify(x)+","+stringify(y));
          table->add(edt,x,y, false);
       }
     }
@@ -475,7 +475,7 @@ void NTestWindow::testTable( )
 
 void NTestWindow::testMemo( )
 {
-  NMemo* memo = new NMemo();
+  Memo* memo = new Memo();
      memo->setPosition(10,10,400,400);
   pane()->add(memo, nAlClient);
   memo->setWordWrap(true);
@@ -493,17 +493,17 @@ void NTestWindow::testFlowLayout( )
 
 void NTestWindow::testComboBox( )
 {
-  NComboBox* box = new NComboBox();
+  ComboBox* box = new ComboBox();
     box->setPosition(10,40,200,20);
     for (int i = 0; i < 1000; i++) {
-       box->add(new NItem(stringify(i)+" : tester"));
+       box->add(new Item(stringify(i)+" : tester"));
     }
   pane()->add(box);
 }
 
 void NTestWindow::testMsgBox( )
 {
-  NMessageBox* box = new NMessageBox("Save changes of : name ?");
+  MessageBox* box = new MessageBox("Save changes of : name ?");
     box->setTitle("New Song");
     box->setButtonText("Yes","No","Abort");
   add(box);
@@ -514,39 +514,39 @@ void NTestWindow::testMsgBox( )
 
 void NTestWindow::testTimerButton( )
 {
-  info = new NLabel();
+  info = new Label();
    info->setPosition(200,50,200,20);
   pane()->add(info);
 
   counter = 0;
-  NButton* btn1 = new NButton("press me");
+  Button* btn1 = new Button("press me");
     btn1->setPosition(10,100,200,20);
     btn1->click.connect(this, &NTestWindow::onBtnClick);
     btn1->setRepeatMode(true);
   pane()->add(btn1);
 }
 
-void NTestWindow::onBtnClick( NButtonEvent * ev )
+void NTestWindow::onBtnClick( ButtonEvent * ev )
 {
   
 }
 
 void NTestWindow::testScrollBar( )
 {
-  NScrollBar* scrollBar = new NScrollBar();
+  ScrollBar* scrollBar = new ScrollBar();
   scrollBar->setOrientation(nVertical);
   pane()->add(scrollBar,nAlRight);
 }
 
-void NTestWindow::onColorSelected( const NColor & color )
+void NTestWindow::onColorSelected( const Color & color )
 {
   pane()->setBackground(color);
   pane()->repaint();
 }
 
-void NTestWindow::onDelete( NButtonEvent * ev )
+void NTestWindow::onDelete( ButtonEvent * ev )
 {
-  ((NVisualComponent*)itemD->parent())->erase(itemD);
+  ((VisualComponent*)itemD->parent())->erase(itemD);
   pane()->repaint();
 }
 
@@ -565,14 +565,14 @@ void NTestWindow::onSelection( )
   do
    {
      if(ret != 0) XFree(ret);
-		 XGetWindowProperty(NApp::system().dpy(), win(), NApp::system().atoms().primary_sel(), 0, read_bytes, False, AnyPropertyType,
+		 XGetWindowProperty(App::system().dpy(), win(), App::system().atoms().primary_sel(), 0, read_bytes, False, AnyPropertyType,
      &actual_type, &actual_format, &nitems, &bytes_after, 
      &ret);
      read_bytes *= 2;
    }while(bytes_after != 0);
 			
    std::cout << std::endl;
-//   std::cout << "Actual type: " << GetAtomName(NApp::system().dpy(), actual_type) << std::endl;
+//   std::cout << "Actual type: " << GetAtomName(App::system().dpy(), actual_type) << std::endl;
    std::cout << "Actual format: " << actual_format << std::endl;
    std::cout << "Number of items: " << nitems <<  std::endl;
    std::cout << "Bytes left: " << bytes_after <<  std::endl;
@@ -582,16 +582,16 @@ void NTestWindow::onSelection( )
     std::cerr << std::endl;*/
 }
 
-void NTestWindow::onScrollPosChange( NScrollBar * bar )
+void NTestWindow::onScrollPosChange( ScrollBar * bar )
 {
   std::cout << bar->pos() << std::endl;
 }
 
 void NTestWindow::onMousePress( int x, int y, int button )
 {
-  NWindow::onMousePress(x,y,button);
+  Window::onMousePress(x,y,button);
 
-  /*NLine* line = new NLine();
+  /*Line* line = new Line();
      line->setPoints( NPoint(x,y), NPoint(x,y));
      line->setMoveable( nMvPolygonPicker );
    pane()->add(line);
@@ -600,34 +600,34 @@ void NTestWindow::onMousePress( int x, int y, int button )
 
 void NTestWindow::testObjectInspector( )
 {
-  NObjectInspector* ins = new NObjectInspector();
+  ObjectInspector* ins = new ObjectInspector();
     ins->setControlObject( this );
   pane()->add( ins, nAlClient );
 }
 
 void NTestWindow::testGroupBox( )
 {
-  NGroupBox* box = new NGroupBox();
+  GroupBox* box = new GroupBox();
 	pane()->add( box, nAlClient );
 }
 
 void NTestWindow::testCustomTreeView() {	
   // this creates a customtreeview
-  NCustomTreeView* view = new NCustomTreeView();
+  CustomTreeView* view = new CustomTreeView();
 
-  NTreeNode* node1 = new NTreeNode();
-    node1->setHeader(new NItem("Header1"));
+  TreeNode* node1 = new TreeNode();
+    node1->setHeader(new Item("Header1"));
 	for (int i = 0; i < 10; i++) {
-     node1->addEntry(new NItem("entry"+stringify(i)));
+     node1->addEntry(new Item("entry"+stringify(i)));
     }
   view->addNode(node1);
     
-  NTreeNode* node2 = new NTreeNode();
-    node2->setHeader( new NItem("Header2") );
+  TreeNode* node2 = new TreeNode();
+    node2->setHeader( new Item("Header2") );
 	for (int i = 0; i < 10; i++) {
-     node2->addEntry( new NItem("entryB"+stringify(i) ) );
+     node2->addEntry( new Item("entryB"+stringify(i) ) );
     }
-	itemD = new NItem("delme");
+	itemD = new Item("delme");
     node2->addEntry(itemD);
   view->addNode(node2);
     

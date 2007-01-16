@@ -18,19 +18,19 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <ngrs/ndialog.h>
+#include <ngrs/dialog.h>
 
 namespace ngrs{
-  class NSlider;
-  class NLabel;
-  class NButtonEvent;
+  class Slider;
+  class Label;
+  class ButtonEvent;
 }
 
 namespace psycle
 {
   namespace host
   {
-    class WaveEdCrossfadeDialog : public ngrs::NDialog
+    class WaveEdCrossfadeDialog : public ngrs::Dialog
     {
     public:
       WaveEdCrossfadeDialog();
@@ -40,18 +40,18 @@ namespace psycle
       float destStartVol;
       float destEndVol;
     protected:
-      void onOkClicked( ngrs::NButtonEvent* ev );
-      void onCancelClicked( ngrs::NButtonEvent* ev );
-      void onSliderMoved( ngrs::NSlider* slider );
+      void onOkClicked( ngrs::ButtonEvent* ev );
+      void onCancelClicked( ngrs::ButtonEvent* ev );
+      void onSliderMoved( ngrs::Slider* slider );
     private:
-      ngrs::NSlider		*m_srcStartVol;
-      ngrs::NSlider		*m_srcEndVol;
-      ngrs::NSlider		*m_destStartVol;
-      ngrs::NSlider		*m_destEndVol;
-      ngrs::NLabel		*m_srcStartVolText;
-      ngrs::NLabel		*m_srcEndVolText;
-      ngrs::NLabel		*m_destStartVolText;
-      ngrs::NLabel		*m_destEndVolText;
+      ngrs::Slider		*m_srcStartVol;
+      ngrs::Slider		*m_srcEndVol;
+      ngrs::Slider		*m_destStartVol;
+      ngrs::Slider		*m_destEndVol;
+      ngrs::Label		*m_srcStartVolText;
+      ngrs::Label		*m_srcEndVolText;
+      ngrs::Label		*m_destStartVolText;
+      ngrs::Label		*m_destEndVolText;
     };
 
   }

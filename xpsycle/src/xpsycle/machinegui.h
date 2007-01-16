@@ -23,10 +23,10 @@
 #include "skinreader.h"
 #include "macpropdlg.h"
 #include "wiregui.h"
-#include <ngrs/npanel.h>
+#include <ngrs/panel.h>
 
 namespace ngrs {
-  class NSlider;
+  class Slider;
 }
 
 namespace psycle {
@@ -41,7 +41,7 @@ namespace psycle {
     @author Stefan Nattkemper
     */
 
-    class MachineGUI : public ngrs::NPanel
+    class MachineGUI : public ngrs::Panel
     {
       class LineAttachment {
       public:
@@ -86,9 +86,9 @@ namespace psycle {
 
       virtual void onMouseDoublePress(int x, int y, int button);
       virtual void onMousePress( int x, int y, int button );
-      virtual void onMoveStart( const ngrs::NMoveEvent& moveEvent );
-      virtual void onMove( const ngrs::NMoveEvent& moveEvent );
-      virtual void onMoveEnd( const ngrs::NMoveEvent& moveEvent );
+      virtual void onMoveStart( const ngrs::MoveEvent& moveEvent );
+      virtual void onMove( const ngrs::MoveEvent& moveEvent );
+      virtual void onMoveEnd( const ngrs::MoveEvent& moveEvent );
       virtual void resize();
 
       virtual void paint( ngrs::Graphics& g );
@@ -109,13 +109,13 @@ namespace psycle {
     private:								
 
       bool selected_;
-      ngrs::NRegion oldDrag;
+      ngrs::Region oldDrag;
       Machine* mac_;
       MacPropDlg* propsDlg_;			
       MachineCoordInfo coords_;
       std::vector<LineAttachment> attachedLines;
 
-      ngrs::NRegion linesRegion() const;
+      ngrs::Region linesRegion() const;
     };
 
 
@@ -147,7 +147,7 @@ namespace psycle {
     {
     public:
 
-      class VUPanel : public ngrs::NPanel {
+      class VUPanel : public ngrs::Panel {
 
         friend class GeneratorGUI;
 
@@ -178,18 +178,18 @@ namespace psycle {
 
       virtual void paint( ngrs::Graphics& g );
 
-      virtual void onKeyPress( const ngrs::NKeyEvent & event);
+      virtual void onKeyPress( const ngrs::KeyEvent & event);
 
       virtual void updateSkin();
 
     private:
 
-      ngrs::NSlider* panSlider_;
+      ngrs::Slider* panSlider_;
       VUPanel* vuPanel_;
 
       void setSkin();
-      void customSliderPaint( ngrs::NSlider* sl, ngrs::Graphics& g);		
-      void onPosChanged( ngrs::NSlider* sender );
+      void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g);		
+      void onPosChanged( ngrs::Slider* sender );
       void onTweakSlide( int machine, int command, int value );
     };
 
@@ -198,7 +198,7 @@ namespace psycle {
     {
     public:
 
-      class VUPanel : public ngrs::NPanel {
+      class VUPanel : public ngrs::Panel {
 
         friend class EffectGUI;
 
@@ -224,18 +224,18 @@ namespace psycle {
       virtual void onMouseDoublePress(int x, int y, int button);
       virtual void paint( ngrs::Graphics& g );
       virtual void repaintVUMeter();
-      virtual void onKeyPress( const ngrs::NKeyEvent & event );
+      virtual void onKeyPress( const ngrs::KeyEvent & event );
       virtual void updateSkin();
 
     private:
 
-      ngrs::NSlider* panSlider_;
+      ngrs::Slider* panSlider_;
       VUPanel* vuPanel_;
       FrameMachine* frameMachine;
 
       void setSkin();
-      void customSliderPaint( ngrs::NSlider* sl, ngrs::Graphics& g);    
-      void onPosChanged( ngrs::NSlider* sender );
+      void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g);    
+      void onPosChanged( ngrs::Slider* sender );
       void onTweakSlide( int machine, int command, int value );
     };
 

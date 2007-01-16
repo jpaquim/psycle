@@ -20,20 +20,20 @@
 #ifndef ZOOMBAR_H
 #define ZOOMBAR_H
 
-#include <ngrs/npanel.h>
-#include <ngrs/nbitmap.h>
+#include <ngrs/panel.h>
+#include <ngrs/bitmap.h>
 
 /**
 @author Stefan Nattkemper
 */
 
 namespace ngrs {
-  class NButton;
-  class NSlider;
-  class NImage;
+  class Button;
+  class Slider;
+  class Image;
 }
 
-class ZoomBar : public ngrs::NPanel{
+class ZoomBar : public ngrs::Panel{
 public:
     ZoomBar();
 
@@ -48,26 +48,26 @@ public:
     void setPos( double pos );
     double pos() const;
 
-    void customSliderPaint( ngrs::NSlider* sl, ngrs::Graphics& g );
+    void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g );
 
 private:
 
    int orientation_;
    int increment_;
 
-   ngrs::NButton* decBtn;
-   ngrs::NButton* incBtn;
-   ngrs::NSlider* zoomSlider;
+   ngrs::Button* decBtn;
+   ngrs::Button* incBtn;
+   ngrs::Slider* zoomSlider;
 
-   ngrs::NBitmap zoomOutBpm;
-   ngrs::NBitmap zoomInBpm;
-   ngrs::NBitmap sliderBpm;
+   ngrs::Bitmap zoomOutBpm;
+   ngrs::Bitmap zoomInBpm;
+   ngrs::Bitmap sliderBpm;
 
    void init();
 
-   void onPosChanged( ngrs::NSlider* slider );
-   void onIncButton( ngrs::NButtonEvent* ev );
-   void onDecButton( ngrs::NButtonEvent* ev );
+   void onPosChanged( ngrs::Slider* slider );
+   void onIncButton( ngrs::ButtonEvent* ev );
+   void onDecButton( ngrs::ButtonEvent* ev );
 };
 
 #endif

@@ -25,9 +25,9 @@
 #include "singlepattern.h"
 #include "custompatternview.h"
 #include "skinreader.h"
-#include <ngrs/npopupmenu.h>
-#include <ngrs/nscrollbar.h>
-#include <ngrs/nxmlparser.h>
+#include <ngrs/popupmenu.h>
+#include <ngrs/scrollbar.h>
+#include <ngrs/xmlparser.h>
 #include <map>
 
 /**
@@ -35,11 +35,11 @@
 */
 
 namespace ngrs {
-  class NToolBar;
-  class NComboBox;
+  class ToolBar;
+  class ComboBox;
   class NCheckBox;
-  class NSplitBar;
-  class NItemEvent;
+  class SplitBar;
+  class ItemEvent;
 }
 
 class ZoomBar;
@@ -54,18 +54,18 @@ namespace psycle {
     public  :
 
       UndoPattern();
-      UndoPattern( int patternId, const ngrs::NSize & changedBlock, const PatCursor & cursor  );
+      UndoPattern( int patternId, const ngrs::Size & changedBlock, const PatCursor & cursor  );
 
       ~UndoPattern();
 
-      const ngrs::NSize & changedBlock() const;
+      const ngrs::Size & changedBlock() const;
       const PatCursor & oldCursor();
 
       int patternId();
 
     private :
 
-      ngrs::NSize changedBlock_;
+      ngrs::Size changedBlock_;
       int patternId_;
       PatCursor cursor_;
 
@@ -79,7 +79,7 @@ namespace psycle {
 
       void setSong( Song* pSong  );
       void setPattern( SinglePattern* pattern );
-      void addUndo( const ngrs::NSize & block, const PatCursor & cursor );
+      void addUndo( const ngrs::Size & block, const PatCursor & cursor );
       void addUndo( const PatCursor & cursor );
 
       void doUndo();
@@ -92,11 +92,11 @@ namespace psycle {
     };
 
 
-    class PatternView : public ngrs::NPanel
+    class PatternView : public ngrs::Panel
     {
     public:
 
-      class Header: public ngrs::NPanel {
+      class Header: public ngrs::Panel {
       public:
         Header(PatternView* pPatternView);
         ~Header();
@@ -124,7 +124,7 @@ namespace psycle {
       };
 
 
-      class LineNumber : public ngrs::NPanel {
+      class LineNumber : public ngrs::Panel {
       public:
         LineNumber( PatternView* pPatternView );
         ~LineNumber();
@@ -134,8 +134,8 @@ namespace psycle {
         void setDy( int dy );
         int dy() const;
 
-        void setTextColor( const ngrs::NColor& textColor );
-        const ngrs::NColor & textColor() const;
+        void setTextColor( const ngrs::Color& textColor );
+        const ngrs::Color & textColor() const;
 
         virtual int preferredWidth() const;
 
@@ -143,7 +143,7 @@ namespace psycle {
 
         PatternView* pView;
         int dy_;
-        ngrs::NColor textColor_;
+        ngrs::Color textColor_;
 
       };
 
@@ -165,8 +165,8 @@ namespace psycle {
         virtual void onMousePress( int x, int y, int button );
         virtual void onMousePressed( int x, int y, int button );
         virtual void onMouseOver( int x, int y );
-        virtual void onKeyPress( const ngrs::NKeyEvent & event );
-        virtual void onKeyRelease( const ngrs::NKeyEvent & event );
+        virtual void onKeyPress( const ngrs::KeyEvent & event );
+        virtual void onKeyRelease( const ngrs::KeyEvent & event );
 
         void copyBlock( bool cutit );
         void pasteBlock( int tx, int lx, bool mix, bool save = true );
@@ -193,24 +193,24 @@ namespace psycle {
         PatternView* pView;      
 
         bool isBlockCopied;
-        ngrs::NSize blockLastOrigin;
+        ngrs::Size blockLastOrigin;
         bool sharpMode_;
 
         void clearCursorPos();
 
-        void onPopupBlockCopy( ngrs::NButtonEvent* ev );
-        void onPopupBlockCut( ngrs::NButtonEvent* ev );
-        void onPopupBlockPaste( ngrs::NButtonEvent* ev );
-        void onPopupBlockDelete( ngrs::NButtonEvent* ev );
-        void onPopupBlockMixPaste( ngrs::NButtonEvent* ev );
-        void onPopupTranspose1( ngrs::NButtonEvent* ev );
-        void onPopupTranspose12( ngrs::NButtonEvent* ev );
-        void onPopupTranspose_1( ngrs::NButtonEvent* ev );
-        void onPopupTranspose_12( ngrs::NButtonEvent* ev );
-        void onPopupPattern( ngrs::NButtonEvent* ev );
+        void onPopupBlockCopy( ngrs::ButtonEvent* ev );
+        void onPopupBlockCut( ngrs::ButtonEvent* ev );
+        void onPopupBlockPaste( ngrs::ButtonEvent* ev );
+        void onPopupBlockDelete( ngrs::ButtonEvent* ev );
+        void onPopupBlockMixPaste( ngrs::ButtonEvent* ev );
+        void onPopupTranspose1( ngrs::ButtonEvent* ev );
+        void onPopupTranspose12( ngrs::ButtonEvent* ev );
+        void onPopupTranspose_1( ngrs::ButtonEvent* ev );
+        void onPopupTranspose_12( ngrs::ButtonEvent* ev );
+        void onPopupPattern( ngrs::ButtonEvent* ev );
 
         SinglePattern pasteBuffer;
-        void onTagParse( const ngrs::NXmlParser & parser, const std::string & tagName );
+        void onTagParse( const ngrs::XmlParser & parser, const std::string & tagName );
         float lastXmlLineBeatPos;
         int xmlTracks;
         float xmlBeats;
@@ -220,7 +220,7 @@ namespace psycle {
 
       };
 
-      class TweakHeader : public ngrs::NPanel {
+      class TweakHeader : public ngrs::Panel {
       public:
 
         TweakHeader(  PatternView* pPatternView );
@@ -234,8 +234,8 @@ namespace psycle {
 
       private:
 
-        ngrs::NRect bgCoords;
-        ngrs::NRect noCoords;
+        ngrs::Rect bgCoords;
+        ngrs::Rect noCoords;
 
         PatternView* pView;
 
@@ -256,7 +256,7 @@ namespace psycle {
 
         virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-        virtual void onKeyPress( const ngrs::NKeyEvent & event );
+        virtual void onKeyPress( const ngrs::KeyEvent & event );
 
         virtual void resize();
 
@@ -286,8 +286,8 @@ namespace psycle {
 
       sigslot::signal1<int> lineChanged;
 
-      void setSeparatorColor( const ngrs::NColor & separatorColor );
-      const ngrs::NColor & separatorColor();
+      void setSeparatorColor( const ngrs::Color & separatorColor );
+      const ngrs::Color & separatorColor();
 
 
       int rowHeight() const;
@@ -316,8 +316,8 @@ namespace psycle {
       void setEditOctave( int octave );
       int editOctave() const;
 
-      ngrs::NScrollBar* vScrBar();
-      ngrs::NScrollBar* hScrBar();
+      ngrs::ScrollBar* vScrBar();
+      ngrs::ScrollBar* hScrBar();
 
       void PlayNote( int note, int velocity, bool bTranspose, psycle::host::Machine*pMachine);
       void StopNote( int note, bool bTranspose=true, psycle::host::Machine* pMachine=NULL);
@@ -334,7 +334,7 @@ namespace psycle {
       void setMoveCursorWhenPaste( bool on );
       bool moveCursorWhenPaste() const;
 
-      ngrs::NRect repaintLineNumberArea( int startLine, int endLine );
+      ngrs::Rect repaintLineNumberArea( int startLine, int endLine );
       void repaintLineNumber( int startLine, int endLine );
 
       void setPattern( SinglePattern* pattern );
@@ -369,7 +369,7 @@ namespace psycle {
 
       Song* _pSong;
       SinglePattern* pattern_;
-      ngrs::NXmlParser xmlParser;
+      ngrs::XmlParser xmlParser;
       PatternUndoManager undoManager_;
 
       int editPosition_, prevEditPosition_;
@@ -382,23 +382,23 @@ namespace psycle {
       TweakGUI* tweakGUI;
       TweakHeader* tweakHeader;
 
-      ngrs::NScrollBar* hBar;
-      ngrs::NScrollBar* tweakHBar;
+      ngrs::ScrollBar* hBar;
+      ngrs::ScrollBar* tweakHBar;
       ngrs::NCheckBox* sideBox;
       ZoomBar* zoomHBar;
-      ngrs::NScrollBar* vBar;
+      ngrs::ScrollBar* vBar;
       Header*     header;
       LineNumber* lineNumber_;
-      ngrs::NColor      separatorColor_;
-      ngrs::NToolBar*   toolBar;
-      ngrs::NComboBox* patternCombo_;
-      ngrs::NComboBox* octaveCombo_;
-      ngrs::NComboBox*  meterCbx;
-      ngrs::NComboBox* trackCombo_;
-      ngrs::NSplitBar* splitBar;
-      ngrs::NPanel* tweakGroup;
-      ngrs::NPanel* lineHeaderLabel;
-      ngrs::NButton* sharpBtn_;
+      ngrs::Color      separatorColor_;
+      ngrs::ToolBar*   toolBar;
+      ngrs::ComboBox* patternCombo_;
+      ngrs::ComboBox* octaveCombo_;
+      ngrs::ComboBox*  meterCbx;
+      ngrs::ComboBox* trackCombo_;
+      ngrs::SplitBar* splitBar;
+      ngrs::Panel* tweakGroup;
+      ngrs::Panel* lineHeaderLabel;
+      ngrs::Button* sharpBtn_;
 
       PatternViewColorInfo colorInfo_;
 
@@ -406,24 +406,24 @@ namespace psycle {
 
       void resize();
 
-      void onHScrollBar( ngrs::NScrollBar* sender );
-      void onHTweakScrollBar( ngrs::NScrollBar* sender );
-      void onVScrollBar( ngrs::NScrollBar* sender );
+      void onHScrollBar( ngrs::ScrollBar* sender );
+      void onHTweakScrollBar( ngrs::ScrollBar* sender );
+      void onVScrollBar( ngrs::ScrollBar* sender );
 
       void initToolBar();
-      void onAddBar( ngrs::NButtonEvent* ev );
-      void onDeleteBar( ngrs::NButtonEvent* ev );
+      void onAddBar( ngrs::ButtonEvent* ev );
+      void onDeleteBar( ngrs::ButtonEvent* ev );
 
       /// multi-key playback state stuff
       int notetrack[MAX_TRACKS];
       int outtrack;
 
       void onZoomHBarPosChanged( ZoomBar* zoomBar, double newPos );
-      void onPatternStepChange( ngrs::NItemEvent* ev );
-      void onOctaveChange( ngrs::NItemEvent* ev );
-      void onTrackChange( ngrs::NItemEvent* ev );
-      void onSideChange( ngrs::NButtonEvent* ev );
-      void onToggleSharpMode( ngrs::NButtonEvent* ev );
+      void onPatternStepChange( ngrs::ItemEvent* ev );
+      void onOctaveChange( ngrs::ItemEvent* ev );
+      void onTrackChange( ngrs::ItemEvent* ev );
+      void onSideChange( ngrs::ButtonEvent* ev );
+      void onToggleSharpMode( ngrs::ButtonEvent* ev );
 
       void checkUpScroll( const PatCursor & cursor );
       void checkDownScroll( const PatCursor & cursor );

@@ -23,8 +23,8 @@
 #include "audiodriver.h"
 #include "inputhandler.h"
 
-#include <ngrs/nobject.h>
-#include <ngrs/nxmlparser.h>
+#include <ngrs/object.h>
+#include <ngrs/xmlparser.h>
 #include <vector>
 #include <string>
 
@@ -35,7 +35,7 @@
 namespace psycle {
   namespace host {
 
-    class Configuration : public ngrs::NObject {
+    class Configuration : public ngrs::Object {
     public:
 
       Configuration();
@@ -89,7 +89,7 @@ namespace psycle {
 
       void setSkinDefaults();
       void setXmlDefaults();
-      void onConfigTagParse( const ngrs::NXmlParser & parser, const std::string & tagName );
+      void onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName );
       void loadConfig( const std::string & path );
 
     };

@@ -20,8 +20,8 @@
 #ifndef MASTERDLG_H
 #define MASTERDLG_H
 
-#include <ngrs/nwindow.h>
-#include <ngrs/nslider.h>
+#include <ngrs/window.h>
+#include <ngrs/slider.h>
 
 namespace psycle { namespace host {
 
@@ -31,9 +31,9 @@ class Machine;
 @author Stefan
 */
 
-class MasterDlg : public ngrs::NWindow
+class MasterDlg : public ngrs::Window
 {
-      class Led : public ngrs::NPanel {
+      class Led : public ngrs::Panel {
       public :
 
         Led();
@@ -47,17 +47,17 @@ class MasterDlg : public ngrs::NWindow
 
         int number_;
 
-        static ngrs::NBitmap numberBitmap;
+        static ngrs::Bitmap numberBitmap;
         static int c;
 
     };
 
 
 
-    class Slider : public ngrs::NSlider {
+    class Slider : public ngrs::Slider {
       public:
 
-        Slider() : ngrs::NSlider(), index_(-1), led_(0) {}
+        Slider() : ngrs::Slider(), index_(-1), led_(0) {}
 
         void setIndex(int index) { index_ = index; }
         int index() { return index_; }
@@ -88,7 +88,7 @@ private:
     Machine* pMaster;
 
     void init();
-    void onSliderPosChanged( ngrs::NSlider* sender );
+    void onSliderPosChanged( ngrs::Slider* sender );
 };
 
 }}

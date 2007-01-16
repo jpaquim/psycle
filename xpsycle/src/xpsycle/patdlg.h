@@ -20,11 +20,11 @@
 #ifndef PATDLG_H
 #define PATDLG_H
 
-#include <ngrs/nwindow.h>
+#include <ngrs/window.h>
 
 namespace ngrs {
-  class NButton;
-  class NSpinEdit;
+  class Button;
+  class SpinEdit;
 }
 
 namespace psycle { 
@@ -35,7 +35,7 @@ namespace psycle {
 @author Stefan
 */
 
-class PatDlg : public ngrs::NWindow
+class PatDlg : public ngrs::Window
 {
 public:
     PatDlg();
@@ -55,13 +55,13 @@ private:
     int lineNumber_;
     bool do_Execute;
 
-    ngrs::NSpinEdit* lineNumEdit_;
+    ngrs::SpinEdit* lineNumEdit_;
 
-    void onOkBtn( ngrs::NButtonEvent* sender );
-    void onCancelBtn( ngrs::NButtonEvent* sender );
+    void onOkBtn( ngrs::ButtonEvent* sender );
+    void onCancelBtn( ngrs::ButtonEvent* sender );
 
-    void onIncBtnClick( ngrs::NButtonEvent* ev );
-    void onDecBtnClick( ngrs::NButtonEvent* ev );
+    void onIncBtnClick( ngrs::ButtonEvent* ev );
+    void onDecBtnClick( ngrs::ButtonEvent* ev );
 
 };
 

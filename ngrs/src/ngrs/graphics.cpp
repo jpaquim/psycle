@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "graphics.h"
-#include "napp.h"
-#include "nvisualcomponent.h"
+#include "app.h"
+#include "visualcomponent.h"
 #include <cmath>
 #include <iostream>
 
@@ -54,8 +54,8 @@ namespace ngrs {
     win = winID;
 
 #ifdef __unix__
-    gc_     = XCreateGC(NApp::system().dpy(),winID,0,0);
-    drawWin = XftDrawCreate(NApp::system().dpy(), win, NApp::system().visual(),NApp::system().colormap());
+    gc_     = XCreateGC(App::system().dpy(),winID,0,0);
+    drawWin = XftDrawCreate(App::system().dpy(), win, App::system().visual(),App::system().colormap());
 
     doubleBufferPixmap_=0;
     gcp = 0;
@@ -98,13 +98,13 @@ namespace ngrs {
 
     if (dblBuffer_)
 #ifdef __unix__
-      XFillRectangle( NApp::system().dpy(), doubleBufferPixmap_, gcp, x+dx_, y+dy_, width, height );
+      XFillRectangle( App::system().dpy(), doubleBufferPixmap_, gcp, x+dx_, y+dy_, width, height );
 #else
       Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
 #endif
     else
 #ifdef __unix__
-      XFillRectangle( NApp::system().dpy(), win, gc_, x+dx_, y+dy_, width, height);
+      XFillRectangle( App::system().dpy(), win, gc_, x+dx_, y+dy_, width, height);
 #else
       Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width, y + dy_ +height);
 #endif
@@ -114,21 +114,21 @@ namespace ngrs {
   {
 #ifdef __unix__
     XWindowAttributes attr;
-    XGetWindowAttributes( NApp::system().dpy(), win, &attr );
+    XGetWindowAttributes( App::system().dpy(), win, &attr );
 
     if (dblBuffer_) {
-      doubleBufferPixmap_ = XCreatePixmap(NApp::system().dpy(), win, attr.width, attr.height, NApp::system().depth());
-      gcp = XCreateGC(NApp::system().dpy(),doubleBufferPixmap_,0,0);
+      doubleBufferPixmap_ = XCreatePixmap(App::system().dpy(), win, attr.width, attr.height, App::system().depth());
+      gcp = XCreateGC(App::system().dpy(),doubleBufferPixmap_,0,0);
       dblWidth_  = attr.width;
       dblHeight_ = attr.height;
-      XSetForeground( NApp::system().dpy(), gcp, oldColor.colorValue() );
-      drawDbl = XftDrawCreate(NApp::system().dpy(), doubleBufferPixmap_, NApp::system().visual(), NApp::system().colormap());
+      XSetForeground( App::system().dpy(), gcp, oldColor.colorValue() );
+      drawDbl = XftDrawCreate(App::system().dpy(), doubleBufferPixmap_, App::system().visual(), App::system().colormap());
     } else
     {
       doubleBufferPixmap_=0;
       gcp = 0;
       drawDbl = 0;
-      XSetForeground( NApp::system().dpy(), gc_, oldColor.colorValue() );
+      XSetForeground( App::system().dpy(), gc_, oldColor.colorValue() );
     }
 #else
     if (dblBuffer_) {
@@ -150,8 +150,8 @@ namespace ngrs {
   {     
     if (dblBuffer_) {
 #ifdef __unix__
-      XFreeGC(NApp::system().dpy(), gcp);
-      XFreePixmap(NApp::system().dpy(), doubleBufferPixmap_);
+      XFreeGC(App::system().dpy(), gcp);
+      XFreePixmap(App::system().dpy(), doubleBufferPixmap_);
       XftDrawDestroy(drawDbl);
 #else
       // Clean up - only need to do this one time as well
@@ -175,19 +175,20 @@ namespace ngrs {
     }
   }
 
-  void Graphics::copyDblBuffer( const NRect & repaintArea )
+  void Graphics::copyDblBuffer( const Rect & repaintArea )
   {
 #ifdef __unix__
-    XCopyArea(NApp::system().dpy(), doubleBufferPixmap_, win, gc_,repaintArea.left(), repaintArea.top(),repaintArea.width(), repaintArea.height(),repaintArea.left(), repaintArea.top());
+    XCopyArea(App::system().dpy(), doubleBufferPixmap_, win, gc_,repaintArea.left(), repaintArea.top(),repaintArea.width(), repaintArea.height(),repaintArea.left(), repaintArea.top());
 #else
     // blit the gcp to gc_
     BitBlt( gc_, repaintArea.left(), repaintArea.top(), repaintArea.width(), repaintArea.height(), gcp, repaintArea.left(), repaintArea.top(), SRCCOPY);
 #endif     
   }
 
-  void Graphics::swap( const NRect & repaintArea )
+  void Graphics::swap( const Rect & repaintArea )
   {
-    if ( dblBuffer_ ) copyDblBuffer( repaintArea );
+    if ( dblBuffer_ ) 
+      copyDblBuffer( repaintArea );
   }
 
   long Graphics::xTranslation( )
@@ -200,12 +201,12 @@ namespace ngrs {
     return dy_;
   }
 
-  void Graphics::setForeground( const NColor & color )
+  void Graphics::setForeground( const Color & color )
   {
     if (!(oldColor == color)) {
 #ifdef __unix__                 
-      if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
-      else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
+      if (dblBuffer_) XSetForeground( App::system().dpy(), gcp, color.colorValue() );
+      else XSetForeground( App::system().dpy(), gc_, color.colorValue() );
 #else
       DeleteObject( brush );
       brush =  CreateSolidBrush(RGB(color.red(), color.green(), color.blue() ));
@@ -234,9 +235,9 @@ namespace ngrs {
 #ifdef __unix__
     if ( !fntStruct.antialias ) {
       if ( dblBuffer_ )
-        XSetFont( NApp::system().dpy(), gcp, fntStruct.xFnt->fid );
+        XSetFont( App::system().dpy(), gcp, fntStruct.xFnt->fid );
       else
-        XSetFont( NApp::system().dpy(), gc_, fntStruct.xFnt->fid );
+        XSetFont( App::system().dpy(), gc_, fntStruct.xFnt->fid );
     }
 #else
     if ( dblBuffer_ )
@@ -260,7 +261,7 @@ namespace ngrs {
   {
 #ifdef __unix__
     // if (!fntStruct.font.transparent()) {
-    //  NColor old = lastUsed;
+    //  Color old = lastUsed;
     //setForeground(fntStruct.font.bgColor());
     //  fillRect(x,y-textAscent(),textWidth(text),textAscent()+textDescent());
     // setForeground(old);
@@ -269,17 +270,17 @@ namespace ngrs {
     if (!fntStruct.antialias)  {
 
       if (!(fntStruct.textColor==oldColor)) {
-        if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, fntStruct.textColor.colorValue() );
-        else XSetForeground( NApp::system().dpy(), gc_, fntStruct.textColor.colorValue() );
+        if (dblBuffer_) XSetForeground( App::system().dpy(), gcp, fntStruct.textColor.colorValue() );
+        else XSetForeground( App::system().dpy(), gc_, fntStruct.textColor.colorValue() );
       }
       if (dblBuffer_)
-        XDrawString(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
+        XDrawString(App::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
       else
-        XDrawString(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
+        XDrawString(App::system().dpy(),win,gc_,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
       setForeground(old);
     } else
     {
-      NColor color;
+      Color color;
       color = fntStruct.textColor;
       fFtColor.color.red   = color.red() * ( 0xFFFF/255);
       fFtColor.color.green = color.green() * ( 0xFFFF/255);
@@ -302,16 +303,16 @@ namespace ngrs {
 #endif
   }
 
-  void Graphics::drawText(int x, int y, const std::string & text, const NColor & color ) {
+  void Graphics::drawText(int x, int y, const std::string & text, const Color & color ) {
 #ifdef __unix__
     if (!fntStruct.antialias)  {
-      if (dblBuffer_) XSetForeground( NApp::system().dpy(), gcp, color.colorValue() );
-      else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
+      if (dblBuffer_) XSetForeground( App::system().dpy(), gcp, color.colorValue() );
+      else XSetForeground( App::system().dpy(), gc_, color.colorValue() );
 
       if (dblBuffer_)
-        XDrawString(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
+        XDrawString(App::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
       else
-        XDrawString(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
+        XDrawString(App::system().dpy(),win,gc_,x+dx_,y+dy_,text.c_str(),strlen(text.c_str()));
       //setForeground(old);
     } else
     {
@@ -343,7 +344,7 @@ namespace ngrs {
 
     if (dblBuffer_) {
 #ifdef __unix__
-      XDrawRectangle(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
+      XDrawRectangle(App::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height);
 #else
       HBRUSH holdbrush = (HBRUSH) SelectObject( gcp, hollow );
       Rectangle( gcp, x + dx_,y + dy_, x + dx_ + width + 1, y + dy_ +height + 1);
@@ -353,7 +354,7 @@ namespace ngrs {
     else
     {
 #ifdef __unix__
-      XDrawRectangle(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
+      XDrawRectangle(App::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
 #else
       HBRUSH holdbrush = (HBRUSH) SelectObject( gc_, hollow );
       Rectangle( gc_, x + dx_,y + dy_, x + dx_ + width + 1, y + dy_ + height + 1);
@@ -362,7 +363,7 @@ namespace ngrs {
     }  
   }
 
-  void Graphics::drawRect( const NRect & rect )
+  void Graphics::drawRect( const Rect & rect )
   {
     drawRect(rect.left(),rect.top(),rect.width(),rect.height());
   }
@@ -372,7 +373,7 @@ namespace ngrs {
     if ( dblBuffer_ ) 
     {
 #ifdef __unix__
-      XDrawLine(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
+      XDrawLine(App::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,x1+dx_,y1+dy_);
 #else
       MoveToEx( gcp, x + dx_, y + dy_, NULL);
       LineTo( gcp, x1 + dx_, y1 + dy_);
@@ -381,7 +382,7 @@ namespace ngrs {
     else
     {
 #ifdef __unix__
-      XDrawLine(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,x1+dx_,y1+dy_);
+      XDrawLine(App::system().dpy(),win,gc_,x+dx_,y+dy_,x1+dx_,y1+dy_);
 #else 
       MoveToEx( gc_, x + dx_, y + dy_, NULL);
       LineTo( gc_, x1 + dx_, y1 + dy_);
@@ -419,9 +420,9 @@ namespace ngrs {
 
 #ifdef __unix__
     if (dblBuffer_)
-      XFillPolygon(NApp::system().dpy(),doubleBufferPixmap_,gcp,pt,n,Complex,CoordModeOrigin);
+      XFillPolygon(App::system().dpy(),doubleBufferPixmap_,gcp,pt,n,Complex,CoordModeOrigin);
     else
-      XFillPolygon(NApp::system().dpy(),win,gc_,pt,n,Complex,CoordModeOrigin);
+      XFillPolygon(App::system().dpy(),win,gc_,pt,n,Complex,CoordModeOrigin);
 #else   
     if (dblBuffer_)
       Polygon( gcp, pt, n );
@@ -432,25 +433,25 @@ namespace ngrs {
     delete[] pt;
   }
 
-  NRegion Graphics::region( )
+  ngrs::Region Graphics::region( )
   {
     return region_;
   }
 
-  void Graphics::setRegion( const NRegion & region )
+  void Graphics::setRegion( const ngrs::Region & region )
   {
     region_ = region;
   }
 
-  void Graphics::setClipping( const NRegion & region )
+  void Graphics::setClipping( const ngrs::Region & region )
   {
 #ifdef __unix__
     if (dblBuffer_) {
-      XSetRegion(NApp::system().dpy(), gcp,region.sRegion());
+      XSetRegion(App::system().dpy(), gcp,region.sRegion());
       XftDrawSetClip(drawDbl,region.sRegion());
     }
     else {
-      XSetRegion(NApp::system().dpy(), gc_,region.sRegion());
+      XSetRegion(App::system().dpy(), gc_,region.sRegion());
       XftDrawSetClip(drawWin,region.sRegion());
     }
 #else
@@ -461,12 +462,12 @@ namespace ngrs {
 #endif
   }
 
-  void Graphics::fillTranslucent( int x, int y, int width, int height, NColor color, int percent )
+  void Graphics::fillTranslucent( int x, int y, int width, int height, Color color, int percent )
   {
 #ifdef __unix__
-    XImage* xi = XGetImage(NApp::system().dpy(),doubleBufferPixmap_,x+dx_,y+dy_,width,height,AllPlanes,ZPixmap);
+    XImage* xi = XGetImage(App::system().dpy(),doubleBufferPixmap_,x+dx_,y+dy_,width,height,AllPlanes,ZPixmap);
     unsigned char* data = (unsigned char*) xi->data;
-    int pixelsize = NApp::system().pixelSize( NApp::system().depth() );
+    int pixelsize = App::system().pixelSize( App::system().depth() );
     double anteil = percent / 100.0f;
     if (pixelsize == 4)
       for (int i = 0; i < xi->width*xi->height*pixelsize;i=i+pixelsize) {
@@ -478,7 +479,7 @@ namespace ngrs {
         data[i+1] =  (int) ((anteil*g + (1 - anteil) * color.green()));
         data[i+2] =  (int) ((anteil*b + (1 - anteil) * color.blue()));
       }
-      XPutImage(NApp::system().dpy(),doubleBufferPixmap_,gcp,xi,0,0,x+dx_,y+dy_,xi->width,xi->height);
+      XPutImage(App::system().dpy(),doubleBufferPixmap_,gcp,xi,0,0,x+dx_,y+dy_,xi->width,xi->height);
       XDestroyImage(xi);
 #endif
   }
@@ -492,7 +493,7 @@ namespace ngrs {
     } else
     {
       XGlyphInfo info;
-      XftTextExtents8(NApp::system().dpy(),fntStruct.xftFnt
+      XftTextExtents8(App::system().dpy(),fntStruct.xftFnt
         ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
       return info.xOff;
     }
@@ -573,14 +574,14 @@ namespace ngrs {
   }
 
 
-  void Graphics::putStretchBitmap(int x, int y, const NBitmap & bitmap, int width, int height ) {
+  void Graphics::putStretchBitmap(int x, int y, const Bitmap & bitmap, int width, int height ) {
 #ifdef __unix__
     if (bitmap.sysData() != 0) {
 
       if (dblBuffer_) {
         if (bitmap.clpData()==0) {
           // first create a new data for the stretched image
-          int pixelsize = NApp::system().pixelSize( NApp::system().depth() );
+          int pixelsize = App::system().pixelSize( App::system().depth() );
           unsigned char* dst_data = reinterpret_cast<unsigned char*> ( malloc( width * height * pixelsize) );
           for ( int i = 0; i < width* height * pixelsize; i++ ) {
             dst_data[i];
@@ -615,11 +616,11 @@ namespace ngrs {
             int pad    = bitmap.sysData()->bitmap_pad;
             int bytes_per_line = bitmap.sysData()->bytes_per_line;
 
-            XImage* xi = XCreateImage(NApp::system().dpy(), NApp::system().visual(), depth, ZPixmap,0,(char*) dst_data , width, height, pad , bytes_per_line );
+            XImage* xi = XCreateImage(App::system().dpy(), App::system().visual(), depth, ZPixmap,0,(char*) dst_data , width, height, pad , bytes_per_line );
 
             // write the image to the screen
 
-            XPutImage(NApp::system().dpy(),doubleBufferPixmap_,gcp,xi,0,0,x+dx_,y+dy_,xi->width,xi->height);
+            XPutImage(App::system().dpy(),doubleBufferPixmap_,gcp,xi,0,0,x+dx_,y+dy_,xi->width,xi->height);
 
             // destroys the image
             XDestroyImage(xi);
@@ -629,35 +630,35 @@ namespace ngrs {
 #endif
   }
 
-  void Graphics::putBitmap( int x, int y, const NBitmap & bitmap )
+  void Graphics::putBitmap( int x, int y, const Bitmap & bitmap )
   {
 #ifdef __unix__
     if (bitmap.sysData() != 0) {
 
       if (dblBuffer_) {
         if (bitmap.clpData()==0) {
-          XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.sysData(),0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
+          XPutImage(App::system().dpy(), doubleBufferPixmap_, gcp,bitmap.sysData(),0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
         } else
         {
           // transparent bitmap;
           XImage* clp = bitmap.clpData();
           Pixmap pix;
-          pix = XCreatePixmap(NApp::system().dpy(), doubleBufferPixmap_, clp->width, clp->height, clp->depth);
+          pix = XCreatePixmap(App::system().dpy(), doubleBufferPixmap_, clp->width, clp->height, clp->depth);
 
-          GC gc1 = XCreateGC (NApp::system().dpy(), pix, 0, NULL);
-          XPutImage(NApp::system().dpy(), pix, gc1, clp, 0, 0, 0, 0, clp->width, clp->height);
+          GC gc1 = XCreateGC (App::system().dpy(), pix, 0, NULL);
+          XPutImage(App::system().dpy(), pix, gc1, clp, 0, 0, 0, 0, clp->width, clp->height);
 
-          XSetClipMask(NApp::system().dpy(), gcp, pix);
-          XSetClipOrigin(NApp::system().dpy(), gcp, x+dx_, y+dy_);
+          XSetClipMask(App::system().dpy(), gcp, pix);
+          XSetClipOrigin(App::system().dpy(), gcp, x+dx_, y+dy_);
           // todo valgrind check error on some images
-          XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp, bitmap.sysData(), 0, 0, x+dx_, y+dy_, bitmap.width(), bitmap.height() );
+          XPutImage(App::system().dpy(), doubleBufferPixmap_, gcp, bitmap.sysData(), 0, 0, x+dx_, y+dy_, bitmap.width(), bitmap.height() );
           // valgrind check error end
-          XSetClipMask(NApp::system().dpy(), gcp, None);
-          XFreeGC(NApp::system().dpy(), gc1);
-          XFreePixmap(NApp::system().dpy(), pix);
+          XSetClipMask(App::system().dpy(), gcp, None);
+          XFreeGC(App::system().dpy(), gc1);
+          XFreePixmap(App::system().dpy(), pix);
         }}
       else
-        XPutImage(NApp::system().dpy(), win, gc_,bitmap.sysData(),
+        XPutImage(App::system().dpy(), win, gc_,bitmap.sysData(),
         0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
     }
 #else
@@ -694,16 +695,16 @@ namespace ngrs {
 
 
 
-  void Graphics::putBitmap( int destX, int destY, int width, int height, const NBitmap & bitmap, int srcX, int srcY )
+  void Graphics::putBitmap( int destX, int destY, int width, int height, const Bitmap & bitmap, int srcX, int srcY )
   {
 #ifdef __unix__
     if ( bitmap.sysData() ) {
 
       if (dblBuffer_)
-        XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.sysData(),
+        XPutImage(App::system().dpy(), doubleBufferPixmap_, gcp,bitmap.sysData(),
         srcX, srcY, destX+dx_,destY+dy_, width,height);
       else
-        XPutImage(NApp::system().dpy(), win, gc_,bitmap.sysData(),
+        XPutImage(App::system().dpy(), win, gc_,bitmap.sysData(),
         srcX, srcY, destX+dx_,destY+dy_, width,height);
 
     }
@@ -729,9 +730,9 @@ namespace ngrs {
 #ifdef __unix__
     if (width != 0 && height != 0) {
       if (dblBuffer_)
-        XCopyArea(NApp::system().dpy(),/*win,win,gc_*/doubleBufferPixmap_,doubleBufferPixmap_,gcp,
+        XCopyArea(App::system().dpy(),/*win,win,gc_*/doubleBufferPixmap_,doubleBufferPixmap_,gcp,
         src_x, src_y, width, height, dest_x, dest_y); else
-        XCopyArea(NApp::system().dpy(),win,win,gc_,
+        XCopyArea(App::system().dpy(),win,win,gc_,
         src_x, src_y, width, height, dest_x, dest_y);
     }
 #else
@@ -775,7 +776,7 @@ namespace ngrs {
   }
 
 
-  void Graphics::fillGradient(int x, int y, int width, int height, const NColor & start, const  NColor & end , int direction) {
+  void Graphics::fillGradient(int x, int y, int width, int height, const Color & start, const  Color & end , int direction) {
     int middle = (direction == nHorizontal) ? width : height;
 
     int r1 = start.red();
@@ -793,23 +794,23 @@ namespace ngrs {
 
     if (direction == nHorizontal)
       for (int i = 0; i < middle; i++) {
-        setForeground(NColor((int) (r1 + i*dr),(int) (g1 + i*dg),(int) (b1 + i*db)));
+        setForeground(Color((int) (r1 + i*dr),(int) (g1 + i*dg),(int) (b1 + i*db)));
         fillRect(x+i,y,1,height);
       }
     else
       for (int i = 0; i < middle; i++) {
-        setForeground(NColor((int) (r1 + i*dr),(int) (g1 + i*dg), (int) (b1 + i*db)));
+        setForeground(Color((int) (r1 + i*dr),(int) (g1 + i*dg), (int) (b1 + i*db)));
         fillRect(x,y+i,width,1);
       }
   }
 
 
-  const NRegion & Graphics::repaintArea( )
+  const ngrs::Region & Graphics::repaintArea( )
   {
     return repaintArea_;
   }
 
-  void Graphics::setRepaintArea( const NRegion & region )
+  void Graphics::setRepaintArea( const ngrs::Region & region )
   {
     repaintArea_ = region;
   }
@@ -954,9 +955,9 @@ namespace ngrs {
   {
 #ifdef __unix__
     if (dblBuffer_)
-      XDrawArc( NApp::system().dpy(), doubleBufferPixmap_, gcp, x+dx_, y+dy_, width, height, start, extent );
+      XDrawArc( App::system().dpy(), doubleBufferPixmap_, gcp, x+dx_, y+dy_, width, height, start, extent );
     else
-      XDrawArc( NApp::system().dpy(), win, gc_, x+dx_, y+dy_, width, height, start, extent );
+      XDrawArc( App::system().dpy(), win, gc_, x+dx_, y+dy_, width, height, start, extent );
 #else
     drawArcX( x +dx_, y+ dy_, width, height, start, extent , 0 );
 #endif     
@@ -966,15 +967,15 @@ namespace ngrs {
   {
 #ifdef __unix__   
     if (dblBuffer_)
-      XFillArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
+      XFillArc(App::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
     else
-      XFillArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
+      XFillArc(App::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
 #else
     drawArcX( x + dx_, y + dy_, width, height, angle1, angle2, 1 );
 #endif
   }
 
-  void Graphics::fillRect( const NRect & rect )
+  void Graphics::fillRect( const Rect & rect )
   {
     fillRect(rect.left(),rect.top(),rect.width(),rect.height());
   }
@@ -1027,7 +1028,7 @@ namespace ngrs {
     }
   }
 
-  void Graphics::fillRoundGradient( int x, int y, int width, int height, const NColor & start, const NColor & end, int direction, int arcWidth, int arcHeight )
+  void Graphics::fillRoundGradient( int x, int y, int width, int height, const Color & start, const Color & end, int direction, int arcWidth, int arcHeight )
   {
     int nx = x;
     int ny = y;
@@ -1086,7 +1087,7 @@ namespace ngrs {
   }
 
 
-  void Graphics::fillGradient( int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end, int direction, int percent )
+  void Graphics::fillGradient( int x, int y, int width, int height, const Color & start, const Color & mid, const Color & end, int direction, int percent )
   {
     int middle  = 0;
     int length  = 0;
@@ -1110,7 +1111,7 @@ namespace ngrs {
 
   }
 
-  void Graphics::fillRoundGradient( int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end, int direction, int percent , int arcWidth, int arcHeight)
+  void Graphics::fillRoundGradient( int x, int y, int width, int height, const Color & start, const Color & mid, const Color & end, int direction, int percent , int arcWidth, int arcHeight)
   {
     int nx = x;
     int ny = y;
@@ -1175,7 +1176,7 @@ namespace ngrs {
   int Graphics::textWidth( const NFntString & text ) const
   {
 #ifdef __unix__
-    NFontStructure newFntStruct = fntStruct;
+    FontStructure newFntStruct = fntStruct;
     int pos = 0; int w = 0;
     std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
     for (std::vector<std::string::size_type>::const_iterator it = text.positions().begin(); it < text.positions().end(); it++) {
@@ -1186,7 +1187,7 @@ namespace ngrs {
         w+=XTextWidth(newFntStruct.xFnt,s,strlen(s));
       else {
         XGlyphInfo info;
-        XftTextExtents8(NApp::system().dpy(),newFntStruct.xftFnt
+        XftTextExtents8(App::system().dpy(),newFntStruct.xftFnt
           ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
         w+= info.xOff;
       }
@@ -1200,7 +1201,7 @@ namespace ngrs {
       w+=XTextWidth(newFntStruct.xFnt,s,strlen(s));
     else {
       XGlyphInfo info;
-      XftTextExtents8(NApp::system().dpy(),newFntStruct.xftFnt
+      XftTextExtents8(App::system().dpy(),newFntStruct.xftFnt
         ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
       w+= info.xOff;
     }
@@ -1269,37 +1270,37 @@ namespace ngrs {
     }
   }
 
-  void Graphics::putPixmap( int destX, int destY, int width, int height, NPixmap & pixmap, int srcX, int srcY )
+  void Graphics::putPixmap( int destX, int destY, int width, int height, Pixmap & pixmap, int srcX, int srcY )
   {
 #ifdef __unix__
     if (pixmap.X11Pixmap() != 0) {
 
       if (dblBuffer_)
-        XCopyArea(NApp::system().dpy(),  pixmap.X11Pixmap(), doubleBufferPixmap_,gcp,
+        XCopyArea(App::system().dpy(),  pixmap.X11Pixmap(), doubleBufferPixmap_,gcp,
         srcX, srcY, width, height, destX+dx_,destY+dy_);
       else
-        XCopyArea(NApp::system().dpy(),  pixmap.X11Pixmap(), win ,gc_,
+        XCopyArea(App::system().dpy(),  pixmap.X11Pixmap(), win ,gc_,
         srcX, srcY, width, height, destX+dx_,destY+dy_);
     }
 #else
-    putBitmap( destX, destY, width, height, ( NBitmap & ) pixmap, srcX, srcY )  ;
+    putBitmap( destX, destY, width, height, ( Bitmap & ) pixmap, srcX, srcY )  ;
 #endif
   }
 
   // sets and gets the pen (line style etc ..)
 
-  void Graphics::setPen( const NPen & pen )
+  void Graphics::setPen( const Pen & pen )
   {
     pen_ = pen;
 #ifdef __unix__
     if (dblBuffer_) {
-      XSetLineAttributes(NApp::system().dpy(), gcp , pen.lineWidth(), (int) pen. lineStyle(), pen.capStyle(), pen.joinStyle() );
-      XSetFillStyle(NApp::system().dpy(), gcp, pen.fillStyle() );
-      XSetFunction(NApp::system().dpy(), gcp, pen.function() );
+      XSetLineAttributes(App::system().dpy(), gcp , pen.lineWidth(), (int) pen. lineStyle(), pen.capStyle(), pen.joinStyle() );
+      XSetFillStyle(App::system().dpy(), gcp, pen.fillStyle() );
+      XSetFunction(App::system().dpy(), gcp, pen.function() );
     } else {
-      XSetLineAttributes(NApp::system().dpy(), gc() , pen.lineWidth(), (int) pen. lineStyle(), pen.capStyle(), pen.joinStyle() );
-      XSetFillStyle(NApp::system().dpy(), gc() , pen.fillStyle() );
-      XSetFunction(NApp::system().dpy(), gc() , pen.function() );
+      XSetLineAttributes(App::system().dpy(), gc() , pen.lineWidth(), (int) pen. lineStyle(), pen.capStyle(), pen.joinStyle() );
+      XSetFillStyle(App::system().dpy(), gc() , pen.fillStyle() );
+      XSetFunction(App::system().dpy(), gc() , pen.function() );
     }
 #else
 
@@ -1324,14 +1325,14 @@ namespace ngrs {
 #endif
   }
 
-  const NPen & Graphics::pen( ) const
+  const Pen & Graphics::pen( ) const
   {
     return pen_;
   }
 
   void Graphics::resetPen( )
   {
-    setPen( NPen() );
+    setPen( Pen() );
   }
 
 }

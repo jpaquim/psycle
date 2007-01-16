@@ -21,27 +21,27 @@
 #ifndef NTESTWINDOW_H
 #define NTESTWINDOW_H
 
-#include <ngrs/nwindow.h>
-#include <ngrs/nmenubar.h>
-#include <ngrs/nmenuitem.h>
-#include <ngrs/nscrollbox.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nfile.h>
-#include <ngrs/nprogressbar.h>
-#include <ngrs/nslider.h>
-#include <ngrs/nimage.h>
-#include <ngrs/nslider.h>
-#include <ngrs/nnotebook.h>
-#include <ngrs/ntabbook.h>
-#include <ngrs/ncheckbox.h>
-#include <ngrs/nfilelistbox.h>
-#include <ngrs/nfiledialog.h>
+#include <ngrs/window.h>
+#include <ngrs/menubar.h>
+#include <ngrs/menuitem.h>
+#include <ngrs/scrollbox.h>
+#include <ngrs/edit.h>
+#include <ngrs/file.h>
+#include <ngrs/progressbar.h>
+#include <ngrs/slider.h>
+#include <ngrs/image.h>
+#include <ngrs/slider.h>
+#include <ngrs/notebook.h>
+#include <ngrs/tabbook.h>
+#include <ngrs/checkbox.h>
+#include <ngrs/filelistbox.h>
+#include <ngrs/filedialog.h>
 
 /**
 @author Stefan
 */
 
-class Tpnl : public ngrs::NPanel {
+class Tpnl : public ngrs::Panel {
 
    virtual void paint( ngrs::Graphics& g ) {
       ngrs::NFntString str;
@@ -54,7 +54,7 @@ class Tpnl : public ngrs::NPanel {
 };
 
 
-class NTestWindow : public ngrs::NWindow
+class NTestWindow : public ngrs::Window
 {
 public:
     NTestWindow();
@@ -65,12 +65,12 @@ private:
 
     int counter; // this is for timer button test;
 
-    ngrs::NProgressBar* pBar;
-    ngrs::NSlider* slider;
-    ngrs::NWindow* scrollWin;
-    ngrs::NFileListBox* fileBox;
-    ngrs::NFileDialog* fDialog;
-    ngrs::NLabel* info;
+    ngrs::ProgressBar* pBar;
+    ngrs::Slider* slider;
+    ngrs::Window* scrollWin;
+    ngrs::FileListBox* fileBox;
+    ngrs::FileDialog* fDialog;
+    ngrs::Label* info;
     ngrs::NCustomItem* itemD;
 
     void testListBox();
@@ -94,16 +94,16 @@ private:
 	void testObjectInspector();
 	void testCustomTreeView();
 
-    void onOpen(ngrs::NButtonEvent* ev);
+    void onOpen(ngrs::ButtonEvent* ev);
     void onSliderPosChanged(double v);
-    void onQuit(ngrs::NObject* sender);
-    void onBtnClick(ngrs::NButtonEvent* ev);
+    void onQuit(ngrs::Object* sender);
+    void onBtnClick(ngrs::ButtonEvent* ev);
 
-    void onColorSelected(const ngrs::NColor & color);
-    void onDelete(ngrs::NButtonEvent* ev);
+    void onColorSelected(const ngrs::Color & color);
+    void onDelete(ngrs::ButtonEvent* ev);
 
     void onSelection();
-    void onScrollPosChange( ngrs::NScrollBar* bar );
+    void onScrollPosChange( ngrs::ScrollBar* bar );
 
 
 

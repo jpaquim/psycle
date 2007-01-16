@@ -20,7 +20,7 @@
 #include "plugin.h"
 #include "configuration.h"
 //#include "inputhandler.h"
-//#include <ngrs/nfile.h>
+//#include <ngrs/file.h>
 #ifdef __unix__
 #include <dlfcn.h>
 #else

@@ -20,11 +20,11 @@
 
 #include "ntestwindow.h"
 
-#include <ngrs/napp.h>
-#include <ngrs/nregexp.h>
-#include <ngrs/nruntime.h>
-#include <ngrs/nproperty.h>
-#include <ngrs/nlabel.h>
+#include <ngrs/app.h>
+#include <ngrs/regexp.h>
+#include <ngrs/runtime.h>
+#include <ngrs/property.h>
+#include <ngrs/label.h>
 
 #include <iostream>
 #include <sstream>
@@ -35,9 +35,9 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-  ngrs::NApp app;
+  ngrs::App app;
 
-  ngrs::NWindow* myMainWindow = new NTestWindow();
+  ngrs::Window* myMainWindow = new NTestWindow();
   app.setMainWindow( myMainWindow );
   app.run();
 

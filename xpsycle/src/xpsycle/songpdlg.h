@@ -20,13 +20,13 @@
 #ifndef SONGPDLG_H
 #define SONGPDLG_H
 
-#include <ngrs/nwindow.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nedit.h>
-#include <ngrs/nbutton.h>
+#include <ngrs/window.h>
+#include <ngrs/label.h>
+#include <ngrs/edit.h>
+#include <ngrs/button.h>
 
 namespace ngrs {
-  class NMemo;
+  class Memo;
 }
 
 namespace psycle { 
@@ -37,7 +37,7 @@ namespace psycle {
     /**
     @author Stefan
     */
-    class SongpDlg : public ngrs::NWindow
+    class SongpDlg : public ngrs::Window
     {
     public:
       SongpDlg( );
@@ -51,17 +51,17 @@ namespace psycle {
 
     private:
 
-      ngrs::NEdit* songTitle_;
-      ngrs::NEdit* songCredits_;
-      ngrs::NMemo* songComments_;
-      ngrs::NButton* okBtn_;
-      ngrs::NButton* cnclBtn_;
+      ngrs::Edit* songTitle_;
+      ngrs::Edit* songCredits_;
+      ngrs::Memo* songComments_;
+      ngrs::Button* okBtn_;
+      ngrs::Button* cnclBtn_;
 
       Song* pSong_;
 
       void init();
-      void onOkBtn( ngrs::NButtonEvent* ev );
-      void onCancelBtn( ngrs::NButtonEvent* ev );
+      void onOkBtn( ngrs::ButtonEvent* ev );
+      void onCancelBtn( ngrs::ButtonEvent* ev );
     };
 
   }

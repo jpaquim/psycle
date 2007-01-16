@@ -23,10 +23,10 @@
 #include "singlepattern.h"
 #include "patternsequence.h"
 #include "audiodriver.h"
-#include <ngrs/npanel.h>
-#include <ngrs/nbutton.h>
-#include <ngrs/nline.h>
-#include <ngrs/nhint.h>
+#include <ngrs/panel.h>
+#include <ngrs/button.h>
+#include <ngrs/line.h>
+#include <ngrs/hint.h>
 #include <list>
 
 /**
@@ -34,13 +34,13 @@
 */
 
 namespace ngrs {
-  class NScrollBar;
-  class NLabel;
-  class NToolBar;
+  class ScrollBar;
+  class Label;
+  class ToolBar;
   class NListBox;  
   class NCheckBox;
-  class NLine;
-  class NEdit;
+  class Line;
+  class Edit;
 }
 
 class ZoomBar;
@@ -52,7 +52,7 @@ namespace psycle {
 
     class SequencerGUI;
 
-    class SequencerLoopItem : public ngrs::NPanel {
+    class SequencerLoopItem : public ngrs::Panel {
     public:
 
       SequencerLoopItem( SequencerGUI* seqGui );
@@ -69,11 +69,11 @@ namespace psycle {
     private:
 
       SequencerGUI* sView;
-      ngrs::NEdit* loopEdit;
+      ngrs::Edit* loopEdit;
 
     };
 
-    class SequencerItem : public ngrs::NPanel {
+    class SequencerItem : public ngrs::Panel {
     public:
       SequencerItem( SequencerGUI* seqGui );
       ~SequencerItem();
@@ -83,9 +83,9 @@ namespace psycle {
       virtual void paint( ngrs::Graphics& g);
       virtual void onMousePress(int x, int y, int button);
       virtual void resize();
-      virtual void onMove(const ngrs::NMoveEvent & moveEvent);
-      virtual void onMoveEnd(const ngrs::NMoveEvent & moveEvent);
-      virtual void onMoveStart(const ngrs::NMoveEvent & moveEvent);
+      virtual void onMove(const ngrs::MoveEvent & moveEvent);
+      virtual void onMoveEnd(const ngrs::MoveEvent & moveEvent);
+      virtual void onMoveStart(const ngrs::MoveEvent & moveEvent);
 
       void setText(const std::string & text);
 
@@ -114,8 +114,8 @@ namespace psycle {
       SequenceEntry* sequenceEntry_;
       SequencerGUI* sView;
 
-      ngrs::NRegion entriesInRegion();
-      ngrs::NRegion oldDrag;
+      ngrs::Region entriesInRegion();
+      ngrs::Region oldDrag;
 
       ngrs::NHint* hint_;
 
@@ -123,10 +123,10 @@ namespace psycle {
 
     };
 
-    class SequencerGUI : public ngrs::NPanel
+    class SequencerGUI : public ngrs::Panel
     {
     public:
-      class SequencerLine : public ngrs::NPanel {
+      class SequencerLine : public ngrs::Panel {
       public :
 
         SequencerLine( SequencerGUI* seqGui );
@@ -140,7 +140,7 @@ namespace psycle {
         virtual int preferredWidth() const;
         virtual int preferredHeight() const;
 
-        virtual void removeChild( ngrs::NVisualComponent* item );
+        virtual void removeChild( ngrs::VisualComponent* item );
 
         void setSequenceLine( SequenceLine* line );
         SequenceLine* sequenceLine();
@@ -164,7 +164,7 @@ namespace psycle {
       };
 
 
-      class SequencerBeatLineal : public ngrs::NPanel {
+      class SequencerBeatLineal : public ngrs::Panel {
       public :
         SequencerBeatLineal( SequencerGUI* seqGui );
         ~SequencerBeatLineal();
@@ -181,7 +181,7 @@ namespace psycle {
       };
 
 
-      class Area : public ngrs::NPanel {
+      class Area : public ngrs::Panel {
       public :
         Area( SequencerGUI* seqGui );
         ~Area();
@@ -195,24 +195,24 @@ namespace psycle {
 
         virtual void removeChilds();
 
-        ngrs::NPanel* vLine();
-        ngrs::NPanel* vLine() const;
+        ngrs::Panel* vLine();
+        ngrs::Panel* vLine() const;
 
-        NPanel* pLine(); // playpos line
-        ngrs::NPanel* pLine() const;
+        Panel* pLine(); // playpos line
+        ngrs::Panel* pLine() const;
 
         bool lockPlayLine() const;
 
-        virtual void onMove(const ngrs::NMoveEvent & moveEvent);
-        virtual void onMoveEnd(const ngrs::NMoveEvent & moveEvent);
-        virtual void onMoveStart(const ngrs::NMoveEvent & moveEvent);
+        virtual void onMove(const ngrs::MoveEvent & moveEvent);
+        virtual void onMoveEnd(const ngrs::MoveEvent & moveEvent);
+        virtual void onMoveStart(const ngrs::MoveEvent & moveEvent);
 
       private:
 
         SequencerGUI* sView;
 
-        ngrs::NPanel* vLine_;
-        ngrs::NPanel* pLine_; // playPosLine
+        ngrs::Panel* vLine_;
+        ngrs::Panel* pLine_; // playPosLine
 
         double playPos_;
         double newBeatPos_;
@@ -268,7 +268,7 @@ namespace psycle {
       int beatPxLength_;
       double oldPlayPos_;
 
-      ngrs::NTimer recStatusTimer;
+      ngrs::Timer recStatusTimer;
 
       ngrs::NCheckBox* snapToGridCheck_;
       SequencerBeatLineal* beatLineal_;
@@ -278,33 +278,33 @@ namespace psycle {
       PatternSequence* patternSequence_;
       std::vector<SequencerLine*> lines;
 
-      ngrs::NScrollBar* hBar;
-      ngrs::NScrollBar* vBar;
-      ngrs::NButton* renderBtn;
+      ngrs::ScrollBar* hBar;
+      ngrs::ScrollBar* vBar;
+      ngrs::Button* renderBtn;
 
       ZoomBar* zoomHBar;
 
       Area* scrollArea_;
-      ngrs::NToolBar* toolBar_;
+      ngrs::ToolBar* toolBar_;
       ngrs::NListBox* patternBox_;
 
-      void onInsertTrack( ngrs::NButtonEvent* ev );
-      void onDeleteTrack( ngrs::NButtonEvent* ev );
-      void onMoveDownTrack( ngrs::NButtonEvent* ev );
-      void onMoveUpTrack( ngrs::NButtonEvent* ev );
+      void onInsertTrack( ngrs::ButtonEvent* ev );
+      void onDeleteTrack( ngrs::ButtonEvent* ev );
+      void onMoveDownTrack( ngrs::ButtonEvent* ev );
+      void onMoveUpTrack( ngrs::ButtonEvent* ev );
 
-      void onNewPattern( ngrs::NButtonEvent* ev );
-      void onDeleteEntry( ngrs::NButtonEvent* ev );
-      void onAddLoop( ngrs::NButtonEvent* ev );
-      void onRefreshGUI( ngrs::NButtonEvent* ev );
+      void onNewPattern( ngrs::ButtonEvent* ev );
+      void onDeleteEntry( ngrs::ButtonEvent* ev );
+      void onAddLoop( ngrs::ButtonEvent* ev );
+      void onRefreshGUI( ngrs::ButtonEvent* ev );
 
       void onSequencerLineClick( SequencerLine* line );
       void onSequencerItemClick( SequencerItem* item );
       void onZoomHBarPosChanged( ZoomBar* zoomBar, double newPos );
-      void onHScrollBar( ngrs::NScrollBar* sender );
-      void onVScrollBar( ngrs::NScrollBar* sender );
+      void onHScrollBar( ngrs::ScrollBar* sender );
+      void onVScrollBar( ngrs::ScrollBar* sender );
 
-      void onRenderAsWave( ngrs::NButtonEvent* ev );
+      void onRenderAsWave( ngrs::ButtonEvent* ev );
       void onRecordingTimer();
 
     };

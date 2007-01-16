@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "zoombar.h"
-#include <ngrs/nbutton.h>
-#include <ngrs/nslider.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nimage.h>
+#include <ngrs/button.h>
+#include <ngrs/slider.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/image.h>
 
 /* XPM */
 const char * zoomin_xpm[] = {
@@ -399,7 +399,7 @@ const char * sl_xpm[] = {
 
 
 ZoomBar::ZoomBar()
- : ngrs::NPanel()
+ : ngrs::Panel()
 {
   init();
 }
@@ -413,31 +413,31 @@ void ZoomBar::init( )
   orientation_ = ngrs::nHorizontal;
   increment_ = 1;
 
-  setLayout( ngrs::NAlignLayout() );
+  setLayout( ngrs::AlignLayout() );
 
   zoomInBpm.createFromXpmData(zoomin_xpm);
   zoomOutBpm.createFromXpmData(zoomout_xpm);
   sliderBpm.createFromXpmData(sl_xpm);
 
-  ngrs::NImage* img = new ngrs::NImage(zoomOutBpm);
+  ngrs::Image* img = new ngrs::Image(zoomOutBpm);
 
-  decBtn = new ngrs::NButton(img);
+  decBtn = new ngrs::Button(img);
     decBtn->setFlat(false);
     decBtn->setPreferredSize(20,15);
     decBtn->setFlat(true);
     decBtn->clicked.connect( this, &ZoomBar::onDecButton );
   add(decBtn, ngrs::nAlLeft);
 
-  img = new ngrs::NImage(zoomInBpm);
+  img = new ngrs::Image(zoomInBpm);
 
-  incBtn = new ngrs::NButton(img);
+  incBtn = new ngrs::Button(img);
     incBtn->setFlat(false);
     incBtn->setPreferredSize(20,15);
     incBtn->setFlat(true);
     incBtn->clicked.connect( this, &ZoomBar::onIncButton );
   add(incBtn, ngrs::nAlRight);
 
-  zoomSlider = new ngrs::NSlider();
+  zoomSlider = new ngrs::Slider();
     zoomSlider->setOrientation(ngrs::nHorizontal);
     zoomSlider->setPreferredSize(120,15);
     zoomSlider->change.connect(this, &ZoomBar::onPosChanged);
@@ -455,7 +455,7 @@ int ZoomBar::orientation( ) const
   return orientation_;
 }
 
-void ZoomBar::onPosChanged( ngrs::NSlider * slider )
+void ZoomBar::onPosChanged( ngrs::Slider * slider )
 {
   posChanged.emit(this, slider->pos() );
 }
@@ -475,17 +475,17 @@ double ZoomBar::pos( ) const
   return zoomSlider->pos();
 }
 
-void ZoomBar::customSliderPaint( ngrs::NSlider * sl, ngrs::Graphics& g )
+void ZoomBar::customSliderPaint( ngrs::Slider * sl, ngrs::Graphics& g )
 {
   g.putBitmap(0,0,sliderBpm.width(),sliderBpm.height(),sliderBpm,0,0);
 }
 
-void ZoomBar::onIncButton( ngrs::NButtonEvent * ev )
+void ZoomBar::onIncButton( ngrs::ButtonEvent * ev )
 {
   zoomSlider->setPos( zoomSlider->pos() + increment_ );
 }
 
-void ZoomBar::onDecButton( ngrs::NButtonEvent * ev )
+void ZoomBar::onDecButton( ngrs::ButtonEvent * ev )
 {
   zoomSlider->setPos(zoomSlider->pos() - increment_);
 }

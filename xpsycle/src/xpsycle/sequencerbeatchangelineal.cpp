@@ -20,8 +20,8 @@
 #include "sequencerbeatchangelineal.h"
 #include "sequencergui.h"
 #include "patternsequence.h"
-#include <ngrs/nfontmetrics.h>
-#include <ngrs/nedit.h>
+#include <ngrs/fontmetrics.h>
+#include <ngrs/edit.h>
 #include <stdexcept>
 
 namespace psycle {
@@ -35,7 +35,7 @@ SequencerBeatChangeLineal::BeatChangeTriangle::BeatChangeTriangle( )
   tWidth  = 10;
   tHeight = 10;
 
-  bpmEdt_ = new ngrs::NEdit("120");
+  bpmEdt_ = new ngrs::Edit("120");
   add(bpmEdt_);
 
   bpmChangeEvent_ = 0;
@@ -50,7 +50,7 @@ SequencerBeatChangeLineal::BeatChangeTriangle::BeatChangeTriangle( SequencerGUI 
   tWidth  = 10;
   tHeight = 10;
 
-  bpmEdt_ = new ngrs::NEdit("120");
+  bpmEdt_ = new ngrs::Edit("120");
   add(bpmEdt_);
 
   bpmEdt_->keyPress.connect(this,&SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress);
@@ -91,32 +91,32 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::paint( ngrs::Graphics& g )
   pts[2].setX( (cw - tWidth) / 2 );
   pts[2].setY( tHeight );
 
-  g.setForeground( ngrs::NColor(0,255,0) );
+  g.setForeground( ngrs::Color(0,255,0) );
   g.fillPolygon(pts, 3);
-  g.setForeground( ngrs::NColor(150,150,150));
+  g.setForeground( ngrs::Color(150,150,150));
   g.drawPolygon(pts, 3);
 
 }
 
 int SequencerBeatChangeLineal::BeatChangeTriangle::preferredHeight( ) const
 {
-  ngrs::NFontMetrics metrics( font() );
+  ngrs::FontMetrics metrics( font() );
   return tHeight + 2 + metrics.textHeight();
 }
 
 void SequencerBeatChangeLineal::BeatChangeTriangle::resize( )
 {
   int cw = clientWidth();
-  ngrs::NFontMetrics metrics( font() );
+  ngrs::FontMetrics metrics( font() );
   bpmEdt_->setPosition( (cw - bpmEdt_->preferredWidth() ) / 2 , tHeight + 2 , bpmEdt_->preferredWidth() , bpmEdt_->preferredHeight() );
 }
 
-void SequencerBeatChangeLineal::BeatChangeTriangle::onMove( const ngrs::NMoveEvent & moveEvent )
+void SequencerBeatChangeLineal::BeatChangeTriangle::onMove( const ngrs::MoveEvent & moveEvent )
 {
   sView->patternSequence()->moveGlobalEvent(bpmChangeEvent_, (left() +15) / (double) sView->beatPxLength() );
 }
 
-void SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress( const ngrs::NKeyEvent & event )
+void SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress( const ngrs::KeyEvent & event )
 {
   bpmChangeEvent_->setParameter( ngrs::str<float>(bpmEdt_->text()) );
 }
@@ -124,7 +124,7 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::onKeyPress( const ngrs::NKey
 // the Main class of the BeatChangeLineal
 
 SequencerBeatChangeLineal::SequencerBeatChangeLineal()
- : ngrs::NPanel()
+ : ngrs::Panel()
 {
   sView = 0;
 }
@@ -140,9 +140,9 @@ SequencerBeatChangeLineal::~SequencerBeatChangeLineal()
 
 void SequencerBeatChangeLineal::paint( ngrs::Graphics& g )
 {
-  ngrs::NRect area = g.repaintArea().rectClipBox();
+  ngrs::Rect area = g.repaintArea().rectClipBox();
 
-  g.setForeground( ngrs::NColor(0,0,220) );
+  g.setForeground( ngrs::Color(0,0,220) );
 
   int cw = clientWidth();
   int ch = clientHeight();
@@ -152,7 +152,7 @@ void SequencerBeatChangeLineal::paint( ngrs::Graphics& g )
   int scaleTextWidth = g.textWidth(timeScaleText) + rightIdent;
   g.drawText(cw - scaleTextWidth + scrollDx(), 10 + 2 + g.textAscent(), timeScaleText);*/
 
-  g.setForeground( ngrs::NColor( 220, 220, 220) );
+  g.setForeground( ngrs::Color( 220, 220, 220) );
 
   g.drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
 
@@ -162,11 +162,11 @@ void SequencerBeatChangeLineal::paint( ngrs::Graphics& g )
 
   for (int i = start; i < end ; i++) {
      if (! (i % 16)) {
-        g.setForeground( ngrs::NColor( 180, 180, 180) );
+        g.setForeground( ngrs::Color( 180, 180, 180) );
         g.drawLine(i* sView->beatPxLength(),10,d2i(i*sView->beatPxLength()), 0);
      }
      else {
-        g.setForeground( ngrs::NColor( 220, 220, 220) );
+        g.setForeground( ngrs::Color( 220, 220, 220) );
         g.drawLine(i* sView->beatPxLength(),10,d2i(i*sView->beatPxLength()), 5);
     }
   }

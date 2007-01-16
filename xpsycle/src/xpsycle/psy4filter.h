@@ -22,7 +22,7 @@
 
 #include "psy3filter.h"
 #include <ngrs/sigslot.h>
-#include <ngrs/nxmlparser.h>
+#include <ngrs/xmlparser.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -71,8 +71,8 @@ namespace psycle {
 			private:
 
 				std::fstream _stream;
-				void onDetectFilterTag(const ngrs::NXmlParser & parser, const std::string & tagName);
-				void onTagParse(const ngrs::NXmlParser & parser, const std::string & tagName);
+				void onDetectFilterTag(const ngrs::XmlParser & parser, const std::string & tagName);
+				void onTagParse(const ngrs::XmlParser & parser, const std::string & tagName);
 				bool isPsy4;
 
 				PatternCategory* lastCategory;

@@ -19,14 +19,14 @@
   ***************************************************************************/
 
 #include "infodlg.h"
-#include <ngrs/nmemo.h>
+#include <ngrs/memo.h>
 
 namespace psycle { namespace host {
 
 InfoDlg::InfoDlg()
-  : ngrs::NWindow()
+  : ngrs::Window()
 {
-  memo = new ngrs::NMemo();
+  memo = new ngrs::Memo();
     memo->setWordWrap(true);
     memo->setReadOnly(true);
   pane()->add(memo,ngrs::nAlClient);

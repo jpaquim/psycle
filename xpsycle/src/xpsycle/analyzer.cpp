@@ -18,7 +18,7 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "analyzer.h"
-#include <ngrs/nwindow.h>
+#include <ngrs/window.h>
 
 ///\todo for scopes we need some mutex for the buffer
 ///\todo scopes disabled
@@ -27,10 +27,10 @@ namespace psycle {
   namespace host {
 
     Analyzer::Analyzer()
-      : ngrs::NPanel()
+      : ngrs::Panel()
     {
       ngrs::NFont font = ngrs::NFont( "Suse sans", 6, ngrs::nMedium | ngrs::nStraight );
-      font.setTextColor( ngrs::NColor( 0x60, 0x60, 0x60 ) );
+      font.setTextColor( ngrs::Color( 0x60, 0x60, 0x60 ) );
       setFont( font );
       mode_ = 0;
       setTransparent( false );
@@ -41,7 +41,7 @@ namespace psycle {
       memset( pSamplesL, 0, sizeof(pSamplesL) );
       memset( pSamplesR, 0, sizeof(pSamplesR) );
 
-      setBackground( ngrs::NColor( 0, 0, 0) );
+      setBackground( ngrs::Color( 0, 0, 0) );
 
       timer.setIntervalTime(100);
       //  timer.enableTimer();
@@ -57,27 +57,27 @@ namespace psycle {
     {
       switch (mode_) {
   case 0:
-    g.setForeground( ngrs::NColor(0x60,0x60,0x60));
+    g.setForeground( ngrs::Color(0x60,0x60,0x60));
     g.fillRect(32+24,32-8,256-32-24-32-24,1);
     g.drawText(32-1,32-8-6+g.textAscent(),"+6 db" );
     g.drawText(256-32-22,32-8-6+g.textAscent(),"+6 db" );
 
-    g.setForeground( ngrs::NColor(0x60,0x60,0x60));
+    g.setForeground( ngrs::Color(0x60,0x60,0x60));
     g.fillRect(32+24,32+44,256-32-24-32-24,1);
     g.drawText(32-1+4,32+44-6+g.textAscent(),"-6 db" );
     g.drawText(256-32-22,32+44-6+g.textAscent(),"-6 db" );
 
-    g.setForeground( ngrs::NColor(0x60,0x60,0x60));
+    g.setForeground( ngrs::Color(0x60,0x60,0x60));
     g.fillRect(32+24,32+44+16,256-32-24-32-24,1);
     g.drawText(32-1-6+4,32+44+16-6+g.textAscent(),"-12 db" );
     g.drawText(256-32-22,32+44+16-6+g.textAscent(),"-12 db" );
 
-    g.setForeground( ngrs::NColor( 0x60, 0x60, 0x60) );
+    g.setForeground( ngrs::Color( 0x60, 0x60, 0x60) );
     g.fillRect(32+24,32+44+16+18,256-32-24-32-24,1);
     g.drawText(32-1-6+4, 32+44+16+18-6+g.textAscent(), "-24db" );
     g.drawText(256-32-22, 32+44+16+18-6+g.textAscent(), "-24db" );
 
-    g.setForeground( ngrs::NColor( 0x60, 0x60, 0x60) );
+    g.setForeground( ngrs::Color( 0x60, 0x60, 0x60) );
     g.fillRect(32+24,32+23,256-32-24-32-24,1);
     g.drawText(32-1+6, 32+23-6+g.textAscent(), "0 db" );
     g.drawText(256-32-22, 32+23-6+g.textAscent(), "0 db" );
@@ -158,11 +158,11 @@ namespace psycle {
           y = 0;
         }
 
-        ngrs::NRect rect;
+        ngrs::Rect rect;
 
         int cd = (peakLifeL/24)+24;
         long cv = int(0xC0 * (cd/128.0f))<<16 | int(0x80 * (cd/128.0f))<<8 | int(((y<32+23)?0xF0:0x80)*(cd/128.0f)) ;
-        ngrs::NColor lbColor;
+        ngrs::Color lbColor;
         lbColor.setHCOLORREF(cv);
 
         rect.setLeft(128-32-24);
@@ -178,12 +178,12 @@ namespace psycle {
 
         ngrs::Graphics& g = window()->graphics( this );
 
-        g.setForeground( ngrs::NColor( 0, 0, 0) );
+        g.setForeground( ngrs::Color( 0, 0, 0) );
         g.fillRect( 0, 0, 300, 300 );
         paint( g );
         g.setForeground( lbColor );
         g.fillRect( rect );
-        g.swap( ngrs::NRect( absoluteGeometry() ) );
+        g.swap( ngrs::Rect( absoluteGeometry() ) );
 
         /*if (peak2L)
         {

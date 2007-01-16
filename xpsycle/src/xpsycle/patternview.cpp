@@ -26,21 +26,21 @@
 #include "machine.h"
 #include "defaultbitmaps.h"
 #include "zoombar.h"
-#include <ngrs/napp.h>
-#include <ngrs/nalignlayout.h>
-#include <ngrs/nwindow.h>
-#include <ngrs/nmenuitem.h>
-#include <ngrs/nmenuseperator.h>
-#include <ngrs/nframeborder.h>
-#include <ngrs/nfontmetrics.h>
-#include <ngrs/ntoolbar.h>
-#include <ngrs/ncombobox.h>
-#include <ngrs/nitem.h>
-#include <ngrs/nitemevent.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nsystem.h>
-#include <ngrs/nsplitbar.h>
-#include <ngrs/ncheckbox.h>
+#include <ngrs/app.h>
+#include <ngrs/alignlayout.h>
+#include <ngrs/window.h>
+#include <ngrs/menuitem.h>
+#include <ngrs/menuseperator.h>
+#include <ngrs/frameborder.h>
+#include <ngrs/fontmetrics.h>
+#include <ngrs/toolbar.h>
+#include <ngrs/combobox.h>
+#include <ngrs/item.h>
+#include <ngrs/itemevent.h>
+#include <ngrs/label.h>
+#include <ngrs/system.h>
+#include <ngrs/splitbar.h>
+#include <ngrs/checkbox.h>
 
 #ifdef _MSC_VER
 #undef min 
@@ -67,7 +67,7 @@ namespace psycle {
 
     }
 
-    UndoPattern::UndoPattern( int patternId, const ngrs::NSize & changedBlock, const PatCursor & cursor ) {
+    UndoPattern::UndoPattern( int patternId, const ngrs::Size & changedBlock, const PatCursor & cursor ) {
       changedBlock_ = changedBlock;
       patternId_ = patternId;
       cursor_ = cursor;
@@ -81,7 +81,7 @@ namespace psycle {
       return patternId_;
     }
 
-    const ngrs::NSize & UndoPattern::changedBlock() const {
+    const ngrs::Size & UndoPattern::changedBlock() const {
       return changedBlock_;
     }
 
@@ -110,7 +110,7 @@ namespace psycle {
     }
 
 
-    void PatternUndoManager::addUndo( const ngrs::NSize & block, const PatCursor & cursor ) {
+    void PatternUndoManager::addUndo( const ngrs::Size & block, const PatCursor & cursor ) {
       if ( pattern_ ) {
         // create a undoPattern
         UndoPattern dstPattern( pattern_->id() , block, cursor );
@@ -121,7 +121,7 @@ namespace psycle {
     }
 
     void PatternUndoManager::addUndo( const PatCursor & cursor ) {
-      addUndo ( ngrs::NSize( cursor.track(), cursor.line(), cursor.track()+1, cursor.line()+1), cursor );
+      addUndo ( ngrs::Size( cursor.track(), cursor.line(), cursor.track()+1, cursor.line()+1), cursor );
     }
 
     void PatternUndoManager::doUndo() {
@@ -144,7 +144,7 @@ namespace psycle {
         if ( it != end() ) {
           SinglePattern* pattern = pSong_->patternSequence()->patternData()->findById( pattern_->id() );
           if ( pattern ) {
-            ngrs::NSize changedBlock = lastUndoPattern->changedBlock();
+            ngrs::Size changedBlock = lastUndoPattern->changedBlock();
             pattern->copyBlock( changedBlock.left(), changedBlock.top(), *lastUndoPattern, changedBlock.right() - changedBlock.left(), lastUndoPattern->beats() );
             erase( it );		
           } else {
@@ -157,10 +157,10 @@ namespace psycle {
 
     /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
     PatternView::PatternView( Song* song )
-      : ngrs::NPanel()
+      : ngrs::Panel()
     {
       _pSong = song;
-      setLayout( ngrs::NAlignLayout() );
+      setLayout( ngrs::AlignLayout() );
 
       hBar = 0;
       vBar = 0;
@@ -171,32 +171,32 @@ namespace psycle {
       tweakHeader = 0;
       pattern_ = 0;
 
-      vBar = new ngrs::NScrollBar();
+      vBar = new ngrs::ScrollBar();
       vBar->setWidth( 15 );
       vBar->setOrientation( ngrs::nVertical );
       vBar->change.connect( this, &PatternView::onVScrollBar );
       add( vBar, ngrs::nAlRight );
 
       // create the patternview toolbar
-      add(toolBar = new ngrs::NToolBar() ,ngrs::nAlTop);
+      add(toolBar = new ngrs::ToolBar() ,ngrs::nAlTop);
       initToolBar();
 
       // create the left linenumber panel
-      NPanel* linePanel = new ngrs::NPanel();
-      linePanel->setLayout( ngrs::NAlignLayout() );
-      lineHeaderLabel = new ngrs::NPanel();
+      Panel* linePanel = new ngrs::Panel();
+      linePanel->setLayout( ngrs::AlignLayout() );
+      lineHeaderLabel = new ngrs::Panel();
       linePanel->add( lineHeaderLabel, ngrs::nAlTop );
       linePanel->add( lineNumber_ = new LineNumber(this), ngrs::nAlClient);
       add( linePanel, ngrs::nAlLeft );
 
       // sub group tweaker and patterndraw
-      NPanel* drawGroup = new ngrs::NPanel();
-      drawGroup->setLayout( ngrs::NAlignLayout() );
+      Panel* drawGroup = new ngrs::Panel();
+      drawGroup->setLayout( ngrs::AlignLayout() );
       // create tweak gui
-      tweakGroup = new ngrs::NPanel();
-      tweakGroup->setLayout( ngrs::NAlignLayout() );
+      tweakGroup = new ngrs::Panel();
+      tweakGroup->setLayout( ngrs::AlignLayout() );
       tweakGroup->add( tweakHeader = new TweakHeader(this), ngrs::nAlTop);
-      tweakHBar = new ngrs::NScrollBar();
+      tweakHBar = new ngrs::ScrollBar();
       tweakHBar->setOrientation(ngrs::nHorizontal);
       tweakHBar->setPreferredSize(100,15);
       tweakHBar->change.connect(this,&PatternView::onHTweakScrollBar);
@@ -207,24 +207,24 @@ namespace psycle {
       drawGroup->add ( tweakGroup, ngrs::nAlLeft );
       drawGroup->setPreferredSize( 2*tweakGUI->colWidth() , 100);
       // splitbar
-      splitBar = new ngrs::NSplitBar();
+      splitBar = new ngrs::SplitBar();
       drawGroup->add( splitBar, ngrs::nAlLeft );
       // create the pattern panel
-      NPanel* subGroup = new ngrs::NPanel();
-      subGroup->setLayout( ngrs::NAlignLayout() );
+      Panel* subGroup = new ngrs::Panel();
+      subGroup->setLayout( ngrs::AlignLayout() );
       // create the headertrack panel
       subGroup->add(header      = new Header(this), ngrs::nAlTop);
       lineHeaderLabel->setPreferredSize( 20, header->preferredHeight() );
       tweakHeader->setPreferredSize( 20, header->preferredHeight() );
       // hbar with beat zoom
-      NPanel* hBarPanel = new ngrs::NPanel();
-      hBarPanel->setLayout( ngrs::NAlignLayout() );
+      Panel* hBarPanel = new ngrs::Panel();
+      hBarPanel->setLayout( ngrs::AlignLayout() );
       zoomHBar = new ZoomBar();
       zoomHBar->setRange(1,100);
       zoomHBar->setPos(4);
       zoomHBar->posChanged.connect(this, &PatternView::onZoomHBarPosChanged);
       hBarPanel->add(zoomHBar, ngrs::nAlRight);
-      hBar = new ngrs::NScrollBar();
+      hBar = new ngrs::ScrollBar();
       hBar->setOrientation(ngrs::nHorizontal);
       hBar->setPreferredSize(100,15);
       hBar->change.connect(this,&PatternView::onHScrollBar);
@@ -290,7 +290,7 @@ namespace psycle {
       repaint();
     }
 
-    void PatternView::onHScrollBar( ngrs::NScrollBar * sender )
+    void PatternView::onHScrollBar( ngrs::ScrollBar * sender )
     {
       int newPos = drawArea->xOffByTrack( drawArea->findTrackByScreenX( static_cast<int>( sender->pos() ) ) );
 
@@ -300,7 +300,7 @@ namespace psycle {
 
         int diffX  = newPos - drawArea->dx();
         if (diffX < drawArea->clientWidth()) {
-          ngrs::NRect rect = drawArea->blitMove(diffX,0, drawArea->absoluteSpacingGeometry());
+          ngrs::Rect rect = drawArea->blitMove(diffX,0, drawArea->absoluteSpacingGeometry());
           drawArea->setDx(newPos);
           window()->repaint(drawArea,rect);
         } else {
@@ -310,7 +310,7 @@ namespace psycle {
       }
     }
 
-    void PatternView::onHTweakScrollBar( ngrs::NScrollBar * sender )
+    void PatternView::onHTweakScrollBar( ngrs::ScrollBar * sender )
     {
       int newPos = static_cast<int>( ( sender->pos() / tweakGUI->colWidth()) * tweakGUI->colWidth() );
 
@@ -320,7 +320,7 @@ namespace psycle {
 
         int diffX  = newPos - tweakGUI->dx();
         if (diffX < tweakGUI->clientWidth()) {
-          ngrs::NRect rect = tweakGUI->blitMove(diffX,0, tweakGUI->absoluteSpacingGeometry());
+          ngrs::Rect rect = tweakGUI->blitMove(diffX,0, tweakGUI->absoluteSpacingGeometry());
           tweakGUI->setDx(newPos);
           window()->repaint(tweakGUI,rect);
         } else {
@@ -331,7 +331,7 @@ namespace psycle {
     }
 
 
-    void PatternView::onVScrollBar( ngrs::NScrollBar * sender )
+    void PatternView::onVScrollBar( ngrs::ScrollBar * sender )
     {
       if ( sender->pos() >= 0) {
         int newPos = static_cast<int> ( (sender->pos() / rowHeight() ) * rowHeight() );
@@ -339,7 +339,7 @@ namespace psycle {
         if (newPos != drawArea->dy()) {
           int diffY  = newPos - lineNumber_->dy();
           if (diffY < drawArea->clientHeight()) {
-            ngrs::NRect rect = lineNumber_->blitMove(0,diffY,lineNumber_->absoluteSpacingGeometry());
+            ngrs::Rect rect = lineNumber_->blitMove(0,diffY,lineNumber_->absoluteSpacingGeometry());
             lineNumber_->setDy(newPos);
             window()->repaint(lineNumber_,rect);
 
@@ -384,32 +384,32 @@ namespace psycle {
 
     void PatternView::initToolBar( )
     {
-      meterCbx = new ngrs::NComboBox();
-      meterCbx->add(new ngrs::NItem("4/4"));
-      meterCbx->add(new ngrs::NItem("3/4"));
+      meterCbx = new ngrs::ComboBox();
+      meterCbx->add(new ngrs::Item("4/4"));
+      meterCbx->add(new ngrs::Item("3/4"));
       meterCbx->setPreferredSize( 50, 15 );
       meterCbx->setIndex(0);
       meterCbx->enableFocus(false);
       toolBar->add(meterCbx);
-      ngrs::NButton* btn = toolBar->add(new ngrs::NButton("add Bar"));
+      ngrs::Button* btn = toolBar->add(new ngrs::Button("add Bar"));
       btn->clicked.connect(this,&PatternView::onAddBar);
       btn->enableFocus( false);
-      btn = toolBar->add(new ngrs::NButton("delete Bar"));
+      btn = toolBar->add(new ngrs::Button("delete Bar"));
       btn->clicked.connect(this,&PatternView::onDeleteBar);
       btn->enableFocus(false);
-      toolBar->add(new ngrs::NLabel("Pattern Step"));
-      patternCombo_ = new ngrs::NComboBox();
+      toolBar->add(new ngrs::Label("Pattern Step"));
+      patternCombo_ = new ngrs::ComboBox();
       for (int i = 1; i <=16; i++) 
-        patternCombo_->add( new ngrs::NItem( stringify(i) ) );
+        patternCombo_->add( new ngrs::Item( stringify(i) ) );
       patternCombo_->setIndex( 0 );
       patternCombo_->itemSelected.connect(this,&PatternView::onPatternStepChange);
       patternCombo_->setPreferredSize( 40, 20 );
       patternCombo_->enableFocus(false);
       toolBar->add(patternCombo_);
 
-      toolBar->add(new ngrs::NLabel("Octave"));
-      octaveCombo_ = new ngrs::NComboBox();
-      for (int i=0; i<9; i++) octaveCombo_->add(new ngrs::NItem(stringify(i)));
+      toolBar->add(new ngrs::Label("Octave"));
+      octaveCombo_ = new ngrs::ComboBox();
+      for (int i=0; i<9; i++) octaveCombo_->add(new ngrs::Item(stringify(i)));
       octaveCombo_->itemSelected.connect(this,&PatternView::onOctaveChange);
       octaveCombo_->setPreferredSize( 40, 20 );
       octaveCombo_->setIndex(4);
@@ -417,17 +417,17 @@ namespace psycle {
       setEditOctave(4);
       toolBar->add(octaveCombo_);
 
-      toolBar->add(new ngrs::NLabel("Tracks"));
-      trackCombo_ = new ngrs::NComboBox();
+      toolBar->add(new ngrs::Label("Tracks"));
+      trackCombo_ = new ngrs::ComboBox();
       trackCombo_->setPreferredSize( 40, 20 );
       trackCombo_->itemSelected.connect(this,&PatternView::onTrackChange);
       for( int i=4; i<=MAX_TRACKS; i++ ) {
-        trackCombo_->add(new ngrs::NItem(stringify(i)));
+        trackCombo_->add(new ngrs::Item(stringify(i)));
       }
       trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
       toolBar->add(trackCombo_);
 
-      sharpBtn_ = new ngrs::NButton("#");
+      sharpBtn_ = new ngrs::Button("#");
       sharpBtn_->clicked.connect(this,&PatternView::onToggleSharpMode);
       toolBar->add( sharpBtn_ );
 
@@ -437,7 +437,7 @@ namespace psycle {
       toolBar->add(sideBox);
     }
 
-    void PatternView::onAddBar( ngrs::NButtonEvent * ev )
+    void PatternView::onAddBar( ngrs::ButtonEvent * ev )
     {
       if ( pattern_ ) {
         std::string meter = meterCbx->text();
@@ -451,7 +451,7 @@ namespace psycle {
       }
     }
 
-    void PatternView::onToggleSharpMode( ngrs::NButtonEvent* ev ) {
+    void PatternView::onToggleSharpMode( ngrs::ButtonEvent* ev ) {
       drawArea->setSharpMode( !drawArea->sharpMode() );
       if ( drawArea->sharpMode() ) {
         sharpBtn_->setText("#");
@@ -459,7 +459,7 @@ namespace psycle {
         sharpBtn_->setText("b");
     }
 
-    void PatternView::onDeleteBar( ngrs::NButtonEvent* ev )
+    void PatternView::onDeleteBar( ngrs::ButtonEvent* ev )
     {
       if ( pattern_ ) {
         float position = drawArea->cursor().line() / (float) pattern_->beatZoom();
@@ -469,7 +469,7 @@ namespace psycle {
       }
     }
 
-    void PatternView::onSideChange( ngrs::NButtonEvent* ev ) {
+    void PatternView::onSideChange( ngrs::ButtonEvent* ev ) {
       if (sideBox->checked() ) {
         tweakGroup->setAlign(ngrs::nAlRight);
         splitBar->setAlign( ngrs::nAlRight );
@@ -484,17 +484,17 @@ namespace psycle {
     void PatternView::resize( )
     {
       // calls the AlignLayout to reorder scroll-,-header,-linenumber- and patternpanels
-      ngrs::NPanel::resize();
+      ngrs::Panel::resize();
       updateRange();
 
     }
 
-    void PatternView::setSeparatorColor( const ngrs::NColor & separatorColor )
+    void PatternView::setSeparatorColor( const ngrs::Color & separatorColor )
     {
       separatorColor_ = separatorColor;
     }
 
-    const ngrs::NColor & PatternView::separatorColor( )
+    const ngrs::Color & PatternView::separatorColor( )
     {
       return separatorColor_;
     }
@@ -564,12 +564,12 @@ namespace psycle {
       return editPosition_;
     }
 
-    ngrs::NScrollBar * PatternView::vScrBar( )
+    ngrs::ScrollBar * PatternView::vScrBar( )
     {
       return vBar;
     }
 
-    ngrs::NScrollBar * PatternView::hScrBar( )
+    ngrs::ScrollBar * PatternView::hScrBar( )
     {
       return hBar;
     }
@@ -614,7 +614,7 @@ namespace psycle {
     /// The Header Panel Class
     ///
     ///
-    PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , ngrs::NPanel()
+    PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , ngrs::Panel()
     {
       setHeight( coords_.bgCoords.height() );
       skinColWidth_ = coords_.bgCoords.width();
@@ -629,8 +629,8 @@ namespace psycle {
     {
       DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
 
-      ngrs::NBitmap & bitmap = icons.pattern_header_skin();
-      ngrs::NBitmap & patNav = icons.patNav();
+      ngrs::Bitmap & bitmap = icons.pattern_header_skin();
+      ngrs::Bitmap & patNav = icons.patNav();
 
       int startTrack = pView->drawArea->findTrackByScreenX( scrollDx() );
 
@@ -691,17 +691,17 @@ namespace psycle {
         int track = pView->drawArea->findTrackByScreenX( x );
 
         // find out the start offset of the header bitmap
-        ngrs::NBitmap & patNav = icons.patNav();
+        ngrs::Bitmap & patNav = icons.patNav();
         ngrs::NPoint off( patNav.width()+ pView->drawArea->xOffByTrack( track ) + (pView->drawArea->trackWidth( track ) - patNav.width() - skinColWidth()) / 2,0);
         // find out the start offset of the nav buttons
         ngrs::NPoint navOff( pView->drawArea->xOffByTrack( track ),0); 
 
-        ngrs::NRect decCol( navOff.x() , navOff.y(), 10, patNav.height() );
-        ngrs::NRect incCol( navOff.x() +10, navOff.y(), 10, patNav.height() );
-        ngrs::NRect xCol( navOff.x() +20, navOff.y(), 10, patNav.height() );
+        ngrs::Rect decCol( navOff.x() , navOff.y(), 10, patNav.height() );
+        ngrs::Rect incCol( navOff.x() +10, navOff.y(), 10, patNav.height() );
+        ngrs::Rect xCol( navOff.x() +20, navOff.y(), 10, patNav.height() );
 
         // the rect area of the solo led
-        ngrs::NRect solo(off.x() + coords_.dSoloCoords.x(), off.y() + coords_.dSoloCoords.y(), coords_.sSoloCoords.width(), coords_.sSoloCoords.height());
+        ngrs::Rect solo(off.x() + coords_.dSoloCoords.x(), off.y() + coords_.dSoloCoords.y(), coords_.sSoloCoords.width(), coords_.sSoloCoords.height());
 
         std::map<int, TrackGeometry>::const_iterator it;
         it = pView->trackGeometrics().lower_bound( track );
@@ -730,14 +730,14 @@ namespace psycle {
               onSoloLedClick(track);
             } else {
               // the rect area of the solo led
-              ngrs::NRect mute(off.x() + coords_.dMuteCoords.x(), off.y() + coords_.dMuteCoords.y(), coords_.sMuteCoords.width(), coords_.sMuteCoords.height());
+              ngrs::Rect mute(off.x() + coords_.dMuteCoords.x(), off.y() + coords_.dMuteCoords.y(), coords_.sMuteCoords.width(), coords_.sMuteCoords.height());
               // now check point intersection for solo
               if (mute.intersects(x,y)) {
                 onMuteLedClick(track);
               } else
               {
                 // the rect area of the record led
-                ngrs::NRect record(off.x() + coords_.dRecCoords.x(), off.y() + coords_.dRecCoords.y(), coords_.sRecCoords.width(), coords_.sRecCoords.height());
+                ngrs::Rect record(off.x() + coords_.dRecCoords.x(), off.y() + coords_.dRecCoords.y(), coords_.sRecCoords.width(), coords_.sRecCoords.height());
                 // now check point intersection for solo
                 if (record.intersects(x,y)) {
                   onRecLedClick(track);
@@ -808,9 +808,9 @@ namespace psycle {
     ///
     /// The Line Number Panel Class
     ///
-    PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : ngrs::NPanel(), dy_(0)
+    PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : ngrs::Panel(), dy_(0)
     {
-      setBorder( ngrs::NFrameBorder() );
+      setBorder( ngrs::FrameBorder() );
       pView = pPatternView;
       setWidth(60);
       setTransparent(false);
@@ -820,11 +820,11 @@ namespace psycle {
     {
     }
 
-    void PatternView::LineNumber::setTextColor( const ngrs::NColor& textColor ) {
+    void PatternView::LineNumber::setTextColor( const ngrs::Color& textColor ) {
       textColor_ = textColor;
     }
 
-    const ngrs::NColor & PatternView::LineNumber::textColor() const {
+    const ngrs::Color & PatternView::LineNumber::textColor() const {
       return textColor_;
     }
 
@@ -832,7 +832,7 @@ namespace psycle {
     {
       TimeSignature signature;
 
-      ngrs::NRect repaintRect = g.repaintArea().rectClipBox();
+      ngrs::Rect repaintRect = g.repaintArea().rectClipBox();
       int absTop  = absoluteTop();
       int ch      = clientHeight();
       // the start for whole repaint
@@ -942,7 +942,7 @@ namespace psycle {
     void PatternView::TweakHeader::paint( ngrs::Graphics& g ) {
 
       DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
-      ngrs::NBitmap & bitmap = icons.tweakHeader();
+      ngrs::Bitmap & bitmap = icons.tweakHeader();
 
       int startTrack = scrollDx() / pView->tweakColWidth();
       int trackCount = spacingWidth() / pView->tweakColWidth();
@@ -1039,7 +1039,7 @@ namespace psycle {
       pView->updateRange();
     }
 
-    void PatternView::TweakGUI::onKeyPress( const ngrs::NKeyEvent& event ) {
+    void PatternView::TweakGUI::onKeyPress( const ngrs::KeyEvent& event ) {
       CustomPatternView::onKeyPress( event );
 
       int key = Global::pConfig()->inputHandler().getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
@@ -1272,54 +1272,54 @@ namespace psycle {
       pView = pPatternView;
       editPopup_ = new ngrs::NPopupMenu();
       add(editPopup_);
-      editPopup_->add(new ngrs::NMenuItem("Undo"));
-      editPopup_->add(new ngrs::NMenuItem("Redo"));
-      editPopup_->add(new ngrs::NMenuSeperator());
-      ngrs::NMenuItem* blockCutItem_ = new ngrs::NMenuItem("Block cut");
+      editPopup_->add(new ngrs::MenuItem("Undo"));
+      editPopup_->add(new ngrs::MenuItem("Redo"));
+      editPopup_->add(new ngrs::MenuSeperator());
+      ngrs::MenuItem* blockCutItem_ = new ngrs::MenuItem("Block cut");
       blockCutItem_->click.connect(this,&PatternView::PatternDraw::onPopupBlockCut);
       editPopup_->add(blockCutItem_);
-      ngrs::NMenuItem* blockCopyItem_ = new ngrs::NMenuItem("Block copy");
+      ngrs::MenuItem* blockCopyItem_ = new ngrs::MenuItem("Block copy");
       blockCopyItem_->click.connect(this,&PatternView::PatternDraw::onPopupBlockCopy);
       editPopup_->add(blockCopyItem_);
-      ngrs::NMenuItem* blockPasteItem_ = new ngrs::NMenuItem("Block paste");
+      ngrs::MenuItem* blockPasteItem_ = new ngrs::MenuItem("Block paste");
       blockPasteItem_->click.connect(this,&PatternView::PatternDraw::onPopupBlockPaste);
       editPopup_->add(blockPasteItem_);
-      ngrs::NMenuItem* blockPasteMixItem_ = new ngrs::NMenuItem("Block mix paste");
+      ngrs::MenuItem* blockPasteMixItem_ = new ngrs::MenuItem("Block mix paste");
       blockPasteMixItem_->click.connect(this,&PatternView::PatternDraw::onPopupBlockMixPaste);
       editPopup_->add(blockPasteMixItem_);
 
-      ngrs::NMenuItem* blockDelItem = new ngrs::NMenuItem("Block delete");
+      ngrs::MenuItem* blockDelItem = new ngrs::MenuItem("Block delete");
       blockDelItem->click.connect(this,&PatternView::PatternDraw::onPopupBlockDelete);
       editPopup_->add(blockDelItem);
 
-      editPopup_->add(new ngrs::NMenuSeperator());
-      editPopup_->add(new ngrs::NMenuItem("Interpolate Effect"));
-      editPopup_->add(new ngrs::NMenuItem("Change Generator"));
-      editPopup_->add(new ngrs::NMenuItem("Change Instrument"));
-      editPopup_->add(new ngrs::NMenuSeperator());
+      editPopup_->add(new ngrs::MenuSeperator());
+      editPopup_->add(new ngrs::MenuItem("Interpolate Effect"));
+      editPopup_->add(new ngrs::MenuItem("Change Generator"));
+      editPopup_->add(new ngrs::MenuItem("Change Instrument"));
+      editPopup_->add(new ngrs::MenuSeperator());
 
-      ngrs::NMenuItem* blockT1Item = new ngrs::NMenuItem("Transpose+1");
+      ngrs::MenuItem* blockT1Item = new ngrs::MenuItem("Transpose+1");
       blockT1Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose1);
       editPopup_->add(blockT1Item);
 
-      ngrs::NMenuItem* blockT_1Item = new ngrs::NMenuItem("Transpose-1");
+      ngrs::MenuItem* blockT_1Item = new ngrs::MenuItem("Transpose-1");
       blockT_1Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose_1);
       editPopup_->add(blockT_1Item);
 
-      ngrs::NMenuItem* blockT12Item = new ngrs::NMenuItem("Transpose12");
+      ngrs::MenuItem* blockT12Item = new ngrs::MenuItem("Transpose12");
       blockT12Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose12);
       editPopup_->add(blockT12Item);
 
-      ngrs::NMenuItem* blockT_12Item = new ngrs::NMenuItem("Transpose-12");
+      ngrs::MenuItem* blockT_12Item = new ngrs::MenuItem("Transpose-12");
       blockT_12Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose_12);
       editPopup_->add(blockT_12Item);
 
-      editPopup_->add(new ngrs::NMenuSeperator());
+      editPopup_->add(new ngrs::MenuSeperator());
 
-      editPopup_->add(new ngrs::NMenuItem("Block Swing Fill"));
-      editPopup_->add(new ngrs::NMenuItem("Block Track Fill"));
-      editPopup_->add(new ngrs::NMenuSeperator());
-      ngrs::NMenuItem* blockPatPropItem_ = new ngrs::NMenuItem("Pattern properties");
+      editPopup_->add(new ngrs::MenuItem("Block Swing Fill"));
+      editPopup_->add(new ngrs::MenuItem("Block Track Fill"));
+      editPopup_->add(new ngrs::MenuSeperator());
+      ngrs::MenuItem* blockPatPropItem_ = new ngrs::MenuItem("Pattern properties");
       blockPatPropItem_->click.connect(this,&PatternView::PatternDraw::onPopupPattern);
       editPopup_->add(blockPatPropItem_);
 
@@ -1437,7 +1437,7 @@ namespace psycle {
 
 
           if (y != lastLine) {
-            ngrs::NColor tColor = textColor();
+            ngrs::Color tColor = textColor();
 
             bool onBeat = false;
             bool onBar  = false;
@@ -1456,8 +1456,8 @@ namespace psycle {
               g.fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
             }
 
-            ngrs::NColor stdColor = tColor;
-            ngrs::NColor crColor = pView->colorInfo().cursor_text_color;
+            ngrs::Color stdColor = tColor;
+            ngrs::Color crColor = pView->colorInfo().cursor_text_color;
 
             std::map<int, PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
             PatternEvent emptyEvent;
@@ -1561,7 +1561,7 @@ namespace psycle {
       CustomPatternView::onMousePressed(x,y,button);
     }
 
-    void PatternView::PatternDraw::onKeyPress( const ngrs::NKeyEvent & event )
+    void PatternView::PatternDraw::onKeyPress( const ngrs::KeyEvent & event )
     {
       if ( !pView->pattern() ) return;
       CustomPatternView::onKeyPress( event );
@@ -1706,10 +1706,10 @@ namespace psycle {
               pasteBlock( cursor().track(), cursor().line(), false);
 
               if (pView->moveCursorWhenPaste()) {
-                /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
-                pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
+                /*       if (pView->cursor().y()+ blockLines < pView->lineNumber() ) {
+                pView->setCursor(Point3D(pView->cursor().x(),pView->cursor().y()+blockLines,pView->cursor().z()));
                 } else
-                pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
+                pView->setCursor(Point3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
               }
               pView->repaint();
               return;
@@ -1938,20 +1938,20 @@ namespace psycle {
 
     }
 
-    ngrs::NRect PatternView::repaintLineNumberArea( int startLine, int endLine )
+    ngrs::Rect PatternView::repaintLineNumberArea( int startLine, int endLine )
     {
       int top    = startLine    * rowHeight()  + drawArea->absoluteTop()  - lineNumber_->dy();
       int bottom = (endLine+3)  * rowHeight()  + drawArea->absoluteTop()  - lineNumber_->dy();
 
-      return ngrs::NRect(lineNumber_->absoluteLeft(),top,lineNumber_->clientWidth(),bottom - top);
+      return ngrs::Rect(lineNumber_->absoluteLeft(),top,lineNumber_->clientWidth(),bottom - top);
     }
 
-    void PatternView::PatternDraw::onPopupBlockCopy( ngrs::NButtonEvent* ev )
+    void PatternView::PatternDraw::onPopupBlockCopy( ngrs::ButtonEvent* ev )
     {
       copyBlock(false);
     }
 
-    void PatternView::PatternDraw::onPopupBlockCut( ngrs::NButtonEvent* ev )
+    void PatternView::PatternDraw::onPopupBlockCut( ngrs::ButtonEvent* ev )
     {
       copyBlock(true);
     }
@@ -1971,56 +1971,56 @@ namespace psycle {
       xml+= copyPattern.toXml();
       xml+= "</patsel>";
 
-      ngrs::NApp::system().clipBoard().setAsText( xml );
+      ngrs::App::system().clipBoard().setAsText( xml );
 
       if (cutit) {
-        pView->undoManager().addUndo( ngrs::NSize( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
+        pView->undoManager().addUndo( ngrs::Size( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
         pView->pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
         pView->repaint();
       }
     }
 
-    void PatternView::PatternDraw::onPopupBlockDelete( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupBlockDelete( ngrs::ButtonEvent * ev )
     {	
       deleteBlock();
       repaint();
     }
 
-    void PatternView::PatternDraw::onPopupBlockMixPaste( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupBlockMixPaste( ngrs::ButtonEvent * ev )
     {
       pasteBlock( cursor().track(), cursor().line(),true);
 
       if (pView->moveCursorWhenPaste()) {
-        /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
-        pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
+        /*       if (pView->cursor().y()+ blockLines < pView->lineNumber() ) {
+        pView->setCursor(Point3D(pView->cursor().x(),pView->cursor().y()+blockLines,pView->cursor().z()));
         } else
-        pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
+        pView->setCursor(Point3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
       }
       pView->repaint();
     }
 
-    void PatternView::PatternDraw::onPopupBlockPaste( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupBlockPaste( ngrs::ButtonEvent * ev )
     {
       pasteBlock( cursor().track(), cursor().line(), false);
 
       if (pView->moveCursorWhenPaste()) {
-        /*       if (pView->cursor().y()+ blockNLines < pView->lineNumber() ) {
-        pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y()+blockNLines,pView->cursor().z()));
+        /*       if (pView->cursor().y()+ blockLines < pView->lineNumber() ) {
+        pView->setCursor(Point3D(pView->cursor().x(),pView->cursor().y()+blockLines,pView->cursor().z()));
         } else
-        pView->setCursor(NPoint3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
+        pView->setCursor(Point3D(pView->cursor().x(),pView->lineNumber()-1,pView->cursor().z()));*/
       }
       pView->repaint();
     }
 
     void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
     {
-      if ( ngrs::NApp::system().clipBoard().asText() != "" ) {
-        ngrs::NXmlParser parser;
+      if ( ngrs::App::system().clipBoard().asText() != "" ) {
+        ngrs::XmlParser parser;
         lastXmlLineBeatPos = 0.0;
         xmlTracks = 0;
         xmlBeats = 0;
         parser.tagParse.connect(this, &PatternView::PatternDraw::onTagParse);
-        parser.parseString( ngrs::NApp::system().clipBoard().asText() );
+        parser.parseString( ngrs::App::system().clipBoard().asText() );
 
         if (!mix)
           pView->pattern()->copyBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
@@ -2031,7 +2031,7 @@ namespace psycle {
 
     void PatternView::updatePlayBar(bool followSong)
     {
-      /*  if ( ((NVisualComponent*) parent())->visible() && (Global::pPlayer()->_lineChanged) && (editPosition() == Global::pPlayer()->_playPosition) && !followSong )
+      /*  if ( ((VisualComponent*) parent())->visible() && (Global::pPlayer()->_lineChanged) && (editPosition() == Global::pPlayer()->_playPosition) && !followSong )
       {
       int trackCount  = clientWidth() / colWidth();
       int startTrack  = drawArea->dx() / colWidth();
@@ -2173,7 +2173,7 @@ namespace psycle {
       double top = selection().top() / (double)pView->beatZoom();
       double bottom = selection().bottom() / (double)pView->beatZoom();
 
-      pView->undoManager().addUndo( ngrs::NSize( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
+      pView->undoManager().addUndo( ngrs::Size( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
 
       pView->pattern()->transposeBlock(left, right, top, bottom, trp);
 
@@ -2192,32 +2192,32 @@ namespace psycle {
       }
     }
 
-    void PatternView::PatternDraw::onPopupPattern( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupPattern( ngrs::ButtonEvent * ev )
     {
     }
 
-    void PatternView::PatternDraw::onPopupTranspose1( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupTranspose1( ngrs::ButtonEvent * ev )
     {
       transposeBlock(1);
     }
 
-    void PatternView::PatternDraw::onPopupTranspose12( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupTranspose12( ngrs::ButtonEvent * ev )
     {
       transposeBlock(12);
     }
 
-    void PatternView::PatternDraw::onPopupTranspose_1( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupTranspose_1( ngrs::ButtonEvent * ev )
     {
       transposeBlock(-1);
     }
 
-    void PatternView::PatternDraw::onPopupTranspose_12( ngrs::NButtonEvent * ev )
+    void PatternView::PatternDraw::onPopupTranspose_12( ngrs::ButtonEvent * ev )
     {
       transposeBlock(-12);
     }
 
 
-    void PatternView::PatternDraw::onKeyRelease(const ngrs::NKeyEvent & event) {
+    void PatternView::PatternDraw::onKeyRelease(const ngrs::KeyEvent & event) {
       CustomPatternView::onKeyRelease( event );
       if ( !pView->pattern() ) return;
 
@@ -2249,7 +2249,7 @@ namespace psycle {
       double top = selection().top() / (double) pView->beatZoom();
       double bottom = selection().bottom() / (double) pView->beatZoom();
 
-      pView->undoManager().addUndo( ngrs::NSize( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
+      pView->undoManager().addUndo( ngrs::Size( selection().left(), selection().top(), selection().right(), selection().bottom() ), cursor() );
 
       pView->pattern()->deleteBlock(left, right, top, bottom);
       repaint();
@@ -2379,12 +2379,12 @@ namespace psycle {
       }
     }
 
-    void PatternView::onOctaveChange( ngrs::NItemEvent * ev )
+    void PatternView::onOctaveChange( ngrs::ItemEvent * ev )
     {
       setEditOctave( ngrs::str<int> ( ev->item()->text() ) );
     }
 
-    void PatternView::onTrackChange( ngrs::NItemEvent * ev )
+    void PatternView::onTrackChange( ngrs::ItemEvent * ev )
     {
       pSong()->setTracks( ngrs::str<int>( ev->item()->text() ) );
       drawArea->setTrackNumber( pSong()->tracks() ); 
@@ -2480,14 +2480,14 @@ namespace psycle {
       return selectedMacIdx_;
     }
 
-    void psycle::host::PatternView::onPatternStepChange( ngrs::NItemEvent * ev )
+    void psycle::host::PatternView::onPatternStepChange( ngrs::ItemEvent * ev )
     {
       if (patternCombo_->selIndex()!=-1) {
         setPatternStep(patternCombo_->selIndex()+1);
       }
     }
 
-    void PatternView::PatternDraw::onTagParse( const ngrs::NXmlParser & parser, const std::string & tagName  )
+    void PatternView::PatternDraw::onTagParse( const ngrs::XmlParser & parser, const std::string & tagName  )
     {
       if (tagName == "patsel") {
         xmlTracks = ngrs::str<int>   (parser.getAttribValue("tracks"));

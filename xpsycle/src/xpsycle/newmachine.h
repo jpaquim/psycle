@@ -21,25 +21,25 @@
 #define NEWMACHINE_H
 
 #include "pluginfinder.h"
-#include <ngrs/ndialog.h>
-#include <ngrs/ntabbook.h>
-#include <ngrs/nfilelistbox.h>
-#include <ngrs/ngroupbox.h>
-#include <ngrs/nlabel.h>
-#include <ngrs/nbevelborder.h>
+#include <ngrs/dialog.h>
+#include <ngrs/tabbook.h>
+#include <ngrs/filelistbox.h>
+#include <ngrs/groupbox.h>
+#include <ngrs/label.h>
+#include <ngrs/bevelborder.h>
 
 namespace psycle {
   namespace host {
 
     class Song;
 
-    class InfoLine : public ngrs::NPanel {
+    class InfoLine : public ngrs::Panel {
     public:
       InfoLine( const std::string& info ) {
-        add( infoLb = new ngrs::NLabel(info) );
-        add( textLb = new ngrs::NLabel() );
+        add( infoLb = new ngrs::Label(info) );
+        add( textLb = new ngrs::Label() );
         textLb->setWordWrap( true );
-        textLb->setBorder( ngrs::NBevelBorder( ngrs::nNone, ngrs::nLowered ) );
+        textLb->setBorder( ngrs::BevelBorder( ngrs::nNone, ngrs::nLowered ) );
       }
 
       ~InfoLine() {
@@ -65,8 +65,8 @@ namespace psycle {
 
     private:
 
-      ngrs::NLabel* infoLb;
-      ngrs::NLabel* textLb;
+      ngrs::Label* infoLb;
+      ngrs::Label* textLb;
 
     };
 
@@ -74,7 +74,7 @@ namespace psycle {
     @author Stefan Nattkemper
     */
 
-    class NewMachine : public ngrs::NDialog
+    class NewMachine : public ngrs::Dialog
     {
     public:
       NewMachine( const PluginFinder& finder );
@@ -96,30 +96,30 @@ namespace psycle {
       InfoLine* libName;
       InfoLine* description;
       InfoLine* apiVersion;
-      ngrs::NGroupBox* macProperty;
+      ngrs::GroupBox* macProperty;
 
-      ngrs::NTabBook* tabBook_;
+      ngrs::TabBook* tabBook_;
 
       ngrs::NListBox* generatorfBox_;
       ngrs::NListBox* effectfBox_;
       ngrs::NListBox* ladspaBox_;
 
-      void onGeneratorItemSelected( ngrs::NItemEvent* ev );
-      void onEffectItemSelected( ngrs::NItemEvent* ev );
-      void onInternalItemSelected( ngrs::NItemEvent* ev );
-      void onLADSPAItemSelected( ngrs::NItemEvent* ev );
+      void onGeneratorItemSelected( ngrs::ItemEvent* ev );
+      void onEffectItemSelected( ngrs::ItemEvent* ev );
+      void onInternalItemSelected( ngrs::ItemEvent* ev );
+      void onLADSPAItemSelected( ngrs::ItemEvent* ev );
 
-      void onOkBtn( ngrs::NButtonEvent* sender );
-      void onItemDblClick( ngrs::NButtonEvent* sender );	
-      void onCancelBtn( ngrs::NButtonEvent* sender );
+      void onOkBtn( ngrs::ButtonEvent* sender );
+      void onItemDblClick( ngrs::ButtonEvent* sender );	
+      void onCancelBtn( ngrs::ButtonEvent* sender );
 
       std::map< ngrs::NCustomItem*, PluginFinderKey > pluginIdentify_;
 
       void setPlugin( ngrs::NCustomItem* item );
-      void onGeneratorTabChange( ngrs::NButtonEvent* ev );
-      void onEffectTabChange( ngrs::NButtonEvent* ev );
-      void onLADSPATabChange( ngrs::NButtonEvent* ev );
-      void onInternalTabChange( ngrs::NButtonEvent* ev );
+      void onGeneratorTabChange( ngrs::ButtonEvent* ev );
+      void onEffectTabChange( ngrs::ButtonEvent* ev );
+      void onLADSPATabChange( ngrs::ButtonEvent* ev );
+      void onInternalTabChange( ngrs::ButtonEvent* ev );
 
     };
 

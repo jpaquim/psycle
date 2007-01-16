@@ -1,0 +1,65 @@
+/***************************************************************************
+ *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper   *
+ *   natti@linux   *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+#include "dialog.h"
+
+namespace ngrs {
+
+  Dialog::Dialog()
+    : Window()
+  {
+    setModal(true);
+    do_execute = false;
+  }
+
+  Dialog::~Dialog()
+  {
+  }
+
+  int Dialog::execute( )
+  {
+    setPositionToScreenCenter();
+    setVisible(true);
+    return do_execute;
+  }
+
+  int Dialog::onClose()
+  {
+    do_execute = false;
+    setVisible(false);
+    setExitLoop(nDestroyWindow);
+    return nDestroyWindow;
+  }
+
+  void Dialog::doClose( int flag )
+  {
+    do_execute = flag;
+    setVisible(false);
+    setExitLoop(nDestroyWindow);
+  }
+
+  void Dialog::setVisible( bool on )
+  {
+    if (on) {
+      setPositionToScreenCenter();
+    }
+    Window::setVisible(on);
+  }
+
+}

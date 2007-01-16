@@ -20,14 +20,14 @@
 #ifndef SEQUENCERBEATCHANGELINEAL_H
 #define SEQUENCERBEATCHANGELINEAL_H
 
-#include <ngrs/npanel.h>
+#include <ngrs/panel.h>
 
 /**
 @author Stefan Nattkemper
 */
 
 namespace ngrs{
-  class NEdit;
+  class Edit;
 }
 
 namespace psycle {
@@ -37,10 +37,10 @@ namespace psycle {
     class PatternSequence;
     class GlobalEvent;
 
-    class SequencerBeatChangeLineal : public ngrs::NPanel
+    class SequencerBeatChangeLineal : public ngrs::Panel
     {
 
-      class BeatChangeTriangle : public ngrs::NPanel {
+      class BeatChangeTriangle : public ngrs::Panel {
       public:
         BeatChangeTriangle();
         BeatChangeTriangle(SequencerGUI * gui);
@@ -49,7 +49,7 @@ namespace psycle {
         void setBpmChangeEvent(GlobalEvent* event);
         GlobalEvent* bpmChangeEvent();
 
-        virtual void onMove(const ngrs::NMoveEvent & moveEvent);
+        virtual void onMove(const ngrs::MoveEvent & moveEvent);
         virtual void paint( ngrs::Graphics& g);
         virtual int preferredHeight() const;
         virtual void resize();
@@ -57,14 +57,14 @@ namespace psycle {
       private:
 
         SequencerGUI* sView;
-        ngrs::NEdit* bpmEdt_;
+        ngrs::Edit* bpmEdt_;
 
         int tWidth;
         int tHeight;
 
         GlobalEvent* bpmChangeEvent_;
 
-        void onKeyPress(const ngrs::NKeyEvent& event);
+        void onKeyPress(const ngrs::KeyEvent& event);
 
       };
 

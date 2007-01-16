@@ -18,16 +18,16 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <ngrs/ndockpanel.h>
-#include <ngrs/nxmlparser.h>
+#include <ngrs/dockpanel.h>
+#include <ngrs/xmlparser.h>
 
 namespace ngrs {
-  class NMenu;
-  class NMenuBar;
-  class NToolBar;
-  class NComboBox;
-  class NItemEvent;
-  class NFileDialog;
+  class Menu;
+  class MenuBar;
+  class ToolBar;
+  class ComboBox;
+  class ItemEvent;
+  class FileDialog;
 }
 
 namespace psycle { 
@@ -39,7 +39,7 @@ namespace psycle {
 
 
     /// wave editor frame window.
-    class WaveEdFrame : public ngrs::NDockPanel {
+    class WaveEdFrame : public ngrs::DockPanel {
     public:
 
       WaveEdFrame( Song* song );
@@ -53,11 +53,11 @@ namespace psycle {
 
       sigslot::signal2<int,bool> updateInstrumentCbx;
 
-      ngrs::NMenuBar *menuBar;
-      ngrs::NMenu *processMenu;
-      ngrs::NMenu *editMenu;
-      ngrs::NMenu *viewMenu;
-      ngrs::NMenu *convertMenu;
+      ngrs::MenuBar *menuBar;
+      ngrs::Menu *processMenu;
+      ngrs::Menu *editMenu;
+      ngrs::Menu *viewMenu;
+      ngrs::Menu *convertMenu;
 
     private:
 
@@ -67,33 +67,33 @@ namespace psycle {
       void InitMenus();
       void InitToolBar();
 
-      ngrs::NToolBar *toolBar;
-      ngrs::NComboBox* auxSelectCombo_;
+      ngrs::ToolBar *toolBar;
+      ngrs::ComboBox* auxSelectCombo_;
       WaveEdChildView *wavView;
-      ngrs::NFileDialog* wavSaveFileDlg;
+      ngrs::FileDialog* wavSaveFileDlg;
       InstrumentEditor* instrumentEditor;
 
       int wsInstrument;
 
-      void onPlay( ngrs::NButtonEvent *ev );
-      void onRelease( ngrs::NButtonEvent *ev );
-      void onPlayFromStart( ngrs::NButtonEvent *ev );
-      void onStop( ngrs::NButtonEvent *ev );
-      void onFastForward( ngrs::NButtonEvent *ev );
-      void onRewind( ngrs::NButtonEvent *ev );
+      void onPlay( ngrs::ButtonEvent *ev );
+      void onRelease( ngrs::ButtonEvent *ev );
+      void onPlayFromStart( ngrs::ButtonEvent *ev );
+      void onStop( ngrs::ButtonEvent *ev );
+      void onFastForward( ngrs::ButtonEvent *ev );
+      void onRewind( ngrs::ButtonEvent *ev );
       void PlayFrom( unsigned long startpos );
       void Stop();
 
-      void onLoadWave( ngrs::NButtonEvent* ev );
-      void onSaveWave( ngrs::NButtonEvent* ev );
-      void onEditInstrument( ngrs::NButtonEvent* ev );
-      void onEditWave( ngrs::NButtonEvent* ev );
+      void onLoadWave( ngrs::ButtonEvent* ev );
+      void onSaveWave( ngrs::ButtonEvent* ev );
+      void onEditInstrument( ngrs::ButtonEvent* ev );
+      void onEditWave( ngrs::ButtonEvent* ev );
 
-      void onSlotCopy( ngrs::NButtonEvent* ev );
-      void onSlotPaste( ngrs::NButtonEvent* ev );
+      void onSlotCopy( ngrs::ButtonEvent* ev );
+      void onSlotPaste( ngrs::ButtonEvent* ev );
 
-      void onDecInsBtn( ngrs::NButtonEvent* ev );
-      void onIncInsBtn( ngrs::NButtonEvent* ev );
+      void onDecInsBtn( ngrs::ButtonEvent* ev );
+      void onIncInsBtn( ngrs::ButtonEvent* ev );
 
       bool mySel_;
       int leftSize;
@@ -104,7 +104,7 @@ namespace psycle {
 
       int data_pos;
 
-      void onTagParse( const ngrs::NXmlParser& parser, const std::string& tagName );
+      void onTagParse( const ngrs::XmlParser& parser, const std::string& tagName );
 
 
     };

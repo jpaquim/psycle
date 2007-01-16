@@ -14445,285 +14445,285 @@ DefaultBitmaps::~DefaultBitmaps()
 
 // get methods
 
-ngrs::NBitmap & DefaultBitmaps::autoStop( )
+ngrs::Bitmap & DefaultBitmaps::autoStop( )
 {
   return autoStop_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::help( )
+ngrs::Bitmap & DefaultBitmaps::help( )
 {
   return help_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::less( )
+ngrs::Bitmap & DefaultBitmaps::less( )
 {
   return less_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::lessless( )
+ngrs::Bitmap & DefaultBitmaps::lessless( )
 {
   return lessless_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::littleleft( )
+ngrs::Bitmap & DefaultBitmaps::littleleft( )
 {
   return littleleft_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::littleright( )
+ngrs::Bitmap & DefaultBitmaps::littleright( )
 {
   return littleright_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::machines( )
+ngrs::Bitmap & DefaultBitmaps::machines( )
 {
   return machines_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::masterbk( )
+ngrs::Bitmap & DefaultBitmaps::masterbk( )
 {
   return masterbk_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::minus1( )
+ngrs::Bitmap & DefaultBitmaps::minus1( )
 {
   return minus1_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::minus( )
+ngrs::Bitmap & DefaultBitmaps::minus( )
 {
   return minus_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::moremore( )
+ngrs::Bitmap & DefaultBitmaps::moremore( )
 {
   return moremore_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::more( )
+ngrs::Bitmap & DefaultBitmaps::more( )
 {
   return more_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::newmachine( )
+ngrs::Bitmap & DefaultBitmaps::newmachine( )
 {
   return newmachine_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::newfile( )
+ngrs::Bitmap & DefaultBitmaps::newfile( )
 {
   return newfile_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::numbers( )
+ngrs::Bitmap & DefaultBitmaps::numbers( )
 {
   return numbers_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::openeditor( )
+ngrs::Bitmap & DefaultBitmaps::openeditor( )
 {
   return openeditor_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::open( )
+ngrs::Bitmap & DefaultBitmaps::open( )
 {
   return open_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::pattern_header_skin( )
+ngrs::Bitmap & DefaultBitmaps::pattern_header_skin( )
 {
   return pattern_header_skin_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::patterns( )
+ngrs::Bitmap & DefaultBitmaps::patterns( )
 {
   return patterns_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::playselpattern( )
+ngrs::Bitmap & DefaultBitmaps::playselpattern( )
 {
   return playselpattern_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::playstart( )
+ngrs::Bitmap & DefaultBitmaps::playstart( )
 {
   return playstart_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::play( )
+ngrs::Bitmap & DefaultBitmaps::play( )
 {
   return play_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::playstart_flat( )
+ngrs::Bitmap & DefaultBitmaps::playstart_flat( )
 {
   return playstart_flat_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::play_flat( )
+ngrs::Bitmap & DefaultBitmaps::play_flat( )
 {
   return play_flat_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::ffwd( )
+ngrs::Bitmap & DefaultBitmaps::ffwd( )
 {
   return ffwd_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::rwnd( )
+ngrs::Bitmap & DefaultBitmaps::rwnd( )
 {
   return rwnd_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::release( )
+ngrs::Bitmap & DefaultBitmaps::release( )
 {
   return release_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::plus1( )
+ngrs::Bitmap & DefaultBitmaps::plus1( )
 {
   return plus1_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::plus( )
+ngrs::Bitmap & DefaultBitmaps::plus( )
 {
   return plus_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::p( )
+ngrs::Bitmap & DefaultBitmaps::p( )
 {
   return p_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::recordnotes( )
+ngrs::Bitmap & DefaultBitmaps::recordnotes( )
 {
   return recordnotes_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::recordwav( )
+ngrs::Bitmap & DefaultBitmaps::recordwav( )
 {
   return recordwav_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::redo( )
+ngrs::Bitmap & DefaultBitmaps::redo( )
 {
   return redo_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::save_audio( )
+ngrs::Bitmap & DefaultBitmaps::save_audio( )
 {
   return save_audio_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::save( )
+ngrs::Bitmap & DefaultBitmaps::save( )
 {
   return save_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::sequencer( )
+ngrs::Bitmap & DefaultBitmaps::sequencer( )
 {
   return sequencer_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::splash( )
+ngrs::Bitmap & DefaultBitmaps::splash( )
 {
   return splash_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::stop( )
+ngrs::Bitmap & DefaultBitmaps::stop( )
 {
   return stop_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::stop_flat( )
+ngrs::Bitmap & DefaultBitmaps::stop_flat( )
 {
   return stop_flat_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::tbmainknob( )
+ngrs::Bitmap & DefaultBitmaps::tbmainknob( )
 {
   return tbmainknob_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::undo( )
+ngrs::Bitmap & DefaultBitmaps::undo( )
 {
   return undo_;
 }
 
-ngrs::NPixmap & DefaultBitmaps::machine_skin() {
+ngrs::Pixmap & DefaultBitmaps::machine_skin() {
   return machine_skin_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::wood( )
+ngrs::Bitmap & DefaultBitmaps::wood( )
 {
   return wood_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::screw( )
+ngrs::Bitmap & DefaultBitmaps::screw( )
 {
   return screw_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::alert( )
+ngrs::Bitmap & DefaultBitmaps::alert( )
 {
   return alert_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::new_category( )
+ngrs::Bitmap & DefaultBitmaps::new_category( )
 {
   return new_category_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::delPattern( )
+ngrs::Bitmap & DefaultBitmaps::delPattern( )
 {
   return delPattern_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::addTrack( )
+ngrs::Bitmap & DefaultBitmaps::addTrack( )
 {
   return addTrack_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::deleteTrack( )
+ngrs::Bitmap & DefaultBitmaps::deleteTrack( )
 {
   return deleteTrack_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::moveDownTrack( )
+ngrs::Bitmap & DefaultBitmaps::moveDownTrack( )
 {
   return moveDownTrack_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::moveUpTrack( )
+ngrs::Bitmap & DefaultBitmaps::moveUpTrack( )
 {
   return moveUpTrack_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::tweakHeader() {
+ngrs::Bitmap & DefaultBitmaps::tweakHeader() {
   return tweakHeader_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::patNav() {
+ngrs::Bitmap & DefaultBitmaps::patNav() {
   return patNav_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::pattern_new() {
+ngrs::Bitmap & DefaultBitmaps::pattern_new() {
   return pattern_new_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::logoSmall() {
+ngrs::Bitmap & DefaultBitmaps::logoSmall() {
 	return logoSmall_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::logoLeft() {
+ngrs::Bitmap & DefaultBitmaps::logoLeft() {
 	return logoLeft_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::logoMid() {
+ngrs::Bitmap & DefaultBitmaps::logoMid() {
 	return logoMid_;
 }
 
-ngrs::NBitmap & DefaultBitmaps::logoRight() {
+ngrs::Bitmap & DefaultBitmaps::logoRight() {
 	return logoRight_;
 }
 

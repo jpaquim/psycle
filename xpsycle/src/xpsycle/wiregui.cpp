@@ -21,9 +21,9 @@
 #include "skinreader.h"
 #include "bendedlineshape.h"
 #include "wiredlg.h"
-#include <ngrs/npopupmenu.h>
-#include <ngrs/nmenuitem.h>
-#include <ngrs/napp.h>
+#include <ngrs/popupmenu.h>
+#include <ngrs/menuitem.h>
+#include <ngrs/app.h>
 #include <cmath>
 #include <cstdio>
 
@@ -48,7 +48,7 @@ namespace psycle {
 
 
 		WireGUI::WireGUI()
-			: ngrs::NVisualComponent()
+			: ngrs::VisualComponent()
 		{
             lineShape = new BendedLineShape();
             lineShape->setClippingDistance(12);
@@ -96,7 +96,7 @@ namespace psycle {
 
 		void WireGUI::paint( ngrs::Graphics& g )
 		{
-			ngrs::NPen pen;
+			ngrs::Pen pen;
 			pen.setLineWidth(2);
 			g.setPen(pen);
 
@@ -154,17 +154,17 @@ namespace psycle {
 			int btcol = 240 - abs((int)((altslope-0.79) * 32));
 
 
-			ngrs::NColor rtBrush((int) max(0, min(255, rtcol * deltaColR)),
+			ngrs::Color rtBrush((int) max(0, min(255, rtcol * deltaColR)),
 										(int) max(0, min(255, rtcol * deltaColG)),
 										(int) max(0, min(255, rtcol * deltaColB)));
-			ngrs::NColor ltBrush( (int) max(0, min(255, ltcol * deltaColR)),
+			ngrs::Color ltBrush( (int) max(0, min(255, ltcol * deltaColR)),
 									(int) max(0, min(255, ltcol * deltaColG)),
 									(int) max(0, min(255, ltcol * deltaColB)));
-			ngrs::NColor btBrush( (int) max(0, min(255, btcol * deltaColR)),
+			ngrs::Color btBrush( (int) max(0, min(255, btcol * deltaColR)),
 									(int) max(0, min(255, btcol * deltaColG)),
 									(int) max(0, min(255, btcol * deltaColB)));
 
-			ngrs::NColor polyInnardsColor((int) ( 192 * deltaColR ), (int) (192 * deltaColG) , (int) (192 * deltaColB) );
+			ngrs::Color polyInnardsColor((int) ( 192 * deltaColR ), (int) (192 * deltaColG) , (int) (192 * deltaColB) );
 			ngrs::NPoint pol[5];
 
 			pol[0].setX( middleX -  (int) (cos    * triangle_size_center) );
@@ -227,29 +227,29 @@ namespace psycle {
 
 		void WireGUI::initPopupMenu() {
 			menu_ = new ngrs::NPopupMenu();
-			ngrs::NMenuItem* item;
-			item = new ngrs::NMenuItem("add Bend");
+			ngrs::MenuItem* item;
+			item = new ngrs::MenuItem("add Bend");
 			item->click.connect(this,&WireGUI::onAddBend);
 			menu_->add( item );
-			item = new ngrs::NMenuItem("remove Connection");
+			item = new ngrs::MenuItem("remove Connection");
 			item->click.connect(this,&WireGUI::onRemoveMe);
 			menu_->add( item );
 			add( menu_ );                                 
 		}
 
-		void WireGUI::onAddBend( ngrs::NButtonEvent* ev ) {
+		void WireGUI::onAddBend( ngrs::ButtonEvent* ev ) {
 			insertBend( newBendPos_ );
 			repaint();
 			bendAdded.emit( this );
-			setMoveable( ngrs::NMoveable( ngrs::nMvPolygonPicker ) );
+			setMoveable( ngrs::Moveable( ngrs::nMvPolygonPicker ) );
 		}
 		
-		void WireGUI::onRemoveMe( ngrs::NButtonEvent* ev ) {
+		void WireGUI::onRemoveMe( ngrs::ButtonEvent* ev ) {
             removeMe.emit( this );
         }
 
 		void WireGUI::onMousePress( int x, int y, int button ) {
-      		int shift = ngrs::NApp::system().shiftState();      
+      		int shift = ngrs::App::system().shiftState();      
 			if ( (shift &  ngrs::nsRight) && !(shift & ngrs::nsCtrl) ) {
 				// display right click popup menu
 				newBendPos_.setXY( left() + x, top() + y );
@@ -266,7 +266,7 @@ namespace psycle {
 				else
 				  setMoveFocus(1);				
 			}
-			setMoveable( ngrs::NMoveable( ngrs::nMvPolygonPicker ) );        
+			setMoveable( ngrs::Moveable( ngrs::nMvPolygonPicker ) );        
 			repaint();        
 		}
                                         
