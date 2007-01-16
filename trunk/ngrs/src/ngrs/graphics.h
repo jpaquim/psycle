@@ -114,7 +114,7 @@ namespace ngrs {
     void setDoubleBuffer(bool on);
 
 #ifdef __unix__
-    Pixmap dbPixmap();
+    ::Pixmap dbPixmap();
 #endif
 
     GC dbGC();
@@ -145,7 +145,7 @@ namespace ngrs {
     GC gcp;     // GC from Pixmap for double buffering
 
 #ifdef __unix__
-    Pixmap doubleBufferPixmap_;
+    ::Pixmap doubleBufferPixmap_;
 #else
     HBITMAP doubleBufferBitmap_;
 #endif
