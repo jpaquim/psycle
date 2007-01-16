@@ -108,12 +108,12 @@ namespace ngrs {
   }
 
 #ifdef __unix__
-  Visual * System::visual( ) const
+  ::Visual * System::visual( ) const
   {
     return visual_;
   }
 
-  Colormap System::colormap( ) const
+  ::Colormap System::colormap( ) const
   {
     return colormap_;
   }
@@ -759,7 +759,7 @@ namespace ngrs {
 #ifdef __unix__
     XWindowAttributes actual;
     XGetWindowAttributes(dpy(), win, &actual);
-    Window cr; 
+    ::Window cr; 
     int X,Y; 
     XTranslateCoordinates(dpy(), win, actual.root,0, 0, &X, &Y, &cr);
     return X;
@@ -779,7 +779,7 @@ namespace ngrs {
 #ifdef __unix__
     XWindowAttributes actual;
     XGetWindowAttributes(dpy(), win, &actual);
-    Window cr;
+    ::Window cr;
     int X,Y;
     XTranslateCoordinates(dpy(), win, actual.root,0, 0, &X, &Y, &cr);
     return Y;
@@ -934,7 +934,7 @@ namespace ngrs {
   }
 
 #ifdef __unix__
-  MWMHints System::getMotifHints( Window win ) const
+  MWMHints System::getMotifHints( ::Window win ) const
   {
     MWMHints hint;
     Atom type;
@@ -955,7 +955,7 @@ namespace ngrs {
     return hint;
   }
 
-  void System::setMotifHints( Window win, MWMHints hints )
+  void System::setMotifHints( ::Window win, MWMHints hints )
   {
     if (hints.flags != 0l) {
       XChangeProperty(dpy(), win,atoms().wm_motif_hint(), atoms().wm_motif_hint(), 32,
@@ -965,7 +965,7 @@ namespace ngrs {
     }
   }
 
-  void System::setMotifModalMode(Window win)
+  void System::setMotifModalMode(::Window win)
   {
     MWMHints hints = getMotifHints(win);
     hints.input_mode = MWM_INPUT_PRIMARY_APPLICATION_MODAL;
