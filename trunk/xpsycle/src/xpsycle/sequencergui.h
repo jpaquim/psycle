@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by Stefan ngrs::Nattkemper   *
+*   Copyright (C) 2006 by  Stefan ngrs::Nattkemper   *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -30,7 +30,7 @@
 #include <list>
 
 /**
-@author Stefan Nattkemper
+@author  Stefan Nattkemper
 */
 
 namespace ngrs {

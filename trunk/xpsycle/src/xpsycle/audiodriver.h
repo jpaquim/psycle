@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan Nattkemper  *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -23,7 +23,7 @@
 #include <string>
 
 /**
-@author Stefan
+@author  Stefan
 */
 
 ///\todo write a c api interface for building driver plugins

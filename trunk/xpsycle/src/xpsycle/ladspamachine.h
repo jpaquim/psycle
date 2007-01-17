@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper   *
+ *   Copyright (C) 2006 by  Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 #include "ladspa.h"
 
 /**
-@author Stefan Nattkemper
+@author  Stefan Nattkemper
 */
 
 namespace psycle {

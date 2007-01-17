@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006, 2007 by Stefan Nattkemper   *
+ *   Copyright (C) 2006, 2007 by  Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,7 +27,7 @@ namespace ngrs {
   class Segment7;
 
   /**
-  @author Stefan Nattkemper
+  @author  Stefan Nattkemper
   */
 
   class Seg7Display : public Panel

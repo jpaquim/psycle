@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by Stefan   *
+*   Copyright (C) 2006 by  Stefan   *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -1116,7 +1116,7 @@ namespace psycle {
       ngrs::MessageBox* about = new ngrs::MessageBox();
       about->setTitle("About Psycle(X)");
       about->setText( std::string("Psycle version (X alpha 0.1)\n") +
-        std::string("(c) 2006 by Stefan Nattkemper\n") +
+        std::string("(c) 2006 by  Stefan Nattkemper\n") +
         std::string("            Josep Segura\n") +
         std::string("            D.W. Aley\n") +
         std::string("GNU Public Licence 2.0") );

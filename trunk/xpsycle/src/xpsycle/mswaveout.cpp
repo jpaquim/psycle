@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper and others  *
+ *   Copyright (C) 2006 by  Stefan Nattkemper and others  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
