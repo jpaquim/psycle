@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef 7SEGMENT_H
-#define 7SEGMENT_H
+#ifndef SEGMENT7_H
+#define SEGMENT7_H
 
 #include "panel.h"
 
