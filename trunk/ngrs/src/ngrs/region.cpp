@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper                   *
- *   Made in Germany                                                       *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+*   Copyright (C) 2005, 2006, 2007 by  Stefan Nattkemper                   *
+*   Made in Germany                                                       *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #include "region.h"
 
 namespace ngrs {
@@ -24,9 +24,9 @@ namespace ngrs {
   Region::Region()
   {
 #ifdef __unix__
-    region_ = XCreateRegion();
+    platformRegion_ = XCreateRegion();
 #else
-    region_ = CreateRectRgn(0,0,0,0);
+    platformRegion_ = CreateRectRgn(0,0,0,0);
 #endif
     update = true;
   }
@@ -34,69 +34,80 @@ namespace ngrs {
   Region::Region( const Rect & rect )
   {
 #ifdef __unix__
-    region_ = XCreateRegion();
+    platformRegion_ = XCreateRegion();
     XRectangle rectangle;
-    rectangle.x= (short) rect.left();
-    rectangle.y= (short) rect.top();
-    rectangle.width=(unsigned short)  rect.width();
-    rectangle.height=(unsigned short) rect.height();
-    XUnionRectWithRegion( &rectangle, region_, region_ );
+    rectangle.x = static_cast<short>( rect.left() );
+    rectangle.y = static_cast<short>( rect.top() ) ;
+    rectangle.width = static_cast<unsigned short>( rect.width() );
+    rectangle.height= static_cast<unsigned short>( rect.height() );
+    XUnionRectWithRegion( &rectangle, platformRegion_, platformRegion_ );
 #else
-    region_ = CreateRectRgn( rect.left(), rect.top(), rect.left() + rect.width() , rect.top() + rect.height() );
+    platformRegion_ = CreateRectRgn( rect.left(), rect.top(), rect.left() + rect.width() , rect.top() + rect.height() );
 #endif
 
     update = true;
   }
 
-  Region::Region( PlatformRegion sRegion ) {
+  Region::Region( PlatformRegion platformRegion ) {
 #ifdef __unix__
-    region_ = XCreateRegion();
-    XUnionRegion( region_, sRegion, region_ );
+    platformRegion_ = XCreateRegion();
+    XUnionRegion( platformRegion_, platformRegion, platformRegion_ );
 #else
-    region_ = CreateRectRgn(0,0,0,0);
-    CombineRgn( region_, sRegion, NULL, RGN_COPY);
+    platformRegion_ = CreateRectRgn( 0, 0, 0, 0 );
+    CombineRgn( platformRegion_, platformRegion, NULL, RGN_COPY);
 #endif
-
     update = true;
   }
 
   Region::~Region()
   {
 #ifdef __unix__
-    XDestroyRegion( region_ );
+    XDestroyRegion( platformRegion_ );
 #else
-    DeleteObject( region_ );
+    DeleteObject( platformRegion_ );
 #endif
   }
 
-  void Region::setRect( const Rect & rect )
+  void Region::setRect( const Rect& rect )
   {
+    if ( !isEmpty() ) {
 #ifdef __unix__
-    XDestroyRegion(region_);
-    region_ = XCreateRegion();
-    XRectangle rectangle;
-    rectangle.x= (short) rect.left();
-    rectangle.y= (short) rect.top();
-    rectangle.width=(unsigned short)  rect.width();
-    rectangle.height=(unsigned short) rect.height();
-    XUnionRectWithRegion( &rectangle, region_, region_ );
+      XDestroyRegion(platformRegion_);
+      platformRegion_ = XCreateRegion();
+      XRectangle rectangle;
+      rectangle.x = static_cast<short>( rect.left() );
+      rectangle.y = static_cast<short>( rect.top() ) ;
+      rectangle.width = static_cast<unsigned short>( rect.width() );
+      rectangle.height= static_cast<unsigned short>( rect.height() );
+      XUnionRectWithRegion( &rectangle, platformRegion_, platformRegion_ );
 #else
-    DeleteObject( region_ );
-    region_ = CreateRectRgn( rect.left(), rect.top(), rect.left() + rect.width() , rect.top() + rect.height() );
+      ::DeleteObject( platformRegion_ );
+      platformRegion_ = CreateRectRgn( rect.left(), rect.top(), rect.left() + rect.width() , rect.top() + rect.height() );
 #endif
+    } else {
+#ifdef __unix__
+      ::XRectangle rectangle;      
+      rectangle.x = static_cast<short>( rect.left() );
+      rectangle.y = static_cast<short>( rect.top() ) ;
+      rectangle.width = static_cast<unsigned short>( rect.width() );
+      rectangle.height= static_cast<unsigned short>( rect.height() );
+      ::XUnionRectWithRegion( &rectangle, platformRegion_, platformRegion_ );
+#else
+      ::DeleteObject( platformRegion_ );
+      platformRegion_ = CreateRectRgn( rect.left(), rect.top(), rect.left() + rect.width() , rect.top() + rect.height() );
+#endif
+    }
     update = true;
   }
 
-
-  // shouldnt be XPoint
   void Region::setPolygon( NPoint*  pts , int size )
   {
 #ifdef __unix__
-    XDestroyRegion( region_ );
-    XPoint* pt = new XPoint[size];
+    ::XDestroyRegion( platformRegion_ );
+    ::XPoint* pt = new ::XPoint[size];
 #else
-    DeleteObject( region_ );
-    POINT* pt = new POINT[size];
+    ::DeleteObject( platformRegion_ );
+    ::POINT* pt = new ::POINT[size];
 #endif
 
     for (int i = 0; i< size; i++) {
@@ -104,63 +115,46 @@ namespace ngrs {
       pt[i].y = pts[i].y();
     }
 #ifdef __unix__
-    region_ = XPolygonRegion( pt, size, WindingRule );
+    platformRegion_ = ::XPolygonRegion( pt, size, WindingRule );
 #else
-    region_ = CreatePolygonRgn( pt, size, WINDING );
+    platformRegion_ = ::CreatePolygonRgn( pt, size, WINDING );
 #endif    
     update = true;
     delete[] pt;
   }
 
-
-  Region::Region( const Region & src )
+  Region::Region( const Region& src )
   {
 #ifdef __unix__
-    region_ = XCreateRegion();
-    XUnionRegion( region_, src.sRegion(), region_ );
+    platformRegion_ = XCreateRegion();
+    XUnionRegion( platformRegion_, src.asPlatformRegion(), platformRegion_ );
 #else
-    region_ = CreateRectRgn( 0, 0, 0, 0 );
-    CombineRgn( region_, src.sRegion(), NULL, RGN_COPY );
+    platformRegion_ = CreateRectRgn( 0, 0, 0, 0 );
+    CombineRgn( platformRegion_, src.asPlatformRegion(), NULL, RGN_COPY );
 #endif
     update = true;
   }
-
-  const Region & Region::operator =( const Region & rhs )
-  {
-#ifdef __unix__
-    XDestroyRegion( region_);
-    region_ = XCreateRegion();
-    XUnionRegion( region_, rhs.sRegion(), region_ );
-#else
-    DeleteObject( region_ );
-    region_ = CreateRectRgn( 0, 0, 0, 0 );
-    CombineRgn( region_, rhs.sRegion(), NULL, RGN_COPY );    
-#endif
-    update = true;
-    return *this;
-  }
-
 
   bool Region::isEmpty( ) const
   {
 #ifdef __unix__
-    return XEmptyRegion( region_ );
+    return ::XEmptyRegion( platformRegion_ );
 #else
-    RECT rect;
+    ::RECT rect;
     rect.left = 0;
     rect.top = 0;
     rect. bottom = 0;
     rect. right = 0;
-    return NULLREGION == GetRgnBox( region_, &rect);
+    return NULLREGION == GetRgnBox( platformRegion_, &rect);
 #endif
   }
 
   void Region::move( int dx, int dy )
   {
 #ifdef __unix__
-    XOffsetRegion( region_, dx, dy );
+    ::XOffsetRegion( platformRegion_, dx, dy );
 #else
-    OffsetRgn( region_, dx,  dy );   
+    ::OffsetRgn( platformRegion_, dx,  dy );   
 #endif
     update = true;
   }
@@ -168,23 +162,23 @@ namespace ngrs {
   void Region::shrink( int dx, int dy )
   {
 #ifdef __unix__
-    XShrinkRegion( region_, dx, dy );
+    ::XShrinkRegion( platformRegion_, dx, dy );
 #else
     ;
 #endif
     update = true;
   }
 
-  const Rect & Region::rectClipBox( ) const
+  const Rect& Region::rectClipBox( ) const
   {
     if ( update ) {
 #ifdef __unix__
-      XRectangle r;
-      XClipBox( region_, &r  );
+      ::XRectangle r;
+      ::XClipBox( platformRegion_, &r  );
       clipBox.setPosition( r.x, r.y, r.width, r.height );
 #else
-      RECT r;
-      GetRgnBox( region_, &r );
+      ::RECT r;
+      ::GetRgnBox( platformRegion_, &r );
       clipBox.setPosition( r.left, r.top, r.right - r.left, r.bottom - r.top );
 #endif
       update = false;
@@ -195,10 +189,91 @@ namespace ngrs {
   bool Region::intersects( int x, int y ) const
   {
 #ifdef __unix__
-    return XPointInRegion( region_, x, y );
+    return ::XPointInRegion( platformRegion_, x, y );
 #else
-    return PtInRegion( region_, x, y ) != 0;
+    return ::PtInRegion( platformRegion_, x, y ) != 0;
 #endif
+  }
+
+
+  // operator implementation
+
+  Region& Region::operator=( const Region& rhs )
+  {
+    if ( this == &rhs ) return *this;
+#ifdef __unix__
+    ::XDestroyRegion( platformRegion_);
+    platformRegion_ = ::XCreateRegion();      
+    ::XUnionRegion( platformRegion_, rhs.asPlatformRegion(), platformRegion_ );
+#else
+    ::DeleteObject( platformRegion_ );
+    platformRegion_ = ::CreateRectRgn( 0, 0, 0, 0 );
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), NULL, RGN_COPY );
+#endif
+    update = true;
+    return *this;
+  }
+
+  Region& Region::operator&=( const Region& rhs )
+  {
+    if ( this == &rhs ) return *this;
+#ifdef __unix__
+    ::XIntersectRegion( platformRegion_, rhs, platformRegion_);
+#else
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_AND );
+#endif
+    return *this;
+  }
+
+  Region Region::operator&( const Region& rhs )
+  {
+    return Region(*this) &= rhs;
+  }
+
+  Region& Region::operator|=( const Region& rhs )
+  {
+    if ( this == &rhs ) return *this;
+#ifdef __unix__
+    ::XUnionRegion( platformRegion_, rhs, platformRegion_ );
+#else
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_OR );
+#endif
+    return *this;
+  }
+
+  Region Region::operator|( const Region& rhs )
+  {
+    return Region(*this) |= rhs;
+  }
+
+  Region& Region::operator-=( const Region& rhs )
+  {
+#ifdef __unix__
+    ::XSubtractRegion( platformRegion_, rhs, platformRegion_ );
+#else
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_DIFF);
+#endif
+    return *this;
+  }
+
+  Region Region::operator-( const Region& rhs )
+  {
+    return Region(*this) -= rhs;
+  }
+
+  Region& Region::operator^=( const Region& rhs )
+  {
+#ifdef __unix__
+    ::XXorRegion( platformRegion_, rhs, platformRegion_ );
+#else
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_XOR );
+#endif
+    return *this;
+  }
+
+  Region Region::operator^( const Region& rhs )
+  {
+    return Region(*this) -= rhs;
   }
 
 }
