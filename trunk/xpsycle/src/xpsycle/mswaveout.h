@@ -39,11 +39,7 @@ namespace psycle
         ///\ status working, restarting etc not working
         ///\ todo : freeing and configure    
             
-            
-        #define BLOCK_SIZE  4096
-        #define BLOCK_COUNT 7    
-        
-		class MsWaveOut : public AudioDriver
+        class MsWaveOut : public AudioDriver
 		{
 		public:
                   
@@ -80,7 +76,7 @@ namespace psycle
             // waveOut interface notifies about device is opened, closed, 
             // and what we handle here, when a block finishes.
             static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
-            static WAVEHDR* allocateBlocks(int size, int count);
+            WAVEHDR* allocateBlocks();
             static void freeBlocks( WAVEHDR* blockArray );
             
             // writes a intermediate buffer into a ring buffer to the sound card

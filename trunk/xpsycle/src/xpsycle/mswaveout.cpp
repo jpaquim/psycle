@@ -81,12 +81,13 @@ namespace psycle
           return e ? start() : stop();
         }
         
-        WAVEHDR* MsWaveOut::allocateBlocks( int size, int count )
+        WAVEHDR* MsWaveOut::allocateBlocks( )
         {
+
           unsigned char* buffer;
           int i;
           WAVEHDR* blocks;
-          DWORD totalBufferSize = (size + sizeof(WAVEHDR)) * count;
+          DWORD totalBufferSize = (settings().blockSize() + sizeof(WAVEHDR)) * settings().blockCount();
     
           //
           // allocate memory for the entire set in one go
@@ -97,17 +98,17 @@ namespace psycle
             totalBufferSize
           ))) == NULL) {
             std::cerr << "Memory allocation error\n" << std::endl;
-            ExitProcess(1);
+            return 0;
           }
           //
           // and set up the pointers to each bit
           //
           blocks = (WAVEHDR*)buffer;
-          buffer += sizeof(WAVEHDR) * count;
-          for(i = 0; i < count; i++) {
-            blocks[i].dwBufferLength = size;
+          buffer += sizeof(WAVEHDR) * settings().blockCount();
+          for(i = 0; i < settings().blockCount(); i++) {
+            blocks[i].dwBufferLength = settings().blockSize();
             blocks[i].lpData = (CHAR*)( buffer );
-            buffer += size;
+            buffer += settings().blockSize();
           }
     
           return blocks;
@@ -135,17 +136,17 @@ namespace psycle
             if(current->dwFlags & WHDR_PREPARED) 
              waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 
-            if(size < (int)(BLOCK_SIZE - current->dwUser)) {
+            if( size < static_cast<int>( settings().blockSize() - current->dwUser) ) {
               memcpy(current->lpData + current->dwUser, data, size);
               current->dwUser += size;
               break;
             }
 
-            remain = BLOCK_SIZE - current->dwUser;
+            remain = settings().blockSize() - current->dwUser;
             memcpy(current->lpData + current->dwUser, data, remain);
             size -= remain;
             data += remain;
-            current->dwBufferLength = BLOCK_SIZE;
+            current->dwBufferLength = settings().blockSize();
        
             waveOutPrepareHeader(hWaveOut, current, sizeof(WAVEHDR));
             waveOutWrite(hWaveOut, current, sizeof(WAVEHDR));
@@ -165,7 +166,7 @@ namespace psycle
             // point to the next block
             //
             waveCurrentBlock++;
-            waveCurrentBlock %= BLOCK_COUNT;
+            waveCurrentBlock %= settings().blockCount();
 
             current = &waveBlocks[waveCurrentBlock];
             current->dwUser = 0;
@@ -240,8 +241,8 @@ namespace psycle
 			_dither = 0;
 			
 		    // the buffer block variables
-            waveBlocks         = allocateBlocks( BLOCK_SIZE, BLOCK_COUNT );
-            waveFreeBlockCount = BLOCK_COUNT;
+            if (!(waveBlocks = allocateBlocks())) return 0; // memory error
+            waveFreeBlockCount =  settings().blockCount();
             waveCurrentBlock   = 0;
             
             // this will protect the monitor buffer counter variable 
