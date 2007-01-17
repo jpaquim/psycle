@@ -77,8 +77,10 @@ namespace ngrs {
     overrideFontColor_ = src.overrideFontColor();
   }
 
-  const Skin & Skin::operator =( const Skin & rhs )
+  const Skin & Skin::operator=( const Skin & rhs )
   {
+    if ( this == &rhs ) return *this;
+
     if (border_) delete border_;
 
     if (rhs.border())

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper                         *
+ *   Copyright (C) 2005, 2006, 2007 by  Stefan Nattkemper                         *
  *   Made in Germany                                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -447,18 +447,18 @@ namespace ngrs {
   {
 #ifdef __unix__
     if (dblBuffer_) {
-      XSetRegion(App::system().dpy(), gcp,region.sRegion());
-      XftDrawSetClip(drawDbl,region.sRegion());
+      XSetRegion(App::system().dpy(), gcp,region.asPlatformRegion());
+      XftDrawSetClip(drawDbl,region.asPlatformRegion());
     }
     else {
-      XSetRegion(App::system().dpy(), gc_,region.sRegion());
-      XftDrawSetClip(drawWin,region.sRegion());
+      XSetRegion(App::system().dpy(), gc_,region.asPlatformRegion());
+      XftDrawSetClip(drawWin, region.asPlatformRegion());
     }
 #else
     if ( dblBuffer_ )
-      SelectClipRgn( gcp, region );
+      ::SelectClipRgn( gcp, region.asPlatformRegion() );
     else  
-      SelectClipRgn( gc_, region );    
+      ::SelectClipRgn( gc_, region.asPlatformRegion() );    
 #endif
   }
 

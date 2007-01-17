@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSKIN_H
-#define NSKIN_H
+#ifndef SKIN_H
+#define SKIN_H
 
 /**
 @author  Stefan
@@ -41,57 +41,57 @@ namespace ngrs {
     Skin();
     ~Skin();
 
-    Skin(const Skin & src);
-    const Skin & operator= (const Skin & rhs);
+    Skin( const Skin& src );
+    const Skin& operator=( const Skin & rhs );
 
-    void setBorder(const Border & border);
+    void setBorder( const Border& border );
     Border* border() const;
-    void setBackground(const Color & bgColor);
-    const Color & background() const;
-    void setForeground(const Color & fgColor);
-    const Color & foreground() const;
+    void setBackground( const Color& bgColor );
+    const Color& background() const;
+    void setForeground( const Color & fgColor );
+    const Color& foreground() const;
     void setTranslucent(const Color & transColor, int percent);
     void setDisabledTextColor(const Color & color);
-    const Color & disabledTextColor() const;
+    const Color& disabledTextColor() const;
 
-    const Color & transColor() const;
+    const Color& transColor() const;
 
-    void setFont(const NFont & font);
-    const NFont & font() const;
+    void setFont(const NFont& font);
+    const NFont& font() const;
 
-    void setTextColor( const Color & color );
-    const Color & textColor() const;
+    void setTextColor( const Color& color );
+    const Color& textColor() const;
     bool overrideFontColor() const;
 
-    void setSpacing(const Size & size);
-    const Size & spacing() const;
-    void setBitmap(const Bitmap & bitmap, int bitmapBgStyle);
-    const Bitmap & bitmap() const;
+    void setSpacing(const Size& size);
+    const Size& spacing() const;
+    void setBitmap(const Bitmap& bitmap, int bitmapBgStyle);
+    const Bitmap& bitmap() const;
     int bitmapBgStyle() const;
 
-    void useParentBackground(bool on);
+    void useParentBackground( bool on );
     bool parentBackground() const;
-    void useParentForeground(bool on);
+    void useParentForeground( bool on );
     bool parentForeground() const;
-    void useParentFont(bool on);
+    void useParentFont( bool on );
     bool parentFont() const;
-    void setTransparent(bool on);
+    void setTransparent( bool on );
     bool transparent() const;
     int translucent() const;
 
-    void setGradient(const Color & start, const Color & mid, const Color & end, int gradientStyle, int gradientOrientation, int percent, int arcWidth, int arcHeight);
-    const Color & gradientStartColor() const;
-    const Color & gradientMidColor() const;
-    const Color & gradientEndColor() const;
+    void setGradient( const Color& start, const Color& mid, const Color& end, int gradientStyle, int gradientOrientation, int percent, int arcWidth, int arcHeight);
+    const Color& gradientStartColor() const;
+    const Color& gradientMidColor() const;
+    const Color& gradientEndColor() const;
     int gradientPercent() const;
     int gradientStyle() const;
     int gradientOrientation() const;
     int gradientArcWidth() const;
     int gradientArcHeight() const;
 
-    void setGradientStyle(int style);
-    void setGradientPercent(int percent);
-    void setGradientOrientation(int orientation);
+    void setGradientStyle( int style );
+    void setGradientPercent( int percent );
+    void setGradientOrientation( int orientation );
 
   private:
 
