@@ -34,159 +34,12 @@ namespace psycle
 
 
 
-		void Machine::crashed(std::exception const & e) throw()
-		{
-			bool minor_problem(false);
-			bool crash(false);
-			{
-/*				exceptions::function_error const * const function_error(dynamic_cast<exceptions::function_error const * const>(&e));
-				if(function_error)
-				{
-					universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
-					if(translated)
-					{
-						crash = true;
-						switch(translated->code())
-						{
-							// grows the fpu exception mask so that each type of exception is only reported once
-							case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
-							case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
-							case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
-							case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
-							case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
-							case STATUS_FLOAT_STACK_CHECK:                                                                       break;
-							case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
-						}
-					}
-				}*/
-			}
-			if(!minor_problem)
-			{
-				///\todo do we need thread synchronization?
-				///\todo gui needs to update
-				crashed_ = true;
-				_bypass = true;
-				_mute = true;
-			}
-			std::ostringstream s;
-			s << "Machine: " << _editName << ": " << GetDllName();
-			s << std::endl << e.what() << std::endl;
-			if(minor_problem)
-			{
-				s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
-				//host::loggers::warning(s.str());
-                                std::cerr << s.str() << std::endl;
-			}
-			else
-			{
-				s
-					<< "This is a serious error: the machine has been set to bypassed/muted to prevent it from making the host crash." << std::endl
-					<< "You should save your work to a new file, and restart the host.";
-				if(crash)
-				{
-					//host::loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
-					//host::loggers::exception(s.str());
-					std::cerr << s.str() << std::endl;
-				}
-				else
-				{
-					//host::loggers::exception(s.str());
-					std::cerr << s.str() << std::endl;
-				}
-			}
-			//MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
-                        //std::cerr << (crash) ? "Exception (Crash)" : "Exception (Software)" << std::endl;
-			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
-		}
 
-		void Wire::Connect(AudioPort *senderp,AudioPort *receiverp)
-		{
-			senderport=senderp;
-			receiverport=receiverp;
-			multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
-			SetVolume(volume);
-			senderport->Connected(this);
-			receiverport->Connected(this);
-			///\todo : need a way get a wire index.
-		}
-
-		void Wire::ChangeSource(AudioPort* newsource)
-		{
-			assert(senderport); Disconnect(senderport);
-			senderport=newsource;
-			multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
-			SetVolume(volume);
-			senderport->Connected(this);
-		}
-
-		void Wire::ChangeDestination(AudioPort* newdest)
-		{
-			assert(receiverport); Disconnect(receiverport);
-			receiverport=newdest;
-			multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
-			SetVolume(volume);
-			receiverport->Connected(this);
-		}
-
-		void Wire::CollectData(int numSamples)
-		{
-			senderport->CollectData(numSamples);
-			///\todo : apply volume, panning and mapping.
-		}
-
-		void Wire::SetVolume(float newvol)
-		{
-			volume=newvol;
-			rvol=volume*pan*multiplier;
-			lvol=volume*(1.0f-pan)*multiplier;
-		}
-
-		void Wire::SetPan(float newpan)
-		{
-			pan=newpan;
-			SetVolume(volume);
-		}
-
-		void Wire::Disconnect(AudioPort* port)
-		{
-			if ( port == senderport ) senderport=0; else receiverport=0;
-			port->Disconnected(this);
-			///\todo : need a way to indicate to the main Machine that this wire index is now free.
-		}
-
-		void AudioPort::Connected(Wire *wire)
-		{
-			wires_.push_back(wire);
-		}
-
-		void AudioPort::Disconnected(Wire *wire)
-		{
-			wires_type::iterator i(std::find(wires_.begin(), wires_.end(), wire));
-			assert(i != wires_.end());
-			wires_.erase(i);
-		}
-
-		void InPort::CollectData(int numSamples)
-		{
-			///\todo : need to clean the buffer first? wire(0)processreplacing() while(wires) wire(1+).processadding() ?
-			for(wires_type::const_iterator i(wires_.begin()); i != wires_.end(); ++i)
-			{
-				(**i).CollectData(numSamples);
-			}
-		}
-
-		void OutPort::CollectData(int numSamples)
-		{
-//			parent_.Work(numSamples);
-		}
-
-		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id, Song * song)
+		Machine::Machine(int type, int mode, int id, Song * song)
 		:
 			_type(type),
 			_mode(mode),
 			_macIndex(id),
-			crashed_(),
-//			fpu_exception_mask_(),
 			_bypass(false),
 			_mute(false),
 			_waitingForSound(false),
@@ -308,63 +161,8 @@ namespace psycle
 			}
 			_panning = newPan;
 		}
-
-		bool Machine::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
-		{
-			if(dst_machine._mode == MACHMODE_GENERATOR)
-			{
-				std::ostringstream s;
-				s << "attempted to use a generator as destination for wire" << this->id() << " -> " << dst_machine.id();
-				//loggers::warning(s.str());
-                                std::cerr << s.str() << std::endl;
-				return false;
-			}
-
-			// Get a free output slot on the source machine
-			Wire::id_type freebus(-1);
-			{
-				bool error = false;
-				for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
-				{
-					if(!_connection[c]) freebus = c;
-					// Checking that there's not a slot to the dest. machine already
-					else if(_outputMachines[c] == dst_machine.id()) error = true;
-				}
-				// lamely abandon
-				if(freebus == -1 || error) return false;
-			}
-
-			// Get a free input slot on the destination machine
-			Wire::id_type dfreebus(-1);
-			{
-				bool error = false;
-				for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
-				{
-					if(!dst_machine._inputCon[c]) dfreebus = c;
-					// Checking if the destination machine is connected with the source machine to avoid a loop.
-					else if(dst_machine._outputMachines[c] == this->id()) error = true;
-				}
-				// lamely abandon
-				if(dfreebus == -1 || error) return false;
-			}
-
-			// Calibrating in/out properties
-			this->_outputMachines[freebus] = dst_machine.id();
-			this->_connection[freebus] = true;
-			this->_connectedOutputs++;
-			dst_machine._inputMachines[dfreebus] = this->id();
-			dst_machine._inputCon[dfreebus] = true;
-			dst_machine._connectedInputs++;
-			dst_machine.InitWireVolume(_type, dfreebus, volume);
-			return true;
-		}
-
-		bool Machine::Disconnect(Machine& dst_machine)
-		{
-			return false; // \todo o_O`
-		}
-
-		void Machine::InitWireVolume(Machine::type_type type, Wire::id_type wire, float value)
+	
+		void Machine::InitWireVolume(int type, int wire, float value)
 		{
 			if (type == MACH_VST || type == MACH_VSTFX  || type == MACH_LADSPA)
 			{
@@ -396,50 +194,33 @@ namespace psycle
 			// that extra conversion and use directly the volume to do so.
 		}
 
-		Wire::id_type Machine::FindInputWire(Machine::id_type id)
+		int Machine::FindInputWire(int id)
 		{
-			for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
+			for(int c(0); c < MAX_CONNECTIONS; ++c)
 				if(_inputCon[c])
 					if(_inputMachines[c] == id)
 						return c;
-			return Wire::id_type(-1);
+			return int(-1);
 		}
 
-		Wire::id_type Machine::FindOutputWire(Machine::id_type id)
+		int Machine::FindOutputWire(int id)
 		{
-			for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
+			for(int c(0); c < MAX_CONNECTIONS; ++c)
 				if(_connection[c])
 					if(_outputMachines[c] == id)
 						return c;
-			return Wire::id_type(-1);
+			return int(-1);
 		}
+                           
 
-                bool Machine::AcceptsConnections()
-                {
-                        if (_mode == MACHMODE_FX || _mode == MACHMODE_MASTER) {
-                                return true;
-                        } else {
-                                return false;  
-                        }
-                }
-
-                bool Machine::EmitsConnections()
-                {
-                        if (_mode == MACHMODE_GENERATOR || _mode == MACHMODE_FX) {
-                                return true;
-                        } else {
-                                return false;  
-                        }
-                }
-
-		bool Machine::SetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float value)
+		bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,float value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
 			Machine *_pDstMachine = _pSong->_pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
-				Wire::id_type c;
+				int c;
 				if((c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 				{
 					_pDstMachine->SetWireVolume(c,value);
@@ -449,14 +230,14 @@ namespace psycle
 			return false;
 		}
 
-		bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float &value)
+		bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,float &value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
 			Machine *_pDstMachine = _pSong->_pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
-				Wire::id_type c;
+				int c;
 				if((c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 				{
 					//float val;
@@ -592,18 +373,58 @@ namespace psycle
 				}
 			}
 		}
+		
 
-		void Machine::DefineStereoInput(int numinputs)
+bool Machine::ConnectTo(Machine & dst_machine, int dstport, int outport, float volume)
 		{
-			numInPorts=numinputs;
-			inports = new InPort(*this,0,"Stereo In");
+			if(dst_machine._mode == MACHMODE_GENERATOR)
+			{
+				std::ostringstream s;
+				s << "attempted to use a generator as destination for wire" << this->id() << " -> " << dst_machine.id();
+				//loggers::warning(s.str());
+                                std::cerr << s.str() << std::endl;
+				return false;
+			}
+
+			// Get a free output slot on the source machine
+			int freebus(-1);
+			{
+				bool error = false;
+				for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
+				{
+					if(!_connection[c]) freebus = c;
+					// Checking that there's not a slot to the dest. machine already
+					else if(_outputMachines[c] == dst_machine.id()) error = true;
+				}
+				// lamely abandon
+				if(freebus == -1 || error) return false;
+			}
+
+			// Get a free input slot on the destination machine
+			int dfreebus(-1);
+			{
+				bool error = false;
+				for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
+				{
+					if(!dst_machine._inputCon[c]) dfreebus = c;
+					// Checking if the destination machine is connected with the source machine to avoid a loop.
+					else if(dst_machine._outputMachines[c] == this->id()) error = true;
+				}
+				// lamely abandon
+				if(dfreebus == -1 || error) return false;
+			}
+
+			// Calibrating in/out properties
+			this->_outputMachines[freebus] = dst_machine.id();
+			this->_connection[freebus] = true;
+			this->_connectedOutputs++;
+			dst_machine._inputMachines[dfreebus] = this->id();
+			dst_machine._inputCon[dfreebus] = true;
+			dst_machine._connectedInputs++;
+			dst_machine.InitWireVolume(_type, dfreebus, volume);
+			return true;
 		}
 
-		void Machine::DefineStereoOutput(int numoutputs)
-		{
-			numOutPorts=numoutputs;
-			outports = new OutPort(*this,0,"Stereo Out");
-		}
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -621,7 +442,7 @@ namespace psycle
 			return true;
 		};
 
-		Machine* Machine::LoadFileChunk(Song* pSong, RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
+		Machine* Machine::LoadFileChunk(Song* pSong, RiffFile* pFile, int index, int version,bool fullopen)
 		{
 			// assume version 0 for now
 			bool bDeleted(false);
@@ -724,9 +545,9 @@ namespace psycle
 			pFile->Read(pMachine->_mute);
 			pFile->Read(pMachine->_panning);
 			pFile->Read(temp);
-			pMachine->SetPosX(temp);
+			pMachine->_x=temp;
 			pFile->Read(temp);
-			pMachine->SetPosY(temp);
+			pMachine->_y=temp;
 			pFile->Read(pMachine->_connectedInputs);
 			pFile->Read(pMachine->_connectedOutputs);
 			for(int i = 0; i < MAX_CONNECTIONS; i++)
@@ -762,8 +583,8 @@ namespace psycle
 				p->_bypass=pMachine->_bypass;
 				p->_mute=pMachine->_mute;
 				p->_panning=pMachine->_panning;
-				p->SetPosX(pMachine->GetPosX());
-				p->SetPosY(pMachine->GetPosY());
+				p->_x = pMachine->_x;
+				p->_y = pMachine->_y;
 				p->_connectedInputs=pMachine->_connectedInputs;							// number of Incoming connections
 				p->_connectedOutputs=pMachine->_connectedOutputs;						// number of Outgoing connections
 				for(int i = 0; i < MAX_CONNECTIONS; i++)

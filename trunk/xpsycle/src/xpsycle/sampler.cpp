@@ -13,7 +13,7 @@ namespace psycle
 	{
 		std::string Sampler::_psName = "Sampler";
 
-		Sampler::Sampler(Machine::id_type id, Song* song)
+		Sampler::Sampler(int id, Song* song)
 		:
 			Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id, song)
 		{
@@ -39,7 +39,7 @@ namespace psycle
 
 				_voices[i].effCmd = SAMPLER_CMD_NONE;
 			}
-			for (Instrument::id_type i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
+			for (int i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
 		}
 
 		void Sampler::Init(void)

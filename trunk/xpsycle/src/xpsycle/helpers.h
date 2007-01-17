@@ -33,7 +33,7 @@
       /// contructor.
       CValueMapper();
       /// destructor.
-      virtual ~CValueMapper() throw();
+      virtual ~CValueMapper();
       /// maps a byte (0 to 255) to a float (0 to 1).
       static inline float Map_255_1(int iByte)
       {	

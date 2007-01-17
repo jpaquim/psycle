@@ -18,7 +18,7 @@ namespace psycle {
 
 		std::string Dummy::_psName = "DummyPlug";
 
-		Dummy::Dummy(Machine::id_type id, Song* song)
+		Dummy::Dummy(int id, Song* song)
 			:
 		Machine(MACH_DUMMY, MACHMODE_FX, id, song)
 		{
@@ -27,7 +27,7 @@ namespace psycle {
 			_audiorange = 32768.0f;
 			_editName = "Dummy";
 		}
-		Dummy::~Dummy() throw()
+		Dummy::~Dummy() 
 		{
 //			DestroyInputs();
 //			DestroyOutputs();
@@ -57,7 +57,7 @@ namespace psycle {
 
 		std::string DuplicatorMac::_psName = "Dupe it!";
 
-		DuplicatorMac::DuplicatorMac(Machine::id_type id, Song* song)
+		DuplicatorMac::DuplicatorMac(int id, Song* song)
 			:
 		Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
 		{
@@ -71,7 +71,7 @@ namespace psycle {
 				noteOffset[i]=0;
 			}
 		}
-		DuplicatorMac::~DuplicatorMac() throw()
+		DuplicatorMac::~DuplicatorMac() 
 		{
 		}
 		void DuplicatorMac::Init()
@@ -218,7 +218,7 @@ namespace psycle {
 
 		float * Master::_pMasterSamples = 0;
 
-		Master::Master(Machine::id_type id, Song* song)
+		Master::Master(int id, Song* song)
 			:
 		Machine(MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
@@ -229,7 +229,7 @@ namespace psycle {
 //			DefineStereoInput(1);
 			_editName = "Master";
 		}
-		Master::~Master() throw()
+		Master::~Master() 
 		{
 		}
 		void Master::Stop()
@@ -395,7 +395,7 @@ namespace psycle {
 
 		std::string Mixer::_psName = "Mixer";
 
-		Mixer::Mixer(Machine::id_type id, Song* song )
+		Mixer::Mixer(int id, Song* song )
 			:
 		Machine(MACH_MIXER, MACHMODE_FX, id, song)
 		{
@@ -405,7 +405,7 @@ namespace psycle {
 //			DefineStereoOutput(1);
 			_editName = "Mixer";
 		}
-		Mixer::~Mixer() throw()
+		Mixer::~Mixer() 
 		{
 		}
 		void Mixer::Init()
@@ -569,32 +569,9 @@ namespace psycle {
 			}
 		}
 
-		bool Mixer::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
-		{
-			//
-			// \todo ?
-			//
-			return Machine::ConnectTo(dst_machine,dstport,outport,volume);
-		}
+	
 
-		std::string Mixer::GetAudioInputName(InPort::id_type port)
-		{
-			std::string rettxt;
-			if (port < return1 )
-			{	
-				rettxt = "Input ";
-				rettxt += ('0'+port-chan1);
-				return rettxt;
-			}
-			else if ( port <= return12)
-			{
-				rettxt = "Return ";
-				rettxt += ('0'+port-return1);
-				return rettxt;
-			}
-			rettxt = "-";
-			return rettxt;
-		}
+		
 
 		int Mixer::GetNumCols()
 		{
@@ -686,7 +663,7 @@ namespace psycle {
 		bool Mixer::SetParameter(int numparam, int value)
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
-			Wire::id_type send(numparam % 16); // 0 is for channel mix, others are send.
+			int send(numparam % 16); // 0 is for channel mix, others are send.
 			if ( channel == 0) return false;
 			if ( value>100 ) value=100;
 			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
@@ -740,7 +717,7 @@ namespace psycle {
 			pFile->Write(_sendValid);
 		}
 
-		float Mixer::VuChan(Wire::id_type idx)
+		float Mixer::VuChan(int idx)
 		{
 			float vol;
 			GetWireVolume(idx,vol);
@@ -748,7 +725,7 @@ namespace psycle {
 			return 0.0f;
 		}
 
-		float Mixer::VuSend(Wire::id_type idx)
+		float Mixer::VuSend(int idx)
 		{
 			float vol = _sendVol[idx] * _sendVolMulti[idx];
 			if ( _sendValid[idx] ) return (song()->_pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
@@ -789,7 +766,7 @@ namespace psycle {
 #endif
 
 
-		LFO::LFO(Machine::id_type id, Song* song)
+		LFO::LFO(int id, Song* song)
 			:
 		Machine(MACH_LFO, MACHMODE_GENERATOR, id, song)
 		{
@@ -799,7 +776,7 @@ namespace psycle {
 			_editName = "LFO";
 		}
 
-		LFO::~LFO() throw()
+		LFO::~LFO() 
 		{
 		}
 
@@ -1173,7 +1150,7 @@ namespace psycle {
 		void LFO::ParamEnd(int which)
 		{
 			if(which<0 || which>=NUM_CHANS) return;
-			id_type destMac(macOutput[which]);
+			int destMac(macOutput[which]);
 			int destParam = paramOutput[which];
 
 			if	(	destMac		!= -1	&&	song()->_pMachine[destMac] != NULL

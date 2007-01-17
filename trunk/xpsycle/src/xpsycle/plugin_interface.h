@@ -78,7 +78,7 @@ public:
 class CFxCallback
 {
 public:
-  virtual inline ~CFxCallback() throw() {}
+  virtual inline ~CFxCallback()  {}
   virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
   virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
   virtual float *GetWaveLData(int inst,int wave){return 0;} ///\todo USELESS if you cannot get the length!

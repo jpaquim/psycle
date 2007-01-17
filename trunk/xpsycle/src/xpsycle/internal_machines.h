@@ -14,8 +14,8 @@ namespace psycle {
 		class Dummy : public Machine
 		{
 		public:
-			Dummy(id_type index, Song* song);
-			virtual ~Dummy() throw();
+			Dummy(int index, Song* song);
+			virtual ~Dummy();
 			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
@@ -31,8 +31,8 @@ namespace psycle {
 		{
 		public:
 			DuplicatorMac();
-			DuplicatorMac(id_type index, Song* song);
-			virtual ~DuplicatorMac() throw();
+			DuplicatorMac(int index, Song* song);
+			virtual ~DuplicatorMac();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);
@@ -59,8 +59,8 @@ namespace psycle {
 		{
 		public:
 			Master();
-			Master(id_type index, Song* song);
-			virtual ~Master() throw();
+			Master(int index, Song* song);
+			virtual ~Master();
 			virtual void Init(void);
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
@@ -123,8 +123,8 @@ namespace psycle {
 				return12
 			};
 			Mixer();
-			Mixer(id_type index, Song* song);
-			virtual ~Mixer() throw();
+			Mixer(int index, Song* song);
+			virtual ~Mixer();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual int GenerateAudio(int numSamples );
@@ -139,31 +139,28 @@ namespace psycle {
 			virtual bool SetParameter(int numparam,int value);
 			virtual int GetAudioInputs() { return 24; };
 			virtual int GetAudioOutputs() { return 1; };
-			virtual std::string GetAudioInputName(InPort::id_type port);
-			virtual std::string GetAutioOutputName(OutPort::id_type port) { std::string rettxt = "Stereo Output"; return rettxt; };
-			virtual bool ConnectTo(Machine & dst, InPort::id_type dstport = InPort::id_type(0), OutPort::id_type outport = OutPort::id_type(0), float volume = 1.0f);
 			virtual int GetSend(int i){ assert(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool SendValid(int i) { assert(i<MAX_CONNECTIONS); return _sendValid[i]; }
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
-			virtual float VuChan(Wire::id_type idx);
-			virtual float VuSend(Wire::id_type idx);
+			virtual float VuChan(int idx);
+			virtual float VuSend(int idx);
 
 		protected:
-			///\todo hardcoded limits and wastes
+			
 			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
 			/// Incoming send, Machine number
-			///\todo hardcoded limits and wastes
-			id_type _send[MAX_CONNECTIONS];	
+			
+			int _send[MAX_CONNECTIONS];	
 			/// Incoming send, connection volume
-			///\todo hardcoded limits and wastes
+			
 			float _sendVol[MAX_CONNECTIONS];	
 			/// Value to multiply _sendVol[] to have a 0.0..1.0 range
-			///\todo hardcoded limits and wastes
+			
 			float _sendVolMulti[MAX_CONNECTIONS];
 			/// Incoming connections activated
-			///\todo hardcoded limits and wastes
+			
 			bool _sendValid[MAX_CONNECTIONS];
 
 #if 0 // more lightweight
@@ -172,7 +169,7 @@ namespace psycle {
 			private:
 				float grid;
 				/// Incoming send, Machine number
-				Machine::id_type incoming;
+				int incoming;
 				/// Incoming send, connection volume
 				float volume;
 				/// Value to multiply volume to have a 0.0..1.0 range
@@ -190,8 +187,8 @@ namespace psycle {
 		{
 		public:
 			LFO();
-			LFO(id_type index, Song* song);
-			virtual ~LFO() throw();
+			LFO(int index, Song* song);
+			virtual ~LFO();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);

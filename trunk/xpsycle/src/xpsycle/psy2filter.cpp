@@ -103,7 +103,7 @@ namespace psycle
 			LoadSEQD(&file,song);
 
 			file.Read(num);
-			Machine::id_type i;
+			int i;
 			for(i =0 ; i < num; ++i)
 			{
 				LoadPATD(&file,song,i);

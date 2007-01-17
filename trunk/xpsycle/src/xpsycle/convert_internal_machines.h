@@ -34,7 +34,7 @@ namespace psycle
 					dummy = 255
 				};
 
-				virtual ~Converter() throw()
+				virtual ~Converter() 
 				{
 					for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
 				}
@@ -230,7 +230,7 @@ namespace psycle
 						delete (*this)[gainer];
 						delete (*this)[flanger];
 					}
-					const bool exists(const int & type) const throw()
+					const bool exists(const int & type) const 
 					{
 						return find(type) != end();
 					}

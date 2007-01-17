@@ -132,7 +132,7 @@ namespace psycle
 			float * Work(int nsamples);
 
 			// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
-			Machine::id_type prevMachines[MAX_TRACKS];
+			int prevMachines[MAX_TRACKS];
 			// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
 			int backup_rate;
 			// Stores the bitdepth of playback when recording to wave offline (non-realtime), since it can be changed.

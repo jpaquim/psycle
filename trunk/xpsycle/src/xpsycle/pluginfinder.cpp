@@ -43,19 +43,19 @@ namespace psycle
 
 		}
 
-		void PluginInfo::setType( Machine::type_type type ) {
+		void PluginInfo::setType( int type ) {
 			subclass_ = type;
 		}
 
-		Machine::type_type PluginInfo::type() const {
+		int PluginInfo::type() const {
 			return subclass_;
 		}
 
-		void PluginInfo::setMode( Machine::mode_type mode ) {
+		void PluginInfo::setMode( int mode ) {
 			mode_ = mode;
 		}
 
-		Machine::mode_type PluginInfo::mode() const {
+		int PluginInfo::mode() const {
 			return mode_;
 		}
 
