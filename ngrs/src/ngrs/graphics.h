@@ -50,12 +50,12 @@ namespace ngrs {
 
   class Graphics{
   public:
-    Graphics( WinHandle winHandle );
+    Graphics(WinHandle winID);
 
     ~Graphics();
 
-    void setRepaintArea( const ngrs::Region & rect );
-    const ngrs::Region & repaintArea() const;
+    void setRepaintArea(const ngrs::Region & rect);
+    const ngrs::Region & repaintArea();
 
     void setClipping(const ngrs::Region & region);
 
@@ -85,21 +85,21 @@ namespace ngrs {
     void setTranslation( long dx, long dy );
     void resize(int width, int height);
     void swap( const Rect & repaintArea );
-    long xTranslation() const;
-    long yTranslation() const;
-    void setForeground( const Color& color );
+    long xTranslation();
+    long yTranslation();
+    void setForeground( const Color & color );
 
-    void setFont( const Font& font );
-    void drawText( int x, int y, const std::string& text );
-    void drawText( int x, int y, const std::string& text, const Color & color );
-    void drawText( int x, int y, const FntString& text );
+    void setFont( const Font & font );
+    void drawText( int x, int y, const std::string & text );
+    void drawText( int x, int y, const std::string & text, const Color & color );
+    void drawText( int x, int y, const FntString & text );
 
     int textWidth(const std::string & text) const;
     int textWidth( const FntString & text ) const;
 
-    int textHeight() const;
-    int textAscent() const;
-    int textDescent() const;
+    int textHeight();
+    int textAscent();
+    int textDescent();
 
     void drawPolygon(NPoint* pts, int n);
     void fillPolygon(NPoint* pts, int n);
@@ -120,7 +120,7 @@ namespace ngrs {
     GC dbGC();
     GC gc();
 
-    void copyArea( int src_x, int src_y, unsigned width, unsigned height, int dest_x,int dest_y );
+    void copyArea(int src_x,int src_y,unsigned width,unsigned height,int dest_x,int dest_y, bool dblBuffer_ = true);
 
     int dblWidth() const;
     int dblHeight() const;
@@ -129,33 +129,29 @@ namespace ngrs {
 
   private:
 
-    WinHandle win;
-
-    long dx_;        // x translation
-    long dy_;        // y translation    
-    int dblWidth_;
-    int dblHeight_;
-    bool dblBuffer_;
-
-    GC gc_;        // GC from Window
-    GC gcp;        // GC from Pixmap for double buffering
-    GC currentGc_;  
-
     Color old;
     ngrs::Region repaintArea_;
     Color oldColor;
-    Font fnt;  
+    Font fnt;
+    long dx_;
+    long dy_;
+    bool dblBuffer_;
+
+    int dblWidth_;
+    int dblHeight_;
+
+    WinHandle win;
+    GC gc_;      // GC from Window
+    GC gcp;     // GC from Pixmap for double buffering
 
 #ifdef __unix__
     ::Pixmap doubleBufferPixmap_;
-    Drawable currentDrawable_;
 #else
     HBITMAP doubleBufferBitmap_;
 #endif
 
     void createDblBufferHandles();
     void destroyDblBufferHandles();
-    void updateCurrentGc();
     void copyDblBuffer(const Rect &  repaintArea);
     void drawXftString(int x, int y, const char* s);
 
@@ -172,8 +168,10 @@ namespace ngrs {
 #endif
 
     ngrs::Region region_;
-    bool visible_;
 
+    Pen pen_;
+
+    bool visible_;
   };
 
  }
