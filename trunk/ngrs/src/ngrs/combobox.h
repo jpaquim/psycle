@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCOMBOBOX_H
-#define NCOMBOBOX_H
+#ifndef COMBOBOX_H
+#define COMBOBOX_H
 
 #include "customcombobox.h"
 

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NGRADIENT_H
-#define NGRADIENT_H
+#ifndef GRADIENT_H
+#define GRADIENT_H
 
 #include "panel.h"
 

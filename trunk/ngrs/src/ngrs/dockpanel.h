@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NDOCKPANEL_H
-#define NDOCKPANEL_H
+#ifndef DOCKPANEL_H
+#define DOCKPANEL_H
 
 #include "panel.h"
 

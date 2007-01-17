@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTABLELAYOUT_H
-#define NTABLELAYOUT_H
+#ifndef TABLELAYOUT_H
+#define TABLELAYOUT_H
 
 #include "layout.h"
 #include <map>

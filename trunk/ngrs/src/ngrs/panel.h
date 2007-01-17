@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NPANEL_H
-#define NPANEL_H
+#ifndef PANEL_H
+#define PANEL_H
 
 #include "visualcomponent.h"
 

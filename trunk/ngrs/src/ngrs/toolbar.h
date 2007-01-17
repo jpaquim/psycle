@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTOOLBAR_H
-#define NTOOLBAR_H
+#ifndef TOOLBAR_H
+#define TOOLBAR_H
 
 #include "togglepanel.h"
 

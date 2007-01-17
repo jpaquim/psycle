@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTEXTSTATUSITEM_H
-#define NTEXTSTATUSITEM_H
+#ifndef TEXTSTATUSITEM_H
+#define TEXTSTATUSITEM_H
 
 #include "customstatusitem.h"
 

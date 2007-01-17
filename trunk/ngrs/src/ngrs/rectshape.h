@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NRECTSHAPE_H
-#define NRECTSHAPE_H
+#ifndef RECTSHAPE_H
+#define RECTSHAPE_H
 
 #include "shape.h"
 

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NPEN_H
-#define NPEN_H
+#ifndef PEN_H
+#define PEN_H
 
 #ifdef __unix__
 #include <X11/Xlib.h>

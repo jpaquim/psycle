@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NPIXMAP_H
-#define NPIXMAP_H
+#ifndef PIXMAP_H
+#define PIXMAP_H
 
 #include "object.h"
 #include "system.h"

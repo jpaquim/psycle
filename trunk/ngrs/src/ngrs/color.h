@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCOLOR_H
-#define NCOLOR_H
+#ifndef COLOR_H
+#define COLOR_H
 
 #include <map>
 #include <iostream>

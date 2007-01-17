@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NLINE_H
-#define NLINE_H
+#ifndef LINE_H
+#define LINE_H
 
 #include "visualcomponent.h"
 #include "lineshape.h"

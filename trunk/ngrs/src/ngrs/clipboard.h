@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCLIPBOARD_H
-#define NCLIPBOARD_H
+#ifndef CLIPBOARD_H
+#define CLIPBOARD_H
 
 #include <string>
 #include <vector>

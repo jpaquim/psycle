@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCOLORCHOOSER_H
-#define NCOLORCHOOSER_H
+#ifndef COLORCHOOSER_H
+#define COLORCHOOSER_H
 
 #include "panel.h"
 

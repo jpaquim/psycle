@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NVISITOR_H
-#define NVISITOR_H
+#ifndef VISITOR_H
+#define VISITOR_H
 
 /**
 Visitor interface für sicheres casten

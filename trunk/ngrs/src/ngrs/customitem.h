@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCUSTOMITEM_H
-#define NCUSTOMITEM_H
+#ifndef CUSTOMITEM_H
+#define CUSTOMITEM_H
 
 #include "panel.h"
 #include <string>

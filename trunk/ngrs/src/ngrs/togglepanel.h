@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTOGGLEPANEL_H
-#define NTOGGLEPANEL_H
+#ifndef TOGGLEPANEL_H
+#define TOGGLEPANEL_H
 
 #include "panel.h"
 

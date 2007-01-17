@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NRUNTIME_H
-#define NRUNTIME_H
+#ifndef RUNTIME_H
+#define RUNTIME_H
 
 #include "object.h"
 #include <vector>

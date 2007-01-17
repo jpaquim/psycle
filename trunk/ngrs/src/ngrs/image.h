@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NIMAGE_H
-#define NIMAGE_H
+#ifndef IMAGE_H
+#define IMAGE_H
 
 #include "panel.h"
 #include "bitmap.h"

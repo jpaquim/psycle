@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCONFIG_H
-#define NCONFIG_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 /**
 @author  Stefan

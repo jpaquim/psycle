@@ -44,7 +44,7 @@
 class Tpnl : public ngrs::Panel {
 
    virtual void paint( ngrs::Graphics& g ) {
-      ngrs::NFntString str;
+      ngrs::FntString str;
       str.setText("Hallo");
       str.setFont( ngrs::NFont("Suse Sans",8,ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
       str.append("Hier");

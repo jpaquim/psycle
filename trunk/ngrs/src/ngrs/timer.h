@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTIMER_H
-#define NTIMER_H
+#ifndef TIMER_H
+#define TIMER_H
 
 #include "object.h"
 #include <vector>

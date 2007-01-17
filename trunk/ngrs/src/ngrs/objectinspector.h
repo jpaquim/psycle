@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NOBJECTINSPECTOR_H
-#define NOBJECTINSPECTOR_H
+#ifndef OBJECTINSPECTOR_H
+#define OBJECTINSPECTOR_H
 #include "table.h"
 
 namespace ngrs {

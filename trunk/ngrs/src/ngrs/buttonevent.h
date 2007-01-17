@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NBUTTONEVENT_H
-#define NBUTTONEVENT_H
+#ifndef BUTTONEVENT_H
+#define BUTTONEVENT_H
 
 #include "event.h"
 

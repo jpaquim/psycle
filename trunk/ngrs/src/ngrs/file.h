@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NFILE_H
-#define NFILE_H
+#ifndef FILE_H
+#define FILE_H
 
 #include <string>
 #include <vector>

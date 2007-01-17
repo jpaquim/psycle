@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NBEVELBORDER_H
-#define NBEVELBORDER_H
+#ifndef BEVELBORDER_H
+#define BEVELBORDER_H
 
 #include "border.h"
 

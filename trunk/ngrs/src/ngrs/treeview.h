@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTREEVIEW_H
-#define NTREEVIEW_H
+#ifndef TREEVIEW_H
+#define TREEVIEW_H
 
 #include "panel.h"
 

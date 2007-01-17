@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSPLITBAR_H
-#define NSPLITBAR_H
+#ifndef SPLITBAR_H
+#define SPLITBAR_H
 
 #include "panel.h"
 

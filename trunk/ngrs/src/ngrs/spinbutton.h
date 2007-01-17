@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSPINBUTTON_H
-#define NSPINBUTTON_H
+#ifndef SPINBUTTON_H
+#define SPINBUTTON_H
 
 #include "panel.h"
 

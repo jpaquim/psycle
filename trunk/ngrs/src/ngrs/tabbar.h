@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTABBAR_H
-#define NTABBAR_H
+#ifndef TABBAR_H
+#define TABBAR_H
 
 #include "panel.h"
 #include "tab.h"
