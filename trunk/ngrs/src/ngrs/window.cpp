@@ -173,7 +173,7 @@ namespace ngrs {
 
   void Window::repaint( VisualComponent * sender, const ngrs::Region & repaintArea, bool swap )
   {
-    if ( visible() && mapped() ) {
+    if ( visible() ) {
       paintFlag = false;
 
       if (sender->transparent()) {
