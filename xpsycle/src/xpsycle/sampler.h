@@ -139,7 +139,7 @@ namespace psycle
 		{
 		public:
 			void Tick( );
-			Sampler(Machine::id_type id, Song* song);
+			Sampler(int id, Song* song);
 			virtual void Init();
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
 			virtual void Stop();
@@ -229,7 +229,7 @@ namespace psycle
 			int VoiceTick( int channel, const PatternEvent & pEntry );
 			inline void TickEnvelope( int voice );
 			inline void TickFilterEnvelope( int voice );
-			Instrument::id_type lastInstrument[MAX_TRACKS];
+			int lastInstrument[MAX_TRACKS];
 			static inline int alteRand(int x)
 			{
 				return (x*rand())/32768;

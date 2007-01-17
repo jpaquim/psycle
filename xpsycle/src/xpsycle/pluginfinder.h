@@ -41,11 +41,11 @@ namespace psycle
 
 					~PluginInfo();
 
-					void setType( Machine::type_type type );
-					Machine::type_type type() const;
+					void setType( int type );
+					int type() const;
 
-					void setMode( Machine::mode_type mode );
-					Machine::mode_type mode() const;
+					void setMode( int mode );
+					int mode() const;
 
 					void setName( const std::string & name );
 					const std::string & name() const;
@@ -76,8 +76,8 @@ namespace psycle
 
 			private:
 
-				Machine::type_type subclass_;
-				Machine::mode_type mode_;
+				int subclass_;
+				int mode_;
 				std::string name_;
 				std::string author_;
 				std::string desc_;

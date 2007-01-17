@@ -60,8 +60,8 @@ namespace psycle {
 		class LADSPAMachine: public Machine {
 		public:
             
-            LADSPAMachine( Machine::id_type id, Song* song );
-			virtual ~LADSPAMachine() throw();
+            LADSPAMachine( int id, Song* song );
+			virtual ~LADSPAMachine();
 
         public:
             virtual void Init();
@@ -69,7 +69,7 @@ namespace psycle {
             virtual int GenerateAudio(int numSamples );
             virtual void Tick(int channel, const PatternEvent & pEntry );
             virtual void Stop(){}
-            inline virtual std::string GetDllName() const throw() { return libName_.c_str(); }
+            inline virtual std::string GetDllName() const  { return libName_.c_str(); }
             virtual std::string GetName() const { return (char *) (psDescriptor)?psDescriptor->Name:""; };
 
             virtual void GetParamName(int numparam, char * name);

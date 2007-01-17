@@ -55,10 +55,10 @@ class Proxy
     Plugin & host_;
     CMachineInterface * plugin_;
   private:
-    inline Plugin & host() throw();
-    inline const Plugin & host() const throw();
-    inline CMachineInterface & plugin() throw();
-    inline const CMachineInterface & plugin() const throw();
+    inline Plugin & host();
+    inline const Plugin & host() const ;
+    inline CMachineInterface & plugin();
+    inline const CMachineInterface & plugin() const ;
 public:
     Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 
@@ -66,27 +66,27 @@ public:
       // (*this)(0);  ///\todo this segfaults under windows .. investigate 
     }
     
-    inline const bool operator()() const throw();
-    inline void operator()(CMachineInterface * plugin) throw(); //exceptions::function_error);
-    inline void Init() throw(); //std::exceptions::function_error);
-    inline void SequencerTick() throw(); //exceptions::function_error);
-    inline void ParameterTweak(int par, int val) throw(); //exceptions::function_error);
-    inline void Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(); //exceptions::function_error);
-    inline void Stop() throw(); //exceptions::function_error);
-    inline void PutData(void * pData) throw(); //exceptions::function_error);
-    inline void GetData(void * pData) throw(); //exceptions::function_error);
-    inline int GetDataSize() throw(); //exceptions::function_error);
-    inline void Command() throw(); //exceptions::function_error);
-    inline void MuteTrack(const int i) throw(); //exceptions::function_error);
-    inline bool IsTrackMuted(const int i) throw(); //exceptions::function_error);
-    inline void MidiNote(const int channel, const int value, const int velocity) throw(); //exceptions::function_error);
-    inline void Event(const dword data) throw(); //exceptions::function_error);
-    inline bool DescribeValue(char * txt, const int param, const int value) throw(); //exceptions::function_error);
-    inline bool PlayWave(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
-    inline void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
-    inline void StopWave() throw(); //exceptions::function_error);
-    inline int * Vals() throw(); //exceptions::function_error);
-    inline void callback() throw(); //exceptions::function_error);
+    inline const bool operator()() const ;
+    inline void operator()(CMachineInterface * plugin); //exceptions::function_error);
+    inline void Init(); //std::exceptions::function_error);
+    inline void SequencerTick(); //exceptions::function_error);
+    inline void ParameterTweak(int par, int val); //exceptions::function_error);
+    inline void Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks); //exceptions::function_error);
+    inline void Stop(); //exceptions::function_error);
+    inline void PutData(void * pData); //exceptions::function_error);
+    inline void GetData(void * pData); //exceptions::function_error);
+    inline int GetDataSize(); //exceptions::function_error);
+    inline void Command(); //exceptions::function_error);
+    inline void MuteTrack(const int i); //exceptions::function_error);
+    inline bool IsTrackMuted(const int i); //exceptions::function_error);
+    inline void MidiNote(const int channel, const int value, const int velocity); //exceptions::function_error);
+    inline void Event(const dword data); //exceptions::function_error);
+    inline bool DescribeValue(char * txt, const int param, const int value); //exceptions::function_error);
+    inline bool PlayWave(const int wave, const int note, const float volume); //exceptions::function_error);
+    inline void SeqTick(int channel, int note, int ins, int cmd, int val); //exceptions::function_error);
+    inline void StopWave(); //exceptions::function_error);
+    inline int * Vals(); //exceptions::function_error);
+    inline void callback(); //exceptions::function_error);
 };
 
 
@@ -94,18 +94,18 @@ class Plugin : public Machine{
 private:
   static PluginFxCallback _callback;
   public:
-      inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
+      inline static PluginFxCallback * GetCallback()  { return &_callback; };
 public:
     Plugin(int index, Song* song);
 
-    virtual ~Plugin() throw();
+    virtual ~Plugin();
 
     virtual void Init();
     virtual int GenerateAudioInTicks( int startSample, int numSamples );
     virtual void Tick( );
     virtual void Tick(int channel, const PatternEvent & pEntry );
     virtual void Stop();
-    inline virtual std::string GetDllName() const throw() { return _psDllName; }
+    inline virtual std::string GetDllName() const  { return _psDllName; }
     virtual std::string GetName() const { return _psName; };
 
     virtual int GetNumParams() { return GetInfo()->numParameters; };
@@ -116,7 +116,7 @@ public:
     virtual void GetParamValue(int numparam,char* parval);
     virtual bool SetParameter(int numparam,int value);
 
-    inline Proxy & proxy() throw() { return proxy_; };
+    inline Proxy & proxy()  { return proxy_; };
 
     bool Instance(const std::string & file_name);
     bool LoadDll (std::string psFileName);
@@ -134,7 +134,7 @@ public:
 
 
 
-    inline CMachineInfo * GetInfo() throw() { return _pInfo; };
+    inline CMachineInfo * GetInfo()  { return _pInfo; };
 
 private:
     void* _dll;
@@ -148,20 +148,20 @@ private:
 };
 
 
-inline void Proxy::Init() throw()
+inline void Proxy::Init() 
 { assert((*this)()); plugin().Init(); }
-inline CMachineInterface & Proxy::plugin() throw() { return *plugin_; }
-inline void Proxy::SequencerTick() throw() { plugin().SequencerTick(); }
-inline void Proxy::ParameterTweak(int par, int val) throw()
+inline CMachineInterface & Proxy::plugin()  { return *plugin_; }
+inline void Proxy::SequencerTick()  { plugin().SequencerTick(); }
+inline void Proxy::ParameterTweak(int par, int val) 
 { assert((*this)()); plugin().ParameterTweak(par, val);  }
-inline Plugin & Proxy::host() throw() { return host_; }
-inline const Plugin & Proxy::host() const throw() { return host_; }
+inline Plugin & Proxy::host()  { return host_; }
+inline const Plugin & Proxy::host() const  { return host_; }
 
-inline void Proxy::callback() throw()
+inline void Proxy::callback() 
     { assert((*this)()); plugin().pCB = host().GetCallback(); }
 
-inline const bool Proxy::operator()() const throw() { return !!plugin_; }
-inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
+inline const bool Proxy::operator()() const  { return !!plugin_; }
+inline void Proxy::operator()(CMachineInterface * plugin) //exceptions::function_error)
 {
   zapObject(this->plugin_,plugin);
     //if((*this)())
@@ -171,23 +171,23 @@ inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::f
     }
 }
 
-inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw()
+inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) 
 { assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }
-inline void Proxy::StopWave() throw()
+inline void Proxy::StopWave() 
 { assert((*this)());plugin().StopWave(); }
-inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw()
+inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) 
 { assert((*this)()); fflush(stdout); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
-inline int * Proxy::Vals() throw()
+inline int * Proxy::Vals() 
 { assert((*this)()); return plugin().Vals; }
-inline void Proxy::Stop() throw()
+inline void Proxy::Stop() 
 { assert((*this)()); plugin().Stop();  }
-inline bool Proxy::DescribeValue(char * txt, const int param, const int value) throw()
+inline bool Proxy::DescribeValue(char * txt, const int param, const int value) 
 { assert((*this)()); return plugin().DescribeValue(txt, param, value); }
-inline void Proxy::PutData(void * pData) throw()
+inline void Proxy::PutData(void * pData) 
 { assert((*this)()); plugin().PutData(pData);  }
-inline void Proxy::GetData(void * pData) throw()
+inline void Proxy::GetData(void * pData) 
 { assert((*this)()); plugin().GetData(pData); }
-inline int Proxy::GetDataSize() throw()
+inline int Proxy::GetDataSize() 
 { assert((*this)()); return plugin().GetDataSize(); }
 
 }

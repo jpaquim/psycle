@@ -47,7 +47,7 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 
 PluginFxCallback Plugin::_callback;
 
-Plugin::Plugin(Machine::id_type id , Song* song)
+Plugin::Plugin(int id , Song* song)
 			:
 				Machine(MACH_PLUGIN, MACHMODE_FX, id, song),
 				_dll(0),
@@ -57,7 +57,7 @@ Plugin::Plugin(Machine::id_type id , Song* song)
 				_editName = "native plugin";
 			}
 
-Plugin::~ Plugin( ) throw()
+Plugin::~ Plugin( ) 
 {
    #ifdef __unix__
    #else

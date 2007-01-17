@@ -143,7 +143,7 @@ namespace psycle
 		
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
-			Machine::id_type mIndex;
+			int mIndex;
 			switch ( event.type() )
 			{
 			case GlobalEvent::BPM_CHANGE:
@@ -183,7 +183,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					mIndex = event.target();
 					if(mIndex < MAX_MACHINES)
 					{
-						Wire::id_type wire( event.target2() );
+						int wire( event.target2() );
 						if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1( static_cast<int>( event.parameter() )));
 					}
 				}

@@ -160,7 +160,7 @@ namespace psycle {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-		LADSPAMachine::LADSPAMachine( Machine::id_type id, Song* song )
+		LADSPAMachine::LADSPAMachine( int id, Song* song )
 		: Machine(MACH_LADSPA, MACHMODE_FX, id, song)
 		{
 			_audiorange = 1.0f;
@@ -173,7 +173,7 @@ namespace psycle {
 		}
 		
 		
-		LADSPAMachine::~LADSPAMachine() throw()
+		LADSPAMachine::~LADSPAMachine() 
 		{
 			if ( pluginHandle )
 			{

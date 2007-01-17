@@ -12,10 +12,7 @@ namespace psycle
 		/// an instrument is a waveform with some extra features added around it.
 		class Instrument
 		{
-		public:
-			//PSYCLE__STRONG_TYPEDEF(int, id_type);
-			typedef int id_type;
-
+		public:			
 			Instrument();
 			~Instrument();
 			void Delete();
@@ -109,6 +106,6 @@ namespace psycle
 		};
 
 		/// Instrument index of the wave preview.
-		Instrument::id_type const PREV_WAV_INS(255);
+		int const PREV_WAV_INS(255);
 	}
 }

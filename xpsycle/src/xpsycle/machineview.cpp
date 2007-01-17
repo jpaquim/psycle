@@ -269,7 +269,7 @@ namespace psycle {
 		{
 			Player::Instance()->lock();
 
-			dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
+			// dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
 			Machine* _pSrcMachine = dlg->pSrcMachine();
 			Machine* _pDstMachine = dlg->pDstMachine();
 
