@@ -132,15 +132,17 @@ void Graphics::createDblBufferHandles( )
 
 void Graphics::destroyDblBufferHandles( )
 {     
-  if (dblBuffer_) {
+  if (dblBuffer_  && gcp ) {
 #ifdef __unix__
     XFreeGC(App::system().dpy(), gcp);
     XFreePixmap(App::system().dpy(), doubleBufferPixmap_);
     XftDrawDestroy(drawDbl);
+    gcp = 0;
 #else
     // Clean up - only need to do this one time as well
     DeleteDC( gcp);
     DeleteObject( doubleBufferBitmap_ );
+    gcp = 0;
 #endif
   }
 }
