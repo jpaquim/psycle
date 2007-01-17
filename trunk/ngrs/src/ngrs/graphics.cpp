@@ -77,9 +77,8 @@ Graphics::~Graphics()
   ::DeleteObject( hollow );
   ::DeleteObject( hPen );
 #endif
-  if (dblBuffer_) {
-    destroyDblBufferHandles();
-  }
+
+  destroyDblBufferHandles();
 }
 
 void Graphics::fillRect( int x, int y, int width, int height )
@@ -97,51 +96,44 @@ void Graphics::fillRect( int x, int y, int width, int height )
 void Graphics::createDblBufferHandles( )
 {
 #ifdef __unix__
-  ::XWindowAttributes attr;
-  ::XGetWindowAttributes( App::system().dpy(), win, &attr );
+  if (!gcp) {
+    ::XWindowAttributes attr;
+    ::XGetWindowAttributes( App::system().dpy(), win, &attr );
 
-  if (dblBuffer_) {
     doubleBufferPixmap_ = XCreatePixmap(App::system().dpy(), win, attr.width, attr.height, App::system().depth());
     gcp = XCreateGC(App::system().dpy(),doubleBufferPixmap_,0,0);
     dblWidth_  = attr.width;
     dblHeight_ = attr.height;
     XSetForeground( App::system().dpy(), gcp, oldColor.colorValue() );
-    drawDbl = XftDrawCreate(App::system().dpy(), doubleBufferPixmap_, App::system().visual(), App::system().colormap());
-  } else
-  {
-    doubleBufferPixmap_=0;
-    gcp = 0;
-    drawDbl = 0;
-    XSetForeground( App::system().dpy(), gc_, oldColor.colorValue() );
+    drawDbl = XftDrawCreate(App::system().dpy(), doubleBufferPixmap_, App::system().visual(), App::system().colormap());  
   }
 #else
-  if (dblBuffer_) {
+  if (!gcp) {
     RECT r;
     GetWindowRect( win, &r );
 
     gcp = CreateCompatibleDC( gc_ );
     doubleBufferBitmap_ = CreateCompatibleBitmap( gc_, r.right - r.left, r.bottom - r.top);
     SelectObject( gcp, doubleBufferBitmap_ );
-
-  } else {
-    doubleBufferBitmap_ = 0;
-    gcp = 0;
   }
 #endif
 }
 
 void Graphics::destroyDblBufferHandles( )
 {     
-  if (dblBuffer_  && gcp ) {
+  if ( gcp ) {
 #ifdef __unix__
     XFreeGC(App::system().dpy(), gcp);
     XFreePixmap(App::system().dpy(), doubleBufferPixmap_);
-    XftDrawDestroy(drawDbl);
+    XftDrawDestroy( drawDbl );
     gcp = 0;
+    doubleBufferPixmap_=0;
+    drawDbl = 0;
+    XSetForeground( App::system().dpy(), gc_, oldColor.colorValue() );
 #else
-    // Clean up - only need to do this one time as well
     DeleteDC( gcp);
     DeleteObject( doubleBufferBitmap_ );
+    doubleBufferBitmap_ = 0;
     gcp = 0;
 #endif
   }
