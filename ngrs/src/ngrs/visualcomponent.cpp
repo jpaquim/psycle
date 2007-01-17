@@ -137,13 +137,13 @@ namespace ngrs {
                 }
               }
 
-              NFont* oldFont = 0;
+              Font* oldFont = 0;
               bool oldUseParentFont;
 
               if ( skin_.overrideFontColor() ) {
-                NFont fnt = font();
+                Font fnt = font();
                 oldUseParentFont = skin_.parentFont();
-                oldFont = new NFont( fnt );
+                oldFont = new Font( fnt );
                 fnt.setTextColor( skin_.textColor() );
                 setFont( fnt );
               }
@@ -245,7 +245,7 @@ namespace ngrs {
 
   }
 
-  const NFont & VisualComponent::font( ) const
+  const Font & VisualComponent::font( ) const
   {
     if (skin_.parentFont() && parent()!=0 && parent()->visit(VisualComponent::isVisualComponent)) {
       return ((VisualComponent*) parent())->font();
@@ -561,7 +561,7 @@ namespace ngrs {
   }
 
 
-  void VisualComponent::setFont( const NFont & font )
+  void VisualComponent::setFont( const Font & font )
   {
     skin_.setFont(font);
     skin_.useParentFont(false);
@@ -1002,7 +1002,7 @@ namespace ngrs {
 
     if (!on && enabled_) {
       oldFont = font();
-      NFont fnt = font();
+      Font fnt = font();
       fnt.setTextColor(skin_.disabledTextColor());
       disableParentFont_ = skin_.parentFont();
       skin_.useParentFont(false);

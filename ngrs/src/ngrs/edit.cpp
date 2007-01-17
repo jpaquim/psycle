@@ -345,7 +345,7 @@ namespace ngrs {
   void Edit::onMousePress( int x, int y, int button ) {
     Panel::onMousePress( x, y, button );  
 
-    NFntString myText;
+    FntString myText;
     myText.setText( text_ );
     FontMetrics metrics( font( ) );
     pos_ = metrics.findWidthMax( x + dx, myText );
@@ -363,7 +363,7 @@ namespace ngrs {
     int shiftState = App::system().shiftState();
 
     if ( shiftState & nsLeft ) {
-      NFntString myText;
+      FntString myText;
       myText.setText( text_ );
       FontMetrics metrics( font( ) );
       pos_ = metrics.findWidthMax( x + dx, myText );   

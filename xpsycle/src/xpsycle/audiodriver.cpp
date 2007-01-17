@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Stefan   *
+*   Copyright (C) 2006 by  Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -26,30 +26,26 @@ namespace psycle
   namespace host
   {
 
-    AudioDriverInfo::AudioDriverInfo( const std::string & name, 
-      const std::string & header,
-      const std::string & description,
-      bool show ) : 
-    name_( name ), header_( header ), description_( description ), show_( show )
+    AudioDriverInfo::AudioDriverInfo( const std::string& name, const std::string& header, const std::string& description, bool show ) 
+      : name_( name ), header_( header ), description_( description ), show_( show )
     {
     }
 
-    const std::string & AudioDriverInfo::name() const {
+    const std::string& AudioDriverInfo::name() const {
       return name_;
     }
 
-    const std::string & AudioDriverInfo::header() const {
+    const std::string& AudioDriverInfo::header() const {
       return header_;
     }
 
-    const std::string & AudioDriverInfo::description() const {
+    const std::string& AudioDriverInfo::description() const {
       return description_;
     }
 
     bool AudioDriverInfo::show() const {
       return show_;
     }
-
 
     ///
     /// audio driver setting class

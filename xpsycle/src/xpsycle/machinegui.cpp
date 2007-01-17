@@ -44,7 +44,7 @@ namespace psycle {
 			setMoveable( ngrs::Moveable(ngrs::nMvHorizontal | ngrs::nMvVertical | ngrs::nMvNoneRepaint | ngrs::nMvTopLimit | ngrs::nMvLeftLimit));
 			setPosition( mac._x, mac._y, 200+2*ident(), 30+2*ident() );
 
-			setFont( ngrs::NFont("Suse sans",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
+			setFont( ngrs::Font("Suse sans",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
 
 			propsDlg_ = new MacPropDlg( mac_ );
 				propsDlg_->updateMachineProperties.connect(this,&MachineGUI::onUpdateMachinePropertiesSignal);

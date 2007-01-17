@@ -97,20 +97,14 @@ namespace ngrs {
   }
 
   void NFlipBox::paint( Graphics& g ) {
-
     if ( style() & nFlipBoxLine ) {
-
-      Pen oldPen = g.pen();
       g.setForeground( Color( 200, 200, 200 ) );
       Pen pen;
       pen.setLineStyle( nLineOnOffDash );
       g.setPen( pen );	  
       int xoff = flipBar_->flipperWidth() / 2;
-
       g.drawLine( xoff, flipBar_->header()->height() / 2, xoff, height() );	  
       g.drawLine( xoff, flipBar_->header()->height() / 2, flipBar_->header()->left(), flipBar_->header()->height() / 2 );
-
-      g.setPen( oldPen );
     }
   }
 

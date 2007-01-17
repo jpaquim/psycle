@@ -72,7 +72,7 @@ namespace ngrs {
       }
     }
 #else
-    std::map<NFont,FontStructure>::iterator it = xftfntCache.begin();
+    std::map<Font,FontStructure>::iterator it = xftfntCache.begin();
     for ( ; it != xftfntCache.end(); it++ ) {
       FontStructure fnt = it->second;
       DeleteObject( fnt.hFnt );
@@ -352,11 +352,11 @@ namespace ngrs {
 #endif
   }
 
-  FontStructure System::getFontValues( const NFont & nFnt )
+  FontStructure System::getFontValues( const Font & nFnt )
   {
     FontStructure fnt;
     FontStructure cacheFnt;
-    std::map<NFont, FontStructure>::iterator itr;
+    std::map<Font, FontStructure>::iterator itr;
 
 #ifdef __unix__
     if (nFnt.antialias() ) {
@@ -381,7 +381,7 @@ namespace ngrs {
     } else
 
       if (!nFnt.antialias()) {
-        std::map<NFont, FontStructure>::iterator itr;
+        std::map<Font, FontStructure>::iterator itr;
         if ( (itr = xfntCache.find(nFnt)) == xfntCache.end())
         {
           string xname = getFontPattern(nFnt);
@@ -429,7 +429,7 @@ namespace ngrs {
     return fnt;
   }
 
-  std::string System::getFontPattern( const NFont & font )
+  std::string System::getFontPattern( const Font & font )
   {
     string xfntname = "";
 #ifdef __unix__
@@ -493,7 +493,7 @@ namespace ngrs {
     else return true;
   }
 
-  std::string System::fontPattern(const NFont & font) {
+  std::string System::fontPattern(const Font & font) {
 
     string styleString  = "*";
     string italicString = "r";

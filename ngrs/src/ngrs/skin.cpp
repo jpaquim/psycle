@@ -169,13 +169,13 @@ namespace ngrs {
     return transColor_;
   }
 
-  void Skin::setFont( const NFont & font )
+  void Skin::setFont( const Font & font )
   {
     font_ = font;
     useParentFont_ = false;
   }
 
-  const NFont & Skin::font( ) const
+  const Font & Skin::font( ) const
   {
     return font_;
   }

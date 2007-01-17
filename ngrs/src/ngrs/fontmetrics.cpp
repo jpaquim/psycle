@@ -26,12 +26,12 @@ namespace ngrs {
 
   FontMetrics::FontMetrics( )
   {
-    fntStruct = App::system().getFontValues(NFont());
+    fntStruct = App::system().getFontValues(Font());
   }
 
-  FontMetrics::FontMetrics(const NFont & font)
+  FontMetrics::FontMetrics(const Font & font)
   {
-    fntStruct = font.systemFont();
+    fntStruct = font.platformFontStructure();
   }
 
 
@@ -145,9 +145,9 @@ namespace ngrs {
 #endif
   }
 
-  void FontMetrics::setFont( const NFont & font )
+  void FontMetrics::setFont( const Font & font )
   {
-    fntStruct = font.systemFont();
+    fntStruct = font.platformFontStructure();
   }
 
   int FontMetrics::maxCharWidth() const {

@@ -66,8 +66,8 @@ namespace psycle
       ~AudioDriverSettings();
 
       // some drivers require a device name like alsa
-      void setDeviceName( const std::string & name );
-      const std::string & deviceName() const;
+      void setDeviceName( const std::string& name );
+      const std::string& deviceName() const;
 
       void setBufferSize( int size );
       int bufferSize() const;
@@ -120,7 +120,7 @@ namespace psycle
       virtual AudioDriverInfo info() const;
 
       // here you can set the settings of the driver, like samplerate depth etc
-      virtual void setSettings( const AudioDriverSettings & settings );
+      virtual void setSettings( const AudioDriverSettings& settings );
       // here you get the special audio driver settings
       // in case of some drivers like  e.g jack you must prepare, that a driver can set itself
       const AudioDriverSettings& settings() const;
@@ -130,7 +130,7 @@ namespace psycle
       // enable will start the driver and the calling for the work player function
       virtual bool Enable(bool e) { return false; };
       // initialize has nth with the driver todo, it sets only the ptr for a later player work call
-      virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context) {};
+      virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context) {};
       virtual void Configure(void) {};
       virtual bool Initialized(void) { return true; };
       virtual bool Configured(void) { return true; };

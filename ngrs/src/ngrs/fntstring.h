@@ -32,31 +32,31 @@
 
 namespace ngrs {
 
-  class NFntString : public std::string {
+  class FntString : public std::string {
   public:
-    NFntString();
+    FntString();
 
-    ~NFntString(); ///\todo stl inheritance virtual dtor stuff rework needed
+    ~FntString(); ///\todo stl inheritance virtual dtor stuff rework needed
 
     void setText( const std::string & text );
     void append( const std::string & text );
-    void append( const NFntString & text );
+    void append( const FntString & text );
 
-    NFntString substr( std::string::size_type pos, std::string::size_type size ) const;
-    NFntString substr( std::string::size_type last ) const;
+    FntString substr( std::string::size_type pos, std::string::size_type size ) const;
+    FntString substr( std::string::size_type last ) const;
 
     std::string textsubstr( std::string::size_type pos, std::string::size_type size ) const;
     std::string textsubstr( std::string::size_type last) const;
 
-    void setFont( const NFont & font );
+    void setFont( const Font & font );
 
     const std::vector< std::string::size_type > & positions( ) const;
-    const std::vector< NFont > & fonts() const;
+    const std::vector< Font > & fonts() const;
 
   private:
 
     std::vector< std::string::size_type > positions_;
-    std::vector< NFont > fonts_;
+    std::vector< Font > fonts_;
 
   };
 

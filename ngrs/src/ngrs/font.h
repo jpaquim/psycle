@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NFONT_H
-#define NFONT_H
+#ifndef FONT_H
+#define FONT_H
 
 #include <string>
 #include "color.h"
@@ -32,16 +32,16 @@
 
 namespace ngrs {
 
-  enum NFontStyleEnum { nBold=1,nMedium=2, nItalic=4, nStraight=8, nAntiAlias=16};
+  enum FontStyleEnum { nBold=1,nMedium=2, nItalic=4, nStraight=8, nAntiAlias=16};
 
-  class NFont{
+  class Font{
   public:
-    NFont();
-    NFont( const std::string & name, int size=10, int style=nMedium | nStraight | nAntiAlias);
+    Font();
+    Font( const std::string& name, int size=10, int style=nMedium | nStraight | nAntiAlias);
 
-    ~NFont();
+    ~Font();
 
-    void setName( const std::string & name);
+    void setName( const std::string& name);
     void setSize( int size );
     void setStyle( int style );
 
@@ -50,15 +50,13 @@ namespace ngrs {
     int style() const;
     bool antialias() const;
     std::string fontString( ) const;
-    bool operator==(const NFont & fnt) const;
-    bool operator<(const NFont & fnt) const;
+    bool operator==(const Font& fnt) const;
+    bool operator<(const Font& fnt) const;
 
-    void setTextColor(const Color & color);
-    const Color & textColor() const;
+    void setTextColor(const Color& color);
+    const Color& textColor() const;
 
-    const FontStructure & systemFont() const;
-
-
+    const FontStructure& platformFontStructure() const;
 
   private:
 
