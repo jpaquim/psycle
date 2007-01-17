@@ -83,6 +83,7 @@ Graphics::~Graphics()
 
 void Graphics::fillRect( int x, int y, int width, int height )
 {
+  if ( !currentGc_ ) return;
   // Note : XFillRectangle has the same
   // width as Rectangle, but XDrawRectangle is one pixel wider
   // for the same co-ordinates.   
@@ -196,6 +197,8 @@ long Graphics::yTranslation( ) const
 
 void Graphics::setForeground( const Color& color )
 {
+  if ( !currentGc_ ) return;
+
   if ( !( oldColor==color) ) {
 #ifdef __unix__                 
     XSetForeground( App::system().dpy(), currentGc_, color.colorValue() );
@@ -217,6 +220,8 @@ void Graphics::setForeground( const Color& color )
 
 void Graphics::setFont( const Font& font )
 {
+  if ( !currentGc_ ) return;
+
   fntStruct = font.platformFontStructure();   
 #ifdef __unix__
   if ( !fntStruct.antialias ) {
@@ -239,6 +244,8 @@ void Graphics::drawXftString( int x, int y, const char * s )
 
 void Graphics::drawText( int x, int y, const std::string & text )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   if (!fntStruct.antialias)  {
     if (!(fntStruct.textColor==oldColor))
@@ -262,6 +269,8 @@ void Graphics::drawText( int x, int y, const std::string & text )
 }
 
 void Graphics::drawText(int x, int y, const std::string & text, const Color& color ) {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   if (!fntStruct.antialias)  {
     XSetForeground( App::system().dpy(), currentGc_, color.colorValue() );
@@ -283,6 +292,8 @@ void Graphics::drawText(int x, int y, const std::string & text, const Color& col
 
 void Graphics::drawRect( int x, int y, int width, int height )
 {
+  if ( !currentGc_ ) return;
+
   // Note : XFillRectangle has the same
   // width as Rectangle, but XDrawRectangle is one pixel wider
   // for the same co-ordinates.   
@@ -297,11 +308,15 @@ void Graphics::drawRect( int x, int y, int width, int height )
 
 void Graphics::drawRect( const Rect& rect )
 {
+  if ( !currentGc_ ) return;
+
   drawRect( rect.left(), rect.top(), rect.width(), rect.height() );
 }
 
 void Graphics::drawLine( long x, long y, long x1, long y1 )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   XDrawLine(App::system().dpy(), currentDrawable_, currentGc_, x+dx_, y+dy_, x1+dx_, y1+dy_);
 #else
@@ -312,6 +327,8 @@ void Graphics::drawLine( long x, long y, long x1, long y1 )
 
 void Graphics::drawPolygon( NPoint* pts , int n )
 {
+  if ( !currentGc_ ) return;
+
   int p2x = 0;
   int p2y = 0;
   for (int i = 0; i < n; i++) {
@@ -327,6 +344,8 @@ void Graphics::drawPolygon( NPoint* pts , int n )
 
 void Graphics::fillPolygon( NPoint * pts, int n )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   XPoint* pt = new XPoint[n];
 #else
@@ -357,6 +376,8 @@ void Graphics::setRegion( const ngrs::Region& region )
 
 void Graphics::setClipping( const ngrs::Region& region )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   XSetRegion( App::system().dpy(), currentGc_, region.asPlatformRegionHandle() );
   if (dblBuffer_) {
@@ -371,6 +392,8 @@ void Graphics::setClipping( const ngrs::Region& region )
 
 void Graphics::fillTranslucent( int x, int y, int width, int height, Color color, int percent )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   XImage* xi = XGetImage(App::system().dpy(), currentDrawable_, x+dx_,y+dy_,width,height,AllPlanes,ZPixmap );
   unsigned char* data = (unsigned char*) xi->data;
@@ -396,6 +419,8 @@ void Graphics::fillTranslucent( int x, int y, int width, int height, Color color
 
 int Graphics::textWidth( const std::string& text ) const
 {
+  if ( !currentGc_ ) return 0;
+
 #ifdef __unix__
   const char* s = text.c_str();
   if (!fntStruct.antialias) {
@@ -416,6 +441,8 @@ int Graphics::textWidth( const std::string& text ) const
 
 int Graphics::textHeight() const
 {
+  if ( !currentGc_ ) return 0;
+
 #ifdef __unix__
   if (!fntStruct.antialias)
     return (fntStruct.xFnt->max_bounds.ascent+ fntStruct.xFnt->max_bounds.descent);
@@ -430,6 +457,8 @@ int Graphics::textHeight() const
 
 int Graphics::textAscent( ) const
 { 
+  if ( !currentGc_ ) return 0;
+
 #ifdef __unix__
   if (!fntStruct.antialias)
     return ( fntStruct.xFnt->max_bounds.ascent );
@@ -444,6 +473,8 @@ int Graphics::textAscent( ) const
 
 int Graphics::textDescent( ) const
 {
+  if ( !currentGc_ ) return 0;
+
 #ifdef __unix__
   if ( !fntStruct.antialias)
     return ( fntStruct.xFnt->max_bounds.descent );
@@ -462,6 +493,7 @@ void Graphics::putStretchBitmap(int x, int y, const Bitmap& bitmap, int width, i
 
 void Graphics::putBitmap( int x, int y, const Bitmap& bitmap )
 {
+  if ( !currentGc_ ) return;
 #ifdef __unix__
   if (bitmap.sysData() != 0) {
     if (bitmap.clpData()==0) {
@@ -510,6 +542,7 @@ void Graphics::putBitmap( int x, int y, const Bitmap& bitmap )
 
 void Graphics::putBitmap( int destX, int destY, int width, int height, const Bitmap & bitmap, int srcX, int srcY )
 {
+  if ( !currentGc_ ) return;
 #ifdef __unix__
   if ( bitmap.sysData() ) {
     XPutImage(App::system().dpy(), currentDrawable_, currentGc_, bitmap.sysData(),
@@ -570,6 +603,8 @@ GC Graphics::gc( )
 
 
 void Graphics::fillGradient(int x, int y, int width, int height, const Color & start, const  Color & end , int direction) {
+  if ( !currentGc_ ) return;
+
   int middle = (direction == nHorizontal) ? width : height;
 
   int r1 = start.red();
@@ -620,9 +655,9 @@ int Graphics::dblHeight( ) const
 
 
 void Graphics::drawRoundRect( int x, int y, int width, int height, int arcWidth, int arcHeight ) {
+if ( !currentGc_ ) return;
 
 #ifdef __unix__
-
   int nx = x;
   int ny = y;
   int nw = width;
@@ -671,16 +706,9 @@ void Graphics::drawRoundRect( int x, int y, int width, int height, int arcWidth,
     }
   }
 #else
-
-  if ( dblBuffer_ ) {
-    HBRUSH holdbrush = (HBRUSH) SelectObject( currentGc_, hollow );
-    RoundRect( currentGc_, x + dx_, y + dy_ , x + dx_ + width + 1 , y + dy_ + height + 1, arcWidth, arcHeight );
-    SelectObject( currentGc_, holdbrush );
-  } else {
-    HBRUSH holdbrush = (HBRUSH) SelectObject( currentGc_, hollow );   
-    RoundRect( currentGc_, x + dx_, y + dy_ , x + dx_ + width + 1, y + dy_ + height + 1, arcWidth, arcHeight );
-    SelectObject( currentGc_, holdbrush );
-  }
+  HBRUSH holdbrush = (HBRUSH) SelectObject( currentGc_, hollow );
+  RoundRect( currentGc_, x + dx_, y + dy_ , x + dx_ + width + 1 , y + dy_ + height + 1, arcWidth, arcHeight );
+  SelectObject( currentGc_, holdbrush );
 #endif        
 }
 
@@ -690,6 +718,7 @@ static double fTwoPi = 2.0 * 3.14;
 #ifdef __unix__
 #else
 void Graphics::drawArcX( int x, int y, int width, int height, int start, int extent, bool fill ) {
+  if ( !currentGc_ ) return;
 
   int clockwise = (extent < 0); /* non-zero if clockwise */
   int xstart, ystart, xend, yend;
@@ -740,6 +769,8 @@ void Graphics::drawArcX( int x, int y, int width, int height, int start, int ext
 
 void Graphics::drawArc( int x, int y, int width, int height, int start, int extent )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   XDrawArc( App::system().dpy(), currentDrawable_, currentGc_, x+dx_, y+dy_, width, height, start, extent );
 #else
@@ -749,6 +780,8 @@ void Graphics::drawArc( int x, int y, int width, int height, int start, int exte
 
 void Graphics::fillArc( int x, int y, int width, int height, int angle1, int angle2 )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__   
   XFillArc( App::system().dpy(), currentDrawable_, currentGc_, x+dx_, y+dy_, width, height, angle1, angle2);
 #else
@@ -763,6 +796,8 @@ void Graphics::fillRect( const Rect& rect )
 
 void Graphics::fillRoundRect( int x, int y, int width, int height, int arcWidth, int arcHeight )
 {
+  if ( !currentGc_ ) return;
+
   int nx = x;
   int ny = y;
   int nw = width;
@@ -811,6 +846,8 @@ void Graphics::fillRoundRect( int x, int y, int width, int height, int arcWidth,
 
 void Graphics::fillRoundGradient( int x, int y, int width, int height, const Color & start, const Color & end, int direction, int arcWidth, int arcHeight )
 {
+  if ( !currentGc_ ) return;
+
   int nx = x;
   int ny = y;
   int nw = width;
@@ -869,6 +906,8 @@ void Graphics::fillRoundGradient( int x, int y, int width, int height, const Col
 
 void Graphics::fillGradient( int x, int y, int width, int height, const Color& start, const Color& mid, const Color& end, int direction, int percent )
 {
+  if ( !currentGc_ ) return;
+
   int middle  = 0;
   int length  = 0;
   if (direction == nHorizontal) {
@@ -893,6 +932,8 @@ void Graphics::fillGradient( int x, int y, int width, int height, const Color& s
 
 void Graphics::fillRoundGradient( int x, int y, int width, int height, const Color & start, const Color & mid, const Color & end, int direction, int percent , int arcWidth, int arcHeight)
 {
+  if ( !currentGc_ ) return;
+
   int nx = x;
   int ny = y;
   int nw = width;
@@ -954,6 +995,8 @@ void Graphics::fillRoundGradient( int x, int y, int width, int height, const Col
 
 int Graphics::textWidth( const FntString& text ) const
 {
+  if ( !currentGc_ ) return 0;
+
 #ifdef __unix__
   FontStructure newFntStruct = fntStruct;
   int pos = 0; int w = 0;
@@ -994,6 +1037,8 @@ int Graphics::textWidth( const FntString& text ) const
 
 void Graphics::drawText( int x, int y, const FntString& text )
 {
+  if ( !currentGc_ ) return;
+
   std::string::size_type pos = 0; 
   int w = 0;
   std::vector<Font>::const_iterator fntIt = text.fonts().begin();
@@ -1053,6 +1098,8 @@ void Graphics::setVisible( bool on )
 
 void Graphics::putPixmap( int destX, int destY, int width, int height, Pixmap & pixmap, int srcX, int srcY )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   if ( pixmap.X11Pixmap() ) {
     XCopyArea( App::system().dpy(),  pixmap.X11Pixmap(), currentDrawable_, currentGc_,
@@ -1066,6 +1113,8 @@ void Graphics::putPixmap( int destX, int destY, int width, int height, Pixmap & 
 // sets and gets the pen (line style etc ..)
 void Graphics::setPen( const Pen& pen )
 {
+  if ( !currentGc_ ) return;
+
 #ifdef __unix__
   XSetLineAttributes(App::system().dpy(), currentGc_, pen.lineWidth(), (int) pen.lineStyle(), pen.capStyle(), pen.joinStyle() );
   XSetFillStyle(App::system().dpy(), currentGc_, pen.fillStyle() );
