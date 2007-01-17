@@ -63,7 +63,9 @@ namespace ngrs {
     }
   }
 
-  const Bitmap & Bitmap::operator =( const Bitmap & rhs ) {
+  Bitmap& Bitmap::operator=( const Bitmap & rhs ) {
+    if ( this == &rhs ) return *this;
+
     deleteBitmapData();    
 
     if ( rhs.sysData() ) {
@@ -141,18 +143,18 @@ namespace ngrs {
   }
 
 
-  NSysImage Bitmap::sysData( ) const
+  PlatformImageHandle Bitmap::sysData( ) const
   {
     return sysData_;
   }
 
-  NSysImage Bitmap::clpData( ) const
+  PlatformImageHandle Bitmap::clpData( ) const
   {
     return clpData_;
   }
 
 
-  void Bitmap::setSysImgData( NSysImage data, NSysImage clp ) {
+  void Bitmap::setSysImgData( PlatformImageHandle data, PlatformImageHandle clp ) {
     sysData_ = data;
     clpData_ = clp;
   }  
@@ -315,7 +317,7 @@ namespace ngrs {
   }
 
 
-  NSysImage Bitmap::cloneSysImage( NSysImage src_img )
+  PlatformImageHandle Bitmap::cloneSysImage( PlatformImageHandle src_img )
   {
     if ( src_img ) {
 #ifdef __unix__

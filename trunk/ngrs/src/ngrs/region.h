@@ -30,16 +30,16 @@
 namespace ngrs {
 
 #ifdef __unix__
-  typedef ::Region PlatformRegion;
+  typedef ::Region PlatformRegionHandle;
 #else
-  typedef ::HRGN PlatformRegion;
+  typedef ::HRGN PlatformRegionHandle;
 #endif
 
   class Region{
   public:
     Region();
     Region( const Rect& rect );
-    Region( PlatformRegion platformRegion );
+    Region( PlatformRegionHandle platformRegion );
 
     ~Region();
 
@@ -49,7 +49,7 @@ namespace ngrs {
     void move( int dx, int dy );
     void setRect( const Rect & rect );
     void setPolygon( NPoint*  pts, int size );
-    bool isEmpty() const;
+    bool empty() const;
     const Rect & rectClipBox() const;
     bool intersects( int x, int y ) const;
 
@@ -64,13 +64,13 @@ namespace ngrs {
     Region operator^( const Region& rhs );
 
     // warning: this pointer can change
-    inline PlatformRegion asPlatformRegion() const  { 
+    inline PlatformRegionHandle asPlatformRegionHandle() const  { 
       return platformRegion_;
     }
 
   private:
 
-    PlatformRegion platformRegion_;
+    PlatformRegionHandle platformRegion_;
     mutable Rect clipBox;
     mutable bool update;
 

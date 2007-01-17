@@ -48,7 +48,7 @@ namespace ngrs {
     update = true;
   }
 
-  Region::Region( PlatformRegion platformRegion ) {
+  Region::Region( PlatformRegionHandle platformRegion ) {
 #ifdef __unix__
     platformRegion_ = XCreateRegion();
     XUnionRegion( platformRegion_, platformRegion, platformRegion_ );
@@ -70,7 +70,7 @@ namespace ngrs {
 
   void Region::setRect( const Rect& rect )
   {
-    if ( !isEmpty() ) {
+    if ( !empty() ) {
 #ifdef __unix__
       XDestroyRegion(platformRegion_);
       platformRegion_ = XCreateRegion();
@@ -127,15 +127,15 @@ namespace ngrs {
   {
 #ifdef __unix__
     platformRegion_ = XCreateRegion();
-    XUnionRegion( platformRegion_, src.asPlatformRegion(), platformRegion_ );
+    XUnionRegion( platformRegion_, src.asPlatformRegionHandle(), platformRegion_ );
 #else
     platformRegion_ = CreateRectRgn( 0, 0, 0, 0 );
-    CombineRgn( platformRegion_, src.asPlatformRegion(), NULL, RGN_COPY );
+    CombineRgn( platformRegion_, src.asPlatformRegionHandle(), NULL, RGN_COPY );
 #endif
     update = true;
   }
 
-  bool Region::isEmpty( ) const
+  bool Region::empty( ) const
   {
 #ifdef __unix__
     return ::XEmptyRegion( platformRegion_ );
@@ -204,11 +204,11 @@ namespace ngrs {
 #ifdef __unix__
     ::XDestroyRegion( platformRegion_);
     platformRegion_ = ::XCreateRegion();      
-    ::XUnionRegion( platformRegion_, rhs.asPlatformRegion(), platformRegion_ );
+    ::XUnionRegion( platformRegion_, rhs.asPlatformRegionHandle(), platformRegion_ );
 #else
     ::DeleteObject( platformRegion_ );
     platformRegion_ = ::CreateRectRgn( 0, 0, 0, 0 );
-    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), NULL, RGN_COPY );
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegionHandle(), NULL, RGN_COPY );
 #endif
     update = true;
     return *this;
@@ -220,7 +220,7 @@ namespace ngrs {
 #ifdef __unix__
     ::XIntersectRegion( platformRegion_, rhs, platformRegion_);
 #else
-    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_AND );
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegionHandle(), platformRegion_, RGN_AND );
 #endif
     return *this;
   }
@@ -236,7 +236,7 @@ namespace ngrs {
 #ifdef __unix__
     ::XUnionRegion( platformRegion_, rhs, platformRegion_ );
 #else
-    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_OR );
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegionHandle(), platformRegion_, RGN_OR );
 #endif
     return *this;
   }
@@ -251,7 +251,7 @@ namespace ngrs {
 #ifdef __unix__
     ::XSubtractRegion( platformRegion_, rhs, platformRegion_ );
 #else
-    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_DIFF);
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegionHandle(), platformRegion_, RGN_DIFF);
 #endif
     return *this;
   }
@@ -266,7 +266,7 @@ namespace ngrs {
 #ifdef __unix__
     ::XXorRegion( platformRegion_, rhs, platformRegion_ );
 #else
-    ::CombineRgn( platformRegion_, rhs.asPlatformRegion(), platformRegion_, RGN_XOR );
+    ::CombineRgn( platformRegion_, rhs.asPlatformRegionHandle(), platformRegion_, RGN_XOR );
 #endif
     return *this;
   }

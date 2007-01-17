@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NBITMAP_H
-#define NBITMAP_H
+#ifndef BITMAP_H
+#define BITMAP_H
 
 #include "object.h"
 #include "system.h"
@@ -28,9 +28,9 @@
 */
 
 #ifdef __unix__
-typedef XImage* NSysImage;
+typedef XImage* PlatformImageHandle;
 #else
-typedef HBITMAP NSysImage;
+typedef HBITMAP PlatformImageHandle;
 #endif
 
 
@@ -40,11 +40,11 @@ namespace ngrs {
   {
   public:
     Bitmap();
-    Bitmap( const std::string & filename );
-    Bitmap( const Bitmap & rhs );
+    Bitmap( const std::string& filename );
+    Bitmap( const Bitmap& rhs );
     Bitmap( const char** data );
 
-    const Bitmap & operator= ( const Bitmap & rhs );
+    Bitmap& operator=( const Bitmap& rhs );
 
     ~Bitmap();
 
@@ -53,27 +53,26 @@ namespace ngrs {
     int width()     const;
     int height()    const;
 
-    void setDepth(int depth);
+    void setDepth( int depth );
 
-    NSysImage sysData() const;
-    NSysImage clpData() const; 
-
-    void loadFromFile( const std::string & filename );
+    void loadFromFile( const std::string& filename );
     void createFromXpmData( const char** data );
-
-
-    NSysImage cloneSysImage( NSysImage src_img );
 
     bool empty() const;
 
-    void setSysImgData( NSysImage data, NSysImage clp );
+
+    void setSysImgData( PlatformImageHandle data, PlatformImageHandle clp );
+    PlatformImageHandle cloneSysImage( PlatformImageHandle src_img );
+    
+    PlatformImageHandle sysData() const;
+    PlatformImageHandle clpData() const; 
 
   private:
 
     int depth_;
 
-    NSysImage sysData_;
-    NSysImage clpData_;
+    PlatformImageHandle sysData_;
+    PlatformImageHandle clpData_;
 
     long clpColor_;
 
