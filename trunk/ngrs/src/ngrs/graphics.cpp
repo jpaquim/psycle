@@ -154,7 +154,7 @@ void Graphics::updateCurrentGc() {
   } else {
     currentGc_ = gc_;
 #ifdef __unix__
-    currentDrawable_ = WinHandle;
+    currentDrawable_ = win;
 #endif      
   }
 }
