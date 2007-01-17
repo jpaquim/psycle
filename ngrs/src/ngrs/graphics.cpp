@@ -447,18 +447,18 @@ namespace ngrs {
   {
 #ifdef __unix__
     if (dblBuffer_) {
-      XSetRegion(App::system().dpy(), gcp,region.asPlatformRegion());
-      XftDrawSetClip(drawDbl,region.asPlatformRegion());
+      XSetRegion(App::system().dpy(), gcp,region.asPlatformRegionHandle());
+      XftDrawSetClip(drawDbl,region.asPlatformRegionHandle());
     }
     else {
-      XSetRegion(App::system().dpy(), gc_,region.asPlatformRegion());
-      XftDrawSetClip(drawWin, region.asPlatformRegion());
+      XSetRegion(App::system().dpy(), gc_,region.asPlatformRegionHandle());
+      XftDrawSetClip(drawWin, region.asPlatformRegionHandle());
     }
 #else
     if ( dblBuffer_ )
-      ::SelectClipRgn( gcp, region.asPlatformRegion() );
+      ::SelectClipRgn( gcp, region.asPlatformRegionHandle() );
     else  
-      ::SelectClipRgn( gc_, region.asPlatformRegion() );    
+      ::SelectClipRgn( gc_, region.asPlatformRegionHandle() );    
 #endif
   }
 

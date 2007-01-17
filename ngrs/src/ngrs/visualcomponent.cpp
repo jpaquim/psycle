@@ -56,7 +56,7 @@ namespace ngrs {
 
       region &= oldRegion;   // do intersection
 
-      if (!region.isEmpty()) {
+      if (!region.empty()) {
 
         g.resetPen();
 
@@ -263,7 +263,7 @@ namespace ngrs {
     g.setTranslation(g.xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g.yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
     VisualComponent* found = 0;
 
-    if ( !region.isEmpty() && region.intersects( absX, absY ) && events() ) {
+    if ( !region.empty() && region.intersects( absX, absY ) && events() ) {
       g.setRegion(region);       
       found = checkChildrenEvent( g, absX, absY );
       if (!found) found = this;   
