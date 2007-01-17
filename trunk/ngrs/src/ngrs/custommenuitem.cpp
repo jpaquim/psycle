@@ -89,7 +89,7 @@ namespace ngrs {
       }
   }
 
-  void CustomMenuItem::setFont( const NFont & font )
+  void CustomMenuItem::setFont( const Font & font )
   {
     itemNone.setFont(font);
     itemOver.setFont(font);

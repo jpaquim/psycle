@@ -235,9 +235,9 @@ namespace psycle {
       drawGroup->add( subGroup, ngrs::nAlClient );
       add(drawGroup, ngrs::nAlClient);
 
-      drawArea->setFont( ngrs::NFont("8x13bold",8, ngrs::nMedium | ngrs::nStraight ));
-      lineNumber_->setFont( ngrs::NFont("8x13bold",8, ngrs::nMedium | ngrs::nStraight ));
-      tweakGUI->setFont( ngrs::NFont("8x13bold",8, ngrs::nMedium | ngrs::nStraight ));
+      drawArea->setFont( ngrs::Font("8x13bold",8, ngrs::nMedium | ngrs::nStraight ));
+      lineNumber_->setFont( ngrs::Font("8x13bold",8, ngrs::nMedium | ngrs::nStraight ));
+      tweakGUI->setFont( ngrs::Font("8x13bold",8, ngrs::nMedium | ngrs::nStraight ));
       editPosition_ = 0;
       prevEditPosition_ = 0;
       playPos_  = 0;

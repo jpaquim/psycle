@@ -58,7 +58,7 @@ namespace psycle { namespace host {
 		clrBlack.setRGB(0, 0, 0);
 		
 		std::string fontname="Lucida Typewriter";
-		fntLoop=new ngrs::NFont(fontname);
+		fntLoop=new ngrs::Font(fontname);
 		fntLoop->setTextColor(clrLo);
 
 		bSnapToZero=true;

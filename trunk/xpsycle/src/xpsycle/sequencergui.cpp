@@ -1135,7 +1135,7 @@ namespace psycle {
 
     void SequencerGUI::updateSkin() {
       scrollArea()->setBackground( SkinReader::Instance()->sequencerview_info().pane_bg_color );
-      ngrs::NFont font_ = scrollArea()->font();
+      ngrs::Font font_ = scrollArea()->font();
       font_.setTextColor( SkinReader::Instance()->sequencerview_info().pane_text_color );
       scrollArea()->setFont( font_ );
 

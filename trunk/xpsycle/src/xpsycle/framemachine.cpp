@@ -102,7 +102,7 @@ namespace psycle {
       param_ = param;  
       add( label = new ngrs::Label());
       add( vLabel = new ngrs::Label()); // the label that shows the value in %
-      ngrs::NFont font = ngrs::NFont("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
+      ngrs::Font font = ngrs::Font("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
       font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUIFontBottomColor );
       vLabel->setFont(font);
       tvalue =stringify(value_)+"%";
@@ -247,7 +247,7 @@ namespace psycle {
       label = new ngrs::Label();
       label->setTransparent(false);
       label->setBackground( SkinReader::Instance()->framemachine_info().machineGUITitleColor );
-      ngrs::NFont font = ngrs::NFont("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
+      ngrs::Font font = ngrs::Font("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
       font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUITitleFontColor );
       label->setFont( font );
       add(label);
@@ -349,7 +349,7 @@ namespace psycle {
       knobPanel->setLayout( tableLayout );
       pane()->add( knobPanel, ngrs::nAlClient );
 
-      ngrs::NFont font("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
+      ngrs::Font font("6x13",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias );
       font.setTextColor( SkinReader::Instance()->framemachine_info().machineGUITopColor );
       knobPanel->setFont( font );
 

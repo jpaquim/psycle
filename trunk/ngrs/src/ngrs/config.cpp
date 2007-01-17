@@ -69,7 +69,7 @@ namespace ngrs {
             std::string size = parser.getAttribValue("size");
             std::string color = parser.getAttribValue("color");
             std::stringstream str; str << size; int sz = 0; str >> sz;
-            NFont font(name,sz,nMedium | nAntiAlias);
+            Font font(name,sz,nMedium | nAntiAlias);
             font.setTextColor(Color(color));
             skin->setFont(font);
           }

@@ -112,7 +112,7 @@ namespace ngrs {
     void setWindowDecoration(WinHandle win, bool on);
     void setStayAbove(WinHandle win);
     bool isWindowMapped(WinHandle win);
-    FontStructure getFontValues(const NFont & nFnt);
+    FontStructure getFontValues(const Font & nFnt);
     int windowLeft(WinHandle win);
     int windowTop(WinHandle win);
     unsigned long getXColorValue(int r, int g, int b);
@@ -159,8 +159,8 @@ namespace ngrs {
     WNDCLASSEX wc;
 #endif
 
-    std::map<NFont,FontStructure>  xfntCache;
-    std::map<NFont,FontStructure>  xftfntCache;
+    std::map<Font,FontStructure>  xfntCache;
+    std::map<Font,FontStructure>  xftfntCache;
     std::map<unsigned long,unsigned long> colorCache;
 #ifdef __unix__
     std::map<int, Cursor> cursorMap;
@@ -170,11 +170,11 @@ namespace ngrs {
 
     void initX();
     void matchVisual();
-    std::string getFontPattern(const NFont & font);
+    std::string getFontPattern(const Font & font);
 #ifdef __unix__
     static bool isWellFormedFont(std::string name);
     static bool isScalableFont(std::string name);
-    static std::string fontPattern(const NFont & font);
+    static std::string fontPattern(const Font & font);
     static char ** getFontList(Display* dpy, std::string pattern, int* count);
     static std::string getFontPatternWithSizeStyle(Display* dpy, int screen, const char* name, int size);
 #endif

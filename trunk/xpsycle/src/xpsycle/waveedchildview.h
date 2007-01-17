@@ -167,7 +167,7 @@ namespace psycle {
       ngrs::Color clrBlack;
       ngrs::Color clrWhite;
       ngrs::Timer timer;
-      ngrs::NFont *fntLoop;
+      ngrs::Font *fntLoop;
 
       float const static zoomBase;	//base of the logarithmic scale used for zooming with zoom slider
 

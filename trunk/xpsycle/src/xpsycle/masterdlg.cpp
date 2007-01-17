@@ -156,7 +156,7 @@ namespace psycle {
 
     MasterDlg::Led::Led( ) : number_(0)
     {
-      ngrs::NFont font("Suse sans",6,ngrs::nStraight | ngrs::nMedium | ngrs::nAntiAlias);
+      ngrs::Font font("Suse sans",6,ngrs::nStraight | ngrs::nMedium | ngrs::nAntiAlias);
       font.setTextColor( ngrs::Color( 255, 255, 255) );
       setFont(font);
     }

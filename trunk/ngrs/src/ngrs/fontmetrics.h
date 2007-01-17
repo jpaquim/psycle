@@ -36,11 +36,11 @@ namespace ngrs {
   class FontMetrics{
   public:
     FontMetrics();
-    FontMetrics(const NFont & font);
+    FontMetrics(const Font & font);
 
     ~FontMetrics();
 
-    void setFont(const NFont & font);
+    void setFont(const Font & font);
 
     int maxCharWidth() const;
     int textWidth( const std::string & text ) const;

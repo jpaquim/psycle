@@ -24,7 +24,7 @@ using namespace std;
 
 namespace ngrs {
 
-  NFont::NFont() : 
+  Font::Font() : 
 #ifdef __unix__
   name_("9x15"),
 #else
@@ -35,59 +35,60 @@ namespace ngrs {
     systemFnt = App::system().getFontValues(*this);
   }
 
-  NFont::NFont( const std::string & name, int size,int style ) : name_(name),size_(size),style_(style)
+  Font::Font( const std::string& name, int size, int style ) 
+    : name_(name), size_(size), style_(style)
   {
-    systemFnt = App::system().getFontValues(*this);
+    systemFnt = App::system().getFontValues( *this );
   }
 
-  NFont::~NFont()
+  Font::~Font()
   {
 
   }
 
   // setter
 
-  void NFont::setName( const string & name )
+  void Font::setName( const string& name )
   {
     name_ = name;
-    systemFnt = App::system().getFontValues(*this);
+    systemFnt = App::system().getFontValues( *this );
   }
 
-  void NFont::setSize( int size )
+  void Font::setSize( int size )
   {
     size_ = size;
-    systemFnt = App::system().getFontValues(*this);
+    systemFnt = App::system().getFontValues( *this );
   }
 
-  void NFont::setStyle( int style )
+  void Font::setStyle( int style )
   {
     style_ = style;
-    systemFnt = App::system().getFontValues(*this);
+    systemFnt = App::system().getFontValues( *this );
   }
 
   // getter
 
-  const std::string & NFont::name( ) const
+  const std::string & Font::name() const
   {
     return name_;
   }
 
-  int NFont::size( ) const
+  int Font::size() const
   {
     return size_;
   }
 
-  int NFont::style( ) const
+  int Font::style() const
   {
     return style_;
   }
 
-  bool NFont::antialias( ) const
+  bool Font::antialias() const
   {
     return ( style_ & nAntiAlias ) != 0;
   }
 
-  std::string NFont::fontString( ) const
+  std::string Font::fontString() const
   {
     string styleString  = "*";
     string italicString = "i";
@@ -99,18 +100,15 @@ namespace ngrs {
 
     std::ostringstream o;
     o << name_ << ":" << size_ << ":" << styleString << ":" << italicString << ":" << alias;
-
     return o.str();
   }
 
-
-  bool NFont::operator ==( const NFont & fnt ) const
+  bool Font::operator==( const Font& fnt ) const
   {
     return (fnt.name()==name() && fnt.size() == size() && fnt.style()==style());
   }
 
-
-  bool NFont::operator <( const NFont & fnt ) const
+  bool Font::operator <( const Font& fnt ) const
   {
     if (name_ < fnt.name()) return true;
     if (name_ > fnt.name()) return false;
@@ -122,17 +120,17 @@ namespace ngrs {
     return false;
   }
 
-  const FontStructure & NFont::systemFont( ) const
+  const FontStructure& Font::platformFontStructure() const
   {
     return systemFnt;
   }
 
-  const Color & NFont::textColor( ) const
+  const Color& Font::textColor() const
   {
     return textColor_;
   }
 
-  void NFont::setTextColor( const Color & color )
+  void Font::setTextColor( const Color& color )
   {
     textColor_ = color;
     systemFnt.textColor = color;

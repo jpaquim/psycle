@@ -105,9 +105,9 @@ namespace ngrs {
 
     virtual void paint(Graphics& g);
 
-    virtual void setFont(const NFont & font);
+    virtual void setFont(const Font & font);
     void setParentFont(bool on);
-    const NFont & font() const;
+    const Font & font() const;
 
     VisualComponent* overObject(Graphics& g, long absX, long absY);
     void setBorder(const Border & border);
@@ -264,7 +264,7 @@ namespace ngrs {
 
     bool enabled_;
 
-    NFont oldFont;
+    Font oldFont;
     bool disableParentFont_;
 
     bool tabStop_;

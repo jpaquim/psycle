@@ -56,8 +56,8 @@ namespace ngrs {
 
     const Color& transColor() const;
 
-    void setFont(const NFont& font);
-    const NFont& font() const;
+    void setFont(const Font& font);
+    const Font& font() const;
 
     void setTextColor( const Color& color );
     const Color& textColor() const;
@@ -119,7 +119,7 @@ namespace ngrs {
     int bitmapBgStyle_;
 
     // the Font style
-    NFont  font_;
+    Font  font_;
     bool useParentFont_;
 
     // the border style

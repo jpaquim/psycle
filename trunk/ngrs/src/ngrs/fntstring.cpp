@@ -23,33 +23,33 @@ using namespace std;
 
 namespace ngrs {
 
-  NFntString::NFntString()
+  FntString::FntString()
   {
   }
 
 
-  NFntString::~NFntString()
+  FntString::~FntString()
   {
   }
 
-  void NFntString::append( const std::string & text )
+  void FntString::append( const std::string & text )
   {
     std::string::append( text );
   }
 
-  void NFntString::setFont( const NFont & font )
+  void FntString::setFont( const Font & font )
   {
     fonts_.push_back( font );
     positions_.push_back( length() );
   }
 
-  NFntString NFntString::substr( std::string::size_type pos, std::string::size_type size ) const
+  FntString FntString::substr( std::string::size_type pos, std::string::size_type size ) const
   {
-    NFntString sub;
+    FntString sub;
     sub.setText( std::string::substr( pos, size ) );
     bool insertOldFont = false;
 
-    vector<NFont>::const_iterator fntIt = fonts_.begin();
+    vector<Font>::const_iterator fntIt = fonts_.begin();
     for (vector<std::string::size_type>::const_iterator it = positions_.begin(); it < positions_.end(); it++) {
       std::string::size_type p = *it;
       if ( p < pos ) insertOldFont = true; else
@@ -67,48 +67,48 @@ namespace ngrs {
     return sub;
   }
 
-  NFntString NFntString::substr( std::string::size_type last ) const
+  FntString FntString::substr( std::string::size_type last ) const
   {
     return substr( last, length()-last );
   }
 
-  void NFntString::setText( const std::string & text )
+  void FntString::setText( const std::string & text )
   {
     append( text );
     positions_.clear( );
     fonts_.clear( );
   }
 
-  const std::vector< std::string::size_type > & NFntString::positions( ) const
+  const std::vector< std::string::size_type > & FntString::positions( ) const
   {
     return positions_;
   }
 
-  const std::vector< NFont > & NFntString::fonts( ) const
+  const std::vector< Font > & FntString::fonts( ) const
   {
     return fonts_;
   }
 
-  void NFntString::append( const NFntString & text )
+  void FntString::append( const FntString & text )
   {
     std::string::size_type oldLen = length();
     std::string::append(text);
-    vector<NFont>::const_iterator fntIt = text.fonts_.begin();
+    vector<Font>::const_iterator fntIt = text.fonts_.begin();
     for (vector<std::string::size_type>::const_iterator it = text.positions_.begin(); it < text.positions_.end(); it++) {
       std::string::size_type p = *it; 
-      NFont fnt = *fntIt;
+      Font fnt = *fntIt;
       positions_.push_back(p+oldLen);
       fonts_.push_back((*fntIt)); 
       fntIt++;
     }
   }
 
-  std::string NFntString::textsubstr( std::string::size_type pos, std::string::size_type size ) const
+  std::string FntString::textsubstr( std::string::size_type pos, std::string::size_type size ) const
   {
     return substr( pos, size );
   }
 
-  std::string NFntString::textsubstr( std::string::size_type last ) const
+  std::string FntString::textsubstr( std::string::size_type last ) const
   {
     return substr( last );
   }

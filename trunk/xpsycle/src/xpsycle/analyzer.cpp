@@ -29,7 +29,7 @@ namespace psycle {
     Analyzer::Analyzer()
       : ngrs::Panel()
     {
-      ngrs::NFont font = ngrs::NFont( "Suse sans", 6, ngrs::nMedium | ngrs::nStraight );
+      ngrs::Font font = ngrs::Font( "Suse sans", 6, ngrs::nMedium | ngrs::nStraight );
       font.setTextColor( ngrs::Color( 0x60, 0x60, 0x60 ) );
       setFont( font );
       mode_ = 0;

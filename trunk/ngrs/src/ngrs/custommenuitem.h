@@ -49,7 +49,7 @@ namespace ngrs {
 
     virtual void onMessage(Event* ev);
 
-    virtual void setFont(const NFont & font);
+    virtual void setFont(const Font & font);
 
   private:
 
