@@ -123,6 +123,7 @@ void Graphics::createDblBufferHandles( )
 void Graphics::destroyDblBufferHandles( )
 {     
   if ( gcp ) {
+     if ( currentGc_ == gcp ) currentGc_ = gc_;
 #ifdef __unix__
     XFreeGC(App::system().dpy(), gcp);
     XFreePixmap(App::system().dpy(), doubleBufferPixmap_);
@@ -141,7 +142,7 @@ void Graphics::destroyDblBufferHandles( )
 }
 
 void Graphics::updateCurrentGc() {
-  if ( dblBuffer_ ) {
+  if ( dblBuffer_ && gcp) {
    currentGc_ = gcp;
 #ifdef __unix__
     currentDrawable_ = doubleBufferPixmap_;
@@ -583,6 +584,7 @@ void Graphics::setDoubleBuffer( bool on )
     if (!dblBuffer_ && on) {
       dblBuffer_ = on;
     }    
+  updateCurrentGc();
 }
 
 #ifdef __unix__
