@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan   *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -31,7 +31,7 @@
 
 
 /**
-  @author Stefan
+  @author  Stefan
 */
 
 namespace psycle {

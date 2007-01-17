@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by Stefan Nattkemper   *
+*   Copyright (C) 2006 by  Stefan Nattkemper   *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -38,7 +38,7 @@ namespace psycle {
     class MasterDlg;
 
     /**
-    @author Stefan Nattkemper
+    @author  Stefan Nattkemper
     */
 
     class MachineGUI : public ngrs::Panel

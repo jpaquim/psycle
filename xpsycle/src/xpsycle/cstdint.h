@@ -1,7 +1,7 @@
 #ifndef _MSC_VER // [
 
 /***************************************************************************
-*   Copyright (C) 2006 by Stefan   *
+*   Copyright (C) 2006 by  Stefan   *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *

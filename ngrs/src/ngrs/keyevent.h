@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper   *
+ *   Copyright (C) 2005, 2006, 2007 by  Stefan Nattkemper   *
  *   Germany   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,7 +23,7 @@
 #include <string>
 
 /**
-@author Stefan
+@author  Stefan
 */
 
 namespace ngrs {

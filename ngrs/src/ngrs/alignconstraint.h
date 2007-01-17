@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006, 2007 by Stefan Nattkemper   *
+ *   Copyright (C) 2006, 2007 by  Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,7 +21,7 @@
 #define NALIGNCONSTRAINT_H
 
 /**
-@author Stefan Nattkemper
+@author  Stefan Nattkemper
 */
 
 namespace ngrs {

@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::Player
 
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan Nattkemper, Josep Maria Antolin Segura, D.W. Aley			
+  *   Copyright (C) 2006 by  Stefan Nattkemper, Josep Maria Antolin Segura, D.W. Aley			
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *

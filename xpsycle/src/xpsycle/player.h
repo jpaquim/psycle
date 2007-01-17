@@ -3,7 +3,7 @@
 /// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan Nattkemper, Josep Maria Antolín Segura, D.W. Aley			
+  *   Copyright (C) 2006 by  Stefan Nattkemper, Josep Maria Antolín Segura, D.W. Aley			
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *

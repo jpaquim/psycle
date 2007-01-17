@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper  *
+ *   Copyright (C) 2005, 2006, 2007 by  Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,7 +31,7 @@ namespace ngrs {
   class NHint;
 
   /**
-  @author Stefan
+  @author  Stefan
   */
   class Button : public CustomButton
   {

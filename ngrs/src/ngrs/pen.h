@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2006, 2007 by Stefan Nattkemper  *
+ *   Copyright (C) 2005, 2006, 2007 by  Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -107,7 +107,7 @@ namespace ngrs {
 #endif
 
   /**
-  @author Stefan Nattkemper
+  @author  Stefan Nattkemper
   */
 
   class Pen{
