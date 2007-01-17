@@ -65,12 +65,12 @@ namespace ngrs {
 
     // warning: this pointer can change
     inline PlatformRegionHandle asPlatformRegionHandle() const  { 
-      return platformRegion_;
+      return platformRegionHandle_;
     }
 
   private:
 
-    PlatformRegionHandle platformRegion_;
+    PlatformRegionHandle platformRegionHandle_;
     mutable Rect clipBox;
     mutable bool update;
 
