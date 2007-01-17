@@ -49,11 +49,9 @@ win(winHandle), dx_(0), dy_(0), dblWidth_(0), dblHeight_(0), dblBuffer_(0)
   hollow = ::CreateBrushIndirect(&logbrush);
   hPen  = ::CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 #endif
-
 #ifdef __unix__
-  gc_     = ::XCreateGC(App::system().dpy(),winID,0,0);
-  drawWin = ::XftDrawCreate(App::system().dpy(), win, App::system().visual(),App::system().colormap());
-
+  gc_     = ::XCreateGC( App::system().dpy(),win, 0, 0);
+  drawWin = ::XftDrawCreate( App::system().dpy(), win, App::system().visual(), App::system().colormap());
   doubleBufferPixmap_=0;
   gcp = 0;
   drawDbl = 0;
@@ -453,7 +451,7 @@ int Graphics::textAscent( ) const
 int Graphics::textDescent( ) const
 {
 #ifdef __unix__
-  if ( !fntStruct.antialia s)
+  if ( !fntStruct.antialias)
     return ( fntStruct.xFnt->max_bounds.descent );
   else 
     return fntStruct.xftFnt->descent;
