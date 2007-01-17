@@ -162,7 +162,7 @@ void Graphics::setTranslation( long dx, long dy )
 
 void Graphics::resize( int width, int height )
 {
-  if (dblBuffer_) {
+  if ( dblBuffer_ ) {
     destroyDblBufferHandles();
     createDblBufferHandles();
     updateCurrentGc();    
@@ -171,6 +171,7 @@ void Graphics::resize( int width, int height )
 
 void Graphics::copyDblBuffer( const Rect & repaintArea )
 {
+  if ( !gcp ) return;
 #ifdef __unix__
   XCopyArea(App::system().dpy(), doubleBufferPixmap_, win, gc_,repaintArea.left(), repaintArea.top(),repaintArea.width(), repaintArea.height(),repaintArea.left(), repaintArea.top());
 #else
