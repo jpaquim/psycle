@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NMENUITEM_H
-#define NMENUITEM_H
+#ifndef MENUITEM_H
+#define MENUITEM_H
 
 #include "custommenuitem.h"
 

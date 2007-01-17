@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSLIDER_H
-#define NSLIDER_H
+#ifndef SLIDER_H
+#define SLIDER_H
 
 #include "panel.h"
 #include "button.h"

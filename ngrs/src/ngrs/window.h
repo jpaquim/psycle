@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NWINDOW_H
-#define NWINDOW_H
+#ifndef WINDOW_H
+#define WINDOW_H
 
 #include "system.h"
 #include "panel.h"

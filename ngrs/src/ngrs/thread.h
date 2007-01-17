@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTHREAD_H
-#define NTHREAD_H
+#ifndef THREAD_H
+#define THREAD_H
 
 #include <vector>
 

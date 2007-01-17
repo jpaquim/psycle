@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NITEM_H
-#define NITEM_H
+#ifndef ITEM_H
+#define ITEM_H
 
 #include "customitem.h"
 #include "image.h"

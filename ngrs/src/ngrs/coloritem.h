@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCOLORITEM_H
-#define NCOLORITEM_H
+#ifndef COLORITEM_H
+#define COLORITEM_H
 
 #include "customitem.h"
 

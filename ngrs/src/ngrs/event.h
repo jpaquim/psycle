@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NEVENT_H
-#define NEVENT_H
+#ifndef EVENT_H
+#define EVENT_H
 
 /**
 @author  Stefan

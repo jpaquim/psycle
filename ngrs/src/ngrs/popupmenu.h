@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NPOPUPMENU_H
-#define NPOPUPMENU_H
+#ifndef POPUPMENU_H
+#define POPUPMENU_H
 
 #include "popupwindow.h"
 #include "menuseperator.h"

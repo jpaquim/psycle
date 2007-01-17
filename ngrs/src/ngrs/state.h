@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSTATE_H
-#define NSTATE_H
+#ifndef STATE_H
+#define STATE_H
 
 #include <string>
 #include <map>

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NPOINT_H
-#define NPOINT_H
+#ifndef POINT_H
+#define POINT_H
 
 #ifdef __unix__
   #include <X11/Xlib.h>

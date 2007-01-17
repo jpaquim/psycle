@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef N7SEGDISPLAY_H
-#define N7SEGDISPLAY_H
+#ifndef 7SEGDISPLAY_H
+#define 7SEGDISPLAY_H
 
 #include "panel.h"
 

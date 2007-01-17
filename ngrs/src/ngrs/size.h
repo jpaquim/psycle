@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSIZE_H
-#define NSIZE_H
+#ifndef SIZE_H
+#define SIZE_H
 
 #include "color.h"
 #include "size.h"

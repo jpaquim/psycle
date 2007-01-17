@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NDIALOG_H
-#define NDIALOG_H
+#ifndef DIALOG_H
+#define DIALOG_H
 
 #include "window.h"
 

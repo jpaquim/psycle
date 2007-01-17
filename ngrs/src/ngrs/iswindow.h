@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NISWINDOW_H
-#define NISWINDOW_H
+#ifndef ISWINDOW_H
+#define ISWINDOW_H
 
 #include "visitor.h"
 

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTAB_H
-#define NTAB_H
+#ifndef TAB_H
+#define TAB_H
 
 #include "custombutton.h"
 #include "popupmenu.h"

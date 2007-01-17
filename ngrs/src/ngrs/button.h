@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NBUTTON_H
-#define NBUTTON_H
+#ifndef BUTTON_H
+#define BUTTON_H
 
 #include "custombutton.h"
 #include "image.h"

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NXMLPARSER_H
-#define NXMLPARSER_H
+#ifndef XMLPARSER_H
+#define XMLPARSER_H
 
 #include "sigslot.h"
 #include <string>

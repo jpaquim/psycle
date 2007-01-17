@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NPACKAGEINFO_H
-#define NPACKAGEINFO_H
+#ifndef PACKAGEINFO_H
+#define PACKAGEINFO_H
 
 #include <map>
 #include <string>

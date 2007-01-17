@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NFRAMEBORDER_H
-#define NFRAMEBORDER_H
+#ifndef FRAMEBORDER_H
+#define FRAMEBORDER_H
 
 #include "border.h"
 #include "color.h"

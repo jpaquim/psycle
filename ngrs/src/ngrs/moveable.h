@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NMOVEABLE_H
-#define NMOVEABLE_H
+#ifndef MOVEABLE_H
+#define MOVEABLE_H
 
 /**
 @author  Stefan Nattkemper

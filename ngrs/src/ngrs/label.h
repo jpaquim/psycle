@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NLABEL_H
-#define NLABEL_H
+#ifndef LABEL_H
+#define LABEL_H
 
 #include "visualcomponent.h"
 #include <string>

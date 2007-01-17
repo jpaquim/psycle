@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NMENUBAR_H
-#define NMENUBAR_H
+#ifndef MENUBAR_H
+#define MENUBAR_H
 
 #include "panel.h"
 

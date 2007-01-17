@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSCROLLBAR_H
-#define NSCROLLBAR_H
+#ifndef SCROLLBAR_H
+#define SCROLLBAR_H
 
 #include "button.h"
 #include "bevelborder.h"

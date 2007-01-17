@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NAUTOSCROLLLAYOUT_H
-#define NAUTOSCROLLLAYOUT_H
+#ifndef AUTOSCROLLLAYOUT_H
+#define AUTOSCROLLLAYOUT_H
 
 #include "layout.h"
 #include "visualcomponent.h"

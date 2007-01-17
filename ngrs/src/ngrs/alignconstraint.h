@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NALIGNCONSTRAINT_H
-#define NALIGNCONSTRAINT_H
+#ifndef ALIGNCONSTRAINT_H
+#define ALIGNCONSTRAINT_H
 
 /**
 @author  Stefan Nattkemper

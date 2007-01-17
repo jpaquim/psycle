@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NIMGFILTER_H
-#define NIMGFILTER_H
+#ifndef IMGFILTER_H
+#define IMGFILTER_H
 
 #include "object.h"
 #include "bitmap.h"

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NXMLATTRIBUTES_H
-#define NXMLATTRIBUTES_H
+#ifndef XMLATTRIBUTES_H
+#define XMLATTRIBUTES_H
 
 /*
  * No description

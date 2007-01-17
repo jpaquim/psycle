@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NNOTEBOOK_H
-#define NNOTEBOOK_H
+#ifndef NOTEBOOK_H
+#define NOTEBOOK_H
 
 #include "panel.h"
 

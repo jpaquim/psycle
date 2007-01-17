@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NHINT_H
-#define NHINT_H
+#ifndef HINT_H
+#define HINT_H
 
 #include "window.h"
 

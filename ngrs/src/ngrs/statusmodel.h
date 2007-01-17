@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSTATUSMODEL_H
-#define NSTATUSMODEL_H
+#ifndef STATUSMODEL_H
+#define STATUSMODEL_H
 
 #include "sigslot.h"
 #include <string>

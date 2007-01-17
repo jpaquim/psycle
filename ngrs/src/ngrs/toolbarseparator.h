@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTOOLBARSEPARATOR_H
-#define NTOOLBARSEPARATOR_H
+#ifndef TOOLBARSEPARATOR_H
+#define TOOLBARSEPARATOR_H
 
 #include "panel.h"
 

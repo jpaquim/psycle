@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NMEMO_H
-#define NMEMO_H
+#ifndef MEMO_H
+#define MEMO_H
 
 #include "textbase.h"
 #include "point3d.h"

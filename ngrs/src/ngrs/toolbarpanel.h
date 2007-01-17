@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTOOLBARPANEL_H
-#define NTOOLBARPANEL_H
+#ifndef TOOLBARPANEL_H
+#define TOOLBARPANEL_H
 
 #include "panel.h"
 
