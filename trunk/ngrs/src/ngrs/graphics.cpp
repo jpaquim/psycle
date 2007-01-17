@@ -1049,9 +1049,9 @@ void Graphics::setVisible( bool on )
 {
   visible_ = on;
   if (!on) {
-    destroyDblBufferHandles();
-    updateCurrentGc();
+    destroyDblBufferHandles();    
     dblBuffer_ = false;
+    updateCurrentGc();
   } else {
     dblBuffer_ = true;
     createDblBufferHandles();
