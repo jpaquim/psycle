@@ -75,6 +75,10 @@ namespace psycle {
 			setDefault();
 			std::cout << "min/max/def" << minVal_ << "/" << maxVal_ << "/" << value_ << std::endl;
 		}
+
+        LADSPAMachine* LADSPAMachine::clone() const {
+          return new LADSPAMachine( *this );
+        }
 		
 		void LadspaParam::setDefault()
 		{

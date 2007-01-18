@@ -23,6 +23,10 @@ namespace psycle
     class Machine; // forward declaration
     class Song;
 
+    const int MAX_SCOPE_BANDS = 128;
+    const int SCOPE_BUF_SIZE  = 4096;
+    const int SCOPE_SPEC_SAMPLES = 256;
+
     struct CPoint {
       int x;
       int y;
@@ -62,7 +66,7 @@ namespace psycle
     class WorkEvent {
     public:
       WorkEvent();
-      WorkEvent(double beatOffset, int track, const PatternEvent & patternEvent);
+      WorkEvent( double beatOffset, int track, const PatternEvent& patternEvent );
       const PatternEvent &  event() const;
       double beatOffset() const;
       int track() const;
@@ -82,9 +86,12 @@ namespace psycle
     {
 
    public:
+
       Machine(int type, int mode, int id, Song * song);
       virtual ~Machine();
       Song* song();
+
+      virtual Machine* clone() const = 0;
 
 
     public:
@@ -131,7 +138,7 @@ namespace psycle
 
       virtual void SaveDllName( RiffFile* pFile);
       virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-      static Machine* LoadFileChunk(Song* pSong , RiffFile* pFile, int index, int version, bool fullopen=true );
+      
       virtual void SaveFileChunk(RiffFile * pFile);
       virtual void SaveSpecificChunk(RiffFile * pFile);
       /// Loader for psycle fileformat version 2.

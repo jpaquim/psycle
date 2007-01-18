@@ -67,6 +67,10 @@ Plugin::~ Plugin( )
    #endif          
 }
 
+Plugin* Plugin::clone() const {
+  return new Plugin(*this);
+}
+
 bool Plugin::Instance( const std::string & file_name )
 {      
    try {

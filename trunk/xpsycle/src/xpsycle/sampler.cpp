@@ -42,6 +42,10 @@ namespace psycle
 			for (int i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
 		}
 
+        Sampler* Sampler::clone() const {
+          return new Sampler(*this);
+        }
+
 		void Sampler::Init(void)
 		{
 			Machine::Init();

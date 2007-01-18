@@ -116,6 +116,8 @@ namespace psycle
 
 					/// destroys all the machines of this song.
 					void DestroyAllMachines(bool write_locked = false);
+
+                    static Machine* LoadFileChunk(Song* pSong , RiffFile* pFile, int index, int version, bool fullopen=true );
 					
 			///\name machine connections
 			///\{

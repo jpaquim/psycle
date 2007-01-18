@@ -140,6 +140,9 @@ namespace psycle
 		public:
 			void Tick( );
 			Sampler(int id, Song* song);
+
+            virtual Sampler* clone() const;
+
 			virtual void Init();
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
 			virtual void Stop();
