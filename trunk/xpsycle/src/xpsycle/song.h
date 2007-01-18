@@ -11,6 +11,7 @@
 #include <ngrs/sigslot.h>
 #include "patterndata.h"
 #include "patternsequence.h"
+#include "prototypemachinefactory.h"
 
 namespace psycle
 {
@@ -35,6 +36,8 @@ namespace psycle
 
 				PatternSequence* patternSequence();
 				const PatternSequence& patternSequence() const;
+
+                const AbstractMachineFactory& machineFactory() const;
 
 				// loads a song
 				bool load(const std::string& fileName);
@@ -63,6 +66,8 @@ namespace psycle
 			private:
 
 				PatternSequence patternSequence_;
+
+                PrototypeMachineFactory machineFactory_;
 
 				unsigned int tracks_;
 				float bpm_;

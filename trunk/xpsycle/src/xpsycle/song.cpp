@@ -11,6 +11,7 @@
 #include "riff.h"
 #include "ladspamachine.h"
 #include "pluginfinder.h"
+#include "prototypemachinefactory.h"
 #include <cassert>
 #include <algorithm>
 #include <sstream>
@@ -22,6 +23,14 @@ namespace psycle {
 
     Song::Song()
     {
+      machineFactory_.setDeleteFlag(true);
+      machineFactory_.registerMachine( 0, *(new Master(0,this)) );
+      machineFactory_.registerMachine( 3, *(new Sampler(0,this)) );
+      machineFactory_.registerMachine( 8, *(new Plugin(0,this)) );
+      machineFactory_.registerMachine( 13, *(new DuplicatorMac(0,this)) );
+      machineFactory_.registerMachine( 16, *(new LADSPAMachine( 0, this )) );      
+      machineFactory_.registerMachine( 255, *(new Dummy(0,this)) );
+
       tracks_= MAX_TRACKS;
       _machineLock = false;
       Invalided = false;
@@ -96,6 +105,10 @@ namespace psycle {
       fileName = "Untitled.psy";
 
       CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
+    }
+
+    const AbstractMachineFactory& Song::machineFactory() const {
+      return machineFactory_;
     }
 
 
