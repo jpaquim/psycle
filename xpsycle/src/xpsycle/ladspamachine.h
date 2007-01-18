@@ -61,7 +61,8 @@ namespace psycle {
 		public:
             
             LADSPAMachine( int id, Song* song );
-			virtual ~LADSPAMachine();
+            virtual LADSPAMachine* LADSPAMachine::clone() const;
+			~LADSPAMachine();
 
         public:
             virtual void Init();

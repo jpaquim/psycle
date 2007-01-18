@@ -31,11 +31,7 @@
 
 namespace psycle {
   namespace host {
-
-    const int MAX_SCOPE_BANDS = 128;
-    const int SCOPE_BUF_SIZE  = 4096;
-    const int SCOPE_SPEC_SAMPLES = 256;
-
+  
     class Analyzer : public ngrs::Panel
     {
     public:

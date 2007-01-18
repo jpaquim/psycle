@@ -62,7 +62,7 @@ class Proxy
 public:
     Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 
-    ~Proxy() throw () { 
+    ~Proxy()  { 
       // (*this)(0);  ///\todo this segfaults under windows .. investigate 
     }
     
@@ -97,8 +97,8 @@ private:
       inline static PluginFxCallback * GetCallback()  { return &_callback; };
 public:
     Plugin(int index, Song* song);
-
-    virtual ~Plugin();
+    virtual Plugin* Plugin::clone() const;
+    ~Plugin();
 
     virtual void Init();
     virtual int GenerateAudioInTicks( int startSample, int numSamples );

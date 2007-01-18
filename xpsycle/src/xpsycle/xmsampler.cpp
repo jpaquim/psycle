@@ -28,4 +28,7 @@ XMSampler::~XMSampler()
 {
 }
 
+XMSampler* XMSampler::clone() const {
+  return new XMSampler(*this);
+}
 
