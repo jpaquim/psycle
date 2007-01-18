@@ -26,17 +26,18 @@ namespace psycle{
   PrototypeMachineFactory::PrototypeMachineFactory( )
     : deleteProtoypes_( 0 )
   {
-    if ( deleteProtoypes_ ) {
+   
+  }
+
+  PrototypeMachineFactory::~PrototypeMachineFactory()
+  {
+     if ( deleteProtoypes_ ) {
       std::map<int,Machine*>::const_iterator it = prototypeMap_.begin();
       for ( ; it != prototypeMap_.end(); it++ ) {
         Machine* machine = it->second;
         delete machine;
       }
     }
-  }
-
-  PrototypeMachineFactory::~PrototypeMachineFactory()
-  {
   }
 
   void PrototypeMachineFactory::registerMachine( int key, Machine& prototype ) {
