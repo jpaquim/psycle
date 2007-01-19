@@ -9,7 +9,7 @@
 
 
 namespace psycle {
-  namespace host
+  namespace core
   {
 
     Song::Song()

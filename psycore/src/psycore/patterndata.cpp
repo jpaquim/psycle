@@ -28,7 +28,7 @@
 
 namespace psycle
 {
-	namespace host
+	namespace core
 	{
 
 		int PatternCategory::idCounter = 0;
@@ -105,7 +105,7 @@ namespace psycle
 			return color_;
 		}
 
-		SinglePattern * psycle::host::PatternCategory::findById( int id )
+		SinglePattern * PatternCategory::findById( int id )
 		{
 			for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
 				SinglePattern* pat = *it;

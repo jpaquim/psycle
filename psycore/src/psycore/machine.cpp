@@ -25,7 +25,7 @@
 #endif
 
 namespace psycle {
-  namespace host {
+  namespace core {
 
     Machine::Machine() {
     }

@@ -21,7 +21,7 @@
 #define MACHINE_H
 
 namespace psycle {
-  namespace host {
+  namespace core {
 
     class Machine {
     public :

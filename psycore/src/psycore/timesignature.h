@@ -26,7 +26,7 @@
 
 namespace psycle
 {
-	namespace host
+	namespace core
 	{
 
 
