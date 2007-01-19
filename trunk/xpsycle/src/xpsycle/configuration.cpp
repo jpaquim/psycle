@@ -20,19 +20,6 @@
 
 #include "configuration.h"
 #include <psycore/song.h>
-#ifdef __unix__
-#include "alsaout.h"
-#include "jackout.h"
-#include "gstreamerout.h"
-#include "esoundout.h"
-//#include "microsoft_direct_sound_out.h"
-//#include "netaudioout.h"
-#include "wavefileout.h" ///\ todo pthread wrapper
-#else
-#include "mswaveout.h"
-//#include "msdirectsound.h"
-#endif
-//#include "netaudioout.h"
 #include "defaultbitmaps.h"
 #include <ngrs/file.h>
 #include <ngrs/keyevent.h>
@@ -236,62 +223,6 @@ namespace psy {
 
 		void Configuration::setSkinDefaults( )
 		{
-			enableSound_ = 0;      
-
-			{	
-				AudioDriver* driver = 0;
-				driver = new AudioDriver;
-				_pSilentDriver = driver;
-				driverMap_[ driver->info().name() ] = driver;
-
-
-#ifdef __unix__
-				driver = new WaveFileOut();
-				driverMap_[ driver->info().name() ] = driver;
-
-#if !defined XPSYCLE__NO_ALSA
-				driver = new AlsaOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-#endif
-#if !defined XPSYCLE__NO_JACK
-				driver = new JackOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-#endif
-#if !defined XPSYCLE__NO_GSTREAMER
-				driver = new GStreamerOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-#endif
-#if !defined XPSYCLE__NO_ESOUND
-				driver = new ESoundOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-#endif		
-
-#else
-				driver = new MsWaveOut();
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-
-				/*				driver = new MsDirectSound();
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;*/
-#endif
-				/*		#if !defined XPSYCLE__NO_NETAUDIO
-				driver = new NetAudioOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-				#endif*/
-				/*#if !defined XPSYCLE__NO_MICROSOFT_DIRECT_SOUND
-				driver = new MicrosoftDirectSoundOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-				#endif*/
-
-			}
-
 			setDriverByName("silent");
 			enableSound_ = false;
 
@@ -330,18 +261,6 @@ namespace psy {
 
 		void Configuration::setDriverByName( const std::string & driverName )
 		{
-			std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
-
-			if ( ( it = driverMap_.find( driverName ) ) != driverMap_.end() ) {
-				// driver found
-				_pOutputDriver = it->second;
-			}
-			else {
-				// driver not found,  set silent default driver
-				_pOutputDriver = _pSilentDriver;
-			}
-			std::cout << "audio driver set as: " << _pOutputDriver->info().name() << std::endl;		
-
 		}
 
 
@@ -460,14 +379,14 @@ namespace psy {
 					setDriverByName( parser.getAttribValue("name"));
 				} else
 					if (tagName == "alsa") {
-						std::string deviceName = parser.getAttribValue("device");
+						/*std::string deviceName = parser.getAttribValue("device");
 						std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 						if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
 							AudioDriverSettings settings = it->second->settings();
 							settings.setDeviceName( deviceName );
 							it->second->setSettings( settings );
-						}		
-					} else
+						}		*/
+                      } else
 						if (tagName == "audio") {
 							std::string enableStr = parser.getAttribValue("enable");
 							int enable = 0;

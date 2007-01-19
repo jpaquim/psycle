@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "audioconfigdlg.h"
 #include "configuration.h"
-#include "audiodriver.h"
+//#include "audiodriver.h"
 #include <ngrs/listbox.h>
 #include <ngrs/item.h>
 #include <ngrs/alignlayout.h>
@@ -217,7 +217,7 @@ namespace psy {
 		}
 
 		void AudioConfigDlg::updateGeneralPage() {
-			if ( selectedDriver_) {
+/*			if ( selectedDriver_) {
 				// get the information from the selected driver
 				AudioDriverSettings settings = selectedDriver_->settings();
 
@@ -258,7 +258,7 @@ namespace psy {
 
 				driverBox_->resize();
 				driverBox_->repaint();
-			}
+			}*/
 		}
 
         void AudioConfigDlg::onRestartDriver( ngrs::ButtonEvent * ev )

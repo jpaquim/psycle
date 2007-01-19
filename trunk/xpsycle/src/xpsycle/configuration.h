@@ -20,7 +20,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#include "audiodriver.h"
+//#include "audiodriver.h"
 #include "inputhandler.h"
 
 #include <ngrs/object.h>
@@ -48,17 +48,17 @@ namespace psy {
 
       ///\ todo private access
 
-      AudioDriver* _pOutputDriver;
-      AudioDriver* _pSilentDriver;
+//      AudioDriver* _pOutputDriver;
+//      AudioDriver* _pSilentDriver;
       ///\ todo put this in player ..
       bool _RecordTweaks;
       bool _RecordUnarmed;
       ///\end todo
 
 
-      std::map<std::string, AudioDriver*> & driverMap() {
+/*      std::map<std::string, AudioDriver*> & driverMap() {
         return driverMap_;
-      }
+      }*/
 
       // path 
 
@@ -77,7 +77,7 @@ namespace psy {
       InputHandler inputHandler_;
 
       // a map, that holds available drivers ..
-      std::map<std::string, AudioDriver*> driverMap_;
+      //std::map<std::string, AudioDriver*> driverMap_;
       bool enableSound_;
       bool doEnableSound;
 

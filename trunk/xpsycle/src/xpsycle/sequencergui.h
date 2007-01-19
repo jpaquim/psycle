@@ -20,7 +20,6 @@
 #ifndef SEQUENCERGUI_H
 #define SEQUENCERGUI_H
 
-#include "audiodriver.h"
 #include <psycore/singlepattern.h>
 #include <psycore/patternsequence.h>
 #include <ngrs/panel.h>
@@ -261,8 +260,6 @@ namespace psy {
       void updatePlayPos();
 
     private:
-
-      AudioDriver oldDriver;
 
       int counter;
       int beatPxLength_;
