@@ -21,7 +21,7 @@
 #include <sstream>
 
 
-namespace psycle
+namespace psy
 {
 	namespace core
 	{
@@ -44,61 +44,61 @@ namespace psycle
 		{
 		}
 
-		void PatternEvent::setNote( psycle::tr1::uint8_t value )
+		void PatternEvent::setNote( psy::tr1::uint8_t value )
 		{
 			_note = value;
 		}
 
-		psycle::tr1::uint8_t PatternEvent::note( ) const
+		psy::tr1::uint8_t PatternEvent::note( ) const
 		{
 			return _note;
 		}
 
-		void PatternEvent::setInstrument( psycle::tr1::uint8_t instrument )
+		void PatternEvent::setInstrument( psy::tr1::uint8_t instrument )
 		{
 			_inst = instrument;
 		}
 
-		psycle::tr1::uint8_t PatternEvent::instrument( ) const
+		psy::tr1::uint8_t PatternEvent::instrument( ) const
 		{
 			return _inst;
 		}
 
-		void PatternEvent::setMachine( psycle::tr1::uint8_t machine )
+		void PatternEvent::setMachine( psy::tr1::uint8_t machine )
 		{
 			_mach = machine;
 		}
 
-		psycle::tr1::uint8_t PatternEvent::machine( ) const
+		psy::tr1::uint8_t PatternEvent::machine( ) const
 		{
 			return _mach;
 		}
 
-		void PatternEvent::setCommand( psycle::tr1::uint8_t command )
+		void PatternEvent::setCommand( psy::tr1::uint8_t command )
 		{
 			_cmd = command;
 		}
 
-		psycle::tr1::uint8_t PatternEvent::command( ) const
+		psy::tr1::uint8_t PatternEvent::command( ) const
 		{
 			return _cmd;
 		}
 
-		void PatternEvent::setParameter( psycle::tr1::uint8_t parameter )
+		void PatternEvent::setParameter( psy::tr1::uint8_t parameter )
 		{
 			_parameter = parameter;
 		}
 
-		psycle::tr1::uint8_t PatternEvent::parameter( ) const
+		psy::tr1::uint8_t PatternEvent::parameter( ) const
 		{
 			return _parameter;
 		}
 
-		void PatternEvent::setVolume(psycle::tr1::uint8_t vol) {
+		void PatternEvent::setVolume(psy::tr1::uint8_t vol) {
 			_volume = vol;
 		}
 
-		psycle::tr1::uint8_t PatternEvent::volume() const {
+		psy::tr1::uint8_t PatternEvent::volume() const {
 			return _volume;
 		}
 

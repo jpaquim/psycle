@@ -24,7 +24,7 @@
 #include <ngrs/panel.h>
 #include <ngrs/flowlayout.h>
 
-namespace psycle { namespace host {
+namespace psy { namespace host {
 
 PatDlg::PatDlg()
   : ngrs::Window()

@@ -30,7 +30,7 @@ namespace ngrs{
   class Edit;
 }
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     class SequencerGUI;

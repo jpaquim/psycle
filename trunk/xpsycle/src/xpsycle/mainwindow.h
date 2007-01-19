@@ -48,7 +48,7 @@ namespace ngrs {
   class FileDialog;
 }
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
     class GreetDlg;
@@ -210,7 +210,7 @@ namespace psycle {
       void onPatternView( ngrs::ButtonEvent* ev );
       void onSequencerView( ngrs::ButtonEvent* ev );
 
-      void onSongLoadProgress( const psycle::tr1::uint32_t& , const psycle::tr1::uint32_t& , const std::string&);
+      void onSongLoadProgress( const psy::tr1::uint32_t& , const psy::tr1::uint32_t& , const std::string&);
       void onNewMachine( ngrs::ButtonEvent* ev );
 
       void onRecordWav( ngrs::ButtonEvent* ev );

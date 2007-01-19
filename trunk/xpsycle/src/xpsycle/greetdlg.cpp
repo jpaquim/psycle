@@ -22,7 +22,7 @@
 #include <ngrs/memo.h>
 #include <ngrs/item.h>
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
     GreetDlg::GreetDlg()

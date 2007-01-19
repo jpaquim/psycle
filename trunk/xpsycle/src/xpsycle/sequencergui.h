@@ -20,9 +20,9 @@
 #ifndef SEQUENCERGUI_H
 #define SEQUENCERGUI_H
 
-#include "singlepattern.h"
-#include "patternsequence.h"
 #include "audiodriver.h"
+#include <psycore/singlepattern.h>
+#include <psycore/patternsequence.h>
 #include <ngrs/panel.h>
 #include <ngrs/button.h>
 #include <ngrs/line.h>
@@ -45,7 +45,7 @@ namespace ngrs {
 
 class ZoomBar;
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     class SequencerBeatChangeLineal;

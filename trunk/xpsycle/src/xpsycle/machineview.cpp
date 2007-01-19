@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "machineview.h"
-#include "song.h"
+#include <psycore/song.h>
 #include "machine.h"
 #include "machinegui.h"
 #include "wiredlg.h"
@@ -27,7 +27,7 @@
 #include <ngrs/app.h>
 #include <algorithm>
 
-namespace psycle { 
+namespace psy { 
 	namespace host 
 	{
 

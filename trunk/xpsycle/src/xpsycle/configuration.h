@@ -32,7 +32,7 @@
 @author  Stefan
 */
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     class Configuration : public ngrs::Object {

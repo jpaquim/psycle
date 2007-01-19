@@ -18,11 +18,11 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "songpdlg.h"
-#include "song.h"
+#include <psycore/song.h>
 #include <ngrs/memo.h>
 #include <ngrs/alignlayout.h>
 
-namespace psycle { namespace host {
+namespace psy { namespace host {
 
 SongpDlg::SongpDlg( ) 
   : ngrs::Window(), pSong_(0)

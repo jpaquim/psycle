@@ -30,7 +30,7 @@ namespace ngrs {
   class Memo;
 }
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
     class GreetDlg : public ngrs::Window {

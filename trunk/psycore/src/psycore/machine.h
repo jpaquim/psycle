@@ -20,7 +20,7 @@
 #ifndef MACHINE_H
 #define MACHINE_H
 
-namespace psycle {
+namespace psy {
   namespace core {
 
     class Machine {

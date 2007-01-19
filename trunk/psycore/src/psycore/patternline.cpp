@@ -20,7 +20,7 @@
 #include "patternline.h"
 #include <sstream>
 
-namespace psycle
+namespace psy
 {
 	namespace core
 	{

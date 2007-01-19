@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "virtualpattern.h"
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 

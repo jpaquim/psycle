@@ -32,7 +32,7 @@
 #undef max
 #endif
 
-namespace psycle {
+namespace psy {
   namespace host	{	
 
     template<class T> inline std::string toHex(T value , int nums = 2) {

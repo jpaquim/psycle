@@ -27,7 +27,7 @@ namespace ngrs {
   class SpinEdit;
 }
 
-namespace psycle { 
+namespace psy { 
 	namespace host 
 	{
 

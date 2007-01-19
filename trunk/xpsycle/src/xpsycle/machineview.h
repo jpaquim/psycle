@@ -26,7 +26,7 @@
 #include <ngrs/label.h>
 #include <ngrs/popupmenu.h>
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 

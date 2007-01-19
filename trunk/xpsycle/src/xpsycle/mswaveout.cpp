@@ -25,7 +25,7 @@
 #include <iostream>
 
 
-namespace psycle
+namespace psy
 {
 	namespace host
 	{
@@ -201,7 +201,7 @@ namespace psycle
           // the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio
           InitializeCriticalSection( &waveCriticalSection );
           int bufSize = 1024 / 2;
-          psycle::tr1::int16_t buf[1024 / 2];
+          psy::tr1::int16_t buf[1024 / 2];
           int newCount = bufSize / 2;        
           while ( _running ) {
               float const * input(_pCallback(_callbackContext, newCount));              
@@ -299,7 +299,7 @@ namespace psycle
 					l = SHORT_MAX;
 				}
 
-				*piout++ = (r << 16) | static_cast<psycle::tr1::uint16_t>(l);
+				*piout++ = (r << 16) | static_cast<psy::tr1::uint16_t>(l);
 				pin += 2;
 			}
 			while(--c);*/

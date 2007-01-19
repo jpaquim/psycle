@@ -41,7 +41,7 @@
 #include <algorithm>
 
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
 

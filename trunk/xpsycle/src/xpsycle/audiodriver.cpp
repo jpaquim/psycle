@@ -21,7 +21,7 @@
 
 #include <ngrs/property.h>
 
-namespace psycle
+namespace psy
 {
   namespace host
   {

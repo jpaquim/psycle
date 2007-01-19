@@ -26,7 +26,7 @@ int main( int argc, char *argv[] )
 {    	
     ngrs::App app;
 
-    ngrs::Window* mainWin = new psycle::host::MainWindow( );
+    ngrs::Window* mainWin = new psy::host::MainWindow( );
     app.setMainWindow( mainWin );
         
     app.run( );

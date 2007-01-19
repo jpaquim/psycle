@@ -22,7 +22,7 @@
 #ifndef PSYCLE_HOSTEVENTDRIVER_H
 #define PSYCLE_HOSTEVENTDRIVER_H
 
-//namespace psycle {
+//namespace psy {
 //namespace host {
 
 /**

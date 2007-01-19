@@ -20,10 +20,9 @@
 #ifndef SEQUENCERBAR_H
 #define SEQUENCERBAR_H
 
-#include "patternsequence.h"
 #include "patternboxproperties.h"
 #include "childview.h"
-
+#include <psycore/patternsequence.h>
 #include <map>
 #include <ngrs/panel.h>
 #include <ngrs/checkbox.h>
@@ -45,7 +44,7 @@ namespace ngrs {
   class ObjectInspector;
 }
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
     class PatternView;

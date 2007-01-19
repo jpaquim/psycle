@@ -20,7 +20,7 @@
 #include "defaultbitmaps.h"
 #include "configuration.h"
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 //////// The bitmaps

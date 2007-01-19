@@ -21,7 +21,7 @@
 //
 #include "eventdriver.h"
 
-//namespace psycle {
+//namespace psy {
 //namespace host {
 
 EventDriver::EventDriver()

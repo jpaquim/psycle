@@ -33,7 +33,7 @@
 @author  Stefan
 */
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
 

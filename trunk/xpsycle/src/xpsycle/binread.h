@@ -22,7 +22,7 @@
 
 #include <istream>
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     class BinRead {      

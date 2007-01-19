@@ -26,7 +26,7 @@
 #include <ngrs/dockpanel.h>
 #include <ngrs/splitbar.h>
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 const std::string PSYCLE__VERSION="X";
@@ -145,7 +145,7 @@ void ChildView::onMachineViewDblClick( ngrs::ButtonEvent * ev )
   machineViewDblClick.emit( ev );
 }
 
-void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
+void psy::host::ChildView::onTweakSlide( int machine, int command, int value)
 {
 }
 
@@ -168,20 +168,20 @@ SequencerBar * ChildView::sequencerBar( )
 }
 }
 
-void psycle::host::ChildView::showMachineView( )
+void psy::host::ChildView::showMachineView( )
 {
   tabBook_->setActivePage(0);
   repaint();
 }
 
-void psycle::host::ChildView::showPatternView( )
+void psy::host::ChildView::showPatternView( )
 {
   tabBook_->setActivePage(1);
   patternView_->setFocus();
   repaint();
 }
 
-void psycle::host::ChildView::update( )
+void psy::host::ChildView::update( )
 {
   sequencerBar_->update();
   sequencerView()->update();
@@ -189,20 +189,20 @@ void psycle::host::ChildView::update( )
 }
 
 
-void psycle::host::ChildView::showWaveView( )
+void psy::host::ChildView::showWaveView( )
 {
   tabBook_->setActivePage(2);
   repaint();
 }
 
 
-void psycle::host::ChildView::showSequencerView( )
+void psy::host::ChildView::showSequencerView( )
 {
   tabBook_->setActivePage(3);
   repaint();
 }
 
-void psycle::host::ChildView::onTabChange( ngrs::ButtonEvent * ev )
+void psy::host::ChildView::onTabChange( ngrs::ButtonEvent * ev )
 {
   if (tabBook_->activePage() == patDock ) {
     patternView()->setFocus();

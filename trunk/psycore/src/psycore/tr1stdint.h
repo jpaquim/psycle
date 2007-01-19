@@ -23,7 +23,7 @@
 #pragma once
 #include <inttypes.h> // that's for posix/unix.. C1999 has <stdint.h>
 
-namespace psycle {
+namespace psy {
   namespace tr1
   {
     using ::int8_t;    //  8-bit signed integral type. 
@@ -249,7 +249,7 @@ typedef uint64_t  uintmax_t;
 
 // end of weired licence ...
 // gnu gpl 2 licence here again..
-namespace psycle {
+namespace psy {
   namespace tr1
   {
     using ::int8_t;    //  8-bit signed integral type. 
