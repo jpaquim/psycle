@@ -21,7 +21,7 @@
 #include <psycore/machine.h>
 
 namespace psy{
-  namespace host{
+  namespace core{
 
   PrototypeMachineFactory::PrototypeMachineFactory( )
     : deleteProtoypes_( 0 )
