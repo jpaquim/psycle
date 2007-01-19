@@ -24,7 +24,7 @@
 #include <ngrs/edit.h>
 #include <stdexcept>
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 

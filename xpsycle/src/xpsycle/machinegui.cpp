@@ -21,13 +21,13 @@
 #include "machine.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
-#include "song.h"
+#include <psycore/song.h>
 #include <ngrs/frameborder.h>
 #include <ngrs/window.h>
 #include <ngrs/slider.h>
 #include <ngrs/statusmodel.h>
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 

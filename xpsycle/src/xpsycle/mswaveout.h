@@ -30,7 +30,7 @@
 #undef min
 #undef max
 
-namespace psycle
+namespace psy
 {
 	namespace host
 	{                                      

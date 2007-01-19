@@ -23,7 +23,7 @@
 #include <ngrs/alignlayout.h>
 #include <cmath>
 
-namespace psycle { namespace host {
+namespace psy { namespace host {
 
 WireDlg::WireDlg()
   : ngrs::Window()
@@ -87,7 +87,7 @@ WireDlg::~WireDlg()
 {
 }
 
-void psycle::host::WireDlg::setVisible( bool on )
+void psy::host::WireDlg::setVisible( bool on )
 {  
   if (on && pDstMachine()) {
   }

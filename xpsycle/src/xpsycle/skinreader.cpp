@@ -36,7 +36,7 @@
 
 
 
-namespace psycle { 
+namespace psy { 
 	namespace host {
 
 

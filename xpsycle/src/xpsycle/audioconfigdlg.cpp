@@ -30,7 +30,7 @@
 #include <ngrs/button.h>
 #include <ngrs/frameborder.h>
 
-namespace psycle {
+namespace psy {
 	namespace host	{	
 
 		AudioConfigDlg::AudioConfigDlg( )

@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include "AbstractMachineFactory.h"
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     AbstractMachineFactory::AbstractMachineFactory()

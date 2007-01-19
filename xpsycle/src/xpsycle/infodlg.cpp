@@ -21,7 +21,7 @@
 #include "infodlg.h"
 #include <ngrs/memo.h>
 
-namespace psycle { namespace host {
+namespace psy { namespace host {
 
 InfoDlg::InfoDlg()
   : ngrs::Window()

@@ -21,10 +21,10 @@
 #define PATTERNVIEW_H
 
 #include "patdlg.h"
-#include "song.h"
-#include "singlepattern.h"
 #include "custompatternview.h"
 #include "skinreader.h"
+#include <psycore/singlepattern.h>
+#include <psycore/song.h>
 #include <ngrs/popupmenu.h>
 #include <ngrs/scrollbar.h>
 #include <ngrs/xmlparser.h>
@@ -44,13 +44,13 @@ namespace ngrs {
 
 class ZoomBar;
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
 
     class Song;
 
-    class UndoPattern : public SinglePattern {
+    class UndoPattern : public psy::core::SinglePattern {
     public  :
 
       UndoPattern();
@@ -319,8 +319,8 @@ namespace psycle {
       ngrs::ScrollBar* vScrBar();
       ngrs::ScrollBar* hScrBar();
 
-      void PlayNote( int note, int velocity, bool bTranspose, psycle::host::Machine*pMachine);
-      void StopNote( int note, bool bTranspose=true, psycle::host::Machine* pMachine=NULL);
+      void PlayNote( int note, int velocity, bool bTranspose, psy::host::Machine*pMachine);
+      void StopNote( int note, bool bTranspose=true, psy::host::Machine* pMachine=NULL);
 
       void noteOffAny( const PatCursor & cursor );
 

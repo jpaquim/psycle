@@ -29,7 +29,7 @@
 @author  Stefan Nattkemper
 */
 
-namespace psycle {
+namespace psy {
   namespace host	{	
 
     class ColumnEvent {			

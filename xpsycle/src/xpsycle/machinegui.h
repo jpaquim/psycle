@@ -28,7 +28,7 @@ namespace ngrs {
   class Slider;
 }
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     class Machine;

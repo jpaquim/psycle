@@ -27,7 +27,7 @@
 @author  Stefan Nattkemper
 */
 
-namespace psycle { namespace host {
+namespace psy { namespace host {
 
 class InfoDlg : public ngrs::Window
 {

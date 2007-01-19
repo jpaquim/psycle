@@ -21,7 +21,7 @@
 #include "binread.h"
 #include <iostream>
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     BinRead::BinRead( std::istream & in ) 

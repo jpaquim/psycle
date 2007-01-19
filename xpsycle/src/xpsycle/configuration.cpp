@@ -19,7 +19,7 @@
 ***************************************************************************/
 
 #include "configuration.h"
-#include "song.h"
+#include <psycore/song.h>
 #ifdef __unix__
 #include "alsaout.h"
 #include "jackout.h"
@@ -46,7 +46,7 @@
 #include <xpsycle/install_paths.h>
 #endif
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 		Configuration::Configuration()

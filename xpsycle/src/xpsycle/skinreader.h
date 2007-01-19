@@ -35,7 +35,7 @@
 #include <ngrs/pixmap.h>
 
 
-namespace psycle { 
+namespace psy { 
 	namespace host {
 
 		class HeaderCoordInfo {

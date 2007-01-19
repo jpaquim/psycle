@@ -27,7 +27,7 @@
 @author  Stefan Nattkemper
 */
 
-namespace psycle
+namespace psy
 {
 	namespace core
 	{

@@ -28,7 +28,7 @@
 
 ///\todo write a c api interface for building driver plugins
 
-namespace psycle 
+namespace psy 
 { 
   namespace host 
   {

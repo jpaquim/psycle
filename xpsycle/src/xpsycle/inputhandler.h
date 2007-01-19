@@ -24,7 +24,7 @@
 #include <map>
 #include <ngrs/app.h>
 
-namespace psycle {
+namespace psy {
   namespace host {
 
 /**

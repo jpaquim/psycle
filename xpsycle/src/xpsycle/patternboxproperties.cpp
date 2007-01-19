@@ -27,7 +27,7 @@
 #include <ngrs/edit.h>
 #include <ngrs/colorcombobox.h>
 
-namespace psycle { namespace host {
+namespace psy { namespace host {
 
 PatternBoxProperties::PatternBoxProperties()
  : ngrs::NFlipBox()

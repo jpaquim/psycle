@@ -20,7 +20,7 @@
 #include "PrototypeMachineFactory.h"
 #include "machine.h"
 
-namespace psycle{
+namespace psy{
   namespace host{
 
   PrototypeMachineFactory::PrototypeMachineFactory( )

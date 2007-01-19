@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "timesignature.h"
 
-namespace psycle
+namespace psy
 {
 	namespace core
 	{

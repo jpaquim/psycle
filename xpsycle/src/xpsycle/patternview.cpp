@@ -45,7 +45,7 @@
 #undef max
 #endif
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
 
@@ -2331,7 +2331,7 @@ namespace psycle {
       return selectedMacIdx_;
     }
 
-    void psycle::host::PatternView::onPatternStepChange( ngrs::ItemEvent * ev )
+    void psy::host::PatternView::onPatternStepChange( ngrs::ItemEvent * ev )
     {
       if (patternCombo_->selIndex()!=-1) {
         setPatternStep(patternCombo_->selIndex()+1);

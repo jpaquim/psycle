@@ -27,7 +27,7 @@
 */
 
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 		class VirtualPatternSequenceHeader : ngrs::Panel {

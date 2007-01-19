@@ -29,7 +29,7 @@
 @author  Stefan
 */
 
-namespace psycle {
+namespace psy {
   namespace host {
   
     class Analyzer : public ngrs::Panel

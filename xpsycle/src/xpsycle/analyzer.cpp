@@ -23,7 +23,7 @@
 ///\todo for scopes we need some mutex for the buffer
 ///\todo scopes disabled
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
     Analyzer::Analyzer()
@@ -44,7 +44,7 @@ namespace psycle {
     {
     }
 
-    void psycle::host::Analyzer::clearMachineCallBack( )
+    void psy::host::Analyzer::clearMachineCallBack( )
     {
     }
 

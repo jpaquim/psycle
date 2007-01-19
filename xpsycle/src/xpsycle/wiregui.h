@@ -32,7 +32,7 @@ namespace ngrs {
   class NPopupMenu;
 }
 
-namespace psycle 
+namespace psy 
 { 
 	namespace host
 	{

@@ -35,7 +35,7 @@ class ListBox;
 class ObjectInspector;
 class ItemEvent;
 
-namespace psycle {
+namespace psy {
 	namespace host	{	
 
 		class Configuration;

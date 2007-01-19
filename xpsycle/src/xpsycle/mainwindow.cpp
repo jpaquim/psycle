@@ -40,7 +40,7 @@
 #include <ngrs/system.h>
 #include <ngrs/toolbarpanel.h>
 
-namespace psycle { 
+namespace psy { 
   namespace host {
 
     template<class T> inline T str_hex(const std::string &  value) {
@@ -779,7 +779,7 @@ namespace psycle {
       ngrs::App::addRemovePipe( saveDialog );
     }
 
-    void MainWindow::onSongLoadProgress( const psycle::tr1::uint32_t & a, const psycle::tr1::uint32_t & b , const std::string & t)
+    void MainWindow::onSongLoadProgress( const psy::tr1::uint32_t & a, const psy::tr1::uint32_t & b , const std::string & t)
     {
       if (a == 4) {
         std::cout << "progress" << std::endl;

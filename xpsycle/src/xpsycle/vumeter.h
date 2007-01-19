@@ -22,7 +22,7 @@
 
 #include <ngrs/panel.h>
 
-namespace psycle {
+namespace psy {
 	namespace host {
 
 		/**

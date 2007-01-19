@@ -23,7 +23,7 @@
 #include "patterndata.h"
 #include "patternsequence.h"
 
-namespace psycle
+namespace psy
 {
 	namespace core
 	{

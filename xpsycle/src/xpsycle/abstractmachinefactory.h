@@ -20,7 +20,7 @@
 #ifndef ABSTRACTMACHINEFACTORY_H
 #define ABSTRACTMACHINEFACTORY_H
 
-namespace psycle {
+namespace psy {
   namespace host {
 
     class Machine;

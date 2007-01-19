@@ -24,7 +24,7 @@
 #undef max
 #endif
 
-namespace psycle {
+namespace psy {
   namespace core {
 
     Machine::Machine() {

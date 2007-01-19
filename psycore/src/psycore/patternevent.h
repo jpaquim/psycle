@@ -27,7 +27,7 @@
 @author  Stefan Nattkemper
 */
 
-namespace psycle
+namespace psy
 {
   namespace core
   {
@@ -103,30 +103,30 @@ namespace psycle
       };
 
 
-      typedef std::vector< std::pair<psycle::tr1::uint8_t,psycle::tr1::uint8_t> > PcmListType;
-      typedef std::pair<psycle::tr1::uint8_t,psycle::tr1::uint8_t> PcmType;
+      typedef std::vector< std::pair<psy::tr1::uint8_t,psy::tr1::uint8_t> > PcmListType;
+      typedef std::pair<psy::tr1::uint8_t,psy::tr1::uint8_t> PcmType;
 
       PatternEvent();
 
       ~PatternEvent();
 
-      void setNote(psycle::tr1::uint8_t value);
-      psycle::tr1::uint8_t note() const;
+      void setNote(psy::tr1::uint8_t value);
+      psy::tr1::uint8_t note() const;
 
-      void setInstrument(psycle::tr1::uint8_t instrument);
-      psycle::tr1::uint8_t instrument() const;
+      void setInstrument(psy::tr1::uint8_t instrument);
+      psy::tr1::uint8_t instrument() const;
 
-      void setMachine(psycle::tr1::uint8_t machine);
-      psycle::tr1::uint8_t machine() const;
+      void setMachine(psy::tr1::uint8_t machine);
+      psy::tr1::uint8_t machine() const;
 
-      void setCommand(psycle::tr1::uint8_t command);
-      psycle::tr1::uint8_t command() const;
+      void setCommand(psy::tr1::uint8_t command);
+      psy::tr1::uint8_t command() const;
 
-      void setParameter(psycle::tr1::uint8_t parameter);
-      psycle::tr1::uint8_t parameter() const;
+      void setParameter(psy::tr1::uint8_t parameter);
+      psy::tr1::uint8_t parameter() const;
 
-      void setVolume(psycle::tr1::uint8_t parameter);
-      psycle::tr1::uint8_t volume() const;
+      void setVolume(psy::tr1::uint8_t parameter);
+      psy::tr1::uint8_t volume() const;
 
       bool empty() const;
 
@@ -139,12 +139,12 @@ namespace psycle
 
     private:
 
-      psycle::tr1::uint8_t _note;
-      psycle::tr1::uint8_t _inst;
-      psycle::tr1::uint8_t _mach;
-      psycle::tr1::uint8_t _cmd;
-      psycle::tr1::uint8_t _parameter;
-      psycle::tr1::uint8_t _volume;
+      psy::tr1::uint8_t _note;
+      psy::tr1::uint8_t _inst;
+      psy::tr1::uint8_t _mach;
+      psy::tr1::uint8_t _cmd;
+      psy::tr1::uint8_t _parameter;
+      psy::tr1::uint8_t _volume;
       bool _sharp;
 
       PcmListType paraCmdList_;
