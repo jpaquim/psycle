@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "sequencerbeatchangelineal.h"
 #include "sequencergui.h"
-#include "patternsequence.h"
+#include <psycore/patternsequence.h>
 #include <ngrs/fontmetrics.h>
 #include <ngrs/edit.h>
 #include <stdexcept>
@@ -65,9 +65,8 @@ SequencerBeatChangeLineal::BeatChangeTriangle::~ BeatChangeTriangle( )
 {
 }
 
-void SequencerBeatChangeLineal::BeatChangeTriangle::setBpmChangeEvent( GlobalEvent * event )
+void SequencerBeatChangeLineal::BeatChangeTriangle::setBpmChangeEvent( psy::core::GlobalEvent * event )
 {
-  if(event->type() != GlobalEvent::BPM_CHANGE ) throw std::invalid_argument("Wrong global event type in setBpmChangeEvent()");
   bpmChangeEvent_ = event;
   bpmEdt_->setText( stringify( event->parameter() ) );
 }

@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "patternboxproperties.h"
 #include "sequencerbar.h"
-#include "patterndata.h"
+#include <psycore/patterndata.h>
 #include <ngrs/frameborder.h>
 #include <ngrs/tablelayout.h>
 #include <ngrs/alignlayout.h>
@@ -27,7 +27,8 @@
 #include <ngrs/edit.h>
 #include <ngrs/colorcombobox.h>
 
-namespace psy { namespace host {
+namespace psy { 
+  namespace host {
 
 PatternBoxProperties::PatternBoxProperties()
  : ngrs::NFlipBox()

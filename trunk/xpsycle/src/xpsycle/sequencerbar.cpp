@@ -18,13 +18,12 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "sequencerbar.h"
-#include "song.h"
 #include "patternview.h"
 #include "defaultbitmaps.h"
 #include "sequencergui.h"
 #include "skinreader.h"
 #include "childview.h"
-
+#include <psycore/song.h>
 #include <ngrs/label.h>
 #include <ngrs/item.h>
 #include <ngrs/app.h>
@@ -45,7 +44,7 @@ namespace psy {
   namespace host {
 
 
-    CategoryTreeNode::CategoryTreeNode( PatternCategory * cat )
+    CategoryTreeNode::CategoryTreeNode( psy::core::PatternCategory * cat )
     {
       cat_ = cat;
     }
@@ -54,14 +53,14 @@ namespace psy {
     {
     }
 
-    PatternCategory * CategoryTreeNode::category( )
+    psy::core::PatternCategory * CategoryTreeNode::category( )
     {
       return cat_;
     }
 
 
 
-    CategoryItem::CategoryItem( PatternCategory* category , const std::string & text )
+    CategoryItem::CategoryItem( psy::core::PatternCategory* category , const std::string& text )
     {
       init();
       label_->setText(text);
@@ -114,14 +113,14 @@ namespace psy {
       g.fillPolygon(pts,3);
     }
 
-    PatternCategory * CategoryItem::category( )
+    psy::core::PatternCategory * CategoryItem::category( )
     {
       return category_;
     }
 
 
 
-    PatternItem::PatternItem( SinglePattern* pattern,  const std::string & text )
+    PatternItem::PatternItem( psy::core::SinglePattern* pattern,  const std::string& text )
       : ngrs::Item(text)
     {
       pattern_ = pattern;
@@ -272,9 +271,9 @@ namespace psy {
       patternMap.clear();
 
       bool isFirst = true;
-      std::vector<PatternCategory*>::iterator it = seqGui->patternSequence()->patternData()->begin();
+      std::vector<psy::core::PatternCategory*>::iterator it = seqGui->patternSequence()->patternData()->begin();
       for ( ; it < seqGui->patternSequence()->patternData()->end(); ++it) {
-        PatternCategory* category = *it;
+        psy::core::PatternCategory* category = *it;
         CategoryTreeNode* node = new CategoryTreeNode(category);
         node->setExpanded(true);
         categoryMap[node]=category;
@@ -282,9 +281,9 @@ namespace psy {
         catItems.push_back(catItem);
         node->setHeader(catItem);
         patternBox_->addNode(node);
-        std::vector<SinglePattern*>::iterator patIt = category->begin();
+        std::vector<psy::core::SinglePattern*>::iterator patIt = category->begin();
         for ( ; patIt < category->end(); patIt++) {
-          SinglePattern* pattern = *patIt;
+          psy::core::SinglePattern* pattern = *patIt;
           PatternItem* item = new PatternItem( pattern, pattern->name() );
           item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
           node->addEntry(item);
@@ -317,7 +316,7 @@ namespace psy {
 
     void SequencerBar::onNewCategory( ngrs::ButtonEvent * ev )
     {
-      PatternCategory* category = seqGui->patternSequence()-> patternData()->createNewCategory("category");
+      psy::core::PatternCategory* category = seqGui->patternSequence()-> patternData()->createNewCategory("category");
       category->setColor(0xFF0000);
 
       CategoryTreeNode* node = new CategoryTreeNode(category);
@@ -338,10 +337,10 @@ namespace psy {
       if (patternBox_->selectedTreeNode() ) {
         ngrs::TreeNode* node = patternBox_->selectedTreeNode();
 
-        std::map<ngrs::TreeNode*, PatternCategory*>::iterator itr = categoryMap.find(node);
+        std::map<ngrs::TreeNode*, psy::core::PatternCategory*>::iterator itr = categoryMap.find(node);
         if(itr != categoryMap.end()) {
-          PatternCategory* cat = itr->second;
-          SinglePattern* pattern = cat->createNewPattern("Pattern");
+          psy::core::PatternCategory* cat = itr->second;
+          psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
           pattern->setName("Pattern"+ stringify(pattern->id()) );
           PatternItem* item = new PatternItem( pattern, pattern->name() );
           item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
@@ -358,13 +357,13 @@ namespace psy {
     void SequencerBar::onClonePattern( ngrs::ButtonEvent * ev )
     {
       ngrs::CustomItem* item = patternBox_->selectedItem();
-      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      std::map<ngrs::CustomItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
 
       if(itr!=patternMap.end())
       {
         ngrs::TreeNode* node = patternBox_->selectedTreeNode();
-        SinglePattern* pattern = itr->second;
-        SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, pattern->name()+"clone" );
+        psy::core::SinglePattern* pattern = itr->second;
+        psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, pattern->name()+"clone" );
         PatternItem* item = new PatternItem( clonedPat, clonedPat->name() );
         item->mouseDoublePress.connect(this,&SequencerBar::onPatternItemDblClick);
         node->addEntry(item);
@@ -378,11 +377,11 @@ namespace psy {
 
     void SequencerBar::onDeletePattern( ngrs::ButtonEvent* ev ) {
       ngrs::CustomItem* item = patternBox_->selectedItem();
-      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      std::map<ngrs::CustomItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
 
       if( itr!=patternMap.end() )
       {
-        SinglePattern* pattern = itr->second;
+        psy::core::SinglePattern* pattern = itr->second;
         patternMap.erase(itr);
         patternBox_->removeItem( item );
         patternBox_->resize();
@@ -404,7 +403,7 @@ namespace psy {
 
     void SequencerBar::selectNextPattern() {
       ngrs::CustomItem* item = patternBox_->selectedItem();
-      std::map< ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find( item );
+      std::map< ngrs::CustomItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( item );
 
       if ( itr != patternMap.end() ) {
         itr++;
@@ -416,7 +415,7 @@ namespace psy {
 
     void SequencerBar::selectPrevPattern() {
       ngrs::CustomItem* item = patternBox_->selectedItem();
-      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      std::map<ngrs::CustomItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
 
       if ( itr != patternMap.end() && itr != patternMap.begin() ) {
         itr--;
@@ -446,7 +445,7 @@ namespace psy {
       if ( it != catItems.end() )  propertyBox_->setCategoryItem(*it);
 
       if (item) propertyBox_->setName( item->text() );
-      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      std::map<ngrs::CustomItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
       if(itr!=patternMap.end()) {
         patView->setPattern(itr->second);
         patView->repaint();
@@ -457,7 +456,7 @@ namespace psy {
     {
       ngrs::CustomItem* item = patternBox_->selectedItem();
       if (item) {
-        std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+        std::map<ngrs::CustomItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
         if(itr!=patternMap.end())
           seqGui->addPattern(itr->second);
       }
@@ -469,7 +468,7 @@ namespace psy {
       item->setText(name);
       patternBox_->repaint();
 
-      std::map<ngrs::CustomItem*, SinglePattern*>::iterator itr = patternMap.find(item);
+      std::map<ngrs::CustomItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
       if(itr!=patternMap.end()) {
         std::vector<SequencerItem*> list = seqGui->guiItemsByPattern(itr->second);
         std::vector<SequencerItem*>::iterator it = list.begin();

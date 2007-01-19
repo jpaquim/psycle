@@ -35,7 +35,7 @@ SongpDlg::~SongpDlg()
 {
 }
 
-void SongpDlg::setSong( Song * pSong )
+void SongpDlg::setSong( psy::core::Song * pSong )
 {
   pSong_ = pSong;
 }

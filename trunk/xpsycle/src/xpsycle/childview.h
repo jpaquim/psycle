@@ -99,7 +99,7 @@ namespace psy {
       void onTimer();
       void onTweakSlide( int machine, int command, int value );
 
-      void onMachineSelected( Machine* mac );
+      void onMachineSelected( psy::core::Machine* mac );
       void onTabChange( ngrs::ButtonEvent* ev );
 
     };

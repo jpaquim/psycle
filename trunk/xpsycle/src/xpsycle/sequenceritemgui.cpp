@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "sequenceritemgui.h"
 #include "sequencergui.h"
-#include "patternsequence.h"
+#include <psycore/patternsequence.h>
 #include <ngrs/panel.h>
 #include <ngrs/label.h>
 #include <ngrs/frameborder.h>

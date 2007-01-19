@@ -136,7 +136,7 @@ MachineView * ChildView::machineView( )
   return machineView_;
 }
 
-void ChildView::onMachineSelected( Machine* mac ) {
+void ChildView::onMachineSelected( psy::core::Machine* mac ) {
    machineSelected.emit( mac );
 }
 

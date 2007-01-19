@@ -20,11 +20,10 @@
 #include "skinreader.h"
 #include "sequencergui.h"
 #include "sequencerbeatchangelineal.h"
-#include "singlepattern.h"
 #include "zoombar.h"
 #include "defaultbitmaps.h"
 #include "configuration.h"
-
+#include <psycore/singlepattern.h>
 #include <ngrs/app.h>
 #include <ngrs/scrollbar.h>
 #include <ngrs/alignlayout.h>
@@ -331,7 +330,7 @@ namespace psy {
       return hint_;
     }
 
-    void SequencerItem::setSequenceEntry( SequenceEntry * sequenceEntry )
+    void SequencerItem::setSequenceEntry( psy::core::SequenceEntry * sequenceEntry )
     {
       sequenceEntry_ = sequenceEntry;
     }
@@ -359,7 +358,7 @@ namespace psy {
       }
     }
 
-    SequenceEntry * SequencerItem::sequenceEntry( )
+    psy::core::SequenceEntry * SequencerItem::sequenceEntry( )
     {
       return sequenceEntry_;
     }
@@ -389,7 +388,7 @@ namespace psy {
       return region;
     }
 
-    void SequencerItem::onMoveStart( const ngrs::MoveEvent & moveEvent )
+    void SequencerItem::onMoveStart( const ngrs::MoveEvent& moveEvent )
     {
       oldDrag = entriesInRegion();
       oldLeft = left();  
@@ -536,7 +535,7 @@ namespace psy {
       }
     }
 
-    void SequencerGUI::SequencerLine::addItem( SinglePattern* pattern )
+    void SequencerGUI::SequencerLine::addItem( psy::core::SinglePattern* pattern )
     {
       double endTick = sequenceLine()->tickLength();
 
@@ -549,7 +548,7 @@ namespace psy {
 
     }
 
-    void SequencerGUI::SequencerLine::removeItems( SinglePattern * pattern )
+    void SequencerGUI::SequencerLine::removeItems( psy::core::SinglePattern * pattern )
     {
       std::list<SequencerItem*>::iterator it = items.begin();
       while ( it != items.end()) {
@@ -573,12 +572,12 @@ namespace psy {
       click.emit(this);
     }
 
-    void SequencerGUI::SequencerLine::setSequenceLine( SequenceLine * line )
+    void SequencerGUI::SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
     {
       seqLine_ = line;
     }
 
-    SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
+    psy::core::SequenceLine * SequencerGUI::SequencerLine::sequenceLine( )
     {
       return seqLine_;
     }
@@ -590,13 +589,13 @@ namespace psy {
       for ( ; it != items.end(); it++) {
         SequencerItem* item = *it;
         double tickPosition = item->sequenceEntry()->tickPosition();
-        SinglePattern* pattern = item->sequenceEntry()->pattern();
+        psy::core::SinglePattern* pattern = item->sequenceEntry()->pattern();
 
         item->setPosition(d2i(sView->beatPxLength() * tickPosition),5, static_cast<int>( (item->endOffset()-item->start()) * sView->beatPxLength() ),20);
       }
     }
 
-    std::vector<SequencerItem*> SequencerGUI::SequencerLine::itemsByPattern( SinglePattern * pattern )
+    std::vector<SequencerItem*> SequencerGUI::SequencerLine::itemsByPattern( psy::core::SinglePattern * pattern )
     {
       std::vector<SequencerItem*> list;
       std::list<SequencerItem*>::iterator it = items.begin();
@@ -753,13 +752,13 @@ namespace psy {
       return beatPxLength_;
     }
 
-    void SequencerGUI::setPatternSequence( PatternSequence * sequence )
+    void SequencerGUI::setPatternSequence( psy::core::PatternSequence * sequence )
     {
       std::cout << "setted sequence" << std::endl;
       patternSequence_ = sequence;
     }
 
-    PatternSequence * SequencerGUI::patternSequence( )
+    psy::core::PatternSequence * SequencerGUI::patternSequence( )
     {
       return patternSequence_;
     }
@@ -808,7 +807,7 @@ namespace psy {
     {
       if (selectedLine_) {
 
-        SequenceLine* line = selectedLine_->sequenceLine();
+        psy::core::SequenceLine* line = selectedLine_->sequenceLine();
 
         std::vector<SequencerLine*>::iterator it = find(lines.begin(), lines.end(), selectedLine_);
         if (it != lines.end() ) lines.erase(it);
@@ -885,7 +884,7 @@ namespace psy {
 
     // entry operations
 
-    void SequencerGUI::addPattern( SinglePattern * pattern )
+    void SequencerGUI::addPattern( psy::core::SinglePattern * pattern )
     {
       if ( selectedLine_ ) {
         selectedLine_->addItem( pattern );
@@ -901,7 +900,7 @@ namespace psy {
       // deselect all
       for ( ; it < selectedItems_.end(); it++) {
         SequencerItem* selectedItem = *it;
-        SequenceEntry* entry = selectedItem->sequenceEntry();
+        psy::core::SequenceEntry* entry = selectedItem->sequenceEntry();
         ngrs::VisualComponent* parentContainer = (VisualComponent*) (selectedItem->parent());
         parentContainer->removeChild(selectedItem);
         entry->track()->removeEntry(entry);
@@ -921,7 +920,7 @@ namespace psy {
       repaint();
     }
 
-    void SequencerGUI::removePattern( SinglePattern * pattern )
+    void SequencerGUI::removePattern( psy::core::SinglePattern * pattern )
     {
       std::vector<SequencerLine*>::iterator it = lines.begin();
       for (; it < lines.end(); it++) {
@@ -930,7 +929,7 @@ namespace psy {
       }
     }
 
-    std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( SinglePattern * pattern )
+    std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( psy::core::SinglePattern * pattern )
     {
       std::vector<SequencerItem*> list;
 
@@ -1007,10 +1006,10 @@ namespace psy {
       lines.clear();
       scrollArea_->removeChilds();
 
-      std::vector<SequenceLine*>::iterator it = patternSequence()->begin();
+      std::vector<psy::core::SequenceLine*>::iterator it = patternSequence()->begin();
       for ( ; it < patternSequence()->end(); it++) {
-        SequenceLine* seqLine = *it;
-        SequencerLine* line = new SequencerLine( this );
+        psy::core::SequenceLine* seqLine = *it;
+       SequencerLine* line = new SequencerLine( this );
         std::cout << "lineitems : " << seqLine->size() << std::endl;
         line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
         lines.push_back(line);
@@ -1021,10 +1020,10 @@ namespace psy {
         lastLine = line;
         selectedLine_ = line;
         // now iterate the sequence entries
-        SequenceLine::iterator iter = seqLine->begin();
+        psy::core::SequenceLine::iterator iter = seqLine->begin();
         for(; iter!= seqLine->end(); ++iter)
         {
-          SequenceEntry* entry = iter->second;
+          psy::core::SequenceEntry* entry = iter->second;
           SequencerItem* item = new SequencerItem( this );
           item->click.connect(line,&SequencerGUI::SequencerLine::onSequencerItemClick);
           item->setSequenceEntry( entry );

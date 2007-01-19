@@ -21,9 +21,10 @@
 #define ABSTRACTMACHINEFACTORY_H
 
 namespace psy {
-  namespace host {
-
+  namespace core {
     class Machine;
+  }
+  namespace host {    
 
     class AbstractMachineFactory {
     public:
@@ -31,7 +32,7 @@ namespace psy {
       AbstractMachineFactory( );
       virtual ~AbstractMachineFactory();
 
-      virtual Machine* createMachine( int key ) const = 0;
+      virtual psy::core::Machine* createMachine( int key ) const = 0;
 
     };
 

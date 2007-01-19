@@ -99,11 +99,11 @@ namespace psy {
 
     }
 
-    void PatternUndoManager::setSong( Song* pSong  ) {
+    void PatternUndoManager::setSong( psy::core::Song* pSong  ) {
       pSong_ = pSong;
     }
 
-    void PatternUndoManager::setPattern( SinglePattern* pattern ) {
+    void PatternUndoManager::setPattern( psy::core::SinglePattern* pattern ) {
       pattern_ = pattern;
     }
 
@@ -112,7 +112,7 @@ namespace psy {
       if ( pattern_ ) {
         // create a undoPattern
         UndoPattern dstPattern( pattern_->id() , block, cursor );
-        SinglePattern srcPattern = pattern_->block( block.left(), block.right(), block.top(), block.bottom() );
+        psy::core::SinglePattern srcPattern = pattern_->block( block.left(), block.right(), block.top(), block.bottom() );
         dstPattern.copyBlock( 0,0, srcPattern, block.right() - block.left(), srcPattern.beats() );
         push_back( dstPattern );
       }	
@@ -140,7 +140,7 @@ namespace psy {
         }
 
         if ( it != end() ) {
-          SinglePattern* pattern = pSong_->patternSequence().patternData()->findById( pattern_->id() );
+          psy::core::SinglePattern* pattern = pSong_->patternSequence().patternData()->findById( pattern_->id() );
           if ( pattern ) {
             ngrs::Size changedBlock = lastUndoPattern->changedBlock();
             pattern->copyBlock( changedBlock.left(), changedBlock.top(), *lastUndoPattern, changedBlock.right() - changedBlock.left(), lastUndoPattern->beats() );
@@ -154,7 +154,7 @@ namespace psy {
 
 
     /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
-    PatternView::PatternView( Song* song )
+    PatternView::PatternView( psy::core::Song* song )
       : ngrs::Panel()
     {
       _pSong = song;
@@ -442,7 +442,7 @@ namespace psy {
         std::string num   = meter.substr( 0, pos);
         std::string denom = meter.substr( pos+1 );
 
-        pattern_->addBar( TimeSignature( ngrs::str<int>(num), ngrs::str<int>(denom)) );
+        pattern_->addBar( psy::core::TimeSignature( ngrs::str<int>(num), ngrs::str<int>(denom)) );
         resize();
         repaint();
       }
@@ -802,7 +802,7 @@ namespace psy {
 
     void PatternView::LineNumber::paint( ngrs::Graphics& g )
     {
-      TimeSignature signature;
+      psy::core::TimeSignature signature;
 
       ngrs::Rect repaintRect = g.repaintArea().rectClipBox();
       int absTop  = absoluteTop();
@@ -838,12 +838,12 @@ namespace psy {
         std::string text = stringify( i );
         if ( pView->pattern() ) {
           float position = i  / (float) pView->pattern()->beatZoom();
-          SinglePattern::iterator it = pView->pattern()->find_nearest(i);
+          psy::core::SinglePattern::iterator it = pView->pattern()->find_nearest(i);
           if (it != pView->pattern()->end()) {
             // check out how many hidden lines there are
             int lastLine = d2i (it->first * pView->pattern_->beatZoom());
             int y = lastLine;
-            SinglePattern::iterator it2 = it;
+            psy::core::SinglePattern::iterator it2 = it;
             int count = 0;
             do {
               y = d2i (it2->first * pView->pattern_->beatZoom());
@@ -924,7 +924,7 @@ namespace psy {
         int parameterIndex = 0;
         int machineIndex   = 0xFF;    
         if ( pView->pattern() ) {
-          TweakTrackInfo info = pView->pattern()->tweakInfo( i );
+          psy::core::TweakTrackInfo info = pView->pattern()->tweakInfo( i );
           parameterIndex = info.parameterIdx();
           machineIndex   = info.machineIdx();    
         }
@@ -976,7 +976,7 @@ namespace psy {
 
     void PatternView::TweakGUI::customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack) {
       if (pView->pattern()) {
-        TimeSignature signature;
+        psy::core::TimeSignature signature;
 
         int trackWidth = ((endTrack+1) * colWidth()) - dx();
         int lineHeight = ((endLine +1) * rowHeight()) - dy();
@@ -1022,7 +1022,7 @@ namespace psy {
         case cdefNavPageUp:
           {
             std::cout << "tweak pg up" << std::endl;
-            TimeSignature signature;
+            psy::core::TimeSignature signature;
             for (int y = cursor().line()-1; y >= 0; y--) {
               float position = y / (float) beatZoom();
               if ((pView->pattern()->barStart(position, signature) )) {
@@ -1036,7 +1036,7 @@ namespace psy {
         case cdefNavPageDn:
           {
             std::cout << "tweak pg dn" << std::endl;
-            TimeSignature signature;
+            psy::core::TimeSignature signature;
             for (int y = cursor().line()+1; y < lineNumber(); y++) {
               float position = y / (float) beatZoom();
               if ((pView->pattern()->barStart(position, signature) )) {
@@ -1105,7 +1105,7 @@ namespace psy {
       if (isHex(event.scancode()))
         if ( cursor().eventNr() == 0) {
           // comand or parameter
-          PatternEvent patEvent = pView->pattern()->tweakEvent( cursor().line(), cursor().track() );			
+          psy::core::PatternEvent patEvent = pView->pattern()->tweakEvent( cursor().line(), cursor().track() );			
           if (cursor().col() < 2 ) {
             unsigned char newByte = convertDigit( 0x00, event.scancode(), patEvent.command(), cursor().col() );
             patEvent.setCommand( newByte );
@@ -1130,17 +1130,17 @@ namespace psy {
       if ( pView->pattern() ) {
         drawCellBg( g, cursor() );
 
-        SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
+        psy::core::SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
 
         int lastLine = -1;
         for ( ; it != pView->pattern_->end(); it++ ) {
-          PatternLine & line = it->second;
+          psy::core::PatternLine & line = it->second;
           int y = d2i (it->first * pView->pattern_->beatZoom());
           if (y > endLine) break;
           if (y != lastLine) {
-            std::map<int, PatternEvent>::iterator eventIt = line.tweaks().lower_bound(startTrack);
+            std::map<int, psy::core::PatternEvent>::iterator eventIt = line.tweaks().lower_bound(startTrack);
             for(; eventIt != line.tweaks().end() && eventIt->first <= endTrack; ++eventIt) {
-              PatternEvent event = eventIt->second;
+              psy::core::PatternEvent event = eventIt->second;
               int x = eventIt->first;
               if (event.command() != 0 || event.parameter() != 0) {
                 drawData( g, x, y, 0, (event.command() << 8) | event.parameter(), true, textColor() );
@@ -1290,8 +1290,6 @@ namespace psy {
       ngrs::MenuItem* blockPatPropItem_ = new ngrs::MenuItem("Pattern properties");
       blockPatPropItem_->click.connect(this,&PatternView::PatternDraw::onPopupPattern);
       editPopup_->add(blockPatPropItem_);
-
-      patDlg = new PatDlg();
     }
 
     PatternView::PatternDraw::~ PatternDraw( )
@@ -1330,7 +1328,7 @@ namespace psy {
     void PatternView::PatternDraw::customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack)
     {
       if (pView->pattern()) {
-        TimeSignature signature;
+        psy::core::TimeSignature signature;
 
         int trackWidth = xEndByTrack( endTrack ) - dx();
         int lineHeight = ((endLine +1) * rowHeight()) - dy();
@@ -1386,12 +1384,12 @@ namespace psy {
         drawCellBg( g, cursor()  );
 
         // find start iterator
-        SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
-        TimeSignature signature;
+        psy::core::SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
+        psy::core::TimeSignature signature;
 
         int lastLine = -1;
-        PatternLine* line;
-        PatternLine emptyLine;
+        psy::core::PatternLine* line;
+        psy::core::PatternLine emptyLine;
 
         for ( int y = startLine; y <= endLine; y++) {
 
@@ -1427,9 +1425,9 @@ namespace psy {
             ngrs::Color stdColor = tColor;
             ngrs::Color crColor = pView->colorInfo().cursor_text_color;
 
-            std::map<int, PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
-            PatternEvent emptyEvent;
-            PatternEvent* event;
+            std::map<int, psy::core::PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
+            psy::core::PatternEvent emptyEvent;
+            psy::core::PatternEvent* event;
 
             for ( int x = startTrack; x <= endTrack; x++ ) {
 
@@ -1462,11 +1460,11 @@ namespace psy {
                 drawString( g, x, y, 4, "....", tColor );
               }									
 
-              PatternEvent::PcmListType & pcList = event->paraCmdList();
-              PatternEvent::PcmListType::iterator it = pcList.begin();
+              psy::core::PatternEvent::PcmListType & pcList = event->paraCmdList();
+              psy::core::PatternEvent::PcmListType::iterator it = pcList.begin();
               int count = 0;
               for ( ; it < pcList.end(); it++, count++ ) {
-                PatternEvent::PcmType & pc = *it;
+                psy::core::PatternEvent::PcmType & pc = *it;
                 int command = pc.first;
                 int parameter = pc.second;
                 if ( command != 0 || parameter != 0) {
@@ -1548,7 +1546,7 @@ namespace psy {
         case cdefNavPageUp:
           {
             std::cout << "nav page up" << std::endl;
-            TimeSignature signature;
+            psy::core::TimeSignature signature;
             for (int y = cursor().line()-1; y >= 0; y--) {
               float position = y / (float) beatZoom();
               if ((pView->pattern()->barStart(position, signature) )) {
@@ -1562,7 +1560,7 @@ namespace psy {
         case cdefNavPageDn:
           {
             std::cout << "nav page dn" << std::endl;
-            TimeSignature signature;
+            psy::core::TimeSignature signature;
             for (int y = cursor().line()+1; y < lineNumber(); y++) {
               float position = y / (float) beatZoom();
               if ((pView->pattern()->barStart(position, signature) )) {
@@ -1725,7 +1723,7 @@ namespace psy {
             std::cout << "eventnr 1 - inst select" << std::endl;
 
             // Add the new data...
-            PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+            psy::core::PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
             unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.instrument(), cursor().col() );
             patEvent.setInstrument( newByte );
             pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -1741,7 +1739,7 @@ namespace psy {
               // mac select
               // i.e. a key is pressed in the machine column.
               std::cout << "event nr 2 - mach select" << std::endl;
-              PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+              psy::core::PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
               unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.machine(), cursor().col() );
               patEvent.setMachine( newByte );
               pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -1755,7 +1753,7 @@ namespace psy {
               if ( cursor().eventNr() == 3) {
                 // mac select
                 std::cout << "event nr 3 - mach select" << std::endl;
-                PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+                psy::core::PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
                 unsigned char newByte = convertDigit( 0xFF, event.scancode(), patEvent.volume(), cursor().col() );
                 patEvent.setVolume( newByte );
                 pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -1769,20 +1767,20 @@ namespace psy {
                 if ( cursor().eventNr() >= 4) {
                   // comand or parameter
                   std::cout << "event nr >=4 - command or parameter" << std::endl;
-                  PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+                  psy::core::PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
                   if (cursor().col() < 2 ) {
                     int cmdValue;
                     if (cursor().eventNr() == 4) {
                       cmdValue = patEvent.command();
                     } else {
-                      PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                      psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                       cmdValue = pc.first;
                     }
                     unsigned char newByte = convertDigit( 0x00, event.scancode(), cmdValue, cursor().col() );
                     if (cursor().eventNr() == 4) {
                       patEvent.setCommand( newByte );
                     } else {
-                      PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                      psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                       pc.first = newByte;					
                     }
                     pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -1793,14 +1791,14 @@ namespace psy {
                     if (cursor().eventNr() == 4) {
                       paraValue = patEvent.parameter();
                     } else {
-                      PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                      psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                       paraValue = pc.second;
                     }
                     unsigned char newByte = convertDigit( 0x00, event.scancode(), paraValue, cursor().col() - 2 );
                     if (cursor().eventNr() == 4) {
                       patEvent.setParameter( newByte );
                     } else {
-                      PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                      psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                       pc.second = newByte;					
                     }
                     pView->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -1817,7 +1815,7 @@ namespace psy {
 
     void PatternView::PatternDraw::clearCursorPos() {
       if ( !pView->pattern()->lineIsEmpty( cursor().line() ) ) {
-        PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
+        psy::core::PatternEvent patEvent = pView->pattern()->event( cursor().line(), cursor().track() );
         if ( cursor().eventNr() == 0) {
           pView->pattern()->clearTrack( cursor().line(), cursor().track() );
         } else
@@ -1838,7 +1836,7 @@ namespace psy {
                   patEvent.setParameter(0);
                   pView->pattern()->setEvent( cursor().line(), cursor().track() , patEvent );
                 } else {					
-                  PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                  psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                   pc.first = 0;
                   pc.second = 0;
                 }			
@@ -1891,7 +1889,7 @@ namespace psy {
 
     void PatternView::enterNote( const PatCursor & cursor, int note ) {
       if ( pattern() ) {
-        PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+        psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
         event.setNote( editOctave() * 12 + note );
         event.setSharp( drawArea->sharpMode() );        
         pattern()->setEvent( cursor.line(), cursor.track(), event );
@@ -1925,7 +1923,7 @@ namespace psy {
     {  
       isBlockCopied=true;
       pasteBuffer.clear();
-      SinglePattern copyPattern = pView->pattern()->block( selection().left(), selection().right(), selection().top(), selection().bottom() );
+      psy::core::SinglePattern copyPattern = pView->pattern()->block( selection().left(), selection().right(), selection().top(), selection().bottom() );
 
       float start = selection().top()    / (float) pView->pattern()->beatZoom();
       float end   = selection().bottom() / (float) pView->pattern()->beatZoom();
@@ -2070,7 +2068,7 @@ namespace psy {
     void PatternView::noteOffAny( const PatCursor & cursor )
     {
       if (pattern_) {
-        PatternEvent event;
+        psy::core::PatternEvent event;
         event.setNote(120);
         pattern()->setEvent( cursor.line(), cursor.track(), event );
         drawArea->repaintCursorPos( cursor );    
@@ -2199,19 +2197,19 @@ namespace psy {
       }
     }
 
-    void PatternView::setPattern( SinglePattern * pattern )
+    void PatternView::setPattern( psy::core::SinglePattern * pattern )
     {
       pattern_ = pattern;
       undoManager_.setPattern( pattern );
       resize();
     }
 
-    SinglePattern * PatternView::pattern( )
+    psy::core::SinglePattern * PatternView::pattern( )
     {
       return pattern_;
     }
 
-    Song * PatternView::pSong( )
+    psy::core::Song * PatternView::pSong( )
     {
       return _pSong;
     }
@@ -2352,7 +2350,7 @@ namespace psy {
           if ( tagName == "patevent" && pView->pattern() ) {
             int trackNumber = str_hex<int> (parser.getAttribValue("track"));
 
-            PatternEvent data;
+            psy::core::PatternEvent data;
             data.setMachine( str_hex<int> (parser.getAttribValue("mac")) );
             data.setInstrument( str_hex<int> (parser.getAttribValue("inst")) );
             data.setNote( str_hex<int> (parser.getAttribValue("note")) );
