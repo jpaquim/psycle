@@ -25,8 +25,7 @@ namespace psycle{
 
   PrototypeMachineFactory::PrototypeMachineFactory( )
     : deleteProtoypes_( 0 )
-  {
-   
+  {   
   }
 
   PrototypeMachineFactory::~PrototypeMachineFactory()

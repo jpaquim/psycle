@@ -207,7 +207,7 @@ namespace psycle {
 
 		Master::Master(int id, Song* song)
 			:
-		Machine(MACH_MASTER, MACHMODE_MASTER, id, song),
+		Machine(0, MACHMODE_MASTER, id, song),
 			sampleCount(0),
 			decreaseOnClip(false)
 		{

@@ -31,7 +31,7 @@ namespace psycle
 
 
 		PluginInfo::PluginInfo() :
-			subclass_( MACH_UNDEFINED ),
+			subclass_( -1 ),
 			mode_( MACHMODE_FX ),
 			fileTime_( 0 ),
 			allow_( 1 )

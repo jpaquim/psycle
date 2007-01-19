@@ -104,7 +104,7 @@ namespace psycle {
       _saved=false;
       fileName = "Untitled.psy";
 
-      CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
+      CreateMachine( 0, 320, 200, "master", MASTER_INDEX);
     }
 
     const AbstractMachineFactory& Song::machineFactory() const {
@@ -140,52 +140,7 @@ namespace psycle {
 
     bool Song::CreateMachine(int type, int x, int y, std::string const & plugin_name, int index, int pluginIndex)
     {
-      Machine * machine(0);
-      switch (type)
-      {
-      case MACH_MASTER:
-        if(_pMachine[MASTER_INDEX]) return false;
-        index = MASTER_INDEX;
-        machine = new Master(index, this);
-        break;
-      case MACH_SAMPLER:
-        machine = new Sampler(index,this);
-        break;
-      case MACH_DUPLICATOR:
-        machine = new DuplicatorMac(index, this);
-        break;
-      case MACH_DUMMY:
-        machine = new Dummy(index, this);
-        break;
-      case MACH_PLUGIN:
-        {
-          Plugin* plugin = new Plugin( index, this );
-          plugin->LoadDll( plugin_name );
-          machine = plugin;
-        }
-        break;
-      case MACH_LADSPA:
-        {
-          LADSPAMachine* plugin = new LADSPAMachine(index,this);
-          machine = plugin;
-          const char* pcLADSPAPath;
-          pcLADSPAPath = std::getenv("LADSPA_PATH");
-          if ( !pcLADSPAPath) {
-#ifdef __unix__
-            pcLADSPAPath = "/usr/lib/ladspa/";
-#else
-            pcLADSPAPath = "I:\\Archivos de Programa\\Multimedia\\Audacity\\Plug-Ins\\";
-#endif
-          }
-          std::string path;
-          if ( pcLADSPAPath ) path = pcLADSPAPath;
-          plugin->loadDll( path + plugin_name, pluginIndex);
-        }
-        break;
-      default:
-        machine = new Dummy(index, this);
-        break;
-      }
+      Machine * machine = machineFactory_.createMachine( type );
 
       if(index < 0)
       {
@@ -197,17 +152,8 @@ namespace psycle {
       }
 
       if(_pMachine[index]) DestroyMachine(index);
+      machine->Init();
 
-      ///\todo init problem
-      {
-        if(machine->_type == MACH_VSTFX || machine->_type == MACH_VST )
-        {
-
-          // Do not call VST Init() function after Instance.
-          machine->Machine::Init();
-        }
-        else machine->Init();
-      }
       machine->_x = x;
       machine->_y = y;
 
@@ -722,49 +668,8 @@ namespace psycle {
       pFile->Read(type);
       //oldtype=type;
       pFile->ReadString(dllName,256);
-      switch (type)
-      {
-      case MACH_MASTER:
-        if (pSong->_pMachine[MASTER_INDEX]) pMachine = pSong->_pMachine[MASTER_INDEX];
-        else if ( !fullopen ) pMachine = new Dummy(index, pSong);
-        else pMachine = new Master(index, pSong);
-        break;
-      case MACH_SAMPLER:
-        if ( !fullopen ) pMachine = new Dummy(index, pSong);
-        else pMachine = new Sampler(index, pSong );
-        break;
-      case MACH_XMSAMPLER:
-        //if ( !fullopen ) 
-        pMachine = new Dummy(index, pSong);
-        type = MACH_DUMMY;
-        //else pMachine = new XMSampler(index);
-        break;
-      case MACH_DUPLICATOR:
-        if ( !fullopen ) pMachine = new Dummy(index, pSong);
-        else pMachine = new DuplicatorMac(index, pSong);
-        break;
-      case MACH_PLUGIN:
-        {
-          if(!fullopen) pMachine = new Dummy(index, pSong);
-          else 
-          {
-            Plugin * p;
-            pMachine = p = new Plugin(index, pSong);
-            if(!p->LoadDll(dllName))
-            {
-              pMachine = new Dummy(index, pSong);
-              type = MACH_DUMMY;
-              delete p;
-              bDeleted = true;
-            }
-          }
-        }
-        break;
-      default:
-        std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
-        pMachine = new Dummy(index, pSong);
-        break;
-      }
+      pMachine = pSong->machineFactory().createMachine(type);
+      if ( !pMachine) return 0;
       pMachine->Init();
       int temp;
       pMachine->_type = type;
