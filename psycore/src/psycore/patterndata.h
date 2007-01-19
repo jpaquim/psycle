@@ -75,7 +75,7 @@ namespace psy
 			PatternCategory* createNewCategory(const std::string & name);
 			void removeSinglePattern(SinglePattern* pattern);
 			void removeAll();
-                        void resetToDefault();
+            void resetToDefault();
 
 			SinglePattern* findById(int id);
 

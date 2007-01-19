@@ -22,6 +22,7 @@
 
 #include "custompatternview.h"
 #include "skinreader.h"
+#include <psycore/patternsequence.h>
 #include <psycore/singlepattern.h>
 #include <psycore/song.h>
 #include <ngrs/popupmenu.h>

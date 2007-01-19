@@ -22,6 +22,8 @@
 #include "sequencergui.h"
 #include "sequencerbar.h"
 #include "virtualpattern.h"
+#include <psycore/patterndata.h>
+#include <psycore/song.h>
 #include <ngrs/app.h>
 #include <ngrs/dockpanel.h>
 #include <ngrs/splitbar.h>
@@ -36,7 +38,7 @@ ChildView::ChildView()
   : ngrs::Panel()
 {
   _pSong = new psy::core::Song();
-
+ 
   setLayout( ngrs::AlignLayout() );
 
   add(sequencerBar_ = new SequencerBar(), ngrs::nAlLeft);
@@ -58,7 +60,7 @@ ChildView::ChildView()
 
   sequencerView_ = new SequencerGUI();
   sequencerBar_->setSequenceGUI( sequencerView() ) ;
-  sequencerView_->setPatternSequence( &_pSong->patternSequence());
+  sequencerView_->setPatternSequence( _pSong->patternSequence());
   sequencerView_->addSequencerLine();
 
 	virtualPattern_ = new VirtualPattern();
@@ -91,7 +93,7 @@ ChildView::ChildView()
 
   //timer.setIntervalTime(80);
   //timer.enableTimer();
-  _pSong->patternSequence().patternData()->resetToDefault();
+  //_pSong->patternSequence().patternData()->resetToDefault();
   sequencerBar_->update();
 }
 

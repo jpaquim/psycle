@@ -31,11 +31,13 @@ namespace ngrs{
 }
 
 namespace psy {
+  namespace core {
+    class PatternSequence;
+    class GlobalEvent;
+  }
   namespace host {
 
     class SequencerGUI;
-    class PatternSequence;
-    class GlobalEvent;
 
     class SequencerBeatChangeLineal : public ngrs::Panel
     {
@@ -43,11 +45,11 @@ namespace psy {
       class BeatChangeTriangle : public ngrs::Panel {
       public:
         BeatChangeTriangle();
-        BeatChangeTriangle(SequencerGUI * gui);
+        BeatChangeTriangle( SequencerGUI * gui );
         ~BeatChangeTriangle();
 
-        void setBpmChangeEvent(GlobalEvent* event);
-        GlobalEvent* bpmChangeEvent();
+        void setBpmChangeEvent( psy::core::GlobalEvent* event );
+        psy::core::GlobalEvent* bpmChangeEvent();
 
         virtual void onMove(const ngrs::MoveEvent & moveEvent);
         virtual void paint( ngrs::Graphics& g);
@@ -62,9 +64,9 @@ namespace psy {
         int tWidth;
         int tHeight;
 
-        GlobalEvent* bpmChangeEvent_;
+        psy::core::GlobalEvent* bpmChangeEvent_;
 
-        void onKeyPress(const ngrs::KeyEvent& event);
+        void onKeyPress( const ngrs::KeyEvent& event );
 
       };
 
