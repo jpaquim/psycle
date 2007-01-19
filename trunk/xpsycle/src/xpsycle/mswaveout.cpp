@@ -21,7 +21,7 @@
 #if defined _WIN64 || defined _WIN32 || defined __CYGWIN__ || defined __MSYS__ || defined _UWIN
 
 #include "mswaveout.h"
-#include "tr1stdint.h"
+#include <psycore/tr1stdint.h>
 #include <iostream>
 
 

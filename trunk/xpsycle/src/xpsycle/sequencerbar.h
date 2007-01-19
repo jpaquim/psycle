@@ -23,7 +23,6 @@
 #include "patternboxproperties.h"
 #include "childview.h"
 #include <psycore/patternsequence.h>
-#include <map>
 #include <ngrs/panel.h>
 #include <ngrs/checkbox.h>
 #include <ngrs/listlayout.h>
@@ -35,6 +34,7 @@
 #include <ngrs/item.h>
 #include <ngrs/treenode.h>
 #include <ngrs/popupmenu.h>
+#include <map>
 
 /**
 @author  Stefan
@@ -52,36 +52,36 @@ namespace psy {
 
     class CategoryTreeNode: public ngrs::TreeNode {
     public:
-      CategoryTreeNode( PatternCategory* cat );
+      CategoryTreeNode( psy::core::PatternCategory* cat );
       ~CategoryTreeNode();
 
-      PatternCategory* category();
+      psy::core::PatternCategory* category();
 
     private:
 
-      PatternCategory* cat_;
+      psy::core::PatternCategory* cat_;
 
     };
 
 
     class CategoryItem : public ngrs::CustomItem {
     public :
-      CategoryItem(PatternCategory* category, const std::string & text);
+      CategoryItem( psy::core::PatternCategory* category, const std::string & text);
       CategoryItem();
       ~CategoryItem();
 
-      virtual void setText(const std::string & text);
+      virtual void setText( const std::string& text );
       virtual std::string text() const;
 
       virtual void paint( ngrs::Graphics& g);
 
-      PatternCategory* category();
+      psy::core::PatternCategory* category();
 
     private:
 
       ngrs::Label* label_;
 
-      PatternCategory* category_;
+      psy::core::PatternCategory* category_;
 
       void init();
 
@@ -90,28 +90,25 @@ namespace psy {
     class PatternItem : public ngrs::Item {
     public:
 
-      PatternItem(SinglePattern* pattern, const std::string & text);
+      PatternItem( psy::core::SinglePattern* pattern, const std::string& text);
       ~PatternItem();
 
-      virtual void setText(const std::string & text);
+      virtual void setText( const std::string& text );
 
     private:
 
-      SinglePattern* pattern_;
+      psy::core::SinglePattern* pattern_;
 
     };
 
     class SequencerBar : public ngrs::Panel
     {
-
-
-
     public:
       SequencerBar();
 
       ~SequencerBar();
 
-      sigslot::signal1<SinglePattern*> removed;
+      sigslot::signal1<psy::core::SinglePattern*> removed;
 
       void setSequenceGUI( SequencerGUI* sequenceGUI );
       void setPatternView( PatternView* patternView );
@@ -165,12 +162,12 @@ namespace psy {
       void onMoveCursorPaste( ngrs::ButtonEvent* ev );
       void onRecordTweakChange( ngrs::ButtonEvent* ev );
 
-      void onNameChanged( const std::string & name );
+      void onNameChanged( const std::string& name );
 
-      std::map<ngrs::TreeNode*, PatternCategory*> categoryMap;
+      std::map<ngrs::TreeNode*, psy::core::PatternCategory*> categoryMap;
       std::vector<CategoryItem*> catItems;
 
-      std::map<ngrs::CustomItem*, SinglePattern*> patternMap;
+      std::map<ngrs::CustomItem*, psy::core::SinglePattern*> patternMap;
 
     };
 

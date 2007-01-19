@@ -21,13 +21,12 @@
 #define WIREDLG_H
 
 #include "analyzer.h"
-#include "machine.h"
 #include "wiregui.h"
+#include <psycore/machine.h>
 #include <ngrs/window.h>
 #include <ngrs/button.h>
 #include <ngrs/slider.h>
 #include <ngrs/line.h>
-
 
 /**
 @author  Stefan
@@ -44,14 +43,14 @@ namespace psy {
 
       ~WireDlg();
 
-      void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
+      void setMachines( psy::core::Machine* pSrcMachine, psy::core::Machine* pDstMachine);
 
       sigslot::signal1<WireDlg*> deleteMe;
 
       virtual int onClose();
 
-      Machine* pSrcMachine();
-      Machine* pDstMachine();
+      psy::core::Machine* pSrcMachine();
+      psy::core::Machine* pDstMachine();
 
       void setLine(WireGUI* line);
       WireGUI* line();
@@ -70,8 +69,8 @@ namespace psy {
       ngrs::Button* modeBtn;
       ngrs::Button* holdBtn;
 
-      Machine* _pSrcMachine;
-      Machine* _pDstMachine;
+      psy::core::Machine* _pSrcMachine;
+      psy::core::Machine* _pDstMachine;
 
       WireGUI* line_;
 

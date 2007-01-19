@@ -40,7 +40,7 @@ namespace psy {
     {      
     }
 
-    void Analyzer::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
+    void Analyzer::setMachines( psy::core::Machine* pSrcMachine, psy::core::Machine* pDstMachine )
     {
     }
 

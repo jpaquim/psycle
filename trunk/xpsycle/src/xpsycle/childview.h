@@ -22,8 +22,8 @@
 
 #include "machineview.h"
 #include "patternview.h"
-#include "song.h"
 #include "sequencerbar.h"
+#include <psycore/song.h>
 #include <ngrs/tabbook.h>
 #include <ngrs/timer.h>
 #include <ngrs/tabbook.h>
@@ -46,15 +46,15 @@ namespace psy {
 
       ~ChildView();
 
-      Song* song();
+      psy::core::Song* song();
 
       void setTitleBarText( );
 
-      void onPatternView(Object* sender);
+      void onPatternView( Object* sender );
 
       // connect to signals
-      sigslot::signal1<Machine*> newMachineAdded;
-      sigslot::signal1<Machine*> machineSelected;
+      sigslot::signal1<psy::core::Machine*> newMachineAdded;
+      sigslot::signal1<psy::core::Machine*> machineSelected;
       sigslot::signal1<ngrs::ButtonEvent*> machineViewDblClick;
 
       PatternView* patternView();
@@ -80,7 +80,7 @@ namespace psy {
 
     private:
 
-      Song* _pSong;
+      psy::core::Song* _pSong;
 
       ngrs::TabBook* tabBook_;
 

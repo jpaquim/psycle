@@ -18,9 +18,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "machinegui.h"
-#include "machine.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
+#include <psycore/machine.h>
 #include <psycore/song.h>
 #include <ngrs/frameborder.h>
 #include <ngrs/window.h>
@@ -33,7 +33,7 @@ namespace psy {
 
 		// MachineGUI abstract class
 
-		MachineGUI::MachineGUI( Machine & mac )
+      MachineGUI::MachineGUI( psy::core::Machine& mac )
 			: ngrs::Panel()
 		{
 			selected_ = 0;
@@ -49,7 +49,7 @@ namespace psy {
 
 		}
 
-		Machine & MachineGUI::mac( )
+		psy::core::Machine& MachineGUI::mac( )
 		{
 			return *mac_;
 		}
@@ -83,7 +83,7 @@ namespace psy {
 			selected_ = on;
 		}
 
-		void MachineGUI::attachLine( WireGUI * line, int point )
+		void MachineGUI::attachLine( WireGUI* line, int point )
 		{
 			attachedLines.push_back(LineAttachment(line,point));
 			int midW = clientWidth()  / 2;
@@ -112,7 +112,7 @@ namespace psy {
 			oldDrag = linesRegion();
 		}
 
-		void MachineGUI::onMove( const ngrs::MoveEvent & moveEvent )
+		void MachineGUI::onMove( const ngrs::MoveEvent& moveEvent )
 		{
 			ngrs::Region newDrag = linesRegion();
 			ngrs::Region repaintArea = newDrag | oldDrag;
@@ -154,11 +154,11 @@ namespace psy {
 			}
 		}
 
-		void MachineGUI::setCoordInfo( const MachineCoordInfo &  coords ) {
+		void MachineGUI::setCoordInfo( const MachineCoordInfo&  coords ) {
 			coords_ = coords;
 		}
 
-		const MachineCoordInfo & MachineGUI::coords() const {
+		const MachineCoordInfo& MachineGUI::coords() const {
 			return coords_;
 		}
 
@@ -182,7 +182,7 @@ namespace psy {
 			deleteRequest.emit(this);
 		}
 
-		void MachineGUI::detachLine( WireGUI * line )
+		void MachineGUI::detachLine( WireGUI* line )
 		{
 			std::vector<LineAttachment>::iterator it = attachedLines.begin();
 
@@ -214,7 +214,7 @@ namespace psy {
 
 
 		// the MasterGUI class
-		MasterGUI::MasterGUI( Machine& mac ) : MachineGUI( mac )
+		MasterGUI::MasterGUI( psy::core::Machine& mac ) : MachineGUI( mac )
 		{
 			setSkin();
 			setBackground( ngrs::Color( 0, 0, 200 ) );
@@ -275,7 +275,7 @@ namespace psy {
 		//
 		// start of GeneratorGUI class
 		//
-		GeneratorGUI::GeneratorGUI( Machine& mac ) : MachineGUI( mac )
+		GeneratorGUI::GeneratorGUI( psy::core::Machine& mac ) : MachineGUI( mac )
 		{
 			panSlider_ = new ngrs::Slider();
 			panSlider_->change.connect(this,&GeneratorGUI::onPosChanged);
@@ -409,7 +409,7 @@ namespace psy {
 			*/
 		}
 
-		void GeneratorGUI::customSliderPaint( ngrs::Slider * sl, ngrs::Graphics& g )
+		void GeneratorGUI::customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g )
 		{
 			g.putPixmap(0,0,coords().sPan.width(),coords().sPan.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().sPan.left(),coords().sPan.top());
 		}
@@ -437,7 +437,7 @@ namespace psy {
 		//
 		// the Effekt Gui class
 		//
-		EffektGUI::EffektGUI( Machine& mac ) : MachineGUI( mac )
+		EffektGUI::EffektGUI( psy::core::Machine& mac ) : MachineGUI( mac )
 		{
 			panSlider_ = new ngrs::Slider( );
 			panSlider_->change.connect( this, &EffektGUI::onPosChanged );

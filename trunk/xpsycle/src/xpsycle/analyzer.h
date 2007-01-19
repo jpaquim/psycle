@@ -20,7 +20,7 @@
 #ifndef ANALYZER_H
 #define ANALYZER_H
 
-#include "machine.h"
+#include <psycore/machine.h>
 #include <ngrs/panel.h>
 #include <ngrs/timer.h>
 
@@ -39,8 +39,7 @@ namespace psy {
 
       ~Analyzer();
 
-      void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
-
+      void setMachines( psy::core::Machine* pSrcMachine, psy::core::Machine* pDstMachine);
       void clearMachineCallBack();
 
       virtual void paint( ngrs::Graphics& g );
@@ -53,8 +52,9 @@ namespace psy {
       float invol;
       float mult;
 
-      Machine* _pSrcMachine;
-      Machine* _pDstMachine;
+      psy::core::Machine* _pSrcMachine;
+      psy::core::Machine* _pDstMachine;
+
       int _dstWireIndex;
       int isrcMac;
       float peakL,peakR;

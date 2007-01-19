@@ -18,10 +18,10 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "machineview.h"
-#include <psycore/song.h>
-#include "machine.h"
 #include "machinegui.h"
 #include "wiredlg.h"
+#include <psycore/machine.h>
+#include <psycore/song.h>
 #include <ngrs/autoscrolllayout.h>
 #include <ngrs/alignlayout.h>
 #include <ngrs/app.h>
@@ -31,7 +31,7 @@ namespace psy {
 	namespace host 
 	{
 
-		MachineView::MachineView( Song & song ) 
+		MachineView::MachineView( psy::core::Song & song ) 
 			: ngrs::Panel(), _pSong( &song )
 		{
 			setLayout( ngrs::AlignLayout() );
@@ -60,11 +60,11 @@ namespace psy {
 		}
 
 
-		void MachineView::onCreateMachine( Machine& mac )
+		void MachineView::onCreateMachine( psy::core::Machine& mac )
 		{
 		}
 
-		void MachineView::addMachine( Machine& mac )
+		void MachineView::addMachine( psy::core::Machine& mac )
 		{
 			onCreateMachine( mac );
 		}
@@ -83,7 +83,7 @@ namespace psy {
 			repaint();
 		}
 
-		MachineGUI * MachineView::findByMachine( Machine * mac )
+		MachineGUI * MachineView::findByMachine( psy::core::Machine * mac )
 		{
 			for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
 				MachineGUI* machineGUI = *it;
@@ -169,8 +169,8 @@ namespace psy {
 		void MachineView::rewire( WireGUI* line, MachineGUI* src, MachineGUI* dst ) {
 			if ( line ) {
 				// mapped engine machines
-				Machine* macSrc = line->dialog()->pSrcMachine();
-				Machine* macDst = line->dialog()->pDstMachine();
+				psy::core::Machine* macSrc = line->dialog()->pSrcMachine();
+				psy::core::Machine* macDst = line->dialog()->pDstMachine();
 				// find old attachments to Machine GUI`s
 				MachineGUI* oldSrcGUI = findByMachine( macSrc );
 				MachineGUI* oldDstGUI = findByMachine( macDst );
@@ -261,12 +261,12 @@ namespace psy {
 			}
 		}
 
-		void MachineView::onMoveMachine( Machine * mac, int x, int y )
+		void MachineView::onMoveMachine( psy::core::Machine * mac, int x, int y )
 		{
 			machineMoved.emit(mac,x,y);
 		}
 
-		Machine * MachineView::selMachine( )
+		psy::core::Machine * MachineView::selMachine( )
 		{
 			if ( selectedMachine_ )
 				return &selectedMachine_->mac();
@@ -293,7 +293,7 @@ namespace psy {
 			} 
 		}
 
-		void MachineView::setSelectedMachine( Machine* mac )
+		void MachineView::setSelectedMachine( psy::core::Machine* mac )
 		{
 			for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin(); it < machineGUIs.end(); it++ ) {
 				MachineGUI* machineGUI = *it;
