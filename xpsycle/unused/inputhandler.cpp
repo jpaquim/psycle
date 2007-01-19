@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,39 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#include "inputhandler.h"
 
-#include "patterndata.h"
-#include "patternsequence.h"
+namespace psycle {
+namespace host {
 
-namespace psycle
+InputHandler::InputHandler()
 {
-	namespace host
-	{
-
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
-
-		class Song
-		{
-			public:
-				Song();
-
-				virtual ~Song();
-
-				PatternSequence& patternSequence();
-
-			private:
-
-				PatternSequence patternSequence_;
-
-			
-		};
-	}
 }
 
-#endif
+
+InputHandler::~InputHandler()
+{
+}
+
+int InputHandler::getEnumCodeByKey( const Key & key )
+{
+  std::map<Key,int>::iterator itr;
+  if ( (itr = keyMap.find(key)) != keyMap.end() )
+      return itr->second;
+    else
+      return -1;
+}
+
+void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
+{
+  keyMap[key] = keyEnumCode;
+}
+
+Key::Key( int shift, int vkey )
+{
+  vkey_  = vkey;
+  shift_ = shift;
+}
+
+}
+}

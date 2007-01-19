@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,40 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#include "analyzer.h"
+#include <ngrs/window.h>
 
-#include "patterndata.h"
-#include "patternsequence.h"
+///\todo for scopes we need some mutex for the buffer
+///\todo scopes disabled
 
-namespace psycle
-{
-	namespace host
-	{
+namespace psycle { 
+  namespace host {
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+    Analyzer::Analyzer()
+      : ngrs::Panel()
+    {      
+    }
 
-		class Song
-		{
-			public:
-				Song();
 
-				virtual ~Song();
+    Analyzer::~Analyzer()
+    {
+    }
 
-				PatternSequence& patternSequence();
+    void Analyzer::paint( ngrs::Graphics& g )
+    {      
+    }
 
-			private:
+    void Analyzer::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
+    {
+    }
 
-				PatternSequence patternSequence_;
+    void psycle::host::Analyzer::clearMachineCallBack( )
+    {
+    }
 
-			
-		};
-	}
+    void Analyzer::onTimer( )
+    {
+    }
+
+  }
 }
-
-#endif

@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan Nattkemper  *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,55 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef PATDLG_H
+#define PATDLG_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+#include <ngrs/window.h>
 
-namespace psycle
-{
-	namespace host
+namespace ngrs {
+  class Button;
+  class SpinEdit;
+}
+
+namespace psycle { 
+	namespace host 
 	{
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+/**
+@author  Stefan
+*/
 
-		class Song
-		{
-			public:
-				Song();
+class PatDlg : public ngrs::Window
+{
+public:
+    PatDlg();
 
-				virtual ~Song();
+    ~PatDlg();
 
-				PatternSequence& patternSequence();
+    void setLineNumber( int lineNumber );
+    int lineNumber();
 
-			private:
+    bool adaptSize();
 
-				PatternSequence patternSequence_;
+    virtual int onClose();
+    bool execute( );
 
-			
-		};
-	}
+private:
+
+    int lineNumber_;
+    bool do_Execute;
+
+    ngrs::SpinEdit* lineNumEdit_;
+
+    void onOkBtn( ngrs::ButtonEvent* sender );
+    void onCancelBtn( ngrs::ButtonEvent* sender );
+
+    void onIncBtnClick( ngrs::ButtonEvent* ev );
+    void onDecBtnClick( ngrs::ButtonEvent* ev );
+
+};
+
+}
 }
 
 #endif

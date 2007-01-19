@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by Stefan Nattkemper  *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,67 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef JACKOUT_H
+#define JACKOUT_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+#if defined XPSYCLE__CONFIGURATION
+        #include <xpsycle/jack_conditional_build.h>
+#endif
+#if !defined XPSYCLE__NO_JACK
+
+#include "audiodriver.h"
+#include <jack/jack.h>
+#include <string>
 
 namespace psycle
 {
 	namespace host
 	{
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
-
-		class Song
+		class JackOut : public AudioDriver
 		{
-			public:
-				Song();
+		public:
 
-				virtual ~Song();
+			JackOut();
 
-				PatternSequence& patternSequence();
+			~JackOut();
 
-			private:
+			virtual AudioDriverInfo info() const;
 
-				PatternSequence patternSequence_;
+			virtual JackOut* clone()  const;   // Uses the copy constructor
 
-			
+			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+    			virtual bool Initialized();
+    			virtual void configure();
+    			virtual bool Enable(bool e);
+
+		private:
+
+			// psycle variables
+			bool _initialized;
+			void* _callbackContext;
+			AUDIODRIVERWORKFN _pCallback;
+			bool running_;
+
+			// jack variables
+			jack_port_t *output_port_1;
+			jack_port_t *output_port_2;
+
+			jack_client_t *client;
+			const char **ports;
+
+			std::string clientName_;
+			std::string serverName_;
+
+			bool registerToJackServer();
+
+			static int process (jack_nframes_t nframes, void *arg);
+			int fillBuffer( jack_nframes_t nframes );
+
 		};
-	}
-}
 
+	} // end of host namespace
+}	// end of psyclename space
+
+#endif // !defined XPSYCLE__NO_JACK
 #endif

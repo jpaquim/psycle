@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,43 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef MACPROPDLG_H
+#define MACPROPDLG_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+#include <ngrs/window.h>
+#include <ngrs/edit.h>
+#include "machinegui.h"
+#include "machine.h"
 
-namespace psycle
+/**
+@author  Stefan
+*/
+namespace psycle {
+namespace host {
+
+class MacPropDlg : public ngrs::Window
 {
-	namespace host
-	{
+public:
+    MacPropDlg(Machine *machine);
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+    ~MacPropDlg();
 
-		class Song
-		{
-			public:
-				Song();
+    virtual int onClose();
+    virtual void setVisible(bool on);
+    sigslot::signal1<Machine*> updateMachineProperties;
+    sigslot::signal0<> deleteMachine;
 
-				virtual ~Song();
+private:
 
-				PatternSequence& patternSequence();
+    Machine* pMach_;
+    ngrs::Edit* nameEdit_;
 
-			private:
+    void init();
+    void onOKBtn( ngrs::ButtonEvent *ev );
+    void onCloneBtn( ngrs::ButtonEvent *ev );
+    void onDeleteBtn( ngrs::ButtonEvent *ev );
 
-				PatternSequence patternSequence_;
-
-			
-		};
-	}
-}
+};
+}}
 
 #endif

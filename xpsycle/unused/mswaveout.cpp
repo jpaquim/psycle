@@ -21,7 +21,8 @@
 #if defined _WIN64 || defined _WIN32 || defined __CYGWIN__ || defined __MSYS__ || defined _UWIN
 
 #include "mswaveout.h"
-#include "tr1stdint.h"
+#include "cstdint.h"
+#include "helpers.h"
 #include <iostream>
 
 
@@ -201,7 +202,7 @@ namespace psycle
           // the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio
           InitializeCriticalSection( &waveCriticalSection );
           int bufSize = 1024 / 2;
-          psycle::tr1::int16_t buf[1024 / 2];
+          std::int16_t buf[1024 / 2];
           int newCount = bufSize / 2;        
           while ( _running ) {
               float const * input(_pCallback(_callbackContext, newCount));              
@@ -275,7 +276,7 @@ namespace psycle
 
 		void MsWaveOut::quantize(float *pin, int *piout, int c)
 		{
-			/*do
+			do
 			{
 				int r = f2i( (pin[1]) );
 				
@@ -299,10 +300,10 @@ namespace psycle
 					l = SHORT_MAX;
 				}
 
-				*piout++ = (r << 16) | static_cast<psycle::tr1::uint16_t>(l);
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
 			}
-			while(--c);*/
+			while(--c);
 		}
 	
 

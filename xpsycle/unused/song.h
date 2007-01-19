@@ -28,6 +28,9 @@ namespace psycle
 	namespace host
 	{
 
+		class PluginFinder;
+		class PluginFinderKey;
+
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines 
 		/// and their initial parameters and coordinates, wavetables
@@ -39,7 +42,8 @@ namespace psycle
 
 				virtual ~Song();
 
-				PatternSequence& patternSequence();
+				PatternSequence* patternSequence();
+				const PatternSequence& patternSequence() const;
 
 			private:
 
