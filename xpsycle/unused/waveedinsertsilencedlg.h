@@ -17,12 +17,11 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-
 #include <ngrs/dialog.h>
 
-namespace ngrs{
-  class Slider;
-  class Label;
+namespace ngrs {
+  class Edit;
+  class NCheckBox;
   class ButtonEvent;
 }
 
@@ -30,28 +29,29 @@ namespace psycle
 {
   namespace host
   {
-    class WaveEdCrossfadeDialog : public ngrs::Dialog
+    class WaveEdInsertSilenceDialog : public ngrs::Dialog
     {
     public:
-      WaveEdCrossfadeDialog();
+      WaveEdInsertSilenceDialog();
+      ngrs::Edit	*m_time;
+      ngrs::NCheckBox *m_atStart;
+      ngrs::NCheckBox *m_atEnd;
+      ngrs::NCheckBox *m_atCursor;
     public:
-      float srcStartVol;
-      float srcEndVol;
-      float destStartVol;
-      float destEndVol;
+      enum insertPosition
+      {
+        at_start=0,
+        at_end,
+        at_cursor
+      };
+      float timeInSecs;
+      insertPosition insertPos;
     protected:
       void onOkClicked( ngrs::ButtonEvent* ev );
       void onCancelClicked( ngrs::ButtonEvent* ev );
-      void onSliderMoved( ngrs::Slider* slider );
-    private:
-      ngrs::Slider		*m_srcStartVol;
-      ngrs::Slider		*m_srcEndVol;
-      ngrs::Slider		*m_destStartVol;
-      ngrs::Slider		*m_destEndVol;
-      ngrs::Label		*m_srcStartVolText;
-      ngrs::Label		*m_srcEndVolText;
-      ngrs::Label		*m_destStartVolText;
-      ngrs::Label		*m_destEndVolText;
+      void onInsStartClicked( ngrs::ButtonEvent* ev );
+      void onInsEndClicked( ngrs::ButtonEvent* ev );
+      void onInsCursorClicked( ngrs::ButtonEvent* ev );
     };
 
   }
