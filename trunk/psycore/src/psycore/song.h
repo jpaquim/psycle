@@ -39,7 +39,8 @@ namespace psy
 
 				virtual ~Song();
 
-				PatternSequence& patternSequence();
+				PatternSequence* patternSequence();
+                const PatternSequence & patternSequence() const;
 
 			private:
 

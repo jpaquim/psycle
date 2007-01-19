@@ -24,6 +24,7 @@
 #include "zoombar.h"
 #include <psycore/machine.h>
 #include <psycore/song.h>
+#include <psycore/patterndata.h>
 #include <ngrs/app.h>
 #include <ngrs/alignlayout.h>
 #include <ngrs/window.h>
@@ -140,7 +141,7 @@ namespace psy {
         }
 
         if ( it != end() ) {
-          psy::core::SinglePattern* pattern = pSong_->patternSequence().patternData()->findById( pattern_->id() );
+          psy::core::SinglePattern* pattern = pSong_->patternSequence()->patternData()->findById( pattern_->id() );
           if ( pattern ) {
             ngrs::Size changedBlock = lastUndoPattern->changedBlock();
             pattern->copyBlock( changedBlock.left(), changedBlock.top(), *lastUndoPattern, changedBlock.right() - changedBlock.left(), lastUndoPattern->beats() );

@@ -71,7 +71,7 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::setBpmChangeEvent( psy::core
   bpmEdt_->setText( stringify( event->parameter() ) );
 }
 
-GlobalEvent * SequencerBeatChangeLineal::BeatChangeTriangle::bpmChangeEvent( )
+psy::core::GlobalEvent * SequencerBeatChangeLineal::BeatChangeTriangle::bpmChangeEvent( )
 {
   return bpmChangeEvent_;
 }
@@ -176,7 +176,7 @@ void SequencerBeatChangeLineal::onMouseDoublePress( int x, int y, int button )
 {
   if (button == 1) {
     BeatChangeTriangle* triangle = new BeatChangeTriangle(sView);
-      GlobalEvent* bpmChangeEvent = sView->patternSequence()-> createBpmChangeEntry(x / (double) sView->beatPxLength() ,120.0f);
+      psy::core::GlobalEvent* bpmChangeEvent = sView->patternSequence()-> createBpmChangeEntry(x / (double) sView->beatPxLength() ,120.0f);
       triangle->setBpmChangeEvent(bpmChangeEvent);
       triangle->setPosition(x-15, 10,30,30);
     add(triangle);
@@ -198,7 +198,7 @@ void SequencerBeatChangeLineal::resize( )
   for ( ; it !=beatChanges.end(); it++) {
     BeatChangeTriangle* item = *it;
     double tickPosition = sView->patternSequence()->globalTickPosition(item->bpmChangeEvent() );
-    item->setPosition(d2i(sView->beatPxLength() * tickPosition) - 15,5,30,item->preferredHeight());
+    item->setPosition( d2i(sView->beatPxLength() * tickPosition) - 15,5,30,item->preferredHeight() );
   }
 }
 

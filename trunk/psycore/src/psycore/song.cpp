@@ -20,7 +20,11 @@ namespace psy {
     {
     }
 
-    PatternSequence& Song::patternSequence() {
+    PatternSequence* Song::patternSequence() {
+      return &patternSequence_;
+    }
+
+    const PatternSequence& Song::patternSequence() const {
       return patternSequence_;
     }
 
