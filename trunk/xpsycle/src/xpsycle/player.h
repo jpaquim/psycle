@@ -104,15 +104,11 @@ namespace psycle
 			// work function. (Entrance for the callback function (audiodriver)
 			static float * Work(void* context, int& nsamples);
 			
-			// used by the plugins to indicate that they need redraw.
-			bool Tweaker;
 
 			void lock();
 			void unlock();
 
-			
-
-		private:
+        private:
 
 			PlayerTimeInfo timeInfo_;
 
@@ -131,8 +127,6 @@ namespace psycle
 
 			float * Work(int nsamples);
 
-			// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
-			int prevMachines[MAX_TRACKS];
 			// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
 			int backup_rate;
 			// Stores the bitdepth of playback when recording to wave offline (non-realtime), since it can be changed.
@@ -140,7 +134,7 @@ namespace psycle
 			// Stores the channel mode (mono/stereo) of playback when recording to wave offline (non-realtime), since it can be changed.
 			int backup_channelmode;
 			// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
-			float _pBuffer[MAX_DELAY_BUFFER];
+			float _pBuffer[65335];
 			// file to which to output signal.
 			WaveFile _outputWaveFile;
 			// dither handler

@@ -59,10 +59,7 @@ namespace psycle {
       int isrcMac;
       float peakL,peakR;
       float peak2L,peak2R;
-      int peakLifeL,peakLifeR;
-
-      float pSamplesL[SCOPE_BUF_SIZE];
-      float pSamplesR[SCOPE_BUF_SIZE];
+      int peakLifeL,peakLifeR;    
 
       void onTimer();
 
