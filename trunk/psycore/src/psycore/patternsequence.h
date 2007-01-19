@@ -33,7 +33,7 @@
 
 namespace psycle
 {
-	namespace host
+	namespace core
 	{
 
 		const int PatternEnd = -1;

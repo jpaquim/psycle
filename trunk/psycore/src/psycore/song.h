@@ -25,7 +25,7 @@
 
 namespace psycle
 {
-	namespace host
+	namespace core
 	{
 
 		/// songs hold everything comprising a "tracker module",

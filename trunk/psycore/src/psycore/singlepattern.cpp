@@ -30,7 +30,7 @@
 
 namespace psycle
 {
-	namespace host
+	namespace core
 	{
 
 		TweakTrackInfo::TweakTrackInfo() :
@@ -174,7 +174,7 @@ namespace psycle
 			return false;
 		}
 
-		void host::SinglePattern::clearBars( )
+		void SinglePattern::clearBars( )
 		{
 			timeSignatures_.clear();
 		}
