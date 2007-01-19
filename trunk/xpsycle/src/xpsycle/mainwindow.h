@@ -23,7 +23,6 @@
 #include "songpdlg.h"
 #include "childview.h"
 #include "sequencerbar.h"
-#include "pluginfinder.h"
 #include <ngrs/window.h>
 #include <ngrs/menubar.h>
 #include <ngrs/menu.h>
@@ -55,10 +54,8 @@ namespace psycle {
     class GreetDlg;
     class AboutDlg;
     class VuMeter;
-    class InstrumentEditor;
     class InfoDlg;
     class SequencerItem;
-    class NewMachine;
     class AudioConfigDlg;
 
 
@@ -101,7 +98,6 @@ namespace psycle {
       ngrs::StatusModel statusBarData; // statusBar data for the mainWindow statusbar;
 
       bool oldPlayPos_;
-      PluginFinder pluginFinder_; // needs ctor_init_list
 
       ChildView* addChildView();
       ChildView* selectedChildView_;
@@ -141,7 +137,6 @@ namespace psycle {
       GreetDlg* greetDlg;
       InfoDlg*  infoDlg;
       ngrs::FileDialog* wavRecFileDlg;
-      NewMachine* newMachineDlg_;
 
       VuMeter* vuMeter_;
 

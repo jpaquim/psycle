@@ -21,7 +21,6 @@
 #define MACHINEGUI_H
 
 #include "skinreader.h"
-#include "macpropdlg.h"
 #include "wiregui.h"
 #include <ngrs/panel.h>
 

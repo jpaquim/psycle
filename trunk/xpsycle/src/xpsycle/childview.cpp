@@ -20,8 +20,6 @@
 #include "childview.h"
 #include "configuration.h"
 #include "player.h"
-#include "newmachine.h"
-#include "waveedframe.h"
 #include "sequencergui.h"
 #include "sequencerbar.h"
 #include "virtualpattern.h"
@@ -75,10 +73,7 @@ ChildView::ChildView()
   tabBook_->addPage(patDock,"Pattern View");
   tab = tabBook_->tab( patDock );
   tab->click.connect(this,&ChildView::onTabChange);
-  waveEd_ = new WaveEdFrame( song() );
-  tabBook_->addPage(waveEd_,"WaveEditor");
-  tab = tabBook_->tab( waveEd_ );
-  tab->click.connect(this,&ChildView::onTabChange);
+
   ngrs::Panel* seqGroup = new ngrs::Panel();
 		seqGroup->setLayout( ngrs::AlignLayout() );
     seqGroup->add( virtualPattern_, ngrs::nAlBottom);
@@ -175,14 +170,8 @@ void ChildView::onMachineViewDblClick( ngrs::ButtonEvent * ev )
   machineViewDblClick.emit( ev );
 }
 
-WaveEdFrame * ChildView::waveEditor( )
-{
-  return waveEd_;
-}
-
 void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
 {
-//  _pSong->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().track(),patternView_->cursor().line());
 }
 
 SequencerGUI * ChildView::sequencerView( )
@@ -219,7 +208,6 @@ void psycle::host::ChildView::showPatternView( )
 
 void psycle::host::ChildView::update( )
 {
-  waveEditor()->Notify();
   sequencerBar_->update();
   sequencerView()->update();
   machineView()->update();

@@ -24,7 +24,6 @@
 #include "player.h"
 #include "song.h"
 #include "machine.h"
-#include "internal_machines.h"
 
 #ifdef __unix__
 #include <unistd.h> // for OpenBSD usleep()
