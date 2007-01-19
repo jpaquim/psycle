@@ -24,6 +24,9 @@
 #include <map>
 
 namespace psycle {
+  namespace core {
+    class Machine;
+  }
   namespace host {
 
     class PrototypeMachineFactory : public AbstractMachineFactory {
@@ -33,15 +36,15 @@ namespace psycle {
 
       ~PrototypeMachineFactory();
 
-      virtual void registerMachine( int key, Machine& prototype );
-      virtual Machine* createMachine( int key ) const;
+      virtual void registerMachine( int key, psy::core::Machine& prototype );
+      virtual psy::core::Machine* createMachine( int key ) const;
 
       void setDeleteFlag( bool deletePrototypes );
 
     private:
 
       bool deleteProtoypes_;
-      std::map<int,Machine*> prototypeMap_;
+      std::map<int,psy::core::Machine*> prototypeMap_;
       
     };
 

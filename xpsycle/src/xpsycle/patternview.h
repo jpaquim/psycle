@@ -20,7 +20,6 @@
 #ifndef PATTERNVIEW_H
 #define PATTERNVIEW_H
 
-#include "patdlg.h"
 #include "custompatternview.h"
 #include "skinreader.h"
 #include <psycore/singlepattern.h>
@@ -189,7 +188,6 @@ namespace psy {
       private:
 
         ngrs::NPopupMenu* editPopup_;
-        PatDlg* patDlg;
         PatternView* pView;      
 
         bool isBlockCopied;

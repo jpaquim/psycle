@@ -23,7 +23,8 @@
 #include <ngrs/alignlayout.h>
 #include <cmath>
 
-namespace psy { namespace host {
+namespace psy { 
+  namespace host {
 
 WireDlg::WireDlg()
   : ngrs::Window()
@@ -100,7 +101,7 @@ int WireDlg::onClose( )
   return ngrs::nHideWindow;
 }
 
-void WireDlg::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
+void WireDlg::setMachines( psy::core::Machine * pSrcMachine, psy::core::Machine * pDstMachine )
 {
   _pSrcMachine = pSrcMachine;
   _pDstMachine = pDstMachine;
@@ -115,12 +116,12 @@ void WireDlg::onDeleteBtn( ngrs::ButtonEvent * ev )
   _pDstMachine = 0;
 }
 
-Machine * WireDlg::pSrcMachine( )
+psy::core::Machine * WireDlg::pSrcMachine( )
 {
   return _pSrcMachine;
 }
 
-Machine * WireDlg::pDstMachine( )
+psy::core::Machine * WireDlg::pDstMachine( )
 {
   return _pDstMachine;
 }

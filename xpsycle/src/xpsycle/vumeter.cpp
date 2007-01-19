@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include "vumeter.h"
 #include "skinreader.h"
-#include "machine.h"
+#include <psycore/machine.h>
 #include <cmath>
 
 #ifdef _MSC_VER
