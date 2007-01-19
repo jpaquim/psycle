@@ -20,7 +20,7 @@
 #include "abstractmachinefactory.h"
 
 namespace psy {
-  namespace host {
+  namespace core {
 
     AbstractMachineFactory::AbstractMachineFactory()
     {

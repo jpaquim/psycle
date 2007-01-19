@@ -20,19 +20,18 @@
 #ifndef ABSTRACTMACHINEFACTORY_H
 #define ABSTRACTMACHINEFACTORY_H
 
-namespace psy {
-  namespace core {
+namespace psy { 
+  namespace core {    
+
     class Machine;
-  }
-  namespace host {    
 
     class AbstractMachineFactory {
     public:
 
       AbstractMachineFactory( );
-      virtual ~AbstractMachineFactory();
+      virtual ~AbstractMachineFactory( );
 
-      virtual psy::core::Machine* createMachine( int key ) const = 0;
+      virtual Machine* createMachine(int key) const = 0;
 
     };
 
