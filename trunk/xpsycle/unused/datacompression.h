@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,25 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef DATACOMPRESSION_H
+#define DATACOMPRESSION_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+typedef unsigned char byte;
 
-namespace psycle
-{
-	namespace host
-	{
+class DataCompression {
+  public:
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+    DataCompression();
+    ~DataCompression();
+  // compresses.
+  static int BEERZ77Comp2(byte * pSource, byte ** pDestination, int size);
+  /// decompresses.
+  static bool BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination);
 
-		class Song
-		{
-			public:
-				Song();
-
-				virtual ~Song();
-
-				PatternSequence& patternSequence();
-
-			private:
-
-				PatternSequence patternSequence_;
-
-			
-		};
-	}
-}
+  /// squashes.
+  static int SoundSquash(signed short * pSource, byte ** pDestination, int size);
+  /// desquashes.
+  static bool SoundDesquash(byte * pSourcePos, signed short ** pDestination);
+};
 
 #endif

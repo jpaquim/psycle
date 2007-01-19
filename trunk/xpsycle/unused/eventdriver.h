@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,41 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+//
+//
+#ifndef PSYCLE_HOSTEVENTDRIVER_H
+#define PSYCLE_HOSTEVENTDRIVER_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+//namespace psycle {
+//namespace host {
 
-namespace psycle
-{
-	namespace host
-	{
+/**
+Base class for an event driver, such as a MIDI input driver.
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+@author Josep Ma Antolin,,,
+*/
+class EventDriver{
+public:
+	EventDriver();
 
-		class Song
-		{
-			public:
-				Song();
+	~EventDriver();
 
-				virtual ~Song();
 
-				PatternSequence& patternSequence();
+	/// 
+	virtual bool Open();
+	/// 
+	virtual bool Sync(int sampleoffset, int buffersize);
+	/// 
+	virtual void ReSync();
+	/// 
+	virtual bool Close( );
+	/// 
+	virtual bool Active();
 
-			private:
 
-				PatternSequence patternSequence_;
+};
 
-			
-		};
-	}
-}
+//}
+//}
 
 #endif

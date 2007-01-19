@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan Nattkemper   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,35 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef INFODLG_H
+#define INFODLG_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+#include <ngrs/window.h>
+#include <ngrs/memo.h>
 
-namespace psycle
+/**
+@author  Stefan Nattkemper
+*/
+
+namespace psycle { namespace host {
+
+class InfoDlg : public ngrs::Window
 {
-	namespace host
-	{
+public:
+    InfoDlg();
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+    ~InfoDlg();
 
-		class Song
-		{
-			public:
-				Song();
+    void loadFromFile(const std::string & fileName);
 
-				virtual ~Song();
+    virtual int onClose();
 
-				PatternSequence& patternSequence();
+private:
 
-			private:
+    ngrs::Memo* memo;
 
-				PatternSequence patternSequence_;
+};
 
-			
-		};
-	}
-}
+}}
 
 #endif

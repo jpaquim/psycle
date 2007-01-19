@@ -20,6 +20,7 @@
 #include "mainwindow.h"
 #include "configuration.h"
 #include "song.h"
+#include "player.h"
 #include "defaultbitmaps.h"
 #include "greetdlg.h"
 #include "vumeter.h"
@@ -204,7 +205,7 @@ namespace psycle {
       logoPnl->add( img , ngrs::nAlClient );
       pane()->add( logoPnl, ngrs::nAlTop );
 
-      audioConfigDlg = new AudioConfigDlg();
+      audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
       add( audioConfigDlg );	
 
       selectedChildView_ = addChildView();
@@ -224,6 +225,8 @@ namespace psycle {
     
     void MainWindow::enableSound( )
     {
+      AudioDriver* pOut = Global::pConfig()->_pOutputDriver;
+      Player::Instance()->setDriver( *pOut );  
     }
 
     ChildView* MainWindow::addChildView()
@@ -235,7 +238,7 @@ namespace psycle {
       childView_->machineViewDblClick.connect(this,&MainWindow::onNewMachine);
       childView_->machineView()->machineDeleted.connect(this,&MainWindow::onMachineDeleted);
       childView_->machineView()->machineNameChanged.connect(this, &MainWindow::onMachineNameChanged);
-      book->addPage( childView_, "test");
+      book->addPage( childView_, childView_->song()->name() + stringify( count ) );      
       ngrs::NTab* tab = book->tab( childView_ );
       tab->setSkin( songTabSkinNone, songTabSkinDown, 0 );
       book->setActivePage( childView_ );
@@ -257,7 +260,7 @@ namespace psycle {
 
       if (songMap.size() > 0) book->setTabBarVisible(true);
 
-//      Player::Instance()->song( childView_->song() );
+      Player::Instance()->song( childView_->song() );
 
       selectedChildView_ =  childView_;
 
@@ -278,10 +281,10 @@ namespace psycle {
         bool update = false;
         ChildView* view = it->second;
         if (view == selectedChildView_) {
-//          Player::Instance()->stop();
-//          Player::Instance()->song(0);       
-//          selectedChildView_ = 0;
-//          update = true;
+          Player::Instance()->stop();
+          Player::Instance()->song(0);       
+          selectedChildView_ = 0;
+          update = true;
         }
         songMap.erase(it);
         book->removePage(view);
@@ -291,7 +294,7 @@ namespace psycle {
           for ( ; songIt != songTabMap.end() ; songIt++ ) {
             if ( songIt->second == book->activePage() ) {
               selectedChildView_ = songIt->second;         
-//              Player::Instance()->song( selectedChildView_->song() );
+              Player::Instance()->song( selectedChildView_->song() );
               updateNewSong();
             } 
           }
@@ -310,8 +313,8 @@ namespace psycle {
       std::map<Object*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
       if ( it != songTabMap.end() ) {
         ChildView* view = it->second;
-//        Player::Instance()->stop();
-//        Player::Instance()->song( view->song() );
+        Player::Instance()->stop();
+        Player::Instance()->song( view->song() );
         selectedChildView_ = view;
         updateNewSong();
         pane()->repaint();
@@ -628,6 +631,7 @@ namespace psycle {
       genCombo_->setPreferredSize( 158, 20 );
       genCombo_->setIndex(0);
       genCombo_->enableFocus(false);
+      genCombo_->itemSelected.connect(this,&MainWindow::onGeneratorCbx);
       psycleToolBar_->add(genCombo_);
 
       img = new ngrs::Image();
@@ -721,7 +725,7 @@ namespace psycle {
         // pane()->repaint();
         if ( fileName != "" ) {
           // stop player
-//          Player::Instance()->stop();
+          Player::Instance()->stop();
           songpDlg_->setVisible(false);
           // disable audio driver
           //Global::configuration()._pOutputDriver->Enable(false);
@@ -729,7 +733,7 @@ namespace psycle {
           ChildView* newView = addChildView();  
           // load the song
           statusBarData.setText("loading \"" + openDialog->fileName() + "\"" );
-//          newView->song()->load(fileName);
+          newView->song()->load(fileName);
           // update gui to new song
           newView->update();
           updateNewSong();
@@ -768,7 +772,7 @@ namespace psycle {
       add( saveDialog );
 
       if ( saveDialog->execute() ) {
-//        selectedChildView_->song()->save( saveDialog->fileName() );
+        selectedChildView_->song()->save( saveDialog->fileName() );
       }
 
       //progressBar_->setVisible(true);
@@ -779,7 +783,7 @@ namespace psycle {
       ngrs::App::addRemovePipe( saveDialog );
     }
 
-    void MainWindow::onSongLoadProgress( const psycle::tr1::uint32_t & a, const psycle::tr1::uint32_t & b , const std::string & t)
+    void MainWindow::onSongLoadProgress( const std::uint32_t & a, const std::uint32_t & b , const std::string & t)
     {
       if (a == 4) {
         std::cout << "progress" << std::endl;
@@ -793,8 +797,8 @@ namespace psycle {
 
     void MainWindow::onBarStop( ngrs::ButtonEvent* ev )
     {
-//      bool pl = Player::Instance()->playing();
-//      Player::Instance()->stop();
+      bool pl = Player::Instance()->playing();
+      Player::Instance()->stop();
     }
 
     void MainWindow::closePsycle()
@@ -862,11 +866,11 @@ namespace psycle {
 
     bool MainWindow::checkUnsavedSong( )
     {
-      /*if ( !selectedChildView_ ) return true;
+      if ( !selectedChildView_ ) return true;
       Song* selectedSong_ = selectedChildView_->song();
       DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
-//      ngrs::MessageBox* box = new ngrs::MessageBox("Save changes of : "+selectedSong_->fileName+" ?");
+      ngrs::MessageBox* box = new ngrs::MessageBox("Save changes of : "+selectedSong_->fileName+" ?");
       box->setTitle("New Song");
       box->setButtonText("Yes","No","Abort");
       box->icon()->setSharedBitmap( &icons.alert() );
@@ -885,8 +889,7 @@ namespace psycle {
         break;
       }
       ngrs::App::addRemovePipe(box);
-      return result;*/
-      return 1;
+      return result;
     }  
 
     // Sequencer menu events
@@ -949,25 +952,25 @@ namespace psycle {
 
     void MainWindow::onHelpMenuReadme( ngrs::ButtonEvent * ev )
     {
-//      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "readme.txt" );
+      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "readme.txt" );
       infoDlg->setVisible(true);
     }
 
     void MainWindow::onHelpMenuWhatsNew( ngrs::ButtonEvent * ev )
     {
-//      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "keys.txt" );
+      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "keys.txt" );
       infoDlg->setVisible( true );
     }
 
     void MainWindow::onHelpMenuTweaking( ngrs::ButtonEvent * ev )
     {
-//      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "tweaking.txt" );
+      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "tweaking.txt" );
       infoDlg->setVisible( true );
     }
 
     void MainWindow::onHelpMenuKeys( ngrs::ButtonEvent * ev )
     {
-//      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "whatsnew.txt" );
+      infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "whatsnew.txt" );
       infoDlg->setVisible( true );
     }
 
@@ -1068,6 +1071,12 @@ namespace psycle {
     void MainWindow::onNewMachineDialogAdded( Machine * mac )
     {
     }
+
+    // ngrs::New index selected by a mouse click.
+    void MainWindow::onGeneratorCbx( ngrs::ItemEvent * ev )
+    {
+      onNewIndexGeneratorCbx();
+    }
    
     void MainWindow::onSequencerEntryClick( SequencerItem * item )
     {
@@ -1078,8 +1087,7 @@ namespace psycle {
     void MainWindow::onKeyPress( const ngrs::KeyEvent& event )
     {
       if ( selectedChildView_ ) {
-        int key = 0;
-        //Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
+        int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
         switch (key)
         {
         case cdefEditMachine:

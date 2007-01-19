@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,54 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef ANALYZER_H
+#define ANALYZER_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+#include "machine.h"
+#include <ngrs/panel.h>
+#include <ngrs/timer.h>
 
-namespace psycle
-{
-	namespace host
-	{
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+/**
+@author  Stefan
+*/
 
-		class Song
-		{
-			public:
-				Song();
+namespace psycle {
+  namespace host {
+  
+    class Analyzer : public ngrs::Panel
+    {
+    public:
+      Analyzer();
 
-				virtual ~Song();
+      ~Analyzer();
 
-				PatternSequence& patternSequence();
+      void setMachines(Machine* pSrcMachine, Machine* pDstMachine);
 
-			private:
+      void clearMachineCallBack();
 
-				PatternSequence patternSequence_;
+      virtual void paint( ngrs::Graphics& g );
 
-			
-		};
-	}
+    private:
+
+      ngrs::Timer timer;
+
+      int mode_;
+      float invol;
+      float mult;
+
+      Machine* _pSrcMachine;
+      Machine* _pDstMachine;
+      int _dstWireIndex;
+      int isrcMac;
+      float peakL,peakR;
+      float peak2L,peak2R;
+      int peakLifeL,peakLifeR;    
+
+      void onTimer();
+
+    };
+
+  }
 }
-
 #endif

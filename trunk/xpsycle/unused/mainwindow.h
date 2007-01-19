@@ -210,7 +210,7 @@ namespace psycle {
       void onPatternView( ngrs::ButtonEvent* ev );
       void onSequencerView( ngrs::ButtonEvent* ev );
 
-      void onSongLoadProgress( const psycle::tr1::uint32_t& , const psycle::tr1::uint32_t& , const std::string&);
+      void onSongLoadProgress( const std::uint32_t& , const std::uint32_t& , const std::string&);
       void onNewMachine( ngrs::ButtonEvent* ev );
 
       void onRecordWav( ngrs::ButtonEvent* ev );
@@ -245,6 +245,11 @@ namespace psycle {
       void onSeqAdded( SinglePattern* pattern );
 
       void onNewMachineDialogAdded( Machine* mac );
+
+      void onGeneratorCbx( ngrs::ItemEvent* ev );
+      void onNewIndexGeneratorCbx();
+      void changeGeneratorCbxViaKey( int dir ); 
+      void changeInstrumentCbxViaKey( int dir );
 
       void onSequencerEntryClick( SequencerItem* item );
       void onMachineSelected( Machine* mac );

@@ -1,5 +1,5 @@
 /***************************************************************************
-  *   Copyright (C) 2007 by  Stefan Nattkemper  *
+  *   Copyright (C) 2006 by  Stefan   *
   *   natti@linux   *
   *                                                                         *
   *   This program is free software; you can redistribute it and/or modify  *
@@ -17,37 +17,47 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef PSYCLEGLOBAL_H
+#define PSYCLEGLOBAL_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+#include <iostream>
 
-namespace psycle
-{
-	namespace host
+#pragma once
+
+    /**
+    @author  Stefan
+    */
+
+namespace psycle {
+  namespace host {
+
+    class Song;
+    class Configuration;
+
+    class Global{
+    public:
+        Global();
+
+        ~Global();
+
+        static Configuration* pConfig();
+        static Configuration & configuration();
+        static void log(std::string message);
+    };
+
+	template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)
 	{
-
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
-
-		class Song
-		{
-			public:
-				Song();
-
-				virtual ~Song();
-
-				PatternSequence& patternSequence();
-
-			private:
-
-				PatternSequence patternSequence_;
-
-			
-		};
+		if(pointer) delete pointer;
+		return pointer = new_value;
 	}
+
+	template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
+	{
+		if(pointer) delete [] pointer;
+		return pointer = new_value;
+	}
+
+  }
 }
 
 #endif

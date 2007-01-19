@@ -17,37 +17,20 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
-#ifndef SONG_H
-#define SONG_H
+#ifndef MACHINE_H
+#define MACHINE_H
 
-#include "patterndata.h"
-#include "patternsequence.h"
+namespace psycle {
+  namespace host {
 
-namespace psycle
-{
-	namespace host
-	{
+    class Machine {
+    public :
+      Machine();
+      virtual ~Machine();
+      virtual Machine* clone() const = 0;
+    };
 
-		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
-
-		class Song
-		{
-			public:
-				Song();
-
-				virtual ~Song();
-
-				PatternSequence& patternSequence();
-
-			private:
-
-				PatternSequence patternSequence_;
-
-			
-		};
-	}
+  }
 }
 
 #endif
