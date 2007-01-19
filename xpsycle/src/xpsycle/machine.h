@@ -17,14 +17,19 @@
   *   Free Software Foundation, Inc.,                                       *
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
+#ifndef MACHINE_H
+#define MACHINE_H
 
-namespace psycle
-{
-  namespace host
-  {
+namespace psycle {
+  namespace host {
 
-    Machine();
-    ~Machine();
+    class Machine {
+    public :
+      Machine();
+      virtual ~Machine();
+    };
 
   }
 }
+
+#endif

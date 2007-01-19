@@ -414,8 +414,6 @@ namespace psycle {
       void onAddBar( ngrs::ButtonEvent* ev );
       void onDeleteBar( ngrs::ButtonEvent* ev );
 
-      /// multi-key playback state stuff
-      int notetrack[MAX_TRACKS];
       int outtrack;
 
       void onZoomHBarPosChanged( ZoomBar* zoomBar, double newPos );
