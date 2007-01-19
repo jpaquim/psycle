@@ -22,9 +22,6 @@
 #include "sequencerbeatchangelineal.h"
 #include "singlepattern.h"
 #include "zoombar.h"
-#include "global.h"
-#include "player.h"
-#include "wavefileout.h"
 #include "defaultbitmaps.h"
 #include "configuration.h"
 
@@ -257,9 +254,8 @@ namespace psycle {
           xp = std::max(visualChild->preferredWidth(), xp);
         if ( visualChild == pLine() ) {
           if ( sView && sView->patternSequence() ) {
-            int xPos =  std::min( d2i(sView->beatPxLength() * sView->patternSequence()->tickLength()), d2i(Player::Instance()->playPos() * sView->beatPxLength()) );
-
-            pLine_->setPosition(  xPos, scrollDy(), 1, clientHeight() );
+            //int xPos =  std::min( d2i(sView->beatPxLength() * sView->patternSequence()->tickLength()), d2i(/*Player::Instance()->playPos() * sView->beatPxLength()) );
+            //pLine_->setPosition(  xPos, scrollDy(), 1, clientHeight() );
           }
         }
       }
@@ -284,15 +280,15 @@ namespace psycle {
     }
 
     void SequencerGUI::Area::onMoveEnd( const ngrs::MoveEvent & moveEvent ) {
-      Player::Instance()->stop();
-      Player::Instance()->setPlayPos( newBeatPos_ );
+/*      Player::Instance()->stop();
+      Player::Instance()->setPlayPos( newBeatPos_ );*/
       lockPlayLine_ = false;
     }
 
     void SequencerGUI::Area::onMoveStart( const ngrs::MoveEvent & moveEvent ) {
       lockPlayLine_ = true;
-      playing_ = Player::Instance()->playing();
-      newBeatPos_ = pLine_->left() / static_cast<double>( sView->beatPxLength() );
+/*      playing_ = Player::Instance()->playing();
+      newBeatPos_ = pLine_->left() / static_cast<double>( sView->beatPxLength() );*/
     }
     /// end of Area class
 
@@ -644,8 +640,6 @@ namespace psycle {
       setLayout( ngrs::AlignLayout() );
       patternSequence_ = 0;
       oldPlayPos_ = 0;
-
-      Player::Instance()->setFileName("test1.wav");
 
       counter = 0;
       beatPxLength_ = 5; // default value for one beat
@@ -1070,59 +1064,10 @@ namespace psycle {
 
     void SequencerGUI::onRenderAsWave( ngrs::ButtonEvent * ev )
     {
-      if (renderBtn->text()=="Stop rendering") {
-        Player::Instance()->stopRecording();
-        onRecordingTimer();
-        return;
-      }
-
-      AudioDriver* recordDriver = 0;
-
-      // get recordDriver from Configuration
-
-      std::map<std::string, AudioDriver*> & driverMap =  Global::pConfig()->driverMap();
-      std::map<std::string, AudioDriver*>::iterator it = driverMap.find( "wavefileout" );
-      if ( it != driverMap.end() ) {
-        recordDriver = it->second;
-      } else {
-        return;
-      }
-
-      // stop player
-      Player::Instance()->stop();
-
-      // disable driver
-      Player::Instance()->driver().Enable( false );
-
-      // save oldDriver
-      oldDriver = Player::Instance()->driver();		
-
-      // setRecordDriver to Player
-
-      Player::Instance()->setDriver( *recordDriver );
-
-      // change btn text
-      renderBtn->setText("Stop rendering");
-      toolBar_->resize();
-      toolBar_->repaint();
-
-      Player::Instance()->setAutoRecording(true);
-
-      Player::Instance()->start();
-
-      recStatusTimer.enableTimer();
     }
-
 
     void SequencerGUI::onRecordingTimer( )
     {
-      if ( !Player::Instance()->recording() ) {
-        Player::Instance()->setDriver( oldDriver );	
-        renderBtn->setText("Render As Wave");
-        toolBar_->resize();
-        toolBar_->repaint();
-        recStatusTimer.disableTimer();
-      }
     }
 
     void SequencerGUI::onAddLoop( ngrs::ButtonEvent* ev ) {
@@ -1153,7 +1098,7 @@ namespace psycle {
     }
 
     void SequencerGUI::updatePlayPos() {
-      if ( patternSequence() && scrollArea() && !scrollArea()->lockPlayLine() ) {
+/*      if ( patternSequence() && scrollArea() && !scrollArea()->lockPlayLine() ) {
         int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->playPos() * beatPxLength()));
         int oxPos = d2i(std::min(patternSequence()->tickLength()* beatPxLength(), oldPlayPos_ * beatPxLength()));
         if (oxPos != xPos) {
@@ -1162,7 +1107,7 @@ namespace psycle {
           scrollArea()->pLine()->repaint();
         }
         oldPlayPos_ = Player::Instance()->playPos();
-      }
+      }*/
     }
 
     /// loop item class

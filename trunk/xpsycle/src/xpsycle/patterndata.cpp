@@ -128,7 +128,7 @@ namespace psycle
 		std::string PatternCategory::toXml( ) const
 		{
 			std::ostringstream xml;
-			xml << "<category name='" << PsyFilter::replaceIllegalXmlChr( name() ) << "' color='" << color_ << "' >" << std::endl;
+//			xml << "<category name='" << PsyFilter::replaceIllegalXmlChr( name() ) << "' color='" << color_ << "' >" << std::endl;
 			for ( const_iterator it = begin(); it < end(); it++) {
 				SinglePattern* pattern = *it;
 				xml << pattern->toXml();

@@ -22,7 +22,6 @@
 
 #include "mswaveout.h"
 #include "cstdint.h"
-#include "helpers.h"
 #include <iostream>
 
 
@@ -276,7 +275,7 @@ namespace psycle
 
 		void MsWaveOut::quantize(float *pin, int *piout, int c)
 		{
-			do
+			/*do
 			{
 				int r = f2i( (pin[1]) );
 				
@@ -303,7 +302,7 @@ namespace psycle
 				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
 			}
-			while(--c);
+			while(--c);*/
 		}
 	
 

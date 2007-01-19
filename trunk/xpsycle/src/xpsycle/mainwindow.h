@@ -246,11 +246,6 @@ namespace psycle {
 
       void onNewMachineDialogAdded( Machine* mac );
 
-      void onGeneratorCbx( ngrs::ItemEvent* ev );
-      void onNewIndexGeneratorCbx();
-      void changeGeneratorCbxViaKey( int dir ); 
-      void changeInstrumentCbxViaKey( int dir );
-
       void onSequencerEntryClick( SequencerItem* item );
       void onMachineSelected( Machine* mac );
 

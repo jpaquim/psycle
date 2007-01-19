@@ -24,7 +24,6 @@
 #include "patternview.h"
 #include "song.h"
 #include "sequencerbar.h"
-#include "global.h"
 #include <ngrs/tabbook.h>
 #include <ngrs/timer.h>
 #include <ngrs/tabbook.h>

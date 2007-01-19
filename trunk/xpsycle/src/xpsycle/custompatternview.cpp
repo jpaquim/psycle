@@ -18,7 +18,6 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "configuration.h"
-#include "global.h"
 #include "custompatternview.h"
 #include "inputhandler.h"
 
@@ -766,7 +765,8 @@ namespace psycle {
 
     void CustomPatternView::onKeyPress( const ngrs::KeyEvent & event ) {
 
-      int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( event.shift(),event.scancode()));
+      int key = 0; 
+      //Global::pConfig()->inputHandler().getEnumCodeByKey(Key( event.shift(),event.scancode()));
 
       // Keybased block selection commands.
       if (key == cdefSelectUp || key == cdefSelectDn || 

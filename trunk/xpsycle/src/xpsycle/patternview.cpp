@@ -19,10 +19,8 @@
 ***************************************************************************/
 #include "patternview.h"
 #include "configuration.h"
-#include "global.h"
 #include "song.h"
 #include "inputhandler.h"
-#include "player.h"
 #include "machine.h"
 #include "defaultbitmaps.h"
 #include "zoombar.h"
@@ -142,7 +140,7 @@ namespace psycle {
         }
 
         if ( it != end() ) {
-          SinglePattern* pattern = pSong_->patternSequence()->patternData()->findById( pattern_->id() );
+          SinglePattern* pattern = pSong_->patternSequence().patternData()->findById( pattern_->id() );
           if ( pattern ) {
             ngrs::Size changedBlock = lastUndoPattern->changedBlock();
             pattern->copyBlock( changedBlock.left(), changedBlock.top(), *lastUndoPattern, changedBlock.right() - changedBlock.left(), lastUndoPattern->beats() );
@@ -423,7 +421,7 @@ namespace psycle {
       for( int i=4; i<=64; i++ ) {
         trackCombo_->add(new ngrs::Item(stringify(i)));
       }
-      trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
+//      trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
       toolBar->add(trackCombo_);
 
       sharpBtn_ = new ngrs::Button("#");
@@ -1016,14 +1014,10 @@ namespace psycle {
     void PatternView::TweakGUI::onKeyPress( const ngrs::KeyEvent& event ) {
       CustomPatternView::onKeyPress( event );
 
-      int key = Global::pConfig()->inputHandler().getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
+      int key = 0;
+      //Global::pConfig()->inputHandler().getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
       switch (key) {		
         case ' ':
-          if (Player::Instance()->playing() ) {
-            Player::Instance()->stop();
-          } else {
-            Player::Instance()->start();
-          }
           break;
         case cdefNavPageUp:
           {
@@ -1345,7 +1339,7 @@ namespace psycle {
 
         for (int y = startLine; y <= endLine; y++) {
           float position = y / (float) beatZoom();
-          if (!(y == pView->playPos()) || !Player::Instance()->playing() ) {
+          if (!(y == pView->playPos())/*!Player::Instance()->playing()*/ ) {
             if ( !(y % beatZoom())) {
               if ((pView->pattern()->barStart(position, signature) )) {
 
@@ -1424,7 +1418,7 @@ namespace psycle {
               }
             }
 
-            if ((y == pView->playPos() && Player::Instance()->playing() ) ) {
+            if ((y == pView->playPos() /*&& Player::Instance()->playing()*/ ) ) {
               int trackWidth = xEndByTrack( endTrack ) - dx();
               g.setForeground( playBarColor() );
               g.fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
@@ -1540,15 +1534,16 @@ namespace psycle {
       if ( !pView->pattern() ) return;
       CustomPatternView::onKeyPress( event );
 
-      int command = Global::pConfig()->inputHandler().getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
+      int command = 0;
+      //Global::pConfig()->inputHandler().getEnumCodeByKey( Key( event.shift(), event.scancode() ) );
       switch (command) {		
         case cdefEditToggle:
           // FIXME: needs to toggle edit mode...
-          if (Player::Instance()->playing() ) {
+/*          if (Player::Instance()->playing() ) {
             Player::Instance()->stop();
           } else {
             Player::Instance()->start(0);
-          }
+          }*/
           break;
         case cdefNavPageUp:
           {
@@ -1709,7 +1704,8 @@ namespace psycle {
         if (!( event.shift() & ngrs::nsCtrl )) {
           // We don't want a note to fire if ctrl is held down.
           std::cout << "event #0 - note event" << std::endl;
-          int note = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( ngrs::nsNone,event.scancode()));
+          int note = 0;
+          //Global::pConfig()->inputHandler().getEnumCodeByKey(Key( ngrs::nsNone,event.scancode()));
           if ( note == cdefKeyStop ) {
             pView->undoManager().addUndo( cursor() );
             pView->noteOffAny( cursor() );
@@ -2111,7 +2107,8 @@ namespace psycle {
       if ( !pView->pattern() ) return;
 
       if ( cursor().eventNr() == 0 ) {
-        int outnote = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(ngrs::nsNone,event.scancode()));
+        int outnote = 0;
+        //Global::pConfig()->inputHandler().getEnumCodeByKey(Key(ngrs::nsNone,event.scancode()));
         pView->StopNote( outnote );
       }
     }
@@ -2240,9 +2237,9 @@ namespace psycle {
 
     void PatternView::onTrackChange( ngrs::ItemEvent * ev )
     {
-      pSong()->setTracks( ngrs::str<int>( ev->item()->text() ) );
-      drawArea->setTrackNumber( pSong()->tracks() ); 
-      updateRange();
+//      pSong()->setTracks( ngrs::str<int>( ev->item()->text() ) );
+//      drawArea->setTrackNumber( pSong()->tracks() ); 
+//      updateRange();
       //if (cursor().track() >= pSong()->tracks() )
       //{
       //  setCursor( PatCursor( pSong()->tracks() ,cursor().line(),0,0) );
@@ -2299,7 +2296,7 @@ namespace psycle {
 
 
     void PatternView::onTick( double sequenceStart ) {
-      if (pattern_) {
+      /*if (pattern_) {
         int liney = d2i ( (Player::Instance()->playPos() - sequenceStart) * pattern_->beatZoom());
         if (liney != playPos_ ) {			
           int oldPlayPos = playPos_;
@@ -2309,7 +2306,7 @@ namespace psycle {
           window()->repaint( drawArea , drawArea->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ));	
           window()->repaint( drawArea , drawArea->repaintTrackArea( liney,liney, startTrack, endTrack ));
         }
-      }
+      }*/
     }
 
     void PatternView::onStartPlayBar() {

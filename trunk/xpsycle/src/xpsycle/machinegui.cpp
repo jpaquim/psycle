@@ -54,11 +54,6 @@ namespace psycle {
 			return *mac_;
 		}
 
-		MacPropDlg * MachineGUI::propsDlg( )
-		{
-			return propsDlg_;
-		}
-
 		void MachineGUI::paint( ngrs::Graphics& g )
 		{
 			if (selected_) {
@@ -180,7 +175,6 @@ namespace psycle {
 			} else if ( shift & ngrs::nsLeft ) { // left-click (w/ no shift)
 				selected.emit(this);
 			} else if ( button == 2) {
-				showPropsDlg();
 			}
 		}
 

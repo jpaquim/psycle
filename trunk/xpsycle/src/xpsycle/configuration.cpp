@@ -20,7 +20,6 @@
 
 #include "configuration.h"
 #include "song.h"
-#include "global.h"
 #ifdef __unix__
 #include "alsaout.h"
 #include "jackout.h"

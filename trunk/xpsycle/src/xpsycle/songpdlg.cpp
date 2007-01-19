@@ -87,10 +87,10 @@ int SongpDlg::onClose( )
 void SongpDlg::setVisible( bool on )
 {
   if (pSong_ && on) {
-      songTitle_->setText(pSong_->name() );
+/*      songTitle_->setText(pSong_->name() );
       songCredits_->setText(pSong_->author() );
       songComments_->setText(pSong_->comment() );
-      setPositionToScreenCenter();
+      setPositionToScreenCenter();*/
   }
   ngrs::Window::setVisible(on);
 }
@@ -98,9 +98,9 @@ void SongpDlg::setVisible( bool on )
 void SongpDlg::onOkBtn( ngrs::ButtonEvent * ev )
 {
   if (pSong_) {
-   pSong_->setName( songTitle_->text() );
+/*   pSong_->setName( songTitle_->text() );
    pSong_->setAuthor( songCredits_->text() );
-   pSong_->setComment( songComments_->text() );
+   pSong_->setComment( songComments_->text() );*/
    setVisible(false);
   }
 }
