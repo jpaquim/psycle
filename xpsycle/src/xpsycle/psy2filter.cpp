@@ -396,7 +396,7 @@ namespace psycle
 			return true;
 		}
 		
-		#ifdef __unix__
+        #ifdef __psy2__
 		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter)
 		{
 			std::int32_t i;
