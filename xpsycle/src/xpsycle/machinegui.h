@@ -29,14 +29,14 @@ namespace ngrs {
 }
 
 namespace psy {
-  namespace host {
-
+  namespace core {
     class Machine;
-    
+  }
+  namespace host {            
+
     /**
     @author  Stefan Nattkemper
     */
-
     class MachineGUI : public ngrs::Panel
     {
       class LineAttachment {
@@ -62,19 +62,19 @@ namespace psy {
       };
 
     public:
-      MachineGUI( Machine & mac );
+      MachineGUI( psy::core::Machine & mac );
 
       virtual ~MachineGUI() = 0;
 
       sigslot::signal1<MachineGUI*> deleteRequest;
 
-      Machine & mac();
+      psy::core::Machine & mac();
 
       void attachLine( WireGUI* line, int point );
       void detachLine( WireGUI* line );
 
       sigslot::signal1<MachineGUI*> newConnection;
-      sigslot::signal3<Machine*,int,int> moved;
+      sigslot::signal3<psy::core::Machine*,int,int> moved;
       sigslot::signal3<int,int,int> patternTweakSlide;
       sigslot::signal1<MachineGUI*> selected;
 
@@ -104,7 +104,7 @@ namespace psy {
 
       bool selected_;
       ngrs::Region oldDrag;
-      Machine* mac_;		
+      psy::core::Machine* mac_;		
       MachineCoordInfo coords_;
       std::vector<LineAttachment> attachedLines;
 
@@ -115,7 +115,7 @@ namespace psy {
     class MasterGUI : public MachineGUI
     {
     public:
-      MasterGUI( Machine & mac );
+      MasterGUI( psy::core::Machine & mac );
 
       ~MasterGUI();
 
@@ -156,7 +156,7 @@ namespace psy {
 
       };
 
-      GeneratorGUI( Machine & mac );
+      GeneratorGUI( psy::core::Machine & mac );
 
       ~GeneratorGUI();
 
@@ -206,7 +206,7 @@ namespace psy {
       };
 
 
-      EffektGUI( Machine & mac );
+      EffektGUI( psy::core::Machine & mac );
 
       ~EffektGUI();
 

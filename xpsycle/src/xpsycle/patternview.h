@@ -45,10 +45,10 @@ namespace ngrs {
 class ZoomBar;
 
 namespace psy { 
-  namespace host {
-
-
+  namespace core {
     class Song;
+  }
+  namespace host {    
 
     class UndoPattern : public psy::core::SinglePattern {
     public  :
@@ -77,8 +77,8 @@ namespace psy {
       PatternUndoManager( );
       ~PatternUndoManager();
 
-      void setSong( Song* pSong  );
-      void setPattern( SinglePattern* pattern );
+      void setSong( psy::core::Song* pSong  );
+      void setPattern( psy::core::SinglePattern* pattern );
       void addUndo( const ngrs::Size & block, const PatCursor & cursor );
       void addUndo( const PatCursor & cursor );
 
@@ -86,8 +86,8 @@ namespace psy {
 
     private:
 
-      SinglePattern* pattern_;
-      Song* pSong_;
+      psy::core::SinglePattern* pattern_;
+      psy::core::Song* pSong_;
 
     };
 
@@ -209,7 +209,7 @@ namespace psy {
         void onPopupTranspose_12( ngrs::ButtonEvent* ev );
         void onPopupPattern( ngrs::ButtonEvent* ev );
 
-        SinglePattern pasteBuffer;
+        psy::core::SinglePattern pasteBuffer;
         void onTagParse( const ngrs::XmlParser & parser, const std::string & tagName );
         float lastXmlLineBeatPos;
         int xmlTracks;
@@ -278,11 +278,11 @@ namespace psy {
 
       friend class Header;
 
-      PatternView( Song * song );
+      PatternView( psy::core::Song * song );
 
       ~PatternView();
 
-      Song* pSong();
+      psy::core::Song* pSong();
 
       sigslot::signal1<int> lineChanged;
 
@@ -337,8 +337,8 @@ namespace psy {
       ngrs::Rect repaintLineNumberArea( int startLine, int endLine );
       void repaintLineNumber( int startLine, int endLine );
 
-      void setPattern( SinglePattern* pattern );
-      SinglePattern* pattern();
+      void setPattern( psy::core::SinglePattern* pattern );
+      psy::core::SinglePattern* pattern();
 
       void setBeatZoom( int tpb );
       int beatZoom() const;
@@ -367,8 +367,8 @@ namespace psy {
 
     private:
 
-      Song* _pSong;
-      SinglePattern* pattern_;
+      psy::core::Song* _pSong;
+      psy::core::SinglePattern* pattern_;
       ngrs::XmlParser xmlParser;
       PatternUndoManager undoManager_;
 

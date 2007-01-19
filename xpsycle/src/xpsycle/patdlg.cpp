@@ -18,7 +18,6 @@
   *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
   ***************************************************************************/
 #include "patdlg.h"
-#include "constants.h"
 #include <ngrs/spinedit.h>
 #include <ngrs/button.h>
 #include <ngrs/panel.h>
@@ -102,10 +101,6 @@ void PatDlg::onCancelBtn( ngrs::ButtonEvent* sender )
 
 void PatDlg::setLineNumber(int lineNumber )
 {
-  if (lineNumber_ > MAX_LINES && lineNumber_ < 0) lineNumber = 0;
-
-  lineNumEdit_->setText(stringify(lineNumber));
-  lineNumEdit_->repaint();
 }
 
 bool PatDlg::adaptSize() {

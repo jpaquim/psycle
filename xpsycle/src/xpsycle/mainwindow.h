@@ -242,12 +242,12 @@ namespace psy {
 
       int close();
 
-      void onSeqAdded( SinglePattern* pattern );
+      void onSeqAdded( psy::core::SinglePattern* pattern );
 
-      void onNewMachineDialogAdded( Machine* mac );
+      void onNewMachineDialogAdded( psy::core::Machine* mac );
 
       void onSequencerEntryClick( SequencerItem* item );
-      void onMachineSelected( Machine* mac );
+      void onMachineSelected( psy::core::Machine* mac );
 
       void onCloseSongTabPressed( ngrs::ButtonEvent* ev );
       void onTabChange( ngrs::ButtonEvent* ev );

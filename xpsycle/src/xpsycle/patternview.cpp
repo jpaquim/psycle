@@ -19,11 +19,11 @@
 ***************************************************************************/
 #include "patternview.h"
 #include "configuration.h"
-#include "song.h"
 #include "inputhandler.h"
-#include "machine.h"
 #include "defaultbitmaps.h"
 #include "zoombar.h"
+#include <psycore/machine.h>
+#include <psycore/song.h>
 #include <ngrs/app.h>
 #include <ngrs/alignlayout.h>
 #include <ngrs/window.h>

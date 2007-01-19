@@ -35,7 +35,7 @@ const std::string PSYCLE__VERSION="X";
 ChildView::ChildView()
   : ngrs::Panel()
 {
-  _pSong = new Song();
+  _pSong = new psy::core::Song();
 
   setLayout( ngrs::AlignLayout() );
 
@@ -154,7 +154,7 @@ SequencerGUI * ChildView::sequencerView( )
   return sequencerView_;
 }
 
-Song * ChildView::song( )
+psy::core::Song * ChildView::song( )
 {
   return _pSong;
 }

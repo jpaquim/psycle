@@ -30,10 +30,10 @@ namespace ngrs {
 }
 
 namespace psy { 
-  namespace host {
-
+  namespace core {
     class Song;
-
+  }
+  namespace host {   
     /**
     @author  Stefan
     */
@@ -47,7 +47,7 @@ namespace psy {
       virtual int onClose();
       virtual void setVisible( bool on );
 
-      void setSong( Song* pSong );
+      void setSong( psy::core::Song* pSong );
 
     private:
 
@@ -57,7 +57,7 @@ namespace psy {
       ngrs::Button* okBtn_;
       ngrs::Button* cnclBtn_;
 
-      Song* pSong_;
+      psy::core::Song* pSong_;
 
       void init();
       void onOkBtn( ngrs::ButtonEvent* ev );

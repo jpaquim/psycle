@@ -27,12 +27,14 @@
 #include <ngrs/popupmenu.h>
 
 namespace psy {
+  namespace core {
+    class Song;
+    class Machine;
+  }
+
 	namespace host {
 
-
-		class Machine;
-		class MachineGUI;
-		class Song;
+		class MachineGUI;		
 
 		/**
 		@author  Stefan Nattkemper
@@ -42,14 +44,14 @@ namespace psy {
 		{
 		public:
 			
-			MachineView( Song & song );
+          MachineView( psy::core::Song& song );
 
 			~MachineView();
 
-			void setSelectedMachine( Machine* mac);
+			void setSelectedMachine( psy::core::Machine* mac);
 
 			void createGUIMachines();
-			void addMachine( Machine & mac );
+			void addMachine( psy::core::Machine& mac );
 			void removeMachines();
 
 			void update();
@@ -57,13 +59,13 @@ namespace psy {
 
 			Panel* scrollArea();
 
-			sigslot::signal1<Machine*> selected;
-			sigslot::signal3<Machine*, int, int> machineMoved;
+			sigslot::signal1<psy::core::Machine*> selected;
+			sigslot::signal3<psy::core::Machine*, int, int> machineMoved;
 			sigslot::signal3<int,int,int> patternTweakSlide;
 			sigslot::signal1<int> machineDeleted;
 			sigslot::signal1<int> machineNameChanged;
 
-			Machine* selMachine();
+			psy::core::Machine* selMachine();
 
 			void updateSkin();
 			void setColorInfo( const MachineViewColorInfo & info );
@@ -72,7 +74,7 @@ namespace psy {
 
 		private:
 
-			Song* _pSong;
+			psy::core::Song* _pSong;
 			MachineViewColorInfo colorInfo_;
 
 			MachineGUI* startGUI;
@@ -89,7 +91,7 @@ namespace psy {
 
 			void init();
 
-			void onCreateMachine( Machine & mac );
+			void onCreateMachine( psy::core::Machine& mac );
 			void onNewConnection( MachineGUI* sender );
 
 			void onLineMoveStart( const ngrs::MoveEvent & event );
@@ -98,15 +100,15 @@ namespace psy {
             void onWireGUIDelete( WireGUI * line );
 			void onWireDelete( WireDlg* dlg );
 			void onWireSelected( ngrs::ButtonEvent* ev );
-			void onMoveMachine( Machine* mac, int x, int y );
+			void onMoveMachine( psy::core::Machine* mac, int x, int y );
 
-			MachineGUI* findByMachine( Machine* mac );
+			MachineGUI* findByMachine( psy::core::Machine* mac );
 	
 			void onTweakSlide( int machine, int command, int value );
 			void onMachineSelected( MachineGUI* gui );
 
 			void onMachineDeleteRequest( MachineGUI* machineGUI );
-			void onUpdateMachinePropertiesSignal( Machine* machine );
+			void onUpdateMachinePropertiesSignal( psy::core::Machine* machine );
 
 			void onBendAdded( WireGUI* gui );
 			void setSelectedWire( ngrs::Object* wire );

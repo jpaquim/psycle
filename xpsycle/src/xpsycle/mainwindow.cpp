@@ -19,7 +19,6 @@
 ***************************************************************************/
 #include "mainwindow.h"
 #include "configuration.h"
-#include "song.h"
 #include "defaultbitmaps.h"
 #include "greetdlg.h"
 #include "vumeter.h"
@@ -27,7 +26,7 @@
 #include "sequencergui.h"
 #include "audioconfigdlg.h"
 #include "skinreader.h"
-#include <iomanip>
+#include <psycore/song.h>
 #include <ngrs/app.h>
 #include <ngrs/item.h>
 #include <ngrs/checkmenuitem.h>
@@ -39,6 +38,7 @@
 #include <ngrs/filedialog.h>
 #include <ngrs/system.h>
 #include <ngrs/toolbarpanel.h>
+#include <iomanip>
 
 namespace psy { 
   namespace host {
@@ -833,7 +833,7 @@ namespace psy {
     {
     }
 
-    void MainWindow::onMachineSelected( Machine* mac ) {
+    void MainWindow::onMachineSelected( psy::core::Machine* mac ) {
     }
 
     void MainWindow::onTimer( )
@@ -1059,13 +1059,13 @@ namespace psy {
     {
     }
 
-    void MainWindow::onSeqAdded( SinglePattern * pattern )
+    void MainWindow::onSeqAdded( psy::core::SinglePattern * pattern )
     {
       if ( !selectedChildView_ ) return;
       selectedChildView_->sequencerView()->addPattern( pattern);
     }
 
-    void MainWindow::onNewMachineDialogAdded( Machine * mac )
+    void MainWindow::onNewMachineDialogAdded( psy::core::Machine * mac )
     {
     }
    

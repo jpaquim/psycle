@@ -89,8 +89,8 @@ namespace psy {
 
       void setText(const std::string & text);
 
-      void setSequenceEntry(SequenceEntry* entry);
-      SequenceEntry* sequenceEntry();
+      void setSequenceEntry( psy::core::SequenceEntry* entry );
+      psy::core::SequenceEntry* sequenceEntry();
 
       void setSelected(bool on);
       bool selected();
@@ -111,7 +111,7 @@ namespace psy {
 
       bool selected_;
 
-      SequenceEntry* sequenceEntry_;
+      psy::core::SequenceEntry* sequenceEntry_;
       SequencerGUI* sView;
 
       ngrs::Region entriesInRegion();
@@ -142,13 +142,13 @@ namespace psy {
 
         virtual void removeChild( ngrs::VisualComponent* item );
 
-        void setSequenceLine( SequenceLine* line );
-        SequenceLine* sequenceLine();
+        void setSequenceLine( psy::core::SequenceLine* line );
+        psy::core::SequenceLine* sequenceLine();
 
-        void addItem( SinglePattern* pattern );
-        void removeItems( SinglePattern* pattern );
+        void addItem( psy::core::SinglePattern* pattern );
+        void removeItems( psy::core::SinglePattern* pattern );
 
-        std::vector<SequencerItem*> itemsByPattern( SinglePattern* pattern );
+        std::vector<SequencerItem*> itemsByPattern( psy::core::SinglePattern* pattern );
 
         virtual void resize();
 
@@ -158,7 +158,7 @@ namespace psy {
 
       private:
 
-        SequenceLine* seqLine_;
+        psy::core::SequenceLine* seqLine_;
         SequencerGUI* sView;
 
       };
@@ -230,13 +230,13 @@ namespace psy {
 
       sigslot::signal1<SequencerItem*> entryClick;
 
-      void setPatternSequence( PatternSequence* sequence );
-      PatternSequence* patternSequence();
+      void setPatternSequence( psy::core::PatternSequence* sequence );
+      psy::core::PatternSequence* patternSequence();
 
-      void addPattern( SinglePattern* pattern );
-      void removePattern( SinglePattern* pattern );
+      void addPattern( psy::core::SinglePattern* pattern );
+      void removePattern( psy::core::SinglePattern* pattern );
 
-      std::vector<SequencerItem*> guiItemsByPattern( SinglePattern* pattern );
+      std::vector<SequencerItem*> guiItemsByPattern( psy::core::SinglePattern* pattern );
 
       int beatPxLength() const;
 
@@ -275,7 +275,7 @@ namespace psy {
       SequencerBeatChangeLineal* beatChangeLineal_;
       SequencerLine* lastLine;
       std::vector<SequencerItem*> selectedItems_;
-      PatternSequence* patternSequence_;
+      psy::core::PatternSequence* patternSequence_;
       std::vector<SequencerLine*> lines;
 
       ngrs::ScrollBar* hBar;
