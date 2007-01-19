@@ -19,9 +19,6 @@
  ***************************************************************************/
 #include "psyfilter.h"
 
-#include "psy2filter.h"
-#include "psy3filter.h"
-#include "psy4filter.h"
 
 namespace psycle
 {
@@ -36,9 +33,6 @@ namespace psycle
 		{
 			if (c==0) {
 				c++;
-				filters.push_back( Psy2Filter::Instance() );
-				filters.push_back( Psy3Filter::Instance() );
-				filters.push_back( Psy4Filter::Instance() );
 			}
 		}
 

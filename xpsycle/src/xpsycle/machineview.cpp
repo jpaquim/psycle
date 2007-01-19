@@ -21,7 +21,6 @@
 #include "song.h"
 #include "machine.h"
 #include "machinegui.h"
-#include "plugin.h"
 #include "wiredlg.h"
 #include <ngrs/autoscrolllayout.h>
 #include <ngrs/alignlayout.h>
@@ -63,31 +62,6 @@ namespace psycle {
 
 		void MachineView::onCreateMachine( Machine& mac )
 		{
-			MachineGUI* macGui = 0;
-			switch ( mac.mode() ) {							
-				case MACHMODE_GENERATOR:
-					macGui = new GeneratorGUI( mac );
-				break;
-				case MACHMODE_FX:
-					macGui = new EffektGUI( mac );
-				break;
-				case MACHMODE_MASTER: {
-					macGui = new MasterGUI( mac );
-				break;
-				default:
-					macGui = 0;
-				}
-			}
-			if ( macGui ) {
-				macGui->moved.connect(this,&MachineView::onMoveMachine);
-				macGui->newConnection.connect(this,&MachineView::onNewConnection);
-				macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
-				macGui->selected.connect(this,&MachineView::onMachineSelected);
-				macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
-				macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
-				scrollArea_->add(macGui);
-				machineGUIs.push_back(macGui);
-			}
 		}
 
 		void MachineView::addMachine( Machine& mac )
@@ -97,41 +71,6 @@ namespace psycle {
 
 		void MachineView::createGUIMachines( )
 		{
-			// add Gui to Machine
-			for(int c=0;c<MAX_MACHINES;c++)
-			{
-				Machine* mac = _pSong->_pMachine[c];
-				if (mac) { 
-                  onCreateMachine( *mac ); 
-                }
-			}
-
-			// add Wires
-			for(int c=0;c<MAX_MACHINES;c++)
-			{
-				Machine* tmac = _pSong->_pMachine[c];
-				if (tmac) for (int w=0; w<MAX_CONNECTIONS; w++)
-				{
-					if (tmac->_connection[w]) {
-						MachineGUI* from = findByMachine(tmac);
-						if (from!=0) {
-							Machine* pout = _pSong->_pMachine[tmac->_outputMachines[w]];
-							MachineGUI* to = findByMachine(pout);
-							if (to != 0) {
-								WireGUI* line = new WireGUI();
-								wireGUIs.push_back( line );
-								line->setPoints(ngrs::NPoint(10,10),ngrs::NPoint(100,100));
-								scrollArea_->insert(line,0);
-								from->attachLine(line,0);
-								to->attachLine(line,1);
-								line->dialog()->setMachines(tmac,pout);
-								line->dialog()->deleteMe.connect(this,&MachineView::onWireDelete);
-								line->removeMe.connect( this, &MachineView::onWireGUIDelete );
-							}
-						}
-					}
-				}
-			}
 		}
 
 		void MachineView::update( )
@@ -206,7 +145,7 @@ namespace psycle {
 			} else  
 				if ( connectToMachineGUI ) {
 					// a new line has been added.
-					_pSong->InsertConnection( startGUI->mac()._macIndex , connectToMachineGUI->mac()._macIndex, 1.0f );
+//					_pSong->InsertConnection( startGUI->mac()._macIndex , connectToMachineGUI->mac()._macIndex, 1.0f );
 					startGUI->attachLine( line, 0 );
 					connectToMachineGUI->attachLine(line,1);
 					line->dialog()->setMachines( &startGUI->mac(), &connectToMachineGUI->mac() );
@@ -240,22 +179,12 @@ namespace psycle {
 				oldSrcGUI->detachLine( line ); 
 
 				// detach the Engine wire	
-				Player::Instance()->lock();	
-				int wireIndex    = macDst->FindOutputWire( macDst->_macIndex );
-				int dstWireIndex = macDst->FindInputWire( macSrc->_macIndex );
-				macSrc->_connection[wireIndex] = false;
-				macSrc->_outputMachines[wireIndex] = -1;
-				macSrc->_connectedOutputs--;
 
-				macDst->_inputCon[dstWireIndex] = false;
-				macDst->_inputMachines[dstWireIndex]=-1;
-				macDst->_connectedInputs--;    
-				Player::Instance()->unlock();
 				// attach GUI wire
 				src->attachLine( line, 0 );
 				dst->attachLine( line, 1 );
 				// insert in Engine
-				_pSong->InsertConnection( macSrc->_macIndex , macDst->_macIndex, 1.0f);
+
 				// reset wire dialog to new machines
 				line->dialog()->setMachines( &src->mac(), &dst->mac() );  
 			}
@@ -265,26 +194,9 @@ namespace psycle {
         void MachineView::onWireGUIDelete( WireGUI * line ) {
           onWireDelete( line->dialog() );
         }
+
 		void MachineView::onWireDelete( WireDlg * dlg )
 		{
-			Player::Instance()->lock();
-
-			// dlg->pSrcMachine()->Disconnect(*dlg->pDstMachine());
-			Machine* _pSrcMachine = dlg->pSrcMachine();
-			Machine* _pDstMachine = dlg->pDstMachine();
-
-			int wireIndex = dlg->pSrcMachine()->FindOutputWire(_pDstMachine->_macIndex);
-			int dstWireIndex = _pDstMachine->FindInputWire(_pSrcMachine->_macIndex);
-
-			_pSrcMachine->_connection[wireIndex] = false;
-			_pSrcMachine->_outputMachines[wireIndex] = -1;
-			_pSrcMachine->_connectedOutputs--;
-
-			_pDstMachine->_inputCon[dstWireIndex] = false;
-			_pDstMachine->_inputMachines[dstWireIndex]=-1;
-			_pDstMachine->_connectedInputs--;
-
-
 			MachineGUI* from = this->findByMachine(dlg->pSrcMachine());
 			MachineGUI* to   = this->findByMachine(dlg->pDstMachine());
 
@@ -301,7 +213,6 @@ namespace psycle {
 
 			line = 0;
 			repaint();
-			Player::Instance()->unlock();
 		}
 
 		void MachineView::removeMachines( )
@@ -393,20 +304,9 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::onUpdateMachinePropertiesSignal(Machine *machine)
-		{
-			int index = machine->_macIndex;
-			machineNameChanged.emit(index); 
-		}
-
 		void MachineView::onMachineDeleteRequest( MachineGUI * machineGUI )
 		{
-			// todo remove machine
-			int index = machineGUI->mac()._macIndex;
-			_pSong->DestroyMachine( index );
 			selectedMachine_ = 0;
-			update();		 
-			machineDeleted.emit(index); 
 		}
 
 		void MachineView::updateSkin( )

@@ -29,7 +29,6 @@
 #include <ngrs/timer.h>
 #include <ngrs/tabbook.h>
 
-
 /**
   @author  Stefan
 */
@@ -37,7 +36,6 @@
 namespace psycle {
   namespace host {
 
-    class WaveEdFrame;
     class SequencerGUI;
     class VirtualPattern;
     class SequencerBar;
@@ -63,7 +61,6 @@ namespace psycle {
       PatternView* patternView();
       MachineView* machineView();
       SequencerBar* sequencerBar();
-      WaveEdFrame* waveEditor();
       SequencerGUI* sequencerView();
       VirtualPattern* virtualPattern();
 
@@ -99,8 +96,6 @@ namespace psycle {
       ngrs::DockPanel* macDock;
       ngrs::DockPanel* patDock;
       ngrs::DockPanel* seqDock;
-
-      WaveEdFrame* waveEd_;
 
       void onTimer();
       void onTweakSlide( int machine, int command, int value );

@@ -90,10 +90,6 @@ WireDlg::~WireDlg()
 void psycle::host::WireDlg::setVisible( bool on )
 {  
   if (on && pDstMachine()) {
-    float val = 0;
-    pDstMachine()->GetWireVolume( wireIdx(), val);
-	  int t = (int)std::sqrt( val *16384*4*4);
-    volSlider->setPos( 254 * 4 - t );
   }
   ngrs::Window::setVisible( on );
 }
@@ -115,10 +111,8 @@ void WireDlg::setMachines( Machine * pSrcMachine, Machine * pDstMachine )
 void WireDlg::onDeleteBtn( ngrs::ButtonEvent * ev )
 {	
   deleteMe.emit(this);
-	_pSrcMachine = 0;
+  _pSrcMachine = 0;
   _pDstMachine = 0;
-  ///\todo for scopes we need some mutex for the buffer
-	///\todo scopes disabled
 }
 
 Machine * WireDlg::pSrcMachine( )
@@ -143,18 +137,11 @@ WireGUI * WireDlg::line( )
 
 void WireDlg::onVolPosChanged( ngrs::Slider * slider )
 {
-	if ( pDstMachine() && pSrcMachine() && wireIdx() != -1 ) {
-		const float curvol = ((256*4-slider->pos())*(256*4-slider->pos()))/(16384.0f*4*4);
-		pDstMachine()->SetWireVolume( wireIdx(), curvol );
-	} 
 }   
  
 int WireDlg::wireIdx( )
 {
-  if ( pDstMachine() && pSrcMachine() )
-	  return pDstMachine()->FindInputWire( pSrcMachine()->_macIndex );
-  else
-    return -1;
+  return -1;
 }
 
 

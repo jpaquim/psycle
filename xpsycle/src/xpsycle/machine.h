@@ -27,6 +27,7 @@ namespace psycle {
     public :
       Machine();
       virtual ~Machine();
+      virtual Machine* clone() const = 0;
     };
 
   }

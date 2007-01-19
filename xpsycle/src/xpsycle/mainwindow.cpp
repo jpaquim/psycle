@@ -24,12 +24,8 @@
 #include "defaultbitmaps.h"
 #include "greetdlg.h"
 #include "vumeter.h"
-#include "instrumenteditor.h"
 #include "infodlg.h"
-#include "internal_machines.h"
-#include "waveedframe.h"
 #include "sequencergui.h"
-#include "newmachine.h"
 #include "audioconfigdlg.h"
 #include "skinreader.h"
 #include <iomanip>
@@ -84,7 +80,7 @@ namespace psycle {
     // progressbar subclassing end
 
     MainWindow::MainWindow()
-      : ngrs::Window(), pluginFinder_( *Global::pConfig() )
+      : ngrs::Window()
     { 
       setTitle ("] Psycle Modular Music Creation Studio [ ( X alpha ) ");
       setPosition( 10, 10, 800, 600 );
@@ -209,9 +205,6 @@ namespace psycle {
       logoPnl->add( img , ngrs::nAlClient );
       pane()->add( logoPnl, ngrs::nAlTop );
 
-      newMachineDlg_ = new NewMachine( pluginFinder_ );
-      add(newMachineDlg_);
-
       audioConfigDlg = new AudioConfigDlg( Global::pConfig() );
       add( audioConfigDlg );	
 
@@ -243,7 +236,6 @@ namespace psycle {
       childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
       childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
       childView_->machineViewDblClick.connect(this,&MainWindow::onNewMachine);
-      childView_->waveEditor()->updateInstrumentCbx.connect(this,&MainWindow::onUpdateInstrumentCbx);
       childView_->machineView()->machineDeleted.connect(this,&MainWindow::onMachineDeleted);
       childView_->machineView()->machineNameChanged.connect(this, &MainWindow::onMachineNameChanged);
       book->addPage( childView_, childView_->song()->name() + stringify( count ) );      
@@ -658,14 +650,6 @@ namespace psycle {
       insCombo_->setPreferredSize( 158, 20 );
       insCombo_->enableFocus(false);
       insCombo_->itemSelected.connect(this,&MainWindow::onInstrumentCbx);
-      for (int i=0;i<PREV_WAV_INS;i++)
-      {
-        std::ostringstream buffer;
-        buffer.str("");
-        buffer << std::setfill('0') << std::hex << std::setw(2);
-        buffer << i << ": " << "empty";
-        insCombo_->add(new ngrs::Item(buffer.str()));
-      }
       psycleToolBar_->add(insCombo_);
 
 
@@ -700,38 +684,11 @@ namespace psycle {
 
     void MainWindow::onInstrumentCbx( ngrs::ItemEvent * ev )
     {
-      if ( !selectedChildView_) return;
-
-      int index = insCombo_->selIndex();
-      selectedChildView_->song()->instSelected=   index;
-      selectedChildView_->song()->auxcolSelected= index;
-      selectedChildView_->waveEditor()->Notify();
     }
 
     void MainWindow::updateComboIns( bool updatelist )
     {
-      if ( !selectedChildView_) return;
-
-      if (updatelist)  {
-        std::ostringstream buffer;
-        buffer.setf(std::ios::uppercase);
-
-        int listlen = 0;
-        for (int i=0;i<PREV_WAV_INS;i++)
-        {
-          buffer.str("");
-          buffer << std::setfill('0') << std::hex << std::setw(2);
-          buffer << i << ": " << selectedChildView_->song()->_pInstrument[i]->_sName;
-          insCombo_->itemAt(i)->setText( buffer.str());
-          listlen++;
-        }
-        if (selectedChildView_->song()->auxcolSelected >= listlen) {
-          selectedChildView_->song()->auxcolSelected = 0;
-        }    
-      }
     }
-
-
 
     void MainWindow::onBarPlay( ngrs::ButtonEvent * ev )
     {
@@ -774,12 +731,10 @@ namespace psycle {
           //Global::configuration()._pOutputDriver->Enable(false);
           // add a new Song tab
           ChildView* newView = addChildView();  
-          newView->song()->progress.connect(this,&MainWindow::onSongLoadProgress);
           // load the song
           statusBarData.setText("loading \"" + openDialog->fileName() + "\"" );
           newView->song()->load(fileName);
           // update gui to new song
-          newView->song()->progress.disconnect_all();
           newView->update();
           updateNewSong();
           pane()->resize();
@@ -851,74 +806,7 @@ namespace psycle {
       exit(0);
     }
 
-
     void MainWindow::updateComboGen() {
-
-      if (!selectedChildView_) return;
-
-      Song* selectedSong_  = selectedChildView_->song();
-
-      bool filled=false;
-      bool found=false;
-      int selected = -1;
-      int line = -1;
-      std::ostringstream buffer;
-      buffer.setf(std::ios::uppercase);
-
-      genCombo_->removeChilds();
-
-      for (int b=0; b<MAX_BUSES; b++) // Check Generators
-      {
-        if( selectedSong_->_pMachine[b]) {
-          buffer.str("");
-          buffer << std::setfill('0') << std::hex << std::setw(2);
-          buffer << b << ": " << selectedSong_->_pMachine[b]->_editName;
-          genCombo_->add(new ngrs::Item(buffer.str()));
-
-          //cb->SetItemData(cb->GetCount()-1,b);
-          if (!found) selected++;
-          if (selectedSong_->seqBus == b) found = true;
-          filled = true;
-        }
-      }
-
-      genCombo_->add(new ngrs::Item("----------------------------------------------------"));
-      //cb->SetItemData(cb->GetCount()-1,65535);
-      if (!found)  {
-        selected++;
-        line = selected;
-      }
-
-      for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects ngrs::Names.
-      {
-        if(selectedSong_->_pMachine[b]) {
-          buffer.str("");
-          buffer << std::setfill('0') << std::hex << std::setw(2);
-          buffer << b << ": " << selectedSong_->_pMachine[b]->_editName;
-          genCombo_->add(new ngrs::Item(buffer.str()));
-          //cb->SetItemData(cb->GetCount()-1,b);
-          if (!found) selected++;
-          if (selectedSong_->seqBus == b) found = true;
-          filled = true;
-        }
-      }
-
-      if (!filled) {
-        genCombo_->removeChilds();
-        genCombo_->add(new ngrs::Item("No Machines Loaded"));
-        selected = 0;
-      } else if (!found)  {
-        selected=line;
-      }
-      genCombo_->setIndex(selected);
-    }
-
-    void MainWindow::appNew( )
-    {
-      if (checkUnsavedSong())
-      {
-        // todo rework
-      }
     }
 
     void MainWindow::onBpmIncOne( ngrs::ButtonEvent* ev )  // OnBpmAddOne
@@ -943,22 +831,6 @@ namespace psycle {
 
     void MainWindow::setAppSongBpm( double  x )
     {
-      if ( !selectedChildView_ ) return;
-
-      Song* selectedSong_ = selectedChildView_->song();
-
-      double bpm = 0;
-      if ( x != 0 ) {
-        if ( Player::Instance()->playing() )  {
-          selectedSong_->setBpm(  Player::Instance()->timeInfo().bpm() +x );
-        } else selectedSong_->setBpm( selectedSong_->bpm() + x );
-        Player::Instance()->setBpm( (int) selectedSong_->bpm() );
-        bpm = selectedSong_->bpm();
-      }
-      else bpm =  Player::Instance()->bpm();
-
-      bpmDisplay_->setNumber( (int)  Player::Instance()->bpm() );
-      bpmDisplay_->repaint();
     }
 
     void MainWindow::onRecordWav( ngrs::ButtonEvent * ev )
@@ -966,57 +838,10 @@ namespace psycle {
     }
 
     void MainWindow::onMachineSelected( Machine* mac ) {
-
-      if ( !selectedChildView_ ) return;
-
-      Song* selectedSong_ = selectedChildView_->song();
-
-
-      std::vector< ngrs::CustomItem * > items = genCombo_->items();
-      std::vector< ngrs::CustomItem * >::iterator it = items.begin();
-
-      int idx = 0;
-      for ( ; it < items.end(); it++) {
-        ngrs::CustomItem* item = *it;
-        if (item->text().length() > 2) {
-          int macIdx = str_hex<int>( item->text().substr(0,2) );
-
-          if (macIdx == mac->_macIndex) {
-            selectedSong_->seqBus = macIdx;
-            genCombo_->setIndex(idx);
-            genCombo_->repaint();
-            break;
-          }
-        }
-        idx++;
-      }
     }
 
     void MainWindow::onTimer( )
     {
-      if ( !selectedChildView_ ) return;
-      Song* selectedSong_ = selectedChildView_->song();
-
-      if ( Player::Instance()->playing() ) {
-        selectedChildView_->sequencerView()->updatePlayPos();				
-
-        SinglePattern* visiblePattern = selectedChildView_->patternView()->pattern();
-        if ( visiblePattern ) {			
-          double entryStart = 0;
-          bool isPlayPattern = selectedSong_->patternSequence()->getPlayInfo( visiblePattern, Player::Instance()->playPos() , 4 , entryStart );
-          if ( isPlayPattern ) {
-            selectedChildView_->patternView()->onTick( entryStart );
-          }			
-        }
-      }
-
-      /*vuMeter_->setPegel(selectedSong_->_pMachine[MASTER_INDEX]->_lMax,
-      selectedSong_->_pMachine[MASTER_INDEX]->_rMax );
-      vuMeter_->repaint();
-      ((Master*)selectedSong_->_pMachine[MASTER_INDEX])->vuupdated = true;
-
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->machineView()->updateVUs();*/
     }
 
     void MainWindow::updateBars( )
@@ -1094,12 +919,6 @@ namespace psycle {
     {
       if ( !selectedChildView_ ) return;
       selectedChildView_->sequencerBar()->setVisible(!selectedChildView_->sequencerBar()->visible() );
-
-
-
-      //sequencerBar_->setVisible(!sequencerBar_->visible());
-      //pane()->resize();
-      //pane()->repaint();
     }
 
     void MainWindow::onViewMenuStatusbar( ngrs::ButtonEvent * ev )
@@ -1135,7 +954,6 @@ namespace psycle {
     {
       infoDlg->loadFromFile( Global::pConfig()->hlpPath() + "readme.txt" );
       infoDlg->setVisible(true);
-
     }
 
     void MainWindow::onHelpMenuWhatsNew( ngrs::ButtonEvent * ev )
@@ -1158,26 +976,6 @@ namespace psycle {
 
     void MainWindow::onNewMachine( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-
-      if (ev->button()==1) {
-        if (newMachineDlg_->execute()) {
-
-          PluginFinderKey key = newMachineDlg_->pluginKey();
-
-          // search for an unused machine slot
-          int fb = selectedChildView_->song()->GetFreeBus();
-
-          // create machine, tell where to place the new machine--get from mouse.	  
-          Machine* mac = selectedChildView_->song()->createMachine( pluginFinder_, key, ev->x(), ev->y() );
-          if ( mac ) {
-            selectedChildView_->machineView()->addMachine( *mac );
-            selectedChildView_->newMachineAdded.emit( mac );
-            selectedChildView_->machineView()->repaint();
-          }
-
-        }
-      }
     }
 
     void MainWindow::onRenderAsWave( ngrs::ButtonEvent * ev )
@@ -1222,40 +1020,26 @@ namespace psycle {
 
     void MainWindow::onEditBlockMixPaste( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-
-      //  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().track(), selectedChildView_->patternView()->cursor().line(), true);
     }
 
     void MainWindow::onEditBlockDelete( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-
-      selectedChildView_->patternView()->deleteBlock();
     }
 
     void MainWindow::onEditBlockMix( ngrs::ButtonEvent * ev )
     {
-
     }
 
     void MainWindow::onEditBlockPaste( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-
-      //  selectedChildView_->patternView()->pasteBlock(selectedChildView_->patternView()->cursor().track(), selectedChildView_->patternView()->cursor().line(), false);
     }
 
     void MainWindow::onEditBlockCopy( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->patternView()->copyBlock(false);
     }
 
     void MainWindow::onEditBlockCut( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->patternView()->copyBlock(true);
     }
 
     void MainWindow::onEditSeqDelete( ngrs::ButtonEvent * ev )
@@ -1272,39 +1056,20 @@ namespace psycle {
 
     void MainWindow::onFileExit( ngrs::ButtonEvent * ev )
     {
-      if (checkUnsavedSong()) {
-        exit(0);
-      }
     }
 
     void MainWindow::onRecordNotesMode( ngrs::ButtonEvent * ev )
     {
-      /*bEditMode = true;
-      if (sequencerBar_->followSong() && bEditMode)
-      {
-      bEditMode = false;
-      }
-      else
-      {
-      sequencerBar_->setFollowSong(true);
-      bEditMode = true;
-      }*/
     }
 
     void MainWindow::onSeqAdded( SinglePattern * pattern )
     {
       if ( !selectedChildView_ ) return;
-
       selectedChildView_->sequencerView()->addPattern( pattern);
     }
 
     void MainWindow::onNewMachineDialogAdded( Machine * mac )
     {
-      if ( !selectedChildView_ ) return;
-
-      selectedChildView_->patternView()->setActiveMachineIdx(mac->_macIndex);
-      updateComboGen();
-      genCombo_->repaint();
     }
 
     // ngrs::New index selected by a mouse click.
@@ -1312,65 +1077,14 @@ namespace psycle {
     {
       onNewIndexGeneratorCbx();
     }
-
-    void MainWindow::changeGeneratorCbxViaKey(int dir) {
-      int old_index = genCombo_->selIndex();
-      int new_index = 0;
-      // 0 = prev gen, 1 = next gen.
-      if (dir == 0) {
-        new_index = std::max(old_index - 1, 0);
-      } else if (dir == 1) {
-        new_index = old_index + 1;
-      }
-      genCombo_->setIndex(new_index);
-      genCombo_->repaint();
-
-      onNewIndexGeneratorCbx();
-    }
-
-    void MainWindow::changeInstrumentCbxViaKey(int dir) {
-      int old_index = insCombo_->selIndex();
-      int new_index = 0;
-      if (dir == 0) {
-        new_index = std::max(old_index - 1, 0);
-      } else if (dir == 1) {
-        new_index = old_index + 1;
-      }
-      insCombo_->setIndex(new_index);
-      insCombo_->repaint();
-      selectedChildView_->song()->instSelected=   new_index;
-      selectedChildView_->song()->auxcolSelected= new_index;
-      selectedChildView_->waveEditor()->Notify();
-    }
-
-    // Call when a new index has been selected in
-    // the generator combo box.
-    void MainWindow::onNewIndexGeneratorCbx() {
-      if ( !selectedChildView_ ) return;
-      Song* selectedSong_ = selectedChildView_->song();
-
-      std::string text = genCombo_->text();
-      if (text.length() > 2) {
-        std::string hexNumber = text.substr(0,2);
-        std::stringstream hexStream(hexNumber); 
-        int hex = -1;
-        hexStream >> std::hex >> hex;
-        if (hex != -1) {
-          selectedSong_->seqBus = hex;
-          selectedChildView_->machineView()->setSelectedMachine( selectedSong_->_pMachine[hex] );
-        }
-      }
-    }
-
-
+   
     void MainWindow::onSequencerEntryClick( SequencerItem * item )
     {
       if (!selectedChildView_) return;
-
       selectedChildView_->sequencerBar()->setEntry(item);
     }
 
-    void MainWindow::onKeyPress( const ngrs::KeyEvent & event )
+    void MainWindow::onKeyPress( const ngrs::KeyEvent& event )
     {
       if ( selectedChildView_ ) {
         int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
@@ -1399,34 +1113,6 @@ namespace psycle {
         case cdefPlayStop:
           selectedChildView_->stop();
           break;
-        case cdefAddMachine: {
-          selectedChildView_->showMachineView();
-          ngrs::ButtonEvent btnEvent( this, 0,0,1, "");
-          onNewMachine( &btnEvent );
-                             }
-                             break;
-                             /*			case ngrs::ngrs::NK_Up :
-                             if (App::system().keyState() & ControlMask) {
-                             selectedChildView_->sequencerBar()->selectPrevPattern();
-                             }
-                             break;
-                             case ngrs::ngrs::NK_Down :
-                             if (App::system().keyState() & ControlMask) {
-                             selectedChildView_->sequencerBar()->selectNextPattern();
-                             }
-                             break;*/
-        case cdefInstrDec: // current_instrument-1
-          changeInstrumentCbxViaKey(0);
-          break;
-        case cdefInstrInc: // current_instrument+1
-          changeInstrumentCbxViaKey(1);
-          break;
-        case cdefMachineDec: // current_machine-1
-          changeGeneratorCbxViaKey(0);
-          break;
-        case cdefMachineInc: // current_machine+1
-          changeGeneratorCbxViaKey(1);
-          break;
         }
       }
 
@@ -1436,42 +1122,18 @@ namespace psycle {
 
     void MainWindow::updateNewSong( )
     {
-      if (!selectedChildView_) return;
-
-      updateComboIns(true);
-      insCombo_->setIndex(0);
-      updateComboGen();
-
-      bpmDisplay_->setNumber( (int) selectedChildView_->song()->bpm() );
-      bpmDisplay_->repaint();
     }
 
     void MainWindow::onUpdateInstrumentCbx( int index , bool update )
     {
-      if ( !selectedChildView_ ) return;
-
-      if (update) {
-        updateComboIns(true);
-        insCombo_->setIndex(0);
-        insCombo_->repaint();
-      }
-      else {
-        insCombo_->setIndex(index);
-        insCombo_->repaint();
-      }
-
     }
 
     void MainWindow::onMachineNameChanged( int machineIndex )
     {
-      updateComboGen();
-      genCombo_->repaint();
     }
 
     void MainWindow::onMachineDeleted( int machineIndex )
     {
-      updateComboGen();
-      genCombo_->repaint();
     }
 
   }
