@@ -18,11 +18,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "sequencerbar.h"
-#include "global.h"
 #include "song.h"
 #include "patternview.h"
 #include "defaultbitmaps.h"
-#include "player.h"
 #include "sequencergui.h"
 #include "skinreader.h"
 #include "childview.h"

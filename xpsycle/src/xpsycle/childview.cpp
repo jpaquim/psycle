@@ -58,7 +58,7 @@ ChildView::ChildView()
 
   sequencerView_ = new SequencerGUI();
   sequencerBar_->setSequenceGUI( sequencerView() ) ;
-  sequencerView_->setPatternSequence( _pSong->patternSequence());
+  sequencerView_->setPatternSequence( &_pSong->patternSequence());
   sequencerView_->addSequencerLine();
 
 	virtualPattern_ = new VirtualPattern();
@@ -91,7 +91,7 @@ ChildView::ChildView()
 
   //timer.setIntervalTime(80);
   //timer.enableTimer();
-  _pSong->patternSequence()->patternData()->resetToDefault();
+  _pSong->patternSequence().patternData()->resetToDefault();
   sequencerBar_->update();
 }
 

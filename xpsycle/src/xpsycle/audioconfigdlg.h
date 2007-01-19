@@ -43,7 +43,7 @@ namespace psycle {
 
         class AudioConfigDlg : public ngrs::Window {
 		public:
-				AudioConfigDlg( Configuration* cfg );
+				AudioConfigDlg( );
 
 				~AudioConfigDlg();
 
@@ -76,7 +76,6 @@ namespace psycle {
 				ngrs::ComboBox* bitDepthCbx_;
 				ngrs::ComboBox* channelModeCbx_;
 
-				Configuration* config_;
 				AudioDriver* selectedDriver_;
 
 				void init();

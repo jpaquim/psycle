@@ -20,5 +20,9 @@ namespace psycle {
     {
     }
 
+    PatternSequence& Song::patternSequence() {
+      return patternSequence_;
+    }
+
   }
 }

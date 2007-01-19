@@ -32,10 +32,7 @@ namespace psycle {
   namespace host {
 
     class Machine;
-    class FrameMachine;
-    class MacPropDlg;
-    class MasterDlg;
-
+    
     /**
     @author  Stefan Nattkemper
     */
@@ -100,17 +97,14 @@ namespace psycle {
       const MachineCoordInfo & coords() const;
 
       virtual void updateSkin();
-      virtual MacPropDlg* propsDlg();
-      virtual void showPropsDlg();
-      void onUpdateMachinePropertiesSignal(Machine* machine);
+
       void onDeleteMachineSignal();
 
     private:								
 
       bool selected_;
       ngrs::Region oldDrag;
-      Machine* mac_;
-      MacPropDlg* propsDlg_;			
+      Machine* mac_;		
       MachineCoordInfo coords_;
       std::vector<LineAttachment> attachedLines;
 
@@ -136,9 +130,8 @@ namespace psycle {
 
     private:
 
-      MasterDlg* masterDlg;
-
       void setSkin();
+
     };
 
 
@@ -166,8 +159,6 @@ namespace psycle {
       GeneratorGUI( Machine & mac );
 
       ~GeneratorGUI();
-
-      FrameMachine* frameMachine;
 
       virtual void onMousePress( int x, int y, int button );
 
@@ -230,7 +221,6 @@ namespace psycle {
 
       ngrs::Slider* panSlider_;
       VUPanel* vuPanel_;
-      FrameMachine* frameMachine;
 
       void setSkin();
       void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g);    

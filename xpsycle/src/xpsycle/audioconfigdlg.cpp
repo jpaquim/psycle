@@ -33,9 +33,8 @@
 namespace psycle {
 	namespace host	{	
 
-		AudioConfigDlg::AudioConfigDlg( Configuration* cfg )
-		  : ngrs::Window( ),
-				config_(cfg)
+		AudioConfigDlg::AudioConfigDlg( )
+		  : ngrs::Window( )
 		{
 			setTitle("Audio settings");
 
@@ -181,17 +180,17 @@ namespace psycle {
 
 		void AudioConfigDlg::initDriverList( )
 		{
-			std::map<std::string, AudioDriver*> & driverMap =  config_->driverMap();
+/*			std::map<std::string, AudioDriver*> & driverMap =  config_->driverMap();
 			std::map<std::string, AudioDriver*>::iterator it = driverMap.begin();
 			for ( ; it != driverMap.end(); it++ ) {
 				std::string driverName = it->first;
 				driverCbx_->add( new ngrs::Item( driverName ) );
-			}
+			}*/
 		}
 
 		void AudioConfigDlg::onDriverSelected( ngrs::ItemEvent * ev )
 		{
-			std::map<std::string, AudioDriver*> & driverMap =  config_->driverMap();
+/*			std::map<std::string, AudioDriver*> & driverMap =  config_->driverMap();
 			std::map<std::string, AudioDriver*>::iterator it = driverMap.find( ev->text() );
 			if ( it != driverMap.end() ) {
 				AudioDriver* driver = it->second;
@@ -214,7 +213,7 @@ namespace psycle {
 				
 				driverBox_->resize();
 				driverBox_->repaint();
-   		}
+   		}*/
 		}
 
 		void AudioConfigDlg::updateGeneralPage() {

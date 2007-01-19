@@ -24,7 +24,6 @@
 #include <ngrs/point3d.h>
 
 #include "inputhandler.h"
-#include "global.h"
 
 /**
 @author  Stefan Nattkemper
