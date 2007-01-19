@@ -42,44 +42,12 @@ namespace psycle
 
 				virtual ~Song();
 
-				void clear(); // clears all song data
-
 				PatternSequence* patternSequence();
 				const PatternSequence& patternSequence() const;
-
-				// loads a song
-				bool load(const std::string& fileName);
-				bool save(const std::string& fileName);
-
-				//authorship
-				void setName(const std::string & name);
-				const std::string & name() const;
-				void setAuthor(const std::string & author);
-				const std::string & author() const;
-				void setComment(const std::string & comment);
-				const std::string & comment() const;
-
-				// The number of tracks in each pattern of this song.
-				unsigned int tracks() const;
-				void setTracks( unsigned int trackCount) ;
-
-				// start bpm for song, can be overwritten through global bpm event
-				void setBpm(float bpm);
-				float bpm() const;
-
-                std::string fileName;
 
 			private:
 
 				PatternSequence patternSequence_;
-
-				unsigned int tracks_;
-				float bpm_;
-
-				//authorship
-				std::string name_;
-				std::string author_;
-				std::string comment_;
 
 			
 		};

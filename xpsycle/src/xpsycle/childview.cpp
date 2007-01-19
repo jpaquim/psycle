@@ -19,7 +19,6 @@
   ***************************************************************************/
 #include "childview.h"
 #include "configuration.h"
-#include "player.h"
 #include "sequencergui.h"
 #include "sequencerbar.h"
 #include "virtualpattern.h"
@@ -104,21 +103,10 @@ ChildView::~ChildView()
   
 void ChildView::setTitleBarText( )
 {
-  std::string titlename = "[";
-
-  titlename += _pSong->fileName;
-  /*if(pUndoList) {
-      if (UndoSaved != pUndoList->counter) titlename+=" *"; else
-      if (UndoMacSaved != UndoMacCounter)  titlename+=" *"; else
-      if (UndoSaved != 0) titlename+=" *";
-  }*/
-  titlename += "] Psycle Modular Music Creation Studio (" + PSYCLE__VERSION + ")";
-  window()->setTitle(titlename);
 }
 
 void ChildView::onPatternView( ngrs::Object * sender )
 {
-
 }
 
 PatternView * ChildView::patternView( )
@@ -133,28 +121,15 @@ VirtualPattern* ChildView::virtualPattern()
 
 void ChildView::play( )
 {
-  patternView_->setPrevEditPosition(patternView_->editPosition());
-  Player::Instance()->start( Player::Instance()->playPos() );
 }
-
 
 void ChildView::playFromStart()
 {
-  //if (Global::pConfig()->_followSong)
-  {
-    //bScrollDetatch=false;
-  }
-  patternView_->setPrevEditPosition(patternView_->editPosition());
-  Player::Instance()->start(0.0);
-  //pParentMain->StatusBarIdle();
 }
 
 void ChildView::stop( )
 {
-  Player::Instance()->stop();
 }
-
-
 
 MachineView * ChildView::machineView( )
 {
