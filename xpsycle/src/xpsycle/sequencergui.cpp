@@ -430,10 +430,8 @@ namespace psy {
 
       ngrs::Panel* line = sView->scrollArea()->vLine();
 
-
       ngrs::Region newDrag = entriesInRegion();
-      ngrs::Region repaintArea = newDrag | oldDrag;
-      repaintArea |= line->absoluteGeometry();
+      ngrs::Region repaintArea = newDrag | oldDrag | line->absoluteGeometry();
 
       line->setPosition( left(), sView->scrollArea()->scrollDy(), 1, sView->scrollArea()->clientHeight() );
 
