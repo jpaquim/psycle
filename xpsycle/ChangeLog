@@ -1,24 +1,22 @@
+xpsycle (1.9.20070119) unstable; urgency=low
+
+  * 2007-01-19 prodos moved the core engine to the separate psycore project that xpsycle now depends on
+
+ -- Johan Boule <bohan@retropaganda.info>  Fri, 19 Jan 2007 23:28:10 +0000
+
 xpsycle (1.9.20060430) unstable; urgency=low
 
   * new release
 
  -- Johan Boule <bohan@retropaganda.info>  Thu, 20 Apr 2006 18:11:57 +0000
 
-xpsycle (1.9.8) unstable; urgency=low
-
-  * bumping version
-
- -- Johan Boule <bohan@retropaganda.info>  Tue, 18 Apr 2006 18:37:34 +0000
-
 xpsycle (1.9.7) unstable; urgency=low
 
-  * packageneric
+  * 2006-03-26 prodos did the initial import of xpsycle to psycle's svn, based on mspsycle
 
- -- Johan Boule <bohan@retropaganda.info>  Tue, 21 Mar 2006 02:37:55 +0000
+ -- Johan Boule <bohan@retropaganda.info>  Tue, 26 Mar 2006 +0000
 
-xpsycle (0) unstable; urgency=low
-
-  * 2006-03-26 prodos did the initial import of xpsycle to psycle's svn
+mspsycle (0) unstable; urgency=low
 
   * for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=log
 
@@ -1465,7 +1463,7 @@ xpsycle (0) unstable; urgency=low
 
  -- Johan Boule <bohan@retropaganda.info>  Tue, 21 Mar 2006 02:36:18 +0000
 
-xpsycle (-1) unstable; urgency=low
+mspsycle (-1) unstable; urgency=low
 
   * nothing
 

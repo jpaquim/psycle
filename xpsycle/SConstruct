@@ -41,6 +41,22 @@ from packageneric.generic.scons.check.external_package import external_package a
 from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
 from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
 
+psycore = os.path.join('..', 'psycore', 'SConstruct')
+if os.path.exists(psycore): psycore = project.subscript(psycore).local_package()
+else:
+	psycore = external_package_check(project, name = 'psycore',
+		url = 'http://psycle.sourceforge.net',
+		distribution_packages = {
+			'debian and ubuntu': 'lib-psycore-0-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
+		dependencies = [
+			pkg_config_check(project, name = 'psycore-0 >= 0')
+		]
+	)
+
 ngrs = os.path.join('..', 'ngrs', 'SConstruct')
 if os.path.exists(ngrs): ngrs = project.subscript(ngrs).local_package()
 else:
@@ -220,7 +236,7 @@ class xpsycle_module(module):
 			version = source_package.version(),
 			description = source_package.description(),
 			target_type = module.target_types.program,
-			dependencies = [ngrs]
+			dependencies = [psycore, ngrs]
 		)
 		
 	def dynamic_dependencies(self):
