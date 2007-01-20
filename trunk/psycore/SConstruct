@@ -1,0 +1,122 @@
+#! /usr/bin/env scons
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006-2007 johan boule <bohan@jabber.org>
+# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
+
+# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+import sys, os
+sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+
+# project
+
+from packageneric.generic.scons.project import project
+project = project(name = 'psycore')
+
+# authors/maintainers/uploaders
+
+from packageneric.generic.scons.person import person
+prodos = person('Stefan NattKemper', 'natti__@user.sourceforge.net')
+bohan = person('Johan Boule', 'bohan.packageneric@retropaganda.info')
+
+# source package
+
+from packageneric.generic.scons.source_package import source_package
+from packageneric.generic.scons.version import version
+source_package = source_package(project,
+	name = 'psycore',
+	version = version(0, 0),
+	description_file = 'README'
+)
+
+source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
+
+# external packages
+
+from packageneric.generic.scons.check.external_package import external_package as external_package_check
+from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
+
+from packageneric.pool.stdcxx import stdcxx
+stdcxx = stdcxx(project)
+
+from packageneric.pool.dlfcn import dlfcn
+dlfcn = dlfcn(project)
+
+from packageneric.pool.pthread import pthread
+pthread = pthread(project)
+
+microsoft_windows = external_package_check(project, name = 'microsoft windows api',
+	url = 'http://msdn.microsoft.com',
+	distribution_packages = {'microsoft (maybe windows updates?)': 'windows platform sdk'},
+	dependencies = [
+		cxx_build_check(project, name = 'microsoft windows api', libraries = [], source_text = \
+			"""\
+				#if !defined _WIN64 && !defined _WIN32
+					#error Bill Gates: No such fool or dictatory
+				#endif
+				#if !defined _WIN64
+					#define WINVER 0x510
+					#define _WIN32_WINDOWS WINVER
+					#define _WIN32_NT WINVER
+					#define _WIN32_IE 0x600
+					//#define WIN32_LEAN_AND_MEAN
+					//#define WIN32_EXTRA_LEAN
+				#endif
+				//#define VC_EXTRA_LEAN
+				#define NOMINMAX
+				#include <windows.h>
+				#if !defined _WINDOWS_ && !defined __GNUG__ // hmm, mingw's header is bizarre
+					#error bad windows header
+				#endif
+				#if defined min || defined max
+					#error bad windows header: clash with standard library
+				#endif
+				void microsoft_windows()
+				{
+					// todo do something with it for a complete check
+					#if 0 // <wincon.h>
+						GetConsoleWindow();
+					#endif
+				}
+			"""
+		)
+	]
+)
+
+# modules
+
+from packageneric.generic.scons.module import module
+
+class psycore_module(module):
+	def __init__(self):
+		module.__init__(self, source_package,
+			name = 'psycore-' + str(source_package.version().major()),
+			version = source_package.version(),
+			description = source_package.description(),
+			dependencies = [stdcxx]
+		)
+
+	def dynamic_dependencies(self):
+		if microsoft_windows.result(): self.add_dependency(microsoft_windows)
+		else: self.add_dependencies([dlfcn, pthread])
+		
+		from packageneric.generic.scons.find import find
+		self.add_sources(find(self.project(), 'src', [os.path.join('psycore', '*.' + extension) for extension in ('cpp', 'c')]))
+		self.add_headers(find(self.project(), 'src', [os.path.join('psycore', '*.' + extension) for extension in ('hpp', 'h')]))
+		self.contexes().source().compilers().cxx().paths().add(['src'])
+psycore_module = psycore_module()
+
+# pkg-config packages
+
+from packageneric.generic.scons.pkg_config_package import pkg_config_package
+psycore_package = pkg_config_package(project,
+	name = 'psycore-' + str(psycore_module.version().major()),
+	version = psycore_module.version(),
+	description = psycore_module.description(),
+	modules = [psycore_module]
+)
+
+project([psycore_package])
+
+Return('psycore_package')
