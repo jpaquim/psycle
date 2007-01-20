@@ -132,4 +132,8 @@ namespace ngrs {
     //itemDblClick.emit( ev );        
   }
 
+  ScrollBox* CustomTreeView::scrollBox() {
+     return scrollBox_;
+  }
+
 }

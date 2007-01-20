@@ -33,64 +33,82 @@ namespace psy
 
 		int PatternCategory::idCounter = 0;
 
-		PatternCategory::PatternCategory( )
+		PatternCategory::PatternCategory()
 		{
 			color_ = 0x00FF0000;
 			id_ = idCounter;
 			idCounter++;
+            parent_ = 0;
 		}
 
-		PatternCategory::PatternCategory( const std::string & name )
+        PatternCategory::PatternCategory( PatternCategory* parent, const std::string& name ) {
+	      name_ = name;
+		  color_ = 0x00FF0000;
+		  id_ = idCounter;
+		  idCounter++;
+          parent_ = parent;
+        }
+
+		PatternCategory::PatternCategory( const std::string& name )
 		{
 			name_ = name;
 			color_ = 0x00FF0000;
 			id_ = idCounter;
 			idCounter++;
+            parent_ = 0;
 		}
 
 		PatternCategory::~ PatternCategory( )
 		{
-			for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
+			for (std::vector<SinglePattern*>::iterator it = patterns_.begin(); it < patterns_.end(); it++ ) {
+				delete *it;
+			}
+            for (std::vector<PatternCategory*>::iterator it = children_.begin(); it < children_.end(); it++ ) {
 				delete *it;
 			}
 		}
 
-		SinglePattern* PatternCategory::createNewPattern( const std::string & name )
+		SinglePattern* PatternCategory::createNewPattern( const std::string& name )
 		{
 			SinglePattern* pattern = new SinglePattern();
 			pattern->setCategory(this);
 			pattern->setName(name);
-			push_back(pattern);
+			patterns_.push_back(pattern);
 			return pattern;
 		}
                 
-                SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
-                {
+        SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
+        {
                      SinglePattern* pattern = new SinglePattern( src);
                      pattern->setCategory(this);
                      pattern->setName(name);
-                     push_back(pattern);
+                     patterns_.push_back(pattern);
                      return pattern;
 		}
 
 		bool PatternCategory::removePattern( SinglePattern * pattern )
 		{
-			iterator it = find(begin(), end(), pattern);
-			if ( it != end() ) {
-				SinglePattern* pattern = *it;
-				erase(it);
-				delete(pattern);
-				return true;
-			}
-			return false;
+          std::vector<SinglePattern*>::iterator it = find( patterns_.begin(), patterns_.end(), pattern );
+		  if ( it != patterns_.end() ) {
+			SinglePattern* pattern = *it;
+			patterns_.erase(it);
+			delete(pattern);
+			return true;
+          } else {
+            std::vector<PatternCategory*>::iterator cat_it = children_.begin();
+            for ( ; cat_it < children_.end(); cat_it++) {
+              if ( (*cat_it)->removePattern( pattern ) ) return true;
+            }
+          }
+		  return false;
 		}
 
-		void PatternCategory::setName( const std::string & name )
+		void PatternCategory::setName( const std::string& name )
 		{
 			name_ = name;
 		}
 
-		const std::string & PatternCategory::name( ) const
+		const std::string& PatternCategory::name( ) const
 		{
 			return name_;
 		}
@@ -105,12 +123,16 @@ namespace psy
 			return color_;
 		}
 
-		SinglePattern * PatternCategory::findById( int id )
+		SinglePattern* PatternCategory::findById( int id )
 		{
-			for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
+			for (std::vector<SinglePattern*>::iterator it = patterns_.begin(); it < patterns_.end(); it++) {
 				SinglePattern* pat = *it;
 				if (pat->id() == id) return pat;
 			}
+            for (std::vector<PatternCategory*>::iterator cat_it = children_.begin(); cat_it < children_.end(); cat_it++ ) {
+              SinglePattern* pat = (*cat_it)->findById( id );
+              if ( pat ) return pat;
+            }
 			return 0;
 		}
 
@@ -126,17 +148,53 @@ namespace psy
 		}
 
 		std::string PatternCategory::toXml( ) const
-		{
+		{/*
 			std::ostringstream xml;
 //			xml << "<category name='" << PsyFilter::replaceIllegalXmlChr( name() ) << "' color='" << color_ << "' >" << std::endl;
-			for ( const_iterator it = begin(); it < end(); it++) {
+            for ( std::vector<SinglePattern*>::const_iterator it = patterns_.begin(); it < patterns_.end(); it++ ) {
 				SinglePattern* pattern = *it;
 				xml << pattern->toXml();
 			}
 			xml << "</category>" << std::endl;
-			return xml.str();
+			return xml.str();*/
+          return "broken!";
 		}
 
+        const std::vector<SinglePattern*>& PatternCategory::patterns() const {
+          return patterns_;
+        }
+
+        const std::vector<PatternCategory*>& PatternCategory::children() const {
+          return children_;
+        }
+
+        PatternCategory* PatternCategory::parent() const {
+          return parent_;
+        }
+
+        PatternCategory* PatternCategory::createNewCategory( std::string& name ) {
+          PatternCategory* cat = new PatternCategory(this, name);
+          children_.push_back( cat );
+          return cat;
+        }
+
+        void PatternCategory::removeAll() {
+	      	for (std::vector<SinglePattern*>::iterator it = patterns_.begin(); it < patterns_.end(); it++) {
+				SinglePattern* pat = *it;
+				delete* pat;
+			}
+            for (std::vector<PatternCategory*>::iterator cat_it = children_.begin(); cat_it < children_.end(); cat_it++ ) {
+              cat_it->removeAll();
+            }
+            children_.clear();
+        }
+
+        void PatternCategory::resetToDefault()
+        {
+          removeAll();
+          PatternCategory* cat = createNewCategory( "default" );
+          cat->createNewPattern( "pattern0" );
+        }
 		// end of Category class
 
 
@@ -153,7 +211,7 @@ namespace psy
 		}
 
 
-		PatternCategory * PatternData::createNewCategory( const std::string & name )
+		PatternCategory * PatternData::createNewCategory( const std::string& name )
 		{
 			PatternCategory* category = new PatternCategory();
 			category->setName(name);

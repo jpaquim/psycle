@@ -225,7 +225,7 @@ namespace ngrs {
     return *this;
   }
 
-  Region Region::operator&( const Region& rhs )
+  const Region Region::operator&( const Region& rhs )
   {
     return Region(*this) &= rhs;
   }
@@ -241,7 +241,7 @@ namespace ngrs {
     return *this;
   }
 
-  Region Region::operator|( const Region& rhs )
+  const Region Region::operator|( const Region& rhs )
   {
     return Region(*this) |= rhs;
   }
@@ -256,7 +256,7 @@ namespace ngrs {
     return *this;
   }
 
-  Region Region::operator-( const Region& rhs )
+  const Region Region::operator-( const Region& rhs )
   {
     return Region(*this) -= rhs;
   }
@@ -271,7 +271,7 @@ namespace ngrs {
     return *this;
   }
 
-  Region Region::operator^( const Region& rhs )
+  const Region Region::operator^( const Region& rhs )
   {
     return Region(*this) -= rhs;
   }

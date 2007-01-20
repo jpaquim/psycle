@@ -12,6 +12,26 @@ namespace psy {
   namespace core
   {
 
+    // some song infos
+    SongInfo::SongInfo() 
+    {
+      name_ = "untitled";
+    }
+    
+    SongInfo::~SongInfo() {
+    }
+
+    void SongInfo::setName( const std::string& name ) {
+      name_ = name;
+    }
+    
+    const std::string& SongInfo::name() const {
+      return name_;
+    }
+    // end of songinfo
+
+
+    // the song class
     Song::Song()
     {
     }
@@ -26,6 +46,10 @@ namespace psy {
 
     const PatternSequence& Song::patternSequence() const {
       return patternSequence_;
+    }
+
+    const SongInfo& Song::info() const {
+      return info_;
     }
 
   }
