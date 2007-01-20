@@ -30,17 +30,15 @@
 namespace ngrs {
 
   AlignLayout::AlignLayout()
-    : Layout()
+    : Layout(), hgap_(0), vgap_(0), maxX_(0), maxY_(0), preferredWidthChanged_(
+    1), preferredHeightChanged_(1)
   {
-    maxX_ = maxY_ = 0;
-    hgap_ = vgap_ = 0;
   }
 
-  AlignLayout::AlignLayout( int hgap, int vgap )
+  AlignLayout::AlignLayout( int hgap, int vgap ) 
+    : Layout(), hgap_(hgap), vgap_(vgap), maxX_(0), maxY_(0), preferredWidthChanged_(
+    1), preferredHeightChanged_(1)
   {
-    maxX_ = maxY_ = 0;
-    hgap_ = hgap;
-    vgap_ = vgap;
   }
 
   AlignLayout * AlignLayout::clone( ) const
@@ -53,7 +51,9 @@ namespace ngrs {
   }
 
   void AlignLayout::align( VisualComponent * parent )
-  {
+  { 
+    setChanged(1);
+
     VisualComponent* lastTop    = 0;
     VisualComponent* lastLeft   = 0;
     VisualComponent* lastRight  = 0;
@@ -133,6 +133,11 @@ namespace ngrs {
 
   int AlignLayout::preferredWidth( const VisualComponent * target ) const
   {
+    if ( !preferredWidthChanged_) 
+      return maxX_;
+    else
+      preferredWidthChanged_ = 0;
+
     // this will store the block width of same aligns; eg. the width sum of all nAlignTop components
     int top    = 0;
     int left   = 0;
@@ -194,56 +199,62 @@ namespace ngrs {
       xmax = std::max(std::max(client + left + right, bottom),top);
     } else
       if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) { //0001
-        xmax = std::max(std::max(left+client,bottom)+right,top);
-      } else
-        if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) { //0010
-          xmax = std::max( std::max( right + client, bottom ) + left, top);
-        } else
-          if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0011
-            xmax = std::max(std::max(client,bottom)+left+right,top);
-          } else
-            if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { //0100
-              xmax = std::max(std::max(left+client,top)+right,bottom);
-            } else
-              if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//0101
-                xmax = std::max(std::max(left+client,top),bottom)+right;
-              } else
-                if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//0110
-                  xmax = std::max(std::max(left+client,top)+right,bottom+left);
-                } else
-                  if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0111
-                    xmax = std::max(std::max(client,bottom)+left,top)+right;
-                  } else
-                    if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1000
-                      xmax = std::max(std::max(client+right,top)+left,bottom);
-                    } else
-                      if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
-                        xmax = std::max(left+top,right+bottom);
-                      } else
-                        if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1010
-                          xmax = std::max(std::max(client+right,bottom),top)+left;
-                        } else
-                          if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1011
-                            xmax = std::max(std::max(client,bottom)+right,top)+left;
-                          } else
-                            if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100
-                              xmax = std::max(std::max(client,top)+left+right,bottom);
-                            } else
-                              if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1101
-                                xmax = std::max(std::max(client,top)+left,bottom)+right;
-                              } else
-                                if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1110
-                                  xmax = std::max(std::max(client,top)+right,bottom)+left;
-                                } else
-                                  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1111
-                                    xmax = std::max(std::max(client,top),bottom)+left+right;
-                                  }
+      xmax = std::max(std::max(left+client,bottom)+right,top);
+    } else
+    if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) { //0010
+      xmax = std::max( std::max( right + client, bottom ) + left, top);
+    } else
+    if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0011
+      xmax = std::max(std::max(client,bottom)+left+right,top);
+    } else
+    if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { //0100
+      xmax = std::max(std::max(left+client,top)+right,bottom);
+    } else
+    if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//0101
+      xmax = std::max(std::max(left+client,top),bottom)+right;
+    } else
+    if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//0110
+      xmax = std::max(std::max(left+client,top)+right,bottom+left);
+    } else
+    if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0111
+      xmax = std::max(std::max(client,bottom)+left,top)+right;
+    } else
+    if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1000
+      xmax = std::max(std::max(client+right,top)+left,bottom);
+    } else
+    if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
+      xmax = std::max(left+top,right+bottom);
+    } else
+    if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1010
+      xmax = std::max(std::max(client+right,bottom),top)+left;
+    } else
+    if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1011
+      xmax = std::max(std::max(client,bottom)+right,top)+left;
+    } else
+    if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100
+      xmax = std::max(std::max(client,top)+left+right,bottom);
+    } else
+    if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1101
+      xmax = std::max(std::max(client,top)+left,bottom)+right;
+    } else
+    if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1110
+      xmax = std::max(std::max(client,top)+right,bottom)+left;
+    } else
+    if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1111
+      xmax = std::max(std::max(client,top),bottom)+left+right;
+    }
 
-                                  return hgap_ + xmax;
+    maxX_ = hgap_ + xmax;
+    return maxX_;
   }
 
   int AlignLayout::preferredHeight( const VisualComponent * target ) const
   {
+    if ( !preferredHeightChanged_ ) 
+      return maxY_;
+    else
+      preferredHeightChanged_ = 0;
+
     // this will store the block height of same aligns; eg. the height sum of all nAlignTop components
     int top    = 0;
     int left   = 0;
@@ -304,63 +315,66 @@ namespace ngrs {
     if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { // 0000
       ymax = std::max( std::max(left,right), client ) + top + bottom;
     } else
-      if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) { //0001
+    if (topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) { //0001
         ymax = std::max( std::max(left,client) + bottom, right ) + top;
-      } else
-        if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) { //0010
-          ymax = std::max( std::max(right,client) + bottom, left ) + top;
-        } else
-          if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0011
-            ymax = std::max( std::max(client + bottom, left), right ) + top;
-          } else
-            if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { //0100
-              ymax = std::max(right, std::max ( client, left ) + top ) + bottom;
-            } else
-              if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//0101
-                ymax = std::max(right, std::max ( client, left ) + top + bottom);
-              } else
-                if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//0110
-                  ymax = std::max(right, std::max ( top + client, right ) + bottom); // not sure
-                } else
-                  if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0111
-                    ymax = std::max(right, std::max ( client + bottom, left ) + top);
-                  } else
-                    if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1000
-                      ymax = std::max( std::max( client, right) + top, left) + bottom;
-                    } else
-                      if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
-                        ymax = std::max( std::max( client + top, left) + bottom, right);
-                      } else
-                        if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1010
-                          ymax = std::max( std::max( client, right) + top + bottom, left);
-                        } else
-                          if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1011
-                            ymax = std::max( std::max( client + bottom, right) + top, left);
-                          } else
-                            if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100
-                              ymax = std::max( std::max( client + top, right ), left) + bottom;
-                            } else
-                              if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1101
-                                ymax = std::max( std::max( client + top, left) + bottom, right);
-                              } else
-                                if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1110
-                                  ymax = std::max( std::max( client + top, right) + bottom, left);
-                                } else
-                                  if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1111
-                                    ymax = std::max( top + bottom + client, std::max( left, right));
-                                  }
+    } else
+    if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) { //0010
+       ymax = std::max( std::max(right,client) + bottom, left ) + top;
+    } else
+       if (topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0011
+       ymax = std::max( std::max(client + bottom, left), right ) + top;
+    } else
+       if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) { //0100
+       ymax = std::max(right, std::max ( client, left ) + top ) + bottom;
+    } else
+    if (topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//0101
+       ymax = std::max(right, std::max ( client, left ) + top + bottom);
+    } else
+    if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//0110
+       ymax = std::max(right, std::max ( top + client, right ) + bottom); // not sure
+    } else
+    if (topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//0111
+       ymax = std::max(right, std::max ( client + bottom, left ) + top);
+    } else
+    if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1000
+       ymax = std::max( std::max( client, right) + top, left) + bottom;
+    } else
+    if (!topBeforeLeft && topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1001
+       ymax = std::max( std::max( client + top, left) + bottom, right);
+    } else
+    if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1010
+       ymax = std::max( std::max( client, right) + top + bottom, left);
+    } else
+    if (!topBeforeLeft && topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1011
+       ymax = std::max( std::max( client + bottom, right) + top, left);
+    } else
+    if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && bottomBeforeRight) {//1100
+       ymax = std::max( std::max( client + top, right ), left) + bottom;
+    } else
+    if (!topBeforeLeft && !topBeforeRight && bottomBeforeLeft && !bottomBeforeRight) {//1101
+       ymax = std::max( std::max( client + top, left) + bottom, right);
+    } else
+    if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && bottomBeforeRight) {//1110
+       ymax = std::max( std::max( client + top, right) + bottom, left);
+    } else
+    if (!topBeforeLeft && !topBeforeRight && !bottomBeforeLeft && !bottomBeforeRight) {//1111
+       ymax = std::max( top + bottom + client, std::max( left, right));
+    }
 
-                                  return 2 * vgap_ + ymax;
+    maxY_ = 2 * vgap_ + ymax;
+    return maxY_;
   }
 
   void AlignLayout::setHgap( int hgap )
   {
     hgap_ = hgap;
+    preferredWidthChanged_ = 1;
   }
 
   void AlignLayout::setVgap( int vgap )
   {
     vgap_ = vgap;
+    preferredHeightChanged_ = 1;
   }
 
   // this adds and removes components to the layout
@@ -380,6 +394,11 @@ namespace ngrs {
   void AlignLayout::removeAll( )
   {
     components.clear();
+  }
+
+  void AlignLayout::setChanged( bool on ) {
+    preferredWidthChanged_ = on;
+    preferredHeightChanged_ = on;
   }
 
 }

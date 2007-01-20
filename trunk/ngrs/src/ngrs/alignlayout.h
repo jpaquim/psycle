@@ -52,12 +52,15 @@ namespace ngrs {
 
   private:
 
-    int maxX_;
-    int maxY_;
-
     int hgap_,vgap_;
+    mutable int maxX_;
+    mutable int maxY_;
+    mutable bool preferredWidthChanged_;
+    mutable bool preferredHeightChanged_;
 
     std::vector<VisualComponent*> components;
+
+    void setChanged( bool on );
 
   };
 

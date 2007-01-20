@@ -48,11 +48,20 @@ namespace ngrs {
 
   void FlowLayout::init( )
   {
-    maxX = maxY = 0;
+    hgap_ = 5;
+    vgap_ = 5;
+    maxX_ = 0;
+    maxY_ = 0;
     align_ = nAlClient;
-    hgap_ = vgap_ = 5;
     lineBrk_ = true;
     baseLine_ = nAlBottom;
+    preferredWidthChanged_ = 0;
+    preferredHeightChanged_ = 0;
+  }
+
+  void FlowLayout::setChanged( bool on ) {
+    preferredWidthChanged_ = on;
+    preferredHeightChanged_ = on;
   }
 
   FlowLayout * FlowLayout::clone( ) const
@@ -66,6 +75,8 @@ namespace ngrs {
 
   void FlowLayout::align( VisualComponent * parent )
   {
+    setChanged(1);
+
     std::vector<VisualComponent*>::const_iterator itr   = parent->visualComponents().begin();
     std::vector<VisualComponent*>::const_iterator start = itr;
 
@@ -206,12 +217,15 @@ namespace ngrs {
 
       }*/
 
-      maxY = yp + ymax + vgap_;
-      maxX = xp;
   }
 
   int FlowLayout::preferredWidth( const VisualComponent * target ) const
   {
+    if ( !preferredWidthChanged_) 
+      return maxX_;
+    else
+      preferredWidthChanged_ = 0;
+
     int xp = hgap_;
     std::vector<VisualComponent*>::const_iterator itr   = parent()->visualComponents().begin();
 
@@ -222,11 +236,17 @@ namespace ngrs {
 
     if (xp == hgap_) xp+= hgap_;
 
-    return xp + target->spacing().left() + target->spacing().right() + target->borderLeft() + target->borderRight() ;
+    maxX_ = xp;
+    return maxX_; 
   }
 
   int FlowLayout::preferredHeight( const VisualComponent * target ) const
   {
+    if ( !preferredHeightChanged_ ) 
+      return maxY_;
+    else
+      preferredHeightChanged_ = 0;
+
     int xp = hgap_;
     int yp = vgap_;
     int ymax = 2*vgap_;
@@ -254,7 +274,9 @@ namespace ngrs {
         }
       }
     }
-    return yp + ymax + vgap_;
+
+    maxY_ = yp + ymax + vgap_;
+    return maxY_;
   }
 
   void FlowLayout::setAlign( int align )
@@ -265,11 +287,13 @@ namespace ngrs {
   void FlowLayout::setHgap( int hgap )
   {
     hgap_ = hgap;
+    preferredWidthChanged_ = 1;
   }
 
   void FlowLayout::setVgap( int vgap )
   {
     vgap_ = vgap;
+    preferredHeightChanged_ = 1;
   }
 
   int FlowLayout::align( )

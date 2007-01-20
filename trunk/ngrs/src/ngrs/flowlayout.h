@@ -59,15 +59,20 @@ namespace ngrs {
     virtual void drawComponents(class VisualComponent* target, Graphics& g , const ngrs::Region & repaintArea,VisualComponent* sender);
 
   private:
-
-    int maxX, maxY;
-    int align_;
+    
     int hgap_,vgap_;
+    mutable int maxX_;
+    mutable int maxY_;
+    mutable bool preferredWidthChanged_;
+    mutable bool preferredHeightChanged_;
+
+    int align_;
     int baseLine_;
 
     bool lineBrk_;
 
     void init();
+    void setChanged( bool on );
 
   };
 
