@@ -1,0 +1,65 @@
+# This is a sorted list, top priority at the top!
+
+*	Source files that don't build because they are work-in-progress.
+	Symptom: build failure.
+	Since the build systems (both scons and the autotools) want
+	to build all *.cpp files found under the src dir, don't forget
+	to disable the unfinished sources with something like:
+	#if defined XPSYCLE__EXPERIMENTAL
+		... something that's quite not yet right ...
+	#endif
+	Alternatively, it's possible to put them in a subdir named "todo": dirs with
+	that name are excluded when searching for *.cpp files (also leading dot like .foo.cpp)
+	-- bohan
+
+
+
+(text below was moved from the old psycle todo)
+
+###############################
+Possible Features For Psycle 2
+###############################
+
+====================
+Editing Capabilities
+====================
+
+	* Multi pattern Sequencing
+	* Multiple Editors (Not only tracker view)
+	* Parameter Automation  ( Envelopes for Parameters )
+	* Velocity/Panning/other_weird column to pattern data
+	* Appregiator: One "template" note, notes "produced" by the appregiator in a different colour.
+	* "zip"-able columns.
+	* Global track? (for bpm, global volume...)
+	? Notes of current selected machine marked with a different colour
+	? Maybe notes/etc, of muted machines shown in grey
+	? Time signatures
+
+========
+Machines
+========
+
+	* Multiple Inputs/Outputs
+	* MIDI generator - instead of generating audio, generates MIDI out - sync could be an issue.
+	* Sequencers: Posibility to control more than one machine at the same time
+	* Compressor/limiter
+	* Flanger/Chorus
+
+=============
+Audio/Control
+=============
+
+	* audio record support (Like, from microphone)
+	* "MIDI Controlling <-> Machine <-> Machine" Interface = MIDI mapping
+	  (allow to map midi commands to change different parameters)
+
+	* Ogg/Winamp Plugin export?
+
+######
+Legend
+######
+
+	* bug
+	! change
+	+ addition
+	? hmmm
