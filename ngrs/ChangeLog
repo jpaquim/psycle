@@ -1,12 +1,12 @@
 ngrs (0.3.20060430) unstable; urgency=low
 
-  * bumping version
+  * new release
 
  -- Johan Boule <bohan@retropaganda.info>  Tue, 18 Apr 2006 18:36:54 +0000
 
 ngrs (0.0.3) unstable; urgency=low
 
-  * packageneric
+  * building system for ngrs
 
  -- Johan Boule <bohan@retropaganda.info>  Tue, 21 Mar 2006 02:37:55 +0000
 
