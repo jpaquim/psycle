@@ -22,7 +22,7 @@
 
 #include "songpdlg.h"
 #include "childview.h"
-#include "sequencerbar.h"
+#include "songexplorer.h"
 #include <ngrs/window.h>
 #include <ngrs/menubar.h>
 #include <ngrs/menu.h>
@@ -52,7 +52,6 @@ namespace psy {
   namespace host {
 
     class GreetDlg;
-    class AboutDlg;
     class VuMeter;
     class InfoDlg;
     class SequencerItem;
@@ -101,6 +100,8 @@ namespace psy {
 
       ChildView* addChildView();
       ChildView* selectedChildView_;
+
+      SongExplorer* songExplorer_;
 
       bool noFileWasYetLoaded;
 

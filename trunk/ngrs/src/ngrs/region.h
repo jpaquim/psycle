@@ -55,13 +55,13 @@ namespace ngrs {
 
     Region& operator=( const Region& rhs );
     Region& operator&=( const Region& rhs ); // intersection
-    Region operator&( const Region& rhs );
+    const Region operator&( const Region& rhs );
     Region& operator|=( const Region& rhs ); // union
-    Region operator|( const Region& rhs );
+    const Region operator|( const Region& rhs );
     Region& operator-= ( const Region& rhs ); // difference
-    Region operator-( const Region& rhs );
+    const Region operator-( const Region& rhs );
     Region& operator^=( const Region& rhs ); // symetric difference
-    Region operator^( const Region& rhs );
+    const Region operator^( const Region& rhs );
 
     // warning: this pointer can change
     inline PlatformRegionHandle asPlatformRegionHandle() const  { 

@@ -22,6 +22,7 @@
 
 #include "patterndata.h"
 #include "patternsequence.h"
+#include <string>
 
 namespace psy
 {
@@ -32,6 +33,22 @@ namespace psy
 		/// this include patterns, pattern sequence, machines 
 		/// and their initial parameters and coordinates, wavetables
 
+
+      class SongInfo {
+      public: 
+
+        SongInfo();
+        ~SongInfo();
+
+        void setName( const std::string& name );
+        const std::string& name() const;
+
+      private:
+
+        std::string name_;
+
+      };
+
 		class Song
 		{
 			public:
@@ -39,12 +56,15 @@ namespace psy
 
 				virtual ~Song();
 
+                const SongInfo& info() const;
+
 				PatternSequence* patternSequence();
                 const PatternSequence & patternSequence() const;
 
 			private:
 
 				PatternSequence patternSequence_;
+                SongInfo info_;
 
 			
 		};

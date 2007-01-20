@@ -26,6 +26,7 @@
 #include "sequencergui.h"
 #include "audioconfigdlg.h"
 #include "skinreader.h"
+#include "aboutbox.h"
 #include <psycore/song.h>
 #include <ngrs/app.h>
 #include <ngrs/item.h>
@@ -109,6 +110,10 @@ namespace psy {
       initMenu();
       initBars();
       initDialogs();
+
+
+      songExplorer_ = new SongExplorer();
+      pane()->add( songExplorer_, ngrs::nAlLeft );
 
       book = new ngrs::TabBook();    
       pane()->add(book,ngrs::nAlClient);
@@ -239,6 +244,8 @@ namespace psy {
       ngrs::NTab* tab = book->tab( childView_ );
       tab->setSkin( songTabSkinNone, songTabSkinDown, 0 );
       book->setActivePage( childView_ );
+
+      songExplorer_->addSong( *childView_->song() );
 
       count++;
 
@@ -929,17 +936,11 @@ namespace psy {
 
     void MainWindow::onHelpMenuAbout( ngrs::ButtonEvent * ev )
     {
-      ngrs::MessageBox* about = new ngrs::MessageBox();
-      about->setTitle("About Psycle(X)");
-      about->setText( std::string("Psycle version (X alpha 0.1)\n") +
-        std::string("(c) 2006 by  Stefan Nattkemper\n") +
-        std::string("            Josep Segura\n") +
-        std::string("            D.W. Aley\n") +
-        std::string("GNU Public Licence 2.0") );
-      about->setButtons( ngrs::nMsgOkBtn );
-      add( about );
-      about->execute();
-      ngrs::App::addRemovePipe(about);
+      ngrs::Dialog* aboutBox = new AboutBox();
+      add( aboutBox );
+      aboutBox->execute();
+      erase( aboutBox );
+      ngrs::App::addRemovePipe( aboutBox );
     }
 
     void MainWindow::onHelpMenuGreeting( ngrs::ButtonEvent * ev )

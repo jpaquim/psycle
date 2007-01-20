@@ -32,17 +32,19 @@ namespace psy
 	namespace core
 	{
 
-		class PatternCategory : public std::vector<SinglePattern*> {
+
+		class PatternCategory  {
 		public:
 			PatternCategory();
 			PatternCategory(const std::string & name);
+            PatternCategory( PatternCategory* parent, const std::string & name );
 			~PatternCategory();
 
 			void setName(const std::string & name);
 			const std::string & name() const;
 
 			SinglePattern* createNewPattern(const std::string & name);
-                        SinglePattern* clonePattern( const SinglePattern & src, const std::string & name);
+            SinglePattern* clonePattern( const SinglePattern & src, const std::string & name);
 			bool removePattern(SinglePattern* pattern);
 
 			void setColor(long color);
@@ -55,13 +57,27 @@ namespace psy
 
 			std::string toXml() const;
 
+            const std::vector<SinglePattern*>& patterns() const;
+            const std::vector<PatternCategory*>& children() const;
+
+            PatternCategory* createNewCategory( std::string& name );
+
+            PatternCategory* parent() const;
+
+            void removeAll();
+            void resetToDefault();
+
+
 		private:
 
+            PatternCategory* parent_;
 			std::string name_;
 			long color_;
-
 			int id_;
 			static int idCounter;
+            
+            std::vector<SinglePattern*> patterns_;
+            std::vector<PatternCategory*> children_;
 
 		};
 

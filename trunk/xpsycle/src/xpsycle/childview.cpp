@@ -20,7 +20,7 @@
 #include "childview.h"
 #include "configuration.h"
 #include "sequencergui.h"
-#include "sequencerbar.h"
+#include "songexplorer.h"
 #include "virtualpattern.h"
 #include <psycore/patterndata.h>
 #include <psycore/song.h>
@@ -41,8 +41,8 @@ ChildView::ChildView()
  
   setLayout( ngrs::AlignLayout() );
 
-  add(sequencerBar_ = new SequencerBar(), ngrs::nAlLeft);
-  sequencerBar_->setChildView(this);
+  //add(sequencerBar_ = new SongExplorer(), ngrs::nAlLeft);
+  //sequencerBar_->setChildView(this);
 
   tabBook_ = new ngrs::TabBook();
   add(tabBook_, ngrs::nAlClient);
@@ -56,10 +56,10 @@ ChildView::ChildView()
     machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
 
   patternView_ = new PatternView( _pSong );
-	sequencerBar_->setPatternView( patternView() );
+	//sequencerBar_->setPatternView( patternView() );
 
   sequencerView_ = new SequencerGUI();
-  sequencerBar_->setSequenceGUI( sequencerView() ) ;
+  //sequencerBar_->setSequenceGUI( sequencerView() ) ;
   sequencerView_->setPatternSequence( _pSong->patternSequence());
   sequencerView_->addSequencerLine();
 
@@ -94,7 +94,7 @@ ChildView::ChildView()
   //timer.setIntervalTime(80);
   //timer.enableTimer();
   //_pSong->patternSequence().patternData()->resetToDefault();
-  sequencerBar_->update();
+  //sequencerBar_->update();
 }
 
 
@@ -161,7 +161,7 @@ psy::core::Song * ChildView::song( )
   return _pSong;
 }
 
-SequencerBar * ChildView::sequencerBar( )
+SongExplorer * ChildView::sequencerBar( )
 {
   return sequencerBar_;
 }

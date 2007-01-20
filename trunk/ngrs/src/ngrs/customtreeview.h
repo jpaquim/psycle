@@ -54,6 +54,8 @@ namespace ngrs {
 
     void setSelectedItem( TreeNode* node, CustomItem* item );
 
+    ScrollBox* scrollBox();
+
   private:
 
     ScrollBox* scrollBox_;

@@ -22,7 +22,7 @@
 
 #include "machineview.h"
 #include "patternview.h"
-#include "sequencerbar.h"
+#include "songexplorer.h"
 #include <psycore/song.h>
 #include <ngrs/tabbook.h>
 #include <ngrs/timer.h>
@@ -37,7 +37,7 @@ namespace psy {
 
     class SequencerGUI;
     class VirtualPattern;
-    class SequencerBar;
+    class SongExplorer;
 
 
     class ChildView : public ngrs::Panel {
@@ -59,7 +59,7 @@ namespace psy {
 
       PatternView* patternView();
       MachineView* machineView();
-      SequencerBar* sequencerBar();
+      SongExplorer* sequencerBar();
       SequencerGUI* sequencerView();
       VirtualPattern* virtualPattern();
 
@@ -86,7 +86,7 @@ namespace psy {
 
       // ngrs::FileDialog* getSaveFileName_;
 
-      SequencerBar* sequencerBar_;
+      SongExplorer* sequencerBar_;
       MachineView* machineView_;
       PatternView* patternView_;
       SequencerGUI* sequencerView_;
