@@ -439,7 +439,7 @@ namespace psy {
     {
       if ( pattern_ ) {
         std::string meter = meterCbx->text();
-        int pos = meter.find("/");
+        std::string::size_type pos = meter.find("/");
         std::string num   = meter.substr( 0, pos);
         std::string denom = meter.substr( pos+1 );
 
@@ -839,12 +839,13 @@ namespace psy {
         std::string text = stringify( i );
         if ( pView->pattern() ) {
           float position = i  / (float) pView->pattern()->beatZoom();
-          psy::core::SinglePattern::iterator it = pView->pattern()->find_nearest(i);
+                    
+          std::map<double, psy::core::PatternLine>::const_iterator it = pView->pattern()->find_nearest(i);
           if (it != pView->pattern()->end()) {
             // check out how many hidden lines there are
             int lastLine = d2i (it->first * pView->pattern_->beatZoom());
             int y = lastLine;
-            psy::core::SinglePattern::iterator it2 = it;
+            std::map<double, psy::core::PatternLine>::const_iterator it2 = it;
             int count = 0;
             do {
               y = d2i (it2->first * pView->pattern_->beatZoom());
@@ -1131,11 +1132,11 @@ namespace psy {
       if ( pView->pattern() ) {
         drawCellBg( g, cursor() );
 
-        psy::core::SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
+        std::map<double, psy::core::PatternLine>::iterator it = pView->pattern_->find_lower_nearest(startLine);
 
         int lastLine = -1;
         for ( ; it != pView->pattern_->end(); it++ ) {
-          psy::core::PatternLine & line = it->second;
+          psy::core::PatternLine& line = it->second;
           int y = d2i (it->first * pView->pattern_->beatZoom());
           if (y > endLine) break;
           if (y != lastLine) {
@@ -1385,7 +1386,7 @@ namespace psy {
         drawCellBg( g, cursor()  );
 
         // find start iterator
-        psy::core::SinglePattern::iterator it = pView->pattern_->find_lower_nearest(startLine);
+        std::map<double, psy::core::PatternLine>::iterator it = pView->pattern_->find_lower_nearest(startLine);
         psy::core::TimeSignature signature;
 
         int lastLine = -1;
@@ -2358,7 +2359,7 @@ namespace psy {
             data.setParameter( str_hex<int> (parser.getAttribValue("param")) );
             data.setParameter( str_hex<int> (parser.getAttribValue("cmd")) );
 
-            pasteBuffer[lastXmlLineBeatPos].notes()[trackNumber]=data;
+            //pasteBuffer.insert( lastXmlLineBeatPos,].notes()[trackNumber]=data;
           }
     }
 

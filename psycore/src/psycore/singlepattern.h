@@ -36,7 +36,6 @@ namespace psy
 	namespace core
 	{
 
-		class PatternCategory;
 
     class TweakTrackInfo {
 		public:
@@ -63,7 +62,7 @@ namespace psy
 		};
 
 
-		class SinglePattern : public std::map<double, PatternLine> {
+		class SinglePattern  {
 		public:
 			SinglePattern();
 
@@ -96,21 +95,24 @@ namespace psy
 			void setName(const std::string & name);
 			const std::string & name() const;
 
-			void setCategory(PatternCategory* category);
-			PatternCategory* category();
-
 			float beatsPerLine() const;
 
 			void clearTrack( int linenr , int tracknr );
 			void clearTweakTrack( int linenr , int tracknr );
+            void clear();
 			bool lineIsEmpty( int linenr ) const;
 
-			SinglePattern::iterator find_nearest( int linenr );
-			SinglePattern::const_iterator find_nearest( int linenr ) const;
+            std::map<double, PatternLine>::iterator find_nearest( int linenr );
+			std::map<double, PatternLine>::const_iterator find_nearest( int linenr ) const;
 
-			SinglePattern::iterator find_lower_nearest( int linenr );
-			SinglePattern::const_iterator find_lower_nearest( int linenr ) const;
-			
+            std::map<double, PatternLine>::const_iterator begin() const;
+            std::map<double, PatternLine>::const_iterator end() const;
+
+			std::map<double, PatternLine>::iterator find_lower_nearest( int linenr );
+			std::map<double, PatternLine>::const_iterator find_lower_nearest( int linenr ) const;
+
+            std::map<double, PatternLine>::const_iterator lower_bound(double key) const;
+            void insert( double pos, const PatternLine& pattern );
 
 			void clearEmptyLines();
 
@@ -138,14 +140,13 @@ namespace psy
 			int beatZoom_;
 			std::string name_;
 
-			PatternCategory* category_;
 			std::vector<TimeSignature> timeSignatures_;
-
 			TimeSignature zeroTime;
 
 			int id_;
 			static int idCounter;
 
+            std::map<double, PatternLine> patternMap;
 			std::map<TweakTrackInfo, int> tweakInfoMap;
 
 		};
