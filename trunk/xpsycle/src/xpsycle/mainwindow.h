@@ -243,7 +243,7 @@ namespace psy {
 
       int close();
 
-      void onSeqAdded( psy::core::SinglePattern* pattern );
+      void onSeqAdded( const std::list<psy::core::SinglePattern>::iterator& patternItr );
 
       void onNewMachineDialogAdded( psy::core::Machine* mac );
 

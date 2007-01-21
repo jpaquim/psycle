@@ -86,8 +86,8 @@ void PatternBoxProperties::onColorChange( const ngrs::Color & color )
      int g = color.green();
      int b = color.blue();
      long href = (b << 16) | (g << 8) | r;
-     cat_->category()->setColor( href );
-     cat_->repaint();
+//     cat_->category()->setColor( href );
+//     cat_->repaint();
   }
 }
 

@@ -87,63 +87,38 @@ namespace psy
 
 		// pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
 
-		SequenceEntry::SequenceEntry( )
+		SequenceEntry::SequenceEntry( SequenceLine* parent, const std::list<SinglePattern>::iterator& itr )
 		{
-			line_ = 0;
-			init();
-		}
-
-		SequenceEntry::SequenceEntry( SequenceLine * line )
-		{
-			line_ = line;
-			init();
-		}
-
-		void SequenceEntry::init( )
-		{
-			pattern_ = 0;
+			line_ = parent;
+            patternItr_ = itr;
 			startPos_ = 0;
-			endPos_ = PatternEnd;
-			transpose_ = 0;
+		    endPos_ = (*patternItr_).beats();
 		}
 
 		SequenceEntry::~ SequenceEntry( )
 		{
 		}
 
-		void SequenceEntry::setPattern( SinglePattern * pattern )
-		{
-			pattern_ = pattern;
-			startPos_ = 0;
-			endPos_   = pattern->beats();
-		}
-
-		SinglePattern * SequenceEntry::pattern( )
-		{
-			return pattern_;
-		}
-
-		SinglePattern * SequenceEntry::pattern( ) const
-		{
-			return pattern_;
-		}
-
+        const std::list<SinglePattern>::iterator& SequenceEntry::patternItr() const{
+          return patternItr_;
+        } 
+		
 		float SequenceEntry::patternBeats() const
 		{
-			return pattern_->beats();
+			return (*patternItr_).beats();
 		}
 
 		double SequenceEntry::tickPosition( ) const
 		{
-			SequenceLine::iterator iter = line_->begin();
-			for(; iter!= line_->end(); ++iter)
+			SequenceLine::iterator itr = line_->begin();
+			for(; itr!= line_->end(); ++itr)
 			{
-				if(iter->second==this)
+				if(itr->second==this)
 				break;
 			}
-			if(iter!=line_->end())
+			if(itr!=line_->end())
 			{
-				return iter->first;
+				return itr->first;
 			}
 			return 0;
 		}
@@ -180,12 +155,12 @@ namespace psy
 
 		std::string SequenceEntry::toXml( double pos ) const
 		{
-			std::ostringstream xml;
-			xml << "<seqentry pos='" << pos << "' patid='" << pattern()->id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "transpose='" << transpose() << std::hex << "' />" << std::endl;
-    	return xml.str();
+		  std::ostringstream xml;
+		  xml << "<seqentry pos='" << pos << "' patid='" << (*patternItr_).id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "transpose='" << transpose() << std::hex << "' />" << std::endl;
+       	  return xml.str();
 		}
-
 		// end of PatternEntry
+
 
 		// represents one track/line in the sequencer
 		SequenceLine::SequenceLine( )
@@ -205,20 +180,19 @@ namespace psy
 			for ( it; it != end(); it++) delete it->second;
 		}
 
-		SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double position )
+        SequenceEntry* SequenceLine::createEntry( std::list<SinglePattern>::iterator patternItr, double position )
 		{
-			SequenceEntry* entry = new SequenceEntry(this);
-			entry->setPattern(pattern);
+			SequenceEntry* entry = new SequenceEntry(this, patternItr);
 			insert(value_type(position, entry));
 			return entry;
 		}
 
-		void SequenceLine::removeSinglePatternEntries( SinglePattern* pattern )
+		void SequenceLine::removeSinglePatternEntries( const std::list<SinglePattern>::iterator& patternItr )
 		{
 			iterator it = begin();
 			while ( it != end() ) {
 				SequenceEntry* entry = it->second;
-				if ( entry->pattern() == pattern) {
+				if ( entry->patternItr() == patternItr ) {
 					delete entry;
 					erase(it++);
 				} else it++;
@@ -367,25 +341,25 @@ namespace psy
 				for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt )
 				{
 					// take the pattern,
-					SinglePattern* pPat = sLineIt->second->pattern();
+					const SinglePattern& pPat = *sLineIt->second->patternItr();
 					double entryStart = sLineIt->first;
 					float entryStartOffset  = sLineIt->second->startPos();
 					float entryEndOffset  = sLineIt->second->endPos();
 					float entryLength = entryEndOffset - entryStartOffset;
 					double relativeStart = start - entryStart + entryStartOffset;
 					
-					SinglePattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
-					patEnd = pPat->lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
+					SinglePattern::const_iterator patIt = pPat.lower_bound( std::min(relativeStart , (double)entryEndOffset)),
+					patEnd = pPat.lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
 
 					// and iterate through the lines that are inside the range
 					for( ; patIt != patEnd; ++patIt)
 						{
-						PatternLine *thisline= &(patIt->second);
+						const PatternLine& thisline= patIt->second;
 						PatternLine tmpline;
-						std::map<int, PatternEvent>::iterator lineIt = thisline->notes().begin();
+						std::map<int, PatternEvent>::const_iterator lineIt = thisline.notes().begin();
 						// Since the player needs to differentiate between tracks of different SequenceEntrys, 
 						// we generate a temporary PatternLine with a special column value.
-						for( ;lineIt != thisline->notes().end() ;lineIt++)
+						for( ;lineIt != thisline.notes().end() ;lineIt++)
 						{
 							tmpline.notes()[lineIt->first]=lineIt->second;
 							tmpline.notes()[lineIt->first].setNote(tmpline.notes()[lineIt->first].note()+sLineIt->second->transpose() );
@@ -400,7 +374,7 @@ namespace psy
 			}
 		}
 
-		bool PatternSequence::getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const {
+		bool PatternSequence::getPlayInfo( const std::list<SinglePattern>::iterator& itr, double start, double length, double & entryStart  ) const {
 			entryStart = 0;
 			PatternLine* searchLine = 0;
 
@@ -415,11 +389,7 @@ namespace psy
 				// this was left open in the player code)
 				for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt )
 				{
-					// take the pattern,
-
-					SinglePattern* pPat = sLineIt->second->pattern();
-
-					if ( pPat == pattern ) {
+					if ( itr == sLineIt->second->patternItr() ) {
 						entryStart = sLineIt->first;
 						return true;
 					}
@@ -492,12 +462,12 @@ namespace psy
 			return globalEvents_;
 		}
 
-		void PatternSequence::removeSinglePattern( SinglePattern * pattern )
+		void PatternSequence::removeSinglePattern( const std::list<SinglePattern>::iterator& patternItr )
 		{
 			for(iterator it = begin(); it != end(); ++it) {
-				(*it)->removeSinglePatternEntries(pattern);
+				(*it)->removeSinglePatternEntries( patternItr );
 			}
-			patternData_.removeSinglePattern(pattern);
+            patternData_.erase( patternItr );
 		}
 
 		void PatternSequence::removeAll( )
@@ -506,7 +476,7 @@ namespace psy
 				delete *it;
 			}
 			clear();
-			patternData_.removeAll();
+			patternData_.clear();
 		}
 
 		double PatternSequence::tickLength( ) const

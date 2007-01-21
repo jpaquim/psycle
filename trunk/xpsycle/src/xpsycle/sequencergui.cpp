@@ -340,14 +340,15 @@ namespace psy {
       int cw = clientWidth();
       int ch = clientHeight();
 
-      int tw = g.textWidth(sequenceEntry_->pattern()->name());
+      const psy::core::SinglePattern& pattern = *(sequenceEntry_->patternItr());
+      int tw = g.textWidth( pattern.name() );
 
       int xp = (cw - tw) / 2;
       int yp = (ch + g.textHeight() /2 ) / 2;
 
-      g.setForeground( ngrs::Color( sequenceEntry_->pattern()->category()->color() ));
+//      g.setForeground( ngrs::Color( sequenceEntry_->pattern()->category()->color() ));
       g.fillRect(0,0, clientWidth(), clientHeight() );
-      g.drawText( xp, yp, sequenceEntry_->pattern()->name());
+      g.drawText( xp, yp, pattern.name() );
 
       if (selected_) {
         g.setForeground( ngrs::Color( 0,0,255) );
@@ -534,25 +535,27 @@ namespace psy {
       }
     }
 
-    void SequencerGUI::SequencerLine::addItem( psy::core::SinglePattern* pattern )
+    void SequencerGUI::SequencerLine::addItem( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
+      const psy::core::SinglePattern& pattern = *patternItr;
+
       double endTick = sequenceLine()->tickLength();
 
       SequencerItem* item = new SequencerItem(sView);
       item->click.connect(this,&SequencerGUI::SequencerLine::onSequencerItemClick);
-      item->setPosition(d2i(sView->beatPxLength() * endTick),5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
-      item->setSequenceEntry( sequenceLine()->createEntry(pattern, endTick) );
+      item->setPosition(d2i(sView->beatPxLength() * endTick),5, static_cast<int>( pattern.beats() * sView->beatPxLength() ) ,20);
+      item->setSequenceEntry( sequenceLine()->createEntry(patternItr, endTick) );
       items.push_back( item );
       add( item );
 
     }
 
-    void SequencerGUI::SequencerLine::removeItems( psy::core::SinglePattern * pattern )
+    void SequencerGUI::SequencerLine::removeItems( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
       std::list<SequencerItem*>::iterator it = items.begin();
       while ( it != items.end()) {
         SequencerItem* item = *it;
-        if (item->sequenceEntry()->pattern() == pattern) {
+        if (item->sequenceEntry()->patternItr() == patternItr ) {
           items.erase(it++);
           removeChild(item);
         } else it++;
@@ -588,19 +591,17 @@ namespace psy {
       for ( ; it != items.end(); it++) {
         SequencerItem* item = *it;
         double tickPosition = item->sequenceEntry()->tickPosition();
-        psy::core::SinglePattern* pattern = item->sequenceEntry()->pattern();
-
         item->setPosition(d2i(sView->beatPxLength() * tickPosition),5, static_cast<int>( (item->endOffset()-item->start()) * sView->beatPxLength() ),20);
       }
     }
 
-    std::vector<SequencerItem*> SequencerGUI::SequencerLine::itemsByPattern( psy::core::SinglePattern * pattern )
+    std::vector<SequencerItem*> SequencerGUI::SequencerLine::itemsByPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
       std::vector<SequencerItem*> list;
       std::list<SequencerItem*>::iterator it = items.begin();
       for ( ; it != items.end(); it++) {
         SequencerItem* item = *it;
-        if (item->sequenceEntry()->pattern() == pattern) {
+        if (item->sequenceEntry()->patternItr() == patternItr ) {
           list.push_back(item);
         }
       }
@@ -883,10 +884,10 @@ namespace psy {
 
     // entry operations
 
-    void SequencerGUI::addPattern( psy::core::SinglePattern * pattern )
+    void SequencerGUI::addPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
       if ( selectedLine_ ) {
-        selectedLine_->addItem( pattern );
+        selectedLine_->addItem( patternItr );
         resize();
         repaint();
       }
@@ -919,23 +920,23 @@ namespace psy {
       repaint();
     }
 
-    void SequencerGUI::removePattern( psy::core::SinglePattern * pattern )
+    void SequencerGUI::removePattern( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
       std::vector<SequencerLine*>::iterator it = lines.begin();
       for (; it < lines.end(); it++) {
         SequencerLine* line = *it;
-        line->removeItems(pattern);
+        line->removeItems(patternItr);
       }
     }
 
-    std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( psy::core::SinglePattern * pattern )
+    std::vector<SequencerItem*> SequencerGUI::guiItemsByPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
       std::vector<SequencerItem*> list;
 
       std::vector<SequencerLine*>::iterator it = lines.begin();
       for (; it < lines.end(); it++) {
         SequencerLine* line = *it;
-        std::vector<SequencerItem*> temp = line->itemsByPattern(pattern);
+        std::vector<SequencerItem*> temp = line->itemsByPattern(patternItr);
         list.insert( list.end() , temp.begin(), temp.end());
       }
       return list;

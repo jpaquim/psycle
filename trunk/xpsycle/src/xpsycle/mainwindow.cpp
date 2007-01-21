@@ -1060,10 +1060,10 @@ namespace psy {
     {
     }
 
-    void MainWindow::onSeqAdded( psy::core::SinglePattern * pattern )
+    void MainWindow::onSeqAdded( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
       if ( !selectedChildView_ ) return;
-      selectedChildView_->sequencerView()->addPattern( pattern);
+      selectedChildView_->sequencerView()->addPattern( patternItr );
     }
 
     void MainWindow::onNewMachineDialogAdded( psy::core::Machine * mac )
@@ -1073,7 +1073,7 @@ namespace psy {
     void MainWindow::onSequencerEntryClick( SequencerItem * item )
     {
       if (!selectedChildView_) return;
-      selectedChildView_->sequencerBar()->setEntry(item);
+//      selectedChildView_->sequencerBar()->setEntry(item);
     }
 
     void MainWindow::onKeyPress( const ngrs::KeyEvent& event )

@@ -30,11 +30,32 @@
 #include <sstream>
 #include <string>
 #include <cstdlib>
+#include <algorithm>
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+  std::vector<int> a;
+  for ( int i = 0; i < 10; i++)
+    a.push_back(i);
+
+  std::vector<int>::iterator it = a.begin();
+  for ( ; it < a.end(); it++ ) {
+    int& a = *it;
+    std::cout << "value" << a << "memadress" << &a << std::endl;
+  }
+
+  it = find( a.begin(), a.end(), 5 );
+  a.erase( it);
+  it = a.begin();
+  for ( ; it < a.end(); it++ ) {
+    int& a = *it;
+    std::cout << "value" << a << "memadress" << &a << std::endl;
+  }
+
+   return EXIT_SUCCESS;
+
   ngrs::App app;
 
   ngrs::Window* myMainWindow = new NTestWindow();
