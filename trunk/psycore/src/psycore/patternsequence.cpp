@@ -348,7 +348,7 @@ namespace psy
 					float entryLength = entryEndOffset - entryStartOffset;
 					double relativeStart = start - entryStart + entryStartOffset;
 					
-					SinglePattern::const_iterator patIt = pPat.lower_bound( std::min(relativeStart , (double)entryEndOffset)),
+                    std::map<double, PatternLine>::const_iterator patIt = pPat.lower_bound( std::min(relativeStart , (double)entryEndOffset)),
 					patEnd = pPat.lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
 
 					// and iterate through the lines that are inside the range
@@ -367,7 +367,7 @@ namespace psy
 						
 						// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
 						tmpline.setSequenceTrack(seqlineidx);
-						events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
+						events.insert( std::map<double, PatternLine>::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 						}
 				}
 			    seqlineidx++;
