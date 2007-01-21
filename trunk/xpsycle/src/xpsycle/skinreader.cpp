@@ -21,11 +21,11 @@
 #include "zipreader.h"
 #ifdef __unix__
 	#include <unistd.h>
-	#include <sys/stat.h>
+//	#include <sys/stat.h>
 	#include <sys/types.h>
 #elif __MSDOS__ || __WIN32__ || _MSC_VER
 	#include <io.h>
-	#include <sys\stat.h>
+//	#include <sys\stat.h>
 #endif
 #include <fcntl.h>
 #include <stdlib.h>

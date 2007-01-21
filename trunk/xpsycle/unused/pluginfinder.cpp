@@ -210,13 +210,14 @@ namespace psycle
 		}
 
 		void PluginFinder::scanLadspa() {
-			///\todo this just uses the first path in getenv
+			///\todo this just uses the first path in ladspaPath
 			std::string ladspa_path = conf_.ladspaPath() ;			
 			#ifdef __unix__
 			std::string::size_type dotpos = ladspa_path.find(':',0);
-			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
 			#else
+			std::string::size_type dotpos = ladspa_path.find(';',0);
 			#endif
+			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
 			const LADSPA_Descriptor * psDescriptor;
 			LADSPA_Descriptor_Function pfDescriptorFunction;
 			unsigned long lPluginIndex;

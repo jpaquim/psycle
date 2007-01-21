@@ -209,11 +209,14 @@ namespace psy {
 			if ( !pcLADSPAPath) {
 				#ifdef __unix__
 				pcLADSPAPath = "/usr/lib/ladspa/";
+				ladspaPath_ = pcLADSPAPath;
 				#else
-				pcLADSPAPath = "I:\\Archivos de programa\\Multimedia\\Audacity\\Plug-Ins";
+				ladspaPath_ = std::getenv("ProgramFiles");
+				ladspaPath_ += "\\Audacity\\Plug-Ins";
 				#endif
 			}
-			ladspaPath_ = pcLADSPAPath;
+			else 
+				ladspaPath_ = pcLADSPAPath;
 
 			ngrs::XmlParser parser;
 			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
@@ -240,7 +243,8 @@ namespace psy {
 #ifdef __unix__
 			pluginPath_ = ngrs::File::replaceTilde("~/xpsycle/plugins/");
 #else
-			pluginPath_ = ngrs::File::replaceTilde("C:\\Programme\\Psycle\\PsyclePlugins\\");
+			pluginPath_ = std::getenv("ProgramFiles");
+			pluginPath_ += "\\Psycle\\PsyclePlugins\\";
 #endif
 
 

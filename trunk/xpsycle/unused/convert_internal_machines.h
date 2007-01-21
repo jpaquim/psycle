@@ -6,8 +6,8 @@
 #include "plugin.h"
 //\todo:
 #include "configuration.h"
-#include "helpers/scale.hpp"
-#include "helpers/math/pi.hpp"
+#include "../helpers/scale.hpp"
+#include "../helpers/math/pi.hpp"
 #include <string>
 #include <exception>
 #include <map>
