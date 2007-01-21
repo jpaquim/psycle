@@ -163,10 +163,10 @@ namespace psy {
       ngrs::Rect area = g.repaintArea().rectClipBox();
 
       int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
-      int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
+      int end   = start + ( area.width() / sView->beatPxLength()) ;
 
       for (int i = start ; i <= end ; i++) {
-        if ( sView->beatPxLength() > 3 || (sView->beatPxLength() <= 3 && (!( i %16)))  ) {
+        if ( sView->beatPxLength() > 3 || (!( i %16))  ) {
           g.setForeground( SkinReader::Instance()->sequencerview_info().pane_grid_color );
           g.drawLine(i* sView->beatPxLength(),-scrollDy(),d2i(i*sView->beatPxLength()),clientHeight()+scrollDy());
         }
