@@ -360,7 +360,7 @@ void NTestWindow::testMenu( )
 //  menu1->add(item);
 //  item->click.connect(this,&NTestWindow::onOpen);
 
-  CheckMenuItem* item5 = new CheckMenuItem("test disabled");
+  ngrs::CheckMenuItem* item5 = new ngrs::CheckMenuItem("test disabled");
    item5->setEnable(false);
   menu1->add(item5);
 
@@ -370,13 +370,13 @@ void NTestWindow::testMenu( )
   Menu* subMenu = new Menu();
   item6->add(subMenu);
 
-  CheckMenuItem* sub_item = new CheckMenuItem("test");
+  ngrs::CheckMenuItem* sub_item = new ngrs::CheckMenuItem("test");
   subMenu->add(sub_item);
 }
 
 void NTestWindow::testSpinButton( )
 {
-   SpinButton* btn = new SpinButton();
+  ngrs::SpinButton* btn = new ngrs::SpinButton();
      std::cout << btn->preferredWidth() << std::endl;
      btn->setPosition(10,10,btn->preferredWidth(),btn->preferredHeight());
    pane()->add(btn);
@@ -411,7 +411,7 @@ void NTestWindow::toolBarTest( )
   ToolBar* toolBar1_ = new ToolBar();
   pane()->add(toolBar1_,nAlTop); //toolBar1_->add(lb);
 
-    Button* lb = new Button("Hallo");
+  ngrs::Button* lb = new ngrs::Button("Hallo");
     std::cout << "this" << lb->preferredHeight() << std::endl;
     toolBar1_->add(lb);
     std::cout << "after" << lb->preferredHeight() << std::endl; 
@@ -419,17 +419,17 @@ void NTestWindow::toolBarTest( )
     std::cout << toolBar1_->preferredHeight() << std::endl;
     std::cout << "y" << lb->preferredHeight() << std::endl;
 
-    Image* img;
-    img = new Image();
+    ngrs::Image* img;
+    img = new ngrs::Image();
     img->loadFromFile(iconPath+ "new.xpm");
     img->setPreferredSize(40,80);
     toolBar1_->add(new Button(img));
 
-    img = new Image();
+    img = new ngrs::Image();
     img->loadFromFile(iconPath+ "new.xpm");
     toolBar1_->add(new Button(img));
 
-    img = new Image();
+    img = new ngrs::Image();
     img->loadFromFile(iconPath+ "new.xpm");
     toolBar1_->add(new Button(img));
    //toolBarPanel_->add(toolBar1_);
@@ -441,7 +441,7 @@ void NTestWindow::toolBarTest( )
 
 void NTestWindow::testListBox( )
 {
-  ListBox* lbox = new ListBox();
+  ngrs::ListBox* lbox = new ngrs::ListBox();
      lbox->setMultiSelect(true);
      lbox->setPosition(10,10,200,200);
      for (int i = 0; i < 10; i++) {
@@ -503,7 +503,7 @@ void NTestWindow::testComboBox( )
 
 void NTestWindow::testMsgBox( )
 {
-  MessageBox* box = new MessageBox("Save changes of : name ?");
+  ngrs::MessageBox* box = new ngrs::MessageBox("Save changes of : name ?");
     box->setTitle("New Song");
     box->setButtonText("Yes","No","Abort");
   add(box);
@@ -514,27 +514,27 @@ void NTestWindow::testMsgBox( )
 
 void NTestWindow::testTimerButton( )
 {
-  info = new Label();
+  info = new ngrs::Label();
    info->setPosition(200,50,200,20);
   pane()->add(info);
 
   counter = 0;
-  Button* btn1 = new Button("press me");
+  ngrs::Button* btn1 = new ngrs::Button("press me");
     btn1->setPosition(10,100,200,20);
     btn1->click.connect(this, &NTestWindow::onBtnClick);
     btn1->setRepeatMode(true);
   pane()->add(btn1);
 }
 
-void NTestWindow::onBtnClick( ButtonEvent * ev )
+void NTestWindow::onBtnClick( ngrs::ButtonEvent * ev )
 {
   
 }
 
 void NTestWindow::testScrollBar( )
 {
-  ScrollBar* scrollBar = new ScrollBar();
-  scrollBar->setOrientation(nVertical);
+  ngrs::ScrollBar* scrollBar = new ngrs::ScrollBar();
+  scrollBar->setOrientation( ngrs::nVertical);
   pane()->add(scrollBar,nAlRight);
 }
 

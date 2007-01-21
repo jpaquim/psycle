@@ -35,7 +35,7 @@ namespace psy
 {
 	namespace core
 	{
-
+      
 		const int PatternEnd = -1;
 
 		class GlobalEvent
@@ -80,41 +80,33 @@ namespace psy
 		class SequenceEntry {
 		public:
 
-			SequenceEntry();
-			SequenceEntry(SequenceLine* line);
-			~SequenceEntry();
+          SequenceEntry( SequenceLine* parent, const std::list<SinglePattern>::iterator& itr );
+		  ~SequenceEntry();
 
-			double tickPosition() const;
+          const std::list<SinglePattern>::iterator& patternItr() const;
 
-			void setPattern(SinglePattern* pattern);
-			SinglePattern* pattern();
-			SinglePattern* pattern() const;
+		  double tickPosition() const;
+		  float patternBeats() const;
+		  SequenceLine* track() {return line_;}
 
-			float patternBeats() const;
+          void setStartPos( float pos );
+          float startPos() const;
 
-			SequenceLine* track() {return line_;}
+          void setEndPos( float pos );
+          float endPos() const;
 
-			void setStartPos( float pos );
-			float startPos() const;
+          void setTranspose( int offset );
+          int transpose() const;
 
-			void setEndPos( float pos );
-			float endPos() const;
-
-			void setTranspose( int offset );
-			int transpose() const;
-
-			std::string toXml(double pos) const;
+          std::string toXml(double pos) const;
 
 		private:
 
 			SequenceLine* line_; 			// the sequence track , the sequence belongs to
-			SinglePattern* pattern_; 	// the wrapped pattern
+            std::list<SinglePattern>::iterator patternItr_; // the wrapped pattern
 			float startPos_;					// here we can shrink the pattern of the entry
 			float endPos_;						// endpos shrink (from begin of a pattern starting at 0)
 			int transpose_;						// a transpose offset for the entry
-
-			void init();
-
 		};
 
 		class PatternSequence;
@@ -127,8 +119,8 @@ namespace psy
 			SequenceLine(PatternSequence* patSeq);
 			~SequenceLine();
 
-			SequenceEntry* createEntry(SinglePattern* pattern, double position);
-			void removeSinglePatternEntries(SinglePattern* pattern);
+            SequenceEntry* createEntry(  std::list<SinglePattern>::iterator patternItr, double position);
+			void removeSinglePatternEntries( const std::list<SinglePattern>::iterator& patternItr );
 
 			double tickLength() const;
 
@@ -168,12 +160,12 @@ namespace psy
 
 			// playpos info
 
-			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
+			bool getPlayInfo( const std::list<SinglePattern>::iterator& itr, double start, double length, double & entryStart  ) const;
 
 			PatternData* patternData();
 			const PatternData & patternData() const;
 
-			void removeSinglePattern(SinglePattern* pattern);
+			void removeSinglePattern(const std::list<SinglePattern>::iterator& itr);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.

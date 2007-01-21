@@ -144,10 +144,10 @@ namespace psy {
         void setSequenceLine( psy::core::SequenceLine* line );
         psy::core::SequenceLine* sequenceLine();
 
-        void addItem( psy::core::SinglePattern* pattern );
-        void removeItems( psy::core::SinglePattern* pattern );
+        void addItem( const std::list<psy::core::SinglePattern>::iterator& patternItr );
+        void removeItems( const std::list<psy::core::SinglePattern>::iterator& patternItr );
 
-        std::vector<SequencerItem*> itemsByPattern( psy::core::SinglePattern* pattern );
+        std::vector<SequencerItem*> itemsByPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr );
 
         virtual void resize();
 
@@ -232,10 +232,10 @@ namespace psy {
       void setPatternSequence( psy::core::PatternSequence* sequence );
       psy::core::PatternSequence* patternSequence();
 
-      void addPattern( psy::core::SinglePattern* pattern );
-      void removePattern( psy::core::SinglePattern* pattern );
+      void addPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr );
+      void removePattern( const std::list<psy::core::SinglePattern>::iterator& patternItr );
 
-      std::vector<SequencerItem*> guiItemsByPattern( psy::core::SinglePattern* pattern );
+      std::vector<SequencerItem*> guiItemsByPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr );
 
       int beatPxLength() const;
 

@@ -185,7 +185,7 @@ void psy::host::ChildView::showPatternView( )
 
 void psy::host::ChildView::update( )
 {
-  sequencerBar_->update();
+//  sequencerBar_->update();
   sequencerView()->update();
   machineView()->update();
 }
