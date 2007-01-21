@@ -31,9 +31,7 @@
 #include <algorithm>
 #include <cctype>
 
-#ifdef __unix__
 #include "convert_internal_machines.h"
-#endif
 
 namespace psycle
 {
@@ -111,13 +109,9 @@ namespace psycle
 			LoadINSD(&file,song);
 			LoadWAVD(&file,song);
 			PreLoadVSTs(&file,song);
-			#ifdef __unix__
 			convert_internal_machines::Converter converter;
-			#endif
-			#ifdef __unix__
 			LoadMACD(&file,song,&converter);
 			TidyUp(&file,song,&converter);
-			#endif
 			return true;
 		}
 
@@ -396,7 +390,6 @@ namespace psycle
 			return true;
 		}
 		
-        #ifdef __psy2__
 		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter)
 		{
 			std::int32_t i;
@@ -959,7 +952,6 @@ namespace psycle
 			return true;
 		}
 
-       #endif
 
 		bool Machine::LoadPsy2FileFormat(RiffFile* pFile)
 		{

@@ -117,7 +117,7 @@ namespace psy {
 			ngrs::Region newDrag = linesRegion();
 			ngrs::Region repaintArea = newDrag | oldDrag;
 
-			ngrs::VisualComponent* parentVc =  dynamic_cast<ngrs::VisualComponent*>( parent() );
+			ngrs::VisualComponent* parentVc =  (ngrs::VisualComponent*)( parent() );
 
 			int parentAbsLeft = parentVc->absoluteLeft() - parentVc->scrollDx();
 			int parentAbsTop  = parentVc->absoluteTop() - parentVc->scrollDy();;

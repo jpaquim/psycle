@@ -27,6 +27,11 @@
 #include <stdexcept>
 #include "sigslot.h"
 
+// Disables the error "warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)"
+// This is the recommended behaviour.
+#pragma warning( disable : 4290 )
+
+
 ///\internal
 /// the user doesn't have to use the Property class directly,
 /// it's only used via PropertyMap.
