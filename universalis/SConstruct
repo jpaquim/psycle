@@ -5,18 +5,12 @@
 # copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
-import sys, os, os.path
-sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
 from packageneric.generic.scons.project import project
 project = project(name = 'universalis')
-
-# authors/maintainers/uploaders
-
-from packageneric.generic.scons.person import person
-bohan = person('johan boule', 'bohan.debian.universalis@retropaganda.info')
 
 # source package
 
@@ -24,7 +18,7 @@ from packageneric.generic.scons.source_package import source_package
 from packageneric.generic.scons.version import version
 
 source_package = source_package(project,
-	name = 'universalis',
+	name = project.name(),
 	version = version(0, 0),
 	description_file = 'README'
 )
@@ -36,21 +30,18 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 from packageneric.generic.scons.check.external_package import external_package as external_package_check
 from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
 
-import os.path
 diversalis = os.path.join('..', 'diversalis', 'SConstruct')
 if os.path.exists(diversalis): diversalis = project.subscript(diversalis).local_package()
 else:
-	diversalis = external_package_check(project, name = 'diversalis',
-		url = 'http://psycle.sourceforge.net',
+	diversalis = external_package_check(project, name = 'diversalis', url = 'http://psycle.sourceforge.net',
 		distribution_packages = {
-			'debian and ubuntu': 'lib-diversalis-0-dev (>= 0)',
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/diversalis-dev.xml',
+			'debian and ubuntu': 'lib-diversalis-dev (>= 0)',
 			'gentoo': '...',
 			'fedora': '...',
 			'cygwin': '...'
 		},
-		dependencies = [
-			pkg_config_check(project, name = 'diversalis-0 >= 0')
-		]
+		dependencies = [pkg_config_check(project, name = 'diversalis >= 0')]
 	)
 
 from packageneric.pool.boost import boost
@@ -58,12 +49,12 @@ boost = boost(project, 103300, ['signals', 'thread', 'filesystem'])
 
 # modules
 
-from packageneric.generic.scons.module import module
+from packageneric.generic.scons.module import module as base_module
 
-class universalis_module(module):
+class module(base_module):
 	def __init__(self):
-		module.__init__(self, source_package,
-			name = 'universalis-' + str(source_package.version().major()),
+		base_module.__init__(self, source_package,
+			name = source_package.name(),
 			version = source_package.version(),
 			description = source_package.description(),
 			dependencies = [diversalis, boost]
@@ -72,17 +63,15 @@ class universalis_module(module):
 	def dynamic_dependencies(self):
 		quaquaversalis = True
 
-		glibmm = external_package_check(self.project(), name = 'glibmm',
-			url = 'http://freedesktops.org',
+		glibmm = external_package_check(self.project(), name = 'glibmm', url = 'http://freedesktops.org',
 			distribution_packages = {
+				'zero-install': 'http://0install.net/interfaces/2006/GLibmm-dev.xml',
 				'debian and ubuntu': 'libglibmm-2.4-dev (>= 2.4)',
 				'gentoo': '...',
 				'fedora': '...',
-				'cygwin': 'glib2-devel-2.6.6-2' # mm!
+				'cygwin': 'glib2-devel (>= 2.6.6-2)' # mm!
 			},
-			dependencies = [
-				pkg_config_check(self.project(), name = 'glibmm-2.4 >= 2.4 gmodule-2.0 >= 2.0 gthread-2.0 >= 2.0')
-			]
+			dependencies = [pkg_config_check(self.project(), name = 'glibmm-2.4 >= 2.4 gmodule-2.0 >= 2.0 gthread-2.0 >= 2.0')]
 		)
 		if glibmm.result(): self.add_dependency(glibmm)
 		else: quaquaversalis = False
@@ -98,60 +87,18 @@ class universalis_module(module):
 		self.add_sources(find(self.project(), 'src', [os.path.join('universalis', '*.cpp')]))
 		self.add_headers(find(self.project(), 'src', [os.path.join('universalis', '*.hpp')]))
 		self.contexes().source().compilers().cxx().paths().add(['src'])
-universalis_module = universalis_module()
+module = module()
 
 # pkg-config packages
 
 from packageneric.generic.scons.pkg_config_package import pkg_config_package
-universalis_package = pkg_config_package(project,
-	name = 'universalis-' + str(universalis_module.version().major()),
-	version = universalis_module.version(),
-	description = universalis_module.description(),
-	modules = [universalis_module]
+pkg_config_package = pkg_config_package(project,
+	name = module.name(),
+	version = module.version(),
+	description = module.description(),
+	modules = [module]
 )
 
-if False:
-	# debian
+project([pkg_config_package])
 
-	from packageneric.generic.scons.debian_package import debian_package
-
-	universalis_runtime = debian_package(project,
-		name = 'lib-universalis-' + str(source_package.version().major()),
-		section = 'libs',
-		description = universalis_package.description(),
-		long_description = 'This package contains the runtime library.'
-	)
-	#universalis_runtime.add_files(universalis_package.binaries())
-
-	class universalis_dev(debian_package):
-		def __init__(self):
-			debian_package.__init__(self, project,
-				name = universalis_runtime.name() + '-dev',
-				section = 'libdevel',
-				description = universalis_package.description(),
-				long_description = 'This package contains the development files.',
-			)
-		def dynamirc_dependencies(self):
-			self.add_depend(universalis_runtime)
-			self.add_build_depends(universalis_package.build_depends())
-	universalis_dev = universalis_dev()
-	#universalis_dev.add_files(universalis_package.headers())
-	#universalis_dev.add_files(universalis_package.pkg_config())
-
-	universalis_doc = debian_package(project,
-		name = universalis_runtime.name() + '-doc',
-		section = 'doc',
-		architecture = 'all',
-		description = universalis_package.description(),
-		long_description = 'This package contains the documentation.'
-	)
-
-	from packageneric.generic.scons.debian import debian
-	debian = debian(source_package,
-		maintainer = bohan,
-		binary_packages = [universalis_runtime, universalis_dev, universalis_doc],
-	)
-
-project([universalis_package])
-
-Return('universalis_package')
+Return('pkg_config_package')

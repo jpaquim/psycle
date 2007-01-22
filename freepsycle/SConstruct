@@ -5,20 +5,12 @@
 # copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
-import sys, os, os.path
-sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
-name = 'freepsycle' # this is the unique place where the name is defined. it is cascaded everywhere else.
-
 from packageneric.generic.scons.project import project
-project = project(name)
-
-# authors/maintainers/uploaders
-
-from packageneric.generic.scons.person import person
-bohan = person('johan boule', 'bohan.debian.psycle@retropaganda.info')
+project = project(name = 'freepsycle')
 
 # source package
 
@@ -27,9 +19,9 @@ from packageneric.generic.scons.version import version
 source_package = source_package(project,
 	name = project.name(),
 	version = version(0, 0),
-	description = '%(name)s ...' % {'name': project.name()},
+	description = '%(name)s modular music creation studio' % {'name': project.name()},
 	long_description = \
-		"%(name)s is  a ..." % {'name': project.name()}
+		"%(name)s is a modular music creation studio." % {'name': project.name()}
 )
 
 source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
@@ -43,18 +35,67 @@ from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_ch
 universalis = os.path.join('..', 'universalis', 'SConstruct')
 if os.path.exists(universalis): universalis = project.subscript(universalis).local_package()
 else:
-	universalis = external_package_check(project, name = 'universalis',
-		dependencies = [
-			pkg_config_check(project, name = 'universalis-0 >= 0')
-		],
+	universalis = external_package_check(project, name = 'universalis', url = 'http://psycle.sourceforge.net',
 		distribution_packages = {
-			'debian and ubuntu': 'lib-universalis-0-dev (>= 0)',
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/universalis-dev.xml',
+			'debian and ubuntu': 'lib-universalis-dev (>= 0)',
 			'gentoo': '...',
 			'fedora': '...',
 			'cygwin': '...'
 		},
-		url = 'http://psycle.sourceforge.net'
+		dependencies = [pkg_config_check(project, name = 'universalis >= 0')]
 	)
+
+gstreamer = external_package_check(project, name = 'gstreamer', url = 'http://gstreamer.net',
+	distribution_packages = {
+		'zero-install': '...',
+		'debian and ubuntu': 'libgstreamer0.10-dev (>= 0.10), libgstreamer-plugins-base0.10-dev (>= 0.10)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
+	dependencies = [pkg_config_check(project, name = 'gstreamer-0.10 >= 0.10 gstreamer-plugins-base-0.10 >= 0.10')]
+)
+
+microsoft_direct_sound = external_package_check(project, name = 'microsoft direct sound', url = 'http://msdn.microsoft.com',
+	distribution_packages = {'microsoft (maybe windows updates?)': 'direct sound'},
+	dependencies = [
+		cxx_build_check(project, name = 'microsoft direct sound', libraries = ['dsound'], source_text = \
+			"""\
+				#include <dsound.h>
+				#if DIRECTSOUND_VERSION < 0x0900  /* Version 9.0 */
+					#error microsoft direct sound version too old
+				#endif
+				void microsoft_direct_sound()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
+	]
+)
+
+gtkmm = external_package_check(project, name = 'gtkmm', url = 'http://gtkmm.org',
+	distribution_packages = {
+		'zero-install': 'http://0install.net/interfaces/2006/GTKmm-dev.xml',
+		'debian and ubuntu': 'libgtkmm-2.4-dev (>= 2.4)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': 'gtk2-x11-devel (>= 2.6.10)' # mm!
+	},
+	dependencies = [pkg_config_check(project, name = 'gtkmm-2.4 >= 2.4')]
+)
+
+gnomecanvasmm = external_package_check(project, name = 'gnomecanvasmm', url = 'http://gnome.org',
+	distribution_packages = {
+		'zero-install': '...',
+		'debian and ubuntu': 'libgnomecanvasmm-2.6-dev (>= 2.6)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
+	dependencies = [gtkmm, pkg_config_check(project, name = 'libgnomecanvasmm-2.6 >= 2.6')]
+)
 
 # modules and pkg-config packages
 
@@ -66,20 +107,29 @@ modules = []
 pkg_config_packages = []
 
 class uniform_module(module):
-	def __init__(self, name, *args, **kw):
+	def __init__(self, name, path = None, dir = None, *args, **kw):
 		module.__init__(self, source_package,
-			name = source_package.name() + '-' + name + '-' + str(source_package.version().major()),
+			name = source_package.name() + '-' + name,
 			version = source_package.version(),
 			*args, **kw
 		)
 		modules.append(self)
-		self.pkg_config_package()
-		self._dir = name
+		self.pkg_config_package() # todo hmm?
+		if path is not None:
+			self._path = path
+		else:
+			if dir is None: self._path = name
+			else: self._path = os.path.join(dir, name)
+		
 
 	def dynamic_dependencies(self):
 		self.contexes().source().compilers().cxx().paths().add(['src'])
-		self.add_sources(find(self.project(), 'src', [os.path.join('psycle', self._dir, '*.cpp')]))
-		self.add_headers(find(self.project(), 'src', [os.path.join('psycle', self._dir, '*.hpp')]))
+		if os.path.exists(os.path.join('src', 'psycle', self._path)):
+			self.add_sources(find(self.project(), 'src', [os.path.join('psycle', self._path, '*.cpp')]))
+			self.add_headers(find(self.project(), 'src', [os.path.join('psycle', self._path, '*.hpp')]))
+		else:
+			self.add_sources(find(self.project(), 'src', [os.path.join('psycle', self._path + '.cpp')]))
+			self.add_headers(find(self.project(), 'src', [os.path.join('psycle', self._path + '.hpp')]))
 		if not len(self.sources()): import sys; sys.exit(1)
 	
 	def pkg_config_package(self):
@@ -96,90 +146,150 @@ class uniform_module(module):
 	
 	def as_dependency(self): return self.pkg_config_package().local_package()
 
-# engine
+paths_module = uniform_module(
+	name = 'paths',
+	description = 'paths',
+	dependencies = [universalis]
+)
+
 engine_module = uniform_module(
 	name = 'engine',
 	description = 'audio engine',
 	dependencies = [universalis]
 )
 
-# host
 host_module = uniform_module(
 	name = 'host',
 	description = 'plugin host',
 	dependencies = [engine_module.as_dependency()]
 )
 
-# stream
 stream_module = uniform_module(
 	name = 'stream',
 	description = 'stream format handling',
 	dependencies = [universalis]
 )
 
-# text front-end
-class text_module(module):
+bipolar_filter_module = uniform_module(
+	dir = 'plugins',
+	name = 'bipolar_filter',
+	description = 'bipolar filter plugin abstraction',
+	dependencies = [engine_module.as_dependency()]
+)
+
+resource_module = uniform_module(
+	dir = 'plugins',
+	name = 'resource',
+	description = 'resource',
+	dependencies = [engine_module.as_dependency()]
+)
+
+class plugin_uniform_module(uniform_module):
+	def __init__(self, name, *args, **kw):
+		if 'dependencies' in kw: dependencies = kw['dependencies']
+		else: dependencies = kw['dependencies'] = []
+		dependencies.append(resource_module.as_dependency())
+		uniform_module.__init__(self,
+			path = os.path.join('plugins', name),
+			name = 'plugin-' + name,
+			*args, **kw
+		)
+	
+sine_plugin_module = plugin_uniform_module(
+	name = 'sine',
+	description = 'sine plugin'
+)
+
+additioner_plugin_module = plugin_uniform_module(
+	name = 'additioner',
+	description = 'additioner plugin',
+	dependencies = [bipolar_filter_module.as_dependency()]
+)
+
+multiplier_plugin_module = plugin_uniform_module(
+	name = 'multiplier',
+	description = 'multiplier plugin',
+	dependencies = [bipolar_filter_module.as_dependency()]
+)
+
+class output_plugin_uniform_module(uniform_module):
+	def __init__(self, name, *args, **kw):
+		if 'dependencies' in kw: dependencies = kw['dependencies']
+		else: dependencies = kw['dependencies'] = []
+		dependencies.append(resource_module.as_dependency())
+		uniform_module.__init__(self,
+			path = os.path.join('plugins', 'outputs', name),
+			name = 'plugin-output-' + name,
+			*args, **kw
+		)
+		self._dir = name
+
+default_output_plugin_module = None
+
+if microsoft_direct_sound.result():
+	microsoft_direct_sound_output_plugin_module = output_plugin_uniform_module(
+		name = 'direct_sound',
+		description = 'microsoft direct sound output plugin',
+		dependencies = [microsoft_direct_sound, stream_module.as_dependency()]
+	)
+	default_output_plugin_module = microsoft_direct_sound_output_plugin_module
+
+if gstreamer.result():
+	gstreamer_output_plugin_module = output_plugin_uniform_module(
+		name = 'gstreamer',
+		description = 'gstreamer output plugin',
+		dependencies = [gstreamer, stream_module.as_dependency()]
+	)
+	default_output_plugin_module = gstreamer_output_plugin_module
+
+if default_output_plugin_module:
+	default_output_plugin_module = plugin_uniform_module(
+		name = 'output',
+		description = 'default output plugin',
+		dependencies = [default_output_plugin_module.as_dependency()]
+	)
+
+front_end_modules = []
+
+class text_front_end_module(module):
 	def __init__(self):
 		module.__init__(self, source_package,
-			name = source_package.name() + '-text-' + str(source_package.version().major()),
+			name = source_package.name() + '-text',
 			version = source_package.version(),
 			description = 'text front-end',
-			dependencies = [host_module.as_dependency()],
+			dependencies = [paths_module.as_dependency(), host_module.as_dependency()],
 			target_type = module.target_types.program
 		)
 		modules.append(self)
+		front_end_modules.append(self)
 	def dynamic_dependencies(self):
 		self.contexes().source().compilers().cxx().paths().add(['src'])
-		self.add_sources(find(self.project(), 'src', [
-			os.path.join('psycle', 'front_ends', 'text', '*.cpp'),
-			os.path.join('psycle', 'paths.cpp')
-		]))
-		self.add_headers(find(self.project(), 'src', [
-			os.path.join('psycle', 'front_ends', 'text', '*.hpp'),
-			os.path.join('psycle', 'paths.hpp')
-		]))
-text_module = text_module()
+		self.add_sources(find(self.project(), 'src', [os.path.join('psycle', 'front_ends', 'text', '*.cpp')]))
+		self.add_headers(find(self.project(), 'src', [os.path.join('psycle', 'front_ends', 'text', '*.hpp')]))
+text_front_end_module = text_front_end_module()
 
-if False:
-	# debian
-
-	from packageneric.generic.scons.debian_package import debian_package
-
-	engine_runtime = debian_package(project,
-		name = 'lib-' + name + '-engine-' + str(source_package.version().major()),
-		section = 'libs',
-		description = engine_package.description(),
-		long_description = 'This package contains the runtime library.'
-	)
-	#universalis_runtime.add_files(engine_package.binaries())
-
-	class engine_dev(debian_package):
+if gtkmm.result() and gnomecanvasmm.result():
+	class gui_front_end_module(module):
 		def __init__(self):
-			debian_package.__init__(self, project,
-				name = engine_runtime.name() + '-dev',
-				section = 'libdevel',
-				description = engine_package.description(),
-				long_description = 'This package contains the development files.',
+			module.__init__(self, source_package,
+				name = source_package.name() + '-gui',
+				version = source_package.version(),
+				description = 'gui front-end',
+				dependencies = [gtkmm, gnomecanvasmm, paths_module.as_dependency(), host_module.as_dependency()],
+				target_type = module.target_types.program
 			)
-		def dynamirc_dependencies(self):
-			self.add_depend(engine_runtime)
-			self.add_build_depends(engine_package.build_depends())
-	engine_dev = engine_dev()
-	#engine_dev.add_files(engine_package.headers())
-	#engine_dev.add_files(engine_package.pkg_config())
+			modules.append(self)
+			front_end_modules.append(self)
+		def dynamic_dependencies(self):
+			self.contexes().source().compilers().cxx().paths().add(['src'])
+			self.add_sources(find(self.project(), 'src',
+				exclude_patterns = [os.path.join('*', 'todo', '*'), os.path.join('*', 'x_window', '*')],
+				include_patterns = [os.path.join('psycle', 'front_ends', 'gui', '*.cpp')]
+			))
+			self.add_headers(find(self.project(), 'src',
+				exclude_patterns = [os.path.join('*', 'todo', '*'), os.path.join('*', 'x_window', '*')],
+				include_patterns = [os.path.join('psycle', 'front_ends', 'gui', '*.hpp')]
+			))
+	gui_front_end_module = gui_front_end_module()
 
-	engine_doc = debian_package(project,
-		name = engine_runtime.name() + '-doc',
-		section = 'doc',
-		architecture = 'all',
-		description = engine_package.description(),
-		long_description = 'This package contains the documentation.'
-	)
-
-	from packageneric.generic.scons.debian import debian
-	debian = debian(source_package,
-		maintainer = bohan,
-		binary_packages = [engine_runtime, engine_dev, engine_doc],
-	)
-
-project(pkg_config_packages + [text_module])
+project(pkg_config_packages + front_end_modules)

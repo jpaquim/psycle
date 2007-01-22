@@ -22,7 +22,7 @@
 
 #include "patternline.h"
 #include "timesignature.h"
-#include <ngrs/sigslot.h>
+#include "../../ngrs/src/ngrs/sigslot.h" // todo put sigslot in a common dir
 #include <map>
 #include <vector>
 #include <string>

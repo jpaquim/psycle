@@ -81,7 +81,7 @@ namespace psycle
 				plugin_resolver_(plugin_resolver),
 				///\todo the version number is actually libtool's version info
 				//library_resolver_("-" + universalis::operating_system::paths::package::name() + ".plugin." + name, universalis::operating_system::paths::package::version::major_number()),
-				library_resolver_("lib-psycle.plugin." + name, 0),
+				library_resolver_("libfreepsycle-plugin-" + name, 0),
 				node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(new))))
 		{
 			if(loggers::information()())

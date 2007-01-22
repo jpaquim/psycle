@@ -62,14 +62,14 @@ namespace universalis
 						(
 							path.leaf() +
 							#if defined DIVERSALIS__OPERATING_SYSTEM__LINUX
-								".so." + version_string.str() // lib-foo.so.0
+								".so" // "." + version_string.str() // lib-foo.so.0
 							#elif defined DIVERSALIS__OPERATING_SYSTEM__APPLE
 								// to create a bundle with libtool, we pass the -module option.
 								//".bundle" // lib-foo.bundle
 								// actually, libtool names bundles with the usual .so extension.
 								".so" // lib-foo.so
 							#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT || defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN
-								"-" + version_string.str() + ".dll" // lib-foo-0.dll
+								".dll" // "-" + version_string.str() + ".dll" // lib-foo-0.dll
 								// [bohan] it is only necessary to append the .dll suffix when the given name itself contains a dot,
 								// [bohan] otherwise, we do not need to explicitly tell the suffix.
 							#else
@@ -84,7 +84,7 @@ namespace universalis
 								path.branch_path().native_directory_string(),
 								path.leaf()
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-										+ "-" + version_string.str()
+										//+ "-" + version_string.str()
 									#endif
 							),
 							boost::filesystem::native

@@ -5,31 +5,24 @@
 # copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
-import sys, os, os.path
-sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
 from packageneric.generic.scons.project import project
 project = project(name = 'xpsycle.plugins')
 
-# authors/maintainers/uploaders
-
-from packageneric.generic.scons.person import person
-psycledelics = person('the psycledelics community', 'http://psycle.pasnotecut.org') # todo this is not an e-mail, as required by the debian policy
-bohan = person('Johan Boule', 'bohan.packageneric@retropaganda.info')
-
 # source package
 
 from packageneric.generic.scons.source_package import source_package
 from packageneric.generic.scons.version import version
 source_package = source_package(project,
-	name = 'xpsycle.plugins',
+	name = project.name(),
 	version = version(1, 9),
-	description = 'xpsycle plugins',
+	description = 'plugins for psycle',
 	long_description = \
-		"these are the plugins for psycle ..."
-		"psycle is a modular music creation studio ..."
+		"these are the plugins for psycle."
+		"psycle is a modular music creation studio."
 )
 
 source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
@@ -37,20 +30,19 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 # external packages
 
 import os.path
-universalis = os.path.join('..', 'universalis', 'SConstruct') # todo SConscript
+universalis = os.path.join('..', 'universalis', 'SConstruct')
 if os.path.exists(universalis): universalis = project.subscript(universalis).local_package()
 else:
 	universalis = external_package_check(project, name = 'universalis',
 		url = 'http://psycle.sourceforge.net',
 		distribution_packages = {
-			'debian and ubuntu': 'lib-universalis-0-dev (>= 0)',
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/universalis-dev.xml',
+			'debian and ubuntu': 'lib-universalis-dev (>= 0)',
 			'gentoo': '...',
 			'fedora': '...',
 			'cygwin': '...'
 		},
-		dependencies = [
-			pkg_config_check(project, name = 'universalis-0 >= 0')
-		]
+		dependencies = [pkg_config_check(project, name = 'universalis >= 0')]
 	)
 
 from packageneric.generic.scons.check.external_package import external_package as external_package_check
@@ -68,7 +60,8 @@ from packageneric.generic.scons.pkg_config_package import pkg_config_package
 modules = []
 plugin_modules = []
 
-if project.platform() in ('win64', 'win32'): # [bohan] we fucking need to agree on a naming convention here!
+# todo we fucking need to agree on a naming convention here!
+if project.platform() in ('win64', 'win32'):
 	def plugin_file_name(name): return 'lib-xpsycle.plugin.' + name
 else:
 	def plugin_file_name(name): return '-xpsycle.plugin.' + name
@@ -89,9 +82,8 @@ class plugin_module(module):
 		self.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', include_pattern) for include_pattern in include_patterns], exclude_patterns))
 
 	def variant(self, name, defines):
-		source = name + '.cpp'
-		source = project.file_from_value(source, ''.join(['#define %s 1\n' % define for define in defines] + ['#include <%s>\n' % source_.relative() for source_ in self.sources()]))
-		result = self.__class__(name, name.replace('_', ' '))
+		source = project.file_from_value(name + '.cpp', ''.join(['#define %s 1\n' % define for define in defines] + ['#include <%s>\n' % source_.relative() for source_ in self.sources()]))
+		result = self.__class__(name, self.description() + ' (variant: ' + name.replace('_', ' ') + ')')
 		result.add_sources([find.file('.', source)])
 		return result
 
@@ -327,33 +319,6 @@ if dlfcn.result():
 		def dynamic_dependencies(self):
 			self.add_sources(find(project, 'src', [os.path.join('psycle', 'plugin_check.cpp')]))
 	plugin_check_module = plugin_check_module()
-
-if False:
-	# debian
-
-	from packageneric.generic.scons.debian_package import debian_package
-
-	xpsycle_plugins_runtime = debian_package(project,
-		name = 'xpsycle.plugins-' + str(source_package.version().major()),
-		section = 'audio',
-		description = source_package.description(),
-		long_description = 'This package contains the runtime plugins.'
-	)
-
-	xpsycle_plugins_doc = debian_package(project,
-		name = xpsycle_plugins_runtime.name() + '-doc',
-		section = 'doc',
-		architecture = 'all',
-		description = source_package.description(),
-		long_description = 'This package contains the documentation.'
-	)
-
-	from packageneric.generic.scons.debian import debian
-	debian = debian(source_package,
-		maintainer = psycledelics,
-		uploaders = [psycledelics],
-		binary_packages = [xpsycle_plugins_runtime, xpsycle_plugins_doc],
-	)
 
 project(modules)
 
