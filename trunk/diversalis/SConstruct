@@ -5,18 +5,12 @@
 # copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
-import sys, os, os.path
-sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
 from packageneric.generic.scons.project import project
-project = project('diversalis')
-
-# authors/maintainers/uploaders
-
-from packageneric.generic.scons.person import person
-bohan = person('johan boule', 'bohan.debian.diversalis@retropaganda.info')
+project = project(name = 'diversalis')
 
 # source package
 
@@ -24,7 +18,7 @@ from packageneric.generic.scons.source_package import source_package
 from packageneric.generic.scons.version import version
 
 source_package = source_package(project,
-	name = 'diversalis',
+	name = project.name(),
 	version = version(0, 0),
 	description_file = 'README'
 )
@@ -34,47 +28,13 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 # pkg-config packages
 
 from packageneric.generic.scons.pkg_config_package import pkg_config_package
-diversalis_package = pkg_config_package(project,
-	name = 'diversalis-' + str(source_package.version().major()),
+pkg_config_package = pkg_config_package(project,
+	name = source_package.name(),
 	version = source_package.version(),
 	description = source_package.description()
 )
-diversalis_package.uninstalled_env().compilers().cxx().paths().add(['src'])
+pkg_config_package.uninstalled_env().compilers().cxx().paths().add(['src'])
 
-if False:
-	# debian
+project([pkg_config_package])
 
-	from packageneric.generic.scons.debian_package import debian_package
-
-	class diversalis_dev(debian_package):
-		def __init__(self):
-			debian_package.__init__(self, project,
-				name = 'lib-' + diversalis_package.name() + '-dev',
-				section = 'libdevel',
-				description = diversalis_package.description(),
-				long_description = 'This package contains the development files.',
-			)
-		def dynamic_dependencies(self):
-			self.add_build_depends(diversalis_package.build_depends())
-	diversalis_dev = diversalis_dev()
-	#diversalis_dev.add_files(universalis_package.headers())
-	#diversalis_dev.add_files(universalis_package.pkg_config())
-
-	diversalis_doc = debian_package(project,
-		name = 'lib-' + diversalis_package.name() + '-doc',
-		section = 'doc',
-		architecture = 'all',
-		description = diversalis_package.description(),
-		long_description = 'This package contains the documentation.'
-	)
-
-	from packageneric.generic.scons.debian import debian
-	debian = debian(source_package,
-		maintainer = bohan,
-		section = 'libdevel',
-		binary_packages = [diversalis_dev, diversalis_doc],
-	)
-
-project([diversalis_package])
-
-Return('diversalis_package')
+Return('pkg_config_package')

@@ -5,32 +5,26 @@
 # copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
-import sys, os, os.path
-sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
 from packageneric.generic.scons.project import project
 project = project(name = 'xpsycle')
 
-# authors/maintainers/uploaders
-
-from packageneric.generic.scons.person import person
-prodos = person('Stefan NattKemper', 'natti__@user.sourceforge.net')
-bohan = person('Johan Boule', 'bohan.packageneric@retropaganda.info')
-
 # source package
 
 from packageneric.generic.scons.source_package import source_package
 from packageneric.generic.scons.version import version
 source_package = source_package(project,
-	name = 'xpsycle',
+	name = project.name(),
 	version = version(0, 0),
-	#description_file = 'README',
+	#description_file = 'README', # not using the README file because it's rather long for a package description
 	description = 'modular music creation studio',
-	long_description = """\
-psycle is a modular music creation studio ...
-"""
+	long_description = \
+		"psycle is a modular music creation studio" '\n'
+		"that offers unlimited (opinions may vary) possibilites" '\n'
+		"for creating your own music in a professional way."
 )
 
 source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
@@ -44,38 +38,57 @@ from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_ch
 psycore = os.path.join('..', 'psycore', 'SConstruct')
 if os.path.exists(psycore): psycore = project.subscript(psycore).local_package()
 else:
-	psycore = external_package_check(project, name = 'psycore',
-		url = 'http://psycle.sourceforge.net',
+	psycore = external_package_check(project, name = 'psycore', url = 'http://psycle.sourceforge.net',
 		distribution_packages = {
-			'debian and ubuntu': 'lib-psycore-0-dev (>= 0)',
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/psycore-dev.xml',
+			'debian and ubuntu': 'lib-psycore-dev (>= 0)',
 			'gentoo': '...',
 			'fedora': '...',
 			'cygwin': '...'
 		},
-		dependencies = [
-			pkg_config_check(project, name = 'psycore-0 >= 0')
-		]
+		dependencies = [pkg_config_check(project, name = 'psycore >= 0')]
 	)
 
 ngrs = os.path.join('..', 'ngrs', 'SConstruct')
 if os.path.exists(ngrs): ngrs = project.subscript(ngrs).local_package()
 else:
-	ngrs = external_package_check(project, name = 'ngrs',
-		url = 'http://psycle.sourceforge.net',
+	ngrs = external_package_check(project, name = 'ngrs', url = 'http://psycle.sourceforge.net',
 		distribution_packages = {
-			'debian and ubuntu': 'lib-ngrs-0-dev (>= 0)',
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/ngrs-dev.xml',
+			'debian and ubuntu': 'lib-ngrs-dev (>= 0)',
 			'gentoo': '...',
 			'fedora': '...',
 			'cygwin': '...'
 		},
-		dependencies = [
-			pkg_config_check(project, name = 'ngrs-0 >= 0')
-		]
+		dependencies = [pkg_config_check(project, name = 'ngrs >= 0')]
 	)
 
-netaudio = external_package_check(project, name = 'network audio system',
-	url = 'http://google.ch "network audio system" nas', # todo check the url
+# see also libzzip at http://zziplib.sourceforge.net
+z = external_package_check(project, name = 'z', url = 'http://google.ch ...',
 	distribution_packages = {
+		'zero-install': '...',
+		'debian and ubuntu': 'zlib-dev (>= 1.2.3) | zlib1-dev (>= 1.2.3) | zlib1g-dev (>= 1.2.3) | libz-dev (>= 1.2.3) | libz1-dev (>= 1.2.3) | libz1g-dev (>= 1.2.3)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': 'zlib (>= 1.2.3)',
+		'microsoft': '"This is their problem." (TM)'
+	},
+	dependencies = [
+		cxx_build_check(project, name = 'z', dependencies = [], libraries = ['z'], source_text = \
+			"""\
+				#include <zlib.h>
+				void zlib()
+				{
+					// todo do something with it for a complete check
+				}
+			"""
+		)
+	]
+)
+
+netaudio = external_package_check(project, name = 'network audio system', url = 'http://google.ch "network audio system" nas', # todo check the url
+	distribution_packages = {
+		'zero-install': '...',
 		'debian and ubuntu': 'libaudio-dev (>= 1.8)', # note that debian package 1.8 corresponds to header version 2.3.0
 		'gentoo': '...',
 		'fedora': '...',
@@ -97,60 +110,51 @@ netaudio = external_package_check(project, name = 'network audio system',
 	]
 )
 
-esound = external_package_check(project, name = 'esound',
-	url = 'http://google.ch esound', # todo check the url
+esound = external_package_check(project, name = 'esound', url = 'http://google.ch esound', # todo check the url
 	distribution_packages = {
+		'zero-install': '...',
 		'debian and ubuntu': 'libesd0-dev (>= 0.2.34)',
 		'gentoo': '...',
 		'fedora': '...',
 		'cygwin': '...'
 	},
-	dependencies = [
-		pkg_config_check(project, name = 'esound >= 0.2.34')
-	]
+	dependencies = [pkg_config_check(project, name = 'esound >= 0.2.34')]
 )
 
-jack = external_package_check(project, name = 'jack',
-	url = 'http://jackaudio.net or http://linuxaudio.org ?', # todo check this url
+jack = external_package_check(project, name = 'jack', url = 'http://jackaudio.net or http://linuxaudio.org ?', # todo check this url
 	distribution_packages = {
+		'zero-install': '...',
 		'debian and ubuntu': 'libjack-dev (>= 0.80) | libjack0.100.0-dev (>= 0.100)',
 		'gentoo': '...',
 		'fedora': '...',
 		'cygwin': '...'
 	},
-	dependencies = [
-		pkg_config_check(project, name = 'jack >= 0.80')
-	]
+	dependencies = [pkg_config_check(project, name = 'jack >= 0.80')]
 )
 
-alsa = external_package_check(project, name = 'alsa',
-	url = 'http://alsa.org or http://linuxaudio.org ?', # todo check this url
+alsa = external_package_check(project, name = 'alsa', url = 'http://alsa.org or http://linuxaudio.org ?', # todo check this url
 	distribution_packages = {
+		'zero-install': '...',
 		'debian and ubuntu': 'libasound-dev (>= 1.0.11) | libasound2-dev (>= 1.0.11)',
 		'gentoo': '...',
 		'fedora': '...',
 		'cygwin': '...'
 	},
-	dependencies = [
-		pkg_config_check(project, name = 'alsa >= 1.0.11')
-	]
+	dependencies = [pkg_config_check(project, name = 'alsa >= 1.0.11')]
 )
 
-gstreamer = external_package_check(project, name = 'gstreamer',
-	url = 'http://gstreamer.net',
+gstreamer = external_package_check(project, name = 'gstreamer', url = 'http://gstreamer.net',
 	distribution_packages = {
+		'zero-install': '...',
 		'debian and ubuntu': 'libgstreamer0.10-dev (>= 0.10), libgstreamer-plugins-base0.10-dev (>= 0.10)',
 		'gentoo': '...',
 		'fedora': '...',
 		'cygwin': '...'
 	},
-	dependencies = [
-		pkg_config_check(project, name = 'gstreamer-0.10 >= 0.10 gstreamer-plugins-base-0.10 >= 0.10')
-	]
+	dependencies = [pkg_config_check(project, name = 'gstreamer-0.10 >= 0.10 gstreamer-plugins-base-0.10 >= 0.10')]
 )
 
-microsoft_direct_sound = external_package_check(project, name = 'microsoft direct sound',
-	url = 'http://msdn.microsoft.com',
+microsoft_direct_sound = external_package_check(project, name = 'microsoft direct sound', url = 'http://msdn.microsoft.com',
 	distribution_packages = {'microsoft (maybe windows updates?)': 'direct sound'},
 	dependencies = [
 		cxx_build_check(project, name = 'microsoft direct sound', libraries = ['dsound'], source_text = \
@@ -168,8 +172,7 @@ microsoft_direct_sound = external_package_check(project, name = 'microsoft direc
 	]
 )
 
-microsoft_mme = external_package_check(project, name = 'microsoft mme',
-	url = 'http://msdn.microsoft.com',
+microsoft_mme = external_package_check(project, name = 'microsoft mme', url = 'http://msdn.microsoft.com',
 	distribution_packages = {'microsoft (maybe windows updates?)': 'multimedia extension'},
 	dependencies = [
 		cxx_build_check(project, name = 'microsoft mme', libraries = ['winmm'], source_text = \
@@ -186,8 +189,7 @@ microsoft_mme = external_package_check(project, name = 'microsoft mme',
 )
 
 # todo or not todo, asio is not "designed" to be (re)distributed
-steinberg_asio = external_package_check(project, name = 'steinberg asio',
-	url = 'http://steinberg.de',
+steinberg_asio = external_package_check(project, name = 'steinberg asio', url = 'http://steinberg.de',
 	distribution_packages = {'microsoft (distributed by steinberg => no windows updates)': 'steinberg asio'},
 	dependencies = [
 		cxx_build_check(project, name = 'steinberg asio', libraries = ['asio-is-not-even-a-library'], source_text = \
@@ -202,13 +204,14 @@ steinberg_asio = external_package_check(project, name = 'steinberg asio',
 	]
 )
 
-ladspa = external_package_check(project, name = 'ladspa',
-	url = 'http://ladspa.org or http://linuxaudio.org ?',
+ladspa = external_package_check(project, name = 'ladspa', url = 'http://ladspa.org or http://linuxaudio.org ?',
 	distribution_packages = {
+		'zero-install': '...',
 		'debian and ubuntu': 'ladspa-dev (>= 1.1) | ladspa-sdk-dev (>= 1.1) | ladspa-sdk (>= 1.1)',
 		'gentoo': '...',
 		'fedora': '...',
-		'cygwin': '...'
+		'cygwin': '...',
+		'microsoft': '"This is their problem." (TM)'
 	},
 	dependencies = [
 		cxx_build_check(project, name = 'ladspa >= 1.1', libraries = [], source_text = \
@@ -228,17 +231,17 @@ ladspa = external_package_check(project, name = 'ladspa',
 
 # modules
 
-from packageneric.generic.scons.module import module
-class xpsycle_module(module):
+from packageneric.generic.scons.module import module as base_module
+class module(base_module):
 	def __init__(self):
-		module.__init__(self, source_package,
-			name = 'xpsycle-' + str(source_package.version().major()),
+		base_module.__init__(self, source_package,
+			name = source_package.name(),
 			version = source_package.version(),
 			description = source_package.description(),
 			target_type = module.target_types.program,
-			dependencies = [psycore, ngrs]
+			dependencies = [psycore, ngrs, z]
 		)
-		
+	
 	def dynamic_dependencies(self):
 		got_audio = False # flag indicating whether we have found at least one audio output lib
 		
@@ -285,42 +288,6 @@ class xpsycle_module(module):
 		self.add_sources(find(self.project(), 'src', [os.path.join('xpsycle', '*.' + extension) for extension in ('cpp', 'c')]))
 		self.add_headers(find(self.project(), 'src', [os.path.join('xpsycle', '*.' + extension) for extension in ('hpp', 'h')]))
 		self.contexes().source().compilers().cxx().paths().add(['src'])
-xpsycle_module = xpsycle_module()
+module = module()
 
-
-if False:
-	# debian
-
-	from packageneric.generic.scons.debian_package import debian_package
-
-	xpsycle_runtime = debian_package(project,
-		name = 'xpsycle-' + str(source_package.version().major()),
-		section = 'audio',
-		description = xpsycle_module.description(),
-		long_description = 'This package contains the runtime program.'
-	)
-	#ngrs_runtime.add_files(ngrs_package.binaries())
-
-	xpsycle_doc = debian_package(project,
-		name = xpsycle_runtime.name() + '-doc',
-		section = 'doc',
-		architecture = 'all',
-		description = xpsycle_module.description(),
-		long_description = 'This package contains the documentation.'
-	)
-
-	from packageneric.generic.scons.debian import debian
-	debian = debian(source_package,
-		maintainer = prodos,
-		uploaders = [prodos, bohan],
-		binary_packages = [xpsycle_runtime, xpsycle_doc],
-	)
-
-
-if False:
-	plugin_modules = os.path.join('..', 'xpsycle.plugins', 'SConstruct')
-	if os.path.exists(plugin_modules): plugin_modules = project.subscript(plugin_modules)
-	else: plugin_modules = []
-else: plugin_modules = []
-
-project([xpsycle_module] + plugin_modules)
+project([module])

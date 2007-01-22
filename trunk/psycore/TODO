@@ -1,15 +1,6 @@
 # This is a sorted list, top priority at the top!
 
-*	Source files that don't build because they are work-in-progress.
-	Symptom: build failure.
-	Since the build systems (both scons and the autotools) want
-	to build all *.cpp files found under the src dir, don't forget
-	to disable the unfinished sources with something like:
-	#if defined XPSYCLE__EXPERIMENTAL
-		... something that's quite not yet right ...
-	#endif
-	Alternatively, it's possible to put them in a subdir named "todo": dirs with
-	that name are excluded when searching for *.cpp files (also leading dot like .foo.cpp)
+*	put sigslot in a common dir
 	-- bohan
 
 
