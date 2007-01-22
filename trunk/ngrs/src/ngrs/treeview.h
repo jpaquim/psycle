@@ -29,20 +29,12 @@
 namespace ngrs {
 
   class TreeNode;
-  class TreeNode;
 
   class TreeView : public Panel
   {
   public:
     TreeView();
-
     ~TreeView();
-
-    TreeNode* rootNode();
-
-  private:
-
-    TreeNode* rootNode_;
 
   };
 

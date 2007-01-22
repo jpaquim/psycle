@@ -1240,7 +1240,7 @@ namespace psy {
       setTransparent(false);
 
       pView = pPatternView;
-      editPopup_ = new ngrs::NPopupMenu();
+      editPopup_ = new ngrs::PopupMenu();
       add(editPopup_);
       editPopup_->add(new ngrs::MenuItem("Undo"));
       editPopup_->add(new ngrs::MenuItem("Redo"));

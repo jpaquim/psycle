@@ -58,15 +58,15 @@ namespace psy
 
                 const SongInfo& info() const;
 
-				PatternSequence* patternSequence();
-                const PatternSequence & patternSequence() const;
+                PatternSequence& patternSequence();
 
 			private:
 
 				PatternSequence patternSequence_;
                 SongInfo info_;
 
-			
+                void init();
+		
 		};
 	}
 }

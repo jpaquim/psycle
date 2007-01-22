@@ -34,23 +34,28 @@ namespace psy {
     // the song class
     Song::Song()
     {
+      init();
     }
 
     Song::~Song()
     {
     }
 
-    PatternSequence* Song::patternSequence() {
-      return &patternSequence_;
+    void Song::init() {
+      patternSequence_.patternData().newPattern();
+      std::list<SinglePattern>::iterator it = patternSequence_.patternData().begin();
+      SinglePattern& pat = *it;
+      pat.setName("/pattern0");
     }
 
-    const PatternSequence& Song::patternSequence() const {
+    PatternSequence& Song::patternSequence() {
       return patternSequence_;
     }
 
     const SongInfo& Song::info() const {
       return info_;
     }
+
 
   }
 }

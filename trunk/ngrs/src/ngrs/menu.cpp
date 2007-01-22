@@ -38,7 +38,7 @@ Menu::Menu( const std::string & text ) : CustomButton(text)
 
 void Menu::init( )
 {
-  popupMenu_ = new NPopupMenu();
+  popupMenu_ = new PopupMenu();
 	popupMenu_->setName("popup_menu");
   CustomButton::add(popupMenu_);
 
@@ -129,7 +129,7 @@ bool Menu::mapped( ) const
   return popupMenu_->mapped();
 }
 
-NPopupMenu * Menu::popupMenu( )
+PopupMenu * Menu::popupMenu( )
 {
   return popupMenu_;
 }

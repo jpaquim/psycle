@@ -226,7 +226,7 @@ namespace psy {
 
 
 		void WireGUI::initPopupMenu() {
-			menu_ = new ngrs::NPopupMenu();
+			menu_ = new ngrs::PopupMenu();
 			ngrs::MenuItem* item;
 			item = new ngrs::MenuItem("add Bend");
 			item->click.connect(this,&WireGUI::onAddBend);

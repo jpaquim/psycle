@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Stefan Nattkemper   *
+*   Copyright (C) 2007 by  Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,41 +17,22 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PATTERNDATA_H
-#define PATTERNDATA_H
+#ifndef MACHINEDATA_H
+#define MACHINEDATA_H
 
-#include "singlepattern.h"
-#include <list>
+namespace psy {
+  namespace core {
 
-/**
-@author  Stefan Nattkemper
-*/
-
-namespace psy
-{
-  namespace core
-  {
-    class PatternData {
+    class MachineData {
     public:
 
-      PatternData();
+      MachineData();
 
-      ~PatternData();
-
-      std::list<SinglePattern>::iterator begin(); 
-      std::list<SinglePattern>::iterator end();
-      const std::list<SinglePattern>::const_iterator begin() const; 
-      const std::list<SinglePattern>::const_iterator end() const;
-
-      SinglePattern& newPattern();
-      void erase( std::list<SinglePattern>::iterator it );
-      void clear();
-
-    private:
-
-      std::list<SinglePattern> patterns_;		
+      ~MachineData();
 
     };
+
   }
 }
+
 #endif

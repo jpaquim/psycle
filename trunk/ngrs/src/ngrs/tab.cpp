@@ -45,7 +45,7 @@ namespace ngrs {
     CustomButton::setSkin(noneSk);
 
     enablePopup_ = false;
-    popupMenu_ = new NPopupMenu();
+    popupMenu_ = new PopupMenu();
     add( popupMenu_ );
 
     heightIdent_ = 5;
@@ -75,7 +75,7 @@ namespace ngrs {
     enablePopup_ = on;
   }
 
-  NPopupMenu * NTab::popupMenu( )
+  PopupMenu * NTab::popupMenu( )
   {
     return popupMenu_;
   }

@@ -25,6 +25,9 @@
 #include <ngrs/item.h>
 #include <ngrs/treenode.h>
 #include <ngrs/customtreeview.h>
+#include <ngrs/popupmenu.h>
+#include <ngrs/menuitem.h>
+#include <ngrs/tabbook.h>
 #include <map>
 
 /**
@@ -34,13 +37,14 @@
 namespace psy { 
   namespace core {
     class Song;
+    class TabBook;
   }
   namespace host {
 
     class SongExplorer : public ngrs::Panel
     {
     public:
-      SongExplorer();
+      SongExplorer( ngrs::TabBook& book );
 
       ~SongExplorer();
 
@@ -49,10 +53,20 @@ namespace psy {
       void addSong( psy::core::Song& song );
 
     private:
+     
+      ngrs::TabBook& book_;
 
       ngrs::CustomTreeView* songTreeView_;
+      ngrs::TreeNode* topNode;
+      ngrs::PopupMenu* patternPopupMenu_;
+      
+      std::map<ngrs::TreeNode*, psy::core::Song*> patternMap;
 
       void init();
+      void initPatternPopupMenu();
+      ngrs::TreeNode* createPatternNodes( const psy::core::PatternData& patterns );
+      
+      void onAddPatternClicked( ngrs::ButtonEvent* ev );
 
     };
 

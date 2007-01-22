@@ -20,44 +20,48 @@
 #ifndef TREENODE_H
 #define TREENODE_H
 
-#include "flipbox.h"
-
 /**
 @author  Stefan Nattkemper
 */
 
+#include "object.h"
+#include <vector>
+
 namespace ngrs {
 
-  class CustomItem;
+  class PopupMenu;
 
-  class TreeNode : public NFlipBox
-  {
-
-
+  class TreeNode {
   public:
-    TreeNode();
 
+    TreeNode();
+    TreeNode( const std::string& userText, Object* userObject );
     ~TreeNode();
 
-    signal2<TreeNode*, CustomItem*> itemSelected;
+    std::vector<TreeNode*>::iterator begin();
+    std::vector<TreeNode*>::iterator end();
+    std::vector<TreeNode*>::const_iterator begin() const;
+    std::vector<TreeNode*>::const_iterator end() const;
 
-    virtual void setHeader(CustomItem* entry);
-    virtual void addEntry(CustomItem* entry);
-    virtual void addNode(TreeNode* node);
+    void insert( std::vector<TreeNode*>::iterator itr, TreeNode* node );
+    void add( TreeNode* node );
+    void setPopupMenu( PopupMenu* popupMenu );
+    PopupMenu* popupMenu();
 
+    bool leaf() const;
+    TreeNode* parent() const;
 
-    CustomItem* headerItem();
-
-    virtual void paint( Graphics& g );
+    Object* userObject();
+    std::string userText() const;
 
   private:
 
-    Panel* entries_;
-    Panel* subNodes;
+    std::string userText_;
+    Object* userObject_;
+    PopupMenu* popupMenu_;
 
-    CustomItem* headerItem_;
-
-    void onItemPress(ButtonEvent * ev);
+    std::vector<TreeNode*> children;
+    TreeNode* parent_;
 
   };
 

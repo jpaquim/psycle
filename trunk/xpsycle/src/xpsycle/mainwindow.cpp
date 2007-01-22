@@ -112,13 +112,13 @@ namespace psy {
       initDialogs();
 
 
-      songExplorer_ = new SongExplorer();
-      pane()->add( songExplorer_, ngrs::nAlLeft );
-
       book = new ngrs::TabBook();    
       pane()->add(book,ngrs::nAlClient);
       tabBar_ = new ngrs::TabBar();
       book->setTabBar( tabBar_ );   
+
+      songExplorer_ = new SongExplorer( *book );
+      pane()->add( songExplorer_, ngrs::nAlLeft );
 
       ngrs::ToolBar* playBar = new ngrs::ToolBar();
       playBar->setSkin( ngrs::Skin() );
@@ -252,7 +252,7 @@ namespace psy {
       
       tab->click.connect(this,&MainWindow::onTabChange);
       tab->setEnablePopupMenu(true);
-      ngrs::NPopupMenu* menu = tab->popupMenu();
+      ngrs::PopupMenu* menu = tab->popupMenu();
       ngrs::MenuItem* closeSong = new ngrs::MenuItem("Close");
       menu->add( closeSong );
       closeSong->click.connect(this,&MainWindow::onCloseSongTabPressed);

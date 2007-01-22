@@ -162,8 +162,7 @@ namespace psy
 
 			bool getPlayInfo( const std::list<SinglePattern>::iterator& itr, double start, double length, double & entryStart  ) const;
 
-			PatternData* patternData();
-			const PatternData & patternData() const;
+            PatternData& patternData();
 
 			void removeSinglePattern(const std::list<SinglePattern>::iterator& itr);
 
