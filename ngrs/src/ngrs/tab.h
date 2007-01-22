@@ -44,7 +44,7 @@ namespace ngrs {
 
     virtual void onMousePress( int x, int y, int button);
 
-    NPopupMenu* popupMenu();
+    PopupMenu* popupMenu();
 
     void setSkin( const Skin & noneSkin, const Skin & downSkin, int ident = 5 );
 
@@ -56,7 +56,7 @@ namespace ngrs {
     bool enablePopup_;
     int heightIdent_;
 
-    NPopupMenu* popupMenu_;
+    PopupMenu* popupMenu_;
 
     void init();
 

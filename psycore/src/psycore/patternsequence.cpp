@@ -310,11 +310,7 @@ namespace psy
 			}
 		}
 
-		PatternData* PatternSequence::patternData() {
-			return &patternData_;
-		}
-
-		const PatternData& PatternSequence::patternData( ) const
+		PatternData& PatternSequence::patternData( )
 		{
 			return patternData_;
 		}

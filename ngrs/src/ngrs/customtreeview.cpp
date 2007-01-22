@@ -26,14 +26,29 @@
 #include "app.h"
 #include "config.h"
 #include "window.h"
+#include "label.h"
+#include "popupmenu.h"
 
 namespace ngrs {
 
   CustomTreeView::CustomTreeView()
-    : Panel()
-  {
-    setLayout( AlignLayout() );
+    : Panel(), rootNode_( 0 ), selectedTreeNodeGui_(0)
+  {   
+    init();
+  }
 
+  CustomTreeView::CustomTreeView( TreeNode* rootNode )
+    : Panel(), rootNode_( rootNode ),  selectedTreeNodeGui_(0)
+  {
+    init();
+    updateTree();
+  }
+
+  CustomTreeView::~CustomTreeView() {
+  }
+
+  void CustomTreeView::init() {
+    setLayout( AlignLayout() );
     scrollBox_ = new ScrollBox();
     scrollArea_ = new Panel();
     scrollArea_->setLayout( AlignLayout() );
@@ -41,99 +56,59 @@ namespace ngrs {
     scrollArea_->setBackground(Color(255,255,255));
     scrollArea_->setTransparent(false);
     scrollBox_->setScrollPane(scrollArea_);
-    add(scrollBox_, nAlClient);
+    add( scrollBox_, nAlClient );
 
-    selectedItem_ = 0;
-    selectedTreeNode_ = 0;
-
-    itemBg = App::config()->skin("lbitemsel");
-    itemFg = App::config()->skin("lbitemnone");
-
+    nodeSkinSelected_ = App::config()->skin("lbitemsel");
+    nodeSkinNone_ = App::config()->skin("lbitemnone");
   }
 
-
-  CustomTreeView::~CustomTreeView()
-  {
-  }
-
-
-  void CustomTreeView::addNode( TreeNode * node )
-  {
-    scrollArea_->add( node, nAlTop );
-    node->itemSelected.connect(this,&CustomTreeView::onSelectedItem);
-  }
-
-  void CustomTreeView::onSelectedItem(TreeNode* node, CustomItem * sender )
-  {
-    selectedTreeNode_ = node;
-
-    sender->setSkin(itemBg);
-    sender->repaint();
-
-
-    if (selectedItem_ && sender!=selectedItem_ ) {
-      selectedItem_->setSkin(itemFg);
-      selectedItem_->repaint();
+  void CustomTreeView::buildTree( TreeNode* node ) {
+    if ( !node) return;
+    TreeNodeGui* leaf = new TreeNodeGui( node );
+    leaf->setEvents( true );
+    leaf->mousePress.connect( this, &CustomTreeView::onNodeMousePress );
+    scrollArea_->add( leaf, nAlTop );
+    std::vector<TreeNode*>::iterator it = node->begin();
+    for ( ; it != node->end(); it++ ) {
+      if ( *it ) {
+        buildTree( *it );
+      }
     }
-
-    selectedItem_ = sender;
-
-    ItemEvent ev(sender,sender->text());
-    itemSelected.emit(&ev);
   }
 
-  void CustomTreeView::setSelectedItem( TreeNode* node, CustomItem* item ) {
-    selectedTreeNode_ = node;
-
-    item->setSkin(itemBg);
-    item->repaint();
-
-
-    if (selectedItem_ && item!=selectedItem_ ) {
-      selectedItem_->setSkin(itemFg);
-      selectedItem_->repaint();
-    }
-
-    selectedItem_ = item;
-
-    ItemEvent ev(item,item->text());
-    itemSelected.emit(&ev);          
-  }     
-
-  TreeNode * CustomTreeView::selectedTreeNode( )
-  {
-    return selectedTreeNode_;
-  }
-
-  CustomItem * CustomTreeView::selectedItem( )
-  {
-    return selectedItem_;
-  }
-
-  void CustomTreeView::removeChilds( )
-  {
+  void CustomTreeView::updateTree() {
     scrollArea_->removeChilds();
-    selectedItem_ = 0;
-    selectedTreeNode_ = 0;
-  }
-
-  void CustomTreeView::removeItem( CustomItem * item )
-  {
-    if ( item && item->isChildOf( this ) ) {
-      if ( item == selectedItem_ ) selectedItem_ = 0;
-      item->erase();
-      if ( window() ) window()->checkForRemove( item );
-      App::addRemovePipe(item);
+    selectedTreeNodeGui_ = 0;
+    if ( rootNode_ ) {
+      buildTree( rootNode_ );      
     }
   }
 
-  void CustomTreeView::onItemDblClick( ButtonEvent* ev ) {
-    //ItemEvent ev( sender, sender->text() );
-    //itemDblClick.emit( ev );        
+  void CustomTreeView::onNodeMousePress( ButtonEvent* ev ) {
+    // dynamic_cast<TreeNodeGui*>(), c cast for rtti disabled compilers
+    TreeNodeGui* gui = (TreeNodeGui*) ( ev->sender() );
+    if ( gui != selectedTreeNodeGui_ ) {
+      if ( selectedTreeNodeGui_ ) {
+        selectedTreeNodeGui_->setSkin( nodeSkinNone_ ) ;
+        selectedTreeNodeGui_->repaint();
+      }
+      selectedTreeNodeGui_ = gui;
+      selectedTreeNodeGui_->setSkin( nodeSkinSelected_ );
+      selectedTreeNodeGui_->repaint();
+    }
+    if ( ev->button() == 3 && gui->node()->popupMenu() ) {
+      PopupMenu* popupMenu_ = gui->node()->popupMenu();
+      popupMenu_->setPosition( ev->x() + absoluteLeft() + window()->left(), ev->y() + absoluteTop() + window()->top(),100,100);
+      popupMenu_->setVisible(true);
+    }
   }
 
-  ScrollBox* CustomTreeView::scrollBox() {
-     return scrollBox_;
+  TreeNode* CustomTreeView::selectedTreeNode() {
+    if ( selectedTreeNodeGui_ )
+      return selectedTreeNodeGui_->node();
+    else
+      return 0;
   }
+
 
 }

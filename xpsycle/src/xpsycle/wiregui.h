@@ -29,7 +29,7 @@
 class BendedLineShape;
 
 namespace ngrs {
-  class NPopupMenu;
+  class PopupMenu;
 }
 
 namespace psy 
@@ -68,7 +68,7 @@ namespace psy
 
                 BendedLineShape* lineShape;
 
-				ngrs::NPopupMenu* menu_;
+				ngrs::PopupMenu* menu_;
 				ngrs::NPoint newBendPos_;
                 
 				ngrs::Color polyColor_;

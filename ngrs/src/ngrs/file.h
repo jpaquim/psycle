@@ -31,7 +31,7 @@ namespace ngrs {
 
   const int nFiles = 1;
   const int nDirs  = 2;
-
+  
   class File{
   public:
     File();
@@ -48,7 +48,11 @@ namespace ngrs {
     static std::string home();
     static std::string replaceTilde(const std::string & path);
     static std::string env(const std::string & envName);
-    static std::string extractFileNameFromPath(const std::string & fileName);
+    #ifdef __unix__
+      static std::string extractFileNameFromPath( const std::string& fileName, bool slash = true );
+    #else
+      static std::string extractFileNameFromPath( const std::string& fileName, bool slash = false );
+    #endif
     static std::string slash();
 
     // replaces entitys`s for xml writing

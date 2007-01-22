@@ -246,14 +246,14 @@ namespace ngrs {
 #endif
   }
 
-  std::string File::extractFileNameFromPath(const std::string & fileName) {
+  std::string File::extractFileNameFromPath(const std::string & fileName, bool slash) {
     std::string fileWithoutPathName = "";
 
-#ifdef __unix__
-    std::string::size_type i = fileName.rfind("/");
-#else
-    std::string::size_type i = fileName.rfind("\\");
-#endif
+    std::string::size_type i = std::string::npos;
+    if ( slash )
+      i = fileName.rfind("/");
+    else
+      i = fileName.rfind("\\");
 
     if ( i != std::string::npos  &&  i != fileName.length() - 1 ) {
       fileWithoutPathName = fileName.substr(i+1);

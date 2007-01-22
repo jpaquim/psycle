@@ -29,12 +29,12 @@
 
 namespace ngrs {
 
-  class NPopupMenu : public PopupWindow
+  class PopupMenu : public PopupWindow
   {
   public:
-    NPopupMenu();
+    PopupMenu();
 
-    ~NPopupMenu();
+    ~PopupMenu();
 
 
     virtual void add(CustomMenuItem* item);

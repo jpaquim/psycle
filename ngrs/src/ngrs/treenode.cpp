@@ -18,75 +18,74 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "treenode.h"
-#include "alignlayout.h"
-#include "frameborder.h"
-#include "label.h"
-#include "customitem.h"
+#include "popupmenu.h"
 
 namespace ngrs {
 
-  TreeNode::TreeNode()
-    : NFlipBox()
-  {
-    entries_ = new Panel();
-    entries_->setLayout( AlignLayout() );
-    entries_->setSpacing(flipperWidth(),0,0,0);
-    pane()->add(entries_, nAlTop);
-
-    subNodes = new Panel();
-    subNodes->setLayout( AlignLayout() );
-    pane()->add(subNodes, nAlTop);
-
-    headerItem_ = 0;
-  }
-
-  TreeNode::~TreeNode()
+  TreeNode::TreeNode() 
+    : userObject_(0), popupMenu_(0)
   {
   }
 
-  void TreeNode::addNode( TreeNode * node )
+  TreeNode::TreeNode( const std::string& userText, Object* userObject ) 
+    : userText_(userText), userObject_(userObject_), popupMenu_(0) 
   {
-    subNodes->add(node, nAlTop);
   }
-
-  void TreeNode::addEntry( CustomItem * entry )
+  
+  TreeNode::~TreeNode() 
   {
-    entries_->add(entry, nAlTop);
-    entry->mousePress.connect(this,&TreeNode::onItemPress);
-    entry->setTransparent(true);
-  }
-
-  void TreeNode::setHeader( CustomItem * entry )
-  {
-    headerItem_ = entry;
-    header()->add(entry, nAlClient);
-    entry->mousePress.connect(this,&TreeNode::onItemPress);
-    entry->setTransparent(true);
-  }
-
-  void TreeNode::onItemPress( ButtonEvent * ev )
-  {
-    if (ev->button() == 1) {
-      CustomItem* item = static_cast<CustomItem*>( ev->sender() );
-      itemSelected.emit(this, item);
+    for ( std::vector<TreeNode*>::iterator it = begin(); it < end(); it++ ) {      
+      delete *it;
     }
+    children.clear();
   }
 
-  CustomItem * TreeNode::headerItem( )
-  {
-    return headerItem_;
+  std::vector<TreeNode*>::iterator TreeNode::begin() {
+    return children.begin();
   }
 
-  void TreeNode::paint( Graphics& g ) {
-    /*
-    VisualComponent* last = dynamic_cast<VisualComponent*>( parent() )->visualComponents().back();
-    if ( this != last )
-    setStyle( nFlipBoxLine );
-    else
-    setStyle( 0 );
-    */
+  std::vector<TreeNode*>::iterator TreeNode::end()  {
+    return children.end();
+  }
 
-    NFlipBox::paint( g );
+  std::vector<TreeNode*>::const_iterator TreeNode::begin() const{
+    return children.begin();
+  }
+
+  std::vector<TreeNode*>::const_iterator TreeNode::end() const {
+    return children.end();
+  }
+
+  bool TreeNode::leaf() const {
+    return children.size() == 0;
+  }
+
+  TreeNode* TreeNode::parent() const {
+    return parent_;
+  }
+
+  Object* TreeNode::userObject() {
+    return userObject_;
+  }
+
+  std::string TreeNode::userText() const {
+    return userText_;
+  }
+
+  void TreeNode::insert( std::vector<TreeNode*>::iterator itr, TreeNode* node ) {
+    children.insert( itr, node );
+  }
+
+  void TreeNode::add( TreeNode* node ) {
+    children.push_back( node );
+  }
+
+  void TreeNode::setPopupMenu( PopupMenu* popupMenu ) {
+    popupMenu_ = popupMenu;
+  }
+
+  PopupMenu* TreeNode::popupMenu() {
+    return popupMenu_;
   }
 
 }

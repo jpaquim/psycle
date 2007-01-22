@@ -21,53 +21,52 @@
 #define CUSTOMTREEVIEW_H
 
 #include "panel.h"
-#include "itemevent.h"
+#include "label.h"
+#include "treenode.h"
 
 /**
 @author  Stefan Nattkemper
 */
 
 namespace ngrs {
-
-  class TreeNode;
+  
   class ScrollBox;
-  class CustomItem;
 
-
-  class CustomTreeView : public Panel
-  {
+  class CustomTreeView : public Panel {
   public:
+    
+    struct TreeNodeGui : Label {
+      TreeNodeGui( TreeNode* node ) : Label( node->userText() ), node_( node) {}      
+      TreeNode* TreeNodeGui::node() { return node_; }
+    private:
+      TreeNode* node_;
+    };
+
     CustomTreeView();
+    CustomTreeView( TreeNode* rootNode );
 
     ~CustomTreeView();
 
-    void addNode( TreeNode* node);
+    signal1<TreeNode*> nodeClicked;
 
-    signal1<ItemEvent*> itemSelected;
-    signal1<ItemEvent*> itemDblClick;
-
+    void updateTree();
     TreeNode* selectedTreeNode();
-    CustomItem* selectedItem();
 
-    virtual void removeChilds();
-    void removeItem( CustomItem* item );
+  protected:
 
-    void setSelectedItem( TreeNode* node, CustomItem* item );
-
-    ScrollBox* scrollBox();
+    void buildTree( TreeNode* node );
 
   private:
 
     ScrollBox* scrollBox_;
     Panel* scrollArea_;
-    CustomItem* selectedItem_;
-    TreeNode* selectedTreeNode_;
+    TreeNode* rootNode_;
+    TreeNodeGui* selectedTreeNodeGui_;
+    Skin nodeSkinSelected_;
+    Skin nodeSkinNone_;
 
-    Skin itemBg;
-    Skin itemFg;
-
-    void onSelectedItem(TreeNode* node, CustomItem* sender);
-    void onItemDblClick( ButtonEvent* ev );
+    void init();
+    void onNodeMousePress( ButtonEvent* ev );
 
   };
 

@@ -28,7 +28,7 @@
 
 namespace ngrs {
 
-  class NPopupMenu;
+  class PopupMenu;
   class CustomMenuItem;
 
   class Menu : public CustomButton
@@ -41,7 +41,7 @@ namespace ngrs {
 
     bool mapped() const;
 
-    NPopupMenu* popupMenu();
+    PopupMenu* popupMenu();
 
     virtual CustomMenuItem* add(CustomMenuItem* item);
 
@@ -60,7 +60,7 @@ namespace ngrs {
     Skin btnOver_;
     Skin btnNone_;
 
-    NPopupMenu* popupMenu_;
+    PopupMenu* popupMenu_;
     bool hide_;
 
     void init();

@@ -60,7 +60,7 @@ ChildView::ChildView()
 
   sequencerView_ = new SequencerGUI();
   //sequencerBar_->setSequenceGUI( sequencerView() ) ;
-  sequencerView_->setPatternSequence( _pSong->patternSequence());
+  sequencerView_->setPatternSequence( &_pSong->patternSequence() );
   sequencerView_->addSequencerLine();
 
 	virtualPattern_ = new VirtualPattern();

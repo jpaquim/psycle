@@ -27,20 +27,11 @@ namespace ngrs {
   TreeView::TreeView()
     : Panel()
   {
-    setLayout(AlignLayout());
-    setBorder(FrameBorder());
-    add( rootNode_ = new TreeNode(), nAlTop );
-
   }
 
 
   TreeView::~TreeView()
   {
-  }
-
-  TreeNode * TreeView::rootNode( )
-  {
-    return rootNode_;
   }
 
 }

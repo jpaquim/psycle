@@ -53,6 +53,8 @@ namespace ngrs {
 
     PropertyMap* properties() const;
 
+    virtual std::string toString() const;
+
   private:
 
     std::string name_;

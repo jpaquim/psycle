@@ -73,4 +73,8 @@ namespace ngrs {
     return properties_;
   }
 
+  std::string Object::toString() const {
+    return name_;
+  }
+
 }

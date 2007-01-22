@@ -27,7 +27,7 @@
 
 namespace ngrs {
 
-  NPopupMenu::NPopupMenu()
+  PopupMenu::PopupMenu()
     : PopupWindow(), lastOverItem(0)
   {
     setName("name");
@@ -36,11 +36,11 @@ namespace ngrs {
   }
 
 
-  NPopupMenu::~NPopupMenu()
+  PopupMenu::~PopupMenu()
   {
   }
 
-  void NPopupMenu::setVisible( bool on )
+  void PopupMenu::setVisible( bool on )
   {
     if (on) pack();
     Window::setVisible(on);
@@ -56,7 +56,7 @@ namespace ngrs {
 
   }
 
-  void NPopupMenu::add( CustomMenuItem * item )
+  void PopupMenu::add( CustomMenuItem * item )
   {
     pane()->add(item, nAlCenter);
     items.push_back(item);
@@ -64,7 +64,7 @@ namespace ngrs {
     addMessageListener(item);
   }
 
-  void NPopupMenu::onMessage( Event * ev )
+  void PopupMenu::onMessage( Event * ev )
   {
     PopupWindow::onMessage(ev);
 
@@ -88,7 +88,7 @@ namespace ngrs {
           }
   }
 
-  void NPopupMenu::onKeyPress( const KeyEvent & event )
+  void PopupMenu::onKeyPress( const KeyEvent & event )
   {
     switch (event.scancode()) {
       case NK_Return : {
@@ -162,7 +162,7 @@ namespace ngrs {
     }
   }
 
-  void NPopupMenu::removeChilds( )
+  void PopupMenu::removeChilds( )
   {
     items.clear();
     lastOverItem = 0;

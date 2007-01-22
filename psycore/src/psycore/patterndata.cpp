@@ -37,8 +37,9 @@ namespace psy
       PatternData::~PatternData() {
       }
 
-      void PatternData::add( const SinglePattern& pattern ) {
-        patterns_.push_back( pattern );
+      SinglePattern& PatternData::newPattern() {
+        patterns_.push_back( SinglePattern() );
+        return patterns_.back(); 
       }
 
       void PatternData::erase( std::list<SinglePattern>::iterator it ) {
@@ -47,6 +48,22 @@ namespace psy
 
       void PatternData::clear() {
         patterns_.clear();
+      }
+
+      const std::list<SinglePattern>::const_iterator PatternData::begin() const {
+        return patterns_.begin();
+      }
+
+      const std::list<SinglePattern>::const_iterator PatternData::end() const {
+        return patterns_.end();
+      }
+
+      std::list<SinglePattern>::iterator PatternData::begin() {
+        return patterns_.begin();
+      }
+
+      std::list<SinglePattern>::iterator PatternData::end() {
+        return patterns_.end();
       }
 
 

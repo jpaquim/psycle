@@ -188,7 +188,7 @@ namespace psy {
 
       private:
 
-        ngrs::NPopupMenu* editPopup_;
+        ngrs::PopupMenu* editPopup_;
         PatternView* pView;      
 
         bool isBlockCopied;
