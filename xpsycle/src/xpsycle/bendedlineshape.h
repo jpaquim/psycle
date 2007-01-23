@@ -39,21 +39,21 @@ public:
   virtual void setTop( int top );
   virtual void setWidth( int width );
   virtual void setHeight( int height );
-  virtual ngrs::NPoint pickerAt( int i );
+  virtual ngrs::Point pickerAt( int i );
   virtual int pickerSize();
   virtual void drawPicker( ngrs::Graphics& g );
 
-  const ngrs::NPoint & p1() const;
-  const ngrs::NPoint & p2() const;
-  ngrs::NPoint p3() const;
-  ngrs::NPoint p4() const;
-  ngrs::NPoint p5() const;
+  const ngrs::Point & p1() const;
+  const ngrs::Point & p2() const;
+  ngrs::Point p3() const;
+  ngrs::Point p4() const;
+  ngrs::Point p5() const;
 
-  void setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
-  void insertBend( const ngrs::NPoint & bendPt );
+  void setPoints( const ngrs::Point & p1, const ngrs::Point & p2 );
+  void insertBend( const ngrs::Point & bendPt );
   void setClippingDistance( int d );
 
-  const std::vector<ngrs::NPoint> & bendPts() const;
+  const std::vector<ngrs::Point> & bendPts() const;
 
   virtual int overPicker( int x, int y );
   virtual void setPicker( int index, int x, int y );
@@ -65,13 +65,13 @@ public:
 
 private:
 
-  ngrs::NPoint p1_;
-  ngrs::NPoint p2_;
-  ngrs::NPoint p3_;
-  ngrs::NPoint p4_;
-  ngrs::NPoint p5_;
+  ngrs::Point p1_;
+  ngrs::Point p2_;
+  ngrs::Point p3_;
+  ngrs::Point p4_;
+  ngrs::Point p5_;
 
-  std::vector< ngrs::NPoint > bendPts_;
+  std::vector< ngrs::Point > bendPts_;
 
   int pickWidth_ ;
   int pickHeight_;

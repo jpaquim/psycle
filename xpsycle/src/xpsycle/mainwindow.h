@@ -98,7 +98,6 @@ namespace psy {
 
       bool oldPlayPos_;
 
-      ChildView* addChildView();
       ChildView* selectedChildView_;
 
       SongExplorer* songExplorer_;
@@ -156,6 +155,7 @@ namespace psy {
       void initToolBar();
       void initStatusBar();
       void initMachineView();
+      
 
       void updateBars();
 

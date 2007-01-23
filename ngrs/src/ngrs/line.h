@@ -37,10 +37,10 @@ namespace ngrs {
     ~Line();
 
     virtual void paint(Graphics& g);
-    void setPoints( const NPoint & p1, const NPoint & p2);
+    void setPoints( const Point & p1, const Point & p2);
 
-    const NPoint & p1() const;
-    const NPoint & p2() const;
+    const Point & p1() const;
+    const Point & p2() const;
 
     void setClippingDistance( int distance );
 

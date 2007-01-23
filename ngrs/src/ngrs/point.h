@@ -30,12 +30,12 @@
 
 namespace ngrs {
 
-  class NPoint{
+  class Point{
   public:
-    NPoint();
-    NPoint(int x, int y);
+    Point();
+    Point(int x, int y);
 
-    ~NPoint();
+    ~Point();
 
     void setX(int x);
     void setY(int y);

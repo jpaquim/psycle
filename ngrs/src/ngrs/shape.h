@@ -55,7 +55,7 @@ namespace ngrs {
     int width() const;
     int height() const;
 
-    virtual NPoint pickerAt(int i);
+    virtual Point pickerAt(int i);
     virtual int pickerSize();
     virtual void setPicker(int index, int x, int y);
 

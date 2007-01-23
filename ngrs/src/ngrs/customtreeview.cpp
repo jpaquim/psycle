@@ -44,36 +44,57 @@ namespace ngrs {
   // flipper
 
   /* XPM */
-  const char * node_expanded_xpm[] = {
-    "12 6 2 1",
-    " 	c None",
-    ".	c black",
-    "            ",
-    "  .......   ",
-    "   .....    ",
-    "    ...     ",
-    "     .      ",
-    "            "
-  };
+const char * node_expanded_xpm[] = {
+"11 11 2 1",
+" 	c #404040",
+".	c #FFFFFF",
+"           ",
+" ......... ",
+" ......... ",
+" ......... ",
+" ......... ",
+" ..     .. ",
+" ......... ",
+" ......... ",
+" ......... ",
+" ......... ",
+"           "};
+/* XPM */
+const char * node_expand_xpm[] = {
+"11 11 2 1",
+" 	c #404040",
+".	c #FFFFFF",
+"           ",
+" ......... ",
+" ......... ",
+" .... .... ",
+" .... .... ",
+" ..     .. ",
+" .... .... ",
+" .... .... ",
+" ......... ",
+" ......... ",
+"           "};
 
-  /* XPM */
-  const char * node_expand_xpm[] = {
-    "12 12 2 1",
-    " 	c None",
-    ".	c black",
-    "            ",
-    "            ",
-    "    .       ",
-    "    ..      ",
-    "    ...     ",
-    "    ....    ",
-    "    ...     ",
-    "    ..      ",
-    "    .       ",
-    "            ",
-    "            ",
-    "            "
-  };
+  TreeNodeGui::FlipperImage::FlipperImage() {
+  }
+
+  TreeNodeGui::FlipperImage::~FlipperImage() {
+  }
+
+  void TreeNodeGui::FlipperImage::paint( Graphics& g ) {
+    Pen pen;
+    pen.setLineStyle( nLineOnOffDash );
+    g.setPen( pen );
+    int ch = clientHeight();
+    int cw = clientWidth();
+    g.drawLine( 0, ch/2, cw, ch/2 );
+    Image::paint(g);
+  }
+
+  int TreeNodeGui::FlipperImage::preferredWidth() const {
+    return static_cast<int>( 1.5 * Image::preferredWidth() );
+  }
 
   TreeNodeGui::TreeNodeGui( TreeNode* node )
    : Panel(), node_( node )
@@ -82,12 +103,13 @@ namespace ngrs {
     expandBmp.createFromXpmData(node_expand_xpm);
     expandedBmp.createFromXpmData(node_expanded_xpm);
     // the left flipper, node line image
-    img_ = new Image();
+    img_ = new FlipperImage();
     img_->setVAlign(nAlCenter);
-    img_->setHAlign(nAlCenter);
-    img_->setSharedBitmap(&expandBmp);
+    img_->setHAlign(nAlLeft);
+    img_->setSharedBitmap(&expandedBmp);
     img_->mousePress.connect( this, &TreeNodeGui::onImgClick );
     img_->setEvents( true );
+    img_->setVisible( false );
     Panel::add( img_ );
     // the label;
     label_ = new Label( node->userText() );    
@@ -95,7 +117,7 @@ namespace ngrs {
     // panel for children
     children_ = new Panel();
     children_->setLayout( ListLayout() );
-    children_->setSpacing( Size( 20,0,0,0));
+    children_->setSpacing( Size( img_->preferredWidth(),0,0,0));
     Panel::add( children_ );
   }
 
@@ -108,6 +130,7 @@ namespace ngrs {
 
   void TreeNodeGui::add( TreeNodeGui* nodeGui ) {
     children_->add( nodeGui,nAlTop );
+    img_->setVisible( true );
   }
 
   void TreeNodeGui::resize() {
@@ -122,7 +145,7 @@ namespace ngrs {
 
   int TreeNodeGui::preferredHeight() const {    
     return label_->preferredHeight() +
-      ( !node_->leaf()  ? children_->preferredHeight() : 0 );
+      ( (!node_->leaf() && expanded_)  ? children_->preferredHeight() : 0 );
   }
 
   void TreeNodeGui::setSkin( const Skin& skin ) {
@@ -139,7 +162,7 @@ namespace ngrs {
       img_->setSharedBitmap(&expandBmp);
     }
     repaint();
-  }
+  }  
 
 
   CustomTreeView::CustomTreeView()
@@ -178,6 +201,7 @@ namespace ngrs {
     TreeNodeGui* leaf = new TreeNodeGui( node );
     leaf->setEvents( true );
     leaf->mousePress.connect( this, &CustomTreeView::onNodeMousePress );
+    leaf->mouseDoublePress.connect( this, &CustomTreeView::onNodeDblClick );
     if ( !nodeGui )
       scrollArea_->add( leaf, nAlTop );
     else
@@ -209,12 +233,29 @@ namespace ngrs {
       selectedTreeNodeGui_ = gui;
       selectedTreeNodeGui_->setSkin( nodeSkinSelected_ );
       selectedTreeNodeGui_->repaint();
+      nodeClicked.emit( gui->node() );
+      gui->node()->clicked.emit( gui->node() );
     }
     if ( ev->button() == 3 && gui->node()->popupMenu() ) {
       PopupMenu* popupMenu_ = gui->node()->popupMenu();
-      popupMenu_->setPosition( ev->x() + absoluteLeft() + window()->left(), ev->y() + absoluteTop() + window()->top(),100,100);
+      Point mouse_pos = App::system().mousePosition();
+      popupMenu_->setPosition( mouse_pos.x(), mouse_pos.y(), 100,100);
       popupMenu_->setVisible(true);
     }
+  }
+
+  void CustomTreeView::onNodeDblClick( ButtonEvent* ev ) {
+    TreeNodeGui* gui = (TreeNodeGui*) ( ev->sender() );
+    if ( gui != selectedTreeNodeGui_ ) {
+      if ( selectedTreeNodeGui_ ) {
+        selectedTreeNodeGui_->setSkin( nodeSkinNone_ ) ;
+        selectedTreeNodeGui_->repaint();
+      }
+      selectedTreeNodeGui_ = gui;
+      selectedTreeNodeGui_->setSkin( nodeSkinSelected_ );
+      selectedTreeNodeGui_->repaint();
+    }
+    gui->node()->dblClick.emit( gui->node() );
   }
 
   TreeNode* CustomTreeView::selectedTreeNode() {

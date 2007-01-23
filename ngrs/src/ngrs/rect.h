@@ -49,7 +49,7 @@ namespace ngrs {
     long int bottom() const;
 
     bool hasIntersection( const Rect & r2) const;
-    bool intersects(const NPoint & p) const;
+    bool intersects(const Point & p) const;
     bool intersects(long x, long y) const;
     void intersects( const Rect & r2, Rect & result ) const;
 

@@ -42,14 +42,14 @@ namespace ngrs {
     virtual void setTop(int top);
     virtual void setWidth(int width);
     virtual void setHeight(int height);
-    virtual NPoint pickerAt(int i);
+    virtual Point pickerAt(int i);
     virtual int pickerSize();
     virtual void drawPicker(Graphics& g);
 
-    const NPoint & p1();
-    const NPoint & p2();
+    const Point & p1();
+    const Point & p2();
 
-    void setPoints(NPoint p1, NPoint p2);
+    void setPoints(Point p1, Point p2);
     void setClippingDistance(int d);
 
     virtual int overPicker(int x, int y);
@@ -62,8 +62,8 @@ namespace ngrs {
 
   private:
 
-    NPoint p1_;
-    NPoint p2_;
+    Point p1_;
+    Point p2_;
 
     void resize(int width, int height);
     void calculateRectArea();

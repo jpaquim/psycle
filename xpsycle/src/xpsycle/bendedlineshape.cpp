@@ -41,7 +41,7 @@ BendedLineShape * BendedLineShape::clone( ) const
   return new BendedLineShape(*this);
 }
 
-ngrs::NPoint BendedLineShape::pickerAt( int i )
+ngrs::Point BendedLineShape::pickerAt( int i )
 {
   if (i == 0) return p1_; else return p2_;
 }
@@ -89,7 +89,7 @@ void BendedLineShape::calculateRectArea( )
   int dy = (int) (-cos*distance_);
                   
                   
-  ngrs::NPoint  pts[4];
+  ngrs::Point  pts[4];
   pts[0].setX ( p1_.x() + dx );
   pts[0].setY ( p1_.y() - dy );
   pts[1].setX ( p2_.x() + dx );
@@ -119,9 +119,9 @@ void BendedLineShape::drawPicker( ngrs::Graphics& g )
   g.fillRect(p1_.x()- pickWidth_/2,p1_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   g.fillRect(p2_.x()- pickWidth_/2,p2_.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   
-  std::vector<ngrs::NPoint>::const_iterator it = bendPts().begin();
+  std::vector<ngrs::Point>::const_iterator it = bendPts().begin();
   for ( ; it < bendPts().end(); it++ ) {
-    ngrs::NPoint pt = *it;
+    ngrs::Point pt = *it;
     g.fillRect(pt.x()- pickWidth_/2, pt.y() - pickHeight_/2, pickWidth_, pickHeight_ );
   }
 }
@@ -150,48 +150,48 @@ void BendedLineShape::setHeight( int height )
   calculateRectArea();
 }
 
-const ngrs::NPoint & BendedLineShape::p1( ) const
+const ngrs::Point & BendedLineShape::p1( ) const
 {
   return p1_;
 }
 
-const ngrs::NPoint & BendedLineShape::p2( ) const
+const ngrs::Point & BendedLineShape::p2( ) const
 {
   return p2_;
 }
 
-ngrs::NPoint BendedLineShape::p3() const 
+ngrs::Point BendedLineShape::p3() const 
 {
-  return ngrs::NPoint(( p1_.x() + p2_.x() ) / 2,  ( p1_.y() + p2_.y() ) 
+  return ngrs::Point(( p1_.x() + p2_.x() ) / 2,  ( p1_.y() + p2_.y() ) 
                / 2 );
 }
 
-ngrs::NPoint BendedLineShape::p4() const 
+ngrs::Point BendedLineShape::p4() const 
 {
-  return ngrs::NPoint ( p2_.x() , p3().y() );
+  return ngrs::Point ( p2_.x() , p3().y() );
 }
 
-ngrs::NPoint BendedLineShape::p5() const 
+ngrs::Point BendedLineShape::p5() const 
 {
-  return ngrs::NPoint ( p1_.x(), p3().y() );
+  return ngrs::Point ( p1_.x(), p3().y() );
 }
 
-void BendedLineShape::setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 )
+void BendedLineShape::setPoints( const ngrs::Point & p1, const ngrs::Point & p2 )
 {
   p1_ = p1;
   p2_ = p2;
   calculateRectArea();
 }
 
-void BendedLineShape::insertBend( const ngrs::NPoint & pt ) {
+void BendedLineShape::insertBend( const ngrs::Point & pt ) {
   if ( bendPts_.size() == 0) {        
     bendPts_.push_back( pt );
   } else {             
     int dist =  ( left() + pt.x() - p1().x() )*( left() + pt.x() - p1().x() ) + ( top() + pt.y() - p1().y() )*( top() + pt.y() - p1().y() );
-    std::vector<ngrs::NPoint>::iterator insIt = bendPts_.begin();
-    std::vector<ngrs::NPoint>::iterator it = bendPts_.begin();
+    std::vector<ngrs::Point>::iterator insIt = bendPts_.begin();
+    std::vector<ngrs::Point>::iterator it = bendPts_.begin();
     for ( ; it < bendPts_.end(); it++ ) {
-      const ngrs::NPoint & p = *it;
+      const ngrs::Point & p = *it;
       int newDist =  ( left() + pt.x() - p.x() )*( left() + pt.x() - p.x() ) + ( top() + pt.y() - p.y() )*( top() + pt.y() - p.y() );
       if ( newDist < dist ) insIt = it;
       dist = newDist;
@@ -207,7 +207,7 @@ void BendedLineShape::insertBend( const ngrs::NPoint & pt ) {
   }    
 }
 
-const std::vector<ngrs::NPoint> & BendedLineShape::bendPts() const {
+const std::vector<ngrs::Point> & BendedLineShape::bendPts() const {
   return bendPts_;
 }
 
@@ -216,10 +216,10 @@ int BendedLineShape::overPicker( int x, int y )
   if (ngrs::Rect(p1_.x()-pickWidth_/2,p1_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 0;
   if (ngrs::Rect(p2_.x()-pickWidth_/2,p2_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 1;
   
-  std::vector<ngrs::NPoint>::const_iterator it = bendPts().begin();
+  std::vector<ngrs::Point>::const_iterator it = bendPts().begin();
   int i = 2;
   for ( ; it < bendPts().end(); it++, i++ ) {
-    ngrs::NPoint pt = *it;
+    ngrs::Point pt = *it;
     if (ngrs::Rect(pt.x()-pickWidth_/2,pt.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return i;
   }
   
@@ -229,15 +229,15 @@ int BendedLineShape::overPicker( int x, int y )
 void BendedLineShape::setPicker( int index, int x, int y )
 {
   if (index == 0) {
-      p1_ = ngrs::NPoint(x,y);
+      p1_ = ngrs::Point(x,y);
       calculateRectArea();
   } else 
   if (index == 1) {
-      p2_ = ngrs::NPoint(x,y);
+      p2_ = ngrs::Point(x,y);
       calculateRectArea();
   } else
   if ( bendPts_.size() > index - 2 ) {
-    ngrs::NPoint & pt = bendPts_.at( index - 2);
+    ngrs::Point & pt = bendPts_.at( index - 2);
     pt.setXY ( x ,y );
   }
 }
@@ -256,10 +256,10 @@ ngrs::Region BendedLineShape::lineToRegion( )
 
   ngrs::Region region;
 
-  ngrs::NPoint startPt = p1();
-  std::vector<ngrs::NPoint>::const_iterator it = bendPts().begin();
+  ngrs::Point startPt = p1();
+  std::vector<ngrs::Point>::const_iterator it = bendPts().begin();
   for ( ; it < bendPts().end(); it++ ) {
-    ngrs::NPoint pt = *it;
+    ngrs::Point pt = *it;
                                                                                                                                                                                
     double  ankathede    = ( startPt.x() - pt.x() );
     double  gegenkathede = ( startPt.y() - pt.y() );
@@ -271,7 +271,7 @@ ngrs::Region BendedLineShape::lineToRegion( )
     int dx = (int) ( -sin*distance_);
     int dy = (int) ( -cos*distance_);
                                           
-    ngrs::NPoint  pts[4];
+    ngrs::Point  pts[4];
     pts[0].setX ( startPt.x() + dx );
     pts[0].setY ( startPt.y() - dy );
     pts[1].setX ( pt.x() + dx );
@@ -288,7 +288,7 @@ ngrs::Region BendedLineShape::lineToRegion( )
     startPt = pt;
   }
 
-  ngrs::NPoint pt = p2();
+  ngrs::Point pt = p2();
   
   double  ankathede    = ( startPt.x() - pt.x() );
   double  gegenkathede = ( startPt.y() - pt.y() );
@@ -300,7 +300,7 @@ ngrs::Region BendedLineShape::lineToRegion( )
   int dx = (int) ( -sin*distance_);
   int dy = (int) ( -cos*distance_);
                                           
-  ngrs::NPoint  pts[4];
+  ngrs::Point  pts[4];
   pts[0].setX ( startPt.x() + dx );
   pts[0].setY ( startPt.y() - dy );
   pts[1].setX ( pt.x() + dx );

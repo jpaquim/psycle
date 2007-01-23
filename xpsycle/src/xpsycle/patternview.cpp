@@ -690,9 +690,9 @@ namespace psy {
 
         // find out the start offset of the header bitmap
         ngrs::Bitmap & patNav = icons.patNav();
-        ngrs::NPoint off( patNav.width()+ pView->drawArea->xOffByTrack( track ) + (pView->drawArea->trackWidth( track ) - patNav.width() - skinColWidth()) / 2,0);
+        ngrs::Point off( patNav.width()+ pView->drawArea->xOffByTrack( track ) + (pView->drawArea->trackWidth( track ) - patNav.width() - skinColWidth()) / 2,0);
         // find out the start offset of the nav buttons
-        ngrs::NPoint navOff( pView->drawArea->xOffByTrack( track ),0); 
+        ngrs::Point navOff( pView->drawArea->xOffByTrack( track ),0); 
 
         ngrs::Rect decCol( navOff.x() , navOff.y(), 10, patNav.height() );
         ngrs::Rect incCol( navOff.x() +10, navOff.y(), 10, patNav.height() );

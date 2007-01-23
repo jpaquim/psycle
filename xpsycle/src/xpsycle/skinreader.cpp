@@ -420,7 +420,7 @@ namespace psy {
 			if ( tagName == "name_dest" && parseMachineView) {
 				std::string coord = parser.getAttribValue("coord");
 				ngrs::Rect rect = getCoords( coord );
-				ngrs::NPoint point = ngrs::NPoint( rect.left(), rect.top() );
+				ngrs::Point point = ngrs::Point( rect.left(), rect.top() );
 				if ( parseMacMaster )     machineview_master_coords_.dNameCoords    = point; else
 				if ( parseMacEffect )     machineview_effect_coords_.dNameCoords    = point; else
 				if ( parseMacGenerator )  machineview_generator_coords_.dNameCoords = point;
@@ -487,27 +487,27 @@ namespace psy {
 			if ( tagName == "digit_x0_dest" && parsePatHeader ) {
 				std::string coord = parser.getAttribValue("coord");
 				ngrs::Rect rect = getCoords( coord );
-				headerCoords_.dgX0Coords = ngrs::NPoint( rect.left(), rect.top() );
+				headerCoords_.dgX0Coords = ngrs::Point( rect.left(), rect.top() );
 			} else
 			if ( tagName == "digit_0x_dest" && parsePatHeader ) {
 				std::string coord = parser.getAttribValue("coord");
 				ngrs::Rect rect = getCoords( coord );
-				headerCoords_.dg0XCoords = ngrs::NPoint( rect.left(), rect.top() );
+				headerCoords_.dg0XCoords = ngrs::Point( rect.left(), rect.top() );
 			} else
 			if ( tagName == "record_on_dest" && parsePatHeader ) {
 				std::string coord = parser.getAttribValue("coord");
 				ngrs::Rect rect = getCoords( coord );
-				headerCoords_.dRecCoords = ngrs::NPoint( rect.left(), rect.top() );
+				headerCoords_.dRecCoords = ngrs::Point( rect.left(), rect.top() );
 			} else
 			if ( tagName == "mute_on_dest" && parsePatHeader ) {
 				std::string coord = parser.getAttribValue("coord");
 				ngrs::Rect rect = getCoords( coord );
-				headerCoords_.dMuteCoords = ngrs::NPoint( rect.left(), rect.top() );
+				headerCoords_.dMuteCoords = ngrs::Point( rect.left(), rect.top() );
 			} else
 			if ( tagName == "solo_on_dest" && parsePatHeader ) {
 				std::string coord = parser.getAttribValue("coord");
 				ngrs::Rect rect = getCoords( coord );
-				headerCoords_.dSoloCoords = ngrs::NPoint( rect.left(), rect.top() );
+				headerCoords_.dSoloCoords = ngrs::Point( rect.left(), rect.top() );
 			} else
 
 			if ( tagName == "selection" && parsePatView ) {

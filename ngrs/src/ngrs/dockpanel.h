@@ -24,6 +24,7 @@
 
 namespace ngrs {
   class Image;
+  class Label;
 
   /**
   @author  Stefan Nattkemper
@@ -38,6 +39,8 @@ namespace ngrs {
 
     Panel* pane();
 
+    void setAutoHideOnDockOut( bool on );
+
     void onDockWindow();
 
   private:
@@ -48,8 +51,11 @@ namespace ngrs {
 
     Panel* dockBar_;
     Panel* area_;
+    Label* dockBarLabel_;
 
     Window* undockedWindow;
+    
+    bool autoHideDock_;
 
     void init();
 

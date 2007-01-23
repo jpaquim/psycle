@@ -42,7 +42,7 @@ namespace ngrs {
     return new LineShape(*this);
   }
 
-  NPoint LineShape::pickerAt( int i )
+  Point LineShape::pickerAt( int i )
   {
     if (i == 0) return p1_; else return p2_;
   }
@@ -90,7 +90,7 @@ namespace ngrs {
     int dy = (int) (-cos*distance_);
 
 
-    NPoint  pts[4];
+    Point  pts[4];
     pts[0].setX ( p1_.x() + dx );
     pts[0].setY ( p1_.y() - dy );
     pts[1].setX ( p2_.x() + dx );
@@ -145,17 +145,17 @@ namespace ngrs {
     calculateRectArea();
   }
 
-  const NPoint & LineShape::p1( )
+  const Point & LineShape::p1( )
   {
     return p1_;
   }
 
-  const NPoint & LineShape::p2( )
+  const Point & LineShape::p2( )
   {
     return p2_;
   }
 
-  void LineShape::setPoints( NPoint p1, NPoint p2 )
+  void LineShape::setPoints( Point p1, Point p2 )
   {
     p1_ = p1;
     p2_ = p2;
@@ -172,11 +172,11 @@ namespace ngrs {
   void LineShape::setPicker( int index, int x, int y )
   {
     if (index == 0) {
-      p1_ = NPoint(x,y);
+      p1_ = Point(x,y);
       calculateRectArea();
     } else 
       if (index == 1) {
-        p2_ = NPoint(x,y);
+        p2_ = Point(x,y);
         calculateRectArea();
       }
   }
@@ -194,7 +194,7 @@ namespace ngrs {
     int dy = (int) ( -cos*distance_);
 
 
-    NPoint  pts[4];
+    Point  pts[4];
     pts[0].setX ( p1_.x() + dx );
     pts[0].setY ( p1_.y() - dy );
     pts[1].setX ( p2_.x() + dx );

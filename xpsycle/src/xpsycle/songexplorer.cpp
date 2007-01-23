@@ -19,6 +19,8 @@
 ***************************************************************************/
 #include "songexplorer.h"
 #include "patternview.h"
+#include "machineview.h"
+#include "sequencergui.h"
 #include "defaultbitmaps.h"
 #include "sequencergui.h"
 #include "skinreader.h"
@@ -50,7 +52,7 @@ namespace psy {
 
 
     SongExplorer::SongExplorer( ngrs::TabBook& book )
-      : ngrs::Panel(), book_(book)
+      : ngrs::DockPanel(), book_(book)
     {
       init();
     }
@@ -59,35 +61,45 @@ namespace psy {
     SongExplorer::~SongExplorer()
     {
     }
-
-
-    void SongExplorer::setSkin( )
-    {  
-    }
-
+   
     void SongExplorer::init( )
     {  
       ngrs::FrameBorder frBorder;
       frBorder.setOval();
       setBorder( frBorder );
 
-      setLayout( ngrs::AlignLayout() );
-      setWidth( 90 );
-
-
-      topNode = new ngrs::TreeNode( "Test tree", 0 );
+      topNode = new ngrs::TreeNode( "Projects (0 songs)", 0 );
       songTreeView_ = new ngrs::CustomTreeView( topNode );
-      songTreeView_->setPreferredSize( 200, 100 );
-      add( songTreeView_, ngrs::nAlClient );
+      setPreferredSize( 200, 100 );
+      pane()->add( songTreeView_, ngrs::nAlClient );
 
       initPatternPopupMenu();
     }
 
-    void SongExplorer::addSong( psy::core::Song& song ) {
-      ngrs::TreeNode* patternNode = createPatternNodes( song.patternSequence().patternData() );
-      patternMap[patternNode] = &song;
-      topNode->add( patternNode );
+    psy::core::Song* SongExplorer::newSong() {
+      psy::core::Song* song = projects.createSong();
+      ngrs::TreeNode* songNode = new ngrs::TreeNode( song->info().name(),0);
+
+      ngrs::TreeNode* patternNode = createPatternNodes( song->patternSequence().patternData() );
+      songMap[patternNode] = song;
+      songNode->add( patternNode );
+
+      ngrs::TreeNode* machineNode = createMachineNodes();
+      songMap[machineNode] = song;
+      songNode->add( machineNode );
+
+      ngrs::TreeNode* sampleNode = createSampleNodes();
+      songMap[sampleNode] = song;
+      songNode->add( sampleNode );
+
+      ngrs::TreeNode* sequencerNode = createSequencerNodes();
+      songMap[sequencerNode] = song;
+      songNode->add( sequencerNode );
+      
+      topNode->add( songNode );
       songTreeView_->updateTree();
+
+      return song;
     }
 
     ngrs::TreeNode* SongExplorer::createPatternNodes( const psy::core::PatternData& patterns ) {
@@ -104,6 +116,23 @@ namespace psy {
       return patternNode;
     }
 
+    ngrs::TreeNode* SongExplorer::createMachineNodes() {
+      ngrs::TreeNode* machineNode = new ngrs::TreeNode("Machines",0);
+      machineNode->dblClick.connect( this, &SongExplorer::onMachineBranchNodeClicked );
+      return machineNode;
+    }
+
+    ngrs::TreeNode* SongExplorer::createSequencerNodes() {
+      ngrs::TreeNode* sequencerNode = new ngrs::TreeNode("Sequencer",0);
+      sequencerNode->dblClick.connect( this, &SongExplorer::onSequencerBranchNodeClicked );
+      return sequencerNode;
+    }
+
+    ngrs::TreeNode* SongExplorer::createSampleNodes() {
+      ngrs::TreeNode* sampleNode = new ngrs::TreeNode("Samples",0);
+      return sampleNode;
+    }
+
     void SongExplorer::initPatternPopupMenu() {
       patternPopupMenu_ = new ngrs::PopupMenu();
       add( patternPopupMenu_ );
@@ -115,8 +144,8 @@ namespace psy {
 
     void SongExplorer::onAddPatternClicked( ngrs::ButtonEvent* ev ) {
       ngrs::TreeNode* node = songTreeView_->selectedTreeNode();
-      std::map<ngrs::TreeNode*, psy::core::Song*>::iterator it = patternMap.find( node );
-      if ( it != patternMap.end() ) {
+      std::map<ngrs::TreeNode*, psy::core::Song*>::iterator it = songMap.find( node );
+      if ( it != songMap.end() ) {
         psy::core::Song* song = it->second;
         psy::core::SinglePattern& pattern = song->patternSequence().patternData().newPattern();
         pattern.setName("/pattern");
@@ -133,6 +162,39 @@ namespace psy {
         ///todo end
       }
     }    
+
+    void SongExplorer::onMachineBranchNodeClicked( ngrs::TreeNode* node ) {
+      std::map<ngrs::TreeNode*, psy::core::Song*>::iterator it = songMap.find( node );
+      if ( it != songMap.end() ) {
+        psy::core::Song* song = it->second;
+        if ( !node->userObject() ) {
+          MachineView* view = new MachineView(*song);
+          node->setUserObject( view );
+          book_.addPage( view, "MachineView" );
+        } else {
+          book_.setActivePage( (MachineView*) node->userObject() );
+        }
+        book_.resize();
+        book_.repaint();
+      }
+    }
+
+      void SongExplorer::onSequencerBranchNodeClicked( ngrs::TreeNode* node ) {
+      std::map<ngrs::TreeNode*, psy::core::Song*>::iterator it = songMap.find( node );
+      if ( it != songMap.end() ) {
+        psy::core::Song* song = it->second;
+        if ( !node->userObject() ) {
+          SequencerGUI* view = new SequencerGUI();
+          view->setPatternSequence( &song->patternSequence() );
+          node->setUserObject( view );
+          book_.addPage( view, "Sequencer" );
+        } else {
+          book_.setActivePage( (SequencerGUI*) node->userObject() );
+        }
+        book_.resize();
+        book_.repaint();
+      }
+    }
 
   }
 }

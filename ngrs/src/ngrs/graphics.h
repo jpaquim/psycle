@@ -101,8 +101,8 @@ namespace ngrs {
     int textAscent();
     int textDescent();
 
-    void drawPolygon(NPoint* pts, int n);
-    void fillPolygon(NPoint* pts, int n);
+    void drawPolygon(Point* pts, int n);
+    void fillPolygon(Point* pts, int n);
 
     void fillTranslucent(int x, int y, int width, int height, Color color, int percent);
 

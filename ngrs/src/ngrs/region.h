@@ -48,7 +48,7 @@ namespace ngrs {
     void shrink( int dx, int dy );
     void move( int dx, int dy );
     void setRect( const Rect & rect );
-    void setPolygon( NPoint*  pts, int size );
+    void setPolygon( Point*  pts, int size );
     bool empty() const;
     const Rect & rectClipBox() const;
     bool intersects( int x, int y ) const;

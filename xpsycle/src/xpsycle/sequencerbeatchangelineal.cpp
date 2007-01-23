@@ -81,7 +81,7 @@ void SequencerBeatChangeLineal::BeatChangeTriangle::paint( ngrs::Graphics& g )
   int cw = clientWidth();
   int ch = clientHeight();
 
-  ngrs::NPoint pts[3];
+  ngrs::Point pts[3];
 
   pts[0].setX( cw / 2 );
   pts[0].setY( 0 );

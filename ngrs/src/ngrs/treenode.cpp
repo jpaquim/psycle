@@ -28,7 +28,7 @@ namespace ngrs {
   }
 
   TreeNode::TreeNode( const std::string& userText, Object* userObject ) 
-    : userText_(userText), userObject_(userObject_), popupMenu_(0) 
+    : userText_(userText), userObject_(userObject), popupMenu_(0) 
   {
   }
   
@@ -66,6 +66,10 @@ namespace ngrs {
 
   Object* TreeNode::userObject() {
     return userObject_;
+  }
+
+  void TreeNode::setUserObject( Object* object ) {
+    userObject_ = object;
   }
 
   std::string TreeNode::userText() const {

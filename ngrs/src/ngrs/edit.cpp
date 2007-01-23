@@ -70,7 +70,7 @@ namespace ngrs {
   {
     dx = computeDx(g,text_);
 
-    NPoint screenPos = getScreenPos(g, text_);
+    Point screenPos = getScreenPos(g, text_);
 
     if ( selEndIdx_ != selStartIdx_ ) {
       std::string startText = text_.substr(0, selStartIdx_ );
@@ -100,7 +100,7 @@ namespace ngrs {
     Color oldColor = foreground();
     g.setForeground(font().textColor());
 
-    NPoint screenPos = getScreenPos(g, text );
+    Point screenPos = getScreenPos(g, text );
     int w = g.textWidth(text.substr(0,pos()));
     g.drawLine(screenPos.x()+w,screenPos.y() + g.textDescent(),screenPos.x()+w,screenPos.y() - g.textAscent());
     g.setForeground(oldColor);
@@ -112,7 +112,7 @@ namespace ngrs {
 
     dx = 0;
 
-    NPoint screenPos = getScreenPos(g, text );
+    Point screenPos = getScreenPos(g, text );
 
     int w = 0;
     int wa = g.textWidth(text);
@@ -163,7 +163,7 @@ namespace ngrs {
   }
 
 
-  NPoint Edit::getScreenPos(Graphics& g, const std::string & text )
+  Point Edit::getScreenPos(Graphics& g, const std::string & text )
   {
     int xp=0;
     int yp=0;
@@ -185,7 +185,7 @@ namespace ngrs {
     default        : xp = 0;                  break;
     }
 
-    return NPoint(xp,yp);
+    return Point(xp,yp);
   }
 
   void Edit::setVAlign( int align )

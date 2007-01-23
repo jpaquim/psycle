@@ -198,8 +198,8 @@ namespace psy {
       void repaintCursorPos( const PatCursor & cursor );
       void repaintBlock( const ngrs::Size & block );
       ngrs::Rect repaintTrackArea( int startLine, int endLine, int startTrack, int endTrack ) const;
-      ngrs::NPoint linesFromRepaint( const ngrs::Region & repaintArea) const;
-      ngrs::NPoint tracksFromRepaint( const ngrs::Region & repaintArea) const;
+      ngrs::Point linesFromRepaint( const ngrs::Region & repaintArea) const;
+      ngrs::Point tracksFromRepaint( const ngrs::Region & repaintArea) const;
 
       const ngrs::Size & selection() const;
       void clearOldSelection();

@@ -20,8 +20,9 @@
 #ifndef SONGEXPLORER_H
 #define SONGEXPLORER_H
 
+#include "projectdata.h"
 #include <psycore/patternsequence.h>
-#include <ngrs/panel.h>
+#include <ngrs/dockpanel.h>
 #include <ngrs/item.h>
 #include <ngrs/treenode.h>
 #include <ngrs/customtreeview.h>
@@ -41,32 +42,37 @@ namespace psy {
   }
   namespace host {
 
-    class SongExplorer : public ngrs::Panel
+    class SongExplorer : public ngrs::DockPanel
     {
     public:
       SongExplorer( ngrs::TabBook& book );
 
       ~SongExplorer();
 
-      void setSkin();
-
-      void addSong( psy::core::Song& song );
+      psy::core::Song* newSong();
 
     private:
      
       ngrs::TabBook& book_;
+      ProjectData projects;
 
       ngrs::CustomTreeView* songTreeView_;
       ngrs::TreeNode* topNode;
       ngrs::PopupMenu* patternPopupMenu_;
       
-      std::map<ngrs::TreeNode*, psy::core::Song*> patternMap;
+      std::map<ngrs::TreeNode*, psy::core::Song*> songMap;
 
       void init();
       void initPatternPopupMenu();
       ngrs::TreeNode* createPatternNodes( const psy::core::PatternData& patterns );
+      ngrs::TreeNode* createMachineNodes();
+      ngrs::TreeNode* createSampleNodes();
+      ngrs::TreeNode* createSequencerNodes();
       
       void onAddPatternClicked( ngrs::ButtonEvent* ev );
+
+      void onMachineBranchNodeClicked( ngrs::TreeNode* node );
+      void onSequencerBranchNodeClicked( ngrs::TreeNode* node );
 
     };
 

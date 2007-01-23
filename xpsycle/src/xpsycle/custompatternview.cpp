@@ -468,11 +468,11 @@ namespace psy {
 
     void CustomPatternView::paint( ngrs::Graphics& g ) {
 
-      ngrs::NPoint lineArea = linesFromRepaint(g.repaintArea());
+      ngrs::Point lineArea = linesFromRepaint(g.repaintArea());
       int startLine = lineArea.x();
       int endLine   = lineArea.y();
 
-      ngrs::NPoint trackArea = tracksFromRepaint(g.repaintArea());
+      ngrs::Point trackArea = tracksFromRepaint(g.repaintArea());
       int startTrack = trackArea.x();
       int endTrack   = trackArea.y();
 
@@ -1169,7 +1169,7 @@ namespace psy {
       return ngrs::Rect(left,top,right - left,bottom - top);
     }
 
-    ngrs::NPoint CustomPatternView::linesFromRepaint( const ngrs::Region& repaintArea ) const {
+    ngrs::Point CustomPatternView::linesFromRepaint( const ngrs::Region& repaintArea ) const {
       ngrs::Rect repaintRect = repaintArea.rectClipBox();
       int absTop  = absoluteTop();
       int ch      = clientHeight();
@@ -1185,10 +1185,10 @@ namespace psy {
       int endOff  = std::max((ch-(repaintRect.top()-absTop + repaintRect.height())) / rowHeight(), (long)0);
       // the end
       end         = std::min(end - endOff, lineNumber()-1);
-      return ngrs::NPoint(start,end);
+      return ngrs::Point(start,end);
     }
 
-    ngrs::NPoint CustomPatternView::tracksFromRepaint( const ngrs::Region& repaintArea ) const {
+    ngrs::Point CustomPatternView::tracksFromRepaint( const ngrs::Region& repaintArea ) const {
       ngrs::Rect repaintRect = repaintArea.rectClipBox();
 
       int absLeft = absoluteLeft();
@@ -1210,7 +1210,7 @@ namespace psy {
         ,(long)0);
       // the end
       end         = std::min(end - endOff, trackNumber()-1);
-      return ngrs::NPoint(start,end);
+      return ngrs::Point(start,end);
     }
 
     bool CustomPatternView::doSelect() const {

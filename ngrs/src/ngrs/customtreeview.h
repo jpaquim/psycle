@@ -23,6 +23,7 @@
 #include "panel.h"
 #include "flipbox.h"
 #include "treenode.h"
+#include "image.h"
 
 /**
 @author  Stefan Nattkemper
@@ -32,10 +33,19 @@ namespace ngrs {
   
   class ScrollBox;
   class Label;
-  class Image;
-
+  
   class TreeNodeGui : public Panel {
   public:
+
+    class FlipperImage : public Image {
+    public :
+       FlipperImage();
+      ~FlipperImage();
+
+      virtual void paint( Graphics& g );
+      virtual int preferredWidth() const;
+
+    };
 
     TreeNodeGui( TreeNode* node );
     ~TreeNodeGui();
@@ -50,7 +60,7 @@ namespace ngrs {
   
   private:
 
-      Image* img_;
+      FlipperImage* img_;
       Label* label_;
       Panel* children_;
       bool expanded_;
@@ -91,6 +101,7 @@ namespace ngrs {
 
     void init();
     void onNodeMousePress( ButtonEvent* ev );
+    void onNodeDblClick( ButtonEvent* ev );
 
   };
 
