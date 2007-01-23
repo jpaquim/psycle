@@ -86,7 +86,7 @@ namespace ngrs {
     left_ = left;
   }
 
-  bool Rect::intersects( const NPoint & p ) const
+  bool Rect::intersects( const Point & p ) const
   {
     if ((left() <= p.x()) && (width()+ left() >= p.x()) && (top()  <= p.y())
       && (height()+top()  >= p.y())) return true; else return false;

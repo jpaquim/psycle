@@ -43,19 +43,19 @@ namespace ngrs {
     g.setTranslation(g.xTranslation()+left(),g.yTranslation()+top());
   }
 
-  void Line::setPoints( const NPoint & p1, const NPoint & p2 )
+  void Line::setPoints( const Point & p1, const Point & p2 )
   {
     lineShape->setPoints(p1,p2);
   }
 
 
 
-  const NPoint & Line::p1( ) const
+  const Point & Line::p1( ) const
   {
     return lineShape->p1();
   }
 
-  const NPoint & Line::p2( ) const
+  const Point & Line::p2( ) const
   {
     return lineShape->p2();
   }

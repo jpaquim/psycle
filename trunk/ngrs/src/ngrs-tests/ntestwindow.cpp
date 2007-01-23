@@ -299,7 +299,7 @@ void NTestWindow::testFrameBorder( )
 void NTestWindow::testLine( )
 {
   Line* line = new Line();
-    line->setPoints(NPoint(10,10),NPoint(100,100));
+    line->setPoints(Point(10,10),Point(100,100));
     line->setMoveable(Moveable());
     fDialog = new FileDialog();
     line->add(fDialog);
@@ -592,7 +592,7 @@ void NTestWindow::onMousePress( int x, int y, int button )
   Window::onMousePress(x,y,button);
 
   /*Line* line = new Line();
-     line->setPoints( NPoint(x,y), NPoint(x,y));
+     line->setPoints( Point(x,y), Point(x,y));
      line->setMoveable( nMvPolygonPicker );
    pane()->add(line);
   line->setMoveFocus(0);*/

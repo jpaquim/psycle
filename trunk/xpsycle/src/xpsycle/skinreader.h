@@ -43,20 +43,20 @@ namespace psy {
 			ngrs::Rect bgCoords;
 			ngrs::Rect noCoords;
 			ngrs::Rect sRecCoords;
-			ngrs::NPoint dRecCoords;
+			ngrs::Point dRecCoords;
 			ngrs::Rect sMuteCoords;
-			ngrs::NPoint dMuteCoords;
+			ngrs::Point dMuteCoords;
 			ngrs::Rect sSoloCoords;
-			ngrs::NPoint dSoloCoords;
-			ngrs::NPoint dgX0Coords;
-			ngrs::NPoint dg0XCoords;
+			ngrs::Point dSoloCoords;
+			ngrs::Point dgX0Coords;
+			ngrs::Point dg0XCoords;
 		};
 
 		class MachineCoordInfo {
 		public:
 			ngrs::Rect bgCoords;
 			ngrs::Rect sPan;
-			ngrs::NPoint dNameCoords;
+			ngrs::Point dNameCoords;
 
 			ngrs::Rect muteCoords;
 			ngrs::Rect soloCoords;

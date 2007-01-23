@@ -21,39 +21,39 @@
 
 namespace ngrs {
 
-  NPoint::NPoint() : x_(0), y_(0) 
+  Point::Point() : x_(0), y_(0) 
   {
   }
 
-  NPoint::NPoint( int x, int y ) : x_(x),y_(y) 
+  Point::Point( int x, int y ) : x_(x),y_(y) 
   {
   }
 
-  NPoint::~NPoint()
+  Point::~Point()
   {
   }
 
-  void NPoint::setX( int x )
+  void Point::setX( int x )
   {
     x_ = x;
   }
 
-  void NPoint::setY( int y )
+  void Point::setY( int y )
   {
     y_ = y;
   }
 
-  int NPoint::x( ) const
+  int Point::x( ) const
   {
     return x_;
   }
 
-  int NPoint::y( ) const
+  int Point::y( ) const
   {
     return y_;
   }
 
-  void NPoint::setXY( int x, int y )
+  void Point::setXY( int x, int y )
   {
     x_ = x;
     y_ = y;

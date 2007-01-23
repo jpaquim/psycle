@@ -194,6 +194,21 @@ namespace ngrs {
     return states;
   }
 
+  Point System::mousePosition() const {
+#ifdef __unix__
+    int x_win; int y_win; 
+    unsigned int mask;
+    int pos_x;
+    int pos_y;
+    ::XQueryPointer( dpy(), rootWindow(),&root_win,&child_win,&pos_x,&pos_y,&x_win,&y_win,&mask);
+    return Point( pos_x, pos_y );
+#else
+    ::POINT pt;
+    ::GetCursorPos( &pt );
+    return  Point( pt.x, pt.y );
+#endif
+  }
+
  Rect System::convertPlatformRect( PlatformRect & rect ) const {
     return Rect(
 #ifdef __unix__

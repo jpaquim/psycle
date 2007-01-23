@@ -38,6 +38,9 @@ namespace ngrs {
     TreeNode( const std::string& userText, Object* userObject );
     ~TreeNode();
 
+    signal1<TreeNode*> clicked;
+    signal1<TreeNode*> dblClick;
+
     std::vector<TreeNode*>::iterator begin();
     std::vector<TreeNode*>::iterator end();
     std::vector<TreeNode*>::const_iterator begin() const;
@@ -46,12 +49,15 @@ namespace ngrs {
     void insert( std::vector<TreeNode*>::iterator itr, TreeNode* node );
     void add( TreeNode* node );
     void setPopupMenu( PopupMenu* popupMenu );
+    
     PopupMenu* popupMenu();
 
     bool leaf() const;
     TreeNode* parent() const;
 
     Object* userObject();
+    void setUserObject( Object* object );
+
     std::string userText() const;
 
   private:

@@ -49,11 +49,11 @@ namespace psy
                 sigslot::signal1<WireGUI*> bendAdded;
                 sigslot::signal1<WireGUI*> removeMe;
 
-                const ngrs::NPoint & p1() const;
-                const ngrs::NPoint & p2() const;
+                const ngrs::Point & p1() const;
+                const ngrs::Point & p2() const;
 
-                void setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
-                void insertBend( const ngrs::NPoint & pts );
+                void setPoints( const ngrs::Point & p1, const ngrs::Point & p2 );
+                void insertBend( const ngrs::Point & pts );
 
 				virtual void paint( ngrs::Graphics& g );
 			
@@ -69,7 +69,7 @@ namespace psy
                 BendedLineShape* lineShape;
 
 				ngrs::PopupMenu* menu_;
-				ngrs::NPoint newBendPos_;
+				ngrs::Point newBendPos_;
                 
 				ngrs::Color polyColor_;
 				ngrs::Color borderColor_;
@@ -85,7 +85,7 @@ namespace psy
 				double triangle_size_wide;
 				double triangle_size_indent;
 				
-				void drawArrow( ngrs::Graphics& g, const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
+				void drawArrow( ngrs::Graphics& g, const ngrs::Point & p1, const ngrs::Point & p2 );
 				void initPopupMenu( );
 
 				void onAddBend( ngrs::ButtonEvent* ev );

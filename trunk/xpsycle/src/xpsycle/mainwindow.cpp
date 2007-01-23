@@ -27,6 +27,7 @@
 #include "audioconfigdlg.h"
 #include "skinreader.h"
 #include "aboutbox.h"
+#include "startpage.h"
 #include <psycore/song.h>
 #include <ngrs/app.h>
 #include <ngrs/item.h>
@@ -39,6 +40,7 @@
 #include <ngrs/filedialog.h>
 #include <ngrs/system.h>
 #include <ngrs/toolbarpanel.h>
+#include <ngrs/splitbar.h>
 #include <iomanip>
 
 namespace psy { 
@@ -112,13 +114,16 @@ namespace psy {
       initDialogs();
 
 
-      book = new ngrs::TabBook();    
-      pane()->add(book,ngrs::nAlClient);
-      tabBar_ = new ngrs::TabBar();
-      book->setTabBar( tabBar_ );   
+      book = new ngrs::TabBook(); 
+      book->addPage( new StartPage(icons), "StartPage" );
 
       songExplorer_ = new SongExplorer( *book );
       pane()->add( songExplorer_, ngrs::nAlLeft );
+
+      ngrs::SplitBar* splitBar = new ngrs::SplitBar();
+      pane()->add( splitBar, ngrs::nAlLeft );
+
+      pane()->add(book,ngrs::nAlClient);
 
       ngrs::ToolBar* playBar = new ngrs::ToolBar();
       playBar->setSkin( ngrs::Skin() );
@@ -166,7 +171,7 @@ namespace psy {
       recNotes->clicked.connect(this,&MainWindow::onRecordNotesMode);
       playBar->add(recNotes);
 
-      ngrs::ToolBar* vuToolBar = new ngrs::ToolBar();
+/*      ngrs::ToolBar* vuToolBar = new ngrs::ToolBar();
       vuToolBar->add(new ngrs::Label("VU"));
       ngrs::Panel* vuPanel = new ngrs::Panel();
       vuPanel->setPreferredSize( 225, 10 );
@@ -177,43 +182,10 @@ namespace psy {
       masterSlider_->setOrientation(ngrs::nHorizontal);
       masterSlider_->setPosition(0,10,225,10);
       vuPanel->add(masterSlider_);
-      vuToolBar->add(vuPanel);      
-
-      ngrs::FlowLayout fl;
-      fl.setAlign( ngrs::nAlLeft );
-      fl.setHgap( 2 );
-      fl.setVgap( 0 );
-      fl.setBaseLine( ngrs::nAlBottom );
-      tabBar_->setLayout( fl );
+      vuToolBar->add(vuPanel);*/
       
-      ngrs::Panel* logoPnl = new ngrs::Panel();
-      logoPnl->setLayout( ngrs::AlignLayout() );
-      logoPnl->setSpacing( ngrs::Size( 10,5,10,5 ) );
-      img = new ngrs::Image( icons.logoRight()  );
-      img->setVAlign( ngrs::nAlCenter );
-      logoPnl->add( img , ngrs::nAlRight );
-      img = new ngrs::Image( icons.logoLeft() );
-      img->setVAlign( ngrs::nAlCenter );
-      logoPnl->add( img , ngrs::nAlLeft );
-      img = new ngrs::Image( icons.logoMid() );
-      img->setLayout( ngrs::AlignLayout() );
-      img->add( tabBar_, ngrs::nAlBottom );     
-      img->add( vuToolBar, ngrs::nAlTop );      
-      tabBar_->add( playBar, ngrs::nAlLeft );
-      ngrs::Panel* spacer = new ngrs::Panel();
-      spacer->setPreferredSize(20,5);
-      tabBar_->add( spacer, ngrs::nAlLeft );
-      img->setVAlign( ngrs::nAlCenter );
-      img->setHAlign( ngrs::nAlWallPaper );
-      img->setEvents( true );
-      logoPnl->add( img , ngrs::nAlClient );
-      pane()->add( logoPnl, ngrs::nAlTop );
-
       audioConfigDlg = new AudioConfigDlg();
       add( audioConfigDlg );	
-
-      selectedChildView_ = addChildView();
-      updateNewSong();
 
       enableSound();
 
@@ -231,46 +203,7 @@ namespace psy {
     {
     }
 
-    ChildView* MainWindow::addChildView()
-    {
-      ChildView* childView_ = new ChildView( );
-      childView_->newMachineAdded.connect(this, &MainWindow::onNewMachineDialogAdded);
-      childView_->sequencerView()->entryClick.connect(this,&MainWindow::onSequencerEntryClick);
-      childView_->machineSelected.connect(this,&MainWindow::onMachineSelected);
-      childView_->machineViewDblClick.connect(this,&MainWindow::onNewMachine);
-      childView_->machineView()->machineDeleted.connect(this,&MainWindow::onMachineDeleted);
-      childView_->machineView()->machineNameChanged.connect(this, &MainWindow::onMachineNameChanged);
-      book->addPage( childView_, "test");
-      ngrs::NTab* tab = book->tab( childView_ );
-      tab->setSkin( songTabSkinNone, songTabSkinDown, 0 );
-      book->setActivePage( childView_ );
-
-      songExplorer_->addSong( *childView_->song() );
-
-      count++;
-
-      
-      tab->click.connect(this,&MainWindow::onTabChange);
-      tab->setEnablePopupMenu(true);
-      ngrs::PopupMenu* menu = tab->popupMenu();
-      ngrs::MenuItem* closeSong = new ngrs::MenuItem("Close");
-      menu->add( closeSong );
-      closeSong->click.connect(this,&MainWindow::onCloseSongTabPressed);
-
-      songMap[closeSong] = childView_;
-      songTabMap[tab] = childView_;
-
-      songpDlg_->setSong( childView_->song() );
-
-      if (songMap.size() > 0) book->setTabBarVisible(true);
-
-//      Player::Instance()->song( childView_->song() );
-
-      selectedChildView_ =  childView_;
-
-      return childView_;
-    } 
-
+    
     void MainWindow::onCloseSongTabPressed( ngrs::ButtonEvent* ev ) {
       std::map<Object*,ChildView*>::iterator it = songMap.find( ev->sender() ); 
       if ( it != songMap.end() ) {
@@ -707,7 +640,7 @@ namespace psy {
 
     void MainWindow::onFileNew( ngrs::ButtonEvent * ev )
     {
-      addChildView();  
+      songExplorer_->newSong();
       pane()->resize();
       pane()->repaint();
     }
@@ -733,13 +666,10 @@ namespace psy {
           // disable audio driver
           //Global::configuration()._pOutputDriver->Enable(false);
           // add a new Song tab
-          ChildView* newView = addChildView();  
           // load the song
           statusBarData.setText("loading \"" + openDialog->fileName() + "\"" );
 //          newView->song()->load(fileName);
           // update gui to new song
-          newView->update();
-          updateNewSong();
           pane()->resize();
           pane()->repaint();
           // enable audio driver

@@ -29,6 +29,7 @@
 #include "crdefine.h"
 #include "keydefine.h"
 #include "rect.h"
+#include "point.h"
 
 #ifdef __unix__
   #include <X11/Xlib.h>
@@ -97,6 +98,7 @@ namespace ngrs {
     int shiftState() const;
     int keyState( int vkey ) const; // 0 up : 1 down 2 : toggled
     std::map<int,int> keyboardState() const;
+    Point mousePosition() const;
 
     Rect convertPlatformRect( PlatformRect & rect ) const;
 

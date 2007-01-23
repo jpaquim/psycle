@@ -89,9 +89,9 @@ namespace psy {
 			int midW = clientWidth()  / 2;
 			int midH = clientHeight() / 2;
 			if (point == 1) {
-				line->setPoints( ngrs::NPoint(left()+midW, top()+midH), line->p2() );
+				line->setPoints( ngrs::Point(left()+midW, top()+midH), line->p2() );
 			} else {
-				line->setPoints( line->p1(), ngrs::NPoint(left()+midW, top()+midH) );
+				line->setPoints( line->p1(), ngrs::Point(left()+midW, top()+midH) );
 			}
 
 		}
@@ -147,9 +147,9 @@ namespace psy {
 				int midW = clientWidth() / 2;
 				int midH = clientHeight() / 2;
 				if ( lineAttach.point() == 1 ) {
-					lineAttach.line()->setPoints( ngrs::NPoint( left() + midW, top() + midH ), lineAttach.line()->p2() );
+					lineAttach.line()->setPoints( ngrs::Point( left() + midW, top() + midH ), lineAttach.line()->p2() );
 				} else {
-					lineAttach.line()->setPoints( lineAttach.line()->p1(), ngrs::NPoint( left() + midW, top() + midH ) );
+					lineAttach.line()->setPoints( lineAttach.line()->p1(), ngrs::Point( left() + midW, top() + midH ) );
 				}
 			}
 		}

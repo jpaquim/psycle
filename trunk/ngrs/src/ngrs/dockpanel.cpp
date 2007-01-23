@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "dockpanel.h"
 #include "alignlayout.h"
-#include "flowlayout.h"
+#include "label.h"
 #include "image.h"
 #include "button.h"
 #include "window.h"
@@ -84,7 +84,7 @@ namespace ngrs {
     // create header with the button to dock and undock the pane
 
     dockBar_ = new Panel();
-    dockBar_->setLayout( FlowLayout( nAlRight,0 , 0) );
+    dockBar_->setLayout( AlignLayout() );
     // create the dockBar icon bitmaps
     dockBmp.createFromXpmData( windock_xpm );
     undockBmp.createFromXpmData( winundock_xpm );
@@ -93,8 +93,10 @@ namespace ngrs {
     dockImg->setPreferredSize( 20, 10 );
     Button* unCoupleBtn = new Button( dockImg );
     unCoupleBtn->clicked.connect( this, &DockPanel::onUndockWindow );
-    dockBar_->add( unCoupleBtn );
+    dockBar_->add( unCoupleBtn, nAlRight );
     dockBar_->setSkin( App::config()->skin("dockbar_bg") );
+    dockBarLabel_ = new Label("Song Explorer");
+    dockBar_->add( dockBarLabel_, nAlClient );
     add( dockBar_, nAlTop );
 
     // create the pane
@@ -106,6 +108,7 @@ namespace ngrs {
 
     // start state = docked
     undockedWindow = 0;
+    autoHideDock_ = true;
   }
 
   DockPanel::~DockPanel()
@@ -118,7 +121,9 @@ namespace ngrs {
     return area_;
   }
 
-
+  void DockPanel::setAutoHideOnDockOut( bool on ) {
+    autoHideDock_ = on;
+  }
 
   void DockPanel::onUndockWindow( ButtonEvent * ev )
   {
@@ -130,7 +135,7 @@ namespace ngrs {
 
       add ( undockedWindow = new Window() );
       undockedWindow->setDock(this);
-      NPoint newWinSize(area_->width(),area_->height() + dockBar_->height());
+      Point newWinSize(area_->width(),area_->height() + dockBar_->height());
 
       erase(area_);
       erase(dockBar_);
@@ -143,7 +148,11 @@ namespace ngrs {
       undockedWindow->setPosition(0,0,newWinSize.x(),newWinSize.y());
       undockedWindow->setVisible(true);
 
-      window()->resize();
+      if ( autoHideDock_ ) {
+        setVisible(false);
+      }
+
+      window()->pane()->resize();
       window()->repaint(window()->pane(),Rect(0,0,window()->width(),window()->height()));
       window()->checkForRemove(0);
     }
@@ -170,7 +179,11 @@ namespace ngrs {
 
     dockImg->setSharedBitmap(&undockBmp);
 
-    window()->resize();
+    if ( autoHideDock_ ) {
+        setVisible(true);
+    }
+
+    window()->pane()->resize();
     window()->repaint(window()->pane(),Rect(0,0,window()->width(),window()->height()));
     window()->checkForRemove(0);
   }

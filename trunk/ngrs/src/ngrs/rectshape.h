@@ -38,7 +38,7 @@ namespace ngrs {
     virtual void fill(Graphics& g, const ngrs::Region & repaintArea);
     virtual void drawPicker(Graphics& g);
 
-    virtual NPoint pickerAt(int i);
+    virtual Point pickerAt(int i);
     virtual int pickerSize();
 
     virtual ngrs::Region region();

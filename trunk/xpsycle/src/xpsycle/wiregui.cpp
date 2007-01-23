@@ -76,20 +76,20 @@ namespace psy {
 		}
 				
 
-        const ngrs::NPoint & WireGUI::p1( ) const {
+        const ngrs::Point & WireGUI::p1( ) const {
           return lineShape->p1();
         }
 
-        const ngrs::NPoint & WireGUI::p2( ) const
+        const ngrs::Point & WireGUI::p2( ) const
         {
           return lineShape->p2();
         }
                 
-		void WireGUI::insertBend( const ngrs::NPoint & pt ) {
+		void WireGUI::insertBend( const ngrs::Point & pt ) {
 		  lineShape->insertBend( pt );		
 		}                
 
-        void WireGUI::setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 )
+        void WireGUI::setPoints( const ngrs::Point & p1, const ngrs::Point & p2 )
         {
           lineShape->setPoints(p1,p2);
         }
@@ -103,10 +103,10 @@ namespace psy {
             g.setTranslation( g.xTranslation()-left(), g.yTranslation()-top() );
               
             // draw the bended lines           
-            ngrs::NPoint startPt = lineShape->p1();                        
-            std::vector<ngrs::NPoint>::const_iterator it = lineShape->bendPts().begin();
+            ngrs::Point startPt = lineShape->p1();                        
+            std::vector<ngrs::Point>::const_iterator it = lineShape->bendPts().begin();
             for ( ; it < lineShape->bendPts().end(); it++ ) {
-              ngrs::NPoint pt = *it;
+              ngrs::Point pt = *it;
               g.drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() );              
               startPt = pt;                         
             }                                                                                    
@@ -117,7 +117,7 @@ namespace psy {
             startPt = lineShape->p1();                        
             it = lineShape->bendPts().begin();
             for ( ; it < lineShape->bendPts().end(); it++ ) {
-              ngrs::NPoint pt = *it;
+              ngrs::Point pt = *it;
               drawArrow( g, startPt, pt );             
               startPt = pt;                         
             }                                                                           		
@@ -126,7 +126,7 @@ namespace psy {
 			g.setTranslation( g.xTranslation()+left(), g.yTranslation()+top() );
 		}
 
-		void WireGUI::drawArrow( ngrs::Graphics& g , const ngrs::NPoint& p1, const ngrs::NPoint& p2 )
+		void WireGUI::drawArrow( ngrs::Graphics& g , const ngrs::Point& p1, const ngrs::Point& p2 )
 		{
 			// Spaces between the end and startPoint of the Line
 
@@ -165,7 +165,7 @@ namespace psy {
 									(int) max(0, min(255, btcol * deltaColB)));
 
 			ngrs::Color polyInnardsColor((int) ( 192 * deltaColR ), (int) (192 * deltaColG) , (int) (192 * deltaColB) );
-			ngrs::NPoint pol[5];
+			ngrs::Point pol[5];
 
 			pol[0].setX( middleX -  (int) (cos    * triangle_size_center) );
 			pol[0].setY( middleY -  (int) (sin    * triangle_size_center) );
@@ -178,7 +178,7 @@ namespace psy {
 			pol[4].setX( pol[0].x() + (int) (sin    * triangle_size_wide) );
 			pol[4].setY( pol[0].y() - (int) (cos    * triangle_size_wide) );
 
-			ngrs::NPoint fillPoly[7];
+			ngrs::Point fillPoly[7];
 
 			fillPoly[2].setX( pol[0].x() + (int) (2* cos * triangle_size_indent) );
 			fillPoly[2].setY( pol[0].y() + (int) (2* sin * triangle_size_indent) );

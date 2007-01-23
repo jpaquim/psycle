@@ -100,7 +100,7 @@ namespace psy {
 			int midH = sender->clientHeight() / 2;
 
 			line = new WireGUI();
-			line->setPoints(ngrs::NPoint(sender->left()+midW,sender->top()+midH),ngrs::NPoint(sender->left()+midW,sender->top()+midH));
+			line->setPoints(ngrs::Point(sender->left()+midW,sender->top()+midH),ngrs::Point(sender->left()+midW,sender->top()+midH));
 			scrollArea_->insert( line,0 );
 			line->setMoveable(ngrs::Moveable(ngrs::nMvVertical | ngrs::nMvHorizontal | ngrs::nMvPolygonPicker));
 			repaint();

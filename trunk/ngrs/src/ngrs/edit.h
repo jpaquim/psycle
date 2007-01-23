@@ -89,7 +89,7 @@ namespace ngrs {
 
     std::string text_;
 
-    NPoint getScreenPos(Graphics& g, const std::string & text );
+    Point getScreenPos(Graphics& g, const std::string & text );
     int computeDx( Graphics& g, const std::string & text );
     void drawCursor(Graphics& g, const std::string & text );
 

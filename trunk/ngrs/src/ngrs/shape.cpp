@@ -83,9 +83,9 @@ namespace ngrs {
     rectArea_.setLeft(left);
   }
 
-  NPoint Shape::pickerAt( int i )
+  Point Shape::pickerAt( int i )
   {
-    return NPoint(-1,-1);
+    return Point(-1,-1);
   }
 
   int Shape::pickerSize( )

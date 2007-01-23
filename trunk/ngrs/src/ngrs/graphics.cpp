@@ -390,7 +390,7 @@ namespace ngrs {
     }   
   }
 
-  void Graphics::drawPolygon( NPoint* pts , int n )
+  void Graphics::drawPolygon( Point* pts , int n )
   {
     int p2x = 0;
     int p2y = 0;
@@ -405,7 +405,7 @@ namespace ngrs {
     }
   }
 
-  void Graphics::fillPolygon( NPoint * pts, int n )
+  void Graphics::fillPolygon( Point * pts, int n )
   {
 #ifdef __unix__
     XPoint* pt = new XPoint[n];

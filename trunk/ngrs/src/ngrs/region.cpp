@@ -100,7 +100,7 @@ namespace ngrs {
     update = true;
   }
 
-  void Region::setPolygon( NPoint*  pts , int size )
+  void Region::setPolygon( Point*  pts , int size )
   {
 #ifdef __unix__
     ::XDestroyRegion( platformRegionHandle_ );

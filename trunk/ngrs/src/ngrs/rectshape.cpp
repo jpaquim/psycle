@@ -39,25 +39,25 @@ namespace ngrs {
   {
   }
 
-  NPoint RectShape::pickerAt( int i )
+  Point RectShape::pickerAt( int i )
   {
     switch (i) {
     case 0 :
-      return NPoint(rectArea().left(), rectArea().top());
+      return Point(rectArea().left(), rectArea().top());
       break;
     case 1 :
-      return NPoint(rectArea().left()+rectArea().width(), rectArea().top());
+      return Point(rectArea().left()+rectArea().width(), rectArea().top());
       break;
     case 2 :
-      return NPoint(rectArea().left()+rectArea().width(), rectArea().top()+rectArea().height());
+      return Point(rectArea().left()+rectArea().width(), rectArea().top()+rectArea().height());
       break;
     case 3 :
-      return NPoint(rectArea().left(), rectArea().top()+rectArea().height());
+      return Point(rectArea().left(), rectArea().top()+rectArea().height());
       break;
     default:;
 
     }
-    return NPoint(-1,1);
+    return Point(-1,1);
   }
 
   int RectShape::pickerSize( )
