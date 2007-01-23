@@ -96,8 +96,8 @@ const char * node_expand_xpm[] = {
     return static_cast<int>( 1.5 * Image::preferredWidth() );
   }
 
-  TreeNodeGui::TreeNodeGui( TreeNode* node )
-   : Panel(), node_( node )
+  TreeNodeGui::TreeNodeGui( CustomTreeView& treeView, TreeNode* node )
+   : Panel(), treeView_(treeView), node_( node )
   {
     expanded_ = true;
     expandBmp.createFromXpmData(node_expand_xpm);
@@ -161,7 +161,8 @@ const char * node_expand_xpm[] = {
       children_->setVisible( false );
       img_->setSharedBitmap(&expandBmp);
     }
-    repaint();
+    treeView_.resize();
+    treeView_.repaint();
   }  
 
 
@@ -198,7 +199,7 @@ const char * node_expand_xpm[] = {
 
   void CustomTreeView::buildTree( TreeNode* node, TreeNodeGui* nodeGui ) {
     if ( !node) return;
-    TreeNodeGui* leaf = new TreeNodeGui( node );
+    TreeNodeGui* leaf = new TreeNodeGui( *this, node );
     leaf->setEvents( true );
     leaf->mousePress.connect( this, &CustomTreeView::onNodeMousePress );
     leaf->mouseDoublePress.connect( this, &CustomTreeView::onNodeDblClick );
