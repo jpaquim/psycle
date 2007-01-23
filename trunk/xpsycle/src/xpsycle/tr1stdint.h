@@ -1,5 +1,3 @@
-#ifndef _MSC_VER // [
-
 /***************************************************************************
 *   Copyright (C) 2006 by  Stefan   *
 *   natti@linux   *
@@ -21,24 +19,10 @@
 ***************************************************************************/
 
 #pragma once
+
+#ifndef _MSC_VER // [
+
 #include <inttypes.h> // that's for posix/unix.. C1999 has <stdint.h>
-
-namespace psycle {
-  namespace tr1
-  {
-    using ::int8_t;    //  8-bit signed integral type. 
-    using ::int16_t;   //  16-bit signed integral type. 
-    using ::int32_t;   //  32-bit signed integral type. 
-    using ::int64_t;   //  64-bit signed integral type. 
-    using ::uint8_t;   //  8-bit unsigned integral type. 
-    using ::uint16_t;  //  16-bit unsigned integral type. 
-    using ::uint32_t;  //  32-bit unsigned integral type. 
-    using ::uint64_t;  //  64-bit unsigned integral type. 
-    using ::intptr_t;  //  Signed integral type large enough to hold any pointer. 
-    using ::uintptr_t; //  Unsigned integral type large enough to hold any pointer.
-  }
-
-}
 
 #else
 
@@ -245,6 +229,9 @@ typedef uint64_t  uintmax_t;
 
 #endif // __STDC_CONSTANT_MACROS ]
 
+#endif // _MSC_STDINT_H_ ]
+
+#endif
 
 
 // end of weired licence ...
@@ -264,7 +251,3 @@ namespace psycle {
     using ::uintptr_t; //  Unsigned integral type large enough to hold any pointer.
   }
 }
-
-#endif // _MSC_STDINT_H_ ]
-
-#endif

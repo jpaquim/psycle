@@ -130,7 +130,7 @@ namespace operating_system
 					attributes |= 0;
 			}
 			std::size_t const length(string.length());
-			::DWORD length(string.length());
+			::DWORD length_written(0);
 			::SetConsoleTextAttribute(output_handle, attributes);
 			::WriteConsole(output_handle, string.c_str(), static_cast< ::DWORD >(length), &length_written, 0);
 			// <bohan> "reset" the attributes before new line because otherwise we have
