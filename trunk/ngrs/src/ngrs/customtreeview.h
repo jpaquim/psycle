@@ -47,7 +47,7 @@ namespace ngrs {
 
     };
 
-    TreeNodeGui( TreeNode* node );
+    TreeNodeGui( class CustomTreeView& treeView, TreeNode* node );
     ~TreeNodeGui();
     TreeNode* node();
 
@@ -67,6 +67,8 @@ namespace ngrs {
 
       Bitmap expandBmp;
       Bitmap expandedBmp;
+
+      class CustomTreeView& treeView_;
       TreeNode* node_;
 
       void onImgClick( ButtonEvent* ev );
