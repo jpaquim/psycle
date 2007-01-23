@@ -21,7 +21,7 @@
 #define CUSTOMTREEVIEW_H
 
 #include "panel.h"
-#include "label.h"
+#include "flipbox.h"
 #include "treenode.h"
 
 /**
@@ -31,17 +31,41 @@
 namespace ngrs {
   
   class ScrollBox;
+  class Label;
+  class Image;
+
+  class TreeNodeGui : public Panel {
+  public:
+
+    TreeNodeGui( TreeNode* node );
+    ~TreeNodeGui();
+    TreeNode* node();
+
+    void add( TreeNodeGui* nodeGui );
+
+    virtual void resize();
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
+    virtual void setSkin( const Skin& skin );
+  
+  private:
+
+      Image* img_;
+      Label* label_;
+      Panel* children_;
+      bool expanded_;
+
+      Bitmap expandBmp;
+      Bitmap expandedBmp;
+      TreeNode* node_;
+
+      void onImgClick( ButtonEvent* ev );
+
+  };
 
   class CustomTreeView : public Panel {
   public:
     
-    struct TreeNodeGui : Label {
-      TreeNodeGui( TreeNode* node ) : Label( node->userText() ), node_( node) {}      
-      TreeNode* TreeNodeGui::node() { return node_; }
-    private:
-      TreeNode* node_;
-    };
-
     CustomTreeView();
     CustomTreeView( TreeNode* rootNode );
 
@@ -54,7 +78,7 @@ namespace ngrs {
 
   protected:
 
-    void buildTree( TreeNode* node );
+    void buildTree( TreeNode* node, TreeNodeGui* nodeGui );
 
   private:
 
