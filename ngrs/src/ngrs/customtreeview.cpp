@@ -27,9 +27,120 @@
 #include "config.h"
 #include "window.h"
 #include "label.h"
+#include "image.h"
 #include "popupmenu.h"
+#include "listlayout.h"
+#include <algorithm>
+
+#ifdef _MSC_VER
+#undef min 
+#undef max
+#endif
+
 
 namespace ngrs {
+
+
+  // flipper
+
+  /* XPM */
+  const char * node_expanded_xpm[] = {
+    "12 6 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "  .......   ",
+    "   .....    ",
+    "    ...     ",
+    "     .      ",
+    "            "
+  };
+
+  /* XPM */
+  const char * node_expand_xpm[] = {
+    "12 12 2 1",
+    " 	c None",
+    ".	c black",
+    "            ",
+    "            ",
+    "    .       ",
+    "    ..      ",
+    "    ...     ",
+    "    ....    ",
+    "    ...     ",
+    "    ..      ",
+    "    .       ",
+    "            ",
+    "            ",
+    "            "
+  };
+
+  TreeNodeGui::TreeNodeGui( TreeNode* node )
+   : Panel(), node_( node )
+  {
+    expanded_ = true;
+    expandBmp.createFromXpmData(node_expand_xpm);
+    expandedBmp.createFromXpmData(node_expanded_xpm);
+    // the left flipper, node line image
+    img_ = new Image();
+    img_->setVAlign(nAlCenter);
+    img_->setHAlign(nAlCenter);
+    img_->setSharedBitmap(&expandBmp);
+    img_->mousePress.connect( this, &TreeNodeGui::onImgClick );
+    img_->setEvents( true );
+    Panel::add( img_ );
+    // the label;
+    label_ = new Label( node->userText() );    
+    Panel::add( label_ );
+    // panel for children
+    children_ = new Panel();
+    children_->setLayout( ListLayout() );
+    children_->setSpacing( Size( 20,0,0,0));
+    Panel::add( children_ );
+  }
+
+  TreeNodeGui::~TreeNodeGui() {
+  }
+
+  TreeNode* TreeNodeGui::node() { 
+    return node_; 
+  }
+
+  void TreeNodeGui::add( TreeNodeGui* nodeGui ) {
+    children_->add( nodeGui,nAlTop );
+  }
+
+  void TreeNodeGui::resize() {
+    img_->setPosition(0,0, img_->preferredWidth(), label_->preferredHeight() );
+    label_->setPosition( img_->preferredWidth(), 0, clientWidth() - img_->preferredWidth(), label_->preferredHeight() );
+    children_->setPosition( 0, label_->preferredHeight(), clientWidth(), clientHeight() - label_->preferredHeight() );
+  }
+
+  int TreeNodeGui::preferredWidth() const {
+    return std::max( img_->preferredWidth() + label_->preferredWidth(), children_->preferredWidth() );
+  }
+
+  int TreeNodeGui::preferredHeight() const {    
+    return label_->preferredHeight() +
+      ( !node_->leaf()  ? children_->preferredHeight() : 0 );
+  }
+
+  void TreeNodeGui::setSkin( const Skin& skin ) {
+    label_->setSkin( skin );
+  }
+
+  void TreeNodeGui::onImgClick( ButtonEvent* ev ) {
+    expanded_ = !expanded_;
+    if ( expanded_ ) {
+      img_->setSharedBitmap(&expandedBmp);
+      children_->setVisible( true );
+    } else {
+      children_->setVisible( false );
+      img_->setSharedBitmap(&expandBmp);
+    }
+    repaint();
+  }
+
 
   CustomTreeView::CustomTreeView()
     : Panel(), rootNode_( 0 ), selectedTreeNodeGui_(0)
@@ -62,16 +173,19 @@ namespace ngrs {
     nodeSkinNone_ = App::config()->skin("lbitemnone");
   }
 
-  void CustomTreeView::buildTree( TreeNode* node ) {
+  void CustomTreeView::buildTree( TreeNode* node, TreeNodeGui* nodeGui ) {
     if ( !node) return;
     TreeNodeGui* leaf = new TreeNodeGui( node );
     leaf->setEvents( true );
     leaf->mousePress.connect( this, &CustomTreeView::onNodeMousePress );
-    scrollArea_->add( leaf, nAlTop );
+    if ( !nodeGui )
+      scrollArea_->add( leaf, nAlTop );
+    else
+      nodeGui->add( leaf );
     std::vector<TreeNode*>::iterator it = node->begin();
     for ( ; it != node->end(); it++ ) {
       if ( *it ) {
-        buildTree( *it );
+         buildTree( *it, leaf );
       }
     }
   }
@@ -80,7 +194,7 @@ namespace ngrs {
     scrollArea_->removeChilds();
     selectedTreeNodeGui_ = 0;
     if ( rootNode_ ) {
-      buildTree( rootNode_ );      
+      buildTree( rootNode_, 0 );      
     }
   }
 
@@ -109,6 +223,8 @@ namespace ngrs {
     else
       return 0;
   }
+
+  
 
 
 }
