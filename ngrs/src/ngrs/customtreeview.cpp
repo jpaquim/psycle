@@ -45,38 +45,38 @@ namespace ngrs {
 
   /* XPM */
 const char * node_expanded_xpm[] = {
-"11 11 2 1",
+"9 9 2 1",
 " 	c #404040",
 ".	c #FFFFFF",
-"           ",
-" ......... ",
-" ......... ",
-" ......... ",
-" ......... ",
-" ..     .. ",
-" ......... ",
-" ......... ",
-" ......... ",
-" ......... ",
-"           "};
+"         ",
+" ....... ",
+" ....... ",
+" ....... ",
+" .     . ",
+" ....... ",
+" ....... ",
+" ....... ",
+"         ",};
 /* XPM */
 const char * node_expand_xpm[] = {
-"11 11 2 1",
+"9 9 2 1",
 " 	c #404040",
 ".	c #FFFFFF",
-"           ",
-" ......... ",
-" ......... ",
-" .... .... ",
-" .... .... ",
-" ..     .. ",
-" .... .... ",
-" .... .... ",
-" ......... ",
-" ......... ",
-"           "};
+"         ",
+" ....... ",
+" ... ... ",
+" ... ... ",
+" .     . ",
+" ... ... ",
+" ... ... ",
+" ....... ",
+"         ",};
 
-  TreeNodeGui::FlipperImage::FlipperImage() {
+  TreeNodeGui::FlipperImage::FlipperImage( const TreeNodeGui& nodeGui ) 
+    : nodeGui_(nodeGui)
+  {
+    setVAlign( nAlCenter );
+    setHAlign( nAlCenter );
   }
 
   TreeNodeGui::FlipperImage::~FlipperImage() {
@@ -86,15 +86,52 @@ const char * node_expand_xpm[] = {
     Pen pen;
     pen.setLineStyle( nLineOnOffDash );
     g.setPen( pen );
+    g.setForeground( Color( 200,200,200 ));
     int ch = clientHeight();
     int cw = clientWidth();
-    g.drawLine( 0, ch/2, cw, ch/2 );
-    Image::paint(g);
+    g.drawLine( cw/2, ch/2, cw, ch/2 );
+    if ( !nodeGui_.node()->parent() || *(nodeGui_.node()->parent()->end()-1) == nodeGui_.node() ) {
+      g.drawLine( cw/2, 0, cw/2, ch/2 );
+    } else {
+      g.drawLine( cw/2, 0, cw/2, ch );
+    }
+    if ( !nodeGui_.node()->leaf() ) {
+      Image::paint(g);
+    }   
   }
 
   int TreeNodeGui::FlipperImage::preferredWidth() const {
-    return static_cast<int>( 1.5 * Image::preferredWidth() );
+    return static_cast<int>( 1.3 * Image::preferredWidth() );
   }
+
+
+
+  TreeNodeGui::ChildPanel::ChildPanel( const TreeNodeGui& nodeGui ) 
+    : nodeGui_( nodeGui ) {
+    ListLayout listLayout;
+    listLayout.setIdent( Point( nodeGui.flipperOffset(), 0 ));
+    setLayout( listLayout );
+  }
+
+  TreeNodeGui::ChildPanel::~ChildPanel() {
+  }
+
+  void TreeNodeGui::ChildPanel::paint( Graphics& g ) {
+    if ( nodeGui_.node()->leaf() || !nodeGui_.node()->parent() || *(nodeGui_.node()->parent()->end()-1) == nodeGui_.node() )
+      return;
+        
+    Pen pen;
+    pen.setLineStyle( nLineOnOffDash );
+    g.setPen( pen );
+    int ch = clientHeight();
+    int cw = nodeGui_.flipperOffset();
+    g.setForeground( Color( 200,200,200 ));
+    g.drawLine( cw/2, 0, cw/2, ch );
+
+  }
+
+
+
 
   TreeNodeGui::TreeNodeGui( CustomTreeView& treeView, TreeNode* node )
    : Panel(), treeView_(treeView), node_( node )
@@ -103,34 +140,36 @@ const char * node_expand_xpm[] = {
     expandBmp.createFromXpmData(node_expand_xpm);
     expandedBmp.createFromXpmData(node_expanded_xpm);
     // the left flipper, node line image
-    img_ = new FlipperImage();
-    img_->setVAlign(nAlCenter);
-    img_->setHAlign(nAlLeft);
+    img_ = new FlipperImage( *this );
     img_->setSharedBitmap(&expandedBmp);
     img_->mousePress.connect( this, &TreeNodeGui::onImgClick );
-    img_->setEvents( true );
-    img_->setVisible( false );
+    img_->setEvents(true);
     Panel::add( img_ );
     // the label;
     label_ = new Label( node->userText() );    
     Panel::add( label_ );
     // panel for children
-    children_ = new Panel();
-    children_->setLayout( ListLayout() );
-    children_->setSpacing( Size( img_->preferredWidth(),0,0,0));
+    children_ = new ChildPanel( *this );
     Panel::add( children_ );
   }
 
   TreeNodeGui::~TreeNodeGui() {
   }
 
-  TreeNode* TreeNodeGui::node() { 
+  TreeNode* TreeNodeGui::node() const { 
     return node_; 
   }
 
+  const CustomTreeView& TreeNodeGui::treeView() const {
+    return treeView_;
+  }
+
+  int TreeNodeGui::flipperOffset() const {
+    return img_->preferredWidth();
+  }
+
   void TreeNodeGui::add( TreeNodeGui* nodeGui ) {
-    children_->add( nodeGui,nAlTop );
-    img_->setVisible( true );
+    children_->add( nodeGui, nAlTop );
   }
 
   void TreeNodeGui::resize() {
@@ -153,6 +192,7 @@ const char * node_expand_xpm[] = {
   }
 
   void TreeNodeGui::onImgClick( ButtonEvent* ev ) {
+    if ( node()->leaf() ) return;
     expanded_ = !expanded_;
     if ( expanded_ ) {
       img_->setSharedBitmap(&expandedBmp);

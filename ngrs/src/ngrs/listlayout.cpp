@@ -41,16 +41,18 @@ namespace ngrs {
 
   void ListLayout::align( VisualComponent * parent )
   {
-    maxX_ = maxY_ = 0;
+    maxX_ = 0;
+    maxY_ = 0;
+
     std::vector<VisualComponent*>::const_iterator itr = parent->visualComponents().begin();
-    int yp = 0;
+    int yp = ident().y();
     for (;itr < parent->visualComponents().end(); itr++) {
       VisualComponent* visualChild = *itr;
       if (visualChild->visible()) {
         int prefWidth = visualChild->preferredWidth();
         int minWidth = visualChild->minimumWidth();
         int width = (prefWidth < minWidth) ? minWidth : prefWidth; 
-        visualChild->setPosition(0,yp,width,visualChild->preferredHeight());
+        visualChild->setPosition( ident().x(),yp,width,visualChild->preferredHeight());
         if (visualChild->align() == nAlCenter) {
           visualChild->setWidth(parent->spacingWidth());
         }
@@ -61,6 +63,7 @@ namespace ngrs {
       }
     }
     maxY_ = yp;
+    maxX_ = maxX_ + ident().x();
   }
 
 
@@ -128,6 +131,14 @@ namespace ngrs {
   void ListLayout::setAlign( int align )
   {
     align_ = align;
+  }
+
+  void ListLayout::setIdent( const Point& ident ) {
+    ident_ = ident;
+  }
+
+  const Point& ListLayout::ident() const {
+    return ident_;
   }
 
 }
