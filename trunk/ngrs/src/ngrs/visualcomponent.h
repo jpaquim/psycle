@@ -143,6 +143,11 @@ namespace ngrs {
     virtual void onMouseExit();
     virtual void onMouseEnter();
 
+    virtual void doDrag();
+    virtual void onDropEnter();
+    virtual void onDrop();
+    void setAllowDrop( bool on );
+    bool allowDrop() const;
 
     void repaint(bool swap = true);
 
@@ -269,6 +274,8 @@ namespace ngrs {
 
     bool tabStop_;
     bool focusEnabled_;
+
+    bool allowDrop_;
 
     void tabRight();
     void tabLeft();

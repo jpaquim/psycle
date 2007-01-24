@@ -91,6 +91,9 @@ namespace ngrs {
     static void enterThread();
     static void leaveThread();
 
+    static void doDrag( bool on, ngrs::Window* win );
+    static bool drag();
+
     static Window* lastOverWin_;
 
 #ifdef __unix__
@@ -143,6 +146,8 @@ namespace ngrs {
     static void buttonPress( Window* win, WEvent* event, int button );
 
     static int modalExitLoop_;
+
+    static bool doDrag_;
 
   };
 

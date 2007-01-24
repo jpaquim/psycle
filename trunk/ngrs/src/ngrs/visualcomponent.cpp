@@ -31,7 +31,7 @@ namespace ngrs {
   IsVisualComponent* VisualComponent::isVisualComponent = new IsVisualComponent();
 
   VisualComponent::VisualComponent()
-    : Visual(), clipping_(1), events_(1), scrollDx_(0), scrollDy_(0), layout_(0), win_(0), clSzPolicy(0), ownerSizeSet_(0), ownerPreferredWidth_(0), ownerPreferredHeight_(0), enabled_(1), tabStop_(0), focusEnabled_(1)
+    : Visual(), clipping_(1), events_(1), scrollDx_(0), scrollDy_(0), layout_(0), win_(0), clSzPolicy(0), ownerSizeSet_(0), ownerPreferredWidth_(0), ownerPreferredHeight_(0), enabled_(1), tabStop_(0), focusEnabled_(1), allowDrop_( false )
   {
     // if (properties()) properties()->bind("align", *this, &VisualComponent::align, &VisualComponent::setAlign);
 
@@ -183,6 +183,24 @@ namespace ngrs {
 
   void VisualComponent::onEnter() {
     repaint();
+  }
+
+  void VisualComponent::onDrop() {
+  }
+
+  void VisualComponent::onDropEnter() {
+  }
+  
+  void VisualComponent::doDrag() {
+    App::doDrag( true, window() );
+  }
+  
+  void VisualComponent::setAllowDrop( bool on ) {
+    allowDrop_ = on;
+  }
+
+  bool VisualComponent::allowDrop() const {
+    return allowDrop_;
   }
 
   void VisualComponent::drawChildren( Graphics& g, const ngrs::Region & repaintArea , VisualComponent* sender )
@@ -508,7 +526,10 @@ namespace ngrs {
 
   void VisualComponent::onMouseEnter() {
     Visual::onMouseEnter();
-    App::system().setCursor( cursor(), window() );
+    if ( !App::drag() )
+      App::system().setCursor( cursor(), window() );
+    else
+      App::system().setCursor( nCrDrag, window() );
   }
 
   int VisualComponent::align( ) const

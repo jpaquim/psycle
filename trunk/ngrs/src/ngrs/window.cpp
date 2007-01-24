@@ -258,6 +258,14 @@ namespace ngrs {
 
   void Window::onMousePressed( int x, int y, int button )
   {
+    if ( App::drag() ) {
+      mousePressBase_->onDrop();
+      App::doDrag( false, this );
+      App::system().setCursor( mousePressBase_->cursor(), this );
+      mousePressBase_ = 0;
+      dragBase_ = 0;
+    }
+
     if (mousePressBase_!=0 && mousePressBase_->enabled()) mousePressBase_->onMousePressed( x - mousePressBase_->absoluteSpacingLeft(), y - mousePressBase_->absoluteSpacingTop(), button);
     endDrag(dragBase_,x,y);
     dragBase_ = 0;
@@ -270,18 +278,26 @@ namespace ngrs {
   void Window::onMouseOver( int x, int y )
   {
     graphics_.setRegion(Rect(0,0,width(),height()));
-    if (dragBase_!=NULL) {    
+    if ( dragBase_ && !App::drag() ) {    
       if (dragBase_->moveable().style()!=0) doDrag(dragBase_,x,y);
       dragBase_->onMouseOver( x - dragBase_->absoluteSpacingLeft(), y - dragBase_->absoluteSpacingTop());
     } else 
-      if (mousePressBase_!=NULL) {   
+      if ( mousePressBase_ && !App::drag() ) {   
         mousePressBase_->onMouseOver( x - mousePressBase_->absoluteSpacingLeft(), y - mousePressBase_->absoluteSpacingTop());
       } else
       {
         VisualComponent* over = pane_->overObject(graphics_,x,y);
-        if (lastOver_!=0 && over!=lastOver_ && lastOver_->enabled()) lastOver_->onMouseExit();
+        if (lastOver_!=0 && over!=lastOver_ && lastOver_->enabled()) {
+          lastOver_->onMouseExit();
+        }
         if (over!=0 && over->enabled()) {
-          if (over!=lastOver_ || lastOver_==0 && selectedBase_->enabled()) over->onMouseEnter();
+          if (over!=lastOver_ || lastOver_==0 && selectedBase_->enabled()) {
+            over->onMouseEnter();
+            if ( App::drag() ) {
+              over->onDropEnter();
+              mousePressBase_ = over;
+            }
+          }
           over->onMouseOver( x - over->absoluteSpacingLeft(), y - over->absoluteSpacingTop());
         }
         lastOver_ = over;

@@ -203,8 +203,14 @@ const char * node_expand_xpm[] = {
     }
     treeView_.resize();
     treeView_.repaint();
-  }  
+  }
 
+  void TreeNodeGui::onMouseOver( int x, int y ) {
+    int shift = App::system().shiftState();
+    if ( shift & nsLeft ) {
+      doDrag();
+    }
+  }
 
   CustomTreeView::CustomTreeView()
     : Panel(), rootNode_( 0 ), selectedTreeNodeGui_(0)

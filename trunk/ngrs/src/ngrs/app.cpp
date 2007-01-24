@@ -55,6 +55,7 @@ namespace ngrs {
   Window* App::lastOverWin_;
   Window* App::mainWin_;
   int App::modalExitLoop_ = 0;
+  bool App::doDrag_ = 0;
 
 
 
@@ -772,6 +773,18 @@ namespace ngrs {
   void App::leaveThread( )
   {
     in_thread_=false;
+  }
+
+  void App::doDrag( bool on, ngrs::Window* win )
+  {
+    doDrag_ = on;
+    if ( on ) {
+      system().setCursor( nCrDrag, win );
+    }
+  }
+
+  bool App::drag() {    
+    return doDrag_;
   }
 
 }
