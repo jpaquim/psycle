@@ -46,12 +46,16 @@ namespace ngrs {
 
     void setAlign(int align);
 
+    void setIdent( const Point& ident );
+    const Point& ident() const;
+
 
   private:
 
     int align_;
     int findVerticalStart( long comparator , VisualComponent* owner);
     int maxX_, maxY_;
+    Point ident_;
 
     std::vector<VisualComponent*> comps;
 

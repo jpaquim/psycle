@@ -23,12 +23,12 @@
 namespace ngrs {
 
   TreeNode::TreeNode() 
-    : userObject_(0), popupMenu_(0)
+    : userObject_(0), popupMenu_(0), parent_(0)
   {
   }
 
   TreeNode::TreeNode( const std::string& userText, Object* userObject ) 
-    : userText_(userText), userObject_(userObject), popupMenu_(0) 
+    : userText_(userText), userObject_(userObject), popupMenu_(0), parent_(0)
   {
   }
   
@@ -56,12 +56,24 @@ namespace ngrs {
     return children.end();
   }
 
+  std::vector<TreeNode*>::const_reverse_iterator TreeNode::rbegin() const {
+    return children.rbegin();
+  }
+
+  std::vector<TreeNode*>::const_reverse_iterator TreeNode::rend() const {
+    return children.rend();
+  }
+
   bool TreeNode::leaf() const {
     return children.size() == 0;
   }
 
   TreeNode* TreeNode::parent() const {
     return parent_;
+  }
+
+  void TreeNode::setParent( TreeNode* parent ) {
+    parent_ = parent;
   }
 
   Object* TreeNode::userObject() {
@@ -78,10 +90,12 @@ namespace ngrs {
 
   void TreeNode::insert( std::vector<TreeNode*>::iterator itr, TreeNode* node ) {
     children.insert( itr, node );
+    node->setParent( this );
   }
 
   void TreeNode::add( TreeNode* node ) {
     children.push_back( node );
+    node->setParent( this );
   }
 
   void TreeNode::setPopupMenu( PopupMenu* popupMenu ) {

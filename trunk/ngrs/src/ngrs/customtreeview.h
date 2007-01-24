@@ -39,20 +39,35 @@ namespace ngrs {
 
     class FlipperImage : public Image {
     public :
-       FlipperImage();
+       FlipperImage( const TreeNodeGui& nodeGui );
       ~FlipperImage();
 
       virtual void paint( Graphics& g );
       virtual int preferredWidth() const;
 
+    private:
+       const TreeNodeGui& nodeGui_;
+    };
+
+    class ChildPanel : public Panel {
+    public :
+      ChildPanel( const TreeNodeGui& nodeGui );
+      ~ChildPanel();
+
+      virtual void paint( Graphics& g );
+
+    private:
+      const TreeNodeGui& nodeGui_; 
+
     };
 
     TreeNodeGui( class CustomTreeView& treeView, TreeNode* node );
     ~TreeNodeGui();
-    TreeNode* node();
+    TreeNode* node() const;
+    const class CustomTreeView& treeView() const;
+    int flipperOffset() const;
 
-    void add( TreeNodeGui* nodeGui );
-
+    virtual void add( TreeNodeGui* nodeGui );
     virtual void resize();
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;
@@ -62,7 +77,7 @@ namespace ngrs {
 
       FlipperImage* img_;
       Label* label_;
-      Panel* children_;
+      ChildPanel* children_;
       bool expanded_;
 
       Bitmap expandBmp;

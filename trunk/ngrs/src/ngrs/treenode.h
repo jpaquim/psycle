@@ -45,6 +45,8 @@ namespace ngrs {
     std::vector<TreeNode*>::iterator end();
     std::vector<TreeNode*>::const_iterator begin() const;
     std::vector<TreeNode*>::const_iterator end() const;
+    std::vector<TreeNode*>::const_reverse_iterator rbegin() const;
+    std::vector<TreeNode*>::const_reverse_iterator rend() const;
 
     void insert( std::vector<TreeNode*>::iterator itr, TreeNode* node );
     void add( TreeNode* node );
@@ -54,6 +56,7 @@ namespace ngrs {
 
     bool leaf() const;
     TreeNode* parent() const;
+    void setParent( TreeNode* parent );
 
     Object* userObject();
     void setUserObject( Object* object );
