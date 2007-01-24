@@ -62,6 +62,7 @@ namespace ngrs {
 
   class Atoms;
   class Window;
+  class Bitmap;
 
   class System{
     // Singleton Pattern
@@ -139,6 +140,8 @@ namespace ngrs {
     void setCursor( int crIdentifier, Window* win );
     int cursor() const;
 
+    void registerOwnerCursor( int identifier, const Bitmap& bitmap );
+
   private:
 
     Atoms* atoms_;
@@ -167,7 +170,7 @@ namespace ngrs {
 #ifdef __unix__
     std::map<int, Cursor> cursorMap;
 #else
-    std::map<int, HCURSOR> cursorMap;    
+    std::map<int, HCURSOR> cursorMap;
 #endif
 
     void initX();

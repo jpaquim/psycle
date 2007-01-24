@@ -612,24 +612,5 @@ void NTestWindow::testGroupBox( )
 }
 
 void NTestWindow::testCustomTreeView() {	
-  // this creates a customtreeview
-  CustomTreeView* view = new CustomTreeView();
 
-  TreeNode* node1 = new TreeNode();
-    node1->setHeader(new Item("Header1"));
-	for (int i = 0; i < 10; i++) {
-     node1->addEntry(new Item("entry"+stringify(i)));
-    }
-  view->addNode(node1);
-    
-  TreeNode* node2 = new TreeNode();
-    node2->setHeader( new Item("Header2") );
-	for (int i = 0; i < 10; i++) {
-     node2->addEntry( new Item("entryB"+stringify(i) ) );
-    }
-	itemD = new Item("delme");
-    node2->addEntry(itemD);
-  view->addNode(node2);
-    
-  pane()->add( view, nAlClient );  
 }

@@ -67,6 +67,7 @@ namespace ngrs {
     const class CustomTreeView& treeView() const;
     int flipperOffset() const;
 
+    virtual void onMouseOver( int x, int y );
     virtual void add( TreeNodeGui* nodeGui );
     virtual void resize();
     virtual int preferredWidth() const;

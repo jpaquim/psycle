@@ -21,11 +21,50 @@
 #include "atoms.h"
 #include "window.h"
 #include "app.h"
+#include "bitmap.h"
 #include <stdexcept>
 
 using namespace std;
 
 namespace ngrs {
+
+   /* XPM */
+  const char * dragicon_xpm[] = {
+  "21 31 3 1",
+  " 	c #000000",
+  ".	c None",
+  "R	c #FFFFFF",
+  ".....................",
+  ".....................",
+  ".....................",
+  "... .................",
+  "...  ................",
+  "... R ...............",
+  "... RR ..............",
+  "... RRR .............",
+  "... RRRR ............",
+  "... RRRRR ...........",
+  "... RRRRRR ..........",
+  "... RRRRRRR .........",
+  "... RRRRRRRR ........",
+  "... RRRRR     .......",
+  "... RR RR ...........",
+  "... R . RR ..........",
+  "...  .. RR ..........",
+  "... .... RR .........",
+  "........ RR .........",
+  "..... . . RR  . . ...",
+  "...... .  RR . . ....",
+  "..... ....   .... ...",
+  "...... ......... ....",
+  "..... ........... ...",
+  "...... ......... ....",
+  "..... ........... ...",
+  "...... . . . . . ....",
+  "..... . . . . . . ...",
+  ".....................",
+  ".....................",
+  "....................."};
 
   System::System()
   {
@@ -277,7 +316,7 @@ namespace ngrs {
     cursorMap[ nCrSizeWE    ] = LoadCursor( NULL, IDC_SIZEWE );
     cursorMap[ nCrUpArrow   ] = LoadCursor( NULL, IDC_UPARROW );
     cursorMap[ nCrHourGlass ] = LoadCursor( NULL, IDC_WAIT );
-    //  cursorMap[ nCrDrag      ] = LoadCursor( NULL,
+    registerOwnerCursor( nCrDrag, Bitmap( dragicon_xpm ));
     //  cursorMap[ nCrNoDrop    ] = LoadCursor( NULL,
     cursorMap[ nCrHSplit    ] = LoadCursor( NULL, IDC_SIZENS );
     cursorMap[ nCrVSplit    ] = LoadCursor( NULL, IDC_SIZEWE );
@@ -1026,6 +1065,21 @@ namespace ngrs {
   const ClipBoard & System::clipBoard( ) const
   {
     return clipBoard_;
+  }
+
+  void System::registerOwnerCursor( int identifier, const Bitmap& bitmap ) {
+#ifdef __unix__
+#else            
+   ICONINFO iconinfo = {0};
+   iconinfo.fIcon        = FALSE;
+   iconinfo.xHotspot       = 0;
+   iconinfo.yHotspot       = 0;
+   iconinfo.hbmMask        = bitmap.clpData();
+   iconinfo.hbmColor       = bitmap.sysData();
+
+   HCURSOR hCursor = ::CreateIconIndirect(&iconinfo);
+   cursorMap[identifier] = hCursor;
+#endif
   }
 
 }
