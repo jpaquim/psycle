@@ -279,10 +279,12 @@ namespace psy {
       friend class Header;
 
       PatternView( psy::core::Song * song );
+      virtual PatternView* clone() const;
 
       ~PatternView();
 
       psy::core::Song* pSong();
+      ModuleInfo info() const;
 
       sigslot::signal1<int> lineChanged;
 

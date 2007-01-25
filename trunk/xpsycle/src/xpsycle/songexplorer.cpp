@@ -145,11 +145,13 @@ namespace psy {
       while ( walkNode = walkNode->parent() )
         path.insert( path.begin(), walkNode->userText() );
 
-      if ( path.size() == 3 ) {
+      if ( path.size() > 2 ) {
         psy::core::Song* song = projects.songByName( path.at(1) );
         if ( song ) {
-          if ( path.at(2) == "Sequencer" ) {
-            showSequencerView(*song);
+          Module* module = projects.createModule( path, song );
+          if ( module ) {
+            book_.addPage( module, module->info().name() );
+            refreshBook();
           }
         }
       }
@@ -168,32 +170,25 @@ namespace psy {
           psy::core::Song* song = projects.songByName( path.at(1) );
           if ( song ) {
             psy::core::SinglePattern& pattern = song->patternSequence().patternData().newPattern();
-            PatternView* module = new PatternView( song );
-            module->setPattern( &pattern );
-            book_.addPage( module, pattern.name() );
-            modules_.push_back( module );
+            pattern.setName("/pattern"+stringify( pattern.id() ));
+            path.push_back( "pattern"+stringify( pattern.id()));
+            songTreeView_->selectedTreeNode()->add( new ngrs::TreeNode( ngrs::File::extractFileNameFromPath(pattern.name(),true), 0 ));
+            Module* module = projects.createModule( path, song );
+            if ( module ) {
+              book_.addPage( module, module->info().name() );
+              songTreeView_->updateTree();
+              window()->pane()->resize();
+              window()->pane()->repaint();
+              refreshBook();
+            }            
           }
         }
       }
     }
 
-    void SongExplorer::showSequencerView( psy::core::Song& song ) {
-      bool found = false;
-      std::vector<Module*>::iterator it = modules_.begin();
-      for ( ; it != modules_.end(); it++ ) {
-        Module* module = *it;
-        if ( module->song() == &song ) {
-          book_.setActivePage( module );
-          found = true;
-          break;
-        }
-      }
-      if ( !found ) {
-        SequencerGUI* view = new SequencerGUI();
-        view->setSong( &song );
-        book_.addPage( view, "Sequencer");
-        modules_.push_back( view );
-      }
+    void SongExplorer::refreshBook() {
+      book_.resize();
+      book_.repaint();
     }
 
   }

@@ -45,9 +45,11 @@ namespace psy {
 		{
 		public:
 			
-          MachineView( psy::core::Song& song );
-
+            MachineView( psy::core::Song& song );
+            virtual MachineView* clone() const;
 			~MachineView();
+
+            ModuleInfo info() const;
 
 			void setSelectedMachine( psy::core::Machine* mac);
 

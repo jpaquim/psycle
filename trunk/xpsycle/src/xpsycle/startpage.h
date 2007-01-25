@@ -32,8 +32,10 @@ namespace psy {
     public:
 
       StartPage( DefaultBitmaps& icons );
-
+      virtual StartPage* clone() const;
       ~StartPage();
+
+      ModuleInfo info() const;
 
     };
 

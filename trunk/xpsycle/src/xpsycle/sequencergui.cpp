@@ -294,9 +294,6 @@ namespace psy {
 
 
 
-
-
-
     ///
     /// this is the gui class of one pattern entry
     ///
@@ -637,7 +634,6 @@ namespace psy {
     {
       scrollArea_ = 0;
       setLayout( ngrs::AlignLayout() );
-      patternSequence_ = 0;
       oldPlayPos_ = 0;
 
       counter = 0;
@@ -733,42 +729,35 @@ namespace psy {
       lastLine = 0;
       selectedLine_ = 0;
 
-      patternSequence_ = 0;
-
       updateSkin();
-
 
       recStatusTimer.setIntervalTime(100);
       recStatusTimer.timerEvent.connect(this,&SequencerGUI::onRecordingTimer);
     }
 
+    SequencerGUI* SequencerGUI::clone() const {
+       return new SequencerGUI(*this);
+    }
 
     SequencerGUI::~SequencerGUI()
     {
+    }
+
+    ModuleInfo SequencerGUI::info() const {
+      return ModuleInfo("Sequencer");
     }
 
     int SequencerGUI::beatPxLength( ) const
     {
       return beatPxLength_;
     }
-
-    void SequencerGUI::setPatternSequence( psy::core::PatternSequence * sequence )
-    {
-      std::cout << "setted sequence" << std::endl;
-      patternSequence_ = sequence;
-    }
-
-    psy::core::PatternSequence * SequencerGUI::patternSequence( )
-    {
-      return patternSequence_;
-    }
-
+    
     void SequencerGUI::addSequencerLine( )
     {
       SequencerLine* line = new SequencerLine( this );
       line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
       lines.push_back(line);
-      line->setSequenceLine( patternSequence_->createNewLine() );
+      line->setSequenceLine( song()->patternSequence().createNewLine() );
       line->click.connect(this, &SequencerGUI::onSequencerLineClick);
 
       scrollArea_->add(line);
@@ -790,7 +779,7 @@ namespace psy {
           SequencerLine* line = new SequencerLine( this );
           line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
           lines.push_back(line);
-          line->setSequenceLine( patternSequence_->insertNewLine( selectedLine_->sequenceLine()) );
+          line->setSequenceLine( song()->patternSequence().insertNewLine( selectedLine_->sequenceLine()) );
           line->click.connect(this, &SequencerGUI::onSequencerLineClick);
 
           int index = selectedLine_->zOrder();
@@ -815,7 +804,7 @@ namespace psy {
         scrollArea_->removeChild(selectedLine_);
         scrollArea_->resize();
 
-        patternSequence_->removeLine(line);
+        song()->patternSequence().removeLine(line);
         scrollArea_->repaint();
         selectedLine_ = 0;
       }
@@ -828,7 +817,7 @@ namespace psy {
         if ( i < componentZOrderSize() ) {
           scrollArea_->erase(selectedLine_);
           scrollArea_->insert(selectedLine_,i+1);
-          patternSequence_->moveDownLine(selectedLine_->sequenceLine());
+          song()->patternSequence().moveDownLine(selectedLine_->sequenceLine());
           scrollArea_->resize();
           scrollArea_->repaint();
         }
@@ -842,7 +831,7 @@ namespace psy {
         if ( i > 0 ) {
           scrollArea_->erase(selectedLine_);
           scrollArea_->insert(selectedLine_,i-1);
-          patternSequence_->moveUpLine(selectedLine_->sequenceLine());
+          song()->patternSequence().moveUpLine(selectedLine_->sequenceLine());
           scrollArea_->resize();
           scrollArea_->repaint();
         }
@@ -1096,6 +1085,10 @@ namespace psy {
       repaint();
     }
 
+    psy::core::PatternSequence* SequencerGUI::patternSequence() {
+      return & (song()->patternSequence());
+    }
+
     void SequencerGUI::updatePlayPos() {
 /*      if ( patternSequence() && scrollArea() && !scrollArea()->lockPlayLine() ) {
         int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), Player::Instance()->playPos() * beatPxLength()));
@@ -1154,6 +1147,7 @@ namespace psy {
     void SequencerLoopItem::resize() {
       loopEdit->setPosition( clientWidth() - loopEdit->preferredWidth() - 7, 0, loopEdit->preferredWidth(), clientHeight() );
     }
+
 
   }
 }

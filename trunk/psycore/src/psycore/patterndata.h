@@ -47,6 +47,8 @@ namespace psy
       void erase( std::list<SinglePattern>::iterator it );
       void clear();
 
+      std::list<SinglePattern>::iterator patternByName( const std::string& name);
+
     private:
 
       std::list<SinglePattern> patterns_;		

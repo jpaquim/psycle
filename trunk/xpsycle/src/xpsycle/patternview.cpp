@@ -254,6 +254,14 @@ namespace psy {
     {
     }
 
+    PatternView* PatternView::clone() const {
+      return new PatternView(*this);
+    }
+
+    ModuleInfo PatternView::info() const {
+      return ModuleInfo("pattern view");
+    }
+
     void PatternView::updateSkin() {
 
       setColorInfo ( SkinReader::Instance()->patternview_color_info() );

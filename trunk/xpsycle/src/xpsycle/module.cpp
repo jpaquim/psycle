@@ -19,6 +19,21 @@
 ***************************************************************************/
 #include "module.h"
 
+namespace psy {
+  namespace host {
+
+ModuleInfo::ModuleInfo( const std::string& name ) 
+  : name_(name) {
+}
+
+ModuleInfo::~ModuleInfo() {
+}
+
+std::string ModuleInfo::name() const {
+  return name_;
+}
+
+
 Module::Module() 
   : song_( 0 )
 {
@@ -34,4 +49,8 @@ void Module::setSong( psy::core::Song* song ) {
 
 psy::core::Song* Module::song() {
   return song_; 
+}
+
+
+  }
 }

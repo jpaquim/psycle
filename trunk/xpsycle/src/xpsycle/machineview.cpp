@@ -47,9 +47,17 @@ namespace psy {
 			init();
 		}
 
+        MachineView* MachineView::clone() const {
+          return new MachineView(*this);
+        }
+
 		MachineView::~MachineView()
 		{
 		}
+
+        ModuleInfo MachineView::info() const {
+          return ModuleInfo("machine");
+        }
 
 		void MachineView::init( )
 		{
