@@ -224,12 +224,13 @@ namespace psy {
     public:
 
       SequencerGUI();
-
+      virtual SequencerGUI* clone() const;
       ~SequencerGUI();
+
+      ModuleInfo info() const;
 
       sigslot::signal1<SequencerItem*> entryClick;
 
-      void setPatternSequence( psy::core::PatternSequence* sequence );
       psy::core::PatternSequence* patternSequence();
 
       void addPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr );
@@ -252,11 +253,8 @@ namespace psy {
       Area* scrollArea();
 
       void deselectAll();
-
       bool gridSnap() const;
-
       void updateSkin();
-
       void updatePlayPos();
 
     private:
@@ -272,7 +270,6 @@ namespace psy {
       SequencerBeatChangeLineal* beatChangeLineal_;
       SequencerLine* lastLine;
       std::vector<SequencerItem*> selectedItems_;
-      psy::core::PatternSequence* patternSequence_;
       std::vector<SequencerLine*> lines;
 
       ngrs::ScrollBar* hBar;

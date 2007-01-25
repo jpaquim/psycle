@@ -69,11 +69,11 @@ namespace psy {
       ngrs::TreeNode* createMachineNodes();
       ngrs::TreeNode* createSampleNodes();
       ngrs::TreeNode* createSequencerNodes();
+
+      void refreshBook();
       
       void onPatternNewClick( ngrs::ButtonEvent* ev );
       void onTreeNodeClick( ngrs::TreeNode& node );
-
-      void showSequencerView( psy::core::Song& song );
 
     };
 

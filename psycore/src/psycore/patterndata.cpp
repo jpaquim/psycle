@@ -66,6 +66,14 @@ namespace psy
         return patterns_.end();
       }
 
+      std::list<SinglePattern>::iterator PatternData::patternByName( const std::string& name) {
+        std::list<SinglePattern>::iterator it = patterns_.begin();
+        for ( ; it != patterns_.end(); it++ ) {
+          const SinglePattern& pattern = *it;
+          if ( pattern.name() == name ) return it;
+        }
+        return patterns_.end();
+      }
 
 	}
 }

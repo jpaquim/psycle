@@ -37,9 +37,18 @@ namespace psy {
       add( new LogoPanel(icons), ngrs::nAlBottom );
     }
 
+    StartPage* StartPage::clone() const {
+      return new StartPage(*this);
+    }
+
     StartPage::~StartPage()
     {
     }
+
+    ModuleInfo StartPage::info() const {
+      return ModuleInfo("startpage");
+    }
+
 
   }
 }
