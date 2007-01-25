@@ -27,6 +27,7 @@ namespace psy {
   namespace host {
 
     StartPage::StartPage( DefaultBitmaps& icons )
+      : Module()
     {
       ngrs::FrameBorder frBorder;
       frBorder.setOval();

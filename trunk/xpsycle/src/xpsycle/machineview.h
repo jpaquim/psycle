@@ -22,6 +22,7 @@
 
 #include "wiregui.h"
 #include "skinreader.h"
+#include "module.h"
 #include <ngrs/scrollbox.h>
 #include <ngrs/label.h>
 #include <ngrs/popupmenu.h>
@@ -40,7 +41,7 @@ namespace psy {
 		@author  Stefan Nattkemper
 		*/
 
-		class MachineView : public ngrs::Panel
+		class MachineView : public Module
 		{
 		public:
 			

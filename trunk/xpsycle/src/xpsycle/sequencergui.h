@@ -20,9 +20,9 @@
 #ifndef SEQUENCERGUI_H
 #define SEQUENCERGUI_H
 
+#include "module.h"
 #include <psycore/singlepattern.h>
 #include <psycore/patternsequence.h>
-#include <ngrs/panel.h>
 #include <ngrs/button.h>
 #include <ngrs/line.h>
 #include <ngrs/hint.h>
@@ -122,7 +122,7 @@ namespace psy {
 
     };
 
-    class SequencerGUI : public ngrs::Panel
+    class SequencerGUI : public Module
     {
     public:
       class SequencerLine : public ngrs::Panel {

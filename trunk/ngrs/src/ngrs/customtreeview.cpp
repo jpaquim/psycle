@@ -280,7 +280,7 @@ const char * node_expand_xpm[] = {
       selectedTreeNodeGui_ = gui;
       selectedTreeNodeGui_->setSkin( nodeSkinSelected_ );
       selectedTreeNodeGui_->repaint();
-      nodeClicked.emit( gui->node() );
+      nodeClicked.emit( *gui->node() );
       gui->node()->clicked.emit( gui->node() );
     }
     if ( ev->button() == 3 && gui->node()->popupMenu() ) {
@@ -303,6 +303,7 @@ const char * node_expand_xpm[] = {
       selectedTreeNodeGui_->repaint();
     }
     gui->node()->dblClick.emit( gui->node() );
+    nodeDblClick.emit( *gui->node() );
   }
 
   TreeNode* CustomTreeView::selectedTreeNode() {

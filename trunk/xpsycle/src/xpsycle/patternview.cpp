@@ -156,7 +156,7 @@ namespace psy {
 
     /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
     PatternView::PatternView( psy::core::Song* song )
-      : ngrs::Panel()
+      : Module()
     {
       _pSong = song;
       setLayout( ngrs::AlignLayout() );
