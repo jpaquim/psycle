@@ -99,7 +99,8 @@ namespace ngrs {
 
     ~CustomTreeView();
 
-    signal1<TreeNode*> nodeClicked;
+    signal1<TreeNode&> nodeClicked;
+    signal1<TreeNode&> nodeDblClick;
 
     void updateTree();
     TreeNode* selectedTreeNode();

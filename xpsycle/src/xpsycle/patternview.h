@@ -22,6 +22,7 @@
 
 #include "custompatternview.h"
 #include "skinreader.h"
+#include "module.h"
 #include <psycore/patternsequence.h>
 #include <psycore/singlepattern.h>
 #include <psycore/song.h>
@@ -92,7 +93,7 @@ namespace psy {
     };
 
 
-    class PatternView : public ngrs::Panel
+    class PatternView : public Module
     {
     public:
 

@@ -21,6 +21,7 @@
 #define SONGEXPLORER_H
 
 #include "projectdata.h"
+#include "module.h"
 #include <psycore/patternsequence.h>
 #include <ngrs/dockpanel.h>
 #include <ngrs/item.h>
@@ -55,24 +56,24 @@ namespace psy {
      
       ngrs::TabBook& book_;
       ProjectData projects;
+      std::vector<Module*> modules_;
 
       ngrs::CustomTreeView* songTreeView_;
       ngrs::TreeNode* topNode;
       ngrs::PopupMenu* patternPopupMenu_;
       
-      std::map<ngrs::TreeNode*, psy::core::Song*> songMap;
-
       void init();
       void initPatternPopupMenu();
+
       ngrs::TreeNode* createPatternNodes( const psy::core::PatternData& patterns );
       ngrs::TreeNode* createMachineNodes();
       ngrs::TreeNode* createSampleNodes();
       ngrs::TreeNode* createSequencerNodes();
       
-      void onAddPatternClicked( ngrs::ButtonEvent* ev );
+      void onPatternNewClick( ngrs::ButtonEvent* ev );
+      void onTreeNodeClick( ngrs::TreeNode& node );
 
-      void onMachineBranchNodeClicked( ngrs::TreeNode* node );
-      void onSequencerBranchNodeClicked( ngrs::TreeNode* node );
+      void showSequencerView( psy::core::Song& song );
 
     };
 

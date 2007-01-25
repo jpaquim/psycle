@@ -32,7 +32,7 @@ namespace psy {
 	{
 
 		MachineView::MachineView( psy::core::Song & song ) 
-			: ngrs::Panel(), _pSong( &song )
+			: Module(), _pSong( &song )
 		{
 			setLayout( ngrs::AlignLayout() );
 

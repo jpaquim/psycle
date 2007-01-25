@@ -17,27 +17,27 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef STARTPAGE_H
-#define STARTPAGE_H
+#ifndef MODULE_H
+#define MODULE_H
 
-#include "module.h"
+#include <psycore/song.h>
 #include <ngrs/panel.h>
 
-namespace psy {
-  namespace host {
+class Module : public ngrs::Panel
+{
+  public:
 
-    class DefaultBitmaps;
+    Module();
 
-    class StartPage : public Module {
-    public:
+    virtual ~Module() = 0;
 
-      StartPage( DefaultBitmaps& icons );
+    void setSong( psy::core::Song* song );
+    psy::core::Song* song(); // maybe 0
 
-      ~StartPage();
+  private:
 
-    };
+    psy::core::Song* song_;
 
-  }
-}
+};
 
 #endif

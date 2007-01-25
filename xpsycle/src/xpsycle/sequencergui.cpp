@@ -633,7 +633,7 @@ namespace psy {
     // main class
 
     SequencerGUI::SequencerGUI()
-      : ngrs::Panel()
+      : Module()
     {
       scrollArea_ = 0;
       setLayout( ngrs::AlignLayout() );
