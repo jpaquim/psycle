@@ -259,7 +259,10 @@ namespace psy {
     }
 
     ModuleInfo PatternView::info() const {
-      return ModuleInfo("pattern view");
+      if ( pattern_ ) 
+        return ModuleInfo( pattern_->name() );
+      else
+        return ModuleInfo("pattern view");
     }
 
     void PatternView::updateSkin() {

@@ -75,6 +75,7 @@ namespace psy {
       pane()->add( songTreeView_, ngrs::nAlClient );
 
       initPatternPopupMenu();
+      initPatternBranchPopupMenu();
     }
 
     psy::core::Song* SongExplorer::newSong() {
@@ -101,13 +102,14 @@ namespace psy {
 
     ngrs::TreeNode* SongExplorer::createPatternNodes( const psy::core::PatternData& patterns ) {
       ngrs::TreeNode* patternNode = new ngrs::TreeNode("Patterns",0);
-      patternNode->setPopupMenu( patternPopupMenu_ );
+      patternNode->setPopupMenu( patternBranchPopupMenu_ );
 
       std::list<psy::core::SinglePattern>::const_iterator it = patterns.begin();
       for ( ; it != patterns.end(); it++ ) {
         const psy::core::SinglePattern& pattern = *it;        
         std::string patternName = ngrs::File::extractFileNameFromPath( pattern.name(), true );
         ngrs::TreeNode* leaf = new ngrs::TreeNode( patternName, 0 );
+        leaf->setPopupMenu( patternPopupMenu_ );
         patternNode->add( leaf );
       }
       return patternNode;
@@ -128,23 +130,26 @@ namespace psy {
       return sampleNode;
     }
 
+    void SongExplorer::initPatternBranchPopupMenu() {
+      patternBranchPopupMenu_ = new ngrs::PopupMenu();
+      add( patternBranchPopupMenu_ );
+
+      ngrs::MenuItem* item = new ngrs::MenuItem("New Pattern");
+      item->click.connect( this, &SongExplorer::onPatternNewClick );
+      patternBranchPopupMenu_->add( item );      
+    }
+
     void SongExplorer::initPatternPopupMenu() {
       patternPopupMenu_ = new ngrs::PopupMenu();
       add( patternPopupMenu_ );
 
-      ngrs::MenuItem* item = new ngrs::MenuItem("New Pattern");
-      item->click.connect( this, &SongExplorer::onPatternNewClick );
+      ngrs::MenuItem* item = new ngrs::MenuItem("Remove Pattern");
+      item->click.connect( this, &SongExplorer::onPatternRemoveClick );
       patternPopupMenu_->add( item );
     }
 
     void SongExplorer::onTreeNodeClick( ngrs::TreeNode& node ) {
-      // build tree path as string
-      std::vector<std::string> path;
-      path.push_back( node.userText() );
-      ngrs::TreeNode* walkNode = &node;
-      while ( walkNode = walkNode->parent() )
-        path.insert( path.begin(), walkNode->userText() );
-
+      std::vector<std::string> path = nodePath(node);
       if ( path.size() > 2 ) {
         psy::core::Song* song = projects.songByName( path.at(1) );
         if ( song ) {
@@ -157,15 +162,23 @@ namespace psy {
       }
     }
 
+    void SongExplorer::onPatternRemoveClick( ngrs::ButtonEvent* ev ) {
+      ngrs::TreeNode* node = songTreeView_->selectedTreeNode();
+      if ( node ) {
+        std::vector<std::string> path = nodePath(*node);
+        psy::core::Song* song = projects.songByName( path.at(1) );
+        std::list<psy::core::SinglePattern>::iterator patternItr;
+        patternItr = song->patternSequence().patternData().patternByName( pathAsString(path));
+        if ( patternItr != song->patternSequence().patternData().end() ) {
+         // song->patternSequence().patternData().erase(patternItr));
+        }
+      }
+    }
+
     void SongExplorer::onPatternNewClick( ngrs::ButtonEvent* ev ) {
       ngrs::TreeNode* node = songTreeView_->selectedTreeNode();
       if ( node ) {
-        // build tree path as string
-        std::vector<std::string> path;
-        path.push_back( node->userText() );
-        while ( node = node->parent() ) 
-          path.insert( path.begin(), node->userText() );
-
+        std::vector<std::string> path = nodePath(*node);
         if ( path.size() == 3 ) {
           psy::core::Song* song = projects.songByName( path.at(1) );
           if ( song ) {
@@ -173,6 +186,7 @@ namespace psy {
             pattern.setName("/pattern"+stringify( pattern.id() ));
             path.push_back( "pattern"+stringify( pattern.id()));
             songTreeView_->selectedTreeNode()->add( new ngrs::TreeNode( ngrs::File::extractFileNameFromPath(pattern.name(),true), 0 ));
+            songTreeView_->selectedTreeNode()->setPopupMenu( patternPopupMenu_ );
             Module* module = projects.createModule( path, song );
             if ( module ) {
               book_.addPage( module, module->info().name() );
@@ -189,6 +203,29 @@ namespace psy {
     void SongExplorer::refreshBook() {
       book_.resize();
       book_.repaint();
+    }
+
+    std::vector<std::string> SongExplorer::nodePath( ngrs::TreeNode& node ) const {
+      // build tree path as string
+      ngrs::TreeNode* walkNode = &node;
+      std::vector<std::string> path;
+      path.push_back( walkNode->userText() );
+      while ( walkNode = walkNode->parent() ) 
+        path.insert( path.begin(), walkNode->userText() );
+      return path;
+    }
+
+    std::string SongExplorer::pathAsString( const std::vector<std::string>& path ) const {
+      if ( path.size() > 3 ) {
+          std::vector<std::string>::const_iterator it = path.begin() + 3;
+          std::string patternName = "/";
+          for ( ; it != path.end(); ++it ) {
+            patternName += (*it);
+            if ( it != path.end()-1 ) patternName += "/";
+          }
+          return patternName;
+      } else 
+        return "";
     }
 
   }
