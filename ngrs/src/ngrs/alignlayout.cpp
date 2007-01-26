@@ -114,7 +114,8 @@ namespace ngrs {
              alClientVc = visualChild;
                             }
                             break;
-           default : ;
+           default: ;
+           // disable warning
         }
       }
     }
@@ -187,6 +188,8 @@ namespace ngrs {
         case nAlClient :
           client = hgap_ + visualChild->preferredWidth();
           break;
+        default: ;
+          // disable warning
         }
       }
     }
@@ -304,6 +307,8 @@ namespace ngrs {
         case nAlClient :
           client = vgap_+visualChild->preferredHeight();
           break;
+        default: ;
+          // disable warning
         }
       }
     }
