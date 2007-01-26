@@ -541,7 +541,7 @@ namespace psy {
           std::list<psy::core::SinglePattern>::iterator patternItr = sView->song()->patternSequence().patternData().patternByName( patternName );
           if ( patternItr != sView->song()->patternSequence().patternData().end() ) {
             ngrs::Point pt = ngrs::App::system().mousePosition();
-            int relX = pt.x() - absoluteSpacingLeft();
+            int relX = pt.x() - window()->left() - absoluteSpacingLeft();
             SequencerItem* item = addItem( patternItr );
             item->sequenceEntry()->track()->MoveEntry(item->sequenceEntry(), relX / (double) sView->beatPxLength() );
             resize();
