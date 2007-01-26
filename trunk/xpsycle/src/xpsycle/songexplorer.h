@@ -61,18 +61,24 @@ namespace psy {
       ngrs::CustomTreeView* songTreeView_;
       ngrs::TreeNode* topNode;
       ngrs::PopupMenu* patternPopupMenu_;
+      ngrs::PopupMenu* patternBranchPopupMenu_;
       
       void init();
       void initPatternPopupMenu();
+      void initPatternBranchPopupMenu();
 
       ngrs::TreeNode* createPatternNodes( const psy::core::PatternData& patterns );
       ngrs::TreeNode* createMachineNodes();
       ngrs::TreeNode* createSampleNodes();
       ngrs::TreeNode* createSequencerNodes();
 
+      std::vector<std::string> nodePath( ngrs::TreeNode& node ) const;
+      std::string pathAsString( const std::vector<std::string>& path ) const;
+
       void refreshBook();
       
       void onPatternNewClick( ngrs::ButtonEvent* ev );
+      void onPatternRemoveClick( ngrs::ButtonEvent* ev );
       void onTreeNodeClick( ngrs::TreeNode& node );
 
     };
