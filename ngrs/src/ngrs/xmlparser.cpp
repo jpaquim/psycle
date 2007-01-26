@@ -261,7 +261,7 @@ namespace ngrs {
 #endif      
   }
 
-  int XmlParser::parseString( const std::string & text )
+  int XmlParser::parseString( const std::string& text )
   {
 #ifdef __unix__
     try {

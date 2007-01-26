@@ -143,7 +143,7 @@ namespace ngrs {
     virtual void onMouseExit();
     virtual void onMouseEnter();
 
-    virtual void doDrag();
+    virtual void doDrag( const std::string& data );
     virtual void onDropEnter();
     virtual void onDrop();
     void setAllowDrop( bool on );

@@ -39,6 +39,7 @@
 #include <ngrs/checkbox.h>
 #include <ngrs/edit.h>
 #include <ngrs/splitbar.h>
+#include <ngrs/xmlparser.h>
 #include <algorithm>
 
 #ifdef _MSC_VER
@@ -524,6 +525,37 @@ namespace psy {
     {
     }
 
+    void SequencerGUI::SequencerLine::onDrop() {
+      path_.clear();
+      ngrs::XmlParser xmlDropParser;
+      xmlDropParser.tagParse.connect( this, &SequencerGUI::SequencerLine::onXmlDropParse);
+      xmlDropParser.parseString( ngrs::App::dragClipboard() );
+
+      if ( path_.size() > 3 ) {
+          std::vector<std::string>::const_iterator it = path_.begin() + 3;
+          std::string patternName = "/";
+          for ( ; it != path_.end(); ++it ) {
+            patternName += (*it);
+            if ( it != path_.end()-1 ) patternName += "/";
+          }
+          std::list<psy::core::SinglePattern>::iterator patternItr = sView->song()->patternSequence().patternData().patternByName( patternName );
+          if ( patternItr != sView->song()->patternSequence().patternData().end() ) {
+            ngrs::Point pt = ngrs::App::system().mousePosition();
+            int relX = pt.x() - absoluteSpacingLeft();
+            SequencerItem* item = addItem( patternItr );
+            item->sequenceEntry()->track()->MoveEntry(item->sequenceEntry(), relX / (double) sView->beatPxLength() );
+            resize();
+            repaint();
+          }
+      }
+    }
+
+    void SequencerGUI::SequencerLine::onXmlDropParse( const ngrs::XmlParser& parser, const std::string& tagName ) {
+      if ( tagName == "path" ) {
+        path_.push_back( parser.getAttribValue("name") );
+      }
+    }
+
     void SequencerGUI::SequencerLine::paint( ngrs::Graphics& g )
     {
       if ( sView->selectedLine_ && sView->selectedLine_ == this) {
@@ -532,7 +564,7 @@ namespace psy {
       }
     }
 
-    void SequencerGUI::SequencerLine::addItem( const std::list<psy::core::SinglePattern>::iterator& patternItr )
+    SequencerItem* SequencerGUI::SequencerLine::addItem( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
       const psy::core::SinglePattern& pattern = *patternItr;
 
@@ -544,7 +576,8 @@ namespace psy {
       item->setSequenceEntry( sequenceLine()->createEntry(patternItr, endTick) );
       items.push_back( item );
       add( item );
-
+     
+      return item;
     }
 
     void SequencerGUI::SequencerLine::removeItems( const std::list<psy::core::SinglePattern>::iterator& patternItr )
