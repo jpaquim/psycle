@@ -208,7 +208,19 @@ const char * node_expand_xpm[] = {
   void TreeNodeGui::onMouseOver( int x, int y ) {
     int shift = App::system().shiftState();
     if ( shift & nsLeft ) {
-      doDrag();
+      // build tree path as string
+      TreeNode* u_node = node();
+      std::vector<std::string> path;
+      path.push_back( u_node->userText() );
+      while ( u_node = u_node->parent() ) 
+        path.insert( path.begin(), u_node->userText() );
+
+      std::string dragData = "<drag src='treenode'>\n";
+      for ( std::vector<std::string>::iterator it = path.begin(); it != path.end(); ++it ) {
+        dragData += "<path name='"+*it+"' />\n";
+      }      
+      dragData += "</drag>";
+      doDrag( dragData );
     }
   }
 

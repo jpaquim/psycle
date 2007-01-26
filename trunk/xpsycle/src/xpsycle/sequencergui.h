@@ -40,6 +40,7 @@ namespace ngrs {
   class NCheckBox;
   class Line;
   class Edit;
+  class XmlParser;
 }
 
 class ZoomBar;
@@ -139,12 +140,14 @@ namespace psy {
         virtual int preferredWidth() const;
         virtual int preferredHeight() const;
 
+        virtual void onDrop();
+
         virtual void removeChild( ngrs::VisualComponent* item );
 
         void setSequenceLine( psy::core::SequenceLine* line );
         psy::core::SequenceLine* sequenceLine();
 
-        void addItem( const std::list<psy::core::SinglePattern>::iterator& patternItr );
+        SequencerItem* addItem( const std::list<psy::core::SinglePattern>::iterator& patternItr );
         void removeItems( const std::list<psy::core::SinglePattern>::iterator& patternItr );
 
         std::vector<SequencerItem*> itemsByPattern( const std::list<psy::core::SinglePattern>::iterator& patternItr );
@@ -159,6 +162,9 @@ namespace psy {
 
         psy::core::SequenceLine* seqLine_;
         SequencerGUI* sView;
+        std::vector<std::string> path_;
+
+        void onXmlDropParse( const ngrs::XmlParser& parser, const std::string& tagName );
 
       };
 

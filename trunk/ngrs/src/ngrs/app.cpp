@@ -56,7 +56,7 @@ namespace ngrs {
   Window* App::mainWin_;
   int App::modalExitLoop_ = 0;
   bool App::doDrag_ = 0;
-
+  std::string App::dragClipboard_;
 
 
 
@@ -775,7 +775,7 @@ namespace ngrs {
     in_thread_=false;
   }
 
-  void App::doDrag( bool on, ngrs::Window* win )
+  void App::doDrag( bool on, ngrs::Window* win  )
   {
     doDrag_ = on;
     if ( on ) {
@@ -785,6 +785,14 @@ namespace ngrs {
 
   bool App::drag() {    
     return doDrag_;
+  }
+
+  const std::string& App::dragClipboard() {
+    return dragClipboard_;
+  }
+
+  void App::setDragClipboard( const std::string& data ) {
+    dragClipboard_ = data;
   }
 
 }

@@ -91,9 +91,11 @@ namespace ngrs {
     static void enterThread();
     static void leaveThread();
 
-    static void doDrag( bool on, ngrs::Window* win );
+    static void doDrag( bool on, ngrs::Window* win);
     static bool drag();
 
+    static const std::string& dragClipboard();
+    static void setDragClipboard( const std::string& data );
     static Window* lastOverWin_;
 
 #ifdef __unix__
@@ -148,6 +150,7 @@ namespace ngrs {
     static int modalExitLoop_;
 
     static bool doDrag_;
+    static std::string dragClipboard_;
 
   };
 

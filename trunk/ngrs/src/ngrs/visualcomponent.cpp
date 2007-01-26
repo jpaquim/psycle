@@ -191,8 +191,9 @@ namespace ngrs {
   void VisualComponent::onDropEnter() {
   }
   
-  void VisualComponent::doDrag() {
+  void VisualComponent::doDrag( const std::string& data ) {
     App::doDrag( true, window() );
+    App::setDragClipboard( data );
   }
   
   void VisualComponent::setAllowDrop( bool on ) {
