@@ -54,7 +54,7 @@ namespace ngrs {
     const XERCES_CPP_NAMESPACE_QUALIFIER  Attributes*   attrs;
 #endif
 
-    virtual void onTagParse( const std::string & tagName );
+    void onTagParse( const std::string& tagName );
 
   private:
 
