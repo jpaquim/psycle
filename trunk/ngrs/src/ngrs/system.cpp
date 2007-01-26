@@ -239,6 +239,7 @@ namespace ngrs {
     unsigned int mask;
     int pos_x;
     int pos_y;
+    ::Window root_win,child_win;
     ::XQueryPointer( dpy(), rootWindow(),&root_win,&child_win,&pos_x,&pos_y,&x_win,&y_win,&mask);
     return Point( pos_x, pos_y );
 #else

@@ -394,7 +394,7 @@ namespace psy
 
 		std::map<double, PatternLine>::const_iterator SinglePattern::find_nearest( int line ) const
 		{
-			std::map<double, PatternLine>::iterator::const_iterator result;
+			std::map<double, PatternLine>::const_iterator result;
 
 			double low = ( (line - 0.499999) / (float) beatZoom() );
 			double up  = (line + 0.49999999) / (float) beatZoom();

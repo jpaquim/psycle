@@ -866,7 +866,7 @@ namespace psy {
               text+= std::string(":") + stringify( count );
             }
             // check if line is on beatzoom raster else draw arrow up or down hint
-            if ( std::abs(it->first - position) > 0.001) {
+            if ( abs(it->first - position) > 0.001) {
               int xOff = clientWidth()-g.textWidth(text)- 10 ;
               int yOff = i*pView->rowHeight()+pView->rowHeight() -1 - 3 -dy();
               g.drawLine( xOff , yOff+1, xOff, yOff - pView->rowHeight() + 5);
