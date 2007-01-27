@@ -25,6 +25,7 @@
 #include "infodlg.h"
 #include "sequencergui.h"
 #include "audioconfigdlg.h"
+#include "keyconfigdlg.h"
 #include "skinreader.h"
 #include "aboutbox.h"
 #include "startpage.h"
@@ -186,6 +187,9 @@ namespace psy {
       
       audioConfigDlg = new AudioConfigDlg();
       add( audioConfigDlg );	
+      
+      keyConfigDlg = new KeyConfigDlg();
+      add( keyConfigDlg );	
 
       enableSound();
 
@@ -261,6 +265,10 @@ namespace psy {
 
     void MainWindow::onConfigMenuAudio( ngrs::ButtonEvent* ev ) {
       audioConfigDlg->setVisible( true );
+    }
+
+    void MainWindow::onConfigMenuKeys( ngrs::ButtonEvent* ev ) {
+      keyConfigDlg->setVisible( true );
     }
 
     void MainWindow::initMenu( )
@@ -340,6 +348,7 @@ namespace psy {
       configurationMenu_->add(new ngrs::MenuItem("Loop Playback"));
       configurationMenu_->add(new ngrs::MenuSeperator());
       configurationMenu_->add(new ngrs::MenuItem("Audio Settings"))->click.connect(this,&MainWindow::onConfigMenuAudio);
+      configurationMenu_->add(new ngrs::MenuItem("Key Bindings"))->click.connect(this,&MainWindow::onConfigMenuKeys);
       configurationMenu_->add(new ngrs::MenuItem("Load Skin"))->click.connect(this,&MainWindow::onConfigMenuSkin);
       menuBar_->add(configurationMenu_);
 
