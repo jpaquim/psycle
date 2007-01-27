@@ -47,6 +47,7 @@ namespace psy {
       std::string building;
       std::string testing;
       std::string gpl;
+      std::string maillist;
 
       void init();
       void initText();
