@@ -834,24 +834,27 @@ namespace ngrs {
     if ( start_itr == components.end() ) return visualComponents_.end();
     components.erase( start_itr, end_itr );
 
+    ngrs::Window* win = window();
     std::vector<VisualComponent*>::iterator it = first;
     for ( ; it != visualComponents_.end() && it <= last; it++ ) {
-      (*it)->setParent( 0 );     
+      (*it)->setParent( 0 );           
       if ( layout_ ) {
         layout_->remove( *it );
       }
+      if ( win ) window()->checkForRemove(*it);
     }
     it = visualComponents_.erase( first, last );  
     if ( layout_ )layout_->align( this );
-    if ( window() ) window()->checkForRemove(0);
 
     return it;
   }
 
   void VisualComponent::eraseAll() {
     std::vector<Runtime*>::iterator it = components.begin();
+    ngrs::Window* win = window();
     for ( ; it < components.end(); it ++ ) {
       (*it)->setParent( 0 );
+      if ( win ) window()->checkForRemove(*it);
     }
     components.clear();
 
@@ -864,7 +867,6 @@ namespace ngrs {
       visualComponents_.clear();  
 
       if ( layout_ ) layout_->align( this );
-      if ( window() ) window()->checkForRemove(0);
   }
 
   std::vector<VisualComponent*>::iterator VisualComponent::vcBegin() {
