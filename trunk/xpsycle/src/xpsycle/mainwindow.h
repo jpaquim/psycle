@@ -56,6 +56,7 @@ namespace psy {
     class InfoDlg;
     class SequencerItem;
     class AudioConfigDlg;
+    class KeyConfigDlg;
 
 
     /**
@@ -146,6 +147,7 @@ namespace psy {
       ngrs::ComboBox* insCombo_;
 
       AudioConfigDlg* audioConfigDlg;
+      KeyConfigDlg* keyConfigDlg;
 
       int count;
 
@@ -198,6 +200,7 @@ namespace psy {
       void onViewMenuStatusbar( ngrs::ButtonEvent* ev );
 
       void onConfigMenuAudio( ngrs::ButtonEvent* ev );
+      void onConfigMenuKeys( ngrs::ButtonEvent* ev );
       void onConfigMenuSkin( ngrs::ButtonEvent* ev );
 
       void onHelpMenuAbout( ngrs::ButtonEvent* ev );
