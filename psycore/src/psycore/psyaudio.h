@@ -23,7 +23,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-... /* body of header */
+
+/* type definition */
+
+typedef int(* 	PsyProcessCallback )(unsigned int nframes, void *arg)
+typedef struct _psyAudioDevice  psyDevice_t;
+
+/* body of header */
+
+psyDevice_t* psyNewAudio();
+void psyAudioStart( psyDevice_t* device );
+void psyAudioStop( psyDevice_t* device );
+float* psyAudioGetBuffer( psyDevice_t* device, int portHandle, unsigned int frames );
+char** psyAudioPorts( psyDevice_t* device);
+
+// this defines the callback to a work function
+int psySetCallback( psyDevice_t *device, PsyProcessCallback process_callback, void *arg);
+
 #ifdef __cplusplus
 } /* closing brace for extern "C" */
 #endif
