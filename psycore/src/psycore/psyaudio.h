@@ -17,34 +17,16 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef SAMPLE_H
-#define SAMPLE_H
+#ifndef PSYAUDIO_H
+#define PSYAUDIO_H
 
-#include <vector>
+#ifdef __cplusplus
+extern "C" {
+#endif
+... /* body of header */
+#ifdef __cplusplus
+} /* closing brace for extern "C" */
+#endif
 
-namespace psy {
-  namespace core {
-    
-    // multi channel sample datastructure
-
-    class Sample
-    {
-    public:
-
-      Sample();
-      ~Sample();
-
-    private:
-
-      unsigned int frames_;
-      unsigned int samplesPerSec_;
-
-      // 1. vector channel, 2. sample data of each channel
-      std::vector< std::vector<float> > data_;      
-
-    };
-
-  }
-}
 
 #endif
