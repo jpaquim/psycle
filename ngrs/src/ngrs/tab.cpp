@@ -48,7 +48,7 @@ namespace ngrs {
     popupMenu_ = new PopupMenu();
     add( popupMenu_ );
 
-    heightIdent_ = 5;
+    heightIdent_ = 0;
   }
 
   NTab::~NTab()

@@ -308,12 +308,17 @@ namespace ngrs {
           newSkin.useParentBackground(false);
           newSkin.setTransparent(false);
         } else
-          if (identifier == "toolbar") {
+        if (identifier == "toolbar") {
             BevelBorder border( nNone, nRaised );
             border.setSpacing( Size( 0, 2, 0, 2 ) );
             newSkin.setBorder(border);
-          } else
-            if (identifier == "filedlgpane") {
+        } else
+        if (identifier == "tabbar") {
+          newSkin.setBackground( Color( 228, 226, 213 ) );
+          newSkin.useParentBackground(false);
+          newSkin.setTransparent(false);
+        } else
+        if (identifier == "filedlgpane") {
               newSkin.setBackground(Color(236,233,216));
               newSkin.useParentBackground(false);
               newSkin.setTransparent(false);
