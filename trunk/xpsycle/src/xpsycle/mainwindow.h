@@ -21,7 +21,6 @@
 #define MAINWINDOW_H
 
 #include "songpdlg.h"
-#include "childview.h"
 #include "songexplorer.h"
 #include <ngrs/window.h>
 #include <ngrs/menubar.h>
@@ -49,6 +48,9 @@ namespace ngrs {
 }
 
 namespace psy { 
+  namespace core {
+    class Machine;
+  }
   namespace host {
 
     class GreetDlg;
@@ -99,10 +101,7 @@ namespace psy {
 
       bool oldPlayPos_;
 
-      ChildView* selectedChildView_;
-
       SongExplorer* songExplorer_;
-
       bool noFileWasYetLoaded;
 
       SongpDlg* songpDlg_;
@@ -255,8 +254,6 @@ namespace psy {
 
       void onCloseSongTabPressed( ngrs::ButtonEvent* ev );
       void onTabChange( ngrs::ButtonEvent* ev );
-      std::map<Object*, ChildView*> songMap;
-      std::map<Object*, ChildView*> songTabMap;
 
       void updateNewSong();
 
