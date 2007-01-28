@@ -20,6 +20,8 @@
 #include "tabbar.h"
 #include "notebook.h"
 #include "flowlayout.h"
+#include "app.h"
+#include "config.h"
 
 namespace ngrs {
 
@@ -30,8 +32,8 @@ namespace ngrs {
     fl.setBaseLine(nAlBottom);
     setLayout(fl);
     noteBook_ = 0;
-    setTransparent(true);
     orientation_ = nAlTop;
+    setSkin( App::config()->skin("tabbar") );
   }
 
 
