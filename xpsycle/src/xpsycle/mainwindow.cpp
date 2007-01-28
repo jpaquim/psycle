@@ -209,59 +209,11 @@ namespace psy {
 
     
     void MainWindow::onCloseSongTabPressed( ngrs::ButtonEvent* ev ) {
-      std::map<Object*,ChildView*>::iterator it = songMap.find( ev->sender() ); 
-      if ( it != songMap.end() ) {
-        std::map<Object*,ChildView*>::iterator tabIt = songTabMap.begin();
-        for ( ; tabIt != songTabMap.end() ; tabIt++ ) {
-          if ( tabIt->second == it->second ) {
-            songTabMap.erase( tabIt );
-            break;
-          }
-        }
-
-        bool update = false;
-        ChildView* view = it->second;
-        if (view == selectedChildView_) {
-//          Player::Instance()->stop();
-//          Player::Instance()->song(0);       
-//          selectedChildView_ = 0;
-//          update = true;
-        }
-        songMap.erase(it);
-        book->removePage(view);
-
-        if (update) {
-          std::map<Object*,ChildView*>::iterator songIt = songTabMap.begin();
-          for ( ; songIt != songTabMap.end() ; songIt++ ) {
-            if ( songIt->second == book->activePage() ) {
-              selectedChildView_ = songIt->second;         
-//              Player::Instance()->song( selectedChildView_->song() );
-              updateNewSong();
-            } 
-          }
-        } 
-
-        if (songMap.size() <= 1) {
-          book->setTabBarVisible(false);
-        }
-        pane()->resize();
-        pane()->repaint();
-      }
     }
 
     void MainWindow::onTabChange( ngrs::ButtonEvent * ev )
     {
-      std::map<Object*,ChildView*>::iterator it = songTabMap.find( ev->sender() ); 
-      if ( it != songTabMap.end() ) {
-        ChildView* view = it->second;
-//        Player::Instance()->stop();
-//        Player::Instance()->song( view->song() );
-        selectedChildView_ = view;
-        updateNewSong();
-        pane()->repaint();
-      }
     }
-
 
     void MainWindow::onConfigMenuAudio( ngrs::ButtonEvent* ev ) {
       audioConfigDlg->setVisible( true );
@@ -406,10 +358,8 @@ namespace psy {
 
     void MainWindow::showSongpDlg( ngrs::ButtonEvent* ev )
     {
-      if ( !selectedChildView_) return;
-
-      songpDlg_->setSong( selectedChildView_->song() );
-      songpDlg_->setVisible(true);
+//      songpDlg_->setSong( selectedChildView_->song() );
+//      songpDlg_->setVisible(true);
     }
 
     void MainWindow::initBars( )
@@ -613,10 +563,10 @@ namespace psy {
         std::string fileName = openDialog->fileName();
         SkinReader::Instance()->loadSkin( fileName );
 
-        if ( selectedChildView_ ) {
-          selectedChildView_->patternView()->updateSkin();
-          selectedChildView_->machineView()->updateSkin();
-        }			
+//        if ( selectedChildView_ ) {
+//          selectedChildView_->patternView()->updateSkin();
+//          selectedChildView_->machineView()->updateSkin();
+//        }			
 
         pane()->resize();
         pane()->repaint();	
@@ -637,14 +587,10 @@ namespace psy {
 
     void MainWindow::onBarPlay( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->play();
     }
 
     void MainWindow::onBarPlayFromStart( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->playFromStart();
     }
 
     void MainWindow::onFileNew( ngrs::ButtonEvent * ev )
@@ -706,7 +652,7 @@ namespace psy {
 
     void MainWindow::onFileSaveAs( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
+//      if ( !selectedChildView_ ) return;
 
       ngrs::FileDialog* saveDialog = new ngrs::FileDialog();
       saveDialog->addFilter("*.psy [psy4 song format]","!S*.psy");
@@ -797,13 +743,9 @@ namespace psy {
     }
 
     void MainWindow::onMachineView( ngrs::ButtonEvent* ev ) {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->showMachineView();
     }
 
     void MainWindow::onPatternView( ngrs::ButtonEvent* ev ) {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->showPatternView();
     }
 
     bool MainWindow::checkUnsavedSong( )
@@ -839,9 +781,6 @@ namespace psy {
 
     void MainWindow::onSequencerView( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-
-      selectedChildView_->showSequencerView();
     }
 
     void MainWindow::onViewMenuToolbar( ngrs::ButtonEvent * ev )
@@ -860,8 +799,6 @@ namespace psy {
 
     void MainWindow::onViewMenuSequencerbar( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->sequencerBar()->setVisible(!selectedChildView_->sequencerBar()->visible() );
     }
 
     void MainWindow::onViewMenuStatusbar( ngrs::ButtonEvent * ev )
@@ -921,9 +858,6 @@ namespace psy {
 
     void MainWindow::onEditUndo( ngrs::ButtonEvent * ev )
     {
-      if ( !selectedChildView_ ) return;
-
-      selectedChildView_->patternView()->doUndo();
     }
 
     void MainWindow::onEditRedo( ngrs::ButtonEvent * ev )
@@ -1001,8 +935,6 @@ namespace psy {
 
     void MainWindow::onSeqAdded( const std::list<psy::core::SinglePattern>::iterator& patternItr )
     {
-      if ( !selectedChildView_ ) return;
-      selectedChildView_->sequencerView()->addPattern( patternItr );
     }
 
     void MainWindow::onNewMachineDialogAdded( psy::core::Machine * mac )
@@ -1011,13 +943,11 @@ namespace psy {
    
     void MainWindow::onSequencerEntryClick( SequencerItem * item )
     {
-      if (!selectedChildView_) return;
-//      selectedChildView_->sequencerBar()->setEntry(item);
     }
 
     void MainWindow::onKeyPress( const ngrs::KeyEvent& event )
     {
-      if ( selectedChildView_ ) {
+/*      if ( selectedChildView_ ) {
         int key = 0;
         //Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
         switch (key)
@@ -1047,7 +977,7 @@ namespace psy {
           break;
         }
       }
-
+*/
       ngrs::Window::onKeyPress( event);
     }
 

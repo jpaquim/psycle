@@ -24,7 +24,6 @@
 #include "defaultbitmaps.h"
 #include "sequencergui.h"
 #include "skinreader.h"
-#include "childview.h"
 #include "patternview.h"
 #include <psycore/song.h>
 #include <psycore/patterndata.h>
@@ -34,7 +33,6 @@
 #include <ngrs/item.h>
 #include <ngrs/app.h>
 #include <ngrs/config.h>
-#include <ngrs/seg7display.h>
 #include <ngrs/frameborder.h>
 #include <ngrs/toolbar.h>
 #include <ngrs/toolbarseparator.h>
