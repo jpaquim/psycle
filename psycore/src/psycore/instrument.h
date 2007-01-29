@@ -24,6 +24,20 @@
 
 namespace psy {
   namespace core {
+    
+
+    class InstrumentPatch {
+    public:
+
+      InstrumentPatch();
+
+      ~InstrumentPatch();
+
+    private:
+
+      Sample sample_;
+
+    };
 
     class Instrument
     {
@@ -34,7 +48,7 @@ namespace psy {
 
     private:
 
-      Sample sample;
+      std::vector<InstrumentPatch> patches_; 
     };
 
   }
