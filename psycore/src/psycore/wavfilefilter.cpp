@@ -56,16 +56,15 @@ namespace psy {
 
     bool WavFileFilter::read( BinRead& in ) {
       // WAVE format starts with the RIFF header
-      // The canonical WAVE format starts with the RIFF header:
-      // Offset  Length   Contents
-      // 0       4 bytes  'RIFF'
-      // 4       4 bytes  <file length - 8>
-      // 8       4 bytes  'WAVE'
+      // Offset  Length   Contents      
       RiffHeader riffHeader;
+      // 0       4 bytes  'RIFF'
       in.read( riffHeader.riff, 4 );
       if (!memcmp( riffHeader.riff, "RIFF", 4 )) return 0; 
+      // 4       4 bytes  <file length - 8>
       riffHeader.fileLength = in.readInt4LE();
       in.read( riffHeader.wave, 4 );
+      // 8       4 bytes  'WAVE'
       if (!memcmp( riffHeader.wave, "WAVE", 4 )) return 0; 
 
       unsigned int chunk_count = 0;
