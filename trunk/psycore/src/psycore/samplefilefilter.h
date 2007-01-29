@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 by  Stefan Nattkemper   *
+*   Copyright (C) 2007 by  Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,33 +17,36 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "sample.h"
+#ifndef SAMPLEFILEFILTER_H
+#define SAMPLEFILEFILTER_H
+
+#include "binread.h"
 
 namespace psy {
   namespace core {
 
-    Sample::Sample() 
-      : frames_(0),
-        samplesPerSec_(0)
+    class Sample;
+
+    class SampleFileFilter
     {
-    }
+    public:
+      SampleFileFilter( Sample& sample );
 
-    Sample::~Sample()
-    {
-    }
+      virtual ~SampleFileFilter() = 0;
 
-    std::list< std::vector<float> >::iterator Sample::channelBegin() {
-      return data_.begin();
-    }
+      virtual bool read( BinRead& in );
 
-    std::list< std::vector<float> >::iterator Sample::channelEnd() {
-      return data_.end();
-    }
+    protected:
 
-    void Sample::addNewChannel( int count ) {
-      for ( int i = 0; i < count; i++ )
-        data_.push_back( std::vector<float>() );
-    }
+      Sample& sample();
+
+    private:
+
+      Sample& sample_;
+
+    };
 
   }
 }
+
+#endif

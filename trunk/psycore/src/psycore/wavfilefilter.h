@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 by  Stefan Nattkemper   *
+*   Copyright (C) 2007 by  Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,33 +17,28 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "sample.h"
+#ifndef WAVEFILEFILTER_H
+#define WAVEFILEFILTER_H
+
+#include "samplefilefilter.h"
 
 namespace psy {
   namespace core {
 
-    Sample::Sample() 
-      : frames_(0),
-        samplesPerSec_(0)
+    class Sample;
+
+    class WavFileFilter : public SampleFileFilter
     {
-    }
+    public:
+      WavFileFilter( Sample& sample );
 
-    Sample::~Sample()
-    {
-    }
+      ~WavFileFilter();
 
-    std::list< std::vector<float> >::iterator Sample::channelBegin() {
-      return data_.begin();
-    }
+      virtual bool read( BinRead& in );
 
-    std::list< std::vector<float> >::iterator Sample::channelEnd() {
-      return data_.end();
-    }
-
-    void Sample::addNewChannel( int count ) {
-      for ( int i = 0; i < count; i++ )
-        data_.push_back( std::vector<float>() );
-    }
+    };
 
   }
 }
+
+#endif

@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 by  Stefan Nattkemper   *
+*   Copyright (C) 2007 by  Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,32 +17,29 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "samplefilefilter.h"
 #include "sample.h"
+#include <iostream>
 
 namespace psy {
   namespace core {
 
-    Sample::Sample() 
-      : frames_(0),
-        samplesPerSec_(0)
+    SampleFileFilter::SampleFileFilter( Sample& sample ) 
+      : sample_(sample)
     {
     }
 
-    Sample::~Sample()
+    SampleFileFilter::~SampleFileFilter()
     {
     }
 
-    std::list< std::vector<float> >::iterator Sample::channelBegin() {
-      return data_.begin();
+    Sample& SampleFileFilter::sample() {
+      return sample_;
     }
 
-    std::list< std::vector<float> >::iterator Sample::channelEnd() {
-      return data_.end();
-    }
-
-    void Sample::addNewChannel( int count ) {
-      for ( int i = 0; i < count; i++ )
-        data_.push_back( std::vector<float>() );
+    bool SampleFileFilter::read( BinRead& in ) {
+      std::cout << "no default load filter" << std::endl;
+      return true;
     }
 
   }
