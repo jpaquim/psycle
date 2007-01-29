@@ -22,6 +22,13 @@
 namespace psy {
   namespace core {
 
+    InstrumentPatch::InstrumentPatch() {
+    }
+
+    InstrumentPatch::~InstrumentPatch() {
+    }
+
+
     Instrument::Instrument()
     {
     }
