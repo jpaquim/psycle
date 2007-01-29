@@ -130,10 +130,16 @@ namespace psy {
               return 0;
             };
             // For multi-channel data, samples are interleaved between channels
+            // sample 0 for channel 0  
+            // sample 0 for channel 1  
+            // sample 1 for channel 0
+            // sample 1 for channel 1
+            // ...
             // For stereo audio, channel 0 is the left channel and channel 1 is the right.
-            ++channelItr; // increase channelIterator
+            ++channelItr; // increase channelIterator after each sample read
             if ( channelItr == sample().channelEnd() ) {
-              // put to begin when end channel reached ( like a ring )
+              // after each channel is filled go back to the beginning of the channellist
+              // and start writing the next sample
               channelItr = sample().channelBegin();
             }
           }
