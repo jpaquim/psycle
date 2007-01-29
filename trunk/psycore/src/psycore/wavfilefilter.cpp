@@ -25,7 +25,7 @@
 
 namespace psy {
   namespace core {
-        
+
     struct RiffHeader {
       char riff[4];
       psy::tr1::uint32_t fileLength;
@@ -101,32 +101,33 @@ namespace psy {
           if ( in.bad() ) return 0;
           sample().addNewChannel( fmt.wChannels );          
           channelItr = sample().channelBegin();
-        } else
-        if ( memcmp( chunkHeader, "data", 4) ) {
+        } else if ( memcmp( chunkHeader, "data", 4) ) {
           // 4 bytes  <length of the data block>
           unsigned int size = in.readUInt4LE();
-            while ( size ) {
-            switch (fmt.wBitsPerSample) {
-              case 8: {
-                // 8-bit samples are stored as unsigned bytes, ranging from 0 to 255
-                char data;
-                in.read( &data, 1);
-                if ( in.bad() ) return 0;
-                (*channelItr).push_back(static_cast<float>(static_cast<int>(data)/127));
-                size--;
-              }
-              break;
-              case 16:
-                // 16-bit samples are stored as 2's-complement signed integers, ranging from -32768 to 32767.
-                (*channelItr).push_back(static_cast<float>( in.readInt2LE() / 32768));
-                if ( in.bad() ) return 0;
-                size--;
-                size--;
-              break;
-              case 24:
-                return 0;
-              default: 
-                return 0;
+          while ( size ) {
+            switch (fmt.wBitsPerSample) 
+            {
+            case 8: {
+              // 8-bit samples are stored as unsigned bytes, ranging from 0 to 255
+              char data;
+              in.read( &data, 1);
+              if ( in.bad() ) return 0;
+              (*channelItr).push_back(static_cast<float>(static_cast<int>(data)/127));
+              size--;
+            }
+            break;
+            case 16:
+              // 16-bit samples are stored as 2's-complement signed integers, ranging from -32768 to 32767.
+              (*channelItr).push_back(static_cast<float>( in.readInt2LE() / 32768));
+              if ( in.bad() ) return 0;
+              size--;
+              size--;
+            break;
+            case 24:
+              return 0;
+            break;
+            default: 
+              return 0;
             };
             // For multi-channel data, samples are interleaved between channels
             // For stereo audio, channel 0 is the left channel and channel 1 is the right.
