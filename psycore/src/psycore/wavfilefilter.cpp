@@ -98,17 +98,13 @@ namespace psy {
               char data;
               in.read( &data, 1);
               if ( in.bad() ) return 0;
-              std::vector<float>& channelData = *channelItr;
               (*channelItr).push_back(static_cast<float>(static_cast<int>(data)/127));
             }
             break;
-            case 16: {
+            case 16:
               // 16-bit samples are stored as 2's-complement signed integers, ranging from -32768 to 32767.
-              int data = in.readInt2LE();
+              (*channelItr).push_back(static_cast<float>( in.readInt2LE() / 32768));
               if ( in.bad() ) return 0;
-              std::vector<float>& channelData = *channelItr;
-              (*channelItr).push_back(static_cast<float>(data / 32768));
-            }
             break;
             case 24:
             default: ;
