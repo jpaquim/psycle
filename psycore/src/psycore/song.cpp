@@ -32,7 +32,8 @@ namespace psy {
 
 
     // the song class
-    Song::Song()
+    Song::Song() 
+      : patternSequence_(patternData_)
     {
       init();
     }

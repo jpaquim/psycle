@@ -271,10 +271,10 @@ namespace psy
 
 
 		// PatternSequence
-		PatternSequence::PatternSequence()
+        PatternSequence::PatternSequence( PatternData& patternData )
+          : patternData_( patternData )
 		{
 		}
-
 
 		PatternSequence::~PatternSequence()
 		{

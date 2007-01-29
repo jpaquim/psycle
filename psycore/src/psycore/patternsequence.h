@@ -143,7 +143,7 @@ namespace psy
 
 		class PatternSequence : public std::vector<SequenceLine*> {
 		public:
-			PatternSequence();
+			PatternSequence( PatternData& patternData );
 			~PatternSequence();
 
 			typedef std::multimap<double, GlobalEvent*> GlobalMap;
@@ -185,8 +185,7 @@ namespace psy
 
 		private:
 
-			PatternData patternData_;
-
+            PatternData& patternData_;
 			GlobalMap globalEvents_;
 
 		};

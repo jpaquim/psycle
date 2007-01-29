@@ -22,6 +22,8 @@
 
 #include "patterndata.h"
 #include "patternsequence.h"
+#include "machinedata.h"
+#include "instrumentdata.h"
 #include <string>
 
 namespace psy
@@ -62,7 +64,12 @@ namespace psy
 
 			private:
 
+                PatternData patternData_;
+                MachineData machineData_;
+                InstrumentData instrumentData_;
+
 				PatternSequence patternSequence_;
+
                 SongInfo info_;
 
                 void init();
