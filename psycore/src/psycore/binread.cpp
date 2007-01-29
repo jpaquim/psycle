@@ -22,7 +22,7 @@
 #include <iostream>
 
 namespace psy {
-  namespace host {
+  namespace core {
 
     BinRead::BinRead( std::istream & in ) 
       : in_( in  ) 
@@ -44,6 +44,21 @@ namespace psy {
     #pragma warning(disable:4293)
     #endif 
 
+    unsigned short BinRead::readUInt2LE() {
+      unsigned char buf[2];
+      in_.read( reinterpret_cast<char*>(&buf), 2 );
+      switch ( platform_ ) {
+        case byte4LE : return buf[0] | buf[1] << 8;
+        break;
+        case byte4BE : return buf[0] << 24 | buf[1] << 16;
+        break;
+        case byte8LE : return buf[0] | buf[1] << 8;
+        break;
+        case byte8BE : return buf[0] << 56 | buf[1] << 48;
+        break;
+      }
+      return 0; // cannot handle platform
+    }
 
     unsigned int BinRead::readUInt4LE() {
       unsigned char buf[4];
@@ -53,9 +68,9 @@ namespace psy {
         break;
         case byte4BE : return buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0 ; 
         break;
-        case byte8LE : return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24 | buf[4] << 32 | buf[5] << 40 | buf[6] << 48 | buf[7] << 56;
+        case byte8LE : return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24;
         break;
-        case byte8BE : return buf[0] << 56 | buf[1] << 48 | buf[2] << 40 | buf[3] << 32 | buf[4] << 24 | buf[5] << 16 | buf[6] << 8 | buf[7];
+        case byte8BE : return buf[0] << 56 | buf[1] << 48 | buf[2] << 40 | buf[3] << 32 | buf[4] << 24;
         break;
       }
       return 0; // cannot handle platform
@@ -65,6 +80,10 @@ namespace psy {
     #elif defined _MSC_VER
     #pragma warning(pop)
     #endif 
+
+    short BinRead::readInt2LE() {
+      return static_cast<short>( readUInt2LE() );
+    }
 
     int BinRead::readInt4LE() {
       return static_cast<int>( readUInt4LE() );

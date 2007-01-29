@@ -21,6 +21,7 @@
 #define SAMPLE_H
 
 #include <vector>
+#include <list>
 
 namespace psy {
   namespace core {
@@ -34,13 +35,20 @@ namespace psy {
       Sample();
       ~Sample();
 
+      void loadFromFile( const std::string& fileName );
+
+      std::list< std::vector<float> >::iterator channelBegin();
+      std::list< std::vector<float> >::iterator channelEnd();
+
+      void addNewChannel( int count = 1 );
+
     private:
 
       unsigned int frames_;
       unsigned int samplesPerSec_;
 
       // 1. vector channel, 2. sample data of each channel
-      std::vector< std::vector<float> > data_;      
+      std::list< std::vector<float> > data_;      
 
     };
 

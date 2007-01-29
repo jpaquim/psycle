@@ -23,7 +23,7 @@
 #include <istream>
 
 namespace psy {
-  namespace host {
+  namespace core {
 
     class BinRead {      
     public:
@@ -33,7 +33,9 @@ namespace psy {
       BinRead( std::istream & in );
       ~BinRead();
 
-      unsigned int readUInt4LE();
+      short readInt2LE();
+      unsigned short readUInt2LE();
+      unsigned int readUInt4LE();      
       int readInt4LE();
       void readUIntArray4LE( unsigned int data[], int count );
       void readIntArray4LE( int data[], int size );
