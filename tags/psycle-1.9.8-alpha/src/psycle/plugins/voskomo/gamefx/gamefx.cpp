@@ -1,5 +1,5 @@
 /*
-	GameFX (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_yahoo_dot_de
+	GameFX (C)2005 by Jan-Marco Edelmann [jme]
 	Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
 	This plugin is free software; you can redistribute it and/or modify
@@ -1452,7 +1452,7 @@ CMachineInfo const MacInfo =
 		"GameFX 1.3",
 	#endif
 	"GameFX",
-	"Jan-Marco Edelmann [voskomo]",
+	"Jan-Marco Edelmann [jme]",
 	"Help",
 	8
 };

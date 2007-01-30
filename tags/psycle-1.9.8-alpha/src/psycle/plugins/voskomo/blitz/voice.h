@@ -1,4 +1,4 @@
-/*		Blitz (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_voskomo_dot_com
+/*		Blitz (C)2005 by Jan-Marco Edelmann [jme]
 		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
         This plugin is free software; you can redistribute it and/or modify

@@ -18,7 +18,7 @@ Version | Date | Type of release             | Authors
 1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
 1.8     |      | stable                      | psycledelics combined effort :-)
 1.8.1   | 2005 | bugfix			     | bohan & plugin developers
-1.8.2	| 2006 | bugfix			     | [JAZ] & bohan & voskomo	
+1.8.2	| 2006 | bugfix			     | [JAZ] & bohan & jme	
 ----------------------------------------------------------------------------------------------------
 
 
@@ -75,8 +75,8 @@ v1.8
 	+stk plugins (sartorius)
 	+chorus plugin (sartorius)
 	+whawha plugin (sartorius)
-	+gamefx plugin (voskomo)
-	+blitz plugin (voskomo)
+	+gamefx plugin (jme)
+	+blitz plugin (jme)
 + some native plugins are now opensource (druttis & pooplog):
 	* all druttis' plugins now opensource
 	* all pooplog's plugins now opensource

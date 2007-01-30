@@ -156,7 +156,7 @@ for example, 1122334444, means:
 The player calls the Machine::Tick function with those values, and the instrument value set to 0.
 
 Revision 1.27  2005/05/18 06:55:47  johan-boule
-releasing voskomo's blitz plugin
+releasing jme's blitz plugin
 
 Revision 1.26  2005/05/14 15:32:57  johan-boule
 bug fix
@@ -186,7 +186,7 @@ Revision 1.22  2005/04/18 02:00:41  johan-boule
 added src/configuration.hpp to psycle.vcproj
 
 Revision 1.21  2005/04/10 20:11:37  johan-boule
-releasing alpha version 1.7.39 -- with voskomo's gamefx plugin
+releasing alpha version 1.7.39 -- with jme's gamefx plugin
 
 Revision 1.20  2005/04/06 04:32:03  johan-boule
 Attempt to use boost::read_write_mutex instead of an exclusive mutex for Song's lock.
