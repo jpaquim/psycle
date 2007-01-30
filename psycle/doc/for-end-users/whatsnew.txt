@@ -63,8 +63,8 @@ v1.8
 	+stk plugins (sartorius)
 	+chorus plugin (sartorius)
 	+whawha plugin (sartorius)
-	+gamefx plugin (voskomo)
-	+blitz plugin (voskomo)
+	+gamefx plugin (jme)
+	+blitz plugin (jme)
 + some native plugins are now opensource (druttis & pooplog):
 	* all druttis' plugins now opensource
 	* all pooplog's plugins now opensource
