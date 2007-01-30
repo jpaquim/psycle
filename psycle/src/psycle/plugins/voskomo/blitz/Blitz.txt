@@ -114,5 +114,4 @@
 
 
 
-                  (p)2005 Jan-Marco Edelmann [voskomo]
-                       http://www.voskomo.com
+                  (p)2005 Jan-Marco Edelmann [jme]
