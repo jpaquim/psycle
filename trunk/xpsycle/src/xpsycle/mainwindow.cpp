@@ -126,52 +126,7 @@ namespace psy {
 
       pane()->add(book,ngrs::nAlClient);
 
-      ngrs::ToolBar* playBar = new ngrs::ToolBar();
-      playBar->setSkin( ngrs::Skin() );
-      playBar->setSpacing( ngrs::Size( 5,0,0,0) );
-      ngrs::Image* img = new ngrs::Image();
-      img->setSharedBitmap(&icons.playstart());
-      img->setPreferredSize(25,25);
-      barPlayFromStartBtn_ = new ngrs::Button(img);
-      barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
-      barPlayFromStartBtn_->setHint("Play from start");
-      playBar->add(barPlayFromStartBtn_);
-
-      img = new ngrs::Image();
-      img->setSharedBitmap(&icons.play());
-      img->setPreferredSize(25,25);
-      ngrs::Button* playBtn = new ngrs::Button(img);
-      playBtn->setHint("Play from edit position");
-      playBar->add(playBtn)->clicked.connect(this,&MainWindow::onBarPlay);
-
-      img = new ngrs::Image();
-      img->setSharedBitmap(&icons.playselpattern());
-      img->setPreferredSize(25,25);
-      playBar->add(new ngrs::Button(img));
-
-      img = new ngrs::Image();
-      img->setSharedBitmap(&icons.stop());
-      img->setPreferredSize(25,25);
-      ngrs::Button* stopBtn_ = new ngrs::Button(img);
-      stopBtn_->click.connect(this,&MainWindow::onBarStop);
-      stopBtn_->setHint("Stop");
-      playBar->add(stopBtn_);
-
-      img = new ngrs::Image();
-      img->setSharedBitmap(&icons.autoStop());
-      img->setPreferredSize(25,25);
-      playBar->add(new ngrs::Button(img));
-
-      playBar->add(new ngrs::ToolBarSeparator());
-
-      img = new ngrs::Image();
-      img->setSharedBitmap(&icons.recordnotes());
-      img->setPreferredSize(25,25);
-      ngrs::Button* recNotes = new ngrs::Button(img);
-      recNotes->setHint("Record Notes Mode");
-      recNotes->clicked.connect(this,&MainWindow::onRecordNotesMode);
-      playBar->add(recNotes);
-
+     
 /*      ngrs::ToolBar* vuToolBar = new ngrs::ToolBar();
       vuToolBar->add(new ngrs::Label("VU"));
       ngrs::Panel* vuPanel = new ngrs::Panel();
@@ -221,6 +176,55 @@ namespace psy {
 
     void MainWindow::onConfigMenuKeys( ngrs::ButtonEvent* ev ) {
       keyConfigDlg->setVisible( true );
+    }
+
+    ngrs::ToolBar* MainWindow::initPlayBar() {
+      DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
+      playBar = new ngrs::ToolBar();
+      ngrs::Image* img = new ngrs::Image();
+      img->setSharedBitmap(&icons.playstart());
+      img->setPreferredSize(25,25);
+      barPlayFromStartBtn_ = new ngrs::Button(img);
+      barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
+      barPlayFromStartBtn_->setHint("Play from start");
+      playBar->add(barPlayFromStartBtn_);
+
+      img = new ngrs::Image();
+      img->setSharedBitmap(&icons.play());
+      img->setPreferredSize(25,25);
+      ngrs::Button* playBtn = new ngrs::Button(img);
+      playBtn->setHint("Play from edit position");
+      playBar->add(playBtn)->clicked.connect(this,&MainWindow::onBarPlay);
+
+      img = new ngrs::Image();
+      img->setSharedBitmap(&icons.playselpattern());
+      img->setPreferredSize(25,25);
+      playBar->add(new ngrs::Button(img));
+
+      img = new ngrs::Image();
+      img->setSharedBitmap(&icons.stop());
+      img->setPreferredSize(25,25);
+      ngrs::Button* stopBtn_ = new ngrs::Button(img);
+      stopBtn_->click.connect(this,&MainWindow::onBarStop);
+      stopBtn_->setHint("Stop");
+      playBar->add(stopBtn_);
+
+      img = new ngrs::Image();
+      img->setSharedBitmap(&icons.autoStop());
+      img->setPreferredSize(25,25);
+      playBar->add(new ngrs::Button(img));
+
+      playBar->add(new ngrs::ToolBarSeparator());
+
+      img = new ngrs::Image();
+      img->setSharedBitmap(&icons.recordnotes());
+      img->setPreferredSize(25,25);
+      ngrs::Button* recNotes = new ngrs::Button(img);
+      recNotes->setHint("Record Notes Mode");
+      recNotes->clicked.connect(this,&MainWindow::onRecordNotesMode);
+      playBar->add(recNotes);
+
+      return playBar;
     }
 
     void MainWindow::initMenu( )
@@ -388,6 +392,8 @@ namespace psy {
     {
       toolBarPanel_ = new ngrs::ToolBarPanel();    
       pane()->add(toolBarPanel_, ngrs::nAlTop);
+
+      toolBarPanel_->add( initPlayBar() );
 
       DefaultBitmaps & icons =  SkinReader::Instance()->bitmaps();
 
