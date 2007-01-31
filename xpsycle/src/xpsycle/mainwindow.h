@@ -22,6 +22,7 @@
 
 #include "songpdlg.h"
 #include "songexplorer.h"
+#include <psycore/player.h>
 #include <ngrs/window.h>
 #include <ngrs/menubar.h>
 #include <ngrs/menu.h>
@@ -71,7 +72,7 @@ namespace psy {
       ProgressStatusItem();
       ~ProgressStatusItem();
 
-      virtual void setText( const std::string & text );
+      virtual void setText( const std::string& text );
 
 
     private:
@@ -88,9 +89,11 @@ namespace psy {
 
       ~MainWindow();
 
-      virtual void onKeyPress( const ngrs::KeyEvent & event);	
+      virtual void onKeyPress( const ngrs::KeyEvent& event);	
 
     private:
+
+      psy::core::Player player;
 
       ngrs::Skin songTabSkinNone;
       ngrs::Skin songTabSkinDown;
@@ -156,6 +159,7 @@ namespace psy {
       void initToolBar();
       void initStatusBar();
       void initMachineView();
+      ngrs::ToolBar* initPlayBar();
       
 
       void updateBars();
