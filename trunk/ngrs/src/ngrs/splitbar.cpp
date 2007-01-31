@@ -53,10 +53,17 @@ namespace ngrs {
     setPreferredSize(5,5);
     setMinimumWidth(1);
     setMinimumHeight(1);
+    mode_ = nSplitFull;
     skin_ = App::config()->skin("splitbar");
   }
 
-  void SplitBar::onMove( const MoveEvent & moveEvent )
+  void SplitBar::onStart( const MoveEvent& moveEvent ) {
+    if ( mode_ == nSplitXor ) {
+         
+    }
+  }
+
+  void SplitBar::onMove( const MoveEvent& moveEvent )
   {
     if (orientation_ == nVertical) {
       VisualComponent* leftVc = 0;
@@ -113,6 +120,9 @@ namespace ngrs {
       }
   }
 
+  void SplitBar::onEnd( const MoveEvent& moveEvent ) {
+  }
+
   void SplitBar::setOrientation( int orientation )
   {
     setGradientOrientation(!orientation);
@@ -126,6 +136,14 @@ namespace ngrs {
         setMoveable(Moveable(nMvVertical | nMvNoneRepaint | nMvParentLimit));
         setCursor( nCrHSplit );
       }
+  }
+
+  void SplitBar::setMode( int mode ) {
+    mode = mode_;
+  }
+  
+  int SplitBar::mode() const {
+    return mode_;
   }
 
 }
