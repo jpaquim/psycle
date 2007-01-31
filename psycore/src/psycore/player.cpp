@@ -72,5 +72,27 @@ namespace psy {
       return 0;
     }
 
+    // starts to play.
+    void Player::start( double pos ) {
+    }
+
+    // stops playing.
+    void Player::stop() {
+    }
+
+    // is the player in playmode.
+    bool Player::playing() const {
+      return true;
+    }
+
+    // set the actualPlaypos
+    void Player::setPlayPos( double pos ) {
+    }
+
+    // the current playPos
+    double Player::playPos() const {
+      return 0;
+    }
+
   }
 }
