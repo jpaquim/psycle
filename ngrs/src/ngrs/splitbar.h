@@ -28,21 +28,30 @@
 
 namespace ngrs {
 
+  const int nSplitFull = 1;
+  const int nSplitXor = 2;
+
   class SplitBar : public Panel
   {
   public:
     SplitBar();
-    SplitBar(int orientation);
+    SplitBar( int orientation );
 
     ~SplitBar();
 
-    void setOrientation(int orientation);
+    void setOrientation( int orientation );
+    void setMode( int mode );
+    int mode() const;
 
-    virtual void onMove(const MoveEvent & moveEvent);
+    virtual void onStart( const MoveEvent& moveEvent );
+    virtual void onMove( const MoveEvent& moveEvent );
+    virtual void onEnd( const MoveEvent& moveEvent );
 
   private:
 
     int orientation_;
+    int mode_;
+
     void init();
 
   };
