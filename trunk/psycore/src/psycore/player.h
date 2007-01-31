@@ -36,6 +36,21 @@ namespace psy {
 
       virtual Player* clone() const;
 
+      // starts to play.
+      void start( double pos = 0.0 );
+
+      // stops playing.
+      void stop();
+
+      // is the player in playmode.
+      bool playing() const;
+
+      // set the actualPlaypos
+      void setPlayPos( double pos );
+
+      // the current playPos
+      double playPos() const;
+
       void loadAudioOutPlugin( const std::string& path );
 
     private:
