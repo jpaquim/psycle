@@ -2,18 +2,20 @@
 <xpsycle>
 
 <!-- help configuration -->
-<path id='hlpdir' src='~/xpsycle/doc/' />
+<path id='hlpdir' src='/usr/share/doc/packages/xpsycle/doc/' />
 
 <!-- audio configuration -->
 
 <audio enable='1' />
-<driver name='mme' />
+<!--<driver name='jack' /> -->
+<driver name='alsa' />
+<alsa device = 'plughw:0' />
 
 <!-- gui configuration -->
 
-<path id='plugindir' src='C:\Programme\Psycle\PsyclePlugins\' />
-<path id='ladspadir' src='C:\Programme\Audacity\Plug-Ins\' />
-<path id='prsdir' src='C:\Programme\Psycle\PsyclePlugins\'></path>
+<path id='plugindir' src='/usr/lib/psycle/' />
+<path id='ladspadir' src='/usr/lib/ladspa' />
+<path id='prsdir' src='/usr/share/psycle/presets/'></path>
 
 <!-- keyHandler configuration -->
 
@@ -120,3 +122,4 @@
 <key id='block_unmark' mod='ctrl' keychar='U' />
 
 </xpsycle>
+
