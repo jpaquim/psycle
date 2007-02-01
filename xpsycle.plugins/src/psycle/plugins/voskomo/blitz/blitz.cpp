@@ -264,7 +264,7 @@ CMachineParameter const paraOsc1FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	47,											// MaxValue
+	50,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -424,7 +424,7 @@ CMachineParameter const paraOsc2FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	47,											// MaxValue
+	50,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -585,7 +585,7 @@ CMachineParameter const paraOsc3FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	47,											// MaxValue
+	50,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -746,7 +746,7 @@ CMachineParameter const paraOsc4FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	47,											// MaxValue
+	50,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -1484,7 +1484,7 @@ sprintf(
 		"\nBFFF and lower: Arpeggio (xyzz, x=2nd, y=3rd, zz=optional 4th tone)\n"
 		);
 
-pCB->MessBox(buffer,"hello",0);
+pCB->MessBox(buffer,"Help",0);
 
 }
 
@@ -1738,6 +1738,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 45:sprintf(txt,"FM next Oscillator (-)");return true;break;
 			case 46:sprintf(txt,"Filter Modulation");return true;break;
 			case 47:sprintf(txt,"Master Saturation");return true;break;
+			case 48:sprintf(txt,"FM last Oscillator (+)");return true;break;
+			case 49:sprintf(txt,"FM last Oscillator (-)");return true;break;
+			case 50:sprintf(txt,"Phase Control");return true;break;
 		}
 	}
 
