@@ -175,6 +175,7 @@ private:
 	float cmCtl[4];
 	float fbCtl[4];
 	float fmCtl[2][4];
+	float fmCtl2[2][4];
 	float fmData1;
 	float fmData2;
 	float fmData3;
