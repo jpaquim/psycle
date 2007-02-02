@@ -22,6 +22,7 @@
 
 #include "mswaveoutplugin.h"
 #include <mmsystem.h>
+#include "stdlib.h"
 
 /* is plugin initialized ? */
 static int _initialized = 0;
@@ -52,21 +53,30 @@ static DWORD WINAPI audioOutThread( void *pWaveOut );
 /* check, if thread loop should be left */
 static int _running = 0; 
 static void fillBuffer(void);
-static int _dither;
+static int _dither = 0;
 static int start(void);
 static int stop(void);
 static void quantizeWithDither(float *pin, int *piout, int c);
 static void quantize(float *pin, int *piout, int c);
 static PsyProcessCallback _pCallback = 0;
-static PsyAudioSettings settings_;
+
+static PsyAudioSettings settings_ = {
+  44100,
+  16,
+  3,
+  2048,
+  4096,
+  7,
+  ""
+};
+
 static void* arg_ = 0;
 
 static int msWaveOutInit(void) {
   return 1;
 }
 
-static int msWaveOutOpen( PsyAudioSettings settings ) {
-  settings_ = settings;
+static int msWaveOutOpen( ) {  
   return start();
 }
 
@@ -74,7 +84,12 @@ static int msWaveOutClose(void) {
   return stop();
 }
 
-static int msWaveOutPause(void) {
+static int msWaveOutLock(void) {
+  /* todo */
+  return 1;
+}
+
+static int msWaveOutUnlock(void) {
   /* todo */
   return 1;
 }
@@ -83,6 +98,14 @@ static int msWaveOutSetCallback( PsyProcessCallback processCallback, void *arg) 
   _pCallback = processCallback;
   arg_ = arg;
   return 1;
+}
+
+static void msWaveOutSetSettings( PsyAudioSettings settings ) {
+  settings_ = settings;
+}
+
+static PsyAudioSettings* msWaveOutSettings(void) {
+  return &settings_;
 }
 
 static int const SHORT_MIN = -32768;
@@ -204,21 +227,24 @@ void CALLBACK waveOutProc(
   LeaveCriticalSection(&waveCriticalSection);
 }
 
+static char buf[512];
+
 void fillBuffer() {
   /* this protects freeBlockCounter, that is manipulated from two threads. */
   /* the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio */
-  //          InitializeCriticalSection( &waveCriticalSection );
-  int bufSize;
-  bufSize = 1024 / 2;
-  //          psy::tr1::int16_t buf[1024 / 2];
-  //          int newCount = bufSize / 2;        
+  InitializeCriticalSection( &waveCriticalSection );
+  
   /*          while ( _running ) {
   float const * input(_pCallback(_callbackContext, newCount));              
   for (int i = 0; i < bufSize; i++) {
   buf[i] = *input++;
-  }       
-  writeAudio(hWaveOut, (CHAR*) buf, sizeof(buf) );
-  }*/
+  }*/       
+  while ( _running) {
+    if ( _pCallback ) {
+      _pCallback( 256, arg_);
+    }
+    writeAudio(hWaveOut, (CHAR*) buf, sizeof(buf) );
+  }
 }
 
 DWORD WINAPI audioOutThread( void* pWaveOut ) {

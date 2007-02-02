@@ -22,6 +22,7 @@
 
 #include "machine.h"
 #include "psyaudio.h"
+#include "pluginload.h"
 #include <string>
 
 namespace psy {
@@ -55,11 +56,11 @@ namespace psy {
 
     private:
 
+      PsyAudioOut* outputPlugin_;
+      PluginLoad pluginLoad;
+
       static int process ( unsigned int nframes, void *arg);
-
-      void* outputPluginLibHandle_;
-
-      void unloadOutputPlugin();
+      int process ( unsigned int nframes );
 
     };
 

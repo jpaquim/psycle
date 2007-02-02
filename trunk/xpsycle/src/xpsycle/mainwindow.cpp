@@ -124,7 +124,9 @@ namespace psy {
       ngrs::SplitBar* splitBar = new ngrs::SplitBar();
       pane()->add( splitBar, ngrs::nAlLeft );
 
-      pane()->add(book,ngrs::nAlClient);
+      pane()->add( book, ngrs::nAlClient);
+
+      player.loadAudioOutPlugin( "c:\\psycle\\trunk\\audiodriver\\mme\\src\\debug\\psymmedriver.dll");
 
      
 /*      ngrs::ToolBar* vuToolBar = new ngrs::ToolBar();

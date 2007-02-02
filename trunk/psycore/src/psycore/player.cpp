@@ -18,28 +18,18 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "player.h"
-
-#ifdef __unix__
-#include <dlfcn.h>
-#else
-#include <windows.h>
-#ifdef _MSC_VER
-#undef min
-#undef max
-#endif
-#endif
+#include <iostream>
 
 namespace psy {
   namespace core {
 
     Player::Player() 
-      : outputPluginLibHandle_(0)
+      : outputPlugin_(0)
     {
     }
 
     Player::~Player()
     {
-      unloadOutputPlugin();
     }
 
     Player* Player::clone() const {
@@ -47,28 +37,28 @@ namespace psy {
     }
 
     void Player::loadAudioOutPlugin( const std::string& path ) {
-      unloadOutputPlugin();
-#ifdef __unix__
-     outputPluginLibHandle_ = dlopen( path.c_str(), RTLD_LAZY);
-#else
-     // Set error mode to disable system error pop-ups (for LoadLibrary)
-      UINT uOldErrorMode = ::SetErrorMode(SEM_FAILCRITICALERRORS);
-     outputPluginLibHandle_ = ::LoadLibrary( path.c_str() );
-     // Restore previous error mode
-     ::SetErrorMode( uOldErrorMode );
-#endif
-    }
-
-    void Player::unloadOutputPlugin() {
-      #ifdef __unix__
-      #else
-      if  ( outputPluginLibHandle_ ) {
-        ::FreeLibrary( reinterpret_cast<HINSTANCE>(outputPluginLibHandle_) ) ;
+      if ( pluginLoad.open( path ) ) {
+        void* (*gpi) (void);                
+        gpi = reinterpret_cast<void*(__cdecl*)(void)>(pluginLoad.loadProcAdress("getPsyAudioOutPlugin"));
+        outputPlugin_ = reinterpret_cast<PsyAudioOut*>(gpi());
       }
-      #endif
+      if ( outputPlugin_ ) {
+        std::cout << "Outputplugin is : " << outputPlugin_->name << std::endl;
+        PsyAudioSettings settings;
+        outputPlugin_->setCallback( Player::process, this );
+        std::cout << outputPlugin_->settings()->samplesPerSec << std::endl;
+        if ( outputPlugin_->open() ) {
+          std::cout << "device started" << std::endl;
+        }
+      }
     }
 
-    int Player::process ( unsigned int nframes, void *arg) {
+    int Player::process( unsigned int nframes, void *arg ) {
+      Player* player = reinterpret_cast<Player*>(arg);
+      return player->process( nframes );
+    }
+
+    int Player::process( unsigned int nframes ) {
       return 0;
     }
 
