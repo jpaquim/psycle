@@ -1,4 +1,4 @@
-/***************************************************************************
+/**************************************************************************
 *   Copyright (C) 2007 by  Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
@@ -17,53 +17,37 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef MACHINEDATA_H
-#define MACHINEDATA_H
-
-#include "machine.h"
 #include "wire.h"
-#include <map>
 
 namespace psy {
   namespace core {
 
-    class MachineSlot {
-    public:
+    Wire::Wire()
+    {
+    }
 
-      MachineSlot( int number, const std::string& name = "" );
-      ~MachineSlot();
-      
-      int number() const;
-      void setName( const std::string& name );
-      const std::string& name() const;
+    Wire::~Wire()
+    {
+    }
 
-      bool operator<( const MachineSlot& rhs ) const;
 
-    private:
+    DefaultWire::DefaultWire() {
+    }
 
-      int number_;
-      std::string name_;
+    DefaultWire::~DefaultWire() {
+    }
 
-    };
+    DefaultWire* DefaultWire::clone() const {
+      return new DefaultWire(*this);
+    }
 
-    class MachineData {
-    public:
+    ChannelData& DefaultWire::input() {
+      return input_;
+    }
 
-      MachineData();
-
-      ~MachineData();
-
-      void add( const MachineSlot& slot, Machine* machine );
-
-    private:
-
-      bool delFlag_;
-      std::map<MachineSlot, Machine*> machines_;
-      std::vector<Wire*> wires_;
-
-    };
+    ChannelData& DefaultWire::output() {
+      return output_;
+    }
 
   }
 }
-
-#endif
