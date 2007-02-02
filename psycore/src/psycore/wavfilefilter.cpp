@@ -71,7 +71,7 @@ namespace psy {
       //Next, the fmt chunk describes the sample format:
       WavFmt fmt;
       // channel Iterator
-      std::list< std::vector<float> >::iterator channelItr = sample().channelBegin();
+      std::list< Channel >::iterator channelItr = sample().channels().begin();
       while( !in.eof() ) {
         char chunkHeader[4];
         in.read(chunkHeader, 4);
@@ -99,11 +99,17 @@ namespace psy {
           // 34      2 bytes  <bits/sample>  // 8 or 16
           fmt.wBitsPerSample= in.readUInt2LE();
           if ( in.bad() ) return 0;
-          sample().addNewChannel( fmt.wChannels );          
-          channelItr = sample().channelBegin();
+          sample().channels().addNewChannel( fmt.wChannels );                    
         } else if ( memcmp( chunkHeader, "data", 4) ) {
           // 4 bytes  <length of the data block>
+          unsigned int frame = 0;
           unsigned int size = in.readUInt4LE();
+          channelItr = sample().channels().begin();
+          for ( ; channelItr != sample().channels().end(); channelItr++ ) {
+            int frames = size / fmt.wBitsPerSample / fmt.wChannels;
+            (*channelItr).createBuffer( frames );
+          }
+          channelItr = sample().channels().begin();
           while ( size ) {
             switch (fmt.wBitsPerSample) 
             {
@@ -112,13 +118,13 @@ namespace psy {
               char data;
               in.read( &data, 1);
               if ( in.bad() ) return 0;
-              (*channelItr).push_back(static_cast<float>(static_cast<int>(data)/127));
+              (*channelItr).buffer()[frame] = static_cast<float>(static_cast<int>(data)/127);
               size--;
             }
             break;
             case 16:
               // 16-bit samples are stored as 2's-complement signed integers, ranging from -32768 to 32767.
-              (*channelItr).push_back(static_cast<float>( in.readInt2LE() / 32768));
+              (*channelItr).buffer()[frame] = static_cast<float>( in.readInt2LE() / 32768);
               if ( in.bad() ) return 0;
               size--;
               size--;
@@ -137,10 +143,11 @@ namespace psy {
             // ...
             // For stereo audio, channel 0 is the left channel and channel 1 is the right.
             ++channelItr; // increase channelIterator after each sample read
-            if ( channelItr == sample().channelEnd() ) {
+            if ( channelItr == sample().channels().end() ) {
               // after each channel is filled go back to the beginning of the channellist
               // and start writing the next sample
-              channelItr = sample().channelBegin();
+              channelItr = sample().channels().begin();
+              frame++;
             }
           }
         }

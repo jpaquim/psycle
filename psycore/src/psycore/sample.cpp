@@ -24,7 +24,7 @@ namespace psy {
 
     Sample::Sample() 
       : frames_(0),
-        samplesPerSec_(0)
+      samplesPerSec_(0)
     {
     }
 
@@ -32,18 +32,10 @@ namespace psy {
     {
     }
 
-    std::list< std::vector<float> >::iterator Sample::channelBegin() {
-      return data_.begin();
+    ChannelData& Sample::channels() {
+      return channels_;
     }
 
-    std::list< std::vector<float> >::iterator Sample::channelEnd() {
-      return data_.end();
-    }
-
-    void Sample::addNewChannel( int count ) {
-      for ( int i = 0; i < count; i++ )
-        data_.push_back( std::vector<float>() );
-    }
 
   }
 }
