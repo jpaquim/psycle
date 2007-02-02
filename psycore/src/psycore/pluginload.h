@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Stefan Nattkemper   *
+*   Copyright (C) 2007 by  Stefan Nattkemper  *
 *   natti@linux   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,51 +17,36 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "pluginfinder.h"
-#include <ngrs/file.h>
+#ifndef PLUGINLOAD_H
+#define PLUGINLOAD_H
 
-namespace psycle
-{
-  namespace host
-  {
+#include <string>
 
-    AudioOutDriverInfo::AudioOutDriverInfo( const std::string& path ) 
-      : path_(path)
+namespace psy {
+  namespace core {
+
+
+    class PluginLoad
     {
-    }
+    public:
 
-    AudioOutDriverInfo::~AudioOutDriverInfo() {
-    }
+      PluginLoad();
 
-    std::string AudioOutDriverInfo::path() const {
-      return path_;
-    }
+      ~PluginLoad();
 
+      bool open( const std::string& librarypath );
+      void close();
+      void* loadProcAdress( const std::string& functionname );      
 
-    PluginFinder::PluginFinder( ) 
-    {
-    }
+      std::string error() const;
 
-    PluginFinder::~PluginFinder()
-    {
-    }
+    private:
 
-    void PluginFinder::scanAll() {
-      scanAudioOutDriver();
-      scanNatives();
-      scanLadspa();		
-    }
+      void* _libHandle;
 
-    void PluginFinder::scanLadspa() {
-    }
-
-    void PluginFinder::scanNatives() {
-    }
-
-    void PluginFinder::scanAudioOutDriver() {
-      // just for test, not yet implemneted
-      audioOutDriverList.push_back( AudioOutDriverInfo("c:\\psycle\\trunk\\audiodriver\\mme\\src\\debug\\psymmedriver.dll"));
-    }
+    };
 
   }
 }
+
+#endif

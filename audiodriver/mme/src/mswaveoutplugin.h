@@ -31,17 +31,32 @@
 extern "C" {
 #endif
 /* body of header */
-     
+
+#if defined(_MSC_VER)
+#ifdef __cplusplus
+#define EXPORT extern "C" __declspec (dllexport)
+#else
+#define EXPORT __declspec (dllexport)
+#endif 
+#else 
+#define EXPORT
+#endif
 
 static int msWaveOutInit(void);
 
-static int msWaveOutOpen( PsyAudioSettings settings );
+static int msWaveOutOpen(void);
 
 static int msWaveOutClose(void);
 
-static int msWaveOutPause(void);
+static int msWaveOutLock(void);
+
+static int msWaveOutUnlock(void);
 
 static int msWaveOutSetCallback( PsyProcessCallback process_callback, void *arg);
+
+static void msWaveOutSetSettings( PsyAudioSettings settings );
+
+static PsyAudioSettings* msWaveOutSettings(void);
 
 PsyAudioOut msWaveOut = 
 {
@@ -52,9 +67,17 @@ PsyAudioOut msWaveOut =
   msWaveOutInit,
   msWaveOutOpen,
   msWaveOutClose,
-  msWaveOutPause,
+  msWaveOutLock,
+  msWaveOutUnlock,
   msWaveOutSetCallback,
+  msWaveOutSetSettings,
+  msWaveOutSettings
 };
+
+EXPORT PsyAudioOut *getPsyAudioOutPlugin(void)
+{
+	return &msWaveOut;
+}
                    
 #ifdef __cplusplus
 } /* closing brace for extern "C" */

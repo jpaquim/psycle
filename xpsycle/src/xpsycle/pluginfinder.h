@@ -25,12 +25,28 @@
 */
 
 #include <string>
+#include <vector>
 
 namespace psycle
 {
 	namespace host
 	{
 
+      class AudioOutDriverInfo {
+      public:
+
+        AudioOutDriverInfo( const std::string& path );
+        ~AudioOutDriverInfo();
+
+        // path and name of teh audiodriver library ( e.g adriv.so )
+        // unique key
+        std::string path() const;
+
+      private:
+
+        std::string path_;
+
+      };
 
 		class PluginFinder  {
 		public:
@@ -42,9 +58,11 @@ namespace psycle
 
 		private:
 
-			void scanLadspa();
-			void scanNatives();
-            void scanAudioDriver();
+          std::vector<AudioOutDriverInfo> audioOutDriverList;
+
+	      void scanLadspa();
+		  void scanNatives();
+          void scanAudioOutDriver();
 
 		};
 	}

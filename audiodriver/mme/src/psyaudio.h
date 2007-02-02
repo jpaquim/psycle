@@ -53,10 +53,13 @@ struct PsyAudioOut {
   int show; 
 
   int (*init)  (void);  // inits the plugin
-  int (*open)  ( PsyAudioSettings settings );  // open and starts the device
+  int (*open)  (void);  // open and starts the device
   int (*close) (void);  // closes the device
-  int (*pause) (void);  // locks the callback
+  int (*lock)   (void);  // locks the callback
+  int (*unlock) (void);  // unlocks the callback
   int (*setCallback) ( PsyProcessCallback process_callback, void *arg); // sets the callback to the work method
+  void (*setSettings) ( PsyAudioSettings settings );
+  PsyAudioSettings* (*settings) (void);
 };
 
 
