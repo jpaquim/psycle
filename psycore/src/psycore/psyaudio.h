@@ -34,7 +34,7 @@ typedef struct PsyAudioSettings PsyAudioSettings;
 struct PsyAudioSettings {
   int samplesPerSec;
   int bitDepth;
-  int channelMode;
+  int channelSize;
   int bufferSize;
   int blockSize;
   int blockCount;
@@ -58,8 +58,12 @@ struct PsyAudioOut {
   int (*lock)   (void);  // locks the callback
   int (*unlock) (void);  // unlocks the callback
   int (*setCallback) ( PsyProcessCallback process_callback, void *arg); // sets the callback to the work method
-  void (*setSettings) ( PsyAudioSettings settings );
-  PsyAudioSettings* (*settings) (void);;
+  void (*setSettings) ( PsyAudioSettings settings ); // here you can set settings
+  PsyAudioSettings* (*settings) (void); // here you can get settings
+  int (*channelSize) (void); // how many channels has the device available
+  float* (*buffer) (int); // returns float array start to the buffer of a channel 
+                          // if device is stereo 0 is left, and 1 shall be right
+
 };
 
 

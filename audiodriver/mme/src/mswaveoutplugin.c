@@ -63,7 +63,7 @@ static PsyProcessCallback _pCallback = 0;
 static PsyAudioSettings settings_ = {
   44100,
   16,
-  3,
+  2,
   2048,
   4096,
   7,
@@ -106,6 +106,22 @@ static void msWaveOutSetSettings( PsyAudioSettings settings ) {
 
 static PsyAudioSettings* msWaveOutSettings(void) {
   return &settings_;
+}
+
+static int msWaveOutChannelSize(void) {
+  return settings_.channelSize;
+}
+
+static float buf_left[512];
+static float buf_right[512];
+
+static float* msWaveOutBuffer( int channel ) {
+  if ( channel == 0 ) {
+    return buf_left;
+  } else
+  if ( channel == 1 ) {
+    return buf_right;
+  }
 }
 
 static int const SHORT_MIN = -32768;
@@ -227,9 +243,10 @@ void CALLBACK waveOutProc(
   LeaveCriticalSection(&waveCriticalSection);
 }
 
-static char buf[512];
+static short buf[512];
 
 void fillBuffer() {
+  int i;
   /* this protects freeBlockCounter, that is manipulated from two threads. */
   /* the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio */
   InitializeCriticalSection( &waveCriticalSection );
@@ -242,6 +259,11 @@ void fillBuffer() {
   while ( _running) {
     if ( _pCallback ) {
       _pCallback( 256, arg_);
+    }
+    /* mme uses a interleaved format */    
+    for (i = 0; i < 256; i++) {
+      buf[2*i]   = buf_left[i] * 32768;
+      buf[2*i+1] = buf_right[i] * 32768;
     }
     writeAudio(hWaveOut, (CHAR*) buf, sizeof(buf) );
   }
