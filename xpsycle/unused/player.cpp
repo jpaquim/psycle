@@ -24,6 +24,7 @@
 #include "player.h"
 #include "song.h"
 #include "machine.h"
+#include "internal_machines.h"
 
 #ifdef __unix__
 #include <unistd.h> // for OpenBSD usleep()
@@ -142,7 +143,7 @@ namespace psycle
 		
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
-			int mIndex;
+			Machine::id_type mIndex;
 			switch ( event.type() )
 			{
 			case GlobalEvent::BPM_CHANGE:
@@ -182,7 +183,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					mIndex = event.target();
 					if(mIndex < MAX_MACHINES)
 					{
-						int wire( event.target2() );
+						Wire::id_type wire( event.target2() );
 						if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1( static_cast<int>( event.parameter() )));
 					}
 				}

@@ -485,10 +485,10 @@ namespace psycle
 			file->Read(index);
 			if(index < MAX_MACHINES)
 			{
-				int const id(index);
+				Machine::id_type const id(index);
 				///\todo: song.clear() creates an empty song with a Master Machine. This loader doesn't
 				// try to free that allocated machine.
-				song._pMachine[index] = song.LoadFileChunk(&song,file, id, minorversion, true);
+				song._pMachine[index] = Machine::LoadFileChunk(&song,file, id, minorversion, true);
 			}
 			return (bool)song._pMachine[index];
 		}

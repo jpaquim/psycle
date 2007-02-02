@@ -19,6 +19,9 @@
 ***************************************************************************/
 #include "machinegui.h"
 #include "machine.h"
+#include "framemachine.h"
+#include "macpropdlg.h"
+#include "masterdlg.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include "song.h"
@@ -39,8 +42,14 @@ namespace psycle {
 			selected_ = 0;
 			mac_ = & mac;
 			setMoveable( ngrs::Moveable(ngrs::nMvHorizontal | ngrs::nMvVertical | ngrs::nMvNoneRepaint | ngrs::nMvTopLimit | ngrs::nMvLeftLimit));
+			setPosition( mac._x, mac._y, 200+2*ident(), 30+2*ident() );
+
 			setFont( ngrs::Font("Suse sans",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
 
+			propsDlg_ = new MacPropDlg( mac_ );
+				propsDlg_->updateMachineProperties.connect(this,&MachineGUI::onUpdateMachinePropertiesSignal);
+				propsDlg_->deleteMachine.connect(this,&MachineGUI::onDeleteMachineSignal);
+			add(propsDlg_);
 		}
 
 
@@ -133,10 +142,15 @@ namespace psycle {
 
 			oldDrag = newDrag;
 
-            if ( window()->statusModel() ) {
-				//std::string msg =  mac()._editName + "("+ stringify(left()) + ","+ stringify(top())+ ")";
-				//window()->statusModel()->setText( msg );
+			mac()._x = left();
+			mac()._y = top();
+
+			if ( window()->statusModel() ) {
+				std::string msg =  mac()._editName + "("+ stringify(left()) + ","+ stringify(top())+ ")";
+				window()->statusModel()->setText( msg );
 			}
+
+			moved.emit( &mac(), mac()._x, mac()._y );
 		}
 
 		int MachineGUI::ident( ) const
@@ -188,6 +202,11 @@ namespace psycle {
 			deleteRequest.emit(this);
 		}
 
+		void MachineGUI::showPropsDlg()
+		{
+			propsDlg_->setVisible(true); 
+		}
+
 		void MachineGUI::detachLine( WireGUI * line )
 		{
 			std::vector<LineAttachment>::iterator it = attachedLines.begin();
@@ -215,6 +234,10 @@ namespace psycle {
 		{
 		}
 
+		void MachineGUI::onUpdateMachinePropertiesSignal( Machine* machine ) {
+			repaint( this );
+		}
+
 		// end of Machine GUI class
 
 
@@ -223,6 +246,7 @@ namespace psycle {
 		MasterGUI::MasterGUI( Machine& mac ) : MachineGUI( mac )
 		{
 			setSkin();
+			masterDlg = new MasterDlg( &mac );
 			setBackground( ngrs::Color( 0, 0, 200 ) );
 		}
 
@@ -274,6 +298,9 @@ namespace psycle {
 		} 
 
 		void MasterGUI::onMouseDoublePress( int x, int y, int button ) {
+			if ( button==1 ) {
+				masterDlg->setVisible(true);
+			}
 		}
 		// end of MasterGUI class
 
@@ -288,6 +315,9 @@ namespace psycle {
 			add(panSlider_);
 
 			setSkin();
+			frameMachine = new FrameMachine( &mac );
+			frameMachine->patternTweakSlide.connect(this,&GeneratorGUI::onTweakSlide);
+			add(frameMachine);
 
 			vuPanel_ = new VUPanel(this);
 			vuPanel_->setPosition(coords().dVu.left() + ident(),coords().dVu.top() + ident(),coords().dVu.width(),coords().dVu.height());
@@ -310,14 +340,14 @@ namespace psycle {
 			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
 			g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
-//			g.drawText(coords().dNameCoords.x(),coords().dNameCoords.y()+g.textAscent(), stringify(mac()._macIndex)+ ":" + mac()._editName );
+			g.drawText(coords().dNameCoords.x(),coords().dNameCoords.y()+g.textAscent(), stringify(mac()._macIndex)+ ":" + mac()._editName );
 
 
-//			if ( mac()._mute )
-//				g.putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
+			if ( mac()._mute )
+				g.putPixmap(coords().dMuteCoords.left(),coords().dMuteCoords.top(),coords().muteCoords.width(),coords().muteCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
 
-//			if ( mac().song()->machineSoloed == mac()._macIndex )
-//				g.putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top());
+			if ( mac().song()->machineSoloed == mac()._macIndex )
+				g.putPixmap(coords().dSoloCoords.left(),coords().dSoloCoords.top(),coords().soloCoords.width(),coords().soloCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top());
 
 			// reset old Translation
 			g.setTranslation( xTrans, yTrans );
@@ -336,7 +366,7 @@ namespace psycle {
 			panSlider_->setOrientation(ngrs::nHorizontal);
 			panSlider_->setTrackLine(false);
 			panSlider_->setRange(0,127);
-//			panSlider_->setPos( mac()._panning );
+			panSlider_->setPos( mac()._panning );
 			panSlider_->customSliderPaint.connect(this,&GeneratorGUI::customSliderPaint);
 			panSlider_->slider()->setWidth( coords().sPan.width() );
 			panSlider_->slider()->setHeight( coords().sPan.height() );
@@ -344,20 +374,51 @@ namespace psycle {
 
 		void GeneratorGUI::onPosChanged( ngrs::Slider* sender )
 		{
-//		  mac().SetPan( (int) panSlider_->pos());		
+		  mac().SetPan( (int) panSlider_->pos());		
 		}
 
 		void GeneratorGUI::onMousePress( int x, int y, int button )
 		{
 			MachineGUI::onMousePress(x,y,button);
 			if (button==1) { // left-click
-				if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { 
-                  // mute or unmute
-				  repaint();
-                } else
-			    if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { 
-                  // solo or unsolo
-                } 
+				if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
+					mac()._mute = !mac()._mute;
+					if (mac()._mute) {
+						mac()._volumeCounter=0.0f;
+						mac()._volumeDisplay=0;
+						if (mac().song()->machineSoloed == mac()._macIndex ) {
+							mac().song()->machineSoloed = -1;
+						}
+					}
+					repaint();
+				} else
+					if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
+						if (mac().song()->machineSoloed == mac()._macIndex ) {
+							mac().song()->machineSoloed = -1;
+							for ( int i=0;i<MAX_MACHINES;i++ ) {
+								if ( mac().song()->_pMachine[i] ) {
+									if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+										mac().song()->_pMachine[i]->_mute = false;
+									}
+								}
+							}
+						} else {
+							for ( int i=0;i<MAX_MACHINES;i++ ) {
+								if ( mac().song()->_pMachine[i] )
+								{
+									if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != mac()._macIndex))
+									{
+										mac().song()->_pMachine[i]->_mute = true;
+										mac().song()->_pMachine[i]->_volumeCounter=0.0f;
+										mac().song()->_pMachine[i]->_volumeDisplay=0;
+									}
+								}
+							}
+							mac()._mute = false;
+							mac().song()->machineSoloed = mac()._macIndex;
+						}
+						repaint();
+					}
 			}
 		}
 
@@ -436,20 +497,28 @@ namespace psycle {
 		}
 
 		void GeneratorGUI::onMouseDoublePress( int x, int y, int button ) {
+			if (button==1) {
+				frameMachine->setVisible(true);
+			}
 		}
 		// end of GeneratorGUI class
+
+
 
 
 		//
 		// the Effekt Gui class
 		//
-		EffektGUI::EffektGUI( Machine& mac ) : MachineGUI( mac )
+		EffektGUI::EffektGUI( Machine & mac ) : MachineGUI( mac )
 		{
 			panSlider_ = new ngrs::Slider( );
 			panSlider_->change.connect( this, &EffektGUI::onPosChanged );
 			add(panSlider_);
 
 			setSkin();
+			frameMachine = new FrameMachine( &mac );
+			frameMachine->patternTweakSlide.connect( this, &EffektGUI::onTweakSlide );
+			add(frameMachine);
 
 			vuPanel_ = new VUPanel( this );
 			vuPanel_->setPosition( coords().dVu.left() + ident(), coords().dVu.top() + ident(), coords().dVu.width(), coords().dVu.height() );
@@ -471,13 +540,13 @@ namespace psycle {
 			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
 			g.putPixmap(0,0, coords().bgCoords.width(), coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top() );
-//		    g.drawText( coords().dNameCoords.x(), coords().dNameCoords.y() + g.textAscent(), mac()._editName);
+		    g.drawText( coords().dNameCoords.x(), coords().dNameCoords.y() + g.textAscent(), mac()._editName);
 
-//			if (mac()._mute)
-//				g.putPixmap( coords().dMuteCoords.left(), coords().dMuteCoords.top(), coords().muteCoords.width(), coords().muteCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
+			if (mac()._mute)
+				g.putPixmap( coords().dMuteCoords.left(), coords().dMuteCoords.top(), coords().muteCoords.width(), coords().muteCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().muteCoords.left(), coords().muteCoords.top());
 
-//			if (mac().song()->machineSoloed == mac()._macIndex)
-//				g.putPixmap( coords().dSoloCoords.left(), coords().dSoloCoords.top(), coords(). soloCoords.width(), coords().soloCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top() );
+			if (mac().song()->machineSoloed == mac()._macIndex)
+				g.putPixmap( coords().dSoloCoords.left(), coords().dSoloCoords.top(), coords(). soloCoords.width(), coords().soloCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().soloCoords.left(), coords().soloCoords.top() );
 
 			// move translation to original
 			g.setTranslation(xTrans, yTrans);
@@ -496,7 +565,7 @@ namespace psycle {
 			panSlider_->setOrientation(ngrs::nHorizontal);
 			panSlider_->setTrackLine(false);
 			panSlider_->setRange(0,127);
-//			panSlider_->setPos( mac()._panning );
+			panSlider_->setPos( mac()._panning );
 			panSlider_->customSliderPaint.connect(this,&EffektGUI::customSliderPaint);
 			panSlider_->slider()->setWidth( coords().sPan.width());
 			panSlider_->slider()->setHeight( coords().sPan.height());
@@ -505,7 +574,7 @@ namespace psycle {
 
 		void EffektGUI::onPosChanged( ngrs::Slider* sender )
 		{
-//		  mac().SetPan( (int) panSlider_->pos());
+		  mac().SetPan( (int) panSlider_->pos());
 		}
 
 		void EffektGUI::customSliderPaint( ngrs::Slider * sl, ngrs::Graphics& g )
@@ -517,12 +586,44 @@ namespace psycle {
 		{
 			MachineGUI::onMousePress(x,y,button);
 			if (button==1) {
-				if ( coords().dMuteCoords.intersects(x-ident(),y-ident()) ) { 
-                  // mute or unmute				
+				if ( coords().dMuteCoords.intersects(x-ident(),y-ident()) ) { // mute or unmute
+					mac()._mute = !mac()._mute;
+					if (mac()._mute) {
+						mac()._volumeCounter=0.0f;
+						mac()._volumeDisplay=0;
+						if (mac().song()->machineSoloed == mac()._macIndex ) {
+							mac().song()->machineSoloed = -1;
+						}
+					}
+					repaint();
 				} else
-                if ( coords().dSoloCoords.intersects(x-ident(),y-ident()) ) { 
-                  // solo or unsolo
-                }
+					if ( coords().dSoloCoords.intersects(x-ident(),y-ident()) ) { // solo or unsolo
+						if (mac().song()->machineSoloed == mac()._macIndex ) {
+							mac().song()->machineSoloed = -1;
+							for ( int i=0;i<MAX_MACHINES;i++ ) {
+								if ( mac().song()->_pMachine[i] ) {
+									if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+										mac().song()->_pMachine[i]->_mute = false;
+									}
+								}
+							}
+						} else {
+							for ( int i=0;i<MAX_MACHINES;i++ ) {
+								if ( mac().song()->_pMachine[i] )
+								{
+									if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != mac()._macIndex))
+									{
+										mac().song()->_pMachine[i]->_mute = true;
+										mac().song()->_pMachine[i]->_volumeCounter=0.0f;
+										mac().song()->_pMachine[i]->_volumeDisplay=0;
+									}
+								}
+							}
+							mac()._mute = false;
+							mac().song()->machineSoloed = mac()._macIndex;
+						}
+						repaint();
+					}
 			}
 		}
 
@@ -585,6 +686,9 @@ namespace psycle {
 		}
 
 		void EffektGUI::onMouseDoublePress( int x, int y, int button ) {
+			if ( button==1 ) {
+				frameMachine->setVisible(true); 
+			}
 		}
 
 		void EffektGUI::onTweakSlide( int machine, int command, int value )

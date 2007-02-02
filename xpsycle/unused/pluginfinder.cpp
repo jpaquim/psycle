@@ -31,7 +31,7 @@ namespace psycle
 
 
 		PluginInfo::PluginInfo() :
-			subclass_( -1 ),
+			subclass_( MACH_UNDEFINED ),
 			mode_( MACHMODE_FX ),
 			fileTime_( 0 ),
 			allow_( 1 )
@@ -43,19 +43,19 @@ namespace psycle
 
 		}
 
-		void PluginInfo::setType( int type ) {
+		void PluginInfo::setType( Machine::type_type type ) {
 			subclass_ = type;
 		}
 
-		int PluginInfo::type() const {
+		Machine::type_type PluginInfo::type() const {
 			return subclass_;
 		}
 
-		void PluginInfo::setMode( int mode ) {
+		void PluginInfo::setMode( Machine::mode_type mode ) {
 			mode_ = mode;
 		}
 
-		int PluginInfo::mode() const {
+		Machine::mode_type PluginInfo::mode() const {
 			return mode_;
 		}
 
@@ -210,14 +210,13 @@ namespace psycle
 		}
 
 		void PluginFinder::scanLadspa() {
-			///\todo this just uses the first path in ladspaPath
+			///\todo this just uses the first path in getenv
 			std::string ladspa_path = conf_.ladspaPath() ;			
 			#ifdef __unix__
 			std::string::size_type dotpos = ladspa_path.find(':',0);
-			#else
-			std::string::size_type dotpos = ladspa_path.find(';',0);
-			#endif
 			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
+			#else
+			#endif
 			const LADSPA_Descriptor * psDescriptor;
 			LADSPA_Descriptor_Function pfDescriptorFunction;
 			unsigned long lPluginIndex;

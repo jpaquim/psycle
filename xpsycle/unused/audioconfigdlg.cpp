@@ -20,6 +20,7 @@
 #include "audioconfigdlg.h"
 #include "configuration.h"
 #include "audiodriver.h"
+#include "player.h"
 #include <ngrs/listbox.h>
 #include <ngrs/item.h>
 #include <ngrs/alignlayout.h>
@@ -265,6 +266,10 @@ namespace psycle {
         void AudioConfigDlg::onRestartDriver( ngrs::ButtonEvent * ev )
 		{		
 			if ( selectedDriver_ ) {
+				// disable old driver
+				Player::Instance()->driver().Enable( false );
+				// set new Driver to Player
+				Player::Instance()->setDriver( *selectedDriver_ );
 			}
 		}
 
@@ -278,6 +283,22 @@ namespace psycle {
 
 
 		void AudioConfigDlg::setVisible( bool on ) {
+			if (on) {
+				AudioDriverInfo driverInfo = Player::Instance()->driver().info();
+				std::vector<ngrs::CustomItem*>::iterator it = driverCbx_->items().begin();
+				int idx = 0;
+				for ( ; it < driverCbx_->items().end(); it++, idx++ ) {
+                  ngrs::CustomItem* item = *it;
+					if ( item->text() == driverInfo.name() ) {
+						driverCbx_->setIndex( idx );
+                        ngrs::ItemEvent ev(item,item->text());
+						onDriverSelected( &ev );
+						break;
+					}
+				}
+				pack();
+				setPositionToScreenCenter();
+			}
 			Window::setVisible(on);
 		}
 

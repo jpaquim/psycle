@@ -1,10 +1,6 @@
-#ifdef __outcommented_
-
-// code example for later ladspa support 
-
 /***************************************************************************
- *   Copyright (C) 2006 by Josep Antolin  *
- *   josepma@linux   *
+ *   Copyright (C) 2006 by  Stefan Nattkemper   *
+ *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,8 +21,6 @@
 #include "player.h"
 #include "dsp.h"
 
-
-
 #ifdef __unix__
 	#include <dlfcn.h>
 #else
@@ -37,8 +31,6 @@
 	#undef min 
 	#undef max	
 #endif
-
-
 
 namespace psycle {
 	namespace host {
@@ -72,7 +64,7 @@ namespace psycle {
 				if ( LADSPA_IS_HINT_LOGARITHMIC(hint.HintDescriptor) ){
 					logaritmic_ = true;
 //					rangeMultiplier_ =   9 / (maxVal_ - minVal_);
-					rangeMultiplier_ =   (exp(1.0f)-1) / (maxVal_ - minVal_);				
+					rangeMultiplier_ =   (exp(1.0)-1) / (maxVal_ - minVal_);				
 				}
 				else if ( LADSPA_IS_HINT_INTEGER(hint.HintDescriptor) ){
 					integer_ = true;
@@ -83,10 +75,6 @@ namespace psycle {
 			setDefault();
 			std::cout << "min/max/def" << minVal_ << "/" << maxVal_ << "/" << value_ << std::endl;
 		}
-
-        LADSPAMachine* LADSPAMachine::clone() const {
-          return new LADSPAMachine( *this );
-        }
 		
 		void LadspaParam::setDefault()
 		{
@@ -100,13 +88,13 @@ namespace psycle {
 			case LADSPA_HINT_DEFAULT_LOW:
 				if (LADSPA_IS_HINT_LOGARITHMIC(hint_.HintDescriptor)) {
 					fDefault 
-					= exp(log(hint_.LowerBound) 	* 0.75f
-					+ logf(hint_.UpperBound) 			* 0.25f) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					= exp(log(hint_.LowerBound) 	* 0.75
+					+ log(hint_.UpperBound) 			* 0.25) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				else {
 					fDefault 
-					= (hint_.LowerBound			 * 0.75f
-					+ hint_.UpperBound			 * 0.25f)* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					= (hint_.LowerBound			 * 0.75
+					+ hint_.UpperBound			 * 0.25)* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_MIDDLE:
@@ -117,20 +105,20 @@ namespace psycle {
 				}
 				else {
 					fDefault 
-					= 0.5f * (hint_.LowerBound
+					= 0.5 * (hint_.LowerBound
 					+ hint_.UpperBound) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_HIGH:
 				if (LADSPA_IS_HINT_LOGARITHMIC(hint_.HintDescriptor)) {
 					fDefault 
-					= exp(log(hint_.LowerBound) * 0.25f
-					+ log(hint_.UpperBound) 			* 0.75f) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					= exp(log(hint_.LowerBound) * 0.25
+					+ log(hint_.UpperBound) 			* 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				else {
 					fDefault 
-					= (hint_.LowerBound			 * 0.25f
-					+ hint_.UpperBound			 * 0.75f) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					= (hint_.LowerBound			 * 0.25
+					+ hint_.UpperBound			 * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_MAXIMUM:
@@ -172,7 +160,7 @@ namespace psycle {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-		LADSPAMachine::LADSPAMachine( int id, Song* song )
+		LADSPAMachine::LADSPAMachine( Machine::id_type id, Song* song )
 		: Machine(MACH_LADSPA, MACHMODE_FX, id, song)
 		{
 			_audiorange = 1.0f;
@@ -185,7 +173,7 @@ namespace psycle {
 		}
 		
 		
-		LADSPAMachine::~LADSPAMachine() 
+		LADSPAMachine::~LADSPAMachine() throw()
 		{
 			if ( pluginHandle )
 			{
@@ -198,7 +186,7 @@ namespace psycle {
 				#ifdef __unix__
 				dlclose(libHandle_);
 				#else
-				FreeLibrary( static_cast<HINSTANCE> ( libHandle_ ) ) ;
+				::FreeLibrary( static_cast<HINSTANCE> ( libHandle_ ) ) ;
 				#endif
 
 			}
@@ -214,26 +202,25 @@ namespace psycle {
 		void * LADSPAMachine::dlopenLADSPA(const char * pcFilename, int iFlag)
 		{
 			std::string filename_(pcFilename);
-//			char *pcBuffer;
-//			const char * pcStart, * pcEnd ,* pcLADSPAPath;
-//			bool endsInSO, needsSlash;
-//			size_t iFilenameLength;
-			const char * pcLADSPAPath;
+			char *pcBuffer;
+			const char * pcStart, * pcEnd ,* pcLADSPAPath;
+			bool endsInSO, needsSlash;
+			size_t iFilenameLength;
 			void * pvResult(NULL);
 			std::cout << filename_ << std::endl;
 			#ifdef __unix__
 			if (filename_.compare(filename_.length()-3,3,".so"))
 				filename_.append(".so");
 			#else
-			if (filename_.compare(filename_.length()-4,4,".dll"))
+			if (filename_.compare(filename_.length()-3,3,".dll"))
 				filename_.append(".dll");
 			#endif
 			std::cout << filename_ << std::endl;
 			
 			#ifdef __unix__
-			if (filename_.c_str()[0] == '/') { // filesystem root 
+			if (filename_.c_str()[0] == '/') {
 			#else
-			if (filename_.c_str()[1] == ':') { // Drive unit.
+			if (filename_.c_str()[0] == '\\') {
 			#endif
 					/* The filename is absolute. Assume the user knows what he/she is
 						   doing and simply dlopen() it. */
@@ -317,8 +304,43 @@ namespace psycle {
 		
 		bool LADSPAMachine::loadDll( const std::string & fileName, int pluginIndex )
 		{	
-			LADSPA_Descriptor_Function pfDescriptorFunction = loadDescriptorFunction( fileName );
+			// Step one: Open the shared library.
+			#ifdef __unix__
+			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
+			if ( !libHandle_ ) {
+				std::cerr << "Cannot load library: " << dlerror() << std::endl;
+				return false;
+			}
+			#else
+			// Set error mode to disable system error pop-ups (for LoadLibrary)
+			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+			libHandle_ = LoadLibrary( fileName.c_str() );
+			// Restore previous error mode
+			SetErrorMode( uOldErrorMode );
+			#endif
+
+			std::cout << "step two" << std::endl;
+			// Step two: Get the entry function.
+			#ifdef __unix__
+			LADSPA_Descriptor_Function pfDescriptorFunction =
+				 (LADSPA_Descriptor_Function)dlsym( libHandle_, "ladspa_descriptor");
+			#else			
+			LADSPA_Descriptor_Function pfDescriptorFunction =
+				 (LADSPA_Descriptor_Function)GetProcAddress(  static_cast<HINSTANCE>( libHandle_ ), "ladspa_descriptor" );
+			#endif
 		
+			if (!pfDescriptorFunction) {
+				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
+				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+				#ifdef __unix__
+				std::cerr << dlerror() << std::endl;				
+				dlclose( libHandle_ ); 
+				#else
+				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
+				#endif
+				libHandle_=0;
+				return false;
+			}
 			/*Step three: Get the descriptor of the selected plugin (a shared library can have
 				 several plugins*/
 			std::cout << "step three" << std::endl;
@@ -328,7 +350,7 @@ namespace psycle {
 				#ifdef __unix__
 				dlclose(libHandle_);
 				#else
-				FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
+				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
 				#endif
 				libHandle_=0;
 				return false;       
@@ -366,7 +388,7 @@ namespace psycle {
 			SetErrorMode( uOldErrorMode );
 			#endif
 			if ( !libHandle_ ) {
-				std::cerr << "Cannot load library: " << fileName.c_str()
+				std::cerr << "Cannot load library: "
 					#ifdef __unix__
 					  <<  dlerror() 
 					#endif
@@ -457,13 +479,11 @@ namespace psycle {
 		
 		void LADSPAMachine::PreWork(int numSamples)
 		{
-			/*float *tmpbufL(_pSamplesL),*tmpbufR(_pSamplesR);
-			_pSamplesL= pOutSamplesL; 
-            _pSamplesR= pOutSamplesR;
-			pOutSamplesL=&tmpbufL; 
-            pOutSamplesR=&tmpbufR;
+			float *tmpbufL(_pSamplesL),*tmpbufR(_pSamplesR);
+			_pSamplesL=pOutSamplesL; _pSamplesR=pOutSamplesR;
+			pOutSamplesL=tmpbufL; pOutSamplesR=tmpbufR;
 			Machine::PreWork(numSamples);
-			dsp::Clear(pOutSamplesL,sizeof(pOutSamplesL));dsp::Clear(pOutSamplesR,sizeof(pOutSamplesR));*/
+			dsp::Clear(pOutSamplesL,sizeof(pOutSamplesL));dsp::Clear(pOutSamplesR,sizeof(pOutSamplesR));
 		}
 		
 		int LADSPAMachine::GenerateAudio(int numSamples )
@@ -569,4 +589,4 @@ namespace psycle {
 	}
 }
 
-#endif
+

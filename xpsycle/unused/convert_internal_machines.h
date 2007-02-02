@@ -6,8 +6,8 @@
 #include "plugin.h"
 //\todo:
 #include "configuration.h"
-#include "../helpers/scale.hpp"
-#include "../helpers/math/pi.hpp"
+#include "helpers/scale.hpp"
+#include "helpers/math/pi.hpp"
 #include <string>
 #include <exception>
 #include <map>
@@ -34,7 +34,7 @@ namespace psycle
 					dummy = 255
 				};
 
-				virtual ~Converter() 
+				virtual ~Converter() throw()
 				{
 					for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
 				}
@@ -230,7 +230,7 @@ namespace psycle
 						delete (*this)[gainer];
 						delete (*this)[flanger];
 					}
-					const bool exists(const int & type) const 
+					const bool exists(const int & type) const throw()
 					{
 						return find(type) != end();
 					}

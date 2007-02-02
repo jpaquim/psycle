@@ -32,10 +32,12 @@ namespace psycle
 	{
 
 		class RiffFile;
+		#ifdef __unix__
 		namespace convert_internal_machines
 		{
 			class Converter;
 		}
+        #endif
 
 		class Psy2Filter : public PsyFilter
 		{
@@ -79,8 +81,10 @@ namespace psycle
 				virtual bool LoadINSD(RiffFile* file,Song& song);
 				virtual bool LoadWAVD(RiffFile* file,Song& song);
 				virtual bool PreLoadVSTs(RiffFile* file,Song& song);
+				#ifdef __unix__
 				virtual bool LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter);
 				virtual bool TidyUp(RiffFile* file,Song &song,convert_internal_machines::Converter* converter);
+                #endif				
 	
 
 		protected:
