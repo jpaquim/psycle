@@ -56,6 +56,10 @@ static int msWaveOutSetCallback( PsyProcessCallback process_callback, void *arg)
 
 static void msWaveOutSetSettings( PsyAudioSettings settings );
 
+static int msWaveOutChannelSize(void);
+
+static float* msWaveOutBuffer( int channel );
+
 static PsyAudioSettings* msWaveOutSettings(void);
 
 PsyAudioOut msWaveOut = 
@@ -71,7 +75,9 @@ PsyAudioOut msWaveOut =
   msWaveOutUnlock,
   msWaveOutSetCallback,
   msWaveOutSetSettings,
-  msWaveOutSettings
+  msWaveOutSettings,
+  msWaveOutChannelSize,
+  msWaveOutBuffer
 };
 
 EXPORT PsyAudioOut *getPsyAudioOutPlugin(void)
