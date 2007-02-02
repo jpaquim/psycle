@@ -37,6 +37,9 @@ namespace psy {
 
       virtual Player* clone() const;
 
+      virtual ChannelData& input();
+      virtual ChannelData& output();
+
       // starts to play.
       void start( double pos = 0.0 );
 
@@ -58,6 +61,9 @@ namespace psy {
 
       PsyAudioOut* outputPlugin_;
       PluginLoad pluginLoad;
+
+      ChannelData input_;
+      ChannelData output_;
 
       static int process ( unsigned int nframes, void *arg);
       int process ( unsigned int nframes );

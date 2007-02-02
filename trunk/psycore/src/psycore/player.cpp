@@ -37,6 +37,15 @@ namespace psy {
       return new Player(*this);
     }
 
+
+    ChannelData& Player::input() {
+      return input_;
+    }
+
+    ChannelData& Player::output() {
+      return output_;
+    }
+
     void Player::loadAudioOutPlugin( const std::string& path ) {
       if ( pluginLoad.open( path ) ) {
         void* (*gpi) (void);                
@@ -45,13 +54,20 @@ namespace psy {
       }
       if ( outputPlugin_ ) {
         std::cout << "Outputplugin is : " << outputPlugin_->name << std::endl;
-        PsyAudioSettings settings;
         outputPlugin_->setCallback( Player::process, this );
         std::cout << outputPlugin_->settings()->samplesPerSec << std::endl;
         std::cout << outputPlugin_->settings()->channelSize << std::endl;
         if ( outputPlugin_->open() ) {
           std::cout << "device started" << std::endl;
           std::cout << "device has " << outputPlugin_->channelSize() << " channels" << std::endl;
+          
+          output_.addNewChannel( outputPlugin_->channelSize() );
+          std::list< Channel >::iterator it =  output_.begin();
+          for ( int i = 0; it != output_.end(); it++, i++ ) {
+            Channel& channel = *it;
+            channel.setBuffer( outputPlugin_->buffer(i), 256 );
+          }          
+
         }
       }
     }
@@ -63,15 +79,15 @@ namespace psy {
 
     int Player::process( unsigned int nframes ) {
       // produce a sin test wave
-      int channelSize = outputPlugin_->channelSize();
-      if ( channelSize == 2 ) {
-        float* left  = outputPlugin_->buffer( 0 );
-        float* right = outputPlugin_->buffer( 1 );
-        for ( unsigned int i = 0; i < nframes; i++ ) {
-          *left++ = sin(2*3.14/180*i);
-          *right++ = sin(2*3.14/180*i);
+
+      std::list< Channel >::iterator it =  output_.begin();
+      for ( ; it != output_.end(); it++ ) {
+        Channel& channel = *it;
+        for ( unsigned int frame = 0; frame < nframes; frame++ ) {
+          channel.buffer()[frame] = sin( 2* 3.14/ 180* frame );
         }
-      }
+      }          
+      
       return 0;
     }
 

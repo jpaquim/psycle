@@ -17,33 +17,51 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef SAMPLE_H
-#define SAMPLE_H
+#ifndef CHANNELDATA_H
+#define CHANNELDATA_H
 
-#include "channeldata.h"
+#include <vector>
+#include <list>
 
 namespace psy {
   namespace core {
 
-    // multi channel sample datastructure
+    class Channel {
+    public:
+      Channel();
+      ~Channel();
 
-    class Sample
+      void setBuffer( float* buffer, int size );
+      float* buffer();
+      void createBuffer( int size = 0 );
+
+      int size() const;
+
+    private:
+      
+      bool owner_;
+      float* data_;
+      int size_;
+
+    };
+
+    class ChannelData
     {
     public:
 
-      Sample();
-      ~Sample();
+      ChannelData();
 
-      void loadFromFile( const std::string& fileName );
+      ~ChannelData();
 
-      ChannelData& channels();
+      std::list< Channel >::iterator begin();
+      std::list< Channel >::iterator end();
+
+      void addNewChannel( int count = 1 );
 
     private:
 
-      unsigned int frames_;
-      unsigned int samplesPerSec_;
-
-      ChannelData channels_;
+      // 1. channel list, 2. sample data of each channel
+      std::list< Channel > data_;
 
     };
 
