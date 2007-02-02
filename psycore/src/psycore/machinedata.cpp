@@ -23,12 +23,51 @@ namespace psy {
   namespace core {
 
 
-    MachineData::MachineData()
+    MachineSlot::MachineSlot( int number, const std::string& name ) 
+      : number_(number),
+      name_(name) 
+    {
+    }
+       
+    MachineSlot::~MachineSlot() {
+    }
+      
+    int MachineSlot::number() const {
+      return number_;
+    }
+
+    void MachineSlot::setName( const std::string& name ) {
+      name_ = name;
+    }
+
+    const std::string& MachineSlot::name() const {
+      return name_;
+    }
+
+    bool MachineSlot::operator<( const MachineSlot& rhs ) const
+    {
+      return number() < rhs.number();
+    }
+
+
+
+    MachineData::MachineData() 
+      : delFlag_(1)
     {
     }
 
     MachineData::~MachineData()
     {
+      if ( delFlag_ ) {
+        std::map<MachineSlot, Machine*>::iterator it;
+        for ( ; it != machines_.end(); ++it ) {
+          delete it->second;
+        }
+      }
+    }
+
+    void MachineData::add( const MachineSlot& slot, Machine* machine ) {
+       machines_[slot] = machine;
     }
 
   }
