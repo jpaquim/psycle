@@ -62,7 +62,7 @@ Plugin::~ Plugin( ) throw()
    #ifdef __unix__
    #else
    if  ( _dll ) {
-       FreeLibrary( (HINSTANCE) _dll ) ;
+       ::FreeLibrary( (HINSTANCE) _dll ) ;
    }
    #endif          
 }

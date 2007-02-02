@@ -31,7 +31,11 @@
 
 namespace psycle {
   namespace host {
-  
+
+    const int MAX_SCOPE_BANDS = 128;
+    const int SCOPE_BUF_SIZE  = 4096;
+    const int SCOPE_SPEC_SAMPLES = 256;
+
     class Analyzer : public ngrs::Panel
     {
     public:
@@ -59,7 +63,10 @@ namespace psycle {
       int isrcMac;
       float peakL,peakR;
       float peak2L,peak2R;
-      int peakLifeL,peakLifeR;    
+      int peakLifeL,peakLifeR;
+
+      float pSamplesL[SCOPE_BUF_SIZE];
+      float pSamplesR[SCOPE_BUF_SIZE];
 
       void onTimer();
 

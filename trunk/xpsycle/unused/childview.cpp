@@ -19,6 +19,9 @@
   ***************************************************************************/
 #include "childview.h"
 #include "configuration.h"
+#include "player.h"
+#include "newmachine.h"
+#include "waveedframe.h"
 #include "sequencergui.h"
 #include "sequencerbar.h"
 #include "virtualpattern.h"
@@ -72,7 +75,10 @@ ChildView::ChildView()
   tabBook_->addPage(patDock,"Pattern View");
   tab = tabBook_->tab( patDock );
   tab->click.connect(this,&ChildView::onTabChange);
-
+  waveEd_ = new WaveEdFrame( song() );
+  tabBook_->addPage(waveEd_,"WaveEditor");
+  tab = tabBook_->tab( waveEd_ );
+  tab->click.connect(this,&ChildView::onTabChange);
   ngrs::Panel* seqGroup = new ngrs::Panel();
 		seqGroup->setLayout( ngrs::AlignLayout() );
     seqGroup->add( virtualPattern_, ngrs::nAlBottom);
@@ -103,10 +109,21 @@ ChildView::~ChildView()
   
 void ChildView::setTitleBarText( )
 {
+  std::string titlename = "[";
+
+  titlename += _pSong->fileName;
+  /*if(pUndoList) {
+      if (UndoSaved != pUndoList->counter) titlename+=" *"; else
+      if (UndoMacSaved != UndoMacCounter)  titlename+=" *"; else
+      if (UndoSaved != 0) titlename+=" *";
+  }*/
+  titlename += "] Psycle Modular Music Creation Studio (" + PSYCLE__VERSION + ")";
+  window()->setTitle(titlename);
 }
 
 void ChildView::onPatternView( ngrs::Object * sender )
 {
+
 }
 
 PatternView * ChildView::patternView( )
@@ -121,15 +138,28 @@ VirtualPattern* ChildView::virtualPattern()
 
 void ChildView::play( )
 {
+  patternView_->setPrevEditPosition(patternView_->editPosition());
+  Player::Instance()->start( Player::Instance()->playPos() );
 }
+
 
 void ChildView::playFromStart()
 {
+  //if (Global::pConfig()->_followSong)
+  {
+    //bScrollDetatch=false;
+  }
+  patternView_->setPrevEditPosition(patternView_->editPosition());
+  Player::Instance()->start(0.0);
+  //pParentMain->StatusBarIdle();
 }
 
 void ChildView::stop( )
 {
+  Player::Instance()->stop();
 }
+
+
 
 MachineView * ChildView::machineView( )
 {
@@ -145,8 +175,14 @@ void ChildView::onMachineViewDblClick( ngrs::ButtonEvent * ev )
   machineViewDblClick.emit( ev );
 }
 
+WaveEdFrame * ChildView::waveEditor( )
+{
+  return waveEd_;
+}
+
 void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
 {
+//  _pSong->patternTweakSlide( machine,command,value, patternView_->editPosition(), patternView_->cursor().track(),patternView_->cursor().line());
 }
 
 SequencerGUI * ChildView::sequencerView( )
@@ -183,6 +219,7 @@ void psycle::host::ChildView::showPatternView( )
 
 void psycle::host::ChildView::update( )
 {
+  waveEditor()->Notify();
   sequencerBar_->update();
   sequencerView()->update();
   machineView()->update();

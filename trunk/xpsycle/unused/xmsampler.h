@@ -26,7 +26,7 @@
 class XMSampler{
 public:
     XMSampler();
-    XMSampler* XMSampler::clone() const;
+
     ~XMSampler();
 
 };

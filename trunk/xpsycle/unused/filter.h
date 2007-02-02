@@ -127,7 +127,7 @@ namespace psycle
 				Reset();
 			};
 
-			virtual inline ~ITFilter()  {}
+			virtual inline ~ITFilter() throw() {}
 
 			void Reset(void)
 			{

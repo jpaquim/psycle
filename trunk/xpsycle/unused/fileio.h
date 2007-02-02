@@ -50,7 +50,7 @@ namespace psycle
 		class RiffFile
 		{
 			public:
-				std::string const inline & file_name() const  { return file_name_; }
+				std::string const inline & file_name() const throw() { return file_name_; }
 			private:
 				std::string file_name_;
 
@@ -93,7 +93,7 @@ namespace psycle
 
 				/// just a usless reinterpret_cast
 				///\todo disabled because the compiler accepts arguments of different size!
-				//static std::uint32_t inline FourCC(char const four_cc[4])  { return *reinterpret_cast<std::uint32_t const *>(four_cc); }
+				//static std::uint32_t inline FourCC(char const four_cc[4]) throw() { return *reinterpret_cast<std::uint32_t const *>(four_cc); }
 
 				/// pad the string with spaces
 				///\todo is it really used with null terminated strings?

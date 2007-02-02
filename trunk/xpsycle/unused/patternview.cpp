@@ -243,6 +243,7 @@ namespace psycle {
       playPos_  = 0;
       outtrack = 0;
       editOctave_ = 4;
+      for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
 
       moveCursorWhenPaste_ = false;  
       selectedMacIdx_ = 255;
@@ -420,7 +421,7 @@ namespace psycle {
       trackCombo_ = new ngrs::ComboBox();
       trackCombo_->setPreferredSize( 40, 20 );
       trackCombo_->itemSelected.connect(this,&PatternView::onTrackChange);
-      for( int i=4; i<=64; i++ ) {
+      for( int i=4; i<=MAX_TRACKS; i++ ) {
         trackCombo_->add(new ngrs::Item(stringify(i)));
       }
       trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
@@ -656,22 +657,22 @@ namespace psycle {
             track0X*coords_.noCoords.width(), coords_.noCoords.top());
 
           // blit the mute LED
-//          if (  pView->pSong()->_trackMuted[it->first]) {
-//            g.putBitmap(xOffc+coords_.dMuteCoords.x(),0+coords_.dMuteCoords.y(),coords_.sMuteCoords.width(),coords_.sMuteCoords.height(), bitmap,
-//              coords_.sMuteCoords.left(), coords_.sMuteCoords.top());
-//          }
+          if (  pView->pSong()->_trackMuted[it->first]) {
+            g.putBitmap(xOffc+coords_.dMuteCoords.x(),0+coords_.dMuteCoords.y(),coords_.sMuteCoords.width(),coords_.sMuteCoords.height(), bitmap,
+              coords_.sMuteCoords.left(), coords_.sMuteCoords.top());
+          }
 
           // blit the solo LED
-//          if ( pView->pSong()->_trackSoloed == it->first) {
-//            g.putBitmap(xOffc+coords_.dSoloCoords.x(),0+coords_.dSoloCoords.y(),coords_.sSoloCoords.width(),coords_.sSoloCoords.height(), bitmap,
-//              coords_.sSoloCoords.left(), coords_.sSoloCoords.top());
-//          }
+          if ( pView->pSong()->_trackSoloed == it->first) {
+            g.putBitmap(xOffc+coords_.dSoloCoords.x(),0+coords_.dSoloCoords.y(),coords_.sSoloCoords.width(),coords_.sSoloCoords.height(), bitmap,
+              coords_.sSoloCoords.left(), coords_.sSoloCoords.top());
+          }
 
           // blit the record LED
-//          if ( pView->pSong()->_trackArmed[it->first]) {
-//            g.putBitmap(xOffc+coords_.dRecCoords.x(),0+coords_.dRecCoords.y(),coords_.sRecCoords.width(),coords_.sRecCoords.height(), bitmap,
-//              coords_.sRecCoords.left(), coords_.sRecCoords.top());
-//          }
+          if ( pView->pSong()->_trackArmed[it->first]) {
+            g.putBitmap(xOffc+coords_.dRecCoords.x(),0+coords_.dRecCoords.y(),coords_.sRecCoords.width(),coords_.sRecCoords.height(), bitmap,
+              coords_.sRecCoords.left(), coords_.sRecCoords.top());
+          }
         }
         g.putBitmap(xOff, 0,patNav.width(),patNav.height(), patNav, 
           0, 0);
@@ -748,15 +749,40 @@ namespace psycle {
 
     void PatternView::Header::onSoloLedClick( int track )
     {
+      if ( pView->pSong()->_trackSoloed != track )
+      {
+        for ( int i=0;i<MAX_TRACKS;i++ ) {
+          pView->pSong()->_trackMuted[i] = true;
+        }
+        pView->pSong()->_trackMuted[track] = false;
+        pView->pSong()->_trackSoloed = track;
+      }
+      else
+      {
+        for ( int i=0;i<MAX_TRACKS;i++ )
+        {
+          pView->pSong()->_trackMuted[i] = false;
+        }
+        pView->pSong()->_trackSoloed = -1;
+      }
       repaint();
     }
 
     void PatternView::Header::onMuteLedClick( int track )
     {
+      pView->pSong()->_trackMuted[track] = !(pView->pSong()->_trackMuted[track]);
       repaint();
     }
 
     void PatternView::Header::onRecLedClick(int track) {
+      pView->pSong()->_trackArmed[track] = ! pView->pSong()->_trackArmed[track];
+      pView->pSong()->_trackArmedCount = 0;
+      for ( int i=0;i<MAX_TRACKS;i++ ) {
+        if ( pView->pSong()->_trackArmed[i] )
+        {
+          pView->pSong()->_trackArmedCount++;
+        }
+      }
       repaint();
     }
 
@@ -1896,10 +1922,15 @@ namespace psycle {
     void PatternView::enterNote( const PatCursor & cursor, int note ) {
       if ( pattern() ) {
         PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+        Machine* tmac = pSong()->_pMachine[ pSong()->seqBus ];
         event.setNote( editOctave() * 12 + note );
-        event.setSharp( drawArea->sharpMode() );        
+        event.setSharp( drawArea->sharpMode() );
+        if (tmac) event.setMachine( tmac->_macIndex );
+        if (tmac && tmac->_type == MACH_SAMPLER ) {
+          event.setInstrument( pSong()->instSelected );
+        }
         pattern()->setEvent( cursor.line(), cursor.track(), event );
-        //if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);   
+        if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);   
       }
     }
 
@@ -2053,6 +2084,86 @@ namespace psycle {
 
     void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine)
     {
+      // stop any notes with the same value
+      StopNote(note,bTranspose,pMachine);
+
+      if(note<0) return;
+
+      // octave offset
+      if(note<120) {
+        if(bTranspose)
+          note+=pSong()->currentOctave*12;
+        if (note > 119)
+          note = 119;
+      }
+
+      // build entry
+      PatternEvent entry;
+      entry.setNote( note );
+      entry.setInstrument( pSong()->auxcolSelected );
+      entry.setMachine( pSong()->seqBus );	// Not really needed.
+
+      //   if ( velocity != 127 ) //&& Global::pConfig()->midi().velocity().record())
+      //      {
+      //          int par = Global::pConfig()->midi().velocity().from() + (Global::pConfig()->midi().velocity().to() - Global::pConfig()->midi().velocity().from()) * velocity / 127;
+      //          if (par > 255) par = 255; else if (par < 0) par = 0;
+      //          switch(Global::pConfig()->midi().velocity().type())
+      //          {
+      //            case 0:
+      //              entry.setCommand( Global::pConfig()->midi().velocity().command() );
+      //			  entry.setParameter( par );
+      //            break;
+      //            case 3:
+      //              entry.setInstrument( par );
+      //            break;
+      //      }
+      //    } else
+      {
+        entry.setCommand( 0 );
+        entry.setParameter( 0 );
+      }
+
+      // play it
+      if(pMachine==NULL)
+      {
+        int mgn = pSong()->seqBus;
+
+        if (mgn < MAX_MACHINES) {
+          pMachine = pSong()->_pMachine[mgn];
+        }
+      }
+
+      if (pMachine) {
+        // pick a track to play it on	
+        //        if(bMultiKey)
+        {
+          int i;
+          for (i = outtrack+1; i < pSong()->tracks(); i++)
+          {
+            if (notetrack[i] == 120) {
+              break;
+            }
+          }
+          if (i >= pSong()->tracks()) {
+            for (i = 0; i <= outtrack; i++) {
+              if (notetrack[i] == 120) {
+                break;
+              }
+            }
+          }
+          outtrack = i;
+        }// else  {
+        //   outtrack=0;
+        //}
+        // this should check to see if a note is playing on that track
+        if (notetrack[outtrack] < 120) {
+          StopNote(notetrack[outtrack], bTranspose, pMachine);
+        }
+
+        // play
+        notetrack[outtrack]=note;
+        pMachine->Tick(outtrack, entry );
+      }
     }
 
     void PatternView::PatternDraw::transposeBlock(int trp)
@@ -2162,6 +2273,41 @@ namespace psycle {
 
     void PatternView::StopNote( int note, bool bTranspose, Machine * pMachine )
     {
+      if (!(note >=0 && note < 128)) return;
+
+      // octave offset
+      if(note<120) {
+        if(bTranspose) note+=pSong()->currentOctave*12;
+        if (note > 119) note = 119;
+      }
+
+      if(pMachine==NULL) {
+        int mgn = pSong()->seqBus;
+
+        if (mgn < MAX_MACHINES) {
+          pMachine = pSong()->_pMachine[mgn];
+        }
+
+        for(int i=0; i<pSong()->tracks(); i++) {
+          if(notetrack[i]==note) {
+            notetrack[i]=120;
+            // build entry
+            PatternEvent entry;
+            entry.setNote( 120+0 );
+            entry.setInstrument( pSong()->auxcolSelected );
+            entry.setMachine( pSong()->seqBus );
+            entry.setCommand( 0 );
+            entry.setParameter( 0 );
+
+            // play it
+
+            if (pMachine) {
+              pMachine->Tick( i, entry );
+            }
+          }
+        }
+
+      }
     }
 
     void PatternView::PatternDraw::scaleBlock(float factor )

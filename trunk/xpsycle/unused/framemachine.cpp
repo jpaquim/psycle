@@ -23,6 +23,7 @@
 #include "defaultbitmaps.h"
 #include "configuration.h"
 #include "global.h"
+#include "plugin.h"
 #include "binread.h"
 #include <ngrs/app.h>
 #include <ngrs/menubar.h>
@@ -544,4 +545,3 @@ namespace psycle {
 
   }
 }
-
