@@ -75,7 +75,7 @@ namespace psy {
 #ifdef HPUX
         shl_unload( reinterpret_cast<shl_t>(_libHandle) );
 #elif __unix__
-        dlclose( _dll );
+        dlclose( _libHandle );
 #else
         ::FreeLibrary( reinterpret_cast<HINSTANCE> (_libHandle) ) ;
 #endif
