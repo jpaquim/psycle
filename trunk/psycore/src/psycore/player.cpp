@@ -48,8 +48,15 @@ namespace psy {
 
     void Player::loadAudioOutPlugin( const std::string& path ) {
       if ( pluginLoad.open( path ) ) {
-        void* (*gpi) (void);                
-        gpi = reinterpret_cast<void*(__cdecl*)(void)>(pluginLoad.loadProcAdress("getPsyAudioOutPlugin"));
+        void* (*gpi) (void);
+        typedef void* (*gpi_t)()
+		#if defined __MSC_VER
+			__cdecl
+		#elif defined __GNUG__
+			__attribute__((cdecl))
+		#endif
+		;               
+        gpi = reinterpret_cast<gpi_t>(pluginLoad.loadProcAdress("getPsyAudioOutPlugin"));
         outputPlugin_ = reinterpret_cast<PsyAudioOut*>(gpi());
       }
       if ( outputPlugin_ ) {

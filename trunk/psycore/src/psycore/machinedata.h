@@ -23,6 +23,7 @@
 #include "machine.h"
 #include "wire.h"
 #include <map>
+#include <string>
 
 namespace psy {
   namespace core {
