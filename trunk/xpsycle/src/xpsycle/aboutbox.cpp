@@ -125,6 +125,7 @@ namespace psy {
             btnPnl->setLayout( ngrs::AlignLayout() );
             btnPnl->setSpacing( 5, 5, 5, 5 );
             ngrs::Button *clsBtn = new ngrs::Button( "Close" );
+            clsBtn->clicked.connect( this, &AboutBox::onClsBtn );
             clsBtn->setFlat( false );
        btnPnl->add( clsBtn, ngrs::nAlRight );
 
@@ -152,6 +153,11 @@ namespace psy {
 	        "http://www.gnu.org/copyleft/gpl.html\n";
       maillist = "psycle-devel@list.sourceforge.net";
 
+    }
+
+    void AboutBox::onClsBtn( ngrs::ButtonEvent* ev )
+    {
+        onClose();
     }
 
   }
