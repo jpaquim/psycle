@@ -52,6 +52,8 @@ namespace psy {
       void init();
       void initText();
 
+      void onClsBtn( ngrs::ButtonEvent* ev );
+
     };
 
   }
