@@ -70,7 +70,7 @@ namespace psycle
 					node & sine3(resolver("sine", graph, "sine3"));
 					node & multiplier(resolver("multiplier", graph, "*"));
 					node & additioner(resolver("additioner", graph, "+"));
-					node & out(resolver("output.default", graph, "out"));
+					node & out(resolver("output", graph, "out"));
 					loggers::information()("############################################### settings ####################################################");
 					{
 						out.input_port("in")->events_per_second(44100);
