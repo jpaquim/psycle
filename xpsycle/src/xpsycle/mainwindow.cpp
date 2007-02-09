@@ -126,7 +126,10 @@ namespace psy {
 
       pane()->add( book, ngrs::nAlClient);
 
-      player.loadAudioOutPlugin( "c:\\psycle\\trunk\\audiodriver\\mme\\src\\debug\\psymmedriver.dll");
+      std::string audioOutPluginPath = "c:\\psycle\\trunk\\audiodriver\\mme\\src\\debug\\psymmedriver.dll";
+      if (!player.loadAudioOutPlugin( audioOutPluginPath )) {
+	fprintf(stderr,"Warning: (%s,line %d) Couldn't load audio output plugin: %s\n", __FILE__, __LINE__, audioOutPluginPath.c_str());
+      }
 
      
 /*      ngrs::ToolBar* vuToolBar = new ngrs::ToolBar();
