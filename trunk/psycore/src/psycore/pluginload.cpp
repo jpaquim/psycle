@@ -69,6 +69,10 @@ namespace psy {
       return _libHandle != 0;
     }
 
+    bool PluginLoad::isopen() const {
+      return _libHandle != 0;
+    }
+
     void PluginLoad::close()
     {
       if ( _libHandle ) {

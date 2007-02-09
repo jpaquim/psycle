@@ -35,6 +35,7 @@ namespace psy {
       ~PluginLoad();
 
       bool open( const std::string& librarypath );
+      bool isopen() const;
       void close();
       void* loadProcAdress( const std::string& functionname );      
 

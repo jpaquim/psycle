@@ -55,7 +55,8 @@ namespace psy {
       // the current playPos
       double playPos() const;
 
-      void loadAudioOutPlugin( const std::string& path );
+      // returns false if loading fails
+      bool loadAudioOutPlugin( const std::string& path );
 
     private:
 

@@ -78,5 +78,9 @@ namespace psy {
         data_.push_back( Channel() );
     }
 
+    void ChannelData::removeAllChannels() {
+      data_.clear();
+    }
+
   }
 }
