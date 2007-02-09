@@ -58,6 +58,8 @@ namespace psy {
 
       void addNewChannel( int count = 1 );
 
+      void removeAllChannels();
+
     private:
 
       // 1. channel list, 2. sample data of each channel

@@ -46,37 +46,55 @@ namespace psy {
       return output_;
     }
 
-    void Player::loadAudioOutPlugin( const std::string& path ) {
-      if ( pluginLoad.open( path ) ) {
-        void* (*gpi) (void);
-        typedef void* (*gpi_t)()
+    bool Player::loadAudioOutPlugin( const std::string& path ) {
+      if ( !pluginLoad.open( path ) ) {
+	goto handle_error;
+      }
+      else {
+	void* (*gpi) (void);
+	typedef void* (*gpi_t)()
 		#if defined __MSC_VER
 			__cdecl
 		#elif defined __GNUG__
 			__attribute__((cdecl))
 		#endif
 		;               
-        gpi = reinterpret_cast<gpi_t>(pluginLoad.loadProcAdress("getPsyAudioOutPlugin"));
-        outputPlugin_ = reinterpret_cast<PsyAudioOut*>(gpi());
-      }
-      if ( outputPlugin_ ) {
-        std::cout << "Outputplugin is : " << outputPlugin_->name << std::endl;
-        outputPlugin_->setCallback( Player::process, this );
-        std::cout << outputPlugin_->settings()->samplesPerSec << std::endl;
-        std::cout << outputPlugin_->settings()->channelSize << std::endl;
-        if ( outputPlugin_->open() ) {
-          std::cout << "device started" << std::endl;
-          std::cout << "device has " << outputPlugin_->channelSize() << " channels" << std::endl;
-          
-          output_.addNewChannel( outputPlugin_->channelSize() );
-          std::list< Channel >::iterator it =  output_.begin();
-          for ( int i = 0; it != output_.end(); it++, i++ ) {
-            Channel& channel = *it;
-            channel.setBuffer( outputPlugin_->buffer(i), 256 );
-          }          
+	gpi = reinterpret_cast<gpi_t>(pluginLoad.loadProcAdress("getPsyAudioOutPlugin"));
+	if ( gpi == NULL) {
+	  goto handle_error;
+	}
+	outputPlugin_ = reinterpret_cast<PsyAudioOut*>(gpi());
+	if ( outputPlugin_ == NULL) {
+	  goto handle_error;
+	}
 
-        }
+	std::cout << "Outputplugin is : " << outputPlugin_->name << std::endl;
+	outputPlugin_->setCallback( Player::process, this );
+	std::cout << outputPlugin_->settings()->samplesPerSec << std::endl;
+	std::cout << outputPlugin_->settings()->channelSize << std::endl;
+	if ( !outputPlugin_->open() ) {
+	  goto handle_error;
+	}
+      
+	std::cout << "device started" << std::endl;
+	std::cout << "device has " << outputPlugin_->channelSize() << " channels" << std::endl;
+      
+	output_.addNewChannel( outputPlugin_->channelSize() );
+	std::list< Channel >::iterator it =  output_.begin();
+	for ( int i = 0; it != output_.end(); it++, i++ ) {
+	  Channel& channel = *it;
+	  channel.setBuffer( outputPlugin_->buffer(i), 256 );
+	}
+	return true;
       }
+
+    handle_error:
+      output_.removeAllChannels();
+      outputPlugin_ = NULL;
+      if (pluginLoad.isopen()) {
+	pluginLoad.close();
+      }
+      return false;
     }
 
     int Player::process( unsigned int nframes, void *arg ) {
