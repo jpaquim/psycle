@@ -24,6 +24,7 @@
 #include "childview.h"
 #include "sequencerbar.h"
 #include "pluginfinder.h"
+#include "aboutbox.h"
 #include <ngrs/window.h>
 #include <ngrs/menubar.h>
 #include <ngrs/menu.h>
@@ -53,7 +54,7 @@ namespace psycle {
   namespace host {
 
     class GreetDlg;
-    class AboutDlg;
+    class AboutBox;
     class VuMeter;
     class InstrumentEditor;
     class InfoDlg;
@@ -140,6 +141,7 @@ namespace psycle {
 
       GreetDlg* greetDlg;
       InfoDlg*  infoDlg;
+      AboutBox* aboutBox_;
       ngrs::FileDialog* wavRecFileDlg;
       NewMachine* newMachineDlg_;
 
