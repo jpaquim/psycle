@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patternboxproperties.h"
-#include "sequencerbar.h"
+#include "patternbox.h"
 #include "patterndata.h"
 #include <ngrs/frameborder.h>
 #include <ngrs/tablelayout.h>
