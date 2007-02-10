@@ -2,3 +2,11 @@ ngrs gui toolkit
 
 ngrs is a graphic toolkit library.
 This library is used by xpsycle.
+
+
+IMPORTANT NOTE!
+---------------
+
+The version of ngrs in the psycle repositories is not the official,
+maintained version.  Please see http://sf.net/projects/sondar
+or http://www.nattisoft.de for the official version.
