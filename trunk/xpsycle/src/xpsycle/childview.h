@@ -23,7 +23,7 @@
 #include "machineview.h"
 #include "patternview.h"
 #include "song.h"
-#include "sequencerbar.h"
+#include "patternbox.h"
 #include "global.h"
 #include <ngrs/tabbook.h>
 #include <ngrs/timer.h>
@@ -40,7 +40,7 @@ namespace psycle {
     class WaveEdFrame;
     class SequencerGUI;
     class VirtualPattern;
-    class SequencerBar;
+    class PatternBox;
 
 
     class ChildView : public ngrs::Panel {
@@ -62,7 +62,7 @@ namespace psycle {
 
       PatternView* patternView();
       MachineView* machineView();
-      SequencerBar* sequencerBar();
+      PatternBox* patternBox();
       WaveEdFrame* waveEditor();
       SequencerGUI* sequencerView();
       VirtualPattern* virtualPattern();
@@ -90,7 +90,7 @@ namespace psycle {
 
       // ngrs::FileDialog* getSaveFileName_;
 
-      SequencerBar* sequencerBar_;
+      PatternBox* patternBox_;
       MachineView* machineView_;
       PatternView* patternView_;
       SequencerGUI* sequencerView_;

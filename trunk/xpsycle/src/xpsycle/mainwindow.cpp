@@ -1100,11 +1100,11 @@ namespace psycle {
     void MainWindow::onViewMenuSequencerbar( ngrs::ButtonEvent * ev )
     {
       if ( !selectedChildView_ ) return;
-      selectedChildView_->sequencerBar()->setVisible(!selectedChildView_->sequencerBar()->visible() );
+      selectedChildView_->patternBox()->setVisible(!selectedChildView_->patternBox()->visible() );
 
 
 
-      //sequencerBar_->setVisible(!sequencerBar_->visible());
+      //patternBox_->setVisible(!patternBox_->visible());
       //pane()->resize();
       //pane()->repaint();
     }
@@ -1277,13 +1277,13 @@ namespace psycle {
     void MainWindow::onRecordNotesMode( ngrs::ButtonEvent * ev )
     {
       /*bEditMode = true;
-      if (sequencerBar_->followSong() && bEditMode)
+      if (patternBox_->followSong() && bEditMode)
       {
       bEditMode = false;
       }
       else
       {
-      sequencerBar_->setFollowSong(true);
+      patternBox_->setFollowSong(true);
       bEditMode = true;
       }*/
     }
@@ -1364,7 +1364,7 @@ namespace psycle {
     {
       if (!selectedChildView_) return;
 
-      selectedChildView_->sequencerBar()->setEntry(item);
+      selectedChildView_->patternBox()->setEntry(item);
     }
 
     void MainWindow::onKeyPress( const ngrs::KeyEvent & event )
@@ -1404,12 +1404,12 @@ namespace psycle {
                              break;
                              /*			case ngrs::ngrs::NK_Up :
                              if (App::system().keyState() & ControlMask) {
-                             selectedChildView_->sequencerBar()->selectPrevPattern();
+                             selectedChildView_->patternBox_()->selectPrevPattern();
                              }
                              break;
                              case ngrs::ngrs::NK_Down :
                              if (App::system().keyState() & ControlMask) {
-                             selectedChildView_->sequencerBar()->selectNextPattern();
+                             selectedChildView_->patternBox_()->selectNextPattern();
                              }
                              break;*/
         case cdefInstrDec: // current_instrument-1

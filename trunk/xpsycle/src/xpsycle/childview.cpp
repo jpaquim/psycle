@@ -23,7 +23,7 @@
 #include "newmachine.h"
 #include "waveedframe.h"
 #include "sequencergui.h"
-#include "sequencerbar.h"
+#include "patternbox.h"
 #include "virtualpattern.h"
 #include <ngrs/app.h>
 #include <ngrs/dockpanel.h>
@@ -42,8 +42,8 @@ ChildView::ChildView()
 
   setLayout( ngrs::AlignLayout() );
 
-  add(sequencerBar_ = new SequencerBar(), ngrs::nAlLeft);
-  sequencerBar_->setChildView(this);
+  add(patternBox_ = new PatternBox(), ngrs::nAlLeft);
+  patternBox_->setChildView(this);
 
   tabBook_ = new ngrs::TabBook();
   add(tabBook_, ngrs::nAlClient);
@@ -57,10 +57,10 @@ ChildView::ChildView()
     machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
 
   patternView_ = new PatternView( _pSong );
-	sequencerBar_->setPatternView( patternView() );
+	patternBox_->setPatternView( patternView() );
 
   sequencerView_ = new SequencerGUI();
-  sequencerBar_->setSequenceGUI( sequencerView() ) ;
+  patternBox_->setSequenceGUI( sequencerView() ) ;
   sequencerView_->setPatternSequence( _pSong->patternSequence());
   sequencerView_->addSequencerLine();
 
@@ -98,7 +98,7 @@ ChildView::ChildView()
   //timer.setIntervalTime(80);
   //timer.enableTimer();
   _pSong->patternSequence()->patternData()->resetToDefault();
-  sequencerBar_->update();
+  patternBox_->update();
 }
 
 
@@ -195,9 +195,9 @@ Song * ChildView::song( )
   return _pSong;
 }
 
-SequencerBar * ChildView::sequencerBar( )
+PatternBox * ChildView::patternBox( )
 {
-  return sequencerBar_;
+  return patternBox_;
 }
 
 
@@ -220,7 +220,7 @@ void psycle::host::ChildView::showPatternView( )
 void psycle::host::ChildView::update( )
 {
   waveEditor()->Notify();
-  sequencerBar_->update();
+  patternBox_->update();
   sequencerView()->update();
   machineView()->update();
 }
