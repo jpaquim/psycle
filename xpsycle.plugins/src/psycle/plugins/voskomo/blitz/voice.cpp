@@ -135,17 +135,17 @@ void CSynthTrack::InitVoice(VOICEPAR *voicePar){
 
 void CSynthTrack::ResetSym(){
 	for (int i=0; i<4; i++){
-		if (vpar->oscOptions[0]==10){
-			synfx[0].once=true;
-			synfx[0].twice=false;
+		if (vpar->oscOptions[i]==10){
+			synfx[i].once=true;
+			synfx[i].twice=false;
 		}
-		else if (vpar->oscOptions[0]==11){
-			synfx[0].once=false;
-			synfx[0].twice=true;
+		else if (vpar->oscOptions[i]==11){
+			synfx[i].once=false;
+			synfx[i].twice=true;
 		}
 		else {
-			synfx[0].once=false;
-			synfx[0].twice=false;
+			synfx[i].once=false;
+			synfx[i].twice=false;
 		}
 	}
 
