@@ -29,6 +29,8 @@
 #include <ngrs/window.h>
 #include <ngrs/slider.h>
 #include <ngrs/statusmodel.h>
+#include <ngrs/popupmenu.h>
+#include <ngrs/menuitem.h>
 
 namespace psycle {
 	namespace host {
@@ -46,10 +48,10 @@ namespace psycle {
 
 			setFont( ngrs::Font("Suse sans",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
 
-			propsDlg_ = new MacPropDlg( mac_ );
-				propsDlg_->updateMachineProperties.connect(this,&MachineGUI::onUpdateMachinePropertiesSignal);
-				propsDlg_->deleteMachine.connect(this,&MachineGUI::onDeleteMachineSignal);
-			add(propsDlg_);
+			propsMenu_ = new ngrs::PopupMenu();
+                propsMenu_->add(new ngrs::MenuItem("Clone Machine"));
+                propsMenu_->add(new ngrs::MenuItem("Delete Machine"));
+			add(propsMenu_);
 		}
 
 
@@ -63,10 +65,10 @@ namespace psycle {
 			return *mac_;
 		}
 
-		MacPropDlg * MachineGUI::propsDlg( )
+/*		MacPropDlg * MachineGUI::propsDlg( )
 		{
 			return propsDlg_;
-		}
+		}*/
 
 		void MachineGUI::paint( ngrs::Graphics& g )
 		{
@@ -188,13 +190,13 @@ namespace psycle {
 		void MachineGUI::onMousePress( int x, int y, int button )
 		{
 			int shift = ngrs::App::system().shiftState();
-			if ( (shift & ngrs::nsShift & ngrs::nsLeft) || button == 3 ) {
-				// shift+left-click or right-click.
+			if ( shift & ngrs::nsShift && button == 1 ) { // shift+left-click
 				newConnection.emit(this);
 			} else if ( shift & ngrs::nsLeft ) { // left-click (w/ no shift)
 				selected.emit(this);
-			} else if ( button == 2) {
-				showPropsDlg();
+			} else if ( button == 3) {
+                propsMenu_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
+				propsMenu_->setVisible(true);//showPropsDlg();
 			}
 		}
 
@@ -202,10 +204,10 @@ namespace psycle {
 			deleteRequest.emit(this);
 		}
 
-		void MachineGUI::showPropsDlg()
+/*		void MachineGUI::showPropsDlg()
 		{
 			propsDlg_->setVisible(true); 
-		}
+		}*/
 
 		void MachineGUI::detachLine( WireGUI * line )
 		{

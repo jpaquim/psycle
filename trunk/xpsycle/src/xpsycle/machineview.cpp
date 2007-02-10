@@ -84,7 +84,7 @@ namespace psycle {
 				macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
 				macGui->selected.connect(this,&MachineView::onMachineSelected);
 				macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
-				macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
+				//macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
 				scrollArea_->add(macGui);
 				machineGUIs.push_back(macGui);
 			}

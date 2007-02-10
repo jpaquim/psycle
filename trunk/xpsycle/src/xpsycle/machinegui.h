@@ -21,9 +21,9 @@
 #define MACHINEGUI_H
 
 #include "skinreader.h"
-#include "macpropdlg.h"
 #include "wiregui.h"
 #include <ngrs/panel.h>
+#include <ngrs/popupmenu.h>
 
 namespace ngrs {
   class Slider;
@@ -34,7 +34,6 @@ namespace psycle {
 
     class Machine;
     class FrameMachine;
-    class MacPropDlg;
     class MasterDlg;
 
     /**
@@ -101,8 +100,8 @@ namespace psycle {
       const MachineCoordInfo & coords() const;
 
       virtual void updateSkin();
-      virtual MacPropDlg* propsDlg();
-      virtual void showPropsDlg();
+      //virtual MacPropDlg* propsDlg();
+//      virtual void showPropsDlg();
       void onUpdateMachinePropertiesSignal(Machine* machine);
       void onDeleteMachineSignal();
 
@@ -111,7 +110,7 @@ namespace psycle {
       bool selected_;
       ngrs::Region oldDrag;
       Machine* mac_;
-      MacPropDlg* propsDlg_;			
+      ngrs::PopupMenu *propsMenu_;
       MachineCoordInfo coords_;
       std::vector<LineAttachment> attachedLines;
 
