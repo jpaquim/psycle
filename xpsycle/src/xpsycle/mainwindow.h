@@ -22,7 +22,7 @@
 
 #include "songpdlg.h"
 #include "childview.h"
-#include "sequencerbar.h"
+#include "patternbox.h"
 #include "pluginfinder.h"
 #include "aboutbox.h"
 #include <ngrs/window.h>
