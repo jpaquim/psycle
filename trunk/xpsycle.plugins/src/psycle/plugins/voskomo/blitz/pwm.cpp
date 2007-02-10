@@ -37,6 +37,8 @@ pwm::pwm() :
 	,last(0)
 	,move(0)
 	,direction(0)
+	,once(false)
+	,twice(false)
 {
 
 }
@@ -53,22 +55,26 @@ int pwm::getPosition(){
 int pwm::getLast(){ return (int)last; }
 void pwm::setRange(int val) { frange=(float)val*0.000488519785f; }
 void pwm::setSpeed(int val) { speed=val+val; }
-void pwm::reset(){ last=9999; pos=0; }
+void pwm::reset(){ last=9999; pos=0; direction=0;}
 void pwm::next(){
 	if (frange != 0) move = speed; else speed = 0;
 	last=realpos;
 	realpos=(int)((float)pos*frange)&2047;
-	if (direction){
+	if (direction==1){
 		pos-=move;
 		if (pos<=0){
 			pos=0;
-			direction=0;
+			if (twice) direction+=2;
+			else direction=0;
 		}
-	}else{
+	}
+	else if (direction==0)
+	{
 		pos+=move;
 		if (pos>=2047){
 			pos=2047;
-			direction=1;
+			if (once) direction+=2;
+			else direction=1;
 		}
 	}
 };
