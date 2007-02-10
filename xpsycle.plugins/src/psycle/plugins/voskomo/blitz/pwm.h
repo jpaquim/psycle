@@ -33,6 +33,8 @@ public:
 	void setSpeed(int val);
 	void reset();
 	void next();
+	bool once;
+	bool twice;
 private:
 	int sym;
 	float frange;

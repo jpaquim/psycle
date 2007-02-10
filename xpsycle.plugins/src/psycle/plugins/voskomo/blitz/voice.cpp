@@ -134,6 +134,21 @@ void CSynthTrack::InitVoice(VOICEPAR *voicePar){
 }
 
 void CSynthTrack::ResetSym(){
+	for (int i=0; i<4; i++){
+		if (vpar->oscOptions[0]==10){
+			synfx[0].once=true;
+			synfx[0].twice=false;
+		}
+		else if (vpar->oscOptions[0]==11){
+			synfx[0].once=false;
+			synfx[0].twice=true;
+		}
+		else {
+			synfx[0].once=false;
+			synfx[0].twice=false;
+		}
+	}
+
 	synbase[0]=vpar->initposition[0];
 	synfx[0].reset();
 	synbase[1]=vpar->initposition[1];
@@ -285,6 +300,11 @@ void CSynthTrack::RealNoteOn(){
 	speedup2=((float)vpar->fltScaling*basenote*0.0015f)+1.0f;
 	if (speedup<1.0f) speedup=1.0f;
 	if (speedup2<1.0f) speedup2=1.0f;
+
+	if (vpar->oscOptions[0] == 9) dco1Position=0.0f;
+	if (vpar->oscOptions[1] == 9) dco2Position=0.0f;
+	if (vpar->oscOptions[2] == 9) dco3Position=0.0f;
+	if (vpar->oscOptions[3] == 9) dco4Position=0.0f;
 }
 
 void CSynthTrack::updateTuning() {
@@ -306,145 +326,145 @@ void CSynthTrack::updateTuning() {
 	}
 	switch (vpar->lfoDestination) {
 	case 0:	//all osc
-		if (vpar->oscOptions[0] < 7) 
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9 ) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 1: // osc 2+3+4
-		if (vpar->oscOptions[0] < 7) 
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 2: // osc 2+3
-		if (vpar->oscOptions[0] < 7)
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9)
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 3: // osc 2+4
-		if (vpar->oscOptions[0] < 7) 
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 4: // osc 3+4
-		if (vpar->oscOptions[0] < 7) 
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 5: // osc 2
-		if (vpar->oscOptions[0] < 7) 
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 6: // osc 3
-		if (vpar->oscOptions[0] < 7) 
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(rbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 7: // osc 4
-		if (vpar->oscOptions[0] < 7) 
+		if (vpar->oscOptions[0] != 8 || vpar->oscOptions[0] != 9) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
 		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] < 7) 
+		if (vpar->oscOptions[1] != 8 || vpar->oscOptions[1] != 9) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] < 7) 
+		if (vpar->oscOptions[2] != 8 || vpar->oscOptions[2] != 9) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		else
 		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] < 7) 
+		if (vpar->oscOptions[3] != 8 || vpar->oscOptions[3] != 9) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
 		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
