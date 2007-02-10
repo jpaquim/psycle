@@ -105,6 +105,9 @@ namespace psycle {
       void onUpdateMachinePropertiesSignal(Machine* machine);
       void onDeleteMachineSignal();
 
+      void muteMachine();
+      void soloMachine();
+
     private:								
 
       bool selected_;

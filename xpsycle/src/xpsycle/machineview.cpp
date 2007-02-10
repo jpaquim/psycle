@@ -23,6 +23,7 @@
 #include "machinegui.h"
 #include "plugin.h"
 #include "wiredlg.h"
+#include "inputhandler.h"
 #include <ngrs/autoscrolllayout.h>
 #include <ngrs/alignlayout.h>
 #include <ngrs/app.h>
