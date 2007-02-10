@@ -14108,6 +14108,74 @@ const char * move_track_down_xpm[] = {
 ".++;;$$.%%%%%%,%%%%%%.",
 ".++;;$$.%%%%%%%%%%%%%."};
 
+/* XPM */
+const char *patternbox_clonepattern_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 45 1",
+"  c black",
+". c #20204A4A8787",
+"X c #34346565A4A4",
+"o c #BABABDBDB6B6",
+"O c #E2E2E3E3E0E0",
+"+ c gray90",
+"@ c #E5E5E5E5E6E6",
+"# c #E5E5E6E6E5E5",
+"$ c #E9E9E9E9E9E9",
+"% c #EAEAE9E9E9E9",
+"& c #EAEAE9E9EAEA",
+"* c #EAEAEAEAEAEA",
+"= c #EBEBEAEAEAEA",
+"- c #EEEEEEEEEDED",
+"; c #EEEEEEEEEEEE",
+": c #EEEEEFEFEEEE",
+"> c #EFEFEFEFEFEF",
+", c #EFEFEFEFF0F0",
+"< c #EFEFF0F0EFEF",
+"1 c #EFEFF0F0F0F0",
+"2 c #F0F0EFEFEFEF",
+"3 c #F1F1F2F2F1F1",
+"4 c gray95",
+"5 c #F2F2F2F2F3F3",
+"6 c #F2F2F3F3F3F3",
+"7 c #F3F3F2F2F2F2",
+"8 c #F3F3F2F2F3F3",
+"9 c #F3F3F3F3F3F3",
+"0 c #F4F4F3F3F3F3",
+"q c gray96",
+"w c #F5F5F6F6F6F6",
+"e c #F6F6F5F5F5F5",
+"r c #F6F6F5F5F6F6",
+"t c #F6F6F6F6F6F6",
+"y c gray97",
+"u c #F8F8F8F8F8F8",
+"i c #F8F8F9F9F8F8",
+"p c #F9F9F9F9F9F9",
+"a c #FAFAFBFBFAFA",
+"s c #FBFBFBFBFBFB",
+"d c #FCFCFCFCFBFB",
+"f c #FDFDFDFDFDFD",
+"g c #FEFEFEFEFEFE",
+"h c gray100",
+"j c None",
+/* pixels */
+"joooooooooojjjjj",
+"ohhhhhhhhhhojjjj",
+"oh........sojjjj",
+"odXXXXXXXXaojjjj",
+"oaaaOooooooooooj",
+"oattohhhhhhhhhho",
+"ot00oh........ho",
+"o1;>oaXXXXXXXXao",
+"o,==oaaaatayyyuo",
+"o2++oyttttyyttyo",
+"o112oyt1100110yo",
+"joooo1:>12,,>>1o",
+"jjjjo>%=%%%%==>o",
+"jjjjo;++++++++>o",
+"jjjjo02111>>>>>o",
+"jjjjjooooooooooj"
+};
+
 
 DefaultBitmaps::DefaultBitmaps()
 {
@@ -14161,6 +14229,7 @@ DefaultBitmaps::DefaultBitmaps()
   logoLeft_.createFromXpmData( logo_left_xpm );
   logoMid_.createFromXpmData( logo_middle_xpm );
   logoRight_.createFromXpmData( logo_right_xpm );
+  patternbox_clonepattern_.createFromXpmData( patternbox_clonepattern_xpm );
 }
 
 DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
@@ -14434,6 +14503,12 @@ DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
     machine_skin_.loadFromFile( pCfg->iconPath() + "machine_skin.xpm" );
   } catch ( const char* e ) {
     machine_skin_.createFromXpmData( machine_skin_xpm );
+  }
+
+  try {
+    patternbox_clonepattern_.loadFromFile( pCfg->iconPath() + "patternbox_clonepattern.xpm" );
+  } catch ( const char* e ) {
+    patternbox_clonepattern_.createFromXpmData( patternbox_clonepattern_xpm );
   }
 }
 
@@ -14725,6 +14800,10 @@ ngrs::Bitmap & DefaultBitmaps::logoMid() {
 
 ngrs::Bitmap & DefaultBitmaps::logoRight() {
 	return logoRight_;
+}
+
+ngrs::Bitmap & DefaultBitmaps::patternbox_clonepattern() {
+	return patternbox_clonepattern_;
 }
 
 }

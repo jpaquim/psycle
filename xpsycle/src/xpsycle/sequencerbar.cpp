@@ -188,26 +188,32 @@ namespace psycle {
       img->setPreferredSize(25,25);
       ngrs::Button* newCatBtn = new ngrs::Button(img);
       newCatBtn->setHint("New Category");
-      patToolBar->add( newCatBtn )->clicked.connect(this,&SequencerBar::onNewCategory);
-      patToolBar->add(new ngrs::ToolBarSeparator());
       img = new ngrs::Image();
       img->setSharedBitmap( &icons.pattern_new() );
       ngrs::Button* newPatBtn = new ngrs::Button( img );
       newPatBtn->setHint("New Pattern");
-      patToolBar->add( newPatBtn )->clicked.connect( this, &SequencerBar::onNewPattern );
+      img = new ngrs::Image();
+      img->setSharedBitmap( &icons.patternbox_clonepattern() );
+      img->setPreferredSize(25,25);
+      ngrs::Button* clnPatBtn = new ngrs::Button( img );
+      clnPatBtn->setHint("Clone Pattern");
       img = new ngrs::Image();
       img->setSharedBitmap( &icons.delPattern() );
       img->setPreferredSize(25,25);
       ngrs::Button* delPatBtn = new ngrs::Button( img );
       delPatBtn->setHint( "Delete Pattern" );
-      patToolBar->add( delPatBtn )->clicked.connect( this, &SequencerBar::onDeletePattern );
-      ngrs::Button* clnPatBtn = new ngrs::Button("Cln");
-      clnPatBtn->setHint("Clone Pattern");
-      patToolBar->add( clnPatBtn )->clicked.connect(this, &SequencerBar::onClonePattern );
 
       ngrs::Button* addPatBtn = new ngrs::Button("Add");
       addPatBtn->setHint("Add Pattern To Sequencer");
+
+      patToolBar->add( newCatBtn )->clicked.connect(this,&SequencerBar::onNewCategory);
+      patToolBar->add(new ngrs::ToolBarSeparator());
+      patToolBar->add( newPatBtn )->clicked.connect( this, &SequencerBar::onNewPattern );
+      patToolBar->add( clnPatBtn )->clicked.connect(this, &SequencerBar::onClonePattern );
+      patToolBar->add( delPatBtn )->clicked.connect( this, &SequencerBar::onDeletePattern );
+      patToolBar->add(new ngrs::ToolBarSeparator());
       patToolBar->add( addPatBtn )->clicked.connect(this,&SequencerBar::onPatternAdd);
+
       patternPanel->add(patToolBar, ngrs::nAlTop);
 
       patternBox_ = new ngrs::NCustomTreeView();
