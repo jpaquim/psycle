@@ -100,20 +100,21 @@ namespace psycle {
       const MachineCoordInfo & coords() const;
 
       virtual void updateSkin();
-      //virtual MacPropDlg* propsDlg();
-//      virtual void showPropsDlg();
       void onUpdateMachinePropertiesSignal(Machine* machine);
       void onDeleteMachineSignal();
+      void onPopupDeleteMachine( ngrs::ButtonEvent *event );
 
       void muteMachine();
       void soloMachine();
+
+      void deleteMachine();
 
     private:								
 
       bool selected_;
       ngrs::Region oldDrag;
       Machine* mac_;
-      ngrs::PopupMenu *propsMenu_;
+      ngrs::PopupMenu *machActionsPopup_;
       MachineCoordInfo coords_;
       std::vector<LineAttachment> attachedLines;
 
@@ -135,7 +136,6 @@ namespace psycle {
       virtual void paint( ngrs::Graphics& g );
 
       virtual void updateSkin();
-      virtual void showPropsDlg() {}; // override--we don't to see a master props dlg (atm)
 
     private:
 
