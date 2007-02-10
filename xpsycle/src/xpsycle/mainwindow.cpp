@@ -352,16 +352,16 @@ namespace psycle {
       fileMenu_->add(new ngrs::MenuSeperator());
       fileMenu_->add(new ngrs::MenuItem("Song properties"))->click.connect(this,&MainWindow::showSongpDlg);
       fileMenu_->add(new ngrs::MenuSeperator());
-      fileMenu_->add(new ngrs::MenuItem("revert to saved"));
-      ngrs::MenuItem* recentItem = new ngrs::MenuItem("recent files");
+      fileMenu_->add(new ngrs::MenuItem("Revert to saved"));
+      ngrs::MenuItem* recentItem = new ngrs::MenuItem("Recent files");
       fileMenu_->add(recentItem);
       recentFileMenu_ = new ngrs::Menu();
       recentItem->add(recentFileMenu_);
-      noneFileItem = new ngrs::MenuItem("none");
+      noneFileItem = new ngrs::MenuItem("None");
       noneFileItem->setEnable(false);
       recentFileMenu_->add(noneFileItem);
       noFileWasYetLoaded = true;
-      fileMenu_->add(new ngrs::MenuItem("exit"))->click.connect(this,&MainWindow::onFileExit);
+      fileMenu_->add(new ngrs::MenuItem("Exit"))->click.connect(this,&MainWindow::onFileExit);
       menuBar_->add(fileMenu_);
 
       // Creates the edit menu
@@ -424,7 +424,7 @@ namespace psycle {
       communityMenu_ = new ngrs::Menu("Community");
       ngrs::MenuItem* comSearchItem = new ngrs::MenuItem("Community Search");	  
       communityMenu_->add( new ngrs::MenuItem("Ask a Question") );
-      communityMenu_->add( new ngrs::MenuItem("Sent Feedback" ) );
+      communityMenu_->add( new ngrs::MenuItem("Send Feedback" ) );
       communityMenu_->add( new ngrs::MenuSeperator() );
       communityMenu_->add( new ngrs::MenuItem("Psycledelics Center") );
       communityMenu_->add( new ngrs::MenuSeperator() );
@@ -442,10 +442,14 @@ namespace psycle {
       helpMenu_->add(new ngrs::MenuItem("About"))->click.connect(this,&MainWindow::onHelpMenuAbout);
       helpMenu_->add(new ngrs::MenuItem("Greetings"))->click.connect(this,&MainWindow::onHelpMenuGreeting);
       helpMenu_->add(new ngrs::MenuSeperator());
-      helpMenu_->add(new ngrs::MenuItem("readme"))->click.connect(this,&MainWindow::onHelpMenuReadme);
-      helpMenu_->add(new ngrs::MenuItem("keys"))->click.connect(this,&MainWindow::onHelpMenuKeys);
-      helpMenu_->add(new ngrs::MenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
-      helpMenu_->add(new ngrs::MenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
+      ngrs::MenuItem* docsItem = new ngrs::MenuItem("User Docs");
+      ngrs::Menu* docsMenu = new ngrs::Menu();
+          docsMenu->add(new ngrs::MenuItem("readme"))->click.connect(this,&MainWindow::onHelpMenuReadme);
+          docsMenu->add(new ngrs::MenuItem("keys"))->click.connect(this,&MainWindow::onHelpMenuKeys);
+          docsMenu->add(new ngrs::MenuItem("tweaking"))->click.connect(this,&MainWindow::onHelpMenuTweaking);
+          docsMenu->add(new ngrs::MenuItem("whatsnew"))->click.connect(this,&MainWindow::onHelpMenuWhatsNew);
+      docsItem->add(docsMenu);
+      helpMenu_->add(docsItem);
       menuBar_->add(helpMenu_);
     }
 
