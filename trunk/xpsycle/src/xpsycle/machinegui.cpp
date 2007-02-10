@@ -50,10 +50,13 @@ namespace psycle {
 
 			setFont( ngrs::Font("Suse sans",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
 
-			propsMenu_ = new ngrs::PopupMenu();
-                propsMenu_->add(new ngrs::MenuItem("Clone Machine"));
-                propsMenu_->add(new ngrs::MenuItem("Delete Machine"));
-			add(propsMenu_);
+			machActionsPopup_ = new ngrs::PopupMenu();
+                ngrs::MenuItem *clnItem = new ngrs::MenuItem("Clone Machine");
+                ngrs::MenuItem *delItem = new ngrs::MenuItem("Delete Machine");
+                delItem->click.connect(this,&MachineGUI::onPopupDeleteMachine);
+                machActionsPopup_->add(clnItem);
+                machActionsPopup_->add(delItem);
+			add(machActionsPopup_);
 		}
 
 
@@ -66,11 +69,6 @@ namespace psycle {
 		{
 			return *mac_;
 		}
-
-/*		MacPropDlg * MachineGUI::propsDlg( )
-		{
-			return propsDlg_;
-		}*/
 
 		void MachineGUI::paint( ngrs::Graphics& g )
 		{
@@ -197,8 +195,8 @@ namespace psycle {
 			} else if ( shift & ngrs::nsLeft ) { // left-click (w/ no shift)
 				selected.emit(this);
 			} else if ( button == 3) {
-                propsMenu_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
-				propsMenu_->setVisible(true);//showPropsDlg();
+                machActionsPopup_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
+				machActionsPopup_->setVisible(true);
 			}
 		}
 
@@ -271,6 +269,14 @@ namespace psycle {
                 mac().song()->machineSoloed = mac()._macIndex;
             }
             repaint();
+        }
+
+        void MachineGUI::onPopupDeleteMachine( ngrs::ButtonEvent *event ) {
+            deleteMachine();
+        }
+
+        void MachineGUI::deleteMachine() {
+            deleteRequest.emit(this);
         }
 
 		// end of Machine GUI class
@@ -418,10 +424,9 @@ namespace psycle {
 			if (button==1) { // left-click
 				if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
                     muteMachine();
-				} else
-					if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
-                        soloMachine();
-					}
+				} else if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
+                    soloMachine();
+                }
 			}
 		}
 
