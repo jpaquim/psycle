@@ -95,6 +95,7 @@ namespace psycle {
       ngrs::Bitmap & logoLeft();
       ngrs::Bitmap & logoMid();
       ngrs::Bitmap & logoRight();
+      ngrs::Bitmap & patternbox_clonepattern();
 
     private:
 
@@ -156,6 +157,7 @@ namespace psycle {
       ngrs::Bitmap logoLeft_;
       ngrs::Bitmap logoMid_;
       ngrs::Bitmap logoRight_;
+      ngrs::Bitmap patternbox_clonepattern_;
 
     };
 
