@@ -95,7 +95,7 @@ namespace ngrs {
     unCoupleBtn->clicked.connect( this, &DockPanel::onUndockWindow );
     dockBar_->add( unCoupleBtn, nAlRight );
     dockBar_->setSkin( App::config()->skin("dockbar_bg") );
-    dockBarLabel_ = new Label("Song Explorer");
+    dockBarLabel_ = new Label("");
     dockBar_->add( dockBarLabel_, nAlClient );
     add( dockBar_, nAlTop );
 
