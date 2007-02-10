@@ -32,6 +32,7 @@
 #include "newmachine.h"
 #include "audioconfigdlg.h"
 #include "skinreader.h"
+#include "aboutbox.h"
 #include <iomanip>
 #include <ngrs/app.h>
 #include <ngrs/item.h>
@@ -44,6 +45,7 @@
 #include <ngrs/filedialog.h>
 #include <ngrs/system.h>
 #include <ngrs/toolbarpanel.h>
+#include <ngrs/dialog.h>
 
 namespace psycle { 
   namespace host {
@@ -460,6 +462,7 @@ namespace psycle {
       add( songpDlg_ = new SongpDlg( ) );
       // creates the greeting dialog, that greets people who help psycle development
       add( greetDlg =  new GreetDlg() );
+      add( aboutBox_ =  new AboutBox() );
       // creates the save dialog, that ask where to store wave files, recorded from playing a psy song
       wavRecFileDlg = new ngrs::FileDialog();
       wavRecFileDlg->setMode( ngrs::nSave );
@@ -1117,17 +1120,7 @@ namespace psycle {
 
     void MainWindow::onHelpMenuAbout( ngrs::ButtonEvent * ev )
     {
-      ngrs::MessageBox* about = new ngrs::MessageBox();
-      about->setTitle("About Psycle(X)");
-      about->setText( std::string("Psycle version (X alpha 0.1)\n") +
-        std::string("(c) 2006 by  Stefan Nattkemper\n") +
-        std::string("            Josep Segura\n") +
-        std::string("            D.W. Aley\n") +
-        std::string("GNU Public Licence 2.0") );
-      about->setButtons( ngrs::nMsgOkBtn );
-      add( about );
-      about->execute();
-      ngrs::App::addRemovePipe(about);
+      aboutBox_->setVisible(true);
     }
 
     void MainWindow::onHelpMenuGreeting( ngrs::ButtonEvent * ev )
