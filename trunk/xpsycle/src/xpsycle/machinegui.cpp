@@ -25,6 +25,8 @@
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include "song.h"
+#include "inputhandler.h"
+#include "global.h"
 #include <ngrs/frameborder.h>
 #include <ngrs/window.h>
 #include <ngrs/slider.h>
@@ -204,11 +206,6 @@ namespace psycle {
 			deleteRequest.emit(this);
 		}
 
-/*		void MachineGUI::showPropsDlg()
-		{
-			propsDlg_->setVisible(true); 
-		}*/
-
 		void MachineGUI::detachLine( WireGUI * line )
 		{
 			std::vector<LineAttachment>::iterator it = attachedLines.begin();
@@ -236,9 +233,45 @@ namespace psycle {
 		{
 		}
 
-		void MachineGUI::onUpdateMachinePropertiesSignal( Machine* machine ) {
-			repaint( this );
-		}
+        void MachineGUI::muteMachine() {
+            mac()._mute = !mac()._mute;
+            if (mac()._mute) {
+                mac()._volumeCounter=0.0f;
+                mac()._volumeDisplay=0;
+                if (mac().song()->machineSoloed == mac()._macIndex ) {
+                    mac().song()->machineSoloed = -1;
+                }
+            }
+            repaint();
+        }
+
+        void MachineGUI::soloMachine() {
+            if (mac().song()->machineSoloed == mac()._macIndex ) {
+                mac().song()->machineSoloed = -1;
+                for ( int i=0;i<MAX_MACHINES;i++ ) {
+                    if ( mac().song()->_pMachine[i] ) {
+                        if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+                            mac().song()->_pMachine[i]->_mute = false;
+                        }
+                    }
+                }
+            } else {
+                for ( int i=0;i<MAX_MACHINES;i++ ) {
+                    if ( mac().song()->_pMachine[i] )
+                    {
+                        if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != mac()._macIndex))
+                        {
+                            mac().song()->_pMachine[i]->_mute = true;
+                            mac().song()->_pMachine[i]->_volumeCounter=0.0f;
+                            mac().song()->_pMachine[i]->_volumeDisplay=0;
+                        }
+                    }
+                }
+                mac()._mute = false;
+                mac().song()->machineSoloed = mac()._macIndex;
+            }
+            repaint();
+        }
 
 		// end of Machine GUI class
 
@@ -384,42 +417,10 @@ namespace psycle {
 			MachineGUI::onMousePress(x,y,button);
 			if (button==1) { // left-click
 				if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
-					mac()._mute = !mac()._mute;
-					if (mac()._mute) {
-						mac()._volumeCounter=0.0f;
-						mac()._volumeDisplay=0;
-						if (mac().song()->machineSoloed == mac()._macIndex ) {
-							mac().song()->machineSoloed = -1;
-						}
-					}
-					repaint();
+                    muteMachine();
 				} else
 					if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
-						if (mac().song()->machineSoloed == mac()._macIndex ) {
-							mac().song()->machineSoloed = -1;
-							for ( int i=0;i<MAX_MACHINES;i++ ) {
-								if ( mac().song()->_pMachine[i] ) {
-									if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-										mac().song()->_pMachine[i]->_mute = false;
-									}
-								}
-							}
-						} else {
-							for ( int i=0;i<MAX_MACHINES;i++ ) {
-								if ( mac().song()->_pMachine[i] )
-								{
-									if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != mac()._macIndex))
-									{
-										mac().song()->_pMachine[i]->_mute = true;
-										mac().song()->_pMachine[i]->_volumeCounter=0.0f;
-										mac().song()->_pMachine[i]->_volumeDisplay=0;
-									}
-								}
-							}
-							mac()._mute = false;
-							mac().song()->machineSoloed = mac()._macIndex;
-						}
-						repaint();
+                        soloMachine();
 					}
 			}
 		}
@@ -494,8 +495,19 @@ namespace psycle {
 
 		void GeneratorGUI::onKeyPress( const ngrs::KeyEvent & event )
 		{
-			if ( event.scancode() == ngrs::NK_Delete ) 
+            int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
+			if ( key == ngrs::NK_Delete ) {
 				deleteRequest.emit( this );
+            }
+            switch ( key ) { // FIXME: shouldn't be hardcoded, should come from conf file.
+                case 11: // 'm' key
+                    muteMachine();
+                break;
+                case 1: // 's' key
+                    soloMachine();
+                break;
+                default:;
+            }
 		}
 
 		void GeneratorGUI::onMouseDoublePress( int x, int y, int button ) {
