@@ -315,13 +315,15 @@ void CSynthTrack::updateTuning() {
 	else vibadd = 0.125f*(float)lfoViberSample;
 	for (int c = 0; c < 4; c++){
 		switch (vpar->oscOptions[c]){
-		case 0: oscArpTranspose[c] = curArp; break; // ---
-		case 1: oscArpTranspose[c] = curArp; break; // sync
 		case 2: oscArpTranspose[c] = 0; break;      // arpless sync
 		case 3: oscArpTranspose[c] = 0; break;      // arp note 1
 		case 4: oscArpTranspose[c] = arpInput[1]; break; // 2
 		case 5: oscArpTranspose[c] = arpInput[2]; break; // 3
 		case 6: oscArpTranspose[c] = arpInput[3]; break; // 4
+		case 7: oscArpTranspose[c] = 0; break;      // no track
+		case 8: oscArpTranspose[c] = 0; break;      // no track + sync
+		default: oscArpTranspose[c] = curArp; break; // ---
+
 		}
 	}
 	switch (vpar->lfoDestination) {
