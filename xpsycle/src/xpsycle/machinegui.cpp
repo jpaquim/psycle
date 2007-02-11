@@ -54,11 +54,11 @@ namespace psycle {
                 ngrs::MenuItem *clnItem = new ngrs::MenuItem("Clone Machine");
                 ngrs::MenuItem *delItem = new ngrs::MenuItem("Delete Machine");
                 delItem->click.connect(this,&MachineGUI::onPopupDeleteMachine);
+                clnItem->click.connect(this,&MachineGUI::onPopupCloneMachine);
                 machActionsPopup_->add(clnItem);
                 machActionsPopup_->add(delItem);
 			add(machActionsPopup_);
 		}
-
 
 		MachineGUI::~MachineGUI()
 		{
@@ -273,6 +273,10 @@ namespace psycle {
 
         void MachineGUI::onPopupDeleteMachine( ngrs::ButtonEvent *event ) {
             deleteMachine();
+        }
+
+        void MachineGUI::onPopupCloneMachine( ngrs::ButtonEvent *event ) {
+            cloneMachineSignal.emit(this);
         }
 
         void MachineGUI::deleteMachine() {
@@ -505,14 +509,15 @@ namespace psycle {
 				deleteRequest.emit( this );
             }
             switch ( key ) { // FIXME: shouldn't be hardcoded, should come from conf file.
-                case 11: // 'm' key
+                case 557: // should be cdefMuteMachine
                     muteMachine();
                 break;
-                case 1: // 's' key
+                case 558: // should be cdefSoloMachine
                     soloMachine();
                 break;
                 default:;
             }
+            std::cout << key << std::endl;
 		}
 
 		void GeneratorGUI::onMouseDoublePress( int x, int y, int button ) {

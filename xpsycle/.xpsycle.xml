@@ -121,5 +121,10 @@
 <key id='block_start' mod='ctrl' keychar='K' />
 <key id='block_unmark' mod='ctrl' keychar='U' />
 
+<!-- machine view key options -->
+
+<key id='mute_machine' mod='shift' keychar='M' />
+<key id='solo_machine' mod='shift' keychar='S' />
+
 </xpsycle>
 

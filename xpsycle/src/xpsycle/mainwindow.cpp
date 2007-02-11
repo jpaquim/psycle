@@ -896,7 +896,7 @@ namespace psycle {
         line = selected;
       }
 
-      for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects ngrs::Names.
+      for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
       {
         if(selectedSong_->_pMachine[b]) {
           buffer.str("");

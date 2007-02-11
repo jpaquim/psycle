@@ -65,8 +65,8 @@ namespace psycle
 			return pattern;
 		}
                 
-                SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
-                {
+        SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
+        {
                      SinglePattern* pattern = new SinglePattern( src);
                      pattern->setCategory(this);
                      pattern->setName(name);

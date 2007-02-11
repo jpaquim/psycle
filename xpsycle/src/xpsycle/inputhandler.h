@@ -229,6 +229,8 @@ namespace psycle {
       cdefPatternTrackSolo,
       cdefPatternTrackRecord,
       cdefSelectBar,
+      cdefMuteMachine,
+      cdefSoloMachine
 
     };
 
@@ -425,6 +427,9 @@ namespace psycle {
         case cdefRedo:		return "Edit Redo";
 
         case cdefErrorLog:	return "Show Error Log";
+
+        case cdefMuteMachine: return "Mute Machine";
+        case cdefSoloMachine: return "Solo Machine";
 
         case cdefNull:
         default:

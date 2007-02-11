@@ -106,6 +106,8 @@ namespace psycle {
 			void onMachineSelected( MachineGUI* gui );
 
 			void onMachineDeleteRequest( MachineGUI* machineGUI );
+			void onCloneMachineSignal( MachineGUI *macGui ); 
+            void cloneMachine( const MachineGUI & macGui );
 			void onUpdateMachinePropertiesSignal( Machine* machine );
 
 			void onBendAdded( WireGUI* gui );

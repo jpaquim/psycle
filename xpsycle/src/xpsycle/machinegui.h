@@ -80,6 +80,7 @@ namespace psycle {
       sigslot::signal3<Machine*,int,int> moved;
       sigslot::signal3<int,int,int> patternTweakSlide;
       sigslot::signal1<MachineGUI*> selected;
+      sigslot::signal1<MachineGUI*> cloneMachineSignal;
 
       int ident() const;
 
@@ -103,6 +104,7 @@ namespace psycle {
       void onUpdateMachinePropertiesSignal(Machine* machine);
       void onDeleteMachineSignal();
       void onPopupDeleteMachine( ngrs::ButtonEvent *event );
+      void onPopupCloneMachine( ngrs::ButtonEvent *event );
 
       void muteMachine();
       void soloMachine();
