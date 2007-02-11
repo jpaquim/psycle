@@ -908,7 +908,13 @@ if (id == "block_copy") {
 																																																																																																				} else
 																																																																																																					if (id == "tweak_smooth_paramater") {
 																																																																																																						inputHandler_.changeKeyCode(cdefTweakS,Key(shift,keyCode));
-																																																																																																					}
+																																																																																																					} else if (id == "mute_machine") {
+																																																																																																						inputHandler_.changeKeyCode(cdefMuteMachine,Key(shift,keyCode));
+
+																																																																																																					} else if (id == "solo_machine") {
+																																																																																																						inputHandler_.changeKeyCode(cdefSoloMachine,Key(shift,keyCode));
+
+                                                                                                                                                                                                                                                                                                                                                                                                                    }
 							}
 		}
 		

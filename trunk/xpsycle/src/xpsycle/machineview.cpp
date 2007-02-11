@@ -85,7 +85,7 @@ namespace psycle {
 				macGui->patternTweakSlide.connect(this,&MachineView::onTweakSlide);
 				macGui->selected.connect(this,&MachineView::onMachineSelected);
 				macGui->deleteRequest.connect(this,&MachineView::onMachineDeleteRequest);
-				//macGui->propsDlg()->updateMachineProperties.connect(this,&MachineView::onUpdateMachinePropertiesSignal);
+				macGui->cloneMachineSignal.connect(this,&MachineView::onCloneMachineSignal);
 				scrollArea_->add(macGui);
 				machineGUIs.push_back(macGui);
 			}
@@ -95,6 +95,14 @@ namespace psycle {
 		{
 			onCreateMachine( mac );
 		}
+
+        void MachineView::onCloneMachineSignal( MachineGUI *macGui ) {
+            cloneMachine( *macGui );
+        }
+
+        void MachineView::cloneMachine( const MachineGUI & macGui ) {
+            std::cout << "pls clone me" << std::endl;
+        }
 
 		void MachineView::createGUIMachines( )
 		{
