@@ -21,6 +21,7 @@
 #include <QtGui>
 
  #include "mainwindow.h"
+ #include "machineview.h"
 
  MainWindow::MainWindow()
  {
@@ -32,11 +33,7 @@
      patternBox->setLayout(patternBoxLayout);
      QTabWidget *views = new QTabWidget();
      
-     QWidget *macView = new QWidget();
-     macView->setPalette(QPalette(QColor(0, 0, 0)));
-     macView->setAutoFillBackground(true);
-     QGridLayout *macLay = new QGridLayout();
-     macView->setLayout(macLay);
+     MachineView *macView = new MachineView();
 
      QWidget *patView = new QWidget();
      QGridLayout *patLay = new QGridLayout();
