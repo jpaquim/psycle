@@ -17,37 +17,22 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef PATTERNBOX_H
- #define PATTERNBOX_H
+ #ifndef MACHINEGUI_H
+ #define MACHINEGUI_H
 
  #include <QWidget>
 
- class QToolBar;
-
- class PatternBox : public QWidget
+ class MachineGui : public QWidget
  {
      Q_OBJECT
 
  public:
-     PatternBox(QWidget *parent = 0);
+     MachineGui(QWidget *parent = 0);
 
- private slots:
-     void newCategory();
-     void newPattern();
-     void clonePattern();
-     void deletePattern();
-     void addPatternToSequencer();
+ protected:
+     void mouseMoveEvent(QMouseEvent *event); 
 
  private:
-     void createActions();
-
-     QToolBar *patToolBar;
-
-     QAction *newCatAct;
-     QAction *newPatAct;
-     QAction *clnPatAct;
-     QAction *delPatAct;
-     QAction *addPatToSeqAct;
 
  };
 

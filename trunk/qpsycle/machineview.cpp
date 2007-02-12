@@ -21,6 +21,7 @@
 #include <QtGui>
 
  #include "machineview.h"
+ #include "machinegui.h"
 
  MachineView::MachineView(QWidget *parent) 
     : QWidget(parent)
@@ -28,5 +29,9 @@
      setPalette(QPalette(QColor(0, 0, 0)));
      setAutoFillBackground(true);
      QGridLayout *layout = new QGridLayout();
+
+     MachineGui *mach = new MachineGui();
+
+     layout->addWidget(mach);
      setLayout(layout);
  }
