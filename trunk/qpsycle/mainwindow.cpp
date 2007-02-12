@@ -22,6 +22,9 @@
 
  #include "mainwindow.h"
  #include "machineview.h"
+ #include "patternview.h"
+ #include "waveview.h"
+ #include "sequencerview.h"
 
  MainWindow::MainWindow()
  {
@@ -34,21 +37,9 @@
      QTabWidget *views = new QTabWidget();
      
      MachineView *macView = new MachineView();
-
-     QWidget *patView = new QWidget();
-     QGridLayout *patLay = new QGridLayout();
-     patLay->addWidget(new QTextEdit());
-     patView->setLayout(patLay);
-
-     QWidget *wavView = new QWidget();
-     QGridLayout *wavLay = new QGridLayout();
-     wavLay->addWidget(new QTextEdit());
-     wavView->setLayout(wavLay);
-
-     QWidget *seqView = new QWidget();
-     QGridLayout *seqLay = new QGridLayout();
-     seqLay->addWidget(new QTextEdit());
-     seqView->setLayout(seqLay);
+     PatternView *patView = new PatternView();
+     WaveView *wavView = new WaveView();
+     SequencerView *seqView = new SequencerView();
 
      views->addTab(macView, "Machine View");
      views->addTab(patView, "Pattern View");

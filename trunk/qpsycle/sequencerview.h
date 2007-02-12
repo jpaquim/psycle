@@ -17,16 +17,20 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+ #ifndef SEQUENCERVIEW_H
+ #define SEQUENCERVIEW_H
 
-#include <QtGui>
+ #include <QWidget>
 
- #include "machineview.h"
-
- MachineView::MachineView(QWidget *parent) 
-    : QWidget(parent)
+ class SequencerView : public QWidget
  {
-     setPalette(QPalette(QColor(0, 0, 0)));
-     setAutoFillBackground(true);
-     QGridLayout *layout = new QGridLayout();
-     setLayout(layout);
- }
+     Q_OBJECT
+
+ public:
+     SequencerView(QWidget *parent = 0);
+
+ private:
+
+ };
+
+ #endif

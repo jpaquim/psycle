@@ -20,12 +20,12 @@
 
 #include <QtGui>
 
- #include "machineview.h"
+ #include "waveview.h"
 
- MachineView::MachineView(QWidget *parent) 
+ WaveView::WaveView(QWidget *parent) 
     : QWidget(parent)
  {
-     setPalette(QPalette(QColor(0, 0, 0)));
+     setPalette(QPalette(QColor(100, 100, 100)));
      setAutoFillBackground(true);
      QGridLayout *layout = new QGridLayout();
      setLayout(layout);
