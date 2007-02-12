@@ -25,8 +25,52 @@
  PatternBox::PatternBox(QWidget *parent) 
     : QWidget(parent)
  {
-     QHBoxLayout *layout = new QHBoxLayout();
+     createActions();
+
+     QGridLayout *layout = new QGridLayout();
+
+     patToolBar = new QToolBar();
+     patToolBar->addAction(newCatAct);
+     patToolBar->addSeparator();
+     patToolBar->addAction(newPatAct);
+     patToolBar->addAction(clnPatAct);
+     patToolBar->addAction(delPatAct);
+     patToolBar->addSeparator();
+     patToolBar->addAction(addPatToSeqAct);
+
      QTreeView *patBox = new QTreeView();
-     layout->addWidget(new QTreeView());
+
+     layout->addWidget(patToolBar, 0, 0);
+     layout->addWidget(patBox, 1, 0, 2, 0);
+     layout->setRowStretch(1, 10);
      setLayout(layout);
+ }
+
+ void PatternBox::newCategory() { }
+ void PatternBox::newPattern() { }
+ void PatternBox::clonePattern() { }
+ void PatternBox::deletePattern() { }
+ void PatternBox::addPatternToSequencer() { }
+
+ void PatternBox::createActions()
+ {
+     newCatAct = new QAction(QIcon(":/images/pb_newcat.png"), tr("New Category"), this);
+     newCatAct->setStatusTip(tr("Create a new category"));
+     connect(newCatAct, SIGNAL(triggered()), this, SLOT(newCategory()));
+
+     newPatAct = new QAction(QIcon(":/images/pb_newpat.png"), tr("New Pattern"), this);
+     newPatAct->setStatusTip(tr("Create a new pattern"));
+     connect(newPatAct, SIGNAL(triggered()), this, SLOT(newPattern()));
+
+     clnPatAct = new QAction(QIcon(":/images/pb_clnpat.png"), tr("Clone Pattern"), this);
+     clnPatAct->setStatusTip(tr("Clone selected pattern"));
+     connect(clnPatAct, SIGNAL(triggered()), this, SLOT(clonePattern()));
+
+     delPatAct = new QAction(QIcon(":/images/pb_delpat.png"), tr("Delete Pattern"), this);
+     delPatAct->setStatusTip(tr("Delete selected pattern"));
+     connect(delPatAct, SIGNAL(triggered()), this, SLOT(deletePattern()));
+
+     addPatToSeqAct = new QAction(QIcon(":/images/pb_addpattoseq.png"), tr("Add Pattern To Sequencer"), this);
+     addPatToSeqAct->setStatusTip(tr("Add selected pattern to sequencer"));
+     connect(addPatToSeqAct, SIGNAL(triggered()), this, SLOT(addPatternToSequencer()));
  }

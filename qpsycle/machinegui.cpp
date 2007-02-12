@@ -17,38 +17,26 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef PATTERNBOX_H
- #define PATTERNBOX_H
 
- #include <QWidget>
+#include <QtGui>
+#include <QMouseEvent>
+#include <iostream>
 
- class QToolBar;
+ #include "machinegui.h"
 
- class PatternBox : public QWidget
+ MachineGui::MachineGui(QWidget *parent) 
+    : QWidget(parent)
  {
-     Q_OBJECT
+     setPalette(QPalette(QColor(100, 100, 100)));
+     setAutoFillBackground(true);
+     setMaximumSize(100,50);
+ }
 
- public:
-     PatternBox(QWidget *parent = 0);
-
- private slots:
-     void newCategory();
-     void newPattern();
-     void clonePattern();
-     void deletePattern();
-     void addPatternToSequencer();
-
- private:
-     void createActions();
-
-     QToolBar *patToolBar;
-
-     QAction *newCatAct;
-     QAction *newPatAct;
-     QAction *clnPatAct;
-     QAction *delPatAct;
-     QAction *addPatToSeqAct;
-
- };
-
- #endif
+ void MachineGui::mouseMoveEvent(QMouseEvent *event)
+ {
+    QPoint pos = event->pos();
+    setGeometry(pos.x(), parentWidget()->x()+pos.y(), 100, 50);
+    std::cout << parentWidget()->x() << " " << parentWidget()->y() << std::endl;
+    std::cout << pos.x() << " " << pos.y() << std::endl;
+    update();
+ }
