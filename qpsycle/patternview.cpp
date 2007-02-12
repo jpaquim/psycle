@@ -20,12 +20,12 @@
 
 #include <QtGui>
 
- #include "machineview.h"
+ #include "patternview.h"
 
- MachineView::MachineView(QWidget *parent) 
+ PatternView::PatternView(QWidget *parent) 
     : QWidget(parent)
  {
-     setPalette(QPalette(QColor(0, 0, 0)));
+     setPalette(QPalette(QColor(50, 50, 50)));
      setAutoFillBackground(true);
      QGridLayout *layout = new QGridLayout();
      setLayout(layout);

@@ -20,12 +20,12 @@
 
 #include <QtGui>
 
- #include "machineview.h"
+ #include "sequencerview.h"
 
- MachineView::MachineView(QWidget *parent) 
+ SequencerView::SequencerView(QWidget *parent) 
     : QWidget(parent)
  {
-     setPalette(QPalette(QColor(0, 0, 0)));
+     setPalette(QPalette(QColor(150, 150, 150)));
      setAutoFillBackground(true);
      QGridLayout *layout = new QGridLayout();
      setLayout(layout);
