@@ -17,33 +17,25 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+ #ifndef NEWMACHINEDLG_H
+ #define NEWMACHINEDLG_H
 
-#include <QtGui>
-#include <iostream>
+ #include <QWidget>
+ #include <QDialog>
+ #include <QDialogButtonBox>
 
- #include "machineview.h"
- #include "machinegui.h"
+ class QDialog;
 
- MachineView::MachineView(QWidget *parent) 
-    : QWidget(parent)
+ class NewMachineDlg : public QDialog
  {
-     setPalette(QPalette(QColor(0, 0, 0)));
-     setAutoFillBackground(true);
-     QGridLayout *layout = new QGridLayout();
+     Q_OBJECT
 
-     MachineGui *mach = new MachineGui();
-     newMachineDlg = new NewMachineDlg();
+ public:
+     NewMachineDlg(QWidget *parent = 0);
 
-     layout->addWidget(mach);
-     setLayout(layout);
- }
+ private:
+     QDialogButtonBox *buttonBox;
 
- void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
- {
-     int accepted = newMachineDlg->exec();
-     if (accepted) {
-        QMessageBox::information (this, "Hi", "Add a new machine...");
-     } else {
-        QMessageBox::information (this, "Hi", "Cancel");
-     }
- }
+ };
+
+ #endif
