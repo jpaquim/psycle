@@ -29,7 +29,7 @@
  MainWindow::MainWindow()
  {
      QWidget *workArea = new QWidget();
-     QHBoxLayout *layout = new QHBoxLayout;
+
      QWidget *patternBox = new QWidget();
      QVBoxLayout *patternBoxLayout = new QVBoxLayout;
      patternBoxLayout->addWidget(new QTreeView());
@@ -46,8 +46,10 @@
      views->addTab(wavView, "Wave Editor");
      views->addTab(seqView, "Sequencer View");
 
-     layout->addWidget(patternBox);
-     layout->addWidget(views);
+     QGridLayout *layout = new QGridLayout;
+     layout->addWidget(patternBox, 0, 0);
+     layout->addWidget(views, 0, 1, 0, 2);
+     layout->setColumnStretch(1, 10);
      workArea->setLayout(layout);
      setCentralWidget(workArea);
 
