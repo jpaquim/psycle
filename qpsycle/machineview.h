@@ -21,6 +21,7 @@
  #define MACHINEVIEW_H
 
  #include <QWidget>
+ #include "newmachinedlg.h"
 
  class MachineView : public QWidget
  {
@@ -29,7 +30,11 @@
  public:
      MachineView(QWidget *parent = 0);
 
+ protected:
+     void mouseDoubleClickEvent(QMouseEvent *event);
+
  private:
+     NewMachineDlg *newMachineDlg;
 
  };
 

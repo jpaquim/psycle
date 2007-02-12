@@ -19,31 +19,34 @@
 ***************************************************************************/
 
 #include <QtGui>
-#include <iostream>
 
- #include "machineview.h"
- #include "machinegui.h"
+ #include "newmachinedlg.h"
 
- MachineView::MachineView(QWidget *parent) 
-    : QWidget(parent)
+ NewMachineDlg::NewMachineDlg(QWidget *parent) 
+    : QDialog(parent)
  {
-     setPalette(QPalette(QColor(0, 0, 0)));
-     setAutoFillBackground(true);
+     setWindowTitle(tr("Choose New Machine"));
+     
      QGridLayout *layout = new QGridLayout();
 
-     MachineGui *mach = new MachineGui();
-     newMachineDlg = new NewMachineDlg();
+     QTabWidget *machineTabs = new QTabWidget();
 
-     layout->addWidget(mach);
+     QListWidget *genList = new QListWidget();
+     QListWidget *efxList = new QListWidget();
+     QListWidget *intList = new QListWidget();
+     QListWidget *ladList = new QListWidget();
+     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                      | QDialogButtonBox::Cancel);
+     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+     machineTabs->addTab(genList, "Generators");
+     machineTabs->addTab(efxList, "Effects");
+     machineTabs->addTab(intList, "Internal");
+     machineTabs->addTab(ladList, "Ladspa");
+
+     layout->addWidget(machineTabs);
+     layout->addWidget(buttonBox);
      setLayout(layout);
  }
 
- void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
- {
-     int accepted = newMachineDlg->exec();
-     if (accepted) {
-        QMessageBox::information (this, "Hi", "Add a new machine...");
-     } else {
-        QMessageBox::information (this, "Hi", "Cancel");
-     }
- }
