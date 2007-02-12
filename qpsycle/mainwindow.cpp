@@ -24,8 +24,43 @@
 
  MainWindow::MainWindow()
  {
-     textEdit = new QTextEdit;
-     setCentralWidget(textEdit);
+     QWidget *workArea = new QWidget();
+     QHBoxLayout *layout = new QHBoxLayout;
+     QWidget *patternBox = new QWidget();
+     QVBoxLayout *patternBoxLayout = new QVBoxLayout;
+     patternBoxLayout->addWidget(new QTreeView());
+     patternBox->setLayout(patternBoxLayout);
+     QTabWidget *views = new QTabWidget();
+     
+     QWidget *macView = new QWidget();
+     QGridLayout *macLay = new QGridLayout();
+     macLay->addWidget(new QTextEdit());
+     macView->setLayout(macLay);
+
+     QWidget *patView = new QWidget();
+     QGridLayout *patLay = new QGridLayout();
+     patLay->addWidget(new QTextEdit());
+     patView->setLayout(patLay);
+
+     QWidget *wavView = new QWidget();
+     QGridLayout *wavLay = new QGridLayout();
+     wavLay->addWidget(new QTextEdit());
+     wavView->setLayout(wavLay);
+
+     QWidget *seqView = new QWidget();
+     QGridLayout *seqLay = new QGridLayout();
+     seqLay->addWidget(new QTextEdit());
+     seqView->setLayout(seqLay);
+
+     views->addTab(macView, "Machine View");
+     views->addTab(patView, "Pattern View");
+     views->addTab(wavView, "Wave Editor");
+     views->addTab(seqView, "Sequencer View");
+
+     layout->addWidget(patternBox);
+     layout->addWidget(views);
+     workArea->setLayout(layout);
+     setCentralWidget(workArea);
 
      createActions();
      createMenus();
