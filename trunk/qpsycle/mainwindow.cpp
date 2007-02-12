@@ -25,29 +25,31 @@
  #include "patternview.h"
  #include "waveview.h"
  #include "sequencerview.h"
+ #include "patternbox.h"
 
  MainWindow::MainWindow()
  {
      QWidget *workArea = new QWidget();
 
-     QWidget *patternBox = new QWidget();
-     QVBoxLayout *patternBoxLayout = new QVBoxLayout;
-     patternBoxLayout->addWidget(new QTreeView());
-     patternBox->setLayout(patternBoxLayout);
-     QTabWidget *views = new QTabWidget();
-     
+     QGroupBox *sideBar = new QGroupBox("Pattern Box");
+     QVBoxLayout *sbLayout = new QVBoxLayout();
+     PatternBox *patternBox = new PatternBox();
+     sbLayout->addWidget(patternBox);
+     sideBar->setLayout(sbLayout);
+
      MachineView *macView = new MachineView();
      PatternView *patView = new PatternView();
      WaveView *wavView = new WaveView();
      SequencerView *seqView = new SequencerView();
 
+     QTabWidget *views = new QTabWidget();
      views->addTab(macView, "Machine View");
      views->addTab(patView, "Pattern View");
      views->addTab(wavView, "Wave Editor");
      views->addTab(seqView, "Sequencer View");
 
      QGridLayout *layout = new QGridLayout;
-     layout->addWidget(patternBox, 0, 0);
+     layout->addWidget(sideBar, 0, 0);
      layout->addWidget(views, 0, 1, 0, 2);
      layout->setColumnStretch(1, 10);
      workArea->setLayout(layout);
