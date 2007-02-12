@@ -33,8 +33,9 @@
      QTabWidget *views = new QTabWidget();
      
      QWidget *macView = new QWidget();
+     macView->setPalette(QPalette(QColor(0, 0, 0)));
+     macView->setAutoFillBackground(true);
      QGridLayout *macLay = new QGridLayout();
-     macLay->addWidget(new QTextEdit());
      macView->setLayout(macLay);
 
      QWidget *patView = new QWidget();
