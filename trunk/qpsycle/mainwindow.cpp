@@ -81,33 +81,16 @@
                          tr("HTML (*.html *.htm)"));
      if (fileName.isEmpty())
          return;
-     QFile file(fileName);
-     if (!file.open(QFile::WriteOnly | QFile::Text)) {
-         QMessageBox::warning(this, tr("Dock Widgets"),
-                              tr("Cannot write file %1:\n%2.")
-                              .arg(fileName)
-                              .arg(file.errorString()));
-         return;
-     }
-
-     QTextStream out(&file);
-     QApplication::setOverrideCursor(Qt::WaitCursor);
-     out << textEdit->toHtml();
-     QApplication::restoreOverrideCursor();
 
      statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
  }
 
  void MainWindow::undo()
  {
-     QTextDocument *document = textEdit->document();
-     document->undo();
  }
 
  void MainWindow::redo()
  {
-     QTextDocument *document = textEdit->document();
-     document->redo();
  }
 
  void MainWindow::about()
