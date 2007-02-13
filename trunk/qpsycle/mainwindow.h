@@ -49,8 +49,6 @@
      void createToolBars();
      void createStatusBar();
 
-     QTextEdit *textEdit;
-
      QMenu *fileMenu;
      QMenu *editMenu;
      QMenu *viewMenu;
