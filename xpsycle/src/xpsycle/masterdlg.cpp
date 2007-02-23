@@ -26,140 +26,140 @@
 #include <algorithm>
 
 namespace psycle { 
-  namespace host {
+	namespace host {
 
-    MasterDlg::MasterDlg(Machine* master)
-      : ngrs::Window()
-    {
-      pMaster = master;
+		MasterDlg::MasterDlg(Machine* master)
+			: ngrs::Window()
+		{
+			pMaster = master;
 
-      const ngrs::Bitmap & bg = SkinReader::Instance()->bitmaps().masterbk();
+			const ngrs::Bitmap & bg = SkinReader::Instance()->bitmaps().masterbk();
 
-      pane()->skin_.setBitmap( bg , 1);
+			pane()->skin_.setBitmap( bg , 1);
 
-      setMinimumHeight( bg.height() );
-      setMinimumWidth( bg. width() );
-      setPosition(0,0, bg.width(),bg.height());
+			setMinimumHeight( bg.height() );
+			setMinimumWidth( bg. width() );
+			setPosition(0,0, bg.width(),bg.height());
 
-      init();
-    }
+			init();
+		}
 
 
-    MasterDlg::~MasterDlg()
-    {
-    }
+		MasterDlg::~MasterDlg()
+		{
+		}
 
-    void MasterDlg::init( )
-    {
-      for (int i = 0; i < 13 ; i++) {
-        Slider* slider = new Slider();
-        slider->setTrackLine(false);
-        slider->setRange(0,208);
-        slider->change.connect(this,&MasterDlg::onSliderPosChanged);
-        slider->setIndex(i);
-        pane()->add(slider);
+		void MasterDlg::init( )
+		{
+			for (int i = 0; i < 13 ; i++) {
+				Slider* slider = new Slider();
+				slider->setTrackLine(false);
+				slider->setRange(0,208);
+				slider->change.connect(this,&MasterDlg::onSliderPosChanged);
+				slider->setIndex(i);
+				pane()->add(slider);
 
-        sliders.push_back(slider);
+				sliders.push_back(slider);
 
-        Led* led = new Led();
-        pane()->add(led);
+				Led* led = new Led();
+				pane()->add(led);
 
-        slider->setLed(led);
+				slider->setLed(led);
 
-        if (i==0) {
-          // Master of Desaster
-          slider->setPosition(30,40,20,100);
-          led->setPosition(30,140,20,10);
-        } else {
-          slider->setPosition(70+i*20,40,15,100);
-          led->setPosition(70+i*20,140,20,10);
-        }
-      }
-    }
+				if (i==0) {
+					// Master of Desaster
+					slider->setPosition(30,40,20,100);
+					led->setPosition(30,140,20,10);
+				} else {
+					slider->setPosition(70+i*20,40,15,100);
+					led->setPosition(70+i*20,140,20,10);
+				}
+			}
+		}
 
-    int MasterDlg::onClose( )
-    {
-      setVisible(false);
-      return ngrs::nHideWindow;
-    }
+		int MasterDlg::onClose( )
+		{
+			setVisible(false);
+			return ngrs::nHideWindow;
+		}
 
-    void MasterDlg::setVisible( bool on )
-    {
-      int index = 0;
-      for (std::vector<Slider*>::iterator it = sliders.begin(); it < sliders.end(); it++) {
-        Slider* sl = *it;
+		void MasterDlg::setVisible( bool on )
+		{
+			int index = 0;
+			for (std::vector<Slider*>::iterator it = sliders.begin(); it < sliders.end(); it++) {
+				Slider* sl = *it;
 
-        if ( index == 0 ) {
-          float db = dsp::dB(pMaster->_outDry/256.0f);
-          sl->setPos(208-(int)((db+40.0f)*4.0f));
-          sl->led()->setNumber( static_cast<int>( sl->pos() ) );
-          sl->led()->repaint();
-          sl->repaint();
-        } else {
-          if (pMaster->_inputCon[index-1]) {
-            float val;
-            pMaster->GetWireVolume(index-1,val);
-            sl->setPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-            sl->led()->setNumber( static_cast<int>( sl->pos() ) );
-            sl->led()->repaint();
-            sl->repaint();
-          } else {
-            sl->setPos(208);
-            sl->led()->setNumber(-99);
-            sl->led()->repaint();
-            sl->repaint();
-          }
-        }
-        index++;
-      }
-      ngrs::Window::setVisible(on);
-    }
+				if ( index == 0 ) {
+					float db = dsp::dB(pMaster->_outDry/256.0f);
+					sl->setPos(208-(int)((db+40.0f)*4.0f));
+					sl->led()->setNumber( static_cast<int>( sl->pos() ) );
+					sl->led()->repaint();
+					sl->repaint();
+				} else {
+					if (pMaster->_inputCon[index-1]) {
+						float val;
+						pMaster->GetWireVolume(index-1,val);
+						sl->setPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
+						sl->led()->setNumber( static_cast<int>( sl->pos() ) );
+						sl->led()->repaint();
+						sl->repaint();
+					} else {
+						sl->setPos(208);
+						sl->led()->setNumber(-99);
+						sl->led()->repaint();
+						sl->repaint();
+					}
+				}
+				index++;
+			}
+			ngrs::Window::setVisible(on);
+		}
 
-    void MasterDlg::onSliderPosChanged( ngrs::Slider * sender  )
-    {
-      std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
-      if (it != sliders.end()) {
-        Slider* slider = *it;
-        if (slider->led()) {
-          if (slider->index() > 0) {
-            float db = ((208 - sender->pos() )/4.0f)-40.0f;
-            pMaster->SetWireVolume(slider->index()-1,dsp::dB2Amp(db));
-            slider->led()->setNumber( static_cast<int>( db ) );
-            slider->led()->repaint();
-          } else {
-            // slidermaster
+		void MasterDlg::onSliderPosChanged( ngrs::Slider * sender  )
+		{
+			std::vector<Slider*>::iterator it = find(sliders.begin(),sliders.end(),sender);
+			if (it != sliders.end()) {
+				Slider* slider = *it;
+				if (slider->led()) {
+					if (slider->index() > 0) {
+						float db = ((208 - sender->pos() )/4.0f)-40.0f;
+						pMaster->SetWireVolume(slider->index()-1,dsp::dB2Amp(db));
+						slider->led()->setNumber( static_cast<int>( db ) );
+						slider->led()->repaint();
+					} else {
+						// slidermaster
 
-            float db = ((208- sender->pos() )/4.0f)-40.0f;
-            pMaster->_outDry = int(dsp::dB2Amp(db)*256.0f);
-            slider->led()->setNumber( static_cast<int>( db ) );
-            slider->led()->repaint();
-          }
-        }
-      }
-    }
+						float db = ((208- sender->pos() )/4.0f)-40.0f;
+						pMaster->_outDry = int(dsp::dB2Amp(db)*256.0f);
+						slider->led()->setNumber( static_cast<int>( db ) );
+						slider->led()->repaint();
+					}
+				}
+			}
+		}
 
-    void MasterDlg::Led::setNumber( int number )
-    {
-      number_ = number;
-    }
+		void MasterDlg::Led::setNumber( int number )
+		{
+			number_ = number;
+		}
 
-    int MasterDlg::Led::number( )
-    {
-      return number_;
-    }
+		int MasterDlg::Led::number( )
+		{
+			return number_;
+		}
 
-    void MasterDlg::Led::paint( ngrs::Graphics& g )
-    {
-      /// todo replace with bitmap numbers and add in number.xpm a minus
-      g.drawText(0,clientHeight(),stringify(number_));
-    }
+		void MasterDlg::Led::paint( ngrs::Graphics& g )
+		{
+			/// todo replace with bitmap numbers and add in number.xpm a minus
+			g.drawText(0,clientHeight(),stringify(number_));
+		}
 
-    MasterDlg::Led::Led( ) : number_(0)
-    {
-      ngrs::Font font("Suse sans",6,ngrs::nStraight | ngrs::nMedium | ngrs::nAntiAlias);
-      font.setTextColor( ngrs::Color( 255, 255, 255) );
-      setFont(font);
-    }
+		MasterDlg::Led::Led( ) : number_(0)
+		{
+			ngrs::Font font("Suse sans",6,ngrs::nStraight | ngrs::nMedium | ngrs::nAntiAlias);
+			font.setTextColor( ngrs::Color( 255, 255, 255) );
+			setFont(font);
+		}
 
-  }
+	}
 }

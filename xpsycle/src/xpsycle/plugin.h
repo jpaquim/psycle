@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
+	***************************************************************************/
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
@@ -36,14 +36,14 @@ namespace psycle {
 
 class PluginFxCallback : public CFxCallback
 {
-  public:
-    //HWND hWnd;
-    inline virtual void MessBox(char* ptxt,char *caption,unsigned int type) { //MessageBox(hWnd,ptxt,caption,type); 
-    }
-    inline virtual int GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerRow()); }
-    inline virtual int GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
-    inline virtual int GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
-    inline virtual int GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
+	public:
+		//HWND hWnd;
+		inline virtual void MessBox(char* ptxt,char *caption,unsigned int type) { //MessageBox(hWnd,ptxt,caption,type); 
+		}
+		inline virtual int GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerRow()); }
+		inline virtual int GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
+		inline virtual int GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
+		inline virtual int GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
 };
 
 class Plugin;  // forward declaration
@@ -51,75 +51,75 @@ class Plugin;  // forward declaration
 
 class Proxy
 {
-  private:
-    Plugin & host_;
-    CMachineInterface * plugin_;
-  private:
-    inline Plugin & host() throw();
-    inline const Plugin & host() const throw();
-    inline CMachineInterface & plugin() throw();
-    inline const CMachineInterface & plugin() const throw();
+	private:
+		Plugin & host_;
+		CMachineInterface * plugin_;
+	private:
+		inline Plugin & host() throw();
+		inline const Plugin & host() const throw();
+		inline CMachineInterface & plugin() throw();
+		inline const CMachineInterface & plugin() const throw();
 public:
-    Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
+		Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 
-    ~Proxy() throw () { 
-      // (*this)(0);  ///\todo this segfaults under windows .. investigate 
-    }
-    
-    inline const bool operator()() const throw();
-    inline void operator()(CMachineInterface * plugin) throw(); //exceptions::function_error);
-    inline void Init() throw(); //std::exceptions::function_error);
-    inline void SequencerTick() throw(); //exceptions::function_error);
-    inline void ParameterTweak(int par, int val) throw(); //exceptions::function_error);
-    inline void Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(); //exceptions::function_error);
-    inline void Stop() throw(); //exceptions::function_error);
-    inline void PutData(void * pData) throw(); //exceptions::function_error);
-    inline void GetData(void * pData) throw(); //exceptions::function_error);
-    inline int GetDataSize() throw(); //exceptions::function_error);
-    inline void Command() throw(); //exceptions::function_error);
-    inline void MuteTrack(const int i) throw(); //exceptions::function_error);
-    inline bool IsTrackMuted(const int i) throw(); //exceptions::function_error);
-    inline void MidiNote(const int channel, const int value, const int velocity) throw(); //exceptions::function_error);
-    inline void Event(const dword data) throw(); //exceptions::function_error);
-    inline bool DescribeValue(char * txt, const int param, const int value) throw(); //exceptions::function_error);
-    inline bool PlayWave(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
-    inline void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
-    inline void StopWave() throw(); //exceptions::function_error);
-    inline int * Vals() throw(); //exceptions::function_error);
-    inline void callback() throw(); //exceptions::function_error);
+		~Proxy() throw () { 
+			// (*this)(0);  ///\todo this segfaults under windows .. investigate 
+		}
+		
+		inline const bool operator()() const throw();
+		inline void operator()(CMachineInterface * plugin) throw(); //exceptions::function_error);
+		inline void Init() throw(); //std::exceptions::function_error);
+		inline void SequencerTick() throw(); //exceptions::function_error);
+		inline void ParameterTweak(int par, int val) throw(); //exceptions::function_error);
+		inline void Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(); //exceptions::function_error);
+		inline void Stop() throw(); //exceptions::function_error);
+		inline void PutData(void * pData) throw(); //exceptions::function_error);
+		inline void GetData(void * pData) throw(); //exceptions::function_error);
+		inline int GetDataSize() throw(); //exceptions::function_error);
+		inline void Command() throw(); //exceptions::function_error);
+		inline void MuteTrack(const int i) throw(); //exceptions::function_error);
+		inline bool IsTrackMuted(const int i) throw(); //exceptions::function_error);
+		inline void MidiNote(const int channel, const int value, const int velocity) throw(); //exceptions::function_error);
+		inline void Event(const dword data) throw(); //exceptions::function_error);
+		inline bool DescribeValue(char * txt, const int param, const int value) throw(); //exceptions::function_error);
+		inline bool PlayWave(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
+		inline void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
+		inline void StopWave() throw(); //exceptions::function_error);
+		inline int * Vals() throw(); //exceptions::function_error);
+		inline void callback() throw(); //exceptions::function_error);
 };
 
 
 class Plugin : public Machine{
 private:
-  static PluginFxCallback _callback;
-  public:
-      inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
+	static PluginFxCallback _callback;
+	public:
+			inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
 public:
-    Plugin(int index, Song* song);
+		Plugin(int index, Song* song);
 
-    virtual ~Plugin() throw();
+		virtual ~Plugin() throw();
 
-    virtual void Init();
-    virtual int GenerateAudioInTicks( int startSample, int numSamples );
-    virtual void Tick( );
-    virtual void Tick(int channel, const PatternEvent & pEntry );
-    virtual void Stop();
-    inline virtual std::string GetDllName() const throw() { return _psDllName; }
-    virtual std::string GetName() const { return _psName; };
+		virtual void Init();
+		virtual int GenerateAudioInTicks( int startSample, int numSamples );
+		virtual void Tick( );
+		virtual void Tick(int channel, const PatternEvent & pEntry );
+		virtual void Stop();
+		inline virtual std::string GetDllName() const throw() { return _psDllName; }
+		virtual std::string GetName() const { return _psName; };
 
-    virtual int GetNumParams() { return GetInfo()->numParameters; };
-    virtual int GetNumCols() { return GetInfo()->numCols; };
-    virtual void GetParamName(int numparam, char * name);
-    virtual void GetParamRange(int numparam,int &minval, int &maxval);
-    virtual int GetParamValue(int numparam);
-    virtual void GetParamValue(int numparam,char* parval);
-    virtual bool SetParameter(int numparam,int value);
+		virtual int GetNumParams() { return GetInfo()->numParameters; };
+		virtual int GetNumCols() { return GetInfo()->numCols; };
+		virtual void GetParamName(int numparam, char * name);
+		virtual void GetParamRange(int numparam,int &minval, int &maxval);
+		virtual int GetParamValue(int numparam);
+		virtual void GetParamValue(int numparam,char* parval);
+		virtual bool SetParameter(int numparam,int value);
 
-    inline Proxy & proxy() throw() { return proxy_; };
+		inline Proxy & proxy() throw() { return proxy_; };
 
-    bool Instance(const std::string & file_name);
-    bool LoadDll (std::string psFileName);
+		bool Instance(const std::string & file_name);
+		bool LoadDll (std::string psFileName);
 
 ///\name (de)serialization
 			///\{
@@ -134,17 +134,17 @@ public:
 
 
 
-    inline CMachineInfo * GetInfo() throw() { return _pInfo; };
+		inline CMachineInfo * GetInfo() throw() { return _pInfo; };
 
 private:
-    void* _dll;
-    char _psShortName[16];
-    std::string _psAuthor;
-    std::string _psDllName;
-    std::string _psName;
-    bool _isSynth;
-    CMachineInfo * _pInfo;
-    Proxy proxy_;
+		void* _dll;
+		char _psShortName[16];
+		std::string _psAuthor;
+		std::string _psDllName;
+		std::string _psName;
+		bool _isSynth;
+		CMachineInfo * _pInfo;
+		Proxy proxy_;
 };
 
 
@@ -158,17 +158,17 @@ inline Plugin & Proxy::host() throw() { return host_; }
 inline const Plugin & Proxy::host() const throw() { return host_; }
 
 inline void Proxy::callback() throw()
-    { assert((*this)()); plugin().pCB = host().GetCallback(); }
+		{ assert((*this)()); plugin().pCB = host().GetCallback(); }
 
 inline const bool Proxy::operator()() const throw() { return !!plugin_; }
 inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
 {
-  zapObject(this->plugin_,plugin);
-    //if((*this)())
-    if(plugin) {
-        callback();
-        //Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
-    }
+	zapObject(this->plugin_,plugin);
+		//if((*this)())
+		if(plugin) {
+				callback();
+				//Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
+		}
 }
 
 inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw()

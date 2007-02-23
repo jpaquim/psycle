@@ -45,232 +45,232 @@
 #include <ngrs/customstatusitem.h>
 
 namespace ngrs {
-  class NStatusBar;
-  class TextStatusItem;
-  class FileDialog;
+	class NStatusBar;
+	class TextStatusItem;
+	class FileDialog;
 }
 
 namespace psycle { 
-  namespace host {
+	namespace host {
 
-    class GreetDlg;
-    class AboutBox;
-    class VuMeter;
-    class InstrumentEditor;
-    class InfoDlg;
-    class SequencerItem;
-    class NewMachine;
-    class AudioConfigDlg;
-
-
-    /**
-    @author  Stefan
-    */
-
-    class ProgressStatusItem : public ngrs::CustomStatusItem {
-    public:
-
-      ProgressStatusItem();
-      ~ProgressStatusItem();
-
-      virtual void setText( const std::string & text );
+		class GreetDlg;
+		class AboutBox;
+		class VuMeter;
+		class InstrumentEditor;
+		class InfoDlg;
+		class SequencerItem;
+		class NewMachine;
+		class AudioConfigDlg;
 
 
-    private:
+		/**
+		@author  Stefan
+		*/
 
-      ngrs::ProgressBar* progressBar_;
+		class ProgressStatusItem : public ngrs::CustomStatusItem {
+		public:
 
-    };
+			ProgressStatusItem();
+			~ProgressStatusItem();
+
+			virtual void setText( const std::string & text );
 
 
-    class MainWindow : public ngrs::Window
-    {
-    public:
-      MainWindow();
+		private:
 
-      ~MainWindow();
+			ngrs::ProgressBar* progressBar_;
 
-      virtual void onKeyPress( const ngrs::KeyEvent & event);	
+		};
 
-    private:
 
-      ngrs::Skin songTabSkinNone;
-      ngrs::Skin songTabSkinDown;
+		class MainWindow : public ngrs::Window
+		{
+		public:
+			MainWindow();
 
-      ngrs::Timer timer; // we poll playpos infos here to avoid thread sync with the audio thread
+			~MainWindow();
 
-      ngrs::StatusModel statusBarData; // statusBar data for the mainWindow statusbar;
+			virtual void onKeyPress( const ngrs::KeyEvent & event);	
 
-      bool oldPlayPos_;
-      PluginFinder pluginFinder_; // needs ctor_init_list
+		private:
 
-      ChildView* addChildView();
-      ChildView* selectedChildView_;
+			ngrs::Skin songTabSkinNone;
+			ngrs::Skin songTabSkinDown;
 
-      bool noFileWasYetLoaded;
+			ngrs::Timer timer; // we poll playpos infos here to avoid thread sync with the audio thread
 
-      SongpDlg* songpDlg_;
-      ngrs::TabBook* tabBook_;
-      ngrs::TabBar* tabBar_;
+			ngrs::StatusModel statusBarData; // statusBar data for the mainWindow statusbar;
 
-      ngrs::Panel* toolBarPanel_;
-      ngrs::Button* barPlayFromStartBtn_;
-      ngrs::ToolBar* toolBar1_;
-      ngrs::ToolBar* psycleToolBar_;
-      ngrs::ComboBox* genCombo_;
-      ngrs::ToolBar* psycleControlBar_;
-      ngrs::Slider*   masterSlider_;
-      ngrs::NStatusBar* statusBar_;
-      ProgressStatusItem* progressBar_;
+			bool oldPlayPos_;
+			PluginFinder pluginFinder_; // needs ctor_init_list
 
-      ngrs::ToolBar* playBar;
+			ChildView* addChildView();
+			ChildView* selectedChildView_;
 
-      ngrs::MenuBar* menuBar_;
-      ngrs::Menu* fileMenu_;
-      ngrs::Menu* recentFileMenu_;
-      ngrs::Menu* editMenu_;
-      ngrs::Menu* viewMenu_;
-      ngrs::Menu* configurationMenu_;
-      ngrs::Menu* performanceMenu_;
-      ngrs::Menu* communityMenu_;
-      ngrs::Menu* helpMenu_;
+			bool noFileWasYetLoaded;
 
-      ngrs::MenuItem* noneFileItem;
+			SongpDlg* songpDlg_;
+			ngrs::TabBook* tabBook_;
+			ngrs::TabBar* tabBar_;
 
-      ngrs::Seg7Display* bpmDisplay_;
+			ngrs::Panel* toolBarPanel_;
+			ngrs::Button* barPlayFromStartBtn_;
+			ngrs::ToolBar* toolBar1_;
+			ngrs::ToolBar* psycleToolBar_;
+			ngrs::ComboBox* genCombo_;
+			ngrs::ToolBar* psycleControlBar_;
+			ngrs::Slider*   masterSlider_;
+			ngrs::NStatusBar* statusBar_;
+			ProgressStatusItem* progressBar_;
 
-      GreetDlg* greetDlg;
-      InfoDlg*  infoDlg;
-      AboutBox* aboutBox_;
-      ngrs::FileDialog* wavRecFileDlg;
-      NewMachine* newMachineDlg_;
+			ngrs::ToolBar* playBar;
 
-      VuMeter* vuMeter_;
+			ngrs::MenuBar* menuBar_;
+			ngrs::Menu* fileMenu_;
+			ngrs::Menu* recentFileMenu_;
+			ngrs::Menu* editMenu_;
+			ngrs::Menu* viewMenu_;
+			ngrs::Menu* configurationMenu_;
+			ngrs::Menu* performanceMenu_;
+			ngrs::Menu* communityMenu_;
+			ngrs::Menu* helpMenu_;
 
-      ngrs::Panel* page;
-      ngrs::TabBook* book;
+			ngrs::MenuItem* noneFileItem;
 
-      ngrs::ComboBox* insCombo_;
+			ngrs::Seg7Display* bpmDisplay_;
 
-      AudioConfigDlg* audioConfigDlg;
+			GreetDlg* greetDlg;
+			InfoDlg*  infoDlg;
+			AboutBox* aboutBox_;
+			ngrs::FileDialog* wavRecFileDlg;
+			NewMachine* newMachineDlg_;
 
-      int count;
+			VuMeter* vuMeter_;
 
-      void initMenu();
-      void initDialogs();
-      void initBars();
-      void initToolBar();
-      void initStatusBar();
-      void initMachineView();
+			ngrs::Panel* page;
+			ngrs::TabBook* book;
 
-      void updateBars();
+			ngrs::ComboBox* insCombo_;
 
-      void showSongpDlg( ngrs::ButtonEvent* ev );
+			AudioConfigDlg* audioConfigDlg;
 
-      void onBarPlay( ngrs::ButtonEvent* ev );
-      void onBarPlayFromStart( ngrs::ButtonEvent* ev );
-      void onBarStop( ngrs::ButtonEvent* ev );
+			int count;
 
-      void onHelpMenuItemClicked( ngrs::Event* menuEv, ngrs::ButtonEvent* itemEv );
+			void initMenu();
+			void initDialogs();
+			void initBars();
+			void initToolBar();
+			void initStatusBar();
+			void initMachineView();
 
-      void onFileNew( ngrs::ButtonEvent* ev );
-      void onFileOpen( ngrs::ButtonEvent* ev );
-      void onFileSave( ngrs::ButtonEvent* ev );
-      void onFileSaveAs( ngrs::ButtonEvent* ev );
-      void onRenderAsWave( ngrs::ButtonEvent* ev );
-      void onFileExit( ngrs::ButtonEvent* ev );
+			void updateBars();
 
-      void onEditUndo( ngrs::ButtonEvent* ev );
-      void onEditRedo( ngrs::ButtonEvent* ev );
-      void onEditPatternCut( ngrs::ButtonEvent* ev );
-      void onEditPatternCopy( ngrs::ButtonEvent* ev );
-      void onEditPatternPaste( ngrs::ButtonEvent* ev );
-      void onEditPatternMix( ngrs::ButtonEvent* ev );
-      void onEditPatternMixPaste( ngrs::ButtonEvent* ev );
-      void onEditPatternDelete( ngrs::ButtonEvent* ev );
-      void onEditBlockCut( ngrs::ButtonEvent* ev );
-      void onEditBlockCopy( ngrs::ButtonEvent* ev );
-      void onEditBlockPaste( ngrs::ButtonEvent* ev );
-      void onEditBlockMix( ngrs::ButtonEvent* ev );
-      void onEditBlockMixPaste( ngrs::ButtonEvent* ev );
-      void onEditBlockDelete( ngrs::ButtonEvent* ev );
-      void onEditSeqCut( ngrs::ButtonEvent* ev );
-      void onEditSeqCopy( ngrs::ButtonEvent* ev );
-      void onEditSeqDelete( ngrs::ButtonEvent* ev );
+			void showSongpDlg( ngrs::ButtonEvent* ev );
 
-      void onViewMenuToolbar( ngrs::ButtonEvent* ev );
-      void onViewMenuMachinebar( ngrs::ButtonEvent* ev );
-      void onViewMenuSequencerbar( ngrs::ButtonEvent* ev );
-      void onViewMenuStatusbar( ngrs::ButtonEvent* ev );
+			void onBarPlay( ngrs::ButtonEvent* ev );
+			void onBarPlayFromStart( ngrs::ButtonEvent* ev );
+			void onBarStop( ngrs::ButtonEvent* ev );
 
-      void onConfigMenuAudio( ngrs::ButtonEvent* ev );
-      void onConfigMenuSkin( ngrs::ButtonEvent* ev );
+			void onHelpMenuItemClicked( ngrs::Event* menuEv, ngrs::ButtonEvent* itemEv );
 
-      void onHelpMenuAbout( ngrs::ButtonEvent* ev );
-      void onHelpMenuGreeting( ngrs::ButtonEvent* ev );
-      void onHelpMenuReadme( ngrs::ButtonEvent* ev );
-      void onHelpMenuKeys( ngrs::ButtonEvent* ev );
-      void onHelpMenuTweaking( ngrs::ButtonEvent* ev );
-      void onHelpMenuWhatsNew( ngrs::ButtonEvent* ev );
+			void onFileNew( ngrs::ButtonEvent* ev );
+			void onFileOpen( ngrs::ButtonEvent* ev );
+			void onFileSave( ngrs::ButtonEvent* ev );
+			void onFileSaveAs( ngrs::ButtonEvent* ev );
+			void onRenderAsWave( ngrs::ButtonEvent* ev );
+			void onFileExit( ngrs::ButtonEvent* ev );
 
-      void onMachineView( ngrs::ButtonEvent* ev );
-      void onPatternView( ngrs::ButtonEvent* ev );
-      void onSequencerView( ngrs::ButtonEvent* ev );
+			void onEditUndo( ngrs::ButtonEvent* ev );
+			void onEditRedo( ngrs::ButtonEvent* ev );
+			void onEditPatternCut( ngrs::ButtonEvent* ev );
+			void onEditPatternCopy( ngrs::ButtonEvent* ev );
+			void onEditPatternPaste( ngrs::ButtonEvent* ev );
+			void onEditPatternMix( ngrs::ButtonEvent* ev );
+			void onEditPatternMixPaste( ngrs::ButtonEvent* ev );
+			void onEditPatternDelete( ngrs::ButtonEvent* ev );
+			void onEditBlockCut( ngrs::ButtonEvent* ev );
+			void onEditBlockCopy( ngrs::ButtonEvent* ev );
+			void onEditBlockPaste( ngrs::ButtonEvent* ev );
+			void onEditBlockMix( ngrs::ButtonEvent* ev );
+			void onEditBlockMixPaste( ngrs::ButtonEvent* ev );
+			void onEditBlockDelete( ngrs::ButtonEvent* ev );
+			void onEditSeqCut( ngrs::ButtonEvent* ev );
+			void onEditSeqCopy( ngrs::ButtonEvent* ev );
+			void onEditSeqDelete( ngrs::ButtonEvent* ev );
 
-      void onSongLoadProgress( const std::uint32_t& , const std::uint32_t& , const std::string&);
-      void onNewMachine( ngrs::ButtonEvent* ev );
+			void onViewMenuToolbar( ngrs::ButtonEvent* ev );
+			void onViewMenuMachinebar( ngrs::ButtonEvent* ev );
+			void onViewMenuSequencerbar( ngrs::ButtonEvent* ev );
+			void onViewMenuStatusbar( ngrs::ButtonEvent* ev );
 
-      void onRecordWav( ngrs::ButtonEvent* ev );
-      void onRecordNotesMode( ngrs::ButtonEvent* ev );
+			void onConfigMenuAudio( ngrs::ButtonEvent* ev );
+			void onConfigMenuSkin( ngrs::ButtonEvent* ev );
 
-      void onMachineDeleted( int machineIndex );
-      void onMachineNameChanged( int machineIndex );
+			void onHelpMenuAbout( ngrs::ButtonEvent* ev );
+			void onHelpMenuGreeting( ngrs::ButtonEvent* ev );
+			void onHelpMenuReadme( ngrs::ButtonEvent* ev );
+			void onHelpMenuKeys( ngrs::ButtonEvent* ev );
+			void onHelpMenuTweaking( ngrs::ButtonEvent* ev );
+			void onHelpMenuWhatsNew( ngrs::ButtonEvent* ev );
 
-      void setAppSongBpm( double x );
+			void onMachineView( ngrs::ButtonEvent* ev );
+			void onPatternView( ngrs::ButtonEvent* ev );
+			void onSequencerView( ngrs::ButtonEvent* ev );
 
-      void onBpmIncOne( ngrs::ButtonEvent* ev );
-      void onBpmAddTen( ngrs::ButtonEvent* ev );
-      void onBpmDecOne( ngrs::ButtonEvent* ev );
-      void onBpmDecTen( ngrs::ButtonEvent* ev );
+			void onSongLoadProgress( const std::uint32_t& , const std::uint32_t& , const std::string&);
+			void onNewMachine( ngrs::ButtonEvent* ev );
 
-      void onUpdateInstrumentCbx( int index , bool update );
-      void onInstrumentCbx( ngrs::ItemEvent* ev );
-      void updateComboIns( bool updatelist );
+			void onRecordWav( ngrs::ButtonEvent* ev );
+			void onRecordNotesMode( ngrs::ButtonEvent* ev );
 
-      void updateComboGen();
-      void appNew();
+			void onMachineDeleted( int machineIndex );
+			void onMachineNameChanged( int machineIndex );
 
-      void enableSound( );
-      void closePsycle();  // last but not least, all has an end
+			void setAppSongBpm( double x );
 
-      void onTimer();
+			void onBpmIncOne( ngrs::ButtonEvent* ev );
+			void onBpmAddTen( ngrs::ButtonEvent* ev );
+			void onBpmDecOne( ngrs::ButtonEvent* ev );
+			void onBpmDecTen( ngrs::ButtonEvent* ev );
 
-      bool checkUnsavedSong();
+			void onUpdateInstrumentCbx( int index , bool update );
+			void onInstrumentCbx( ngrs::ItemEvent* ev );
+			void updateComboIns( bool updatelist );
 
-      int close();
+			void updateComboGen();
+			void appNew();
 
-      void onSeqAdded( SinglePattern* pattern );
+			void enableSound( );
+			void closePsycle();  // last but not least, all has an end
 
-      void onNewMachineDialogAdded( Machine* mac );
+			void onTimer();
 
-      void onGeneratorCbx( ngrs::ItemEvent* ev );
-      void onNewIndexGeneratorCbx();
-      void changeGeneratorCbxViaKey( int dir ); 
-      void changeInstrumentCbxViaKey( int dir );
+			bool checkUnsavedSong();
 
-      void onSequencerEntryClick( SequencerItem* item );
-      void onMachineSelected( Machine* mac );
+			int close();
 
-      void onCloseSongTabPressed( ngrs::ButtonEvent* ev );
-      void onTabChange( ngrs::ButtonEvent* ev );
-      std::map<Object*, ChildView*> songMap;
-      std::map<Object*, ChildView*> songTabMap;
+			void onSeqAdded( SinglePattern* pattern );
 
-      void updateNewSong();
+			void onNewMachineDialogAdded( Machine* mac );
 
-    };
+			void onGeneratorCbx( ngrs::ItemEvent* ev );
+			void onNewIndexGeneratorCbx();
+			void changeGeneratorCbxViaKey( int dir ); 
+			void changeInstrumentCbxViaKey( int dir );
 
-  }
+			void onSequencerEntryClick( SequencerItem* item );
+			void onMachineSelected( Machine* mac );
+
+			void onCloseSongTabPressed( ngrs::ButtonEvent* ev );
+			void onTabChange( ngrs::ButtonEvent* ev );
+			std::map<Object*, ChildView*> songMap;
+			std::map<Object*, ChildView*> songTabMap;
+
+			void updateNewSong();
+
+		};
+
+	}
 }
 
 #endif

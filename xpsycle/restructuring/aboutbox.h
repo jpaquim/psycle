@@ -24,39 +24,39 @@
 #include <ngrs/memo.h>
 
 namespace ngrs {
-  class NMemo;
+	class NMemo;
 }
 
 namespace psy {
-  namespace host {
-   
-    class AboutBox : public ngrs::Dialog {
-    public:
+	namespace host {
+		
+		class AboutBox : public ngrs::Dialog {
+		public:
 
-      AboutBox();
+			AboutBox();
 
-      ~AboutBox();
+			~AboutBox();
 
-    private:
+		private:
 
-      ngrs::Memo* memo;
+			ngrs::Memo* memo;
 
-      std::string author;
-      std::string bugs;
-      std::string home;
-      std::string building;
-      std::string testing;
-      std::string gpl;
-      std::string maillist;
+			std::string author;
+			std::string bugs;
+			std::string home;
+			std::string building;
+			std::string testing;
+			std::string gpl;
+			std::string maillist;
 
-      void init();
-      void initText();
+			void init();
+			void initText();
 
-      void onClsBtn( ngrs::ButtonEvent* ev );
+			void onClsBtn( ngrs::ButtonEvent* ev );
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

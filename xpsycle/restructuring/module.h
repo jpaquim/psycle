@@ -24,45 +24,45 @@
 #include <ngrs/panel.h>
 
 namespace psy {
-  namespace host {
+	namespace host {
 
 
 class ModuleInfo {
 public:
 
-  ModuleInfo( const std::string& name );
-  ~ModuleInfo();
+	ModuleInfo( const std::string& name );
+	~ModuleInfo();
 
-  std::string name() const;
+	std::string name() const;
 
 private:
 
-  std::string name_;
+	std::string name_;
 
 };
 
 
 class Module : public ngrs::Panel
 {
-  public:
+	public:
 
-    Module();
-    virtual ~Module() = 0;
-    virtual Module* clone() const = 0;
+		Module();
+		virtual ~Module() = 0;
+		virtual Module* clone() const = 0;
 
-    void setSong( psy::core::Song* song );
-    psy::core::Song* song(); // maybe 0
+		void setSong( psy::core::Song* song );
+		psy::core::Song* song(); // maybe 0
 
-    virtual ModuleInfo info() const = 0;
-    
+		virtual ModuleInfo info() const = 0;
+		
 
-  private:
+	private:
 
-    psy::core::Song* song_;
+		psy::core::Song* song_;
 
 };
 
-  }
+	}
 }
 
 #endif

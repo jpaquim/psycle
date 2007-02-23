@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "childview.h"
 #include "configuration.h"
 #include "player.h"
@@ -36,89 +36,89 @@ const std::string PSYCLE__VERSION="X";
 
 
 ChildView::ChildView()
-  : ngrs::Panel()
+	: ngrs::Panel()
 {
-  _pSong = new Song();
+	_pSong = new Song();
 
-  setLayout( ngrs::AlignLayout() );
+	setLayout( ngrs::AlignLayout() );
 
-  add(patternBox_ = new PatternBox(), ngrs::nAlLeft);
-  patternBox_->setChildView(this);
+	add(patternBox_ = new PatternBox(), ngrs::nAlLeft);
+	patternBox_->setChildView(this);
 
-  tabBook_ = new ngrs::TabBook();
-  add(tabBook_, ngrs::nAlClient);
+	tabBook_ = new ngrs::TabBook();
+	add(tabBook_, ngrs::nAlClient);
 
-  tabBook_->setTabBarAlign(ngrs::nAlBottom);
-  setAlign(ngrs::nAlClient);
+	tabBook_->setTabBarAlign(ngrs::nAlBottom);
+	setAlign(ngrs::nAlClient);
 
-  machineView_ = new MachineView( *_pSong );
-    machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
-    machineView_->selected.connect(this,&ChildView::onMachineSelected);
-    machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
+	machineView_ = new MachineView( *_pSong );
+		machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
+		machineView_->selected.connect(this,&ChildView::onMachineSelected);
+		machineView_->patternTweakSlide.connect(this, &ChildView::onTweakSlide);
 
-  patternView_ = new PatternView( _pSong );
+	patternView_ = new PatternView( _pSong );
 	patternBox_->setPatternView( patternView() );
 
-  sequencerView_ = new SequencerGUI();
-  patternBox_->setSequenceGUI( sequencerView() ) ;
-  sequencerView_->setPatternSequence( _pSong->patternSequence());
-  sequencerView_->addSequencerLine();
+	sequencerView_ = new SequencerGUI();
+	patternBox_->setSequenceGUI( sequencerView() ) ;
+	sequencerView_->setPatternSequence( _pSong->patternSequence());
+	sequencerView_->addSequencerLine();
 
 	virtualPattern_ = new VirtualPattern();
 
-  
-  macDock = new ngrs::DockPanel(machineView_);
-  tabBook_->addPage(macDock,"Machine View");
-  ngrs::NTab* tab = tabBook_->tab( macDock );
-  tab->click.connect(this,&ChildView::onTabChange);
-  patDock = new ngrs::DockPanel(patternView_);
-  tabBook_->addPage(patDock,"Pattern View");
-  tab = tabBook_->tab( patDock );
-  tab->click.connect(this,&ChildView::onTabChange);
-  waveEd_ = new WaveEdFrame( song() );
-  tabBook_->addPage(waveEd_,"WaveEditor");
-  tab = tabBook_->tab( waveEd_ );
-  tab->click.connect(this,&ChildView::onTabChange);
-  ngrs::Panel* seqGroup = new ngrs::Panel();
+	
+	macDock = new ngrs::DockPanel(machineView_);
+	tabBook_->addPage(macDock,"Machine View");
+	ngrs::NTab* tab = tabBook_->tab( macDock );
+	tab->click.connect(this,&ChildView::onTabChange);
+	patDock = new ngrs::DockPanel(patternView_);
+	tabBook_->addPage(patDock,"Pattern View");
+	tab = tabBook_->tab( patDock );
+	tab->click.connect(this,&ChildView::onTabChange);
+	waveEd_ = new WaveEdFrame( song() );
+	tabBook_->addPage(waveEd_,"WaveEditor");
+	tab = tabBook_->tab( waveEd_ );
+	tab->click.connect(this,&ChildView::onTabChange);
+	ngrs::Panel* seqGroup = new ngrs::Panel();
 		seqGroup->setLayout( ngrs::AlignLayout() );
-    seqGroup->add( virtualPattern_, ngrs::nAlBottom);
-    ngrs::SplitBar* splitBar = new ngrs::SplitBar();
+		seqGroup->add( virtualPattern_, ngrs::nAlBottom);
+		ngrs::SplitBar* splitBar = new ngrs::SplitBar();
 		splitBar->setOrientation( ngrs::nHorizontal );
-    seqGroup->add( splitBar, ngrs::nAlBottom );
-    seqGroup->add( sequencerView_, ngrs::nAlClient);
+		seqGroup->add( splitBar, ngrs::nAlBottom );
+		seqGroup->add( sequencerView_, ngrs::nAlClient);
 	seqDock = new ngrs::DockPanel(seqGroup);
-  tabBook_->addPage(seqDock,"Sequencer View");
-  tab = tabBook_->tab( seqDock );
-  tab->click.connect(this,&ChildView::onTabChange);
+	tabBook_->addPage(seqDock,"Sequencer View");
+	tab = tabBook_->tab( seqDock );
+	tab->click.connect(this,&ChildView::onTabChange);
 
-  tabBook_->setActivePage(macDock);
+	tabBook_->setActivePage(macDock);
 
-  machineView_->createGUIMachines();
+	machineView_->createGUIMachines();
 
-  //timer.setIntervalTime(80);
-  //timer.enableTimer();
-  _pSong->patternSequence()->patternData()->resetToDefault();
-  patternBox_->update();
+	//timer.setIntervalTime(80);
+	//timer.enableTimer();
+	_pSong->patternSequence()->patternData()->resetToDefault();
+	patternBox_->update();
 }
 
 
 ChildView::~ChildView()
 {
-  delete _pSong;
+	delete _pSong;
 }
-  
+	
 void ChildView::setTitleBarText( )
 {
-  std::string titlename = "[";
+	std::string titlename = "[";
 
-  titlename += _pSong->fileName;
-  /*if(pUndoList) {
-      if (UndoSaved != pUndoList->counter) titlename+=" *"; else
-      if (UndoMacSaved != UndoMacCounter)  titlename+=" *"; else
-      if (UndoSaved != 0) titlename+=" *";
-  }*/
-  titlename += "] Psycle Modular Music Creation Studio (" + PSYCLE__VERSION + ")";
-  window()->setTitle(titlename);
+	titlename += _pSong->fileName;
+	/*if(pUndoList) {
+			if (UndoSaved != pUndoList->counter) titlename+=" *"; else
+			if (UndoMacSaved != UndoMacCounter)  titlename+=" *"; else
+			if (UndoSaved != 0) titlename+=" *";
+	}*/
+	titlename += "] Psycle Modular Music Creation Studio (" + PSYCLE__VERSION + ")";
+	window()->setTitle(titlename);
 }
 
 void ChildView::onPatternView( ngrs::Object * sender )
@@ -128,56 +128,56 @@ void ChildView::onPatternView( ngrs::Object * sender )
 
 PatternView * ChildView::patternView( )
 {
-  return patternView_;
+	return patternView_;
 }
 
 VirtualPattern* ChildView::virtualPattern()
 {
-  return virtualPattern_;
+	return virtualPattern_;
 }
 
 void ChildView::play( )
 {
-  patternView_->setPrevEditPosition(patternView_->editPosition());
-  Player::Instance()->start( Player::Instance()->playPos() );
+	patternView_->setPrevEditPosition(patternView_->editPosition());
+	Player::Instance()->start( Player::Instance()->playPos() );
 }
 
 
 void ChildView::playFromStart()
 {
-  //if (Global::pConfig()->_followSong)
-  {
-    //bScrollDetatch=false;
-  }
-  patternView_->setPrevEditPosition(patternView_->editPosition());
-  Player::Instance()->start(0.0);
-  //pParentMain->StatusBarIdle();
+	//if (Global::pConfig()->_followSong)
+	{
+		//bScrollDetatch=false;
+	}
+	patternView_->setPrevEditPosition(patternView_->editPosition());
+	Player::Instance()->start(0.0);
+	//pParentMain->StatusBarIdle();
 }
 
 void ChildView::stop( )
 {
-  Player::Instance()->stop();
+	Player::Instance()->stop();
 }
 
 
 
 MachineView * ChildView::machineView( )
 {
-  return machineView_;
+	return machineView_;
 }
 
 void ChildView::onMachineSelected( Machine* mac ) {
-   machineSelected.emit( mac );
+		machineSelected.emit( mac );
 }
 
 void ChildView::onMachineViewDblClick( ngrs::ButtonEvent * ev )
 {
-  machineViewDblClick.emit( ev );
+	machineViewDblClick.emit( ev );
 }
 
 WaveEdFrame * ChildView::waveEditor( )
 {
-  return waveEd_;
+	return waveEd_;
 }
 
 void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
@@ -187,17 +187,17 @@ void psycle::host::ChildView::onTweakSlide( int machine, int command, int value)
 
 SequencerGUI * ChildView::sequencerView( )
 {
-  return sequencerView_;
+	return sequencerView_;
 }
 
 Song * ChildView::song( )
 {
-  return _pSong;
+	return _pSong;
 }
 
 PatternBox * ChildView::patternBox( )
 {
-  return patternBox_;
+	return patternBox_;
 }
 
 
@@ -206,42 +206,42 @@ PatternBox * ChildView::patternBox( )
 
 void psycle::host::ChildView::showMachineView( )
 {
-  tabBook_->setActivePage(0);
-  repaint();
+	tabBook_->setActivePage(0);
+	repaint();
 }
 
 void psycle::host::ChildView::showPatternView( )
 {
-  tabBook_->setActivePage(1);
-  patternView_->setFocus();
-  repaint();
+	tabBook_->setActivePage(1);
+	patternView_->setFocus();
+	repaint();
 }
 
 void psycle::host::ChildView::update( )
 {
-  waveEditor()->Notify();
-  patternBox_->update();
-  sequencerView()->update();
-  machineView()->update();
+	waveEditor()->Notify();
+	patternBox_->update();
+	sequencerView()->update();
+	machineView()->update();
 }
 
 
 void psycle::host::ChildView::showWaveView( )
 {
-  tabBook_->setActivePage(2);
-  repaint();
+	tabBook_->setActivePage(2);
+	repaint();
 }
 
 
 void psycle::host::ChildView::showSequencerView( )
 {
-  tabBook_->setActivePage(3);
-  repaint();
+	tabBook_->setActivePage(3);
+	repaint();
 }
 
 void psycle::host::ChildView::onTabChange( ngrs::ButtonEvent * ev )
 {
-  if (tabBook_->activePage() == patDock ) {
-    patternView()->setFocus();
+	if (tabBook_->activePage() == patDock ) {
+		patternView()->setFocus();
 	}
 }

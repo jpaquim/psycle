@@ -25,210 +25,210 @@
 #include <ngrs/panel.h>
 
 namespace ngrs {
-  class Slider;
+	class Slider;
 }
 
 namespace psy {
-  namespace core {
-    class Machine;
-  }
-  namespace host {            
+	namespace core {
+		class Machine;
+	}
+	namespace host {            
 
-    /**
-    @author  Stefan Nattkemper
-    */
-    class MachineGUI : public ngrs::Panel
-    {
-      class LineAttachment {
-      public:
+		/**
+		@author  Stefan Nattkemper
+		*/
+		class MachineGUI : public ngrs::Panel
+		{
+			class LineAttachment {
+			public:
 
-        LineAttachment( WireGUI* line, int pt ) 
-          : point_( pt ), line_( line ) {
-        }
+				LineAttachment( WireGUI* line, int pt ) 
+					: point_( pt ), line_( line ) {
+				}
 
-        int point() const {
-          return point_;
-        }
+				int point() const {
+					return point_;
+				}
 
-        WireGUI* line() {
-          return line_;
-        }			
+				WireGUI* line() {
+					return line_;
+				}			
 
-      private:
+			private:
 
-        int point_;
-        WireGUI* line_;
+				int point_;
+				WireGUI* line_;
 
-      };
+			};
 
-    public:
-      MachineGUI( psy::core::Machine & mac );
+		public:
+			MachineGUI( psy::core::Machine & mac );
 
-      virtual ~MachineGUI() = 0;
+			virtual ~MachineGUI() = 0;
 
-      sigslot::signal1<MachineGUI*> deleteRequest;
+			sigslot::signal1<MachineGUI*> deleteRequest;
 
-      psy::core::Machine & mac();
+			psy::core::Machine & mac();
 
-      void attachLine( WireGUI* line, int point );
-      void detachLine( WireGUI* line );
+			void attachLine( WireGUI* line, int point );
+			void detachLine( WireGUI* line );
 
-      sigslot::signal1<MachineGUI*> newConnection;
-      sigslot::signal3<psy::core::Machine*,int,int> moved;
-      sigslot::signal3<int,int,int> patternTweakSlide;
-      sigslot::signal1<MachineGUI*> selected;
+			sigslot::signal1<MachineGUI*> newConnection;
+			sigslot::signal3<psy::core::Machine*,int,int> moved;
+			sigslot::signal3<int,int,int> patternTweakSlide;
+			sigslot::signal1<MachineGUI*> selected;
 
-      int ident() const;
+			int ident() const;
 
-      virtual void onMouseDoublePress(int x, int y, int button);
-      virtual void onMousePress( int x, int y, int button );
-      virtual void onMoveStart( const ngrs::MoveEvent& moveEvent );
-      virtual void onMove( const ngrs::MoveEvent& moveEvent );
-      virtual void onMoveEnd( const ngrs::MoveEvent& moveEvent );
-      virtual void resize();
+			virtual void onMouseDoublePress(int x, int y, int button);
+			virtual void onMousePress( int x, int y, int button );
+			virtual void onMoveStart( const ngrs::MoveEvent& moveEvent );
+			virtual void onMove( const ngrs::MoveEvent& moveEvent );
+			virtual void onMoveEnd( const ngrs::MoveEvent& moveEvent );
+			virtual void resize();
 
-      virtual void paint( ngrs::Graphics& g );
+			virtual void paint( ngrs::Graphics& g );
 
-      virtual void repaintVUMeter();
+			virtual void repaintVUMeter();
 
-      void setSelected( bool on );		
+			void setSelected( bool on );		
 
-      void setCoordInfo( const MachineCoordInfo &  coords );
-      const MachineCoordInfo & coords() const;
+			void setCoordInfo( const MachineCoordInfo &  coords );
+			const MachineCoordInfo & coords() const;
 
-      virtual void updateSkin();
+			virtual void updateSkin();
 
-      void onDeleteMachineSignal();
+			void onDeleteMachineSignal();
 
-    private:								
+		private:								
 
-      bool selected_;
-      ngrs::Region oldDrag;
-      psy::core::Machine* mac_;		
-      MachineCoordInfo coords_;
-      std::vector<LineAttachment> attachedLines;
+			bool selected_;
+			ngrs::Region oldDrag;
+			psy::core::Machine* mac_;		
+			MachineCoordInfo coords_;
+			std::vector<LineAttachment> attachedLines;
 
-      ngrs::Region linesRegion() const;
-    };
+			ngrs::Region linesRegion() const;
+		};
 
 
-    class MasterGUI : public MachineGUI
-    {
-    public:
-      MasterGUI( psy::core::Machine & mac );
+		class MasterGUI : public MachineGUI
+		{
+		public:
+			MasterGUI( psy::core::Machine & mac );
 
-      ~MasterGUI();
+			~MasterGUI();
 
 
-      virtual void onMousePress(int x, int y, int button);
-      virtual void onMouseDoublePress(int x, int y, int button);
+			virtual void onMousePress(int x, int y, int button);
+			virtual void onMouseDoublePress(int x, int y, int button);
 
-      virtual void paint( ngrs::Graphics& g );
+			virtual void paint( ngrs::Graphics& g );
 
-      virtual void updateSkin();
-      virtual void showPropsDlg() {}; // override--we don't to see a master props dlg (atm)
+			virtual void updateSkin();
+			virtual void showPropsDlg() {}; // override--we don't to see a master props dlg (atm)
 
-    private:
+		private:
 
-      void setSkin();
+			void setSkin();
 
-    };
+		};
 
 
-    class GeneratorGUI : public MachineGUI
-    {
-    public:
+		class GeneratorGUI : public MachineGUI
+		{
+		public:
 
-      class VUPanel : public ngrs::Panel {
+			class VUPanel : public ngrs::Panel {
 
-        friend class GeneratorGUI;
+				friend class GeneratorGUI;
 
-      public:
-        VUPanel(GeneratorGUI* pGui) {
-          pGui_ = pGui;
-        };
+			public:
+				VUPanel(GeneratorGUI* pGui) {
+					pGui_ = pGui;
+				};
 
-        virtual void paint( ngrs::Graphics& g );
+				virtual void paint( ngrs::Graphics& g );
 
-      private:
+			private:
 
-        GeneratorGUI* pGui_;
+				GeneratorGUI* pGui_;
 
-      };
+			};
 
-      GeneratorGUI( psy::core::Machine & mac );
+			GeneratorGUI( psy::core::Machine & mac );
 
-      ~GeneratorGUI();
+			~GeneratorGUI();
 
-      virtual void onMousePress( int x, int y, int button );
+			virtual void onMousePress( int x, int y, int button );
 
-      virtual void repaintVUMeter();
+			virtual void repaintVUMeter();
 
-      virtual void onMouseDoublePress( int x, int y, int button );
+			virtual void onMouseDoublePress( int x, int y, int button );
 
-      virtual void paint( ngrs::Graphics& g );
+			virtual void paint( ngrs::Graphics& g );
 
-      virtual void onKeyPress( const ngrs::KeyEvent & event);
+			virtual void onKeyPress( const ngrs::KeyEvent & event);
 
-      virtual void updateSkin();
+			virtual void updateSkin();
 
-    private:
+		private:
 
-      ngrs::Slider* panSlider_;
-      VUPanel* vuPanel_;
+			ngrs::Slider* panSlider_;
+			VUPanel* vuPanel_;
 
-      void setSkin();
-      void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g);		
-      void onPosChanged( ngrs::Slider* sender );
-      void onTweakSlide( int machine, int command, int value );
-    };
+			void setSkin();
+			void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g);		
+			void onPosChanged( ngrs::Slider* sender );
+			void onTweakSlide( int machine, int command, int value );
+		};
 
 
-    class EffektGUI : public MachineGUI
-    {
-    public:
+		class EffektGUI : public MachineGUI
+		{
+		public:
 
-      class VUPanel : public ngrs::Panel {
+			class VUPanel : public ngrs::Panel {
 
-        friend class EffectGUI;
+				friend class EffectGUI;
 
-      public:
-        VUPanel(EffektGUI* pGui) {
-          pGui_ = pGui;
-        };
+			public:
+				VUPanel(EffektGUI* pGui) {
+					pGui_ = pGui;
+				};
 
-        virtual void paint( ngrs::Graphics& g );
+				virtual void paint( ngrs::Graphics& g );
 
-      private:
+			private:
 
-        EffektGUI* pGui_;
+				EffektGUI* pGui_;
 
-      };
+			};
 
 
-      EffektGUI( psy::core::Machine & mac );
+			EffektGUI( psy::core::Machine & mac );
 
-      ~EffektGUI();
+			~EffektGUI();
 
-      virtual void onMousePress(int x, int y, int button);
-      virtual void onMouseDoublePress(int x, int y, int button);
-      virtual void paint( ngrs::Graphics& g );
-      virtual void repaintVUMeter();
-      virtual void onKeyPress( const ngrs::KeyEvent & event );
-      virtual void updateSkin();
+			virtual void onMousePress(int x, int y, int button);
+			virtual void onMouseDoublePress(int x, int y, int button);
+			virtual void paint( ngrs::Graphics& g );
+			virtual void repaintVUMeter();
+			virtual void onKeyPress( const ngrs::KeyEvent & event );
+			virtual void updateSkin();
 
-    private:
+		private:
 
-      ngrs::Slider* panSlider_;
-      VUPanel* vuPanel_;
+			ngrs::Slider* panSlider_;
+			VUPanel* vuPanel_;
 
-      void setSkin();
-      void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g);    
-      void onPosChanged( ngrs::Slider* sender );
-      void onTweakSlide( int machine, int command, int value );
-    };
+			void setSkin();
+			void customSliderPaint( ngrs::Slider* sl, ngrs::Graphics& g);    
+			void onPosChanged( ngrs::Slider* sender );
+			void onTweakSlide( int machine, int command, int value );
+		};
 
-  }
+	}
 }
 
 #endif

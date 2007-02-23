@@ -33,7 +33,7 @@ namespace psy {
 
 		// MachineGUI abstract class
 
-      MachineGUI::MachineGUI( psy::core::Machine& mac )
+			MachineGUI::MachineGUI( psy::core::Machine& mac )
 			: ngrs::Panel()
 		{
 			selected_ = 0;
@@ -128,7 +128,7 @@ namespace psy {
 
 			oldDrag = newDrag;
 
-            if ( window()->statusModel() ) {
+						if ( window()->statusModel() ) {
 				//std::string msg =  mac()._editName + "("+ stringify(left()) + ","+ stringify(top())+ ")";
 				//window()->statusModel()->setText( msg );
 			}
@@ -244,7 +244,7 @@ namespace psy {
 			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
 
-            g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
+						g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
 
 			/*
 			if (mac()._mute)
@@ -346,12 +346,12 @@ namespace psy {
 			MachineGUI::onMousePress(x,y,button);
 			if (button==1) { // left-click
 				if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { 
-                  // mute or unmute
+									// mute or unmute
 				  repaint();
-                } else
+								} else
 			    if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { 
-                  // solo or unsolo
-                } 
+									// solo or unsolo
+								} 
 			}
 		}
 
@@ -512,11 +512,11 @@ namespace psy {
 			MachineGUI::onMousePress(x,y,button);
 			if (button==1) {
 				if ( coords().dMuteCoords.intersects(x-ident(),y-ident()) ) { 
-                  // mute or unmute				
+									// mute or unmute				
 				} else
-                if ( coords().dSoloCoords.intersects(x-ident(),y-ident()) ) { 
-                  // solo or unsolo
-                }
+								if ( coords().dSoloCoords.intersects(x-ident(),y-ident()) ) { 
+									// solo or unsolo
+								}
 			}
 		}
 

@@ -1,21 +1,21 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/esound_conditional_build.h>
 #endif
@@ -206,7 +206,7 @@ namespace psycle
 				int newCount = bufSize / channels_;
 				while(!killThread_)
 				{
- 					float const * input(callback_(callbackContext_, newCount));
+						float const * input(callback_(callbackContext_, newCount));
 					for (int i = 0; i < bufSize; i++) {
 						buf[i] = *input++;
 					}
@@ -233,6 +233,6 @@ namespace psycle
 
 
 
- // end of psycle namespace
+	// end of psycle namespace
 
 #endif // !defined XPSYCLE__NO_ESOUND

@@ -2,24 +2,24 @@
 ///\brief implementation file for psycle::host::Player
 
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan Nattkemper, Josep Maria Antolin Segura, D.W. Aley			
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper, Josep Maria Antolin Segura, D.W. Aley			
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 
 #include "player.h"
 #include "song.h"
@@ -81,7 +81,7 @@ namespace psycle
 		void Player::start( double pos )
 		{
 			///\todo : && or || ??
-      if ( !song_ && !driver_ ) return;
+			if ( !song_ && !driver_ ) return;
 			stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
 
@@ -105,7 +105,7 @@ namespace psycle
 		void Player::stop( )
 		{
 			///\todo: && or || ??
-      if ( !song_  && driver_ ) return;
+			if ( !song_  && driver_ ) return;
 
 			// Stop song enviroment
 			_playing = false;
@@ -129,7 +129,7 @@ namespace psycle
 
 		void Player::SampleRate(const int sampleRate)
 		{
-       if ( !song_ ) return;
+				if ( !song_ ) return;
 
 			///\todo update the source code of the plugins...
 
@@ -485,7 +485,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			driver_ = driver.clone();
 			std::cout << "cloned driver " << std::endl;
 			if (!driver_->Initialized())
-  			{
+				{
 				driver_->Initialize( Work, this );
 			}
 			std::cout << " driver initialized" << std::endl;
@@ -493,7 +493,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 	  		{
 			      	driver_->Configure();
 //					SampleRate(driver_->_samplesPerSec);
-  			//   _outputActive = true;
+				//   _outputActive = true;
 	  		}
 			std::cout << " driver configured" << std::endl;
 			if (driver_->Enable(true))

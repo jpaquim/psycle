@@ -26,44 +26,44 @@
 #include <ngrs/button.h>
 
 namespace ngrs {
-  class Memo;
+	class Memo;
 }
 
 namespace psy { 
-  namespace core {
-    class Song;
-  }
-  namespace host {   
-    /**
-    @author  Stefan
-    */
-    class SongpDlg : public ngrs::Window
-    {
-    public:
-      SongpDlg( );
+	namespace core {
+		class Song;
+	}
+	namespace host {   
+		/**
+		@author  Stefan
+		*/
+		class SongpDlg : public ngrs::Window
+		{
+		public:
+			SongpDlg( );
 
-      ~SongpDlg();
+			~SongpDlg();
 
-      virtual int onClose();
-      virtual void setVisible( bool on );
+			virtual int onClose();
+			virtual void setVisible( bool on );
 
-      void setSong( psy::core::Song* pSong );
+			void setSong( psy::core::Song* pSong );
 
-    private:
+		private:
 
-      ngrs::Edit* songTitle_;
-      ngrs::Edit* songCredits_;
-      ngrs::Memo* songComments_;
-      ngrs::Button* okBtn_;
-      ngrs::Button* cnclBtn_;
+			ngrs::Edit* songTitle_;
+			ngrs::Edit* songCredits_;
+			ngrs::Memo* songComments_;
+			ngrs::Button* okBtn_;
+			ngrs::Button* cnclBtn_;
 
-      psy::core::Song* pSong_;
+			psy::core::Song* pSong_;
 
-      void init();
-      void onOkBtn( ngrs::ButtonEvent* ev );
-      void onCancelBtn( ngrs::ButtonEvent* ev );
-    };
+			void init();
+			void onOkBtn( ngrs::ButtonEvent* ev );
+			void onCancelBtn( ngrs::ButtonEvent* ev );
+		};
 
-  }
+	}
 }
 #endif

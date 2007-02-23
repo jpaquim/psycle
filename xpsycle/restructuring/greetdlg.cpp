@@ -23,41 +23,41 @@
 #include <ngrs/item.h>
 
 namespace psy { 
-  namespace host {
+	namespace host {
 
-    GreetDlg::GreetDlg()
-      : ngrs::Window()
-    {
-      memo = new ngrs::Memo();
-      memo->setReadOnly(true);
+		GreetDlg::GreetDlg()
+			: ngrs::Window()
+		{
+			memo = new ngrs::Memo();
+			memo->setReadOnly(true);
 
-      ngrs::Label* greetings = new ngrs::Label();
-      greetings->setText("Psyceledics Community, wants to thank the following people for their contributions in the developement of Psycle");
-      greetings->setWordWrap(true);
-      pane()->add(greetings,ngrs::nAlTop);
+			ngrs::Label* greetings = new ngrs::Label();
+			greetings->setText("Psyceledics Community, wants to thank the following people for their contributions in the developement of Psycle");
+			greetings->setWordWrap(true);
+			pane()->add(greetings,ngrs::nAlTop);
 
-      pane()->add(memo, ngrs::nAlClient);
+			pane()->add(memo, ngrs::nAlClient);
 
-      setGreetz();
+			setGreetz();
 
-      setPosition(10,10,600,500);
-    }
+			setPosition(10,10,600,500);
+		}
 
 
-    GreetDlg::~GreetDlg()
-    {
-    }
+		GreetDlg::~GreetDlg()
+		{
+		}
 
-    int GreetDlg::onClose( )
-    {
-      setVisible(false);
-      return ngrs::nHideWindow;
-    }
+		int GreetDlg::onClose( )
+		{
+			setVisible(false);
+			return ngrs::nHideWindow;
+		}
 
-    void GreetDlg::setGreetz( )
-    {
-      memo->setText("all psycledelics members, ppl who helped writing this program");
-    }
+		void GreetDlg::setGreetz( )
+		{
+			memo->setText("all psycledelics members, ppl who helped writing this program");
+		}
 
-  } // end of host namespace
+	} // end of host namespace
 } // end of psycle namespace

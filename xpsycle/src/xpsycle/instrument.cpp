@@ -23,15 +23,15 @@ template<class T> inline std::string toHex(T value , int nums = 8) {
 }
 
 template<class T> inline T str_hex(const std::string &  value, int pos) {
-   T result;
+		T result;
 
 	 pos = pos*8;
 
-   std::stringstream str;
-   str << value.substr(pos,8);
-   str >> std::hex >> result;
+		std::stringstream str;
+		str << value.substr(pos,8);
+		str >> std::hex >> result;
 
-   return result;
+		return result;
 }
 
 
@@ -338,14 +338,14 @@ namespace psycle
 
 		std::string Instrument::toXml( ) const
 		{
-    std::cout << "loopStart" << waveLoopStart << std::endl;
+		std::cout << "loopStart" << waveLoopStart << std::endl;
 
 			std::ostringstream xml;
-      xml << "<instrument name='" << std::string(_sName) << "'>" << std::endl;
+			xml << "<instrument name='" << std::string(_sName) << "'>" << std::endl;
 
-      xml << "<header bin='";
-      xml << toHex(_loop);
-      xml << toHex(_lines);      
+			xml << "<header bin='";
+			xml << toHex(_loop);
+			xml << toHex(_lines);      
 			xml << toHex(_NNA);
 
 			xml << toHex(ENV_AT);
@@ -403,12 +403,12 @@ namespace psycle
 					std::strlen(waveName) + 1 +
 					size1 +
 					size2;
-        
-        xml << toHex(waveLength);
+				
+				xml << toHex(waveLength);
 				xml << toHex(waveVolume);
 				xml << toHex(waveLoopStart);
 				xml << toHex(waveLoopEnd);
-       
+				
 				xml << toHex(waveTune);
 				xml << toHex(waveFinetune);
 				xml << toHex(waveLoopType);
@@ -452,8 +452,8 @@ namespace psycle
 		{
 			int pos=0;
 			
-      _loop = str_hex<int> (header, pos++);
-      _lines = str_hex<int> (header, pos++);
+			_loop = str_hex<int> (header, pos++);
+			_lines = str_hex<int> (header, pos++);
 			_NNA = str_hex<int> (header, pos++);
 			ENV_AT = str_hex<int> (header, pos++);
 			ENV_DT = str_hex<int> (header, pos++);
@@ -475,7 +475,7 @@ namespace psycle
 			_RCUT = str_hex<int> (header,pos++);
 			_RRES = str_hex<int> (header,pos++);
 
-      int numwaves = str_hex<int> (header,pos++);
+			int numwaves = str_hex<int> (header,pos++);
 		}
 
 		void Instrument::setName( const std::string & name )
@@ -484,7 +484,7 @@ namespace psycle
 			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
 				_sName[size_count] = *it;
 			}	
-      _sName[size_count++] = '0';
+			_sName[size_count++] = '0';
 		}
 
 		void Instrument::createWavHeader( const std::string & name, const std::string & header )
@@ -493,16 +493,16 @@ namespace psycle
 			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
 				waveName[size_count] = *it;
 			}	
-      waveName[size_count++] = '0';
+			waveName[size_count++] = '0';
 
 			int pos = 0;
 
-      waveLength = str_hex<unsigned int> (header,pos++);
+			waveLength = str_hex<unsigned int> (header,pos++);
 			std::cout << waveLength << std::endl;
 			waveVolume = str_hex<int> (header,pos++);
 			waveLoopStart = str_hex<unsigned int> (header,pos++);
 			waveLoopEnd = str_hex<unsigned int> (header,pos++);
-       
+				
 			waveTune = str_hex<int> (header,pos++);
 			waveFinetune = str_hex<int> (header,pos++);
 			waveLoopType = str_hex<int> (header,pos++);
@@ -544,4 +544,4 @@ namespace psycle
 
 
 
- // end of psycle namespace
+	// end of psycle namespace

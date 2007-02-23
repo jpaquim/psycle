@@ -20,15 +20,15 @@
 #include "AbstractMachineFactory.h"
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    AbstractMachineFactory::AbstractMachineFactory()
-    {
-    }
+		AbstractMachineFactory::AbstractMachineFactory()
+		{
+		}
 
-    AbstractMachineFactory::~AbstractMachineFactory()
-    {
-    }
+		AbstractMachineFactory::~AbstractMachineFactory()
+		{
+		}
 
-  }
+	}
 }

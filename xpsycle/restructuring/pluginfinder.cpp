@@ -22,46 +22,46 @@
 
 namespace psycle
 {
-  namespace host
-  {
+	namespace host
+	{
 
-    AudioOutDriverInfo::AudioOutDriverInfo( const std::string& path ) 
-      : path_(path)
-    {
-    }
+		AudioOutDriverInfo::AudioOutDriverInfo( const std::string& path ) 
+			: path_(path)
+		{
+		}
 
-    AudioOutDriverInfo::~AudioOutDriverInfo() {
-    }
+		AudioOutDriverInfo::~AudioOutDriverInfo() {
+		}
 
-    std::string AudioOutDriverInfo::path() const {
-      return path_;
-    }
+		std::string AudioOutDriverInfo::path() const {
+			return path_;
+		}
 
 
-    PluginFinder::PluginFinder( ) 
-    {
-    }
+		PluginFinder::PluginFinder( ) 
+		{
+		}
 
-    PluginFinder::~PluginFinder()
-    {
-    }
+		PluginFinder::~PluginFinder()
+		{
+		}
 
-    void PluginFinder::scanAll() {
-      scanAudioOutDriver();
-      scanNatives();
-      scanLadspa();		
-    }
+		void PluginFinder::scanAll() {
+			scanAudioOutDriver();
+			scanNatives();
+			scanLadspa();		
+		}
 
-    void PluginFinder::scanLadspa() {
-    }
+		void PluginFinder::scanLadspa() {
+		}
 
-    void PluginFinder::scanNatives() {
-    }
+		void PluginFinder::scanNatives() {
+		}
 
-    void PluginFinder::scanAudioOutDriver() {
-      // just for test, not yet implemneted
-      audioOutDriverList.push_back( AudioOutDriverInfo("c:\\psycle\\trunk\\audiodriver\\mme\\src\\debug\\psymmedriver.dll"));
-    }
+		void PluginFinder::scanAudioOutDriver() {
+			// just for test, not yet implemneted
+			audioOutDriverList.push_back( AudioOutDriverInfo("c:\\psycle\\trunk\\audiodriver\\mme\\src\\debug\\psymmedriver.dll"));
+		}
 
-  }
+	}
 }

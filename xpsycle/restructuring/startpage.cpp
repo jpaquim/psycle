@@ -24,31 +24,31 @@
 #include <ngrs/frameborder.h>
 
 namespace psy {
-  namespace host {
+	namespace host {
 
-    StartPage::StartPage( DefaultBitmaps& icons )
-      : Module()
-    {
-      ngrs::FrameBorder frBorder;
-      frBorder.setOval();
-      setBorder( frBorder );
+		StartPage::StartPage( DefaultBitmaps& icons )
+			: Module()
+		{
+			ngrs::FrameBorder frBorder;
+			frBorder.setOval();
+			setBorder( frBorder );
 
-      setLayout( ngrs::AlignLayout() );
-      add( new LogoPanel(icons), ngrs::nAlBottom );
-    }
+			setLayout( ngrs::AlignLayout() );
+			add( new LogoPanel(icons), ngrs::nAlBottom );
+		}
 
-    StartPage* StartPage::clone() const {
-      return new StartPage(*this);
-    }
+		StartPage* StartPage::clone() const {
+			return new StartPage(*this);
+		}
 
-    StartPage::~StartPage()
-    {
-    }
+		StartPage::~StartPage()
+		{
+		}
 
-    ModuleInfo StartPage::info() const {
-      return ModuleInfo("startpage");
-    }
+		ModuleInfo StartPage::info() const {
+			return ModuleInfo("startpage");
+		}
 
 
-  }
+	}
 }

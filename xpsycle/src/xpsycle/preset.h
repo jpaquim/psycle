@@ -21,7 +21,7 @@
 #define PRESETSDLG_H
 
 /**
-  @author  Stefan Nattkemper
+	@author  Stefan Nattkemper
 */
 
 #include "binread.h"
@@ -29,33 +29,33 @@
 #include <vector>
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    class Machine;
+		class Machine;
 
-    class Preset {
-    public:
+		class Preset {
+		public:
 
-      Preset();
+			Preset();
 
-      Preset( int numpars, int dataSize );
+			Preset( int numpars, int dataSize );
 
-      bool read( BinRead & prsIn );
+			bool read( BinRead & prsIn );
 
-      const std::string& name() const;
-      const std::vector<int>& parameter() const;
+			const std::string& name() const;
+			const std::vector<int>& parameter() const;
 
-      void tweakMachine( Machine & mac );
+			void tweakMachine( Machine & mac );
 
-    private:
+		private:
 
-      std::string name_;
+			std::string name_;
 
-      std::vector<int> params_;
-      std::vector<char> data_;
-    };
+			std::vector<int> params_;
+			std::vector<char> data_;
+		};
 
-  }
+	}
 }
 
 #endif

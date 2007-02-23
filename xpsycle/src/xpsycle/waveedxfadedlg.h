@@ -21,38 +21,38 @@
 #include <ngrs/dialog.h>
 
 namespace ngrs{
-  class Slider;
-  class Label;
-  class ButtonEvent;
+	class Slider;
+	class Label;
+	class ButtonEvent;
 }
 
 namespace psycle
 {
-  namespace host
-  {
-    class WaveEdCrossfadeDialog : public ngrs::Dialog
-    {
-    public:
-      WaveEdCrossfadeDialog();
-    public:
-      float srcStartVol;
-      float srcEndVol;
-      float destStartVol;
-      float destEndVol;
-    protected:
-      void onOkClicked( ngrs::ButtonEvent* ev );
-      void onCancelClicked( ngrs::ButtonEvent* ev );
-      void onSliderMoved( ngrs::Slider* slider );
-    private:
-      ngrs::Slider		*m_srcStartVol;
-      ngrs::Slider		*m_srcEndVol;
-      ngrs::Slider		*m_destStartVol;
-      ngrs::Slider		*m_destEndVol;
-      ngrs::Label		*m_srcStartVolText;
-      ngrs::Label		*m_srcEndVolText;
-      ngrs::Label		*m_destStartVolText;
-      ngrs::Label		*m_destEndVolText;
-    };
+	namespace host
+	{
+		class WaveEdCrossfadeDialog : public ngrs::Dialog
+		{
+		public:
+			WaveEdCrossfadeDialog();
+		public:
+			float srcStartVol;
+			float srcEndVol;
+			float destStartVol;
+			float destEndVol;
+		protected:
+			void onOkClicked( ngrs::ButtonEvent* ev );
+			void onCancelClicked( ngrs::ButtonEvent* ev );
+			void onSliderMoved( ngrs::Slider* slider );
+		private:
+			ngrs::Slider		*m_srcStartVol;
+			ngrs::Slider		*m_srcEndVol;
+			ngrs::Slider		*m_destStartVol;
+			ngrs::Slider		*m_destEndVol;
+			ngrs::Label		*m_srcStartVolText;
+			ngrs::Label		*m_srcEndVolText;
+			ngrs::Label		*m_destStartVolText;
+			ngrs::Label		*m_destEndVolText;
+		};
 
-  }
+	}
 }

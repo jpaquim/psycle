@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "patternsequence.h"
 #include <iostream>
 #include <sstream>
@@ -46,7 +46,7 @@ namespace psycle
 
 		void GlobalEvent::setParameter( float parameter )
 		{
-      parameter_ = parameter;
+			parameter_ = parameter;
 		}
 
 		float GlobalEvent::parameter( ) const
@@ -182,7 +182,7 @@ namespace psycle
 		{
 			std::ostringstream xml;
 			xml << "<seqentry pos='" << pos << "' patid='" << pattern()->id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "transpose='" << transpose() << std::hex << "' />" << std::endl;
-    	return xml.str();
+			return xml.str();
 		}
 
 		// end of PatternEntry
@@ -230,7 +230,7 @@ namespace psycle
 			if (size() > 0 ) {
 				return rbegin()->first + rbegin()->second->patternBeats();
 			} else
-  		return 0;
+			return 0;
 		}
 
 		PatternSequence * SequenceLine::patternSequence( )
@@ -257,7 +257,7 @@ namespace psycle
 
 		void SequenceLine::removeEntry( SequenceEntry * entry )
 		{
-      iterator iter = begin();
+			iterator iter = begin();
 			for(; iter!= end(); ++iter)
 			{
 				if(iter->second==entry)
@@ -290,7 +290,7 @@ namespace psycle
 				xml << entry->toXml( it-> first);
 			}
 			xml << "</seqline>" << std::endl;
-    	return xml.str();
+			return xml.str();
 		}
 		//end of sequenceLine;
 
@@ -556,7 +556,7 @@ namespace psycle
 				xml << line->toXml();
 			}
 			xml << "</sequence>" << std::endl;
-    	return xml.str();
+			return xml.str();
 		}
 
 	} // end of host namespace

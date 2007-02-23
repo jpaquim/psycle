@@ -96,13 +96,13 @@ namespace psycle {
 			onCreateMachine( mac );
 		}
 
-        void MachineView::onCloneMachineSignal( MachineGUI *macGui ) {
-            cloneMachine( *macGui );
-        }
+				void MachineView::onCloneMachineSignal( MachineGUI *macGui ) {
+						cloneMachine( *macGui );
+				}
 
-        void MachineView::cloneMachine( const MachineGUI & macGui ) {
-            std::cout << "pls clone me" << std::endl;
-        }
+				void MachineView::cloneMachine( const MachineGUI & macGui ) {
+						std::cout << "pls clone me" << std::endl;
+				}
 
 		void MachineView::createGUIMachines( )
 		{
@@ -111,8 +111,8 @@ namespace psycle {
 			{
 				Machine* mac = _pSong->_pMachine[c];
 				if (mac) { 
-                  onCreateMachine( *mac ); 
-                }
+									onCreateMachine( *mac ); 
+								}
 			}
 
 			// add Wires
@@ -271,9 +271,9 @@ namespace psycle {
 		}
 
 
-        void MachineView::onWireGUIDelete( WireGUI * line ) {
-          onWireDelete( line->dialog() );
-        }
+				void MachineView::onWireGUIDelete( WireGUI * line ) {
+					onWireDelete( line->dialog() );
+				}
 		void MachineView::onWireDelete( WireDlg * dlg )
 		{
 			Player::Instance()->lock();

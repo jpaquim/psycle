@@ -27,28 +27,28 @@
 */
 
 namespace ngrs {
-  class Memo;
+	class Memo;
 }
 
 namespace psycle { 
-  namespace host {
+	namespace host {
 
-    class GreetDlg : public ngrs::Window {
-    public:
-      GreetDlg();
+		class GreetDlg : public ngrs::Window {
+		public:
+			GreetDlg();
 
-      ~GreetDlg();
+			~GreetDlg();
 
-      virtual int onClose();
+			virtual int onClose();
 
-    private:
+		private:
 
-      ngrs::Memo* memo;
+			ngrs::Memo* memo;
 
-      void setGreetz();
-    };
+			void setGreetz();
+		};
 
-  }
+	}
 }
 
 #endif

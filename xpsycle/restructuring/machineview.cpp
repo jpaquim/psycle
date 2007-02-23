@@ -47,17 +47,17 @@ namespace psy {
 			init();
 		}
 
-        MachineView* MachineView::clone() const {
-          return new MachineView(*this);
-        }
+				MachineView* MachineView::clone() const {
+					return new MachineView(*this);
+				}
 
 		MachineView::~MachineView()
 		{
 		}
 
-        ModuleInfo MachineView::info() const {
-          return ModuleInfo("machine");
-        }
+				ModuleInfo MachineView::info() const {
+					return ModuleInfo("machine");
+				}
 
 		void MachineView::init( )
 		{
@@ -199,9 +199,9 @@ namespace psy {
 		}
 
 
-        void MachineView::onWireGUIDelete( WireGUI * line ) {
-          onWireDelete( line->dialog() );
-        }
+				void MachineView::onWireGUIDelete( WireGUI * line ) {
+					onWireDelete( line->dialog() );
+				}
 
 		void MachineView::onWireDelete( WireDlg * dlg )
 		{

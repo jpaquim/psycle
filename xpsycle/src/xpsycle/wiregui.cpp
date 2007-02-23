@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "wiregui.h"
 #include "skinreader.h"
 #include "bendedlineshape.h"
@@ -38,7 +38,7 @@ namespace psycle {
 
 		template<typename X, typename Y>
 			inline double min (X x,Y y) {
-    	return std::min((double)(x),(double)(y));
+			return std::min((double)(x),(double)(y));
 		}
 
 		template<typename X, typename Y>
@@ -50,9 +50,9 @@ namespace psycle {
 		WireGUI::WireGUI()
 			: ngrs::VisualComponent()
 		{
-            lineShape = new BendedLineShape();
-            lineShape->setClippingDistance(12);
-            setGeometry( lineShape );  
+						lineShape = new BendedLineShape();
+						lineShape->setClippingDistance(12);
+						setGeometry( lineShape );  
 
 			triangle_size_tall = 22+((23*2)/16);
 
@@ -72,27 +72,27 @@ namespace psycle {
 
 		WireGUI::~WireGUI()
 		{
-         delete lineShape;
+					delete lineShape;
 		}
 				
 
-        const ngrs::Point & WireGUI::p1( ) const {
-          return lineShape->p1();
-        }
+				const ngrs::Point & WireGUI::p1( ) const {
+					return lineShape->p1();
+				}
 
-        const ngrs::Point & WireGUI::p2( ) const
-        {
-          return lineShape->p2();
-        }
-                
+				const ngrs::Point & WireGUI::p2( ) const
+				{
+					return lineShape->p2();
+				}
+								
 		void WireGUI::insertBend( const ngrs::Point & pt ) {
 		  lineShape->insertBend( pt );		
 		}                
 
-        void WireGUI::setPoints( const ngrs::Point & p1, const ngrs::Point & p2 )
-        {
-          lineShape->setPoints(p1,p2);
-        }
+				void WireGUI::setPoints( const ngrs::Point & p1, const ngrs::Point & p2 )
+				{
+					lineShape->setPoints(p1,p2);
+				}
 
 		void WireGUI::paint( ngrs::Graphics& g )
 		{
@@ -100,27 +100,27 @@ namespace psycle {
 			pen.setLineWidth(2);
 			g.setPen(pen);
 
-            g.setTranslation( g.xTranslation()-left(), g.yTranslation()-top() );
-              
-            // draw the bended lines           
-            ngrs::Point startPt = lineShape->p1();                        
-            std::vector<ngrs::Point>::const_iterator it = lineShape->bendPts().begin();
-            for ( ; it < lineShape->bendPts().end(); it++ ) {
-              ngrs::Point pt = *it;
-              g.drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() );              
-              startPt = pt;                         
-            }                                                                                    
-            g.drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
-            
-            // draw the arrows with resetted pen ( normal line width )
-            g.resetPen();
-            startPt = lineShape->p1();                        
-            it = lineShape->bendPts().begin();
-            for ( ; it < lineShape->bendPts().end(); it++ ) {
-              ngrs::Point pt = *it;
-              drawArrow( g, startPt, pt );             
-              startPt = pt;                         
-            }                                                                           		
+						g.setTranslation( g.xTranslation()-left(), g.yTranslation()-top() );
+							
+						// draw the bended lines           
+						ngrs::Point startPt = lineShape->p1();                        
+						std::vector<ngrs::Point>::const_iterator it = lineShape->bendPts().begin();
+						for ( ; it < lineShape->bendPts().end(); it++ ) {
+							ngrs::Point pt = *it;
+							g.drawLine( startPt.x(), startPt.y(), pt.x(), pt.y() );              
+							startPt = pt;                         
+						}                                                                                    
+						g.drawLine( startPt.x(), startPt.y(), lineShape->p2().x(), lineShape->p2().y() );
+						
+						// draw the arrows with resetted pen ( normal line width )
+						g.resetPen();
+						startPt = lineShape->p1();                        
+						it = lineShape->bendPts().begin();
+						for ( ; it < lineShape->bendPts().end(); it++ ) {
+							ngrs::Point pt = *it;
+							drawArrow( g, startPt, pt );             
+							startPt = pt;                         
+						}                                                                           		
 			drawArrow( g, startPt, lineShape->p2() );
 
 			g.setTranslation( g.xTranslation()+left(), g.yTranslation()+top() );
@@ -245,11 +245,11 @@ namespace psycle {
 		}
 		
 		void WireGUI::onRemoveMe( ngrs::ButtonEvent* ev ) {
-            removeMe.emit( this );
-        }
+						removeMe.emit( this );
+				}
 
 		void WireGUI::onMousePress( int x, int y, int button ) {
-      		int shift = ngrs::App::system().shiftState();      
+					int shift = ngrs::App::system().shiftState();      
 			if ( (shift &  ngrs::nsRight) && !(shift & ngrs::nsCtrl) ) {
 				// display right click popup menu
 				newBendPos_.setXY( left() + x, top() + y );
@@ -262,20 +262,20 @@ namespace psycle {
 				int distToSquareP1 = ( left() + x - p1().x() )*( left() + x - p1().x() ) + ( top() + y - p1().y() )*( top() + y - p1().y() );
 				int distToSquareP2 = ( left() + x - p2().x() )*( left() + x - p2().x() ) + ( top() + y - p2().y() )*( top() + y - p2().y() );
 				if ( distToSquareP1 < distToSquareP2 )
-                  setMoveFocus(0);
+									setMoveFocus(0);
 				else
 				  setMoveFocus(1);				
 			}
 			setMoveable( ngrs::Moveable( ngrs::nMvPolygonPicker ) );        
 			repaint();        
 		}
-                                        
+																				
 		void WireGUI::onMouseDoublePress (int x, int y, int button) {
 			if ( button==1 ) {
 				dlg->setVisible(true);
 			}
 		}
-                      
+											
 		WireDlg* WireGUI::dialog() {
 			return dlg;
 		}

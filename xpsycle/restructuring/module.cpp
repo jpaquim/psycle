@@ -20,22 +20,22 @@
 #include "module.h"
 
 namespace psy {
-  namespace host {
+	namespace host {
 
 ModuleInfo::ModuleInfo( const std::string& name ) 
-  : name_(name) {
+	: name_(name) {
 }
 
 ModuleInfo::~ModuleInfo() {
 }
 
 std::string ModuleInfo::name() const {
-  return name_;
+	return name_;
 }
 
 
 Module::Module() 
-  : song_( 0 )
+	: song_( 0 )
 {
 }
 
@@ -44,13 +44,13 @@ Module::~Module()
 }
 
 void Module::setSong( psy::core::Song* song ) {
-  song_ = song;
+	song_ = song;
 }
 
 psy::core::Song* Module::song() {
-  return song_; 
+	return song_; 
 }
 
 
-  }
+	}
 }

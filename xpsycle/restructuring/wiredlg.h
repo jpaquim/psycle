@@ -33,55 +33,55 @@
 */
 
 namespace psy { 
-  namespace host {
+	namespace host {
 
 
-    class WireDlg : public ngrs::Window
-    {
-    public:
-      WireDlg();
+		class WireDlg : public ngrs::Window
+		{
+		public:
+			WireDlg();
 
-      ~WireDlg();
+			~WireDlg();
 
-      void setMachines( psy::core::Machine* pSrcMachine, psy::core::Machine* pDstMachine);
+			void setMachines( psy::core::Machine* pSrcMachine, psy::core::Machine* pDstMachine);
 
-      sigslot::signal1<WireDlg*> deleteMe;
+			sigslot::signal1<WireDlg*> deleteMe;
 
-      virtual int onClose();
+			virtual int onClose();
 
-      psy::core::Machine* pSrcMachine();
-      psy::core::Machine* pDstMachine();
+			psy::core::Machine* pSrcMachine();
+			psy::core::Machine* pDstMachine();
 
-      void setLine(WireGUI* line);
-      WireGUI* line();
+			void setLine(WireGUI* line);
+			WireGUI* line();
 
-      virtual void setVisible( bool on);
+			virtual void setVisible( bool on);
 
-    private:
+		private:
 
-      Analyzer* analyzer;
+			Analyzer* analyzer;
 
-      ngrs::Slider* volSlider;
-      ngrs::Slider* slider;
-      ngrs::Slider* slider2;
+			ngrs::Slider* volSlider;
+			ngrs::Slider* slider;
+			ngrs::Slider* slider2;
 
-      ngrs::Button* delBtn;
-      ngrs::Button* modeBtn;
-      ngrs::Button* holdBtn;
+			ngrs::Button* delBtn;
+			ngrs::Button* modeBtn;
+			ngrs::Button* holdBtn;
 
-      psy::core::Machine* _pSrcMachine;
-      psy::core::Machine* _pDstMachine;
+			psy::core::Machine* _pSrcMachine;
+			psy::core::Machine* _pDstMachine;
 
-      WireGUI* line_;
+			WireGUI* line_;
 
-      void onVolPosChanged( ngrs::Slider* slider );
+			void onVolPosChanged( ngrs::Slider* slider );
 
-      void onDeleteBtn( ngrs::ButtonEvent* ev);
+			void onDeleteBtn( ngrs::ButtonEvent* ev);
 
-      int wireIdx();
-    };
+			int wireIdx();
+		};
 
 
-  }
+	}
 }
 #endif

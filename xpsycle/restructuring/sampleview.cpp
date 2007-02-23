@@ -20,24 +20,24 @@
 #include "sampleview.h"
 
 namespace psy {
-  namespace host {
+	namespace host {
 
 
-    SampleView::SampleView()
-    {
-    }
+		SampleView::SampleView()
+		{
+		}
 
-    SampleView::~SampleView()
-    {
-    }
+		SampleView::~SampleView()
+		{
+		}
 
-    SampleView* SampleView::clone() const {
-      return new SampleView(*this);
-    }
+		SampleView* SampleView::clone() const {
+			return new SampleView(*this);
+		}
 
-    ModuleInfo SampleView::info() const {
-      return ModuleInfo("sampleview");
-    }
+		ModuleInfo SampleView::info() const {
+			return ModuleInfo("sampleview");
+		}
 
-  }
+	}
 }

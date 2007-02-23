@@ -21,23 +21,23 @@
 #define SAMPLEVIEW_H
 
 #include "module.h"
-      
+			
 namespace psy {
-  namespace host {
+	namespace host {
 
-    class SampleView :
-      public Module
-    {
-    public:
-      SampleView();
-      virtual SampleView* clone() const;
-      ~SampleView();
+		class SampleView :
+			public Module
+		{
+		public:
+			SampleView();
+			virtual SampleView* clone() const;
+			~SampleView();
 
-      virtual ModuleInfo info() const;
+			virtual ModuleInfo info() const;
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

@@ -224,7 +224,7 @@ namespace psycle {
 			sampleCount(0),
 			decreaseOnClip(false)
 		{
-    		  _outDry = 256;
+				  _outDry = 256;
 			_audiorange = 32768.0f;
 //			DefineStereoInput(1);
 			_editName = "Master";
@@ -813,7 +813,7 @@ namespace psycle {
 				level[i]=100;
 				phase[i]= static_cast<int>( MAX_PHASE / 2.0f );
 				prevVal[i]   = 0;
-                centerVal[i] = 0;
+								centerVal[i] = 0;
 			}
 			lfoPos = 0.0;
 			lSpeed= MAX_SPEED / 10;

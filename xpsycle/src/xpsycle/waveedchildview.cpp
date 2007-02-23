@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 //#include "xpsycle.cpp"
 #include "song.h"
 #include "mainwindow.h"
@@ -160,13 +160,13 @@ namespace psycle { namespace host {
 		
 		scrollBar->setOrientation(ngrs::nHorizontal);
 		scrollBar->setSmallChange(1);
- 
+	
 		scrollBar->change.connect(this,&WaveEdChildView::onHScroll);
 		
 		volSlider->slider()->setTransparent(true);
 		volSlider->setRange(0, 100);
 		volSlider->setPos(pSong->waved.GetVolume()*100.0f);
-        volSlider->change.connect(this, &WaveEdChildView::onVolSliderScroll);
+				volSlider->change.connect(this, &WaveEdChildView::onVolSliderScroll);
 		
 		zoomSlider->setTransparent(false);
 		zoomSlider->setOrientation(ngrs::nHorizontal);
@@ -255,8 +255,8 @@ namespace psycle { namespace host {
 	}
 
 
-    void WaveEdChildView::WavePanel::paint( ngrs::Graphics& g )
-    {
+		void WaveEdChildView::WavePanel::paint( ngrs::Graphics& g )
+		{
 		int wrHeight = 0;
 		int wrHeadHeight=0;
 		int c;
@@ -481,11 +481,11 @@ namespace psycle { namespace host {
 		
 		ngrs::Point points[3];
 		points[0].setX( left+5 );		
-    points[0].setY( top+height-6 );
+		points[0].setY( top+height-6 );
 		points[1].setX( left+width-2);	
-    points[1].setY( top+1 );
+		points[1].setY( top+1 );
 		points[2].setX( left+5);		
-    points[2].setY( top+1 );
+		points[2].setY( top+1 );
 		g.fillPolygon(points, 3);
 		
 	}
@@ -745,8 +745,8 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 					}
 				}
 				#ifdef __unix__
-                XDefineCursor( ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
-                #endif				
+								XDefineCursor( ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
+								#endif				
 				repaint();
 				wView_->UpdateStatusBar();
 			}
@@ -922,16 +922,16 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 							abs ( x - int((  wView_->wdLoopE-wView_->diStart )			* dispRatio ))  < 10) )
 					)
 					#ifdef __unix__
-                    XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
-                    #else	
-                    ;
-                    #endif				
+										XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
+										#else	
+										;
+										#endif				
 				else
 				    #ifdef __unix__
-                  XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_xterm));
+									XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_xterm));
 					#else
 					;
-                    #endif					
+										#endif					
 			}
 			else if (wView_->wdLength!=0)					//mouse is over header
 			{
@@ -942,16 +942,16 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 							abs ( x - int((  wView_->blStart+wView_->blLength)	* dispRatio ))	< 10 )
 					)
 					#ifdef __unix__
-                    XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
+										XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_right_side));
 					#else
 					;
 					#endif
 				else
 					#ifdef __unix__
-                  XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_xterm));
-                    #else
-                    ;
-                    #endif					
+									XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_xterm));
+										#else
+										;
+										#endif					
 			}
 		}
 		
@@ -2247,12 +2247,12 @@ void WaveEdChildView::WavePanel::onMousePress( int x, int y, int button )
 	}
 
 	void WaveEdChildView::WavePanel::onMouseExit()
-  {
+	{
 		// reset mousearrow
 		#ifdef __unix__
-    XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_left_ptr));
-        #endif		
-  }
+		XDefineCursor(ngrs::App::system().dpy(),window()->win(),XCreateFontCursor(ngrs::App::system().dpy(),XC_left_ptr));
+				#endif		
+	}
 
 }}
 

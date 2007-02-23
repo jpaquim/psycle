@@ -75,7 +75,7 @@ namespace psycle
 			{
 				s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
 				//host::loggers::warning(s.str());
-                                std::cerr << s.str() << std::endl;
+																std::cerr << s.str() << std::endl;
 			}
 			else
 			{
@@ -95,7 +95,7 @@ namespace psycle
 				}
 			}
 			//MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
-                        //std::cerr << (crash) ? "Exception (Crash)" : "Exception (Software)" << std::endl;
+												//std::cerr << (crash) ? "Exception (Crash)" : "Exception (Software)" << std::endl;
 			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 		}
 
@@ -219,7 +219,7 @@ namespace psycle
 			_editName("")
 			
 		{
-      _outDry = 256;
+			_outDry = 256;
 			_pSong = song;
 			_pSamplesL = new float[MAX_BUFFER_LENGTH];
 			_pSamplesR = new float[MAX_BUFFER_LENGTH];
@@ -316,7 +316,7 @@ namespace psycle
 				std::ostringstream s;
 				s << "attempted to use a generator as destination for wire" << this->id() << " -> " << dst_machine.id();
 				//loggers::warning(s.str());
-                                std::cerr << s.str() << std::endl;
+																std::cerr << s.str() << std::endl;
 				return false;
 			}
 
@@ -414,23 +414,23 @@ namespace psycle
 			return Wire::id_type(-1);
 		}
 
-                bool Machine::AcceptsConnections()
-                {
-                        if (_mode == MACHMODE_FX || _mode == MACHMODE_MASTER) {
-                                return true;
-                        } else {
-                                return false;  
-                        }
-                }
+								bool Machine::AcceptsConnections()
+								{
+												if (_mode == MACHMODE_FX || _mode == MACHMODE_MASTER) {
+																return true;
+												} else {
+																return false;  
+												}
+								}
 
-                bool Machine::EmitsConnections()
-                {
-                        if (_mode == MACHMODE_GENERATOR || _mode == MACHMODE_FX) {
-                                return true;
-                        } else {
-                                return false;  
-                        }
-                }
+								bool Machine::EmitsConnections()
+								{
+												if (_mode == MACHMODE_GENERATOR || _mode == MACHMODE_FX) {
+																return true;
+												} else {
+																return false;  
+												}
+								}
 
 		bool Machine::SetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float value)
 		{
@@ -713,7 +713,7 @@ namespace psycle
 				break;
 			default:
 //				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
-                                std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
+																std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
 				pMachine = new Dummy(index, pSong);
 				break;
 			}
@@ -752,7 +752,7 @@ namespace psycle
 				{
 					std::ostringstream s;
 					s << "Missing or Corrupted Machine Specific Chunk " << dllName << std::endl << "Replacing with Dummy.";
-                                        std::cerr << s.str() << std::endl;
+																				std::cerr << s.str() << std::endl;
 					//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				}
 				Machine* p = new Dummy(index, pSong);
@@ -820,7 +820,7 @@ namespace psycle
 				pFile->Write(_inputCon[i]);
 			}
 			pFile->WriteChunk(GetEditName().c_str(), GetEditName().length()+1);	//a max of 128 chars will be read on song load, but there's no real
-  	//reason to limit what gets saved here.. (is there?)
+		//reason to limit what gets saved here.. (is there?)
 			SaveSpecificChunk(pFile);
 		}
 
@@ -883,7 +883,7 @@ int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 
 int Machine::GenerateAudio( int numsamples )
 {
-  const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 	//position [0.0-1.0] inside the current beat.
 	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 	//position [0.0-linesperbeat] converted to "Tick()" lines
@@ -952,7 +952,7 @@ int Machine::GenerateAudio( int numsamples )
 
 Song * Machine::song( )
 {
-  return _pSong;
+	return _pSong;
 }
 
 void Machine::reallocateRemainingEvents(double beatOffset)

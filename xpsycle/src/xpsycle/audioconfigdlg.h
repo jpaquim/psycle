@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #ifndef AUDIOCONFIGDLG_H
 #define AUDIOCONFIGDLG_H
 
@@ -41,7 +41,7 @@ namespace psycle {
 		class Configuration;
 		class AudioDriver;
 
-        class AudioConfigDlg : public ngrs::Window {
+				class AudioConfigDlg : public ngrs::Window {
 		public:
 				AudioConfigDlg( Configuration* cfg );
 
@@ -52,17 +52,17 @@ namespace psycle {
 
 		private:
 
-                ngrs::TabBook* tabBook_;
-                ngrs::Panel* audioPage_;
-                ngrs::Panel* midiPage_;
+								ngrs::TabBook* tabBook_;
+								ngrs::Panel* audioPage_;
+								ngrs::Panel* midiPage_;
 
-                ngrs::GroupBox* driverBox_;
-                ngrs::ComboBox* driverCbx_; // contains the drivers
-                ngrs::Button* restartBtn_; // re/starts the driver
+								ngrs::GroupBox* driverBox_;
+								ngrs::ComboBox* driverCbx_; // contains the drivers
+								ngrs::Button* restartBtn_; // re/starts the driver
 
-                ngrs::Button* cancelBtn_;
-                ngrs::Button* closeBtn_;
-                ngrs::Button* okBtn_;
+								ngrs::Button* cancelBtn_;
+								ngrs::Button* closeBtn_;
+								ngrs::Button* okBtn_;
 
 				ngrs::Label* audioHeaderLbl_;
 				ngrs::Label* audioDescriptionLbl_;

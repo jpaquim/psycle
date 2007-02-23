@@ -94,7 +94,7 @@ namespace psycle
 			signed short *waveDataR;
 
 			// xml copy paste methods
-      std::string toXml() const;
+			std::string toXml() const;
 			void setName( const std::string & name );
 			void createHeader( const std::string & header );
 			void createWavHeader( const std::string & name, const std::string & header );

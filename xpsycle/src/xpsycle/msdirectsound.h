@@ -33,14 +33,14 @@ namespace psycle
 {
 	namespace host
 	{
-              
-        ///\todo  this driver is (over)filling the buffer to fast
-              
+							
+				///\todo  this driver is (over)filling the buffer to fast
+							
 		/// output device interface implemented by direct sound.
 		class MsDirectSound : public AudioDriver
 		{
 		public:
-               
+								
 			MsDirectSound();
 			
 			~MsDirectSound();

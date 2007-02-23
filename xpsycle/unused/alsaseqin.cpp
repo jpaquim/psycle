@@ -22,20 +22,20 @@ AlsaSeqIn::~AlsaSeqIn()
 bool AlsaSeqIn::Open()
 {
 	//\todo: change "default" to something configurable.
-    if (snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0) < 0) {
-        fprintf(stderr, "Error opening ALSA sequencer.\n");
-        return false;
-    }
-    snd_seq_set_client_name(seq_handle, "xpsycle");
-    if (snd_seq_create_simple_port(seq_handle, "midiIO",
-        SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE,
-        SND_SEQ_PORT_TYPE_APPLICATION) < 0) {
-        fprintf(stderr, "Error creating sequencer port.\n");
-        return false;
-    }
-    npolldesc = snd_seq_poll_descriptors_count(seq_handle, POLLIN);
-    ppolldesc = (struct pollfd *)alloca(sizeof(struct pollfd) * npolldesc);
-    snd_seq_poll_descriptors(seq_handle, ppolldesc,npolldesc, POLLIN);
+		if (snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0) < 0) {
+				fprintf(stderr, "Error opening ALSA sequencer.\n");
+				return false;
+		}
+		snd_seq_set_client_name(seq_handle, "xpsycle");
+		if (snd_seq_create_simple_port(seq_handle, "midiIO",
+				SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE,
+				SND_SEQ_PORT_TYPE_APPLICATION) < 0) {
+				fprintf(stderr, "Error creating sequencer port.\n");
+				return false;
+		}
+		npolldesc = snd_seq_poll_descriptors_count(seq_handle, POLLIN);
+		ppolldesc = (struct pollfd *)alloca(sizeof(struct pollfd) * npolldesc);
+		snd_seq_poll_descriptors(seq_handle, ppolldesc,npolldesc, POLLIN);
 	
 	return true;
 }
@@ -49,47 +49,47 @@ bool AlsaSeqIn::Close()
 void AlsaSeqIn::MidiCallback(int numSamples)
 {
 	   if (poll (ppolldesc, npolldesc, 1000) > 0) {
-            for (int l1 = 0; l1 < npolldesc; l1++) {
-               if (ppolldesc[l1].revents > 0) ProcessEvent();
-            }
+						for (int l1 = 0; l1 < npolldesc; l1++) {
+								if (ppolldesc[l1].revents > 0) ProcessEvent();
+						}
 		}
 }
 
 void AlsaSeqIn::ProcessEvent()
 {
 	snd_seq_event_t *ev;
-    int l1;
-    
+		int l1;
+		
 	do{
-        snd_seq_event_input(seq_handle, &ev);
-        switch (ev->type) {
-            case SND_SEQ_EVENT_PITCHBEND:
-                //pitch = (double)ev->data.control.value / 8192.0;
+				snd_seq_event_input(seq_handle, &ev);
+				switch (ev->type) {
+						case SND_SEQ_EVENT_PITCHBEND:
+								//pitch = (double)ev->data.control.value / 8192.0;
 				break;
 				
-            case SND_SEQ_EVENT_CONTROLLER:
+						case SND_SEQ_EVENT_CONTROLLER:
 				if (ev->data.control.param == 1) {
 				//                pitch = (double)ev->data.control.value / 8192.0;
 				}
 				break;
 
-            case SND_SEQ_EVENT_NOTEON:
+						case SND_SEQ_EVENT_NOTEON:
 				if ( ev->data.note.velocity != 0 ) {
 //                	 	note[l1] = ev->data.note.note;
 //                        	velocity[l1] = ev->data.note.velocity / 127.0;
 					break;
 				}
 				// else, we do NOTEOFF		
-            case SND_SEQ_EVENT_NOTEOFF:
+						case SND_SEQ_EVENT_NOTEOFF:
 //				ev->data.note.note
 				break;
-            case SND_SEQ_EVENT_NOTE:
+						case SND_SEQ_EVENT_NOTE:
 			    //note[l1] = ev->data.note.note;
-                 //velocity[l1] = ev->data.note.velocity / 127.0;
+									//velocity[l1] = ev->data.note.velocity / 127.0;
 				break;
 		}
-        snd_seq_free_event(ev);
-    } while (snd_seq_event_input_pending(seq_handle, 0) > 0);
+				snd_seq_free_event(ev);
+		} while (snd_seq_event_input_pending(seq_handle, 0) > 0);
 }
 /*
 SND_SEQ_EVENT_SYSTEM 	system status; event data type = snd_seq_result_t

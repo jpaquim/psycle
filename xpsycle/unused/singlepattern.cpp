@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "singlepattern.h"
 #include "patterndata.h"
 #include "psyfilter.h"
@@ -64,11 +64,11 @@ namespace psycle
 			return type_;
 		}
 
-    bool TweakTrackInfo::operator<(const TweakTrackInfo & key) const {
-      long key1 = machineIdx() | parameterIdx() << 8;
-      long key2 = key.machineIdx() | key.parameterIdx() <<8;
-      return key1 < key2;
-    };
+		bool TweakTrackInfo::operator<(const TweakTrackInfo & key) const {
+			long key1 = machineIdx() | parameterIdx() << 8;
+			long key2 = key.machineIdx() | key.parameterIdx() <<8;
+			return key1 < key2;
+		};
 
 
 
@@ -340,12 +340,12 @@ namespace psycle
 
 		std::vector< TimeSignature > & SinglePattern::timeSignatures( )
 		{
-  		return timeSignatures_;
+			return timeSignatures_;
 		}
 
 		const std::vector< TimeSignature > & SinglePattern::timeSignatures( ) const
 		{
-  		return timeSignatures_;
+			return timeSignatures_;
 		}
 
 		void SinglePattern::setID( int id )
@@ -507,8 +507,8 @@ namespace psycle
 	          ; entryIt != line.notes().end() && entryIt->first < right
 	          ; ++entryIt)
 				{
-    	      newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
-  	  	}   
+			      newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
+		  	}   
 				newPattern.insert( SinglePattern::value_type( lineIt->first-topBeat, newLine ) );
 			}
 			return newPattern;
@@ -564,8 +564,8 @@ namespace psycle
 	          ; entryIt != line.notes().end() && entryIt->first < right
 	          ; )
 				{
-    	                line.notes().erase(entryIt++);
-                }   
+			                line.notes().erase(entryIt++);
+								}   
 				if (line.notes().size() == 0) 
 					erase(lineIt++);
 				else 

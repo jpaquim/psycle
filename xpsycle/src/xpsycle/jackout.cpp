@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by Stefan Nattkemper  *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by Stefan Nattkemper  *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 
 #if defined XPSYCLE__CONFIGURATION
 	#include <xpsycle/jack_conditional_build.h>
@@ -85,23 +85,23 @@ namespace psycle
 		bool JackOut::registerToJackServer() {
 	//		jack_options_t options = JackNullOption;
 //			jack_status_t status;
- 			// try to become a client of the JACK server
+				// try to become a client of the JACK server
 			const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
 
 			if ( (client = jack_client_new ( registerCPtr )) == 0) {
- 				std::cerr << "jack server not running?\n" << std::endl;
+					std::cerr << "jack server not running?\n" << std::endl;
 				return 0;
- 			}
+				}
 
 /*			if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
 			{
- 				std::cerr << "jack server not running?\n" << std::endl;
+					std::cerr << "jack server not running?\n" << std::endl;
 				return 0;
 			}*/
 
 			// tell the JACK server to call `process()' whenever
 			// there is work to be done.
- 
+	
 			jack_set_process_callback (client, process, (void*) this);
 
 			 // display the current sample rate. 
@@ -118,10 +118,10 @@ namespace psycle
 
 			 // tell the JACK server that we are ready to roll
 
- 			if (jack_activate (client)) {
- 				std::cout << "cannot activate client" << std::endl;
+				if (jack_activate (client)) {
+					std::cout << "cannot activate client" << std::endl;
 				return 0;
- 			}
+				}
 
 			AudioDriverSettings settings_ = settings();
 				settings_.setSamplesPerSec( jack_get_sample_rate (client) );
@@ -133,7 +133,7 @@ namespace psycle
 				return 0;
 			}
 
-      std::cout << "jo1" << std::endl;
+			std::cout << "jo1" << std::endl;
 
 			if (jack_connect (client, jack_port_name (output_port_1), ports[0])) {
 				std::cout << "cannot connect output ports" << std::endl;
@@ -155,17 +155,17 @@ namespace psycle
 		}
 
 		int JackOut::process (jack_nframes_t nframes, void *arg)
- 		{
+			{
 			JackOut* driver = static_cast<JackOut*> (arg);
 			driver->fillBuffer( nframes );
 			return 0;      
- 		}
+			}
 
 		int JackOut::fillBuffer( jack_nframes_t nframes )
 		{
 			jack_default_audio_sample_t *out_1 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_1, nframes);
 			jack_default_audio_sample_t *out_2 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_2, nframes);
- 
+	
 			int nframesint = nframes;
 			float const * input(_pCallback(_callbackContext, nframesint));
 
