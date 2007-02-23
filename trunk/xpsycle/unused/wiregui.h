@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan Nattkemper   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #ifndef WIREGUI_H
 #define WIREGUI_H
 
@@ -29,7 +29,7 @@
 class BendedLineShape;
 
 namespace ngrs {
-  class NPopupMenu;
+	class NPopupMenu;
 }
 
 namespace psycle 
@@ -46,14 +46,14 @@ namespace psycle
 
 				~WireGUI();
 
-                sigslot::signal1<WireGUI*> bendAdded;
-                sigslot::signal1<WireGUI*> removeMe;
+								sigslot::signal1<WireGUI*> bendAdded;
+								sigslot::signal1<WireGUI*> removeMe;
 
-                const ngrs::NPoint & p1() const;
-                const ngrs::NPoint & p2() const;
+								const ngrs::NPoint & p1() const;
+								const ngrs::NPoint & p2() const;
 
-                void setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
-                void insertBend( const ngrs::NPoint & pts );
+								void setPoints( const ngrs::NPoint & p1, const ngrs::NPoint & p2 );
+								void insertBend( const ngrs::NPoint & pts );
 
 				virtual void paint( ngrs::Graphics& g );
 			
@@ -61,16 +61,16 @@ namespace psycle
 
 				virtual void onMousePress( int x, int y, int button );
 				virtual void onMouseDoublePress( int x, int y, int button );
-   
+		
 				WireDlg* dialog();
-        
+				
 		private:
 
-                BendedLineShape* lineShape;
+								BendedLineShape* lineShape;
 
 				ngrs::NPopupMenu* menu_;
 				ngrs::NPoint newBendPos_;
-                
+								
 				ngrs::Color polyColor_;
 				ngrs::Color borderColor_;
 
@@ -89,7 +89,7 @@ namespace psycle
 				void initPopupMenu( );
 
 				void onAddBend( ngrs::ButtonEvent* ev );
-                void onRemoveMe ( ngrs::ButtonEvent* ev ); 
+								void onRemoveMe ( ngrs::ButtonEvent* ev ); 
 
 		};
 	}

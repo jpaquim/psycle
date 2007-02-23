@@ -157,9 +157,9 @@ namespace psycle
 					break;
 				case MACH_PLUGIN:
 					{
-                       Plugin* plugin = new Plugin( index, this );
-                       plugin->LoadDll( plugin_name );
-                       machine = plugin;
+												Plugin* plugin = new Plugin( index, this );
+												plugin->LoadDll( plugin_name );
+												machine = plugin;
 					}
 					break;
 				case MACH_LADSPA:

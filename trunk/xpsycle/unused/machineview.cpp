@@ -102,8 +102,8 @@ namespace psycle {
 			{
 				Machine* mac = _pSong->_pMachine[c];
 				if (mac) { 
-                  onCreateMachine( *mac ); 
-                }
+									onCreateMachine( *mac ); 
+								}
 			}
 
 			// add Wires
@@ -262,9 +262,9 @@ namespace psycle {
 		}
 
 
-        void MachineView::onWireGUIDelete( WireGUI * line ) {
-          onWireDelete( line->dialog() );
-        }
+				void MachineView::onWireGUIDelete( WireGUI * line ) {
+					onWireDelete( line->dialog() );
+				}
 		void MachineView::onWireDelete( WireDlg * dlg )
 		{
 			Player::Instance()->lock();

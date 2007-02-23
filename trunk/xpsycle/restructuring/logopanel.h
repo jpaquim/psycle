@@ -24,18 +24,18 @@
 #include <ngrs/panel.h>
 
 namespace psy {
-  namespace host {
+	namespace host {
 
-    class LogoPanel : public ngrs::Panel {
-    public:
+		class LogoPanel : public ngrs::Panel {
+		public:
 
-      LogoPanel( DefaultBitmaps& icons );
+			LogoPanel( DefaultBitmaps& icons );
 
-      ~LogoPanel();
+			~LogoPanel();
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

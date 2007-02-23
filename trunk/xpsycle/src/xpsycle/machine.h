@@ -114,11 +114,11 @@ namespace psycle
 			}*/
 		}
 
-                class CPoint {
-                public:
-                   int x;
-                   int y;
-                };
+								class CPoint {
+								public:
+										int x;
+										int y;
+								};
 
 		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
@@ -530,7 +530,7 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///\todo below are unencapsulated data members
 
-                public:
+								public:
 //		PSYCLE__PRIVATE:
 
 			InPort *inports;
@@ -638,9 +638,9 @@ namespace psycle
 				///\todo hardcoded limits and wastes
 				float TWSDestination[MAX_TWS];
 			///\}
-                     float _lMax;
+											float _lMax;
 	             float _rMax;
-       int _outDry;
+				int _outDry;
 		};
 
 		inline void Machine::SetVolumeCounter(int numSamples)

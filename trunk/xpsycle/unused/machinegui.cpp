@@ -274,7 +274,7 @@ namespace psycle {
 			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
 
-            g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
+						g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
 
 			/*
 			if (mac()._mute)

@@ -22,92 +22,92 @@
 #include <ngrs/xmlparser.h>
 
 namespace ngrs {
-  class Menu;
-  class MenuBar;
-  class ToolBar;
-  class ComboBox;
-  class ItemEvent;
-  class FileDialog;
+	class Menu;
+	class MenuBar;
+	class ToolBar;
+	class ComboBox;
+	class ItemEvent;
+	class FileDialog;
 }
 
 namespace psycle { 
-  namespace host {
+	namespace host {
 
-    class WaveEdChildView;
-    class InstrumentEditor;
-    class Song;
-
-
-    /// wave editor frame window.
-    class WaveEdFrame : public ngrs::DockPanel {
-    public:
-
-      WaveEdFrame( Song* song );
-
-      ~WaveEdFrame();
-
-      Song* pSong();
-
-    public:
-      void Notify(void);
-
-      sigslot::signal2<int,bool> updateInstrumentCbx;
-
-      ngrs::MenuBar *menuBar;
-      ngrs::Menu *processMenu;
-      ngrs::Menu *editMenu;
-      ngrs::Menu *viewMenu;
-      ngrs::Menu *convertMenu;
-
-    private:
-
-      Song* _pSong;
-
-      void InitStatusBar();
-      void InitMenus();
-      void InitToolBar();
-
-      ngrs::ToolBar *toolBar;
-      ngrs::ComboBox* auxSelectCombo_;
-      WaveEdChildView *wavView;
-      ngrs::FileDialog* wavSaveFileDlg;
-      InstrumentEditor* instrumentEditor;
-
-      int wsInstrument;
-
-      void onPlay( ngrs::ButtonEvent *ev );
-      void onRelease( ngrs::ButtonEvent *ev );
-      void onPlayFromStart( ngrs::ButtonEvent *ev );
-      void onStop( ngrs::ButtonEvent *ev );
-      void onFastForward( ngrs::ButtonEvent *ev );
-      void onRewind( ngrs::ButtonEvent *ev );
-      void PlayFrom( unsigned long startpos );
-      void Stop();
-
-      void onLoadWave( ngrs::ButtonEvent* ev );
-      void onSaveWave( ngrs::ButtonEvent* ev );
-      void onEditInstrument( ngrs::ButtonEvent* ev );
-      void onEditWave( ngrs::ButtonEvent* ev );
-
-      void onSlotCopy( ngrs::ButtonEvent* ev );
-      void onSlotPaste( ngrs::ButtonEvent* ev );
-
-      void onDecInsBtn( ngrs::ButtonEvent* ev );
-      void onIncInsBtn( ngrs::ButtonEvent* ev );
-
-      bool mySel_;
-      int leftSize;
-      int rightSize;
-      bool onWaveLeft;
-      unsigned char* pDataLeft;
-      unsigned char* pDataRight;
-
-      int data_pos;
-
-      void onTagParse( const ngrs::XmlParser& parser, const std::string& tagName );
+		class WaveEdChildView;
+		class InstrumentEditor;
+		class Song;
 
 
-    };
+		/// wave editor frame window.
+		class WaveEdFrame : public ngrs::DockPanel {
+		public:
 
-  }
+			WaveEdFrame( Song* song );
+
+			~WaveEdFrame();
+
+			Song* pSong();
+
+		public:
+			void Notify(void);
+
+			sigslot::signal2<int,bool> updateInstrumentCbx;
+
+			ngrs::MenuBar *menuBar;
+			ngrs::Menu *processMenu;
+			ngrs::Menu *editMenu;
+			ngrs::Menu *viewMenu;
+			ngrs::Menu *convertMenu;
+
+		private:
+
+			Song* _pSong;
+
+			void InitStatusBar();
+			void InitMenus();
+			void InitToolBar();
+
+			ngrs::ToolBar *toolBar;
+			ngrs::ComboBox* auxSelectCombo_;
+			WaveEdChildView *wavView;
+			ngrs::FileDialog* wavSaveFileDlg;
+			InstrumentEditor* instrumentEditor;
+
+			int wsInstrument;
+
+			void onPlay( ngrs::ButtonEvent *ev );
+			void onRelease( ngrs::ButtonEvent *ev );
+			void onPlayFromStart( ngrs::ButtonEvent *ev );
+			void onStop( ngrs::ButtonEvent *ev );
+			void onFastForward( ngrs::ButtonEvent *ev );
+			void onRewind( ngrs::ButtonEvent *ev );
+			void PlayFrom( unsigned long startpos );
+			void Stop();
+
+			void onLoadWave( ngrs::ButtonEvent* ev );
+			void onSaveWave( ngrs::ButtonEvent* ev );
+			void onEditInstrument( ngrs::ButtonEvent* ev );
+			void onEditWave( ngrs::ButtonEvent* ev );
+
+			void onSlotCopy( ngrs::ButtonEvent* ev );
+			void onSlotPaste( ngrs::ButtonEvent* ev );
+
+			void onDecInsBtn( ngrs::ButtonEvent* ev );
+			void onIncInsBtn( ngrs::ButtonEvent* ev );
+
+			bool mySel_;
+			int leftSize;
+			int rightSize;
+			bool onWaveLeft;
+			unsigned char* pDataLeft;
+			unsigned char* pDataRight;
+
+			int data_pos;
+
+			void onTagParse( const ngrs::XmlParser& parser, const std::string& tagName );
+
+
+		};
+
+	}
 }

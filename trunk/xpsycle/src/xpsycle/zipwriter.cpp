@@ -1,23 +1,23 @@
 /*
- * zipwriter
- * a library for writing zipfiles
- *
- * copyright (c) 2006 Mrs. Brisby <mrs.brisby@nimh.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+	* zipwriter
+	* a library for writing zipfiles
+	*
+	* copyright (c) 2006 Mrs. Brisby <mrs.brisby@nimh.org>
+	*
+	* This program is free software; you can redistribute it and/or modify
+	* it under the terms of the GNU General Public License as published by
+	* the Free Software Foundation; either version 2 of the License, or
+	* (at your option) any later version.
+	*
+	* This program is distributed in the hope that it will be useful,
+	* but WITHOUT ANY WARRANTY; without even the implied warranty of
+	* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	* GNU General Public License for more details.
+	*
+	* You should have received a copy of the GNU General Public License
+	* along with this program; if not, write to the Free Software
+	* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	*/
 #include "zipwriter.h"
 
 #include <stdlib.h>
@@ -447,7 +447,7 @@ static void _zm_deflate_finish(zipwriter_file *f)
 			s->next_out = f->top->buffer;
 		}
 	} while ((tmp = deflate(s, Z_FINISH)) == Z_OK);
-       
+				
 	if (tmp != Z_STREAM_END) {
 		f->top->err = EINVAL;
 		return;

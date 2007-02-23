@@ -51,12 +51,12 @@ namespace psycle {
 			setFont( ngrs::Font("Suse sans",6, ngrs::nMedium | ngrs::nStraight | ngrs::nAntiAlias));
 
 			machActionsPopup_ = new ngrs::PopupMenu();
-                ngrs::MenuItem *clnItem = new ngrs::MenuItem("Clone Machine");
-                ngrs::MenuItem *delItem = new ngrs::MenuItem("Delete Machine");
-                delItem->click.connect(this,&MachineGUI::onPopupDeleteMachine);
-                clnItem->click.connect(this,&MachineGUI::onPopupCloneMachine);
-                machActionsPopup_->add(clnItem);
-                machActionsPopup_->add(delItem);
+								ngrs::MenuItem *clnItem = new ngrs::MenuItem("Clone Machine");
+								ngrs::MenuItem *delItem = new ngrs::MenuItem("Delete Machine");
+								delItem->click.connect(this,&MachineGUI::onPopupDeleteMachine);
+								clnItem->click.connect(this,&MachineGUI::onPopupCloneMachine);
+								machActionsPopup_->add(clnItem);
+								machActionsPopup_->add(delItem);
 			add(machActionsPopup_);
 		}
 
@@ -195,7 +195,7 @@ namespace psycle {
 			} else if ( shift & ngrs::nsLeft ) { // left-click (w/ no shift)
 				selected.emit(this);
 			} else if ( button == 3) {
-                machActionsPopup_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
+								machActionsPopup_->setPosition(x + absoluteLeft() + window()->left(), y + absoluteTop() + window()->top(),100,100);
 				machActionsPopup_->setVisible(true);
 			}
 		}
@@ -231,57 +231,57 @@ namespace psycle {
 		{
 		}
 
-        void MachineGUI::muteMachine() {
-            mac()._mute = !mac()._mute;
-            if (mac()._mute) {
-                mac()._volumeCounter=0.0f;
-                mac()._volumeDisplay=0;
-                if (mac().song()->machineSoloed == mac()._macIndex ) {
-                    mac().song()->machineSoloed = -1;
-                }
-            }
-            repaint();
-        }
+				void MachineGUI::muteMachine() {
+						mac()._mute = !mac()._mute;
+						if (mac()._mute) {
+								mac()._volumeCounter=0.0f;
+								mac()._volumeDisplay=0;
+								if (mac().song()->machineSoloed == mac()._macIndex ) {
+										mac().song()->machineSoloed = -1;
+								}
+						}
+						repaint();
+				}
 
-        void MachineGUI::soloMachine() {
-            if (mac().song()->machineSoloed == mac()._macIndex ) {
-                mac().song()->machineSoloed = -1;
-                for ( int i=0;i<MAX_MACHINES;i++ ) {
-                    if ( mac().song()->_pMachine[i] ) {
-                        if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
-                            mac().song()->_pMachine[i]->_mute = false;
-                        }
-                    }
-                }
-            } else {
-                for ( int i=0;i<MAX_MACHINES;i++ ) {
-                    if ( mac().song()->_pMachine[i] )
-                    {
-                        if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != mac()._macIndex))
-                        {
-                            mac().song()->_pMachine[i]->_mute = true;
-                            mac().song()->_pMachine[i]->_volumeCounter=0.0f;
-                            mac().song()->_pMachine[i]->_volumeDisplay=0;
-                        }
-                    }
-                }
-                mac()._mute = false;
-                mac().song()->machineSoloed = mac()._macIndex;
-            }
-            repaint();
-        }
+				void MachineGUI::soloMachine() {
+						if (mac().song()->machineSoloed == mac()._macIndex ) {
+								mac().song()->machineSoloed = -1;
+								for ( int i=0;i<MAX_MACHINES;i++ ) {
+										if ( mac().song()->_pMachine[i] ) {
+												if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR )) {
+														mac().song()->_pMachine[i]->_mute = false;
+												}
+										}
+								}
+						} else {
+								for ( int i=0;i<MAX_MACHINES;i++ ) {
+										if ( mac().song()->_pMachine[i] )
+										{
+												if (( mac().song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != mac()._macIndex))
+												{
+														mac().song()->_pMachine[i]->_mute = true;
+														mac().song()->_pMachine[i]->_volumeCounter=0.0f;
+														mac().song()->_pMachine[i]->_volumeDisplay=0;
+												}
+										}
+								}
+								mac()._mute = false;
+								mac().song()->machineSoloed = mac()._macIndex;
+						}
+						repaint();
+				}
 
-        void MachineGUI::onPopupDeleteMachine( ngrs::ButtonEvent *event ) {
-            deleteMachine();
-        }
+				void MachineGUI::onPopupDeleteMachine( ngrs::ButtonEvent *event ) {
+						deleteMachine();
+				}
 
-        void MachineGUI::onPopupCloneMachine( ngrs::ButtonEvent *event ) {
-            cloneMachineSignal.emit(this);
-        }
+				void MachineGUI::onPopupCloneMachine( ngrs::ButtonEvent *event ) {
+						cloneMachineSignal.emit(this);
+				}
 
-        void MachineGUI::deleteMachine() {
-            deleteRequest.emit(this);
-        }
+				void MachineGUI::deleteMachine() {
+						deleteRequest.emit(this);
+				}
 
 		// end of Machine GUI class
 
@@ -319,7 +319,7 @@ namespace psycle {
 			g.setTranslation(xTrans + ident(), yTrans+ ident());
 
 
-            g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
+						g.putPixmap(0,0,coords().bgCoords.width(),coords().bgCoords.height(), SkinReader::Instance()->bitmaps().machine_skin(), coords().bgCoords.left(), coords().bgCoords.top());
 
 			/*
 			if (mac()._mute)
@@ -427,10 +427,10 @@ namespace psycle {
 			MachineGUI::onMousePress(x,y,button);
 			if (button==1) { // left-click
 				if (coords().dMuteCoords.intersects(x-ident(),y-ident())) { // mute or unmute
-                    muteMachine();
+										muteMachine();
 				} else if (coords().dSoloCoords.intersects(x-ident(),y-ident())) { // solo or unsolo
-                    soloMachine();
-                }
+										soloMachine();
+								}
 			}
 		}
 
@@ -504,20 +504,20 @@ namespace psycle {
 
 		void GeneratorGUI::onKeyPress( const ngrs::KeyEvent & event )
 		{
-            int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
+						int key = Global::pConfig()->inputHandler().getEnumCodeByKey(Key(event.shift(),event.scancode()));
 			if ( key == ngrs::NK_Delete ) {
 				deleteRequest.emit( this );
-            }
-            switch ( key ) { // FIXME: shouldn't be hardcoded, should come from conf file.
-                case 557: // should be cdefMuteMachine
-                    muteMachine();
-                break;
-                case 558: // should be cdefSoloMachine
-                    soloMachine();
-                break;
-                default:;
-            }
-            std::cout << key << std::endl;
+						}
+						switch ( key ) { // FIXME: shouldn't be hardcoded, should come from conf file.
+								case 557: // should be cdefMuteMachine
+										muteMachine();
+								break;
+								case 558: // should be cdefSoloMachine
+										soloMachine();
+								break;
+								default:;
+						}
+						std::cout << key << std::endl;
 		}
 
 		void GeneratorGUI::onMouseDoublePress( int x, int y, int button ) {

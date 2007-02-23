@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "psy4filter.h"
 #include "fileio.h"
 #include "zipwriter.h"
@@ -24,12 +24,12 @@
 #include "zipreader.h"
 
 #ifdef __unix__
-      #include <unistd.h>
-      #include <sys/stat.h>
-      #include <sys/types.h>
+			#include <unistd.h>
+			#include <sys/stat.h>
+			#include <sys/types.h>
 #elif __MSDOS__ || __WIN32__ || _MSC_VER
-      #include <io.h>
-      #include <sys\stat.h>
+			#include <io.h>
+			#include <sys\stat.h>
 #endif
 
 #include <fcntl.h>
@@ -41,23 +41,23 @@
 
 
 template<class T> inline T str(const std::string &  value) {
-   T result;
+		T result;
 
-   std::stringstream str;
-   str << value;
-   str >> result;
+		std::stringstream str;
+		str << value;
+		str >> result;
 
-   return result;
+		return result;
 }
 
 template<class T> inline T str_hex(const std::string &  value) {
-   T result;
+		T result;
 
-   std::stringstream str;
-   str << value;
-   str >> std::hex >> result;
+		std::stringstream str;
+		str << value;
+		str >> std::hex >> result;
 
-   return result;
+		return result;
 }
 
 
@@ -401,7 +401,7 @@ namespace psycle {
 			zipwriter_file *f;
 
 
- 			//\todo:
+				//\todo:
 			if ( !autosave )
 			{
 				progress.emit(1,0,"");
@@ -444,19 +444,19 @@ namespace psycle {
 			//\todo:
 			file.Close();
 
-      // copy the bin data to the zip
-      f = zipwriter_addfile(z, std::string("bin/song.bin").c_str(), 9);
+			// copy the bin data to the zip
+			f = zipwriter_addfile(z, std::string("bin/song.bin").c_str(), 9);
 	    zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
 
-      if (!zipwriter_finish(z)) {
+			if (!zipwriter_finish(z)) {
 				return false;
 			}
 
 			// remove temp file
 			 if( std::remove("psycle_tmp.bin") == -1 )
-    			std::cerr << "Error deleting temp file" << std::endl;
-  
-         
+					std::cerr << "Error deleting temp file" << std::endl;
+	
+					
 		}
 
 		int Psy4Filter::LoadSONGv0(RiffFile* file,Song& song)

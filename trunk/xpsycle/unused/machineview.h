@@ -85,7 +85,7 @@ namespace psycle {
 			WireGUI* selectedWire_;
 
 			ngrs::Panel* scrollArea_;
-            ngrs::ScrollBox* scrollBox_;							
+						ngrs::ScrollBox* scrollBox_;							
 
 			void init();
 
@@ -95,7 +95,7 @@ namespace psycle {
 			void onLineMoveStart( const ngrs::MoveEvent & event );
 			void onLineMoveEnd( const ngrs::MoveEvent & event );
 
-            void onWireGUIDelete( WireGUI * line );
+						void onWireGUIDelete( WireGUI * line );
 			void onWireDelete( WireDlg* dlg );
 			void onWireSelected( ngrs::ButtonEvent* ev );
 			void onMoveMachine( Machine* mac, int x, int y );

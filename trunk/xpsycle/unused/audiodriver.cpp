@@ -23,135 +23,135 @@
 
 namespace psycle
 {
-  namespace host
-  {
+	namespace host
+	{
 
-    AudioDriverInfo::AudioDriverInfo( const std::string& name, const std::string& header, const std::string& description, bool show ) 
-      : name_( name ), header_( header ), description_( description ), show_( show )
-    {
-    }
+		AudioDriverInfo::AudioDriverInfo( const std::string& name, const std::string& header, const std::string& description, bool show ) 
+			: name_( name ), header_( header ), description_( description ), show_( show )
+		{
+		}
 
-    const std::string& AudioDriverInfo::name() const {
-      return name_;
-    }
+		const std::string& AudioDriverInfo::name() const {
+			return name_;
+		}
 
-    const std::string& AudioDriverInfo::header() const {
-      return header_;
-    }
+		const std::string& AudioDriverInfo::header() const {
+			return header_;
+		}
 
-    const std::string& AudioDriverInfo::description() const {
-      return description_;
-    }
+		const std::string& AudioDriverInfo::description() const {
+			return description_;
+		}
 
-    bool AudioDriverInfo::show() const {
-      return show_;
-    }
+		bool AudioDriverInfo::show() const {
+			return show_;
+		}
 
-    ///
-    /// audio driver setting class
-    ///
-    AudioDriverSettings::AudioDriverSettings() :
-    samplesPerSec_(44100),
-      bitDepth_(16),
-      channelMode_(3),
-      bufferSize_(2048),
-      blockSize_(4096),
-      blockCount_(7)
-    {
-    }
+		///
+		/// audio driver setting class
+		///
+		AudioDriverSettings::AudioDriverSettings() :
+		samplesPerSec_(44100),
+			bitDepth_(16),
+			channelMode_(3),
+			bufferSize_(2048),
+			blockSize_(4096),
+			blockCount_(7)
+		{
+		}
 
-    AudioDriverSettings::~AudioDriverSettings() {
-    }
+		AudioDriverSettings::~AudioDriverSettings() {
+		}
 
-    void AudioDriverSettings::setDeviceName( const std::string& name ) {
-      deviceName_ = name;
-    }
+		void AudioDriverSettings::setDeviceName( const std::string& name ) {
+			deviceName_ = name;
+		}
 
-    const std::string& AudioDriverSettings::deviceName() const {
-      return deviceName_;
-    }
+		const std::string& AudioDriverSettings::deviceName() const {
+			return deviceName_;
+		}
 
-    void AudioDriverSettings::setBufferSize( int size ) {
-      bufferSize_ = size;
-    }
+		void AudioDriverSettings::setBufferSize( int size ) {
+			bufferSize_ = size;
+		}
 
-    int AudioDriverSettings::bufferSize() const {
-      return bufferSize_;
-    }
+		int AudioDriverSettings::bufferSize() const {
+			return bufferSize_;
+		}
 
-    void AudioDriverSettings::setSamplesPerSec( int samples ) {
-      samplesPerSec_ = samples;
-    }
+		void AudioDriverSettings::setSamplesPerSec( int samples ) {
+			samplesPerSec_ = samples;
+		}
 
-    int AudioDriverSettings::samplesPerSec() const {
-      return samplesPerSec_;
-    }
+		int AudioDriverSettings::samplesPerSec() const {
+			return samplesPerSec_;
+		}
 
-    void AudioDriverSettings::setChannelMode( int mode ) {
-      channelMode_ = mode;
-    }
+		void AudioDriverSettings::setChannelMode( int mode ) {
+			channelMode_ = mode;
+		}
 
-    int AudioDriverSettings::channelMode() const {
-      return channelMode_;
-    }
+		int AudioDriverSettings::channelMode() const {
+			return channelMode_;
+		}
 
-    void AudioDriverSettings::setBitDepth( int depth ) {
-      bitDepth_ = depth;
-    }
+		void AudioDriverSettings::setBitDepth( int depth ) {
+			bitDepth_ = depth;
+		}
 
-    int AudioDriverSettings::bitDepth() const {
-      return bitDepth_;
-    }
+		int AudioDriverSettings::bitDepth() const {
+			return bitDepth_;
+		}
 
-    int AudioDriverSettings::sampleSize() const {
-      return ( channelMode_ == 3 ) ? bitDepth_ / 4 : bitDepth_ / 8;
-    }
+		int AudioDriverSettings::sampleSize() const {
+			return ( channelMode_ == 3 ) ? bitDepth_ / 4 : bitDepth_ / 8;
+		}
 
-    void AudioDriverSettings::setBlockSize( int size ) {
-      blockSize_ = size;   
-    }     
+		void AudioDriverSettings::setBlockSize( int size ) {
+			blockSize_ = size;   
+		}     
 
-    int AudioDriverSettings::blockSize() const {
-      return blockSize_;
-    }
+		int AudioDriverSettings::blockSize() const {
+			return blockSize_;
+		}
 
-    void AudioDriverSettings::setBlockCount( int count ) {
-      blockCount_ = count;
-    }
-    
-    int AudioDriverSettings::blockCount() const {
-      return blockCount_;
-    }
+		void AudioDriverSettings::setBlockCount( int count ) {
+			blockCount_ = count;
+		}
+		
+		int AudioDriverSettings::blockCount() const {
+			return blockCount_;
+		}
 
 
-    ///
-    /// the AudioDriver main class
-    ///
-    AudioDriver::AudioDriver()  
-    {
-    }
+		///
+		/// the AudioDriver main class
+		///
+		AudioDriver::AudioDriver()  
+		{
+		}
 
-    AudioDriver::~AudioDriver()
-    {
-    }
+		AudioDriver::~AudioDriver()
+		{
+		}
 
-    AudioDriver * AudioDriver::clone( ) const
-    {
-      return new AudioDriver(*this);
-    }
+		AudioDriver * AudioDriver::clone( ) const
+		{
+			return new AudioDriver(*this);
+		}
 
-    void AudioDriver::setSettings( const AudioDriverSettings& settings ) {
-      settings_ = settings;
-    }
+		void AudioDriver::setSettings( const AudioDriverSettings& settings ) {
+			settings_ = settings;
+		}
 
-    const AudioDriverSettings& AudioDriver::settings() const {
-      return settings_;
-    }
+		const AudioDriverSettings& AudioDriver::settings() const {
+			return settings_;
+		}
 
-    AudioDriverInfo AudioDriver::info( ) const
-    {
-      return AudioDriverInfo("silent","NullDriver","no sound output",true);
-    }
+		AudioDriverInfo AudioDriver::info( ) const
+		{
+			return AudioDriverInfo("silent","NullDriver","no sound output",true);
+		}
 
-  } // end of host namespace
+	} // end of host namespace
 } // end of psycle namespace

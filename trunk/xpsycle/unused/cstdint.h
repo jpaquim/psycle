@@ -26,16 +26,16 @@
 
 namespace std
 {
-  using ::int8_t;    //  8-bit signed integral type. 
-  using ::int16_t;   //  16-bit signed integral type. 
-  using ::int32_t;   //  32-bit signed integral type. 
-  using ::int64_t;   //  64-bit signed integral type. 
-  using ::uint8_t;   //  8-bit unsigned integral type. 
-  using ::uint16_t;  //  16-bit unsigned integral type. 
-  using ::uint32_t;  //  32-bit unsigned integral type. 
-  using ::uint64_t;  //  64-bit unsigned integral type. 
-  using ::intptr_t;  //  Signed integral type large enough to hold any pointer. 
-  using ::uintptr_t; //  Unsigned integral type large enough to hold any pointer.
+	using ::int8_t;    //  8-bit signed integral type. 
+	using ::int16_t;   //  16-bit signed integral type. 
+	using ::int32_t;   //  32-bit signed integral type. 
+	using ::int64_t;   //  64-bit signed integral type. 
+	using ::uint8_t;   //  8-bit unsigned integral type. 
+	using ::uint16_t;  //  16-bit unsigned integral type. 
+	using ::uint32_t;  //  32-bit unsigned integral type. 
+	using ::uint64_t;  //  64-bit unsigned integral type. 
+	using ::intptr_t;  //  Signed integral type large enough to hold any pointer. 
+	using ::uintptr_t; //  Unsigned integral type large enough to hold any pointer.
 }
 
 #else
@@ -249,16 +249,16 @@ typedef uint64_t  uintmax_t;
 // gnu gpl 2 licence here again..
 namespace std
 {
-  using ::int8_t;    //  8-bit signed integral type. 
-  using ::int16_t;   //  16-bit signed integral type. 
-  using ::int32_t;   //  32-bit signed integral type. 
-  using ::int64_t;   //  64-bit signed integral type. 
-  using ::uint8_t;   //  8-bit unsigned integral type. 
-  using ::uint16_t;  //  16-bit unsigned integral type. 
-  using ::uint32_t;  //  32-bit unsigned integral type. 
-  using ::uint64_t;  //  64-bit unsigned integral type. 
-  using ::intptr_t;  //  Signed integral type large enough to hold any pointer. 
-  using ::uintptr_t; //  Unsigned integral type large enough to hold any pointer.
+	using ::int8_t;    //  8-bit signed integral type. 
+	using ::int16_t;   //  16-bit signed integral type. 
+	using ::int32_t;   //  32-bit signed integral type. 
+	using ::int64_t;   //  64-bit signed integral type. 
+	using ::uint8_t;   //  8-bit unsigned integral type. 
+	using ::uint16_t;  //  16-bit unsigned integral type. 
+	using ::uint32_t;  //  32-bit unsigned integral type. 
+	using ::uint64_t;  //  64-bit unsigned integral type. 
+	using ::intptr_t;  //  Signed integral type large enough to hold any pointer. 
+	using ::uintptr_t; //  Unsigned integral type large enough to hold any pointer.
 }
 
 

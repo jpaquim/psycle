@@ -21,21 +21,21 @@
 #define ABSTRACTMACHINEFACTORY_H
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    class Machine;
+		class Machine;
 
-    class AbstractMachineFactory {
-    public:
+		class AbstractMachineFactory {
+		public:
 
-      AbstractMachineFactory( );
-      virtual ~AbstractMachineFactory();
+			AbstractMachineFactory( );
+			virtual ~AbstractMachineFactory();
 
-      virtual Machine* createMachine( int key ) const = 0;
+			virtual Machine* createMachine( int key ) const = 0;
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

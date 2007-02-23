@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #ifndef PATTERNBOX_H
 #define PATTERNBOX_H
 
@@ -42,139 +42,139 @@
 */
 
 namespace ngrs {
-  class ObjectInspector;
+	class ObjectInspector;
 }
 
 namespace psycle { 
-  namespace host {
+	namespace host {
 
-    class PatternView;
-    class SequencerGUI;
+		class PatternView;
+		class SequencerGUI;
 
-    class CategoryTreeNode: public ngrs::NTreeNode {
-    public:
-      CategoryTreeNode( PatternCategory* cat );
-      ~CategoryTreeNode();
+		class CategoryTreeNode: public ngrs::NTreeNode {
+		public:
+			CategoryTreeNode( PatternCategory* cat );
+			~CategoryTreeNode();
 
-      PatternCategory* category();
+			PatternCategory* category();
 
-    private:
+		private:
 
-      PatternCategory* cat_;
+			PatternCategory* cat_;
 
-    };
-
-
-    class CategoryItem : public ngrs::CustomItem {
-    public :
-      CategoryItem(PatternCategory* category, const std::string & text);
-      CategoryItem();
-      ~CategoryItem();
-
-      virtual void setText(const std::string & text);
-      virtual std::string text() const;
-
-      virtual void paint( ngrs::Graphics& g);
-
-      PatternCategory* category();
-
-    private:
-
-      ngrs::Label* label_;
-
-      PatternCategory* category_;
-
-      void init();
-
-    };
-
-    class PatternItem : public ngrs::Item {
-    public:
-
-      PatternItem(SinglePattern* pattern, const std::string & text);
-      ~PatternItem();
-
-      virtual void setText(const std::string & text);
-
-    private:
-
-      SinglePattern* pattern_;
-
-    };
-
-    class PatternBox : public ngrs::Panel
-    {
+		};
 
 
+		class CategoryItem : public ngrs::CustomItem {
+		public :
+			CategoryItem(PatternCategory* category, const std::string & text);
+			CategoryItem();
+			~CategoryItem();
 
-    public:
-      PatternBox();
+			virtual void setText(const std::string & text);
+			virtual std::string text() const;
 
-      ~PatternBox();
+			virtual void paint( ngrs::Graphics& g);
 
-      sigslot::signal1<SinglePattern*> removed;
+			PatternCategory* category();
 
-      void setSequenceGUI( SequencerGUI* sequenceGUI );
-      void setPatternView( PatternView* patternView );
+		private:
 
-      bool followSong() const;
+			ngrs::Label* label_;
 
-      void update();
+			PatternCategory* category_;
 
-      void onSelChangeSeqList( ngrs::ItemEvent* sender );
+			void init();
 
-      void setEntry( ngrs::Object* obj );
-      void setChildView( class ChildView* view );
+		};
 
-      void selectNextPattern();
-      void selectPrevPattern();
+		class PatternItem : public ngrs::Item {
+		public:
 
-      void setSkin();
+			PatternItem(SinglePattern* pattern, const std::string & text);
+			~PatternItem();
 
-    private:
+			virtual void setText(const std::string & text);
 
-      SequencerGUI* seqGui;
-      PatternView* patView;
-      ChildView* childView_;
+		private:
 
-      void init();
+			SinglePattern* pattern_;
 
-      int counter;
+		};
 
-      ngrs::NCustomTreeView* patternBox_;
-      PatternBoxProperties* propertyBox_;
-      ngrs::ObjectInspector* entryBox_;
-
-      ngrs::NCheckBox* follow_;
-      ngrs::NCheckBox* multichannel_audition_;
-      ngrs::NCheckBox* record_noteoff_;
-      ngrs::NCheckBox* record_tweaks_;
-      ngrs::NCheckBox* notestoeffects_;
-      ngrs::NCheckBox* movecursorpaste_;
+		class PatternBox : public ngrs::Panel
+		{
 
 
-      void onNewCategory( ngrs::ButtonEvent * ev );
-      void onNewPattern( ngrs::ButtonEvent* ev );
-      void onClonePattern( ngrs::ButtonEvent* ev );
-      void onDeletePattern( ngrs::ButtonEvent* ev );
 
-      void onItemSelected( ngrs::ItemEvent* ev );
-      void onPatternItemDblClick( ngrs::ButtonEvent * ev );
-      void onPatternAdd( ngrs::ButtonEvent* ev );
-      void switchPatternViewPattern( ngrs::CustomItem* item );
+		public:
+			PatternBox();
 
-      void onMoveCursorPaste( ngrs::ButtonEvent* ev );
-      void onRecordTweakChange( ngrs::ButtonEvent* ev );
+			~PatternBox();
 
-      void onNameChanged( const std::string & name );
+			sigslot::signal1<SinglePattern*> removed;
 
-      std::map<ngrs::NTreeNode*, PatternCategory*> categoryMap;
-      std::vector<CategoryItem*> catItems;
+			void setSequenceGUI( SequencerGUI* sequenceGUI );
+			void setPatternView( PatternView* patternView );
 
-      std::map<ngrs::CustomItem*, SinglePattern*> patternMap;
+			bool followSong() const;
 
-    };
+			void update();
 
-  }
+			void onSelChangeSeqList( ngrs::ItemEvent* sender );
+
+			void setEntry( ngrs::Object* obj );
+			void setChildView( class ChildView* view );
+
+			void selectNextPattern();
+			void selectPrevPattern();
+
+			void setSkin();
+
+		private:
+
+			SequencerGUI* seqGui;
+			PatternView* patView;
+			ChildView* childView_;
+
+			void init();
+
+			int counter;
+
+			ngrs::NCustomTreeView* patternBox_;
+			PatternBoxProperties* propertyBox_;
+			ngrs::ObjectInspector* entryBox_;
+
+			ngrs::NCheckBox* follow_;
+			ngrs::NCheckBox* multichannel_audition_;
+			ngrs::NCheckBox* record_noteoff_;
+			ngrs::NCheckBox* record_tweaks_;
+			ngrs::NCheckBox* notestoeffects_;
+			ngrs::NCheckBox* movecursorpaste_;
+
+
+			void onNewCategory( ngrs::ButtonEvent * ev );
+			void onNewPattern( ngrs::ButtonEvent* ev );
+			void onClonePattern( ngrs::ButtonEvent* ev );
+			void onDeletePattern( ngrs::ButtonEvent* ev );
+
+			void onItemSelected( ngrs::ItemEvent* ev );
+			void onPatternItemDblClick( ngrs::ButtonEvent * ev );
+			void onPatternAdd( ngrs::ButtonEvent* ev );
+			void switchPatternViewPattern( ngrs::CustomItem* item );
+
+			void onMoveCursorPaste( ngrs::ButtonEvent* ev );
+			void onRecordTweakChange( ngrs::ButtonEvent* ev );
+
+			void onNameChanged( const std::string & name );
+
+			std::map<ngrs::NTreeNode*, PatternCategory*> categoryMap;
+			std::vector<CategoryItem*> catItems;
+
+			std::map<ngrs::CustomItem*, SinglePattern*> patternMap;
+
+		};
+
+	}
 }
 #endif

@@ -24,22 +24,22 @@
 #include <ngrs/panel.h>
 
 namespace psy {
-  namespace host {
+	namespace host {
 
-    class DefaultBitmaps;
+		class DefaultBitmaps;
 
-    class StartPage : public Module {
-    public:
+		class StartPage : public Module {
+		public:
 
-      StartPage( DefaultBitmaps& icons );
-      virtual StartPage* clone() const;
-      ~StartPage();
+			StartPage( DefaultBitmaps& icons );
+			virtual StartPage* clone() const;
+			~StartPage();
 
-      ModuleInfo info() const;
+			ModuleInfo info() const;
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

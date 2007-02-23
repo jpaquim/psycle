@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #ifndef PSY2FILTER_H
 #define PSY2FILTER_H
 
@@ -37,7 +37,7 @@ namespace psycle
 		{
 			class Converter;
 		}
-        #endif
+				#endif
 
 		class Psy2Filter : public PsyFilter
 		{
@@ -55,17 +55,17 @@ namespace psycle
 			// Singleton Pattern
 		protected:
 	  	Psy2Filter();          
-  		virtual ~Psy2Filter();
+			virtual ~Psy2Filter();
 
 		private:
 			Psy2Filter( Psy2Filter const & );
-  		Psy2Filter& operator=(Psy2Filter const&);
+			Psy2Filter& operator=(Psy2Filter const&);
 
 		public:
 			static Psy2Filter* Instance() {
 					// don`t use multithreaded
 					static Psy2Filter s;
- 					return &s; 
+						return &s; 
 			}
 			// Singleton pattern end
 	
@@ -84,7 +84,7 @@ namespace psycle
 				#ifdef __unix__
 				virtual bool LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter);
 				virtual bool TidyUp(RiffFile* file,Song &song,convert_internal_machines::Converter* converter);
-                #endif				
+								#endif				
 	
 
 		protected:

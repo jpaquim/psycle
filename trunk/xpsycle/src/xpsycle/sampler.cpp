@@ -708,7 +708,7 @@ namespace psycle
 
 		void Sampler::TickFilterEnvelope( int voice )
 		{
-      const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 
 			Voice* pVoice = &_voices[voice];
 			switch (pVoice->_filterEnv._stage)
@@ -746,7 +746,7 @@ namespace psycle
 
 		void Sampler::TickEnvelope( int voice )
 		{
-      const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 
 			Voice* pVoice = &_voices[voice];
 			switch (pVoice->_envelope._stage)

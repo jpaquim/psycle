@@ -30,16 +30,16 @@ namespace psycle
 {
 	namespace host
 	{
-              
-        int const SHORT_MIN = -32768;
+							
+				int const SHORT_MIN = -32768;
 		int const SHORT_MAX =  32767;      
-              
+							
 
-              
-        AudioDriverInfo MsDirectSound::info( ) const
-        {
-            return AudioDriverInfo("dsound","Microsoft DirectSound Driver","Microsoft output driver",true);
-        }      
+							
+				AudioDriverInfo MsDirectSound::info( ) const
+				{
+						return AudioDriverInfo("dsound","Microsoft DirectSound Driver","Microsoft output driver",true);
+				}      
 
 		void MsDirectSound::Error(const char msg[])
 		{
@@ -61,9 +61,9 @@ namespace psycle
 		}
 		
 		MsDirectSound * MsDirectSound::clone( ) const
-        {
-          return new MsDirectSound(*this);
-        }
+				{
+					return new MsDirectSound(*this);
+				}
 
 		void MsDirectSound::Initialize( AUDIODRIVERWORKFN pCallback, void * context )
 		{
@@ -87,9 +87,9 @@ namespace psycle
 
 		bool MsDirectSound::Start()
 		{
-             GUID GUID_NULL;//guidNULL;
-             memset(&GUID_NULL,0,sizeof(GUID));
-             
+							GUID GUID_NULL;//guidNULL;
+							memset(&GUID_NULL,0,sizeof(GUID));
+							
 		//	CSingleLock lock(&_lock, true);
 			if(_running) return true;
 			if(!_pCallback) return false;
@@ -185,7 +185,7 @@ namespace psycle
 			//_event.ResetEvent();
 			_timerActive = true;
 			DWORD dwThreadId;
-            ::CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
+						::CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
 //			::_beginthread(PollerThread, 0, this);
 			_running = true;
 			return true;
@@ -202,7 +202,7 @@ namespace psycle
 			}
 			//_event.SetEvent();
 //			::_endthread();
-            return 0;
+						return 0;
 		}
 
 		bool MsDirectSound::Stop()
@@ -297,7 +297,7 @@ namespace psycle
 						int n = blockSize;
 						float *pFloatBlock = _pCallback(_callbackContext, n);
 //						if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else 
-                        quantize(pFloatBlock, pBlock, n);
+												quantize(pFloatBlock, pBlock, n);
 						pBlock += n;
 						blockSize -= n;
 					}
@@ -308,7 +308,7 @@ namespace psycle
 						int n = blockSize;
 						float *pFloatBlock = _pCallback(_callbackContext, n);
 						//if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else 
-                        quantize(pFloatBlock, pBlock, n);
+												quantize(pFloatBlock, pBlock, n);
 						pBlock += n;
 						blockSize -= n;
 					}

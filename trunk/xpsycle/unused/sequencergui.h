@@ -34,282 +34,282 @@
 */
 
 namespace ngrs {
-  class ScrollBar;
-  class Label;
-  class ToolBar;
-  class ListBox;  
-  class NCheckBox;
-  class Line;
-  class Edit;
+	class ScrollBar;
+	class Label;
+	class ToolBar;
+	class ListBox;  
+	class NCheckBox;
+	class Line;
+	class Edit;
 }
 
 class ZoomBar;
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    class SequencerBeatChangeLineal;
+		class SequencerBeatChangeLineal;
 
-    class SequencerGUI;
+		class SequencerGUI;
 
-    class SequencerLoopItem : public ngrs::Panel {
-    public:
+		class SequencerLoopItem : public ngrs::Panel {
+		public:
 
-      SequencerLoopItem( SequencerGUI* seqGui );
+			SequencerLoopItem( SequencerGUI* seqGui );
 
-      ~SequencerLoopItem();
+			~SequencerLoopItem();
 
-      virtual void paint( ngrs::Graphics& g);
+			virtual void paint( ngrs::Graphics& g);
 
-      virtual int preferredWidth() const;
-      virtual int preferredHeight() const;
+			virtual int preferredWidth() const;
+			virtual int preferredHeight() const;
 
-      virtual void resize();
+			virtual void resize();
 
-    private:
+		private:
 
-      SequencerGUI* sView;
-      ngrs::Edit* loopEdit;
+			SequencerGUI* sView;
+			ngrs::Edit* loopEdit;
 
-    };
+		};
 
-    class SequencerItem : public ngrs::Panel {
-    public:
-      SequencerItem( SequencerGUI* seqGui );
-      ~SequencerItem();
+		class SequencerItem : public ngrs::Panel {
+		public:
+			SequencerItem( SequencerGUI* seqGui );
+			~SequencerItem();
 
-      sigslot::signal1<SequencerItem*> click;
+			sigslot::signal1<SequencerItem*> click;
 
-      virtual void paint( ngrs::Graphics& g);
-      virtual void onMousePress(int x, int y, int button);
-      virtual void resize();
-      virtual void onMove(const ngrs::MoveEvent & moveEvent);
-      virtual void onMoveEnd(const ngrs::MoveEvent & moveEvent);
-      virtual void onMoveStart(const ngrs::MoveEvent & moveEvent);
+			virtual void paint( ngrs::Graphics& g);
+			virtual void onMousePress(int x, int y, int button);
+			virtual void resize();
+			virtual void onMove(const ngrs::MoveEvent & moveEvent);
+			virtual void onMoveEnd(const ngrs::MoveEvent & moveEvent);
+			virtual void onMoveStart(const ngrs::MoveEvent & moveEvent);
 
-      void setText(const std::string & text);
+			void setText(const std::string & text);
 
-      void setSequenceEntry(SequenceEntry* entry);
-      SequenceEntry* sequenceEntry();
+			void setSequenceEntry(SequenceEntry* entry);
+			SequenceEntry* sequenceEntry();
 
-      void setSelected(bool on);
-      bool selected();
+			void setSelected(bool on);
+			bool selected();
 
-      void setStart(float start);
-      float start() const;
+			void setStart(float start);
+			float start() const;
 
-      void setEndOffset(float start);
-      float endOffset() const;
+			void setEndOffset(float start);
+			float endOffset() const;
 
-      void setTranspose( int offset );
-      int transpose() const;
+			void setTranspose( int offset );
+			int transpose() const;
 
-      ngrs::NHint* hint();
+			ngrs::NHint* hint();
 
 
-    private:
+		private:
 
-      bool selected_;
+			bool selected_;
 
-      SequenceEntry* sequenceEntry_;
-      SequencerGUI* sView;
+			SequenceEntry* sequenceEntry_;
+			SequencerGUI* sView;
 
-      ngrs::Region entriesInRegion();
-      ngrs::Region oldDrag;
+			ngrs::Region entriesInRegion();
+			ngrs::Region oldDrag;
 
-      ngrs::NHint* hint_;
+			ngrs::NHint* hint_;
 
-      int oldLeft;
+			int oldLeft;
 
-    };
+		};
 
-    class SequencerGUI : public ngrs::Panel
-    {
-    public:
-      class SequencerLine : public ngrs::Panel {
-      public :
+		class SequencerGUI : public ngrs::Panel
+		{
+		public:
+			class SequencerLine : public ngrs::Panel {
+			public :
 
-        SequencerLine( SequencerGUI* seqGui );
-        ~SequencerLine();
+				SequencerLine( SequencerGUI* seqGui );
+				~SequencerLine();
 
-        sigslot::signal1<SequencerLine*> click;
-        sigslot::signal1<SequencerItem*> itemClick;
+				sigslot::signal1<SequencerLine*> click;
+				sigslot::signal1<SequencerItem*> itemClick;
 
-        virtual void paint( ngrs::Graphics& g );
-        virtual void onMousePress( int x, int y, int button );
-        virtual int preferredWidth() const;
-        virtual int preferredHeight() const;
+				virtual void paint( ngrs::Graphics& g );
+				virtual void onMousePress( int x, int y, int button );
+				virtual int preferredWidth() const;
+				virtual int preferredHeight() const;
 
-        virtual void removeChild( ngrs::VisualComponent* item );
+				virtual void removeChild( ngrs::VisualComponent* item );
 
-        void setSequenceLine( SequenceLine* line );
-        SequenceLine* sequenceLine();
+				void setSequenceLine( SequenceLine* line );
+				SequenceLine* sequenceLine();
 
-        void addItem( SinglePattern* pattern );
-        void removeItems( SinglePattern* pattern );
+				void addItem( SinglePattern* pattern );
+				void removeItems( SinglePattern* pattern );
 
-        std::vector<SequencerItem*> itemsByPattern( SinglePattern* pattern );
+				std::vector<SequencerItem*> itemsByPattern( SinglePattern* pattern );
 
-        virtual void resize();
+				virtual void resize();
 
-        std::list<SequencerItem*> items;
+				std::list<SequencerItem*> items;
 
-        void onSequencerItemClick( SequencerItem* item );
+				void onSequencerItemClick( SequencerItem* item );
 
-      private:
+			private:
 
-        SequenceLine* seqLine_;
-        SequencerGUI* sView;
+				SequenceLine* seqLine_;
+				SequencerGUI* sView;
 
-      };
+			};
 
 
-      class SequencerBeatLineal : public ngrs::Panel {
-      public :
-        SequencerBeatLineal( SequencerGUI* seqGui );
-        ~SequencerBeatLineal();
+			class SequencerBeatLineal : public ngrs::Panel {
+			public :
+				SequencerBeatLineal( SequencerGUI* seqGui );
+				~SequencerBeatLineal();
 
-        virtual void paint( ngrs::Graphics& g );
-        virtual int preferredHeight() const;
+				virtual void paint( ngrs::Graphics& g );
+				virtual int preferredHeight() const;
 
-      private:
+			private:
 
-        SequencerGUI* sView;
+				SequencerGUI* sView;
 
-        void drawLineal( ngrs::Graphics& g, int dx );
+				void drawLineal( ngrs::Graphics& g, int dx );
 
-      };
+			};
 
 
-      class Area : public ngrs::Panel {
-      public :
-        Area( SequencerGUI* seqGui );
-        ~Area();
+			class Area : public ngrs::Panel {
+			public :
+				Area( SequencerGUI* seqGui );
+				~Area();
 
-        void drawTimeGrid( ngrs::Graphics& g );
+				void drawTimeGrid( ngrs::Graphics& g );
 
-        virtual void paint( ngrs::Graphics& g );
-        virtual int preferredWidth() const;
-        virtual int preferredHeight() const;
-        virtual void resize();
+				virtual void paint( ngrs::Graphics& g );
+				virtual int preferredWidth() const;
+				virtual int preferredHeight() const;
+				virtual void resize();
 
-        virtual void removeChilds();
+				virtual void removeChilds();
 
-        ngrs::Panel* vLine();
-        ngrs::Panel* vLine() const;
+				ngrs::Panel* vLine();
+				ngrs::Panel* vLine() const;
 
-        Panel* pLine(); // playpos line
-        ngrs::Panel* pLine() const;
+				Panel* pLine(); // playpos line
+				ngrs::Panel* pLine() const;
 
-        bool lockPlayLine() const;
+				bool lockPlayLine() const;
 
-        virtual void onMove(const ngrs::MoveEvent & moveEvent);
-        virtual void onMoveEnd(const ngrs::MoveEvent & moveEvent);
-        virtual void onMoveStart(const ngrs::MoveEvent & moveEvent);
+				virtual void onMove(const ngrs::MoveEvent & moveEvent);
+				virtual void onMoveEnd(const ngrs::MoveEvent & moveEvent);
+				virtual void onMoveStart(const ngrs::MoveEvent & moveEvent);
 
-      private:
+			private:
 
-        SequencerGUI* sView;
+				SequencerGUI* sView;
 
-        ngrs::Panel* vLine_;
-        ngrs::Panel* pLine_; // playPosLine
+				ngrs::Panel* vLine_;
+				ngrs::Panel* pLine_; // playPosLine
 
-        double playPos_;
-        double newBeatPos_;
+				double playPos_;
+				double newBeatPos_;
 
-        bool lockPlayLine_;
-        bool playing_;
+				bool lockPlayLine_;
+				bool playing_;
 
-      };
+			};
 
-    public:
+		public:
 
-      SequencerGUI();
+			SequencerGUI();
 
-      ~SequencerGUI();
+			~SequencerGUI();
 
-      sigslot::signal1<SequencerItem*> entryClick;
+			sigslot::signal1<SequencerItem*> entryClick;
 
-      void setPatternSequence( PatternSequence* sequence );
-      PatternSequence* patternSequence();
+			void setPatternSequence( PatternSequence* sequence );
+			PatternSequence* patternSequence();
 
-      void addPattern( SinglePattern* pattern );
-      void removePattern( SinglePattern* pattern );
+			void addPattern( SinglePattern* pattern );
+			void removePattern( SinglePattern* pattern );
 
-      std::vector<SequencerItem*> guiItemsByPattern( SinglePattern* pattern );
+			std::vector<SequencerItem*> guiItemsByPattern( SinglePattern* pattern );
 
-      int beatPxLength() const;
+			int beatPxLength() const;
 
-      SequencerLine* selectedLine_;
+			SequencerLine* selectedLine_;
 
-      void update();
+			void update();
 
-      virtual void resize();
+			virtual void resize();
 
-      void addSequencerLine();
+			void addSequencerLine();
 
-      const std::vector<SequencerItem*> & selectedItems();
+			const std::vector<SequencerItem*> & selectedItems();
 
-      Area* scrollArea();
+			Area* scrollArea();
 
-      void deselectAll();
+			void deselectAll();
 
-      bool gridSnap() const;
+			bool gridSnap() const;
 
-      void updateSkin();
+			void updateSkin();
 
-      void updatePlayPos();
+			void updatePlayPos();
 
-    private:
+		private:
 
-      AudioDriver oldDriver;
+			AudioDriver oldDriver;
 
-      int counter;
-      int beatPxLength_;
-      double oldPlayPos_;
+			int counter;
+			int beatPxLength_;
+			double oldPlayPos_;
 
-      ngrs::Timer recStatusTimer;
+			ngrs::Timer recStatusTimer;
 
-      ngrs::NCheckBox* snapToGridCheck_;
-      SequencerBeatLineal* beatLineal_;
-      SequencerBeatChangeLineal* beatChangeLineal_;
-      SequencerLine* lastLine;
-      std::vector<SequencerItem*> selectedItems_;
-      PatternSequence* patternSequence_;
-      std::vector<SequencerLine*> lines;
+			ngrs::NCheckBox* snapToGridCheck_;
+			SequencerBeatLineal* beatLineal_;
+			SequencerBeatChangeLineal* beatChangeLineal_;
+			SequencerLine* lastLine;
+			std::vector<SequencerItem*> selectedItems_;
+			PatternSequence* patternSequence_;
+			std::vector<SequencerLine*> lines;
 
-      ngrs::ScrollBar* hBar;
-      ngrs::ScrollBar* vBar;
-      ngrs::Button* renderBtn;
+			ngrs::ScrollBar* hBar;
+			ngrs::ScrollBar* vBar;
+			ngrs::Button* renderBtn;
 
-      ZoomBar* zoomHBar;
+			ZoomBar* zoomHBar;
 
-      Area* scrollArea_;
-      ngrs::ToolBar* toolBar_;
-      ngrs::ListBox* patternBox_;
+			Area* scrollArea_;
+			ngrs::ToolBar* toolBar_;
+			ngrs::ListBox* patternBox_;
 
-      void onInsertTrack( ngrs::ButtonEvent* ev );
-      void onDeleteTrack( ngrs::ButtonEvent* ev );
-      void onMoveDownTrack( ngrs::ButtonEvent* ev );
-      void onMoveUpTrack( ngrs::ButtonEvent* ev );
+			void onInsertTrack( ngrs::ButtonEvent* ev );
+			void onDeleteTrack( ngrs::ButtonEvent* ev );
+			void onMoveDownTrack( ngrs::ButtonEvent* ev );
+			void onMoveUpTrack( ngrs::ButtonEvent* ev );
 
-      void onNewPattern( ngrs::ButtonEvent* ev );
-      void onDeleteEntry( ngrs::ButtonEvent* ev );
-      void onAddLoop( ngrs::ButtonEvent* ev );
-      void onRefreshGUI( ngrs::ButtonEvent* ev );
+			void onNewPattern( ngrs::ButtonEvent* ev );
+			void onDeleteEntry( ngrs::ButtonEvent* ev );
+			void onAddLoop( ngrs::ButtonEvent* ev );
+			void onRefreshGUI( ngrs::ButtonEvent* ev );
 
-      void onSequencerLineClick( SequencerLine* line );
-      void onSequencerItemClick( SequencerItem* item );
-      void onZoomHBarPosChanged( ZoomBar* zoomBar, double newPos );
-      void onHScrollBar( ngrs::ScrollBar* sender );
-      void onVScrollBar( ngrs::ScrollBar* sender );
+			void onSequencerLineClick( SequencerLine* line );
+			void onSequencerItemClick( SequencerItem* item );
+			void onZoomHBarPosChanged( ZoomBar* zoomBar, double newPos );
+			void onHScrollBar( ngrs::ScrollBar* sender );
+			void onVScrollBar( ngrs::ScrollBar* sender );
 
-      void onRenderAsWave( ngrs::ButtonEvent* ev );
-      void onRecordingTimer();
+			void onRenderAsWave( ngrs::ButtonEvent* ev );
+			void onRecordingTimer();
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

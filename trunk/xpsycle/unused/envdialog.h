@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan Nattkemper   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #ifndef ENVDIALOG_H
 #define ENVDIALOG_H
 
@@ -28,15 +28,15 @@
 */
 
 namespace ngrs {
-  class Label;
-  class Slider;
-  class ComboBox;
-  class ItemEvent;
-  class Graphics;
+	class Label;
+	class Slider;
+	class ComboBox;
+	class ItemEvent;
+	class Graphics;
 }
 
 namespace psycle { 
-  namespace host {
+	namespace host {
 
 class Song;
 
@@ -47,13 +47,13 @@ class EnvDialog : public ngrs::Window
 	public:
 		EnvPanel() {};
 		~EnvPanel() {};
-        virtual void paint( ngrs::Graphics& g );
+				virtual void paint( ngrs::Graphics& g );
 		void setEnvelope( int attack, int decay, int sustain, int release ) {
 		  m_attack=attack;
 		  m_decay=decay;
 		  m_sustain=sustain;
 		  m_release=release;
-        }
+				}
 	private:
 		int m_attack;
 		int m_decay;
@@ -69,7 +69,7 @@ public:
 
 	Song* pSong;
 
-    ngrs::ComboBox* m_filtercombo;
+		ngrs::ComboBox* m_filtercombo;
 	ngrs::Slider* m_envelope_slider;
 	ngrs::Slider* m_q_slider;
 	ngrs::Slider* m_cutoff_slider;
@@ -105,7 +105,7 @@ private:
 
 	void onCutoffSliderMoved( ngrs::Slider* slider );
 	void onQSliderMoved( ngrs::Slider *slider );
-    void onFilterModeSelected( ngrs::ItemEvent* ev );
+		void onFilterModeSelected( ngrs::ItemEvent* ev );
 	void onEnvAmtSliderMoved( ngrs::Slider* slider );
 };
 

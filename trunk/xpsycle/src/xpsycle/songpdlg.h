@@ -26,44 +26,44 @@
 #include <ngrs/button.h>
 
 namespace ngrs {
-  class Memo;
+	class Memo;
 }
 
 namespace psycle { 
-  namespace host {
+	namespace host {
 
-    class Song;
+		class Song;
 
-    /**
-    @author  Stefan
-    */
-    class SongpDlg : public ngrs::Window
-    {
-    public:
-      SongpDlg( );
+		/**
+		@author  Stefan
+		*/
+		class SongpDlg : public ngrs::Window
+		{
+		public:
+			SongpDlg( );
 
-      ~SongpDlg();
+			~SongpDlg();
 
-      virtual int onClose();
-      virtual void setVisible( bool on );
+			virtual int onClose();
+			virtual void setVisible( bool on );
 
-      void setSong( Song* pSong );
+			void setSong( Song* pSong );
 
-    private:
+		private:
 
-      ngrs::Edit* songTitle_;
-      ngrs::Edit* songCredits_;
-      ngrs::Memo* songComments_;
-      ngrs::Button* okBtn_;
-      ngrs::Button* cnclBtn_;
+			ngrs::Edit* songTitle_;
+			ngrs::Edit* songCredits_;
+			ngrs::Memo* songComments_;
+			ngrs::Button* okBtn_;
+			ngrs::Button* cnclBtn_;
 
-      Song* pSong_;
+			Song* pSong_;
 
-      void init();
-      void onOkBtn( ngrs::ButtonEvent* ev );
-      void onCancelBtn( ngrs::ButtonEvent* ev );
-    };
+			void init();
+			void onOkBtn( ngrs::ButtonEvent* ev );
+			void onCancelBtn( ngrs::ButtonEvent* ev );
+		};
 
-  }
+	}
 }
 #endif

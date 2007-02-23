@@ -24,28 +24,28 @@
 #include <map>
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    class PrototypeMachineFactory : public AbstractMachineFactory {
-    public:
+		class PrototypeMachineFactory : public AbstractMachineFactory {
+		public:
 
-      PrototypeMachineFactory();
+			PrototypeMachineFactory();
 
-      ~PrototypeMachineFactory();
+			~PrototypeMachineFactory();
 
-      virtual void registerMachine( int key, Machine& prototype );
-      virtual Machine* createMachine( int key ) const;
+			virtual void registerMachine( int key, Machine& prototype );
+			virtual Machine* createMachine( int key ) const;
 
-      void setDeleteFlag( bool deletePrototypes );
+			void setDeleteFlag( bool deletePrototypes );
 
-    private:
+		private:
 
-      bool deleteProtoypes_;
-      std::map<int,Machine*> prototypeMap_;
-      
-    };
+			bool deleteProtoypes_;
+			std::map<int,Machine*> prototypeMap_;
+			
+		};
 
-  }
+	}
 }
 
 #endif

@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "audioconfigdlg.h"
 #include "configuration.h"
 //#include "audiodriver.h"
@@ -54,24 +54,24 @@ namespace psy {
 			selectedDriver_ = 0;
 
 			// creates the cancel and the ok button at the bottom of the window
-            ngrs::Panel* btnPanel = new ngrs::Panel();
-               btnPanel->setLayout( ngrs::AlignLayout(5,5) );
+						ngrs::Panel* btnPanel = new ngrs::Panel();
+								btnPanel->setLayout( ngrs::AlignLayout(5,5) );
 				/*okBtn_ = new Button( " Ok " );
 					okBtn_->setFlat(false);
 					okBtn_->clicked.connect( this, &AudioConfigDlg::onOkBtn );
 				btnPanel->add( okBtn_, ngrs::nAlRight );*/
-                closeBtn_ = new ngrs::Button( "Close" );
+								closeBtn_ = new ngrs::Button( "Close" );
 					closeBtn_->setFlat(false);
 					closeBtn_->clicked.connect( this, &AudioConfigDlg::onCloseBtn );
 				btnPanel->add( closeBtn_, ngrs::nAlRight );				
-                pane()->add( btnPanel, ngrs::nAlBottom );
+								pane()->add( btnPanel, ngrs::nAlBottom );
 
 			// creates a TabBook with an audio system and MIDI tab
 			tabBook_ = new ngrs::TabBook();
-            audioPage_ = new ngrs::Panel();
-            audioPage_->setLayout( ngrs::AlignLayout( 5, 5 ) );
-            midiPage_  = new ngrs::Panel();
-            midiPage_->setLayout( ngrs::AlignLayout() );
+						audioPage_ = new ngrs::Panel();
+						audioPage_->setLayout( ngrs::AlignLayout( 5, 5 ) );
+						midiPage_  = new ngrs::Panel();
+						midiPage_->setLayout( ngrs::AlignLayout() );
 				tabBook_->addPage( audioPage_, "Audio System" );
 				tabBook_->addPage( midiPage_, "Midi System" );
 			pane()->add(tabBook_, ngrs::nAlClient);
@@ -83,16 +83,16 @@ namespace psy {
 
 		void AudioConfigDlg::initAudioDriverBox( )
 		{
-          driverBox_ = new ngrs::GroupBox("Audio Driver");
+					driverBox_ = new ngrs::GroupBox("Audio Driver");
 				driverBox_->setLayout( ngrs::AlignLayout() );
 			audioPage_->add( driverBox_, ngrs::nAlClient );
 
-            ngrs::Panel* infoPanel = new ngrs::Panel();
+						ngrs::Panel* infoPanel = new ngrs::Panel();
 				infoPanel->setPreferredSize(200,100);
 				infoPanel->setBorder( ngrs::FrameBorder( 1, 5, 5 ) );
 				infoPanel->setSpacing(10,10,10,10);
 				infoPanel->setLayout( ngrs::AlignLayout() );
-                audioHeaderLbl_ = new	ngrs::Label( );
+								audioHeaderLbl_ = new	ngrs::Label( );
 					audioHeaderLbl_->setWordWrap(true);
 				infoPanel->add( audioHeaderLbl_, ngrs::nAlTop );
 				audioDescriptionLbl_ = new ngrs::Label( );
@@ -213,7 +213,7 @@ namespace psy {
 				
 				driverBox_->resize();
 				driverBox_->repaint();
-   		}*/
+				}*/
 		}
 
 		void AudioConfigDlg::updateGeneralPage() {
@@ -261,17 +261,17 @@ namespace psy {
 			}*/
 		}
 
-        void AudioConfigDlg::onRestartDriver( ngrs::ButtonEvent * ev )
+				void AudioConfigDlg::onRestartDriver( ngrs::ButtonEvent * ev )
 		{		
 			if ( selectedDriver_ ) {
 			}
 		}
 
 		void AudioConfigDlg::onOkBtn( ngrs::ButtonEvent* ev ) {
-                        
+												
 		}
 
-        void AudioConfigDlg::onCloseBtn( ngrs::ButtonEvent* ev ) {
+				void AudioConfigDlg::onCloseBtn( ngrs::ButtonEvent* ev ) {
 			onClose();
 		}
 
@@ -283,7 +283,7 @@ namespace psy {
 		int AudioConfigDlg::onClose( )
 		{
 			setVisible(false);
-            return ngrs::nHideWindow;
+						return ngrs::nHideWindow;
 		}
 
 		void AudioConfigDlg::onChannelCbx( ngrs::ItemEvent * ev )

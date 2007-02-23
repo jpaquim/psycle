@@ -23,39 +23,39 @@
 #include <istream>
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    class BinRead {      
-    public:
+		class BinRead {      
+		public:
 
-      enum BinPlatform { byte4LE, byte4BE, byte8LE, byte8BE };
+			enum BinPlatform { byte4LE, byte4BE, byte8LE, byte8BE };
 
-      BinRead( std::istream & in );
-      ~BinRead();
+			BinRead( std::istream & in );
+			~BinRead();
 
-      unsigned int readUInt4LE();
-      int readInt4LE();
-      void readUIntArray4LE( unsigned int data[], int count );
-      void readIntArray4LE( int data[], int size );
+			unsigned int readUInt4LE();
+			int readInt4LE();
+			void readUIntArray4LE( unsigned int data[], int count );
+			void readIntArray4LE( int data[], int size );
 
-      void read( char * data, std::streamsize const & bytes );
+			void read( char * data, std::streamsize const & bytes );
 
-      bool eof() const;
-      bool bad() const;
+			bool eof() const;
+			bool bad() const;
 
-      BinPlatform platform() const;
+			BinPlatform platform() const;
 
-    private:
+		private:
 
-      BinPlatform platform_;
-      std::istream & in_;
+			BinPlatform platform_;
+			std::istream & in_;
 
-      BinPlatform testPlatform();
-      unsigned int swap4( unsigned int value );
+			BinPlatform testPlatform();
+			unsigned int swap4( unsigned int value );
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

@@ -21,39 +21,39 @@
 #include "machine.h"
 
 namespace psycle{
-  namespace host{
+	namespace host{
 
-  PrototypeMachineFactory::PrototypeMachineFactory( )
-    : deleteProtoypes_( 0 )
-  {   
-  }
+	PrototypeMachineFactory::PrototypeMachineFactory( )
+		: deleteProtoypes_( 0 )
+	{   
+	}
 
-  PrototypeMachineFactory::~PrototypeMachineFactory()
-  {
-     if ( deleteProtoypes_ ) {
-      std::map<int,Machine*>::const_iterator it = prototypeMap_.begin();
-      for ( ; it != prototypeMap_.end(); it++ ) {
-        Machine* machine = it->second;
-        delete machine;
-      }
-    }
-  }
+	PrototypeMachineFactory::~PrototypeMachineFactory()
+	{
+			if ( deleteProtoypes_ ) {
+			std::map<int,Machine*>::const_iterator it = prototypeMap_.begin();
+			for ( ; it != prototypeMap_.end(); it++ ) {
+				Machine* machine = it->second;
+				delete machine;
+			}
+		}
+	}
 
-  void PrototypeMachineFactory::registerMachine( int key, Machine& prototype ) {
-    prototypeMap_[key] = &prototype;
-  }
+	void PrototypeMachineFactory::registerMachine( int key, Machine& prototype ) {
+		prototypeMap_[key] = &prototype;
+	}
 
-  Machine* PrototypeMachineFactory::createMachine( int key ) const {
-    std::map<int,Machine*>::const_iterator it = prototypeMap_.find( key );
-    if ( it != prototypeMap_.end() )
-      return (it->second)->clone();
-    else
-      return 0;
-  }
+	Machine* PrototypeMachineFactory::createMachine( int key ) const {
+		std::map<int,Machine*>::const_iterator it = prototypeMap_.find( key );
+		if ( it != prototypeMap_.end() )
+			return (it->second)->clone();
+		else
+			return 0;
+	}
 
-  void PrototypeMachineFactory::setDeleteFlag( bool deletePrototypes ) {
-    deleteProtoypes_ = deletePrototypes;
-  }
+	void PrototypeMachineFactory::setDeleteFlag( bool deletePrototypes ) {
+		deleteProtoypes_ = deletePrototypes;
+	}
 
-  }
+	}
 }

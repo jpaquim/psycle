@@ -125,7 +125,7 @@ namespace psycle
 			while(count--)
 			{
 				unsigned char c;
-        _stream.read (reinterpret_cast<char *> (&c), sizeof (c));
+				_stream.read (reinterpret_cast<char *> (&c), sizeof (c));
 				if (_stream.eof()) return false;
 				if(c != *chars) return false;
 				++chars;

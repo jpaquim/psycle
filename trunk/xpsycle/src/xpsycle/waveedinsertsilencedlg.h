@@ -20,39 +20,39 @@
 #include <ngrs/dialog.h>
 
 namespace ngrs {
-  class Edit;
-  class NCheckBox;
-  class ButtonEvent;
+	class Edit;
+	class NCheckBox;
+	class ButtonEvent;
 }
 
 namespace psycle
 {
-  namespace host
-  {
-    class WaveEdInsertSilenceDialog : public ngrs::Dialog
-    {
-    public:
-      WaveEdInsertSilenceDialog();
-      ngrs::Edit	*m_time;
-      ngrs::NCheckBox *m_atStart;
-      ngrs::NCheckBox *m_atEnd;
-      ngrs::NCheckBox *m_atCursor;
-    public:
-      enum insertPosition
-      {
-        at_start=0,
-        at_end,
-        at_cursor
-      };
-      float timeInSecs;
-      insertPosition insertPos;
-    protected:
-      void onOkClicked( ngrs::ButtonEvent* ev );
-      void onCancelClicked( ngrs::ButtonEvent* ev );
-      void onInsStartClicked( ngrs::ButtonEvent* ev );
-      void onInsEndClicked( ngrs::ButtonEvent* ev );
-      void onInsCursorClicked( ngrs::ButtonEvent* ev );
-    };
+	namespace host
+	{
+		class WaveEdInsertSilenceDialog : public ngrs::Dialog
+		{
+		public:
+			WaveEdInsertSilenceDialog();
+			ngrs::Edit	*m_time;
+			ngrs::NCheckBox *m_atStart;
+			ngrs::NCheckBox *m_atEnd;
+			ngrs::NCheckBox *m_atCursor;
+		public:
+			enum insertPosition
+			{
+				at_start=0,
+				at_end,
+				at_cursor
+			};
+			float timeInSecs;
+			insertPosition insertPos;
+		protected:
+			void onOkClicked( ngrs::ButtonEvent* ev );
+			void onCancelClicked( ngrs::ButtonEvent* ev );
+			void onInsStartClicked( ngrs::ButtonEvent* ev );
+			void onInsEndClicked( ngrs::ButtonEvent* ev );
+			void onInsCursorClicked( ngrs::ButtonEvent* ev );
+		};
 
-  }
+	}
 }

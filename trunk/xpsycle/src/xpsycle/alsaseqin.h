@@ -30,8 +30,8 @@ class AlsaSeqIn : public EventDriver
 	protected:
 		// AlsaSeqIn variables
 	snd_seq_t  *seq_handle;
-    int npolldesc;
-    struct pollfd *ppolldesc;
+		int npolldesc;
+		struct pollfd *ppolldesc;
 	
 	
 		// TODO: add member variables...

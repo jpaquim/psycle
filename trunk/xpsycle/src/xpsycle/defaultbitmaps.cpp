@@ -1,22 +1,22 @@
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan Nattkemper   *
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "defaultbitmaps.h"
 #include "configuration.h"
 
@@ -14179,337 +14179,337 @@ const char *patternbox_clonepattern_xpm[] = {
 
 DefaultBitmaps::DefaultBitmaps()
 {
-  alert_.createFromXpmData(alert_xpm);
-  autoStop_.createFromXpmData(autostop_xpm);
-  help_.createFromXpmData(help_xpm);
-  less_.createFromXpmData(less_xpm);
-  lessless_.createFromXpmData(lessless_xpm);
-  littleleft_.createFromXpmData(littleleft_xpm);
-  littleright_.createFromXpmData(littleright_xpm);
-  machines_.createFromXpmData(machines_xpm);
-  masterbk_.createFromXpmData(masterbk_xpm);
-  minus1_.createFromXpmData(minus1_xpm);
-  minus_.createFromXpmData(minus_xpm);
-  moremore_.createFromXpmData(moremore_xpm);
-  more_.createFromXpmData(more_xpm);
-  newmachine_.createFromXpmData(newmachine_xpm);
-  newfile_.createFromXpmData(new_xpm);
-  numbers_.createFromXpmData(numbers_xpm);
-  openeditor_.createFromXpmData(openeditor_xpm);
-  open_.createFromXpmData(open_xpm);
-  pattern_header_skin_.createFromXpmData(pattern_header_skin_xpm);
-  patterns_.createFromXpmData(patterns_xpm);
-  playselpattern_.createFromXpmData(playselpattern_xpm);
-  playstart_.createFromXpmData(playstart_xpm);
-  play_.createFromXpmData(play_xpm);
-  plus1_.createFromXpmData(plus1_xpm);
-  plus_.createFromXpmData(plus_xpm);
-  p_.createFromXpmData(p_xpm);
-  recordnotes_.createFromXpmData(recordnotes_xpm);
-  recordwav_.createFromXpmData(recordwav_xpm);
-  redo_.createFromXpmData(redo_xpm);
-  save_audio_.createFromXpmData(saveaudio_xpm);
-  save_.createFromXpmData(save_xpm);
-  sequencer_.createFromXpmData(sequencer_xpm);
-  splash_.createFromXpmData(splash_xpm);
-  stop_.createFromXpmData(stop_xpm);
-  tbmainknob_.createFromXpmData(tbmainknob_xpm);
-  undo_.createFromXpmData(undo_xpm);
-  machine_skin_.createFromXpmData(machine_skin_xpm);
-  new_category_.createFromXpmData(newcat_xpm);
-  delPattern_.createFromXpmData(delpatterns_xpm);
-  addTrack_.createFromXpmData(add_tracks_xpm);
-  deleteTrack_.createFromXpmData(delete_track_xpm);
-  moveDownTrack_.createFromXpmData(move_track_down_xpm);
-  moveUpTrack_.createFromXpmData(move_track_up_xpm);
-  tweakHeader_.createFromXpmData(tweak_header_xpm);
-  patNav_.createFromXpmData( nav_xpm );
-  pattern_new_.createFromXpmData( pattern_new_xpm );
-  logoSmall_.createFromXpmData( logo_small_xpm );
-  logoLeft_.createFromXpmData( logo_left_xpm );
-  logoMid_.createFromXpmData( logo_middle_xpm );
-  logoRight_.createFromXpmData( logo_right_xpm );
-  patternbox_clonepattern_.createFromXpmData( patternbox_clonepattern_xpm );
+	alert_.createFromXpmData(alert_xpm);
+	autoStop_.createFromXpmData(autostop_xpm);
+	help_.createFromXpmData(help_xpm);
+	less_.createFromXpmData(less_xpm);
+	lessless_.createFromXpmData(lessless_xpm);
+	littleleft_.createFromXpmData(littleleft_xpm);
+	littleright_.createFromXpmData(littleright_xpm);
+	machines_.createFromXpmData(machines_xpm);
+	masterbk_.createFromXpmData(masterbk_xpm);
+	minus1_.createFromXpmData(minus1_xpm);
+	minus_.createFromXpmData(minus_xpm);
+	moremore_.createFromXpmData(moremore_xpm);
+	more_.createFromXpmData(more_xpm);
+	newmachine_.createFromXpmData(newmachine_xpm);
+	newfile_.createFromXpmData(new_xpm);
+	numbers_.createFromXpmData(numbers_xpm);
+	openeditor_.createFromXpmData(openeditor_xpm);
+	open_.createFromXpmData(open_xpm);
+	pattern_header_skin_.createFromXpmData(pattern_header_skin_xpm);
+	patterns_.createFromXpmData(patterns_xpm);
+	playselpattern_.createFromXpmData(playselpattern_xpm);
+	playstart_.createFromXpmData(playstart_xpm);
+	play_.createFromXpmData(play_xpm);
+	plus1_.createFromXpmData(plus1_xpm);
+	plus_.createFromXpmData(plus_xpm);
+	p_.createFromXpmData(p_xpm);
+	recordnotes_.createFromXpmData(recordnotes_xpm);
+	recordwav_.createFromXpmData(recordwav_xpm);
+	redo_.createFromXpmData(redo_xpm);
+	save_audio_.createFromXpmData(saveaudio_xpm);
+	save_.createFromXpmData(save_xpm);
+	sequencer_.createFromXpmData(sequencer_xpm);
+	splash_.createFromXpmData(splash_xpm);
+	stop_.createFromXpmData(stop_xpm);
+	tbmainknob_.createFromXpmData(tbmainknob_xpm);
+	undo_.createFromXpmData(undo_xpm);
+	machine_skin_.createFromXpmData(machine_skin_xpm);
+	new_category_.createFromXpmData(newcat_xpm);
+	delPattern_.createFromXpmData(delpatterns_xpm);
+	addTrack_.createFromXpmData(add_tracks_xpm);
+	deleteTrack_.createFromXpmData(delete_track_xpm);
+	moveDownTrack_.createFromXpmData(move_track_down_xpm);
+	moveUpTrack_.createFromXpmData(move_track_up_xpm);
+	tweakHeader_.createFromXpmData(tweak_header_xpm);
+	patNav_.createFromXpmData( nav_xpm );
+	pattern_new_.createFromXpmData( pattern_new_xpm );
+	logoSmall_.createFromXpmData( logo_small_xpm );
+	logoLeft_.createFromXpmData( logo_left_xpm );
+	logoMid_.createFromXpmData( logo_middle_xpm );
+	logoRight_.createFromXpmData( logo_right_xpm );
+	patternbox_clonepattern_.createFromXpmData( patternbox_clonepattern_xpm );
 }
 
 DefaultBitmaps::DefaultBitmaps( Configuration * pCfg )
 {
-  new_category_.createFromXpmData(newcat_xpm);
-  screw_.createFromXpmData(screw_xpm);
-  wood_.createFromXpmData(wood_xpm);
-  alert_.createFromXpmData(alert_xpm);
-  delPattern_.createFromXpmData(delpatterns_xpm);
-  addTrack_.createFromXpmData(add_tracks_xpm);
-  deleteTrack_.createFromXpmData(delete_track_xpm);
-  moveDownTrack_.createFromXpmData(move_track_down_xpm);
-  moveUpTrack_.createFromXpmData(move_track_up_xpm);
-  tweakHeader_.createFromXpmData(tweak_header_xpm);
-  patNav_.createFromXpmData( nav_xpm );
-  pattern_new_.createFromXpmData( pattern_new_xpm );
-  logoSmall_.createFromXpmData( logo_small_xpm );
+	new_category_.createFromXpmData(newcat_xpm);
+	screw_.createFromXpmData(screw_xpm);
+	wood_.createFromXpmData(wood_xpm);
+	alert_.createFromXpmData(alert_xpm);
+	delPattern_.createFromXpmData(delpatterns_xpm);
+	addTrack_.createFromXpmData(add_tracks_xpm);
+	deleteTrack_.createFromXpmData(delete_track_xpm);
+	moveDownTrack_.createFromXpmData(move_track_down_xpm);
+	moveUpTrack_.createFromXpmData(move_track_up_xpm);
+	tweakHeader_.createFromXpmData(tweak_header_xpm);
+	patNav_.createFromXpmData( nav_xpm );
+	pattern_new_.createFromXpmData( pattern_new_xpm );
+	logoSmall_.createFromXpmData( logo_small_xpm );
 
-  logoLeft_.createFromXpmData( logo_left_xpm );
-  logoMid_.createFromXpmData( logo_middle_xpm );
-  logoRight_.createFromXpmData( logo_right_xpm );
+	logoLeft_.createFromXpmData( logo_left_xpm );
+	logoMid_.createFromXpmData( logo_middle_xpm );
+	logoRight_.createFromXpmData( logo_right_xpm );
 
 
-  try {
-    autoStop_.loadFromFile(pCfg->iconPath()+ "autostop.xpm");
-  } catch (const char* e) {
-    autoStop_.createFromXpmData(autostop_xpm);
-  }
+	try {
+		autoStop_.loadFromFile(pCfg->iconPath()+ "autostop.xpm");
+	} catch (const char* e) {
+		autoStop_.createFromXpmData(autostop_xpm);
+	}
 
-  try {
-    help_.loadFromFile(pCfg->iconPath()+ "help.xpm");
-  } catch (const char* e) {
-    help_.createFromXpmData(help_xpm);
-  }
+	try {
+		help_.loadFromFile(pCfg->iconPath()+ "help.xpm");
+	} catch (const char* e) {
+		help_.createFromXpmData(help_xpm);
+	}
 
-  try {
-    less_.loadFromFile(pCfg->iconPath()+ "less.xpm");
-  } catch (const char* e) {
-    less_.createFromXpmData(less_xpm);
-  }
+	try {
+		less_.loadFromFile(pCfg->iconPath()+ "less.xpm");
+	} catch (const char* e) {
+		less_.createFromXpmData(less_xpm);
+	}
 
-  try {
-    lessless_.loadFromFile(pCfg->iconPath()+ "lessless.xpm");
-  } catch (const char* e) {
-    lessless_.createFromXpmData(lessless_xpm);
-  }
+	try {
+		lessless_.loadFromFile(pCfg->iconPath()+ "lessless.xpm");
+	} catch (const char* e) {
+		lessless_.createFromXpmData(lessless_xpm);
+	}
 
-  try {
-    littleleft_.loadFromFile(pCfg->iconPath()+ "littleleft.xpm");
-  } catch (const char* e) {
-    littleleft_.createFromXpmData(littleleft_xpm);
-  }
+	try {
+		littleleft_.loadFromFile(pCfg->iconPath()+ "littleleft.xpm");
+	} catch (const char* e) {
+		littleleft_.createFromXpmData(littleleft_xpm);
+	}
 
-  try {
-    littleright_.loadFromFile(pCfg->iconPath()+ "littleright.xpm");
-  } catch (const char* e) {
-    littleright_.createFromXpmData(littleright_xpm);
-  }
+	try {
+		littleright_.loadFromFile(pCfg->iconPath()+ "littleright.xpm");
+	} catch (const char* e) {
+		littleright_.createFromXpmData(littleright_xpm);
+	}
 
-  try {
-    machines_.loadFromFile(pCfg->iconPath()+ "machines.xpm");
-  } catch (const char* e) {
-    machines_.createFromXpmData(machines_xpm);
-  }
+	try {
+		machines_.loadFromFile(pCfg->iconPath()+ "machines.xpm");
+	} catch (const char* e) {
+		machines_.createFromXpmData(machines_xpm);
+	}
 
-  try {
-    masterbk_.loadFromFile(pCfg->iconPath()+ "masterbk.xpm");
-  } catch (const char* e) {
-    masterbk_.createFromXpmData(masterbk_xpm);
-  }
+	try {
+		masterbk_.loadFromFile(pCfg->iconPath()+ "masterbk.xpm");
+	} catch (const char* e) {
+		masterbk_.createFromXpmData(masterbk_xpm);
+	}
 
-  try {
-    minus1_.loadFromFile(pCfg->iconPath()+ "minus1.xpm");
-  } catch (const char* e) {
-    minus1_.createFromXpmData(minus1_xpm);
-  }
+	try {
+		minus1_.loadFromFile(pCfg->iconPath()+ "minus1.xpm");
+	} catch (const char* e) {
+		minus1_.createFromXpmData(minus1_xpm);
+	}
 
-  try {
-    minus_.loadFromFile(pCfg->iconPath()+ "minus.xpm");
-  } catch (const char* e) {
-    minus_.createFromXpmData(minus_xpm);
-  }
+	try {
+		minus_.loadFromFile(pCfg->iconPath()+ "minus.xpm");
+	} catch (const char* e) {
+		minus_.createFromXpmData(minus_xpm);
+	}
 
-  try {
-    moremore_.loadFromFile(pCfg->iconPath()+ "moremore.xpm");
-  } catch (const char* e) {
-    moremore_.createFromXpmData(moremore_xpm);
-  }
+	try {
+		moremore_.loadFromFile(pCfg->iconPath()+ "moremore.xpm");
+	} catch (const char* e) {
+		moremore_.createFromXpmData(moremore_xpm);
+	}
 
-  try {
-    more_.loadFromFile(pCfg->iconPath()+ "more.xpm");
-  } catch (const char* e) {
-    more_.createFromXpmData(more_xpm);
-  }
+	try {
+		more_.loadFromFile(pCfg->iconPath()+ "more.xpm");
+	} catch (const char* e) {
+		more_.createFromXpmData(more_xpm);
+	}
 
-  try {
-    newmachine_.loadFromFile(pCfg->iconPath()+ "newmachine.xpm");
-  } catch (const char* e) {
-    newmachine_.createFromXpmData(newmachine_xpm);
-  }
+	try {
+		newmachine_.loadFromFile(pCfg->iconPath()+ "newmachine.xpm");
+	} catch (const char* e) {
+		newmachine_.createFromXpmData(newmachine_xpm);
+	}
 
-  try {
-    newfile_.loadFromFile(pCfg->iconPath()+ "new.xpm");
-  } catch (const char* e) {
-    newfile_.createFromXpmData(new_xpm);
-  }
+	try {
+		newfile_.loadFromFile(pCfg->iconPath()+ "new.xpm");
+	} catch (const char* e) {
+		newfile_.createFromXpmData(new_xpm);
+	}
 
-  try {
-    numbers_.loadFromFile(pCfg->iconPath()+ "numbers.xpm");
-  } catch (const char* e) {
-    numbers_.createFromXpmData(numbers_xpm);
-  }
+	try {
+		numbers_.loadFromFile(pCfg->iconPath()+ "numbers.xpm");
+	} catch (const char* e) {
+		numbers_.createFromXpmData(numbers_xpm);
+	}
 
-  try {
-    openeditor_.loadFromFile(pCfg->iconPath()+ "openeditor.xpm");
-  } catch (const char* e) {
-    openeditor_.createFromXpmData(openeditor_xpm);
-  }
+	try {
+		openeditor_.loadFromFile(pCfg->iconPath()+ "openeditor.xpm");
+	} catch (const char* e) {
+		openeditor_.createFromXpmData(openeditor_xpm);
+	}
 
-  try {
-    open_.loadFromFile(pCfg->iconPath()+ "open.xpm");
-  } catch (const char* e) {
-    open_.createFromXpmData(open_xpm);
-  }
+	try {
+		open_.loadFromFile(pCfg->iconPath()+ "open.xpm");
+	} catch (const char* e) {
+		open_.createFromXpmData(open_xpm);
+	}
 
-  try {
-    pattern_header_skin_.loadFromFile(pCfg->iconPath()+ "pattern_header_skin.xpm");
-  } catch (const char* e) {
-    pattern_header_skin_.createFromXpmData(pattern_header_skin_xpm);
-  }
+	try {
+		pattern_header_skin_.loadFromFile(pCfg->iconPath()+ "pattern_header_skin.xpm");
+	} catch (const char* e) {
+		pattern_header_skin_.createFromXpmData(pattern_header_skin_xpm);
+	}
 
-  try {
-    patterns_.loadFromFile(pCfg->iconPath() + "patterns.xpm");
-  } catch (const char* e) {
-    patterns_.createFromXpmData(patterns_xpm);
-  }
+	try {
+		patterns_.loadFromFile(pCfg->iconPath() + "patterns.xpm");
+	} catch (const char* e) {
+		patterns_.createFromXpmData(patterns_xpm);
+	}
 
-  try {
-    playselpattern_.loadFromFile(pCfg->iconPath() + "playselpattern.xpm");
-  } catch (const char* e) {
-    playselpattern_.createFromXpmData(playselpattern_xpm);
-  }
+	try {
+		playselpattern_.loadFromFile(pCfg->iconPath() + "playselpattern.xpm");
+	} catch (const char* e) {
+		playselpattern_.createFromXpmData(playselpattern_xpm);
+	}
 
-  try {
-    playstart_.loadFromFile(pCfg->iconPath() + "playstart.xpm");
-  } catch (const char* e) {
-    playstart_.createFromXpmData( playstart_xpm );
-  }
+	try {
+		playstart_.loadFromFile(pCfg->iconPath() + "playstart.xpm");
+	} catch (const char* e) {
+		playstart_.createFromXpmData( playstart_xpm );
+	}
 
-  try {
-    play_.loadFromFile(pCfg->iconPath() + "play.xpm");
-  } catch (const char* e) {
-    play_.createFromXpmData( play_xpm );
-  }
+	try {
+		play_.loadFromFile(pCfg->iconPath() + "play.xpm");
+	} catch (const char* e) {
+		play_.createFromXpmData( play_xpm );
+	}
 
-  try {
-    playstart_flat_.loadFromFile( pCfg->iconPath() + "playstart_flat.xpm");
-  } catch (const char* e) {
-    playstart_flat_.createFromXpmData( playstart_xpm );
-  }
+	try {
+		playstart_flat_.loadFromFile( pCfg->iconPath() + "playstart_flat.xpm");
+	} catch (const char* e) {
+		playstart_flat_.createFromXpmData( playstart_xpm );
+	}
 
-  try {
-    play_flat_.loadFromFile( pCfg->iconPath() + "play_flat.xpm" );
-  } catch (const char* e) {
-    play_flat_.createFromXpmData( play_xpm );
-  }
+	try {
+		play_flat_.loadFromFile( pCfg->iconPath() + "play_flat.xpm" );
+	} catch (const char* e) {
+		play_flat_.createFromXpmData( play_xpm );
+	}
 
-  try {
-    ffwd_.loadFromFile(pCfg->iconPath() + "ffwd.xpm");
-  } catch (const char* e) {
-    ffwd_.createFromXpmData( ffwd_xpm );
-  }
+	try {
+		ffwd_.loadFromFile(pCfg->iconPath() + "ffwd.xpm");
+	} catch (const char* e) {
+		ffwd_.createFromXpmData( ffwd_xpm );
+	}
 
-  try {
-    rwnd_.loadFromFile( pCfg->iconPath() + "rwnd.xpm");
-  } catch (const char* e) {
-    rwnd_.createFromXpmData( rwnd_xpm );
-  }
+	try {
+		rwnd_.loadFromFile( pCfg->iconPath() + "rwnd.xpm");
+	} catch (const char* e) {
+		rwnd_.createFromXpmData( rwnd_xpm );
+	}
 
-  try {
-    release_.loadFromFile( pCfg->iconPath() + "release.xpm");
-  } catch ( const char* e ) {
-    release_.createFromXpmData( release_xpm );
-  }
+	try {
+		release_.loadFromFile( pCfg->iconPath() + "release.xpm");
+	} catch ( const char* e ) {
+		release_.createFromXpmData( release_xpm );
+	}
 
-  try {
-    plus1_.loadFromFile( pCfg->iconPath() + "plus1.xpm");
-  } catch ( const char* e ) {
-    plus1_.createFromXpmData(plus1_xpm);
-  }
+	try {
+		plus1_.loadFromFile( pCfg->iconPath() + "plus1.xpm");
+	} catch ( const char* e ) {
+		plus1_.createFromXpmData(plus1_xpm);
+	}
 
-  try {
-    plus_.loadFromFile( pCfg->iconPath() + "plus.xpm");
-  } catch ( const char* e ) {
-    plus_.createFromXpmData( plus_xpm );
-  }
+	try {
+		plus_.loadFromFile( pCfg->iconPath() + "plus.xpm");
+	} catch ( const char* e ) {
+		plus_.createFromXpmData( plus_xpm );
+	}
 
-  try {
-    p_.loadFromFile( pCfg->iconPath() + "p.xpm");
-  } catch (const char* e) {
-    p_.createFromXpmData( p_xpm );
-  }
+	try {
+		p_.loadFromFile( pCfg->iconPath() + "p.xpm");
+	} catch (const char* e) {
+		p_.createFromXpmData( p_xpm );
+	}
 
-  try {
-    recordnotes_.loadFromFile( pCfg->iconPath() + "recordnotes.xpm");
-  } catch ( const char* e ) {
-    recordnotes_.createFromXpmData( recordnotes_xpm );
-  }
+	try {
+		recordnotes_.loadFromFile( pCfg->iconPath() + "recordnotes.xpm");
+	} catch ( const char* e ) {
+		recordnotes_.createFromXpmData( recordnotes_xpm );
+	}
 
-  try {
-    recordwav_.loadFromFile(pCfg->iconPath() + "recordwav.xpm");
-  } catch ( const char* e ) {
-    recordwav_.createFromXpmData( recordwav_xpm );
-  }
+	try {
+		recordwav_.loadFromFile(pCfg->iconPath() + "recordwav.xpm");
+	} catch ( const char* e ) {
+		recordwav_.createFromXpmData( recordwav_xpm );
+	}
 
-  try {
-    redo_.loadFromFile(pCfg->iconPath() + "redo.xpm");
-  } catch ( const char* e ) {
-    redo_.createFromXpmData( redo_xpm );
-  }
+	try {
+		redo_.loadFromFile(pCfg->iconPath() + "redo.xpm");
+	} catch ( const char* e ) {
+		redo_.createFromXpmData( redo_xpm );
+	}
 
-  try {
-    save_audio_.loadFromFile( pCfg->iconPath() + "saveaudio.xpm");
-  } catch ( const char* e ) {
-    save_audio_.createFromXpmData( saveaudio_xpm );
-  }
+	try {
+		save_audio_.loadFromFile( pCfg->iconPath() + "saveaudio.xpm");
+	} catch ( const char* e ) {
+		save_audio_.createFromXpmData( saveaudio_xpm );
+	}
 
-  try {
-    save_.loadFromFile( pCfg->iconPath() + "save.xpm" );
-  } catch ( const char* e ) {
-    save_.createFromXpmData( save_xpm );
-  }
+	try {
+		save_.loadFromFile( pCfg->iconPath() + "save.xpm" );
+	} catch ( const char* e ) {
+		save_.createFromXpmData( save_xpm );
+	}
 
-  try {
-    sequencer_.loadFromFile( pCfg->iconPath() + "sequencer.xpm" );
-  } catch ( const char* e ) {
-    sequencer_.createFromXpmData( sequencer_xpm );
-  }
+	try {
+		sequencer_.loadFromFile( pCfg->iconPath() + "sequencer.xpm" );
+	} catch ( const char* e ) {
+		sequencer_.createFromXpmData( sequencer_xpm );
+	}
 
-  try {
-    splash_.loadFromFile( pCfg->iconPath() + "splash.xpm" );
-  } catch ( const char* e ) {
-    splash_.createFromXpmData(splash_xpm);
-  }
+	try {
+		splash_.loadFromFile( pCfg->iconPath() + "splash.xpm" );
+	} catch ( const char* e ) {
+		splash_.createFromXpmData(splash_xpm);
+	}
 
-  try {
-    stop_.loadFromFile( pCfg->iconPath() + "stop.xpm");
-  } catch ( const char* e ) {
-    stop_.createFromXpmData( stop_xpm );
-  }
+	try {
+		stop_.loadFromFile( pCfg->iconPath() + "stop.xpm");
+	} catch ( const char* e ) {
+		stop_.createFromXpmData( stop_xpm );
+	}
 
-  try {
-    stop_flat_.loadFromFile( pCfg->iconPath() + "stop_flat.xpm" );
-  } catch (const char* e) {
-    stop_flat_.createFromXpmData( stop_xpm );
-  }
+	try {
+		stop_flat_.loadFromFile( pCfg->iconPath() + "stop_flat.xpm" );
+	} catch (const char* e) {
+		stop_flat_.createFromXpmData( stop_xpm );
+	}
 
-  try {
-    tbmainknob_.loadFromFile( pCfg->iconPath() + "TbMainKnob.xpm" );
-  } catch ( const char* e ) {
-    tbmainknob_.createFromXpmData( tbmainknob_xpm );
-  }
+	try {
+		tbmainknob_.loadFromFile( pCfg->iconPath() + "TbMainKnob.xpm" );
+	} catch ( const char* e ) {
+		tbmainknob_.createFromXpmData( tbmainknob_xpm );
+	}
 
-  try {
-    undo_.loadFromFile( pCfg->iconPath()+ "undo.xpm" );
-  } catch ( const char* e ) {
-    undo_.createFromXpmData( undo_xpm );
-  }
+	try {
+		undo_.loadFromFile( pCfg->iconPath()+ "undo.xpm" );
+	} catch ( const char* e ) {
+		undo_.createFromXpmData( undo_xpm );
+	}
 
-  try {
-    machine_skin_.loadFromFile( pCfg->iconPath() + "machine_skin.xpm" );
-  } catch ( const char* e ) {
-    machine_skin_.createFromXpmData( machine_skin_xpm );
-  }
+	try {
+		machine_skin_.loadFromFile( pCfg->iconPath() + "machine_skin.xpm" );
+	} catch ( const char* e ) {
+		machine_skin_.createFromXpmData( machine_skin_xpm );
+	}
 
-  try {
-    patternbox_clonepattern_.loadFromFile( pCfg->iconPath() + "patternbox_clonepattern.xpm" );
-  } catch ( const char* e ) {
-    patternbox_clonepattern_.createFromXpmData( patternbox_clonepattern_xpm );
-  }
+	try {
+		patternbox_clonepattern_.loadFromFile( pCfg->iconPath() + "patternbox_clonepattern.xpm" );
+	} catch ( const char* e ) {
+		patternbox_clonepattern_.createFromXpmData( patternbox_clonepattern_xpm );
+	}
 }
 
 
@@ -14522,268 +14522,268 @@ DefaultBitmaps::~DefaultBitmaps()
 
 ngrs::Bitmap & DefaultBitmaps::autoStop( )
 {
-  return autoStop_;
+	return autoStop_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::help( )
 {
-  return help_;
+	return help_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::less( )
 {
-  return less_;
+	return less_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::lessless( )
 {
-  return lessless_;
+	return lessless_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::littleleft( )
 {
-  return littleleft_;
+	return littleleft_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::littleright( )
 {
-  return littleright_;
+	return littleright_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::machines( )
 {
-  return machines_;
+	return machines_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::masterbk( )
 {
-  return masterbk_;
+	return masterbk_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::minus1( )
 {
-  return minus1_;
+	return minus1_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::minus( )
 {
-  return minus_;
+	return minus_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::moremore( )
 {
-  return moremore_;
+	return moremore_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::more( )
 {
-  return more_;
+	return more_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::newmachine( )
 {
-  return newmachine_;
+	return newmachine_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::newfile( )
 {
-  return newfile_;
+	return newfile_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::numbers( )
 {
-  return numbers_;
+	return numbers_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::openeditor( )
 {
-  return openeditor_;
+	return openeditor_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::open( )
 {
-  return open_;
+	return open_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::pattern_header_skin( )
 {
-  return pattern_header_skin_;
+	return pattern_header_skin_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::patterns( )
 {
-  return patterns_;
+	return patterns_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::playselpattern( )
 {
-  return playselpattern_;
+	return playselpattern_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::playstart( )
 {
-  return playstart_;
+	return playstart_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::play( )
 {
-  return play_;
+	return play_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::playstart_flat( )
 {
-  return playstart_flat_;
+	return playstart_flat_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::play_flat( )
 {
-  return play_flat_;
+	return play_flat_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::ffwd( )
 {
-  return ffwd_;
+	return ffwd_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::rwnd( )
 {
-  return rwnd_;
+	return rwnd_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::release( )
 {
-  return release_;
+	return release_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::plus1( )
 {
-  return plus1_;
+	return plus1_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::plus( )
 {
-  return plus_;
+	return plus_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::p( )
 {
-  return p_;
+	return p_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::recordnotes( )
 {
-  return recordnotes_;
+	return recordnotes_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::recordwav( )
 {
-  return recordwav_;
+	return recordwav_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::redo( )
 {
-  return redo_;
+	return redo_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::save_audio( )
 {
-  return save_audio_;
+	return save_audio_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::save( )
 {
-  return save_;
+	return save_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::sequencer( )
 {
-  return sequencer_;
+	return sequencer_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::splash( )
 {
-  return splash_;
+	return splash_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::stop( )
 {
-  return stop_;
+	return stop_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::stop_flat( )
 {
-  return stop_flat_;
+	return stop_flat_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::tbmainknob( )
 {
-  return tbmainknob_;
+	return tbmainknob_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::undo( )
 {
-  return undo_;
+	return undo_;
 }
 
 ngrs::Pixmap & DefaultBitmaps::machine_skin() {
-  return machine_skin_;
+	return machine_skin_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::wood( )
 {
-  return wood_;
+	return wood_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::screw( )
 {
-  return screw_;
+	return screw_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::alert( )
 {
-  return alert_;
+	return alert_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::new_category( )
 {
-  return new_category_;
+	return new_category_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::delPattern( )
 {
-  return delPattern_;
+	return delPattern_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::addTrack( )
 {
-  return addTrack_;
+	return addTrack_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::deleteTrack( )
 {
-  return deleteTrack_;
+	return deleteTrack_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::moveDownTrack( )
 {
-  return moveDownTrack_;
+	return moveDownTrack_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::moveUpTrack( )
 {
-  return moveUpTrack_;
+	return moveUpTrack_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::tweakHeader() {
-  return tweakHeader_;
+	return tweakHeader_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::patNav() {
-  return patNav_;
+	return patNav_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::pattern_new() {
-  return pattern_new_;
+	return pattern_new_;
 }
 
 ngrs::Bitmap & DefaultBitmaps::logoSmall() {

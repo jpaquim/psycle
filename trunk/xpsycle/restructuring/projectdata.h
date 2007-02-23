@@ -25,28 +25,28 @@
 #include <vector>
 
 namespace psy {
-  namespace host {
+	namespace host {
 
-    class ProjectData {
-    public:
+		class ProjectData {
+		public:
 
-      ProjectData();
-      ~ProjectData();
+			ProjectData();
+			~ProjectData();
 
-      psy::core::Song* createSong();
-      psy::core::Song* songByName( const std::string& name );
+			psy::core::Song* createSong();
+			psy::core::Song* songByName( const std::string& name );
 
-      Module* createModule( const std::vector<std::string>& path, psy::core::Song* song );
+			Module* createModule( const std::vector<std::string>& path, psy::core::Song* song );
 
-    private:
+		private:
 
-      std::vector<psy::core::Song*> songs_;
+			std::vector<psy::core::Song*> songs_;
 
 
 
-    };
+		};
 
-  }
+	}
 }
 
 #endif

@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #include "zoombar.h"
 #include <ngrs/button.h>
 #include <ngrs/slider.h>
@@ -399,9 +399,9 @@ const char * sl_xpm[] = {
 
 
 ZoomBar::ZoomBar()
- : ngrs::Panel()
+	: ngrs::Panel()
 {
-  init();
+	init();
 }
 
 ZoomBar::~ZoomBar()
@@ -410,84 +410,84 @@ ZoomBar::~ZoomBar()
 
 void ZoomBar::init( )
 {
-  orientation_ = ngrs::nHorizontal;
-  increment_ = 1;
+	orientation_ = ngrs::nHorizontal;
+	increment_ = 1;
 
-  setLayout( ngrs::AlignLayout() );
+	setLayout( ngrs::AlignLayout() );
 
-  zoomInBpm.createFromXpmData(zoomin_xpm);
-  zoomOutBpm.createFromXpmData(zoomout_xpm);
-  sliderBpm.createFromXpmData(sl_xpm);
+	zoomInBpm.createFromXpmData(zoomin_xpm);
+	zoomOutBpm.createFromXpmData(zoomout_xpm);
+	sliderBpm.createFromXpmData(sl_xpm);
 
-  ngrs::Image* img = new ngrs::Image(zoomOutBpm);
+	ngrs::Image* img = new ngrs::Image(zoomOutBpm);
 
-  decBtn = new ngrs::Button(img);
-    decBtn->setFlat(false);
-    decBtn->setPreferredSize(20,15);
-    decBtn->setFlat(true);
-    decBtn->clicked.connect( this, &ZoomBar::onDecButton );
-  add(decBtn, ngrs::nAlLeft);
+	decBtn = new ngrs::Button(img);
+		decBtn->setFlat(false);
+		decBtn->setPreferredSize(20,15);
+		decBtn->setFlat(true);
+		decBtn->clicked.connect( this, &ZoomBar::onDecButton );
+	add(decBtn, ngrs::nAlLeft);
 
-  img = new ngrs::Image(zoomInBpm);
+	img = new ngrs::Image(zoomInBpm);
 
-  incBtn = new ngrs::Button(img);
-    incBtn->setFlat(false);
-    incBtn->setPreferredSize(20,15);
-    incBtn->setFlat(true);
-    incBtn->clicked.connect( this, &ZoomBar::onIncButton );
-  add(incBtn, ngrs::nAlRight);
+	incBtn = new ngrs::Button(img);
+		incBtn->setFlat(false);
+		incBtn->setPreferredSize(20,15);
+		incBtn->setFlat(true);
+		incBtn->clicked.connect( this, &ZoomBar::onIncButton );
+	add(incBtn, ngrs::nAlRight);
 
-  zoomSlider = new ngrs::Slider();
-    zoomSlider->setOrientation(ngrs::nHorizontal);
-    zoomSlider->setPreferredSize(120,15);
-    zoomSlider->change.connect(this, &ZoomBar::onPosChanged);
-    zoomSlider->customSliderPaint.connect(this,&ZoomBar::customSliderPaint);
-  add(zoomSlider, ngrs::nAlClient);
+	zoomSlider = new ngrs::Slider();
+		zoomSlider->setOrientation(ngrs::nHorizontal);
+		zoomSlider->setPreferredSize(120,15);
+		zoomSlider->change.connect(this, &ZoomBar::onPosChanged);
+		zoomSlider->customSliderPaint.connect(this,&ZoomBar::customSliderPaint);
+	add(zoomSlider, ngrs::nAlClient);
 }
 
 void ZoomBar::setOrientation( int orientation )
 {
-  orientation_ = orientation;
+	orientation_ = orientation;
 }
 
 int ZoomBar::orientation( ) const
 {
-  return orientation_;
+	return orientation_;
 }
 
 void ZoomBar::onPosChanged( ngrs::Slider * slider )
 {
-  posChanged.emit(this, slider->pos() );
+	posChanged.emit(this, slider->pos() );
 }
 
 void ZoomBar::setRange( double min, double max )
 {
-  zoomSlider->setRange(min, max);
+	zoomSlider->setRange(min, max);
 }
 
 void ZoomBar::setPos( double pos )
 {
-  zoomSlider->setPos( pos );
+	zoomSlider->setPos( pos );
 }
 
 double ZoomBar::pos( ) const
 {
-  return zoomSlider->pos();
+	return zoomSlider->pos();
 }
 
 void ZoomBar::customSliderPaint( ngrs::Slider * sl, ngrs::Graphics& g )
 {
-  g.putBitmap(0,0,sliderBpm.width(),sliderBpm.height(),sliderBpm,0,0);
+	g.putBitmap(0,0,sliderBpm.width(),sliderBpm.height(),sliderBpm,0,0);
 }
 
 void ZoomBar::onIncButton( ngrs::ButtonEvent * ev )
 {
-  zoomSlider->setPos( zoomSlider->pos() + increment_ );
+	zoomSlider->setPos( zoomSlider->pos() + increment_ );
 }
 
 void ZoomBar::onDecButton( ngrs::ButtonEvent * ev )
 {
-  zoomSlider->setPos(zoomSlider->pos() - increment_);
+	zoomSlider->setPos(zoomSlider->pos() - increment_);
 }
 
 

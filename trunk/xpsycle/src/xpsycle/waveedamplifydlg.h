@@ -21,29 +21,29 @@
 #include <ngrs/dialog.h>
 
 namespace ngrs {
-  class Edit;
-  class Slider;
+	class Edit;
+	class Slider;
 }
 
 namespace psycle
 {
-  namespace host
-  {
-    /// wave amplification dialog window.
-    class WaveEdAmplifyDialog : public ngrs::Dialog
-    {
-      // Construction
-    public:
-      WaveEdAmplifyDialog();
-      // Dialog Data
-      ngrs::Edit *m_dbedit;
-      ngrs::Slider *m_slider;
+	namespace host
+	{
+		/// wave amplification dialog window.
+		class WaveEdAmplifyDialog : public ngrs::Dialog
+		{
+			// Construction
+		public:
+			WaveEdAmplifyDialog();
+			// Dialog Data
+			ngrs::Edit *m_dbedit;
+			ngrs::Slider *m_slider;
 
-      int db_i;
-    protected:
-      void onOkClicked( ngrs::ButtonEvent* ev );
-      void onCancelClicked( ngrs::ButtonEvent* ev );
-      void onSliderPosChanged( ngrs::Slider* sender );
-    };
-  }
+			int db_i;
+		protected:
+			void onOkClicked( ngrs::ButtonEvent* ev );
+			void onCancelClicked( ngrs::ButtonEvent* ev );
+			void onSliderPosChanged( ngrs::Slider* sender );
+		};
+	}
 }

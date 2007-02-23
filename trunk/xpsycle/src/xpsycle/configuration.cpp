@@ -365,10 +365,10 @@ namespace psycle {
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 				}
 			} else {
-              path = ngrs::File::replaceTilde("~" + ngrs::File::slash() + ".xpsycle.xml");
+							path = ngrs::File::replaceTilde("~" + ngrs::File::slash() + ".xpsycle.xml");
 			  if (path.length()!=0) {
 					try {
-                      loadConfig( ngrs::File::replaceTilde( "~" + ngrs::File::slash() + ".xpsycle.xml") );
+											loadConfig( ngrs::File::replaceTilde( "~" + ngrs::File::slash() + ".xpsycle.xml") );
 					}
 					catch( std::exception const & e ) {
 						std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
@@ -395,11 +395,11 @@ namespace psycle {
 			std::cout << "xpsycle: configuration: attempting to load file: " << path << std::endl;
 #endif
 
-            ngrs::XmlParser parser;   
+						ngrs::XmlParser parser;   
 			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
 
 			// check whether the file is readable
-            if( !ngrs::File::fileIsReadable( path ) )
+						if( !ngrs::File::fileIsReadable( path ) )
 			{
 				std::ostringstream s;
 				s << "cannot read file: " << path;
@@ -448,13 +448,13 @@ namespace psycle {
 				std::string src = parser.getAttribValue("src");
 
 				if ( id == "icondir" )   iconPath_   = src;
-                  else  
+									else  
 				if ( id == "plugindir" ) pluginPath_ = src;
-                  else
+									else
 				if ( id == "prsdir" )    prsPath_    = src;
-                  else
+									else
 				if ( id == "hlpdir" )    hlpPath_    = src; 
-                  else
+									else
 				if ( id == "ladspadir" ) ladspaPath_ = src;
 			} else
 				if (tagName == "driver" && doEnableSound) {		
@@ -472,7 +472,7 @@ namespace psycle {
 						if (tagName == "audio") {
 							std::string enableStr = parser.getAttribValue("enable");
 							int enable = 0;
-                            if ( enableStr != "" ) enable = ngrs::str<int>(enableStr);
+														if ( enableStr != "" ) enable = ngrs::str<int>(enableStr);
 							enableSound_ = enable;
 							if (enable == 0) {
 								setDriverByName( "silent" );
@@ -486,12 +486,12 @@ namespace psycle {
 
 								// define special chars pressed in addition to this key function
 								std::string modInput    = parser.getAttribValue("mod");
-                                int shift = ngrs::nsNone;
+																int shift = ngrs::nsNone;
 								if (modInput == "ctrl")  {
-                                  shift = ngrs::nsCtrl;   
+																	shift = ngrs::nsCtrl;   
 								} else
 								if (modInput == "shift") {
-                                  shift = ngrs::nsShift;      
+																	shift = ngrs::nsShift;      
 								}
 
 								// the keycode      
@@ -526,10 +526,10 @@ namespace psycle {
 									if ( keyCharStr == "F7") keyCode = ngrs::NK_F7; else
 									if (keyCharStr == "F8") keyCode = ngrs::NK_F8; else
 									if (keyCharStr == "F9") keyCode = ngrs::NK_F9;
-                                }
-  if (id == "add_new_machine") {
+																}
+	if (id == "add_new_machine") {
 	inputHandler_.changeKeyCode(cdefAddMachine,Key(shift,keyCode));
-  } else
+	} else
 if (id == "block_copy") {
 											inputHandler_.changeKeyCode(cdefBlockCopy,Key(shift,keyCode));
 										} else
@@ -914,7 +914,7 @@ if (id == "block_copy") {
 																																																																																																					} else if (id == "solo_machine") {
 																																																																																																						inputHandler_.changeKeyCode(cdefSoloMachine,Key(shift,keyCode));
 
-                                                                                                                                                                                                                                                                                                                                                                                                                    }
+																																																																																																																																																																																																										}
 							}
 		}
 		

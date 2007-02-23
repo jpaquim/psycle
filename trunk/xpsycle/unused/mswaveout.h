@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by  Stefan Nattkemper   *
- *   natti@linux   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper   *
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 #ifndef MSWAVEOUT_H
 #define MSWAVEOUT_H
 
@@ -34,26 +34,26 @@ namespace psycle
 {
 	namespace host
 	{                                      
-            
-        ///\ todo work in progress
-        ///\ status working, restarting etc not working
-        ///\ todo : freeing and configure    
-            
-        class MsWaveOut : public AudioDriver
+						
+				///\ todo work in progress
+				///\ status working, restarting etc not working
+				///\ todo : freeing and configure    
+						
+				class MsWaveOut : public AudioDriver
 		{
 		public:
-                  
+									
 			MsWaveOut();
 			
-            ~MsWaveOut();
+						~MsWaveOut();
 			
 			virtual MsWaveOut* clone()  const;   // Uses the copy constructor
 			
 			virtual AudioDriverInfo info() const;			
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-            bool Initialized( );
+						bool Initialized( );
 			virtual bool Enable( bool e );	
-            
+						
 		private:
 			
 			char buffer[1024];   // intermediate buffer for reading
@@ -65,32 +65,32 @@ namespace psycle
 			
 			// mme variables
 			HWAVEOUT hWaveOut;   // device handle
-            static CRITICAL_SECTION waveCriticalSection;
-            static WAVEHDR*         waveBlocks; // array of header structure, 
-                                                // that points to a block buffer
-            static volatile int     waveFreeBlockCount;
-            static int              waveCurrentBlock;
-            
-            // mme functions
-                        
-            // waveOut interface notifies about device is opened, closed, 
-            // and what we handle here, when a block finishes.
-            static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
-            WAVEHDR* allocateBlocks();
-            static void freeBlocks( WAVEHDR* blockArray );
-            
-            // writes a intermediate buffer into a ring buffer to the sound card
-            void writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size );
-            
-            // thread , the writeAudio loop is in
-            // note : waveOutproc is a different, thread, too, but we cant
-            // use all winapi calls there we need due to restrictions of the winapi
-            HANDLE hThread_;
-            static DWORD WINAPI audioOutThread( void *pWaveOut );
-            static bool _running; // check, if thread loop should be left
-            void fillBuffer();
-            
-            bool _dither;
+						static CRITICAL_SECTION waveCriticalSection;
+						static WAVEHDR*         waveBlocks; // array of header structure, 
+																								// that points to a block buffer
+						static volatile int     waveFreeBlockCount;
+						static int              waveCurrentBlock;
+						
+						// mme functions
+												
+						// waveOut interface notifies about device is opened, closed, 
+						// and what we handle here, when a block finishes.
+						static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
+						WAVEHDR* allocateBlocks();
+						static void freeBlocks( WAVEHDR* blockArray );
+						
+						// writes a intermediate buffer into a ring buffer to the sound card
+						void writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size );
+						
+						// thread , the writeAudio loop is in
+						// note : waveOutproc is a different, thread, too, but we cant
+						// use all winapi calls there we need due to restrictions of the winapi
+						HANDLE hThread_;
+						static DWORD WINAPI audioOutThread( void *pWaveOut );
+						static bool _running; // check, if thread loop should be left
+						void fillBuffer();
+						
+						bool _dither;
 
 			bool start();
 			bool stop();

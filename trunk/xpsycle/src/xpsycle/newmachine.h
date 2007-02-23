@@ -29,101 +29,101 @@
 #include <ngrs/bevelborder.h>
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    class Song;
+		class Song;
 
-    class InfoLine : public ngrs::Panel {
-    public:
-      InfoLine( const std::string& info ) {
-        add( infoLb = new ngrs::Label(info) );
-        add( textLb = new ngrs::Label() );
-        textLb->setWordWrap( true );
-        textLb->setBorder( ngrs::BevelBorder( ngrs::nNone, ngrs::nLowered ) );
-      }
+		class InfoLine : public ngrs::Panel {
+		public:
+			InfoLine( const std::string& info ) {
+				add( infoLb = new ngrs::Label(info) );
+				add( textLb = new ngrs::Label() );
+				textLb->setWordWrap( true );
+				textLb->setBorder( ngrs::BevelBorder( ngrs::nNone, ngrs::nLowered ) );
+			}
 
-      ~InfoLine() {
-      }
+			~InfoLine() {
+			}
 
-      void setText( const std::string& info ) { 
-        textLb->setText(info);
-      }
+			void setText( const std::string& info ) { 
+				textLb->setText(info);
+			}
 
-      virtual int preferredWidth () const { 
-        return 200;
-      }
+			virtual int preferredWidth () const { 
+				return 200;
+			}
 
-      virtual int preferredHeight() const {
-        return textLb->preferredHeight();
-      }
+			virtual int preferredHeight() const {
+				return textLb->preferredHeight();
+			}
 
-      virtual void resize() {
-        infoLb->setPosition( 0, 0, 100, clientHeight() );
-        textLb->setSpacing( 2, 2, 2, 2 );
-        textLb->setPosition( 100, 0, clientWidth()-100, clientHeight() );
-      }
+			virtual void resize() {
+				infoLb->setPosition( 0, 0, 100, clientHeight() );
+				textLb->setSpacing( 2, 2, 2, 2 );
+				textLb->setPosition( 100, 0, clientWidth()-100, clientHeight() );
+			}
 
-    private:
+		private:
 
-      ngrs::Label* infoLb;
-      ngrs::Label* textLb;
+			ngrs::Label* infoLb;
+			ngrs::Label* textLb;
 
-    };
+		};
 
-    /**
-    @author  Stefan Nattkemper
-    */
+		/**
+		@author  Stefan Nattkemper
+		*/
 
-    class NewMachine : public ngrs::Dialog
-    {
-    public:
-      NewMachine( const PluginFinder& finder );
+		class NewMachine : public ngrs::Dialog
+		{
+		public:
+			NewMachine( const PluginFinder& finder );
 
-      ~NewMachine();
+			~NewMachine();
 
-      const PluginFinderKey& pluginKey() const;
+			const PluginFinderKey& pluginKey() const;
 
-      virtual int onClose();
+			virtual int onClose();
 
-    private:
+		private:
 
-      std::string dllName_;
+			std::string dllName_;
 
-      PluginFinderKey selectedKey_;
-      const PluginFinder& finder_;
+			PluginFinderKey selectedKey_;
+			const PluginFinder& finder_;
 
-      InfoLine* name;
-      InfoLine* libName;
-      InfoLine* description;
-      InfoLine* apiVersion;
-      ngrs::GroupBox* macProperty;
+			InfoLine* name;
+			InfoLine* libName;
+			InfoLine* description;
+			InfoLine* apiVersion;
+			ngrs::GroupBox* macProperty;
 
-      ngrs::TabBook* tabBook_;
+			ngrs::TabBook* tabBook_;
 
-      ngrs::ListBox* generatorfBox_;
-      ngrs::ListBox* effectfBox_;
-      ngrs::ListBox* ladspaBox_;
+			ngrs::ListBox* generatorfBox_;
+			ngrs::ListBox* effectfBox_;
+			ngrs::ListBox* ladspaBox_;
 
-      void onGeneratorItemSelected( ngrs::ItemEvent* ev );
-      void onEffectItemSelected( ngrs::ItemEvent* ev );
-      void onInternalItemSelected( ngrs::ItemEvent* ev );
-      void onLADSPAItemSelected( ngrs::ItemEvent* ev );
+			void onGeneratorItemSelected( ngrs::ItemEvent* ev );
+			void onEffectItemSelected( ngrs::ItemEvent* ev );
+			void onInternalItemSelected( ngrs::ItemEvent* ev );
+			void onLADSPAItemSelected( ngrs::ItemEvent* ev );
 
-      void onOkBtn( ngrs::ButtonEvent* sender );
-      void onItemDblClick( ngrs::ButtonEvent* sender );	
-      void onCancelBtn( ngrs::ButtonEvent* sender );
+			void onOkBtn( ngrs::ButtonEvent* sender );
+			void onItemDblClick( ngrs::ButtonEvent* sender );	
+			void onCancelBtn( ngrs::ButtonEvent* sender );
 
-      std::map< ngrs::CustomItem*, PluginFinderKey > pluginIdentify_;
+			std::map< ngrs::CustomItem*, PluginFinderKey > pluginIdentify_;
 
-      void setPlugin( ngrs::CustomItem* item );
-      void onGeneratorTabChange( ngrs::ButtonEvent* ev );
-      void onEffectTabChange( ngrs::ButtonEvent* ev );
-      void onLADSPATabChange( ngrs::ButtonEvent* ev );
-      void onInternalTabChange( ngrs::ButtonEvent* ev );
+			void setPlugin( ngrs::CustomItem* item );
+			void onGeneratorTabChange( ngrs::ButtonEvent* ev );
+			void onEffectTabChange( ngrs::ButtonEvent* ev );
+			void onLADSPATabChange( ngrs::ButtonEvent* ev );
+			void onInternalTabChange( ngrs::ButtonEvent* ev );
 
-    };
+		};
 
-  } // end of host namespace
+	} // end of host namespace
 } // end of psycle namespace
 
 #endif

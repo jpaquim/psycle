@@ -23,80 +23,80 @@
 #include <ngrs/window.h>
 
 /**
-  @author  Stefan Nattkemper
+	@author  Stefan Nattkemper
 */
 
 namespace ngrs {
-  class Label;
-  class Button;
-  class Edit;
-  class ComboBox;
-  class Slider;
-  class NCheckBox;
-  class ItemEvent;
+	class Label;
+	class Button;
+	class Edit;
+	class ComboBox;
+	class Slider;
+	class NCheckBox;
+	class ItemEvent;
 }
 
 namespace psycle {
-  namespace host{
+	namespace host{
 
-    class EnvDialog;
-    class Song;
-    
-    class InstrumentEditor : public ngrs::Window
-    {
-    public:
-      InstrumentEditor( Song * song );
+		class EnvDialog;
+		class Song;
+		
+		class InstrumentEditor : public ngrs::Window
+		{
+		public:
+			InstrumentEditor( Song * song );
 
-      ~InstrumentEditor();
+			~InstrumentEditor();
 
-      void setInstrument( int index );
-      int instrumentIndex();
+			void setInstrument( int index );
+			int instrumentIndex();
 
-      virtual int onClose();
+			virtual int onClose();
 
-    private:
+		private:
 
-      Song* _pSong;
+			Song* _pSong;
 
-      ngrs::Label* instNumberLbl;
-      ngrs::Button* incInstBtn;
-      ngrs::Button* decInstBtn;
-      ngrs::Edit* instNameEd;
-      ngrs::Button* killBtn;
-      ngrs::ComboBox* newNoteActionCb;
-      ngrs::Slider* panningSlider;
-      ngrs::Label* panningLbl;
-      ngrs::NCheckBox* rndPanningCbx;
-      ngrs::NCheckBox* rndVCFCutCbx;
-      ngrs::NCheckBox* rndVCFResoCbx;
-      ngrs::NCheckBox* playSampleFitCbx;
-      ngrs::Edit* patRowEdt;
-      ngrs::Slider* volumeSlider;
-      ngrs::Label* volumeLbl;
-      ngrs::Slider* fineTuneSlider;
-      ngrs::Label* fineTuneLbl;
-      ngrs::Button* octDecBtn;
-      ngrs::Button* noteDecBtn;
-      ngrs::Button* noteIncBtn;
-      ngrs::Button* octIncBtn;
-      ngrs::Label* octLbl;
-      ngrs::Label* loopLbl;
-      ngrs::Label* loopAtFromLbl;
-      ngrs::Label* loopAtToLbl;
-      ngrs::Label* lenLbl;
+			ngrs::Label* instNumberLbl;
+			ngrs::Button* incInstBtn;
+			ngrs::Button* decInstBtn;
+			ngrs::Edit* instNameEd;
+			ngrs::Button* killBtn;
+			ngrs::ComboBox* newNoteActionCb;
+			ngrs::Slider* panningSlider;
+			ngrs::Label* panningLbl;
+			ngrs::NCheckBox* rndPanningCbx;
+			ngrs::NCheckBox* rndVCFCutCbx;
+			ngrs::NCheckBox* rndVCFResoCbx;
+			ngrs::NCheckBox* playSampleFitCbx;
+			ngrs::Edit* patRowEdt;
+			ngrs::Slider* volumeSlider;
+			ngrs::Label* volumeLbl;
+			ngrs::Slider* fineTuneSlider;
+			ngrs::Label* fineTuneLbl;
+			ngrs::Button* octDecBtn;
+			ngrs::Button* noteDecBtn;
+			ngrs::Button* noteIncBtn;
+			ngrs::Button* octIncBtn;
+			ngrs::Label* octLbl;
+			ngrs::Label* loopLbl;
+			ngrs::Label* loopAtFromLbl;
+			ngrs::Label* loopAtToLbl;
+			ngrs::Label* lenLbl;
 
-      EnvDialog* envelopeEditor;
+			EnvDialog* envelopeEditor;
 
-      void init();
-      std::string noteToString( int value );
-      void onBtnPress( ngrs::ButtonEvent* ev );
-      void onComboSelected( ngrs::ItemEvent* ev );
-      void onSliderMove( ngrs::Slider* sender );
-      void onShowEnvelopeEditor( ngrs::ButtonEvent* ev );
-      void onPatRowEdit( const ngrs::KeyEvent& event );
-    };
+			void init();
+			std::string noteToString( int value );
+			void onBtnPress( ngrs::ButtonEvent* ev );
+			void onComboSelected( ngrs::ItemEvent* ev );
+			void onSliderMove( ngrs::Slider* sender );
+			void onShowEnvelopeEditor( ngrs::ButtonEvent* ev );
+			void onPatRowEdit( const ngrs::KeyEvent& event );
+		};
 
-  }
+	}
 }
 
 #endif

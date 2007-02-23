@@ -3,24 +3,24 @@
 /// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 
 /***************************************************************************
-  *   Copyright (C) 2006 by  Stefan Nattkemper, Josep Maria Antolín Segura, D.W. Aley			
-  *   natti@linux   *
-  *                                                                         *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation; either version 2 of the License, or     *
-  *   (at your option) any later version.                                   *
-  *                                                                         *
-  *   This program is distributed in the hope that it will be useful,       *
-  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-  *   GNU General Public License for more details.                          *
-  *                                                                         *
-  *   You should have received a copy of the GNU General Public License     *
-  *   along with this program; if not, write to the                         *
-  *   Free Software Foundation, Inc.,                                       *
-  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-  ***************************************************************************/
+	*   Copyright (C) 2006 by  Stefan Nattkemper, Josep Maria Antolín Segura, D.W. Aley			
+	*   natti@linux   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 
 #pragma once
 #include "song.h"
@@ -38,20 +38,20 @@ namespace psycle
 		class Player
 		{
 		// Singleton Pattern
-         private:
-                Player();          
-  		        ~Player();
+					private:
+								Player();          
+			        ~Player();
 		
-                Player( Player const & );
-  		        Player& operator=(Player const&);
+								Player( Player const & );
+			        Player& operator=(Player const&);
 
-            public:
-                static Player* Instance() {
+						public:
+								static Player* Instance() {
 					// note keep sure a player instance is created from the gui
 					// before starting audiothread
 					// or use single threaded only
 					static Player s;
- 					return &s; 
+						return &s; 
 			}
 		// Singleton pattern end
 

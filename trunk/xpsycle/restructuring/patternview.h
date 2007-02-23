@@ -36,400 +36,400 @@
 */
 
 namespace ngrs {
-  class ToolBar;
-  class ComboBox;
-  class NCheckBox;
-  class SplitBar;
-  class ItemEvent;
+	class ToolBar;
+	class ComboBox;
+	class NCheckBox;
+	class SplitBar;
+	class ItemEvent;
 }
 
 class ZoomBar;
 
 namespace psy { 
-  namespace core {
-    class Song;
-  }
-  namespace host {    
+	namespace core {
+		class Song;
+	}
+	namespace host {    
 
-    class UndoPattern : public psy::core::SinglePattern {
-    public  :
+		class UndoPattern : public psy::core::SinglePattern {
+		public  :
 
-      UndoPattern();
-      UndoPattern( int patternId, const ngrs::Size & changedBlock, const PatCursor & cursor  );
+			UndoPattern();
+			UndoPattern( int patternId, const ngrs::Size & changedBlock, const PatCursor & cursor  );
 
-      ~UndoPattern();
+			~UndoPattern();
 
-      const ngrs::Size & changedBlock() const;
-      const PatCursor & oldCursor();
+			const ngrs::Size & changedBlock() const;
+			const PatCursor & oldCursor();
 
-      int patternId();
+			int patternId();
 
-    private :
+		private :
 
-      ngrs::Size changedBlock_;
-      int patternId_;
-      PatCursor cursor_;
+			ngrs::Size changedBlock_;
+			int patternId_;
+			PatCursor cursor_;
 
-    };
+		};
 
-    class PatternUndoManager : public std::vector<UndoPattern> {
-    public :
+		class PatternUndoManager : public std::vector<UndoPattern> {
+		public :
 
-      PatternUndoManager( );
-      ~PatternUndoManager();
+			PatternUndoManager( );
+			~PatternUndoManager();
 
-      void setSong( psy::core::Song* pSong  );
-      void setPattern( psy::core::SinglePattern* pattern );
-      void addUndo( const ngrs::Size & block, const PatCursor & cursor );
-      void addUndo( const PatCursor & cursor );
+			void setSong( psy::core::Song* pSong  );
+			void setPattern( psy::core::SinglePattern* pattern );
+			void addUndo( const ngrs::Size & block, const PatCursor & cursor );
+			void addUndo( const PatCursor & cursor );
 
-      void doUndo();
+			void doUndo();
 
-    private:
+		private:
 
-      psy::core::SinglePattern* pattern_;
-      psy::core::Song* pSong_;
+			psy::core::SinglePattern* pattern_;
+			psy::core::Song* pSong_;
 
-    };
+		};
 
 
-    class PatternView : public Module
-    {
-    public:
+		class PatternView : public Module
+		{
+		public:
 
-      class Header: public ngrs::Panel {
-      public:
-        Header(PatternView* pPatternView);
-        ~Header();
+			class Header: public ngrs::Panel {
+			public:
+				Header(PatternView* pPatternView);
+				~Header();
 
-        virtual void paint( ngrs::Graphics& g );
+				virtual void paint( ngrs::Graphics& g );
 
-        void setHeaderCoordInfo( const HeaderCoordInfo & info );
+				void setHeaderCoordInfo( const HeaderCoordInfo & info );
 
-        virtual void onMousePress(int x, int y, int button);
-        virtual int preferredWidth();
+				virtual void onMousePress(int x, int y, int button);
+				virtual int preferredWidth();
 
-        int skinColWidth();
+				int skinColWidth();
 
-      private:
+			private:
 
-        HeaderCoordInfo coords_;
+				HeaderCoordInfo coords_;
 
-        int skinColWidth_;
-        PatternView* pView;
+				int skinColWidth_;
+				PatternView* pView;
 
-        void onSoloLedClick( int track );
-        void onMuteLedClick( int track );
-        void onRecLedClick( int track );
+				void onSoloLedClick( int track );
+				void onMuteLedClick( int track );
+				void onRecLedClick( int track );
 
-      };
+			};
 
 
-      class LineNumber : public ngrs::Panel {
-      public:
-        LineNumber( PatternView* pPatternView );
-        ~LineNumber();
+			class LineNumber : public ngrs::Panel {
+			public:
+				LineNumber( PatternView* pPatternView );
+				~LineNumber();
 
-        virtual void paint( ngrs::Graphics& g );
+				virtual void paint( ngrs::Graphics& g );
 
-        void setDy( int dy );
-        int dy() const;
+				void setDy( int dy );
+				int dy() const;
 
-        void setTextColor( const ngrs::Color& textColor );
-        const ngrs::Color & textColor() const;
+				void setTextColor( const ngrs::Color& textColor );
+				const ngrs::Color & textColor() const;
 
-        virtual int preferredWidth() const;
+				virtual int preferredWidth() const;
 
-      private:
+			private:
 
-        PatternView* pView;
-        int dy_;
-        ngrs::Color textColor_;
+				PatternView* pView;
+				int dy_;
+				ngrs::Color textColor_;
 
-      };
+			};
 
 
 
-      class PatternDraw : public CustomPatternView {
-      public:
+			class PatternDraw : public CustomPatternView {
+			public:
 
-        PatternDraw( PatternView* pPatternView );
-        ~PatternDraw();
+				PatternDraw( PatternView* pPatternView );
+				~PatternDraw();
 
-        virtual int colWidth() const;
-        virtual int rowHeight() const;
-        virtual int lineNumber() const;
-        virtual int beatZoom() const;
+				virtual int colWidth() const;
+				virtual int rowHeight() const;
+				virtual int lineNumber() const;
+				virtual int beatZoom() const;
 
-        virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
+				virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-        virtual void onMousePress( int x, int y, int button );
-        virtual void onMousePressed( int x, int y, int button );
-        virtual void onMouseOver( int x, int y );
-        virtual void onKeyPress( const ngrs::KeyEvent & event );
-        virtual void onKeyRelease( const ngrs::KeyEvent & event );
+				virtual void onMousePress( int x, int y, int button );
+				virtual void onMousePressed( int x, int y, int button );
+				virtual void onMouseOver( int x, int y );
+				virtual void onKeyPress( const ngrs::KeyEvent & event );
+				virtual void onKeyRelease( const ngrs::KeyEvent & event );
 
-        void copyBlock( bool cutit );
-        void pasteBlock( int tx, int lx, bool mix, bool save = true );
-        void deleteBlock();
-        void transposeBlock( int trp );
-        void scaleBlock( float factor );
+				void copyBlock( bool cutit );
+				void pasteBlock( int tx, int lx, bool mix, bool save = true );
+				void deleteBlock();
+				void transposeBlock( int trp );
+				void scaleBlock( float factor );
 
-        void setSharpMode( bool on );
-        bool sharpMode() const;
+				void setSharpMode( bool on );
+				bool sharpMode() const;
 
-        virtual void resize();
+				virtual void resize();
 
-      protected:
+			protected:
 
-        virtual int doSel( const PatCursor & p );
-        virtual void selectAll( const PatCursor & cursor );
-        virtual void drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
+				virtual int doSel( const PatCursor & p );
+				virtual void selectAll( const PatCursor & cursor );
+				virtual void drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
 
-      private:
+			private:
 
-        ngrs::PopupMenu* editPopup_;
-        PatternView* pView;      
+				ngrs::PopupMenu* editPopup_;
+				PatternView* pView;      
 
-        bool isBlockCopied;
-        ngrs::Size blockLastOrigin;
-        bool sharpMode_;
+				bool isBlockCopied;
+				ngrs::Size blockLastOrigin;
+				bool sharpMode_;
 
-        void clearCursorPos();
+				void clearCursorPos();
 
-        void onPopupBlockCopy( ngrs::ButtonEvent* ev );
-        void onPopupBlockCut( ngrs::ButtonEvent* ev );
-        void onPopupBlockPaste( ngrs::ButtonEvent* ev );
-        void onPopupBlockDelete( ngrs::ButtonEvent* ev );
-        void onPopupBlockMixPaste( ngrs::ButtonEvent* ev );
-        void onPopupTranspose1( ngrs::ButtonEvent* ev );
-        void onPopupTranspose12( ngrs::ButtonEvent* ev );
-        void onPopupTranspose_1( ngrs::ButtonEvent* ev );
-        void onPopupTranspose_12( ngrs::ButtonEvent* ev );
-        void onPopupPattern( ngrs::ButtonEvent* ev );
+				void onPopupBlockCopy( ngrs::ButtonEvent* ev );
+				void onPopupBlockCut( ngrs::ButtonEvent* ev );
+				void onPopupBlockPaste( ngrs::ButtonEvent* ev );
+				void onPopupBlockDelete( ngrs::ButtonEvent* ev );
+				void onPopupBlockMixPaste( ngrs::ButtonEvent* ev );
+				void onPopupTranspose1( ngrs::ButtonEvent* ev );
+				void onPopupTranspose12( ngrs::ButtonEvent* ev );
+				void onPopupTranspose_1( ngrs::ButtonEvent* ev );
+				void onPopupTranspose_12( ngrs::ButtonEvent* ev );
+				void onPopupPattern( ngrs::ButtonEvent* ev );
 
-        psy::core::SinglePattern pasteBuffer;
-        void onTagParse( const ngrs::XmlParser & parser, const std::string & tagName );
-        float lastXmlLineBeatPos;
-        int xmlTracks;
-        float xmlBeats;
+				psy::core::SinglePattern pasteBuffer;
+				void onTagParse( const ngrs::XmlParser & parser, const std::string & tagName );
+				float lastXmlLineBeatPos;
+				int xmlTracks;
+				float xmlBeats;
 
-        void checkLeftScroll( const PatCursor & cursor );
-        void checkRightScroll( const PatCursor & cursor );
+				void checkLeftScroll( const PatCursor & cursor );
+				void checkRightScroll( const PatCursor & cursor );
 
-      };
+			};
 
-      class TweakHeader : public ngrs::Panel {
-      public:
+			class TweakHeader : public ngrs::Panel {
+			public:
 
-        TweakHeader(  PatternView* pPatternView );
+				TweakHeader(  PatternView* pPatternView );
 
-        ~TweakHeader();
+				~TweakHeader();
 
-        virtual int preferredWidth();
-        virtual void paint( ngrs::Graphics& g );
+				virtual int preferredWidth();
+				virtual void paint( ngrs::Graphics& g );
 
-        int skinColWidth() const;
+				int skinColWidth() const;
 
-      private:
+			private:
 
-        ngrs::Rect bgCoords;
-        ngrs::Rect noCoords;
+				ngrs::Rect bgCoords;
+				ngrs::Rect noCoords;
 
-        PatternView* pView;
+				PatternView* pView;
 
-      };
+			};
 
 
-      class TweakGUI : public CustomPatternView {
-      public:
-        TweakGUI( PatternView* pPatternView);
+			class TweakGUI : public CustomPatternView {
+			public:
+				TweakGUI( PatternView* pPatternView);
 
-        ~TweakGUI();			
+				~TweakGUI();			
 
-        virtual int colWidth() const;
-        virtual int rowHeight() const;
-        virtual int lineNumber() const;
-        virtual int trackNumber() const;
-        virtual int beatZoom() const;
+				virtual int colWidth() const;
+				virtual int rowHeight() const;
+				virtual int lineNumber() const;
+				virtual int trackNumber() const;
+				virtual int beatZoom() const;
 
-        virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
+				virtual void customPaint( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-        virtual void onKeyPress( const ngrs::KeyEvent & event );
+				virtual void onKeyPress( const ngrs::KeyEvent & event );
 
-        virtual void resize();
+				virtual void resize();
 
-      protected:
+			protected:
 
-        virtual int doSel( const PatCursor & p );
-        void drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
+				virtual int doSel( const PatCursor & p );
+				void drawPattern( ngrs::Graphics& g, int startLine, int endLine, int startTrack, int endTrack );
 
-      private:
+			private:
 
-        PatternView* pView;
+				PatternView* pView;
 
-        void checkLeftScroll( const PatCursor & cursor );
-        void checkRightScroll( const PatCursor & cursor );
+				void checkLeftScroll( const PatCursor & cursor );
+				void checkRightScroll( const PatCursor & cursor );
 
-      };
+			};
 
-    public:
+		public:
 
-      friend class Header;
+			friend class Header;
 
-      PatternView( psy::core::Song * song );
-      virtual PatternView* clone() const;
+			PatternView( psy::core::Song * song );
+			virtual PatternView* clone() const;
 
-      ~PatternView();
+			~PatternView();
 
-      psy::core::Song* pSong();
-      ModuleInfo info() const;
+			psy::core::Song* pSong();
+			ModuleInfo info() const;
 
-      sigslot::signal1<int> lineChanged;
+			sigslot::signal1<int> lineChanged;
 
-      void setSeparatorColor( const ngrs::Color & separatorColor );
-      const ngrs::Color & separatorColor();
+			void setSeparatorColor( const ngrs::Color & separatorColor );
+			const ngrs::Color & separatorColor();
 
 
-      int rowHeight() const;
+			int rowHeight() const;
 
-      int tweakColWidth() const;
-      int colWidth() const;
-      const std::map<int, TrackGeometry> & trackGeometrics() const;
-      int headerWidth() const;
-      int tweakHeaderWidth() const;
-      int headerHeight() const;
+			int tweakColWidth() const;
+			int colWidth() const;
+			const std::map<int, TrackGeometry> & trackGeometrics() const;
+			int headerWidth() const;
+			int tweakHeaderWidth() const;
+			int headerHeight() const;
 
-      int lineNumber() const;
-      int trackNumber() const;
+			int lineNumber() const;
+			int trackNumber() const;
 
-      void setEditPosition( int pos );
-      void setPrevEditPosition( int pos );
-      int editPosition() const;
-      int prevEditPosition() const;
-      int playPos() const;
+			void setEditPosition( int pos );
+			void setPrevEditPosition( int pos );
+			int editPosition() const;
+			int prevEditPosition() const;
+			int playPos() const;
 
-      void setPatternStep( int step );
-      int patternStep() const;
+			void setPatternStep( int step );
+			int patternStep() const;
 
-      void updatePlayBar( bool followSong );
+			void updatePlayBar( bool followSong );
 
-      void setEditOctave( int octave );
-      int editOctave() const;
+			void setEditOctave( int octave );
+			int editOctave() const;
 
-      ngrs::ScrollBar* vScrBar();
-      ngrs::ScrollBar* hScrBar();
+			ngrs::ScrollBar* vScrBar();
+			ngrs::ScrollBar* hScrBar();
 
-      void PlayNote( int note, int velocity, bool bTranspose, psy::host::Machine*pMachine);
-      void StopNote( int note, bool bTranspose=true, psy::host::Machine* pMachine=NULL);
+			void PlayNote( int note, int velocity, bool bTranspose, psy::host::Machine*pMachine);
+			void StopNote( int note, bool bTranspose=true, psy::host::Machine* pMachine=NULL);
 
-      void noteOffAny( const PatCursor & cursor );
+			void noteOffAny( const PatCursor & cursor );
 
-      void copyBlock( bool cutit );
-      void pasteBlock( int tx, int lx, bool mix, bool save = true );
-      void blockTranspose( int trp );
-      void deleteBlock();
-      void doubleLength();
-      void halveLength();
+			void copyBlock( bool cutit );
+			void pasteBlock( int tx, int lx, bool mix, bool save = true );
+			void blockTranspose( int trp );
+			void deleteBlock();
+			void doubleLength();
+			void halveLength();
 
-      void setMoveCursorWhenPaste( bool on );
-      bool moveCursorWhenPaste() const;
+			void setMoveCursorWhenPaste( bool on );
+			bool moveCursorWhenPaste() const;
 
-      ngrs::Rect repaintLineNumberArea( int startLine, int endLine );
-      void repaintLineNumber( int startLine, int endLine );
+			ngrs::Rect repaintLineNumberArea( int startLine, int endLine );
+			void repaintLineNumber( int startLine, int endLine );
 
-      void setPattern( psy::core::SinglePattern* pattern );
-      psy::core::SinglePattern* pattern();
+			void setPattern( psy::core::SinglePattern* pattern );
+			psy::core::SinglePattern* pattern();
 
-      void setBeatZoom( int tpb );
-      int beatZoom() const;
+			void setBeatZoom( int tpb );
+			int beatZoom() const;
 
 
-      void setActiveMachineIdx( int idx );
-      int selectedMachineIndex() const;
+			void setActiveMachineIdx( int idx );
+			int selectedMachineIndex() const;
 
-      void clearCurr();
+			void clearCurr();
 
-      virtual void setFocus();
+			virtual void setFocus();
 
-      void updateRange();
-      void updateSkin();
+			void updateRange();
+			void updateSkin();
 
-      void setColorInfo( const PatternViewColorInfo & info );
-      const PatternViewColorInfo & colorInfo() const;
+			void setColorInfo( const PatternViewColorInfo & info );
+			const PatternViewColorInfo & colorInfo() const;
 
-      void onTick( double sequenceStart );
-      void onStartPlayBar();
-      void onEndPlayBar();
+			void onTick( double sequenceStart );
+			void onStartPlayBar();
+			void onEndPlayBar();
 
-      PatternUndoManager & undoManager();
+			PatternUndoManager & undoManager();
 
-      void doUndo();
+			void doUndo();
 
-    private:
+		private:
 
-      psy::core::Song* _pSong;
-      psy::core::SinglePattern* pattern_;
-      ngrs::XmlParser xmlParser;
-      PatternUndoManager undoManager_;
+			psy::core::Song* _pSong;
+			psy::core::SinglePattern* pattern_;
+			ngrs::XmlParser xmlParser;
+			PatternUndoManager undoManager_;
 
-      int editPosition_, prevEditPosition_;
-      int playPos_;
-      int editOctave_;
-      int selectedMacIdx_;
-      bool moveCursorWhenPaste_;
+			int editPosition_, prevEditPosition_;
+			int playPos_;
+			int editOctave_;
+			int selectedMacIdx_;
+			bool moveCursorWhenPaste_;
 
-      PatternDraw* drawArea;
-      TweakGUI* tweakGUI;
-      TweakHeader* tweakHeader;
+			PatternDraw* drawArea;
+			TweakGUI* tweakGUI;
+			TweakHeader* tweakHeader;
 
-      ngrs::ScrollBar* hBar;
-      ngrs::ScrollBar* tweakHBar;
-      ngrs::NCheckBox* sideBox;
-      ZoomBar* zoomHBar;
-      ngrs::ScrollBar* vBar;
-      Header*     header;
-      LineNumber* lineNumber_;
-      ngrs::Color      separatorColor_;
-      ngrs::ToolBar*   toolBar;
-      ngrs::ComboBox* patternCombo_;
-      ngrs::ComboBox* octaveCombo_;
-      ngrs::ComboBox*  meterCbx;
-      ngrs::ComboBox* trackCombo_;
-      ngrs::SplitBar* splitBar;
-      ngrs::Panel* tweakGroup;
-      ngrs::Panel* lineHeaderLabel;
-      ngrs::Button* sharpBtn_;
+			ngrs::ScrollBar* hBar;
+			ngrs::ScrollBar* tweakHBar;
+			ngrs::NCheckBox* sideBox;
+			ZoomBar* zoomHBar;
+			ngrs::ScrollBar* vBar;
+			Header*     header;
+			LineNumber* lineNumber_;
+			ngrs::Color      separatorColor_;
+			ngrs::ToolBar*   toolBar;
+			ngrs::ComboBox* patternCombo_;
+			ngrs::ComboBox* octaveCombo_;
+			ngrs::ComboBox*  meterCbx;
+			ngrs::ComboBox* trackCombo_;
+			ngrs::SplitBar* splitBar;
+			ngrs::Panel* tweakGroup;
+			ngrs::Panel* lineHeaderLabel;
+			ngrs::Button* sharpBtn_;
 
-      PatternViewColorInfo colorInfo_;
+			PatternViewColorInfo colorInfo_;
 
-      void enterNote( const PatCursor & cursor, int note );
+			void enterNote( const PatCursor & cursor, int note );
 
-      void resize();
+			void resize();
 
-      void onHScrollBar( ngrs::ScrollBar* sender );
-      void onHTweakScrollBar( ngrs::ScrollBar* sender );
-      void onVScrollBar( ngrs::ScrollBar* sender );
+			void onHScrollBar( ngrs::ScrollBar* sender );
+			void onHTweakScrollBar( ngrs::ScrollBar* sender );
+			void onVScrollBar( ngrs::ScrollBar* sender );
 
-      void initToolBar();
-      void onAddBar( ngrs::ButtonEvent* ev );
-      void onDeleteBar( ngrs::ButtonEvent* ev );
+			void initToolBar();
+			void onAddBar( ngrs::ButtonEvent* ev );
+			void onDeleteBar( ngrs::ButtonEvent* ev );
 
-      int outtrack;
+			int outtrack;
 
-      void onZoomHBarPosChanged( ZoomBar* zoomBar, double newPos );
-      void onPatternStepChange( ngrs::ItemEvent* ev );
-      void onOctaveChange( ngrs::ItemEvent* ev );
-      void onTrackChange( ngrs::ItemEvent* ev );
-      void onSideChange( ngrs::ButtonEvent* ev );
-      void onToggleSharpMode( ngrs::ButtonEvent* ev );
+			void onZoomHBarPosChanged( ZoomBar* zoomBar, double newPos );
+			void onPatternStepChange( ngrs::ItemEvent* ev );
+			void onOctaveChange( ngrs::ItemEvent* ev );
+			void onTrackChange( ngrs::ItemEvent* ev );
+			void onSideChange( ngrs::ButtonEvent* ev );
+			void onToggleSharpMode( ngrs::ButtonEvent* ev );
 
-      void checkUpScroll( const PatCursor & cursor );
-      void checkDownScroll( const PatCursor & cursor );
+			void checkUpScroll( const PatCursor & cursor );
+			void checkDownScroll( const PatCursor & cursor );
 
-    };
+		};
 
-  }
+	}
 }
 #endif

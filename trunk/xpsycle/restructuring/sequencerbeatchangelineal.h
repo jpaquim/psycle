@@ -27,71 +27,71 @@
 */
 
 namespace ngrs{
-  class Edit;
+	class Edit;
 }
 
 namespace psy {
-  namespace core {
-    class PatternSequence;
-    class GlobalEvent;
-  }
-  namespace host {
+	namespace core {
+		class PatternSequence;
+		class GlobalEvent;
+	}
+	namespace host {
 
-    class SequencerGUI;
+		class SequencerGUI;
 
-    class SequencerBeatChangeLineal : public ngrs::Panel
-    {
+		class SequencerBeatChangeLineal : public ngrs::Panel
+		{
 
-      class BeatChangeTriangle : public ngrs::Panel {
-      public:
-        BeatChangeTriangle();
-        BeatChangeTriangle( SequencerGUI * gui );
-        ~BeatChangeTriangle();
+			class BeatChangeTriangle : public ngrs::Panel {
+			public:
+				BeatChangeTriangle();
+				BeatChangeTriangle( SequencerGUI * gui );
+				~BeatChangeTriangle();
 
-        void setBpmChangeEvent( psy::core::GlobalEvent* event );
-        psy::core::GlobalEvent* bpmChangeEvent();
+				void setBpmChangeEvent( psy::core::GlobalEvent* event );
+				psy::core::GlobalEvent* bpmChangeEvent();
 
-        virtual void onMove(const ngrs::MoveEvent & moveEvent);
-        virtual void paint( ngrs::Graphics& g);
-        virtual int preferredHeight() const;
-        virtual void resize();
+				virtual void onMove(const ngrs::MoveEvent & moveEvent);
+				virtual void paint( ngrs::Graphics& g);
+				virtual int preferredHeight() const;
+				virtual void resize();
 
-      private:
+			private:
 
-        SequencerGUI* sView;
-        ngrs::Edit* bpmEdt_;
+				SequencerGUI* sView;
+				ngrs::Edit* bpmEdt_;
 
-        int tWidth;
-        int tHeight;
+				int tWidth;
+				int tHeight;
 
-        psy::core::GlobalEvent* bpmChangeEvent_;
+				psy::core::GlobalEvent* bpmChangeEvent_;
 
-        void onKeyPress( const ngrs::KeyEvent& event );
+				void onKeyPress( const ngrs::KeyEvent& event );
 
-      };
+			};
 
-    public:
-      SequencerBeatChangeLineal();
-      SequencerBeatChangeLineal( SequencerGUI* seqGui );
+		public:
+			SequencerBeatChangeLineal();
+			SequencerBeatChangeLineal( SequencerGUI* seqGui );
 
-      ~SequencerBeatChangeLineal();
+			~SequencerBeatChangeLineal();
 
-      virtual void paint( ngrs::Graphics& g );
+			virtual void paint( ngrs::Graphics& g );
 
-      virtual int preferredHeight() const;
+			virtual int preferredHeight() const;
 
-      virtual void onMouseDoublePress( int x, int y, int button );
+			virtual void onMouseDoublePress( int x, int y, int button );
 
-      virtual void resize();
+			virtual void resize();
 
-    private:
+		private:
 
-      SequencerGUI* sView;
-      std::list<BeatChangeTriangle*> beatChanges;
+			SequencerGUI* sView;
+			std::list<BeatChangeTriangle*> beatChanges;
 
-    };
+		};
 
 
-  }
+	}
 }
 #endif

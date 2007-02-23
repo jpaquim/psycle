@@ -22,32 +22,32 @@
 #include <ngrs/alignlayout.h>
 
 namespace psy {
-  namespace host {
+	namespace host {
 
 
-    LogoPanel::LogoPanel( DefaultBitmaps& icons )
-    {
-      setLayout( ngrs::AlignLayout() );
-      setSpacing( ngrs::Size( 10,5,10,5 ) );
+		LogoPanel::LogoPanel( DefaultBitmaps& icons )
+		{
+			setLayout( ngrs::AlignLayout() );
+			setSpacing( ngrs::Size( 10,5,10,5 ) );
 
-      ngrs::Image* img = new ngrs::Image( icons.logoRight()  );
-      img->setVAlign( ngrs::nAlCenter );
-      add( img , ngrs::nAlRight );
+			ngrs::Image* img = new ngrs::Image( icons.logoRight()  );
+			img->setVAlign( ngrs::nAlCenter );
+			add( img , ngrs::nAlRight );
 
-      /*img = new ngrs::Image( icons.logoLeft() );
-      img->setVAlign( ngrs::nAlCenter );
-      add( img , ngrs::nAlLeft );*/
+			/*img = new ngrs::Image( icons.logoLeft() );
+			img->setVAlign( ngrs::nAlCenter );
+			add( img , ngrs::nAlLeft );*/
 
-      img = new ngrs::Image( icons.logoMid() );
-      img->setVAlign( ngrs::nAlCenter );
-      img->setHAlign( ngrs::nAlWallPaper );
-      img->setEvents( true );
-      add( img , ngrs::nAlClient );
-    }
+			img = new ngrs::Image( icons.logoMid() );
+			img->setVAlign( ngrs::nAlCenter );
+			img->setHAlign( ngrs::nAlWallPaper );
+			img->setEvents( true );
+			add( img , ngrs::nAlClient );
+		}
 
-    LogoPanel::~LogoPanel()
-    {
-    }
+		LogoPanel::~LogoPanel()
+		{
+		}
 
-  }
+	}
 }

@@ -28,10 +28,10 @@
 #include <ngrs/popupmenu.h>
 
 namespace psy {
-  namespace core {
-    class Song;
-    class Machine;
-  }
+	namespace core {
+		class Song;
+		class Machine;
+	}
 
 	namespace host {
 
@@ -45,11 +45,11 @@ namespace psy {
 		{
 		public:
 			
-            MachineView( psy::core::Song& song );
-            virtual MachineView* clone() const;
+						MachineView( psy::core::Song& song );
+						virtual MachineView* clone() const;
 			~MachineView();
 
-            ModuleInfo info() const;
+						ModuleInfo info() const;
 
 			void setSelectedMachine( psy::core::Machine* mac);
 
@@ -90,7 +90,7 @@ namespace psy {
 			WireGUI* selectedWire_;
 
 			ngrs::Panel* scrollArea_;
-            ngrs::ScrollBox* scrollBox_;							
+						ngrs::ScrollBox* scrollBox_;							
 
 			void init();
 
@@ -100,7 +100,7 @@ namespace psy {
 			void onLineMoveStart( const ngrs::MoveEvent & event );
 			void onLineMoveEnd( const ngrs::MoveEvent & event );
 
-            void onWireGUIDelete( WireGUI * line );
+						void onWireGUIDelete( WireGUI * line );
 			void onWireDelete( WireDlg* dlg );
 			void onWireSelected( ngrs::ButtonEvent* ev );
 			void onMoveMachine( psy::core::Machine* mac, int x, int y );

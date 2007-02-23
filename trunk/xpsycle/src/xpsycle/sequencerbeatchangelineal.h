@@ -27,69 +27,69 @@
 */
 
 namespace ngrs{
-  class Edit;
+	class Edit;
 }
 
 namespace psycle {
-  namespace host {
+	namespace host {
 
-    class SequencerGUI;
-    class PatternSequence;
-    class GlobalEvent;
+		class SequencerGUI;
+		class PatternSequence;
+		class GlobalEvent;
 
-    class SequencerBeatChangeLineal : public ngrs::Panel
-    {
+		class SequencerBeatChangeLineal : public ngrs::Panel
+		{
 
-      class BeatChangeTriangle : public ngrs::Panel {
-      public:
-        BeatChangeTriangle();
-        BeatChangeTriangle(SequencerGUI * gui);
-        ~BeatChangeTriangle();
+			class BeatChangeTriangle : public ngrs::Panel {
+			public:
+				BeatChangeTriangle();
+				BeatChangeTriangle(SequencerGUI * gui);
+				~BeatChangeTriangle();
 
-        void setBpmChangeEvent(GlobalEvent* event);
-        GlobalEvent* bpmChangeEvent();
+				void setBpmChangeEvent(GlobalEvent* event);
+				GlobalEvent* bpmChangeEvent();
 
-        virtual void onMove(const ngrs::MoveEvent & moveEvent);
-        virtual void paint( ngrs::Graphics& g);
-        virtual int preferredHeight() const;
-        virtual void resize();
+				virtual void onMove(const ngrs::MoveEvent & moveEvent);
+				virtual void paint( ngrs::Graphics& g);
+				virtual int preferredHeight() const;
+				virtual void resize();
 
-      private:
+			private:
 
-        SequencerGUI* sView;
-        ngrs::Edit* bpmEdt_;
+				SequencerGUI* sView;
+				ngrs::Edit* bpmEdt_;
 
-        int tWidth;
-        int tHeight;
+				int tWidth;
+				int tHeight;
 
-        GlobalEvent* bpmChangeEvent_;
+				GlobalEvent* bpmChangeEvent_;
 
-        void onKeyPress(const ngrs::KeyEvent& event);
+				void onKeyPress(const ngrs::KeyEvent& event);
 
-      };
+			};
 
-    public:
-      SequencerBeatChangeLineal();
-      SequencerBeatChangeLineal( SequencerGUI* seqGui );
+		public:
+			SequencerBeatChangeLineal();
+			SequencerBeatChangeLineal( SequencerGUI* seqGui );
 
-      ~SequencerBeatChangeLineal();
+			~SequencerBeatChangeLineal();
 
-      virtual void paint( ngrs::Graphics& g );
+			virtual void paint( ngrs::Graphics& g );
 
-      virtual int preferredHeight() const;
+			virtual int preferredHeight() const;
 
-      virtual void onMouseDoublePress( int x, int y, int button );
+			virtual void onMouseDoublePress( int x, int y, int button );
 
-      virtual void resize();
+			virtual void resize();
 
-    private:
+		private:
 
-      SequencerGUI* sView;
-      std::list<BeatChangeTriangle*> beatChanges;
+			SequencerGUI* sView;
+			std::list<BeatChangeTriangle*> beatChanges;
 
-    };
+		};
 
 
-  }
+	}
 }
 #endif
