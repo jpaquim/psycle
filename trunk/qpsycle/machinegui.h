@@ -30,12 +30,6 @@
  public:
      MachineGui(int left, int top, MachineView *macView);
 
-/*     QRectF boundingRect() const;
-     QPainterPath shape() const;
-     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                QWidget *widget);*/
-
-
  protected:
 
  private:

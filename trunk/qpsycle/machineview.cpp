@@ -32,12 +32,9 @@
      QGraphicsScene *scene = new QGraphicsScene(this);
      scene->setItemIndexMethod(QGraphicsScene::NoIndex);
      scene->setBackgroundBrush(Qt::black);
-     setBackgroundBrush(Qt::black);
+
      setScene(scene);
-     setCacheMode(CacheBackground);
-     setRenderHint(QPainter::Antialiasing);
-     setTransformationAnchor(AnchorUnderMouse);
-     setResizeAnchor(AnchorViewCenter);
+     setBackgroundBrush(Qt::black);
 
      MachineGui *machGui = new MachineGui(0, 0, this);
      scene->addItem(machGui);
