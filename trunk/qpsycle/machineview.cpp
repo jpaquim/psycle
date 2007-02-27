@@ -43,6 +43,20 @@
      scene->addItem(machGui);
  }
 
+ void MachineView::keyPressEvent(QKeyEvent *event)
+ {
+     switch (event->key()) {
+     case Qt::Key_Plus:
+         scaleView(1.2);
+         break;
+     case Qt::Key_Minus:
+         scaleView(1 / 1.2);
+         break;
+     default:
+         QGraphicsView::keyPressEvent(event);
+     }
+ }
+
 /* void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
  {
      int accepted = newMachineDlg->exec();
@@ -52,3 +66,11 @@
         QMessageBox::information (this, "Hi", "Cancel");
      }
  }*/
+ void MachineView::scaleView(qreal scaleFactor) 
+ {
+      qreal factor = matrix().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width();
+     if (factor < 0.07 || factor > 100)
+         return;
+
+     scale(scaleFactor, scaleFactor);
+ }

@@ -32,7 +32,10 @@
      MachineView();
 
  protected:
+    void keyPressEvent(QKeyEvent *event);
 //     void mouseDoubleClickEvent(QMouseEvent *event);
+
+    void scaleView(qreal scaleFactor);
 
  private:
 //     NewMachineDlg *newMachineDlg;
