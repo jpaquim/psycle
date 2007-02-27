@@ -1,6 +1,6 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Stefan   *
-*   natti@linux   *
+*   Copyright (C) 2007 by Neil Mather   *
+*   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -17,26 +17,38 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "machinegui.h"
 
-#include <QtGui>
-#include <QMouseEvent>
-#include <iostream>
+ #include <QGraphicsScene>
+ #include <QGraphicsSceneMouseEvent>
+ #include <QPainter>
+ #include <QStyleOption>
 
- #include "machinegui.h"
+ #include "machineview.h"
 
- MachineGui::MachineGui(QWidget *parent) 
-    : QWidget(parent)
+ MachineGui::MachineGui(MachineView *macView)
+     : machineView(macView)
  {
-     setPalette(QPalette(QColor(100, 100, 100)));
-     setAutoFillBackground(true);
-     setMaximumSize(100,50);
+     setFlag(ItemIsMovable);
+     setZValue(1);
  }
 
- void MachineGui::mouseMoveEvent(QMouseEvent *event)
+  QRectF MachineGui::boundingRect() const
  {
-    QPoint pos = event->pos();
-    setGeometry(pos.x(), parentWidget()->x()+pos.y(), 100, 50);
-    std::cout << parentWidget()->x() << " " << parentWidget()->y() << std::endl;
-    std::cout << pos.x() << " " << pos.y() << std::endl;
-    update();
+     qreal adjust = 2;
+     return QRectF(0 - adjust, 0 - adjust,
+                   100 + adjust, 60 + adjust);
+ }
+
+ QPainterPath MachineGui::shape() const
+ {
+      QPainterPath path;
+     path.addRect(0, 0, 100, 60);
+     return path;
+ }
+
+ void MachineGui::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+ {
+     painter->setPen(QPen(Qt::red, 0));
+     painter->drawRect(0, 0, 100, 60);
  }

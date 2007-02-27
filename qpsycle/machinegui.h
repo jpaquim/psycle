@@ -17,23 +17,30 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef MACHINEGUI_H
+#ifndef MACHINEGUI_H
  #define MACHINEGUI_H
 
- #include <QWidget>
+ #include <QGraphicsItem>
+ #include <QObject>
+ #include "machineview.h"
 
- class MachineGui : public QWidget
+ class MachineGui : public QGraphicsItem
  {
-     Q_OBJECT
 
  public:
-     MachineGui(QWidget *parent = 0);
+     MachineGui(MachineView *macView);
+
+     QRectF boundingRect() const;
+     QPainterPath shape() const;
+     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                QWidget *widget);
+
 
  protected:
-     void mouseMoveEvent(QMouseEvent *event); 
 
  private:
-
+     QColor color;
+     MachineView *machineView;
  };
 
  #endif
