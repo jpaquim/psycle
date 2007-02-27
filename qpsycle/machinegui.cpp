@@ -29,31 +29,12 @@
  MachineGui::MachineGui(int left, int top, MachineView *macView)
      : machineView(macView)
  {
+     left_ = left;
+     top_ = top;
+
      setRect(QRectF(left, top, 100, 60));
      setPen(QPen(Qt::gray,5));
      setBrush(QBrush(Qt::darkGray));
-     left_ = left;
-     top_ = top;
      setFlag(ItemIsMovable);
      setZValue(1);
  }
-
-/*  QRectF MachineGui::boundingRect() const
- {
-     qreal adjust = 2;
-     return QRectF(left_ - adjust, top_ - adjust,
-                   100 + adjust, 60 + adjust);
- }
-
- QPainterPath MachineGui::shape() const
- {
-      QPainterPath path;
-     path.addRect(left_, top_, 100, 60);
-     return path;
- }
-
- void MachineGui::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
- {
-     painter->setPen(QPen(Qt::red, 0));
-     painter->drawRect(left_, top_, 100, 60);
- }*/
