@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Neil Mather   *
+*   Copyright (C) 2007 by Neil Mather   *
 *   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,23 +17,23 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef SEQUENCERVIEW_H
- #define SEQUENCERVIEW_H
+#include "sequenceritem.h"
 
- #include <QWidget>
- #include <QtGui/QGraphicsView>
+ #include <QGraphicsScene>
+ #include <QGraphicsSceneMouseEvent>
+ #include <QPainter>
+ #include <QStyleOption>
+ #include <QMessageBox>
+ #include <QMouseEvent>
 
- class SequencerView : public QGraphicsView
+ #include "sequencerview.h"
+
+ SequencerItem::SequencerItem(SequencerView *seqView)
+     : sequencerView(seqView)
  {
-     Q_OBJECT
-
- public:
-     SequencerView();
-
- protected:
-
- private:
-
- };
-
- #endif
+     setRect(QRectF(seqView->sceneRect().x(), seqView->sceneRect().y(), 150, 30));
+     setPen(QPen(Qt::white,1));
+     setBrush(QBrush(Qt::red));
+     setFlag(ItemIsMovable);
+     setZValue(1);
+ }

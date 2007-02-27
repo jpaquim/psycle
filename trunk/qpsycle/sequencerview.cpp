@@ -19,14 +19,23 @@
 ***************************************************************************/
 
 #include <QtGui>
+#include <QGraphicsScene>
+#include <QPainter>
+#include <iostream>
 
  #include "sequencerview.h"
+ #include "sequenceritem.h"
 
- SequencerView::SequencerView(QWidget *parent) 
-    : QWidget(parent)
+ SequencerView::SequencerView()
  {
-     setPalette(QPalette(QColor(150, 150, 150)));
-     setAutoFillBackground(true);
-     QGridLayout *layout = new QGridLayout();
-     setLayout(layout);
+     QGraphicsScene *scene = new QGraphicsScene(this);
+     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+     scene->setBackgroundBrush(Qt::black);
+
+     setAlignment ( Qt::AlignLeft | Qt::AlignTop );
+     setScene(scene);
+     setBackgroundBrush(Qt::black);
+
+     SequencerItem *seqItem = new SequencerItem(this);
+     scene->addItem(seqItem);
  }
