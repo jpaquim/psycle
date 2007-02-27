@@ -26,7 +26,6 @@
  #include "machineview.h"
  #include "machinegui.h"
 
-// should be a canvas
  MachineView::MachineView()
  {
      QGraphicsScene *scene = new QGraphicsScene(this);

@@ -17,23 +17,21 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef SEQUENCERVIEW_H
- #define SEQUENCERVIEW_H
+#ifndef SEQUENCERITEM_H
+#define SEQUENCERITEM_H
 
- #include <QWidget>
- #include <QtGui/QGraphicsView>
+#include <QGraphicsItem>
+#include <QObject>
+#include "sequencerview.h"
 
- class SequencerView : public QGraphicsView
+ class SequencerItem : public QGraphicsRectItem
  {
-     Q_OBJECT
 
  public:
-     SequencerView();
-
- protected:
+     SequencerItem(SequencerView *seqView);
 
  private:
-
+     SequencerView *sequencerView;
  };
 
- #endif
+#endif
