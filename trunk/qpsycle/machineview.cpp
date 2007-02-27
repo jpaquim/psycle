@@ -19,26 +19,34 @@
 ***************************************************************************/
 
 #include <QtGui>
+#include <QGraphicsScene>
+#include <QPainter>
 #include <iostream>
 
  #include "machineview.h"
  #include "machinegui.h"
 
- MachineView::MachineView(QWidget *parent) 
-    : QWidget(parent)
+// should be a canvas
+ MachineView::MachineView()
  {
-     setPalette(QPalette(QColor(0, 0, 0)));
-     setAutoFillBackground(true);
-     QGridLayout *layout = new QGridLayout();
+     QGraphicsScene *scene = new QGraphicsScene(this);
+     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+     scene->setBackgroundBrush(Qt::black);
+     setBackgroundBrush(Qt::black);
+     setScene(scene);
+     setCacheMode(CacheBackground);
+     setRenderHint(QPainter::Antialiasing);
+     setTransformationAnchor(AnchorUnderMouse);
+     setResizeAnchor(AnchorViewCenter);
 
-     MachineGui *mach = new MachineGui();
-     newMachineDlg = new NewMachineDlg();
+     MachineGui *node1 = new MachineGui(this);
+     scene->addItem(node1);
 
-     layout->addWidget(mach);
-     setLayout(layout);
+     node1->setPos(-50, -50);
+
  }
 
- void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
+/* void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
  {
      int accepted = newMachineDlg->exec();
      if (accepted) {
@@ -46,4 +54,4 @@
      } else {
         QMessageBox::information (this, "Hi", "Cancel");
      }
- }
+ }*/

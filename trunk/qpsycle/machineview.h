@@ -21,20 +21,21 @@
  #define MACHINEVIEW_H
 
  #include <QWidget>
- #include "newmachinedlg.h"
+ #include <QtGui/QGraphicsView>
+// #include "newmachinedlg.h"
 
- class MachineView : public QWidget
+ class MachineView : public QGraphicsView
  {
      Q_OBJECT
 
  public:
-     MachineView(QWidget *parent = 0);
+     MachineView();
 
  protected:
-     void mouseDoubleClickEvent(QMouseEvent *event);
+//     void mouseDoubleClickEvent(QMouseEvent *event);
 
  private:
-     NewMachineDlg *newMachineDlg;
+//     NewMachineDlg *newMachineDlg;
 
  };
 

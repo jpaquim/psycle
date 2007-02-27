@@ -22,6 +22,11 @@
 
  #include <QWidget>
 
+ class QToolBar;
+ class QComboBox;
+ class QGridLayout;
+ class QAction;
+
  class PatternView : public QWidget
  {
      Q_OBJECT
@@ -30,6 +35,15 @@
      PatternView(QWidget *parent = 0);
 
  private:
+    void createToolBar();
+
+    QGridLayout *layout;
+
+    QToolBar *toolBar_;
+    QComboBox *meterCbx_;
+    QComboBox *patternCbx_;
+
+    QAction *delBarAct_;
 
  };
 
