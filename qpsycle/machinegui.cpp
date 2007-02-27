@@ -26,9 +26,11 @@
 
  #include "machineview.h"
 
- MachineGui::MachineGui(MachineView *macView)
+ MachineGui::MachineGui(int left, int top, MachineView *macView)
      : machineView(macView)
  {
+     left_ = left;
+     top_ = top;
      setFlag(ItemIsMovable);
      setZValue(1);
  }
@@ -36,19 +38,19 @@
   QRectF MachineGui::boundingRect() const
  {
      qreal adjust = 2;
-     return QRectF(0 - adjust, 0 - adjust,
+     return QRectF(left_ - adjust, top_ - adjust,
                    100 + adjust, 60 + adjust);
  }
 
  QPainterPath MachineGui::shape() const
  {
       QPainterPath path;
-     path.addRect(0, 0, 100, 60);
+     path.addRect(left_, top_, 100, 60);
      return path;
  }
 
  void MachineGui::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
  {
      painter->setPen(QPen(Qt::red, 0));
-     painter->drawRect(0, 0, 100, 60);
+     painter->drawRect(left_, top_, 100, 60);
  }

@@ -28,7 +28,7 @@
  {
 
  public:
-     MachineGui(MachineView *macView);
+     MachineGui(int left, int top, MachineView *macView);
 
      QRectF boundingRect() const;
      QPainterPath shape() const;
@@ -39,8 +39,9 @@
  protected:
 
  private:
-     QColor color;
      MachineView *machineView;
+     int left_;
+     int top_;
  };
 
  #endif

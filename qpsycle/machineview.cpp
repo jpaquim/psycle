@@ -39,11 +39,8 @@
      setTransformationAnchor(AnchorUnderMouse);
      setResizeAnchor(AnchorViewCenter);
 
-     MachineGui *node1 = new MachineGui(this);
-     scene->addItem(node1);
-
-     node1->setPos(-50, -50);
-
+     MachineGui *machGui = new MachineGui(0, 0, this);
+     scene->addItem(machGui);
  }
 
 /* void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
