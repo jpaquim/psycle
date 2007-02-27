@@ -29,13 +29,16 @@
  MachineGui::MachineGui(int left, int top, MachineView *macView)
      : machineView(macView)
  {
+     setRect(QRectF(left, top, 100, 60));
+     setPen(QPen(Qt::gray,5));
+     setBrush(QBrush(Qt::darkGray));
      left_ = left;
      top_ = top;
      setFlag(ItemIsMovable);
      setZValue(1);
  }
 
-  QRectF MachineGui::boundingRect() const
+/*  QRectF MachineGui::boundingRect() const
  {
      qreal adjust = 2;
      return QRectF(left_ - adjust, top_ - adjust,
@@ -53,4 +56,4 @@
  {
      painter->setPen(QPen(Qt::red, 0));
      painter->drawRect(left_, top_, 100, 60);
- }
+ }*/

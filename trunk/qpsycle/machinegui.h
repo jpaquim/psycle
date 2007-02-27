@@ -24,16 +24,16 @@
  #include <QObject>
  #include "machineview.h"
 
- class MachineGui : public QGraphicsItem
+ class MachineGui : public QGraphicsRectItem
  {
 
  public:
      MachineGui(int left, int top, MachineView *macView);
 
-     QRectF boundingRect() const;
+/*     QRectF boundingRect() const;
      QPainterPath shape() const;
      void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                QWidget *widget);
+                QWidget *widget);*/
 
 
  protected:
