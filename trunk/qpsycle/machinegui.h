@@ -1,6 +1,6 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Stefan   *
-*   natti@linux   *
+*   Copyright (C) 2006 by  Neil Mather   *
+*   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -31,6 +31,7 @@
      MachineGui(int left, int top, MachineView *macView);
 
  protected:
+     void mousePressEvent(QMouseEvent *event);
 
  private:
      MachineView *machineView;

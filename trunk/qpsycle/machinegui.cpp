@@ -23,6 +23,8 @@
  #include <QGraphicsSceneMouseEvent>
  #include <QPainter>
  #include <QStyleOption>
+ #include <QMessageBox>
+ #include <QMouseEvent>
 
  #include "machineview.h"
 
@@ -38,3 +40,12 @@
      setFlag(ItemIsMovable);
      setZValue(1);
  }
+
+ void MachineGui::mousePressEvent(QMouseEvent *event)
+ {
+//    if (event->button() == Qt::RightButton) {
+        QMessageBox::information(0, "yo", "hi");
+//    }
+
+ }
+
