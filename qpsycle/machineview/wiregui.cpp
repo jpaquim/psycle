@@ -70,7 +70,8 @@
      if (!source || !dest)
          return;
 
-     QLineF line(mapFromItem(source, 0, 0), mapFromItem(dest, 0, 0));
+     QLineF line(mapFromItem(source, source->boundingRect().width()/2, source->boundingRect().height()/2), 
+                 mapFromItem(dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2)); 
      qreal length = line.length();
      QPointF wireGuiOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
 
