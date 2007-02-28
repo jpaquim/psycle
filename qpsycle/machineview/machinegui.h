@@ -23,20 +23,24 @@
  #include <QGraphicsItem>
 // #include <QGraphicsSceneContextMenuEvent>
  #include "machineview.h"
+ #include "wiregui.h"
 
  class MachineGui : public QGraphicsRectItem
  {
 
  public:
      MachineGui(int left, int top, MachineView *macView);
+     void addWireGui(WireGui *wireGui);
 
  protected:
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
  private:
      MachineView *machineView;
      int left_;
      int top_;
+     QList<WireGui *> wireGuiList;
  };
 
  #endif

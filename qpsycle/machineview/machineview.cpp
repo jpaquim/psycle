@@ -25,6 +25,7 @@
 
  #include "machineview.h"
  #include "machinegui.h"
+ #include "wiregui.h"
 
  MachineView::MachineView()
  {
@@ -41,8 +42,16 @@
      MachineGui *machGui2 = new MachineGui(400, 20, this);
      QGraphicsTextItem *name2 = new QGraphicsTextItem("Bar", machGui2);
      name2->setDefaultTextColor(Qt::white);
+     MachineGui *machGui3 = new MachineGui(100, 120, this);
+     QGraphicsTextItem *name3 = new QGraphicsTextItem("Baz", machGui3);
+     name3->setDefaultTextColor(Qt::white);
      scene->addItem(machGui);
      scene->addItem(machGui2);
+     scene->addItem(machGui3);
+     WireGui *wireGui = new WireGui(machGui, machGui2);
+     WireGui *wireGui1 = new WireGui(machGui, machGui3);
+     scene->addItem(wireGui);
+     scene->addItem(wireGui1);
  }
 
  void MachineView::keyPressEvent(QKeyEvent *event)

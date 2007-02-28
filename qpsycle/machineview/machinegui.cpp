@@ -43,6 +43,27 @@
      setFlag(ItemIsMovable);
      setZValue(1);
  }
+
+  void MachineGui::addWireGui(WireGui *wireGui)
+ {
+     wireGuiList << wireGui;
+     wireGui->adjust();
+ }
+
+ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)
+ {
+     switch (change) {
+     case ItemPositionChange:
+         foreach (WireGui *wireGui, wireGuiList)
+             wireGui->adjust();
+//         graph->itemMoved();
+         break;
+     default:
+         break;
+     };
+
+     return QGraphicsItem::itemChange(change, value);
+ }
     
   void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
   {
