@@ -29,14 +29,16 @@
  MachineView::MachineView()
  {
      QGraphicsScene *scene = new QGraphicsScene(this);
-     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
      scene->setBackgroundBrush(Qt::black);
+     scene->setSceneRect(0,0,width(),height());
 
      setScene(scene);
      setBackgroundBrush(Qt::black);
 
-     MachineGui *machGui = new MachineGui(0, 0, this);
+     MachineGui *machGui = new MachineGui(100, 20, this);
+     MachineGui *machGui2 = new MachineGui(400, 20, this);
      scene->addItem(machGui);
+     scene->addItem(machGui2);
  }
 
  void MachineView::keyPressEvent(QKeyEvent *event)

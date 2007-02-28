@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 by Neil Mather   *
+*   Copyright (C) 2006 by  Neil Mather   *
 *   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,39 +17,21 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "machinegui.h"
+#ifndef SEQUENCERLINE_H
+#define SEQUENCERLINE_H
 
- #include <QGraphicsScene>
- #include <QGraphicsSceneMouseEvent>
- #include <QPainter>
- #include <QStyleOption>
- #include <QMessageBox>
- #include <QMouseEvent>
- #include <QMenu>
- #include <QAction>
+#include <QGraphicsItem>
+#include <QObject>
+#include "sequencerview.h"
 
- #include "machineview.h"
-
- MachineGui::MachineGui(int left, int top, MachineView *macView)
-     : machineView(macView)
+ class SequencerLine : public QGraphicsRectItem
  {
-     left_ = left;
-     top_ = top;
 
-     setRect(QRectF(left, top, 100, 60));
-     setPen(QPen(Qt::white,1));
-     setBrush(QBrush(Qt::blue));
-     setFlag(ItemIsMovable);
-     setZValue(1);
- }
+ public:
+     SequencerLine(SequencerView *seqView);
 
-  void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-  {
-     QMenu menu;
-      menu.addAction("Rename");
-      menu.addAction("Clone");
-      menu.addAction("Delete");
-      QAction *a = menu.exec(event->screenPos());
-  }
+ private:
+     SequencerView *sequencerView;
+ };
 
-
+#endif
