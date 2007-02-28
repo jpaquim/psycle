@@ -41,6 +41,7 @@
      setPen(QPen(Qt::white,1));
      setBrush(QBrush(Qt::blue));
      setFlag(ItemIsMovable);
+     setFlag(ItemIsSelectable);
      setZValue(1);
  }
 
