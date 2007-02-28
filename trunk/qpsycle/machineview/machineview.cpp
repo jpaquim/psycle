@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Neil Mather   *
+*   Copyright (C) 2007 by  Neil Mather   *
 *   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
