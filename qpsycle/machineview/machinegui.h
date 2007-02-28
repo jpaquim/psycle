@@ -31,6 +31,7 @@
  public:
      MachineGui(int left, int top, MachineView *macView);
      void addWireGui(WireGui *wireGui);
+     void setName(const QString &name);
 
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
@@ -38,6 +39,7 @@
 
  private:
      MachineView *machineView;
+     QGraphicsTextItem *nameItem;
      int left_;
      int top_;
      QList<WireGui *> wireGuiList;

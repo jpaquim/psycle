@@ -35,6 +35,8 @@
  {
      left_ = left;
      top_ = top;
+     nameItem = new QGraphicsTextItem("", this);
+     nameItem->setDefaultTextColor(Qt::white);
 
      setRect(QRectF(0, 0, 100, 60));
      setPos(left, top);
@@ -43,6 +45,11 @@
      setFlag(ItemIsMovable);
      setFlag(ItemIsSelectable);
      setZValue(1);
+ }
+
+ void MachineGui::setName(const QString &name)
+ {
+     nameItem->setPlainText(name);
  }
 
   void MachineGui::addWireGui(WireGui *wireGui)
