@@ -31,8 +31,9 @@
  {
      QGraphicsScene *scene = new QGraphicsScene(this);
      scene->setBackgroundBrush(Qt::black);
-     scene->setSceneRect(0,0,width(),height());
 
+     setDragMode(QGraphicsView::RubberBandDrag);
+     setSceneRect(0,0,width(),height());
      setScene(scene);
      setBackgroundBrush(Qt::black);
 
