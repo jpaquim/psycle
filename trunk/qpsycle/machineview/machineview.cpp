@@ -37,21 +37,20 @@
      setScene(scene);
      setBackgroundBrush(Qt::black);
 
-     MachineGui *machGui = new MachineGui(100, 20, this);
-     QGraphicsTextItem *name = new QGraphicsTextItem("Foo", machGui);
-     name->setDefaultTextColor(Qt::white);
-     MachineGui *machGui2 = new MachineGui(400, 20, this);
-     QGraphicsTextItem *name2 = new QGraphicsTextItem("Bar", machGui2);
-     name2->setDefaultTextColor(Qt::white);
-     MachineGui *machGui3 = new MachineGui(100, 120, this);
-     QGraphicsTextItem *name3 = new QGraphicsTextItem("Baz", machGui3);
-     name3->setDefaultTextColor(Qt::white);
-     scene->addItem(machGui);
+     MachineGui *machGui0 = new MachineGui(100, 20, this);
+     MachineGui *machGui1 = new MachineGui(400, 20, this);
+     MachineGui *machGui2 = new MachineGui(100, 120, this);
+
+     machGui0->setName("Foo");
+     machGui1->setName("Bar");
+     machGui2->setName("Baz");
+
+     scene->addItem(machGui0);
+     scene->addItem(machGui1);
      scene->addItem(machGui2);
-     scene->addItem(machGui3);
-     WireGui *wireGui = new WireGui(machGui, machGui2);
-     WireGui *wireGui1 = new WireGui(machGui, machGui3);
-     scene->addItem(wireGui);
+     WireGui *wireGui0 = new WireGui(machGui0, machGui1);
+     WireGui *wireGui1 = new WireGui(machGui0, machGui2);
+     scene->addItem(wireGui0);
      scene->addItem(wireGui1);
  }
 
