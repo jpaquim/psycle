@@ -31,7 +31,7 @@
  SequencerItem::SequencerItem(SequencerView *seqView)
      : sequencerView(seqView)
  {
-     setRect(QRectF(seqView->sceneRect().x(), seqView->sceneRect().y(), 150, 30));
+     setRect(QRectF(0, 0, 150, 30));
      setPen(QPen(Qt::white,1));
      setBrush(QBrush(Qt::red));
      setFlag(ItemIsMovable);

@@ -25,6 +25,8 @@
  #include <QStyleOption>
  #include <QMessageBox>
  #include <QMouseEvent>
+ #include <QMenu>
+ #include <QAction>
 
  #include "machineview.h"
 
@@ -41,11 +43,13 @@
      setZValue(1);
  }
 
- void MachineGui::mousePressEvent(QMouseEvent *event)
- {
-//    if (event->button() == Qt::RightButton) {
-        QMessageBox::information(0, "yo", "hi");
-//    }
+  void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+  {
+     QMenu menu;
+      menu.addAction("Rename");
+      menu.addAction("Clone");
+      menu.addAction("Delete");
+      QAction *a = menu.exec(event->screenPos());
+  }
 
- }
 

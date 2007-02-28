@@ -18,10 +18,10 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #ifndef MACHINEGUI_H
- #define MACHINEGUI_H
+#define MACHINEGUI_H
 
  #include <QGraphicsItem>
- #include <QObject>
+// #include <QGraphicsSceneContextMenuEvent>
  #include "machineview.h"
 
  class MachineGui : public QGraphicsRectItem
@@ -31,7 +31,7 @@
      MachineGui(int left, int top, MachineView *macView);
 
  protected:
-     void mousePressEvent(QMouseEvent *event);
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
  private:
      MachineView *machineView;

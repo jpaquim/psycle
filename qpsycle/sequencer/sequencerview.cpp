@@ -24,6 +24,7 @@
 #include <iostream>
 
  #include "sequencerview.h"
+ #include "sequencerline.h"
  #include "sequenceritem.h"
 
  SequencerView::SequencerView()
@@ -36,6 +37,8 @@
      setScene(scene);
      setBackgroundBrush(Qt::black);
 
+     SequencerLine *seqLine = new SequencerLine(this);
      SequencerItem *seqItem = new SequencerItem(this);
+     scene->addItem(seqLine);
      scene->addItem(seqItem);
  }
