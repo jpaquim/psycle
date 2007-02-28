@@ -36,7 +36,11 @@
      setBackgroundBrush(Qt::black);
 
      MachineGui *machGui = new MachineGui(100, 20, this);
+     QGraphicsTextItem *name = new QGraphicsTextItem("Foo", machGui);
+     name->setDefaultTextColor(Qt::white);
      MachineGui *machGui2 = new MachineGui(400, 20, this);
+     QGraphicsTextItem *name2 = new QGraphicsTextItem("Bar", machGui2);
+     name2->setDefaultTextColor(Qt::white);
      scene->addItem(machGui);
      scene->addItem(machGui2);
  }

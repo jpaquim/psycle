@@ -36,13 +36,14 @@
      left_ = left;
      top_ = top;
 
-     setRect(QRectF(left, top, 100, 60));
+     setRect(QRectF(0, 0, 100, 60));
+     setPos(left, top);
      setPen(QPen(Qt::white,1));
      setBrush(QBrush(Qt::blue));
      setFlag(ItemIsMovable);
      setZValue(1);
  }
-
+    
   void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
   {
      QMenu menu;
