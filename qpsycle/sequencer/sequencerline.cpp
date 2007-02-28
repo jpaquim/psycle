@@ -17,7 +17,6 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "machinegui.h"
 
  #include <QGraphicsScene>
  #include <QGraphicsSceneMouseEvent>
@@ -25,31 +24,20 @@
  #include <QStyleOption>
  #include <QMessageBox>
  #include <QMouseEvent>
- #include <QMenu>
- #include <QAction>
 
- #include "machineview.h"
+#include "sequencerline.h"
+#include "sequencerview.h"
+#include "sequenceritem.h"
 
- MachineGui::MachineGui(int left, int top, MachineView *macView)
-     : machineView(macView)
+ SequencerLine::SequencerLine(SequencerView *seqView)
+     : sequencerView(seqView)
  {
-     left_ = left;
-     top_ = top;
-
-     setRect(QRectF(left, top, 100, 60));
+     setRect(QRectF(0, 0, sequencerView->width(), 30));
      setPen(QPen(Qt::white,1));
-     setBrush(QBrush(Qt::blue));
-     setFlag(ItemIsMovable);
+     setBrush(QBrush(Qt::transparent));
+//     setFlag(ItemIsMovable);
      setZValue(1);
+
+     SequencerItem *seqItem = new SequencerItem(sequencerView);
+     seqItem->setParentItem(this);
  }
-
-  void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-  {
-     QMenu menu;
-      menu.addAction("Rename");
-      menu.addAction("Clone");
-      menu.addAction("Delete");
-      QAction *a = menu.exec(event->screenPos());
-  }
-
-
