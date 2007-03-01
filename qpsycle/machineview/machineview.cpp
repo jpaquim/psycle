@@ -46,6 +46,7 @@
      machGui1->setName("Bar");
      machGui2->setName("Baz");
      connect( machGui0, SIGNAL(wiringNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(newConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+     connect( machGui0, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 
      scene_->addItem(machGui0);
      scene_->addItem(machGui1);
@@ -58,8 +59,10 @@
 
      newMachineDlg = new NewMachineDlg();
 
-     tempLine_ = new QGraphicsLineItem(0, 0, 50, 50);
+     // A temporary line to display when user is making a new connection.
+     tempLine_ = new QGraphicsLineItem(0, 0, 0, 0);
      tempLine_->setPen(QPen(Qt::white));
+     tempLine_->setVisible(false);// We don't want it to be visible yet.
      scene_->addItem(tempLine_);
  }
 
@@ -100,4 +103,11 @@
  {
      qDebug("machineview: new con");
      tempLine_->setLine(QLineF(macGui->x(), macGui->y(), event->scenePos().x(), event->scenePos().y()));
+     tempLine_->setVisible(true);
+ }
+
+ void MachineView::closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event)
+ {
+     qDebug("machineview: close con");
+     tempLine_->setVisible(false);
  }
