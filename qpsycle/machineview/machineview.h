@@ -22,7 +22,11 @@
 
  #include <QWidget>
  #include <QtGui/QGraphicsView>
+ #include <QtGui/QGraphicsScene>
  #include "newmachinedlg.h"
+ #include "machinegui.h"
+
+ class MachineGui;
 
  class MachineView : public QGraphicsView
  {
@@ -37,8 +41,13 @@
 
     void scaleView(qreal scaleFactor);
 
+ public slots:
+    void newConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
+
  private:
      NewMachineDlg *newMachineDlg;
+     QGraphicsScene *scene_;
+     QGraphicsLineItem *tempLine_;
 
  };
 
