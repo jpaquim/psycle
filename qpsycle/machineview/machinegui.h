@@ -35,6 +35,7 @@
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
 
  private:
      MachineView *machineView;

@@ -52,6 +52,8 @@
      WireGui *wireGui1 = new WireGui(machGui0, machGui2);
      scene->addItem(wireGui0);
      scene->addItem(wireGui1);
+
+     newMachineDlg = new NewMachineDlg();
  }
 
  void MachineView::keyPressEvent(QKeyEvent *event)
@@ -72,11 +74,12 @@
  {
      int accepted = newMachineDlg->exec();
      if (accepted) {
-        QMessageBox::information (this, "Hi", "Add a new machine...");
+//        add a new machine.
      } else {
-        QMessageBox::information (this, "Hi", "Cancel");
+//        don't bother.
      }
  }*/
+
  void MachineView::scaleView(qreal scaleFactor) 
  {
       qreal factor = matrix().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width();

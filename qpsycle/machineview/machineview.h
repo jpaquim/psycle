@@ -22,7 +22,7 @@
 
  #include <QWidget>
  #include <QtGui/QGraphicsView>
-// #include "newmachinedlg.h"
+ #include "newmachinedlg.h"
 
  class MachineView : public QGraphicsView
  {
@@ -38,7 +38,7 @@
     void scaleView(qreal scaleFactor);
 
  private:
-//     NewMachineDlg *newMachineDlg;
+     NewMachineDlg *newMachineDlg;
 
  };
 

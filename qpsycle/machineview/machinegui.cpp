@@ -27,6 +27,7 @@
  #include <QMouseEvent>
  #include <QMenu>
  #include <QAction>
+ #include <iostream>
 
  #include "machineview.h"
 
@@ -79,6 +80,12 @@
       menu.addAction("Clone");
       menu.addAction("Delete");
       QAction *a = menu.exec(event->screenPos());
+  }
+
+  void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
+  { 
+        QDialog dialog(machineView);
+        dialog.exec();
   }
 
 
