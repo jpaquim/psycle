@@ -64,7 +64,6 @@
      case ItemPositionChange:
          foreach (WireGui *wireGui, wireGuiList)
              wireGui->adjust();
-//         graph->itemMoved();
          break;
      default:
          break;
