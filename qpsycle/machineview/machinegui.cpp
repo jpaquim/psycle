@@ -30,6 +30,7 @@
  #include <iostream>
 
  #include "machineview.h"
+ #include "machinetweakdlg.h"
 
  MachineGui::MachineGui(int left, int top, MachineView *macView)
      : machineView(macView)
@@ -84,8 +85,8 @@
 
   void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
   { 
-        QDialog dialog(machineView);
-        dialog.exec();
+        MachineTweakDlg *macTwkDlg = new MachineTweakDlg(machineView);
+        macTwkDlg->exec();
   }
 
 
