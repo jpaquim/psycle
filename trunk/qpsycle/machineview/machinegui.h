@@ -21,7 +21,6 @@
 #define MACHINEGUI_H
 
  #include <QGraphicsItem>
-// #include <QGraphicsSceneContextMenuEvent>
  #include "machineview.h"
  #include "wiregui.h"
 

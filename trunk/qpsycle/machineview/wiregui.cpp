@@ -19,6 +19,9 @@
 ***************************************************************************/
 
 #include <QPainter>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QMenu>
+#include <QAction>
 
  #include "wiregui.h"
  #include "machinegui.h"
@@ -64,6 +67,16 @@
      dest = macGui;
      adjust();
  }
+
+  void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+  {
+     QMenu menu;
+      menu.addAction("Delete Connection");
+      menu.addSeparator();
+      menu.addAction("Rewire Connection Source");
+      menu.addAction("Rewire Connection Destination");
+      QAction *a = menu.exec(event->screenPos());
+  }
 
  void WireGui::adjust()
  {
