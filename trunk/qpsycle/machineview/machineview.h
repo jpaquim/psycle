@@ -43,6 +43,7 @@
 
  public slots:
     void newConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
+    void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
 
  private:
      NewMachineDlg *newMachineDlg;

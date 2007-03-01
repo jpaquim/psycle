@@ -95,7 +95,7 @@ void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
 
 void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->buttons() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier) {
+    if (event->buttons() & Qt::MidButton) {
         qDebug("emitting new wire con..");
         emit wiringNewConnection(this, event);
     } 
@@ -104,6 +104,24 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     } 
     else {
     }
+}
+
+void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    std::cout << event->buttons() << std::endl;
+    std::cout << event->button() << std::endl;
+    std::cout << event->modifiers() << std::endl;
+    if (event->button() == Qt::MidButton) {
+        qDebug("ending new wire con..");
+        emit closeNewConnection(this, event);
+    } 
+    else if (event->buttons() == Qt::LeftButton) {
+        QGraphicsItem::mouseReleaseEvent(event);
+    } 
+    else {
+    }
+        qDebug("mouse release");
+
 }
 
 //void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)

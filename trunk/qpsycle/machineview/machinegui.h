@@ -43,12 +43,14 @@
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 public slots:
     void showMacTwkDlg();
 
 signals:
     void wiringNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
+    void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
 
  private:
      MachineView *machineView;
