@@ -30,7 +30,6 @@
  #include <iostream>
 
  #include "machineview.h"
- #include "machinetweakdlg.h"
 
  MachineGui::MachineGui(int left, int top, MachineView *macView)
      : machineView(macView)
@@ -47,6 +46,10 @@
      setFlag(ItemIsMovable);
      setFlag(ItemIsSelectable);
      setZValue(1);
+
+     macTwkDlg_ = new MachineTweakDlg(machineView);
+     showMacTwkDlgAct_ = new QAction("Tweak Machine", this);
+     connect(showMacTwkDlgAct_, SIGNAL(triggered()), this, SLOT(showMacTwkDlg()));
  }
 
  void MachineGui::setName(const QString &name)
@@ -80,13 +83,19 @@
       menu.addAction("Rename");
       menu.addAction("Clone");
       menu.addAction("Delete");
+      menu.addSeparator();
+      menu.addAction(showMacTwkDlgAct_);
       QAction *a = menu.exec(event->screenPos());
   }
 
-  void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
-  { 
-        MachineTweakDlg *macTwkDlg = new MachineTweakDlg(machineView);
-        macTwkDlg->exec();
-  }
+void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
+{ 
+    showMacTwkDlgAct_->activate(QAction::Trigger);    
+ }
+
+void MachineGui::showMacTwkDlg()
+{
+    macTwkDlg_->exec();
+}
 
 

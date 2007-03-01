@@ -21,11 +21,15 @@
 #define MACHINEGUI_H
 
  #include <QGraphicsItem>
+ #include <QAction>
+ #include <QObject>
  #include "machineview.h"
  #include "wiregui.h"
+ #include "machinetweakdlg.h"
 
- class MachineGui : public QGraphicsRectItem
+ class MachineGui : public QObject, public QGraphicsRectItem
  {
+    Q_OBJECT
 
  public:
      MachineGui(int left, int top, MachineView *macView);
@@ -37,12 +41,18 @@
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
 
+public slots:
+    void showMacTwkDlg();
+
  private:
      MachineView *machineView;
      QGraphicsTextItem *nameItem;
      int left_;
      int top_;
      QList<WireGui *> wireGuiList;
+     MachineTweakDlg *macTwkDlg_;
+
+     QAction *showMacTwkDlgAct_;
  };
 
  #endif
