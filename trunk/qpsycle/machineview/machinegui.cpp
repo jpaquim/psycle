@@ -91,7 +91,22 @@
 void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
 { 
     showMacTwkDlgAct_->activate(QAction::Trigger);    
- }
+}
+
+void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->buttons() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier) {
+        qDebug("emitting new wire con..");
+        emit wiringNewConnection(this, event);
+    } 
+    else if (event->buttons() == Qt::LeftButton) {
+        QGraphicsItem::mouseMoveEvent(event);
+    } 
+    else {
+    }
+}
+
+//void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void MachineGui::showMacTwkDlg()
 {

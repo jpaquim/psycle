@@ -27,6 +27,8 @@
  #include "wiregui.h"
  #include "machinetweakdlg.h"
 
+ class MachineView;
+
  class MachineGui : public QObject, public QGraphicsRectItem
  {
     Q_OBJECT
@@ -40,9 +42,13 @@
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 
 public slots:
     void showMacTwkDlg();
+
+signals:
+    void wiringNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
 
  private:
      MachineView *machineView;

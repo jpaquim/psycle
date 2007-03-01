@@ -131,7 +131,7 @@
      QPointF arrowP2 = midPoint + QPointF(sin(angle - Pi + Pi / 3) * arrowSize,
                                                cos(angle - Pi + Pi / 3) * arrowSize);
 
-     painter->setBrush(Qt::black);
+     painter->setBrush(Qt::darkGray);
      painter->drawPolygon(QPolygonF() << midPoint << arrowP1 << arrowP2);
  }
 

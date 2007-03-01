@@ -22,6 +22,7 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <iostream>
+#include <QGraphicsLineItem>
 
  #include "machineview.h"
  #include "machinegui.h"
@@ -29,12 +30,12 @@
 
  MachineView::MachineView()
  {
-     QGraphicsScene *scene = new QGraphicsScene(this);
-     scene->setBackgroundBrush(Qt::black);
+     scene_ = new QGraphicsScene(this);
+     scene_->setBackgroundBrush(Qt::black);
 
      setDragMode(QGraphicsView::RubberBandDrag);
      setSceneRect(0,0,width(),height());
-     setScene(scene);
+     setScene(scene_);
      setBackgroundBrush(Qt::black);
 
      MachineGui *machGui0 = new MachineGui(100, 20, this);
@@ -44,16 +45,22 @@
      machGui0->setName("Foo");
      machGui1->setName("Bar");
      machGui2->setName("Baz");
+     connect( machGui0, SIGNAL(wiringNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(newConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 
-     scene->addItem(machGui0);
-     scene->addItem(machGui1);
-     scene->addItem(machGui2);
+     scene_->addItem(machGui0);
+     scene_->addItem(machGui1);
+     scene_->addItem(machGui2);
      WireGui *wireGui0 = new WireGui(machGui0, machGui1);
      WireGui *wireGui1 = new WireGui(machGui0, machGui2);
-     scene->addItem(wireGui0);
-     scene->addItem(wireGui1);
+     scene_->addItem(wireGui0);
+     scene_->addItem(wireGui1);
+
 
      newMachineDlg = new NewMachineDlg();
+
+     tempLine_ = new QGraphicsLineItem(0, 0, 50, 50);
+     tempLine_->setPen(QPen(Qt::white));
+     scene_->addItem(tempLine_);
  }
 
  void MachineView::keyPressEvent(QKeyEvent *event)
@@ -87,4 +94,10 @@
          return;
 
      scale(scaleFactor, scaleFactor);
+ }
+
+ void MachineView::newConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event)
+ {
+     qDebug("machineview: new con");
+     tempLine_->setLine(QLineF(macGui->x(), macGui->y(), event->scenePos().x(), event->scenePos().y()));
  }
