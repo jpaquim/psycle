@@ -32,7 +32,7 @@
  static double TwoPi = 2.0 * Pi;
 
  WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui)
-     : arrowSize(10)
+     : arrowSize(20)
  {
      setAcceptedMouseButtons(0);
      source = sourceMacGui;
@@ -113,27 +113,25 @@
      if (!source || !dest)
          return;
 
-     // Draw the line itself
+     // Draw the line.
      QLineF line(sourcePoint, destPoint);
      painter->setPen(QPen(Qt::white, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
      painter->drawLine(line);
 
-     // Draw the arrows if there's enough room
+     // Draw the arrow.
+     // FIXME: arrow isn't quite in centre of line (observe two machines close to each other)
      double angle = ::acos(line.dx() / line.length());
      if (line.dy() >= 0)
          angle = TwoPi - angle;
 
-     QPointF sourceArrowP1 = sourcePoint + QPointF(sin(angle + Pi / 3) * arrowSize,
-                                                   cos(angle + Pi / 3) * arrowSize);
-     QPointF sourceArrowP2 = sourcePoint + QPointF(sin(angle + Pi - Pi / 3) * arrowSize,
-                                                   cos(angle + Pi - Pi / 3) * arrowSize);
-     QPointF destArrowP1 = destPoint + QPointF(sin(angle - Pi / 3) * arrowSize,
+     QPointF midPoint = sourcePoint + QPointF((destPoint.x()-sourcePoint.x())/2, 
+                                  (destPoint.y()-sourcePoint.y())/2);
+     QPointF arrowP1 = midPoint + QPointF(sin(angle - Pi / 3) * arrowSize,
                                                cos(angle - Pi / 3) * arrowSize);
-     QPointF destArrowP2 = destPoint + QPointF(sin(angle - Pi + Pi / 3) * arrowSize,
+     QPointF arrowP2 = midPoint + QPointF(sin(angle - Pi + Pi / 3) * arrowSize,
                                                cos(angle - Pi + Pi / 3) * arrowSize);
 
      painter->setBrush(Qt::black);
-     painter->drawPolygon(QPolygonF() << line.p1() << sourceArrowP1 << sourceArrowP2);
-     painter->drawPolygon(QPolygonF() << line.p2() << destArrowP1 << destArrowP2);
+     painter->drawPolygon(QPolygonF() << midPoint << arrowP1 << arrowP2);
  }
 
