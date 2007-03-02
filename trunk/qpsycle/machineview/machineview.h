@@ -49,7 +49,6 @@
      NewMachineDlg *newMachineDlg;
      QGraphicsScene *scene_;
      QGraphicsLineItem *tempLine_;
-
  };
 
  #endif

@@ -60,7 +60,6 @@
      scene_->addItem(wireGui0);
      scene_->addItem(wireGui1);
 
-
      newMachineDlg = new NewMachineDlg();
 
      // A temporary line to display when user is making a new connection.
@@ -113,5 +112,10 @@
  void MachineView::closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event)
  {
      qDebug("machineview: close con");
-     tempLine_->setVisible(false);
+     // See if we hit another machine gui.
+     if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) ) ) {
+
+     } else {
+         tempLine_->setVisible(false);
+     }
  }
