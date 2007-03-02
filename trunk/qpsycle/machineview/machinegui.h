@@ -39,6 +39,9 @@
      void addWireGui(WireGui *wireGui);
      void setName(const QString &name);
      QPointF centrePointInSceneCoords();
+    enum { Type = UserType + 1 };
+
+    int type() const { return Type; }
 
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);

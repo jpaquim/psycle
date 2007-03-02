@@ -35,6 +35,8 @@
  public:
      MachineView();
 
+     void connectMachines(MachineGui *srcMacGui, MachineGui *dstMacGui );
+
  protected:
     void keyPressEvent(QKeyEvent *event);
 //    void mouseDoubleClickEvent(QMouseEvent *event);
@@ -42,8 +44,8 @@
     void scaleView(qreal scaleFactor);
 
  public slots:
-    void newConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
-    void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
+    void newConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
+    void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
 
  private:
      NewMachineDlg *newMachineDlg;
