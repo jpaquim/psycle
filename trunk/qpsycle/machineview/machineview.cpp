@@ -45,12 +45,6 @@
      machGui0->setName("Foo");
      machGui1->setName("Bar");
      machGui2->setName("Baz");
-     connect( machGui0, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
-     connect( machGui0, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
-     connect( machGui1, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
-     connect( machGui1, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
-     connect( machGui2, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
-     connect( machGui2, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 
      scene_->addItem(machGui0);
      scene_->addItem(machGui1);
@@ -143,5 +137,5 @@
     // Delete the connection in the song file.
     
     // Delete the connection in the GUI.
-    scene_->removeItem( wireGui );
+    scene_->removeItem( wireGui ); // FIXME: do we need to do more here?
  }

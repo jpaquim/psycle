@@ -50,6 +50,11 @@
      macTwkDlg_ = new MachineTweakDlg(machineView);
      showMacTwkDlgAct_ = new QAction("Tweak Machine", this);
      connect(showMacTwkDlgAct_, SIGNAL(triggered()), this, SLOT(showMacTwkDlg()));
+
+     connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
+              machineView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+     connect( this, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
+              machineView, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
  }
 
  void MachineGui::setName(const QString &name)
