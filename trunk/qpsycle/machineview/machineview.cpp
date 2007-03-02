@@ -113,8 +113,13 @@
  {
      qDebug("machineview: close con");
      // See if we hit another machine gui.
-     if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) ) ) {
-
+     if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
+         QGraphicsItem *itm = scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) );
+         if (itm->type() == 3) { // FIXME: overload type() in MachineGui
+            // do some business.
+         } else {
+             tempLine_->setVisible(false);
+         }
      } else {
          tempLine_->setVisible(false);
      }
