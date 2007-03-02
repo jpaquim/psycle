@@ -49,8 +49,8 @@
      scene_->addItem(machGui0);
      scene_->addItem(machGui1);
      scene_->addItem(machGui2);
-     WireGui *wireGui0 = new WireGui(machGui0, machGui1);
-     WireGui *wireGui1 = new WireGui(machGui0, machGui2);
+     WireGui *wireGui0 = new WireGui(machGui0, machGui1, this);
+     WireGui *wireGui1 = new WireGui(machGui0, machGui2, this);
      scene_->addItem(wireGui0);
      scene_->addItem(wireGui1);
 
@@ -124,9 +124,7 @@
     // Make a connection in the song file..
     
     // Make a new wiregui connection.
-    WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui );
-    connect( newWireGui, SIGNAL( deleteConnectionRequest( WireGui* ) ),
-             this, SLOT( deleteConnection( WireGui* ) ) );
+    WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui, this );
     scene_->addItem( newWireGui );
  }
 

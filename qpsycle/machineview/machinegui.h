@@ -29,6 +29,7 @@
  #include "machinetweakdlg.h"
 
  class MachineView;
+ class WireGui;
 
  class MachineGui : public QObject, public QGraphicsRectItem
  {

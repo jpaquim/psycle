@@ -29,6 +29,7 @@
  #include "wiregui.h"
 
  class MachineGui;
+ class WireGui;
 
  class MachineView : public QGraphicsView
  {

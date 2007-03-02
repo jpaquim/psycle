@@ -24,13 +24,16 @@
  #include <QGraphicsItem>
  #include <QAction>
 
+ #include "machineview.h"
+
  class MachineGui;
+ class MachineView;
 
  class WireGui : public QObject, public QGraphicsItem
  {
     Q_OBJECT
  public:
-     WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui);
+     WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView);
      ~WireGui();
 
      MachineGui *sourceMacGui() const;
@@ -53,6 +56,8 @@
      void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
  private:
+     MachineView *machineView;
+
      MachineGui *source, *dest;
 
      QPointF sourcePoint;
