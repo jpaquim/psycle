@@ -31,8 +31,8 @@
  static const double Pi = 3.14159265358979323846264338327950288419717;
  static double TwoPi = 2.0 * Pi;
 
- WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui)
-     : arrowSize(20)
+ WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView)
+     : arrowSize(20), machineView(macView)
  {
      setAcceptedMouseButtons(0);
      source = sourceMacGui;
@@ -43,6 +43,8 @@
 
      delConnAct_ = new QAction("Delete Connection", this);
      connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
+     connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
+     // FIXME: the above lines seem not the best way of doing things...
  }
 
  WireGui::~WireGui()
