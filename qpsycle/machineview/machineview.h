@@ -23,8 +23,10 @@
  #include <QWidget>
  #include <QtGui/QGraphicsView>
  #include <QtGui/QGraphicsScene>
+
  #include "newmachinedlg.h"
  #include "machinegui.h"
+ #include "wiregui.h"
 
  class MachineGui;
 
@@ -44,8 +46,9 @@
     void scaleView(qreal scaleFactor);
 
  public slots:
-    void newConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
+    void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
+    void deleteConnection( WireGui *wireGui );
 
  private:
      NewMachineDlg *newMachineDlg;

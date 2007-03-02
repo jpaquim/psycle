@@ -40,6 +40,9 @@
      source->addWireGui(this);
      dest->addWireGui(this);
      adjust();
+
+     delConnAct_ = new QAction("Delete Connection", this);
+     connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
  }
 
  WireGui::~WireGui()
@@ -71,7 +74,7 @@
   void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
   {
      QMenu menu;
-      menu.addAction("Delete Connection");
+      menu.addAction( delConnAct_ );
       menu.addSeparator();
       menu.addAction("Rewire Connection Source");
       menu.addAction("Rewire Connection Destination");
@@ -133,5 +136,10 @@
 
      painter->setBrush(Qt::darkGray);
      painter->drawPolygon(QPolygonF() << midPoint << arrowP1 << arrowP2);
+ }
+
+ void WireGui::deleteConnectionRequest()
+ {
+    emit deleteConnectionRequest(this);
  }
 
