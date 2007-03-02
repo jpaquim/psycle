@@ -97,7 +97,7 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     if (event->buttons() & Qt::MidButton) {
         qDebug("emitting new wire con..");
-        emit wiringNewConnection(this, event);
+        emit startNewConnection(this, event);
     } 
     else { // business as usual
         QGraphicsItem::mouseMoveEvent(event);

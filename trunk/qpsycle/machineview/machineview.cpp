@@ -45,11 +45,11 @@
      machGui0->setName("Foo");
      machGui1->setName("Bar");
      machGui2->setName("Baz");
-     connect( machGui0, SIGNAL(wiringNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(newConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+     connect( machGui0, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
      connect( machGui0, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
-     connect( machGui1, SIGNAL(wiringNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(newConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+     connect( machGui1, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
      connect( machGui1, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
-     connect( machGui2, SIGNAL(wiringNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(newConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+     connect( machGui2, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
      connect( machGui2, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), this, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 
      scene_->addItem(machGui0);
@@ -102,7 +102,7 @@
      scale(scaleFactor, scaleFactor);
  }
 
- void MachineView::newConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
+ void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
  {
      qDebug("machineview: new con");
      tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
@@ -120,14 +120,28 @@
             connectMachines(srcMacGui, dstMacGui); 
          }
      }
-     tempLine_->setVisible(false);     // We want the tempLine to go away, whatever happens.
+     tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
  }
 
  void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
  {
     // Check there's not already a connection.
     
-    // Make a new connection.
+    // Make a connection in the song file..
+    
+    // Make a new wiregui connection.
     WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui );
+    connect( newWireGui, SIGNAL( deleteConnectionRequest( WireGui* ) ),
+             this, SLOT( deleteConnection( WireGui* ) ) );
     scene_->addItem( newWireGui );
+ }
+
+ void MachineView::deleteConnection( WireGui *wireGui )
+ {
+    qDebug("deleting connection");
+
+    // Delete the connection in the song file.
+    
+    // Delete the connection in the GUI.
+    scene_->removeItem( wireGui );
  }

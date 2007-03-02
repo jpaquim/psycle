@@ -22,11 +22,13 @@
  #define WIREGUI_H
 
  #include <QGraphicsItem>
+ #include <QAction>
 
  class MachineGui;
 
- class WireGui : public QGraphicsItem
+ class WireGui : public QObject, public QGraphicsItem
  {
+    Q_OBJECT
  public:
      WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui);
      ~WireGui();
@@ -39,6 +41,12 @@
 
      void adjust();
 
+ signals:
+    void deleteConnectionRequest( WireGui *wireGui );
+
+ public slots:
+    void deleteConnectionRequest();
+
  protected:
      QRectF boundingRect() const;
      void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -50,6 +58,8 @@
      QPointF sourcePoint;
      QPointF destPoint;
      qreal arrowSize;
+
+     QAction *delConnAct_;
  };
 
  #endif

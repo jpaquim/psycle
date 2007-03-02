@@ -54,7 +54,7 @@ public slots:
     void showMacTwkDlg();
 
 signals:
-    void wiringNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
+    void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
 
  private:
