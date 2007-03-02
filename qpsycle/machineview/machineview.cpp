@@ -102,25 +102,32 @@
      scale(scaleFactor, scaleFactor);
  }
 
- void MachineView::newConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event)
+ void MachineView::newConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
  {
      qDebug("machineview: new con");
-     tempLine_->setLine( QLineF( macGui->centrePointInSceneCoords(), event->scenePos() ) );
+     tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
      tempLine_->setVisible(true);
  }
 
- void MachineView::closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event)
+ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
  {
      qDebug("machineview: close con");
      // See if we hit another machine gui.
      if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
          QGraphicsItem *itm = scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) );
-         if (itm->type() == 3) { // FIXME: overload type() in MachineGui
-            // do some business.
-         } else {
-             tempLine_->setVisible(false);
+         if (itm->type() == 65537) { // FIXME: un-hardcode this
+            MachineGui *dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
+            connectMachines(srcMacGui, dstMacGui); 
          }
-     } else {
-         tempLine_->setVisible(false);
      }
+     tempLine_->setVisible(false);     // We want the tempLine to go away, whatever happens.
+ }
+
+ void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
+ {
+    // Check there's not already a connection.
+    
+    // Make a new connection.
+    WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui );
+    scene_->addItem( newWireGui );
  }
