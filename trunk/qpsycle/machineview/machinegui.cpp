@@ -99,10 +99,8 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         qDebug("emitting new wire con..");
         emit wiringNewConnection(this, event);
     } 
-    else if (event->buttons() == Qt::LeftButton) {
+    else { // business as usual
         QGraphicsItem::mouseMoveEvent(event);
-    } 
-    else {
     }
 }
 
@@ -115,13 +113,9 @@ void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         qDebug("ending new wire con..");
         emit closeNewConnection(this, event);
     } 
-    else if (event->buttons() == Qt::LeftButton) {
+    else { // business as usual
         QGraphicsItem::mouseReleaseEvent(event);
-    } 
-    else {
     }
-        qDebug("mouse release");
-
 }
 
 //void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -129,6 +123,10 @@ void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void MachineGui::showMacTwkDlg()
 {
     macTwkDlg_->exec();
+}
+
+QPointF MachineGui::centrePointInSceneCoords() {
+    return mapToScene( QPointF( boundingRect().width()/2, boundingRect().height()/2 ) );
 }
 
 

@@ -23,6 +23,7 @@
  #include <QGraphicsItem>
  #include <QAction>
  #include <QObject>
+ #include <QPointF>
  #include "machineview.h"
  #include "wiregui.h"
  #include "machinetweakdlg.h"
@@ -37,6 +38,7 @@
      MachineGui(int left, int top, MachineView *macView);
      void addWireGui(WireGui *wireGui);
      void setName(const QString &name);
+     QPointF centrePointInSceneCoords();
 
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
