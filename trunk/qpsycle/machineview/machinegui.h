@@ -21,25 +21,25 @@
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
- #include <QGraphicsItem>
- #include <QAction>
- #include <QObject>
- #include <QPointF>
+#include <QGraphicsItem>
+#include <QAction>
+#include <QObject>
+#include <QPointF>
 
- #include "machineview.h"
- #include "wiregui.h"
- #include "machinetweakdlg.h"
+#include "machineview.h"
+#include "wiregui.h"
+#include "machinetweakdlg.h"
 
- #include "psycore/machine.h"
+#include "psycore/machine.h"
 
- class MachineView;
- class WireGui;
+class MachineView;
+class WireGui;
 
- class MachineGui : public QObject, public QGraphicsRectItem
- {
-    Q_OBJECT
+class MachineGui : public QObject, public QGraphicsRectItem
+{
+Q_OBJECT
 
- public:
+public:
      MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
      void addWireGui(WireGui *wireGui);
      void setName(const QString &name);
@@ -47,6 +47,9 @@
     enum { Type = UserType + 1 };
 
     int type() const { return Type; }
+
+    psy::core::Machine* mac();
+
 
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
@@ -72,7 +75,6 @@ signals:
      MachineTweakDlg *macTwkDlg_;
 
      QAction *showMacTwkDlgAct_;
-
  };
 
  #endif

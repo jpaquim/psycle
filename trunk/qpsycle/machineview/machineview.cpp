@@ -44,21 +44,17 @@
      setScene(scene_);
      setBackgroundBrush(Qt::black);
 
-     psy::core::Sampler *sampler0 = new psy::core::Sampler(3, song_);
-     psy::core::Sampler *sampler1 = new psy::core::Sampler(3, song_);
-     psy::core::Sampler *sampler2 = new psy::core::Sampler(3, song_);
+    int fb = song_->GetFreeBus();
+    song_->CreateMachine(psy::core::MACH_SAMPLER, 100, 20, "SAMPLER", fb);  
+    psy::core::Machine *sampler0 = song_->_pMachine[fb];
 
-     MachineGui *machGui0 = new MachineGui(100, 20, sampler0, this);
-     MachineGui *machGui1 = new MachineGui(400, 20, sampler1, this);
-     MachineGui *machGui2 = new MachineGui(100, 120, sampler2, this);
+    fb = song_->GetFreeBus();
+    song_->CreateMachine(psy::core::MACH_SAMPLER, 300, 20, "SAMPLER", fb);  
+    psy::core::Machine *sampler1 = song_->_pMachine[fb];
 
-     scene_->addItem(machGui0);
-     scene_->addItem(machGui1);
-     scene_->addItem(machGui2);
-     WireGui *wireGui0 = new WireGui(machGui0, machGui1, this);
-     WireGui *wireGui1 = new WireGui(machGui0, machGui2, this);
-     scene_->addItem(wireGui0);
-     scene_->addItem(wireGui1);
+     psy::core::Machine *master = song_->_pMachine[psy::core::MASTER_INDEX] ; 
+     song_->InsertConnection( sampler0->_macIndex , master->_macIndex, 1.0f);
+     song_->InsertConnection( sampler1->_macIndex , master->_macIndex, 1.0f);
 
      newMachineDlg = new NewMachineDlg();
 
@@ -68,28 +64,51 @@
      tempLine_->setVisible(false);// We don't want it to be visible yet.
      scene_->addItem(tempLine_);
 
-        // Create MachineGuis for the Machines in the Song.
-        for(int c=0;c<psy::core::MAX_MACHINES;c++)
+    // Create MachineGuis for the Machines in the Song.
+    for(int c=0;c<psy::core::MAX_MACHINES;c++)
+    {
+        psy::core::Machine* mac = song_->_pMachine[c];
+        if (mac) std::cout << "c:" << c << mac->mode() << std::endl;
+        MachineGui *macGui;
+        if (mac) { 
+            switch ( mac->mode() ) {							
+                case psy::core::MACHMODE_GENERATOR:
+                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                break;
+                case psy::core::MACHMODE_FX:
+                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                break;
+                case psy::core::MACHMODE_MASTER: 
+                    macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+                break;
+                default:
+                    macGui = 0;
+            }
+            scene_->addItem(macGui);
+            machineGuis.push_back(macGui);
+        }
+    }
+    // Create WireGuis for connections in Song file.
+    for(int c=0;c<psy::core::MAX_MACHINES;c++)
+    {
+        psy::core::Machine* tmac = song_->_pMachine[c];
+        if (tmac) for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
         {
-            psy::core::Machine* mac = song_->_pMachine[c];
-            MachineGui *macGui;
-            if (mac) { 
-                switch ( mac->mode() ) {							
-                    case psy::core::MACHMODE_GENERATOR:
-                        macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-                    break;
-                    case psy::core::MACHMODE_FX:
-                        macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-                    break;
-                    case psy::core::MACHMODE_MASTER: 
-                        macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
-                    break;
-                    default:
-                        macGui = 0;
-				}
-                scene_->addItem(macGui);
+            if (tmac->_connection[w]) {
+                    std::cout << "hi" << std::endl;
+                MachineGui* srcMacGui = findByMachine(tmac);
+                if ( srcMacGui!=0 ) {
+                    psy::core::Machine *pout = song_->_pMachine[tmac->_outputMachines[w]];
+                    MachineGui* dstMacGui = findByMachine(pout);
+                    if ( dstMacGui != 0 ) {
+                        WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
+                        scene_->addItem( wireGui );
+                    }
+                }
             }
         }
+    }
+
  }
 
  void MachineView::keyPressEvent(QKeyEvent *event)
@@ -166,5 +185,15 @@
     // Delete the connection in the GUI.
     scene_->removeItem( wireGui ); // FIXME: do we need to do more here?
  }
+
+MachineGui *MachineView::findByMachine( psy::core::Machine *mac )
+{
+    for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
+        MachineGui* machineGui = *it;
+        if ( machineGui->mac() == mac ) return machineGui;
+    }
+    return 0;
+}
+
 
 

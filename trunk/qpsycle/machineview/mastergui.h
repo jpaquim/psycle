@@ -29,6 +29,7 @@ public:
     MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
 
 protected:
+    // Override these, as MasterGui doesn't do much (for now.)
     void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event ) {}
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {}
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseMoveEvent( event ); }
