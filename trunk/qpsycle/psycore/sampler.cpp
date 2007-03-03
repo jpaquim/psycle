@@ -355,6 +355,7 @@ namespace psy
 
 		void Sampler::Tick( int channel, const PatternEvent & pData )
 		{
+        std::cout << pData.note() << std::endl;
 			if ( pData.note() > 120 ) // don't process twk , twf of Mcm Commands
 			{
 				if ( pData.command() == 0 || pData.note() != 255) return; // Return in everything but commands!
@@ -363,6 +364,7 @@ namespace psy
 
 			int voice;
 			int useVoice = -1;
+
 
 			PatternEvent data = pData;
 
