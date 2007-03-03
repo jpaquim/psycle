@@ -269,7 +269,7 @@ namespace psy
 							{
 								std::ostringstream s;
 								s << c << " and " << j << " have duplicate pointers";
-								report.emit(s.str(), "Song Delete Error");
+//								report.emit(s.str(), "Song Delete Error");
 							}
 							_pMachine[j] = 0;
 						}

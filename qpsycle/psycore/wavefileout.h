@@ -22,7 +22,7 @@
 
 #include "audiodriver.h"
 #include "riff.h"
-#include "sigslot.h"
+//#include "sigslot.h"
 
 #ifdef __unix__
 #include <unistd.h>

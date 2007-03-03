@@ -22,7 +22,7 @@
 
 #include "patternline.h"
 #include "timesignature.h"
-#include "sigslot.h"
+//#include "sigslot.h"
 #include <map>
 #include <vector>
 #include <string>

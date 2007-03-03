@@ -83,8 +83,8 @@ namespace psy
 		{
 			RiffFile file;
 			file.Open(fileName);
-			progress.emit(1,0,"");
-			progress.emit(2,0,"Loading... psycle song fileformat version 3...");
+			//progress.emit(1,0,"");
+//			progress.emit(2,0,"Loading... psycle song fileformat version 3...");
 
 			// skip header
 			file.Skip(8);
@@ -109,11 +109,11 @@ namespace psy
 				file.Read(size);
 
 				int fileposition = file.GetPos();
-				song.progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
+//				song.progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
 
 				if(std::strcmp(header,"INFO") == 0)
 				{
-					song.progress.emit(2,0,"Loading... Song authorship information...");
+//					song.progress.emit(2,0,"Loading... Song authorship information...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadINFOv0(&file,song,version&0x00FF);
@@ -122,7 +122,7 @@ namespace psy
 				}
 				else if(std::strcmp(header,"SNGI")==0)
 				{
-					song.progress.emit(2,0,"Loading... Song properties information...");
+//					song.progress.emit(2,0,"Loading... Song properties information...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadSNGIv0(&file,song,version&0x00FF);
@@ -133,7 +133,7 @@ namespace psy
 				}
 				else if(std::strcmp(header,"SEQD")==0)
 				{
-					song.progress.emit(2,0,"Loading... Song sequence...");
+//					song.progress.emit(2,0,"Loading... Song sequence...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadSEQDv0(&file,song,version&0x00FF);
@@ -142,7 +142,7 @@ namespace psy
 				}
 				else if(std::strcmp(header,"PATD") == 0)
 				{
-					progress.emit(2,0,"Loading... Song patterns...");
+//					progress.emit(2,0,"Loading... Song patterns...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadPATDv0(&file,song,version&0x00FF);
@@ -153,7 +153,7 @@ namespace psy
 				}
 				else if(std::strcmp(header,"MACD") == 0)
 				{
-					song.progress.emit(2,0,"Loading... Song machines...");
+//					song.progress.emit(2,0,"Loading... Song machines...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 							LoadMACDv0(&file,song,version&0x00FF);
@@ -162,7 +162,7 @@ namespace psy
 				}
 				else if(std::strcmp(header,"INSD") == 0)
 				{
-					song.progress.emit(2,0,"Loading... Song instruments...");
+//					song.progress.emit(2,0,"Loading... Song instruments...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadINSDv0(&file,song,version&0x00FF);
@@ -172,7 +172,7 @@ namespace psy
 				else
 				{
 //					loggers::warning("foreign chunk found. skipping it.");
-					song.progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
+//					song.progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
 					std::ostringstream s;
 					s << "foreign chunk: version: " << version << ", size: " << size;
 //					loggers::trace(s.str());
@@ -193,7 +193,7 @@ namespace psy
 				--chunkcount;
 			}
 
-			song.progress.emit(4,16384,"");
+//			song.progress.emit(4,16384,"");
 
 			//\todo: Move this to something like "song.validate()" 
 
@@ -264,13 +264,13 @@ namespace psy
 				}
 			}
 
-			song.progress.emit(5,0,"");
+//			song.progress.emit(5,0,"");
 			if(chunkcount)
 			{
 				std::ostringstream s;
 				s << "Error reading from file '" << file.file_name() << "'" << std::endl;
 				s << "some chunks were missing in the file";
-				report.emit(s.str(), "Song Load Error.");
+//				report.emit(s.str(), "Song Load Error.");
 			}
 			//\todo:
 			return true;
@@ -286,7 +286,7 @@ namespace psy
 			file->Read(size);
 			if(fileversion > CURRENT_FILE_VERSION)
 			{
-				report.emit("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
+//				report.emit("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
 			}
 
 			file->Read(chunkcount);
