@@ -26,9 +26,9 @@
 #include <ngrs/nwindow.h>
 
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 							
 				int const SHORT_MIN = -32768;

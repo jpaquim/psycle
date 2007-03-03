@@ -27,9 +27,9 @@
 #undef max
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		int PatternCategory::idCounter = 0;
@@ -106,7 +106,7 @@ namespace psycle
 			return color_;
 		}
 
-		SinglePattern * psycle::host::PatternCategory::findById( int id )
+		SinglePattern * psy::core::PatternCategory::findById( int id )
 		{
 			for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
 				SinglePattern* pat = *it;

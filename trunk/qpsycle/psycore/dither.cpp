@@ -1,13 +1,13 @@
 //\file
-///\brief implementation file for psycle::host::dsp::Dither
+///\brief implementation file for psy::core::dsp::Dither
 
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "dither.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace dsp
 		{

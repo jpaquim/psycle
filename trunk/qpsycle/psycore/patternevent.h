@@ -40,9 +40,9 @@
 
 //const int CS_LAST = max_cmds;
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		class PatternEvent{

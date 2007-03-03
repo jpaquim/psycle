@@ -1,9 +1,9 @@
 #include "instpreview.h"
 #include "instrument.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		void InstPreview::Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 		{

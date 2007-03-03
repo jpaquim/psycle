@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psycle::host::Machine
+///\brief interface file for psy::core::Machine
 #pragma once
 #include "patternevent.h"
 #include "songstructs.h"
@@ -16,9 +16,9 @@
 #include <map>
 #include "global.h" // for zapArray
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
         // FIXME: stole these from analzyer.h just to fix compile error.
 		const int MAX_SCOPE_BANDS = 128;
@@ -72,7 +72,7 @@ namespace psycle
 			class function_error : public exception
 			{
 				public:
-					function_error(std::string const & what, std::exception const * const exception = 0) : host::exception(what), exception_(exception) {}
+					function_error(std::string const & what, std::exception const * const exception = 0) : core::exception(what), exception_(exception) {}
 				public:
 					std::exception const inline * const exception() const throw() { return exception_; }
 				private:
@@ -115,7 +115,7 @@ namespace psycle
 					};
 				}
 				#define PSYCLE__HOST__CATCH_ALL(machine) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor(machine))
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psy::core::exceptions::function_errors::detail::rethrow_functor(machine))
 				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
 			}*/
 		}

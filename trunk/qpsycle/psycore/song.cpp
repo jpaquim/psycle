@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::Song
+///\brief implementation file for psy::core::Song
 #include "song.h"
 #include "machine.h"
 #include "internal_machines.h"
@@ -15,9 +15,9 @@
 #include <sstream>
 
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		Song::Song()
 		{

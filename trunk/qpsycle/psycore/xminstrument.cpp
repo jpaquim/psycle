@@ -25,7 +25,7 @@
 
 #include "xminstrument.h"
 
-namespace psycle { namespace host {
+namespace psy { namespace core {
 
 
 

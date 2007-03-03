@@ -3,9 +3,9 @@
 #endif
 #if !defined XPSYCLE__NO_GSTREAMER
 #include "gstreamerout.h"
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		AudioDriverInfo GStreamerOut::info( ) const

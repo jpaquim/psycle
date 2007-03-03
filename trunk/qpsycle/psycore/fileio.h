@@ -1,4 +1,4 @@
-///\interface psycle::host::RiffFile
+///\interface psy::core::RiffFile
 #pragma once
 //#include <psycle/host/detail/project.hpp>
 #include "cstdint.h"
@@ -10,9 +10,9 @@
 #include <sstream>
 
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace endian
 		{

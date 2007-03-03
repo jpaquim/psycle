@@ -1,5 +1,5 @@
 //\file
-///\brief implementation file for psycle::host::Cubic.
+///\brief implementation file for psy::core::Cubic.
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 
@@ -29,9 +29,9 @@
 
 
 #include "dsp.h"
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace dsp
 		{

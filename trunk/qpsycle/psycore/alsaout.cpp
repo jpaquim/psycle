@@ -27,7 +27,7 @@
 //#include "configuration.h"
 #include "player.h"
 
-namespace psycle { namespace host {
+namespace psy { namespace core {
 
 int AlsaOut::enablePlayer = 0;
 bool AlsaOut::running = false;

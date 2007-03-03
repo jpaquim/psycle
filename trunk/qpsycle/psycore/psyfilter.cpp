@@ -24,9 +24,9 @@
 //#include "psy4filter.h"
 // no psy4 until get an xml parser
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		std::vector<PsyFilter*> PsyFilter::filters;

@@ -29,9 +29,9 @@
 #include <cerrno>
 #include "cstdint.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		NetAudioOut::NetAudioOut()

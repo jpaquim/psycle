@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psycle::host::Song based on Revision 2730
+///\brief interface file for psy::core::Song based on Revision 2730
 #pragma once
 #include "songstructs.h"
 #include "instrument.h"
@@ -12,9 +12,9 @@
 #include "patternsequence.h"
 #include "sigslot.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		class PluginFinder;

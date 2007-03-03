@@ -12,9 +12,9 @@
 #include <exception>
 #include <map>
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace convert_internal_machines
 		{

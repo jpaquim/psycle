@@ -1,12 +1,12 @@
-///\implementation psycle::host::RiffFile
+///\implementation psy::core::RiffFile
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "fileio.h"
 #include <stdexcept>
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		RiffFile::RiffFile( )

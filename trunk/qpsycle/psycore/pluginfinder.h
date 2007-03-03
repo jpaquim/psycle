@@ -28,9 +28,9 @@
 #include <ctime>
 #include "machine.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 //		class Configuration;
 

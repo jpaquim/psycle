@@ -35,9 +35,9 @@
 #include "convert_internal_machines.h"
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		struct ToLower
 	    {

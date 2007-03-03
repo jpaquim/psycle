@@ -1,6 +1,6 @@
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		class Instrument;
 

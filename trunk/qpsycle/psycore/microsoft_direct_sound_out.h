@@ -8,9 +8,9 @@
 #if defined __unix__
 	#include <pthread.h>
 #endif
-namespace psycle
+namespace psy
 	{
-		namespace host
+		namespace core
 		{
 			class MicrosoftDirectSoundOut : public AudioDriver
 			{

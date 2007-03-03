@@ -19,8 +19,8 @@
 	***************************************************************************/
 #include "inputhandler.h"
 
-namespace psycle {
-namespace host {
+namespace psy {
+namespace core {
 
 InputHandler::InputHandler()
 {

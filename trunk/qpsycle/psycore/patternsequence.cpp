@@ -27,9 +27,9 @@
 #undef max
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		GlobalEvent::GlobalEvent( ) : parameter_(0), target_(-1), target2_(-1), type_(NONE)
@@ -340,7 +340,7 @@ namespace psycle
 			return &patternData_;
 		}
 
-		const PatternData & psycle::host::PatternSequence::patternData( ) const
+		const PatternData & psy::core::PatternSequence::patternData( ) const
 		{
 			return patternData_;
 		}

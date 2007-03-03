@@ -21,9 +21,9 @@
 
 /// class for play time informations
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 

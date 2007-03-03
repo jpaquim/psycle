@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::Machine
+///\brief implementation file for psy::core::Machine
 #include "machine.h"
 #include "song.h"
 #include "dsp.h"
@@ -21,9 +21,9 @@
 #undef max
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 //		extern CPsycleApp theApp;
 
@@ -859,7 +859,7 @@ WorkEvent::WorkEvent( double beatOffset, int track, const PatternEvent & pattern
 {
 }
 
-const PatternEvent &  psycle::host::WorkEvent::event( ) const
+const PatternEvent &  psy::core::WorkEvent::event( ) const
 {
 	return event_;
 }

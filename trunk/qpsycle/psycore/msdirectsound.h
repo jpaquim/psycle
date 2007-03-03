@@ -29,9 +29,9 @@
 #include "dsound.h"
 
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 							
 				///\todo  this driver is (over)filling the buffer to fast

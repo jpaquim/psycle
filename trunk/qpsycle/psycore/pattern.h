@@ -1,7 +1,7 @@
 #include "cstdint.h"
 #pragma once
 
-namespace psycle { namespace host {
+namespace psy { namespace core {
 
 class PatternEntry
 {

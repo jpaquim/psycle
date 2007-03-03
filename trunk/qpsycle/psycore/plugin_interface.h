@@ -4,7 +4,7 @@
 #pragma once
 #include <cstdio> // would be better if plugins that wants it included it themselves.
 
-//namespace psycle
+//namespace psy
 //{
 	int const MI_VERSION = 11;
 	int const SEQUENCER = 1;
