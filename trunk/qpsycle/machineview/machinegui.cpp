@@ -101,7 +101,7 @@
 void MachineGui::keyPressEvent ( QKeyEvent * event )
 {
     int key = event->key();
-    int note = 1;
+    int note;
     switch (key) { // FIXME: shouldn't be hardcoded.
         case Qt::Key_Z: // C_0
             note = 1;
@@ -139,11 +139,13 @@ void MachineGui::keyPressEvent ( QKeyEvent * event )
         case Qt::Key_M: // B_0
             note = 12;
             break;
-        default:;
+        default: note = NULL;
     }
     int octave = 4;
     int velocity = 127;
-    machineView->PlayNote( octave * 12 + note, velocity, false, mac() );   
+    if (note) {
+        machineView->PlayNote( octave * 12 + note, velocity, false, mac() );   
+    }
 }
 
 void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )

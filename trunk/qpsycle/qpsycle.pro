@@ -97,6 +97,7 @@ HEADERS += mainwindow.h \
            psycore/zipreader.h \
            psycore/zipwriter.h \
            psycore/zipwriterstream.h \
+           psycore/file.h \
            sequencer/sequenceritem.h \
            sequencer/sequencerline.h \
            sequencer/sequencerview.h \
@@ -160,6 +161,7 @@ SOURCES += mainwindow.cpp \
            psycore/zipreader.cpp \
            psycore/zipwriter.cpp \
            psycore/zipwriterstream.cpp \
+           psycore/file.cpp \
            sequencer/sequenceritem.cpp \
            sequencer/sequencerline.cpp \
            sequencer/sequencerview.cpp \

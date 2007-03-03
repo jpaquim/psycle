@@ -53,7 +53,7 @@
 
  protected:
     void keyPressEvent(QKeyEvent *event);
-//    void mouseDoubleClickEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
 
     void scaleView(qreal scaleFactor);
 
