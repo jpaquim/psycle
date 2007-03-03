@@ -35,10 +35,10 @@
      song_ = new psy::core::Song();
      int si = song_->instSelected;
      song_->WavAlloc(si,"/home/neil/mymusic/samples/yeah.wav");
-     song_->auxcolSelected = 0;
+     //song_->auxcolSelected = 0;
+
+
      psy::core::AudioDriver *driver = new psy::core::AlsaOut;
-
-
         psy::core::AudioDriverSettings settings = driver->settings();
         settings.setDeviceName( "plughw:0" );
         driver->setSettings( settings );

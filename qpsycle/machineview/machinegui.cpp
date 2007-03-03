@@ -100,7 +100,11 @@
 
 void MachineGui::keyPressEvent ( QKeyEvent * event )
 {
-    machineView->PlayNote( 4 * 12 + 100, 127, false, mac() );   
+    int key = event->key();
+    int note = 1;
+    int octave = 4;
+    int velocity = 127;
+    machineView->PlayNote( octave * 12 + note, velocity, false, mac() );   
 }
 
 void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
