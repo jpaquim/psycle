@@ -20,6 +20,8 @@
  #ifndef MACHINEVIEW_H
  #define MACHINEVIEW_H
 
+ #include <vector>
+
  #include <QWidget>
  #include <QtGui/QGraphicsView>
  #include <QtGui/QGraphicsScene>
@@ -54,10 +56,14 @@
     void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void deleteConnection( WireGui *wireGui );
 
- private:
-     NewMachineDlg *newMachineDlg;
-     QGraphicsScene *scene_;
-     QGraphicsLineItem *tempLine_;
- };
+private:
+    MachineGui* findByMachine( psy::core::Machine *mac );
+
+    std::vector<MachineGui*> machineGuis;
+
+    NewMachineDlg *newMachineDlg;
+    QGraphicsScene *scene_;
+    QGraphicsLineItem *tempLine_;
+};
 
  #endif

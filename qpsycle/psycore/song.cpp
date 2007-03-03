@@ -294,6 +294,7 @@ namespace psy
 
 		bool Song::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume)
 		{
+        std::cout << "in insert connection" << std::endl;
 			Machine *srcMac = _pMachine[src];
 			Machine *dstMac = _pMachine[dst];
 			if(!srcMac || !dstMac)

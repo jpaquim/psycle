@@ -138,4 +138,9 @@ QPointF MachineGui::centrePointInSceneCoords() {
     return mapToScene( QPointF( boundingRect().width()/2, boundingRect().height()/2 ) );
 }
 
+psy::core::Machine* MachineGui::mac()
+{
+    return mac_;
+}
+
 
