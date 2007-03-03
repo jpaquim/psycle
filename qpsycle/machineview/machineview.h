@@ -27,7 +27,8 @@
  #include "newmachinedlg.h"
  #include "machinegui.h"
  #include "wiregui.h"
- #include "song.h"
+
+ #include "psycore/song.h"
 
 
  class MachineGui;
