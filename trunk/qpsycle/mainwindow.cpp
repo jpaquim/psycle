@@ -53,11 +53,11 @@
 
      QWidget *workArea = new QWidget();
 
-     QGroupBox *sideBar = new QGroupBox("Pattern Box");
-     QVBoxLayout *sbLayout = new QVBoxLayout();
+     QDockWidget *dock = new QDockWidget( "Pattern Box", this );
+     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
      PatternBox *patternBox = new PatternBox();
-     sbLayout->addWidget(patternBox);
-     sideBar->setLayout(sbLayout);
+     dock->setWidget(patternBox);
+     addDockWidget(Qt::LeftDockWidgetArea, dock);
 
      MachineView *macView = new MachineView(song_);
      PatternView *patView = new PatternView();
@@ -71,7 +71,6 @@
      views->addTab(seqView, "Sequencer View");
 
      QGridLayout *layout = new QGridLayout;
-     layout->addWidget(sideBar, 0, 0);
      layout->addWidget(views, 0, 1, 0, 2);
      layout->setColumnStretch(1, 10);
      workArea->setLayout(layout);
