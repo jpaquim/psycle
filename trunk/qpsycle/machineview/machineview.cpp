@@ -26,11 +26,13 @@
 
  #include "machineview.h"
  #include "machinegui.h"
+ #include "mastergui.h"
  #include "wiregui.h"
 
  #include "psycore/song.h"
  #include "psycore/sampler.h"
  #include "psycore/constants.h"
+ #include "psycore/machine.h"
 
  MachineView::MachineView(psy::core::Song *song_)
  {
@@ -66,13 +68,26 @@
      tempLine_->setVisible(false);// We don't want it to be visible yet.
      scene_->addItem(tempLine_);
 
-        // add Gui to Machine
+        // Create MachineGuis for the Machines in the Song.
         for(int c=0;c<psy::core::MAX_MACHINES;c++)
         {
             psy::core::Machine* mac = song_->_pMachine[c];
+            MachineGui *macGui;
             if (mac) { 
-                 MachineGui *machGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this);
-                 scene_->addItem(machGui);
+                switch ( mac->mode() ) {							
+                    case psy::core::MACHMODE_GENERATOR:
+                        macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                    break;
+                    case psy::core::MACHMODE_FX:
+                        macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                    break;
+                    case psy::core::MACHMODE_MASTER: 
+                        macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+                    break;
+                    default:
+                        macGui = 0;
+				}
+                scene_->addItem(macGui);
             }
         }
  }
