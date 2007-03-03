@@ -1,6 +1,6 @@
 /**
 	\file
-	interface file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
+	interface file for psy::core::ExtRiffFile and psy::core::WaveFile.
 	\verbatim
 		===========================================================================
 
@@ -20,9 +20,9 @@
 #pragma once
 //#include <psycle/host/detail/project.hpp>
 #include <stdio.h>
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		enum DDCRET
 		{

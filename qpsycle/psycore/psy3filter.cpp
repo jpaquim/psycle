@@ -23,9 +23,9 @@
 #include "global.h" // for zapArray shit
 #include "inputhandler.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		std::string const Psy3Filter::FILE_FOURCC = "PSY3";

@@ -1,5 +1,5 @@
 ///\file
-///\brief interface for psycle::host::dsp::MersenneTwister based on rev.2631
+///\brief interface for psy::core::dsp::MersenneTwister based on rev.2631
 
 /* 
 		A C-program for MT19937, with initialization improved 2002/1/26.
@@ -46,9 +46,9 @@
 
 //(c++-ified for psycle by dw aley)
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace dsp
 		{

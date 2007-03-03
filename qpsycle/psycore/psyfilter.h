@@ -27,9 +27,9 @@
 @author  Psycledelics  
 */
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 

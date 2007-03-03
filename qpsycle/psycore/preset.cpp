@@ -22,8 +22,8 @@
 #include "plugin.h"
 #include "binread.h"
 
-namespace psycle {
-	namespace host {
+namespace psy {
+	namespace core {
 
 		using namespace std;
 

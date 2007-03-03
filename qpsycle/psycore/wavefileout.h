@@ -28,9 +28,9 @@
 #include <unistd.h>
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		/**

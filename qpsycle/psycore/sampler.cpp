@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::Sampler. based on rev. 2708
+///\brief implementation file for psy::core::Sampler. based on rev. 2708
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "sampler.h"
@@ -7,9 +7,9 @@
 #include "player.h"
 #include "fileio.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		std::string Sampler::_psName = "Sampler";
 

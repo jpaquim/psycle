@@ -22,8 +22,8 @@
 #ifndef PSYCLE_HOSTEVENTDRIVER_H
 #define PSYCLE_HOSTEVENTDRIVER_H
 
-//namespace psycle {
-//namespace host {
+//namespace psy {
+//namespace core {
 
 /**
 Base class for an event driver, such as a MIDI input driver.

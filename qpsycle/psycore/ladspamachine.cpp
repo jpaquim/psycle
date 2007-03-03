@@ -32,8 +32,8 @@
 	#undef max	
 #endif
 
-namespace psycle {
-	namespace host {
+namespace psy {
+	namespace core {
 	
 		///\todo: Improve the case where no min/max limit is given by the plugin (Example: the amp.so doesn't have a max value).
 		LadspaParam::LadspaParam(LADSPA_PortDescriptor descriptor,LADSPA_PortRangeHint hint, const char *newname)

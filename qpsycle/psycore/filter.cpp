@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::Filter. based on Revision 2623
+///\brief implementation file for psy::core::Filter. based on Revision 2623
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "player.h"
@@ -11,9 +11,9 @@
 #undef max
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace dsp
 		{

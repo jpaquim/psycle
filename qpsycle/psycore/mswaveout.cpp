@@ -26,9 +26,9 @@
 #include <iostream>
 
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 				int const SHORT_MIN = -32768;
 		int const SHORT_MAX =  32767;

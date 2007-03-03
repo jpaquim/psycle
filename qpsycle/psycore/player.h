@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psycle::host::Player.
+///\brief interface file for psy::core::Player.
 /// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 
 /***************************************************************************
@@ -30,9 +30,9 @@
 #include "audiodriver.h"
 #include "playertimeinfo.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		class Player

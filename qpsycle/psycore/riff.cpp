@@ -1,6 +1,6 @@
 /**
 	\file
-	implementation file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
+	implementation file for psy::core::ExtRiffFile and psy::core::WaveFile.
 	\verbatim
 		==========================================================================
 
@@ -36,9 +36,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		unsigned long FourCC( const char *ChunkName)
 		{

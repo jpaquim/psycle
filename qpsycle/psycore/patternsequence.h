@@ -31,9 +31,9 @@
 @author  Psycledelics  
 */
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		const int PatternEnd = -1;

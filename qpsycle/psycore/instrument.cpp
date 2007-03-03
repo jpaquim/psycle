@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psycle::host::Filter. based on revision 2686
+///\brief interface file for psy::core::Filter. based on revision 2686
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
 #include "instrument.h"
@@ -36,9 +36,9 @@ template<class T> inline T str_hex(const std::string &  value, int pos) {
 
 
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		Instrument::Instrument()
 		:

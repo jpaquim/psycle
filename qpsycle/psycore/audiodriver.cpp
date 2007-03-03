@@ -19,9 +19,9 @@
 ***************************************************************************/
 #include "audiodriver.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		AudioDriverInfo::AudioDriverInfo( const std::string& name, const std::string& header, const std::string& description, bool show ) 

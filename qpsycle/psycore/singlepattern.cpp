@@ -29,9 +29,9 @@
 #undef max
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		TweakTrackInfo::TweakTrackInfo() :
@@ -175,7 +175,7 @@ namespace psycle
 			return false;
 		}
 
-		void host::SinglePattern::clearBars( )
+		void core::SinglePattern::clearBars( )
 		{
 			timeSignatures_.clear();
 		}
@@ -598,5 +598,5 @@ namespace psycle
 		}
 
 
-	}	// end of host namespace
+	}	// end of core namespace
 }// end of psycle namespace

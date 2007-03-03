@@ -21,9 +21,9 @@
 #include "player.h"
 
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		volatile int WaveFileOut::kill_thread = 0;

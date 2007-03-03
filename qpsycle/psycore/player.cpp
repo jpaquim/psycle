@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::Player
+///\brief implementation file for psy::core::Player
 
 /***************************************************************************
 	*   Copyright (C) 2006 by  Psycledelics  , Josep Maria Antolin Segura, D.W. Aley			
@@ -35,9 +35,9 @@
 #undef max
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		Player::Player()
@@ -512,7 +512,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			return *driver_;
 		}
 
-		void psycle::host::Player::lock( )
+		void psy::core::Player::lock( )
 		{
 			lock_ = true;
 			#ifdef __unix__
@@ -520,7 +520,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			#endif
 		}
 
-		void psycle::host::Player::unlock( )
+		void psy::core::Player::unlock( )
 		{
 			lock_ = false;
 		}

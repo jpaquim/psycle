@@ -28,8 +28,8 @@
 #include <string>
 #include <vector>
 
-namespace psycle {
-	namespace host {
+namespace psy {
+	namespace core {
 
 		class Machine;
 

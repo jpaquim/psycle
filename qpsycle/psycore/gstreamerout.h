@@ -4,9 +4,9 @@
 #endif
 #if !defined XPSYCLE__NO_GSTREAMER
 #include "audiodriver.h"
-namespace psycle
+namespace psy
 	{
-		namespace host
+		namespace core
 		{
 			class GStreamerOut : public AudioDriver
 			{

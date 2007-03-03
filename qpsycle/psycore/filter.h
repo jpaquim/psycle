@@ -1,13 +1,13 @@
 ///\file
-///\brief interface file for psycle::host::Filter. Revision 2078
+///\brief interface file for psy::core::Filter. Revision 2078
 #pragma once
 //#include <psycle/host/detail/project.hpp>
 //#include <universalis/operating_system/exception.hpp>
 #include <cmath>
 #include <cfloat>
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 	namespace dsp
 	{

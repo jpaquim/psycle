@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation for psycle::host::dsp::MersenneTwister based on rev.2631
+///\brief implementation for psy::core::dsp::MersenneTwister based on rev.2631
 
 /* 
 		A C-program for MT19937, with initialization improved 2002/1/26.
@@ -52,9 +52,9 @@
 #include "mersennetwister.h"
 #include <cmath>
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace dsp
 		{

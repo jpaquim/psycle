@@ -30,8 +30,8 @@
 @author  Psycledelics
 */
 
-namespace psycle {
-	namespace host {
+namespace psy {
+	namespace core {
 
 
 class PluginFxCallback : public CFxCallback

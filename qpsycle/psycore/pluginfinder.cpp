@@ -23,9 +23,9 @@
 //#include "configuration.h"
 //#include "global.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 

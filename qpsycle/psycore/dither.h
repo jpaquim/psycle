@@ -1,11 +1,11 @@
 ///\file
-///\brief interface file for psycle::host::dsp::Dither
+///\brief interface file for psy::core::dsp::Dither
 
 #include "mersennetwister.h"
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace dsp
 		{

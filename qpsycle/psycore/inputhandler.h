@@ -23,8 +23,8 @@
 #include <cassert>
 #include <map>
 
-namespace psycle {
-	namespace host {
+namespace psy {
+	namespace core {
 
 /**
 @author  Psycledelics

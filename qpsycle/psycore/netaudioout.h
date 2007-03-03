@@ -26,9 +26,9 @@
 #include <audio/audiolib.h> // aka nas - net audio system
 #include <pthread.h>
 #include <exception>
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 //////////////////////////////////////////////////////////////////////////

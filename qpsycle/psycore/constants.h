@@ -1,8 +1,8 @@
 // Constants used by psycle
 #pragma once
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 /// number of samples per tweak slide update

@@ -5,9 +5,9 @@
 #include "microsoft_direct_sound_out.h"
 #include "cstdint.h"
 #include <iostream>
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 
 		AudioDriverInfo MicrosoftDirectSoundOut::info( ) const

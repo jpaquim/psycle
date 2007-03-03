@@ -29,7 +29,7 @@
 /**
 @author Psycledelics
 */
-namespace psycle { namespace host {
+namespace psy { namespace core {
 
 class AlsaOut : public AudioDriver
 {

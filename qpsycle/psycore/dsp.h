@@ -1,12 +1,12 @@
 ///\file
-///\brief various signal processing utility functions and classes, psycle::host::Cubic amongst others. based on revison  2663
+///\brief various signal processing utility functions and classes, psy::core::Cubic amongst others. based on revison  2663
 #pragma once
 #include <cmath>
 #include "helpers.h"
 #include "cstdint.h"
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		namespace dsp
 		{

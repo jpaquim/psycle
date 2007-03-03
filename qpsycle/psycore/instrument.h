@@ -1,13 +1,13 @@
 ///\file
-///\brief interface file for psycle::host::Filter. based on Revision 2078
+///\brief interface file for psy::core::Filter. based on Revision 2078
 #pragma once
 #include "constants.h"
 #include "fileio.h"
 #include <string>
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 		/// an instrument is a waveform with some extra features added around it.
 		class Instrument

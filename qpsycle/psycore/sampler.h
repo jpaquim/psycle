@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psycle::host::Sampler. based on Revision 2624
+///\brief interface file for psy::core::Sampler. based on Revision 2624
 #pragma once
 #include "machine.h"
 #include "instrument.h"
@@ -14,9 +14,9 @@
 	#undef max
 #endif
 
-namespace psycle
+namespace psy
 {
-	namespace host
+	namespace core
 	{
 //		class CGearTracker; // forward declaration
 
