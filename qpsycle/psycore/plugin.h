@@ -163,7 +163,7 @@ inline void Proxy::callback() throw()
 inline const bool Proxy::operator()() const throw() { return !!plugin_; }
 inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
 {
-	//zapObject(this->plugin_,plugin);
+	zapObject(this->plugin_,plugin);
 		//if((*this)())
 		if(plugin) {
 				callback();

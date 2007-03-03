@@ -20,6 +20,8 @@
 #include "pluginfinder.h"
 #include "ladspamachine.h"
 #include "plugin.h"
+
+#include "psycore/file.h"
 //#include "configuration.h"
 //#include "global.h"
 
@@ -208,8 +210,9 @@ namespace psy
 		}
 
 		void PluginFinder::scanLadspa() {
-/*			///\todo this just uses the first path in getenv
-			std::string ladspa_path = conf_.ladspaPath() ;			
+			///\todo this just uses the first path in getenv
+			//std::string ladspa_path = conf_.ladspaPath() ;			
+			std::string ladspa_path = "/usr/lib/ladspa/";
 			#ifdef __unix__
 			std::string::size_type dotpos = ladspa_path.find(':',0);
 			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
@@ -220,7 +223,7 @@ namespace psy
 			unsigned long lPluginIndex;
 
 			std::vector<std::string> fileList;
-//			fileList = ngrs::File::fileList( ladspa_path );
+			fileList = File::fileList( ladspa_path );
 
 			std::vector<std::string>::iterator it = fileList.begin();
 			for ( ; it < fileList.end(); it++ ) {
@@ -232,7 +235,7 @@ namespace psy
 				#endif
 
 				LADSPAMachine plugin(0, 0 );
-//				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + ngrs::File::slash() + fileName );
+				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + File::slash() + fileName );
 
 				if (pfDescriptorFunction) {
 					for (lPluginIndex = 0;; lPluginIndex++) {
@@ -244,19 +247,19 @@ namespace psy
 						info.setType( MACH_LADSPA );
 						info.setName( psDescriptor->Name );
 						info.setLibName( fileName );
-//						PluginFinderKey key(fileName, ladspa_path + ngrs::File::slash() + fileName, lPluginIndex );
+						PluginFinderKey key(fileName, ladspa_path + File::slash() + fileName, lPluginIndex );
 						map_[key] = info;
 					}
 				}
-			}*/
+			}
 		}
 
 		void PluginFinder::scanNatives() {
-/*
 //			std::string psycle_path = Global::pConfig()->pluginPath();
+			std::string psycle_path = "/home/neil/code/xpsycle.plugins/";
 
 			std::vector<std::string> fileList;
-//			fileList = ngrs::File::fileList( psycle_path );
+			fileList = File::fileList( psycle_path );
 
 			std::vector<std::string>::iterator it = fileList.begin();
 
@@ -284,7 +287,7 @@ namespace psy
 				PluginFinderKey key( plugin.GetDllName(), fileName );
 				map_[key] = info;               
 				}
-			}*/
+			}
 		}
 	}
 }

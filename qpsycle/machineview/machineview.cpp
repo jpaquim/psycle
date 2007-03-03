@@ -33,6 +33,7 @@
  #include "psycore/sampler.h"
  #include "psycore/constants.h"
  #include "psycore/machine.h"
+ #include "psycore/pluginfinder.h"
 
  MachineView::MachineView(psy::core::Song *song)
  {
@@ -44,6 +45,10 @@
      setSceneRect(0,0,width(),height());
      setScene(scene_);
      setBackgroundBrush(Qt::black);
+
+//     psy::core::PluginFinder *pluginFinder_ = new psy::core::PluginFinder();
+//     psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, ev->x(), ev->y() );
+    
 
     int fb = song_->GetFreeBus();
     song_->CreateMachine(psy::core::MACH_SAMPLER, 100, 20, "SAMPLER", fb);  
@@ -126,7 +131,7 @@
      }
  }
 
-/* void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
+ void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
  {
      int accepted = newMachineDlg->exec();
      if (accepted) {
@@ -134,7 +139,7 @@
      } else {
 //        don't bother.
      }
- }*/
+ }
 
  void MachineView::scaleView(qreal scaleFactor) 
  {
