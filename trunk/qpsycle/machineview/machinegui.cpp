@@ -49,6 +49,7 @@
      setBrush(QBrush(Qt::blue));
      setFlag(ItemIsMovable);
      setFlag(ItemIsSelectable);
+     setFlag(ItemIsFocusable);
      setZValue(1);
 
      macTwkDlg_ = new MachineTweakDlg(machineView);
@@ -96,6 +97,11 @@
       menu.addAction(showMacTwkDlgAct_);
       QAction *a = menu.exec(event->screenPos());
   }
+
+void MachineGui::keyPressEvent ( QKeyEvent * event )
+{
+    machineView->PlayNote( 4 * 12 + 100, 127, false, mac() );   
+}
 
 void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
 { 

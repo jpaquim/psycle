@@ -34,8 +34,9 @@
  #include "psycore/constants.h"
  #include "psycore/machine.h"
 
- MachineView::MachineView(psy::core::Song *song_)
+ MachineView::MachineView(psy::core::Song *song)
  {
+    song_ = song;
      scene_ = new QGraphicsScene(this);
      scene_->setBackgroundBrush(Qt::black);
 
@@ -195,5 +196,123 @@ MachineGui *MachineView::findByMachine( psy::core::Machine *mac )
     return 0;
 }
 
+psy::core::Song *MachineView::song()
+{
+    return song_;
+}
+
+void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Machine *pMachine )
+{
+    qDebug("playing note.");
+    int outtrack = 0;
+    int notetrack[psy::core::MAX_TRACKS];
+    for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
+
+    // stop any notes with the same value
+    StopNote(note,bTranspose,pMachine);
+
+    if(note<0) return;
+
+    // octave offset
+    if(note<120) {
+        if(bTranspose)
+            note+= song()->currentOctave*12;
+        if (note > 119)
+            note = 119;
+    }
+
+    // build entry
+    psy::core::PatternEvent entry;
+    entry.setNote( note );
+    entry.setInstrument( song()->auxcolSelected );
+    entry.setMachine( song()->seqBus );	// Not really needed.
+
+    entry.setCommand( 0 );
+    entry.setParameter( 0 );
+
+    // play it
+    if(pMachine==NULL)
+    {
+        int mgn = song()->seqBus;
+
+        if (mgn < psy::core::MAX_MACHINES) {
+            pMachine = song()->_pMachine[mgn];
+        }
+    }
+
+    if (pMachine) {
+        // pick a track to play it on	
+        //        if(bMultiKey)
+        {
+            int i;
+            for (i = outtrack+1; i < song()->tracks(); i++)
+            {
+                if (notetrack[i] == 120) {
+                    break;
+                }
+            }
+            if (i >= song()->tracks()) {
+                for (i = 0; i <= outtrack; i++) {
+                    if (notetrack[i] == 120) {
+                        break;
+                    }
+                }
+            }
+            outtrack = i;
+        }// else  {
+        //   outtrack=0;
+        //}
+        // this should check to see if a note is playing on that track
+        if (notetrack[outtrack] < 120) {
+            StopNote(notetrack[outtrack], bTranspose, pMachine);
+        }
+
+        // play
+        notetrack[outtrack]=note;
+        pMachine->Tick(outtrack, entry );
+    }
+}
+
+void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMachine )
+{
+    int notetrack[psy::core::MAX_TRACKS];
+    for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
+
+    if (!(note >=0 && note < 128)) return;
+
+    // octave offset
+    if(note<120) {
+        if(bTranspose) note+=song()->currentOctave*12;
+        if (note > 119) note = 119;
+    }
+
+    if(pMachine==NULL) {
+        int mgn = song()->seqBus;
+
+        if (mgn < psy::core::MAX_MACHINES) {
+            pMachine = song()->_pMachine[mgn];
+        }
+
+        for(int i=0; i<song()->tracks(); i++) {
+            if(notetrack[i]==note) {
+                notetrack[i]=120;
+                // build entry
+                psy::core::PatternEvent entry;
+                entry.setNote( 120+0 );
+                entry.setInstrument( song()->auxcolSelected );
+                entry.setMachine( song()->seqBus );
+                entry.setCommand( 0 );
+                entry.setParameter( 0 );
+
+                // play it
+
+                if (pMachine) {
+                    pMachine->Tick( i, entry );
+                }
+            }
+        }
+
+    }
+}
 
 

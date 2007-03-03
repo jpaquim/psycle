@@ -31,6 +31,8 @@
  #include "wiregui.h"
 
  #include "psycore/song.h"
+ #include "psycore/machine.h"
+ #include "psycore/patternevent.h"
 
 
  class MachineGui;
@@ -44,6 +46,10 @@
      MachineView( psy::core::Song *song_ );
 
      void connectMachines(MachineGui *srcMacGui, MachineGui *dstMacGui );
+    void PlayNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
+    void StopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
+    psy::core::Song *song();
+
 
  protected:
     void keyPressEvent(QKeyEvent *event);
@@ -57,6 +63,8 @@
     void deleteConnection( WireGui *wireGui );
 
 private:
+    psy::core::Song *song_;
+
     MachineGui* findByMachine( psy::core::Machine *mac );
 
     std::vector<MachineGui*> machineGuis;
