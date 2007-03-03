@@ -31,13 +31,17 @@
 
  #include "machineview.h"
 
- MachineGui::MachineGui(int left, int top, MachineView *macView)
+ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : machineView(macView)
  {
+     mac_ = mac;
      left_ = left;
      top_ = top;
      nameItem = new QGraphicsTextItem("", this);
      nameItem->setDefaultTextColor(Qt::white);
+
+     QString string = QString::fromStdString( mac->GetEditName() );
+     setName( QString(string) );
 
      setRect(QRectF(0, 0, 100, 60));
      setPos(left, top);

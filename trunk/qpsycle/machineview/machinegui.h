@@ -40,7 +40,7 @@
     Q_OBJECT
 
  public:
-     MachineGui(int left, int top, MachineView *macView);
+     MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
      void addWireGui(WireGui *wireGui);
      void setName(const QString &name);
      QPointF centrePointInSceneCoords();
@@ -64,6 +64,7 @@ signals:
 
  private:
      MachineView *machineView;
+     psy::core::Machine *mac_;
      QGraphicsTextItem *nameItem;
      int left_;
      int top_;

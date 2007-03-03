@@ -29,6 +29,8 @@
 
  MainWindow::MainWindow()
  {
+     song_ = new psy::core::Song();
+
      QWidget *workArea = new QWidget();
 
      QGroupBox *sideBar = new QGroupBox("Pattern Box");
@@ -37,7 +39,7 @@
      sbLayout->addWidget(patternBox);
      sideBar->setLayout(sbLayout);
 
-     MachineView *macView = new MachineView();
+     MachineView *macView = new MachineView(song_);
      PatternView *patView = new PatternView();
      WaveView *wavView = new WaveView();
      SequencerView *seqView = new SequencerView();
@@ -62,7 +64,6 @@
 
      setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q alpha ) "));
 
-     song_ = new psy::core::Song();
  }
 
  void MainWindow::newSong()

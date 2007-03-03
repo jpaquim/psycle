@@ -27,6 +27,8 @@
  #include "newmachinedlg.h"
  #include "machinegui.h"
  #include "wiregui.h"
+ #include "song.h"
+
 
  class MachineGui;
  class WireGui;
@@ -36,7 +38,7 @@
      Q_OBJECT
 
  public:
-     MachineView();
+     MachineView( psy::core::Song *song_ );
 
      void connectMachines(MachineGui *srcMacGui, MachineGui *dstMacGui );
 
