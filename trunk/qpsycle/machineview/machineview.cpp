@@ -30,6 +30,7 @@
 
  #include "psycore/song.h"
  #include "psycore/sampler.h"
+ #include "psycore/constants.h"
 
  MachineView::MachineView(psy::core::Song *song_)
  {
@@ -41,9 +42,9 @@
      setScene(scene_);
      setBackgroundBrush(Qt::black);
 
-     psy::core::Sampler *sampler0 = new psy::core::Sampler(0, song_);
-     psy::core::Sampler *sampler1 = new psy::core::Sampler(0, song_);
-     psy::core::Sampler *sampler2 = new psy::core::Sampler(0, song_);
+     psy::core::Sampler *sampler0 = new psy::core::Sampler(3, song_);
+     psy::core::Sampler *sampler1 = new psy::core::Sampler(3, song_);
+     psy::core::Sampler *sampler2 = new psy::core::Sampler(3, song_);
 
      MachineGui *machGui0 = new MachineGui(100, 20, sampler0, this);
      MachineGui *machGui1 = new MachineGui(400, 20, sampler1, this);
@@ -64,6 +65,16 @@
      tempLine_->setPen(QPen(Qt::gray,2,Qt::DashLine));
      tempLine_->setVisible(false);// We don't want it to be visible yet.
      scene_->addItem(tempLine_);
+
+        // add Gui to Machine
+        for(int c=0;c<psy::core::MAX_MACHINES;c++)
+        {
+            psy::core::Machine* mac = song_->_pMachine[c];
+            if (mac) { 
+                 MachineGui *machGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+                 scene_->addItem(machGui);
+            }
+        }
  }
 
  void MachineView::keyPressEvent(QKeyEvent *event)
@@ -140,3 +151,5 @@
     // Delete the connection in the GUI.
     scene_->removeItem( wireGui ); // FIXME: do we need to do more here?
  }
+
+
