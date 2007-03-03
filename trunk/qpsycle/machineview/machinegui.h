@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
@@ -24,9 +25,12 @@
  #include <QAction>
  #include <QObject>
  #include <QPointF>
+
  #include "machineview.h"
  #include "wiregui.h"
  #include "machinetweakdlg.h"
+
+ #include "psycore/machine.h"
 
  class MachineView;
  class WireGui;
@@ -67,6 +71,7 @@ signals:
      MachineTweakDlg *macTwkDlg_;
 
      QAction *showMacTwkDlgAct_;
+
  };
 
  #endif
