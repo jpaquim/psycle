@@ -102,6 +102,45 @@ void MachineGui::keyPressEvent ( QKeyEvent * event )
 {
     int key = event->key();
     int note = 1;
+    switch (key) { // FIXME: shouldn't be hardcoded.
+        case Qt::Key_Z: // C_0
+            note = 1;
+            break;
+        case Qt::Key_S: // CS_0
+            note = 2;
+            break;
+        case Qt::Key_X: // D_0
+            note = 3;
+            break;
+        case Qt::Key_D: // DS_0
+            note = 4;
+            break;
+        case Qt::Key_C: // E_0
+            note = 5;
+            break;
+        case Qt::Key_V: // F_0
+            note = 6;
+            break;
+        case Qt::Key_G: // FS_0
+            note = 7;
+            break;
+        case Qt::Key_B: // G_0
+            note = 8;
+            break;
+        case Qt::Key_H: // GS_0
+            note = 9;
+            break;
+        case Qt::Key_N: // A_0
+            note = 10;
+            break;
+        case Qt::Key_J: // AS_0
+            note = 11;
+            break;
+        case Qt::Key_M: // B_0
+            note = 12;
+            break;
+        default:;
+    }
     int octave = 4;
     int velocity = 127;
     machineView->PlayNote( octave * 12 + note, velocity, false, mac() );   
