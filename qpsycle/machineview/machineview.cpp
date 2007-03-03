@@ -28,7 +28,10 @@
  #include "machinegui.h"
  #include "wiregui.h"
 
- MachineView::MachineView()
+ #include "psycore/song.h"
+ #include "psycore/sampler.h"
+
+ MachineView::MachineView(psy::core::Song *song_)
  {
      scene_ = new QGraphicsScene(this);
      scene_->setBackgroundBrush(Qt::black);
@@ -38,13 +41,13 @@
      setScene(scene_);
      setBackgroundBrush(Qt::black);
 
-     MachineGui *machGui0 = new MachineGui(100, 20, this);
-     MachineGui *machGui1 = new MachineGui(400, 20, this);
-     MachineGui *machGui2 = new MachineGui(100, 120, this);
+     psy::core::Sampler *sampler0 = new psy::core::Sampler(0, song_);
+     psy::core::Sampler *sampler1 = new psy::core::Sampler(0, song_);
+     psy::core::Sampler *sampler2 = new psy::core::Sampler(0, song_);
 
-     machGui0->setName("Foo");
-     machGui1->setName("Bar");
-     machGui2->setName("Baz");
+     MachineGui *machGui0 = new MachineGui(100, 20, sampler0, this);
+     MachineGui *machGui1 = new MachineGui(400, 20, sampler1, this);
+     MachineGui *machGui2 = new MachineGui(100, 120, sampler2, this);
 
      scene_->addItem(machGui0);
      scene_->addItem(machGui1);
