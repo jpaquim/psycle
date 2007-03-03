@@ -43,8 +43,8 @@ namespace psy
 			bool saveSong(const std::string & fileName, Song & song, int version);
 
 			//signals
-			sigslot::signal2<const std::string &, const std::string &> report;
-			sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
+//			sigslot::signal2<const std::string &, const std::string &> report;
+//			sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
 
 			// helper function for xml writing
 

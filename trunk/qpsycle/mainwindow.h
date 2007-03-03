@@ -28,6 +28,8 @@
  class QTextEdit;
  class QComboBox;
 
+ #include "psycore/song.h"
+
  class MainWindow : public QMainWindow
  {
      Q_OBJECT
@@ -44,6 +46,8 @@
      void about();
 
  private:
+    psy::core::Song *song_;
+    
      void createActions();
      void createMenus();
      void createToolBars();

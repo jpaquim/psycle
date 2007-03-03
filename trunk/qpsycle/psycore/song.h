@@ -10,7 +10,7 @@
 #include "cstdint.h"
 #include "patterndata.h"
 #include "patternsequence.h"
-#include "sigslot.h"
+//#include "sigslot.h"
 
 namespace psy
 {
@@ -24,7 +24,7 @@ namespace psy
 		/// this include patterns, pattern sequence, machines 
 		///and their initial parameters and coordinates, wavetables
 
-		class Song
+		class Song 
 		{
 			public:
 				Song();
@@ -57,8 +57,8 @@ namespace psy
 				float bpm() const;
 
 				// signals
-				sigslot::signal2<const std::string &, const std::string &> report;
-				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
+//				sigslot::signal2<const std::string &, const std::string &> report;
+//				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
 
 			private:
 

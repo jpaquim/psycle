@@ -412,7 +412,7 @@ namespace psy
 				std::int32_t x,y,type;
 				if (_machineActive[i])
 				{
-					progress.emit(4,8192+i*(4096/128),"");
+					//progress.emit(4,8192+i*(4096/128),"");
 
 					file->Read(x);
 					file->Read(y);

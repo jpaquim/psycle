@@ -62,6 +62,7 @@
 
      setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q alpha ) "));
 
+     song_ = new psy::core::Song();
  }
 
  void MainWindow::newSong()
