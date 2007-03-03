@@ -27,9 +27,29 @@
  #include "sequencerview.h"
  #include "patternbox.h"
 
+ #include "psycore/player.h"
+ #include "psycore/alsaout.h"
+
  MainWindow::MainWindow()
  {
      song_ = new psy::core::Song();
+     int si = song_->instSelected;
+     song_->WavAlloc(si,"/home/neil/mymusic/samples/yeah.wav");
+     song_->auxcolSelected = 0;
+     psy::core::AudioDriver *driver = new psy::core::AlsaOut;
+
+
+        psy::core::AudioDriverSettings settings = driver->settings();
+        settings.setDeviceName( "plughw:0" );
+        driver->setSettings( settings );
+
+
+
+    psy::core::Player::Instance()->song( song_ );
+    psy::core::Player::Instance()->setDriver( *driver );  
+
+
+
 
      QWidget *workArea = new QWidget();
 

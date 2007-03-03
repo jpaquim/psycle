@@ -57,6 +57,7 @@ public:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    void keyPressEvent ( QKeyEvent *event );
 
 public slots:
     void showMacTwkDlg();
