@@ -60,7 +60,13 @@
 						pluginIdentify_[item] = key;
                     }
                 }
+     connect( efxList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
+              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+
      QListWidget *intList = new QListWidget();
+     connect( intList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
+              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+
      QListWidget *ladList = new QListWidget();
                 it = finder_->begin();
 				for ( ; it != finder_->end(); it++ ) {
@@ -72,6 +78,9 @@
 						pluginIdentify_[item] = key;
                     }
                 }
+     connect( ladList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
+              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+
      buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
                                       | QDialogButtonBox::Cancel);
      connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
