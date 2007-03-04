@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Neil Mather   *
+*   Copyright (C) 2007 by  Neil Mather   *
 *   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -20,17 +20,22 @@
 
 #include <QtGui>
 
- #include "patternview.h"
+#include "patternview.h"
 
- PatternView::PatternView(QWidget *parent) 
-    : QWidget(parent)
+#include "psycore/song.h"
+
+ PatternView::PatternView( psy::core::Song *song_ )
  {
-     setPalette(QPalette(QColor(50, 50, 50)));
-     setAutoFillBackground(true);
-     layout = new QGridLayout();
-     setLayout(layout);
+     scene_ = new QGraphicsScene(this);
+     scene_->setBackgroundBrush(Qt::black);
+     setSceneRect(0,0,width(),height());
+     setScene(scene_);
 
-     createToolBar();
+     lineNumCol_ = new LineNumberColumn( this );
+     scene_->addItem( lineNumCol_ );
+
+    // Create the toolbar.
+    //     createToolBar();
  }
 
  void PatternView::createToolBar()
@@ -43,47 +48,14 @@
       delBarAct_ = new QAction(tr("Delete Bar"), this);
       delBarAct_->setStatusTip(tr("Delete a bar"));
 
-/*      patternCbx_ = new QComboBox();
-      for (int i = 1; i <=16; i++) {
-          patternCbx_->addItem( new QString(i) );
-      }
-
-      octaveCombo_ = new ngrs::ComboBox();
-      for (int i=0; i<9; i++) octaveCombo_->add(new ngrs::Item(stringify(i)));
-      octaveCombo_->itemSelected.connect(this,&PatternView::onOctaveChange);
-      octaveCombo_->setPreferredSize( 40, 20 );
-      octaveCombo_->setIndex(4);
-      octaveCombo_->enableFocus(false);
-      setEditOctave(4);
-      toolBar->add(octaveCombo_);
-
-      trackCombo_ = new ngrs::ComboBox();
-      trackCombo_->setPreferredSize( 40, 20 );
-      trackCombo_->itemSelected.connect(this,&PatternView::onTrackChange);
-      for( int i=4; i<=MAX_TRACKS; i++ ) {
-        trackCombo_->add(new ngrs::Item(stringify(i)));
-      }
-      trackCombo_->setIndex( _pSong->tracks() - 4 );  // starts at 4 .. so 16 - 4 = 12 ^= 16
-
-      sharpBtn_ = new ngrs::Button("#");
-      sharpBtn_->clicked.connect(this,&PatternView::onToggleSharpMode);
-
-
-      sideBox = new ngrs::NCheckBox("Tweak left/right");
-      sideBox->clicked.connect(this,&PatternView::onSideChange);*/
-
       toolBar_->addWidget(meterCbx_);
       toolBar_->addAction(delBarAct_);
-//      toolBar_->addWidget(patternCbx_);
 
       layout->addWidget(toolBar_);
-//      ngrs::Button* btn = toolBar->add(new ngrs::Button("add Bar"));
- //     toolBar->add(new ngrs::Label("Pattern Step"));
-  //    toolBar->add(patternCombo_);
-   //   toolBar->add(new ngrs::Label("Octave"));
-    //  toolBar->add(new ngrs::Label("Tracks"));
-     // toolBar->add(trackCombo_);
-//      toolBar->add( sharpBtn_ );
- //     toolBar->add(sideBox);
   }
+
+int PatternView::rowHeight( ) const
+{
+    return 13;
+}
 

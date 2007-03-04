@@ -59,8 +59,8 @@
      dock->setWidget(patternBox);
      addDockWidget(Qt::LeftDockWidgetArea, dock);
 
-     MachineView *macView = new MachineView(song_);
-     PatternView *patView = new PatternView();
+     MachineView *macView = new MachineView( song_ );
+     PatternView *patView = new PatternView( song_ );
      WaveView *wavView = new WaveView();
      SequencerView *seqView = new SequencerView();
 

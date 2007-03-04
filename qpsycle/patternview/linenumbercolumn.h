@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by  Neil Mather   *
+*   Copyright (C) 2007 by  Neil Mather   *
 *   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,46 +17,32 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef PATTERNVIEW_H
- #define PATTERNVIEW_H
+#ifndef LINENUMBERCOLUMN_H
+#define LINENUMBERCOLUMN_H
 
- #include <QGraphicsView>
- #include <QGraphicsScene>
+#include <QGraphicsRectItem>
 
- #include "linenumbercolumn.h"
- #include "psycore/song.h"
+#include "patternview.h"
 
- class QToolBar;
- class QComboBox;
- class QGridLayout;
- class QAction;
+class PatternView;
 
- class LineNumberColumn;
+class LineNumberColumn : public QGraphicsRectItem {
+public:
+    LineNumberColumn( PatternView *patView );
+    ~LineNumberColumn();
 
- class PatternView : public QGraphicsView
- {
-     Q_OBJECT
+    void setDy( int dy );
+    int dy() const;
 
- public:
-     PatternView( psy::core::Song *song_ );
+    virtual int preferredWidth() const;
+    QRectF boundingRect() const;
+    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
-     int rowHeight() const;
 
- private:
-    void createToolBar();
+private:
 
-    QGraphicsScene *scene_;
+    PatternView *patternView;
+    int dy_;
+};
 
-    LineNumberColumn *lineNumCol_;
-
-    QGridLayout *layout;
-
-    QToolBar *toolBar_;
-    QComboBox *meterCbx_;
-    QComboBox *patternCbx_;
-
-    QAction *delBarAct_;
-
- };
-
- #endif
+#endif
