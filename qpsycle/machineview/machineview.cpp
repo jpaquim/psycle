@@ -136,6 +136,29 @@
      int accepted = newMachineDlg->exec();
      if (accepted) {
 //        add a new machine.
+          psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
+          // search for an unused machine slot
+		  int fb = song_->GetFreeBus();
+
+		// create machine, tell where to place the new machine--get from mouse.	  
+			psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, event->x(), event->y() );
+            MachineGui *macGui;
+            switch ( mac->mode() ) {							
+                case psy::core::MACHMODE_GENERATOR:
+                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                break;
+                case psy::core::MACHMODE_FX:
+                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                break;
+                case psy::core::MACHMODE_MASTER: 
+                    macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+                break;
+                default:
+                    macGui = 0;
+            }
+            scene_->addItem(macGui);
+            machineGuis.push_back(macGui);
+            repaint();
      } else {
 //        don't bother.
      }

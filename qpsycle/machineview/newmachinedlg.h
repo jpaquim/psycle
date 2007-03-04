@@ -17,25 +17,43 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef NEWMACHINEDLG_H
- #define NEWMACHINEDLG_H
+#ifndef NEWMACHINEDLG_H
+#define NEWMACHINEDLG_H
 
- #include <QWidget>
- #include <QDialog>
- #include <QDialogButtonBox>
+#include <map>
 
- class QDialog;
+#include <QWidget>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QListWidgetItem>
 
- class NewMachineDlg : public QDialog
- {
+#include "pluginfinder.h"
+
+class QDialog;
+
+class NewMachineDlg : public QDialog
+{
      Q_OBJECT
 
  public:
      NewMachineDlg(QWidget *parent = 0);
 
+    const psy::core::PluginFinderKey & pluginKey() const;
+
+public slots:
+    void currentItemChanged( QListWidgetItem *current, QListWidgetItem *previous );
+
  private:
      QDialogButtonBox *buttonBox;
+    const psy::core::PluginFinder *finder_;
 
- };
+
+    psy::core::PluginFinderKey selectedKey_;
+	std::map< QListWidgetItem* , psy::core::PluginFinderKey > pluginIdentify_;
+
+    void setPlugin( QListWidgetItem* item );
+
+
+};
 
  #endif

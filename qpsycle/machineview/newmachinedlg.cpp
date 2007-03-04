@@ -33,41 +33,43 @@
 
      QTabWidget *machineTabs = new QTabWidget();
 
-     psy::core::PluginFinder *finder = new psy::core::PluginFinder();
+     finder_ = new psy::core::PluginFinder();
 
      QListWidget *genList = new QListWidget();
-     std::map< psy::core::PluginFinderKey, psy::core::PluginInfo >::const_iterator it = finder->begin();
-				for ( ; it != finder->end(); it++ ) {
+     std::map< psy::core::PluginFinderKey, psy::core::PluginInfo >::const_iterator it = finder_->begin();
+				for ( ; it != finder_->end(); it++ ) {
 					const psy::core::PluginFinderKey & key = it->first;
 					const psy::core::PluginInfo & info = it->second;
 					if ( info.type() == psy::core::MACH_PLUGIN && info.mode() == psy::core::MACHMODE_GENERATOR ) {
 						QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
 						genList->addItem( item );
-//						pluginIdentify_[item] = key;
+						pluginIdentify_[item] = key;
                     }
                 }
+     connect( genList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
+              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
 
      QListWidget *efxList = new QListWidget();
-                it = finder->begin();
-				for ( ; it != finder->end(); it++ ) {
+                it = finder_->begin();
+				for ( ; it != finder_->end(); it++ ) {
 					const psy::core::PluginFinderKey & key = it->first;
 					const psy::core::PluginInfo & info = it->second;
 					if ( info.type() == psy::core::MACH_PLUGIN && info.mode() == psy::core::MACHMODE_FX ) {
 						QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
 						efxList->addItem( item );
-//						pluginIdentify_[item] = key;
+						pluginIdentify_[item] = key;
                     }
                 }
      QListWidget *intList = new QListWidget();
      QListWidget *ladList = new QListWidget();
-                it = finder->begin();
-				for ( ; it != finder->end(); it++ ) {
+                it = finder_->begin();
+				for ( ; it != finder_->end(); it++ ) {
 					const psy::core::PluginFinderKey & key = it->first;
 					const psy::core::PluginInfo & info = it->second;
 					if ( info.type() == psy::core::MACH_LADSPA ) {
 						QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
 						ladList->addItem( item );
-//						pluginIdentify_[item] = key;
+						pluginIdentify_[item] = key;
                     }
                 }
      buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
@@ -85,3 +87,32 @@
      setLayout(layout);
  }
 
+void NewMachineDlg::currentItemChanged( QListWidgetItem *current, QListWidgetItem *previous )
+{
+    qDebug( "setting plugin." );
+	setPlugin ( current );
+}
+
+void NewMachineDlg::setPlugin( QListWidgetItem* item ) 
+{
+		std::map< QListWidgetItem*, psy::core::PluginFinderKey >::iterator it;		
+	it = pluginIdentify_.find( item );
+
+		if ( it != pluginIdentify_.end() ) {
+		const psy::core::PluginInfo & info = finder_->info( it->second );
+		const psy::core::PluginFinderKey & key = it->second;
+
+/*		name->setText( info.name() );
+			dllName_ = info.libName();
+		libName->setText( dllName_ );
+		description->setText( "Psycle Instrument by "+ info.author() );
+		apiVersion->setText( info.version() ); */
+
+		selectedKey_ = key;
+		}
+
+}
+
+const psy::core::PluginFinderKey & NewMachineDlg::pluginKey() const {
+	return selectedKey_;
+}
