@@ -64,17 +64,17 @@
     void deleteConnection( WireGui *wireGui );
 
 private:
-    psy::core::Song *song_;
-
+    void createMachineGui( psy::core::Machine *mac );
     MachineGui* findByMachine( psy::core::Machine *mac );
 
+    psy::core::Song *song_;
+    psy::core::PluginFinder pluginFinder_;
     std::vector<MachineGui*> machineGuis;
-
+    
     NewMachineDlg *newMachineDlg;
     QGraphicsScene *scene_;
     QGraphicsLineItem *tempLine_;
 
-    psy::core::PluginFinder pluginFinder_;
 };
 
  #endif

@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
- #include "mastergui.h"
+ #include "effectgui.h"
 
  EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : MachineGui(left, top, mac, macView)

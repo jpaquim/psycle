@@ -21,7 +21,7 @@
 #ifndef EFFECTGUI_H
 #define EFFECTGUI_H
 
-#include "effectgui.h"
+#include "machinegui.h"
 
 class EffectGui : public MachineGui
 {

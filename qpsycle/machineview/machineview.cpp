@@ -27,6 +27,7 @@
  #include "machineview.h"
  #include "machinegui.h"
  #include "mastergui.h"
+ #include "effectgui.h"
  #include "wiregui.h"
 
  #include "psycore/song.h"
@@ -74,24 +75,8 @@
     for(int c=0;c<psy::core::MAX_MACHINES;c++)
     {
         psy::core::Machine* mac = song_->_pMachine[c];
-        if (mac) std::cout << "c:" << c << mac->mode() << std::endl;
-        MachineGui *macGui;
-        if (mac) { 
-            switch ( mac->mode() ) {							
-                case psy::core::MACHMODE_GENERATOR:
-                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-                break;
-                case psy::core::MACHMODE_FX:
-                    macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-                break;
-                case psy::core::MACHMODE_MASTER: 
-                    macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
-                break;
-                default:
-                    macGui = 0;
-            }
-            scene_->addItem(macGui);
-            machineGuis.push_back(macGui);
+        if ( mac ) {
+            createMachineGui( mac );
         }
     }
     // Create WireGuis for connections in Song file.
@@ -142,22 +127,7 @@
 
 		// create machine, tell where to place the new machine--get from mouse.	  
 			psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, event->x(), event->y() );
-            MachineGui *macGui;
-            switch ( mac->mode() ) {							
-                case psy::core::MACHMODE_GENERATOR:
-                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-                break;
-                case psy::core::MACHMODE_FX:
-                    macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-                break;
-                case psy::core::MACHMODE_MASTER: 
-                    macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
-                break;
-                default:
-                    macGui = 0;
-            }
-            scene_->addItem(macGui);
-            machineGuis.push_back(macGui);
+            if ( mac ) createMachineGui( mac );
             update();
             repaint();
      } else {
@@ -342,6 +312,26 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
         }
 
     }
+}
+
+void MachineView::createMachineGui( psy::core::Machine *mac )
+{
+    MachineGui *macGui;
+    switch ( mac->mode() ) {							
+        case psy::core::MACHMODE_GENERATOR:
+            macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+        break;
+        case psy::core::MACHMODE_FX:
+            macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+        break;
+        case psy::core::MACHMODE_MASTER: 
+            macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+        break;
+        default:
+            macGui = 0;
+    }
+    scene_->addItem(macGui);
+    machineGuis.push_back(macGui);
 }
 
 
