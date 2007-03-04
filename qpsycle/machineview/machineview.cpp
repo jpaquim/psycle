@@ -82,7 +82,7 @@
                     macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
                 break;
                 case psy::core::MACHMODE_FX:
-                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                    macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
                 break;
                 case psy::core::MACHMODE_MASTER: 
                     macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
@@ -148,7 +148,7 @@
                     macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
                 break;
                 case psy::core::MACHMODE_FX:
-                    macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+                    macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
                 break;
                 case psy::core::MACHMODE_MASTER: 
                     macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
