@@ -33,6 +33,7 @@
  #include "psycore/song.h"
  #include "psycore/machine.h"
  #include "psycore/patternevent.h"
+ #include "psycore/pluginfinder.h"
 
 
  class MachineGui;
@@ -72,6 +73,8 @@ private:
     NewMachineDlg *newMachineDlg;
     QGraphicsScene *scene_;
     QGraphicsLineItem *tempLine_;
+
+    psy::core::PluginFinder pluginFinder_;
 };
 
  #endif
