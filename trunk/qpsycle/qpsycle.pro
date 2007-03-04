@@ -35,6 +35,7 @@ HEADERS += mainwindow.h \
            machineview/effectgui.h \
            patternview/patternview.h \
            patternview/linenumbercolumn.h \
+           patternview/header.h \
            psycore/abstractmachinefactory.h \
            psycore/alsa_conditional_build.h \
            psycore/alsaout.h \
@@ -118,6 +119,7 @@ SOURCES += mainwindow.cpp \
            machineview/effectgui.cpp \
            patternview/patternview.cpp \
            patternview/linenumbercolumn.cpp \
+           patternview/header.cpp \
            psycore/abstractmachinefactory.cpp \
            psycore/alsaout.cpp \
            psycore/alsaseqin.cpp \
