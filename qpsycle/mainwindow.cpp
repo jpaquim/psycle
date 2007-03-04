@@ -21,10 +21,6 @@
 #include <QtGui>
 
  #include "mainwindow.h"
- #include "machineview.h"
- #include "patternview.h"
- #include "waveview.h"
- #include "sequencerview.h"
  #include "patternbox.h"
 
  #include "psycore/player.h"
@@ -59,19 +55,19 @@
      dock->setWidget(patternBox);
      addDockWidget(Qt::LeftDockWidgetArea, dock);
 
-     MachineView *macView = new MachineView( song_ );
-     PatternView *patView = new PatternView( song_ );
-     WaveView *wavView = new WaveView();
-     SequencerView *seqView = new SequencerView();
+     macView_ = new MachineView( song_ );
+     patView_ = new PatternView( song_ );
+     wavView_ = new WaveView();
+     seqView_ = new SequencerView();
 
-     QTabWidget *views = new QTabWidget();
-     views->addTab(macView, "Machine View");
-     views->addTab(patView, "Pattern View");
-     views->addTab(wavView, "Wave Editor");
-     views->addTab(seqView, "Sequencer View");
+     views_ = new QTabWidget();
+     views_->addTab( macView_, "Machine View" );
+     views_->addTab( patView_, "Pattern View" );
+     views_->addTab( wavView_, "Wave Editor" );
+     views_->addTab( seqView_, "Sequencer View" );
 
      QGridLayout *layout = new QGridLayout;
-     layout->addWidget(views, 0, 1, 0, 2);
+     layout->addWidget( views_, 0, 1, 0, 2 );
      layout->setColumnStretch(1, 10);
      workArea->setLayout(layout);
      setCentralWidget(workArea);
@@ -225,3 +221,21 @@
      statusBar()->showMessage(tr("Ready"));
  }
 
+void MainWindow::keyPressEvent( QKeyEvent * event )
+{
+    switch ( event->key() ) {
+        case Qt::Key_F2:
+            views_->setCurrentWidget( macView_ );        
+        break;
+        case Qt::Key_F3:
+            views_->setCurrentWidget( patView_ );        
+        break;
+        case Qt::Key_F4:
+            views_->setCurrentWidget( wavView_ );        
+        break;
+        case Qt::Key_F5:
+            views_->setCurrentWidget( seqView_ );        
+        break;
+        default:;
+    }
+}
